@@ -9,7 +9,10 @@ import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
 } from "../runner-run-target-evaluation";
-import { runnerSameTurnAccessPreparationFitsTarget } from "../run-analysis/runner-run-preparation";
+import {
+  runnerSameTurnAccessPreparationFitsTarget,
+  runnerHasExpiringAgendaAccessPayoff,
+} from "../run-analysis/runner-run-preparation";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -232,4 +235,134 @@ describe("preparation uses the executing owner's actual reserve and hand floor",
       decision.evidence!.some((e) => e.startsWith("plan_scheduler:route:")),
     ).toBe(true);
   });
+});
+
+describe("preparation preserves an admitted parent after its own spend", () => {
+  it.each([
+    [8, 32],
+    [13, 14],
+    [25, 97],
+    [34, 163],
+    [34, 164],
+  ])("holds the expiring bonus at G%i D%i", (game, index) => {
+    const cp = JSON.parse(
+      readFileSync(
+        new URL(
+          `../../../../data/scenarios/ai-decision-checkpoints/cp-meta-461-r3-g${game}-d${index}.json`,
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    const input: AiDecisionInput = {
+      ...cp.input,
+      ...buildAiDecisionInputDto(cp.input),
+    };
+    restoreAiRuntimeCheckpoint(
+      input,
+      cp.input.ownDeckSnapshot.deckSnapshotId,
+      cp.runtime,
+    );
+    const rejected = input.legalActions
+      .filter(
+        (a) =>
+          a.type === "play_event" &&
+          (a.source?.includes("prearranged-drop") ||
+            a.source?.includes("promises-promises")),
+      )
+      .map((a) => a.actionId);
+    if (game !== 13) expect(rejected.length).toBeGreaterThan(0);
+    const decision = chooseAiAction(input);
+    if (game === 13) {
+      expect(decision.actionId).toBe("runner.start_run.rd");
+      expect(decision.evidence).toContain("plan_priority_class:P3");
+    } else expect(rejected).not.toContain(decision.actionId);
+    expect(
+      input.legalActions.some((a) => a.actionId === decision.actionId),
+    ).toBe(true);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.evidence).toContain("plan_first_runtime:true");
+    expect(decision.evidence!.some((e) => e.startsWith("plan_step_id:"))).toBe(
+      true,
+    );
+    expect(
+      decision.evidence!.some((e) => e.startsWith("plan_scheduler:route:")),
+    ).toBe(true);
+  });
+});
+
+describe("public expiring access payoff facts", () => {
+  it("expires at the turn boundary and clears only when the Engine reports consumption", () => {
+    const cp = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-461-r3-g13-d14.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    const input: AiDecisionInput = {
+      ...cp.input,
+      ...buildAiDecisionInputDto(cp.input),
+    };
+    expect(runnerHasExpiringAgendaAccessPayoff(input)).toBe(true);
+    const expired = structuredClone(input);
+    expired.playerView.turnSerial! += 1;
+    expect(runnerHasExpiringAgendaAccessPayoff(expired)).toBe(false);
+    const consumed = structuredClone(input);
+    const last = consumed.eventTail.at(-1)!;
+    consumed.eventTail.push({
+      ...last,
+      eventId: "test-consumption",
+      type: "access_card",
+      stateVersionBefore: last.stateVersionAfter,
+      stateVersionAfter: last.stateVersionAfter + 1,
+      publicPayload: {
+        actor: "runner",
+        actionType: "access_card",
+        nextAgendaAccessAgendaPointConsumed: true,
+      },
+    });
+    expect(runnerHasExpiringAgendaAccessPayoff(consumed)).toBe(false);
+    const different = structuredClone(input);
+    different.eventTail.push({
+      ...last,
+      eventId: "test-other-consumption",
+      type: "access_card",
+      stateVersionBefore: last.stateVersionAfter,
+      stateVersionAfter: last.stateVersionAfter + 1,
+      publicPayload: {
+        actor: "runner",
+        actionType: "access_card",
+        nextAgendaAccessCreditGainResolved: true,
+      },
+    });
+    expect(runnerHasExpiringAgendaAccessPayoff(different)).toBe(true);
+  });
+});
+
+it("keeps a genuinely convertible bonus and prioritizes its following access", () => {
+  const cp = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-461-r3-g13-d13.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  const input: AiDecisionInput = {
+    ...cp.input,
+    ...buildAiDecisionInputDto(cp.input),
+  };
+  restoreAiRuntimeCheckpoint(
+    input,
+    cp.input.ownDeckSnapshot.deckSnapshotId,
+    cp.runtime,
+  );
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toContain("promises-promises");
+  expect(decision.evidence).toContain("plan_module:runner.pressure_central");
+  expect(decision.fallbackUsed).toBe(false);
 });

@@ -33,6 +33,8 @@ import {
   runnerSameTurnAccessPreparationSourceDefinitionId,
   runnerSameTurnAccessPreparationFitsTarget,
   runnerRunReplacesAgendaAccess,
+  runnerHasExpiringAgendaAccessPayoff,
+  runnerRunCanConsumeAgendaAccessPayoff,
   runnerTargetedBypassPayoffValue,
   runnerTargetedIceTrashPayoffValue,
 } from "../../run-analysis/runner-run-preparation";
@@ -220,6 +222,7 @@ function runnerTargetedBypassRemotePreparationSignals(
 }
 
 function runnerSameTurnAccessRemotePreparationSignals(
+  admittedParents: readonly RunnerRemoteContestSignalDraft[],
   input: AiDecisionInput,
   economy: RunnerEconomyPosture,
   candidates: readonly ActionSemanticCandidate[],
@@ -231,6 +234,13 @@ function runnerSameTurnAccessRemotePreparationSignals(
     .filter(
       (evaluation) =>
         evaluation.targetServerId.startsWith("remote_") &&
+        admittedParents.some(
+          (parent) =>
+            parent.serverId === evaluation.targetServerId &&
+            parent.reachable &&
+            parent.routePreparation === undefined &&
+            parent.preferredRunActionIds?.includes(evaluation.actionId),
+        ) &&
         !runnerRunReplacesAgendaAccess(input, evaluation) &&
         evaluation.pathPassability === "reachable" &&
         evaluation.recommendation === "run_now" &&
@@ -243,6 +253,9 @@ function runnerSameTurnAccessRemotePreparationSignals(
         left.targetServerId.localeCompare(right.targetServerId),
     )[0];
   if (!target) return [];
+  const parent = admittedParents.find(
+    (entry) => entry.serverId === target.targetServerId,
+  )!;
   const handRoute = [...handDevelopment]
     .filter(
       (evaluation) =>
@@ -298,7 +311,12 @@ function runnerSameTurnAccessRemotePreparationSignals(
       input,
       exactRoute.candidate.actionId,
       target,
-      { economy, candidates, minimumHandBuffer: 0 },
+      {
+        economy,
+        candidates,
+        minimumHandBuffer: runnerDefenseHandBufferFacts(input, runTargets)
+          .minimumHandBuffer,
+      },
     )
   )
     return [];
@@ -306,10 +324,10 @@ function runnerSameTurnAccessRemotePreparationSignals(
     {
       contestId: `remote:${target.targetServerId}`,
       serverId: target.targetServerId,
-      purpose: "contest" as const,
+      purpose: parent.purpose,
       knownAgendaThreat: target.scoreThreat,
       reachable: true,
-      marginalValue: Math.min(300, Math.max(target.score, exactRoute.value)),
+      marginalValue: parent.marginalValue,
       evidenceCode: `runner_same_turn_access_preparation:${target.targetServerId}:${exactRoute.definitionId}`,
       preparationActionIds: [exactRoute.candidate.actionId],
       routePreparation: "prepare_access_payoff" as const,
@@ -1092,16 +1110,17 @@ export function buildRunnerRemoteContestSignals({
         ];
       },
     ),
+  ];
+  const remoteContestDrafts: RunnerRemoteContestSignalDraft[] = [
+    ...baseRemoteContestDrafts,
     ...runnerSameTurnAccessRemotePreparationSignals(
+      baseRemoteContestDrafts,
       input,
       economy,
       candidates,
       handDevelopment,
       runTargets,
     ),
-  ];
-  const remoteContestDrafts: RunnerRemoteContestSignalDraft[] = [
-    ...baseRemoteContestDrafts,
     ...runnerTargetedIceTrashRemotePreparationSignals(
       input,
       candidates,
@@ -1196,5 +1215,37 @@ export function buildRunnerRemoteContestSignals({
     ],
     (signal) => signal.contestId,
   );
-  return remoteContests;
+  if (!runnerHasExpiringAgendaAccessPayoff(input)) return remoteContests;
+  return remoteContests.map((signal) => {
+    if (!signal.reachable || signal.routePreparation) return signal;
+    const eligible = runTargets.filter(
+      (target) =>
+        signal.runActionAssessments[target.actionId]?.verdict ===
+          "executable" && runnerRunCanConsumeAgendaAccessPayoff(input, target),
+    );
+    if (eligible.length === 0) return signal;
+    const admittedIds = new Set(eligible.map((target) => target.actionId));
+    return {
+      ...signal,
+      expiringAgendaAccessPayoff: true,
+      evidenceCode: `runner_expiring_agenda_access_payoff:${signal.serverId}`,
+      runActionAssessments: Object.fromEntries(
+        Object.entries(signal.runActionAssessments).map(([id, assessment]) =>
+          admittedIds.has(id)
+            ? [id, assessment]
+            : [
+                id,
+                {
+                  ...assessment,
+                  verdict: "explicitly_nonproductive" as const,
+                  evidenceCodes: [
+                    ...assessment.evidenceCodes,
+                    "runner_expiring_payoff_requires_agenda_access",
+                  ],
+                },
+              ],
+        ),
+      ),
+    };
+  });
 }

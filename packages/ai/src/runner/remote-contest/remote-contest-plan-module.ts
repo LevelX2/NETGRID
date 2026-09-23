@@ -112,12 +112,15 @@ export function remoteContestModule(): PlanModule {
   };
 }
 
-function remotePriority(signal: RunnerRemoteContestSignal): "P2" | "P4" | "P6" {
+function remotePriority(
+  signal: RunnerRemoteContestSignal,
+): "P2" | "P3" | "P4" | "P6" {
   if (
     (signal.knownAgendaThreat || signal.terminalPatternThreat) &&
     signal.routePreparation !== "targeted_bypass"
   )
     return "P2";
+  if (signal.expiringAgendaAccessPayoff) return "P3";
   return signal.constrainedActionCapacity ? "P6" : "P4";
 }
 

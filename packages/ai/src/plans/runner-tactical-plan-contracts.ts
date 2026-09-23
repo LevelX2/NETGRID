@@ -103,6 +103,7 @@ export type RunnerRemoteContestSignal = {
   serverId: string;
   purpose: "contest" | "information";
   knownAgendaThreat: boolean;
+  expiringAgendaAccessPayoff?: boolean;
   terminalPatternThreat?: boolean;
   reachable: boolean;
   marginalValue: number;

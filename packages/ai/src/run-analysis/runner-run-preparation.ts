@@ -1,14 +1,71 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type {
-  RunnerEconomyPosture,
-  RunnerRunTargetEvaluation,
+import {
+  evaluateRunnerRunTargets,
+  buildRunnerEconomyPosture,
+  type RunnerEconomyPosture,
+  type RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
 import { runnerCandidateSourceDefinitionId } from "../runtime/runner-action-source-facts";
 import { runnerTargetedIceTrashState } from "../runtime/runner-targeted-ice-trash-plan";
 import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
 import { runnerRunTargetCanConvertNow } from "./runner-plan-run-funding";
+import { mergedPublicHistory } from "../runtime/public-event-history";
+
+export function runnerHasExpiringAgendaAccessPayoff(
+  input: AiDecisionInput,
+): boolean {
+  let credit = false;
+  let point = false;
+  for (const event of mergedPublicHistory(input)) {
+    if (event.turnSerial !== input.playerView.turnSerial) continue;
+    const payload = event.publicPayload;
+    if (payload.nextAgendaAccessCreditGainResolved === true) credit = false;
+    if (payload.nextAgendaAccessAgendaPointConsumed === true) point = false;
+    if (
+      payload.actor !== "runner" ||
+      event.type !== "play_event" ||
+      typeof payload.cardDefinitionId !== "string"
+    )
+      continue;
+    const abilities = cardSpecPlanningCardByDefinitionId(
+      payload.cardDefinitionId,
+    )?.planning.engine.abilities;
+    for (const ability of abilities ?? []) {
+      if (ability.kind !== "on_play") continue;
+      for (const effect of ability.effects) {
+        if (
+          effect.kind === "mark_next_agenda_access_credit_gain" &&
+          effect.amount > 0
+        )
+          credit = true;
+        if (
+          effect.kind === "mark_next_agenda_access_agenda_point" &&
+          effect.amount > 0
+        )
+          point = true;
+      }
+    }
+  }
+  return credit || point;
+}
+
+export function runnerRunCanConsumeAgendaAccessPayoff(
+  input: AiDecisionInput,
+  target: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    !runnerRunReplacesAgendaAccess(input, target) &&
+    target.knownAccessState !== "known_no_current_payoff" &&
+    !(
+      target.knownAccessState === "known_payoff" &&
+      (target.accessPayoff === "trash_affordable" ||
+        target.accessPayoff === "trash_unaffordable" ||
+        target.accessPayoff === "known_low_value")
+    )
+  );
+}
 
 export function runnerRunReplacesAgendaAccess(
   input: AiDecisionInput,
@@ -58,7 +115,7 @@ export function runnerSameTurnAccessPreparationFitsTarget(
     !preparation ||
     !run ||
     !reserve ||
-    runnerRunReplacesAgendaAccess(input, target)
+    !runnerRunCanConsumeAgendaAccessPayoff(input, target)
   )
     return false;
   const credits = actionCreditCost(preparation);
@@ -73,24 +130,36 @@ export function runnerSameTurnAccessPreparationFitsTarget(
         ...input.playerView.own,
         credits: input.playerView.own.credits - credits,
         clicks: input.playerView.own.clicks - actionClickCost(preparation),
+        gripOrHq: input.playerView.own.gripOrHq.filter(
+          (card) => card.instanceId !== preparation.source,
+        ),
       },
     },
   };
   const handAfterPreparation = input.playerView.own.gripOrHq.length - 1;
+  // Hand size also changes consumable run admission and its risk quote.
+  // Requote this exact existing action; this does not create a future action.
+  const quotedTarget = evaluateRunnerRunTargets({
+    input: afterPreparation,
+  }).find((entry) => entry.actionId === target.actionId);
+  if (
+    !quotedTarget ||
+    quotedTarget.pathPassability !== "reachable" ||
+    quotedTarget.recommendation !== "run_now" ||
+    !runnerRunCanConsumeAgendaAccessPayoff(afterPreparation, quotedTarget)
+  )
+    return false;
   return (
     actionClickCost(preparation) + actionClickCost(run) <=
       input.playerView.own.clicks &&
     target.creditsAfterRun - credits >= 0 &&
     reserve.creditsAfterKnownPath - credits >= reserve.requiredCredits &&
     handAfterPreparation >= reserve.requiredHandBuffer &&
-    (target.pathCost === 0 ||
-      target.accessPayoff === "agenda" ||
-      target.accessPayoff === "score_threat" ||
-      handAfterPreparation >= continuation.minimumHandBuffer) &&
+    handAfterPreparation >= continuation.minimumHandBuffer &&
     runnerRunTargetCanConvertNow(
       afterPreparation,
-      continuation.economy,
-      { ...target, creditsAfterRun: target.creditsAfterRun - credits },
+      buildRunnerEconomyPosture({ input: afterPreparation }),
+      quotedTarget,
       continuation.candidates,
     )
   );

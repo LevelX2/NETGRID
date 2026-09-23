@@ -25,7 +25,7 @@ describe("match B008 older decision checkpoints", () => {
     expectCheckpointToPass(noBreakBudget);
   });
 
-  it("keeps an open R&D path in the pressure plan while Gypsy remains legal", () => {
+  it("holds the agenda-access preparation below the hand floor even with open R&D", () => {
     const openRnd = mutateFixture(cp02Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const rnd = state.corp.servers.find((server) => server.id === "rd");
@@ -40,17 +40,12 @@ describe("match B008 older decision checkpoints", () => {
         };
       }
       fixture.expectation = {
-        acceptableActions: [
-          {
-            actionId:
-              "runner.play_event.runner_onr_proteus_119_promises-promises_3.runner_onr_proteus_119_promises-promises_3.onr_proteus_119_promises-promises:on_play_mark_next_agenda_access_point_gain",
-          },
-        ],
+        acceptableActions: [{ type: "draw_card" }],
         planExecution: {
-          acceptablePlanKinds: ["runner.pressure_central"],
-          acceptableCapabilities: ["develop_onr_proteus_119_promises-promises"],
+          acceptablePlanKinds: ["runner.defense_and_recovery"],
+          acceptableCapabilities: ["build_required_hand_buffer"],
           requiredAssessmentEvidence: [
-            "runner_same_turn_access_preparation:rd:onr_proteus_119_promises-promises",
+            "runner_no_defense_support_current_need",
           ],
         },
       };

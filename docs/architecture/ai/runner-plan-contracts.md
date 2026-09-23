@@ -121,9 +121,21 @@ verbleibenden gequoteten Pfad, die unbekannte-ICE-Reserve und den Handpuffer.
 Ein vor dem Spend zugelassener Run allein belegt keine konvertierbare Folge.
 Die Folgequote verwendet auch die bestehende Funding-Admission des ausführenden
 Owners einschließlich geschützter Nachlaufreserve. `run_now` ersetzt diese
-Prüfung nicht. Central zieht die gespielte Handkarte vor seiner bestehenden
-Handpufferprüfung für bezahlte Zugriffe ohne konkrete Agenda-Bedrohung ab;
-so kann die Vorbereitung keinen danach gesperrten Parent als bereit erklären.
+Prüfung nicht. Central und Remote bewahren auch den globalen Handpuffer nach dem
+Kartenverbrauch. Die konkrete bestehende Run-Action wird nach Klick-, Credit-
+und Kartenverbrauch neu gequotet; dazu zählt die eigene Handkartenanforderung
+eines Run-Events. Die Vorbereitung erbt die Admission, Priorität und Bewertung
+des bereits ausführbaren Parents. Ein bekannter reiner Trash-Zugriff trägt
+keinen Agenda-Bonus.
+
+Ein öffentlich ausgespielter, noch nicht verbrauchter Agenda-Zugriffsbonus
+verfällt am Runner-Zugende. Die Run-Owner lesen diesen Zustand aus kanonischem
+Karteneffekt und den Engine-Ereignissen zu Spiel, Verbrauch und TurnSerial.
+Ein bereits zugelassener echter Agenda-Zugriff erhält für diese Gelegenheit
+P3; Finanzierung, Sicherheit und stärkere unmittelbare Bedrohungen bleiben
+maßgeblich. Ersetzende Informationsläufe verbrauchen diesen Bonus nicht und
+erhalten diese Priorität nicht. So verdrängt gewöhnlicher Ausbau den
+vorbereiteten letzten Zugriff nicht.
 Die Prüfung erzeugt keine zukünftigen Actions; der Owner materialisiert die
 Folge nach der Zustandsänderung erneut aus den LegalActions.
 

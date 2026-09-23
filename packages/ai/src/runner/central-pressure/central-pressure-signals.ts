@@ -34,6 +34,8 @@ import {
   runnerSameTurnAccessPreparationSourceDefinitionId,
   runnerSameTurnAccessPreparationFitsTarget,
   runnerRunReplacesAgendaAccess,
+  runnerHasExpiringAgendaAccessPayoff,
+  runnerRunCanConsumeAgendaAccessPayoff,
   runnerTargetedBypassPayoffValue,
   runnerTargetedIceTrashPayoffValue,
 } from "../../run-analysis/runner-run-preparation";
@@ -331,6 +333,7 @@ export function runnerCentralPressureHasExecutableEventRun(
 }
 
 function runnerSameTurnAccessCentralPreparationSignals(
+  admittedParents: RunnerPlanDomain["centralPressure"],
   input: AiDecisionInput,
   economy: RunnerEconomyPosture,
   minimumHandBuffer: number,
@@ -346,6 +349,15 @@ function runnerSameTurnAccessCentralPreparationSignals(
         (evaluation.targetServerId === "hq" ||
           evaluation.targetServerId === "rd" ||
           evaluation.targetServerId === "archives") &&
+        admittedParents.some(
+          (parent) =>
+            parent.serverId === evaluation.targetServerId &&
+            parent.reachable &&
+            parent.routePreparation === undefined &&
+            parent.runActionIds?.includes(evaluation.actionId) &&
+            (parent.runActionExclusions?.[evaluation.actionId]?.length ?? 0) ===
+              0,
+        ) &&
         !runnerRunReplacesAgendaAccess(input, evaluation) &&
         evaluation.pathPassability === "reachable" &&
         evaluation.recommendation === "run_now" &&
@@ -358,6 +370,9 @@ function runnerSameTurnAccessCentralPreparationSignals(
         left.targetServerId.localeCompare(right.targetServerId),
     )[0];
   if (!target) return [];
+  const parent = admittedParents.find(
+    (entry) => entry.serverId === target.targetServerId,
+  )!;
   const handRoute = [...handDevelopment]
     .filter(
       (evaluation) =>
@@ -421,7 +436,7 @@ function runnerSameTurnAccessCentralPreparationSignals(
     {
       pressureId: `central:${target.targetServerId}`,
       serverId: target.targetServerId as "hq" | "rd" | "archives",
-      purpose: "access" as const,
+      purpose: parent.purpose,
       strategyLineIds: [
         ...new Set([
           strategicIntent.primaryWinIntent,
@@ -430,9 +445,9 @@ function runnerSameTurnAccessCentralPreparationSignals(
           ),
         ]),
       ],
-      priorityClass: "P4" as const,
+      priorityClass: parent.priorityClass,
       reachable: true,
-      marginalValue: Math.min(300, Math.max(target.score, exactRoute.value)),
+      marginalValue: parent.marginalValue,
       evidenceCode: `runner_same_turn_access_preparation:${target.targetServerId}:${exactRoute.definitionId}`,
       sourceDefinitionIds: [exactRoute.definitionId],
       preparationActionIds: [exactRoute.candidate.actionId],
@@ -1367,11 +1382,14 @@ export function buildRunnerCentralPressureSignals({
         },
       ),
       ...effectiveAccessPayoffCampaignSignals,
-      // A legal same-turn payoff changes the current phase of the already
-      // discovered server-pressure plan. Keep it after the direct route
-      // signals because uniqueBy intentionally retains the last phase for a
-      // shared pressureId.
+    ],
+    (signal) => signal.pressureId,
+  );
+  const centralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
+    [
+      ...baseCentralPressure,
       ...runnerSameTurnAccessCentralPreparationSignals(
+        baseCentralPressure,
         input,
         economy,
         minimumHandBuffer,
@@ -1380,12 +1398,6 @@ export function buildRunnerCentralPressureSignals({
         runTargets,
         strategicIntent,
       ),
-    ],
-    (signal) => signal.pressureId,
-  );
-  const centralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
-    [
-      ...baseCentralPressure,
       ...runnerPostBreakTrashPreparationSignals(
         input,
         candidates,
@@ -1431,5 +1443,29 @@ export function buildRunnerCentralPressureSignals({
       },
     };
   });
-  return centralPressure;
+  if (!runnerHasExpiringAgendaAccessPayoff(input)) return centralPressure;
+  return centralPressure.map((signal) => {
+    if (
+      !signal.reachable ||
+      signal.routePreparation ||
+      signal.priorityClass === "P2"
+    )
+      return signal;
+    const runActionIds = (signal.runActionIds ?? []).filter(
+      (id) =>
+        (signal.runActionExclusions?.[id]?.length ?? 0) === 0 &&
+        runTargets.some(
+          (target) =>
+            target.actionId === id &&
+            runnerRunCanConsumeAgendaAccessPayoff(input, target),
+        ),
+    );
+    if (runActionIds.length === 0) return signal;
+    return {
+      ...signal,
+      runActionIds,
+      priorityClass: "P3" as const,
+      evidenceCode: `runner_expiring_agenda_access_payoff:${signal.serverId}`,
+    };
+  });
 }
