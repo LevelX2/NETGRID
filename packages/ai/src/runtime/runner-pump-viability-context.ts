@@ -24,6 +24,7 @@ import {
   encounterMitigationEvidence,
 } from "./runner-encounter-mitigation";
 import { cheaperSafeCurrentTracePayment } from "./runner-encounter-trace-payment";
+import { runnerRigAfterPumpAndEncounter } from "./runner-rig-after-encounter";
 import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
@@ -385,7 +386,22 @@ export function createRunnerPumpViabilityContext(
             evidence: [] as string[],
           }
         : dependencies.encounterFuturePathAfterPumpBreakAssessment(
-            input,
+            {
+              ...input,
+              playerView: {
+                ...input.playerView,
+                own: {
+                  ...input.playerView.own,
+                  rig: runnerRigAfterPumpAndEncounter(
+                    input.playerView.own.rig ?? [],
+                    breaker,
+                    currentEncounteredIceCard(input) ?? encounteredIce,
+                    pumpAmount,
+                    requiredPumps,
+                  ),
+                },
+              },
+            },
             server,
             {
               ...breakPayment.budget,

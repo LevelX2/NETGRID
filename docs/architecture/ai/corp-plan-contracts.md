@@ -37,6 +37,14 @@ Deckstrategie, Hand, Agendaexposition und erwarteter früher Run-Gefahr.
 
 ## 2. `corp.score_agenda`
 
+Das Deckstrategieprofil übernimmt `score.fast_advance_support` aus den
+aktuellen kanonischen Kartenhints in den Scorebeschleunigungswert sowie die
+Supportnachweise für Fast Advance, Scoreplan und Advancement-Fenster. Ein
+vorhandener Countertransfer oder eine Counterplatzierung darf nicht allein
+wegen älterer Signalnamen als fehlende Unterstützung erscheinen. Diese
+statische Kapazität ist keine aktuelle Aktionszulassung: Verbraucher,
+Counterquelle, Kosten und Frist prüft weiterhin der konkrete Score-Owner.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence
@@ -80,6 +88,18 @@ Suche nach fehlender wirksamer ICE. Eine bekannte bedrohte Agenda in R&D wäre
 ein konkreter Informations-/Defense-Fall und darf nur aus dafür tatsächlich
 verfügbaren side-sicheren Fakten begründet werden. Weder allgemeine
 Agendadichte noch eine leere Agenda-Hand ersetzen diesen Nachweis.
+
+Eine bereits gefüllte Counterbank darf einen vollständig finanzierten Score
+im aktuellen Corp-Zug auch dann bedienen, wenn ihr Remote im nächsten
+Runner-Zug erreichbar wäre. Die Schutzprüfung bleibt Voraussetzung für den
+Aufbau der Bank; sie darf den unmittelbar ausführbaren Verbrauch nicht
+verwerfen. Eine installierte, mit derselben Bank abschließbare Agenda hat
+Vorrang vor einer weiteren Installation, die dieselben Counter beansprucht.
+Ausgenommen ist ein neuer sofortiger Spielsieg, wenn die vorhandenen Ziele
+nicht terminal sind. Alle passenden installierten Ziele werden mit ihrer
+konkreten Karten- und Serverbindung dem Score-Owner angeboten; seine normale
+Priorisierung wählt den Abschluss. Vollständig avancierte Agenden beanspruchen
+keine Bankcounter (Regressionen: Paarung 461, Runde 5, G10 D139 und G40 D203).
 
 Für eine installierte Agenda unterscheidet der Scoreowner die vollständigen
 Kosten der aktuellen Konversion von der bis zum nächsten Corp-Zug nötigen
@@ -1344,6 +1364,21 @@ Remote-Sicherheit sofort aufgedeckt und ausgezahlt. Bereits aufgedeckte Banken
 und echte Agenda-Handoffs behalten ihre jeweiligen Score-Routen. Die Ambush-
 Signale werden einmal erzeugt und den betroffenen Ownern gemeinsam übergeben.
 
+Die Score-Finanzierung übernimmt die Counter-Freigabe aus
+`corp/score/score-counter-bank-funding.ts`. Ein sicherer Bankvorrat bleibt auch
+zwischen zwei Advance-Actions eine Score-Investition; ein konkurrierender
+gewöhnlicher Liquiditätsbedarf darf ihn nicht auszahlen und danach erneut
+aufbauen. Eine höher priorisierte aktuelle Konversion darf eine fremde
+Investition freigeben, aber dieselben Counter niemals zugleich als Transfer-
+und Creditquelle beanspruchen. Unsichere, nicht anderweitig gebundene Banken
+behalten ihre Liquidationsroute.
+
+Der residente Ambush-Owner beendet neue Advancement- und Support-Investitionen,
+wenn die Karte dem Runner exakt bekannt ist und die kanonische Access-Projektion
+`not_applicable` meldet. Bereits investierte Counter begründen keinen neuen
+Bluffwert. Echte Access-Effekte, aktuelle Trigger und Recycling bleiben nach
+ihren eigenen Quotes verfügbar; der bloße Rez-Zustand verwirft keine Schadensfalle.
+
 **Klasse:** `bounded_sequence`, `recurring_cycle` oder
 `development_project`
 **Rolle:** Support/Vordergrund/Background
@@ -1585,6 +1620,16 @@ Instanzidentität. Nach jedem State-Wechsel werden nur die dann legalen
 Action-IDs neu entdeckt; eine fehlende kartenspezifische Phasensemantik darf
 nicht durch Definition-, Server- oder Rollenfallbacks ersetzt werden.
 
+Ein vorbereiteter installierter Access-Effekt kann den Rez seiner Quelle
+benötigen. Am exakt erreichten Quellserver bindet der residente Ambush-Owner
+die aktuelle Root-Rezaktion auch bei positiven Creditkosten als Trigger.
+Er prüft den bekannten zusätzlichen Effekt nach Rez mit dem verbleibenden
+Creditbudget; spätere Access-Zahlungen und gebundene Score-Reserven müssen
+gemeinsam finanzierbar bleiben. Vorherige ICE-Fenster, fremde Zielserver,
+fehlende Wirkung und unbekannte Kosten begründen diese Route nicht.
+Installation und Advancement allein belegen daher noch keine wirksame
+Verwendung einer rezpflichtigen Falle wie Experimental AI.
+
 Die access-zonenbezogene Vorbereitung ergänzt den bestehenden Ambush-Owner:
 Eine eigene Asset-Quelle mit kostenlosem Self-Shuffle beim Rez und
 R&D-Zugriffseffekt darf als exakt gebundene Install-/Rez-Folge auftreten.
@@ -1656,13 +1701,23 @@ regellegal; Engine-Ausführung und Zielprüfung bleiben unverändert maßgeblich
 
 ### Vertikale Implementierung von Ambush und Bluff
 
+Öffentliche Program-Trash-Choices eines installierten Zugriffseffekts gehören
+ebenfalls dem Ambush-Owner. Er prüft Quellkarte, tatsächlich angegriffenen
+Server, aktive CardSpec-Wirkung, sichtbare Programme und die vollständige
+LegalAction-Choice. Er priorisiert sichtbare Icebreaker, Counter und
+Installations-/Speicherwert und bindet die vorgeschriebene Anzahl geordnet an
+den aktuellen Executor. Die Choice-Auflösung übernimmt ausschließlich diese
+Auswahl; falsche Quelle, fehlende Ziele oder veraltete Bindung scheitern
+fail-closed. Hardware-Trash-Operations bleiben beim bisherigen Owner.
+
 Der Owner liegt unter `packages/ai/src/corp/ambush/`:
 
 - `ambush-plan-module.ts`: Parent, Setup-Step, Priorität, Needs und aktuelle Routen;
 - `corp-ambush-plan-signals.ts`: Intent- und Quellenbindung, Köder, Fortsetzung und Disposition;
 - `corp-access-zone-preparation.ts`: begrenzte Install-/Halte-/Rückmischfolge und Zugriffszonenwert;
 - `corp-access-payment-choice.ts`: Bewertung und Bindung bezahlter Zugriffseffekte;
-- `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-Choice.
+- `corp-access-program-trash-choice.ts`: Bewertung und Bindung öffentlicher Program-Trash-Ziele beim Zugriff;
+- `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-/Trash-Choice.
 
 Defense liefert weiterhin den typisierten Bluff-Schutzbedarf; Economy erfüllt
 seine Finanzierung. Die Runtime komponiert diese Fakten und delegiert Choices
@@ -1806,3 +1861,15 @@ einen belegten Draw-, Refresh-, Agenda- oder Overflow-Zweck.
 `raise_visible_floor` benötigt Defense-Evidence; allgemeine Boardentwicklung
 benötigt ein Domainmodul. Fehlt die Planabdeckung, wird dies nicht durch
 Credit, Draw oder Boardentwicklung verdeckt.
+
+Ein aktueller Same-Turn-Score darf den exakt legalen Rez einer eigenen
+installierten Advancement-Quelle als ersten Schritt binden. Die eng begrenzte
+Projektion in `corp-installed-advancement-preparation.ts` akzeptiert nur eine
+kanonische, bedingungslose Corp-Main-Fähigkeit mit genau einem festen Klick-,
+einem festen Creditpreis und einer einzelnen Counterplatzierung auf ein
+installiertes Ziel. Rezpreis und aktuelle Source-/Server-/StateVersion-Bindung
+stammen aus der LegalAction; die vollständige Folge muss gemeinsam finanziert
+sein. Nach Rez wird die wirkliche Aktivierungsaction neu von der Engine
+angefordert und im bestehenden Score-Parent bewertet. Eine zukünftige Action-ID
+wird nicht erfunden. Der Regressionstest aus 461 R9 G5 D207 belegt den zuvor
+fehlenden Rezschritt vor dem sofortigen Gewinn.

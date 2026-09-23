@@ -54,6 +54,11 @@ azyklischer interner Implementierungsschnitt.
 - Steal-, Trash- und Install-Aktionen revalidieren Zustand, Kosten und Choices
   bei der Ausführung. LegalActions sind keine Autorisierung durch Vertrauen in
   den Client.
+- Beim Stehlen werden installierte Counter zuerst durch den kanonischen
+  Zonenwechsel entfernt. Erst danach werden neue Agenda-Punktboni auf der
+  gestohlenen Karte angelegt und für Punkteschulden ausgewertet. Ein
+  Remote-Steal darf diese neu entstandenen Boni nicht wieder löschen;
+  Advancement-Historie wird vor dem Zonenwechsel erfasst.
 - CardImplementation-Effekte und Legacy-Fallbacks sind gegenseitig exklusiv.
   Dadurch wird derselbe Karteneffekt nicht doppelt ausgeführt.
 - Archives-Autozugriffe verwenden dieselbe Queue und denselben Abschluss wie

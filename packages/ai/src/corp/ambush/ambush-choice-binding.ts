@@ -132,3 +132,71 @@ export function selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan(
   }
   return [...binding.selectedOptionIds];
 }
+
+export function selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) => instance.instanceId === portfolio.executorInstanceId,
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: CorpAmbushSignal }
+    | undefined;
+  const binding = moduleState?.signal?.accessProgramTrashChoiceBinding;
+  const requirement = action.choiceRequirements?.[0];
+  const optionIds = selectableOptions.map((option) => option.id);
+  const selectedCardIds = binding?.selectedOptionIds.flatMap((optionId) => {
+    const option = selectableOptions.find((entry) => entry.id === optionId);
+    return typeof option?.value === "string" ? [option.value] : [];
+  });
+  const exactBinding =
+    portfolio?.side === "corp" &&
+    executor?.moduleId === "corp.ambush_and_bluff" &&
+    executor.executionState === "executor" &&
+    moduleState?.kind === "ambush" &&
+    moduleState.signal?.phase === "trigger" &&
+    binding?.actionId === action.actionId &&
+    binding.choiceId === choice.choiceId &&
+    binding.choiceSource === choice.source &&
+    binding.observedAtStateVersion === input.playerView.stateVersion &&
+    selectedCardIds?.length === binding.targetProgramInstanceIds.length &&
+    selectedCardIds.every(
+      (cardId, index) => cardId === binding.targetProgramInstanceIds[index],
+    ) &&
+    choice.side === "corp" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.visibility === "public" &&
+    choice.minSelections > 0 &&
+    choice.minSelections === choice.maxSelections &&
+    choice.selectionOrdering === "ordered" &&
+    choice.sourceCardInstanceId === moduleState.signal.sourceInstanceId &&
+    choice.sourceCardDefinitionId === moduleState.signal.sourceDefinitionId &&
+    binding.selectedOptionIds.length === choice.maxSelections &&
+    new Set(binding.selectedOptionIds).size ===
+      binding.selectedOptionIds.length &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId)) &&
+    binding.selectedOptionIds.every((optionId) => optionIds.includes(optionId));
+  if (!exactBinding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Corp ambush plan must own and bind the exact program-trash targets before the choice resolver completes the current Engine payload.",
+    );
+  }
+  return [...binding.selectedOptionIds];
+}

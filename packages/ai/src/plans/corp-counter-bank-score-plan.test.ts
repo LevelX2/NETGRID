@@ -1,6 +1,7 @@
 import type { CorpAmbushSignal } from "./corp-tactical-plan-contracts";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
+  CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type LegalAction,
@@ -267,6 +268,102 @@ describe("corpCounterBankScoreProjects", () => {
       }),
     );
   });
+
+  it.each([
+    ["unrezzed bank, existing unfinished agenda", false, 0, 0, false, false],
+    ["rezzed bank, existing unfinished agenda", true, 0, 0, false, false],
+    ["existing agenda needs no bank counters", false, 3, 0, false, true],
+    ["new immediate win dominates nonterminal target", false, 0, 5, true, true],
+    ["existing immediate win keeps its bank", false, 0, 5, false, false],
+  ] as const)(
+    "%s",
+    (_label, rezzed, counters, points, onePointExisting, installAllowed) => {
+      const install = current(
+        legalAction(
+          "install-agenda",
+          "corp",
+          "install_card",
+          "Install",
+          { clicks: 1, credits: 0 },
+          {
+            source: "agenda",
+            payload: {
+              cardId: "agenda",
+              serverId: "new_remote",
+              placement: "root",
+              agendaInstallScoreHorizonQuoteSchemaVersion:
+                CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
+              agendaInstallScoreHorizonQuoteCardId: "agenda",
+              agendaInstallScoreHorizonQuoteTargetServerId: "new_remote",
+              agendaInstallScoreHorizonQuoteExpiresAtStateVersion: 1,
+              agendaInstallScoreHorizonQuoteAdvancementRequirement: 3,
+            },
+          },
+        ),
+      );
+      const rez = current(
+        legalAction(
+          "rez-vapor",
+          "corp",
+          "rez_card",
+          "Rez",
+          { clicks: 0, credits: 0 },
+          {
+            source: "vapor",
+            payload: { cardId: "vapor", serverId: "remote_1" },
+          },
+        ),
+      );
+      const input = withDeck(
+        aiInput("corp", rezzed ? [install] : [install, rez]),
+      );
+      input.playerView.own.clicks = 2;
+      input.playerView.own.agendaPoints = points;
+      input.playerView.own.gripOrHq = [agenda("agenda")];
+      const existing = onePointExisting
+        ? visibleCard("existing", "corp", "agenda", {
+            definitionId: "onr_v1_203_hostile-takeover",
+            advancementRequirement: 3,
+            agendaPoints: 1,
+          })
+        : agenda("existing");
+      existing.advancementCounters = counters;
+      input.playerView.servers = [
+        server("remote_1", [], [vapor("vapor", "installed_root", 3, rezzed)]),
+        server("remote_2", [], [existing]),
+      ];
+      const projects = corpCounterBankScoreProjects(
+        input,
+        [
+          candidate(install, "install.card"),
+          ...(!rezzed ? [candidate(rez, "corp_window.rez")] : []),
+        ],
+        [],
+      );
+      expect(
+        projects.some((p) => p.phase === "install_agenda_from_counter_bank"),
+      ).toBe(installAllowed);
+      if (!rezzed && counters < 3)
+        expect(projects).toContainEqual(
+          expect.objectContaining({
+            phase: "rez_counter_bank_for_handoff",
+            agendaInstanceId: "existing",
+            sameTurnCloseout: true,
+          }),
+        );
+      input.playerView.own.clicks = 1;
+      expect(
+        corpCounterBankScoreProjects(
+          input,
+          [
+            candidate(install, "install.card"),
+            candidate(rez, "corp_window.rez"),
+          ],
+          [],
+        ).some((p) => p.phase === "install_agenda_from_counter_bank"),
+      ).toBe(false);
+    },
+  );
 
   it("rejects an agenda install that would replace its bound counter bank", () => {
     const installAgenda = current(

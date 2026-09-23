@@ -11,6 +11,7 @@ import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { corpVisibleLiquidityDemandTarget } from "./economy-domain-signals";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
+import { scoreFundingPreservesCounterBanks } from "../score/score-counter-bank-funding";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -1258,12 +1259,16 @@ export function corpRequiredEconomyNeeds(
             kind: "parent_funding" as const,
             needId: `score-support:${project.projectId}`,
             gap: project.fundingMilestone.remainingGap,
-            actionIds:
+            actionIds: scoreFundingPreservesCounterBanks(
+              input,
+              project,
+              scoreProjects,
               project.sameTurnFundingActionIds ??
-              (project.feasible &&
-              (project.sameTurnCloseout || project.terminalScore)
-                ? terminalFundingActionIds
-                : immediateFundingActionIds),
+                (project.feasible &&
+                (project.sameTurnCloseout || project.terminalScore)
+                  ? terminalFundingActionIds
+                  : immediateFundingActionIds),
+            ),
             parentPlanInstanceId: planInstanceIdForProposal({
               moduleId: "corp.score_agenda",
               dedupeKey: project.projectId,

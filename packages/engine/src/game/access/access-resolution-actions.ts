@@ -388,6 +388,7 @@ export function stealAgenda(
           Math.floor(host.state.run.liberatedBlackOpsAgendaCount ?? 0),
         ) + 1;
   }
+  host.zones.removeFromAllZones(cardId as CardInstanceId);
   applyPendingAgendaPointBonusToStolenAgenda(
     host,
     cardId as CardInstanceId,
@@ -400,7 +401,6 @@ export function stealAgenda(
     0,
     Math.floor(host.state.runnerAgendaPointsToForfeit ?? 0),
   );
-  host.zones.removeFromAllZones(cardId as CardInstanceId);
   let paidDebt = 0;
   if (agendaDebt > 0) {
     paidDebt = Math.min(agendaDebt, agendaPointValue);

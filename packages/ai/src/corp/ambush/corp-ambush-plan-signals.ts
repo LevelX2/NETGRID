@@ -1,3 +1,4 @@
+import { accessProgramTrashChoiceSignal } from "./corp-access-program-trash-choice";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { corpRdRecyclingSignals } from "./corp-access-zone-preparation";
 import { corpAccessPaymentChoiceSignal } from "./corp-access-payment-choice";
@@ -39,10 +40,15 @@ export function buildCorpAmbushPlanSignals(params: {
     params.input,
     params.candidates,
   );
+  const accessProgramTrash = accessProgramTrashChoiceSignal(
+    params.input,
+    params.candidates,
+  );
   const continued = continuedAmbushSignals(params).filter(
     (signal) =>
       signal.sourceInstanceId !== accessProgramBounce?.sourceInstanceId &&
-      signal.sourceInstanceId !== accessPayment?.sourceInstanceId,
+      signal.sourceInstanceId !== accessPayment?.sourceInstanceId &&
+      signal.sourceInstanceId !== accessProgramTrash?.sourceInstanceId,
   );
   const continuedSourceIds = new Set(
     continued.map((signal) => signal.sourceInstanceId),
@@ -53,6 +59,7 @@ export function buildCorpAmbushPlanSignals(params: {
     return [
       ...(accessPayment ? [accessPayment] : []),
       ...(accessProgramBounce ? [accessProgramBounce] : []),
+      ...(accessProgramTrash ? [accessProgramTrash] : []),
       ...continued,
     ];
   }
@@ -106,6 +113,7 @@ export function buildCorpAmbushPlanSignals(params: {
   return [
     ...(accessPayment ? [accessPayment] : []),
     ...(accessProgramBounce ? [accessProgramBounce] : []),
+    ...(accessProgramTrash ? [accessProgramTrash] : []),
     ...continued,
     ...plannedDecoys,
     ...recycling,
@@ -605,6 +613,7 @@ export function corpAmbushAdvanceDispositionEvidence(
 }
 
 function continuedAmbushSignals(params: {
+  reservedScoreCredits?: number;
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio | undefined;
@@ -728,21 +737,42 @@ function continuedAmbushSignals(params: {
       const action = params.input.legalActions.find(
         (legalAction) => legalAction.actionId === candidate.actionId,
       );
-      if (action === undefined || exactLegalActionCreditCost(action) !== 0)
+      if (action === undefined) return false;
+      const rezCredits = exactLegalActionCreditCost(action);
+      const reservedCredits = params.reservedScoreCredits ?? 0;
+      if (
+        rezCredits === undefined ||
+        !Number.isSafeInteger(reservedCredits) ||
+        reservedCredits < 0 ||
+        params.input.playerView.own.credits - rezCredits < reservedCredits
+      ) {
         return false;
+      }
       const beforeRez = projectKnownCorpCardAccessEffect({
         input: params.input,
         sourceDefinitionId,
         sourceCard: location.card,
       });
       const afterRez = projectKnownCorpCardAccessEffect({
-        input: params.input,
+        input: {
+          ...params.input,
+          playerView: {
+            ...params.input.playerView,
+            own: {
+              ...params.input.playerView.own,
+              credits: params.input.playerView.own.credits - rezCredits,
+            },
+          },
+        },
         sourceDefinitionId,
         sourceCard: { ...location.card, rezzed: true },
       });
       return (
         beforeRez.status !== "unknown" &&
         afterRez.status === "complete" &&
+        afterRez.corpCanPayActivation !== false &&
+        (afterRez.activationCreditCost ?? 0) + reservedCredits <=
+          params.input.playerView.own.credits - rezCredits &&
         afterRez.threatValue > beforeRez.threatValue
       );
     });
@@ -750,7 +780,7 @@ function continuedAmbushSignals(params: {
       throw ambushContractFailure(
         params.input,
         accessWindowRezCandidates.map((candidate) => candidate.actionId),
-        `Resident ambush ${sourceInstanceId} has ambiguous zero-cost access-window rez actions.`,
+        `Resident ambush ${sourceInstanceId} has ambiguous funded access-window rez actions.`,
       );
     }
     const exactTriggerCandidate =
@@ -820,14 +850,22 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous advancement actions.`,
       );
     }
-    const supportRoute = ambushAdvancementSupportRoute({
-      input: params.input,
-      candidates: params.candidates,
-      sourceInstanceId,
-      serverId: location.serverId,
-      currentCounters,
-      advancementTarget,
-    });
+    // A known card without an access effect has lost its bluff purpose.
+    // Current counters are sunk investment, not a reason to buy them back.
+    // Weak but real access effects may still improve through advancement.
+    const advancementHasPurpose =
+      runnerKnowledge === undefined ||
+      accessThreatProjection?.status !== "not_applicable";
+    const supportRoute = advancementHasPurpose
+      ? ambushAdvancementSupportRoute({
+          input: params.input,
+          candidates: params.candidates,
+          sourceInstanceId,
+          serverId: location.serverId,
+          currentCounters,
+          advancementTarget,
+        })
+      : undefined;
     const selectRecycle =
       supportRoute === undefined &&
       exactTriggerCandidate === undefined &&
@@ -841,7 +879,7 @@ function continuedAmbushSignals(params: {
       exactTriggerCandidate ??
       (selectRecycle
         ? recycleCandidate
-        : currentCounters < advancementTarget
+        : advancementHasPurpose && currentCounters < advancementTarget
           ? advanceCandidates[0]
           : undefined);
     const phase =
@@ -855,7 +893,7 @@ function continuedAmbushSignals(params: {
               ? ("trigger" as const)
               : selectRecycle
                 ? ("recycle" as const)
-                : currentCounters < advancementTarget
+                : advancementHasPurpose && currentCounters < advancementTarget
                   ? ("advance" as const)
                   : ("trigger" as const);
     const {

@@ -1214,6 +1214,14 @@ Handbudget verschwinden. Die Finanzierung verwendet den vollständigen Pfad
 mit ihrem garantierten Budget; ein tragbarer günstigerer Schadenspfad bleibt
 ohne unnötiges Darlehen zulässig.
 
+Erzeugt erst eine ungebrochene äußere Subroutine eine innere Zugriffssperre,
+bleibt die fehlende Breaker-Abdeckung an dieser Quell-ICE gebunden. Der
+Pfaddienst vergleicht die bekannte Fortsetzung mit und ohne Wirkung auch dann,
+wenn der Quellbreaker fehlt. Eine unabhängig unüberwindbare innere ICE behält
+ihren eigenen Bedarf; ohne betroffene Folge-ICE entsteht kein künstlicher
+Coveragebedarf. Ein vorhandener, aber unbezahlbarer Quellbreaker bleibt eine
+Finanzierungslücke.
+
 Die Engine projiziert bereits aktivierte Encounter-Gebühren öffentlich als
 `run.encounterTaxForFutureIce`. Restpfad-, Pump-, Break- und Risikoprüfungen
 erhalten diesen Wert auch durch die KI-Eingabeprojektion. Diese verwirft
@@ -1438,6 +1446,16 @@ gebrochene Subroutine wird dabei nicht erneut angesetzt. Auch am innersten ICE
 ohne weiteren Pfad müssen sämtliche verbleibenden Pflicht-Breaks gemeinsam
 finanziert sein. Die Bezahlbarkeit nur eines weiteren Breaks erlaubt keine
 optionale Schadensabwehr, die eine zweite verbleibende ETR-Sperre offenließe.
+
+Die Pump-Zulassung projiziert zusätzlich die bereits im aktuellen Angebot
+finanzierten, aber noch nicht ausgeführten Pumps über diese Grenze. Ihre
+Gültigkeitsdauer stammt aus dem kanonischen Engine-Breaker-Quote: Nur Run-
+und Zug-Pumps erhöhen auch die Stärke im inneren Pfad. Encounter-Pumps
+verfallen dort, ebenso bereits bestehende Encounter-Boni. Der zukünftige
+Zahlungspfad verwendet diese projizierte Stärke und das um Pump und Break
+verminderte Budget zusammen; andernfalls würde er fortbestehende Stärke ein
+zweites Mal berechnen. Ein uneindeutiger Quote-Horizont scheitert sichtbar
+mit `runner_projected_pump_horizon_unresolved`.
 
 Öffentlich aufgelöster Corp-Schaden wird nach seiner Quelle zugeordnet.
 Der Runner als Actor einer `continue_run`-Action macht die darin aufgelösten

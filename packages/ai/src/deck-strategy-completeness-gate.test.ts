@@ -72,13 +72,19 @@ describe("deck strategy completeness gate", () => {
   it("classifies Counter Shell as a productive counter-to-score doctrine", () => {
     const profile = buildDeckStrategyProfile(standardSnapshot("Counter Shell"));
 
+    // FTE, three Teams, Chicago and three Vapor copies provide eight
+    // current score.fast_advance_support signals, not a support gap.
+    expect(profile.corpProfile?.scoreProfile.scoreAcceleration).toBe(8);
+    expect(profile.strategyScores["corp.fast_advance"]?.supportGaps).toEqual(
+      [],
+    );
     expect(profile.primaryStrategies).toEqual([
-      "corp.ambush_bluff",
-      "corp.remote_scoring",
+      "corp.fast_advance",
       "corp.overadvance_value",
+      "corp.ambush_bluff",
     ]);
     expect(profile.secondaryStrategies).toEqual([
-      "corp.fast_advance",
+      "corp.remote_scoring",
       "corp.draw_engine",
       "corp.rush_score",
     ]);

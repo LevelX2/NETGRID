@@ -10,6 +10,7 @@ import {
 import {
   selectedCorpAccessPaymentOptionsFromAmbushPlan,
   selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan,
+  selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan,
 } from "../corp/ambush/ambush-choice-binding";
 import {
   selectedCorpAgendaPurgeInstallTargetOptionIds,
@@ -634,6 +635,23 @@ export function selectedChoicesForDecision(
         currentPortfolio,
       ),
       "resident_corp_start_rez_economy",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.source === "card_implementation.runner_installed_multi_trash" &&
+    !corpInstalledHardwareTrashOperationProfile(choice.sourceCardDefinitionId)
+  ) {
+    return resolved(
+      selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_corp_ambush_program_trash",
     );
   }
   if (

@@ -1,3 +1,4 @@
+import { corpInstalledAdvancementPreparations } from "./corp-installed-advancement-preparation";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
@@ -23,6 +24,7 @@ import {
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type CorpScoreConversionStepKind =
+  | "rez_score_support"
   | "recover_score_support"
   | "gain_action_capacity"
   | "install_score_target"
@@ -90,6 +92,11 @@ type ConversionCapability = {
   creditCost: number;
   projected: boolean;
   recoveredFromArchives?: boolean;
+  rezPreparation?: {
+    action: LegalAction;
+    credits: number;
+    sourceCardId: string;
+  };
 };
 
 type ActionCapacity = {
@@ -478,7 +485,8 @@ function visitCapabilityCombinations(params: {
   const capability = params.capabilities[params.index]!;
   if (params.usedActionIds.has(capability.capabilityId)) return;
   const clickCost = capability.clickCost;
-  const creditCost = capability.creditCost;
+  const creditCost =
+    capability.creditCost + (capability.rezPreparation?.credits ?? 0);
   if (clickCost > params.clicks || creditCost > params.credits) return;
   let availableAmount = capability.amount;
   const nextSourceCounters = { ...params.sourceCounters };
@@ -539,7 +547,26 @@ function visitCapabilityCombinations(params: {
       credits: params.credits - creditCost,
       sourceCounters: branchSourceCounters,
       usedActionIds,
-      steps: [...params.steps, step],
+      steps: [
+        ...params.steps,
+        ...(capability.rezPreparation
+          ? [
+              {
+                kind: "rez_score_support" as const,
+                actionId: capability.rezPreparation.action.actionId,
+                sourceCardId: capability.rezPreparation.sourceCardId,
+                targetCardId: params.target.card.instanceId,
+                targetServerId: params.target.serverId,
+                advancementAmount: 0,
+                clickCost: 0,
+                creditCost: capability.rezPreparation.credits,
+                generatedClicks: 0,
+                evidence: ["score_conversion:exact_installed_support_rez"],
+              },
+            ]
+          : []),
+        step,
+      ],
     });
   }
 }
@@ -673,6 +700,26 @@ function conversionCapabilities(
           };
         });
     },
+  );
+  legalCapabilities.push(
+    ...corpInstalledAdvancementPreparations(input).map((preparation) => ({
+      kind: "place_advancement" as const,
+      capabilityId:
+        "installed:" +
+        preparation.sourceCardId +
+        ":" +
+        preparation.capabilityId,
+      sourceCardId: preparation.sourceCardId,
+      amount: preparation.amount,
+      clickCost: preparation.clickCost,
+      creditCost: preparation.creditCost,
+      projected: true,
+      rezPreparation: {
+        action: preparation.action,
+        credits: preparation.rezCredits,
+        sourceCardId: preparation.sourceCardId,
+      },
+    })),
   );
   if (!target.installAction)
     return legalCapabilities.sort(compareConversionCapabilities);
@@ -1168,9 +1215,11 @@ function conversionStep(
         : []),
       ...(capability.projected
         ? [
-            capability.recoveredFromArchives
-              ? "score_conversion:engine_quoted_archives_recovery"
-              : "score_conversion:projected_from_visible_hand",
+            capability.rezPreparation
+              ? "score_conversion:projected_from_canonical_installed_ability"
+              : capability.recoveredFromArchives
+                ? "score_conversion:engine_quoted_archives_recovery"
+                : "score_conversion:projected_from_visible_hand",
           ]
         : []),
     ],

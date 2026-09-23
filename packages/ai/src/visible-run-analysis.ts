@@ -1190,6 +1190,19 @@ function assessKnownRezzedIcePathInternal(
             additionalBreakCostPerSubroutine,
           })
         : undefined;
+      if (breakAssessment && "missingSourceCoverage" in breakAssessment) {
+        return blockedPathAssessment(
+          visibleBreakCost,
+          creditBudget.credits,
+          iceIndex,
+          effectiveIce.definitionId,
+          effectiveIce.subtypes,
+          visibleBreakCost,
+          firstKnownIceBreakable,
+          assessedKnownIceCount,
+          "ice_unbreakable",
+        );
+      }
       if (breakAssessment) {
         const payment = projectBreakerCreditPayment(
           creditBudget,
@@ -1506,7 +1519,7 @@ function runPathEffectBreakAssessment(params: {
   breakerStrengths: Map<string, number>;
   carriedBreakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
-}): BreakAssessment | undefined {
+}): BreakAssessment | { missingSourceCoverage: true } | undefined {
   if (!runPathProjectionEffectCanMatter(params.effect)) return undefined;
   const futureIce = params.iceCards.slice(0, Math.max(0, params.iceIndex));
   if (futureIce.length <= 0) return undefined;
@@ -1520,12 +1533,6 @@ function runPathEffectBreakAssessment(params: {
     [params.sourceSubroutine],
     params.deflectorContext.allowRandomBreakAttempts,
   );
-  if (!breakAssessment) return undefined;
-  const payment = projectBreakerCreditPayment(
-    params.creditBudget,
-    breakAssessment,
-  );
-
   const futureWithoutEffect = assessKnownRezzedIcePathInternal(
     futureIce,
     params.rigCards,
@@ -1557,6 +1564,15 @@ function runPathEffectBreakAssessment(params: {
     // does not turn it into a structural lock that must be broken at any cost.
     !runnerKnownPathAssessmentIsCostNoAccess(futureWithEffect) &&
     futureWithEffect.assessedKnownIceCount > 0;
+  // Preserve the cause of a downstream lock. Asking for the inner ICE's
+  // breaker cannot repair an unbroken source that disables that breaker.
+  if (!breakAssessment) {
+    return effectCreatesNoAccess ? { missingSourceCoverage: true } : undefined;
+  }
+  const payment = projectBreakerCreditPayment(
+    params.creditBudget,
+    breakAssessment,
+  );
   // An unfunded source break remains a funding need. Dropping its quote
   // would apply the lock and misreport the following ICE as missing coverage.
   if (!payment.affordable) {
