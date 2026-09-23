@@ -119,6 +119,11 @@ Informationsrun erfüllt diese Bedingung nicht. Central und Remote prüfen
 vor der Vorbereitung deren eigene Klick- und Creditkosten sowie den danach
 verbleibenden gequoteten Pfad, die unbekannte-ICE-Reserve und den Handpuffer.
 Ein vor dem Spend zugelassener Run allein belegt keine konvertierbare Folge.
+Die Folgequote verwendet auch die bestehende Funding-Admission des ausführenden
+Owners einschließlich geschützter Nachlaufreserve. `run_now` ersetzt diese
+Prüfung nicht. Central zieht die gespielte Handkarte vor seiner bestehenden
+Handpufferprüfung für bezahlte Zugriffe ohne konkrete Agenda-Bedrohung ab;
+so kann die Vorbereitung keinen danach gesperrten Parent als bereit erklären.
 Die Prüfung erzeugt keine zukünftigen Actions; der Owner materialisiert die
 Folge nach der Zustandsänderung erneut aus den LegalActions.
 

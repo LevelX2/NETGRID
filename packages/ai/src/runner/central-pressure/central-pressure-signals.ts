@@ -332,6 +332,8 @@ export function runnerCentralPressureHasExecutableEventRun(
 
 function runnerSameTurnAccessCentralPreparationSignals(
   input: AiDecisionInput,
+  economy: RunnerEconomyPosture,
+  minimumHandBuffer: number,
   candidates: readonly ActionSemanticCandidate[],
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
   runTargets: readonly RunnerRunTargetEvaluation[],
@@ -411,6 +413,7 @@ function runnerSameTurnAccessCentralPreparationSignals(
       input,
       exactRoute.candidate.actionId,
       target,
+      { economy, candidates, minimumHandBuffer },
     )
   )
     return [];
@@ -1370,6 +1373,8 @@ export function buildRunnerCentralPressureSignals({
       // shared pressureId.
       ...runnerSameTurnAccessCentralPreparationSignals(
         input,
+        economy,
+        minimumHandBuffer,
         candidates,
         handDevelopment,
         runTargets,

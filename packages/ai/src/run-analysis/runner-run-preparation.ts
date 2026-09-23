@@ -1,10 +1,14 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
+import type {
+  RunnerEconomyPosture,
+  RunnerRunTargetEvaluation,
+} from "../runner-run-target-evaluation";
 import { runnerCandidateSourceDefinitionId } from "../runtime/runner-action-source-facts";
 import { runnerTargetedIceTrashState } from "../runtime/runner-targeted-ice-trash-plan";
 import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
+import { runnerRunTargetCanConvertNow } from "./runner-plan-run-funding";
 
 export function runnerRunReplacesAgendaAccess(
   input: AiDecisionInput,
@@ -39,6 +43,11 @@ export function runnerSameTurnAccessPreparationFitsTarget(
   input: AiDecisionInput,
   preparationActionId: string,
   target: RunnerRunTargetEvaluation,
+  continuation: {
+    economy: RunnerEconomyPosture;
+    candidates: readonly ActionSemanticCandidate[];
+    minimumHandBuffer: number;
+  },
 ): boolean {
   const preparation = input.legalActions.find(
     (a) => a.actionId === preparationActionId,
@@ -53,12 +62,37 @@ export function runnerSameTurnAccessPreparationFitsTarget(
   )
     return false;
   const credits = actionCreditCost(preparation);
+  // Quote the already bound route after the current legal preparation's spend.
+  // Reuse the executing owner's funding admission rather than treating run_now
+  // as proof that its protected post-run reserve is already available.
+  const afterPreparation: AiDecisionInput = {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      own: {
+        ...input.playerView.own,
+        credits: input.playerView.own.credits - credits,
+        clicks: input.playerView.own.clicks - actionClickCost(preparation),
+      },
+    },
+  };
+  const handAfterPreparation = input.playerView.own.gripOrHq.length - 1;
   return (
     actionClickCost(preparation) + actionClickCost(run) <=
       input.playerView.own.clicks &&
     target.creditsAfterRun - credits >= 0 &&
     reserve.creditsAfterKnownPath - credits >= reserve.requiredCredits &&
-    input.playerView.own.gripOrHq.length - 1 >= reserve.requiredHandBuffer
+    handAfterPreparation >= reserve.requiredHandBuffer &&
+    (target.pathCost === 0 ||
+      target.accessPayoff === "agenda" ||
+      target.accessPayoff === "score_threat" ||
+      handAfterPreparation >= continuation.minimumHandBuffer) &&
+    runnerRunTargetCanConvertNow(
+      afterPreparation,
+      continuation.economy,
+      { ...target, creditsAfterRun: target.creditsAfterRun - credits },
+      continuation.candidates,
+    )
   );
 }
 export function runnerSameTurnAccessPreparationSourceDefinitionId(

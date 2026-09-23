@@ -221,6 +221,7 @@ function runnerTargetedBypassRemotePreparationSignals(
 
 function runnerSameTurnAccessRemotePreparationSignals(
   input: AiDecisionInput,
+  economy: RunnerEconomyPosture,
   candidates: readonly ActionSemanticCandidate[],
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
   runTargets: readonly RunnerRunTargetEvaluation[],
@@ -297,6 +298,7 @@ function runnerSameTurnAccessRemotePreparationSignals(
       input,
       exactRoute.candidate.actionId,
       target,
+      { economy, candidates, minimumHandBuffer: 0 },
     )
   )
     return [];
@@ -1092,6 +1094,7 @@ export function buildRunnerRemoteContestSignals({
     ),
     ...runnerSameTurnAccessRemotePreparationSignals(
       input,
+      economy,
       candidates,
       handDevelopment,
       runTargets,
