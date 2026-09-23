@@ -110,7 +110,7 @@ export function buildRunnerCardDevelopmentSignals({
         evaluation.availability === "legal_now" &&
         (evaluation.deferReason === "none" ||
           (strengthInvestment?.admitted === true &&
-            ["no_current_need", "duplicate"].includes(evaluation.deferReason)));
+            evaluation.deferReason === "no_current_need"));
       const waitingForCredits =
         evaluation.availability === "missing_credits" &&
         evaluation.deferReason === "missing_credits" &&
@@ -576,8 +576,9 @@ export function buildRunnerCardDevelopmentSignals({
                 fundingRouteAssessment: fundingRoute!.routeAssessment,
               }
             : {}),
-          priorityClass:
-            strengthInvestment?.admitted || runCreditInvestment?.admitted
+          priorityClass: strengthInvestment?.admitted
+            ? strengthInvestment.priorityClass
+            : runCreditInvestment?.admitted
               ? ("P4" as const)
               : developmentPriorityClass,
           value: normalizedDevelopmentValue,

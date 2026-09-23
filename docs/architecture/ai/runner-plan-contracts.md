@@ -941,20 +941,57 @@ Bruttokosten des alten Pfads sind dafür kein Ersatz. Regressionen prüfen sowoh
 einen gespeicherten echten Entscheidungszustand als auch die Budgetgrenze mit
 kompatiblen Programmkrediten und den unmittelbar zu knappen Gegenfall.
 
-Admission verlangt eine gegenwärtig sinnvolle, finanzierte HQ-/R&D-Route,
-legalen Install ohne Programmopfer, freie MU, Handpuffer, Klicks und erhaltene
-Reserven. Sichtbare Scorefristen, Matchpoint, Tags, bedingte Breakerpfade und
-unvermeidbare ICE-Gefahren schließen diese begrenzte Investition aus. Die
-Amortisation umfasst den aktuellen und genau einen bedingten künftigen Run;
-für diesen werden nur ausdrücklich erneuernde Pools auf ihre ausgewiesene
-Kapazität gesetzt. Zukünftige Ersparnis wird nicht als heutiges Geld ausgegeben.
-Beide Runs müssen liquide Credits sparen; nach Installcredits und einem
-Creditäquivalent pro Installklick bleiben mindestens zwei Credits Nutzen.
+Der unmittelbare P4-Investitionsvergleich verlangt weiterhin eine aktuell
+finanzierte HQ-/R&D-Route und mindestens zwei Credits Überschuss aus dem
+aktuellen und einem bedingten künftigen Run, nach Installcredits und einem
+Creditäquivalent je Installklick. Sein Wert bleibt auf 300 begrenzt.
 
-Der Dienst liefert Zweck, Belege und einen auf 300 begrenzten P4-Wert an
-`runner.develop_board_and_hand`. Planinstanz, Step, Route und Aktionsauswahl
-bleiben bei den bestehenden Ownern. Er erzwingt weder eine benannte Karte noch
-wertet er unbekannte ICE als bekannte Ersparnis.
+Daneben bewertet `hand-development/passive-strength-development.ts` denselben
+Installationszweck über höchstens drei künftige Runnerzüge, begrenzt durch
+beide Deckreste. Ein Run im Installationszug ist dafür keine Voraussetzung.
+Bekannte zentrale ICE-Pfade werden mit und ohne zusätzliche Reduktion gegen
+denselben bedingten Verbraucher und erneuerte Creditpools verglichen. Ein
+bereits installierter Breaker begründet bei positivem Nettoertrag einen auf
+200 begrenzten P4-Wert. Ein kompatibler Handbreaker erhält einen
+Readiness-Abschlag auf 0,75; ein nur im eigenen Deck verbleibender Breaker
+zusätzlich die Ziehwahrscheinlichkeit über den begrenzten Horizont, ohne
+Kenntnis der Reihenfolge. Solche Vorbereitungen bleiben P5. Installkosten und
+MU des noch fehlenden Verbrauchers werden reserviert; ein Host ist dafür
+keine Voraussetzung. Die beste einzelne Pfad-/Verbraucheralternative zählt,
+nicht die Summe wechselseitig alternativer Einsparungen.
+
+Ohne bekannte zentrale ICE wird nur ein begrenzter P5-Optionswert bewertet:
+120 Punkte mal Readiness, geteilt durch die Anzahl gleichartiger installierter
+Quellen plus eins, abzüglich zehn Punkten je Installcredit/-klick, maximal
+80 Punkte. Zusätzliche freie Liquidität in Höhe der Installkosten muss dabei
+erhalten bleiben. Das ist eine generische Entwicklungspolicy und keine
+Behauptung konkreter Einsparungen an verdeckten Karten oder ein Deckbonus.
+Auf bekannten Pfaden belegte Nullersparnis erhält keinen Ersatz-Optionswert.
+
+Beide Bewertungen verlangen einen legalen Install ohne Programmopfer, freie
+MU und erhaltene Reserven. Tags, sichtbare Scorefristen und Matchpoint
+begrenzen die langfristige Investition. Zukünftige Ersparnis ist niemals
+heutiges Geld. Erneuernde eingeschränkte Creditpools behalten auch bei null
+aktuellen Credits ihre öffentlichen Kapazitäts-, Verwendungs- und
+Refresh-Metadaten in der Engine-PlayerView. So werden verbrauchte Quellen
+im Zukunftsvergleich nicht als dauerhaft verschwunden behandelt.
+
+Die Handbewertung übernimmt einen positiven typisierten Nachweis additiver
+Kapazität in die funktionale Rolle. Eine frühere pauschale
+`duplicate_or_low_value`-Einstufung darf diesen Nachweis nicht nachträglich
+verwerfen. Echte Redundanz, negative Ersatzbewertung, MU-Druck und Reserven
+bleiben wirksam. Der Test mit zwei gleichzeitig installierten Clowns verwendet
+verschiedene Karteninstanzen und prüft die echte Planwahl; eine weitere
+Kopie wird mit und ohne vorherigen Speicheraufbau geprüft.
+
+Planinstanz, Step, Route und Aktionsauswahl bleiben bei den bestehenden
+Ownern. Es entsteht weder ein starres Zielrig noch eine zweite Strategiesteuerung.
+Die Kernfunktionen des Clown-Decks sind Krash als Coverage, Clown als passive
+Kostensenkung, Spin Chip als optionaler Host, Cloak/Vewy als kompatible
+erneuerbare Finanzierung sowie Cybermodem als Speicher-/Credit-Unterstützung.
+Streetware stellt Aufbauwirtschaft bereit. Die jeweiligen Owner werden mit
+kanonischen Karten und Engine-Aktionen geprüft; Krash bleibt ohne Host
+installierbar. Ein eigener Installationsbonus für dieses Deck ist nicht aktiv.
 
 ## 6. `runner.economy`
 

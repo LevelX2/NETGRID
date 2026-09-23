@@ -2427,20 +2427,33 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (card) => card.instanceId === fridgeId,
     );
     const corpView = getPlayerView(state, "corp");
-    const projectedDisplayIds = [
+    const projectedCards = [
       recurringCard,
       restrictedCard,
       virusCard,
       fridgeCard,
       runnerView.own.identity,
-    ].flatMap(
-      (card) => card?.counterDisplays?.map((display) => display.id) ?? [],
-    );
-    expect(new Set(projectedDisplayIds).size).toBe(projectedDisplayIds.length);
+    ];
+    for (const card of projectedCards) {
+      const ids = card?.counterDisplays?.map((display) => display.id) ?? [];
+      expect(new Set(ids).size).toBe(ids.length);
+    }
 
     expect(
       recurringCard?.counterDisplays?.map((display) => display.id),
-    ).toEqual(["recurring_credit"]);
+    ).toEqual(["restricted_pool", "recurring_credit"]);
+    // Cloak's actual bit pool is empty here; its public capacity and refresh
+    // contract must remain visible without changing spendable funds or state.
+    expect(recurringCard?.counterDisplays).toContainEqual(
+      expect.objectContaining({
+        id: "restricted_pool",
+        amount: 0,
+        creditPool: expect.objectContaining({
+          capacity: 3,
+          uses: ["using_icebreaker_during_run_non_noisy"],
+        }),
+      }),
+    );
     expect(recurringCard?.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

@@ -4,7 +4,9 @@ import {
   createGameAfterSetup,
   getLegalActions,
   getPlayerView,
+  hashState,
   projectVisibleIceAfterPassiveRunnerInstall,
+  replayEvents,
 } from "@netgrid/engine";
 import type { DeckDefinition, GameState } from "@netgrid/shared";
 import catalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
@@ -122,7 +124,7 @@ function assess(state: GameState) {
 }
 
 describe("canonical passive strength investment", () => {
-  it("releases residual liquidity when a real three-decision sequence admits Clown", () => {
+  it("releases residual liquidity for Clown one decision earlier through strategic development", () => {
     const { checkpoints } = structuredClone(
       capturedContinuation,
     ) as unknown as {
@@ -140,10 +142,9 @@ describe("canonical passive strength investment", () => {
     // Restore once, then preserve actual in-process commitments. Restoring the
     // final checkpoint alone simulates a restart and falsely passes this case.
     expect(chooseAiAction(first.input).actionId).toBe("runner.draw_card");
-    expect(chooseAiAction(checkpoints[1]!.input).actionId).toBe(
-      "runner.gain_credit",
-    );
-    const input = checkpoints[2]!.input;
+    // The new horizon admits the investment before the old extra credit click.
+    // Stop at that divergence instead of feeding an obsolete successor state.
+    const input = checkpoints[1]!.input;
     const decision = chooseAiAction(input);
     const action = input.legalActions.find(
       (a) => a.actionId === decision.actionId,
@@ -154,11 +155,9 @@ describe("canonical passive strength investment", () => {
     const pf = decision.decisionDebug!.planFirstDecision!;
     expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
     expect(pf.route?.actionId).toBe(action.actionId);
-    expect(pf.turnPlanning?.commitment?.continuation).toMatchObject({
-      status: "preempted",
-      boundaryKind: "higher_priority_plan_available",
-      takeoverRootPlanInstanceId: pf.rootPlanInstanceId,
-    });
+    expect(pf.executionOrigin?.leafPlanInstanceId).toBe(
+      pf.selectedPlan?.instanceId,
+    );
   });
   it("selects the real G9 D324 investment that funds the cheaper HQ path", () => {
     const capture = structuredClone(capturedInvestment) as unknown as {
@@ -280,16 +279,42 @@ describe("canonical passive strength investment", () => {
     // Spent pools do not disappear from the next-turn economic comparison.
     for (const id of state.runner.rig.programs)
       state.cardInstances[id]!.counters = { bit: 0 };
-    expect(assess(state).investment?.admitted).toBe(false);
+    const exhausted = assess(state);
+    expect(exhausted.investment?.admitted).toBe(false);
+    expect(
+      exhausted.input.playerView.own.rig!.find(
+        (c) => c.definitionId === "onr_v1_011_cloak",
+      )!.counterDisplays,
+    ).toContainEqual(
+      expect.objectContaining({
+        amount: 0,
+        creditPool: expect.objectContaining({ capacity: 3 }),
+      }),
+    );
   });
 
-  it("does not convert hidden ICE into a known saving", () => {
+  it("values an unrevealed board as a conditional option, never a known saving", () => {
     const state = fixture();
     for (const id of state.corp.servers.find((s) => s.id === "rd")!.ice) {
       state.cardInstances[id]!.rezzed = false;
       state.cardInstances[id]!.faceup = false;
     }
-    expect(assess(state).investment?.admitted).toBe(false);
+    const { investment } = assess(state);
+    expect(investment).toMatchObject({ admitted: true, priorityClass: "P5" });
+    expect(investment!.evidenceCodes).toContain(
+      "runner_passive_strength_unrevealed_board_option_value",
+    );
+    expect(
+      investment!.evidenceCodes.some(
+        (e) => e.includes("saving_per_run:") || e.includes("current_saving:"),
+      ),
+    ).toBe(false);
+    const changed = structuredClone(state);
+    changed.runner.stack.reverse();
+    changed.corp.rd.reverse();
+    for (const id of changed.corp.servers.find((s) => s.id === "rd")!.ice)
+      changed.cardInstances[id]!.definitionId = "onr_v1_279_wall-of-static";
+    expect(assess(changed).investment).toEqual(investment);
   });
   it("connects real hints, coverage and the Clown engine without mocked roles", () => {
     const profile = buildDeckStrategyProfile(snapshot);
@@ -342,7 +367,14 @@ describe("canonical passive strength investment", () => {
   it("stacks a second installation only once against the existing encounter quote", () => {
     let state = fixture();
     state = apply(state, "runner", assess(state).evaluation.legalActionId!);
-    RealEngineFixtureBuilder.forState(state).withRunnerCardInGrip(clownId);
+    // Move another copy; the generic fixture helper would return the first
+    // installed Clown to the grip and falsely test a first installation again.
+    const secondId = state.runner.stack.find(
+      (id) => state.cardInstances[id]!.definitionId === clownId,
+    )!;
+    state.runner.stack = state.runner.stack.filter((id) => id !== secondId);
+    state.runner.grip.push(secondId);
+    state.cardInstances[secondId]!.zone = { side: "runner", zone: "grip" };
     const { input, evaluation } = assess(state);
     const before = input.playerView.servers.find((s) => s.id === "rd")!.ice;
     const predicted = before.map(
@@ -350,7 +382,17 @@ describe("canonical passive strength investment", () => {
         projectVisibleIceAfterPassiveRunnerInstall(clownId, c)!
           .effectiveRunQuote!.encounterStrength,
     );
-    const next = apply(state, "runner", evaluation.legalActionId!);
+    const decision = chooseAiAction(input);
+    expect(decision.actionId).toBe(evaluation.legalActionId);
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("runner.develop_board_and_hand");
+    const next = apply(state, "runner", decision.actionId!);
+    expect(
+      next.runner.rig.programs.filter(
+        (id) => next.cardInstances[id]!.definitionId === clownId,
+      ),
+    ).toHaveLength(2);
     expect(
       getPlayerView(next, "runner")
         .servers.find((s) => s.id === "rd")!
@@ -396,29 +438,239 @@ describe("canonical passive strength investment", () => {
     ).toContain("runner.develop_board_and_hand");
   });
 
-  it.each([
-    "no_breaker",
-    "poor",
-    "no_mu",
-    "last_click",
-    "matchpoint",
-    "zero_strength",
-  ])("defers %s instead of forcing the named deck card", (condition) => {
+  it.each(["poor", "no_mu", "matchpoint", "zero_strength"])(
+    "defers %s instead of forcing the named deck card",
+    (condition) => {
+      const state = fixture();
+      if (condition === "poor") state.runner.credits = 4;
+      if (condition === "no_mu") state.runner.memoryUsed = 4;
+      if (condition === "matchpoint") state.agendaPointsToWin = 2;
+      if (condition === "zero_strength")
+        for (const id of state.corp.servers.find((s) => s.id === "rd")!.ice)
+          state.cardInstances[id]!.strengthModifier = -20;
+      const { investment, input, evaluation } = assess(state);
+      expect(investment?.admitted).toBe(false);
+      if (evaluation.legalActionId)
+        expect(chooseAiAction(input).actionId).not.toBe(
+          evaluation.legalActionId,
+        );
+    },
+  );
+
+  it("admits preparatory strength support while reserving the hand breaker's credits and MU", () => {
     const state = fixture();
-    if (condition === "no_breaker") {
-      RealEngineFixtureBuilder.forState(state).withRunnerCardInGrip(krashId);
+    RealEngineFixtureBuilder.forState(state).withRunnerCardInGrip(krashId);
+    state.runner.memoryUsed = 0;
+    const { input, investment } = assess(state);
+    expect(investment).toMatchObject({ admitted: true, priorityClass: "P5" });
+    expect(investment!.evidenceCodes).toContain(
+      "runner_passive_strength_consumer_location:hand",
+    );
+    const decision = chooseAiAction(input);
+    expect(decision.decisionDebug?.planFirstDecision?.portfolio).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.develop_board_and_hand",
+          viability: "ready",
+        }),
+      ]),
+    );
+    state.runner.memoryUsed = input.playerView.own.memoryLimit! - 1;
+    expect(assess(state).investment?.admitted).toBe(false);
+    state.runner.memoryUsed = 0;
+    state.runner.credits = 6;
+    expect(assess(state).investment?.admitted).toBe(false);
+  });
+
+  it("uses the last click for future savings and applies the exact owned installation", () => {
+    const state = fixture();
+    state.runner.clicks = 1;
+    const { input, evaluation, investment } = assess(state);
+    expect(investment).toMatchObject({ admitted: true, priorityClass: "P4" });
+    const decision = chooseAiAction(input);
+    expect(decision.actionId).toBe(evaluation.legalActionId);
+    const pf = decision.decisionDebug!.planFirstDecision!;
+    expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
+    expect(pf.route?.actionId).toBe(decision.actionId);
+    expect(pf.executionOrigin?.leafPlanInstanceId).toContain(
+      "runner.develop_board_and_hand",
+    );
+    const next = apply(state, "runner", decision.actionId!);
+    expect(next.runner.rig.programs).toContain(evaluation.cardInstanceId);
+    expect(next.runner.credits).toBe(36);
+    expect(next.runner.clicks).toBe(0);
+  });
+
+  it("uses only remaining own-deck composition for a future breaker and rejects an exhausted consumer", () => {
+    const state = fixture();
+    const f = RealEngineFixtureBuilder.forState(state);
+    f.withRunnerCardInGrip(krashId)
+      .withRunnerGripSize(0)
+      .withRunnerCardInGrip(clownId);
+    state.runner.memoryUsed = 0;
+    const breakers = state.runner.stack.filter(
+      (id) => state.cardInstances[id]!.definitionId === krashId,
+    );
+    const others = state.runner.stack.filter((id) => !breakers.includes(id));
+    const kept = new Set([...breakers, ...others.slice(0, 3)]);
+    for (const id of state.runner.stack.filter((id) => !kept.has(id))) {
+      state.runner.heap.push(id);
+      state.cardInstances[id]!.zone = { side: "runner", zone: "heap" };
+    }
+    state.runner.stack = state.runner.stack.filter((id) => kept.has(id));
+    const before = assess(state).investment;
+    expect(before).toMatchObject({ admitted: true, priorityClass: "P5" });
+    expect(before!.evidenceCodes).toContain(
+      "runner_passive_strength_consumer_location:deck",
+    );
+    state.runner.stack.reverse();
+    expect(assess(state).investment).toEqual(before);
+    for (const id of breakers) {
+      state.runner.stack = state.runner.stack.filter((entry) => entry !== id);
+      state.runner.heap.push(id);
+      state.cardInstances[id]!.zone = { side: "runner", zone: "heap" };
+    }
+    expect(assess(state).investment?.admitted).toBe(false);
+  });
+
+  it.each([false, true])(
+    "builds two Clowns in one runtime and checks the third against spare memory (%s)",
+    (extraMemory) => {
+      let state = fixture();
+      if (extraMemory) {
+        state.runner.clicks = 4;
+        const memoryCard = getPlayerView(state, "runner").own.gripOrHq.find(
+          (c) => c.definitionId === "onr_v1_146_zetatech-mem-chip",
+        )!;
+        const install = getLegalActions(state, "runner").find(
+          (a) =>
+            a.type === "install_card" && a.source === memoryCard.instanceId,
+        )!;
+        state = apply(state, "runner", install.actionId);
+      }
+      const copies = state.runner.stack.filter(
+        (id) => state.cardInstances[id]!.definitionId === clownId,
+      );
+      for (const id of copies) {
+        state.runner.stack = state.runner.stack.filter((entry) => entry !== id);
+        state.runner.grip.push(id);
+        state.cardInstances[id]!.zone = { side: "runner", zone: "grip" };
+      }
+      const initial = structuredClone(state);
+      const eventStart = state.eventLog.length;
+      for (const installedCount of [1, 2]) {
+        const { input } = assess(state);
+        const decision = chooseAiAction(input);
+        const action = input.legalActions.find(
+          (a) => a.actionId === decision.actionId,
+        )!;
+        expect(action.type).toBe("install_card");
+        expect(
+          input.playerView.own.gripOrHq.find(
+            (c) => c.instanceId === action.source,
+          )?.definitionId,
+        ).toBe(clownId);
+        expect(
+          decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+        ).toBe("runner.develop_board_and_hand");
+        state = apply(state, "runner", action.actionId);
+        expect(
+          state.runner.rig.programs.filter(
+            (id) => state.cardInstances[id]!.definitionId === clownId,
+          ),
+        ).toHaveLength(installedCount);
+      }
+      const third = assess(state);
+      expect(third.investment?.admitted).toBe(true);
+      const decision = chooseAiAction(third.input);
+      if (extraMemory) {
+        expect(decision.decisionDebug?.planFirstDecision?.portfolio).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              moduleId: "runner.develop_board_and_hand",
+              target: { kind: "card", id: clownId },
+              viability: "ready",
+            }),
+          ]),
+        );
+      } else {
+        expect(third.evaluation.deferReason).toBe("missing_mu");
+        expect(decision.actionId).not.toBe(third.evaluation.legalActionId);
+      }
+      expect(decision.fallbackUsed).toBe(false);
+      const replay = replayEvents(initial, state.eventLog.slice(eventStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    },
+  );
+
+  it.each([
+    ["onr_v1_039_krash", "runner.rig_and_coverage"],
+    [
+      "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "runner.develop_board_and_hand",
+    ],
+    ["onr_v1_011_cloak", "runner.recurring_economy"],
+    ["onr_v1_071_vewy-vewy-quiet", "runner.recurring_economy"],
+    ["onr_proteus_134_cortical-cybermodem", "runner.develop_board_and_hand"],
+    ["onr_proteus_150_streetware-distributor", "runner.credit_bank"],
+  ])("binds canonical core card %s to its existing owner", (cardId, owner) => {
+    const state = fixture();
+    const f = RealEngineFixtureBuilder.forState(state)
+      .withRunnerGripSize(0)
+      .withRunnerCardInGrip(cardId!);
+    if (cardId!.includes("spin-chip") || cardId === krashId) {
+      f.withRunnerCardInGrip(krashId);
       state.runner.memoryUsed = 0;
     }
-    if (condition === "poor") state.runner.credits = 4;
-    if (condition === "no_mu") state.runner.memoryUsed = 4;
-    if (condition === "last_click") state.runner.clicks = 1;
-    if (condition === "matchpoint") state.agendaPointsToWin = 2;
-    if (condition === "zero_strength")
-      for (const id of state.corp.servers.find((s) => s.id === "rd")!.ice)
-        state.cardInstances[id]!.strengthModifier = -20;
-    const { investment, input, evaluation } = assess(state);
-    expect(investment?.admitted).toBe(false);
-    if (evaluation.legalActionId)
-      expect(chooseAiAction(input).actionId).not.toBe(evaluation.legalActionId);
+    if (cardId === "onr_proteus_150_streetware-distributor")
+      state.runner.credits = 5;
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "hard",
+      profileId: "core-card-audit",
+      ownDeckSnapshot: snapshot,
+    });
+    const decision = chooseAiAction(input);
+    const pf = decision.decisionDebug!.planFirstDecision!;
+    const ownPlans = pf.portfolio.filter((p) => p.moduleId === owner);
+    if (cardId === krashId) {
+      expect(pf.selectedPlan?.moduleId).toBe(owner);
+      const action = input.legalActions.find(
+        (a) => a.actionId === decision.actionId,
+      )!;
+      expect(action.type).toBe("install_card");
+      expect(
+        input.playerView.own.gripOrHq.find(
+          (c) => c.instanceId === action.source,
+        )?.definitionId,
+      ).toBe(krashId);
+      expect(
+        apply(state, "runner", action.actionId).runner.rig.programs,
+      ).toContain(action.source);
+    } else {
+      const targetId =
+        owner === "runner.credit_bank"
+          ? input.playerView.own.gripOrHq.find(
+              (c) => c.definitionId === cardId,
+            )!.instanceId
+          : cardId;
+      expect(ownPlans).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            target: expect.objectContaining({ id: targetId }),
+          }),
+        ]),
+      );
+      if (
+        owner === "runner.develop_board_and_hand" ||
+        owner === "runner.credit_bank"
+      ) {
+        expect(
+          ownPlans.some(
+            (p) => p.target?.id === targetId && p.viability === "ready",
+          ),
+        ).toBe(true);
+      }
+    }
   });
 });

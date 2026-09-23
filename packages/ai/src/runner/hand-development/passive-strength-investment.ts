@@ -10,6 +10,7 @@ import type {
   RunnerRunTargetEvaluation,
 } from "../../runner-run-target-evaluation";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development-types";
+import { assessPassiveStrengthDevelopment } from "./passive-strength-development";
 
 /** Admission/value service of develop_board_and_hand; never chooses an action. */
 export function assessPassiveStrengthInvestment(
@@ -31,6 +32,7 @@ export function assessPassiveStrengthInvestment(
   const deferred = {
     admitted: false,
     value: 0,
+    priorityClass: "P5" as const,
     evidenceCodes: ["runner_passive_strength_no_funded_amortizing_route"],
   };
   const own = input.playerView.own;
@@ -48,6 +50,7 @@ export function assessPassiveStrengthInvestment(
   if (
     !action ||
     !card ||
+    action.costs.some((cost) => (cost.clicks ?? 0) > own.clicks) ||
     action.payload?.runnerProgramTrashBeforeInstall === true ||
     action.targetRequirements.length ||
     (action.choiceRequirements?.length ?? 0) ||
@@ -178,6 +181,7 @@ export function assessPassiveStrengthInvestment(
     return [
       {
         admitted: true,
+        priorityClass: "P4" as const,
         value: Math.min(300, net * 100),
         evidenceCodes: [
           "runner_passive_strength_investment_admitted",
@@ -196,11 +200,22 @@ export function assessPassiveStrengthInvestment(
       },
     ];
   });
+  const development = assessPassiveStrengthDevelopment(
+    input,
+    evaluation.definitionId,
+    card.memoryCost!,
+    installCredits,
+    installClicks,
+    economy.minimumCreditFloor,
+    refreshedRig,
+  );
   return (
     quotes.sort(
       (a, b) =>
         b.value - a.value ||
         a.evidenceCodes[1]!.localeCompare(b.evidenceCodes[1]!),
-    )[0] ?? deferred
+    )[0] ??
+    development ??
+    deferred
   );
 }

@@ -314,6 +314,7 @@ function evaluateHandCard(
   const developmentRole = roleAdjustedByPersistentInstall(
     initialDevelopmentRole,
     initialPersistentInstallEvaluation,
+    context,
   );
   const availability =
     developmentRole === initialDevelopmentRole
@@ -462,7 +463,19 @@ function evaluateHandCard(
 function roleAdjustedByPersistentInstall(
   role: RunnerHandDevelopmentRole,
   evaluation: RunnerPersistentInstallEvaluation | undefined,
+  context: CardContext,
 ): RunnerHandDevelopmentRole {
+  if (
+    role === "duplicate_or_low_value" &&
+    evaluation?.stackabilityClass === "cumulative_capacity" &&
+    evaluation.capabilityDelta === "cumulative_capacity" &&
+    evaluation.duplicateRole === "useful_backup" &&
+    evaluation.finalInstallFit > 0
+  ) {
+    // The typed marginal assessment has established additive utility. The
+    // initial same-definition shortcut must not veto it again downstream.
+    return roleForCard({ ...context, duplicateInstalled: false });
+  }
   if (
     role === "duplicate_or_low_value" &&
     evaluation?.stackabilityClass === "risk_mitigation" &&

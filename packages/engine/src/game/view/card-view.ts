@@ -649,10 +649,17 @@ function restrictedPoolCounterDisplays(
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
   const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
-  if (amount <= 0) return undefined;
   const implementation = cardImplementationForDefinitionId(definition.id);
   if (hasStoredCreditCounterDisplay(implementation)) return undefined;
   const restrictedSource = implementation?.restrictedHostedCreditSource;
+  // An exhausted installed renewable pool still has public capacity and usage
+  // restrictions. Losing that metadata would make next-turn quotes treat the
+  // source as absent. Uninstalled cards and consumable pools stay unchanged.
+  if (
+    amount <= 0 &&
+    !(instance.zone.zone === "rig" && restrictedSource?.refresh)
+  )
+    return undefined;
   const tracePoolSource = implementation?.fortRunWindows?.some(
     (window) => window.kind === "corp_trace_bits_during_runs_on_this_fort",
   );
