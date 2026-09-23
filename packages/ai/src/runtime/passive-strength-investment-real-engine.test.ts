@@ -20,6 +20,12 @@ import {
   evaluateRunnerRunTargets,
 } from "../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
+import capturedInvestment from "../../../../data/scenarios/ai-decision-checkpoints/cp-clown-strength-pool-investment-g9-d324.json";
+import {
+  restoreAiRuntimeCheckpoint,
+  type AiRuntimeCheckpointV1,
+} from "../evaluation/decision-checkpoints/runtime-checkpoint";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 const runner = catalog.decks.find(
   (d) =>
@@ -115,6 +121,58 @@ function assess(state: GameState) {
 }
 
 describe("canonical passive strength investment", () => {
+  it("selects the real G9 D324 investment that funds the cheaper HQ path", () => {
+    const capture = structuredClone(capturedInvestment) as unknown as {
+      input: AiDecisionInputWithDeckCapabilities;
+      runtime: AiRuntimeCheckpointV1;
+    };
+    const { input, runtime } = capture;
+    restoreAiRuntimeCheckpoint(
+      input,
+      input.ownDeckSnapshot!.deckSnapshotId,
+      runtime,
+    );
+    const decision = chooseAiAction(input);
+    const action = input.legalActions.find(
+      (a) => a.actionId === decision.actionId,
+    )!;
+    expect(action.type).toBe("install_card");
+    expect(action.source).toBe("runner_onr_v1_012_clown_3");
+    expect(decision.fallbackUsed).toBe(false);
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("runner.develop_board_and_hand");
+    expect(decision.decisionDebug?.planFirstDecision?.route?.actionId).toBe(
+      action.actionId,
+    );
+  });
+
+  it.each([15, 16])(
+    "checks the post-install liquid reserve at %i credits with a real renewing pool",
+    (credits) => {
+      const state = fixture();
+      RealEngineFixtureBuilder.forState(state)
+        .withRunnerCredits(credits)
+        .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet");
+      const source = Object.values(state.cardInstances).find(
+        (c) =>
+          c.definitionId === "onr_v1_071_vewy-vewy-quiet" &&
+          c.zone.zone === "rig",
+      )!;
+      source.counters = { bit: 2 };
+      state.runner.memoryUsed = 2;
+      const { input, evaluation, investment } = assess(state);
+      expect(investment?.admitted).toBe(credits === 16);
+      if (credits === 16) {
+        const decision = chooseAiAction(input);
+        expect(decision.actionId).toBe(evaluation.legalActionId);
+        const next = apply(state, "runner", decision.actionId!);
+        expect(next.runner.credits).toBe(12);
+        expect(next.cardInstances[source.instanceId]!.counters?.bit).toBe(2);
+      }
+    },
+  );
+
   it("admits Streetware with its real install and rematerializes its actual bank build", () => {
     let state = fixture();
     state.runner.credits = 5;

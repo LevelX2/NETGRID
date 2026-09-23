@@ -934,6 +934,13 @@ ohne Installation einschließlich kompatibler Creditpools. Er verwendet für
 Begegnungen `encounterStrength` aus der Engine-Quote; bereits installierte
 Stärkemodifikatoren werden nicht erneut addiert.
 
+Die Alternative ohne Installation erhält das aktuelle Cashbudget, die
+Installationsalternative das Budget nach den Installkosten. Die geschützte
+Liquiditätsreserve muss nach dem günstigeren projizierten Run erhalten bleiben;
+Bruttokosten des alten Pfads sind dafür kein Ersatz. Regressionen prüfen sowohl
+einen gespeicherten echten Entscheidungszustand als auch die Budgetgrenze mit
+kompatiblen Programmkrediten und den unmittelbar zu knappen Gegenfall.
+
 Admission verlangt eine gegenwärtig sinnvolle, finanzierte HQ-/R&D-Route,
 legalen Install ohne Programmopfer, freie MU, Handpuffer, Klicks und erhaltene
 Reserven. Sichtbare Scorefristen, Matchpoint, Tags, bedingte Breakerpfade und

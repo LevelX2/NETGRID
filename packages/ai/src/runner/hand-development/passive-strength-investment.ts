@@ -130,11 +130,12 @@ export function assessPassiveStrengthInvestment(
     const cost = (
       ice: readonly VisibleCard[],
       sources: readonly VisibleCard[],
+      availableCash: number,
     ) => {
       const path = assessKnownRezzedIcePath(
         [...ice],
         [...sources],
-        runnerRunPathCreditBudgetWithVisiblePools(liquid, sources),
+        runnerRunPathCreditBudgetWithVisiblePools(availableCash, sources),
         server.root,
         input.playerView.opponent.credits,
       );
@@ -148,12 +149,14 @@ export function assessPassiveStrengthInvestment(
         (path.unavoidableVisibleIceHazardCount ?? 0) > 0
       )
         return undefined;
-      return liquid - path.creditsAfterPath;
+      return availableCash - path.creditsAfterPath;
     };
-    const before = cost(knownIce, rig),
-      after = cost(projected as VisibleCard[], rig);
-    const futureBefore = cost(knownIce, refreshedRig),
-      futureAfter = cost(projected as VisibleCard[], refreshedRig);
+    // Each alternative pays only its own costs. Charging the installation to
+    // the no-install baseline can falsely make that baseline unquotable.
+    const before = cost(knownIce, rig, own.credits),
+      after = cost(projected as VisibleCard[], rig, liquid);
+    const futureBefore = cost(knownIce, refreshedRig, own.credits),
+      futureAfter = cost(projected as VisibleCard[], refreshedRig, liquid);
     if (
       before === undefined ||
       after === undefined ||
@@ -168,7 +171,7 @@ export function assessPassiveStrengthInvestment(
       currentSaving <= 0 ||
       futureSaving <= 0 ||
       net < 2 ||
-      liquid < target.pathCost + target.fundingNeed.protectedLiquidReserve ||
+      liquid < after + target.fundingNeed.protectedLiquidReserve ||
       liquid < after + economy.minimumCreditFloor
     )
       return [];
@@ -183,6 +186,9 @@ export function assessPassiveStrengthInvestment(
           `runner_passive_strength_current_saving:${currentSaving}`,
           `runner_passive_strength_refreshed_saving:${futureSaving}`,
           `runner_passive_strength_net:${net}`,
+          `runner_passive_strength_before_liquid_cost:${before}`,
+          `runner_passive_strength_after_liquid_cost:${after}`,
+          `runner_passive_strength_protected_liquid_reserve:${target.fundingNeed.protectedLiquidReserve}`,
           `runner_passive_strength_unknown_ice:${server.ice.length - knownIce.length}`,
           "runner_passive_strength_horizon:current_run_plus_one_conditional_future_run",
           "runner_passive_strength_future_savings_not_spendable",

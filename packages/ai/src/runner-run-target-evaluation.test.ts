@@ -911,28 +911,16 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     if (!baseCapabilities.runner || !krash) {
       throw new Error("Expected Krash deck capability");
     }
-    const stableUniversalCapabilities = {
-      ...baseCapabilities,
+    expect(krash.coverage).toContain("universal");
+    expect(krash.risks).toEqual([]);
+    const stableUniversalCapabilities = baseCapabilities;
+    const typedOnlyCapabilities = {
+      ...stableUniversalCapabilities,
       runner: {
         ...baseCapabilities.runner,
         breakerInventory: [
           {
             ...krash,
-            coverage: ["universal" as const],
-            risks: [],
-            locations: ["installed" as const],
-            confidence: "high" as const,
-          },
-        ],
-      },
-    };
-    const typedOnlyCapabilities = {
-      ...stableUniversalCapabilities,
-      runner: {
-        ...stableUniversalCapabilities.runner,
-        breakerInventory: [
-          {
-            ...stableUniversalCapabilities.runner.breakerInventory[0]!,
             coverage: ["code_gate" as const],
           },
         ],
