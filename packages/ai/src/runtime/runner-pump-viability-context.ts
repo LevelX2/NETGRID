@@ -44,6 +44,7 @@ import {
   fundRunnerRunPathPayment,
   runnerPaymentSupportBudgetForRig,
 } from "../run-analysis/visible-run-credit-budget";
+import { runnerRigWithPlannedPump } from "./runner-rig-after-encounter";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
 type MutableEncounterCreditBudget = MutableRunnerRunPathCreditBudget & {
@@ -385,7 +386,20 @@ export function createRunnerPumpViabilityContext(
             evidence: [] as string[],
           }
         : dependencies.encounterFuturePathAfterPumpBreakAssessment(
-            input,
+            {
+              ...input,
+              playerView: {
+                ...input.playerView,
+                own: {
+                  ...input.playerView.own,
+                  rig: runnerRigWithPlannedPump(
+                    input.playerView.own.rig ?? [],
+                    action,
+                    requiredPumps * pumpAmount,
+                  ),
+                },
+              },
+            },
             server,
             {
               ...breakPayment.budget,

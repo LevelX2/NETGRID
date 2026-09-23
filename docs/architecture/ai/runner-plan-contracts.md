@@ -1248,6 +1248,11 @@ die akzeptierte Reserve nicht mehr, lässt der Owner die reine ETR auflösen,
 statt zunächst zu bezahlen und im folgenden unveränderten Fenster abzubrechen.
 Bereits gebrochene Subroutinen werden nicht erneut bezahlt. Die Zahlung führt
 zweckgebundene Pools und über den Encounter hinaus gültige Stärke fort.
+Die Pump-Zulassung projiziert dabei auch die noch geplante, bereits im Budget
+abgezogene Stärkeerhöhung vor die Encounter-Grenze. Ihre Laufzeit stammt aus
+der exakt gebundenen Engine-Fähigkeit: Zug-/Run-Stärke bleibt im Folgepfad,
+reine Encounter-Stärke entfällt. Die aktuelle Quote darf zukünftige Pumpkosten
+nicht erneut verlangen, weil sie diesen geplanten Zustand ausgelassen hat.
 Gemischte Wirkungen, notwendiger Schadens-/Programmschutz und ein Break zum
 Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
 
