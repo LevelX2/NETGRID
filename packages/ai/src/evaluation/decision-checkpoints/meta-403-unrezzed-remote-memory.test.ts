@@ -79,7 +79,7 @@ describe("meta 403 remembered unrezzed remote access", () => {
     ).toBeUndefined();
   });
 
-  it("lets the real coverage owner draw instead of repeating the unchanged declined remote", () => {
+  it("develops the real Streetware bank instead of repeating the unchanged declined remote", () => {
     const capture = structuredClone(checkpointJson) as unknown as {
       input: AiDecisionInputWithDeckCapabilities;
       runtime: AiRuntimeCheckpointV1;
@@ -98,7 +98,16 @@ describe("meta 403 remembered unrezzed remote access", () => {
     const result = chooseAiAction(current, {
       runnerTurnPlannerMode: "cutover",
     });
-    expect(result.actionId).toBe("runner.draw_card");
+    expect(result.actionId).toBe(
+      "runner.install_card.runner_onr_proteus_150_streetware-distributor_1.runner_onr_proteus_150_streetware-distributor_1",
+    );
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(current, "remote_1"),
+    ).toMatchObject({
+      applies: true,
+      suppressesPlanBonus: true,
+      suppressUntilInvalidated: true,
+    });
     expect(
       current.legalActions.some(
         (action) => action.actionId === result.actionId,
@@ -107,12 +116,12 @@ describe("meta 403 remembered unrezzed remote access", () => {
     expect(result.fallbackUsed).toBe(false);
     const plan = result.decisionDebug?.planFirstDecision;
     expect(plan?.selectedPlan).toMatchObject({
-      moduleId: "runner.rig_and_coverage",
-      phase: "draw_for_answer",
+      moduleId: "runner.credit_bank",
+      phase: "install",
     });
     expect(plan?.selectedStep).toMatchObject({
       planInstanceId: plan?.selectedPlan?.instanceId,
     });
-    expect(plan?.selectedStep?.stepId).toContain(":find:breaker_code_gate");
+    expect(plan?.route?.actionId).toBe(result.actionId);
   });
 });

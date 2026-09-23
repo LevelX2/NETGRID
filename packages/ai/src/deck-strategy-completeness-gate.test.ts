@@ -54,14 +54,20 @@ describe("deck strategy completeness gate", () => {
       }
     }
 
-    expect(neutralDeckNames).toEqual([
-      "Bit-Denial Lock",
-      "Deep Market Engine",
-      "Inside Forgery Loop",
-      "Krashkurs: Clown-Kreditmaschine",
-      "Rent-I-Con: Das Shellspiel",
-    ]);
+    expect(neutralDeckNames).toEqual([]);
   });
+
+  it.each(["Krashkurs: Clown-Kreditmaschine", "Rent-I-Con: Das Shellspiel"])(
+    "recognizes universal coverage and a productive breaker strategy in %s",
+    (name) => {
+      const profile = buildDeckStrategyProfile(standardSnapshot(name));
+      expect(profile.runnerProfile?.coverageProfile.universal.count).toBe(3);
+      expect(profile.primaryStrategies).toContain("runner.search.breaker");
+      expect(
+        profile.strategyScores["runner.search.breaker"]?.runtimeBlockers,
+      ).toEqual([]);
+    },
+  );
 
   it("classifies Counter Shell as a productive counter-to-score doctrine", () => {
     const profile = buildDeckStrategyProfile(standardSnapshot("Counter Shell"));

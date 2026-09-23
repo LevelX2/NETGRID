@@ -39,6 +39,7 @@ export function projectIceForRunPathEffects(
   const baseQuote = requireEffectiveRunQuoteForKnownRezzedIce(ice);
   if (!baseQuote) return ice;
   let effectiveStrength = baseQuote.effectiveStrength;
+  let encounterStrength = baseQuote.encounterStrength;
   let breakSubroutineAdditionalCostPerSubroutine =
     baseQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
   const subroutines = baseQuote.subroutines.map((subroutine) => ({
@@ -59,6 +60,11 @@ export function projectIceForRunPathEffects(
       0,
       Math.floor(effect.increasesFutureIceStrength ?? 0),
     );
+    if (encounterStrength !== undefined)
+      encounterStrength += Math.max(
+        0,
+        Math.floor(effect.increasesFutureIceStrength ?? 0),
+      );
     breakSubroutineAdditionalCostPerSubroutine += Math.max(
       0,
       Math.floor(effect.increasesFutureBreakCostPerSubroutine ?? 0),
@@ -70,6 +76,7 @@ export function projectIceForRunPathEffects(
     effectiveRunQuote: {
       ...baseQuote,
       effectiveStrength,
+      ...(encounterStrength !== undefined ? { encounterStrength } : {}),
       subroutines,
       ...(breakSubroutineAdditionalCostPerSubroutine > 0
         ? { breakSubroutineAdditionalCostPerSubroutine }
@@ -249,7 +256,9 @@ export function effectiveIceForQuote(
   ice: IceCardLike,
   quote: VisibleEffectiveIceRunQuote | undefined,
 ): IceCardLike {
-  return quote ? { ...ice, strength: quote.effectiveStrength } : ice;
+  return quote
+    ? { ...ice, strength: quote.encounterStrength ?? quote.effectiveStrength }
+    : ice;
 }
 
 export function minimumCreditsToBreakVisibleSubroutines(

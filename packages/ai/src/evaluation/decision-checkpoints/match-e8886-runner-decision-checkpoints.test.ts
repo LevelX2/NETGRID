@@ -15,7 +15,10 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match E8886 runner decision checkpoints", () => {
   it.each([
-    ["E8886-F01 funds before a zero-credit unknown R&D path", zeroCreditRdJson],
+    [
+      "E8886-F01 develops coverage before a zero-credit unknown R&D path",
+      zeroCreditRdJson,
+    ],
     ["E8886-F02 does not treat empty-heap Junkyard as economy", junkyardJson],
     [
       "E8886-F03 rejects an action-specific unpayable Inside Job",

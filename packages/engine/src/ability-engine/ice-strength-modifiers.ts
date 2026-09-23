@@ -8,7 +8,9 @@ import type {
   CardDefinition,
   CardInstanceId,
   GameState,
+  VisibleCard,
 } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import {
   activeCardImplementationModifiersForCorpRoot,
   activeCardImplementationModifiersForRunnerInstalled,
@@ -22,6 +24,77 @@ import {
   sameServerAsSourceApplies,
 } from "./card-implementation-modifiers";
 import type { CardIceStrengthModifierImplementation } from "./definition-types";
+
+/**
+ * Marginal encounter quote for an additional passive Runner installation.
+ * The caller must bind its legal install separately. Mixed effects and scoped
+ * sources without a visible target binding are deliberately unsupported.
+ */
+export function projectVisibleIceAfterPassiveRunnerInstall(
+  sourceDefinitionId: string,
+  ice: VisibleCard,
+): VisibleCard | undefined {
+  const implementation = cardImplementationForDefinitionId(sourceDefinitionId);
+  const modifiers = implementation?.modifiers;
+  if (
+    !implementation ||
+    !modifiers?.length ||
+    Object.keys(implementation).some(
+      (key) => key !== "cardDefinitionId" && key !== "modifiers",
+    ) ||
+    modifiers.some(
+      (modifier) =>
+        modifier.kind !== "ice_strength" ||
+        modifier.operation !== "reduce" ||
+        !isPublicRunnerInstalledModifier(modifier) ||
+        modifier.appliesTo.sameServerAsSource === true ||
+        modifier.appliesTo.side !== "corp" ||
+        modifier.appliesTo.cardType !== "ice" ||
+        !Number.isSafeInteger(modifier.amount) ||
+        modifier.amount <= 0,
+    )
+  )
+    return undefined;
+  const quote = ice.effectiveRunQuote;
+  if (
+    !ice.known ||
+    ice.rezzed !== true ||
+    ice.type !== "ice" ||
+    !quote ||
+    quote.iceInstanceId !== ice.instanceId ||
+    quote.iceDefinitionId !== ice.definitionId ||
+    !Number.isSafeInteger(quote.effectiveStrength) ||
+    quote.effectiveStrength < 0 ||
+    !Number.isSafeInteger(quote.encounterStrength) ||
+    quote.encounterStrength! < 0
+  )
+    return undefined;
+  const reduction = (encounter: boolean) =>
+    modifiers.reduce((sum, modifier) => {
+      if (modifier.kind !== "ice_strength") return sum;
+      if (!encounter && modifier.appliesTo.encounteredOnly) return sum;
+      if (
+        modifier.appliesTo.subtype &&
+        !ice.subtypes?.includes(modifier.appliesTo.subtype)
+      )
+        return sum;
+      return sum + modifier.amount;
+    }, 0);
+  return {
+    ...ice,
+    effectiveRunQuote: {
+      ...quote,
+      effectiveStrength: Math.max(
+        0,
+        quote.effectiveStrength - reduction(false),
+      ),
+      encounterStrength: Math.max(
+        0,
+        quote.encounterStrength! - reduction(true),
+      ),
+    },
+  };
+}
 
 function iceStrengthModifierAppliesToIce(
   state: GameState,

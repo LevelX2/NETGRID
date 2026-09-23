@@ -28,7 +28,7 @@ import {
 // verwendeten Strategiequellen erhöhen. Das Standarddeck-Guide-Gate prüft die
 // resultierenden Profile zusätzlich vollständig.
 export const DECK_STRATEGY_PROFILE_ANALYSIS_REVISION =
-  "deck-strategy-profile-v1" as const;
+  "deck-strategy-profile-v2" as const;
 
 export type DeckStrategyConfidence = "low" | "medium" | "high";
 

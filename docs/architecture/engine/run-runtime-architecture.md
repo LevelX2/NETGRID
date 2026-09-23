@@ -158,6 +158,18 @@ ist `docs/source/Netrunner Errata 1.70.md`, Abschnitt „Dr. Dreff“.
 Breakaktionen und Wiederverwendung, beide Rückkehrmodi, Zahlungsgrenzen,
 falsche Seite/veraltete Aktion, Sichtbarkeit und deterministischen Replay.
 
+## Öffentliche marginale Stärkequote
+
+`projectVisibleIceAfterPassiveRunnerInstall` projiziert den zusätzlichen
+Stärkemodifikator einer reinen passiven Runnerinstallation auf eine vorhandene
+öffentliche ICE-Quote. Die Quelle ist die kanonische CardImplementation;
+gemischte Effekte, unbekannte ICE und unpassende oder unvollständige Quotes
+liefern keine Projektion. Aktuelle Stärke und Begegnungsstärke bleiben
+getrennt. Der Consumer muss die echte LegalAction sowie Kosten und Ressourcen
+selbst binden. Die Projektion verändert keinen Spielzustand und ersetzt weder
+Installation noch Revalidierung. Ein Real-Engine-Test vergleicht sie mit der
+tatsächlichen Installation und deren PlayerView.
+
 ## Ausführbare Grenzen
 
 `scripts/check-engine-source-structure.mjs` akzeptiert keine relativen

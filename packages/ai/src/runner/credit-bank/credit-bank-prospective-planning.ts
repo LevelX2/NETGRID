@@ -36,7 +36,7 @@ export type RunnerCreditBankProspectivePlan = {
         canonicalCapabilityId: string;
         actionCost: number;
         hostedCreditsAdded: number;
-        sharedLimit: {
+        sharedLimit?: {
           kind: "once_per_turn_per_source";
           scope: "any_ability_on_source";
         };
@@ -153,10 +153,9 @@ export function runnerCreditBankProspectivePlan(params: {
           canonicalCapabilityId: build.identity.canonicalCapabilityId,
           actionCost: activatedBuild.actionCost,
           hostedCreditsAdded: activatedBuild.hostedCreditsAdded,
-          sharedLimit: {
-            kind: "once_per_turn_per_source",
-            scope: "any_ability_on_source",
-          },
+          ...(activatedBuild.sharedLimit
+            ? { sharedLimit: activatedBuild.sharedLimit }
+            : {}),
           futureInvocation: buildCanonicalLegalActionInvocation({
             stateIdentity: params.stateIdentity,
             semanticActionType: "card_ability.trigger",
@@ -267,9 +266,16 @@ export function rematerializedRunnerCreditBankBuildCandidate(
   return matches.length === 1 ? matches[0] : undefined;
 }
 
-function activatedBuildProjection(
-  build: ProspectiveCapability,
-): { actionCost: number; hostedCreditsAdded: number } | undefined {
+function activatedBuildProjection(build: ProspectiveCapability):
+  | {
+      actionCost: number;
+      hostedCreditsAdded: number;
+      sharedLimit?: {
+        kind: "once_per_turn_per_source";
+        scope: "any_ability_on_source";
+      };
+    }
+  | undefined {
   const costs = descriptorArray(build, ".costs");
   const effects = descriptorArray(build, ".effects");
   const limit = descriptorObject(build, ".limit");
@@ -286,11 +292,30 @@ function activatedBuildProjection(
   if (
     actionCost === undefined ||
     hostedCreditsAdded === undefined ||
-    stringField(limit, "kind") !== "once_per_turn_per_source" ||
-    stringField(limit, "scope") !== "any_ability_on_source"
+    costs.length !== 1 ||
+    effects.length !== 1 ||
+    stringField(effects[0], "target") !== "source" ||
+    !Number.isSafeInteger(actionCost) ||
+    actionCost < 1 ||
+    !Number.isSafeInteger(hostedCreditsAdded) ||
+    hostedCreditsAdded < 1 ||
+    (limit !== undefined &&
+      (stringField(limit, "kind") !== "once_per_turn_per_source" ||
+        stringField(limit, "scope") !== "any_ability_on_source"))
   )
     return undefined;
-  return { actionCost, hostedCreditsAdded };
+  return {
+    actionCost,
+    hostedCreditsAdded,
+    ...(limit
+      ? {
+          sharedLimit: {
+            kind: "once_per_turn_per_source" as const,
+            scope: "any_ability_on_source" as const,
+          },
+        }
+      : {}),
+  };
 }
 
 type PlanningCard = NonNullable<ReturnType<typeof planningCardByDefinitionId>>;

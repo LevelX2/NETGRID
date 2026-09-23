@@ -28609,14 +28609,24 @@
   "expectation": {
     "acceptableActions": [
       {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_176_the-shell-traders"
+      }
+    ],
+    "forbiddenActions": [
+      {
         "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.economy"],
-      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "acceptablePlanKinds": [
+        "runner.develop_board_and_hand"
+      ],
+      "acceptableCapabilities": [
+        "develop_onr_v1_176_the-shell-traders"
+      ],
       "requiredAssessmentEvidence": [
-        "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_1"
+        "source:own_runner_hand:card_specific_purpose:delayed_install_engine:useful_now"
       ]
     }
   }

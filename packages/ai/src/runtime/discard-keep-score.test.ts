@@ -1,3 +1,4 @@
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
@@ -768,33 +769,33 @@ describe("discard keep score", () => {
   });
 
   it("discards excess copies of an installed breaker before a unique support program", () => {
-    const krash = runnerCard("krash", "program");
+    const krash = runnerCard("onr_v1_039_krash", "program");
     const secondKrash = {
-      ...runnerCard("krash", "program"),
+      ...runnerCard("onr_v1_039_krash", "program"),
       instanceId: "krash-second-instance",
     };
     const installedKrash = {
-      ...runnerCard("krash", "program"),
+      ...runnerCard("onr_v1_039_krash", "program"),
       instanceId: "krash-installed-instance",
     };
-    const support = runnerCard("clown", "program");
+    const support = runnerCard("onr_v1_012_clown", "program");
     const redundantBreaker = score(
       krash,
-      ["breaker_fracter", "breaker_decoder", "breaker_killer"],
+      AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles!,
       "runner",
       [installedKrash],
       {
-        krash: ["breaker_fracter", "breaker_decoder", "breaker_killer"],
+        onr_v1_039_krash: AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles!,
       },
       { extraGrip: [secondKrash, support] },
     );
     const uniqueSupport = score(
       support,
-      ["ice_modifier", "run_support", "build_rig"],
+      AI_HINTS_BY_CARD.get("onr_v1_012_clown")!.roles!,
       "runner",
       [installedKrash],
       {
-        krash: ["breaker_fracter", "breaker_decoder", "breaker_killer"],
+        onr_v1_039_krash: AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles!,
       },
       { extraGrip: [krash, secondKrash] },
     );
@@ -818,19 +819,14 @@ describe("discard keep score", () => {
       ...runnerCard("onr_v1_039_krash", "program"),
       instanceId: "krash-installed-instance",
     };
-    const rolesByCardId: Record<string, readonly string[]> = {
-      onr_v1_039_krash: [
-        "breaker_fracter",
-        "breaker_decoder",
-        "breaker_killer",
-      ],
-      "onr_v1_046_pattels-virus": ["ice_modifier", "run_support"],
-      onr_v1_011_cloak: ["economy_recurring", "run_support"],
-      "onr_proteus_150_streetware-distributor": [
-        "economy",
-        "economy_recurring",
-      ],
-    };
+    const rolesByCardId = Object.fromEntries(
+      [
+        "onr_v1_039_krash",
+        "onr_v1_046_pattels-virus",
+        "onr_v1_011_cloak",
+        "onr_proteus_150_streetware-distributor",
+      ].map((id) => [id, AI_HINTS_BY_CARD.get(id)!.roles ?? []]),
+    );
     const redundantKrash = score(
       firstKrash,
       rolesByCardId["onr_v1_039_krash"],

@@ -5,6 +5,7 @@
  * Runtime internals live below game/ and engine-runtime-internal.
  */
 export { quoteCorpRestrictedCreditRoute } from "./game/view/corp-restricted-credit-route-quote";
+export { projectVisibleIceAfterPassiveRunnerInstall } from "./ability-engine/ice-strength-modifiers";
 
 export {
   getLegalActions,

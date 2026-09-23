@@ -4813,7 +4813,23 @@ function deriveRoles(
       } else if (entry.definition.type === "program") {
         roles.add("program");
       }
+      if (
+        entry.definition.side === "runner" &&
+        modifier.kind === "ice_strength" &&
+        modifier.operation === "reduce" &&
+        modifier.amount > 0
+      )
+        roles.add("icebreaker_support");
     }
+  if (
+    entry.definition.side === "runner" &&
+    (entry.planning.engine.runnerRunStrengthBoost !== undefined ||
+      entry.planning.engine.virusCounter?.continuousEffect?.kind ===
+        "ice_strength_reduce_per_counter")
+  ) {
+    roles.add("icebreaker_support");
+    roles.add("program");
+  }
   for (const access of entry.planning.engine.accessEffects ?? []) {
     for (const effect of access.effects)
       if (
@@ -7821,7 +7837,9 @@ function deriveBreakerProfile(
   if (breaker.matches.kind === "any")
     return {
       coverage: ["universal"],
-      emergencyCoverage: true,
+      ...(breaker.onUse?.some((effect) => effect.kind === "end_run")
+        ? { emergencyCoverage: true, sideEffects: ["ends_run_after_use"] }
+        : {}),
       breakCost: breaker.cost.amount,
       ...(engine.characteristics.strength.kind === "fixed"
         ? { baseStrength: engine.characteristics.strength.value }
@@ -7916,7 +7934,9 @@ function breakerProfileWithoutPump(
   const coverage = breakerCoverageForMatches(breaker.matches);
   return {
     coverage,
-    ...(breaker.matches.kind === "any" ? { emergencyCoverage: true } : {}),
+    ...(breaker.onUse?.some((effect) => effect.kind === "end_run")
+      ? { emergencyCoverage: true, sideEffects: ["ends_run_after_use"] }
+      : {}),
     breakCost: breaker.cost.amount,
     ...(engine.characteristics.strength.kind === "fixed"
       ? { baseStrength: engine.characteristics.strength.value }
@@ -9518,7 +9538,7 @@ function appendClosedHardwareEffects(
     if (modifier.kind === "hand_size")
       effects.push({
         kind: "hand_size_modifier",
-        scope: "runner",
+        scope: modifier.side,
         timing: "persistent",
         resource: "hand_size",
         amount: modifier.amount,
@@ -10125,9 +10145,11 @@ function derivedFunctionSignals(
   if (
     breakerSignalAbility?.kind === "break_subroutine" &&
     breakerSignalAbility.matches.kind === "any"
-  )
-    for (const signal of ["breaker.emergency_coverage", "breaker.universal"])
-      signals.add(signal);
+  ) {
+    signals.add("breaker.universal");
+    if (breakerSignalAbility.onUse?.some((effect) => effect.kind === "end_run"))
+      signals.add("breaker.emergency_coverage");
+  }
   if (
     breakerSignalAbility?.kind === "break_subroutine" &&
     breakerSignalAbility.special?.kind === "run_end_trash_source_if_used"

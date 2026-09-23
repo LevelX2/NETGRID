@@ -18,6 +18,7 @@ import {
   replayEvents,
 } from "@netgrid/engine";
 import type { LegalAction } from "@netgrid/shared";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
@@ -28,42 +29,66 @@ import { simulateAiGame } from "../simulation";
 const RUNNER_DECK_ID = "standard_runner_rd_express";
 
 describe("R&D Express selfplay runtime regressions", () => {
-  it("uses the renewing program-install pool before liquid credits in the captured coverage line", () => {
-    const captures: AiSimulationDecisionCheckpointCapture[] = [];
-    const summary = simulateStandardGame({
-      runnerDeckId: "standard_runner_blink_pressure_rig",
-      corpDeckId: "standard_corp_original_speed_v10",
-      seed: "meta-402-round-3-002",
-      difficulty: "hard",
-      // The current decision line reaches the same pool-funded installation at 187.
-      maxActions: 200,
-      captures,
+  it("uses the renewing program-install pool before liquid credits for real coverage", () => {
+    // Freeze the funding precondition. A changing 200-action selfplay line
+    // does not guarantee that the Installer precedes Blink.
+    const runner = standardSnapshot("standard_runner_blink_pressure_rig");
+    const corp = standardSnapshot("standard_corp_original_speed_v10");
+    const state = createGameAfterSetup({
+      seed: "renewing-installer-coverage",
+      runnerDeck: buildEngineDeck(runner),
+      corpDeck: buildEngineDeck(corp),
     });
-    expect(summary.errors).toEqual([]);
-    const installed = (capture: AiSimulationDecisionCheckpointCapture) =>
-      capture.input.playerView.own.rig?.some(
-        (card) => card.definitionId === "onr_v1_007_blink",
-      ) === true;
-    const afterIndex = captures.findIndex(installed);
-    expect(afterIndex).toBeGreaterThan(0);
-    const before = captures[afterIndex - 1]!.input.playerView.own;
-    const after = captures[afterIndex]!.input.playerView.own;
-    const pool = (rig: typeof before.rig) =>
-      rig?.find(
-        (card) =>
-          card.definitionId === "onr_v1_075_zetatech-software-installer",
-      )?.counters?.bit;
-    expect(pool(before.rig)).toBeGreaterThan(0);
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerGripSize(0)
+      .withRunnerCredits(5)
+      .withRunnerClicks(4)
+      .withRunnerProgramInstalled("onr_v1_075_zetatech-software-installer")
+      .withRunnerCardInGrip("onr_v1_007_blink");
+    const installer = Object.values(state.cardInstances).find(
+      (c) =>
+        c.definitionId === "onr_v1_075_zetatech-software-installer" &&
+        c.zone.zone === "rig",
+    )!;
+    installer.counters = { bit: 2 };
+    const initial = structuredClone(state);
+    resetResidentPlanPortfolioMemory();
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "hard",
+      ownDeckSnapshot: { ...runner, side: "runner" },
+    });
+    const decision = chooseAiAction(input);
+    const action = input.legalActions.find(
+      (a) => a.actionId === decision.actionId,
+    )!;
+    expect(action.type).toBe("install_card");
+    expect(state.cardInstances[action.source]!.definitionId).toBe(
+      "onr_v1_007_blink",
+    );
+    expect(decision.fallbackUsed).toBe(false);
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.state.runner.credits).toBe(2);
     expect(
-      after.rig?.some(
-        (card) =>
-          card.definitionId === "onr_v1_075_zetatech-software-installer",
-      ),
-    ).toBe(true);
-    expect(pool(after.rig)).toBeUndefined();
-    expect(after.credits).toBe(before.credits - 5 + pool(before.rig)!);
-    expect(summary.replayOk).toBe(true);
-  }, 120_000);
+      result.state.cardInstances[installer.instanceId]!.counters?.bit ?? 0,
+    ).toBe(0);
+    expect(result.state.runner.rig.programs).toContain(action.source);
+    expect(
+      replayEvents(
+        initial,
+        result.state.eventLog.slice(initial.eventLog.length),
+      ).actualFinalStateHash,
+    ).toBe(hashState(result.state));
+  });
 
   it.each([
     {

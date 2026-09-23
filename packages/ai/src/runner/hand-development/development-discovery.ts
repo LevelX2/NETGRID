@@ -39,6 +39,7 @@ import {
 import type { RunnerDevelopmentInstallServices } from "./development-services";
 import { runnerAccessPayoffDevelopmentLacksBoundAccessRoute } from "./development-signals";
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
+import { assessPassiveStrengthInvestment } from "./passive-strength-investment";
 
 export function buildRunnerCardDevelopmentSignals({
   handDevelopment,
@@ -98,9 +99,18 @@ export function buildRunnerCardDevelopmentSignals({
 } {
   const handCardDevelopments: RunnerPlanDomain["developments"] =
     handDevelopment.flatMap((evaluation): RunnerPlanDomain["developments"] => {
+      const strengthInvestment = assessPassiveStrengthInvestment(
+        input,
+        evaluation,
+        runTargets,
+        economy,
+      );
+      if (strengthInvestment && !strengthInvestment.admitted) return [];
       const executableNow =
         evaluation.availability === "legal_now" &&
-        evaluation.deferReason === "none";
+        (evaluation.deferReason === "none" ||
+          (strengthInvestment?.admitted === true &&
+            ["no_current_need", "duplicate"].includes(evaluation.deferReason)));
       const waitingForCredits =
         evaluation.availability === "missing_credits" &&
         evaluation.deferReason === "missing_credits" &&
@@ -398,8 +408,9 @@ export function buildRunnerCardDevelopmentSignals({
         return [];
       }
       const duplicate =
+        !strengthInvestment?.admitted &&
         evaluation.persistentInstallEvaluation?.duplicateRole ===
-        "redundant_duplicate";
+          "redundant_duplicate";
       const productiveRunNowAvailable = runTargets.some(
         (run) =>
           run.pathPassability === "reachable" &&
@@ -431,23 +442,25 @@ export function buildRunnerCardDevelopmentSignals({
       // The mechanic-specific investment quote owns admission as well as value.
       // A deferred investment cannot return through the generic useful-card plan.
       if (runCreditInvestment && !runCreditInvestment.admitted) return [];
-      const normalizedDevelopmentValue = runCreditInvestment?.admitted
-        ? runCreditInvestment.value
-        : unassignedWeakCardPlan
-          ? Math.min(20, evaluation.priority)
-          : restrictedCapacitySetup
-            ? Math.min(
-                120,
-                60 +
-                  candidate.actionCapacityProjection!.followupActionCapacity *
-                    10,
-              )
-            : evaluation.currentNeed === "acute"
-              ? Math.min(300, evaluation.priority)
-              : evaluation.currentNeed === "useful_now" ||
-                  evaluation.currentNeed === "setup"
-                ? Math.min(80, evaluation.priority)
-                : Math.min(20, evaluation.priority);
+      const normalizedDevelopmentValue = strengthInvestment?.admitted
+        ? strengthInvestment.value
+        : runCreditInvestment?.admitted
+          ? runCreditInvestment.value
+          : unassignedWeakCardPlan
+            ? Math.min(20, evaluation.priority)
+            : restrictedCapacitySetup
+              ? Math.min(
+                  120,
+                  60 +
+                    candidate.actionCapacityProjection!.followupActionCapacity *
+                      10,
+                )
+              : evaluation.currentNeed === "acute"
+                ? Math.min(300, evaluation.priority)
+                : evaluation.currentNeed === "useful_now" ||
+                    evaluation.currentNeed === "setup"
+                  ? Math.min(80, evaluation.priority)
+                  : Math.min(20, evaluation.priority);
       const reserveProtectedTargetCredits = waitingForReserve
         ? evaluation.fundingNeed!.targetCredits
         : undefined;
@@ -531,18 +544,20 @@ export function buildRunnerCardDevelopmentSignals({
             : developmentFundingMilestone !== undefined
               ? ("fund" as const)
               : ("execute" as const),
-          ...(restrictedProgramInstallCommitment
-            ? {
-                purposeCode: "open_committed_program_install_sequence",
-              }
-            : recoverySearchCommitment
-              ? { purposeCode: recoverySearchCommitment.targetPurpose }
-              : evaluation.currentNeed !== "none" &&
-                  evaluation.currentNeed !== undefined
-                ? {
-                    purposeCode: `${evaluation.developmentRole}:${evaluation.currentNeed}`,
-                  }
-                : {}),
+          ...(strengthInvestment?.admitted
+            ? { purposeCode: "amortize_passive_ice_strength_reduction" }
+            : restrictedProgramInstallCommitment
+              ? {
+                  purposeCode: "open_committed_program_install_sequence",
+                }
+              : recoverySearchCommitment
+                ? { purposeCode: recoverySearchCommitment.targetPurpose }
+                : evaluation.currentNeed !== "none" &&
+                    evaluation.currentNeed !== undefined
+                  ? {
+                      purposeCode: `${evaluation.developmentRole}:${evaluation.currentNeed}`,
+                    }
+                  : {}),
           assignedDomainPlanIds: assignedCoveragePlanIds,
           duplicateAlreadyInstalled: duplicate,
           affordableOrSupportable:
@@ -561,14 +576,17 @@ export function buildRunnerCardDevelopmentSignals({
                 fundingRouteAssessment: fundingRoute!.routeAssessment,
               }
             : {}),
-          priorityClass: runCreditInvestment?.admitted
-            ? ("P4" as const)
-            : developmentPriorityClass,
+          priorityClass:
+            strengthInvestment?.admitted || runCreditInvestment?.admitted
+              ? ("P4" as const)
+              : developmentPriorityClass,
           value: normalizedDevelopmentValue,
           evidenceCode: evaluation.evidence[0] ?? "runner_hand_development",
-          ...(runCreditInvestment
-            ? { evidenceCodes: runCreditInvestment.evidenceCodes }
-            : {}),
+          ...(strengthInvestment
+            ? { evidenceCodes: strengthInvestment.evidenceCodes }
+            : runCreditInvestment
+              ? { evidenceCodes: runCreditInvestment.evidenceCodes }
+              : {}),
           ...(restrictedProgramInstallCommitment
             ? {
                 evidenceCodes: restrictedProgramInstallCommitment.evidenceCodes,

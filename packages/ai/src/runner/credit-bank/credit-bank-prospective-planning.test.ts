@@ -12,6 +12,29 @@ const stateIdentity = {
 };
 
 describe("runner credit-bank prospective planning", () => {
+  it("projects Streetware's repeatable build and automatic payout without imposing Broker's shared limit", () => {
+    const plan = runnerCreditBankProspectivePlan({
+      sourceDefinitionId: "onr_proteus_150_streetware-distributor",
+      sourceCardInstanceId: "streetware-1",
+      currentCredits: 3,
+      currentActions: 4,
+      stateIdentity,
+    });
+    expect(plan).toMatchObject({
+      install: { projection: "feasible_in_projection", creditCost: 1 },
+      build: {
+        kind: "activated",
+        projection: "feasible_in_projection",
+        capabilityKey: "runner_main_add_three_hosted_credits",
+        actionCost: 1,
+        hostedCreditsAdded: 3,
+      },
+      cashOut: { kind: "automatic_lifecycle", creditsPerTrigger: 1 },
+    });
+    expect(plan?.build).not.toHaveProperty("sharedLimit");
+    expect(JSON.stringify(plan)).not.toContain("actionId");
+  });
+
   it("admits Rigged Investments through its automatic lifecycle payout without inventing a cash-out action", () => {
     const plan = runnerCreditBankProspectivePlan({
       sourceDefinitionId: "onr_v1_174_rigged-investments",

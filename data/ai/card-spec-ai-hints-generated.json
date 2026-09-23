@@ -3899,7 +3899,6 @@
         "strategicExchangeKinds": ["temporary_resource"],
         "breakerProfile": {
           "coverage": ["universal"],
-          "emergencyCoverage": true,
           "breakCost": 1,
           "baseStrength": 2,
           "maxSubroutinesPerBreak": 1,
@@ -3919,7 +3918,6 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.emergency_coverage",
           "breaker.self_trash_risk",
           "breaker.universal"
         ],
@@ -13461,7 +13459,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": [],
+        "roles": ["icebreaker_support", "program"],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "targetProfiles": [
@@ -18958,7 +18956,6 @@
         "strategicRole": ["emergency_tool"],
         "breakerProfile": {
           "coverage": ["universal"],
-          "emergencyCoverage": true,
           "breakCost": 1,
           "baseStrength": 0,
           "maxSubroutinesPerBreak": 1,
@@ -18970,7 +18967,6 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.emergency_coverage",
           "breaker.universal"
         ],
         "tacticSignals": ["coverage.breaker"],
@@ -19069,7 +19065,6 @@
         "valueHints": {},
         "breakerProfile": {
           "coverage": ["universal"],
-          "emergencyCoverage": true,
           "breakCost": 0,
           "baseStrength": 5,
           "maxSubroutinesPerBreak": 1,
@@ -19094,7 +19089,6 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.emergency_coverage",
           "breaker.universal",
           "breaker.random_failure",
           "risk.random_outcome",
@@ -19459,7 +19453,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice_modifier", "program"],
+        "roles": ["ice_modifier", "program", "icebreaker_support"],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "effects": [
@@ -19879,6 +19873,7 @@
         "breakerProfile": {
           "coverage": ["universal"],
           "emergencyCoverage": true,
+          "sideEffects": ["ends_run_after_use"],
           "breakCost": 0,
           "baseStrength": 4,
           "maxSubroutinesPerBreak": 1,
@@ -20999,7 +20994,6 @@
         "valueHints": {},
         "breakerProfile": {
           "coverage": ["universal"],
-          "emergencyCoverage": true,
           "breakCost": 2,
           "baseStrength": 0,
           "maxSubroutinesPerBreak": 1,
@@ -21011,7 +21005,6 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.emergency_coverage",
           "breaker.universal"
         ],
         "tacticSignals": ["coverage.breaker"],
@@ -21487,7 +21480,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": [],
+        "roles": ["icebreaker_support", "program"],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "targetProfiles": [
@@ -33169,7 +33162,7 @@
         "effects": [
           {
             "kind": "hand_size_modifier",
-            "scope": "runner",
+            "scope": "corp",
             "timing": "persistent",
             "resource": "hand_size",
             "amount": 2
@@ -33178,7 +33171,7 @@
         "functionSignals": ["setup.hand_size"],
         "actionTacticSignals": [
           "effect:hand_size_modifier",
-          "effect_scope:runner",
+          "effect_scope:corp",
           "effect_timing:persistent"
         ],
         "riskTags": ["hidden_until_score_or_access"],
@@ -43717,7 +43710,7 @@
           },
           {
             "kind": "hand_size_modifier",
-            "scope": "runner",
+            "scope": "corp",
             "timing": "persistent",
             "resource": "hand_size",
             "amount": 2
@@ -43739,7 +43732,6 @@
           "effect:draw",
           "effect:hand_size_modifier",
           "effect_scope:corp",
-          "effect_scope:runner",
           "effect_timing:action",
           "effect_timing:persistent"
         ],
@@ -44990,7 +44982,7 @@
         "effects": [
           {
             "kind": "hand_size_modifier",
-            "scope": "runner",
+            "scope": "corp",
             "timing": "persistent",
             "resource": "hand_size",
             "amount": 2
@@ -44999,7 +44991,7 @@
         "functionSignals": ["setup.hand_size"],
         "actionTacticSignals": [
           "effect:hand_size_modifier",
-          "effect_scope:runner",
+          "effect_scope:corp",
           "effect_timing:persistent"
         ],
         "costProfile": { "credits": 0 },

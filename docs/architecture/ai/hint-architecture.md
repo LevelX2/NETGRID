@@ -42,3 +42,22 @@ entfernten Snapshots `ai-card-hints-1.3.1.json`.
 Hint- und Doctrine-Daten unterstützen den zuständigen Planowner. Die aktuelle
 Ability-, Kosten-, Ziel- und LegalAction-Bindung bleibt Aufgabe der Semantik
 und der Engine; ein Hint allein zertifiziert keinen ausführbaren Step.
+
+## Universelle Coverage und Stärkehilfe
+
+`breaker.matches.kind === "any"` beschreibt universelle mechanische Coverage.
+Es begründet keine Notfall-Markierung. `emergencyCoverage` wird bei solchen
+Breakern aus einem bei Nutzung erzwungenen Runende abgeleitet; die zusätzliche
+Nebenwirkung `ends_run_after_use` bleibt sichtbar. Zufall, Selbsttrash und
+wirtschaftliche Tragfähigkeit werden getrennt bewertet. Krash liefert deshalb
+reguläre universelle Coverage, Dropp dagegen keine normale Access-Coverage.
+
+Eine positive ICE-Stärkereduktion einer Runnerkarte, ein kanonischer
+Run-Stärkeboost oder ein ICE-schwächender Virus erzeugt die Supportrolle
+`icebreaker_support`. Der jeweilige Sofort-, Run- oder Folge-Run-Horizont bleibt
+im mechanischen Vertrag erhalten. Die Engine-Doktrin verbindet Support mit
+Breakern und kompatibler erneuernder Economy. Eine erkannte Rolle allein
+begründet noch keine Installation: Der Entwicklungsowner benötigt einen
+zustandsgebundenen marginalen Nutzen. Regressionen prüfen sowohl die echten
+generierten Hints im Standarddeck als auch Admission und tatsächlich gewählte
+LegalAction. Selbst vorgegebene Rollen testen nur ihren jeweiligen Consumer.

@@ -13,7 +13,7 @@ const SPIN_CHIP_INSTANCE_ID =
   "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1";
 
 describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
-  it("funds Cortical Cybermodem instead of the underfunded remote contest", () => {
+  it("uses the pool-funded HQ path while the remote contest remains underfunded", () => {
     expectCheckpointToPass(fixture(fundedRemoteContestJson));
   });
 
@@ -36,7 +36,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
     expectCheckpointToPass(lowCorpCredits);
   });
 
-  it("funds the bound Cybermodem while the rich-Corp remote remains unfunded", () => {
+  it("preserves liquid credits on HQ while the rich-Corp remote remains unfunded", () => {
     const highCorpCredits = mutateFixture(
       fundedRemoteContestJson,
       (checkpoint) => {
@@ -47,15 +47,25 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "2023BC65-C02-HIGH-CORP-REZ-CAPACITY";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.gain_credit" }],
+          acceptableActions: [{ actionId: "runner.start_run.hq" }],
           forbiddenActions: [{ actionId: "runner.start_run.remote_1" }],
           planExecution: {
-            acceptablePlanKinds: ["runner.economy"],
-            acceptableCapabilities: ["gain_general_liquid_credits"],
-            requiredAssessmentEvidence: [
-              "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_2",
-            ],
+            acceptablePlanKinds: ["runner.pressure_central"],
+            acceptableCapabilities: ["pressure_hq_information"],
           },
+          runTargets: [
+            {
+              actionId: "runner.start_run.hq",
+              recommendation: "run_if_free",
+              pathCost: 2,
+              creditsAfterRun: 10,
+            },
+            {
+              actionId: "runner.start_run.remote_1",
+              recommendation: "gain_credits_first",
+              creditsAfterRun: 0,
+            },
+          ],
         };
       },
     );

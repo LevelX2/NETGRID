@@ -311,7 +311,6 @@
         "strategicRole": ["emergency_tool"],
         "breakerProfile": {
           "coverage": ["universal"],
-          "emergencyCoverage": true,
           "breakCost": 1,
           "baseStrength": 0,
           "maxSubroutinesPerBreak": 1,
@@ -323,7 +322,6 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.emergency_coverage",
           "breaker.universal"
         ],
         "tacticSignals": ["coverage.breaker"],
@@ -418,7 +416,6 @@
         "valueHints": {},
         "breakerProfile": {
           "coverage": ["universal"],
-          "emergencyCoverage": true,
           "breakCost": 0,
           "baseStrength": 5,
           "maxSubroutinesPerBreak": 1,
@@ -443,7 +440,6 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.emergency_coverage",
           "breaker.universal",
           "breaker.random_failure",
           "risk.random_outcome",
@@ -798,7 +794,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice_modifier", "program"],
+        "roles": ["ice_modifier", "program", "icebreaker_support"],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "effects": [
@@ -1204,6 +1200,7 @@
         "breakerProfile": {
           "coverage": ["universal"],
           "emergencyCoverage": true,
+          "sideEffects": ["ends_run_after_use"],
           "breakCost": 0,
           "baseStrength": 4,
           "maxSubroutinesPerBreak": 1,
@@ -2284,7 +2281,6 @@
         "valueHints": {},
         "breakerProfile": {
           "coverage": ["universal"],
-          "emergencyCoverage": true,
           "breakCost": 2,
           "baseStrength": 0,
           "maxSubroutinesPerBreak": 1,
@@ -2296,7 +2292,6 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.emergency_coverage",
           "breaker.universal"
         ],
         "tacticSignals": ["coverage.breaker"],
@@ -2758,8 +2753,14 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": [],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "roles": [
+          "icebreaker_support",
+          "program"
+        ],
+        "planRoles": [
+          "build_rig",
+          "safe_probe_run"
+        ],
         "valueHints": {},
         "targetProfiles": [
           {
@@ -2770,7 +2771,10 @@
               "high_strength_ice",
               "relevant_server_ice"
             ],
-            "avoid": ["irrelevant_server_ice", "already_cheap_to_break"],
+            "avoid": [
+              "irrelevant_server_ice",
+              "already_cheap_to_break"
+            ],
             "kind": "use_target",
             "timing": "after_successful_run",
             "targetType": "installed_ice",
@@ -2791,7 +2795,9 @@
             "amountKind": "fixed",
             "bankable": false,
             "repeatable": true,
-            "actionTypes": ["purge_virus_counters"]
+            "actionTypes": [
+              "purge_virus_counters"
+            ]
           }
         ],
         "effects": [
@@ -2827,8 +2833,16 @@
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 1, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2837,7 +2851,10 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["install_program", "subtype_virus"]
+        "requiredMechanics": [
+          "install_program",
+          "subtype_virus"
+        ]
       }
     },
     {
@@ -13621,7 +13638,12 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
+        "roles": [
+          "agenda",
+          "score_plan",
+          "agenda_3pt",
+          "no_ability_agenda"
+        ],
         "planRoles": [
           "corp_score_agenda",
           "corp_hand_size_support",
@@ -13631,19 +13653,23 @@
         "effects": [
           {
             "kind": "hand_size_modifier",
-            "scope": "runner",
+            "scope": "corp",
             "timing": "persistent",
             "resource": "hand_size",
             "amount": 2
           }
         ],
-        "functionSignals": ["setup.hand_size"],
+        "functionSignals": [
+          "setup.hand_size"
+        ],
         "actionTacticSignals": [
           "effect:hand_size_modifier",
-          "effect_scope:runner",
+          "effect_scope:corp",
           "effect_timing:persistent"
         ],
-        "riskTags": ["hidden_until_score_or_access"],
+        "riskTags": [
+          "hidden_until_score_or_access"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -23811,13 +23837,24 @@
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
-        "roles": ["draw", "asset"],
-        "planRoles": ["corp_hand_size_support", "corp_repeatable_draw"],
-        "valueHints": { "remoteRootValue": 1 },
+        "roles": [
+          "draw",
+          "asset"
+        ],
+        "planRoles": [
+          "corp_hand_size_support",
+          "corp_repeatable_draw"
+        ],
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_draw_cards",
-            "costProfile": { "clicks": 1, "credits": 1 },
+            "costProfile": {
+              "clicks": 1,
+              "credits": 1
+            },
             "effects": [
               {
                 "kind": "draw",
@@ -23829,7 +23866,9 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["setup.draw"]
+            "functionSignals": [
+              "setup.draw"
+            ]
           }
         ],
         "effects": [
@@ -23844,7 +23883,7 @@
           },
           {
             "kind": "hand_size_modifier",
-            "scope": "runner",
+            "scope": "corp",
             "timing": "persistent",
             "resource": "hand_size",
             "amount": 2
@@ -23859,19 +23898,31 @@
             "finite": true
           }
         ],
-        "functionSignals": ["draw.corp_draw", "setup.draw", "setup.hand_size"],
-        "tacticSignals": ["draw.card", "draw.corp_draw"],
+        "functionSignals": [
+          "draw.corp_draw",
+          "setup.draw",
+          "setup.hand_size"
+        ],
+        "tacticSignals": [
+          "draw.card",
+          "draw.corp_draw"
+        ],
         "actionTacticSignals": [
           "draw.card",
           "effect:draw",
           "effect:hand_size_modifier",
           "effect_scope:corp",
-          "effect_scope:runner",
           "effect_timing:action",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 2 },
-        "riskTags": ["hidden_zone_change", "credit_cost"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
+        "riskTags": [
+          "hidden_zone_change",
+          "credit_cost"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -25080,24 +25131,33 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["corp_hand_size_support", "hq_discard_buffer"],
-        "valueHints": { "remoteRootValue": 1 },
+        "planRoles": [
+          "corp_hand_size_support",
+          "hq_discard_buffer"
+        ],
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "effects": [
           {
             "kind": "hand_size_modifier",
-            "scope": "runner",
+            "scope": "corp",
             "timing": "persistent",
             "resource": "hand_size",
             "amount": 2
           }
         ],
-        "functionSignals": ["setup.hand_size"],
+        "functionSignals": [
+          "setup.hand_size"
+        ],
         "actionTacticSignals": [
           "effect:hand_size_modifier",
-          "effect_scope:runner",
+          "effect_scope:corp",
           "effect_timing:persistent"
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
