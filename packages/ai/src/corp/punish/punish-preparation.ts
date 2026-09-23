@@ -10,8 +10,29 @@ import {
   minimumVisiblePlayCost,
   serverForInstalledCard,
   visibleCardIsAgenda,
+  requireVisibleCandidateSource,
+  visibleKnownCardType,
 } from "../../runtime/visible-action-facts";
 import { getStructuredTagPunishProfileForCard } from "../../tag-punish-ontology-consumer";
+
+export function corpPunishPreparationConflictsScoreServer(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  reservedScoreServerIds: ReadonlySet<string>,
+): boolean {
+  if (
+    candidate.semanticActionType !== "install.card" &&
+    candidate.semanticActionType !== "corp_window.rez"
+  )
+    return false;
+  const source = requireVisibleCandidateSource(input, candidate);
+  if (visibleKnownCardType(input, source) !== "asset") return false;
+  const serverId =
+    candidate.semanticActionType === "install.card"
+      ? candidateTargetIds(candidate).find(isCorpInstallServerId)
+      : serverForInstalledCard(input, source.instanceId);
+  return serverId !== undefined && reservedScoreServerIds.has(serverId);
+}
 
 export function corpInstallTargetProfileHasPurpose(
   candidate: ActionSemanticCandidate,

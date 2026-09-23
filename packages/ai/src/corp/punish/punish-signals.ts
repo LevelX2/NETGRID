@@ -1,3 +1,5 @@
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-hand-support";
 import { immediateCorpLiquidCreditGain } from "../economy/economy-routes";
 import {
   type AiDecisionInput,
@@ -20,6 +22,7 @@ import {
 } from "../../runtime/visible-action-facts";
 import { getStructuredTagPunishProfileForCard } from "../../tag-punish-ontology-consumer";
 import {
+  corpPunishPreparationConflictsScoreServer,
   corpDefinitionIsTraceSource,
   corpDefinitionIsTraceSupport,
   corpFortTraceSupportPlacementIsPreferred,
@@ -36,10 +39,16 @@ export function punishSignals(
   candidates: readonly ActionSemanticCandidate[],
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
   previous: ResidentPlanPortfolio | undefined,
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpPunishCampaignSignal[] {
   const quoted = quotedPunishSignals(input, candidates, previous);
   const legacyRoots = mergeStableLegacyPunishRoots(
-    legacyPunishSignals(input, candidates, scorelineFeasibility).filter(
+    legacyPunishSignals(
+      input,
+      candidates,
+      scorelineFeasibility,
+      corpReservedScoreServerIds(input, scoreProjects),
+    ).filter(
       (signal) =>
         signal.phase === "prepare" ||
         signal.evidenceCode.startsWith(
@@ -640,6 +649,7 @@ function legacyPunishSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
+  reservedScoreServerIds: ReadonlySet<string>,
 ): CorpPunishCampaignSignal[] {
   return candidates.flatMap((candidate): CorpPunishCampaignSignal[] => {
     if (corpCandidateIsAmbushInstall(candidate)) return [];
@@ -776,6 +786,15 @@ function legacyPunishSignals(
             ? "damage"
             : undefined);
     if (!phase) return [];
+    if (
+      phase === "prepare" &&
+      corpPunishPreparationConflictsScoreServer(
+        input,
+        candidate,
+        reservedScoreServerIds,
+      )
+    )
+      return [];
     if (
       phase === "prepare" &&
       corpStrategicFundingPhaseBlocksPreparation(input, candidate, legalAction)

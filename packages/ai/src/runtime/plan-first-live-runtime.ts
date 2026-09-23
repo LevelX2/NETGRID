@@ -3666,7 +3666,13 @@ function buildCorpDomain(
   const { immediateFundingActionIds, terminalFundingActionIds } =
     corpEconomyFundingActionIds(input, candidates);
   const punishCampaigns = uniqueBy(
-    punishSignals(input, candidates, scorelineFeasibility, previous),
+    punishSignals(
+      input,
+      candidates,
+      scorelineFeasibility,
+      previous,
+      scoreProjects,
+    ),
     (signal) => signal.campaignId,
   );
   const economyNeeds = buildCorpEconomySignals({

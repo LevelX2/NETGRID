@@ -1504,6 +1504,13 @@ viability: dormant
 Der Plan darf über mehrere Züge bestehen, während Scoring oder Economy den
 Vordergrund übernimmt.
 
+Die persistente Asset-Vorbereitung konsumiert die bestehenden Score-Remote-
+Reservierungen aus `corpReservedScoreServerIds`. Installation und Rez dürfen
+keinen Asset-Root vorbereiten, dessen Slot bereits für die Agenda-Installation
+reserviert ist. Andere Remotes, kompatible Upgrades und aktuell quotierte
+Punish-Konversionen bleiben davon unberührt. Die Sperre entsteht im
+Punish-Signal-Owner; die Action-Disposition nennt den Reservierungskonflikt.
+
 Der Normalzustand dieser Kampagne ist ein lauerndes `watch_window`, kein aktiv
 abzuarbeitender Komponentenaufbau. Fehlende Damage-, Tag- oder
 Trace-Komponenten sind beobachtete Kampagnenfakten, aber noch keine offenen

@@ -1,3 +1,5 @@
+import { corpPunishPreparationConflictsScoreServer } from "../corp/punish/punish-preparation";
+import { corpReservedScoreServerIds } from "../runtime/corp-scoreline/score-hand-support";
 import { corpEconomyActionIsOwned } from "../corp/economy/economy-routes";
 import { type CorpDefenseSignal } from "./corp-defense-contracts";
 import { type CorpScoreProjectSignal } from "./corp-score-contracts";
@@ -1101,7 +1103,19 @@ function contributeCorpActionDispositionForCandidate(
       corpPunishCampaignOwnsCandidate(signal, candidate),
     )
   ) {
-    if (candidate.semanticActionType === "install.card") {
+    if (
+      corpPunishPreparationConflictsScoreServer(
+        input,
+        candidate,
+        corpReservedScoreServerIds(input, domain.scoreProjects),
+      )
+    ) {
+      add(
+        candidate.actionId,
+        "corp.execute_punish_sequence",
+        "corp_punish_preparation_conflicts_score_server",
+      );
+    } else if (candidate.semanticActionType === "install.card") {
       add(
         candidate.actionId,
         "corp.execute_punish_sequence",
