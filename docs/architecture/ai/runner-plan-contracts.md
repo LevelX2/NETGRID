@@ -2129,3 +2129,10 @@ Die Engine kennzeichnet auch einen freiwilligen Zusatzrun nach erfolgreichem
 Run mit `optionalBonusRun`. Der bestehende Run-Window-Owner verlangt dafür
 einen aktuellen Zugriffsnutzen und darf den Bonus ausdrücklich ablehnen.
 Verpflichtende Mehrserverfolgen erhalten diese Kennzeichnung nicht.
+
+Eine vom Central-Owner exakt zugelassene optionale Runroute behält ihre
+Zuständigkeit auch dann, wenn die lokale Run-Window-Nutzenprüfung sie ablehnt.
+Die Disposition prüft dieselbe Action-ID, Erreichbarkeit, positiven Nutzen,
+fehlende Routenausschlüsse und die Ausführungsphase; eine Vorbereitung oder
+bloß gleichnamiger Server genügt nicht. Vollständig bekannte agendalose
+Archives erzeugen dadurch keinen neuen Runzweck.
