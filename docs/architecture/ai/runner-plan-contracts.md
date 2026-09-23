@@ -1296,6 +1296,14 @@ zweckgebundene Pools und über den Encounter hinaus gültige Stärke fort.
 Gemischte Wirkungen, notwendiger Schadens-/Programmschutz und ein Break zum
 Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
 
+Harte ETR mit einem erst am Zugende wirksamen Selbsttrash zählt in der
+Pumpzulassung und der aktuellen Zahlungsquote ebenfalls als Zugriffsbarriere.
+Der Run-Owner darf eine bloße allgemeine Zugreserve zurückstellen, wenn die
+vollständige Pump-/Breakzahlung den aktuell neu gequoteten, gebundenen
+Runvertrag erhält. Unbezahlbare Pflichtbreaks, verschlechterte unbekannte
+ICE-Reserven und fehlende Rootbindung behalten ihre Sperren. Eine anfängliche
+Probe benötigt dafür keine nachträglich erfundene Vollpfadzusage.
+
 Die Zulassung von Run-Ereignissen quotiert Route und Handreserve mit der
 bereits vorhandenen Projektion nach dem Verbrauch der Startkarte. Credit-
 und Klickkosten stammen weiterhin aus der aktuellen LegalAction; dieselbe

@@ -864,6 +864,13 @@ eine tatsächlich produktive Installation derselben oder einer höheren
 Prioritätsklasse behält ihren Vorrang. Kosten, Zustandsversion und Ziel-ICE
 werden an der bestehenden Funding-Grenze erneut gebunden und geprüft.
 
+Ein solcher Funding-Need braucht einen aktuell legalen Finanzierungskopf
+oder eine exakt gebundene Restricted-Credit-Vorbereitung. Verbleibende Klicks
+allein reichen nicht: Eine verpflichtende Choice kann alle Credit-Aktionen
+auch innerhalb von `corp_action.main` aussetzen. Der Defense-Factproducer
+erzeugt dann keinen leeren Economy-Need; die normale Choice-Ownership bleibt
+erhalten und der Economy-Validator behält seine strenge Bindungsprüfung.
+
 Ein typisierter Schutzbedarf eines Score- oder Remoteplans erzeugt eine
 explizite Parent-Kind-Delegation. Nur die konkret gebundene
 Defense-Supportroute erbt `parentInstanceId` und Prioritätsklasse des

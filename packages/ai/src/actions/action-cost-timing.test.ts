@@ -148,16 +148,52 @@ describe("action cost and timing profiles", () => {
         source: "legal_action_payload",
       },
     });
-    expect(profile.additionalCosts).toEqual(
-      expect.arrayContaining([
-        "xValue",
-        "xMinimum",
-        "xMaximum",
-        "xUpperBound",
-        "xCreditsPerUnit",
-        "variableCostKind",
-      ]),
-    );
+    expect(profile.additionalCosts).toEqual([]);
+  });
+
+  it.each([
+    { xValue: "choice" },
+    { xValue: 5 },
+    { xValue: -1 },
+    { xMaximum: 3 },
+    { xCreditsPerUnit: 2 },
+    { xMinimum: 3 },
+    { variableCostKind: "unresolved" },
+  ])(
+    "keeps an unbound or conflicting printed X contract explicit: %j",
+    (override) => {
+      const profile = costProfileForAction({
+        ...action("play_operation", {
+          xValue: 2,
+          xMinimum: 1,
+          xMaximum: 4,
+          xUpperBound: 4,
+          xCreditsPerUnit: 1,
+          variableCostKind: "printed_play_cost",
+          ...override,
+        }),
+        costs: [{ clicks: 1, credits: 2 }],
+      });
+      expect(profile.additionalCosts).toContain("xValue");
+    },
+  );
+
+  it("retains noncash costs beside an exactly bound X payment", () => {
+    const profile = costProfileForAction({
+      ...action("play_operation", {
+        xValue: 2,
+        xMinimum: 1,
+        xMaximum: 4,
+        xUpperBound: 4,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+        cardImplementationTapSourceCost: true,
+      }),
+      costs: [{ clicks: 1, credits: 2 }],
+    });
+    expect(profile.additionalCosts).toEqual([
+      "cardImplementationTapSourceCost",
+    ]);
   });
 
   it("treats an omitted dimension in the complete Engine cost list as exact zero", () => {

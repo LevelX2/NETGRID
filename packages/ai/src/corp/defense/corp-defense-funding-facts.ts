@@ -120,6 +120,13 @@ export function corpDefenseReserveNeeds(
       restrictedCreditPreparations.length > 0
         ? immediateFundingActionIds
         : retainedFundingActionIds;
+    // Remaining clicks do not imply a current funding head: a mandatory
+    // choice can suspend all credit actions inside corp_action.main.
+    if (
+      fundingActionIds.length === 0 &&
+      restrictedCreditPreparations.length === 0
+    )
+      return [];
     if (dominatedCredits.size > 0 && fundingActionIds.length === 0) return [];
     return [
       {

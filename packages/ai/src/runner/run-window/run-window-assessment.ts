@@ -742,29 +742,36 @@ function runnerRunWindowActionAssessment(
     runOrigin,
     runRiskReassessment,
   );
-  const overriddenEncounterExclusion =
-    fullPathCommitmentPreserved &&
-    encounterExclusion &&
-    runnerFullPathCommitmentCanOverrideEncounterExclusion(encounterExclusion)
-      ? encounterExclusion
-      : undefined;
-  const effectiveEncounterExclusion = overriddenEncounterExclusion
-    ? undefined
-    : encounterExclusion;
   const planStepExclusion = runnerRunWindowPlanStepExclusion(
     input,
     action,
     dependencies,
     runOrigin,
   );
-  const encounterPayment =
-    !effectiveEncounterExclusion && !planStepExclusion
-      ? pureEndRunEncounterPayment(input, action)
-      : undefined;
+  const encounterPayment = !planStepExclusion
+    ? pureEndRunEncounterPayment(input, action)
+    : undefined;
   const paidRunRisk =
     encounterPayment && runOrigin?.runRiskContract
       ? runnerRunRiskContractReassessment(input, runOrigin, encounterPayment)
       : undefined;
+  // The root's current, fully paid run reserve owns continuation. A generic
+  // turn reserve must not charge a second unrelated floor for the same run.
+  const boundRunReservePreserved =
+    encounterExclusion?.key === "encounter_reserve_would_break" &&
+    paidRunRisk?.decision === "preserve_continuation";
+  const overriddenEncounterExclusion =
+    encounterExclusion &&
+    ((fullPathCommitmentPreserved &&
+      runnerFullPathCommitmentCanOverrideEncounterExclusion(
+        encounterExclusion,
+      )) ||
+      boundRunReservePreserved)
+      ? encounterExclusion
+      : undefined;
+  const effectiveEncounterExclusion = overriddenEncounterExclusion
+    ? undefined
+    : encounterExclusion;
   const reserveExclusion =
     paidRunRisk?.decision === "prefer_jack_out"
       ? {
@@ -857,7 +864,7 @@ function runnerRunWindowActionAssessment(
             : []),
           ...(overriddenEncounterExclusion
             ? [
-                `runner_full_path_commitment_overrode_encounter_exclusion:${overriddenEncounterExclusion.key}`,
+                `${boundRunReservePreserved ? "runner_bound_paid_reserve" : "runner_full_path_commitment"}_overrode_encounter_exclusion:${overriddenEncounterExclusion.key}`,
                 ...overriddenEncounterExclusion.reason
                   .split("|")
                   .map((entry) => entry.trim())

@@ -9,6 +9,7 @@ import {
   spendRunnerEncounterActionCost,
 } from "../../runtime/runner-encounter-credit-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
+import { isVisibleHardEndRunSubroutine } from "../../run-analysis/visible-subroutine-semantics";
 
 /** Quote the access-only payment before testing the bound continuation reserve.
  * Safety mitigation and mixed-effect encounters keep their existing owners.
@@ -42,7 +43,7 @@ export function pureEndRunEncounterPayment(
   );
   if (
     subroutines.length === 0 ||
-    subroutines.some((s) => s.type !== "end_the_run")
+    subroutines.some((s) => !isVisibleHardEndRunSubroutine(s))
   )
     return undefined;
   const quote = creditsToBreakVisibleSubroutinesWithBreaker(

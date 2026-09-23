@@ -342,6 +342,27 @@ function additionalCostFields(
   action: LegalAction,
   normalizedGrossCredits: number | undefined,
 ): string[] {
+  const printedXFields = new Set([
+    "xValue",
+    "xMinimum",
+    "xMaximum",
+    "xUpperBound",
+    "xCreditsPerUnit",
+    "variableCostKind",
+  ]);
+  const p = action.payload;
+  const exactPrintedX =
+    (action.type === "play_operation" || action.type === "play_event") &&
+    p?.variableCostKind === "printed_play_cost" &&
+    [p.xValue, p.xMinimum, p.xMaximum, p.xUpperBound, p.xCreditsPerUnit].every(
+      (value) =>
+        typeof value === "number" && Number.isSafeInteger(value) && value >= 0,
+    ) &&
+    Number(p.xCreditsPerUnit) > 0 &&
+    Number(p.xMinimum) <= Number(p.xValue) &&
+    Number(p.xValue) <= Number(p.xMaximum) &&
+    p.xMaximum === p.xUpperBound &&
+    Number(p.xValue) * Number(p.xCreditsPerUnit) === normalizedGrossCredits;
   const normalizedCreditFields = new Set([
     "accessTrashTotalCost",
     "stealCost",
@@ -396,6 +417,9 @@ function additionalCostFields(
   return fields.filter((field) => {
     const value = action.payload?.[field];
     if (value === undefined) return false;
+    // The fully bound printed X contract is the same cash payment, not an
+    // extra unresolved cost. Other variables and conflicting quotes remain.
+    if (exactPrintedX && printedXFields.has(field)) return false;
     // Keep unsupported or conflicting facts explicit. A matching Engine cash
     // quote is already represented by creditCost, not an additional payment.
     return !(

@@ -34,7 +34,10 @@ import {
   isUnacceptableImmediateSafetyThreatSubroutine,
   type VisibleEncounterSubroutine,
 } from "./encounter-subroutine";
-import { isVisibleDirectDamageSubroutine } from "../run-analysis/visible-subroutine-semantics";
+import {
+  isVisibleDirectDamageSubroutine,
+  isVisibleHardEndRunSubroutine,
+} from "../run-analysis/visible-subroutine-semantics";
 import type { EncounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import type {
   RunnerEncounterActionConstraint,
@@ -165,7 +168,7 @@ export function createRunnerPumpViabilityContext(
       };
 
     const endTheRunCount = currentQuote.subroutines.filter(
-      (subroutine) => subroutine.type === "end_the_run",
+      isVisibleHardEndRunSubroutine,
     ).length;
     const deflectorContext = {
       visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>

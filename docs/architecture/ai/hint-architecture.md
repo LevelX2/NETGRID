@@ -61,3 +61,13 @@ begründet noch keine Installation: Der Entwicklungsowner benötigt einen
 zustandsgebundenen marginalen Nutzen. Regressionen prüfen sowohl die echten
 generierten Hints im Standarddeck als auch Admission und tatsächlich gewählte
 LegalAction. Selbst vorgegebene Rollen testen nur ihren jeweiligen Consumer.
+
+## Exakt gebundene variable Aktionskosten
+
+`actions/action-cost-timing.ts` behandelt einen vollständig gebundenen
+`printed_play_cost`-X-Vertrag als dieselbe bereits normalisierte Credit-Zahlung.
+Gewähltes X, Unter-/Obergrenze, Credits je Einheit und Gesamtzahlung müssen
+konsistent sein; diese Metadaten sind dann keine ungeklärten Zusatzkosten.
+Offene oder widersprüchliche Variablen und nicht monetäre Kosten bleiben
+ausdrücklich erhalten. Der fachliche Owner bewertet weiterhin Ziel, Dauer,
+Reserve und Nutzen; die Kostenprojektion trifft keine Kartenentscheidung.
