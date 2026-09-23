@@ -15029,7 +15029,9 @@ describe("authoritative plan-first live runtime", () => {
     unprotectedInput.playerView.own.credits = 0;
     for (const action of unprotectedInput.legalActions)
       action.expiresAtStateVersion = 2;
-    bindSyntheticAgendaInstallQuotes(unprotectedInput, { refreshExisting: true });
+    bindSyntheticAgendaInstallQuotes(unprotectedInput, {
+      refreshExisting: true,
+    });
     unprotectedInput.playerView.servers.find(
       (candidate) => candidate.id === "remote_1",
     )!.ice = [
@@ -21096,9 +21098,15 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
     );
     const input = aiInput("runner", [prepareAccess, run, credit]);
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.own.stackOrRdCount = 20;
     input.playerView.own.credits = 6;
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
+      ...Array.from({ length: 3 }, (_, index) =>
+        visibleCard(`preparation-buffer-${index}`, "runner", "event"),
+      ),
       visibleCard("access-event", "runner", "event", {
         definitionId: "onr_proteus_119_promises-promises",
       }),
@@ -21127,14 +21135,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       liveContext({
         evaluateRunnerHandDevelopment: () => [development],
-        evaluateRunnerRunTargets: () => [
-          runTargetEvaluation({
-            actionId: "run-rd",
-            targetServerId: "rd",
-            knownAccessState: "known_payoff",
-            score: 200,
-          }),
-        ],
+        evaluateRunnerRunTargets,
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: "prepare-access",

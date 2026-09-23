@@ -2,7 +2,7 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
-  evaluateRunnerRunTargets,
+  assessRunnerRunAfterAccessPreparation,
   buildRunnerEconomyPosture,
   type RunnerEconomyPosture,
   type RunnerRunTargetEvaluation,
@@ -119,29 +119,16 @@ export function runnerSameTurnAccessPreparationFitsTarget(
   )
     return false;
   const credits = actionCreditCost(preparation);
-  // Quote the already bound route after the current legal preparation's spend.
-  // Reuse the executing owner's funding admission rather than treating run_now
-  // as proof that its protected post-run reserve is already available.
-  const afterPreparation: AiDecisionInput = {
-    ...input,
-    playerView: {
-      ...input.playerView,
-      own: {
-        ...input.playerView.own,
-        credits: input.playerView.own.credits - credits,
-        clicks: input.playerView.own.clicks - actionClickCost(preparation),
-        gripOrHq: input.playerView.own.gripOrHq.filter(
-          (card) => card.instanceId !== preparation.source,
-        ),
-      },
-    },
-  };
-  const handAfterPreparation = input.playerView.own.gripOrHq.length - 1;
-  // Hand size also changes consumable run admission and its risk quote.
-  // Requote this exact existing action; this does not create a future action.
-  const quotedTarget = evaluateRunnerRunTargets({
-    input: afterPreparation,
-  }).find((entry) => entry.actionId === target.actionId);
+  // Resource projection and exact route evaluation belong to the run evaluator.
+  const quote = assessRunnerRunAfterAccessPreparation({
+    input,
+    preparationActionId,
+    runActionId: target.actionId,
+    targetServerId: target.targetServerId,
+  });
+  if (!quote) return false;
+  const { input: afterPreparation, target: quotedTarget } = quote;
+  const handAfterPreparation = afterPreparation.playerView.own.gripOrHq.length;
   if (
     !quotedTarget ||
     quotedTarget.pathPassability !== "reachable" ||

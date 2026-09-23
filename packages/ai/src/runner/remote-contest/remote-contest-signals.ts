@@ -32,7 +32,6 @@ import {
   runnerRezOrTrashPreparationBeatsImmediateRun,
   runnerSameTurnAccessPreparationSourceDefinitionId,
   runnerSameTurnAccessPreparationFitsTarget,
-  runnerRunReplacesAgendaAccess,
   runnerHasExpiringAgendaAccessPayoff,
   runnerRunCanConsumeAgendaAccessPayoff,
   runnerTargetedBypassPayoffValue,
@@ -241,7 +240,7 @@ function runnerSameTurnAccessRemotePreparationSignals(
             parent.routePreparation === undefined &&
             parent.preferredRunActionIds?.includes(evaluation.actionId),
         ) &&
-        !runnerRunReplacesAgendaAccess(input, evaluation) &&
+        runnerRunCanConsumeAgendaAccessPayoff(input, evaluation) &&
         evaluation.pathPassability === "reachable" &&
         evaluation.recommendation === "run_now" &&
         evaluation.score > 0 &&

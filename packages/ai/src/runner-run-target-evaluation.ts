@@ -187,6 +187,66 @@ export function assessRunnerRunAfterGuaranteedFunding(
   return target ? { input: fundedInput, target } : undefined;
 }
 
+/** Quote one currently legal run after a currently legal access-preparation spend. */
+export function assessRunnerRunAfterAccessPreparation(params: {
+  input: AiDecisionInput;
+  preparationActionId: string;
+  runActionId: string;
+  targetServerId: string;
+}): { input: AiDecisionInput; target: RunnerRunTargetEvaluation } | undefined {
+  const preparation = params.input.legalActions.find(
+    (action) => action.actionId === params.preparationActionId,
+  );
+  const consumedCard = params.input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === preparation?.source,
+  );
+  if (
+    !preparation ||
+    preparation.type !== "play_event" ||
+    !consumedCard ||
+    preparation.expiresAtStateVersion !== params.input.playerView.stateVersion
+  )
+    return undefined;
+  const credits = preparation.costs.reduce(
+    (sum, cost) => sum + (cost.credits ?? 0),
+    0,
+  );
+  const clicks = preparation.costs.reduce(
+    (sum, cost) => sum + (cost.clicks ?? 0),
+    0,
+  );
+  const input: AiDecisionInput = {
+    ...params.input,
+    playerView: {
+      ...params.input.playerView,
+      own: {
+        ...params.input.playerView.own,
+        credits: params.input.playerView.own.credits - credits,
+        clicks: params.input.playerView.own.clicks - clicks,
+        gripOrHq: params.input.playerView.own.gripOrHq.filter(
+          (card) => card.instanceId !== consumedCard.instanceId,
+        ),
+      },
+    },
+  };
+  const targetParams = { input };
+  const projection = projectInternalRunnerRunActions(targetParams).find(
+    (run) =>
+      run.action.actionId === params.runActionId &&
+      run.targetServerId === params.targetServerId &&
+      run.projectionStatus === "concrete_target",
+  );
+  if (!projection) return undefined;
+  const target = evaluateRunnerRunTarget(
+    targetParams,
+    projection,
+    buildRunnerEconomyPosture(targetParams),
+    reconstructBeliefState(input).runnerOpponentModel?.unrezzedIceRiskModel ??
+      [],
+  );
+  return target ? { input, target } : undefined;
+}
+
 export function evaluateRunnerRunTargets(
   params: EvaluateRunnerRunTargetsParams,
 ): RunnerRunTargetEvaluation[] {
