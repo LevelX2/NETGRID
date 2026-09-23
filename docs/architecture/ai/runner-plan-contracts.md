@@ -1370,6 +1370,16 @@ ohne weiteren Pfad müssen sämtliche verbleibenden Pflicht-Breaks gemeinsam
 finanziert sein. Die Bezahlbarkeit nur eines weiteren Breaks erlaubt keine
 optionale Schadensabwehr, die eine zweite verbleibende ETR-Sperre offenließe.
 
+Die Pump-Zulassung projiziert zusätzlich die bereits im aktuellen Angebot
+finanzierten, aber noch nicht ausgeführten Pumps über diese Grenze. Ihre
+Gültigkeitsdauer stammt aus dem kanonischen Engine-Breaker-Quote: Nur Run-
+und Zug-Pumps erhöhen auch die Stärke im inneren Pfad. Encounter-Pumps
+verfallen dort, ebenso bereits bestehende Encounter-Boni. Der zukünftige
+Zahlungspfad verwendet diese projizierte Stärke und das um Pump und Break
+verminderte Budget zusammen; andernfalls würde er fortbestehende Stärke ein
+zweites Mal berechnen. Ein uneindeutiger Quote-Horizont scheitert sichtbar
+mit `runner_projected_pump_horizon_unresolved`.
+
 Öffentlich aufgelöster Corp-Schaden wird nach seiner Quelle zugeordnet.
 Der Runner als Actor einer `continue_run`-Action macht die darin aufgelösten
 Corp-ICE-Subroutinen nicht zu Runner-Selbstschaden. Erst ein tatsächlicher
