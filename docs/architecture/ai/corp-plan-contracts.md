@@ -37,6 +37,14 @@ Deckstrategie, Hand, Agendaexposition und erwarteter früher Run-Gefahr.
 
 ## 2. `corp.score_agenda`
 
+Das Deckstrategieprofil übernimmt `score.fast_advance_support` aus den
+aktuellen kanonischen Kartenhints in den Scorebeschleunigungswert sowie die
+Supportnachweise für Fast Advance, Scoreplan und Advancement-Fenster. Ein
+vorhandener Countertransfer oder eine Counterplatzierung darf nicht allein
+wegen älterer Signalnamen als fehlende Unterstützung erscheinen. Diese
+statische Kapazität ist keine aktuelle Aktionszulassung: Verbraucher,
+Counterquelle, Kosten und Frist prüft weiterhin der konkrete Score-Owner.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence

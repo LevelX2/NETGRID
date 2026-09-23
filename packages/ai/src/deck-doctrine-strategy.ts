@@ -1366,7 +1366,11 @@ function supportComponentScore(
       return evidenceFromSignals(
         stats,
         dimension,
-        ["score.advance_burst", "score.agenda_action"],
+        [
+          "score.advance_burst",
+          "score.agenda_action",
+          "score.fast_advance_support",
+        ],
         2,
       );
     case "scorePlan":
@@ -1419,6 +1423,7 @@ function supportComponentScore(
           "score.overadvance_scaling",
           "score.advance_burst",
           "score.agenda_action",
+          "score.fast_advance_support",
         ],
         2,
       );
@@ -1840,7 +1845,11 @@ function scorePlanSupport(
   const acceleration = evidenceFromSignals(
     stats,
     dimension,
-    ["score.advance_burst", "score.agenda_action"],
+    [
+      "score.advance_burst",
+      "score.agenda_action",
+      "score.fast_advance_support",
+    ],
     2,
   );
   return {
@@ -2272,7 +2281,8 @@ function buildCorpProfiles(
     scoreProfile: {
       scoreAcceleration:
         (stats.functionSignalCounts["score.advance_burst"] ?? 0) +
-        (stats.functionSignalCounts["score.agenda_action"] ?? 0),
+        (stats.functionSignalCounts["score.agenda_action"] ?? 0) +
+        (stats.functionSignalCounts["score.fast_advance_support"] ?? 0),
       agendaInstallAdvanceScoreSupport:
         (stats.cardTypeCounts.agenda ?? 0) +
         Math.round(
