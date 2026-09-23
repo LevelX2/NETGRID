@@ -1356,6 +1356,21 @@ Remote-Sicherheit sofort aufgedeckt und ausgezahlt. Bereits aufgedeckte Banken
 und echte Agenda-Handoffs behalten ihre jeweiligen Score-Routen. Die Ambush-
 Signale werden einmal erzeugt und den betroffenen Ownern gemeinsam übergeben.
 
+Die Score-Finanzierung übernimmt die Counter-Freigabe aus
+`corp/score/score-counter-bank-funding.ts`. Ein sicherer Bankvorrat bleibt auch
+zwischen zwei Advance-Actions eine Score-Investition; ein konkurrierender
+gewöhnlicher Liquiditätsbedarf darf ihn nicht auszahlen und danach erneut
+aufbauen. Eine höher priorisierte aktuelle Konversion darf eine fremde
+Investition freigeben, aber dieselben Counter niemals zugleich als Transfer-
+und Creditquelle beanspruchen. Unsichere, nicht anderweitig gebundene Banken
+behalten ihre Liquidationsroute.
+
+Der residente Ambush-Owner beendet neue Advancement- und Support-Investitionen,
+wenn die Karte dem Runner exakt bekannt ist und die kanonische Access-Projektion
+`not_applicable` meldet. Bereits investierte Counter begründen keinen neuen
+Bluffwert. Echte Access-Effekte, aktuelle Trigger und Recycling bleiben nach
+ihren eigenen Quotes verfügbar; der bloße Rez-Zustand verwirft keine Schadensfalle.
+
 **Klasse:** `bounded_sequence`, `recurring_cycle` oder
 `development_project`
 **Rolle:** Support/Vordergrund/Background

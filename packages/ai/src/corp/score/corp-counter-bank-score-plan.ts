@@ -425,6 +425,18 @@ function installedCounterBanks(input: AiDecisionInput): InstalledCounterBank[] {
   );
 }
 
+/** A completed safe bank still retains its score purpose between actions. */
+export function corpCounterBankInvestmentSourceIds(
+  input: AiDecisionInput,
+): ReadonlySet<string> {
+  if (counterBankTargetFromKnownDeck(input) === undefined) return new Set();
+  return new Set(
+    installedCounterBanks(input)
+      .filter(({ serverId }) => counterBankRemoteIsSecure(input, serverId))
+      .map(({ card }) => card.instanceId),
+  );
+}
+
 function counterBankTargetFromKnownDeck(
   input: AiDecisionInput,
 ): number | undefined {

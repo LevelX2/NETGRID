@@ -820,14 +820,22 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous advancement actions.`,
       );
     }
-    const supportRoute = ambushAdvancementSupportRoute({
-      input: params.input,
-      candidates: params.candidates,
-      sourceInstanceId,
-      serverId: location.serverId,
-      currentCounters,
-      advancementTarget,
-    });
+    // A known card without an access effect has lost its bluff purpose.
+    // Current counters are sunk investment, not a reason to buy them back.
+    // Weak but real access effects may still improve through advancement.
+    const advancementHasPurpose =
+      runnerKnowledge === undefined ||
+      accessThreatProjection?.status !== "not_applicable";
+    const supportRoute = advancementHasPurpose
+      ? ambushAdvancementSupportRoute({
+          input: params.input,
+          candidates: params.candidates,
+          sourceInstanceId,
+          serverId: location.serverId,
+          currentCounters,
+          advancementTarget,
+        })
+      : undefined;
     const selectRecycle =
       supportRoute === undefined &&
       exactTriggerCandidate === undefined &&
@@ -841,7 +849,7 @@ function continuedAmbushSignals(params: {
       exactTriggerCandidate ??
       (selectRecycle
         ? recycleCandidate
-        : currentCounters < advancementTarget
+        : advancementHasPurpose && currentCounters < advancementTarget
           ? advanceCandidates[0]
           : undefined);
     const phase =
@@ -855,7 +863,7 @@ function continuedAmbushSignals(params: {
               ? ("trigger" as const)
               : selectRecycle
                 ? ("recycle" as const)
-                : currentCounters < advancementTarget
+                : advancementHasPurpose && currentCounters < advancementTarget
                   ? ("advance" as const)
                   : ("trigger" as const);
     const {

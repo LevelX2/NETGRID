@@ -1145,6 +1145,14 @@ Handbudget verschwinden. Die Finanzierung verwendet den vollständigen Pfad
 mit ihrem garantierten Budget; ein tragbarer günstigerer Schadenspfad bleibt
 ohne unnötiges Darlehen zulässig.
 
+Erzeugt erst eine ungebrochene äußere Subroutine eine innere Zugriffssperre,
+bleibt die fehlende Breaker-Abdeckung an dieser Quell-ICE gebunden. Der
+Pfaddienst vergleicht die bekannte Fortsetzung mit und ohne Wirkung auch dann,
+wenn der Quellbreaker fehlt. Eine unabhängig unüberwindbare innere ICE behält
+ihren eigenen Bedarf; ohne betroffene Folge-ICE entsteht kein künstlicher
+Coveragebedarf. Ein vorhandener, aber unbezahlbarer Quellbreaker bleibt eine
+Finanzierungslücke.
+
 Die Engine projiziert bereits aktivierte Encounter-Gebühren öffentlich als
 `run.encounterTaxForFutureIce`. Restpfad-, Pump-, Break- und Risikoprüfungen
 erhalten diesen Wert auch durch die KI-Eingabeprojektion. Diese verwirft
