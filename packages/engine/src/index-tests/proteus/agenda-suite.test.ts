@@ -986,6 +986,83 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     });
   });
 
+  it.each(["rd", "remote_1"] as const)(
+    "preserves Promises bonuses when stealing from %s",
+    (serverId) => {
+      let state = baseState("promises-zone-" + serverId);
+      const agendaId = addCorpCard(
+        state,
+        MARKED_ACCOUNTS,
+        "promised_agenda",
+        serverId,
+      );
+      for (let i = 0; i < 2; i++) {
+        const id = addRunnerGripCard(state, PROMISES_PROMISES, "promise_" + i);
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.type === "play_event" && action.payload?.cardId === id,
+        );
+      }
+      state = accessTopCard(state, serverId);
+      const before = structuredClone(state);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "steal_agenda",
+      );
+      expect(state.cardInstances[agendaId]?.counters?.agenda).toBe(2);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        agendaPointBonus: 2,
+        totalAgendaPoints: 4,
+      });
+      expectReplayStable(before, state);
+    },
+  );
+
+  it.each([0, 3])(
+    "clears old installed counters before awarding steal bonuses and paying %s point debt",
+    (debt) => {
+      let state = baseState("promises-debt-" + debt);
+      const agendaId = addCorpCard(
+        state,
+        MARKED_ACCOUNTS,
+        "promised_debt_agenda",
+        "remote_1",
+      );
+      state.cardInstances[agendaId]!.counters = { agenda: 7 };
+      state.runnerAgendaPointsToForfeit = debt;
+      for (let i = 0; i < 2; i++) {
+        const id = addRunnerGripCard(
+          state,
+          PROMISES_PROMISES,
+          "debt_promise_" + i,
+        );
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.type === "play_event" && action.payload?.cardId === id,
+        );
+      }
+      state = accessTopCard(state, "remote_1");
+      const before = structuredClone(state);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "steal_agenda",
+      );
+      expect(state.cardInstances[agendaId]?.counters?.agenda).toBe(2);
+      expect(state.cardInstances[agendaId]?.agendaPointsSpent ?? 0).toBe(debt);
+      expect(state.runnerAgendaPointsToForfeit ?? 0).toBe(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        totalAgendaPoints: 4 - debt,
+      });
+      expectReplayStable(before, state);
+    },
+  );
+
   it("Promises, Promises marks the next agenda access only, survives non-agenda access, expires at turn end, and adds exactly one steal point", () => {
     let state = baseState("pro013-promises");
     const promisesId = addRunnerGripCard(
