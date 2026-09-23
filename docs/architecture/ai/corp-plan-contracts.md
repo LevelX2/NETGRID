@@ -1861,3 +1861,15 @@ einen belegten Draw-, Refresh-, Agenda- oder Overflow-Zweck.
 `raise_visible_floor` benötigt Defense-Evidence; allgemeine Boardentwicklung
 benötigt ein Domainmodul. Fehlt die Planabdeckung, wird dies nicht durch
 Credit, Draw oder Boardentwicklung verdeckt.
+
+Ein aktueller Same-Turn-Score darf den exakt legalen Rez einer eigenen
+installierten Advancement-Quelle als ersten Schritt binden. Die eng begrenzte
+Projektion in `corp-installed-advancement-preparation.ts` akzeptiert nur eine
+kanonische, bedingungslose Corp-Main-Fähigkeit mit genau einem festen Klick-,
+einem festen Creditpreis und einer einzelnen Counterplatzierung auf ein
+installiertes Ziel. Rezpreis und aktuelle Source-/Server-/StateVersion-Bindung
+stammen aus der LegalAction; die vollständige Folge muss gemeinsam finanziert
+sein. Nach Rez wird die wirkliche Aktivierungsaction neu von der Engine
+angefordert und im bestehenden Score-Parent bewertet. Eine zukünftige Action-ID
+wird nicht erfunden. Der Regressionstest aus 461 R9 G5 D207 belegt den zuvor
+fehlenden Rezschritt vor dem sofortigen Gewinn.
