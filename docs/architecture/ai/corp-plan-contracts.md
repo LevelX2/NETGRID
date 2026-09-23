@@ -1620,6 +1620,16 @@ Instanzidentität. Nach jedem State-Wechsel werden nur die dann legalen
 Action-IDs neu entdeckt; eine fehlende kartenspezifische Phasensemantik darf
 nicht durch Definition-, Server- oder Rollenfallbacks ersetzt werden.
 
+Ein vorbereiteter installierter Access-Effekt kann den Rez seiner Quelle
+benötigen. Am exakt erreichten Quellserver bindet der residente Ambush-Owner
+die aktuelle Root-Rezaktion auch bei positiven Creditkosten als Trigger.
+Er prüft den bekannten zusätzlichen Effekt nach Rez mit dem verbleibenden
+Creditbudget; spätere Access-Zahlungen und gebundene Score-Reserven müssen
+gemeinsam finanzierbar bleiben. Vorherige ICE-Fenster, fremde Zielserver,
+fehlende Wirkung und unbekannte Kosten begründen diese Route nicht.
+Installation und Advancement allein belegen daher noch keine wirksame
+Verwendung einer rezpflichtigen Falle wie Experimental AI.
+
 Die access-zonenbezogene Vorbereitung ergänzt den bestehenden Ambush-Owner:
 Eine eigene Asset-Quelle mit kostenlosem Self-Shuffle beim Rez und
 R&D-Zugriffseffekt darf als exakt gebundene Install-/Rez-Folge auftreten.

@@ -605,6 +605,7 @@ export function corpAmbushAdvanceDispositionEvidence(
 }
 
 function continuedAmbushSignals(params: {
+  reservedScoreCredits?: number;
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio | undefined;
@@ -728,21 +729,42 @@ function continuedAmbushSignals(params: {
       const action = params.input.legalActions.find(
         (legalAction) => legalAction.actionId === candidate.actionId,
       );
-      if (action === undefined || exactLegalActionCreditCost(action) !== 0)
+      if (action === undefined) return false;
+      const rezCredits = exactLegalActionCreditCost(action);
+      const reservedCredits = params.reservedScoreCredits ?? 0;
+      if (
+        rezCredits === undefined ||
+        !Number.isSafeInteger(reservedCredits) ||
+        reservedCredits < 0 ||
+        params.input.playerView.own.credits - rezCredits < reservedCredits
+      ) {
         return false;
+      }
       const beforeRez = projectKnownCorpCardAccessEffect({
         input: params.input,
         sourceDefinitionId,
         sourceCard: location.card,
       });
       const afterRez = projectKnownCorpCardAccessEffect({
-        input: params.input,
+        input: {
+          ...params.input,
+          playerView: {
+            ...params.input.playerView,
+            own: {
+              ...params.input.playerView.own,
+              credits: params.input.playerView.own.credits - rezCredits,
+            },
+          },
+        },
         sourceDefinitionId,
         sourceCard: { ...location.card, rezzed: true },
       });
       return (
         beforeRez.status !== "unknown" &&
         afterRez.status === "complete" &&
+        afterRez.corpCanPayActivation !== false &&
+        (afterRez.activationCreditCost ?? 0) + reservedCredits <=
+          params.input.playerView.own.credits - rezCredits &&
         afterRez.threatValue > beforeRez.threatValue
       );
     });
@@ -750,7 +772,7 @@ function continuedAmbushSignals(params: {
       throw ambushContractFailure(
         params.input,
         accessWindowRezCandidates.map((candidate) => candidate.actionId),
-        `Resident ambush ${sourceInstanceId} has ambiguous zero-cost access-window rez actions.`,
+        `Resident ambush ${sourceInstanceId} has ambiguous funded access-window rez actions.`,
       );
     }
     const exactTriggerCandidate =

@@ -713,6 +713,25 @@ describe("Corp compromised Ambush disposition", () => {
   });
 
   it.each([
+    [5, false],
+    [6, true],
+  ] as const)(
+    "reserves both the quoted rez and later access payment with %i credits",
+    (corpCredits, shouldRez) => {
+      const fixture = installedTrapFixture({
+        exposed: false,
+        corpCredits,
+        zeroCostAccessRez: true,
+        accessRezCredits: 2,
+        definitionId: "onr_v1_345_trap",
+        counters: 0,
+      });
+      const [signal] = buildCorpAmbushPlanSignals(fixture);
+      expect(signal?.actionIds).toEqual(shouldRez ? ["rez-prepared-trap"] : []);
+    },
+  );
+
+  it.each([
     ["onr_v1_340_setup", 0, true],
     ["onr_v1_348_virus-test-site", 0, false],
     ["onr_v1_348_virus-test-site", 3, true],
@@ -983,6 +1002,7 @@ function installedTrapFixture(options: {
   corpCredits: number;
   triggerAction?: boolean;
   zeroCostAccessRez?: boolean;
+  accessRezCredits?: number;
   definitionId?: string;
   counters?: number;
 }): {
@@ -1026,7 +1046,7 @@ function installedTrapFixture(options: {
     "corp",
     "rez_card",
     "Rez prepared ambush",
-    { credits: 0, clicks: 0 },
+    { credits: options.accessRezCredits ?? 0, clicks: 0 },
     {
       source: trap.instanceId,
       payload: { cardId: trap.instanceId, serverId: "remote_1" },
