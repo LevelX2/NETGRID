@@ -1,3 +1,4 @@
+import { accessProgramTrashChoiceSignal } from "./corp-access-program-trash-choice";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { corpRdRecyclingSignals } from "./corp-access-zone-preparation";
 import { corpAccessPaymentChoiceSignal } from "./corp-access-payment-choice";
@@ -39,10 +40,15 @@ export function buildCorpAmbushPlanSignals(params: {
     params.input,
     params.candidates,
   );
+  const accessProgramTrash = accessProgramTrashChoiceSignal(
+    params.input,
+    params.candidates,
+  );
   const continued = continuedAmbushSignals(params).filter(
     (signal) =>
       signal.sourceInstanceId !== accessProgramBounce?.sourceInstanceId &&
-      signal.sourceInstanceId !== accessPayment?.sourceInstanceId,
+      signal.sourceInstanceId !== accessPayment?.sourceInstanceId &&
+      signal.sourceInstanceId !== accessProgramTrash?.sourceInstanceId,
   );
   const continuedSourceIds = new Set(
     continued.map((signal) => signal.sourceInstanceId),
@@ -53,6 +59,7 @@ export function buildCorpAmbushPlanSignals(params: {
     return [
       ...(accessPayment ? [accessPayment] : []),
       ...(accessProgramBounce ? [accessProgramBounce] : []),
+      ...(accessProgramTrash ? [accessProgramTrash] : []),
       ...continued,
     ];
   }
@@ -106,6 +113,7 @@ export function buildCorpAmbushPlanSignals(params: {
   return [
     ...(accessPayment ? [accessPayment] : []),
     ...(accessProgramBounce ? [accessProgramBounce] : []),
+    ...(accessProgramTrash ? [accessProgramTrash] : []),
     ...continued,
     ...plannedDecoys,
     ...recycling,

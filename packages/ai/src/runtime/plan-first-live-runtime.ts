@@ -3756,6 +3756,14 @@ function resolveEngineWindow(
 ): EngineWindowResolution | undefined {
   if (
     context.input.side === "corp" &&
+    context.input.playerView.pendingChoice?.source ===
+      "card_implementation.runner_installed_multi_trash" &&
+    context.input.playerView.timingPoint === "access.resolve_card"
+  ) {
+    return undefined;
+  }
+  if (
+    context.input.side === "corp" &&
     context.input.playerView.pendingChoice?.source.startsWith(
       "p3_35.access_payment:",
     )

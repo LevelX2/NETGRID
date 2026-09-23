@@ -1701,13 +1701,23 @@ regellegal; Engine-Ausführung und Zielprüfung bleiben unverändert maßgeblich
 
 ### Vertikale Implementierung von Ambush und Bluff
 
+Öffentliche Program-Trash-Choices eines installierten Zugriffseffekts gehören
+ebenfalls dem Ambush-Owner. Er prüft Quellkarte, tatsächlich angegriffenen
+Server, aktive CardSpec-Wirkung, sichtbare Programme und die vollständige
+LegalAction-Choice. Er priorisiert sichtbare Icebreaker, Counter und
+Installations-/Speicherwert und bindet die vorgeschriebene Anzahl geordnet an
+den aktuellen Executor. Die Choice-Auflösung übernimmt ausschließlich diese
+Auswahl; falsche Quelle, fehlende Ziele oder veraltete Bindung scheitern
+fail-closed. Hardware-Trash-Operations bleiben beim bisherigen Owner.
+
 Der Owner liegt unter `packages/ai/src/corp/ambush/`:
 
 - `ambush-plan-module.ts`: Parent, Setup-Step, Priorität, Needs und aktuelle Routen;
 - `corp-ambush-plan-signals.ts`: Intent- und Quellenbindung, Köder, Fortsetzung und Disposition;
 - `corp-access-zone-preparation.ts`: begrenzte Install-/Halte-/Rückmischfolge und Zugriffszonenwert;
 - `corp-access-payment-choice.ts`: Bewertung und Bindung bezahlter Zugriffseffekte;
-- `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-Choice.
+- `corp-access-program-trash-choice.ts`: Bewertung und Bindung öffentlicher Program-Trash-Ziele beim Zugriff;
+- `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-/Trash-Choice.
 
 Defense liefert weiterhin den typisierten Bluff-Schutzbedarf; Economy erfüllt
 seine Finanzierung. Die Runtime komponiert diese Fakten und delegiert Choices

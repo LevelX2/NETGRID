@@ -63,6 +63,15 @@ export type CorpAmbushSignal = {
     targetProgramInstanceIds: string[];
     evidenceCodes: string[];
   };
+  accessProgramTrashChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    choiceSource: string;
+    observedAtStateVersion: number;
+    selectedOptionIds: string[];
+    targetProgramInstanceIds: string[];
+    evidenceCodes: string[];
+  };
   recycleRoute?: {
     actionId: string;
     recyclerSourceInstanceId: string;
