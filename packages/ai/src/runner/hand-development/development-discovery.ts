@@ -40,6 +40,7 @@ import type { RunnerDevelopmentInstallServices } from "./development-services";
 import { runnerAccessPayoffDevelopmentLacksBoundAccessRoute } from "./development-signals";
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
 import { assessPassiveStrengthInvestment } from "./passive-strength-investment";
+import { assessRunStrengthStock } from "./run-strength-stock";
 
 export function buildRunnerCardDevelopmentSignals({
   handDevelopment,
@@ -99,12 +100,19 @@ export function buildRunnerCardDevelopmentSignals({
 } {
   const handCardDevelopments: RunnerPlanDomain["developments"] =
     handDevelopment.flatMap((evaluation): RunnerPlanDomain["developments"] => {
-      const strengthInvestment = assessPassiveStrengthInvestment(
+      const runStrengthStock = assessRunStrengthStock(
         input,
         evaluation,
         runTargets,
         economy,
       );
+      const strengthInvestment =
+        assessPassiveStrengthInvestment(
+          input,
+          evaluation,
+          runTargets,
+          economy,
+        ) ?? runStrengthStock;
       if (strengthInvestment && !strengthInvestment.admitted) return [];
       const executableNow =
         evaluation.availability === "legal_now" &&
@@ -545,7 +553,11 @@ export function buildRunnerCardDevelopmentSignals({
               ? ("fund" as const)
               : ("execute" as const),
           ...(strengthInvestment?.admitted
-            ? { purposeCode: "amortize_passive_ice_strength_reduction" }
+            ? {
+                purposeCode: runStrengthStock?.admitted
+                  ? "stock_run_strength_support"
+                  : "amortize_passive_ice_strength_reduction",
+              }
             : restrictedProgramInstallCommitment
               ? {
                   purposeCode: "open_committed_program_install_sequence",

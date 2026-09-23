@@ -993,6 +993,30 @@ Streetware stellt Aufbauwirtschaft bereit. Die jeweiligen Owner werden mit
 kanonischen Karten und Engine-Aktionen geprüft; Krash bleibt ohne Host
 installierbar. Ein eigener Installationsbonus für dieses Deck ist nicht aktiv.
 
+`hand-development/run-strength-stock.ts` bewertet einen durch die kanonische
+Mechanik belegten, selbstverbrauchenden Run-Stärkeboost außerdem als Vorrat.
+Ein sofortiger Run oder eine gebundene Zielroute ist dafür nicht erforderlich.
+Ein installierter zugriffsfähiger Breaker mit bezahltem Pumpen, freie MU,
+eine direkte legale Installation ohne Programmopfer und erhaltene
+Liquiditätsreserven begründen einen begrenzten P5-Entwicklungszweck.
+Der Optionswert beträgt höchstens 80 Punkte: 30 je zusätzlicher Stärke,
+abzüglich zehn je Installcredit und Installklick. Das ist keine Behauptung
+einer bestimmten Ersparnis an verdeckter ICE und kein deckspezifischer Bonus.
+
+Tags, sichtbare Agenda-/Scorefristen und ein zu kurzer Deckhorizont sperren
+diese Vorratsentwicklung. Eine bereits installierte Run-Stärkequelle genügt;
+weitere spekulative Kopien belegen keinen zusätzlichen Vorratsbedarf. Nach
+Verbrauch wird der Bedarf neu beurteilt. Höher priorisierte Coverage, Abwehr
+und Zugriffe bleiben beim jeweiligen Owner. Die spätere Aktivierung bleibt
+bei `runner.convert_run_window`; die Vorratsbewertung bindet weder eine
+zukünftige Action-ID noch einen garantierten Folgerun und verändert dessen
+Zulässigkeit oder Finanzierungsquote nicht.
+
+Die Real-Engine-Regression prüft tatsächliche Plan-, Step- und Routenwahl mit
+letztem Klick, direkte Engine-Anwendung, die genannten Gegenfälle und die
+spätere Aktivierung mit normalen Pumpaktionen als Alternative. Gegen bereits
+ohne Pumpen brechbare ICE bleibt der Vorrat in der geprüften Folge erhalten.
+
 ## 6. `runner.economy`
 
 Der vertikale Owner liegt in `packages/ai/src/runner/economy/`.
