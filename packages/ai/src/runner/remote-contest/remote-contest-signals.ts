@@ -31,6 +31,8 @@ import { runnerRunLockReleaseRoutes } from "../../run-analysis/runner-run-lock-r
 import {
   runnerRezOrTrashPreparationBeatsImmediateRun,
   runnerSameTurnAccessPreparationSourceDefinitionId,
+  runnerSameTurnAccessPreparationFitsTarget,
+  runnerRunReplacesAgendaAccess,
   runnerTargetedBypassPayoffValue,
   runnerTargetedIceTrashPayoffValue,
 } from "../../run-analysis/runner-run-preparation";
@@ -228,6 +230,7 @@ function runnerSameTurnAccessRemotePreparationSignals(
     .filter(
       (evaluation) =>
         evaluation.targetServerId.startsWith("remote_") &&
+        !runnerRunReplacesAgendaAccess(input, evaluation) &&
         evaluation.pathPassability === "reachable" &&
         evaluation.recommendation === "run_now" &&
         evaluation.score > 0 &&
@@ -288,7 +291,15 @@ function runnerSameTurnAccessRemotePreparationSignals(
       .sort((left, right) =>
         left.candidate.actionId.localeCompare(right.candidate.actionId),
       )[0];
-  if (!exactRoute) return [];
+  if (
+    !exactRoute ||
+    !runnerSameTurnAccessPreparationFitsTarget(
+      input,
+      exactRoute.candidate.actionId,
+      target,
+    )
+  )
+    return [];
   return [
     {
       contestId: `remote:${target.targetServerId}`,

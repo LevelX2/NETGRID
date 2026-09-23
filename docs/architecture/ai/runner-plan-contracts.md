@@ -113,6 +113,15 @@ Eine HQ- und eine R&D-Instanz dürfen gleichzeitig Kandidaten sein. Nur eine
 ist Executor. Ein Zielwechsel verlangt Planarbitration, nicht bloß eine andere
 Run-Action.
 
+Eine Vorbereitung mit Payoff beim nächsten Agenda-Zugriff benötigt einen
+echten anschließenden Zugriff desselben Parents. Ein ersetzender
+Informationsrun erfüllt diese Bedingung nicht. Central und Remote prüfen
+vor der Vorbereitung deren eigene Klick- und Creditkosten sowie den danach
+verbleibenden gequoteten Pfad, die unbekannte-ICE-Reserve und den Handpuffer.
+Ein vor dem Spend zugelassener Run allein belegt keine konvertierbare Folge.
+Die Prüfung erzeugt keine zukünftigen Actions; der Owner materialisiert die
+Folge nach der Zustandsänderung erneut aus den LegalActions.
+
 Ein verpflichtender Ersatz des Zugriffs durch eigenen Creditverbrauch gegen
 Corp-Credits erhält ausschließlich seinen tatsächlichen Denial-Payoff. Die
 Runprojektion bindet diese geschlossene Funktion an die gedruckte Make-Run-
@@ -561,6 +570,12 @@ möglicher Draw dürfen das nicht. Die Projektion wird je `stateVersion` und
 side-sicherem Planning-Fingerprint neu aufgebaut, scheitert bei fehlenden
 MU-/Providerquotes fail-closed und besitzt weder Plan-, Action-, Executor-
 noch Discard-Autorität.
+
+Ein installierter Speicherprovider ist bereits in der aktuellen Kapazität
+enthalten und kein zusätzlicher Ausbau. Bei exklusiver Deck-Hardware zählt
+für einen MU-Bedarf ausschließlich der Zuwachs nach Abzug des ersetzten
+installierten Decks. Eine identische Ersetzung oder ein anderes Deck mit
+derselben Kapazität kann daher keinen weiteren Speicherbedarf erfüllen.
 
 Sichtbare additive Programme mit `conditional_support` dürfen ihren echten
 MU-Verbrauch in den bevorzugten simultanen Meilenstein eines bereits

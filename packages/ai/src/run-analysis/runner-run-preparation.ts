@@ -1,8 +1,66 @@
 import { type AiDecisionInput } from "@netgrid/shared";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { runnerCandidateSourceDefinitionId } from "../runtime/runner-action-source-facts";
 import { runnerTargetedIceTrashState } from "../runtime/runner-targeted-ice-trash-plan";
+import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
+
+export function runnerRunReplacesAgendaAccess(
+  input: AiDecisionInput,
+  target: RunnerRunTargetEvaluation,
+): boolean {
+  if (target.runActionProjection.accessReplacement) return true;
+  const run = input.legalActions.find((a) => a.actionId === target.actionId);
+  if (!run) return true;
+  // Event payloads need not duplicate the replacement on the exact printed
+  // make-run capability. This is a source fact, not a card-name heuristic.
+  const source = target.runActionProjection.sourceCardId;
+  const capability = run.payload?.cardImplementationAbilityKey;
+  const boundAbility =
+    source && typeof capability === "string"
+      ? cardSpecPlanningCardByDefinitionId(
+          source,
+        )?.planning.engine.abilities?.find(
+          (ability) => ability.capabilityKey === capability,
+        )
+      : undefined;
+  return Boolean(
+    boundAbility?.effects.some(
+      (effect) =>
+        effect.kind === "make_run" &&
+        effect.successfulRunAccessReplacement !== undefined,
+    ),
+  );
+}
+
+/** Admission of an access payoff must include the preparation's own spend. */
+export function runnerSameTurnAccessPreparationFitsTarget(
+  input: AiDecisionInput,
+  preparationActionId: string,
+  target: RunnerRunTargetEvaluation,
+): boolean {
+  const preparation = input.legalActions.find(
+    (a) => a.actionId === preparationActionId,
+  );
+  const run = input.legalActions.find((a) => a.actionId === target.actionId);
+  const reserve = target.prerunReserveQuote;
+  if (
+    !preparation ||
+    !run ||
+    !reserve ||
+    runnerRunReplacesAgendaAccess(input, target)
+  )
+    return false;
+  const credits = actionCreditCost(preparation);
+  return (
+    actionClickCost(preparation) + actionClickCost(run) <=
+      input.playerView.own.clicks &&
+    target.creditsAfterRun - credits >= 0 &&
+    reserve.creditsAfterKnownPath - credits >= reserve.requiredCredits &&
+    input.playerView.own.gripOrHq.length - 1 >= reserve.requiredHandBuffer
+  );
+}
 export function runnerSameTurnAccessPreparationSourceDefinitionId(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,

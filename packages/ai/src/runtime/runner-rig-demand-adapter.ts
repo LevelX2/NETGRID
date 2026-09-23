@@ -454,7 +454,17 @@ function memorySupportProviders(
 ): RunnerRigDemandProviderInput[] {
   const input = params.input as AiDecisionInputWithDeckCapabilities;
   const visible = knownOwnCards(input).flatMap((card) => {
-    const capacity = memoryCapacityForCard(card, params.rolesForDefinitionId);
+    if (
+      input.playerView.own.rig?.some(
+        (installed) => installed.instanceId === card.instanceId,
+      )
+    )
+      return [];
+    const capacity = additionalMemoryCapacity(
+      input,
+      card.definitionId,
+      memoryCapacityForCard(card, params.rolesForDefinitionId),
+    );
     if (capacity < requiredCapacity) return [];
     return [
       {
@@ -476,7 +486,11 @@ function memorySupportProviders(
   );
   const deck = (input.ownDeckSnapshot?.cards ?? []).flatMap((entry) => {
     if (visibleDefinitions.has(entry.cardId) || entry.quantity <= 0) return [];
-    const capacity = memoryCapacityForDefinition(entry.cardId);
+    const capacity = additionalMemoryCapacity(
+      input,
+      entry.cardId,
+      memoryCapacityForDefinition(entry.cardId),
+    );
     if (capacity < requiredCapacity) return [];
     return [
       {
@@ -490,6 +504,32 @@ function memorySupportProviders(
     ];
   });
   return uniqueProviders([...visible, ...deck]);
+}
+
+function additionalMemoryCapacity(
+  input: AiDecisionInput,
+  definitionId: string | undefined,
+  capacity: number,
+): number {
+  if (
+    !definitionId ||
+    cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
+      .hardwareDeck !== true
+  )
+    return capacity;
+  const replacedCapacity = (input.playerView.own.rig ?? []).reduce(
+    (sum, card) => {
+      if (
+        !card.definitionId ||
+        cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+          .hardwareDeck !== true
+      )
+        return sum;
+      return sum + memoryCapacityForDefinition(card.definitionId);
+    },
+    0,
+  );
+  return Math.max(0, capacity - replacedCapacity);
 }
 
 function memoryCapacityForCard(

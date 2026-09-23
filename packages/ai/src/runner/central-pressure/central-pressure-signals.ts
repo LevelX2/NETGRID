@@ -32,6 +32,8 @@ import {
 import {
   runnerRezOrTrashPreparationBeatsImmediateRun,
   runnerSameTurnAccessPreparationSourceDefinitionId,
+  runnerSameTurnAccessPreparationFitsTarget,
+  runnerRunReplacesAgendaAccess,
   runnerTargetedBypassPayoffValue,
   runnerTargetedIceTrashPayoffValue,
 } from "../../run-analysis/runner-run-preparation";
@@ -342,6 +344,7 @@ function runnerSameTurnAccessCentralPreparationSignals(
         (evaluation.targetServerId === "hq" ||
           evaluation.targetServerId === "rd" ||
           evaluation.targetServerId === "archives") &&
+        !runnerRunReplacesAgendaAccess(input, evaluation) &&
         evaluation.pathPassability === "reachable" &&
         evaluation.recommendation === "run_now" &&
         evaluation.score > 0 &&
@@ -402,7 +405,15 @@ function runnerSameTurnAccessCentralPreparationSignals(
       .sort((left, right) =>
         left.candidate.actionId.localeCompare(right.candidate.actionId),
       )[0];
-  if (!exactRoute) return [];
+  if (
+    !exactRoute ||
+    !runnerSameTurnAccessPreparationFitsTarget(
+      input,
+      exactRoute.candidate.actionId,
+      target,
+    )
+  )
+    return [];
   return [
     {
       pressureId: `central:${target.targetServerId}`,

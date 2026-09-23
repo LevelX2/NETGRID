@@ -17,6 +17,60 @@ import {
 } from "./runner-rig-demand-adapter";
 
 describe("runner rig-demand coverage adapter", () => {
+  it.each([
+    ["onr_v1_123_bodyweight-data-creche", 1, false],
+    ["onr_classic_047_little-black-box", 1, false],
+    ["onr_proteus_134_cortical-cybermodem", 4, true],
+  ] as const)(
+    "uses net memory after replacing the installed deck with %s",
+    (definitionId, capacity, admitted) => {
+      const candidate = visibleCard("candidate-deck", {
+        definitionId,
+        type: "hardware",
+        memoryLimitBonus: capacity,
+      });
+      const decoder = visibleCard("decoder", {
+        definitionId: "test-decoder",
+        type: "program",
+        memoryCost: 2,
+      });
+      const input = boundInput({
+        hand: [candidate, decoder],
+        legalActions: [currentInstallAction("install-deck", candidate)],
+        memoryUsed: 5,
+        memoryLimit: 5,
+      });
+      input.playerView.own.rig = [
+        visibleCard("installed-deck", {
+          definitionId: "onr_v1_123_bodyweight-data-creche",
+          type: "hardware",
+          memoryLimitBonus: 1,
+        }),
+      ];
+      const coverageGap = gap({ answerInHand: true, priorityClass: "P2" });
+      const projection = buildRunnerRigDemandProjectionForCoverage({
+        input,
+        strategicIntent: strategicIntent({ setupEngine: ["runner.rig_first"] }),
+        deckCapabilities: deckCapabilities(),
+        coverageGaps: [coverageGap],
+        rolesForDefinitionId: roles,
+      });
+      const [bound] = bindRunnerRigDemandProjectionToCoverageGaps({
+        input,
+        coverageGaps: [coverageGap],
+        projection,
+      });
+      expect(bound!.memorySupportActionIds ?? []).toEqual(
+        admitted ? ["install-deck"] : [],
+      );
+      expect(
+        projection.roleDemands
+          .filter((d) => d.capabilityId.startsWith("memory_capacity_general:"))
+          .flatMap((d) => d.providers)
+          .some((p) => p.cardInstanceId === "installed-deck"),
+      ).toBe(false);
+    },
+  );
   it("binds an exact memory-support install to the existing coverage owner", () => {
     const memoryChip = visibleCard("memory-chip", {
       definitionId: "onr_v1_146_zetatech-mem-chip",
