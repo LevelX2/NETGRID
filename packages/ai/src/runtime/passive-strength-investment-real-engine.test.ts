@@ -21,6 +21,7 @@ import {
 } from "../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import capturedInvestment from "../../../../data/scenarios/ai-decision-checkpoints/cp-clown-strength-pool-investment-g9-d324.json";
+import capturedContinuation from "../../../../data/scenarios/ai-decision-checkpoints/cp-clown-p6-continuation-g6-d239-241.json";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -121,6 +122,44 @@ function assess(state: GameState) {
 }
 
 describe("canonical passive strength investment", () => {
+  it("releases residual liquidity when a real three-decision sequence admits Clown", () => {
+    const { checkpoints } = structuredClone(
+      capturedContinuation,
+    ) as unknown as {
+      checkpoints: Array<{
+        input: AiDecisionInputWithDeckCapabilities;
+        runtime?: AiRuntimeCheckpointV1;
+      }>;
+    };
+    const first = checkpoints[0]!;
+    restoreAiRuntimeCheckpoint(
+      first.input,
+      first.input.ownDeckSnapshot!.deckSnapshotId,
+      first.runtime!,
+    );
+    // Restore once, then preserve actual in-process commitments. Restoring the
+    // final checkpoint alone simulates a restart and falsely passes this case.
+    expect(chooseAiAction(first.input).actionId).toBe("runner.draw_card");
+    expect(chooseAiAction(checkpoints[1]!.input).actionId).toBe(
+      "runner.gain_credit",
+    );
+    const input = checkpoints[2]!.input;
+    const decision = chooseAiAction(input);
+    const action = input.legalActions.find(
+      (a) => a.actionId === decision.actionId,
+    )!;
+    expect(action.type).toBe("install_card");
+    expect(action.source).toBe("runner_onr_v1_012_clown_3");
+    expect(decision.fallbackUsed).toBe(false);
+    const pf = decision.decisionDebug!.planFirstDecision!;
+    expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
+    expect(pf.route?.actionId).toBe(action.actionId);
+    expect(pf.turnPlanning?.commitment?.continuation).toMatchObject({
+      status: "preempted",
+      boundaryKind: "higher_priority_plan_available",
+      takeoverRootPlanInstanceId: pf.rootPlanInstanceId,
+    });
+  });
   it("selects the real G9 D324 investment that funds the cheaper HQ path", () => {
     const capture = structuredClone(capturedInvestment) as unknown as {
       input: AiDecisionInputWithDeckCapabilities;

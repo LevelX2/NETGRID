@@ -278,523 +278,539 @@ describe("AI decision debug sanitizing", () => {
     );
   });
 
-  it("keeps the structured side-safe plan-first authority contract", () => {
-    const sanitized = sanitizeAiDecisionDebug({
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 2,
-      planFirstDecision: {
+  it.each([
+    "plan_internal_continuation",
+    "higher_priority_plan_available",
+  ] as const)(
+    "keeps side-safe plan authority for %s",
+    (continuationBoundary) => {
+      const continuationStatus =
+        continuationBoundary === "plan_internal_continuation"
+          ? "retained"
+          : "preempted";
+      const sanitized = sanitizeAiDecisionDebug({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        planFirstDecision: {
+          schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+          stateVersion: 12,
+          lane: "plan",
+          selectionAuthority: "resident_plan_instance",
+          rootPlanInstanceId: "plan:corp.score_agenda:general",
+          leafExecutorInstanceId: "plan:corp.economy:score-material",
+          executionOrigin: {
+            rootPlanInstanceId: "plan:corp.score_agenda:general",
+            leafPlanInstanceId: "plan:corp.economy:score-material",
+            commitmentId: "commitment:corp:turn:4",
+            side: "corp",
+            windowKind: "main_action",
+            windowId: "corp_action:12",
+            stateVersion: 12,
+            timingPoint: "corp_action",
+          },
+          selectedStep: {
+            planInstanceId: "plan:corp.economy:score-material",
+            stepId: "draw_score_material",
+            parentInstanceId: "plan:corp.score_agenda:general",
+            needId: "score-material:general",
+            supportAssignmentId: "assignment:score-material",
+          },
+          selectedPlan: {
+            instanceId: "plan:corp.economy:score-material",
+            dedupeKey: "score-material:general",
+            moduleId: "corp.economy",
+            moduleVersion: "1",
+            viability: "ready",
+            portfolioRole: "foreground",
+            executionState: "executor",
+            persistencePolicy: "flexible_support",
+            phase: "fund_parent_need",
+            milestone: "open",
+            parentInstanceId: "plan:corp.score_agenda:general",
+            parentNeedId: "score-material:general",
+            openNeedIds: [],
+            blockers: [],
+            evidenceCodes: ["engine_certified_draw_quote"],
+          },
+          priority: {
+            requestedClass: "P5",
+            effectiveClass: "P5",
+            reasonCode: "required_parent_support",
+            horizon: "current_turn",
+            readiness: "executable_now",
+            intentFit: "aligned",
+            validationReasonCodes: ["priority_claim_accepted"],
+            delegatedFromPlanInstanceId: "plan:corp.score_agenda:general",
+            parentNeedId: "score-material:general",
+          },
+          route: {
+            planInstanceId: "plan:corp.economy:score-material",
+            stepId: "draw_score_material",
+            capabilityId: "draw_card",
+            purpose: "Satisfy the exact score-material need.",
+            actionId: "corp.draw",
+            actionType: "draw_card",
+            semanticActionType: "economy.draw",
+            stateVersion: 12,
+          },
+          strategicContext: {
+            authority: "diagnostic_only",
+            primaryStrategyId: "corp.remote_scoring",
+            phase: "convert",
+            intentFit: "aligned",
+            signals: [],
+          },
+          engineQuoteEvidence: {
+            status: "certified",
+            evidenceCodes: ["engine_certified_draw_quote"],
+          },
+          assessmentEvidenceCodes: ["required_parent_support"],
+          dispositions: [
+            {
+              actionId: "corp.install",
+              disposition: "assessment_unknown",
+              ownerModuleId: "corp.defend_servers",
+              evidenceCode: "corp_install_quote_unknown",
+            },
+          ],
+          portfolio: [],
+          turnPlanning: {
+            schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
+            mode: "shadow",
+            stateVersion: 12,
+            sideSafePlanningFingerprint: "planning-state:test",
+            planningRulesFingerprint: "planning-rules:test",
+            turnKey: "corp:turn:4",
+            heads: [
+              {
+                candidateId: "head:corp.draw",
+                moduleId: "corp.economy",
+                rootPlanInstanceId: "plan:corp.score_agenda:general",
+                executorPlanInstanceId: "plan:corp.economy:score-material",
+                actionId: "corp.draw",
+                semanticActionType: "economy.draw",
+                invocationKey: "invocation:test",
+                witnessValid: true,
+              },
+            ],
+            selectedLine: {
+              lineId: "line:corp.draw",
+              stopReason: "observation_boundary",
+              projectedFrameKey: "projected-frame:test",
+              cursor: { phaseIndex: 0, nodeIndex: 0 },
+              phases: [
+                {
+                  phaseId: "phase:score-material",
+                  rootPlanInstanceId: "plan:corp.score_agenda:general",
+                  rootModuleId: "corp.economy",
+                  rootProvenance: "admitted_support",
+                  entryFrameKey: "projected-frame:entry",
+                  completionCode: "observation_required",
+                  transitionKind: "observation_boundary",
+                  supportBindings: [
+                    {
+                      planInstanceId: "plan:corp.economy:score-material",
+                      parentNeedId: "score-material:general",
+                      assignmentId: "assignment:score-material",
+                    },
+                  ],
+                  nodes: [
+                    {
+                      nodeId: "node:corp.draw",
+                      semanticActionType: "economy.draw",
+                      boundaryAfter: "private_observation",
+                    },
+                  ],
+                },
+              ],
+            },
+            commitment: {
+              commitmentId: "commitment:corp:turn:4",
+              status: "active",
+              cursor: {
+                phaseIndex: 0,
+                nodeIndex: 0,
+                phaseId: "phase:score-material",
+                nodeId: "node:corp.draw",
+              },
+              phaseEntry: {
+                phaseId: "phase:score-material",
+                status: "validated",
+                reasonCode: "phase_entry_validated",
+              },
+              rematerialization: {
+                status: "executable",
+                actionId: "corp.draw",
+                leaseId: "lease:corp.draw",
+              },
+              observationClass: "expected_progress",
+              ...(continuationBoundary === "higher_priority_plan_available"
+                ? { replanReason: continuationBoundary }
+                : {}),
+              continuation: {
+                status: continuationStatus,
+                previousCommitmentId: "commitment:corp:turn:3",
+                previousOwnerRootPlanInstanceId:
+                  "plan:corp.score_agenda:general",
+                intendedNextMilestoneId: "score-material-ready",
+                boundaryKind: continuationBoundary,
+                nextCommitmentId: "commitment:corp:turn:4",
+                evidenceCodes: ["same_root_continuation_line_rematerialized"],
+              },
+            },
+            boundary: {
+              kind: "private_observation",
+              residualTurnValueBasis: "hand_quality_distribution",
+              optionalityUnit: "hand_quality_band",
+              optionalityMinimum: 0,
+              optionalityMaximum: 1,
+            },
+            agendaComparison: {
+              opportunityKey: "opening-rush:2:agenda-1:remote_1",
+              selectedFamily: "combined_rush",
+              selectionReason: "best_expected_value",
+              randomizationEligible: false,
+              lines: [
+                {
+                  lineId: "line:combined",
+                  family: "combined_rush",
+                  actionCount: 3,
+                  agendaProgress: 55,
+                  defense: 25,
+                  economy: 0,
+                  risk: 10,
+                  worstCaseFloor: 58,
+                  expectedValue: 86,
+                },
+              ],
+            },
+            defenseComparison: {
+              selectedLineId: "line:defense",
+              lines: [
+                {
+                  lineId: "line:defense",
+                  targetServerId: "rd",
+                  disposition: "fund_then_install",
+                  actionCount: 2,
+                  fundingGapBefore: 2,
+                  fundingGapAfter: 0,
+                  rezReadyAfterLine: true,
+                  bluffValue: 0,
+                  defenseValue: 18,
+                  economyValue: 8,
+                  totalValue: 26,
+                },
+              ],
+              rejected: [
+                {
+                  defenseId: "central-defense:hq",
+                  actionId: "install-hq",
+                  reasonCode: "productive_defense_install_available",
+                },
+              ],
+            },
+            campaigns: [
+              {
+                campaignId: "campaign:agenda:agenda-1:remote_1",
+                kind: "opening_rush",
+                status: "awaiting_opponent_outcome",
+                rootPlanInstanceId: "plan:corp.score_agenda:general",
+                moduleId: "corp.score_agenda",
+                milestoneId: "agenda_installed",
+                targetServerId: "remote_1",
+                targetCardInstanceId: "agenda-1",
+                openingRushOpportunityKey: "opening-rush:2:agenda-1:remote_1",
+                requoteStatus: "awaiting_next_own_turn",
+                requoteReasonCode:
+                  "campaign_waits_for_public_opponent_outcomes",
+                reactionStatus: "paused",
+                openReactionWindowKinds: ["trace"],
+                reactionDeadline: "current_run_end",
+                claimDisposition: "reserved",
+                reactionReasonCode:
+                  "campaign_paused_for_public_reaction_windows",
+                publicOutcomes: [
+                  {
+                    outcomeId: "event-run:run_declared:campaign",
+                    eventId: "event-run",
+                    eventType: "start_run",
+                    stateVersionAfter: 8,
+                    kind: "run_declared",
+                    milestoneId: "opponent_run_observed",
+                    origin: "public_event",
+                    targetServerId: "remote_1",
+                    evidenceCode: "campaign_public_run",
+                  },
+                ],
+                evidenceCodes: ["campaign_status:awaiting_opponent_outcome"],
+              },
+            ],
+            shadowComparison: {
+              liveActionId: "corp.draw",
+              shadowActionId: "corp.draw",
+              shadowRootPlanInstanceId: "plan:corp.score_agenda:general",
+              boundedBaselineActionId: "corp.gain-credit",
+              agreement: true,
+              comparisonClass: "two_step_changes_head",
+              twoStepChangedHead: true,
+            },
+            coverage: {
+              status: "pass",
+              coveragePercent: 100,
+              legalActionCount: 3,
+              productiveActionCount: 2,
+              explicitlyNonproductiveActionCount: 1,
+              assessmentUnknownActionCount: 0,
+              engineWindowActionCount: 0,
+              missingActionCount: 0,
+              conflictingActionCount: 0,
+              issueCodes: [],
+              missingActionIds: [],
+              conflictingActionIds: [],
+              progressRoots: [
+                {
+                  moduleId: "corp.score_agenda",
+                  planInstanceId: "plan:corp.score_agenda:general",
+                  blocked: true,
+                  blockerCode: "remote_protection_below_target",
+                  needId: "score-protection:general:remote_1",
+                  witnessKind: "support_head",
+                  providerInstanceId:
+                    "plan:corp.defend_servers:server-defense-portfolio",
+                  providerActionId: "corp.install-ice",
+                  needBefore: 2,
+                  needAfter: 1,
+                  parentProgress: true,
+                },
+              ],
+            },
+            search: {
+              headCount: 2,
+              lineCount: 2,
+              expandedNodeCount: 3,
+              protectedPartitionCount: 1,
+              conservativeBaselineCount: 1,
+              maximumDepth: 2,
+              maximumExpandedNodes: 64,
+              maximumBranchesPerPartition: 16,
+              maximumParetoLinesPerPartition: 4,
+              selectedLineScalarValue: 42,
+              selectedLineStepCount: 2,
+            },
+            consideredLines: [
+              {
+                lineId: "line:corp.draw",
+                firstActionId: "corp.draw",
+                rootPlanInstanceId: "plan:corp.score_agenda:general",
+                stepCount: 2,
+                scalarValue: 42,
+                stopReason: "observation_boundary",
+                violatedObligationCount: 0,
+                steps: [
+                  {
+                    candidateId: "head:corp.draw",
+                    semanticActionType: "economy.draw",
+                    rootPlanInstanceId: "plan:corp.score_agenda:general",
+                    nextMilestoneId: "score-material-ready",
+                    currentActionId: "corp.draw",
+                  },
+                ],
+                evaluationValues: { economy: 42 },
+                evidenceCodes: ["score_material_needed"],
+              },
+            ],
+            pruneEvents: [],
+            evidenceCodes: ["turn_planning_projection_contract_only"],
+          },
+        },
+      });
+
+      expect(sanitized?.planFirstDecision).toMatchObject({
         schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
-        stateVersion: 12,
         lane: "plan",
-        selectionAuthority: "resident_plan_instance",
         rootPlanInstanceId: "plan:corp.score_agenda:general",
         leafExecutorInstanceId: "plan:corp.economy:score-material",
         executionOrigin: {
-          rootPlanInstanceId: "plan:corp.score_agenda:general",
-          leafPlanInstanceId: "plan:corp.economy:score-material",
           commitmentId: "commitment:corp:turn:4",
           side: "corp",
           windowKind: "main_action",
-          windowId: "corp_action:12",
           stateVersion: 12,
-          timingPoint: "corp_action",
         },
         selectedStep: {
-          planInstanceId: "plan:corp.economy:score-material",
-          stepId: "draw_score_material",
           parentInstanceId: "plan:corp.score_agenda:general",
           needId: "score-material:general",
           supportAssignmentId: "assignment:score-material",
         },
-        selectedPlan: {
-          instanceId: "plan:corp.economy:score-material",
-          dedupeKey: "score-material:general",
-          moduleId: "corp.economy",
-          moduleVersion: "1",
-          viability: "ready",
-          portfolioRole: "foreground",
-          executionState: "executor",
-          persistencePolicy: "flexible_support",
-          phase: "fund_parent_need",
-          milestone: "open",
-          parentInstanceId: "plan:corp.score_agenda:general",
-          parentNeedId: "score-material:general",
-          openNeedIds: [],
-          blockers: [],
-          evidenceCodes: ["engine_certified_draw_quote"],
-        },
         priority: {
-          requestedClass: "P5",
           effectiveClass: "P5",
-          reasonCode: "required_parent_support",
-          horizon: "current_turn",
-          readiness: "executable_now",
-          intentFit: "aligned",
-          validationReasonCodes: ["priority_claim_accepted"],
-          delegatedFromPlanInstanceId: "plan:corp.score_agenda:general",
           parentNeedId: "score-material:general",
         },
         route: {
-          planInstanceId: "plan:corp.economy:score-material",
-          stepId: "draw_score_material",
-          capabilityId: "draw_card",
-          purpose: "Satisfy the exact score-material need.",
           actionId: "corp.draw",
-          actionType: "draw_card",
-          semanticActionType: "economy.draw",
-          stateVersion: 12,
+          stepId: "draw_score_material",
         },
-        strategicContext: {
-          authority: "diagnostic_only",
-          primaryStrategyId: "corp.remote_scoring",
-          phase: "convert",
-          intentFit: "aligned",
-          signals: [],
-        },
-        engineQuoteEvidence: {
-          status: "certified",
-          evidenceCodes: ["engine_certified_draw_quote"],
-        },
-        assessmentEvidenceCodes: ["required_parent_support"],
+        strategicContext: { authority: "diagnostic_only" },
         dispositions: [
-          {
-            actionId: "corp.install",
-            disposition: "assessment_unknown",
-            ownerModuleId: "corp.defend_servers",
-            evidenceCode: "corp_install_quote_unknown",
-          },
+          expect.objectContaining({ disposition: "assessment_unknown" }),
         ],
-        portfolio: [],
-        turnPlanning: {
+        turnPlanning: expect.objectContaining({
           schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
-          mode: "shadow",
-          stateVersion: 12,
-          sideSafePlanningFingerprint: "planning-state:test",
-          planningRulesFingerprint: "planning-rules:test",
-          turnKey: "corp:turn:4",
+          commitment: expect.objectContaining({
+            commitmentId: "commitment:corp:turn:4",
+            continuation: expect.objectContaining({
+              status: continuationStatus,
+              boundaryKind: continuationBoundary,
+            }),
+            phaseEntry: expect.objectContaining({ status: "validated" }),
+            rematerialization: expect.objectContaining({
+              status: "executable",
+            }),
+          }),
+          selectedLine: expect.objectContaining({
+            stopReason: "observation_boundary",
+          }),
           heads: [
-            {
-              candidateId: "head:corp.draw",
-              moduleId: "corp.economy",
+            expect.objectContaining({
               rootPlanInstanceId: "plan:corp.score_agenda:general",
               executorPlanInstanceId: "plan:corp.economy:score-material",
-              actionId: "corp.draw",
-              semanticActionType: "economy.draw",
-              invocationKey: "invocation:test",
-              witnessValid: true,
-            },
+            }),
           ],
-          selectedLine: {
-            lineId: "line:corp.draw",
-            stopReason: "observation_boundary",
-            projectedFrameKey: "projected-frame:test",
-            cursor: { phaseIndex: 0, nodeIndex: 0 },
-            phases: [
-              {
-                phaseId: "phase:score-material",
-                rootPlanInstanceId: "plan:corp.score_agenda:general",
-                rootModuleId: "corp.economy",
-                rootProvenance: "admitted_support",
-                entryFrameKey: "projected-frame:entry",
-                completionCode: "observation_required",
-                transitionKind: "observation_boundary",
-                supportBindings: [
-                  {
-                    planInstanceId: "plan:corp.economy:score-material",
-                    parentNeedId: "score-material:general",
-                    assignmentId: "assignment:score-material",
-                  },
-                ],
-                nodes: [
-                  {
-                    nodeId: "node:corp.draw",
-                    semanticActionType: "economy.draw",
-                    boundaryAfter: "private_observation",
-                  },
-                ],
-              },
-            ],
-          },
-          commitment: {
-            commitmentId: "commitment:corp:turn:4",
-            status: "active",
-            cursor: {
-              phaseIndex: 0,
-              nodeIndex: 0,
-              phaseId: "phase:score-material",
-              nodeId: "node:corp.draw",
-            },
-            phaseEntry: {
-              phaseId: "phase:score-material",
-              status: "validated",
-              reasonCode: "phase_entry_validated",
-            },
-            rematerialization: {
-              status: "executable",
-              actionId: "corp.draw",
-              leaseId: "lease:corp.draw",
-            },
-            observationClass: "expected_progress",
-            continuation: {
-              status: "retained",
-              previousCommitmentId: "commitment:corp:turn:3",
-              previousOwnerRootPlanInstanceId: "plan:corp.score_agenda:general",
-              intendedNextMilestoneId: "score-material-ready",
-              boundaryKind: "plan_internal_continuation",
-              nextCommitmentId: "commitment:corp:turn:4",
-              evidenceCodes: ["same_root_continuation_line_rematerialized"],
-            },
-          },
-          boundary: {
-            kind: "private_observation",
-            residualTurnValueBasis: "hand_quality_distribution",
-            optionalityUnit: "hand_quality_band",
-            optionalityMinimum: 0,
-            optionalityMaximum: 1,
-          },
-          agendaComparison: {
-            opportunityKey: "opening-rush:2:agenda-1:remote_1",
-            selectedFamily: "combined_rush",
-            selectionReason: "best_expected_value",
-            randomizationEligible: false,
-            lines: [
-              {
-                lineId: "line:combined",
-                family: "combined_rush",
-                actionCount: 3,
-                agendaProgress: 55,
-                defense: 25,
-                economy: 0,
-                risk: 10,
-                worstCaseFloor: 58,
-                expectedValue: 86,
-              },
-            ],
-          },
-          defenseComparison: {
-            selectedLineId: "line:defense",
-            lines: [
-              {
-                lineId: "line:defense",
-                targetServerId: "rd",
-                disposition: "fund_then_install",
-                actionCount: 2,
-                fundingGapBefore: 2,
-                fundingGapAfter: 0,
-                rezReadyAfterLine: true,
-                bluffValue: 0,
-                defenseValue: 18,
-                economyValue: 8,
-                totalValue: 26,
-              },
-            ],
-            rejected: [
-              {
-                defenseId: "central-defense:hq",
-                actionId: "install-hq",
-                reasonCode: "productive_defense_install_available",
-              },
-            ],
-          },
-          campaigns: [
-            {
-              campaignId: "campaign:agenda:agenda-1:remote_1",
-              kind: "opening_rush",
-              status: "awaiting_opponent_outcome",
-              rootPlanInstanceId: "plan:corp.score_agenda:general",
-              moduleId: "corp.score_agenda",
-              milestoneId: "agenda_installed",
-              targetServerId: "remote_1",
-              targetCardInstanceId: "agenda-1",
-              openingRushOpportunityKey: "opening-rush:2:agenda-1:remote_1",
-              requoteStatus: "awaiting_next_own_turn",
-              requoteReasonCode: "campaign_waits_for_public_opponent_outcomes",
-              reactionStatus: "paused",
-              openReactionWindowKinds: ["trace"],
-              reactionDeadline: "current_run_end",
-              claimDisposition: "reserved",
-              reactionReasonCode: "campaign_paused_for_public_reaction_windows",
-              publicOutcomes: [
-                {
-                  outcomeId: "event-run:run_declared:campaign",
-                  eventId: "event-run",
-                  eventType: "start_run",
-                  stateVersionAfter: 8,
-                  kind: "run_declared",
-                  milestoneId: "opponent_run_observed",
-                  origin: "public_event",
-                  targetServerId: "remote_1",
-                  evidenceCode: "campaign_public_run",
-                },
-              ],
-              evidenceCodes: ["campaign_status:awaiting_opponent_outcome"],
-            },
-          ],
-          shadowComparison: {
+          shadowComparison: expect.objectContaining({
             liveActionId: "corp.draw",
-            shadowActionId: "corp.draw",
-            shadowRootPlanInstanceId: "plan:corp.score_agenda:general",
-            boundedBaselineActionId: "corp.gain-credit",
-            agreement: true,
             comparisonClass: "two_step_changes_head",
-            twoStepChangedHead: true,
-          },
-          coverage: {
+          }),
+          coverage: expect.objectContaining({
             status: "pass",
             coveragePercent: 100,
-            legalActionCount: 3,
-            productiveActionCount: 2,
-            explicitlyNonproductiveActionCount: 1,
-            assessmentUnknownActionCount: 0,
-            engineWindowActionCount: 0,
-            missingActionCount: 0,
-            conflictingActionCount: 0,
-            issueCodes: [],
-            missingActionIds: [],
-            conflictingActionIds: [],
-            progressRoots: [
+          }),
+          search: expect.objectContaining({
+            maximumDepth: 2,
+            selectedLineStepCount: 2,
+          }),
+          campaigns: [
+            expect.objectContaining({
+              kind: "opening_rush",
+              status: "awaiting_opponent_outcome",
+              requoteStatus: "awaiting_next_own_turn",
+            }),
+          ],
+        }),
+      });
+
+      const cutover = sanitizeAiDecisionDebug({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        planFirstDecision: {
+          ...sanitized?.planFirstDecision,
+          selectionAuthority: "turn_plan_commitment",
+          turnPlanning: {
+            ...sanitized?.planFirstDecision?.turnPlanning,
+            mode: "cutover",
+          },
+        },
+      });
+      expect(cutover?.planFirstDecision).toMatchObject({
+        selectionAuthority: "turn_plan_commitment",
+        turnPlanning: {
+          mode: "cutover",
+          commitment: {
+            status: "active",
+            rematerialization: { status: "executable" },
+          },
+        },
+      });
+
+      const malformedTurnPlanning = sanitizeAiDecisionDebug({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        planFirstDecision: {
+          ...sanitized?.planFirstDecision,
+          turnPlanning: {
+            ...sanitized?.planFirstDecision?.turnPlanning,
+            selectedLine: {
+              ...sanitized?.planFirstDecision?.turnPlanning?.selectedLine,
+              cursor: { phaseIndex: "zero", nodeIndex: 0 },
+            },
+          },
+        },
+      });
+      expect(malformedTurnPlanning?.planFirstDecision).toBeUndefined();
+
+      const untypedReplanReason = sanitizeAiDecisionDebug({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        planFirstDecision: {
+          ...sanitized?.planFirstDecision,
+          turnPlanning: {
+            ...sanitized?.planFirstDecision?.turnPlanning,
+            commitment: {
+              ...sanitized?.planFirstDecision?.turnPlanning?.commitment,
+              replanReason: "free_text_is_not_a_replan_contract",
+            },
+          },
+        },
+      });
+      expect(untypedReplanReason?.planFirstDecision).toBeUndefined();
+
+      const untypedShadowComparison = sanitizeAiDecisionDebug({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        planFirstDecision: {
+          ...sanitized?.planFirstDecision,
+          turnPlanning: {
+            ...sanitized?.planFirstDecision?.turnPlanning,
+            shadowComparison: {
+              ...sanitized?.planFirstDecision?.turnPlanning?.shadowComparison,
+              comparisonClass: "free_text_shadow_result",
+            },
+          },
+        },
+      });
+      expect(untypedShadowComparison?.planFirstDecision).toBeUndefined();
+
+      const untypedCampaignStatus = sanitizeAiDecisionDebug({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        planFirstDecision: {
+          ...sanitized?.planFirstDecision,
+          turnPlanning: {
+            ...sanitized?.planFirstDecision?.turnPlanning,
+            campaigns: [
               {
-                moduleId: "corp.score_agenda",
-                planInstanceId: "plan:corp.score_agenda:general",
-                blocked: true,
-                blockerCode: "remote_protection_below_target",
-                needId: "score-protection:general:remote_1",
-                witnessKind: "support_head",
-                providerInstanceId:
-                  "plan:corp.defend_servers:server-defense-portfolio",
-                providerActionId: "corp.install-ice",
-                needBefore: 2,
-                needAfter: 1,
-                parentProgress: true,
+                ...sanitized?.planFirstDecision?.turnPlanning?.campaigns?.[0],
+                status: "free_text_campaign_status",
               },
             ],
           },
-          search: {
-            headCount: 2,
-            lineCount: 2,
-            expandedNodeCount: 3,
-            protectedPartitionCount: 1,
-            conservativeBaselineCount: 1,
-            maximumDepth: 2,
-            maximumExpandedNodes: 64,
-            maximumBranchesPerPartition: 16,
-            maximumParetoLinesPerPartition: 4,
-            selectedLineScalarValue: 42,
-            selectedLineStepCount: 2,
-          },
-          consideredLines: [
-            {
-              lineId: "line:corp.draw",
-              firstActionId: "corp.draw",
-              rootPlanInstanceId: "plan:corp.score_agenda:general",
-              stepCount: 2,
-              scalarValue: 42,
-              stopReason: "observation_boundary",
-              violatedObligationCount: 0,
-              steps: [
-                {
-                  candidateId: "head:corp.draw",
-                  semanticActionType: "economy.draw",
-                  rootPlanInstanceId: "plan:corp.score_agenda:general",
-                  nextMilestoneId: "score-material-ready",
-                  currentActionId: "corp.draw",
-                },
-              ],
-              evaluationValues: { economy: 42 },
-              evidenceCodes: ["score_material_needed"],
-            },
-          ],
-          pruneEvents: [],
-          evidenceCodes: ["turn_planning_projection_contract_only"],
         },
-      },
-    });
+      });
+      expect(untypedCampaignStatus?.planFirstDecision).toBeUndefined();
 
-    expect(sanitized?.planFirstDecision).toMatchObject({
-      schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
-      lane: "plan",
-      rootPlanInstanceId: "plan:corp.score_agenda:general",
-      leafExecutorInstanceId: "plan:corp.economy:score-material",
-      executionOrigin: {
-        commitmentId: "commitment:corp:turn:4",
-        side: "corp",
-        windowKind: "main_action",
-        stateVersion: 12,
-      },
-      selectedStep: {
-        parentInstanceId: "plan:corp.score_agenda:general",
-        needId: "score-material:general",
-        supportAssignmentId: "assignment:score-material",
-      },
-      priority: {
-        effectiveClass: "P5",
-        parentNeedId: "score-material:general",
-      },
-      route: {
-        actionId: "corp.draw",
-        stepId: "draw_score_material",
-      },
-      strategicContext: { authority: "diagnostic_only" },
-      dispositions: [
-        expect.objectContaining({ disposition: "assessment_unknown" }),
-      ],
-      turnPlanning: expect.objectContaining({
-        schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
-        commitment: expect.objectContaining({
-          commitmentId: "commitment:corp:turn:4",
-          continuation: expect.objectContaining({
-            status: "retained",
-            boundaryKind: "plan_internal_continuation",
-          }),
-          phaseEntry: expect.objectContaining({ status: "validated" }),
-          rematerialization: expect.objectContaining({
-            status: "executable",
-          }),
-        }),
-        selectedLine: expect.objectContaining({
-          stopReason: "observation_boundary",
-        }),
-        heads: [
-          expect.objectContaining({
-            rootPlanInstanceId: "plan:corp.score_agenda:general",
-            executorPlanInstanceId: "plan:corp.economy:score-material",
-          }),
-        ],
-        shadowComparison: expect.objectContaining({
-          liveActionId: "corp.draw",
-          comparisonClass: "two_step_changes_head",
-        }),
-        coverage: expect.objectContaining({
-          status: "pass",
-          coveragePercent: 100,
-        }),
-        search: expect.objectContaining({
-          maximumDepth: 2,
-          selectedLineStepCount: 2,
-        }),
-        campaigns: [
-          expect.objectContaining({
-            kind: "opening_rush",
-            status: "awaiting_opponent_outcome",
-            requoteStatus: "awaiting_next_own_turn",
-          }),
-        ],
-      }),
-    });
-
-    const cutover = sanitizeAiDecisionDebug({
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 2,
-      planFirstDecision: {
-        ...sanitized?.planFirstDecision,
-        selectionAuthority: "turn_plan_commitment",
-        turnPlanning: {
-          ...sanitized?.planFirstDecision?.turnPlanning,
-          mode: "cutover",
-        },
-      },
-    });
-    expect(cutover?.planFirstDecision).toMatchObject({
-      selectionAuthority: "turn_plan_commitment",
-      turnPlanning: {
-        mode: "cutover",
-        commitment: {
-          status: "active",
-          rematerialization: { status: "executable" },
-        },
-      },
-    });
-
-    const malformedTurnPlanning = sanitizeAiDecisionDebug({
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 2,
-      planFirstDecision: {
-        ...sanitized?.planFirstDecision,
-        turnPlanning: {
-          ...sanitized?.planFirstDecision?.turnPlanning,
-          selectedLine: {
-            ...sanitized?.planFirstDecision?.turnPlanning?.selectedLine,
-            cursor: { phaseIndex: "zero", nodeIndex: 0 },
+      const p6WithoutNarrowContract = sanitizeAiDecisionDebug({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        planFirstDecision: {
+          ...sanitized?.planFirstDecision,
+          priority: {
+            ...sanitized?.planFirstDecision?.priority,
+            requestedClass: "P6",
+            effectiveClass: "P6",
           },
         },
-      },
-    });
-    expect(malformedTurnPlanning?.planFirstDecision).toBeUndefined();
+      });
+      expect(p6WithoutNarrowContract?.planFirstDecision).toBeUndefined();
 
-    const untypedReplanReason = sanitizeAiDecisionDebug({
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 2,
-      planFirstDecision: {
-        ...sanitized?.planFirstDecision,
-        turnPlanning: {
-          ...sanitized?.planFirstDecision?.turnPlanning,
-          commitment: {
-            ...sanitized?.planFirstDecision?.turnPlanning?.commitment,
-            replanReason: "free_text_is_not_a_replan_contract",
-          },
+      const unknownField = sanitizeAiDecisionDebug({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        planFirstDecision: {
+          ...sanitized?.planFirstDecision,
+          undeclaredDiagnostic: "must-not-cross-the-side-safe-contract",
         },
-      },
-    });
-    expect(untypedReplanReason?.planFirstDecision).toBeUndefined();
-
-    const untypedShadowComparison = sanitizeAiDecisionDebug({
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 2,
-      planFirstDecision: {
-        ...sanitized?.planFirstDecision,
-        turnPlanning: {
-          ...sanitized?.planFirstDecision?.turnPlanning,
-          shadowComparison: {
-            ...sanitized?.planFirstDecision?.turnPlanning?.shadowComparison,
-            comparisonClass: "free_text_shadow_result",
-          },
-        },
-      },
-    });
-    expect(untypedShadowComparison?.planFirstDecision).toBeUndefined();
-
-    const untypedCampaignStatus = sanitizeAiDecisionDebug({
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 2,
-      planFirstDecision: {
-        ...sanitized?.planFirstDecision,
-        turnPlanning: {
-          ...sanitized?.planFirstDecision?.turnPlanning,
-          campaigns: [
-            {
-              ...sanitized?.planFirstDecision?.turnPlanning?.campaigns?.[0],
-              status: "free_text_campaign_status",
-            },
-          ],
-        },
-      },
-    });
-    expect(untypedCampaignStatus?.planFirstDecision).toBeUndefined();
-
-    const p6WithoutNarrowContract = sanitizeAiDecisionDebug({
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 2,
-      planFirstDecision: {
-        ...sanitized?.planFirstDecision,
-        priority: {
-          ...sanitized?.planFirstDecision?.priority,
-          requestedClass: "P6",
-          effectiveClass: "P6",
-        },
-      },
-    });
-    expect(p6WithoutNarrowContract?.planFirstDecision).toBeUndefined();
-
-    const unknownField = sanitizeAiDecisionDebug({
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 2,
-      planFirstDecision: {
-        ...sanitized?.planFirstDecision,
-        undeclaredDiagnostic: "must-not-cross-the-side-safe-contract",
-      },
-    });
-    expect(unknownField?.planFirstDecision).toBeUndefined();
-  });
+      });
+      expect(unknownField?.planFirstDecision).toBeUndefined();
+    },
+  );
 
   it("drops incomplete plan-first authority data instead of guessing fields", () => {
     const sanitized = sanitizeAiDecisionDebug({

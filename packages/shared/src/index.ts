@@ -4640,6 +4640,7 @@ export type AiTurnPlanningDebug = {
       | "route_completed"
       | "route_unavailable"
       | "urgent_interrupt"
+      | "higher_priority_plan_available"
       | "phase_entry_invalid"
       | "hard_plan_commitment_invalid"
       | "campaign_requote_invalid"
@@ -4653,6 +4654,7 @@ export type AiTurnPlanningDebug = {
         | "plan_internal_continuation"
         | "route_completed"
         | "route_unavailable"
+        | "higher_priority_plan_available"
         | "urgent_interrupt";
       nextCommitmentId?: string;
       takeoverRootPlanInstanceId?: string;
@@ -6138,6 +6140,7 @@ function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
         "route_completed",
         "route_unavailable",
         "urgent_interrupt",
+        "higher_priority_plan_available",
         "phase_entry_invalid",
         "hard_plan_commitment_invalid",
         "campaign_requote_invalid",
@@ -6172,6 +6175,7 @@ function isAiTurnPlanningDebugContinuation(value: unknown): boolean {
       "plan_internal_continuation",
       "route_completed",
       "route_unavailable",
+      "higher_priority_plan_available",
       "urgent_interrupt",
     ].includes(String(candidate.boundaryKind)) &&
     ["nextCommitmentId", "takeoverRootPlanInstanceId"].every(

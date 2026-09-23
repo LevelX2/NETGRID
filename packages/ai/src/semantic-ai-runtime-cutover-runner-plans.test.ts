@@ -1736,66 +1736,91 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("retains a Runner root across an internal continuation instead of silently handing it to a pre-known alternative", () => {
-    const firstInput = versionedRunnerTurnInput(1, [
-      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-        credits: 0,
-      }),
-    ]);
-    firstInput.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
-    const first = chooseRunnerAction(firstInput);
-    const firstLeaf =
-      first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId;
-    const firstCommitment =
-      first.decisionDebug?.planFirstDecision?.turnPlanning?.commitment;
+  it.each([false, true])(
+    "retains residual liquidity only without an admitted higher-priority plan (pressure: %s)",
+    (hasPressure) => {
+      const firstInput = versionedRunnerTurnInput(1, [
+        legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+          credits: 0,
+        }),
+      ]);
+      firstInput.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+      ];
+      const first = chooseRunnerAction(firstInput);
+      const firstLeaf =
+        first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId;
+      const firstCommitment =
+        first.decisionDebug?.planFirstDecision?.turnPlanning?.commitment;
 
-    const secondInput = versionedRunnerTurnInput(2, [
-      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-        credits: 0,
-      }),
-      legalAction(
-        "run-rd",
-        "runner",
-        "start_run",
-        "Run R&D",
-        { credits: 0 },
-        { payload: { serverId: "rd" } },
-      ),
-    ]);
-    secondInput.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
-    const second = chooseRunnerAction(secondInput);
-    const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
+      const secondInput = versionedRunnerTurnInput(2, [
+        legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+          credits: 0,
+        }),
+        ...(hasPressure
+          ? [
+              legalAction(
+                "run-rd",
+                "runner",
+                "start_run",
+                "Run R&D",
+                { credits: 0 },
+                { payload: { serverId: "rd" } },
+              ),
+            ]
+          : []),
+      ]);
+      secondInput.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+      ];
+      const second = chooseRunnerAction(secondInput);
+      const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
 
-    expect(first.actionId).toBe("gain-credit");
-    expect(second.actionId).toBe("gain-credit");
-    expect(second.decisionDebug?.planKind).toBe("runner.economy");
-    expect(
-      second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toBe(firstLeaf);
-    expect(planning?.commitment?.continuation).toMatchObject({
-      status: "retained",
-      previousCommitmentId: firstCommitment?.commitmentId,
-      boundaryKind: "plan_internal_continuation",
-      evidenceCodes: expect.arrayContaining([
-        "continuation_action_id:gain-credit",
-        "same_root_continuation_line_rematerialized",
-      ]),
-    });
-    expect(planning?.selectedLine.phases[0]?.rootPlanInstanceId).toBe(
-      planning?.commitment?.continuation?.previousOwnerRootPlanInstanceId,
-    );
-    expect(planning?.commitment?.rematerialization.actionId).toBe(
-      "gain-credit",
-    );
-  });
+      expect(first.actionId).toBe("gain-credit");
+      if (hasPressure) {
+        expect(second.actionId).toBe("run-rd");
+        expect(
+          second.decisionDebug?.planFirstDecision?.priority?.effectiveClass,
+        ).toBe("P4");
+        expect(planning?.commitment?.continuation).toMatchObject({
+          status: "preempted",
+          previousCommitmentId: firstCommitment?.commitmentId,
+          boundaryKind: "higher_priority_plan_available",
+          takeoverRootPlanInstanceId:
+            second.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+          evidenceCodes: expect.arrayContaining([
+            "residual_p6_continuation_yields_to_admitted_plan",
+          ]),
+        });
+        expect(planning?.commitment?.rematerialization.actionId).toBe("run-rd");
+        return;
+      }
+      expect(second.actionId).toBe("gain-credit");
+      expect(second.decisionDebug?.planKind).toBe("runner.economy");
+      expect(
+        second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      ).toBe(firstLeaf);
+      expect(planning?.commitment?.continuation).toMatchObject({
+        status: "retained",
+        previousCommitmentId: firstCommitment?.commitmentId,
+        boundaryKind: "plan_internal_continuation",
+        evidenceCodes: expect.arrayContaining([
+          "continuation_action_id:gain-credit",
+          "same_root_continuation_line_rematerialized",
+        ]),
+      });
+      expect(planning?.selectedLine.phases[0]?.rootPlanInstanceId).toBe(
+        planning?.commitment?.continuation?.previousOwnerRootPlanInstanceId,
+      );
+      expect(planning?.commitment?.rematerialization.actionId).toBe(
+        "gain-credit",
+      );
+    },
+  );
 
   it("keeps a card-parent funding sequence on the same root when its install milestone becomes legal", () => {
     const interfaceCard = () =>

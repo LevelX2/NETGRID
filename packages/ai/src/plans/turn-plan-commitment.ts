@@ -57,6 +57,7 @@ export type TurnPlanReplanReason =
   | "route_completed"
   | "route_unavailable"
   | "urgent_interrupt"
+  | "higher_priority_plan_available"
   | "phase_entry_invalid"
   | "hard_plan_commitment_invalid"
   | "campaign_requote_invalid"
