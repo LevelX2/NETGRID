@@ -520,6 +520,39 @@ export function corpTraceTagSourceProfile(
     : undefined;
 }
 
+export function corpScoredTraceTagSourceProfile(
+  definitionId: string | undefined,
+): CorpTraceTagSourceProfile | undefined {
+  const planning = planningCard(definitionId);
+  if (
+    planning?.planning.side !== "corp" ||
+    planning.planning.cardType !== "agenda"
+  )
+    return undefined;
+  const ability = (planning.planning.engine.abilities ?? []).find(
+    (candidate) =>
+      candidate.kind === "activated" &&
+      candidate.timing === "corp_main" &&
+      mechanicalRecordsByKind(candidate.effects, "trace").some(
+        (trace) =>
+          containsMechanicalKind(trace.onSuccess, "add_tags") ||
+          containsMechanicalKind(
+            trace.onSuccess,
+            "add_tags_by_trace_margin_over_runner_link",
+          ),
+      ),
+  );
+  return ability
+    ? {
+        capabilityKey: ability.capabilityKey,
+        sourceCapabilityId: canonicalCapabilityId(
+          planning.planning.cardDefinitionId,
+          ability.capabilityKey,
+        ),
+      }
+    : undefined;
+}
+
 export function corpDirectTagOperationProfile(
   definitionId: string | undefined,
 ): CorpOnPlayCapabilityProfile | undefined {

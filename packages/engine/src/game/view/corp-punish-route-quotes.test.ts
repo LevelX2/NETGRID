@@ -20,6 +20,86 @@ import {
 } from "./corp-punish-route-quotes";
 
 describe("Corp punish-route quote request", () => {
+  it("certifies a scored activated trace head and the following damage", () => {
+    const state = corpActionState("scored-trace-head");
+    state.corp.clicks = 2;
+    state.corp.credits = 8;
+    state.runner.credits = 1;
+    const id = addCorpCardToHqForTest(
+      state,
+      "onr_v1_207_netwatch-operations-office",
+      "scored-trace",
+    );
+    state.corp.hq = state.corp.hq.filter((x) => x !== id);
+    state.corp.scoreArea.push(id);
+    state.cardInstances[id]!.zone = { side: "corp", zone: "scoreArea" };
+    state.cardInstances[id]!.faceup = true;
+    state.cardInstances[id]!.rezzed = true;
+    const urban = addCorpCardToHqForTest(
+      state,
+      "onr_v1_307_urban-renewal",
+      "urban",
+    );
+    const request = routeRequest(state, [
+      canonicalStep(
+        "trace",
+        0,
+        "trace_tag",
+        id,
+        "onr_v1_207_netwatch-operations-office",
+        "abilities_activated_corp_main_trace",
+      ),
+      step(state, "damage", 1, "meat_damage", urban),
+    ]);
+    const before = structuredClone(state);
+    expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        totalClicks: 2,
+        totalActionCredits: 6,
+        steps: [
+          {
+            currentLegalAction: { type: "activated_card_ability", source: id },
+          },
+          {},
+        ],
+        tagOutcomeEnvelope: { addedTags: { minimum: 1, maximum: 1 } },
+        damageEnvelope: { rawDamage: { meat: 5 } },
+      },
+    });
+    expect(state).toEqual(before);
+    for (const boundary of [
+      "hq",
+      "foreign",
+      "clicks",
+      "capability",
+      "action",
+    ] as const) {
+      const probe = structuredClone(state),
+        req = structuredClone(request);
+      if (boundary === "hq") {
+        probe.corp.scoreArea = probe.corp.scoreArea.filter((x) => x !== id);
+        probe.corp.hq.push(id);
+        probe.cardInstances[id]!.zone = { side: "corp", zone: "hq" };
+      }
+      if (boundary === "foreign")
+        probe.cardInstances[id]!.controller = "runner";
+      if (boundary === "clicks") probe.corp.clicks = 0;
+      if (boundary === "capability")
+        req.steps[0]!.sourceCapabilityId =
+          "onr_v1_207_netwatch-operations-office:missing";
+      if (boundary === "action")
+        req.steps[0]!.currentLegalActionId = "foreign-action";
+      expect(quoteCorpPunishRoute(probe, req), boundary).toMatchObject({
+        ok: true,
+        quote: { complete: false },
+      });
+    }
+    const stale = structuredClone(request);
+    stale.stateVersion--;
+    expect(quoteCorpPunishRoute(state, stale)).toMatchObject({ ok: false });
+  });
   it.each([0, 12])(
     "certifies public forced success and its extra tag against Runner bid %i",
     (runnerBid) => {

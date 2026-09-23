@@ -25,6 +25,36 @@ const PUNITIVE = "onr_v1_301_punitive-counterstrike";
 const SCORCHED = "onr_v1_302_scorched-earth";
 
 describe("decision-local Corp punish route quote input", () => {
+  it("discovers a scored activated trace source while excluding the same agenda still in HQ", () => {
+    const input = punishInput({ runnerTags: 0, runnerHandCount: 4 });
+    const agenda = {
+      ...operation("netwatch", "onr_v1_207_netwatch-operations-office"),
+      type: "agenda" as const,
+    };
+    input.playerView.own.gripOrHq = [agenda, operation("scorched", SCORCHED)];
+    expect(
+      buildBoundedCorpPunishRouteRequests(input).some(
+        (r) => r.steps[0]?.sourceCardInstanceId === "netwatch",
+      ),
+    ).toBe(false);
+    input.playerView.own.gripOrHq = [operation("scorched", SCORCHED)];
+    input.playerView.own.scoreArea = [agenda];
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          steps: [
+            expect.objectContaining({
+              kind: "trace_tag",
+              sourceCardInstanceId: "netwatch",
+              sourceCapabilityId:
+                "onr_v1_207_netwatch-operations-office:abilities_activated_corp_main_trace",
+            }),
+            expect.objectContaining({ kind: "meat_damage" }),
+          ],
+        }),
+      ]),
+    );
+  });
   afterEach(() => {
     resetResidentPlanPortfolioMemory();
   });

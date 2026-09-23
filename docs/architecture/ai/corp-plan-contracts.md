@@ -1520,6 +1520,13 @@ Targeted-Basic-Draw. Sie wird bei relevanten Änderungen an eigener Hand,
 übernimmt erst dann den Vordergrund, wenn eine ausreichend vollständige Route
 das Opportunity-Gate erreicht.
 
+Trace-Tag-Routen entdecken neben Operationen in HQ auch kanonisch deklarierte
+Corp-Main-Aktivierungen gescorter Agendas. Die Engine zertifiziert dafür die
+Score-Zone, exakte Capability, aktuellen LegalAction-Head und Kosten; sie
+verwendet denselben side-sicheren Trace-/Präventionsvertrag wie für Operationen.
+Eine Agenda in HQ ist keine aktivierbare Quelle. Verdeckte Runnerreaktionen
+bleiben unbekannt und werden nicht durch den Quelltypwechsel aufgewertet.
+
 Die ausgewählte Route ist variabel. Sie verwendet nur so viele aktuell
 vorhandene Komponenten, wie nach Runner-Handzahl und sichtbarer Prävention
 notwendig sind. Vier sicher wirksame Damage sind bei drei Runner-Handkarten

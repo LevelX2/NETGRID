@@ -22,6 +22,7 @@ import type {
 } from "../../ability-engine/definition-types";
 import {
   CardCapabilityBindingError,
+  activatedAbilityBindingForPersistedIdentity,
   onPlayAbilityForCapabilityIdentity,
 } from "../../ability-engine/card-capability-binding";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -931,6 +932,8 @@ function certifyStep(
   ) {
     return { ok: false, reason: "source_unavailable" };
   }
+  if (instance.zone.zone === "scoreArea")
+    return certifyScoredTraceStep(state, request);
   if (instance.zone.zone !== "hq") {
     return { ok: false, reason: "source_zone_unsupported" };
   }
@@ -993,6 +996,80 @@ function certifyStep(
       },
       effects: capability.effects,
       ...(capability.condition ? { condition: capability.condition } : {}),
+      ...(request.currentLegalActionId
+        ? { currentLegalActionId: request.currentLegalActionId }
+        : {}),
+    },
+  };
+}
+
+function certifyScoredTraceStep(
+  state: GameState,
+  request: CorpPunishRouteQuoteRequest["steps"][number],
+):
+  | { ok: true; step: CertifiedStep }
+  | { ok: false; reason: CorpPunishRouteIncompleteReason } {
+  const instance = state.cardInstances[request.sourceCardInstanceId]!;
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+  if (
+    definition?.type !== "agenda" ||
+    !state.corp.scoreArea.includes(request.sourceCardInstanceId) ||
+    request.kind !== "trace_tag" ||
+    request.order !== 0
+  )
+    return { ok: false, reason: "source_capability_unsupported" };
+  if (request.sourceCapabilityBindingKind !== "card_spec_capability_key")
+    return { ok: false, reason: "source_capability_missing" };
+  let binding: ReturnType<typeof activatedAbilityBindingForPersistedIdentity>;
+  try {
+    binding = activatedAbilityBindingForPersistedIdentity(definition, {
+      sourceAbilityId: request.sourceCapabilityId,
+    });
+  } catch (error) {
+    if (
+      error instanceof CardCapabilityBindingError ||
+      error instanceof CapabilityIdentityError
+    )
+      return { ok: false, reason: "source_capability_missing" };
+    throw error;
+  }
+  const ability = binding.ability;
+  if (
+    ability.timing !== "corp_main" ||
+    ability.condition ||
+    ability.costs.some(
+      (cost) =>
+        (cost.kind !== "action" && cost.kind !== "credit") ||
+        !Number.isSafeInteger(cost.amount) ||
+        cost.amount < 0,
+    )
+  )
+    return { ok: false, reason: "cost_quote_incomplete" };
+  const valid = supportedEffects(request.kind, ability.effects);
+  if (!valid.ok) return valid;
+  const clicks = ability.costs.reduce(
+    (n, c) => n + (c.kind === "action" ? c.amount : 0),
+    0,
+  );
+  const credits = ability.costs.reduce(
+    (n, c) => n + (c.kind === "credit" ? c.amount : 0),
+    0,
+  );
+  return {
+    ok: true,
+    step: {
+      quote: {
+        stepId: request.stepId,
+        order: request.order,
+        kind: request.kind,
+        sourceCardInstanceId: request.sourceCardInstanceId,
+        sourceCardDefinitionId: instance.definitionId,
+        sourceCapabilityBindingKind: request.sourceCapabilityBindingKind,
+        sourceCapabilityId: request.sourceCapabilityId,
+        clicks,
+        credits,
+      },
+      effects: ability.effects,
       ...(request.currentLegalActionId
         ? { currentLegalActionId: request.currentLegalActionId }
         : {}),
@@ -1361,7 +1438,12 @@ function exactCurrentHeadAction(
       (currentLegalActionId === undefined ||
         action.actionId === currentLegalActionId) &&
       action.side === "corp" &&
-      action.type === "play_operation" &&
+      (action.type === "play_operation" ||
+        (action.type === "activated_card_ability" &&
+          action.payload?.cardImplementationAbilityId ===
+            step.sourceCapabilityId &&
+          action.payload?.cardImplementationCapabilityBindingKind ===
+            step.sourceCapabilityBindingKind)) &&
       action.source === step.sourceCardInstanceId &&
       action.payload?.cardId === step.sourceCardInstanceId &&
       action.timingPoint === state.timingPoint &&

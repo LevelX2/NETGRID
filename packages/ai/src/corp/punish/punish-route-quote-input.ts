@@ -17,6 +17,7 @@ import {
   corpInstalledHardwareTrashOperationProfile,
   corpTaggedCreditDenialOperationProfile,
   corpTraceTagSourceProfile,
+  corpScoredTraceTagSourceProfile,
   corpTaggedMeatDamageOperationProfile,
 } from "../../runtime/corp-canonical-card-facts";
 
@@ -98,8 +99,14 @@ export function buildBoundedCorpPunishRouteRequests(
   ) {
     return [];
   }
-  const components = input.playerView.own.gripOrHq
-    .map(visiblePunishComponent)
+  const components = [
+    ...input.playerView.own.gripOrHq.map((card) =>
+      visiblePunishComponent(card, false),
+    ),
+    ...input.playerView.own.scoreArea.map((card) =>
+      visiblePunishComponent(card, true),
+    ),
+  ]
     .filter(
       (component): component is VisiblePunishComponent =>
         component !== undefined,
@@ -245,12 +252,13 @@ function legalActionCreditCost(
 
 function visiblePunishComponent(
   card: VisibleCard,
+  scored: boolean,
 ): VisiblePunishComponent | undefined {
   if (
     card.known !== true ||
     card.owner !== "corp" ||
     card.controller !== "corp" ||
-    card.type !== "operation" ||
+    card.type !== (scored ? "agenda" : "operation") ||
     typeof card.definitionId !== "string"
   ) {
     return undefined;
@@ -280,7 +288,9 @@ function structuredPunishComponentAdapter(
 function structuredTraceTagAdapter(
   definitionId: string,
 ): PunishComponentAdapter | undefined {
-  const profile = corpTraceTagSourceProfile(definitionId);
+  const profile =
+    corpTraceTagSourceProfile(definitionId) ??
+    corpScoredTraceTagSourceProfile(definitionId);
   if (!profile) return undefined;
   return {
     definitionId,
