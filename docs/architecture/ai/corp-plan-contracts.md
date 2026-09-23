@@ -81,6 +81,18 @@ ein konkreter Informations-/Defense-Fall und darf nur aus dafür tatsächlich
 verfügbaren side-sicheren Fakten begründet werden. Weder allgemeine
 Agendadichte noch eine leere Agenda-Hand ersetzen diesen Nachweis.
 
+Eine bereits gefüllte Counterbank darf einen vollständig finanzierten Score
+im aktuellen Corp-Zug auch dann bedienen, wenn ihr Remote im nächsten
+Runner-Zug erreichbar wäre. Die Schutzprüfung bleibt Voraussetzung für den
+Aufbau der Bank; sie darf den unmittelbar ausführbaren Verbrauch nicht
+verwerfen. Eine installierte, mit derselben Bank abschließbare Agenda hat
+Vorrang vor einer weiteren Installation, die dieselben Counter beansprucht.
+Ausgenommen ist ein neuer sofortiger Spielsieg, wenn die vorhandenen Ziele
+nicht terminal sind. Alle passenden installierten Ziele werden mit ihrer
+konkreten Karten- und Serverbindung dem Score-Owner angeboten; seine normale
+Priorisierung wählt den Abschluss. Vollständig avancierte Agenden beanspruchen
+keine Bankcounter (Regressionen: Paarung 461, Runde 5, G10 D139 und G40 D203).
+
 Für eine installierte Agenda unterscheidet der Scoreowner die vollständigen
 Kosten der aktuellen Konversion von der bis zum nächsten Corp-Zug nötigen
 Reserve. Eine Engine-Quote mit `creditsRequiredBeforeNextCorpTurn: 0` bedeutet

@@ -155,7 +155,9 @@ function counterBankAgendaInstallProjects(
   candidates: readonly ActionSemanticCandidate[],
   bank: InstalledCounterBank,
 ): CorpScoreProjectSignal[] {
-  if (!counterBankRemoteIsSecure(input, bank.serverId)) return [];
+  // This handoff finishes before another Runner window. Bank safety is an
+  // investment prerequisite, not a prerequisite for consuming funded counters.
+  const existingTargets = counterBankInstalledScoreTargets(input, bank);
   return input.playerView.own.gripOrHq.flatMap((agenda) => {
     const requirement = agendaAdvancementRequirement(agenda);
     if (
@@ -165,6 +167,17 @@ function counterBankAgendaInstallProjects(
     ) {
       return [];
     }
+    const agendaPoints = agenda.agendaPoints ?? 0;
+    const terminalScore =
+      input.playerView.own.agendaPoints + agendaPoints >=
+      input.playerView.agendaPointsToWin;
+    // Finish an exposed consumer before admitting another claim on the same
+    // bank. A new immediate game win may dominate a nonterminal continuation.
+    if (
+      existingTargets.length > 0 &&
+      (!terminalScore || existingTargets.some((target) => target.terminalScore))
+    )
+      return [];
     return candidates.flatMap((candidate) => {
       const targetServerId = exactRootInstallTarget(
         input,
@@ -196,7 +209,6 @@ function counterBankAgendaInstallProjects(
       ) {
         return [];
       }
-      const agendaPoints = agenda.agendaPoints ?? 0;
       return [
         {
           ...counterBankProject({
@@ -214,9 +226,7 @@ function counterBankAgendaInstallProjects(
           agendaInstanceId: agenda.instanceId,
           serverId: targetServerId,
           sameTurnCloseout: true,
-          terminalScore:
-            input.playerView.own.agendaPoints + agendaPoints >=
-            input.playerView.agendaPointsToWin,
+          terminalScore,
         },
       ];
     });
@@ -228,8 +238,7 @@ function counterBankHandoffRezProjects(
   candidates: readonly ActionSemanticCandidate[],
   bank: InstalledCounterBank,
 ): CorpScoreProjectSignal[] {
-  if (bank.card.rezzed || !counterBankRemoteIsSecure(input, bank.serverId))
-    return [];
+  if (bank.card.rezzed) return [];
   const rez = candidates.find(
     (candidate) =>
       candidate.semanticActionType === "corp_window.rez" &&
@@ -238,30 +247,8 @@ function counterBankHandoffRezProjects(
   );
   if (!rez || input.playerView.own.clicks < bank.quote.transfer.actionCost)
     return [];
-  const target = input.playerView.servers
-    .filter((server) => server.id !== bank.serverId)
-    .flatMap((server) =>
-      server.root.flatMap((card) => {
-        const requirement = agendaAdvancementRequirement(card);
-        return isKnownAgenda(card) &&
-          requirement !== undefined &&
-          bank.quote.advancementCounters >=
-            Math.max(0, requirement - (card.advancementCounters ?? 0))
-          ? [{ agenda: card, serverId: server.id }]
-          : [];
-      }),
-    )
-    .sort((left, right) => left.serverId.localeCompare(right.serverId))[0];
-  if (!target) return [];
-  const { agenda, serverId: targetServerId } = target;
-  const remaining = Math.max(
-    0,
-    (agendaAdvancementRequirement(agenda) ?? 0) -
-      (agenda.advancementCounters ?? 0),
-  );
-  if (remaining <= 0) return [];
-  return [
-    {
+  return counterBankInstalledScoreTargets(input, bank).map(
+    ({ agenda, serverId: targetServerId, remaining, terminalScore }) => ({
       ...counterBankProject({
         projectId: `counter-bank:rez-handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
         sourceCard: bank.card,
@@ -277,11 +264,43 @@ function counterBankHandoffRezProjects(
       agendaInstanceId: agenda.instanceId,
       serverId: targetServerId,
       sameTurnCloseout: true,
-      terminalScore:
-        input.playerView.own.agendaPoints + (agenda.agendaPoints ?? 0) >=
-        input.playerView.agendaPointsToWin,
-    },
-  ];
+      terminalScore,
+    }),
+  );
+}
+
+function counterBankInstalledScoreTargets(
+  input: AiDecisionInput,
+  bank: InstalledCounterBank,
+) {
+  return input.playerView.servers
+    .filter((server) => server.id !== bank.serverId)
+    .flatMap((server) =>
+      server.root.flatMap((card) => {
+        const requirement = agendaAdvancementRequirement(card);
+        const remaining =
+          requirement === undefined
+            ? undefined
+            : Math.max(0, requirement - (card.advancementCounters ?? 0));
+        return isKnownAgenda(card) &&
+          remaining !== undefined &&
+          remaining > 0 &&
+          bank.quote.advancementCounters >= remaining
+          ? [
+              {
+                agenda: card,
+                serverId: server.id,
+                remaining,
+                terminalScore:
+                  input.playerView.own.agendaPoints +
+                    (card.agendaPoints ?? 0) >=
+                  input.playerView.agendaPointsToWin,
+              },
+            ]
+          : [];
+      }),
+    )
+    .sort((left, right) => left.serverId.localeCompare(right.serverId));
 }
 
 function counterBankLiquidationProjects(
