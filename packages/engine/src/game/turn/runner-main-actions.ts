@@ -1195,7 +1195,10 @@ export function buildRunnerMainActions(
           {
             ...runPayload,
             bonusRunNoClick: true,
-            ...(optionalBonusRunPending ? { optionalBonusRun: true } : {}),
+            ...(optionalBonusRunPending ||
+            (bodyweightExtraRunPending && nextSequenceServerId === undefined)
+              ? { optionalBonusRun: true }
+              : {}),
             bonusRunSource: nextSequenceServerId
               ? pendingSequence?.sourceDefinitionId
               : flags.successfulRunExtraRunPending === true

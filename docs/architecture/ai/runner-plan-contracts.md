@@ -1802,6 +1802,12 @@ verbleibenden Subroutinen der Engine-Continue-Action. Bereits gebrochene
 Programmzerstörung begründet keine weitere Ausgabe gegen bloßes End-the-run;
 fehlende oder widersprüchliche Restquoten scheitern strukturiert.
 
+Eine Same-Turn-Zugriffsvorbereitung erbt den vollständigen bereits zugelassenen
+Central-Run-Vertrag, insbesondere Zugriffszweck und Risikoreserve. Wechselt
+ein gebundener Restzug nach der Vorbereitung zum Run, darf eine neu entdeckte
+weitere Vorbereitung diese Fakten nicht aus dem residenten Owner entfernen.
+Die Fortsetzungsvalidierung bleibt unverändert streng.
+
 Eine spätere Vacuum-Link-Choice darf ebenso aus einer exakt gebundenen
 Run-Executor-Phase hervorgehen, deren Root ein übergeordneter Restricted-Run-
 Plan ist. Der bestehende Continuation-Owner prüft Commitment, Source-Plan,
@@ -2118,3 +2124,8 @@ Die Live-Runtime verbindet diese Ergebnisse mit den übrigen Plänen; sie
 enthält die terminale Entscheidungsformel nicht mehr. Das erleichtert spätere
 Änderungen an unmittelbaren Siegkonversionen, ohne einen zweiten Scheduler
 oder eine neue Regelautorität einzuführen.
+
+Die Engine kennzeichnet auch einen freiwilligen Zusatzrun nach erfolgreichem
+Run mit `optionalBonusRun`. Der bestehende Run-Window-Owner verlangt dafür
+einen aktuellen Zugriffsnutzen und darf den Bonus ausdrücklich ablehnen.
+Verpflichtende Mehrserverfolgen erhalten diese Kennzeichnung nicht.

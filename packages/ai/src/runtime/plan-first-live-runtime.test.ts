@@ -18715,6 +18715,7 @@ describe("authoritative plan-first live runtime", () => {
           payload: {
             serverId,
             bonusRunNoClick: true,
+            optionalBonusRun: true,
             bonusRunSource: "onr_v1_123_bodyweight-data-creche",
             restrictedActionGrantActionType: "start_run",
             restrictedActionGrantCostProfile: "no_click",
@@ -18776,6 +18777,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           serverId: "hq",
           bonusRunNoClick: true,
+          optionalBonusRun: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
           restrictedActionGrantActionType: "start_run",
           restrictedActionGrantCostProfile: "no_click",
@@ -18794,6 +18796,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           serverId: "rd",
           bonusRunNoClick: true,
+          optionalBonusRun: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
           restrictedActionGrantActionType: "start_run",
           restrictedActionGrantCostProfile: "no_click",
@@ -18812,6 +18815,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           serverId: "archives",
           bonusRunNoClick: true,
+          optionalBonusRun: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
           restrictedActionGrantActionType: "start_run",
           restrictedActionGrantCostProfile: "no_click",

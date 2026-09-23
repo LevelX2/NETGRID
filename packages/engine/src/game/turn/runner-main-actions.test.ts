@@ -177,6 +177,7 @@ describe("runner main action generation", () => {
         bonusRunSource: "onr_proteus_116_pirate-broadcast",
       },
     });
+    expect(actions[0]?.payload?.optionalBonusRun).toBeUndefined();
     expect(actions[0]?.actionId).toBe(
       "runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast",
     );
@@ -254,6 +255,7 @@ describe("runner main action generation", () => {
           (candidate.type === "start_run" &&
             candidate.payload?.bonusRunNoClick === true &&
             candidate.payload?.bonusRunSource === "bodyweight_data_creche" &&
+            candidate.payload?.optionalBonusRun === true &&
             candidate.payload?.multiServerSuccessSequenceRun !== true) ||
           (candidate.type === "trigger_ability" &&
             candidate.payload?.runnerAbility ===

@@ -433,8 +433,9 @@ function runnerSameTurnAccessCentralPreparationSignals(
     return [];
   return [
     {
-      pressureId: `central:${target.targetServerId}`,
-      serverId: target.targetServerId as "hq" | "rd" | "archives",
+      // Preparation belongs to the admitted run and must preserve its access
+      // purpose and risk contract across a committed preparation/run sequence.
+      ...parent,
       purpose: parent.purpose,
       strategyLineIds: [
         ...new Set([
