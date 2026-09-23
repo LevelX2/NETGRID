@@ -29,6 +29,26 @@ const realDoctrineSnapshotIds = [
 ] as const;
 
 describe("DeckDoctrine strategy aggregation diagnostics", () => {
+  it("counts canonical burst-credit copies in the diagnostic Runner economy profile", () => {
+    const profile = buildDeckStrategyProfile({
+      deckSnapshotId: "runner-burst-diagnostic",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_108_score", quantity: 3 },
+        { cardId: "onr_v1_178_short-term-contract", quantity: 2 },
+      ],
+    });
+    expect(profile.functionSignalCounts["economy.burst_credit"]).toBe(3);
+    expect(profile.runnerProfile?.economyProfile.burst).toBe(3);
+    expect(DECK_STRATEGY_METADATA_CONSUMER_CONTRACT["runnerProfile.economyProfile"])
+      .toMatchObject({ mode: "diagnostic_only" });
+    const gradual = buildDeckStrategyProfile({
+      deckSnapshotId: "runner-gradual-diagnostic", side: "runner",
+      cards: [{ cardId: "onr_v1_178_short-term-contract", quantity: 2 }],
+    });
+    expect(gradual.runnerProfile?.economyProfile.burst).toBe(0);
+  });
+
   it("derives a material score route before post-score-only engines for match 978d", () => {
     const profile = buildDeckStrategyProfile(
       match978dCheckpoint.deckSnapshot as AiDeckStrategyDeckSnapshot,

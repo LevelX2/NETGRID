@@ -2177,7 +2177,7 @@ function buildRunnerProfiles(
     },
     economyProfile: {
       generic: stats.functionSignalCounts["economy.generic"] ?? 0,
-      burst: stats.functionSignalCounts["economy.burst"] ?? 0,
+      burst: stats.functionSignalCounts["economy.burst_credit"] ?? 0,
       recurring: stats.functionSignalCounts["economy.recurring"] ?? 0,
       finite: stats.functionSignalCounts["economy.finite_pool"] ?? 0,
       risky: riskyEconomyCount(stats),
