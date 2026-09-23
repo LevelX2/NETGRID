@@ -20,7 +20,7 @@ describe("Corporate Downsizing effective-zero score coverage", () => {
 
     const summary = simulateAiGame({
       seed: SEED,
-      maxActions: 500,
+      maxActions: 600,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       ...resolved.config,
@@ -41,7 +41,8 @@ describe("Corporate Downsizing effective-zero score coverage", () => {
         }),
       ]),
     );
-    // This is a complete 500-action-budget integration run, including replay.
-    // Keep a local CI budget above the measured ~42-second baseline.
+    // Admitted development may now preempt residual liquidity. This seed
+    // completes cleanly after 504 actions; retain a bounded terminal/replay
+    // check with room for that legitimate change in the full-game sequence.
   }, 120_000);
 });
