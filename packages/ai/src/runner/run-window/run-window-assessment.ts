@@ -70,6 +70,7 @@ import {
 import { reservedAccessTrashCredits } from "./run-window-access";
 import { pureEndRunEncounterPayment } from "./run-window-encounter-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
+import { runnerRunStrengthCurrentPumpSavings } from "./run-window-strength-preparation";
 import {
   isRunnerRunWindowCandidate,
   runnerOptionalBonusRunDeclineAction,
@@ -796,6 +797,10 @@ function runnerRunWindowActionAssessment(
     input,
     action,
   );
+  const strengthPumpSavings = runnerRunStrengthCurrentPumpSavings(
+    input,
+    candidate,
+  );
   const accessedDefinitionId = input.playerView.run.accessedCard?.definitionId;
   const exactParentTrashTarget =
     accessedDefinitionId !== undefined &&
@@ -835,16 +840,18 @@ function runnerRunWindowActionAssessment(
       }
     : {
         admissible: true,
-        ...(programPreservationPayment !== undefined
-          ? { value: programPreservationPayment }
-          : accessTrashImpact
-            ? {
-                value:
-                  action.type === "trash_accessed_card"
-                    ? accessTrashImpact.margin
-                    : -accessTrashImpact.margin,
-              }
-            : {}),
+        ...(strengthPumpSavings !== undefined
+          ? { value: 350 + Math.min(80, strengthPumpSavings * 10) }
+          : programPreservationPayment !== undefined
+            ? { value: programPreservationPayment }
+            : accessTrashImpact
+              ? {
+                  value:
+                    action.type === "trash_accessed_card"
+                      ? accessTrashImpact.margin
+                      : -accessTrashImpact.margin,
+                }
+              : {}),
         evidenceCodes: [
           accessAction
             ? "runner_access_window_action_plan_admissible"
@@ -853,6 +860,9 @@ function runnerRunWindowActionAssessment(
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
           `runner_run_window_action:${action.type}`,
+          ...(strengthPumpSavings !== undefined
+            ? [`runner_run_strength_current_pump_saving:${strengthPumpSavings}`]
+            : []),
           ...(mitigation
             ? encounterMitigationEvidence(mitigation, mitigation.pumpCost)
             : []),
@@ -1124,14 +1134,17 @@ export function runnerExactRunWindowPhaseActionIds(
     return exactPayOrEndRunRouteActionIds;
   }
   if (encounterRequiresTargetPreservingBreak) {
-    const directEncounterActionIds = input.legalActions
+    // A run-long strength ability is preparation for the same mandatory
+    // break. Preserve its prior owner assessment instead of dropping it
+    // merely because the Engine exposes it as trigger_ability, not pump.
+    const directEncounterActionIds = admissibleRunWindowCandidates
       .filter(
-        (action) =>
-          (action.type === "pump_breaker" ||
-            action.type === "break_subroutine") &&
-          assessments[action.actionId]?.admissible === true,
+        (candidate) =>
+          candidate.actionType === "pump_breaker" ||
+          candidate.actionType === "break_subroutine" ||
+          runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined,
       )
-      .map((action) => action.actionId);
+      .map((candidate) => candidate.actionId);
     if (directEncounterActionIds.length > 0) {
       return directEncounterActionIds;
     }

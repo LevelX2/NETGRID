@@ -1501,6 +1501,18 @@ gewählten Pumpaktion. Ihr eigener Continuation-Owner prüft die gespeicherte
 Actionbindung; die Pump-Zulassung verlangt in diesem unterbrochenen Fenster
 keine neue Encounter-Restquote.
 
+Eine bereits zugelassene Fähigkeit für zusätzliche Breakerstärke bis zum
+Run-Ende bleibt auch in einer zielerhaltenden Deflektor-Bruchroute enthalten.
+`run-window-strength-preparation.ts` beziffert beim Run-Window-Owner die im
+aktuellen Encounter nachweislich ersetzten Pumpkosten anhand aktueller
+Stärke, kanonischer Verstärkung und legaler Zahlungsquotes. Verschiedene
+Pumpgrößen ohne gemeinsame Sequenzquote begründen keine solche Ersparnis.
+Die Bewertung bleibt unter der Priorität eines unmittelbar möglichen
+Pflicht-Breaks; sie ist kein Deckbonus und begründet keine neue Zulassung.
+Die Planübergabe erhält explizite Actionbewertungen auch bei einem gebundenen
+Informationszugriff. Der exakte Checkpoint `cp-meta-467-r1-g2-d257` sichert
+Aktivierung, Owner, Route und unveränderte StateVersion ab.
+
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
 

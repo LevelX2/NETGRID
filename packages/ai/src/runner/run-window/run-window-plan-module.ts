@@ -168,7 +168,7 @@ function runWindowCandidateValue(
       ? (assessedValue ?? 0) - 200
       : (assessedValue ?? 100);
   }
-  if (commitment.intendedAction !== "trash") return 100;
+  if (commitment.intendedAction !== "trash") return assessedValue ?? 100;
   const committedTrashCandidates = context.actionCandidates.filter(
     (entry) =>
       entry.actionType === "trash_accessed_card" &&
