@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import {
   type AiDecisionInput,
   type AiDecisionScoreComponent,
@@ -500,7 +501,8 @@ export function corpOptionalDrawCapacity(
   );
   const projectedDrawCount = corpProjectedDrawCount(action);
   const freeSlotsBefore = Math.max(0, maxHandSize - handCount);
-  const freeSlotsAfter = freeSlotsBefore - projectedDrawCount;
+  const freeSlotsAfter =
+    maxHandSize - handCount - projectedDrawHandDelta(action);
   return {
     eligible: maxHandSize > 2 && projectedDrawCount > 0 && freeSlotsAfter >= 0,
     handCount,
@@ -524,7 +526,7 @@ export function corpQuantitativeDrawScoreComponents(
   );
   const overflowCount = Math.max(
     0,
-    handCount + projectedDrawCount - maxHandSize,
+    handCount + projectedDrawHandDelta(action) - maxHandSize,
   );
   const evidence = [
     `projected_draw_count:${projectedDrawCount}`,
@@ -877,6 +879,13 @@ export function corpProjectedDrawCount(action: LegalAction): number {
     }
   }
   return action.type === "draw_card" ? 1 : 0;
+}
+
+function projectedDrawHandDelta(action: LegalAction): number {
+  // Reuse the action projection's source consumption and zone-transition facts.
+  // Gross draws still govern deck consumption; only net hand growth needs slots.
+  const [candidate] = buildActionSemanticCandidates({ legalActions: [action] });
+  return candidate!.economyProjection!.netHandDelta!;
 }
 
 function corpOptionalDrawCapacityEvidence(

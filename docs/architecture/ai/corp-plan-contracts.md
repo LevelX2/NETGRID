@@ -853,6 +853,16 @@ Funding-/Reservevertrag verfehlt, ist das `funding_only`: Der Parent fordert
 Economy-Support an; weiterer gezielter Draw ist unzulässig. Unbekannte oder
 unvollständige Quotes werden nicht als Effektlücke umgedeutet.
 
+Für denselben zugelassenen Draw-Bedarf vergleicht Defense die aktuellen
+Ziehrouten nach Karten pro Aktion, Ziehzahl, Kosten und Netto-Handzuwachs.
+Eine zusätzlich Credits liefernde Operation bleibt dabei dem exakt gebundenen
+Defense-Plan zugeordnet; ein fehlender Economy-Bedarf darf diese Route nicht
+sperren. Die Handplatzprüfung verwendet die gemeinsame Action-Projektion
+einschließlich der verbrauchten ausgespielten Karte. Brutto-Ziehzahl und
+Deckout-Horizont bleiben getrennte Grenzen. Weder diese Zuordnung noch der
+Routenvergleich erzeugen einen zusätzlichen Ziehbedarf oder überstimmen einen
+terminalen Score.
+
 Terminale Rez-Reservebedarfe werden aus den aktuellen typisierten
 Bedrohungsfakten beider Zentralen entdeckt. Weder ein Abstand von mehr als
 einem Agendapunkt zum Runner-Sieg noch die nominelle Auswahl der anderen

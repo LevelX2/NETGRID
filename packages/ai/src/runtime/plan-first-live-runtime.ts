@@ -3510,6 +3510,9 @@ function corpExactExecutableNonEconomyPlanOwnsAction(
   candidate: ActionSemanticCandidate,
 ): boolean {
   return (
+    domain.defenseNeeds.some((signal) =>
+      corpDefenseSignalOwnsAction(signal, candidate.actionId),
+    ) ||
     domain.scoreProjects.some(
       (signal) =>
         signal.feasible &&

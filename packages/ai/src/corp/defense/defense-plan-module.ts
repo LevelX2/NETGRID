@@ -1540,6 +1540,10 @@ function selectedDirectDefenseRoute(
     .sort(
       (left, right) =>
         right.stepValue - left.stepValue ||
+        (corpCandidateProjectsCardDraw(left.candidate) &&
+        corpCandidateProjectsCardDraw(right.candidate)
+          ? compareDefenseDrawRoutes(left, right)
+          : 0) ||
         technicalCompare(left.candidate.actionId, right.candidate.actionId),
     )
     .slice(0, 1);
@@ -1916,7 +1920,7 @@ function selectedScoreProtectionRoute(
           candidate,
         })),
       )
-      .sort(compareScoreProtectionDrawRoutes)[0];
+      .sort(compareDefenseDrawRoutes)[0];
     if (drawRoute) parentRoutes.push(drawRoute);
   }
   return parentRoutes.sort(
@@ -1930,9 +1934,9 @@ function selectedScoreProtectionRoute(
   )[0];
 }
 
-function compareScoreProtectionDrawRoutes(
-  left: SelectedScoreProtectionRoute,
-  right: SelectedScoreProtectionRoute,
+function compareDefenseDrawRoutes(
+  left: { candidate: ActionSemanticCandidate },
+  right: { candidate: ActionSemanticCandidate },
 ): number {
   const leftProjection = exactScoreProtectionDrawProjection(left.candidate);
   const rightProjection = exactScoreProtectionDrawProjection(right.candidate);

@@ -303,8 +303,13 @@ export function corpAction(
     side: "corp",
     type,
     label: actionId,
+    timingPoint: "corp_action.main",
+    visibility: "public",
+    expiresAtStateVersion: 1,
     source,
     costs: [],
+    targetRequirements: [],
+    choiceRequirements: [],
     payload,
   } as unknown as LegalAction;
 }
