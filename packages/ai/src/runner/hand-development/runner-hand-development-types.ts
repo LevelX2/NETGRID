@@ -203,6 +203,7 @@ export type RunnerHandRetentionCounterfactual = {
 };
 
 export type RunnerHandDevelopmentEvaluation = {
+  hostedBreakerDevelopment?: import("./hosted-breaker-development").HostedBreakerDevelopment;
   schemaVersion: typeof RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION;
   cardInstanceId: string;
   definitionId?: string;

@@ -11,7 +11,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 describe("hosted economy consumer admission", () => {
   it.each([54, 120])(
-    "does not prepare a host for the rejected duplicate in original D%i",
+    "does not prepare an unprofitable host upgrade in original D%i",
     (decisionIndex) => {
       const checkpoint = JSON.parse(
         readFileSync(

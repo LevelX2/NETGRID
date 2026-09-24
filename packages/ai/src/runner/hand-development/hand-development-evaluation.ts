@@ -47,6 +47,7 @@ import {
 } from "./runner-hand-development-types";
 import type { RunnerRigRoleDemand } from "../rig-demand/runner-rig-demand-projection";
 import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
+import { assessHostedBreakerDevelopment } from "./hosted-breaker-development";
 
 export {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
@@ -163,7 +164,73 @@ export function evaluateRunnerHandDevelopment(
   if (params.input.side !== "runner") return [];
   const evaluations = params.input.playerView.own.gripOrHq
     .filter((card) => card.known !== false)
-    .map((card) => evaluateHandCard(params, card));
+    .map((card): RunnerHandDevelopmentEvaluation => {
+      const evaluation = evaluateHandCard(params, card);
+      const investment = assessHostedBreakerDevelopment(
+        params.input,
+        card,
+        minimumCreditFloorForPersistentInstall(params.input),
+      );
+      if (!investment) return evaluation;
+      if (!investment.admitted)
+        return {
+          ...evaluation,
+          ...(card.type === "hardware"
+            ? { deferReason: "no_current_need" as const }
+            : {}),
+          hostedBreakerDevelopment: investment,
+          evidence: [...evaluation.evidence, ...investment.evidenceCodes],
+        };
+      const { fundingNeed: _fundingNeed, ...readyEvaluation } = evaluation;
+      const installAction = params.input.legalActions.find(
+        (a) => a.actionId === investment.actionId,
+      )!;
+      const installCost = actionCreditCost(installAction)!;
+      return {
+        ...readyEvaluation,
+        hostedBreakerDevelopment: investment,
+        legalActionId: investment.actionId!,
+        availability: "legal_now" as const,
+        developmentRole:
+          card.type === "hardware"
+            ? ("economy_engine" as const)
+            : ("breaker_or_rig_piece" as const),
+        currentNeed: "useful_now" as const,
+        deferReason: "none" as const,
+        priority: investment.value,
+        activationPrerequisites: evaluation.activationPrerequisites.map((p) =>
+          p.kind === "hosted_icebreaker" ? { ...p, satisfied: true } : p,
+        ),
+        ...(evaluation.persistentInstallEvaluation
+          ? {
+              persistentInstallEvaluation: {
+                ...evaluation.persistentInstallEvaluation,
+                actionId: investment.actionId!,
+                installCost,
+                creditsAfterInstall:
+                  params.input.playerView.own.credits - installCost,
+                memoryAfterInstall:
+                  params.input.playerView.own.memoryLimit! -
+                  params.input.playerView.own.memoryUsed!,
+                capabilityDelta: "cost_upgrade" as const,
+                duplicateRole:
+                  evaluation.persistentInstallEvaluation
+                    .installedSameDefinitionCount > 0
+                    ? ("useful_backup" as const)
+                    : ("none" as const),
+                marginalUtilityScore: investment.value,
+                opportunityPenalty: 0,
+                reservePenalty: 0,
+                muPressurePenalty: 0,
+                displacementPenalty: 0,
+                finalInstallFit: investment.value,
+                evidence: investment.evidenceCodes,
+              },
+            }
+          : {}),
+        evidence: investment.evidenceCodes,
+      };
+    });
   return applyRunnerHandRetentionCounterfactuals(params, evaluations).sort(
     (left, right) =>
       right.priority - left.priority ||

@@ -375,7 +375,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     ]);
   });
 
-  it("keeps hosted breaker economy useful when a breaker is immediately hostable", () => {
+  it("recognizes a hostable consumer without inventing savings on an unknown board", () => {
     const eurocorpse = visibleCard("eurocorpse-1", {
       definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
       title: "Eurocorpse (TM) Spin Chip",
@@ -408,6 +408,8 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
 
     expect(evaluation.currentNeed).not.toBe("later");
+    expect(evaluation.deferReason).toBe("no_current_need");
+    expect(evaluation.hostedBreakerDevelopment?.admitted).toBe(false);
     expect(evaluation.evidence).toContain("hostable_icebreaker_available:true");
     expect(evaluation.activationPrerequisites).toEqual([
       { kind: "hosted_icebreaker", satisfied: true },

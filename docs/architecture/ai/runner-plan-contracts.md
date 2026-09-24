@@ -713,16 +713,44 @@ Verantwortung:
 - sinnvollen Draw, Search, Install oder Eventeinsatz koordinieren;
 - generische Karten ohne eigenen Spezialplan verwertbar machen.
 
-Die Aktivierungsvoraussetzung einer Hardware mit gehostetem Breaker-Verbraucher
-zählt keine Handkopie, deren Definition bereits im Rig liegt und die der
-generische Entwicklungsowner deshalb als redundant ablehnt. Bloße
-Bezahlbarkeit belegt für diese Kopie keinen produktiven Folgeeinsatz. Fehlt
-der Verbraucher, setzt die Handbewertung `no_current_need`; ein bloßes
-Herabstufen auf `later` darf keinen ausführbaren neutralen Kartenplan erzeugen. Die
-gespeicherten D54/D120-Zustände aus `match_26a1db342966ffbe` sichern die
-Ablehnung des leeren Host-Investments; ein bezahlbarer, noch nicht installierter
-Breaker bleibt als Verbraucher zulässig. Eine gezielte wirtschaftliche
-Ersatz-/Duplikatfolge benötigt weiterhin einen eigenen belegten Entwicklungszweck.
+Ein Host mit erneuerbaren, nur für seinen gehosteten Breaker verwendbaren
+Credits erhält seinen Entwicklungszweck aus
+`hand-development/hosted-breaker-development.ts`. Der Vergleich bindet eine
+konkrete kompatible Handkarte und die aktuelle legale Installationsaktion.
+Ein zweiter Breaker derselben Definition ist bei positivem Zusatznutzen
+zulässig; bloße Bezahlbarkeit oder eine Deckkopie genügt weiterhin nicht.
+Die gespeicherten D54/D120-Zustände aus `match_26a1db342966ffbe` bleiben
+negative Kontrollen für einen nicht rentablen Hostaufbau.
+
+Die Bewertung vergleicht die liquiden Kosten vollständig bekannter zentraler
+ICE-Pfade mit und ohne Hosting. Vorhandene erneuerbare Pools werden in beiden
+Alternativen aufgefüllt; nur die zusätzliche Ersparnis zählt. Der bedingte
+Horizont beträgt höchstens fünf Runnerzüge, begrenzt durch beide Deckreste.
+Installcredits und zusätzliche Installklicks werden abgezogen. Ein beim ersten
+Breaker tatsächlich vermiedener MU erhält 0,5 Creditäquivalente Optionswert,
+bei konkretem zusätzlichem Handprogramm und Speicherengpass 1,5. Das ist eine
+begrenzte Policy, keine garantierte Runfolge oder heutiges Guthaben.
+Positive Investitionen beanspruchen P4 mit höchstens 300 Punkten; Tags,
+sichtbare Agenda-/Advancementfristen, Matchpoint, fehlende Folgeklicks und
+ungenügende Runreserve schließen sie aus. Fehlende bekannte Pfade oder
+Nullersparnis werden nicht durch einen allgemeinen Kartenbonus ersetzt.
+
+Bei schon installiertem Breaker bleibt die alte Kopie zunächst erhalten.
+Ihre spätere Entfernung wird weder vorausgesetzt noch als bereits freie MU
+verbucht. Die aktuelle Folgeinstallation bindet ausschließlich die von der
+Engine angebotene Hostroute. Ein bereits produktiver gleichartiger Host oder
+ein verfügbarer leerer kompatibler Host verhindert weitere redundante
+Hostkäufe. Coverage berücksichtigt bei der planinternen Wahl einer vorhandenen
+Hostroute den gebundenen Kreditvorrat; dringende Coverage bleibt höher
+priorisiert als der Hardwareaufbau.
+
+Die öffentliche `hostOnCardId` bleibt in der positiven AI-DTO-Allowlist erhalten.
+Die Regression prüft die wiederholte DTO-Projektion sowie frühe und spätere
+Installationsfolgen mit echten Engine-Aktionen, einschließlich vollständig
+belegter normaler MU. Die bekannte Pfadbewertung berücksichtigt bei gleichen
+mechanischen Breakkosten die für die konkrete Breakerinstanz verfügbaren
+Credits vor dem stabilen Instanz-ID-Tiebreak. Budgetfreie Kostenanfragen
+vergleichen weiterhin ausschließlich mechanische Kosten.
 
 Auch die negative Ersatzbewertung eines exklusiven Decks ist verbindlich:
 `already_satisfied` verwirft die Installation als Duplikat, selbst wenn ein

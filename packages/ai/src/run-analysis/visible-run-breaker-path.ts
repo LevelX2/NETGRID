@@ -1,3 +1,6 @@
+import { projectBreakerCreditPayment } from "./visible-run-credit-budget";
+import { subtypeKey } from "./visible-run-subtype-key";
+export { subtypeKey } from "./visible-run-subtype-key";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type CardDefinition,
@@ -269,6 +272,7 @@ export function minimumCreditsToBreakVisibleSubroutines(
   additionalBreakCostPerSubroutine = 0,
   pendingFreeBreaks: VisibleRunBreakerState["pendingFreeBreaks"] = [],
   allowRandomBreakAttempt = false,
+  creditBudget?: MutableRunnerRunPathCreditBudget,
 ): BreakAssessment | undefined {
   const freeBreak = pendingFreeBreakAssessment(
     ice,
@@ -294,6 +298,7 @@ export function minimumCreditsToBreakVisibleSubroutines(
     .sort(
       (left, right) =>
         left.cost - right.cost ||
+        compareRestrictedBreakerPayment(creditBudget, left, right) ||
         left.breakerInstanceId.localeCompare(right.breakerInstanceId),
     );
   const withPendingFreeBreak: BreakAssessment[] = (
@@ -327,7 +332,11 @@ export function minimumCreditsToBreakVisibleSubroutines(
                 (assessment): assessment is BreakAssessment =>
                   assessment !== undefined,
               )
-              .sort((left, right) => left.cost - right.cost)[0];
+              .sort(
+                (left, right) =>
+                  left.cost - right.cost ||
+                  compareRestrictedBreakerPayment(creditBudget, left, right),
+              )[0];
             return paid
               ? {
                   ...paid,
@@ -343,6 +352,7 @@ export function minimumCreditsToBreakVisibleSubroutines(
   return [...costs, ...withPendingFreeBreak].sort(
     (left, right) =>
       left.cost - right.cost ||
+      compareRestrictedBreakerPayment(creditBudget, left, right) ||
       left.breakerInstanceId.localeCompare(right.breakerInstanceId),
   )[0];
 }
@@ -400,6 +410,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
   pendingFreeBreaks: VisibleRunBreakerState["pendingFreeBreaks"] = [],
   targetSubroutines?: readonly VisibleEffectiveSubroutine[],
   allowRandomBreakAttempt = false,
+  creditBudget?: MutableRunnerRunPathCreditBudget,
 ): BreakAssessment | undefined {
   const freeBreak = pendingFreeBreakAssessment(
     ice,
@@ -437,6 +448,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
     .sort(
       (left, right) =>
         left.cost - right.cost ||
+        compareRestrictedBreakerPayment(creditBudget, left, right) ||
         left.breakerInstanceId.localeCompare(right.breakerInstanceId),
     );
   const allTargets =
@@ -476,7 +488,11 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
                 (assessment): assessment is BreakAssessment =>
                   assessment !== undefined,
               )
-              .sort((left, right) => left.cost - right.cost)[0];
+              .sort(
+                (left, right) =>
+                  left.cost - right.cost ||
+                  compareRestrictedBreakerPayment(creditBudget, left, right),
+              )[0];
             return paid
               ? {
                   ...paid,
@@ -492,6 +508,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
   return [...costs, ...withPendingFreeBreak].sort(
     (left, right) =>
       left.cost - right.cost ||
+      compareRestrictedBreakerPayment(creditBudget, left, right) ||
       left.breakerInstanceId.localeCompare(right.breakerInstanceId),
   )[0];
 }
@@ -934,9 +951,16 @@ export function hasSubtype(
   return subtypes.some((subtype) => subtypeKey(subtype) === expected);
 }
 
-export function subtypeKey(subtype: string): string {
-  return subtype
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
+// For equal mechanical cost, preserve cash by using the actually applicable
+// restricted pool. Instance-id ordering must not hide a funded hosted copy.
+function compareRestrictedBreakerPayment(
+  budget: MutableRunnerRunPathCreditBudget | undefined,
+  left: BreakAssessment,
+  right: BreakAssessment,
+): number {
+  if (!budget) return 0; // A deliberately budget-free quote compares gross cost.
+  return (
+    projectBreakerCreditPayment(budget, right).creditsAfterPath -
+    projectBreakerCreditPayment(budget, left).creditsAfterPath
+  );
 }

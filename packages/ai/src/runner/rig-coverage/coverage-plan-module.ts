@@ -370,7 +370,20 @@ function coverageInstallCandidates(
       {
         candidate,
         sourceRoles: [...new Set([...roles, gap.requiredRole])],
-        stepValue: gap.installActionValues?.[candidate.actionId] ?? 100,
+        stepValue:
+          (gap.installActionValues?.[candidate.actionId] ?? 100) +
+          (typeof action?.payload?.hostOnCardId === "string" &&
+          context.input.playerView.own.rig?.some(
+            (host) =>
+              host.instanceId === action.payload?.hostOnCardId &&
+              host.counterDisplays?.some(
+                (d) =>
+                  d.creditPool?.requireHostedBreakerForIcebreakerUse &&
+                  (d.creditPool.capacity ?? d.amount) > 0,
+              ),
+          )
+            ? 20
+            : 0),
       },
     ];
   });

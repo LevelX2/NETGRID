@@ -632,6 +632,7 @@ function assessKnownRezzedIcePathInternal(
             additionalBreakCostPerSubroutine,
             breakerState.pendingFreeBreaks,
             deflectorContext.allowRandomBreakAttempts,
+            creditBudget,
           );
       const payment = assessment
         ? projectBreakerCreditPayment(creditBudget, assessment)
@@ -684,6 +685,7 @@ function assessKnownRezzedIcePathInternal(
         additionalBreakCostPerSubroutine,
         undefined,
         deflectorContext.allowRandomBreakAttempts,
+        creditBudget,
       );
       const breakPayment = breakAssessment
         ? projectBreakerCreditPayment(creditBudget, breakAssessment)
@@ -731,6 +733,7 @@ function assessKnownRezzedIcePathInternal(
                 ),
             ),
             deflectorContext.allowRandomBreakAttempts,
+            creditBudget,
           );
       if (!breakAssessment) {
         return blockedPathAssessment(
@@ -805,6 +808,7 @@ function assessKnownRezzedIcePathInternal(
             breakerState.pendingFreeBreaks,
             undefined,
             deflectorContext.allowRandomBreakAttempts,
+            creditBudget,
           );
       const payment = bestAccessPreservingPayment(
         creditBudget,
@@ -861,6 +865,7 @@ function assessKnownRezzedIcePathInternal(
             additionalBreakCostPerSubroutine,
             breakerState.pendingFreeBreaks,
             deflectorContext.allowRandomBreakAttempts,
+            creditBudget,
           );
       if (payCost === undefined) {
         const breakPayment = breakAssessment
@@ -1104,6 +1109,7 @@ function assessKnownRezzedIcePathInternal(
               additionalBreakCostPerSubroutine,
               undefined,
               deflectorContext.allowRandomBreakAttempts,
+              creditBudget,
             )
           : undefined;
         const payment = breakAssessment
@@ -1532,6 +1538,7 @@ function runPathEffectBreakAssessment(params: {
     [],
     [params.sourceSubroutine],
     params.deflectorContext.allowRandomBreakAttempts,
+    params.creditBudget,
   );
   const futureWithoutEffect = assessKnownRezzedIcePathInternal(
     futureIce,

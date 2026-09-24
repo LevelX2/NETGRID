@@ -84,6 +84,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "runnerInstallPaymentSourceAmounts",
   "runnerInstallPaymentHostedCredits",
   "runnerProgramTrashBeforeInstall",
+  "hostOnCardId",
   "restrictedCreditGainAmount",
   "restrictedCreditGainUsableFor",
   "restrictedCreditGainCleanup",

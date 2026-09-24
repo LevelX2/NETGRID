@@ -112,7 +112,11 @@ export function buildRunnerCardDevelopmentSignals({
           evaluation,
           runTargets,
           economy,
-        ) ?? runStrengthStock;
+        ) ??
+        runStrengthStock ??
+        (evaluation.hostedBreakerDevelopment?.admitted
+          ? evaluation.hostedBreakerDevelopment
+          : undefined);
       if (strengthInvestment && !strengthInvestment.admitted) return [];
       const executableNow =
         evaluation.availability === "legal_now" &&
@@ -231,6 +235,9 @@ export function buildRunnerCardDevelopmentSignals({
         executableNow && candidate
           ? candidates.filter((entry) => {
               if (
+                (evaluation.hostedBreakerDevelopment?.admitted &&
+                  entry.actionId !==
+                    evaluation.hostedBreakerDevelopment.actionId) ||
                 entry.sourceCardInstanceId !== evaluation.cardInstanceId ||
                 entry.actionType !== candidate.actionType ||
                 entry.semanticActionType !== candidate.semanticActionType ||
@@ -554,9 +561,11 @@ export function buildRunnerCardDevelopmentSignals({
               : ("execute" as const),
           ...(strengthInvestment?.admitted
             ? {
-                purposeCode: runStrengthStock?.admitted
-                  ? "stock_run_strength_support"
-                  : "amortize_passive_ice_strength_reduction",
+                purposeCode: evaluation.hostedBreakerDevelopment?.admitted
+                  ? "amortize_hosted_breaker_economy"
+                  : runStrengthStock?.admitted
+                    ? "stock_run_strength_support"
+                    : "amortize_passive_ice_strength_reduction",
               }
             : restrictedProgramInstallCommitment
               ? {

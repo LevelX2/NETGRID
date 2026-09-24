@@ -6,7 +6,7 @@ import type {
   RunnerRunPathCreditBudget,
   RunnerRunPathCreditBudgetInput,
 } from "./visible-run-analysis-contracts";
-import { subtypeKey } from "./visible-run-breaker-path";
+import { subtypeKey } from "./visible-run-subtype-key";
 
 export function runnerPaymentSupportBudgetForRig(
   liquidCredits: number,
