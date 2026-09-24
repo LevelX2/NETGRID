@@ -25,7 +25,7 @@ export type CorpTaggedDamagePayoffProfile = Readonly<{
   damageAmount: number;
 }>;
 
-export type CorpTaggedMeatDamageOperationProfile = Readonly<{
+export type CorpTaggedMeatDamageProfile = Readonly<{
   capabilityKey: string;
   sourceCapabilityId: string;
   damageAmount: number;
@@ -688,17 +688,37 @@ export function corpArchivesToHqOperationProfile(
 
 export function corpTaggedMeatDamageOperationProfile(
   definitionId: string | undefined,
-): CorpTaggedMeatDamageOperationProfile | undefined {
+): CorpTaggedMeatDamageProfile | undefined {
+  return taggedMeatDamageProfile(definitionId, "operation");
+}
+
+export function corpScoredTaggedMeatDamageProfile(
+  definitionId: string | undefined,
+): CorpTaggedMeatDamageProfile | undefined {
+  return taggedMeatDamageProfile(definitionId, "agenda");
+}
+
+function taggedMeatDamageProfile(
+  definitionId: string | undefined,
+  cardType: "operation" | "agenda",
+): CorpTaggedMeatDamageProfile | undefined {
   const planning = planningCard(definitionId);
   if (
     planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation"
+    planning.planning.cardType !== cardType
   ) {
     return undefined;
   }
   const profiles = (planning.planning.engine.abilities ?? []).flatMap(
     (ability) => {
-      if (ability.kind !== "on_play") return [];
+      if (cardType === "operation") {
+        if (ability.kind !== "on_play") return [];
+      } else if (
+        ability.kind !== "activated" ||
+        ability.timing !== "corp_main"
+      ) {
+        return [];
+      }
       const requiresTaggedRunner =
         containsMechanicalKind(ability.condition, "runner_is_tagged") ||
         containsMechanicalKind(ability.condition, "runner_tags_at_least");

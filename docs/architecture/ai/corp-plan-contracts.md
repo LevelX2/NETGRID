@@ -1544,6 +1544,15 @@ verwendet denselben side-sicheren Trace-/Präventionsvertrag wie für Operatione
 Eine Agenda in HQ ist keine aktivierbare Quelle. Verdeckte Runnerreaktionen
 bleiben unbekannt und werden nicht durch den Quelltypwechsel aufgewertet.
 
+Auch getaggtenabhängiger Meat-Schaden aus einer gescorten Agenda gehört in
+diese Quote-Anfragen. Die kanonische aktivierte Corp-Main-Fähigkeit liefert
+die Capability-Identität; die Engine prüft Score-Zone, Tagbedingung, Kosten,
+Schaden und aktuellen LegalAction-Head. Der Payoff darf einzeln oder neben
+einer Schadensoperation laufen. Nach einer Aktivierung wird die wiederverwendbare
+Quelle im neuen Zustand erneut gequotet; dieselbe Quelle wird nicht doppelt
+in einer vorausberechneten Route gebucht. Ein Profil- oder Legalitätsnachweis
+allein ersetzt diesen produktiven Übergang zur Punish-Route nicht.
+
 Die ausgewählte Route ist variabel. Sie verwendet nur so viele aktuell
 vorhandene Komponenten, wie nach Runner-Handzahl und sichtbarer Prävention
 notwendig sind. Vier sicher wirksame Damage sind bei drei Runner-Handkarten

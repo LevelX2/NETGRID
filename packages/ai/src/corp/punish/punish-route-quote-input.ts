@@ -19,6 +19,7 @@ import {
   corpTraceTagSourceProfile,
   corpScoredTraceTagSourceProfile,
   corpTaggedMeatDamageOperationProfile,
+  corpScoredTaggedMeatDamageProfile,
 } from "../../runtime/corp-canonical-card-facts";
 
 const MAX_PUNISH_ROUTES = 8;
@@ -383,7 +384,9 @@ function structuredTaggedCreditDenialAdapter(
 function structuredTaggedDamageAdapter(
   definitionId: string,
 ): PunishComponentAdapter | undefined {
-  const profile = corpTaggedMeatDamageOperationProfile(definitionId);
+  const profile =
+    corpTaggedMeatDamageOperationProfile(definitionId) ??
+    corpScoredTaggedMeatDamageProfile(definitionId);
   return profile
     ? {
         definitionId,

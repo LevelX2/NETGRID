@@ -933,7 +933,7 @@ function certifyStep(
     return { ok: false, reason: "source_unavailable" };
   }
   if (instance.zone.zone === "scoreArea")
-    return certifyScoredTraceStep(state, request);
+    return certifyScoredActivatedStep(state, request);
   if (instance.zone.zone !== "hq") {
     return { ok: false, reason: "source_zone_unsupported" };
   }
@@ -1003,7 +1003,7 @@ function certifyStep(
   };
 }
 
-function certifyScoredTraceStep(
+function certifyScoredActivatedStep(
   state: GameState,
   request: CorpPunishRouteQuoteRequest["steps"][number],
 ):
@@ -1014,8 +1014,8 @@ function certifyScoredTraceStep(
   if (
     definition?.type !== "agenda" ||
     !state.corp.scoreArea.includes(request.sourceCardInstanceId) ||
-    request.kind !== "trace_tag" ||
-    request.order !== 0
+    !["trace_tag", "meat_damage"].includes(request.kind) ||
+    (request.kind === "trace_tag" && request.order !== 0)
   )
     return { ok: false, reason: "source_capability_unsupported" };
   if (request.sourceCapabilityBindingKind !== "card_spec_capability_key")
@@ -1036,7 +1036,11 @@ function certifyScoredTraceStep(
   const ability = binding.ability;
   if (
     ability.timing !== "corp_main" ||
-    ability.condition ||
+    (ability.condition &&
+      (request.kind !== "meat_damage" ||
+        !["runner_is_tagged", "runner_tags_at_least"].includes(
+          ability.condition.kind,
+        ))) ||
     ability.costs.some(
       (cost) =>
         (cost.kind !== "action" && cost.kind !== "credit") ||
@@ -1070,6 +1074,7 @@ function certifyScoredTraceStep(
         credits,
       },
       effects: ability.effects,
+      ...(ability.condition ? { condition: ability.condition } : {}),
       ...(request.currentLegalActionId
         ? { currentLegalActionId: request.currentLegalActionId }
         : {}),
