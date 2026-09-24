@@ -22,6 +22,8 @@ import {
   type RunnerRigRoleDemandInput,
 } from "../runner/rig-demand/runner-rig-demand-projection";
 import { rolesMatch } from "./role-match";
+import { strategicSupportDemands } from "../runner/hand-development/strategic-support-development";
+import { minimumCreditFloorForPersistentInstall } from "../runner/hand-development/runner-persistent-install-evaluation";
 
 export type BuildRunnerRigDemandProjectionForCoverageParams = Readonly<{
   input: AiDecisionInput;
@@ -103,13 +105,39 @@ export function buildRunnerRigDemandProjectionForCoverage(
     strategicIntent: params.strategicIntent,
     demands: [...coverageDemands, ...restrictedRunCreditDemands],
   });
-  const memoryDemand = memoryCapacityDemand(params, preliminary, binding);
-  return memoryDemand || restrictedRunCreditDemands.length > 0
+  // Fully established coverage still has a development horizon. The owner
+  // admits visible support before the projection derives its capacity need.
+  const supportDemands =
+    coverageDemands.length === 0
+      ? strategicSupportDemands(
+          input,
+          minimumCreditFloorForPersistentInstall(input),
+          params.strategicIntent,
+          binding,
+        )
+      : [];
+  const developmentProjection =
+    supportDemands.length > 0
+      ? buildRunnerRigDemandProjection({
+          input,
+          strategicIntent: params.strategicIntent,
+          demands: supportDemands,
+        })
+      : preliminary;
+  const memoryDemand = memoryCapacityDemand(
+    params,
+    developmentProjection,
+    binding,
+  );
+  return memoryDemand ||
+    restrictedRunCreditDemands.length > 0 ||
+    supportDemands.length > 0
     ? buildRunnerRigDemandProjection({
         input,
         strategicIntent: params.strategicIntent,
         demands: [
           ...coverageDemands,
+          ...supportDemands,
           ...(memoryDemand ? [memoryDemand] : []),
           ...restrictedRunCreditDemands,
         ],
@@ -409,8 +437,7 @@ function memoryCapacityDemand(
   );
   const requiredCapacity = requiredGap > 0 ? requiredGap : preferredGap;
   if (requiredCapacity <= 0) return undefined;
-  const providers = memorySupportProviders(params, requiredCapacity);
-  if (providers.length === 0) return undefined;
+  let providers = memorySupportProviders(params, requiredCapacity);
   const required = requiredGap > 0;
   const sourceDemand = preliminary.roleDemands.find((demand) =>
     (required
@@ -419,9 +446,49 @@ function memoryCapacityDemand(
     ).includes(demand.demandId),
   );
   if (!sourceDemand) return undefined;
+  if (sourceDemand.ownerModuleId === "runner.develop_board_and_hand") {
+    const programIds = new Set(
+      preliminary.roleDemands.flatMap((d) =>
+        d.simultaneousSetId === sourceDemand.simultaneousSetId
+          ? d.providers.flatMap((p) =>
+              p.cardInstanceId ? [p.cardInstanceId] : [],
+            )
+          : [],
+      ),
+    );
+    const programs = params.input.playerView.own.gripOrHq.filter((c) =>
+      programIds.has(c.instanceId),
+    );
+    if (
+      programs.length !== programIds.size ||
+      programs.some((c) => !Number.isSafeInteger(c.installCost))
+    )
+      return undefined;
+    const followupCredits = programs.reduce(
+      (sum, c) => sum + c.installCost!,
+      0,
+    );
+    const floor = minimumCreditFloorForPersistentInstall(params.input);
+    providers = providers.filter((p) =>
+      params.input.legalActions.some(
+        (a) =>
+          a.type === "install_card" &&
+          a.side === "runner" &&
+          a.source === p.cardInstanceId &&
+          a.expiresAtStateVersion === params.input.playerView.stateVersion &&
+          !a.targetRequirements.length &&
+          !a.choiceRequirements?.length &&
+          params.input.playerView.own.credits -
+            a.costs.reduce((sum, c) => sum + (c.credits ?? 0), 0) -
+            followupCredits >=
+            floor,
+      ),
+    );
+  }
+  if (providers.length === 0) return undefined;
   return {
     demandId: `memory-capacity:${sourceDemand.simultaneousSetId}:${requiredCapacity}`,
-    ownerModuleId: "runner.rig_and_coverage",
+    ownerModuleId: sourceDemand.ownerModuleId,
     sourceKind:
       sourceDemand.horizon === "current_step"
         ? "current_plan_step"

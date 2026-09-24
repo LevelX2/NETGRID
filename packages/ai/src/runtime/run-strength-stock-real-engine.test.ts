@@ -122,12 +122,13 @@ describe("run-strength consumable stock through the real development owner", () 
   it("selects and applies stock when current central pressure has no affordable route", () => {
     const s = fixture();
     s.runner.credits = 8;
-    // An almost empty grip legitimately prefers replenishing the hand. Keep
-    // real, currently redundant/support cards so this is an idle setup choice.
+    // An almost empty grip legitimately prefers replenishing the hand. The
+    // spare host is not affordable with its follow-up here. Pattel is no longer
+    // inert filler: its productive installation has its own owner regression.
     for (const id of [
       breakerId,
       breakerId,
-      "onr_v1_046_pattels-virus",
+      "onr_proteus_139_eurocorpse-tm-spin-chip",
       "onr_v1_146_zetatech-mem-chip",
     ]) {
       const instance = s.runner.stack.find(

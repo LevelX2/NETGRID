@@ -603,6 +603,27 @@ Demand-Set berechnet. So kann ein künftiger Breaker zusammen mit bereits
 sichtbaren kompatiblen Run-Credit-Programmen eine frühe MU-Vorbereitung
 begründen, ohne aus allgemeiner Programmdichte ein Zielrig zu erfinden.
 
+Nach erfüllter Breaker-Abdeckung liefert zusätzlich der bestehende
+Handentwicklungs-Owner einen begrenzten nächsten Support-Meilenstein aus
+`hand-development/strategic-support-development.ts`. Ein vorhandener
+pumpfähiger Breaker, sichtbare bezahlbare Handprogramme und ein nicht akut
+bedrohtes Entwicklungsfenster sind Voraussetzung. Höchstens zwei Programme,
+je eines pro Funktionsart (bedingte Counter-Stärkesenkung, passive
+Stärkesenkung, kompatible erneuerbare Breakercredits), bilden einen
+`preferred_simultaneously`-Bedarf. Ein schon belegter Virusplatz, drei
+gleichartige passive Stärkesenkungen beziehungsweise bereits sechs
+erneuerbare Breakercredits begrenzen spekulativen weiteren Ausbau.
+
+Die Projektion erhält diesen konkret zugelassenen Entwicklungsbedarf auch
+ohne offene Coverage-Lücke. Eine Kapazitätsvorbereitung gehört dann zum
+Handentwicklungs-Owner, nicht zu einem erfundenen Coverage-Plan. Speicher wird
+nur angeboten, wenn der nächste sichtbare Meilenstein den freien Platz
+überschreitet. Speicherinstallation, Folgeprogramme und Creditreserve müssen
+zusammen finanzierbar sein; jeder Speicherprovider wird mit seiner eigenen
+aktuellen LegalAction geprüft. Handfülle allein erzeugt weiterhin keinen
+Speicherbedarf. Nach jeder echten Installation wird neu bewertet; es werden
+keine zukünftigen Action-IDs festgeschrieben.
+
 Ein Basic Draw für eine im eigenen Deck side-sicher bekannte Antwort wird als
 exakte Route dieses Coverage-Plans gebunden. Eine volle Hand ist dabei keine
 harte Sperre: Der Plan darf den sichtbaren Cleanup-Trade-off bewerten, wenn die
@@ -705,6 +726,28 @@ Zugplanung aus; sie enthält keine zweite Handentwicklungs-Discovery.
 **Rolle:** Vordergrund/Support
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
 Ein pauschaler `play_best_hand_card`-Owner existiert nicht.
+
+Erfolgsrun-Counter mit Stärkesenkung auf vollständig gebrochener ICE werden
+mechanisch als Rig-Unterstützung klassifiziert. Ihre Installation erhält über
+`successful-run-counter-development.ts` den konkreten Zweck
+`prepare_successful_run_strength_counters`; ein bloßes `unknown:setup` ist
+kein Ersatz. Die vorbereitete erste Kopie darf auch am letzten Klick einen
+P5-Aufbauplan erhalten. Ihr begrenzter Optionswert setzt einen installierten
+pumpfähigen Verbraucher und bekannte positive oder noch unbekannte ICE
+voraus. Er ist keine sofortige Runverbilligung und garantiert weder
+Erfolgsrun, vollständigen Break, Countererhalt noch einen gegnerischen Purge.
+Vollständig bekannte Nullstärke, Tags, Matchpoint, kurze Deckreste und
+sichtbare Remote-Fristen schließen diesen Vorratszweck aus. Direkte
+Installationslegalität, MU und tatsächliche Kosten bleiben verbindlich.
+
+Eine vorhandene `rig_first`- oder `economy_setup_before_pressure`-Ausrichtung
+liefert bis zu 15 zusätzliche Optionspunkte innerhalb dieses Aufbauzwecks.
+Sie erzeugt weder Legalität noch Consumer oder Bedarf. Zusätzliche Kopien und
+Installkosten mindern den Optionswert. Die bestehende Zugplanung entscheidet
+weiterhin zwischen diesem Aufbau und dringenderen Spielzügen. Regressionen
+beginnen mit der echten Karte in der Hand, prüfen produktive Auswahl,
+Plan/Route/Executor und die aufeinanderfolgende Speicher-/Virusinstallation
+ohne Runtime-Reset.
 
 Verantwortung:
 

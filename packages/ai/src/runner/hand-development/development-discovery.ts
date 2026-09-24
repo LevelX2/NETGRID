@@ -41,6 +41,7 @@ import { runnerAccessPayoffDevelopmentLacksBoundAccessRoute } from "./developmen
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
 import { assessPassiveStrengthInvestment } from "./passive-strength-investment";
 import { assessRunStrengthStock } from "./run-strength-stock";
+import { assessSuccessfulRunCounterDevelopment } from "./successful-run-counter-development";
 
 export function buildRunnerCardDevelopmentSignals({
   handDevelopment,
@@ -106,7 +107,14 @@ export function buildRunnerCardDevelopmentSignals({
         runTargets,
         economy,
       );
+      const successCounterInvestment = assessSuccessfulRunCounterDevelopment(
+        input,
+        evaluation,
+        runTargets,
+        economy,
+      );
       const strengthInvestment =
+        successCounterInvestment ??
         assessPassiveStrengthInvestment(
           input,
           evaluation,
@@ -561,11 +569,13 @@ export function buildRunnerCardDevelopmentSignals({
               : ("execute" as const),
           ...(strengthInvestment?.admitted
             ? {
-                purposeCode: evaluation.hostedBreakerDevelopment?.admitted
-                  ? "amortize_hosted_breaker_economy"
-                  : runStrengthStock?.admitted
-                    ? "stock_run_strength_support"
-                    : "amortize_passive_ice_strength_reduction",
+                purposeCode: successCounterInvestment?.admitted
+                  ? "prepare_successful_run_strength_counters"
+                  : evaluation.hostedBreakerDevelopment?.admitted
+                    ? "amortize_hosted_breaker_economy"
+                    : runStrengthStock?.admitted
+                      ? "stock_run_strength_support"
+                      : "amortize_passive_ice_strength_reduction",
               }
             : restrictedProgramInstallCommitment
               ? {

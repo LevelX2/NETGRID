@@ -158,6 +158,8 @@ import {
   runnerEffectsProvideTopTrashRecovery,
 } from "../../runner-canonical-hint-semantics";
 
+import { successfulRunStrengthCounter } from "./strategic-support-development";
+
 export function evaluateRunnerHandDevelopment(
   params: EvaluateRunnerHandDevelopmentParams,
 ): RunnerHandDevelopmentEvaluation[] {
@@ -673,6 +675,8 @@ function finiteRunnerHandNumber(value: unknown): number {
 
 function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   const text = context.signals.text;
+  if (successfulRunStrengthCounter(context.card.definitionId))
+    return "breaker_or_rig_piece";
   if (looksLikeDelayedInstallEngine(context.signals)) {
     return "delayed_install_engine";
   }
