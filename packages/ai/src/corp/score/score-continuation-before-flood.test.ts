@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
+import { allocateCorpCentralDefenseFromAiFacts } from "../defense/corp-central-defense-facts-adapter";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -110,10 +111,22 @@ describe("existing terminal score continuation before emergency agenda flood", (
     expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
     expect(decision.fallbackUsed).toBe(false);
   });
-  it.each(["stale_quote", "incomplete_quote", "unfundable_quote"])(
-    "keeps emergency development available without a certified current continuation: %s",
-    (condition) => {
+  it.each(
+    ["stale_quote", "incomplete_quote", "unfundable_quote"].flatMap(condition =>
+      ["protected", "exposed"].map(hq => ({ condition, hq })),
+    ),
+  )(
+    "uses HQ protection when continuation is $condition and HQ is $hq",
+    ({ condition, hq }) => {
       const cp = fixture();
+      // At zero credits, unrezzed positive-cost HQ ICE leaves the agendas
+      // exposed. This keeps the deck population and remote-install costs intact.
+      if (hq === "exposed")
+        cp.input.playerView.servers.find((server: { id: string }) => server.id === "hq").ice.forEach((card: { rezzed: boolean }) => { card.rezzed = false; });
+      const allocation = allocateCorpCentralDefenseFromAiFacts({ input: cp.input });
+      expect(allocation.status).toBe("known");
+      if (allocation.status === "known")
+        expect(allocation.evidence.hq.expectedAgendaLoss.numerator > 0).toBe(hq === "exposed");
       const quote = cp.input.playerView.servers.find(
         (s: { id: string }) => s.id === "remote_1",
       ).root[0].scoreContinuationQuote;
@@ -130,8 +143,13 @@ describe("existing terminal score continuation before emergency agenda flood", (
         cp.runtime,
       );
       const decision = chooseAiAction(cp.input);
-      expect(decision.actionId).toContain("corp.install_card.");
-      expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
+      if (hq === "exposed") {
+        expect(decision.actionId).toContain("corp.install_card.");
+        expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
+      } else {
+        expect(decision.actionId).toBe("corp.gain_credit");
+        expect(decision.reasonCode).toBe("plan_first.corp.economy");
+      }
       expect(decision.fallbackUsed).toBe(false);
     },
   );

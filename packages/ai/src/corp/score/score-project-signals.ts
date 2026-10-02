@@ -480,6 +480,10 @@ export function scoreProjectForCandidate(
       !preparedScoreContinuationAvailable &&
       scorelineFeasibility?.deadline !== "current_turn_only" &&
       corpDeckoutAgendaFloodRequiresScoreDevelopment(input) &&
+      !(
+        centralDefenseAllocation?.status === "known" &&
+        centralDefenseAllocation.evidence.hq.expectedAgendaLoss.numerator === 0
+      ) &&
       (!preferredDeckoutAgendaRecycleRouteAvailable ||
         corpAgendaRecyclesHqAgendasIntoRd(agendaDefinitionId));
     const accessPunishingScoreDeceptionWindow =

@@ -9,7 +9,12 @@ export function corpScorePriorityClass(
   if (signal.terminalScore && signal.sameTurnCloseout) return "P1";
   if (
     signal.preventsTerminalSteal ||
-    signal.terminalDefense !== undefined ||
+    // A zero-cost, already active protection quote creates no survival work.
+    // Keep P2 for an actual protection installation or rez reserve, rather
+    // than promoting ordinary progress on a costlessly protected agenda.
+    (signal.terminalDefense !== undefined &&
+      (signal.terminalDefense.install !== undefined ||
+        signal.terminalDefense.best.totalSelectedRezCost > 0)) ||
     (signal.lastDrawScoreSurvival && signal.terminalScore && signal.feasible)
   ) {
     return "P2";
