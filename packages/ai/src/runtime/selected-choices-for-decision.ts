@@ -11,7 +11,7 @@ import { runnerPartialProgramSearchProfile } from "./runner-partial-program-sear
 import {
   selectedCorpAccessPaymentOptionsFromAmbushPlan,
   selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan,
-  selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan,
+  selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan,
 } from "../corp/ambush/ambush-choice-binding";
 import {
   selectedCorpAgendaPurgeInstallTargetOptionIds,
@@ -646,14 +646,14 @@ export function selectedChoicesForDecision(
     !corpInstalledHardwareTrashOperationProfile(choice.sourceCardDefinitionId)
   ) {
     return resolved(
-      selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
+      selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan(
         input,
         action,
         choice,
         selectableOptions,
         currentPortfolio,
       ),
-      "resident_corp_ambush_program_trash",
+      "resident_corp_ambush_installed_trash",
     );
   }
   if (

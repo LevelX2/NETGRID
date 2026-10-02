@@ -3,7 +3,7 @@ import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts"
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { projectKnownCorpCardAccessEffect } from "../../runtime/known-corp-card-access-effect-projection";
-export function accessProgramTrashChoiceSignal(
+export function accessInstalledTrashChoiceSignal(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
 ): CorpAmbushSignal | undefined {
@@ -52,7 +52,10 @@ export function accessProgramTrashChoiceSignal(
       hint?.lineSupport?.includes("corp.ambush_bluff")
     ) ||
     !hint.targetProfiles?.some(
-      (p) => "purpose" in p && p.purpose === "trash_installed_runner_programs",
+      (p) =>
+        "purpose" in p &&
+        (p.purpose === "trash_installed_runner_programs" ||
+          p.purpose === "trash_visible_runner_hardware_on_access"),
     )
   )
     return undefined;
@@ -61,9 +64,20 @@ export function accessProgramTrashChoiceSignal(
     sourceDefinitionId,
     sourceCard: card,
   });
+  const targetCardType =
+    projection.installedHardwareTrash && !projection.installedProgramTrash
+      ? "hardware"
+      : projection.installedProgramTrash && !projection.installedHardwareTrash
+        ? "program"
+        : undefined;
+  const projectedCount =
+    targetCardType === "hardware"
+      ? projection.installedHardwareTrash
+      : projection.installedProgramTrash;
   if (
     projection.status !== "complete" ||
-    projection.installedProgramTrash !== choice.minSelections
+    !targetCardType ||
+    projectedCount !== choice.minSelections
   )
     return undefined;
   const location = { card, serverId: server.id };
@@ -98,14 +112,14 @@ export function accessProgramTrashChoiceSignal(
   ) {
     return undefined;
   }
-  const visiblePrograms = new Map(
+  const visibleTargets = new Map(
     (input.playerView.opponent.rig ?? [])
       .filter(
         (card) =>
           card.known === true &&
           card.owner === "runner" &&
           card.controller === "runner" &&
-          card.type === "program",
+          card.type === targetCardType,
       )
       .map((card) => [card.instanceId, card] as const),
   );
@@ -114,14 +128,14 @@ export function accessProgramTrashChoiceSignal(
     cardId: typeof option.value === "string" ? option.value : undefined,
   }));
   if (
-    optionBindings.length !== visiblePrograms.size ||
+    optionBindings.length !== visibleTargets.size ||
     new Set(optionBindings.map((b) => b.cardId)).size !==
       optionBindings.length ||
     optionBindings.some(
       (binding) =>
         !binding.cardId ||
         binding.optionId !== `target_${binding.cardId}` ||
-        !visiblePrograms.has(binding.cardId),
+        !visibleTargets.has(binding.cardId),
     )
   ) {
     return undefined;
@@ -129,24 +143,24 @@ export function accessProgramTrashChoiceSignal(
   const selected = optionBindings
     .map((binding) => ({
       ...binding,
-      card: visiblePrograms.get(binding.cardId!)!,
+      card: visibleTargets.get(binding.cardId!)!,
     }))
     .sort(
       (left, right) =>
-        programTrashTargetScore(right.card) -
-          programTrashTargetScore(left.card) ||
+        installedTrashTargetScore(right.card) -
+          installedTrashTargetScore(left.card) ||
         left.optionId.localeCompare(right.optionId),
     )
     .slice(0, choice.maxSelections);
   return {
     commitmentVersion: "corp_ambush_commitment_v1",
-    ambushId: `access-program-trash:${choice.choiceId}`,
+    ambushId: `access-installed-trash:${choice.choiceId}`,
     sourceDefinitionId,
     sourceInstanceId,
     actionIds: [resolveAction.actionId],
     serverId: location.serverId,
     phase: "trigger",
-    purposeCode: `resolve_access_program_trash:${sourceInstanceId}`,
+    purposeCode: `resolve_access_${targetCardType}_trash:${sourceInstanceId}`,
     assignedDomainPlanIds: ["corp.ambush_bluff"],
     duplicateAlreadyInstalled: false,
     affordableOrSupportable: true,
@@ -156,24 +170,25 @@ export function accessProgramTrashChoiceSignal(
       location.card.advancementCounters ?? 0,
     ),
     value: 1_000,
-    evidenceCode: `corp_ambush_access_program_trash_owned:${sourceInstanceId}`,
-    accessProgramTrashChoiceBinding: {
+    evidenceCode: `corp_ambush_access_${targetCardType}_trash_owned:${sourceInstanceId}`,
+    accessInstalledTrashChoiceBinding: {
+      targetCardType,
       actionId: resolveAction.actionId,
       choiceId: choice.choiceId,
       choiceSource: choice.source,
       observedAtStateVersion: input.playerView.stateVersion,
       selectedOptionIds: selected.map((entry) => entry.optionId),
-      targetProgramInstanceIds: selected.map((entry) => entry.cardId!),
+      targetCardInstanceIds: selected.map((entry) => entry.cardId!),
       evidenceCodes: [
-        "corp_ambush_program_trash_choice_owned_by_ambush_plan",
-        "corp_ambush_program_trash_bound_to_current_engine_choice",
-        "corp_ambush_program_trash_targets_ranked_by_visible_board_value",
+        "corp_ambush_installed_trash_choice_owned_by_ambush_plan",
+        "corp_ambush_installed_trash_bound_to_current_engine_choice",
+        "corp_ambush_installed_trash_targets_ranked_by_visible_board_value",
       ],
     },
   };
 }
 
-function programTrashTargetScore(card: VisibleCard): number {
+function installedTrashTargetScore(card: VisibleCard): number {
   const counters = Object.values(card.counters ?? {}).reduce(
     (sum, value) => sum + (typeof value === "number" ? value : 0),
     0,

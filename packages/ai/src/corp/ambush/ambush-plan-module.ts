@@ -139,7 +139,7 @@ export function ambushModule(): PlanModule {
               : `ambush_${current.signal.phase}`,
             semanticActionTypes: ambushSemanticTypes(current.signal.phase),
             ...(current.signal.accessProgramBounceChoiceBinding ||
-            current.signal.accessProgramTrashChoiceBinding ||
+            current.signal.accessInstalledTrashChoiceBinding ||
             current.signal.accessPaymentChoiceBinding
               ? {}
               : {
@@ -156,7 +156,7 @@ export function ambushModule(): PlanModule {
                 }),
           },
           ...(current.signal.accessProgramBounceChoiceBinding ||
-          current.signal.accessProgramTrashChoiceBinding ||
+          current.signal.accessInstalledTrashChoiceBinding ||
           current.signal.accessPaymentChoiceBinding
             ? {}
             : {

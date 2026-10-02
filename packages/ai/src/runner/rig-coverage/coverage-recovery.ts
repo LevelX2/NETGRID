@@ -101,6 +101,28 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
   ) {
     return undefined;
   }
+  // Compare the current and prospective rig under the same funded path budget.
+  // A cash-poor trace quote may otherwise add both break and bid reserves,
+  // while the prospective path chooses the cheaper funded avoidance route.
+  const comparisonBudget = Math.max(
+    evaluation.pathCost,
+    input.playerView.own.credits,
+  );
+  const currentPath = assessKnownRezzedIcePath(
+    server.ice,
+    input.playerView.own.rig ?? [],
+    comparisonBudget,
+    server.root,
+    input.playerView.opponent.credits,
+  );
+  const currentOperatingCost = currentPath.visibleBreakCost;
+  if (
+    currentOperatingCost === undefined ||
+    (!currentPath.canReachAccess &&
+      !runnerKnownPathAssessmentIsCostNoAccess(currentPath))
+  ) {
+    return undefined;
+  }
   const installedDefinitionIds = new Set(
     (input.playerView.own.rig ?? [])
       .filter((card) =>
@@ -143,7 +165,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
       const path = assessKnownRezzedIcePath(
         server.ice,
         [...(input.playerView.own.rig ?? []), card],
-        evaluation.pathCost,
+        comparisonBudget,
         server.root,
         input.playerView.opponent.credits,
       );
@@ -155,7 +177,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
         return [];
       }
       const totalRecoveryCost = installCost + breakCost;
-      return totalRecoveryCost < evaluation.pathCost
+      return totalRecoveryCost < currentOperatingCost
         ? [{ card, totalRecoveryCost, breakCost }]
         : [];
     })
@@ -171,7 +193,8 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
     deckCapabilities,
     role,
     installedDefinitionIds,
-    evaluation.pathCost,
+    currentOperatingCost,
+    comparisonBudget,
   );
   if (!visibleAnswer && !deckAlternative) return undefined;
 
@@ -215,6 +238,8 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
     evidenceCodes: [
       `coverage_efficiency_target:${evaluation.targetServerId}`,
       `coverage_efficiency_current_known_path_cost:${evaluation.pathCost}`,
+      `coverage_efficiency_comparison_budget:${comparisonBudget}`,
+      `coverage_efficiency_current_operating_cost:${currentOperatingCost}`,
       `coverage_efficiency_current_funding_gap:${Math.max(0, evaluation.routeQuote?.fundingGap ?? 0)}`,
       `coverage_efficiency_installed_definition_count:${installedDefinitionIds.size}`,
       ...(visibleAnswer
@@ -244,6 +269,7 @@ export function runnerCostEffectiveDeckCoverageAlternative(
   role: RunnerCoverageGapSignal["requiredRole"],
   installedDefinitionIds: ReadonlySet<string>,
   currentKnownPathCost: number,
+  comparisonBudget: number,
 ):
   | { breaker: BreakerCapability; breakCost: number; totalCost: number }
   | undefined {
@@ -255,7 +281,7 @@ export function runnerCostEffectiveDeckCoverageAlternative(
       const path = assessKnownRezzedIcePath(
         server.ice,
         [...(input.playerView.own.rig ?? []), projectedBreaker],
-        Math.max(currentKnownPathCost, input.playerView.own.credits),
+        comparisonBudget,
         server.root,
         input.playerView.opponent.credits,
       );

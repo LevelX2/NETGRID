@@ -63,13 +63,14 @@ export type CorpAmbushSignal = {
     targetProgramInstanceIds: string[];
     evidenceCodes: string[];
   };
-  accessProgramTrashChoiceBinding?: {
+  accessInstalledTrashChoiceBinding?: {
+    targetCardType: "program" | "hardware";
     actionId: string;
     choiceId: string;
     choiceSource: string;
     observedAtStateVersion: number;
     selectedOptionIds: string[];
-    targetProgramInstanceIds: string[];
+    targetCardInstanceIds: string[];
     evidenceCodes: string[];
   };
   recycleRoute?: {

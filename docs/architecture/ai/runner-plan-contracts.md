@@ -414,6 +414,14 @@ Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
 
+Kosten-Recovery vergleicht installiertes Rig, sichtbare Handantwort und
+bekannte Stack-Alternative unter demselben finanzierten Pfadbudget. Die
+aktuelle Run-Finanzierung bleibt davon getrennt: Eine bei Geldmangel größere
+garantierte Trace-/Breakreserve ist keine Betriebskostenersparnis einer
+neuen Installation. Zulassung verlangt niedrigere vollständige
+Installations- plus Pfadkosten als die so gequotete bestehende Abdeckung.
+Gleiche Kosten erzeugen keinen Effizienzbedarf, auch bei kostenloser Kopie.
+
 Eine begrenzte Programmsuche in der eigenen Stack-Spitze
 verwendet den generierten CardSpec-Zieltyp, die Anzahl betrachteter Karten
 und die Kosten je übernommener Karte. Sie ist kein R&D-Informationswerkzeug

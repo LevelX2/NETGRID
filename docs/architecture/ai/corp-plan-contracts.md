@@ -1620,6 +1620,15 @@ Quelle im neuen Zustand erneut gequotet; dieselbe Quelle wird nicht doppelt
 in einer vorausberechneten Route gebucht. Ein Profil- oder Legalitätsnachweis
 allein ersetzt diesen produktiven Übergang zur Punish-Route nicht.
 
+Die Vorbereitung erkennt Trace-Support an den tatsächlich erzeugten typisierten
+`trace_credit`-Effekten. `scope: trace` unterstützt sichtbare eigene Trace-Quellen
+unabhängig vom Installationsserver; `scope: fort` benötigt eine Trace-Quelle
+im gebundenen Fort. Ohne sichtbare Quelle bleibt die Vorbereitung unproduktiv.
+Eine globale Counter-Pool-Karte erreicht damit den bestehenden vorbereitenden
+Punish-Root und seinen materialisierten Step, aber weder liquide Credits noch eine
+garantierte spätere Trace- oder Lethal-Quote. Score-Slot-Reservierungen und
+Finanzierungsgrenzen bleiben Teil derselben Zulassungsprüfung.
+
 Die ausgewählte Route ist variabel. Sie verwendet nur so viele aktuell
 vorhandene Komponenten, wie nach Runner-Handzahl und sichtbarer Prävention
 notwendig sind. Vier sicher wirksame Damage sind bei drei Runner-Handkarten
@@ -1808,14 +1817,15 @@ regellegal; Engine-Ausführung und Zielprüfung bleiben unverändert maßgeblich
 
 ### Vertikale Implementierung von Ambush und Bluff
 
-Öffentliche Program-Trash-Choices eines installierten Zugriffseffekts gehören
-ebenfalls dem Ambush-Owner. Er prüft Quellkarte, tatsächlich angegriffenen
-Server, aktive CardSpec-Wirkung, sichtbare Programme und die vollständige
-LegalAction-Choice. Er priorisiert sichtbare Icebreaker, Counter und
-Installations-/Speicherwert und bindet die vorgeschriebene Anzahl geordnet an
-den aktuellen Executor. Die Choice-Auflösung übernimmt ausschließlich diese
-Auswahl; falsche Quelle, fehlende Ziele oder veraltete Bindung scheitern
-fail-closed. Hardware-Trash-Operations bleiben beim bisherigen Owner.
+Öffentliche Programm- und Hardware-Trash-Choices eines installierten
+Zugriffseffekts gehören ebenfalls dem Ambush-Owner. Er prüft Quellkarte,
+tatsächlich angegriffenen Server, aktive CardSpec-Wirkung, den konkreten
+Zieltyp, sichtbare Zielkarten und die vollständige LegalAction-Choice.
+Er priorisiert sichtbare Icebreaker, Counter und Installations-/Speicherwert
+und bindet Zieltyp sowie vorgeschriebene Anzahl geordnet an den aktuellen
+Executor. Die Choice-Auflösung übernimmt ausschließlich diese Auswahl;
+falsche Quelle, fremder Zieltyp, fehlende Ziele oder veraltete Bindung
+scheitern fail-closed. Hardware-Trash-Operations bleiben beim bisherigen Owner.
 
 Der Owner liegt unter `packages/ai/src/corp/ambush/`:
 
@@ -1823,7 +1833,7 @@ Der Owner liegt unter `packages/ai/src/corp/ambush/`:
 - `corp-ambush-plan-signals.ts`: Intent- und Quellenbindung, Köder, Fortsetzung und Disposition;
 - `corp-access-zone-preparation.ts`: begrenzte Install-/Halte-/Rückmischfolge und Zugriffszonenwert;
 - `corp-access-payment-choice.ts`: Bewertung und Bindung bezahlter Zugriffseffekte;
-- `corp-access-program-trash-choice.ts`: Bewertung und Bindung öffentlicher Program-Trash-Ziele beim Zugriff;
+- `corp-access-installed-trash-choice.ts`: Bewertung und typisierte Bindung öffentlicher Programm-/Hardware-Trash-Ziele beim Zugriff;
 - `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-/Trash-Choice.
 
 Defense liefert weiterhin den typisierten Bluff-Schutzbedarf; Economy erfüllt

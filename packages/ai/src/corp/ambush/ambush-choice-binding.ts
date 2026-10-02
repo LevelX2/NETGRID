@@ -133,7 +133,7 @@ export function selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan(
   return [...binding.selectedOptionIds];
 }
 
-export function selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
+export function selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan(
   input: AiDecisionInput,
   action: LegalAction,
   choice: PendingChoice,
@@ -147,7 +147,7 @@ export function selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
   const moduleState = executor?.moduleState as
     | { kind?: unknown; signal?: CorpAmbushSignal }
     | undefined;
-  const binding = moduleState?.signal?.accessProgramTrashChoiceBinding;
+  const binding = moduleState?.signal?.accessInstalledTrashChoiceBinding;
   const requirement = action.choiceRequirements?.[0];
   const optionIds = selectableOptions.map((option) => option.id);
   const selectedCardIds = binding?.selectedOptionIds.flatMap((optionId) => {
@@ -156,6 +156,7 @@ export function selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
   });
   const exactBinding =
     portfolio?.side === "corp" &&
+    portfolio.stateVersion === input.playerView.stateVersion &&
     executor?.moduleId === "corp.ambush_and_bluff" &&
     executor.executionState === "executor" &&
     moduleState?.kind === "ambush" &&
@@ -164,9 +165,29 @@ export function selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
     binding.choiceId === choice.choiceId &&
     binding.choiceSource === choice.source &&
     binding.observedAtStateVersion === input.playerView.stateVersion &&
-    selectedCardIds?.length === binding.targetProgramInstanceIds.length &&
+    (binding.targetCardType === "program" ||
+      binding.targetCardType === "hardware") &&
+    (input.playerView.opponent.rig ?? []).filter(
+      (c) =>
+        c.known &&
+        c.owner === "runner" &&
+        c.controller === "runner" &&
+        c.type === binding.targetCardType,
+    ).length === selectableOptions.length &&
+    selectableOptions.every((o) =>
+      (input.playerView.opponent.rig ?? []).some(
+        (c) =>
+          c.known &&
+          c.owner === "runner" &&
+          c.controller === "runner" &&
+          c.type === binding.targetCardType &&
+          c.instanceId === o.value &&
+          o.id === `target_${c.instanceId}`,
+      ),
+    ) &&
+    selectedCardIds?.length === binding.targetCardInstanceIds.length &&
     selectedCardIds.every(
-      (cardId, index) => cardId === binding.targetProgramInstanceIds[index],
+      (cardId, index) => cardId === binding.targetCardInstanceIds[index],
     ) &&
     choice.side === "corp" &&
     choice.stateVersion === input.playerView.stateVersion &&
@@ -195,7 +216,7 @@ export function selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
     throw unresolvedChoiceFailure(
       input,
       action,
-      "The Corp ambush plan must own and bind the exact program-trash targets before the choice resolver completes the current Engine payload.",
+      "The Corp ambush plan must own and bind the exact installed-card-trash targets before the choice resolver completes the current Engine payload.",
     );
   }
   return [...binding.selectedOptionIds];

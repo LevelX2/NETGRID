@@ -11,7 +11,7 @@ import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
-import { selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan } from "../../corp/ambush/ambush-choice-binding";
+import { selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan } from "../../corp/ambush/ambush-choice-binding";
 
 function fixture(name: string) {
   const cp = JSON.parse(
@@ -55,7 +55,7 @@ it.each([
   expect(executor.moduleState).toMatchObject({
     kind: "ambush",
     signal: {
-      accessProgramTrashChoiceBinding: {
+      accessInstalledTrashChoiceBinding: {
         actionId: decision.actionId,
         observedAtStateVersion: input.playerView.stateVersion,
         selectedOptionIds: decision.selectedChoices!.selectedOptionIds,
@@ -64,7 +64,7 @@ it.each([
   });
   const choice = input.playerView.pendingChoice!;
   expect(() =>
-    selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
+    selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan(
       input,
       {
         ...input.legalActions[0]!,
@@ -76,7 +76,7 @@ it.each([
     ),
   ).toThrow();
   expect(() =>
-    selectedCorpAccessProgramTrashOptionIdsFromResidentAmbushPlan(
+    selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan(
       input,
       input.legalActions[0]!,
       { ...choice, sourceCardInstanceId: "other-source" },

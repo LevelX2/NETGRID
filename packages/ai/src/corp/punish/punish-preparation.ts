@@ -12,6 +12,7 @@ import {
   visibleCardIsAgenda,
   requireVisibleCandidateSource,
   visibleKnownCardType,
+  visibleOwnDefinitionIds,
 } from "../../runtime/visible-action-facts";
 import { getStructuredTagPunishProfileForCard } from "../../tag-punish-ontology-consumer";
 
@@ -148,8 +149,12 @@ export function corpDefinitionIsTraceSupport(
   if (!definitionId) return false;
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   return (
-    hint?.actionTacticSignals?.includes("trace.credit_support") === true ||
-    hint?.functionSignals?.includes("economy.trace_credit") === true
+    hint?.effects?.some(
+      (effect) =>
+        effect.kind === "trace_credit" &&
+        effect.resource === "credits" &&
+        (effect.scope === "trace" || effect.scope === "fort"),
+    ) === true
   );
 }
 
@@ -163,6 +168,19 @@ export function corpTraceSupportTargetHasVisibleTraceSource(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
+  const globalTraceSupport =
+    candidate.sourceDefinitionId !== undefined &&
+    AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)?.effects?.some(
+      (effect) =>
+        effect.kind === "trace_credit" &&
+        effect.resource === "credits" &&
+        effect.scope === "trace",
+    ) === true;
+  if (globalTraceSupport) {
+    return [...visibleOwnDefinitionIds(input)].some(
+      corpDefinitionIsTraceSource,
+    );
+  }
   const sourceServerId = candidate.sourceCardInstanceId
     ? serverForInstalledCard(input, candidate.sourceCardInstanceId)
     : undefined;
