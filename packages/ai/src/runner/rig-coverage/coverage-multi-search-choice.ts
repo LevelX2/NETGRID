@@ -11,6 +11,7 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import { extractAiFeatures } from "../../runtime/ai-features";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { runnerPartialProgramSearchProfile } from "../../runtime/runner-partial-program-search-facts";
 import {
   selectedSearchChoiceOptionIds,
   type SearchChoiceScoringContext,
@@ -40,6 +41,20 @@ function isMultiGripSearch(choice: Choice | undefined): choice is Choice {
     choice.cardSearchPresentation?.sourceZone === "stack" &&
     choice.cardSearchPresentation.destination === "grip" &&
     choice.maxSelections > 1
+  );
+}
+
+function hasBoundPartialProgramSearch(
+  input: AiDecisionInput,
+  state: CoverageState,
+): boolean {
+  return (
+    state.gap?.directSearchChoiceBindings?.some(
+      (binding) =>
+        binding.actionId === state.selectedSearchActionId &&
+        runnerPartialProgramSearchProfile(input, binding.sourceDefinitionId) !==
+          undefined,
+    ) === true
   );
 }
 
@@ -73,6 +88,7 @@ export function resolvePlanBoundRunnerCoverageMultiSearchChoice(
   const state = executor.moduleState as CoverageState;
   if (!state || state.kind !== "coverage")
     throw failure(input, executor.instanceId);
+  if (hasBoundPartialProgramSearch(input, state)) return undefined;
   const bindings = state.gap?.directSearchChoiceBindings?.filter(
     (b) =>
       b.actionId === state.selectedSearchActionId &&
@@ -266,6 +282,10 @@ export function selectedBoundRunnerCoverageMultiSearchChoiceOptionIds(
     (p) => p.instanceId === portfolio.executorInstanceId,
   );
   if (executor?.moduleId !== "runner.rig_and_coverage") return undefined;
+  if (
+    hasBoundPartialProgramSearch(input, executor.moduleState as CoverageState)
+  )
+    return undefined;
   const bound = (executor.moduleState as CoverageState)
     .multiSearchChoiceBinding;
   const requirement = action.choiceRequirements?.[0];

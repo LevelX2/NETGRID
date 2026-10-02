@@ -425,6 +425,12 @@ Resolver übernimmt ausschließlich das gebundene Ziel, falls es unter den
 tatsächlichen Optionen liegt, ansonsten die erlaubte leere Auswahl. Er
 entwickelt dort keine neue Suchstrategie und übernimmt keine weiteren Programme.
 
+Die maximale Optionszahl allein macht eine begrenzte Spitzensuche nicht zur
+Mehrkartensuche. Die Coverage-Fortsetzung trennt beide Verträge anhand der
+vorher gebundenen kanonischen Quellfunktion. Auch bei einer abweichenden
+aktuellen Choice-Quelle prüft anschließend derselbe exakte Einzelzielresolver
+die ursprüngliche Bindung und scheitert bei Quellenverlust sichtbar.
+
 Die Materialisierung verwendet nur die Actionmenge der aktuellen
 Beschaffungsphase: direkte Suchaktionen in `search_answer`, Installationen
 des Suchwerkzeugs in `setup_search_engine` und Ziehaktionen in
