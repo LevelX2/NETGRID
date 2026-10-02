@@ -3,13 +3,14 @@ import type {
   AiDecisionInput,
   LegalAction,
   VisibleCard,
+  VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
 
 import {
   currentEncounteredIceCard,
   currentEncounterNextOnlySubroutineHasNoTarget,
   currentEncounterRequiresFullBreak,
-  currentRunHasFutureVisibleIce,
+  currentEncounterUnbrokenSubroutineIndexes,
   currentRunRemainingIce,
 } from "./current-encounter";
 import { isTrashUnlessRunnerPaysSubroutine } from "./encounter-subroutine";
@@ -28,7 +29,7 @@ type RunRemainderEffectEntry = {
       VisibleCard["effectiveRunQuote"]
     >["subroutines"][number]["unbrokenRunEffect"]
   >;
-  subroutineType: string | undefined;
+  subroutineType: VisibleEffectiveSubroutine["type"];
 };
 
 export type EncounterRunRemainderEffectAssessment = {
@@ -51,19 +52,33 @@ export function encounterRunRemainderEffectAssessment(
   projectedSubroutineIndexes?: readonly number[],
 ): EncounterRunRemainderEffectAssessment {
   const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  const explicitBreakIndex =
+    action?.type === "break_subroutine" &&
+    typeof action.payload?.subroutineIndex === "number"
+      ? action.payload.subroutineIndex
+      : undefined;
+  const remainingIndexes =
+    quote?.subroutines.some((subroutine) => subroutine.unbrokenRunEffect) &&
+    explicitBreakIndex === undefined &&
+    !projectedSubroutineIndexes
+      ? currentEncounterUnbrokenSubroutineIndexes(input)
+      : undefined;
   const targetIndexes =
     projectedSubroutineIndexes ??
-    (action?.type === "break_subroutine" &&
-    typeof action.payload?.subroutineIndex === "number"
-      ? [action.payload.subroutineIndex]
+    (explicitBreakIndex !== undefined
+      ? [explicitBreakIndex]
       : (quote?.subroutines
           .map((subroutine, index) =>
-            subroutine.unbrokenRunEffect ? index : undefined,
+            subroutine.unbrokenRunEffect && remainingIndexes?.has(index)
+              ? index
+              : undefined,
           )
           .filter((index): index is number => index !== undefined) ?? []));
   const effects: RunRemainderEffectEntry[] = targetIndexes.flatMap((index) => {
-    const effect = quote?.subroutines[index]?.unbrokenRunEffect;
-    const subroutineType = quote?.subroutines[index]?.type;
+    const subroutine = quote?.subroutines[index];
+    if (!subroutine?.unbrokenRunEffect) return [];
+    const effect = subroutine.unbrokenRunEffect;
+    const subroutineType = subroutine.type;
     if (currentEncounterNextOnlySubroutineHasNoTarget(input, subroutineType))
       return [];
     return effect ? [{ index, effect, subroutineType }] : [];
@@ -155,14 +170,8 @@ export function encounterRunRemainderEffectAssessment(
     0,
     (projectedPath.visibleBreakCost ?? 0) - (basePath.visibleBreakCost ?? 0),
   );
-  const createsHardLock = remainingEffects.some(
-    ({ effect }) => effect.preventsFutureBreaking === true,
-  );
   const mustBreak =
     (!ignoredBecauseNoRemainingIce && projectedPath.blocked) ||
-    (!ignoredBecauseNoRemainingIce &&
-      createsHardLock &&
-      currentRunHasFutureVisibleIce(input)) ||
     (seriousNonCostRiskAfterAction && !basePath.blocked);
   const evidence = [
     ...deferredFullBreakSubroutineIndexes.map(

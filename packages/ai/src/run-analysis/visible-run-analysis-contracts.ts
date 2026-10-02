@@ -26,7 +26,10 @@ export type RootCardLike = {
 
 export type RunPathProjectionEffect = NonNullable<
   VisibleEffectiveSubroutine["unbrokenRunEffect"]
->;
+> & {
+  /** Derived from the Engine subroutine kind; consumed by the next actual encounter. */
+  expiresAfterNextEncounter?: true;
+};
 
 export type RunPathProjection = {
   effect: RunPathProjectionEffect;
@@ -51,6 +54,8 @@ export type VisibleDeflectorContext = {
   availableRunnerClicks?: number;
   /** Structured run restriction; noisy breakers cannot be used. */
   prohibitNoisyIcebreakers?: boolean;
+  /** Public resolved break restrictions, bound to their actual encounter ICE. */
+  prohibitBreakingIceInstanceIds?: readonly string[];
   /** Runner-private Engine quote for trace base-link and credit support. */
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
   /** Active trace rules profile used by run-path trace projections. */

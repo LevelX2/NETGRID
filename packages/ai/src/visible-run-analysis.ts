@@ -71,6 +71,7 @@ import {
   pathProjectionEffectsForQuote,
   runPathEffectAlreadyVisibleOnFutureIce,
   runPathProjectionEffectCanMatter,
+  subroutineOnlyAffectsNextEncounter,
   unbrokenEffectIsUnavoidableTraceRunLock,
   visibleIceHazardPenalty,
   visibleIceRunHazardsForQuote,
@@ -146,6 +147,7 @@ export function assessKnownRezzedIcePath(
   rootCards: RootCardLike[] = [],
   visibleCorpBidCapacity = 0,
   deflectorContext: VisibleDeflectorContext = {},
+  unbrokenRunPathEffects: RunPathProjectionEffect[] = [],
 ): KnownRezzedIcePathAssessment {
   const normalizedCorpBidCapacity = normalizeVisibleCorpBidCapacity(
     visibleCorpBidCapacity,
@@ -193,7 +195,7 @@ export function assessKnownRezzedIcePath(
             runnerCredits,
             rootCards,
             normalizedCorpBidCapacity,
-            [],
+            unbrokenRunPathEffects,
             {
               allowBreakingRunPathEffects: true,
               bartmossOutcome,
@@ -539,14 +541,19 @@ function assessKnownRezzedIcePathInternal(
       (ice.rezzed !== true && ice.authoritativePostRezRunProjection !== true)
     )
       continue;
-    const rigCardsForEncounter = rigCards.filter(
-      (card) =>
-        !breakersAtRiskOfBeingTrashed.has(card.instanceId) &&
-        !(
-          deflectorContext.prohibitNoisyIcebreakers === true &&
-          card.subtypes?.includes("noisy")
-        ),
-    );
+    const breakingProhibited =
+      ice.instanceId !== undefined &&
+      deflectorContext.prohibitBreakingIceInstanceIds?.includes(ice.instanceId);
+    const rigCardsForEncounter = breakingProhibited
+      ? []
+      : rigCards.filter(
+          (card) =>
+            !breakersAtRiskOfBeingTrashed.has(card.instanceId) &&
+            !(
+              deflectorContext.prohibitNoisyIcebreakers === true &&
+              card.subtypes?.includes("noisy")
+            ),
+        );
     requireEffectiveRunQuoteForKnownRezzedIce(ice);
     const effectiveIce = projectIceForRunPathEffects(
       ice,
@@ -926,7 +933,7 @@ function assessKnownRezzedIcePathInternal(
       quote,
       ice: effectiveIce,
       iceIndex,
-      rigCards,
+      rigCards: rigCardsForEncounter,
       availableCredits: Math.max(0, creditsAfterAvoidingVisibleIceHazards),
       visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
@@ -992,6 +999,18 @@ function assessKnownRezzedIcePathInternal(
       }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
+    // A known encounter consumes its queued next-encounter effects, after all
+    // of this encounter's hazards and breaks have been priced. Unknown ICE
+    // and a quoted random auto-pass cannot certify that consumption.
+    if (
+      !quote.conditionalEncounterEffects?.some(
+        (effect) => effect.kind === "random_strength_or_derez_auto_pass",
+      )
+    ) {
+      activeRunPathEffects = activeRunPathEffects.filter(
+        (effect) => effect.expiresAfterNextEncounter !== true,
+      );
+    }
     const futureIce = iceCards.slice(0, Math.max(0, iceIndex));
     const runPathEffects = pathProjectionEffectsForQuote(quote).filter(
       ({ effect, sourceSubroutine }) =>
@@ -1017,6 +1036,7 @@ function assessKnownRezzedIcePathInternal(
           Number(right.sourceSubroutine.type === "do_damage"),
       );
     }
+    const newlyQueuedRunPathEffects: RunPathProjectionEffect[] = [];
     for (const [
       effectIndex,
       { effect, sourceSubroutine },
@@ -1187,6 +1207,7 @@ function assessKnownRezzedIcePathInternal(
             sourceSubroutine,
             activeRunPathEffects,
             rigCards,
+            rigCardsForEncounter,
             rootCards,
             creditBudget,
             visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
@@ -1244,9 +1265,13 @@ function assessKnownRezzedIcePathInternal(
           carriedBreakerStrengths,
         );
       } else {
-        activeRunPathEffects = [...activeRunPathEffects, effect];
+        newlyQueuedRunPathEffects.push(effect);
       }
     }
+    activeRunPathEffects = [
+      ...activeRunPathEffects,
+      ...newlyQueuedRunPathEffects,
+    ];
     visibleCorpCreditsThroughPath += (quote?.subroutines ?? [])
       .filter((subroutine) => subroutine.type === "corp_gain_credit")
       .reduce(
@@ -1499,16 +1524,6 @@ function advanceVisibleRunBreakerState(
   }
 }
 
-function subroutineOnlyAffectsNextEncounter(
-  subroutine: VisibleEffectiveSubroutine,
-): boolean {
-  return (
-    subroutine.type === "set_next_encounter_unless_fully_break_damage" ||
-    subroutine.type === "set_next_encounter_lock" ||
-    subroutine.type === "set_next_encounter_no_break_subroutines"
-  );
-}
-
 function runPathEffectBreakAssessment(params: {
   iceCards: IceCardLike[];
   iceIndex: number;
@@ -1518,6 +1533,7 @@ function runPathEffectBreakAssessment(params: {
   sourceSubroutine: VisibleEffectiveSubroutine;
   activeRunPathEffects: RunPathProjectionEffect[];
   rigCards: VisibleCard[];
+  rigCardsForEncounter: VisibleCard[];
   rootCards: RootCardLike[];
   creditBudget: MutableRunnerRunPathCreditBudget;
   visibleCorpBidCapacity: number;
@@ -1531,7 +1547,7 @@ function runPathEffectBreakAssessment(params: {
   if (futureIce.length <= 0) return undefined;
   const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(
     effectiveIceForQuote(params.ice, params.quote),
-    params.rigCards,
+    params.rigCardsForEncounter,
     1,
     params.breakerStrengths,
     params.additionalBreakCostPerSubroutine,

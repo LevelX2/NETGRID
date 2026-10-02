@@ -1,19 +1,15 @@
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import type { AiDecisionInput, VisibleEffectiveSubroutine } from "@netgrid/shared";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
+import { subroutineOnlyAffectsNextEncounter } from "../run-analysis/visible-run-hazards";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
-
 import {
   assessKnownRezzedIcePath,
-  requireEffectiveRunQuoteForKnownRezzedIce,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
 
 type UnbrokenRunEffectEntry = {
-  effect: NonNullable<
-    NonNullable<
-      VisibleCard["effectiveRunQuote"]
-    >["subroutines"][number]["unbrokenRunEffect"]
-  >;
+  effect: NonNullable<VisibleEffectiveSubroutine["unbrokenRunEffect"]>;
+  subroutineType?: VisibleEffectiveSubroutine["type"];
 };
 
 export function currentRunFuturePathAssessment(
@@ -26,11 +22,8 @@ export function currentRunFuturePathAssessment(
     (candidate) => candidate.id === run.position?.serverId,
   );
   if (!server) return { blocked: false };
-  const futureIce = server.ice
-    .slice(0, Math.max(0, run.position.iceIndex))
-    .map((ice) => projectFutureIceForUnbrokenEffects(ice, effects));
   const assessment = assessKnownRezzedIcePath(
-    futureIce,
+    server.ice.slice(0, Math.max(0, run.position.iceIndex)),
     runnerRigAfterEncounter(input.playerView.own.rig ?? []),
     runnerRunPathCreditBudgetWithVisiblePools(
       input.playerView.own.credits,
@@ -39,62 +32,16 @@ export function currentRunFuturePathAssessment(
     server.root,
     input.playerView.opponent.credits,
     currentRunPathContext(input),
+    effects.map(({ effect, subroutineType }) =>
+      subroutineType && subroutineOnlyAffectsNextEncounter({ type: subroutineType })
+        ? { ...effect, expiresAfterNextEncounter: true }
+        : effect,
+    ),
   );
-  const encounterTax = effects.reduce((sum, { effect }) => {
-    const perIce = Math.max(0, Math.floor(effect.addsFutureEncounterCost ?? 0));
-    return (
-      sum + perIce * futureIce.filter((ice) => ice.known && ice.rezzed).length
-    );
-  }, 0);
-  const visibleBreakCost = (assessment.visibleBreakCost ?? 0) + encounterTax;
   return {
-    blocked: assessment.blocked || assessment.creditsAfterPath < encounterTax,
-    ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
-  };
-}
-
-export function projectFutureIceForUnbrokenEffects(
-  ice: VisibleCard,
-  effects: UnbrokenRunEffectEntry[],
-): VisibleCard {
-  if (!ice.known || ice.rezzed !== true || !ice.definitionId) return ice;
-  const baseQuote = requireEffectiveRunQuoteForKnownRezzedIce(ice);
-  if (!baseQuote) return ice;
-  let effectiveStrength = baseQuote.effectiveStrength;
-  let breakSubroutineAdditionalCostPerSubroutine =
-    baseQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
-  const subroutines = baseQuote.subroutines.map((subroutine) => ({
-    ...subroutine,
-  }));
-  for (const { effect } of effects) {
-    const addedEndTheRun = Math.max(
-      0,
-      Math.floor(effect.addsFutureEndTheRunSubroutines ?? 0),
-    );
-    for (let index = 0; index < addedEndTheRun; index += 1) {
-      subroutines.push({
-        id: `visible_projection.future_end_the_run.${index + 1}`,
-        type: "end_the_run",
-      });
-    }
-    effectiveStrength += Math.max(
-      0,
-      Math.floor(effect.increasesFutureIceStrength ?? 0),
-    );
-    breakSubroutineAdditionalCostPerSubroutine += Math.max(
-      0,
-      Math.floor(effect.increasesFutureBreakCostPerSubroutine ?? 0),
-    );
-  }
-  return {
-    ...ice,
-    effectiveRunQuote: {
-      ...baseQuote,
-      effectiveStrength,
-      subroutines,
-      ...(breakSubroutineAdditionalCostPerSubroutine > 0
-        ? { breakSubroutineAdditionalCostPerSubroutine }
-        : {}),
-    },
+    blocked: assessment.blocked,
+    ...(assessment.visibleBreakCost
+      ? { visibleBreakCost: assessment.visibleBreakCost }
+      : {}),
   };
 }

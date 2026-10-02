@@ -52,10 +52,25 @@ export function pathProjectionEffectsForQuote(
         ? { ...quotedEffect, causesDamageOrProgramTrash: false }
         : quotedEffect;
     if (effect && runPathProjectionEffectCanMatter(effect)) {
-      effects.push({ effect, sourceSubroutine: subroutine });
+      effects.push({
+        effect: subroutineOnlyAffectsNextEncounter(subroutine)
+          ? { ...effect, expiresAfterNextEncounter: true }
+          : effect,
+        sourceSubroutine: subroutine,
+      });
     }
   }
   return effects;
+}
+
+export function subroutineOnlyAffectsNextEncounter(
+  subroutine: Pick<VisibleEffectiveSubroutine, "type">,
+): boolean {
+  return (
+    subroutine.type === "set_next_encounter_unless_fully_break_damage" ||
+    subroutine.type === "set_next_encounter_lock" ||
+    subroutine.type === "set_next_encounter_no_break_subroutines"
+  );
 }
 
 export function visibleIceRunHazardSummary(
