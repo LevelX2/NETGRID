@@ -45,13 +45,14 @@ function addCostQuotes(input: AiDecisionInput) {
         a.payload.iceInstallTotalCost > 0,
     );
     const quote: CorpRootRezIceInstallCostQuote = {
-      schemaVersion: "corp-root-rez-ice-install-cost-quote-v1",
+      schemaVersion: "corp-root-rez-ice-install-cost-quote-v2",
       actionId: action.actionId,
       sourceCardInstanceId: action.source,
-      targetServerId: server.id,
+      sourceServerId: server.id,
       stateVersion: input.playerView.stateVersion,
       installs: installs.map((a) => ({
         cardInstanceId: a.source!,
+        serverId: server.id,
         beforeCredits: a.payload!.iceInstallTotalCost as number,
         afterCredits: Math.max(
           0,
@@ -117,7 +118,7 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
     });
     const quotes = addCostQuotes(cp.input);
     expect(quotes).toHaveLength(1);
-    expect(quotes[0]?.targetServerId).toBe("hq");
+    expect(quotes[0]?.sourceServerId).toBe("hq");
     Object.assign(cp.input, buildAiDecisionInputDto(cp.input));
     const after = choose(cp);
     expect(after.actionId).toBe(before.actionId);
@@ -145,6 +146,20 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
 
   for (const [name, mutate] of [
     [
+      "another installation destination",
+      (q: CorpRootRezIceInstallCostQuote) => {
+        q.installs.forEach((i) => {
+          i.serverId = "rd";
+        });
+      },
+    ],
+    [
+      "ambiguous destination entry",
+      (q: CorpRootRezIceInstallCostQuote) => {
+        q.installs.push(...structuredClone(q.installs));
+      },
+    ],
+    [
       "stale state",
       (q: CorpRootRezIceInstallCostQuote) => {
         q.stateVersion--;
@@ -153,7 +168,7 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
     [
       "another fort",
       (q: CorpRootRezIceInstallCostQuote) => {
-        q.targetServerId = "rd";
+        q.sourceServerId = "rd";
       },
     ],
     [

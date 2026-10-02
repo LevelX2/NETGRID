@@ -670,8 +670,11 @@ Vor einer ausgewählten ICE-Installation kann Defense eine kostenlose Root-Rez
 als exakt gebundene Kostenvorbereitung ausführen. Die Engine veröffentlicht
 dafür `CorpRootRezIceInstallCostQuote` nur für reine, öffentliche
 Installationskostenmodifikatoren ohne weitere Lifecycle-Funktion. Die Quote
-vergleicht aktuelle und nach Rez geltende Kosten derselben HQ-Karte im selben
-Fort; sie bleibt Corp-privat und bindet Quelle, Rez-Action und StateVersion.
+vergleicht aktuelle und nach Rez geltende Kosten derselben HQ-Karte an jedem
+aktuell vorhandenen Installationsziel. Die Version 2 bindet den Standort der
+Root-Quelle getrennt vom Server jedes Installationseintrags; lokale und globale
+Modifikatoren folgen ausschließlich der Engine-Kostenrechnung. Die Quote bleibt
+Corp-privat und bindet Quelle, Rez-Action und StateVersion.
 Die Positivliste in `input-dto.ts` übernimmt
 `rootRezIceInstallCostQuoteJson` in beide actor-sicheren LegalAction-Listen.
 Der Nachweis umfasst die Engine-Aktion durch diesen DTO-Pfad und die

@@ -61,31 +61,34 @@ export function quoteCorpRootRezIceInstallCosts(
       [source.instanceId]: { ...source, faceup: true, rezzed: true },
     },
   };
-  const installs = state.corp.hq.flatMap((id) => {
-    const card = state.cardInstances[id];
-    const definition = card
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]
-      : undefined;
-    if (!definition || !canInstallCorpIceInServer(definition, server))
-      return [];
-    const before = quoteCorpIceInstallCost(state, id, server);
-    const after = quoteCorpIceInstallCost(projected, id, server);
-    return before.canPay && after.finalCredits < before.finalCredits
-      ? [
-          {
-            cardInstanceId: id,
-            beforeCredits: before.finalCredits,
-            afterCredits: after.finalCredits,
-          },
-        ]
-      : [];
-  });
+  const installs = state.corp.servers.flatMap((target) =>
+    state.corp.hq.flatMap((id) => {
+      const card = state.cardInstances[id];
+      const definition = card
+        ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+        : undefined;
+      if (!definition || !canInstallCorpIceInServer(definition, target))
+        return [];
+      const before = quoteCorpIceInstallCost(state, id, target);
+      const after = quoteCorpIceInstallCost(projected, id, target);
+      return before.canPay && after.finalCredits < before.finalCredits
+        ? [
+            {
+              cardInstanceId: id,
+              serverId: target.id,
+              beforeCredits: before.finalCredits,
+              afterCredits: after.finalCredits,
+            },
+          ]
+        : [];
+    }),
+  );
   if (installs.length === 0) return undefined;
   return {
-    schemaVersion: "corp-root-rez-ice-install-cost-quote-v1",
+    schemaVersion: "corp-root-rez-ice-install-cost-quote-v2",
     actionId: action.actionId,
     sourceCardInstanceId: source.instanceId,
-    targetServerId: server.id,
+    sourceServerId: server.id,
     stateVersion: state.stateVersion,
     installs,
   };

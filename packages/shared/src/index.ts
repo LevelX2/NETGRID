@@ -2657,16 +2657,18 @@ export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
   "runner-draw-projection-v1" as const;
 
 /** Actor-private cost projection, conditional on a free modifier-only root rez.
+ * Source location and every affected installation destination are bound separately.
  * The subsequent installation must be rediscovered and revalidated after rez.
  */
 export type CorpRootRezIceInstallCostQuote = {
-  schemaVersion: "corp-root-rez-ice-install-cost-quote-v1";
+  schemaVersion: "corp-root-rez-ice-install-cost-quote-v2";
   actionId: string;
   sourceCardInstanceId: CardInstanceId;
-  targetServerId: Exclude<ServerId, "new_remote">;
+  sourceServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
   installs: Array<{
     cardInstanceId: CardInstanceId;
+    serverId: Exclude<ServerId, "new_remote">;
     beforeCredits: number;
     afterCredits: number;
   }>;
