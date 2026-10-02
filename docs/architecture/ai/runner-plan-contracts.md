@@ -593,7 +593,12 @@ eine spätere Duplikat-Zurückstellung darf die zuvor ausgeschlossene Drawroute
 nicht wieder zur ausführbaren Route machen. Weitere Handkopien derselben
 Definition, die nur diesem Bedarf zugeordnet sind, erhalten eine ausdrückliche
 Zurückstellung beim Coverage-Owner; sie erzeugen weder einen zweiten generischen
-Entwicklungsplan noch eine Lücke in der LegalAction-Klassifikation. Lehnt ein
+Entwicklungsplan noch eine Lücke in der LegalAction-Klassifikation. Der
+Entwicklungsproducer übernimmt diese Zuordnung nur für die konkret gebundene
+Definition und ihre weiteren Kopien. Eine ausdrücklich leere Antwortliste
+oder die Antwort einer anderen Definition übernimmt keine nur
+rollenkompatible Handkarte; deren eigenständiger Entwicklungsbedarf bleibt
+beim Entwicklungs-Owner. Lehnt ein
 exakt gebundener Zentraldruck-Parent seinen aktuellen Payoff mit einem Wert
 kleiner oder gleich null ab, bleibt auch seine Installation ausdrücklich
 zurückgestellt. Eine andere positive oder unabhängige Coverage-Bindung
@@ -1500,6 +1505,15 @@ die akzeptierte Reserve nicht mehr, lässt der Owner die reine ETR auflösen,
 statt zunächst zu bezahlen und im folgenden unveränderten Fenster abzubrechen.
 Bereits gebrochene Subroutinen werden nicht erneut bezahlt. Die Zahlung führt
 zweckgebundene Pools und über den Encounter hinaus gültige Stärke fort.
+Bei mehreren finanzierbaren Antworten gegen reine ETR bewertet derselbe
+Run-Window-Owner den vollständigen aktuellen Pump-/Breakpreis und einen
+vollständig bekannten reinen ETR-Restpfad. Die gemeinsame Pfadquote erhält
+zweckgebundene Pools und gültige Pumpstärke. Die Rangfolge bevorzugt danach
+verbleibende liquide Credits und bei gleichem Cashverbrauch die geringeren
+gesamten Nominalkosten. Ein einzelner billiger Pump zertifiziert keine
+günstigere vollständige Folge. Unbekannte innere ICE, gemischte Wirkungen,
+konditionale Folgen oder die Liquidation einer Zahlungsquelle liefern keine
+gleichwertige reine ETR-Kostenrangfolge.
 Gemischte Wirkungen, notwendiger Schadens-/Programmschutz und ein Break zum
 Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
 

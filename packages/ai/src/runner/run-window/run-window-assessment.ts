@@ -68,7 +68,10 @@ import {
   visibleDeflectorSubroutineCanResolve,
 } from "../../visible-run-analysis";
 import { reservedAccessTrashCredits } from "./run-window-access";
-import { pureEndRunEncounterPayment } from "./run-window-encounter-budget";
+import {
+  pureEndRunEncounterPayment,
+  pureEndRunEncounterEconomics,
+} from "./run-window-encounter-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
 import { runnerRunStrengthCurrentPumpSavings } from "./run-window-strength-preparation";
 import {
@@ -827,6 +830,9 @@ function runnerRunWindowActionAssessment(
         })
       : undefined;
   const committedParentPayoff = runnerRunOriginCommittedPayoff(runOrigin);
+  const encounterEconomics = encounterPayment
+    ? pureEndRunEncounterEconomics(input, encounterPayment)
+    : undefined;
   return exclusion
     ? {
         admissible: false,
@@ -840,18 +846,20 @@ function runnerRunWindowActionAssessment(
       }
     : {
         admissible: true,
-        ...(strengthPumpSavings !== undefined
-          ? { value: 350 + Math.min(80, strengthPumpSavings * 10) }
-          : programPreservationPayment !== undefined
-            ? { value: programPreservationPayment }
-            : accessTrashImpact
-              ? {
-                  value:
-                    action.type === "trash_accessed_card"
-                      ? accessTrashImpact.margin
-                      : -accessTrashImpact.margin,
-                }
-              : {}),
+        ...(encounterEconomics !== undefined
+          ? { value: encounterEconomics.value }
+          : strengthPumpSavings !== undefined
+            ? { value: 350 + Math.min(80, strengthPumpSavings * 10) }
+            : programPreservationPayment !== undefined
+              ? { value: programPreservationPayment }
+              : accessTrashImpact
+                ? {
+                    value:
+                      action.type === "trash_accessed_card"
+                        ? accessTrashImpact.margin
+                        : -accessTrashImpact.margin,
+                  }
+                : {}),
         evidenceCodes: [
           accessAction
             ? "runner_access_window_action_plan_admissible"
@@ -860,6 +868,12 @@ function runnerRunWindowActionAssessment(
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
           `runner_run_window_action:${action.type}`,
+          ...(encounterEconomics
+            ? [
+                `runner_pure_etr_complete_path_cost:${encounterEconomics.totalCost}`,
+                `runner_pure_etr_complete_path_cash_cost:${encounterEconomics.cashCost}`,
+              ]
+            : []),
           ...(strengthPumpSavings !== undefined
             ? [`runner_run_strength_current_pump_saving:${strengthPumpSavings}`]
             : []),
