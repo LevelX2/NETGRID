@@ -370,6 +370,14 @@ Der Encounter-Eintritt kann erst danach eine Zahlung auslösen. Die exakte
 Engine-Fortsetzung behält Action-ID, Root, Executor und Step; ein fehlender
 Ursprung wird nicht aus der einzigen verbleibenden Bankaktion geraten.
 
+Dies gilt ebenso für die einzige verpflichtende Bewegung im
+`run.jack_out_window`. Der bestehende Kostenfortsetzungs-Owner speichert die
+aktuelle Auswahl vor dem nächsten Corp-Rezfenster mit dem bereits residenten
+Run-Root und Run-Executor. Eine lückenlose, jeweils um eine StateVersion
+fortschreitende Run-/Rez-Folge sowie identische Run-, Server- und
+Executor-Fensterbindung belegen die Herkunft. Eine fremde Aktion, ein
+anderer Run oder eine Ereignislücke darf keine neue Herkunft erzeugen.
+
 Öffnet erst das abschließende Corp-Rezfenster die Encounter-Steuer, erzeugt
 die Engine die gebundene Runner-Encounter-Fortsetzung und veröffentlicht
 deren Action-ID aus dem tatsächlichen Zahlungsfenster. Die bereits
