@@ -26,6 +26,8 @@ describe("Runner canonical card facts", () => {
     expect(
       runnerVoluntarySelfTrashLifecycleProfile("onr_classic_044_crash-space"),
     ).toEqual({
+      capabilityKey: "trash_source_action",
+      actionCost: 1,
       turnStartCreditGain: 1,
       leavePlayCreditLoss: 2,
       exposesRunnerToAutomaticTraceSuccess: true,

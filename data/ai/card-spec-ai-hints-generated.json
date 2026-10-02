@@ -5184,7 +5184,7 @@
     {
       "cardId": "onr_classic_044_crash-space",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:0647a220630e64a4",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4fa04f94dc42d710",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:60df730d2af50111",
       "hint": {
         "cardId": "onr_classic_044_crash-space",
         "side": "runner",
@@ -5194,6 +5194,12 @@
         "planRoles": ["find_economy"],
         "valueHints": { "economy": 2 },
         "strategicRole": ["support_tool"],
+        "actionPlanOwnerBindings": [
+          {
+            "capabilityKey": "trash_source_action",
+            "owner": "runner.resource_lifecycle"
+          }
+        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trash_source_action",

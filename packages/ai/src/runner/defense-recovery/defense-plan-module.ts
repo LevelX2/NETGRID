@@ -351,6 +351,42 @@ export function runnerDefenseTagClearFundingIsCurrentPhase(params: {
   );
 }
 
+export function runnerDefenseDeferredHandBufferDispositions(params: {
+  actionCandidates: readonly ActionSemanticCandidate[];
+  stateVersion: number;
+  signals: RunnerDefenseSignals;
+  independentlyOwnedActionIds: ReadonlySet<string>;
+  actionDispositions?: readonly PlanActionDisposition[];
+}): PlanActionDisposition[] {
+  const phase = defensePhase(
+    params.actionCandidates,
+    params.stateVersion,
+    params.signals,
+    params.actionDispositions,
+  );
+  if (!phase || phase === "build_hand_buffer") return [];
+  const handBufferActionIds = new Set(params.signals.handBufferActionIds ?? []);
+  // The need remains resident; only its current head is deferred while this
+  // same owner resolves an earlier defense phase. A separate admitted purpose
+  // may still materialize the identical LegalAction.
+  return params.actionCandidates.flatMap((candidate) =>
+    handBufferActionIds.has(candidate.actionId) &&
+    !params.independentlyOwnedActionIds.has(candidate.actionId) &&
+    !params.actionDispositions?.some(
+      (entry) => entry.actionId === candidate.actionId,
+    )
+      ? [
+          {
+            actionId: candidate.actionId,
+            disposition: "explicitly_nonproductive" as const,
+            ownerModuleId: "runner.defense_and_recovery" as const,
+            evidenceCode: `runner_hand_buffer_deferred_for_current_defense_phase:${phase}`,
+          },
+        ]
+      : [],
+  );
+}
+
 function defenseCapability(
   phase: DefenseState["phase"],
   candidates: PlanMaterialization["candidates"],

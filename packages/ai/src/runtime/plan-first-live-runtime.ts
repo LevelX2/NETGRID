@@ -212,6 +212,7 @@ import { runnerCreditBankActionDispositions } from "../runner/credit-bank/credit
 import { runnerCreditBankSignals } from "../runner/credit-bank/credit-bank-signals";
 import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
 import {
+  runnerDefenseDeferredHandBufferDispositions,
   runnerDefenseReactionReserveIsCurrentPhase,
   runnerDefenseTagClearFundingIsCurrentPhase,
 } from "../runner/defense-recovery/defense-plan-module";
@@ -1952,6 +1953,23 @@ export function runnerActionDispositions(
       (signal) => signal.preparationActionIds ?? [],
     ),
   );
+  for (const disposition of runnerDefenseDeferredHandBufferDispositions({
+    actionCandidates: candidates,
+    stateVersion: input.playerView.stateVersion,
+    signals: domain.defense,
+    independentlyOwnedActionIds: new Set([
+      ...coverageOwnedActionIds,
+      ...developmentOwnedActionIds,
+      ...specializedEconomyActionIds,
+      ...centralPreparationActionIds,
+      ...remotePreparationActionIds,
+      ...admissibleRunWindowActionIds,
+      ...exposeInformationActionIds,
+    ]),
+    actionDispositions: dispositions,
+  })) {
+    addDisposition(disposition);
+  }
   for (const candidate of candidates) {
     if (
       (!runnerActionRequiresTargetedBypassPlan(candidate) &&

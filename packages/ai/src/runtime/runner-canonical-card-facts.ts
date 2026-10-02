@@ -53,6 +53,8 @@ export type RunnerNoRunRecurringEconomyProfile = Readonly<{
 }>;
 
 export type RunnerVoluntarySelfTrashLifecycleProfile = Readonly<{
+  capabilityKey: string;
+  actionCost: number;
   turnStartCreditGain: number;
   leavePlayCreditLoss: number;
   exposesRunnerToAutomaticTraceSuccess: boolean;
@@ -76,6 +78,10 @@ export function runnerVoluntarySelfTrashLifecycleProfile(
       ability.effects[0]?.kind === "trash_source",
   );
   if (pureVoluntarySelfTrashAbilities.length !== 1) return undefined;
+  const voluntaryAbility = pureVoluntarySelfTrashAbilities[0]!;
+  if (voluntaryAbility.kind !== "activated") return undefined;
+  const voluntaryCost = voluntaryAbility.costs[0]!;
+  if (voluntaryCost.kind !== "action") return undefined;
   const startTurnEffects = (
     planning.engine.lifecycle?.start_of_runner_turn ?? []
   ).flatMap((ability) => ability.effects);
@@ -107,6 +113,8 @@ export function runnerVoluntarySelfTrashLifecycleProfile(
     return undefined;
   }
   return {
+    capabilityKey: voluntaryAbility.capabilityKey,
+    actionCost: voluntaryCost.amount,
     turnStartCreditGain: startTurnCreditAmounts.reduce(
       (sum, amount) => sum + amount,
       0,

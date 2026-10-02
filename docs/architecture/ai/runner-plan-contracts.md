@@ -1219,6 +1219,13 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Liegt ein gebundener Handpufferschritt hinter einer früheren Defense-Phase,
+klassifiziert Defense seine derzeit nicht materialisierte Action ausdrücklich
+als zurückgestellt. Der Handbedarf bleibt erhalten und wird nach der früheren
+Phase erneut geprüft. Eine unabhängig produktiv gebundene Action desselben
+IDs bleibt bei ihrem anderen Owner ausführbar; bestehende Unknown-Bewertungen
+werden durch diese Phasendisposition nicht ersetzt.
+
 Ist der gewöhnliche Basisdraw die einzige aktuelle Handpufferroute und würde
 seine bereits sichtbare Steuer einen Tag erzeugen, darf Defense zuerst eine
 passende Reaktionsreserve finanzieren. Die vorhandene Funding-Suche muss die
@@ -2118,6 +2125,22 @@ Im Verzeichnis `packages/ai/src/runner/resource-lifecycle/` liegen:
   Parent-/Need-Revalidierung und quellengebundene Materialisierung.
 - `resource-lifecycle-dispositions.ts`: begründete Ablehnung der aktuell
   nicht produktiven Leave-play-Actions einer gehaltenen Ressource.
+
+Freiwilliger Selbsttrash bindet die kanonische Capability, Quelleninstanz,
+StateVersion und den tatsächlichen Aktionspreis. Ein vollständiges reines
+Lebenszyklusprofil liefert Startzug-Einkommen, Leave-play-Verlust und eine
+etwaige automatische Trace-Erfolgs-/Tag-Haftung. Ohne aktuell sichtbare,
+gerezzte installierte Trace-Quelle bleibt das Einkommen erhalten; öffentliche
+Archives-Abwürfe sind keine installierten Trace-Quellen. Bei einer solchen
+Haftung bietet der Owner ihre Entfernung als P5-Route an, wenn nach dem Trash
+noch ein aktuell legaler Run-Klick und nach dem exakten Kreditverlust ein
+Startzuggewinn als Geldreserve verbleiben. Diese begrenzte Reserve ist eine
+Owner-Bewertung, kein garantierter zukünftiger Run- oder Trace-Erfolg. Fehlt
+die Folgekapazität, hält der Owner die Ressource mit konkreter Begründung.
+Unvollständige Quellen-, Capability- oder Kostenbindungen bleiben unbekannt.
+Die ausführbare Fähigkeit braucht zusätzlich ihre kanonische
+`runner.resource_lifecycle`-Plan-Zuständigkeit; ein Lebenszyklussignal ersetzt
+diese Bindung nicht.
 
 Die Signalbildung erhält **einen injizierten Dienst** für die bestehende exakte
 Finanzierungssuche. Der Owner liefert Bedarf, Elternplan-ID, Zielbetrag,

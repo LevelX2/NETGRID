@@ -86,7 +86,7 @@ export function createRunnerResourceLifecycleModule(): PlanModule {
           target: { kind: "card", id: signal.sourceCardInstanceId },
           purpose:
             signal.phase === "leave_play"
-              ? "Resolve the explicitly profitable end-of-turn resource lifecycle route."
+              ? "Resolve the assessed, source-bound resource leave-play route."
               : "Retain the resource while its leave-play route is not productive.",
         },
         candidates,

@@ -28,10 +28,11 @@ export function runnerResourceLifecycleSignals(
           (card) => card.instanceId === sourceCardInstanceId,
         )
       : undefined;
-    const visibleTraceThreat = input.playerView.servers.some((server) =>
-      [...server.ice, ...server.root].some(
+    const visibleTraceSources = input.playerView.servers.flatMap((server) =>
+      [...server.ice, ...(server.id === "archives" ? [] : server.root)].filter(
         (card) =>
           card.known === true &&
+          card.rezzed === true &&
           corpDefinitionHasTraceSource(card.definitionId),
       ),
     );
@@ -48,26 +49,61 @@ export function runnerResourceLifecycleSignals(
       action.payload?.cardId !== sourceCardInstanceId ||
       action.payload?.cardImplementationCapabilityBindingKind !==
         "card_spec_capability_key" ||
-      action.payload?.cardImplementationAbilityKey !== "trash_source_action" ||
+      action.payload?.cardImplementationAbilityKey !== profile.capabilityKey ||
       action.payload?.cardImplementationTrashesSource !== true ||
-      (profile.exposesRunnerToAutomaticTraceSuccess && visibleTraceThreat)
+      action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) !==
+        profile.actionCost ||
+      action.costs.some((cost) => (cost.credits ?? 0) !== 0)
     ) {
       return [];
     }
+    const visibleTraceHazard =
+      profile.exposesRunnerToAutomaticTraceSuccess &&
+      visibleTraceSources.length > 0;
+    // This is a low-priority removal of a known installed liability, not a
+    // claim that a future run or trace outcome is guaranteed. Preserve a run
+    // click and one payout's cash after the exact leave-play loss. Other ready
+    // plans retain their higher priorities.
+    const followRunAvailable = input.legalActions.some(
+      (entry) =>
+        entry.side === "runner" &&
+        entry.type === "start_run" &&
+        entry.expiresAtStateVersion === input.playerView.stateVersion &&
+        input.playerView.own.clicks >=
+          profile.actionCost +
+            entry.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) &&
+        input.playerView.own.credits >=
+          profile.leavePlayCreditLoss +
+            profile.turnStartCreditGain +
+            entry.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+    );
+    const removeLiability = visibleTraceHazard && followRunAvailable;
+    const evidenceCode = !visibleTraceHazard
+      ? "runner_resource_self_trash_deferred_without_visible_hazard"
+      : removeLiability
+        ? "runner_resource_remove_visible_trace_liability"
+        : "runner_resource_trace_liability_removal_deferred_without_follow_capacity";
     return [
       {
         lifecycleId: `voluntary-self-trash:${definitionId}:${sourceCardInstanceId}`,
         sourceCardInstanceId,
         definitionId,
-        phase: "retain" as const,
-        actionIds: [],
-        rejectedActionIds: [candidate.actionId],
+        phase: removeLiability ? ("leave_play" as const) : ("retain" as const),
+        actionIds: removeLiability ? [candidate.actionId] : [],
+        ...(!removeLiability
+          ? { rejectedActionIds: [candidate.actionId] }
+          : {}),
         priorityClass: "P5" as const,
-        value: 0,
+        value: removeLiability ? 1 : 0,
         evidenceCodes: [
-          "runner_resource_self_trash_deferred_without_visible_hazard",
-          `runner_resource_retained_start_turn_credit_gain:${profile.turnStartCreditGain}`,
-          `runner_resource_avoided_leave_play_credit_loss:${profile.leavePlayCreditLoss}`,
+          evidenceCode,
+          `runner_resource_start_turn_credit_gain:${profile.turnStartCreditGain}`,
+          `runner_resource_leave_play_credit_loss:${profile.leavePlayCreditLoss}`,
+          `runner_resource_self_trash_action_cost:${profile.actionCost}`,
+          ...visibleTraceSources.map(
+            (source) =>
+              `runner_resource_visible_trace_source:${source.instanceId}`,
+          ),
         ],
       },
     ];
