@@ -28842,6 +28842,7 @@
                 "zone": "stack_top",
                 "targetCardType": "program",
                 "lookCount": 5,
+                "costPerTaken": 1,
                 "showToOpponent": true,
                 "shuffleAfter": true
               }
@@ -28862,6 +28863,7 @@
             "zone": "stack_top",
             "targetCardType": "program",
             "lookCount": 5,
+            "costPerTaken": 1,
             "showToOpponent": true,
             "shuffleAfter": true
           }
@@ -30180,6 +30182,7 @@
               {
                 "zone": "stack_top",
                 "lookCount": 4,
+                "costPerTaken": 1,
                 "showToOpponent": true,
                 "shuffleAfter": true
               }
@@ -30203,6 +30206,7 @@
           {
             "zone": "stack_top",
             "lookCount": 4,
+            "costPerTaken": 1,
             "showToOpponent": true,
             "shuffleAfter": true
           }
@@ -30688,6 +30692,7 @@
                 "zone": "stack_top",
                 "targetCardType": "hardware",
                 "lookCount": 5,
+                "costPerTaken": 1,
                 "showToOpponent": true,
                 "shuffleAfter": true
               }
@@ -30729,6 +30734,7 @@
             "zone": "stack_top",
             "targetCardType": "hardware",
             "lookCount": 5,
+            "costPerTaken": 1,
             "showToOpponent": true,
             "shuffleAfter": true
           },

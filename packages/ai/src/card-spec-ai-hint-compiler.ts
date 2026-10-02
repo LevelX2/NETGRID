@@ -2325,6 +2325,7 @@ function appendGenericTargetProfile(
         ? { targetCardType: effect.allowedTypes[0] }
         : {}),
       lookCount: effect.count,
+      costPerTaken: effect.costPerTaken,
       showToOpponent: effect.revealTakenToCorp,
       shuffleAfter: effect.shuffleRemainder,
     });

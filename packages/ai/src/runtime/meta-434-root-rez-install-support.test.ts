@@ -144,6 +144,20 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
 
   for (const [name, mutate] of [
     [
+      "another installation destination",
+      (q: CorpRootRezIceInstallCostQuote) => {
+        q.installs.forEach((i) => {
+          i.targetServerId = "rd";
+        });
+      },
+    ],
+    [
+      "ambiguous destination entry",
+      (q: CorpRootRezIceInstallCostQuote) => {
+        q.installs.push(...structuredClone(q.installs));
+      },
+    ],
+    [
       "stale state",
       (q: CorpRootRezIceInstallCostQuote) => {
         q.stateVersion--;

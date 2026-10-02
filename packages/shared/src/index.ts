@@ -2657,6 +2657,7 @@ export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
   "runner-draw-projection-v1" as const;
 
 /** Actor-private cost projection, conditional on a free modifier-only root rez.
+ * Source location and every affected installation destination are bound separately.
  * The subsequent installation must be rediscovered and revalidated after rez.
  */
 export type CorpRootRezIceInstallCostQuote = {

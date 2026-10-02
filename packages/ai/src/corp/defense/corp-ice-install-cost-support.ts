@@ -34,7 +34,9 @@ function currentSavings(
   }
   const view = input.playerView;
   const server = view.servers.find((s) => s.id === install.payload?.serverId);
-  const sourceServer = view.servers.find((s) => s.id === rez.payload?.serverId);
+  const sourceServer = view.servers.find((s) =>
+    s.root.some((c) => c.instanceId === rez.source),
+  );
   const source = sourceServer?.root.find((c) => c.instanceId === rez.source);
   if (
     !quote ||

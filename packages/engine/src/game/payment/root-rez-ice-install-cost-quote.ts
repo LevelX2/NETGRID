@@ -61,14 +61,14 @@ export function quoteCorpRootRezIceInstallCosts(
       [source.instanceId]: { ...source, faceup: true, rezzed: true },
     },
   };
-  const installs = state.corp.hq.flatMap((id) => {
-    const card = state.cardInstances[id];
-    const definition = card
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]
-      : undefined;
-    if (!definition) return [];
-    return state.corp.servers.flatMap((target) => {
-      if (!canInstallCorpIceInServer(definition, target)) return [];
+  const installs = state.corp.servers.flatMap((target) =>
+    state.corp.hq.flatMap((id) => {
+      const card = state.cardInstances[id];
+      const definition = card
+        ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+        : undefined;
+      if (!definition || !canInstallCorpIceInServer(definition, target))
+        return [];
       const before = quoteCorpIceInstallCost(state, id, target);
       const after = quoteCorpIceInstallCost(projected, id, target);
       return before.canPay && after.finalCredits < before.finalCredits
@@ -81,8 +81,8 @@ export function quoteCorpRootRezIceInstallCosts(
             },
           ]
         : [];
-    });
-  });
+    }),
+  );
   if (installs.length === 0) return undefined;
   return {
     schemaVersion: "corp-root-rez-ice-install-cost-quote-v2",

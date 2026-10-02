@@ -770,6 +770,7 @@ export type AiHintEffectTargetProfile = {
   showToOpponent?: boolean;
   oncePerRun?: boolean;
   lookCount?: number;
+  costPerTaken?: number;
 };
 
 export type AiHintTargetProfileV1 = {
@@ -1598,6 +1599,11 @@ function validateTargetProfiles(
     validateOptionalNumber(
       targetProfile.lookCount,
       `${targetPath}.lookCount`,
+      issues,
+    );
+    validateOptionalNumber(
+      targetProfile.costPerTaken,
+      `${targetPath}.costPerTaken`,
       issues,
     );
   });

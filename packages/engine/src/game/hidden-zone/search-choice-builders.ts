@@ -124,6 +124,8 @@ export function buildLookTopStackTakeMatchingChoice(input: {
   return {
     choiceId: `p3_37_look_top_stack_take_matching_${nextStateVersion}`,
     side: "runner",
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: input.sourceDefinitionId,
     source: `p3_37.look_top_stack_take_matching:${input.sourceCardId}:${input.sourceDefinitionId}:${input.count}:${input.allowedTypes.join(",")}:${input.costPerTaken}:${input.revealTakenToCorp ? "reveal" : "private"}:${input.shuffleRemainder ? "shuffle" : "no_shuffle"}:${nextStateVersion}`,
     prompt: "Stack-Spitze ansehen und Karten nehmen",
     kind: "select_cards",

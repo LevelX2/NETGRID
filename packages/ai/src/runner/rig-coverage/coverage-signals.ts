@@ -389,10 +389,10 @@ export function uniqueCoverageGaps(
             ),
         )
       : undefined;
-    const visibleAnswer =
-      coverageDevelopment?.visibleAnswer ??
-      bestLegalCoverageCard ??
-      runnerHandBreakerForCoverage(input.playerView, preciseCoverage);
+    const visibleAnswer = coverageDevelopment
+      ? coverageDevelopment.visibleAnswer
+      : (bestLegalCoverageCard ??
+        runnerHandBreakerForCoverage(input.playerView, preciseCoverage));
     const answerInstallCost = coverageDevelopment
       ? visibleAnswer?.installCost
       : bestLegalCoverageCandidate?.costProfile.costKnownStatus === "known"

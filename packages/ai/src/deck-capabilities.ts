@@ -850,10 +850,17 @@ function searchAccessToolForRecord(
 ): SearchAccessTool | undefined {
   const text = normalizedRecordRulesTextWithoutRoles(record);
   const roleSignals = [...record.roles, ...record.planRoles];
+  const structuredProgramSearch = record.effects.some(
+    (effect) =>
+      effect.kind === "search" &&
+      effect.scope === "stack" &&
+      effect.target === "program",
+  );
   const genericStackSearch =
     deckCapabilityTextHasStackSearchSignal(text) ||
     rolesMatch(roleSignals, ["stack_search"]);
   const canSearchPrograms =
+    structuredProgramSearch ||
     genericStackSearch ||
     deckCapabilityTextHasProgramSearchSignal(text) ||
     rolesMatch(roleSignals, ["program_search", "breaker_search"]);
@@ -864,12 +871,14 @@ function searchAccessToolForRecord(
     rolesMatch(roleSignals, ["breaker_search"]);
   if (!canSearchPrograms && !canSearchBreakers) return undefined;
   const status = primaryStatus(record.locations);
-  const structuredSearch = rolesMatch(roleSignals, [
-    "program_search",
-    "breaker_search",
-    "stack_search",
-    "search",
-  ]);
+  const structuredSearch =
+    structuredProgramSearch ||
+    rolesMatch(roleSignals, [
+      "program_search",
+      "breaker_search",
+      "stack_search",
+      "search",
+    ]);
   return {
     cardId: record.cardId,
     title: record.title,
