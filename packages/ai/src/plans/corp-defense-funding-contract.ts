@@ -28,7 +28,10 @@ export function corpGenericDefensePriorityClass(
   if (
     genericSignals.some(
       (signal) =>
-        signal.immediateInstallSupport ||
+        // Current executability does not make ordinary remote prebuild expire.
+        // Its exact parent remains P6; score support has a separate delegated
+        // contract, and concrete central pressure retains its own priority.
+        (signal.immediateInstallSupport && signal.parentKind !== "remote") ||
         (signal.phase === "install_ice" &&
           (signal.installRoute?.progressKind ===
             "scoreline_central_tax_allocation" ||

@@ -523,6 +523,12 @@ gegnerzugseitige Rez-Responses und höherpriorisierte Score-Schritte zählen
 nicht dazu. Ob ein solcher P6-Schritt den Zug erhält, entscheidet allein der
 TurnPlanner aus vollständigen Restzuglinien und Prioritäten.
 
+Die sofortige Ausführbarkeit einer solchen Defense-Installation erzeugt
+keine auslaufende P3-Gelegenheit. `immediateInstallSupport` hält den aktuellen
+Routenkopf ausführbar, erhöht aber bei einem gewöhnlichen Remote-Parent
+nicht dessen P6-Klasse. Konkreter Score-Support und materielle, akute oder
+terminale Central-Abwehr behalten ihre eigenen Prioritätsverträge.
+
 Die Rückbindung eines neu angelegten Remotes und der Cadence-Verbrauch
 beobachten die ausgeführte `turnPlanExecutionLease`, den zugehörigen
 Commitment-Knoten, den Remote-Parent und das unmittelbar erfolgreiche
