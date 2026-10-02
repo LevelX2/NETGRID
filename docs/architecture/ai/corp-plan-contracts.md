@@ -475,7 +475,12 @@ wenn ein zusätzlicher Basiscredit Advance und Rezreserve gemeinsam ermöglicht,
 steht diese Finanzierung zuerst. Die Zugplanung übernimmt denselben Parent/Need
 und validiert nach Installation neu. Während eines terminalen Runs erhält die
 gewählte finanzierte ICE-Kombination Vorrang vor Score-Credits und redundanten
-Rezzes. Finanzierbare Teilabsicherung terminaler Server bleibt außerdem beim
+Rezzes. Das gilt auch, wenn beide bekannten Linien Zugriff zulassen und die
+gewählte Kombination dem Runner weniger Restcredits lässt: Ein schwächerer
+äußerer Rez darf deren innere Rez-Kosten nicht verbrauchen. Dieser Vergleich
+belegt Teilabsicherung, keine sichere Run-Sperre; unbekannte Folgeeffekte
+werden nicht als zusätzliche Zugriffshinderung gewertet.
+Finanzierbare Teilabsicherung terminaler Server bleibt außerdem beim
 Vergleich mit Rezzes auf anderen Servern reservierbar.
 
 Die historische Gegenprobe `match_52de6345f1e39802` hat bei D34 sechs Credits und

@@ -77,8 +77,13 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
     );
     if (
       defense &&
-      defense.best.protection.runnerAccessSuccessProbability.numerator <
-        defense.best.protection.runnerAccessSuccessProbability.denominator
+      (defense.best.protection.runnerAccessSuccessProbability.numerator <
+        defense.best.protection.runnerAccessSuccessProbability.denominator ||
+        (route.after !== undefined &&
+          route.after.runnerAccessSuccessProbability.numerator ===
+            route.after.runnerAccessSuccessProbability.denominator &&
+          defense.best.protection.runnerCreditsRemainingOnBestAccessPath <
+            route.after.runnerCreditsRemainingOnBestAccessPath))
     ) {
       const selected = defense.best.selectedRezCosts.find(
         (cost) => cost.iceInstanceId === route.sourceCardInstanceId,
