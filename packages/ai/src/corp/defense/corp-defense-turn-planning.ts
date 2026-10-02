@@ -13,6 +13,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
 import type { PriorityClass } from "../../plans/plan-assessment";
+import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 export { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
@@ -685,6 +686,7 @@ function createDefenseLine(
     defenseValue,
     economyValue,
     totalValue,
+    priorityClass: corpGenericDefensePriorityClass([signal]),
     campaignQuote,
     valueClaims,
     evidenceCodes: [

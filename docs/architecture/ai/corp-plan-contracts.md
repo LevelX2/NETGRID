@@ -907,6 +907,18 @@ Evidence und Assessment müssen aus derselben ausgewählten Prioritätsklasse
 und Parentbindung stammen; ein planfremder Action-Score darf diese Delegation
 nicht nachträglich verändern.
 
+Jede generische native Defense-Zuglinie trägt die Prioritätsklasse ihres
+exakten Signals. Ein Remote-Supportbedarf darf weder eine terminale
+Central-Linie auf P6 absenken noch gewöhnlichen Remote-Aufbau durch eine
+fremde P2-Linie hochstufen. Ein dringlicher Rez-Bedarf ohne aktuellen
+ausführbaren Kopf verdrängt keine ausführbare Installation derselben
+Schutzklasse. Gibt es für die bevorzugte Zentrale keine ausführbare exakte
+Route, darf Defense eine unabhängig Engine-zertifizierte, vollständig
+finanzierte terminale Schließung der anderen Zentrale ausführen, sofern sie
+die Ressourcenreserven erhält. Diese Route bleibt autonom gebunden. Ist
+die allokierte Route ausführbar, behält sie ihren Vorrang; Teilfortschritt,
+unbekannte Bewertung oder fehlende Finanzierung ersetzen den Nachweis nicht.
+
 Bei der erstmaligen Anlage eines Remotes ist die konkrete aktuelle
 `LegalAction` die Autorität für die Bindung an das Ziel `new_remote`; ihr
 Post-Install-Quote bindet zusätzlich die von der Engine projizierte spätere
