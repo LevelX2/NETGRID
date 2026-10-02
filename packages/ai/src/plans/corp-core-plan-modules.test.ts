@@ -1785,6 +1785,127 @@ describe("Corp core plan modules", () => {
     },
   );
 
+  it.each([
+    {
+      label: "funded terminal closure",
+      urgent: true,
+      terminal: true,
+      effect: "satisfied" as const,
+      reserves: true,
+      preferredAvailable: false,
+      expected: ["install-hq"],
+    },
+    {
+      label: "partial protection",
+      urgent: true,
+      terminal: true,
+      effect: "progress" as const,
+      reserves: true,
+      preferredAvailable: false,
+      expected: [],
+    },
+    {
+      label: "ordinary protection",
+      urgent: false,
+      terminal: true,
+      effect: "satisfied" as const,
+      reserves: true,
+      preferredAvailable: false,
+      expected: [],
+    },
+    {
+      label: "nonterminal pressure",
+      urgent: true,
+      terminal: false,
+      effect: "satisfied" as const,
+      reserves: true,
+      preferredAvailable: false,
+      expected: [],
+    },
+    {
+      label: "unpreserved funding reserve",
+      urgent: true,
+      terminal: true,
+      effect: "progress" as const,
+      reserves: false,
+      preferredAvailable: false,
+      expected: [],
+    },
+    {
+      label: "executable allocated route",
+      urgent: true,
+      terminal: true,
+      effect: "satisfied" as const,
+      reserves: true,
+      preferredAvailable: true,
+      expected: ["install-rd"],
+    },
+  ])(
+    "admits only independently certified terminal closure when the allocated route is absent: $label",
+    ({ urgent, terminal, effect, reserves, preferredAvailable, expected }) => {
+      const actions = ["hq", "rd"].map((serverId) => ({
+        ...cardAction("install-" + serverId, "install.card", "ice-shared"),
+        sourceCardInstanceId: "ice-shared-1",
+        targetContext: targetContext(serverId, "server"),
+      }));
+      const hq = productiveDefenseSignal(actions[0]!, "hq");
+      if (hq.kind !== "generic")
+        throw new Error("Generic defense fixture required");
+      hq.urgent = urgent;
+      hq.centralPressure = terminal ? "terminal" : "material";
+      hq.installRoute = {
+        ...hq.installRoute!,
+        ...(!reserves ? { disposition: "funding_only" as const } : {}),
+        projection: knownInstallProjection({
+          actionId: actions[0]!.actionId,
+          sourceCardInstanceId: "ice-shared-1",
+          sourceDefinitionId: "ice-shared",
+          targetServerId: "hq",
+          effect,
+          probability: {
+            numerator: effect === "satisfied" ? 0 : 1,
+            denominator: 2,
+          },
+          totalCredits: reserves ? 0 : 2,
+          availableCredits: 0,
+          availableClicks: 3,
+          preservesReserves: reserves,
+        }),
+      };
+      const rd = productiveDefenseSignal(actions[1]!, "rd", "terminal");
+      if (rd.kind !== "generic")
+        throw new Error("Generic defense fixture required");
+      rd.urgent = true;
+      const allocation = knownCentralAllocation("rd");
+      const corpContext = context(
+        preferredAvailable ? actions : [actions[0]!],
+        {
+          centralDefenseAllocation: {
+            ...allocation,
+            evidence: {
+              hq: {
+                ...allocation.evidence.hq,
+                threat: terminal ? "terminal" : "material",
+              },
+              rd: { ...allocation.evidence.rd, threat: "terminal" },
+            },
+          },
+          defenseNeeds: preferredAvailable ? [hq, rd] : [hq],
+        },
+      );
+      const module = corpModule("corp.defend_servers");
+      const instance = instantiatePlanProposal(
+        module.discover(corpContext)[0]!,
+        10,
+      );
+      expect(
+        module
+          .materialize(instance, {} as never, corpContext)
+          .candidates.map((entry) => entry.candidate.actionId),
+      ).toEqual(expected);
+    },
+  );
+
   it("does not fall back from terminal allocated R&D to a threat-free HQ route", () => {
     const installHq = {
       ...cardAction("install-hq", "install.card", "ice-shared"),

@@ -65,7 +65,7 @@ it("carries the real global other-fort quote through both DTO action lists", () 
     expect(quote.sourceServerId).toBe("rd");
     expect(quote.installs).toContainEqual(
       expect.objectContaining({
-        serverId: "hq",
+        targetServerId: "hq",
         beforeCredits: 1,
         afterCredits: 0,
       }),
@@ -124,7 +124,7 @@ function addGlobalQuotes(input: AiDecisionInput) {
         )
         .map((a) => ({
           cardInstanceId: a.source!,
-          serverId: a.payload!.serverId as "hq" | "rd" | "archives",
+          targetServerId: a.payload!.serverId as "hq" | "rd" | "archives",
           beforeCredits: Number(a.payload!.iceInstallTotalCost),
           afterCredits: Number(a.payload!.iceInstallTotalCost) - 1,
         })),

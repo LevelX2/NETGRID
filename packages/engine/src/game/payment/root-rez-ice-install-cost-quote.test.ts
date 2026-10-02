@@ -34,14 +34,18 @@ const cards = [
   { id: "onr_v1_296_off-site-backups", quantity: 2 },
   { id: "onr_v1_309_bbs-whispering-campaign", quantity: 2 },
   { id: "onr_v1_314_corporate-negotiating-center", quantity: 2 },
-  { id: "onr_v1_352_chester-mix", quantity: 2 },
   { id: "onr_v1_324_fortress-architects", quantity: 2 },
+  { id: "onr_v1_352_chester-mix", quantity: 2 },
   { id: "onr_v1_363_olivia-salazar", quantity: 2 },
   { id: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 2 },
   { id: "onr_v1_368_roving-submarine", quantity: 2 },
   { id: "onr_v1_374_washington-d-c-city-grid", quantity: 2 },
 ];
-function setup(depth: number, otherFort = false, globalDiscount = false) {
+function setup(
+  depth: number,
+  otherFort = false,
+  sourceDefinitionId = "onr_v1_352_chester-mix",
+) {
   const state = createGameAfterSetup({
     seed: "sp337-cost-proof-" + depth,
     corpDeck: { ...ORIGINALSET_DEFAULT_DECKS.corp, cards },
@@ -53,11 +57,7 @@ function setup(depth: number, otherFort = false, globalDiscount = false) {
   state.corp.clicks = 3;
   const hq = state.corp.servers.find((s) => s.id === "hq")!;
   const source = Object.values(state.cardInstances).find(
-    (c) =>
-      c.definitionId ===
-      (globalDiscount
-        ? "onr_v1_324_fortress-architects"
-        : "onr_v1_352_chester-mix"),
+    (c) => c.definitionId === sourceDefinitionId,
   )!.instanceId;
   const walls = Object.values(state.cardInstances)
     .filter((c) =>
@@ -98,24 +98,41 @@ function setup(depth: number, otherFort = false, globalDiscount = false) {
   )!;
   return { state, target, source, install, rez };
 }
-describe("Engine quote for free root rez and same-fort ICE installation", () => {
-  it("certifies a global discount on the actual other-fort installation", () => {
-    const { state, target, install, rez } = setup(2, true, true);
+describe("Engine quote for free root rez and actual ICE installation scope", () => {
+  it("quotes the real global saving on another fort's ICE installation", () => {
+    const { state, target, source, install, rez } = setup(
+      2,
+      true,
+      "onr_v1_324_fortress-architects",
+    );
+    const initialHash = hashState(state);
     const quote = quoteCorpRootRezIceInstallCosts(state, rez);
-    expect(quote?.installs).toContainEqual({
-      cardInstanceId: target,
-      serverId: "hq",
-      beforeCredits: 2,
-      afterCredits: 1,
-    });
+    expect(hashState(state)).toBe(initialHash);
     const direct = apply(state, "corp", install);
     const rezzed = apply(state, "corp", (a) => a.actionId === rez.actionId);
     const discounted = apply(rezzed, "corp", install);
-    expect(discounted.corp.credits - direct.corp.credits).toBe(1);
+    expect(rezzed.cardInstances[source]?.rezzed).toBe(true);
+    expect(rezzed.corp.credits).toBe(state.corp.credits);
+    expect(rezzed.corp.clicks).toBe(state.corp.clicks);
+    expect(direct.corp.credits).toBe(8);
+    expect(discounted.corp.credits).toBe(9);
     expect(discounted.corp.clicks).toBe(direct.corp.clicks);
     expect(validateGameState(discounted)).toEqual({ ok: true, errors: [] });
+    expect(quote).toMatchObject({
+      schemaVersion: "corp-root-rez-ice-install-cost-quote-v2",
+      sourceServerId: "rd",
+    });
+    expect(quote?.installs).toContainEqual({
+      cardInstanceId: target,
+      targetServerId: "hq",
+      beforeCredits: 2,
+      afterCredits: 1,
+    });
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "rootRezIceInstallCostQuoteJson",
+    );
+    expect(JSON.stringify(rezzed.eventLog.at(-1)?.publicPayload)).not.toContain(
+      target,
     );
   });
   for (const depth of [0, 1, 2, 3])
@@ -128,7 +145,7 @@ describe("Engine quote for free root rez and same-fort ICE installation", () => 
       else
         expect(quote?.installs).toContainEqual({
           cardInstanceId: target,
-          serverId: "hq",
+          targetServerId: "hq",
           beforeCredits: depth,
           afterCredits: Math.max(0, depth - 2),
         });
@@ -158,7 +175,7 @@ describe("Engine quote for free root rez and same-fort ICE installation", () => 
     const { state, rez, target } = setup(2, true);
     expect(
       quoteCorpRootRezIceInstallCosts(state, rez)?.installs.some(
-        (x) => x.cardInstanceId === target && x.serverId === "hq",
+        (x) => x.cardInstanceId === target && x.targetServerId === "hq",
       ),
     ).not.toBe(true);
   });

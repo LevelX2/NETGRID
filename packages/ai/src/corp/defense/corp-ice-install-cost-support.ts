@@ -33,6 +33,7 @@ function currentSavings(
     });
   }
   const view = input.playerView;
+  const server = view.servers.find((s) => s.id === install.payload?.serverId);
   const sourceServer = view.servers.find((s) =>
     s.root.some((c) => c.instanceId === rez.source),
   );
@@ -44,6 +45,7 @@ function currentSavings(
     quote.actionId !== rez.actionId ||
     quote.sourceCardInstanceId !== rez.source ||
     quote.sourceServerId !== sourceServer?.id ||
+    !server ||
     quote.stateVersion !== view.stateVersion ||
     !Array.isArray(quote.installs) ||
     !source?.known ||
@@ -72,7 +74,7 @@ function currentSavings(
       typeof q === "object" &&
       !Array.isArray(q) &&
       (q as Record<string, unknown>).cardInstanceId === install.source &&
-      (q as Record<string, unknown>).serverId === install.payload?.serverId,
+      (q as Record<string, unknown>).targetServerId === server.id,
   );
   if (entries.length !== 1) return undefined;
   const entry = entries[0]!;

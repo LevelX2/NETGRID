@@ -920,6 +920,15 @@ export function corpVisibleCardEconomyWithdrawals(
     const hint = sourceDefinitionId
       ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
       : undefined;
+    // An exact current all-pool payout needs no finite on-rez pool model.
+    // Action-loaded banks bind their public bits to the Engine payout instead.
+    const exactCurrentAllHostedCreditPayout =
+      action?.payload?.cardImplementationTakesHostedCredits === true &&
+      hostedCreditTakeMode === "all" &&
+      typeof hostedCreditTakeAmount === "number" &&
+      Number.isSafeInteger(hostedCreditTakeAmount) &&
+      hostedCreditTakeAmount > 0 &&
+      hostedCreditTakeAmount === sourceCard?.counters?.bit;
     const sourceIsAdmitted =
       sourceZone === "score_area"
         ? sourceCard?.known === true &&
@@ -933,7 +942,8 @@ export function corpVisibleCardEconomyWithdrawals(
           hint.quality.strategyCovered === true &&
           hint.quality.needsHumanReview !== true &&
           sourceDefinitionId !== undefined &&
-          (corpHostedCreditBankProfile(sourceDefinitionId) !== undefined ||
+          (exactCurrentAllHostedCreditPayout ||
+            corpHostedCreditBankProfile(sourceDefinitionId) !== undefined ||
             corpCounterCashoutProfile(sourceDefinitionId) !== undefined);
     const hostedCreditPayout =
       action?.payload?.cardImplementationTakesHostedCredits === true &&
@@ -998,6 +1008,8 @@ export function corpVisibleCardEconomyWithdrawals(
       });
     }
     const admittedPayout = hostedCreditPayout ?? advancementCounterPayout;
+    const expectedPayoutMode =
+      hostedCreditTakeMode === "all" ? "all_available" : "fixed";
     if (
       !sourceInstanceId ||
       !sourceDefinitionId ||
@@ -1011,6 +1023,7 @@ export function corpVisibleCardEconomyWithdrawals(
       action.source !== sourceInstanceId ||
       action.payload?.cardId !== sourceInstanceId ||
       !admittedPayout ||
+      (hostedCreditTakeMode === "all" && !exactCurrentAllHostedCreditPayout) ||
       candidate.sourceKind !== "card" ||
       candidate.semanticActionType !== "economy.gain_credit" ||
       candidate.costProfile.costKnownStatus !== "known" ||
@@ -1023,7 +1036,7 @@ export function corpVisibleCardEconomyWithdrawals(
       projection?.kind !== "immediate_liquid" ||
       projection.timing !== "immediate" ||
       projection.creditRestriction !== "general" ||
-      projection.payoutMode !== "fixed" ||
+      projection.payoutMode !== expectedPayoutMode ||
       projection.reliability !== "guaranteed" ||
       projection.source !== "legal_action_payload" ||
       projection.confidence !== "high" ||
@@ -1098,7 +1111,7 @@ export function corpVisibleCardEconomyWithdrawals(
           cardsDrawn: 0,
           cardsConsumed: 0,
           netHandDelta: 0,
-          payoutMode: "fixed",
+          payoutMode: expectedPayoutMode,
           reliability: "guaranteed",
           source: "legal_action_payload",
           payoutSource: admittedPayout.payoutSource,

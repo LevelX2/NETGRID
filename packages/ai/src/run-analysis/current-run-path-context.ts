@@ -45,6 +45,11 @@ export function currentRunPathContext(
     }
   }
   return {
+    ...(input.playerView.own.runnerTraceSupportQuote
+      ? {
+          runnerTraceSupportQuote: input.playerView.own.runnerTraceSupportQuote,
+        }
+      : {}),
     ...(run.encounterTaxForFutureIce
       ? {
           encounterEntryTax: {

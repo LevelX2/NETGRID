@@ -75,7 +75,7 @@ export function quoteCorpRootRezIceInstallCosts(
         ? [
             {
               cardInstanceId: id,
-              serverId: target.id,
+              targetServerId: target.id,
               beforeCredits: before.finalCredits,
               afterCredits: after.finalCredits,
             },

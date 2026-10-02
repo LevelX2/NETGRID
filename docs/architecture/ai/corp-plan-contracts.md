@@ -676,10 +676,11 @@ Vor einer ausgewählten ICE-Installation kann Defense eine kostenlose Root-Rez
 als exakt gebundene Kostenvorbereitung ausführen. Die Engine veröffentlicht
 dafür `CorpRootRezIceInstallCostQuote` nur für reine, öffentliche
 Installationskostenmodifikatoren ohne weitere Lifecycle-Funktion. Die Quote
-vergleicht aktuelle und nach Rez geltende Kosten derselben HQ-Karte an jedem
-aktuell vorhandenen Installationsziel. Die Version 2 bindet den Standort der
-Root-Quelle getrennt vom Server jedes Installationseintrags; lokale und globale
-Modifikatoren folgen ausschließlich der Engine-Kostenrechnung. Die Quote bleibt
+vergleicht aktuelle und nach Rez geltende Kosten jeder HQ-ICE-Karte an den
+regelkonformen bestehenden Installationszielen. Ihr Vertrag v2 trennt den
+Root-Fort der Quelle (`sourceServerId`) vom tatsächlichen Installationsfort
+jedes Kosteneintrags (`targetServerId`). Die Engine-Kostenauswertung entscheidet,
+ob ein Modifikator nur im eigenen Fort oder global wirkt. Die Quote bleibt
 Corp-privat und bindet Quelle, Rez-Action und StateVersion.
 Die Positivliste in `input-dto.ts` übernimmt
 `rootRezIceInstallCostQuoteJson` in beide actor-sicheren LegalAction-Listen.
@@ -909,6 +910,18 @@ sichtbar; andere Serverbedarfe behalten ihre eigene Dringlichkeit. Auswahl,
 Evidence und Assessment müssen aus derselben ausgewählten Prioritätsklasse
 und Parentbindung stammen; ein planfremder Action-Score darf diese Delegation
 nicht nachträglich verändern.
+
+Jede generische native Defense-Zuglinie trägt die Prioritätsklasse ihres
+exakten Signals. Ein Remote-Supportbedarf darf weder eine terminale
+Central-Linie auf P6 absenken noch gewöhnlichen Remote-Aufbau durch eine
+fremde P2-Linie hochstufen. Ein dringlicher Rez-Bedarf ohne aktuellen
+ausführbaren Kopf verdrängt keine ausführbare Installation derselben
+Schutzklasse. Gibt es für die bevorzugte Zentrale keine ausführbare exakte
+Route, darf Defense eine unabhängig Engine-zertifizierte, vollständig
+finanzierte terminale Schließung der anderen Zentrale ausführen, sofern sie
+die Ressourcenreserven erhält. Diese Route bleibt autonom gebunden. Ist
+die allokierte Route ausführbar, behält sie ihren Vorrang; Teilfortschritt,
+unbekannte Bewertung oder fehlende Finanzierung ersetzen den Nachweis nicht.
 
 Bei der erstmaligen Anlage eines Remotes ist die konkrete aktuelle
 `LegalAction` die Autorität für die Bindung an das Ziel `new_remote`; ihr
@@ -1371,6 +1384,32 @@ Score-Reserve und Defense-Funding bleiben fremde Fachverträge in
 und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
+
+Eine bereits installierte, aktionsweise geladene Creditbank besitzt einen
+getrennten aktuellen Restzugvertrag. Die Engine bindet Rez beziehungsweise
+Laden, Quellinstanz, kanonische Fähigkeiten, StateVersion, Kosten und die
+vollständige Lade-/Auszahlungsfolge an eine aktuelle Quote. Nur zwei oder drei
+normale Restklicks und ein strikt höherer liquider Endbestand als bei direkter
+Auszahlung plus Basic-Credits beziehungsweise ausschließlich Basic-Credits
+begründen diesen Pfad. Es entstehen keine zukünftigen LegalAction-IDs.
+Economy materialisiert stets nur den aktuellen Head und revalidiert nach jeder
+Transition. Ein Mehrzug-Scorebedarf oder die exakte Rezreserve bereits
+installierter ICE kann die Folge als Support übernehmen; eine noch nötige
+ICE-Installation darf dadurch nicht ihren letzten Klick verlieren. Andere
+aktuelle Einkommensquellen und ein bereits direkt finanzierbarer Score
+behalten ihre Finanzierung. Eine aktuelle vollständige Auszahlung aus
+sichtbaren Bits braucht kein endliches On-rez-Poolprofil. Laden ohne quotierte
+aktuelle Liquiditätskonversion bleibt als unbekannte spätere Entwicklung
+sichtbar. Engine- und Chooser-Regressionen liegen in
+`hosted-credit-bank-cycle-quote.test.ts` und
+`meta-472-hosted-bank-cycle.test.ts` (SP-456, G30/D242).
+Die direkte Entnahme bewahrt den nativen Auszahlungsmodus `all_available`
+durch Signal und Materialisierung, sofern der exakt quotierte Gesamtbetrag
+mit den aktuell sichtbaren Bits übereinstimmt. Sie benötigt keinen fremden
+Funding-Parent und bleibt ein eigenes P4-Auszahlungsprojekt. Die Regression
+R6 G1/D200 prüft die vollständige Plan-, Step- und Routenwahl für 15 Credits
+beim letzten Klick sowie die Ablehnung eines widersprüchlichen Bankbestands.
+Feste Teilentnahmen behalten ihren Modus `fixed`.
 
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt

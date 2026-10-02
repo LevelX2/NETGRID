@@ -9,6 +9,7 @@ import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { uniqueBy } from "../../runtime/collection";
 import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-draw-action-facts";
 import { turnKey } from "../../runtime/runtime-identifiers";
+import { corpHostedBankCycleDevelopment } from "./hosted-credit-bank-cycle";
 import {
   assessCorpEconomyFundingRoute,
   corpEconomyActionIsOwned,
@@ -141,6 +142,7 @@ export function buildCorpEconomySignals({
       ...corpVisibleCardEconomyWithdrawals(input, candidates),
       ...corpOptionalActionCapacityConversions(input, candidates),
       ...corpEconomyDevelopmentCampaigns(input, candidates, scoreProjects),
+      ...corpHostedBankCycleDevelopment(input, candidates),
     ],
     (signal) => signal.needId,
   );
@@ -179,6 +181,13 @@ export function buildCorpEconomySignals({
             : []),
         ],
         fundingRouteAssessment,
+        ...(signal.kind === "parent_funding" &&
+        fundingRouteAssessment.hostedCreditBankCycle
+          ? {
+              hostedCreditBankCycle:
+                fundingRouteAssessment.hostedCreditBankCycle,
+            }
+          : {}),
       };
     });
   return economyNeeds;

@@ -2668,10 +2668,36 @@ export type CorpRootRezIceInstallCostQuote = {
   stateVersion: number;
   installs: Array<{
     cardInstanceId: CardInstanceId;
-    serverId: Exclude<ServerId, "new_remote">;
+    targetServerId: Exclude<ServerId, "new_remote">;
     beforeCredits: number;
     afterCredits: number;
   }>;
+};
+
+/** Actor-private, same-turn income from a pure load/all-cashout bank.
+ * Only the head is a current LegalAction; later capabilities are requoted.
+ */
+export type CorpHostedCreditBankCycleQuote = {
+  schemaVersion: "corp-hosted-credit-bank-cycle-quote-v1";
+  actionId: string;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  sourceServerId: Exclude<ServerId, "new_remote">;
+  stateVersion: number;
+  headKind: "rez" | "load";
+  loadAbilityId: string;
+  cashoutAbilityId: string;
+  currentCredits: number;
+  currentClicks: number;
+  currentHostedCredits: number;
+  setupCreditCost: number;
+  loadCredits: number;
+  loadExecutions: number;
+  totalClickCost: number;
+  cashoutCredits: number;
+  netLiquidCreditGain: number;
+  baselineLiquidCreditGain: number;
+  extraLiquidCredits: number;
 };
 
 export const CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION =

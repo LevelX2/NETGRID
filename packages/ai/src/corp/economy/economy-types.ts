@@ -18,6 +18,7 @@ export type CorpEconomyFundingRouteAssessment = {
   reliability: FundingRouteSearchResult["bestRoute"]["reliability"];
   headActionId?: string;
   evidence: string[];
+  hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
 };
 
 export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
@@ -36,6 +37,7 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
     iceInstanceId: string;
   };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
+  hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
   restrictedCreditFunding?: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
   restrictedCreditPreparations?: CorpRestrictedRezPreparation[];
 };
@@ -77,7 +79,7 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   kind: "develop_campaign";
   sourceInstanceId: string;
   sourceDefinitionId: string;
-  phase: "install" | "advance" | "rez";
+  phase: "install" | "advance" | "rez" | "load";
   actionIds: string[];
   restrictedCreditNeed?: {
     needId: string;
@@ -95,6 +97,7 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
       | "finite_pool"
       | "automatic_start_of_turn"
       | "immediate_on_rez"
+      | "hosted_credit_bank_cycle"
       | "counter_cashout_development";
     maximumSetupExecutions: 1;
   };
@@ -123,8 +126,10 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
     expectedState:
       | "installed_unrezzed"
       | "advancement_counter_added"
-      | "installed_rezzed";
+      | "installed_rezzed"
+      | "hosted_credits_added";
   };
+  hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
   counterCashout?: {
     currentAdvancementCounters: number;
     targetAdvancementCounters: number;
@@ -180,7 +185,7 @@ export type CorpEconomyVisibleCardWithdrawalSignal = CorpEconomySignalBase & {
     cardsDrawn: 0;
     cardsConsumed: 0;
     netHandDelta: 0;
-    payoutMode: "fixed";
+    payoutMode: "fixed" | "all_available";
     reliability: "guaranteed";
     source: "legal_action_payload";
     payoutSource: "hosted_credit_pool" | "advancement_counter_cashout";

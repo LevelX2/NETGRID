@@ -3,6 +3,10 @@ import { assessCorpIceLiquidation } from "../defense/corp-ice-liquidation";
 
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import {
+  corpHostedBankCycleForParentFunding,
+  currentCorpHostedBankCycleQuotes,
+} from "./hosted-credit-bank-cycle";
 import { domain } from "../../plans/corp-core-module-support";
 import { createCreditDemand } from "../../plans/credit-demand";
 import { searchFundingRoutes } from "../../plans/funding-route";
@@ -33,6 +37,19 @@ export function economyCandidates(
   context: PlanSchedulerContext,
   signal: CorpEconomyNeedSignal,
 ): PlanMaterialization["candidates"] {
+  if (signal.kind === "parent_funding" && signal.hostedCreditBankCycle) {
+    const quote = currentCorpHostedBankCycleQuotes(context.input).find(
+      (q) => JSON.stringify(q) === JSON.stringify(signal.hostedCreditBankCycle),
+    );
+    return quote
+      ? context.actionCandidates
+          .filter((c) => c.actionId === quote.actionId)
+          .map((candidate) => ({
+            candidate,
+            stepValue: Math.min(signal.gap, quote.netLiquidCreditGain) * 10,
+          }))
+      : [];
+  }
   if (
     signal.kind === "parent_funding" &&
     signal.restrictedCreditPreparations?.length
@@ -125,12 +142,19 @@ export function economyCandidates(
                 candidate.semanticActionType === "choice.resolve"
               : candidate.sourceCardInstanceId === signal.sourceInstanceId &&
                 candidate.sourceDefinitionId === signal.sourceDefinitionId &&
-                candidate.semanticActionType ===
-                  (signal.phase === "install"
-                    ? "install.card"
-                    : signal.phase === "advance"
-                      ? "score.advance_card"
-                      : "corp_window.rez")) &&
+                (signal.hostedCreditBankCycle
+                  ? currentCorpHostedBankCycleQuotes(context.input).some(
+                      (q) =>
+                        q.actionId === candidate.actionId &&
+                        JSON.stringify(q) ===
+                          JSON.stringify(signal.hostedCreditBankCycle),
+                    )
+                  : candidate.semanticActionType ===
+                    (signal.phase === "install"
+                      ? "install.card"
+                      : signal.phase === "advance"
+                        ? "score.advance_card"
+                        : "corp_window.rez"))) &&
             (signal.cadence.kind !== "immediate_on_rez" ||
               certifiedImmediateRootRezCampaignCandidate(candidate, signal))
           : signal.kind === "convert_immediate_operation"
@@ -300,6 +324,32 @@ export function assessCorpEconomyFundingRoute(
       : (signal.scoreFundingMilestone?.targetCredits ??
         signal.incrementalDefenseReserve?.targetCredits ??
         currentCredits + signal.gap);
+  const bankCycle =
+    signal.kind === "parent_funding"
+      ? corpHostedBankCycleForParentFunding(
+          context.input,
+          context.actionCandidates,
+          signal,
+        )
+      : undefined;
+  if (bankCycle)
+    return {
+      routeId: `${signal.needId}:hosted-bank-cycle:${bankCycle.sourceCardInstanceId}`,
+      status: "covered_guaranteed",
+      reliability: "guaranteed",
+      headActionId: bankCycle.actionId,
+      hostedCreditBankCycle: bankCycle,
+      evidence: [
+        signal.evidenceCode,
+        "corp_same_turn_hosted_bank_funding",
+        currentCredits + bankCycle.netLiquidCreditGain < fullTargetCredits
+          ? "corp_bank_cycle_incremental_funding_only"
+          : "corp_bank_cycle_full_target_funded",
+        `corp_bank_cycle_final_target:${fullTargetCredits}`,
+        `corp_bank_cycle_projected_credits:${currentCredits + bankCycle.netLiquidCreditGain}`,
+        `corp_bank_cycle_click_cost:${bankCycle.totalClickCost}`,
+      ],
+    };
   if (!Number.isFinite(currentCredits) || !Number.isFinite(fullTargetCredits)) {
     return {
       routeId: `${signal.needId}:uncovered`,
@@ -473,7 +523,10 @@ function economyDevelopmentStepValue(
   candidate: ActionSemanticCandidate,
   signal: CorpEconomyDevelopmentSignal,
 ): number {
-  if (signal.cadence.kind === "counter_cashout_development")
+  if (
+    signal.cadence.kind === "counter_cashout_development" ||
+    signal.cadence.kind === "hosted_credit_bank_cycle"
+  )
     return Math.max(1, signal.payback.projectedNetCredits * 10);
   if (signal.phase === "rez")
     return Math.max(1, signal.payback.projectedNetCredits * 10);
@@ -538,7 +591,10 @@ export function economyMaterialization(
                         : signal.kind === "parent_funding" &&
                             signal.restrictedCreditFunding
                           ? "Take the exact restricted payout for the bound current install/rez consumer, then return control to its resident parent."
-                          : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+                          : signal.kind === "parent_funding" &&
+                              signal.hostedCreditBankCycle
+                            ? "Execute the current Engine-quoted hosted-bank head for the bound Score funding need; revalidate the source and remaining rest-turn cycle after this transition."
+                            : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };
@@ -632,7 +688,7 @@ function visibleCardPayoutCandidateMatchesSignal(
     projection.cardsDrawn === 0 &&
     projection.cardsConsumed === 0 &&
     projection.netHandDelta === 0 &&
-    projection.payoutMode === "fixed" &&
+    projection.payoutMode === signal.conversion.payoutMode &&
     projection.reliability === "guaranteed" &&
     projection.source === "legal_action_payload" &&
     projection.confidence === "high"

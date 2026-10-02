@@ -1471,7 +1471,11 @@ function genericDefensePortfolioWithoutInstallPreparation(
     (signal) => signal.urgent && !isDefensePlacementPhase(signal.phase),
   );
   if (urgentRezSignals.length > 0) {
-    return selectedDirectDefenseRoute(context, urgentRezSignals);
+    const urgentRezCandidates = selectedDirectDefenseRoute(
+      context,
+      urgentRezSignals,
+    );
+    if (urgentRezCandidates.length > 0) return urgentRezCandidates;
   }
   if (eligibleSignals.some((signal) => signal.urgent)) {
     return selectedExactGenericDefenseRoutes(
@@ -1688,14 +1692,27 @@ function selectedExactGenericDefenseRoutes(
         fallbackServer?.ice.length === 0 ||
         allocation.evidence[fallbackServerId].threat !== "none" ||
         knownCorpHandOverflow;
+      // Central risk ordering cannot bind Defense to an unavailable route
+      // while an independently quoted terminal closure is executable now.
+      // Keep the allocated route first when it actually has a legal head.
+      const independentTerminalClosures = fallbackCentralRoutes.filter(
+        (route) =>
+          route.signal.urgent &&
+          route.signal.centralPressure === "terminal" &&
+          route.projection.funded &&
+          route.projection.preservesReserves &&
+          route.projection.effect === "satisfied",
+      );
       const allocatedCentralRoutes =
         selectedCentralRoutes.length > 0
           ? selectedCentralRoutes
-          : fallbackCentralRoutes.length > 0 &&
-              !allocationLocked &&
-              fallbackHasIndependentValue
-            ? fallbackCentralRoutes
-            : [];
+          : independentTerminalClosures.length > 0
+            ? independentTerminalClosures
+            : fallbackCentralRoutes.length > 0 &&
+                !allocationLocked &&
+                fallbackHasIndependentValue
+              ? fallbackCentralRoutes
+              : [];
       // The allocation orders HQ against R&D. It must not remove an exact
       // route for Archives or another independently assessed server.
       eligibleRoutes = [

@@ -52,7 +52,7 @@ function addCostQuotes(input: AiDecisionInput) {
       stateVersion: input.playerView.stateVersion,
       installs: installs.map((a) => ({
         cardInstanceId: a.source!,
-        serverId: server.id,
+        targetServerId: server.id,
         beforeCredits: a.payload!.iceInstallTotalCost as number,
         afterCredits: Math.max(
           0,
@@ -106,7 +106,7 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
     });
   }
 
-  it("keeps the selected Remote allocation when the available root discount only applies to HQ", () => {
+  it("preserves the current HQ allocation and its priority when preparing its exact cost support", () => {
     const cp = checkpoint(5, 148);
     const before = choose(cp);
     const selected = cp.input.legalActions.find(
@@ -114,31 +114,29 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
     );
     expect(selected).toMatchObject({
       type: "install_card",
-      payload: { serverId: "remote_1", placement: "ice" },
+      payload: { serverId: "hq", placement: "ice" },
     });
     const quotes = addCostQuotes(cp.input);
     expect(quotes).toHaveLength(1);
     expect(quotes[0]?.sourceServerId).toBe("hq");
     Object.assign(cp.input, buildAiDecisionInputDto(cp.input));
     const after = choose(cp);
-    expect(after.actionId).toBe(before.actionId);
+    expect(quotes.map((q) => q.actionId)).toContain(after.actionId);
     expect(after.reasonCode).toBe("plan_first.corp.defend_servers");
-    expect(after.decisionDebug?.planFirstDecision?.selectedStep).toMatchObject({
-      planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-      stepId:
-        "plan:corp.defend_servers:server-defense-portfolio:improve_remote_protection_path",
-      parentInstanceId:
-        "plan:corp.establish_scoring_remote:strategic-score-remote",
-      needId: before.decisionDebug?.planFirstDecision?.selectedStep?.needId,
-    });
+    expect(after.decisionDebug?.planFirstDecision?.selectedStep).toEqual(
+      before.decisionDebug?.planFirstDecision?.selectedStep,
+    );
+    expect(after.decisionDebug?.planFirstDecision?.priority).toEqual(
+      before.decisionDebug?.planFirstDecision?.priority,
+    );
     expect(after.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.establish_scoring_remote:strategic-score-remote",
+      before.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
     );
     expect(after.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
       "plan:corp.defend_servers:server-defense-portfolio",
     );
     expect(after.decisionDebug?.planFirstDecision?.route).toMatchObject({
-      actionId: before.actionId,
+      actionId: after.actionId,
       stateVersion: cp.input.playerView.stateVersion,
     });
     expect(after.fallbackUsed).toBe(false);
@@ -149,7 +147,7 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
       "another installation destination",
       (q: CorpRootRezIceInstallCostQuote) => {
         q.installs.forEach((i) => {
-          i.serverId = "rd";
+          i.targetServerId = "rd";
         });
       },
     ],
@@ -169,6 +167,20 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
       "another fort",
       (q: CorpRootRezIceInstallCostQuote) => {
         q.sourceServerId = "rd";
+      },
+    ],
+    [
+      "another installation fort",
+      (q: CorpRootRezIceInstallCostQuote) => {
+        q.installs.forEach((i) => {
+          i.targetServerId = "rd";
+        });
+      },
+    ],
+    [
+      "duplicate exact installation",
+      (q: CorpRootRezIceInstallCostQuote) => {
+        q.installs.push(...q.installs.map((i) => ({ ...i })));
       },
     ],
     [

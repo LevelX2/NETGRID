@@ -32,6 +32,7 @@ import {
 } from "../hidden-zone/corp-zone-transition-projection";
 import { quoteCorpScoreRecovery } from "../hidden-zone/corp-score-recovery-quote";
 import { quoteCorpRootRezIceInstallCosts } from "../payment/root-rez-ice-install-cost-quote";
+import { quoteCorpHostedCreditBankCycle } from "../payment/hosted-credit-bank-cycle-quote";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -909,7 +910,20 @@ export function buildCorpMainActions(
         ),
     );
   }
-  return filterActionsForRestrictedExtraActions(state, "corp", actions);
+  return filterActionsForRestrictedExtraActions(state, "corp", actions).map(
+    (candidate) => {
+      const quote = quoteCorpHostedCreditBankCycle(state, candidate);
+      return quote
+        ? {
+            ...candidate,
+            payload: {
+              ...candidate.payload,
+              hostedCreditBankCycleQuoteJson: JSON.stringify(quote),
+            },
+          }
+        : candidate;
+    },
+  );
 }
 
 function optionalExtraActionOfferProjection(

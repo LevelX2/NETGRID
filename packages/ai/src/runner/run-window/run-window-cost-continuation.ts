@@ -314,7 +314,49 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         requirement.optionIds.includes(optionId),
       ) &&
       traceWindowIsContinuous;
-    if (exactRunTraceBidOrigin) {
+    const exactForcedRunMovementOrigin =
+      previous !== undefined &&
+      previous.side === "runner" &&
+      previous.stateVersion < input.playerView.stateVersion &&
+      rootPlanInstanceId !== undefined &&
+      executorInstanceId !== undefined &&
+      result.portfolio.rootForegroundInstanceId === rootPlanInstanceId &&
+      result.portfolio.executorInstanceId === executorInstanceId &&
+      root?.side === "runner" &&
+      executor?.side === "runner" &&
+      traceOriginOwnedByRunWindowLeaf &&
+      executorState?.signal?.windowId === `run:${run?.runId}` &&
+      run?.phase === "movement" &&
+      input.playerView.timingPoint === "run.jack_out_window" &&
+      selectedAction?.side === "runner" &&
+      selectedAction.type === "continue_run" &&
+      selectedAction.actionId === "runner.continue_run" &&
+      selectedAction.source === "game_rule" &&
+      selectedAction.expiresAtStateVersion === input.playerView.stateVersion &&
+      input.legalActions.length === 1 &&
+      result.diagnostics.some(
+        (diagnostic) =>
+          diagnostic.code === "engine_window_single_legal_resolution",
+      ) &&
+      interveningEvents.length >= 1 &&
+      interveningEvents[0]?.stateVersionBefore === previous.stateVersion &&
+      interveningEvents.at(-1)?.stateVersionAfter ===
+        input.playerView.stateVersion &&
+      interveningEvents.every(
+        (event, index) =>
+          event.stateVersionAfter === event.stateVersionBefore + 1 &&
+          (index === 0 ||
+            event.stateVersionBefore ===
+              interveningEvents[index - 1]!.stateVersionAfter) &&
+          event.publicPayload.serverId === run.attackedServerId &&
+          ((event.publicPayload.actor === "runner" &&
+            event.publicPayload.actionType === "continue_run") ||
+            (event.publicPayload.actor === "corp" &&
+              ["rez_ice", "rez_card", "decline_rez"].includes(
+                String(event.publicPayload.actionType),
+              ))),
+      );
+    if (exactRunTraceBidOrigin || exactForcedRunMovementOrigin) {
       result.portfolio.stateVersion = input.playerView.stateVersion;
       const staleRunStartOrigin = result.portfolio.selectedActionOrigin;
       if (

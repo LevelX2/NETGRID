@@ -18,6 +18,59 @@ import {
 import { buildPlanningStateIdentity } from "./turn-planning-contracts";
 
 describe("Corp defense/economy turn-planning vertical slice", () => {
+  it.each([
+    {
+      urgent: true,
+      pressure: "terminal" as const,
+      serverId: "rd",
+      priority: "P2",
+    },
+    {
+      urgent: false,
+      pressure: "material" as const,
+      serverId: "rd",
+      priority: "P3",
+    },
+    {
+      urgent: false,
+      pressure: undefined,
+      serverId: "remote_1",
+      priority: "P6",
+    },
+  ])(
+    "quotes $priority for the exact $serverId route instead of another portfolio need",
+    ({ urgent, pressure, serverId, priority }) => {
+      const input = decisionInput();
+      const defense = defenseSignal({
+        disposition: "productive",
+        effect: "satisfied",
+        fundingGap: 0,
+        ...(pressure ? { centralPressure: pressure } : {}),
+      });
+      defense.urgent = urgent;
+      defense.serverId = serverId;
+      defense.installRoute = {
+        ...defense.installRoute!,
+        projection: {
+          ...defense.installRoute!.projection,
+          targetServerId: serverId,
+        },
+      };
+      const slice = buildSlice(
+        input,
+        [defense],
+        [],
+        [installCandidate("install-rd", "ice-1", serverId)],
+      );
+      expect(slice.lines).toHaveLength(1);
+      expect(slice.lines[0]).toMatchObject({
+        currentActionId: "install-rd",
+        targetServerId: serverId,
+        priorityClass: priority,
+      });
+    },
+  );
+
   it("binds exact funding before the ICE install without duplicating defense value", () => {
     const input = decisionInput();
     offerFundingAction(input, 2);

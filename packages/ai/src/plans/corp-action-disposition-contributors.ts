@@ -272,6 +272,22 @@ function contributeCorpActionDispositionForCandidate(
     );
     return;
   }
+  if (
+    action?.side === "corp" &&
+    action.type === "activated_card_ability" &&
+    action.payload?.cardImplementationAddsHostedCredits === true &&
+    action.payload?.hostedCreditBankCycleQuoteJson === undefined &&
+    !domain.economyNeeds.some((signal) =>
+      signal.actionIds.includes(candidate.actionId),
+    )
+  ) {
+    addUnknown(
+      candidate.actionId,
+      "corp.economy",
+      "corp_hosted_credit_load_has_no_certified_current_liquid_conversion",
+    );
+    return;
+  }
   const optionalActionCapacitySignal = domain.economyNeeds.find(
     (signal) =>
       signal.kind === "resolve_optional_action_capacity_offer" &&
