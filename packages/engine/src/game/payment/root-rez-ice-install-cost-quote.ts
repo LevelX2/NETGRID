@@ -66,26 +66,29 @@ export function quoteCorpRootRezIceInstallCosts(
     const definition = card
       ? CARD_DEFINITIONS_BY_ID[card.definitionId]
       : undefined;
-    if (!definition || !canInstallCorpIceInServer(definition, server))
-      return [];
-    const before = quoteCorpIceInstallCost(state, id, server);
-    const after = quoteCorpIceInstallCost(projected, id, server);
-    return before.canPay && after.finalCredits < before.finalCredits
-      ? [
-          {
-            cardInstanceId: id,
-            beforeCredits: before.finalCredits,
-            afterCredits: after.finalCredits,
-          },
-        ]
-      : [];
+    if (!definition) return [];
+    return state.corp.servers.flatMap((target) => {
+      if (!canInstallCorpIceInServer(definition, target)) return [];
+      const before = quoteCorpIceInstallCost(state, id, target);
+      const after = quoteCorpIceInstallCost(projected, id, target);
+      return before.canPay && after.finalCredits < before.finalCredits
+        ? [
+            {
+              cardInstanceId: id,
+              targetServerId: target.id,
+              beforeCredits: before.finalCredits,
+              afterCredits: after.finalCredits,
+            },
+          ]
+        : [];
+    });
   });
   if (installs.length === 0) return undefined;
   return {
-    schemaVersion: "corp-root-rez-ice-install-cost-quote-v1",
+    schemaVersion: "corp-root-rez-ice-install-cost-quote-v2",
     actionId: action.actionId,
     sourceCardInstanceId: source.instanceId,
-    targetServerId: server.id,
+    sourceServerId: server.id,
     stateVersion: state.stateVersion,
     installs,
   };

@@ -49,7 +49,13 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       });
       defense.urgent = urgent;
       defense.serverId = serverId;
-      defense.installRoute!.projection.targetServerId = serverId;
+      defense.installRoute = {
+        ...defense.installRoute!,
+        projection: {
+          ...defense.installRoute!.projection,
+          targetServerId: serverId,
+        },
+      };
       const slice = buildSlice(
         input,
         [defense],

@@ -2660,13 +2660,14 @@ export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
  * The subsequent installation must be rediscovered and revalidated after rez.
  */
 export type CorpRootRezIceInstallCostQuote = {
-  schemaVersion: "corp-root-rez-ice-install-cost-quote-v1";
+  schemaVersion: "corp-root-rez-ice-install-cost-quote-v2";
   actionId: string;
   sourceCardInstanceId: CardInstanceId;
-  targetServerId: Exclude<ServerId, "new_remote">;
+  sourceServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
   installs: Array<{
     cardInstanceId: CardInstanceId;
+    targetServerId: Exclude<ServerId, "new_remote">;
     beforeCredits: number;
     afterCredits: number;
   }>;

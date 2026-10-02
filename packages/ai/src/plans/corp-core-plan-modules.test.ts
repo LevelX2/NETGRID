@@ -1853,22 +1853,25 @@ describe("Corp core plan modules", () => {
         throw new Error("Generic defense fixture required");
       hq.urgent = urgent;
       hq.centralPressure = terminal ? "terminal" : "material";
-      hq.installRoute!.projection = knownInstallProjection({
-        actionId: actions[0]!.actionId,
-        sourceCardInstanceId: "ice-shared-1",
-        sourceDefinitionId: "ice-shared",
-        targetServerId: "hq",
-        effect,
-        probability: {
-          numerator: effect === "satisfied" ? 0 : 1,
-          denominator: 2,
-        },
-        totalCredits: reserves ? 0 : 2,
-        availableCredits: 0,
-        availableClicks: 3,
-        preservesReserves: reserves,
-      });
-      if (!reserves) hq.installRoute!.disposition = "funding_only";
+      hq.installRoute = {
+        ...hq.installRoute!,
+        ...(!reserves ? { disposition: "funding_only" as const } : {}),
+        projection: knownInstallProjection({
+          actionId: actions[0]!.actionId,
+          sourceCardInstanceId: "ice-shared-1",
+          sourceDefinitionId: "ice-shared",
+          targetServerId: "hq",
+          effect,
+          probability: {
+            numerator: effect === "satisfied" ? 0 : 1,
+            denominator: 2,
+          },
+          totalCredits: reserves ? 0 : 2,
+          availableCredits: 0,
+          availableClicks: 3,
+          preservesReserves: reserves,
+        }),
+      };
       const rd = productiveDefenseSignal(actions[1]!, "rd", "terminal");
       if (rd.kind !== "generic")
         throw new Error("Generic defense fixture required");

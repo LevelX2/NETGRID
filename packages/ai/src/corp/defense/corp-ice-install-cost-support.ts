@@ -34,14 +34,16 @@ function currentSavings(
   }
   const view = input.playerView;
   const server = view.servers.find((s) => s.id === install.payload?.serverId);
-  const source = server?.root.find((c) => c.instanceId === rez.source);
+  const sourceServer = view.servers.find((s) => s.id === rez.payload?.serverId);
+  const source = sourceServer?.root.find((c) => c.instanceId === rez.source);
   if (
     !quote ||
     typeof quote !== "object" ||
-    quote.schemaVersion !== "corp-root-rez-ice-install-cost-quote-v1" ||
+    quote.schemaVersion !== "corp-root-rez-ice-install-cost-quote-v2" ||
     quote.actionId !== rez.actionId ||
     quote.sourceCardInstanceId !== rez.source ||
-    quote.targetServerId !== server?.id ||
+    quote.sourceServerId !== sourceServer?.id ||
+    !server ||
     quote.stateVersion !== view.stateVersion ||
     !Array.isArray(quote.installs) ||
     !source?.known ||
@@ -69,7 +71,8 @@ function currentSavings(
       !!q &&
       typeof q === "object" &&
       !Array.isArray(q) &&
-      (q as Record<string, unknown>).cardInstanceId === install.source,
+      (q as Record<string, unknown>).cardInstanceId === install.source &&
+      (q as Record<string, unknown>).targetServerId === server.id,
   );
   if (entries.length !== 1) return undefined;
   const entry = entries[0]!;

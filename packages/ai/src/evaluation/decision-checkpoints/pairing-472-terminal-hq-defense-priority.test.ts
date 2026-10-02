@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { describe, expect, it } from "vitest";
 import {
   chooseAiAction,
@@ -8,7 +9,7 @@ import {
 import { restoreStrategicIntentMemorySnapshot } from "../../strategic-intent-memory";
 
 type CapturedCheckpoint = {
-  input: AiDecisionInput;
+  input: AiDecisionInputWithDeckCapabilities;
   validation: Record<string, boolean>;
   runtime: {
     strategicIntent: Parameters<typeof restoreStrategicIntentMemorySnapshot>[1];
