@@ -573,6 +573,13 @@ bei gleicher Antwort und gleichen Kosten bleibt die kanonische Rollenreihenfolge
 stabil. Der gewählte Rollenbedarf, die konkrete
 Installation und der anschließende Run bleiben an denselben Parent gebunden.
 
+Hat diese Kosten-Recovery oder ein Upgrade bereits eine konkrete Antwort
+gewählt, bleibt deren Handverfügbarkeit maßgeblich. Eine allgemeine
+rollenpassende Handkarte darf eine noch im Stack liegende bessere Antwort
+nicht als `answerInHand` ersetzen. Die Beschaffungsphase behält damit das
+gewählte Ziel; eine weitere Kopie des bereits teuren Breakers wird nicht
+zur Installationsantwort dieses Recovery-Bedarfs.
+
 Ein konkreter Remote-Parent darf außerdem eine sichtbare Handinstallation als
 Kosten-Vorbereitung binden, auch wenn seine ICE-Kette noch unbekannte Teile
 enthält. Der Coverage-Owner vergleicht dafür den bekannten Pfad mit dem
