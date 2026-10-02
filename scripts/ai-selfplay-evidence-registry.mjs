@@ -7,11 +7,13 @@ import {
   completeJob,
   exportEvidenceSnapshot,
   getStoredReport,
+  getReportingSeries,
   importLegacyArtifacts,
   importPairingBundle,
   openEvidenceRegistry,
   recordReport,
   registerJob,
+  registerReportingSeries,
   registryCheck,
   registryStatus,
   resolveDefaultEvidenceDatabasePath,
@@ -55,6 +57,8 @@ Usage:
   node scripts/ai-selfplay-evidence-registry.mjs allocate --kind pairing|case --job-id ID [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs upsert --input pairing.json [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs record-report --input report.json [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs register-reporting-series --input series.json [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs get-reporting-series --series-id ID [--output FILE] [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs backup --output FILE [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs import-legacy --reviews-dir DIR --matrix FILE [--reporting-state FILE] [--reports-dir DIR] [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs export [--pairings 031,032] [--output FILE] [--db PATH]
@@ -126,6 +130,18 @@ try {
         2,
       ),
     );
+  } else if (command === "register-reporting-series") {
+    const inputPath = resolve(required(opts, "input"));
+    console.log(JSON.stringify(registerReportingSeries(db,
+      JSON.parse(readFileSync(inputPath, "utf8"))), null, 2));
+  } else if (command === "get-reporting-series") {
+    const series = getReportingSeries(db, required(opts, "series-id"));
+    const content = `${JSON.stringify(series, null, 2)}\n`;
+    if (opts.output) {
+      const outputPath = resolve(opts.output);
+      writeFileSync(outputPath, content, "utf8");
+      console.log(JSON.stringify({ seriesId: series.id, outputPath }));
+    } else console.log(content);
   } else if (command === "record-report") {
     const inputPath = resolve(required(opts, "input"));
     const input = JSON.parse(readFileSync(inputPath, "utf8"));

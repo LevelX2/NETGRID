@@ -9,6 +9,7 @@ import {
   completeJob,
   exportEvidenceSnapshot,
   getStoredReport,
+  getReportingSeries,
   importLegacyArtifacts,
   importPairingBundle,
   openEvidenceRegistry,
@@ -16,6 +17,7 @@ import {
   parseLegacyReview,
   recordReport,
   registerJob,
+  registerReportingSeries,
   registryCheck,
   registryStatus,
 } from "./lib/ai-selfplay-evidence-registry.mjs";
@@ -213,6 +215,87 @@ test("legacy import is repeatable and retains source documents", () => {
         .get().count,
       0,
     );
+  });
+});
+
+function reportingBundle(id, seriesId = "series-1") {
+  return {
+    schemaVersion: 1,
+    reportingSeriesId: seriesId,
+    pairing: { id, title: `Paarung ${id}`, status: "closed" },
+    games: [{ key: "final-1", phase: "final", winner: "Runner", decisionCount: 31, flagsCount: 0 }],
+  };
+}
+
+test("registers a reporting series without resetting pending delivery on repetition", () => {
+  withRegistry(({ db }) => {
+    const config = { id: "series-1", recipient: "me", interval: 1 };
+    assert.deepEqual(registerReportingSeries(db, config).unreportedPairingIds, []);
+    recordReport(db, {
+      reportId: "report-042", status: "pending", htmlBody: "<html>Bericht</html>",
+      coveredPairingIds: ["042"], series: { ...config, unreportedPairingIds: ["042"],
+        pendingReport: { reportId: "report-042" } },
+    });
+    const before = getReportingSeries(db, config.id);
+    assert.deepEqual(registerReportingSeries(db, config), before);
+    assert.throws(() => registerReportingSeries(db, { ...config, recipient: "changed" }), /configuration conflict/);
+    assert.throws(() => registerReportingSeries(db, { ...config, interval: 0 }), /positive integer/);
+    assert.deepEqual(getReportingSeries(db, config.id), before);
+  });
+});
+
+test("counts closed pairings once and preserves pending reports while adding another pairing", () => {
+  withRegistry(({ db }) => {
+    const config = { id: "series-1", recipient: "me", interval: 1 };
+    registerReportingSeries(db, config);
+    importPairingBundle(db, reportingBundle("042"));
+    importPairingBundle(db, reportingBundle("042"));
+    assert.deepEqual(getReportingSeries(db, config.id).unreportedPairingIds, ["042"]);
+    recordReport(db, {
+      reportId: "report-042", status: "pending", htmlBody: "<html>Bericht</html>",
+      coveredPairingIds: ["042"], series: { ...config, unreportedPairingIds: ["042"],
+        pendingReport: { reportId: "report-042" } },
+    });
+    importPairingBundle(db, reportingBundle("043"));
+    const series = getReportingSeries(db, config.id);
+    assert.deepEqual(series.unreportedPairingIds, ["042", "043"]);
+    assert.deepEqual(series.pendingReport, { reportId: "report-042" });
+    assert.equal(getStoredReport(db, "report-042").status, "pending");
+  });
+});
+
+test("rolls pairing and counter back together for unknown series or incomplete final games", () => {
+  withRegistry(({ db }) => {
+    registerReportingSeries(db, { id: "series-1", recipient: "me", interval: 1 });
+    importPairingBundle(db, reportingBundle("042"));
+    assert.throws(() => importPairingBundle(db, reportingBundle("043", "missing")), /Unknown reporting series/);
+    const invalids = [
+      { ...reportingBundle("043"), pairing: { id: "043", title: "Offen", status: "active" } },
+      { ...reportingBundle("043"), games: [] },
+      ...[{ phase: "repair" }, { flagsCount: 1 }, { winner: "Aborted" }, { decisionCount: 0 }]
+        .map((patch) => ({ ...reportingBundle("043"), games: [{ ...reportingBundle("043").games[0], ...patch }] })),
+    ];
+    for (const bundle of invalids) assert.throws(() => importPairingBundle(db, bundle), /Only closed pairings/);
+    assert.equal(registryStatus(db).pairings, 1);
+    assert.equal(registryStatus(db).games, 1);
+    assert.deepEqual(getReportingSeries(db, "series-1").unreportedPairingIds, ["042"]);
+  });
+});
+
+test("does not count a delivered pairing again when its evidence is reimported", () => {
+  withRegistry(({ db }) => {
+    const config = { id: "series-1", recipient: "me", interval: 1 };
+    registerReportingSeries(db, config);
+    importPairingBundle(db, reportingBundle("042"));
+    recordReport(db, {
+      reportId: "report-042", status: "sent", htmlBody: "<html>Bericht</html>",
+      coveredPairingIds: ["042"], series: { ...config, unreportedPairingIds: [],
+        lastReportedPairingId: "042", lastSentAt: "2026-10-02T04:00:00Z" },
+    });
+    importPairingBundle(db, reportingBundle("042"));
+    assert.deepEqual(getReportingSeries(db, config.id).unreportedPairingIds, []);
+    importPairingBundle(db, reportingBundle("043"));
+    assert.deepEqual(getReportingSeries(db, config.id).unreportedPairingIds, ["043"]);
   });
 });
 
