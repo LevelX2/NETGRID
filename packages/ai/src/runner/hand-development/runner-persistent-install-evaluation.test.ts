@@ -634,7 +634,17 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
     const evaluation = findByInstance(
       evaluateRunnerHandDevelopment({
-        input,
+        input: {
+          ...input,
+          ownDeckSnapshot: {
+            deckSnapshotId: "breaker-variant-deck",
+            side: "runner",
+            cards: [
+              { cardId: "onr_v1_021_dwarf", quantity: 2 },
+              { cardId: "onr_v1_047_pile-driver", quantity: 2 },
+            ],
+          },
+        } as AiDecisionInput,
         deckCapabilities: breakerVariantDeckCapabilities(),
         strategicIntent: strategicIntent({
           setupEngine: ["runner.rig_first"],
@@ -662,7 +672,17 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     incompleteRig.runner!.breakerCoverageMatrix.code_gate.inHand = true;
     const blockedVariant = findByInstance(
       evaluateRunnerHandDevelopment({
-        input,
+        input: {
+          ...input,
+          ownDeckSnapshot: {
+            deckSnapshotId: "breaker-variant-deck",
+            side: "runner",
+            cards: [
+              { cardId: "onr_v1_021_dwarf", quantity: 2 },
+              { cardId: "onr_v1_047_pile-driver", quantity: 2 },
+            ],
+          },
+        } as AiDecisionInput,
         deckCapabilities: incompleteRig,
         strategicIntent: strategicIntent({
           setupEngine: ["runner.rig_first"],

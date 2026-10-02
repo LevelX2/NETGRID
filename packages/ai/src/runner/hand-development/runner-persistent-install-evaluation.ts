@@ -10,6 +10,7 @@ import type {
   DeckCapabilityProfile,
 } from "../../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { persistentDevelopmentActionProjection } from "../../actions/persistent-development-action";
@@ -887,12 +888,22 @@ export function breakerVariantAssessment(
       params.strategicIntent?.setupEngine.includes(
         "runner.search_breaker_setup",
       ) === true);
+  const deckSnapshot = (params.input as AiDecisionInputWithDeckCapabilities)
+    .ownDeckSnapshot;
+  const ownDeckCards =
+    deckSnapshot?.side === "runner" ? deckSnapshot.cards : undefined;
+  // Inventory quantity is the remaining stack supply, not the deck's composition.
+  // Drawing the last copy must not erase the doctrine's original breaker pair.
   const deckContainsIntentionalPair =
-    (candidate?.quantityKnownInDeck ?? 0) > 0 &&
+    ownDeckCards?.some(
+      (entry) => entry.cardId === candidate?.cardId && entry.quantity > 0,
+    ) === true &&
     installedCapabilities.some(
       (installed) =>
         installed.cardId !== candidate?.cardId &&
-        installed.quantityKnownInDeck > 0,
+        ownDeckCards?.some(
+          (entry) => entry.cardId === installed.cardId && entry.quantity > 0,
+        ) === true,
     );
   const pendingPrimaryCoverage = matrix
     ? (["wall", "code_gate", "sentry"] as const).filter((coverage) => {
@@ -910,6 +921,7 @@ export function breakerVariantAssessment(
     ...(installedCapabilities.length === 0
       ? ["no_overlapping_installed_breaker_profile"]
       : []),
+    ...(!ownDeckCards ? ["own_deck_snapshot_unavailable"] : []),
     ...(!deckContainsIntentionalPair
       ? ["deck_does_not_express_breaker_pair"]
       : []),

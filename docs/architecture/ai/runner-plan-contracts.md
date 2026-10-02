@@ -827,6 +827,15 @@ Zugplanung aus; sie enthält keine zweite Handentwicklungs-Discovery.
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
 Ein pauschaler `play_best_hand_card`-Owner existiert nicht.
 
+Der Deckpaar-Beleg für eine wirtschaftlich bessere Breaker-Variante stammt
+aus `ownDeckSnapshot.cards`. `quantityKnownInDeck` beschreibt dagegen den
+verbleibenden Stackbestand und dient der aktuellen Verfügbarkeit. Beide
+Kopien in der Hand oder eine letzte installierte Kopie löschen deshalb keine
+ursprüngliche Deckpaarung. Ohne eigenen Runner-Snapshot bleibt die Paarung
+mit `own_deck_snapshot_unavailable` ausdrücklich unbelegt; Vorteile,
+Strategieausrichtung, primäre Coverage, MU und Reserve bleiben eigenständige
+Zulassungsbedingungen im bestehenden Entwicklungs-Owner.
+
 Erfolgsrun-Counter mit Stärkesenkung auf vollständig gebrochener ICE werden
 mechanisch als Rig-Unterstützung klassifiziert. Ihre Installation erhält über
 `successful-run-counter-development.ts` den konkreten Zweck
