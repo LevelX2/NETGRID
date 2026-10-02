@@ -440,7 +440,13 @@ Bei einer installierten Agenda, deren Steal den Runner gewinnen lässt, stellt
 finanzierbaren Schutzweg zurück. Ein im aktuellen Zug schließender Score bleibt
 vorrangig. Der typisierte `terminalDefense`-Bedarf trägt P2, Agenda-/Serverbindung,
 StateVersion und den bestehenden `score-protection`-Need. Eine Next-Turn-
-Fortsetzungsquote hebt diesen Bedarf nicht auf.
+Fortsetzungsquote hebt diesen Bedarf nicht auf. P2 gilt für eine konkrete
+Schutzinstallation oder eine gequotete Rezreserve. Wenn die vorhandenen aktiven
+Schichten bereits ohne weitere Rezcredits schützen, bleibt gewöhnlicher
+Scorefortschritt in seiner normalen Prioritätsklasse. Die bloße Existenz von
+`terminalDefense` hebt einen solchen Remote nicht über einen anderen terminalen
+Schutzbedarf. Regression: Paarung 473, G13 D531,
+geschützte Superior Net Barriers gegenüber einem fehlenden HQ-Rezcredit.
 
 `corp.defend_servers` vergleicht mit dem bestehenden exakten ICE-Subset-Solver
 vorhandene Schichten, eine aktuell legale ICE-Installation und eine aktuell
