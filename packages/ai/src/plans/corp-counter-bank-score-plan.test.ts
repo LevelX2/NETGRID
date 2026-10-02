@@ -449,7 +449,7 @@ describe("corpCounterBankScoreProjects", () => {
     );
   });
 
-  it.each(["archives", "hq", "rd"])(
+  it.each(["archives", "hq", "rd"] as const)(
     "does not certify a visible agenda in %s as an installed score consumer",
     (serverId) => {
       const rez = current(
