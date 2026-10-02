@@ -376,6 +376,20 @@ Remote-Parent; nach Auszahlung werden Kosten und Reserve erneut geprüft.
 Identische unterfinanzierte Wiederholungen erhalten dadurch keine neue
 Zulassung, während eine inzwischen finanzierte Route weiterhin zulässig ist.
 
+Die gemeinsame Funding-Admission übernimmt auch die Creditlücke der
+Vorabreserve. Eine gequotete bekannte Pfadkostenlücke allein genügt bei
+unbekanntem ICE nicht; eine blockierte Vorabreserve ist keine direkte
+Konversion, auch nicht bei terminaler Dringlichkeit. Die kleine
+Letztchancenfinanzierung des bekannten Pfads setzt vollständig bekanntes ICE
+voraus. Bei einem dringlichen Remote darf der Bank-Owner stattdessen eine
+endliche Folge verschiedener aktuell angebotener Bankauszahlungen an denselben
+Bedarf binden. Der Run-Owner quotiert deren garantiertes Nettobudget mit der
+unveränderten Risikopolicy und reserviert den Run-Klick. Nur eine danach
+zugelassene vollständige Route rechtfertigt den ersten Bank-Step; unbekanntes
+ICE bleibt bedingter Zugriff. Nach jeder Auszahlung werden Bedarf, Quelle,
+Klickbudget und Reserve neu geprüft. Dieselbe endliche Bankquelle wird nicht
+mehrfach als Auszahlung gezählt.
+
 `packages/ai/src/runner/remote-contest/` enthält:
 
 - `remote-contest-signals.ts`: Bedrohungs- und Zielbewertung, Vorbereitung,
@@ -2098,7 +2112,7 @@ allgemeine Importzyklus-Gate geschützt.
 
 ### Benannte gemeinsame Dienste
 
-`RunnerCreditBankServices` erhält fünf Funktionen, die im selben
+`RunnerCreditBankServices` erhält acht Funktionen, die im selben
 `runnerContext` an aktuellen Input, Kandidaten und Economy-Facts gebunden werden:
 
 - `hasExactRunUrgency`: belegte Dringlichkeit des konkreten Runziels;
@@ -2106,6 +2120,12 @@ allgemeine Importzyklus-Gate geschützt.
 - `terminalVisibleHazardFundingGap`: konkrete Finanzierungslücke eines
   terminalen Remote-Contests;
 - `isDirectlyMandatoryRun`: bereits direkt konvertierbare Pflichtlinie;
+- `terminalKnownPathFundingGap`: Lücke eines vollständig bekannten
+  terminalen Pfads;
+- `quoteRunAfterCashout`: vollständige Runquote nach einer garantierten
+  Auszahlung;
+- `quoteRunAfterCashoutRoute`: dieselbe Runquote nach einer endlichen Folge
+  verschiedener garantierter Bankauszahlungen;
 - `developmentFundingRoute`: aktuelle Action-IDs einer vollständig
   finanzierbaren Same-Turn-Kartenentwicklung.
 

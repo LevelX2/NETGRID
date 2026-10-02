@@ -38,6 +38,10 @@ export type RunnerCreditBankServices = {
     target: RunnerRunTargetEvaluation,
     actionId: string,
   ) => RunnerRunTargetEvaluation | undefined;
+  quoteRunAfterCashoutRoute: (
+    target: RunnerRunTargetEvaluation,
+    actionIds: readonly string[],
+  ) => RunnerRunTargetEvaluation | undefined;
   developmentFundingRoute: (target: RunnerHandDevelopmentEvaluation) => {
     actionIds: string[];
     evidenceCodes: string[];
@@ -690,15 +694,65 @@ function runnerCreditBankRunFundingRoute(params: {
                 target.visibleTraceTagHazardUnavoidable !== true,
             )
         : undefined;
+    const reserveFundingRoute =
+      evaluation.accessTargetKind === "remote" &&
+      admission.admitted &&
+      (evaluation.prerunReserveQuote?.creditGap ?? 0) > 0 &&
+      (evaluation.prerunReserveQuote?.unknownIceCount ?? 0) > 0 &&
+      params.services.hasExactRunUrgency(evaluation)
+        ? searchFundingRoutes({
+            demand: createRunnerCreditDemand({
+              demandId: `run-support:${evaluation.actionId}`,
+              sourcePlanId: `runner.contest_remote:${evaluation.targetServerId}`,
+              purpose: "current_run",
+              priority: "acute_hard_plan_blocker",
+              hardness: "hard",
+              deadline: "end_of_current_turn",
+              currentCredits: params.input.playerView.own.credits,
+              targetCredits:
+                params.input.playerView.own.credits + admission.concreteFundingGap,
+            }),
+            candidates: params.candidates.filter(
+              (candidate) =>
+                candidate.planOwnerBinding?.owner === "runner.credit_bank" &&
+                candidate.economyProjection?.payoutMode === "all_available" &&
+                candidate.economyProjection.sourcePool === "finite",
+            ),
+            remainingClicks: remainingFundingClicks,
+            maxSteps: remainingFundingClicks,
+            maxRoutes: 16,
+            acceptRoute: (route) => {
+              if (!cashOutActionIds.has(route.steps[0]?.actionId ?? ""))
+                return false;
+              const actionIds = route.steps.map((step) => step.actionId);
+              if (actionIds.some((actionId) => actionId === undefined))
+                return false;
+              const funded = params.services.quoteRunAfterCashoutRoute(
+                evaluation,
+                actionIds as string[],
+              );
+              return funded !== undefined &&
+                funded.prerunReserveQuote?.status === "satisfied" &&
+                params.services.isDirectlyMandatoryRun(funded);
+            },
+          }).routes.find(
+            (route) => route.status === "covered_guaranteed" &&
+              route.horizon === "same_turn" &&
+              cashOutActionIds.has(route.steps[0]?.actionId ?? ""),
+          )
+        : undefined;
     const exactUrgentConvertibleTarget =
       params.services.hasExactRunUrgency(evaluation) &&
-      (fundedTerminalTarget !== undefined ||
+      (reserveFundingRoute !== undefined ||
+        fundedTerminalTarget !== undefined ||
         evaluation.score > 0 ||
         (terminalVisibleHazardFundingGap !== undefined &&
           terminalVisibleHazardFundingGap <= params.estimatedPayout)) &&
       evaluation.recommendation === "gain_credits_first";
     if (!exactUrgentConvertibleTarget) continue;
-    const conversionFundingGap = fundedTerminalTarget
+    const conversionFundingGap = reserveFundingRoute
+      ? admission.concreteFundingGap
+      : fundedTerminalTarget
       ? Math.max(
           0,
           params.estimatedPayout - fundedTerminalTarget.creditsAfterRun,
@@ -723,7 +777,7 @@ function runnerCreditBankRunFundingRoute(params: {
         `run_funding_gap:${conversionFundingGap}`,
       ],
     });
-    const route = searchFundingRoutes({
+    const route = reserveFundingRoute ?? searchFundingRoutes({
       demand,
       // This certificate belongs to the bank payout itself. An unrelated
       // loan must not prune it before the bank's route can be materialized.
@@ -744,7 +798,7 @@ function runnerCreditBankRunFundingRoute(params: {
     );
     if (route) {
       return {
-        ...(fundedTerminalTarget
+        ...(fundedTerminalTarget || reserveFundingRoute
           ? {
               runFunding: {
                 parentPlanInstanceId: `plan:runner.contest_remote:${encodeURIComponent(`remote:${evaluation.targetServerId}`)}`,
@@ -774,6 +828,9 @@ function runnerCreditBankRunFundingRoute(params: {
           `runner_credit_bank_bound_funding_gap:${conversionFundingGap}`,
           ...(fundedTerminalTarget
             ? ["runner_credit_bank_complete_terminal_path_after_cashout"]
+            : []),
+          ...(reserveFundingRoute
+            ? ["runner_credit_bank_complete_prerun_reserve_after_cashout_route"]
             : []),
           ...(terminalVisibleHazardFundingGap !== undefined
             ? [

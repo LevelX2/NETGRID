@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
@@ -14,11 +14,11 @@ it("funds terminal HQ protection before ordinary progress on an already protecte
     import.meta.url,
   ), "utf8"));
   expect(Object.values(cp.validation).every(value => value === true)).toBe(true);
-  const input: AiDecisionInput = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  const input: AiDecisionInputWithDeckCapabilities = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
   expect(input.playerView.own.credits).toBe(3);
   expect(input.playerView.own.clicks).toBe(3);
-  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot.deckSnapshotId, cp.runtime);
+  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
   const funding = input.legalActions.find(a => a.type === "gain_credit")!;
   const result = chooseAiAction(input);
   expect(result.fallbackUsed).toBe(false);

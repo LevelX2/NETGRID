@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
@@ -15,7 +15,7 @@ it("keeps an agenda flood behind safe HQ protection instead of exposing unfunded
     import.meta.url,
   ), "utf8"));
   expect(Object.values(cp.validation).every(value => value === true)).toBe(true);
-  const input: AiDecisionInput = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  const input: AiDecisionInputWithDeckCapabilities = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
   expect(input.playerView.own.credits).toBe(0);
   expect(input.playerView.own.stackOrRdCount).toBe(6);
@@ -25,7 +25,7 @@ it("keeps an agenda flood behind safe HQ protection instead of exposing unfunded
     status: "known",
     evidence: { hq: { expectedAgendaLoss: { numerator: 0 } } },
   });
-  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot.deckSnapshotId, cp.runtime);
+  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
   const funding = input.legalActions.find(action => action.type === "gain_credit")!;
   const result = chooseAiAction(input);
   expect(result.fallbackUsed).toBe(false);

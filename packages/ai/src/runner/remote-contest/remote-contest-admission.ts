@@ -68,6 +68,7 @@ export function runnerTerminalRemoteLastChanceKnownPathFundingGap(
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessPayoffContestable === false ||
     evaluation.visibleTraceTagHazardUnavoidable === true ||
+    (evaluation.routeQuote?.unknownIceCount ?? 0) > 0 ||
     (evaluation.unavoidableVisibleIceHazardCount ?? 0) > 0 ||
     !Number.isSafeInteger(routeFundingGap) ||
     (routeFundingGap ?? 0) <= 0 ||
