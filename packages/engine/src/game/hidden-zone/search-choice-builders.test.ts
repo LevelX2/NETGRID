@@ -158,6 +158,8 @@ describe("hidden-zone search choice builders", () => {
 
     expect(takeMatching).toMatchObject({
       choiceId: "p3_37_look_top_stack_take_matching_3",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
       source:
         "p3_37.look_top_stack_take_matching:source_card:source_definition:5:program,event:1:reveal:shuffle:3",
       minSelections: 0,

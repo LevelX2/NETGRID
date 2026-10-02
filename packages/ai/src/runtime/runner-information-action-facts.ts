@@ -27,8 +27,17 @@ export function runnerCandidateIsCentralInformationAbility(
   candidate: ActionSemanticCandidate,
 ): "hq" | "rd" | undefined {
   if (!runnerCandidateIsCardAbility(candidate)) return undefined;
-  if (candidate.actionTacticSignals.includes("effect:hq_info")) return "hq";
-  if (candidate.actionTacticSignals.includes("effect:topdeck_info"))
+  if (
+    candidate.functionalEffects?.some(
+      (effect) => effect.kind === "hq_info" && effect.scope === "hq",
+    )
+  )
+    return "hq";
+  if (
+    candidate.functionalEffects?.some(
+      (effect) => effect.kind === "topdeck_info" && effect.scope === "rnd",
+    )
+  )
     return "rd";
   return undefined;
 }

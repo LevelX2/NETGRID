@@ -7,6 +7,7 @@ import {
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
+import { runnerPartialProgramSearchProfile } from "./runner-partial-program-search-facts";
 import {
   selectedCorpAccessPaymentOptionsFromAmbushPlan,
   selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan,
@@ -1348,6 +1349,7 @@ export function selectedChoicesForDecision(
         ...(coverageBinding
           ? {
               requiredCoverage: coverageBinding.requiredCoverage,
+              optionalExactTargetOnly: coverageBinding.optionalExactTargetOnly,
               ...(coverageBinding.targetCardInstanceId
                 ? {
                     preferredCardInstanceId:
@@ -1363,6 +1365,8 @@ export function selectedChoicesForDecision(
             }
           : developmentBinding
             ? {
+                optionalExactTargetOnly:
+                  developmentBinding.optionalExactTargetOnly,
                 ...(developmentBinding.targetCardInstanceId
                   ? {
                       preferredCardInstanceId:
@@ -2660,6 +2664,7 @@ function runnerDevelopmentSearchChoiceBinding(
       planInstanceId: string;
       targetCardInstanceId?: string;
       targetDefinitionId: string;
+      optionalExactTargetOnly: boolean;
     }
   | undefined {
   if (input.side !== "runner") return undefined;
@@ -2705,6 +2710,14 @@ function runnerDevelopmentSearchChoiceBinding(
   const recoveryCommitment = signal?.recoverySearchCommitment;
   if (!programCommitment && !recoveryCommitment) return undefined;
   const commitment = recoveryCommitment ?? programCommitment;
+  const partialProfile =
+    programCommitment &&
+    typeof programCommitment.sourceDefinitionId === "string"
+      ? runnerPartialProgramSearchProfile(
+          input,
+          programCommitment.sourceDefinitionId,
+        )
+      : undefined;
   const matchingTargetOptions =
     typeof recoveryCommitment?.targetCardInstanceId === "string"
       ? choice.options.filter(
@@ -2744,19 +2757,27 @@ function runnerDevelopmentSearchChoiceBinding(
     choice.sourceCardInstanceId === commitment.sourceCardInstanceId &&
     choice.sourceCardDefinitionId === commitment.sourceDefinitionId &&
     choice.kind === "select_cards" &&
-    choice.minSelections === 1 &&
-    choice.maxSelections === 1 &&
+    (partialProfile
+      ? choice.minSelections === 0
+      : choice.minSelections === 1 && choice.maxSelections === 1) &&
     action.side === "runner" &&
     action.type === "resolve_choice" &&
     action.expiresAtStateVersion === input.playerView.stateVersion &&
     (programCommitment === undefined ||
-      choice.cardSearchPresentation?.selectableFilter === "program") &&
+      choice.cardSearchPresentation?.selectableFilter ===
+        (partialProfile ? "matching_cards" : "program")) &&
     (recoveryCommitment === undefined ||
       (choice.cardSearchPresentation?.sourceZone === "heap" &&
         choice.cardSearchPresentation.destination === "grip" &&
         choice.cardSearchPresentation.selectableFilter ===
           recoveryCommitment.searchFilter)) &&
-    matchingTargetOptions.length > 0;
+    (partialProfile
+      ? choice.cardSearchPresentation?.sourceZone === "stack" &&
+        choice.cardSearchPresentation.destination === "grip" &&
+        Number.isSafeInteger(choice.maxSelections) &&
+        choice.maxSelections >= 0 &&
+        choice.maxSelections <= partialProfile.lookCount!
+      : matchingTargetOptions.length > 0);
   if (!exactBinding || !commitment || !portfolio) {
     throw unresolvedChoiceFailure(
       input,
@@ -2770,6 +2791,7 @@ function runnerDevelopmentSearchChoiceBinding(
       ? { targetCardInstanceId: recoveryCommitment.targetCardInstanceId }
       : {}),
     targetDefinitionId: commitment.targetDefinitionId as string,
+    optionalExactTargetOnly: partialProfile !== undefined,
   };
 }
 
@@ -2784,6 +2806,7 @@ function runnerCoverageSearchChoiceBinding(
       serverId?: string;
       targetCardInstanceId?: string;
       targetDefinitionId?: string;
+      optionalExactTargetOnly: boolean;
     }
   | undefined {
   if (input.side !== "runner") return undefined;
@@ -2852,9 +2875,33 @@ function runnerCoverageSearchChoiceBinding(
       "The exact coverage-search binding is incomplete.",
     );
   }
+  const partialProfile = runnerPartialProgramSearchProfile(
+    input,
+    binding.sourceDefinitionId as string,
+  );
+  if (
+    partialProfile &&
+    (input.playerView.stateVersion !== portfolio!.stateVersion + 1 ||
+      choice.stateVersion !== input.playerView.stateVersion ||
+      choice.kind !== "select_cards" ||
+      choice.minSelections !== 0 ||
+      !Number.isSafeInteger(choice.maxSelections) ||
+      choice.maxSelections < 0 ||
+      choice.maxSelections > partialProfile.lookCount! ||
+      choice.cardSearchPresentation?.sourceZone !== "stack" ||
+      choice.cardSearchPresentation.destination !== "grip" ||
+      choice.cardSearchPresentation.selectableFilter !== "matching_cards")
+  ) {
+    throw coverageSearchChoiceBindingFailure(
+      input,
+      executor.instanceId,
+      "The bounded search continuation must preserve its exact source, next state version, optional selection bounds and Stack-to-Grip presentation.",
+    );
+  }
   return {
     planInstanceId: executor.instanceId,
     actionId: binding.actionId,
+    optionalExactTargetOnly: partialProfile !== undefined,
     requiredCoverage: moduleState.gap.requiredRole as RequiredCapabilityKind,
     ...(typeof moduleState.gap.targetServerId === "string"
       ? { serverId: moduleState.gap.targetServerId }

@@ -1,0 +1,230 @@
+{
+  "runner": {
+    "id": "sp332-runner",
+    "name": "Run til End",
+    "side": "runner",
+    "identity": "runner_identity_001",
+    "cards": [
+      {
+        "id": "onr_v1_011_cloak",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_012_clown",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_016_cyfermaster",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_021_dwarf",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_024_expert-schedule-analyzer",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_056_replicator",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_066_snowball",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_073_wizards-book",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_074_worm",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_079_bodyweight-synthetic-blood",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_091_hunt-club-bbs",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_095_jack-n-joe",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_097_livewires-contacts",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_099_mantis-fixer-at-large",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_101_mit-west-tier",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_104_playful-ai",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_108_score",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_114_temple-microcode-outlet",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_121_armored-fridge",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_129_hq-interface",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_146_zetatech-mem-chip",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_151_aujourdoui",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_154_broker",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_161_fall-guy",
+        "quantity": 3
+      }
+    ]
+  },
+  "corp": {
+    "id": "sp332-corp",
+    "name": "Ivory Bastion",
+    "side": "corp",
+    "identity": "corp_identity_001",
+    "cards": [
+      {
+        "id": "onr_v1_193_corporate-coup",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_212_priority-requisition",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_215_security-net-optimization",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_219_superior-net-barriers",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_220_tycho-extension",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_230_cortical-scanner",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_232_crystal-wall",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_237_data-wall",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_238_data-wall-2-0",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_239_endless-corridor",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_245_fire-wall",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_263_reinforced-wall",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_265_rock-is-strong",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_278_wall-of-ice",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_279_wall-of-static",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_281_accounts-receivable",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_282_annual-reviews",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_290_efficiency-experts",
+        "quantity": 3
+      },
+      {
+        "id": "onr_v1_297_overtime-incentives",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_309_bbs-whispering-campaign",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_311_braindance-campaign",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_317_data-masons",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_324_fortress-architects",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_329_investment-firm",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_350_antiquated-interface-routines",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_355_crystal-palace-station-grid",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_360_jerusalem-city-grid",
+        "quantity": 1
+      },
+      {
+        "id": "onr_v1_366_red-herrings",
+        "quantity": 2
+      },
+      {
+        "id": "onr_v1_370_tesseract-fort-construction",
+        "quantity": 1
+      }
+    ]
+  }
+}

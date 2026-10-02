@@ -410,6 +410,17 @@ Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
 
+Eine begrenzte Programmsuche in der eigenen Stack-Spitze
+verwendet den generierten CardSpec-Zieltyp, die Anzahl betrachteter Karten
+und die Kosten je übernommener Karte. Sie ist kein R&D-Informationswerkzeug
+und garantiert keinen Treffer im gesamten Stack. Coverage und Entwicklung
+binden vor der Aktivierung ein konkretes Ziel; aktive Suche verlangt bezahlbare
+Übernahme und freie Handkapazität. Die Engine übergibt Karteninstanz und
+Kartendefinition der Quelle strukturiert an die nachfolgende Choice. Deren
+Resolver übernimmt ausschließlich das gebundene Ziel, falls es unter den
+tatsächlichen Optionen liegt, ansonsten die erlaubte leere Auswahl. Er
+entwickelt dort keine neue Suchstrategie und übernimmt keine weiteren Programme.
+
 Die Materialisierung verwendet nur die Actionmenge der aktuellen
 Beschaffungsphase: direkte Suchaktionen in `search_answer`, Installationen
 des Suchwerkzeugs in `setup_search_engine` und Ziehaktionen in

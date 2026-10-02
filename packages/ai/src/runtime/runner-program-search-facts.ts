@@ -27,6 +27,12 @@ export function runnerCandidateSourceSupportsProgramSearch(
     ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
     : undefined;
   return (
+    candidate.functionalEffects?.some(
+      (effect) =>
+        effect.kind === "search" &&
+        effect.scope === "stack" &&
+        effect.target === "program",
+    ) === true ||
     effectTargets.has("setup.program_search") ||
     effectTargets.has("program_search") ||
     hint?.functionSignals?.includes("setup.program_search") === true ||

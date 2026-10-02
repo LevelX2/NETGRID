@@ -32,6 +32,7 @@ export type SearchChoiceScoringContext = {
   readonly preferredServerId?: string;
   readonly preferredCardInstanceId?: string;
   readonly preferredCardDefinitionId?: string;
+  readonly optionalExactTargetOnly?: boolean;
 };
 
 export function selectedSearchChoiceOptionIds(
@@ -46,6 +47,22 @@ export function selectedSearchChoiceOptionIds(
     selectableOptions.length,
   );
   if (count <= 0) return [];
+  const preferredOption = context.preferredCardInstanceId
+    ? selectableOptions.find(
+        (option) =>
+          option.card?.instanceId === context.preferredCardInstanceId ||
+          option.value === context.preferredCardInstanceId,
+      )
+    : undefined;
+  const preferredDefinitionOption = context.preferredCardDefinitionId
+    ? selectableOptions.find(
+        (option) =>
+          option.card?.definitionId === context.preferredCardDefinitionId,
+      )
+    : undefined;
+  const exactPreferredOption = preferredOption ?? preferredDefinitionOption;
+  if (context.optionalExactTargetOnly)
+    return exactPreferredOption ? [exactPreferredOption.id] : [];
   const hasDirectCoverageAnswer = Boolean(
     context.requiredCoverage &&
     selectableOptions.some(
@@ -64,20 +81,6 @@ export function selectedSearchChoiceOptionIds(
     context,
     hasDirectCoverageAnswer,
   );
-  const preferredOption = context.preferredCardInstanceId
-    ? selectableOptions.find(
-        (option) =>
-          option.card?.instanceId === context.preferredCardInstanceId ||
-          option.value === context.preferredCardInstanceId,
-      )
-    : undefined;
-  const preferredDefinitionOption = context.preferredCardDefinitionId
-    ? selectableOptions.find(
-        (option) =>
-          option.card?.definitionId === context.preferredCardDefinitionId,
-      )
-    : undefined;
-  const exactPreferredOption = preferredOption ?? preferredDefinitionOption;
   if (exactPreferredOption) {
     return [
       exactPreferredOption,

@@ -54,6 +54,7 @@ import {
 } from "../../runtime/runner-program-search-facts";
 
 import { type RunnerDevelopmentSignal } from "./development-types";
+import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
 
 export function runnerProgramSearchRecentlyResolved(
   input: AiDecisionInput,
@@ -633,6 +634,7 @@ export function runnerProgramSearchStrategyDevelopmentSignals(
   for (const candidate of candidates) {
     if (
       !runnerCandidateSourceSupportsProgramSearch(input, candidate) ||
+      !runnerPartialProgramSearchIsPayable(input, candidate) ||
       coverageOwnedActionIds.has(candidate.actionId) ||
       runnerHandDevelopmentRejectionForCandidate(
         input,

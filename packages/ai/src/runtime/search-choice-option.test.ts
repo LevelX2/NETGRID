@@ -12,6 +12,37 @@ type PendingChoice = NonNullable<
 >;
 
 describe("selectedSearchChoiceOptionIds", () => {
+  it.each([true, false])(
+    "takes only the prebound optional target without ranking alternatives: %s",
+    (hasTarget) => {
+      const choice = searchChoice(
+        [
+          option("other", "Other", "program"),
+          ...(hasTarget ? [option("target", "Target", "program")] : []),
+        ],
+        2,
+      );
+      choice.minSelections = 0;
+      const selected = selectedSearchChoiceOptionIds(choice, choice.options, {
+        features: {
+          credits: 2,
+          memoryRemaining: 2,
+          hasInstalledNonNoisyIcebreaker: false,
+          rigRoles: new Set(),
+          rigDefinitionIds: new Set(),
+        },
+        preferredCardDefinitionId: "target",
+        optionalExactTargetOnly: true,
+        effectsForCardId: () => {
+          throw Error("No strategic reevaluation during bounded choice");
+        },
+        rolesForCardId: () => {
+          throw Error("No strategic reevaluation during bounded choice");
+        },
+      });
+      expect(selected).toEqual(hasTarget ? ["target"] : []);
+    },
+  );
   it("matches search choices by bounded source tokens", () => {
     expect(isSearchChoice(sourceOnlyChoice("stack search"))).toBe(true);
     expect(isSearchChoice(sourceOnlyChoice("searchlight stackish"))).toBe(
