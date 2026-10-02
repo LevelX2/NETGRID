@@ -923,8 +923,12 @@ function deriveKnownPositionMemory(
     }
   }
 
-  for (const key of [...memory.keys()]) {
-    if (key.startsWith("rd:")) memory.delete(key);
+  for (const [key, entry] of memory) {
+    // The ordered R&D timeline replaces deck positions only. Publicly
+    // observed installed ICE/root positions belong to the server, not its
+    // hidden deck, and remain subject to the normal board invalidation.
+    if (entry.zone === "rd" && /^top(?::\d+)?$/.test(entry.positionKey))
+      memory.delete(key);
   }
   for (const [index, definitionId] of (
     rndTopFreshness?.knownSequenceDefinitionIds ?? []
@@ -1651,8 +1655,16 @@ function positionInvalidatesKey(
     event.family === "shuffle" ||
     event.family === "arrange" ||
     event.family === "swap"
-  )
+  ) {
+    // An explicit hidden-deck mutation does not rearrange installed cards
+    // protecting R&D. Actual board conceal/reorder still invalidates below.
+    if (
+      event.hiddenZoneMutation?.changesRd === true &&
+      /^rd:(?:installed-position-v1:|ice:|root:)/.test(key)
+    )
+      return false;
     return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
+  }
   if (event.family === "install") return false;
   if (rdTopRemovedByRunnerAccess(event) && key.startsWith("rd:")) return false;
   if (

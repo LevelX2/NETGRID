@@ -66,6 +66,17 @@ Engine erhalten keine zweite Entscheidungsautorität.
 7. Eine widersprüchliche oder unvollständige Beobachtungsfolge verwirft nur
    den nicht mehr belegten Suffix. Sie wird nie mit geratenen Karten ergänzt.
 
+Das positionsgebundene Wissen über installierte Karten am R&D-Server ist vom
+geordneten Stapelwissen getrennt. Die Aktualisierung der R&D-Sequenz ersetzt
+nur `top`/`top:n`. Eine ausdrücklich auf den verdeckten R&D-Stapel begrenzte
+Mutation löscht keine öffentlich beobachtete `installedPositionKey` von ICE
+oder Roots. Tatsächliche Board-Ersetzungen, Abgänge und Conceal/Reorder
+invalidieren weiterhin die betroffenen Positionen. Eine nach Derezz erinnerte
+Definition erzeugt weder eine aktuelle ICE-Runquote noch eine garantierte
+Zugriffsroute; dafür bleiben die Engine-Projektion und bestehenden Runowner
+zuständig. SP-478 ist mit dem nativen Paarung-474-Zustand G25 D283 sowie
+unbekanntem ICE und echtem Board-Reorder als Gegenfällen abgesichert.
+
 ## Zustandsmodell
 
 ```text
