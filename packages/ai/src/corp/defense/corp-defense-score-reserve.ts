@@ -79,11 +79,12 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
       defense &&
       (defense.best.protection.runnerAccessSuccessProbability.numerator <
         defense.best.protection.runnerAccessSuccessProbability.denominator ||
-        (route.after !== undefined &&
+        (route.before !== undefined &&
+          route.after !== undefined &&
           route.after.runnerAccessSuccessProbability.numerator ===
             route.after.runnerAccessSuccessProbability.denominator &&
           defense.best.protection.runnerCreditsRemainingOnBestAccessPath <
-            route.after.runnerCreditsRemainingOnBestAccessPath))
+            route.before.runnerCreditsRemainingOnBestAccessPath))
     ) {
       const selected = defense.best.selectedRezCosts.find(
         (cost) => cost.iceInstanceId === route.sourceCardInstanceId,
@@ -92,7 +93,9 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
         defense.best.totalSelectedRezCost - (selected?.credits ?? 0);
       const preservesReserve =
         selected !== undefined &&
-        selected.credits === route.totalRezCredits &&
+        route.totalRezCredits <= selected.credits &&
+        route.quote.mandatoryAdditionalCosts.agendaPoints <=
+          (selected.agendaPoints ?? 0) &&
         availableCreditsAfterRez >= requiredCreditsAfterRez;
       return {
         preservesReserve,

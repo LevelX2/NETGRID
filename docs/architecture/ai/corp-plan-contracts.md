@@ -480,6 +480,15 @@ gewählte Kombination dem Runner weniger Restcredits lässt: Ein schwächerer
 äußerer Rez darf deren innere Rez-Kosten nicht verbrauchen. Dieser Vergleich
 belegt Teilabsicherung, keine sichere Run-Sperre; unbekannte Folgeeffekte
 werden nicht als zusätzliche Zugriffshinderung gewertet.
+Der Restcredit-Vergleich bezieht sich auf den bekannten Zustand vor dem Rez,
+damit auch die gerade angebotene ICE der gewählten Teilabsicherung ihre
+Priorität erhält. Eine aktuell enginegequotete günstigere Rez-Variante derselben
+ICE erhält diese Bindung, solange sie weder mehr Credits noch mehr Agendapunkte
+als die gewählte Subset-Quote kostet und die weiteren ausgewählten Rezzes
+finanzierbar bleiben. Die Gleichheit der einzelnen Creditkosten ist dafür
+keine Voraussetzung. Paarung 474, G1 D140 aus Kontrolllauf 5 belegt beide
+aktuellen Varianten und die exakte Eincredit-Action mit unverändertem
+Defense-Owner, Executor, Step und StateVersion.
 Finanzierbare Teilabsicherung terminaler Server bleibt außerdem beim
 Vergleich mit Rezzes auf anderen Servern reservierbar.
 
