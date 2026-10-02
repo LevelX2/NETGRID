@@ -1895,6 +1895,14 @@ Die Strategie lautet:
 - bei fehlendem exakten Runursprung, uneindeutigem Fenster oder unvollständiger
   Bindung fail-closed abbrechen.
 
+Die lückenlose Ereigniskette eines aktuellen Turn-Plan-Lease darf zwischen
+Run-Fortsetzung und Approach-ICE-Fenster auch Corp-Root-Rez-Ereignisse im
+angegriffenen Server enthalten. Diese ändern den Runursprung nicht. Actor,
+Root-Platzierung, Server und alle StateVersion-Übergänge bleiben exakt
+geprüft; ein fremder Server oder eine Lücke zertifiziert diese Fortsetzung
+nicht. Die native Regression aus Paarung 489, Spiel 27, D112 erhält den
+HQ-Pressure-Root und dessen Run-Window-Parent über zwei solche Ereignisse.
+
 Das plan-eigene Informationsgedächtnis ist privilegierter lokaler
 KI-Zustand. Es erweitert weder PlayerViews noch PublicEvents und darf nicht
 als allgemeine Hidden-Info-Quelle verwendet werden. Im TurnPlanner wird der
