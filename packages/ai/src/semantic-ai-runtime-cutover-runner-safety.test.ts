@@ -259,6 +259,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
           sourceDefinitionId: "onr_v1_232_crystal-wall",
+          encounterSubroutineIds: crystalWall.effectiveRunQuote!.subroutines
+            .map((subroutine) => subroutine.id)
+            .join(","),
         },
       },
     );

@@ -26,10 +26,21 @@ export function currentRunPathContext(
         ice?.[nextIndex]?.instanceId === run.pendingAutoPassIceId
       )
         nextIndex -= 1;
-      if (nextIndex >= 0) {
+      for (; nextIndex >= 0; nextIndex -= 1) {
         const next = ice?.[nextIndex];
         if (!next) throw missingBreakRestrictionBinding(input, "next");
         prohibitBreakingIceInstanceIds.push(next.instanceId);
+        // An unrezzed layer may be passed without beginning an encounter.
+        // Keep every possible next target until a public guaranteed encounter.
+        if (
+          next.known &&
+          next.rezzed === true &&
+          next.effectiveRunQuote &&
+          !next.effectiveRunQuote.conditionalEncounterEffects?.some(
+            (effect) => effect.kind === "random_strength_or_derez_auto_pass",
+          )
+        )
+          break;
       }
     }
   }

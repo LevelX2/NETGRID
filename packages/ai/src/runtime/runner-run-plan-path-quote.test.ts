@@ -813,7 +813,16 @@ function runnerEncounterInput(params: {
       publicEvents: [],
     },
     eventTail: [],
-    legalActions: params.legalActions,
+    legalActions: params.legalActions.map((action) => {
+      if (action.type !== "continue_run") return action;
+      const ids = ice.effectiveRunQuote!.subroutines.map((subroutine) => subroutine.id);
+      // These fixtures start with the whole quoted encounter still open.
+      expect(action.payload?.unbrokenSubroutineCount).toBe(ids.length);
+      return {
+        ...action,
+        payload: { ...action.payload, encounterSubroutineIds: ids.join(",") },
+      };
+    }),
     difficulty: "normal",
     seed: "runner-run-plan-path-quote-test",
     decisionId: "runner-run-plan-path-quote-test:86:runner",

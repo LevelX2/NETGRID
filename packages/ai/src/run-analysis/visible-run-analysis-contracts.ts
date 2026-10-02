@@ -26,7 +26,10 @@ export type RootCardLike = {
 
 export type RunPathProjectionEffect = NonNullable<
   VisibleEffectiveSubroutine["unbrokenRunEffect"]
->;
+> & {
+  /** Derived from the Engine subroutine kind; consumed by the next actual encounter. */
+  expiresAfterNextEncounter?: true;
+};
 
 export type RunPathProjection = {
   effect: RunPathProjectionEffect;

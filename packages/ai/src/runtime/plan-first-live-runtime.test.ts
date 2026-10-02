@@ -5171,6 +5171,8 @@ describe("authoritative plan-first live runtime", () => {
       strength: 4,
       subtypes: ["code_gate"],
     });
+    resolveIce.payload!.encounterSubroutineIds =
+      encounteredIce.effectiveRunQuote!.subroutines.map((s) => s.id).join(",");
     input.playerView.run = {
       runId: "advanced-remote-random-break",
       attackedServerId: "remote_1",

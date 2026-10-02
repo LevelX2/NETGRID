@@ -1460,10 +1460,24 @@ Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
 Sperre gilt nur im laufenden Encounter; die vorgemerkte Sperre gilt für den
 nächsten tatsächlichen Encounter, auch nach einem Auto-Pass. Die Pfadquote
 darf dort keine Breaker-Zahlung oder Schadens-/Programmschutz durch einen
-verbotenen Break erfinden. Unbekanntes ICE verbraucht diese Bindung ohne
-Behauptung einer verdeckten Wirkung; eine harmlose gesperrte ICE sperrt nicht
-zusätzlich die danach folgende ICE. Der bestehende Run-Owner entscheidet
+verbotenen Break erfinden. Unbekannte beziehungsweise ungerezzte ICE und eine
+mögliche zufällige Auto-Passage zertifizieren keinen Encounter-Verbrauch.
+Die vorgemerkte Sperre bindet daher die möglichen nächsten Instanzen bis zum
+ersten öffentlich gesicherten Encounter. Eine bekannte harmlose gesperrte ICE
+sperrt nicht zusätzlich die danach folgende ICE. Der bestehende Run-Owner entscheidet
 weiterhin über die legale Fortsetzung beziehungsweise den Ausstieg.
+
+Noch nicht aufgelöste Folgewirkungen erhalten ihre Encounter-Dauer aus dem
+Engine-Subroutinentyp. Die gemeinsame Pfadquote setzt sie erst nach dem
+Quellencounter ein und verbraucht eine Next-Encounter-Wirkung nach dem
+nächsten tatsächlich gequoteten Encounter. Unbekannte ICE und eine mögliche
+zufällige Auto-Passage zertifizieren diesen Verbrauch nicht. Runweite
+Stärke-, Breakkosten- und Encountersteuern bleiben danach erhalten.
+Die aktuelle Restwirkungsbewertung konsumiert dieselbe Pfadquote statt eine
+zweite globale ICE-Projektion. Ihr Pflichtbedarf umfasst ausschließlich die
+noch offenen Subroutinen-IDs der aktuellen Engine-Continuation; bereits
+gebrochene oder aufgelöste Wirkungen werden nicht erneut als Breakpflicht
+verwendet. Fehlende oder widersprüchliche Bindungen scheitern strukturiert.
 
 Harte ETR mit einem erst am Zugende wirksamen Selbsttrash zählt in der
 Pumpzulassung und der aktuellen Zahlungsquote ebenfalls als Zugriffsbarriere.

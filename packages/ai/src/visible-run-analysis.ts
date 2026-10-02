@@ -71,6 +71,7 @@ import {
   pathProjectionEffectsForQuote,
   runPathEffectAlreadyVisibleOnFutureIce,
   runPathProjectionEffectCanMatter,
+  subroutineOnlyAffectsNextEncounter,
   unbrokenEffectIsUnavoidableTraceRunLock,
   visibleIceHazardPenalty,
   visibleIceRunHazardsForQuote,
@@ -146,6 +147,7 @@ export function assessKnownRezzedIcePath(
   rootCards: RootCardLike[] = [],
   visibleCorpBidCapacity = 0,
   deflectorContext: VisibleDeflectorContext = {},
+  unbrokenRunPathEffects: RunPathProjectionEffect[] = [],
 ): KnownRezzedIcePathAssessment {
   const normalizedCorpBidCapacity = normalizeVisibleCorpBidCapacity(
     visibleCorpBidCapacity,
@@ -193,7 +195,7 @@ export function assessKnownRezzedIcePath(
             runnerCredits,
             rootCards,
             normalizedCorpBidCapacity,
-            [],
+            unbrokenRunPathEffects,
             {
               allowBreakingRunPathEffects: true,
               bartmossOutcome,
@@ -997,6 +999,18 @@ function assessKnownRezzedIcePathInternal(
       }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
+    // A known encounter consumes its queued next-encounter effects, after all
+    // of this encounter's hazards and breaks have been priced. Unknown ICE
+    // and a quoted random auto-pass cannot certify that consumption.
+    if (
+      !quote.conditionalEncounterEffects?.some(
+        (effect) => effect.kind === "random_strength_or_derez_auto_pass",
+      )
+    ) {
+      activeRunPathEffects = activeRunPathEffects.filter(
+        (effect) => effect.expiresAfterNextEncounter !== true,
+      );
+    }
     const futureIce = iceCards.slice(0, Math.max(0, iceIndex));
     const runPathEffects = pathProjectionEffectsForQuote(quote).filter(
       ({ effect, sourceSubroutine }) =>
@@ -1022,6 +1036,7 @@ function assessKnownRezzedIcePathInternal(
           Number(right.sourceSubroutine.type === "do_damage"),
       );
     }
+    const newlyQueuedRunPathEffects: RunPathProjectionEffect[] = [];
     for (const [
       effectIndex,
       { effect, sourceSubroutine },
@@ -1250,9 +1265,13 @@ function assessKnownRezzedIcePathInternal(
           carriedBreakerStrengths,
         );
       } else {
-        activeRunPathEffects = [...activeRunPathEffects, effect];
+        newlyQueuedRunPathEffects.push(effect);
       }
     }
+    activeRunPathEffects = [
+      ...activeRunPathEffects,
+      ...newlyQueuedRunPathEffects,
+    ];
     visibleCorpCreditsThroughPath += (quote?.subroutines ?? [])
       .filter((subroutine) => subroutine.type === "corp_gain_credit")
       .reduce(
@@ -1503,16 +1522,6 @@ function advanceVisibleRunBreakerState(
       },
     ];
   }
-}
-
-function subroutineOnlyAffectsNextEncounter(
-  subroutine: VisibleEffectiveSubroutine,
-): boolean {
-  return (
-    subroutine.type === "set_next_encounter_unless_fully_break_damage" ||
-    subroutine.type === "set_next_encounter_lock" ||
-    subroutine.type === "set_next_encounter_no_break_subroutines"
-  );
 }
 
 function runPathEffectBreakAssessment(params: {

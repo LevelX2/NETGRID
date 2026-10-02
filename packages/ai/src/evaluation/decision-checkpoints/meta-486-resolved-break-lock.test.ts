@@ -91,9 +91,42 @@ it("does not transfer a consumed restriction from harmless ICE to the later ETR"
   input.playerView.run!.position = { kind: "ice", serverId: "hq", iceIndex: 1 };
   expect(path(input)).toMatchObject({ canReachAccess: true });
   harmless.known = false;
+  harmless.rezzed = false;
   delete harmless.definitionId;
   delete harmless.effectiveRunQuote;
-  expect(path(input)).toMatchObject({ canReachAccess: true });
+  expect(currentRunPathContext(input).prohibitBreakingIceInstanceIds).toEqual([
+    harmless.instanceId,
+    etr.instanceId,
+  ]);
+  expect(path(input)).toMatchObject({
+    canReachAccess: false,
+    unpayableReason: "ice_unbreakable",
+  });
+});
+
+it("keeps a resolved queued lock through a possible random auto-pass", () => {
+  const input = fixture(),
+    server = input.playerView.servers.find((s) => s.id === "hq")!;
+  const etr = structuredClone(server.ice[2]!);
+  etr.effectiveRunQuote!.subroutines =
+    etr.effectiveRunQuote!.subroutines.filter((s) => s.type === "end_the_run");
+  const uncertain = structuredClone(etr);
+  uncertain.instanceId = "public_random_auto_pass_ice";
+  uncertain.effectiveRunQuote!.iceInstanceId = uncertain.instanceId;
+  uncertain.effectiveRunQuote!.subroutines = [];
+  uncertain.effectiveRunQuote!.conditionalEncounterEffects = [{
+    kind: "random_strength_or_derez_auto_pass",
+    dieFaces: 6,
+    autoPassResult: 6,
+    maxStrengthBonus: 5,
+  }];
+  server.ice = [etr, uncertain];
+  input.playerView.run!.position = { kind: "ice", serverId: "hq", iceIndex: 1 };
+  expect(currentRunPathContext(input).prohibitBreakingIceInstanceIds).toEqual([
+    uncertain.instanceId,
+    etr.instanceId,
+  ]);
+  expect(path(input).canReachAccess).toBe(false);
 });
 
 it("binds a queued restriction after an Engine auto-pass, and expires only the current restriction", () => {
