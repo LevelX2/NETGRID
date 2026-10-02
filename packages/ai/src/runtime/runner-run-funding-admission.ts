@@ -21,6 +21,7 @@ export type RunnerRunFundingAdmission = {
   concreteFundingGap: number;
   routeFundingGap: number;
   postRunFloorGap: number;
+  prerunReserveCreditGap: number;
   requiredPostRunReserve: number;
   requiredPostRunReserveGap: number;
   urgentScoreThreat: boolean;
@@ -68,6 +69,7 @@ export function assessRunnerRunFundingAdmission(
     routeFundingGap,
     postRunFloorGap,
     requiredPostRunReserveGap,
+    nonNegative(params.target.prerunReserveQuote?.creditGap ?? 0),
   );
   const urgentScoreThreat = urgentScoreThreatFor(params);
   const sameServerDirectlyConvertibleActionIds = directAlternativeActionIds({
@@ -96,6 +98,9 @@ export function assessRunnerRunFundingAdmission(
     concreteFundingGap,
     routeFundingGap,
     postRunFloorGap,
+    prerunReserveCreditGap: nonNegative(
+      params.target.prerunReserveQuote?.creditGap ?? 0,
+    ),
     requiredPostRunReserve,
     requiredPostRunReserveGap,
     urgentScoreThreat,
@@ -144,6 +149,7 @@ export function runnerRunTargetIsDirectlyConvertible(params: {
   );
   return (
     params.target.pathPassability === "reachable" &&
+    params.target.prerunReserveQuote?.status !== "blocked" &&
     params.target.score > 0 &&
     (params.target.recommendation !== "gain_credits_first" ||
       params.allowCreditFloorOverride === true) &&
@@ -221,6 +227,7 @@ function result(
       `runner_run_funding_gap:${context.concreteFundingGap}`,
       `runner_run_funding_route_gap:${context.routeFundingGap}`,
       `runner_run_funding_floor_gap:${context.postRunFloorGap}`,
+      `runner_run_funding_prerun_reserve_gap:${context.prerunReserveCreditGap}`,
       `runner_run_funding_required_post_run_reserve:${context.requiredPostRunReserve}`,
       `runner_run_funding_required_post_run_reserve_gap:${context.requiredPostRunReserveGap}`,
       `runner_run_funding_urgent_score_threat:${context.urgentScoreThreat}`,

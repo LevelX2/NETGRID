@@ -198,7 +198,10 @@ import {
 } from "../run-analysis/runner-run-preparation-choice-binding";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
 import { runnerRecentFutureEncounterDamageSafetyAbort } from "../runner-damage-threat-assessment";
-import { quoteRunnerRunAfterGuaranteedFunding } from "../runner-run-target-evaluation";
+import {
+  quoteRunnerRunAfterGuaranteedFunding,
+  quoteRunnerRunAfterGuaranteedBankCashouts,
+} from "../runner-run-target-evaluation";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -3042,6 +3045,20 @@ function buildRunnerDomain(
               targetServerId: target.targetServerId,
             })
           : undefined;
+      },
+      quoteRunAfterCashoutRoute: (target, actionIds) => {
+        const fundingCandidates = actionIds.map((actionId) =>
+          candidates.find((candidate) => candidate.actionId === actionId),
+        );
+        if (fundingCandidates.some((candidate) => candidate === undefined))
+          return undefined;
+        return quoteRunnerRunAfterGuaranteedBankCashouts({
+          input,
+          deckCapabilities: _deckCapabilities,
+          fundingCandidates: fundingCandidates as ActionSemanticCandidate[],
+          runActionId: target.actionId,
+          targetServerId: target.targetServerId,
+        });
       },
       developmentFundingRoute: (target) =>
         runnerSameTurnDevelopmentFundingRoute(input, candidates, target),

@@ -163,6 +163,16 @@ normale Zugriff erhalten. Ein unbedingter Entzug ersetzt ihn auch dann. Beide
 Fälle teilen dieselbe Central-Projektion; fehlende oder widersprüchliche
 Effektmengen scheitern sichtbar, statt einen Zugriffswert zu erfinden.
 
+Die terminale Finanzierung eines vollständig bekannten Remote-Pfads zertifiziert
+die gesamte gebundene Route erneut mit deren garantiertem liquiden Budget und
+verbleibendem Run-Klick. Eine am ersten unbezahlbaren ICE oder an dessen erster
+unbezahlbarer Subroutine endende Quote liefert nur eine Untergrenze. Das Erreichen
+dieser Untergrenze macht eine Fundingfolge nicht `covered_guaranteed`; der
+Consumer muss mit dem tatsächlichen Folgenbudget garantierten Zugriff ohne
+weitere Finanzierungslücke nachweisen. Die vorhandene Handreserveprüfung bleibt
+zusätzlich verbindlich. Diese Ressourcenprüfung erzeugt keine LegalAction und
+keine zusätzliche Entscheidungsautorität.
+
 Ein Zentralzugriff am Runner-Matchpoint darf ohne aktuelle Remote-Scorebedrohung
 das vorhandene Runbudget verbrauchen. Die allgemeine gewünschte Auffüllreserve
 ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
@@ -375,6 +385,20 @@ ersetzt keinen ausführbaren Zugriffspfad. Ein finanzierbarer Bedarf bleibt am
 Remote-Parent; nach Auszahlung werden Kosten und Reserve erneut geprüft.
 Identische unterfinanzierte Wiederholungen erhalten dadurch keine neue
 Zulassung, während eine inzwischen finanzierte Route weiterhin zulässig ist.
+
+Die gemeinsame Funding-Admission übernimmt auch die Creditlücke der
+Vorabreserve. Eine gequotete bekannte Pfadkostenlücke allein genügt bei
+unbekanntem ICE nicht; eine blockierte Vorabreserve ist keine direkte
+Konversion, auch nicht bei terminaler Dringlichkeit. Die kleine
+Letztchancenfinanzierung des bekannten Pfads setzt vollständig bekanntes ICE
+voraus. Bei einem dringlichen Remote darf der Bank-Owner stattdessen eine
+endliche Folge verschiedener aktuell angebotener Bankauszahlungen an denselben
+Bedarf binden. Der Run-Owner quotiert deren garantiertes Nettobudget mit der
+unveränderten Risikopolicy und reserviert den Run-Klick. Nur eine danach
+zugelassene vollständige Route rechtfertigt den ersten Bank-Step; unbekanntes
+ICE bleibt bedingter Zugriff. Nach jeder Auszahlung werden Bedarf, Quelle,
+Klickbudget und Reserve neu geprüft. Dieselbe endliche Bankquelle wird nicht
+mehrfach als Auszahlung gezählt.
 
 `packages/ai/src/runner/remote-contest/` enthält:
 
@@ -1330,6 +1354,16 @@ Das Modul besitzt eine gemeinsame Threat-Priorisierung für:
   Rules Engine hierfür Runner-Aktionen anbietet;
 - notwendige Damage-Prävention oder Recovery.
 
+Der Installationsbedarf einer typgebundenen Prävention wird nur aus passenden
+öffentlich belegten Schadensarten gebildet. Der allgemeine Handpuffer bleibt
+gegen sämtliche belegten Schadensquellen aktiv; eine reine Net-/Core-Gefahr
+erzeugt jedoch keinen Meat-Präventionsparent. Die kanonischen strukturierten
+Hints liefern den Präventionsumfang, der bestehende Schadens-Fact-Service
+filtert bekannte Quellen und öffentliche Schadensereignisse vor der
+Bedarfsbildung. Untypisierte Textsignale begründen keinen typgebundenen
+Präventionsnutzen. Universelle Flatline- und Runprävention behalten ihren
+allgemeinen Umfang; unbekannte Präventionshints scheitern sichtbar.
+
 Die gebundene Runner-Discard-Choice erhält ihre Keep-Wertung aus demselben
 Owner. Liegt fehlende Breaker-Abdeckung nachweislich nur im eigenen Stack,
 erkennt die Wertung deren Suchzugang über die exakte Kartenbindung in
@@ -2102,7 +2136,7 @@ allgemeine Importzyklus-Gate geschützt.
 
 ### Benannte gemeinsame Dienste
 
-`RunnerCreditBankServices` erhält fünf Funktionen, die im selben
+`RunnerCreditBankServices` erhält acht Funktionen, die im selben
 `runnerContext` an aktuellen Input, Kandidaten und Economy-Facts gebunden werden:
 
 - `hasExactRunUrgency`: belegte Dringlichkeit des konkreten Runziels;
@@ -2110,6 +2144,12 @@ allgemeine Importzyklus-Gate geschützt.
 - `terminalVisibleHazardFundingGap`: konkrete Finanzierungslücke eines
   terminalen Remote-Contests;
 - `isDirectlyMandatoryRun`: bereits direkt konvertierbare Pflichtlinie;
+- `terminalKnownPathFundingGap`: Lücke eines vollständig bekannten
+  terminalen Pfads;
+- `quoteRunAfterCashout`: vollständige Runquote nach einer garantierten
+  Auszahlung;
+- `quoteRunAfterCashoutRoute`: dieselbe Runquote nach einer endlichen Folge
+  verschiedener garantierter Bankauszahlungen;
 - `developmentFundingRoute`: aktuelle Action-IDs einer vollständig
   finanzierbaren Same-Turn-Kartenentwicklung.
 

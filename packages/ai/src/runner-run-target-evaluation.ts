@@ -112,6 +112,44 @@ export function quoteRunnerRunAfterGuaranteedFunding(params: {
   return assessRunnerRunAfterGuaranteedFunding(params)?.target;
 }
 
+/** A resource quote for distinct finite bank payouts, retaining this run's risk policy.
+ * Current actions certify resources; execution still rematerializes after each payout. */
+export function quoteRunnerRunAfterGuaranteedBankCashouts(params: {
+  input: AiDecisionInput;
+  deckCapabilities: DeckCapabilityProfile;
+  fundingCandidates: readonly ActionSemanticCandidate[];
+  runActionId: string;
+  targetServerId: string;
+}): RunnerRunTargetEvaluation | undefined {
+  if (params.fundingCandidates.length === 0) return undefined;
+  const sources = new Set<string>();
+  let input = params.input;
+  let target: RunnerRunTargetEvaluation | undefined;
+  for (const candidate of params.fundingCandidates) {
+    const funding = candidate.economyProjection;
+    if (
+      !candidate.sourceCardInstanceId ||
+      sources.has(candidate.sourceCardInstanceId) ||
+      funding?.payoutMode !== "all_available" ||
+      funding.sourcePool !== "finite" ||
+      funding.cardsConsumed !== 0 ||
+      !(funding.storedCreditsTaken! > 0)
+    ) return undefined;
+    sources.add(candidate.sourceCardInstanceId);
+    const result = assessRunnerRunAfterGuaranteedFunding({
+      input,
+      deckCapabilities: params.deckCapabilities,
+      fundingCandidate: candidate,
+      runActionId: params.runActionId,
+      targetServerId: params.targetServerId,
+    });
+    if (!result) return undefined;
+    input = result.input;
+    target = result.target;
+  }
+  return target;
+}
+
 export function assessRunnerRunAfterGuaranteedFunding(
   params: Parameters<typeof quoteRunnerRunAfterGuaranteedFunding>[0],
 ): { input: AiDecisionInput; target: RunnerRunTargetEvaluation } | undefined {

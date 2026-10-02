@@ -7,7 +7,10 @@ import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-fun
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
 import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
-import { assessRunnerRunAfterGuaranteedFunding } from "../runner-run-target-evaluation";
+import {
+  assessRunnerRunAfterGuaranteedFunding,
+  evaluateRunnerRunTargets,
+} from "../runner-run-target-evaluation";
 import {
   runnerCriticalDamageContestBlocked,
   runnerTerminalRemoteContestIsDirectlyMandatory,
@@ -140,6 +143,9 @@ export function runnerExactFundingRouteContract(
           ...result.evidence,
           ...bestRoute.evidence,
           ...funding.evidence,
+          ...(request.requireCompleteKnownPath
+            ? ["runner_funding_complete_known_path_required"]
+            : []),
           ...(bufferRepair?.evidence ?? []),
         ]),
       ],
@@ -237,6 +243,54 @@ function runnerFundingRouteConsumerBufferFits(
   request: RunnerExactFundingRouteRequest,
   route: FundingRoute,
 ): boolean {
+  if (request.requireCompleteKnownPath) {
+    const target = request.paymentWindowTarget;
+    const runAction = input.legalActions.find(
+      (action) => action.actionId === target?.actionId,
+    );
+    if (
+      request.purpose !== "current_run" ||
+      !request.sourcePlanId ||
+      !target ||
+      !runAction ||
+      runAction.expiresAtStateVersion !== input.playerView.stateVersion ||
+      route.reliability !== "guaranteed" ||
+      route.horizon !== "same_turn" ||
+      input.playerView.own.clicks - route.totalClickCost < 1 ||
+      route.steps.some((step) =>
+        step.kind !== "legal_action" ||
+        step.ownTurnOffset !== 0 ||
+        !input.legalActions.some((action) =>
+          action.actionId === step.actionId &&
+          action.expiresAtStateVersion === input.playerView.stateVersion,
+        ),
+      )
+    ) return false;
+    // Only quote the resources of this admitted route. A blocked path's
+    // first unpaid subroutine is a lower bound, never its complete price.
+    const fundedInput: AiDecisionInput = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          credits: route.projectedGeneralCredits,
+          clicks: input.playerView.own.clicks - route.totalClickCost,
+        },
+      },
+    };
+    const fundedTarget = evaluateRunnerRunTargets({
+      input: fundedInput,
+      deckCapabilities:
+        createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
+    }).find((entry) => entry.actionId === target.actionId);
+    if (
+      fundedTarget?.pathPassability !== "reachable" ||
+      fundedTarget.routeQuote?.reachability !== "guaranteed_access" ||
+      fundedTarget.routeQuote.unknownIceCount !== 0 ||
+      fundedTarget.routeQuote.fundingGap !== 0
+    ) return false;
+  }
   if (
     request.purpose !== "current_run" ||
     !route.steps.some((step) =>

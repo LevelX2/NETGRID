@@ -109,6 +109,50 @@ export function runnerEffectsProvideDamagePrevention(
   );
 }
 
+export type RunnerPreventableDamageType = "net" | "meat" | "core";
+
+export function runnerEffectsDamagePreventionTypes(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): RunnerPreventableDamageType[] {
+  const types = new Set<RunnerPreventableDamageType>();
+  for (const effect of effects ?? []) {
+    if (!DAMAGE_PREVENTION_EFFECT_KINDS.has(effect.kind)) continue;
+    if (
+      effect.kind === "flatline_prevention" ||
+      effect.target === "run.damage_prevention_pool"
+    ) {
+      types.add("net");
+      types.add("meat");
+      types.add("core");
+    } else if (effect.target === "prevent.core_and_net_damage") {
+      types.add("core");
+      types.add("net");
+    } else if (
+      effect.kind === "meat_damage_prevention" ||
+      effect.target === "prevent.meat_damage" ||
+      effect.target === "meat_damage"
+    ) {
+      types.add("meat");
+    } else if (
+      effect.kind === "net_damage_prevention" ||
+      effect.target === "prevent.net_damage" ||
+      effect.target === "ap_net_damage_reduction"
+    ) {
+      types.add("net");
+    } else if (
+      effect.kind === "brain_damage_prevention" ||
+      effect.target === "prevent.core_damage"
+    ) {
+      types.add("core");
+    } else {
+      throw new Error(
+        `runner_damage_prevention_scope_missing:${effect.kind}:${effect.target}`,
+      );
+    }
+  }
+  return [...types].sort();
+}
+
 export function runnerEffectsProvideProgramTrashPrevention(
   effects: readonly AiHintStructuredEffect[] | undefined,
 ): boolean {
