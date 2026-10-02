@@ -6,13 +6,22 @@ export function currentRunPathContext(
   input: AiDecisionInput,
 ): VisibleDeflectorContext {
   const run = input.playerView.run;
-  if (!run?.encounterTaxForFutureIce) return {};
+  if (!run) return {};
   return {
-    encounterEntryTax: {
-      amount: run.encounterTaxForFutureIce,
-      ...(run.encounteredIce?.instanceId
-        ? { paidIceInstanceId: run.encounteredIce.instanceId }
-        : {}),
-    },
+    ...(input.playerView.own.runnerTraceSupportQuote
+      ? {
+          runnerTraceSupportQuote: input.playerView.own.runnerTraceSupportQuote,
+        }
+      : {}),
+    ...(run.encounterTaxForFutureIce
+      ? {
+          encounterEntryTax: {
+            amount: run.encounterTaxForFutureIce,
+            ...(run.encounteredIce?.instanceId
+              ? { paidIceInstanceId: run.encounteredIce.instanceId }
+              : {}),
+          },
+        }
+      : {}),
   };
 }

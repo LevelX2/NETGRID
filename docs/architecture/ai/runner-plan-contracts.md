@@ -1576,6 +1576,16 @@ beschränkte Zahlungspools und verbrauchbare Trace-Quellen. Er ändert nur die
 Zulassung beim bestehenden Run-Window-Owner; die konkrete Trace-Choice bleibt
 an ihre spätere Engine-Action gebunden.
 
+Alle Quotes des aktiven Restpfads übernehmen die aktuelle Runner-private
+`runnerTraceSupportQuote` aus der Engine über `currentRunPathContext`.
+Das gilt auch ohne Encounter-Gebühr und für die Neuprüfung der beim Runstart
+zugelassenen Creditreserve. Eine bezahlbare Trace-Abwehr darf beim Wechsel
+vom Runstart zum Run-Window nicht aus der Kostenquote verschwinden.
+Encounter-Gebühren und bereits bezahlte ICE bleiben daneben erhalten;
+verbrauchte Trace-Quellen und gesunkene Credits werden aus dem aktuellen
+Sichtzustand erneut bewertet. Root, Executor und spätere Trace-Choices
+behalten ihre bestehenden Owner und exakten Engine-Bindungen.
+
 Die Engine kennzeichnet bei installierten Runner-Programmen eine vom aktuellen
 Wert abweichende Stärke nach dem Encounter mit `strengthAfterEncounter`.
 Fehlt dieses Feld, bleibt die Stärke unverändert. Der Wert entfernt nur den
