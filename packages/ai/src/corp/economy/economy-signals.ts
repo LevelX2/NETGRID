@@ -920,6 +920,15 @@ export function corpVisibleCardEconomyWithdrawals(
     const hint = sourceDefinitionId
       ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
       : undefined;
+    // An exact current all-pool payout needs no finite on-rez pool model.
+    // Action-loaded banks bind their public bits to the Engine payout instead.
+    const exactCurrentAllHostedCreditPayout =
+      action?.payload?.cardImplementationTakesHostedCredits === true &&
+      hostedCreditTakeMode === "all" &&
+      typeof hostedCreditTakeAmount === "number" &&
+      Number.isSafeInteger(hostedCreditTakeAmount) &&
+      hostedCreditTakeAmount > 0 &&
+      hostedCreditTakeAmount === sourceCard?.counters?.bit;
     const sourceIsAdmitted =
       sourceZone === "score_area"
         ? sourceCard?.known === true &&
@@ -933,7 +942,8 @@ export function corpVisibleCardEconomyWithdrawals(
           hint.quality.strategyCovered === true &&
           hint.quality.needsHumanReview !== true &&
           sourceDefinitionId !== undefined &&
-          (corpHostedCreditBankProfile(sourceDefinitionId) !== undefined ||
+          (exactCurrentAllHostedCreditPayout ||
+            corpHostedCreditBankProfile(sourceDefinitionId) !== undefined ||
             corpCounterCashoutProfile(sourceDefinitionId) !== undefined);
     const hostedCreditPayout =
       action?.payload?.cardImplementationTakesHostedCredits === true &&

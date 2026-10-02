@@ -32,6 +32,7 @@ import {
   immediateCorpLiquidCreditGain,
 } from "./economy-routes";
 import { CorpEconomyNeedSignal } from "./economy-types";
+import { corpHostedBankCycleForParentFunding } from "./hosted-credit-bank-cycle";
 
 export function economyModule(): PlanModule {
   return {
@@ -185,6 +186,21 @@ function validatedEconomyNeeds(
         .filter(immediateCorpLiquidCreditGain)
         .map((candidate) => candidate.actionId),
     );
+    if (signal.hostedCreditBankCycle) {
+      const current = corpHostedBankCycleForParentFunding(
+        context.input,
+        context.actionCandidates,
+        signal,
+      );
+      if (
+        current &&
+        JSON.stringify(current) ===
+          JSON.stringify(signal.hostedCreditBankCycle) &&
+        JSON.stringify(current) ===
+          JSON.stringify(signal.fundingRouteAssessment?.hostedCreditBankCycle)
+      )
+        validFundingActions.add(current.actionId);
+    }
     const validFundingRouteBinding =
       signal.actionIds.length > 0
         ? signal.actionIds.every((actionId) =>
@@ -438,6 +454,21 @@ function validatedEconomyNeeds(
         .filter(immediateCorpLiquidCreditGain)
         .map((candidate) => candidate.actionId),
     );
+    if (signal.hostedCreditBankCycle) {
+      const current = corpHostedBankCycleForParentFunding(
+        context.input,
+        context.actionCandidates,
+        signal,
+      );
+      if (
+        current &&
+        JSON.stringify(current) ===
+          JSON.stringify(signal.hostedCreditBankCycle) &&
+        JSON.stringify(current) ===
+          JSON.stringify(signal.fundingRouteAssessment?.hostedCreditBankCycle)
+      )
+        validFundingActions.add(current.actionId);
+    }
     const requirement = parentNeed
       ? genericDefenseFundingRequirement(
           parentNeed,
@@ -509,6 +540,11 @@ export function corpEconomyPriorityClass(
 ): PriorityClass {
   if (signal.kind === "parent_funding")
     return signal.delegatedPriorityClass ?? signal.parentPriorityClass ?? "P5";
+  if (
+    signal.kind === "develop_campaign" &&
+    signal.cadence.kind === "hosted_credit_bank_cycle"
+  )
+    return "P4";
   if (signal.kind === "convert_immediate_operation") return "P4";
   if (signal.kind === "convert_visible_card_payout") return "P4";
   if (signal.kind === "prepare_immediate_operation") return "P4";

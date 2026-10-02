@@ -1385,6 +1385,25 @@ und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
 
+Eine bereits installierte, aktionsweise geladene Creditbank besitzt einen
+getrennten aktuellen Restzugvertrag. Die Engine bindet Rez beziehungsweise
+Laden, Quellinstanz, kanonische Fähigkeiten, StateVersion, Kosten und die
+vollständige Lade-/Auszahlungsfolge an eine aktuelle Quote. Nur zwei oder drei
+normale Restklicks und ein strikt höherer liquider Endbestand als bei direkter
+Auszahlung plus Basic-Credits beziehungsweise ausschließlich Basic-Credits
+begründen diesen Pfad. Es entstehen keine zukünftigen LegalAction-IDs.
+Economy materialisiert stets nur den aktuellen Head und revalidiert nach jeder
+Transition. Ein Mehrzug-Scorebedarf oder die exakte Rezreserve bereits
+installierter ICE kann die Folge als Support übernehmen; eine noch nötige
+ICE-Installation darf dadurch nicht ihren letzten Klick verlieren. Andere
+aktuelle Einkommensquellen und ein bereits direkt finanzierbarer Score
+behalten ihre Finanzierung. Eine aktuelle vollständige Auszahlung aus
+sichtbaren Bits braucht kein endliches On-rez-Poolprofil. Laden ohne quotierte
+aktuelle Liquiditätskonversion bleibt als unbekannte spätere Entwicklung
+sichtbar. Engine- und Chooser-Regressionen liegen in
+`hosted-credit-bank-cycle-quote.test.ts` und
+`meta-472-hosted-bank-cycle.test.ts` (SP-456, G30/D242).
+
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt
 eine einzelne statische Schicht, wenn der verbleibende bekannte Pfad den
