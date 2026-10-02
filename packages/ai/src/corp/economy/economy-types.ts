@@ -185,7 +185,7 @@ export type CorpEconomyVisibleCardWithdrawalSignal = CorpEconomySignalBase & {
     cardsDrawn: 0;
     cardsConsumed: 0;
     netHandDelta: 0;
-    payoutMode: "fixed";
+    payoutMode: "fixed" | "all_available";
     reliability: "guaranteed";
     source: "legal_action_payload";
     payoutSource: "hosted_credit_pool" | "advancement_counter_cashout";

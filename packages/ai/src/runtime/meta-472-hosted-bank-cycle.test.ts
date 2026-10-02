@@ -10,6 +10,9 @@ import {
   corpHostedBankCycleForParentFunding,
 } from "../corp/economy/hosted-credit-bank-cycle";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { corpVisibleCardEconomyWithdrawals } from "../corp/economy/economy-signals";
+import { restoreResidentPlanPortfolioMemorySnapshot } from "../plans/resident-plan-portfolio-memory";
+import { restoreStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import type { CorpEconomyParentFundingSignal } from "../corp/economy/economy-types";
 
 function checkpoint() {
@@ -43,6 +46,99 @@ function checkpoint() {
   };
 }
 afterEach(resetResidentPlanPortfolioMemory);
+function currentCashoutCheckpoint() {
+  return JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-472-sp456-unbound-bank-cashout.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  ) as {
+    input: AiDecisionInputWithDeckCapabilities;
+    validation: Record<string, boolean>;
+    runtime: {
+      strategicIntent: Parameters<
+        typeof restoreStrategicIntentMemorySnapshot
+      >[1];
+      residentPlanPortfolio: Parameters<
+        typeof restoreResidentPlanPortfolioMemorySnapshot
+      >[1];
+    };
+  };
+}
+
+function currentWithdrawalSignals(input: AiDecisionInputWithDeckCapabilities) {
+  return corpVisibleCardEconomyWithdrawals(
+    input,
+    buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "corp",
+      stateVersion: input.playerView.stateVersion,
+    }),
+  );
+}
+
+describe("SP-456 exact current all-pool withdrawal at R6 G1/D200", () => {
+  it("selects the native fifteen-credit cashout through the existing Economy plan, step and route", () => {
+    const cp = currentCashoutCheckpoint();
+    expect(Object.values(cp.validation).every(Boolean)).toBe(true);
+    restoreStrategicIntentMemorySnapshot(
+      cp.input,
+      cp.runtime.strategicIntent,
+      cp.input.ownDeckSnapshot!.deckSnapshotId,
+    );
+    restoreResidentPlanPortfolioMemorySnapshot(
+      cp.input,
+      cp.runtime.residentPlanPortfolio,
+    );
+    const cashout = cp.input.legalActions.find(
+      (action) => action.payload?.hostedCreditTakeMode === "all",
+    )!;
+    const decision = chooseAiAction(cp.input, {
+      persistTacticalPlanMemory: false,
+    });
+    expect(decision.actionId).toBe(cashout.actionId);
+    expect(decision.decisionDebug?.fallbackUsed).toBe(false);
+    const plan = decision.decisionDebug?.planFirstDecision;
+    expect(plan?.rootPlanInstanceId).toBe(
+      `plan:corp.economy:economy-visible-card-payout%3A${cashout.source}`,
+    );
+    expect(plan?.priority?.effectiveClass).toBe("P4");
+    expect(plan?.selectedStep?.planInstanceId).toBe(plan?.rootPlanInstanceId);
+    expect(plan?.route).toMatchObject({
+      planInstanceId: plan?.rootPlanInstanceId,
+      stepId: plan?.selectedStep?.stepId,
+      actionId: cashout.actionId,
+      actionType: "activated_card_ability",
+      semanticActionType: "economy.gain_credit",
+      stateVersion: cp.input.playerView.stateVersion,
+    });
+    expect(currentWithdrawalSignals(cp.input)[0]?.conversion).toMatchObject({
+      grossLiquidCreditGain: 15,
+      netLiquidCreditGain: 15,
+      payoutMode: "all_available",
+      hostedCreditTakeMode: "all",
+    });
+    expect(currentWithdrawalSignals(buildAiDecisionInputDto(cp.input))).toEqual(
+      currentWithdrawalSignals(cp.input),
+    );
+  });
+
+  it("rejects an all-pool payout that disagrees with the currently visible bank", () => {
+    const input = currentCashoutCheckpoint().input;
+    const cashout = input.legalActions.find(
+      (action) => action.payload?.hostedCreditTakeMode === "all",
+    )!;
+    const source = input.playerView.servers
+      .flatMap((server) => server.root)
+      .find((card) => card.instanceId === cashout.source)!;
+    source.counters!.bit = 14;
+    expect(currentWithdrawalSignals(input)).toEqual([]);
+  });
+});
+
 describe("SP-456 actual Engine bank cycle through the normal Corp chooser", () => {
   it("preserves the original basic-credit result before the missing producer is supplied", () => {
     const decision = chooseAiAction(checkpoint().beforeInput);

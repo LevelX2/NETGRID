@@ -1008,6 +1008,8 @@ export function corpVisibleCardEconomyWithdrawals(
       });
     }
     const admittedPayout = hostedCreditPayout ?? advancementCounterPayout;
+    const expectedPayoutMode =
+      hostedCreditTakeMode === "all" ? "all_available" : "fixed";
     if (
       !sourceInstanceId ||
       !sourceDefinitionId ||
@@ -1021,6 +1023,7 @@ export function corpVisibleCardEconomyWithdrawals(
       action.source !== sourceInstanceId ||
       action.payload?.cardId !== sourceInstanceId ||
       !admittedPayout ||
+      (hostedCreditTakeMode === "all" && !exactCurrentAllHostedCreditPayout) ||
       candidate.sourceKind !== "card" ||
       candidate.semanticActionType !== "economy.gain_credit" ||
       candidate.costProfile.costKnownStatus !== "known" ||
@@ -1033,7 +1036,7 @@ export function corpVisibleCardEconomyWithdrawals(
       projection?.kind !== "immediate_liquid" ||
       projection.timing !== "immediate" ||
       projection.creditRestriction !== "general" ||
-      projection.payoutMode !== "fixed" ||
+      projection.payoutMode !== expectedPayoutMode ||
       projection.reliability !== "guaranteed" ||
       projection.source !== "legal_action_payload" ||
       projection.confidence !== "high" ||
@@ -1108,7 +1111,7 @@ export function corpVisibleCardEconomyWithdrawals(
           cardsDrawn: 0,
           cardsConsumed: 0,
           netHandDelta: 0,
-          payoutMode: "fixed",
+          payoutMode: expectedPayoutMode,
           reliability: "guaranteed",
           source: "legal_action_payload",
           payoutSource: admittedPayout.payoutSource,

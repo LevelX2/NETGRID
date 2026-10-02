@@ -1403,6 +1403,13 @@ aktuelle Liquiditätskonversion bleibt als unbekannte spätere Entwicklung
 sichtbar. Engine- und Chooser-Regressionen liegen in
 `hosted-credit-bank-cycle-quote.test.ts` und
 `meta-472-hosted-bank-cycle.test.ts` (SP-456, G30/D242).
+Die direkte Entnahme bewahrt den nativen Auszahlungsmodus `all_available`
+durch Signal und Materialisierung, sofern der exakt quotierte Gesamtbetrag
+mit den aktuell sichtbaren Bits übereinstimmt. Sie benötigt keinen fremden
+Funding-Parent und bleibt ein eigenes P4-Auszahlungsprojekt. Die Regression
+R6 G1/D200 prüft die vollständige Plan-, Step- und Routenwahl für 15 Credits
+beim letzten Klick sowie die Ablehnung eines widersprüchlichen Bankbestands.
+Feste Teilentnahmen behalten ihren Modus `fixed`.
 
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt

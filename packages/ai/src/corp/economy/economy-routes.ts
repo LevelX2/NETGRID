@@ -688,7 +688,7 @@ function visibleCardPayoutCandidateMatchesSignal(
     projection.cardsDrawn === 0 &&
     projection.cardsConsumed === 0 &&
     projection.netHandDelta === 0 &&
-    projection.payoutMode === "fixed" &&
+    projection.payoutMode === signal.conversion.payoutMode &&
     projection.reliability === "guaranteed" &&
     projection.source === "legal_action_payload" &&
     projection.confidence === "high"
