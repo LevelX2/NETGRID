@@ -14,6 +14,7 @@ import { createAiHintsByCard } from "./ai-hints";
 import {
   runnerHintProvidesDamagePrevention,
   runnerHintProvidesTagPrevention,
+  type RunnerPreventableDamageType,
 } from "./runner-canonical-hint-semantics";
 import {
   creditsToBreakVisibleSubroutinesWithBreaker,
@@ -462,6 +463,7 @@ const AI_HINTS = createAiHintsByCard();
 export function runnerDamageThreatAssessment(
   input: AiDecisionInput,
   handCount = input.playerView.own.gripOrHq.length,
+  damageTypes?: readonly RunnerPreventableDamageType[],
 ): RunnerDamageThreatAssessment {
   const effectiveMaxHandSize = Math.max(
     0,
@@ -469,9 +471,19 @@ export function runnerDamageThreatAssessment(
   );
   const handBufferHeadroom = Math.max(0, effectiveMaxHandSize - handCount);
   const history = mergedHistory(input);
-  const damageEvents = corpDamageEventEvidence(history);
-  const deckSignals = visibleOpponentDamageSignals(input, history);
-  const activeSignals = activeOpponentDamageSignals(input);
+  const damageEvents = corpDamageEventEvidence(
+    damageTypes === undefined
+      ? history
+      : history.filter((event) => {
+          const type = event.publicPayload.damageType;
+          return type === "brain"
+            ? damageTypes.includes("core")
+            : (type === "net" || type === "meat" || type === "core") &&
+                damageTypes.includes(type);
+        }),
+  );
+  const deckSignals = visibleOpponentDamageSignals(input, history, damageTypes);
+  const activeSignals = activeOpponentDamageSignals(input, damageTypes);
   const deckBelief = runnerDamageDeckBelief(damageEvents, deckSignals);
   const recentDamage = recentResolvedCorpDamageEvidence(input, damageEvents);
   const riskyRunServerIds = input.playerView.servers
@@ -552,7 +564,13 @@ export function runnerDamageThreatAssessment(
         : []),
     ],
   };
-  const evidence = [...deckBelief.evidence, ...flatlineRisk.evidence];
+  const evidence = [
+    ...deckBelief.evidence,
+    ...flatlineRisk.evidence,
+    ...(damageTypes === undefined
+      ? []
+      : [`runner_damage_prevention_scope:${damageTypes.join("|")}`]),
+  ];
   return {
     deckBelief,
     flatlineRisk,
@@ -1248,6 +1266,7 @@ type VisibleOpponentDamageSignals = {
 function visibleOpponentDamageSignals(
   input: AiDecisionInput,
   history: readonly PublicGameEvent[],
+  damageTypes?: readonly RunnerPreventableDamageType[],
 ): VisibleOpponentDamageSignals {
   const visibleCards = visibleOpponentCards(input);
   const definitionIds = new Set(
@@ -1261,11 +1280,12 @@ function visibleOpponentDamageSignals(
       if (hint?.side === "corp") definitionIds.add(definitionId);
     }
   }
-  return damageSignalsForKnownSources(visibleCards, definitionIds);
+  return damageSignalsForKnownSources(visibleCards, definitionIds, damageTypes);
 }
 
 function activeOpponentDamageSignals(
   input: AiDecisionInput,
+  damageTypes?: readonly RunnerPreventableDamageType[],
 ): VisibleOpponentDamageSignals {
   const visibleCards = activeOpponentCards(input);
   return damageSignalsForKnownSources(
@@ -1277,12 +1297,14 @@ function activeOpponentDamageSignals(
           Boolean(definitionId),
         ),
     ),
+    damageTypes,
   );
 }
 
 function damageSignalsForKnownSources(
   visibleCards: readonly VisibleCard[],
   definitionIds: ReadonlySet<string>,
+  damageTypes?: readonly RunnerPreventableDamageType[],
 ): VisibleOpponentDamageSignals {
   let score = 0;
   const kinds = new Set<string>();
@@ -1290,19 +1312,37 @@ function damageSignalsForKnownSources(
   const damageDefinitionIds = new Set<string>();
   const deliveryDefinitionIds = new Set<string>();
   const payoffDefinitionIds = new Set<string>();
+  const compatibleDamage = (definitionId: string): boolean =>
+    AI_HINTS.get(definitionId)?.effects?.some((effect) => {
+      if (effect.kind !== "damage") return false;
+      if (damageTypes === undefined) return true;
+      const type =
+        effect.resource === "brain_damage"
+          ? "core"
+          : effect.resource === "net_damage"
+            ? "net"
+            : effect.resource === "meat_damage"
+              ? "meat"
+              : undefined;
+      return type !== undefined && damageTypes.includes(type);
+    }) === true;
+  const compatibleSourcePresent = [...definitionIds].some(compatibleDamage);
   for (const definitionId of definitionIds) {
     const hint = AI_HINTS.get(definitionId);
     if (hint?.side !== "corp") continue;
     const effectKinds = new Set(
       (hint.effects ?? []).map((effect) => effect.kind),
     );
-    const directDamage = effectKinds.has("damage");
+    const directDamage = compatibleDamage(definitionId);
     const traceTag =
+      (damageTypes === undefined || compatibleSourcePresent) &&
       (effectKinds.has("trace") ||
         effectKinds.has("tag") ||
         effectKinds.has("tag_source")) &&
       (hint.lineSupport ?? []).includes("corp.tag_trace_punish");
-    const punishPayoff = effectKinds.has("tag_punish_payoff");
+    const punishPayoff =
+      effectKinds.has("tag_punish_payoff") &&
+      (damageTypes === undefined || directDamage);
     if (!directDamage && !traceTag && !punishPayoff) continue;
     signalDefinitionIds.add(definitionId);
     if (directDamage) {
@@ -1324,6 +1364,9 @@ function damageSignalsForKnownSources(
 
   const fallbackSignalIds = new Set<string>();
   for (const card of visibleCards) {
+    // Untyped text evidence still informs the general hand buffer, but cannot
+    // certify a type-specific prevention provider.
+    if (damageTypes !== undefined) continue;
     if (!visibleCardShowsDamageSourceFallback(card)) continue;
     const hint = card.definitionId
       ? AI_HINTS.get(card.definitionId)

@@ -1316,6 +1316,16 @@ Das Modul besitzt eine gemeinsame Threat-Priorisierung für:
   Rules Engine hierfür Runner-Aktionen anbietet;
 - notwendige Damage-Prävention oder Recovery.
 
+Der Installationsbedarf einer typgebundenen Prävention wird nur aus passenden
+öffentlich belegten Schadensarten gebildet. Der allgemeine Handpuffer bleibt
+gegen sämtliche belegten Schadensquellen aktiv; eine reine Net-/Core-Gefahr
+erzeugt jedoch keinen Meat-Präventionsparent. Die kanonischen strukturierten
+Hints liefern den Präventionsumfang, der bestehende Schadens-Fact-Service
+filtert bekannte Quellen und öffentliche Schadensereignisse vor der
+Bedarfsbildung. Untypisierte Textsignale begründen keinen typgebundenen
+Präventionsnutzen. Universelle Flatline- und Runprävention behalten ihren
+allgemeinen Umfang; unbekannte Präventionshints scheitern sichtbar.
+
 Die gebundene Runner-Discard-Choice erhält ihre Keep-Wertung aus demselben
 Owner. Liegt fehlende Breaker-Abdeckung nachweislich nur im eigenen Stack,
 erkennt die Wertung deren Suchzugang über die exakte Kartenbindung in

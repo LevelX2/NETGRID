@@ -148,6 +148,7 @@ import {
 } from "./runner-persistent-install-evaluation";
 import {
   runnerEffectsProvideDamagePrevention,
+  runnerEffectsDamagePreventionTypes,
   runnerEffectsProvideBreakerCredits,
   runnerEffectsProvideExposeInformation,
   runnerEffectsProvideMultiaccess,
@@ -941,10 +942,20 @@ function defenseSupportNeed(
     context.signals.structuredEffects,
   );
   if (damagePrevention) {
-    if (damage.level === "confirmed" || damage.level === "critical") {
+    const types = runnerEffectsDamagePreventionTypes(
+      context.signals.structuredEffects,
+    );
+    const compatibleDamage =
+      types.length === 3
+        ? damage
+        : runnerDamageThreatAssessment(input, undefined, types).flatlineRisk;
+    if (
+      compatibleDamage.level === "confirmed" ||
+      compatibleDamage.level === "critical"
+    ) {
       return "acute";
     }
-    if (damage.level === "suspected") return "setup";
+    if (compatibleDamage.level === "suspected") return "setup";
   }
   const tagPrevention = runnerEffectsProvideTagPrevention(
     context.signals.structuredEffects,
