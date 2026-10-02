@@ -469,7 +469,9 @@ export function uniqueCoverageGaps(
             })
             .map((candidate) => candidate.actionId)
         : legalCoverageInstallActionIds
-      : undefined;
+      : coverageDevelopment
+        ? []
+        : undefined;
     const sameTurnRunConversion = runnerUrgentRemoteCoverageConversionQuote(
       input,
       candidates,

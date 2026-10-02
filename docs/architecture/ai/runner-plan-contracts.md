@@ -560,9 +560,15 @@ Bedarf. Suche und Optionsbindung folgen weiterhin exakt dem gewählten
 Coverage-Plan, Step und Executor.
 
 Eine exakt gebundene Upgrade-/Kosten-Recovery-Route bleibt an ihre gewählte
-Karteninstanz gebunden. Weitere Handkopien derselben Definition, die nur
-diesem Bedarf zugeordnet sind, erhalten eine ausdrückliche Zurückstellung
-beim Coverage-Owner; sie erzeugen weder einen zweiten generischen
+Karteninstanz gebunden. Fehlt ihre tatsächliche sichtbare Antwort, liefert
+der Signalproducer eine ausdrücklich leere `installActionIds`-Liste.
+Eine ausgelassene Liste würde sonst beliebige rollenkompatible Installationen
+in die Phasenwahl aufnehmen, obwohl sie den gebundenen Bedarf nicht erfüllen.
+Dispositionen und Materialisierung bestimmen so dieselbe Beschaffungsphase;
+eine spätere Duplikat-Zurückstellung darf die zuvor ausgeschlossene Drawroute
+nicht wieder zur ausführbaren Route machen. Weitere Handkopien derselben
+Definition, die nur diesem Bedarf zugeordnet sind, erhalten eine ausdrückliche
+Zurückstellung beim Coverage-Owner; sie erzeugen weder einen zweiten generischen
 Entwicklungsplan noch eine Lücke in der LegalAction-Klassifikation. Lehnt ein
 exakt gebundener Zentraldruck-Parent seinen aktuellen Payoff mit einem Wert
 kleiner oder gleich null ab, bleibt auch seine Installation ausdrücklich
