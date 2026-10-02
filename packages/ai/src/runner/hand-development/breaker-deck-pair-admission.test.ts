@@ -30,7 +30,7 @@ function checkpointInput(reference: string) {
 function variant(input: AiDecisionInputWithDeckCapabilities, cardId: string) {
   return evaluateRunnerHandDevelopment({
     input,
-    deckCapabilities: input.ownDeckCapabilities,
+    deckCapabilities: input.ownDeckCapabilities!,
     strategicIntent: input.ownRunnerStrategicIntent!,
   }).find((entry) => entry.definitionId === cardId)!;
 }
