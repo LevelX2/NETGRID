@@ -202,8 +202,12 @@ ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
 Zugriff, rechtfertigt unveränderter Aufbau keine erneute identische Probe.
 `run-analysis/runner-free-stop-observation.ts` liefert das öffentliche
 Endereignis für Zielserver und Zug; `central-probe-outcome.ts` entscheidet
-dessen Zulassung im Central-Owner. Aktuell garantierter Zugriff, Kartenruns und geänderte
-Board-/Effektzustände bleiben eigenständig bewertete Routen. Ein neuer Zug
+dessen Zulassung im Central-Owner.
+Ein installierter Informations- oder Multiaccess-Bonus macht ein weiterhin
+unbekanntes Zugriffsziel nicht zu einem belegten Payoff und öffnet diese
+unveränderte, kostenlos gestoppte Probe nicht erneut.
+Aktuell garantierter Zugriff, Kartenruns und geänderte Board-/Effektzustände
+bleiben eigenständig bewertete Routen. Ein neuer Zug
 öffnet eine neue Beobachtung; Kartenidentitäten oder verborgene ICE-Quotes
 werden aus der Historie nicht rekonstruiert. Das Eingabe-DTO bewahrt dafür
 die öffentlichen Engine-Felder `result`, `encounterContinue` und
