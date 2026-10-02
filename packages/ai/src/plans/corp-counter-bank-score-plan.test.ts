@@ -449,6 +449,36 @@ describe("corpCounterBankScoreProjects", () => {
     );
   });
 
+  it.each(["archives", "hq", "rd"])(
+    "does not certify a visible agenda in %s as an installed score consumer",
+    (serverId) => {
+      const rez = current(
+        legalAction(
+          "rez-vapor",
+          "corp",
+          "rez_card",
+          "Rez Vapor Ops",
+          { credits: 0, clicks: 0 },
+          { source: "vapor", payload: { cardId: "vapor", serverId: "remote_1" } },
+        ),
+      );
+      const input = withDeck(aiInput("corp", [rez]));
+      input.playerView.own.clicks = 2;
+      input.playerView.servers = [
+        secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
+        server(serverId, [], [agenda("agenda")]),
+      ];
+
+      expect(
+        corpCounterBankScoreProjects(
+          input,
+          [candidate(rez, "corp_window.rez")],
+          [],
+        ).filter((project) => project.phase === "rez_counter_bank_for_handoff"),
+      ).toEqual([]);
+    },
+  );
+
   it("allows cashout only after the certified remote is no longer secure and only in Corp main", () => {
     const cashout = current(
       legalAction(

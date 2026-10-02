@@ -101,6 +101,11 @@ konkreten Karten- und Serverbindung dem Score-Owner angeboten; seine normale
 Priorisierung wählt den Abschluss. Vollständig avancierte Agenden beanspruchen
 keine Bankcounter (Regressionen: Paarung 461, Runde 5, G10 D139 und G40 D203).
 
+Ein installierter Counterbank-Scoreverbraucher steht im Root eines anderen
+Remote-Servers. Sichtbare Agenden in Zentralzonen, insbesondere in Archives,
+sind keine installierten Transfer- oder Scoreziele. Die Root-Darstellung einer
+Zentralzone ersetzt diesen Nachweis nicht (Paarung 482, Runde 1, G20 D378).
+
 Für eine installierte Agenda unterscheidet der Scoreowner die vollständigen
 Kosten der aktuellen Konversion von der bis zum nächsten Corp-Zug nötigen
 Reserve. Eine Engine-Quote mit `creditsRequiredBeforeNextCorpTurn: 0` bedeutet
