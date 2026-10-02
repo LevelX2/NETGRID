@@ -435,6 +435,14 @@ und erhält diesen Aufschlag nicht. Gleiche Zugriffschancen dürfen beim Verglei
 gehaltener Agenden nicht die unmittelbare Verlustfolge unterschlagen (Regression:
 Pairing 432, D464; Coup und Security Net bei sechs Corp-/vier Runnerpunkten).
 
+Der vorsorgliche Agenda-Flood-Pfad bei höchstens sechs R&D-Karten ersetzt keine
+Schutzzulassung, solange die aktuelle zentrale Defense-Quote für HQ keinen
+erwarteten Agendaverlust ausweist. Gehaltene Agenden wechseln dann nur über die
+regulären Schutz- und Fundingbedingungen in einen Remote. Ein tatsächliches
+Last-Draw-Fenster, ein sofort schließender Score und die Fortsetzung bereits
+installierter Agenden behalten ihre eigenen Fristverträge. Regression:
+Paarung 473, Kontrollrunde 2, G3 D355, fünf HQ-Agenden bei null Credits.
+
 Bei einer installierten Agenda, deren Steal den Runner gewinnen lässt, stellt
 `corp.score_agenda` gewöhnlichen Advance-Fortschritt hinter einen konkret
 finanzierbaren Schutzweg zurück. Ein im aktuellen Zug schließender Score bleibt
