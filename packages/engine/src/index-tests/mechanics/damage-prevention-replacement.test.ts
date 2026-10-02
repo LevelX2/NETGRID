@@ -615,6 +615,57 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("keeps ordinary TRAP damage separate from the following tag window", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention("trap-ordinary-damage-tag"),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_161_fall-guy");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_161_fall-guy",
+    );
+    drawRunnerCardsForTest(state, 4);
+    addCorpCardToHqForTest(state, "onr_v1_345_trap", "ordinary-damage-tag");
+    putCorpCardOnTopOfRd(state, "onr_v1_345_trap");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const gripBefore = state.runner.grip.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = applyChoice(state, "corp", "pay");
+    expect(state.runner.grip.length).toBe(gripBefore - 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 3,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "imminentEventId",
+    );
+    expect(state.imminentEvent?.eventType).toBe("add_tag");
+    const tagId = state.imminentEvent?.eventId;
+    state = applyChoice(state, "runner", "pass");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      imminentEventId: tagId,
+      imminentEventType: "add_tag",
+      eventModificationDecision: "pass",
+    });
+    expect(state.runner.tags).toBe(1);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it.each(["avoid", "pass"] as const)(
     "keeps completed damage bound when TRAP opens a later tag window (%s)",
     (tagDecision) => {
