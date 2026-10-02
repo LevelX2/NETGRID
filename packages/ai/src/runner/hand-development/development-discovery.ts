@@ -3,6 +3,7 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 
 import { runnerInstallDefinitionCoversCoverageGap } from "../rig-coverage/coverage-plan-module";
 import { runnerDevelopmentFundingMilestone } from "../../plans/runner-development-contracts";
@@ -320,15 +321,25 @@ export function buildRunnerCardDevelopmentSignals({
       const evaluationDefinitionId = evaluation.definitionId;
       const assignedCoveragePlanIds = evaluationDefinitionId
         ? coverageGaps
-            .filter((gap) =>
-              runnerInstallDefinitionCoversCoverageGap(
-                evaluationDefinitionId,
-                rolesForDeckDoctrineCard(evaluationDefinitionId),
-                gap.requiredRole,
-                input.legalActions.find(
-                  (action) => action.actionId === evaluation.legalActionId,
-                )?.payload?.selectedSubtype,
-              ),
+            .filter(
+              (gap) =>
+                (gap.handAnswerDefinitionId === evaluationDefinitionId ||
+                  candidates.some(
+                    (boundCandidate) =>
+                      gap.installActionIds?.includes(boundCandidate.actionId) &&
+                      runnerCandidateSourceDefinitionId(
+                        input,
+                        boundCandidate,
+                      ) === evaluationDefinitionId,
+                  )) &&
+                runnerInstallDefinitionCoversCoverageGap(
+                  evaluationDefinitionId,
+                  rolesForDeckDoctrineCard(evaluationDefinitionId),
+                  gap.requiredRole,
+                  input.legalActions.find(
+                    (action) => action.actionId === evaluation.legalActionId,
+                  )?.payload?.selectedSubtype,
+                ),
             )
             .map((gap) => `runner.rig_and_coverage:${gap.gapId}`)
         : [];

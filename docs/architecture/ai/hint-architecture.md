@@ -61,6 +61,14 @@ Die reale Compiler-/Artefaktregression prüft alle aktuellen Double-Spielkarten
 und unabhängige Utility-Felder; die produktive Score-Recovery-Gegenprobe prüft
 weiterhin Plan-, Action-, StateVersion- und Choice-Ownership.
 
+## Handreset und Draw
+
+Der zusammengesetzte Effekt `shuffle_grip_trash_and_stack_then_draw` erzeugt
+die mechanischen Funktionen `setup.draw` und `zone.shuffle`. Damit zählt die
+Deckstrategie seine Kopien als Draw-Funktion. Die Projektion macht daraus
+keinen additiven Kartengewinn und keine gezielte Heap-Recovery; der bestehende
+Compound-Capability-Vertrag und seine Informationsgrenze bleiben erhalten.
+
 ## Universelle Coverage und Stärkehilfe
 
 `breaker.matches.kind === "any"` beschreibt universelle mechanische Coverage.

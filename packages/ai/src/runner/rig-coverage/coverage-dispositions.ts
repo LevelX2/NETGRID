@@ -25,6 +25,11 @@ type CoverageDispositionDomain = {
     pressureId: string;
     marginalValue: number;
   }[];
+  remoteContests: readonly {
+    supportNeedId?: string;
+    contestId: string;
+    marginalValue: number;
+  }[];
 };
 type AddDisposition = (
   actionId: string,
@@ -132,21 +137,35 @@ export function applyRunnerCoverageCandidateDisposition(
       : [];
   if (
     boundCoverageInstallGaps.length > 0 &&
-    boundCoverageInstallGaps.every(
-      (gap) =>
-        gap.requesterModuleId === "runner.pressure_central" &&
-        domain.centralPressure.some(
-          (parent) =>
-            parent.supportNeedId === gap.gapId &&
-            gap.requesterNeedId === gap.gapId &&
-            gap.requesterPlanInstanceId ===
-              planInstanceIdForProposal({
-                moduleId: "runner.pressure_central",
-                dedupeKey: parent.pressureId,
-              }) &&
-            parent.marginalValue <= 0,
-        ),
-    )
+    boundCoverageInstallGaps.every((gap) => {
+      const parentModuleId = gap.requesterModuleId;
+      if (
+        parentModuleId !== "runner.pressure_central" &&
+        parentModuleId !== "runner.contest_remote"
+      )
+        return false;
+      const parents =
+        parentModuleId === "runner.pressure_central"
+          ? domain.centralPressure.map((parent) => ({
+              ...parent,
+              dedupeKey: parent.pressureId,
+            }))
+          : domain.remoteContests.map((parent) => ({
+              ...parent,
+              dedupeKey: parent.contestId,
+            }));
+      return parents.some(
+        (parent) =>
+          parent.supportNeedId === gap.gapId &&
+          gap.requesterNeedId === gap.gapId &&
+          gap.requesterPlanInstanceId ===
+            planInstanceIdForProposal({
+              moduleId: parentModuleId,
+              dedupeKey: parent.dedupeKey,
+            }) &&
+          parent.marginalValue <= 0,
+      );
+    })
   ) {
     // A child cannot execute for a parent that currently rejects the payoff.
     // Keep the exact installation diagnosed by its existing coverage owner;

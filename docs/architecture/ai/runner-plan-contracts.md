@@ -475,6 +475,13 @@ Quellenbindung; spätere Ausschlüsse können keinen zuvor gesperrten Ziehpfad
 zur ausführbaren Route machen. Suche und Draw bleiben beim bestehenden
 Coverage-Owner und werden nach neuer Information erneut gebunden.
 
+Die Handentwicklung übernimmt eine Coverage-Zuordnung nur für die typisierte
+`handAnswerDefinitionId` oder eine tatsächlich gebundene Installationsaction
+derselben Definition. Rollenübereinstimmung allein überträgt keine Ownership
+auf eine andere Handantwort. Die ausgewählte Definition bleibt auch während
+der Installationsfinanzierung gebunden; definitionsgleiche weitere Kopien
+behalten die bestehende ausdrückliche Zurückstellung.
+
 Eine unbezahlbare Antwort auf der Hand sperrt keinen bereits exakt gebundenen
 günstigeren Stack-Suchweg. `coverage-search-alternatives.ts` prüft bekannte
 Such- und Installationskosten, freie Handkapazität, bekannte eigene
@@ -589,8 +596,8 @@ Karteninstanz gebunden. Weitere Handkopien derselben Definition, die nur
 diesem Bedarf zugeordnet sind, erhalten eine ausdrückliche Zurückstellung
 beim Coverage-Owner; sie erzeugen weder einen zweiten generischen
 Entwicklungsplan noch eine Lücke in der LegalAction-Klassifikation. Lehnt ein
-exakt gebundener Zentraldruck-Parent seinen aktuellen Payoff mit einem Wert
-kleiner oder gleich null ab, bleibt auch seine Installation ausdrücklich
+exakt gebundener Zentraldruck- oder Remote-Parent seinen aktuellen Payoff mit
+einem Wert kleiner oder gleich null ab, bleibt auch seine Installation ausdrücklich
 zurückgestellt. Eine andere positive oder unabhängige Coverage-Bindung
 derselben Action bleibt davon unberührt. Diese Dispositionen ändern weder
 die gewählte Kopie noch Action-ID, Parent-/Need-Bindung oder Executor.
