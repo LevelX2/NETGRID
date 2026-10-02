@@ -49,7 +49,7 @@ describe("pairing 474: open Trace base strength is already funded", () => {
         input,
         traceContext: context,
         maxBid: 6,
-        sourceDefinitionId: context.sourceDefinitionId,
+        sourceDefinitionId: context.sourceDefinitionId!,
       }),
     ).toMatchObject({
       recommendedBid: 2,
@@ -120,7 +120,7 @@ describe("pairing 474: open Trace base strength is already funded", () => {
           input,
           traceContext: context,
           maxBid: 6,
-          sourceDefinitionId: context.sourceDefinitionId,
+          sourceDefinitionId: context.sourceDefinitionId!,
         }).recommendedBid,
       ).toBe(expectedBid);
     },
@@ -134,20 +134,21 @@ describe("pairing 474: open Trace base strength is already funded", () => {
         input,
         traceContext: context,
         maxBid: 1,
-        sourceDefinitionId: context.sourceDefinitionId,
+        sourceDefinitionId: context.sourceDefinitionId!,
       }).recommendedBid,
     ).toBe(0);
   });
 
   it("reports unknown open base strength instead of inventing zero", () => {
     const { input } = checkpoint();
-    const context = { ...latestTraceContext(input), traceLimit: undefined };
+    const context = latestTraceContext(input);
+    delete context.traceLimit;
     expect(
       assessCorpTraceBid({
         input,
         traceContext: context,
         maxBid: 6,
-        sourceDefinitionId: context.sourceDefinitionId,
+        sourceDefinitionId: context.sourceDefinitionId!,
       }),
     ).toEqual({ recommendedBid: 0, reason: "unknown_trace_context" });
   });
