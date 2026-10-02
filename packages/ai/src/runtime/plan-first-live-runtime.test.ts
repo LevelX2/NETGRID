@@ -19471,6 +19471,9 @@ describe("authoritative plan-first live runtime", () => {
       }),
       visibleCard("buffer-1", "runner", "event"),
       visibleCard("buffer-2", "runner", "event"),
+      visibleCard("buffer-3", "runner", "event"),
+      visibleCard("buffer-4", "runner", "event"),
+      visibleCard("buffer-5", "runner", "event"),
     ];
     const target = {
       ...safeRuntimeRunTarget(run.actionId, "remote_1"),
@@ -19485,6 +19488,22 @@ describe("authoritative plan-first live runtime", () => {
       scoreThreat: true,
       recommendation: "gain_credits_first" as const,
       score: 500,
+      prerunReserveQuote: {
+        purpose: "contest" as const,
+        status: "blocked" as const,
+        riskTolerance: "standard" as const,
+        knownPathCost: 0,
+        creditsAfterKnownPath: 4,
+        unknownIceCount: 1,
+        unknownIcePositions: [],
+        corpRezCredits: 5,
+        visibleCoverage: "none" as const,
+        requiredCredits: 8,
+        creditGap: 4,
+        requiredHandBuffer: 4,
+        handBufferGap: 0,
+        evidence: ["test_remote_funding_consumer_buffer"],
+      },
       fundingNeed: {
         reason: "post_run_floor_gap" as const,
         routeFundingGap: 0,

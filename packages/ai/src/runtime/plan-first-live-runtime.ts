@@ -1,5 +1,9 @@
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
+  bindSelectedRunnerCoverageMultiSearchChoice,
+  resolvePlanBoundRunnerCoverageMultiSearchChoice,
+} from "../runner/rig-coverage/coverage-multi-search-choice";
+import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
@@ -212,6 +216,7 @@ import { runnerCreditBankActionDispositions } from "../runner/credit-bank/credit
 import { runnerCreditBankSignals } from "../runner/credit-bank/credit-bank-signals";
 import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
 import {
+  runnerDefenseDeferredHandBufferDispositions,
   runnerDefenseReactionReserveIsCurrentPhase,
   runnerDefenseTagClearFundingIsCurrentPhase,
 } from "../runner/defense-recovery/defense-plan-module";
@@ -540,6 +545,10 @@ export function choosePlanFirstLiveAction(
     if (planBoundRunnerEventInstallChoice) return undefined;
     return (
       resolveCorpPunishTraceWindow(schedulerContext, previous) ??
+      resolvePlanBoundRunnerCoverageMultiSearchChoice(
+        schedulerContext,
+        previous,
+      ) ??
       resolvePlanBoundRunnerDelayedProgramSearchChoice(
         schedulerContext,
         previous,
@@ -765,6 +774,7 @@ export function choosePlanFirstLiveAction(
   bindSelectedRunnerExposeInformationMemory(input, result);
   bindSelectedEngineWindowRunnerVacuumLinkOrigin(input, result, previous);
   reconcileSelectedRunnerCostPenaltySupportOrigin(input, result, previous);
+  bindSelectedRunnerCoverageMultiSearchChoice(input, result);
   bindSelectedRunnerDelayedProgramSearchChoice(
     input,
     result,
@@ -1952,6 +1962,23 @@ export function runnerActionDispositions(
       (signal) => signal.preparationActionIds ?? [],
     ),
   );
+  for (const disposition of runnerDefenseDeferredHandBufferDispositions({
+    actionCandidates: candidates,
+    stateVersion: input.playerView.stateVersion,
+    signals: domain.defense,
+    independentlyOwnedActionIds: new Set([
+      ...coverageOwnedActionIds,
+      ...developmentOwnedActionIds,
+      ...specializedEconomyActionIds,
+      ...centralPreparationActionIds,
+      ...remotePreparationActionIds,
+      ...admissibleRunWindowActionIds,
+      ...exposeInformationActionIds,
+    ]),
+    actionDispositions: dispositions,
+  })) {
+    addDisposition(disposition);
+  }
   for (const candidate of candidates) {
     if (
       (!runnerActionRequiresTargetedBypassPlan(candidate) &&

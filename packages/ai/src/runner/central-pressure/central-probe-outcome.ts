@@ -16,7 +16,11 @@ export function runnerRepeatedFreeStopProbeEvidence(
       evaluation.targetServerId !== "rd") ||
     evaluation.runCommitment !== "probe_only" ||
     evaluation.routeQuote?.reachability === "guaranteed_access" ||
-    evaluation.accessPayoff !== "unknown" ||
+    !(
+      evaluation.accessPayoff === "unknown" ||
+      (evaluation.accessPayoff === "access_bonus" &&
+        evaluation.knownAccessState === "unknown")
+    ) ||
     action?.type !== "start_run" ||
     action.source !== "basic_action"
   )

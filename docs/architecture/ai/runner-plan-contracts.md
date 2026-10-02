@@ -202,8 +202,12 @@ ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
 Zugriff, rechtfertigt unveränderter Aufbau keine erneute identische Probe.
 `run-analysis/runner-free-stop-observation.ts` liefert das öffentliche
 Endereignis für Zielserver und Zug; `central-probe-outcome.ts` entscheidet
-dessen Zulassung im Central-Owner. Aktuell garantierter Zugriff, Kartenruns und geänderte
-Board-/Effektzustände bleiben eigenständig bewertete Routen. Ein neuer Zug
+dessen Zulassung im Central-Owner.
+Ein installierter Informations- oder Multiaccess-Bonus macht ein weiterhin
+unbekanntes Zugriffsziel nicht zu einem belegten Payoff und öffnet diese
+unveränderte, kostenlos gestoppte Probe nicht erneut.
+Aktuell garantierter Zugriff, Kartenruns und geänderte Board-/Effektzustände
+bleiben eigenständig bewertete Routen. Ein neuer Zug
 öffnet eine neue Beobachtung; Kartenidentitäten oder verborgene ICE-Quotes
 werden aus der Historie nicht rekonstruiert. Das Eingabe-DTO bewahrt dafür
 die öffentlichen Engine-Felder `result`, `encounterContinue` und
@@ -706,6 +710,18 @@ Rig-Abdeckung. Der konkrete Installationspfad bleibt an Quelle, LegalAction,
 Rolle und Parent gebunden; die Engine-basierte Pfadprüfung wahrt Moduskosten
 und die Bindung einer einmaligen Moduswahl. Feste Deckdoktrin-Rollen dürfen
 diesen nachgewiesenen Installationspfad nicht erneut verwerfen.
+
+Eine Coverage-Suche mehrerer Stackkarten in die Hand bleibt im privaten
+Suchfenster unter ihrem ursprünglichen Root und Coverage-Executor.
+`coverage-multi-search-choice.ts` prüft die gewählte Quellenaction,
+StateVersion, Bedarfsbindung und aktuellen Engine-Optionen. Der Owner wählt
+zuerst die exakt gebundene Antwort. Für weitere Karten bewertet er die bereits
+gewählten Handkopien mit; derselbe beantwortete Suchbedarf erhält keinen
+weiteren Antwortbonus. Die Projektion installiert keine Karte und erzeugt
+weder Credits noch freie MU. Erforderliche Kopien bleiben zulässig. Der
+Payload-Resolver konsumiert ausschließlich die fertige, versionsgebundene
+Auswahl. Der gespeicherte Zustand 471/R3/G5/D135 und Gegenfälle sichern
+Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
@@ -1217,6 +1233,19 @@ Die prospektive Einzelquote wird durch
 Bank-Owner konsumieren diese Quote; sie rufen weder eine zweite Runbewertung
 noch eine eigene Actionauswahl auf.
 
+Selbstschaden-Finanzierung für einen aktuellen Run berücksichtigt den
+Handverbrauch aller Finanzierungsaktionen und den bekannten Selbstschaden.
+Der Handpuffer stammt aus der Reservequote genau dieses Run-Parents. Fehlt
+die Quote, bleibt die Finanzierung unbewiesen. Sinkt der Puffer darunter,
+reserviert die Finanzierungssuche die mit der aktuellen Engine-Projektion
+belegten Basisdraws einschließlich Klickkosten, Stack-Kapazität und sichtbarer
+Draw Taxes. Finanzierung, Pufferreparatur und der bereits reservierte Run-Klick
+müssen zusammen in denselben Zug passen. Ein nach Zufallsschaden noch benötigter
+Grip-Verbrauch einer späteren Finanzierungsaktion ist nicht garantiert.
+Die Ressourcenprüfung erzeugt keine zukünftigen Kartenidentitäten oder
+LegalActions. Das tatsächliche Nachziehen bleibt beim bestehenden Hand-Owner;
+jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.
+
 ## 7. `runner.defense_and_recovery`
 
 Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
@@ -1229,6 +1258,17 @@ Schutzinstallationen gegenüber Statusbereinigung. Die Live-Runtime reicht
 Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
+
+Liegt ein gebundener Handpufferschritt hinter einer früheren Defense-Phase,
+klassifiziert Defense seine derzeit nicht materialisierte Action ausdrücklich
+als zurückgestellt. Der Handbedarf bleibt erhalten und wird nach der früheren
+Phase erneut geprüft. Eine unabhängig produktiv gebundene Action desselben
+IDs bleibt bei ihrem anderen Owner ausführbar; bestehende Unknown-Bewertungen
+werden durch diese Phasendisposition nicht ersetzt.
+Eine Mehrzweck-Action, die auch zum aktuell materialisierten Defense-Schritt
+gehört, erhält keine Zurückstellung für ihren späteren Handpufferzweck. Die
+Ausnahme folgt den tatsächlichen Kandidaten derselben Phase und nicht dem
+Karten- oder Actionnamen.
 
 Ist der gewöhnliche Basisdraw die einzige aktuelle Handpufferroute und würde
 seine bereits sichtbare Steuer einen Tag erzeugen, darf Defense zuerst eine
@@ -2129,6 +2169,22 @@ Im Verzeichnis `packages/ai/src/runner/resource-lifecycle/` liegen:
   Parent-/Need-Revalidierung und quellengebundene Materialisierung.
 - `resource-lifecycle-dispositions.ts`: begründete Ablehnung der aktuell
   nicht produktiven Leave-play-Actions einer gehaltenen Ressource.
+
+Freiwilliger Selbsttrash bindet die kanonische Capability, Quelleninstanz,
+StateVersion und den tatsächlichen Aktionspreis. Ein vollständiges reines
+Lebenszyklusprofil liefert Startzug-Einkommen, Leave-play-Verlust und eine
+etwaige automatische Trace-Erfolgs-/Tag-Haftung. Ohne aktuell sichtbare,
+gerezzte installierte Trace-Quelle bleibt das Einkommen erhalten; öffentliche
+Archives-Abwürfe sind keine installierten Trace-Quellen. Bei einer solchen
+Haftung bietet der Owner ihre Entfernung als P5-Route an, wenn nach dem Trash
+noch ein aktuell legaler Run-Klick und nach dem exakten Kreditverlust ein
+Startzuggewinn als Geldreserve verbleiben. Diese begrenzte Reserve ist eine
+Owner-Bewertung, kein garantierter zukünftiger Run- oder Trace-Erfolg. Fehlt
+die Folgekapazität, hält der Owner die Ressource mit konkreter Begründung.
+Unvollständige Quellen-, Capability- oder Kostenbindungen bleiben unbekannt.
+Die ausführbare Fähigkeit braucht zusätzlich ihre kanonische
+`runner.resource_lifecycle`-Plan-Zuständigkeit; ein Lebenszyklussignal ersetzt
+diese Bindung nicht.
 
 Die Signalbildung erhält **einen injizierten Dienst** für die bestehende exakte
 Finanzierungssuche. Der Owner liefert Bedarf, Elternplan-ID, Zielbetrag,

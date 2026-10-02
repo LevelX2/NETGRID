@@ -66,6 +66,8 @@ corepack pnpm selfplay:evidence -- allocate --kind case --job-id <job-id>
 corepack pnpm selfplay:evidence -- upsert --input <pairing-bundle.json>
 corepack pnpm selfplay:evidence -- export --pairings 031,032 --output <report-input.json>
 corepack pnpm selfplay:evidence -- record-report --input <report-state.json>
+corepack pnpm selfplay:evidence -- register-reporting-series --input <series.json>
+corepack pnpm selfplay:evidence -- get-reporting-series --series-id <series-id> --output <series-state.json>
 corepack pnpm selfplay:evidence -- export-report --report-id latest --output <bericht.html>
 corepack pnpm selfplay:evidence -- backup --output <backup.sqlite>
 corepack pnpm selfplay:evidence -- check --json
@@ -80,7 +82,7 @@ fehlgeschlagenen SQLite-Integritätscheck.
 ## Paarungs-Bundle V1
 
 `upsert` erwartet ein JSON-Objekt mit `schemaVersion: 1`, `pairing`, `games`
-und optional `clusters`, `cases` und `fixes`. Pflichtfelder sind
+und optional `clusters`, `cases`, `fixes` und `reportingSeriesId`. Pflichtfelder sind
 `pairing.id` und `pairing.title`. Das Pairing enthält insbesondere Job,
 Auswahlseed, Source-Commit, Regel-/KI-Profil und beide Decknamen,
 Snapshot-IDs/-Hashes. Jedes Spiel erhält einen stabilen `key` sowie Seed,
@@ -117,6 +119,24 @@ historischen Verknüpfungen; sie ersetzen sie nicht. Eine tatsächlich andere
 Ursache erhält eine neu reservierte Fall-ID.
 
 ## Bericht und Sicherung
+
+Vor dem ersten reportfähigen Lauf wird die Serie mit `id`, `recipient` und
+positivem ganzzahligem `interval` registriert. Wiederholtes Registrieren
+derselben Konfiguration erhält Zähler, Versandstand und ausstehenden Bericht;
+eine abweichende Konfiguration scheitert sichtbar. `get-reporting-series`
+liest den maßgeblichen Zähler aus der gemeinsamen Registry.
+
+Ein Paarungs-Bundle kann `reportingSeriesId` angeben. Der Import nimmt nur eine
+geschlossene Paarung mit flagfreien finalen Spielen in diese bereits
+registrierte Serie auf. Paarungsabschluss und Zählerergänzung erfolgen in
+derselben SQLite-Transaktion. Ein unbekannter Serienbezug oder ungültiger
+Abschluss rollt den gesamten Import zurück. Wiederholter Import zählt weder
+einen ausstehenden noch einen bereits versendeten Paarungsbericht erneut;
+vorhandene ausstehende Berichte bleiben erhalten. Die vollständige fachliche
+Abnahme und der Entscheidungsnenner werden vorher durch die jeweiligen
+Selfplay-Gates geprüft.
+Eine aktive Paarung darf derselben bekannten Serie bereits zugeordnet werden;
+sie erhöht den Versandzähler erst bei ihrem geprüften Abschluss.
 
 Der Bericht wird aus `export` und der festen HTML-Vorlage erzeugt. Jeder offene
 Eintrag der Verdachtsmatrix zeigt seine `SP-nnn`-Verdachtsnummer sichtbar an.

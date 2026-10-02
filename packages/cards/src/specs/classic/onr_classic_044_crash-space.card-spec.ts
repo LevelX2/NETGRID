@@ -131,7 +131,14 @@ export const cardSpec = {
         severity: "medium",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("trash_source_action"),
+        annotations: [
+          { kind: "plan_owner", owner: "runner.resource_lifecycle" },
+        ],
+      },
+    ],
   },
   printings: [
     {
