@@ -1394,6 +1394,33 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Nach dem planselektierten Aufdecken übernimmt dieser Run-Owner die unmittelbare
+Engine-Continuation „Ansehen beenden“. Die KI-Eingabe erhält die skalaren
+Engine-Fakten `approachIceExposeViewDecision` und `approachIceExposeJackOut`.
+Der Owner prüft ausgewählte Aufdeckerinnerung, lückenlosen letzten Ereignis-
+Übergang, Root, Run, Server, Quelle, ICE und aktuelle StateVersion. Ohne diese
+Bindung scheitert das Fenster strukturiert. Bestehende Safety- und Reserve-
+Abbruchgründe haben Vorrang vor der Fortsetzung. Die Continuation zertifiziert
+keine erfundene Rez- oder Encounterquote; neue LegalActions bleiben die
+Autorität für den folgenden Encounter.
+
+Eine während des Runs angebotene Stack-Programmsuche mit normaler Installation
+gehört zum gebundenen Run-Owner. Bei einer aktuellen reinen ETR-Coveragelücke
+quotiert `run-window-program-search.ts` die kanonischen eigenen Stackantworten,
+den Source-Trash, tatsächlich freigemachte MU sowie Installations-, Encounter-
+und Restpfadkosten einschließlich zweckgebundener Credits. Eine Antwort wird
+nur zugelassen, wenn sie die Lücke schließt und den aktuellen Runreservevertrag
+erhält. Gehostete Quellen und notwendige weitere Opfer werden nicht als freie
+MU behauptet. Fehlende Coverage-/Kostenfakten bleiben explizite Ausschlüsse.
+
+Der gewählte Runstep bindet die konkrete Suchaction, Quelle, Zieldefinition,
+Run-ID, Server und StateVersion. Die unmittelbare Engine-Suchchoice erhält
+denselben Root und Executor; ihr Resolver übernimmt ausschließlich das vorher
+gebundene Ziel aus den tatsächlichen privaten Optionen. Eine andere Quelle,
+Version, Route oder unpassende Installationsquote scheitert fail-closed. Die
+Suchchoice bildet die Informationsgrenze; Pump-, Break- und weitere Runactions
+werden anschließend aus neuen LegalActions materialisiert.
+
 Die bekannte Pfadquote erhält bereits bezahlte einzelne Subroutine-Breaks mit
 ICE- und Subroutine-ID. Nachgelagerte Schadens- und Handreserveprüfungen
 rechnen diese Wirkungen nicht erneut an. Unbezahlte Subroutinen derselben

@@ -193,6 +193,18 @@ export type RunnerRunWindowActionAssessment = {
   admissible: boolean;
   value?: number;
   evidenceCodes: string[];
+  programSearchCommitment?: {
+    sourceActionId: string;
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    targetDefinitionId: string;
+    serverId: string;
+    runId: string;
+    plannedAtStateVersion: number;
+    installCost: number;
+    targetMemoryCost: number;
+    selectedAtStateVersion?: number;
+  };
 };
 
 export type RunnerTacticalPlanDomain = {

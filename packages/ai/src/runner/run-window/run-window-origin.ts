@@ -29,6 +29,7 @@ import {
 } from "../../visible-run-analysis";
 import { reservedAccessTrashCredits } from "./run-window-access";
 import { runnerRunRiskContractReassessment } from "./run-window-assessment";
+import { runnerRunExposeViewingBinding } from "./run-window-expose-viewing";
 import {
   knownPathAfterDamageBudget,
   runnerConfirmedDamageRequiredHandFloor,
@@ -40,7 +41,10 @@ export function activeRunRootPlan(
   input: AiDecisionInput,
 ): ActiveRunnerRunRoot | undefined {
   const serverId = input.playerView.run?.attackedServerId;
-  if (!previous || !serverId) return undefined;
+  if (!previous || !serverId) {
+    runnerRunExposeViewingBinding(input, previous, undefined);
+    return undefined;
+  }
   const candidates = [
     previous.instances.find(
       (instance) =>
@@ -64,7 +68,10 @@ export function activeRunRootPlan(
     ),
   ].filter((instance) => instance !== undefined);
   const root = candidates[0];
-  if (!root) return undefined;
+  if (!root) {
+    runnerRunExposeViewingBinding(input, previous, undefined);
+    return undefined;
+  }
   const runOrigin = runOriginFromModuleState(root.moduleState);
   const accessCommitment = accessCommitmentFromModuleState(root.moduleState);
   const moduleState = root.moduleState as {
@@ -100,9 +107,15 @@ export function activeRunRootPlan(
             ) as RunnerRemoteContestSignal,
           }
         : undefined;
+  const exposeViewingContinuation = runnerRunExposeViewingBinding(
+    input,
+    previous,
+    root.instanceId,
+  );
   return {
     instanceId: root.instanceId,
     ...runOrigin,
+    ...(exposeViewingContinuation ? { exposeViewingContinuation } : {}),
     ...(accessCommitment ? { accessCommitment } : {}),
     ...(parentBinding ? { parentBinding } : {}),
     ...(restrictedRunBinding ? { restrictedRunBinding } : {}),
