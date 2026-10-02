@@ -574,6 +574,9 @@ export function uniqueCoverageGaps(
               : (evaluation.evidence[0] ?? `missing_${requiredRole}`),
       deckHasAnswer,
       answerInHand: visibleAnswer !== undefined,
+      ...(visibleAnswer
+        ? { handAnswerDefinitionId: visibleAnswer.definitionId }
+        : {}),
       ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
       installActionIds,
       ...(fundingGap !== undefined ? { fundingGap } : {}),
@@ -725,6 +728,9 @@ export function uniqueCoverageGaps(
             : `deck_strategy_open_${coverage}_coverage`,
         deckHasAnswer,
         answerInHand: visibleAnswer !== undefined,
+        ...(visibleAnswer
+          ? { handAnswerDefinitionId: visibleAnswer.definitionId }
+          : {}),
         ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
         ...(fundingGap !== undefined ? { fundingGap } : {}),
         fundingActionIds: runnerCoverageFundingActionIds(

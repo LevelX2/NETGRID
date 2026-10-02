@@ -148,6 +148,43 @@ describe("exact Runner coverage-copy ownership", () => {
       );
       domain.coverageGaps.pop();
       domain.centralPressure.pop();
+      Object.assign(gap, {
+        requesterModuleId: "runner.contest_remote",
+        requesterPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      });
+      const remoteParent = {
+        ...parent,
+        contestId: "remote:remote_1",
+        marginalValue: 0,
+      };
+      (domain.remoteContests as unknown[]).push(remoteParent);
+      expect(inspect()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            actionId: actions[0]!.actionId,
+            ownerModuleId: "runner.rig_and_coverage",
+            evidenceCode:
+              "runner_coverage_install_deferred_by_nonpositive_bound_parent",
+          }),
+        ]),
+      );
+      remoteParent.marginalValue = 60;
+      expect(inspect().some((d) => d.actionId === actions[0]!.actionId)).toBe(
+        false,
+      );
+      remoteParent.marginalValue = 0;
+      domain.coverageGaps.push({ ...gap, gapId: "independent-remote-need" });
+      expect(inspect().some((d) => d.actionId === actions[0]!.actionId)).toBe(
+        false,
+      );
+      domain.coverageGaps.pop();
+      Object.assign(gap, {
+        requesterPlanInstanceId: "plan:runner.contest_remote:remote%3Aother",
+      });
+      expect(inspect().some((d) => d.actionId === actions[0]!.actionId)).toBe(
+        false,
+      );
+      domain.remoteContests.pop();
       candidates[0]!.sourceDefinitionId = "onr_v1_039_krash";
       input.playerView.own.gripOrHq[0]!.definitionId = "onr_v1_039_krash";
       // A different answer is not proven interchangeable. Do not conceal that

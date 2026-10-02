@@ -9782,6 +9782,10 @@ function derivedFunctionSignals(
       }
       if (effect.kind === "draw_cards")
         signals.add(`draw.${effect.recipient}_draw`);
+      if (effect.kind === "shuffle_grip_trash_and_stack_then_draw") {
+        signals.add("setup.draw");
+        signals.add("zone.shuffle");
+      }
       if (effect.kind === "add_current_run_access_count") {
         const additionalAccess = closedCurrentRunAdditionalAccess(entry);
         if (!additionalAccess)

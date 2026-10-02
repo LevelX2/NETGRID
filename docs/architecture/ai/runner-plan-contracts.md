@@ -483,6 +483,13 @@ Quellenbindung; spätere Ausschlüsse können keinen zuvor gesperrten Ziehpfad
 zur ausführbaren Route machen. Suche und Draw bleiben beim bestehenden
 Coverage-Owner und werden nach neuer Information erneut gebunden.
 
+Die Handentwicklung übernimmt eine Coverage-Zuordnung nur für die typisierte
+`handAnswerDefinitionId` oder eine tatsächlich gebundene Installationsaction
+derselben Definition. Rollenübereinstimmung allein überträgt keine Ownership
+auf eine andere Handantwort. Die ausgewählte Definition bleibt auch während
+der Installationsfinanzierung gebunden; definitionsgleiche weitere Kopien
+behalten die bestehende ausdrückliche Zurückstellung.
+
 Eine unbezahlbare Antwort auf der Hand sperrt keinen bereits exakt gebundenen
 günstigeren Stack-Suchweg. `coverage-search-alternatives.ts` prüft bekannte
 Such- und Installationskosten, freie Handkapazität, bekannte eigene
@@ -603,12 +610,13 @@ nicht wieder zur ausführbaren Route machen. Weitere Handkopien derselben
 Definition, die nur diesem Bedarf zugeordnet sind, erhalten eine ausdrückliche
 Zurückstellung beim Coverage-Owner; sie erzeugen weder einen zweiten generischen
 Entwicklungsplan noch eine Lücke in der LegalAction-Klassifikation. Der
-Entwicklungsproducer übernimmt diese Zuordnung nur für die konkret gebundene
+Entwicklungsproducer übernimmt diese Zuordnung nur für die durch
+`handAnswerDefinitionId` oder eine konkrete Installationsaction gebundene
 Definition und ihre weiteren Kopien. Eine ausdrücklich leere Antwortliste
 oder die Antwort einer anderen Definition übernimmt keine nur
 rollenkompatible Handkarte; deren eigenständiger Entwicklungsbedarf bleibt
 beim Entwicklungs-Owner. Lehnt ein
-exakt gebundener Zentraldruck-Parent seinen aktuellen Payoff mit einem Wert
+exakt gebundener Zentraldruck- oder Remote-Parent seinen aktuellen Payoff mit einem Wert
 kleiner oder gleich null ab, bleibt auch seine Installation ausdrücklich
 zurückgestellt. Eine andere positive oder unabhängige Coverage-Bindung
 derselben Action bleibt davon unberührt. Diese Dispositionen ändern weder

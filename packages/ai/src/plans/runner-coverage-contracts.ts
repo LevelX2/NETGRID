@@ -22,6 +22,7 @@ export type RunnerCoverageGapSignal = {
   evidenceCode: string;
   deckHasAnswer: boolean;
   answerInHand: boolean;
+  handAnswerDefinitionId?: string;
   answerInstallCost?: number;
   installActionIds?: string[];
   installActionValues?: Record<string, number>;

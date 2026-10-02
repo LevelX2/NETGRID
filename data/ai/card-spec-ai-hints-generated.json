@@ -25193,6 +25193,7 @@
             "capabilityKey": "abilities_on_play_shuffle_grip_trash_and_stack_then_draw"
           }
         ],
+        "functionSignals": ["setup.draw", "zone.shuffle"],
         "tacticSignals": ["draw.card"],
         "actionTacticSignals": ["draw.card"],
         "costProfile": { "clicks": 1, "credits": 3 },
