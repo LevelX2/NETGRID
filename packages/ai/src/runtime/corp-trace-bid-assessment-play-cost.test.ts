@@ -21,7 +21,7 @@ describe("Corp trace-bid play-cost projection", () => {
     expect(assessment).toMatchObject({
       recommendedBid: 0,
       reason: "unconvertible_visible_payoff",
-      minimumGuaranteedBid: 2,
+      minimumGuaranteedBid: 1,
       followupCreditReserve: 1,
       followupCardId: "power-grid",
     });

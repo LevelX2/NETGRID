@@ -1,3 +1,4 @@
+import { traceCorpBaseStrength, traceRulesDefinition } from "@netgrid/engine";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
@@ -47,8 +48,25 @@ export function assessCorpTraceBid(params: {
     };
   }
 
-  const tieMargin =
-    params.traceContext.traceRulesProfile === "classic_blind_corp_ties" ? 0 : 1;
+  const rules = traceRulesDefinition(params.traceContext.traceRulesProfile);
+  const printedTrace = params.traceContext.traceLimit;
+  if (
+    rules.corpBaseStrengthMode === "printed_trace" &&
+    (typeof printedTrace !== "number" ||
+      !Number.isInteger(printedTrace) ||
+      printedTrace < 0)
+  ) {
+    return {
+      recommendedBid: 0,
+      reason: "unknown_trace_context",
+    };
+  }
+  const baseStrength = traceCorpBaseStrength({
+    traceLimit:
+      rules.corpBaseStrengthMode === "printed_trace" ? printedTrace! : 0,
+    traceRulesProfile: rules.profile,
+  });
+  const tieMargin = rules.tieWinner === "corp" ? 0 : 1;
   const visibleRunnerMaximumStrength =
     typeof params.traceContext.runnerMaximumPreRevealStrength === "number" &&
     Number.isInteger(params.traceContext.runnerMaximumPreRevealStrength)
@@ -60,7 +78,7 @@ export function assessCorpTraceBid(params: {
           : Math.max(0, params.input.playerView.opponent.credits));
   const minimumGuaranteedBid = Math.max(
     0,
-    visibleRunnerMaximumStrength + tieMargin,
+    visibleRunnerMaximumStrength + tieMargin - baseStrength,
   );
   if (
     params.sourceDefinitionId !== undefined &&

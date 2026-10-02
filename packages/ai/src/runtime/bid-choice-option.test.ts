@@ -33,7 +33,7 @@ describe("selectedBidChoiceOptionId", () => {
         bidChoice("trace:corp", range(0, 11)),
         { traceLimit: 5, runnerLink: 0 },
       ),
-    ).toBe("bid_7");
+    ).toBe("bid_2");
   });
 
   it("bids zero without a visible tag-punish followup", () => {
@@ -62,7 +62,7 @@ describe("selectedBidChoiceOptionId", () => {
         bidChoice("trace:run_1.rex.0.trace", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
       ),
-    ).toBe("bid_1");
+    ).toBe("bid_0");
   });
 
   it("does not go all-in for Rex when guaranteeing the native payoff is too expensive", () => {
@@ -122,7 +122,7 @@ describe("selectedBidChoiceOptionId", () => {
         bidChoice("trace:corp", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
       ),
-    ).toBe("bid_1");
+    ).toBe("bid_0");
   });
 
   it("bids zero when no followup click remains", () => {

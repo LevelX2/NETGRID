@@ -746,6 +746,17 @@ auch das wirkungsgleiche Mindestgebot 0 zertifizieren. Die Choice-Auflösung
 verwendet dann die vorhandene, exakt gebundene Nulloption; sie bewertet keine
 neue Strategie und gibt keine zusätzlichen Credits ohne Wirkung aus.
 
+Beim Mindestgebot eines bereits begonnenen Traces stammen Basisstärke und
+Gleichstandsregel aus dem aktiven Engine-Profil. `modern_open` rechnet die
+öffentlich gebundene gedruckte Trace-Stärke bereits ein; Blind-Profile haben
+keine gedruckte Basisstärke. Fehlende offene Basisdaten ergeben
+`unknown_trace_context` und keine erfundene Erfolgsgarantie. Gebotsgrenze,
+Folgekostenreserve und die aktuelle Choice-/Executor-Bindung bleiben erhalten.
+Der native Zustand Paarung 474 G40 D250 belegt Trace 3 gegen höchstens
+Runner-Stärke 4: Corp-Gebot 2 garantiert den nativen Run-Abbruch. Gebot 0
+garantiert ihn nicht. Ein besserer vollständiger Matchausgang ist damit
+nicht nachgewiesen.
+
 Rez ist grundsätzlich eine einmalige Investition in wiederkehrenden Druck.
 Ein positiver, exakt belegter Breakpreis darf auch unter dem Rezpreis liegen;
 der erste Run muss den Rez nicht allein amortisieren. Nur temporäre
