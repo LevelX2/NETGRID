@@ -466,6 +466,15 @@ Ziehevents bleiben für die Handentwicklung verfügbar, solange Coverage
 Suche oder Suchwerkzeug-Aufbau materialisiert. Sie werden nicht zugleich
 von Coverage beansprucht und dort ohne ausführbaren Head ausgeschlossen.
 
+Die Lückenbildung bindet Installationen an die tatsächlich ausgewählte
+Handantwort. Ist für einen Bedarf keine Handantwort ausgewählt, bleibt
+`installActionIds` ausdrücklich leer. Insbesondere darf eine benötigte
+Effizienzverbesserung keine beliebige zweite Kopie des vorhandenen Breakers
+als Antwort beanspruchen. Damit verwenden Phasenwahl und Disposition dieselbe
+Quellenbindung; spätere Ausschlüsse können keinen zuvor gesperrten Ziehpfad
+zur ausführbaren Route machen. Suche und Draw bleiben beim bestehenden
+Coverage-Owner und werden nach neuer Information erneut gebunden.
+
 Eine unbezahlbare Antwort auf der Hand sperrt keinen bereits exakt gebundenen
 günstigeren Stack-Suchweg. `coverage-search-alternatives.ts` prüft bekannte
 Such- und Installationskosten, freie Handkapazität, bekannte eigene
