@@ -58,6 +58,7 @@ Standardpfad. `NETGRID_SELFPLAY_EVIDENCE_DB` oder `--db` darf ihn für Tests
 corepack pnpm selfplay:evidence -- init
 corepack pnpm selfplay:evidence -- status --json
 corepack pnpm selfplay:evidence -- register-job --job-id <job-id> --worktree <pfad> --branch <branch>
+corepack pnpm selfplay:evidence -- register-series --series-id <series-id> --recipient me --interval 1
 corepack pnpm selfplay:evidence -- complete-job --job-id <job-id> --status completed
 corepack pnpm selfplay:evidence -- complete-job --job-id <job-id> --status abandoned
 corepack pnpm selfplay:evidence -- allocate --kind pairing --job-id <job-id>
@@ -87,6 +88,18 @@ Match-ID, StateHash, Gewinner, Match-/Agendapunkte, Terminalgrund,
 Entscheidungszahl, `flagsCount` und die menschenverständliche Gewinner- und
 Verlierereinordnung entweder spielbezogen in `metadata` oder aggregiert im
 Pairing.
+
+Bei ausdrücklich beauftragtem Mailversand wird die Reporting-Series vor der
+ersten Paarung mit `register-series` angelegt. Derselbe Aufruf erhält beim
+Resume bestehende Zähler und Versanddaten; eine abweichende Empfänger- oder
+Intervallbindung scheitert sichtbar. Ein Paarungs-Bundle kann die vorher
+registrierte Serie über `reportingSeriesId` binden. Der erste Übergang nach
+`closed` ergänzt die Paarungs-ID genau einmal im selben Commit der
+Registry-Transaktion. Aktive Paarungen zählen nicht; ein wiederholter Import
+einer bereits abgeschlossenen Paarung erzeugt nach dem Versand keine neue
+Mailpflicht. Eine unbekannte Serie oder ein fehlerhaftes Bundle rollt auch
+die Zähleränderung zurück. Ohne diese Bindung schließt sich eine Paarung
+keiner Reporting-Series an.
 
 Ein Fall enthält stabile Fall-/Cluster-IDs, Evidenzgrad, Seite,
 menschenverständliches Symptom, zuständigen Pfad, Match-/Entscheidungskontext

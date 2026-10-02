@@ -290,6 +290,38 @@ export function completeJob(db, input) {
   if (result.changes !== 1) throw new Error(`Unknown job: ${jobId}`);
 }
 
+export function registerReportingSeries(db, input) {
+  const seriesId = requireText(input?.id, "series.id");
+  const recipient = requireText(input?.recipient, "series.recipient");
+  const interval = Number(input?.interval);
+  if (!Number.isSafeInteger(interval) || interval < 1) {
+    throw new Error("series.interval must be a positive integer");
+  }
+  return withImmediateTransaction(db, () => {
+    const existing = db
+      .prepare(
+        `SELECT recipient, interval FROM reporting_series WHERE series_id = ?`,
+      )
+      .get(seriesId);
+    if (existing) {
+      if (existing.recipient !== recipient || existing.interval !== interval) {
+        throw new Error(
+          `Reporting series ${seriesId} already has a different delivery scope`,
+        );
+      }
+      return seriesId;
+    }
+    db.prepare(
+      `
+      INSERT INTO reporting_series(
+        series_id, recipient, interval, unreported_pairing_ids_json, updated_at
+      ) VALUES (?, ?, ?, ?, ?)
+    `,
+    ).run(seriesId, recipient, interval, json([]), nowIso());
+    return seriesId;
+  });
+}
+
 export function recordReport(db, input) {
   const reportId = requireText(input?.reportId, "report.reportId");
   const status = requireText(input?.status, "report.status");
@@ -423,6 +455,23 @@ export function importPairingBundle(db, bundle) {
   const timestamp = nowIso();
 
   return withImmediateTransaction(db, () => {
+    const previousPairing = db
+      .prepare(`SELECT status FROM pairings WHERE pairing_id = ?`)
+      .get(pairingId);
+    const reportingSeriesId =
+      bundle.reportingSeriesId === undefined
+        ? null
+        : requireText(bundle.reportingSeriesId, "reportingSeriesId");
+    const reportingSeries = reportingSeriesId
+      ? db
+          .prepare(
+            `SELECT unreported_pairing_ids_json FROM reporting_series WHERE series_id = ?`,
+          )
+          .get(reportingSeriesId)
+      : null;
+    if (reportingSeriesId && !reportingSeries) {
+      throw new Error(`Unknown reporting series: ${reportingSeriesId}`);
+    }
     if (pairing.jobId)
       registerJob(db, {
         jobId: pairing.jobId,
@@ -542,6 +591,24 @@ export function importPairingBundle(db, bundle) {
       WHERE kind = 'pairing' AND formatted_id = ?
     `,
     ).run(timestamp, pairingId);
+
+    if (
+      reportingSeries &&
+      (pairing.status ?? "closed") === "closed" &&
+      previousPairing?.status !== "closed"
+    ) {
+      const unreportedPairingIds = JSON.parse(
+        reportingSeries.unreported_pairing_ids_json,
+      );
+      if (!unreportedPairingIds.includes(pairingId))
+        unreportedPairingIds.push(pairingId);
+      db.prepare(
+        `
+        UPDATE reporting_series SET unreported_pairing_ids_json = ?, updated_at = ?
+        WHERE series_id = ?
+      `,
+      ).run(json(unreportedPairingIds), timestamp, reportingSeriesId);
+    }
 
     return pairingId;
   });

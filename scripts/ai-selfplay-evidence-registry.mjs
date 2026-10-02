@@ -12,6 +12,7 @@ import {
   openEvidenceRegistry,
   recordReport,
   registerJob,
+  registerReportingSeries,
   registryCheck,
   registryStatus,
   resolveDefaultEvidenceDatabasePath,
@@ -51,6 +52,7 @@ Usage:
   node scripts/ai-selfplay-evidence-registry.mjs init [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs status [--db PATH] [--json]
   node scripts/ai-selfplay-evidence-registry.mjs register-job --job-id ID [--worktree PATH] [--branch NAME] [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs register-series --series-id ID --recipient ADDRESS --interval COUNT [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs complete-job --job-id ID [--status completed|abandoned] [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs allocate --kind pairing|case --job-id ID [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs upsert --input pairing.json [--db PATH]
@@ -96,6 +98,13 @@ try {
       branchName: opts.branch,
     });
     console.log(JSON.stringify({ registered: opts["job-id"], databasePath }));
+  } else if (command === "register-series") {
+    const seriesId = registerReportingSeries(db, {
+      id: required(opts, "series-id"),
+      recipient: required(opts, "recipient"),
+      interval: required(opts, "interval"),
+    });
+    console.log(JSON.stringify({ registeredSeries: seriesId, databasePath }));
   } else if (command === "complete-job") {
     const jobId = required(opts, "job-id");
     completeJob(db, { jobId, status: opts.status ?? "completed" });

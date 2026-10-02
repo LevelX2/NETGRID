@@ -16,6 +16,7 @@ import {
   parseLegacyReview,
   recordReport,
   registerJob,
+  registerReportingSeries,
   registryCheck,
   registryStatus,
 } from "./lib/ai-selfplay-evidence-registry.mjs";
@@ -96,6 +97,89 @@ test("upserts a complete pairing bundle idempotently", () => {
       exportEvidenceSnapshot(db, ["042"]).pairings[0].title,
       "Aktualisierte Testpaarung",
     );
+  });
+});
+
+test("queues closed pairings atomically and preserves report state on retries", () => {
+  withRegistry(({ db }) => {
+    const series = { id: "mail-series", recipient: "me", interval: 1 };
+    const bundle = {
+      schemaVersion: 1,
+      reportingSeriesId: series.id,
+      pairing: { id: "001", title: "First", status: "active" },
+      games: [],
+    };
+    assert.throws(
+      () => importPairingBundle(db, bundle),
+      /Unknown reporting series/,
+    );
+    assert.equal(exportEvidenceSnapshot(db).pairings.length, 0);
+    assert.throws(
+      () => importPairingBundle(db, { ...bundle, reportingSeriesId: "" }),
+      /reportingSeriesId is required/,
+    );
+    assert.throws(
+      () => registerReportingSeries(db, { ...series, interval: 0 }),
+      /positive integer/,
+    );
+    registerReportingSeries(db, series);
+    const state = () =>
+      JSON.parse(
+        db
+          .prepare(
+            `SELECT unreported_pairing_ids_json FROM reporting_series WHERE series_id = ?`,
+          )
+          .get(series.id).unreported_pairing_ids_json,
+      );
+    importPairingBundle(db, bundle);
+    assert.deepEqual(state(), []);
+    const closed = {
+      ...bundle,
+      pairing: { ...bundle.pairing, status: "closed" },
+    };
+    importPairingBundle(db, closed);
+    importPairingBundle(db, closed);
+    assert.deepEqual(state(), ["001"]);
+    registerReportingSeries(db, series);
+    assert.deepEqual(state(), ["001"]);
+    assert.throws(
+      () => registerReportingSeries(db, { ...series, recipient: "another" }),
+      /different delivery scope/,
+    );
+    assert.throws(
+      () =>
+        importPairingBundle(db, {
+          ...closed,
+          pairing: { ...closed.pairing, id: "002" },
+          cases: [
+            {
+              id: "SP-001",
+              clusterId: "missing",
+              grade: "Verdacht",
+              symptom: "rollback",
+            },
+          ],
+        }),
+      /FOREIGN KEY/,
+    );
+    assert.deepEqual(state(), ["001"]);
+    assert.equal(exportEvidenceSnapshot(db).pairings.length, 1);
+    recordReport(db, {
+      reportId: "report-001",
+      status: "sent",
+      coveredPairingIds: ["001"],
+      htmlBody: "<p>Report</p>",
+      series: {
+        ...series,
+        unreportedPairingIds: [],
+        lastReportedPairingId: "001",
+        lastSentAt: "2026-10-02T12:00:00Z",
+      },
+    });
+    importPairingBundle(db, closed);
+    registerReportingSeries(db, series);
+    assert.deepEqual(state(), []);
+    assert.equal(getStoredReport(db, "report-001").status, "sent");
   });
 });
 
