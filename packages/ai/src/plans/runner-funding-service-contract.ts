@@ -15,6 +15,8 @@ export type RunnerExactFundingRouteRequest = Pick<
   remainingClicks: number;
   allowIncrementalProgress?: boolean;
   allowStrategicExchange?: boolean;
+  /** A prefix funding gap cannot certify conversion of a fully known run. */
+  requireCompleteKnownPath?: boolean;
   paymentWindowTarget?: RunnerRunTargetEvaluation;
   debtFinancingParent?: Readonly<{
     planInstanceId: string;

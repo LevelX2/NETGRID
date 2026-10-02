@@ -130,6 +130,7 @@ export function runnerRunFundingSupport(
       targetCredits: input.playerView.own.credits + terminalKnownPathGap,
       remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
       allowStrategicExchange: true,
+      requireCompleteKnownPath: true,
       paymentWindowTarget: evaluation,
       debtFinancingParent: {
         planInstanceId: parentPlanInstanceId,
@@ -152,6 +153,10 @@ export function runnerRunFundingSupport(
     });
     if (terminalRoute.routeActionIds.length > 0) {
       route = terminalRoute;
+    } else {
+      route.routeAssessment.evidenceCodes.push(
+        "runner_funding_complete_known_path_uncovered",
+      );
     }
   }
   const gap =

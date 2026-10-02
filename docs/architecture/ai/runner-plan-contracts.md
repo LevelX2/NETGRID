@@ -163,6 +163,16 @@ normale Zugriff erhalten. Ein unbedingter Entzug ersetzt ihn auch dann. Beide
 Fälle teilen dieselbe Central-Projektion; fehlende oder widersprüchliche
 Effektmengen scheitern sichtbar, statt einen Zugriffswert zu erfinden.
 
+Die terminale Finanzierung eines vollständig bekannten Remote-Pfads zertifiziert
+die gesamte gebundene Route erneut mit deren garantiertem liquiden Budget und
+verbleibendem Run-Klick. Eine am ersten unbezahlbaren ICE oder an dessen erster
+unbezahlbarer Subroutine endende Quote liefert nur eine Untergrenze. Das Erreichen
+dieser Untergrenze macht eine Fundingfolge nicht `covered_guaranteed`; der
+Consumer muss mit dem tatsächlichen Folgenbudget garantierten Zugriff ohne
+weitere Finanzierungslücke nachweisen. Die vorhandene Handreserveprüfung bleibt
+zusätzlich verbindlich. Diese Ressourcenprüfung erzeugt keine LegalAction und
+keine zusätzliche Entscheidungsautorität.
+
 Ein Zentralzugriff am Runner-Matchpoint darf ohne aktuelle Remote-Scorebedrohung
 das vorhandene Runbudget verbrauchen. Die allgemeine gewünschte Auffüllreserve
 ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
