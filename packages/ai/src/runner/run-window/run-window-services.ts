@@ -9,6 +9,13 @@ import type {
   PendingChoiceOptions,
 } from "../../runtime/plan-bound-choice-contract";
 import type { SemanticRuntimeExclusion } from "../../runtime/semantic-runtime-types";
+import type { RunnerRunPathCreditBudget } from "../../visible-run-analysis";
+
+export type RunnerRunContinuationPayment = {
+  cost: number;
+  rig: VisibleCard[];
+  budget: RunnerRunPathCreditBudget;
+};
 
 /** Decision-local services supplied by the shared runtime composition. */
 export type RunWindowAssessmentServices = {

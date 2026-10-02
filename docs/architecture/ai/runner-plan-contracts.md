@@ -474,6 +474,15 @@ Ziehevents bleiben für die Handentwicklung verfügbar, solange Coverage
 Suche oder Suchwerkzeug-Aufbau materialisiert. Sie werden nicht zugleich
 von Coverage beansprucht und dort ohne ausführbaren Head ausgeschlossen.
 
+Die Lückenbildung bindet Installationen an die tatsächlich ausgewählte
+Handantwort. Ist für einen Bedarf keine Handantwort ausgewählt, bleibt
+`installActionIds` ausdrücklich leer. Insbesondere darf eine benötigte
+Effizienzverbesserung keine beliebige zweite Kopie des vorhandenen Breakers
+als Antwort beanspruchen. Damit verwenden Phasenwahl und Disposition dieselbe
+Quellenbindung; spätere Ausschlüsse können keinen zuvor gesperrten Ziehpfad
+zur ausführbaren Route machen. Suche und Draw bleiben beim bestehenden
+Coverage-Owner und werden nach neuer Information erneut gebunden.
+
 Eine unbezahlbare Antwort auf der Hand sperrt keinen bereits exakt gebundenen
 günstigeren Stack-Suchweg. `coverage-search-alternatives.ts` prüft bekannte
 Such- und Installationskosten, freie Handkapazität, bekannte eigene
@@ -1413,6 +1422,33 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Nach dem planselektierten Aufdecken übernimmt dieser Run-Owner die unmittelbare
+Engine-Continuation „Ansehen beenden“. Die KI-Eingabe erhält die skalaren
+Engine-Fakten `approachIceExposeViewDecision` und `approachIceExposeJackOut`.
+Der Owner prüft ausgewählte Aufdeckerinnerung, lückenlosen letzten Ereignis-
+Übergang, Root, Run, Server, Quelle, ICE und aktuelle StateVersion. Ohne diese
+Bindung scheitert das Fenster strukturiert. Bestehende Safety- und Reserve-
+Abbruchgründe haben Vorrang vor der Fortsetzung. Die Continuation zertifiziert
+keine erfundene Rez- oder Encounterquote; neue LegalActions bleiben die
+Autorität für den folgenden Encounter.
+
+Eine während des Runs angebotene Stack-Programmsuche mit normaler Installation
+gehört zum gebundenen Run-Owner. Bei einer aktuellen reinen ETR-Coveragelücke
+quotiert `run-window-program-search.ts` die kanonischen eigenen Stackantworten,
+den Source-Trash, tatsächlich freigemachte MU sowie Installations-, Encounter-
+und Restpfadkosten einschließlich zweckgebundener Credits. Eine Antwort wird
+nur zugelassen, wenn sie die Lücke schließt und den aktuellen Runreservevertrag
+erhält. Gehostete Quellen und notwendige weitere Opfer werden nicht als freie
+MU behauptet. Fehlende Coverage-/Kostenfakten bleiben explizite Ausschlüsse.
+
+Der gewählte Runstep bindet die konkrete Suchaction, Quelle, Zieldefinition,
+Run-ID, Server und StateVersion. Die unmittelbare Engine-Suchchoice erhält
+denselben Root und Executor; ihr Resolver übernimmt ausschließlich das vorher
+gebundene Ziel aus den tatsächlichen privaten Optionen. Eine andere Quelle,
+Version, Route oder unpassende Installationsquote scheitert fail-closed. Die
+Suchchoice bildet die Informationsgrenze; Pump-, Break- und weitere Runactions
+werden anschließend aus neuen LegalActions materialisiert.
+
 Die bekannte Pfadquote erhält bereits bezahlte einzelne Subroutine-Breaks mit
 ICE- und Subroutine-ID. Nachgelagerte Schadens- und Handreserveprüfungen
 rechnen diese Wirkungen nicht erneut an. Unbezahlte Subroutinen derselben
@@ -1922,6 +1958,14 @@ Die Strategie lautet:
   Identitäten nicht über andere Server hinweg geraten;
 - bei fehlendem exakten Runursprung, uneindeutigem Fenster oder unvollständiger
   Bindung fail-closed abbrechen.
+
+Die lückenlose Ereigniskette eines aktuellen Turn-Plan-Lease darf zwischen
+Run-Fortsetzung und Approach-ICE-Fenster auch Corp-Root-Rez-Ereignisse im
+angegriffenen Server enthalten. Diese ändern den Runursprung nicht. Actor,
+Root-Platzierung, Server und alle StateVersion-Übergänge bleiben exakt
+geprüft; ein fremder Server oder eine Lücke zertifiziert diese Fortsetzung
+nicht. Die native Regression aus Paarung 489, Spiel 27, D112 erhält den
+HQ-Pressure-Root und dessen Run-Window-Parent über zwei solche Ereignisse.
 
 Das plan-eigene Informationsgedächtnis ist privilegierter lokaler
 KI-Zustand. Es erweitert weder PlayerViews noch PublicEvents und darf nicht

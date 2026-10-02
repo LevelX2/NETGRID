@@ -454,6 +454,9 @@ export function uniqueCoverageGaps(
             requiredRole,
           )
         : undefined;
+    // No selected hand answer means no current installation. An open set
+    // would admit unrelated or already installed breakers, then change the
+    // phase when their later disposition rejects them.
     const installActionIds = visibleAnswer
       ? coverageDevelopment
         ? candidates
@@ -469,9 +472,7 @@ export function uniqueCoverageGaps(
             })
             .map((candidate) => candidate.actionId)
         : legalCoverageInstallActionIds
-      : coverageDevelopment
-        ? []
-        : undefined;
+      : [];
     const sameTurnRunConversion = runnerUrgentRemoteCoverageConversionQuote(
       input,
       candidates,
@@ -574,7 +575,7 @@ export function uniqueCoverageGaps(
       deckHasAnswer,
       answerInHand: visibleAnswer !== undefined,
       ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
-      ...(installActionIds !== undefined ? { installActionIds } : {}),
+      installActionIds,
       ...(fundingGap !== undefined ? { fundingGap } : {}),
       ...(sameTurnRunConversion ? { sameTurnRunConversion } : {}),
       ...(coverageDevelopment

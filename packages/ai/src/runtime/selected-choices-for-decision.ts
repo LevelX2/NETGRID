@@ -8,6 +8,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { runnerPartialProgramSearchProfile } from "./runner-partial-program-search-facts";
+import { selectedRunnerRunProgramSearchOptionIds } from "../runner/run-window/run-window-program-search-binding";
 import {
   selectedCorpAccessPaymentOptionsFromAmbushPlan,
   selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan,
@@ -1333,6 +1334,14 @@ export function selectedChoicesForDecision(
     );
   }
   if (choice.kind === "select_cards") {
+    const runSearch = selectedRunnerRunProgramSearchOptionIds(
+      input,
+      action,
+      choice,
+      currentPortfolio,
+    );
+    if (runSearch)
+      return resolved(runSearch, "bound_runner_run_program_search");
     const retainedHqCards = selectedCorpHqRetainPaymentOptionIds(
       input,
       choice,

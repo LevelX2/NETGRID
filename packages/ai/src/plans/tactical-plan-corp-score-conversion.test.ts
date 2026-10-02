@@ -12,6 +12,47 @@ import {
 } from "./tactical-plan-corp-score-conversion";
 
 describe("Corp same-turn score conversion", () => {
+  it.each([3, 1])(
+    "compares funded score costs and retains acceleration at %i available clicks",
+    (clicks) => {
+      const agenda = card("installed-agenda", "agenda", {
+        advancementRequirement: 3,
+        advancementCounters: 1,
+      });
+      const burst = placement("three-counter-operation", 3);
+      burst.costs = [{ clicks: 1, credits: 10 }];
+      const advance = action(
+        "advance-installed",
+        "advance_card",
+        agenda.instanceId,
+        {},
+      );
+      advance.costs = [{ clicks: 1, credits: 1 }];
+      const input = corpInput({
+        clicks,
+        credits: 14,
+        hq: [],
+        root: [agenda],
+        actions: [burst, advance],
+      });
+      const path = bestCorpSameTurnScoreConversionPath(input);
+      expect(path).toMatchObject({
+        agendaCardId: agenda.instanceId,
+        targetServerId: "remote_1",
+        agendaPoints: 2,
+        sameTurnGuaranteed: true,
+        creditsRequired: clicks === 3 ? 2 : 10,
+        clicksRequired: clicks === 3 ? 2 : 1,
+      });
+      expect(path?.steps.map((step) => step.kind)).toEqual(
+        clicks === 3
+          ? ["basic_advance", "basic_advance", "score_ready"]
+          : ["place_advancement", "score_ready"],
+      );
+      if (clicks === 1) expect(path?.steps[0]?.actionId).toBe(burst.actionId);
+    },
+  );
+
   it("plans install, Vapor transfer and free score with two clicks", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,

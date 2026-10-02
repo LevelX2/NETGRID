@@ -153,6 +153,7 @@ function runnerCurrentExposeInformationSignal(
   ) {
     return undefined;
   }
+  const attackedServerId = input.playerView.run.attackedServerId;
   const exposeActions = input.legalActions.filter(
     (action) =>
       action.side === "runner" &&
@@ -261,7 +262,10 @@ function runnerCurrentExposeInformationSignal(
         (event) =>
           event.publicPayload?.actor === "corp" &&
           (event.publicPayload?.actionType === "rez_ice" ||
-            event.publicPayload?.actionType === "decline_rez"),
+            event.publicPayload?.actionType === "decline_rez" ||
+            (event.publicPayload?.actionType === "rez_card" &&
+              event.publicPayload?.installPlacement === "root" &&
+              event.publicPayload?.serverId === attackedServerId)),
       );
   const exactPlanBinding =
     previous !== undefined &&

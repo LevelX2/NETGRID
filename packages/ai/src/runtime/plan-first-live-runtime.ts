@@ -237,6 +237,10 @@ import {
 import { runnerInstalledCardLiquidationChoiceSignal } from "../runner/economy/installed-card-liquidation";
 import { runnerExposeInformationActionDispositions } from "../runner/expose-information/expose-information-dispositions";
 import { bindSelectedRunnerExposeInformationMemory } from "../runner/expose-information/expose-information-memory";
+import {
+  bindSelectedRunnerRunProgramSearch,
+  resolvePlanBoundRunnerRunProgramSearchChoice,
+} from "../runner/run-window/run-window-program-search-binding";
 import { runnerExposeInformationSignals } from "../runner/expose-information/expose-information-signals";
 import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
 import {
@@ -548,6 +552,10 @@ export function choosePlanFirstLiveAction(
     if (planBoundRunnerEventInstallChoice) return undefined;
     return (
       resolveCorpPunishTraceWindow(schedulerContext, previous) ??
+      resolvePlanBoundRunnerRunProgramSearchChoice(
+        schedulerContext,
+        previous,
+      ) ??
       resolvePlanBoundRunnerCoverageMultiSearchChoice(
         schedulerContext,
         previous,
@@ -746,6 +754,7 @@ export function choosePlanFirstLiveAction(
   }
   bindSelectedCoverageSearchAction(input, result);
   bindSelectedRunnerProgramSearchAction(input, result, candidates);
+  bindSelectedRunnerRunProgramSearch(input, result);
   bindSelectedRunnerRecoverySearchAction(input, result, candidates);
   bindSelectedRunnerProgramInstallTrashChoiceContinuation(
     input,

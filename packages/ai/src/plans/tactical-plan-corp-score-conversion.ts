@@ -1415,8 +1415,10 @@ function comparePaths(
   );
   return (
     right.agendaPoints - left.agendaPoints ||
-    left.steps.length - right.steps.length ||
+    // Every candidate already completes its score in the current turn.
+    // A shorter sequence must not discard a funded, cheaper score route.
     left.creditsRequired - right.creditsRequired ||
+    left.steps.length - right.steps.length ||
     leftNetClicks - rightNetClicks ||
     leftSourceOpportunityCost - rightSourceOpportunityCost ||
     rightOffTargetAdvancement - leftOffTargetAdvancement ||

@@ -42,7 +42,10 @@ import {
   currentEncounterMitigationForAction,
   encounterMitigationEvidence,
 } from "../../runtime/runner-encounter-mitigation";
-import type { RunWindowAssessmentServices } from "./run-window-services";
+import type {
+  RunWindowAssessmentServices,
+  RunnerRunContinuationPayment,
+} from "./run-window-services";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
 import {
   runnerFortPassTollWindow,
@@ -74,6 +77,7 @@ import {
 } from "./run-window-encounter-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
 import { runnerRunStrengthCurrentPumpSavings } from "./run-window-strength-preparation";
+import { runnerRunProgramSearchAssessment } from "./run-window-program-search";
 import {
   isRunnerRunWindowCandidate,
   runnerOptionalBonusRunDeclineAction,
@@ -202,9 +206,7 @@ export function visibleEncounterMitigation(
 export function runnerRunRiskContractReassessment(
   input: AiDecisionInput,
   runOrigin: RunnerRunOrigin | undefined,
-  afterEncounterPayment?: NonNullable<
-    ReturnType<typeof pureEndRunEncounterPayment>
-  >,
+  afterEncounterPayment?: RunnerRunContinuationPayment,
 ): RunnerRunRiskReassessmentSignal | undefined {
   const run = input.playerView.run;
   const contract = runOrigin?.runRiskContract;
@@ -496,9 +498,34 @@ function runnerRunWindowActionAssessment(
   runOrigin: RunnerRunOrigin | undefined,
   runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
 ): RunnerRunWindowActionAssessment {
+  if (action.payload?.approachIceExposeViewDecision === "finish") {
+    const binding = runOrigin?.exposeViewingContinuation;
+    return {
+      admissible:
+        binding?.actionId === action.actionId &&
+        binding.stateVersion === input.playerView.stateVersion &&
+        binding.runId === input.playerView.run?.runId &&
+        binding.serverId === input.playerView.run?.attackedServerId,
+      value: 100,
+      evidenceCodes: [
+        "runner_run_window_action_plan_admissible",
+        "runner_expose_viewing_continuation_bound_to_selected_information",
+      ],
+    };
+  }
   const paymentSupport = runnerRunPaymentSupportAction(input, candidate);
   if (paymentSupport)
     return runnerRunPaymentSupportAssessment(input, paymentSupport, runOrigin);
+  const programSearch = runnerRunProgramSearchAssessment(
+    input,
+    candidate,
+    action,
+    runOrigin,
+    (payment) =>
+      runnerRunRiskContractReassessment(input, runOrigin, payment)?.decision ===
+      "preserve_continuation",
+  );
+  if (programSearch) return programSearch;
   const additionalAccessAssessment =
     assessRunnerAdditionalAccessRunWindowAction({
       candidate,
@@ -1133,6 +1160,15 @@ export function runnerExactRunWindowPhaseActionIds(
       .filter((candidate) => candidate.actionType === "jack_out")
       .map((candidate) => candidate.actionId);
   }
+  const viewingFinish = admissibleRunWindowCandidates.filter((candidate) =>
+    input.legalActions.some(
+      (action) =>
+        action.actionId === candidate.actionId &&
+        action.payload?.approachIceExposeViewDecision === "finish",
+    ),
+  );
+  if (viewingFinish.length > 0)
+    return viewingFinish.map((candidate) => candidate.actionId);
   const paymentSupport = admissibleRunWindowCandidates.filter(
     (candidate) =>
       runnerRunPaymentSupportAction(input, candidate) !== undefined,

@@ -7,6 +7,15 @@ import {
   type RunnerRunRiskContractSignal,
 } from "./runner-tactical-plan-contracts";
 export type RunnerRunOrigin = {
+  exposeViewingContinuation?: Readonly<{
+    actionId: string;
+    rootPlanInstanceId: string;
+    sourceCardInstanceId: string;
+    targetIceInstanceId: string;
+    serverId: string;
+    runId: string;
+    stateVersion: number;
+  }>;
   postBreakTrashCommitment?: RunnerPressureSignal["postBreakTrashCommitment"];
   purpose?: "access" | "multiaccess" | "information" | "contest";
   encounterCreditSpendLimit?: number;

@@ -178,6 +178,17 @@ Der Plan berechnet die vollständige Konversionsroute und reserviert:
 - Advancement-Counter;
 - benötigte Schutz-/Rezreserve.
 
+Bei gleichwertigen, bereits im aktuellen Zug vollständig ausführbaren
+Scorepfaden vergleicht der Konversionsdienst die vollständigen Creditkosten
+vor der Schrittzahl. Ein kürzerer Beschleunigungspfad darf keinen günstigeren
+finanzierten Abschluss allein wegen seiner geringeren Schrittzahl verdrängen.
+Bei gleichen Creditkosten bleibt die kürzere Folge vorrangig; unnötige
+Action-Capacity-Quellen werden dadurch nicht verbraucht. Passt der normale
+Pfad nicht in den aktuellen Klickhorizont, bleibt eine legal finanzierte
+Beschleunigung regulär möglich. Paarung 489, Spiel 10, D129 belegt zwei
+gequotete normale Advances statt einer zehn Credits teuren Beschleunigung
+unter demselben Agenda-Parent.
+
 Auch eine aktuell legale, regelbasierte Ressourcenumwandlung, die unmittelbar
 Agendapunkte erzeugt, gehört als `convert_agenda`-Step diesem Owner. Ihr
 Vertrag stammt vollständig aus derselben LegalAction: Quellregel, positive
