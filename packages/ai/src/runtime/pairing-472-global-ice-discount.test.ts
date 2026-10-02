@@ -154,6 +154,39 @@ describe("pairing 472: actual Engine global ICE discount through the productive 
       payload: { placement: "ice", serverId: "hq", iceInstallTotalCost: 2 },
     });
   });
+  it("does not synthesize an unaffordable HQ install when one credit short", () => {
+    const state = prepared();
+    state.corp.credits = 1;
+    const current = input(state);
+    expect(
+      current.legalActions.some(
+        (a) =>
+          a.type === "install_card" &&
+          a.payload?.placement === "ice" &&
+          a.payload.serverId === "hq",
+      ),
+    ).toBe(false);
+    const rez = current.legalActions.find(
+      (a) =>
+        a.type === "rez_card" &&
+        state.cardInstances[a.source!]!.definitionId === fortress,
+    )!;
+    expect(
+      JSON.parse(rez.payload!.rootRezIceInstallCostQuoteJson as string)
+        .installs,
+    ).not.toContainEqual(expect.objectContaining({ targetServerId: "hq" }));
+    const chosen = chooseAiAction(current);
+    const selected = current.legalActions.find(
+      (a) => a.actionId === chosen.actionId,
+    );
+    expect(selected).toBeDefined();
+    expect(
+      selected?.type === "install_card" &&
+        selected.payload?.placement === "ice" &&
+        selected.payload.serverId === "hq",
+    ).toBe(false);
+    expect(chosen).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
+  });
   it("does not prepare an already free selected HQ installation", () => {
     const state = prepared(fortress, true);
     const current = input(state);
