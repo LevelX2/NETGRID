@@ -34,6 +34,7 @@ import {
   selectedCorpScoredAgendaSubtypeRevealOptionIds,
 } from "../corp/score/score-choice-binding";
 import type { AiHintStructuredEffect } from "../hint-ontology";
+import { selectedBoundRunnerCoverageMultiSearchChoiceOptionIds } from "../runner/rig-coverage/coverage-multi-search-choice";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
@@ -1332,6 +1333,14 @@ export function selectedChoicesForDecision(
     if (exposeSelected) {
       return resolved(exposeSelected, "runner_expose_installed_card");
     }
+    const boundMultiSearch =
+      selectedBoundRunnerCoverageMultiSearchChoiceOptionIds(
+        input,
+        action,
+        currentPortfolio ?? residentPlanPortfolioSnapshot(input),
+      );
+    if (boundMultiSearch)
+      return resolved(boundMultiSearch, "bound_runner_coverage_multi_search");
     const coverageBinding = runnerCoverageSearchChoiceBinding(input, choice);
     const developmentBinding = coverageBinding
       ? undefined

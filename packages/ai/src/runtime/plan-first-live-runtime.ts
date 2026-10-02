@@ -1,5 +1,9 @@
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
+  bindSelectedRunnerCoverageMultiSearchChoice,
+  resolvePlanBoundRunnerCoverageMultiSearchChoice,
+} from "../runner/rig-coverage/coverage-multi-search-choice";
+import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
@@ -541,6 +545,10 @@ export function choosePlanFirstLiveAction(
     if (planBoundRunnerEventInstallChoice) return undefined;
     return (
       resolveCorpPunishTraceWindow(schedulerContext, previous) ??
+      resolvePlanBoundRunnerCoverageMultiSearchChoice(
+        schedulerContext,
+        previous,
+      ) ??
       resolvePlanBoundRunnerDelayedProgramSearchChoice(
         schedulerContext,
         previous,
@@ -766,6 +774,7 @@ export function choosePlanFirstLiveAction(
   bindSelectedRunnerExposeInformationMemory(input, result);
   bindSelectedEngineWindowRunnerVacuumLinkOrigin(input, result, previous);
   reconcileSelectedRunnerCostPenaltySupportOrigin(input, result, previous);
+  bindSelectedRunnerCoverageMultiSearchChoice(input, result);
   bindSelectedRunnerDelayedProgramSearchChoice(
     input,
     result,

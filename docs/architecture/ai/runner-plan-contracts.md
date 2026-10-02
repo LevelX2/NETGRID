@@ -696,6 +696,18 @@ Rolle und Parent gebunden; die Engine-basierte Pfadprüfung wahrt Moduskosten
 und die Bindung einer einmaligen Moduswahl. Feste Deckdoktrin-Rollen dürfen
 diesen nachgewiesenen Installationspfad nicht erneut verwerfen.
 
+Eine Coverage-Suche mehrerer Stackkarten in die Hand bleibt im privaten
+Suchfenster unter ihrem ursprünglichen Root und Coverage-Executor.
+`coverage-multi-search-choice.ts` prüft die gewählte Quellenaction,
+StateVersion, Bedarfsbindung und aktuellen Engine-Optionen. Der Owner wählt
+zuerst die exakt gebundene Antwort. Für weitere Karten bewertet er die bereits
+gewählten Handkopien mit; derselbe beantwortete Suchbedarf erhält keinen
+weiteren Antwortbonus. Die Projektion installiert keine Karte und erzeugt
+weder Credits noch freie MU. Erforderliche Kopien bleiben zulässig. Der
+Payload-Resolver konsumiert ausschließlich die fertige, versionsgebundene
+Auswahl. Der gespeicherte Zustand 471/R3/G5/D135 und Gegenfälle sichern
+Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
+
 ## 5. `runner.develop_board_and_hand`
 
 Einmalige Suchereignisse werden auch anhand ihres aktuellen kanonischen
