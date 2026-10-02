@@ -13,6 +13,27 @@ import {
 } from "./funding-route";
 
 describe("funding routes", () => {
+  it("continues past credit coverage when the bound consumer still needs a quoted draw-tax reserve", () => {
+    const result = searchFundingRoutes({
+      demand: runnerDemand({ currentCredits: 0, targetCredits: 4 }),
+      candidates: [
+        liquidCandidate("funding-event", 4),
+        liquidCandidate("basic-credit", 1, { repeatable: true }),
+      ],
+      remainingClicks: 2,
+      acceptRoute: (route) => route.projectedGeneralCredits >= 5,
+    });
+    expect(result.bestRoute).toMatchObject({
+      status: "covered_guaranteed",
+      projectedCredits: 5,
+      totalClickCost: 2,
+    });
+    expect(result.bestRoute.steps.map((step) => step.actionId)).toEqual([
+      "funding-event",
+      "basic-credit",
+    ]);
+  });
+
   it("recognizes an already funded demand without adding actions", () => {
     const result = searchFundingRoutes({
       demand: runnerDemand({ currentCredits: 5, targetCredits: 4 }),

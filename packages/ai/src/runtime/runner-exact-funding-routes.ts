@@ -1,7 +1,8 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { runnerDrawProjectionFor } from "../actions/action-economy-projection";
 import { createRunnerCreditDemand } from "../plans/credit-demand";
-import { searchFundingRoutes } from "../plans/funding-route";
+import { searchFundingRoutes, type FundingRoute } from "../plans/funding-route";
 import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-funding-candidates";
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
@@ -63,7 +64,7 @@ export function runnerExactFundingRouteContract(
     runCandidate.costProfile.creditCost === 0
       ? runnerPaymentInstallSetups(input, candidates)
       : [];
-  const routeCandidates = runnerExactFundingRouteCandidates(
+  const funding = runnerExactFundingRouteCandidates(
     input,
     candidates,
     request,
@@ -71,23 +72,34 @@ export function runnerExactFundingRouteContract(
   );
   const result = searchFundingRoutes({
     demand: paymentSetups.length
-      ? { ...demand, acceptedCreditRestrictions: ["general", "restricted"] }
-      : demand,
+      ? {
+          ...funding.demand,
+          acceptedCreditRestrictions: ["general", "restricted"],
+        }
+      : funding.demand,
     candidates: [
-      ...routeCandidates,
+      ...funding.candidates,
       ...candidates.filter((candidate) =>
         paymentSetups.some((setup) => setup.actionId === candidate.actionId),
       ),
     ],
     paymentWindowSetups: paymentSetups,
-    remainingClicks: request.remainingClicks,
+    remainingClicks: funding.remainingClicks,
     maxSteps: Math.max(
       1,
-      request.remainingClicks + (paymentSetups.length ? 1 : 0),
+      funding.remainingClicks + (paymentSetups.length ? 1 : 0),
     ),
     maxRoutes: 8,
+    acceptRoute: (route) =>
+      runnerFundingRouteConsumerBufferFits(input, candidates, request, route),
   });
   const bestRoute = result.bestRoute;
+  const bufferRepair = runnerSelfDamageFundingBufferRepair(
+    input,
+    candidates,
+    request,
+    bestRoute,
+  );
   const firstStepActionId =
     bestRoute.status === "covered_guaranteed" &&
     bestRoute.reliability === "guaranteed" &&
@@ -123,7 +135,14 @@ export function runnerExactFundingRouteContract(
             },
           }
         : {}),
-      evidenceCodes: [...new Set([...result.evidence, ...bestRoute.evidence])],
+      evidenceCodes: [
+        ...new Set([
+          ...result.evidence,
+          ...bestRoute.evidence,
+          ...funding.evidence,
+          ...(bufferRepair?.evidence ?? []),
+        ]),
+      ],
     },
   };
 }
@@ -133,14 +152,25 @@ function runnerExactFundingRouteCandidates(
   candidates: readonly ActionSemanticCandidate[],
   request: RunnerExactFundingRouteRequest,
   demand: ReturnType<typeof createRunnerCreditDemand>,
-): ActionSemanticCandidate[] {
+): {
+  candidates: ActionSemanticCandidate[];
+  demand: ReturnType<typeof createRunnerCreditDemand>;
+  remainingClicks: number;
+  evidence: string[];
+} {
   const materializable = candidates.filter(
     runnerFundingRouteCandidateIsMaterializable,
   );
   const ordinary = materializable.filter(
     (candidate) => !runnerStrategicExchangeRequiresBoundParent(candidate),
   );
-  if (request.allowStrategicExchange !== true) return ordinary;
+  const ordinaryFunding = {
+    candidates: ordinary,
+    demand,
+    remainingClicks: request.remainingClicks,
+    evidence: [] as string[],
+  };
+  if (request.allowStrategicExchange !== true) return ordinaryFunding;
 
   const routeCoversDemand = (
     routeCandidates: readonly ActionSemanticCandidate[],
@@ -151,6 +181,8 @@ function runnerExactFundingRouteCandidates(
       remainingClicks: request.remainingClicks,
       maxSteps: Math.max(1, request.remainingClicks),
       maxRoutes: 8,
+      acceptRoute: (route) =>
+        runnerFundingRouteConsumerBufferFits(input, candidates, request, route),
     });
     return (
       result.bestRoute.status === "covered_guaranteed" &&
@@ -159,7 +191,7 @@ function runnerExactFundingRouteCandidates(
       result.bestRoute.projectedGap === 0
     );
   };
-  if (routeCoversDemand(ordinary)) return ordinary;
+  if (routeCoversDemand(ordinary)) return ordinaryFunding;
 
   const parentBoundCandidates = materializable
     .filter((candidate) => {
@@ -182,12 +214,160 @@ function runnerExactFundingRouteCandidates(
           (right.economyProjection?.netLiquidCreditGain ?? 0) ||
         left.actionId.localeCompare(right.actionId),
     );
-  const smallestSufficientExchange = parentBoundCandidates.find((candidate) =>
-    routeCoversDemand([...ordinary, candidate]),
+  for (const candidate of parentBoundCandidates) {
+    if (!routeCoversDemand([...ordinary, candidate])) {
+      ordinaryFunding.evidence.push(
+        `runner_funding_consumer_buffer_budget_uncovered:${candidate.actionId}`,
+      );
+      continue;
+    }
+    return {
+      candidates: [...ordinary, candidate],
+      demand,
+      remainingClicks: request.remainingClicks,
+      evidence: ordinaryFunding.evidence,
+    };
+  }
+  return ordinaryFunding;
+}
+
+function runnerFundingRouteConsumerBufferFits(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  request: RunnerExactFundingRouteRequest,
+  route: FundingRoute,
+): boolean {
+  if (
+    request.purpose !== "current_run" ||
+    !route.steps.some((step) =>
+      candidates.some(
+        (candidate) =>
+          candidate.actionId === step.actionId &&
+          runnerStrategicExchangeKinds(candidate).includes("self_damage"),
+      ),
+    )
+  )
+    return true;
+  const repair = runnerSelfDamageFundingBufferRepair(
+    input,
+    candidates,
+    request,
+    route,
   );
-  return smallestSufficientExchange === undefined
-    ? ordinary
-    : [...ordinary, smallestSufficientExchange];
+  return (
+    repair !== undefined &&
+    route.totalClickCost + repair.clickCost <= request.remainingClicks &&
+    route.projectedGeneralCredits - repair.creditCost >= route.targetCredits
+  );
+}
+
+/** Resource feasibility only. The existing hand owner performs later draws;
+ * random damage and unknown drawn card identities are never simulated here. */
+function runnerSelfDamageFundingBufferRepair(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  request: RunnerExactFundingRouteRequest,
+  route: FundingRoute,
+): { clickCost: number; creditCost: number; evidence: string[] } | undefined {
+  const fundingActions = route.steps
+    .filter((step) => step.kind === "legal_action")
+    .map((step) =>
+      candidates.find((candidate) => candidate.actionId === step.actionId),
+    );
+  const selfDamageFunding = fundingActions.some(
+    (candidate) =>
+      candidate &&
+      runnerStrategicExchangeKinds(candidate).includes("self_damage"),
+  );
+  if (request.purpose !== "current_run" || !selfDamageFunding)
+    return { clickCost: 0, creditCost: 0, evidence: [] };
+
+  const target = request.paymentWindowTarget;
+  const requiredHandBuffer = target?.prerunReserveQuote?.requiredHandBuffer;
+  if (
+    !request.sourcePlanId ||
+    !target ||
+    !input.legalActions.some((action) => action.actionId === target.actionId) ||
+    !Number.isSafeInteger(requiredHandBuffer) ||
+    requiredHandBuffer === undefined ||
+    requiredHandBuffer < 0 ||
+    fundingActions.some((candidate) => !candidate)
+  )
+    return undefined;
+
+  let handAfter = input.playerView.own.gripOrHq.length;
+  let randomDamageOccurred = false;
+  for (const candidate of fundingActions) {
+    if (!candidate) return undefined;
+    const projection = candidate.economyProjection;
+    const netHandDelta = projection?.netHandDelta;
+    const damage = runnerCandidateSelfDamageAmount(candidate);
+    // A later grip source may have been randomly discarded. Such a sequence
+    // cannot be guaranteed; already consumed sources before damage are safe.
+    if (
+      !Number.isSafeInteger(netHandDelta) ||
+      netHandDelta === undefined ||
+      !Number.isSafeInteger(damage) ||
+      damage < 0 ||
+      (randomDamageOccurred && (projection?.cardsConsumed ?? 0) > 0)
+    )
+      return undefined;
+    handAfter += netHandDelta - damage;
+    if (handAfter < 0) return undefined;
+    randomDamageOccurred ||= damage > 0;
+  }
+  if (handAfter < 0) return undefined;
+  const gap = Math.max(0, requiredHandBuffer - handAfter);
+  if (gap === 0)
+    return {
+      clickCost: 0,
+      creditCost: 0,
+      evidence: [
+        `runner_funding_consumer_hand_buffer_preserved:${handAfter}|required:${requiredHandBuffer}`,
+      ],
+    };
+  const draw = input.legalActions.find(
+    (action) =>
+      action.side === "runner" &&
+      action.type === "draw_card" &&
+      action.source === "basic_action",
+  );
+  const projection = draw && runnerDrawProjectionFor(draw);
+  if (!draw || !projection || projection.projectedNetHandDelta <= 0)
+    return undefined;
+  const draws = Math.ceil(gap / projection.projectedNetHandDelta);
+  const drawClicks = draw.costs.reduce(
+    (total, cost) => total + (cost.clicks ?? 0),
+    0,
+  );
+  const drawCredits = draw.costs.reduce(
+    (total, cost) => total + (cost.credits ?? 0),
+    0,
+  );
+  const clickCost = draws * drawClicks;
+  const creditCost =
+    draws *
+    (drawCredits +
+      projection.projectedGrossDrawCount *
+        projection.visibleDrawTaxSourceCount);
+  if (
+    !Number.isSafeInteger(drawClicks) ||
+    drawClicks <= 0 ||
+    !Number.isSafeInteger(drawCredits) ||
+    drawCredits < 0 ||
+    clickCost > request.remainingClicks ||
+    draws * projection.projectedGrossDrawCount >
+      input.playerView.own.stackOrRdCount
+  )
+    return undefined;
+  return {
+    clickCost,
+    creditCost,
+    evidence: [
+      `runner_funding_consumer_hand_after_self_damage:${handAfter}|required:${requiredHandBuffer}`,
+      `runner_funding_consumer_buffer_repair_reserved:${draws}|clicks:${clickCost}|credits:${creditCost}|action:${draw.actionId}`,
+    ],
+  };
 }
 
 function runnerDebtFinancingCandidateHasSafeBoundRunExit(

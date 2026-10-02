@@ -1222,6 +1222,19 @@ Die prospektive Einzelquote wird durch
 Bank-Owner konsumieren diese Quote; sie rufen weder eine zweite Runbewertung
 noch eine eigene Actionauswahl auf.
 
+Selbstschaden-Finanzierung für einen aktuellen Run berücksichtigt den
+Handverbrauch aller Finanzierungsaktionen und den bekannten Selbstschaden.
+Der Handpuffer stammt aus der Reservequote genau dieses Run-Parents. Fehlt
+die Quote, bleibt die Finanzierung unbewiesen. Sinkt der Puffer darunter,
+reserviert die Finanzierungssuche die mit der aktuellen Engine-Projektion
+belegten Basisdraws einschließlich Klickkosten, Stack-Kapazität und sichtbarer
+Draw Taxes. Finanzierung, Pufferreparatur und der bereits reservierte Run-Klick
+müssen zusammen in denselben Zug passen. Ein nach Zufallsschaden noch benötigter
+Grip-Verbrauch einer späteren Finanzierungsaktion ist nicht garantiert.
+Die Ressourcenprüfung erzeugt keine zukünftigen Kartenidentitäten oder
+LegalActions. Das tatsächliche Nachziehen bleibt beim bestehenden Hand-Owner;
+jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.
+
 ## 7. `runner.defense_and_recovery`
 
 Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.

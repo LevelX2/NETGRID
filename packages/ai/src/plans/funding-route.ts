@@ -82,6 +82,9 @@ export type SearchFundingRoutesParams = {
   paymentWindowSetups?: readonly PaymentWindowFundingSetup[];
   maxSteps?: number;
   maxRoutes?: number;
+  /** The owning consumer can reject a credit-covered route whose other
+   * quoted resources cannot support its same-turn conversion. */
+  acceptRoute?: (route: FundingRoute) => boolean;
 };
 
 /** A quoted install followed by a single-use payment inside the bound run.
@@ -238,10 +241,13 @@ export function searchFundingRoutes(
       if (visited.has(stateKey)) continue;
       visited.add(stateKey);
       if (next.eligibleCredits >= params.demand.targetCredits) {
-        covered.push(routeFromState(params.demand, next));
-      } else {
-        queue.push(next);
+        const route = routeFromState(params.demand, next);
+        if (params.acceptRoute === undefined || params.acceptRoute(route)) {
+          covered.push(route);
+          continue;
+        }
       }
+      queue.push(next);
     }
   }
 
