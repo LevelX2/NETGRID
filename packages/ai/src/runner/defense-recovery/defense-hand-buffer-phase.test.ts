@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
 import {
   aiInput,
   legalAction,
@@ -80,6 +81,83 @@ function fixture(tags = 1) {
 }
 
 describe("Defense hand-buffer phase ownership", () => {
+  it("keeps a canonical tag-clearing draw executable in the current Defense phase", () => {
+    const f = fixture();
+    const meatUpgrade = legalAction(
+      "runner.play_event.meat-upgrade",
+      "runner",
+      "play_event",
+      "Meat Upgrade",
+      { credits: 2, clicks: 2 },
+      {
+        source: "meat-upgrade",
+        payload: {
+          cardId: "meat-upgrade",
+          cardImplementationEffectKind: "remove_tags",
+          drawCardsAmount: 3,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw",
+          cardImplementationAbilityKey: "on_play_remove_tags_and_draw",
+        },
+      },
+    );
+    meatUpgrade.expiresAtStateVersion = f.input.playerView.stateVersion;
+    f.input.legalActions.push(meatUpgrade);
+    Object.assign(f.input.playerView.own, { coreDamage: 0, maxHandSize: 5 });
+    f.input.playerView.own.gripOrHq[0] = visibleCard(
+      "meat-upgrade",
+      "runner",
+      "event",
+      { definitionId: "onr_classic_040_meat-upgrade" },
+    );
+    f.defense.handBufferActionIds = [f.draw.actionId, meatUpgrade.actionId];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: f.input.legalActions,
+      observerSide: "runner",
+      stateVersion: f.input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        "meat-upgrade": "onr_classic_040_meat-upgrade",
+      },
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+    });
+    const multiPurpose = candidates.find(
+      (candidate) => candidate.actionId === meatUpgrade.actionId,
+    );
+    expect(multiPurpose?.semanticActionType).toBe("tag.remove");
+    expect(multiPurpose?.economyProjection?.cardsDrawn).toBe(3);
+    const dispositions = runnerActionDispositions(
+      f.input,
+      candidates,
+      f.domain,
+      [],
+      [],
+      () => undefined,
+    );
+    expect(dispositions.map((entry) => entry.actionId)).toContain(f.draw.actionId);
+    expect(dispositions.map((entry) => entry.actionId)).not.toContain(
+      meatUpgrade.actionId,
+    );
+    const module = createRunnerDefenseModule();
+    const context = {
+      input: f.input,
+      actionCandidates: candidates,
+      actionDispositions: dispositions,
+      turnKey: "runner:0",
+      domain: f.domain,
+    };
+    const proposal = module.discover(context)[0]!;
+    expect(proposal.phase).toBe("clear_tags");
+    expect(
+      module.materialize(
+        { ...proposal, instanceId: "defense-current-phase" } as never,
+        {} as never,
+        context,
+      ).candidates.map((entry) => entry.candidate.actionId),
+    ).toContain(meatUpgrade.actionId);
+  });
+
   it("classifies the pending basic draw under Defense while the same owner clears a tag", () => {
     const f = fixture();
     expect(

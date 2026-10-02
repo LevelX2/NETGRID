@@ -1225,6 +1225,10 @@ als zurückgestellt. Der Handbedarf bleibt erhalten und wird nach der früheren
 Phase erneut geprüft. Eine unabhängig produktiv gebundene Action desselben
 IDs bleibt bei ihrem anderen Owner ausführbar; bestehende Unknown-Bewertungen
 werden durch diese Phasendisposition nicht ersetzt.
+Eine Mehrzweck-Action, die auch zum aktuell materialisierten Defense-Schritt
+gehört, erhält keine Zurückstellung für ihren späteren Handpufferzweck. Die
+Ausnahme folgt den tatsächlichen Kandidaten derselben Phase und nicht dem
+Karten- oder Actionnamen.
 
 Ist der gewöhnliche Basisdraw die einzige aktuelle Handpufferroute und würde
 seine bereits sichtbare Steuer einen Tag erzeugen, darf Defense zuerst eine
