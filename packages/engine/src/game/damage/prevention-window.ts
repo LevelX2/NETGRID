@@ -83,6 +83,14 @@ export function openEventModificationWindow(
     state.imminentEvent,
     state.stateVersion + 1,
   );
+  // Eine fortgesetzte Effektfolge darf die gerade aufgelöste Modification
+  // oder Damage-Auflösung nicht mit ihrem nächsten Fenster vermischen. Das
+  // neue Fenster ist im Zustand/PlayerView gebunden; der Payload zur Auflösung.
+  if (
+    legalAction.payload?.eventModificationDecision !== undefined ||
+    legalAction.payload?.damageResolved === true
+  )
+    return true;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     eventModificationWindowOpened: true,

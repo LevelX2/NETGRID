@@ -1891,15 +1891,15 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "low",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 0
         },
         "riskTags": [
           "opportunity_cost",
           "reserve_risk",
-          "double_action",
           "hq_card_selection",
-          "hidden_zone"
+          "hidden_zone",
+          "double_action"
         ],
         "quality": {
           "hintReviewed": true,
@@ -2006,14 +2006,14 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "low",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 0
         },
         "riskTags": [
           "opportunity_cost",
           "reserve_risk",
-          "archives_dependency",
           "double_action",
+          "archives_dependency",
           "reveal_to_runner"
         ],
         "quality": {
@@ -4030,7 +4030,7 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "medium",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 2
         },
         "riskTags": [
@@ -4120,7 +4120,7 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "low",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 3
         },
         "riskTags": ["opportunity_cost", "reserve_risk", "double_action"],
@@ -4243,7 +4243,7 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "low",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 1
         },
         "riskTags": [
@@ -4375,7 +4375,7 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "medium",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 2
         },
         "riskTags": [

@@ -1,7 +1,7 @@
 # AI-Hints: Quelle und Runtime-Vertrag
 
 Status: **aktueller generierter CardSpec-Vertrag**  
-Stand: 2026-09-10
+Stand: 2026-10-02
 
 ## Autorenquelle und Datenpfad
 
@@ -42,6 +42,24 @@ entfernten Snapshots `ai-card-hints-1.3.1.json`.
 Hint- und Doctrine-Daten unterstützen den zuständigen Planowner. Die aktuelle
 Ability-, Kosten-, Ziel- und LegalAction-Bindung bleibt Aufgabe der Semantik
 und der Engine; ein Hint allein zertifiziert keinen ausführbaren Step.
+
+## Typisierte Recovery- und Spielkosten
+
+`corp_archives_to_hq` beschreibt grundsätzlich Archives-Recovery. Die
+ICE-Spezialisierung entsteht nur aus `filter.cardType: "ice"`, Offenlegung
+nur aus `revealToRunner: true` und Double-Kosten nur aus den ausdrücklich
+gebundenen zusätzlichen Spielaktionen. Off-Site Backups bleibt deshalb eine
+private Recovery beliebiger Karten mit einer Aktion; Reclamation Project
+behält seine ICE-Auswahl, Offenlegung und zwei Aktionen.
+
+Das statische `costProfile.clicks` für Events und Operations enthält die
+normale Spielaktion plus die mechanischen `additionalClicks` der
+`on_play`-Ability beziehungsweise `corpUtility.playCost`. Die abschließende
+Projektion der gedruckten Creditkosten darf zusätzliche Aktionen nicht
+überschreiben. Subtypname und konkrete Karten-ID ersetzen diese Bindung nicht.
+Die reale Compiler-/Artefaktregression prüft alle aktuellen Double-Spielkarten
+und unabhängige Utility-Felder; die produktive Score-Recovery-Gegenprobe prüft
+weiterhin Plan-, Action-, StateVersion- und Choice-Ownership.
 
 ## Universelle Coverage und Stärkehilfe
 

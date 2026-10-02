@@ -274,7 +274,10 @@ function counterBankInstalledScoreTargets(
   bank: InstalledCounterBank,
 ) {
   return input.playerView.servers
-    .filter((server) => server.id !== bank.serverId)
+    .filter(
+      (server) =>
+        server.id.startsWith("remote_") && server.id !== bank.serverId,
+    )
     .flatMap((server) =>
       server.root.flatMap((card) => {
         const requirement = agendaAdvancementRequirement(card);

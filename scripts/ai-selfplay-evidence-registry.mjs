@@ -53,6 +53,7 @@ Usage:
   node scripts/ai-selfplay-evidence-registry.mjs init [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs status [--db PATH] [--json]
   node scripts/ai-selfplay-evidence-registry.mjs register-job --job-id ID [--worktree PATH] [--branch NAME] [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs register-series --series-id ID --recipient ADDRESS --interval COUNT [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs complete-job --job-id ID [--status completed|abandoned] [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs allocate --kind pairing|case --job-id ID [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs upsert --input pairing.json [--db PATH]
@@ -100,6 +101,13 @@ try {
       branchName: opts.branch,
     });
     console.log(JSON.stringify({ registered: opts["job-id"], databasePath }));
+  } else if (command === "register-series") {
+    const series = registerReportingSeries(db, {
+      id: required(opts, "series-id"),
+      recipient: required(opts, "recipient"),
+      interval: Number(required(opts, "interval")),
+    });
+    console.log(JSON.stringify({ registeredSeries: series.id, databasePath }));
   } else if (command === "complete-job") {
     const jobId = required(opts, "job-id");
     completeJob(db, { jobId, status: opts.status ?? "completed" });
@@ -132,8 +140,16 @@ try {
     );
   } else if (command === "register-reporting-series") {
     const inputPath = resolve(required(opts, "input"));
-    console.log(JSON.stringify(registerReportingSeries(db,
-      JSON.parse(readFileSync(inputPath, "utf8"))), null, 2));
+    console.log(
+      JSON.stringify(
+        registerReportingSeries(
+          db,
+          JSON.parse(readFileSync(inputPath, "utf8")),
+        ),
+        null,
+        2,
+      ),
+    );
   } else if (command === "get-reporting-series") {
     const series = getReportingSeries(db, required(opts, "series-id"));
     const content = `${JSON.stringify(series, null, 2)}\n`;

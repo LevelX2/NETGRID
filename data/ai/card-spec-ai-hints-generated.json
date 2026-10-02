@@ -2617,15 +2617,15 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "low",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 0
         },
         "riskTags": [
           "opportunity_cost",
           "reserve_risk",
-          "double_action",
           "hq_card_selection",
-          "hidden_zone"
+          "hidden_zone",
+          "double_action"
         ],
         "quality": {
           "hintReviewed": true,
@@ -2734,14 +2734,14 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "low",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 0
         },
         "riskTags": [
           "opportunity_cost",
           "reserve_risk",
-          "archives_dependency",
           "double_action",
+          "archives_dependency",
           "reveal_to_runner"
         ],
         "quality": {
@@ -4802,7 +4802,7 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "medium",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 2
         },
         "riskTags": [
@@ -4894,7 +4894,7 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "low",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 3
         },
         "riskTags": ["opportunity_cost", "reserve_risk", "double_action"],
@@ -5019,7 +5019,7 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "low",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 1
         },
         "riskTags": [
@@ -5153,7 +5153,7 @@
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "medium",
-          "clicks": 1,
+          "clicks": 2,
           "credits": 2
         },
         "riskTags": [
@@ -41328,7 +41328,7 @@
         "side": "corp",
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
-        "roles": ["operation", "ice_recovery"],
+        "roles": ["operation"],
         "planRoles": [],
         "valueHints": {},
         "targetProfiles": [
@@ -41360,22 +41360,12 @@
             "scope": "archives",
             "timing": "action",
             "resource": "cards",
-            "target": "ice_recovery",
+            "target": "archives.corp_recovery",
             "finite": true
           }
         ],
-        "functionSignals": [
-          "archives.corp_recovery",
-          "info.reveal_recovered_cards_to_runner",
-          "risk.double_operation_action_cost"
-        ],
-        "tacticSignals": [
-          "archives.corp_recovery",
-          "hq.corp_ice_recovery",
-          "ice.corp_recovery",
-          "info.reveal_recovered_cards_to_runner",
-          "risk.double_operation_action_cost"
-        ],
+        "functionSignals": ["archives.corp_recovery"],
+        "tacticSignals": ["archives.corp_recovery"],
         "actionTacticSignals": [
           "effect:card_recovery",
           "effect:search",
@@ -41385,11 +41375,7 @@
         ],
         "conditions": [{ "kind": "requires_archives_card" }],
         "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": [
-          "archives_dependency",
-          "double_action",
-          "reveal_to_runner"
-        ],
+        "riskTags": ["archives_dependency"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -41398,12 +41384,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": [
-          "archives_to_hq",
-          "double_action_cost",
-          "play_operation",
-          "reveal"
-        ]
+        "requiredMechanics": ["archives_to_hq", "play_operation"]
       }
     },
     {

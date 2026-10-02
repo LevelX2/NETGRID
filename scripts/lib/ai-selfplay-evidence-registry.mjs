@@ -292,19 +292,31 @@ export function completeJob(db, input) {
 
 export function getReportingSeries(db, seriesId) {
   const id = requireText(seriesId, "reportingSeries.id");
-  const row = db.prepare(`SELECT * FROM reporting_series WHERE series_id = ?`).get(id);
+  const row = db
+    .prepare(`SELECT * FROM reporting_series WHERE series_id = ?`)
+    .get(id);
   if (!row) throw new Error(`Unknown reporting series: ${id}`);
   const unreportedPairingIds = JSON.parse(row.unreported_pairing_ids_json);
-  if (!Array.isArray(unreportedPairingIds) ||
-      unreportedPairingIds.some((value) => typeof value !== "string" || !value) ||
-      new Set(unreportedPairingIds).size !== unreportedPairingIds.length) {
-    throw new Error(`Invalid unreported pairing ids for reporting series: ${id}`);
+  if (
+    !Array.isArray(unreportedPairingIds) ||
+    unreportedPairingIds.some((value) => typeof value !== "string" || !value) ||
+    new Set(unreportedPairingIds).size !== unreportedPairingIds.length
+  ) {
+    throw new Error(
+      `Invalid unreported pairing ids for reporting series: ${id}`,
+    );
   }
   return {
-    id, recipient: row.recipient, interval: row.interval, unreportedPairingIds,
+    id,
+    recipient: row.recipient,
+    interval: row.interval,
+    unreportedPairingIds,
     lastReportedPairingId: row.last_reported_pairing_id,
     lastSentAt: row.last_sent_at,
-    pendingReport: row.pending_report_json === null ? null : JSON.parse(row.pending_report_json),
+    pendingReport:
+      row.pending_report_json === null
+        ? null
+        : JSON.parse(row.pending_report_json),
   };
 }
 
@@ -315,34 +327,64 @@ export function registerReportingSeries(db, input) {
     throw new Error("reportingSeries.interval must be a positive integer");
   }
   return withImmediateTransaction(db, () => {
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO reporting_series(series_id, recipient, interval, updated_at)
       VALUES (?, ?, ?, ?) ON CONFLICT(series_id) DO NOTHING
-    `).run(id, recipient, input.interval, nowIso());
+    `,
+    ).run(id, recipient, input.interval, nowIso());
     const series = getReportingSeries(db, id);
     if (series.recipient !== recipient || series.interval !== input.interval) {
-      throw new Error(`Reporting series configuration conflict: ${id}`);
+      throw new Error(
+        `Reporting series configuration conflict: ${id}; different delivery scope`,
+      );
     }
     return series;
   });
 }
 
 function appendClosedPairingToReportingSeries(db, bundle, timestamp) {
-  const series = getReportingSeries(db, bundle.reportingSeriesId);
-  if (bundle.pairing.status !== "closed" || !bundle.games?.length ||
-      !bundle.games.every((game) => (game.phase ?? "final") === "final" &&
-        ["Runner", "Corp", "Draw"].includes(game.winner) && game.flagsCount === 0 &&
-        Number.isSafeInteger(game.decisionCount) && game.decisionCount > 0)) {
-    throw new Error("Only closed pairings with clean final games enter a reporting series");
+  const series = getReportingSeries(
+    db,
+    requireText(bundle.reportingSeriesId, "reportingSeriesId"),
+  );
+  if (bundle.pairing.status !== "closed") return;
+  if (
+    !bundle.games?.length ||
+    !bundle.games.every(
+      (game) =>
+        (game.phase ?? "final") === "final" &&
+        ["Runner", "Corp", "Draw"].includes(game.winner) &&
+        game.flagsCount === 0 &&
+        Number.isSafeInteger(game.decisionCount) &&
+        game.decisionCount > 0,
+    )
+  ) {
+    throw new Error(
+      "Only closed pairings with clean final games enter a reporting series",
+    );
   }
   const pairingId = bundle.pairing.id;
-  const alreadySent = db.prepare(`
+  const alreadySent = db
+    .prepare(
+      `
     SELECT covered_pairing_ids_json FROM reports WHERE series_id = ? AND status = 'sent'
-  `).all(series.id).some((report) => JSON.parse(report.covered_pairing_ids_json).includes(pairingId));
+  `,
+    )
+    .all(series.id)
+    .some((report) =>
+      JSON.parse(report.covered_pairing_ids_json).includes(pairingId),
+    );
   if (alreadySent || series.unreportedPairingIds.includes(pairingId)) return;
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE reporting_series SET unreported_pairing_ids_json = ?, updated_at = ? WHERE series_id = ?
-  `).run(json([...series.unreportedPairingIds, pairingId]), timestamp, series.id);
+  `,
+  ).run(
+    json([...series.unreportedPairingIds, pairingId]),
+    timestamp,
+    series.id,
+  );
 }
 
 export function recordReport(db, input) {

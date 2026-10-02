@@ -615,6 +615,168 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("keeps ordinary TRAP damage separate from the following tag window", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention("trap-ordinary-damage-tag"),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_161_fall-guy");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_161_fall-guy",
+    );
+    drawRunnerCardsForTest(state, 4);
+    addCorpCardToHqForTest(state, "onr_v1_345_trap", "ordinary-damage-tag");
+    putCorpCardOnTopOfRd(state, "onr_v1_345_trap");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const gripBefore = state.runner.grip.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = applyChoice(state, "corp", "pay");
+    expect(state.runner.grip.length).toBe(gripBefore - 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 3,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "imminentEventId",
+    );
+    expect(state.imminentEvent?.eventType).toBe("add_tag");
+    const tagId = state.imminentEvent?.eventId;
+    state = applyChoice(state, "runner", "pass");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      imminentEventId: tagId,
+      imminentEventType: "add_tag",
+      eventModificationDecision: "pass",
+    });
+    expect(state.runner.tags).toBe(1);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it.each(["avoid", "pass"] as const)(
+    "keeps completed damage bound when TRAP opens a later tag window (%s)",
+    (tagDecision) => {
+      let state = toRunnerTurn(
+        MECHANIC_SMOKE_GAMES.damagePrevention(`trap-damage-tag-${tagDecision}`),
+      );
+      state.runner.credits = 20;
+      state.corp.credits = 20;
+      const forceShieldId = moveRunnerCardToGrip(
+        state,
+        "onr_v1_038_joan-of-arc",
+      );
+      state.cardInstances[forceShieldId]!.definitionId =
+        "onr_v1_028_force-shield";
+      for (const definitionId of [
+        "onr_v1_028_force-shield",
+        "onr_v1_128_green-knight-surge-buffers",
+        "onr_v1_161_fall-guy",
+      ]) {
+        moveRunnerCardToGrip(state, definitionId);
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.type === "install_card" &&
+            sourceDefinition(state, action) === definitionId,
+        );
+      }
+      addCorpCardToHqForTest(state, "onr_v1_345_trap", "damage-tag");
+      putCorpCardOnTopOfRd(state, "onr_v1_345_trap");
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const gripBefore = state.runner.grip.length;
+      const tagsBefore = state.runner.tags;
+      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+        "onr_v1_345_trap",
+      );
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      state = applyChoice(state, "corp", "pay");
+      const damageId = state.imminentEvent?.eventId;
+      let damageWindowId = state.eventModificationWindow?.windowId;
+      expect(state.imminentEvent?.eventType).toBe("damage");
+      for (const label of [
+        "Force Shield: 1 Schaden verhindern",
+        "Force Shield: 1 Schaden verhindern",
+        "“Green Knight” Surge Buffers: 1 Schaden verhindern",
+      ]) {
+        const option = state.pendingChoice?.options.find(
+          (entry) => entry.label === label,
+        );
+        expect(option, label).toBeDefined();
+        damageWindowId = state.eventModificationWindow?.windowId;
+        state = applyChoice(state, "runner", String(option?.id));
+      }
+      const damageEvent = state.eventLog.at(-1)!;
+      expect(damageEvent.publicPayload).toMatchObject({
+        eventModificationWindowId: damageWindowId,
+        imminentEventId: damageId,
+        imminentEventType: "damage",
+        eventModificationKind: "prevent",
+        eventModificationDecision: "apply",
+        eventModificationOutcome: "prevented",
+        sourceDefinitionId: "onr_v1_128_green-knight-surge-buffers",
+        damageResolved: true,
+        damageAmount: 0,
+        finalAmount: 0,
+      });
+      expect(damageEvent.publicPayload.resolvedEffects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "damage",
+            amount: 0,
+            sourceDefinitionId: "onr_v1_345_trap",
+          }),
+        ]),
+      );
+      expect(state.imminentEvent?.eventType).toBe("add_tag");
+      const tagId = state.imminentEvent?.eventId;
+      expect(tagId).not.toBe(damageId);
+      expect(state.eventModificationWindow?.eventId).toBe(tagId);
+      const tagOption = state.pendingChoice?.options.find((entry) =>
+        tagDecision === "pass"
+          ? entry.id === "pass"
+          : entry.label.includes("Fall Guy"),
+      );
+      expect(tagOption).toBeDefined();
+      state = applyChoice(state, "runner", String(tagOption?.id));
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        imminentEventId: tagId,
+        imminentEventType: "add_tag",
+        eventModificationKind: "avoid",
+        eventModificationDecision: tagDecision === "pass" ? "pass" : "apply",
+      });
+      expect(state.runner.grip.length).toBe(gripBefore);
+      expect(state.runner.tags).toBe(
+        tagsBefore + (tagDecision === "pass" ? 1 : 0),
+      );
+      expect(state.pendingChoice).toBeUndefined();
+      expect(validateGameState(state)).toEqual({ ok: true, errors: [] });
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    },
+  );
+
   it("rebuilds later damage-prevention stages without duplicate source options", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.damagePrevention("v1913-multi-source-prevention"),

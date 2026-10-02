@@ -4255,15 +4255,14 @@ function deriveExtendedRequiredMechanics(
     ])
       mechanics.add(token);
   if (utilityKind === "draw_corp_cards_then_shuffle_hq_card_into_rd")
-    for (const token of [
-      "draw_cards",
-      "shuffle_hq_to_rd",
-      "double_action_cost",
-    ])
+    for (const token of ["draw_cards", "shuffle_hq_to_rd"])
       mechanics.add(token);
-  if (utilityKind === "corp_archives_to_hq")
-    for (const token of ["archives_to_hq", "reveal", "double_action_cost"])
-      mechanics.add(token);
+  if (engine.corpUtility?.playCost?.additionalClicks === 1)
+    mechanics.add("double_action_cost");
+  if (engine.corpUtility?.kind === "corp_archives_to_hq") {
+    mechanics.add("archives_to_hq");
+    if (engine.corpUtility.revealToRunner === true) mechanics.add("reveal");
+  }
   if (utilityKind === "corp_start_turn_tag_roll_per_runner_run_last_turn")
     for (const token of [
       "corp_start_turn",
@@ -4961,7 +4960,10 @@ function deriveRoles(
         "tag_punishment_operation",
       ])
         roles.add(role);
-    if (engine.corpUtility?.kind === "corp_archives_to_hq")
+    if (
+      engine.corpUtility?.kind === "corp_archives_to_hq" &&
+      engine.corpUtility.filter?.cardType === "ice"
+    )
       roles.add("ice_recovery");
     if (
       engine.corpUtility?.kind ===
@@ -5418,15 +5420,14 @@ function deriveClosedExtendedRiskTags(
     for (const risk of ["memory_pressure", "program_trash", "tag_condition"])
       risks.add(risk);
   if (utility === "draw_corp_cards_then_shuffle_hq_card_into_rd")
-    for (const risk of ["double_action", "hq_card_selection", "hidden_zone"])
-      risks.add(risk);
-  if (utility === "corp_archives_to_hq")
-    for (const risk of [
-      "archives_dependency",
-      "double_action",
-      "reveal_to_runner",
-    ])
-      risks.add(risk);
+    for (const risk of ["hq_card_selection", "hidden_zone"]) risks.add(risk);
+  if (engine.corpUtility?.playCost?.additionalClicks === 1)
+    risks.add("double_action");
+  if (engine.corpUtility?.kind === "corp_archives_to_hq") {
+    risks.add("archives_dependency");
+    if (engine.corpUtility.revealToRunner === true)
+      risks.add("reveal_to_runner");
+  }
   if (utility === "corp_start_turn_tag_roll_per_runner_run_last_turn")
     for (const risk of ["tag", "random_effect"]) risks.add(risk);
   if (utility === "corp_draw_extra_then_bottom_one")
@@ -5726,7 +5727,14 @@ function applyStaticCardCosts(
     entry.definition.type === "event" ||
     entry.definition.type === "operation"
   ) {
-    result.clicks = 1;
+    const engine = entry.planning.engine;
+    const additionalPlayActions = Math.max(
+      engine.corpUtility?.playCost?.additionalClicks ?? 0,
+      ...(engine.abilities ?? [])
+        .filter((ability) => ability.kind === "on_play")
+        .map((ability) => additionalClickAmount(ability.costs)),
+    );
+    result.clicks = 1 + additionalPlayActions;
     if (characteristics.playCost?.kind === "fixed")
       result.credits = characteristics.playCost.credits;
   }
@@ -9038,7 +9046,10 @@ function appendClosedCorpUtilityEffects(
         scope: "archives",
         timing: "action",
         resource: "cards",
-        target: "ice_recovery",
+        target:
+          utility.filter?.cardType === "ice"
+            ? "ice_recovery"
+            : "archives.corp_recovery",
         finite: true,
       },
     );
@@ -10024,17 +10035,16 @@ function derivedFunctionSignals(
     for (const signal of [
       "draw.corp_draw",
       "hq.corp_hand_refresh",
-      "risk.double_operation_action_cost",
       "rnd.corp_shuffle_hq_into_rnd",
     ])
       signals.add(signal);
-  if (engine.corpUtility?.kind === "corp_archives_to_hq")
-    for (const signal of [
-      "archives.corp_recovery",
-      "info.reveal_recovered_cards_to_runner",
-      "risk.double_operation_action_cost",
-    ])
-      signals.add(signal);
+  if (engine.corpUtility?.playCost?.additionalClicks === 1)
+    signals.add("risk.double_operation_action_cost");
+  if (engine.corpUtility?.kind === "corp_archives_to_hq") {
+    signals.add("archives.corp_recovery");
+    if (engine.corpUtility.revealToRunner === true)
+      signals.add("info.reveal_recovered_cards_to_runner");
+  }
   if (
     engine.corpUtility?.kind ===
     "corp_start_turn_tag_roll_per_runner_run_last_turn"
@@ -10642,7 +10652,10 @@ function derivedTacticSignals(
       if (subroutine.kind === "prohibit_break_next_ice")
         signals.add("corp_ice.run_lock");
     }
-    if (engine.corpUtility?.kind === "corp_archives_to_hq")
+    if (
+      engine.corpUtility?.kind === "corp_archives_to_hq" &&
+      engine.corpUtility.filter?.cardType === "ice"
+    )
       for (const signal of ["hq.corp_ice_recovery", "ice.corp_recovery"])
         signals.add(signal);
     if (
@@ -12174,13 +12187,13 @@ function derivedStrategyEvidence(
   for (const utility of engine.corpUtility === undefined
     ? []
     : [engine.corpUtility]) {
-    if (utility.kind === "corp_archives_to_hq")
-      add(
-        "archives.corp_recovery",
-        "hq.corp_ice_recovery",
-        "ice.corp_recovery",
-        "info.reveal_recovered_cards_to_runner",
-      );
+    if (utility.kind === "corp_archives_to_hq") {
+      add("archives.corp_recovery");
+      if (utility.filter?.cardType === "ice")
+        add("hq.corp_ice_recovery", "ice.corp_recovery");
+      if (utility.revealToRunner === true)
+        add("info.reveal_recovered_cards_to_runner");
+    }
     if (utility.kind === "corp_start_turn_tag_roll_per_runner_run_last_turn")
       add("condition.runner_attempted_run_last_turn", "tag.source");
     if (utility.kind === "corp_draw_extra_then_bottom_one")

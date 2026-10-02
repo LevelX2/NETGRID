@@ -54,6 +54,12 @@ Verträge direkt.
   Fensterzustand gespeichert. Choice-Auflösung revalidiert Quelle und Kosten,
   leitet aber die Reihenfolge nicht aus veränderlicher Registry-Iteration neu
   ab.
+- Öffnet eine fortgesetzte Effektfolge im selben Aktionsschritt ein weiteres
+  Prevention-Fenster, behält der öffentliche Choice-Payload die Identität,
+  Art und Menge der gerade aufgelösten Modification. Das neue Fenster liegt
+  mit seiner eigenen Bindung im aktuellen Zustand und PlayerView. So bleibt
+  etwa vollständig verhinderter TRAP-Schaden seinem Damage-Ereignis
+  zugeordnet, auch wenn anschließend die Tag-Vermeidung offen ist.
 - Direkte Tag-Erhöhungen bleiben ausschließlich in den finalen Tag- und
   Replacement-Resolvern. Der ausführbare Boundary-Test schützt diese Autorität.
 - Hidden Runner Resources werden erst über den gemeinsamen Reveal-Payload
