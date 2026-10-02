@@ -1455,6 +1455,16 @@ zweckgebundene Pools und über den Encounter hinaus gültige Stärke fort.
 Gemischte Wirkungen, notwendiger Schadens-/Programmschutz und ein Break zum
 Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
 
+Öffentlich bereits aufgelöste Brechsperren werden im gemeinsamen
+`currentRunPathContext` an die konkrete ICE-Instanz gebunden. Die aktuelle
+Sperre gilt nur im laufenden Encounter; die vorgemerkte Sperre gilt für den
+nächsten tatsächlichen Encounter, auch nach einem Auto-Pass. Die Pfadquote
+darf dort keine Breaker-Zahlung oder Schadens-/Programmschutz durch einen
+verbotenen Break erfinden. Unbekanntes ICE verbraucht diese Bindung ohne
+Behauptung einer verdeckten Wirkung; eine harmlose gesperrte ICE sperrt nicht
+zusätzlich die danach folgende ICE. Der bestehende Run-Owner entscheidet
+weiterhin über die legale Fortsetzung beziehungsweise den Ausstieg.
+
 Harte ETR mit einem erst am Zugende wirksamen Selbsttrash zählt in der
 Pumpzulassung und der aktuellen Zahlungsquote ebenfalls als Zugriffsbarriere.
 Der Run-Owner darf eine bloße allgemeine Zugreserve zurückstellen, wenn die

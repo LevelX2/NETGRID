@@ -539,14 +539,19 @@ function assessKnownRezzedIcePathInternal(
       (ice.rezzed !== true && ice.authoritativePostRezRunProjection !== true)
     )
       continue;
-    const rigCardsForEncounter = rigCards.filter(
-      (card) =>
-        !breakersAtRiskOfBeingTrashed.has(card.instanceId) &&
-        !(
-          deflectorContext.prohibitNoisyIcebreakers === true &&
-          card.subtypes?.includes("noisy")
-        ),
-    );
+    const breakingProhibited =
+      ice.instanceId !== undefined &&
+      deflectorContext.prohibitBreakingIceInstanceIds?.includes(ice.instanceId);
+    const rigCardsForEncounter = breakingProhibited
+      ? []
+      : rigCards.filter(
+          (card) =>
+            !breakersAtRiskOfBeingTrashed.has(card.instanceId) &&
+            !(
+              deflectorContext.prohibitNoisyIcebreakers === true &&
+              card.subtypes?.includes("noisy")
+            ),
+        );
     requireEffectiveRunQuoteForKnownRezzedIce(ice);
     const effectiveIce = projectIceForRunPathEffects(
       ice,
@@ -926,7 +931,7 @@ function assessKnownRezzedIcePathInternal(
       quote,
       ice: effectiveIce,
       iceIndex,
-      rigCards,
+      rigCards: rigCardsForEncounter,
       availableCredits: Math.max(0, creditsAfterAvoidingVisibleIceHazards),
       visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
@@ -1187,6 +1192,7 @@ function assessKnownRezzedIcePathInternal(
             sourceSubroutine,
             activeRunPathEffects,
             rigCards,
+            rigCardsForEncounter,
             rootCards,
             creditBudget,
             visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
@@ -1518,6 +1524,7 @@ function runPathEffectBreakAssessment(params: {
   sourceSubroutine: VisibleEffectiveSubroutine;
   activeRunPathEffects: RunPathProjectionEffect[];
   rigCards: VisibleCard[];
+  rigCardsForEncounter: VisibleCard[];
   rootCards: RootCardLike[];
   creditBudget: MutableRunnerRunPathCreditBudget;
   visibleCorpBidCapacity: number;
@@ -1531,7 +1538,7 @@ function runPathEffectBreakAssessment(params: {
   if (futureIce.length <= 0) return undefined;
   const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(
     effectiveIceForQuote(params.ice, params.quote),
-    params.rigCards,
+    params.rigCardsForEncounter,
     1,
     params.breakerStrengths,
     params.additionalBreakCostPerSubroutine,
