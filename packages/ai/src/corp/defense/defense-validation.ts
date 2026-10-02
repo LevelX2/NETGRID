@@ -536,6 +536,7 @@ export function genericDefensePhase(
     value === "resolve_install_targets" ||
     value === "resolve_run_redirect" ||
     value === "resolve_program_trash" ||
+    value === "resolve_hardware_trash" ||
     value === "resolve_post_pass_ice_lifecycle" ||
     value === "draw_for_ice" ||
     value === "fund_rez_reserve" ||
@@ -1050,6 +1051,8 @@ export function isValidDefenseSignal(
           value.urgent === true
         : value.rezReserveNeed === undefined) &&
       (value.choiceResolution === undefined ||
+        (value.phase === "resolve_hardware_trash" &&
+          validTraceHardwareTrashResolution(value.choiceResolution)) ||
         (value.phase === "resolve_program_trash" &&
           validProgramTrashResolution(value.choiceResolution)) ||
         (value.phase === "resolve_install_targets" &&
@@ -1062,6 +1065,8 @@ export function isValidDefenseSignal(
             value.choiceResolution,
             value,
           ))) &&
+      (value.phase !== "resolve_hardware_trash" ||
+        validTraceHardwareTrashResolution(value.choiceResolution)) &&
       (value.phase !== "resolve_post_pass_ice_lifecycle" ||
         (value.sourceDefinitionIds.length === 1 &&
           Array.isArray(value.actionIds) &&
@@ -1159,6 +1164,48 @@ export function isValidDefenseSignal(
     );
   }
   return false;
+}
+
+function validTraceHardwareTrashResolution(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const r = value as Record<string, unknown>;
+  return (
+    hasOnlyKeys(
+      r,
+      new Set([
+        "kind",
+        "choiceId",
+        "choiceSource",
+        "sourceStateVersion",
+        "traceId",
+        "runId",
+        "sourceIceInstanceId",
+        "sourceDefinitionId",
+        "subroutineIndex",
+        "selectedOptionId",
+        "targetCardInstanceId",
+      ]),
+    ) &&
+    r.kind === "trace_hardware_trash" &&
+    knownNonNegativeInteger(r.sourceStateVersion) &&
+    knownNonNegativeInteger(r.subroutineIndex) &&
+    [
+      r.choiceId,
+      r.choiceSource,
+      r.traceId,
+      r.runId,
+      r.sourceIceInstanceId,
+      r.sourceDefinitionId,
+      r.selectedOptionId,
+      r.targetCardInstanceId,
+    ].every(nonEmptyString) &&
+    r.choiceSource === `trace_success.hardware_wrecker:${r.traceId}` &&
+    r.traceId ===
+      `${r.runId}.${r.sourceIceInstanceId}.${r.subroutineIndex}.trace` &&
+    r.choiceId ===
+      `trace_hardware_wrecker_${r.traceId}_${r.sourceStateVersion}` &&
+    r.selectedOptionId === `hardware_${r.targetCardInstanceId}`
+  );
 }
 
 function validProgramTrashResolution(value: unknown): boolean {

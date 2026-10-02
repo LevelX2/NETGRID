@@ -3884,6 +3884,9 @@ function resolveEngineWindow(
     ) ||
     context.input.playerView.pendingChoice?.source.startsWith(
       "card_implementation.trash_installed_program:",
+    ) ||
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "trace_success.hardware_wrecker:",
     )
   ) {
     return undefined;

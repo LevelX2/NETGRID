@@ -1316,6 +1316,20 @@ verdeckte Runnerkarten werden nicht einbezogen. Die Engine-Fälle in
 `corp-program-trash-coverage.test.ts` prüfen Zielwirkung, Ersatzbreaker,
 Grenzen, Defense-Ownership, Choice-Bindung und deterministisches Replay.
 
+Hardwarezerstörung nach einem erfolgreichen ICE-Trace bleibt auch nach dem
+Run-Ende bei `corp.defend_servers`. `trace-hardware-trash-choice-facts.ts`
+prüft den nativen Trace-Ursprung, die aktuelle Post-Rez-Engine-Quote, das
+öffentliche Runner-Bid-Event und den vollständigen legalen Hardware-Zielsatz.
+Bereits durch Olivia derezztes Quell-ICE bleibt über diese Quote gebunden.
+`trace-hardware-trash-signal.ts` bewertet nur bekannte installierte Hardware
+nach öffentlichen Countern und Installationskosten; die Options-ID entscheidet
+Gleichstände. Der gewählte Defense-Step bindet Action, Choice, Ziel, Trace und
+StateVersion. Der Payload-Resolver übernimmt ausschließlich dieses Ziel und
+scheitert bei veralteten oder beschädigten Bindungen. Auch ein einziges
+verbleibendes Ziel behält diese Domain-Ownership. Der unveränderte native
+Checkpoint und die Gegenproben in `meta-474-trace-hardware-trash.test.ts`
+prüfen diesen Pfad einschließlich Run-Ende, Derezzing und Zielbindung.
+
 Auch das anschließende ICE-Lifecycle-Fenster gehört diesem Owner. Die Engine
 liefert in jeder Post-Pass-LegalAction das exakte boolesche Fact
 `postPassIceTrashedUnlessReturned`. Temporäres Encounter-ICE würde bei

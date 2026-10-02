@@ -1,4 +1,5 @@
 import { corpProgramTrashDefenseSignals } from "./program-trash-signal";
+import { corpTraceHardwareTrashDefenseSignals } from "./trace-hardware-trash-signal";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
@@ -711,6 +712,7 @@ export function buildCorpDefenseNeeds({
       ...(agendaPurgeDefenseChoice ? [agendaPurgeDefenseChoice] : []),
       ...(classicDeflectorDefenseChoice ? [classicDeflectorDefenseChoice] : []),
       ...corpProgramTrashDefenseSignals(input, candidates),
+      ...corpTraceHardwareTrashDefenseSignals(input, candidates),
     ]);
   const genuineCurrentDefenseThreat = mergedDefenseNeeds.some(
     (signal) =>

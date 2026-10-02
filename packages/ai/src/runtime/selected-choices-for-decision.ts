@@ -65,6 +65,7 @@ import { corpInstalledHardwareTrashOperationProfile } from "./corp-canonical-car
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
+import { selectedCorpTraceHardwareTrashChoiceOptionIds } from "./corp-trace-hardware-trash-choice";
 import { selectedCorpStartOfTurnOrderChoiceOptionId } from "./corp-start-of-turn-order-choice";
 import {
   runnerDamagePreventionChoiceResolution,
@@ -1192,6 +1193,21 @@ export function selectedChoicesForDecision(
       selectableOptions,
     );
     return resolved(selected, "corp_program_trash_subroutine");
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("trace_success.hardware_wrecker:")
+  ) {
+    return resolved(
+      selectedCorpTraceHardwareTrashChoiceOptionIds(
+        input,
+        action,
+        choice,
+        selectableOptions,
+      ),
+      "corp_trace_hardware_trash_subroutine",
+    );
   }
   if (
     choice.kind === "select_cards" &&
