@@ -265,6 +265,25 @@ export function buildRunnerDefenseSignals(params: {
   const forgoExhaustedStandardCapacity =
     input.playerView.own.clicks > 0 &&
     input.playerView.own.stackOrRdCount === 0;
+  const confirmedDamageTaxedDrawActionIds =
+    damageThreat.flatlineRisk.level === "confirmed" ||
+    damageThreat.flatlineRisk.level === "critical"
+      ? candidates
+          .filter((candidate) => {
+            const legalAction = input.legalActions.find(
+              (action) => action.actionId === candidate.actionId,
+            );
+            return (
+              legalAction !== undefined &&
+              runnerDrawTaxLiabilityProjection(input, legalAction, candidate)
+                .projectedTagsAdded > 0
+            );
+          })
+          .map((candidate) => candidate.actionId)
+      : [];
+  const confirmedDamageTaxedDrawActionIdSet = new Set(
+    confirmedDamageTaxedDrawActionIds,
+  );
   const tagClearTargetCredits = 2;
   const tagClearFundingActionIds = services.findFundingRoute({
     demandId: "runner-defense-tag-clear-funding",
@@ -279,7 +298,9 @@ export function buildRunnerDefenseSignals(params: {
     evidence: ["runner_visible_tag_punish_requires_clear_funding"],
   }).routeActionIds;
   const directTagClearAvailable = candidates.some(
-    (candidate) => candidate.semanticActionType === "tag.remove",
+    (candidate) =>
+      candidate.semanticActionType === "tag.remove" &&
+      !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId),
   );
   const tagClearFundingOpen =
     input.playerView.own.tags > 0 &&
@@ -352,25 +373,6 @@ export function buildRunnerDefenseSignals(params: {
           evidenceCode: "runner_damage_locked_hand_reaction_reserve",
         }
       : undefined;
-  const confirmedDamageTaxedDrawActionIds =
-    damageThreat.flatlineRisk.level === "confirmed" ||
-    damageThreat.flatlineRisk.level === "critical"
-      ? candidates
-          .filter((candidate) => {
-            const legalAction = input.legalActions.find(
-              (action) => action.actionId === candidate.actionId,
-            );
-            return (
-              legalAction !== undefined &&
-              runnerDrawTaxLiabilityProjection(input, legalAction, candidate)
-                .projectedTagsAdded > 0
-            );
-          })
-          .map((candidate) => candidate.actionId)
-      : [];
-  const confirmedDamageTaxedDrawActionIdSet = new Set(
-    confirmedDamageTaxedDrawActionIds,
-  );
   const defense: RunnerDefenseSignals = {
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,

@@ -1420,6 +1420,15 @@ aktiviert dort keine Drawsteuer. Dieser Zonenfilter gilt auch für zusammengeset
 Draw-Actions ohne eigenen Basisdraw-Steuerpayload. Der Scheduler darf einen
 falschen Quellenfact nicht durch Aufheben der Unsafe-Disposition kaschieren.
 
+Eine bei bestätigter oder kritischer Schadensgefahr tatsächlich taggefährliche
+Draw-Action gehört auch dann nicht zur aktuellen Defense-Route, wenn sie zuerst
+Tags entfernt. Die Zulassung jeder Defense-Phase respektiert dieselbe aktuelle
+Unsafe-Menge. Eine solche Mehrzweck-Action darf die Finanzierung einer sicheren
+Basis-Tagentfernung nicht als scheinbar bereits vorhandene Tag-Clear-Route
+unterdrücken. Die Ausnahme für eine nur später zurückgestellte Handpufferwirkung
+bleibt auf aktuell sichere Mehrzweck-Actions begrenzt; echte Draw-Tax-Gefahr wird
+weder durch den Scheduler noch durch die aktuelle Phasenbindung aufgehoben.
+
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
 Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda- oder
 Score-Threat-Route übernimmt der Defense-Owner den gequoteten Puffer, wenn
