@@ -313,6 +313,21 @@ Eine veraltete, unvollständige oder nicht finanzierbare Fortsetzung sperrt
 die Notfallentwicklung nicht; ein überlebender Remote wird dadurch nicht
 als garantiert behauptet.
 
+Diese Zulassungsgrenze gilt ebenfalls für die Last-Draw-Installation einer
+neuen Gewinnagenda. Deren P2-Notfallclaim darf eine vorhandene finanzierbare
+terminale Fortsetzung nicht verdrängen. Paarung 493, Durchlauf 3, G37 D374
+belegt die fehlende Bindung: Die vollständig aktuelle Fortsetzungsquote der
+installierten Agenda benötigt einen erreichbaren Vorhaltecredit; die neue
+ungeschützte Remote darf daraus keinen vorrangigen Überlebenspfad erhalten.
+Die normale Schutzprüfung anderer Installationen und die Revalidierung jedes
+Funding-/Advance-Schritts bleiben bestehen.
+Der vollständig zertifizierte installierte Pfad veröffentlicht im letzten
+Drawfenster denselben typisierten Überlebensclaim auch vor einem nötigen
+Basis-Creditpräfix. Er verlangt eine terminale Agenda und eine jetzt
+erreichbare Vorhaltefinanzierung. So behält der bestehende Parent seine
+Dringlichkeit bereits vor dem ersten bezahlbaren Advance. Außerhalb dieser
+Frist entsteht daraus kein P2-Claim.
+
 Dieselbe Grenze gilt für eine bereits installierte Agenda, deren vollständige
 Konversion einschließlich nötiger Basis-Creditaktionen noch im aktuellen Zug
 Engine-gequotet möglich ist. Dafür ist kein unmittelbarer Spielsieg nötig:

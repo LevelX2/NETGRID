@@ -28,6 +28,7 @@ import { type CorpFundedRemoteAccessRiskNeed } from "../../runtime/corp-funded-s
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
 import {
   corpScorelineActionCanCloseThisTurn,
+  corpScorelineFeasibilityForDecisionInput,
   type CorpScorelineFeasibility,
 } from "../../runtime/corp-scoreline-feasibility";
 import { CorpScoreAccelerationSetupBinding } from "../../runtime/corp-scoreline/score-hand-support";
@@ -130,6 +131,7 @@ export function corpNextTurnScoreContinuationProjects(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
 ): CorpScoreProjectSignal[] {
+  const scoreline = corpScorelineFeasibilityForDecisionInput(input);
   return input.playerView.servers.flatMap((server) =>
     server.root.flatMap((agenda) => {
       const quote = agenda.scoreContinuationQuote;
@@ -183,6 +185,16 @@ export function corpNextTurnScoreContinuationProjects(
         ].every(isFiniteNonNegativeInteger) &&
         (currentFundingGap === 0 || exactBasicCreditAvailable) &&
         currentScoreClicks + currentFundingGap <= input.playerView.own.clicks;
+      const continuationFundingGap = Math.max(
+        0,
+        quote.creditsRequiredBeforeNextCorpTurn - input.playerView.own.credits,
+      );
+      const lastDrawScoreSurvival =
+        scoreline?.deadline === "last_draw_window" &&
+        quote.terminalScore &&
+        (continuationFundingGap === 0 ||
+          (exactBasicCreditAvailable &&
+            continuationFundingGap <= input.playerView.own.clicks));
       return [
         {
           projectId: corpScoreProjectId(agenda.instanceId, server.id),
@@ -200,6 +212,7 @@ export function corpNextTurnScoreContinuationProjects(
             : {}),
           ...(quote.terminalScore ? { deadlinePressure: true } : {}),
           terminalScore: quote.terminalScore,
+          ...(lastDrawScoreSurvival ? { lastDrawScoreSurvival: true } : {}),
           conversion: corpScoreConversionFacts({
             input,
             agenda,
@@ -458,7 +471,9 @@ export function scoreProjectForCandidate(
         requireVisibleAgendaAdvancementRequirement(input, agenda),
       );
     const lastViableDeckoutMatchpointWindow =
-      matchpointTarget && scorelineFeasibility?.deadline === "last_draw_window";
+      !preparedScoreContinuationAvailable &&
+      matchpointTarget &&
+      scorelineFeasibility?.deadline === "last_draw_window";
     const boundedStagedScoreWindow =
       residentBoundedStagedScoreWindow || handPressureBoundedStagedScoreWindow;
     const certifiedNearTermScoreHorizon =
