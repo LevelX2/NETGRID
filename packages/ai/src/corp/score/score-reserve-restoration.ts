@@ -1,6 +1,63 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { corpUnconditionalScoreCreditGain } from "../../runtime/corp-canonical-card-facts";
+import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+
+/** Score admits a complete route against Defense's current funded claim.
+ * Apply after reconciliation so a direct sibling cannot erase the rejection.
+ */
+export function withCorpSameTurnScoreDefenseReserve(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+): CorpScoreProjectSignal {
+  if (
+    !project.feasible ||
+    !project.sameTurnCloseout ||
+    project.sameTurnConversionProof !== "engine_quoted_path" ||
+    project.terminalScore
+  )
+    return project;
+  const reserve = corpFundedCentralProtectionReserve(
+    input,
+    project.agendaInstanceId,
+    project.preventsTerminalSteal ? project.agendaPoints : undefined,
+  );
+  if (reserve === 0) return project;
+  const horizon = project.sameTurnConversionCreditHorizon;
+  const cost = project.sameTurnConversionResourceCost;
+  const creditsBeforePayout = horizon
+    ? horizon.creditsBeforeScorePayout
+    : cost
+      ? input.playerView.own.credits - cost.credits
+      : undefined;
+  if (
+    creditsBeforePayout === undefined ||
+    !Number.isSafeInteger(creditsBeforePayout) ||
+    creditsBeforePayout < 0 ||
+    (horizon ? horizon.stateVersion : cost?.stateVersion) !==
+      input.playerView.stateVersion
+  )
+    throw new PlanResolutionFailure("resource_claim_conflict", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: project.actionIds ?? [],
+      owner: "plan_module",
+      removalCondition:
+        "Bind every funded same-turn score admission to its complete current Engine-quoted liquid credit horizon.",
+    });
+  const payout =
+    corpUnconditionalScoreCreditGain(project.agendaDefinitionId) ?? 0;
+  if (creditsBeforePayout + payout >= reserve) return project;
+  return {
+    ...project,
+    feasible: false,
+    routeAssessment: "corp_same_turn_score_consumes_funded_defense_reserve",
+    evidenceCode: `corp_same_turn_score_consumes_funded_defense_reserve:${creditsBeforePayout}:${payout}:${reserve}`,
+  };
+}
 
 /** Installed agendas use their own Engine continuation quote, including every
  * remaining advance and the score itself, rather than next-turn credit needs.
@@ -39,7 +96,7 @@ export function corpInstalledScoreResourceCost(
   return { stateVersion: input.playerView.stateVersion, credits, clicks };
 }
 
-/** A funded ordinary score can restore liquid defense cash before any run
+/** A funded fixed-cost score can restore liquid defense cash before any run
  * window. This is a horizon proof, never cash available to pay the route now.
  */
 export function corpScoreRestoresRezReserveBeforeRunnerTurn(

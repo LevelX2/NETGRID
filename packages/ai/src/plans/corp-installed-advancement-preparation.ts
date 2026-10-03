@@ -2,7 +2,8 @@ import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 /** Quotes only a pure fixed-cost activation on an owned installed source.
- * The current rez is an Engine action; the later activation is rematerialized.
+ * Unrezzed sources need the exact current Engine rez. Already rezzed sources
+ * can precede an HQ target's installation; the real activation is rematerialized.
  */
 export function corpInstalledAdvancementPreparations(input: AiDecisionInput) {
   if (
@@ -17,7 +18,7 @@ export function corpInstalledAdvancementPreparations(input: AiDecisionInput) {
         !card.known ||
         card.owner !== "corp" ||
         card.controller !== "corp" ||
-        card.rezzed !== false ||
+        (card.rezzed !== false && card.rezzed !== true) ||
         !card.definitionId
       )
         return [];
@@ -25,22 +26,25 @@ export function corpInstalledAdvancementPreparations(input: AiDecisionInput) {
         card.definitionId,
       )?.planning;
       if (planning?.side !== "corp" || planning.cardType !== "asset") return [];
-      const rez = input.legalActions.find(
-        (a) =>
-          a.side === "corp" &&
-          a.type === "rez_card" &&
-          a.source === card.instanceId &&
-          a.payload?.cardId === card.instanceId &&
-          a.payload?.serverId === server.id &&
-          a.expiresAtStateVersion === input.playerView.stateVersion,
-      );
+      const rez = card.rezzed
+        ? undefined
+        : input.legalActions.find(
+            (a) =>
+              a.side === "corp" &&
+              a.type === "rez_card" &&
+              a.source === card.instanceId &&
+              a.payload?.cardId === card.instanceId &&
+              a.payload?.serverId === server.id &&
+              a.expiresAtStateVersion === input.playerView.stateVersion,
+          );
       if (
-        !rez ||
-        rez.targetRequirements.length ||
-        (rez.choiceRequirements?.length ?? 0) > 0
+        !card.rezzed &&
+        (!rez ||
+          rez.targetRequirements.length ||
+          (rez.choiceRequirements?.length ?? 0) > 0)
       )
         return [];
-      const rezCredits = exactCredits(rez);
+      const rezCredits = card.rezzed ? 0 : rez ? exactCredits(rez) : undefined;
       if (rezCredits === undefined) return [];
       return (planning.engine.abilities ?? []).flatMap((ability) => {
         const effect = ability.effects[0];

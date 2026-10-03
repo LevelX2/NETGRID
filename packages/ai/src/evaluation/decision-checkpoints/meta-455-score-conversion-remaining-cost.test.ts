@@ -13,7 +13,7 @@ import {
 } from "./runtime-checkpoint";
 import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
 
-it("finishes the installed agenda instead of buying another equal-point score with extra capacity", () => {
+it("finishes the cheaper installed agenda before the prospective equal-point sibling", () => {
   const input = structuredClone(
     checkpoint.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
@@ -40,7 +40,9 @@ it("finishes the installed agenda instead of buying another equal-point score wi
     ]),
   ).toEqual([
     ["corp_onr_v1_203_hostile-takeover_1", 3, 3, 0],
-    ["corp_onr_v1_203_hostile-takeover_2", 7, 5, 2],
+    // Rezzed pure support now supplies the prospective HQ route without
+    // artificial extra action capacity. The installed score is still cheaper.
+    ["corp_onr_v1_203_hostile-takeover_2", 4, 3, 0],
   ]);
   const decision = chooseAiAction(input);
   const action = input.legalActions.find(
@@ -66,7 +68,7 @@ it("finishes the installed agenda instead of buying another equal-point score wi
   expect(other.moduleState).toMatchObject({
     signal: {
       sameTurnCloseout: true,
-      conversion: { remainingAdvancementClicks: 3, remainingScoreCredits: 3 },
+      conversion: { remainingAdvancementClicks: 1, remainingScoreCredits: 4 },
     },
   });
 });

@@ -1213,18 +1213,14 @@ export function sameTurnScoreConversionProjectForCandidate(
       phase: scorePhaseForConversionStep(step),
       sameTurnCloseout: true,
       sameTurnConversionProof: "engine_quoted_path",
-      ...(!path.fundingPrefix &&
-      path.clicksGenerated === 0 &&
-      path.steps.every(
-        (routeStep) =>
-          [
-            "install_score_target",
-            "place_advancement",
-            "basic_advance",
-            "score_ready",
-          ].includes(routeStep.kind) &&
-          (routeStep.offTargetAdvancementAmount ?? 0) === 0,
-      )
+      sameTurnConversionCreditHorizon: {
+        stateVersion: input.playerView.stateVersion,
+        creditsBeforeScorePayout:
+          input.playerView.own.credits +
+          (path.fundingPrefix?.grossCreditGain ?? 0) -
+          path.creditsRequired,
+      },
+      ...(!path.fundingPrefix && path.clicksGenerated === 0
         ? {
             sameTurnConversionResourceCost: {
               stateVersion: input.playerView.stateVersion,
@@ -1588,6 +1584,8 @@ function sameScoreProjectMergeFacts(
     project.serverId,
     project.routeAssessment,
     project.sameTurnConversionProof,
+    project.sameTurnConversionResourceCost,
+    project.sameTurnConversionCreditHorizon,
     project.terminalScore,
     project.preventsTerminalSteal,
     project.deadlinePressure,

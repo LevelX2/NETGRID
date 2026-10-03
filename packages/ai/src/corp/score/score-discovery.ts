@@ -17,6 +17,7 @@ import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-d
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
 import { corpAssetPreservingSameTurnScoreRoutes } from "./score-asset-preservation";
 import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
+import { withCorpSameTurnScoreDefenseReserve } from "./score-reserve-restoration";
 import {
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreDefenseBinding,
@@ -351,10 +352,13 @@ export function reconcileCorpScoreProjects({
   // mandatory draw will expose fresh scoring material at its normal cadence.
   const scoreProjects: CorpScoreProjectSignal[] = [
     ...continuityBoundScoreProjects.map((project) =>
-      withCorpTerminalAgendaDefense(
+      withCorpSameTurnScoreDefenseReserve(
         input,
-        project,
-        continuityBoundScoreProjects,
+        withCorpTerminalAgendaDefense(
+          input,
+          project,
+          continuityBoundScoreProjects,
+        ),
       ),
     ),
   ];

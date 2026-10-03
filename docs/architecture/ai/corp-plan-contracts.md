@@ -343,7 +343,33 @@ weitere installierte Agenden oder aktive Einkommenseffekte auf dem Board.
 Eine zusätzliche freie Aktion, unzureichende Finanzierung, eine erreichbare
 Bonusschwelle oder veraltete Kosten verhindern diesen Variantenvergleich.
 
-Eine vollständig aktuell finanzierte gewöhnliche Scorefolge kann die liquide
+Ein bereits gerezzter reiner Advancement-Support bleibt im prospektiven
+Scorepfad verfügbar, wenn die neue HQ-Agenda noch kein installiertes legales
+Aktivierungsziel bietet. Dieselbe enge kanonische Prüfung auf unbedingte feste
+Kosten und Wiederholbarkeit gilt für beide Rez-Zustände. Ein ungerezzter
+Support benötigt seine exakte aktuelle Engine-Rezaction; ein gerezzter bezahlt
+keinen zweiten Rez. Sobald die Agenda installiert ist, wird jede echte
+Aktivierung ausschließlich aus den aktuellen LegalActions materialisiert.
+Ein bereits vorhandenes natives Capability wird nicht doppelt projiziert.
+Die native Gegenprobe schließt zwei Scorefolgen über eine echte Zuggrenze ab.
+
+Vor der Admission prüft Score nach der Zusammenführung seiner Projekte den
+vollständigen Engine-gequoteten Same-Turn-Credithorizont gegen die bereits
+finanzierten Zentral-Schutzclaims von `corp.defend_servers`. Ein exaktes
+Fundingpräfix zählt mit seinem einmaligen Bruttozufluss und seinen Kosten;
+ein späterer Score-Ertrag bezahlt keine vorherigen Schritte. Eine
+nichtterminale Folge, die die Schutzreserve nach ihrem sicheren unbedingten
+Score-Zufluss unterschreitet, bleibt mit typisierter Begründung blockiert und
+fordert keinen scheinbar ausführbaren Economy-Support an. Ein direktes
+Geschwisterprojekt darf diese Ablehnung nicht ersetzen. Terminaler eigener
+Score bleibt P1; die vergleichende Schutzpriorität bleibt beim Defenseowner.
+Paarung 492 R3 G2 D102–106 belegt den bezahlbaren Acht-Credit-Pfad, der eine
+finanzierte Fünf-Credit-Reserve verbraucht und deshalb nach der ersten
+Aktivierung korrekt durch P2-Finanzierung unterbrochen wird. Der Score-Owner
+weist ihn bereits vor der Installation zurück. Eine native Kontrolle mit
+dreizehn Credits beendet beide gebundenen Aktivierungen und hält fünf Credits.
+
+Eine vollständig aktuell finanzierte Scorefolge mit festen Kosten kann die liquide
 Rezreserve vor dem nächsten Runner-Fenster wiederherstellen. Der Score-Owner
 weist dies in `score-reserve-restoration.ts` mit seiner aktuellen vollständigen
 Engine-Kostenquote und einer kanonischen unbedingten Score-Auszahlung nach.
@@ -352,7 +378,9 @@ Rezreservebedarfs zurück. Die Auszahlung zählt nicht als Geld für die noch
 offenen Scorekosten. Jeder reale Schritt revalidiert Kosten, LegalAction und
 Reserve; fehlende Klicks, Fundingbedarf, abgelaufene Quotes, bedingte Erträge,
 spätere Aktivierungserträge und aktuelle Runfenster tragen diesen Nachweis
-nicht. Der historische Fall Paarung 455 G3 D414/D459 benötigt zwei Credits
+nicht. Auch notwendige Support-Rezs und wiederholte feste Zahlungen zählen
+vollständig; zusätzliche Klickerzeugung und Fundingpräfixe erzeugen hier
+keinen Ersatz für die feste Kostenquote. Der historische Fall Paarung 455 G3 D414/D459 benötigt zwei Credits
 und drei Klicks und stellt mit dem Score fünf Credits für eine Reserve von
 vier wieder her. Er ändert weder Planprioritäten noch Rez-Ownership.
 Nach Installation publiziert derselbe Score-Owner die vollständigen Kosten

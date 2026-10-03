@@ -713,25 +713,37 @@ function conversionCapabilities(
     },
   );
   legalCapabilities.push(
-    ...corpInstalledAdvancementPreparations(input).map((preparation) => ({
-      kind: "place_advancement" as const,
-      capabilityId:
-        "installed:" +
-        preparation.sourceCardId +
-        ":" +
-        preparation.capabilityId,
-      sourceCardId: preparation.sourceCardId,
-      amount: preparation.amount,
-      clickCost: preparation.clickCost,
-      creditCost: preparation.creditCost,
-      projected: true,
-      repeatable: preparation.repeatable,
-      rezPreparation: {
-        action: preparation.action,
-        credits: preparation.rezCredits,
+    ...corpInstalledAdvancementPreparations(input)
+      .filter(
+        (preparation) =>
+          !legalCapabilities.some(
+            (capability) =>
+              capability.sourceCardId === preparation.sourceCardId,
+          ),
+      )
+      .map((preparation) => ({
+        kind: "place_advancement" as const,
+        capabilityId:
+          "installed:" +
+          preparation.sourceCardId +
+          ":" +
+          preparation.capabilityId,
         sourceCardId: preparation.sourceCardId,
-      },
-    })),
+        amount: preparation.amount,
+        clickCost: preparation.clickCost,
+        creditCost: preparation.creditCost,
+        projected: true,
+        repeatable: preparation.repeatable,
+        ...(preparation.action
+          ? {
+              rezPreparation: {
+                action: preparation.action,
+                credits: preparation.rezCredits,
+                sourceCardId: preparation.sourceCardId,
+              },
+            }
+          : {}),
+      })),
   );
   if (!target.installAction)
     return legalCapabilities.sort(compareConversionCapabilities);

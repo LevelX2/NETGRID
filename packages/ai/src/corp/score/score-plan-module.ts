@@ -372,6 +372,11 @@ function scoreResourceGaps(
   context: PlanSchedulerContext,
   signal: CorpScoreProjectSignal,
 ): ResourceGap[] {
+  if (
+    signal.routeAssessment ===
+    "corp_same_turn_score_consumes_funded_defense_reserve"
+  )
+    return [];
   const resourceGaps: ResourceGap[] = [];
   if (signal.phase === "select_agenda") {
     resourceGaps.push({
