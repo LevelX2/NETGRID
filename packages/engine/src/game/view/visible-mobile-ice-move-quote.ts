@@ -1,9 +1,15 @@
 import type { GameState, LegalAction, VisibleCard } from "@netgrid/shared";
-import { visibleCorpCard } from "./card-view";
+import { agendaPoints, visibleCorpCard } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+import { projectInstalledCorpIceRezCost } from "../payment";
+import { spendCorpAgendaPoints } from "../state/corp-agenda-point-cost";
+import {
+  projectFixedCorpIcePostRezState,
+  visibleCorpIcePostRezRunQuote,
+} from "./visible-post-rez-run-quote";
 
-/** Exact physical relocation of already-rezzed public ICE. Unrezzed ICE
- * requires a separate move/rez projection and is intentionally unquoted. */
+/** Exact relocation and, where necessary, fixed affordable follow-up rez.
+ * Unprojected lifecycle work or another unrezzed path layer stays unquoted. */
 export function visibleMobileIceMoveQuote(
   state: GameState,
   action: LegalAction,
@@ -17,7 +23,7 @@ export function visibleMobileIceMoveQuote(
   if (
     !origin ||
     !target ||
-    !source?.rezzed ||
+    !source ||
     origin.id === target.id ||
     action.payload?.fortRunWindowAbility !==
       "move_self_to_outermost_position_on_other_fort"
@@ -59,16 +65,50 @@ export function visibleMobileIceMoveQuote(
     projected.run.approachedIceId = sourceId;
     delete projected.run.encounteredIceId;
   }
-  const after = path(projected);
+  let defenseState = projected;
+  let rezCredits = 0,
+    mandatoryAgendaPoints = 0;
+  if (!source.rezzed) {
+    const rez = projectInstalledCorpIceRezCost(projected, sourceId);
+    if (!rez?.complete || rez.costKind !== "fixed") return undefined;
+    rezCredits = rez.finalCredits;
+    mandatoryAgendaPoints = rez.mandatoryAdditionalCosts.agendaPoints;
+    if (
+      projected.corp.credits < rezCredits ||
+      agendaPoints(projected, "corp") < mandatoryAgendaPoints
+    )
+      return undefined;
+    projected.corp.credits -= rezCredits;
+    if (mandatoryAgendaPoints > 0)
+      spendCorpAgendaPoints(projected, mandatoryAgendaPoints);
+    const visible = visibleCorpCard(projected, sourceId, "corp", "ice");
+    const runQuote = visibleCorpIcePostRezRunQuote(
+      projected,
+      sourceId,
+      visible,
+    );
+    if (!runQuote?.complete) return undefined;
+    const rezzed = projectFixedCorpIcePostRezState(projected, sourceId);
+    if (!rezzed) return undefined;
+    defenseState = rezzed;
+  }
+  const after = path(defenseState);
   if (!after) return undefined;
   return JSON.stringify({
-    schemaVersion: "corp-mobile-ice-move-v1",
+    schemaVersion: "corp-mobile-ice-move-v2",
     stateVersion: state.stateVersion,
     actionId: action.actionId,
     sourceIceInstanceId: sourceId,
     sourceServerId: origin.id,
     targetServerId: target.id,
-    corpCreditsAfterMove: projected.corp.credits,
+    corpCreditsAfterMove: state.corp.credits - credits,
+    continuation: {
+      requiresRez: !source.rezzed,
+      rezCredits,
+      mandatoryAgendaPoints,
+      corpCreditsAfterDefense: defenseState.corp.credits,
+      corpAgendaPointsAfterDefense: agendaPoints(defenseState, "corp"),
+    },
     beforeIce: before,
     afterIce: after,
   });

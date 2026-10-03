@@ -1,3 +1,4 @@
+import { spendCorpAgendaPoints } from "../state/corp-agenda-point-cost";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
@@ -645,47 +646,7 @@ export function createCorpRuntimeResolvers(
     state: GameState,
     requiredPoints: number,
   ): CorpAgendaPointCostResult {
-    if (!Number.isInteger(requiredPoints) || requiredPoints <= 0)
-      throw new Error("Agenda-Punkt-Kosten sind ungueltig.");
-    if (deps.corpAgendaPointTotal(state) < requiredPoints)
-      throw new Error("Die Korp hat nicht genug Agenda-Punkte.");
-    let remaining = requiredPoints;
-    let paidPoints = 0;
-    const bonusBefore = Math.max(
-      0,
-      Math.floor(state.corpBonusAgendaPoints ?? 0),
-    );
-    const bonusPointsSpent = Math.min(bonusBefore, remaining);
-    if (bonusPointsSpent > 0) {
-      state.corpBonusAgendaPoints = bonusBefore - bonusPointsSpent;
-      remaining -= bonusPointsSpent;
-      paidPoints += bonusPointsSpent;
-    }
-    const spentAgendaIds: CardInstanceId[] = [];
-    const spentAgendaDefinitionIds: CardDefinitionId[] = [];
-    if (remaining > 0) {
-      for (const agendaId of corpScoredAgendaForfeitTargets(state)) {
-        const points = deps.agendaPointsForScoredCard(state, agendaId);
-        const spentFromAgenda = Math.min(points, remaining);
-        if (spentFromAgenda <= 0) continue;
-        spentAgendaIds.push(agendaId);
-        spentAgendaDefinitionIds.push(definitionFor(state, agendaId).id);
-        for (let index = 0; index < spentFromAgenda; index += 1) {
-          deps.spendAgendaPointFromScoredCard(state, agendaId);
-        }
-        paidPoints += spentFromAgenda;
-        remaining -= spentFromAgenda;
-        if (remaining <= 0) break;
-      }
-    }
-    if (paidPoints < requiredPoints)
-      throw new Error("Die Korp hat nicht genug Agenda-Punkte.");
-    return {
-      paidPoints,
-      bonusPointsSpent,
-      spentAgendaIds,
-      spentAgendaDefinitionIds,
-    };
+    return spendCorpAgendaPoints(state, requiredPoints);
   }
 
   function installedAgendaOperationTarget(

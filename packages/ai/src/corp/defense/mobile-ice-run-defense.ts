@@ -20,6 +20,13 @@ type Quote = {
   sourceServerId: string;
   targetServerId: string;
   corpCreditsAfterMove: number;
+  continuation: {
+    requiresRez: boolean;
+    rezCredits: number;
+    mandatoryAgendaPoints: number;
+    corpCreditsAfterDefense: number;
+    corpAgendaPointsAfterDefense: number;
+  };
   beforeIce: VisibleCard[];
   afterIce: VisibleCard[];
 };
@@ -69,6 +76,10 @@ export function assessMobileIceRunDefense(
     (s) => s.id === q?.targetServerId,
   );
   const cost = action.costs.reduce((n, c) => n + (c.credits ?? 0), 0);
+  const source = origin?.ice.find((c) => c.instanceId === action.source);
+  const payment = q?.continuation;
+  const exactNonNegative = (n: unknown): n is number =>
+    typeof n === "number" && Number.isSafeInteger(n) && n >= 0;
   const validIce = (card: VisibleCard) =>
     card?.known === true &&
     card.rezzed === true &&
@@ -78,7 +89,7 @@ export function assessMobileIceRunDefense(
     Array.isArray(card.effectiveRunQuote.subroutines);
   if (
     !q ||
-    q.schemaVersion !== "corp-mobile-ice-move-v1" ||
+    q.schemaVersion !== "corp-mobile-ice-move-v2" ||
     q.stateVersion !== input.playerView.stateVersion ||
     q.actionId !== action.actionId ||
     q.sourceIceInstanceId !== action.source ||
@@ -89,9 +100,19 @@ export function assessMobileIceRunDefense(
     action.timingPoint !== input.playerView.timingPoint ||
     !origin ||
     !target ||
-    !origin.ice.some(
-      (c) => c.instanceId === action.source && c.rezzed === true,
-    ) ||
+    !source?.known ||
+    !payment ||
+    payment.requiresRez !== (source.rezzed !== true) ||
+    !exactNonNegative(payment.rezCredits) ||
+    !exactNonNegative(payment.mandatoryAgendaPoints) ||
+    !exactNonNegative(payment.corpCreditsAfterDefense) ||
+    !exactNonNegative(payment.corpAgendaPointsAfterDefense) ||
+    (source.rezzed === true &&
+      (payment.rezCredits !== 0 || payment.mandatoryAgendaPoints !== 0)) ||
+    payment.corpCreditsAfterDefense !==
+      q.corpCreditsAfterMove - payment.rezCredits ||
+    payment.corpAgendaPointsAfterDefense !==
+      input.playerView.own.agendaPoints - payment.mandatoryAgendaPoints ||
     q.corpCreditsAfterMove !== input.playerView.own.credits - cost ||
     q.corpCreditsAfterMove < 0 ||
     !Array.isArray(q.beforeIce) ||
@@ -117,7 +138,9 @@ export function assessMobileIceRunDefense(
     origin.id === target.id
   )
     return reject("corp_mobile_ice_has_no_current_run_or_empty_origin");
-  const terminalAgenda = target.root.some(
+  const protectedCards =
+    target.id === "hq" ? input.playerView.own.gripOrHq : target.root;
+  const terminalAgenda = protectedCards.some(
     (c) =>
       c.known &&
       c.type === "agenda" &&
@@ -150,7 +173,7 @@ export function assessMobileIceRunDefense(
     rig,
     budget(),
     target.root,
-    q.corpCreditsAfterMove,
+    payment.corpCreditsAfterDefense,
   );
   // The path assessor stops at a proven unaffordable ETR. Its assessed prefix
   // therefore need not contain inner ICE, whose complete Engine quotes were

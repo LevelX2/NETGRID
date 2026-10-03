@@ -26,14 +26,20 @@ Das ist keine allgemeine Root-Rez-Freigabe am Runstart. Eine bereits geöffnete
 Corp-Priorität führt nach der letzten verfügbaren Root-Rez am leeren Fort
 regulär in das Runner-Fortsetzungsfenster zurück.
 
-Für bereits gerezztes mobiles ICE quotiert
+Für mobiles ICE quotiert
 `game/view/visible-mobile-ice-move-quote.ts` die physische Bewegung und Zahlung
 sowie den öffentlichen ICE-Pfad vor und nach dem Zonenwechsel. Die Quote
 `corpMobileIceMoveQuoteJson` bindet Action, Quelle, Herkunfts-/Zielfort und
-StateVersion. Alle enthaltenen ICE-Identitäten müssen gerezzte öffentliche
-Karten sein; gegnerische Handkarten werden nicht projiziert. Eine ungerezzte
-Quelle oder Zielschicht erhält keine vorgetäuschte vollständige Move-/Rez-
-Quote. `applyAction` validiert und bezahlt weiterhin die aktuelle LegalAction.
+StateVersion. Version `corp-mobile-ice-move-v2` bindet zusätzlich einen nötigen
+festen Rez und die Credits sowie Agenda-Punkte nach der vollständigen Folge.
+Die Projektion der ungerezzten eigenen Quelle verwendet die bestehenden
+Rez-Kosten- und Post-Rez-Verträge. Agenda-Punkte bezahlt sie auf ihrem eigenen
+State-Klon mit derselben deterministischen Transition
+`game/state/corp-agenda-point-cost.ts` wie die Ausführung. Ungerezzte weitere
+Zielschichten, variable Rezzes und unprojizierte On-Rez-Effekte bleiben
+unvollständig. Die Quote ist Corp-privat; gegnerische Handkarten werden nicht
+projiziert. `applyAction` validiert und bezahlt weiterhin jeden tatsächlich
+angebotenen Schritt erneut.
 
 Die normale Runner-Run-Aktion kann eine akteursprivate
 `runnerPostBreakTrashQuoteJson` tragen. Der Producer

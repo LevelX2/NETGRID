@@ -730,20 +730,25 @@ Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
 
-Der aktuelle Run-Response darf bereits gerezzte mobile ICE aus einem leeren
-Remote-Fort zum angegriffenen Fort bewegen, wenn dort eine bekannte Agenda
-den Runner gewinnen ließe. `mobile-ice-run-defense.ts` konsumiert die aktuelle
+Der aktuelle Run-Response darf mobile ICE aus einem leeren Remote-Fort zum
+angegriffenen Fort bewegen, wenn dort eine bekannte Agenda den Runner gewinnen
+ließe. Für HQ zählen dabei ausschließlich die eigenen bekannten Handkarten.
+Eine ungerezzte Quelle benötigt eine vollständige bezahlbare Engine-Projektion
+von Bewegung und anschließendem festen Rez einschließlich Agenda-Punkt-Kosten.
+`mobile-ice-run-defense.ts` konsumiert die aktuelle
 Engine-Quote `corpMobileIceMoveQuoteJson`: Action, Quelle, beide Forts,
 StateVersion, Zahlung und vollständige öffentliche ICE-Pfade bleiben gebunden.
 Der bisherige Pfad muss erreichbar sein; der neue Pfad muss anhand des
 sichtbaren Runner-Rigs und seiner tatsächlich verfügbaren Run-Zahlungsmittel
 an einer unbezahlbaren ETR scheitern. Der Pfadprüfer darf dabei am belegten
 Stop enden, ohne inneres ICE nochmals zu durchlaufen. Root, Executor, Step und
-Route gehören weiterhin `corp.defend_servers`. Unbekannte oder ungerezzte
-Schichten, unvollständige Quotes, nichtterminale Allokation und ein belegter
+Route gehören weiterhin `corp.defend_servers`, ebenso der später separat
+revalidierte Rez-Schritt. Unbekannte oder weitere ungerezzte Zielschichten,
+unvollständige Quotes, nichtterminale Allokation und ein belegter
 weiterhin bezahlbarer Zugriff eröffnen diese enge Route nicht. Eine Rootkarte
 im Herkunftsfort sperrt sie ebenfalls; allgemeine Umverteilung mit Aufgabe
-anderer Schutzbedarfe bleibt offen. Regression: Paarung 475/R13/G2/D375.
+anderer Schutzbedarfe bleibt offen. Regressionen: Paarung 475/R13/G2/D375 und
+Originalseed-Kontrolle G26/D446 auf `2254ba250`.
 
 ### Vertikale Implementierung
 

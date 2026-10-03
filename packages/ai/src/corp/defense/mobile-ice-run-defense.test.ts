@@ -158,8 +158,134 @@ function apply(state: GameState, action: LegalAction) {
   expect(validateGameState(r.state)).toEqual({ ok: true, errors: [] });
   return r.state;
 }
+function terminalHqFixture(corpCredits = 3, runnerCredits = 4) {
+  const { state, source } = fixture(corpCredits, runnerCredits);
+  // Arrange the public resources and Corp-private HQ of native G26 D446;
+  // the run itself and both movement/rez transitions use real LegalActions.
+  delete state.run;
+  state.activeSide = "runner";
+  state.phase = "runner_action_phase";
+  state.timingPoint = "runner_action.main";
+  const remote = state.corp.servers.find((s) => s.id === "remote_2")!;
+  const agenda = state.cardInstances[remote.root[0]!]!;
+  removeEverywhere(state, agenda.instanceId);
+  agenda.zone = { side: "corp", zone: "hq" };
+  state.corp.hq.push(agenda.instanceId);
+  const runnerRemap = state.runner.scoreArea.find(
+    (id) =>
+      state.cardInstances[id]!.definitionId ===
+      "onr_classic_001_data-fort-remapping",
+  )!;
+  removeEverywhere(state, runnerRemap);
+  state.cardInstances[runnerRemap]!.zone = { side: "corp", zone: "archives" };
+  state.corp.archives.push(runnerRemap);
+  const extraScore = Object.values(state.cardInstances).find(
+    (c) =>
+      c.definitionId === "onr_classic_004_theorem-proof" &&
+      c.zone.zone !== "scoreArea" &&
+      c.instanceId !== agenda.instanceId,
+  )!;
+  removeEverywhere(state, extraScore.instanceId);
+  extraScore.zone = { side: "runner", zone: "scoreArea" };
+  extraScore.faceup = true;
+  state.runner.scoreArea.push(extraScore.instanceId);
+  state.cardInstances[source]!.rezzed = false;
+  state.cardInstances[source]!.faceup = false;
+  const start = getLegalActions(state, "runner").find(
+    (a) => a.type === "start_run" && a.payload?.serverId === "hq",
+  )!;
+  return { state: apply(state, start), source };
+}
 afterEach(resetResidentPlanPortfolioMemory);
 describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
+  it("completes a real move and point-paid rez before terminal HQ access", () => {
+    const { state, source } = terminalHqFixture();
+    const input = inputFor(state);
+    expect(state.cardInstances[source]!.rezzed).toBe(false);
+    expect(state.corp.credits).toBe(3);
+    expect(input.playerView.own.agendaPoints).toBe(4);
+    expect(
+      getPlayerView(state, "runner").servers.find((s) => s.id === "remote_1")!
+        .ice[0]!.known,
+    ).toBe(false);
+    expect(input.playerView.opponent.agendaPoints).toBe(6);
+    const action = input.legalActions.find(
+      (a) => a.source === source && a.payload?.targetServerId === "hq",
+    )!;
+    const quote = JSON.parse(
+      action.payload!.corpMobileIceMoveQuoteJson as string,
+    );
+    expect(quote.continuation).toEqual({
+      requiresRez: true,
+      rezCredits: 0,
+      mandatoryAgendaPoints: 1,
+      corpCreditsAfterDefense: 2,
+      corpAgendaPointsAfterDefense: 3,
+    });
+    // Before the producer/owner correction this offered move had no quote,
+    // and the productive chooser declined the current terminal HQ run.
+    const moved = apply(state, action);
+    const rezInput = inputFor(moved);
+    const rez = rezInput.legalActions.find((a) => a.type === "rez_ice")!;
+    expect(rez).toBeDefined();
+    const rezDecision = chooseAiAction(rezInput);
+    expect(rezDecision.actionId).toBe(rez.actionId);
+    const rezzed = apply(moved, rez);
+    expect(getPlayerView(rezzed, "corp").own.agendaPoints).toBe(3);
+    expect(rezzed.corp.credits).toBe(2);
+    expect(
+      getPlayerView(rezzed, "corp")
+        .servers.find((s) => s.id === "hq")!
+        .ice.map((c) => c.effectiveRunQuote),
+    ).toEqual(quote.afterIce.map((c: any) => c.effectiveRunQuote));
+    resetResidentPlanPortfolioMemory();
+    const decision = chooseAiAction(input);
+    expect(decision.actionId).toBe(action.actionId);
+    expect(
+      decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
+    ).toContain("corp.defend_servers");
+    expect(
+      rezDecision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
+    ).toContain("corp.defend_servers");
+    for (const d of [decision, rezDecision]) {
+      expect(d.fallbackUsed).toBe(false);
+      expect(
+        d.decisionDebug!.planFirstDecision!.leafExecutorInstanceId,
+      ).toContain("corp.defend_servers");
+      expect(d.decisionDebug!.planFirstDecision!.selectedStep).toBeDefined();
+      expect(d.decisionDebug!.planFirstDecision!.route).toBeDefined();
+    }
+  });
+  it("holds an HQ move when the Runner can fund its complete post-rez path", () => {
+    const { state, source } = terminalHqFixture(3, 50),
+      input = inputFor(state);
+    const action = input.legalActions.find(
+      (a) => a.source === source && a.payload?.targetServerId === "hq",
+    )!;
+    expect(assessMobileIceRunDefense(input, action)).toMatchObject({
+      productive: false,
+      evidenceCode: "corp_mobile_ice_does_not_prove_terminal_access_block",
+    });
+    expect(chooseAiAction(input).actionId).not.toBe(action.actionId);
+  });
+  it("does not infer terminal HQ material from hidden R&D or the deck list", () => {
+    const { state, source } = terminalHqFixture();
+    for (const id of state.corp.hq.filter((id) =>
+      state.cardInstances[id]!.definitionId.includes("theorem-proof"),
+    )) {
+      removeEverywhere(state, id);
+      state.cardInstances[id]!.zone = { side: "corp", zone: "rd" };
+      state.corp.rd.push(id);
+    }
+    const input = inputFor(state),
+      action = input.legalActions.find(
+        (a) => a.source === source && a.payload?.targetServerId === "hq",
+      )!;
+    expect(assessMobileIceRunDefense(input, action)).toMatchObject({
+      productive: false,
+      evidenceCode: "corp_mobile_ice_has_no_bound_current_terminal_agenda",
+    });
+  });
   it.each([1, 3])(
     "uses a real Engine move and quote with %i Corp credits",
     (credits) => {
@@ -225,9 +351,11 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       input = inputFor(state);
     expect(move(input)).toBeUndefined();
   });
-  it("does not claim protection for an unrezzed movement source without a complete quote", () => {
+  it("does not claim protection when an unrezzed movement source cannot pay its mandatory point", () => {
     const { state, source } = fixture();
     state.cardInstances[source]!.rezzed = false;
+    for (const id of state.corp.scoreArea)
+      state.cardInstances[id]!.agendaPointsSpent = 2;
     const input = inputFor(state),
       action = move(input);
     expect(action).toBeDefined();
@@ -254,7 +382,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       evidenceCode: "corp_mobile_ice_has_no_bound_current_terminal_agenda",
     });
   });
-  it.each(["state", "action", "target", "json"])(
+  it.each(["state", "action", "target", "json", "payment"])(
     "fails closed on a broken quote binding: %s",
     (broken) => {
       const { state } = fixture(),
@@ -264,6 +392,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       if (broken === "state") q.stateVersion--;
       if (broken === "action") q.actionId = "another-action";
       if (broken === "target") q.targetServerId = "hq";
+      if (broken === "payment") q.continuation.corpAgendaPointsAfterDefense--;
       action.payload!.corpMobileIceMoveQuoteJson =
         broken === "json" ? "{" : JSON.stringify(q);
       expect(() => assessMobileIceRunDefense(input, action)).toThrow(

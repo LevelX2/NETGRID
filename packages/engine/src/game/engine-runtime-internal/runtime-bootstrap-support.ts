@@ -1,3 +1,4 @@
+import { scoredAgendaPointValue } from "../state/corp-agenda-point-cost";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
 import {
@@ -749,14 +750,7 @@ export function agendaPointsForScoredCard(
   state: GameState,
   cardId: CardInstanceId,
 ): number {
-  const definition = definitionFor(state, cardId);
-  const basePoints = definition.agendaPoints ?? 0;
-  const bonusPoints = cardCounter(state, cardId, "agenda");
-  const spentPoints = Math.max(
-    0,
-    Math.floor(state.cardInstances[cardId]?.agendaPointsSpent ?? 0),
-  );
-  return Math.max(0, basePoints + bonusPoints - spentPoints);
+  return scoredAgendaPointValue(state, cardId);
 }
 
 export function spendAgendaPointFromScoredCard(
