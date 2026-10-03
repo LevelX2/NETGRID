@@ -671,6 +671,15 @@ seinem Doctrine-`targetRecoveryTurns`-Horizont verfolgen. Eine bekannte
 zentrale Rez-Reserve darf dabei weder für Installation noch Finanzierung
 verbraucht werden.
 
+Eine unbekannte globale Central-Allokation löscht keine unabhängig bekannten
+lokalen Reserven. Defense prüft eigene Agenda-Bedrohung und aktuelle,
+vollständig gebundene installierte Rez-Quotes beider Zentralen weiterhin.
+Zusätzliche ICE und Upgrade-Platzierungen dürfen weder bereits finanzierte
+noch durch die verbleibenden exakten Basiscredits erreichbare Reserven
+verbrauchen. Der Defense-Owner dispositioniert eine solche Upgrade-Route
+auch vor einer sonst möglichen HQ-Overflow-Konversion. Unbekannte, veraltete
+oder mit unbelegten Zusatzkosten belastete Quotes begründen keine Reserve.
+
 Bei einer konkreten Scoreline beendet der Remote-Parent seinen eigenen Need,
 wechselt nach `leased_to_score_project` und veröffentlicht keinen zweiten
 Schutzauftrag. `corp.score_agenda` erzeugt seinen eigenen Need und prüft das
