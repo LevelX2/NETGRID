@@ -1864,6 +1864,16 @@ Breaker-Nebenkosten werden nicht als garantierte Teilabwehr zertifiziert und
 bleiben bei ihren bestehenden Risiko-/Zahlungsverträgen. Die Trace-Evidence
 nennt Gesamtkosten, Ziele, verhinderte und verbleibende Verluste.
 
+Auch der vorgelagerte Immediate-Safety-Breakguard konsumiert diese exakte
+finanzierte Teilabwehr. Eine unabhängige Trace-Subroutine darf den gequoteten
+Schadens- oder Programm-Break nicht verwerfen, nachdem derselbe Owner dessen
+Pumps zugelassen hat. Andere Breakziele behalten die bestehenden Safety- und
+Pfadprüfungen. Der echte Checkpoint `cp-meta-475-r14-g19-d354-mitigation`
+prüft die Schadens-Breakroute unter unverändertem Root, Executor und
+StateVersion; ein separater Engine-Fall belegt vollständige Zahlung, erhaltene
+Hand und Programme sowie deterministisches Replay. Dieser Mechanikfall ist
+kein Replay des historischen Matches und keine Zusage eines Gesamtsiegs.
+
 Der fokussierte Nachweis liegt in
 `evaluation/decision-checkpoints/match-d0f6-partial-break.test.ts`:
 Die side-sicheren Maintenance-Checkpoints D77/D156 wählten auf dem aktuellen

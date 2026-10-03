@@ -8,6 +8,7 @@ import {
 import { encounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import { isUnacceptableImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
 import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
+import { currentEncounterMitigationForAction } from "./runner-encounter-mitigation";
 
 export type RunnerEncounterViabilityAssessment = {
   canLeadToBreak: boolean;
@@ -205,6 +206,15 @@ function breakMissesAvailableImmediateSafetyThreat(
   action: LegalAction,
   requiredHandFloor?: number,
 ): boolean {
+  // Pump admission and break admission consume the same funded current-loss
+  // projection. An independent trace may remain harmful, but must not reject
+  // the exact damage/program break that the existing run owner is paying for.
+  // Random costs, full-break duties and the access-path assessment stay intact.
+  if (
+    currentEncounterMitigationForAction(input, action, requiredHandFloor)
+      ?.supportsCurrentAction
+  )
+    return false;
   const subroutines =
     currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
   if (!subroutines?.length) return false;
