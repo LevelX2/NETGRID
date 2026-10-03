@@ -76,6 +76,15 @@ ihnen aber nicht zurückimportiert.
   unvollständig; verdeckte Runner-Karten werden nicht ausgewertet.
 - Fort-Pass- und Root-Rez-Fenster teilen nur einen deklarativen Port. Dadurch
   kann keines der Fenster die Implementierung des anderen zurückimportieren.
+- Eine aktuell legale `corp_during_run`-/`corp_paid`-Aktivierung zählt bei
+  Eröffnung und Fortsetzung desselben Corp-Runfensters ebenso wie eine
+  Root-Rez-Aktion. Der Port konsumiert die vorhandene CardImplementation-
+  Aktionserzeugung; er rekonstruiert keine Kartenfähigkeit. Auch bereits
+  gerezztes ICE darf dieses Fenster nicht durch direkten Encounter-Eintritt
+  überspringen. Der gebundene Corp-Pass schließt die Aktivierungsangebote
+  für dieselbe Runposition, bevor die Runner-Fortsetzung wieder legal wird.
+  Ein leeres Fort mit scored Run-Abbruchfähigkeit erhält denselben Vertrag.
+  Regression: Paarung 475, Kontrollrunde 2, G15 nach D285/D288.
 - Gleichzeitig offene Aktivierungstimings werden gemeinsam an die
   CardImplementation-Aktionserzeugung übergeben. Jede gebundene Fähigkeit
   wird einmal über ihr erstes zulässiges Timing angeboten, einschließlich

@@ -55,6 +55,18 @@ aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
 Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
 niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
+Eine Matchpointagenda darf auch auf dem letzten Klick installiert werden,
+wenn die aktuelle, exakt an Agenda und Zielserver gebundene Engine-Quote den
+Abschluss im nächsten Corp-Zug bestätigt und der Defense-Owner bereits
+finanzierten Schutz unter Erhalt der vollständigen Score-Creditreserve
+zertifiziert. Der gequotete Agendapunktestand nach der Defense muss zusammen
+mit dem Score weiterhin zum Sieg reichen. Fehlende oder veraltete Quotes,
+unzureichende nächste Action Capacity, fehlende Finanzierung und ein durch
+Rez-Punktkosten verlorener Matchpoint öffnen diese Zulassung nicht. Das ist
+eine reguläre Fortentwicklung desselben Score-Parents; der nächste Zustand
+wird nach Installation und Gegnerzug erneut validiert. Regression:
+Paarung 475, Kontrollrunde 2, G20 D355.
+
 Innerhalb derselben Prioritätsklasse bewertet der Score-Owner einen aktuell
 ausführbaren Abschluss höher als bloßes Advancement unter Expositionsdruck.
 Die Bedrohung einer zweiten Agenda rechtfertigt keine Verteilung der letzten

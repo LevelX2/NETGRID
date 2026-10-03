@@ -415,6 +415,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           selectedChoiceIds(selectedChoices),
       },
       callbacks: {
+        corpDuringRunCardImplementationLegalActions: () =>
+          host.run.corpDuringRunCardImplementationLegalActions(state),
         continueAfterRootRez: (legalAction) => {
           const run = state.run;
           if (

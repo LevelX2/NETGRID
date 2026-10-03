@@ -17,6 +17,7 @@ import {
   installRunnerProgramForTest,
   ONR_V1_0_5K_RUNNER_DECK,
   putCorpCardOnTopOfRd,
+  putCorpIceOnServer,
   putCorpRootInRemote,
   removeEverywhere,
   toRunnerTurnFromCorpMain,
@@ -90,88 +91,138 @@ function scoreClassicAgenda(
 }
 
 describe("Classic Agenda Implementation Smokes", () => {
-  it("scores Data Fort Remapping with a Remap counter that can end a run", () => {
-    let state = corpMainClassicAgendaGame("classic-data-fort-remapping");
-    const scored = scoreClassicAgenda(state, DATA_FORT_REMAPPING, 4);
-    state = scored.state;
-
-    expect(cardCounterAmount(state, scored.agendaId, "remap")).toBe(1);
-    for (const side of ["corp", "runner"] as const) {
-      const view = getPlayerView(state, side);
-      const scoreArea =
-        side === "corp" ? view.own.scoreArea : view.opponent.scoreArea;
+  it.each([false, true])(
+    "closes a declined scored ability window before Runner continuation (rezzed ICE: %s)",
+    (rezzedIce) => {
+      let state = corpMainClassicAgendaGame(`classic-remap-pass-${rezzedIce}`);
+      state = scoreClassicAgenda(state, DATA_FORT_REMAPPING, 4).state;
+      state = toRunnerTurnFromCorpMain(state);
+      if (rezzedIce) {
+        const ice = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[ice]!.rezzed = true;
+        state.cardInstances[ice]!.faceup = true;
+      }
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const pass = getLegalActions(state, "corp").find(
+        (a) => a.type === "decline_rez",
+      )!;
+      expect(pass).toBeDefined();
+      expect(getLegalActions(state, "runner")).toEqual([]);
+      state = apply(state, "corp", (a) => a.actionId === pass.actionId);
+      expect(getLegalActions(state, "corp")).toEqual([]);
+      expect(getLegalActions(state, "runner").length).toBeGreaterThan(0);
       expect(
-        scoreArea.find((card) => card.instanceId === scored.agendaId)
-          ?.counterDisplays,
+        getPlayerView(state, "corp").own.scoreArea.find(
+          (c) => c.definitionId === DATA_FORT_REMAPPING,
+        )?.counterDisplays,
       ).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({
-            id: "remap",
-            counterType: "remap",
-            amount: 1,
-          }),
+          expect.objectContaining({ counterType: "remap", amount: 1 }),
         ]),
       );
-    }
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "score_agenda",
-      cardDefinitionId: DATA_FORT_REMAPPING,
-      addedCounterAmount: 1,
-      counterType: "remap",
-    });
+    },
+  );
+  it.each([false, true])(
+    "scores Data Fort Remapping and offers its counter before Runner continuation (rezzed ICE: %s)",
+    (rezzedIce) => {
+      let state = corpMainClassicAgendaGame("classic-data-fort-remapping");
+      const scored = scoreClassicAgenda(state, DATA_FORT_REMAPPING, 4);
+      state = scored.state;
 
-    state = toRunnerTurnFromCorpMain(state);
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "rd",
-    );
-    const runAbility = getLegalActions(state, "corp").find(
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardId === scored.agendaId,
-    );
-    expect(runAbility).toBeDefined();
-    if (!runAbility)
-      throw new Error("Missing Data Fort Remapping run ability.");
-    expect(runAbility.payload).toMatchObject({
-      cardImplementationAbilityTiming: "corp_during_run",
-      cardImplementationEffectKind: "end_run",
-      cardImplementationSourceCounterType: "remap",
-      cardImplementationSourceCounterCost: 1,
-    });
+      expect(cardCounterAmount(state, scored.agendaId, "remap")).toBe(1);
+      for (const side of ["corp", "runner"] as const) {
+        const view = getPlayerView(state, side);
+        const scoreArea =
+          side === "corp" ? view.own.scoreArea : view.opponent.scoreArea;
+        expect(
+          scoreArea.find((card) => card.instanceId === scored.agendaId)
+            ?.counterDisplays,
+        ).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: "remap",
+              counterType: "remap",
+              amount: 1,
+            }),
+          ]),
+        );
+      }
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "score_agenda",
+        cardDefinitionId: DATA_FORT_REMAPPING,
+        addedCounterAmount: 1,
+        counterType: "remap",
+      });
 
-    state = apply(
-      state,
-      "corp",
-      (action) => action.actionId === runAbility.actionId,
-    );
-
-    expect(state.run).toBeUndefined();
-    expect(cardCounterAmount(state, scored.agendaId, "remap")).toBe(0);
-    for (const side of ["corp", "runner"] as const) {
-      const view = getPlayerView(state, side);
-      const scoreArea =
-        side === "corp" ? view.own.scoreArea : view.opponent.scoreArea;
-      expect(
-        scoreArea.find((card) => card.instanceId === scored.agendaId)
-          ?.counterDisplays ?? [],
-      ).not.toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ counterType: "remap" }),
-        ]),
+      state = toRunnerTurnFromCorpMain(state);
+      if (rezzedIce) {
+        const ice = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[ice]!.rezzed = true;
+        state.cardInstances[ice]!.faceup = true;
+      }
+      const initial = structuredClone(state);
+      const eventStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
       );
-    }
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "activated_card_ability",
-      cardDefinitionId: DATA_FORT_REMAPPING,
-      cardImplementationSourceCounterType: "remap",
-      cardImplementationSourceCounterCost: 1,
-      runEnded: true,
-      runSuccessful: false,
-    });
-  });
+      const runAbility = getLegalActions(state, "corp").find(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === scored.agendaId,
+      );
+      expect(runAbility).toBeDefined();
+      if (!runAbility)
+        throw new Error("Missing Data Fort Remapping run ability.");
+      expect(getLegalActions(state, "runner")).toEqual([]);
+      expect(runAbility.payload).toMatchObject({
+        cardImplementationAbilityTiming: "corp_during_run",
+        cardImplementationEffectKind: "end_run",
+        cardImplementationSourceCounterType: "remap",
+        cardImplementationSourceCounterCost: 1,
+      });
+
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === runAbility.actionId,
+      );
+
+      expect(state.run).toBeUndefined();
+      expect(cardCounterAmount(state, scored.agendaId, "remap")).toBe(0);
+      for (const side of ["corp", "runner"] as const) {
+        const view = getPlayerView(state, side);
+        const scoreArea =
+          side === "corp" ? view.own.scoreArea : view.opponent.scoreArea;
+        expect(
+          scoreArea.find((card) => card.instanceId === scored.agendaId)
+            ?.counterDisplays ?? [],
+        ).not.toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ counterType: "remap" }),
+          ]),
+        );
+      }
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "activated_card_ability",
+        cardDefinitionId: DATA_FORT_REMAPPING,
+        cardImplementationSourceCounterType: "remap",
+        cardImplementationSourceCounterCost: 1,
+        runEnded: true,
+        runSuccessful: false,
+      });
+      const replay = replayEvents(initial, state.eventLog.slice(eventStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    },
+  );
 
   it("scores Superserum by purging runner virus counters and banking two prevention charges", () => {
     let state = corpMainClassicAgendaGame("classic-superserum");

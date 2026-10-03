@@ -308,7 +308,10 @@ export function buildCorpRunRootRezWindowActions(
 export function corpRunRootRezActionsAvailable(
   host: RunRezWindowHost,
 ): boolean {
-  return buildCorpRunRootRezActions(host).length > 0;
+  return (
+    buildCorpRunRootRezActions(host).length > 0 ||
+    host.callbacks.corpDuringRunCardImplementationLegalActions().length > 0
+  );
 }
 
 export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
@@ -324,14 +327,15 @@ export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
         run,
         server,
         "corp_fort_pass_window",
-      ).length > 0
+      ).length > 0 ||
+      host.callbacks.corpDuringRunCardImplementationLegalActions().length > 0
     );
   }
   if (host.state.timingPoint !== "run.movement_rez_window") return false;
   const key = corpRunRootRezWindowKey(run);
   if (run.rootRezWindowPassedKeys?.includes(key)) return false;
   if (run.rootRezWindowPendingPassKeys?.includes(key)) return true;
-  return buildCorpRunRootRezActions(host).length > 0;
+  return corpRunRootRezActionsAvailable(host);
 }
 
 export function corpRunFortPassWindowKey(run: ActiveRun): string {
