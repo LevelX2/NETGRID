@@ -343,7 +343,7 @@ export function corpRunDefenseAbilityAssessment(
     const currentCredits = input.playerView.own.credits;
     const server = input.playerView.servers.find((s) => s.id === serverId);
     const ice =
-      run?.position.kind === "ice" &&
+      run?.position?.kind === "ice" &&
       run.position.serverId === serverId &&
       Number.isSafeInteger(run.position.iceIndex)
         ? server?.ice[run.position.iceIndex]

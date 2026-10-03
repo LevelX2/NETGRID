@@ -120,6 +120,9 @@ it("binds a nonagenda discard through the existing hand owner and replays the na
     state.pendingChoice!.choiceId,
   );
   const options = decision.selectedChoices!.selectedOptionIds;
+  if (!Array.isArray(options) || decision.selectedChoices === undefined) {
+    throw Error("exact_discard_options_required");
+  }
   expect(options).toHaveLength(1);
   const selected = state.pendingChoice!.options.find(
     (o) => o.id === options[0],

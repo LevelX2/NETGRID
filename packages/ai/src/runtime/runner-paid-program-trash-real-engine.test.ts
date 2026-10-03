@@ -126,11 +126,19 @@ it("keeps mandatory MU replacement executable across native recurring-credit pay
     side: "runner",
     actionId: native!.actionId,
     clientKnownStateVersion: state.stateVersion,
-    selectedChoices: decision.selectedChoices,
+    ...(decision.selectedChoices !== undefined
+      ? { selectedChoices: decision.selectedChoices }
+      : {}),
   });
   if (!started.ok) throw Error(started.error.message);
   expect(started.state.pendingChoice).toBeDefined();
   const choice = chooseRunnerAction(input(started.state));
+  const nativeChoice = getLegalActions(started.state, "runner").find(
+    (action) => action.actionId === choice.actionId,
+  );
+  if (!nativeChoice || choice.selectedChoices === undefined) {
+    throw Error("exact_program_trash_choice_required");
+  }
   expect(
     choice.decisionDebug?.planFirstDecision?.executionOrigin.leafPlanInstanceId,
   ).toBe(decision.decisionDebug!.planFirstDecision!.leafExecutorInstanceId);
@@ -140,7 +148,7 @@ it("keeps mandatory MU replacement executable across native recurring-credit pay
   const resolved = applyAction(started.state, {
     matchId: started.state.matchId,
     side: "runner",
-    actionId: choice.actionId,
+    actionId: nativeChoice.actionId,
     clientKnownStateVersion: started.state.stateVersion,
     selectedChoices: choice.selectedChoices,
   });
@@ -171,7 +179,9 @@ it("retains the direct native install when no MU sacrifice is required", () => {
     side: "runner",
     actionId: native.actionId,
     clientKnownStateVersion: state.stateVersion,
-    selectedChoices: decision.selectedChoices,
+    ...(decision.selectedChoices !== undefined
+      ? { selectedChoices: decision.selectedChoices }
+      : {}),
   });
   if (!result.ok) throw Error(result.error.message);
   expect(result.state.pendingChoice).toBeUndefined();

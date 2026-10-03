@@ -82,9 +82,9 @@ describe("selectedCorpDiscardChoiceOptionIds", () => {
   it("fails closed when an existing reachable Archives agenda has unknown points", () => {
     const unknown = {
       ...agenda("unknown-existing", 2),
-      agendaPoints: undefined,
       definitionId: "unknown-existing-definition",
-    } as VisibleCard;
+    } satisfies VisibleCard;
+    delete (unknown as VisibleCard).agendaPoints;
     const input = discardInput(
       [agenda("agenda-1", 2), operation("operation-1")],
       { count: 1, archivesCards: [unknown] },
