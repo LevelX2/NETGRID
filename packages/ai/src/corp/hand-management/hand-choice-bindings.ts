@@ -521,7 +521,7 @@ function corpHandChoiceSelection(
       unresolvedActionIds: [resolveAction.actionId],
       owner: "plan_module",
       removalCondition:
-        "The Corp hand plan requires known agenda points for every agenda in the exact discard batch; unknown cleanup exposure must remain fail-closed.",
+        "The Corp hand plan requires known agenda points for the exact discard batch and existing reachable own Archives; unknown cleanup exposure must remain fail-closed.",
     });
   }
   const selectedOptionIds =

@@ -338,22 +338,34 @@ export function corpRunDefenseAbilityAssessment(
     legalAction.payload?.cardImplementationAbilityKey ===
       "during_run_discard_for_two_run_credits";
   if (isRunCreditReserve) {
-    const serverId = input.playerView.run?.attackedServerId ?? "unknown";
+    const run = input.playerView.run;
+    const serverId = run?.attackedServerId ?? "unknown";
     const currentCredits = input.playerView.own.credits;
-    const currentRezCosts = input.legalActions
-      .filter(
-        (action) =>
-          action.side === "corp" &&
-          action.type === "rez_ice" &&
-          action.expiresAtStateVersion === input.playerView.stateVersion,
-      )
-      .map((action) => legalActionCreditCost(action))
-      .filter(
-        (credits): credits is number =>
-          typeof credits === "number" &&
-          Number.isSafeInteger(credits) &&
-          credits >= 0,
-      );
+    const server = input.playerView.servers.find((s) => s.id === serverId);
+    const ice =
+      run?.position.kind === "ice" &&
+      run.position.serverId === serverId &&
+      Number.isSafeInteger(run.position.iceIndex)
+        ? server?.ice[run.position.iceIndex]
+        : undefined;
+    const quote = ice?.effectiveRezCostQuote;
+    // Unaffordable rezzes have no LegalAction yet. The current installed ICE
+    // still has an Engine cost quote; use that bound fact to admit its funding.
+    const currentRezCosts =
+      input.playerView.timingPoint === "run.approach_ice" &&
+      ice?.known === true &&
+      !ice.rezzed &&
+      quote?.context === "installed" &&
+      quote.complete === true &&
+      quote.costKind === "fixed" &&
+      quote.cardId === ice.instanceId &&
+      quote.targetServerId === serverId &&
+      quote.projectedServerId === serverId &&
+      quote.expiresAtStateVersion === input.playerView.stateVersion &&
+      quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
+      isFiniteNonNegativeInteger(quote.finalCredits)
+        ? [quote.finalCredits]
+        : [];
     const exactFundingGap = currentRezCosts
       .map((rezCost) => rezCost - currentCredits)
       .filter((gap) => gap > 0 && gap <= 2)

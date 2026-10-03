@@ -442,6 +442,56 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     expectReplayStable(beforeCleanup, state);
   });
 
+  it.each([1, 3])(
+    "spends the run-credit pool once on native ICE rez after %i grants",
+    (grants) => {
+      let state = baseState(`pro016-boot-rez-${grants}`);
+      const boot = addCorpRoot(
+        state,
+        EXECUTIVE_BOOT_CAMP,
+        "boot_rez",
+        "remote_1",
+        true,
+      );
+      const wall = addCorpIce(state, WALL, "boot_rez_wall", "remote_1", false);
+      addCorpHq(state, SCORCHED_EARTH, "boot_rez_hq");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.serverId === "remote_1",
+      );
+      const before = state;
+      for (let i = 0; i < grants; i++)
+        state = apply(
+          state,
+          "corp",
+          (action) =>
+            action.type === "activated_card_ability" && action.source === boot,
+        );
+      const rez = mustAction(
+        state,
+        "corp",
+        (action) => action.type === "rez_ice" && action.source === wall,
+      );
+      const cost = rez.costs.reduce((sum, c) => sum + (c.credits ?? 0), 0);
+      expect(cost).toBe(3);
+      state = applyLegal(state, "corp", rez.actionId);
+      expect(state.corp.credits).toBe(20 + grants * 2 - cost);
+      expect(state.run?.corpRunTemporaryCredits?.remaining).toBe(
+        Math.max(0, grants * 2 - cost),
+      );
+      expectReplayStable(before, state);
+      state.timingPoint = "run.jack_out_window";
+      const beforeCleanup = state;
+      state = jackOut(state);
+      expect(state.corp.credits).toBe(20 - Math.max(0, cost - grants * 2));
+      expect(state.run).toBeUndefined();
+      expectReplayStable(beforeCleanup, state);
+    },
+  );
+
   it("removes unspent Executive Boot Camp credits at run end without leaving a post-run pool", () => {
     let state = baseState("pro016-boot-camp-unspent-cleanup");
     const bootCamp = addCorpRoot(

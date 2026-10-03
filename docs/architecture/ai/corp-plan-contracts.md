@@ -1199,6 +1199,16 @@ Interne Bedarfe und Steps:
 - `harden_target_remote`;
 - `restore_rez_reserve`.
 
+Aktivierte Runcredits dürfen eine aktuelle Rezlücke finanzieren, auch wenn
+die unbezahlbare Rezaktion noch nicht in `LegalActions` enthalten ist.
+`corp.defend_servers` verwendet dafür ausschließlich den vollständigen,
+aktuellen Engine-Quote der gerade angegriffenen, ungerezzten installierten
+ICE. Instanz, Server und StateVersion müssen übereinstimmen; variable oder
+zusätzliche Agendapunktkosten begründen keinen behaupteten Finanzierungsweg.
+Nach der tatsächlichen Finanzierungsaktion wird die Rezaktion aus den neuen
+`LegalActions` gewählt. HQ-Verlust und ungenutzte, am Runende verfallende
+Credits bleiben Kosten dieses Weges.
+
 `restore_rez_reserve` ist kein eigener Plan und keine dauerhafte pauschale
 „Zentralreserve“. Es ist ausschließlich ein interner, endlicher
 Ressourcenbedarf von `corp.defend_servers`. Score- und Remote-Parents können
@@ -2031,6 +2041,17 @@ für das Ziel Archives; eine R&D-Rückführung bleibt separat bewertet. Cleanup
 verwendet dieselbe Disposition, behält konkrete Parent-Bindungen und den
 Schutz vor entscheidender Agenda-Exposition aber bei. Weder Installation noch
 garantierter Zugriffsschaden werden aus einer Ambush-Rolle abgeleitet.
+
+Bei unmittelbar offenen Archives bewertet der bestehende Discard-Plan die
+bekannten Agendapunkte aus eigenen Archives zusammen mit Runnerpunkten und
+dem gesamten neuen Discard-Batch. Eine dadurch sofort siegentscheidende
+Exposition hat Vorrang vor einer Nichtagenda-Retention; der Schutz konkreter
+Planbindungen bleibt für nichtterminale Abwürfe erhalten. Unbekannte
+Agendapunkte in diesem erreichbaren Zielgebiet scheitern fail-closed. Die
+bereits ausgewählte Handplaninstanz bindet weiter genau dieselbe
+Engine-Choice, Action und StateVersion; der Payload-Resolver bewertet nicht
+erneut und öffentliche Archives-Spiegel ersetzen die eigene Zonenprojektion
+nicht.
 
 Das Modul darf Hidden-Info nur aus der eigenen HQ/R&D und öffentlichen
 Ereignissen verwenden.

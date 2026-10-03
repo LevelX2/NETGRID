@@ -22,6 +22,7 @@ import { executeCardImplementationEffects } from "../../ability-engine/effect-in
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
+import { quoteCorpIceInstallCost } from "../../game/payment/corp-rez-cost";
 import { publicContextForAction } from "../../public-context";
 import {
   MECHANIC_SMOKE_CARD_IDS,
@@ -1254,6 +1255,10 @@ describe("V1.8.1 Mechanikpaket H", () => {
     );
     expect(rdInstall.costs[0]?.credits).toBe(3);
     expect(rdInstall.payload?.iceInstallAdditionalCost).toBe(3);
+    expect(rdInstall.payload?.iceInstallReduction).toBe(0);
+    expect(rdInstall.payload?.iceInstallIncreaseSourceDefinitionIds).toBe(
+      "onr_v1_173_restrictive-net-zoning",
+    );
   });
 
   it("applies Restrictive Net Zoning as a +2 ICE install tax only on the chosen fort", () => {
@@ -1306,8 +1311,29 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(sameFortInstall.costs[0]).toMatchObject({ clicks: 1, credits: 2 });
     expect(sameFortInstall.payload).toMatchObject({
       iceInstallAdditionalCost: 2,
+      iceInstallReduction: 0,
+      iceInstallIncreaseSourceDefinitionIds:
+        "onr_v1_173_restrictive-net-zoning",
       iceInstallTotalCost: 2,
     });
+    expect(
+      sameFortInstall.payload?.iceInstallReductionSourceDefinitionIds,
+    ).toBeUndefined();
+    const quote = quoteCorpIceInstallCost(
+      state,
+      sameFortIceId,
+      state.corp.servers.find((server) => server.id === "rd")!,
+    );
+    expect(quote.modifiers).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: restrictiveCardId,
+        sourceDefinitionId: "onr_v1_173_restrictive-net-zoning",
+        amount: 2,
+        kind: "increase",
+      }),
+    ]);
+    expect(quote.publicPayload.iceInstallReduction).toBe(0);
+    expect(quote.finalCredits).toBe(sameFortInstall.costs[0]?.credits);
 
     const stale = structuredClone(state);
     stale.runner.rig.resources = stale.runner.rig.resources.filter(

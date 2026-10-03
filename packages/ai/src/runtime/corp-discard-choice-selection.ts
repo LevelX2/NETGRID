@@ -23,8 +23,8 @@ export type CorpDiscardBatchSelection = {
  * Selects the exact discard payload for the already-owned Corp hand plan.
  *
  * This is deliberately a hand-plan policy rather than a generic choice
- * resolver. It preserves plan-bound cards first, then evaluates the cleanup
- * batch against the points it would expose in immediately reachable Archives.
+ * resolver. It rejects avoidable terminal Archives exposure before preserving
+ * plan-bound cards and comparing the remaining cleanup candidates.
  */
 export function selectedCorpDiscardChoiceOptionIds(
   input: AiDecisionInput,
@@ -55,6 +55,15 @@ export function selectedCorpDiscardChoiceOptionIds(
       exposedAgendaPoints: 0,
       terminalAgendaExposure: false,
     };
+  }
+
+  let archivesAgendaPoints = 0;
+  if (archivesReachable) {
+    for (const card of input.playerView.own.heapOrArchives) {
+      const points = card.known ? visibleAgendaPoints(card) : undefined;
+      if (points === undefined) return undefined;
+      archivesAgendaPoints += points;
+    }
   }
 
   const handByInstanceId = new Map(
@@ -91,6 +100,7 @@ export function selectedCorpDiscardChoiceOptionIds(
           left,
           right,
           archivesReachable,
+          archivesAgendaPoints,
           exposedAgendaPoints,
           runnerAgendaPoints: input.playerView.opponent.agendaPoints,
           agendaPointsToWin: input.playerView.agendaPointsToWin,
@@ -117,7 +127,9 @@ export function selectedCorpDiscardChoiceOptionIds(
     exposedAgendaPoints,
     terminalAgendaExposure:
       archivesReachable &&
-      input.playerView.opponent.agendaPoints + exposedAgendaPoints >=
+      input.playerView.opponent.agendaPoints +
+        archivesAgendaPoints +
+        exposedAgendaPoints >=
         input.playerView.agendaPointsToWin,
   };
 }
@@ -134,19 +146,23 @@ function compareCorpDiscardCandidates(params: {
     score: DiscardChoiceKeepScore;
   };
   archivesReachable: boolean;
+  archivesAgendaPoints: number;
   exposedAgendaPoints: number;
   runnerAgendaPoints: number;
   agendaPointsToWin: number;
 }): number {
+  const leftExposure = discardExposureCost(params, params.left.agendaPoints);
+  const rightExposure = discardExposureCost(params, params.right.agendaPoints);
+  const terminalDifference =
+    Number(leftExposure.terminal) - Number(rightExposure.terminal);
+  if (terminalDifference !== 0) return terminalDifference;
+
   const protectionDifference =
     discardProtectionRank(params.left.score.planDisposition) -
     discardProtectionRank(params.right.score.planDisposition);
   if (protectionDifference !== 0) return protectionDifference;
 
-  const leftExposure = discardExposureCost(params, params.left.agendaPoints);
-  const rightExposure = discardExposureCost(params, params.right.agendaPoints);
   return (
-    Number(leftExposure.terminal) - Number(rightExposure.terminal) ||
     params.left.score.total +
       leftExposure.keepPenalty -
       (params.right.score.total + rightExposure.keepPenalty) ||
@@ -158,25 +174,28 @@ function compareCorpDiscardCandidates(params: {
 function discardExposureCost(
   params: {
     archivesReachable: boolean;
+    archivesAgendaPoints: number;
     exposedAgendaPoints: number;
     runnerAgendaPoints: number;
     agendaPointsToWin: number;
   },
   candidateAgendaPoints: number,
 ): { terminal: boolean; keepPenalty: number } {
-  if (!params.archivesReachable || candidateAgendaPoints <= 0) {
+  if (!params.archivesReachable) {
     return { terminal: false, keepPenalty: 0 };
   }
   const projectedExposedPoints =
     params.exposedAgendaPoints + candidateAgendaPoints;
   return {
     terminal:
-      params.runnerAgendaPoints + projectedExposedPoints >=
+      params.runnerAgendaPoints +
+        params.archivesAgendaPoints +
+        projectedExposedPoints >=
       params.agendaPointsToWin,
     // This is intentionally finite: a nonterminal agenda may still be the
     // correct discard when every alternative protects a materially stronger
     // current route. Terminal exposure is the separate strict batch guard.
-    keepPenalty: candidateAgendaPoints * 180,
+    keepPenalty: candidateAgendaPoints > 0 ? candidateAgendaPoints * 180 : 0,
   };
 }
 
@@ -186,7 +205,12 @@ function visibleAgendaPoints(card: VisibleCard): number | undefined {
     : undefined;
   const type = card.type ?? definition?.type;
   if (type !== "agenda") return 0;
-  return card.agendaPoints ?? definition?.agendaPoints;
+  const points = card.agendaPoints ?? definition?.agendaPoints;
+  return typeof points === "number" &&
+    Number.isSafeInteger(points) &&
+    points >= 0
+    ? points
+    : undefined;
 }
 
 function discardProtectionRank(

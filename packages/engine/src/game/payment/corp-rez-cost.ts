@@ -1321,7 +1321,7 @@ function corpInstallCostModifierQuoteForMatch(
     sourceDefinitionId,
     label: sourceDefinition?.title ?? sourceDefinitionId,
     amount: modifier.amount,
-    kind: "reduction",
+    kind: modifier.operation === "increase" ? "increase" : "reduction",
   };
 }
 
