@@ -1963,6 +1963,25 @@ abzüglich der kanonischen Rezkosten. Dafür müssen Initialisierung, Menge und
 Ziel `source` belegt sein; fehlender Rezzustand erzeugt keinen Zukunftspool.
 Fehlende kanonische Kartendaten scheitern strukturiert.
 
+Die bekannte Zugriffsbewertung trennt einen aktuell aktiven Effekt von einem
+möglichen Effekt nach einer späteren Rezaktivierung. Vor einem angebotenen
+Basisrun und am letzten Abbruchfenster darf sie bei einem tatsächlich
+beobachteten ungerezzten Asset oder Upgrade die kanonische Rezvariante mit
+dem öffentlichen Basiskreditpreis als Risiko bewerten. Eine zusätzliche
+optionale Effektzahlung wird erst aus dem verbleibenden Corp-Pool bewertet.
+Das ist kein zukünftiges LegalAction- oder Kostenquote-Zertifikat; die
+Engine revalidiert jede tatsächliche Rezaktivierung. Aktuelle Effektconsumer
+erhalten weiterhin ausschließlich die im jetzigen Rezzustand aktive Variante.
+
+Ein bekannter Nicht-Agenda-Trash-Ertrag rechtfertigt dabei keinen Zugriff,
+der eine gesamte vorhandene Breaker-Abdeckung zerstören kann. Der gemeinsame
+Effektproducer leitet die bedrohten Klassen aus den tatsächlich installierten
+kanonischen Breakern und der legalen Effektzielmenge ab. Zwei unabhängige
+Provider gegen einen einzelnen Programmtrash sind kein vollständiger
+Coverageverlust. Unbeobachtete Root-Identitäten werden nicht geraten; eine
+echte Rootersetzung invalidiert weiterhin das Positionsgedächtnis. Auswahl
+und Ablehnung bleiben beim bestehenden Remote-Owner, nicht beim Choiceresolver.
+
 Die reine Trash-Bewertung liegt unter `access/`; der Runtime-Adapter bindet
 sie an die tatsächlich angebotene Trash-Action und deren zweckgebundene
 Credit-Quote. Wiederkehrende Draw-Tag-Effekte werden über die kanonische
@@ -2214,6 +2233,15 @@ Phase, Node, Lease, Parent und die lückenlose Run-/Rez-Ereigniskette. Die
 letzte freiwillige Entscheidung muss dabei nicht unmittelbar vor dem
 auslösenden Subroutinenfenster liegen; verpflichtende Engine-Fenster eröffnen
 keinen neuen strategischen Owner.
+
+Die Herkunftskette beginnt am Zustand der zuletzt ausgeführten Lease-Aktion,
+nicht am späteren Beobachtungszustand des Portfolios. Der bestehende Owner
+prüft weiterhin Commitment, Source-Plan, Phase, Node, Lease-Zustand, aktuelle
+Run-ID, Quellkarte und vollständigen Choicevertrag. Native verpflichtende
+Corp-Decline-Fenster dürfen in dieser lückenlosen Run-Kette ohne eigenes
+Serverfeld vorkommen; sie ändern keinen Run. Jedes vorhandene Serverfeld muss
+zum behaltenen Run passen. Lücken, fremde Aktionen oder widersprüchliche
+Lease-Bindungen eröffnen keine Fortsetzung.
 
 Die Zufallsbruchquote addiert zum Fehlschaden den direkten Schaden aller
 noch offenen Encounter-Subroutinen. Maßgeblich sind die exakten

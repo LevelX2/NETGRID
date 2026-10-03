@@ -1,5 +1,11 @@
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { icebreakerAbilitiesForDefinition } from "@netgrid/engine";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import {
+  breakerCardBlocksAccessReachability,
+  classifyBreakerCoverageFromOntology,
+} from "../breaker-ontology-consumer";
 
 export type KnownCorpCardAccessEffectProjection = {
   status: "complete" | "not_applicable" | "unknown";
@@ -14,6 +20,7 @@ export type KnownCorpCardAccessEffectProjection = {
   };
   tags?: number;
   installedProgramTrash?: number;
+  runnerCoverageAtRisk?: ("wall" | "code_gate" | "sentry")[];
   installedHardwareTrash?: number;
   relevantVisibleTargetCount?: number;
   threatValue: number;
@@ -158,6 +165,7 @@ export function projectKnownCorpCardAccessEffect(params: {
   let installedProgramTrash = 0;
   let installedHardwareTrash = 0;
   let relevantVisibleTargetCount = 0;
+  const coverageAtRisk = new Set<"wall" | "code_gate" | "sentry">();
   let threatValue = 0;
   let unsupported = false;
   for (const effect of accessEffect.effects) {
@@ -198,18 +206,27 @@ export function projectKnownCorpCardAccessEffect(params: {
       continue;
     }
     if (effect.kind === "trash_installed_runner_cards") {
-      const targetCount = runnerRig.filter((card) =>
+      const targets = runnerRig.filter((card) =>
         effect.target === "daemon"
           ? card.subtypes?.includes("daemon") === true
           : card.type === effect.target,
-      ).length;
+      );
+      const targetCount = targets.length;
       const amount =
         typeof effect.amount === "number" ? effect.amount : counters;
       const materialTargets = Math.min(amount, targetCount);
       relevantVisibleTargetCount += targetCount;
       if (effect.target === "hardware")
         installedHardwareTrash += materialTargets;
-      else installedProgramTrash += materialTargets;
+      else {
+        installedProgramTrash += materialTargets;
+        for (const kind of threatenedInstalledCoverage(
+          runnerRig,
+          targets,
+          materialTargets,
+        ))
+          coverageAtRisk.add(kind);
+      }
       threatValue += materialTargets * VISIBLE_TRASH_VALUE_PER_TARGET;
       evidence.push(
         `known_access_effect_visible_${effect.target}_targets:${targetCount}`,
@@ -224,7 +241,14 @@ export function projectKnownCorpCardAccessEffect(params: {
         (card) => card.type === "program",
       ).length;
       installedHardwareTrash += hardwareCount;
-      installedProgramTrash += Math.min(effect.programAmount, programCount);
+      const programTrash = Math.min(effect.programAmount, programCount);
+      installedProgramTrash += programTrash;
+      for (const kind of threatenedInstalledCoverage(
+        runnerRig,
+        runnerRig.filter((card) => card.type === "program"),
+        programTrash,
+      ))
+        coverageAtRisk.add(kind);
       relevantVisibleTargetCount += hardwareCount + programCount;
       threatValue +=
         (installedHardwareTrash + installedProgramTrash) *
@@ -239,6 +263,19 @@ export function projectKnownCorpCardAccessEffect(params: {
     evidence.push(`known_access_effect_unsupported:${effect.kind}`);
   }
 
+  if (
+    installedProgramTrash > 0 &&
+    runnerRig.some(
+      (card) =>
+        card.type === "program" &&
+        (!card.known ||
+          !card.definitionId ||
+          !CARD_DEFINITIONS_BY_ID[card.definitionId]),
+    )
+  ) {
+    unsupported = true;
+    evidence.push("known_access_effect_installed_program_definition_unknown");
+  }
   if (damage?.runnerSurvivable === false) {
     threatValue += DAMAGE_VALUE_PER_POINT * 4;
     evidence.push("known_access_effect_damage_lethal");
@@ -255,6 +292,9 @@ export function projectKnownCorpCardAccessEffect(params: {
     ...(tags > 0 ? { tags } : {}),
     ...(installedProgramTrash > 0 ? { installedProgramTrash } : {}),
     ...(installedHardwareTrash > 0 ? { installedHardwareTrash } : {}),
+    ...(coverageAtRisk.size > 0
+      ? { runnerCoverageAtRisk: [...coverageAtRisk] }
+      : {}),
     ...(relevantVisibleTargetCount > 0 ||
     accessEffect.effects.some(
       (effect) =>
@@ -306,4 +346,119 @@ function result(
   evidenceCodes: string[],
 ): KnownCorpCardAccessEffectProjection {
   return { status, sourceDefinitionId, threatValue, evidenceCodes };
+}
+
+/** Risk projection at the public canonical base price; never a future LegalAction. */
+export function projectKnownCorpCardProspectiveAccessEffect(params: {
+  input: AiDecisionInput;
+  sourceDefinitionId: string;
+  sourceCard?: VisibleCard;
+}): KnownCorpCardAccessEffectProjection {
+  const current = projectKnownCorpCardAccessEffect(params);
+  if (params.input.side !== "runner" || params.sourceCard?.rezzed !== false)
+    return current;
+  const card = cardSpecPlanningCardByDefinitionId(params.sourceDefinitionId);
+  if (
+    !card ||
+    (card.definition.type !== "asset" && card.definition.type !== "upgrade") ||
+    !card.planning.engine.accessEffects?.some(
+      (effect) =>
+        effect.kind === "on_access" &&
+        effect.sourceZones.includes("installed") &&
+        !effect.ignoreIfAccessedFrom?.includes("installed") &&
+        (effect.installedSourceActivation ?? "requires_rezzed") ===
+          "requires_rezzed",
+    )
+  )
+    return current;
+  const cost = card.definition.rezCost;
+  if (typeof cost !== "number" || !Number.isFinite(cost) || cost < 0)
+    return result(params.sourceDefinitionId, "unknown", 0, [
+      "known_access_effect_prospective_rez_base_cost_unavailable",
+    ]);
+  const credits = params.input.playerView.opponent.credits;
+  if (credits < cost) return current;
+  const prospective = projectKnownCorpCardAccessEffect({
+    ...params,
+    input: {
+      ...params.input,
+      playerView: {
+        ...params.input.playerView,
+        opponent: {
+          ...params.input.playerView.opponent,
+          credits: credits - cost,
+        },
+      },
+    },
+    sourceCard: { ...params.sourceCard, rezzed: true },
+  });
+  if (
+    prospective.status !== "unknown" &&
+    prospective.threatValue <= current.threatValue
+  )
+    return current;
+  return {
+    ...prospective,
+    evidenceCodes: [
+      ...prospective.evidenceCodes,
+      "known_access_effect_prospective_rez_public_base_price_risk",
+      "known_access_effect_prospective_rez_cost:" + cost,
+      "known_access_effect_prospective_post_rez_credits:" + (credits - cost),
+      "known_access_effect_future_engine_quote_not_claimed",
+    ],
+  };
+}
+
+function threatenedInstalledCoverage(
+  rig: readonly VisibleCard[],
+  targets: readonly VisibleCard[],
+  trashCount: number,
+): ("wall" | "code_gate" | "sentry")[] {
+  if (trashCount <= 0) return [];
+  const targetIds = new Set(targets.map((card) => card.instanceId));
+  const providers = rig
+    .filter(
+      (card) =>
+        card.known &&
+        card.rezzed === true &&
+        card.type === "program" &&
+        !breakerCardBlocksAccessReachability(card.definitionId),
+    )
+    .map((card) => ({ card, coverage: installedCoverage(card) }));
+  return (["wall", "code_gate", "sentry"] as const).filter((kind) => {
+    const current = providers.filter(
+      (p) => p.coverage.includes(kind) || p.coverage.includes("universal"),
+    );
+    return (
+      current.length > 0 &&
+      current.length <= trashCount &&
+      current.every((p) => targetIds.has(p.card.instanceId))
+    );
+  });
+}
+function installedCoverage(card: VisibleCard): string[] {
+  const definition = card.definitionId
+    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    : undefined;
+  if (!definition) return [];
+  const abilities = icebreakerAbilitiesForDefinition(definition);
+  if (
+    !abilities.some(
+      (ability) =>
+        ability.type === "break_subroutine" &&
+        ability.selectedIceSubtypeFromBreaker,
+    )
+  )
+    return classifyBreakerCoverageFromOntology(card.definitionId);
+  return abilities.flatMap((ability) =>
+    ability.type !== "break_subroutine"
+      ? []
+      : ability.selectedIceSubtypeFromBreaker
+        ? card.selectedSubtype
+          ? [card.selectedSubtype]
+          : []
+        : [ability.iceSubtype, ...(ability.iceSubtypes ?? [])].filter(
+            (subtype): subtype is string => typeof subtype === "string",
+          ),
+  );
 }
