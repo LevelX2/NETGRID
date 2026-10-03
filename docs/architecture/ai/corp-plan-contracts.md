@@ -1901,6 +1901,14 @@ Quelle im neuen Zustand erneut gequotet; dieselbe Quelle wird nicht doppelt
 in einer vorausberechneten Route gebucht. Ein Profil- oder Legalitätsnachweis
 allein ersetzt diesen produktiven Übergang zur Punish-Route nicht.
 
+Dieselbe Schadensroute entdeckt gerezzte Assets und Upgrades in tatsächlich
+installierten Roots. Virtuelle Archives-Roots sind keine installierten Quellen.
+Die Engine zertifiziert Root-Zone und Servermitgliedschaft, Rez-Zustand,
+kanonische Corp-Main-Capability, Tagbedingung und aktuelle LegalAction. Dieser
+Slice unterstützt feste Klick-/Creditkosten und nicht limitierte Aktivierungen;
+verbrauchende oder anderweitig limitierte Fähigkeiten bleiben fail-closed.
+Auch hier wird eine wiederverwendbare Quelle nach jeder Aktion neu gequotet.
+
 Die Vorbereitung erkennt Trace-Support an den tatsächlich erzeugten typisierten
 `trace_credit`-Effekten. `scope: trace` unterstützt sichtbare eigene Trace-Quellen
 unabhängig vom Installationsserver; `scope: fort` benötigt eine Trace-Quelle

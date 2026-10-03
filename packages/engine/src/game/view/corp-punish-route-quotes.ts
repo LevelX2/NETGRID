@@ -932,8 +932,8 @@ function certifyStep(
   ) {
     return { ok: false, reason: "source_unavailable" };
   }
-  if (instance.zone.zone === "scoreArea")
-    return certifyScoredActivatedStep(state, request);
+  if (instance.zone.zone === "scoreArea" || instance.zone.zone === "serverRoot")
+    return certifyActivatedStep(state, request);
   if (instance.zone.zone !== "hq") {
     return { ok: false, reason: "source_zone_unsupported" };
   }
@@ -1003,7 +1003,7 @@ function certifyStep(
   };
 }
 
-function certifyScoredActivatedStep(
+function certifyActivatedStep(
   state: GameState,
   request: CorpPunishRouteQuoteRequest["steps"][number],
 ):
@@ -1011,9 +1011,25 @@ function certifyScoredActivatedStep(
   | { ok: false; reason: CorpPunishRouteIncompleteReason } {
   const instance = state.cardInstances[request.sourceCardInstanceId]!;
   const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+  const scored =
+    instance.zone.zone === "scoreArea" &&
+    definition?.type === "agenda" &&
+    state.corp.scoreArea.includes(request.sourceCardInstanceId);
+  const installedServerId =
+    instance.zone.zone === "serverRoot" ? instance.zone.serverId : undefined;
+  const installed =
+    instance.zone.zone === "serverRoot" &&
+    (definition?.type === "asset" || definition?.type === "upgrade") &&
+    instance.rezzed === true &&
+    state.corp.servers.some(
+      (server) =>
+        server.id === installedServerId &&
+        server.root.includes(request.sourceCardInstanceId),
+    );
   if (
-    definition?.type !== "agenda" ||
-    !state.corp.scoreArea.includes(request.sourceCardInstanceId) ||
+    !definition ||
+    (!scored && !installed) ||
+    (installed && request.kind !== "meat_damage") ||
     !["trace_tag", "meat_damage"].includes(request.kind) ||
     (request.kind === "trace_tag" && request.order !== 0)
   )
@@ -1036,6 +1052,7 @@ function certifyScoredActivatedStep(
   const ability = binding.ability;
   if (
     ability.timing !== "corp_main" ||
+    (installed && ability.limit !== undefined) ||
     (ability.condition &&
       (request.kind !== "meat_damage" ||
         !["runner_is_tagged", "runner_tags_at_least"].includes(
