@@ -2341,6 +2341,18 @@ eine Engine-gequotete End-of-turn-Zahlung. Erwerb und anfängliche Finanzierung
 bleiben beim jeweiligen Entwicklungs-/Economy-Parent. Eine Folgewirkung
 berechtigt den Choice-Resolver nicht zur unabhängigen Ressourcenwahl.
 
+Die positive AI-DTO-Allowlist erhält die Engine-Felder
+`cardImplementationLifecycleAction`,
+`cardImplementationLifecycleLeavePlayPaymentAmount` und
+`cardImplementationLifecycleLeavePlayPaymentStatus` auch bei wiederholter
+Projektion. Die Capability-, Quellen-, Action- und StateVersion-Bindung bleibt
+unverändert. Der Owner entscheidet weiterhin anhand der tatsächlich gequoteten
+Zahlbarkeit und des sichtbaren Restzughorizonts über Halten oder Verlassen;
+fehlende Quotes werden nicht aus dem Kartennamen ergänzt. Ein ursprünglicher
+Entscheidungszustand mit wiederhergestellten, im historischen Engine-Angebot
+belegten DTO-Feldern prüft die Plan-/Step-/Routenbindung bei ausreichendem und
+unmittelbar zu knappem Budget sowie beim wirtschaftlich zu kurzen Horizont.
+
 ### Vertikale Implementierung des Ressourcenlebenszyklus
 
 Der produktive Einstieg ist
