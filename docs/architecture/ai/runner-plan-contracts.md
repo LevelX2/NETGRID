@@ -86,6 +86,13 @@ Moduls. Für den aktuellen Domainvertrag gilt:
 - fehlende Abdeckung wird als `missing_module_coverage` diagnostiziert und
   nicht durch einen generischen Grund- oder Supportplan kaschiert.
 
+Eine Bezahlaktion zum Aufheben der Runsperre ist nur dann produktiv gebunden,
+wenn die aktuelle Central-Route erreichbar, positiv und frei von ihren
+eigenen Action-Ausschlüssen ist. Ein durch Recurring Economy zurückgestellter
+Folgerun darf deshalb keinen ausführbaren Release-Head behaupten. Die
+Runtime übernimmt den konkreten Ausschluss vom Central-Owner, statt die
+Runsperre ungeprüft zu lösen oder die LegalAction ownerlos zu lassen.
+
 Mögliche Phasen:
 
 ```text
@@ -437,6 +444,23 @@ Kosten-Recovery, Search-/Install-/Funding-Unterstützung, Actionzuordnung,
 Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
+
+Ein zusammengesetzter Karteneffekt mit positivem Draw-Anteil darf auch bei
+genau einer Karte den vorhandenen `draw_for_answer`-Bedarf bedienen. Der
+bekannte Stack muss weiterhin eine passende Antwort enthalten, die aktuelle
+native Aktion muss vorhanden sein und die bestehende Draw-Tax-Prüfung bleibt
+wirksam. Der Creditanteil erzeugt keinen zweiten Economy-Executor. Die
+Originalentscheidung und eine echte Engine-Anwendung prüfen Plananschluss,
+Klick-, Credit- und Kartenänderung; bei leerem Stack entsteht kein Coverage-Draw.
+
+Eine notwendige MU-Ersatzinstallation bleibt auch mit angehängten
+Recurring-Credit-Zahlungsvarianten ausführbar. Ob ein direkter
+Installationsgeschwisterpfad besteht, wird ausschließlich an der vorhandenen
+nativen `install_card`-Aktion und deren `runnerProgramTrashBeforeInstall`
+festgestellt. Ein Action-ID-Suffix ist kein Beleg für freie MU. Coverage,
+Quellinstanz und die anschließende exakte Programmopfer-Choice behalten
+denselben Executor; eine tatsächlich direkte Installation wird weiterhin
+ohne Opfer ausgeführt.
 
 Kosten-Recovery vergleicht installiertes Rig, sichtbare Handantwort und
 bekannte Stack-Alternative unter demselben finanzierten Pfadbudget. Die
