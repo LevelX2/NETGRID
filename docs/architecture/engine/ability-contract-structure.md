@@ -45,6 +45,13 @@ Aufteilung und denselben Endbetrag ausweisen. Ein Aufschlag darf weder als
 Reduktionsbetrag noch als Reduktionsquelle erscheinen. Die Defense-KI prüft
 diese Übereinstimmung vor der Zulassung ihrer Installationsroute.
 
+Die gemeinsame Corp-Installations-/Rez-Zahlung in
+`card-lifecycle-runtime-hosts.ts` verbraucht auch rungebundene Credits.
+Alle temporären Pools sind bereits im angezeigten Guthaben enthalten.
+Eine Zahlung wird daher nur einmal zugeordnet: zuerst dem aktuellen
+Tracepool, danach dem Runpool, zuletzt dem Installations-/Rez-Pool des Zuges.
+Die jeweilige Abschlussbereinigung entfernt ausschließlich ungenutzte Reste.
+
 ## Stärke beim Verlassen der Runner-Installation
 
 Die Runner-Lifecycle-Pfade für Trash, Batch-Trash, Rückgabe und Entfernung aus

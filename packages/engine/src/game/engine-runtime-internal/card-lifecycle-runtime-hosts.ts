@@ -584,12 +584,42 @@ export function createCardLifecycleRuntimeHosts(
   | "resolveRunnerProgramTrashBeforeInstallChoice"
 > {
   function spendCorpInstallRezCredits(state: GameState, amount: number): void {
+    const runCredits =
+      state.phase === "run" ? state.run?.corpRunTemporaryCredits : undefined;
+    const installRezCredits = state.corpTemporaryInstallRezCredits;
+    if (
+      runCredits &&
+      (!Number.isSafeInteger(runCredits.remaining) ||
+        runCredits.remaining < 0 ||
+        runCredits.usableFor !== "corp_costs_during_this_run" ||
+        runCredits.returnUnusedAtRunEnd !== true)
+    )
+      throw new Error("Der temporäre Run-Creditpool ist ungültig.");
+    if (
+      installRezCredits &&
+      (!Number.isSafeInteger(installRezCredits.remaining) ||
+        installRezCredits.remaining < 0 ||
+        installRezCredits.usableFor !== "corp_install_or_rez" ||
+        installRezCredits.returnUnusedAtTurnEnd !== true)
+    )
+      throw new Error(
+        "Der temporäre Installations-/Rez-Creditpool ist ungültig.",
+      );
+    const traceCreditsBefore =
+      state.trace?.corpTemporaryTraceCredits?.remaining ?? 0;
     spendCredits(state, "corp", amount);
-    if (amount <= 0 || !state.corpTemporaryInstallRezCredits) return;
-    state.corpTemporaryInstallRezCredits.remaining = Math.max(
-      0,
-      Math.floor(state.corpTemporaryInstallRezCredits.remaining ?? 0) - amount,
-    );
+    const traceCreditsSpent =
+      traceCreditsBefore -
+      (state.trace?.corpTemporaryTraceCredits?.remaining ?? 0);
+    let unallocated = amount - traceCreditsSpent;
+    // All pools are already included in Corp credits. Account for each paid
+    // credit once, consuming pools in expiry order: trace, run, then turn.
+    for (const pool of [runCredits, installRezCredits]) {
+      if (!pool) continue;
+      const spent = Math.min(unallocated, pool.remaining);
+      pool.remaining -= spent;
+      unallocated -= spent;
+    }
   }
 
   function installCardHost(state: GameState): InstallCardHost {
