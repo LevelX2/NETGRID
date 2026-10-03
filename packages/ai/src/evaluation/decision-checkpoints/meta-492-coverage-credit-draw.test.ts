@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import capture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-492-r1-g7-d168.json";
+import { readFileSync } from "node:fs";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
@@ -7,7 +7,15 @@ import type { AiRuntimeCheckpointV1 } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
 it("uses the current hybrid draw route under the original missing-Codegate Coverage parent", () => {
-  const c = structuredClone(capture) as unknown as {
+  const c = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-492-r1-g7-d168.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  ) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
