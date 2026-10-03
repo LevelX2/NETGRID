@@ -11,6 +11,7 @@ import { chooseCorpAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
+import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
 
 beforeEach(() => resetResidentPlanPortfolioMemory());
 
@@ -28,6 +29,7 @@ function fixture() {
   const corpDeck = deck("standard_corp_syds_ice_pfandhaus_2026_07_09", "corp");
   let state = createGameAfterSetup({
     seed: "existing-archives-discard-matchpoint",
+    agendaPointsToWin: 7,
     corpDeck,
     runnerDeck: deck("standard_runner_bit_denial_lock", "runner"),
     traceRulesProfile: "modern_open",
@@ -67,8 +69,13 @@ function fixture() {
   place("onr_v1_216_security-purge", "hq");
   place("onr_classic_018_reclamation-project", "hq");
   place("onr_proteus_015_colonel-failure", "hq");
-  state.runner.agendaPoints = 4;
-  state.corp.agendaPoints = 6;
+  for (let n = 0; n < 2; n++) {
+    const scoredId = place("onr_proteus_008_project-zurich", "archives");
+    state.corp.archives = state.corp.archives.filter((id) => id !== scoredId);
+    state.runner.scoreArea.push(scoredId);
+    state.cardInstances[scoredId]!.zone = { side: "runner", zone: "scoreArea" };
+    state.cardInstances[scoredId]!.controller = "runner";
+  }
   state.corp.clicks = 0;
   const end = getLegalActions(state, "corp").find(
     (a) => a.type === "end_turn",
@@ -134,4 +141,50 @@ it("binds a nonagenda discard through the existing hand owner and replays the na
   const replay = replayEvents(state, [result.event]);
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(result.state));
+});
+
+it("enforces the terminal batch guard against a low redundant-agenda score on native options", () => {
+  const { state, corpDeck } = fixture();
+  const input = buildAiDecisionInput(state, "corp", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: corpDeck.id,
+      side: "corp",
+      cards: corpDeck.cards.map((c) => ({
+        cardId: c.id,
+        quantity: c.quantity,
+      })),
+    },
+  });
+  const choice = input.playerView.pendingChoice!;
+  expect(input.playerView.agendaPointsToWin).toBe(7);
+  expect(input.playerView.opponent.agendaPoints).toBe(4);
+  expect(
+    input.playerView.servers.find((s) => s.id === "archives")!.ice,
+  ).toHaveLength(0);
+  const selection = selectedCorpDiscardChoiceOptionIds(
+    input,
+    choice,
+    choice.options,
+    (_input, card) => ({
+      total: card.type === "agenda" ? -1_000 : 0,
+      planDisposition: "redundant",
+    }),
+  );
+  expect(selection?.exposedAgendaPoints).toBe(0);
+  expect(selection?.terminalAgendaExposure).toBe(false);
+  const action = getLegalActions(state, "corp").find(
+    (a) => a.type === "resolve_choice",
+  )!;
+  const applied = applyAction(state, {
+    matchId: state.matchId,
+    side: "corp",
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    selectedChoices: {
+      choiceId: choice.choiceId,
+      selectedOptionIds: selection!.selectedOptionIds,
+    },
+  });
+  expect(applied.ok).toBe(true);
 });
