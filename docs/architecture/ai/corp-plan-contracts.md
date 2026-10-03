@@ -442,6 +442,22 @@ elf Credits bei zwölf Credits Bank: Die verbleibende Bank von eins verliert
 die bereits bezahlbare Fünf-Credit-R&D-Abwehr. Mit sechzehn Credits bleibt
 derselbe exakte Beschleunigungskopf zugelassen.
 
+Besitzt eine vollständig aktuell bezahlbare Scorefolge mit festen Kosten noch
+freie aktuelle Aktionen, kann derselbe Score-Owner die fehlende gemeinsame
+Finanzierung von Score und bereits finanziertem Defense-Claim anfordern.
+Ein aktueller, exakt gebundener nativer Basiscredit liefert je eine Aktion
+und einen Credit; alle nötigen Fundingaktionen müssen zusammen mit der
+vollständigen Scorefolge in den aktuellen Zug passen. Economy führt diesen
+Support unter demselben Score-Parent aus. Der vollständige Credit- und
+Aktionshorizont wird vor der Admission neu gebunden; nach jedem Schritt
+revalidiert Score mit den aktuellen LegalActions. Fehlende oder veraltete
+Basisactions und unzureichende freie Aktionen lassen die Folge blockiert.
+Bereits finanzierte Folgen und terminaler eigener Score behalten ihr Verhalten.
+Paarung 493 R6 G8 D86 belegt sechs Credits, drei Aktionen, zwei verbleibende
+Coup-Advances und fünf Credits Schutzreserve: Gain→Advance→Advance→Score passt
+vollständig und erhält fünf Credits. Ein weiterer Remote-Ausbau würde dieses
+vorhandene Abschlussfenster dagegen verlieren.
+
 Eine vollständig aktuell finanzierte Scorefolge mit festen Kosten kann die liquide
 Rezreserve vor dem nächsten Runner-Fenster wiederherstellen. Der Score-Owner
 weist dies in `score-reserve-restoration.ts` mit seiner aktuellen vollständigen
