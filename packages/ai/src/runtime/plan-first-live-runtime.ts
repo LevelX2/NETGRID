@@ -4807,8 +4807,11 @@ function decisionFromScheduler(
         `plan_scheduler:${event.stage}:${event.code}:${event.instanceId ?? "none"}`,
     ),
   ];
-  const actionAlternatives = input.legalActions
-    .slice(0, 32)
+  const debugActionWindow = input.legalActions.slice(0, 32);
+  if (!debugActionWindow.some((candidate) => candidate.actionId === actionId)) {
+    debugActionWindow[debugActionWindow.length - 1] = action;
+  }
+  const actionAlternatives = debugActionWindow
     .map((alternative, index) => {
       const randomizedCandidate =
         randomizedIceInstallNearTie?.candidates.some(
