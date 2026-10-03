@@ -1195,6 +1195,13 @@ keinen unerreichbaren Mindestpuffer. Scorefortsetzung, andere Agendaremotes und
 innere ICE des aktuellen Runs bleiben in derselben Ressourcenprüfung;
 derselbe Server wird dabei nicht doppelt reserviert.
 
+Auch ein inneres ICE im bereits laufenden Run begründet nur dann eine
+Stopping-Rezreserve, wenn seine exakte Zahlung beim Verzicht auf den aktuellen
+Rez bereits finanzierbar wäre. Ein zehn Credits teures inneres ICE bei vier
+oder sieben verfügbaren Credits blockiert keine unabhängig produktive aktuelle
+Abwehr. Sobald diese innere Fortsetzung finanzierbar ist, bleibt ihre volle
+Quote im selben Reservevergleich erhalten.
+
 Nach dem letzten Runnerklick entfällt die Reserve für spätere normale Runs.
 `run.followupRunOpportunity` erhält öffentlich bekannte Zusatzruns; einen
 erfolgsabhängigen Zusatzrun verhindert ein belegter Stopp des aktuellen Runs.
