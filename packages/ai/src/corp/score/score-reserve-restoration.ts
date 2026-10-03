@@ -2,6 +2,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { corpUnconditionalScoreCreditGain } from "../../runtime/corp-canonical-card-facts";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
+import { corpSpendConsumesKnownCentralRezReserve } from "../defense/corp-defense-domain-signals";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
 /** Score admits a complete route against Defense's current funded claim.
@@ -23,7 +24,28 @@ export function withCorpSameTurnScoreDefenseReserve(
     project.agendaInstanceId,
     project.preventsTerminalSteal ? project.agendaPoints : undefined,
   );
-  if (reserve === 0) return project;
+  const terminalTaxClaim = project.preventsTerminalSteal
+    ? undefined
+    : {
+        kind: "funded_terminal_score_admission" as const,
+        ...(project.agendaInstanceId === undefined
+          ? {}
+          : { leavingHqCardId: project.agendaInstanceId }),
+      };
+  // Defense also owns funded terminal tax/disruption claims, even when the
+  // visible Runner could eventually break the whole central path.
+  if (
+    reserve === 0 &&
+    (!terminalTaxClaim ||
+      !corpSpendConsumesKnownCentralRezReserve(
+        input,
+        undefined,
+        0,
+        0,
+        terminalTaxClaim,
+      ))
+  )
+    return project;
   const horizon = project.sameTurnConversionCreditHorizon;
   const cost = project.sameTurnConversionResourceCost;
   const creditsBeforePayout = horizon
@@ -50,12 +72,22 @@ export function withCorpSameTurnScoreDefenseReserve(
     });
   const payout =
     corpUnconditionalScoreCreditGain(project.agendaDefinitionId) ?? 0;
-  if (creditsBeforePayout + payout >= reserve) return project;
+  const consumesTerminalTax =
+    terminalTaxClaim !== undefined &&
+    corpSpendConsumesKnownCentralRezReserve(
+      input,
+      undefined,
+      creditsBeforePayout + payout,
+      0,
+      terminalTaxClaim,
+    );
+  if (creditsBeforePayout + payout >= reserve && !consumesTerminalTax)
+    return project;
   return {
     ...project,
     feasible: false,
     routeAssessment: "corp_same_turn_score_consumes_funded_defense_reserve",
-    evidenceCode: `corp_same_turn_score_consumes_funded_defense_reserve:${creditsBeforePayout}:${payout}:${reserve}`,
+    evidenceCode: `corp_same_turn_score_consumes_funded_defense_reserve:${creditsBeforePayout}:${payout}:${reserve}${consumesTerminalTax ? ":funded_terminal_tax_or_disruption" : ""}`,
   };
 }
 

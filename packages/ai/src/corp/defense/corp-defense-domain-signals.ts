@@ -20,7 +20,10 @@ import {
 import { corpHandDuplicateCount } from "../hand-management/hand-inventory-facts";
 import { corpKnownAgendaInventory } from "../../runtime/corp-known-agenda-inventory";
 import { isCorpOpeningTurnSerial } from "../../runtime/corp-opening-rush";
-import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
+import {
+  readCorpCentralAgendaExposure,
+  readKnownCorpCentralAgendaThreat,
+} from "./corp-central-defense-facts-adapter";
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
 import {
   visibleBreakerCardCanAddressIce,
@@ -557,10 +560,27 @@ export function corpSpendConsumesKnownCentralRezReserve(
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
   creditsAfterInstall: number,
   clicksAfterInstall: number,
+  claimScope?: {
+    kind: "funded_terminal_score_admission";
+    leavingHqCardId?: string;
+  },
 ): boolean {
   // Unknown global allocation does not erase independently known local
   // agenda pressure and current Engine rez quotes on either central.
   const threatenedServerIds = (["hq", "rd"] as const).filter((serverId) => {
+    if (claimScope?.kind === "funded_terminal_score_admission") {
+      const exposure = readCorpCentralAgendaExposure(
+        input,
+        serverId,
+        claimScope.leavingHqCardId,
+      );
+      return (
+        exposure !== undefined &&
+        exposure.maximumPoints >=
+          input.playerView.agendaPointsToWin -
+            input.playerView.opponent.agendaPoints
+      );
+    }
     const knownAgendaThreat = readKnownCorpCentralAgendaThreat({
       input,
       serverId,
@@ -622,19 +642,20 @@ export function corpSpendConsumesKnownCentralRezReserve(
           Number.isSafeInteger(quote.finalCredits) &&
           ((quote.finalCredits <= input.playerView.own.credits &&
             quote.finalCredits > creditsAfterInstall) ||
-            basicFunding.some(
-              (funding) =>
-                quote.finalCredits <=
-                  input.playerView.own.credits +
-                    Math.floor(input.playerView.own.clicks / funding.clicks) *
-                      funding.gain &&
-                quote.finalCredits >
-                  creditsAfterInstall +
-                    Math.floor(
-                      Math.max(0, clicksAfterInstall) / funding.clicks,
-                    ) *
-                      funding.gain,
-            ))
+            (claimScope === undefined &&
+              basicFunding.some(
+                (funding) =>
+                  quote.finalCredits <=
+                    input.playerView.own.credits +
+                      Math.floor(input.playerView.own.clicks / funding.clicks) *
+                        funding.gain &&
+                  quote.finalCredits >
+                    creditsAfterInstall +
+                      Math.floor(
+                        Math.max(0, clicksAfterInstall) / funding.clicks,
+                      ) *
+                        funding.gain,
+              )))
         );
       }) === true
     );

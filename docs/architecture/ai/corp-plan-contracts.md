@@ -430,6 +430,18 @@ Aktivierung korrekt durch P2-Finanzierung unterbrochen wird. Der Score-Owner
 weist ihn bereits vor der Installation zurück. Eine native Kontrolle mit
 dreizehn Credits beendet beide gebundenen Aktivierungen und hält fünf Credits.
 
+Dieselbe Admission konsumiert auch die bestehenden Defense-Facts für aktuell
+finanzierte terminale Zentral-ICE mit Tax-, Schadens- oder Disruptionwirkung.
+Ein sicherer Run-Stopp ist dafür keine Voraussetzung. Score übergibt den
+vollständigen liquiden Endhorizont nach sicherer Auszahlung und die aus HQ
+entfernte Agenda; zukünftige Finanzierungsklicks begründen diesen Claim nicht.
+Terminaler eigener Score und die vorhandene Bewertung einer unmittelbar
+verhinderten terminalen Agenda-Entwendung behalten ihre Verträge. Paarung 493
+R5 G32 D190 belegt zwei Overtime-Zahlungen und drei Advances für insgesamt
+elf Credits bei zwölf Credits Bank: Die verbleibende Bank von eins verliert
+die bereits bezahlbare Fünf-Credit-R&D-Abwehr. Mit sechzehn Credits bleibt
+derselbe exakte Beschleunigungskopf zugelassen.
+
 Eine vollständig aktuell finanzierte Scorefolge mit festen Kosten kann die liquide
 Rezreserve vor dem nächsten Runner-Fenster wiederherstellen. Der Score-Owner
 weist dies in `score-reserve-restoration.ts` mit seiner aktuellen vollständigen
