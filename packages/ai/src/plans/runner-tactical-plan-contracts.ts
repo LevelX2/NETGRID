@@ -120,6 +120,14 @@ export type RunnerRemoteContestSignal = {
   >;
   preparationActionIds?: string[];
   supportNeedId?: string;
+  remoteExposePreparation?: {
+    sourceActionId: string;
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    targetCardInstanceId: string;
+    targetRootIndex: number;
+    observedAtStateVersion: number;
+  };
   routePreparation?:
     | "release_run_lock"
     | "expose_remote"

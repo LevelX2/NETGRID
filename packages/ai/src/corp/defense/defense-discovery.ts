@@ -987,6 +987,7 @@ export function buildCorpDefenseProtectionSignals({
           project,
           scan,
           candidates,
+          centralDefenseAllocation,
         );
         if (!signal) return [];
         const action = input.legalActions.find(

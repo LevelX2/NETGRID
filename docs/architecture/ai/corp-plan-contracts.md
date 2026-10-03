@@ -1110,6 +1110,16 @@ Evidence und Assessment müssen aus derselben ausgewählten Prioritätsklasse
 und Parentbindung stammen; ein planfremder Action-Score darf diese Delegation
 nicht nachträglich verändern.
 
+Auch begrenztes Score-Protection-Staging erhält die bereits bekannte
+Central-Rezreserve. Die Defense-Zulassung und die Prüfung eines ausführbaren
+vorbereiteten Score-Parents konsumieren dieselbe aktuelle Zentralallokation
+und den bestehenden Reservevertrag. Installationskosten und verbleibende
+Click-Finanzierung dürfen ein bereits erreichbares Rezbudget nicht verlieren.
+Die native Gegenprobe Paarung 493/R1/G24/D96 verwirft so den Remote-Sleeper
+bei sechs Credits vor dem gequoteten Sieben-Credit-HQ-Rez. Bei ausreichender
+Bank oder bereits gerezztem HQ-ICE bleibt derselbe delegierte Score-Step
+zugelassen; der Score-Owner trifft keine eigene ICE-Auswahl.
+
 Jede generische native Defense-Zuglinie trägt die Prioritätsklasse ihres
 exakten Signals. Ein Remote-Supportbedarf darf weder eine terminale
 Central-Linie auf P6 absenken noch gewöhnlichen Remote-Aufbau durch eine

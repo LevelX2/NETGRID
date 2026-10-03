@@ -238,6 +238,7 @@ export function reconcileCorpScoreProjects({
             input,
             candidates,
             project,
+            centralDefenseAllocation,
           ) ||
             corpPreparedScoreProjectHasImmediateFundingSupport(
               input,

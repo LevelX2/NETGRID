@@ -47,6 +47,7 @@ import type {
 } from "../../runner-run-target-evaluation";
 import { uniqueBy } from "../../runtime/collection";
 import { runnerCandidateIsExposeAbility } from "../../runtime/runner-information-action-facts";
+import { runnerExposeInstalledOpportunity } from "../expose-information/expose-installed-card-choice";
 import {
   runnerActionRequiresTargetedBypassPlan,
   runnerDefinitionRequiresTargetedBypassPlan,
@@ -350,7 +351,7 @@ function runnerRemoteInformationPreparationSignals(
       input.playerView.agendaPointsToWin - 2 ||
     input.playerView.opponent.agendaPoints >=
       input.playerView.agendaPointsToWin - 2;
-  const remote = input.playerView.servers
+  const remotes = input.playerView.servers
     .filter((server) => {
       const accessState = runTargets.find(
         (evaluation) => evaluation.targetServerId === server.id,
@@ -361,8 +362,8 @@ function runnerRemoteInformationPreparationSignals(
         (accessState === undefined ||
           accessState === "unknown" ||
           accessState === "changed") &&
-        matchpointPressure &&
-        server.root.every((card) => (card.advancementCounters ?? 0) === 0)
+        (matchpointPressure ||
+          server.root.some((card) => (card.advancementCounters ?? 0) > 0))
       );
     })
     .sort(
@@ -377,50 +378,117 @@ function runnerRemoteInformationPreparationSignals(
           ) ||
         right.root.length - left.root.length ||
         left.id.localeCompare(right.id),
-    )[0];
-  if (!remote) return [];
-  const directContest = runTargets.find(
-    (evaluation) =>
-      evaluation.targetServerId === remote.id &&
-      evaluation.pathPassability === "reachable" &&
-      (evaluation.recommendation === "run_now" ||
-        evaluation.recommendation === "run_if_free") &&
-      evaluation.score > 0,
-  );
-  if (directContest) return [];
-  const remoteTargetIds = new Set([
-    remote.id,
-    ...remote.root.map((card) => card.instanceId),
-  ]);
-  const preparationActionIds = exposeCandidates
-    .filter((candidate) => {
-      const targetIds = candidateTargetIds(candidate);
-      return (
-        targetIds.length === 0 ||
-        targetIds.some((targetId) => remoteTargetIds.has(targetId))
+    );
+  return remotes.flatMap((remote) => {
+    const directContest = runTargets.find(
+      (evaluation) =>
+        evaluation.targetServerId === remote.id &&
+        evaluation.pathPassability === "reachable" &&
+        evaluation.fundingNeed.reason === "none" &&
+        input.legalActions.some(
+          (action) =>
+            action.actionId === evaluation.actionId &&
+            action.type === "start_run" &&
+            action.source === "basic_action",
+        ) &&
+        (evaluation.recommendation === "run_now" ||
+          evaluation.recommendation === "run_if_free") &&
+        evaluation.score > 0,
+    );
+    const unknownAdvancedRoot = remote.root.some(
+      (card) => !card.known && (card.advancementCounters ?? 0) > 0,
+    );
+    const legacyInformationWindow =
+      !directContest &&
+      matchpointPressure &&
+      remote.root.every((card) => (card.advancementCounters ?? 0) === 0);
+    if (!legacyInformationWindow && !(directContest && unknownAdvancedRoot))
+      return [];
+    const remoteTargetIds = new Set([
+      remote.id,
+      ...remote.root.map((card) => card.instanceId),
+    ]);
+    const preparationCandidates = exposeCandidates
+      .filter((candidate) => {
+        const targetIds = candidateTargetIds(candidate);
+        return (
+          (targetIds.length === 0 ||
+            targetIds.some((targetId) => remoteTargetIds.has(targetId))) &&
+          (legacyInformationWindow ||
+            (candidate.actionType === "activated_card_ability" &&
+              candidate.abilityKey ===
+                "abilities_activated_runner_main_expose_installed_card" &&
+              candidate.costProfile.costKnownStatus === "known" &&
+              candidate.costProfile.additionalCosts.length === 0 &&
+              typeof candidate.costProfile.clickCost === "number" &&
+              typeof candidate.costProfile.creditCost === "number" &&
+              input.playerView.own.clicks - candidate.costProfile.clickCost >=
+                1 + (directContest?.futureClicksLost ?? 0) &&
+              input.playerView.own.credits - candidate.costProfile.creditCost >=
+                (directContest?.pathCost ?? Number.POSITIVE_INFINITY) +
+                  Math.max(
+                    directContest?.fundingNeed.protectedLiquidReserve ?? 0,
+                    directContest?.prerunReserveQuote?.requiredCredits ?? 0,
+                  )))
+        );
+      })
+      .sort(
+        (left, right) =>
+          (left.costProfile.creditCost ?? 0) -
+            (right.costProfile.creditCost ?? 0) ||
+          left.actionId.localeCompare(right.actionId),
       );
-    })
-    .map((candidate) => candidate.actionId);
-  if (preparationActionIds.length === 0) return [];
-  return [
-    {
-      contestId: `remote:${remote.id}`,
-      serverId: remote.id,
-      purpose: "information",
-      knownAgendaThreat: false,
-      reachable: true,
-      marginalValue:
-        800 +
-        Math.max(
-          0,
-          ...remote.root.map((card) => card.advancementCounters ?? 0),
-        ) *
-          50,
-      evidenceCode: "runner_remote_information_preparation",
-      preparationActionIds,
-      routePreparation: "expose_remote",
-    },
-  ];
+    const preparation = preparationCandidates[0];
+    if (!preparation) return [];
+    const unknownPosition = runnerExposeInstalledOpportunity(input)
+      .unseenPositions.filter(
+        (position) =>
+          position.serverId === remote.id && position.area === "root",
+      )
+      .sort(
+        (left, right) =>
+          Number(right.advanced) - Number(left.advanced) ||
+          left.index - right.index,
+      )[0];
+    if (!unknownPosition) return [];
+    const target = remote.root[unknownPosition.index]!;
+    const exactSingleExpose =
+      preparation.abilityKey ===
+        "abilities_activated_runner_main_expose_installed_card" &&
+      preparation.sourceCardInstanceId !== undefined &&
+      preparation.sourceDefinitionId !== undefined;
+    return [
+      {
+        contestId: `remote:${remote.id}`,
+        serverId: remote.id,
+        purpose: "information",
+        knownAgendaThreat: false,
+        reachable: true,
+        marginalValue:
+          800 +
+          Math.max(
+            0,
+            ...remote.root.map((card) => card.advancementCounters ?? 0),
+          ) *
+            50,
+        evidenceCode: "runner_remote_information_preparation",
+        preparationActionIds: [preparation.actionId],
+        ...(exactSingleExpose
+          ? {
+              remoteExposePreparation: {
+                sourceActionId: preparation.actionId,
+                sourceCardInstanceId: preparation.sourceCardInstanceId!,
+                sourceDefinitionId: preparation.sourceDefinitionId!,
+                targetCardInstanceId: target.instanceId,
+                targetRootIndex: unknownPosition.index,
+                observedAtStateVersion: input.playerView.stateVersion,
+              },
+            }
+          : {}),
+        routePreparation: "expose_remote",
+      },
+    ];
+  });
 }
 
 function runnerIrrecoverableRandomBreakScoreThreatContest(
@@ -804,7 +872,6 @@ export function buildRunnerRemoteContestSignals({
     // General threat focus precedes concrete routes. Deduplication keeps the
     // later draft, including its exact funding/coverage and risk bindings.
     ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
-    ...runnerRemoteInformationPreparationSignals(input, candidates, runTargets),
     ...runLockReleaseRoutes.flatMap((route) => {
       if (!route.serverId.startsWith("remote_")) return [];
       return [
@@ -1112,6 +1179,9 @@ export function buildRunnerRemoteContestSignals({
   ];
   const remoteContestDrafts: RunnerRemoteContestSignalDraft[] = [
     ...baseRemoteContestDrafts,
+    // Information is an exact preparation of this remote. Later sabotage and
+    // bypass routes still retain their independently certified bindings.
+    ...runnerRemoteInformationPreparationSignals(input, candidates, runTargets),
     ...runnerSameTurnAccessRemotePreparationSignals(
       baseRemoteContestDrafts,
       input,
