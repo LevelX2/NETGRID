@@ -91,6 +91,7 @@ type ConversionCapability = {
   clickCost: number;
   creditCost: number;
   projected: boolean;
+  repeatable?: true;
   recoveredFromArchives?: boolean;
   rezPreparation?: {
     action: LegalAction;
@@ -483,10 +484,12 @@ function visitCapabilityCombinations(params: {
   visitCapabilityCombinations({ ...params, index: params.index + 1 });
 
   const capability = params.capabilities[params.index]!;
-  if (params.usedActionIds.has(capability.capabilityId)) return;
+  const alreadyUsed = params.usedActionIds.has(capability.capabilityId);
+  if (alreadyUsed && !capability.repeatable) return;
   const clickCost = capability.clickCost;
   const creditCost =
-    capability.creditCost + (capability.rezPreparation?.credits ?? 0);
+    capability.creditCost +
+    (alreadyUsed ? 0 : (capability.rezPreparation?.credits ?? 0));
   if (clickCost > params.clicks || creditCost > params.credits) return;
   let availableAmount = capability.amount;
   const nextSourceCounters = { ...params.sourceCounters };
@@ -541,7 +544,10 @@ function visitCapabilityCombinations(params: {
     }
     visitCapabilityCombinations({
       ...params,
-      index: params.index + 1,
+      index:
+        capability.repeatable && params.remaining > appliedAmount
+          ? params.index
+          : params.index + 1,
       remaining: Math.max(0, params.remaining - appliedAmount),
       clicks: params.clicks - clickCost,
       credits: params.credits - creditCost,
@@ -549,7 +555,7 @@ function visitCapabilityCombinations(params: {
       usedActionIds,
       steps: [
         ...params.steps,
-        ...(capability.rezPreparation
+        ...(capability.rezPreparation && !alreadyUsed
           ? [
               {
                 kind: "rez_score_support" as const,
@@ -634,6 +640,11 @@ function conversionCapabilities(
             clickCost: actionCost(action, "clicks"),
             creditCost: actionCost(action, "credits"),
             projected: false,
+            ...(action.type === "activated_card_ability" &&
+            action.payload?.scoreConversionRepeatable === true &&
+            actionCost(action, "clicks") > 0
+              ? { repeatable: true as const }
+              : {}),
           },
         ];
       }
@@ -714,6 +725,7 @@ function conversionCapabilities(
       clickCost: preparation.clickCost,
       creditCost: preparation.creditCost,
       projected: true,
+      repeatable: preparation.repeatable,
       rezPreparation: {
         action: preparation.action,
         credits: preparation.rezCredits,

@@ -398,6 +398,70 @@ describe("activatedAbilityPayload advancement semantics", () => {
     });
   });
 
+  it.each([
+    "unlimited",
+    "limit",
+    "condition",
+    "trash",
+    "counters",
+    "zero_clicks",
+    "extra_effect",
+  ] as const)(
+    "certifies repeated placement only for persistent pure fixed-cost abilities: %s",
+    (variant) => {
+      const ability: ActivatedCardAbilityImplementation = {
+        kind: "activated",
+        timing: "corp_main",
+        costs: [
+          { kind: "action", amount: 1 },
+          { kind: "credit", amount: 3 },
+        ],
+        effects: [
+          {
+            kind: "distribute_advancement_counters",
+            amount: 2,
+            target: "installed_advanceable_cards",
+            distribution: "single_target",
+            visibility: "public",
+          },
+        ],
+      };
+      if (variant === "limit")
+        ability.limit = {
+          kind: "once_per_turn_per_source",
+          scope: "any_ability_on_source",
+        };
+      if (variant === "condition")
+        ability.condition = {
+          kind: "runner_made_successful_run_on_server_this_turn",
+          server: "hq",
+        };
+      if (variant === "trash")
+        ability.costs = [...ability.costs, { kind: "trash_source", amount: 1 }];
+      if (variant === "counters")
+        ability.costs = [
+          ...ability.costs,
+          { kind: "advancement_counter", amount: 1, source: "source" },
+        ];
+      if (variant === "zero_clicks")
+        ability.costs = [{ kind: "credit", amount: 3 }];
+      if (variant === "extra_effect")
+        ability.effects = [
+          ...ability.effects,
+          {
+            kind: "gain_credits",
+            amount: 1,
+            recipient: "corp",
+            visibility: "public",
+          },
+        ];
+      expect(
+        activatedAbilityPayload("source" as never, ability, binding(ability))
+          .scoreConversionRepeatable,
+      ).toBe(variant === "unlimited" ? true : undefined);
+    },
+  );
+
   it("publishes advancement transfer semantics", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

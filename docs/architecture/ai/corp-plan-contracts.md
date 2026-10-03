@@ -55,6 +55,19 @@ aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
 Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
 niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
+Die Konversionssuche darf eine reine, unbedingte Advancement-Aktivierung mit
+positiven Aktionskosten und ausschließlich festen Aktions-/Creditkosten
+mehrfach verwenden, wenn die Engine ihre Wiederholbarkeit ausdrücklich
+projiziert. Eine notwendige Rez-Vorbereitung wird einmal bezahlt; jede
+Aktivierung verbraucht erneut ihre vollständigen Kosten. Bei unrezztem
+installiertem Support gilt dieselbe enge mechanische Prüfung aus der
+kanonischen Engine-Projektion; Fähigkeiten mit Limits sind ausgeschlossen.
+Operationen und nicht ausdrücklich wiederholbare Fähigkeiten bleiben
+einmalige Ressourcen. Ziel, Root, Executor, StateVersion und jede folgende
+Choice werden vor jedem nativen Schritt erneut gebunden. Der Nachweis aus
+Paarung 492, Diagnose-Runde 2, G26 D299 umfasst zwei Aktivierungen auf derselben
+Agenda; ein Root-Austausch darf die dafür nötige Supportkarte nicht zerstören.
+
 Innerhalb derselben Prioritätsklasse bewertet der Score-Owner einen aktuell
 ausführbaren Abschluss höher als bloßes Advancement unter Expositionsdruck.
 Die Bedrohung einer zweiten Agenda rechtfertigt keine Verteilung der letzten

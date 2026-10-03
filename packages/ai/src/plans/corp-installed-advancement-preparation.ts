@@ -48,6 +48,7 @@ export function corpInstalledAdvancementPreparations(input: AiDecisionInput) {
           ability.kind !== "activated" ||
           ability.timing !== "corp_main" ||
           ability.condition ||
+          ability.limit !== undefined ||
           ability.effects.length !== 1 ||
           effect?.kind !== "distribute_advancement_counters" ||
           effect.target !== "installed_advanceable_cards" ||
@@ -79,6 +80,7 @@ export function corpInstalledAdvancementPreparations(input: AiDecisionInput) {
             clickCost: 1,
             creditCost: cost.amount,
             capabilityId: String(ability.capabilityKey),
+            repeatable: true as const,
           },
         ];
       });
