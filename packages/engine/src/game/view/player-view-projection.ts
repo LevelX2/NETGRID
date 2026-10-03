@@ -241,20 +241,45 @@ export function buildPlayerViewProjection(
       : undefined;
   const followupRunOpportunity = publicRunFollowupOpportunity(state);
   const pendingSequenceRunCount = publicPendingSequenceRunCount(state);
+  const approachedIce = state.run?.approachIceExposeViewingIceId
+    ? visibleCorpCard(
+        state,
+        state.run.approachIceExposeViewingIceId,
+        side,
+        "ice",
+      )
+    : undefined;
+  // Only the ICE just shown by the Engine is eligible. Other unrezzed ICE
+  // retain their ordinary hidden projection, including on the same server.
+  const exposedPostRezRunQuote =
+    runnerSide && approachedIce?.known
+      ? visibleCorpIcePostRezRunQuote(
+          state,
+          approachedIce.instanceId,
+          approachedIce,
+        )
+      : undefined;
+  const exposedRezCostQuote =
+    runnerSide && approachedIce?.known
+      ? projectInstalledCorpIceRezCost(state, approachedIce.instanceId)
+      : undefined;
   const run = state.run
     ? {
         runId: state.run.runId,
         attackedServerId: state.run.attackedServerId,
         phase: state.run.phase,
         position: { ...state.run.position },
-        ...(state.run.approachIceExposeViewingIceId
+        ...(approachedIce
           ? {
-              approachedIce: visibleCorpCard(
-                state,
-                state.run.approachIceExposeViewingIceId,
-                side,
-                "ice",
-              ),
+              approachedIce: {
+                ...approachedIce,
+                ...(exposedPostRezRunQuote
+                  ? { effectivePostRezRunQuote: exposedPostRezRunQuote }
+                  : {}),
+                ...(exposedRezCostQuote
+                  ? { effectiveRezCostQuote: exposedRezCostQuote }
+                  : {}),
+              },
             }
           : {}),
         ...(encounteredIce

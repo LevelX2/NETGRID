@@ -1575,6 +1575,18 @@ widersprüchliche IDs scheitern am bestehenden Rules-Contract fail-closed.
 Während eines Zahlungs-/Choice-Unterfensters ohne Encounter-Continue bleibt
 der gebundene Parent bis zur erneuten Engine-Fortsetzung erhalten.
 
+Im unmittelbar gebundenen Expose-Betrachtungsfenster konsumiert derselbe
+Run-Owner die aktuelle Engine-Rezquote und feste Post-Rez-Runquote von
+`run.approachedIce`. Ist das bekannte ICE jetzt finanzierbar und sein nicht
+bezahlbar brechbarer Schaden tödlich, erhält der angebotene kostenlose
+Jackout Vorrang vor `finish`. Root, Run-Executor und Zustandsbindung bleiben
+erhalten. Nicht finanzierbares Rez, verkraftbarer Schaden, vorhandene
+Prävention und ein finanzierter installierter Breaker erzeugen diesen
+Abbruchgrund nicht. Sichtbarer Support für Rez während des Runs bleibt ein
+mögliches Rez-Potenzial. Eine notwendige fehlende oder veraltete feste Quote
+scheitert strukturiert; variable Rezentscheidungen bleiben beim bestehenden
+Variablen-/Risikovertrag und werden hier nicht geraten.
+
 ### Vertikale Implementierung
 
 [`runWindowModule`](../../../packages/ai/src/runner/run-window/run-window-plan-module.ts)

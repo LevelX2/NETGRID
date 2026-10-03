@@ -57,6 +57,13 @@ ihnen aber nicht zurückimportiert.
   Kopie; der eigentliche Zustand, RNG und Eventlog bleiben unverändert.
   Der Runner erhält diese Vorschau für ungerezzt verborgenes ICE nicht.
 
+- Nach dem tatsächlich ausgeführten Approach-Expose erhält der Runner für
+  genau das gezeigte ICE unter `run.approachedIce` dessen aktuelle Rez-Kosten
+  und feste bedingte Post-Rez-Runquote. Beide Quotes binden ICE, Server und
+  StateVersion. Sie ändern keinen Zustand und behaupten kein ausgeführtes
+  Rez. Andere ungerezzte ICE und gegnerische Handkarten liefern diese Fakten
+  nicht; nach Ende des Betrachtungsfensters entfällt diese Projektion.
+
 - Run-Window-Reihenfolge und Timingpunkte werden nicht aus Importreihenfolge
   abgeleitet. Die Registry und der persistierte Run-Zustand bleiben Autorität.
 - Bezahlbare `corp_encounter`-Fähigkeiten öffnen vor der nächsten

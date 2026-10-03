@@ -3283,8 +3283,10 @@ export type VisibleEffectiveIceRunQuote = {
 };
 
 /**
- * Corp-private, Engine-certified run projection for one currently unrezzed,
- * installed ICE after a fixed rez in the current board state.
+ * Engine-certified run projection for one currently unrezzed, installed ICE
+ * after a fixed rez in the current board state. Normally Corp-private; the
+ * Runner receives it only on run.approachedIce during that ICE's expose
+ * viewing continuation, after its identity was shown by the Engine.
  *
  * Incomplete quotes intentionally expose no projected run effect. Consumers
  * must not reconstruct it from printed definitions, card text, or AI hints.
@@ -4055,7 +4057,7 @@ export type VisibleCard = {
   lifecycleMarkers?: VisibleCardLifecycleMarker[];
   runnerPaymentSupportAbilities?: VisibleRunnerPaymentSupportAbility[];
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
-  /** Present only to the Corp for own, installed, currently unrezzed ICE. */
+  /** Corp-private except the Runner's exact exposed approach viewing ICE. */
   effectivePostRezRunQuote?: VisibleCorpIcePostRezRunQuote;
   /** Corp-only projections for exact variable-rez legal actions. */
   effectivePostRezActionRunQuotes?: (VisibleCorpIcePostRezRunQuote & {
