@@ -2,6 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
+import { corpServerAgendaExposure } from "./corp-server-protection-reserve";
 import {
   knownNonNegativeInteger,
   nonEmptyString,
@@ -356,7 +357,36 @@ export function corpClassicDeflectorDefenseChoiceSignal(
         classicDeflectorServerExposure(input, right, centralAllocation);
       return difference || technicalCompare(left, right);
     });
-  const selectedServerId = redirectTargets[0];
+  const canRetainScoreReserve =
+    input.playerView.own.credits - context.creditCost >= requiredCreditFloor;
+  const currentAgendaExposure = corpServerAgendaExposure(
+    input,
+    run.attackedServerId,
+  );
+  const matchpoint =
+    input.playerView.agendaPointsToWin - input.playerView.opponent.agendaPoints;
+  // Later scoring cash cannot forbid an exactly payable escape from current
+  // matchpoint access. With no ICE at a known agenda-free destination, there
+  // is no further ICE/redirect continuation whose safety we would be assuming.
+  const mustSpendScoreReserveForTerminalDefense =
+    context.creditCost > 0 &&
+    !canRetainScoreReserve &&
+    knownNonNegativeInteger(input.playerView.own.credits) &&
+    input.playerView.own.credits >= context.creditCost &&
+    knownNonNegativeInteger(input.playerView.opponent.agendaPoints) &&
+    knownNonNegativeInteger(input.playerView.agendaPointsToWin) &&
+    matchpoint > 0 &&
+    currentAgendaExposure !== undefined &&
+    knownNonNegativeInteger(currentAgendaExposure.maximumPoints) &&
+    currentAgendaExposure.maximumPoints >= matchpoint;
+  const selectableRedirectTargets = mustSpendScoreReserveForTerminalDefense
+    ? redirectTargets.filter((serverId) => {
+        const server = input.playerView.servers.find((s) => s.id === serverId);
+        const exposure = corpServerAgendaExposure(input, serverId);
+        return server?.ice.length === 0 && exposure?.maximumPoints === 0;
+      })
+    : redirectTargets;
+  const selectedServerId = selectableRedirectTargets[0];
   const sourceExposure =
     classicDeflectorServerExposure(
       input,
@@ -366,12 +396,12 @@ export function corpClassicDeflectorDefenseChoiceSignal(
   const targetExposure = selectedServerId
     ? classicDeflectorServerExposure(input, selectedServerId, centralAllocation)
     : Number.POSITIVE_INFINITY;
-  const canPay =
-    input.playerView.own.credits - context.creditCost >= requiredCreditFloor;
   const redirectIsProductive =
     selectedServerId !== undefined &&
     (context.creditCost === 0 ||
-      (canPay && sourceExposure - targetExposure > context.creditCost * 250));
+      mustSpendScoreReserveForTerminalDefense ||
+      (canRetainScoreReserve &&
+        sourceExposure - targetExposure > context.creditCost * 250));
   const selectedOptionId = redirectIsProductive
     ? optionsByServerId.get(selectedServerId!)
     : declineOptionId;

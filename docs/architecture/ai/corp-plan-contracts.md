@@ -803,6 +803,15 @@ begründen keinen aktuellen Nutzen.
 Die Route wird erst nach `assessCorpExactIceRezAgainstScoreReserves`
 zugelassen: veröffentlichte Score-Fortsetzungen, andere bedrohte Agenden und
 notwendige weitere ICE im laufenden Run behalten ihre konkreten Reserven.
+Für eine bereits ausgelöste, exakt gebundene bezahlte Umleitungs-Choice
+bewertet ebenfalls `corp.defend_servers` den aktuellen Zugriff. Eine spätere
+Score-Creditreserve darf einen vollständig bezahlbaren Ausweg vor aktuellem
+Matchpoint-Zugriff nicht verhindern, wenn der Zielfort nach eigenen aktuellen
+Agendafakten sicher keine Agenda enthält und keine weitere ICE-Fortsetzung
+besitzt. Ohne diesen begrenzten Nachweis bleibt die Reserve bindend; die
+Choice-Auflösung übernimmt nur das gewählte, stategebundene Ziel. Paarung 475,
+Kontrolllauf 7, G39 D318 belegt zwei vorhandene Credits für zwei Credits
+Umleitung von Theorem bei vier Runnerpunkten auf den agendafreien Remote.
 Quotierte Encounter-Aktivierungskosten werden zusätzlich zum Rez reserviert;
 eine bereits im Bluffbedarf enthaltene Aktivierung wird nicht doppelt gezählt.
 Eine unbekannte Zugriffsprojektion ist weder eine erfundene Stop-Garantie noch
