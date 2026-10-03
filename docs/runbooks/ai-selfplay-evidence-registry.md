@@ -1,6 +1,6 @@
 # KI-Selbstspiel-Evidenzregistrierung
 
-Stand: 2026-08-30
+Stand: 2026-10-03
 
 Die kanonische 40er-Erfassung erlaubt für nachweislich fortschreitende lange
 Partien ein explizites `--max-batches N` (1–200, Standard 20). Das Limit wird
@@ -119,6 +119,29 @@ historischen Verknüpfungen; sie ersetzen sie nicht. Eine tatsächlich andere
 Ursache erhält eine neu reservierte Fall-ID.
 
 ## Bericht und Sicherung
+
+### Ausdrücklich begrenzte Metaserien
+
+Wählt der Nutzer einen begrenzten Abschluss, werden Quellstand und ursprüngliche
+Seedliste vor der Erfassung festgehalten. Jeder geplante Seed wird einmal
+versucht; weitere Findings kommen mit Ursache und Nachweisgrenze in den Bericht.
+Sie lösen keine automatische Reparatur oder neue vollständige Spielrunde aus.
+Gezielte Kontrollläufe benötigen eine konkrete Prüffrage und werden getrennt
+von der ursprünglichen Population ausgewiesen.
+
+Ein technischer Abbruch hält die ganze Runde diagnostisch: `finalBaseGames`
+bleibt null. Terminale Beobachtungen und fehlgeschlagene Versuche erhalten
+getrennte Nenner; der begrenzte Bericht darf die angeforderte Berichtsgrenze
+abschließen, zählt aber nicht als saubere finale Metaserie.
+
+Jede sichtbare Fortschrittsausgabe nennt `Paarung X/N`, die Zahl abgeschlossener
+und versendeter Berichte und die aktuelle Phase. Erfassung des ersten Durchlaufs,
+ausdrücklich beauftragte Kontrolle, Abschlussprüfung, Berichtprüfung und Versand
+bleiben unterscheidbar. Bei Mailauftrag zählt ein Bericht erst nach bestätigtem
+Versand als abgeschlossen. Versuche, Endstände, Abbrüche und vollständig gelesene
+Spiele werden getrennt angezeigt.
+
+### Regulärer Berichtscheckpoint
 
 Vor dem ersten reportfähigen Lauf wird die Serie mit `id`, `recipient` und
 positivem ganzzahligem `interval` registriert. Wiederholtes Registrieren
