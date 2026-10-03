@@ -3,6 +3,20 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { visibleRunnerDrawTaxSourceCount } from "./ai-feature-server";
 
 describe("visibleRunnerDrawTaxSourceCount", () => {
+  it("ignores a discarded rezzed tax while retaining a separate installed tax", () => {
+    const input = inputWithRemoteRoot([
+      rootCard("onr_v1_313_city-surveillance", { rezzed: true }),
+    ]);
+    input.playerView.servers.push({
+      id: "archives",
+      label: "Archives",
+      ice: [],
+      root: [rootCard("onr_v1_313_city-surveillance", { rezzed: true })],
+    });
+    expect(visibleRunnerDrawTaxSourceCount(input)).toBe(1);
+    input.playerView.servers[0]!.root = [];
+    expect(visibleRunnerDrawTaxSourceCount(input)).toBe(0);
+  });
   it("counts a known rezzed draw-linked tag source by ontology profile", () => {
     expect(
       visibleRunnerDrawTaxSourceCount(

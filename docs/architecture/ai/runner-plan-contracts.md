@@ -1413,7 +1413,12 @@ den Draw übrig lassen. Der Bedarf bleibt beim Defense-Parent und wird nach
 jedem Schritt neu geprüft. Verdeckte Steuerquellen, nur bedingte Finanzierung,
 andere unmittelbar nutzbare Handpufferrouten oder fehlende Folgekapazität
 erzeugen diesen Vorbereitungsnachweis nicht. Die tatsächliche Steuerzahlung
-erfolgt weiter ausschließlich über die spätere Engine-Choice.
+erfolgt weiter ausschließlich über die spätere Engine-Choice. Der sichtbare
+Quellenfact zählt ausschließlich bekannte gerezzte installierte Rootkarten.
+Virtuelle Rootkarten in Archives sind entsorgt; ein erhaltenes Rezzustandsfeld
+aktiviert dort keine Drawsteuer. Dieser Zonenfilter gilt auch für zusammengesetzte
+Draw-Actions ohne eigenen Basisdraw-Steuerpayload. Der Scheduler darf einen
+falschen Quellenfact nicht durch Aufheben der Unsafe-Disposition kaschieren.
 
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
 Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda- oder
