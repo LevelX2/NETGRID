@@ -532,6 +532,9 @@ function defenseCandidates(
     });
     if (
       !route ||
+      (route.disposition === "productive" &&
+        !route.projection.funded &&
+        genericDefenseFundingAlternativeExists(context, signal)) ||
       (route.disposition !== "productive" && !stagingAssessment.admissible) ||
       !exactInstallProjectionMatchesSignal(context, signal, route.projection)
     ) {
@@ -2176,7 +2179,10 @@ export function corpDefenseActionDispositions(
     const fundingOnlyInstall = placementSignals.find(
       (signal) =>
         signal.phase === "install_ice" &&
-        signal.installRoute?.disposition === "funding_only" &&
+        (signal.installRoute?.disposition === "funding_only" ||
+          (signal.installRoute?.disposition === "productive" &&
+            !signal.installRoute.projection.funded &&
+            genericDefenseFundingAlternativeExists(context, signal))) &&
         signal.installRoute.projection.actionId === candidate.actionId,
     );
     if (fundingOnlyInstall) {

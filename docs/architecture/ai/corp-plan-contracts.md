@@ -993,6 +993,20 @@ auch innerhalb von `corp_action.main` aussetzen. Der Defense-Factproducer
 erzeugt dann keinen leeren Economy-Need; die normale Choice-Ownership bleibt
 erhalten und der Economy-Validator behält seine strenge Bindungsprüfung.
 
+Auch eine zugelassene vorbereitende ICE-Installation kann noch eine konkrete
+Rezfinanzierungslücke tragen. Schließt ein aktuell legaler, sofortiger und
+allgemein verwendbarer Zufluss diese ganze Lücke, und passen Finanzierung plus
+Installation in die verbleibenden Klicks, bindet Defense diesen Kopf vor der
+Installation an denselben Need. Economy führt den gebundenen Schritt unter dem
+Defense-Parent aus; anschließend werden Installation und Rezreserve neu
+quotiert. Das verhindert, dass die Installation die Zahlungsschwelle ihrer
+eigenen verfügbaren Finanzierung unterschreitet. Bereits finanzierte Routen
+bleiben sofort ausführbar. Ohne vollständig belegten aktuellen Präfix bleibt
+die bisherige Staging-Bewertung bestehen; andere wirksame Routen derselben oder
+einer höheren Priorität behalten ihren Vorrang. Die Zugplanung verwendet
+dieselbe Parentbindung und darf keinen nicht mehr bezahlbaren Zufluss hinter
+der Installation als Konversion verbuchen.
+
 Ein typisierter Schutzbedarf eines Score- oder Remoteplans erzeugt eine
 explizite Parent-Kind-Delegation. Nur die konkret gebundene
 Defense-Supportroute erbt `parentInstanceId` und Prioritätsklasse des
