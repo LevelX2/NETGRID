@@ -812,6 +812,19 @@ besitzt. Ohne diesen begrenzten Nachweis bleibt die Reserve bindend; die
 Choice-Auflösung übernimmt nur das gewählte, stategebundene Ziel. Paarung 475,
 Kontrolllauf 7, G39 D318 belegt zwei vorhandene Credits für zwei Credits
 Umleitung von Theorem bei vier Runnerpunkten auf den agendafreien Remote.
+Umleitungsziele werden am tatsächlich betretenen äußersten bereits gerezzten
+ICE bewertet; ungerezzt darüberliegende ICE sind keine Encounter-Protektion.
+Ein exakt belegter unmittelbarer Stop darf die statische Agendaexposition des
+Zielforts verdrängen. Eine bezahlte Umleitung wird ausgeschlossen, wenn eine
+einzige bekannte kostenlose, aktuell nicht brechbare Zielsubroutine zwingend
+zum Ausgangsfort zurückführt. Die Ressourcenprüfung verwendet Engine-Breaker-
+Quotes und eine optimistische obere Creditgrenze; unbekannte Rig-Effekte,
+bezahlte Rückumleitungen, mehrere Rückziele oder andere Encounter-Effekte
+liefern keinen solchen Nachweis. Die Entscheidung bleibt bei
+`corp.defend_servers`; der Choice-Resolver übernimmt nur ihre gebundene Option.
+Paarung 475, Kontrolllauf 8, G6 D147 und G10 D359 belegen die wiederholte
+kostenpflichtige Rückkehr ohne Abwehrgewinn. Ein Gesamtmatchsieg folgt aus der
+lokalen Vermeidung dieser Zahlungen nicht.
 Quotierte Encounter-Aktivierungskosten werden zusätzlich zum Rez reserviert;
 eine bereits im Bluffbedarf enthaltene Aktivierung wird nicht doppelt gezählt.
 Eine unbekannte Zugriffsprojektion ist weder eine erfundene Stop-Garantie noch

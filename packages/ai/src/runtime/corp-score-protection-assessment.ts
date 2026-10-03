@@ -134,6 +134,109 @@ export type CorpScoreProtectionAssessmentInput = Readonly<{
   maximumRunnerAccessSuccessProbability: ExactProbability;
 }>;
 
+/** A sufficient current-resource proof for one quoted subroutine. Optimistic
+ * strength, pooled credits and ignored extra costs may prevent certification;
+ * they must never turn an affordable or unsupported break into a forced effect.
+ */
+export function corpVisibleSingleSubroutineIsUnbreakable(params: {
+  ice: CorpScoreProtectionIceInput;
+  runnerRig: readonly VisibleCard[];
+  runnerCredits: number;
+}): boolean {
+  const { ice, runnerRig, runnerCredits } = params;
+  const quote = ice.effectiveRunQuote;
+  if (
+    !ice.known ||
+    !ice.definitionId ||
+    !quote ||
+    !validEffectiveRunQuote(ice, quote) ||
+    quote.subroutines.length !== 1 ||
+    (quote.conditionalEncounterEffects?.length ?? 0) > 0 ||
+    !nonNegativeSafeInteger(runnerCredits) ||
+    runnerRig.some(
+      (card) =>
+        !validRunnerRigCard(card) ||
+        runnerRigCardRequiresUnsupportedAccessProjection(card, [ice]),
+    )
+  ) {
+    return false;
+  }
+  const budget = runnerRunPathCreditBudgetWithVisiblePools(
+    runnerCredits,
+    runnerRig,
+    { liquidCredits: runnerCredits },
+  );
+  // All restricted pools and even currently unaffordable support are counted
+  // as available. This is an upper bound, not an executable funding promise.
+  const available =
+    runnerCredits +
+    (budget.icebreakerCredits ?? 0) +
+    (budget.nonNoisyIcebreakerCredits ?? 0) +
+    (budget.killerCredits ?? 0) +
+    Object.values(
+      budget.hostedIcebreakerCreditsByBreakerInstanceId ?? {},
+    ).reduce((sum, credits) => sum + credits, 0) +
+    [...new Set(budget.paymentSupportSources?.map((s) => s.cardInstanceId))]
+      .map((id) =>
+        Math.max(
+          0,
+          ...budget
+            .paymentSupportSources!.filter((s) => s.cardInstanceId === id)
+            .map((s) => s.gainCredits - s.creditCost),
+        ),
+      )
+      .reduce((sum, credits) => sum + credits, 0);
+  for (const breaker of runnerRig.filter(cardIsIcebreaker)) {
+    const definition = CARD_DEFINITIONS_BY_ID[breaker.definitionId!];
+    const encounter = visibleBreakerEncounterQuote({
+      breakerDefinitionId: breaker.definitionId!,
+      breakerInstanceId: breaker.instanceId,
+      breakerStrength: Math.max(breaker.strength!, definition!.strength ?? 0),
+      ...(breaker.selectedTargetCardId
+        ? { selectedTargetCardId: breaker.selectedTargetCardId }
+        : {}),
+      ...(breaker.selectedSubtype
+        ? { selectedSubtype: breaker.selectedSubtype }
+        : {}),
+      iceDefinitionId: ice.definitionId,
+      iceInstanceId: ice.instanceId,
+      iceSubtypes: ice.subtypes!,
+      subroutines: quote.subroutines,
+    });
+    if (
+      !encounter ||
+      encounter.coverageStatus === "requires_selection" ||
+      encounter.randomRunStrength ||
+      encounter.stateChangesAfterUse.length > 0
+    ) {
+      return false;
+    }
+    const breakOptions = encounter.breakOptions.filter((option) =>
+      option.breakableSubroutineIndexes.includes(0),
+    );
+    if (breakOptions.length === 0) continue;
+    const breakCost = Math.min(
+      ...breakOptions.map((option) => option.creditCost),
+    );
+    const deficit = Math.max(
+      0,
+      (quote.encounterStrength ?? quote.effectiveStrength) -
+        encounter.effectiveStrength,
+    );
+    const pumpCost =
+      deficit === 0
+        ? 0
+        : Math.min(
+            ...encounter.pumpOptions.map(
+              (option) =>
+                Math.ceil(deficit / option.strengthGain) * option.creditCost,
+            ),
+          );
+    if (breakCost + pumpCost <= available) return false;
+  }
+  return true;
+}
+
 type Rational = Readonly<{
   numerator: bigint;
   denominator: bigint;
