@@ -17,6 +17,7 @@ import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-d
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
 import { corpAssetPreservingSameTurnScoreRoutes } from "./score-asset-preservation";
 import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
+import { corpShorterTerminalScoreRouteDominates } from "./score-terminal-route-dominance";
 import {
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreDefenseBinding,
@@ -313,10 +314,29 @@ export function reconcileCorpScoreProjects({
       };
     },
   );
+  const terminalComparedScoreProjects = concreteScoreProjects.map((project) => {
+    const shorter = concreteScoreProjects.find((alternative) =>
+      corpShorterTerminalScoreRouteDominates(
+        input,
+        candidates,
+        alternative,
+        project,
+      ),
+    );
+    return shorter
+      ? {
+          ...project,
+          feasible: false,
+          routeAssessment:
+            "corp_shorter_terminal_score_route_dominates" as const,
+          evidenceCode: `corp_shorter_terminal_score_route_dominates:${shorter.projectId}`,
+        }
+      : project;
+  });
   const residentPreparedScoreProject =
     residentScoreAgendaInstanceId === undefined
       ? undefined
-      : concreteScoreProjects.find(
+      : terminalComparedScoreProjects.find(
           (project) =>
             project.agendaInstanceId === residentScoreAgendaInstanceId &&
             project.serverId === residentScoreDefenseBinding?.serverId &&
@@ -326,7 +346,7 @@ export function reconcileCorpScoreProjects({
             project.feasible,
         );
   const continuityBoundScoreProjects = residentPreparedScoreProject
-    ? concreteScoreProjects.map((project) => {
+    ? terminalComparedScoreProjects.map((project) => {
         if (project.phase !== "install_agenda") return project;
         const competingTargetForResidentAgenda =
           project.agendaInstanceId === residentScoreAgendaInstanceId &&
@@ -345,7 +365,7 @@ export function reconcileCorpScoreProjects({
             }
           : project;
       })
-    : concreteScoreProjects;
+    : terminalComparedScoreProjects;
   // Missing HQ agendas are not an actionable scoring window. Optional draws
   // need an independently justified development or defense purpose; the
   // mandatory draw will expose fresh scoring material at its normal cadence.

@@ -1006,7 +1006,7 @@ export function corpPreferredDeckoutAgendaRecycleRouteAvailable(
   });
 }
 
-function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+export function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   serverId: string | undefined,

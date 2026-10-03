@@ -55,6 +55,22 @@ aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
 Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
 niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
+Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
+Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
+Eine mit aktueller Engine-Horizontquote früher abschließbare Agenda verdrängt
+die langsamere Vorbereitung nur bei höchstens gleichen Installations- und
+Scorekosten, ohne zusätzliche Steal-Punkte oder höheres Zugriffsrisiko und
+mit vollständiger Score-/Defense-Finanzierung. Defense-Punktkosten dürfen
+den terminalen Score nicht aufheben. Bei unquantifiziertem Schutz gilt der
+Vergleich ausschließlich für dieselbe vollständig gerezzte Topologie,
+nichtterminale gegnerische Steals und bereits zugelassene, bezahlbare Routen;
+er zertifiziert den Schutz nicht nachträglich. Unterschiedliche Remotes,
+blockierte Routen, nichtterminale Ziele und installierte Agendas erhalten
+dadurch keine neue Zulassung. Die verdrängte Vorbereitung veröffentlicht
+`corp_shorter_terminal_score_route_dominates` und beansprucht keine weitere
+Score-Finanzierung. Plan-, Step-, Route- und Zugbindungsprüfung bleiben beim
+bestehenden Score-Owner und Scheduler.
+
 Eine Matchpointagenda darf auch auf dem letzten Klick installiert werden,
 wenn die aktuelle, exakt an Agenda und Zielserver gebundene Engine-Quote den
 Abschluss im nächsten Corp-Zug bestätigt und der Defense-Owner bereits

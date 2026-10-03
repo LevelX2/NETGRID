@@ -16,6 +16,7 @@ export function corpScoreFundingMilestone(
     !Number.isSafeInteger(observedCredits) ||
     observedCredits < 0 ||
     signal.phase === "select_agenda" ||
+    signal.routeAssessment === "corp_shorter_terminal_score_route_dominates" ||
     signal.evidenceCode.startsWith(
       "corp_resident_score_parent_dominates_sibling_route:",
     )
