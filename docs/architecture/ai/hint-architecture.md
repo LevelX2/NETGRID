@@ -51,6 +51,16 @@ Der feste Zielbezug `that_ice` erzeugt kein Auswahlprofil und keine zusätzliche
 Strategieannotation. Die reale Entfernung bleibt an die aktuelle Engine-Quote
 und den bestehenden begrenzten Central-Pressure-Parent gebunden.
 
+`private_look` wird aus derselben typisierten Ability sowohl auf Kartenebene
+als auch in der exakten Capability projiziert. Zone, Kartenzahl und Timing
+bleiben gebunden; eine als Kosten geopferte Quelle ist endlich, eine dauerhaft
+nutzbare Quelle wiederholbar. Der Action-Semantik-Join übernimmt nur die
+gebundene Capability. Ungebundene HQ-/R&D-Information fällt damit unter den
+bestehenden `runner.pressure_central`-Owner und dessen explizite Ablehnung
+ohne Vor-Run-Step. Die korrekte Projektion belegt noch keinen strategisch
+sinnvollen bezahlten Informationsschritt; dieser benötigt weiterhin eine
+side-sichere Neuquote des anschließenden Zugriffs.
+
 ## Typisierte Recovery- und Spielkosten
 
 `corp_archives_to_hq` beschreibt grundsätzlich Archives-Recovery. Die

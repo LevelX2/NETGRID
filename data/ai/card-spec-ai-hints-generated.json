@@ -5421,6 +5421,14 @@
                 "timing": "action",
                 "target": "source.trash",
                 "finite": true
+              },
+              {
+                "kind": "hq_info",
+                "scope": "hq",
+                "timing": "action",
+                "resource": "cards",
+                "target": "full_reveal",
+                "finite": true
               }
             ],
             "functionSignals": ["risk.self_trash"]
@@ -5428,18 +5436,18 @@
         ],
         "effects": [
           {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
+          },
+          {
             "kind": "hq_info",
             "scope": "hq",
             "timing": "action",
             "resource": "cards",
             "target": "full_reveal",
-            "repeatable": true
-          },
-          {
-            "kind": "resource_trash",
-            "scope": "installed_card",
-            "timing": "action",
-            "target": "source.trash",
             "finite": true
           }
         ],
@@ -5862,6 +5870,15 @@
                 "timing": "action",
                 "target": "source.trash",
                 "finite": true
+              },
+              {
+                "kind": "topdeck_info",
+                "scope": "rnd",
+                "timing": "action",
+                "resource": "cards",
+                "target": "top_cards",
+                "amount": 3,
+                "finite": true
               }
             ],
             "functionSignals": ["risk.self_trash"]
@@ -5869,19 +5886,19 @@
         ],
         "effects": [
           {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
+          },
+          {
             "kind": "topdeck_info",
             "scope": "rnd",
             "timing": "action",
             "resource": "cards",
             "target": "top_cards",
             "amount": 3,
-            "repeatable": true
-          },
-          {
-            "kind": "resource_trash",
-            "scope": "installed_card",
-            "timing": "action",
-            "target": "source.trash",
             "finite": true
           }
         ],
@@ -31437,7 +31454,18 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_private_look",
-            "costProfile": { "clicks": 1 }
+            "costProfile": { "clicks": 1 },
+            "effects": [
+              {
+                "kind": "topdeck_info",
+                "scope": "rnd",
+                "timing": "action",
+                "resource": "cards",
+                "target": "top_cards",
+                "amount": 1,
+                "repeatable": true
+              }
+            ]
           }
         ],
         "effects": [

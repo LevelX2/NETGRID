@@ -12071,7 +12071,18 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_private_look",
-            "costProfile": { "clicks": 1 }
+            "costProfile": { "clicks": 1 },
+            "effects": [
+              {
+                "kind": "topdeck_info",
+                "scope": "rnd",
+                "timing": "action",
+                "resource": "cards",
+                "target": "top_cards",
+                "amount": 1,
+                "repeatable": true
+              }
+            ]
           }
         ],
         "effects": [

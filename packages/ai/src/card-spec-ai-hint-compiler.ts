@@ -1517,6 +1517,20 @@ function appendGenericAbilityEffect(
     entry.definition.type === "agenda" && ability.kind === "activated"
       ? ("scored_activated" as const)
       : typedEffectTiming(ability);
+  if (effect.kind === "private_look") {
+    const consumed =
+      ability.kind === "on_play" ||
+      ability.costs?.some((cost) => cost.kind === "trash_source") === true;
+    overlay.effects.push({
+      kind: effect.zone === "hq" ? "hq_info" : "topdeck_info",
+      scope: effect.zone === "rd" ? "rnd" : "hq",
+      timing,
+      resource: "cards",
+      target: effect.count === "all" ? "full_reveal" : "top_cards",
+      ...(typeof effect.count === "number" ? { amount: effect.count } : {}),
+      ...(consumed ? { finite: true } : { repeatable: true }),
+    });
+  }
   if (effect.kind === "add_current_run_access_count") {
     overlay.effects.push({
       kind: "multiaccess",
@@ -3102,7 +3116,8 @@ function deriveClosedMechanicalHintOverlay(
         (cost) => cost?.kind === "trash_source" && cost.amount === 1,
       ).length !== 1 ||
       runnerUtility.costs.filter(
-        (cost) => cost?.kind === "target_rez_cost" && cost.target === "that_ice",
+        (cost) =>
+          cost?.kind === "target_rez_cost" && cost.target === "that_ice",
       ).length !== 1
     )
       throw new Error("card_spec_unknown_post_pass_trash_shape");
@@ -8598,16 +8613,6 @@ function deriveClosedExtendedHintEffects(
           target: "avoid_next_tag",
           amount: effect.amount,
           finite: true,
-        });
-      if (effect.kind === "private_look")
-        effects.push({
-          kind: effect.zone === "hq" ? "hq_info" : "topdeck_info",
-          scope: effect.zone === "rd" ? "rnd" : effect.zone,
-          timing: "action",
-          resource: "cards",
-          target: effect.zone === "hq" ? "full_reveal" : "top_cards",
-          ...(typeof effect.count === "number" ? { amount: effect.count } : {}),
-          repeatable: true,
         });
       if (effect.kind === "make_run") {
         effects.push({
