@@ -375,9 +375,14 @@ describe("Corp core plan modules", () => {
           gripOrHq: [],
           heapOrArchives: [],
         },
+        opponent: {
+          credits: 5,
+          rig: [],
+        },
         run: {
           attackedServerId: "rd",
           phase: "encounter_ice",
+          badPublicityCredits: 0,
           position: { kind: "ice", serverId: "rd", iceIndex: 0 },
           encounteredIce: {
             instanceId: sourceIceId,

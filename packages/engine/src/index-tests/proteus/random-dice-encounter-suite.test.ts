@@ -209,7 +209,21 @@ function expectReplayStable(before: GameState, after: GameState): void {
   expect(hashState(replay.state)).toBe(hashState(after));
 }
 
+function passCorpRunWindows(state: GameState): GameState {
+  for (let pass = 0; pass < 4; pass++) {
+    if (
+      !getLegalActions(state, "corp").some(
+        (action) => action.type === "decline_rez",
+      )
+    )
+      return state;
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+  }
+  throw new Error("Corp run windows did not close after four native passes");
+}
+
 function jackOut(state: GameState): GameState {
+  state = passCorpRunWindows(state);
   return apply(state, "runner", (action) => action.type === "jack_out");
 }
 
@@ -622,7 +636,13 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     );
     expect(action.payload?.subroutineId).toBe("simple_tag_ice_tag");
     state = applyLegal(state, "corp", action.actionId);
+    expect(state.activeSide).toBe("corp");
+    state = passCorpRunWindows(state);
+    expect(state.activeSide).toBe("runner");
+    // This isolated encounter fixture must bind the same installed ICE as
+    // both the run position and the current encounter, just like entry does.
     state.run!.phase = "encounter_ice";
+    state.run!.encounteredIceId = tagIce;
     state.timingPoint = "run.encounter_ice";
 
     const effectiveSubroutines =
