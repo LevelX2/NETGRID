@@ -65,6 +65,12 @@ export function startRunForCardImplementation(
     serverId,
     forwardedOptions.accessCount ?? 1,
     {
+      ...(options.successfulRunEffectTargetServerId
+        ? {
+            successfulRunEffectTargetServerId:
+              options.successfulRunEffectTargetServerId,
+          }
+        : {}),
       ...(forwardedOptions.freeTrashAccessZones
         ? {
             freeTrashAccessZones: forwardedOptions.freeTrashAccessZones.slice(),

@@ -23,6 +23,7 @@ export type StartRunOptions = Pick<
   | "freeTrashAccessZones"
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
+  | "successfulRunEffectTargetServerId"
   | "successfulRunServerOverride"
   | "successfulRunAccessReplacement"
   | "conditionalAccessBonus"
@@ -129,6 +130,12 @@ export function startRun(
       ? { runnerActionOrdinal: flags.currentRunnerActionOrdinal }
       : {}),
     attackedServerId: server.id,
+    ...(options?.successfulRunEffectTargetServerId
+      ? {
+          successfulRunEffectTargetServerId:
+            options.successfulRunEffectTargetServerId,
+        }
+      : {}),
     phase: "approach_ice",
     position:
       server.ice.length > 0

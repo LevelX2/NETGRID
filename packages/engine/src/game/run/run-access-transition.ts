@@ -12,10 +12,14 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import {
   accessCountPayloadForBreach,
   buildBreachState,
+  installedAccessBonusForServer,
   type BreachStateHost,
 } from "../access/breach-state";
 import { credits } from "../state/economy-mutation";
-import { successfulRunServerId } from "./run-server-identities";
+import {
+  successfulRunEffectTargetMatches,
+  successfulRunServerId,
+} from "./run-server-identities";
 import { temporaryEncounterOptionFacts } from "./temporary-encounter-option-facts";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -129,6 +133,38 @@ export function enterAccessFromSuccessfulRun(
   legalAction?: LegalAction,
 ): RunAccessTransitionResult {
   let run = mustRun(host);
+  if (
+    run.successfulRunEffectTargetServerId !== undefined &&
+    !successfulRunEffectTargetMatches(run)
+  ) {
+    // A deflected run succeeds on its actual fort, without the fixed-fort
+    // event's access replacement, bonus or successful-run identity override.
+    run.accessCount =
+      1 + installedAccessBonusForServer(host.breach, run.attackedServerId);
+    delete run.accessServerOverride;
+    delete run.successfulRunServerOverride;
+    delete run.successfulRunAccessReplacement;
+    delete run.freeTrashAccessZones;
+    delete run.conditionalAccessBonus;
+    delete run.conditionalAccessBonusApplied;
+    delete run.pendingSuccessBonusCredits;
+    delete run.successfulRunCreditLoss;
+    delete run.successfulRunRunnerTagGain;
+    delete run.successfulRunCorpDraw;
+    delete run.successfulRunRunnerCreditGain;
+    delete run.successfulRunRequiresCorpCredits;
+    delete run.successfulRunPrivateLookCount;
+    delete run.successfulRunArchivesMoveCount;
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        successfulRunEffectTargetMatched: false,
+        successfulRunEffectTargetServerId:
+          run.successfulRunEffectTargetServerId,
+        serverId: run.attackedServerId,
+      };
+    }
+  }
   if (startSuccessfulRunInterventionChoice(host, run, legalAction))
     return {
       handled: true,

@@ -1483,6 +1483,8 @@ export type RunState = {
   /** Continuous runner action ordinal that initiated this run, if any. */
   runnerActionOrdinal?: number;
   attackedServerId: Exclude<ServerId, "new_remote">;
+  /** Fixed fort required by the initiating effect's successful-run benefits. */
+  successfulRunEffectTargetServerId?: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
   successfulRunServerOverride?: Exclude<ServerId, "new_remote">;
   freeTrashAccessZones?: Array<"rd" | "hq">;

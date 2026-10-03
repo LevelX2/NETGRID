@@ -111,6 +111,19 @@ ihnen aber nicht zurückimportiert.
 - Successful-Run-Interventionen werden vor Access abgeschlossen. Verzögerte
   Successful Runs behalten ihre Ice- und Source-Referenzen bis zum passenden
   Passed-Ice-Übergang.
+- Ein deklaratives `make_run` mit festem Central-Ziel bindet seine
+  Erfolgswirkungen über `successfulRunEffectTargetServerId` an dieses Fort.
+  Nach einer Deflection zählt das tatsächlich erreichte Fort. Wird das
+  vorgeschriebene Fort nicht erreicht, entfallen Access-Ersatz, Event-Multiaccess,
+  bedingte Access-Boni, Credit-/Tagwirkungen und die Successful-Run-Identitäts-
+  beziehungsweise Access-Umdeutung. Der normale Zugriff einschließlich der
+  installierten Boni des tatsächlichen Forts bleibt erhalten. Ein frei
+  wählbares Run-Ziel besitzt diese Einschränkung nicht. Die Bindung wird erst
+  am erfolgreichen Übergang ausgewertet; eine Umleitung zurück auf das
+  vorgeschriebene Fort darf dessen Erfolgswirkung daher weiterhin auslösen.
+  Regelquelle ist `docs/source/Netrunner Errata 1.70.md`, Abschnitt „Siren“.
+  `index-tests/mechanics/run-event-deflection.test.ts` prüft die tatsächlichen
+  Event-/Trapdoor-Aktionen, Zugriff, Sichtbarkeit und deterministischen Replay.
 - Jeder Zufallspfad bleibt Seed-/RandomCounter-gesteuert; die Extraktionen
   fügen weder Ziehungen hinzu noch verändern sie deren Reihenfolge.
 

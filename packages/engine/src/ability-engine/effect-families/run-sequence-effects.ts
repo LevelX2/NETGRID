@@ -66,6 +66,9 @@ export function executeRunSequenceEffect(
       if (!serverId)
         throw new Error("make_run effect requires a chosen run server.");
       const runResult = context.startRun(serverId, {
+        ...(effect.target.kind === "central_server"
+          ? { successfulRunEffectTargetServerId: serverId }
+          : {}),
         ...(effect.accessCount !== undefined
           ? { accessCount: effect.accessCount }
           : {}),
