@@ -321,6 +321,18 @@ installierten Agenda benötigt einen erreichbaren Vorhaltecredit; die neue
 ungeschützte Remote darf daraus keinen vorrangigen Überlebenspfad erhalten.
 Die normale Schutzprüfung anderer Installationen und die Revalidierung jedes
 Funding-/Advance-Schritts bleiben bestehen.
+Der Installationsquote selbst bestätigt nur den Klickhorizont. Der Score-Owner
+prüft vor dem Last-Draw-Überlebensclaim zusätzlich den vollständigen
+Advancement-Creditbedarf einschließlich jeder erforderlichen Basiscreditaktion
+gegen aktuelle Restaktionen und die Engine-bestätigten garantierten Aktionen
+des nächsten Corp-Zugs. Eine aktuell exakt legale Basiscreditaktion ist dafür
+erforderlich, sobald Liquidität fehlt. Zusätzliche Finanzierung darf nicht
+dieselben Klicks nochmals verwenden, die schon für Advances reserviert sind.
+Paarung 493, Durchlauf 4, G11 D370 belegt den Gegenfall: Mit einem Credit und
+zusammen sechs Aktionen sind Installation, fünf Advances und vier nötige
+Creditaktionen unerreichbar. Die vorhandene dreifache Advancement-Linie kann
+mit zwei Finanzierungsklicks in demselben Horizont erreichbar sein. Der Claim
+bescheinigt keine Unangreifbarkeit; jede echte Folgeaktion bleibt neu gebunden.
 Der vollständig zertifizierte installierte Pfad veröffentlicht im letzten
 Drawfenster denselben typisierten Überlebensclaim auch vor einem nötigen
 Basis-Creditpräfix. Er verlangt eine terminale Agenda und eine jetzt

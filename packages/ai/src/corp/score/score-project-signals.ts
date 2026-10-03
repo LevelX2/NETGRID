@@ -55,7 +55,10 @@ import {
   requireVisibleCardDefinition,
 } from "../../runtime/visible-agenda-facts";
 import { corpCandidateIsAmbushInstall } from "../ambush/corp-ambush-plan-signals";
-import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
+import {
+  corpExactCurrentBasicLiquidCreditAction,
+  corpExactCurrentBasicLiquidCreditCandidate,
+} from "../economy/economy-domain-signals";
 import { corpScorePriorityClass } from "./corp-score-priority";
 import { corpInstalledScoreResourceCost } from "./score-reserve-restoration";
 import {
@@ -473,7 +476,8 @@ export function scoreProjectForCandidate(
     const lastViableDeckoutMatchpointWindow =
       !preparedScoreContinuationAvailable &&
       matchpointTarget &&
-      scorelineFeasibility?.deadline === "last_draw_window";
+      scorelineFeasibility?.deadline === "last_draw_window" &&
+      corpAgendaInstallCanFundLastDrawScoreHorizon(input, candidate, serverId);
     const boundedStagedScoreWindow =
       residentBoundedStagedScoreWindow || handPressureBoundedStagedScoreWindow;
     const certifiedNearTermScoreHorizon =
@@ -1019,6 +1023,52 @@ export function corpPreferredDeckoutAgendaRecycleRouteAvailable(
       )
     );
   });
+}
+
+/** The install quote certifies clicks only. Score must also account for the
+ * standard one-credit advancement reserve and every required basic-credit
+ * click before admitting a terminal last-draw route. This is not a protection
+ * certificate, nor a future LegalAction. Every later step is revalidated.
+ */
+function corpAgendaInstallCanFundLastDrawScoreHorizon(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  serverId: string | undefined,
+): boolean {
+  if (
+    !hasExactNonNegativeCostProfile(candidate) ||
+    !corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+      input,
+      candidate,
+      serverId,
+    )
+  )
+    return false;
+  const payload = input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  )!.payload!;
+  const advancementReserve =
+    payload.agendaInstallScoreHorizonQuoteAdvancementRequirement as number;
+  const nextClicks =
+    payload.agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks as number;
+  const creditsAfterInstall =
+    input.playerView.own.credits - candidate.costProfile.creditCost!;
+  const clicksAfterInstall =
+    input.playerView.own.clicks - candidate.costProfile.clickCost!;
+  if (
+    !isFiniteNonNegativeInteger(creditsAfterInstall) ||
+    !isFiniteNonNegativeInteger(clicksAfterInstall)
+  )
+    return false;
+  const fundingClicks = Math.max(0, advancementReserve - creditsAfterInstall);
+  if (
+    fundingClicks > 0 &&
+    !input.legalActions.some((action) =>
+      corpExactCurrentBasicLiquidCreditAction(input, action),
+    )
+  )
+    return false;
+  return advancementReserve + fundingClicks <= clicksAfterInstall + nextClicks;
 }
 
 export function corpAgendaInstallHasCertifiedNearTermScoreHorizon(

@@ -75,7 +75,7 @@ it("funds the already certified terminal continuation instead of opening an unpr
   ).not.toContain("corp_last_viable_deckout_matchpoint_install:new_remote");
 });
 it.each(["stale", "incomplete", "nonterminal", "unfundable"] as const)(
-  "retains the real emergency install with a %s installed continuation",
+  "does not replace a %s installed continuation with an unfunded emergency install",
   (variant) => {
     const cp = checkpoint(),
       agenda = cp.input.playerView.servers
@@ -97,7 +97,33 @@ it.each(["stale", "incomplete", "nonterminal", "unfundable"] as const)(
     if (variant === "nonterminal") quote.terminalScore = false;
     if (variant === "unfundable")
       quote.creditsRequiredBeforeNextCorpTurn =
-        cp.input.playerView.own.clicks + 1;
+        cp.input.playerView.own.credits + cp.input.playerView.own.clicks + 1;
+    const result = decide(cp),
+      plan = result.decisionDebug!.planFirstDecision!;
+    expect(result.actionId).toBe("corp.gain_credit");
+    expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
+  },
+);
+it.each(["stale", "incomplete"] as const)(
+  "retains a separately funded emergency installation with a %s installed quote",
+  (variant) => {
+    const cp = checkpoint();
+    cp.input.playerView.own.credits = 4;
+    const agenda = cp.input.playerView.servers
+      .flatMap((s) => s.root)
+      .find((c) => c.instanceId === installed)!;
+    const quote = agenda.scoreContinuationQuote!;
+    if (!quote.complete) throw Error("complete_native_continuation_required");
+    if (variant === "stale") quote.expiresAtStateVersion--;
+    else
+      agenda.scoreContinuationQuote = {
+        context: quote.context,
+        agendaCardId: quote.agendaCardId,
+        serverId: quote.serverId,
+        expiresAtStateVersion: quote.expiresAtStateVersion,
+        complete: false,
+        reason: "not_completable_next_corp_turn",
+      };
     const result = decide(cp),
       plan = result.decisionDebug!.planFirstDecision!;
     expect(result.actionId).toBe(newInstall);

@@ -1,6 +1,6 @@
 import { corpExactBasicLiquidCreditCandidate } from "./economy-routes";
 import { type CorpEconomyLiquidityDevelopmentSignal } from "./economy-types";
-import { type AiDecisionInput } from "@netgrid/shared";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
@@ -14,13 +14,25 @@ export function corpExactCurrentBasicLiquidCreditCandidate(
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
+  return corpExactCurrentBasicLiquidCreditAction(input, action);
+}
+
+export function corpExactCurrentBasicLiquidCreditAction(
+  input: AiDecisionInput,
+  action: LegalAction | undefined,
+): boolean {
   if (
     action?.side !== "corp" ||
     action.type !== "gain_credit" ||
     action.source !== "basic_action" ||
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.targetRequirements.length > 0 ||
-    (action.choiceRequirements?.length ?? 0) > 0
+    (action.choiceRequirements?.length ?? 0) > 0 ||
+    !action.costs.every((cost) =>
+      [cost.clicks ?? 0, cost.credits ?? 0].every(
+        (value) => Number.isSafeInteger(value) && value >= 0,
+      ),
+    )
   ) {
     return false;
   }
