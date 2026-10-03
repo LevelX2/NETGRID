@@ -716,9 +716,12 @@ function conversionCapabilities(
     ...corpInstalledAdvancementPreparations(input)
       .filter(
         (preparation) =>
+          (preparation.action !== undefined ||
+            target.installAction !== undefined) &&
           !legalCapabilities.some(
             (capability) =>
-              capability.sourceCardId === preparation.sourceCardId,
+              (capability.sourceCardId ?? capability.action?.source) ===
+              preparation.sourceCardId,
           ),
       )
       .map((preparation) => ({
@@ -1319,7 +1322,8 @@ function visibleOwnCard(
 function visibleInstalledCorpCards(input: AiDecisionInput): VisibleCard[] {
   return input.playerView.servers.flatMap((server) => [
     ...server.ice,
-    ...server.root,
+    // Archives ICE is installed; its virtual root contains discarded cards.
+    ...(server.id === "archives" ? [] : server.root),
   ]);
 }
 

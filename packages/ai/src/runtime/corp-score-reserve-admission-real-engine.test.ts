@@ -20,6 +20,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import { corpSameTurnScoreConversionPaths } from "../plans/tactical-plan-corp-score-conversion";
+import { corpInstalledAdvancementPreparations } from "../plans/corp-installed-advancement-preparation";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
 const SUPPORT = "onr_v1_312_chicago-branch",
@@ -235,6 +236,79 @@ function finishNativeScore(
   return state;
 }
 beforeEach(() => resetResidentPlanPortfolioMemory());
+
+it("excludes rezzed support after a native root replacement sends it to Archives", () => {
+  let state = createGameAfterSetup({
+    matchId: "archived-score-support",
+    seed: "archived-score-support",
+    agendaPointsToWin: 7,
+    runnerDeck,
+    corpDeck,
+  });
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find((a) => a.type === "mandatory_draw")!,
+  );
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpHqSize(0)
+    .withCorpCredits(20)
+    .withCorpCardInHq(SUPPORT)
+    .withCorpCardInHq("onr_v1_205_main-office-relocation");
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find(
+      (a) =>
+        a.type === "install_card" &&
+        a.source.includes("chicago-branch") &&
+        a.payload?.serverId === "new_remote",
+    )!,
+  );
+  const source = state.corp.servers
+      .flatMap((s) => s.root)
+      .find((id) => state.cardInstances[id]?.definitionId === SUPPORT)!,
+    server = state.corp.servers.find((s) => s.root.includes(source))!;
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find(
+      (a) => a.type === "rez_card" && a.source === source,
+    )!,
+  );
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find(
+      (a) =>
+        a.type === "install_card" &&
+        a.source.includes("main-office-relocation") &&
+        a.payload?.serverId === server.id,
+    )!,
+  );
+  expect(state.corp.archives).toContain(source);
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find((a) => a.type === "end_turn")!,
+  );
+  state = apply(
+    state,
+    getLegalActions(state, "runner").find((a) => a.type === "end_turn")!,
+  );
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find((a) => a.type === "mandatory_draw")!,
+  );
+  RealEngineFixtureBuilder.forState(state).withCorpHqSize(0).withCorpCredits(9);
+  const input = inputFor(state),
+    archived = input.playerView.servers
+      .find((s) => s.id === "archives")!
+      .root.find((c) => c.instanceId === source)!;
+  expect(archived.rezzed).toBe(true);
+  expect(
+    input.legalActions.some(
+      (a) => a.type === "activated_card_ability" && a.source === source,
+    ),
+  ).toBe(false);
+  expect(corpInstalledAdvancementPreparations(input)).toEqual([]);
+  expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+});
 
 it("rejects the exact engine-funded nonterminal score before it consumes current terminal central defense", () => {
   const input = inputFor(nativeFixture(9));

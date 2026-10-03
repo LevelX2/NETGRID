@@ -40,9 +40,9 @@ it("finishes the cheaper installed agenda before the prospective equal-point sib
     ]),
   ).toEqual([
     ["corp_onr_v1_203_hostile-takeover_1", 3, 3, 0],
-    // Rezzed pure support now supplies the prospective HQ route without
-    // artificial extra action capacity. The installed score is still cheaper.
-    ["corp_onr_v1_203_hostile-takeover_2", 4, 3, 0],
+    // The visible rezzed support is discarded in Archives, so this sibling
+    // still requires the real extra-action operation and its full costs.
+    ["corp_onr_v1_203_hostile-takeover_2", 7, 5, 2],
   ]);
   const decision = chooseAiAction(input);
   const action = input.legalActions.find(
@@ -68,7 +68,7 @@ it("finishes the cheaper installed agenda before the prospective equal-point sib
   expect(other.moduleState).toMatchObject({
     signal: {
       sameTurnCloseout: true,
-      conversion: { remainingAdvancementClicks: 1, remainingScoreCredits: 4 },
+      conversion: { remainingAdvancementClicks: 3, remainingScoreCredits: 3 },
     },
   });
 });

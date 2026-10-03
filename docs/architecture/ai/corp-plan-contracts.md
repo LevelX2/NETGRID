@@ -352,6 +352,12 @@ keinen zweiten Rez. Sobald die Agenda installiert ist, wird jede echte
 Aktivierung ausschließlich aus den aktuellen LegalActions materialisiert.
 Ein bereits vorhandenes natives Capability wird nicht doppelt projiziert.
 Die native Gegenprobe schließt zwei Scorefolgen über eine echte Zuggrenze ab.
+Die virtuelle `Archives.root`-Projektion enthält entsorgte Karten und zählt
+niemals als installierte Support- oder Counterquelle, auch wenn deren sichtbare
+Rezmarkierung erhalten ist. Tatsächlich installiertes Archives-ICE bleibt eine
+installierte Quelle. Der native Root-Austausch und G1 D171 aus Diagnose-Runde 4
+der Paarung 492 sichern diese Zonengrenze und den weiterhin legalen Babylon-
+Advance ab.
 
 Vor der Admission prüft Score nach der Zusammenführung seiner Projekte den
 vollständigen Engine-gequoteten Same-Turn-Credithorizont gegen die bereits
