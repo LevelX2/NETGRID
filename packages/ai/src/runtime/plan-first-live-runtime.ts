@@ -217,6 +217,8 @@ import {
 } from "../runner/central-pressure/central-pressure-signals";
 import { runnerCreditBankActionDispositions } from "../runner/credit-bank/credit-bank-dispositions";
 import { runnerCreditBankSignals } from "../runner/credit-bank/credit-bank-signals";
+import { reconcileRunnerCreditBankRunFunding } from "../runner/credit-bank/credit-bank-funding-revalidation";
+import { runnerRunFundingParentHasCurrentNeed } from "../plans/runner-funding-parent";
 import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
 import {
   runnerDefenseDeferredHandBufferDispositions,
@@ -2838,10 +2840,7 @@ function runnerFundingNeedHasMaterialParent(
         (signal.marginalValue ?? 0) > 0,
     );
   }
-  return [...domain.centralPressure, ...domain.remoteContests].some(
-    (signal) =>
-      signal.supportNeedId === need.needId && signal.marginalValue > 0,
-  );
+  return runnerRunFundingParentHasCurrentNeed(domain, need);
 }
 
 function runnerDrawActionHasCurrentPlanPurpose(
@@ -3023,7 +3022,7 @@ function buildRunnerDomain(
     );
   const defenseHandBuffer = runnerDefenseHandBufferFacts(input, runTargets);
   const { handSize, damageThreat, minimumHandBuffer } = defenseHandBuffer;
-  const creditBanks = runnerCreditBankSignals(
+  const prospectiveCreditBanks = runnerCreditBankSignals(
     input,
     candidates,
     _deckCapabilities,
@@ -3120,7 +3119,7 @@ function buildRunnerDomain(
           candidates,
         );
     const bankFunding = support
-      ? creditBanks.find(
+      ? prospectiveCreditBanks.find(
           (bank) =>
             bank.runFunding?.parentPlanInstanceId ===
               support.parentPlanInstanceId &&
@@ -3223,17 +3222,6 @@ function buildRunnerDomain(
       currentCredits,
       remainingClicks,
     });
-  const preDevelopmentFundingNeeds = uniqueBy(
-    [
-      ...runFundingNeeds,
-      ...runLockFundingNeeds,
-      ...resourceLifecycleFundingNeeds,
-      ...accessPayoffFundingNeeds,
-      ...portfolioReserveFundingNeeds,
-      ...turnLiquidityFundingNeeds,
-    ],
-    (need) => need.needId,
-  );
   const constrainedRunCandidates =
     runOnlyActionCapacity && !forgoUnsafeRunCapacity
       ? bestRunTargetsByServer(input, economy, runTargets, candidates)
@@ -3310,6 +3298,29 @@ function buildRunnerDomain(
     recurringEconomyRunDeferralEvidenceCode,
     activeRunRoot,
   });
+  const runFundingParents = { centralPressure, remoteContests };
+  const creditBanks = reconcileRunnerCreditBankRunFunding(
+    prospectiveCreditBanks,
+    input.playerView.stateVersion,
+    runFundingParents,
+  );
+  const preDevelopmentFundingNeeds = uniqueBy(
+    [
+      ...runFundingNeeds.filter((need) =>
+        runnerRunFundingParentHasCurrentNeed(runFundingParents, need),
+      ),
+      ...runLockFundingNeeds.filter(
+        (need) =>
+          need.kind === "parent_plan_support" &&
+          runnerRunFundingParentHasCurrentNeed(runFundingParents, need),
+      ),
+      ...resourceLifecycleFundingNeeds,
+      ...accessPayoffFundingNeeds,
+      ...portfolioReserveFundingNeeds,
+      ...turnLiquidityFundingNeeds,
+    ],
+    (need) => need.needId,
+  );
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
     input,
     {

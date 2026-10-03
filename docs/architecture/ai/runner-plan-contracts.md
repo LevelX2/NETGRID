@@ -2255,6 +2255,19 @@ ohne Projektion. Die strategische Ladetaktung bleibt Entscheidung des Bank-Owner
 Finanzierungsentscheidungen verwenden die bestehenden exakten Demand- und
 Route-Suchen; der Schnitt ergänzt keine neue Parentkante im Scheduler.
 
+Eine prospektiv vollständig finanzierbare Runroute ist noch kein aktuell
+offener Bedarf des Run-Owners. Nach dessen konkreter Routenaufnahme prüft
+`credit-bank-funding-revalidation.ts` StateVersion, exakte Parentinstanz,
+`supportNeedId` und positiven materiellen Wert erneut. Wechselt der Parent
+beispielsweise zu vorbereitender ICE-Entfernung und veröffentlicht keinen
+Run-Funding-Bedarf mehr, hält die Bank ihren Vorrat und weist ihre zuvor
+vorgesehene Auszahlung mit konkreter Ursachenangabe zurück. Auch der
+komponierte Run-Funding-Bedarf wird dann nicht mehr veröffentlicht. Erst nach
+der Engine-Anwendung entsteht gegebenenfalls ein neuer, vollständig geprüfter
+Bedarf. Der strenge Assessment-Validator und der vorbereitende Remote-Owner
+bleiben unverändert. Der native Zustand 475/R5/G4/D325 und die positive
+Bank-Remote-Gegenprobe sichern diese Grenze.
+
 Für den heutigen Bankpfad existiert kein eigener strategischer Choice-Resolver.
 Die gebundene generische Ausführung bleibt zuständig. CardSpec-Installchoices
 mit `requires_engine_quote` behalten ihre bisherige Projektionsgrenze; daraus
