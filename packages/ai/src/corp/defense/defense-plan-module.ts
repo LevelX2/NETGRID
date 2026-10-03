@@ -557,6 +557,7 @@ function defenseCandidates(
   if (
     (signal.phase === "resolve_install_targets" ||
       signal.phase === "resolve_run_redirect" ||
+      signal.phase === "resolve_rez_or_trash" ||
       signal.phase === "resolve_program_trash" ||
       signal.phase === "resolve_hardware_trash") &&
     signal.choiceResolution
@@ -1463,7 +1464,9 @@ function genericDefensePortfolioWithoutInstallPreparation(
   centralAllocation?: CorpCentralDefenseAllocation,
 ): PlanMaterialization["candidates"] {
   const targetChoiceSignals = eligibleSignals.filter(
-    (signal) => signal.phase === "resolve_install_targets",
+    (signal) =>
+      signal.phase === "resolve_install_targets" ||
+      signal.phase === "resolve_rez_or_trash",
   );
   if (targetChoiceSignals.length > 0) {
     return selectedDirectDefenseRoute(context, targetChoiceSignals);

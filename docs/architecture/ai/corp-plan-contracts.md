@@ -806,6 +806,15 @@ garantiert ihn nicht. Ein besserer vollständiger Matchausgang ist damit
 nicht nachgewiesen.
 
 Rez ist grundsätzlich eine einmalige Investition in wiederkehrenden Druck.
+Die erzwungene Rez-/Trash-Choice gehört ebenfalls zu `corp.defend_servers`.
+Der Owner bindet die aktuelle Engine-Option an ICE, Action und StateVersion.
+Ein bereits zertifizierter Stop ohne dieses ICE darf eine veröffentlichte
+Score-Fortsetzungsreserve vor einer redundanten bezahlten Rez schützen.
+Unbekannte Protektion zertifiziert keine Redundanz. Der Resolver übernimmt
+nur die Option des aktuellen Defense-Executors; fehlende Bindungen scheitern
+geschlossen. Paarung 475, Kontrolllauf 11, G37 D224 belegt den Reserveverlust
+durch Puzzle trotz bereits gerezzter Imperial Guard vor dem terminalen Lab-Score.
+
 Ein positiver, exakt belegter Breakpreis darf auch unter dem Rezpreis liegen;
 der erste Run muss den Rez nicht allein amortisieren. Nur temporäre
 Rez-Aktionen behalten den bisherigen Vergleich für einen einzelnen Run.

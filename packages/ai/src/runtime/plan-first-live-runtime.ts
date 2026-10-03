@@ -3903,6 +3903,9 @@ function resolveEngineWindow(
       "card_implementation.classic_deflector:",
     ) ||
     context.input.playerView.pendingChoice?.source.startsWith(
+      "card_implementation.corp_choice_rez_or_trash_ice_decision:",
+    ) ||
+    context.input.playerView.pendingChoice?.source.startsWith(
       "card_implementation.trash_installed_program:",
     ) ||
     context.input.playerView.pendingChoice?.source.startsWith(

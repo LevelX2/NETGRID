@@ -201,7 +201,7 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
   };
 }
 
-function scoreContinuationClaims(
+export function scoreContinuationClaims(
   projects: readonly CorpScoreProjectSignal[],
 ): ScoreContinuationClaim[] {
   return projects
