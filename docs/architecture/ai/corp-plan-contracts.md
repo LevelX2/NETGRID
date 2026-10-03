@@ -730,6 +730,21 @@ Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
 
+Der aktuelle Run-Response darf bereits gerezzte mobile ICE aus einem leeren
+Remote-Fort zum angegriffenen Fort bewegen, wenn dort eine bekannte Agenda
+den Runner gewinnen ließe. `mobile-ice-run-defense.ts` konsumiert die aktuelle
+Engine-Quote `corpMobileIceMoveQuoteJson`: Action, Quelle, beide Forts,
+StateVersion, Zahlung und vollständige öffentliche ICE-Pfade bleiben gebunden.
+Der bisherige Pfad muss erreichbar sein; der neue Pfad muss anhand des
+sichtbaren Runner-Rigs und seiner tatsächlich verfügbaren Run-Zahlungsmittel
+an einer unbezahlbaren ETR scheitern. Der Pfadprüfer darf dabei am belegten
+Stop enden, ohne inneres ICE nochmals zu durchlaufen. Root, Executor, Step und
+Route gehören weiterhin `corp.defend_servers`. Unbekannte oder ungerezzte
+Schichten, unvollständige Quotes, nichtterminale Allokation und ein belegter
+weiterhin bezahlbarer Zugriff eröffnen diese enge Route nicht. Eine Rootkarte
+im Herkunftsfort sperrt sie ebenfalls; allgemeine Umverteilung mit Aufgabe
+anderer Schutzbedarfe bleibt offen. Regression: Paarung 475/R13/G2/D375.
+
 ### Vertikale Implementierung
 
 [`defenseModule`](../../../packages/ai/src/corp/defense/defense-plan-module.ts)

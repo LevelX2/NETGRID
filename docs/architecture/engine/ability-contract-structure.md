@@ -15,6 +15,26 @@ passenden Familie definiert.
 
 ## Familien
 
+`RunState.startOfRunIceRepositionOpen` markiert das Fenster vor der ersten
+Begegnung beziehungsweise Passage. Die Engine bietet kanonische mobile
+ICE-Aktionen auch vor bereits gerezztem äußerem ICE und vor dem Zugriff auf
+einen ICE-leeren Fort an. Begegnung, Passage und das Schließen des leeren
+Startfensters entfernen die Markierung; eine spätere Approach-Position öffnet
+sie nicht erneut. Der Dispatcher führt auch
+`move_self_to_outermost_position_on_other_fort` über den Fort-Run-Resolver aus.
+Das ist keine allgemeine Root-Rez-Freigabe am Runstart. Eine bereits geöffnete
+Corp-Priorität führt nach der letzten verfügbaren Root-Rez am leeren Fort
+regulär in das Runner-Fortsetzungsfenster zurück.
+
+Für bereits gerezztes mobiles ICE quotiert
+`game/view/visible-mobile-ice-move-quote.ts` die physische Bewegung und Zahlung
+sowie den öffentlichen ICE-Pfad vor und nach dem Zonenwechsel. Die Quote
+`corpMobileIceMoveQuoteJson` bindet Action, Quelle, Herkunfts-/Zielfort und
+StateVersion. Alle enthaltenen ICE-Identitäten müssen gerezzte öffentliche
+Karten sein; gegnerische Handkarten werden nicht projiziert. Eine ungerezzte
+Quelle oder Zielschicht erhält keine vorgetäuschte vollständige Move-/Rez-
+Quote. `applyAction` validiert und bezahlt weiterhin die aktuelle LegalAction.
+
 Die normale Runner-Run-Aktion kann eine akteursprivate
 `runnerPostBreakTrashQuoteJson` tragen. Der Producer
 `game/turn/runner-post-break-trash-quote.ts` bindet eigene Hand-/Rig-Quellen und

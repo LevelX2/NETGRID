@@ -345,7 +345,19 @@ export function passApproachedIce(
   legalAction?: LegalAction,
 ): RunMovementResult {
   const run = mustRun(host.state);
-  if (!run.approachedIceId) throw new Error("Kein ICE wird approached.");
+  if (!run.approachedIceId) {
+    if (
+      run.startOfRunIceRepositionOpen !== true ||
+      run.position.kind !== "server"
+    )
+      throw new Error("Kein ICE wird approached.");
+    delete run.startOfRunIceRepositionOpen;
+    run.phase = "movement";
+    host.state.timingPoint = "run.jack_out_window";
+    host.state.activeSide = "runner";
+    return { handled: true, runContinues: true, stateChanged: true };
+  }
+  delete run.startOfRunIceRepositionOpen;
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   if (ice.rezzed && run.bypassFirstIceRemaining) {
     markRunStartBypassAutoPass(host, run.approachedIceId, legalAction);
@@ -373,6 +385,8 @@ export function approachOrEncounterIce(
   const run = mustRun(state);
   const ice = host.cards.cardInstanceFor(approachedIceId);
   run.approachedIceId = approachedIceId;
+  run.phase = "approach_ice";
+  state.timingPoint = "run.approach_ice";
   if (ice.rezzed) {
     if (host.rules.corpRunRootRezActionsAvailable()) {
       const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } =
@@ -430,6 +444,7 @@ export function movePastCurrentIce(
 ): MovePastCurrentIceResult {
   const state = host.state;
   const run = mustRun(state);
+  delete run.startOfRunIceRepositionOpen;
   if (run.position.kind !== "ice")
     throw new Error("Runner ist nicht an ICE positioniert.");
   const server = host.servers.mustServer(run.position.serverId);

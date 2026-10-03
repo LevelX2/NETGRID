@@ -682,6 +682,7 @@ export function buildCorpDefenseNeeds({
         }
         if (
           candidate.actionType === "activated_card_ability" ||
+          candidate.actionType === "trigger_ability" ||
           candidate.semanticActionType === "card_ability.trigger" ||
           candidate.semanticActionType === "run.end_by_corp"
         ) {

@@ -176,6 +176,7 @@ function hostFor(state: GameState): {
           }) as RunAccessTransitionHost,
       },
       run: {
+        startRunIceRepositionActionsAvailable: () => false,
         movementHost: () => ({
           state,
           cards: {

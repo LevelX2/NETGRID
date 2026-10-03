@@ -67,6 +67,7 @@ export type RunCoreExecutionHost = {
   };
   run: {
     movementHost: () => RunMovementHost;
+    startRunIceRepositionActionsAvailable: () => boolean;
     corpDuringRunCardImplementationLegalActions?: (
       state: GameState,
     ) => LegalAction[];
@@ -137,6 +138,7 @@ export function startRun(
         }
       : {}),
     phase: "approach_ice",
+    startOfRunIceRepositionOpen: true,
     position:
       server.ice.length > 0
         ? {
@@ -318,6 +320,9 @@ export function resumeRunAfterStartEffects(
   const server = host.servers.mustServer(run.attackedServerId);
   if (host.callbacks.openStartOfRunFortUtilityWindow(state, legalAction))
     return;
+  // Start-window action producers must observe the approach timing before
+  // availability is queried, including an already-rezzed first ICE.
+  state.timingPoint = "run.approach_ice";
   if (server.ice.length > 0) {
     const iceIndex = outermostIceIndex(server);
     const approachedIceId = mustArrayValue(
@@ -331,9 +336,13 @@ export function resumeRunAfterStartEffects(
       approachedIceId,
       legalAction,
     );
+  } else if (host.run.startRunIceRepositionActionsAvailable()) {
+    state.activeSide = "corp";
+    return;
   } else if (openServerMovementWindowBeforeAccess(host, server.id)) {
     return;
   } else {
+    delete run.startOfRunIceRepositionOpen;
     enterAccessFromSuccessfulRun(
       host.access.runAccessTransitionHost(),
       legalAction,

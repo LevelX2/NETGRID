@@ -60,7 +60,24 @@ export function buildCorpApproachActions(
   host: RunRezWindowHost,
 ): LegalAction[] {
   const run = mustRun(host.state);
-  if (!run.approachedIceId) return [];
+  if (!run.approachedIceId) {
+    if (
+      run.startOfRunIceRepositionOpen !== true ||
+      run.position.kind !== "server"
+    )
+      return [];
+    return [
+      ...buildCorpRunRootRezActions(host),
+      buildLegalAction(
+        host.state,
+        "corp",
+        "decline_rez",
+        "Run-Start-Fenster schließen",
+        "game_rule",
+        [],
+      ),
+    ];
+  }
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   const definition = host.cards.definitionFor(run.approachedIceId);
   const actions: LegalAction[] = [];

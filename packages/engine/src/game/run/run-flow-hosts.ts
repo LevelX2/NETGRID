@@ -107,7 +107,10 @@ import {
   passCorpRunRootRezWindow,
   type RunRezWindowHost,
 } from "./run-rez-window";
-import type { FortPassWindowHost } from "./fort-pass-window";
+import {
+  buildStartRunIceRepositionActions,
+  type FortPassWindowHost,
+} from "./fort-pass-window";
 import {
   isTokyoUnsuccessfulRunSource,
   fortTraceBitPoolSource,
@@ -166,6 +169,18 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       run: {
         movementHost: () => runMovementHostForState(state),
+        startRunIceRepositionActionsAvailable: () => {
+          const run = state.run;
+          if (!run)
+            throw new Error("Die Run-Start-Aktionsprüfung hat keinen Run.");
+          return (
+            buildStartRunIceRepositionActions(
+              fortPassWindowHostForState(state),
+              run,
+              host.servers.mustServer(state, run.attackedServerId),
+            ).length > 0
+          );
+        },
         corpDuringRunCardImplementationLegalActions:
           host.run.corpDuringRunCardImplementationLegalActions,
       },
@@ -419,6 +434,16 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.run.corpDuringRunCardImplementationLegalActions(state),
         continueAfterRootRez: (legalAction) => {
           const run = state.run;
+          if (
+            state.timingPoint === "run.approach_ice" &&
+            run?.phase === "approach_ice" &&
+            run.startOfRunIceRepositionOpen === true &&
+            !run.approachedIceId &&
+            !corpRunRootRezActionsAvailable(runRezWindowHostForState(state))
+          ) {
+            passApproachedIce(runMovementHostForState(state), legalAction);
+            return;
+          }
           if (
             state.timingPoint === "run.movement_rez_window" &&
             run?.phase === "movement" &&

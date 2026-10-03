@@ -96,14 +96,19 @@ describe("typed post-pass fully-broken ICE trash semantics", () => {
   });
 
   it("derives from the typed capability without card identity or planning annotations", () => {
-    const renamed = entry();
+    const original = entry();
     // A different supported identity keeps scenario evidence valid while
     // proving that the function comes from the capability, not the card name.
-    renamed.definition = {
-      ...renamed.definition,
-      id: "onr_v1_039_krash" as typeof renamed.definition.id,
+    const { planningAnnotations: _annotations, ...mechanicalPlanning } =
+      original.planning;
+    const renamed = {
+      ...original,
+      definition: {
+        ...original.definition,
+        id: "onr_v1_039_krash" as typeof original.definition.id,
+      },
+      planning: mechanicalPlanning,
     };
-    delete renamed.planning.planningAnnotations;
     const hint = deriveCardSpecAiHint(renamed);
     expect(hint.cardId).toBe("onr_v1_039_krash");
     expect(hint.effects).toContainEqual(

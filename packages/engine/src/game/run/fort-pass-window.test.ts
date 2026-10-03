@@ -429,6 +429,7 @@ describe("fort pass window", () => {
     const server = host.servers.mustServer("rd");
     const run = state.run!;
 
+    run.startOfRunIceRepositionOpen = true;
     const actions = buildStartRunIceRepositionActions(host, run, server);
 
     expect(actions).toHaveLength(1);
@@ -487,6 +488,7 @@ describe("fort pass window", () => {
     const host = hostFor(state);
     const server = host.servers.mustServer("rd");
 
+    state.run!.startOfRunIceRepositionOpen = true;
     const actions = buildStartRunIceRepositionActions(host, state.run!, server);
 
     expect(actions).toHaveLength(3);
@@ -546,6 +548,7 @@ describe("fort pass window", () => {
     const server = host.servers.mustServer("rd");
     const run = state.run!;
 
+    run.startOfRunIceRepositionOpen = true;
     const glacierAction = buildStartRunIceRepositionActions(
       host,
       run,

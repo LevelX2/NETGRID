@@ -798,6 +798,17 @@ Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Eine Zahlung für das Trash einer vollständig gebrochenen, gerade passierten
+ICE ist kein Einkommen. Die typisierte `ice_trash`-Wirkung mit Ziel
+`trash_fully_broken_passed_ice` und Timing `encounter_resolution` erhält die
+Rolle `access_payoff` und persistente `access_support`-Coverage. Sie begründet
+keinen allgemeinen Economy- oder Setup-Bedarf, auch nicht bei hohen Credits
+oder strategischem Installationsfit. Die produktive Vorbereitung bleibt beim
+vorhandenen, exakt gebundenen Zentraldruck-Parent mit finanzierter aktueller
+Run-/Break-/Trash-Folge. Paarung 475/R13/G1/D47 belegt den früheren falschen
+Economy-Zweck; native Eingabe, generierter Hint und echte Engine-Folge sichern
+die Korrektur und ihre Zulassungsgrenzen.
+
 Einmalige Suchereignisse werden auch anhand ihres aktuellen kanonischen
 `effectKind` für Stack- oder Heap-Suche erkannt. Ohne exakt gebundenen
 Zielplan erhält die Aktion die bestehende ausdrückliche Zurückstellung;

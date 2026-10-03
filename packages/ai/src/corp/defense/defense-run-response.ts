@@ -16,6 +16,7 @@ import {
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
 import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
+import { assessMobileIceRunDefense } from "./mobile-ice-run-defense";
 import { corpPassTaxRezAssessment } from "../../runtime/corp-pass-tax-rez-assessment";
 import { corpRootRezTimingComponent } from "../../runtime/corp-scoreline/semantic-runtime-corp-score-ice-components";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
@@ -309,6 +310,8 @@ export function corpRunDefenseAbilityAssessment(
       removalCondition:
         "Bind the run-defense assessment to the current exact LegalAction.",
     });
+  const mobileDefense = assessMobileIceRunDefense(input, legalAction);
+  if (mobileDefense) return mobileDefense;
   const paidEncounterDefense = assessCorpPaidEncounterDefense(
     input,
     legalAction,

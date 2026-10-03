@@ -75,6 +75,7 @@ export function beginEncounter(
   legalAction?: LegalAction,
 ): EncounterEntryResult {
   const run = mustRun(host.state);
+  delete run.startOfRunIceRepositionOpen;
   const encounteredDefinition = host.cards.definitionFor(encounteredIceId);
   // Closing a Corp rez window can enter the next encounter. Its tax is a
   // Runner payment, so any optional bank support resumes a Runner action,

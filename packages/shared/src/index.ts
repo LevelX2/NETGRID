@@ -1766,6 +1766,8 @@ export type RunState = {
   >;
   hqIceSwapUsedSourceIdsThisRun?: CardInstanceId[];
   iceRepositionUsedSourceIdsThisRun?: CardInstanceId[];
+  /** Present only before the first encounter/pass of the current run. */
+  startOfRunIceRepositionOpen?: true;
   discountedRezUsedSourceIdsThisRun?: CardInstanceId[];
   temporaryDiscountedRezzedIceIds?: CardInstanceId[];
   successfulRunInterventionUsedSourceIds?: CardInstanceId[];
