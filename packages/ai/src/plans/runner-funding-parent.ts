@@ -1,4 +1,33 @@
 import type { PlanInstance } from "./plan-kernel-types";
+import type {
+  RunnerPressureSignal,
+  RunnerRemoteContestSignal,
+} from "./runner-tactical-plan-contracts";
+
+export function runnerRunFundingParentHasCurrentNeed(
+  parents: {
+    centralPressure: readonly RunnerPressureSignal[];
+    remoteContests: readonly RunnerRemoteContestSignal[];
+  },
+  need: { parentPlanInstanceId: string; needId: string },
+): boolean {
+  return (
+    parents.centralPressure.some(
+      (signal) =>
+        need.parentPlanInstanceId ===
+          `plan:runner.pressure_central:${encodeURIComponent(signal.pressureId)}` &&
+        signal.supportNeedId === need.needId &&
+        signal.marginalValue > 0,
+    ) ||
+    parents.remoteContests.some(
+      (signal) =>
+        need.parentPlanInstanceId ===
+          `plan:runner.contest_remote:${encodeURIComponent(signal.contestId)}` &&
+        signal.supportNeedId === need.needId &&
+        signal.marginalValue > 0,
+    )
+  );
+}
 
 export function runnerFundingParentMaterialValue(
   candidate: PlanInstance,

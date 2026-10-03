@@ -304,6 +304,7 @@ export type CardEffectTraceResult = {
 };
 
 export type CardEffectMakeRunOptions = {
+  successfulRunEffectTargetServerId?: Exclude<ServerId, "new_remote">;
   accessCount?: number;
   freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
   accessServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;

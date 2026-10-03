@@ -152,6 +152,7 @@ import {
   runnerEffectsProvideBreakerCredits,
   runnerEffectsProvideExposeInformation,
   runnerEffectsProvideMultiaccess,
+  runnerEffectsProvidePostBreakIceTrash,
   runnerEffectsProvideNonNoisyBreakerCredits,
   runnerEffectsProvideProgramTrashPrevention,
   runnerEffectsProvideSearch,
@@ -404,8 +405,9 @@ function evaluateHandCard(
           baseNeed,
         );
   const adjustedNeed =
-    developmentRole === "draw_or_search_engine" &&
-    recoveryOnlySearchHasNoVisibleTarget(params.input, context)
+    (developmentRole === "draw_or_search_engine" &&
+      recoveryOnlySearchHasNoVisibleTarget(params.input, context)) ||
+    runnerEffectsProvidePostBreakIceTrash(context.signals.structuredEffects)
       ? baseNeed
       : currentNeedAdjustedByPersistentInstall(
           baseNeed,
@@ -676,6 +678,9 @@ function finiteRunnerHandNumber(value: unknown): number {
 
 function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   const text = context.signals.text;
+  // Paying an ICE's rez price is a removal cost, not an income capability.
+  if (runnerEffectsProvidePostBreakIceTrash(context.signals.structuredEffects))
+    return "access_payoff";
   if (successfulRunStrengthCounter(context.card.definitionId))
     return "breaker_or_rig_piece";
   if (looksLikeDelayedInstallEngine(context.signals)) {
@@ -847,6 +852,13 @@ function currentNeedForCard(
         ? "useful_now"
         : "setup";
     case "access_payoff":
+      if (
+        runnerEffectsProvidePostBreakIceTrash(context.signals.structuredEffects)
+      ) {
+        // The central run owner prices installation, full breaking and removal
+        // together. Generic hand setup must not invent an unbound income need.
+        return "none";
+      }
       if (context.signals.planRoles.includes("information")) {
         return runnerInformationDevelopmentNeed(params.input, context);
       }

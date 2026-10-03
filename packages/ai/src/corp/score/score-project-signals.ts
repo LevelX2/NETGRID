@@ -547,9 +547,23 @@ export function scoreProjectForCandidate(
         input.playerView.agendaPointsToWin - 1 &&
       (input.playerView.servers.find((server) => server.id === serverId)?.ice
         .length ?? 0) < 2;
+    const protectedNearTermMatchpointWindow =
+      matchpointTarget &&
+      certifiedNearTermScoreHorizon &&
+      corpScoreProtectionNeedIsSatisfied(
+        input,
+        protectionNeed,
+        projectId,
+        serverId,
+      ) &&
+      protectionNeed?.baseline.knowledge === "known" &&
+      protectionNeed.baseline.agendaPointsAfterDefense + agendaPoints >=
+        input.playerView.agendaPointsToWin;
     const developmentClickAvailable =
-      input.playerView.own.clicks >= (boundedStagedScoreWindow ? 1 : 2) ||
-      deadlinePressure;
+      input.playerView.own.clicks >=
+        (boundedStagedScoreWindow || protectedNearTermMatchpointWindow
+          ? 1
+          : 2) || deadlinePressure;
     const protectedScoreWindow =
       forcedAgendaDiscardRelief ||
       sameTurnCloseout ||
@@ -992,7 +1006,7 @@ export function corpPreferredDeckoutAgendaRecycleRouteAvailable(
   });
 }
 
-function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+export function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   serverId: string | undefined,

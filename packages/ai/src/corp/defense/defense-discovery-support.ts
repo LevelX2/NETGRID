@@ -13,6 +13,7 @@ import {
 } from "../../plans/corp-defense-contracts";
 import {
   corpGlobalDefenseInstallRouteAssessment,
+  corpSpendConsumesKnownCentralRezReserve,
   type CorpDefenseDomainSignalFacts,
   type CorpLayeredIceStagingParent,
 } from "./corp-defense-domain-signals";
@@ -541,6 +542,19 @@ export function corpDefensiveUpgradePlacement(
       removalCondition:
         "The defensive upgrade has a declared plan role but no complete placement assessment.",
     });
+  }
+  if (
+    hasExactNonNegativeCostProfile(candidate) &&
+    corpSpendConsumesKnownCentralRezReserve(
+      input,
+      centralAllocation,
+      input.playerView.own.credits - candidate.costProfile.creditCost!,
+      input.playerView.own.clicks - candidate.costProfile.clickCost!,
+    )
+  ) {
+    return {
+      evidenceCode: `corp_defense_support_rejected:${serverId}:consumes_known_central_rez_reserve`,
+    };
   }
   if (!assignedToDefense && placement.recommendation !== "defer") {
     return undefined;

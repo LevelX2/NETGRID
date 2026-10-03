@@ -372,7 +372,7 @@ export function corpQualitativeIceStagingSignal(
     rezFundingGap <= (layeredParent.targetRecoveryTurns ?? 0) * 3;
   if (rezFundingGap > 3 && !boundedRemoteFundingHorizon) return undefined;
   if (
-    additionalIceInstallConsumesKnownCentralRezReserve(
+    corpSpendConsumesKnownCentralRezReserve(
       input,
       centralAllocation,
       creditsAfterInstall,
@@ -552,29 +552,27 @@ function readPostInstallEffectiveRunQuote(
   }
 }
 
-function additionalIceInstallConsumesKnownCentralRezReserve(
+export function corpSpendConsumesKnownCentralRezReserve(
   input: AiDecisionInput,
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
   creditsAfterInstall: number,
   clicksAfterInstall: number,
 ): boolean {
-  if (centralAllocation?.status !== "known") return false;
-  const serverId = centralAllocation.selectedServerId;
-  const knownAgendaThreat = readKnownCorpCentralAgendaThreat({
-    input,
-    serverId,
+  // Unknown global allocation does not erase independently known local
+  // agenda pressure and current Engine rez quotes on either central.
+  const threatenedServerIds = (["hq", "rd"] as const).filter((serverId) => {
+    const knownAgendaThreat = readKnownCorpCentralAgendaThreat({
+      input,
+      serverId,
+    });
+    return (
+      (centralAllocation?.status === "known" &&
+        centralAllocation.selectedServerId === serverId &&
+        centralAllocation.evidence[serverId].threat !== "none") ||
+      knownAgendaThreat?.threat === "material" ||
+      knownAgendaThreat?.threat === "terminal"
+    );
   });
-  if (
-    centralAllocation.evidence[serverId].threat === "none" &&
-    knownAgendaThreat?.threat !== "material" &&
-    knownAgendaThreat?.threat !== "terminal"
-  ) {
-    return false;
-  }
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return false;
   const basicFunding = input.legalActions.flatMap((action) => {
     if (
       action.side !== "corp" ||
@@ -600,36 +598,45 @@ function additionalIceInstallConsumesKnownCentralRezReserve(
       return [];
     return [{ gain, clicks: costs.clickCost }];
   });
-  return server.ice.some((ice) => {
-    const quote = ice.effectiveRezCostQuote;
-    const defense = visibleCorpIceDefenseProfile(ice);
+  return threatenedServerIds.some((serverId) => {
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     return (
-      ice.rezzed !== true &&
-      defense.isVisibleIce &&
-      (defense.hasImmediateStop ||
-        defense.hasMeaningfulTaxOrDamage ||
-        defense.hasEncounterDisruption) &&
-      quote?.context === "installed" &&
-      quote.cardId === ice.instanceId &&
-      quote.targetServerId === serverId &&
-      quote.projectedServerId === serverId &&
-      quote.expiresAtStateVersion === input.playerView.stateVersion &&
-      quote.complete === true &&
-      quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
-      Number.isSafeInteger(quote.finalCredits) &&
-      ((quote.finalCredits <= input.playerView.own.credits &&
-        quote.finalCredits > creditsAfterInstall) ||
-        basicFunding.some(
-          (funding) =>
-            quote.finalCredits <=
-              input.playerView.own.credits +
-                Math.floor(input.playerView.own.clicks / funding.clicks) *
-                  funding.gain &&
-            quote.finalCredits >
-              creditsAfterInstall +
-                Math.floor(Math.max(0, clicksAfterInstall) / funding.clicks) *
-                  funding.gain,
-        ))
+      server?.ice.some((ice) => {
+        const quote = ice.effectiveRezCostQuote;
+        const defense = visibleCorpIceDefenseProfile(ice);
+        return (
+          ice.rezzed !== true &&
+          defense.isVisibleIce &&
+          (defense.hasImmediateStop ||
+            defense.hasMeaningfulTaxOrDamage ||
+            defense.hasEncounterDisruption) &&
+          quote?.context === "installed" &&
+          quote.cardId === ice.instanceId &&
+          quote.targetServerId === serverId &&
+          quote.projectedServerId === serverId &&
+          quote.expiresAtStateVersion === input.playerView.stateVersion &&
+          quote.complete === true &&
+          quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
+          Number.isSafeInteger(quote.finalCredits) &&
+          ((quote.finalCredits <= input.playerView.own.credits &&
+            quote.finalCredits > creditsAfterInstall) ||
+            basicFunding.some(
+              (funding) =>
+                quote.finalCredits <=
+                  input.playerView.own.credits +
+                    Math.floor(input.playerView.own.clicks / funding.clicks) *
+                      funding.gain &&
+                quote.finalCredits >
+                  creditsAfterInstall +
+                    Math.floor(
+                      Math.max(0, clicksAfterInstall) / funding.clicks,
+                    ) *
+                      funding.gain,
+            ))
+        );
+      }) === true
     );
   });
 }
@@ -699,7 +706,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
   const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
   if (
     (server?.ice.length ?? 0) > 0 &&
-    additionalIceInstallConsumesKnownCentralRezReserve(
+    corpSpendConsumesKnownCentralRezReserve(
       input,
       centralAllocation,
       input.playerView.own.credits - projectedInstallCredits,

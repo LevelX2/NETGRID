@@ -1,7 +1,7 @@
 # AI-Hints: Quelle und Runtime-Vertrag
 
 Status: **aktueller generierter CardSpec-Vertrag**  
-Stand: 2026-10-02
+Stand: 2026-10-03
 
 ## Autorenquelle und Datenpfad
 
@@ -42,6 +42,14 @@ entfernten Snapshots `ai-card-hints-1.3.1.json`.
 Hint- und Doctrine-Daten unterstützen den zuständigen Planowner. Die aktuelle
 Ability-, Kosten-, Ziel- und LegalAction-Bindung bleibt Aufgabe der Semantik
 und der Engine; ein Hint allein zertifiziert keinen ausführbaren Step.
+
+`trash_fully_broken_passed_ice` projiziert ICE-Entfernung nach vollständigem
+Break, die Zahlung des aktuellen Rezpreises und den Selbsttrash des Programms.
+Die Installationskosten bleiben davon getrennt. Kosten, Ziel und Timing müssen
+dem typisierten Vertrag entsprechen; abweichende Formen scheitern sichtbar.
+Der feste Zielbezug `that_ice` erzeugt kein Auswahlprofil und keine zusätzliche
+Strategieannotation. Die reale Entfernung bleibt an die aktuelle Engine-Quote
+und den bestehenden begrenzten Central-Pressure-Parent gebunden.
 
 ## Typisierte Recovery- und Spielkosten
 

@@ -48,6 +48,7 @@ export type RunRezWindowHost = {
     ) => string[];
   };
   callbacks: {
+    corpDuringRunCardImplementationLegalActions: () => LegalAction[];
     canReplaceFortCardsFromHq: (
       serverId: Exclude<ServerId, "new_remote">,
     ) => boolean;

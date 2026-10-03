@@ -1,4 +1,5 @@
 import { corpProgramTrashDefenseSignals } from "./program-trash-signal";
+import { corpRezOrTrashDefenseChoiceSignal } from "./rez-or-trash-choice";
 import { corpTraceHardwareTrashDefenseSignals } from "./trace-hardware-trash-signal";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -681,6 +682,7 @@ export function buildCorpDefenseNeeds({
         }
         if (
           candidate.actionType === "activated_card_ability" ||
+          candidate.actionType === "trigger_ability" ||
           candidate.semanticActionType === "card_ability.trigger" ||
           candidate.semanticActionType === "run.end_by_corp"
         ) {
@@ -711,6 +713,11 @@ export function buildCorpDefenseNeeds({
       ...consumedDefenseDrawSignals,
       ...(agendaPurgeDefenseChoice ? [agendaPurgeDefenseChoice] : []),
       ...(classicDeflectorDefenseChoice ? [classicDeflectorDefenseChoice] : []),
+      ...[
+        corpRezOrTrashDefenseChoiceSignal(input, candidates, scoreProjects),
+      ].filter(
+        (signal): signal is CorpGenericDefenseSignal => signal !== undefined,
+      ),
       ...corpProgramTrashDefenseSignals(input, candidates),
       ...corpTraceHardwareTrashDefenseSignals(input, candidates),
     ]);

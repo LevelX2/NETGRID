@@ -7,7 +7,7 @@ import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
-it("preserves the current financing threshold in original R6 G13 D83 under its defense parent", () => {
+it("preserves the financing threshold while known central reserve protection suspends the original staging route", () => {
   const cp = JSON.parse(
     readFileSync(
       new URL(
@@ -36,8 +36,23 @@ it("preserves the current financing threshold in original R6 G13 D83 under its d
     decision = chooseAiAction(cp.input);
   expect(decision.actionId).toBe(account.actionId);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_281_accounts-receivable_1",
   );
+  const plan = decision.decisionDebug!.planFirstDecision!;
+  expect(
+    plan.dispositions.some(
+      (disposition) =>
+        disposition.actionId.includes("d-arc-knight") &&
+        disposition.actionId.includes(".hq.") &&
+        disposition.disposition === "explicitly_nonproductive" &&
+        disposition.ownerModuleId === "corp.defend_servers",
+    ),
+  ).toBe(true);
+  expect(
+    plan.portfolio.find(
+      (instance) => instance.moduleId === "corp.defend_servers",
+    )?.openNeedIds,
+  ).toEqual([]);
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("corp.economy");

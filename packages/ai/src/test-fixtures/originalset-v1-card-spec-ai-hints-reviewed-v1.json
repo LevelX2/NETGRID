@@ -4178,10 +4178,54 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["program"],
+        "roles": ["program", "ice_trash", "fully_broken_ice"],
         "planRoles": [],
         "valueHints": {},
-        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "effects": [
+          {
+            "kind": "ice_trash",
+            "scope": "ice",
+            "timing": "encounter_resolution",
+            "resource": "credits",
+            "target": "trash_fully_broken_passed_ice",
+            "finite": true
+          },
+          {
+            "kind": "program_trash",
+            "scope": "installed_program",
+            "timing": "encounter_resolution",
+            "target": "source.trash",
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "ice.trash",
+          "economy.dynamic_rez_cost",
+          "risk.self_trash"
+        ],
+        "tacticSignals": ["ice.trash"],
+        "actionTacticSignals": [
+          "effect:ice_trash",
+          "effect:program_trash",
+          "effect_scope:ice",
+          "effect_scope:installed_program",
+          "effect_timing:encounter_resolution",
+          "target.runner_program_trash"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_rezzed_ice"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0,
+          "memory": 1
+        },
+        "riskTags": ["timing_window", "self_trash", "dynamic_rez_cost"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -4190,7 +4234,13 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["install_program"]
+        "requiredMechanics": [
+          "fully_break_ice_window",
+          "install_program",
+          "target_rez_cost",
+          "trash_ice",
+          "trash_source"
+        ]
       }
     },
     {

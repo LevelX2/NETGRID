@@ -2,6 +2,12 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
+import { corpServerAgendaExposure } from "./corp-server-protection-reserve";
+import {
+  assessCorpScoreProtection,
+  corpVisibleSingleSubroutineIsUnbreakable,
+} from "../../runtime/corp-score-protection-assessment";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import {
   knownNonNegativeInteger,
   nonEmptyString,
@@ -348,30 +354,75 @@ export function corpClassicDeflectorDefenseChoiceSignal(
     return undefined;
   }
 
+  const entryEffects = new Map<
+    string,
+    ReturnType<typeof classicDeflectorEntryEffect>
+  >(
+    eligibleServerIds.map((serverId) => [
+      serverId,
+      classicDeflectorEntryEffect(input, serverId, run.attackedServerId),
+    ]),
+  );
+  const targetExposure = (serverId: string) =>
+    entryEffects.get(serverId) === "stops_run"
+      ? 0
+      : classicDeflectorServerExposure(input, serverId, centralAllocation);
   const redirectTargets = eligibleServerIds
-    .filter((serverId) => serverId !== run.attackedServerId)
+    .filter(
+      (serverId) =>
+        serverId !== run.attackedServerId &&
+        (context.creditCost === 0 ||
+          entryEffects.get(serverId) !== "forced_source_return"),
+    )
     .sort((left, right) => {
-      const difference =
-        classicDeflectorServerExposure(input, left, centralAllocation) -
-        classicDeflectorServerExposure(input, right, centralAllocation);
+      const difference = targetExposure(left) - targetExposure(right);
       return difference || technicalCompare(left, right);
     });
-  const selectedServerId = redirectTargets[0];
+  const canRetainScoreReserve =
+    input.playerView.own.credits - context.creditCost >= requiredCreditFloor;
+  const currentAgendaExposure = corpServerAgendaExposure(
+    input,
+    run.attackedServerId,
+  );
+  const matchpoint =
+    input.playerView.agendaPointsToWin - input.playerView.opponent.agendaPoints;
+  // Later scoring cash cannot forbid an exactly payable escape from current
+  // matchpoint access. With no ICE at a known agenda-free destination, there
+  // is no further ICE/redirect continuation whose safety we would be assuming.
+  const mustSpendScoreReserveForTerminalDefense =
+    context.creditCost > 0 &&
+    !canRetainScoreReserve &&
+    knownNonNegativeInteger(input.playerView.own.credits) &&
+    input.playerView.own.credits >= context.creditCost &&
+    knownNonNegativeInteger(input.playerView.opponent.agendaPoints) &&
+    knownNonNegativeInteger(input.playerView.agendaPointsToWin) &&
+    matchpoint > 0 &&
+    currentAgendaExposure !== undefined &&
+    knownNonNegativeInteger(currentAgendaExposure.maximumPoints) &&
+    currentAgendaExposure.maximumPoints >= matchpoint;
+  const selectableRedirectTargets = mustSpendScoreReserveForTerminalDefense
+    ? redirectTargets.filter((serverId) => {
+        const server = input.playerView.servers.find((s) => s.id === serverId);
+        const exposure = corpServerAgendaExposure(input, serverId);
+        return server?.ice.length === 0 && exposure?.maximumPoints === 0;
+      })
+    : redirectTargets;
+  const selectedServerId = selectableRedirectTargets[0];
   const sourceExposure =
     classicDeflectorServerExposure(
       input,
       run.attackedServerId,
       centralAllocation,
     ) + 1_000;
-  const targetExposure = selectedServerId
-    ? classicDeflectorServerExposure(input, selectedServerId, centralAllocation)
+  const selectedTargetExposure = selectedServerId
+    ? targetExposure(selectedServerId)
     : Number.POSITIVE_INFINITY;
-  const canPay =
-    input.playerView.own.credits - context.creditCost >= requiredCreditFloor;
   const redirectIsProductive =
     selectedServerId !== undefined &&
     (context.creditCost === 0 ||
-      (canPay && sourceExposure - targetExposure > context.creditCost * 250));
+      mustSpendScoreReserveForTerminalDefense ||
+      (canRetainScoreReserve &&
+        sourceExposure - selectedTargetExposure > context.creditCost * 250));
   const selectedOptionId = redirectIsProductive
     ? optionsByServerId.get(selectedServerId!)
     : declineOptionId;
@@ -385,7 +436,7 @@ export function corpClassicDeflectorDefenseChoiceSignal(
     sourceDefinitionIds: [context.sourceDefinitionId],
     actionIds: [action.actionId],
     urgent: true,
-    value: 1_000 + Math.max(0, sourceExposure - targetExposure),
+    value: 1_000 + Math.max(0, sourceExposure - selectedTargetExposure),
     evidenceCode: "classic_deflector_redirect_owned_by_corp_defend_servers",
     choiceResolution: {
       kind: "classic_deflector_redirect",
@@ -404,6 +455,81 @@ export function corpClassicDeflectorDefenseChoiceSignal(
       ...(redirectIsProductive ? { selectedServerId } : {}),
     },
   };
+}
+
+function classicDeflectorEntryEffect(
+  input: AiDecisionInput,
+  serverId: string,
+  sourceServerId: string,
+): "stops_run" | "forced_source_return" | undefined {
+  const server = input.playerView.servers.find((s) => s.id === serverId);
+  // Engine redirects enter the outermost already rezzed ICE, skipping every
+  // unrezzed outer layer. Only its exact current quote can certify this entry.
+  const ice = server?.ice
+    .slice()
+    .reverse()
+    .find((i) => i.rezzed === true);
+  const quote = ice?.effectiveRunQuote;
+  const rig = input.playerView.opponent.rig;
+  const runnerCredits = input.playerView.opponent.credits;
+  const badPublicityCredits = input.playerView.run?.badPublicityCredits;
+  if (
+    !ice?.known ||
+    !rig ||
+    !ice.definitionId ||
+    !quote ||
+    quote.iceInstanceId !== ice.instanceId ||
+    quote.iceDefinitionId !== ice.definitionId ||
+    (quote.conditionalEncounterEffects?.length ?? 0) > 0 ||
+    !knownNonNegativeInteger(runnerCredits) ||
+    !knownNonNegativeInteger(badPublicityCredits)
+  ) {
+    return undefined;
+  }
+  const availableCredits = runnerCredits + badPublicityCredits;
+  const protection = assessCorpScoreProtection({
+    serverIce: [ice],
+    runnerRig: rig.map((card) => ({
+      ...card,
+      ...(card.strength !== undefined
+        ? {
+            strength: Math.max(
+              card.strength,
+              CARD_DEFINITIONS_BY_ID[card.definitionId ?? ""]?.strength ?? 0,
+            ),
+          }
+        : {}),
+    })),
+    runnerCredits: availableCredits,
+    maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+  });
+  if (protection.knowledge === "known" && protection.protectsScore) {
+    return "stops_run";
+  }
+  const subroutine = quote.subroutines[0];
+  if (
+    quote.subroutines.length !== 1 ||
+    subroutine?.type !== "deflect_run" ||
+    (subroutine.deflectorCost ?? 0) !== 0
+  ) {
+    return undefined;
+  }
+  const returnTargets = input.playerView.servers.filter((s) =>
+    subroutine.deflectorTarget === "archives"
+      ? s.id === "archives"
+      : subroutine.deflectorTarget === "subsidiary_data_fort"
+        ? s.id.startsWith("remote_")
+        : subroutine.deflectorTarget === "any_data_fort",
+  );
+  return returnTargets.length === 1 &&
+    returnTargets[0]!.id === sourceServerId &&
+    corpVisibleSingleSubroutineIsUnbreakable({
+      ice,
+      runnerRig: rig,
+      runnerCredits: availableCredits,
+    })
+    ? "forced_source_return"
+    : undefined;
 }
 
 function parseClassicDeflectorChoiceContext(

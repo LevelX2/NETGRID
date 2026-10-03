@@ -307,14 +307,19 @@ function buildLegalActionsUnchecked(
     return side === "corp" ? corpActions : [];
   }
   if (state.timingPoint === "run.jack_out_window") {
+    const corpWindowOpen = isCorpRunRootRezWindowOpen(
+      host.hosts.runRezWindowHost(),
+    );
     if (side === "corp")
-      return [
-        ...buildCorpRunRootRezWindowActions(host.hosts.runRezWindowHost()),
-        ...buildCorpDuringRunCardImplementationActions(
-          host.hosts.runCardImplementationActionHost(),
-        ).legalActions,
-      ];
-    if (isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
+      return corpWindowOpen
+        ? [
+            ...buildCorpRunRootRezWindowActions(host.hosts.runRezWindowHost()),
+            ...buildCorpDuringRunCardImplementationActions(
+              host.hosts.runCardImplementationActionHost(),
+            ).legalActions,
+          ]
+        : [];
+    if (corpWindowOpen) return [];
     return side === "runner"
       ? [
           ...buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
@@ -325,6 +330,7 @@ function buildLegalActionsUnchecked(
   }
   if (state.timingPoint === "run.movement_rez_window") {
     if (side === "runner") return [];
+    if (!isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
     return [
       ...buildCorpRunRootRezWindowActions(host.hosts.runRezWindowHost()),
       ...buildCorpDuringRunCardImplementationActions(

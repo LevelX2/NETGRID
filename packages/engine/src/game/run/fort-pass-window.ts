@@ -11,6 +11,7 @@ import type {
 import type { CardFortRunWindowImplementation } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildLegalAction } from "../turn/action-builders";
+import { visibleMobileIceMoveQuote } from "../view/visible-mobile-ice-move-quote";
 import { selectedChoiceCardIds } from "./encounter-resolution";
 import { afterPassingLastIceWindowContext } from "./windows/after-passing-last-ice-window";
 import type { FortPassWindowHost } from "./windows/fort-pass-window-contracts";
@@ -157,8 +158,12 @@ export function buildStartRunIceRepositionActions(
 ): LegalAction[] {
   if (host.state.timingPoint !== "run.approach_ice") return [];
   if (run.attackedServerId !== server.id) return [];
-  if (run.phase !== "approach_ice" || run.position.kind !== "ice") return [];
-  if (run.position.iceIndex !== outermostIceIndex(server)) return [];
+  if (run.startOfRunIceRepositionOpen !== true || run.phase !== "approach_ice")
+    return [];
+  if (run.position.kind === "ice") {
+    if (run.position.iceIndex !== outermostIceIndex(server)) return [];
+  } else if (server.ice.length !== 0 || run.position.serverId !== server.id)
+    return [];
   const used = new Set(run.iceRepositionUsedSourceIdsThisRun ?? []);
   const sameFortActions =
     server.ice.length < 2
@@ -233,8 +238,8 @@ export function buildStartRunIceRepositionActions(
         const definition = host.cards.definitionFor(sourceCardId);
         return host.state.corp.servers
           .filter((targetServer) => targetServer.id !== sourceServer.id)
-          .map((targetServer) =>
-            buildLegalAction(
+          .map((targetServer) => {
+            const action = buildLegalAction(
               host.state,
               "corp",
               "trigger_ability",
@@ -255,8 +260,15 @@ export function buildStartRunIceRepositionActions(
                 fortRunWindowAbility:
                   "move_self_to_outermost_position_on_other_fort",
               },
-            ),
-          );
+            );
+            const quote = visibleMobileIceMoveQuote(host.state, action);
+            if (quote)
+              action.payload = {
+                ...action.payload,
+                corpMobileIceMoveQuoteJson: quote,
+              };
+            return action;
+          });
       }),
   );
   return [...sameFortActions, ...otherFortActions];
@@ -355,13 +367,15 @@ export function resolveStartRunIceRepositionWindow(
   if (host.state.timingPoint !== "run.approach_ice")
     throw new Error("Das ICE-Bewegungsfenster ist nicht offen.");
   const run = mustRun(host.state);
-  if (run.phase !== "approach_ice" || run.position.kind !== "ice")
+  if (run.startOfRunIceRepositionOpen !== true || run.phase !== "approach_ice")
     throw new Error("Runner ist nicht am Run-Start eines ICE-Forts.");
   if (
     legalAction.payload?.fortRunWindowAbility ===
     "move_self_to_outermost_position_on_other_fort"
   )
     return resolveStartRunOtherFortIceMove(host, legalAction, run);
+  if (run.position.kind !== "ice")
+    throw new Error("Die Bewegung innerhalb eines Forts benötigt ICE.");
   const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
     ServerId,
     "new_remote"
@@ -479,9 +493,11 @@ function resolveStartRunOtherFortIceMove(
 ): RunIceRepositionWindowResult {
   const attackedServer = host.servers.mustServer(run.attackedServerId);
   if (
-    run.position.kind !== "ice" ||
+    run.startOfRunIceRepositionOpen !== true ||
     run.position.serverId !== attackedServer.id ||
-    run.position.iceIndex !== outermostIceIndex(attackedServer)
+    (run.position.kind === "ice"
+      ? run.position.iceIndex !== outermostIceIndex(attackedServer)
+      : attackedServer.ice.length !== 0)
   )
     throw new Error("ICE-Bewegung ist nur am Start des Runs legal.");
   const sourceServerId = String(

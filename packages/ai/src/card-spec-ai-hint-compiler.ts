@@ -3089,6 +3089,52 @@ function deriveClosedMechanicalHintOverlay(
   }
 
   const runnerUtility = engine.runnerUtilityLongtail;
+  if (runnerUtility?.kind === "trash_fully_broken_passed_ice") {
+    if (
+      entry.definition.side !== "runner" ||
+      entry.definition.type !== "program" ||
+      runnerUtility.timing !== "after_passing_fully_broken_ice" ||
+      runnerUtility.target !== "that_ice" ||
+      runnerUtility.visibility !== "public" ||
+      !Array.isArray(runnerUtility.costs) ||
+      runnerUtility.costs.length !== 2 ||
+      runnerUtility.costs.filter(
+        (cost) => cost?.kind === "trash_source" && cost.amount === 1,
+      ).length !== 1 ||
+      runnerUtility.costs.filter(
+        (cost) => cost?.kind === "target_rez_cost" && cost.target === "that_ice",
+      ).length !== 1
+    )
+      throw new Error("card_spec_unknown_post_pass_trash_shape");
+    overlay.effects.push(
+      {
+        kind: "ice_trash",
+        scope: "ice",
+        timing: "encounter_resolution",
+        resource: "credits",
+        target: "trash_fully_broken_passed_ice",
+        finite: true,
+      },
+      {
+        kind: "program_trash",
+        scope: "installed_program",
+        timing: "encounter_resolution",
+        target: "source.trash",
+        finite: true,
+      },
+    );
+    overlay.conditions.push(
+      { kind: "requires_encounter" },
+      { kind: "requires_rezzed_ice" },
+    );
+    overlay.functionSignals.push(
+      "ice.trash",
+      "economy.dynamic_rez_cost",
+      "risk.self_trash",
+    );
+    overlay.tacticSignals.push("ice.trash");
+    overlay.roles.push("ice_trash", "fully_broken_ice");
+  }
   if (runnerUtility?.kind === "derez_fully_broken_passed_ice_and_end_run") {
     if (
       runnerUtility.cost.kind !== "credit" ||
@@ -4380,6 +4426,14 @@ function deriveExtendedRequiredMechanics(
     mechanics.add("run_duration_strength");
 
   const runnerUtilityKind = engine.runnerUtilityLongtail?.kind;
+  if (runnerUtilityKind === "trash_fully_broken_passed_ice")
+    for (const token of [
+      "fully_break_ice_window",
+      "trash_ice",
+      "target_rez_cost",
+      "trash_source",
+    ])
+      mechanics.add(token);
   if (runnerUtilityKind === "hq_access_expose_all_installed_corp_cards")
     for (const token of ["hq_access_trigger", "expose_installed_corp_cards"])
       mechanics.add(token);
@@ -5511,6 +5565,9 @@ function deriveClosedExtendedRiskTags(
     risks.add("stealth_loss");
 
   const runnerUtility = engine.runnerUtilityLongtail?.kind;
+  if (runnerUtility === "trash_fully_broken_passed_ice")
+    for (const risk of ["timing_window", "self_trash", "dynamic_rez_cost"])
+      risks.add(risk);
   if (runnerUtility === "hq_access_expose_all_installed_corp_cards")
     risks.add("public_reveal");
   if (runnerUtility === "derez_fully_broken_passed_ice")

@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
+import { validCorpRezOrTrashChoiceResolution } from "./rez-or-trash-choice";
 import {
   CorpDefenseSignal,
   CorpGenericDefenseSignal,
@@ -535,6 +536,7 @@ export function genericDefensePhase(
     value === "install_defense_support" ||
     value === "resolve_install_targets" ||
     value === "resolve_run_redirect" ||
+    value === "resolve_rez_or_trash" ||
     value === "resolve_program_trash" ||
     value === "resolve_hardware_trash" ||
     value === "resolve_post_pass_ice_lifecycle" ||
@@ -1051,6 +1053,8 @@ export function isValidDefenseSignal(
           value.urgent === true
         : value.rezReserveNeed === undefined) &&
       (value.choiceResolution === undefined ||
+        (value.phase === "resolve_rez_or_trash" &&
+          validCorpRezOrTrashChoiceResolution(value.choiceResolution, value)) ||
         (value.phase === "resolve_hardware_trash" &&
           validTraceHardwareTrashResolution(value.choiceResolution)) ||
         (value.phase === "resolve_program_trash" &&
@@ -1067,6 +1071,8 @@ export function isValidDefenseSignal(
           ))) &&
       (value.phase !== "resolve_hardware_trash" ||
         validTraceHardwareTrashResolution(value.choiceResolution)) &&
+      (value.phase !== "resolve_rez_or_trash" ||
+        validCorpRezOrTrashChoiceResolution(value.choiceResolution, value)) &&
       (value.phase !== "resolve_post_pass_ice_lifecycle" ||
         (value.sourceDefinitionIds.length === 1 &&
           Array.isArray(value.actionIds) &&

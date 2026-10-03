@@ -8,6 +8,19 @@ type HintWithStructuredEffects = {
   readonly effects?: readonly AiHintStructuredEffect[];
 };
 
+export function runnerEffectsProvidePostBreakIceTrash(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return (
+    effects?.some(
+      (effect) =>
+        effect.kind === "ice_trash" &&
+        effect.target === "trash_fully_broken_passed_ice" &&
+        effect.timing === "encounter_resolution",
+    ) ?? false
+  );
+}
+
 const DAMAGE_PREVENTION_EFFECT_KINDS = new Set<AiHintStructuredEffect["kind"]>([
   "damage_prevention",
   "flatline_prevention",

@@ -341,6 +341,8 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     "last_click",
     "hidden_ice",
     "missing_breaker",
+    "multiple_ice",
+    "deflector",
   ])("does not promise an unsupported route: %s", (condition) => {
     const { state, ice } = fixture();
     if (condition === "insufficient_credits") state.runner.credits = 5;
@@ -355,6 +357,22 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       state.cardInstances[id]!.zone = { side: "runner", zone: "heap" };
       state.runner.heap.push(id);
     }
+    if (condition === "multiple_ice") {
+      const second = Object.values(state.cardInstances).find(
+        (card) =>
+          card.definitionId === ice.definitionId &&
+          card.instanceId !== ice.instanceId,
+      )!;
+      removeEverywhere(state, second.instanceId);
+      second.zone = { side: "corp", zone: "serverIce", serverId: "hq" };
+      second.rezzed = true;
+      second.faceup = true;
+      state.corp.servers
+        .find((server) => server.id === "hq")!
+        .ice.push(second.instanceId);
+    }
+    if (condition === "deflector")
+      ice.definitionId = "onr_classic_010_entrapment";
     expect(signals(state)).toEqual([]);
   });
   it.each(["stale_state", "wrong_action", "invalid_json"])(

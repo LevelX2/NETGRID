@@ -641,7 +641,6 @@ export function applyClassicDeflectorRedirect(
   const run = mustRun(host.state);
   const rezzedIceIndex = outermostRezzedIceIndex(host, server);
   run.attackedServerId = server.id;
-  delete run.accessServerOverride;
   delete run.postPassPayOrEndRun;
   delete run.corpPostPassIceReturnToHq;
   delete run.postPassCancellableFutureIceStrength;

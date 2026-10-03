@@ -76,6 +76,15 @@ ihnen aber nicht zurückimportiert.
   unvollständig; verdeckte Runner-Karten werden nicht ausgewertet.
 - Fort-Pass- und Root-Rez-Fenster teilen nur einen deklarativen Port. Dadurch
   kann keines der Fenster die Implementierung des anderen zurückimportieren.
+- Eine aktuell legale `corp_during_run`-/`corp_paid`-Aktivierung zählt bei
+  Eröffnung und Fortsetzung desselben Corp-Runfensters ebenso wie eine
+  Root-Rez-Aktion. Der Port konsumiert die vorhandene CardImplementation-
+  Aktionserzeugung; er rekonstruiert keine Kartenfähigkeit. Auch bereits
+  gerezztes ICE darf dieses Fenster nicht durch direkten Encounter-Eintritt
+  überspringen. Der gebundene Corp-Pass schließt die Aktivierungsangebote
+  für dieselbe Runposition, bevor die Runner-Fortsetzung wieder legal wird.
+  Ein leeres Fort mit scored Run-Abbruchfähigkeit erhält denselben Vertrag.
+  Regression: Paarung 475, Kontrollrunde 2, G15 nach D285/D288.
 - Gleichzeitig offene Aktivierungstimings werden gemeinsam an die
   CardImplementation-Aktionserzeugung übergeben. Jede gebundene Fähigkeit
   wird einmal über ihr erstes zulässiges Timing angeboten, einschließlich
@@ -111,6 +120,19 @@ ihnen aber nicht zurückimportiert.
 - Successful-Run-Interventionen werden vor Access abgeschlossen. Verzögerte
   Successful Runs behalten ihre Ice- und Source-Referenzen bis zum passenden
   Passed-Ice-Übergang.
+- Ein deklaratives `make_run` mit festem Central-Ziel bindet seine
+  Erfolgswirkungen über `successfulRunEffectTargetServerId` an dieses Fort.
+  Nach einer Deflection zählt das tatsächlich erreichte Fort. Wird das
+  vorgeschriebene Fort nicht erreicht, entfallen Access-Ersatz, Event-Multiaccess,
+  bedingte Access-Boni, Credit-/Tagwirkungen und die Successful-Run-Identitäts-
+  beziehungsweise Access-Umdeutung. Der normale Zugriff einschließlich der
+  installierten Boni des tatsächlichen Forts bleibt erhalten. Ein frei
+  wählbares Run-Ziel besitzt diese Einschränkung nicht. Die Bindung wird erst
+  am erfolgreichen Übergang ausgewertet; eine Umleitung zurück auf das
+  vorgeschriebene Fort darf dessen Erfolgswirkung daher weiterhin auslösen.
+  Regelquelle ist `docs/source/Netrunner Errata 1.70.md`, Abschnitt „Siren“.
+  `index-tests/mechanics/run-event-deflection.test.ts` prüft die tatsächlichen
+  Event-/Trapdoor-Aktionen, Zugriff, Sichtbarkeit und deterministischen Replay.
 - Jeder Zufallspfad bleibt Seed-/RandomCounter-gesteuert; die Extraktionen
   fügen weder Ziehungen hinzu noch verändern sie deren Reihenfolge.
 

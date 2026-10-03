@@ -1250,13 +1250,12 @@ export function selectedChoicesForDecision(
   ) {
     const selected = selectedCorpRezOrTrashIceOptionId(
       input,
+      action,
       choice,
       selectableOptions,
+      currentPortfolio,
     );
-    return resolved(
-      selected !== undefined ? [selected] : [],
-      "corp_rez_or_trash_ice",
-    );
+    return resolved([selected], "corp_rez_or_trash_ice");
   }
   if (
     input.side === "runner" &&

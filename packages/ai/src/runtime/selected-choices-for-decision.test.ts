@@ -713,30 +713,27 @@ describe("selectedChoicesForDecision", () => {
     );
   });
 
-  it("resolves the Corp rez-or-trash ICE choice without an unbound choice window", () => {
-    const decision = selectedChoicesForDecision(
-      inputWithChoice(
-        {
-          kind: "select_option",
-          source:
-            "card_implementation.corp_choice_rez_or_trash_ice_decision:ice_2:7",
-          minSelections: 1,
-          maxSelections: 1,
-          options: [
-            { id: "rez_ice", label: "Rez ICE", value: "rez_ice" },
-            { id: "trash_ice", label: "Trash ICE", value: "trash_ice" },
-          ],
-        },
-        { side: "corp" },
+  it("rejects a Corp rez-or-trash ICE payload without its defense executor binding", () => {
+    expect(() =>
+      selectedChoicesForDecision(
+        inputWithChoice(
+          {
+            kind: "select_option",
+            source:
+              "card_implementation.corp_choice_rez_or_trash_ice_decision:ice_2:7",
+            minSelections: 1,
+            maxSelections: 1,
+            options: [
+              { id: "rez_ice", label: "Rez ICE", value: "rez_ice" },
+              { id: "trash_ice", label: "Trash ICE", value: "trash_ice" },
+            ],
+          },
+          { side: "corp" },
+        ),
+        resolveChoiceAction("corp"),
+        unusedDependencies(),
       ),
-      resolveChoiceAction("corp"),
-      unusedDependencies(),
-    );
-
-    expect(decision).toEqual({
-      choiceId: "choice_multi",
-      selectedOptionIds: ["trash_ice"],
-    });
+    ).toThrowError(expect.objectContaining({ code: "window_origin_missing" }));
   });
 
   it("requires a plan binding for the real Engine access-payment choice", () => {

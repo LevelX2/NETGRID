@@ -201,7 +201,7 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
   };
 }
 
-function scoreContinuationClaims(
+export function scoreContinuationClaims(
   projects: readonly CorpScoreProjectSignal[],
 ): ScoreContinuationClaim[] {
   return projects
@@ -298,7 +298,11 @@ function exactCurrentRunFollowupStoppingRez(
         sourceCard: ice,
         targetServerId: server.id,
       });
-      if (!quote) return [];
+      // Preserve a stopping continuation only when declining the current rez
+      // can actually fund it. An already unaffordable inner ICE cannot claim
+      // cash from an independently productive current encounter.
+      if (!quote || quote.totalRezCredits > input.playerView.own.credits)
+        return [];
       const after = assessProtectionAfterRezzing(
         input,
         futureIce,

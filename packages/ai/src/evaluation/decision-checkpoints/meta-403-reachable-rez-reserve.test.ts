@@ -17,7 +17,7 @@ import { corpGlobalDefenseInstallRouteAssessment } from "../../corp/defense/corp
 describe("meta 403 reachable central rez reserve", () => {
   it.each([
     [5, true],
-    [3, false],
+    [3, true],
     [7, false],
   ] as const)(
     "protects only funding windows destroyed by staging at %i credits",

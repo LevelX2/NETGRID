@@ -60,7 +60,24 @@ export function buildCorpApproachActions(
   host: RunRezWindowHost,
 ): LegalAction[] {
   const run = mustRun(host.state);
-  if (!run.approachedIceId) return [];
+  if (!run.approachedIceId) {
+    if (
+      run.startOfRunIceRepositionOpen !== true ||
+      run.position.kind !== "server"
+    )
+      return [];
+    return [
+      ...buildCorpRunRootRezActions(host),
+      buildLegalAction(
+        host.state,
+        "corp",
+        "decline_rez",
+        "Run-Start-Fenster schließen",
+        "game_rule",
+        [],
+      ),
+    ];
+  }
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   const definition = host.cards.definitionFor(run.approachedIceId);
   const actions: LegalAction[] = [];
@@ -308,7 +325,10 @@ export function buildCorpRunRootRezWindowActions(
 export function corpRunRootRezActionsAvailable(
   host: RunRezWindowHost,
 ): boolean {
-  return buildCorpRunRootRezActions(host).length > 0;
+  return (
+    buildCorpRunRootRezActions(host).length > 0 ||
+    host.callbacks.corpDuringRunCardImplementationLegalActions().length > 0
+  );
 }
 
 export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
@@ -324,14 +344,15 @@ export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
         run,
         server,
         "corp_fort_pass_window",
-      ).length > 0
+      ).length > 0 ||
+      host.callbacks.corpDuringRunCardImplementationLegalActions().length > 0
     );
   }
   if (host.state.timingPoint !== "run.movement_rez_window") return false;
   const key = corpRunRootRezWindowKey(run);
   if (run.rootRezWindowPassedKeys?.includes(key)) return false;
   if (run.rootRezWindowPendingPassKeys?.includes(key)) return true;
-  return buildCorpRunRootRezActions(host).length > 0;
+  return corpRunRootRezActionsAvailable(host);
 }
 
 export function corpRunFortPassWindowKey(run: ActiveRun): string {

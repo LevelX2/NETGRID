@@ -49,6 +49,7 @@ function fixture(
   account = true,
   fundingCard = ACCOUNT,
   agendaPointsToWin = 7,
+  knownUnfundedCentralReserve = false,
 ) {
   let state = createGameAfterSetup({
     seed: "staged-defense-funding-order",
@@ -72,10 +73,17 @@ function fixture(
     .withRunnerProgramInstalled("onr_v1_045_newsgroup-filter")
     .withRunnerProgramInstalled("onr_v1_054_raptor")
     .withRunnerProgramInstalled("onr_v1_074_worm")
-    .withCorpIceOnServer("hq", "onr_v1_237_data-wall")
-    .withCorpIceOnServer("rd", "onr_v1_271_tko-2-0")
-    .withCorpIceOnServer("rd", "onr_v1_270_sleeper")
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_249_hunter");
+    .withCorpIceOnServer("hq", "onr_v1_237_data-wall");
+  // An independently known unfunded R&D reserve now suspends this install
+  // before its own funding demand exists. The positive fixture needs an
+  // admitted staging route; retain the suspended route as a separate case.
+  if (knownUnfundedCentralReserve)
+    f.withCorpIceOnServer("rd", "onr_v1_271_tko-2-0");
+  else f.withRezzedCorpIceOnServer("rd", "onr_v1_271_tko-2-0");
+  f.withCorpIceOnServer("rd", "onr_v1_270_sleeper").withRezzedCorpIceOnServer(
+    "remote_1",
+    "onr_v1_249_hunter",
+  );
   for (const id of [
     "onr_v1_199_employee-empowerment",
     "onr_v1_306_trojan-horse",
@@ -155,6 +163,35 @@ it("keeps an already funded installation immediate", () => {
   expect(decision.actionId).toContain(".hq.");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+  ).toBe("corp.defend_servers");
+});
+it("keeps funding separate while an independently known central reserve suspends installation", () => {
+  const state = fixture(5, 2, true, ACCOUNT, 7, true);
+  const i = input(state),
+    decision = chooseAiAction(i);
+  const plan = decision.decisionDebug!.planFirstDecision!;
+  const account = i.legalActions.find((a) => a.actionId === decision.actionId)!;
+  expect(account.type).toBe("play_operation");
+  expect(account.source).toContain("accounts-receivable");
+  expect(plan.rootPlanInstanceId).toBe(
+    "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_281_accounts-receivable_1",
+  );
+  expect(
+    plan.dispositions.some(
+      (d) =>
+        d.actionId.includes("d-arc-knight") &&
+        d.actionId.includes(".hq.") &&
+        d.disposition === "explicitly_nonproductive" &&
+        d.ownerModuleId === "corp.defend_servers",
+    ),
+  ).toBe(true);
+  const funded = apply(state, account),
+    installDecision = chooseAiAction(input(funded));
+  expect(funded.corp.credits).toBe(9);
+  expect(installDecision.actionId).toContain("d-arc-knight");
+  expect(installDecision.actionId).toContain(".hq.");
+  expect(
+    installDecision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("corp.defend_servers");
 });
 it("uses a different canonical liquid-credit operation for the same admitted installation", () => {

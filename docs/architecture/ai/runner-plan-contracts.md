@@ -822,6 +822,17 @@ Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Eine Zahlung für das Trash einer vollständig gebrochenen, gerade passierten
+ICE ist kein Einkommen. Die typisierte `ice_trash`-Wirkung mit Ziel
+`trash_fully_broken_passed_ice` und Timing `encounter_resolution` erhält die
+Rolle `access_payoff` und persistente `access_support`-Coverage. Sie begründet
+keinen allgemeinen Economy- oder Setup-Bedarf, auch nicht bei hohen Credits
+oder strategischem Installationsfit. Die produktive Vorbereitung bleibt beim
+vorhandenen, exakt gebundenen Zentraldruck-Parent mit finanzierter aktueller
+Run-/Break-/Trash-Folge. Paarung 475/R13/G1/D47 belegt den früheren falschen
+Economy-Zweck; native Eingabe, generierter Hint und echte Engine-Folge sichern
+die Korrektur und ihre Zulassungsgrenzen.
+
 Einmalige Suchereignisse werden auch anhand ihres aktuellen kanonischen
 `effectKind` für Stack- oder Heap-Suche erkannt. Ohne exakt gebundenen
 Zielplan erhält die Aktion die bestehende ausdrückliche Zurückstellung;
@@ -1877,6 +1888,16 @@ Breaker-Nebenkosten werden nicht als garantierte Teilabwehr zertifiziert und
 bleiben bei ihren bestehenden Risiko-/Zahlungsverträgen. Die Trace-Evidence
 nennt Gesamtkosten, Ziele, verhinderte und verbleibende Verluste.
 
+Auch der vorgelagerte Immediate-Safety-Breakguard konsumiert diese exakte
+finanzierte Teilabwehr. Eine unabhängige Trace-Subroutine darf den gequoteten
+Schadens- oder Programm-Break nicht verwerfen, nachdem derselbe Owner dessen
+Pumps zugelassen hat. Andere Breakziele behalten die bestehenden Safety- und
+Pfadprüfungen. Der echte Checkpoint `cp-meta-475-r14-g19-d354-mitigation`
+prüft die Schadens-Breakroute unter unverändertem Root, Executor und
+StateVersion; ein separater Engine-Fall belegt vollständige Zahlung, erhaltene
+Hand und Programme sowie deterministisches Replay. Dieser Mechanikfall ist
+kein Replay des historischen Matches und keine Zusage eines Gesamtsiegs.
+
 Der fokussierte Nachweis liegt in
 `evaluation/decision-checkpoints/match-d0f6-partial-break.test.ts`:
 Die side-sicheren Maintenance-Checkpoints D77/D156 wählten auf dem aktuellen
@@ -2279,6 +2300,19 @@ ohne Projektion. Die strategische Ladetaktung bleibt Entscheidung des Bank-Owner
 Finanzierungsentscheidungen verwenden die bestehenden exakten Demand- und
 Route-Suchen; der Schnitt ergänzt keine neue Parentkante im Scheduler.
 
+Eine prospektiv vollständig finanzierbare Runroute ist noch kein aktuell
+offener Bedarf des Run-Owners. Nach dessen konkreter Routenaufnahme prüft
+`credit-bank-funding-revalidation.ts` StateVersion, exakte Parentinstanz,
+`supportNeedId` und positiven materiellen Wert erneut. Wechselt der Parent
+beispielsweise zu vorbereitender ICE-Entfernung und veröffentlicht keinen
+Run-Funding-Bedarf mehr, hält die Bank ihren Vorrat und weist ihre zuvor
+vorgesehene Auszahlung mit konkreter Ursachenangabe zurück. Auch der
+komponierte Run-Funding-Bedarf wird dann nicht mehr veröffentlicht. Erst nach
+der Engine-Anwendung entsteht gegebenenfalls ein neuer, vollständig geprüfter
+Bedarf. Der strenge Assessment-Validator und der vorbereitende Remote-Owner
+bleiben unverändert. Der native Zustand 475/R5/G4/D325 und die positive
+Bank-Remote-Gegenprobe sichern diese Grenze.
+
 Für den heutigen Bankpfad existiert kein eigener strategischer Choice-Resolver.
 Die gebundene generische Ausführung bleibt zuständig. CardSpec-Installchoices
 mit `requires_engine_quote` behalten ihre bisherige Projektionsgrenze; daraus
@@ -2371,6 +2405,18 @@ Verlassen und verpflichtende Folgezustände einer eigenen Ressource, etwa
 eine Engine-gequotete End-of-turn-Zahlung. Erwerb und anfängliche Finanzierung
 bleiben beim jeweiligen Entwicklungs-/Economy-Parent. Eine Folgewirkung
 berechtigt den Choice-Resolver nicht zur unabhängigen Ressourcenwahl.
+
+Die positive AI-DTO-Allowlist erhält die Engine-Felder
+`cardImplementationLifecycleAction`,
+`cardImplementationLifecycleLeavePlayPaymentAmount` und
+`cardImplementationLifecycleLeavePlayPaymentStatus` auch bei wiederholter
+Projektion. Die Capability-, Quellen-, Action- und StateVersion-Bindung bleibt
+unverändert. Der Owner entscheidet weiterhin anhand der tatsächlich gequoteten
+Zahlbarkeit und des sichtbaren Restzughorizonts über Halten oder Verlassen;
+fehlende Quotes werden nicht aus dem Kartennamen ergänzt. Ein ursprünglicher
+Entscheidungszustand mit wiederhergestellten, im historischen Engine-Angebot
+belegten DTO-Feldern prüft die Plan-/Step-/Routenbindung bei ausreichendem und
+unmittelbar zu knappem Budget sowie beim wirtschaftlich zu kurzen Horizont.
 
 ### Vertikale Implementierung des Ressourcenlebenszyklus
 

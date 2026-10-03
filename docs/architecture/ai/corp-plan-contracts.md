@@ -68,6 +68,34 @@ Choice werden vor jedem nativen Schritt erneut gebunden. Der Nachweis aus
 Paarung 492, Diagnose-Runde 2, G26 D299 umfasst zwei Aktivierungen auf derselben
 Agenda; ein Root-Austausch darf die dafür nötige Supportkarte nicht zerstören.
 
+Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
+Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
+Eine mit aktueller Engine-Horizontquote früher abschließbare Agenda verdrängt
+die langsamere Vorbereitung nur bei höchstens gleichen Installations- und
+Scorekosten, ohne zusätzliche Steal-Punkte oder höheres Zugriffsrisiko und
+mit vollständiger Score-/Defense-Finanzierung. Defense-Punktkosten dürfen
+den terminalen Score nicht aufheben. Bei unquantifiziertem Schutz gilt der
+Vergleich ausschließlich für dieselbe vollständig gerezzte Topologie,
+nichtterminale gegnerische Steals und bereits zugelassene, bezahlbare Routen;
+er zertifiziert den Schutz nicht nachträglich. Unterschiedliche Remotes,
+blockierte Routen, nichtterminale Ziele und installierte Agendas erhalten
+dadurch keine neue Zulassung. Die verdrängte Vorbereitung veröffentlicht
+`corp_shorter_terminal_score_route_dominates` und beansprucht keine weitere
+Score-Finanzierung. Plan-, Step-, Route- und Zugbindungsprüfung bleiben beim
+bestehenden Score-Owner und Scheduler.
+
+Eine Matchpointagenda darf auch auf dem letzten Klick installiert werden,
+wenn die aktuelle, exakt an Agenda und Zielserver gebundene Engine-Quote den
+Abschluss im nächsten Corp-Zug bestätigt und der Defense-Owner bereits
+finanzierten Schutz unter Erhalt der vollständigen Score-Creditreserve
+zertifiziert. Der gequotete Agendapunktestand nach der Defense muss zusammen
+mit dem Score weiterhin zum Sieg reichen. Fehlende oder veraltete Quotes,
+unzureichende nächste Action Capacity, fehlende Finanzierung und ein durch
+Rez-Punktkosten verlorener Matchpoint öffnen diese Zulassung nicht. Das ist
+eine reguläre Fortentwicklung desselben Score-Parents; der nächste Zustand
+wird nach Installation und Gegnerzug erneut validiert. Regression:
+Paarung 475, Kontrollrunde 2, G20 D355.
+
 Innerhalb derselben Prioritätsklasse bewertet der Score-Owner einen aktuell
 ausführbaren Abschluss höher als bloßes Advancement unter Expositionsdruck.
 Die Bedrohung einer zweiten Agenda rechtfertigt keine Verteilung der letzten
@@ -706,6 +734,15 @@ seinem Doctrine-`targetRecoveryTurns`-Horizont verfolgen. Eine bekannte
 zentrale Rez-Reserve darf dabei weder für Installation noch Finanzierung
 verbraucht werden.
 
+Eine unbekannte globale Central-Allokation löscht keine unabhängig bekannten
+lokalen Reserven. Defense prüft eigene Agenda-Bedrohung und aktuelle,
+vollständig gebundene installierte Rez-Quotes beider Zentralen weiterhin.
+Zusätzliche ICE und Upgrade-Platzierungen dürfen weder bereits finanzierte
+noch durch die verbleibenden exakten Basiscredits erreichbare Reserven
+verbrauchen. Der Defense-Owner dispositioniert eine solche Upgrade-Route
+auch vor einer sonst möglichen HQ-Overflow-Konversion. Unbekannte, veraltete
+oder mit unbelegten Zusatzkosten belastete Quotes begründen keine Reserve.
+
 Bei einer konkreten Scoreline beendet der Remote-Parent seinen eigenen Need,
 wechselt nach `leased_to_score_project` und veröffentlicht keinen zweiten
 Schutzauftrag. `corp.score_agenda` erzeugt seinen eigenen Need und prüft das
@@ -739,6 +776,26 @@ Projektionsdienst. Das Remote-Modul besitzt weiterhin keine eigene ICE-,
 Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
+
+Der aktuelle Run-Response darf mobile ICE aus einem leeren Remote-Fort zum
+angegriffenen Fort bewegen, wenn dort eine bekannte Agenda den Runner gewinnen
+ließe. Für HQ zählen dabei ausschließlich die eigenen bekannten Handkarten.
+Eine ungerezzte Quelle benötigt eine vollständige bezahlbare Engine-Projektion
+von Bewegung und anschließendem festen Rez einschließlich Agenda-Punkt-Kosten.
+`mobile-ice-run-defense.ts` konsumiert die aktuelle
+Engine-Quote `corpMobileIceMoveQuoteJson`: Action, Quelle, beide Forts,
+StateVersion, Zahlung und vollständige öffentliche ICE-Pfade bleiben gebunden.
+Der bisherige Pfad muss erreichbar sein; der neue Pfad muss anhand des
+sichtbaren Runner-Rigs und seiner tatsächlich verfügbaren Run-Zahlungsmittel
+an einer unbezahlbaren ETR scheitern. Der Pfadprüfer darf dabei am belegten
+Stop enden, ohne inneres ICE nochmals zu durchlaufen. Root, Executor, Step und
+Route gehören weiterhin `corp.defend_servers`, ebenso der später separat
+revalidierte Rez-Schritt. Unbekannte oder weitere ungerezzte Zielschichten,
+unvollständige Quotes, nichtterminale Allokation und ein belegter
+weiterhin bezahlbarer Zugriff eröffnen diese enge Route nicht. Eine Rootkarte
+im Herkunftsfort sperrt sie ebenfalls; allgemeine Umverteilung mit Aufgabe
+anderer Schutzbedarfe bleibt offen. Regressionen: Paarung 475/R13/G2/D375 und
+Originalseed-Kontrolle G26/D446 auf `2254ba250`.
 
 ### Vertikale Implementierung
 
@@ -816,6 +873,15 @@ garantiert ihn nicht. Ein besserer vollständiger Matchausgang ist damit
 nicht nachgewiesen.
 
 Rez ist grundsätzlich eine einmalige Investition in wiederkehrenden Druck.
+Die erzwungene Rez-/Trash-Choice gehört ebenfalls zu `corp.defend_servers`.
+Der Owner bindet die aktuelle Engine-Option an ICE, Action und StateVersion.
+Ein bereits zertifizierter Stop ohne dieses ICE darf eine veröffentlichte
+Score-Fortsetzungsreserve vor einer redundanten bezahlten Rez schützen.
+Unbekannte Protektion zertifiziert keine Redundanz. Der Resolver übernimmt
+nur die Option des aktuellen Defense-Executors; fehlende Bindungen scheitern
+geschlossen. Paarung 475, Kontrolllauf 11, G37 D224 belegt den Reserveverlust
+durch Puzzle trotz bereits gerezzter Imperial Guard vor dem terminalen Lab-Score.
+
 Ein positiver, exakt belegter Breakpreis darf auch unter dem Rezpreis liegen;
 der erste Run muss den Rez nicht allein amortisieren. Nur temporäre
 Rez-Aktionen behalten den bisherigen Vergleich für einen einzelnen Run.
@@ -829,6 +895,28 @@ begründen keinen aktuellen Nutzen.
 Die Route wird erst nach `assessCorpExactIceRezAgainstScoreReserves`
 zugelassen: veröffentlichte Score-Fortsetzungen, andere bedrohte Agenden und
 notwendige weitere ICE im laufenden Run behalten ihre konkreten Reserven.
+Für eine bereits ausgelöste, exakt gebundene bezahlte Umleitungs-Choice
+bewertet ebenfalls `corp.defend_servers` den aktuellen Zugriff. Eine spätere
+Score-Creditreserve darf einen vollständig bezahlbaren Ausweg vor aktuellem
+Matchpoint-Zugriff nicht verhindern, wenn der Zielfort nach eigenen aktuellen
+Agendafakten sicher keine Agenda enthält und keine weitere ICE-Fortsetzung
+besitzt. Ohne diesen begrenzten Nachweis bleibt die Reserve bindend; die
+Choice-Auflösung übernimmt nur das gewählte, stategebundene Ziel. Paarung 475,
+Kontrolllauf 7, G39 D318 belegt zwei vorhandene Credits für zwei Credits
+Umleitung von Theorem bei vier Runnerpunkten auf den agendafreien Remote.
+Umleitungsziele werden am tatsächlich betretenen äußersten bereits gerezzten
+ICE bewertet; ungerezzt darüberliegende ICE sind keine Encounter-Protektion.
+Ein exakt belegter unmittelbarer Stop darf die statische Agendaexposition des
+Zielforts verdrängen. Eine bezahlte Umleitung wird ausgeschlossen, wenn eine
+einzige bekannte kostenlose, aktuell nicht brechbare Zielsubroutine zwingend
+zum Ausgangsfort zurückführt. Die Ressourcenprüfung verwendet Engine-Breaker-
+Quotes und eine optimistische obere Creditgrenze; unbekannte Rig-Effekte,
+bezahlte Rückumleitungen, mehrere Rückziele oder andere Encounter-Effekte
+liefern keinen solchen Nachweis. Die Entscheidung bleibt bei
+`corp.defend_servers`; der Choice-Resolver übernimmt nur ihre gebundene Option.
+Paarung 475, Kontrolllauf 8, G6 D147 und G10 D359 belegen die wiederholte
+kostenpflichtige Rückkehr ohne Abwehrgewinn. Ein Gesamtmatchsieg folgt aus der
+lokalen Vermeidung dieser Zahlungen nicht.
 Quotierte Encounter-Aktivierungskosten werden zusätzlich zum Rez reserviert;
 eine bereits im Bluffbedarf enthaltene Aktivierung wird nicht doppelt gezählt.
 Eine unbekannte Zugriffsprojektion ist weder eine erfundene Stop-Garantie noch
@@ -1253,6 +1341,13 @@ zur Zahl der verbleibenden Runmöglichkeiten. Unfinanzierbare Portfolios erzeuge
 keinen unerreichbaren Mindestpuffer. Scorefortsetzung, andere Agendaremotes und
 innere ICE des aktuellen Runs bleiben in derselben Ressourcenprüfung;
 derselbe Server wird dabei nicht doppelt reserviert.
+
+Auch ein inneres ICE im bereits laufenden Run begründet nur dann eine
+Stopping-Rezreserve, wenn seine exakte Zahlung beim Verzicht auf den aktuellen
+Rez bereits finanzierbar wäre. Ein zehn Credits teures inneres ICE bei vier
+oder sieben verfügbaren Credits blockiert keine unabhängig produktive aktuelle
+Abwehr. Sobald diese innere Fortsetzung finanzierbar ist, bleibt ihre volle
+Quote im selben Reservevergleich erhalten.
 
 Nach dem letzten Runnerklick entfällt die Reserve für spätere normale Runs.
 `run.followupRunOpportunity` erhält öffentlich bekannte Zusatzruns; einen

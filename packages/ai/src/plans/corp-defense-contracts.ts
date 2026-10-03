@@ -18,6 +18,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "install_defense_support"
     | "resolve_install_targets"
     | "resolve_run_redirect"
+    | "resolve_rez_or_trash"
     | "resolve_program_trash"
     | "resolve_hardware_trash"
     | "resolve_post_pass_ice_lifecycle"
@@ -68,6 +69,15 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   };
   value: number;
   choiceResolution?:
+    | {
+        kind: "rez_or_trash_ice";
+        choiceId: string;
+        choiceSource: string;
+        sourceStateVersion: number;
+        targetIceInstanceId: string;
+        selectedOptionId: "rez_ice" | "trash_ice";
+        preservedScoreProjectId?: string;
+      }
     | {
         kind: "trace_hardware_trash";
         choiceId: string;

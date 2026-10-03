@@ -11,6 +11,7 @@ import preserveVeniceTargetJson from "../../../../../data/scenarios/ai-decision-
 import avoidUnfundedRdOverstackJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e6aca-08-avoid-unfunded-rd-overstack-d110.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { corpSpendConsumesKnownCentralRezReserve } from "../../corp/defense/corp-defense-domain-signals";
 
 describe("e6aca Corp remediation decision checkpoints", () => {
   it.each([
@@ -33,10 +34,6 @@ describe("e6aca Corp remediation decision checkpoints", () => {
     [
       "continues the already started Zurich score line",
       continueZurichScoreJson,
-    ],
-    [
-      "puts Red Herrings on pressured HQ instead of opening a decoy remote",
-      bindVaporDecoyRouteJson,
     ],
     [
       "does not drift away from the bound Venice score remote",
@@ -65,6 +62,61 @@ describe("e6aca Corp remediation decision checkpoints", () => {
         planInstanceId: plan?.selectedPlan?.instanceId,
       });
     }
+  });
+
+  it("preserves the reachable seven-credit R&D rez before installing HQ support", () => {
+    const checkpoint = mutateFixture(bindVaporDecoyRouteJson, (fixture) => {
+      fixture.expectation = {
+        forbiddenActions: [
+          {
+            sourceDefinitionId: "onr_v1_366_red-herrings",
+            targetServerId: "hq",
+          },
+        ],
+        acceptableActions: [
+          {
+            sourceDefinitionId: "onr_v1_347_vapor-ops",
+            targetServerId: "remote_1",
+          },
+        ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.ambush_and_bluff"],
+          acceptableCapabilities: ["decoy_setup"],
+        },
+      };
+    });
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, result.message).toBe(true);
+    const rd = result.input.playerView.servers.find(
+      (server) => server.id === "rd",
+    )!;
+    expect(
+      rd.ice.find((ice) => ice.definitionId === "onr_v1_231_cortical-scrub")
+        ?.effectiveRezCostQuote,
+    ).toMatchObject({ complete: true, finalCredits: 7 });
+    expect(result.input.playerView.own).toMatchObject({
+      credits: 4,
+      clicks: 3,
+    });
+    // Installation costs no credits, but consumes a funding click: 4+3 can
+    // reach seven, whereas 4+(3-1) cannot. Rez costs remain Engine-quoted.
+    expect(
+      corpSpendConsumesKnownCentralRezReserve(result.input, undefined, 4, 2),
+    ).toBe(true);
+  });
+
+  it("still puts Red Herrings on pressured HQ when the seven-credit rez stays reachable", () => {
+    const checkpoint = mutateFixture(bindVaporDecoyRouteJson, (fixture) => {
+      fixture.engine.testOnlyGameState.corp.credits = 7;
+    });
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, result.message).toBe(true);
+    expect(
+      corpSpendConsumesKnownCentralRezReserve(result.input, undefined, 7, 2),
+    ).toBe(false);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("corp.defend_servers");
   });
 
   it("still permits a funded fifth R&D layer", () => {

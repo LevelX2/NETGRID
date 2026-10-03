@@ -620,6 +620,18 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     expect(state.corp.credits).toBe(0);
     expect(state.corpTemporaryInstallRezCredits?.remaining ?? 0).toBe(0);
     expect(state.cardInstances[contractId(state)]!.advancementCounters).toBe(1);
+    expect(state.timingPoint).toBe("run.approach_ice");
+    expect(state.activeSide).toBe("corp");
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.source === contractId(state),
+      ),
+    ).toBe(true);
+    const pass = getLegalActions(state, "corp").find(
+      (action) => action.type === "decline_rez",
+    )!;
+    expect(pass).toBeDefined();
+    state = apply(state, pass);
     expect(state.timingPoint).toBe("run.encounter_ice");
     expect(
       getLegalActions(state, "corp").some(

@@ -35,7 +35,10 @@ import type {
   RunnerTurnFlags,
   RunTemporaryCreditCleanupResult,
 } from "./run-end-cleanup-contracts";
-import { successfulRunServerId } from "./run-server-identities";
+import {
+  successfulRunEffectTargetMatches,
+  successfulRunServerId,
+} from "./run-server-identities";
 import { validatedEncounterTemporaryTraceCreditRemainder } from "../trace/encounter-temporary-trace-credits";
 
 export function clearEncounterTemporaryTraceCredits(
@@ -125,7 +128,10 @@ export function handleRunEndCleanup(
       )
     : { handled: false };
   const bonusRunOnFinish = run?.grantBonusRunOnFinish === true;
-  const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
+  const bonus =
+    successful && run && successfulRunEffectTargetMatches(run)
+      ? (run.pendingSuccessBonusCredits ?? 0)
+      : 0;
   const corpBonus = unsuccessfulRunCorpCreditBonus(host, run, successful);
   host.followups.cleanupDelayedSuccessfulRunTemporaryIce(run, legalAction);
   if (run) host.followups.resolveTestSpinRunEnd(run, legalAction);

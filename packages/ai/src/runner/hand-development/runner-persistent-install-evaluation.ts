@@ -20,6 +20,7 @@ import {
   runnerHintProvidesDamagePrevention,
   runnerHintProvidesExposeInformation,
   runnerHintProvidesMultiaccess,
+  runnerEffectsProvidePostBreakIceTrash,
   runnerHintProvidesNonNoisyBreakerCredits,
   runnerHintProvidesSearch,
   runnerHintProvidesTopTrashRecovery,
@@ -222,13 +223,18 @@ export function persistentFunctionalProfileForCard(
     restrictedRunCreditProfile !== undefined ||
     runnerHintProvidesNonNoisyBreakerCredits(hint);
   const runOnlyEconomyPool = cardHasRunOnlyEconomyPool(card);
+  const postBreakIceTrash = runnerEffectsProvidePostBreakIceTrash(
+    hint?.effects,
+  );
   const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
   const economyTool =
     !runOnlyEconomyPool &&
+    !postBreakIceTrash &&
     breakerCoverage.length === 0 &&
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
   const accessSupport =
+    postBreakIceTrash ||
     hint?.planRoles?.includes("information") === true ||
     runnerHintProvidesExposeInformation(hint) ||
     runnerHintProvidesMultiaccess(hint) ||

@@ -95,7 +95,9 @@ export function handleRunFortTriggerExecution(
   }
   if (
     legalAction.payload?.fortRunWindowAbility ===
-    "move_self_to_different_position_on_same_fort"
+      "move_self_to_different_position_on_same_fort" ||
+    legalAction.payload?.fortRunWindowAbility ===
+      "move_self_to_outermost_position_on_other_fort"
   ) {
     host.run.resolveStartRunIceRepositionWindow(legalAction);
     return handled(legalAction);

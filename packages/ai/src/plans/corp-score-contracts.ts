@@ -65,6 +65,7 @@ export type CorpScoreProjectSignal = {
     | "corp_score_horizon_unbounded"
     | "corp_same_turn_score_consumes_funded_defense_reserve"
     | "corp_funded_protected_score_install"
+    | "corp_shorter_terminal_score_route_dominates"
     | "corp_resident_score_parent_dominates_sibling_route";
   /** Positive certificate from the existing Engine-quoted same-turn conversion path. */
   sameTurnConversionProof?: "engine_quoted_path";

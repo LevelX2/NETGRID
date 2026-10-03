@@ -1,6 +1,8 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
+import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
+import { currentCorpRezOrTrashChoice } from "./rez-or-trash-choice";
 import {
   PendingChoice,
   PendingChoiceOptions,
@@ -9,40 +11,57 @@ import {
 
 export function selectedCorpRezOrTrashIceOptionId(
   input: AiDecisionInput,
+  action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-): string | undefined {
-  const rezOptionId = selectableOptions.find(
-    (option) => option.id === "rez_ice",
-  )?.id;
-  const trashOptionId = selectableOptions.find(
-    (option) => option.id === "trash_ice",
-  )?.id;
-  const targetMatch =
-    /^card_implementation\.corp_choice_rez_or_trash_ice_decision:([^:]+):([0-9]+)$/.exec(
-      choice.source,
-    );
-  const targetCardId = targetMatch?.[1];
-  const targetIce = input.playerView.servers
-    .flatMap((server) => server.ice)
-    .find(
-      (card) =>
-        card.instanceId === targetCardId &&
-        card.known === true &&
-        card.rezzed === false,
-    );
-  const rezQuote = targetIce?.effectiveRezCostQuote;
+  currentPortfolio?: ResidentPlanPortfolio,
+): string {
+  const context = currentCorpRezOrTrashChoice(input, action);
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "corp.defend_servers" &&
+      instance.executionState === "executor",
+  );
+  const state = executor?.moduleState as
+    | { kind?: string; signals?: CorpGenericDefenseSignal[] }
+    | undefined;
+  const signal = state?.signals?.find(
+    (signal) =>
+      signal.kind === "generic" &&
+      signal.phase === "resolve_rez_or_trash" &&
+      signal.actionIds?.length === 1 &&
+      signal.actionIds[0] === action.actionId &&
+      signal.choiceResolution?.kind === "rez_or_trash_ice",
+  );
+  const resolution = signal?.choiceResolution;
   if (
-    rezOptionId !== undefined &&
-    rezQuote?.complete === true &&
-    rezQuote.cardId === targetCardId &&
-    rezQuote.expiresAtStateVersion === input.playerView.stateVersion &&
-    Number.isFinite(rezQuote.finalCredits) &&
-    rezQuote.finalCredits <= input.playerView.own.credits
+    !context ||
+    context.choice.choiceId !== choice.choiceId ||
+    context.choice.source !== choice.source ||
+    choice.stateVersion !== input.playerView.stateVersion ||
+    portfolio?.side !== "corp" ||
+    portfolio.stateVersion !== input.playerView.stateVersion ||
+    state?.kind !== "defense" ||
+    resolution?.kind !== "rez_or_trash_ice" ||
+    resolution.choiceId !== choice.choiceId ||
+    resolution.choiceSource !== choice.source ||
+    resolution.sourceStateVersion !== input.playerView.stateVersion ||
+    resolution.targetIceInstanceId !== context.ice.instanceId ||
+    signal?.serverId !== context.server.id ||
+    !selectableOptions.some(
+      (option) =>
+        option.id === resolution.selectedOptionId && option.value === option.id,
+    )
   ) {
-    return rezOptionId;
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Materialize rez-or-trash only from the current corp.defend_servers executor and its exact state-, ICE-, action- and option-bound choice.",
+    );
   }
-  return trashOptionId;
+  return resolution.selectedOptionId;
 }
 
 export function selectedCorpClassicDeflectorOptionId(
