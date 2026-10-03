@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 import type {
   RunnerEconomyPosture,
@@ -18,7 +19,10 @@ import {
   assessRunnerRecurringEconomyRunHorizon,
   assessRunnerRestrictedRunEconomyInvestment,
 } from "./recurring-economy-investment";
-import type { RunnerRecurringEconomySignal } from "./recurring-economy-types";
+import type {
+  RunnerPreparedRunOpportunity,
+  RunnerRecurringEconomySignal,
+} from "./recurring-economy-types";
 
 export function runnerRecurringEconomySignals(
   input: AiDecisionInput,
@@ -28,7 +32,41 @@ export function runnerRecurringEconomySignals(
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
   strategicIntent: RunnerStrategicIntentProfile,
   hasExactRunUrgency: (target: RunnerRunTargetEvaluation) => boolean,
+  preparedRunOpportunities: readonly RunnerPreparedRunOpportunity[],
 ): RunnerRecurringEconomySignal[] {
+  for (const route of preparedRunOpportunities) {
+    if (!route.ready) continue;
+    const action = input.legalActions.find(
+      (a) => a.actionId === route.actionId,
+    );
+    if (
+      !action ||
+      action.side !== "runner" ||
+      input.side !== "runner" ||
+      action.type !== "trigger_ability" ||
+      (action.payload?.abilityId !== "pay_to_remove_run_lock" &&
+        action.payload?.v1920RunnerRunLockAbility !==
+          "pay_to_remove_run_lock") ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      !route.serverId ||
+      !route.parentPlanInstanceId ||
+      !Number.isFinite(route.value) ||
+      route.value <= 0 ||
+      route.fundingGap !== 0
+    ) {
+      throw new PlanResolutionFailure("stale_or_future_action_reference", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((a) => a.type),
+        unresolvedActionIds: route.actionId ? [route.actionId] : [],
+        owner: "plan_module",
+        planInstanceId: route.parentPlanInstanceId,
+        removalCondition:
+          "A ready recurring-economy run opportunity requires its current native release action and funded Run-parent binding.",
+      });
+    }
+  }
   const installedSources = (input.playerView.own.rig ?? []).filter((card) =>
     hasNoRunRecurringEconomyCommitment(card.definitionId),
   );
@@ -50,6 +88,7 @@ export function runnerRecurringEconomySignals(
         profile.turnStartCredits,
         realization.value,
         installedThisTurn || realization.payoutCount === 0,
+        preparedRunOpportunities,
       );
       // The investment owns only the decision to defer a run. It must not
       // become a second authority for otherwise independent development or
@@ -116,6 +155,7 @@ export function runnerRecurringEconomySignals(
         profile.turnStartCredits,
         0,
         true,
+        preparedRunOpportunities,
       );
       const productiveSetupAlternative = input.legalActions.some(
         (action) =>
@@ -340,6 +380,7 @@ function runnerRecurringEconomyRunDecision(
   futureValueAtRisk: number,
   realizedValue: number,
   payoutStillUnrealized: boolean,
+  preparedRunOpportunities: readonly RunnerPreparedRunOpportunity[],
 ): {
   decision: "wait" | "allow_run" | "preempt_for_urgent_run";
   bestVisibleRunPayoff: number;
@@ -347,6 +388,7 @@ function runnerRecurringEconomyRunDecision(
 } {
   return assessRunnerRecurringEconomyRunHorizon({
     runTargets,
+    preparedRunOpportunities,
     legalRunActionIds: new Set(
       input.legalActions
         .filter((action) => action.type === "start_run")

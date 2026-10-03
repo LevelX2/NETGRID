@@ -1,3 +1,14 @@
+/** Current Run-owner prerequisite and funded follow-up; never a future action ID. */
+export type RunnerPreparedRunOpportunity = Readonly<{
+  actionId?: string;
+  ready: boolean;
+  terminal: boolean;
+  serverId: string;
+  parentPlanInstanceId: string;
+  value: number;
+  fundingGap: number;
+}>;
+
 export type RunnerRecurringEconomySignal = {
   commitmentId: string;
   definitionId: string;

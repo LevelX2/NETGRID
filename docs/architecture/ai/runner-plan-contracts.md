@@ -2331,6 +2331,26 @@ wendet diese Zurückstellung auf seine eigenen aktuellen Routen an. Halten
 zurück; bereits aktive Installationsrouten, exakte Coverage-Zwecke und zuvor
 dispositionierte Actions bleiben geschützt.
 
+Der endliche Investitionshorizont berücksichtigt zusätzlich die aktuell
+gequotete Vorbereitung eines Run-Owners: Eine bezahlte Run-Sperre kann alle
+`start_run`-Actions entfernen, obwohl ihre native Freigabe samt finanziertem
+Folgerun bereits bereitsteht. `runnerContext` erzeugt diese bestehenden
+Run-Lock-Routen vor den Economy-Signalen und übergibt sie als typisierte
+Fakten. Der Economy-Owner validiert Action-ID, Seite, Zustand, Fähigkeit,
+Finanzierung und Parentbindung. Eine behauptete bereite Route mit fehlender
+oder veralteter Bindung scheitert strukturiert; blockierte Routen begründen
+keinen verfügbaren Run.
+
+Ein finanzierter vorbereiteter Run beendet das Halten nach tatsächlich
+realisierten Einnahmen von Installationskosten plus zwei weiteren Auszahlungen.
+Ein terminaler vorbereiteter Pfad oder erreichbarer Run bei gegnerischem
+Matchpoint darf früher vorgehen. Die statische Priorität der Vorbereitung ist
+kein erfundener Runertrag: Der sichtbare Run-Payoff stammt weiterhin nur aus
+aktuellen Runbewertungen. Unrealisierte Investments, Finanzierungslücken,
+fehlende Folgeklicks und blockierte bekannte Pfade bleiben geschützt. Die
+Economy hebt ausschließlich ihre eigene Zurückstellung auf; Run-Admission,
+Actionausschlüsse, Planwahl und Engine-Ausführung behalten ihre Owner.
+
 Als einzige Rückfrage wird die exakte Dringlichkeit eines Runziels an denselben
 aktuellen Entscheidungsinput gebunden übergeben. Kanonische Kartenprofile,
 Rollen, nichtnegative LegalAction-Kosten und gemeinsame Planstandards bleiben

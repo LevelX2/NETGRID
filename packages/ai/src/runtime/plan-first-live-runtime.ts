@@ -2999,6 +2999,11 @@ function buildRunnerDomain(
     handDevelopment,
     strategicIntent,
   });
+  const runLockReleaseRoutes = runnerRunLockReleaseRoutes(
+    input,
+    candidates,
+    previous,
+  );
   const recurringEconomy = runnerRecurringEconomySignals(
     input,
     candidates,
@@ -3007,6 +3012,7 @@ function buildRunnerDomain(
     handDevelopment,
     strategicIntent,
     (target) => runnerRunHasExactUrgency(input, target),
+    runLockReleaseRoutes,
   );
   const recurringEconomyRunDeferralEvidenceCode =
     runnerRecurringEconomyRunDeferral(recurringEconomy);
@@ -3167,11 +3173,6 @@ function buildRunnerDomain(
         ]
       : [];
   });
-  const runLockReleaseRoutes = runnerRunLockReleaseRoutes(
-    input,
-    candidates,
-    previous,
-  );
   const runLockFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
     runLockReleaseRoutes.flatMap((route) =>
       route.supportNeedId && route.fundingGap > 0
