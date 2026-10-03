@@ -4,6 +4,99 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
 
 describe("selectedCorpDiscardChoiceOptionIds", () => {
+  it("counts existing Archives agendas before discarding another agenda at matchpoint", () => {
+    const input = discardInput(
+      [agenda("agenda-1", 2), operation("operation-1")],
+      {
+        runnerAgendaPoints: 4,
+        count: 1,
+        archivesCards: [agenda("already-in-archives", 2)],
+      },
+    );
+    const choice = input.playerView.pendingChoice!;
+    const selection = selectedCorpDiscardChoiceOptionIds(
+      input,
+      choice,
+      choice.options,
+      (_input, candidate) => ({
+        total: candidate.type === "agenda" ? -1_000 : 0,
+        planDisposition: "redundant",
+      }),
+    );
+    expect(selection).toMatchObject({
+      selectedOptionIds: ["option-operation-1"],
+      exposedAgendaPoints: 0,
+      terminalAgendaExposure: false,
+    });
+  });
+
+  it("keeps an immediate terminal Archives exposure ahead of a protected nonagenda route", () => {
+    const input = discardInput(
+      [agenda("agenda-1", 2), operation("operation-1")],
+      {
+        runnerAgendaPoints: 4,
+        count: 1,
+        archivesCards: [agenda("already-in-archives", 2)],
+      },
+    );
+    const choice = input.playerView.pendingChoice!;
+    const selection = selectedCorpDiscardChoiceOptionIds(
+      input,
+      choice,
+      choice.options,
+      (_input, candidate) => ({
+        total: 0,
+        planDisposition:
+          candidate.type === "agenda" ? "redundant" : "current_plan_route",
+      }),
+    );
+    expect(selection?.selectedOptionIds).toEqual(["option-operation-1"]);
+  });
+
+  it("recomputes the whole exposed batch together with the existing Archives points", () => {
+    const input = discardInput(
+      [agenda("agenda-1", 2), agenda("agenda-2", 2), operation("operation-1")],
+      {
+        runnerAgendaPoints: 2,
+        count: 2,
+        archivesCards: [agenda("already-in-archives", 2)],
+      },
+    );
+    const choice = input.playerView.pendingChoice!;
+    const selection = selectedCorpDiscardChoiceOptionIds(
+      input,
+      choice,
+      choice.options,
+      (_input, candidate) => ({
+        total: candidate.type === "agenda" ? -1_000 : 0,
+        planDisposition: "redundant",
+      }),
+    );
+    expect(selection).toMatchObject({
+      selectedOptionIds: ["option-agenda-1", "option-operation-1"],
+      exposedAgendaPoints: 2,
+      terminalAgendaExposure: false,
+    });
+  });
+
+  it("fails closed when an existing reachable Archives agenda has unknown points", () => {
+    const unknown = {
+      ...agenda("unknown-existing", 2),
+      agendaPoints: undefined,
+      definitionId: "unknown-existing-definition",
+    } as VisibleCard;
+    const input = discardInput(
+      [agenda("agenda-1", 2), operation("operation-1")],
+      { count: 1, archivesCards: [unknown] },
+    );
+    const choice = input.playerView.pendingChoice!;
+    expect(
+      selectedCorpDiscardChoiceOptionIds(input, choice, choice.options, () => ({
+        total: 0,
+      })),
+    ).toBeUndefined();
+  });
+
   it("keeps the aggregate discard batch from exposing matchpoint in open Archives", () => {
     const cards = [
       agenda("agenda-1", 2),
@@ -134,13 +227,14 @@ function discardInput(
     count?: number;
     runnerAgendaPoints?: number;
     archivesIce?: VisibleCard[];
+    archivesCards?: VisibleCard[];
   } = {},
 ): AiDecisionInput {
   const count = options.count ?? 2;
   return {
     side: "corp",
     playerView: {
-      own: { gripOrHq: cards },
+      own: { gripOrHq: cards, heapOrArchives: options.archivesCards ?? [] },
       opponent: { agendaPoints: options.runnerAgendaPoints ?? 0 },
       agendaPointsToWin: 7,
       servers: [

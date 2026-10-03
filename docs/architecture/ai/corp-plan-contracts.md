@@ -1976,6 +1976,17 @@ verwendet dieselbe Disposition, behält konkrete Parent-Bindungen und den
 Schutz vor entscheidender Agenda-Exposition aber bei. Weder Installation noch
 garantierter Zugriffsschaden werden aus einer Ambush-Rolle abgeleitet.
 
+Bei unmittelbar offenen Archives bewertet der bestehende Discard-Plan die
+bekannten Agendapunkte aus eigenen Archives zusammen mit Runnerpunkten und
+dem gesamten neuen Discard-Batch. Eine dadurch sofort siegentscheidende
+Exposition hat Vorrang vor einer Nichtagenda-Retention; der Schutz konkreter
+Planbindungen bleibt für nichtterminale Abwürfe erhalten. Unbekannte
+Agendapunkte in diesem erreichbaren Zielgebiet scheitern fail-closed. Die
+bereits ausgewählte Handplaninstanz bindet weiter genau dieselbe
+Engine-Choice, Action und StateVersion; der Payload-Resolver bewertet nicht
+erneut und öffentliche Archives-Spiegel ersetzen die eigene Zonenprojektion
+nicht.
+
 Das Modul darf Hidden-Info nur aus der eigenen HQ/R&D und öffentlichen
 Ereignissen verwenden.
 
