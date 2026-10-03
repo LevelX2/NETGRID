@@ -1140,6 +1140,16 @@ Interne Bedarfe und Steps:
 - `harden_target_remote`;
 - `restore_rez_reserve`.
 
+Aktivierte Runcredits dürfen eine aktuelle Rezlücke finanzieren, auch wenn
+die unbezahlbare Rezaktion noch nicht in `LegalActions` enthalten ist.
+`corp.defend_servers` verwendet dafür ausschließlich den vollständigen,
+aktuellen Engine-Quote der gerade angegriffenen, ungerezzten installierten
+ICE. Instanz, Server und StateVersion müssen übereinstimmen; variable oder
+zusätzliche Agendapunktkosten begründen keinen behaupteten Finanzierungsweg.
+Nach der tatsächlichen Finanzierungsaktion wird die Rezaktion aus den neuen
+`LegalActions` gewählt. HQ-Verlust und ungenutzte, am Runende verfallende
+Credits bleiben Kosten dieses Weges.
+
 `restore_rez_reserve` ist kein eigener Plan und keine dauerhafte pauschale
 „Zentralreserve“. Es ist ausschließlich ein interner, endlicher
 Ressourcenbedarf von `corp.defend_servers`. Score- und Remote-Parents können
