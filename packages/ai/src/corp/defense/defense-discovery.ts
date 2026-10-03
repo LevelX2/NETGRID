@@ -60,6 +60,7 @@ import {
   CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
   corpCardRoutePreservesScoreReserve,
   corpDefensiveUpgradePlacement,
+  corpGlobalIceSupportAssetInstallSignal,
   corpLayeredIceStagingParent,
   corpResidentDelayedSuccessDefenseSignals,
   corpSelectedCentralDirectInstallRouteState,
@@ -130,6 +131,12 @@ export function buildCorpDefenseNeeds({
           candidate,
         );
         if (postPassIceLifecycle) return [postPassIceLifecycle];
+        const globalSupportInstall = corpGlobalIceSupportAssetInstallSignal(
+          input,
+          candidate,
+          scoreProjects,
+        );
+        if (globalSupportInstall) return [globalSupportInstall];
         const defensiveUpgradePlacement = corpDefensiveUpgradePlacement(
           input,
           candidate,

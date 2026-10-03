@@ -1501,6 +1501,19 @@ produktiven Support. Das gilt für den allgemeinen persistenten Pfad ebenso
 wie für strukturierte ICE-Zielprofile und Fort-Stärke-Unterstützung.
 Eigenständige Upgrade-Wirkungen behalten ihre getrennten Owner-Assessments.
 
+Ein passives globales ICE-Support-Asset kann denselben strukturierten
+Defensebedarf bereits für seine Installation in einem neuen Remote nutzen.
+Die Engine liefert dafür die an Quelle, Ziel und aktuellen Zustand gebundene
+Post-Install-Rez-Kostenquote. Zulassung verlangt passende vorhandene ICE,
+gemeinsame Finanzierung von Installation, Support-Rez und erforderlichen
+Ziel-Rezs sowie den Erhalt des Scorebudgets. Globale Wirkung wird nicht auf
+den neuen Quellfort beschränkt. Fehlende, veraltete oder unfinanzierte Quotes
+und fehlende Ziel-ICE erzeugen keine Installationsroute. Im Folgezustand
+materialisiert derselbe Defense-Owner die tatsächliche neue Rez-LegalAction
+erneut; die Vorbereitung behauptet weder ein ausgeführtes Rez noch sicheren
+Run-Schutz. `corp-structured-ice-support.ts` liefert beiden Phasen dieselben
+Ziel- und Fundingfakten ohne Rückimport in die Discovery.
+
 Gemeinsame Hint-Begriffe rechtfertigen keine gemeinsame Rez-Heuristik.
 Dr. Dreff wird nur im letzten relevanten Begegnungsfenster desselben Forts
 produktiv, wenn sichtbares HQ-ICE unter seinem eigenen Halb-Rez-Kostenvertrag
