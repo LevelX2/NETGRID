@@ -73,6 +73,7 @@ import {
 import { reservedAccessTrashCredits } from "./run-window-access";
 import {
   pureEndRunEncounterPayment,
+  optionalDamageBreakContinuationPayments,
   pureEndRunEncounterEconomics,
 } from "./run-window-encounter-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
@@ -782,6 +783,20 @@ function runnerRunWindowActionAssessment(
   const encounterPayment = !planStepExclusion
     ? pureEndRunEncounterPayment(input, action)
     : undefined;
+  const optionalPayments =
+    !planStepExclusion && !encounterExclusion && runOrigin?.runRiskContract
+      ? optionalDamageBreakContinuationPayments(
+          input,
+          action,
+          runnerRunWindowEncounterRequiredHandFloor(runOrigin),
+        )
+      : [];
+  const optionalPaidRisks = optionalPayments.map((payment) =>
+    runnerRunRiskContractReassessment(input, runOrigin, payment),
+  );
+  const optionalReserveViolation =
+    optionalPaidRisks.length > 0 &&
+    optionalPaidRisks.every((risk) => risk?.decision === "prefer_jack_out");
   const paidRunRisk =
     encounterPayment && runOrigin?.runRiskContract
       ? runnerRunRiskContractReassessment(input, runOrigin, encounterPayment)
@@ -813,7 +828,21 @@ function runnerRunWindowActionAssessment(
             ...paidRunRisk.evidenceCodes,
           ].join("|"),
         }
-      : undefined;
+      : optionalReserveViolation
+        ? {
+            key: "run_plan_optional_damage_payment_degrades_bound_reserve",
+            label:
+              "Optionale Schadensabwehr lässt Pflichtbreaks und Runreserve nicht gemeinsam zu",
+            reason: [
+              "optional_damage_and_current_mandatory_breaks_quoted",
+              ...optionalPayments.map(
+                (payment) =>
+                  "run_plan_optional_and_mandatory_payment:" + payment.cost,
+              ),
+              ...optionalPaidRisks[0]!.evidenceCodes,
+            ].join("|"),
+          }
+        : undefined;
   const exclusion =
     effectiveEncounterExclusion ?? planStepExclusion ?? reserveExclusion;
   const mitigation = !exclusion

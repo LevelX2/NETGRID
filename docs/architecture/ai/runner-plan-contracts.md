@@ -1869,6 +1869,18 @@ ohne weiteren Pfad müssen sämtliche verbleibenden Pflicht-Breaks gemeinsam
 finanziert sein. Die Bezahlbarkeit nur eines weiteren Breaks erlaubt keine
 optionale Schadensabwehr, die eine zweite verbleibende ETR-Sperre offenließe.
 
+Beim gebundenen Run gilt dieselbe Prüfung auch für die Reserve vor unbekanntem
+inneren ICE. Der Run-Window quotiert einen freiwilligen direkten Netz- oder
+Fleischschaden-Break gemeinsam mit sämtlichen aktuellen ETR-Pflichtbreaks aus
+den angebotenen Engine-Actions und denselben Zahlungspools. Nur wenn jede
+vollständig zertifizierte Zahlungsroute danach den bestehenden Risikovertrag
+zum Abbruch zwingt, wird die freiwillige Ausgabe ausgeschlossen. Die konkrete
+Breakwahl bleibt beim bisherigen Owner; verdeckte ICE-Kosten werden nicht
+angenommen. Aktuelle Schadensmitigation, gebundener Handpuffer, Hirnschaden,
+Full-Break-Pflichten und unabhängige Folgeeffekte behalten ihre Abwehrpriorität.
+Der native Checkpoint `cp-meta-500-r2-g22-d397` sichert Pflichtbreak,
+Runreserve, Owner und Route sowie die finanzierten Gegenfälle ab.
+
 Die Pump-Zulassung projiziert zusätzlich die bereits im aktuellen Angebot
 finanzierten, aber noch nicht ausgeführten Pumps über diese Grenze. Ihre
 Gültigkeitsdauer stammt aus dem kanonischen Engine-Breaker-Quote: Nur Run-
