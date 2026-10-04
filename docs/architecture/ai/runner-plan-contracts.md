@@ -86,6 +86,13 @@ Moduls. Für den aktuellen Domainvertrag gilt:
 - fehlende Abdeckung wird als `missing_module_coverage` diagnostiziert und
   nicht durch einen generischen Grund- oder Supportplan kaschiert.
 
+Eine Bezahlaktion zum Aufheben der Runsperre ist nur dann produktiv gebunden,
+wenn die aktuelle Central-Route erreichbar, positiv und frei von ihren
+eigenen Action-Ausschlüssen ist. Ein durch Recurring Economy zurückgestellter
+Folgerun darf deshalb keinen ausführbaren Release-Head behaupten. Die
+Runtime übernimmt den konkreten Ausschluss vom Central-Owner, statt die
+Runsperre ungeprüft zu lösen oder die LegalAction ownerlos zu lassen.
+
 Mögliche Phasen:
 
 ```text
@@ -308,6 +315,24 @@ Der Plan muss unterscheiden:
 - Ambush-/Damage-Risiko;
 - deckstrategisch begründeten wiederholten Remote-Druck.
 
+Ein unbekanntes avanciertes Root darf vor einem bereits bezahlbaren Basisrun
+eine exakt gebundene Einzelkarten-Aufdeckung erhalten. Der Remote-Owner prüft
+die aktuellen Aufdeckkosten, mindestens einen verbleibenden Run-Click sowie
+Pfadkosten und native Runreserve gemeinsam. Ein offener Fundingbedarf, ein
+bekanntes oder bereits exakt aufgedecktes Root und der letzte Click erzeugen
+diese Vorbereitung nicht. Der konkrete Informationsschritt bleibt bei
+`runner.contest_remote`; weitere Sabotage- und Bypassrouten behalten ihre
+eigenen Nachweise.
+
+Quelle, Action, side-sichere Root-Instanz, Position und StateVersion werden
+vor der Aufdeckung gebunden. Die anschließende Engine-Choice übernimmt nur
+das eine passende aktuelle Optionsfeld; sie wählt weder ein anderes Fort
+noch eine neue Strategie. Fehlende oder widersprüchliche Bindung scheitert
+geschlossen. Nach der privaten Beobachtung wird der mögliche Run regulär
+neu bewertet, ohne die bisherige Run-Action über die Informationsgrenze zu
+fixieren. Paarung 493/R1/G7/D44 und native Engine-Gegenfälle sichern diesen
+Übergang; allgemeine ICE-Offenlegung aus SP-358 bleibt eine eigene Frage.
+
 Ein allgemeiner Matchpoint-Fokus wird vor den konkret bewerteten Remote-Routen
 zusammengeführt. Er darf deren aktuelle Finanzierungs- oder Coverage-Bindung,
 Zugriffsvertrag und Risikoquote nicht überschreiben. Ein bereits berechneter
@@ -437,6 +462,23 @@ Kosten-Recovery, Search-/Install-/Funding-Unterstützung, Actionzuordnung,
 Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
+
+Ein zusammengesetzter Karteneffekt mit positivem Draw-Anteil darf auch bei
+genau einer Karte den vorhandenen `draw_for_answer`-Bedarf bedienen. Der
+bekannte Stack muss weiterhin eine passende Antwort enthalten, die aktuelle
+native Aktion muss vorhanden sein und die bestehende Draw-Tax-Prüfung bleibt
+wirksam. Der Creditanteil erzeugt keinen zweiten Economy-Executor. Die
+Originalentscheidung und eine echte Engine-Anwendung prüfen Plananschluss,
+Klick-, Credit- und Kartenänderung; bei leerem Stack entsteht kein Coverage-Draw.
+
+Eine notwendige MU-Ersatzinstallation bleibt auch mit angehängten
+Recurring-Credit-Zahlungsvarianten ausführbar. Ob ein direkter
+Installationsgeschwisterpfad besteht, wird ausschließlich an der vorhandenen
+nativen `install_card`-Aktion und deren `runnerProgramTrashBeforeInstall`
+festgestellt. Ein Action-ID-Suffix ist kein Beleg für freie MU. Coverage,
+Quellinstanz und die anschließende exakte Programmopfer-Choice behalten
+denselben Executor; eine tatsächlich direkte Installation wird weiterhin
+ohne Opfer ausgeführt.
 
 Kosten-Recovery vergleicht installiertes Rig, sichtbare Handantwort und
 bekannte Stack-Alternative unter demselben finanzierten Pfadbudget. Die
@@ -1371,7 +1413,21 @@ den Draw übrig lassen. Der Bedarf bleibt beim Defense-Parent und wird nach
 jedem Schritt neu geprüft. Verdeckte Steuerquellen, nur bedingte Finanzierung,
 andere unmittelbar nutzbare Handpufferrouten oder fehlende Folgekapazität
 erzeugen diesen Vorbereitungsnachweis nicht. Die tatsächliche Steuerzahlung
-erfolgt weiter ausschließlich über die spätere Engine-Choice.
+erfolgt weiter ausschließlich über die spätere Engine-Choice. Der sichtbare
+Quellenfact zählt ausschließlich bekannte gerezzte installierte Rootkarten.
+Virtuelle Rootkarten in Archives sind entsorgt; ein erhaltenes Rezzustandsfeld
+aktiviert dort keine Drawsteuer. Dieser Zonenfilter gilt auch für zusammengesetzte
+Draw-Actions ohne eigenen Basisdraw-Steuerpayload. Der Scheduler darf einen
+falschen Quellenfact nicht durch Aufheben der Unsafe-Disposition kaschieren.
+
+Eine bei bestätigter oder kritischer Schadensgefahr tatsächlich taggefährliche
+Draw-Action gehört auch dann nicht zur aktuellen Defense-Route, wenn sie zuerst
+Tags entfernt. Die Zulassung jeder Defense-Phase respektiert dieselbe aktuelle
+Unsafe-Menge. Eine solche Mehrzweck-Action darf die Finanzierung einer sicheren
+Basis-Tagentfernung nicht als scheinbar bereits vorhandene Tag-Clear-Route
+unterdrücken. Die Ausnahme für eine nur später zurückgestellte Handpufferwirkung
+bleibt auf aktuell sichere Mehrzweck-Actions begrenzt; echte Draw-Tax-Gefahr wird
+weder durch den Scheduler noch durch die aktuelle Phasenbindung aufgehoben.
 
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
 Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda- oder
@@ -1518,6 +1574,18 @@ zählen. Die übrigen ICE behalten ihre vollständigen Quotes. Fehlende oder
 widersprüchliche IDs scheitern am bestehenden Rules-Contract fail-closed.
 Während eines Zahlungs-/Choice-Unterfensters ohne Encounter-Continue bleibt
 der gebundene Parent bis zur erneuten Engine-Fortsetzung erhalten.
+
+Im unmittelbar gebundenen Expose-Betrachtungsfenster konsumiert derselbe
+Run-Owner die aktuelle Engine-Rezquote und feste Post-Rez-Runquote von
+`run.approachedIce`. Ist das bekannte ICE jetzt finanzierbar und sein nicht
+bezahlbar brechbarer Schaden tödlich, erhält der angebotene kostenlose
+Jackout Vorrang vor `finish`. Root, Run-Executor und Zustandsbindung bleiben
+erhalten. Nicht finanzierbares Rez, verkraftbarer Schaden, vorhandene
+Prävention und ein finanzierter installierter Breaker erzeugen diesen
+Abbruchgrund nicht. Sichtbarer Support für Rez während des Runs bleibt ein
+mögliches Rez-Potenzial. Eine notwendige fehlende oder veraltete feste Quote
+scheitert strukturiert; variable Rezentscheidungen bleiben beim bestehenden
+Variablen-/Risikovertrag und werden hier nicht geraten.
 
 ### Vertikale Implementierung
 
@@ -1921,6 +1989,25 @@ abzüglich der kanonischen Rezkosten. Dafür müssen Initialisierung, Menge und
 Ziel `source` belegt sein; fehlender Rezzustand erzeugt keinen Zukunftspool.
 Fehlende kanonische Kartendaten scheitern strukturiert.
 
+Die bekannte Zugriffsbewertung trennt einen aktuell aktiven Effekt von einem
+möglichen Effekt nach einer späteren Rezaktivierung. Vor einem angebotenen
+Basisrun und am letzten Abbruchfenster darf sie bei einem tatsächlich
+beobachteten ungerezzten Asset oder Upgrade die kanonische Rezvariante mit
+dem öffentlichen Basiskreditpreis als Risiko bewerten. Eine zusätzliche
+optionale Effektzahlung wird erst aus dem verbleibenden Corp-Pool bewertet.
+Das ist kein zukünftiges LegalAction- oder Kostenquote-Zertifikat; die
+Engine revalidiert jede tatsächliche Rezaktivierung. Aktuelle Effektconsumer
+erhalten weiterhin ausschließlich die im jetzigen Rezzustand aktive Variante.
+
+Ein bekannter Nicht-Agenda-Trash-Ertrag rechtfertigt dabei keinen Zugriff,
+der eine gesamte vorhandene Breaker-Abdeckung zerstören kann. Der gemeinsame
+Effektproducer leitet die bedrohten Klassen aus den tatsächlich installierten
+kanonischen Breakern und der legalen Effektzielmenge ab. Zwei unabhängige
+Provider gegen einen einzelnen Programmtrash sind kein vollständiger
+Coverageverlust. Unbeobachtete Root-Identitäten werden nicht geraten; eine
+echte Rootersetzung invalidiert weiterhin das Positionsgedächtnis. Auswahl
+und Ablehnung bleiben beim bestehenden Remote-Owner, nicht beim Choiceresolver.
+
 Die reine Trash-Bewertung liegt unter `access/`; der Runtime-Adapter bindet
 sie an die tatsächlich angebotene Trash-Action und deren zweckgebundene
 Credit-Quote. Wiederkehrende Draw-Tag-Effekte werden über die kanonische
@@ -2173,6 +2260,15 @@ letzte freiwillige Entscheidung muss dabei nicht unmittelbar vor dem
 auslösenden Subroutinenfenster liegen; verpflichtende Engine-Fenster eröffnen
 keinen neuen strategischen Owner.
 
+Die Herkunftskette beginnt am Zustand der zuletzt ausgeführten Lease-Aktion,
+nicht am späteren Beobachtungszustand des Portfolios. Der bestehende Owner
+prüft weiterhin Commitment, Source-Plan, Phase, Node, Lease-Zustand, aktuelle
+Run-ID, Quellkarte und vollständigen Choicevertrag. Native verpflichtende
+Corp-Decline-Fenster dürfen in dieser lückenlosen Run-Kette ohne eigenes
+Serverfeld vorkommen; sie ändern keinen Run. Jedes vorhandene Serverfeld muss
+zum behaltenen Run passen. Lücken, fremde Aktionen oder widersprüchliche
+Lease-Bindungen eröffnen keine Fortsetzung.
+
 Die Zufallsbruchquote addiert zum Fehlschaden den direkten Schaden aller
 noch offenen Encounter-Subroutinen. Maßgeblich sind die exakten
 `encounterSubroutineIds` der Engine-Continue-Action, die das AI-DTO erhält.
@@ -2340,6 +2436,26 @@ wendet diese Zurückstellung auf seine eigenen aktuellen Routen an. Halten
 `recurring-economy-dispositions.ts` weist unproduktive Installationsalternativen
 zurück; bereits aktive Installationsrouten, exakte Coverage-Zwecke und zuvor
 dispositionierte Actions bleiben geschützt.
+
+Der endliche Investitionshorizont berücksichtigt zusätzlich die aktuell
+gequotete Vorbereitung eines Run-Owners: Eine bezahlte Run-Sperre kann alle
+`start_run`-Actions entfernen, obwohl ihre native Freigabe samt finanziertem
+Folgerun bereits bereitsteht. `runnerContext` erzeugt diese bestehenden
+Run-Lock-Routen vor den Economy-Signalen und übergibt sie als typisierte
+Fakten. Der Economy-Owner validiert Action-ID, Seite, Zustand, Fähigkeit,
+Finanzierung und Parentbindung. Eine behauptete bereite Route mit fehlender
+oder veralteter Bindung scheitert strukturiert; blockierte Routen begründen
+keinen verfügbaren Run.
+
+Ein finanzierter vorbereiteter Run beendet das Halten nach tatsächlich
+realisierten Einnahmen von Installationskosten plus zwei weiteren Auszahlungen.
+Ein terminaler vorbereiteter Pfad oder erreichbarer Run bei gegnerischem
+Matchpoint darf früher vorgehen. Die statische Priorität der Vorbereitung ist
+kein erfundener Runertrag: Der sichtbare Run-Payoff stammt weiterhin nur aus
+aktuellen Runbewertungen. Unrealisierte Investments, Finanzierungslücken,
+fehlende Folgeklicks und blockierte bekannte Pfade bleiben geschützt. Die
+Economy hebt ausschließlich ihre eigene Zurückstellung auf; Run-Admission,
+Actionausschlüsse, Planwahl und Engine-Ausführung behalten ihre Owner.
 
 Als einzige Rückfrage wird die exakte Dringlichkeit eines Runziels an denselben
 aktuellen Entscheidungsinput gebunden übergeben. Kanonische Kartenprofile,

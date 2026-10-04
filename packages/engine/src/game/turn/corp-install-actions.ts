@@ -19,6 +19,7 @@ import {
 import { guaranteedNextCorpTurnFlexibleClicks } from "../view/visible-corp-score-continuation-quote";
 import { buildLegalAction } from "./action-builders";
 import { visibleCorpIcePostInstallRunQuote } from "../view/visible-post-rez-run-quote";
+import { projectGlobalRootSupportRezAfterInstall } from "../payment/root-support-post-install-rez-quote";
 
 export type CorpInstallServerRef = Pick<CorpServer, "id" | "label">;
 
@@ -139,6 +140,7 @@ export function buildCorpNewRemoteRootInstallAction(
   cardId: CardInstanceId,
   installCost: number,
 ): LegalAction {
+  const supportRez = projectGlobalRootSupportRezAfterInstall(state, cardId);
   return buildLegalAction(
     state,
     "corp",
@@ -150,6 +152,7 @@ export function buildCorpNewRemoteRootInstallAction(
       cardId,
       serverId: "new_remote",
       placement: "root",
+      ...(supportRez ? corpIcePostInstallRezProjectionPayload(supportRez) : {}),
       ...corpAgendaInstallScoreHorizonPayload(state, cardId, "new_remote"),
     },
   );

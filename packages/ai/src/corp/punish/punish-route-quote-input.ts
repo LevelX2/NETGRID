@@ -20,6 +20,7 @@ import {
   corpScoredTraceTagSourceProfile,
   corpTaggedMeatDamageOperationProfile,
   corpScoredTaggedMeatDamageProfile,
+  corpInstalledTaggedMeatDamageProfile,
 } from "../../runtime/corp-canonical-card-facts";
 
 const MAX_PUNISH_ROUTES = 8;
@@ -102,11 +103,15 @@ export function buildBoundedCorpPunishRouteRequests(
   }
   const components = [
     ...input.playerView.own.gripOrHq.map((card) =>
-      visiblePunishComponent(card, false),
+      visiblePunishComponent(card, "hq"),
     ),
     ...input.playerView.own.scoreArea.map((card) =>
-      visiblePunishComponent(card, true),
+      visiblePunishComponent(card, "scoreArea"),
     ),
+    ...input.playerView.servers
+      .filter((server) => server.id !== "archives")
+      .flatMap((server) => server.root)
+      .map((card) => visiblePunishComponent(card, "installed")),
   ]
     .filter(
       (component): component is VisiblePunishComponent =>
@@ -253,13 +258,16 @@ function legalActionCreditCost(
 
 function visiblePunishComponent(
   card: VisibleCard,
-  scored: boolean,
+  sourceZone: "hq" | "scoreArea" | "installed",
 ): VisiblePunishComponent | undefined {
   if (
     card.known !== true ||
     card.owner !== "corp" ||
     card.controller !== "corp" ||
-    card.type !== (scored ? "agenda" : "operation") ||
+    (sourceZone === "installed"
+      ? card.rezzed !== true ||
+        (card.type !== "asset" && card.type !== "upgrade")
+      : card.type !== (sourceZone === "scoreArea" ? "agenda" : "operation")) ||
     typeof card.definitionId !== "string"
   ) {
     return undefined;
@@ -386,7 +394,8 @@ function structuredTaggedDamageAdapter(
 ): PunishComponentAdapter | undefined {
   const profile =
     corpTaggedMeatDamageOperationProfile(definitionId) ??
-    corpScoredTaggedMeatDamageProfile(definitionId);
+    corpScoredTaggedMeatDamageProfile(definitionId) ??
+    corpInstalledTaggedMeatDamageProfile(definitionId);
   return profile
     ? {
         definitionId,

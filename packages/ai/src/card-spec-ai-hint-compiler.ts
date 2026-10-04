@@ -1257,7 +1257,10 @@ function deriveGenericTypedHintOverlay(
       resource: "tags",
       target: "avoid_tag",
       amount: source.amount,
-      finite: true,
+      ...(source.cost.kind === "trash_source" ||
+      source.cost.kind === "credit_and_trash_source"
+        ? { finite: true }
+        : { repeatable: true }),
     });
     overlay.functionSignals.push("defense.tag_prevention");
   }
@@ -1517,6 +1520,20 @@ function appendGenericAbilityEffect(
     entry.definition.type === "agenda" && ability.kind === "activated"
       ? ("scored_activated" as const)
       : typedEffectTiming(ability);
+  if (effect.kind === "private_look") {
+    const consumed =
+      ability.kind === "on_play" ||
+      ability.costs?.some((cost) => cost.kind === "trash_source") === true;
+    overlay.effects.push({
+      kind: effect.zone === "hq" ? "hq_info" : "topdeck_info",
+      scope: effect.zone === "rd" ? "rnd" : "hq",
+      timing,
+      resource: "cards",
+      target: effect.count === "all" ? "full_reveal" : "top_cards",
+      ...(typeof effect.count === "number" ? { amount: effect.count } : {}),
+      ...(consumed ? { finite: true } : { repeatable: true }),
+    });
+  }
   if (effect.kind === "add_current_run_access_count") {
     overlay.effects.push({
       kind: "multiaccess",
@@ -3102,7 +3119,8 @@ function deriveClosedMechanicalHintOverlay(
         (cost) => cost?.kind === "trash_source" && cost.amount === 1,
       ).length !== 1 ||
       runnerUtility.costs.filter(
-        (cost) => cost?.kind === "target_rez_cost" && cost.target === "that_ice",
+        (cost) =>
+          cost?.kind === "target_rez_cost" && cost.target === "that_ice",
       ).length !== 1
     )
       throw new Error("card_spec_unknown_post_pass_trash_shape");
@@ -4509,12 +4527,15 @@ function deriveExtendedRequiredMechanics(
     mechanics.add("damage_prevention_turn_limit");
   for (const source of engine.tagPreventionSources ?? []) {
     mechanics.add("prevent_tag");
-    mechanics.add("credit_cost");
-    mechanics.add(
-      source.cost.kind === "credit_and_forgo_next_action"
-        ? "future_action_debt"
-        : "trash_source",
-    );
+    if (source.cost.kind !== "trash_source" && source.cost.amount > 0)
+      mechanics.add("credit_cost");
+    if (source.cost.kind === "credit_and_forgo_next_action")
+      mechanics.add("future_action_debt");
+    if (
+      source.cost.kind === "trash_source" ||
+      source.cost.kind === "credit_and_trash_source"
+    )
+      mechanics.add("trash_source");
   }
   return [...mechanics].sort();
 }
@@ -5656,17 +5677,16 @@ function deriveClosedExtendedRiskTags(
   }
   if (engine.damagePreventionSources !== undefined) risks.add("damage_window");
   for (const source of engine.tagPreventionSources ?? []) {
-    if (source.cost.kind === "credit_and_forgo_next_action") {
-      for (const risk of [
-        "future_action_debt",
-        "tag_prevention",
-        "credit_cost",
-      ])
-        risks.add(risk);
-    } else {
-      for (const risk of ["tag_prevention", "credit_cost", "trash_source"])
-        risks.add(risk);
-    }
+    risks.add("tag_prevention");
+    if (source.cost.kind !== "trash_source" && source.cost.amount > 0)
+      risks.add("credit_cost");
+    if (source.cost.kind === "credit_and_forgo_next_action")
+      risks.add("future_action_debt");
+    if (
+      source.cost.kind === "trash_source" ||
+      source.cost.kind === "credit_and_trash_source"
+    )
+      risks.add("trash_source");
   }
   for (const effect of engine.lifecycle?.on_leave_play ?? []) {
     if (effect.kind === "lose_credits") risks.add("leave_play_credit_loss");
@@ -8598,16 +8618,6 @@ function deriveClosedExtendedHintEffects(
           target: "avoid_next_tag",
           amount: effect.amount,
           finite: true,
-        });
-      if (effect.kind === "private_look")
-        effects.push({
-          kind: effect.zone === "hq" ? "hq_info" : "topdeck_info",
-          scope: effect.zone === "rd" ? "rnd" : effect.zone,
-          timing: "action",
-          resource: "cards",
-          target: effect.zone === "hq" ? "full_reveal" : "top_cards",
-          ...(typeof effect.count === "number" ? { amount: effect.count } : {}),
-          repeatable: true,
         });
       if (effect.kind === "make_run") {
         effects.push({

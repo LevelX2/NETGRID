@@ -1330,15 +1330,21 @@ function runnerRunLockReleaseBoundRouteDisposition(
       signal.runActionIds?.includes(actionId) === true,
   );
   if (centralRoute) {
-    const executable = centralRoute.reachable && centralRoute.marginalValue > 0;
+    const exclusions = centralRoute.runActionExclusions?.[actionId] ?? [];
+    const executable =
+      centralRoute.reachable &&
+      centralRoute.marginalValue > 0 &&
+      exclusions.length === 0;
     return {
       executable,
       ownerModuleId: "runner.pressure_central",
       evidenceCode: executable
         ? `runner_run_lock_release_bound_route_executable:${centralRoute.serverId}`
-        : centralRoute.supportNeedId
-          ? `runner_run_lock_release_waits_for_bound_support:${centralRoute.serverId}:${centralRoute.supportNeedId}`
-          : `runner_run_lock_release_bound_route_not_executable:${centralRoute.serverId}:${centralRoute.evidenceCode}`,
+        : exclusions.length > 0
+          ? `runner_run_lock_release_bound_route_excluded:${centralRoute.serverId}:${exclusions.join("|")}`
+          : centralRoute.supportNeedId
+            ? `runner_run_lock_release_waits_for_bound_support:${centralRoute.serverId}:${centralRoute.supportNeedId}`
+            : `runner_run_lock_release_bound_route_not_executable:${centralRoute.serverId}:${centralRoute.evidenceCode}`,
     };
   }
 
@@ -1801,28 +1807,29 @@ export function runnerActionDispositions(
       continue;
     }
     const directInstallAvailable =
-      candidates.some(
-        (alternative) =>
+      candidates.some((alternative) => {
+        const nativeAction = input.legalActions.find(
+          (action) => action.actionId === alternative.actionId,
+        );
+        return (
           alternative.actionId !== candidate.actionId &&
           alternative.semanticActionType === "install.card" &&
-          runnerInstallSourceInstanceId(
-            alternative,
-            input.legalActions.find(
-              (action) => action.actionId === alternative.actionId,
-            ),
-          ) === sourceCardInstanceId &&
-          !alternative.actionId.endsWith(
-            ".runner_program_trash_before_install",
-          ),
-      ) ||
-      handDevelopment.some(
-        (evaluation) =>
+          nativeAction?.type === "install_card" &&
+          nativeAction.payload?.runnerProgramTrashBeforeInstall !== true &&
+          runnerInstallSourceInstanceId(alternative, nativeAction) ===
+            sourceCardInstanceId
+        );
+      }) ||
+      handDevelopment.some((evaluation) => {
+        const nativeAction = input.legalActions.find(
+          (action) => action.actionId === evaluation.legalActionId,
+        );
+        return (
           evaluation.cardInstanceId === sourceCardInstanceId &&
-          evaluation.legalActionId !== undefined &&
-          !evaluation.legalActionId.endsWith(
-            ".runner_program_trash_before_install",
-          ),
-      );
+          nativeAction?.type === "install_card" &&
+          nativeAction.payload?.runnerProgramTrashBeforeInstall !== true
+        );
+      });
     if (!directInstallAvailable) continue;
     optionalProgramTrashInstallDispositionActionIds.add(candidate.actionId);
     add(
@@ -2991,6 +2998,11 @@ function buildRunnerDomain(
     handDevelopment,
     strategicIntent,
   });
+  const runLockReleaseRoutes = runnerRunLockReleaseRoutes(
+    input,
+    candidates,
+    previous,
+  );
   const recurringEconomy = runnerRecurringEconomySignals(
     input,
     candidates,
@@ -2999,6 +3011,7 @@ function buildRunnerDomain(
     handDevelopment,
     strategicIntent,
     (target) => runnerRunHasExactUrgency(input, target),
+    runLockReleaseRoutes,
   );
   const recurringEconomyRunDeferralEvidenceCode =
     runnerRecurringEconomyRunDeferral(recurringEconomy);
@@ -3159,11 +3172,6 @@ function buildRunnerDomain(
         ]
       : [];
   });
-  const runLockReleaseRoutes = runnerRunLockReleaseRoutes(
-    input,
-    candidates,
-    previous,
-  );
   const runLockFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
     runLockReleaseRoutes.flatMap((route) =>
       route.supportNeedId && route.fundingGap > 0
@@ -4799,8 +4807,11 @@ function decisionFromScheduler(
         `plan_scheduler:${event.stage}:${event.code}:${event.instanceId ?? "none"}`,
     ),
   ];
-  const actionAlternatives = input.legalActions
-    .slice(0, 32)
+  const debugActionWindow = input.legalActions.slice(0, 32);
+  if (!debugActionWindow.some((candidate) => candidate.actionId === actionId)) {
+    debugActionWindow[debugActionWindow.length - 1] = action;
+  }
+  const actionAlternatives = debugActionWindow
     .map((alternative, index) => {
       const randomizedCandidate =
         randomizedIceInstallNearTie?.candidates.some(

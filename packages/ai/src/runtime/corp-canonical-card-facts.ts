@@ -698,9 +698,18 @@ export function corpScoredTaggedMeatDamageProfile(
   return taggedMeatDamageProfile(definitionId, "agenda");
 }
 
+export function corpInstalledTaggedMeatDamageProfile(
+  definitionId: string | undefined,
+): CorpTaggedMeatDamageProfile | undefined {
+  const cardType = planningCard(definitionId)?.planning.cardType;
+  return cardType === "asset" || cardType === "upgrade"
+    ? taggedMeatDamageProfile(definitionId, cardType)
+    : undefined;
+}
+
 function taggedMeatDamageProfile(
   definitionId: string | undefined,
-  cardType: "operation" | "agenda",
+  cardType: "operation" | "agenda" | "asset" | "upgrade",
 ): CorpTaggedMeatDamageProfile | undefined {
   const planning = planningCard(definitionId);
   if (

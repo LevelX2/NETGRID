@@ -42,6 +42,7 @@ import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 import { selectedRunnerExposeInstalledCardChoiceOptionIds } from "../runner/expose-information/expose-installed-card-choice";
+import { selectedRunnerRemoteExposeChoiceOptionIds } from "../runner/remote-contest/remote-expose-choice";
 import type { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
 import {
   selectedRunnerAccessProgramInstallMemoryOptionIds,
@@ -1350,6 +1351,14 @@ export function selectedChoicesForDecision(
     if (retainedHqCards) {
       return resolved(retainedHqCards, "corp_hq_retain_payment");
     }
+    const remoteExpose = selectedRunnerRemoteExposeChoiceOptionIds(
+      input,
+      action,
+      choice,
+      selectableOptions,
+    );
+    if (remoteExpose)
+      return resolved(remoteExpose, "bound_runner_remote_expose");
     const exposeSelected = selectedRunnerExposeInstalledCardChoiceOptionIds(
       input,
       choice,

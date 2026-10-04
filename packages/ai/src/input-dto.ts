@@ -323,6 +323,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "scoreConversionSourceMode",
   "scoreConversionTargetMode",
   "scoreConversionTiming",
+  "scoreConversionRepeatable",
   "gainActionsAmount",
   "purgeModel",
   "actionDebtAdded",
@@ -440,6 +441,10 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "installedPositionKey",
   "accessedArea",
   "accessedIndex",
+  "accessIndex",
+  "baseAccessCount",
+  "installedAccessBonus",
+  "effectiveAccessCount",
   "stealCost",
   "stealAdditionalCost",
   "stealCostSourceDefinitionIds",
@@ -992,6 +997,33 @@ function sanitizePlayerView(
             phase: view.run.phase,
             ...(view.run.position
               ? { position: structuredClone(view.run.position) }
+              : {}),
+            ...(view.run.approachedIce &&
+            view.side === "runner" &&
+            view.run.phase === "approach_ice" &&
+            view.timingPoint === "run.approach_ice" &&
+            view.run.position?.kind === "ice" &&
+            view.run.approachedIce.known === true &&
+            view.servers.find((s) => s.id === view.run!.attackedServerId)?.ice[
+              view.run.position.iceIndex
+            ]?.instanceId === view.run.approachedIce.instanceId &&
+            view.legalActions.some(
+              (a) =>
+                a.payload?.approachIceExposeViewDecision === "finish" &&
+                a.payload.iceId === view.run!.approachedIce!.instanceId &&
+                a.expiresAtStateVersion === view.stateVersion,
+            )
+              ? {
+                  approachedIce: sanitizeVisibleCardWithOptions(
+                    view.run.approachedIce,
+                    {
+                      allowCorpRezCostQuote: true,
+                      allowCorpPostRezRunQuote: true,
+                      expectedCorpRezServerId: view.run.attackedServerId,
+                      expectedCorpRezStateVersion: view.stateVersion,
+                    },
+                  ),
+                }
               : {}),
             ...(view.run.encounteredIce
               ? {

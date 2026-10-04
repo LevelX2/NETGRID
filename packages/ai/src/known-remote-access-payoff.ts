@@ -23,6 +23,7 @@ import {
 } from "./runtime/public-event-history";
 import {
   projectKnownCorpCardAccessEffect,
+  projectKnownCorpCardProspectiveAccessEffect,
   type KnownCorpCardAccessEffectProjection,
 } from "./runtime/known-corp-card-access-effect-projection";
 
@@ -46,6 +47,7 @@ export type KnownRemoteAccessDeclineReason =
   | "insufficient_credits"
   | "reserve_would_break"
   | "unsafe_access_damage"
+  | "unsafe_access_coverage"
   | "low_value_target"
   | "no_current_payoff"
   | "unknown";
@@ -176,8 +178,21 @@ export function evaluateKnownRemoteAccessPayoff(
     ...visibleNoProgressRunContext(server.ice),
     ...remoteInvalidations.map((entry) => `remote_memory_invalidated:${entry}`),
   ];
+  const futureRezWindow =
+    input.legalActions.some(
+      (action) =>
+        action.side === "runner" &&
+        action.type === "start_run" &&
+        action.payload?.serverId === serverId,
+    ) ||
+    (input.playerView.timingPoint === "run.jack_out_window" &&
+      input.playerView.run?.attackedServerId === serverId &&
+      input.playerView.run.position?.kind === "server");
+  const projectAccessEffect = futureRezWindow
+    ? projectKnownCorpCardProspectiveAccessEffect
+    : projectKnownCorpCardAccessEffect;
   const accessThreatProjections = knownRoots.map((root) =>
-    projectKnownCorpCardAccessEffect({
+    projectAccessEffect({
       input,
       sourceDefinitionId: root.definitionId,
       ...(root.visibleCard ? { sourceCard: root.visibleCard } : {}),
@@ -326,6 +341,13 @@ export function evaluateKnownRemoteAccessPayoff(
         left.positionKey.localeCompare(right.positionKey),
     )[0]!;
     const cheapestTrashCost = cheapestTrashRoot.trashCost;
+    const unsafeCoverageAccessThreat = accessThreatProjections.some(
+      (projection) =>
+        projection.status === "complete" &&
+        (projection.runnerCoverageAtRisk?.length ?? 0) > 0,
+    );
+    const unsafeTrashAccessThreat =
+      unsafeKnownAccessThreat || unsafeCoverageAccessThreat;
     const trashProjection = projectKnownRemoteTrashCommitment(input, {
       serverId,
       definitionId: cheapestTrashRoot.definitionId,
@@ -384,13 +406,13 @@ export function evaluateKnownRemoteAccessPayoff(
         : {}),
       contestable:
         trashProjection.contestable &&
-        !unsafeKnownAccessThreat &&
+        !unsafeTrashAccessThreat &&
         !accessThreatUnknown,
       knownNoCurrentPayoff:
         trashProjection.knownNoCurrentPayoff &&
-        !unsafeKnownAccessThreat &&
+        !unsafeTrashAccessThreat &&
         !accessThreatUnknown,
-      score: unsafeKnownAccessThreat
+      score: unsafeTrashAccessThreat
         ? 0
         : Math.max(
             0,
@@ -399,14 +421,18 @@ export function evaluateKnownRemoteAccessPayoff(
           ),
       penalty:
         trashProjection.penalty +
-        (unsafeKnownAccessThreat
+        (unsafeTrashAccessThreat
           ? 840
           : accessThreatUnknown
             ? 300
             : Math.min(240, knownAccessThreatProjection?.threatValue ?? 0)),
       reasons: [
-        ...(unsafeKnownAccessThreat
-          ? ["known_remote_access_effect_breaks_runner_safety_buffer"]
+        ...(unsafeTrashAccessThreat
+          ? [
+              unsafeCoverageAccessThreat
+                ? "known_remote_access_effect_breaks_installed_coverage"
+                : "known_remote_access_effect_breaks_runner_safety_buffer",
+            ]
           : accessThreatUnknown
             ? ["known_remote_access_effect_unknown"]
             : knownAccessThreatProjection?.threatValue
@@ -414,10 +440,12 @@ export function evaluateKnownRemoteAccessPayoff(
               : []),
         ...trashProjection.reasons,
       ],
-      ...(unsafeKnownAccessThreat
+      ...(unsafeTrashAccessThreat
         ? {
             accessDecision: "defer_until_safe" as const,
-            declineReason: "unsafe_access_damage" as const,
+            declineReason: unsafeCoverageAccessThreat
+              ? ("unsafe_access_coverage" as const)
+              : ("unsafe_access_damage" as const),
           }
         : {}),
       ...(knownAccessThreatProjection ? { knownAccessThreatProjection } : {}),
@@ -443,8 +471,10 @@ export function evaluateKnownRemoteAccessPayoff(
         ...accessProjection.evidence,
         ...(projectedAccessOutcome ? projectedAccessOutcome.evidence : []),
         ...trashProjection.evidence,
-        unsafeKnownAccessThreat
-          ? "remote_run_deferred_for_known_access_damage:true"
+        unsafeTrashAccessThreat
+          ? unsafeCoverageAccessThreat
+            ? "remote_run_deferred_for_known_access_coverage:true"
+            : "remote_run_deferred_for_known_access_damage:true"
           : accessThreatUnknown
             ? "remote_run_deferred_for_unknown_known_card_access_effect:true"
             : trashProjection.contestable

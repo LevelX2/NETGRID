@@ -1,4 +1,5 @@
 import type { RunnerRunTargetEvaluation } from "../../run-analysis/runner-run-target-types";
+import type { RunnerPreparedRunOpportunity } from "./recurring-economy-types";
 import { describe, expect, it } from "vitest";
 import {
   assessRunnerRecurringEconomyRunHorizon,
@@ -100,6 +101,65 @@ describe("assessRunnerRestrictedRunEconomyInvestment", () => {
 });
 
 describe("assessRunnerRecurringEconomyRunHorizon", () => {
+  const preparation: RunnerPreparedRunOpportunity = {
+    actionId: "current-native-release",
+    ready: true,
+    terminal: false,
+    serverId: "hq",
+    parentPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+    value: 1800,
+    fundingGap: 0,
+  };
+  it("uses a funded prepared run after recoupment without inventing a run action or payoff", () => {
+    expect(
+      assess({
+        score: 0,
+        payoutStillUnrealized: false,
+        realizedValue: 4,
+        noNativeRun: true,
+        preparedRunOpportunities: [preparation],
+      }),
+    ).toMatchObject({
+      decision: "allow_run",
+      bestVisibleRunPayoff: 0,
+      evidenceCodes: expect.arrayContaining([
+        "runner_recurring_economy_allowed_preparation_action:current-native-release",
+      ]),
+    });
+  });
+  it("does not treat the preparation priority as an early run payoff", () => {
+    expect(
+      assess({
+        score: 0,
+        payoutStillUnrealized: false,
+        realizedValue: 2,
+        noNativeRun: true,
+        preparedRunOpportunities: [preparation],
+      }).decision,
+    ).toBe("wait");
+  });
+  it("preempts an unrecouped investment for a current prepared run at opponent matchpoint", () => {
+    expect(
+      assess({
+        score: 0,
+        payoutStillUnrealized: true,
+        opponentAgendaPoints: 5,
+        noNativeRun: true,
+        preparedRunOpportunities: [preparation],
+      }).decision,
+    ).toBe("preempt_for_urgent_run");
+  });
+  it("keeps the investment when only a blocked preparation exists", () => {
+    expect(
+      assess({
+        score: 0,
+        payoutStillUnrealized: false,
+        realizedValue: 10,
+        noNativeRun: true,
+        preparedRunOpportunities: [{ ...preparation, ready: false }],
+      }).decision,
+    ).toBe("wait");
+  });
   it("waits for the first payout even when a weak run is legal", () => {
     expect(assess({ score: 150, payoutStillUnrealized: true })).toMatchObject({
       decision: "wait",
@@ -183,6 +243,8 @@ function assess(params: {
   opponentAgendaPoints?: number;
   realizedValue?: number;
   installCost?: number;
+  noNativeRun?: boolean;
+  preparedRunOpportunities?: readonly RunnerPreparedRunOpportunity[];
 }) {
   return assessRunnerRecurringEconomyRunHorizon({
     runTargets: [
@@ -195,7 +257,8 @@ function assess(params: {
         scoreThreat: params.scoreThreat ?? false,
       } as RunnerRunTargetEvaluation,
     ],
-    legalRunActionIds: new Set(["generic-run"]),
+    legalRunActionIds: new Set(params.noNativeRun ? [] : ["generic-run"]),
+    preparedRunOpportunities: params.preparedRunOpportunities ?? [],
     runnerAgendaPoints: 0,
     opponentAgendaPoints: params.opponentAgendaPoints ?? 0,
     agendaPointsToWin: 7,

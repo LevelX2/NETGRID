@@ -1,0 +1,79 @@
+{
+  "provenance": "real-engine-corp-projection-in-immediate-next-window; expiry-rebound-for-explicit-viewing-counterline",
+  "decision": 107,
+  "ice": {
+    "instanceId": "corp_onr_v1_224_bolter-cluster_1",
+    "known": true,
+    "title": "Bolter Cluster",
+    "definitionId": "onr_v1_224_bolter-cluster",
+    "type": "ice",
+    "subtypes": ["ap", "hellbolt", "sentry"],
+    "rulesText": "[Subroutine] Do 4 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
+    "rezCost": 7,
+    "rezzed": false,
+    "advancementCounters": 0,
+    "strength": 4,
+    "owner": "corp",
+    "controller": "corp",
+    "effectivePostRezRunQuote": {
+      "context": "installed_post_rez",
+      "cardId": "corp_onr_v1_224_bolter-cluster_1",
+      "iceDefinitionId": "onr_v1_224_bolter-cluster",
+      "targetServerId": "remote_1",
+      "projectedServerId": "remote_1",
+      "expiresAtStateVersion": 106,
+      "complete": true,
+      "effectiveRunQuote": {
+        "iceInstanceId": "corp_onr_v1_224_bolter-cluster_1",
+        "iceDefinitionId": "onr_v1_224_bolter-cluster",
+        "effectiveStrength": 4,
+        "encounterStrength": 4,
+        "subroutines": [
+          {
+            "id": "printed_subroutines_damage_net",
+            "type": "do_damage",
+            "amount": 4,
+            "damageType": "net",
+            "sourceDefinitionId": "onr_v1_224_bolter-cluster",
+            "sourceTitle": "Bolter Cluster",
+            "unbrokenRunEffect": {
+              "causesDamageOrProgramTrash": true
+            }
+          },
+          {
+            "id": "printed_subroutines_prohibit_break_next_ice",
+            "type": "set_next_encounter_no_break_subroutines",
+            "sourceDefinitionId": "onr_v1_224_bolter-cluster",
+            "sourceTitle": "Bolter Cluster",
+            "unbrokenRunEffect": {
+              "preventsFutureBreaking": true
+            }
+          }
+        ]
+      }
+    },
+    "effectiveRezCostQuote": {
+      "context": "installed",
+      "targetServerId": "remote_1",
+      "cardId": "corp_onr_v1_224_bolter-cluster_1",
+      "projectedServerId": "remote_1",
+      "expiresAtStateVersion": 106,
+      "complete": true,
+      "baseCredits": 7,
+      "finalCredits": 7,
+      "mandatoryAdditionalCosts": {
+        "agendaPoints": 0
+      },
+      "costKind": "fixed"
+    },
+    "effectiveRezResourceExchangeQuote": {
+      "context": "installed",
+      "cardId": "corp_onr_v1_224_bolter-cluster_1",
+      "targetServerId": "remote_1",
+      "projectedServerId": "remote_1",
+      "expiresAtStateVersion": 106,
+      "complete": false,
+      "reason": "no_hard_end_the_run_subroutine"
+    }
+  }
+}

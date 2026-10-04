@@ -1,7 +1,7 @@
 # R&D-Zugriffsgedächtnis
 
 Status: umgesetzt
-Stand: 2026-08-29
+Stand: 2026-10-04
 
 ## Quelle und Zielprüfung
 
@@ -17,6 +17,15 @@ R&D-Zugriff eine side-sichere Definition, `accessIndex` und den unveränderten
 Snapshot der Breach-Queue. Der Runner darf genau das erinnern, was er selbst
 gesehen hat. Unbekannte Karten, Instanz-IDs und verdeckte künftige
 R&D-Reihenfolgen bleiben außerhalb des Modells.
+
+Der KI-Input-DTO erhält `accessIndex`, `baseAccessCount`,
+`installedAccessBonus` und `effectiveAccessCount` sowohl in den
+`PlayerView.publicEvents` als auch im Eventtail. Diese öffentlichen Zahlen
+binden Beobachtung und Entfernung an dieselbe Breach-Position; verdeckte
+Queue-Einträge werden nicht übertragen. Die native Regression aus Paarung
+497, Spiel 35, Entscheidung 14 belegt die Entfernung der gerade gestohlenen
+Fetal AI und den weiterhin unbekannten nächsten Stapelinhalt. Der
+Gegenfall ohne Steal behält die tatsächlich beobachtete Agenda.
 
 ## Gesamtziel
 

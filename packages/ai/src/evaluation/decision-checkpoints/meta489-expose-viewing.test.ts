@@ -5,6 +5,11 @@ import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { projectInstalledCorpIceRezCost } from "../../../../engine/src/game/payment/corp-rez-cost";
+import {
+  MECHANIC_SMOKE_GAMES,
+  putCorpIceOnServer,
+} from "../../../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 
 const read = (name: string) =>
   JSON.parse(
@@ -20,9 +25,27 @@ function checkpoint() {
   expect(counterline.provenance.kind).toBe(
     "real-engine-input-from-exact-native-api-prefix",
   );
+  // Preserve the origin regression's native counterline. The current producer
+  // additionally quotes this exposed ICE; obtain its public minimum cost from
+  // the Engine, with no active Corp cost modifiers in either board.
+  const current = structuredClone(counterline.input) as AiDecisionInput;
+  const ice = current.playerView.servers.find((s) => s.id === "hq")!.ice[0]!;
+  const state = MECHANIC_SMOKE_GAMES.runAccess("sp472-current-viewing-cost");
+  const id = putCorpIceOnServer(state, "hq", "onr_v1_227_cerberus");
+  state.cardInstances[id]!.definitionId = ice.definitionId!;
+  const quote = projectInstalledCorpIceRezCost(state, id);
+  expect(quote).toMatchObject({ complete: true, finalCredits: 6 });
+  current.playerView.run!.approachedIce = {
+    ...ice,
+    effectiveRezCostQuote: {
+      ...quote!,
+      cardId: ice.instanceId,
+      expiresAtStateVersion: current.playerView.stateVersion,
+    },
+  };
   const input = {
-    ...counterline.input,
-    ...buildAiDecisionInputDto(counterline.input),
+    ...current,
+    ...buildAiDecisionInputDto(current),
   } as AiDecisionInput;
   const runtime = structuredClone(native.runtime);
   return {

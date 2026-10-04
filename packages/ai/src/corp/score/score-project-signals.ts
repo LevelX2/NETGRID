@@ -28,6 +28,7 @@ import { type CorpFundedRemoteAccessRiskNeed } from "../../runtime/corp-funded-s
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
 import {
   corpScorelineActionCanCloseThisTurn,
+  corpScorelineFeasibilityForDecisionInput,
   type CorpScorelineFeasibility,
 } from "../../runtime/corp-scoreline-feasibility";
 import { CorpScoreAccelerationSetupBinding } from "../../runtime/corp-scoreline/score-hand-support";
@@ -54,7 +55,10 @@ import {
   requireVisibleCardDefinition,
 } from "../../runtime/visible-agenda-facts";
 import { corpCandidateIsAmbushInstall } from "../ambush/corp-ambush-plan-signals";
-import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
+import {
+  corpExactCurrentBasicLiquidCreditAction,
+  corpExactCurrentBasicLiquidCreditCandidate,
+} from "../economy/economy-domain-signals";
 import { corpScorePriorityClass } from "./corp-score-priority";
 import { corpInstalledScoreResourceCost } from "./score-reserve-restoration";
 import {
@@ -130,6 +134,7 @@ export function corpNextTurnScoreContinuationProjects(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
 ): CorpScoreProjectSignal[] {
+  const scoreline = corpScorelineFeasibilityForDecisionInput(input);
   return input.playerView.servers.flatMap((server) =>
     server.root.flatMap((agenda) => {
       const quote = agenda.scoreContinuationQuote;
@@ -183,6 +188,16 @@ export function corpNextTurnScoreContinuationProjects(
         ].every(isFiniteNonNegativeInteger) &&
         (currentFundingGap === 0 || exactBasicCreditAvailable) &&
         currentScoreClicks + currentFundingGap <= input.playerView.own.clicks;
+      const continuationFundingGap = Math.max(
+        0,
+        quote.creditsRequiredBeforeNextCorpTurn - input.playerView.own.credits,
+      );
+      const lastDrawScoreSurvival =
+        scoreline?.deadline === "last_draw_window" &&
+        quote.terminalScore &&
+        (continuationFundingGap === 0 ||
+          (exactBasicCreditAvailable &&
+            continuationFundingGap <= input.playerView.own.clicks));
       return [
         {
           projectId: corpScoreProjectId(agenda.instanceId, server.id),
@@ -200,6 +215,7 @@ export function corpNextTurnScoreContinuationProjects(
             : {}),
           ...(quote.terminalScore ? { deadlinePressure: true } : {}),
           terminalScore: quote.terminalScore,
+          ...(lastDrawScoreSurvival ? { lastDrawScoreSurvival: true } : {}),
           conversion: corpScoreConversionFacts({
             input,
             agenda,
@@ -458,7 +474,10 @@ export function scoreProjectForCandidate(
         requireVisibleAgendaAdvancementRequirement(input, agenda),
       );
     const lastViableDeckoutMatchpointWindow =
-      matchpointTarget && scorelineFeasibility?.deadline === "last_draw_window";
+      !preparedScoreContinuationAvailable &&
+      matchpointTarget &&
+      scorelineFeasibility?.deadline === "last_draw_window" &&
+      corpAgendaInstallCanFundLastDrawScoreHorizon(input, candidate, serverId);
     const boundedStagedScoreWindow =
       residentBoundedStagedScoreWindow || handPressureBoundedStagedScoreWindow;
     const certifiedNearTermScoreHorizon =
@@ -1006,6 +1025,52 @@ export function corpPreferredDeckoutAgendaRecycleRouteAvailable(
   });
 }
 
+/** The install quote certifies clicks only. Score must also account for the
+ * standard one-credit advancement reserve and every required basic-credit
+ * click before admitting a terminal last-draw route. This is not a protection
+ * certificate, nor a future LegalAction. Every later step is revalidated.
+ */
+function corpAgendaInstallCanFundLastDrawScoreHorizon(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  serverId: string | undefined,
+): boolean {
+  if (
+    !hasExactNonNegativeCostProfile(candidate) ||
+    !corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+      input,
+      candidate,
+      serverId,
+    )
+  )
+    return false;
+  const payload = input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  )!.payload!;
+  const advancementReserve =
+    payload.agendaInstallScoreHorizonQuoteAdvancementRequirement as number;
+  const nextClicks =
+    payload.agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks as number;
+  const creditsAfterInstall =
+    input.playerView.own.credits - candidate.costProfile.creditCost!;
+  const clicksAfterInstall =
+    input.playerView.own.clicks - candidate.costProfile.clickCost!;
+  if (
+    !isFiniteNonNegativeInteger(creditsAfterInstall) ||
+    !isFiniteNonNegativeInteger(clicksAfterInstall)
+  )
+    return false;
+  const fundingClicks = Math.max(0, advancementReserve - creditsAfterInstall);
+  if (
+    fundingClicks > 0 &&
+    !input.legalActions.some((action) =>
+      corpExactCurrentBasicLiquidCreditAction(input, action),
+    )
+  )
+    return false;
+  return advancementReserve + fundingClicks <= clicksAfterInstall + nextClicks;
+}
+
 export function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -1227,18 +1292,14 @@ export function sameTurnScoreConversionProjectForCandidate(
       phase: scorePhaseForConversionStep(step),
       sameTurnCloseout: true,
       sameTurnConversionProof: "engine_quoted_path",
-      ...(!path.fundingPrefix &&
-      path.clicksGenerated === 0 &&
-      path.steps.every(
-        (routeStep) =>
-          [
-            "install_score_target",
-            "place_advancement",
-            "basic_advance",
-            "score_ready",
-          ].includes(routeStep.kind) &&
-          (routeStep.offTargetAdvancementAmount ?? 0) === 0,
-      )
+      sameTurnConversionCreditHorizon: {
+        stateVersion: input.playerView.stateVersion,
+        creditsBeforeScorePayout:
+          input.playerView.own.credits +
+          (path.fundingPrefix?.grossCreditGain ?? 0) -
+          path.creditsRequired,
+      },
+      ...(!path.fundingPrefix && path.clicksGenerated === 0
         ? {
             sameTurnConversionResourceCost: {
               stateVersion: input.playerView.stateVersion,
@@ -1602,6 +1663,8 @@ function sameScoreProjectMergeFacts(
     project.serverId,
     project.routeAssessment,
     project.sameTurnConversionProof,
+    project.sameTurnConversionResourceCost,
+    project.sameTurnConversionCreditHorizon,
     project.terminalScore,
     project.preventsTerminalSteal,
     project.deadlinePressure,

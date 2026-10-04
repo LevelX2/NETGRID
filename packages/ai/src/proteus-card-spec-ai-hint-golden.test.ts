@@ -137,8 +137,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      // Reviewed universal coverage correction also applies to Rent-I-Con.
-      "sha256:686f36d141b583957528132f802316999e087a98faf11a65c524d0d2e2c09896",
+      // Reviewed repeatable tag prevention also corrects Vintage Camaro.
+      "sha256:421f6bf7731d5e43848ce018041440c3cad9501cb720017ef033275d6ad8da50",
     );
   });
 

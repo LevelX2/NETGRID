@@ -63,16 +63,22 @@ export type CorpScoreProjectSignal = {
     | "corp_bounded_staged_score_install"
     | "corp_score_protection_required"
     | "corp_score_horizon_unbounded"
+    | "corp_same_turn_score_consumes_funded_defense_reserve"
     | "corp_funded_protected_score_install"
     | "corp_shorter_terminal_score_route_dominates"
     | "corp_resident_score_parent_dominates_sibling_route";
   /** Positive certificate from the existing Engine-quoted same-turn conversion path. */
   sameTurnConversionProof?: "engine_quoted_path";
-  /** Exact ordinary costs of an uninterrupted installation/advancement/score route. */
+  /** Exact fixed costs of an uninterrupted Engine-quoted score route without income or extra clicks. */
   sameTurnConversionResourceCost?: {
     stateVersion: number;
     credits: number;
     clicks: number;
+  };
+  /** Liquid balance after the complete quoted route, before any on-score payout. */
+  sameTurnConversionCreditHorizon?: {
+    stateVersion: number;
+    creditsBeforeScorePayout: number;
   };
   projectId: string;
   agendaDefinitionId?: string;

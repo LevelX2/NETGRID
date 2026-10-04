@@ -74,10 +74,14 @@ export function genericDefenseFundingRequirement(
   | undefined {
   if (
     signal.phase === "install_ice" &&
-    signal.installRoute?.disposition === "funding_only"
+    (signal.installRoute?.disposition === "funding_only" ||
+      (signal.installRoute?.disposition === "productive" &&
+        !signal.installRoute.projection.funded))
   ) {
     const projection = signal.installRoute.projection;
-    const gap = projection.after.minimumAdditionalCreditsToSatisfy;
+    const gap =
+      projection.after.minimumAdditionalCreditsToSatisfy ??
+      signal.installRoute.rezFundingGap;
     if (typeof gap !== "number" || !Number.isSafeInteger(gap) || gap <= 0) {
       return undefined;
     }
@@ -127,7 +131,10 @@ export function genericDefenseFundingRequirementIsCurrent(
 ): boolean {
   if (signal.phase === "install_ice") {
     return (
-      signal.installRoute?.disposition === "funding_only" &&
+      (signal.installRoute?.disposition === "funding_only" ||
+        (signal.installRoute?.disposition === "productive" &&
+          !signal.installRoute.projection.funded &&
+          genericDefenseFundingRequirement(signal)?.gap === requirement.gap)) &&
       signal.installRoute.projection.targetServerId === signal.serverId &&
       signal.installRoute.projection.sourceCardInstanceId ===
         requirement.iceInstanceId

@@ -365,7 +365,7 @@ export function coverageSupportActionIds(
         (candidate.semanticActionType === "play.runner_event" &&
           (candidate.actionTacticSignals.includes("draw.card") ||
             candidate.actionTacticSignals.includes("setup.draw"))) ||
-        (candidate.economyProjection?.cardsDrawn ?? 0) > 1),
+        (candidate.economyProjection?.cardsDrawn ?? 0) > 0),
   );
   const safeCardDrawForAnswerCandidates = cardDrawForAnswerCandidates.filter(
     (candidate) => {

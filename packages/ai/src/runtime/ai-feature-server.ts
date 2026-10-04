@@ -34,7 +34,7 @@ export function visibleRunnerDrawTaxSourceCount(
   return input.playerView.servers.reduce(
     (count, server) =>
       count +
-      server.root.filter(
+      (server.id === "archives" ? [] : server.root).filter(
         (card) =>
           card.known &&
           card.rezzed === true &&

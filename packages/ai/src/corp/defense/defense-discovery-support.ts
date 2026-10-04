@@ -43,6 +43,7 @@ import {
 import { archivesHasVisibleKnownAgenda } from "../../runtime/visible-server-agenda-facts";
 import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
 import { CorpDefensiveUpgradePlacement } from "./defense-runtime-types";
+import { corpStructuredIceSupportAssessment } from "./corp-structured-ice-support";
 
 export const CORP_DEFENSE_DOMAIN_SIGNAL_FACTS = {
   hasExactNonNegativeCostProfile,
@@ -395,6 +396,107 @@ export function mergeDefenseSignals(
     });
   }
   return [...result.values()];
+}
+
+/** Global passive assets prepare the same structured need their rez consumes. */
+export function corpGlobalIceSupportAssetInstallSignal(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): CorpGenericDefenseSignal | undefined {
+  if (input.side !== "corp" || candidate.semanticActionType !== "install.card")
+    return undefined;
+  const action = input.legalActions.find(
+    (a) => a.actionId === candidate.actionId,
+  );
+  const source = input.playerView.own.gripOrHq.find(
+    (c) => c.instanceId === candidate.sourceCardInstanceId,
+  );
+  const hint =
+    source?.definitionId && AI_HINTS_BY_CARD.get(source.definitionId);
+  const profile =
+    hint &&
+    hint.targetProfiles?.find(
+      (p) =>
+        "schemaVersion" in p &&
+        p.purpose === "rez_support_visible_installed_ice" &&
+        p.targetType === "installed_ice" &&
+        p.serverScope === "any_visible_server",
+    );
+  if (
+    !action ||
+    !source?.known ||
+    source.type !== "asset" ||
+    source.owner !== "corp" ||
+    source.controller !== "corp" ||
+    !profile ||
+    action.side !== "corp" ||
+    action.source !== source.instanceId ||
+    action.payload?.cardId !== source.instanceId ||
+    action.payload.placement !== "root" ||
+    action.payload.serverId !== "new_remote" ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    !hasExactNonNegativeCostProfile(candidate)
+  )
+    return undefined;
+  const p = action.payload;
+  if (
+    p.postInstallRezQuoteComplete !== true ||
+    p.postInstallRezQuoteCostKind !== "fixed" ||
+    p.postInstallRezQuoteCardId !== source.instanceId ||
+    p.postInstallRezQuoteTargetServerId !== "new_remote" ||
+    p.postInstallRezQuoteExpiresAtStateVersion !==
+      input.playerView.stateVersion ||
+    typeof p.postInstallRezQuoteProjectedServerId !== "string" ||
+    !/^remote_[1-9]\d*$/.test(p.postInstallRezQuoteProjectedServerId) ||
+    input.playerView.servers.some(
+      (s) => s.id === p.postInstallRezQuoteProjectedServerId,
+    ) ||
+    !Number.isSafeInteger(p.postInstallRezQuoteFinalCredits) ||
+    Number(p.postInstallRezQuoteFinalCredits) < 0 ||
+    p.postInstallRezQuoteMandatoryAgendaPointCost !== 0 ||
+    Number(p.postInstallRezQuoteFinalCredits) +
+      candidate.costProfile.creditCost! >
+      input.playerView.own.credits
+  )
+    return undefined;
+  const preparation = {
+    ...candidate,
+    costProfile: {
+      ...candidate.costProfile,
+      creditCost:
+        candidate.costProfile.creditCost! +
+        Number(p.postInstallRezQuoteFinalCredits),
+    },
+  };
+  const support = corpStructuredIceSupportAssessment(
+    input,
+    preparation,
+    "new_remote",
+    hint || undefined,
+  );
+  if (
+    !support?.productive ||
+    !corpCardRoutePreservesScoreReserve(
+      input,
+      preparation,
+      "new_remote",
+      scoreProjects,
+    ).preservesReserve
+  )
+    return undefined;
+  return {
+    kind: "generic",
+    defenseId: `install-global-ice-support:${source.instanceId}`,
+    serverId: "new_remote",
+    phase: "install_defense_support",
+    sourceDefinitionIds: [source.definitionId!],
+    actionIds: [action.actionId],
+    urgent: false,
+    value: support.value,
+    evidenceCode: `corp_global_ice_support_install_bound_to_existing_targets:${support.evidenceCode}:rez_credits:${p.postInstallRezQuoteFinalCredits}`,
+  };
 }
 
 export function corpDefensiveUpgradePlacement(

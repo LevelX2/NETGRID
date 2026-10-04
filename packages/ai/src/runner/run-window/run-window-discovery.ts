@@ -19,6 +19,7 @@ import type {
 } from "../../runner-run-target-evaluation";
 import { currentRunRemainingIce } from "../../runtime/current-encounter";
 import { currentAccessWindowCommitment } from "./run-window-access";
+import { runnerExposedIceSafetyAssessment } from "./run-window-expose-viewing";
 import {
   isRunnerRunWindowCandidate,
   runnerRestrictedRunSequenceAction,
@@ -78,6 +79,7 @@ export function buildRunnerRunWindowSignals({
             visibleIceDamageSafetyAssessment,
           );
         const safetyAssessment =
+          runnerExposedIceSafetyAssessment(input) ??
           futureEncounterSafetyAssessment ??
           (preservesTerminalNonlethalDamageContest
             ? undefined

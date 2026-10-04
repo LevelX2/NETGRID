@@ -3,7 +3,14 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { knownInstallRouteHasUsefulEffectBlockedByFunding } from "./corp-defense-domain-signals";
-import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
+import {
+  corpGenericDefensePriorityClass,
+  genericDefenseFundingRequirement,
+} from "../../plans/corp-defense-funding-contract";
+import {
+  corpEconomyCandidateHasExecutablePayload,
+  immediateCorpLiquidCreditGain,
+} from "../economy/economy-routes";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { corpRestrictedRezPreparationCandidates } from "../../runtime/corp-restricted-credit-reserve";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
@@ -31,7 +38,7 @@ export function corpDefenseReserveNeeds(
     need.phase === "install_ice" &&
     need.installRoute?.disposition === "productive" &&
     need.installRoute.projection.effect !== "no_progress"
-      ? [corpGenericDefensePriorityClass([need])]
+      ? [{ need, priority: corpGenericDefensePriorityClass([need]) }]
       : [],
   );
   return defenseNeeds.flatMap((need): CorpCorePlanDomain["economyNeeds"] => {
@@ -59,26 +66,53 @@ export function corpDefenseReserveNeeds(
       ];
     }
     const fundingPriority = corpGenericDefensePriorityClass([need]);
+    const stagedInstallFundingActionIds =
+      need.phase === "install_ice" &&
+      need.installRoute?.disposition === "productive" &&
+      !need.installRoute.projection.funded
+        ? retainedFundingActionIds.filter((actionId) => {
+            const candidate = candidates.find((c) => c.actionId === actionId);
+            const requirement = genericDefenseFundingRequirement(need);
+            const clicks = candidate?.economyProjection?.clickCost;
+            return (
+              candidate !== undefined &&
+              requirement !== undefined &&
+              candidate.economyProjection?.reliability === "guaranteed" &&
+              typeof clicks === "number" &&
+              Number.isSafeInteger(clicks) &&
+              clicks >= 0 &&
+              clicks + need.installRoute!.projection.installClicks <=
+                input.playerView.own.clicks &&
+              immediateCorpLiquidCreditGain(candidate) >= requirement.gap &&
+              corpEconomyCandidateHasExecutablePayload(input, candidate)
+            );
+          })
+        : [];
     if (
       productivePriorities.some(
-        (priority) => priorityRank[priority] <= priorityRank[fundingPriority],
+        (entry) =>
+          !(stagedInstallFundingActionIds.length > 0 && entry.need === need) &&
+          priorityRank[entry.priority] <= priorityRank[fundingPriority],
       )
     ) {
       return [];
     }
     const installProjection =
       need.phase === "install_ice" &&
-      need.installRoute?.disposition === "funding_only" &&
-      knownInstallRouteHasUsefulEffectBlockedByFunding(
-        need.installRoute.projection,
-      )
+      need.installRoute !== undefined &&
+      ((need.installRoute.disposition === "funding_only" &&
+        knownInstallRouteHasUsefulEffectBlockedByFunding(
+          need.installRoute.projection,
+        )) ||
+        stagedInstallFundingActionIds.length > 0)
         ? need.installRoute.projection
         : undefined;
     const reserve =
       need.phase === "fund_rez_reserve" ? need.rezReserveNeed : undefined;
     const gap =
-      installProjection?.after.minimumAdditionalCreditsToSatisfy ??
-      reserve?.fundingGap;
+      (installProjection
+        ? genericDefenseFundingRequirement(need)?.gap
+        : undefined) ?? reserve?.fundingGap;
     const targetCredits =
       (reserve
         ? reserve.requiredCredits - (reserve.storedRestrictedCredits ?? 0)
@@ -117,9 +151,11 @@ export function corpDefenseReserveNeeds(
         })
       : [];
     const fundingActionIds =
-      restrictedCreditPreparations.length > 0
-        ? immediateFundingActionIds
-        : retainedFundingActionIds;
+      stagedInstallFundingActionIds.length > 0
+        ? stagedInstallFundingActionIds
+        : restrictedCreditPreparations.length > 0
+          ? immediateFundingActionIds
+          : retainedFundingActionIds;
     // Remaining clicks do not imply a current funding head: a mandatory
     // choice can suspend all credit actions inside corp_action.main.
     if (

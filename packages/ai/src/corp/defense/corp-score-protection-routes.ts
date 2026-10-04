@@ -21,8 +21,10 @@ import {
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import {
   corpIceInstallHasCurrentCompleteRezQuote,
+  corpSpendConsumesKnownCentralRezReserve,
   knownInstallRouteHasUsefulEffectBlockedByFunding,
 } from "./corp-defense-domain-signals";
+import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
@@ -241,6 +243,7 @@ export function corpScoreProtectionStagingInstallSignal(
   project: CorpScoreProjectSignal,
   scan: CorpScoreProtectionInstallRouteScan,
   allCandidates: readonly ActionSemanticCandidate[],
+  centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
 ):
   | Extract<CorpDefenseSignal, { kind: "score_protection_staging_install" }>
   | undefined {
@@ -355,6 +358,18 @@ export function corpScoreProtectionStagingInstallSignal(
   if (!corpScoreProtectionStagingPairFitsCurrentTurn(input, project, action)) {
     return undefined;
   }
+  // Delegation does not release an independently known central rez reserve.
+  // The prepared-parent admission must consume this same staging decision.
+  if (
+    corpSpendConsumesKnownCentralRezReserve(
+      input,
+      centralAllocation,
+      input.playerView.own.credits - totalCredits,
+      input.playerView.own.clicks - totalClicks,
+    )
+  ) {
+    return undefined;
+  }
   const completesBoundedScoreProtectionMaturity =
     existingRemote?.ice.length === 1 &&
     corpScoreProjectNeedsProtectionMaturity(project);
@@ -422,6 +437,7 @@ export function corpPreparedScoreProjectHasExecutableCurrentStep(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   project: CorpScoreProjectSignal,
+  centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
 ): boolean {
   if (
     project.feasible &&
@@ -443,6 +459,7 @@ export function corpPreparedScoreProjectHasExecutableCurrentStep(
           project,
           scan,
           candidates,
+          centralAllocation,
         ) !== undefined,
     )
   );

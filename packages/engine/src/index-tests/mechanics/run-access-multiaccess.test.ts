@@ -523,6 +523,11 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state.corp.credits = 100;
     installRunnerProgramForTest(state, "onr_v1_065_smarteye");
     const iceId = putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    const hiddenOtherIceId = putCorpIceOnServer(
+      state,
+      "hq",
+      "onr_v1_255_mastiff",
+    );
     const initial = structuredClone(state);
 
     state = apply(
@@ -569,11 +574,47 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       getLegalActions(state, "runner").map((action) => action.type),
     ).toEqual(["trigger_ability", "jack_out"]);
     const runnerView = getPlayerView(state, "runner");
+    const unchangedHash = hashState(state);
     expect(runnerView.run?.approachedIce).toMatchObject({
       instanceId: iceId,
       known: true,
       definitionId: "onr_v1_227_cerberus",
+      effectiveRezCostQuote: {
+        context: "installed",
+        cardId: iceId,
+        targetServerId: "rd",
+        projectedServerId: "rd",
+        expiresAtStateVersion: state.stateVersion,
+        complete: true,
+      },
+      effectivePostRezRunQuote: {
+        context: "installed_post_rez",
+        cardId: iceId,
+        iceDefinitionId: "onr_v1_227_cerberus",
+        targetServerId: "rd",
+        projectedServerId: "rd",
+        expiresAtStateVersion: state.stateVersion,
+        complete: true,
+      },
     });
+    expect(hashState(state)).toBe(unchangedHash);
+    const conditionalRunQuote =
+      runnerView.run!.approachedIce!.effectivePostRezRunQuote;
+    for (const server of runnerView.servers) {
+      for (const card of server.ice) {
+        expect(card.effectivePostRezRunQuote).toBeUndefined();
+        expect(card.effectiveRezCostQuote).toBeUndefined();
+      }
+    }
+    const hiddenVariant = structuredClone(state);
+    hiddenVariant.cardInstances[hiddenOtherIceId]!.definitionId =
+      "onr_v1_224_bolter-cluster";
+    for (const id of [...hiddenVariant.corp.hq, ...hiddenVariant.corp.rd]) {
+      hiddenVariant.cardInstances[id]!.definitionId = "onr_v1_261_quandary";
+    }
+    expect(getPlayerView(hiddenVariant, "runner").run?.approachedIce).toEqual(
+      runnerView.run?.approachedIce,
+    );
     expect(
       runnerView.servers
         .find((server) => server.id === "rd")
@@ -598,6 +639,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
     expect(state.activeSide).toBe("corp");
     expect(state.run?.approachIceExposeViewingIceId).toBeUndefined();
+    expect(getPlayerView(state, "runner").run?.approachedIce).toBeUndefined();
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
@@ -615,6 +657,13 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
     expect(state.timingPoint).toBe("run.encounter_ice");
     expect(state.activeSide).toBe("runner");
+    expect(
+      getPlayerView(state, "runner").run?.encounteredIce?.effectiveRunQuote,
+    ).toEqual(
+      conditionalRunQuote?.complete
+        ? conditionalRunQuote.effectiveRunQuote
+        : undefined,
+    );
 
     const replay = replayEvents(
       initial,

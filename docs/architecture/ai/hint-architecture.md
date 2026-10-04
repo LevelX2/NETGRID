@@ -1,7 +1,7 @@
 # AI-Hints: Quelle und Runtime-Vertrag
 
 Status: **aktueller generierter CardSpec-Vertrag**  
-Stand: 2026-10-03
+Stand: 2026-10-04
 
 ## Autorenquelle und Datenpfad
 
@@ -51,7 +51,27 @@ Der feste Zielbezug `that_ice` erzeugt kein Auswahlprofil und keine zusätzliche
 Strategieannotation. Die reale Entfernung bleibt an die aktuelle Engine-Quote
 und den bestehenden begrenzten Central-Pressure-Parent gebunden.
 
+`private_look` wird aus derselben typisierten Ability sowohl auf Kartenebene
+als auch in der exakten Capability projiziert. Zone, Kartenzahl und Timing
+bleiben gebunden; eine als Kosten geopferte Quelle ist endlich, eine dauerhaft
+nutzbare Quelle wiederholbar. Der Action-Semantik-Join übernimmt nur die
+gebundene Capability. Ungebundene HQ-/R&D-Information fällt damit unter den
+bestehenden `runner.pressure_central`-Owner und dessen explizite Ablehnung
+ohne Vor-Run-Step. Die korrekte Projektion belegt noch keinen strategisch
+sinnvollen bezahlten Informationsschritt; dieser benötigt weiterhin eine
+side-sichere Neuquote des anschließenden Zugriffs.
+
 ## Typisierte Recovery- und Spielkosten
+
+Tagprävention übernimmt Verbrauch und Zahlung getrennt aus
+`tagPreventionSources.cost`. Nur `trash_source` und
+`credit_and_trash_source` kennzeichnen die Quelle als endlich und erzeugen
+die entsprechende Verbrauchsmechanik. Reine Credits, Tappen und der Verzicht
+auf eine spätere Aktion opfern die Quelle nicht. Ein Creditmechanik-Fakt
+entsteht nur bei tatsächlich positiven Creditkosten. Die Regression prüft
+alle realen Quellen, das generierte Artefakt und den Verbrauchsconsumer der
+Handentwicklung; ein korrekter Hint allein belegt weiterhin keinen
+dominanten Installationsplan.
 
 `corp_archives_to_hq` beschreibt grundsätzlich Archives-Recovery. Die
 ICE-Spezialisierung entsteht nur aus `filter.cardType: "ice"`, Offenlegung

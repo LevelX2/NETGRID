@@ -8570,7 +8570,7 @@
             "resource": "tags",
             "target": "avoid_tag",
             "amount": 1,
-            "finite": true
+            "repeatable": true
           }
         ],
         "functionSignals": ["defense.tag_prevention"],
@@ -8582,12 +8582,7 @@
         ],
         "conditions": [{ "kind": "requires_prevention_window" }],
         "costProfile": { "clicks": 1, "credits": 1 },
-        "riskTags": [
-          "install_runner",
-          "tag_prevention",
-          "credit_cost",
-          "trash_source"
-        ],
+        "riskTags": ["install_runner", "tag_prevention", "credit_cost"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8600,8 +8595,7 @@
           "credit_cost",
           "install_hardware",
           "prevent_tag",
-          "subtype_vehicle",
-          "trash_source"
+          "subtype_vehicle"
         ]
       }
     },
@@ -10481,7 +10475,7 @@
         ],
         "conditions": [{ "kind": "requires_prevention_window" }],
         "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["tag_prevention", "credit_cost", "trash_source"],
+        "riskTags": ["tag_prevention", "trash_source"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -10490,12 +10484,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": [
-          "credit_cost",
-          "install_resource",
-          "prevent_tag",
-          "trash_source"
-        ]
+        "requiredMechanics": ["install_resource", "prevent_tag", "trash_source"]
       }
     },
     {
@@ -10830,12 +10819,7 @@
           { "kind": "requires_prevention_window" }
         ],
         "costProfile": { "clicks": 1, "credits": 2 },
-        "riskTags": [
-          "damage_window",
-          "tag_prevention",
-          "credit_cost",
-          "trash_source"
-        ],
+        "riskTags": ["damage_window", "tag_prevention", "trash_source"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -10845,7 +10829,6 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "credit_cost",
           "damage_prevention_turn_limit",
           "install_resource",
           "prevent_tag",
@@ -12071,7 +12054,18 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_private_look",
-            "costProfile": { "clicks": 1 }
+            "costProfile": { "clicks": 1 },
+            "effects": [
+              {
+                "kind": "topdeck_info",
+                "scope": "rnd",
+                "timing": "action",
+                "resource": "cards",
+                "target": "top_cards",
+                "amount": 1,
+                "repeatable": true
+              }
+            ]
           }
         ],
         "effects": [
@@ -12344,12 +12338,7 @@
           { "kind": "requires_prevention_window" }
         ],
         "costProfile": { "clicks": 1, "credits": 4 },
-        "riskTags": [
-          "damage_window",
-          "tag_prevention",
-          "credit_cost",
-          "trash_source"
-        ],
+        "riskTags": ["damage_window", "tag_prevention", "trash_source"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -12359,7 +12348,6 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "credit_cost",
           "damage_prevention_turn_limit",
           "install_resource",
           "prevent_tag",

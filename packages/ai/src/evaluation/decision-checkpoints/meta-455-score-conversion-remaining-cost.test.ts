@@ -13,7 +13,7 @@ import {
 } from "./runtime-checkpoint";
 import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
 
-it("finishes the installed agenda instead of buying another equal-point score with extra capacity", () => {
+it("finishes the cheaper installed agenda before the prospective equal-point sibling", () => {
   const input = structuredClone(
     checkpoint.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
@@ -40,6 +40,8 @@ it("finishes the installed agenda instead of buying another equal-point score wi
     ]),
   ).toEqual([
     ["corp_onr_v1_203_hostile-takeover_1", 3, 3, 0],
+    // The visible rezzed support is discarded in Archives, so this sibling
+    // still requires the real extra-action operation and its full costs.
     ["corp_onr_v1_203_hostile-takeover_2", 7, 5, 2],
   ]);
   const decision = chooseAiAction(input);

@@ -253,8 +253,12 @@ function defenseCandidates(
   const defenseSupportInstallActionIds = new Set(
     signals.defenseSupportInstallActionIds ?? [],
   );
+  const confirmedDamageTaxedDrawActionIds = new Set(
+    signals.confirmedDamageTaxedDrawActionIds ?? [],
+  );
   return actionCandidates
     .filter((candidate) => {
+      if (confirmedDamageTaxedDrawActionIds.has(candidate.actionId)) return false;
       if (
         (phase === "fund_tag_clear" || phase === "build_reaction_reserve") &&
         (actionDispositions ?? []).some(

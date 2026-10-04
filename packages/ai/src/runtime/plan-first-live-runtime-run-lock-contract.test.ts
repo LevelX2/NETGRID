@@ -97,6 +97,7 @@ function runLockInput(
 ) {
   const input = aiInput("runner", actions);
   input.playerView.stateVersion = credits;
+  for (const action of actions) action.expiresAtStateVersion = credits;
   input.playerView.own.credits = credits;
   input.playerView.own.clicks = 4;
   input.playerView.own.rig = [

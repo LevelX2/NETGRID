@@ -11,9 +11,11 @@ import {
   state,
 } from "../../plans/runner-tactical-module-support";
 import { RunnerRemoteContestSignal } from "../../plans/runner-tactical-plan-contracts";
+import type { RemoteExposeChoiceBinding } from "./remote-expose-choice";
 type RemoteState = {
   kind: "remote_contest";
   signal: RunnerRemoteContestSignal;
+  remoteExposeChoice?: RemoteExposeChoiceBinding;
 };
 
 export function remoteContestModule(): PlanModule {
@@ -83,6 +85,13 @@ export function remoteContestModule(): PlanModule {
     materialize: (instance, _assessment, context) => {
       const current = state<RemoteState>(instance);
       const candidates = remoteCandidates(context, current.signal);
+      if (current.signal.remoteExposePreparation) {
+        current.remoteExposeChoice = {
+          ...current.signal.remoteExposePreparation,
+          family: "runner_remote_expose",
+          serverId: current.signal.serverId,
+        };
+      }
       return {
         step: {
           stepId: `${instance.instanceId}:contest`,

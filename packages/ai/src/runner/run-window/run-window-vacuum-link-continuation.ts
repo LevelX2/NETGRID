@@ -41,19 +41,24 @@ export function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
     | undefined;
   const lease = previous?.turnPlanExecutionLease;
   const commitment = previous?.turnPlanCommitment;
+  const executionStateVersion = lease?.currentBinding.stateVersion;
   const interveningEvents = (input.eventTail ?? []).filter(
     (event) =>
       previous !== undefined &&
-      event.stateVersionBefore >= previous.stateVersion &&
+      executionStateVersion !== undefined &&
+      event.stateVersionBefore >= executionStateVersion &&
       event.stateVersionAfter <= input.playerView.stateVersion,
   );
   const exactPriorActionChain =
     interveningEvents.length >= 1 &&
-    interveningEvents[0]?.stateVersionBefore === previous?.stateVersion &&
+    interveningEvents[0]?.stateVersionBefore === executionStateVersion &&
     interveningEvents.at(-1)?.stateVersionAfter ===
       input.playerView.stateVersion &&
     interveningEvents[0]?.publicPayload?.actor === "runner" &&
     interveningEvents[0]?.publicPayload?.actionType === lease?.actionType &&
+    (interveningEvents[0]?.publicPayload?.serverId === undefined ||
+      interveningEvents[0]?.publicPayload?.serverId ===
+        input.playerView.run?.attackedServerId) &&
     interveningEvents.every(
       (event, index) =>
         event.stateVersionAfter === event.stateVersionBefore + 1 &&
@@ -61,31 +66,14 @@ export function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
           interveningEvents[index - 1]?.stateVersionAfter ===
             event.stateVersionBefore),
     ) &&
-    interveningEvents.slice(1).every((event) => {
-      const payload = event.publicPayload;
-      // Forced run windows preserve the existing execution owner. Only the
-      // continuous, same-server run chain may connect its last chosen action
-      // to this choice-producing Engine action.
-      const passedUnrezzedIce =
-        payload?.actor === "corp" &&
-        payload.actionType === "decline_rez" &&
-        payload.runPhase === "movement" &&
-        typeof payload.passedIcePosition === "number" &&
-        Number.isSafeInteger(payload.passedIcePosition) &&
-        payload.passedIcePosition >= 0;
-      // The Engine's pass transition carries the ICE position, not a server
-      // field. In this continuous run-only chain it cannot change the run.
-      return (
-        passedUnrezzedIce ||
-        (payload?.abilityFamily === "run-access" &&
-          payload.serverId === input.playerView.run?.attackedServerId &&
-          ((payload.actor === "corp" &&
-            (payload.actionType === "rez_ice" ||
-              payload.actionType === "decline_rez")) ||
-            (payload.actor === "runner" &&
-              payload.actionType === "continue_run")))
+    interveningEvents
+      .slice(1)
+      .every((event) =>
+        boundRunContinuationEvent(
+          input.playerView.run?.attackedServerId,
+          event,
+        ),
       );
-    });
   const committedPhase = commitment?.phases?.[commitment.cursor.phaseIndex];
   const exactCommittedRunExecutor =
     committedPhase !== undefined &&
@@ -123,7 +111,12 @@ export function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
     lease !== undefined &&
     lease.commitmentId === commitment.commitmentId &&
     lease.sourcePlanId === commitment.sourcePlanId &&
-    lease.currentBinding.stateVersion === previous.stateVersion &&
+    committedPhase?.phaseId === lease.phaseId &&
+    committedPhase.nodes[commitment.cursor.nodeIndex]?.nodeId ===
+      lease.nodeId &&
+    lease.stateIdentity.stateVersion === executionStateVersion &&
+    executionStateVersion !== undefined &&
+    executionStateVersion <= previous.stateVersion &&
     exactPriorActionChain &&
     selectedAction.side === "runner" &&
     selectedAction.source === "game_rule" &&
@@ -200,18 +193,22 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
       choice.choiceId,
     )?.[1];
   const sourceCard = context.input.playerView.run?.encounteredIce;
+  const executionLease = previous?.turnPlanExecutionLease;
+  const executionStateVersion = executionLease?.currentBinding.stateVersion;
   const continuationEvents = (context.input.eventTail ?? []).filter(
     (event) =>
       previous !== undefined &&
-      event.stateVersionBefore >= previous.stateVersion &&
+      executionStateVersion !== undefined &&
+      event.stateVersionBefore >= executionStateVersion &&
       event.stateVersionAfter <= context.input.playerView.stateVersion,
   );
   const firstContinuationEvent = continuationEvents[0];
   const lastContinuationEvent = continuationEvents.at(-1);
   const exactContinuationChain =
     previous !== undefined &&
+    firstContinuationEvent !== undefined &&
     continuationEvents.length >= 1 &&
-    firstContinuationEvent?.stateVersionBefore === previous.stateVersion &&
+    firstContinuationEvent?.stateVersionBefore === executionStateVersion &&
     continuationEvents.every(
       (event, index) =>
         event.stateVersionAfter === event.stateVersionBefore + 1 &&
@@ -222,6 +219,9 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
     firstContinuationEvent.publicPayload?.actor === "runner" &&
     firstContinuationEvent.publicPayload?.actionType ===
       previous?.turnPlanExecutionLease?.actionType &&
+    (firstContinuationEvent.publicPayload?.serverId === undefined ||
+      firstContinuationEvent.publicPayload?.serverId ===
+        context.input.playerView.run?.attackedServerId) &&
     lastContinuationEvent?.stateVersionAfter ===
       context.input.playerView.stateVersion &&
     lastContinuationEvent.publicPayload?.actor === "runner" &&
@@ -231,26 +231,20 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
         effect.kind === "resolve_subroutine" &&
         effect.sourceDefinitionId === choice.sourceCardDefinitionId,
     ) === true &&
-    continuationEvents.slice(1, -1).every((event) => {
-      const payload = event.publicPayload;
-      const isCorpRezPass =
-        payload?.actor === "corp" &&
-        (payload.actionType === "rez_ice" ||
-          payload.actionType === "decline_rez");
-      const isBoundRunnerRunContinuation =
-        payload?.actor === "runner" &&
-        payload.actionType === "continue_run" &&
-        payload.abilityFamily === "run-access" &&
-        payload.serverId === context.input.playerView.run?.attackedServerId;
-      return isCorpRezPass || isBoundRunnerRunContinuation;
-    });
+    continuationEvents
+      .slice(1, -1)
+      .every((event) =>
+        boundRunContinuationEvent(
+          context.input.playerView.run?.attackedServerId,
+          event,
+        ),
+      );
   const immediateOriginMatches =
     origin?.immediateChoicePolicy === "resolve_runner_vacuum_link_rewind" &&
     origin.selectedAtStateVersion === previous?.stateVersion &&
     origin.sourceActionType === "continue_run" &&
     origin.rootPlanInstanceId === previous?.rootForegroundInstanceId &&
     origin.executorInstanceId === previous?.executorInstanceId;
-  const executionLease = previous?.turnPlanExecutionLease;
   const cardRunStartOriginMatches =
     origin?.immediateChoicePolicy === "resolve_runner_run_start_order" &&
     origin.selectedAtStateVersion === previous?.stateVersion &&
@@ -280,7 +274,12 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
     executionLease !== undefined &&
     executionLease.commitmentId === commitment.commitmentId &&
     executionLease.sourcePlanId === commitment.sourcePlanId &&
-    executionLease.currentBinding.stateVersion === previous.stateVersion &&
+    committedPhase?.phaseId === executionLease.phaseId &&
+    committedPhase.nodes[commitment.cursor.nodeIndex]?.nodeId ===
+      executionLease.nodeId &&
+    executionLease.stateIdentity.stateVersion === executionStateVersion &&
+    executionStateVersion !== undefined &&
+    executionStateVersion <= previous.stateVersion &&
     (executionLease.actionType === "continue_run" ||
       executionLease.actionType === "start_run" ||
       cardRunStartOriginMatches);
@@ -296,6 +295,7 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
     sourceCard.definitionId === choice.sourceCardDefinitionId &&
     typeof choiceRunId === "string" &&
     choiceRunId.length > 0 &&
+    choiceRunId === context.input.playerView.run?.runId &&
     choice.minSelections === 1 &&
     choice.maxSelections === 1 &&
     optionIds.length === 2 &&
@@ -363,4 +363,32 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
       timingPoint: context.input.playerView.timingPoint,
     },
   };
+}
+
+/** The surrounding exact lease chain excludes new runs and non-run actions.
+ * A native decline event may omit the server field; it cannot change servers.
+ * Any explicit server binding must still match the retained current run.
+ */
+function boundRunContinuationEvent(
+  serverId: string | undefined,
+  event: NonNullable<AiDecisionInput["eventTail"]>[number],
+): boolean {
+  const payload = event.publicPayload;
+  if (
+    !serverId ||
+    !payload ||
+    (payload.serverId !== undefined && payload.serverId !== serverId)
+  )
+    return false;
+  if (payload.actor === "runner")
+    return (
+      payload.actionType === "continue_run" &&
+      payload.abilityFamily === "run-access" &&
+      payload.serverId === serverId
+    );
+  if (payload.actor !== "corp") return false;
+  return (
+    payload.actionType === "decline_rez" ||
+    (payload.actionType === "rez_ice" && payload.serverId === serverId)
+  );
 }

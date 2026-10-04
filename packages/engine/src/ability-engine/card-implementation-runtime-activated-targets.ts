@@ -90,6 +90,20 @@ export function activatedAbilityPayload(
   const scoreConversionPayload = scoreConversionCapabilityPayloadForEffects(
     ability.effects,
   );
+  const repeatableScorePlacement =
+    ability.timing === "corp_main" &&
+    ability.condition === undefined &&
+    ability.limit === undefined &&
+    ability.effects.length === 1 &&
+    advancementDistribution?.target === "installed_advanceable_cards" &&
+    advancementDistribution.distribution === "single_target" &&
+    ability.costs.some((cost) => cost.kind === "action" && cost.amount > 0) &&
+    ability.costs.every(
+      (cost) =>
+        (cost.kind === "action" || cost.kind === "credit") &&
+        Number.isSafeInteger(cost.amount) &&
+        cost.amount >= 0,
+    );
   const actionCapacityPayload = actionCapacityLegalActionPayloadForEffects(
     ability.effects,
     state?.cardInstances[cardId]?.controller ?? "corp",
@@ -137,6 +151,7 @@ export function activatedAbilityPayload(
     cardImplementationAbility: "activated",
     ...activatedAbilityBindingPayload(binding),
     cardImplementationAbilityTiming: offeredTiming,
+    ...(repeatableScorePlacement ? { scoreConversionRepeatable: true } : {}),
     ...(exactRestrictedCreditEffect
       ? {
           cardImplementationEffectKind: "gain_temporary_corp_credits",

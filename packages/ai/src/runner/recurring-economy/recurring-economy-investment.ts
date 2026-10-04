@@ -1,4 +1,5 @@
 import type { RunnerRunTargetEvaluation } from "../../run-analysis/runner-run-target-types";
+import type { RunnerPreparedRunOpportunity } from "./recurring-economy-types";
 
 export type RunnerRecurringEconomyRunDecision = Readonly<{
   decision: "wait" | "allow_run" | "preempt_for_urgent_run";
@@ -90,6 +91,7 @@ export function assessRunnerRestrictedRunEconomyInvestment(params: {
 export function assessRunnerRecurringEconomyRunHorizon(params: {
   runTargets: readonly RunnerRunTargetEvaluation[];
   legalRunActionIds: ReadonlySet<string>;
+  preparedRunOpportunities: readonly RunnerPreparedRunOpportunity[];
   runnerAgendaPoints: number;
   opponentAgendaPoints: number;
   agendaPointsToWin: number;
@@ -108,11 +110,15 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
       right.score - left.score || left.actionId.localeCompare(right.actionId),
   )[0];
   const bestVisibleRunPayoff = best?.score ?? 0;
+  // A native preparation can make a run available without a current start_run.
+  // Its route priority is not the payoff of a hypothetical future run.
+  const prepared = params.preparedRunOpportunities.find((route) => route.ready);
   const opponentMatchpointRunPressure =
     params.opponentAgendaPoints >= params.agendaPointsToWin - 2 &&
-    params.legalRunActionIds.size > 0;
+    (params.legalRunActionIds.size > 0 || prepared !== undefined);
   const urgent =
     opponentMatchpointRunPressure ||
+    prepared?.terminal === true ||
     (best !== undefined &&
       (best.scoreThreat ||
         best.accessPayoff === "agenda" ||
@@ -124,7 +130,16 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
       decision: "preempt_for_urgent_run",
       bestVisibleRunPayoff,
       evidenceCodes: [
-        `runner_recurring_economy_preempting_run_action:${best?.actionId ?? "legal_run_surface"}`,
+        ...(best
+          ? [`runner_recurring_economy_preempting_run_action:${best.actionId}`]
+          : prepared
+            ? [
+                `runner_recurring_economy_preempting_preparation_action:${prepared.actionId}`,
+                `runner_recurring_economy_prepared_run_parent:${prepared.parentPlanInstanceId}:${prepared.serverId}`,
+              ]
+            : [
+                "runner_recurring_economy_preempting_run_action:legal_run_surface",
+              ]),
         `runner_recurring_economy_preempting_run_payoff:${best?.accessPayoff ?? "unknown"}`,
         ...(opponentMatchpointRunPressure
           ? ["runner_recurring_economy_preempting_opponent_matchpoint"]
@@ -148,14 +163,19 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
     };
   }
   const finiteInvestmentHorizonRecouped =
-    best !== undefined &&
+    (best !== undefined || prepared !== undefined) &&
     params.realizedValue >= params.installCost + params.futureValueAtRisk * 2;
   if (finiteInvestmentHorizonRecouped) {
     return {
       decision: "allow_run",
       bestVisibleRunPayoff,
       evidenceCodes: [
-        `runner_recurring_economy_allowed_run_action:${best.actionId}`,
+        ...(best
+          ? [`runner_recurring_economy_allowed_run_action:${best.actionId}`]
+          : [
+              `runner_recurring_economy_allowed_preparation_action:${prepared!.actionId}`,
+              `runner_recurring_economy_prepared_run_parent:${prepared!.parentPlanInstanceId}:${prepared!.serverId}`,
+            ]),
         `runner_recurring_economy_investment_horizon_recouped:${params.realizedValue}:${params.installCost + params.futureValueAtRisk * 2}`,
       ],
     };

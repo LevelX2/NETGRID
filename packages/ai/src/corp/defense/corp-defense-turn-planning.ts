@@ -119,6 +119,24 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       });
       return [];
     }
+    const fundingNeed = exactFundingNeed(
+      params.input,
+      signal,
+      params.economyNeeds,
+      params.candidates,
+    );
+    if (
+      route.disposition === "productive" &&
+      !route.projection.funded &&
+      fundingNeed
+    ) {
+      return [
+        createDefenseLine(params, signal, installCandidate, fundingNeed, {
+          disposition: "fund_then_install",
+          bluffValue: 0,
+        }),
+      ];
+    }
     if (route.disposition === "productive") {
       return [
         createDefenseLine(params, signal, installCandidate, undefined, {
@@ -130,12 +148,6 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       ];
     }
 
-    const fundingNeed = exactFundingNeed(
-      params.input,
-      signal,
-      params.economyNeeds,
-      params.candidates,
-    );
     if (fundingNeed) {
       return [
         createDefenseLine(params, signal, installCandidate, fundingNeed, {
@@ -463,6 +475,11 @@ function exactFundingNeed(
         entry.economyProjection.timing === "immediate" &&
         entry.economyProjection.creditRestriction === "general" &&
         corpEconomyCandidateHasExecutablePayload(input, entry) &&
+        typeof entry.economyProjection.clickCost === "number" &&
+        Number.isSafeInteger(entry.economyProjection.clickCost) &&
+        entry.economyProjection.clickCost >= 0 &&
+        entry.economyProjection.clickCost + projection.installClicks <=
+          input.playerView.own.clicks &&
         (entry.economyProjection?.netLiquidCreditGain ?? 0) >= funding.gap,
     )
     .sort((left, right) => left.actionId.localeCompare(right.actionId))[0];

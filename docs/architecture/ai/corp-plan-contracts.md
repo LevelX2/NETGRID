@@ -55,6 +55,19 @@ aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
 Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
 niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
+Die Konversionssuche darf eine reine, unbedingte Advancement-Aktivierung mit
+positiven Aktionskosten und ausschließlich festen Aktions-/Creditkosten
+mehrfach verwenden, wenn die Engine ihre Wiederholbarkeit ausdrücklich
+projiziert. Eine notwendige Rez-Vorbereitung wird einmal bezahlt; jede
+Aktivierung verbraucht erneut ihre vollständigen Kosten. Bei unrezztem
+installiertem Support gilt dieselbe enge mechanische Prüfung aus der
+kanonischen Engine-Projektion; Fähigkeiten mit Limits sind ausgeschlossen.
+Operationen und nicht ausdrücklich wiederholbare Fähigkeiten bleiben
+einmalige Ressourcen. Ziel, Root, Executor, StateVersion und jede folgende
+Choice werden vor jedem nativen Schritt erneut gebunden. Der Nachweis aus
+Paarung 492, Diagnose-Runde 2, G26 D299 umfasst zwei Aktivierungen auf derselben
+Agenda; ein Root-Austausch darf die dafür nötige Supportkarte nicht zerstören.
+
 Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
 Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
 Eine mit aktueller Engine-Horizontquote früher abschließbare Agenda verdrängt
@@ -300,6 +313,33 @@ Eine veraltete, unvollständige oder nicht finanzierbare Fortsetzung sperrt
 die Notfallentwicklung nicht; ein überlebender Remote wird dadurch nicht
 als garantiert behauptet.
 
+Diese Zulassungsgrenze gilt ebenfalls für die Last-Draw-Installation einer
+neuen Gewinnagenda. Deren P2-Notfallclaim darf eine vorhandene finanzierbare
+terminale Fortsetzung nicht verdrängen. Paarung 493, Durchlauf 3, G37 D374
+belegt die fehlende Bindung: Die vollständig aktuelle Fortsetzungsquote der
+installierten Agenda benötigt einen erreichbaren Vorhaltecredit; die neue
+ungeschützte Remote darf daraus keinen vorrangigen Überlebenspfad erhalten.
+Die normale Schutzprüfung anderer Installationen und die Revalidierung jedes
+Funding-/Advance-Schritts bleiben bestehen.
+Der Installationsquote selbst bestätigt nur den Klickhorizont. Der Score-Owner
+prüft vor dem Last-Draw-Überlebensclaim zusätzlich den vollständigen
+Advancement-Creditbedarf einschließlich jeder erforderlichen Basiscreditaktion
+gegen aktuelle Restaktionen und die Engine-bestätigten garantierten Aktionen
+des nächsten Corp-Zugs. Eine aktuell exakt legale Basiscreditaktion ist dafür
+erforderlich, sobald Liquidität fehlt. Zusätzliche Finanzierung darf nicht
+dieselben Klicks nochmals verwenden, die schon für Advances reserviert sind.
+Paarung 493, Durchlauf 4, G11 D370 belegt den Gegenfall: Mit einem Credit und
+zusammen sechs Aktionen sind Installation, fünf Advances und vier nötige
+Creditaktionen unerreichbar. Die vorhandene dreifache Advancement-Linie kann
+mit zwei Finanzierungsklicks in demselben Horizont erreichbar sein. Der Claim
+bescheinigt keine Unangreifbarkeit; jede echte Folgeaktion bleibt neu gebunden.
+Der vollständig zertifizierte installierte Pfad veröffentlicht im letzten
+Drawfenster denselben typisierten Überlebensclaim auch vor einem nötigen
+Basis-Creditpräfix. Er verlangt eine terminale Agenda und eine jetzt
+erreichbare Vorhaltefinanzierung. So behält der bestehende Parent seine
+Dringlichkeit bereits vor dem ersten bezahlbaren Advance. Außerhalb dieser
+Frist entsteht daraus kein P2-Claim.
+
 Dieselbe Grenze gilt für eine bereits installierte Agenda, deren vollständige
 Konversion einschließlich nötiger Basis-Creditaktionen noch im aktuellen Zug
 Engine-gequotet möglich ist. Dafür ist kein unmittelbarer Spielsieg nötig:
@@ -358,7 +398,67 @@ weitere installierte Agenden oder aktive Einkommenseffekte auf dem Board.
 Eine zusätzliche freie Aktion, unzureichende Finanzierung, eine erreichbare
 Bonusschwelle oder veraltete Kosten verhindern diesen Variantenvergleich.
 
-Eine vollständig aktuell finanzierte gewöhnliche Scorefolge kann die liquide
+Ein bereits gerezzter reiner Advancement-Support bleibt im prospektiven
+Scorepfad verfügbar, wenn die neue HQ-Agenda noch kein installiertes legales
+Aktivierungsziel bietet. Dieselbe enge kanonische Prüfung auf unbedingte feste
+Kosten und Wiederholbarkeit gilt für beide Rez-Zustände. Ein ungerezzter
+Support benötigt seine exakte aktuelle Engine-Rezaction; ein gerezzter bezahlt
+keinen zweiten Rez. Sobald die Agenda installiert ist, wird jede echte
+Aktivierung ausschließlich aus den aktuellen LegalActions materialisiert.
+Ein bereits vorhandenes natives Capability wird nicht doppelt projiziert.
+Die native Gegenprobe schließt zwei Scorefolgen über eine echte Zuggrenze ab.
+Die virtuelle `Archives.root`-Projektion enthält entsorgte Karten und zählt
+niemals als installierte Support- oder Counterquelle, auch wenn deren sichtbare
+Rezmarkierung erhalten ist. Tatsächlich installiertes Archives-ICE bleibt eine
+installierte Quelle. Der native Root-Austausch und G1 D171 aus Diagnose-Runde 4
+der Paarung 492 sichern diese Zonengrenze und den weiterhin legalen Babylon-
+Advance ab.
+
+Vor der Admission prüft Score nach der Zusammenführung seiner Projekte den
+vollständigen Engine-gequoteten Same-Turn-Credithorizont gegen die bereits
+finanzierten Zentral-Schutzclaims von `corp.defend_servers`. Ein exaktes
+Fundingpräfix zählt mit seinem einmaligen Bruttozufluss und seinen Kosten;
+ein späterer Score-Ertrag bezahlt keine vorherigen Schritte. Eine
+nichtterminale Folge, die die Schutzreserve nach ihrem sicheren unbedingten
+Score-Zufluss unterschreitet, bleibt mit typisierter Begründung blockiert und
+fordert keinen scheinbar ausführbaren Economy-Support an. Ein direktes
+Geschwisterprojekt darf diese Ablehnung nicht ersetzen. Terminaler eigener
+Score bleibt P1; die vergleichende Schutzpriorität bleibt beim Defenseowner.
+Paarung 492 R3 G2 D102–106 belegt den bezahlbaren Acht-Credit-Pfad, der eine
+finanzierte Fünf-Credit-Reserve verbraucht und deshalb nach der ersten
+Aktivierung korrekt durch P2-Finanzierung unterbrochen wird. Der Score-Owner
+weist ihn bereits vor der Installation zurück. Eine native Kontrolle mit
+dreizehn Credits beendet beide gebundenen Aktivierungen und hält fünf Credits.
+
+Dieselbe Admission konsumiert auch die bestehenden Defense-Facts für aktuell
+finanzierte terminale Zentral-ICE mit Tax-, Schadens- oder Disruptionwirkung.
+Ein sicherer Run-Stopp ist dafür keine Voraussetzung. Score übergibt den
+vollständigen liquiden Endhorizont nach sicherer Auszahlung und die aus HQ
+entfernte Agenda; zukünftige Finanzierungsklicks begründen diesen Claim nicht.
+Terminaler eigener Score und die vorhandene Bewertung einer unmittelbar
+verhinderten terminalen Agenda-Entwendung behalten ihre Verträge. Paarung 493
+R5 G32 D190 belegt zwei Overtime-Zahlungen und drei Advances für insgesamt
+elf Credits bei zwölf Credits Bank: Die verbleibende Bank von eins verliert
+die bereits bezahlbare Fünf-Credit-R&D-Abwehr. Mit sechzehn Credits bleibt
+derselbe exakte Beschleunigungskopf zugelassen.
+
+Besitzt eine vollständig aktuell bezahlbare Scorefolge mit festen Kosten noch
+freie aktuelle Aktionen, kann derselbe Score-Owner die fehlende gemeinsame
+Finanzierung von Score und bereits finanziertem Defense-Claim anfordern.
+Ein aktueller, exakt gebundener nativer Basiscredit liefert je eine Aktion
+und einen Credit; alle nötigen Fundingaktionen müssen zusammen mit der
+vollständigen Scorefolge in den aktuellen Zug passen. Economy führt diesen
+Support unter demselben Score-Parent aus. Der vollständige Credit- und
+Aktionshorizont wird vor der Admission neu gebunden; nach jedem Schritt
+revalidiert Score mit den aktuellen LegalActions. Fehlende oder veraltete
+Basisactions und unzureichende freie Aktionen lassen die Folge blockiert.
+Bereits finanzierte Folgen und terminaler eigener Score behalten ihr Verhalten.
+Paarung 493 R6 G8 D86 belegt sechs Credits, drei Aktionen, zwei verbleibende
+Coup-Advances und fünf Credits Schutzreserve: Gain→Advance→Advance→Score passt
+vollständig und erhält fünf Credits. Ein weiterer Remote-Ausbau würde dieses
+vorhandene Abschlussfenster dagegen verlieren.
+
+Eine vollständig aktuell finanzierte Scorefolge mit festen Kosten kann die liquide
 Rezreserve vor dem nächsten Runner-Fenster wiederherstellen. Der Score-Owner
 weist dies in `score-reserve-restoration.ts` mit seiner aktuellen vollständigen
 Engine-Kostenquote und einer kanonischen unbedingten Score-Auszahlung nach.
@@ -367,7 +467,9 @@ Rezreservebedarfs zurück. Die Auszahlung zählt nicht als Geld für die noch
 offenen Scorekosten. Jeder reale Schritt revalidiert Kosten, LegalAction und
 Reserve; fehlende Klicks, Fundingbedarf, abgelaufene Quotes, bedingte Erträge,
 spätere Aktivierungserträge und aktuelle Runfenster tragen diesen Nachweis
-nicht. Der historische Fall Paarung 455 G3 D414/D459 benötigt zwei Credits
+nicht. Auch notwendige Support-Rezs und wiederholte feste Zahlungen zählen
+vollständig; zusätzliche Klickerzeugung und Fundingpräfixe erzeugen hier
+keinen Ersatz für die feste Kostenquote. Der historische Fall Paarung 455 G3 D414/D459 benötigt zwei Credits
 und drei Klicks und stellt mit dem Score fünf Credits für eine Reserve von
 vier wieder her. Er ändert weder Planprioritäten noch Rez-Ownership.
 Nach Installation publiziert derselbe Score-Owner die vollständigen Kosten
@@ -1034,6 +1136,20 @@ auch innerhalb von `corp_action.main` aussetzen. Der Defense-Factproducer
 erzeugt dann keinen leeren Economy-Need; die normale Choice-Ownership bleibt
 erhalten und der Economy-Validator behält seine strenge Bindungsprüfung.
 
+Auch eine zugelassene vorbereitende ICE-Installation kann noch eine konkrete
+Rezfinanzierungslücke tragen. Schließt ein aktuell legaler, sofortiger und
+allgemein verwendbarer Zufluss diese ganze Lücke, und passen Finanzierung plus
+Installation in die verbleibenden Klicks, bindet Defense diesen Kopf vor der
+Installation an denselben Need. Economy führt den gebundenen Schritt unter dem
+Defense-Parent aus; anschließend werden Installation und Rezreserve neu
+quotiert. Das verhindert, dass die Installation die Zahlungsschwelle ihrer
+eigenen verfügbaren Finanzierung unterschreitet. Bereits finanzierte Routen
+bleiben sofort ausführbar. Ohne vollständig belegten aktuellen Präfix bleibt
+die bisherige Staging-Bewertung bestehen; andere wirksame Routen derselben oder
+einer höheren Priorität behalten ihren Vorrang. Die Zugplanung verwendet
+dieselbe Parentbindung und darf keinen nicht mehr bezahlbaren Zufluss hinter
+der Installation als Konversion verbuchen.
+
 Ein typisierter Schutzbedarf eines Score- oder Remoteplans erzeugt eine
 explizite Parent-Kind-Delegation. Nur die konkret gebundene
 Defense-Supportroute erbt `parentInstanceId` und Prioritätsklasse des
@@ -1048,6 +1164,16 @@ sichtbar; andere Serverbedarfe behalten ihre eigene Dringlichkeit. Auswahl,
 Evidence und Assessment müssen aus derselben ausgewählten Prioritätsklasse
 und Parentbindung stammen; ein planfremder Action-Score darf diese Delegation
 nicht nachträglich verändern.
+
+Auch begrenztes Score-Protection-Staging erhält die bereits bekannte
+Central-Rezreserve. Die Defense-Zulassung und die Prüfung eines ausführbaren
+vorbereiteten Score-Parents konsumieren dieselbe aktuelle Zentralallokation
+und den bestehenden Reservevertrag. Installationskosten und verbleibende
+Click-Finanzierung dürfen ein bereits erreichbares Rezbudget nicht verlieren.
+Die native Gegenprobe Paarung 493/R1/G24/D96 verwirft so den Remote-Sleeper
+bei sechs Credits vor dem gequoteten Sieben-Credit-HQ-Rez. Bei ausreichender
+Bank oder bereits gerezztem HQ-ICE bleibt derselbe delegierte Score-Step
+zugelassen; der Score-Owner trifft keine eigene ICE-Auswahl.
 
 Jede generische native Defense-Zuglinie trägt die Prioritätsklasse ihres
 exakten Signals. Ein Remote-Supportbedarf darf weder eine terminale
@@ -1374,6 +1500,19 @@ veraltete Quotes und zusätzliche ungequotete Kosten begründen keinen
 produktiven Support. Das gilt für den allgemeinen persistenten Pfad ebenso
 wie für strukturierte ICE-Zielprofile und Fort-Stärke-Unterstützung.
 Eigenständige Upgrade-Wirkungen behalten ihre getrennten Owner-Assessments.
+
+Ein passives globales ICE-Support-Asset kann denselben strukturierten
+Defensebedarf bereits für seine Installation in einem neuen Remote nutzen.
+Die Engine liefert dafür die an Quelle, Ziel und aktuellen Zustand gebundene
+Post-Install-Rez-Kostenquote. Zulassung verlangt passende vorhandene ICE,
+gemeinsame Finanzierung von Installation, Support-Rez und erforderlichen
+Ziel-Rezs sowie den Erhalt des Scorebudgets. Globale Wirkung wird nicht auf
+den neuen Quellfort beschränkt. Fehlende, veraltete oder unfinanzierte Quotes
+und fehlende Ziel-ICE erzeugen keine Installationsroute. Im Folgezustand
+materialisiert derselbe Defense-Owner die tatsächliche neue Rez-LegalAction
+erneut; die Vorbereitung behauptet weder ein ausgeführtes Rez noch sicheren
+Run-Schutz. `corp-structured-ice-support.ts` liefert beiden Phasen dieselben
+Ziel- und Fundingfakten ohne Rückimport in die Discovery.
 
 Gemeinsame Hint-Begriffe rechtfertigen keine gemeinsame Rez-Heuristik.
 Dr. Dreff wird nur im letzten relevanten Begegnungsfenster desselben Forts
@@ -1774,6 +1913,14 @@ einer Schadensoperation laufen. Nach einer Aktivierung wird die wiederverwendbar
 Quelle im neuen Zustand erneut gequotet; dieselbe Quelle wird nicht doppelt
 in einer vorausberechneten Route gebucht. Ein Profil- oder Legalitätsnachweis
 allein ersetzt diesen produktiven Übergang zur Punish-Route nicht.
+
+Dieselbe Schadensroute entdeckt gerezzte Assets und Upgrades in tatsächlich
+installierten Roots. Virtuelle Archives-Roots sind keine installierten Quellen.
+Die Engine zertifiziert Root-Zone und Servermitgliedschaft, Rez-Zustand,
+kanonische Corp-Main-Capability, Tagbedingung und aktuelle LegalAction. Dieser
+Slice unterstützt feste Klick-/Creditkosten und nicht limitierte Aktivierungen;
+verbrauchende oder anderweitig limitierte Fähigkeiten bleiben fail-closed.
+Auch hier wird eine wiederverwendbare Quelle nach jeder Aktion neu gequotet.
 
 Die Vorbereitung erkennt Trace-Support an den tatsächlich erzeugten typisierten
 `trace_credit`-Effekten. `scope: trace` unterstützt sichtbare eigene Trace-Quellen
