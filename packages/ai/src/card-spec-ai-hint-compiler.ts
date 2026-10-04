@@ -1257,7 +1257,10 @@ function deriveGenericTypedHintOverlay(
       resource: "tags",
       target: "avoid_tag",
       amount: source.amount,
-      finite: true,
+      ...(source.cost.kind === "trash_source" ||
+      source.cost.kind === "credit_and_trash_source"
+        ? { finite: true }
+        : { repeatable: true }),
     });
     overlay.functionSignals.push("defense.tag_prevention");
   }
@@ -4524,12 +4527,15 @@ function deriveExtendedRequiredMechanics(
     mechanics.add("damage_prevention_turn_limit");
   for (const source of engine.tagPreventionSources ?? []) {
     mechanics.add("prevent_tag");
-    mechanics.add("credit_cost");
-    mechanics.add(
-      source.cost.kind === "credit_and_forgo_next_action"
-        ? "future_action_debt"
-        : "trash_source",
-    );
+    if (source.cost.kind !== "trash_source" && source.cost.amount > 0)
+      mechanics.add("credit_cost");
+    if (source.cost.kind === "credit_and_forgo_next_action")
+      mechanics.add("future_action_debt");
+    if (
+      source.cost.kind === "trash_source" ||
+      source.cost.kind === "credit_and_trash_source"
+    )
+      mechanics.add("trash_source");
   }
   return [...mechanics].sort();
 }
@@ -5671,17 +5677,16 @@ function deriveClosedExtendedRiskTags(
   }
   if (engine.damagePreventionSources !== undefined) risks.add("damage_window");
   for (const source of engine.tagPreventionSources ?? []) {
-    if (source.cost.kind === "credit_and_forgo_next_action") {
-      for (const risk of [
-        "future_action_debt",
-        "tag_prevention",
-        "credit_cost",
-      ])
-        risks.add(risk);
-    } else {
-      for (const risk of ["tag_prevention", "credit_cost", "trash_source"])
-        risks.add(risk);
-    }
+    risks.add("tag_prevention");
+    if (source.cost.kind !== "trash_source" && source.cost.amount > 0)
+      risks.add("credit_cost");
+    if (source.cost.kind === "credit_and_forgo_next_action")
+      risks.add("future_action_debt");
+    if (
+      source.cost.kind === "trash_source" ||
+      source.cost.kind === "credit_and_trash_source"
+    )
+      risks.add("trash_source");
   }
   for (const effect of engine.lifecycle?.on_leave_play ?? []) {
     if (effect.kind === "lose_credits") risks.add("leave_play_credit_loss");

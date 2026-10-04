@@ -1,7 +1,7 @@
 # AI-Hints: Quelle und Runtime-Vertrag
 
 Status: **aktueller generierter CardSpec-Vertrag**  
-Stand: 2026-10-03
+Stand: 2026-10-04
 
 ## Autorenquelle und Datenpfad
 
@@ -62,6 +62,16 @@ sinnvollen bezahlten Informationsschritt; dieser benötigt weiterhin eine
 side-sichere Neuquote des anschließenden Zugriffs.
 
 ## Typisierte Recovery- und Spielkosten
+
+Tagprävention übernimmt Verbrauch und Zahlung getrennt aus
+`tagPreventionSources.cost`. Nur `trash_source` und
+`credit_and_trash_source` kennzeichnen die Quelle als endlich und erzeugen
+die entsprechende Verbrauchsmechanik. Reine Credits, Tappen und der Verzicht
+auf eine spätere Aktion opfern die Quelle nicht. Ein Creditmechanik-Fakt
+entsteht nur bei tatsächlich positiven Creditkosten. Die Regression prüft
+alle realen Quellen, das generierte Artefakt und den Verbrauchsconsumer der
+Handentwicklung; ein korrekter Hint allein belegt weiterhin keinen
+dominanten Installationsplan.
 
 `corp_archives_to_hq` beschreibt grundsätzlich Archives-Recovery. Die
 ICE-Spezialisierung entsteht nur aus `filter.cardType: "ice"`, Offenlegung

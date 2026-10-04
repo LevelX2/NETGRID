@@ -5990,7 +5990,7 @@
             "resource": "tags",
             "target": "avoid_tag",
             "amount": 1,
-            "finite": true
+            "repeatable": true
           }
         ],
         "functionSignals": ["defense.tag_prevention", "risk.action_loss"],
@@ -6013,9 +6013,9 @@
           "opportunity_cost",
           "reserve_risk",
           "install_runner",
-          "future_action_debt",
           "tag_prevention",
-          "credit_cost"
+          "credit_cost",
+          "future_action_debt"
         ],
         "quality": {
           "hintReviewed": true,
@@ -27593,7 +27593,7 @@
             "resource": "tags",
             "target": "avoid_tag",
             "amount": 1,
-            "finite": true
+            "repeatable": true
           }
         ],
         "functionSignals": ["defense.tag_prevention"],
@@ -27605,12 +27605,7 @@
         ],
         "conditions": [{ "kind": "requires_prevention_window" }],
         "costProfile": { "clicks": 1, "credits": 1 },
-        "riskTags": [
-          "install_runner",
-          "tag_prevention",
-          "credit_cost",
-          "trash_source"
-        ],
+        "riskTags": ["install_runner", "tag_prevention", "credit_cost"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -27623,8 +27618,7 @@
           "credit_cost",
           "install_hardware",
           "prevent_tag",
-          "subtype_vehicle",
-          "trash_source"
+          "subtype_vehicle"
         ]
       }
     },
@@ -29700,7 +29694,7 @@
         ],
         "conditions": [{ "kind": "requires_prevention_window" }],
         "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["tag_prevention", "credit_cost", "trash_source"],
+        "riskTags": ["tag_prevention", "trash_source"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -29709,12 +29703,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": [
-          "credit_cost",
-          "install_resource",
-          "prevent_tag",
-          "trash_source"
-        ]
+        "requiredMechanics": ["install_resource", "prevent_tag", "trash_source"]
       }
     },
     {
@@ -30052,12 +30041,7 @@
           { "kind": "requires_prevention_window" }
         ],
         "costProfile": { "clicks": 1, "credits": 2 },
-        "riskTags": [
-          "damage_window",
-          "tag_prevention",
-          "credit_cost",
-          "trash_source"
-        ],
+        "riskTags": ["damage_window", "tag_prevention", "trash_source"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -30067,7 +30051,6 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "credit_cost",
           "damage_prevention_turn_limit",
           "install_resource",
           "prevent_tag",
@@ -31746,12 +31729,7 @@
           { "kind": "requires_prevention_window" }
         ],
         "costProfile": { "clicks": 1, "credits": 4 },
-        "riskTags": [
-          "damage_window",
-          "tag_prevention",
-          "credit_cost",
-          "trash_source"
-        ],
+        "riskTags": ["damage_window", "tag_prevention", "trash_source"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -31761,7 +31739,6 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "credit_cost",
           "damage_prevention_turn_limit",
           "install_resource",
           "prevent_tag",

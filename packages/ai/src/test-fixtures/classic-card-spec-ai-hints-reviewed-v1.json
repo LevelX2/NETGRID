@@ -5190,7 +5190,7 @@
             "resource": "tags",
             "target": "avoid_tag",
             "amount": 1,
-            "finite": true
+            "repeatable": true
           }
         ],
         "functionSignals": ["defense.tag_prevention", "risk.action_loss"],
@@ -5213,9 +5213,9 @@
           "opportunity_cost",
           "reserve_risk",
           "install_runner",
-          "future_action_debt",
           "tag_prevention",
-          "credit_cost"
+          "credit_cost",
+          "future_action_debt"
         ],
         "quality": {
           "hintReviewed": true,
