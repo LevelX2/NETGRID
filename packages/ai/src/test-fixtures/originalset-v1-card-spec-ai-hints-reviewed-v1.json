@@ -25824,12 +25824,29 @@
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ambush", "net_damage", "hidden_zone"],
-        "planRoles": ["remote_asset_trap"],
-        "valueHints": { "remoteRootValue": 1, "damage": 3 },
-        "strategicRole": ["punish_payoff", "enabler"],
-        "strategyAnchors": ["corp.ambush_bluff"],
-        "lineSupport": ["corp.ambush_bluff", "corp.tag_trace_punish"],
+        "roles": [
+          "ambush",
+          "net_damage",
+          "hidden_zone"
+        ],
+        "planRoles": [
+          "remote_asset_trap"
+        ],
+        "valueHints": {
+          "remoteRootValue": 1,
+          "damage": 3
+        },
+        "strategicRole": [
+          "punish_payoff",
+          "enabler"
+        ],
+        "strategyAnchors": [
+          "corp.ambush_bluff"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.tag_trace_punish"
+        ],
         "strategySupportPairs": [
           {
             "strategyId": "corp.ambush_bluff",
@@ -25847,7 +25864,9 @@
             "strategyId": "corp.tag_trace_punish",
             "role": "enabler",
             "roleDetail": "access_tag_source",
-            "evidence": ["access.corp_net_damage_ambush"],
+            "evidence": [
+              "access.corp_net_damage_ambush"
+            ],
             "confidence": "medium",
             "rationale": "Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
           }
@@ -25862,6 +25881,15 @@
             "target": "access.corp_net_damage_ambush"
           },
           {
+            "kind": "tag_source",
+            "scope": "runner",
+            "timing": "on_access",
+            "resource": "tags",
+            "target": "tag.source",
+            "amount": 1,
+            "finite": true
+          },
+          {
             "kind": "ambush",
             "scope": "accessed_card",
             "timing": "on_access",
@@ -25873,32 +25901,43 @@
           "access.archives_safe_exception",
           "access.corp_net_damage_ambush",
           "access.rnd_reveal_requirement",
+          "tag.source",
+          "access.corp_tag_ambush",
           "access.punish",
           "remote.ambush"
         ],
         "tacticSignals": [
           "access.archives_safe_exception",
           "access.corp_net_damage_ambush",
+          "access.corp_tag_ambush",
           "access.punish",
           "access.rnd_reveal_requirement",
           "damage.payoff",
-          "remote.ambush"
+          "remote.ambush",
+          "tag.source"
         ],
         "actionTacticSignals": [
           "access.punish",
           "damage.payoff.runner",
           "effect:ambush",
           "effect:damage",
+          "effect:tag_source",
           "effect_scope:accessed_card",
           "effect_scope:runner",
           "effect_timing:on_access",
           "remote.ambush"
         ],
         "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": [
           "hidden_info_barrier",
           "access_window",

@@ -6665,8 +6665,32 @@
             "confidence": "high"
           }
         ],
-        "functionSignals": ["access.rnd_reveal_requirement"],
-        "tacticSignals": ["access.rnd_reveal_requirement"],
+        "effects": [
+          {
+            "kind": "tag_source",
+            "scope": "runner",
+            "timing": "on_access",
+            "resource": "tags",
+            "target": "tag.source",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "access.rnd_reveal_requirement",
+          "tag.source",
+          "access.corp_tag_ambush"
+        ],
+        "tacticSignals": [
+          "access.corp_tag_ambush",
+          "access.rnd_reveal_requirement",
+          "tag.source"
+        ],
+        "actionTacticSignals": [
+          "effect:tag_source",
+          "effect_scope:runner",
+          "effect_timing:on_access"
+        ],
         "conditions": [
           { "kind": "requires_accessed_card" },
           { "kind": "requires_rnd_top" }
@@ -8452,7 +8476,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": [],
+        "roles": ["ice", "tag_ice", "sentry_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool", "enabler"],
@@ -8486,6 +8510,50 @@
             "rationale": "v2: Mehrere Trace-5-Tag-Subroutinen sind deutlich stärker als ein einfacher Hunter/Fetch-Trace und tragen die Tag/Trace-Linie als Enabler."
           }
         ],
+        "effects": [
+          {
+            "kind": "trace",
+            "scope": "trace",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.outer_ice_scaling",
+            "amountKind": "dynamic"
+          },
+          {
+            "kind": "tag_source",
+            "scope": "runner",
+            "timing": "trace_success",
+            "resource": "tags",
+            "target": "tag.source",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.trace_source",
+          "corp_ice.tag_source",
+          "trace.source",
+          "tag.source"
+        ],
+        "tacticSignals": [
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "actionTacticSignals": [
+          "effect:tag_source",
+          "effect:trace",
+          "effect_scope:runner",
+          "effect_scope:trace",
+          "effect_timing:encounter_resolution",
+          "effect_timing:trace_success",
+          "tag.source",
+          "trace.source"
+        ],
+        "conditions": [{ "kind": "requires_trace_attempt" }],
         "costProfile": { "credits": 1 },
         "quality": {
           "hintReviewed": true,
@@ -45725,6 +45793,15 @@
             "target": "access.corp_net_damage_ambush"
           },
           {
+            "kind": "tag_source",
+            "scope": "runner",
+            "timing": "on_access",
+            "resource": "tags",
+            "target": "tag.source",
+            "amount": 1,
+            "finite": true
+          },
+          {
             "kind": "ambush",
             "scope": "accessed_card",
             "timing": "on_access",
@@ -45736,22 +45813,27 @@
           "access.archives_safe_exception",
           "access.corp_net_damage_ambush",
           "access.rnd_reveal_requirement",
+          "tag.source",
+          "access.corp_tag_ambush",
           "access.punish",
           "remote.ambush"
         ],
         "tacticSignals": [
           "access.archives_safe_exception",
           "access.corp_net_damage_ambush",
+          "access.corp_tag_ambush",
           "access.punish",
           "access.rnd_reveal_requirement",
           "damage.payoff",
-          "remote.ambush"
+          "remote.ambush",
+          "tag.source"
         ],
         "actionTacticSignals": [
           "access.punish",
           "damage.payoff.runner",
           "effect:ambush",
           "effect:damage",
+          "effect:tag_source",
           "effect_scope:accessed_card",
           "effect_scope:runner",
           "effect_timing:on_access",

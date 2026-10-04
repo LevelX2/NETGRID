@@ -518,6 +518,63 @@ function deriveGenericTypedHintOverlay(
   };
   const engine = entry.planning.engine;
 
+  for (const access of engine.accessEffects ?? [])
+    for (const effect of access.effects)
+      if (effect.kind === "add_tags") {
+        // Access tags are independent of a nested trace or damage outcome.
+        // The access zone/payment contract remains owned by the engine.
+        overlay.effects.push({
+          kind: "tag_source",
+          scope: "runner",
+          timing: "on_access",
+          resource: "tags",
+          target: "tag.source",
+          amount: effect.amount,
+          finite: true,
+        });
+        overlay.functionSignals.push("tag.source", "access.corp_tag_ambush");
+      }
+
+  const relativeTrace = engine.relativeIce?.dynamicTraceSubroutines;
+  if (relativeTrace !== undefined) {
+    if (
+      engine.relativeIce?.kind !== "rezzed_ice_outside_this_ice" ||
+      relativeTrace.visibility !== "public" ||
+      !Number.isSafeInteger(relativeTrace.traceLimit) ||
+      relativeTrace.traceLimit < 0 ||
+      relativeTrace.traceSuccessEffect.type !== "add_tag" ||
+      !Number.isSafeInteger(relativeTrace.traceSuccessEffect.amount) ||
+      relativeTrace.traceSuccessEffect.amount <= 0
+    )
+      throw new Error("card_spec_unknown_relative_ice_dynamic_trace_shape");
+    overlay.effects.push(
+      {
+        kind: "trace",
+        scope: "trace",
+        timing: "encounter_resolution",
+        target: "corp_ice.outer_ice_scaling",
+        amountKind: "dynamic",
+      },
+      {
+        kind: "tag_source",
+        scope: "runner",
+        timing: "trace_success",
+        resource: "tags",
+        target: "tag.source",
+        amount: relativeTrace.traceSuccessEffect.amount,
+        finite: true,
+      },
+    );
+    overlay.functionSignals.push(
+      "corp_ice.outer_ice_scaling",
+      "corp_ice.trace_source",
+      "corp_ice.tag_source",
+      "trace.source",
+      "tag.source",
+    );
+    overlay.conditions.push({ kind: "requires_trace_attempt" });
+  }
+
   for (const ability of engine.abilities ?? []) {
     appendTypedCondition(overlay.conditions, ability.condition);
     appendGenericAbilityCosts(overlay, entry, ability);
@@ -4764,6 +4821,8 @@ function deriveRoles(
   const roles = new Set<string>();
   const engine = entry.planning.engine;
   const cardType = entry.definition.type;
+  if (engine.relativeIce?.dynamicTraceSubroutines !== undefined)
+    for (const role of ["ice", "tag_ice"]) roles.add(role);
   if (cardType === "identity") {
     roles.add(`${entry.definition.side}_identity`);
     roles.add("setup");
@@ -4953,7 +5012,8 @@ function deriveRoles(
   if (entry.definition.subtypes.includes("code_gate"))
     roles.add("code_gate_ice");
   if (
-    entry.planning.engine.printedSubroutines !== undefined &&
+    (entry.planning.engine.printedSubroutines !== undefined ||
+      engine.relativeIce?.dynamicTraceSubroutines !== undefined) &&
     entry.definition.subtypes.includes("sentry")
   )
     roles.add("sentry_ice");
@@ -10496,6 +10556,16 @@ function derivedTacticSignals(
   const engine = entry.planning.engine;
   const signals = new Set<string>();
   const relativeDynamicDamage = engine.relativeIce?.dynamicDamageSubroutine;
+  if (engine.relativeIce?.dynamicTraceSubroutines !== undefined)
+    for (const signal of [
+      "corp_ice.outer_ice_scaling",
+      "corp_ice.position_scaling",
+      "corp_ice.trace_source",
+      "corp_ice.tag_source",
+      "trace.source",
+      "tag.source",
+    ])
+      signals.add(signal);
   const variableRunLockTrace = engine.printedSubroutines?.find(
     (subroutine) =>
       subroutine.kind === "trace" &&
@@ -10538,6 +10608,10 @@ function derivedTacticSignals(
     if (access.revealIfAccessedFrom?.includes("rd"))
       signals.add("access.rnd_reveal_requirement");
     for (const effect of access.effects) {
+      if (effect.kind === "add_tags") {
+        signals.add("tag.source");
+        signals.add("access.corp_tag_ambush");
+      }
       if (
         effect.kind === "damage" ||
         effect.kind === "damage_from_source_advancement_counters"
