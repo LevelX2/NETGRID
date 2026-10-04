@@ -1475,6 +1475,13 @@ materialisiert. Gibt es keine solche Rez-Route, ist Decline die regelkonforme
 fenstergebundene Entscheidung und darf nicht durch eine bloße
 Rez-Kartenfamilie oder einen allgemeinen Defensebedarf verdrängt werden.
 
+Für eine vollständige aktuelle Post-Rez-Enginequote stammen die qualitativen
+Begegnungswirkungen ausschließlich aus ihren Subroutinen. Gedruckte Mechaniken,
+Kartentext und allgemeine Hints dürfen fehlende aktuelle Wirkungen nicht
+ergänzen. Eine leere Subroutinenliste zertifiziert insbesondere null aktuelle
+Subroutinen; das positionsabhängige Trace-Potenzial allein rechtfertigt kein
+Rez. Separat quotierte konditionale Encounter-Abwehr bleibt bewertbar.
+
 Eine vollständige Enginequote mit ausschließlich zukünftigen
 Encounter-Effekten begründet am innersten ICE keinen aktuellen Rez-Nutzen.
 Der qualitative Rez-Consumer prüft diesen fehlenden Folgezustand, bevor

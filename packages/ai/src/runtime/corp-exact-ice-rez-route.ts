@@ -464,12 +464,10 @@ function quoteQualitativeEncounterActivationCredits(params: {
     return undefined;
   }
   const profile = visibleCorpIceDefenseProfile(
+    sourceCard,
     postRezQuote.complete === true
-      ? ({
-          ...sourceCard,
-          subroutines: postRezQuote.effectiveRunQuote.subroutines,
-        } as VisibleCard)
-      : sourceCard,
+      ? postRezQuote.effectiveRunQuote.subroutines
+      : undefined,
   );
   if (
     postRezQuote.complete === true &&

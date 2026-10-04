@@ -294,6 +294,7 @@ function visibleRunnerRunCreditPool(
 
 export function visibleCorpIceDefenseProfile(
   sourceCard: VisibleCard | undefined,
+  currentEncounterSubroutines?: readonly unknown[],
 ): {
   isVisibleIce: boolean;
   hasImmediateStop: boolean;
@@ -321,7 +322,7 @@ export function visibleCorpIceDefenseProfile(
     sourceCard.definitionId !== undefined
       ? AI_HINTS_BY_CARD.get(sourceCard.definitionId)
       : undefined;
-  const subroutines = [
+  const subroutines = currentEncounterSubroutines ?? [
     ...visibleSubroutineArray(
       (sourceCard as { subroutines?: unknown }).subroutines,
     ),
@@ -342,6 +343,12 @@ export function visibleCorpIceDefenseProfile(
     ...(hint?.functionSignals ?? []),
     ...(hint?.effects ?? []).map((effect) => `effect:${effect.kind}`),
   ].map((entry) => entry.toLocaleLowerCase("en-US"));
+  // A complete current Engine quote is the encounter authority. Printed
+  // potential and hints must not add effects that this quote does not contain.
+  if (currentEncounterSubroutines !== undefined) {
+    mechanics.length = 0;
+    hintSignals.length = 0;
+  }
   const textInput: {
     title?: string;
     rulesText?: string;
@@ -362,7 +369,10 @@ export function visibleCorpIceDefenseProfile(
   }
   if (Array.isArray(sourceCard.subtypes))
     textInput.subtypes = sourceCard.subtypes;
-  const rulesTokens = visibleCardText(textInput).toLocaleLowerCase("en-US");
+  const rulesTokens =
+    currentEncounterSubroutines === undefined
+      ? visibleCardText(textInput).toLocaleLowerCase("en-US")
+      : "";
   const hasImmediateStop =
     subroutines.some(subroutineLooksLikeImmediateStop) ||
     mechanics.some((mechanic) => mechanic === "end_the_run") ||
@@ -431,6 +441,7 @@ export function visibleCorpIceDefenseProfile(
     hasEncounterDisruption,
     evidence: [
       "effective_defense_source_visible_ice:true",
+      `effective_defense_source_subroutines:${currentEncounterSubroutines === undefined ? "printed_potential" : "current_engine_quote"}`,
       `effective_defense_source_definition:${sourceCard.definitionId ?? "unknown"}`,
       `effective_defense_source_stop:${hasImmediateStop}`,
       `effective_defense_source_tax_or_damage:${hasMeaningfulTaxOrDamage}`,
@@ -488,6 +499,7 @@ function subroutineLooksLikeTaxOrDamage(subroutine: unknown): boolean {
   const type = subroutineType(subroutine);
   return (
     type === "do_damage" ||
+    type === "random_damage" ||
     type === "initiate_trace" ||
     type === "give_tag" ||
     type === "corp_gain_credit" ||
@@ -505,6 +517,7 @@ function subroutineLooksLikeDirectEncounterCostOrDamage(
   const type = subroutineType(subroutine);
   return (
     type === "do_damage" ||
+    type === "random_damage" ||
     type === "set_run_break_subroutine_cost_modifier" ||
     type === "set_run_encounter_tax" ||
     type === "trash_installed_program" ||
