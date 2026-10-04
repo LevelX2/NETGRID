@@ -1,3 +1,7 @@
+import type { AiDecision, LegalAction } from "@netgrid/shared";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
+import { unresolvedChoiceFailure } from "../../runtime/plan-bound-choice-contract";
+import { runnerPartialProgramSearchProfile } from "../../runtime/runner-partial-program-search-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
@@ -996,4 +1000,266 @@ export function bindSelectedRunnerRecoverySearchAction(
   }
   commitment.selectedActionId = result.route.head.actionId;
   commitment.selectedAtStateVersion = input.playerView.stateVersion;
+}
+
+export function runnerDevelopmentSearchChoiceBinding(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+  portfolio = residentPlanPortfolioSnapshot(input),
+):
+  | {
+      planInstanceId: string;
+      targetCardInstanceId?: string;
+      targetDefinitionId: string;
+      optionalExactTargetOnly: boolean;
+      sourceOptionId?: string;
+    }
+  | undefined {
+  if (input.side !== "runner") return undefined;
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand",
+  );
+  if (!executor) return undefined;
+  const moduleState = executor.moduleState as
+    | {
+        kind?: unknown;
+        signal?: {
+          phase?: unknown;
+          targetKind?: unknown;
+          actionIds?: unknown;
+          programSearchCommitment?: {
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+            targetDefinitionId?: unknown;
+            plannedAtStateVersion?: unknown;
+            selectedActionId?: unknown;
+            selectedAtStateVersion?: unknown;
+            engineContinuationAtStateVersion?: unknown;
+          };
+          recoverySearchCommitment?: {
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+            searchFilter?: unknown;
+            targetCardInstanceId?: unknown;
+            targetDefinitionId?: unknown;
+            plannedAtStateVersion?: unknown;
+            selectedActionId?: unknown;
+            selectedAtStateVersion?: unknown;
+            engineContinuationAtStateVersion?: unknown;
+          };
+        };
+      }
+    | undefined;
+  const signal = moduleState?.signal;
+  const programCommitment = signal?.programSearchCommitment;
+  const recoveryCommitment = signal?.recoverySearchCommitment;
+  if (!programCommitment && !recoveryCommitment) return undefined;
+  const commitment = recoveryCommitment ?? programCommitment;
+  const partialProfile =
+    programCommitment &&
+    typeof programCommitment.sourceDefinitionId === "string"
+      ? runnerPartialProgramSearchProfile(
+          input,
+          programCommitment.sourceDefinitionId,
+        )
+      : undefined;
+  const sourceChoice =
+    choice.source ===
+    `p3_38.stack_or_trash_program_install_source:${commitment?.sourceCardInstanceId}:${commitment?.sourceDefinitionId}:${choice.stateVersion}`;
+  const stackOption = sourceChoice
+    ? choice.options.find(
+        (option) =>
+          option.selectable !== false &&
+          option.id === "source_stack" &&
+          option.value === "stack" &&
+          option.card === undefined,
+      )
+    : undefined;
+  const matchingTargetOptions =
+    typeof recoveryCommitment?.targetCardInstanceId === "string"
+      ? choice.options.filter(
+          (option) =>
+            option.selectable !== false &&
+            option.card?.instanceId ===
+              recoveryCommitment.targetCardInstanceId &&
+            option.card?.definitionId === recoveryCommitment.targetDefinitionId,
+        )
+      : typeof commitment?.targetDefinitionId === "string"
+        ? choice.options.filter(
+            (option) =>
+              option.selectable !== false &&
+              option.card?.definitionId === commitment.targetDefinitionId,
+          )
+        : [];
+  const exactBinding =
+    portfolio !== undefined &&
+    moduleState?.kind === "development" &&
+    signal?.phase === "execute" &&
+    signal.targetKind === "capability" &&
+    Array.isArray(signal.actionIds) &&
+    typeof commitment?.sourceCardInstanceId === "string" &&
+    typeof commitment.sourceDefinitionId === "string" &&
+    typeof commitment.targetDefinitionId === "string" &&
+    typeof commitment.selectedActionId === "string" &&
+    signal.actionIds.includes(commitment.selectedActionId) &&
+    commitment.plannedAtStateVersion === commitment.selectedAtStateVersion &&
+    (commitment.engineContinuationAtStateVersion === undefined
+      ? commitment.selectedAtStateVersion === portfolio.stateVersion
+      : commitment.engineContinuationAtStateVersion ===
+          portfolio.stateVersion &&
+        typeof commitment.selectedAtStateVersion === "number" &&
+        commitment.selectedAtStateVersion < portfolio.stateVersion) &&
+    input.playerView.stateVersion === portfolio.stateVersion + 1 &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.side === "runner" &&
+    choice.sourceCardInstanceId === commitment.sourceCardInstanceId &&
+    choice.sourceCardDefinitionId === commitment.sourceDefinitionId &&
+    choice.kind === "select_cards" &&
+    (partialProfile
+      ? choice.minSelections === 0
+      : choice.minSelections === 1 && choice.maxSelections === 1) &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    (programCommitment === undefined ||
+      choice.cardSearchPresentation?.selectableFilter ===
+        (partialProfile ? "matching_cards" : "program")) &&
+    (recoveryCommitment === undefined ||
+      (choice.cardSearchPresentation?.sourceZone === "heap" &&
+        choice.cardSearchPresentation.destination === "grip" &&
+        choice.cardSearchPresentation.selectableFilter ===
+          recoveryCommitment.searchFilter)) &&
+    (partialProfile
+      ? choice.cardSearchPresentation?.sourceZone === "stack" &&
+        choice.cardSearchPresentation.destination === "grip" &&
+        Number.isSafeInteger(choice.maxSelections) &&
+        choice.maxSelections >= 0 &&
+        choice.maxSelections <= partialProfile.lookCount!
+      : sourceChoice
+        ? programCommitment !== undefined && stackOption !== undefined
+        : matchingTargetOptions.length > 0);
+  if (!exactBinding || !commitment || !portfolio) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The resident Runner development plan must preserve the exact search purpose, source, selected action, state version and useful target.",
+    );
+  }
+  return {
+    planInstanceId: executor.instanceId,
+    ...(stackOption ? { sourceOptionId: stackOption.id } : {}),
+    ...(typeof recoveryCommitment?.targetCardInstanceId === "string"
+      ? { targetCardInstanceId: recoveryCommitment.targetCardInstanceId }
+      : {}),
+    targetDefinitionId: commitment.targetDefinitionId as string,
+    optionalExactTargetOnly: partialProfile !== undefined,
+  };
+}
+
+export function advanceRunnerDevelopmentSearchChoice(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  decision: AiDecision,
+  previous: ResidentPlanPortfolio | undefined,
+): void {
+  const choice = input.playerView.pendingChoice;
+  if (
+    !choice ||
+    (!choice.source.startsWith(
+      "p3_38.stack_or_trash_program_install_source:",
+    ) &&
+      !choice.source.startsWith("p3_38.stack_or_trash_program_install:"))
+  )
+    return;
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === decision.actionId,
+  );
+  if (!action) return;
+  const binding = runnerDevelopmentSearchChoiceBinding(
+    input,
+    action,
+    choice,
+    previous,
+  );
+  if (!binding) return;
+  const selectedIds = decision.selectedChoices?.selectedOptionIds;
+  const selectedTarget =
+    Array.isArray(selectedIds) && selectedIds.length === 1
+      ? choice.options.find((option) => option.id === selectedIds[0])
+      : undefined;
+  const exactPayload = binding.sourceOptionId
+    ? JSON.stringify(selectedIds) === JSON.stringify([binding.sourceOptionId])
+    : selectedTarget?.card?.definitionId === binding.targetDefinitionId;
+  const executor = result.portfolio?.instances.find(
+    (entry) => entry.instanceId === binding.planInstanceId,
+  );
+  const state = executor?.moduleState as DevelopmentSearchState | undefined;
+  if (
+    result.lane !== "engine_window" ||
+    result.origin.rootPlanInstanceId !== previous?.rootForegroundInstanceId ||
+    result.origin.leafPlanInstanceId !== binding.planInstanceId ||
+    result.portfolio?.executorInstanceId !== binding.planInstanceId ||
+    decision.selectedChoices?.choiceId !== choice.choiceId ||
+    !exactPayload ||
+    !state?.signal?.programSearchCommitment
+  ) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Preserve the exact Runner search executor and selected source through the source-to-target observation boundary.",
+    );
+  }
+  state.signal.programSearchCommitment.engineContinuationAtStateVersion =
+    input.playerView.stateVersion;
+  result.portfolio!.stateVersion = input.playerView.stateVersion;
+}
+
+type DevelopmentSearchState = {
+  kind: "development";
+  signal: RunnerDevelopmentSignal;
+};
+
+export function resolvePlanBoundRunnerDevelopmentSearchChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "runner" ||
+    !choice ||
+    (!choice.source.startsWith(
+      "p3_38.stack_or_trash_program_install_source:",
+    ) &&
+      !choice.source.startsWith("p3_38.stack_or_trash_program_install:"))
+  )
+    return;
+  const action = context.input.legalActions.find(
+    (entry) => entry.type === "resolve_choice",
+  );
+  if (!action) return;
+  const binding = runnerDevelopmentSearchChoiceBinding(
+    context.input,
+    action,
+    choice,
+    previous,
+  );
+  if (!binding || !previous?.rootForegroundInstanceId) return;
+  return {
+    actionId: action.actionId,
+    reasonCode: binding.sourceOptionId
+      ? "plan_bound_runner_development_search_source"
+      : "plan_bound_runner_development_search_target",
+    origin: {
+      rootPlanInstanceId: previous.rootForegroundInstanceId,
+      leafPlanInstanceId: binding.planInstanceId,
+      side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
 }

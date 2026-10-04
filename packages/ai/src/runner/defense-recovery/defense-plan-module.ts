@@ -174,6 +174,8 @@ function defensePhase(
   actionDispositions?: readonly PlanActionDisposition[],
 ): DefenseState["phase"] | undefined {
   const openPhases: DefenseState["phase"][] = [];
+  if (signals.terminalDamageReplacementBinding)
+    openPhases.push("replace_terminal_damage");
   if (signals.discardChoiceBinding) openPhases.push("discard_window");
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
@@ -258,7 +260,8 @@ function defenseCandidates(
   );
   return actionCandidates
     .filter((candidate) => {
-      if (confirmedDamageTaxedDrawActionIds.has(candidate.actionId)) return false;
+      if (confirmedDamageTaxedDrawActionIds.has(candidate.actionId))
+        return false;
       if (
         (phase === "fund_tag_clear" || phase === "build_reaction_reserve") &&
         (actionDispositions ?? []).some(
@@ -269,6 +272,11 @@ function defenseCandidates(
       }
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
+      if (phase === "replace_terminal_damage")
+        return (
+          signals.terminalDamageReplacementBinding?.actionId ===
+          candidate.actionId
+        );
       if (
         phase === "forgo_unsafe_run" ||
         phase === "forgo_exhausted_options" ||
@@ -404,6 +412,11 @@ function defenseCapability(
   phase: DefenseState["phase"],
   candidates: PlanMaterialization["candidates"],
 ): PlanRouteStepCapability {
+  if (phase === "replace_terminal_damage")
+    return {
+      capabilityId: "replace_terminal_damage",
+      semanticActionTypes: ["choice.resolve"],
+    };
   if (phase === "discard_window")
     return {
       capabilityId: "resolve_plan_bound_runner_discard",
@@ -482,6 +495,7 @@ function defensePhaseValue(
   phase: DefenseState["phase"],
   signals: RunnerDefenseSignals,
 ): number {
+  if (phase === "replace_terminal_damage") return 10_000;
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
   if (phase === "install_defense_support") return 60;
@@ -498,6 +512,7 @@ function defensePhaseValue(
 function defensePriorityClass(
   signals: RunnerDefenseSignals,
 ): "P2" | "P3" | "P4" | "P5" {
+  if (signals.terminalDamageReplacementBinding) return "P2";
   if (signals.discardChoiceBinding) return "P2";
   if (
     signals.pendingDamage > 0 ||

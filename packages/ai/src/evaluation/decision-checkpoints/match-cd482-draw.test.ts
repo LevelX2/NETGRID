@@ -60,6 +60,26 @@ it("D29 does not create an unbound second draw plan after the coverage draw with
   const { input, runtime } = capture;
   expect(input.playerView.own.gripOrHq).toHaveLength(8);
   expect(input.playerView.own.clicks).toBe(1);
+  // The complete current turn contains no steal. Its historical LegalAction
+  // projection is updated to the current Engine's bound zero-point quote.
+  expect(
+    input.eventTail
+      .filter((event) => event.turnSerial === 7)
+      .map((event) => event.type),
+  ).toEqual(["end_turn", "play_event", "gain_credit", "gain_credit"]);
+  const conditionalPointEvent = input.legalActions.find(
+    (action) => action.source === "runner_onr_v1_090_hot-tip-for-wns_1",
+  )!;
+  expect(conditionalPointEvent.payload).toMatchObject({
+    runnerConditionalAgendaPointQuoteSchema:
+      "runner-conditional-agenda-point-v1",
+    runnerConditionalAgendaPointQuoteStateVersion: input.playerView.stateVersion,
+    runnerConditionalAgendaPointQuoteSourceCardInstanceId:
+      conditionalPointEvent.source,
+    runnerConditionalAgendaPointQuoteSourceCapabilityId:
+      conditionalPointEvent.abilityRef!.sourceAbilityId,
+    runnerConditionalAgendaPointQuoteAmount: 0,
+  });
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,

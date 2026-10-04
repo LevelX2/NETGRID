@@ -8,7 +8,7 @@ export function runnerImmediateAgendaPointTerminalWinSignals(
   candidates: readonly ActionSemanticCandidate[],
 ): RunnerTerminalWinSignal[] {
   return candidates.flatMap((candidate) => {
-    const agendaPointAmount = runnerImmediateAgendaPointGain(candidate);
+    const agendaPointAmount = runnerImmediateAgendaPointGain(candidate, input);
     if (
       agendaPointAmount === undefined ||
       input.playerView.own.agendaPoints + agendaPointAmount <

@@ -125,9 +125,14 @@ Ursache erhält eine neu reservierte Fall-ID.
 Wählt der Nutzer einen begrenzten Abschluss, werden Quellstand und ursprüngliche
 Seedliste vor der Erfassung festgehalten. Jeder geplante Seed wird einmal
 versucht; weitere Findings kommen mit Ursache und Nachweisgrenze in den Bericht.
-Sie lösen keine automatische Reparatur oder neue vollständige Spielrunde aus.
+Sie starten keine neue vollständige Spielrunde. Belegte generische Ursachen
+werden im beauftragten Fixumfang nach der Erfassung behoben und gezielt geprüft;
+offene Reviews benennen den noch fehlenden Nachweis. Ein begrenzter Abschluss
+beendet die Wiederholung von 40er-Runden, nicht die beauftragte Fehlerbehebung.
+Nur ein ausdrücklicher Auftrag zur reinen Berichterstattung beendet die Umsetzung.
 Gezielte Kontrollläufe benötigen eine konkrete Prüffrage und werden getrennt
-von der ursprünglichen Population ausgewiesen.
+von der ursprünglichen Population ausgewiesen; die ursprünglichen Ergebnisse
+bleiben ihrem ursprünglichen Quellstand zugeordnet.
 
 Ein technischer Abbruch hält die ganze Runde diagnostisch: `finalBaseGames`
 bleibt null. Terminale Beobachtungen und fehlgeschlagene Versuche erhalten

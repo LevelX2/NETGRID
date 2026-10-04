@@ -43,6 +43,12 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Der aktuelle Payoff wird pro Runaktion am tatsächlichen `accessServerId`
+bewertet. Ein Zugang über Archives mit anschließendem HQ-Zugriff übernimmt
+nicht den bekannten Nullnutzen eines normalen Archives-Runs. Auch innerhalb
+derselben Zielservergruppe bleiben beide Action-Routen getrennt zulässig
+beziehungsweise ausgeschlossen (SP-509).
+
 Die bekannten Central-/Remote-Access-Payoffs veröffentlichen Zielidentitäten
 und das allgemeine Trash-Creditbudget als `RunnerAccessFacts`. Die Runbewertung
 transportiert diese Fakten vollständig bis zum gebundenen Access-Commitment;
@@ -846,6 +852,14 @@ Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Die strategische Programmsuche zählt bekannte eigene Instanzen in Grip, Rig,
+Heap, Score Area, Set-aside und Removed genau einmal. Set-aside ist kein
+verfügbarer Stackbestand. Ein fehlendes Ziel eröffnet keinen Suchplan.
+Eine vorgebundene Stack-Suche bewahrt Quelle, Ziel und Executor durch die
+separate Quellwahl, eventuelle Zahlung und anschließende Kartenwahl. Die
+Quellwahl setzt die Continuation-StateVersion fort; der Payloadresolver darf
+kein anderes Ziel erfinden (SP-504/SP-505).
+
 Eine Zahlung für das Trash einer vollständig gebrochenen, gerade passierten
 ICE ist kein Einkommen. Die typisierte `ice_trash`-Wirkung mit Ziel
 `trash_fully_broken_passed_ice` und Timing `encounter_resolution` erhält die
@@ -1388,6 +1402,13 @@ LegalActions. Das tatsächliche Nachziehen bleibt beim bestehenden Hand-Owner;
 jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.
 
 ## 7. `runner.defense_and_recovery`
+
+Die Engine-Choice `v121.replacement.damage` kann eine ausdrücklich angebotene
+Rettung aus der eigenen bekannten Grip enthalten. Der Defense-Owner bindet
+sie vor der Payloadauflösung an exakte Quelle, Option, StateVersion und
+LegalAction. Der Resolver validiert ausschließlich diese Bindung. Eine
+unbekannte oder widersprüchliche Ersatzwirkung scheitert sichtbar; sie wird
+nicht aus dem technischen Optionsnamen abgeleitet (SP-508).
 
 Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
 `defense-signals.ts` bündelt Schutzinstallationen, Handpuffer, Tag-Clear-
@@ -2605,6 +2626,13 @@ aus; fehlende Quotes oder Bindungen scheitern sichtbar. Eine notwendige
 anschließende MU-Auswahl verbleibt bei der bestehenden Programmersatzlogik.
 
 ## 14. `runner.score_installed_agenda` und `runner.secure_terminal_win`
+
+Bedingte direkte Runner-Agendapunkte erhalten zusätzlich zur strukturierten
+Wirkung eine private Engine-Quote für den aktuellen Zustand, die konkrete
+Quellinstanz und Capability. Die Engine entscheidet die Black-Ops-Bedingung
+aus den realen Turnflags. Quote null eröffnet keinen Punkteplan; Quote eins
+erreicht je nach Siegschwelle den bestehenden Development- oder Terminal-Owner.
+Fehlende, veraltete oder fremd gebundene Quotes scheitern sichtbar (SP-512).
 
 **Status:** registrierte Core- beziehungsweise Tactical-Owner.
 `score_installed_agenda` besitzt die legale Score-Konversion einer eigenen

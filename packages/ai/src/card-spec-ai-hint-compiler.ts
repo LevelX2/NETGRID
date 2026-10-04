@@ -1700,7 +1700,20 @@ function appendGenericAbilityEffect(
     });
     overlay.functionSignals.push("corp.random_discard_pressure");
   }
-  if (effect.kind === "gain_runner_event_agenda_point") {
+  if (
+    effect.kind === "gain_runner_event_agenda_point" ||
+    effect.kind === "gain_runner_event_agenda_point_if_liberated_agenda_subtype"
+  ) {
+    if (
+      effect.kind ===
+      "gain_runner_event_agenda_point_if_liberated_agenda_subtype"
+    ) {
+      if (effect.subtype !== "black_ops" || effect.amount !== 1)
+        throw new Error(
+          "card_spec_unknown_conditional_runner_agenda_point_shape",
+        );
+      overlay.conditions.push({ kind: "requires_liberated_black_ops_agenda" });
+    }
     overlay.effects.push({
       kind: "scored_agenda_action",
       scope: "runner",

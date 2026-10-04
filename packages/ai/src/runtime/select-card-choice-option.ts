@@ -15,6 +15,8 @@ export function selectedForcedChoiceOptionIds(
   ) {
     return [];
   }
+  if (choice.selectionOrdering === "ordered" && selectableOptions.length > 1)
+    return undefined;
   if (
     choice.minSelections > 0 &&
     selectableOptions.length === choice.minSelections &&

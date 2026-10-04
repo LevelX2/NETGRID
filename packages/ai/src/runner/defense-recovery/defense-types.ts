@@ -13,6 +13,15 @@ export type RunnerDefenseSignals = {
   forgoExhaustedStandardCapacity?: boolean;
   forgoTerminalDeckPressureCapacity?: boolean;
   discardChoiceBinding?: RunnerDiscardChoiceBinding;
+  terminalDamageReplacementBinding?: {
+    actionId: string;
+    choiceId: string;
+    stateVersion: number;
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    selectedOptionId: string;
+    optionIds: string[];
+  };
   tagClearFundingNeed?: {
     needId: "runner-defense-tag-clear-funding";
     parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
@@ -68,6 +77,7 @@ export type DefenseState = {
     | "build_hand_buffer"
     | "build_reaction_reserve"
     | "discard_window"
+    | "replace_terminal_damage"
     | "forgo_unsafe_run"
     | "forgo_exhausted_options"
     | "forgo_terminal_deck_pressure";

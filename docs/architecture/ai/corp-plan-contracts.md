@@ -2173,6 +2173,17 @@ importiert weder die Tactical-Registry noch den allgemeinen Choice-Dispatcher.
 
 ## 10. `corp.hand_and_agenda_management`
 
+Eine freie R&D-Spitzensortierung bleibt auch bei `minSelections` gleich
+Optionenzahl eine echte Reihenfolgeentscheidung. Die Engine kennzeichnet
+`selectionOrdering: ordered` und bindet die eigene Quelle. Der Hand-Owner
+bindet die vollständige sichtbare Permutation und die aktuelle vollständige
+R&D-Zugriffsquote. Ohne bereits gebundenen eigenen Draw stellt er Nichtagenden
+vor Agenden, dann kleinere vor größere Punktwerte; bei gleicher Exposition
+ordnet der vorhandene Handhaltewert. Das verbessert den nächsten Zugriffspräfix
+und behauptet keinen optimalen mehrzügigen Deckplan. Der Resolver übernimmt
+nur die vorher gebundene Permutation; ein generischer Mengenresolver darf
+mehrere geordnete Optionen nicht als erzwungen übernehmen (SP-513).
+
 Der Owner liegt unter `packages/ai/src/corp/hand-management/`.
 `hand-development-signals.ts` komponiert Kartenentwicklung und den endlichen
 Overflow-Parent; `hand-overflow.ts` revalidiert dessen konkrete Konversionen.

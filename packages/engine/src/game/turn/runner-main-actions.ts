@@ -159,7 +159,7 @@ function runnerEventCapabilityBinding(
 ):
   | {
       abilityRef: NonNullable<LegalAction["abilityRef"]>;
-      payload: Record<string, string>;
+      payload: NonNullable<LegalAction["payload"]>;
     }
   | undefined {
   const implementation =
@@ -177,6 +177,26 @@ function runnerEventCapabilityBinding(
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: capability.capabilityKey,
       cardImplementationAbilityId: sourceAbilityId,
+      ...(ability?.effects?.some(
+        (effect: { kind: string }) =>
+          effect.kind ===
+          "gain_runner_event_agenda_point_if_liberated_agenda_subtype",
+      )
+        ? {
+            runnerConditionalAgendaPointQuoteSchema:
+              "runner-conditional-agenda-point-v1",
+            runnerConditionalAgendaPointQuoteStateVersion:
+              host.state.stateVersion,
+            runnerConditionalAgendaPointQuoteSourceCardInstanceId:
+              sourceCardInstanceId,
+            runnerConditionalAgendaPointQuoteSourceCapabilityId:
+              sourceAbilityId,
+            runnerConditionalAgendaPointQuoteAmount:
+              host.state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true
+                ? 1
+                : 0,
+          }
+        : {}),
       ...(ability === undefined
         ? { cardImplementationEffectKind: capability.kind }
         : {}),

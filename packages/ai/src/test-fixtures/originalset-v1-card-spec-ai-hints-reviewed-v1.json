@@ -5680,16 +5680,69 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["score_now"],
+        "planRoles": [
+          "score_now"
+        ],
         "valueHints": {},
-        "strategicRole": ["payoff_anchor"],
-        "lineSupport": ["score_closeout"],
+        "strategicRole": [
+          "payoff_anchor"
+        ],
+        "lineSupport": [
+          "score_closeout"
+        ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype"
+            "capabilityKey": "abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype",
+            "effects": [
+              {
+                "kind": "scored_agenda_action",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "agenda_points",
+                "target": "runner.agenda_point_conversion",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "runner.agenda_point_conversion"
+            ],
+            "conditions": [
+              {
+                "kind": "requires_liberated_black_ops_agenda"
+              }
+            ]
           }
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "agenda_points",
+            "target": "runner.agenda_point_conversion",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "runner.agenda_point_conversion"
+        ],
+        "actionTacticSignals": [
+          "effect:scored_agenda_action",
+          "effect_scope:runner",
+          "effect_timing:action",
+          "runner.agenda_point_conversion"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_liberated_black_ops_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
