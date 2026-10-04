@@ -1566,6 +1566,13 @@ zusätzliche, außerhalb dieser Quote wirksame Encountermechanik. Eine leere
 temporäre Begegnung ohne sonstige Wirkung erhält keine produktive Zulassung.
 Die nativen Kontrollzustände und ihre Budget-, Profil-, Bindungs- und
 Decline-Gegenproben liegen in `meta498-temporary-encounter-defense.test.ts`.
+Eine vollständig gequotete kostenlose Vollbreakantwort liefert weder
+Zugriffsschutz noch aktuelle Runnerkosten. Solche Optionen werden vor dem
+Kostenvergleich ausgeschlossen, auch bei nur einem ICE-Angebot oder einem
+Fort ohne Agenda. Bleibt keine Option mit aktuellem Nutzen, bindet derselbe
+Owner ausdrücklich die vorhandene Decline-Option. Fehlende oder veraltete
+Quotes bleiben ein Bindungsfehler; unmodellierte zusätzliche Wirkungen werden
+nicht als kostenlos brechbar behandelt.
 
 Programmzerstörungs-Choices aus ICE-Subroutinen gehören ebenfalls zu
 `corp.defend_servers`. `program-trash-signal.ts` bindet das Ziel vor der

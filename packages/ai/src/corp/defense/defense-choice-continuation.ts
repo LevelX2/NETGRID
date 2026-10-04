@@ -105,13 +105,14 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
     (entry) =>
       delayedSuccessOptionHasCurrentEffect(entry.option.metadata) === true,
   );
-  const selectedOption =
+  const preference =
     productiveIceOptions.length > 0
       ? preferUnbreakableEquivalentTemporaryIce(
           context.input,
           productiveIceOptions.map((entry) => entry.option),
         )
-      : decline;
+      : null;
+  const selectedOption = preference === null ? decline : preference;
   const choiceActions = context.input.legalActions.filter(
     (action) => action.type === "resolve_choice",
   );
@@ -318,7 +319,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
       ),
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
-      removalCondition: `Resolve Dr. Dreff only from the resident corp.defend_servers owner, exact rezzed source on the attacked fort, continuous matching run event chain and complete Engine-priced effect facts. Choose the cheapest current-effect option or the bound legal decline when every option only affects later encounters. Failed=${delayedSuccessFailedChecks || "unknown"}.`,
+      removalCondition: `Resolve Dr. Dreff only from the resident corp.defend_servers owner, exact rezzed source on the attacked fort, continuous matching run event chain and complete Engine-priced effect facts. Choose a current defense option or the bound legal decline when no option provides current defense value, including a complete free full break. Failed=${delayedSuccessFailedChecks || "unknown"}.`,
     });
   }
   moduleState.delayedSuccessChoiceBinding = {

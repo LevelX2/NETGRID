@@ -18,8 +18,8 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 
 afterEach(() => resetResidentPlanPortfolioMemory());
 
-function fixture(game: 8 | 29 | 36) {
-  const decision = { 8: 408, 29: 187, 36: 97 }[game];
+function fixture(game: 8 | 29 | 36, requestedDecision?: number) {
+  const decision = requestedDecision ?? { 8: 408, 29: 187, 36: 97 }[game];
   const native = JSON.parse(
     readFileSync(
       new URL(
@@ -256,6 +256,41 @@ it.each(["stale", "malformed"])(
       asp.metadata!.temporaryEncounterBreakQuoteJson as string,
     );
     asp.metadata!.temporaryEncounterBreakQuoteJson =
+      variant === "stale"
+        ? JSON.stringify({ ...quote, stateVersion: quote.stateVersion - 1 })
+        : "{";
+    expect(() => decide(native)).toThrow("window_origin_missing");
+  },
+);
+
+it("SP-530 preserves the native HQ card instead of spending it against a free full break", () => {
+  const native = fixture(29, 280);
+  const choice = native.input.playerView.pendingChoice!;
+  expect(choice.options).toHaveLength(2);
+  expect(
+    JSON.parse(
+      choice.options[1]!.metadata!.temporaryEncounterBreakQuoteJson as string,
+    ),
+  ).toMatchObject({
+    status: "breakable",
+    requiredCredits: 0,
+    stateVersion: native.input.playerView.stateVersion,
+    runId: native.input.playerView.run!.runId,
+    cardId: choice.options[1]!.value,
+    serverId: "hq",
+  });
+  expect(decide(native)).toEqual(["decline"]);
+});
+
+it.each(["stale", "malformed"])(
+  "fails closed on a %s single-option break quote",
+  (variant) => {
+    const native = fixture(29, 280);
+    const option = native.input.playerView.pendingChoice!.options[1]!;
+    const quote = JSON.parse(
+      option.metadata!.temporaryEncounterBreakQuoteJson as string,
+    );
+    option.metadata!.temporaryEncounterBreakQuoteJson =
       variant === "stale"
         ? JSON.stringify({ ...quote, stateVersion: quote.stateVersion - 1 })
         : "{";
