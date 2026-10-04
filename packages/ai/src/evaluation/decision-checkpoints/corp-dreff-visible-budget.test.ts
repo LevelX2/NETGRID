@@ -122,6 +122,41 @@ it("includes current run-only credits in the visible break response", () => {
   expect(selectedOptionId(decision)).toContain("data-wall");
 });
 
+it("ends a real temporary Asp encounter against the full four-credit runner trace response", () => {
+  let state = choiceState(4, 0, false, true, true);
+  const initial = structuredClone(state);
+  const eventStart = state.eventLog.length;
+  const decision = chooseCorpAction(corpInput(state));
+  expect(selectedOptionId(decision)).toContain("asp");
+  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+  });
+  state = applyMatching(
+    state,
+    (a) => a.actionId === decision.actionId,
+    selectedOptionId(decision),
+  );
+  for (let step = 0; !state.trace && step < 8; step++)
+    state = applyMatching(state, (a) => a.type === "continue_run");
+  expect(state.trace).toMatchObject({
+    traceLimit: 5,
+    traceRulesProfile: "modern_open",
+  });
+  const bid = chooseCorpAction(corpInput(state));
+  expect(selectedOptionId(bid)).toBe("bid_0");
+  state = applyMatching(state, (a) => a.actionId === bid.actionId, "bid_0");
+  state = applyMatching(state, (a) => a.type === "resolve_choice", "bid_4");
+  for (let step = 0; state.run && step < 8; step++)
+    state = applyMatching(state, (a) => a.type === "continue_run");
+  expect(state.run).toBeUndefined();
+  expect(getPlayerView(state, "runner").own.agendaPoints).toBe(0);
+  expect(state.corp.credits).toBe(8);
+  const replay = replayEvents(initial, state.eventLog.slice(eventStart));
+  expect(replay.ok).toBe(true);
+  expect(hashGameState(replay.state)).toBe(hashGameState(state));
+});
+
 it("already values a BBS pool more highly behind effective protection", () => {
   const state = choiceState(1);
   delete state.run;
@@ -249,10 +284,12 @@ function choiceState(
   badPublicity = 0,
   scoring = false,
   terminal = true,
+  trace = false,
 ): GameState {
   const corpCards = [
-    "onr_v1_237_data-wall",
-    "onr_v1_279_wall-of-static",
+    ...(trace
+      ? ["onr_v1_221_asp", "onr_v1_243_fetch-4-0-1"]
+      : ["onr_v1_237_data-wall", "onr_v1_279_wall-of-static"]),
     "onr_v1_358_dr-dreff",
     "onr_v1_199_employee-empowerment",
     "onr_proteus_008_project-zurich",
@@ -261,6 +298,7 @@ function choiceState(
   ];
   let state = createGameAfterSetup({
     seed: "dreff-visible-budget",
+    traceRulesProfile: "modern_open",
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
@@ -273,9 +311,13 @@ function choiceState(
     runnerDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.runner,
       cards: [
-        { id: "onr_v1_039_krash", quantity: 1 },
+        {
+          id: trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash",
+          quantity: 1,
+        },
         ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter(
-          (c) => c.id !== "onr_v1_039_krash",
+          (c) =>
+            c.id !== (trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash"),
         ),
       ],
     },
@@ -307,7 +349,10 @@ function choiceState(
     );
   }
   for (const id of corpCards.slice(0, 2)) moveCorpCardToHq(state, id);
-  installRunnerProgramForTest(state, "onr_v1_039_krash");
+  installRunnerProgramForTest(
+    state,
+    trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash",
+  );
   state.runner.credits = credits;
   state.corp.credits = 10;
   state.corp.clicks = 0;
