@@ -151,6 +151,12 @@ it("distinguishes the forced set from a free ordered permutation", () => {
   expect(selectedForcedChoiceOptionIds(choice, choice.options)).toBeUndefined();
   expect(
     selectedForcedChoiceOptionIds(
+      { ...choice, minSelections: 0, maxSelections: 0 },
+      choice.options,
+    ),
+  ).toEqual([]);
+  expect(
+    selectedForcedChoiceOptionIds(
       { ...choice, selectionOrdering: "unordered" },
       choice.options,
     ),

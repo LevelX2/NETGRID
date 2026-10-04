@@ -2133,7 +2133,12 @@
             "cardId": "runner_onr_v1_090_hot-tip-for-wns_1",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
             "cardImplementationAbilityId": "onr_v1_090_hot-tip-for-wns:abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype",
-            "cardImplementationAbilityKey": "abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype"
+            "cardImplementationAbilityKey": "abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype",
+            "runnerConditionalAgendaPointQuoteSchema": "runner-conditional-agenda-point-v1",
+            "runnerConditionalAgendaPointQuoteStateVersion": 52,
+            "runnerConditionalAgendaPointQuoteSourceCardInstanceId": "runner_onr_v1_090_hot-tip-for-wns_1",
+            "runnerConditionalAgendaPointQuoteSourceCapabilityId": "onr_v1_090_hot-tip-for-wns:abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype",
+            "runnerConditionalAgendaPointQuoteAmount": 0
           }
         },
         {
@@ -4072,7 +4077,12 @@
           "cardId": "runner_onr_v1_090_hot-tip-for-wns_1",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
           "cardImplementationAbilityId": "onr_v1_090_hot-tip-for-wns:abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype",
-          "cardImplementationAbilityKey": "abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype"
+          "cardImplementationAbilityKey": "abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype",
+          "runnerConditionalAgendaPointQuoteSchema": "runner-conditional-agenda-point-v1",
+          "runnerConditionalAgendaPointQuoteStateVersion": 52,
+          "runnerConditionalAgendaPointQuoteSourceCardInstanceId": "runner_onr_v1_090_hot-tip-for-wns_1",
+          "runnerConditionalAgendaPointQuoteSourceCapabilityId": "onr_v1_090_hot-tip-for-wns:abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype",
+          "runnerConditionalAgendaPointQuoteAmount": 0
         }
       },
       {

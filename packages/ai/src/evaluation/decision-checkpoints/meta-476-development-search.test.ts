@@ -10,7 +10,7 @@ import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { runnerProgramSearchStrategyDevelopmentSignals } from "../../runner/hand-development/development-signals";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
+import { AI_HINTS_BY_CARD } from "../../catalog-ai-hint-authority";
 
 function native(game: number) {
   const cp = JSON.parse(
@@ -91,18 +91,9 @@ it.each([38, 40])(
       actionType: "play_event",
       sourceCardInstanceId: source.sourceCardInstanceId,
       sourceDefinitionId: source.sourceDefinitionId,
-      functionalEffects: [
-        { kind: "search", scope: "stack", target: "program" },
-      ],
+      functionalEffects: AI_HINTS_BY_CARD.get(source.sourceDefinitionId)!.effects,
     } as unknown as ActionSemanticCandidate;
-    const strategy = {
-      setupEngine: ["runner.search_breaker_setup"],
-      engineLineIds: ["runner.engine.compatible_recurring_economy"],
-      engineProviders: input.ownDeckSnapshot!.cards.map((c) => ({
-        cardId: c.cardId,
-        capabilities: ["runner.economy.recurring_breaker"],
-      })),
-    } as unknown as RunnerStrategicIntentProfile;
+    const strategy = input.ownRunnerStrategicIntent!;
     const plans = runnerProgramSearchStrategyDevelopmentSignals(
       input,
       [candidate],
@@ -111,6 +102,7 @@ it.each([38, 40])(
       [],
     );
     if (game === 38) expect(plans).toHaveLength(1);
+    if (game === 40) expect(plans).toHaveLength(0);
     for (const plan of plans) {
       const target = plan.programSearchCommitment!.targetDefinitionId;
       expect(target).not.toBe("onr_v1_011_cloak");
