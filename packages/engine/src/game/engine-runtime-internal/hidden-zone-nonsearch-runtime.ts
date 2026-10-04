@@ -29,6 +29,7 @@ import * as nonSearchMemory from "../install/nonsearch-program-install-memory";
 import { parseTemporaryInstallChoiceSource } from "./hidden-zone-nonsearch-choice-source";
 import { buildCanonicalPaidIceRezActions } from "../run/run-rez-window";
 import { rezCard as executeRezCard } from "../rez/rez-card";
+import { projectForcedIceRezOptionQuote } from "../rez/forced-rez-option-quote";
 
 export function createHiddenZoneNonSearchRuntime(
   deps: RuntimeDeps,
@@ -413,10 +414,12 @@ export function createHiddenZoneNonSearchRuntime(
       publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
     const choiceTargetLabel = icePositionLabel || "ICE";
     const rezActions = forcedRezActions(state, selectedId);
+    const choiceId = `card_implementation_corp_choice_rez_or_trash_ice_decision_${state.stateVersion + 1}`;
+    const choiceSource = `card_implementation.corp_choice_rez_or_trash_ice_decision:${selectedId}:${state.stateVersion + 1}`;
     state.pendingChoice = {
-      choiceId: `card_implementation_corp_choice_rez_or_trash_ice_decision_${state.stateVersion + 1}`,
+      choiceId,
       side: "corp",
-      source: `card_implementation.corp_choice_rez_or_trash_ice_decision:${selectedId}:${state.stateVersion + 1}`,
+      source: choiceSource,
       prompt: `Rez-oder-Trash-Entscheidung für ${choiceTargetLabel}`,
       presentationKey: "rez_or_trash_ice",
       kind: "select_option",
@@ -430,6 +433,17 @@ export function createHiddenZoneNonSearchRuntime(
             publicLabel: `${choiceTargetLabel} gerezzt`,
             value: optionId,
             metadata: { cardTitle: choiceTargetLabel, optionKind: "rez" },
+            ...(action.payload?.variableRezKind
+              ? {
+                  forcedIceRezQuote: projectForcedIceRezOptionQuote(
+                    state,
+                    selectedId,
+                    action,
+                    { choiceId, choiceSource, optionId },
+                    deps.rezCardHost,
+                  ),
+                }
+              : {}),
           };
         }),
         {

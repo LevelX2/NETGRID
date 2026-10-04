@@ -1,4 +1,5 @@
 import { sanitizeCorpStartDrawQuote } from "./runtime/corp-start-draw-quote-input";
+import { sanitizeForcedIceRezChoiceQuote } from "./runtime/forced-ice-rez-choice-quote";
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -3429,6 +3430,27 @@ function sanitizeVisibleChoiceRequest(
           servers,
         },
       );
+      const forcedServer = servers.find((server) =>
+        server.ice.some((ice) => choice.source.includes(`:${ice.instanceId}:`)),
+      );
+      const forcedIceRezQuote =
+        playerViewSide === "corp" && choice.side === "corp"
+          ? sanitizeForcedIceRezChoiceQuote(
+              option.forcedIceRezQuote,
+              {
+                choice,
+                option,
+                stateVersion: playerViewStateVersion,
+                ownCredits,
+                ownAgendaPoints,
+                ice: forcedServer?.ice.find((ice) =>
+                  choice.source.includes(`:${ice.instanceId}:`),
+                ),
+                serverId: forcedServer?.id,
+              },
+              sanitizeVisibleEffectiveIceRunQuote,
+            )
+          : undefined;
       return {
         id: option.id,
         label: option.label,
@@ -3442,6 +3464,7 @@ function sanitizeVisibleChoiceRequest(
         ...(metadata ? { metadata } : {}),
         ...(option.card ? { card: sanitizeVisibleCard(option.card) } : {}),
         ...(hqInstallRezOptionQuote ? { hqInstallRezOptionQuote } : {}),
+        ...(forcedIceRezQuote ? { forcedIceRezQuote } : {}),
       };
     }),
     minSelections: choice.minSelections,

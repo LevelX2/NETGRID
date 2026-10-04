@@ -69,6 +69,9 @@ export function visibleChoice(
           ...(option.metadata ? { metadata: { ...option.metadata } } : {}),
           ...(card ? { card } : {}),
           ...(hqInstallRezOptionQuote ? { hqInstallRezOptionQuote } : {}),
+          ...(choice.side === "corp" && option.forcedIceRezQuote
+            ? { forcedIceRezQuote: structuredClone(option.forcedIceRezQuote) }
+            : {}),
         };
       }),
       minSelections: choice.minSelections,

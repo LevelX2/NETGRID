@@ -63,6 +63,15 @@ side-sichere Neuquote des anschließenden Zugriffs.
 
 ## Typisierte Recovery- und Spielkosten
 
+Direktes `lifecycle.on_score.gain_credits` erzeugt aus der mechanischen Quelle
+eine endliche Creditgutschrift mit `when_scored`-Timing und `score.credit_gain`.
+Ein Agenda-Scoringeffekt beziehungsweise eine eigene Ability schließt die
+Klassifizierung `no_ability_agenda` aus. Die kanonischen Corp-Facts erfassen
+denselben unbedingten liquiden Ertrag auch für den bestehenden
+Score-/Defense-Reservehorizont. Diese Gutschrift bezahlt keine vorangehenden
+Advances. Bedingte Schwellen, Counterbanken und andere zusammengesetzte
+Scoreeffekte begründen diesen Nachweis nicht; Nebenrisiken bleiben separat.
+
 Tagprävention übernimmt Verbrauch und Zahlung getrennt aus
 `tagPreventionSources.cost`. Nur `trash_source` und
 `credit_and_trash_source` kennzeichnen die Quelle als endlich und erzeugen

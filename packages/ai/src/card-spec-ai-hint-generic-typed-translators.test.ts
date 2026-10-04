@@ -82,6 +82,67 @@ const activated = (effects: unknown[]) => ({
 });
 
 describe("generic typed CardSpec AI translators", () => {
+  it("projects direct lifecycle score credits without strategy annotations and keeps conditional pools distinct", () => {
+    const charity = actualHint("onr_proteus_002_charity-takeover");
+    expect(charity.roles).not.toContain("no_ability_agenda");
+    expect(charity.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "economy",
+        scope: "corp",
+        timing: "when_scored",
+        target: "score.credit_gain",
+        amount: 9,
+      }),
+    );
+    expect(charity.functionSignals).toEqual(
+      expect.arrayContaining(["economy.burst_credit", "score.credit_gain"]),
+    );
+    const renamed = syntheticHint(
+      {
+        lifecycle: {
+          on_score: [
+            {
+              kind: "gain_credits",
+              recipient: "corp",
+              amount: 6,
+              visibility: "public",
+            },
+          ],
+        },
+      },
+      { side: "corp", type: "agenda" },
+    );
+    expect(renamed.effects).toContainEqual(
+      expect.objectContaining({
+        timing: "when_scored",
+        target: "score.credit_gain",
+        amount: 6,
+      }),
+    );
+    expect(() =>
+      syntheticHint(
+        {
+          lifecycle: {
+            on_score: [
+              {
+                kind: "gain_credits",
+                recipient: "corp",
+                amount: -1,
+                visibility: "public",
+              },
+            ],
+          },
+        },
+        { side: "corp", type: "agenda" },
+      ),
+    ).toThrow("card_spec_unknown_score_credit_gain_shape");
+    expect(actualHint("onr_v1_196_corporate-war").effects).not.toContainEqual(
+      expect.objectContaining({ target: "score.credit_gain" }),
+    );
+    expect(actualHint("onr_v1_209_political-coup").effects).not.toContainEqual(
+      expect.objectContaining({ target: "score.credit_gain" }),
+    );
+  });
   it("projects a legal multi-central virus conversion as Corp action denial", () => {
     const viralPipeline = actualHint("onr_proteus_099_viral-pipeline");
 

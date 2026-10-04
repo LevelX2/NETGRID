@@ -75,7 +75,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         choiceSource: string;
         sourceStateVersion: number;
         targetIceInstanceId: string;
-        selectedOptionId: "rez_ice" | "trash_ice";
+        selectedOptionId: string;
         preservedScoreProjectId?: string;
       }
     | {

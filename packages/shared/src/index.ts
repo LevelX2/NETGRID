@@ -1006,12 +1006,34 @@ export type CorpOptionalRezChoiceQuote = CorpOptionalRezChoiceQuoteBinding &
       }
   );
 
+/** Corp-private facts for one mandatory, variable ICE rez option. */
+export type CorpForcedIceRezChoiceQuote = {
+  schemaVersion: 1;
+  choiceId: string;
+  choiceSource: string;
+  optionId: string;
+  stateVersion: number;
+  iceInstanceId: CardInstanceId;
+  iceDefinitionId: CardDefinitionId;
+  serverId: ServerId;
+  rezActionId: string;
+  rezCredits: number;
+  mandatoryAgendaPointCost: number;
+  creditsBeforeRez: number;
+  creditsAfterRez: number;
+  agendaPointsBeforeRez: number;
+  agendaPointsAfterRez: number;
+  effectiveSubtypes: string[];
+  effectiveRunQuote: VisibleEffectiveIceRunQuote;
+};
+
 export type ChoiceOption = {
   id: string;
   label: string;
   publicLabel?: string;
   value?: string | number | boolean;
   selectable?: boolean;
+  forcedIceRezQuote?: CorpForcedIceRezChoiceQuote;
   metadata?: {
     creditCost?: number;
     /** Corp-private certificate: this exact paid access effect has no target or other effect. False makes no optimality claim. */

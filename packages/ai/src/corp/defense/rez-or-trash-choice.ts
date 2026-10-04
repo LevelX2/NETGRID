@@ -5,6 +5,8 @@ import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../../runtime/corp-exact-ice-rez-route";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 import { scoreContinuationClaims } from "./corp-defense-score-reserve";
+import { sanitizeForcedIceRezChoiceQuote } from "../../runtime/forced-ice-rez-choice-quote";
+import { selectForcedRezVariant } from "./forced-rez-variant-selection";
 
 export function validCorpRezOrTrashChoiceResolution(
   value: unknown,
@@ -33,7 +35,9 @@ export function validCorpRezOrTrashChoiceResolution(
     typeof r.targetIceInstanceId === "string" &&
     r.targetIceInstanceId.length > 0 &&
     signal.targetIceInstanceId === r.targetIceInstanceId &&
-    (r.selectedOptionId === "rez_ice" || r.selectedOptionId === "trash_ice") &&
+    (r.selectedOptionId === "trash_ice" ||
+      (typeof r.selectedOptionId === "string" &&
+        /^rez_ice(?:_[1-9][0-9]*)?$/.test(r.selectedOptionId))) &&
     (r.preservedScoreProjectId === undefined ||
       (typeof r.preservedScoreProjectId === "string" &&
         r.preservedScoreProjectId.length > 0)) &&
@@ -87,7 +91,8 @@ export function currentCorpRezOrTrashChoice(
         !requirement.optionIds.includes(option.id) ||
         option.selectable === false ||
         option.value !== option.id ||
-        (option.id !== "rez_ice" && option.id !== "trash_ice"),
+        (option.id !== "trash_ice" &&
+          !/^rez_ice(?:_[1-9][0-9]*)?$/.test(option.id)),
     )
   )
     return undefined;
@@ -105,7 +110,10 @@ export function currentCorpRezOrTrashChoice(
     !choice.options.some((option) => option.id === "trash_ice")
   )
     return undefined;
-  const rezOffered = choice.options.some((option) => option.id === "rez_ice");
+  const rezOptions = choice.options.filter(
+    (option) => option.id !== "trash_ice",
+  );
+  const rezOffered = rezOptions.length > 0;
   const rez = rezOffered
     ? readExactCurrentInstalledCorpIceRezQuote({
         input,
@@ -121,7 +129,56 @@ export function currentCorpRezOrTrashChoice(
         input.playerView.own.agendaPoints)
   )
     return undefined;
-  return { choice, server, ice, rezOffered, rez };
+  const variable = rez?.quote.costKind === "variable";
+  if (
+    rezOffered &&
+    !variable &&
+    (rezOptions.length !== 1 || rezOptions[0]?.id !== "rez_ice")
+  )
+    return undefined;
+  const variants = variable
+    ? rezOptions.map((option) =>
+        sanitizeForcedIceRezChoiceQuote(
+          option.forcedIceRezQuote,
+          {
+            choice,
+            option,
+            stateVersion: input.playerView.stateVersion,
+            ownCredits: input.playerView.own.credits,
+            ownAgendaPoints: input.playerView.own.agendaPoints,
+            ice,
+            serverId: server.id,
+          },
+          (value) =>
+            value as
+              | import("@netgrid/shared").VisibleEffectiveIceRunQuote
+              | undefined,
+        ),
+      )
+    : [];
+  if (
+    variable &&
+    (variants.some(
+      (quote) =>
+        !quote ||
+        quote.rezCredits < rez!.totalRezCredits ||
+        quote.mandatoryAgendaPointCost !==
+          rez!.quote.mandatoryAdditionalCosts.agendaPoints,
+    ) ||
+      new Set(variants.map((quote) => quote?.rezActionId)).size !==
+        variants.length)
+  )
+    return undefined;
+  return {
+    choice,
+    server,
+    ice,
+    rezOffered,
+    rez,
+    variants: variants.filter(
+      (quote): quote is NonNullable<typeof quote> => quote !== undefined,
+    ),
+  };
 }
 
 /** Defense owns the mandatory rez-or-trash decision, including its reserve use. */
@@ -144,9 +201,33 @@ export function corpRezOrTrashDefenseChoiceSignal(
     )
   )
     return undefined;
-  const { choice, server, ice, rez } = context;
-  let selectedOptionId: "rez_ice" | "trash_ice" = context.rezOffered
-    ? "rez_ice"
+  const { choice, server, ice } = context;
+  const selectedVariant = context.variants.length
+    ? selectForcedRezVariant(
+        input,
+        server,
+        ice,
+        context.variants,
+        scoreProjects,
+      )
+    : undefined;
+  if (context.variants.length && !selectedVariant) return undefined;
+  const rez =
+    selectedVariant && context.rez
+      ? {
+          totalRezCredits: selectedVariant.rezCredits,
+          quote: {
+            ...context.rez.quote,
+            mandatoryAdditionalCosts: {
+              agendaPoints: selectedVariant.mandatoryAgendaPointCost,
+            },
+          },
+        }
+      : context.rez;
+  let selectedOptionId: string = context.rezOffered
+    ? context.variants.length
+      ? selectedVariant!.optionId
+      : "rez_ice"
     : "trash_ice";
   let preservedScoreProjectId: string | undefined;
   let evidenceCode = context.rezOffered

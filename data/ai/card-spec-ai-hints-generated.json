@@ -6367,12 +6367,29 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_1pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_1pt"],
         "planRoles": ["corp_score_agenda", "score_next_turn"],
         "valueHints": {},
         "strategicExchangeKinds": ["credits_for_bad_publicity"],
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "when_scored",
+            "resource": "credits",
+            "target": "score.credit_gain",
+            "amount": 9,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["economy.burst_credit", "score.credit_gain"],
         "tacticSignals": ["economy.card"],
-        "actionTacticSignals": ["economy.card"],
+        "actionTacticSignals": [
+          "economy.card",
+          "effect:economy",
+          "effect_scope:corp",
+          "effect_timing:when_scored"
+        ],
         "riskTags": [
           "bad_publicity_loss_condition",
           "hidden_until_score_or_access"
@@ -6949,13 +6966,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_2pt",
-          "no_ability_agenda",
-          "hidden_zone"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_2pt", "hidden_zone"],
         "planRoles": ["corp_score_agenda", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
@@ -32305,14 +32316,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_2pt",
-          "no_ability_agenda",
-          "economy",
-          "resource"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_2pt", "economy", "resource"],
         "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
         "valueHints": { "economy": 2 },
         "actionCapabilitySemantics": [
@@ -32740,7 +32744,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_1pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_1pt"],
         "planRoles": [],
         "valueHints": { "economy": 1 },
         "effects": [
@@ -33359,13 +33363,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_2pt",
-          "no_ability_agenda",
-          "economy"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_2pt", "economy"],
         "planRoles": [],
         "valueHints": {},
         "actionCapabilitySemantics": [
@@ -33472,7 +33470,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_2pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_2pt"],
         "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["enabler"],
@@ -33639,7 +33637,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_3pt"],
         "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
@@ -33804,14 +33802,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_2pt",
-          "no_ability_agenda",
-          "economy",
-          "resource"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_2pt", "economy", "resource"],
         "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
         "valueHints": { "economy": 2 },
         "actionCapabilitySemantics": [
@@ -33940,13 +33931,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_6pt",
-          "no_ability_agenda",
-          "economy"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_6pt", "economy"],
         "planRoles": ["corp_score_agenda", "score_now"],
         "valueHints": {},
         "strategicRole": ["win_condition"],
@@ -34187,7 +34172,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_2pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_2pt"],
         "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["enabler"],
@@ -34591,7 +34576,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_3pt"],
         "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],

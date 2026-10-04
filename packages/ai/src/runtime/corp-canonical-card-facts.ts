@@ -214,15 +214,30 @@ export function corpUnconditionalScoreCreditGain(
 ): number | undefined {
   const card = planningCard(definitionId);
   const effect = card?.planning.engine.scoredAgenda;
+  if (card?.planning.side !== "corp" || card.planning.cardType !== "agenda")
+    return undefined;
+  // A threshold, pool, choice or other compound scored effect is not a
+  // certificate of an unconditional liquid end-of-score balance.
   if (
-    card?.planning.side !== "corp" ||
-    card.planning.cardType !== "agenda" ||
-    effect?.kind !== "gain_credits_on_score" ||
-    effect.recipient !== "corp" ||
-    !positiveSafeInteger(effect.amount)
+    effect &&
+    (effect.kind !== "gain_credits_on_score" ||
+      effect.recipient !== "corp" ||
+      !positiveSafeInteger(effect.amount))
   )
     return undefined;
-  return effect.amount;
+  let payout = effect?.amount ?? 0;
+  for (const lifecycle of card.planning.engine.lifecycle?.on_score ?? []) {
+    if (lifecycle.kind === "add_bad_publicity") continue;
+    if (
+      lifecycle.kind !== "gain_credits" ||
+      (lifecycle.recipient !== "corp" &&
+        lifecycle.recipient !== "controller") ||
+      !positiveSafeInteger(lifecycle.amount)
+    )
+      return undefined;
+    payout += lifecycle.amount;
+  }
+  return positiveSafeInteger(payout) ? payout : undefined;
 }
 
 export function corpConditionalScoreCreditProfile(

@@ -1457,6 +1457,24 @@ zweiten, gegen HQ-, R&D- oder Remote-Schutz konkurrierenden Verteidigungsplan.
 Der Verteidigungsplan darf einen Scoring- oder Remoteplan präemptieren, aber
 deren Zustand nicht vergessen.
 
+Auch eine erzwungene ICE-Rez-oder-Trash-Choice gehört ausschließlich
+`corp.defend_servers`. Bei variablen Rezoptionen projiziert die Engine jede
+bereits kanonische bezahlbare Variante durch ihren echten Rezpfad auf einem
+privaten Zustandsklon. `forcedIceRezQuote` bindet Choice, Option, ICE, Server
+und StateVersion an sämtliche Zahlungen und die tatsächlichen Subtypen,
+Stärke und Subroutinen. Diese Fakten erscheinen ausschließlich in der
+Corp-Choice und werden durch die positive DTO-Allowlist übernommen.
+Eine fehlende oder veraltete Variantenquote scheitert fail-closed.
+
+Defense vergleicht die vollständig quotierten Varianten. Zusätzliche Zahlung
+benötigt bekannten marginalen Zugriffsschutz oder zusätzliche bekannte
+Zugriffskosten und erhält veröffentlichte Score-Reserven. Bei unbekanntem
+Schutzgewinn begründet die vollständig bekannte Mindestzahlung nur den Erhalt
+der ICE; sie bescheinigt keinen Run-Stopp. Ein schon bekannter redundanter
+Stopp kann weiterhin Trash zugunsten der Score-Fortsetzung begründen. Der
+Choice-Resolver übernimmt ausschließlich die genaue Optionsbindung des
+aktuellen Defense-Executors und bewertet keine Variante neu.
+
 Dasselbe `corp.defend_servers` besitzt die Aktivierung und den Pass im
 bezahlten Encounter-Fenster. Die Engine bestimmt die Entscheidungsseite durch
 ihre exklusiven LegalActions; die KI ergänzt keinen eigenen Prioritätswechsel.

@@ -1329,13 +1329,33 @@ function deriveGenericTypedHintOverlay(
       effect,
       "install",
     );
-  for (const effect of engine.lifecycle?.on_score ?? [])
+  for (const effect of engine.lifecycle?.on_score ?? []) {
     appendHostedCreditLifecycleEffect(
       overlay,
       entry.definition.side,
       effect,
       "when_scored",
     );
+    if (effect.kind === "gain_credits") {
+      if (
+        !Number.isSafeInteger(effect.amount) ||
+        effect.amount <= 0 ||
+        effect.visibility !== "public"
+      )
+        throw new Error("card_spec_unknown_score_credit_gain_shape");
+      const scope = controlledSide(entry, effect.recipient);
+      overlay.effects.push({
+        kind: "economy",
+        scope,
+        timing: "when_scored",
+        resource: "credits",
+        target: "score.credit_gain",
+        amount: effect.amount,
+        finite: true,
+      });
+      overlay.functionSignals.push("economy.burst_credit", "score.credit_gain");
+    }
+  }
   for (const effect of engine.lifecycle?.on_rez ?? [])
     appendHostedCreditLifecycleEffect(
       overlay,
@@ -4849,7 +4869,8 @@ function deriveRoles(
     roles.add("score_plan");
     if (entry.definition.agendaPoints !== undefined)
       roles.add(`agenda_${entry.definition.agendaPoints}pt`);
-    roles.add("no_ability_agenda");
+    if (!engine.lifecycle?.on_score?.length && !engine.abilities?.length)
+      roles.add("no_ability_agenda");
   }
   if (
     cardType === "hardware" &&
