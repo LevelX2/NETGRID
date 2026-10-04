@@ -25,6 +25,8 @@ it.each([
     ["do_damage", "set_next_encounter_no_break_subroutines"],
   ],
   ["onr_v1_223_banpei", ["trash_installed_program", "end_the_run"]],
+  ["onr_proteus_026_hunting-pack", []],
+  ["onr_proteus_021_dog-pile", ["do_damage", "end_the_run"]],
 ] as const)(
   "projects actual temporary effect kinds for %s without changing the state",
   (id, types) => {

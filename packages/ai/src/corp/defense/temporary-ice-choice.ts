@@ -30,12 +30,18 @@ export function preferUnbreakableEquivalentTemporaryIce(
         option.metadata?.temporaryEncounterHasAdditionalMechanics !== false ||
         !Array.isArray(types) ||
         types.length === 0 ||
-        types.some((type) => type !== "end_the_run")
+        !(
+          types.every((type) => type === "end_the_run") ||
+          (types.length === 1 && types[0] === "initiate_trace")
+        )
       );
     })
   )
     return options[0];
   const quotes = options.map((option) => {
+    const traceRunEnd =
+      option.metadata?.temporaryEncounterSubroutineTypes?.[0] ===
+      "initiate_trace";
     const raw = option.metadata?.temporaryEncounterBreakQuoteJson;
     let quote: Record<string, unknown> | undefined;
     try {
@@ -57,7 +63,19 @@ export function preferUnbreakableEquivalentTemporaryIce(
       ].includes(String(quote.status)) ||
       (["breakable", "unaffordable"].includes(String(quote.status)) &&
         (!Number.isSafeInteger(quote.requiredCredits) ||
-          (quote.requiredCredits as number) < 0))
+          (quote.requiredCredits as number) < 0)) ||
+      (traceRunEnd &&
+        quote.status !== "unmodeled" &&
+        (!["trace_run_end", "trace_tag"].includes(String(quote.effectClass)) ||
+          (quote.effectClass === "trace_tag" &&
+            quote.guaranteedRunEnd !== false) ||
+          typeof quote.guaranteedRunEnd !== "boolean" ||
+          quote.corpBid !== 0 ||
+          !Number.isSafeInteger(quote.corpTraceStrength) ||
+          (quote.corpTraceStrength as number) < 0 ||
+          !Number.isSafeInteger(quote.maximumRunnerTraceStrength) ||
+          (quote.maximumRunnerTraceStrength as number) < 0 ||
+          input.playerView.traceRulesProfile !== "modern_open"))
     ) {
       throw new PlanResolutionFailure("window_origin_missing", {
         side: input.side,
@@ -73,17 +91,18 @@ export function preferUnbreakableEquivalentTemporaryIce(
           "Provide the current Engine temporary-encounter break quote bound to this option, run, fort and StateVersion.",
       });
     }
-    return { option, quote };
+    return { option, quote, traceRunEnd };
   });
   // Unknown effects do not certify equivalent outcomes. Keep the existing
   // qualitative comparison until the Engine can quote the complete option set.
   if (quotes.some((entry) => entry.quote.status === "unmodeled"))
     return options[0];
   return (
-    quotes.find(
-      (entry) =>
-        entry.quote.status === "unaffordable" ||
-        entry.quote.status === "no_visible_breaker",
+    quotes.find((entry) =>
+      entry.traceRunEnd
+        ? entry.quote.guaranteedRunEnd === true
+        : entry.quote.status === "unaffordable" ||
+          entry.quote.status === "no_visible_breaker",
     )?.option ?? options[0]
   );
 }

@@ -8,6 +8,11 @@ import { effectiveIceRunSubroutines } from "./effective-ice-run-subroutines";
 import { visibleOwnCard } from "../view/card-view";
 import { visibleEffectiveEncounteredIceRunQuote } from "../view/visible-run-quote";
 import { visibleRunnerBreakExchangeFacts } from "../view/visible-rez-resource-exchange-quote";
+import { visibleRunnerMaximumTraceStrength } from "../view/visible-trace-ice-rez-quote";
+import {
+  traceComparisonIsSuccessful,
+  traceCorpBaseStrength,
+} from "../trace/trace-rules-profile";
 
 /** Corp-private rule facts for the ICE offered by a temporary HQ encounter.
  * This exposes effect kinds, not a preferred choice or a utility score.
@@ -73,6 +78,10 @@ export function temporaryEncounterOptionFacts(
       Object.keys(implementation).some((key) => {
         if (key === "cardDefinitionId" || key === "printedSubroutines")
           return false;
+        // Relative ICE changes strength/subroutines at the current zone. Both
+        // are already projected by the shared public ICE derivation below;
+        // the family is not a second encounter effect outside that quote.
+        if (key === "relativeIce") return false;
         // Temporary HQ ICE is neither installed nor rezzed. These hooks
         // cannot contribute an effect to this encounter (e.g. rez income).
         if (key === "lifecycle")
@@ -96,14 +105,10 @@ export function temporaryEncounterOptionFacts(
       reason,
     }),
   });
-  // This comparison covers only equivalent pure ETR effects, not damage,
-  // traces, lifecycle value or a guarantee against every possible run ability.
+  // Entry costs or separate mechanics are not covered by this response quote.
   if (
     facts.temporaryEncounterHasAdditionalMechanics ||
     facts.temporaryEncounterSubroutineTypes.length === 0 ||
-    facts.temporaryEncounterSubroutineTypes.some(
-      (type) => type !== "end_the_run",
-    ) ||
     (run.encounterTaxForFutureIce ?? 0) > 0 ||
     (run.breakSubroutineAdditionalCost ?? 0) > 0 ||
     (run.nextEncounterFatalDamage ?? 0) > 0
@@ -122,6 +127,27 @@ export function temporaryEncounterOptionFacts(
     quote.encounterTemporaryTraceCredits
   )
     return unmodeled("effective_encounter_not_complete");
+  const pureRunEnd = quote.subroutines.every((s) => s.type === "end_the_run");
+  const trace =
+    quote.subroutines.length === 1 ? quote.subroutines[0] : undefined;
+  const traceRunEnd =
+    trace?.type === "initiate_trace" &&
+    (trace.traceSuccessEffect?.type === "end_run_and_run_lock" ||
+      trace.traceSuccessEffect?.type ===
+        "end_run_trash_hardware_and_unpreventable_meat_damage") &&
+    trace.traceLimit !== undefined;
+  const traceTag =
+    trace?.type === "initiate_trace" &&
+    trace.traceSuccessEffect?.type === "add_tag" &&
+    trace.traceLimit !== undefined;
+  const traceComparable = traceRunEnd || traceTag;
+  if (!pureRunEnd && !traceComparable)
+    return unmodeled("non_equivalent_or_conditional_encounter");
+  const maximumRunnerStrength = traceComparable
+    ? visibleRunnerMaximumTraceStrength(projected)
+    : undefined;
+  if (traceComparable && maximumRunnerStrength === undefined)
+    return unmodeled("visible_trace_response_incomplete");
   const response = visibleRunnerBreakExchangeFacts(
     projected,
     iceId,
@@ -141,6 +167,28 @@ export function temporaryEncounterOptionFacts(
           : "unaffordable",
       ...(response.runnerBreak
         ? { requiredCredits: response.runnerBreak.requiredCredits }
+        : {}),
+      ...(traceComparable
+        ? {
+            effectClass: traceRunEnd ? "trace_run_end" : "trace_tag",
+            corpBid: 0,
+            corpTraceStrength: traceCorpBaseStrength({
+              traceRulesProfile: "modern_open",
+              traceLimit: trace!.traceLimit!,
+            }),
+            maximumRunnerTraceStrength: maximumRunnerStrength,
+            guaranteedRunEnd:
+              traceRunEnd &&
+              response.runnerBreak?.canPayFromCurrentCredits !== true &&
+              traceComparisonIsSuccessful(
+                projected.traceRulesProfile,
+                traceCorpBaseStrength({
+                  traceRulesProfile: "modern_open",
+                  traceLimit: trace!.traceLimit!,
+                }),
+                maximumRunnerStrength!,
+              ),
+          }
         : {}),
     }),
   };

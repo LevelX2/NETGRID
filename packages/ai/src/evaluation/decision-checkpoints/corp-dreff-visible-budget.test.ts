@@ -126,6 +126,9 @@ it("already values a BBS pool more highly behind effective protection", () => {
   const state = choiceState(1);
   delete state.run;
   delete state.pendingChoice;
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.activeSide = "corp";
   state.corp.clicks = 3;
   for (const id of [...state.runner.rig.programs]) {
     removeEverywhere(state, id);
