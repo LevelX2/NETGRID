@@ -405,6 +405,8 @@ export function startCorpRdTopReorderChoice(
     choiceId: `v1922_corp_rd_arrange_top5_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `v1922.corp_rd_arrange_top5:${sourceCardId}:${host.state.stateVersion + 1}`,
+    sourceCardInstanceId: sourceCardId,
+    sourceCardDefinitionId: host.cards.definitionFor(sourceCardId).id,
     prompt: "R&D-Spitze anordnen",
     kind: "select_cards",
     options: topCards.map((cardId) => {
@@ -413,6 +415,7 @@ export function startCorpRdTopReorderChoice(
     }),
     minSelections: topCards.length,
     maxSelections: topCards.length,
+    selectionOrdering: "ordered",
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };

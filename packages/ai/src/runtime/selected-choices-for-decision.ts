@@ -1,3 +1,9 @@
+import { runnerDevelopmentSearchChoiceBinding } from "../runner/hand-development/development-choice-bindings";
+import {
+  isRunnerTerminalGripReplacementWindow,
+  selectedRunnerTerminalDamageReplacement,
+} from "../runner/defense-recovery/terminal-damage-replacement";
+import { selectedCorpRdReorderChoice } from "../corp/hand-management/rd-reorder-choice";
 import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
@@ -526,6 +532,16 @@ export function selectedChoicesForDecision(
       selectableOptions,
       selectedOptionIds,
       resolverId,
+    );
+  if (isRunnerTerminalGripReplacementWindow(input))
+    return resolved(
+      selectedRunnerTerminalDamageReplacement(input, action, currentPortfolio),
+      "bound_runner_terminal_damage_replacement",
+    );
+  if (choice.source.startsWith("v1922.corp_rd_arrange_top5:"))
+    return resolved(
+      selectedCorpRdReorderChoice(input, action, currentPortfolio),
+      "bound_corp_rd_reorder",
     );
   if (choice.source === "setup.mulligan") {
     const opening =
@@ -1379,6 +1395,11 @@ export function selectedChoicesForDecision(
     const developmentBinding = coverageBinding
       ? undefined
       : runnerDevelopmentSearchChoiceBinding(input, action, choice);
+    if (developmentBinding?.sourceOptionId)
+      return resolved(
+        [developmentBinding.sourceOptionId],
+        "bound_runner_development_search_source",
+      );
     const preferredServerId =
       coverageBinding?.serverId ?? runnerStrategicSearchTarget(input);
     const searchSelected = selectedSearchChoiceOptionIds(
@@ -2695,146 +2716,6 @@ function runnerStrategicSearchTarget(
     (target.targetId === "hq" || target.targetId === "rd")
     ? target.targetId
     : undefined;
-}
-
-function runnerDevelopmentSearchChoiceBinding(
-  input: AiDecisionInput,
-  action: LegalAction,
-  choice: PendingChoice,
-):
-  | {
-      planInstanceId: string;
-      targetCardInstanceId?: string;
-      targetDefinitionId: string;
-      optionalExactTargetOnly: boolean;
-    }
-  | undefined {
-  if (input.side !== "runner") return undefined;
-  const portfolio = residentPlanPortfolioSnapshot(input);
-  const executor = portfolio?.instances.find(
-    (instance) =>
-      instance.instanceId === portfolio.executorInstanceId &&
-      instance.moduleId === "runner.develop_board_and_hand",
-  );
-  if (!executor) return undefined;
-  const moduleState = executor.moduleState as
-    | {
-        kind?: unknown;
-        signal?: {
-          phase?: unknown;
-          targetKind?: unknown;
-          actionIds?: unknown;
-          programSearchCommitment?: {
-            sourceCardInstanceId?: unknown;
-            sourceDefinitionId?: unknown;
-            targetDefinitionId?: unknown;
-            plannedAtStateVersion?: unknown;
-            selectedActionId?: unknown;
-            selectedAtStateVersion?: unknown;
-            engineContinuationAtStateVersion?: unknown;
-          };
-          recoverySearchCommitment?: {
-            sourceCardInstanceId?: unknown;
-            sourceDefinitionId?: unknown;
-            searchFilter?: unknown;
-            targetCardInstanceId?: unknown;
-            targetDefinitionId?: unknown;
-            plannedAtStateVersion?: unknown;
-            selectedActionId?: unknown;
-            selectedAtStateVersion?: unknown;
-            engineContinuationAtStateVersion?: unknown;
-          };
-        };
-      }
-    | undefined;
-  const signal = moduleState?.signal;
-  const programCommitment = signal?.programSearchCommitment;
-  const recoveryCommitment = signal?.recoverySearchCommitment;
-  if (!programCommitment && !recoveryCommitment) return undefined;
-  const commitment = recoveryCommitment ?? programCommitment;
-  const partialProfile =
-    programCommitment &&
-    typeof programCommitment.sourceDefinitionId === "string"
-      ? runnerPartialProgramSearchProfile(
-          input,
-          programCommitment.sourceDefinitionId,
-        )
-      : undefined;
-  const matchingTargetOptions =
-    typeof recoveryCommitment?.targetCardInstanceId === "string"
-      ? choice.options.filter(
-          (option) =>
-            option.selectable !== false &&
-            option.card?.instanceId ===
-              recoveryCommitment.targetCardInstanceId &&
-            option.card?.definitionId === recoveryCommitment.targetDefinitionId,
-        )
-      : typeof commitment?.targetDefinitionId === "string"
-        ? choice.options.filter(
-            (option) =>
-              option.selectable !== false &&
-              option.card?.definitionId === commitment.targetDefinitionId,
-          )
-        : [];
-  const exactBinding =
-    portfolio !== undefined &&
-    moduleState?.kind === "development" &&
-    signal?.phase === "execute" &&
-    signal.targetKind === "capability" &&
-    Array.isArray(signal.actionIds) &&
-    typeof commitment?.sourceCardInstanceId === "string" &&
-    typeof commitment.sourceDefinitionId === "string" &&
-    typeof commitment.targetDefinitionId === "string" &&
-    typeof commitment.selectedActionId === "string" &&
-    signal.actionIds.includes(commitment.selectedActionId) &&
-    commitment.plannedAtStateVersion === commitment.selectedAtStateVersion &&
-    (commitment.engineContinuationAtStateVersion === undefined
-      ? commitment.selectedAtStateVersion === portfolio.stateVersion
-      : commitment.engineContinuationAtStateVersion ===
-          portfolio.stateVersion &&
-        typeof commitment.selectedAtStateVersion === "number" &&
-        commitment.selectedAtStateVersion < portfolio.stateVersion) &&
-    input.playerView.stateVersion === portfolio.stateVersion + 1 &&
-    choice.stateVersion === input.playerView.stateVersion &&
-    choice.sourceCardInstanceId === commitment.sourceCardInstanceId &&
-    choice.sourceCardDefinitionId === commitment.sourceDefinitionId &&
-    choice.kind === "select_cards" &&
-    (partialProfile
-      ? choice.minSelections === 0
-      : choice.minSelections === 1 && choice.maxSelections === 1) &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    (programCommitment === undefined ||
-      choice.cardSearchPresentation?.selectableFilter ===
-        (partialProfile ? "matching_cards" : "program")) &&
-    (recoveryCommitment === undefined ||
-      (choice.cardSearchPresentation?.sourceZone === "heap" &&
-        choice.cardSearchPresentation.destination === "grip" &&
-        choice.cardSearchPresentation.selectableFilter ===
-          recoveryCommitment.searchFilter)) &&
-    (partialProfile
-      ? choice.cardSearchPresentation?.sourceZone === "stack" &&
-        choice.cardSearchPresentation.destination === "grip" &&
-        Number.isSafeInteger(choice.maxSelections) &&
-        choice.maxSelections >= 0 &&
-        choice.maxSelections <= partialProfile.lookCount!
-      : matchingTargetOptions.length > 0);
-  if (!exactBinding || !commitment || !portfolio) {
-    throw unresolvedChoiceFailure(
-      input,
-      action,
-      "The resident Runner development plan must preserve the exact search purpose, source, selected action, state version and useful target.",
-    );
-  }
-  return {
-    planInstanceId: executor.instanceId,
-    ...(typeof recoveryCommitment?.targetCardInstanceId === "string"
-      ? { targetCardInstanceId: recoveryCommitment.targetCardInstanceId }
-      : {}),
-    targetDefinitionId: commitment.targetDefinitionId as string,
-    optionalExactTargetOnly: partialProfile !== undefined,
-  };
 }
 
 function runnerCoverageSearchChoiceBinding(

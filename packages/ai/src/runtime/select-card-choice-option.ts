@@ -9,6 +9,8 @@ export function selectedForcedChoiceOptionIds(
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
 ): string[] | undefined {
+  if (choice.selectionOrdering === "ordered" && selectableOptions.length > 1)
+    return undefined;
   if (
     choice.minSelections === 0 &&
     (choice.maxSelections === 0 || selectableOptions.length === 0)

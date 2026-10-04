@@ -311,6 +311,11 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "afterRunUnpreventableCoreDamage",
   "conditionalAccessBonusKind",
   "conditionalAccessBonusAmount",
+  "runnerConditionalAgendaPointQuoteSchema",
+  "runnerConditionalAgendaPointQuoteStateVersion",
+  "runnerConditionalAgendaPointQuoteSourceCardInstanceId",
+  "runnerConditionalAgendaPointQuoteSourceCapabilityId",
+  "runnerConditionalAgendaPointQuoteAmount",
   "runnerEventRun",
   "followupRunOnEnd",
   "bonusRunNoClick",
@@ -3351,11 +3356,27 @@ function sanitizeVisibleChoiceRequest(
     kind: choice.kind,
     options: choice.options.map((option) => {
       const value = sanitizePrimitive(option.value);
-      const metadata = sanitizeChoiceOptionMetadata(
+      let metadata = sanitizeChoiceOptionMetadata(
         option.metadata,
         ownRig,
         servers,
       );
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
+        choice.source === "v121.replacement.damage" &&
+        (option.metadata?.optionKind === "flatline_replacement_from_grip" ||
+          option.metadata?.optionKind === "do_not_replace")
+      ) {
+        metadata = {
+          ...metadata,
+          optionKind: option.metadata.optionKind,
+          ...(Number.isSafeInteger(option.metadata.amount) &&
+          Number(option.metadata.amount) > 0
+            ? { amount: Number(option.metadata.amount) }
+            : {}),
+        };
+      }
       if (
         metadata &&
         playerViewSide === "corp" &&

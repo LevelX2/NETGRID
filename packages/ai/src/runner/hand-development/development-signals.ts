@@ -81,18 +81,28 @@ function runnerUnrepresentedProgramDevelopmentTargets(
       ...(input.playerView.own.rig ?? []),
     ].flatMap((card) => (card.definitionId ? [card.definitionId] : [])),
   );
-  const discardedByDefinition = new Map<string, number>();
-  for (const card of input.playerView.own.heapOrArchives ?? []) {
-    if (!card.definitionId) continue;
-    discardedByDefinition.set(
-      card.definitionId,
-      (discardedByDefinition.get(card.definitionId) ?? 0) + 1,
-    );
+  const outsideStackByDefinition = new Map<string, Set<string>>();
+  const ownUnavailable = [
+    ...(input.playerView.specialZones?.setAside ?? []),
+    ...(input.playerView.specialZones?.removedFromGame ?? []),
+  ].filter((card) => card.owner === "runner");
+  for (const card of [
+    ...input.playerView.own.gripOrHq,
+    ...(input.playerView.own.rig ?? []),
+    ...input.playerView.own.heapOrArchives,
+    ...input.playerView.own.scoreArea,
+    ...ownUnavailable,
+  ]) {
+    if (!card.known || !card.definitionId) continue;
+    const instances =
+      outsideStackByDefinition.get(card.definitionId) ?? new Set<string>();
+    instances.add(card.instanceId);
+    outsideStackByDefinition.set(card.definitionId, instances);
   }
   return deckSnapshot.cards.flatMap((entry) => {
     const definition = CARD_DEFINITIONS_BY_ID[entry.cardId];
     const plausibleStackCopies =
-      entry.quantity - (discardedByDefinition.get(entry.cardId) ?? 0);
+      entry.quantity - (outsideStackByDefinition.get(entry.cardId)?.size ?? 0);
     return definition?.type === "program" &&
       plausibleStackCopies > 0 &&
       !representedDefinitions.has(entry.cardId)
@@ -814,7 +824,7 @@ export function runnerImmediateAgendaPointDevelopmentSignals(
     (terminalWins ?? []).flatMap((signal) => signal.actionIds ?? []),
   );
   return candidates.flatMap((candidate) => {
-    const agendaPointGain = runnerImmediateAgendaPointGain(candidate);
+    const agendaPointGain = runnerImmediateAgendaPointGain(candidate, input);
     if (
       agendaPointGain === undefined ||
       terminalActionIds.has(candidate.actionId)

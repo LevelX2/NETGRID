@@ -1,3 +1,4 @@
+import { isRunnerTerminalGripReplacementWindow } from "../runner/defense-recovery/terminal-damage-replacement";
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
   bindSelectedRunnerCoverageMultiSearchChoice,
@@ -246,12 +247,14 @@ import {
 import { runnerExposeInformationSignals } from "../runner/expose-information/expose-information-signals";
 import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
 import {
+  advanceRunnerDevelopmentSearchChoice,
   bindSelectedRunnerDelayedProgramSearchChoice,
   bindSelectedRunnerEventInstallChoiceContinuation,
   bindSelectedRunnerProgramInstallTrashChoiceContinuation,
   bindSelectedRunnerProgramSearchAction,
   bindSelectedRunnerRecoverySearchAction,
   resolvePlanBoundRunnerDelayedProgramSearchChoice,
+  resolvePlanBoundRunnerDevelopmentSearchChoice,
   resolvePlanBoundRunnerEventInstallMemoryChoice,
   resolvePlanBoundRunnerProgramTrashChoice,
 } from "../runner/hand-development/development-choice-bindings";
@@ -357,6 +360,7 @@ import {
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
+import { corpRdReorderChoiceSignal } from "../corp/hand-management/rd-reorder-choice";
 import { uniqueBy } from "./collection";
 import { corpCandidateProjectsCardDraw } from "./corp-draw-action-facts";
 import { corpScorelineFeasibilityForDecisionInput } from "./corp-scoreline-feasibility";
@@ -563,6 +567,10 @@ export function choosePlanFirstLiveAction(
         previous,
       ) ??
       resolvePlanBoundRunnerDelayedProgramSearchChoice(
+        schedulerContext,
+        previous,
+      ) ??
+      resolvePlanBoundRunnerDevelopmentSearchChoice(
         schedulerContext,
         previous,
       ) ??
@@ -818,6 +826,7 @@ export function choosePlanFirstLiveAction(
     dependencies.runnerProgramInstallTrashAssessmentForCard,
   );
   advanceSelectedRunnerRunStartOrderOrigin(input, result, previous);
+  advanceRunnerDevelopmentSearchChoice(input, result, decision, previous);
   if (
     options.persistTacticalPlanMemory !== false &&
     result.portfolio &&
@@ -1265,6 +1274,7 @@ function runnerTransientPlanSignals(
     defense.handSize < defense.minimumHandBuffer ||
     defense.forgoUnsafeRunCapacity ||
     defense.discardChoiceBinding !== undefined ||
+    defense.terminalDamageReplacementBinding !== undefined ||
     defense.reactionReserveNeed !== undefined ||
     (defense.defenseSupportInstallActionIds?.length ?? 0) > 0;
   const survivalSignals: TransientPlanSignal[] = survivalNeedOpen
@@ -2645,6 +2655,9 @@ export function runnerActionDispositions(
     ...(domain.defense.discardChoiceBinding
       ? [domain.defense.discardChoiceBinding.actionId]
       : []),
+    ...(domain.defense.terminalDamageReplacementBinding
+      ? [domain.defense.terminalDamageReplacementBinding.actionId]
+      : []),
     ...domain.creditBanks.flatMap((signal) => signal.actionIds),
     ...(domain.recurringEconomy ?? []).flatMap((signal) => signal.actionIds),
     ...(domain.installedCardLiquidationChoices ?? []).map(
@@ -3487,6 +3500,7 @@ function corpContext(
     previous,
   );
   const forcedHandChoiceSignal =
+    corpRdReorderChoiceSignal(input, sourceBoundCandidates, discardKeepScore) ??
     corpOptionalStartDrawSignal(input, sourceBoundCandidates) ??
     corpStrategicPlanningGroupDrawChoiceSignal(
       input,
@@ -3835,6 +3849,13 @@ function recentServerAccessCount(
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
+  if (isRunnerTerminalGripReplacementWindow(context.input)) return undefined;
+  if (
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "v1922.corp_rd_arrange_top5:",
+    )
+  )
+    return undefined;
   if (
     context.input.side === "corp" &&
     context.input.playerView.pendingChoice?.source ===

@@ -985,7 +985,7 @@ export function buildRunnerCentralPressureSignals({
             hqSuccessWindowRoute !== undefined;
           const knownNoPayoff =
             evaluation.knownAccessState === "known_no_current_payoff" ||
-            (evaluation.targetServerId === "archives" &&
+            (evaluation.accessServerId === "archives" &&
               archivesIsKnownWithoutAgenda(input));
           const terminalRemoteUnreachableCentralLastChance =
             runnerTerminalRemoteUnreachableCentralLastChance(
@@ -1249,9 +1249,13 @@ export function buildRunnerCentralPressureSignals({
                   );
                 const opensHqSuccessWindow =
                   candidate.actionId === hqSuccessWindowRoute?.actionId;
+                const candidateHasNoPayoff =
+                  candidate.knownAccessState === "known_no_current_payoff" ||
+                  (candidate.accessServerId === "archives" &&
+                    archivesIsKnownWithoutAgenda(input));
                 const candidateRouteAdmissible =
                   !forgoUnsafeRunCapacity &&
-                  (!knownNoPayoff || opensHqSuccessWindow) &&
+                  (!candidateHasNoPayoff || opensHqSuccessWindow) &&
                   pressureCadence.routeAvailable &&
                   (materialMarginalValue ||
                     opensHqSuccessWindow ||
