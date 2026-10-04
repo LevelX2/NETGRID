@@ -5,11 +5,13 @@ type Option = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
 >["options"][number];
 
-/** The caller already sorted legal productive choices by their Engine cost. */
+/** The caller sorted legal effect-bearing choices by their Engine cost.
+ * null is a proved absence of current defense value, not missing information.
+ */
 export function preferUnbreakableEquivalentTemporaryIce(
   input: AiDecisionInput,
   options: readonly Option[],
-): Option | undefined {
+): Option | null | undefined {
   const attackedServerId = input.playerView.run?.attackedServerId;
   const agendaExposed =
     input.playerView.servers
@@ -21,21 +23,21 @@ export function preferUnbreakableEquivalentTemporaryIce(
       ));
   // Extra HQ-card/credit investment needs a concrete access-defense purpose.
   // A harder encounter alone is not a reason to pay more for an empty fort.
-  if (!agendaExposed) return options[0];
-  if (
-    options.length < 2 ||
-    options.some((option) => {
-      const types = option.metadata?.temporaryEncounterSubroutineTypes;
-      return (
-        option.metadata?.temporaryEncounterHasAdditionalMechanics !== false ||
-        !Array.isArray(types) ||
-        types.length === 0 ||
-        types.some((type) => type !== "end_the_run")
-      );
-    })
-  )
-    return options[0];
   const quotes = options.map((option) => {
+    const types = option.metadata?.temporaryEncounterSubroutineTypes;
+    if (
+      option.metadata?.temporaryEncounterHasAdditionalMechanics !== false ||
+      !Array.isArray(types) ||
+      types.length === 0 ||
+      !(
+        types.every((type) => type === "end_the_run") ||
+        (types.length === 1 && types[0] === "initiate_trace")
+      )
+    )
+      return { option, quote: undefined, traceRunEnd: false };
+    const traceRunEnd =
+      option.metadata?.temporaryEncounterSubroutineTypes?.[0] ===
+      "initiate_trace";
     const raw = option.metadata?.temporaryEncounterBreakQuoteJson;
     let quote: Record<string, unknown> | undefined;
     try {
@@ -57,7 +59,19 @@ export function preferUnbreakableEquivalentTemporaryIce(
       ].includes(String(quote.status)) ||
       (["breakable", "unaffordable"].includes(String(quote.status)) &&
         (!Number.isSafeInteger(quote.requiredCredits) ||
-          (quote.requiredCredits as number) < 0))
+          (quote.requiredCredits as number) < 0)) ||
+      (traceRunEnd &&
+        quote.status !== "unmodeled" &&
+        (!["trace_run_end", "trace_tag"].includes(String(quote.effectClass)) ||
+          (quote.effectClass === "trace_tag" &&
+            quote.guaranteedRunEnd !== false) ||
+          typeof quote.guaranteedRunEnd !== "boolean" ||
+          quote.corpBid !== 0 ||
+          !Number.isSafeInteger(quote.corpTraceStrength) ||
+          (quote.corpTraceStrength as number) < 0 ||
+          !Number.isSafeInteger(quote.maximumRunnerTraceStrength) ||
+          (quote.maximumRunnerTraceStrength as number) < 0 ||
+          input.playerView.traceRulesProfile !== "modern_open"))
     ) {
       throw new PlanResolutionFailure("window_origin_missing", {
         side: input.side,
@@ -73,17 +87,33 @@ export function preferUnbreakableEquivalentTemporaryIce(
           "Provide the current Engine temporary-encounter break quote bound to this option, run, fort and StateVersion.",
       });
     }
-    return { option, quote };
+    return { option, quote, traceRunEnd };
   });
+  // A complete free full break cannot protect access or tax the current run.
+  // Preserve the HQ card even with only one option or no agenda in this fort.
+  const candidates = quotes.filter(
+    (entry) =>
+      !(
+        entry.quote?.status === "breakable" && entry.quote.requiredCredits === 0
+      ),
+  );
+  if (options.length > 0 && candidates.length === 0) return null;
   // Unknown effects do not certify equivalent outcomes. Keep the existing
   // qualitative comparison until the Engine can quote the complete option set.
-  if (quotes.some((entry) => entry.quote.status === "unmodeled"))
-    return options[0];
+  if (
+    !agendaExposed ||
+    candidates.length < 2 ||
+    candidates.some(
+      (entry) => !entry.quote || entry.quote.status === "unmodeled",
+    )
+  )
+    return candidates[0]?.option;
   return (
-    quotes.find(
-      (entry) =>
-        entry.quote.status === "unaffordable" ||
-        entry.quote.status === "no_visible_breaker",
-    )?.option ?? options[0]
+    candidates.find((entry) =>
+      entry.traceRunEnd
+        ? entry.quote!.guaranteedRunEnd === true
+        : entry.quote!.status === "unaffordable" ||
+          entry.quote!.status === "no_visible_breaker",
+    )?.option ?? candidates[0]?.option
   );
 }

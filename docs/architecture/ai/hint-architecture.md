@@ -89,6 +89,21 @@ Die reale Compiler-/Artefaktregression prüft alle aktuellen Double-Spielkarten
 und unabhängige Utility-Felder; die produktive Score-Recovery-Gegenprobe prüft
 weiterhin Plan-, Action-, StateVersion- und Choice-Ownership.
 
+## Zugriffstags und positionsabhängige Traces
+
+Direktes `accessEffects.effects.add_tags` erzeugt eine Tagquelle mit
+`on_access`-Timing auch ohne eingebetteten Trace oder Schaden. Der Compiler
+behält Zugriffszonen, optionale Zahlung und Sichtbarkeit in der nativen
+Engine-Semantik; die Funktionserkennung zertifiziert keine LegalAction.
+
+`relativeIce.dynamicTraceSubroutines` projiziert öffentliche Trace-Tagquellen
+mit dynamischer Subroutinenzahl. Der Hint setzt diese Zahl weder auf null noch
+auf eine feste positive Anzahl: Nur die aktuelle Engine-Quote zählt die
+gerezzten äußeren ICE. Der Tagbetrag je erfolgreichem Trace bleibt exakt
+gebunden. Die echten generierten Hints erreichen Deckprofil und
+Tag-Punish-Consumer; alleinstehendes Hunting Pack behält null Subroutinen.
+Unbekannte Sichtbarkeit, Wirkung oder ungültige Beträge scheitern sichtbar.
+
 ## Handreset und Draw
 
 Der zusammengesetzte Effekt `shuffle_grip_trash_and_stack_then_draw` erzeugt

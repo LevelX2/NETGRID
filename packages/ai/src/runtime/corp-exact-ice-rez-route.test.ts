@@ -286,6 +286,82 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
+  it("declines an Engine-quoted empty encounter despite native dynamic trace hints", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_proteus_026_hunting-pack", 0, {
+      corpCredits: 13,
+      runnerCredits: 20,
+      includeDecline: true,
+    });
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: true,
+      expiresAtStateVersion: fixture.input.playerView.stateVersion,
+      effectiveRunQuote: { subroutines: [] },
+    });
+    expect(
+      projectExactCorpIceRezRoute({ ...fixture, targetServerId: "rd" }),
+    ).toBeUndefined();
+    const decline = fixture.input.legalActions.find(
+      (action) => action.type === "decline_rez",
+    )!;
+    const decision = chooseAiAction(fixture.input, {
+      persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(decision).toMatchObject({
+      actionId: decline.actionId,
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+        },
+      },
+    });
+    const passed = applyEngineAction(
+      fixture.state,
+      "corp",
+      decision.actionId!,
+      "empty-quoted-defense-pass",
+    );
+    expect(passed.stateVersion).toBe(fixture.input.playerView.stateVersion + 1);
+    expect(passed.corp.credits).toBe(13);
+  });
+
+  it("keeps a native current Hunting Pack trace behind a passed rezzed outer ICE", () => {
+    const fixture = engineIceRezWindow("onr_proteus_026_hunting-pack", 0, {
+      corpCredits: 13,
+      runnerCredits: 20,
+      outsideRezzedIceDefinitionId: "onr_proteus_026_hunting-pack",
+      includeDecline: true,
+    });
+    expect(fixture.input.playerView.run?.position).toMatchObject({
+      iceIndex: 0,
+    });
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: true,
+      effectiveRunQuote: {
+        subroutines: [
+          expect.objectContaining({
+            type: "initiate_trace",
+            traceLimit: 5,
+            traceSuccessEffect: { type: "add_tag", amount: 1 },
+          }),
+        ],
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({ ...fixture, targetServerId: "rd" }),
+    ).toMatchObject({ routeKind: "qualitative_encounter_defense" });
+    const hidden = getPlayerView(fixture.state, "runner").servers.find(
+      (server) => server.id === "rd",
+    )!.ice[0]!;
+    expect(hidden.definitionId).toBeUndefined();
+    expect(hidden.effectivePostRezRunQuote).toBeUndefined();
+  });
+
   it("declines future-only encounter tax at the innermost ICE", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_222_ball-and-chain", 0, {
@@ -2122,6 +2198,7 @@ function engineIceRezWindow(
     runnerProgramBitCounters?: readonly number[];
     futureIceDefinitionId?: string;
     futureIceRezzed?: boolean;
+    outsideRezzedIceDefinitionId?: string;
     rezSubroutineCount?: number;
     selectedSubtypesAfterRez?: string;
     includeAllRezVariants?: boolean;
@@ -2231,6 +2308,20 @@ function engineIceRezWindow(
   } else {
     addUnrezzedIce(state, iceId, definitionId, "rd");
   }
+  if (options?.outsideRezzedIceDefinitionId) {
+    const outsideIceId = `exact_outside_ice_${agendaPoints}` as CardInstanceId;
+    addUnrezzedIce(
+      state,
+      outsideIceId,
+      options.outsideRezzedIceDefinitionId,
+      "rd",
+    );
+    state.cardInstances[outsideIceId] = {
+      ...state.cardInstances[outsideIceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
   if (options?.runnerRunOnlyAction) {
     const resourceId = "exact_run_only_source" as CardInstanceId;
     state.runner.rig.resources.push(resourceId);
@@ -2262,6 +2353,28 @@ function engineIceRezWindow(
   });
   if (!result.ok) throw new Error(result.error.message);
   state = result.state;
+  if (options?.outsideRezzedIceDefinitionId) {
+    for (let step = 0; step < 8; step += 1) {
+      if (
+        getLegalActions(state, "corp").some(
+          (action) =>
+            action.type === "rez_ice" && action.payload?.cardId === iceId,
+        )
+      )
+        break;
+      const continuation = getLegalActions(state, "runner").find(
+        (action) => action.type === "continue_run",
+      );
+      if (!continuation)
+        throw new Error("Outer ICE fixture has no legal continuation");
+      state = applyEngineAction(
+        state,
+        "runner",
+        continuation.actionId,
+        `outer-pass-${step}`,
+      );
+    }
+  }
   const currentActions = getLegalActions(state, "corp");
   const rezAction = currentActions.find(
     (action) =>

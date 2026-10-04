@@ -8,6 +8,34 @@ import {
 import { withPostRezRunQuote } from "../effective-run-quote.test-support";
 
 describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
+  it("uses current quoted subroutines instead of printed potential when supplied", () => {
+    const hunting = corpIce("hunting", {
+      definitionId: "onr_proteus_026_hunting-pack",
+      title: "Hunting Pack",
+    });
+    expect(visibleCorpIceDefenseProfile(hunting)).toMatchObject({
+      hasMeaningfulTaxOrDamage: true,
+    });
+    expect(visibleCorpIceDefenseProfile(hunting, [])).toMatchObject({
+      hasImmediateStop: false,
+      hasMeaningfulTaxOrDamage: false,
+      hasDirectEncounterCostOrDamage: false,
+      hasEncounterDisruption: false,
+      evidence: expect.arrayContaining([
+        "effective_defense_source_subroutines:current_engine_quote",
+      ]),
+    });
+    expect(
+      visibleCorpIceDefenseProfile(hunting, [
+        {
+          type: "initiate_trace",
+          traceLimit: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+        },
+      ]),
+    ).toMatchObject({ hasMeaningfulTaxOrDamage: true });
+  });
+
   it("consumes runtime card text and structured active hints for visible ICE", () => {
     expect(
       visibleCorpIceDefenseProfile(
