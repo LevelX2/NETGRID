@@ -1029,7 +1029,12 @@ export function buildRunnerCentralPressureSignals({
             evaluation,
             candidates,
           );
-          const executionMode = runPurposeForEvaluation(evaluation);
+          // An admitted, fully quoted HQ success-window setup has a concrete
+          // access payoff. The one-credit information-probe budget must not
+          // replace that route's already validated path and follow-up budget.
+          const executionMode = hqSuccessWindowSetupAvailable
+            ? ("access" as const)
+            : runPurposeForEvaluation(evaluation);
           const currentPressureRoute =
             (!knownNoPayoff || hqSuccessWindowSetupAvailable) &&
             pressureCadence.routeAvailable &&

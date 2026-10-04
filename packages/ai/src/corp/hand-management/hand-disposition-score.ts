@@ -2,6 +2,7 @@ import { corpArchivesPreparationDiscardValue } from "../ambush/corp-access-zone-
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { corpTerminalHqAgendaShuffleExposure } from "../defense/corp-server-protection-reserve";
 import type { DiscardChoiceKeepScore } from "../../runtime/discard-choice-selection";
 import {
   corpHandDuplicateCount,
@@ -79,6 +80,18 @@ export function corpHandDispositionScore(params: {
     agendaPoints > 0 &&
     input.playerView.own.agendaPoints + agendaPoints >=
       input.playerView.agendaPointsToWin;
+  const terminalRelocation =
+    matchpoint &&
+    destination === "rd_shuffle" &&
+    input.playerView.activeSide === "corp" &&
+    input.playerView.own.clicks === 0
+      ? corpTerminalHqAgendaShuffleExposure(input, card.instanceId)
+      : undefined;
+  // A potential own winning agenda cannot be converted with no clicks left.
+  // Preserve its keep protection unless Defense proves lower next-turn
+  // terminal exposure at the exact shuffle destination.
+  const matchpointProtected =
+    matchpoint && terminalRelocation?.lowerDestinationExposure !== true;
   const currentPlanProtected =
     baseKeepScore.planDisposition === "current_plan_route" ||
     baseKeepScore.planDisposition === "support_for_need" ||
@@ -108,7 +121,7 @@ export function corpHandDispositionScore(params: {
     hqExposureRelief +
     destinationRiskPenalty +
     scoreEfficiencyProtection +
-    (matchpoint ? 900 : 0) +
+    (matchpointProtected ? 900 : 0) +
     (currentPlanProtected ? 700 : 0);
 
   return {
@@ -133,7 +146,12 @@ export function corpHandDispositionScore(params: {
       ...(destinationRiskPenalty > 0
         ? ["corp_hand_destination_rd_exposure_risk"]
         : []),
-      ...(matchpoint ? ["corp_hand_destination_matchpoint_protected"] : []),
+      ...(matchpointProtected
+        ? ["corp_hand_destination_matchpoint_protected"]
+        : []),
+      ...(terminalRelocation?.lowerDestinationExposure
+        ? ["corp_hand_destination_terminal_hq_exposure_lower_after_shuffle"]
+        : []),
       ...(currentPlanProtected
         ? ["corp_hand_destination_current_plan_protected"]
         : []),

@@ -163,6 +163,12 @@ anderen Kartenrun auf demselben Server weitergeben. Kartenruns behalten ihren
 eigenen gequoteten Payoff; zulässige Basisruns können weiterhin die vorbereitete
 ICE-Entfernung begründen.
 
+Eine so zugelassene, vollständig finanzierte HQ-Erfolgsfenster-Vorbereitung
+besitzt den konkreten Runzweck `access`. Der Ein-Credit-Budgetdeckel einer
+reinen Informationsprobe darf ihren bereits quotierten Pfad und die
+Folgezahlung nicht erneut ausschließen. Unbekannte, verschobene oder fremde
+Runrouten erhalten diesen Zweck nicht.
+
 Bei festem Creditentzug begrenzt zusätzlich die kanonische Effektmenge den
 Payoff; eigene Credits werden dafür nicht ausgegeben. Verlangt die gebundene
 Ersatzwirkung ein nichtleeres Corp-Konto, bleibt bei bereits leerem Konto der

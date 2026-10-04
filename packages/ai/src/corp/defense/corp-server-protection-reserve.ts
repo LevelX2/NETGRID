@@ -3,6 +3,115 @@ import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
 import type { CorpExactIceRezRouteProjection } from "../../runtime/corp-exact-ice-rez-route";
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
 import { readCorpCentralAgendaExposure } from "./corp-central-defense-facts-adapter";
+import {
+  compareExactProbabilities,
+  type ExactProbability,
+} from "../../runtime/corp-score-protection-assessment";
+
+/** Conditional exposure of this exact terminal HQ agenda after a random shuffle.
+ * No hidden R&D order or future Runner action is inferred. */
+export function corpTerminalHqAgendaShuffleExposure(
+  input: AiDecisionInput,
+  cardId: string,
+):
+  | Readonly<{
+      observedAtStateVersion: number;
+      cardId: string;
+      hqExposure: ExactProbability;
+      rdAfterShuffleExposure: ExactProbability;
+      lowerDestinationExposure: boolean;
+    }>
+  | undefined {
+  if (input.side !== "corp" || input.playerView.phase === "run")
+    return undefined;
+  const card = input.playerView.own.gripOrHq.find(
+    (c) => c.instanceId === cardId,
+  );
+  if (
+    !card?.known ||
+    card.type !== "agenda" ||
+    !Number.isSafeInteger(card.agendaPoints) ||
+    (card.agendaPoints ?? 0) < 1 ||
+    input.playerView.opponent.agendaPoints + card.agendaPoints! <
+      input.playerView.agendaPointsToWin
+  )
+    return undefined;
+  // Both readers validate the native access quotes and complete own inventory.
+  if (
+    !readCorpCentralAgendaExposure(input, "hq") ||
+    !readCorpCentralAgendaExposure(input, "rd")
+  )
+    return undefined;
+  const runnerRig = input.playerView.opponent.rig;
+  const preparationClicks = input.playerView.runnerNextTurnCreditClicks;
+  const rdCount = input.playerView.own.stackOrRdCount;
+  if (
+    !runnerRig ||
+    typeof rdCount !== "number" ||
+    !Number.isSafeInteger(rdCount) ||
+    rdCount < 0 ||
+    !Number.isSafeInteger(preparationClicks) ||
+    preparationClicks! < 0
+  )
+    return undefined;
+  const income = visibleRunnerPreparationIncomePerClick(runnerRig);
+  const exposures = (["hq", "rd"] as const).map((serverId) => {
+    const server = input.playerView.servers.find((s) => s.id === serverId);
+    const quote = input.playerView.corpCentralAccessQuotes?.find(
+      (q) => q.serverId === serverId,
+    );
+    if (!server || !quote) return undefined;
+    const protection = assessBestFundedCorpScoreProtection({
+      serverIce: server.ice,
+      serverRoot: server.root,
+      runnerRig,
+      runnerSetAside: input.playerView.specialZones?.setAside ?? [],
+      runnerCredits: input.playerView.opponent.credits,
+      runnerPreparationCreditClicks: income * preparationClicks!,
+      ...(input.playerView.opponent.memoryUsed !== undefined
+        ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
+        : {}),
+      ...(input.playerView.opponent.memoryLimit !== undefined
+        ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
+        : {}),
+      targetServerId: serverId,
+      observedAtStateVersion: input.playerView.stateVersion,
+      availableCorpCredits: input.playerView.own.credits,
+      availableCorpClicks: input.playerView.own.clicks,
+      availableCorpAgendaPoints: input.playerView.own.agendaPoints,
+      scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
+      maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+    });
+    if (protection.knowledge !== "known") return undefined;
+    const population =
+      serverId === "hq" ? input.playerView.own.gripOrHq.length : rdCount + 1;
+    const probability = protection.protection.runnerAccessSuccessProbability;
+    const numerator =
+      probability.numerator * Math.min(quote.effectiveAccessCount, population);
+    const denominator = probability.denominator * population;
+    if (
+      !Number.isSafeInteger(numerator) ||
+      !Number.isSafeInteger(denominator) ||
+      denominator < 1
+    )
+      return undefined;
+    return { numerator, denominator };
+  });
+  const [hqExposure, rdAfterShuffleExposure] = exposures;
+  if (!hqExposure || !rdAfterShuffleExposure) return undefined;
+  const comparison = compareExactProbabilities(
+    rdAfterShuffleExposure,
+    hqExposure,
+  );
+  if (comparison === undefined) return undefined;
+  return {
+    observedAtStateVersion: input.playerView.stateVersion,
+    cardId,
+    hqExposure,
+    rdAfterShuffleExposure,
+    lowerDestinationExposure: comparison < 0,
+  };
+}
 
 export type CorpServerProtectionClaim = Readonly<{
   serverId: string;
