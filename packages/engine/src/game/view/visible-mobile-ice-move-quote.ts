@@ -3,10 +3,8 @@ import { agendaPoints, visibleCorpCard } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { projectInstalledCorpIceRezCost } from "../payment";
 import { spendCorpAgendaPoints } from "../state/corp-agenda-point-cost";
-import {
-  projectFixedCorpIcePostRezState,
-  visibleCorpIcePostRezRunQuote,
-} from "./visible-post-rez-run-quote";
+import { projectFixedCorpIcePostRezState } from "./fixed-ice-post-rez-state";
+import { visibleCorpIcePostRezRunQuote } from "./visible-post-rez-run-quote";
 
 /** Exact relocation and, where necessary, fixed affordable follow-up rez.
  * Unprojected lifecycle work or another unrezzed path layer stays unquoted. */

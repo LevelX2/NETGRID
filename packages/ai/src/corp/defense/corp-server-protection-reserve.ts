@@ -316,8 +316,10 @@ export function assessCorpRezOpportunityCost(
           0,
           route.before.runnerAccessSuccessProbability.numerator /
             route.before.runnerAccessSuccessProbability.denominator -
-            route.after.runnerAccessSuccessProbability.numerator /
-              route.after.runnerAccessSuccessProbability.denominator,
+            (stops
+              ? 0
+              : route.after.runnerAccessSuccessProbability.numerator /
+                route.after.runnerAccessSuccessProbability.denominator),
         )
       : Number(stops);
   if (

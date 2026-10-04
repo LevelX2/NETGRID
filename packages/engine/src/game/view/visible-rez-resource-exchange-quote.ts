@@ -12,6 +12,7 @@ import {
 } from "../../ability-engine/icebreaker-abilities";
 import { visibleRunnerRigCardForViewer } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+import { projectFixedCorpIcePostRezState } from "./fixed-ice-post-rez-state";
 import {
   availableRunnerRunCreditPool,
   availableRunnerRunCredits,
@@ -86,11 +87,12 @@ export function visibleCorpIceRezResourceExchangeQuote(
       ? { subtypes: [...options.subtypesAfterRez] }
       : {}),
   };
-  const projectedRunQuote = visibleEffectiveIceRunQuote(
-    state,
-    iceId,
-    projectedVisibleIce,
-  );
+  // Passive subroutine providers inspect the actual source's active state,
+  // not just VisibleCard.rezzed. Share the fixed post-rez flags with run quotes.
+  const projectedState = projectFixedCorpIcePostRezState(state, iceId);
+  const projectedRunQuote = projectedState
+    ? visibleEffectiveIceRunQuote(projectedState, iceId, projectedVisibleIce)
+    : undefined;
   if (!projectedRunQuote)
     return {
       ...binding,

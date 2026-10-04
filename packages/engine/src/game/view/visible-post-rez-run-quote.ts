@@ -11,30 +11,7 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { visibleCorpCard } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { visibleCurrentIceBreakExchange } from "./visible-rez-resource-exchange-quote";
-
-/**
- * Projects the deterministic state transition shared by every fixed ICE rez.
- * Lifecycle effects are not reproduced here: callers must reject cards with
- * on-rez lifecycle work before using this narrow state projection.
- */
-export function projectFixedCorpIcePostRezState(
-  state: GameState,
-  iceId: CardInstanceId,
-): GameState | undefined {
-  const source = state.cardInstances[iceId];
-  if (!source || source.rezzed) return undefined;
-  return {
-    ...state,
-    cardInstances: {
-      ...state.cardInstances,
-      [iceId]: {
-        ...source,
-        faceup: true,
-        rezzed: true,
-      },
-    },
-  };
-}
+import { projectFixedCorpIcePostRezState } from "./fixed-ice-post-rez-state";
 
 /**
  * Quotes the run-facing state of one ICE without mutating GameState. Fixed

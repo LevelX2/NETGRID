@@ -1407,6 +1407,14 @@ keinen unerreichbaren Mindestpuffer. Scorefortsetzung, andere Agendaremotes und
 innere ICE des aktuellen Runs bleiben in derselben Ressourcenprüfung;
 derselbe Server wird dabei nicht doppelt reserviert.
 
+Ein exakter aktueller `accessBlock` oder `traceAccessBlock` setzt die
+Zugriffswahrscheinlichkeit nach der Rezroute im Verlustvergleich auf null.
+Eine abstrakte Serverquote darf diesen konkreten Runstopp nicht überschreiben.
+Die Vorherquote bleibt maßgeblich: War der Zugriff bereits blockiert,
+entsteht kein zusätzlicher vermiedener Verlust. Ohne exakten Stopp bleiben
+die quotierten Vorher-/Nachherwahrscheinlichkeiten und die konkurrierenden
+zertifizierten Schutzansprüche erhalten.
+
 Auch ein inneres ICE im bereits laufenden Run begründet nur dann eine
 Stopping-Rezreserve, wenn seine exakte Zahlung beim Verzicht auf den aktuellen
 Rez bereits finanzierbar wäre. Ein zehn Credits teures inneres ICE bei vier

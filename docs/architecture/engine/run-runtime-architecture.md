@@ -51,6 +51,13 @@ ihnen aber nicht zurückimportiert.
   oder Lifecycle-Effekte auszuführen. Mehrere Clowns kumulieren, die Stärke
   bleibt mindestens null. Eine unbekannte zukünftige Zufallswirkung wird
   damit nicht vorweggenommen; die bedingten Effekte bleiben separat sichtbar.
+- Aktuelle Rez-Break-Austauschquotes berechnen passive Subroutinen auf
+  derselben lokalen Post-Rez-Zustandsprojektion wie die Runquote.
+  `fixed-ice-post-rez-state.ts` setzt dafür nur die festen sichtbaren
+  Rezflags der Quellinstanz. Eine als gerezzt markierte `VisibleCard`
+  bei weiterhin inaktivem `GameState` genügt nicht. Lifecycle und variable
+  Choices behalten ihre eigenen Zulassungsgrenzen; RNG, Eventlog und der
+  tatsächliche Zustand bleiben unverändert.
 - Die Corp erhält für angebotene X-Rez-LegalActions eigene
   `effectivePostRezActionRunQuotes` mit Action-ID und StateVersion. Die
   Projektion setzt nur den öffentlich gewählten X-Zustand in einer lokalen

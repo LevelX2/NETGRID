@@ -20,6 +20,79 @@ const CONCEALED_RESOURCE_ID =
   "resource_exchange_concealed_resource" as CardInstanceId;
 
 describe("visible Corp ICE rez resource exchange quote", () => {
+  it.each([0, 1, 2])(
+    "quotes %i active outside gates through the projected rezzed source",
+    (outsideCount) => {
+      const { state, visibleIce } = resourceExchangeState();
+      state.cardInstances[FILTER_ID]!.definitionId = "onr_proteus_031_minotaur";
+      state.cardInstances[RENT_I_CON_ID]!.definitionId = "onr_v1_039_krash";
+      state.runner.credits = 6;
+      const server = state.corp.servers.find((s) => s.id === "rd")!;
+      for (let i = 0; i < outsideCount; i++) {
+        const id = `active-outside-gate-${i}` as CardInstanceId;
+        server.ice.push(id);
+        state.cardInstances[id] = {
+          ...state.cardInstances[FILTER_ID]!,
+          instanceId: id,
+          definitionId: FILTER,
+          rezzed: true,
+          faceup: true,
+        };
+      }
+      const before = structuredClone(state);
+      const quote = visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, {
+        ...visibleIce,
+        definitionId: "onr_proteus_031_minotaur",
+        subtypes: ["sentry"],
+        strength: 4,
+      });
+      expect(quote).toMatchObject(
+        outsideCount === 0
+          ? { complete: false, reason: "no_hard_end_the_run_subroutine" }
+          : {
+              complete: true,
+              hardEndTheRunSubroutineCount: outsideCount,
+              runnerBreak: {
+                requiredCredits: 8 + outsideCount * 2,
+                canPayFromCurrentCredits: false,
+              },
+            },
+      );
+      expect(state).toEqual(before);
+    },
+  );
+
+  it("does not count unrezzed outside gates or active outside sentries", () => {
+    const { state, visibleIce } = resourceExchangeState();
+    state.cardInstances[FILTER_ID]!.definitionId = "onr_proteus_031_minotaur";
+    const server = state.corp.servers.find((s) => s.id === "rd")!;
+    for (const [i, definitionId, rezzed] of [
+      [0, FILTER, false],
+      [1, "onr_proteus_011_brain-wash", true],
+    ] as const) {
+      const id = `nonqualifying-outside-${i}` as CardInstanceId;
+      server.ice.push(id);
+      state.cardInstances[id] = {
+        ...state.cardInstances[FILTER_ID]!,
+        instanceId: id,
+        definitionId,
+        rezzed,
+        faceup: rezzed,
+      };
+    }
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, {
+        ...visibleIce,
+        definitionId: "onr_proteus_031_minotaur",
+        subtypes: ["sentry"],
+        strength: 4,
+      }),
+    ).toMatchObject({
+      complete: false,
+      reason: "no_hard_end_the_run_subroutine",
+    });
+  });
+
   it.each([0, 2, 3])(
     "keeps a run spending cap separate from normal credit holdings (spent: %s)",
     (spent) => {
@@ -109,9 +182,12 @@ describe("visible Corp ICE rez resource exchange quote", () => {
 
   it("certifies the exact current encounter on a layered server", () => {
     const { state, visibleIce } = resourceExchangeState();
-    state.corp.servers
-      .find((server) => server.id === "rd")!
-      .ice.push("other_ice" as CardInstanceId);
+    const outerId = "other_ice" as CardInstanceId;
+    state.corp.servers.find((server) => server.id === "rd")!.ice.push(outerId);
+    state.cardInstances[outerId] = {
+      ...state.cardInstances[FILTER_ID]!,
+      instanceId: outerId,
+    };
 
     expect(
       visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
