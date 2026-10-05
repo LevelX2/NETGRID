@@ -1,3 +1,7 @@
+import {
+  pureEndRunEncounterPayment,
+  pureEndRunEncounterEconomics,
+} from "./run-window-pure-etr-economics";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
@@ -71,11 +75,7 @@ import {
   visibleDeflectorSubroutineCanResolve,
 } from "../../visible-run-analysis";
 import { reservedAccessTrashCredits } from "./run-window-access";
-import {
-  pureEndRunEncounterPayment,
-  optionalDamageBreakContinuationPayments,
-  pureEndRunEncounterEconomics,
-} from "./run-window-encounter-budget";
+import { optionalDamageBreakContinuationPayments } from "./run-window-encounter-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
 import { runnerRunStrengthCurrentPumpSavings } from "./run-window-strength-preparation";
 import { runnerRunProgramSearchAssessment } from "./run-window-program-search";
@@ -928,6 +928,7 @@ function runnerRunWindowActionAssessment(
             ? [
                 `runner_pure_etr_complete_path_cost:${encounterEconomics.totalCost}`,
                 `runner_pure_etr_complete_path_cash_cost:${encounterEconomics.cashCost}`,
+                `runner_pure_etr_new_run_end_trash_sources:${encounterEconomics.newRunEndTrashSourceCount}`,
               ]
             : []),
           ...(strengthPumpSavings !== undefined

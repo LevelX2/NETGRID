@@ -609,6 +609,7 @@ export function structuredBreakerAssessment(params: {
     BreakAssessment["postBreakStealthLosses"]
   > = [];
   let mayTrashBreakerAfterPass = false;
+  let runEndTrashSourceIfUsed = false;
   let dependsOnRandomBreakAttempt = false;
   while (remainingIndexes.size > 0) {
     const option = quote.breakOptions
@@ -634,6 +635,9 @@ export function structuredBreakerAssessment(params: {
             ).length || left.creditCost - right.creditCost,
       )[0];
     if (!option) return undefined;
+    runEndTrashSourceIfUsed ||= option.consequences.some(
+      (effect) => effect.kind === "run_end_trash_source_if_used",
+    );
     dependsOnRandomBreakAttempt ||= option.consequences.some(
       (effect) => effect.kind === "random_break_attempt",
     );
@@ -738,6 +742,9 @@ export function structuredBreakerAssessment(params: {
       pumpOption?.option.duration === "current_run" ||
       pumpOption?.option.duration === "current_turn" ||
       runStrengthGain > 0,
+    ...(runEndTrashSourceIfUsed
+      ? { runEndTrashSourceIfUsed: true as const }
+      : {}),
     ...(runStrengthGain > 0 ? { runStrengthGain } : {}),
     ...(postBreakStealthLosses.some((loss) => loss.occurrences > 0)
       ? {

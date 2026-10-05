@@ -10,7 +10,7 @@ import {
 import {
   pureEndRunEncounterPayment,
   pureEndRunEncounterEconomics,
-} from "../../runner/run-window/run-window-encounter-budget";
+} from "../../runner/run-window/run-window-pure-etr-economics";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,

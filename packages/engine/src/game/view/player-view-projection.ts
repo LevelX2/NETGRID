@@ -270,6 +270,13 @@ export function buildPlayerViewProjection(
         ...(state.run.accessServerOverride
           ? { accessServerOverride: state.run.accessServerOverride }
           : {}),
+        ...(state.run.runEndTrashUsedBreakerIdsThisRun?.length
+          ? {
+              runEndTrashUsedBreakerIdsThisRun: [
+                ...new Set(state.run.runEndTrashUsedBreakerIdsThisRun),
+              ],
+            }
+          : {}),
         phase: state.run.phase,
         position: { ...state.run.position },
         ...(approachedIce

@@ -1,0 +1,122 @@
+{
+  "source": "589417c8ef8858fafacfcd52c7c8d2a0831a90a3",
+  "originalPrefix": 111,
+  "checkpointHash": "fnv1a:0d5cf7f0",
+  "equivalentCurrentEncounterCost": 3,
+  "retainedRent": "runner_onr_classic_031_rent-i-con_2",
+  "sameOriginalCurrentRunAccess": true,
+  "creditsAfterRun": 9,
+  "rows": [
+    {
+      "actionId": "runner.pump_breaker.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_v1_245_fire-wall_2.onr_classic_027_early-worm:pump_strength_three",
+      "type": "pump_breaker",
+      "version": 112,
+      "hash": "fnv1a:d3f91438",
+      "credits": [
+        11,
+        2
+      ]
+    },
+    {
+      "actionId": "runner.break_subroutine.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_v1_245_fire-wall_2.0.printed_subroutines_end_the_run.onr_classic_027_early-worm:break_wall_subroutine",
+      "type": "break_subroutine",
+      "version": 113,
+      "hash": "fnv1a:e72a8e85",
+      "credits": [
+        10,
+        2
+      ]
+    },
+    {
+      "actionId": "runner.continue_run",
+      "type": "continue_run",
+      "version": 114,
+      "hash": "fnv1a:7be03fbb",
+      "credits": [
+        10,
+        2
+      ]
+    },
+    {
+      "actionId": "runner.continue_run",
+      "type": "continue_run",
+      "version": 115,
+      "hash": "fnv1a:eb100f53",
+      "credits": [
+        10,
+        2
+      ]
+    },
+    {
+      "actionId": "corp.decline_rez.rd",
+      "type": "decline_rez",
+      "version": 116,
+      "hash": "fnv1a:276bdea9",
+      "credits": [
+        10,
+        2
+      ]
+    },
+    {
+      "actionId": "corp.decline_rez",
+      "type": "decline_rez",
+      "version": 117,
+      "hash": "fnv1a:447ee881",
+      "credits": [
+        10,
+        2
+      ]
+    },
+    {
+      "actionId": "runner.break_subroutine.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_proteus_038_snowbank_3.0.subroutine_end_run_unless_runner_pays_one.onr_classic_027_early-worm:break_wall_subroutine",
+      "type": "break_subroutine",
+      "version": 118,
+      "hash": "fnv1a:3858ef42",
+      "credits": [
+        9,
+        2
+      ]
+    },
+    {
+      "actionId": "runner.continue_run",
+      "type": "continue_run",
+      "version": 119,
+      "hash": "fnv1a:1eb09f24",
+      "credits": [
+        9,
+        2
+      ]
+    },
+    {
+      "actionId": "runner.continue_run",
+      "type": "continue_run",
+      "version": 120,
+      "hash": "fnv1a:4585dae9",
+      "credits": [
+        9,
+        2
+      ]
+    },
+    {
+      "actionId": "corp.decline_rez.rd",
+      "type": "decline_rez",
+      "version": 121,
+      "hash": "fnv1a:77fe072a",
+      "credits": [
+        9,
+        2
+      ]
+    },
+    {
+      "actionId": "runner.access_card",
+      "type": "access_card",
+      "version": 122,
+      "hash": "fnv1a:28e449d1",
+      "credits": [
+        9,
+        2
+      ]
+    }
+  ],
+  "boundary": "One fewer pump changes later run IDs and their seeded purposes. This control proves only the same original current run and bank with the universal breaker retained."
+}

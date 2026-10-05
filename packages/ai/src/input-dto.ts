@@ -742,6 +742,14 @@ function sanitizePlayerView(
   view: PlayerView,
   publicEvents: PublicGameEvent[],
 ): PlayerView {
+  const runEndTrashUsed = view.run?.runEndTrashUsedBreakerIdsThisRun;
+  if (
+    runEndTrashUsed !== undefined &&
+    (!Array.isArray(runEndTrashUsed) ||
+      runEndTrashUsed.some((id) => typeof id !== "string" || id.length === 0) ||
+      new Set(runEndTrashUsed).size !== runEndTrashUsed.length)
+  )
+    throw new Error("Invalid Engine public run-end breaker usage.");
   if (
     view.run?.accessServerOverride !== undefined &&
     !view.servers.some((server) => server.id === view.run!.accessServerOverride)
@@ -1015,6 +1023,9 @@ function sanitizePlayerView(
             attackedServerId: view.run.attackedServerId,
             ...(view.run.accessServerOverride !== undefined
               ? { accessServerOverride: view.run.accessServerOverride }
+              : {}),
+            ...(runEndTrashUsed !== undefined
+              ? { runEndTrashUsedBreakerIdsThisRun: runEndTrashUsed.slice() }
               : {}),
             phase: view.run.phase,
             ...(view.run.position

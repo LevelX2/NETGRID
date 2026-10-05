@@ -9,6 +9,12 @@ Lifecycle, Parent-/Need-Bindung und aktuelle Ausführung definiert der
 [gemeinsame Planvertrag](planning-architecture.md). Fachliche Ziele liegen
 bei den [Runner-](runner-plan-contracts.md) und [Corp-Ownern](corp-plan-contracts.md).
 
+Der Runner-Adapter begrenzt endliche Ownerwerte auf den bestehenden
+Utilitybereich, erhält dabei aber deren Nachkommastellen. Ein gebundener
+Kostenvergleich darf seinen nachgeordneten Gleichstandsvorteil nicht durch
+Rundung vor Headbildung, Value Claim und Restzugsuche verlieren. Ganze
+Kosten, Ressourcen und LegalAction-Bindungen bleiben unverändert.
+
 Die Typblöcke erläutern Konzepte; sie sind keine kopierte API-Spezifikation.
 Für reale Feldnamen, Pflichtfelder und Signaturen gelten die folgenden Quellen.
 Konzeptionelle Namen ohne entsprechendes Symbol begründen keinen neuen Hook.

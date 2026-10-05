@@ -4253,6 +4253,8 @@ export type PlayerView = {
     attackedServerId: Exclude<ServerId, "new_remote">;
     /** Public resolved access destination; absent means the attacked server. */
     accessServerOverride?: Exclude<ServerId, "new_remote">;
+    /** Public sources already bound to run-end trash by actual break use. */
+    runEndTrashUsedBreakerIdsThisRun?: CardInstanceId[];
     phase: RunState["phase"];
     position?: RunState["position"];
     approachedIce?: VisibleCard;

@@ -1743,6 +1743,18 @@ gesamten Nominalkosten. Ein einzelner billiger Pump zertifiziert keine
 günstigere vollständige Folge. Unbekannte innere ICE, gemischte Wirkungen,
 konditionale Folgen oder die Liquidation einer Zahlungsquelle liefern keine
 gleichwertige reine ETR-Kostenrangfolge.
+Bei gleichen vollständigen Cash- und Nominalkosten berücksichtigt die Quote
+anschließend neu entstehende Quellentrashpflichten am Runende. Die Engine
+kennzeichnet diese Konsequenz am tatsächlichen Break und projiziert bereits
+benutzte öffentliche Quellen durch PlayerView und DTO. Pumpen allein zählt
+nicht als Verbrauch; eine gebundene Quelle bleibt innerhalb desselben Runs
+nutzbar. Der bekannte Restpfad zählt dieselbe Quelle nur einmal. Eine exakt
+angebotene Pay-or-ETR-Fortsetzung kann bei gleichem Preis den Verbrauch
+vermeiden; geschlossene, gemischte oder unvollständig gebundene Zahlungen
+erhalten diesen Vergleich nicht. Der Runner-Zugplaner erhält den begrenzten
+Nachkommawert des Owners ohne Rundung, damit die aktuelle Auswahl dieselbe
+Kostenrangfolge konsumiert. Eine günstigere notwendige Coverage bleibt vor
+dem bloßen Erhalt einer Quelle priorisiert.
 Gemischte Wirkungen, notwendiger Schadens-/Programmschutz und ein Break zum
 Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
 

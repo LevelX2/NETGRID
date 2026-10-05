@@ -454,7 +454,10 @@ function assessKnownRezzedIcePathInternal(
   let firstKnownIceBreakable = false;
   let activeRunPathEffects = initialRunPathEffects.slice();
   const conditionalAccessReasons = new Set<string>();
+  const runEndTrashSourceIds = new Set<string>();
   const spendPathBreak = (assessment: BreakAssessment) => {
+    if (assessment.runEndTrashSourceIfUsed)
+      runEndTrashSourceIds.add(assessment.breakerInstanceId);
     if (assessment.conditionalAccessReason)
       conditionalAccessReasons.add(assessment.conditionalAccessReason);
     spendBreakerCreditsAndApplySideEffects(creditBudget, assessment);
@@ -1288,6 +1291,9 @@ function assessKnownRezzedIcePathInternal(
     return {
       ...damageOnlyBlock,
       knownPathBlockedOnlyByDamage: true,
+      ...(runEndTrashSourceIds.size
+        ? { runEndTrashSourceIds: [...runEndTrashSourceIds] }
+        : {}),
       ...(fullyBrokenIceInstanceIds.length
         ? { fullyBrokenIceInstanceIds }
         : {}),
@@ -1308,6 +1314,9 @@ function assessKnownRezzedIcePathInternal(
   }
   return {
     blocked: false,
+    ...(runEndTrashSourceIds.size
+      ? { runEndTrashSourceIds: [...runEndTrashSourceIds] }
+      : {}),
     ...(fullyBrokenIceInstanceIds.length ? { fullyBrokenIceInstanceIds } : {}),
     ...(paidSubroutineBreaks.length ? { paidSubroutineBreaks } : {}),
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),

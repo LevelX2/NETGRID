@@ -1363,5 +1363,7 @@ function findRootPlanInstanceId(
 
 function boundedUtility(value: number): number {
   if (!Number.isFinite(value)) return 0;
-  return Math.max(-10_000, Math.min(10_000, Math.round(value)));
+  // Owner quotes may carry a bounded fractional tie-break after exact costs.
+  // Rounding erases that ordering before the authoritative remainder search.
+  return Math.max(-10_000, Math.min(10_000, value));
 }

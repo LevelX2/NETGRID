@@ -23817,6 +23817,7 @@ describe("authoritative plan-first live runtime", () => {
           encounterContinue: true,
           encounterWillEndRun: true,
           unbrokenSubroutineCount: 1,
+          encounterSubroutineIds: "printed_subroutines_end_the_run",
           sourceDefinitionId: "onr_v1_261_quandary",
         },
       },

@@ -55,6 +55,13 @@ ihnen aber nicht zurückimportiert.
 
 ## Nicht offensichtliche Verträge
 
+- Die kanonische Breakerquote kennzeichnet `run_end_trash_source_if_used`
+  ausschließlich an der tatsächlichen Breakfähigkeit. Der öffentliche Run
+  projiziert bereits benutzte Instanzen als
+  `runEndTrashUsedBreakerIdsThisRun` für beide Seiten. Pumpen allein erzeugt
+  keinen Eintrag; die Quelle bleibt bis zum wirklichen Runende nutzbar.
+  Diese Projektion ändert weder Zustand noch Cleanupregel und enthält keine
+  verdeckten Handdaten.
 - Effektive ICE-Runquotes unterscheiden die aktuelle `effectiveStrength`
   von `encounterStrength`: Letztere wendet die aktuellen öffentlichen
   Encounter-Modifikatoren über dieselbe Stärkeberechnung an, ohne Trigger

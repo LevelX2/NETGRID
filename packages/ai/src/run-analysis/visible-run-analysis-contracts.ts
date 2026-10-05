@@ -78,6 +78,8 @@ export type BreakAssessment = {
   breakerSubtypes: string[];
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
+  /** The selected actual break binds this source to trash at run end. */
+  runEndTrashSourceIfUsed?: true;
   runStrengthGain?: number;
   postBreakStealthLosses?: Array<{
     amount: number;
@@ -242,6 +244,8 @@ export type VisibleIceRunHazardProjection = {
 
 export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
+  /** Run-end trash obligations of the selected path; sources remain usable inside it. */
+  runEndTrashSourceIds?: string[];
   /** ICE fully broken by the selected, already paid visible path. */
   fullyBrokenIceInstanceIds?: string[];
   /** Exact breaks already paid by this path; never charge their damage again. */

@@ -1323,7 +1323,10 @@ describe("plan-first Remote contest continuation", () => {
             [breakSnowbank.actionId]: {
               admissible: false,
               evidenceCodes: expect.arrayContaining([
-                "run_window_action_outside_exact_phase_route",
+                "runner_run_window_action_excluded:run_plan_encounter_payment_degrades_bound_reserve",
+                "run_plan_encounter_payment:2",
+                "runner_run_risk_contract_baseline_credit_gap:0",
+                "runner_run_risk_contract_current_credit_gap:1",
               ]),
             },
           },

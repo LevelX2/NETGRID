@@ -19,6 +19,7 @@ export type VisibleBreakerConsequence =
       optionalIfUnavailable: boolean;
     }
   | { kind: "end_run_after_use" }
+  | { kind: "run_end_trash_source_if_used" }
   | { kind: "lose_future_clicks"; amountPerStrength: number }
   | {
       kind: "increase_breaker_strength";
@@ -328,6 +329,8 @@ function consequencesFor(
     });
   if (ability.onUseEndRun) result.push({ kind: "end_run_after_use" });
   for (const effect of ability.specialEffects ?? []) {
+    if (effect.kind === "run_end_trash_source_if_used")
+      result.push({ kind: "run_end_trash_source_if_used" });
     if (effect.kind === "set_next_sentry_free_break_after_fully_breaking_wall")
       result.push({
         kind: "set_next_matching_ice_free_break",

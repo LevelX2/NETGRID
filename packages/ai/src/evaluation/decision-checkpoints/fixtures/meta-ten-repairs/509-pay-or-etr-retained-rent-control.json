@@ -1,0 +1,47 @@
+{
+  "originalPrefix": 21,
+  "checkpointHash": "fnv1a:0e70c7a9",
+  "originalCurrentEncounterCost": 1,
+  "controlledCurrentEncounterCost": 1,
+  "sameCurrentRunAccess": true,
+  "creditsAfterRun": 2,
+  "retainedRent": true,
+  "rows": [
+    {
+      "id": "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
+      "hash": "fnv1a:48455782",
+      "credits": 3,
+      "phase": "movement"
+    },
+    {
+      "id": "runner.continue_run",
+      "hash": "fnv1a:67b20052",
+      "credits": 3,
+      "phase": "access"
+    },
+    {
+      "id": "runner.access_card",
+      "hash": "fnv1a:f144007a",
+      "credits": 3,
+      "phase": "access"
+    },
+    {
+      "id": "runner.trash_accessed_card.corp_onr_v1_366_red-herrings_3.1",
+      "hash": "fnv1a:9984e501",
+      "credits": 2,
+      "phase": "access"
+    },
+    {
+      "id": "runner.access_card",
+      "hash": "fnv1a:5e88a978",
+      "credits": 2,
+      "phase": "access"
+    },
+    {
+      "id": "runner.decline_trash",
+      "hash": "fnv1a:0acc577f",
+      "credits": 2
+    }
+  ],
+  "boundary": "Current original run only; one fewer action changes later run IDs and seeded purposes. No other whole-game winner asserted."
+}
