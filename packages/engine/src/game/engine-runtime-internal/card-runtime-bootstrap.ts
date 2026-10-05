@@ -1,5 +1,6 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
+import { temporaryIceStrengthPulseBonus } from "../../ability-engine/temporary-ice-strength-pulse";
 import { grantSourceBoundActions } from "./turn-action-economy-runtime";
 import {
   type ActionType,
@@ -872,8 +873,7 @@ export function configureCardRuntimeBootstrap() {
     )
       throw new Error("Sterdroid braucht ein gerezztes installiertes ICE.");
     const currentStrength = runtimePorts.iceStrengthFor(state, targetIceId);
-    const cappedStrength = Math.min(maxStrength, currentStrength * 2);
-    const amount = Math.max(0, cappedStrength - currentStrength);
+    const amount = temporaryIceStrengthPulseBonus(currentStrength, maxStrength);
     if (amount > 0) {
       state.cardInstances[targetIceId] = {
         ...target,

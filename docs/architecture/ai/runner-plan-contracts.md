@@ -2435,6 +2435,17 @@ Abschnitt 6 hebt diese tatsächlichen Modulidentitäten nicht auf.
 
 ### Vertikale Implementierung der Bank
 
+Allgemeine wiederkehrende Breaker-Credits tragen im kanonischen Factsproducer
+den Qualifier `using_icebreaker_during_run`. Sie dürfen auch noisy Breaker
+finanzieren; non-noisy- und Killer-Pools behalten ihre Einschränkungen.
+Development und Rigprojektion verlangen einen wirklichen installierten oder
+gebundenen Folge-Breaker. Ein positiver Economyhint allein erzeugt keinen
+ausführbaren parentlosen Installationsbedarf. Gehostete Breaker-Pools bleiben
+im separaten Hostinvestment, Event-only-Pools außerhalb der Breakerfacts.
+Der Datenvertrag bescheinigt weder sichere Core-Amortisierung noch einen
+vollständigen Leaveplayhorizont. Kanonische Qualifier, Parentgegenfälle und
+der reale noisy Break mit allgemeinen Bits sind fokussiert geprüft.
+
 Die produktive Bankentscheidung liegt unter `packages/ai/src/runner/credit-bank/`:
 
 | Quelle                                                                                                                 | Verantwortung                                                                                                               |

@@ -36,6 +36,7 @@ export function runnerSoleFortIceTrashTagAmount(
 }
 
 export type RunnerRestrictedRunCreditUse =
+  | "using_icebreaker_during_run"
   | "using_icebreaker_during_run_non_noisy"
   | "using_killer_during_run";
 
@@ -133,18 +134,28 @@ export function runnerRestrictedRunCreditProfile(
   definitionId: string | undefined,
 ): RunnerRestrictedRunCreditProfile | undefined {
   if (!definitionId) return undefined;
-  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  return runnerRestrictedRunCreditProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerRestrictedRunCreditProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerRestrictedRunCreditProfile | undefined {
+  const planning = card?.planning;
   if (planning?.side !== "runner") return undefined;
   const source = planning.engine.restrictedHostedCreditSource;
   if (
     !source ||
     !positiveSafeInteger(source.capacity) ||
-    source.refresh?.timing !== "start_of_runner_turn"
+    source.refresh?.timing !== "start_of_runner_turn" ||
+    source.requireHostedBreakerForIcebreakerUse === true
   ) {
     return undefined;
   }
   const uses = [...new Set(source.usableFor)].filter(
     (use): use is RunnerRestrictedRunCreditUse =>
+      use === "using_icebreaker_during_run" ||
       use === "using_icebreaker_during_run_non_noisy" ||
       use === "using_killer_during_run",
   );

@@ -360,7 +360,10 @@ function restrictedUseMatchesDemand(
   return demand.providers.some((provider) => {
     const traits = provider.breakerTraits;
     if (!traits) return false;
-    return use === "using_killer_during_run" ? traits.killer : !traits.noisy;
+    return (
+      use === "using_icebreaker_during_run" ||
+      (use === "using_killer_during_run" ? traits.killer : !traits.noisy)
+    );
   });
 }
 

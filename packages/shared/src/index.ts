@@ -3344,6 +3344,34 @@ export type VisibleCorpIcePostRezRunQuote =
       };
     };
 
+/** Corp-private current-action projection. Never forwarded into PublicEvents. */
+export type CorpTemporaryIceStrengthPulseQuote = {
+  schemaVersion: 1;
+  kind: "prepare_rez" | "activate";
+  stateVersion: number;
+  actionId: string;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  targetIceInstanceId: CardInstanceId | null;
+  targetServerId: Exclude<ServerId, "new_remote"> | null;
+  capabilityKey: string;
+  sourceTrashed: true;
+  expires: "turn_end";
+  turnSerial: number;
+  pulseCredits: number;
+  sourceRezCredits: number;
+} & (
+  | { complete: false; reason: string }
+  | {
+      complete: true;
+      iceRezCredits: number;
+      corpCreditsAfterDefense: number;
+      corpAgendaPointsAfterDefense: number;
+      beforeIce: VisibleCard;
+      afterIce: VisibleCard;
+    }
+);
+
 export type VisibleMandatoryCorpRezCosts = {
   agendaPoints: number;
 };

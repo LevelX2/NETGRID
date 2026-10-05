@@ -14,6 +14,7 @@ import { nonNegativeActionCreditCost as legalActionCreditCost } from "../../runt
 import {
   runnerNoRunRecurringEconomyProfile,
   runnerRestrictedRunCreditProfile,
+  type RunnerRestrictedRunCreditUse,
 } from "../../runtime/runner-canonical-card-facts";
 import {
   assessRunnerRecurringEconomyRunHorizon,
@@ -343,10 +344,7 @@ export function runnerRecurringEconomySignals(
 
 function runnerInstalledCompatibleRestrictedCreditBreakerCount(
   input: AiDecisionInput,
-  uses: readonly (
-    | "using_icebreaker_during_run_non_noisy"
-    | "using_killer_during_run"
-  )[],
+  uses: readonly RunnerRestrictedRunCreditUse[],
 ): number {
   const supportsNonNoisy = uses.includes(
     "using_icebreaker_during_run_non_noisy",
@@ -366,6 +364,7 @@ function runnerInstalledCompatibleRestrictedCreditBreakerCount(
       );
     if (!breaker) return false;
     return (
+      uses.includes("using_icebreaker_during_run") ||
       (supportsNonNoisy && !subtypes.has("noisy")) ||
       (supportsKiller &&
         (rolesMatch(roles, ["breaker_killer"]) || subtypes.has("killer")))

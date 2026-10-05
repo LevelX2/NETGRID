@@ -454,6 +454,74 @@ describe("runner rig-demand coverage adapter", () => {
     });
   });
 
+  it.each([false, true])(
+    "binds general recurring breaker credits to a real parent, including noisy=%s",
+    (noisy) => {
+      const source = visibleCard("general-pool", {
+        definitionId: "onr_classic_048_omnitech-spinal-tap-cybermodem",
+        type: "hardware",
+      });
+      const decoder = visibleCard("decoder", {
+        definitionId: "test-decoder",
+        type: "program",
+        subtypes: ["icebreaker", "decoder", ...(noisy ? ["noisy"] : [])],
+        memoryCost: 2,
+      });
+      for (const hasParent of [true, false]) {
+        const input = boundInput({
+          hand: hasParent ? [source, decoder] : [source],
+          legalActions: [currentInstallAction("install-general-pool", source)],
+          memoryUsed: 0,
+          memoryLimit: 4,
+        });
+        const projection = buildRunnerRigDemandProjectionForCoverage({
+          input,
+          strategicIntent: strategicIntent(),
+          deckCapabilities: deckCapabilities({
+            cardId: "test-decoder",
+            coverage: "code_gate",
+            memoryCost: 2,
+            noisy,
+            location: hasParent ? "in_hand" : "in_deck",
+          }),
+          coverageGaps: [gap({ answerInHand: hasParent })],
+          rolesForDefinitionId: roles,
+        });
+        const demands = projection.roleDemands.filter((d) =>
+          d.capabilityId.endsWith("using_icebreaker_during_run"),
+        );
+        if (hasParent)
+          expect(demands).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                ownerModuleId: "runner.develop_board_and_hand",
+                sourceNeedId: "code-gate",
+                requirement: "conditional_support",
+              }),
+            ]),
+          );
+        else
+          expect(
+            evaluateRunnerHandDevelopment({
+              input,
+              strategicIntent: strategicIntent(),
+              deckCapabilities: deckCapabilities({
+                cardId: "test-decoder",
+                coverage: "code_gate",
+                memoryCost: 2,
+                noisy,
+                location: "in_deck",
+              }),
+              rigDemandProjection: projection,
+            }).find((e) => e.cardInstanceId === source.instanceId),
+          ).toMatchObject({
+            currentNeed: "none",
+            deferReason: "no_current_need",
+          });
+      }
+    },
+  );
+
   it("binds non-noisy recurring credits only to a compatible breaker line", () => {
     const vewy = visibleCard("vewy", {
       definitionId: "onr_v1_071_vewy-vewy-quiet",

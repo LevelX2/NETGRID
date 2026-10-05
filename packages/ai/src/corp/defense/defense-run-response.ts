@@ -21,6 +21,7 @@ import {
 } from "./corp-defense-rez-support-facts";
 import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
 import { assessMobileIceRunDefense } from "./mobile-ice-run-defense";
+import { assessCorpTemporaryIceStrengthPulse } from "./corp-temporary-ice-strength-pulse";
 import { corpPassTaxRezAssessment } from "../../runtime/corp-pass-tax-rez-assessment";
 import { corpRootRezTimingComponent } from "../../runtime/corp-scoreline/semantic-runtime-corp-score-ice-components";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
@@ -269,6 +270,8 @@ export function corpRunDefenseAbilityAssessment(
       removalCondition:
         "Bind the run-defense assessment to the current exact LegalAction.",
     });
+  const strengthPulse = assessCorpTemporaryIceStrengthPulse(input, legalAction);
+  if (strengthPulse) return strengthPulse;
   const mobileDefense = assessMobileIceRunDefense(input, legalAction);
   if (mobileDefense) return mobileDefense;
   const paidEncounterDefense = assessCorpPaidEncounterDefense(
@@ -591,6 +594,12 @@ export function corpExactCardRezSupportAssessment(
   ) {
     return undefined;
   }
+  const pulseAction = input.legalActions.find(
+    (a) => a.actionId === candidate.actionId,
+  );
+  const strengthPulse =
+    pulseAction && assessCorpTemporaryIceStrengthPulse(input, pulseAction);
+  if (strengthPulse) return strengthPulse;
   const passTaxAssessment = corpPassTaxRezAssessment(
     input,
     candidate,

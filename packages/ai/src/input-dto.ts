@@ -138,6 +138,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "postInstallRezQuoteProjectedServerId",
   "postInstallEffectiveRunQuoteJson",
   "corpMobileIceMoveQuoteJson",
+  "corpTemporaryIceStrengthPulseQuoteJson",
   "postInstallRezQuoteExpiresAtStateVersion",
   "postInstallRezQuoteComplete",
   "postInstallRezQuoteCostKind",

@@ -1368,7 +1368,7 @@ function restrictedRunCreditsCanUseBreaker(
       ? traits.has("killer") || traits.has("breaker_killer")
       : use === "using_icebreaker_during_run_non_noisy"
         ? !traits.has("noisy") && !traits.has("breaker_noisy")
-        : false,
+        : use === "using_icebreaker_during_run",
   );
 }
 

@@ -1545,6 +1545,19 @@ Unvollständige Austauschquoten begründen keine erfundene Stop- oder Taxwirkung
 Ein fehlender beziehungsweise falsch gebundener Quote scheitert strukturiert.
 Der Pass ist eine ausdrückliche Engine-Action desselben Plans, kein Fallback.
 
+Der endliche einzelne ICE-Stärkepuls gehört ebenfalls diesem Defenseowner.
+Die private aktuelle Enginequote bindet Vorbereitung beziehungsweise
+Aktivierung an Quelle, Ziel, Action-ID, StateVersion, Zahlungen, Quellentrash
+und Zugende. Der Owner vergleicht die tatsächliche sichtbare Breakroute vor
+und nach dem Puls gegen bekannte aktuelle Agendaexposition. Allgemeine
+Strengthhints oder eine billige Rootrez allein geben die Route nicht frei.
+Der vollständige Consumer ist auf das gerade angegriffene innerste ICE
+begrenzt; zusätzliche verbleibende ICE, unbekannte Austauschkosten oder
+Wirkungen erzeugen eine ausdrückliche unvollständige Quote. Fehlende oder
+veraltete Bindungen scheitern strukturiert. Reale Enginekontrollen belegen
+zwei verhinderte unmittelbare terminale Zugriffslinien, keinen garantierten
+alternativen Gesamtsieger und keine vollständige Folgerunprojektion.
+
 `decline_rez` wird nur dann als unproduktiv zurückgewiesen, wenn derselbe
 Defense-Modus eine exakte, aktuell produktive Rez-Action als Route
 materialisiert. Gibt es keine solche Rez-Route, ist Decline die regelkonforme

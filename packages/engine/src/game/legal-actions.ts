@@ -50,6 +50,7 @@ import {
 } from "./turn/runner-main-actions";
 import { runnerCostPenaltySupportOriginalActionReady } from "./payment/runner-payment-support";
 import { buildLegalAction } from "./turn/action-builders";
+import { visibleTemporaryIceStrengthPulseQuote } from "./view/visible-ice-strength-pulse-quote";
 
 type HostFn<T = unknown> = () => T;
 
@@ -351,6 +352,14 @@ export function buildLegalActions(
   side: Side,
 ): LegalAction[] {
   const actions = buildLegalActionsUnchecked(host, side);
+  for (const action of actions) {
+    const pulse = visibleTemporaryIceStrengthPulseQuote(host.state, action);
+    if (pulse)
+      action.payload = {
+        ...(action.payload ?? {}),
+        corpTemporaryIceStrengthPulseQuoteJson: JSON.stringify(pulse),
+      };
+  }
   const seenActionIds = new Set<string>();
   const duplicateActionIds = new Set<string>();
   for (const action of actions) {

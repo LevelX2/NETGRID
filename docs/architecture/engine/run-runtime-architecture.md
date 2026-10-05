@@ -4,6 +4,16 @@ Status: Current State seit E13 des Engine Architecture Refresh 2026-07-18
 
 ## Zweck
 
+Der aktuelle einzelne temporäre ICE-Stärkepuls verwendet denselben
+kanonischen Verdopplungs-/Capdienst für echte Auflösung und private
+Corp-LegalAction-Projektion. `corpTemporaryIceStrengthPulseQuoteJson` enthält
+aktuelle Quell-/Ziel-/Action-/Zustandsbindung, tatsächliche Rez- und Pulskosten,
+Quellentrash, Zugende sowie Vorher-/Nachher-ICEfacts. Die Projektion klont
+ausschließlich innerhalb der Engine; die KI erhält keinen GameState.
+Nicht vollständig projizierbare Bedingungen und weitere innere ICE bleiben
+ausdrücklich `incomplete`. Private Quotes werden aus öffentlichen
+Eventpayloads entfernt und erscheinen nicht in Runner-LegalActions.
+
 Die Run-Domäne trennt Hostverträge, Window-Ports, Successful-Run-Interventionen
 und Run-End-Aufräumlogik. Der zuvor geduldete Importzyklus zwischen
 Fort-Pass-Fenster, After-Passing-Last-Ice-Kontext und Run-Window-Host ist
