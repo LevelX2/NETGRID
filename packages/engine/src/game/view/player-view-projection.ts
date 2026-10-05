@@ -267,6 +267,9 @@ export function buildPlayerViewProjection(
     ? {
         runId: state.run.runId,
         attackedServerId: state.run.attackedServerId,
+        ...(state.run.accessServerOverride
+          ? { accessServerOverride: state.run.accessServerOverride }
+          : {}),
         phase: state.run.phase,
         position: { ...state.run.position },
         ...(approachedIce

@@ -10,7 +10,10 @@ import {
   compareExactProbabilities,
   type KnownCorpScoreProtectionAssessment,
 } from "./corp-score-protection-assessment";
-import { readKnownCorpCentralAgendaThreat } from "../corp/defense/corp-central-defense-facts-adapter";
+import {
+  readKnownCorpCentralAgendaThreat,
+  corpCurrentRunAccessServerId,
+} from "../corp/defense/corp-central-defense-facts-adapter";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import type { CorpBluffDefenseNeed } from "../plans/corp-bluff-defense-types";
 
@@ -537,6 +540,7 @@ export function corpIceEffectsOnlyReachFutureEncounters(
 ): boolean {
   const futureTypes = new Set([
     "set_run_encounter_tax",
+    "set_run_break_subroutine_cost_modifier",
     "set_run_future_end_the_run_subroutine",
     "set_run_future_strength_bonus",
     "set_next_encounter_unless_fully_break_damage",
@@ -857,17 +861,18 @@ function currentRunMarginalDefenseThreat(
 ): "visible_agenda_remote" | "terminal_central_access" | undefined {
   if (input.playerView.run?.attackedServerId !== targetServerId)
     return undefined;
+  const accessServerId = corpCurrentRunAccessServerId(input);
   const server = input.playerView.servers.find(
-    (candidate) => candidate.id === targetServerId,
+    (candidate) => candidate.id === accessServerId,
   );
   if (!server) return undefined;
-  if (targetServerId.startsWith("remote_")) {
+  if (accessServerId?.startsWith("remote_")) {
     return server.root.some((card) => card.known && card.type === "agenda")
       ? "visible_agenda_remote"
       : undefined;
   }
-  if (targetServerId !== "hq" && targetServerId !== "rd") return undefined;
-  return readKnownCorpCentralAgendaThreat({ input, serverId: targetServerId })
+  if (accessServerId !== "hq" && accessServerId !== "rd") return undefined;
+  return readKnownCorpCentralAgendaThreat({ input, serverId: accessServerId })
     ?.threat === "terminal"
     ? "terminal_central_access"
     : undefined;

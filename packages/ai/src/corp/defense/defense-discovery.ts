@@ -41,7 +41,10 @@ import {
   corpScoreProtectionIsSatisfied,
   corpScoreRemainingAdvancementClicks,
 } from "../score/score-protection-needs";
-import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
+import {
+  allocateCorpCentralDefenseFromAiFacts,
+  readCorpPublicOffServerAccessThreat,
+} from "./corp-central-defense-facts-adapter";
 import {
   corpGlobalDefenseInstallRoute,
   corpQualitativeIceStagingSignal,
@@ -351,7 +354,15 @@ export function buildCorpDefenseNeeds({
                 : boundedFallbackCoveragePressure
                   ? "material"
                   : undefined
-              : undefined;
+              : (() => {
+                  const threat = readCorpPublicOffServerAccessThreat(
+                    input,
+                    serverId,
+                  )?.threat;
+                  return threat === "material" || threat === "terminal"
+                    ? threat
+                    : undefined;
+                })();
           const visibleAgendaExposure =
             serverId === "archives" && archivesHasVisibleKnownAgenda(input);
           const unfundedOrdinaryCentralStaging =

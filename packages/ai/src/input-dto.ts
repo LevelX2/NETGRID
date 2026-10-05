@@ -743,6 +743,12 @@ function sanitizePlayerView(
   publicEvents: PublicGameEvent[],
 ): PlayerView {
   if (
+    view.run?.accessServerOverride !== undefined &&
+    !view.servers.some((server) => server.id === view.run!.accessServerOverride)
+  ) {
+    throw new Error("Invalid Engine public run access destination.");
+  }
+  if (
     (view.run?.pendingSequenceRunCount !== undefined &&
       (!Number.isSafeInteger(view.run.pendingSequenceRunCount) ||
         view.run.pendingSequenceRunCount < 0)) ||
@@ -1007,6 +1013,9 @@ function sanitizePlayerView(
               ? { followupRunOpportunity: view.run.followupRunOpportunity }
               : {}),
             attackedServerId: view.run.attackedServerId,
+            ...(view.run.accessServerOverride !== undefined
+              ? { accessServerOverride: view.run.accessServerOverride }
+              : {}),
             phase: view.run.phase,
             ...(view.run.position
               ? { position: structuredClone(view.run.position) }

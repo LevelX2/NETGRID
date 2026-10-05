@@ -13,6 +13,7 @@ import {
   type CorpCentralDefenseServerId,
 } from "./corp-central-defense-allocation";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
+import { corpPublicFixedOffServerRunProfiles } from "../../runtime/corp-canonical-card-facts";
 
 const FULL_ACCESS_PROBABILITY = { numerator: 1, denominator: 1 } as const;
 const IMPORTANT_TRASHABLE_MECHANICS = new Set([
@@ -25,6 +26,17 @@ const IMPORTANT_TRASHABLE_MECHANICS = new Set([
   "gain_credits_on_rez",
   "install_ice",
 ]);
+
+/** Engine run semantics: a resolved breach wins; otherwise the public override
+ * wins, and its absence explicitly means access at the physical entry. */
+export function corpCurrentRunAccessServerId(
+  input: AiDecisionInput,
+): string | undefined {
+  const run = input.playerView.run;
+  return run
+    ? (run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId)
+    : undefined;
+}
 
 /** Conditional loss on a successful access; never a guess of the next target. */
 export function readCorpCentralAgendaExposure(
@@ -65,6 +77,43 @@ export type CorpKnownCentralAgendaThreat = Readonly<{
   maximumAccessibleAgendaPointValue: number;
 }>;
 
+export function readCorpPublicOffServerAccessThreat(
+  input: AiDecisionInput,
+  entryServerId: string,
+):
+  | Readonly<{
+      threat: "none" | "material" | "terminal";
+      accessServerIds: readonly string[];
+    }>
+  | undefined {
+  if (input.side !== "corp" || !input.playerView.opponent.rig) return undefined;
+  const accessServerIds = [
+    ...new Set(
+      input.playerView.opponent.rig
+        .filter(
+          (card) =>
+            card.known &&
+            card.rezzed === true &&
+            card.definitionId !== undefined,
+        )
+        .flatMap((card) =>
+          corpPublicFixedOffServerRunProfiles(card.definitionId)
+            .filter((path) => path.entryServerId === entryServerId)
+            .map((path) => path.accessServerId),
+        ),
+    ),
+  ];
+  let threat: "none" | "material" | "terminal" = "none";
+  for (const serverId of accessServerIds) {
+    const fact = readKnownCorpCentralAgendaThreat({ input, serverId });
+    if (fact === undefined) return undefined;
+    if (fact.threat === "terminal") threat = "terminal";
+    else if (fact.threat === "material" && threat === "none")
+      threat = "material";
+  }
+  return { threat, accessServerIds };
+}
+
 export function readKnownCorpCentralAgendaThreat(params: {
   input: AiDecisionInput;
   serverId: CorpCentralDefenseServerId;
@@ -80,7 +129,7 @@ export function readKnownCorpCentralAgendaThreat(params: {
   if (
     !quote ||
     !cards ||
-    cards.populationCardCount < 1 ||
+    cards.populationCardCount < 0 ||
     !Number.isSafeInteger(matchpoint) ||
     matchpoint < 1
   ) {

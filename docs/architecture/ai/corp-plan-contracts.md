@@ -1578,6 +1578,30 @@ allgemeine Tax-/Disruption-Signale die Route freigeben. Zusätzliche sofortige
 Wirkungen und quotierte bezahlte Encounter-Abwehr bleiben eigenständig
 bewertbar; eine noch vorhandene innere ICE-Schicht bleibt ein mögliches Ziel.
 
+Die Klassifikation schließt `set_run_break_subroutine_cost_modifier` ein:
+Der Effekt verändert erst nach seiner Ausführung spätere Breakzahlungen.
+Ein reiner solcher Effekt ohne verbleibendes inneres ICE begründet keinen
+Rez; ein äußerer Einsatz und gemischte unmittelbare Wirkungen bleiben erhalten.
+
+Beim aktuellen Run trennt `corp.defend_servers` den physischen ICE-Eintritt
+vom öffentlichen Zugriffsziel. Die Engine projiziert `accessServerOverride`
+in beide PlayerViews; der AI-DTO validiert und erhält den existierenden
+Server. Nach Breach gilt deren `serverId`, vorher der Override; dessen
+fachliche Abwesenheit bedeutet Zugriff auf den angegriffenen Server.
+Aktuelle Agendagefahr, marginaler Rez-Nutzen und konkurrierende Rezreserven
+verwenden diesen Zugriff, während ICE-Kosten, Topologie und spätere
+Protectionclaims am physischen Fort bleiben. Der native Archives→HQ-Fall
+belegt die aktuelle Keeper-Abwehr, keinen alternativen ganzen Sieger.
+
+Für mögliche spätere andere Eintrittspfade liefert der kanonische Factsproducer
+nur öffentlich installierte, wiederverwendbare unbedingte Runner-Main-Fähigkeiten
+mit genau einem Aktionspreis und einem festen öffentlichen `make_run`-Effekt.
+Abweichender HQ-/R&D-Zugriff benötigt aktuelle Accessquotes und vollständig
+gebundenes eigenes Inventar; fehlende Fakten bleiben unknown. Der Fact
+beschreibt eine Möglichkeit, keine Zielwahrscheinlichkeit. Der bestehende
+globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu;
+er garantiert weder ihre Auswahl noch eine vollständig bessere Allokation.
+
 Konditionale Rez-Supportkarten benötigen einen kartenspezifischen
 Folgevertrag. Chester Mix darf nur gerezzt werden, wenn bereits vor dem Rezzen
 genau eine produktive ICE-Installation am selben Fort feststeht, der Discount

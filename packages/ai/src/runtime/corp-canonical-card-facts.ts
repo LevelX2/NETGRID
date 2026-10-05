@@ -11,6 +11,71 @@ export type CorpConditionalScoreCreditProfile = Readonly<{
   gainAmount: number;
 }>;
 
+/** A public, unconditional reusable run has separate physical entry and access.
+ * This certifies a possible path, never predicts the Runner's next action. */
+export function corpPublicFixedOffServerRunProfiles(
+  definitionId: string | undefined,
+): readonly Readonly<{
+  entryServerId: "hq" | "rd" | "archives";
+  accessServerId: "hq" | "rd";
+}>[] {
+  const card = planningCard(definitionId);
+  if (card?.planning.side !== "runner") return [];
+  const result: {
+    entryServerId: "hq" | "rd" | "archives";
+    accessServerId: "hq" | "rd";
+  }[] = [];
+  for (const ability of card.planning.engine.abilities ?? []) {
+    if (
+      ability.kind !== "activated" ||
+      ability.timing !== "runner_main" ||
+      ability.condition !== undefined ||
+      ability.limit !== undefined ||
+      !ability.addressability?.includes("plan") ||
+      !ability.addressability?.includes("action") ||
+      !ability.addressability?.includes("quote") ||
+      ability.costs?.length !== 1 ||
+      ability.costs[0]?.kind !== "action" ||
+      ability.costs[0].amount !== 1 ||
+      ability.effects.length !== 1
+    )
+      continue;
+    const effect = ability.effects[0];
+    if (
+      !isRecord(effect) ||
+      effect.kind !== "make_run" ||
+      !isRecord(effect.target) ||
+      effect.target.kind !== "central_server" ||
+      Object.keys(effect.target).some(
+        (key) => key !== "kind" && key !== "server",
+      ) ||
+      !["hq", "rd", "archives"].includes(String(effect.target.server)) ||
+      (effect.accessServerOverride !== "hq" &&
+        effect.accessServerOverride !== "rd") ||
+      effect.accessServerOverride === effect.target.server ||
+      effect.visibility !== "public" ||
+      (effect.successfulRunServerOverride !== undefined &&
+        effect.successfulRunServerOverride !== effect.accessServerOverride) ||
+      Object.keys(effect).some(
+        (key) =>
+          ![
+            "kind",
+            "target",
+            "accessServerOverride",
+            "successfulRunServerOverride",
+            "visibility",
+          ].includes(key),
+      )
+    )
+      continue;
+    result.push({
+      entryServerId: effect.target.server as "hq" | "rd" | "archives",
+      accessServerId: effect.accessServerOverride,
+    });
+  }
+  return result;
+}
+
 export type CorpHostedCreditBankProfile = Readonly<{
   poolCredits: number;
   payoutCredits: number;

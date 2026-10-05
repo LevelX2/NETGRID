@@ -118,6 +118,14 @@ ihnen aber nicht zurückimportiert.
   `corp_paid` und für `during_run` zusammen mit `runner_paid`.
 - Run-End-Cleanup ist geordnet: Trigger und Zahlungen lesen Run-Marker, bevor
   diese entfernt oder temporäre Werte zurückgesetzt werden.
+- `PlayerView.run.accessServerOverride` erhält für beide Seiten den öffentlich
+  aufgelösten abweichenden Zugriff des aktiven Runs. Der physische
+  `attackedServerId` und die ICE-Position bleiben eigenständig. Fehlt der
+  Override, ist der angegriffene Server das fachliche Zugriffsziel; eine
+  bereits eröffnete Breach trägt ihr aufgelöstes Ziel in `breach.serverId`.
+  Die Projektion verändert weder GameState noch Replayhash und liest keine
+  gegnerische Hand. Der AI-DTO weist nicht existierende Zielserver sichtbar
+  zurück und erhält gültige Ziele für den bestehenden Defenseowner.
 - `PlayerView.run.followupRunOpportunity` projiziert ausschließlich öffentliche
   Run-Effekte, installierte Hardware und deren öffentliche Verbrauchsflags.
   `after_run` bezeichnet einen bereits angekündigten Zusatzrun;

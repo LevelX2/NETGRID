@@ -2,7 +2,10 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
 import type { CorpExactIceRezRouteProjection } from "../../runtime/corp-exact-ice-rez-route";
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
-import { readCorpCentralAgendaExposure } from "./corp-central-defense-facts-adapter";
+import {
+  readCorpCentralAgendaExposure,
+  corpCurrentRunAccessServerId,
+} from "./corp-central-defense-facts-adapter";
 import {
   compareExactProbabilities,
   type ExactProbability,
@@ -148,6 +151,20 @@ export function corpServerAgendaExposure(
     0,
   );
   return { expectedPoints: points, maximumPoints: points };
+}
+
+/** Keep the defended ICE path physical; evaluate its current access payoff at
+ * the Engine's public resolved destination. Future reserve claims stay local. */
+export function corpCurrentRunAgendaExposure(
+  input: AiDecisionInput,
+  defendedServerId: string,
+) {
+  if (input.playerView.run?.attackedServerId !== defendedServerId)
+    return undefined;
+  const accessServerId = corpCurrentRunAccessServerId(input);
+  return accessServerId === undefined
+    ? undefined
+    : corpServerAgendaExposure(input, accessServerId);
 }
 
 /** Reserves require quoted access prevention; terminal agendas also justify partial protection. */
@@ -296,7 +313,7 @@ export function assessCorpRezOpportunityCost(
   });
   if (!Number.isSafeInteger(clicks) || clicks < 0)
     return { ...result("assessment_unknown"), preservesReserve: false };
-  const current = corpServerAgendaExposure(input, route.targetServerId);
+  const current = corpCurrentRunAgendaExposure(input, route.targetServerId);
   const stops =
     route.accessBlock !== undefined ||
     route.traceAccessBlock !== undefined ||

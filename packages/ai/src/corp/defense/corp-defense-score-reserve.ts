@@ -16,7 +16,7 @@ import {
 } from "../../runtime/corp-exact-ice-rez-route";
 import {
   assessCorpRezOpportunityCost,
-  corpServerAgendaExposure,
+  corpCurrentRunAgendaExposure,
   type CorpRezOpportunityAssessment,
 } from "./corp-server-protection-reserve";
 
@@ -62,7 +62,7 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
     ? params.restrictedCreditFunding.consumer
         .generalCreditsRemainingAfterConsumer
     : input.playerView.own.credits - route.totalRezCredits;
-  const exposure = corpServerAgendaExposure(input, route.targetServerId);
+  const exposure = corpCurrentRunAgendaExposure(input, route.targetServerId);
   if (
     !routePreventsImmediateAccess(route) &&
     input.playerView.run?.attackedServerId === route.targetServerId &&

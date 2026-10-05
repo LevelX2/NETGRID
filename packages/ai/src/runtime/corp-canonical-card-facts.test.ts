@@ -16,11 +16,30 @@ import {
   corpTaggedCreditDenialOperationProfile,
   corpTaggedMeatDamageOperationProfile,
   corpTraceTagSourceProfile,
+  corpPublicFixedOffServerRunProfiles,
 } from "./corp-canonical-card-facts";
 
 const hints = createAiHintsByCard();
 
 describe("canonical Corp card facts", () => {
+  it("certifies only a fixed public reusable off-server access path", () => {
+    expect(
+      corpPublicFixedOffServerRunProfiles(
+        "onr_v1_062_shredder-uplink-protocol",
+      ),
+    ).toEqual([{ entryServerId: "archives", accessServerId: "hq" }]);
+    for (const definitionId of [
+      undefined,
+      "unknown",
+      "onr_v1_094_inside-job",
+      "onr_v1_111_social-engineering",
+      "onr_v1_187_wilson-weeflerunner-apprentice",
+      "onr_v1_039_krash",
+      "onr_v1_252_keeper",
+    ]) {
+      expect(corpPublicFixedOffServerRunProfiles(definitionId)).toEqual([]);
+    }
+  });
   it("distinguishes a plain scored credit pool from installed banks and conditional score rewards", () => {
     expect(
       corpScoreHostedCreditPayoutProfile("onr_v1_209_political-coup"),

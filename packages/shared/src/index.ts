@@ -4251,6 +4251,8 @@ export type PlayerView = {
     /** Remaining runs of public event sequences, independent of run success. */
     pendingSequenceRunCount?: number;
     attackedServerId: Exclude<ServerId, "new_remote">;
+    /** Public resolved access destination; absent means the attacked server. */
+    accessServerOverride?: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
     position?: RunState["position"];
     approachedIce?: VisibleCard;

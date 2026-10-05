@@ -62,6 +62,31 @@ const TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID =
   >;
 
 describe("public next-turn basic run preparation", () => {
+  it("projects a resolved public access destination for both sides without exposing either opposing hand", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "public-access-destination" }),
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    expect(
+      getPlayerView(state, "corp").run?.accessServerOverride,
+    ).toBeUndefined();
+    state.run!.accessServerOverride = "rd";
+    const before = hashState(state);
+    for (const side of ["runner", "corp"] as const) {
+      const view = getPlayerView(state, side);
+      expect(view.run).toMatchObject({
+        attackedServerId: "hq",
+        accessServerOverride: "rd",
+      });
+      expect(view.opponent).not.toHaveProperty("gripOrHq");
+    }
+    expect(hashState(state)).toBe(before);
+  });
   it("projects public unconditional and success-dependent followup runs without revealing grip", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({ seed: "followup-run-opportunity" }),

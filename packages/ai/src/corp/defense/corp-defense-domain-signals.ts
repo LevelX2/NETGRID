@@ -23,6 +23,7 @@ import { isCorpOpeningTurnSerial } from "../../runtime/corp-opening-rush";
 import {
   readCorpCentralAgendaExposure,
   readKnownCorpCentralAgendaThreat,
+  readCorpPublicOffServerAccessThreat,
 } from "./corp-central-defense-facts-adapter";
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
 import {
@@ -683,11 +684,22 @@ export function corpGlobalDefenseInstallRouteAssessment(
       (card) => card.known && card.type === "agenda",
     )
   ) {
-    return {
-      knowledge: "known",
-      disposition: "effect_missing",
-      evidenceCode: "corp_archives_ice_install_has_no_visible_agenda_pressure",
-    };
+    const offServerAccess = readCorpPublicOffServerAccessThreat(
+      input,
+      serverId,
+    );
+    if (offServerAccess === undefined)
+      return {
+        knowledge: "unknown",
+        evidenceCode: "corp_off_server_access_threat_current_facts_unknown",
+      };
+    if (offServerAccess.threat === "none")
+      return {
+        knowledge: "known",
+        disposition: "effect_missing",
+        evidenceCode:
+          "corp_archives_ice_install_has_no_visible_agenda_pressure",
+      };
   }
   if (!facts.hasExactNonNegativeCostProfile(candidate)) {
     return {
