@@ -30,6 +30,8 @@ import {
 } from "../turn/turn-basic-execution";
 import { addRunnerTagsWithPrevention } from "../damage/damage-core";
 import { startScoredAgendaStartDrawChoice } from "../corp/scored-agenda-flow";
+import { corpMandatoryAgendaDrawSources } from "../corp/mandatory-agenda-draw-sources";
+import { virusCounterDrawsAtCorpStart } from "../turn/corp-mandatory-virus-draw-count";
 import {
   clearActivityGatedFortRunMarkers,
   isFortTraceBitPoolSource,
@@ -160,19 +162,11 @@ export function createTurnCorpStartRuntimeResolvers(
   function corpMandatoryDrawSummary(
     state: GameState,
   ): CorpMandatoryDrawSummary {
-    const mandatoryAgendaSources: CorpMandatoryDrawSummary["mandatoryAgendaSources"] =
-      [];
-    for (const cardId of state.corp.scoreArea.slice().sort()) {
-      const definition = definitionFor(state, cardId);
-      const implementation =
-        deps.scoredAgendaImplementationForDefinition(definition);
-      if (implementation?.kind !== "corp_start_turn_mandatory_draw") continue;
-      mandatoryAgendaSources.push({
-        cardId,
-        definitionId: definition.id,
-        count: implementation.drawCount,
-      });
-    }
+    const mandatoryAgendaSources = corpMandatoryAgendaDrawSources(
+      state,
+      definitionFor,
+      deps.scoredAgendaImplementationForDefinition,
+    );
     const selectedOptionalIds = new Set(
       ensureCorpTurnFlags(state).scoredAgendaStartDrawChoiceSelectedSourceIds ??
         [],
@@ -1101,28 +1095,6 @@ export function createTurnCorpStartRuntimeResolvers(
       });
       return;
     }
-  }
-
-  function virusCounterDrawsAtCorpStart(state: GameState): number {
-    return CARD_IMPLEMENTATIONS.reduce((sum, implementation) => {
-      const virusCounter = implementation.virusCounter;
-      const start = virusCounter?.startOfCorpTurn;
-      if (
-        !virusCounter ||
-        start?.kind !== "draw_extra_cards_per_counter" ||
-        virusCounter.addOnSuccessfulRun?.counterScope.kind !==
-          "shared_corp_pool"
-      )
-        return sum;
-      return (
-        sum +
-        purgeableRunnerVirusCounterAmount(
-          state.purgeableRunnerVirusCounters?.corp,
-          virusCounter.counterKind as PurgeableRunnerVirusCounterType,
-        ) *
-          start.amountPerCounter
-      );
-    }, 0);
   }
 
   function skivvissCounterTotal(state: GameState): number {

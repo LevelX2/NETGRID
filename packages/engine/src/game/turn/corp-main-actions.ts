@@ -33,6 +33,7 @@ import {
 import { quoteCorpScoreRecovery } from "../hidden-zone/corp-score-recovery-quote";
 import { quoteCorpRootRezIceInstallCosts } from "../payment/root-rez-ice-install-cost-quote";
 import { quoteCorpHostedCreditBankCycle } from "../payment/hosted-credit-bank-cycle-quote";
+import { corpScoreMandatoryDrawHorizonPayload } from "../corp/score-mandatory-draw-horizon";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -349,7 +350,11 @@ export function buildCorpMainActions(
                 )} wählen`,
                 id,
                 [],
-                { cardId: id, selectedServerId: targetServer.id },
+                {
+                  cardId: id,
+                  selectedServerId: targetServer.id,
+                  ...corpScoreMandatoryDrawHorizonPayload(state, id),
+                },
               ),
             );
           }
@@ -362,7 +367,10 @@ export function buildCorpMainActions(
               `Agenda in ${server.label} scoren`,
               id,
               [],
-              { cardId: id },
+              {
+                cardId: id,
+                ...corpScoreMandatoryDrawHorizonPayload(state, id),
+              },
             ),
           );
         }

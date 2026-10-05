@@ -43,6 +43,7 @@ export type CorpScoreProjectSignal = {
     | "corp_terminal_agenda_defense"
     | "corp_opening_rush_engine_randomized"
     | "visible_legal_score_conversion"
+    | "corp_score_mandatory_draw_exceeds_deck"
     | "corp_funded_protected_score_advance"
     | "corp_last_viable_deckout_matchpoint_advance"
     | "corp_engine_certified_mature_remote_score_advance"

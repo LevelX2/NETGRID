@@ -6,6 +6,7 @@ import {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import { corpScorePreservesMandatoryDrawHorizon } from "./score-mandatory-draw-horizon";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
@@ -159,6 +160,25 @@ export function corpNextTurnScoreContinuationProjects(
         return [];
       }
       const agendaPoints = requireVisibleAgendaPoints(input, agenda);
+      const currentScoreCandidate = candidates.find(
+        (candidate) =>
+          candidate.semanticActionType === "score.agenda" &&
+          input.legalActions.some(
+            (action) =>
+              action.actionId === candidate.actionId &&
+              action.payload?.cardId === agenda.instanceId,
+          ),
+      );
+      if (
+        currentScoreCandidate &&
+        !corpScorePreservesMandatoryDrawHorizon(
+          input,
+          currentScoreCandidate,
+          agenda,
+        )
+      ) {
+        return [];
+      }
       const currentScoreCredits =
         quote.remainingAdvancementCounters *
           quote.advancementCreditCostPerCounter +
@@ -769,6 +789,9 @@ export function scoreProjectForCandidate(
       ) ||
       visibleAgendaAdvanceCanCloseThisTurn(input, candidate, installedCard);
     const agendaPoints = requireVisibleAgendaPoints(input, installedCard);
+    const scoreDrawHorizonSafe =
+      candidate.semanticActionType !== "score.agenda" ||
+      corpScorePreservesMandatoryDrawHorizon(input, candidate, installedCard);
     const matchpointTarget =
       input.playerView.own.agendaPoints + agendaPoints >=
       input.playerView.agendaPointsToWin;
@@ -849,18 +872,20 @@ export function scoreProjectForCandidate(
       scoreActionSemanticsKnown &&
       (fundingGap ?? 0) === 0;
     const feasible =
-      sameTurnCloseout ||
-      exposedAgendaProgressRoute ||
-      (scorelineFeasibility?.deadline !== "current_turn_only" &&
-        scorelineFeasibility?.feasible !== false &&
-        scoreActionSemanticsKnown &&
-        (fundedWindowProtected || certifiedMatureRemoteScoreHorizon) &&
-        (fundingGap ?? 0) === 0);
+      scoreDrawHorizonSafe &&
+      (sameTurnCloseout ||
+        exposedAgendaProgressRoute ||
+        (scorelineFeasibility?.deadline !== "current_turn_only" &&
+          scorelineFeasibility?.feasible !== false &&
+          scoreActionSemanticsKnown &&
+          (fundedWindowProtected || certifiedMatureRemoteScoreHorizon) &&
+          (fundingGap ?? 0) === 0));
     const routeAssessment: NonNullable<
       CorpScoreProjectSignal["routeAssessment"]
-    > =
-      scorelineFeasibility?.deadline === "current_turn_only" &&
-      !sameTurnCloseout
+    > = !scoreDrawHorizonSafe
+      ? "corp_score_mandatory_draw_exceeds_deck"
+      : scorelineFeasibility?.deadline === "current_turn_only" &&
+          !sameTurnCloseout
         ? "corp_current_turn_scoreline_unreachable"
         : deckoutAgendaFloodScoreWindow
           ? "corp_deckout_agenda_flood_score_advance"
@@ -1260,6 +1285,12 @@ export function sameTurnScoreConversionProjectForCandidate(
       agenda,
       "agenda",
     );
+    if (
+      candidate.semanticActionType === "score.agenda" &&
+      !corpScorePreservesMandatoryDrawHorizon(input, candidate, agenda)
+    ) {
+      continue;
+    }
     const visibleHqAgendas = input.playerView.own.gripOrHq.filter((card) =>
       visibleCardIsAgenda(input, card),
     );

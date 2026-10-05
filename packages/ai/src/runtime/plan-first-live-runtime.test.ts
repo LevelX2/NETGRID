@@ -5171,8 +5171,9 @@ describe("authoritative plan-first live runtime", () => {
       strength: 4,
       subtypes: ["code_gate"],
     });
-    resolveIce.payload!.encounterSubroutineIds =
-      encounteredIce.effectiveRunQuote!.subroutines.map((s) => s.id).join(",");
+    resolveIce.payload!.encounterSubroutineIds = encounteredIce
+      .effectiveRunQuote!.subroutines.map((s) => s.id)
+      .join(",");
     input.playerView.run = {
       runId: "advanced-remote-random-break",
       attackedServerId: "remote_1",
@@ -7049,6 +7050,23 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision).toMatchObject({
       reasonCode: "plan_first.runner.develop_board_and_hand",
       fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input)!;
+    const executor = portfolio.instances.find(
+      (i) => i.instanceId === portfolio.executorInstanceId,
+    )!;
+    expect(executor.moduleId).toBe("runner.develop_board_and_hand");
+    expect(
+      (
+        executor.moduleState as {
+          signal: { programSearchCommitment?: unknown };
+        }
+      ).signal.programSearchCommitment,
+    ).toBeUndefined();
+    expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
+      actionId: decision.actionId,
+      stateVersion: input.playerView.stateVersion,
+      planInstanceId: portfolio.executorInstanceId,
     });
   });
 
@@ -25371,6 +25389,11 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "temple-card",
           sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationAbilityId:
+            "onr_v1_114_temple-microcode-outlet:abilities_on_play_search_stack_to_grip",
+          cardImplementationAbilityKey:
+            "abilities_on_play_search_stack_to_grip",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -25520,6 +25543,11 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "temple-card",
           sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationAbilityId:
+            "onr_v1_114_temple-microcode-outlet:abilities_on_play_search_stack_to_grip",
+          cardImplementationAbilityKey:
+            "abilities_on_play_search_stack_to_grip",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -25535,6 +25563,8 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [temple, credit]);
     input.decisionId = "recurring-program-search:1";
     input.playerView.stateVersion = 1;
+    temple.expiresAtStateVersion = 1;
+    credit.expiresAtStateVersion = 1;
     input.playerView.own.credits = 5;
     input.playerView.own.memoryLimit = 4;
     input.playerView.own.memoryUsed = 3;

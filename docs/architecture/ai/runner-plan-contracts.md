@@ -877,6 +877,25 @@ separate Quellwahl, eventuelle Zahlung und anschließende Kartenwahl. Die
 Quellwahl setzt die Continuation-StateVersion fort; der Payloadresolver darf
 kein anderes Ziel erfinden (SP-504/SP-505).
 
+Vor der Quellenaction prüft derselbe Development-Owner jedes strategische
+Programmziel gegen genau diese aktuelle LegalAction. Bei direkter Installation
+reserviert er Quellenkosten und den kanonischen Zielpreis gemeinsam; kostenlose
+Installation bleibt kostenlos. Aktuell bekannte MU müssen das Ziel aufnehmen
+können. Development besitzt dafür keine Programmopfer-Continuation und darf
+deshalb bei fehlendem MU keinen Opferplan voraussetzen. Eine Suche in die Grip
+hat dagegen keinen unmittelbaren Installationspreis oder MU-Verbrauch. Jede
+Quelle bindet ihr eigenes ausführbares Ziel; reguläre Installation einer
+Suchressource ist noch keine ausgeführte Suche. Fehlende oder widersprüchliche
+Kosten-/MU-Fakten scheitern sichtbar, statt nach der Quellenzahlung ein anderes
+Ziel zu wählen. Eine aktuell legale Installation einer Suchquelle darf der
+Development-Owner für einen konkreten späteren Suchzweck vorbereiten. Dieser
+Installationsstep bindet ausschließlich seine aktuellen Installationsactions
+und erzeugt noch kein `programSearchCommitment` für ein ungeöffnetes Suchfenster.
+Die nativen Producerzustände 506/G2/D63, G9/D153 und G35/D132
+belegen die Quellen-, Kosten- und Speichergrenzen; echte Enginekontrollen
+erhalten vollständig bezahlte, kostenlose und gestufte Suchpfade.
+
+
 Eine Zahlung für das Trash einer vollständig gebrochenen, gerade passierten
 ICE ist kein Einkommen. Die typisierte `ice_trash`-Wirkung mit Ziel
 `trash_fully_broken_passed_ice` und Timing `encounter_resolution` erhält die
@@ -1494,8 +1513,8 @@ bleibt auf aktuell sichere Mehrzweck-Actions begrenzt; echte Draw-Tax-Gefahr wir
 weder durch den Scheduler noch durch die aktuelle Phasenbindung aufgehoben.
 
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
-Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda- oder
-Score-Threat-Route übernimmt der Defense-Owner den gequoteten Puffer, wenn
+Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda-,
+Score-Threat- oder Informationsroute übernimmt der Defense-Owner den gequoteten Puffer, wenn
 die nötigen Draws und der Run noch in denselben Zug passen. Nur für diese
 gebundene Vorbereitung darf der temporäre Puffer über dem Cleanup-Handlimit
 liegen. Fehlende Stack-Karten, Folgeaktionen oder Run-Credits lassen diese
@@ -2308,7 +2327,17 @@ die aktuellen Corp-Credits und höchstens die Summe der sichtbaren
 Installationskosten der eigenen Programme. Maßgeblich ist das Maximum aus
 diesem Wert und dem bestehenden Risikopuffer; beide werden nicht addiert.
 Ein Informations-Probe darf einen Fehlbetrag dieses Investmentpuffers nicht
-übergehen. Fehlende Programmkosten belegen keinen sicheren Pfad. Die explizite
+übergehen. Ebenso wenig darf seine begrenzte Credit-Ausnahme einen
+bereits gequoteten fehlenden Handpuffer freigeben. Bei gedeckten Run-Credits
+übergibt die aktuelle erreichbare Route den noch im selben Zug herstellbaren
+Puffer an Defense; nach dem Draw wird neu quotiert. Die nativen Zustände
+506/G21/D105, G31/D104 und G32/D59 beginnen sonst mit Hand drei vor einer
+unbekannten ICE. Tatsächliche Engine-Gegenfolgen zeigen unmittelbares
+Überleben mit mindestens vier Handkarten vor dem später aufgedeckten Net4;
+der reparierte G21-Owner wählt Bargain with Viacox für sieben Handkarten,
+G31 und G32 den Basisdraw für vier. Die Identität der
+verdeckten ICE ist kein KI-Input und ein anderer ganzer Spielgewinn wird nicht
+behauptet. Fehlende Programmkosten belegen keinen sicheren Pfad. Die explizite
 Ausnahme für Matchpoint-Zugriffe mit stabiler universeller Coverage bleibt.
 Die Reserve ist eine Risikopolicy, keine Vorhersage der verdeckten ICE-Identität,
 keine garantierte Breakquote und kein Nachweis, dass verlorene Karten erneut

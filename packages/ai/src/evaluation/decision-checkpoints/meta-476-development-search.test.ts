@@ -91,27 +91,25 @@ it.each([38, 40])(
       actionType: "play_event",
       sourceCardInstanceId: source.sourceCardInstanceId,
       sourceDefinitionId: source.sourceDefinitionId,
-      functionalEffects: AI_HINTS_BY_CARD.get(source.sourceDefinitionId)!.effects,
+      functionalEffects: AI_HINTS_BY_CARD.get(source.sourceDefinitionId)!
+        .effects,
     } as unknown as ActionSemanticCandidate;
     const strategy = input.ownRunnerStrategicIntent!;
-    const plans = runnerProgramSearchStrategyDevelopmentSignals(
-      input,
-      [candidate],
-      strategy,
-      [],
-      [],
-    );
-    if (game === 38) expect(plans).toHaveLength(1);
-    if (game === 40) expect(plans).toHaveLength(0);
-    for (const plan of plans) {
-      const target = plan.programSearchCommitment!.targetDefinitionId;
-      expect(target).not.toBe("onr_v1_011_cloak");
-      expect(
-        input.playerView.pendingChoice!.options.some(
-          (o) => o.selectable !== false && o.card?.definitionId === target,
-        ),
-      ).toBe(true);
-    }
+    // This is a choice checkpoint: the historical source is no longer Legal.
+    // A fake source candidate cannot manufacture a new development root here.
+    expect(
+      input.legalActions.some((a) => a.actionId === candidate.actionId),
+    ).toBe(false);
+    const discovery = () =>
+      runnerProgramSearchStrategyDevelopmentSignals(
+        input,
+        [candidate],
+        strategy,
+        [],
+        [],
+      );
+    if (game === 38) expect(discovery).toThrow(/invalid_plan_identity/);
+    else expect(discovery()).toEqual([]);
     // The historical wrong commitment remains invalid: no resolver substitute.
     expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
   },

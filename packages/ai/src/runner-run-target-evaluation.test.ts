@@ -750,6 +750,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("keeps an affordable unknown R&D probe available", () => {
     const input = aiInput({
       credits: 3,
+      grip: Array.from({ length: 4 }, (_, index) =>
+        visibleCard(`probe-buffer-${index}`, { type: "event" }),
+      ),
       opponentCredits: 4,
       servers: [
         server("rd", {
@@ -774,11 +777,19 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       unrezzedIceRiskUnderfunded: false,
       prerunReserveQuote: {
         purpose: "information",
-        status: "information_probe_only",
+        status: "satisfied",
         requiredCredits: 3,
         creditGap: 0,
+        handBufferGap: 0,
       },
     });
+    input.playerView.own.gripOrHq = [];
+    const [unsafe] = evaluateRunnerRunTargets({ input });
+    expect(unsafe).toMatchObject({
+      recommendation: "draw_for_damage_buffer",
+      prerunReserveQuote: { creditGap: 0, status: "blocked" },
+    });
+    expect(unsafe!.prerunReserveQuote!.handBufferGap).toBeGreaterThan(0);
   });
 
   it("allows a zero-credit information probe when the Corp cannot rez", () => {

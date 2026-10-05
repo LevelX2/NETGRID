@@ -71,6 +71,7 @@ export function quoteRunnerRunRiskReserve(params: {
         : creditGap === 0 && handBufferGap === 0
           ? ("satisfied" as const)
           : params.informationProbeAllowed &&
+              handBufferGap === 0 &&
               params.creditsAfterKnownPath >= programReserve
             ? ("information_probe_only" as const)
             : ("blocked" as const);

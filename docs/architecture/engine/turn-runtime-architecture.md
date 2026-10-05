@@ -29,6 +29,15 @@ aufgerufen und keine Momentaufnahme des unvollständigen Ports angelegt.
 
 ## Invarianten
 
+Die aktuelle Corp-Score-LegalAction einer Agenda mit verpflichtendem
+Startdraw enthält eine StateVersion-gebundene Quote der bisherigen und
+zusätzlichen Pflichtdraws sowie der tatsächlichen Punkte nach dem Score.
+`mandatory-agenda-draw-sources.ts` und `corp-mandatory-virus-draw-count.ts`
+speisen sowohl die wirkliche Startauflösung als auch diese Projektion.
+Optionale Draws, weitere Ersatzwirkungen und gegnerische Folgeaktionen sind
+damit nicht als sicher zertifiziert. Die Projektion verändert keine
+Legalität, Karten oder Zufallszähler und erscheint nur in eigenen Corp-Actions.
+
 - Turn-Ende schließt verzögerte Schäden, temporäre Installationen,
   Verpflichtungen und Discard in der bestehenden Reihenfolge ab.
 - Tag-Präventionsfenster setzen nur über die persistierten Continuation-Verträge

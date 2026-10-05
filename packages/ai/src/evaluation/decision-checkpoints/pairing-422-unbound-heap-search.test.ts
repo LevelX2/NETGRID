@@ -54,7 +54,10 @@ it("classifies an unbound canonical heap search without inventing a recovery tar
   );
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);
-  expect(decision.actionId).toBe("runner.end_turn");
+  // The current information-route quote requires H4. Defense first prepares
+  // that exact need; it still must not invent a target for the heap search.
+  expect(input.playerView.own.gripOrHq).toHaveLength(3);
+  expect(decision.actionId).toBe("runner.draw_card");
   expect(
     input.legalActions.some((action) => action.actionId === decision.actionId),
   ).toBe(true);
@@ -74,8 +77,13 @@ it("classifies an unbound canonical heap search without inventing a recovery tar
     )?.moduleId,
   ).toBe("runner.defense_and_recovery");
   expect(debug.selectedStep?.stepId).toBe(
-    `${portfolio.executorInstanceId}:forgo_terminal_deck_pressure`,
+    `${portfolio.executorInstanceId}:build_hand_buffer`,
   );
+  expect(debug.route).toMatchObject({
+    actionId: decision.actionId,
+    stateVersion: input.playerView.stateVersion,
+    planInstanceId: portfolio.executorInstanceId,
+  });
 });
 it("recognizes the current canonical search effect without auxiliary search hints", () => {
   const candidate = candidates().find(

@@ -67,7 +67,7 @@ it.each([3, 4])(
   },
 );
 
-it.each([3, 4])(
+it.each([4])(
   "preserves the admitted event's plan after its expected card consumption (%i cards)",
   (handCount) => {
     let state = fixture(handCount);
@@ -112,6 +112,22 @@ it.each([3, 4])(
     expect(hashGameState(replay.state)).toBe(hashGameState(state));
   },
 );
+
+it("rejects an isolated event whose consumed card leaves the quoted hand buffer short", () => {
+  const input = runnerInput(fixture(3));
+  input.legalActions = input.legalActions.filter(
+    (a) =>
+      a.type === "play_event" &&
+      a.source.includes(INSIDE_JOB) &&
+      a.payload?.serverId === "rd",
+  );
+  input.playerView.legalActions = input.legalActions;
+  expect(input.legalActions).toHaveLength(1);
+  expect(
+    evaluateRunnerRunTargets({ input })[0]?.prerunReserveQuote,
+  ).toMatchObject({ handBufferGap: 1, status: "blocked" });
+  expect(() => chooseRunnerAction(input)).toThrow();
+});
 
 function fixture(handCount: number): GameState {
   const corp = [ZOMBIE, "onr_v1_279_wall-of-static"];

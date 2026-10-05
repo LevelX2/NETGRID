@@ -23,13 +23,15 @@ describe("match 5201 runner decision checkpoints", () => {
     const applied = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
-      actionId: result.decision!.actionId,
+      actionId: result.decision!.actionId!,
       clientKnownStateVersion: state.stateVersion,
     });
     expect(applied.ok).toBe(true);
     if (!applied.ok) throw new Error("Native checkpoint draw was rejected");
     expect(applied.state.runner.grip).toHaveLength(4);
-    expect(applied.state.runner.grip).toContain("runner_onr_classic_027_early-worm_2");
+    expect(applied.state.runner.grip).toContain(
+      "runner_onr_classic_027_early-worm_2",
+    );
     expect(applied.state.runner.coreDamage).toBe(state.runner.coreDamage);
     expect(applied.state.runner.rig).toEqual(state.runner.rig);
     expect(applied.state.runner.tags).toBe(2);

@@ -373,6 +373,18 @@ in die Remote ist kein Verlust der Scoring-Dringlichkeit. Jeder weitere
 Advance-/Consultants-/Score-Schritt benötigt weiterhin den aktuellen
 vollständigen Engine-Pfad; eine leere HQ allein genügt nicht.
 
+Vor einem nichtterminalen Same-Turn-Score berücksichtigt der Score-Owner
+verpflichtende Folgedraws. Für den aktuellen Score einer solchen Agenda
+konsumiert `score-mandatory-draw-horizon.ts` die genaue Engine-Quote aus
+derselben StateVersion. Fehlende, veraltete oder widersprüchliche Pflichtfacts
+scheitern mit `missing_action_semantics`. Übersteigt die gequotete Untergrenze
+das eigene R&D, bleibt der Score im bestehenden Parent mit
+`corp_score_mandatory_draw_exceeds_deck` blockiert. Direkte Scoreprojekte,
+Same-Turn-Konversion und Next-Turn-Fortsetzung beachten dieselbe Grenze.
+Ein tatsächlicher sofortiger Sieg oder eine exakt vorhandene kostenlose
+Scorefolge zum Sieg bleibt zulässig. Zusätzliche Draws und gegnerische
+Folgeaktionen sind damit nicht als harmlos bewiesen.
+
 Vor einem nichtterminalen Same-Turn-Score berücksichtigt der Score-Owner bedingte
 Creditwirkungen aus dem kanonischen strukturierten Scoreprofil. Ist die Agenda
 bereits kostenlos scorebar und ihre Bonusschwelle mit den verbleibenden,

@@ -49,12 +49,14 @@ import {
 import { type RunnerHandRotationAssessment } from "../../runtime/runner-hand-rotation-assessment";
 
 import {
+  runnerCandidateExecutesProgramSearch,
   runnerCandidateSourceSupportsProgramSearch,
   runnerProgramSearchSourceCardInstanceId,
 } from "../../runtime/runner-program-search-facts";
 
 import { type RunnerDevelopmentSignal } from "./development-types";
 import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
+import { runnerDevelopmentSearchTargetIsExecutable } from "./development-search-feasibility";
 
 export function runnerProgramSearchRecentlyResolved(
   input: AiDecisionInput,
@@ -626,8 +628,7 @@ export function runnerProgramSearchStrategyDevelopmentSignals(
     input,
     strategicIntent,
   );
-  const target = strategicTargets?.[0];
-  if (!target) return [];
+  if (!strategicTargets?.length) return [];
   const coverageOwnedActionIds = new Set(
     coverageGaps.flatMap((gap) =>
       gap.answerInHand ? [] : gap.directSearchActionIds,
@@ -643,7 +644,11 @@ export function runnerProgramSearchStrategyDevelopmentSignals(
   >();
   for (const candidate of candidates) {
     if (
-      !runnerCandidateSourceSupportsProgramSearch(input, candidate) ||
+      !(
+        runnerCandidateExecutesProgramSearch(input, candidate) ||
+        (candidate.actionType === "install_card" &&
+          runnerCandidateSourceSupportsProgramSearch(input, candidate))
+      ) ||
       !runnerPartialProgramSearchIsPayable(input, candidate) ||
       coverageOwnedActionIds.has(candidate.actionId) ||
       runnerHandDevelopmentRejectionForCandidate(
@@ -675,7 +680,7 @@ export function runnerProgramSearchStrategyDevelopmentSignals(
       });
     }
   }
-  return [...bySource.entries()].map(
+  return [...bySource.entries()].flatMap(
     ([
       sourceKey,
       {
@@ -683,37 +688,77 @@ export function runnerProgramSearchStrategyDevelopmentSignals(
         sourceDefinitionId,
         candidates: sourceCandidates,
       },
-    ]) => ({
-      developmentId: `program-search:${sourceKey}`,
-      definitionId: sourceDefinitionId,
-      targetKind: "capability" as const,
-      phase: "execute" as const,
-      purposeCode: `search_${target.purpose}`,
-      assignedDomainPlanIds: [],
-      duplicateAlreadyInstalled: false,
-      affordableOrSupportable: true,
-      semanticActionTypes: [
-        ...new Set(
-          sourceCandidates.map((candidate) => candidate.semanticActionType),
+    ]) => {
+      const preparingSource = sourceCandidates.every(
+        (candidate) => candidate.actionType === "install_card",
+      );
+      const target = strategicTargets.find((target) =>
+        sourceCandidates.some(
+          (candidate) =>
+            preparingSource ||
+            runnerDevelopmentSearchTargetIsExecutable(
+              input,
+              candidate,
+              target.definitionId,
+            ),
         ),
-      ],
-      actionIds: sourceCandidates.map((candidate) => candidate.actionId).sort(),
-      priorityClass: "P5" as const,
-      value: 20,
-      evidenceCode: `runner_program_search_strategy_target:${target.definitionId}`,
-      evidenceCodes: [
-        `runner_program_search_source:${sourceDefinitionId}`,
-        `runner_program_search_target_purpose:${target.purpose}`,
-        ...target.evidenceCodes,
-      ],
-      programSearchCommitment: {
-        sourceCardInstanceId,
-        sourceDefinitionId,
-        targetDefinitionId: target.definitionId,
-        targetPurpose: target.purpose,
-        plannedAtStateVersion: input.playerView.stateVersion,
-      },
-    }),
+      );
+      if (!target) return [];
+      const executableCandidates = sourceCandidates.filter(
+        (candidate) =>
+          preparingSource ||
+          runnerDevelopmentSearchTargetIsExecutable(
+            input,
+            candidate,
+            target.definitionId,
+          ),
+      );
+      return [
+        {
+          developmentId: `program-search:${sourceKey}`,
+          definitionId: sourceDefinitionId,
+          targetKind: preparingSource
+            ? ("card" as const)
+            : ("capability" as const),
+          phase: "execute" as const,
+          purposeCode: preparingSource
+            ? `prepare_program_search_${target.purpose}`
+            : `search_${target.purpose}`,
+          assignedDomainPlanIds: [],
+          duplicateAlreadyInstalled: false,
+          affordableOrSupportable: true,
+          semanticActionTypes: [
+            ...new Set(
+              executableCandidates.map(
+                (candidate) => candidate.semanticActionType,
+              ),
+            ),
+          ],
+          actionIds: executableCandidates
+            .map((candidate) => candidate.actionId)
+            .sort(),
+          priorityClass: "P5" as const,
+          value: 20,
+          evidenceCode: `runner_program_search_strategy_target:${target.definitionId}`,
+          evidenceCodes: [
+            `runner_program_search_source:${sourceDefinitionId}`,
+            `runner_program_search_target_purpose:${target.purpose}`,
+            ...target.evidenceCodes,
+          ],
+          ...(preparingSource
+            ? {}
+            : {
+                programSearchCommitment: {
+                  sourceCardInstanceId,
+                  sourceDefinitionId,
+                  targetDefinitionId: target.definitionId,
+                  targetPurpose: target.purpose,
+                  plannedAtStateVersion: input.playerView.stateVersion,
+                },
+              }),
+        },
+      ];
+    },
   );
 }
 

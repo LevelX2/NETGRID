@@ -298,20 +298,21 @@ export function buildRunnerDefenseSignals(params: {
     damageThreat.flatlineRisk.uncappedRecommendedHandFloor <= maxHandSize;
   // Quote the complete cleanup horizon, rather than treating funding for one
   // tag as proof that all tags can disappear before the opponent's turn.
-  const fullTagClearFunding = taggedDamageBufferRequired && tags <= input.playerView.own.clicks
-    ? services.findFundingRoute({
-        demandId: "runner-defense-complete-tag-clear-funding",
-        sourcePlanId: "runner.defense_and_recovery:runner",
-        purpose: "foreground_plan",
-        priority: "acute_hard_plan_blocker",
-        hardness: "hard",
-        deadline: "end_of_current_turn",
-        targetCredits: tagClearTargetCredits * tags,
-        remainingClicks: input.playerView.own.clicks - tags,
-        allowIncrementalProgress: false,
-        evidence: ["runner_complete_tag_clear_horizon"],
-      }).routeAssessment
-    : undefined;
+  const fullTagClearFunding =
+    taggedDamageBufferRequired && tags <= input.playerView.own.clicks
+      ? services.findFundingRoute({
+          demandId: "runner-defense-complete-tag-clear-funding",
+          sourcePlanId: "runner.defense_and_recovery:runner",
+          purpose: "foreground_plan",
+          priority: "acute_hard_plan_blocker",
+          hardness: "hard",
+          deadline: "end_of_current_turn",
+          targetCredits: tagClearTargetCredits * tags,
+          remainingClicks: input.playerView.own.clicks - tags,
+          allowIncrementalProgress: false,
+          evidence: ["runner_complete_tag_clear_horizon"],
+        }).routeAssessment
+      : undefined;
   const completeTagClearAvailable =
     fullTagClearFunding !== undefined &&
     (fullTagClearFunding.status === "funded" ||
@@ -322,7 +323,10 @@ export function buildRunnerDefenseSignals(params: {
   const preserveHandBeforeIncompleteTagClear =
     taggedDamageBufferRequired && !completeTagClearAvailable;
   const endTurnBuffer = preserveHandBeforeIncompleteTagClear
-    ? { requiredEndTurnHandBuffer: damageThreat.flatlineRisk.uncappedRecommendedHandFloor }
+    ? {
+        requiredEndTurnHandBuffer:
+          damageThreat.flatlineRisk.uncappedRecommendedHandFloor,
+      }
     : {};
   const tagClearFundingActionIds = services.findFundingRoute({
     demandId: "runner-defense-tag-clear-funding",
@@ -713,7 +717,8 @@ function runnerRiskAdjustedHandBufferForAttractiveRuns(
       quote.creditGap !== 0 ||
       evaluation.pathPassability !== "reachable" ||
       evaluation.score <= 0 ||
-      !["agenda", "score_threat"].includes(evaluation.accessPayoff) ||
+      (!["agenda", "score_threat"].includes(evaluation.accessPayoff) &&
+        quote.purpose !== "information") ||
       evaluation.accessPayoffContestable === false ||
       !runClicks ||
       quote.handBufferGap + runClicks > input.playerView.own.clicks ||

@@ -59,3 +59,42 @@ it("requires a new proof when program costs are absent and retains the explicit 
     }),
   ).toMatchObject({ status: "satisfied", requiredCredits: 2 });
 });
+
+it("never uses a credit-only probe exception to waive its hand reserve", () => {
+  const probe = {
+    ...params,
+    runnerRig: [],
+    visibleCoverage: "risky_universal" as const,
+    runnerGripCount: 3,
+    creditsAfterKnownPath: 3,
+  };
+  expect(quoteRunnerRunRiskReserve(probe)).toMatchObject({
+    status: "blocked",
+    requiredHandBuffer: 4,
+    handBufferGap: 1,
+    creditGap: 0,
+  });
+  expect(
+    quoteRunnerRunRiskReserve({ ...probe, runnerGripCount: 4 }),
+  ).toMatchObject({ status: "satisfied", handBufferGap: 0 });
+  expect(
+    quoteRunnerRunRiskReserve({
+      ...probe,
+      runnerGripCount: 4,
+      creditsAfterKnownPath: 2,
+    }),
+  ).toMatchObject({
+    status: "information_probe_only",
+    handBufferGap: 0,
+    creditGap: 1,
+  });
+  expect(
+    quoteRunnerRunRiskReserve({ ...probe, corpRezExposureActive: false }),
+  ).toMatchObject({ status: "not_required", requiredHandBuffer: 0 });
+  expect(
+    quoteRunnerRunRiskReserve({
+      ...probe,
+      visibleCoverage: "stable_universal",
+    }),
+  ).toMatchObject({ status: "satisfied", requiredHandBuffer: 2 });
+});
