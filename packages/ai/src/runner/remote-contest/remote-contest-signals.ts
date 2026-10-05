@@ -86,7 +86,9 @@ function runnerTargetedIceTrashRemotePreparationSignals(
   runTargets: readonly RunnerRunTargetEvaluation[],
 ): RunnerRemoteContestSignalDraft[] {
   const eligiblePlans = contestSignals.filter(
-    (signal) => signal.routePreparation === undefined,
+    (signal) =>
+      signal.routePreparation === undefined &&
+      !runnerKnownRemoteAccessDamageAmbushAssessment(input, signal.serverId),
   );
   return candidates
     .filter(runnerActionRequiresTargetedIceTrashPlan)
@@ -167,7 +169,9 @@ function runnerTargetedBypassRemotePreparationSignals(
   runTargets: readonly RunnerRunTargetEvaluation[],
 ): RunnerRemoteContestSignalDraft[] {
   const eligiblePlans = contestSignals.filter(
-    (signal) => signal.routePreparation === undefined,
+    (signal) =>
+      signal.routePreparation === undefined &&
+      !runnerKnownRemoteAccessDamageAmbushAssessment(input, signal.serverId),
   );
   return candidates
     .filter(runnerActionRequiresTargetedBypassPlan)

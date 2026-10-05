@@ -17,6 +17,8 @@ export type RunnerExactFundingRouteRequest = Pick<
   allowStrategicExchange?: boolean;
   /** A prefix funding gap cannot certify conversion of a fully known run. */
   requireCompleteKnownPath?: boolean;
+  /** A Defense-owned buffer that must remain when tags survive cleanup. */
+  requiredEndTurnHandBuffer?: number;
   paymentWindowTarget?: RunnerRunTargetEvaluation;
   debtFinancingParent?: Readonly<{
     planInstanceId: string;

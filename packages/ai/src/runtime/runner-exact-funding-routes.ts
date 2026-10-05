@@ -243,6 +243,23 @@ function runnerFundingRouteConsumerBufferFits(
   request: RunnerExactFundingRouteRequest,
   route: FundingRoute,
 ): boolean {
+  if (request.requiredEndTurnHandBuffer !== undefined) {
+    const floor = request.requiredEndTurnHandBuffer;
+    if (!Number.isSafeInteger(floor) || floor < 0) return false;
+    let hand = input.playerView.own.gripOrHq.length;
+    for (const step of route.steps) {
+      const candidate = candidates.find((entry) => entry.actionId === step.actionId);
+      const delta = candidate?.economyProjection?.netHandDelta;
+      if (
+        step.kind !== "legal_action" ||
+        step.ownTurnOffset !== 0 ||
+        delta === undefined ||
+        !Number.isSafeInteger(delta)
+      ) return false;
+      hand += delta - runnerCandidateSelfDamageAmount(candidate!);
+      if (hand < floor) return false;
+    }
+  }
   if (request.requireCompleteKnownPath) {
     const target = request.paymentWindowTarget;
     const runAction = input.legalActions.find(

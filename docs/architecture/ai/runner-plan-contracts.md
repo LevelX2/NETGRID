@@ -397,6 +397,9 @@ Run-Window. Der Remote-Owner sperrt dafür seine Run- und Vorbereitungsvarianten
 mit expliziter Evidence; ein bereits laufender Run behält seinen gebundenen
 Parent und die bestehende Jack-out-Entscheidung. Unbekannte, ungerezzte oder
 gemischte Roots erfüllen diese spezifische Abbruchbedingung nicht.
+Targeted-ICEtrash und Bypass prüfen diese Bedingung bereits vor dem Binden
+einer Vorbereitung. Ein gesperrter Zielserver darf keinen unmaterialisierbaren
+Vorbereitungs-Parent erzeugen; andere zulässige Zielserver behalten ihre Routen.
 Die Access-Effektprojektion wählt die zur sichtbaren Rez-Lage aktive installierte
 Card-Spec-Variante einschließlich des Engine-Defaults für Agenda und rezzbare
 Karten. Eine inaktive erste Variante darf spätere aktive Varianten nicht
@@ -1435,6 +1438,17 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Kann der getaggte Runner vor bekanntem kritischem Schaden nicht alle Tags im
+aktuellen Zug entfernen, erhält der Defense-Owner zuerst den erreichbaren
+Überlebenspuffer. Er quotiert die vollständige Tagentfernung mit den wirklich
+verbleibenden Klicks. Teilweise Tagentfernung darf den Puffer weder durch
+Selbstschadensfinanzierung noch durch verbrauchte Draw-Klicks unterschreiten.
+`requiredEndTurnHandBuffer` bindet die Finanzierungssuche an den Puffer nach
+jedem tatsächlichen Zahlungsschritt. Während dieser Handpufferphase weist
+Defense die legale Tagentfernung ausdrücklich als zurückgestellt aus. Ein
+vollständig bezahlbarer Tag-Clear bleibt ein eigener zulässiger Gegenfall;
+ein Puffer oberhalb der Maxhand wird nicht als Schutz zum Zugende behauptet.
+
 Öffentlicher Zugriffsschaden bindet seine Quelle über die tatsächlich
 aufgedeckte `cardDefinitionId` des `access_card`-Ereignisses und dessen
 ausdrückliches `damageResolved`. Der Runner-Actor macht den so aufgelösten
@@ -2263,6 +2277,13 @@ kumulativen Schadens-/Handreservennachweis. Ein Break positiver aktueller
 Schadenssubroutinen darf diese Reserve auch schützen, wenn der spätere
 Zugriffspfad nicht mehr bezahlbar ist. Das entlastet weder einen alleinigen
 Folge-ICE-Lock noch einen Schadensbreak oberhalb der gebundenen Reserve.
+
+Blockiert die zunächst günstigere aktuelle ETR-Antwort den bekannten
+Restpfad durch kumulierten Schaden, quotiert derselbe Pump-Owner zusätzlich
+den vollständigen aktuellen Bruch. Nur ein vollständig bezahlbarer
+Pump-/Breakpreis mit danach überlebbarem bekannten Restpfad macht diese
+Vorbereitung zulässig. Unbekannte innere ICE oder ein nicht bezahlbarer
+Vollbruch zertifizieren keine solche Alternative.
 
 Die bekannte Pfadquote unterscheidet einen nicht bezahlbaren Quell-Break von
 fehlender Breaker-Abdeckung. Würde ein Zukunftseffekt den sonst passierbaren

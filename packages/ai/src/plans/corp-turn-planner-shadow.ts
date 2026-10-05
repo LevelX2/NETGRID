@@ -916,9 +916,7 @@ function headsForRoute(params: {
     params.agendaSlices.some(
       ({ projectId, slice }) =>
         projectId === params.route.instance.dedupeKey &&
-        slice.evidenceCodes.includes(
-          "agenda_slice_current_head_awaits_published_funding",
-        ),
+        slice.currentHeadPrerequisiteDisposition === "awaits_published_funding",
     )
   )
     return [];

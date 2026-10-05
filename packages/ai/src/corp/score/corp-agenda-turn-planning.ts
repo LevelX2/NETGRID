@@ -66,6 +66,10 @@ export type CorpAgendaTurnPlanningLine = {
 
 export type CorpAgendaTurnPlanningSlice = {
   schemaVersion: typeof CORP_AGENDA_TURN_SLICE_VERSION;
+  currentHeadPrerequisiteDisposition:
+    | "ready"
+    | "awaits_published_funding"
+    | "no_exact_head";
   opportunityKey: string;
   lines: CorpAgendaTurnPlanningLine[];
   pruned: Array<{ lineId: string; reasonCode: string }>;
@@ -298,6 +302,11 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
 
   return {
     schemaVersion: CORP_AGENDA_TURN_SLICE_VERSION,
+    currentHeadPrerequisiteDisposition: !exactAgenda
+      ? "no_exact_head"
+      : currentHeadFunded
+        ? "ready"
+        : "awaits_published_funding",
     opportunityKey,
     lines,
     pruned,

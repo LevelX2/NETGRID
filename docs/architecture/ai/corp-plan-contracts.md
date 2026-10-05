@@ -251,6 +251,10 @@ exakt gebundenen Advance- oder Score-Step als `score_continuation`. Eine
 unbekannte Folgeaktion wird dabei nicht vorweggenommen. Ein veröffentlichter
 Finanzierungsbedarf sperrt den direkten Agenda-Head bereits beim Produzenten;
 derselbe Head darf nicht als generische Route erneut zugelassen werden.
+Der Produzent liefert dazu `currentHeadPrerequisiteDisposition` als `ready`,
+`awaits_published_funding` oder `no_exact_head`. Die Materialisierung
+konsumiert dieses typisierte Feld; diagnostische Evidence-Texte sind keine
+Zulassungsbedingung.
 Der gebundene Economy-Support bleibt ausführbar. Der ausdrücklich gequotete
 Scope `exact_install_only` bleibt eine eigenständige Installationszulassung.
 

@@ -358,6 +358,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
           amount: 3,
         }),
       ]);
+      expect(slice.currentHeadPrerequisiteDisposition).toBe("awaits_published_funding");
     },
   );
 
@@ -387,6 +388,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       } satisfies CorpScoreProjectSignal;
       const slice = buildSlice(decisionInput(), signal, [current], []);
       expect(slice.lines).toHaveLength(1);
+      expect(slice.currentHeadPrerequisiteDisposition).toBe("ready");
       expect(slice.lines[0]).toMatchObject({
         family: "score_continuation",
         currentActionId: current.actionId,
@@ -409,6 +411,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       uncertainty: { currentActionScope: "exact_install_only" },
     } as CorpScoreProjectSignal;
     const slice = buildSlice(decisionInput(), signal, [agendaCandidate()], []);
+    expect(slice.currentHeadPrerequisiteDisposition).toBe("ready");
     expect(slice.lines[0]).toMatchObject({
       family: "pure_rush",
       currentActionId: "install-agenda",

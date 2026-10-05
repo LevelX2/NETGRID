@@ -179,6 +179,11 @@ function defensePhase(
   if (signals.discardChoiceBinding) openPhases.push("discard_window");
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
+  if (
+    signals.preserveHandBeforeIncompleteTagClear &&
+    (signals.handBufferActionIds?.length ?? 0) > 0 &&
+    signals.handSize < signals.minimumHandBuffer
+  ) openPhases.push("build_hand_buffer");
   if ((signals.defenseSupportInstallActionIds?.length ?? 0) > 0)
     openPhases.push("install_defense_support");
   if (signals.activeTags > 0) openPhases.push("clear_tags");
@@ -376,7 +381,21 @@ export function runnerDefenseDeferredHandBufferDispositions(params: {
     params.signals,
     params.actionDispositions,
   );
-  if (!phase || phase === "build_hand_buffer") return [];
+  if (!phase) return [];
+  if (phase === "build_hand_buffer") {
+    return params.signals.preserveHandBeforeIncompleteTagClear
+      ? params.actionCandidates.flatMap((candidate) =>
+          candidate.semanticActionType === "tag.remove"
+            ? [{
+                actionId: candidate.actionId,
+                disposition: "explicitly_nonproductive" as const,
+                ownerModuleId: "runner.defense_and_recovery" as const,
+                evidenceCode: "runner_tag_clear_deferred_until_survival_buffer",
+              }]
+            : [],
+        )
+      : [];
+  }
   const currentPhaseActionIds = new Set(
     defenseCandidates(
       params.actionCandidates,

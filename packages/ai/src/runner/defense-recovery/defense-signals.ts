@@ -29,7 +29,11 @@ export type RunnerDefenseServices = {
       | "deadline"
       | "targetCredits"
       | "evidence"
-    > & { remainingClicks: number; allowIncrementalProgress: boolean },
+    > & {
+      remainingClicks: number;
+      allowIncrementalProgress: boolean;
+      requiredEndTurnHandBuffer?: number;
+    },
   ) => RunnerFundingRouteContract;
   runCanConvertNow: (target: RunnerRunTargetEvaluation) => boolean;
 };
@@ -286,6 +290,40 @@ export function buildRunnerDefenseSignals(params: {
     confirmedDamageTaxedDrawActionIds,
   );
   const tagClearTargetCredits = 2;
+  const tags = input.playerView.own.tags;
+  const taggedDamageBufferRequired =
+    tags > 0 &&
+    (damageThreat.flatlineRisk.level === "confirmed" ||
+      damageThreat.flatlineRisk.level === "critical") &&
+    damageThreat.flatlineRisk.uncappedRecommendedHandFloor <= maxHandSize;
+  // Quote the complete cleanup horizon, rather than treating funding for one
+  // tag as proof that all tags can disappear before the opponent's turn.
+  const fullTagClearFunding = taggedDamageBufferRequired && tags <= input.playerView.own.clicks
+    ? services.findFundingRoute({
+        demandId: "runner-defense-complete-tag-clear-funding",
+        sourcePlanId: "runner.defense_and_recovery:runner",
+        purpose: "foreground_plan",
+        priority: "acute_hard_plan_blocker",
+        hardness: "hard",
+        deadline: "end_of_current_turn",
+        targetCredits: tagClearTargetCredits * tags,
+        remainingClicks: input.playerView.own.clicks - tags,
+        allowIncrementalProgress: false,
+        evidence: ["runner_complete_tag_clear_horizon"],
+      }).routeAssessment
+    : undefined;
+  const completeTagClearAvailable =
+    fullTagClearFunding !== undefined &&
+    (fullTagClearFunding.status === "funded" ||
+      (fullTagClearFunding.status === "covered_guaranteed" &&
+        fullTagClearFunding.reliability === "guaranteed" &&
+        fullTagClearFunding.horizon === "same_turn" &&
+        fullTagClearFunding.projectedGap === 0));
+  const preserveHandBeforeIncompleteTagClear =
+    taggedDamageBufferRequired && !completeTagClearAvailable;
+  const endTurnBuffer = preserveHandBeforeIncompleteTagClear
+    ? { requiredEndTurnHandBuffer: damageThreat.flatlineRisk.uncappedRecommendedHandFloor }
+    : {};
   const tagClearFundingActionIds = services.findFundingRoute({
     demandId: "runner-defense-tag-clear-funding",
     sourcePlanId: "runner.defense_and_recovery:runner",
@@ -296,6 +334,7 @@ export function buildRunnerDefenseSignals(params: {
     targetCredits: tagClearTargetCredits,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowIncrementalProgress: true,
+    ...endTurnBuffer,
     evidence: ["runner_visible_tag_punish_requires_clear_funding"],
   }).routeActionIds;
   const directTagClearAvailable = candidates.some(
@@ -336,6 +375,7 @@ export function buildRunnerDefenseSignals(params: {
     targetCredits: reactionReserveTargetCredits,
     remainingClicks: input.playerView.own.clicks,
     allowIncrementalProgress: true,
+    ...endTurnBuffer,
     evidence: ["runner_damage_locked_hand_reaction_reserve"],
   }).routeActionIds;
   const criticalDamageAtHandFloor =
@@ -392,6 +432,7 @@ export function buildRunnerDefenseSignals(params: {
     ),
     handSize,
     minimumHandBuffer,
+    preserveHandBeforeIncompleteTagClear,
     drawAllowed:
       input.playerView.own.stackOrRdCount > 0 &&
       candidates.some(
@@ -445,6 +486,9 @@ export function buildRunnerDefenseSignals(params: {
             ? "P4"
             : "P5",
     evidenceCodes: [
+      ...(preserveHandBeforeIncompleteTagClear
+        ? ["runner_incomplete_tag_clear_requires_preserved_hand_buffer"]
+        : []),
       ...(candidates.some(
         (candidate) =>
           candidate.semanticActionType === "counter.remove_trace_tag" ||

@@ -238,7 +238,7 @@ export function createRunnerPumpViabilityContext(
     const fullBreakIndexes = requiresFullBreak
       ? currentEncounterUnbrokenSubroutineIndexes(input)
       : undefined;
-    const requiredBreakSubroutines = currentQuote?.subroutines.filter(
+    let requiredBreakSubroutines = currentQuote?.subroutines.filter(
       (subroutine, index) =>
         fullBreakIndexes
           ? fullBreakIndexes.has(index)
@@ -318,12 +318,12 @@ export function createRunnerPumpViabilityContext(
         ],
       };
 
-    const breakPayment = spendIcebreakerCredits(
+    let breakPayment = spendIcebreakerCredits(
       pumpPayment.budget,
       breaker,
       estimatedBreakCost,
     );
-    const creditsAfterPumpAndBreak = breakPayment.budget.credits;
+    let creditsAfterPumpAndBreak = breakPayment.budget.credits;
     const pumpAndBreakCost = totalPumpCost + estimatedBreakCost;
     const cheaperTraceCost = cheaperSafeCurrentTracePayment(
       input,
@@ -382,7 +382,7 @@ export function createRunnerPumpViabilityContext(
           ),
         ) ??
           false);
-      const futurePath = hasImmediateSafetyThreat
+      let futurePath = hasImmediateSafetyThreat
         ? {
             blocksPump: false,
             creditsAfterPath: creditsAfterPumpAndBreak,
@@ -419,6 +419,72 @@ export function createRunnerPumpViabilityContext(
             ),
             requiredHandFloor,
           );
+      if (
+        futurePath.blocksPump &&
+        !requiresFullBreak &&
+        currentQuote.subroutines.some(
+          (subroutine, index) =>
+            remainingIndexes.has(index) &&
+            isVisibleDirectDamageSubroutine(subroutine) &&
+            !requiredBreakSubroutines.includes(subroutine),
+        )
+      ) {
+        // A cheap ETR-only line may be lethal cumulatively with inner ICE.
+        // Quote the bounded full current mitigation before rejecting the pump;
+        // each alternative still pays the Engine's effective breaker costs.
+        const completeCurrentBreak = currentQuote.subroutines.filter(
+          (_, index) => remainingIndexes.has(index),
+        );
+        const completeQuote = creditsToBreakVisibleSubroutinesWithBreaker(
+          breaker,
+          encounteredIce,
+          completeCurrentBreak,
+          (breaker.strength ?? 0) + requiredPumps * pumpAmount,
+          currentQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+        );
+        const completePayment = completeQuote && spendIcebreakerCredits(
+          pumpPayment.budget,
+          breaker,
+          completeQuote.cost,
+        );
+        if (completePayment?.affordable) {
+          const completeFuture = dependencies.encounterFuturePathAfterPumpBreakAssessment(
+            {
+              ...input,
+              playerView: {
+                ...input.playerView,
+                own: {
+                  ...input.playerView.own,
+                  rig: runnerRigAfterPumpAndEncounter(
+                    input.playerView.own.rig ?? [],
+                    breaker,
+                    currentEncounteredIceCard(input) ?? encounteredIce,
+                    pumpAmount,
+                    requiredPumps,
+                  ),
+                },
+              },
+            },
+            server,
+            {
+              ...completePayment.budget,
+              credits: completePayment.budget.credits + completePayment.budget.runOnlyCredits,
+            },
+            [],
+            requiredHandFloor,
+          );
+          if (!completeFuture.blocksPump) {
+            requiredBreakSubroutines = completeCurrentBreak;
+            estimatedBreakCost = completeQuote!.cost;
+            breakPayment = completePayment;
+            creditsAfterPumpAndBreak = completePayment.budget.credits;
+            futurePath = {
+              ...completeFuture,
+              evidence: ["pump_complete_current_break_preserves_cumulative_damage_budget", ...completeFuture.evidence],
+            };
+          }
+        }
+      }
       if (futurePath.blocksPump)
         return {
           canLeadToBreak: false,

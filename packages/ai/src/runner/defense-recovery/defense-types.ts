@@ -6,6 +6,7 @@ export type RunnerDefenseSignals = {
   damagePreventionNeeded: boolean;
   handSize: number;
   minimumHandBuffer: number;
+  preserveHandBeforeIncompleteTagClear?: boolean;
   drawAllowed: boolean;
   handBufferActionIds?: string[];
   confirmedDamageTaxedDrawActionIds?: string[];
