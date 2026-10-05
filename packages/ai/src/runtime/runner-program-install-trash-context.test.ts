@@ -337,3 +337,193 @@ function program(instanceId: string, memoryCost: number): VisibleCard {
     memoryCost,
   } as VisibleCard;
 }
+
+describe("installed program loss with hosted descendants", () => {
+  function contextFor(rig: VisibleCard[]) {
+    const roles = (card: VisibleCard) =>
+      card.definitionId === "onr_v1_047_pile-driver" ||
+      card.definitionId === "onr_v1_021_dwarf"
+        ? ["breaker_wall"]
+        : card.definitionId === "onr_v1_023_evil-twin"
+          ? ["breaker_sentry"]
+          : card.definitionId === "onr_v1_016_cyfermaster"
+            ? ["breaker_gate"]
+            : [];
+    return createRunnerProgramInstallTrashContext({
+      safeNonNegativeInteger: (value) => Math.max(0, value ?? 0),
+      visibleMemoryCost: (card) => card?.memoryCost ?? 0,
+      visibleCardsByInstanceId: () =>
+        new Map(rig.map((card) => [card.instanceId, card])),
+      visibleBreakerRoleCounts: (cards) => {
+        const result = new Map<string, number>();
+        for (const card of cards)
+          for (const role of roles(card))
+            result.set(role, (result.get(role) ?? 0) + 1);
+        return result;
+      },
+      visibleBreakerRoles: roles,
+      rolesForCardId: (id) =>
+        id === "onr_v1_075_zetatech-software-installer" ? ["build_rig"] : [],
+      isRunnerPressureRole: () => false,
+      isRunnerEconomyRole: () => false,
+      visibleCounterValue: (card) => card?.counters?.virus ?? 0,
+      visibleInstallCost: (card) => card?.installCost ?? 0,
+    });
+  }
+  const ownProgram = (
+    id: string,
+    definitionId: string,
+    hostedOn?: string,
+  ): VisibleCard => ({
+    ...program(id, 1),
+    definitionId,
+    ...(hostedOn ? { hostedOn } : {}),
+  });
+  const inputFor = (rig: VisibleCard[], memoryUsed = 2): AiDecisionInput =>
+    ({
+      side: "runner",
+      legalActions: [],
+      playerView: {
+        stateVersion: 7,
+        timingPoint: "runner_action.main",
+        own: { rig, memoryUsed, memoryLimit: memoryUsed, gripOrHq: [] },
+        opponent: {},
+        servers: [],
+        specialZones: { setAside: [program("incoming", 1)] },
+      },
+    }) as unknown as AiDecisionInput;
+
+  it("preserves a daemon's actual hosted coverage instead of preferring its cheap printed host", () => {
+    const host = ownProgram("host", "onr_v1_001_afreet");
+    const installer = ownProgram(
+      "installer",
+      "onr_v1_075_zetatech-software-installer",
+    );
+    const wall = ownProgram("wall", "onr_v1_047_pile-driver", "host");
+    const sentry = ownProgram("sentry", "onr_v1_023_evil-twin", "host");
+    const rig = [host, installer, wall, sentry];
+    const context = contextFor(rig),
+      input = inputFor(rig);
+    const choice = {
+      source: "v1912.delayed_install_memory:shell:incoming:start_turn:7",
+    } as never;
+    const options = [host, installer].map((card) => ({
+      id: card.instanceId,
+      value: card.instanceId,
+      label: card.instanceId,
+    }));
+    const assessment = context.runnerProgramInstallTrashAssessment(
+      input,
+      choice,
+      options,
+    );
+    expect(
+      assessment.candidates.find(
+        (candidate) => candidate.card?.instanceId === "host",
+      ),
+    ).toMatchObject({
+      memoryCost: 1,
+      protectedRole: true,
+      category: "critical",
+      reasonCategories: expect.arrayContaining([
+        "hosted_programs_lost",
+        "unique_breaker_coverage",
+      ]),
+    });
+    expect(
+      context.selectedRunnerProgramInstallTrashOptionIds(
+        input,
+        choice,
+        options,
+      ),
+    ).toEqual(["installer"]);
+    // Ordinary development cannot count daemon children as freeable printed MU.
+    expect(
+      context
+        .runnerProgramInstallTrashAssessmentForCard(
+          input,
+          program("incoming", 1),
+        )
+        .candidates.map((candidate) => candidate.card?.instanceId),
+    ).toEqual(["installer", "host"]);
+  });
+
+  it("protects a role even when both copies are lost under the same host", () => {
+    const host = ownProgram("host", "onr_v1_001_afreet");
+    const first = ownProgram("wall-a", "onr_v1_021_dwarf", "host");
+    const second = ownProgram("wall-b", "onr_v1_021_dwarf", "host");
+    const input = inputFor([host, first, second], 1);
+    const assessment = contextFor([
+      host,
+      first,
+      second,
+    ]).runnerProgramInstallTrashAssessmentForCard(
+      input,
+      program("incoming", 1),
+    );
+    expect(assessment.candidates).toHaveLength(1);
+    expect(assessment.candidates[0]).toMatchObject({
+      memoryCost: 1,
+      protectedRole: true,
+      category: "critical",
+    });
+  });
+
+  it("does not attribute another host's children to an empty daemon", () => {
+    const empty = ownProgram("empty", "onr_v1_001_afreet");
+    const full = ownProgram("full", "onr_v1_069_succubus");
+    const wall = ownProgram("wall", "onr_v1_047_pile-driver", "full");
+    const rig = [empty, full, wall],
+      input = inputFor(rig);
+    const assessment = contextFor(
+      rig,
+    ).runnerProgramInstallTrashAssessmentForCard(input, program("incoming", 1));
+    expect(
+      assessment.candidates.find(
+        (candidate) => candidate.card?.instanceId === "empty",
+      ),
+    ).toMatchObject({
+      protectedRole: false,
+      sacrificePenalty: 40,
+      memoryCost: 1,
+    });
+  });
+
+  it("keeps printed MU for a program hosted on a non-daemon", () => {
+    const host = ownProgram("ordinary-host", "onr_v1_003_baedekers-net-map");
+    const child = ownProgram(
+      "child",
+      "onr_v1_047_pile-driver",
+      host.instanceId,
+    );
+    const rig = [host, child],
+      input = inputFor(rig);
+    expect(
+      contextFor(rig)
+        .runnerProgramInstallTrashAssessmentForCard(
+          input,
+          program("incoming", 1),
+        )
+        .candidates.find((candidate) => candidate.card?.instanceId === "child"),
+    ).toMatchObject({ memoryCost: 1 });
+  });
+
+  it.each(["missing-host", "cycle"])(
+    "fails closed for a %s own hosting binding",
+    (kind) => {
+      const broken = ownProgram(
+        "broken",
+        "onr_v1_001_afreet",
+        kind === "cycle" ? "broken" : "absent",
+      );
+      const rig = [broken],
+        input = inputFor(rig, 1);
+      expect(() =>
+        contextFor(rig).runnerProgramInstallTrashAssessmentForCard(
+          input,
+          program("incoming", 1),
+        ),
+      ).toThrowError("invalid_player_view_card_projection");
+    },
+  );
+});

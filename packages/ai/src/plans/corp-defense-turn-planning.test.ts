@@ -367,6 +367,10 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
     expect(slice.lines[0]).toMatchObject({
       disposition: "stage_for_later_rez",
       targetServerId: "new_remote",
+      supportBinding: {
+        parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+        parentNeedId: "score-protection:agenda-1",
+      },
       currentActionId: "install-remote",
       rezReadyAfterLine: true,
       priorityClass: "P4",
@@ -423,6 +427,10 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
     expect(slice.lines[0]).toMatchObject({
       currentActionId: "install-rd",
       disposition: "install_rez_ready",
+      supportBinding: {
+        parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+        parentNeedId: "score-protection:agenda-1",
+      },
       targetServerId: "rd",
       priorityClass: "P4",
       defenseValue: 30,
@@ -479,6 +487,10 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
     expect(slice.lines[0]).toMatchObject({
       disposition: "draw_for_ice",
       currentActionId: "draw",
+      supportBinding: {
+        parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+        parentNeedId: "score-protection:agenda-1",
+      },
       priorityClass: "P4",
       campaignQuote: {
         nextMilestoneId: "replan_after_score_protection_draw",

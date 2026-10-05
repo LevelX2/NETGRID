@@ -8,6 +8,7 @@ import { runAiDecisionCheckpoint } from "../evaluation/decision-checkpoints/chec
 import { residentPlanPortfolioSnapshot } from "./resident-plan-portfolio-memory";
 import {
   corpPlanProgressRoots,
+  corpDefensePlanningLineMatchesRoute,
   corpPlanningHeadContinuationScope,
   corpPlanningHeadPriorityCoverage,
   specializedPlanningLineMatchesRoute,
@@ -341,5 +342,68 @@ describe("Corp TurnPlanner selected-head binding", () => {
     expect(portfolio?.turnPlanExecutionLease?.routeKey).toBe(
       committedNode?.invocation.routeKey,
     );
+  });
+});
+
+describe("Corp defense provider authority", () => {
+  const binding = {
+    parentPlanInstanceId: "plan:corp.score_agenda:agenda%3Aone%3Aremote_1",
+    parentNeedId: "score-protection:one:remote_1",
+  };
+  const route = {
+    instance: {
+      parentInstanceId: binding.parentPlanInstanceId,
+      parentNeedId: binding.parentNeedId,
+    },
+    step: { target: { kind: "server", id: "remote_1" } },
+  } as never;
+  it("keeps exact parent, need and server support and rejects unrelated projected siblings", () => {
+    const line = { targetServerId: "remote_1", supportBinding: binding };
+    expect(corpDefensePlanningLineMatchesRoute(line, route)).toBe(true);
+    expect(
+      corpDefensePlanningLineMatchesRoute(
+        { ...line, targetServerId: "hq" },
+        route,
+      ),
+    ).toBe(false);
+    expect(
+      corpDefensePlanningLineMatchesRoute(
+        { targetServerId: line.targetServerId },
+        route,
+      ),
+    ).toBe(false);
+    expect(
+      corpDefensePlanningLineMatchesRoute(
+        {
+          ...line,
+          supportBinding: {
+            ...binding,
+            parentPlanInstanceId: "different-score-parent",
+          },
+        },
+        route,
+      ),
+    ).toBe(false);
+    expect(
+      corpDefensePlanningLineMatchesRoute(
+        {
+          ...line,
+          supportBinding: { ...binding, parentNeedId: "different-need" },
+        },
+        route,
+      ),
+    ).toBe(false);
+  });
+  it("keeps independent global defense and prevents bound lines from borrowing its authority", () => {
+    const general = { instance: {}, step: {} } as never;
+    expect(
+      corpDefensePlanningLineMatchesRoute({ targetServerId: "hq" }, general),
+    ).toBe(true);
+    expect(
+      corpDefensePlanningLineMatchesRoute(
+        { targetServerId: "remote_1", supportBinding: binding },
+        general,
+      ),
+    ).toBe(false);
   });
 });

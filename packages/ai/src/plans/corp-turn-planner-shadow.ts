@@ -806,6 +806,7 @@ function includeSpecializedCurrentRoutes(params: {
     moduleId: PlanModuleId,
     projectId?: string,
     exactPlanInstanceId?: string,
+    defenseLine?: CorpDefenseTurnPlanningLine,
   ): void => {
     if (
       routes.some(
@@ -814,7 +815,9 @@ function includeSpecializedCurrentRoutes(params: {
           route.candidate.actionId === actionId &&
           (projectId === undefined || route.instance.dedupeKey === projectId) &&
           (exactPlanInstanceId === undefined ||
-            route.instance.instanceId === exactPlanInstanceId),
+            route.instance.instanceId === exactPlanInstanceId) &&
+          (defenseLine === undefined ||
+            corpDefensePlanningLineMatchesRoute(defenseLine, route)),
       )
     ) {
       return;
@@ -827,7 +830,9 @@ function includeSpecializedCurrentRoutes(params: {
         route.instance.moduleId === moduleId &&
         (projectId === undefined || route.instance.dedupeKey === projectId) &&
         (exactPlanInstanceId === undefined ||
-          route.instance.instanceId === exactPlanInstanceId),
+          route.instance.instanceId === exactPlanInstanceId) &&
+        (defenseLine === undefined ||
+          corpDefensePlanningLineMatchesRoute(defenseLine, route)),
     );
     if (!candidate || !base) return;
     routes.push({
@@ -869,6 +874,7 @@ function includeSpecializedCurrentRoutes(params: {
         ownerModuleId,
         undefined,
         currentNode.planInstanceId,
+        line,
       );
     }
   }
@@ -1090,16 +1096,18 @@ function specializedVariants(
     );
     const defenseLines =
       defenseSlice?.lines
-        .filter((line) =>
-          specializedPlanningLineMatchesRoute({
-            routeActionId: route.candidate.actionId,
-            routeModuleId: route.instance.moduleId,
-            routePlanInstanceId: route.instance.instanceId,
-            routeDedupeKey: route.instance.dedupeKey,
-            lineActionId: line.currentActionId,
-            lineOwnerModuleId: line.nodes[0]?.ownerModuleId,
-            linePlanInstanceId: line.nodes[0]?.planInstanceId,
-          }),
+        .filter(
+          (line) =>
+            corpDefensePlanningLineMatchesRoute(line, route) &&
+            specializedPlanningLineMatchesRoute({
+              routeActionId: route.candidate.actionId,
+              routeModuleId: route.instance.moduleId,
+              routePlanInstanceId: route.instance.instanceId,
+              routeDedupeKey: route.instance.dedupeKey,
+              lineActionId: line.currentActionId,
+              lineOwnerModuleId: line.nodes[0]?.ownerModuleId,
+              linePlanInstanceId: line.nodes[0]?.planInstanceId,
+            }),
         )
         .map((line) => defenseVariant(line, route)) ?? [];
     return [
@@ -1108,6 +1116,25 @@ function specializedVariants(
     ];
   }
   return [];
+}
+
+/** Domain defense lines may only specialize the authority actually admitted by their owner. */
+export function corpDefensePlanningLineMatchesRoute(
+  line: Pick<CorpDefenseTurnPlanningLine, "targetServerId" | "supportBinding">,
+  route: Pick<PlanSchedulerPlanningRouteCandidate, "instance" | "step">,
+): boolean {
+  const parent = line.supportBinding;
+  if (
+    parent?.parentPlanInstanceId !== route.instance.parentInstanceId ||
+    parent?.parentNeedId !== route.instance.parentNeedId
+  )
+    return false;
+  if (
+    route.step.target?.kind === "server" &&
+    route.step.target.id !== line.targetServerId
+  )
+    return false;
+  return true;
 }
 
 export function specializedPlanningLineMatchesRoute(params: {

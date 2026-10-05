@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 import {
   programSacrificeCandidate as buildProgramSacrificeCandidate,
+  programSacrificeCategory,
   programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
   runnerProgramInstallDisplacementPenalty as buildRunnerProgramInstallDisplacementPenalty,
   runnerProgramInstallTrashAssessmentFromCards as buildRunnerProgramInstallTrashAssessmentFromCards,
@@ -16,6 +17,7 @@ import {
 import { runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion } from "./runner-program-sacrifice-exclusion";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import { runnerInstalledProgramTrashLoss } from "./runner-installed-program";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -125,21 +127,13 @@ export function createRunnerProgramInstallTrashContext(
     const installedCards = dependencies.visibleCardsByInstanceId(
       input.playerView,
     );
-    const installedBreakerRoleCounts = dependencies.visibleBreakerRoleCounts(
-      input.playerView.own.rig ?? [],
-    );
     const selected = selectableOptions
       .map((option) => {
         const card =
           typeof option.value === "string"
             ? installedCards.get(option.value)
             : option.card;
-        return programSacrificeCandidateForAi(
-          input,
-          card,
-          installedBreakerRoleCounts,
-          option,
-        );
+        return programSacrificeCandidateForAi(input, card, option);
       })
       .filter((candidate) => candidate.option)
       .sort(
@@ -272,29 +266,17 @@ export function createRunnerProgramInstallTrashContext(
     const installedCards = dependencies.visibleCardsByInstanceId(
       input.playerView,
     );
-    const installedBreakerRoleCounts = dependencies.visibleBreakerRoleCounts(
-      input.playerView.own.rig ?? [],
-    );
     const candidates = selectableOptions
       ? selectableOptions.map((option) => {
           const card =
             typeof option.value === "string"
               ? installedCards.get(option.value)
               : undefined;
-          return programSacrificeCandidateForAi(
-            input,
-            card,
-            installedBreakerRoleCounts,
-            option,
-          );
+          return programSacrificeCandidateForAi(input, card, option);
         })
-      : (input.playerView.own.rig ?? []).map((card) =>
-          programSacrificeCandidateForAi(
-            input,
-            card,
-            installedBreakerRoleCounts,
-          ),
-        );
+      : (input.playerView.own.rig ?? [])
+          .filter((card) => card.type === "program")
+          .map((card) => programSacrificeCandidateForAi(input, card));
     return buildRunnerProgramInstallTrashAssessmentFromCards({
       memoryUsed,
       memoryLimit,
@@ -306,15 +288,28 @@ export function createRunnerProgramInstallTrashContext(
   function programSacrificeCandidateForAi(
     input: AiDecisionInput,
     card: VisibleCard | undefined,
-    installedBreakerRoleCounts: ReadonlyMap<string, number>,
     option?: PendingChoiceOption,
   ): ProgramSacrificeCandidate {
-    return buildProgramSacrificeCandidate(
+    const loss = runnerInstalledProgramTrashLoss(
+      input,
       card,
-      installedBreakerRoleCounts,
-      option,
-      {
-        visibleMemoryCost: dependencies.visibleMemoryCost,
+      dependencies.visibleMemoryCost,
+    );
+    const lostIds = new Set(loss.cards.map((entry) => entry.instanceId));
+    const survivors = (input.playerView.own.rig ?? []).filter(
+      (entry) => !lostIds.has(entry.instanceId),
+    );
+    const members = loss.cards.map((entry) => {
+      // Coverage/redundancy is measured against cards surviving this entire
+      // trash closure, rather than another copy also lost with the host.
+      const survivingWithMember = [...survivors, entry];
+      const roleCounts = new Map<string, number>();
+      for (const survivor of survivingWithMember) {
+        for (const role of dependencies.visibleBreakerRoles(survivor))
+          roleCounts.set(role, (roleCounts.get(role) ?? 0) + 1);
+      }
+      return buildProgramSacrificeCandidate(entry, roleCounts, undefined, {
+        visibleMemoryCost: () => 0,
         rolesForCardId: dependencies.rolesForCardId,
         visibleBreakerRoles: dependencies.visibleBreakerRoles,
         isRunnerPressureRole: dependencies.isRunnerPressureRole,
@@ -322,24 +317,38 @@ export function createRunnerProgramInstallTrashContext(
         visibleCounterValue: dependencies.visibleCounterValue,
         visibleInstallCost: dependencies.visibleInstallCost,
         isRedundant: (candidate, breakerRoles) =>
-          programSacrificeCandidateIsRedundant(input, candidate, breakerRoles),
-      },
+          buildProgramSacrificeCandidateIsRedundant(
+            candidate,
+            breakerRoles,
+            survivingWithMember,
+            roleCounts,
+          ),
+      });
+    });
+    const protectedRole = members.some((entry) => entry.protectedRole);
+    const sacrificePenalty = members.reduce(
+      (sum, entry) => sum + entry.sacrificePenalty,
+      0,
     );
-  }
-
-  function programSacrificeCandidateIsRedundant(
-    input: AiDecisionInput,
-    card: VisibleCard | undefined,
-    breakerRoles: readonly string[],
-  ): boolean {
-    const rig = input.playerView.own.rig ?? [];
-    const roleCounts = dependencies.visibleBreakerRoleCounts(rig);
-    return buildProgramSacrificeCandidateIsRedundant(
-      card,
-      breakerRoles,
-      rig,
-      roleCounts,
-    );
+    const category = programSacrificeCategory(sacrificePenalty, protectedRole);
+    return {
+      ...(option ? { option } : {}),
+      card: loss.cards[0]!,
+      memoryCost: loss.memoryCost,
+      protectedRole,
+      sacrificePenalty,
+      category,
+      acceptable: category === "low" || category === "medium",
+      score:
+        loss.memoryCost * 70 +
+        members.reduce((sum, entry) => sum + entry.score, 0),
+      reasonCategories: [
+        ...new Set([
+          ...members.flatMap((entry) => entry.reasonCategories),
+          ...(loss.cards.length > 1 ? ["hosted_programs_lost"] : []),
+        ]),
+      ].sort(),
+    };
   }
 
   function runnerProgramInstallDisplacementPenalty(

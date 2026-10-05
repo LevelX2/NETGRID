@@ -15,6 +15,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import type { PriorityClass } from "../../plans/plan-assessment";
 import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 export { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 import {
@@ -40,6 +41,11 @@ export type CorpDefenseTurnPlanningLine = {
   lineId: string;
   defenseId: string;
   targetServerId: string;
+  /** Exact authority for this line's current provider node. */
+  supportBinding?: {
+    parentPlanInstanceId: string;
+    parentNeedId: string;
+  };
   disposition: CorpDefenseLineDisposition;
   currentActionId: string;
   nodes: Array<{
@@ -279,6 +285,13 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       lineId,
       defenseId: signal.defenseId,
       targetServerId: signal.serverId,
+      supportBinding: {
+        parentPlanInstanceId: planInstanceIdForProposal({
+          moduleId: "corp.score_agenda",
+          dedupeKey: signal.parentProjectId,
+        }),
+        parentNeedId: signal.parentNeedId,
+      },
       disposition:
         fundingGapAfter > 0 ? "stage_for_later_rez" : "install_rez_ready",
       currentActionId: signal.actionId,
@@ -545,6 +558,19 @@ function createDefenseLine(
     bluffValue: number;
   },
 ): CorpDefenseTurnPlanningLine {
+  if (
+    signal.parentKind === "remote" &&
+    (!signal.parentProjectId?.trim() || !signal.parentNeedId?.trim())
+  )
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: params.input.side,
+      stateVersion: params.input.playerView.stateVersion,
+      timingPoint: params.input.playerView.timingPoint,
+      legalActionTypes: params.input.legalActions.map((action) => action.type),
+      owner: "plan_module",
+      removalCondition:
+        "A parent-bound remote defense line requires its exact current project and need.",
+    });
   const route = signal.installRoute!;
   const fundingCandidate = funding?.candidate;
   const ordered = fundingCandidate ? [fundingCandidate, install] : [install];
@@ -693,6 +719,24 @@ function createDefenseLine(
     lineId,
     defenseId: signal.defenseId,
     targetServerId: signal.serverId,
+    ...(funding
+      ? {
+          supportBinding: {
+            parentPlanInstanceId: funding.signal.parentPlanInstanceId!,
+            parentNeedId: funding.signal.parentNeedId!,
+          },
+        }
+      : signal.parentKind === "remote"
+        ? {
+            supportBinding: {
+              parentPlanInstanceId: planInstanceIdForProposal({
+                moduleId: "corp.establish_scoring_remote",
+                dedupeKey: signal.parentProjectId!,
+              }),
+              parentNeedId: signal.parentNeedId!,
+            },
+          }
+        : {}),
     disposition: classification.disposition,
     currentActionId: ordered[0]!.actionId,
     nodes,
@@ -830,6 +874,13 @@ function createScoreProtectionStagingLine(
     lineId,
     defenseId: signal.defenseId,
     targetServerId: signal.serverId,
+    supportBinding: {
+      parentPlanInstanceId: planInstanceIdForProposal({
+        moduleId: "corp.score_agenda",
+        dedupeKey: signal.parentProjectId,
+      }),
+      parentNeedId: signal.parentNeedId,
+    },
     disposition: "stage_for_later_rez",
     currentActionId: signal.actionId,
     nodes: [
@@ -902,6 +953,13 @@ function createScoreProtectionInstallLine(
   });
   return {
     ...line,
+    supportBinding: {
+      parentPlanInstanceId: planInstanceIdForProposal({
+        moduleId: "corp.score_agenda",
+        dedupeKey: signal.parentProjectId,
+      }),
+      parentNeedId: signal.parentNeedId,
+    },
     priorityClass: signal.delegatedPriorityClass,
     valueClaims: line.valueClaims.map((claim) =>
       claim.ownerModuleId === "corp.defend_servers"
@@ -990,6 +1048,13 @@ function createScoreProtectionDrawLine(
     lineId,
     defenseId: signal.defenseId,
     targetServerId: signal.serverId,
+    supportBinding: {
+      parentPlanInstanceId: planInstanceIdForProposal({
+        moduleId: "corp.score_agenda",
+        dedupeKey: signal.parentProjectId,
+      }),
+      parentNeedId: signal.parentNeedId,
+    },
     disposition: "draw_for_ice",
     currentActionId: signal.actionId,
     nodes: [

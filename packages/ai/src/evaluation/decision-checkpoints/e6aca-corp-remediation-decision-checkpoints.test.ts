@@ -40,27 +40,57 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       preserveVeniceTargetJson,
     ],
     [
-      "activates a current BBS economy route under its source-bound economy owner",
+      "keeps urgent R&D drawing independent of lower-priority score support and source-bound BBS economy",
       activateBbsEconomyJson,
     ],
   ])("passes the corrected Corp behavior: %s", (_label, json) => {
-    const result = runAiDecisionCheckpoint(
-      structuredClone(json) as AiDecisionCheckpointV1,
-    );
+    const checkpoint = structuredClone(json) as AiDecisionCheckpointV1;
+    if (json === activateBbsEconomyJson) {
+      // The old selected BBS sequence borrowed a remote_1 score-draw quote
+      // for the independent urgent R&D draw. That replaced its P2 priority
+      // with the unrelated score-support priority and postponed protection
+      // against the visible six-point Runner. BBS remains an admitted head
+      // under its own source-bound owner; it must not suppress this P2 need.
+      checkpoint.expectation = {
+        acceptableActions: [{ type: "draw_card" }],
+        planExecution: {
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["allocate_server_defense"],
+        },
+      };
+    }
+    const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     if (json === activateBbsEconomyJson) {
       const plan = result.decision?.decisionDebug?.planFirstDecision;
+      const defenseRoot = "plan:corp.defend_servers:server-defense-portfolio";
       expect(plan?.selectedPlan).toMatchObject({
-        moduleId: "corp.economy",
-        phase: "rez",
-        target: { kind: "card", id: result.selectedAction!.source },
+        moduleId: "corp.defend_servers",
+        instanceId: defenseRoot,
       });
+      expect(plan?.rootPlanInstanceId).toBe(defenseRoot);
+      expect(plan?.priority?.effectiveClass).toBe("P2");
+      expect(plan?.assessmentEvidenceCodes).toContain(
+        "corp_missing_concrete_defense_draw:rd",
+      );
       expect(plan?.route).toMatchObject({
         actionId: result.selectedAction!.actionId,
         stateVersion: result.input.playerView.stateVersion,
         planInstanceId: plan?.selectedPlan?.instanceId,
       });
+      const bbsRoot =
+        "plan:corp.economy:economy-campaign%3Acorp_onr_v1_309_bbs-whispering-campaign_1%3Arez%3Aremote_1";
+      expect(plan?.turnPlanning?.heads).toContainEqual(
+        expect.objectContaining({
+          moduleId: "corp.economy",
+          rootPlanInstanceId: bbsRoot,
+          executorPlanInstanceId: bbsRoot,
+          actionId:
+            "corp.rez_card.corp_onr_v1_309_bbs-whispering-campaign_1.remote_1.corp_onr_v1_309_bbs-whispering-campaign_1",
+          witnessValid: true,
+        }),
+      );
     }
   });
 

@@ -611,6 +611,20 @@ Diese Einordnung wirkt vor der Installationswahl und Opferbindung; ein bereits
 ausgewählter `PlanExecutionOrigin` wird im folgenden Choice-Fenster weiterhin
 unverändert ausgeführt.
 
+Die Opferbewertung bindet jede Kandidateninstanz an das tatsächliche eigene
+Rig und bewertet alle Programme, die beim rekursiven Engine-Trash mit ihrem
+Host verloren gehen. Redundanz und einzigartige Coverage werden gegen das
+nach diesem gesamten Verlust verbleibende Rig geprüft; zwei gemeinsam
+verlorene Kopien decken danach keinen Bedarf. Dieselben sichtbaren
+Hostverlust-Fakten verwendet die Shell-Traders-Ersatzbewertung. Die
+freisetzbare MU bleibt dagegen die von der aktuellen Engine-Choice gequotete
+MU der auswählbaren Wurzel. Gedruckte MU von auf einem Daemon gehosteten
+Kindern wird nicht als zusätzliche Opferkapazität erfunden. Andere kanonische
+Hostmechaniken behalten ihren tatsächlichen MU-Vertrag. Fehlende oder
+zyklische eigene Hostbindungen scheitern mit strukturierter Diagnose.
+Choice-ID, StateVersion, Planinstanz, Executor und ursprünglicher Step
+bleiben bei der reinen Optionsauflösung unverändert.
+
 Deckinventar und Handantworten übernehmen die ICE-Kategorien aus dem
 kanonischen Breakerprofil. Bedingte Zusatzeffekte im Regeltext erweitern diese
 Abdeckung nicht: Ein Folgeeffekt nach einer vollständig gebrochenen Wall ist

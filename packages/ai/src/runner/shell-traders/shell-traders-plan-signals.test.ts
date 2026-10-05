@@ -535,3 +535,64 @@ function card(
     ...extra,
   };
 }
+
+describe("Shell Traders hosted-program displacement", () => {
+  it("counts actual host losses while daemon children provide no selectable MU", () => {
+    const host = card("afreet", "onr_v1_001_afreet", "program", {
+      memoryCost: 1,
+    });
+    const wall = card("wall", "onr_v1_047_pile-driver", "program", {
+      memoryCost: 1,
+      hostedOn: host.instanceId,
+    });
+    const filler = card(
+      "installer",
+      "onr_v1_075_zetatech-software-installer",
+      "program",
+      { memoryCost: 1 },
+    );
+    const target = card("target", "onr_v1_016_cyfermaster", "program", {
+      memoryCost: 1,
+    });
+    const gap = coverageGap("wall-gap", "breaker_wall", "remote_1", "P2");
+    const result = assessShellTradersRigReplacement({
+      input: runnerInput([], {
+        rig: [host, wall, filler],
+        memoryUsed: 2,
+        memoryLimit: 2,
+      }),
+      targetCard: target,
+      targetRoles: ["breaker_gate"],
+      targetValue: 500,
+      targetMemoryCost: 1,
+      freeMemory: 0,
+      coverageGaps: [gap],
+      coverageBinding: undefined,
+    });
+    expect(result).toMatchObject({
+      status: "available",
+      selectedProgramInstanceIds: [filler.instanceId],
+      freedMemory: 1,
+    });
+    const withoutFiller = assessShellTradersRigReplacement({
+      input: runnerInput([], {
+        rig: [host, wall],
+        memoryUsed: 1,
+        memoryLimit: 1,
+      }),
+      targetCard: target,
+      targetRoles: ["breaker_gate"],
+      targetValue: 500,
+      targetMemoryCost: 1,
+      freeMemory: 0,
+      coverageGaps: [gap],
+      coverageBinding: undefined,
+    });
+    expect(withoutFiller).toMatchObject({
+      status: "harmful",
+      selectedProgramInstanceIds: [host.instanceId],
+      freedMemory: 1,
+    });
+    expect(withoutFiller.displacedValue).toBeGreaterThanOrEqual(1000);
+  });
+});

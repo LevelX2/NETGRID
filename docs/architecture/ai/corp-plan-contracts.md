@@ -1165,6 +1165,25 @@ Evidence und Assessment müssen aus derselben ausgewählten Prioritätsklasse
 und Parentbindung stammen; ein planfremder Action-Score darf diese Delegation
 nicht nachträglich verändern.
 
+Die Defense-Zuglinie transportiert die Bindung ihres aktuell ausführbaren
+Providerknotens ausdrücklich als `supportBinding`: Parent-Planinstanz und
+Need müssen beim Zulassen einer aktuellen Route sowie bei ihrer späteren
+Spezialisierung exakt mit dieser Route übereinstimmen. Ein servergebundener
+Step verlangt außerdem dieselbe aktuelle Zielserver-ID. Die gemeinsam
+verwendete globale Defense-Portfolio-ID erlaubt keine Übernahme einer
+sachfremden Linie unter einem anderen Score-Parent. Ein vorgeschalteter
+Economy-Provider trägt seine eigene exakte Defense-/Funding-Bindung; eine
+unabhängige globale Defense-Linie bleibt unabhängig. Nicht passende Linien
+werden nicht in diese Route aufgenommen und behalten nur ihre tatsächlich
+zulässige eigene Autorität.
+
+Eine eigenständige dringliche Defense-Route behält dabei auch ihre eigene
+Prioritätsklasse. Die identische Draw-Action darf beispielsweise nicht die
+niedrigere Klasse eines fremden Remote-Score-Supports erben und deshalb
+hinter einen Wirtschaftsaufbau verschoben werden. Andere aktuelle
+Wirtschaftsheads bleiben mit ihrem eigenen Quell-Owner zugelassen; ihre
+Admission ist von der Auswahl gegenüber der dringlichen Route zu trennen.
+
 Auch begrenztes Score-Protection-Staging erhält die bereits bekannte
 Central-Rezreserve. Die Defense-Zulassung und die Prüfung eines ausführbaren
 vorbereiteten Score-Parents konsumieren dieselbe aktuelle Zentralallokation

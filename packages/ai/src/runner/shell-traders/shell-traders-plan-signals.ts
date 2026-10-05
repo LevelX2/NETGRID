@@ -13,6 +13,7 @@ import type { RunnerHandDevelopmentEvaluation } from "../hand-development/runner
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 import { shellTradersTargetValue } from "./shell-traders-action";
 import { assessShellTradersAccess } from "./shell-traders-access";
+import { runnerInstalledProgramTrashLoss } from "../../runtime/runner-installed-program";
 
 const SHELL_TRADERS_DEFINITION_ID = "onr_v1_176_the-shell-traders" as const;
 
@@ -361,27 +362,41 @@ export function assessShellTradersRigReplacement({
         card.instanceId !== targetCard.instanceId,
     )
     .map((card) => {
-      const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
-      const memory = visibleMemoryCost(card);
-      const protectsOtherGap = coverageGaps.some(
-        (gap) =>
-          gap.gapId !== coverageBinding?.gapId &&
-          rolesCoverGap(roles, gap.requiredRole),
+      const loss = runnerInstalledProgramTrashLoss(
+        input,
+        card,
+        visibleMemoryCost,
       );
-      const overlapsTarget = targetRoles.some((role) => roles.includes(role));
-      const sameDefinition =
-        card.definitionId !== undefined &&
-        card.definitionId === targetCard.definitionId;
-      const displacedValue =
-        (protectsOtherGap ? 1_000 : 0) +
-        (sameDefinition ? targetValue + 200 : 0) +
-        (roles.some((role) => role.startsWith("breaker_")) ? 260 : 40) +
-        (overlapsTarget ? -120 : 0);
+      const values = loss.cards.map((lost) => {
+        const roles = rolesForDeckDoctrineCard(lost.definitionId ?? "");
+        const protectsOtherGap = coverageGaps.some(
+          (gap) =>
+            gap.gapId !== coverageBinding?.gapId &&
+            rolesCoverGap(roles, gap.requiredRole),
+        );
+        const overlapsTarget = targetRoles.some((role) => roles.includes(role));
+        const sameDefinition =
+          lost.definitionId !== undefined &&
+          lost.definitionId === targetCard.definitionId;
+        return {
+          protectsOtherGap,
+          displacedValue: Math.max(
+            0,
+            (protectsOtherGap ? 1_000 : 0) +
+              (sameDefinition ? targetValue + 200 : 0) +
+              (roles.some((role) => role.startsWith("breaker_")) ? 260 : 40) +
+              (overlapsTarget ? -120 : 0),
+          ),
+        };
+      });
       return {
         card,
-        memory,
-        displacedValue: Math.max(0, displacedValue),
-        protectsOtherGap,
+        memory: loss.memoryCost,
+        displacedValue: values.reduce(
+          (sum, value) => sum + value.displacedValue,
+          0,
+        ),
+        protectsOtherGap: values.some((value) => value.protectsOtherGap),
       };
     })
     .filter((entry) => entry.memory > 0)
