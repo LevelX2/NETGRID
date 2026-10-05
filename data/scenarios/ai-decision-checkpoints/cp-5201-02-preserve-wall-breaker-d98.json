@@ -8705,9 +8705,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "actionId": "runner.draw_card",
+        "type": "draw_card"
       }
     ],
+    "planExecution": {
+      "acceptablePlanIds": ["plan:runner.defense_and_recovery:runner"],
+      "acceptablePlanKinds": ["runner.defense_and_recovery"],
+      "acceptableCapabilities": ["build_required_hand_buffer"],
+      "requiredAssessmentEvidence": ["runner_incomplete_tag_clear_requires_preserved_hand_buffer"]
+    },
     "forbiddenActions": [
       {
         "type": "play_event",
