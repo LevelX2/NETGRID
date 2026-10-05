@@ -23,6 +23,7 @@ export const CORP_AGENDA_TURN_SLICE_VERSION =
 export type CorpAgendaLineFamily =
   | "pure_rush"
   | "combined_rush"
+  | "score_continuation"
   | "safe_setup"
   | "fund_setup";
 
@@ -107,11 +108,21 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
       ? params.project.openingRush.quote.opportunityKey
       : `agenda:${params.project.projectId}:${params.stateIdentity.sideSafePlanningFingerprint}`;
   const exactAgenda = exactAgendaHead(params.project, params.candidates);
+  const fundingGap =
+    params.project.fundingMilestone?.remainingGap ??
+    params.project.fundingGap ??
+    0;
+  const currentHeadFunded =
+    fundingGap === 0 ||
+    (params.project.phase === "install_agenda" &&
+      params.project.uncertainty?.currentActionScope === "exact_install_only");
   const agenda =
-    params.project.feasible ||
-    params.project.openingRush?.status === "qualified"
+    currentHeadFunded &&
+    (params.project.feasible ||
+      params.project.openingRush?.status === "qualified")
       ? exactAgenda
       : undefined;
+  const installation = params.project.phase === "install_agenda";
 
   const remoteId = params.project.serverId;
   const protectionProvider = boundScoreProtectionProvider(
@@ -161,7 +172,9 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
       ? protectionProvider.signal.projection
       : undefined;
   const combinedActions =
-    agenda && remoteIce && centralIce ? [agenda, remoteIce, centralIce] : [];
+    installation && agenda && remoteIce && centralIce
+      ? [agenda, remoteIce, centralIce]
+      : [];
   const combinedAdvance =
     combinedActions.length > 0 &&
     params.input.playerView.own.clicks >
@@ -195,11 +208,12 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     ...(agenda
       ? [
           createLine(params, {
-            family: "pure_rush",
+            family: installation ? "pure_rush" : "score_continuation",
             opportunityKey,
             current: agenda,
             actions: [agenda],
             projectedAdvance:
+              installation &&
               params.input.playerView.own.clicks > clickCost(agenda),
           }),
         ]
@@ -316,6 +330,9 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     evidenceCodes: [
       `agenda_line_count:${lines.length}`,
       `agenda_pruned_count:${pruned.length}`,
+      ...(!currentHeadFunded && exactAgenda
+        ? ["agenda_slice_current_head_awaits_published_funding"]
+        : []),
       ...(agenda && remoteIce && !combinedExecutable
         ? ["agenda_slice_combined_protection_not_jointly_certified"]
         : []),
@@ -468,7 +485,7 @@ function createLine(
           Math.max(1, params.project.agendaPoints) * 10 +
           (line.projectedAdvance ? 8 : 0);
   const defense =
-    line.family === "fund_setup"
+    line.family === "fund_setup" || line.family === "score_continuation"
       ? 0
       : line.family === "combined_rush"
         ? 25
@@ -542,9 +559,13 @@ function createLine(
           : "score_funding_gap_reduced"
         : line.family === "safe_setup"
           ? "opening_foundation_ready"
-          : line.projectedAdvance
-            ? "agenda_advanced"
-            : "agenda_installed",
+          : line.family === "score_continuation"
+            ? params.project.phase === "score_agenda"
+              ? "agenda_scored"
+              : "agenda_advanced"
+            : line.projectedAdvance
+              ? "agenda_advanced"
+              : "agenda_installed",
     commitment:
       line.family === "safe_setup" || line.family === "fund_setup"
         ? "soft"
@@ -717,9 +738,13 @@ function exactAgendaHead(
 ): ActionSemanticCandidate | undefined {
   return candidates.find(
     (candidate) =>
-      project.phase === "install_agenda" &&
+      ((project.phase === "install_agenda" &&
+        candidate.semanticActionType === "install.card") ||
+        (project.phase === "advance_agenda" &&
+          candidate.semanticActionType === "score.advance_card") ||
+        (project.phase === "score_agenda" &&
+          candidate.semanticActionType === "score.agenda")) &&
       project.actionIds?.includes(candidate.actionId) === true &&
-      candidate.semanticActionType === "install.card" &&
       candidate.sourceCardInstanceId === project.agendaInstanceId &&
       exactCurrentCost(candidate),
   );

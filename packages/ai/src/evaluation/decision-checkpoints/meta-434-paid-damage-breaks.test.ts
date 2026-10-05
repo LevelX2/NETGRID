@@ -5,6 +5,7 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 
 function input() {
   return JSON.parse(
@@ -41,6 +42,30 @@ it("keeps an actually unfunded known path blocked", () => {
     (t) => t.actionId === "runner.start_run.remote_1",
   )!;
   expect(target.pathPassability).not.toBe("reachable");
+});
+
+it("publishes funding rather than Draw when the exact funded free-break path removes all damage", () => {
+  const current = input();
+  const worm = CARD_DEFINITIONS_BY_ID["onr_v1_074_worm"]!;
+  current.playerView.own.rig = current.playerView.own.rig!.map((c) =>
+    c.type === "program"
+      ? {
+          ...c,
+          definitionId: worm.id,
+          title: worm.title,
+          strength: worm.strength!,
+          subtypes: worm.subtypes.slice(),
+        }
+      : c,
+  );
+  current.playerView.own.credits = 13;
+  const target = evaluateRunnerRunTargets({ input: current }).find(
+    (t) => t.actionId === "runner.start_run.remote_1",
+  )!;
+  expect(target.pathCost).toBe(15);
+  expect(target.pathPassability).toBe("blocked_unpayable");
+  expect(target.recommendation).toBe("gain_credits_first");
+  expect(target.routeQuote?.reachability).toBe("no_access");
 });
 
 it("still counts the exact damage left after only two paid damage breaks", () => {

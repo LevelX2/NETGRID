@@ -30,6 +30,7 @@ import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
+  type KnownRezzedIcePathAssessment,
   type VisibleIceRunHazard,
 } from "./visible-run-analysis";
 import { buildRunnerEconomyPosture } from "./runner-economy-posture";
@@ -134,7 +135,8 @@ export function quoteRunnerRunAfterGuaranteedBankCashouts(params: {
       funding.sourcePool !== "finite" ||
       funding.cardsConsumed !== 0 ||
       !(funding.storedCreditsTaken! > 0)
-    ) return undefined;
+    )
+      return undefined;
     sources.add(candidate.sourceCardInstanceId);
     const result = assessRunnerRunAfterGuaranteedFunding({
       input,
@@ -374,16 +376,16 @@ function evaluateRunnerRunTarget(
         status.kind === "run_payment_restriction" &&
         status.restriction === "runner_stealth_bit_payment_sources",
     ) === true;
-  const quoteKnownPath = (allowRandomBreakAttempts = false) =>
+  const quoteKnownPath = (allowRandomBreakAttempts = false, extraFunding = 0) =>
     assessKnownRezzedIcePath(
       projectedServerIce,
       params.input.playerView.own.rig ?? [],
       runnerRunPathCreditBudgetWithVisiblePools(
-        creditsAvailableDuringRun,
+        creditsAvailableDuringRun + extraFunding,
         params.input.playerView.own.rig ?? [],
         {
           excludeStealthCredits: stealthCreditsBlocked,
-          liquidCredits: creditsAfterAction,
+          liquidCredits: creditsAfterAction + extraFunding,
         },
       ),
       server?.root ?? [],
@@ -453,21 +455,18 @@ function evaluateRunnerRunTarget(
     0,
     params.input.playerView.own.gripOrHq.length - runActionGripCost,
   );
-  const visibleLethalIceDamage = runnerVisibleLethalIceDamageAssessment(
-    params.input,
-    projectedServerIce,
-    {
+  const damageForPath = (quotedPath: KnownRezzedIcePathAssessment) =>
+    runnerVisibleLethalIceDamageAssessment(params.input, projectedServerIce, {
       // The known path has already committed access-preserving breaker and
       // encounter costs.  Optional damage avoidance may only spend what is
       // actually left after those commitments.
-      generalCredits: pathBeforeDamageBudget.creditsAfterPath,
-      ...(pathBeforeDamageBudget.paidSubroutineBreaks
-        ? { paidSubroutineBreaks: pathBeforeDamageBudget.paidSubroutineBreaks }
+      generalCredits: quotedPath.creditsAfterPath,
+      ...(quotedPath.paidSubroutineBreaks
+        ? { paidSubroutineBreaks: quotedPath.paidSubroutineBreaks }
         : {}),
-      ...(pathBeforeDamageBudget.fullyBrokenIceInstanceIds
+      ...(quotedPath.fullyBrokenIceInstanceIds
         ? {
-            fullyBrokenIceInstanceIds:
-              pathBeforeDamageBudget.fullyBrokenIceInstanceIds,
+            fullyBrokenIceInstanceIds: quotedPath.fullyBrokenIceInstanceIds,
           }
         : {}),
       runDamagePreventionRemaining: Math.max(
@@ -488,7 +487,25 @@ function evaluateRunnerRunTarget(
             },
           }
         : {}),
-    },
+    });
+  const visibleLethalIceDamage = damageForPath(pathBeforeDamageBudget);
+  // Classify the prerequisite that can remove this exact damage blocker.
+  // This hypothetical quote never authorizes the presently unfunded run.
+  const exactFundingGap = Math.max(
+    0,
+    (pathBeforeDamageBudget.visibleBreakCost ?? 0) - creditsAvailableDuringRun,
+  );
+  const fundedPath =
+    visibleLethalIceDamage &&
+    pathBeforeDamageBudget.unpayableReason === "ice_unaffordable" &&
+    exactFundingGap > 0
+      ? quoteKnownPath(
+          Boolean(probabilisticPath?.canReachAccess),
+          exactFundingGap,
+        )
+      : undefined;
+  const fundingRemovesDamageBlocker = Boolean(
+    fundedPath?.canReachAccess && damageForPath(fundedPath) === undefined,
   );
   const path = knownPathAfterDamageBudget(
     pathBeforeDamageBudget,
@@ -578,13 +595,15 @@ function evaluateRunnerRunTarget(
     // Unpaid damage does not erase an exact, structurally supported break
     // quote. Keep its funding blocker so Coverage does not install the same
     // answer again. The damage assessment still forbids starting this run.
-    pathPassability = visibleLethalIceDamage.evidenceCode.startsWith(
-      "runner_visible_ice_damage_below_required_hand_floor|",
-    )
-      ? "blocked_by_visible_damage_hand_buffer"
-      : basePathPassability === "blocked_unpayable"
-        ? "blocked_unpayable"
-        : "blocked_unbreakable";
+    pathPassability = fundingRemovesDamageBlocker
+      ? "blocked_unpayable"
+      : visibleLethalIceDamage.evidenceCode.startsWith(
+            "runner_visible_ice_damage_below_required_hand_floor|",
+          )
+        ? "blocked_by_visible_damage_hand_buffer"
+        : basePathPassability === "blocked_unpayable"
+          ? "blocked_unpayable"
+          : "blocked_unbreakable";
   }
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,

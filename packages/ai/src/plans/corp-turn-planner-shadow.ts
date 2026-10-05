@@ -909,6 +909,19 @@ function headsForRoute(params: {
     params.route.instance.moduleId,
   );
   if (!action || !moduleCoverage) return [];
+  // A funded future campaign is not a current direct Score head. Respect
+  // the agenda producer's published prerequisite before generic expansion.
+  if (
+    params.route.instance.moduleId === "corp.score_agenda" &&
+    params.agendaSlices.some(
+      ({ projectId, slice }) =>
+        projectId === params.route.instance.dedupeKey &&
+        slice.evidenceCodes.includes(
+          "agenda_slice_current_head_awaits_published_funding",
+        ),
+    )
+  )
+    return [];
   const selectedChoices =
     planBoundCorpDefenseChoices(params.route, action, params.input) ??
     params.selectedChoicesForDecision(params.input, action, params.portfolio);

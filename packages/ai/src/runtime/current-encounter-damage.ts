@@ -49,9 +49,9 @@ export function currentEncounterRequiresDamagePreservingBreak(
   };
   return (
     runnerVisibleLethalIceDamageAssessment(input, [remainingDamageIce], {
-      // Deliberately leaving current damage unbroken. Exact action guards
-      // separately assess payment for pumping and breaking.
-      generalCredits: 0,
+      // Possible free breaks are actions still to perform, not prevention
+      // already applied. The mitigation owner assesses their exact payment.
+      assumeUnbrokenSubroutines: true,
       requiredHandFloor,
     }) !== undefined
   );

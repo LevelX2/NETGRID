@@ -115,6 +115,8 @@ export type RunnerFutureEncounterDamageJackOutAssessment = {
 
 export type RunnerVisibleLethalIceDamageOptions = {
   generalCredits?: number;
+  /** Consequences if the remaining current subroutines are actually allowed to resolve. */
+  assumeUnbrokenSubroutines?: true;
   fullyBrokenIceInstanceIds?: readonly string[];
   paidSubroutineBreaks?: readonly {
     iceInstanceId: string;
@@ -198,6 +200,7 @@ export function runnerVisibleLethalIceDamageAssessment(
         continue;
       }
       const affordableBreak =
+        options.assumeUnbrokenSubroutines !== true &&
         !visibleEncounterBreakingProhibited(input, ice) &&
         rig.some((breaker) => {
           const assessment = creditsToBreakVisibleSubroutinesWithBreaker(

@@ -1588,6 +1588,20 @@ ICE- und Subroutine-ID. Nachgelagerte Schadens- und Handreserveprüfungen
 rechnen diese Wirkungen nicht erneut an. Unbezahlte Subroutinen derselben
 ICE bleiben wirksam; ein Teilbruch bescheinigt keinen vollständigen Bruch.
 
+Eine aktuell unbezahlbare bekannte Route wird zusätzlich mit genau der
+fehlenden Finanzierung gequotet. Entfernt diese finanzierte Folge den Schaden
+durch tatsächliche bezahlbare Breaks, veröffentlicht die aktuelle Route
+einen Finanzierungsbedarf statt eines Handpufferbedarfs. Die hypothetische
+Finanzierung macht den aktuellen Run nicht ausführbar; unvermeidbarer Schaden
+und unabhängige Handreserven bleiben erhalten.
+
+Die Konsequenzprüfung des aktuellen Encounters verwendet ausdrücklich noch
+ungebrochene Subroutinen. Auch ein kostenloser legaler Break wurde vor seiner
+Engine-Ausführung noch nicht durchgeführt. Eine notwendige aktuelle
+Schadensmitigation bleibt deshalb unter dem vorhandenen Run-Owner ausführbar,
+wenn der spätere Zugriffspfad blockiert ist. Die Breakauswahl prüft weiterhin
+konkrete Ziele, Zahlung und die wirklich benötigte Überlebensreserve.
+
 Bei direktem Schaden vor einer späteren Break-Sperre quotiert der Pfaddienst
 beide Fortsetzungen: vollständige Mitigation mit gemeinsam bezahlter
 Encounter-Stärke sowie Zugang mit ausdrücklich verbleibendem Schaden.

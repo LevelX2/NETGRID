@@ -279,11 +279,12 @@ describe("AI decision debug sanitizing", () => {
   });
 
   it.each([
-    "plan_internal_continuation",
-    "higher_priority_plan_available",
+    ["plan_internal_continuation", "combined_rush"],
+    ["higher_priority_plan_available", "combined_rush"],
+    ["plan_internal_continuation", "score_continuation"],
   ] as const)(
-    "keeps side-safe plan authority for %s",
-    (continuationBoundary) => {
+    "keeps side-safe plan authority for %s with %s",
+    (continuationBoundary, agendaFamily) => {
       const continuationStatus =
         continuationBoundary === "plan_internal_continuation"
           ? "retained"
@@ -467,13 +468,13 @@ describe("AI decision debug sanitizing", () => {
             },
             agendaComparison: {
               opportunityKey: "opening-rush:2:agenda-1:remote_1",
-              selectedFamily: "combined_rush",
+              selectedFamily: agendaFamily,
               selectionReason: "best_expected_value",
               randomizationEligible: false,
               lines: [
                 {
                   lineId: "line:combined",
-                  family: "combined_rush",
+                  family: agendaFamily,
                   actionCount: 3,
                   agendaProgress: 55,
                   defense: 25,
@@ -655,6 +656,10 @@ describe("AI decision debug sanitizing", () => {
         ],
         turnPlanning: expect.objectContaining({
           schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
+          agendaComparison: expect.objectContaining({
+            selectedFamily: agendaFamily,
+            lines: [expect.objectContaining({ family: agendaFamily })],
+          }),
           commitment: expect.objectContaining({
             commitmentId: "commitment:corp:turn:4",
             continuation: expect.objectContaining({

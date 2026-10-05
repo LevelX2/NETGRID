@@ -286,76 +286,133 @@ describe("Corp agenda turn-planning vertical slice", () => {
     );
   });
 
-  it("classifies exact bound funding as neither rush nor agenda-install progress", () => {
-    const input = decisionInput();
-    const { openingRush: _openingRush, ...baseProject } = project(2);
-    const fundingMilestone = {
-      kind: "score_credit_milestone",
-      basis: { kind: "score_conversion_floor" },
-      targetCredits: 4,
-      observedCredits: 0,
-      remainingGap: 4,
-      priorityClass: "P4",
-      hardness: "soft",
-      deadline: "multi_turn",
-      releaseCondition: "parent_invalidated_or_higher_priority_preemption",
-    } as const;
-    const blocked = {
-      ...baseProject,
-      feasible: false,
-      fundingMilestone,
-    } satisfies CorpScoreProjectSignal;
-    const parentPlanInstanceId = planInstanceIdForProposal({
-      moduleId: "corp.score_agenda",
-      dedupeKey: blocked.projectId,
-    });
-    const fundingNeed = {
-      kind: "parent_funding",
-      needId: `score-support:${blocked.projectId}`,
-      gap: 4,
-      actionIds: ["economy"],
-      parentPlanInstanceId,
-      parentNeedId: `score-support:${blocked.projectId}`,
-      scoreFundingMilestone: fundingMilestone,
-      delegatedPriorityClass: "P4",
-      urgentForScore: true,
-      evidenceCode: blocked.evidenceCode,
-    } satisfies CorpEconomyNeedSignal;
-
-    const slice = buildSlice(
-      input,
-      blocked,
-      [agendaCandidate(), economyCandidate()],
-      [],
-      [fundingNeed],
-    );
-
-    expect(slice.lines).toEqual([
-      expect.objectContaining({
-        family: "fund_setup",
-        currentActionId: "economy",
+  it.each([false, true])(
+    "keeps the published funding dependency ahead of a parent with feasible=%s",
+    (feasible) => {
+      const input = decisionInput();
+      const { openingRush: _openingRush, ...baseProject } = project(2);
+      const fundingMilestone = {
+        kind: "score_credit_milestone",
+        basis: { kind: "score_conversion_floor" },
+        targetCredits: 4,
+        observedCredits: 0,
+        remainingGap: 4,
+        priorityClass: "P4",
+        hardness: "soft",
+        deadline: "multi_turn",
+        releaseCondition: "parent_invalidated_or_higher_priority_preemption",
+      } as const;
+      const blocked = {
+        ...baseProject,
+        feasible,
+        fundingMilestone,
+      } satisfies CorpScoreProjectSignal;
+      const parentPlanInstanceId = planInstanceIdForProposal({
+        moduleId: "corp.score_agenda",
+        dedupeKey: blocked.projectId,
+      });
+      const fundingNeed = {
+        kind: "parent_funding",
+        needId: `score-support:${blocked.projectId}`,
+        gap: 4,
+        actionIds: ["economy"],
+        parentPlanInstanceId,
         parentNeedId: `score-support:${blocked.projectId}`,
-        providerModuleId: "corp.economy",
-        expectedNeedProgress: "net_funding_gap_reduction",
-        fundingGapBefore: 4,
-        evaluation: expect.objectContaining({
-          agendaProgress: 0,
-          defense: 0,
-          economy: 3,
+        scoreFundingMilestone: fundingMilestone,
+        delegatedPriorityClass: "P4",
+        urgentForScore: true,
+        evidenceCode: blocked.evidenceCode,
+      } satisfies CorpEconomyNeedSignal;
+
+      const slice = buildSlice(
+        input,
+        blocked,
+        [agendaCandidate(), economyCandidate()],
+        [],
+        [fundingNeed],
+      );
+
+      expect(slice.lines).toEqual([
+        expect.objectContaining({
+          family: "fund_setup",
+          currentActionId: "economy",
+          parentNeedId: `score-support:${blocked.projectId}`,
+          providerModuleId: "corp.economy",
+          expectedNeedProgress: "net_funding_gap_reduction",
+          fundingGapBefore: 4,
+          evaluation: expect.objectContaining({
+            agendaProgress: 0,
+            defense: 0,
+            economy: 3,
+          }),
+          campaignQuote: expect.objectContaining({
+            nextMilestoneId: "score_funding_gap_reduced",
+            commitment: "soft",
+          }),
         }),
-        campaignQuote: expect.objectContaining({
-          nextMilestoneId: "score_funding_gap_reduced",
-          commitment: "soft",
+      ]);
+      expect(slice.lines[0]?.valueClaims).toEqual([
+        expect.objectContaining({
+          ownerModuleId: "corp.economy",
+          contributionKind: "funding_gap_reduction",
+          amount: 3,
         }),
-      }),
-    ]);
-    expect(slice.lines[0]?.valueClaims).toEqual([
-      expect.objectContaining({
-        ownerModuleId: "corp.economy",
-        contributionKind: "funding_gap_reduction",
-        amount: 3,
-      }),
-    ]);
+      ]);
+    },
+  );
+
+  it.each([
+    ["advance_agenda", "score.advance_card", "advance_card"],
+    ["score_agenda", "score.agenda", "score_agenda"],
+  ] as const)(
+    "publishes only the exact installed %s head",
+    (phase, semanticActionType, actionType) => {
+      const { openingRush: _openingRush, ...base } = project(2);
+      const current = {
+        ...agendaCandidate(),
+        semanticActionType,
+        actionId: "current-score-head",
+        actionType,
+        costProfile: {
+          ...agendaCandidate().costProfile,
+          clickCost: phase === "score_agenda" ? 0 : 1,
+        },
+      } as ActionSemanticCandidate;
+      const signal = {
+        ...base,
+        phase,
+        feasible: true,
+        fundingGap: 0,
+        actionIds: [current.actionId],
+      } satisfies CorpScoreProjectSignal;
+      const slice = buildSlice(decisionInput(), signal, [current], []);
+      expect(slice.lines).toHaveLength(1);
+      expect(slice.lines[0]).toMatchObject({
+        family: "score_continuation",
+        currentActionId: current.actionId,
+        evaluation: { defense: 0 },
+      });
+      expect(slice.lines[0]!.nodes).toHaveLength(1);
+      expect(slice.campaignDisposition).toBe("continue");
+      expect(slice.selectionReason).not.toBe(
+        "engine_randomized_opening_rush_posture",
+      );
+    },
+  );
+
+  it("preserves the explicit current-install-only scope despite a future funding gap", () => {
+    const { openingRush: _openingRush, ...base } = project(2);
+    const signal = {
+      ...base,
+      feasible: true,
+      fundingGap: 19,
+      uncertainty: { currentActionScope: "exact_install_only" },
+    } as CorpScoreProjectSignal;
+    const slice = buildSlice(decisionInput(), signal, [agendaCandidate()], []);
+    expect(slice.lines[0]).toMatchObject({
+      family: "pure_rush",
+      currentActionId: "install-agenda",
+    });
   });
 
   it("does not retain fund setup after the published score gap is closed", () => {

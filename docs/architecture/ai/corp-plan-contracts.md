@@ -246,6 +246,21 @@ Prioritätsklasse P1 bis P4 und Evidence. Ein von ihr angeforderter Defense-
 oder Economy-Support bindet seinerseits exakt diese Score-Planinstanz als
 `parentInstanceId`.
 
+Die Zugplanung materialisiert bei installierten Agenden den aktuell legalen,
+exakt gebundenen Advance- oder Score-Step als `score_continuation`. Eine
+unbekannte Folgeaktion wird dabei nicht vorweggenommen. Ein veröffentlichter
+Finanzierungsbedarf sperrt den direkten Agenda-Head bereits beim Produzenten;
+derselbe Head darf nicht als generische Route erneut zugelassen werden.
+Der gebundene Economy-Support bleibt ausführbar. Der ausdrücklich gequotete
+Scope `exact_install_only` bleibt eine eigenständige Installationszulassung.
+
+Die bekannte Score-Schutzprojektion durchläuft auch gerezzte ICE ohne eigene
+ETR-Subroutine. Eine erzeugte Break-Sperre gilt für den nächsten tatsächlichen
+gerezzten Encounter; ungerezzte ICE verbraucht sie nicht. Die Alternative,
+die Quellsubroutine zu brechen, bezahlt deren vollständige Strength- und
+Breakkosten zusammen mit vorhandenen ETR-Breaks. Ein hoher Creditstand allein
+zertifiziert keinen Zugriff durch eine ungebrochene Sperre.
+
 Die Kosten des aktuellen Advance-Steps stammen aus der konkreten
 Engine-LegalAction beziehungsweise einem exakt an StateVersion,
 Agenda-Instanz und Action gebundenen Engine-Quote. Die vollständigen

@@ -258,11 +258,20 @@ type AccessPathState = {
   probability: Rational;
   breakerStrengths: Map<string, number>;
   randomBreaks: RandomBreakChoice[];
+  nextEncounterCannotBreak: boolean;
 };
 
 type SupportedIce = Readonly<{
   card: CorpScoreProtectionIceInput;
   endTheRunCount: number;
+  endTheRunSubroutines: readonly (
+    | SubroutineDefinition
+    | VisibleEffectiveSubroutine
+  )[];
+  nextBreakLockSubroutines: readonly (
+    | SubroutineDefinition
+    | VisibleEffectiveSubroutine
+  )[];
   effectiveStrength: number;
   effectiveSubtypes: readonly string[];
   additionalBreakCostPerSubroutine: number;
@@ -471,37 +480,61 @@ export function assessCorpScoreProtection(
           .map((card) => [card.instanceId, card.strength!]),
       ),
       randomBreaks: [],
+      nextEncounterCannotBreak: false,
     },
   ];
 
   for (const ice of supportedIce) {
-    if (ice.endTheRunCount <= 0) continue;
     const nextStates: AccessPathState[] = [];
     for (const state of states) {
-      const breakStates = accessPreservingBreakStates({
-        state,
-        ice,
-        runnerRig,
-      });
-      if (breakStates.knowledge === "unknown") {
-        return unknownAssessment(
-          input.maximumRunnerAccessSuccessProbability,
-          breakStates.reason,
-          [
-            "scoreProtectionKnown:false",
-            `${breakStates.reason}:true`,
-            `iceInstanceId:${ice.card.instanceId}`,
-            `iceDefinitionId:${ice.card.definitionId}`,
-          ],
-        );
-      }
-      if (breakStates.states.length === 0) {
+      // The Engine consumes a pending lock at the next actual rezzed
+      // encounter, including non-ETR ICE. Unrezzed skipped ICE is absent here.
+      const enteringState = { ...state, nextEncounterCannotBreak: false };
+      if (state.nextEncounterCannotBreak) {
         nextStates.push({
-          ...state,
-          probability: ZERO,
+          ...enteringState,
+          probability: ice.endTheRunCount > 0 ? ZERO : state.probability,
+          nextEncounterCannotBreak: ice.nextBreakLockSubroutines.length > 0,
         });
-      } else {
-        nextStates.push(...breakStates.states);
+        continue;
+      }
+      // Either allow this ICE's next-encounter lock, or pay its exact
+      // subroutine quote as well as every current hard ETR.
+      for (const breakLock of ice.nextBreakLockSubroutines.length > 0
+        ? [false, true]
+        : [false]) {
+        const breakStates = accessPreservingBreakStates({
+          state: enteringState,
+          ice,
+          runnerRig,
+          requiredSubroutines: [
+            ...ice.endTheRunSubroutines,
+            ...(breakLock ? ice.nextBreakLockSubroutines : []),
+          ],
+        });
+        if (breakStates.knowledge === "unknown") {
+          return unknownAssessment(
+            input.maximumRunnerAccessSuccessProbability,
+            breakStates.reason,
+            [
+              "scoreProtectionKnown:false",
+              `${breakStates.reason}:true`,
+              `iceInstanceId:${ice.card.instanceId}`,
+              `iceDefinitionId:${ice.card.definitionId}`,
+            ],
+          );
+        }
+        const branches =
+          breakStates.states.length > 0
+            ? breakStates.states
+            : [{ ...enteringState, probability: ZERO }];
+        nextStates.push(
+          ...branches.map((branch) => ({
+            ...branch,
+            nextEncounterCannotBreak:
+              !breakLock && ice.nextBreakLockSubroutines.length > 0,
+          })),
+        );
       }
     }
     states = pruneDominatedStates(nextStates);
@@ -642,6 +675,8 @@ function readSupportedIce(card: CorpScoreProtectionIceInput): IceReadResult {
     ice: {
       card,
       endTheRunCount: subroutines.filter(isHardEndTheRunSubroutine).length,
+      endTheRunSubroutines: subroutines.filter(isHardEndTheRunSubroutine),
+      nextBreakLockSubroutines: subroutines.filter(isNextEncounterBreakLock),
       effectiveStrength:
         quote?.encounterStrength ?? quote?.effectiveStrength ?? card.strength!,
       effectiveSubtypes: card.subtypes!,
@@ -710,7 +745,11 @@ function catalogMechanicsContradictDirectSubroutines(
 function supportedSubroutine(
   subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
 ): boolean {
-  if (isHardEndTheRunSubroutine(subroutine)) return true;
+  if (
+    isHardEndTheRunSubroutine(subroutine) ||
+    isNextEncounterBreakLock(subroutine)
+  )
+    return true;
   if (subroutine.type === "initiate_trace") {
     const effect = subroutine.traceSuccessEffect;
     if (effect === undefined) return false;
@@ -752,8 +791,6 @@ const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
   "set_run_break_subroutine_cost_modifier",
   "set_run_future_strength_bonus",
   "set_next_encounter_unless_fully_break_damage",
-  "set_next_encounter_lock",
-  "set_next_encounter_no_break_subroutines",
   "set_run_jack_out_lock",
   "set_runner_run_lock_actions",
   "set_runner_forgo_next_action",
@@ -773,10 +810,23 @@ function isHardEndTheRunSubroutine(
   );
 }
 
+function isNextEncounterBreakLock(
+  subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+): boolean {
+  return (
+    subroutine.type === "set_next_encounter_lock" ||
+    subroutine.type === "set_next_encounter_no_break_subroutines"
+  );
+}
+
 function accessPreservingBreakStates(params: {
   state: AccessPathState;
   ice: SupportedIce;
   runnerRig: readonly VisibleCard[];
+  requiredSubroutines: readonly (
+    | SubroutineDefinition
+    | VisibleEffectiveSubroutine
+  )[];
 }):
   | Readonly<{ knowledge: "known"; states: AccessPathState[] }>
   | Readonly<{
@@ -786,6 +836,9 @@ function accessPreservingBreakStates(params: {
         | "unsupported_breaker_combination"
         | "unsupported_random_break_strategy";
     }> {
+  if (params.requiredSubroutines.length === 0) {
+    return { knowledge: "known", states: [params.state] };
+  }
   const breakOptions: Array<
     Readonly<{
       assessment: BreakAssessment;
@@ -801,12 +854,10 @@ function accessPreservingBreakStates(params: {
     const assessment = creditsToBreakEndTheRunSubroutinesWithBreaker(
       breaker,
       effectiveIce,
-      params.ice.endTheRunCount,
+      params.requiredSubroutines.length,
       params.state.breakerStrengths.get(breaker.instanceId),
       params.ice.additionalBreakCostPerSubroutine,
-      params.ice.card.effectiveRunQuote?.subroutines.filter(
-        isHardEndTheRunSubroutine,
-      ),
+      params.requiredSubroutines,
       true,
     );
     if (
@@ -823,6 +874,7 @@ function accessPreservingBreakStates(params: {
       riskProfile: randomBreakRiskProfileForEncounter({
         breaker,
         ice: params.ice,
+        requiredSubroutines: params.requiredSubroutines,
         breakerStrength:
           params.state.breakerStrengths.get(breaker.instanceId) ??
           breaker.strength ??
@@ -844,7 +896,7 @@ function accessPreservingBreakStates(params: {
     (option) =>
       option.assessment.cost === 0 && option.riskProfile === undefined,
   );
-  if (params.ice.endTheRunCount > 1) {
+  if (params.requiredSubroutines.length > 1) {
     const partialBreakerOptions = params.runnerRig
       .map((breaker) =>
         creditsToBreakEndTheRunSubroutinesWithBreaker(
@@ -853,9 +905,7 @@ function accessPreservingBreakStates(params: {
           1,
           params.state.breakerStrengths.get(breaker.instanceId),
           params.ice.additionalBreakCostPerSubroutine,
-          params.ice.card.effectiveRunQuote?.subroutines.filter(
-            isHardEndTheRunSubroutine,
-          ),
+          params.requiredSubroutines,
           true,
         ),
       )
@@ -881,7 +931,7 @@ function accessPreservingBreakStates(params: {
     }
   }
   if (
-    params.ice.endTheRunCount > 1 &&
+    params.requiredSubroutines.length > 1 &&
     breakOptions.length > 1 &&
     randomOptions.length > 0 &&
     !hasMultipleIndependentRandomOptions &&
@@ -908,6 +958,7 @@ function accessPreservingBreakStates(params: {
       );
     }
     states.push({
+      nextEncounterCannotBreak: params.state.nextEncounterCannotBreak,
       credits: nextCreditBudget.credits,
       creditBudget: nextCreditBudget,
       probability: params.state.probability,
@@ -919,6 +970,7 @@ function accessPreservingBreakStates(params: {
     const randomState = independentlyCombinedRandomBreakState({
       state: params.state,
       ice: params.ice,
+      requiredSubroutineCount: params.requiredSubroutines.length,
       randomOptions,
     });
     if (randomState.knowledge === "unknown") return randomState;
@@ -931,6 +983,10 @@ function randomBreakRiskProfileForEncounter(params: {
   breaker: VisibleCard;
   ice: SupportedIce;
   breakerStrength: number;
+  requiredSubroutines: readonly (
+    | SubroutineDefinition
+    | VisibleEffectiveSubroutine
+  )[];
 }): EngineRandomBreakRiskProfile | undefined {
   if (!params.breaker.definitionId || !params.ice.card.definitionId)
     return undefined;
@@ -950,13 +1006,7 @@ function randomBreakRiskProfileForEncounter(params: {
     iceDefinitionId: params.ice.card.definitionId,
     iceInstanceId: params.ice.card.instanceId,
     iceSubtypes: params.ice.effectiveSubtypes,
-    ...(params.ice.card.effectiveRunQuote
-      ? {
-          subroutines: params.ice.card.effectiveRunQuote.subroutines.filter(
-            isHardEndTheRunSubroutine,
-          ),
-        }
-      : {}),
+    subroutines: params.requiredSubroutines,
   });
   const randomAttempt = quote?.breakOptions
     .flatMap((option) => option.consequences)
@@ -969,6 +1019,7 @@ function randomBreakRiskProfileForEncounter(params: {
 function independentlyCombinedRandomBreakState(params: {
   state: AccessPathState;
   ice: SupportedIce;
+  requiredSubroutineCount: number;
   randomOptions: readonly Readonly<{
     assessment: BreakAssessment;
     riskProfile: EngineRandomBreakRiskProfile;
@@ -1015,22 +1066,23 @@ function independentlyCombinedRandomBreakState(params: {
       iceDefinitionId: params.ice.card.definitionId!,
       breakerInstanceId: assessment.breakerInstanceId,
       breakerDefinitionId: assessment.breakerDefinitionId,
-      attempts: params.ice.endTheRunCount,
+      attempts: params.requiredSubroutineCount,
       successProbabilityPerAttempt: perAttempt,
       combinedSuccessProbability: powerRational(
         perAttempt,
-        params.ice.endTheRunCount,
+        params.requiredSubroutineCount,
       ),
     });
   }
   const successPerSubroutine = subtractRational(ONE, allAttemptsFail);
   const combined = powerRational(
     successPerSubroutine,
-    params.ice.endTheRunCount,
+    params.requiredSubroutineCount,
   );
   return {
     knowledge: "known",
     state: {
+      nextEncounterCannotBreak: params.state.nextEncounterCannotBreak,
       credits: params.state.credits,
       creditBudget: cloneRunnerRunPathCreditBudget(params.state.creditBudget),
       probability: multiplyRational(params.state.probability, combined),
@@ -1064,7 +1116,7 @@ function pruneDominatedStates(
           ([breakerInstanceId, credits]) => `${breakerInstanceId}:${credits}`,
         ),
     ].join(",");
-    const key = `${budgetKey}|${strengthKey}`;
+    const key = `${budgetKey}|${strengthKey}|${state.nextEncounterCannotBreak}`;
     const current = bestByResources.get(key);
     if (!current || accessPathIsBetter(state, current)) {
       bestByResources.set(key, state);

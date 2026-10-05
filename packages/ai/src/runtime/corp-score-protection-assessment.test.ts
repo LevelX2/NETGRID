@@ -126,6 +126,89 @@ describe("assessCorpScoreProtection", () => {
     },
   );
 
+  it.each([
+    [11, 0, 11],
+    [12, 1, 0],
+  ])(
+    "pays the next-encounter lock before an inner ETR from %s credits",
+    (credits, access, remaining) => {
+      const assessment = assessCorpScoreProtection({
+        serverIce: [
+          ice("inner", "onr_v1_270_sleeper"),
+          ice("outer", "onr_v1_268_shock-r"),
+        ],
+        runnerRig: [runnerProgram("krash", "onr_v1_039_krash")],
+        runnerCredits: credits,
+        maximumRunnerAccessSuccessProbability: QUARTER,
+      });
+      expect(assessment).toMatchObject({
+        knowledge: "known",
+        runnerAccessSuccessProbability: { numerator: access, denominator: 1 },
+      });
+      if (access && assessment.knowledge === "known")
+        expect(assessment.runnerCreditsRemainingOnBestAccessPath).toBe(
+          remaining,
+        );
+    },
+  );
+
+  it("blocks staged Worm access when outer Shock prevents the next hard ETR break", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [
+        ice("inner", "onr_v1_278_wall-of-ice"),
+        ice("outer", "onr_v1_268_shock-r"),
+      ],
+      runnerRig: [runnerProgram("worm", "onr_v1_074_worm")],
+      runnerCredits: 40,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      protectsScore: true,
+    });
+  });
+
+  it.each([false, true])(
+    "consumes the lock only at a real rezzed encounter (intervening rezzed=%s)",
+    (rezzed) => {
+      const assessment = assessCorpScoreProtection({
+        serverIce: [
+          ice("inner", "onr_v1_270_sleeper"),
+          { ...ice("middle", "onr_v1_249_hunter"), rezzed },
+          ice("outer", "onr_v1_268_shock-r"),
+        ],
+        runnerRig: [runnerProgram("krash", "onr_v1_039_krash")],
+        runnerCredits: 4,
+        maximumRunnerAccessSuccessProbability: QUARTER,
+      });
+      expect(assessment).toMatchObject({
+        knowledge: "known",
+        runnerAccessSuccessProbability: {
+          numerator: rezzed ? 1 : 0,
+          denominator: 1,
+        },
+      });
+    },
+  );
+
+  it("relays a new lock through a locked Shock without inventing a break", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [
+        ice("inner", "onr_v1_270_sleeper"),
+        ice("middle", "onr_v1_268_shock-r"),
+        ice("outer", "onr_v1_268_shock-r"),
+      ],
+      runnerRig: [runnerProgram("krash", "onr_v1_039_krash")],
+      runnerCredits: 4,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+    });
+  });
+
   it("multiplies two necessary Blink successes to exactly 1/4", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [
