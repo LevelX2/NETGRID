@@ -1421,6 +1421,15 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Öffentlicher Zugriffsschaden bindet seine Quelle über die tatsächlich
+aufgedeckte `cardDefinitionId` des `access_card`-Ereignisses und dessen
+ausdrückliches `damageResolved`. Der Runner-Actor macht den so aufgelösten
+Schaden einer bekannten Corp-Karte nicht zu Selbstschaden. Eine aufgedeckte
+Karte ohne Schadensauflösung oder eine Karten-ID in einer anderen Action
+begründet diese Quellenbindung nicht. Vollständig verhinderter Schaden zählt
+als Versuch, nicht als erlittenes Ereignis; Defense und Run-Owner konsumieren
+denselben korrigierten Fact.
+
 Liegt ein gebundener Handpufferschritt hinter einer früheren Defense-Phase,
 klassifiziert Defense seine derzeit nicht materialisierte Action ausdrücklich
 als zurückgestellt. Der Handbedarf bleibt erhalten und wird nach der früheren

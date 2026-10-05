@@ -110,6 +110,77 @@ describe("runner damage threat model v2 red evidence", () => {
     });
   });
 
+  it.each(["onr_v1_340_setup", "onr_proteus_004_fetal-ai"])(
+    "attributes canonical access damage to the publicly accessed Corp card %s",
+    (cardDefinitionId) => {
+      const assessment = runnerDamageThreatAssessment(
+        input({
+          handCount: 1,
+          turnSerial: 8,
+          events: [event("canonical-access", 31, 8, {
+            actor: "runner",
+            actionType: "access_card",
+            cardDefinitionId,
+            damageResolved: true,
+            damageAmount: 2,
+            damageType: "net",
+          })],
+        }),
+      );
+      expect(assessment).toMatchObject({
+        deckBelief: { level: "confirmed", resolvedCorpDamageEvents: 1 },
+        flatlineRisk: {
+          level: "critical",
+          recentResolvedCorpDamageEvents: 1,
+          recentResolvedCorpDamageAmount: 2,
+          recommendedHandFloor: 4,
+          criticalRunSuppression: true,
+        },
+      });
+    },
+  );
+
+  it("counts fully prevented canonical access damage as an attempt", () => {
+    const assessment = runnerDamageThreatAssessment(input({
+      handCount: 3,
+      turnSerial: 8,
+      events: [event("prevented-access", 31, 8, {
+        actor: "runner",
+        actionType: "access_card",
+        cardDefinitionId: "onr_v1_340_setup",
+        damageResolved: true,
+        damageAmount: 0,
+        damageType: "net",
+      })],
+    }));
+    expect(assessment).toMatchObject({
+      deckBelief: { resolvedCorpDamageEvents: 0, attemptedCorpDamageEvents: 1 },
+      flatlineRisk: { recentResolvedCorpDamageEvents: 0 },
+    });
+  });
+
+  it.each([
+    { actionType: "trash_accessed_card", cardDefinitionId: "onr_v1_340_setup", damageResolved: true },
+    { actionType: "access_card", cardDefinitionId: "onr_v1_340_setup", damageResolved: false },
+    { actionType: "access_card", cardDefinitionId: "unknown-damage-source", damageResolved: true },
+    { actionType: "access_card", cardDefinitionId: "onr_v1_093_if-you-want-it-done-right", damageResolved: true },
+  ])("does not infer a Corp damage binding from $actionType / $cardDefinitionId / $damageResolved", (payload) => {
+    const assessment = runnerDamageThreatAssessment(input({
+      handCount: 1,
+      turnSerial: 8,
+      events: [event("unbound-damage", 31, 8, {
+        ...payload,
+        actor: "runner",
+        damageAmount: 2,
+        damageType: "net",
+      })],
+    }));
+    expect(assessment).toMatchObject({
+      deckBelief: { resolvedCorpDamageEvents: 0, attemptedCorpDamageEvents: 0 },
+      flatlineRisk: { recentResolvedCorpDamageEvents: 0 },
+    });
+  });
+
   it("does not promote an unprofiled generic trace event to damage belief", () => {
     const assessment = runnerDamageThreatAssessment(
       input({

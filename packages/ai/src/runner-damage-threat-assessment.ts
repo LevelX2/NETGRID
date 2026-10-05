@@ -1175,10 +1175,19 @@ function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
       typeof effect.sourceDefinitionId === "string" &&
       AI_HINTS.get(effect.sourceDefinitionId)?.side === "corp",
   );
+  // Access-triggered damage is bound to the publicly accessed card, not
+  // the Runner actor who submitted access_card. This canonical binding
+  // applies only to an explicitly resolved access damage event.
+  const accessedCorpDamageSource =
+    event.type === "access_card" &&
+    payload.damageResolved === true &&
+    typeof payload.cardDefinitionId === "string" &&
+    AI_HINTS.get(payload.cardDefinitionId)?.side === "corp";
   if (
     payload.actor !== "corp" &&
     payload.actor !== undefined &&
     !resolvedCorpDamageSource &&
+    !accessedCorpDamageSource &&
     !corpSource
   ) {
     return false;
