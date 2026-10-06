@@ -3429,6 +3429,7 @@ function buildRunnerDomain(
       coverageGaps,
       handRotationAssessment,
       liquiditySaturationOptionDevelopment,
+      economy,
     ),
   ];
   const { runWindows } = buildRunnerRunWindowSignals({

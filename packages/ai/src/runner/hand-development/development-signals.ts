@@ -23,6 +23,7 @@ import { runnerEffectsProvideNonNoisyBreakerCredits } from "../../runner-canonic
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
 
 import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
+import type { RunnerEconomyPosture } from "../../runner-run-target-evaluation";
 
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 
@@ -769,12 +770,24 @@ export function runnerGenericDrawDevelopmentSignals(
   coverageGaps: RunnerCorePlanDomain["coverageGaps"],
   handRotation: RunnerHandRotationAssessment,
   liquiditySaturation: RunnerLiquiditySaturationOptionDevelopment,
+  economy: RunnerEconomyPosture,
 ): RunnerPlanDomain["developments"] {
   if (!handRotation.genericDrawAdmissible && !liquiditySaturation.admissible)
     return [];
   const fullHandHasKnownRotationTarget =
     handRotation.handCapacityGap <= 0 &&
     handRotation.knownRotationTargetCardInstanceIds.length > 0;
+  const fundedDeadHandRotation =
+    fullHandHasKnownRotationTarget &&
+    handRotation.knownRotationTargetCardInstanceIds.length ===
+      handRotation.handSize &&
+    handRotation.retentionProtectedCardInstanceIds.length === 0 &&
+    input.playerView.own.credits >=
+      Math.max(
+        economy.minimumCreditFloor,
+        economy.creditReservePolicy.developmentReserve,
+        economy.creditReservePolicy.emergencyReserve,
+      );
   const drawCandidates = candidates.filter(
     (candidate) =>
       (candidate.actionType === "draw_card" &&
@@ -824,7 +837,8 @@ export function runnerGenericDrawDevelopmentSignals(
         ),
       ],
       actionIds: drawCandidates.map((candidate) => candidate.actionId),
-      priorityClass: liquiditySaturation.admissible ? "P5" : "P6",
+      priorityClass:
+        liquiditySaturation.admissible || fundedDeadHandRotation ? "P5" : "P6",
       value: liquiditySaturation.admissible
         ? 1
         : (fullHandHasKnownRotationTarget
@@ -855,7 +869,14 @@ export function runnerGenericDrawDevelopmentSignals(
                 ),
               ],
             }
-          : { evidenceCodes: [...handRotation.evidenceCodes] }),
+          : {
+              evidenceCodes: [
+                ...handRotation.evidenceCodes,
+                ...(fundedDeadHandRotation
+                  ? ["runner_funded_dead_hand_rotation_before_optional_reserve"]
+                  : []),
+              ],
+            }),
     },
   ];
 }
