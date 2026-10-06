@@ -373,6 +373,19 @@ Es entsteht keine zusätzliche Runwahl oder Ausnahme im Choice-Resolver.
 Die Letztchancen-Ausnahme betrifft ausschließlich den normalen Schadenspuffer.
 Eine zusätzlich bekannte ETR-Sperre ohne passende Coverage oder eine offene
 Finanzierungslücke bleibt auch bei diesem terminalen Contest verbindlich.
+Die Finanzierung umfasst neben Event- und ICE-Kosten auch die anschließende
+Agendaübernahme aus frei verfügbaren Credits. Die Engine liefert hierfür
+eine an Fort und StateVersion gebundene öffentliche Mindestquote, auch bei
+unbekanntem Root; sie enthält ausschließlich öffentliche aktive oder für den
+laufenden Zugriff persistierte Steal-Modifikatoren. Null wird ausdrücklich
+gequotet. Eine bekannte Agenda benötigt ihre vollständige, zusätzlich an ihre
+Instanz gebundene Quote. Die AI-DTO erhält beide Verträge; fehlende, veraltete
+oder widersprüchliche Quotes zertifizieren keinen bezahlbaren Agenda-Contest.
+Historische Ablehnungen ersetzen keine aktuelle Kostenquote. Der Fehlbetrag
+geht an den bestehenden Funding-Owner und sperrt auch eine gezielte
+Bypass-Vorbereitung für dieselbe Agenda. Bekannte Trash-Ziele und gequotete
+Access-Replacements behalten ihre eigenen Zugriffsverträge.
+
 Die Quote zertifiziert `blockedOnlyByDamage` erst nach Prüfung aller bekannten
 Folge-Encounters. Der allgemeine Grund `harmful_unbroken_run_effect` genügt
 nicht: Eine Break-/Jack-out-Sperre ist kein bloßer Handpufferverstoß, und eine
@@ -1031,6 +1044,15 @@ Coverage-Kindplan kann unabhängig davon einen bewusst bewerteten
 Cleanup-Tausch eingehen; Owner, Parent-Need und Draw-Action bleiben dabei exakt
 gebunden. Der tatsächliche Draw ist eine private Beobachtungsgrenze und führt
 danach zur Neuplanung statt zu einer vorweggenommenen Folgekarte.
+
+Besteht die volle Hand vollständig aus solchen bekannten Rotationszielen und
+enthält keine geschützte Karte, darf die Handentwicklung vor einer optionalen
+Economy-Reserve auf P5 wechseln. Voraussetzung sind bereits gedeckter
+Mindestkreditboden, Entwicklungsreserve und Notfallreserve. Eine gemischte
+oder strategisch brauchbare Hand und eine offene dieser Finanzierungsgrenzen
+behalten die bisherige Priorität; ein leerer Stack erzeugt keinen Draw.
+Dieser Nachweis erhöht ausschließlich die Priorität der gebundenen
+Handrotation und gibt keinen allgemeinen Draw-Bonus.
 
 Ein sofortiges Draw-Ereignis erhält keinen zusätzlichen allgemeinen
 Kartenentwicklungsplan allein aufgrund seiner Draw-/Search-Rolle, wenn sein
@@ -2308,6 +2330,24 @@ kumulativen Schadens-/Handreservennachweis. Ein Break positiver aktueller
 Schadenssubroutinen darf diese Reserve auch schützen, wenn der spätere
 Zugriffspfad nicht mehr bezahlbar ist. Das entlastet weder einen alleinigen
 Folge-ICE-Lock noch einen Schadensbreak oberhalb der gebundenen Reserve.
+
+Bei einem nachweislich nicht mehr konvertierbaren bekannten Run darf derselbe
+Encounter-Owner zusätzlich bezahlbaren aktuellen Core-Schaden begrenzen,
+auch wenn der gebundene Handboden bereits eingehalten wird. Dazu quotiert er
+die erforderlichen Pump-Schritte und bezahlbaren Schadensbreaks gemeinsam,
+vergleicht die tatsächlich verbleibenden Verluste bis zum ETR und wählt bei
+gleicher Wirkung die günstigere Folge. Eine unbezahlbare Vorbereitung wird
+nicht begonnen. Eine finanzierte Zugriffsroute, unbekannte Zahlungsalternativen
+und eigenständige Vollbruchpflichten erhalten diese Ausnahme nicht. Reale
+Engine-Folgen aus dem D161-Kontext von `match_28287bd1967ac166` prüfen volle,
+teilweise und unbezahlbare Mitigation sowie den finanzierten Gegenfall.
+
+Die öffentliche exakte `pendingAutoPassIceId`-Bindung bleibt durch die AI-DTO
+erhalten. Access- und Pump-Restpfade verwenden die gemeinsame verbleibende
+ICE-Projektion und quotieren diese bereits gebundene Auto-Pass-Schicht nicht
+erneut. Eine fehlende Bindung oder eine andere ICE entfernt keine innere
+Schicht. D102 desselben Matches und die entsprechenden Gegenfälle prüfen
+den Übergang beim bestehenden Run-Owner.
 
 Blockiert die zunächst günstigere aktuelle ETR-Antwort den bekannten
 Restpfad durch kumulierten Schaden, quotiert derselbe Pump-Owner zusätzlich
