@@ -10,13 +10,27 @@ import {
   spendRunnerEncounterActionCost,
 } from "./runner-encounter-credit-budget";
 import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
-import { creditsToBreakVisibleSubroutinesWithBreaker } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  creditsToBreakVisibleSubroutinesWithBreaker,
+} from "../visible-run-analysis";
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
+import { runnerAgendaStealCreditRequirement } from "../run-analysis/runner-agenda-steal-cost";
+import {
+  runnerRigAfterEncounter,
+  runnerRigAfterPumpAndEncounter,
+} from "./runner-rig-after-encounter";
+import {
+  isVisibleHardEndRunSubroutine,
+  isVisiblePayEndRunSubroutine,
+} from "../run-analysis/visible-subroutine-semantics";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { projectVisibleDamagePrevention } from "../run-analysis/visible-damage-prevention";
 import {
   currentEncounteredIceCard,
   currentEncounterRequiresFullBreak,
   currentEncounterUnbrokenSubroutineIndexes,
+  currentRunRemainingIce,
 } from "./current-encounter";
 import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
 import { isUnacceptableImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
@@ -83,6 +97,7 @@ export function currentEncounterMitigationForAction(
     cost: pumpCost,
   });
   if (!payment.affordable) return undefined;
+  const protectOptionalCore = optionalCoreProtectionBeforeTermination();
   const mitigation = currentEncounterMitigationForBreaker(
     input,
     breaker,
@@ -95,6 +110,7 @@ export function currentEncounterMitigationForAction(
         cost,
       }).affordable,
     requiredHandFloor,
+    protectOptionalCore,
   );
   if (!mitigation) return undefined;
   const supportsCurrentAction =
@@ -108,6 +124,97 @@ export function currentEncounterMitigationForAction(
     pumpCost,
     supportsCurrentAction,
   };
+
+  function optionalCoreProtectionBeforeTermination(): boolean {
+    if (
+      !ice?.effectiveRunQuote ||
+      !breaker?.definitionId ||
+      typeof breaker.strength !== "number"
+    )
+      return false;
+    const remaining = currentEncounterUnbrokenSubroutineIndexes(input);
+    const subroutines = ice.effectiveRunQuote.subroutines.filter((_, i) =>
+      remaining.has(i),
+    );
+    if (
+      !subroutines.some(
+        (s) => s.type === "do_damage" && s.damageType === "core",
+      )
+    )
+      return false;
+    // A conditional pay/stop route needs its own complete quote; this fact
+    // proves only hard ETR continuations and never treats an alternative as blocked.
+    if (subroutines.some(isVisiblePayEndRunSubroutine)) return false;
+    const etr = subroutines.filter(isVisibleHardEndRunSubroutine);
+    let budgetAfterETR = payment.budget;
+    if (etr.length > 0) {
+      const breakQuote = creditsToBreakVisibleSubroutinesWithBreaker(
+        breaker,
+        ice,
+        etr,
+        strength,
+        ice.effectiveRunQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+      );
+      if (
+        !breakQuote ||
+        breakQuote.conditionalRiskReason ||
+        breakQuote.conditionalAccessReason ||
+        breakQuote.postBreakStealthLosses?.length ||
+        breakQuote.futureClicksLost
+      )
+        return false;
+      const etrPayment = spendRunnerEncounterActionCost({
+        input,
+        action,
+        budget: payment.budget,
+        cost: breakQuote.cost,
+      });
+      if (!etrPayment.affordable) return true;
+      budgetAfterETR = etrPayment.budget;
+    }
+    const server = input.playerView.servers.find(
+      (s) => s.id === input.playerView.run?.attackedServerId,
+    );
+    if (!server) return false;
+    const gain =
+      action.type === "pump_breaker"
+        ? pumpStrengthAmountForAction(action, breaker.definitionId)
+        : undefined;
+    const rig =
+      gain && gain > 0
+        ? runnerRigAfterPumpAndEncounter(
+            input.playerView.own.rig ?? [],
+            breaker,
+            ice,
+            gain,
+            Math.ceil(
+              Math.max(
+                0,
+                ice.effectiveRunQuote.effectiveStrength - breaker.strength,
+              ) / gain,
+            ),
+          )
+        : runnerRigAfterEncounter(input.playerView.own.rig ?? []);
+    const path = assessKnownRezzedIcePath(
+      currentRunRemainingIce(input),
+      rig,
+      {
+        ...budgetAfterETR,
+        credits: budgetAfterETR.credits + budgetAfterETR.runOnlyCredits,
+      },
+      server.root,
+      input.playerView.opponent.credits,
+      currentRunPathContext(input),
+    );
+    if (!path.canReachAccess) return true;
+    const stealCost = server.id.startsWith("remote_")
+      ? runnerAgendaStealCreditRequirement(input, server.id)
+      : undefined;
+    return (
+      stealCost !== undefined &&
+      Math.min(budgetAfterETR.credits, path.creditsAfterPath) < stealCost
+    );
+  }
 }
 
 /** A bounded current-encounter alternative, consumed by the existing run owner. */
@@ -117,6 +224,7 @@ export function currentEncounterMitigationForBreaker(
   strength: number,
   canPay: (cost: number) => boolean,
   requiredHandFloor?: number,
+  protectOptionalCore = false,
 ): RunnerEncounterMitigation | undefined {
   const ice = currentEncounteredIceCard(input);
   const quote = ice?.effectiveRunQuote;
@@ -142,7 +250,10 @@ export function currentEncounterMitigationForBreaker(
         s,
         requiredHandFloor,
       ) ||
-        preserveHand)
+        preserveHand ||
+        (protectOptionalCore &&
+          s.type === "do_damage" &&
+          s.damageType === "core"))
     );
   });
   if (targets.length === 0) return undefined;

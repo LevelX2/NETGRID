@@ -485,7 +485,20 @@ export function createRunnerPumpViabilityContext(
           }
         }
       }
-      if (futurePath.blocksPump)
+      if (futurePath.blocksPump) {
+        const mitigation = currentEncounterMitigationForAction(
+          input, action, requiredHandFloor,
+        );
+        if (mitigation?.supportsCurrentAction) {
+          return {
+            canLeadToBreak: true,
+            evidence: [
+              "pump_current_mitigation_before_run_termination:true",
+              `pump_required_count:${requiredPumps}`,
+              ...encounterMitigationEvidence(mitigation, mitigation.pumpCost),
+            ],
+          };
+        }
         return {
           canLeadToBreak: false,
           evidence: [
@@ -494,6 +507,7 @@ export function createRunnerPumpViabilityContext(
             `pump_required_count:${requiredPumps}`,
           ],
         };
+      }
       const remotePayoff =
         dependencies.encounterRemotePayoffAfterBreakAssessment(
           input,
