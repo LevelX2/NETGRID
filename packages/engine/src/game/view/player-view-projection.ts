@@ -48,6 +48,7 @@ import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continua
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
 import { visibleCorpRestrictedCreditBankQuote } from "./visible-corp-restricted-credit-bank-quote";
 import { visibleServerStatuses } from "./server-status-view";
+import { quotePublicServerAgendaStealCost } from "../../ability-engine/steal-cost-modifiers";
 import {
   visibleRunnerTraceBidCapacity,
   visibleRunnerTraceSupportQuote,
@@ -182,6 +183,19 @@ export function buildPlayerViewProjection(
     return {
       id: server.id,
       label: server.label,
+      ...(side === "runner"
+        ? {
+            runnerAgendaStealCostQuote: {
+              stateVersion: state.stateVersion,
+              serverId: server.id,
+              minimumCreditCost: quotePublicServerAgendaStealCost(
+                state,
+                server.id,
+              ),
+              complete: true as const,
+            },
+          }
+        : {}),
       ice,
       root:
         server.id === "archives"

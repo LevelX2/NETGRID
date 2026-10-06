@@ -775,6 +775,17 @@ function sanitizePlayerView(
     throw new Error("Invalid Engine Corp install/rez-only credit pool.");
   const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
   if (
+    view.side === "runner" &&
+    view.run?.pendingAutoPassIceId !== undefined &&
+    (typeof view.run.pendingAutoPassIceId !== "string" ||
+      !view.servers.some((server) =>
+        server.ice.some(
+          (ice) => ice.instanceId === view.run!.pendingAutoPassIceId,
+        ),
+      ))
+  )
+    throw new Error("Invalid Engine pending auto-pass ICE binding.");
+  if (
     view.run?.encounterTaxForFutureIce !== undefined &&
     !nonNegativeInteger(view.run.encounterTaxForFutureIce)
   ) {
@@ -925,6 +936,15 @@ function sanitizePlayerView(
     servers: view.servers.map((server) => ({
       id: server.id,
       label: server.label,
+      ...(view.side === "runner" && server.runnerAgendaStealCostQuote
+        ? {
+            runnerAgendaStealCostQuote: sanitizeRunnerServerStealCostQuote(
+              server.runnerAgendaStealCostQuote,
+              server.id,
+              view.stateVersion,
+            ),
+          }
+        : {}),
       ice: server.ice.map((card) =>
         sanitizeVisibleCardWithOptions(card, {
           allowCorpRezCostQuote:
@@ -946,6 +966,9 @@ function sanitizePlayerView(
       ),
       root: server.root.map((card) =>
         sanitizeVisibleCardWithOptions(card, {
+          allowRunnerAgendaStealCostQuote: view.side === "runner",
+          expectedRunnerStealServerId: server.id,
+          expectedRunnerStealStateVersion: view.stateVersion,
           allowCorpScoreContinuationQuote:
             view.side === "corp" &&
             card.known &&
@@ -1021,6 +1044,9 @@ function sanitizePlayerView(
               ? { followupRunOpportunity: view.run.followupRunOpportunity }
               : {}),
             attackedServerId: view.run.attackedServerId,
+            ...(view.side === "runner" && view.run.pendingAutoPassIceId
+              ? { pendingAutoPassIceId: view.run.pendingAutoPassIceId }
+              : {}),
             ...(view.run.accessServerOverride !== undefined
               ? { accessServerOverride: view.run.accessServerOverride }
               : {}),
@@ -1850,10 +1876,36 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
   return sanitizeVisibleCardWithOptions(card);
 }
 
+function sanitizeRunnerServerStealCostQuote(
+  quote: NonNullable<
+    PlayerView["servers"][number]["runnerAgendaStealCostQuote"]
+  >,
+  serverId: PlayerView["servers"][number]["id"],
+  stateVersion: number,
+) {
+  if (
+    quote.serverId !== serverId ||
+    quote.stateVersion !== stateVersion ||
+    quote.complete !== true ||
+    !Number.isSafeInteger(quote.minimumCreditCost) ||
+    quote.minimumCreditCost < 0
+  )
+    throw new Error("Invalid Engine public server steal-cost quote.");
+  return {
+    serverId,
+    stateVersion,
+    minimumCreditCost: quote.minimumCreditCost,
+    complete: true as const,
+  };
+}
+
 function sanitizeVisibleCardWithOptions(
   card: VisibleCard,
   options: {
     allowRunnerPaymentSupport?: boolean;
+    allowRunnerAgendaStealCostQuote?: boolean;
+    expectedRunnerStealServerId?: PlayerView["servers"][number]["id"];
+    expectedRunnerStealStateVersion?: number;
     allowCorpRezCostQuote?: boolean;
     allowCorpPostRezRunQuote?: boolean;
     expectedCorpRezServerId?: PlayerView["servers"][number]["id"];
@@ -2084,6 +2136,22 @@ function sanitizeVisibleCardWithOptions(
   const installedProgram = card.known
     ? card.installedAsRunnerProgram
     : undefined;
+  const stealQuote =
+    options.allowRunnerAgendaStealCostQuote &&
+    card.known &&
+    card.type === "agenda"
+      ? card.effectiveStealCostQuote
+      : undefined;
+  if (
+    stealQuote &&
+    (stealQuote.agendaInstanceId !== card.instanceId ||
+      stealQuote.serverId !== options.expectedRunnerStealServerId ||
+      stealQuote.stateVersion !== options.expectedRunnerStealStateVersion ||
+      stealQuote.complete !== true ||
+      !Number.isSafeInteger(stealQuote.creditCost) ||
+      stealQuote.creditCost < 0)
+  )
+    throw new Error("Invalid Engine installed agenda steal-cost quote.");
   if (
     installedProgram &&
     (card.controller !== "runner" ||
@@ -2094,6 +2162,7 @@ function sanitizeVisibleCardWithOptions(
   }
   return {
     instanceId: card.instanceId,
+    ...(stealQuote ? { effectiveStealCostQuote: { ...stealQuote } } : {}),
     known: card.known,
     ...(card.title !== undefined ? { title: card.title } : {}),
     ...(card.definitionId !== undefined

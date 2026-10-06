@@ -15,7 +15,10 @@ import {
   isVisiblePayEndRunSubroutine,
   isVisibleDirectDamageSubroutine,
 } from "../run-analysis/visible-subroutine-semantics";
-import { currentEncounterUnbrokenSubroutineIndexes } from "./current-encounter";
+import {
+  currentEncounterUnbrokenSubroutineIndexes,
+  currentRunRemainingIce,
+} from "./current-encounter";
 import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
 import {
   knownPathAfterDamageBudget,
@@ -335,7 +338,7 @@ export function createRunnerAccessPathContext(
         ],
       };
 
-    const futureIce = server.ice.slice(0, Math.max(0, run.position.iceIndex));
+    const futureIce = currentRunRemainingIce(input);
     const futureRig = runnerRigAfterEncounter(input.playerView.own.rig ?? []);
     const currentIce = dependencies.currentEncounteredIceCard(input);
     const damageIce =

@@ -4231,6 +4231,13 @@ export type PlayerView = {
     label: string;
     ice: VisibleCard[];
     root: VisibleCard[];
+    /** Runner-only lower bound from public active/persisted server modifiers; excludes hidden agenda self-costs. */
+    runnerAgendaStealCostQuote?: {
+      stateVersion: number;
+      serverId: Exclude<ServerId, "new_remote">;
+      minimumCreditCost: number;
+      complete: true;
+    };
     counterDisplays?: CounterDisplay[];
     statuses?: VisibleServerStatus[];
   }>;

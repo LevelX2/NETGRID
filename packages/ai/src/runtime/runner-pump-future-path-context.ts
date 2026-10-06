@@ -1,6 +1,9 @@
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { currentEncounteredIceCard } from "./current-encounter";
+import {
+  currentEncounteredIceCard,
+  currentRunRemainingIce,
+} from "./current-encounter";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
 import {
   knownPathAfterDamageBudget,
@@ -56,7 +59,7 @@ export function createRunnerPumpFuturePathContext(
         creditsAfterPath: creditsAfterPumpAndBreak,
         evidence: [],
       };
-    const futureIce = server.ice.slice(0, Math.max(0, run.position.iceIndex));
+    const futureIce = currentRunRemainingIce(input);
     if (futureIce.length <= 0)
       return {
         blocksPump: false,

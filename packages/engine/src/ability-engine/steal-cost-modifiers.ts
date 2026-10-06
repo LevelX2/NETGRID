@@ -41,6 +41,39 @@ export type StealCostQuote = {
   publicPayload: NonNullable<LegalAction["payload"]>;
 };
 
+/** Public server costs apply even when the next agenda identity is unknown. */
+export function quotePublicServerAgendaStealCost(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): number {
+  const active = activeCardImplementationModifiersForCorpRoot(
+    state,
+    "steal_cost",
+  ).filter(
+    (match) =>
+      match.modifier.operation === "increase" &&
+      match.modifier.side === "corp" &&
+      isPublicRezzedCorpRootModifier(match.modifier) &&
+      match.modifier.appliesTo.cardType === "agenda" &&
+      (!match.modifier.sameServerAsSource ||
+        corpServerIdForInstalledCard(state, match.sourceCardInstanceId) ===
+          serverId),
+  );
+  const activeIds = new Set(active.map((match) => match.sourceCardInstanceId));
+  const persisted = (
+    state.run?.accessStealCostModifierSnapshotsByServer?.[serverId] ?? []
+  ).filter(
+    (snapshot) =>
+      snapshot.visibility === "public" &&
+      snapshot.appliesToCardType === "agenda" &&
+      !activeIds.has(snapshot.sourceCardInstanceId),
+  );
+  return (
+    active.reduce((sum, match) => sum + match.modifier.amount, 0) +
+    persisted.reduce((sum, snapshot) => sum + snapshot.amount, 0)
+  );
+}
+
 function stealCostModifierAppliesToAgenda(
   state: GameState,
   modifier: CardStealCostModifierImplementation,

@@ -27,6 +27,7 @@ import type { RankedKnownRemoteAccessCandidate } from "./access/access-target-ra
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
+import { runnerAgendaStealCreditRequirement } from "./run-analysis/runner-agenda-steal-cost";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -441,14 +442,15 @@ function evaluateRunnerRunTarget(
     runOnlyCredits,
     pathBeforeDamageBudget.creditsAfterPath,
   );
+  const replacementPayoff = accessReplacementPayoffForTarget(
+    params,
+    projection,
+    accessServerId,
+    accessTargetKind,
+    creditsAfterRun,
+  );
   const payoff =
-    accessReplacementPayoffForTarget(
-      params,
-      projection,
-      accessServerId,
-      accessTargetKind,
-      creditsAfterRun,
-    ) ??
+    replacementPayoff ??
     payoffForTarget(params, accessServerId, accessTargetKind, economyPosture);
   const runActionGripCost = runActionGripCardCost(params.input, projection);
   const projectedGripAfterRunAction = Math.max(
@@ -517,8 +519,19 @@ function evaluateRunnerRunTarget(
       "runner_visible_lethal_ice_damage|",
     ),
   );
+  const needsAgendaStealBudget =
+    accessTargetKind === "remote" &&
+    !replacementPayoff &&
+    (payoff.accessPayoff === "agenda" || payoff.accessPayoff === "unknown");
+  const agendaStealCreditRequirement = needsAgendaStealBudget
+    ? runnerAgendaStealCreditRequirement(params.input, accessServerId)
+    : undefined;
+  const agendaStealBudgetBlocked =
+    needsAgendaStealBudget &&
+    (agendaStealCreditRequirement === undefined ||
+      creditsAfterRun < agendaStealCreditRequirement);
   const effectiveAccessPayoffContestable =
-    cumulativeVisibleAndKnownAccessDamageLethal
+    cumulativeVisibleAndKnownAccessDamageLethal || agendaStealBudgetBlocked
       ? false
       : payoff.accessPayoffContestable;
   const knownAccessDamageSurvivalCapacityAfterAction =
@@ -616,12 +629,32 @@ function evaluateRunnerRunTarget(
     server?.statuses?.some(
       (status) => status.kind === "during_run_ice_rez_support",
     ) === true;
-  const baseRouteQuote = quoteRunnerRunRoute({
+  const pathRouteQuote = quoteRunnerRunRoute({
     path,
     availableCredits: creditsAvailableDuringRun,
     unknownIceCount: unknownUnrezzedIceCount,
     runnerGripCount: projectedGripAfterRunAction,
   });
+  const accessConversionFundingGap =
+    agendaStealCreditRequirement === undefined
+      ? undefined
+      : Math.max(0, agendaStealCreditRequirement - creditsAfterRun);
+  const baseRouteQuote = {
+    ...pathRouteQuote,
+    fundingGap:
+      accessConversionFundingGap === undefined
+        ? pathRouteQuote.fundingGap
+        : Math.max(pathRouteQuote.fundingGap, accessConversionFundingGap),
+    evidence: [
+      ...pathRouteQuote.evidence,
+      ...(needsAgendaStealBudget
+        ? [
+            `run_target_agenda_steal_credit_requirement:${agendaStealCreditRequirement ?? "unknown"}`,
+            `run_target_agenda_steal_funding_gap:${agendaStealCreditRequirement === undefined ? "unknown" : accessConversionFundingGap}`,
+          ]
+        : []),
+    ],
+  };
   const { noAccessReason: _noAccessReason, ...conditionalBaseRouteQuote } =
     baseRouteQuote;
   const routeQuote =

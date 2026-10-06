@@ -16,6 +16,7 @@ import { projectAccessDecision } from "./decision/access-decision-projection";
 import { createProjectedAccessOutcome } from "./access/access-outcome-projection";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { currentRunRemainingIce } from "./runtime/current-encounter";
+import { runnerAgendaStealCreditRequirement } from "./run-analysis/runner-agenda-steal-cost";
 import type { AccessReserveEconomyPosture } from "./access/access-reserve-adapter";
 import {
   mergedPublicHistory,
@@ -223,17 +224,12 @@ export function evaluateKnownRemoteAccessPayoff(
     (root) => cardDefinitionType(root.definitionId) === "agenda",
   );
   if (agendaRoots.length > 0) {
-    const observedStealCost =
-      agendaRoots.find(
-        (root) =>
-          root.visibleCard?.effectiveStealCostQuote?.complete === true &&
-          root.visibleCard.effectiveStealCostQuote.stateVersion ===
-            input.playerView.stateVersion &&
-          root.visibleCard.effectiveStealCostQuote.serverId === serverId,
-      )?.visibleCard?.effectiveStealCostQuote?.creditCost ??
-      observedRemoteAgendaStealCost(input, serverId, agendaRoots);
+    const observedStealCost = runnerAgendaStealCreditRequirement(
+      input,
+      serverId,
+    );
     const stealAffordable =
-      observedStealCost === undefined || creditsAfterPath >= observedStealCost;
+      observedStealCost !== undefined && creditsAfterPath >= observedStealCost;
     const observedAccessDamage = observedRemoteAccessDamage(
       input,
       serverId,
@@ -265,14 +261,18 @@ export function evaluateKnownRemoteAccessPayoff(
       },
       accessDecision: !accessSurvivable
         ? "defer_until_safe"
-        : stealAffordable
-          ? "steal"
-          : "defer_until_funded",
+        : observedStealCost === undefined
+          ? "unknown"
+          : stealAffordable
+            ? "steal"
+            : "defer_until_funded",
       ...(!accessSurvivable
         ? { declineReason: "unsafe_access_damage" as const }
-        : stealAffordable
-          ? {}
-          : { declineReason: "insufficient_credits" as const }),
+        : observedStealCost === undefined
+          ? { declineReason: "unknown" as const }
+          : stealAffordable
+            ? {}
+            : { declineReason: "insufficient_credits" as const }),
       contestable,
       knownNoCurrentPayoff: false,
       score: contestable ? 420 : 0,
@@ -284,9 +284,11 @@ export function evaluateKnownRemoteAccessPayoff(
             ? "known_remote_access_effect_breaks_runner_safety_buffer"
             : !accessSurvivable
               ? "known_remote_access_damage_would_flatline"
-              : stealAffordable
-                ? "known_remote_agenda_pressure"
-                : "known_remote_agenda_steal_unaffordable_after_ice",
+              : observedStealCost === undefined
+                ? "known_remote_agenda_steal_cost_quote_missing"
+                : stealAffordable
+                  ? "known_remote_agenda_pressure"
+                  : "known_remote_agenda_steal_unaffordable_after_ice",
       ],
       ...(observedAccessDamage ? { observedAccessDamage } : {}),
       ...(knownAccessThreatProjection ? { knownAccessThreatProjection } : {}),
@@ -508,52 +510,6 @@ export function evaluateKnownRemoteAccessPayoff(
       "remote_memory_payoff:known_low_value",
     ],
   };
-}
-
-function observedRemoteAgendaStealCost(
-  input: AiDecisionInput,
-  serverId: string,
-  agendaRoots: readonly KnownRemoteRoot[],
-): number | undefined {
-  const agendaDefinitionIds = new Set(
-    agendaRoots.map((root) => root.definitionId),
-  );
-  const history = mergedPublicHistory(input);
-  for (let index = history.length - 1; index >= 0; index -= 1) {
-    const event = history[index]!;
-    if (
-      publicActionType(event) !== "decline_trash" ||
-      publicActor(event) !== "runner" ||
-      remoteEventServerId(event) !== serverId
-    ) {
-      continue;
-    }
-    const stealCost = numberPayloadValue(event, "stealCost");
-    if (stealCost === undefined || stealCost <= 0) continue;
-    for (let accessIndex = index - 1; accessIndex >= 0; accessIndex -= 1) {
-      const accessEvent = history[accessIndex]!;
-      if (publicActionType(accessEvent) === "start_run") break;
-      if (
-        publicActionType(accessEvent) !== "access_card" ||
-        publicActor(accessEvent) !== "runner" ||
-        remoteEventServerId(accessEvent) !== serverId
-      ) {
-        continue;
-      }
-      const accessedDefinitionId = stringPayloadValue(
-        accessEvent,
-        "cardDefinitionId",
-      );
-      if (
-        accessedDefinitionId &&
-        agendaDefinitionIds.has(accessedDefinitionId)
-      ) {
-        return stealCost;
-      }
-      break;
-    }
-  }
-  return undefined;
 }
 
 function observedRemoteAccessDamage(

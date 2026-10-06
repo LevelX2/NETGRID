@@ -7,6 +7,7 @@ import {
 } from "../../visible-run-analysis";
 import { socialEngineeringCorpGuessAmount } from "../../runtime/bid-choice-option";
 import { runnerActionRequiresTargetedIceTrashPlan } from "../../runtime/runner-targeted-ice-trash-plan";
+import { runnerAgendaStealCreditRequirement } from "../../run-analysis/runner-agenda-steal-cost";
 
 export const SOCIAL_ENGINEERING_DEFINITION_ID = "onr_v1_111_social-engineering";
 
@@ -156,6 +157,20 @@ export function runnerTargetedBypassPlanCommitment(params: {
         (remainingPath.unavoidableVisibleIceHazardCount ?? 0) > 0
       ) {
         return [];
+      }
+      if (
+        target.ownerModuleId === "runner.contest_remote" &&
+        target.knownAgendaThreat
+      ) {
+        const stealCost = runnerAgendaStealCreditRequirement(
+          input,
+          target.serverId,
+        );
+        if (
+          stealCost === undefined ||
+          remainingPath.creditsAfterPath < stealCost
+        )
+          return [];
       }
       const eventCost = Math.max(0, eventCreditCost);
       const originalPathProvenBlocked =
