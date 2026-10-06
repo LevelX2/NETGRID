@@ -1,0 +1,53 @@
+{
+  "rows": [
+    {
+      "side": "corp",
+      "actionId": "corp.advance_card.corp_onr_v1_204_ice-transmutation_2.corp_onr_v1_204_ice-transmutation_2",
+      "beforeHash": "fnv1a:418f854f",
+      "afterHash": "fnv1a:f06aa037"
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.advance_card.corp_onr_v1_204_ice-transmutation_2.corp_onr_v1_204_ice-transmutation_2",
+      "beforeHash": "fnv1a:f06aa037",
+      "afterHash": "fnv1a:19490421"
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.advance_card.corp_onr_v1_204_ice-transmutation_2.corp_onr_v1_204_ice-transmutation_2",
+      "beforeHash": "fnv1a:19490421",
+      "afterHash": "fnv1a:b20dc11f"
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.score_agenda.corp_onr_v1_204_ice-transmutation_2.corp_onr_v1_204_ice-transmutation_2",
+      "beforeHash": "fnv1a:b20dc11f",
+      "afterHash": "fnv1a:a7607803"
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "selectedChoices": {
+        "choiceId": "choice_card_implementation_select_rezzed_ice_mark_modifier_337",
+        "selectedOptionIds": [
+          "card_corp_onr_v1_247_haunting-inquisition_1"
+        ]
+      },
+      "beforeHash": "fnv1a:a7607803",
+      "afterHash": "fnv1a:695d1285"
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "beforeHash": "fnv1a:695d1285",
+      "afterHash": "fnv1a:d835b55a"
+    }
+  ],
+  "scorePoints": 6,
+  "credits": 0,
+  "winner": null,
+  "hash": "fnv1a:d835b55a",
+  "everyOriginalCommandHashMatches": true,
+  "limit": "Sechs tatsächliche Originalcommands bis nach dem finanzierten zweiten Trans-Score; keine volle alternative Gewinnerpopulation.",
+  "deterministicReplay": true
+}

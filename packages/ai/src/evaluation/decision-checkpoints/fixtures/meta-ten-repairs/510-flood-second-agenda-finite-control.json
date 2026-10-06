@@ -1,0 +1,366 @@
+{
+  "sourceCommit": "370195f3c2166de1c9d0edee1884603edf4088fd",
+  "originalGame": 7,
+  "decisionIndex": 343,
+  "originalPrefixActions": 342,
+  "prefixEveryHashMatches": true,
+  "nativeCheckpointHashMatches": true,
+  "originalAction": "corp.install_card.corp_onr_v1_191_black-ice-quality-assurance_2.new_remote.corp_onr_v1_191_black-ice-quality-assurance_2",
+  "alternative": "corp.gain_credit",
+  "allCommandsActualEngineLegal": true,
+  "steps": [
+    {
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "before": {
+        "hash": "fnv1a:b8988aea",
+        "stateVersion": 342,
+        "credits": 8,
+        "clicks": 1
+      },
+      "after": {
+        "hash": "fnv1a:10e9fb93",
+        "stateVersion": 343,
+        "credits": 9,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "before": {
+        "hash": "fnv1a:10e9fb93",
+        "stateVersion": 343,
+        "credits": 9,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:87511121",
+        "stateVersion": 344,
+        "credits": 9,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_corp_344",
+        "selectedOptionIds": [
+          "card_corp_onr_v1_258_neural-blade_2"
+        ]
+      },
+      "before": {
+        "hash": "fnv1a:87511121",
+        "stateVersion": 344,
+        "credits": 9,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:19ec158d",
+        "stateVersion": 345,
+        "credits": 9,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.start_run.remote_1",
+      "before": {
+        "hash": "fnv1a:19ec158d",
+        "stateVersion": 345,
+        "credits": 9,
+        "clicks": 4
+      },
+      "after": {
+        "hash": "fnv1a:da996d71",
+        "stateVersion": 346,
+        "credits": 9,
+        "clicks": 3
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.rez_ice.corp_onr_v1_261_quandary_2.corp_onr_v1_261_quandary_2",
+      "before": {
+        "hash": "fnv1a:da996d71",
+        "stateVersion": 346,
+        "credits": 9,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:98aa5531",
+        "stateVersion": 347,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "before": {
+        "hash": "fnv1a:98aa5531",
+        "stateVersion": 347,
+        "credits": 7,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:34dc4d39",
+        "stateVersion": 348,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.break_subroutine.runner_onr_v1_016_cyfermaster_1.runner_onr_v1_016_cyfermaster_1.runner_onr_v1_016_cyfermaster_1.corp_onr_v1_261_quandary_2.0.printed_subroutines_end_the_run.onr_v1_016_cyfermaster:icebreaker_abilities_break_subroutine",
+      "before": {
+        "hash": "fnv1a:34dc4d39",
+        "stateVersion": 348,
+        "credits": 9,
+        "clicks": 3
+      },
+      "after": {
+        "hash": "fnv1a:e5b5ed4d",
+        "stateVersion": 349,
+        "credits": 7,
+        "clicks": 3
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "before": {
+        "hash": "fnv1a:e5b5ed4d",
+        "stateVersion": 349,
+        "credits": 7,
+        "clicks": 3
+      },
+      "after": {
+        "hash": "fnv1a:24a9235e",
+        "stateVersion": 350,
+        "credits": 7,
+        "clicks": 3
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "before": {
+        "hash": "fnv1a:24a9235e",
+        "stateVersion": 350,
+        "credits": 7,
+        "clicks": 3
+      },
+      "after": {
+        "hash": "fnv1a:d9396302",
+        "stateVersion": 351,
+        "credits": 7,
+        "clicks": 3
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.decline_rez.remote_1",
+      "before": {
+        "hash": "fnv1a:d9396302",
+        "stateVersion": 351,
+        "credits": 7,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:040ba2bf",
+        "stateVersion": 352,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "before": {
+        "hash": "fnv1a:040ba2bf",
+        "stateVersion": 352,
+        "credits": 7,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:37e384b8",
+        "stateVersion": 353,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "before": {
+        "hash": "fnv1a:37e384b8",
+        "stateVersion": 353,
+        "credits": 7,
+        "clicks": 3
+      },
+      "after": {
+        "hash": "fnv1a:e9cee0bc",
+        "stateVersion": 354,
+        "credits": 7,
+        "clicks": 3
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.decline_rez.remote_1",
+      "before": {
+        "hash": "fnv1a:e9cee0bc",
+        "stateVersion": 354,
+        "credits": 7,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:d6c45ae5",
+        "stateVersion": 355,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "before": {
+        "hash": "fnv1a:d6c45ae5",
+        "stateVersion": 355,
+        "credits": 7,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:adb76ef5",
+        "stateVersion": 356,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "before": {
+        "hash": "fnv1a:adb76ef5",
+        "stateVersion": 356,
+        "credits": 7,
+        "clicks": 3
+      },
+      "after": {
+        "hash": "fnv1a:2084efc7",
+        "stateVersion": 357,
+        "credits": 7,
+        "clicks": 3
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.decline_rez.remote_1",
+      "before": {
+        "hash": "fnv1a:2084efc7",
+        "stateVersion": 357,
+        "credits": 7,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:03157ebd",
+        "stateVersion": 358,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "before": {
+        "hash": "fnv1a:03157ebd",
+        "stateVersion": 358,
+        "credits": 7,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:2db55b3d",
+        "stateVersion": 359,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "before": {
+        "hash": "fnv1a:2db55b3d",
+        "stateVersion": 359,
+        "credits": 7,
+        "clicks": 3
+      },
+      "after": {
+        "hash": "fnv1a:69e0e86c",
+        "stateVersion": 360,
+        "credits": 7,
+        "clicks": 3
+      }
+    },
+    {
+      "side": "corp",
+      "actionId": "corp.decline_rez.remote_1",
+      "before": {
+        "hash": "fnv1a:69e0e86c",
+        "stateVersion": 360,
+        "credits": 7,
+        "clicks": 0
+      },
+      "after": {
+        "hash": "fnv1a:40b0dcd7",
+        "stateVersion": 361,
+        "credits": 7,
+        "clicks": 0
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "before": {
+        "hash": "fnv1a:40b0dcd7",
+        "stateVersion": 361,
+        "credits": 7,
+        "clicks": 3
+      },
+      "after": {
+        "hash": "fnv1a:f5261542",
+        "stateVersion": 362,
+        "credits": 7,
+        "clicks": 3
+      }
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.steal_agenda.corp_onr_v1_191_black-ice-quality-assurance_1",
+      "before": {
+        "hash": "fnv1a:f5261542",
+        "stateVersion": 362,
+        "credits": 7,
+        "clicks": 3
+      },
+      "after": {
+        "hash": "fnv1a:ba13f46b",
+        "stateVersion": 363,
+        "credits": 7,
+        "clicks": 3
+      }
+    }
+  ],
+  "afterFirstRemote": {
+    "runnerPoints": 6,
+    "corpPoints": 0,
+    "runnerCredits": 7,
+    "runnerClicks": 3,
+    "corpCredits": 7,
+    "secondAgendaStillInHq": true,
+    "secondRemoteAbsent": true,
+    "matchTerminal": false
+  },
+  "limit": "Endliche Gegenfolge bis zum ersten realen QA-Steal. Corp folgt danach den Originalaktionen, ergänzt nur den nach Zurückhalten der zweiten Agenda tatsächlich verpflichtenden Nichtagenda-Discard. Die zweite offene Remote-Stealroute entsteht nicht; kein Nachweis eines anderen ganzen Spielsiegrausgangs, keine neue Basisrunde."
+}

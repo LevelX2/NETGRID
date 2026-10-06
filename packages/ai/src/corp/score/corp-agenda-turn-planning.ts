@@ -493,14 +493,14 @@ function createLine(
         : 35 +
           Math.max(1, params.project.agendaPoints) * 10 +
           (line.projectedAdvance ? 8 : 0);
+  // Only a bound Defense provider contributes protection. An agenda head
+  // supplies score progress and exposure facts, never incremental defense.
   const defense =
-    line.family === "fund_setup" || line.family === "score_continuation"
-      ? 0
-      : line.family === "combined_rush"
-        ? 25
-        : line.family === "safe_setup"
-          ? 18
-          : 6;
+    line.family === "combined_rush"
+      ? 25
+      : line.family === "safe_setup"
+        ? 18
+        : 0;
   // Score's conversion facts distinguish losing the match from conceding points.
   // Carry that same stake into exposed turn lines, not into unexposed setup.
   const exposureStake = params.project.conversion?.runnerStealIsMatchpoint

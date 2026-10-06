@@ -80,21 +80,30 @@ export function corpTraceHardwareTrashChoiceFacts(
     );
   const { serverId, ice } = locations[0]!;
   const quote = ice.effectivePostRezRunQuote;
+  // The current rez state selects its Engine authority. A still-rezzed
+  // source has a current run quote; an Olivia-derezzed source requires the
+  // fully bound current post-rez projection. Neither replaces a missing one.
   const runQuote =
-    quote?.complete === true ? quote.effectiveRunQuote : undefined;
+    ice.rezzed === true
+      ? ice.effectiveRunQuote
+      : ice.rezzed === false && quote?.complete === true
+        ? quote.effectiveRunQuote
+        : undefined;
   const subroutine = runQuote?.subroutines[subroutineIndex];
   if (
     ice.known !== true ||
     ice.type !== "ice" ||
     ice.controller !== "corp" ||
     !ice.definitionId ||
-    quote?.context !== "installed_post_rez" ||
-    quote.complete !== true ||
-    quote.expiresAtStateVersion !== version ||
-    quote.cardId !== sourceIceInstanceId ||
-    quote.iceDefinitionId !== ice.definitionId ||
-    quote.targetServerId !== serverId ||
-    quote.projectedServerId !== serverId ||
+    (ice.rezzed !== true && ice.rezzed !== false) ||
+    (ice.rezzed === false &&
+      (quote?.context !== "installed_post_rez" ||
+        quote.complete !== true ||
+        quote.expiresAtStateVersion !== version ||
+        quote.cardId !== sourceIceInstanceId ||
+        quote.iceDefinitionId !== ice.definitionId ||
+        quote.targetServerId !== serverId ||
+        quote.projectedServerId !== serverId)) ||
     runQuote?.iceInstanceId !== sourceIceInstanceId ||
     runQuote.iceDefinitionId !== ice.definitionId ||
     subroutine?.type !== "initiate_trace" ||
@@ -104,10 +113,8 @@ export function corpTraceHardwareTrashChoiceFacts(
     subroutine.traceSuccessEffect.amount === 0
   )
     fail(
-      "Supply the exact current Engine post-rez quote and hardware-trash Trace effect for the source ICE.",
+      "Supply the exact current Engine quote for the explicit source rez state and its hardware-trash Trace effect.",
     );
-  // Run-end effects may already have derezzed a temporary Olivia rez. The
-  // current post-rez quote still certifies the source's printed effect.
   const event = input.eventTail.at(-1);
   if (
     event?.stateVersionAfter !== version ||

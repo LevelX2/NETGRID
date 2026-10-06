@@ -781,6 +781,12 @@ Engine-/Assessment-gequoteten monotonen Schutzfortschritt. Die
 ICE-/Serverauswahl bleibt vollständig bei `corp.defend_servers`; Remote und
 Score wählen keine konkrete ICE-Karte.
 
+Eine reine Agenda-Linie liefert keinen inkrementellen Schutzwert und keinen
+Value-Claim von `corp.defend_servers`. Vorhandener Schutz geht bereits in
+die Engine-gequotete Zugriffsexposition ein. Zusätzliche Schutzbeiträge sind
+nur bei einer tatsächlich gebundenen Defense-Provider-Linie zulässig; ein
+Agenda-Head oder bloße Agenda-Präsenz ersetzt diesen Nachweis nicht.
+
 Eine `combined_rush`-Linie darf Schutz nur aus aktuell gebundenen,
 finanzierten Defense-Projektionen übernehmen. Gestagte Installation allein
 belegt keinen finanzierten Schutz. Der zentrale Teil benötigt ebenfalls
@@ -1713,9 +1719,15 @@ Grenzen, Defense-Ownership, Choice-Bindung und deterministisches Replay.
 
 Hardwarezerstörung nach einem erfolgreichen ICE-Trace bleibt auch nach dem
 Run-Ende bei `corp.defend_servers`. `trace-hardware-trash-choice-facts.ts`
-prüft den nativen Trace-Ursprung, die aktuelle Post-Rez-Engine-Quote, das
+prüft den nativen Trace-Ursprung, den expliziten aktuellen Rezstatus, das
 öffentliche Runner-Bid-Event und den vollständigen legalen Hardware-Zielsatz.
-Bereits durch Olivia derezztes Quell-ICE bleibt über diese Quote gebunden.
+Weiterhin gerezztes Quell-ICE benötigt seine aktuelle `effectiveRunQuote`;
+bereits durch Olivia derezztes Quell-ICE benötigt die vollständige aktuelle,
+an Quelle, Fort und StateVersion gebundene Post-Rez-Engine-Quote. Eine
+hypothetische Post-Rez-Projektion ersetzt keine fehlende aktuelle Runquote.
+Fehlender Rezstatus, falsche Quelle oder unvollständige Effektdaten scheitern
+strukturiert. Die drei realen Quellforts und tatsächlichen Engine-Folgen in
+`meta-510-agenda-and-trace.test.ts` ergänzen den Derez-Gegenfall.
 `trace-hardware-trash-signal.ts` bewertet nur bekannte installierte Hardware
 nach öffentlichen Countern und Installationskosten; die Options-ID entscheidet
 Gleichstände. Der gewählte Defense-Step bindet Action, Choice, Ziel, Trace und

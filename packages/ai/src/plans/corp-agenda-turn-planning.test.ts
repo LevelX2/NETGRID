@@ -86,6 +86,14 @@ describe("Corp agenda turn-planning vertical slice", () => {
     expect(
       slice.lines.find((line) => line.family === "combined_rush")?.nodes,
     ).toHaveLength(4);
+    const pure = slice.lines.find((line) => line.family === "pure_rush")!;
+    expect(pure.evaluation.defense).toBe(0);
+    expect(pure.valueClaims.some((claim) => claim.ownerModuleId === "corp.defend_servers")).toBe(false);
+    for (const family of ["combined_rush", "safe_setup"] as const) {
+      const protectedLine = slice.lines.find((line) => line.family === family)!;
+      expect(protectedLine.evaluation.defense).toBe(family === "combined_rush" ? 25 : 18);
+      expect(protectedLine.valueClaims.some((claim) => claim.ownerModuleId === "corp.defend_servers" && claim.contributionKind === "risk_reduction")).toBe(true);
+    }
     for (const line of slice.lines) {
       expect(
         line.valueClaims.filter(
