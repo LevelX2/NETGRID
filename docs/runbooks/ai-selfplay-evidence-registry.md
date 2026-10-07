@@ -1,6 +1,6 @@
 # KI-Selbstspiel-Evidenzregistrierung
 
-Stand: 2026-10-03
+Stand: 2026-10-07
 
 Die kanonische 40er-Erfassung erlaubt für nachweislich fortschreitende lange
 Partien ein explizites `--max-batches N` (1–200, Standard 20). Das Limit wird
@@ -147,6 +147,18 @@ Versand als abgeschlossen. Versuche, Endstände, Abbrüche und vollständig gele
 Spiele werden getrennt angezeigt.
 
 ### Regulärer Berichtscheckpoint
+
+Abschnitt 7 des kanonischen Metaserienberichts führt die tatsächlich aus der
+aktuellen Paarung entstandenen Fixes getrennt von weiteren Befunden auf. Jeder
+Fix bindet Paarungs-ID, Fall-ID, Ursache, Änderung und Wirkung, konkrete
+Spiel-/Entscheidungsbelege, erfolgreiche Prüfungen, Nachweisgrenze, Owner und
+vollständigen Commit. Renderer, HTML-Verifier und Registry-Bundle verwenden
+dieselbe verpflichtende `narrative.fixes`-Liste; der Verifier erhält deshalb
+auch `--narrative`. Ohne neue Fixes wird dies ausdrücklich angezeigt. Eine
+diagnostische Population darf umgesetzte Fixes ausweisen, ohne ihre Spiele in
+den finalen Nenner zu übernehmen. Vor Versand wird die Liste mit den eigenen
+Fixcommits der Paarung abgeglichen; alte Fälle allein zählen nicht als neue
+Reparaturen.
 
 Vor dem ersten reportfähigen Lauf wird die Serie mit `id`, `recipient` und
 positivem ganzzahligem `interval` registriert. Wiederholtes Registrieren
