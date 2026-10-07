@@ -155,11 +155,16 @@ export function runnerCreditBankSignals(
         handEvaluation.liquidityTiming !== "immediate" &&
         !economy.fundingNeed &&
         input.playerView.own.credits >= economy.desiredCreditReserve;
+      const lastActionInstallBreaksHandBuffer =
+        prospectivePlan?.install.remainingActions === 0 &&
+        input.playerView.own.gripOrHq.length - 1 <
+          Math.min(input.playerView.own.gripOrHq.length, minimumHandBuffer);
       if (
         prospectivePlan === undefined ||
         prospectivePlan.install.projection !== "feasible_in_projection" ||
         unsatisfiedActivationPrerequisites.length > 0 ||
-        delayedInstallWithoutFundingNeed
+        delayedInstallWithoutFundingNeed ||
+        lastActionInstallBreaksHandBuffer
       )
         return [
           {
@@ -173,6 +178,9 @@ export function runnerCreditBankSignals(
             estimatedPayout,
             value: 0,
             evidenceCodes: [
+              ...(lastActionInstallBreaksHandBuffer
+                ? ["runner_credit_bank_last_action_install_hand_floor"]
+                : []),
               ...(prospectivePlan === undefined
                 ? ["runner_credit_bank_prospective_projection_unknown"]
                 : prospectivePlan.install.projection === "blocked"

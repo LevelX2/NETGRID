@@ -185,9 +185,13 @@ export function buildRunnerCardDevelopmentSignals({
         : undefined;
       if (executableNow && !candidate) return [];
       if (
-        candidate?.economyProjection?.kind === "immediate_liquid" &&
-        candidate.economyProjection.timing === "immediate" &&
-        candidate.economyProjection.creditRestriction === "general" &&
+        candidate?.economyProjection !== undefined &&
+        ((candidate.economyProjection.kind === "immediate_liquid" &&
+          candidate.economyProjection.timing === "immediate" &&
+          candidate.economyProjection.creditRestriction === "general") ||
+          (candidate.semanticActionType === "install.card" &&
+            candidate.costProfile.clickCost !== undefined &&
+            candidate.costProfile.clickCost >= remainingClicks)) &&
         candidate.economyProjection.netHandDelta !== undefined &&
         input.playerView.own.gripOrHq.length +
           candidate.economyProjection.netHandDelta <

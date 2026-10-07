@@ -943,6 +943,16 @@ exakten Funding-Routen in `runtime/runner-exact-funding-routes.ts`. Die
 Runtime komponiert die Owner-Fakten und führt weiterhin die gemeinsame
 Zugplanung aus; sie enthält keine zweite Handentwicklungs-Discovery.
 
+Die Admission in `development-discovery.ts` schützt die vorhandene
+Mindesthandreserve auch vor einer optionalen Installation, deren echte
+LegalAction-Kosten die restlichen Aktionen verbrauchen. Maßgeblich ist das
+projizierte `netHandDelta` einschließlich unmittelbar gebundener Draw-Effekte.
+Der geschützte Bestand ist höchstens die aktuell vorhandene Hand; eine
+bereits zu kleine Hand wird nicht als ausreichende Reserve ausgegeben.
+Installationen mit erhaltener Reserve oder verbleibender Folgeaktion behalten
+ihre bisherige Prüfung. Spezial-Owner und der gemeinsame Scheduler bleiben
+für ihre eigenen Routen verantwortlich.
+
 **Klasse:** `bounded_sequence` oder `development_project`
 **Rolle:** Vordergrund/Support
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
@@ -2539,6 +2549,15 @@ die übrigen Owner. Sie entscheidet keine Bankphase. Der Owner importiert weder
 die Core-Registry noch die zentrale Runtime oder deren Composition-Factories.
 Diese Grenze wird durch `runner/vertical-owner-boundaries.test.ts` und das
 allgemeine Importzyklus-Gate geschützt.
+
+Eine Bankinstallation auf der letzten Aktion darf die bereits vom
+Defense-Owner gelieferte Mindesthandreserve nicht durch den Verbrauch ihrer
+Handkarte unterschreiten. Der Bank-Owner hält die Quelle dann mit
+`runner_credit_bank_last_action_install_hand_floor` zurück und dispositioniert
+ihre echten Installations-IDs. Eine Installation, die die Reserve erhält,
+bleibt auch ohne selben Turn verfügbaren Ladeklick zugelassen. Der Schutz
+betrifft die Installations-Admission; bestehende Lade-, Auszahlungs- und
+gebundene Finanzierungsrouten behalten ihre jeweiligen Verträge.
 
 ### Benannte gemeinsame Dienste
 
