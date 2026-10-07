@@ -1491,6 +1491,8 @@ describe("visible run analysis trace hazards", () => {
       creditsAfterAvoidingVisibleIceHazards: 0,
     });
     expect(assessment.visibleTraceTagHazardUnavoidable).toBeUndefined();
+    expect(assessment.visibleIceHazardPenalty).toBe(0);
+    expect(assessment.expectedTagsFromVisibleIce).toBeUndefined();
     expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
       kind: "trace_tag",
       runnerTraceCapacity: 10,
@@ -1518,6 +1520,11 @@ describe("visible run analysis trace hazards", () => {
       unavoidableVisibleIceHazardCount: 1,
     });
     expect(assessment.visibleIceRunHazards).toHaveLength(2);
+    expect(assessment.expectedTagsFromVisibleIce).toBe(1);
+    expect(assessment.visibleIceHazardPenalty).toBe(
+      assessment.visibleIceRunHazards?.[1]?.penalty,
+    );
+    expect(assessment.visibleIceHazardPenalty).toBeGreaterThan(0);
     expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
       kind: "trace_tag",
       runnerTraceCapacity: 9,

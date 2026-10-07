@@ -43,6 +43,17 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Die gemeinsame Runquote trennt mögliche Trace-Effekte von der nach bezahlter
+Abwehr verbleibenden Gefahr. Garantierte Break-, Link- oder Cancel-Kosten
+bleiben im vollständigen Pfadbudget; die ursprünglichen Gefahrenrecords
+bleiben als Diagnose erhalten. Der aggregierte Gefahrenabzug und erwartete
+Tags enthalten nur unvermeidbare Restwirkungen. Bereits vollständig
+finanzierte Abwehr darf die Central-/Remote-Konversion nicht zusätzlich als
+unabgewendete Gefahr entwerten. Bei mehreren Traces bleiben der verbrauchte
+Pool und eine anschließend unbezahlbare Wirkung getrennt sichtbar. Native
+Paarung-519-Kontrollen sichern Finanzierung, fehlende Coverage, gebundene
+Planroute und tatsächlichen AI→Engine-Zugriff mit identischem Replayhash ab.
+
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
 verbrauchen den Breakerpreis und zweckgebundene Credits nur einmal. Der

@@ -10,7 +10,7 @@ import {
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
 it.each([false, true])(
-  "SP-296 retains hazard avoidance and starts the contest only with its reserve funded: %s",
+  "SP-296 retains hazard avoidance and selects the remote contest only with its reserve funded: %s",
   (funded) => {
     const { input, runtime } = structuredClone(checkpoint) as unknown as {
       input: AiDecisionInputWithDeckCapabilities;
@@ -34,10 +34,36 @@ it.each([false, true])(
         status: "blocked",
         creditGap: 2,
       });
-      expect(decision.actionId).toBe("runner.gain_credit");
+      expect(decision.actionId).toBe(
+        "runner.play_event.runner_onr_proteus_101_all-hands_1.hq.runner_onr_proteus_101_all-hands_1.onr_proteus_101_all-hands:on_play_hq_run_access_four_prohibit_noisy_icebreakers",
+      );
+      const central = evaluateRunnerRunTargets({ input }).find(
+        (target) => target.actionId === decision.actionId,
+      )!;
+      expect(central.routeQuote).toMatchObject({
+        reachability: "guaranteed_access",
+        fundingGap: 0,
+        unknownIceCount: 0,
+      });
+      expect(central.visibleIceHazardPenalty).toBe(0);
+      expect(central.creditsAfterRun).toBe(0);
+      expect(decision.fallbackUsed).toBe(false);
+      expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        selectedPlan: { moduleId: "runner.pressure_central" },
+        route: {
+          actionId: decision.actionId,
+          stateVersion: input.playerView.stateVersion,
+        },
+      });
       expect(
-        decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
-      ).toBe("runner.economy");
+        input.legalActions.some(
+          (action) =>
+            action.actionId === decision.actionId &&
+            action.expiresAtStateVersion === input.playerView.stateVersion,
+        ),
+      ).toBe(true);
       return;
     }
     expect(remote.prerunReserveQuote?.status).toBe("satisfied");

@@ -78,7 +78,10 @@ export function visibleIceRunHazardSummary(
   creditsAfterAvoidingVisibleIceHazards: number,
 ): Partial<KnownRezzedIcePathAssessment> {
   if (hazards.length === 0) return {};
-  const visibleIceHazardPenalty = hazards.reduce(
+  // The path ledger already pays guaranteed avoidance. Retain the potential
+  // hazard records for diagnostics, but only unprevented effects remain risk.
+  const residualHazards = hazards.filter((hazard) => hazard.unavoidable);
+  const visibleIceHazardPenalty = residualHazards.reduce(
     (sum, hazard) => sum + hazard.penalty,
     0,
   );
@@ -86,13 +89,11 @@ export function visibleIceRunHazardSummary(
     (sum, hazard) => sum + Math.max(0, hazard.minimumAvoidanceCost ?? 0),
     0,
   );
-  const expectedTagsFromVisibleIce = hazards.reduce(
+  const expectedTagsFromVisibleIce = residualHazards.reduce(
     (sum, hazard) => sum + Math.max(0, hazard.expectedTags ?? 0),
     0,
   );
-  const unavoidableVisibleIceHazardCount = hazards.filter(
-    (hazard) => hazard.unavoidable,
-  ).length;
+  const unavoidableVisibleIceHazardCount = residualHazards.length;
   return {
     visibleIceRunHazards: hazards,
     visibleIceHazardPenalty,
