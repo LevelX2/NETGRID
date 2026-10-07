@@ -523,12 +523,24 @@ function evaluateRunnerRunTarget(
       "runner_visible_lethal_ice_damage|",
     ),
   );
+  const knownCentralAgenda =
+    accessTargetKind !== "remote" &&
+    payoff.accessPayoff === "agenda" &&
+    payoff.accessFacts.knownTargetDefinitionIds.length > 0;
   const needsAgendaStealBudget =
-    accessTargetKind === "remote" &&
     !replacementPayoff &&
-    (payoff.accessPayoff === "agenda" || payoff.accessPayoff === "unknown");
+    (knownCentralAgenda ||
+      (accessTargetKind === "remote" &&
+        (payoff.accessPayoff === "agenda" ||
+          payoff.accessPayoff === "unknown")));
   const agendaStealCreditRequirement = needsAgendaStealBudget
-    ? runnerAgendaStealCreditRequirement(params.input, accessServerId)
+    ? runnerAgendaStealCreditRequirement(
+        params.input,
+        accessServerId,
+        knownCentralAgenda
+          ? payoff.accessFacts.knownTargetDefinitionIds
+          : undefined,
+      )
     : undefined;
   const agendaStealBudgetBlocked =
     needsAgendaStealBudget &&

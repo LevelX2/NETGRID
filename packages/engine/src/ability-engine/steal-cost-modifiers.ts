@@ -21,6 +21,7 @@ import {
   isPublicRezzedCorpRootModifier,
 } from "./card-implementation-modifiers";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import type {
   CardAccessZone,
   CardSelfStealCostImplementation,
@@ -175,6 +176,36 @@ function selfStealCostApplies(
   if (!modifier.sourceZones.includes(accessZone)) return false;
   if (modifier.ignoreIfAccessedFrom?.includes(accessZone)) return false;
   return true;
+}
+
+/** Canonical self-cost for an already identified agenda; no hidden instance data. */
+export function quoteAgendaDefinitionSelfStealCreditCost(
+  definitionId: string,
+  serverId: string,
+): number | undefined {
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  if (!definition || definition.type !== "agenda") return undefined;
+  const accessZone: CardAccessZone | undefined =
+    serverId === "hq" || serverId === "rd" || serverId === "archives"
+      ? serverId
+      : /^remote_\d+$/.test(serverId)
+        ? "installed"
+        : undefined;
+  if (!accessZone) return undefined;
+  const modifiers =
+    cardImplementationForDefinitionId(definitionId)?.selfStealCosts ?? [];
+  const applicable = modifiers.filter((modifier) =>
+    selfStealCostApplies(modifier, accessZone),
+  );
+  if (
+    applicable.some(
+      (modifier) =>
+        !Number.isSafeInteger(modifier.amount) || modifier.amount < 0,
+    )
+  )
+    return undefined;
+  const cost = applicable.reduce((sum, modifier) => sum + modifier.amount, 0);
+  return Number.isSafeInteger(cost) ? cost : undefined;
 }
 
 function selfStealCostsForAgendaAtZone(

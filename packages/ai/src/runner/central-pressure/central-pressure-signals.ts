@@ -1029,6 +1029,10 @@ export function buildRunnerCentralPressureSignals({
             evaluation,
             candidates,
           );
+          const knownAgendaFundingAvailable =
+            evaluation.accessPayoff === "agenda" &&
+            evaluation.accessFacts.knownTargetDefinitionIds.length > 0 &&
+            fundingSupport?.routeAssessment.status === "covered_guaranteed";
           // An admitted, fully quoted HQ success-window setup has a concrete
           // access payoff. The one-credit information-probe budget must not
           // replace that route's already validated path and follow-up budget.
@@ -1093,9 +1097,11 @@ export function buildRunnerCentralPressureSignals({
                   ? 1_400 + evaluation.score
                   : hqSuccessWindowRoute
                     ? Math.max(320, evaluation.score)
-                    : evaluation.recommendation === "run_now"
-                      ? evaluation.score
-                      : Math.min(evaluation.score, 60)) +
+                    : knownAgendaFundingAvailable
+                      ? Math.max(320, evaluation.score)
+                      : evaluation.recommendation === "run_now"
+                        ? evaluation.score
+                        : Math.min(evaluation.score, 60)) +
               bestMultiRunRouteValue,
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"

@@ -847,14 +847,13 @@ function assessKnownRezzedIcePathInternal(
         activeRunPathEffects,
       )
         ? undefined
-        : minimumCreditsToBreakEndTheRunSubroutines(
+        : minimumCreditsToBreakVisibleSubroutines(
             effectiveIceForQuote(effectiveIce, quote),
             rigCardsForEncounter,
-            1,
+            [subroutine],
             breakerStrengths,
             additionalBreakCostPerSubroutine,
             breakerState.pendingFreeBreaks,
-            undefined,
             deflectorContext.allowRandomBreakAttempts,
             creditBudget,
           );

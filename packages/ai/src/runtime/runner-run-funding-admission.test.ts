@@ -7,6 +7,47 @@ import {
 } from "./runner-run-funding-admission";
 
 describe("runner run funding admission", () => {
+  it("preserves explicitly bound and unknown-ICE reserves during an urgent contest", () => {
+    const target = runTarget("run-remote", "remote_1", {
+      pathPassability: "reachable",
+      creditsAfterRun: 1,
+      score: 500,
+      scoreThreat: true,
+      accessPayoff: "score_threat",
+      recommendation: "gain_credits_first",
+      routeQuote: routeQuote(0),
+    });
+    expect(
+      assessRunnerRunFundingAdmission({
+        target,
+        runTargets: [target],
+        economy: { minimumCreditFloor: 3 },
+        requiredPostRunReserve: 4,
+      }),
+    ).toMatchObject({
+      admitted: true,
+      concreteFundingGap: 3,
+      postRunFloorGap: 0,
+      requiredPostRunReserveGap: 3,
+    });
+    target.prerunReserveQuote = {
+      ...target.prerunReserveQuote!,
+      status: "blocked",
+      creditGap: 2,
+    };
+    expect(
+      assessRunnerRunFundingAdmission({
+        target,
+        runTargets: [target],
+        economy: { minimumCreditFloor: 3 },
+      }),
+    ).toMatchObject({
+      admitted: true,
+      concreteFundingGap: 2,
+      prerunReserveCreditGap: 2,
+      targetDirectlyConvertible: false,
+    });
+  });
   it("rejects funding when the target already converts while preserving the floor", () => {
     const target = runTarget("run-remote", "remote_1", {
       pathPassability: "reachable",
@@ -178,7 +219,7 @@ describe("runner run funding admission", () => {
       admitted: false,
       reasonCode: "target_already_directly_convertible",
       routeFundingGap: 0,
-      postRunFloorGap: 2,
+      postRunFloorGap: 0,
       targetDirectlyConvertible: true,
     });
   });
@@ -252,7 +293,7 @@ describe("runner run funding admission", () => {
         creditsAfterRun: 1,
         routeQuote: routeQuote(1),
       },
-      2,
+      1,
     ],
     [
       "negative post-run credits",
@@ -260,7 +301,7 @@ describe("runner run funding admission", () => {
         creditsAfterRun: -1,
         routeQuote: routeQuote(0),
       },
-      4,
+      1,
     ],
   ])(
     "does not hide %s behind the urgent floor override",
@@ -339,7 +380,7 @@ describe("runner run funding admission", () => {
     ).toMatchObject({
       admitted: true,
       reasonCode: "concrete_funding_gap_admitted",
-      concreteFundingGap: 8,
+      concreteFundingGap: 5,
       urgentScoreThreat: true,
     });
   });

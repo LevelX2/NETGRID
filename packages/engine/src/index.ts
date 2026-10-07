@@ -6,6 +6,7 @@
  */
 export { quoteCorpRestrictedCreditRoute } from "./game/view/corp-restricted-credit-route-quote";
 export { projectVisibleIceAfterPassiveRunnerInstall } from "./ability-engine/ice-strength-modifiers";
+export { quoteAgendaDefinitionSelfStealCreditCost } from "./ability-engine/steal-cost-modifiers";
 
 export {
   getLegalActions,

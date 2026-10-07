@@ -407,6 +407,21 @@ geht an den bestehenden Funding-Owner und sperrt auch eine gezielte
 Bypass-Vorbereitung für dieselbe Agenda. Bekannte Trash-Ziele und gequotete
 Access-Replacements behalten ihre eigenen Zugriffsverträge.
 
+Bei aus der side-sicheren Central-Memory identifizierten Agendas ergänzt die
+kanonische Engine-Definitionsquote die aktuelle öffentliche Fortquote um die
+Eigenkosten der Agenda. Mehrere bekannte Kandidaten reservieren den höchsten
+Einzelpreis; eine bloße Typbeobachtung erfindet keine Kartenidentität. Der
+bestehende Central-Parent behält ein solches Ziel, wenn seine exakt gebundene
+Finanzierungsroute garantiert gedeckt ist, auch wenn der aktuell noch
+unfinanzierte Zugriff lokal keinen positiven Wert besitzt.
+
+Ein dringender Score-Contest finanziert die echte Pfad- und Zugriffslücke bis
+zum nichtnegativen Restbudget. Der allgemeine Liquiditätsboden vergrößert
+diesen Fehlbetrag nicht; ausdrücklich gebundene Reserven und unbekannte
+Folgerisiken gelten weiterhin. Eine gequotete Zahlung-oder-ETR-Subroutine wird
+mit genau dieser Subroutine an die Engine-Breakerquote gebunden, damit eine
+billigere oder kostenlose Brechung in derselben Pfadberechnung erhalten bleibt.
+
 Die Quote zertifiziert `blockedOnlyByDamage` erst nach Prüfung aller bekannten
 Folge-Encounters. Der allgemeine Grund `harmful_unbroken_run_effect` genügt
 nicht: Eine Break-/Jack-out-Sperre ist kein bloßer Handpufferverstoß, und eine

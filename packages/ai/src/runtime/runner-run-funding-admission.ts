@@ -42,11 +42,14 @@ export type AssessRunnerRunFundingAdmissionParams = {
 export function assessRunnerRunFundingAdmission(
   params: AssessRunnerRunFundingAdmissionParams,
 ): RunnerRunFundingAdmission {
-  const minimumCreditFloor = nonNegative(params.economy.minimumCreditFloor);
+  const urgentScoreThreat = urgentScoreThreatFor(params);
+  const minimumCreditFloor = urgentScoreThreat
+    ? 0
+    : nonNegative(params.economy.minimumCreditFloor);
   const targetDirectlyConvertible = runnerRunTargetIsDirectlyConvertible({
     target: params.target,
     economy: params.economy,
-    allowCreditFloorOverride: urgentScoreThreatFor(params),
+    allowCreditFloorOverride: urgentScoreThreat,
     ...(params.requiredPostRunReserve !== undefined
       ? { requiredPostRunReserve: params.requiredPostRunReserve }
       : {}),
@@ -71,7 +74,6 @@ export function assessRunnerRunFundingAdmission(
     requiredPostRunReserveGap,
     nonNegative(params.target.prerunReserveQuote?.creditGap ?? 0),
   );
-  const urgentScoreThreat = urgentScoreThreatFor(params);
   const sameServerDirectlyConvertibleActionIds = directAlternativeActionIds({
     target: params.target,
     runTargets: params.runTargets,
