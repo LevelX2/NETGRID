@@ -1298,7 +1298,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "economy.rez_discount",
           "ice.etr",
           "tax.runner_persistent",
@@ -1313,7 +1312,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source"
@@ -4655,6 +4653,7 @@
           "run.event_tempo",
           "run.lock"
         ],
+        "tacticSignals": ["run.lock"],
         "actionTacticSignals": [
           "access.hq_multiaccess",
           "access.payoff",
@@ -8435,6 +8434,7 @@
           "corp_ice.rez_paid_scaling",
           "corp_ice.run_lock",
           "corp_ice.trace_source",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -11068,8 +11068,6 @@
         "functionSignals": [
           "access.archives_safe_exception",
           "access.rnd_reveal_requirement",
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
           "access.punish",
           "remote.ambush"
         ],
@@ -11077,8 +11075,6 @@
           "access.archives_safe_exception",
           "access.punish",
           "access.rnd_reveal_requirement",
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
           "punish.payoff"
         ],
         "actionTacticSignals": [
@@ -11119,7 +11115,6 @@
           "access_effect",
           "install_asset",
           "rez_card",
-          "run_start_counter_damage",
           "runner_counter",
           "runner_counter_removal",
           "subtype_ambush",
@@ -35006,6 +35001,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -35488,7 +35484,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source",
@@ -35502,7 +35497,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source"
@@ -36378,8 +36372,6 @@
         "functionSignals": [
           "corp_ice.tag_source",
           "corp_ice.trace_source",
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
           "tag.source",
           "tax.runner_persistent",
           "trace.source",
@@ -36387,8 +36379,6 @@
         ],
         "tacticSignals": [
           "corp_ice.trace_source",
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
           "tag.source",
           "tax.runner_persistent",
           "trace.source"
@@ -36429,7 +36419,6 @@
           "encounter_ice",
           "install_ice",
           "rez_ice",
-          "run_start_counter_damage",
           "runner_counter",
           "runner_counter_removal",
           "subtype_sentry",
@@ -36690,6 +36679,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -36823,6 +36813,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -37247,6 +37238,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -37732,6 +37724,13 @@
         ],
         "effects": [
           {
+            "kind": "run_lock",
+            "scope": "run_path",
+            "timing": "encounter",
+            "target": "corp_ice.jack_out_lock",
+            "finite": true
+          },
+          {
             "kind": "trace",
             "scope": "runner",
             "timing": "encounter",
@@ -37756,20 +37755,26 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.jack_out_lock",
           "corp_ice.tag_source",
           "corp_ice.trace_source",
+          "run.lock",
           "tag.source",
           "trace.source"
         ],
         "tacticSignals": [
+          "corp_ice.jack_out_lock",
           "corp_ice.trace_source",
+          "run.lock",
           "tag.source",
           "trace.source"
         ],
         "actionTacticSignals": [
           "corp.ice_protection",
+          "effect:run_lock",
           "effect:tag_source",
           "effect:trace",
+          "effect_scope:run_path",
           "effect_scope:runner",
           "effect_scope:trace",
           "effect_timing:encounter",
@@ -38165,7 +38170,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source",
@@ -38180,7 +38184,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source"
@@ -38910,6 +38913,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -46706,18 +46710,8 @@
             "finite": true
           }
         ],
-        "functionSignals": [
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
-          "access.punish",
-          "remote.ambush"
-        ],
-        "tacticSignals": [
-          "access.punish",
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
-          "remote.ambush"
-        ],
+        "functionSignals": ["access.punish", "remote.ambush"],
+        "tacticSignals": ["access.punish", "remote.ambush"],
         "actionTacticSignals": [
           "access.corp_ambush",
           "access.payoff",
@@ -46751,7 +46745,6 @@
         "requiredMechanics": [
           "access_effect",
           "rez_card",
-          "run_start_counter_damage",
           "runner_counter",
           "runner_counter_removal",
           "subtype_ambush",

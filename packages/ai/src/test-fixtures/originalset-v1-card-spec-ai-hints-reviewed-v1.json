@@ -2753,14 +2753,8 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "icebreaker_support",
-          "program"
-        ],
-        "planRoles": [
-          "build_rig",
-          "safe_probe_run"
-        ],
+        "roles": ["icebreaker_support", "program"],
+        "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "targetProfiles": [
           {
@@ -2771,10 +2765,7 @@
               "high_strength_ice",
               "relevant_server_ice"
             ],
-            "avoid": [
-              "irrelevant_server_ice",
-              "already_cheap_to_break"
-            ],
+            "avoid": ["irrelevant_server_ice", "already_cheap_to_break"],
             "kind": "use_target",
             "timing": "after_successful_run",
             "targetType": "installed_ice",
@@ -2795,9 +2786,7 @@
             "amountKind": "fixed",
             "bankable": false,
             "repeatable": true,
-            "actionTypes": [
-              "purge_virus_counters"
-            ]
+            "actionTypes": ["purge_virus_counters"]
           }
         ],
         "effects": [
@@ -2833,16 +2822,8 @@
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
-        "conditions": [
-          {
-            "kind": "requires_successful_run"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 1,
-          "memory": 1
-        },
+        "conditions": [{ "kind": "requires_successful_run" }],
+        "costProfile": { "clicks": 1, "credits": 1, "memory": 1 },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2851,10 +2832,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": [
-          "install_program",
-          "subtype_virus"
-        ]
+        "requiredMechanics": ["install_program", "subtype_virus"]
       }
     },
     {
@@ -4213,18 +4191,10 @@
           "target.runner_program_trash"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_rezzed_ice"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_rezzed_ice" }
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0,
-          "memory": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
         "riskTags": ["timing_window", "self_trash", "dynamic_rez_cost"],
         "quality": {
           "hintReviewed": true,
@@ -5680,16 +5650,10 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [
-          "score_now"
-        ],
+        "planRoles": ["score_now"],
         "valueHints": {},
-        "strategicRole": [
-          "payoff_anchor"
-        ],
-        "lineSupport": [
-          "score_closeout"
-        ],
+        "strategicRole": ["payoff_anchor"],
+        "lineSupport": ["score_closeout"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype",
@@ -5704,14 +5668,8 @@
                 "finite": true
               }
             ],
-            "functionSignals": [
-              "runner.agenda_point_conversion"
-            ],
-            "conditions": [
-              {
-                "kind": "requires_liberated_black_ops_agenda"
-              }
-            ]
+            "functionSignals": ["runner.agenda_point_conversion"],
+            "conditions": [{ "kind": "requires_liberated_black_ops_agenda" }]
           }
         ],
         "effects": [
@@ -5725,24 +5683,15 @@
             "finite": true
           }
         ],
-        "functionSignals": [
-          "runner.agenda_point_conversion"
-        ],
+        "functionSignals": ["runner.agenda_point_conversion"],
         "actionTacticSignals": [
           "effect:scored_agenda_action",
           "effect_scope:runner",
           "effect_timing:action",
           "runner.agenda_point_conversion"
         ],
-        "conditions": [
-          {
-            "kind": "requires_liberated_black_ops_agenda"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
+        "conditions": [{ "kind": "requires_liberated_black_ops_agenda" }],
+        "costProfile": { "clicks": 1, "credits": 0 },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9894,6 +9843,7 @@
                 "zone": "stack_top",
                 "targetCardType": "program",
                 "lookCount": 5,
+                "costPerTaken": 1,
                 "showToOpponent": true,
                 "shuffleAfter": true
               }
@@ -9914,6 +9864,7 @@
             "zone": "stack_top",
             "targetCardType": "program",
             "lookCount": 5,
+            "costPerTaken": 1,
             "showToOpponent": true,
             "shuffleAfter": true
           }
@@ -10773,9 +10724,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["resource"],
         "planRoles": ["build_rig", "economy"],
-        "valueHints": {
-          "economy": 1
-        },
+        "valueHints": { "economy": 1 },
         "effects": [
           {
             "kind": "economy",
@@ -10798,15 +10747,8 @@
           "effect_scope:runner",
           "effect_timing:after_successful_run"
         ],
-        "conditions": [
-          {
-            "kind": "requires_successful_run"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 2
-        },
+        "conditions": [{ "kind": "requires_successful_run" }],
+        "costProfile": { "clicks": 1, "credits": 2 },
         "riskTags": ["resource_trash_if_tagged", "unique_resource"],
         "quality": {
           "hintReviewed": true,
@@ -10927,6 +10869,7 @@
               {
                 "zone": "stack_top",
                 "lookCount": 4,
+                "costPerTaken": 1,
                 "showToOpponent": true,
                 "shuffleAfter": true
               }
@@ -10950,6 +10893,7 @@
           {
             "zone": "stack_top",
             "lookCount": 4,
+            "costPerTaken": 1,
             "showToOpponent": true,
             "shuffleAfter": true
           }
@@ -11423,6 +11367,7 @@
                 "zone": "stack_top",
                 "targetCardType": "hardware",
                 "lookCount": 5,
+                "costPerTaken": 1,
                 "showToOpponent": true,
                 "shuffleAfter": true
               }
@@ -11464,6 +11409,7 @@
             "zone": "stack_top",
             "targetCardType": "hardware",
             "lookCount": 5,
+            "costPerTaken": 1,
             "showToOpponent": true,
             "shuffleAfter": true
           },
@@ -12855,14 +12801,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_2pt",
-          "no_ability_agenda",
-          "economy",
-          "resource"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_2pt", "economy", "resource"],
         "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
         "valueHints": { "economy": 2 },
         "actionCapabilitySemantics": [
@@ -13172,7 +13111,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_1pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_1pt"],
         "planRoles": [],
         "valueHints": { "economy": 1 },
         "effects": [
@@ -13730,12 +13669,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_3pt",
-          "no_ability_agenda"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
         "planRoles": [
           "corp_score_agenda",
           "corp_hand_size_support",
@@ -13751,17 +13685,13 @@
             "amount": 2
           }
         ],
-        "functionSignals": [
-          "setup.hand_size"
-        ],
+        "functionSignals": ["setup.hand_size"],
         "actionTacticSignals": [
           "effect:hand_size_modifier",
           "effect_scope:corp",
           "effect_timing:persistent"
         ],
-        "riskTags": [
-          "hidden_until_score_or_access"
-        ],
+        "riskTags": ["hidden_until_score_or_access"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -13784,13 +13714,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_2pt",
-          "no_ability_agenda",
-          "economy"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_2pt", "economy"],
         "planRoles": [],
         "valueHints": {},
         "actionCapabilitySemantics": [
@@ -13895,7 +13819,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_2pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_2pt"],
         "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["enabler"],
@@ -14060,7 +13984,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_3pt"],
         "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
@@ -14223,14 +14147,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_2pt",
-          "no_ability_agenda",
-          "economy",
-          "resource"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_2pt", "economy", "resource"],
         "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
         "valueHints": { "economy": 2 },
         "actionCapabilitySemantics": [
@@ -14357,13 +14274,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "agenda",
-          "score_plan",
-          "agenda_6pt",
-          "no_ability_agenda",
-          "economy"
-        ],
+        "roles": ["agenda", "score_plan", "agenda_6pt", "economy"],
         "planRoles": ["corp_score_agenda", "score_now"],
         "valueHints": {},
         "strategicRole": ["win_condition"],
@@ -14598,7 +14509,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_2pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_2pt"],
         "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["enabler"],
@@ -14994,7 +14905,7 @@
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
+        "roles": ["agenda", "score_plan", "agenda_3pt"],
         "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
@@ -15416,6 +15327,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -15886,7 +15798,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source",
@@ -15900,7 +15811,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source"
@@ -16758,8 +16668,6 @@
         "functionSignals": [
           "corp_ice.tag_source",
           "corp_ice.trace_source",
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
           "tag.source",
           "tax.runner_persistent",
           "trace.source",
@@ -16767,8 +16675,6 @@
         ],
         "tacticSignals": [
           "corp_ice.trace_source",
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
           "tag.source",
           "tax.runner_persistent",
           "trace.source"
@@ -16809,7 +16715,6 @@
           "encounter_ice",
           "install_ice",
           "rez_ice",
-          "run_start_counter_damage",
           "runner_counter",
           "runner_counter_removal",
           "subtype_sentry",
@@ -17062,6 +16967,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -17193,6 +17099,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -17607,6 +17514,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -18082,6 +17990,13 @@
         ],
         "effects": [
           {
+            "kind": "run_lock",
+            "scope": "run_path",
+            "timing": "encounter",
+            "target": "corp_ice.jack_out_lock",
+            "finite": true
+          },
+          {
             "kind": "trace",
             "scope": "runner",
             "timing": "encounter",
@@ -18106,20 +18021,26 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.jack_out_lock",
           "corp_ice.tag_source",
           "corp_ice.trace_source",
+          "run.lock",
           "tag.source",
           "trace.source"
         ],
         "tacticSignals": [
+          "corp_ice.jack_out_lock",
           "corp_ice.trace_source",
+          "run.lock",
           "tag.source",
           "trace.source"
         ],
         "actionTacticSignals": [
           "corp.ice_protection",
+          "effect:run_lock",
           "effect:tag_source",
           "effect:trace",
+          "effect_scope:run_path",
           "effect_scope:runner",
           "effect_scope:trace",
           "effect_timing:encounter",
@@ -18507,7 +18428,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source",
@@ -18522,7 +18442,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source"
@@ -19234,6 +19153,7 @@
           "corp.remote_protection",
           "corp_ice.trace_source",
           "ice.etr",
+          "run.lock",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -21763,12 +21683,8 @@
             "finite": true
           }
         ],
-        "functionSignals": [
-          "archives.corp_recovery"
-        ],
-        "tacticSignals": [
-          "archives.corp_recovery"
-        ],
+        "functionSignals": ["archives.corp_recovery"],
+        "tacticSignals": ["archives.corp_recovery"],
         "actionTacticSignals": [
           "effect:card_recovery",
           "effect:search",
@@ -21778,9 +21694,7 @@
         ],
         "conditions": [{ "kind": "requires_archives_card" }],
         "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": [
-          "archives_dependency"
-        ],
+        "riskTags": ["archives_dependency"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -21789,10 +21703,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": [
-          "archives_to_hq",
-          "play_operation"
-        ]
+        "requiredMechanics": ["archives_to_hq", "play_operation"]
       }
     },
     {
@@ -23919,24 +23830,13 @@
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "draw",
-          "asset"
-        ],
-        "planRoles": [
-          "corp_hand_size_support",
-          "corp_repeatable_draw"
-        ],
-        "valueHints": {
-          "remoteRootValue": 1
-        },
+        "roles": ["draw", "asset"],
+        "planRoles": ["corp_hand_size_support", "corp_repeatable_draw"],
+        "valueHints": { "remoteRootValue": 1 },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_draw_cards",
-            "costProfile": {
-              "clicks": 1,
-              "credits": 1
-            },
+            "costProfile": { "clicks": 1, "credits": 1 },
             "effects": [
               {
                 "kind": "draw",
@@ -23948,9 +23848,7 @@
                 "finite": true
               }
             ],
-            "functionSignals": [
-              "setup.draw"
-            ]
+            "functionSignals": ["setup.draw"]
           }
         ],
         "effects": [
@@ -23980,15 +23878,8 @@
             "finite": true
           }
         ],
-        "functionSignals": [
-          "draw.corp_draw",
-          "setup.draw",
-          "setup.hand_size"
-        ],
-        "tacticSignals": [
-          "draw.card",
-          "draw.corp_draw"
-        ],
+        "functionSignals": ["draw.corp_draw", "setup.draw", "setup.hand_size"],
+        "tacticSignals": ["draw.card", "draw.corp_draw"],
         "actionTacticSignals": [
           "draw.card",
           "effect:draw",
@@ -23997,14 +23888,8 @@
           "effect_timing:action",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 2
-        },
-        "riskTags": [
-          "hidden_zone_change",
-          "credit_cost"
-        ],
+        "costProfile": { "clicks": 1, "credits": 2 },
+        "riskTags": ["hidden_zone_change", "credit_cost"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -25213,13 +25098,8 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [
-          "corp_hand_size_support",
-          "hq_discard_buffer"
-        ],
-        "valueHints": {
-          "remoteRootValue": 1
-        },
+        "planRoles": ["corp_hand_size_support", "hq_discard_buffer"],
+        "valueHints": { "remoteRootValue": 1 },
         "effects": [
           {
             "kind": "hand_size_modifier",
@@ -25229,17 +25109,13 @@
             "amount": 2
           }
         ],
-        "functionSignals": [
-          "setup.hand_size"
-        ],
+        "functionSignals": ["setup.hand_size"],
         "actionTacticSignals": [
           "effect:hand_size_modifier",
           "effect_scope:corp",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "credits": 0
-        },
+        "costProfile": { "credits": 0 },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -25877,29 +25753,12 @@
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
-        "roles": [
-          "ambush",
-          "net_damage",
-          "hidden_zone"
-        ],
-        "planRoles": [
-          "remote_asset_trap"
-        ],
-        "valueHints": {
-          "remoteRootValue": 1,
-          "damage": 3
-        },
-        "strategicRole": [
-          "punish_payoff",
-          "enabler"
-        ],
-        "strategyAnchors": [
-          "corp.ambush_bluff"
-        ],
-        "lineSupport": [
-          "corp.ambush_bluff",
-          "corp.tag_trace_punish"
-        ],
+        "roles": ["ambush", "net_damage", "hidden_zone"],
+        "planRoles": ["remote_asset_trap"],
+        "valueHints": { "remoteRootValue": 1, "damage": 3 },
+        "strategicRole": ["punish_payoff", "enabler"],
+        "strategyAnchors": ["corp.ambush_bluff"],
+        "lineSupport": ["corp.ambush_bluff", "corp.tag_trace_punish"],
         "strategySupportPairs": [
           {
             "strategyId": "corp.ambush_bluff",
@@ -25917,9 +25776,7 @@
             "strategyId": "corp.tag_trace_punish",
             "role": "enabler",
             "roleDetail": "access_tag_source",
-            "evidence": [
-              "access.corp_net_damage_ambush"
-            ],
+            "evidence": ["access.corp_net_damage_ambush"],
             "confidence": "medium",
             "rationale": "Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
           }
@@ -25981,16 +25838,10 @@
           "remote.ambush"
         ],
         "conditions": [
-          {
-            "kind": "requires_accessed_card"
-          },
-          {
-            "kind": "requires_rnd_top"
-          }
+          { "kind": "requires_accessed_card" },
+          { "kind": "requires_rnd_top" }
         ],
-        "costProfile": {
-          "credits": 0
-        },
+        "costProfile": { "credits": 0 },
         "riskTags": [
           "hidden_info_barrier",
           "access_window",
@@ -26688,18 +26539,8 @@
             "finite": true
           }
         ],
-        "functionSignals": [
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
-          "access.punish",
-          "remote.ambush"
-        ],
-        "tacticSignals": [
-          "access.punish",
-          "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter",
-          "remote.ambush"
-        ],
+        "functionSignals": ["access.punish", "remote.ambush"],
+        "tacticSignals": ["access.punish", "remote.ambush"],
         "actionTacticSignals": [
           "access.corp_ambush",
           "access.payoff",
@@ -26733,7 +26574,6 @@
         "requiredMechanics": [
           "access_effect",
           "rez_card",
-          "run_start_counter_damage",
           "runner_counter",
           "runner_counter_removal",
           "subtype_ambush",

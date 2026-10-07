@@ -596,7 +596,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "economy.rez_discount",
           "ice.etr",
           "tax.runner_persistent",
@@ -611,7 +610,6 @@
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "damage.payoff",
-          "defense.corp_run_end_counter",
           "ice.etr",
           "tax.runner_persistent",
           "trace.source"
@@ -3885,6 +3883,7 @@
           "run.event_tempo",
           "run.lock"
         ],
+        "tacticSignals": ["run.lock"],
         "actionTacticSignals": [
           "access.hq_multiaccess",
           "access.payoff",
@@ -4414,6 +4413,12 @@
         "planRoles": ["find_economy"],
         "valueHints": { "economy": 2 },
         "strategicRole": ["support_tool"],
+        "actionPlanOwnerBindings": [
+          {
+            "capabilityKey": "trash_source_action",
+            "owner": "runner.resource_lifecycle"
+          }
+        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trash_source_action",

@@ -140,6 +140,24 @@ zustandsgebundenen marginalen Nutzen. Regressionen prüfen sowohl die echten
 generierten Hints im Standarddeck als auch Admission und tatsächlich gewählte
 LegalAction. Selbst vorgegebene Rollen testen nur ihren jeweiligen Consumer.
 
+## Runner-Counter und Ausstiegssperren
+
+`runnerCounterEffects` erzeugt persistente Schadensfunktionen und die
+Mechanik `run_start_counter_damage` ausschließlich bei einem typisierten
+`runStart.kind: "damage"`. Start-of-turn-Tags, Creditverlust und reine
+Counterentfernung sind keine Schadensquellen. Der Countervertrag besitzt
+keine Run-Ende-Wirkung; `defense.corp_run_end_counter` stammt weiterhin aus
+einer tatsächlichen scored-agenda-Wirkung. Beträge, Timing und Entfernung
+bleiben getrennte mechanische Facts für die bestehenden Plan-Consumer.
+
+`printedSubroutines.run_duration_cannot_jack_out` projiziert einen
+`run_lock` für den Runpfad im Encounter und die Funktionen
+`corp_ice.jack_out_lock`/`run.lock`. Die Taktikprojektion bewahrt die
+mechanisch belegten Sperrfunktionen. Eine Ausstiegssperre beendet den Run
+nicht selbst und ersetzt keine Tracewirkung. Reale Kartenprofile und native
+Engine-Checkpoints prüfen die Projektion, den bestehenden Defense-/Window-
+Owner, LegalAction-Bindung und deterministisches Replay.
+
 ## Exakt gebundene variable Aktionskosten
 
 `actions/action-cost-timing.ts` behandelt einen vollständig gebundenen

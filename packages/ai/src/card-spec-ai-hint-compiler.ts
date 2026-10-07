@@ -4380,13 +4380,16 @@ function deriveExtendedRequiredMechanics(
   for (const window of engine.fortRunWindows ?? [])
     if (window.kind === "move_self_to_outermost_position_on_other_fort")
       mechanics.add("start_run_ice_move");
-  if (engine.runnerCounterEffects !== undefined)
-    for (const token of [
-      "runner_counter",
-      "run_start_counter_damage",
-      "runner_counter_removal",
-    ])
-      mechanics.add(token);
+  if (engine.runnerCounterEffects !== undefined) {
+    mechanics.add("runner_counter");
+    mechanics.add("runner_counter_removal");
+    if (
+      engine.runnerCounterEffects.some(
+        (counter) => counter.runStart?.kind === "damage",
+      )
+    )
+      mechanics.add("run_start_counter_damage");
+  }
   if (engine.characteristics.subtypes.includes("region"))
     mechanics.add("region_upgrade");
   for (const subtype of engine.characteristics.subtypes)
@@ -8957,6 +8960,14 @@ function deriveClosedExtendedHintEffects(
         target: "corp_ice.next_ice_break_lock",
         finite: true,
       });
+    if (subroutine.kind === "run_duration_cannot_jack_out")
+      effects.push({
+        kind: "run_lock",
+        scope: "run_path",
+        timing: "encounter",
+        target: "corp_ice.jack_out_lock",
+        finite: true,
+      });
     if (subroutine.kind === "trash_program")
       effects.push({
         kind: "program_trash",
@@ -10133,6 +10144,10 @@ function derivedFunctionSignals(
         "risk.random_outcome",
       ])
         signals.add(signal);
+    if (subroutine.kind === "run_duration_cannot_jack_out") {
+      signals.add("corp_ice.jack_out_lock");
+      signals.add("run.lock");
+    }
     if (subroutine.kind === "trash_program")
       signals.add("corp_ice.program_trash");
     if (subroutine.kind === "deflect_run") signals.add("run.corp_redirect");
@@ -10157,12 +10172,12 @@ function derivedFunctionSignals(
     engine.relativeIce.strengthBonusPerCount !== undefined
   )
     signals.add("ice.strength_modifier");
-  if (engine.runnerCounterEffects !== undefined)
-    for (const signal of [
-      "damage.corp_persistent_damage_counter",
-      "defense.corp_run_end_counter",
-    ])
-      signals.add(signal);
+  if (
+    engine.runnerCounterEffects?.some(
+      (counter) => counter.runStart?.kind === "damage",
+    )
+  )
+    signals.add("damage.corp_persistent_damage_counter");
   for (const window of engine.fortRunWindows ?? []) {
     if (
       window.kind === "move_self_to_different_position_on_same_fort" ||
@@ -10759,6 +10774,7 @@ function derivedTacticSignals(
       "condition.runner_has_one_or_more_tags",
       "corp_ice.brain_damage",
       "corp_ice.end_run",
+      "corp_ice.jack_out_lock",
       "corp_ice.mobile_position_change",
       "corp_ice.multi_end_run",
       "corp_ice.next_ice_break_lock",
@@ -10780,6 +10796,7 @@ function derivedTacticSignals(
       "ice.corp_targeted_strength_boost",
       "ice.etr",
       "info.reveal_recovered_cards_to_runner",
+      "run.lock",
       "risk.action_loss",
       "risk.brain_damage_self_inflicted",
       "risk.double_operation_action_cost",

@@ -137,8 +137,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      // Reviewed repeatable tag prevention also corrects Vintage Camaro.
-      "sha256:421f6bf7731d5e43848ce018041440c3cad9501cb720017ef033275d6ad8da50",
+      // Reviewed typed counter semantics and run locks are included in this partition.
+      "sha256:fb5528b124db9ef99abc09abb962fa63873b5bfd57b9552b37f375fc62eef4b6",
     );
   });
 
