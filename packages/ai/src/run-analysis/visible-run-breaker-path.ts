@@ -578,6 +578,32 @@ export function structuredBreakerAssessment(params: {
 }): BreakAssessment | undefined {
   if (!params.breakerCard.definitionId || !params.ice.definitionId)
     return undefined;
+  let randomRunStrengthState = params.breakerCard.randomRunStrengthState;
+  if (randomRunStrengthState?.status === "resolved") {
+    if (
+      !Number.isSafeInteger(params.breakerCard.strength) ||
+      params.breakerCard.strength !==
+        randomRunStrengthState.actualStrength +
+          randomRunStrengthState.currentStrengthAdjustment ||
+      !Number.isSafeInteger(params.currentBreakerStrength)
+    ) {
+      throw new Error("Invalid current public random breaker strength.", {
+        cause: {
+          code: "invalid_hypothetical_random_breaker_quote_basis",
+          owner: "ai.run-analysis.structuredBreakerAssessment",
+          cardInstanceId: params.breakerCard.instanceId,
+          visibleStrength: params.breakerCard.strength,
+          requestedStrength: params.currentBreakerStrength,
+        },
+      });
+    }
+    randomRunStrengthState = {
+      status: "resolved",
+      actualStrength: randomRunStrengthState.actualStrength,
+      currentStrengthAdjustment:
+        params.currentBreakerStrength - randomRunStrengthState.actualStrength,
+    };
+  }
   const quote = visibleBreakerEncounterQuote({
     breakerDefinitionId: params.breakerCard.definitionId,
     breakerInstanceId: params.breakerCard.instanceId,
@@ -588,9 +614,7 @@ export function structuredBreakerAssessment(params: {
     ...(params.breakerCard.selectedSubtype
       ? { selectedSubtype: params.breakerCard.selectedSubtype }
       : {}),
-    ...(params.breakerCard.randomRunStrengthState
-      ? { randomRunStrengthState: params.breakerCard.randomRunStrengthState }
-      : {}),
+    ...(randomRunStrengthState ? { randomRunStrengthState } : {}),
     iceDefinitionId: params.ice.definitionId,
     ...(params.ice.instanceId ? { iceInstanceId: params.ice.instanceId } : {}),
     ...(params.ice.subtypes ? { iceSubtypes: params.ice.subtypes } : {}),

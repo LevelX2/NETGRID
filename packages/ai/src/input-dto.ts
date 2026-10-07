@@ -1899,6 +1899,37 @@ function sanitizeRunnerServerStealCostQuote(
   };
 }
 
+function sanitizeVisibleRandomRunStrength(
+  card: VisibleCard,
+): VisibleCard["randomRunStrengthState"] {
+  const state = card.randomRunStrengthState;
+  if (!card.known || state === undefined) return undefined;
+  if (state?.status === "unresolved") return { status: "unresolved" };
+  if (
+    state?.status === "resolved" &&
+    Number.isSafeInteger(state.actualStrength) &&
+    state.actualStrength >= 0 &&
+    Number.isSafeInteger(state.currentStrengthAdjustment) &&
+    Number.isSafeInteger(card.strength) &&
+    card.strength === state.actualStrength + state.currentStrengthAdjustment
+  ) {
+    return {
+      status: "resolved",
+      actualStrength: state.actualStrength,
+      currentStrengthAdjustment: state.currentStrengthAdjustment,
+    };
+  }
+  throw new Error("Invalid public run-start random breaker strength.", {
+    cause: {
+      code: "invalid_public_random_run_strength",
+      owner: "ai.input-dto.sanitizeVisibleRandomRunStrength",
+      cardInstanceId: card.instanceId,
+      strength: card.strength,
+      status: state?.status,
+    },
+  });
+}
+
 function sanitizeVisibleCardWithOptions(
   card: VisibleCard,
   options: {
@@ -1920,6 +1951,7 @@ function sanitizeVisibleCardWithOptions(
     expectedCorpCounterBankStateVersion?: number;
   } = {},
 ): VisibleCard {
+  const randomRunStrengthState = sanitizeVisibleRandomRunStrength(card);
   const effectiveRunQuote = card.effectiveRunQuote;
   const effectivePostRezRunQuote = card.effectivePostRezRunQuote;
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
@@ -2219,6 +2251,7 @@ function sanitizeVisibleCardWithOptions(
       ? { advancementRequirement: card.advancementRequirement }
       : {}),
     ...(card.strength !== undefined ? { strength: card.strength } : {}),
+    ...(randomRunStrengthState ? { randomRunStrengthState } : {}),
     ...(card.known && card.strengthAfterEncounter !== undefined
       ? { strengthAfterEncounter: card.strengthAfterEncounter }
       : {}),

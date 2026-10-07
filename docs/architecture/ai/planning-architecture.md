@@ -418,6 +418,18 @@ verbraucht sie vor Credits aus dem Pool und reicht nur ihren verbleibenden
 Betrag an die Restpfadquote weiter. Sie zählen nicht als verbleibende liquide
 Reserve. Runstart, Pumpfolge und anschließender Break müssen dadurch dieselbe
 bezahlbare Engine-Folge anerkennen.
+Die positive KI-Input-Projektion erhält den öffentlichen
+`randomRunStrengthState` bekannter Breaker auf beiden Seiten. Vor Runstart
+bleibt die Stärke ausdrücklich ungelöst; während eines Runs bleiben die
+gewürfelte `actualStrength` und die aktuelle, auch negative
+`currentStrengthAdjustment` getrennt erhalten. Unbekannte Karten erhalten
+diese Daten nicht, widersprüchliche bekannte Zustände scheitern sichtbar.
+Der bestehende Breaker-Quoteproducer prüft zunächst den tatsächlichen
+sichtbaren Zustand. Für eine hypothetische Pumpstärke leitet er ausschließlich
+die zugehörige Anpassung aus dieser Stärke und dem unveränderten Würfelergebnis
+ab. Er mutiert weder den Breaker noch den tatsächlichen Zustand; die Engine
+validiert und bewertet weiterhin die konsistente Quote. Ein ungelöster Wurf
+bleibt eine bedingte Pfadannahme und ersetzt keine neue LegalAction.
 Die Pfadquote trennt aktuelle Encounter-Stärke von über das ICE hinaus
 gültiger Stärke. Ein bezahlter Encounter-Pump gilt für alle weiteren
 Subroutinen desselben ICE, einschließlich aufeinanderfolgender Trace-Breaks,
