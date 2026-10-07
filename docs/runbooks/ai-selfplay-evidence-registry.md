@@ -178,6 +178,14 @@ Selfplay-Gates geprüft.
 Eine aktive Paarung darf derselben bekannten Serie bereits zugeordnet werden;
 sie erhöht den Versandzähler erst bei ihrem geprüften Abschluss.
 
+Bei ausdrücklich begrenzter Durchführung darf eine vollständig versuchte
+diagnostische Paarung ebenfalls ihren Bericht abschließen. Ihr
+`reproduction.integrity` bindet `population=diagnostic`, `finalBaseGames=0`,
+die Zahl der Endstände und mindestens einen gesonderten Fehlversuch an die
+vollständige ursprüngliche Spielzahl. Alle gespeicherten Endstände behalten
+`phase=diagnostic`; eine widersprüchliche oder unvollständige Population
+scheitert. Dieser Versandcheckpoint erzeugt keine finale Siegquote.
+
 Der Bericht wird aus `export` und der festen HTML-Vorlage erzeugt. Jeder offene
 Eintrag der Verdachtsmatrix zeigt seine `SP-nnn`-Verdachtsnummer sichtbar an.
 Vor dem Versand wird er mit `record-report` als `pending`, nach eindeutigem

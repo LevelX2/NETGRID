@@ -65,6 +65,7 @@ export function buildRunnerCardDevelopmentSignals({
   exposeInformation,
   delegatedFundingActionIds,
   economy,
+  minimumHandBuffer,
   assessProgramInstallTarget,
   discardKeepScore,
   remainingClicks,
@@ -91,6 +92,7 @@ export function buildRunnerCardDevelopmentSignals({
   exposeInformation: readonly RunnerExposeInformationSignal[];
   delegatedFundingActionIds: ReadonlySet<string>;
   economy: RunnerEconomyPosture;
+  minimumHandBuffer: number;
   assessProgramInstallTarget: RunnerDevelopmentInstallServices["assessCard"];
   discardKeepScore: DiscardKeepScorer | undefined;
   remainingClicks: number;
@@ -182,6 +184,16 @@ export function buildRunnerCardDevelopmentSignals({
           )
         : undefined;
       if (executableNow && !candidate) return [];
+      if (
+        candidate?.economyProjection?.kind === "immediate_liquid" &&
+        candidate.economyProjection.timing === "immediate" &&
+        candidate.economyProjection.creditRestriction === "general" &&
+        candidate.economyProjection.netHandDelta !== undefined &&
+        input.playerView.own.gripOrHq.length +
+          candidate.economyProjection.netHandDelta <
+          Math.min(input.playerView.own.gripOrHq.length, minimumHandBuffer)
+      )
+        return [];
       if (
         candidate !== undefined &&
         confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId)

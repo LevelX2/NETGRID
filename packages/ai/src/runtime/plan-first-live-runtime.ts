@@ -2923,6 +2923,8 @@ function buildRunnerDomain(
   const currentCredits = input.playerView.own.credits;
   const remainingClicks = input.playerView.own.clicks;
   const economyReserve = runnerEconomyReserveFacts(input, economy);
+  const defenseHandBuffer = runnerDefenseHandBufferFacts(input, runTargets);
+  const { handSize, damageThreat, minimumHandBuffer } = defenseHandBuffer;
   const installedCardLiquidationChoice =
     runnerInstalledCardLiquidationChoiceSignal(input, candidates);
   const defenseSupport = runnerDefenseSupportSignals(
@@ -2943,6 +2945,7 @@ function buildRunnerDomain(
     previous,
     currentTurnKey: turnKey(input),
     reserve: economyReserve,
+    minimumHandBuffer,
     findFundingRoute: (request) =>
       runnerExactFundingRouteContract(input, candidates, request),
   });
@@ -3046,8 +3049,6 @@ function buildRunnerDomain(
       candidates,
       immediateAgendaPointTerminalWins,
     );
-  const defenseHandBuffer = runnerDefenseHandBufferFacts(input, runTargets);
-  const { handSize, damageThreat, minimumHandBuffer } = defenseHandBuffer;
   const prospectiveCreditBanks = runnerCreditBankSignals(
     input,
     candidates,
@@ -3398,6 +3399,7 @@ function buildRunnerDomain(
       exposeInformation,
       delegatedFundingActionIds,
       economy,
+      minimumHandBuffer,
       assessProgramInstallTarget,
       discardKeepScore,
       remainingClicks,

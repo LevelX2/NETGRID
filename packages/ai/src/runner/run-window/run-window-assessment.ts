@@ -486,6 +486,32 @@ export function runnerRunWindowActionAssessments(
       runRiskReassessment,
     );
   }
+  const admittedAccessPreservingContinue = input.legalActions.some(
+    (action) =>
+      action.type === "continue_run" &&
+      action.payload?.encounterContinue === true &&
+      action.payload?.encounterWillEndRun === false &&
+      assessments[action.actionId]?.admissible === true,
+  );
+  if (admittedAccessPreservingContinue) {
+    for (const action of input.legalActions) {
+      if (
+        action.type !== "continue_run" ||
+        action.payload?.encounterContinue !== true ||
+        action.payload?.encounterWillEndRun !== true ||
+        assessments[action.actionId]?.admissible !== true
+      )
+        continue;
+      assessments[action.actionId] = {
+        admissible: false,
+        evidenceCodes: [
+          "run_plan_step:continue_choice",
+          "run_plan_access_preserving_continue_available:true",
+          "run_plan_selected_continue_would_end_run:true",
+        ],
+      };
+    }
+  }
   return assessments;
 }
 
@@ -1422,29 +1448,6 @@ function runnerRunWindowPlanStepExclusion(
         "run_plan_step:encounter_resource_spend",
         `run_plan_target:${run.attackedServerId}`,
         "run_plan_known_no_current_payoff:true",
-      ].join("|"),
-    };
-  }
-
-  if (
-    action.type === "continue_run" &&
-    action.payload?.encounterContinue === true &&
-    action.payload?.encounterWillEndRun === true &&
-    input.legalActions.some(
-      (candidate) =>
-        candidate.type === "continue_run" &&
-        candidate.actionId !== action.actionId &&
-        candidate.payload?.encounterContinue === true &&
-        candidate.payload?.encounterWillEndRun === false,
-    )
-  ) {
-    return {
-      key: "run_plan_access_preserving_continue_available",
-      label: "Zugriffspfad kann erhalten werden",
-      reason: [
-        "run_plan_step:continue_choice",
-        "run_plan_access_preserving_continue_available:true",
-        "run_plan_selected_continue_would_end_run:true",
       ].join("|"),
     };
   }

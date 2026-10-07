@@ -20,6 +20,66 @@ import {
 } from "./corp-punish-route-quotes";
 
 describe("Corp punish-route quote request", () => {
+  it.each([
+    { profile: "modern_open" as const, credits: 16, bid: 7, tags: 1 },
+    { profile: "modern_open" as const, credits: 8, bid: 5, tags: 0 },
+  ])(
+    "SP-564 quotes only Engine-offered bids ($profile, $credits credits)",
+    ({ profile, credits, bid, tags }) => {
+      const state = corpActionState("modern-unbounded-chance");
+      state.traceRulesProfile = profile;
+      state.corp.credits = credits;
+      state.runner.credits = 11;
+      state.runnerTurnFlags!.runAttemptsLastTurn = 1;
+      const chance = addCorpCardToHqForTest(
+        state,
+        "onr_v1_284_chance-observation",
+        "chance-above-printed",
+      );
+      const scorched = addCorpCardToHqForTest(
+        state,
+        "onr_v1_302_scorched-earth",
+        "payoff",
+      );
+      const before = structuredClone(state);
+      const quote = quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          canonicalStep(
+            "trace-tag",
+            0,
+            "trace_tag",
+            chance,
+            "onr_v1_284_chance-observation",
+            "abilities_on_play_trace",
+          ),
+          canonicalStep(
+            "damage",
+            1,
+            "meat_damage",
+            scorched,
+            "onr_v1_302_scorched-earth",
+            "abilities_on_play_damage",
+          ),
+        ]),
+      );
+      expect(quote).toMatchObject({
+        ok: true,
+        quote: {
+          complete: true,
+          tagOutcomeEnvelope: { addedTags: { minimum: tags, maximum: 1 } },
+          responsePaymentEnvelope: {
+            corpResponseCredits: { maximum: bid },
+            totalCorpCredits: { maximum: 5 + bid },
+          },
+          damageEnvelope: {
+            effectiveDamage: { minimum: tags ? 4 : 0, maximum: 4 },
+          },
+        },
+      });
+      expect(state).toEqual(before);
+    },
+  );
   it("certifies a scored activated trace head and the following damage", () => {
     const state = corpActionState("scored-trace-head");
     state.corp.clicks = 2;

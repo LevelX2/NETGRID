@@ -686,8 +686,9 @@ function certifyExactTraceTagResponse(
         >;
       }
     | undefined;
+  let reactivePrintedLimitAttempt: typeof selected;
   for (const bid of corpBidOptions
-    .filter((option) => option.value <= requiredCorpBid)
+    .filter((option) => !automaticSuccess || option.value === 0)
     .sort((left, right) => left.value - right.value)) {
     const afterBid = applyExactChoice(
       structuredClone(verifiedAfterHead),
@@ -732,18 +733,20 @@ function certifyExactTraceTagResponse(
       )
     )
       return undefined;
-    if (
-      Math.min(...amounts) > 0 ||
-      (bid.value === requiredCorpBid && Math.max(...amounts) > 0)
-    ) {
-      selected = {
-        afterCorpBid: afterBid,
-        successfulOutcomes: zeroOutcomes,
-        maximumResponseOutcomes: maximumOutcomes,
-      };
+    const attempt = {
+      afterCorpBid: afterBid,
+      successfulOutcomes: zeroOutcomes,
+      maximumResponseOutcomes: maximumOutcomes,
+    };
+    if (Math.min(...amounts) > 0) {
+      selected = attempt;
       break;
     }
+    if (bid.value === requiredCorpBid && Math.max(...amounts) > 0) {
+      reactivePrintedLimitAttempt = attempt;
+    }
   }
+  selected ??= reactivePrintedLimitAttempt;
   if (!selected) return undefined;
   const { afterCorpBid, successfulOutcomes, maximumResponseOutcomes } =
     selected;

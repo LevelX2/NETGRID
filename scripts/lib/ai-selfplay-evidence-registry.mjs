@@ -349,11 +349,23 @@ function appendClosedPairingToReportingSeries(db, bundle, timestamp) {
     requireText(bundle.reportingSeriesId, "reportingSeriesId"),
   );
   if (bundle.pairing.status !== "closed") return;
+  const integrity = bundle.pairing.reproduction?.integrity;
+  const diagnostic =
+    integrity?.population === "diagnostic" &&
+    integrity.finalBaseGames === 0 &&
+    integrity.observedTerminalGames === bundle.games?.length &&
+    Array.isArray(integrity.failedAttempts) &&
+    integrity.failedAttempts.length > 0 &&
+    integrity.scheduledGames ===
+      bundle.games.length + integrity.failedAttempts.length &&
+    Number.isSafeInteger(integrity.scheduledGames) &&
+    integrity.scheduledGames > 0;
   if (
+    (integrity?.population === "diagnostic" && !diagnostic) ||
     !bundle.games?.length ||
     !bundle.games.every(
       (game) =>
-        (game.phase ?? "final") === "final" &&
+        (game.phase ?? "final") === (diagnostic ? "diagnostic" : "final") &&
         ["Runner", "Corp", "Draw"].includes(game.winner) &&
         game.flagsCount === 0 &&
         Number.isSafeInteger(game.decisionCount) &&

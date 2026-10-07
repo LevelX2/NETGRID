@@ -908,7 +908,6 @@ Die nativen Producerzustände 506/G2/D63, G9/D153 und G35/D132
 belegen die Quellen-, Kosten- und Speichergrenzen; echte Enginekontrollen
 erhalten vollständig bezahlte, kostenlose und gestufte Suchpfade.
 
-
 Eine Zahlung für das Trash einer vollständig gebrochenen, gerade passierten
 ICE ist kein Einkommen. Die typisierte `ice_trash`-Wirkung mit Ziel
 `trash_fully_broken_passed_ice` und Timing `encounter_resolution` erhält die
@@ -2121,6 +2120,12 @@ eine quotierte Zahlungshilfe muss weiterhin im echten Engine-Fenster ausgeführt
 werden. Die Engine revalidiert beim Anwenden das tatsächliche passierte ICE.
 Es entstehen weder ein zweiter Chooser noch ein allgemeiner Zahlungsbonus.
 
+Bei einem bedingten Encounter-ETR darf der freie Run-Abbruch nur gegenüber
+einer tatsächlich zugelassenen bezahlten Fortsetzung zurückgestellt werden.
+Eine bloß vorhandene LegalAction genügt nicht: Wenn der bestehende
+Run-Window-Owner ihren Restpfad oder ihre Reserve ablehnt, bleibt der eigene
+legale Abbruch als expliziter Run-Step ausführbar.
+
 Die bekannte Remote-Vorprojektion und die aktuelle Access-Konversion nutzen
 dieselbe kanonische Trash-Impact-Bewertung. Die Vorprojektion erhält die
 aktuelle Economy-Reserve; endliche Kreditpools, tatsächlich vorhandene
@@ -2474,6 +2479,14 @@ weitere Ressourcen verbrauchen. Die vorhandene Funding-Auswahl vergleicht
 ihren Ertrag mit der Basisaktion; der Quellenname schließt stärkere Routen
 nicht aus. Höhere Parent-Needs, Zuggrenze und Abschlussbedingung bleiben
 bindend.
+
+Auch die allgemeine Reservefinanzierung erhält den bereits erreichten
+Handboden des vorhandenen Defense-Owners. Economy reicht ihn an die
+exakte Funding-Suche weiter; unmittelbare Cash-Aktionen des
+Hand-Development-Owners prüfen denselben Netto-Handverbrauch. Liegt die
+Hand schon unter diesem Boden, dürfen handneutrale Kreditaktionen weiter
+handeln. Zusätzliche Handkarten oberhalb des Bodens bleiben konvertierbar;
+es entsteht weder ein Kartenname-Verbot noch ein neuer Safety-Owner.
 
 ## 11. `runner.credit_bank` und `runner.recurring_economy`
 

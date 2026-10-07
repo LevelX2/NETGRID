@@ -24,7 +24,11 @@ export type RunnerEconomyFundingSearch = (
     | "deadline"
     | "targetCredits"
     | "evidence"
-  > & { remainingClicks: number; allowIncrementalProgress: boolean },
+  > & {
+    remainingClicks: number;
+    allowIncrementalProgress: boolean;
+    requiredEndTurnHandBuffer: number;
+  },
 ) => RunnerFundingRouteContract;
 export function runnerEconomyReserveFacts(
   input: AiDecisionInput,
@@ -45,6 +49,7 @@ export function buildRunnerEconomySignals(params: {
   previous: ResidentPlanPortfolio | undefined;
   currentTurnKey: string;
   reserve: ReturnType<typeof runnerEconomyReserveFacts>;
+  minimumHandBuffer: number;
   findFundingRoute: RunnerEconomyFundingSearch;
 }) {
   const {
@@ -59,6 +64,12 @@ export function buildRunnerEconomySignals(params: {
   const { debtLiability, portfolioReserveTargetCredits } = params.reserve;
   const currentCredits = input.playerView.own.credits,
     remainingClicks = input.playerView.own.clicks;
+  // P6 reserve development may preserve an achieved defense buffer. A hand
+  // already below the floor still needs non-consuming funding routes.
+  const preservedHandBuffer = Math.min(
+    input.playerView.own.gripOrHq.length,
+    params.minimumHandBuffer,
+  );
   const handDevelopmentOwnedImmediateEconomyActionIds = new Set(
     handDevelopment.flatMap((evaluation) =>
       evaluation.legalActionId !== undefined &&
@@ -85,6 +96,9 @@ export function buildRunnerEconomySignals(params: {
             candidate.actionId,
           ) &&
           runnerTurnLiquidityCandidateIsMaterializable(candidate) &&
+          input.playerView.own.gripOrHq.length +
+            candidate.economyProjection!.netHandDelta >=
+            preservedHandBuffer &&
           !runnerStrategicExchangeRequiresBoundParent(candidate),
       )
       .map((candidate) => candidate.actionId),
@@ -168,8 +182,10 @@ export function buildRunnerEconomySignals(params: {
     targetCredits: portfolioReserveTargetCredits,
     remainingClicks: input.playerView.own.clicks,
     allowIncrementalProgress: true,
+    requiredEndTurnHandBuffer: preservedHandBuffer,
     evidence: [
       "runner_finite_portfolio_credit_reserve",
+      `runner_economy_preserved_hand_buffer:${preservedHandBuffer}`,
       `runner_debt_next_turn_credit_loss:${debtLiability.nextTurnCreditLoss}`,
       `runner_debt_total_leave_play_cost:${debtLiability.totalLeavePlayPayCost}`,
     ],

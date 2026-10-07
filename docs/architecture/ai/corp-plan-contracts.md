@@ -2138,6 +2138,13 @@ Vor Beginn wird die ganze Route geprüft:
 - Damage-Summe und Prävention;
 - legale Reihenfolge.
 
+Für die Trace-Komponente prüft die Engine-Quote sämtliche aktuell legalen
+Corp-Gebote aufsteigend. Die gedruckte Trace-Stärke begrenzt im offenen
+Profil die Zahlung nicht; ein teureres, aber gegen die sichtbare maximale
+Runner-Antwort garantiert erfolgreiches Gebot erhält seine exakten Kosten.
+Ohne eine solche finanzierbare Garantie bleibt die reaktive Route getrennt
+ausgewiesen. Profilgrenzen stammen ausschließlich aus den Engine-Optionen.
+
 Ein Funding-Step wird nur geöffnet, wenn sein Klick und die gesamte
 verbleibende Route noch in dasselbe gültige Punish-Fenster passen. Ein
 langfristig fehlender Credit oder eine fehlende Karte rechtfertigt für sich

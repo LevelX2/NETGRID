@@ -379,6 +379,49 @@ test("counts closed pairings once and preserves pending reports while adding ano
   });
 });
 
+test("reports a complete diagnostic schedule without promoting its games to final", () => {
+  withRegistry(({ db }) => {
+    registerReportingSeries(db, {
+      id: "series-1",
+      recipient: "me",
+      interval: 1,
+    });
+    const bundle = reportingBundle("diagnostic");
+    bundle.games[0].phase = "diagnostic";
+    bundle.pairing.reproduction = {
+      integrity: {
+        population: "diagnostic",
+        finalBaseGames: 0,
+        observedTerminalGames: 1,
+        scheduledGames: 2,
+        failedAttempts: [{ gameNumber: 2, seed: "failed-original" }],
+      },
+    };
+    importPairingBundle(db, bundle);
+    assert.deepEqual(getReportingSeries(db, "series-1").unreportedPairingIds, [
+      "diagnostic",
+    ]);
+    const snapshot = exportEvidenceSnapshot(db);
+    assert.equal(
+      snapshot.games.find((g) => g.pairing_id === "diagnostic").phase,
+      "diagnostic",
+    );
+    for (const patch of [
+      { finalBaseGames: 1 },
+      { scheduledGames: 3 },
+      { failedAttempts: [] },
+    ]) {
+      const invalid = structuredClone(bundle);
+      invalid.pairing.id = "incomplete";
+      Object.assign(invalid.pairing.reproduction.integrity, patch);
+      assert.throws(
+        () => importPairingBundle(db, invalid),
+        /Only closed pairings/,
+      );
+    }
+  });
+});
+
 test("rolls pairing and counter back together for unknown series or incomplete final games", () => {
   withRegistry(({ db }) => {
     registerReportingSeries(db, {
