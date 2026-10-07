@@ -159,6 +159,26 @@ export function assessKnownRezzedIcePath(
   };
   const availablePreRunCredits =
     typeof runnerCredits === "number" ? runnerCredits : runnerCredits.credits;
+  // A single typed group can pay for both access-preserving subroutines and
+  // hazards. Keep the partial route as a candidate: a full break can cost more
+  // under per-subroutine taxes or remove an otherwise useful unbroken effect.
+  const fullGroupedBreakVariants =
+    rigCards.some((card) => {
+      const definition =
+        card.definitionId && CARD_DEFINITIONS_BY_ID[card.definitionId];
+      return (
+        definition &&
+        icebreakerAbilitiesForDefinition(definition).some(
+          (ability) =>
+            ability.type === "break_subroutine" &&
+            typeof ability.count === "number" &&
+            ability.count > 1,
+        )
+      );
+    }) &&
+    iceCards.some((ice) => (ice.effectiveRunQuote?.subroutines.length ?? 0) > 1)
+      ? [false, true]
+      : [false];
   const conditionalFullBreakVariants = iceCards.some((ice) =>
     ice.effectiveRunQuote?.subroutines.some(
       (subroutine) =>
@@ -187,29 +207,32 @@ export function assessKnownRezzedIcePath(
   ).flatMap((variant) =>
     (["retained", "trashed"] as const).flatMap((bartmossOutcome) =>
       conditionalFullBreakVariants.flatMap((deferConditionalFullBreak) =>
-        deferredDamageVariants.map((deferDamageBeforeFutureLock) => ({
-          bartmossOutcome,
-          assessment: assessKnownRezzedIcePathInternal(
-            iceCards,
-            variant.rigCards,
-            runnerCredits,
-            rootCards,
-            normalizedCorpBidCapacity,
-            unbrokenRunPathEffects,
-            {
-              allowBreakingRunPathEffects: true,
-              bartmossOutcome,
-              deferConditionalFullBreak,
-              deferDamageBeforeFutureLock,
-              initialPassCount: context.additionalPassedIceCount ?? 0,
-              ...(variant.preRunPreparation
-                ? { preRunPreparation: variant.preRunPreparation }
-                : {}),
-            },
-            undefined,
-            context,
-          ),
-        })),
+        deferredDamageVariants.flatMap((deferDamageBeforeFutureLock) =>
+          fullGroupedBreakVariants.map((preferFullGroupedBreak) => ({
+            bartmossOutcome,
+            assessment: assessKnownRezzedIcePathInternal(
+              iceCards,
+              variant.rigCards,
+              runnerCredits,
+              rootCards,
+              normalizedCorpBidCapacity,
+              unbrokenRunPathEffects,
+              {
+                allowBreakingRunPathEffects: true,
+                bartmossOutcome,
+                deferConditionalFullBreak,
+                deferDamageBeforeFutureLock,
+                preferFullGroupedBreak,
+                initialPassCount: context.additionalPassedIceCount ?? 0,
+                ...(variant.preRunPreparation
+                  ? { preRunPreparation: variant.preRunPreparation }
+                  : {}),
+              },
+              undefined,
+              context,
+            ),
+          })),
+        ),
       ),
     ),
   );
@@ -412,6 +435,7 @@ function assessKnownRezzedIcePathInternal(
     bartmossOutcome?: "retained" | "trashed";
     deferConditionalFullBreak?: boolean;
     deferDamageBeforeFutureLock?: boolean;
+    preferFullGroupedBreak?: boolean;
     preRunPreparation?: KnownRezzedIcePathAssessment["preRunPreparation"];
     /** Passages before this suffix, whose encounter cost was handled by its caller. */
     initialPassCount?: number;
@@ -627,9 +651,14 @@ function assessKnownRezzedIcePathInternal(
       spendGeneralCredits(creditBudget, encounterTax);
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
-    if (requiredFullBreakIceIndex === iceIndex) {
-      // A typed next-encounter obligation is paid at its target. Every
-      // subroutine is broken once, so none of its printed effects also fires.
+    if (
+      requiredFullBreakIceIndex === iceIndex ||
+      (options.preferFullGroupedBreak &&
+        accessPreservingBreakCount > 0 &&
+        accessPreservingBreakCount < quote.subroutines.length)
+    ) {
+      // Both a next-encounter obligation and an optional complete group are
+      // quoted together. None of the subroutines is paid for or fired twice.
       const assessment = runPathEffectsPreventFutureBreaking(
         activeRunPathEffects,
       )
@@ -678,6 +707,15 @@ function assessKnownRezzedIcePathInternal(
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
       firstKnownIceBreakable = true;
       requiredFullBreakIceIndex = undefined;
+      if (
+        !quote.conditionalEncounterEffects?.some(
+          (effect) => effect.kind === "random_strength_or_derez_auto_pass",
+        )
+      ) {
+        activeRunPathEffects = activeRunPathEffects.filter(
+          (effect) => effect.expiresAfterNextEncounter !== true,
+        );
+      }
       continue;
     }
     for (const subroutine of quote.subroutines) {
@@ -1225,6 +1263,7 @@ function assessKnownRezzedIcePathInternal(
             breakerStrengths,
             carriedBreakerStrengths,
             additionalBreakCostPerSubroutine,
+            preferFullGroupedBreak: options.preferFullGroupedBreak === true,
           })
         : undefined;
       if (breakAssessment && "missingSourceCoverage" in breakAssessment) {
@@ -1557,6 +1596,7 @@ function runPathEffectBreakAssessment(params: {
   breakerStrengths: Map<string, number>;
   carriedBreakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
+  preferFullGroupedBreak?: boolean;
 }): BreakAssessment | { missingSourceCoverage: true } | undefined {
   if (!runPathProjectionEffectCanMatter(params.effect)) return undefined;
   const futureIce = params.iceCards.slice(0, Math.max(0, params.iceIndex));
@@ -1579,7 +1619,11 @@ function runPathEffectBreakAssessment(params: {
     params.rootCards,
     params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
-    { allowBreakingRunPathEffects: false, initialPassCount: 1 },
+    {
+      allowBreakingRunPathEffects: false,
+      initialPassCount: 1,
+      preferFullGroupedBreak: params.preferFullGroupedBreak === true,
+    },
     new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
   );
@@ -1590,7 +1634,11 @@ function runPathEffectBreakAssessment(params: {
     params.rootCards,
     params.visibleCorpBidCapacity,
     [...params.activeRunPathEffects, params.effect],
-    { allowBreakingRunPathEffects: false, initialPassCount: 1 },
+    {
+      allowBreakingRunPathEffects: false,
+      initialPassCount: 1,
+      preferFullGroupedBreak: params.preferFullGroupedBreak === true,
+    },
     new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
   );
@@ -1633,7 +1681,11 @@ function runPathEffectBreakAssessment(params: {
     params.rootCards,
     params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
-    { allowBreakingRunPathEffects: false, initialPassCount: 1 },
+    {
+      allowBreakingRunPathEffects: false,
+      initialPassCount: 1,
+      preferFullGroupedBreak: params.preferFullGroupedBreak === true,
+    },
     breakerStrengthsAfterBreak,
     params.deflectorContext,
   );

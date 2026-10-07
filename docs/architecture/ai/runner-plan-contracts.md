@@ -1,7 +1,7 @@
 # Runner-Planowner: Aufgaben und Grenzen
 
 Status: **aktuelle fachliche Verträge mit ausdrücklich offenen Fähigkeiten**  
-Stand: 2026-09-11
+Stand: 2026-10-07
 
 Die [Ownerkarte](README.md#planowner-und-implementierungen) verbindet jede
 registrierte Modul-ID mit ihrer Implementierung. Diese Seite definiert die
@@ -42,6 +42,16 @@ Der Plan endet, sobald:
 - oder die Opening-Phase ausdrücklich abgebrochen wird.
 
 ## 2. `runner.pressure_central`
+
+Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
+Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
+verbrauchen den Breakerpreis und zweckgebundene Credits nur einmal. Der
+Pfaddienst vergleicht die bisherige Teilbreak-Route mit der vollständigen
+Gruppenroute; unabhängige ICE, zusätzliche Kosten je Subroutine, Stärke,
+Breakverbote und zeitlich begrenzte Mittel bleiben getrennt gebunden. Diese
+Quote eröffnet keine LegalAction: Der vorhandene Run-Window-Owner führt nur
+die aktuell legal gebundene Fortsetzung aus. Native Engine-Prüfungen sichern
+den gemeinsamen Preis, echte Zugriffskonversion und deterministisches Replay.
 
 Die gewöhnliche Run-Startquote finanziert positiven bekannten Hirnschaden-
 Schutz gemeinsam mit allen unabhängigen ETR-Breaks. Die aktuelle

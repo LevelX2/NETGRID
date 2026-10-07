@@ -10,6 +10,8 @@ import { buildAiDecisionInputDto } from "../../input-dto";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { assessCorpIceLiquidation } from "../defense/corp-ice-liquidation";
 import { assessCorpEconomyFundingRoute } from "./economy-routes";
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
 
 const SYD = "onr_proteus_076_syd-meyer-superstores";
 const WALL = "onr_v1_279_wall-of-static";
@@ -117,6 +119,31 @@ it("funds an exact need from one redundant static layer and revalidates the real
     (a) => a.payload?.gainedCredits === 4,
   );
   expect(sales).toHaveLength(2);
+  const saleCandidates = buildActionSemanticCandidates({
+    legalActions: input.legalActions,
+    observerSide: "corp",
+    stateVersion: state.stateVersion,
+    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+      input.playerView,
+    ),
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  }).filter((c) => sales.some((a) => a.actionId === c.actionId));
+  expect(saleCandidates).toHaveLength(2);
+  for (const candidate of saleCandidates) {
+    expect(candidate.functionalEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          target: "economy.own_rezzed_ice_liquidation",
+          amount: 4,
+        }),
+        expect.objectContaining({
+          target: "chosen_own_rezzed_ice",
+          kind: "ice_trash",
+        }),
+      ]),
+    );
+  }
   expect(sales.map((a) => assessCorpIceLiquidation(input, a))).toEqual([
     expect.objectContaining({ status: "preserved" }),
     expect.objectContaining({ status: "preserved" }),

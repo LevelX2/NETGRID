@@ -92,7 +92,7 @@ it("reserves passage of unknown ICE and removes only exact zero damage", () => {
 });
 
 it.each([undefined, 1])(
-  "retains positive or unknown damage %s in the path",
+  "pays once for a complete Redecorator group with positive or unknown damage %s",
   (amount) => {
     const input = zero();
     const server = input.playerView.servers.find((s) => s.id === "rd")!;
@@ -104,8 +104,11 @@ it.each([undefined, 1])(
     else sub.amount = amount;
     expect(path(input, 2)).toMatchObject({
       canReachAccess: true,
-      visibleBreakCost: 2,
+      visibleBreakCost: 1,
+      creditsAfterPath: 1,
+      fullyBrokenIceInstanceIds: [server.ice[0]!.instanceId],
     });
+    expect(path(input, 0).canReachAccess).toBe(false);
   },
 );
 

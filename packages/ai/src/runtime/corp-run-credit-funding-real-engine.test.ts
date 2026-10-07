@@ -15,6 +15,8 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { corpRunDefenseAbilityAssessment } from "../corp/defense/defense-run-response";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
+import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 
 const BOOT = "onr_proteus_058_executive-boot-camp";
 const COLONEL = "onr_proteus_015_colonel-failure";
@@ -120,6 +122,31 @@ it.each([15, 16])(
       expiresAtStateVersion: state.stateVersion,
     });
     const before = hashState(state);
+    const fundingAction = current.legalActions.find(
+      (a) => a.type === "activated_card_ability",
+    )!;
+    const fundingCandidate = buildActionSemanticCandidates({
+      legalActions: current.legalActions,
+      observerSide: "corp",
+      stateVersion: state.stateVersion,
+      visibleSourceDefinitionsByInstanceId:
+        visibleSourceDefinitionsByInstanceId(current.playerView),
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+    }).find((c) => c.actionId === fundingAction.actionId)!;
+    expect(fundingCandidate.functionalEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          target: "economy.corp_run_temporary_credit",
+          amount: 2,
+          economyMode: "restricted_credit",
+        }),
+        expect.objectContaining({
+          target: "cost.corp_random_discard_hq",
+          amount: 1,
+        }),
+      ]),
+    );
     expect(assessment(current)).toMatchObject({
       productive: true,
       serverId: "hq",

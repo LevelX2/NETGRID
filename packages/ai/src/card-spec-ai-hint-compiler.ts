@@ -1557,6 +1557,26 @@ function appendGenericAbilityCosts(
   entry: PlanningEntry,
   ability: PlanningAbility,
 ): void {
+  if (Array.isArray(ability.costs))
+    for (const cost of ability.costs) {
+      if (cost.kind !== "corp_random_discard_hq") continue;
+      if (
+        entry.definition.side !== "corp" ||
+        !Number.isInteger(cost.amount) ||
+        cost.amount <= 0
+      )
+        throw new Error("card_spec_unknown_corp_random_discard_cost_shape");
+      overlay.effects.push({
+        kind: "random_discard",
+        scope: "hq",
+        timing: typedEffectTiming(ability),
+        resource: "cards",
+        target: "cost.corp_random_discard_hq",
+        amount: cost.amount,
+        finite: true,
+      });
+      overlay.functionSignals.push("risk.random_outcome");
+    }
   if (
     entry.definition.side !== "runner" ||
     !Array.isArray(ability.costs) ||
@@ -1694,6 +1714,68 @@ function appendGenericAbilityEffect(
     overlay.functionSignals.push(
       "economy.corp_install_rez_credit",
       "risk.temporary_credit_drawback",
+    );
+  }
+  if (effect.kind === "gain_temporary_corp_run_credits") {
+    if (
+      entry.definition.side !== "corp" ||
+      effect.recipient !== "corp" ||
+      !Number.isInteger(effect.amount) ||
+      effect.amount <= 0 ||
+      effect.usableFor !== "corp_costs_during_this_run" ||
+      effect.cleanup !== "run_end" ||
+      effect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_temporary_corp_run_credit_shape");
+    overlay.effects.push({
+      kind: "finite_economy_pool",
+      scope: "corp",
+      timing,
+      resource: "credits",
+      target: "economy.corp_run_temporary_credit",
+      amount: effect.amount,
+      economyMode: "restricted_credit",
+      finite: true,
+    });
+    overlay.conditions.push({ kind: "requires_during_run" });
+    overlay.functionSignals.push(
+      "economy.corp_run_temporary_credit",
+      "risk.temporary_credit_drawback",
+    );
+  }
+  if (effect.kind === "trash_own_rezzed_ice_for_credits") {
+    if (
+      entry.definition.side !== "corp" ||
+      effect.target !== "chosen_own_rezzed_ice" ||
+      !Number.isInteger(effect.gainCredits) ||
+      effect.gainCredits <= 0 ||
+      effect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_own_ice_liquidation_shape");
+    overlay.effects.push(
+      {
+        kind: "action_economy",
+        scope: "corp",
+        timing,
+        resource: "credits",
+        target: "economy.own_rezzed_ice_liquidation",
+        amount: effect.gainCredits,
+        economyMode: "liquid_payout",
+        finite: true,
+      },
+      {
+        kind: "ice_trash",
+        scope: "ice",
+        timing,
+        target: "chosen_own_rezzed_ice",
+        finite: true,
+      },
+    );
+    overlay.conditions.push({ kind: "requires_rezzed_ice" });
+    overlay.functionSignals.push(
+      "economy.generic",
+      "economy.own_rezzed_ice_liquidation",
+      "ice.trash",
     );
   }
   if (effect.kind === "draw_cards") {

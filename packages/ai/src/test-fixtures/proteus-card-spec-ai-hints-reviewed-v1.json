@@ -4633,8 +4633,71 @@
         "strategicRole": ["enabler"],
         "lineSupport": ["corp.economy_rez_reserve"],
         "actionCapabilitySemantics": [
-          { "capabilityKey": "during_run_discard_for_two_run_credits" }
+          {
+            "capabilityKey": "during_run_discard_for_two_run_credits",
+            "effects": [
+              {
+                "kind": "random_discard",
+                "scope": "hq",
+                "timing": "during_run",
+                "resource": "cards",
+                "target": "cost.corp_random_discard_hq",
+                "amount": 1,
+                "finite": true
+              },
+              {
+                "kind": "finite_economy_pool",
+                "scope": "corp",
+                "timing": "during_run",
+                "resource": "credits",
+                "target": "economy.corp_run_temporary_credit",
+                "amount": 2,
+                "economyMode": "restricted_credit",
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.corp_run_temporary_credit",
+              "risk.random_outcome",
+              "risk.temporary_credit_drawback"
+            ],
+            "conditions": [{ "kind": "requires_during_run" }]
+          }
         ],
+        "effects": [
+          {
+            "kind": "random_discard",
+            "scope": "hq",
+            "timing": "during_run",
+            "resource": "cards",
+            "target": "cost.corp_random_discard_hq",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "finite_economy_pool",
+            "scope": "corp",
+            "timing": "during_run",
+            "resource": "credits",
+            "target": "economy.corp_run_temporary_credit",
+            "amount": 2,
+            "economyMode": "restricted_credit",
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "risk.random_outcome",
+          "economy.corp_run_temporary_credit",
+          "risk.temporary_credit_drawback"
+        ],
+        "actionTacticSignals": [
+          "effect:finite_economy_pool",
+          "effect:random_discard",
+          "effect_scope:corp",
+          "effect_scope:hq",
+          "effect_timing:during_run"
+        ],
+        "conditions": [{ "kind": "requires_during_run" }],
         "costProfile": { "credits": 0 },
         "riskTags": [
           "random_hq_discard",
@@ -4952,7 +5015,19 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "during_run_discard_and_copy_subroutine",
-            "costProfile": { "credits": 1 }
+            "costProfile": { "credits": 1 },
+            "effects": [
+              {
+                "kind": "random_discard",
+                "scope": "hq",
+                "timing": "during_run",
+                "resource": "cards",
+                "target": "cost.corp_random_discard_hq",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.random_outcome"]
           }
         ],
         "targetProfiles": [
@@ -4973,6 +5048,23 @@
             "targetType": "installed_ice",
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
+        ],
+        "effects": [
+          {
+            "kind": "random_discard",
+            "scope": "hq",
+            "timing": "during_run",
+            "resource": "cards",
+            "target": "cost.corp_random_discard_hq",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["risk.random_outcome"],
+        "actionTacticSignals": [
+          "effect:random_discard",
+          "effect_scope:hq",
+          "effect_timing:during_run"
         ],
         "costProfile": { "credits": 0 },
         "riskTags": [
@@ -5857,7 +5949,32 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "corp_main_trash_rezzed_ice_for_credits",
-            "costProfile": { "clicks": 1 }
+            "costProfile": { "clicks": 1 },
+            "effects": [
+              {
+                "kind": "action_economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.own_rezzed_ice_liquidation",
+                "amount": 4,
+                "economyMode": "liquid_payout",
+                "finite": true
+              },
+              {
+                "kind": "ice_trash",
+                "scope": "ice",
+                "timing": "action",
+                "target": "chosen_own_rezzed_ice",
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.generic",
+              "economy.own_rezzed_ice_liquidation",
+              "ice.trash"
+            ],
+            "conditions": [{ "kind": "requires_rezzed_ice" }]
           }
         ],
         "targetProfiles": [
@@ -5879,8 +5996,40 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
+        "effects": [
+          {
+            "kind": "action_economy",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.own_rezzed_ice_liquidation",
+            "amount": 4,
+            "economyMode": "liquid_payout",
+            "finite": true
+          },
+          {
+            "kind": "ice_trash",
+            "scope": "ice",
+            "timing": "action",
+            "target": "chosen_own_rezzed_ice",
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "economy.generic",
+          "economy.own_rezzed_ice_liquidation",
+          "ice.trash"
+        ],
         "tacticSignals": ["economy.card"],
-        "actionTacticSignals": ["economy.card"],
+        "actionTacticSignals": [
+          "economy.card",
+          "effect:action_economy",
+          "effect:ice_trash",
+          "effect_scope:corp",
+          "effect_scope:ice",
+          "effect_timing:action"
+        ],
+        "conditions": [{ "kind": "requires_rezzed_ice" }],
         "costProfile": { "clicks": 1, "credits": 0 },
         "riskTags": ["installed_card_trash_cost"],
         "quality": {

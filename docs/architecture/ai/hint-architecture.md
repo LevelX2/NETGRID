@@ -1,7 +1,7 @@
 # AI-Hints: Quelle und Runtime-Vertrag
 
 Status: **aktueller generierter CardSpec-Vertrag**  
-Stand: 2026-10-04
+Stand: 2026-10-07
 
 ## Autorenquelle und Datenpfad
 
@@ -157,6 +157,23 @@ mechanisch belegten Sperrfunktionen. Eine Ausstiegssperre beendet den Run
 nicht selbst und ersetzt keine Tracewirkung. Reale Kartenprofile und native
 Engine-Checkpoints prüfen die Projektion, den bestehenden Defense-/Window-
 Owner, LegalAction-Bindung und deterministisches Replay.
+
+## Corp-Ökonomie mit begrenztem Pool und eigenem Schutzverlust
+
+`gain_temporary_corp_run_credits` beschreibt ausschließlich den endlichen,
+öffentlichen Corp-Pool für Kosten im aktuellen Run und dessen Entfernung am
+Runende. Er erzeugt keine frei verfügbare dauerhafte Liquidität.
+`trash_own_rezzed_ice_for_credits` projiziert sowohl den festen Creditgewinn
+als auch den Verlust der gewählten eigenen gerezzten ICE. Der Economy-Owner
+benötigt weiterhin eine aktuelle Engine-Quote und bewertet den Schutzverlust;
+die mechanische Funktion allein erzwingt weder Installation noch Verkauf.
+
+Der typisierte Ability-Preis `corp_random_discard_hq` wird als zufälliger
+eigener HQ-Verlust mit dem Timing der Ability projiziert, auch in deren
+Capability-Semantik. Er ist keine gegnerische Abwurfpressure. Ungültige
+Beträge, Empfänger, Ziele, Sichtbarkeit oder Pool-Dauer scheitern sichtbar.
+Reale generierte Profile und native Engine-Prüfungen verbinden Producer,
+bestehenden Funding-/Liquidation-Owner und tatsächliche LegalActions.
 
 ## Exakt gebundene variable Aktionskosten
 
