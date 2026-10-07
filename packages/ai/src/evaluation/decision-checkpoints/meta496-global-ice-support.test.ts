@@ -43,7 +43,11 @@ function checkpoint() {
     ice: [],
     root: [],
   }));
-  const quote = projectGlobalRootSupportRezAfterInstall(state, id)!;
+  const quote = projectGlobalRootSupportRezAfterInstall(
+    state,
+    id,
+    "new_remote",
+  )!;
   expect(quote).toMatchObject({ complete: true, finalCredits: 0 });
   action.payload = {
     ...action.payload,
@@ -77,7 +81,7 @@ describe("global ICE support installation admission (SP-207)", () => {
   it("binds installation to funded Code Gates on other forts through the existing Defense owner", () => {
     const { input, candidate, runtime, actionId } = checkpoint();
     expect(
-      corpGlobalIceSupportAssetInstallSignal(input, candidate, []),
+      corpGlobalIceSupportAssetInstallSignal(input, candidate, [], [candidate]),
     ).toMatchObject({
       kind: "generic",
       phase: "install_defense_support",
@@ -123,7 +127,7 @@ describe("global ICE support installation admission (SP-207)", () => {
     if (condition === "unfunded")
       p.postInstallRezQuoteFinalCredits = input.playerView.own.credits + 1;
     expect(
-      corpGlobalIceSupportAssetInstallSignal(input, candidate, []),
+      corpGlobalIceSupportAssetInstallSignal(input, candidate, [], [candidate]),
     ).toBeUndefined();
   });
 });

@@ -1653,12 +1653,21 @@ wie für strukturierte ICE-Zielprofile und Fort-Stärke-Unterstützung.
 Eigenständige Upgrade-Wirkungen behalten ihre getrennten Owner-Assessments.
 
 Ein passives globales ICE-Support-Asset kann denselben strukturierten
-Defensebedarf bereits für seine Installation in einem neuen Remote nutzen.
+Defensebedarf bereits für seine Installation in einem neuen oder vorhandenen
+Remote mit freiem Asset-/Agenda-Slot nutzen.
 Die Engine liefert dafür die an Quelle, Ziel und aktuellen Zustand gebundene
 Post-Install-Rez-Kostenquote. Zulassung verlangt passende vorhandene ICE,
 gemeinsame Finanzierung von Installation, Support-Rez und erforderlichen
 Ziel-Rezs sowie den Erhalt des Scorebudgets. Globale Wirkung wird nicht auf
-den neuen Quellfort beschränkt. Fehlende, veraltete oder unfinanzierte Quotes
+den Quellfort beschränkt. Ein vorhandener Quellfort benötigt zusätzlich
+mindestens ein nach Install- und Support-Rez-Zahlung weiterhin finanzierbares
+ICE. Bietet dieselbe Quelle eine solche geschützte Route ohne höhere Credit-
+oder Klickkosten, wird ihre ungeschützte neue Remote-Route nicht zugelassen.
+Die Prüfung vergleicht aktuelle Engine-Quotes; sie vergibt keinen Kartenbonus
+und behauptet keinen garantierten Run-Schutz. Die Defense-ID bindet das
+konkrete Installationsziel, damit die Signalzusammenführung keine Serverrouten
+vermischt. Belegte Asset-/Agenda-Slots werden nicht projiziert oder ersetzt.
+Fehlende, veraltete oder unfinanzierte Quotes
 und fehlende Ziel-ICE erzeugen keine Installationsroute. Im Folgezustand
 materialisiert derselbe Defense-Owner die tatsächliche neue Rez-LegalAction
 erneut; die Vorbereitung behauptet weder ein ausgeführtes Rez noch sicheren

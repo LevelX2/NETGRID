@@ -138,6 +138,7 @@ export function buildCorpDefenseNeeds({
           input,
           candidate,
           scoreProjects,
+          candidates,
         );
         if (globalSupportInstall) return [globalSupportInstall];
         const defensiveUpgradePlacement = corpDefensiveUpgradePlacement(

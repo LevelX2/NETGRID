@@ -43,7 +43,10 @@ import {
 import { archivesHasVisibleKnownAgenda } from "../../runtime/visible-server-agenda-facts";
 import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
 import { CorpDefensiveUpgradePlacement } from "./defense-runtime-types";
-import { corpStructuredIceSupportAssessment } from "./corp-structured-ice-support";
+import {
+  corpStructuredIceSupportAssessment,
+  corpSupportRetainsFundedIce,
+} from "./corp-structured-ice-support";
 
 export const CORP_DEFENSE_DOMAIN_SIGNAL_FACTS = {
   hasExactNonNegativeCostProfile,
@@ -403,6 +406,49 @@ export function corpGlobalIceSupportAssetInstallSignal(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   scoreProjects: readonly CorpScoreProjectSignal[],
+  currentCandidates: readonly ActionSemanticCandidate[],
+): CorpGenericDefenseSignal | undefined {
+  const placement = corpGlobalIceSupportPlacementSignal(
+    input,
+    candidate,
+    scoreProjects,
+  );
+  if (!placement || placement.serverId !== "new_remote") return placement;
+  const action = input.legalActions.find(
+    (a) => a.actionId === candidate.actionId,
+  )!;
+  const totalCost =
+    candidate.costProfile.creditCost! +
+    Number(action.payload!.postInstallRezQuoteFinalCredits);
+  const protectedEquivalent = currentCandidates.some((other) => {
+    if (
+      other.sourceCardInstanceId !== candidate.sourceCardInstanceId ||
+      other.actionId === candidate.actionId
+    )
+      return false;
+    const supported = corpGlobalIceSupportPlacementSignal(
+      input,
+      other,
+      scoreProjects,
+    );
+    if (!supported || supported.serverId === "new_remote") return false;
+    const otherAction = input.legalActions.find(
+      (a) => a.actionId === other.actionId,
+    )!;
+    return (
+      other.costProfile.creditCost! +
+        Number(otherAction.payload!.postInstallRezQuoteFinalCredits) <=
+        totalCost &&
+      other.costProfile.clickCost! <= candidate.costProfile.clickCost!
+    );
+  });
+  return protectedEquivalent ? undefined : placement;
+}
+
+function corpGlobalIceSupportPlacementSignal(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpGenericDefenseSignal | undefined {
   if (input.side !== "corp" || candidate.semanticActionType !== "install.card")
     return undefined;
@@ -414,6 +460,10 @@ export function corpGlobalIceSupportAssetInstallSignal(
   );
   const hint =
     source?.definitionId && AI_HINTS_BY_CARD.get(source.definitionId);
+  const target = action?.payload?.serverId;
+  const existing = input.playerView.servers.find(
+    (server) => server.id === target,
+  );
   const profile =
     hint &&
     hint.targetProfiles?.find(
@@ -434,7 +484,13 @@ export function corpGlobalIceSupportAssetInstallSignal(
     action.source !== source.instanceId ||
     action.payload?.cardId !== source.instanceId ||
     action.payload.placement !== "root" ||
-    action.payload.serverId !== "new_remote" ||
+    typeof target !== "string" ||
+    (target !== "new_remote" &&
+      (!/^remote_[1-9]\d*$/.test(target) ||
+        !existing ||
+        existing.root.some(
+          (card) => card.type === "asset" || card.type === "agenda",
+        ))) ||
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.timingPoint !== input.playerView.timingPoint ||
     !hasExactNonNegativeCostProfile(candidate)
@@ -445,14 +501,16 @@ export function corpGlobalIceSupportAssetInstallSignal(
     p.postInstallRezQuoteComplete !== true ||
     p.postInstallRezQuoteCostKind !== "fixed" ||
     p.postInstallRezQuoteCardId !== source.instanceId ||
-    p.postInstallRezQuoteTargetServerId !== "new_remote" ||
+    p.postInstallRezQuoteTargetServerId !== target ||
     p.postInstallRezQuoteExpiresAtStateVersion !==
       input.playerView.stateVersion ||
     typeof p.postInstallRezQuoteProjectedServerId !== "string" ||
     !/^remote_[1-9]\d*$/.test(p.postInstallRezQuoteProjectedServerId) ||
-    input.playerView.servers.some(
-      (s) => s.id === p.postInstallRezQuoteProjectedServerId,
-    ) ||
+    (target === "new_remote"
+      ? input.playerView.servers.some(
+          (s) => s.id === p.postInstallRezQuoteProjectedServerId,
+        )
+      : p.postInstallRezQuoteProjectedServerId !== target) ||
     !Number.isSafeInteger(p.postInstallRezQuoteFinalCredits) ||
     Number(p.postInstallRezQuoteFinalCredits) < 0 ||
     p.postInstallRezQuoteMandatoryAgendaPointCost !== 0 ||
@@ -473,23 +531,25 @@ export function corpGlobalIceSupportAssetInstallSignal(
   const support = corpStructuredIceSupportAssessment(
     input,
     preparation,
-    "new_remote",
+    target,
     hint || undefined,
   );
   if (
     !support?.productive ||
+    (existing &&
+      !corpSupportRetainsFundedIce(input, preparation, [existing], 1)) ||
     !corpCardRoutePreservesScoreReserve(
       input,
       preparation,
-      "new_remote",
+      target,
       scoreProjects,
     ).preservesReserve
   )
     return undefined;
   return {
     kind: "generic",
-    defenseId: `install-global-ice-support:${source.instanceId}`,
-    serverId: "new_remote",
+    defenseId: `install-global-ice-support:${source.instanceId}:${target}`,
+    serverId: target,
     phase: "install_defense_support",
     sourceDefinitionIds: [source.definitionId!],
     actionIds: [action.actionId],

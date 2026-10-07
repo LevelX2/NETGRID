@@ -1,6 +1,7 @@
 import type {
   CardInstanceId,
   GameState,
+  ServerId,
   VisibleCorpRezCostQuote,
 } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
@@ -8,10 +9,11 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { nextCanonicalRemoteServerId } from "../state/remote-server-id";
 import { projectInstalledCorpSequenceRezPayment } from "./corp-rez-cost";
 
-/** Payment facts for passive global ICE support installed in a new remote. */
+/** Payment facts for passive global ICE support installed in an empty remote. */
 export function projectGlobalRootSupportRezAfterInstall(
   state: GameState,
   cardId: CardInstanceId,
+  targetServerId: ServerId,
 ): VisibleCorpRezCostQuote | undefined {
   const card = state.cardInstances[cardId];
   const definition = card && CARD_DEFINITIONS_BY_ID[card.definitionId];
@@ -37,12 +39,30 @@ export function projectGlobalRootSupportRezAfterInstall(
   const binding = {
     context: "post_install" as const,
     cardId,
-    targetServerId: "new_remote" as const,
+    targetServerId,
     expiresAtStateVersion: state.stateVersion,
   };
-  const serverId = nextCanonicalRemoteServerId(state.corp.servers);
+  const existing = state.corp.servers.find(
+    (server) => server.id === targetServerId,
+  );
+  const serverId =
+    targetServerId === "new_remote"
+      ? nextCanonicalRemoteServerId(state.corp.servers)
+      : existing?.id;
   if (
     !serverId ||
+    (targetServerId !== "new_remote" &&
+      (existing?.kind !== "remote" ||
+        existing.root.some((id) => {
+          const rootCard = state.cardInstances[id];
+          const rootDefinition =
+            rootCard && CARD_DEFINITIONS_BY_ID[rootCard.definitionId];
+          return (
+            !rootDefinition ||
+            rootDefinition.type === "asset" ||
+            rootDefinition.type === "agenda"
+          );
+        }))) ||
     card.owner !== "corp" ||
     card.controller !== "corp" ||
     card.zone.side !== "corp" ||
@@ -57,16 +77,23 @@ export function projectGlobalRootSupportRezAfterInstall(
     corp: {
       ...state.corp,
       hq: state.corp.hq.filter((id) => id !== cardId),
-      servers: [
-        ...state.corp.servers,
-        {
-          id: serverId,
-          kind: "remote",
-          label: `Remote ${serverId.slice(7)}`,
-          ice: [],
-          root: [cardId],
-        },
-      ],
+      servers:
+        targetServerId === "new_remote"
+          ? [
+              ...state.corp.servers,
+              {
+                id: serverId,
+                kind: "remote",
+                label: `Remote ${serverId.slice(7)}`,
+                ice: [],
+                root: [cardId],
+              },
+            ]
+          : state.corp.servers.map((server) =>
+              server.id === serverId
+                ? { ...server, root: [...server.root, cardId] }
+                : server,
+            ),
     },
     cardInstances: {
       ...state.cardInstances,

@@ -80,6 +80,8 @@ describe("global root support installation payment facts", () => {
   it("does not add prospective private payment facts for ordinary assets", () => {
     const state = game("sp207-ordinary-asset");
     const id = moveCorpCardToHq(state, "onr_v1_326_holovid-campaign");
-    expect(projectGlobalRootSupportRezAfterInstall(state, id)).toBeUndefined();
+    expect(
+      projectGlobalRootSupportRezAfterInstall(state, id, "new_remote"),
+    ).toBeUndefined();
   });
 });

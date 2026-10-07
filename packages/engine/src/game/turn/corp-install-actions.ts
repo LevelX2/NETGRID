@@ -140,7 +140,11 @@ export function buildCorpNewRemoteRootInstallAction(
   cardId: CardInstanceId,
   installCost: number,
 ): LegalAction {
-  const supportRez = projectGlobalRootSupportRezAfterInstall(state, cardId);
+  const supportRez = projectGlobalRootSupportRezAfterInstall(
+    state,
+    cardId,
+    "new_remote",
+  );
   return buildLegalAction(
     state,
     "corp",
@@ -165,6 +169,11 @@ export function buildCorpServerRootInstallAction(
   installCost: number,
   options: CorpRootInstallOptions = {},
 ): LegalAction {
+  const supportRez = projectGlobalRootSupportRezAfterInstall(
+    state,
+    cardId,
+    server.id,
+  );
   return buildLegalAction(
     state,
     "corp",
@@ -176,6 +185,7 @@ export function buildCorpServerRootInstallAction(
       cardId,
       serverId: server.id,
       placement: "root",
+      ...(supportRez ? corpIcePostInstallRezProjectionPayload(supportRez) : {}),
       ...(options.replacesRootAsset
         ? { rootReplacement: "asset_to_agenda" }
         : {}),
