@@ -43,6 +43,17 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Die gewöhnliche Run-Startquote finanziert positiven bekannten Hirnschaden-
+Schutz gemeinsam mit allen unabhängigen ETR-Breaks. Die aktuelle
+Encounter-Abwehr priorisiert diesen Schutz bereits; eine vorgeschaltete
+Schadens-Handpuffer-Normalisierung darf deshalb keine nur scheinbar bezahlbare
+Vollroute erzeugen. Fehlende Credits bleiben eine konkrete Finanzierungslücke.
+Exakt null Schaden verursacht keine zusätzlichen Schutzkosten. Der bestehende,
+öffentlich belegte terminale Remote-Contest behält seine getrennte
+Nicht-Flatline-Schadenszulassung, ohne unabhängige ETR-Sperren zu beseitigen.
+Die nativen Checkpoints aus Paarung 515 sichern gewöhnliche Finanzierung,
+finanzierten Gegenfall, Nullschaden und tatsächliche AI→Engine-Fortsetzung ab.
+
 Der aktuelle Payoff wird pro Runaktion am tatsächlichen `accessServerId`
 bewertet. Ein Zugang über Archives mit anschließendem HQ-Zugriff übernimmt
 nicht den bekannten Nullnutzen eines normalen Archives-Runs. Auch innerhalb

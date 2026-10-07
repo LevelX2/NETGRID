@@ -760,7 +760,54 @@ describe("PlayerView projection", () => {
     ).toEqual(actuallyRezzedQuote);
   });
 
-  it("fails closed and stays side-safe for ICE with real on-rez lifecycle effects", () => {
+
+  it("keeps a choice-dependent credit replacement incomplete even during mandatory draw", () => {
+    const state = createGameAfterSetup({ seed: "post-rez-credit-replacement" });
+    const iceId = "post-rez-financial-snowbank" as CardInstanceId;
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[state.corp.identity]!, instanceId: iceId,
+      definitionId: "onr_proteus_038_snowbank", owner: "corp", controller: "corp",
+      faceup: false, rezzed: false, zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    };
+    state.corp.servers.find(server => server.id === "rd")!.ice.push(iceId);
+    const firmId = "post-rez-investment-firm" as CardInstanceId;
+    state.cardInstances[firmId] = {
+      ...state.cardInstances[state.corp.identity]!, instanceId: firmId,
+      definitionId: "onr_v1_329_investment-firm", owner: "corp", controller: "corp",
+      faceup: true, rezzed: true, zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+    };
+    state.corp.servers.find(server => server.id === "rd")!.root.push(firmId);
+    const before = structuredClone(state);
+    const quote = getPlayerView(state, "corp").servers.find(server => server.id === "rd")!
+      .ice.find(ice => ice.instanceId === iceId)!.effectivePostRezRunQuote;
+    expect(quote).toMatchObject({ complete: false, reason: "on_rez_lifecycle_projection_required" });
+    expect(state).toEqual(before);
+  });
+
+  it("projects gain interception on an isolated debt object", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "post-rez-credit-debt" }));
+    const iceId = "post-rez-financial-snowbank" as CardInstanceId;
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[state.corp.identity]!, instanceId: iceId,
+      definitionId: "onr_proteus_038_snowbank", owner: "corp", controller: "corp",
+      faceup: false, rezzed: false, zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    };
+    state.corp.servers.find(server => server.id === "rd")!.ice.push(iceId);
+    state.actionEconomy ??= {};
+    state.actionEconomy.corpCreditForfeitDebt = { remaining: 2 } as NonNullable<NonNullable<typeof state.actionEconomy>["corpCreditForfeitDebt"]>;
+    const before = structuredClone(state);
+    expect(getPlayerView(state, "corp").servers.find(server => server.id === "rd")!
+      .ice.find(ice => ice.instanceId === iceId)!.effectivePostRezRunQuote).toMatchObject({ complete: true });
+    expect(state).toEqual(before);
+    expect(state.actionEconomy.corpCreditForfeitDebt?.remaining).toBe(2);
+  });
+  it.each([
+    ["onr_proteus_014_chihuahua", 2],
+    ["onr_proteus_016_coyote", 3],
+    ["onr_proteus_032_misleading-access-menus", 3],
+    ["onr_proteus_038_snowbank", 3],
+    ["onr_proteus_045_washed-up-solo-construct", 3],
+  ])("projects %s public credit lifecycle without changing the current state", (definitionId, gain) => {
     let state = toRunnerTurn(
       createGameAfterSetup({ seed: "on-rez-lifecycle-post-rez-quote" }),
     );
@@ -769,7 +816,7 @@ describe("PlayerView projection", () => {
     state.cardInstances[iceId] = {
       ...state.cardInstances[state.corp.identity]!,
       instanceId: iceId,
-      definitionId: "onr_proteus_038_snowbank",
+      definitionId: definitionId as string,
       owner: "corp",
       controller: "corp",
       faceup: false,
@@ -789,12 +836,11 @@ describe("PlayerView projection", () => {
     expect(corpIce?.effectivePostRezRunQuote).toMatchObject({
       context: "installed_post_rez",
       cardId: iceId,
-      iceDefinitionId: "onr_proteus_038_snowbank",
+      iceDefinitionId: definitionId,
       targetServerId: "rd",
       projectedServerId: "rd",
       expiresAtStateVersion: state.stateVersion,
-      complete: false,
-      reason: "on_rez_lifecycle_projection_required",
+      complete: true,
     });
     expect(runnerIce?.effectivePostRezRunQuote).toBeUndefined();
     expect(state).toEqual(stateBeforeProjection);
@@ -821,7 +867,12 @@ describe("PlayerView projection", () => {
     );
 
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
-    expect(state.corp.credits).toBe(corpCreditsBeforeRez - rezCreditCost + 3);
+    const actualQuote = getPlayerView(state, "corp").servers
+      .find((server) => server.id === "rd")?.ice
+      .find((ice) => ice.instanceId === iceId)?.effectiveRunQuote;
+    const projected = corpIce?.effectivePostRezRunQuote;
+    expect(projected?.complete && projected.effectiveRunQuote).toEqual(actualQuote);
+    expect(state.corp.credits).toBe(corpCreditsBeforeRez - rezCreditCost + Number(gain));
   });
 
   it("keeps variable projections incomplete and quotes the exact approached fixed ICE", () => {

@@ -12,6 +12,8 @@ import { visibleCorpCard } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { visibleCurrentIceBreakExchange } from "./visible-rez-resource-exchange-quote";
 import { projectFixedCorpIcePostRezState } from "./fixed-ice-post-rez-state";
+import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
+import { applyCreditGain } from "../economy/credit-gain";
 
 /**
  * Quotes the run-facing state of one ICE without mutating GameState. Fixed
@@ -78,7 +80,21 @@ export function visibleCorpIcePostRezRunQuote(
       reason: "variable_rez_choice_required",
     };
   }
-  if ((implementation?.lifecycle?.on_rez?.length ?? 0) > 0) {
+  const rezEffects = implementation?.lifecycle?.on_rez ?? [];
+  // This projection supports only deterministic public Corp credit gains.
+  // Other lifecycle effects and open choices keep their explicit boundary.
+  if (
+    rezEffects.length > 0 &&
+    (source.controller !== "corp" ||
+      state.pendingChoice !== undefined ||
+      state.pendingCorpCreditGainReplacement !== undefined ||
+      rezEffects.some(
+        (effect) =>
+          effect.kind !== "gain_credits" ||
+          effect.visibility !== "public" ||
+          (effect.recipient !== "corp" && effect.recipient !== "controller"),
+      ))
+  ) {
     return {
       ...binding,
       complete: false,
@@ -86,6 +102,49 @@ export function visibleCorpIcePostRezRunQuote(
     };
   }
   const projectedState = projectFixedCorpIcePostRezState(state, iceId);
+  if (projectedState && rezEffects.length > 0) {
+    // Only these branches are writable by the admitted credit interpreter.
+    // Keep the event log, RNG and unrelated card objects read-only and shared.
+    projectedState.corp = { ...state.corp };
+    if (state.actionEconomy)
+      projectedState.actionEconomy = structuredClone(state.actionEconomy);
+    const originalTimingPoint = projectedState.timingPoint;
+    // A future ICE encounter cannot inherit mandatory-draw replacement relief.
+    projectedState.timingPoint = "run.approach_ice";
+    executeCardImplementationEffects(
+      projectedState,
+      {
+        sourceCardId: iceId,
+        sourceDefinitionId: definitionId,
+        sourceTitle: CARD_DEFINITIONS_BY_ID[definitionId]!.title,
+        controller: source.controller,
+        reason: "card_lifecycle",
+        isEffectSuspended: () =>
+          Boolean(projectedState.pendingCorpCreditGainReplacement),
+        gainCredits: (side, amount, gainOrdinal) =>
+          applyCreditGain(projectedState, {
+            side,
+            baseAmount: amount,
+            source: {
+              kind: "card_effect",
+              sourceDefinitionId: definitionId,
+              sourceCardId: iceId,
+              gainOrdinal,
+              reason: "card_lifecycle",
+            },
+          }),
+      },
+      rezEffects,
+    );
+    projectedState.timingPoint = originalTimingPoint;
+    if (projectedState.pendingCorpCreditGainReplacement) {
+      return {
+        ...binding,
+        complete: false,
+        reason: "on_rez_lifecycle_projection_required",
+      };
+    }
+  }
   if (
     projectedState &&
     exactVariableAction &&

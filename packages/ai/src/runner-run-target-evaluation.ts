@@ -1,4 +1,5 @@
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
+import { runnerTargetHasTerminalContestThreat } from "./runtime/runner-terminal-contest-threat";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -392,6 +393,9 @@ function evaluateRunnerRunTarget(
       server?.root ?? [],
       params.input.playerView.opponent.credits,
       {
+        requireCoreDamageProtection:
+          targetKind !== "remote" ||
+          !runnerTargetHasTerminalContestThreat(params.input, targetServerId),
         visibleRemoteServerCount: params.input.playerView.servers.filter(
           (candidate) => candidate.id.startsWith("remote_"),
         ).length,

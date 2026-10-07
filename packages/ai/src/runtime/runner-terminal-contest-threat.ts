@@ -148,3 +148,30 @@ export function runnerTerminalContestThreat(
     ],
   };
 }
+
+/** Public target fact shared by route admission and the existing contest owner. */
+export function runnerTargetHasTerminalContestThreat(
+  input: AiDecisionInput,
+  targetServerId: string,
+): boolean {
+  const terminalThreat = runnerTerminalContestThreat(input);
+  if (!terminalThreat) return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  const visiblyAdvancedRoot =
+    server?.root.some(
+      (card) =>
+        (card.known === false || card.type === "agenda") &&
+        (card.advancementCounters ?? 0) > 0,
+    ) === true;
+  const repeatedMatchpointRemote = terminalThreat.remoteServerIds.includes(
+    targetServerId,
+  );
+  if (!visiblyAdvancedRoot && !repeatedMatchpointRemote) {
+    return false;
+  }
+  return (
+    terminalThreat.kind === "opponent_matchpoint" || repeatedMatchpointRemote
+  );
+}

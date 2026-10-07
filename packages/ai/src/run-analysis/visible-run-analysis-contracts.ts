@@ -46,6 +46,8 @@ export type VisibleDeflectorContext = {
   visibleRemoteServerCount?: number;
   visibleCorpCredits?: number;
   targetServerId?: string;
+  /** Ordinary run-start policy: finance positive Core protection required by the run window. */
+  requireCoreDamageProtection?: boolean;
   /** Remaining free Net/Core damage prevention for this turn. */
   netOrCoreDamagePreventionRemaining?: number;
   /** Remaining run-scoped prevention that applies to all damage types. */

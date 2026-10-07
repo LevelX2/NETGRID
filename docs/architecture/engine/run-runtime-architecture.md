@@ -75,6 +75,15 @@ ihnen aber nicht zurückimportiert.
   bei weiterhin inaktivem `GameState` genügt nicht. Lifecycle und variable
   Choices behalten ihre eigenen Zulassungsgrenzen; RNG, Eventlog und der
   tatsächliche Zustand bleiben unverändert.
+- Die Post-Rez-Runquote projiziert feste öffentliche Corp-Creditgewinne des
+  Rez-Lifecycles über den kanonischen Effektinterpreter und `applyCreditGain`.
+  Nur die dabei beschreibbaren Credit-/Debt-Zweige werden lokal kopiert.
+  Ein zukünftiger ICE-Rez erbt keine Credit-Replacement-Ausnahme des aktuellen
+  Pflichtdrawfensters. Öffnet die kanonische Creditvergabe eine Choice oder
+  enthält der Lifecycle andere Effekte, bleibt die Vorschau ausdrücklich
+  unvollständig. Kein Replacement wird geraten; gegnerische Hand, RNG,
+  Eventlog und Originalzustand bleiben unverändert. Die Quote ersetzt weder
+  die gesonderte Rez-Finanzierung noch eine gemeinsame Mehr-ICE-Projektion.
 - Die Corp erhält für angebotene X-Rez-LegalActions eigene
   `effectivePostRezActionRunQuotes` mit Action-ID und StateVersion. Die
   Projektion setzt nur den öffentlich gewählten X-Zustand in einer lokalen

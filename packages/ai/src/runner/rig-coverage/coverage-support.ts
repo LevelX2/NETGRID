@@ -17,7 +17,7 @@ import { runnerDrawTaxLiabilityProjection } from "../../runtime/runner-draw-tax-
 import { type RunnerHandRotationAssessment } from "../../runtime/runner-hand-rotation-assessment";
 import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
-import { runnerTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
+import { runnerTargetHasTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
 import { coverageKindForPlanRole } from "./coverage-card-facts";
@@ -27,26 +27,7 @@ export function runnerCoverageGapIsTerminalRemoteThreat(
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
   if (evaluation.targetKind !== "remote") return false;
-  const terminalThreat = runnerTerminalContestThreat(input);
-  if (!terminalThreat) return false;
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === evaluation.targetServerId,
-  );
-  const visiblyAdvancedRoot =
-    server?.root.some(
-      (card) =>
-        (card.known === false || card.type === "agenda") &&
-        (card.advancementCounters ?? 0) > 0,
-    ) === true;
-  const repeatedMatchpointRemote = terminalThreat.remoteServerIds.includes(
-    evaluation.targetServerId,
-  );
-  if (!visiblyAdvancedRoot && !repeatedMatchpointRemote) {
-    return false;
-  }
-  return (
-    terminalThreat.kind === "opponent_matchpoint" || repeatedMatchpointRemote
-  );
+  return runnerTargetHasTerminalContestThreat(input, evaluation.targetServerId);
 }
 
 export function runnerUrgentRemoteCoverageConversionQuote(

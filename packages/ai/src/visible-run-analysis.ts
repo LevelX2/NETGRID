@@ -1095,7 +1095,13 @@ function assessKnownRezzedIcePathInternal(
       const laterEffectPreventsFutureBreaking = runPathEffects
         .slice(effectIndex + 1)
         .some((entry) => entry.effect.preventsFutureBreaking === true);
+      const coreProtectionRequired =
+        deflectorContext.requireCoreDamageProtection === true &&
+        sourceSubroutine.type === "do_damage" &&
+        sourceSubroutine.damageType === "core" &&
+        (sourceSubroutine.amount ?? 1) > 0;
       const prioritizeLaterAccessPreservation =
+        !coreProtectionRequired &&
         laterEffectPreventsFutureBreaking &&
         hardEffectKinds.length === 1 &&
         hardEffectKinds[0] === "damage_or_program_trash";
@@ -1182,6 +1188,7 @@ function assessKnownRezzedIcePathInternal(
         });
         if (
           sourceSubroutine.type === "do_damage" &&
+          !coreProtectionRequired &&
           hardEffectKinds.length === 1 &&
           hardEffectKinds[0] === "damage_or_program_trash" &&
           effect.preventsFutureBreaking !== true &&
