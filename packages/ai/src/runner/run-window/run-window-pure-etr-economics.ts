@@ -1,10 +1,8 @@
+import { completeEncounterBreakerPayment } from "./run-window-encounter-payment";
 import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
 import { parseSubroutineIndexes } from "../../runtime/subroutine-indexes";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import {
-  assessKnownRezzedIcePath,
-  creditsToBreakVisibleSubroutinesWithBreaker,
-} from "../../visible-run-analysis";
+import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import {
   currentEncounteredIceCard,
   currentEncounterRequiresFullBreak,
@@ -101,51 +99,7 @@ export function pureEndRunEncounterPayment(
       },
     };
   }
-  const breaker = input.playerView.own.rig?.find(
-    (c) => c.instanceId === action.source,
-  );
-  if (!breaker) return undefined;
-  const quote = creditsToBreakVisibleSubroutinesWithBreaker(
-    breaker,
-    { ...ice, strength: ice.effectiveRunQuote.effectiveStrength },
-    subroutines,
-    breaker.strength,
-    ice.effectiveRunQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
-  );
-  if (
-    !quote ||
-    quote.conditionalRiskReason ||
-    quote.conditionalAccessReason ||
-    quote.postBreakStealthLosses?.length ||
-    quote.futureClicksLost
-  )
-    return undefined;
-  const payment = spendRunnerEncounterActionCost({
-    input,
-    action,
-    budget: runnerEncounterCreditBudgetForInput(input),
-    cost: quote.cost,
-  });
-  if (!payment.affordable) return undefined;
-  const rig = runnerRigAfterEncounter(input.playerView.own.rig ?? []).map(
-    (c) =>
-      c.instanceId === breaker.instanceId && quote.carriesStrengthAcrossIce
-        ? { ...c, strength: quote.endingStrength }
-        : c,
-  );
-  return {
-    cost: quote.cost,
-    cashCost: payment.cashCost,
-    liquidCreditsAfterPayment: payment.budget.credits,
-    rig,
-    runEndTrashSourceIds: quote.runEndTrashSourceIfUsed
-      ? [quote.breakerInstanceId]
-      : [],
-    budget: {
-      ...payment.budget,
-      credits: payment.budget.credits + payment.budget.runOnlyCredits,
-    },
-  };
+  return completeEncounterBreakerPayment(input, action);
 }
 
 /** Economic evidence for equivalent, fully paid pure-ETR continuations.

@@ -64,6 +64,7 @@ import { corpScorePriorityClass } from "./corp-score-priority";
 import { corpInstalledScoreResourceCost } from "./score-reserve-restoration";
 import {
   corpFundedScoreProtectionNeed,
+  corpScoreProjectHasCurrentProtectionRequote,
   corpScoreProtectionNeedIsSatisfied,
   remainingAgendaAdvancementCreditsAfterAction,
 } from "./score-protection-needs";
@@ -624,12 +625,14 @@ export function scoreProjectForCandidate(
       recentlyCompromisedRemoteIds.has(serverId) &&
       !sameTurnCloseout &&
       !deckoutAgendaFloodScoreWindow &&
-      !corpScoreProtectionNeedIsSatisfied(
-        input,
-        protectionNeed,
+      !corpScoreProjectHasCurrentProtectionRequote(input, {
+        ...(protectionNeed ? { protectionNeed } : {}),
         projectId,
         serverId,
-      );
+        ...(matureRemoteScoreHorizonCertification
+          ? { scoreHorizonCertification: matureRemoteScoreHorizonCertification }
+          : {}),
+      });
     const fundingGap =
       forcedAgendaDiscardRelief ||
       lastViableDeckoutMatchpointWindow ||

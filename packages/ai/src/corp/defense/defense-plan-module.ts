@@ -1538,7 +1538,7 @@ function selectedDirectDefenseRoute(
         projection: signal.rezRoute,
       })),
     )
-    .sort(compareExactIceRezRoutes);
+    .sort((left, right) => compareExactIceRezRoutes(context, left, right));
   if (exactRezRoutes[0]) {
     return [
       {
@@ -1561,6 +1561,7 @@ function selectedDirectDefenseRoute(
 }
 
 function compareExactIceRezRoutes(
+  context: PlanSchedulerContext,
   left: {
     candidate: ActionSemanticCandidate;
     projection: CorpExactIceRezRouteProjection;
@@ -1583,7 +1584,40 @@ function compareExactIceRezRoutes(
   if (probabilityComparison !== undefined && probabilityComparison !== 0) {
     return probabilityComparison;
   }
+  // Compare lifetime only for the same exact current ICE and target. Public
+  // remaining Runner clicks bound a possible repeat-run investment horizon;
+  // this valuation does not certify that those future runs will occur.
+  const sameIce =
+    probabilityComparison === 0 &&
+    left.projection.sourceCardInstanceId ===
+      right.projection.sourceCardInstanceId &&
+    left.projection.targetServerId === right.projection.targetServerId;
+  const recurringCost = (route: typeof left) => {
+    const action = context.input.legalActions.find(
+      (a) => a.actionId === route.candidate.actionId,
+    );
+    if (
+      !action ||
+      action.expiresAtStateVersion !== context.input.playerView.stateVersion
+    ) {
+      throw new PlanResolutionFailure("step_target_mismatch", {
+        side: context.input.side,
+        stateVersion: context.input.playerView.stateVersion,
+        timingPoint: context.input.playerView.timingPoint,
+        legalActionTypes: context.input.legalActions.map((a) => a.type),
+        owner: "plan_module",
+        removalCondition:
+          "Bind the exact current ICE rez route before valuing its paid lifetime.",
+      });
+    }
+    const activations =
+      sameIce && action.payload?.temporaryDerezAfterRun === true
+        ? 1 + Math.max(0, context.input.playerView.opponent.clicks)
+        : 1;
+    return route.projection.totalRezCredits * activations;
+  };
   return (
+    recurringCost(left) - recurringCost(right) ||
     left.projection.totalRezCredits - right.projection.totalRezCredits ||
     technicalCompare(left.candidate.actionId, right.candidate.actionId)
   );

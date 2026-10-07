@@ -1776,8 +1776,20 @@ erhalten diesen Vergleich nicht. Der Runner-Zugplaner erhält den begrenzten
 Nachkommawert des Owners ohne Rundung, damit die aktuelle Auswahl dieselbe
 Kostenrangfolge konsumiert. Eine günstigere notwendige Coverage bleibt vor
 dem bloßen Erhalt einer Quelle priorisiert.
-Gemischte Wirkungen, notwendiger Schadens-/Programmschutz und ein Break zum
-Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
+Für gemischte aktuelle Encounter darf derselbe Owner ebenfalls vollständig
+finanzierbare Breakerrouten vergleichen, wenn die gewöhnliche Zulassung und
+die neu gequotete Reserve desselben Run-Roots erhalten bleiben. Der lokale
+Zahlungsdienst quotiert alle noch offenen Subroutinen gemeinsam: zuerst
+verbleibende liquide Credits, dann gesamte Nominalkosten und bei Gleichstand
+neu gebundene Quellentrashpflichten. Ein billiger erster Pump ersetzt diesen
+Nachweis nicht. Stärke, die weitere ICE beeinflusst, braucht weiterhin die
+vollständige Restpfadbewertung; konditionale Folgen, spätere Klickverluste,
+Stealthverluste und die Liquidation einer Zahlungsquelle liefern keinen
+gleichwertigen lokalen Vergleich. Ein unfinanzierbarer vollständiger Break
+verdrängt keinen notwendigen Teilbreak zum Schadens-/Programmschutz oder zum
+Erhalt eines späteren Ausstiegs. Native Zustände aus Paarung 512 und ihre
+wirklich angewandten Engine-Folgen sichern diese Grenze in
+`meta-512-pairing-causes.test.ts`.
 
 Öffentlich bereits aufgelöste Brechsperren werden im gemeinsamen
 `currentRunPathContext` an die konkrete ICE-Instanz gebunden. Die aktuelle

@@ -1,3 +1,4 @@
+import { corpScoreProjectHasCurrentProtectionRequote } from "./score-protection-needs";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { withCorpTerminalAgendaDefense } from "./score-terminal-defense";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -193,6 +194,10 @@ export function reconcileCorpScoreProjects({
       }
       return funded;
     });
+  const requiresReprotection = (project: CorpScoreProjectSignal) =>
+    project.serverId !== undefined &&
+    recentlyCompromisedRemoteIds.has(project.serverId) &&
+    !corpScoreProjectHasCurrentProtectionRequote(input, project);
   const ownAgendas = input.playerView.own.gripOrHq.filter(
     (card) => card.known && visibleCardIsAgenda(input, card),
   ).length;
@@ -203,7 +208,7 @@ export function reconcileCorpScoreProjects({
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
-          !recentlyCompromisedRemoteIds.has(project.serverId) &&
+          !requiresReprotection(project) &&
           project.agendaInstanceId !== undefined,
       )
       .map((project) => project.agendaInstanceId!),
@@ -215,7 +220,7 @@ export function reconcileCorpScoreProjects({
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
-          !recentlyCompromisedRemoteIds.has(project.serverId) &&
+          !requiresReprotection(project) &&
           project.agendaInstanceId !== undefined &&
           corpRemoteHasEngineQuotedReusableScoreFriction(
             input,
@@ -232,7 +237,7 @@ export function reconcileCorpScoreProjects({
           project.serverId !== undefined &&
           project.agendaInstanceId !== undefined &&
           (project.serverId === "new_remote" ||
-            !recentlyCompromisedRemoteIds.has(project.serverId)) &&
+            !requiresReprotection(project)) &&
           agendaInstancesWithPreparedRemote.has(project.agendaInstanceId) &&
           (corpPreparedScoreProjectHasExecutableCurrentStep(
             input,
@@ -255,7 +260,7 @@ export function reconcileCorpScoreProjects({
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
-          !recentlyCompromisedRemoteIds.has(project.serverId) &&
+          !requiresReprotection(project) &&
           project.agendaInstanceId !== undefined &&
           actionableScoreProjectIds.has(project.projectId),
       )

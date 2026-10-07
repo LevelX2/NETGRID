@@ -10,7 +10,10 @@ import {
   type CorpFundedRemoteAccessRiskNeed,
   type CorpScoreReserve,
 } from "../../runtime/corp-funded-score-protection";
-import { finiteNonNegativeIntegerOrResolutionFailure } from "../../runtime/exact-action-cost-facts";
+import {
+  finiteNonNegativeIntegerOrResolutionFailure,
+  isFiniteNonNegativeInteger,
+} from "../../runtime/exact-action-cost-facts";
 import { visibleOwnCardByInstanceId } from "../../runtime/runner-action-source-facts";
 import {
   requireVisibleCandidateSource,
@@ -211,6 +214,52 @@ export function corpScoreProtectionIsSatisfied(
     project.protectionNeed,
     project.projectId,
     project.serverId,
+  );
+}
+
+/** A public breach requires a current owner requote. A bounded mature score
+ * may span turns, while its current paid protection and resources remain exact.
+ * The ordinary same-turn funded click reserve is not relaxed. */
+export function corpScoreProjectHasCurrentProtectionRequote(
+  input: AiDecisionInput,
+  project: Pick<
+    CorpScoreProjectSignal,
+    "projectId" | "serverId" | "protectionNeed" | "scoreHorizonCertification"
+  >,
+): boolean {
+  if (corpScoreProtectionIsSatisfied(input, project)) return true;
+  const need = project.protectionNeed,
+    certification = project.scoreHorizonCertification;
+  if (
+    !need ||
+    !certification ||
+    !project.serverId ||
+    project.serverId === "new_remote" ||
+    need.parentProjectId !== project.projectId ||
+    need.targetServerId !== project.serverId ||
+    need.observedAtStateVersion !== input.playerView.stateVersion ||
+    need.baseline.knowledge !== "known" ||
+    !need.baseline.protection.protectsScore ||
+    need.baseline.protection.runnerAccessSuccessProbability.numerator !== 0 ||
+    !need.baseline.preservesScoreCreditReserve ||
+    need.baseline.agendaPointsAfterDefense < 0 ||
+    certification.kind !== "affordable_engine_quoted_defense_layers" ||
+    certification.serverId !== project.serverId ||
+    certification.observedAtStateVersion !== input.playerView.stateVersion ||
+    certification.layerInstanceIds.length !== 2 ||
+    new Set(certification.layerInstanceIds).size !== 2 ||
+    !isFiniteNonNegativeInteger(certification.requiredCredits) ||
+    !isFiniteNonNegativeInteger(certification.requiredAgendaPoints) ||
+    certification.requiredCredits + need.baseline.totalScoreReserveCredits >
+      input.playerView.own.credits ||
+    certification.requiredAgendaPoints > input.playerView.own.agendaPoints
+  )
+    return false;
+  const server = input.playerView.servers.find(
+    (s) => s.id === project.serverId,
+  );
+  return certification.layerInstanceIds.every((id) =>
+    server?.ice.some((ice) => ice.instanceId === id && ice.known !== false),
   );
 }
 

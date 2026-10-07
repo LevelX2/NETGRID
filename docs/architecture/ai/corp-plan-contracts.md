@@ -977,6 +977,17 @@ durch Puzzle trotz bereits gerezzter Imperial Guard vor dem terminalen Lab-Score
 Ein positiver, exakt belegter Breakpreis darf auch unter dem Rezpreis liegen;
 der erste Run muss den Rez nicht allein amortisieren. Nur temporäre
 Rez-Aktionen behalten den bisherigen Vergleich für einen einzelnen Run.
+Bei mehreren bereits zugelassenen Rez-Routen für dieselbe ICE im selben
+Server vergleicht der Defense-Owner nach gleicher Schutzwirkung und gleicher
+Zugriffswahrscheinlichkeit auch die bezahlte Wirkungsdauer. Eine ausdrücklich
+nach dem Run derezzende Route wird für den aktuellen Run plus die öffentlich
+verbleibenden Runneraktionen bewertet; ein dauerhafter Rez bleibt eine
+einmalige Zahlung. Dieser begrenzte Investitionshorizont behauptet keine
+zukünftigen Runs. Die erste Zahlungsfähigkeit und alle Score-Reserven bleiben
+Zulassungsvoraussetzungen. Ein kostenloser temporärer Rez sowie ein bezahlter
+temporärer Rez im letzten aktuellen Run behalten ihren Kostenvorteil.
+Native Gegenfälle und echte wiederholte Engine-Runs aus Paarung 512 liegen in
+`meta-512-pairing-causes.test.ts`.
 Öffentlich belegter Schaden, Tags, Tax, Disruption oder eine bedingte
 Stop-Wirkung können unabhängig von einer vollständigen Zugriffswahrscheinlichkeit
 eine `qualitative_encounter_defense`-Route begründen. Die Engine-Quote muss
@@ -1308,6 +1319,20 @@ Zulässig bleibt das Zertifikat bei einem blockierten Pfad, einer materiellen
 Liquiditätsbindung oder unvermeidbarem Damage-, Tag- oder Aktionsdruck. Damit
 bleibt die Schutzentscheidung beim Score-Parent und wird weder durch reine
 ICE-Anzahl noch durch gedruckte Kartenwerte ersetzt.
+
+Ein jüngster öffentlicher Zugriff sperrt die erneute Agendaallokation nur,
+solange keine aktuelle Schutz-Neuquote denselben Score-Parent und Server
+zertifiziert. Für ein reifes Projekt über mehrere Züge müssen sowohl dessen
+stategebundene bekannte Schutzbasis mit null Zugriffswahrscheinlichkeit als
+auch das aktuelle Engine-Zweischichtzertifikat vorliegen. Zwei unterschiedliche
+bekannte ICE, reale Rez-/Agendapunktkosten und die vollständige Creditreserve
+bleiben bindend. Die normale Same-Turn-Klickreserve wird dadurch nicht
+abgeschwächt. Projekterkennung und Schwesterprojektverdrängung konsumieren
+diesen selben Nachweis; veraltete, falsch gebundene, ungeschützte oder
+unfinanzierte Projekte bleiben gesperrt. Paarung 512 G23 D400–401 sichert die
+erneute Allokation nach dem tatsächlichen Pflichtziehen ohne erneutes Laden
+des residenten Portfolios; der bestehende ungeschützte Reprotection-Gegenfall
+bleibt erhalten.
 
 Die Vorfinanzierungsregel bleibt symmetrisch und begrenzt: Wenn die erste
 Schutzschicht eines langfristigen Scoreprojekts unter den makrostrategischen

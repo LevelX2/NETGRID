@@ -1,4 +1,8 @@
 import {
+  completeEncounterBreakerPayment,
+  completeMixedEncounterEconomics,
+} from "./run-window-encounter-payment";
+import {
   pureEndRunEncounterPayment,
   pureEndRunEncounterEconomics,
 } from "./run-window-pure-etr-economics";
@@ -912,9 +916,26 @@ function runnerRunWindowActionAssessment(
         })
       : undefined;
   const committedParentPayoff = runnerRunOriginCommittedPayoff(runOrigin);
-  const encounterEconomics = encounterPayment
+  const mixedEncounterPayment =
+    !exclusion && !encounterPayment
+      ? completeEncounterBreakerPayment(input, action)
+      : undefined;
+  const mixedPaidRisk =
+    mixedEncounterPayment && runOrigin?.runRiskContract
+      ? runnerRunRiskContractReassessment(
+          input,
+          runOrigin,
+          mixedEncounterPayment,
+        )
+      : undefined;
+  const mixedEncounterEconomics =
+    mixedEncounterPayment && mixedPaidRisk?.decision === "preserve_continuation"
+      ? completeMixedEncounterEconomics(input, mixedEncounterPayment)
+      : undefined;
+  const pureEncounterEconomics = encounterPayment
     ? pureEndRunEncounterEconomics(input, encounterPayment)
     : undefined;
+  const encounterEconomics = pureEncounterEconomics ?? mixedEncounterEconomics;
   return exclusion
     ? {
         admissible: false,
@@ -950,11 +971,18 @@ function runnerRunWindowActionAssessment(
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
           `runner_run_window_action:${action.type}`,
-          ...(encounterEconomics
+          ...(pureEncounterEconomics
             ? [
-                `runner_pure_etr_complete_path_cost:${encounterEconomics.totalCost}`,
-                `runner_pure_etr_complete_path_cash_cost:${encounterEconomics.cashCost}`,
-                `runner_pure_etr_new_run_end_trash_sources:${encounterEconomics.newRunEndTrashSourceCount}`,
+                `runner_pure_etr_complete_path_cost:${pureEncounterEconomics.totalCost}`,
+                `runner_pure_etr_complete_path_cash_cost:${pureEncounterEconomics.cashCost}`,
+                `runner_pure_etr_new_run_end_trash_sources:${pureEncounterEconomics.newRunEndTrashSourceCount}`,
+              ]
+            : []),
+          ...(mixedEncounterEconomics
+            ? [
+                `runner_mixed_encounter_complete_cost:${mixedEncounterEconomics.totalCost}`,
+                `runner_mixed_encounter_complete_cash_cost:${mixedEncounterEconomics.cashCost}`,
+                "runner_mixed_encounter_paid_root_reserve_preserved",
               ]
             : []),
           ...(strengthPumpSavings !== undefined
