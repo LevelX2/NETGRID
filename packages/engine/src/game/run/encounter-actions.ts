@@ -534,7 +534,8 @@ export function buildRunnerEncounterActions(
   };
 }
 
-/** Exact mechanical certificate, not a recommendation or a legality filter. */
+/** Exact mechanical certificate, not a recommendation or a legality filter.
+ * Run-end source disposal cannot add a payoff to preventing zero damage. */
 function breakHasNoDamageOrSecondaryPurpose(
   host: RunnerEncounterActionHost,
   subroutine: Subroutine,
@@ -543,8 +544,11 @@ function breakHasNoDamageOrSecondaryPurpose(
   if (
     subroutine.type !== "do_damage" ||
     subroutine.amount !== 0 ||
-    ability.special ||
-    ability.specialEffects?.length ||
+    (ability.special !== undefined &&
+      ability.special !== "run_end_trash_source_if_used") ||
+    ability.specialEffects?.some(
+      (effect) => effect.kind !== "run_end_trash_source_if_used",
+    ) ||
     ability.onSuccessfulBreakEffects?.length ||
     ability.onUseEffects?.length ||
     ability.onUseEndRun ||

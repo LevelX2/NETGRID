@@ -2353,9 +2353,20 @@ und `sourceCardDefinitionId`. Der Plan konsumiert diese Bindung für jede
 Zugriffszone. Die allgemeine R&D-Run-Ansicht bleibt unverändert verdeckt.
 `false` behauptet weder Nutzen noch Optimalität.
 Ambush lehnt eine so belegte wirkungslose Zahlung ab und bindet die Auswahl
-an Quelle, Choice, StateVersion, Kosten, Bescheinigung und LegalAction. Andere
-bezahlte Zugriffseffekte behalten ihre bisherige Aktivierung. Die Bewertung
-ihres längerfristigen Nutzens bleibt eine gesonderte offene Aufgabe.
+an Quelle, Choice, StateVersion, Kosten, Bescheinigung und LegalAction.
+Zusätzlich prüft `access-target-expiry.ts` einen begrenzten Zielhorizont:
+Bei der letzten Zugriffskarte eines erfolgreichen Runs kann eine ausschließlich
+auf installierte Icebreaker wirkende Stärkesenkung keinen späteren Encounter
+erreichen, wenn alle öffentlich bekannten Ziele bereits für den Runend-Trash
+gebunden sind. CardSpec-Wirkung, Zugriffszonen, tatsächliche Zahlungskosten,
+Run-ID und vollständige Zielinstanzmenge gehören zur typisierten Bindung.
+Der Resolver revalidiert diese Fakten; Änderungen scheitern fail-closed.
+Die nativen G3/D108- und G4/D180-Präfixe aus Paarung530 belegen identisches
+Runner-/Breaker-Cleanup mit drei erhaltenen Corpcredits. G1/D296 mit weiterem
+Access, G26/D95 mit überlebendem Breaker und G31/D405 mit persistentem
+Runnercounter erhalten die Zahlung. Andere bezahlte Zugriffseffekte behalten
+ihre bisherige Aktivierung. Die Bewertung ihres längerfristigen Nutzens bleibt
+eine gesonderte offene Aufgabe.
 Der Window-Resolver besitzt keine eigene Zahlungsstrategie und darf nur die
 exakte Auswahl des aktuellen Ambush-Executors vervollständigen. Fehlende oder
 veraltete Bindungen scheitern fail-closed. Die menschliche Zahlung bleibt

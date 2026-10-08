@@ -1,3 +1,4 @@
+import { accessTargetExpiryMatchesCurrentInput } from "./access-target-expiry";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
@@ -57,6 +58,10 @@ export function selectedCorpAccessPaymentOptionsFromAmbushPlan(
     pay.metadata.accessPaymentNoOpCertified !== binding.noOpCertified ||
     choice.sourceCardDefinitionId !== moduleState.signal.sourceDefinitionId ||
     choice.sourceCardInstanceId !== moduleState.signal.sourceInstanceId ||
+    (binding.targetExpiry !== undefined &&
+      (binding.noOpCertified ||
+        binding.selectedOptionIds[0] !== "decline" ||
+        !accessTargetExpiryMatchesCurrentInput(input, binding.targetExpiry))) ||
     binding.selectedOptionIds.length !== 1 ||
     !selectableOptions.some(
       (option) => option.id === binding.selectedOptionIds[0],

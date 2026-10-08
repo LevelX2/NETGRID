@@ -1,3 +1,4 @@
+import type { CorpAccessTargetExpiry } from "../corp/ambush/access-target-expiry";
 import type { CorpCorePlanDomain } from "./corp-core-plan-contracts";
 import { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
 import { CorpPunishCampaignSignal } from "../corp/punish/punish-types";
@@ -53,6 +54,7 @@ export type CorpAmbushSignal = {
     selectedOptionIds: string[];
     creditCost: number;
     noOpCertified: boolean;
+    targetExpiry?: CorpAccessTargetExpiry;
   };
   accessProgramBounceChoiceBinding?: {
     actionId: string;

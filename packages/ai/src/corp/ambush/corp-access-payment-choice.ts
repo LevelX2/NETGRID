@@ -2,6 +2,8 @@ import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts"
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
+import { accessStrengthTargetsExpireBeforeNextEncounter } from "./access-target-expiry";
+
 const ACCESS_PAYMENT_SOURCE = "p3_35.access_payment";
 const ACCESS_ZONES = new Set(["installed", "hq", "rd", "archives"]);
 
@@ -106,6 +108,15 @@ export function corpAccessPaymentChoiceSignal(
     )
   )
     return undefined;
+  const targetExpiry = noOpCertified
+    ? undefined
+    : accessStrengthTargetsExpireBeforeNextEncounter(
+        input,
+        sourceDefinitionId,
+        sourceParts[3]!,
+        creditCost,
+      );
+  const declinePayment = noOpCertified || targetExpiry !== undefined;
   return {
     commitmentVersion: "corp_ambush_commitment_v1",
     ambushId: `access-payment:${choice.choiceId}`,
@@ -116,7 +127,9 @@ export function corpAccessPaymentChoiceSignal(
     phase: "trigger",
     purposeCode: noOpCertified
       ? "decline_engine_certified_empty_access_effect"
-      : "activate_current_paid_access_effect",
+      : targetExpiry
+        ? "decline_strength_effect_expiring_before_next_encounter"
+        : "activate_current_paid_access_effect",
     assignedDomainPlanIds: ["corp.ambush_bluff"],
     duplicateAlreadyInstalled: false,
     affordableOrSupportable: true,
@@ -125,15 +138,18 @@ export function corpAccessPaymentChoiceSignal(
     value: 1_000,
     evidenceCode: noOpCertified
       ? "corp_access_payment_declines_certified_no_op"
-      : "corp_access_payment_current_activation",
+      : targetExpiry
+        ? "corp_access_payment_declines_bound_run_end_target_expiry"
+        : "corp_access_payment_current_activation",
     accessPaymentChoiceBinding: {
       actionId: action.actionId,
       choiceId: choice.choiceId,
       choiceSource: choice.source,
       observedAtStateVersion: input.playerView.stateVersion,
-      selectedOptionIds: [noOpCertified ? decline.id : pay.id],
+      selectedOptionIds: [declinePayment ? decline.id : pay.id],
       creditCost,
       noOpCertified,
+      ...(targetExpiry ? { targetExpiry } : {}),
     },
   };
 }

@@ -2454,6 +2454,15 @@ gemischter Break mit wirksamer ETR, positive oder unbekannte Schadensmengen
 und eigenständige Vollbruchwirkungen erhalten dieses Zertifikat nicht.
 Legalität, Quelle, Subroutinen und StateVersion bleiben unverändert gebunden;
 ein bestehendes Run-Commitment überstimmt die fehlende Wirkung nicht.
+Die ausschließlich schädliche Pflicht, den benutzten Breaker nach Runende
+zu trashen, begründet dabei keinen eigenständigen Nutzen eines Nullschadens-
+Breaks. Die Engine klassifiziert diese mechanische Effektart generisch;
+positive Erfolgs-/Counter-/Folgebreakeffekte und aktive Vollbruchpflichten
+bleiben ausgeschlossen. Paarung530 G33/D190 reproduziert den ursprünglichen
+Null-Core-Break mit allen 189 Präfixhashes und neun Checkpointbindungen.
+Das aktuelle Engine-Zertifikat erhält dort die legale ETR-Breakauswahl beim
+bisherigen Run-Executor; eine direkte ursprüngliche Fortsetzung spart gegenüber
+Nullbreak plus ungebrochenem ETR einen Credit und erhält die Breakerinstanz.
 Die allgemeine Safety-Einordnung berücksichtigt ebenfalls die aktuelle
 Engine-Schadensmenge: ausdrücklich null direkter Schaden ist keine
 unmittelbare Gefahr, auch bei Core-Schaden. Positive und unbekannte Mengen
