@@ -1,6 +1,6 @@
-import { visibleBreakerEncounterQuote } from "@netgrid/engine";
-import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import { type AiDecisionInput } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { corpScoredAgendaFreeRezDefenseTarget } from "../defense/scored-agenda-free-rez-defense-target";
 import { corpScoredAgendaIceMarkDefenseTarget } from "../defense/corp-defense-domain-signals";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type PlanSchedulerResult } from "../../plans/plan-scheduler";
@@ -10,7 +10,6 @@ import {
   corpScoredAgendaIceMarkProfile,
 } from "../../runtime/corp-canonical-card-facts";
 import type { DiscardKeepScorer } from "../../runtime/discard-choice-selection";
-import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 import { visibleInstalledCard } from "../../runtime/visible-action-facts";
 import { corpHandDispositionScore } from "../hand-management/hand-disposition-score";
 export function bindSelectedCorpScoreChoiceContinuation(
@@ -121,7 +120,7 @@ export function bindSelectedCorpScoreChoiceContinuation(
       ? corpScoredAgendaFreeRezProfile(sourceDefinitionId)
       : undefined;
   const freeRezTarget = freeRezProfile
-    ? corpScoredAgendaFreeRezTarget(input)
+    ? corpScoredAgendaFreeRezDefenseTarget(input, targetCardId)
     : undefined;
   const iceMarkProfile =
     continuationFamily === "corp_scored_agenda_on_score"
@@ -293,161 +292,4 @@ function corpScoredAgendaHqShuffleChoiceBinding(params: {
     creditPerAgendaPoint: params.profile.creditPerAgendaPoint,
     selectedCardInstanceIds,
   };
-}
-
-function corpScoredAgendaFreeRezTarget(input: AiDecisionInput):
-  | Readonly<{
-      card: VisibleCard;
-      selectedVariantId: string;
-      rezCredits: number;
-    }>
-  | undefined {
-  return input.playerView.servers
-    .flatMap((server) =>
-      server.ice.map((card) => ({ card, serverId: server.id })),
-    )
-    .filter(
-      ({ card, serverId }) =>
-        card.known === true &&
-        card.type === "ice" &&
-        card.rezzed === false &&
-        typeof card.definitionId === "string" &&
-        card.definitionId.length > 0 &&
-        card.effectiveRezCostQuote?.context === "installed" &&
-        card.effectiveRezCostQuote.cardId === card.instanceId &&
-        card.effectiveRezCostQuote.targetServerId === serverId &&
-        card.effectiveRezCostQuote.projectedServerId === serverId &&
-        card.effectiveRezCostQuote.expiresAtStateVersion ===
-          input.playerView.stateVersion &&
-        card.effectiveRezCostQuote.complete === true &&
-        isFiniteNonNegativeInteger(card.effectiveRezCostQuote.finalCredits),
-    )
-    .map(({ card }) => {
-      const quote = card.effectiveRezCostQuote;
-      if (quote?.complete !== true) return undefined;
-      const selectedVariantId = corpScoredAgendaFreeRezVariantId(input, card);
-      return selectedVariantId
-        ? { card, selectedVariantId, rezCredits: quote.finalCredits }
-        : undefined;
-    })
-    .filter(
-      (
-        target,
-      ): target is Readonly<{
-        card: VisibleCard;
-        selectedVariantId: string;
-        rezCredits: number;
-      }> => target !== undefined,
-    )
-    .sort(
-      (left, right) =>
-        right.rezCredits - left.rezCredits ||
-        left.card.instanceId.localeCompare(right.card.instanceId),
-    )[0];
-}
-
-function corpScoredAgendaFreeRezVariantId(
-  input: AiDecisionInput,
-  ice: VisibleCard,
-): string | undefined {
-  const quote = ice.effectiveRezCostQuote;
-  if (quote?.complete !== true) return undefined;
-  if (quote.costKind === "fixed") return "fixed";
-  const parameter = quote.variableParameter;
-  if (parameter.kind === "alternate_subtype") {
-    const baseBreakable = corpScoredAgendaIceSubtypeIsBreakable(
-      input,
-      ice,
-      parameter.baseSubtypes,
-    );
-    const alternateBreakable = corpScoredAgendaIceSubtypeIsBreakable(
-      input,
-      ice,
-      parameter.alternateSubtypes,
-    );
-    const alternateAdditionalCost =
-      parameter.alternateSubtypesFinalCredits -
-      parameter.baseSubtypesFinalCredits;
-    return baseBreakable &&
-      !alternateBreakable &&
-      isFiniteNonNegativeInteger(alternateAdditionalCost) &&
-      alternateAdditionalCost <= input.playerView.own.credits
-      ? "alternate_subtype:alternate"
-      : "alternate_subtype:base";
-  }
-  if (parameter.kind === "paid_end_the_run_subroutines") {
-    const minimumAdditionalCost =
-      parameter.minSubroutinesFinalCredits - quote.finalCredits;
-    const firstEndTheRunAdditionalCost =
-      parameter.firstEndTheRunFinalCredits - quote.finalCredits;
-    if (
-      !isFiniteNonNegativeInteger(minimumAdditionalCost) ||
-      minimumAdditionalCost > input.playerView.own.credits
-    ) {
-      return undefined;
-    }
-    const selectedSubroutineCount =
-      isFiniteNonNegativeInteger(firstEndTheRunAdditionalCost) &&
-      firstEndTheRunAdditionalCost <= input.playerView.own.credits
-        ? parameter.firstEndTheRunSubroutineCount
-        : parameter.minSubroutines;
-    return isFiniteNonNegativeInteger(selectedSubroutineCount)
-      ? `paid_end_the_run_subroutines:${selectedSubroutineCount}`
-      : undefined;
-  }
-  if (
-    !isFiniteNonNegativeInteger(parameter.additionalCreditsPerValue) ||
-    parameter.additionalCreditsPerValue <= 0 ||
-    !isFiniteNonNegativeInteger(parameter.minValue) ||
-    !isFiniteNonNegativeInteger(parameter.maxValue) ||
-    parameter.minValue > parameter.maxValue
-  ) {
-    return undefined;
-  }
-  const affordableValue = Math.floor(
-    input.playerView.own.credits / parameter.additionalCreditsPerValue,
-  );
-  if (affordableValue < parameter.minValue) return undefined;
-  return `x_strength:${Math.max(
-    parameter.minValue,
-    Math.min(parameter.maxValue, affordableValue),
-  )}`;
-}
-
-function corpScoredAgendaIceSubtypeIsBreakable(
-  input: AiDecisionInput,
-  ice: VisibleCard,
-  subtypes: readonly string[],
-): boolean {
-  if (!ice.definitionId) return false;
-  const definition = CARD_DEFINITIONS_BY_ID[ice.definitionId];
-  const subroutines = (definition?.subroutines ?? []).map((subroutine) => ({
-    id: subroutine.id,
-    type: subroutine.type,
-    ...(subroutine.breakTags
-      ? { breakTags: subroutine.breakTags.slice() }
-      : {}),
-  }));
-  return (input.playerView.opponent.rig ?? []).some((breaker) => {
-    if (!breaker.definitionId || breaker.known === false) return false;
-    const quote = visibleBreakerEncounterQuote({
-      breakerDefinitionId: breaker.definitionId,
-      breakerInstanceId: breaker.instanceId,
-      breakerStrength: breaker.strength ?? 0,
-      ...(breaker.selectedTargetCardId
-        ? { selectedTargetCardId: breaker.selectedTargetCardId }
-        : {}),
-      ...(breaker.selectedSubtype
-        ? { selectedSubtype: breaker.selectedSubtype }
-        : {}),
-      ...(breaker.randomRunStrengthState
-        ? { randomRunStrengthState: breaker.randomRunStrengthState }
-        : {}),
-      iceDefinitionId: ice.definitionId!,
-      iceInstanceId: ice.instanceId,
-      iceSubtypes: subtypes,
-      subroutines,
-    });
-    return quote?.coverageStatus === "full";
-  });
 }

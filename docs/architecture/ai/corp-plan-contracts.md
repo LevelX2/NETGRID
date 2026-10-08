@@ -900,6 +900,24 @@ Runtime. `defense-memory.ts` bindet Draw-Versuche und HQ-Halteentscheidungen.
 `defense-run-response.ts` besitzt aktuelle Rez- und Encounterbewertungen;
 Choice-Signale, Fortsetzungen und Payload-Bindungen liegen ebenfalls hier.
 
+Für den an einen Agenda-Score gebundenen kostenlosen ICE-Rez bestimmt
+`scored-agenda-free-rez-defense-target.ts` das installierte Ziel vor dem
+Score. Bei mehreren Zielservern steht ihre aktuelle erwartete
+Agendapunkt-Exposition vor der ersparten normalen Rez-Zahlung. HQ/R&D
+konsumieren die bestehenden zentralen Defense-Fakten; eigene übrige
+Agenden und der öffentliche Runnerpfad liefern den Remote-/Archivesbedarf.
+Die gerade gescorete Agenda zählt nicht mehr als zu schützende Rootkarte.
+Fehlende erforderliche Expositions- oder Pfadfakten scheitern strukturiert.
+Bei Zielen auf demselben Server bleibt der normale Rezpreis das Auswahlkriterium.
+Diese Zielbindung ist keine Zusage eines optimalen zukünftigen Runstopps:
+weitere Runner-Vorbereitung und der Grenznutzen verschiedener ICE desselben
+Forts werden dadurch nicht als bewiesen ausgegeben. Score behält seine
+ausgewählte Action, Planinstanz und seinen Executor; die folgende Choice
+löst ausschließlich die exakt gebundene Source-, Ziel-, Varianten- und
+StateVersion-Option auf. Paarung 521 G9 D343/D344 belegt R&D-Triggerman
+statt der teureren HQ-Wall; G14 D137/D138 kontrolliert die einzige verfügbare
+Remote-Wall und die bestehenden Tests variable Rezoptionen.
+
 Score, Remote und Ambush liefern weiterhin ihre typisierten Projekte und Bedarfe.
 Die Live-Runtime komponiert diese Schritte; sie importiert den Owner, der keine
 Runtime-Dispatcher oder Planregistries zurückimportiert. Geteilte Defense- und
