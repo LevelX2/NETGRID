@@ -15,6 +15,8 @@ import { shellTradersTargetValue } from "./shell-traders-action";
 import { assessShellTradersAccess } from "./shell-traders-access";
 import { runnerInstalledProgramTrashLoss } from "../../runtime/runner-installed-program";
 
+import { shellCoverageSubstitution } from "./shell-traders-coverage-substitution";
+
 const SHELL_TRADERS_DEFINITION_ID = "onr_v1_176_the-shell-traders" as const;
 
 export type BuildRunnerShellTradersPipelineSignalsInput = Readonly<{
@@ -196,12 +198,26 @@ export function buildRunnerShellTradersPipelineSignals({
       shellCountersBefore === 1 &&
       (replacementAssessment.status === "harmful" ||
         replacementAssessment.status === "unknown");
+    const coverageSubstitution =
+      ability === "remove_shell_counter" &&
+      replacementAssessment.status === "not_needed"
+        ? shellCoverageSubstitution(
+            input,
+            action,
+            targetCard,
+            coverageBinding,
+            shellCountersBefore,
+            freeMemory,
+            targetMemoryCost,
+          )
+        : undefined;
     const paidCoverageWithoutAccess =
       requiresMainPhaseAccess &&
       ability === "remove_shell_counter" &&
       coverageBinding !== undefined &&
       visibleActionCreditCost(action) > 0 &&
-      accessAssessment?.status !== "funded";
+      accessAssessment?.status !== "funded" &&
+      coverageSubstitution === undefined;
     const phase =
       targetRejected ||
       completionWouldBeHarmful ||
@@ -233,6 +249,9 @@ export function buildRunnerShellTradersPipelineSignals({
         replacementAssessment.displacedValue,
     );
     const evidenceCodes = [
+      ...(coverageSubstitution
+        ? ["runner_shell_traders_substitutes_current_coverage_install"]
+        : []),
       `runner_shell_traders_phase:${phase}`,
       `runner_shell_traders_source:${action.source}`,
       `runner_shell_traders_target:${targetCardInstanceId}`,
@@ -298,6 +317,7 @@ export function buildRunnerShellTradersPipelineSignals({
         targetInstallCost,
         targetMemoryCost,
         freeMemory,
+        ...(coverageSubstitution ? { coverageSubstitution } : {}),
         replacementAssessment,
         ...(coverageBinding
           ? {

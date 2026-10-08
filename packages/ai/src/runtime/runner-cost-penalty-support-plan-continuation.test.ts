@@ -654,60 +654,67 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
-  it("preserves the run-plan owner when a trace bid opens payment support", () => {
-    const originalAction = traceBidAction(225);
-    const previous = runPortfolio(223);
-    const engineWindowResult: Extract<
-      PlanSchedulerResult,
-      { lane: "engine_window" }
-    > = {
-      lane: "engine_window",
-      actionId: originalAction.actionId,
-      origin: {
-        rootPlanInstanceId: "run:run_211",
-        leafPlanInstanceId: "rules.window_resolution",
-        side: "runner",
-        windowKind: "mandatory_choice",
-        windowId: "run.encounter_ice:225",
-        stateVersion: 225,
-        timingPoint: "run.encounter_ice",
-      },
-      portfolio: structuredClone(previous),
-      diagnostics: [],
-    };
+  it.each(["trace", "damage"])(
+    "preserves the run-plan owner when a %s/trace event opens payment support",
+    (effectKind) => {
+      const originalAction = traceBidAction(225);
+      const previous = runPortfolio(223);
+      const engineWindowResult: Extract<
+        PlanSchedulerResult,
+        { lane: "engine_window" }
+      > = {
+        lane: "engine_window",
+        actionId: originalAction.actionId,
+        origin: {
+          rootPlanInstanceId: "run:run_211",
+          leafPlanInstanceId: "rules.window_resolution",
+          side: "runner",
+          windowKind: "mandatory_choice",
+          windowId: "run.encounter_ice:225",
+          stateVersion: 225,
+          timingPoint: "run.encounter_ice",
+        },
+        portfolio: structuredClone(previous),
+        diagnostics: [],
+      };
 
-    reconcileSelectedRunnerCostPenaltySupportOrigin(
-      traceBidInput(225, [originalAction]),
-      engineWindowResult,
-      previous,
-    );
-    expect(engineWindowResult.portfolio?.stateVersion).toBe(225);
-    expect(
-      engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
-    ).toEqual({
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      executorInstanceId: "plan:runner.convert_run_window:run%3Arun_211",
-      sourceStepId: "run.encounter_ice:225",
-      originalActionId: originalAction.actionId,
-      selectedAtStateVersion: 225,
-    });
-
-    const support = supportAction(226, originalAction.actionId);
-    const supportResult = planResult(226, support.actionId, "economy-root");
-    expect(() =>
+      const compoundInput = traceBidInput(225, [originalAction]);
+      compoundInput.eventTail!.find(
+        (event) => event.publicPayload.traceStarted === true,
+      )!.publicPayload.effectKind = effectKind;
       reconcileSelectedRunnerCostPenaltySupportOrigin(
-        input(226, [support]),
-        supportResult,
-        engineWindowResult.portfolio,
-      ),
-    ).not.toThrow();
-    expect(
-      supportResult.portfolio.pendingRunnerCostPenaltySupportOrigin,
-    ).toEqual({
-      ...engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
-      windowId: "runner_cost_penalty_support.91",
-    });
-  });
+        compoundInput,
+        engineWindowResult,
+        previous,
+      );
+      expect(engineWindowResult.portfolio?.stateVersion).toBe(225);
+      expect(
+        engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
+      ).toEqual({
+        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        executorInstanceId: "plan:runner.convert_run_window:run%3Arun_211",
+        sourceStepId: "run.encounter_ice:225",
+        originalActionId: originalAction.actionId,
+        selectedAtStateVersion: 225,
+      });
+
+      const support = supportAction(226, originalAction.actionId);
+      const supportResult = planResult(226, support.actionId, "economy-root");
+      expect(() =>
+        reconcileSelectedRunnerCostPenaltySupportOrigin(
+          input(226, [support]),
+          supportResult,
+          engineWindowResult.portfolio,
+        ),
+      ).not.toThrow();
+      expect(
+        supportResult.portfolio.pendingRunnerCostPenaltySupportOrigin,
+      ).toEqual({
+        ...engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
+        windowId: "runner_cost_penalty_support.91",
+      });
+    },
+  );
 
   it("preserves a direct run-root owner when the mandatory trace starts before a run-window leaf exists", () => {
     const originalAction = traceBidAction(69);

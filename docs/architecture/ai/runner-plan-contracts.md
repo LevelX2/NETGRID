@@ -2553,6 +2553,17 @@ der bestehende Continuation-Owner validiert und erhält die ursprüngliche
 Action-, Plan- und Step-Bindung. Im regulären Encounter bleiben fehlende
 Restquoten ein strukturierter Fehler.
 
+Das gilt bereits im reinen Finanzierungsfenster vor der ursprünglichen
+Kostenfortsetzung. Side, Timingpunkt, StateVersion, Zahlungsfenster und
+ursprüngliche Action bleiben gebunden. Bei kombinierten Subroutinen ist
+`traceStarted` der kanonische Startfakt: Derselbe Event kann wegen eines
+vorangehenden Schadenseffekts `effectKind: damage` tragen. Der bestehende
+Run-Owner erhält dennoch die exakte Trace-Choice und ihre Finanzierung;
+Run-/Serverbindung und lückenlose Ereigniskette bleiben erforderlich.
+Paarung 529/G19/D205–207 prüft Gebot sieben, die einmalige Swiss-Zahlung
+und das exakt fortgesetzte Gebot nativ. Der ursprüngliche Abbruch erhält
+dadurch keinen nachträglich erfundenen Endstand.
+
 Das Informationsbudget darf ebenso einen bereits zugelassenen bezahlbaren
 Break gegen die unmittelbare Zerstörung eines installierten Programms nicht
 sperren. Der bestehende Run-Executor bindet diese Schutzroute an die exakten
@@ -2900,6 +2911,18 @@ Breaker berücksichtigt sämtliche verbleibenden Counterkosten, zulässige
 Speicherverdrängung, den bekannten Engine-gequoteten ICE-Pfad und den
 Run-Klick. Unbekannter Schutz, bedingte Pfade und fehlende Quotes bleiben
 ausdrücklich unbekannt; sie erhalten keinen sicheren Rettungsclaim.
+
+Eine engere Entwicklungsalternative braucht keinen sicheren Zugriffsclaim:
+Hat Coverage eine aktuelle P4-Handinstallation zugelassen, darf Shell den
+letzten Counter eines eigenen sichtbaren definitiongleichen Programms
+entfernen. Die native Quote muss liquide bezahlbar sein, den Installklick
+sparen und ohne Rigopfer in den freien Speicher passen. Quelle, Ziel,
+Handalternative, Kosten und StateVersion bleiben exakt gebunden. Shell
+meldet nur diese dominierten direkten Installationen über seine bestehenden
+Dispositionen; die TurnPlanner-Zuständigkeit umfasst dafür `install.card`.
+Dringende P2-Bedarfe, Coverage-Upgrades, redundante Programme und unbekannte
+Zugriffswege erben daraus keinen Rettungsnachweis. Paarung 529/G9/D424
+prüft diese Substitution und die endliche spätere Zugriff-/Scoregegenlinie.
 
 Ein einzelner dringender Coverage-Bedarf vererbt P2 erst mit diesem
 vollständigen Nachweis. Nicht finanzierbare bezahlte Beschleunigung bleibt

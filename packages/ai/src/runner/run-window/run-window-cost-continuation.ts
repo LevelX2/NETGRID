@@ -240,7 +240,6 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       (event) =>
         event.publicPayload?.actor === "runner" &&
         event.publicPayload.actionType === "continue_run" &&
-        event.publicPayload.effectKind === "trace" &&
         event.publicPayload.traceStarted === true &&
         event.publicPayload.serverId === run?.attackedServerId,
     );
@@ -252,7 +251,6 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       traceStartIndex >= 0 &&
       traceStart?.publicPayload?.actor === "runner" &&
       traceStart.publicPayload.actionType === "continue_run" &&
-      traceStart.publicPayload.effectKind === "trace" &&
       traceStart.publicPayload.traceStarted === true &&
       traceStart.publicPayload.serverId === run?.attackedServerId &&
       traceSuffix.every(

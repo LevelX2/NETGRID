@@ -1,7 +1,10 @@
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import type { ShellTradersAccessAssessment } from "./shell-traders-access";
 
+import type { ShellCoverageSubstitution } from "./shell-traders-coverage-substitution";
+
 export type RunnerShellTradersPipelineSignal = {
+  coverageSubstitution?: ShellCoverageSubstitution;
   pipelineId: string;
   phase: "prepare" | "progress" | "hold";
   sourceCardInstanceId: string;

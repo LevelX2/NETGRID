@@ -16,11 +16,23 @@ export function currentEncounterRequiresDamagePreservingBreak(
   requiredHandFloor = runnerConfirmedDamageRequiredHandFloor(input),
 ): boolean {
   if (input.playerView.run?.phase !== "encounter_ice") return false;
-  // A cost continuation resumes an already bound action; it is not a fresh
-  // encounter choice and has no encounter-continue LegalAction.
+  // Both funding and continuation belong to the committed payment window.
+  // The cost-continuation owner validates original action/plan/window bindings;
+  // this window offers no fresh encounter-continue damage quote.
   if (
-    input.legalActions.some(
-      (action) => action.payload?.runnerCostPenaltySupportContinuation === true,
+    input.legalActions.length > 0 &&
+    input.legalActions.every(
+      (action) =>
+        action.side === "runner" &&
+        action.expiresAtStateVersion === input.playerView.stateVersion &&
+        action.timingPoint === input.playerView.timingPoint &&
+        (action.payload?.runnerCostPenaltySupportContinuation === true ||
+          (action.type === "activated_card_ability" &&
+            typeof action.payload?.costPenaltySupportWindowId === "string" &&
+            action.payload.costPenaltySupportWindowId.length > 0 &&
+            typeof action.payload.costPenaltySupportOriginalActionId ===
+              "string" &&
+            action.payload.costPenaltySupportOriginalActionId.length > 0)),
     )
   )
     return false;

@@ -83,6 +83,7 @@ export const RUNNER_TURN_PLANNING_MODULE_COVERAGE: readonly RunnerTurnPlanningMo
       horizonCapability: "context_dependent",
       ownerKind: "resource",
       semanticActionPatterns: [
+        "install.card",
         "card.*",
         "card_ability.*",
         "special_zone.*",

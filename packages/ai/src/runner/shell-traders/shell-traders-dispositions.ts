@@ -16,6 +16,15 @@ export function runnerShellTradersActionDispositions(
       disposition: "explicitly_nonproductive",
     });
   for (const signal of signals) {
+    if (signal.phase === "progress") {
+      for (const actionId of signal.coverageSubstitution
+        ?.replacedInstallActionIds ?? [])
+        add(
+          actionId,
+          "runner.shell_traders_pipeline",
+          "runner_shell_traders_dominates_current_coverage_install",
+        );
+    }
     for (const actionId of signal.rejectedActionIds ?? []) {
       add(
         actionId,
