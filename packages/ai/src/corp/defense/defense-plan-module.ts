@@ -68,6 +68,7 @@ import {
   selectedPostInstallRezCreditsFromCurrentQuote,
   selectedRezCostsAreUnique,
   selectedRezCostSetsEqual,
+  selectedRezAgendaPointCost,
   technicalCompare,
   validDefenseSignals,
   validDefinitionIdArray,
@@ -885,10 +886,15 @@ function exactInstallProjectionIsCurrent(
     projection.after.knowledge !== "known" ||
     !knownNonNegativeInteger(context.input.playerView.own.credits) ||
     !knownNonNegativeInteger(context.input.playerView.own.clicks) ||
+    !knownNonNegativeInteger(context.input.playerView.own.agendaPoints) ||
     projection.before.availableCorpCredits !==
       context.input.playerView.own.credits ||
     projection.before.availableCorpClicks !==
-      context.input.playerView.own.clicks
+      context.input.playerView.own.clicks ||
+    projection.before.availableCorpAgendaPoints !==
+      context.input.playerView.own.agendaPoints ||
+    projection.after.availableCorpAgendaPoints !==
+      context.input.playerView.own.agendaPoints
   ) {
     return false;
   }
@@ -911,14 +917,29 @@ function exactInstallProjectionIsCurrent(
   );
   const projectedServerId =
     action?.payload?.postInstallRezQuoteProjectedServerId;
-  const selectedPostInstallRezChoiceIsCurrent = useExactPostInstallSourceQuote
-    ? action?.payload?.postInstallRezQuoteComplete === true
-    : action?.payload && projectedRezCost
+  const selectedPostInstallRezChoiceIsCurrent =
+    action?.payload && projectedRezCost
       ? postInstallRezSelectionMatchesCurrentQuote(
           action.payload,
           projectedRezCost,
         )
-      : false;
+      : useExactPostInstallSourceQuote &&
+        action?.payload?.postInstallRezQuoteComplete === true;
+  const routeAgendaPoints = selectedRezAgendaPointCost(routeRezCosts);
+  const selectedAgendaPoints = selectedRezAgendaPointCost(
+    projection.after.selectedRezCosts,
+  );
+  const pointBank = context.input.playerView.own.agendaPoints;
+  const selectedAgendaPointsAreCurrent =
+    routeAgendaPoints !== undefined &&
+    routeAgendaPoints <= pointBank &&
+    selectedAgendaPoints !== undefined &&
+    selectedAgendaPoints <= pointBank &&
+    selectedRezAgendaPointCost(projection.selectedRezCosts) ===
+      selectedAgendaPoints &&
+    projection.after.totalSelectedAgendaPointCost === selectedAgendaPoints &&
+    projection.after.agendaPointsAfterDefense ===
+      pointBank - selectedAgendaPoints;
   const selectedRezCostsAreCurrent =
     useExactPostInstallSourceQuote ||
     (selectedRezCostSetsEqual(routeRezCosts, afterRouteRezCosts) &&
@@ -956,11 +977,14 @@ function exactInstallProjectionIsCurrent(
     knownNonNegativeInteger(
       action.payload.postInstallRezQuoteMandatoryAgendaPointCost,
     ) &&
-    action.payload.postInstallRezQuoteMandatoryAgendaPointCost === 0 &&
+    action.payload.postInstallRezQuoteMandatoryAgendaPointCost <= pointBank &&
     action.payload.postInstallRezQuoteMandatoryAdditionalCostKind ===
-      undefined &&
+      (action.payload.postInstallRezQuoteMandatoryAgendaPointCost > 0
+        ? "agenda_point"
+        : undefined) &&
     validPostInstallRezQuoteModifiers(action.payload) &&
     selectedPostInstallRezChoiceIsCurrent &&
+    selectedAgendaPointsAreCurrent &&
     selectedRezCostsAreCurrent &&
     legalActionResourceCost(action, "credits") === projection.installCredits &&
     legalActionResourceCost(action, "clicks") === projection.installClicks
@@ -1007,6 +1031,8 @@ function currentInstalledRezQuoteMatchesSelection(
     selectedInstalledRezCredits === undefined ||
     selectedInstalledRezCredits !== selected.credits ||
     !validMandatoryInstalledRezCosts(quote.mandatoryAdditionalCosts) ||
+    (selected.agendaPoints ?? 0) !==
+      quote.mandatoryAdditionalCosts.agendaPoints ||
     !validDefinitionIdArray(quote.reductionSourceDefinitionIds) ||
     !validDefinitionIdArray(quote.increaseSourceDefinitionIds)
   ) {
@@ -1025,6 +1051,12 @@ function postInstallRezSelectionMatchesCurrentQuote(
   payload: NonNullable<AiDecisionInput["legalActions"][number]["payload"]>,
   selection: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"][number],
 ): boolean {
+  if (
+    (selection.agendaPoints ?? 0) !==
+    payload.postInstallRezQuoteMandatoryAgendaPointCost
+  ) {
+    return false;
+  }
   if (payload.postInstallRezQuoteCostKind === "fixed") {
     return (
       selection.variableRezChoice === undefined &&

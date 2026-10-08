@@ -6111,6 +6111,7 @@ function context(
         own: {
           credits: visibleResources.credits ?? 0,
           clicks: visibleResources.clicks ?? 3,
+          agendaPoints: 0,
           gripOrHq: candidates.flatMap((candidate) =>
             candidate.sourceCardInstanceId && candidate.sourceDefinitionId
               ? [

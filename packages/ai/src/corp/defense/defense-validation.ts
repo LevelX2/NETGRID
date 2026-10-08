@@ -38,6 +38,7 @@ export function selectedRezCostSetsEqual(
       return (
         matching?.iceDefinitionId === cost.iceDefinitionId &&
         matching.credits === cost.credits &&
+        (matching.agendaPoints ?? 0) === (cost.agendaPoints ?? 0) &&
         matching.source === cost.source
       );
     })
@@ -282,9 +283,22 @@ export function validMandatoryInstalledRezCosts(value: unknown): boolean {
   const costs = value as Record<string, unknown>;
   return (
     Object.keys(costs).length === 1 &&
-    knownNonNegativeInteger(costs.agendaPoints) &&
-    costs.agendaPoints === 0
+    knownNonNegativeInteger(costs.agendaPoints)
   );
+}
+
+export function selectedRezAgendaPointCost(
+  costs: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"],
+): number | undefined {
+  let total = 0;
+  for (const cost of costs) {
+    // The selected-cost contract omits agendaPoints only for a zero cost.
+    const points = cost.agendaPoints ?? 0;
+    if (!knownNonNegativeInteger(points)) return undefined;
+    total += points;
+    if (!knownNonNegativeInteger(total)) return undefined;
+  }
+  return total;
 }
 
 export function validDefinitionIdArray(value: unknown): boolean {
@@ -630,6 +644,8 @@ export function validKnownInstallProjection(
         nonEmptyString(rezCost.iceInstanceId) &&
         nonEmptyString(rezCost.iceDefinitionId) &&
         knownNonNegativeInteger(rezCost.credits) &&
+        (rezCost.agendaPoints === undefined ||
+          knownNonNegativeInteger(rezCost.agendaPoints)) &&
         rezCost.source === "engine_rez_cost_quote"
       );
     }) &&

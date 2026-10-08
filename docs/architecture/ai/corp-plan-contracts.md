@@ -909,6 +909,16 @@ Runtime. `defense-memory.ts` bindet Draw-Versuche und HQ-Halteentscheidungen.
 `defense-run-response.ts` besitzt aktuelle Rez- und Encounterbewertungen;
 Choice-Signale, Fortsetzungen und Payload-Bindungen liegen ebenfalls hier.
 
+Die aktuelle Installationsroute bindet neben Credits auch obligatorische
+Rez-Punktkosten an die vollständige Engine-Quote, die ausgewählten ICE und
+den bekannten eigenen Punktestand. Ein positiver Punktpreis ist zulässig,
+wenn die ganze gewählte Route ihn bezahlt und der projizierte Restpunktestand
+exakt stimmt. Fehlende, veraltete oder widersprüchliche Quotes und
+unfinanzierte Punktkosten sperren die Route. Ein leerer ausgewählter Rezsatz
+bei bloßer Vorbereitung wird nicht als bereits bezahlter Rez ausgegeben.
+Paarung 525 G2 D268 belegt den zuvor verworfenen finanzierten Glacier-RD-Pfad
+mit zwei Punkten; die reale spätere Rez verbraucht genau einen Punkt.
+
 Für den an einen Agenda-Score gebundenen kostenlosen ICE-Rez bestimmt
 `scored-agenda-free-rez-defense-target.ts` das installierte Ziel vor dem
 Score. Bei mehreren Zielservern steht ihre aktuelle erwartete
