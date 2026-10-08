@@ -1,6 +1,6 @@
 # KI-Selbstspiel-Evidenzregistrierung
 
-Stand: 2026-10-07
+Stand: 2026-10-08
 
 Die kanonische 40er-Erfassung erlaubt für nachweislich fortschreitende lange
 Partien ein explizites `--max-batches N` (1–200, Standard 20). Das Limit wird
@@ -120,6 +120,18 @@ Ursache erhält eine neu reservierte Fall-ID.
 
 ## Bericht und Sicherung
 
+Metaserienberichte werden nach jeder abgeschlossenen Paarung als geprüfte
+eigenständige HTML-Dateien unter `docs/Berichte/` im primären Checkout abgelegt.
+Der Ordner ist per `.gitignore` vollständig von Git/GitHub ausgenommen.
+Dateinamen verwenden `YYYY-MM-DD_NETGRID-Paarung-<ID>.html`. Die neun Abschnitte
+und Untergruppen starten geschlossen; Abschnitt 7 enthält alle Paarungsfixes.
+Der Metaserien-Skill speichert den exakt geprüften Inhalt über
+`scripts/save-meta-local-report.mjs` und prüft den SHA-256 nach dem Schreiben.
+In der Registry erhält dieser Bericht `status=generated`, den absoluten
+`outputPath` und den exakten `htmlBody`; eine Mail-Reporting-Series wird dafür
+nicht angelegt. Fortschritt nennt abgeschlossene und lokal abgelegte Berichte.
+Mailversand findet nur bei einem neuen ausdrücklichen Mailauftrag statt.
+
 ### Ausdrücklich begrenzte Metaserien
 
 Wählt der Nutzer einen begrenzten Abschluss, werden Quellstand und ursprüngliche
@@ -140,7 +152,8 @@ getrennte Nenner; der begrenzte Bericht darf die angeforderte Berichtsgrenze
 abschließen, zählt aber nicht als saubere finale Metaserie.
 
 Jede sichtbare Fortschrittsausgabe nennt `Paarung X/N`, die Zahl abgeschlossener
-und versendeter Berichte und die aktuelle Phase. Erfassung des ersten Durchlaufs,
+und lokal abgelegter beziehungsweise ausdrücklich versendeter Berichte und die
+aktuelle Phase. Erfassung des ersten Durchlaufs,
 ausdrücklich beauftragte Kontrolle, Abschlussprüfung, Berichtprüfung und Versand
 bleiben unterscheidbar. Bei Mailauftrag zählt ein Bericht erst nach bestätigtem
 Versand als abgeschlossen. Versuche, Endstände, Abbrüche und vollständig gelesene
@@ -160,7 +173,8 @@ den finalen Nenner zu übernehmen. Vor Versand wird die Liste mit den eigenen
 Fixcommits der Paarung abgeglichen; alte Fälle allein zählen nicht als neue
 Reparaturen.
 
-Vor dem ersten reportfähigen Lauf wird die Serie mit `id`, `recipient` und
+Bei einem ausdrücklichen Mailauftrag wird vor dem ersten reportfähigen Lauf
+die Serie mit `id`, `recipient` und
 positivem ganzzahligem `interval` registriert. Wiederholtes Registrieren
 derselben Konfiguration erhält Zähler, Versandstand und ausstehenden Bericht;
 eine abweichende Konfiguration scheitert sichtbar. `get-reporting-series`
@@ -191,8 +205,9 @@ Eintrag der Verdachtsmatrix zeigt seine `SP-nnn`-Verdachtsnummer sichtbar an.
 Vor dem Versand wird er mit `record-report` als `pending`, nach eindeutigem
 Gmail-Send als `sent` gespeichert. `htmlBody` enthält exakt die versendete
 Fassung; ein optionaler lokaler Exportpfad ist nur eine Ansicht und kann aus
-der Datenbank mit `export-report` rekonstruiert werden. Solche Exporte liegen
-unter `data/local/` und werden nicht versioniert.
+der Datenbank mit `export-report` rekonstruiert werden. Für die manuell nutzbare
+HTML-Fassung ist `docs/Berichte/` der Standardpfad; temporäre Auswertungsexporte
+liegen weiterhin unter `data/local/`. Beide Verzeichnisse werden nicht versioniert.
 
 Nach einem abgeschlossenen Berichtsblock wird eine SQLite-Online-Sicherung der
 kompakten Registry erstellt. Erst danach werden ausschließlich die großen

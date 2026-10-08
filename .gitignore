@@ -64,6 +64,7 @@ yarn-error.log*
 *.tsbuildinfo
 
 docs/source/PrivateScans/
+/docs/Berichte/
 
 .DS_Store
 Thumbs.db
