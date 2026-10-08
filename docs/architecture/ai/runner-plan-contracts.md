@@ -383,6 +383,13 @@ Zugriffsvertrag und Risikoquote nicht überschreiben. Ein bereits berechneter
 Bank-Support bleibt damit am selben Remote-Parent und Bedarf gebunden; eine
 fehlende bezahlbare Route wird durch den Bedrohungsfokus nicht ausführbar.
 
+Coverage-Unterstützung gehört zur exakt bewerteten Run-Action. Eine auf demselben
+Server bereits ausführbare Bypass-Variante übernimmt nicht den Breakerbedarf
+des normalen Runs, auch bei einer terminalen Scorebedrohung. Die bestehende
+Reconciliation entfernt die überholte Parentbindung und erhält unabhängig
+sinnvolle Rig-Projekte. Paarung 524 G6 D158 prüft den gesamten Originalpräfix,
+den Remote-Executor und die echte Engine-Anwendung der bereiten Eventroute.
+
 Ersetzt eine aktuell ausführbare gezielte ICE-Entfernung die blockierte
 Runroute, entfernt ihr Remote-Signal den bisherigen `supportNeedId` bereits
 bei der Routenbildung. Der ersetzte Coverage-Bedarf darf nicht zugleich eine
@@ -599,6 +606,16 @@ als Antwort beanspruchen. Damit verwenden Phasenwahl und Disposition dieselbe
 Quellenbindung; spätere Ausschlüsse können keinen zuvor gesperrten Ziehpfad
 zur ausführbaren Route machen. Suche und Draw bleiben beim bestehenden
 Coverage-Owner und werden nach neuer Information erneut gebunden.
+
+Eine verpflichtende Draw-Replacement-Choice erhält den Handzweck ihres exakt
+gebundenen `draw_for_answer`-Executors. Der Coverage-Owner schützt die einzige
+sichtbare installierbare Antwort auf dessen benötigte Breaker-Rolle, solange
+das installierte Rig diese Rolle tatsächlich noch nicht abdeckt. Konfigurierbare
+Handantworten verwenden ihre kanonischen möglichen Modi; installierte Programme
+verwenden ausschließlich ihre aktuelle Coverage. Der vorhandene Discard-Vertrag
+vergleicht die übrigen tatsächlich gezogenen Optionen. Quelle, Origin, Executor,
+StateVersion und Optionsbindung bleiben beim bestehenden fail-closed Resolver.
+Paarung 524 G18 D33 belegt Antworterhalt, G35 D124 den unveränderten Duplikatabwurf.
 
 Die Handentwicklung übernimmt eine Coverage-Zuordnung nur für die typisierte
 `handAnswerDefinitionId` oder eine tatsächlich gebundene Installationsaction

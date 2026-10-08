@@ -940,10 +940,7 @@ export function buildRunnerRemoteContestSignals({
           (gap) =>
             gap.requesterModuleId === "runner.contest_remote" &&
             gap.targetServerId === evaluation.targetServerId &&
-            (gap.targetRunActionId === evaluation.actionId ||
-              terminalContestThreat?.remoteServerIds.includes(
-                evaluation.targetServerId,
-              ) === true),
+            gap.targetRunActionId === evaluation.actionId,
         );
         return (
           evaluation.targetKind === "remote" &&
@@ -981,10 +978,7 @@ export function buildRunnerRemoteContestSignals({
           (gap) =>
             gap.requesterModuleId === "runner.contest_remote" &&
             gap.targetServerId === evaluation.targetServerId &&
-            (gap.targetRunActionId === evaluation.actionId ||
-              terminalContestThreat?.remoteServerIds.includes(
-                evaluation.targetServerId,
-              ) === true),
+            gap.targetRunActionId === evaluation.actionId,
         );
         const purpose = runPurposeForEvaluation(evaluation);
         const directRunCanConvertNow = runnerRunTargetCanConvertNow(

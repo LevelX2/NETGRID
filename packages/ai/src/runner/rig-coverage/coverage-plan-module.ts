@@ -12,6 +12,7 @@ import type {
   PlanSchedulerContext,
 } from "../../plans/plan-scheduler";
 import type { ProjectedHandDisposition } from "../../plans/turn-projection";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import {
   runnerPlanProposal as proposal,
   runnerPlanAssessment as assessment,
@@ -22,8 +23,65 @@ import { runnerAffordableCoverageSearchActionIds } from "./coverage-search-alter
 export function runnerCoveragePlanHandDisposition(
   input: AiDecisionInput,
   card: VisibleCard,
+  context?: {
+    portfolio: ResidentPlanPortfolio | undefined;
+    visibleBreakerRoles: (card: VisibleCard) => readonly string[];
+  },
 ): ProjectedHandDisposition | undefined {
   if (input.side !== "runner" || !card.definitionId) return undefined;
+  const portfolio = context?.portfolio;
+  const origin = portfolio?.selectedActionOrigin;
+  const choice = input.playerView.pendingChoice;
+  const continuation = choice?.continuation;
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor" &&
+      instance.moduleId === "runner.rig_and_coverage",
+  );
+  const coverage = executor?.moduleState as CoverageState | undefined;
+  if (
+    context &&
+    portfolio?.side === "runner" &&
+    portfolio.stateVersion < input.playerView.stateVersion &&
+    portfolio.executorInstanceId === executor?.instanceId &&
+    portfolio.rootForegroundInstanceId === origin?.rootPlanInstanceId &&
+    origin?.selectedAtStateVersion === portfolio.stateVersion &&
+    origin.immediateChoicePolicy === "trash_lowest_visible_drawn_card" &&
+    continuation?.family === "runner_hidden_draw_keep_or_top_replacement" &&
+    continuation.createdAtStateVersion === input.playerView.stateVersion &&
+    continuation.originActionId === origin.selectedActionId &&
+    choice?.side === "runner" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    coverage?.kind === "coverage" &&
+    coverage.phase === "draw_for_answer"
+  ) {
+    const requiredRole = coverage.gap.requiredRole;
+    const canInstallAnswer = (entry: VisibleCard) =>
+      entry.definitionId !== undefined &&
+      runnerInstallDefinitionCoversCoverageGap(
+        entry.definitionId,
+        AI_HINTS_BY_CARD.get(entry.definitionId)?.roles ?? [],
+        requiredRole,
+      );
+    const installedAnswerExists = (input.playerView.own.rig ?? []).some(
+      (entry) =>
+        runnerRolesCoverCoverageGap(
+          context.visibleBreakerRoles(entry),
+          requiredRole,
+        ),
+    );
+    const reachableAnswers = [
+      ...input.playerView.own.gripOrHq,
+      ...(input.playerView.specialZones?.setAside ?? []),
+    ].filter(canInstallAnswer);
+    if (
+      !installedAnswerExists &&
+      reachableAnswers.length === 1 &&
+      reachableAnswers[0]?.instanceId === card.instanceId
+    )
+      return "support_for_need";
+  }
   const strategyProfile = (
     input as AiDecisionInput & {
       ownDeckStrategyProfile?: AiDeckStrategyProfile;
