@@ -11,6 +11,8 @@ import {
   runnerPlanDomain,
 } from "../../plans/runner-plan-module-support";
 import type { RunnerDefenseSignals, DefenseState } from "./defense-types";
+import type { AiDecisionInput } from "@netgrid/shared";
+import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
 export function createRunnerDefenseModule(): PlanModule {
   return {
     moduleId: "runner.defense_and_recovery",
@@ -33,6 +35,10 @@ export function createRunnerDefenseModule(): PlanModule {
         );
       const phase = invalidTagClearFundingContract
         ? "fund_tag_clear"
+        : signals.persistentHazardCounterFundingNeed !== undefined &&
+            !validPersistentHazardCounterFundingNeed(signals.persistentHazardCounterFundingNeed,
+              context.input, context.actionCandidates)
+          ? "fund_persistent_hazard_counter"
         : invalidReactionReserveContract
           ? "build_reaction_reserve"
           : defensePhase(
@@ -43,7 +49,10 @@ export function createRunnerDefenseModule(): PlanModule {
             );
       if (!phase) return [];
       const candidates =
-        invalidTagClearFundingContract || invalidReactionReserveContract
+        invalidTagClearFundingContract || invalidReactionReserveContract ||
+        (signals.persistentHazardCounterFundingNeed !== undefined &&
+          !validPersistentHazardCounterFundingNeed(signals.persistentHazardCounterFundingNeed,
+            context.input, context.actionCandidates))
           ? []
           : defenseCandidates(
               context.actionCandidates,
@@ -65,6 +74,8 @@ export function createRunnerDefenseModule(): PlanModule {
           routeExists: candidates.length > 0,
           blockerCode: invalidTagClearFundingContract
             ? "invalid_tag_clear_funding_need"
+            : phase === "fund_persistent_hazard_counter" && candidates.length === 0
+              ? "invalid_persistent_hazard_counter_funding_need"
             : invalidReactionReserveContract
               ? "invalid_reaction_reserve_need"
               : `no_${phase}_route`,
@@ -89,7 +100,11 @@ export function createRunnerDefenseModule(): PlanModule {
             context.input.playerView.stateVersion,
           ));
       const candidates =
-        tagClearFundingContractValid && reactionReserveContractValid
+        tagClearFundingContractValid && reactionReserveContractValid &&
+        (current.phase !== "fund_persistent_hazard_counter" ||
+          (current.signals.persistentHazardCounterFundingNeed !== undefined &&
+            validPersistentHazardCounterFundingNeed(current.signals.persistentHazardCounterFundingNeed,
+              context.input, context.actionCandidates)))
           ? defenseCandidates(
               context.actionCandidates,
               current.phase,
@@ -108,7 +123,10 @@ export function createRunnerDefenseModule(): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const current = instance.moduleState as DefenseState;
-      const candidates = defenseCandidates(
+      const candidates = current.phase === "fund_persistent_hazard_counter" &&
+        (!current.signals.persistentHazardCounterFundingNeed ||
+          !validPersistentHazardCounterFundingNeed(current.signals.persistentHazardCounterFundingNeed,
+            context.input, context.actionCandidates)) ? [] : defenseCandidates(
         context.actionCandidates,
         current.phase,
         current.signals,
@@ -194,6 +212,8 @@ function defensePhase(
     openPhases.push("fund_tag_clear");
   if (signals.persistentHazardCounterRemovalAvailable)
     openPhases.push("clear_persistent_hazard_counter");
+  if (signals.persistentHazardCounterFundingNeed?.revalidation.stateVersion === stateVersion)
+    openPhases.push("fund_persistent_hazard_counter");
   if (
     (signals.handBufferActionIds?.length ?? 0) > 0 &&
     signals.handSize < signals.minimumHandBuffer
@@ -257,6 +277,7 @@ function defenseCandidates(
     signals.tagClearFundingNeed?.actionIds ?? [],
   );
   const handBufferActionIds = new Set(signals.handBufferActionIds ?? []);
+  const persistentCounterFundingActionIds = new Set(signals.persistentHazardCounterFundingNeed?.actionIds ?? []);
   const defenseSupportInstallActionIds = new Set(
     signals.defenseSupportInstallActionIds ?? [],
   );
@@ -268,7 +289,7 @@ function defenseCandidates(
       if (confirmedDamageTaxedDrawActionIds.has(candidate.actionId))
         return false;
       if (
-        (phase === "fund_tag_clear" || phase === "build_reaction_reserve") &&
+        (phase === "fund_tag_clear" || phase === "build_reaction_reserve" || phase === "fund_persistent_hazard_counter") &&
         (actionDispositions ?? []).some(
           (entry) => entry.actionId === candidate.actionId,
         )
@@ -295,6 +316,8 @@ function defenseCandidates(
         return candidate.semanticActionType === "tag.remove";
       if (phase === "fund_tag_clear")
         return tagClearFundingActionIds.has(candidate.actionId);
+      if (phase === "fund_persistent_hazard_counter")
+        return persistentCounterFundingActionIds.has(candidate.actionId);
       if (phase === "clear_persistent_hazard_counter")
         return (
           candidate.semanticActionType === "counter.remove_trace_tag" ||
@@ -320,7 +343,7 @@ function defenseCandidates(
             ? (signals.defenseSupportInstallValues?.[candidate.actionId] ?? 50)
             : phase === "clear_tags"
               ? 80
-              : phase === "fund_tag_clear"
+              : phase === "fund_tag_clear" || phase === "fund_persistent_hazard_counter"
                 ? 85
                 : phase === "clear_persistent_hazard_counter"
                   ? 90
@@ -366,6 +389,15 @@ export function runnerDefenseTagClearFundingIsCurrentPhase(params: {
       params.signals,
     ) === "fund_tag_clear"
   );
+}
+
+export function runnerDefensePersistentCounterFundingIsCurrentPhase(params: {
+  actionCandidates: readonly ActionSemanticCandidate[];
+  stateVersion: number;
+  signals: RunnerDefenseSignals;
+}): boolean {
+  return defensePhase(params.actionCandidates, params.stateVersion, params.signals) ===
+    "fund_persistent_hazard_counter";
 }
 
 export function runnerDefenseDeferredHandBufferDispositions(params: {
@@ -455,6 +487,11 @@ function defenseCapability(
         ),
       ],
     };
+  if (phase === "fund_persistent_hazard_counter")
+    return {
+      capabilityId: "fund_persistent_runner_hazard_counter",
+      semanticActionTypes: [...new Set(candidates.map(entry => entry.candidate.semanticActionType))],
+    };
   if (phase === "clear_persistent_hazard_counter")
     return {
       capabilityId: "remove_persistent_runner_hazard_counter",
@@ -520,6 +557,7 @@ function defensePhaseValue(
   if (phase === "install_defense_support") return 60;
   if (phase === "clear_tags") return 80;
   if (phase === "fund_tag_clear") return 85;
+  if (phase === "fund_persistent_hazard_counter") return 85;
   if (phase === "clear_persistent_hazard_counter") return 90;
   if (phase === "forgo_unsafe_run") return 60;
   if (phase === "forgo_exhausted_options") return 10;
@@ -536,7 +574,8 @@ function defensePriorityClass(
   if (
     signals.pendingDamage > 0 ||
     (signals.activeTags > 0 && signals.visibleTagPunish) ||
-    signals.persistentHazardCounterRemovalAvailable
+    signals.persistentHazardCounterRemovalAvailable ||
+    signals.persistentHazardCounterFundingNeed !== undefined
   ) {
     return "P2";
   }
@@ -588,3 +627,24 @@ function validRunnerTagClearFundingNeed(
 }
 
 type PlanRouteStepCapability = PlanMaterialization["step"]["capability"];
+
+function validPersistentHazardCounterFundingNeed(
+  need: NonNullable<RunnerDefenseSignals["persistentHazardCounterFundingNeed"]>,
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): boolean {
+  const quote = runnerPersistentHazardCounterFundingQuotes(input).find(q => q.counterType === need.counterType);
+  return need.needId === "runner-defense-persistent-hazard-counter-funding" &&
+    need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
+    quote !== undefined && quote.observedAmount === need.observedAmount &&
+    quote.credits === need.targetCredits &&
+    Number.isSafeInteger(need.targetCredits) && Number.isSafeInteger(need.gap) &&
+    need.currentCreditsAtRevalidation === input.playerView.own.credits &&
+    need.gap > 0 && need.gap === need.targetCredits - need.currentCreditsAtRevalidation &&
+    need.revalidation.stateVersion === input.playerView.stateVersion &&
+    need.revalidation.status === "defense_parent_open" && input.playerView.own.clicks > 0 &&
+    need.actionIds.length > 0 && new Set(need.actionIds).size === need.actionIds.length &&
+    need.actionIds.every(id => input.legalActions.some(action => action.actionId === id &&
+      action.side === "runner" && action.expiresAtStateVersion === input.playerView.stateVersion) &&
+      candidates.some(candidate => candidate.actionId === id));
+}

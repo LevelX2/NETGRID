@@ -1561,6 +1561,18 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Ein eigener positiver persistenter Gefahrencounter hält den Defense-Parent
+auch bei fehlender Bank offen (SP-335). Die kanonischen, aus
+`runnerCounterEffects.removeCost` erzeugten Hints liefern eine typisierte
+`counterRemoval`-Kostenquote; die KI liest keine technischen Target-Strings.
+Fehlende oder widersprüchliche Quotes scheitern mit strukturierter Diagnose.
+Der vorhandene Funding-Dienst bindet nur aktuelle LegalActions an diesen
+Bedarf, einschließlich eines letzten Finanzierungsklicks für den folgenden
+eigenen Zug. Aktive Tagentfernung und erforderlicher Handpuffer behalten
+Vorrang. Discover, Assess und Materialisierung revalidieren Counter, Kosten,
+Bank, StateVersion und Action-IDs. Die Entfernung selbst wird erst ausgeführt,
+wenn ihre echte Engine-LegalAction vorhanden ist.
+
 Kann der getaggte Runner vor bekanntem kritischem Schaden nicht alle Tags im
 aktuellen Zug entfernen, erhält der Defense-Owner zuerst den erreichbaren
 Überlebenspuffer. Er quotiert die vollständige Tagentfernung mit den wirklich

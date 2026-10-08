@@ -225,6 +225,7 @@ import {
   runnerDefenseDeferredHandBufferDispositions,
   runnerDefenseReactionReserveIsCurrentPhase,
   runnerDefenseTagClearFundingIsCurrentPhase,
+  runnerDefensePersistentCounterFundingIsCurrentPhase,
 } from "../runner/defense-recovery/defense-plan-module";
 import {
   buildRunnerDefenseSignals,
@@ -1276,6 +1277,8 @@ function runnerTransientPlanSignals(
     defense.discardChoiceBinding !== undefined ||
     defense.terminalDamageReplacementBinding !== undefined ||
     defense.reactionReserveNeed !== undefined ||
+    defense.persistentHazardCounterRemovalAvailable ||
+    defense.persistentHazardCounterFundingNeed !== undefined ||
     (defense.defenseSupportInstallActionIds?.length ?? 0) > 0;
   const survivalSignals: TransientPlanSignal[] = survivalNeedOpen
     ? [
@@ -2662,6 +2665,7 @@ export function runnerActionDispositions(
     ...coverageOwnedActionIds,
     ...(domain.defense.handBufferActionIds ?? []),
     ...(domain.defense.reactionReserveNeed?.actionIds ?? []),
+    ...(domain.defense.persistentHazardCounterFundingNeed?.actionIds ?? []),
     ...(domain.defense.discardChoiceBinding
       ? [domain.defense.discardChoiceBinding.actionId]
       : []),
@@ -2843,6 +2847,12 @@ export function runnerDelegatedFundingActionIds(
       []) {
       actionIds.add(actionId);
     }
+  }
+  if (runnerDefensePersistentCounterFundingIsCurrentPhase({
+    actionCandidates: candidates, stateVersion, signals: domain.defense,
+  })) {
+    for (const actionId of domain.defense.persistentHazardCounterFundingNeed?.actionIds ?? [])
+      actionIds.add(actionId);
   }
   return actionIds;
 }

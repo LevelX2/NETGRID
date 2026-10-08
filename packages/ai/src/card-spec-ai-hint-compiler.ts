@@ -9202,6 +9202,12 @@ function deriveClosedExtendedHintEffects(
           counter.removeCost,
           "runner_counter_effect.remove_cost",
         )}_credits`,
+        counterRemoval: {
+          counterType: counter.counterType,
+          credits: requiredFiniteNumber(counter.removeCost, "runner_counter_effect.remove_cost"),
+          clicks: 1,
+          amount: 1,
+        },
         amount: 1,
         repeatable: true,
       });

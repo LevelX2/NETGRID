@@ -686,6 +686,12 @@ export type AiHintStructuredEffect = {
   amountKind?: KnownHintAmountKind;
   economyMode?: KnownHintEconomyMode;
   target?: string;
+  counterRemoval?: {
+    counterType: string;
+    credits: number;
+    clicks: 1;
+    amount: 1;
+  };
   repeatable?: boolean;
   finite?: boolean;
 };
@@ -1265,6 +1271,25 @@ function validateEffects(
       );
     }
     validateOptionalNumber(effect.amount, `${effectPath}.amount`, issues);
+    if (effect.counterRemoval !== undefined) {
+      const removal = effect.counterRemoval;
+      if (
+        !isRecord(removal) ||
+        typeof removal.counterType !== "string" ||
+        removal.counterType.length === 0 ||
+        !Number.isSafeInteger(removal.credits) ||
+        (removal.credits as number) < 0 ||
+        removal.clicks !== 1 ||
+        removal.amount !== 1 ||
+        effect.kind !== "persistent_counter_effect" ||
+        effect.timing !== "action" ||
+        effect.scope !== "runner" ||
+        effect.resource !== "counters"
+      ) {
+        addIssue(issues, "error", "invalid_shape", `${effectPath}.counterRemoval`,
+          "Expected the canonical one-counter, one-click Runner removal quote with a nonnegative integer credit cost.");
+      }
+    }
     validateOptionalBoolean(
       effect.repeatable,
       `${effectPath}.repeatable`,

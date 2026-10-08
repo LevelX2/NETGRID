@@ -60,6 +60,9 @@ describe("typed runner-counter and run-duration lock projections", () => {
             timing: "action",
             resource: "counters",
             amount: 1,
+            counterRemoval: {
+              counterType: expect.any(String), credits: removal, clicks: 1, amount: 1,
+            },
             target: expect.stringContaining(`remove_for_${removal}_credits`),
           }),
         );

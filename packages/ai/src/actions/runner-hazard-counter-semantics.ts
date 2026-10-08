@@ -10,6 +10,10 @@ const REMOVABLE_RUNNER_HAZARD_COUNTERS = new Set([
   "doppelganger",
 ]);
 
+export function isRemovableRunnerHazardCounterType(counterType: string): boolean {
+  return REMOVABLE_RUNNER_HAZARD_COUNTERS.has(counterType);
+}
+
 export function applyRunnerHazardCounterSemantics(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
@@ -47,7 +51,7 @@ export function removesPersistentRunnerHazardCounter(
     action.type === "trigger_ability" &&
     payload?.runnerAbility === "remove_runner_trace_counter" &&
     typeof payload.counterType === "string" &&
-    REMOVABLE_RUNNER_HAZARD_COUNTERS.has(payload.counterType) &&
+    isRemovableRunnerHazardCounterType(payload.counterType) &&
     typeof payload.removeCounterAmount === "number" &&
     Number.isFinite(payload.removeCounterAmount) &&
     payload.removeCounterAmount > 0

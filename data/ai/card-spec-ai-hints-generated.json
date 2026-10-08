@@ -1271,6 +1271,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_baskerville_remove_for_3_credits",
+            "counterRemoval": {
+              "counterType": "baskerville",
+              "credits": 3,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },
@@ -11054,6 +11060,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_doppelganger_remove_for_4_credits",
+            "counterRemoval": {
+              "counterType": "doppelganger",
+              "credits": 4,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },
@@ -35607,6 +35619,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_cerberus_remove_for_4_credits",
+            "counterRemoval": {
+              "counterType": "cerberus",
+              "credits": 4,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },
@@ -36489,6 +36507,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_trace_tag_counter_remove_for_1_credits",
+            "counterRemoval": {
+              "counterType": "trace_tag_counter",
+              "credits": 1,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },
@@ -38292,6 +38316,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_mastiff_remove_for_4_credits",
+            "counterRemoval": {
+              "counterType": "mastiff",
+              "credits": 4,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },
@@ -46848,6 +46878,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_crying_remove_for_2_credits",
+            "counterRemoval": {
+              "counterType": "crying",
+              "credits": 2,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },

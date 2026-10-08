@@ -17,6 +17,7 @@ import type {
 import type { CreateSideCreditDemandParams } from "../../plans/credit-demand";
 import type { RunnerFundingRouteContract } from "../../plans/runner-funding-contracts";
 import { uniqueBy } from "../../runtime/collection";
+import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
 export type RunnerDefenseServices = {
   findFundingRoute: (
     request: Pick<
@@ -369,6 +370,32 @@ export function buildRunnerDefenseSignals(params: {
         }
       : undefined;
   const reactionReserveTargetCredits = 10;
+  const persistentHazardCounterRemovalAvailable = candidates.some(candidate =>
+    candidate.semanticActionType === "counter.remove_trace_tag" ||
+    candidate.semanticActionType === "counter.remove_runner_hazard");
+  const persistentHazardCounterFundingNeed =
+    runnerPersistentHazardCounterFundingQuotes(input).flatMap(quote => {
+      if (persistentHazardCounterRemovalAvailable || currentCredits >= quote.credits ||
+        input.playerView.own.clicks <= 0) return [];
+      const route = services.findFundingRoute({
+        demandId: "runner-defense-persistent-hazard-counter-funding",
+        sourcePlanId: "runner.defense_and_recovery:runner",
+        purpose: "foreground_plan", priority: "acute_hard_plan_blocker", hardness: "hard",
+        deadline: "end_of_current_turn", targetCredits: quote.credits,
+        // The final click may prepare the removal in the following own turn.
+        remainingClicks: input.playerView.own.clicks, allowIncrementalProgress: true,
+        ...endTurnBuffer, evidence: ["runner_persistent_hazard_counter_requires_funding"],
+      });
+      return route.routeActionIds.length === 0 ? [] : [{
+        needId: "runner-defense-persistent-hazard-counter-funding" as const,
+        parentPlanInstanceId: "plan:runner.defense_and_recovery:runner" as const,
+        counterType: quote.counterType, observedAmount: quote.observedAmount,
+        targetCredits: quote.credits, currentCreditsAtRevalidation: currentCredits,
+        gap: quote.credits - currentCredits, actionIds: route.routeActionIds,
+        revalidation: { stateVersion: input.playerView.stateVersion, status: "defense_parent_open" as const },
+        evidenceCode: "runner_persistent_hazard_counter_requires_funding",
+      }];
+    })[0];
   const reactionReserveActionIds = services.findFundingRoute({
     demandId: "runner-defense-reaction-reserve",
     sourcePlanId: "runner.defense_and_recovery:runner",
@@ -423,11 +450,7 @@ export function buildRunnerDefenseSignals(params: {
   const defense: RunnerDefenseSignals = {
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,
-    persistentHazardCounterRemovalAvailable: candidates.some(
-      (candidate) =>
-        candidate.semanticActionType === "counter.remove_trace_tag" ||
-        candidate.semanticActionType === "counter.remove_runner_hazard",
-    ),
+    persistentHazardCounterRemovalAvailable,
     pendingDamage: visiblePendingDamage(candidates),
     damagePreventionNeeded: candidates.some(
       (candidate) =>
@@ -475,6 +498,7 @@ export function buildRunnerDefenseSignals(params: {
       ? { terminalDamageReplacementBinding }
       : {}),
     ...(tagClearFundingNeed ? { tagClearFundingNeed } : {}),
+    ...(persistentHazardCounterFundingNeed ? { persistentHazardCounterFundingNeed } : {}),
     ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
     defenseSupportInstallActionIds,
     defenseSupportRejectedInstallActionIds,
@@ -490,6 +514,8 @@ export function buildRunnerDefenseSignals(params: {
             ? "P4"
             : "P5",
     evidenceCodes: [
+      ...(persistentHazardCounterFundingNeed
+        ? ["runner_persistent_hazard_counter_requires_funding"] : []),
       ...(preserveHandBeforeIncompleteTagClear
         ? ["runner_incomplete_tag_clear_requires_preserved_hand_buffer"]
         : []),

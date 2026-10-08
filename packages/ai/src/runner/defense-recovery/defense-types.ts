@@ -2,6 +2,18 @@ export type RunnerDefenseSignals = {
   activeTags: number;
   visibleTagPunish: boolean;
   persistentHazardCounterRemovalAvailable: boolean;
+  persistentHazardCounterFundingNeed?: {
+    needId: "runner-defense-persistent-hazard-counter-funding";
+    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    counterType: string;
+    observedAmount: number;
+    targetCredits: number;
+    currentCreditsAtRevalidation: number;
+    gap: number;
+    actionIds: string[];
+    revalidation: { stateVersion: number; status: "defense_parent_open" };
+    evidenceCode: string;
+  };
   pendingDamage: number;
   damagePreventionNeeded: boolean;
   handSize: number;
@@ -73,6 +85,7 @@ export type DefenseState = {
     | "clear_tags"
     | "fund_tag_clear"
     | "clear_persistent_hazard_counter"
+    | "fund_persistent_hazard_counter"
     | "prevent_damage"
     | "install_defense_support"
     | "build_hand_buffer"

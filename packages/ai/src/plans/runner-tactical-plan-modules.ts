@@ -36,6 +36,8 @@ export function runnerVoluntaryActionFamilyOwner(
       : undefined;
   }
   if (candidate.semanticActionType === "economy.gain_credit") {
+    if (planDomain.defense.persistentHazardCounterFundingNeed?.actionIds.includes(candidate.actionId))
+      return "runner.defense_and_recovery";
     if (
       planDomain.defense.reactionReserveNeed?.actionIds.includes(
         candidate.actionId,
