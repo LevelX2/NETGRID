@@ -274,7 +274,7 @@ import {
   runnerHandDevelopmentRejectionForCandidate,
   runnerImmediateAgendaPointDevelopmentSignals,
   runnerLiquiditySaturationOptionDevelopment,
-  runnerProgramSearchRecentlyResolved,
+  runnerStackSearchResolvedThisTurn,
   runnerProgramSearchStrategyDevelopmentSignals,
 } from "../runner/hand-development/development-signals";
 import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
@@ -2144,17 +2144,27 @@ export function runnerActionDispositions(
       ) {
         continue;
       }
-      const searchAnswerAlreadyInHand =
-        domain.coverageGaps.some((gap) => gap.answerInHand) ||
-        (runnerProgramSearchRecentlyResolved(input) &&
-          input.playerView.own.gripOrHq.some(
-            (card) => card.known && card.type === "program",
-          ));
+      const searchAnswerAlreadyInHand = domain.coverageGaps.some(
+        (gap) => gap.answerInHand,
+      );
       if (searchAnswerAlreadyInHand) {
         add(
           candidate.actionId,
           "runner.rig_and_coverage",
           `runner_program_search_rejected_visible_answer_already_in_hand:${sourceDefinitionId ?? "unknown"}`,
+        );
+        continue;
+      }
+      if (
+        runnerStackSearchResolvedThisTurn(input) &&
+        input.playerView.own.gripOrHq.some(
+          (card) => card.known && card.type === "program",
+        )
+      ) {
+        add(
+          candidate.actionId,
+          "runner.develop_board_and_hand",
+          `runner_program_search_rejected_current_turn_search_cadence:${sourceDefinitionId ?? "unknown"}`,
         );
         continue;
       }

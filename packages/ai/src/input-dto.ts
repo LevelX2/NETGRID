@@ -383,6 +383,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "remainingCountersBefore",
   "shellCounterAmount",
   "counterType",
+  "counterSide",
+  "counterDelta",
   "traceValue",
   "runnerLink",
   "drawTaxSourceCount",

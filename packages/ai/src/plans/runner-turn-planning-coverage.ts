@@ -183,7 +183,10 @@ export const RUNNER_TURN_PLANNING_MODULE_COVERAGE: readonly RunnerTurnPlanningMo
       moduleId: "runner.convert_run_window",
       horizonCapability: "context_dependent",
       ownerKind: "multiaccess",
-      semanticActionPatterns: [...RUN_SEMANTICS],
+      semanticActionPatterns: [
+        ...RUN_SEMANTICS,
+        "runner.access_replacement_counter",
+      ],
     },
     {
       moduleId: "runner.complete_turn",

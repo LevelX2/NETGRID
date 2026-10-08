@@ -31,8 +31,6 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 
 import { rolesHaveBreakerRole } from "../../runtime/breaker-role-match";
 
-import { uniqueBy } from "../../runtime/collection";
-
 import { mergedPublicHistory } from "../../runtime/public-event-history";
 
 import { rolesMatch } from "../../runtime/role-match";
@@ -59,14 +57,13 @@ import { type RunnerDevelopmentSignal } from "./development-types";
 import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
 import { runnerDevelopmentSearchTargetIsExecutable } from "./development-search-feasibility";
 
-export function runnerProgramSearchRecentlyResolved(
+export function runnerStackSearchResolvedThisTurn(
   input: AiDecisionInput,
 ): boolean {
-  return uniqueBy(
-    [...input.playerView.publicEvents, ...input.eventTail],
-    (event) => event.eventId,
-  ).some(
+  return mergedPublicHistory(input).some(
     (event) =>
+      event.type === "resolve_choice" &&
+      event.turnSerial === input.playerView.turnSerial &&
       event.publicPayload?.actor === "runner" &&
       event.publicPayload?.hiddenZoneAction === "p3_37_search_stack_to_grip",
   );
@@ -601,7 +598,7 @@ export function runnerProgramSearchStrategyDevelopmentSignals(
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
 ): RunnerPlanDomain["developments"] {
   if (
-    runnerProgramSearchRecentlyResolved(input) &&
+    runnerStackSearchResolvedThisTurn(input) &&
     input.playerView.own.gripOrHq.some(
       (card) => card.known && card.type === "program",
     )

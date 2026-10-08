@@ -929,6 +929,15 @@ Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Die Suchkadenz verwendet ausschließlich ein tatsächlich abgeschlossenes
+`resolve_choice`-Ereignis des aktuellen Runner-Zuges. Die Aktivierung eines
+Suchwerkzeugs mit noch offener Choice ist kein Suchabschluss; frühere Züge
+sperren keine neue strategisch gebundene Suche. Eine noch bekannte Programmkarte
+in der Hand begrenzt weitere allgemeine Suchen desselben Zuges, beweist aber
+keine konkrete Coverage-Antwort. Diese Kadenz und `answerInHand` behalten
+getrennte Diagnosegründe; konkrete Coverage-Bedarfe und die exakte Quellen-/
+Ziel-/Optionsbindung bleiben bei ihren bisherigen Ownern.
+
 Die strategische Programmsuche zählt bekannte eigene Instanzen in Grip, Rig,
 Heap, Score Area, Set-aside und Removed genau einmal. Set-aside ist kein
 verfügbarer Stackbestand. Ein fehlendes Ziel eröffnet keinen Suchplan.
@@ -1666,6 +1675,16 @@ erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell
 verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
+
+Engine-gequotete Counter-Zugriffsersetzungen behalten `counterSide`,
+`counterType` und `counterDelta` in der positiven LegalAction-DTO-Projektion.
+Die daraus erkannte Semantik `runner.access_replacement_counter` gehört zur
+Run-Window-Klassifikation und zum entsprechenden Turn-Planner-Ownervertrag.
+Diese Zuordnung erzeugt weder eine neue Action noch einen Aktivierungsbonus:
+Solange die endliche Counter-/Purge-/Folgewirkung gegenüber dem vollständigen
+verlorenen Zugriff nicht bewertet ist, weist die vorhandene lokale Assessment-
+Diagnose die Ersetzung ausdrücklich als nicht zugelassen aus. Der normale
+Zugriff behält seine unabhängig gebundene Route.
 
 Nach dem planselektierten Aufdecken übernimmt dieser Run-Owner die unmittelbare
 Engine-Continuation „Ansehen beenden“. Die KI-Eingabe erhält die skalaren

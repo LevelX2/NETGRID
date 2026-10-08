@@ -8,6 +8,7 @@ function isRunWindowSemantic(candidate: ActionSemanticCandidate): boolean {
     candidate.semanticActionType === "run.continue" ||
     candidate.semanticActionType === "run.jack_out" ||
     candidate.semanticActionType === "run.decline_optional_bonus" ||
+    candidate.semanticActionType === "runner.access_replacement_counter" ||
     candidate.semanticActionType.startsWith("access.") ||
     candidate.semanticActionType === "breaker.boost_strength" ||
     candidate.semanticActionType === "breaker.break_subroutine"
