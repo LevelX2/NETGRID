@@ -1841,7 +1841,13 @@ Fehlt deren erforderliche Risikobasis, bleibt die bestehende strukturierte
 Fail-closed-Bewertung des Run-Owners zuständig.
 
 Die Restpfadquote verwendet die Engine-gequotete Stärke nach dem aktuellen
-Encounter. Vor Ausgaben gegen ausschließlich verbleibende ETR-Subroutinen
+Encounter. Bei einem bereits öffentlich aufgelösten Zufallsbreaker bleibt
+der beobachtete Würfelwert dabei unverändert; die signierte aktuelle
+Stärkeanpassung wird auf die quotierte Encounter-Grenzstärke bezogen. Auch
+ein zusätzlich finanzierter, fortgeltender Pump erhält diese Konsistenz.
+Eine widersprüchliche eingehende öffentliche Stärke scheitert sichtbar,
+statt durch einen Ersatzwert repariert zu werden (SP-596).
+Vor Ausgaben gegen ausschließlich verbleibende ETR-Subroutinen
 prüft derselbe Owner außerdem den vollständigen Pump-/Breakpreis gegen den
 gebundenen Fortsetzungsvertrag. Erhält der danach verbleibende bekannte Pfad
 die akzeptierte Reserve nicht mehr, lässt der Owner die reine ETR auflösen,

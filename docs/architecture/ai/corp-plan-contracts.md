@@ -2479,6 +2479,16 @@ Mehrwert aus einer unvollständigen Beschreibung der alten Region ableiten.
 Der bestehende Placement-Vertrag bleibt zuständig; nachweislich produktive
 Regionswechsel sind weiterhin zulässig (SP-383).
 
+Ein auf eine Agendenkategorie beschränkter Same-Fort-Rabatt benötigt eine
+bekannte passende Agenda im Zielfort. Ein vorbereiteter, ICE-geschützter
+Remote darf stattdessen eine passende bekannte HQ-Agenda binden, wenn ihre
+exakte aktuelle native Root-Installation in genau diesen Fort angeboten
+wird. Source, Karte, Fort und StateVersion müssen übereinstimmen. ICE allein,
+eine unbekannte Karte oder eine unpassende Kategorie liefert diesen Nutzen
+nicht. Gemeinsamer Placement-Vertrag, Installation und Regionsvergleich
+verwenden dieselbe Zulässigkeit; unbeschränkte Rabatte behalten ihren
+bisherigen Prepared-Remote-Vertrag (SP-595).
+
 Der bestehende Zielgebietsvergleich bewertet einen eigenen kostenlosen
 Archives-Zugriffseffekt als Nutzen des Abwerfens. Diese Anpassung gilt nur
 für das Ziel Archives; eine R&D-Rückführung bleibt separat bewertet. Cleanup

@@ -7,9 +7,49 @@ export function runnerRigAfterEncounter(
 ): VisibleCard[] {
   return rig.map((card) =>
     card.strengthAfterEncounter !== undefined
-      ? { ...card, strength: card.strengthAfterEncounter }
+      ? projectPublicBreakerStrength(card, card.strengthAfterEncounter)
       : card,
   );
+}
+
+/** Keep the observed die and its signed adjustment consistent with the
+ * Engine-certified boundary strength. This never rolls or predicts a die. */
+function projectPublicBreakerStrength(
+  card: VisibleCard,
+  strength: number,
+): VisibleCard {
+  const random = card.randomRunStrengthState;
+  if (
+    !Number.isSafeInteger(strength) ||
+    (random?.status === "resolved" &&
+      (!Number.isSafeInteger(card.strength) ||
+        !Number.isSafeInteger(random.actualStrength) ||
+        !Number.isSafeInteger(random.currentStrengthAdjustment) ||
+        card.strength !== random.actualStrength + random.currentStrengthAdjustment))
+  ) {
+    throw new Error("Invalid public breaker encounter-boundary strength.", {
+      cause: {
+        code: "invalid_projected_encounter_boundary_strength",
+        owner: "ai.runtime.runnerRigAfterEncounter",
+        cardInstanceId: card.instanceId,
+        visibleStrength: card.strength,
+        projectedStrength: strength,
+      },
+    });
+  }
+  return {
+    ...card,
+    strength,
+    ...(random?.status === "resolved"
+      ? {
+          randomRunStrengthState: {
+            status: "resolved" as const,
+            actualStrength: random.actualStrength,
+            currentStrengthAdjustment: strength - random.actualStrength,
+          },
+        }
+      : {}),
+  };
 }
 
 /** Quote the already funded pump before crossing the encounter boundary. */
@@ -57,8 +97,7 @@ export function runnerRigAfterPumpAndEncounter(
     if (card.instanceId !== breaker.instanceId) return card;
     const strength = (card.strength ?? 0) + pumpAmount * pumpCount;
     return {
-      ...card,
-      strength,
+      ...projectPublicBreakerStrength(card, strength),
       ...(card.strengthAfterEncounter !== undefined
         ? { strengthAfterEncounter: strength }
         : {}),

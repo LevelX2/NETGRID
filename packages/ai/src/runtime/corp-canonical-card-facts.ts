@@ -11,6 +11,29 @@ export type CorpConditionalScoreCreditProfile = Readonly<{
   gainAmount: number;
 }>;
 
+/** Canonical same-fort discount facts, never an installation recommendation. */
+export function corpSameFortAgendaDiscountProfiles(
+  definitionId: string | undefined,
+): readonly Readonly<{ requiredSubtype?: string; reduction: number }>[] {
+  const card = planningCard(definitionId);
+  return (card?.planning.engine.modifiers ?? []).flatMap((modifier) =>
+    modifier.kind === "agenda_difficulty" &&
+    modifier.operation === "reduce" &&
+    modifier.side === "corp" &&
+    modifier.sourceZone === "corp_root" &&
+    modifier.activeWhile === "rezzed" &&
+    modifier.appliesTo.sameServerAsSource === true &&
+    positiveSafeInteger(modifier.amount)
+      ? [{
+          ...(modifier.appliesTo.subtype !== undefined
+            ? { requiredSubtype: modifier.appliesTo.subtype }
+            : {}),
+          reduction: modifier.amount,
+        }]
+      : [],
+  );
+}
+
 /** A public, unconditional reusable run has separate physical entry and access.
  * This certifies a possible path, never predicts the Runner's next action. */
 export function corpPublicFixedOffServerRunProfiles(

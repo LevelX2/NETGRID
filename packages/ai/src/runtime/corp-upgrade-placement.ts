@@ -7,6 +7,7 @@ import type {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { createAiHintsByCard } from "../ai-hints";
 import { visibleCardDefinition } from "./card-definition-lookup";
+import { corpSameFortAgendaDiscountProfiles } from "./corp-canonical-card-facts";
 import { rolesMatch } from "./role-match";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
@@ -34,6 +35,7 @@ export type CorpUpgradePlacementAssessment = {
     | "placement_has_current_value"
     | "ice_support_without_ice"
     | "agenda_difficulty_requires_remote_scoring_fort"
+    | "agenda_difficulty_without_eligible_agenda"
     | "region_replacement_without_marginal_value"
     | "region_replacement_adds_active_utility";
   candidateActiveUtility: string[];
@@ -78,6 +80,16 @@ export function corpUpgradePlacementAssessment(
       ],
     });
   }
+  if (!hasEligibleRestrictedAgenda(params.input, params.sourceCard, server)) {
+    return placementAssessment({
+      recommendation: "defer",
+      reason: "agenda_difficulty_without_eligible_agenda",
+      evidence: [
+        "placement_contract:restricted_discount_requires_current_eligible_agenda",
+        `server:${params.serverId ?? "none"}`,
+      ],
+    });
+  }
   if (params.action.payload?.regionReplacementWarning === true) {
     return regionReplacementAssessment(params, signals, server);
   }
@@ -88,6 +100,8 @@ export function corpUpgradePlacementAssessment(
       signals,
       params.serverId,
       server,
+      params.input,
+      params.sourceCard,
     ),
     evidence: ["placement_contract:no_defer_condition"],
   });
@@ -105,6 +119,8 @@ export function corpUpgradePlacementExclusion(
         ? "Upgrade benötigt zuerst ICE"
         : assessment.reason === "agenda_difficulty_requires_remote_scoring_fort"
           ? "Agenda-Unterstützung benötigt einen Score-Remote"
+          : assessment.reason === "agenda_difficulty_without_eligible_agenda"
+            ? "Regionsrabatt benötigt eine passende Agenda"
           : "Regionsersatz ohne belegten Mehrwert",
     reason: assessment.evidence.join("|"),
   };
@@ -142,6 +158,7 @@ export function corpUpgradeInstallPlacementComponent(
       params.serverId,
       server,
       evidence,
+      hasEligibleRestrictedAgenda(params.input, params.sourceCard, server),
     );
   }
 
@@ -287,6 +304,7 @@ function agendaDifficultyPlacementComponent(
   serverId: string | undefined,
   server: VisibleCorpServer | undefined,
   evidence: string[],
+  hasEligibleAgenda: boolean,
 ): AiDecisionScoreComponent {
   if (!isRemoteServerId(serverId)) {
     return {
@@ -300,6 +318,14 @@ function agendaDifficultyPlacementComponent(
     };
   }
 
+  if (!hasEligibleAgenda) {
+    return {
+      key: "corp_upgrade_install_placement_defer",
+      label: "Regionsrabatt benötigt eine passende Agenda",
+      value: -1700,
+      reason: [...evidence, "defer_reason:agenda_difficulty_without_eligible_agenda"].join("|"),
+    };
+  }
   if (serverHasScorelineRoot(server)) {
     return {
       key: "corp_upgrade_install_placement_fit",
@@ -476,11 +502,15 @@ function regionReplacementAssessment(
     candidateSignals,
     params.serverId,
     server,
+    params.input,
+    params.sourceCard,
   );
   const replacedActiveUtility = activeUpgradeUtility(
     signalsForVisibleCard(replacedRegion),
     params.serverId,
     server,
+    params.input,
+    replacedRegion,
   );
   const replacedUtility = new Set(replacedActiveUtility);
   const marginalUtility = candidateActiveUtility.filter(
@@ -565,6 +595,8 @@ function activeUpgradeUtility(
   signals: ReadonlySet<string>,
   serverId: string | undefined,
   server: VisibleCorpServer | undefined,
+  input: AiDecisionInput,
+  sourceCard: VisibleCard | undefined,
 ): string[] {
   if (!serverId || !server) return [];
   const utility = new Set<string>();
@@ -612,6 +644,7 @@ function activeUpgradeUtility(
     agendas.length === 0 &&
     serverId.startsWith("remote_") &&
     server.ice.length > 0 &&
+    hasEligibleRestrictedAgenda(input, sourceCard, server) &&
     (signals.has("score.agenda_difficulty_discount") ||
       signals.has("remote.agenda_difficulty_discount"))
   ) {
@@ -651,6 +684,35 @@ function activeUpgradeUtility(
     utility.add("remote_capacity_support");
   }
   return [...utility].sort();
+}
+
+function hasEligibleRestrictedAgenda(
+  input: AiDecisionInput,
+  sourceCard: VisibleCard | undefined,
+  server: VisibleCorpServer | undefined,
+): boolean {
+  const profiles = corpSameFortAgendaDiscountProfiles(sourceCard?.definitionId);
+  if (profiles.length === 0 || profiles.some((profile) => profile.requiredSubtype === undefined))
+    return true;
+  if (!server) return false;
+  const compatible = (card: VisibleCard): boolean => {
+    if (card.known !== true || card.type !== "agenda") return false;
+    const subtypes = new Set([
+      ...(card.subtypes ?? []),
+      ...(visibleCardDefinition(card)?.subtypes ?? []),
+    ].map(normalizedToken));
+    return profiles.some((profile) => subtypes.has(normalizedToken(profile.requiredSubtype!)));
+  };
+  if (server.root.some(compatible)) return true;
+  if (!server.id.startsWith("remote_") || server.ice.length === 0) return false;
+  return (input.playerView.own.gripOrHq ?? []).some((card) =>
+    compatible(card) && input.legalActions.some((action) =>
+      action.side === "corp" && action.type === "install_card" &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.source === card.instanceId && action.payload?.cardId === card.instanceId &&
+      action.payload?.serverId === server.id && action.payload?.placement === "root",
+    ),
+  );
 }
 
 function normalizedToken(value: string): string {

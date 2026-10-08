@@ -56,8 +56,14 @@ describe("Corp upgrade placement signal contract", () => {
   it.each(AGENDA_DIFFICULTY_UPGRADES)(
     "gives %s positive fit on a prepared scoring remote",
     (definitionId) => {
-      const component = placementComponent(definitionId, "remote_1", {
+      const agenda = eligibleAgenda(definitionId);
+      const options = {
         remoteIce: [visibleCard("remote-ice", "simple_ice", "ice")],
+        hqAgendas: [agenda],
+        agendaInstalls: [agendaInstall(agenda)],
+      };
+      const component = placementComponent(definitionId, "remote_1", {
+        ...options,
       });
 
       expect(component).toEqual(
@@ -72,7 +78,7 @@ describe("Corp upgrade placement signal contract", () => {
       expect(
         corpUpgradePlacementAssessment(
           placementScenario(definitionId, "remote_1", {
-            remoteIce: [visibleCard("remote-ice", "simple_ice", "ice")],
+            ...options,
           }),
         )?.recommendation,
       ).toBe("allow");
@@ -87,6 +93,7 @@ describe("Corp upgrade placement signal contract", () => {
         remoteRoot: [
           visibleCard("remote-agenda", "simple_agenda", "agenda", {
             advancementRequirement: 3,
+            subtypes: ["research"],
           }),
         ],
       },
@@ -224,11 +231,12 @@ describe("Corp upgrade placement signal contract", () => {
         remoteIce: [visibleCard("remote-ice", "simple_ice", "ice")],
         remoteRoot: [
           visibleCard(
-            "networked-center-installed",
-            "onr_proteus_065_networked-center",
+            "research-bunker-installed",
+            "onr_proteus_072_research-bunker",
             "upgrade",
             { subtypes: ["region"] },
           ),
+          eligibleAgenda("onr_proteus_072_research-bunker"),
         ],
       },
     );
@@ -277,7 +285,65 @@ describe("Corp upgrade placement signal contract", () => {
     });
     expect(corpUpgradePlacementExclusion(replacement)).toBeUndefined();
   });
+
+  it.each(AGENDA_DIFFICULTY_UPGRADES.slice(1))(
+    "defers %s with no compatible current agenda despite installed ICE",
+    (definitionId) => {
+      const scenario = placementScenario(definitionId, "remote_1", {
+        remoteIce: [visibleCard("ice", "simple_ice", "ice")],
+      });
+      expect(corpUpgradePlacementAssessment(scenario)).toMatchObject({
+        recommendation: "defer",
+        reason: "agenda_difficulty_without_eligible_agenda",
+      });
+      expect(corpUpgradeInstallPlacementComponent(scenario)?.value).toBe(-1700);
+      expect(corpUpgradePlacementExclusion(scenario)?.key).toBe(
+        "corp_upgrade_agenda_difficulty_without_eligible_agenda",
+      );
+    },
+  );
+
+  it.each(["wrong_category", "unknown", "missing_action", "wrong_source", "wrong_fort", "stale"])(
+    "does not invent prepared Weapons Depot support from %s",
+    (variant) => {
+      const agenda = eligibleAgenda("onr_proteus_077_weapons-depot");
+      const action = agendaInstall(agenda);
+      if (variant === "wrong_category") agenda.subtypes = ["research"];
+      if (variant === "unknown") agenda.known = false;
+      if (variant === "wrong_source") action.source = "another-agenda";
+      if (variant === "wrong_fort") action.payload!.serverId = "remote_2";
+      if (variant === "stale") action.expiresAtStateVersion = 0;
+      const scenario = placementScenario("onr_proteus_077_weapons-depot", "remote_1", {
+        remoteIce: [visibleCard("ice", "simple_ice", "ice")],
+        hqAgendas: [agenda],
+        agendaInstalls: variant === "missing_action" ? [] : [action],
+      });
+      expect(corpUpgradePlacementAssessment(scenario)?.recommendation).toBe("defer");
+    },
+  );
+
+  it("preserves unrestricted Washington prepared support without a held agenda", () => {
+    expect(placementComponent(AGENDA_DIFFICULTY_UPGRADES[0], "remote_1", {
+      remoteIce: [visibleCard("ice", "simple_ice", "ice")],
+    })?.value).toBe(850);
+  });
 });
+
+function eligibleAgenda(definitionId: string): VisibleCard {
+  const subtype = definitionId.includes("networked") ? "gray_ops"
+    : definitionId.includes("weapons") ? "black_ops" : "research";
+  return visibleCard("eligible-agenda", "test-agenda", "agenda", { subtypes: [subtype] });
+}
+
+function agendaInstall(card: VisibleCard): LegalAction {
+  return {
+    actionId: `corp.install_card.${card.instanceId}.remote_1`, side: "corp",
+    type: "install_card", label: "Agenda installieren", source: card.instanceId,
+    timingPoint: "corp_action.main", costs: [{ clicks: 1 }], targetRequirements: [],
+    visibility: "private_to_actor", expiresAtStateVersion: 1,
+    payload: { cardId: card.instanceId, serverId: "remote_1", placement: "root" },
+  };
+}
 
 function placementComponent(
   definitionId: string,
@@ -287,6 +353,8 @@ function placementComponent(
     hqIce?: VisibleCard[];
     remoteIce?: VisibleCard[];
     remoteRoot?: VisibleCard[];
+    hqAgendas?: VisibleCard[];
+    agendaInstalls?: LegalAction[];
   } = {},
 ) {
   return corpUpgradeInstallPlacementComponent(
@@ -302,6 +370,8 @@ function placementScenario(
     hqIce?: VisibleCard[];
     remoteIce?: VisibleCard[];
     remoteRoot?: VisibleCard[];
+    hqAgendas?: VisibleCard[];
+    agendaInstalls?: LegalAction[];
   } = {},
 ) {
   const sourceCard = visibleCard(
@@ -345,6 +415,8 @@ function placementScenario(
   return {
     input: {
       playerView: {
+        stateVersion: 1,
+        own: { gripOrHq: options.hqAgendas ?? [] },
         servers: [
           { id: "hq", label: "HQ", ice: options.hqIce ?? [], root: [] },
           { id: "rd", label: "R&D", ice: [], root: [] },
@@ -357,6 +429,7 @@ function placementScenario(
           },
         ],
       },
+      legalActions: [action, ...(options.agendaInstalls ?? [])],
     } as unknown as AiDecisionInput,
     action,
     roles: ["upgrade"],
