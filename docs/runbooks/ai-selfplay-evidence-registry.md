@@ -19,6 +19,18 @@ oder benachbarte Ereignisse sind kein Ersatz für die Identitätsbindung.
 Die Skill-Fixture mit Teilprävention und anschließender Auflösung ohne
 wiederholten Ereignistyp sichert diesen Vertrag.
 
+## Berichtsablage ohne regelmäßigen Mailversand
+
+Seit dem Nutzerauftrag vom 08.10.2026 werden Paarungs- und Selbstspielberichte
+unabhängig von der Spielzahl unter `docs/Berichte/` abgelegt. Regelmäßiger
+E-Mail-Versand entfällt; frühere Versandserien sind keine fortdauernde
+Versandfreigabe. Die nachfolgenden Versandverträge gelten nur nach einem neuen
+ausdrücklichen Versandauftrag. Lokale Berichtserstellung, kanonische Prüfung
+und Evidenzregistrierung bleiben erforderlich. Bestehende Gmail-Berichte
+werden einschließlich Korrekturen, Mailtexten und Anhängen gesichert und erst
+nach erfolgreicher Ablageprüfung in den Papierkorb verschoben. Der lokale
+Importindex liegt unter `docs/Berichte/Gmail-Import-2026-10-08/Index.md`.
+
 ## Zweck
 
 Die zentrale Evidenzregistrierung ist der alleinige operative
