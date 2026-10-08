@@ -90,6 +90,21 @@ veralteten Feldaliasse, historischen Replay-Reparaturen oder Übergangsformate.
 Lokale Entwicklungsdaten, Datenbanken und Fixtures werden stattdessen bei
 Bedarf zurückgesetzt oder auf den aktuellen Stand gebracht.
 
+## Paarungsberichte und Ablage
+
+- Paarungs-, Metaserien-, Selbstspiel- und zugehörige Korrekturberichte werden
+  seit dem Nutzerauftrag vom 08.10.2026 lokal unter `docs/Berichte/` abgelegt,
+  unabhängig von der Spielzahl. Die kanonischen Berichts- und Prüfverträge
+  bleiben maßgeblich.
+- Diese Berichte werden künftig nicht mehr routinemäßig per E-Mail versendet.
+  Frühere regelmäßige Versandvereinbarungen begründen keine weitere
+  Versandpflicht. Ein Versand erfordert einen neuen ausdrücklichen Auftrag.
+- Vorhandene Gmail-Berichte dürfen nach vollständiger Sicherung aller
+  Mailtexte und Anhänge sowie erfolgreicher Dateiprüfung in den Gmail-
+  Papierkorb verschoben werden. Korrekturen bleiben als eigene Fassungen
+  erhalten; reine Projektstatusmails fallen nicht unter diese Löschregel.
+- `docs/Berichte/` bleibt gemäß `.gitignore` ein lokaler Berichtsordner.
+
 ## Git und lokale Artefakte
 
 - `main` ist der lokale Integrationsbranch.
