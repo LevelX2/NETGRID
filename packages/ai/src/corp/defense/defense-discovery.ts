@@ -655,7 +655,10 @@ export function buildCorpDefenseNeeds({
                         : productiveIceRezRoute.routeKind ===
                             "known_access_path_tax"
                           ? `engine_certified_ice_rez_known_access_path_tax:${rezServerId}:${productiveIceRezRoute.knownAccessPathTax ?? 0}:${candidate.actionId}`
-                          : `engine_certified_ice_rez_qualitative_encounter_defense:${rezServerId}:${candidate.actionId}`
+                          : productiveIceRezRoute.routeKind ===
+                              "costless_immediate_credit_gain"
+                            ? `engine_certified_ice_rez_costless_immediate_credit_gain:${rezServerId}:${productiveIceRezRoute.immediateCorpCreditGain}:${candidate.actionId}`
+                            : `engine_certified_ice_rez_qualitative_encounter_defense:${rezServerId}:${candidate.actionId}`
                 : "visible_non_ice_rez_window",
             },
           ];

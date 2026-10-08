@@ -84,6 +84,12 @@ ihnen aber nicht zurückimportiert.
   unvollständig. Kein Replacement wird geraten; gegnerische Hand, RNG,
   Eventlog und Originalzustand bleiben unverändert. Die Quote ersetzt weder
   die gesonderte Rez-Finanzierung noch eine gemeinsame Mehr-ICE-Projektion.
+  Eine vollständige Quote weist den tatsächlich projizierten Creditgewinn
+  zusätzlich als `creditGainOnRez` mit Ausgangsbank, Gewinn und Endbank aus.
+  Diese Werte entstehen vor der gesonderten Rez-Zahlung und enthalten bereits
+  die kanonische Debt-Interception. Sie behaupten keine Nettofinanzierung eines
+  kostenpflichtigen Rez. Der Runner erhält diese Vorschau für verborgenes
+  ungerezztes ICE nicht.
 - Die Corp erhält für angebotene X-Rez-LegalActions eigene
   `effectivePostRezActionRunQuotes` mit Action-ID und StateVersion. Die
   Projektion setzt nur den öffentlich gewählten X-Zustand in einer lokalen

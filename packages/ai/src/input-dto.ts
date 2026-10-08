@@ -3269,6 +3269,17 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
     return { ...binding, complete: false, reason: value.reason };
   }
   if (value.complete !== true) return undefined;
+  const creditGainOnRez = value.creditGainOnRez;
+  if (
+    creditGainOnRez !== undefined &&
+    (!isPlainObjectRecord(creditGainOnRez) ||
+      !isNonNegativeSafeInteger(creditGainOnRez.creditsBefore) ||
+      !isNonNegativeSafeInteger(creditGainOnRez.creditGain) ||
+      !isNonNegativeSafeInteger(creditGainOnRez.creditsAfter) ||
+      creditGainOnRez.creditsAfter !==
+        creditGainOnRez.creditsBefore + creditGainOnRez.creditGain)
+  )
+    return undefined;
   const effectiveRunQuote = sanitizeVisibleEffectiveIceRunQuote(
     value.effectiveRunQuote,
   );
@@ -3314,6 +3325,15 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
     ...binding,
     complete: true,
     effectiveRunQuote,
+    ...(creditGainOnRez !== undefined
+      ? {
+          creditGainOnRez: {
+            creditsBefore: creditGainOnRez.creditsBefore as number,
+            creditGain: creditGainOnRez.creditGain as number,
+            creditsAfter: creditGainOnRez.creditsAfter as number,
+          },
+        }
+      : {}),
     ...(paidEncounterDefense ? { paidEncounterDefense } : {}),
   };
 }

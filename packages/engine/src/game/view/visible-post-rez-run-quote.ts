@@ -194,6 +194,15 @@ export function visibleCorpIcePostRezRunQuote(
     ...binding,
     complete: true,
     effectiveRunQuote,
+    ...(projectedState && rezEffects.length > 0
+      ? {
+          creditGainOnRez: {
+            creditsBefore: state.corp.credits,
+            creditGain: projectedState.corp.credits - state.corp.credits,
+            creditsAfter: projectedState.corp.credits,
+          },
+        }
+      : {}),
     ...(paidEncounterDefense ? { paidEncounterDefense } : {}),
   };
 }

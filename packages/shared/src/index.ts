@@ -3337,6 +3337,12 @@ export type VisibleCorpIcePostRezRunQuote =
       expiresAtStateVersion: number;
       complete: true;
       effectiveRunQuote: VisibleEffectiveIceRunQuote;
+      /** Canonical public Corp credit-only lifecycle outcome before rez payment. */
+      creditGainOnRez?: {
+        creditsBefore: number;
+        creditGain: number;
+        creditsAfter: number;
+      };
       /** One optional paid ETR at the next encounter; never a free rez effect. */
       paidEncounterDefense?: {
         creditCost: number;

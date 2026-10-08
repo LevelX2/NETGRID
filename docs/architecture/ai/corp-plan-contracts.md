@@ -1032,6 +1032,20 @@ an das aktuell angegriffene ICE, den Server und die StateVersion gebunden
 sein. Zukunftseffekte ohne verbleibendes Ziel und unbezahlbare Aktivierungen
 begründen keinen aktuellen Nutzen.
 
+Ein sofortiger, Engine-zertifizierter positiver Creditgewinn kann außerdem
+eine `costless_immediate_credit_gain`-Route begründen, wenn die angebotene
+Rez-Action weder Credits, Klicks noch Agendapunkte kostet. Die vollständige
+Post-Rez-Quote bindet Quelle, Definition, aktuellen Approach-Server,
+StateVersion und Ausgangsbank; ihre Endbank muss dem exakten Gewinn
+entsprechen. Debt-Interception ist bereits enthalten. Fehlende, veraltete
+oder widersprüchliche Werte und kostenpflichtige Aktionen liefern diese
+Route nicht. Die Route bleibt beim alleinigen Rez-Owner
+`corp.defend_servers`, beansprucht nur Fortschritt und behauptet keinen ETR.
+Score-Reserven berücksichtigen den genau belegten Gewinn; die erneute
+Prüfung residenter Routen bindet auch dessen Höhe. Paarung 526, G11 D63 und
+G24 D20 belegen drei tatsächlich ausgezahlte Credits ohne Rez-Zahlung.
+G15 D87 bleibt als Minotaur ohne äußeres aktives Gate ein Decline-Gegenfall.
+
 Die Route wird erst nach `assessCorpExactIceRezAgainstScoreReserves`
 zugelassen: veröffentlichte Score-Fortsetzungen, andere bedrohte Agenden und
 notwendige weitere ICE im laufenden Run behalten ihre konkreten Reserven.

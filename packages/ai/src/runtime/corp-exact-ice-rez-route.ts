@@ -31,7 +31,9 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     | "exact_resource_exchange"
     | "known_access_path_tax"
     | "free_persistent_defense"
+    | "costless_immediate_credit_gain"
     | "qualitative_encounter_defense";
+  immediateCorpCreditGain?: number;
   marginalDefenseThreat?: "visible_agenda_remote" | "terminal_central_access";
   traceAccessBlock?: Readonly<VisibleCorpTraceIceRezQuote>;
   currentEncounterDefense?: Readonly<{
@@ -147,6 +149,14 @@ export function projectExactCorpIceRezRoute(params: {
   const quoteRead = readExactInstalledCorpIceRezQuote(params);
   if (!quoteRead) return undefined;
   const { quote, totalRezCredits } = quoteRead;
+  const immediateCorpCreditGain = readCostlessImmediateCorpIceCreditGain({
+    input,
+    candidate,
+    sourceCard,
+    targetServerId,
+    quote,
+    totalRezCredits,
+  });
   const traceQuotes = sourceCard.currentTraceIceRezQuotes?.filter(
     (q) => q.actionId === candidate.actionId,
   );
@@ -306,6 +316,7 @@ export function projectExactCorpIceRezRoute(params: {
     !resourceExchange &&
     !accessBlock &&
     !currentEncounterDefense &&
+    immediateCorpCreditGain === undefined &&
     marginalDefenseThreat === undefined &&
     !bluffDefenseNeed
   )
@@ -352,10 +363,25 @@ export function projectExactCorpIceRezRoute(params: {
     !accessBlock &&
     !freePersistentDefense &&
     knownAccessPathTax === undefined &&
-    !qualitativeEncounterDefense
+    !qualitativeEncounterDefense &&
+    immediateCorpCreditGain === undefined
   ) {
     return undefined;
   }
+  const routeKind: CorpExactIceRezRouteProjection["routeKind"] =
+    resourceExchange
+      ? "exact_resource_exchange"
+      : accessBlock
+        ? "access_reduction"
+        : freePersistentDefense
+          ? "free_persistent_defense"
+          : knownAccessPathTax !== undefined
+            ? "known_access_path_tax"
+            : qualitativeEncounterDefense
+              ? "qualitative_encounter_defense"
+              : immediateCorpCreditGain !== undefined
+                ? "costless_immediate_credit_gain"
+                : "access_reduction";
   return {
     actionId: candidate.actionId,
     sourceCardInstanceId: sourceCard.instanceId,
@@ -373,27 +399,82 @@ export function projectExactCorpIceRezRoute(params: {
         }
       : {}),
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
-    routeKind: resourceExchange
-      ? "exact_resource_exchange"
-      : accessBlock
-        ? "access_reduction"
-        : freePersistentDefense
-          ? "free_persistent_defense"
-          : knownAccessPathTax !== undefined
-            ? "known_access_path_tax"
-            : qualitativeEncounterDefense
-              ? "qualitative_encounter_defense"
-              : "access_reduction",
+    routeKind,
+    ...(immediateCorpCreditGain !== undefined
+      ? { immediateCorpCreditGain }
+      : {}),
     ...(resourceExchange ? { resourceExchange } : {}),
     ...(accessBlock ? { accessBlock } : {}),
     ...(knownAccessPathTax !== undefined ? { knownAccessPathTax } : {}),
     effect:
-      accessBlock || (assessmentsKnown && knownAfter.protectsScore)
+      routeKind !== "costless_immediate_credit_gain" &&
+      (accessBlock || (assessmentsKnown && knownAfter.protectsScore))
         ? "satisfied"
         : "progress",
     totalRezCredits,
     ...(bluffDefenseNeed ? { bluffDefenseNeed } : {}),
   };
+}
+
+/** Credit conversion is a fact of the offered rez; Defense remains its owner. */
+function readCostlessImmediateCorpIceCreditGain(params: {
+  input: AiDecisionInput;
+  candidate: ActionSemanticCandidate;
+  sourceCard: VisibleCard;
+  targetServerId: string;
+  quote: Extract<VisibleCorpRezCostQuote, { complete: true }>;
+  totalRezCredits: number;
+}): number | undefined {
+  const {
+    input,
+    candidate,
+    sourceCard,
+    targetServerId,
+    quote,
+    totalRezCredits,
+  } = params;
+  const postRez = sourceCard.effectivePostRezRunQuote;
+  const action = input.legalActions.find(
+    (a) => a.actionId === candidate.actionId,
+  );
+  const run = input.playerView.run;
+  if (
+    totalRezCredits !== 0 ||
+    quote.costKind !== "fixed" ||
+    quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+    !action ||
+    action.payload?.variableRezKind !== undefined ||
+    action.costs.some((cost) =>
+      Object.entries(cost).some(
+        ([key, value]) =>
+          (key !== "credits" && key !== "clicks") || value !== 0,
+      ),
+    ) ||
+    postRez?.complete !== true ||
+    postRez.context !== "installed_post_rez" ||
+    postRez.cardId !== sourceCard.instanceId ||
+    postRez.iceDefinitionId !== sourceCard.definitionId ||
+    postRez.targetServerId !== targetServerId ||
+    postRez.projectedServerId !== targetServerId ||
+    postRez.expiresAtStateVersion !== input.playerView.stateVersion ||
+    run?.phase !== "approach_ice" ||
+    run.position?.kind !== "ice" ||
+    run.attackedServerId !== targetServerId ||
+    input.playerView.servers.find((s) => s.id === targetServerId)?.ice[
+      run.position.iceIndex
+    ]?.instanceId !== sourceCard.instanceId
+  )
+    return undefined;
+  const gain = postRez.creditGainOnRez;
+  return gain &&
+    nonNegativeSafeInteger(gain.creditsBefore) &&
+    nonNegativeSafeInteger(gain.creditGain) &&
+    gain.creditGain > 0 &&
+    nonNegativeSafeInteger(gain.creditsAfter) &&
+    gain.creditsBefore === input.playerView.own.credits &&
+    gain.creditsAfter === gain.creditsBefore + gain.creditGain
+    ? gain.creditGain
+    : undefined;
 }
 
 function readKnownCurrentRunAccessPathTax(params: {
@@ -1174,6 +1255,7 @@ export function exactCorpIceRezRoutesEqual(
     left.sourceDefinitionId === right.sourceDefinitionId &&
     left.targetServerId === right.targetServerId &&
     left.routeKind === right.routeKind &&
+    left.immediateCorpCreditGain === right.immediateCorpCreditGain &&
     traceAccessBlocksEqual(left.traceAccessBlock, right.traceAccessBlock) &&
     left.currentEncounterDefense?.effect ===
       right.currentEncounterDefense?.effect &&

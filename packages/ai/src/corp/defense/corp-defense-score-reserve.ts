@@ -61,7 +61,9 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
   const availableCreditsAfterRez = params.restrictedCreditFunding
     ? params.restrictedCreditFunding.consumer
         .generalCreditsRemainingAfterConsumer
-    : input.playerView.own.credits - route.totalRezCredits;
+    : input.playerView.own.credits -
+      route.totalRezCredits +
+      (route.immediateCorpCreditGain ?? 0);
   const exposure = corpCurrentRunAgendaExposure(input, route.targetServerId);
   if (
     !routePreventsImmediateAccess(route) &&
