@@ -386,6 +386,17 @@ export function scoreProjectForCandidate(
         routeSemanticActionTypes: [candidate.semanticActionType],
         phase: "convert_agenda",
         sameTurnCloseout: true,
+        sameTurnConversionProof: "engine_quoted_path",
+        sameTurnConversionCreditHorizon: {
+          stateVersion: input.playerView.stateVersion,
+          creditsBeforeScorePayout:
+            input.playerView.own.credits - quotedCreditCost,
+        },
+        sameTurnConversionResourceCost: {
+          stateVersion: input.playerView.stateVersion,
+          credits: quotedCreditCost,
+          clicks: quotedClickCost,
+        },
         deadlinePressure: true,
         terminalScore:
           input.playerView.own.agendaPoints + agendaPoints >=

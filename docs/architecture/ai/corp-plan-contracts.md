@@ -236,6 +236,15 @@ Vertrag stammt vollständig aus derselben LegalAction: Quellregel, positive
 Punktwirkung, aktive Verpflichtung, Credits, Klicks und StateVersion müssen
 exakt gebunden sein. Der Plan darf weder Kartentext noch historische Kosten
 rekonstruieren; ein unvollständiger Quote blockiert den Step fail-closed.
+Auch diese Konversion veröffentlicht `sameTurnConversionProof`, den exakten
+Credit-/Klickaufwand und den verbleibenden Credithorizont aus derselben
+LegalAction. Dadurch durchläuft eine nichtterminale Verpflichtungsrückzahlung
+die vorhandene gemeinsame Score-/Defense-Admission. Fehlt ein Credit zur
+Schutzreserve, finanziert ein noch verfügbarer Basiscredit unter demselben
+Score-Parent zuerst diese Lücke. Eine terminale Konversion bleibt P1.
+Paarung 522 belegt die zuvor fehlende Quotebindung; native Kontrollen sichern
+Ablehnung unterhalb, Admission genau an der Reservegrenze, die gebundene
+Fundingfolge und den terminalen Punktgewinn ab.
 
 Installieren, Advancen und Scoren sind Phasen derselben exakten
 `corp.score_agenda`-Instanz. Eine aktuell legale Advance-Action ist deshalb
