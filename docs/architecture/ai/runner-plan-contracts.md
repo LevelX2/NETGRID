@@ -2237,6 +2237,14 @@ als Kosten des Trash-Schritts berechnet. Economy- und Parentreserven bleiben
 unverändert gebunden. Nach dem
 Run bleibt der endliche Auffüllbedarf beim Economy-Owner verfügbar; eine
 stärkere aktuelle Run-Gelegenheit kann weiterhin vorgehen.
+Bei abgelehntem Access-Trash bezeichnet die Reservebegründung ausschließlich
+das durch diese Zahlung zusätzlich entstehende Reservedefizit. Eine bereits
+zu niedrige Bank macht eine kostenlose Aktion nicht unbezahlbar. Ohne
+zusätzliches Defizit bleibt die aktuelle Nutzenbewertung als Ablehnungsgrund
+sichtbar. Die Bewertung selbst wird dadurch nicht verändert. Paarung 522,
+G5 D123, und native kostenlose sowie kostenpflichtige Gegenfälle sichern
+diese Trennung ab.
+
 Trash-Impact ist ausschließlich an eine vorhandene `trash_accessed_card`-
 LegalAction gebunden. `decline_trash` bei einem Agenda-Steal ist keine
 Trash-Alternative und erhält keinen daraus abgeleiteten Verzichtswert.

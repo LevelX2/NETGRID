@@ -39,14 +39,14 @@ export function currentAccessWindowCommitment(
   }
   return {
     payoff:
-      impact.creditsAfterTrash < impact.requiredReserve
+      impact.additionalReserveDeficit > 0
         ? "trash_unaffordable"
         : "known_low_value",
     intendedAction: "decline",
     knownTargetDefinitionIds: [accessedDefinitionId],
     trashBudget: 0,
     evidenceCode:
-      impact.creditsAfterTrash < impact.requiredReserve
+      impact.additionalReserveDeficit > 0
         ? "access_window_trash_deferred_by_bound_reserve"
         : "access_window_visible_impact_below_cost",
   };
