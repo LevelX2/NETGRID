@@ -116,8 +116,8 @@ describe("Defense hand-buffer phase ownership", () => {
     ).not.toContain(f.clear.actionId);
   });
 
-  it("keeps a canonical tag-clearing draw executable in the current Defense phase", () => {
-    const f = fixture();
+  it.each([1, 2, 5])("values the canonical current tag reduction at %i active tags", (tags) => {
+    const f = fixture(tags);
     const meatUpgrade = legalAction(
       "runner.play_event.meat-upgrade",
       "runner",
@@ -129,6 +129,8 @@ describe("Defense hand-buffer phase ownership", () => {
         payload: {
           cardId: "meat-upgrade",
           cardImplementationEffectKind: "remove_tags",
+          cardImplementationTagMode: "up_to_amount",
+          cardImplementationTagAmount: 2,
           drawCardsAmount: 3,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
@@ -186,15 +188,13 @@ describe("Defense hand-buffer phase ownership", () => {
     };
     const proposal = module.discover(context)[0]!;
     expect(proposal.phase).toBe("clear_tags");
-    expect(
-      module
-        .materialize(
-          { ...proposal, instanceId: "defense-current-phase" } as never,
-          {} as never,
-          context,
-        )
-        .candidates.map((entry) => entry.candidate.actionId),
-    ).toContain(meatUpgrade.actionId);
+    const materialized = module.materialize(
+      { ...proposal, instanceId: "defense-current-phase" } as never,
+      {} as never,
+      context,
+    );
+    expect(materialized.candidates.find(entry => entry.candidate.actionId === meatUpgrade.actionId)?.stepValue).toBe(80 * Math.min(tags, 2));
+    expect(materialized.candidates.find(entry => entry.candidate.actionId === f.clear.actionId)?.stepValue).toBe(80);
   });
 
   it("classifies the pending basic draw under Defense while the same owner clears a tag", () => {

@@ -1,0 +1,425 @@
+[
+  {
+    "actionId": "runner.gain_credit",
+    "actionType": "gain_credit",
+    "source": {
+      "kind": "basic_action"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 1
+      }
+    ],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "gainCreditsAmount": 1,
+      "abilityFamily": "payment-costs",
+      "effectKind": "gain_credits"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.draw_card",
+    "actionType": "draw_card",
+    "source": {
+      "kind": "basic_action"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 1
+      }
+    ],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "runnerDrawProjectionSchemaVersion": "runner-draw-projection-v1",
+      "projectedGrossDrawCount": 1,
+      "projectedPostDrawDispositionCount": 0,
+      "projectedNetHandDelta": 1,
+      "visibleDrawTaxSourceCount": 0
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.play_event.runner_onr_classic_040_meat-upgrade_2.runner_onr_classic_040_meat-upgrade_2.onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw",
+    "actionType": "play_event",
+    "source": {
+      "kind": "card",
+      "sourceCardInstanceId": "runner_onr_classic_040_meat-upgrade_2",
+      "sourceDefinitionId": "onr_classic_040_meat-upgrade"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 2,
+        "credits": 2
+      }
+    ],
+    "targetRequirements": [],
+    "abilityRef": {
+      "sourceCardInstanceId": "runner_onr_classic_040_meat-upgrade_2",
+      "sourceAbilityId": "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw"
+    },
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "cardId": "runner_onr_classic_040_meat-upgrade_2",
+      "drawCardsAmount": 3,
+      "cardImplementationEffectKind": "remove_tags",
+      "cardImplementationTagMode": "up_to_amount",
+      "cardImplementationTagAmount": 2,
+      "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+      "cardImplementationAbilityKey": "on_play_remove_tags_and_draw",
+      "cardImplementationAbilityId": "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.play_event.runner_onr_classic_043_running-interference_2.hq.runner_onr_classic_043_running-interference_2.onr_classic_043_running-interference:on_play_run_with_rez_surcharge",
+    "actionType": "play_event",
+    "source": {
+      "kind": "card",
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceDefinitionId": "onr_classic_043_running-interference"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 2,
+        "credits": 2
+      }
+    ],
+    "targetRequirements": [],
+    "abilityRef": {
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "cardId": "runner_onr_classic_043_running-interference_2",
+      "serverId": "hq",
+      "runnerEventRun": true,
+      "corpRezCostSurchargeKind": "matching_printed_rez_cost",
+      "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+      "cardImplementationAbilityKey": "on_play_run_with_rez_surcharge",
+      "cardImplementationAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.play_event.runner_onr_classic_043_running-interference_2.rd.runner_onr_classic_043_running-interference_2.onr_classic_043_running-interference:on_play_run_with_rez_surcharge",
+    "actionType": "play_event",
+    "source": {
+      "kind": "card",
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceDefinitionId": "onr_classic_043_running-interference"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 2,
+        "credits": 2
+      }
+    ],
+    "targetRequirements": [],
+    "abilityRef": {
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "cardId": "runner_onr_classic_043_running-interference_2",
+      "serverId": "rd",
+      "runnerEventRun": true,
+      "corpRezCostSurchargeKind": "matching_printed_rez_cost",
+      "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+      "cardImplementationAbilityKey": "on_play_run_with_rez_surcharge",
+      "cardImplementationAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.play_event.runner_onr_classic_043_running-interference_2.archives.runner_onr_classic_043_running-interference_2.onr_classic_043_running-interference:on_play_run_with_rez_surcharge",
+    "actionType": "play_event",
+    "source": {
+      "kind": "card",
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceDefinitionId": "onr_classic_043_running-interference"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 2,
+        "credits": 2
+      }
+    ],
+    "targetRequirements": [],
+    "abilityRef": {
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "cardId": "runner_onr_classic_043_running-interference_2",
+      "serverId": "archives",
+      "runnerEventRun": true,
+      "corpRezCostSurchargeKind": "matching_printed_rez_cost",
+      "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+      "cardImplementationAbilityKey": "on_play_run_with_rez_surcharge",
+      "cardImplementationAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.play_event.runner_onr_classic_043_running-interference_2.remote_1.runner_onr_classic_043_running-interference_2.onr_classic_043_running-interference:on_play_run_with_rez_surcharge",
+    "actionType": "play_event",
+    "source": {
+      "kind": "card",
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceDefinitionId": "onr_classic_043_running-interference"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 2,
+        "credits": 2
+      }
+    ],
+    "targetRequirements": [],
+    "abilityRef": {
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "cardId": "runner_onr_classic_043_running-interference_2",
+      "serverId": "remote_1",
+      "runnerEventRun": true,
+      "corpRezCostSurchargeKind": "matching_printed_rez_cost",
+      "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+      "cardImplementationAbilityKey": "on_play_run_with_rez_surcharge",
+      "cardImplementationAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.play_event.runner_onr_classic_043_running-interference_2.remote_2.runner_onr_classic_043_running-interference_2.onr_classic_043_running-interference:on_play_run_with_rez_surcharge",
+    "actionType": "play_event",
+    "source": {
+      "kind": "card",
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceDefinitionId": "onr_classic_043_running-interference"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 2,
+        "credits": 2
+      }
+    ],
+    "targetRequirements": [],
+    "abilityRef": {
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "cardId": "runner_onr_classic_043_running-interference_2",
+      "serverId": "remote_2",
+      "runnerEventRun": true,
+      "corpRezCostSurchargeKind": "matching_printed_rez_cost",
+      "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+      "cardImplementationAbilityKey": "on_play_run_with_rez_surcharge",
+      "cardImplementationAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.play_event.runner_onr_classic_043_running-interference_2.remote_3.runner_onr_classic_043_running-interference_2.onr_classic_043_running-interference:on_play_run_with_rez_surcharge",
+    "actionType": "play_event",
+    "source": {
+      "kind": "card",
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceDefinitionId": "onr_classic_043_running-interference"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 2,
+        "credits": 2
+      }
+    ],
+    "targetRequirements": [],
+    "abilityRef": {
+      "sourceCardInstanceId": "runner_onr_classic_043_running-interference_2",
+      "sourceAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "cardId": "runner_onr_classic_043_running-interference_2",
+      "serverId": "remote_3",
+      "runnerEventRun": true,
+      "corpRezCostSurchargeKind": "matching_printed_rez_cost",
+      "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+      "cardImplementationAbilityKey": "on_play_run_with_rez_surcharge",
+      "cardImplementationAbilityId": "onr_classic_043_running-interference:on_play_run_with_rez_surcharge"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.start_run.hq",
+    "actionType": "start_run",
+    "source": {
+      "kind": "basic_action"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 1
+      }
+    ],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "serverId": "hq",
+      "abilityFamily": "run-access",
+      "effectKind": "run"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.start_run.rd",
+    "actionType": "start_run",
+    "source": {
+      "kind": "basic_action"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 1
+      }
+    ],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "serverId": "rd",
+      "abilityFamily": "run-access",
+      "effectKind": "run"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.start_run.archives",
+    "actionType": "start_run",
+    "source": {
+      "kind": "basic_action"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 1
+      }
+    ],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "serverId": "archives",
+      "abilityFamily": "run-access",
+      "effectKind": "run"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.start_run.remote_1",
+    "actionType": "start_run",
+    "source": {
+      "kind": "basic_action"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 1
+      }
+    ],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "serverId": "remote_1",
+      "abilityFamily": "run-access",
+      "effectKind": "run"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.start_run.remote_2",
+    "actionType": "start_run",
+    "source": {
+      "kind": "basic_action"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 1
+      }
+    ],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "serverId": "remote_2",
+      "abilityFamily": "run-access",
+      "effectKind": "run"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.start_run.remote_3",
+    "actionType": "start_run",
+    "source": {
+      "kind": "basic_action"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [
+      {
+        "clicks": 1
+      }
+    ],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "payload": {
+      "serverId": "remote_3",
+      "abilityFamily": "run-access",
+      "effectKind": "run"
+    },
+    "bindings": {}
+  },
+  {
+    "actionId": "runner.end_turn",
+    "actionType": "end_turn",
+    "source": {
+      "kind": "game_rule"
+    },
+    "timingPoint": "runner_action.main",
+    "costs": [],
+    "targetRequirements": [],
+    "visibility": "private_to_actor",
+    "expiresAtStateVersion": 97,
+    "bindings": {}
+  }
+]

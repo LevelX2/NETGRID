@@ -13,6 +13,7 @@ import {
 import type { RunnerDefenseSignals, DefenseState } from "./defense-types";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
+import { currentRunnerTagReduction } from "../../actions/tag-effect-semantics";
 export function createRunnerDefenseModule(): PlanModule {
   return {
     moduleId: "runner.defense_and_recovery",
@@ -387,7 +388,7 @@ function defenseCandidates(
           : phase === "install_defense_support"
             ? (signals.defenseSupportInstallValues?.[candidate.actionId] ?? 50)
             : phase === "clear_tags"
-              ? 80
+              ? 80 * currentRunnerTagReduction(candidate, signals.activeTags)
               : phase === "fund_tag_clear" || phase === "fund_persistent_hazard_counter"
                 ? 85
                 : phase === "clear_persistent_hazard_counter"

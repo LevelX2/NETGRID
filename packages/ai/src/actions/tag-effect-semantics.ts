@@ -3,6 +3,7 @@ import type {
   ActionTagEffectProfile,
   ActionSemanticCandidate,
 } from "../action-semantic-candidate-types";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 export function applyTagEffectSemantics(
   candidate: ActionSemanticCandidate,
@@ -33,17 +34,50 @@ function tagEffectProfileFromPayload(
   const effectKind = stringPayload(action, "cardImplementationEffectKind");
   if (effectKind !== "remove_tags") return undefined;
   const mode = modePayload(action);
-  const amount = amountPayload(action) ?? "unknown";
+  const amount = amountPayload(action);
+  if (
+    amount === undefined ||
+    (mode === "all" && amount !== "all") ||
+    ((mode === "amount" || mode === "up_to_amount") &&
+      (typeof amount !== "number" || !Number.isInteger(amount) || amount <= 0)) ||
+    mode === undefined || mode === "support_only"
+  ) {
+    throw new PlanResolutionFailure("missing_action_semantics", {
+      side: action.side,
+      stateVersion: action.expiresAtStateVersion,
+      timingPoint: action.timingPoint,
+      legalActionTypes: [action.type],
+      unresolvedActionIds: [action.actionId],
+      owner: "action_semantics",
+      removalCondition: "Preserve the Engine's exact tag-removal mode and positive integer amount (or all) for this current LegalAction.",
+    });
+  }
   return {
     kind: "remove_tags",
     recipient: "runner",
-    ...(mode !== undefined ? { mode } : {}),
+    mode,
     amount,
     currentTagReduction: amount,
     acuteTagRemoval: true,
     source: "legal_action_payload",
     evidence: ["LegalAction payload cardImplementationEffectKind remove_tags"],
   };
+}
+
+export function currentRunnerTagReduction(
+  candidate: ActionSemanticCandidate,
+  activeTags: number,
+): number {
+  const amount = candidate.tagEffectProfile?.currentTagReduction;
+  if (amount === "all") return activeTags;
+  if (typeof amount === "number" && Number.isInteger(amount) && amount > 0)
+    return Math.min(activeTags, amount);
+  throw new Error(JSON.stringify({
+    code: "missing_current_tag_removal_amount",
+    owner: "action_semantics",
+    actionId: candidate.actionId,
+    stateVersion: candidate.stateVersion,
+  }));
 }
 
 function withTagEffectProfile(

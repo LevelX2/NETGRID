@@ -1736,6 +1736,18 @@ Die genaue Ordnung zwischen Tag-Clear, hostile-State-Entfernung,
 Handkarten-Draw und Präventionsinstallation bleibt modulinterne
 Verfeinerung.
 
+Aktuelle Tagentfernung behält den von der Engine gelieferten Modus und Betrag
+in beiden LegalAction-Projektionen des KI-DTO. Fehlende, nicht ganzzahlige oder
+widersprüchliche Mengen scheitern mit einer strukturierten Semantikdiagnose.
+Der Defense-Owner bewertet nur die tatsächlich vorhandenen entfernten Tags:
+Eine Zwei-Tag-Quote zählt bei einem vorhandenen Tag einmal, bei zwei Tags
+zweimal. Eine aktuell legale vollständige Bereinigung erfüllt auch den
+gesamten Bereinigungshorizont; die Finanzierungsprüfung nur wiederholter
+Basisaktionen darf sie nicht als unvollständig einstufen. Bestätigte
+schadensgefährliche Drawsteuer bleibt ein Ausschlussgrund. Historische
+Checkpoints mit damals verlorenen Mengen werden nicht still repariert;
+gezielt rekonstruierte Gegenmodelle bleiben als solche bezeichnet.
+
 Wenn eine notwendige Prävention oder Recovery nicht auf der Hand liegt, darf
 das Modul planintern Draw-, Search-, Funding- und Installations-Steps
 erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell

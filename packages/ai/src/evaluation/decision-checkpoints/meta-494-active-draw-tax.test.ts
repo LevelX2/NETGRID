@@ -9,13 +9,14 @@ import {
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { visibleRunnerDrawTaxSourceCount } from "../../runtime/ai-feature-server";
 import { runnerDrawTaxLiabilityProjection } from "../../runtime/runner-draw-tax-liability-score";
+import { currentRuleTagRemovalCounterInput } from "./current-rule-tag-removal-counter.test-support";
 
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
   [9, 361, "runner.gain_credit", "fund_active_tag_removal"],
   [32, 106, "runner.remove_tag", "remove_active_tags"],
 ])(
-  "keeps a safe current Defense route in native active-tax G%i D%i",
+  "rejects the incomplete historical quote and keeps active-tax Defense in the current-rule G%i D%i countermodel",
   (g, d, actionId, capabilityId) => {
     const cp = JSON.parse(
       readFileSync(
@@ -27,7 +28,10 @@ it.each([
       ),
     );
     expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
-    const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+    const historical = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+    expect(() => chooseAiAction(historical)).toThrow(/missing_action_semantics/);
+    resetResidentPlanPortfolioMemory();
+    const input = currentRuleTagRemovalCounterInput(cp.input);
     const meat = input.legalActions.find((a: { actionId: string }) =>
       a.actionId.includes("meat-upgrade"),
     )!;
@@ -39,7 +43,7 @@ it.each([
     });
     restoreAiRuntimeCheckpoint(
       input,
-      input.ownDeckSnapshot.deckSnapshotId,
+      input.ownDeckSnapshot!.deckSnapshotId,
       cp.runtime,
     );
     restoreResidentPlanPortfolioMemorySnapshot(

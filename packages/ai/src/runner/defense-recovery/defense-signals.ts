@@ -18,6 +18,7 @@ import type { CreateSideCreditDemandParams } from "../../plans/credit-demand";
 import type { RunnerFundingRouteContract } from "../../plans/runner-funding-contracts";
 import { uniqueBy } from "../../runtime/collection";
 import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
+import { currentRunnerTagReduction } from "../../actions/tag-effect-semantics";
 export type RunnerDefenseServices = {
   findFundingRoute: (
     request: Pick<
@@ -315,12 +316,17 @@ export function buildRunnerDefenseSignals(params: {
         }).routeAssessment
       : undefined;
   const completeTagClearAvailable =
-    fullTagClearFunding !== undefined &&
-    (fullTagClearFunding.status === "funded" ||
-      (fullTagClearFunding.status === "covered_guaranteed" &&
-        fullTagClearFunding.reliability === "guaranteed" &&
-        fullTagClearFunding.horizon === "same_turn" &&
-        fullTagClearFunding.projectedGap === 0));
+    (tags > 0 && candidates.some(candidate =>
+      candidate.semanticActionType === "tag.remove" &&
+      !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
+      currentRunnerTagReduction(candidate, tags) === tags,
+    )) ||
+    (fullTagClearFunding !== undefined &&
+      (fullTagClearFunding.status === "funded" ||
+        (fullTagClearFunding.status === "covered_guaranteed" &&
+          fullTagClearFunding.reliability === "guaranteed" &&
+          fullTagClearFunding.horizon === "same_turn" &&
+          fullTagClearFunding.projectedGap === 0)));
   const preserveHandBeforeIncompleteTagClear =
     taggedDamageBufferRequired && !completeTagClearAvailable;
   const endTurnBuffer = preserveHandBeforeIncompleteTagClear

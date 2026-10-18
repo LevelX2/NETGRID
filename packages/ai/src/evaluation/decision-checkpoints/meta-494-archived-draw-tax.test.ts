@@ -9,12 +9,13 @@ import {
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { visibleRunnerDrawTaxSourceCount } from "../../runtime/ai-feature-server";
 import { runnerDrawTaxLiabilityProjection } from "../../runtime/runner-draw-tax-liability-score";
+import { currentRuleTagRemovalCounterInput } from "./current-rule-tag-removal-counter.test-support";
 
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
   [28, 20],
   [29, 215],
-])("ignores retired draw-tax sources in native G%i D%i", (g, d) => {
+])("rejects the incomplete quote and ignores retired tax in the current-rule G%i D%i countermodel", (g, d) => {
   const cp = JSON.parse(
     readFileSync(
       new URL(
@@ -25,7 +26,10 @@ it.each([
     ),
   );
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
-  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  const historical = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  expect(() => chooseAiAction(historical)).toThrow(/missing_action_semantics/);
+  resetResidentPlanPortfolioMemory();
+  const input = currentRuleTagRemovalCounterInput(cp.input);
   const meat = input.legalActions.find((a: { actionId: string }) =>
     a.actionId.includes("meat-upgrade"),
   )!;
@@ -37,7 +41,7 @@ it.each([
   });
   restoreAiRuntimeCheckpoint(
     input,
-    input.ownDeckSnapshot.deckSnapshotId,
+    input.ownDeckSnapshot!.deckSnapshotId,
     cp.runtime,
   );
   restoreResidentPlanPortfolioMemorySnapshot(
@@ -46,7 +50,9 @@ it.each([
   );
   const before = JSON.stringify([input.playerView, input.legalActions]);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.remove_tag");
+  // With the now explicit two-tag quote, G29's two tags are cleared by the
+  // event; G28's single tag still uses the cheaper basic action.
+  expect(decision.actionId).toBe(g === 29 ? meat.actionId : "runner.remove_tag");
   expect(decision.fallbackUsed).toBe(false);
   expect(input.legalActions).toContainEqual(
     expect.objectContaining({

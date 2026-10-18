@@ -296,6 +296,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "cardImplementationScoresSourceAsAgenda",
   "cardImplementationPrimitiveKind",
   "cardImplementationEffectKind",
+  "cardImplementationTagMode",
+  "cardImplementationTagAmount",
   "creditLoss",
   "targetCount",
   "cardImplementationSearchFilter",
