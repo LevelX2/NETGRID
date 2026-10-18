@@ -1,7 +1,9 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { MatchRuntimeMemory } from "../runtime/match-runtime-memory";
 import type { PlanPortfolioSnapshot } from "./plan-portfolio";
 
-const planPortfolioMemoryByKey = new Map<string, PlanPortfolioSnapshot>();
+const planPortfolioMemoryByKey =
+  new MatchRuntimeMemory<PlanPortfolioSnapshot>();
 
 export function getPlanPortfolioMemorySnapshot(
   input: AiDecisionInput,
@@ -39,7 +41,11 @@ export function rememberPlanPortfolioSnapshot(
     return undefined;
   }
   const storedSnapshot = structuredClone(snapshot);
-  planPortfolioMemoryByKey.set(key, storedSnapshot);
+  planPortfolioMemoryByKey.set(
+    key,
+    storedSnapshot,
+    planPortfolioMemoryContextId(input),
+  );
   return structuredClone(storedSnapshot);
 }
 
@@ -63,7 +69,11 @@ export function restorePlanPortfolioMemorySnapshot(
   ) {
     throw new Error("invalid_plan_portfolio_memory_checkpoint");
   }
-  planPortfolioMemoryByKey.set(key, structuredClone(snapshot));
+  planPortfolioMemoryByKey.set(
+    key,
+    structuredClone(snapshot),
+    planPortfolioMemoryContextId(input),
+  );
 }
 
 function planPortfolioMemoryKey(input: AiDecisionInput): string {

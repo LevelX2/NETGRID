@@ -2,7 +2,7 @@ import type {
   AiDecisionInput,
   CorpHostedCreditBankCycleQuote,
 } from "@netgrid/shared";
-import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
+import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";

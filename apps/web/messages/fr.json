@@ -280,7 +280,12 @@
       "hideMatchStatus": "Jeu actif : masquer le statut",
       "showMatchStatus": "Jeu actif : afficher le statut",
       "cycleChronicle": "Chronique : {current}. Passer à {next}.",
-      "chronicleWidths": {"off":"Masquée","wide":"Large","medium":"Moyenne","narrow":"Étroite"},
+      "chronicleWidths": {
+        "off": "Masquée",
+        "wide": "Large",
+        "medium": "Moyenne",
+        "narrow": "Étroite"
+      },
       "showRightRail": "Afficher le panneau de droite",
       "hideRightRail": "Masquer le panneau droit",
       "askAi": "Interrogez l'IA à propos de mon deck",
@@ -2668,6 +2673,7 @@
     }
   },
   "Errors": {
+    "invalidActionReceipt": "Le reçu d’action enregistré est incomplet. Veuillez vérifier l’état du serveur.",
     "staleState": "L'état du jeu est obsolète. La vue actuelle a été chargée.",
     "staleMatch": "L'état de la match est obsolète. Veuillez réessayer.",
     "wrongSide": "Cette action n'appartient pas à votre camp.",

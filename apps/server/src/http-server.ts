@@ -520,6 +520,10 @@ export class NetgridRealtimeServer {
       side: payload.side,
     });
     sendBootstrap(socket, connected);
+    send(socket, {
+      type: "match_joined",
+      payload: { matchId: payload.matchId, side: payload.side },
+    });
     this.scheduleCountdownFromPayload(connected);
     await this.sendOpponentBootstrap(
       payload.matchId,
@@ -943,25 +947,23 @@ export function createNetgridHttpServer(
     rateLimiter,
     connectionAudit,
   );
-  const server = createServer(
-    (request, response) => {
-      if (!httpDrain.accept(request, response)) return;
-      void routeHttp(
-        activeService,
-        realtime,
-        deploymentConfig,
-        rateLimiter,
-        maintenanceAuth,
-        accountAuth,
-        accountDecks,
-        accountMatchStartPreferences,
-        accountStatistics,
-        cardImageMaintenance,
-        request,
-        response,
-      );
-    },
-  );
+  const server = createServer((request, response) => {
+    if (!httpDrain.accept(request, response)) return;
+    void routeHttp(
+      activeService,
+      realtime,
+      deploymentConfig,
+      rateLimiter,
+      maintenanceAuth,
+      accountAuth,
+      accountDecks,
+      accountMatchStartPreferences,
+      accountStatistics,
+      cardImageMaintenance,
+      request,
+      response,
+    );
+  });
   const httpDrain = new HttpConnectionDrain(server);
   realtime.attach(server);
   const cleanupTimer =

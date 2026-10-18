@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { MatchRuntimeMemory } from "../runtime/match-runtime-memory";
 import {
   assertResidentPlanPortfolio,
   RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
@@ -9,7 +10,7 @@ import {
   type ResidentPortfolioBindingFailure,
 } from "./plan-resolution-failure";
 
-const memory = new Map<string, ResidentPlanPortfolio>();
+const memory = new MatchRuntimeMemory<ResidentPlanPortfolio>();
 
 export function residentPlanPortfolioSnapshot(
   input: AiDecisionInput,
@@ -61,7 +62,11 @@ export function rememberResidentPlanPortfolio(
         "Persist only a current v2 resident portfolio for the matching side.",
     });
   }
-  memory.set(memoryKey(input), structuredClone(snapshot));
+  memory.set(
+    memoryKey(input),
+    structuredClone(snapshot),
+    memoryContextId(input),
+  );
 }
 
 export function resetResidentPlanPortfolioMemory(): void {
@@ -95,7 +100,7 @@ export function restoreResidentPlanPortfolioMemorySnapshot(
     });
   }
   assertResidentPlanPortfolio(snapshot, input.playerView.timingPoint);
-  memory.set(key, structuredClone(snapshot));
+  memory.set(key, structuredClone(snapshot), memoryContextId(input));
 }
 
 function bindingFailure(
@@ -134,11 +139,15 @@ function bindingFailure(
 }
 
 function memoryKey(input: AiDecisionInput): string {
-  const [decisionScope] = input.decisionId.split(":");
   return [
-    decisionScope || input.seed,
+    memoryContextId(input),
     input.side,
     input.profileId,
     RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
   ].join(":");
+}
+
+function memoryContextId(input: AiDecisionInput): string {
+  const [decisionScope] = input.decisionId.split(":");
+  return decisionScope || input.seed;
 }

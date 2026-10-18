@@ -30,6 +30,7 @@ export const USER_ERROR_MESSAGE_KEYS = {
   countdown_not_active: "countdownNotActive",
   countdown_not_due: "countdownNotDue",
   host_required: "hostRequired",
+  invalid_action_receipt: "invalidActionReceipt",
   invalid_token: "invalidToken",
   join_corp_deck_missing: "joinDeckMissing",
   join_deck_invalid: "joinDeckInvalid",

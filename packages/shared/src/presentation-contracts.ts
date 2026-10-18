@@ -28,6 +28,7 @@ export const API_USER_ERROR_CODES = [
   "countdown_not_active",
   "countdown_not_due",
   "host_required",
+  "invalid_action_receipt",
   "invalid_token",
   "join_corp_deck_missing",
   "join_deck_invalid",

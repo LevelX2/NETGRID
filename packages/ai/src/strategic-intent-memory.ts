@@ -1,4 +1,5 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
+import { MatchRuntimeMemory } from "./runtime/match-runtime-memory";
 import {
   STRATEGIC_INTENT_STATE_SCHEMA_VERSION,
   type StrategicIntentState,
@@ -30,10 +31,8 @@ type StrategicIntentInputMetadata = {
   };
 };
 
-const strategicIntentMemoryByKey = new Map<
-  string,
-  StrategicIntentMemorySnapshot
->();
+const strategicIntentMemoryByKey =
+  new MatchRuntimeMemory<StrategicIntentMemorySnapshot>();
 
 export function getStrategicIntentMemorySnapshot(
   input: AiDecisionInput,
@@ -78,7 +77,11 @@ export function rememberStrategicIntentState(
     deckSnapshotId: deckId(input, deckSnapshotId),
     ...(previous ? { previous } : {}),
   });
-  strategicIntentMemoryByKey.set(key, snapshot);
+  strategicIntentMemoryByKey.set(
+    key,
+    snapshot,
+    strategicIntentMemoryContextId(input),
+  );
   return snapshot;
 }
 
@@ -106,7 +109,11 @@ export function restoreStrategicIntentMemorySnapshot(
   ) {
     throw new Error("invalid_strategic_intent_memory_checkpoint");
   }
-  strategicIntentMemoryByKey.set(key, structuredClone(snapshot));
+  strategicIntentMemoryByKey.set(
+    key,
+    structuredClone(snapshot),
+    strategicIntentMemoryContextId(input),
+  );
 }
 
 export function redactedStrategicIntentMemoryFacts(

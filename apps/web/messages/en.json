@@ -280,7 +280,12 @@
       "hideMatchStatus": "Active game: hide status",
       "showMatchStatus": "Active game: show status",
       "cycleChronicle": "Chronicle: {current}. Switch to {next}.",
-      "chronicleWidths": {"off":"Off","wide":"Wide","medium":"Medium","narrow":"Narrow"},
+      "chronicleWidths": {
+        "off": "Off",
+        "wide": "Wide",
+        "medium": "Medium",
+        "narrow": "Narrow"
+      },
       "showRightRail": "Show right panel",
       "hideRightRail": "Hide right panel",
       "askAi": "Ask AI about my deck",
@@ -2584,6 +2589,7 @@
     }
   },
   "Errors": {
+    "invalidActionReceipt": "The stored action receipt is incomplete. Please check the server.",
     "staleState": "The game state is out of date. The current view has been loaded.",
     "staleMatch": "The match state is out of date. Please try again.",
     "wrongSide": "This action does not belong to your side.",

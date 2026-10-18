@@ -280,7 +280,12 @@
       "hideMatchStatus": "Aktives Spiel: Status ausblenden",
       "showMatchStatus": "Aktives Spiel: Status einblenden",
       "cycleChronicle": "Spielchronik: {current}. Weiter zu {next}.",
-      "chronicleWidths": {"off":"Aus","wide":"Breit","medium":"Mittel","narrow":"Schmal"},
+      "chronicleWidths": {
+        "off": "Aus",
+        "wide": "Breit",
+        "medium": "Mittel",
+        "narrow": "Schmal"
+      },
       "showRightRail": "Rechten Bereich einblenden",
       "hideRightRail": "Rechten Bereich ausblenden",
       "askAi": "KI für mein Deck fragen",
@@ -2592,6 +2597,7 @@
     }
   },
   "Errors": {
+    "invalidActionReceipt": "Die gespeicherte Aktionsquittung ist unvollständig. Bitte prüfe den Serverzustand.",
     "staleState": "Der Spielzustand ist veraltet. Die aktuelle Ansicht wurde geladen.",
     "staleMatch": "Der Matchzustand ist veraltet. Bitte versuche es erneut.",
     "wrongSide": "Diese Aktion gehört nicht zu deiner Seite.",

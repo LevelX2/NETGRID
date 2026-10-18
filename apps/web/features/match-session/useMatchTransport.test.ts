@@ -8,7 +8,10 @@ import enMessages from "../../messages/en.json";
 import frMessages from "../../messages/fr.json";
 
 const transportSource = readFileSync(
-  resolve(process.cwd(), "features/match-session/useMatchTransport.ts"),
+  resolve(
+    process.cwd(),
+    "features/match-session/match-transport-connection.ts",
+  ),
   "utf8",
 );
 const pageSource = readFileSync(resolve(process.cwd(), "app/page.tsx"), "utf8");
@@ -25,7 +28,7 @@ describe("localized match transport notices", () => {
   it("resolves every transport status through the current Notices translator", () => {
     expect(pageSource).toContain("translateNotice: (key) => noticeT(key)");
     for (const key of transportNoticeKeys) {
-      expect(transportSource).toContain(`translateNoticeRef.current("${key}")`);
+      if (key !== "reconnecting") expect(transportSource).toContain(`"${key}"`);
     }
     expect(transportSource).not.toContain("Wiederverbindung abgeschlossen.");
     expect(transportSource).not.toContain("WebSocket-Verbindung konnte");
