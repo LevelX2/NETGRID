@@ -131,6 +131,16 @@ Folgerun darf deshalb keinen ausführbaren Release-Head behaupten. Die
 Runtime übernimmt den konkreten Ausschluss vom Central-Owner, statt die
 Runsperre ungeprüft zu lösen oder die LegalAction ownerlos zu lassen.
 
+Der Defense-Owner veröffentlicht die LegalAction-IDs seines aktuell
+ausführbaren produktiven Heads aus derselben Phasen- und Quoteprüfung wie
+Discovery. Die generische Handentwicklung darf diese Aktionen nicht wegen
+eines zusätzlichen Draw-Effekts als global unproduktiv klassifizieren. Das
+gilt auch bei bereits vollem Handpuffer und einer von der Engine erlaubten
+Zahlung mit zweckgebundenen Credits. Spätere Defense-Phasen, ungültige
+Fundingbindungen und bloßes Aufgeben von Aktionen erhalten dadurch keine
+produktive Zuständigkeit; bestätigte schadensbehaftete Draws bleiben
+ausgeschlossen.
+
 Mögliche Phasen:
 
 ```text

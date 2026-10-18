@@ -223,6 +223,7 @@ import { runnerRunFundingParentHasCurrentNeed } from "../plans/runner-funding-pa
 import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
 import {
   runnerDefenseDeferredHandBufferDispositions,
+  runnerDefenseCurrentHeadActionIds,
   runnerDefenseReactionReserveIsCurrentPhase,
   runnerDefenseTagClearFundingIsCurrentPhase,
   runnerDefensePersistentCounterFundingIsCurrentPhase,
@@ -2253,6 +2254,12 @@ export function runnerActionDispositions(
       .map((candidate) => candidate.actionId),
   );
   const specializedPlanOwnedActionIds = new Set([
+    ...runnerDefenseCurrentHeadActionIds({
+      input,
+      actionCandidates: candidates,
+      signals: domain.defense,
+      actionDispositions: dispositions,
+    }),
     ...boundStrategicExchangeFundingActionIds,
     ...domain.creditBanks.flatMap((signal) => [
       ...signal.actionIds,

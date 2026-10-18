@@ -21,45 +21,13 @@ export function createRunnerDefenseModule(): PlanModule {
       const signals = runnerPlanDomain<{ defense: RunnerDefenseSignals }>(
         context,
       ).defense;
-      const invalidTagClearFundingContract =
-        signals.tagClearFundingNeed !== undefined &&
-        !validRunnerTagClearFundingNeed(
-          signals.tagClearFundingNeed,
-          context.input.playerView.stateVersion,
-        );
-      const invalidReactionReserveContract =
-        signals.reactionReserveNeed !== undefined &&
-        !validRunnerDefenseFundingNeed(
-          signals.reactionReserveNeed,
-          context.input.playerView.stateVersion,
-        );
-      const phase = invalidTagClearFundingContract
-        ? "fund_tag_clear"
-        : signals.persistentHazardCounterFundingNeed !== undefined &&
-            !validPersistentHazardCounterFundingNeed(signals.persistentHazardCounterFundingNeed,
-              context.input, context.actionCandidates)
-          ? "fund_persistent_hazard_counter"
-        : invalidReactionReserveContract
-          ? "build_reaction_reserve"
-          : defensePhase(
-              context.actionCandidates,
-              context.input.playerView.stateVersion,
-              signals,
-              context.actionDispositions,
-            );
+      const {
+        phase,
+        candidates,
+        invalidTagClearFundingContract,
+        invalidReactionReserveContract,
+      } = currentDefenseHead({ ...context, signals });
       if (!phase) return [];
-      const candidates =
-        invalidTagClearFundingContract || invalidReactionReserveContract ||
-        (signals.persistentHazardCounterFundingNeed !== undefined &&
-          !validPersistentHazardCounterFundingNeed(signals.persistentHazardCounterFundingNeed,
-            context.input, context.actionCandidates))
-          ? []
-          : defenseCandidates(
-              context.actionCandidates,
-              phase,
-              signals,
-              context.actionDispositions,
-            );
       return [
         proposal({
           moduleId: "runner.defense_and_recovery",
@@ -183,6 +151,83 @@ export function createRunnerDefenseModule(): PlanModule {
       };
     },
   };
+}
+
+type DefenseHeadContext = {
+  input: AiDecisionInput;
+  actionCandidates: readonly ActionSemanticCandidate[];
+  signals: RunnerDefenseSignals;
+  actionDispositions?: readonly PlanActionDisposition[];
+};
+
+function currentDefenseHead(context: DefenseHeadContext) {
+  const { signals } = context;
+  const invalidTagClearFundingContract =
+    signals.tagClearFundingNeed !== undefined &&
+    !validRunnerTagClearFundingNeed(
+      signals.tagClearFundingNeed,
+      context.input.playerView.stateVersion,
+    );
+  const invalidReactionReserveContract =
+    signals.reactionReserveNeed !== undefined &&
+    !validRunnerDefenseFundingNeed(
+      signals.reactionReserveNeed,
+      context.input.playerView.stateVersion,
+    );
+  const phase = invalidTagClearFundingContract
+    ? "fund_tag_clear"
+    : signals.persistentHazardCounterFundingNeed !== undefined &&
+        !validPersistentHazardCounterFundingNeed(
+          signals.persistentHazardCounterFundingNeed,
+          context.input,
+          context.actionCandidates,
+        )
+      ? "fund_persistent_hazard_counter"
+      : invalidReactionReserveContract
+        ? "build_reaction_reserve"
+        : defensePhase(
+            context.actionCandidates,
+            context.input.playerView.stateVersion,
+            signals,
+            context.actionDispositions,
+          );
+  if (!phase)
+    return {
+      phase,
+      candidates: [],
+      invalidTagClearFundingContract,
+      invalidReactionReserveContract,
+    };
+  const candidates =
+    invalidTagClearFundingContract ||
+    invalidReactionReserveContract ||
+    (signals.persistentHazardCounterFundingNeed !== undefined &&
+      !validPersistentHazardCounterFundingNeed(
+        signals.persistentHazardCounterFundingNeed,
+        context.input,
+        context.actionCandidates,
+      ))
+      ? []
+      : defenseCandidates(
+          context.actionCandidates,
+          phase,
+          signals,
+          context.actionDispositions,
+        );
+  return {
+    phase,
+    candidates,
+    invalidTagClearFundingContract,
+    invalidReactionReserveContract,
+  };
+}
+
+export function runnerDefenseCurrentHeadActionIds(
+  context: DefenseHeadContext,
+): string[] {
+  const { phase, candidates } = currentDefenseHead(context);
+  if (!phase || phase.startsWith("forgo_")) return [];
+  return candidates.map((entry) => entry.candidate.actionId);
 }
 
 function defensePhase(
