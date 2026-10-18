@@ -77,6 +77,14 @@ vergleichen anschließend die vollständigen Parents; jede Ausführung bindet
 weiter genau eine aktuelle LegalAction und ihre Choices. Aktionsklassifikation
 und Materialisierung erhalten damit dieselben gequoteten Konversionsfakten.
 
+Nach der Asseterhaltungsprüfung verdrängt eine vollständig gequotete,
+ausführbare Konversion einer HQ-Agenda in einem vorbereiteten Remote auch
+die entsprechende Konversionsvariante in einem neu zu eröffnenden Remote.
+Diese bereits für direkte Installationen geltende Zielbindung wird damit
+auch vor einem gemeinsamen Beschleunigungsschritt erhalten. Andere
+Zielagenden bleiben verfügbar; ein zur Asseterhaltung benötigter neuer
+Remote wird nicht verdrängt.
+
 Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
 Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
 Eine mit aktueller Engine-Horizontquote früher abschließbare Agenda verdrängt

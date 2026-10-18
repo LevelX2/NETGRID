@@ -27,6 +27,60 @@ import {
 } from "./turn-projection";
 
 describe("deterministic remainder-turn search", () => {
+  it.each([0, 4, 7])(
+    "prefers the bound module head at equal value regardless of the agenda resource frame: %s",
+    (points) => {
+      const setup = searchSetup();
+      setup.frame.ownAgendaPoints = { minimum: points, maximum: points };
+      const preferred = offer(setup, "preferred", {
+        root: "root:preferred",
+        milestone: "paid",
+        economy: 5,
+      });
+      const other = offer(setup, "other", {
+        root: "root:other",
+        milestone: "paid",
+        economy: 5,
+      });
+      preferred.moduleCandidatePreferenceRank = 2;
+      other.moduleCandidatePreferenceRank = 1;
+      const result = searchDeterministicRemainderTurnPlans({
+        entryFrame: setup.frame,
+        offers: [other, preferred],
+        budget: { maximumDepth: 1 },
+      });
+      expect(
+        result.lines.find((line) => line.lineId === result.selectedLineId)
+          ?.steps[0]?.candidateId,
+      ).toBe(preferred.head.candidateId);
+    },
+  );
+
+  it("keeps a stronger value ahead of the exact module preference", () => {
+    const setup = searchSetup();
+    const preferred = offer(setup, "preferred", {
+      root: "root:preferred",
+      milestone: "paid",
+      economy: 5,
+    });
+    const stronger = offer(setup, "stronger", {
+      root: "root:stronger",
+      milestone: "paid",
+      economy: 6,
+    });
+    preferred.moduleCandidatePreferenceRank = 2;
+    stronger.moduleCandidatePreferenceRank = 1;
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [preferred, stronger],
+      budget: { maximumDepth: 1 },
+    });
+    expect(
+      result.lines.find((line) => line.lineId === result.selectedLineId)
+        ?.steps[0]?.candidateId,
+    ).toBe(stronger.head.candidateId);
+  });
+
   it.each([1, 3, 4, undefined, -1, 0.5])(
     "accounts for a known agenda payment of %s without dropping its price",
     (cost) => {

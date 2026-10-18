@@ -101,59 +101,63 @@ describe("red contract: persistent Corp Ambush root and exact support children",
     expect(fundingSignal).toHaveProperty("parentPriorityClass", "P5");
   });
 
-  it("executes the exact funded install as a flexible support child of the same Ambush root", () => {
-    resetResidentPlanPortfolioMemory();
-    const trap = vacantSoulkiller();
-    const install = installAmbush(trap, "new_remote", 4);
-    const input = corpInput([install, gainCredit()], [trap]);
-    input.playerView.own.credits = 4;
+  it.each([0, 1, 4, 6])(
+    "executes the exact funded install as a flexible support child of the same Ambush root at %s agenda points",
+    (agendaPoints) => {
+      resetResidentPlanPortfolioMemory();
+      const trap = vacantSoulkiller();
+      const install = installAmbush(trap, "new_remote", 4);
+      const input = corpInput([install, gainCredit()], [trap]);
+      input.playerView.own.credits = 4;
+      input.playerView.own.agendaPoints = agendaPoints;
 
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+      const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
-    expect(decision).toMatchObject({
-      actionId: install.actionId,
-      reasonCode: "plan_first.corp.ambush_and_bluff",
-      fallbackUsed: false,
-    });
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        `plan_first_root:${AMBUSH_ROOT_ID}`,
-        `plan_priority_delegated_from:${AMBUSH_ROOT_ID}`,
-        `plan_priority_need:${AMBUSH_SETUP_NEED_ID}`,
-      ]),
-    );
+      expect(decision).toMatchObject({
+        actionId: install.actionId,
+        reasonCode: "plan_first.corp.ambush_and_bluff",
+        fallbackUsed: false,
+      });
+      expect(decision.evidence).toEqual(
+        expect.arrayContaining([
+          `plan_first_root:${AMBUSH_ROOT_ID}`,
+          `plan_priority_delegated_from:${AMBUSH_ROOT_ID}`,
+          `plan_priority_need:${AMBUSH_SETUP_NEED_ID}`,
+        ]),
+      );
 
-    const portfolio = residentPlanPortfolioSnapshot(input);
-    expect(portfolio?.rootForegroundInstanceId).toBe(AMBUSH_ROOT_ID);
-    expect(
-      portfolio?.instances.find(
-        (instance) => instance.instanceId === AMBUSH_ROOT_ID,
-      ),
-    ).toMatchObject({
-      persistencePolicy: "sticky_goal",
-      openNeedIds: [AMBUSH_SETUP_NEED_ID],
-    });
-    const setupChild = portfolio?.instances.find(
-      (instance) =>
-        instance.parentInstanceId === AMBUSH_ROOT_ID &&
-        instance.parentNeedId === AMBUSH_SETUP_NEED_ID,
-    );
-    expect(setupChild).toMatchObject({
-      moduleId: "corp.ambush_and_bluff",
-      persistencePolicy: "flexible_support",
-      parentInstanceId: AMBUSH_ROOT_ID,
-      parentNeedId: AMBUSH_SETUP_NEED_ID,
-      moduleState: {
-        kind: "ambush_setup",
-        signal: {
-          sourceInstanceId: trap.instanceId,
-          serverId: "new_remote",
-          actionIds: [install.actionId],
+      const portfolio = residentPlanPortfolioSnapshot(input);
+      expect(portfolio?.rootForegroundInstanceId).toBe(AMBUSH_ROOT_ID);
+      expect(
+        portfolio?.instances.find(
+          (instance) => instance.instanceId === AMBUSH_ROOT_ID,
+        ),
+      ).toMatchObject({
+        persistencePolicy: "sticky_goal",
+        openNeedIds: [AMBUSH_SETUP_NEED_ID],
+      });
+      const setupChild = portfolio?.instances.find(
+        (instance) =>
+          instance.parentInstanceId === AMBUSH_ROOT_ID &&
+          instance.parentNeedId === AMBUSH_SETUP_NEED_ID,
+      );
+      expect(setupChild).toMatchObject({
+        moduleId: "corp.ambush_and_bluff",
+        persistencePolicy: "flexible_support",
+        parentInstanceId: AMBUSH_ROOT_ID,
+        parentNeedId: AMBUSH_SETUP_NEED_ID,
+        moduleState: {
+          kind: "ambush_setup",
+          signal: {
+            sourceInstanceId: trap.instanceId,
+            serverId: "new_remote",
+            actionIds: [install.actionId],
+          },
         },
-      },
-    });
-    expect(portfolio?.executorInstanceId).toBe(setupChild?.instanceId);
-  });
+      });
+      expect(portfolio?.executorInstanceId).toBe(setupChild?.instanceId);
+    },
+  );
 
   it("keeps the resident Ambush root when its current Engine route quote disappears while another regular plan continues", () => {
     resetResidentPlanPortfolioMemory();

@@ -506,6 +506,15 @@ fachlich einen unveränderten Punktestand. Der native Nachweis aus Paarung
 536, G27/D297, bindet den zuvor verworfenen punktbezahlten Economy-Rez;
 Gegenproben verhindern doppelte Punktausgabe und negative Restbestände.
 
+Bei ansonsten gleichwertigen Restzuglinien erhält dieselbe aktuelle
+LegalAction eine Präferenz für den bereits fachlich ausgewählten exakten
+Executor. Die Aktions-ID allein reicht dafür nicht: Root, Supportchild und
+verschiedene Score-Parents können dieselbe Aktion materialisieren. Ein
+veränderter Ressourcen-Fingerprint darf diese Bindung nicht über einen
+lexikografischen Hashgleichstand austauschen. Eine tatsächlich höher
+bewertete ganze Restzuglinie behält ihren Vorrang vor dieser nachgeordneten
+Präferenz.
+
 Das Action-Capacity-Ledger bildet nicht nur normale Klicks ab, sondern:
 
 - unrestricted und eingeschränkte Zusatzaktionen;

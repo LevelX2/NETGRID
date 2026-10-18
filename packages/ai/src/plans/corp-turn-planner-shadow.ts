@@ -299,6 +299,7 @@ export function buildCorpTurnPlannerShadow(params: {
     ),
     preferredRootCandidateIds,
     moduleSelectedActionId: params.runtimeResult.route.head.actionId,
+    moduleSelectedPlanInstanceId: params.runtimeResult.route.planInstanceId,
   });
   const search = searchDeterministicRemainderTurnPlans({
     entryFrame,
@@ -1554,6 +1555,7 @@ function offersForHeads(params: {
   urgentExactScoreRootAvailable: boolean;
   preferredRootCandidateIds: ReadonlySet<string>;
   moduleSelectedActionId: string;
+  moduleSelectedPlanInstanceId: string;
 }): TurnRemainderSearchOffer[] {
   const candidateIdsByActionId = new Map<string, string[]>();
   for (const head of params.heads) {
@@ -1605,7 +1607,9 @@ function offersForHeads(params: {
           : 0,
         moduleCandidatePreferenceRank:
           head.currentBinding.actionId === params.moduleSelectedActionId
-            ? 1
+            ? head.executorPlanInstanceId === params.moduleSelectedPlanInstanceId
+              ? 2
+              : 1
             : 0,
         obligationSignature:
           priorityCoverage.requiredObligationIds.join(",") || "no_urgent",
