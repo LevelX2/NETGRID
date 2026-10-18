@@ -1856,6 +1856,14 @@ Choices an die ausgewählte Action und StateVersion. Der Owner konsumiert
 eng typisierte Dienste aus `run-window-services.ts`; er importiert keinen
 Runtime-Dispatcher und keine Planregistry zurück.
 
+Die Vacuum-Link-Fortsetzung erhält auch die bereits vom Runstart-Owner
+zertifizierten obligatorischen Runstart-Choices. Deren Ereignisse liegen nach
+der ausgewählten Runstartaktion und höchstens am gespeicherten
+`continuedThroughStateVersion`. Der fortgesetzte Run behält dieselbe Root,
+denselben Executor, Lease, Server und die lückenlose StateVersion-Kette.
+Eine beliebige spätere Choice, ein fremder Actor/Server oder ein fehlendes
+Runstart-Zertifikat wird dadurch nicht als Runfortsetzung zugelassen.
+
 Der Adapter `runner-access-trash-impact.ts` bindet die gemeinsame fachliche
 Trashbewertung unter `access/` an die angebotene Action und deren Kostenquote.
 Runpfad-Analyse und Fakten bleiben geteilte Dienste. Die Wahl des ursprünglichen
