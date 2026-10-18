@@ -1924,6 +1924,14 @@ Assessment und Materialisierung aus. `economy-routes.ts` bindet aktuelle
 Actions, Kosten und Auszahlungen; Asset-Payback und installierte Erträge
 liegen ebenfalls im Owner. Typen stehen in `economy-types.ts`.
 
+Eine vollständig Engine-gequotete unmittelbare Auszahlung mit bekannten
+Agenda-Punktkosten behält ihren vorhandenen Economy-Owner. Die nachfolgende
+Restzugsuche projiziert diesen Preis gegen den eigenen aktuellen und bereits
+verbrauchten Punktestand, statt ihn als unbekannte Zusatzkosten zu verwerfen
+oder zu übergehen. Pflichtzahlungen behalten ihren Credit-Schutz. Andere
+ungeklärte Zusatzkosten erhalten dadurch keine Freigabe; die nächste reale
+LegalAction wird nach dem Schritt weiterhin neu angefordert.
+
 Score-Reserve und Defense-Funding bleiben fremde Fachverträge in
 `corp/score/corp-score-funding.ts`, `plans/corp-defense-funding-contract.ts`
 und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle

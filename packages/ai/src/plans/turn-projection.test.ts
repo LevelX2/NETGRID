@@ -20,6 +20,33 @@ import {
 } from "./turn-projection";
 
 describe("turn projection", () => {
+  it("deducts certified agenda costs and rejects a payment below zero", () => {
+    const input = decisionInput();
+    input.playerView.own.agendaPoints = 1;
+    const frame = projectedFrame(input);
+    const payout = candidate({ netCredits: 12, netHand: 0, netActions: 0 });
+    payout.costProfile.additionalCosts = ["agendaPointCost"];
+    payout.costProfile.agendaPointCost = 1;
+    const delta = certifiedTurnProjectionDeltaFromCandidate({
+      frame,
+      candidate: payout,
+    });
+    expect(
+      applyCertifiedTurnProjectionDelta(frame, delta).ownAgendaPoints,
+    ).toEqual({ minimum: 0, maximum: 0 });
+    expect(frame.ownAgendaPoints).toEqual({ minimum: 1, maximum: 1 });
+    expect(() =>
+      applyCertifiedTurnProjectionDelta(frame, {
+        ...delta,
+        agendaPointDelta: { minimum: -2, maximum: -2 },
+      }),
+    ).toThrow(/invalid_agenda_point_payment/);
+    delete payout.costProfile.agendaPointCost;
+    expect(() =>
+      certifiedTurnProjectionDeltaFromCandidate({ frame, candidate: payout }),
+    ).toThrow(/agenda_point_cost_not_exact/);
+  });
+
   it("repeats the same frame and fingerprint for the same planning input", () => {
     const first = projectedFrame(decisionInput());
     const repeated = projectedFrame(decisionInput());

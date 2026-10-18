@@ -114,6 +114,7 @@ export type ProjectedDecisionFrame = {
     restrictedTokens: ProjectedRestrictedActionToken[];
   };
   ownCredits: ProjectionValueRange;
+  ownAgendaPoints: ProjectionValueRange;
   ownHand: {
     count: ProjectionValueRange;
     capacity: number;
@@ -164,6 +165,8 @@ export type TurnProjectionDelta = {
     amount: number;
   }>;
   creditDelta: ProjectionValueRange;
+  /** Omitted when the certified step leaves agenda points unchanged. */
+  agendaPointDelta?: ProjectionValueRange;
   handCountDelta: ProjectionValueRange;
   knownZoneMoves: Array<{
     instanceId: string;
@@ -237,6 +240,7 @@ export function buildProjectedDecisionFrame(params: {
       restrictedTokens: [],
     },
     ownCredits: exactRange(params.input.playerView.own.credits),
+    ownAgendaPoints: exactRange(params.input.playerView.own.agendaPoints),
     ownHand: {
       count: exactRange(ownHandCards.length),
       capacity: params.input.playerView.own.maxHandSize,
@@ -327,6 +331,9 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
         ? (economy.netLiquidCreditGain ?? 0)
         : 0) - exactCreditCost,
     ),
+    ...(candidate.costProfile.additionalCosts.includes("agendaPointCost")
+      ? { agendaPointDelta: exactRange(-exactAgendaPointCost(candidate)) }
+      : {}),
     handCountDelta:
       exactEconomy && Number.isSafeInteger(economy.netHandDelta)
         ? exactRange(economy.netHandDelta)
@@ -403,6 +410,9 @@ export function applyCertifiedTurnProjectionDelta(
     ownCredits: nonNegativeRange(
       addRanges(frame.ownCredits, delta.creditDelta),
     ),
+    ownAgendaPoints: delta.agendaPointDelta
+      ? addRanges(frame.ownAgendaPoints, delta.agendaPointDelta)
+      : structuredClone(frame.ownAgendaPoints),
     ownHand: {
       ...structuredClone(frame.ownHand),
       count: nonNegativeRange(ownHandCount),
@@ -543,6 +553,21 @@ function validateProjectionDelta(
     }
   }
   validateRestrictedCapacityDelta(frame, delta, issues);
+  if (delta.agendaPointDelta) {
+    try {
+      validateRange(delta.agendaPointDelta, "agenda_point_delta");
+      if (
+        !Number.isSafeInteger(delta.agendaPointDelta.minimum) ||
+        !Number.isSafeInteger(delta.agendaPointDelta.maximum) ||
+        frame.ownAgendaPoints.minimum + delta.agendaPointDelta.minimum < 0
+      ) {
+        issues.push("invalid_agenda_point_payment");
+      }
+    } catch (error) {
+      if (error instanceof TurnProjectionError) issues.push(...error.issues);
+      else throw error;
+    }
+  }
   const zoneInstances = new Map(
     frame.ownKnownZones.map((zone) => [zone.zoneId, new Set(zone.instanceIds)]),
   );
@@ -557,6 +582,20 @@ function validateProjectionDelta(
     }
   }
   return issues;
+}
+
+function exactAgendaPointCost(candidate: ActionSemanticCandidate): number {
+  const cost = candidate.costProfile.agendaPointCost;
+  if (
+    candidate.costProfile.costKnownStatus !== "known" ||
+    !Number.isSafeInteger(cost) ||
+    (cost as number) < 0
+  ) {
+    throw new TurnProjectionError("candidate_not_projectable", [
+      "agenda_point_cost_not_exact",
+    ]);
+  }
+  return cost as number;
 }
 
 function validateRestrictedCapacityDelta(
