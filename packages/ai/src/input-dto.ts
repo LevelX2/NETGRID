@@ -3518,6 +3518,7 @@ function sanitizeVisibleChoiceRequest(
         choice.side === "runner" &&
         choice.source === "v121.replacement.damage" &&
         (option.metadata?.optionKind === "flatline_replacement_from_grip" ||
+          option.metadata?.optionKind === "play_identity_donor" ||
           option.metadata?.optionKind === "do_not_replace")
       ) {
         metadata = {

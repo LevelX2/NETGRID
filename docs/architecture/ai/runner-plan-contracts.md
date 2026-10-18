@@ -1568,6 +1568,16 @@ LegalAction. Der Resolver validiert ausschließlich diese Bindung. Eine
 unbekannte oder widersprüchliche Ersatzwirkung scheitert sichtbar; sie wird
 nicht aus dem technischen Optionsnamen abgeleitet (SP-508).
 
+Dieselbe Grip-Bindung umfasst eine von der Engine angebotene reaktive
+Meat-Schadensersetzung mit Bad-Publicity-Konversion während des Corpzugs,
+auch wenn der aktuelle Schaden noch nicht tödlich wäre. Die side-sichere
+DTO-Projektion erhält deren semantischen Optionstyp; der Defense-Owner
+verifiziert die eigene Quellinstanz und die kanonischen Präventions- und
+Konversionshints, bevor er `replace_damage_from_grip` materialisiert.
+Der Resolver übernimmt nur diese aktuelle Bindung. Eine angebotene kostenlose
+vollständige Ersatzwirkung benötigt keinen geratenen Schadenswert aus einem
+technischen Choice-Namen. Unbekannte Ersatzwirkungen bleiben fail-closed.
+
 Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
 `defense-signals.ts` bündelt Schutzinstallationen, Handpuffer, Tag-Clear-
 Funding und Reaktionsreserve. `defense-plan-module.ts` besitzt Phasenwahl,

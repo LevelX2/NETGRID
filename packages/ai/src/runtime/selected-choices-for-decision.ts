@@ -1,8 +1,8 @@
 import { runnerDevelopmentSearchChoiceBinding } from "../runner/hand-development/development-choice-bindings";
 import {
-  isRunnerTerminalGripReplacementWindow,
-  selectedRunnerTerminalDamageReplacement,
-} from "../runner/defense-recovery/terminal-damage-replacement";
+  isRunnerGripDamageReplacementWindow,
+  selectedRunnerGripDamageReplacement,
+} from "../runner/defense-recovery/grip-damage-replacement";
 import { selectedCorpRdReorderChoice } from "../corp/hand-management/rd-reorder-choice";
 import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
@@ -533,10 +533,10 @@ export function selectedChoicesForDecision(
       selectedOptionIds,
       resolverId,
     );
-  if (isRunnerTerminalGripReplacementWindow(input))
+  if (isRunnerGripDamageReplacementWindow(input))
     return resolved(
-      selectedRunnerTerminalDamageReplacement(input, action, currentPortfolio),
-      "bound_runner_terminal_damage_replacement",
+      selectedRunnerGripDamageReplacement(input, action, currentPortfolio),
+      "bound_runner_grip_damage_replacement",
     );
   if (choice.source.startsWith("v1922.corp_rd_arrange_top5:"))
     return resolved(

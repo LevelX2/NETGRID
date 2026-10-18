@@ -17,7 +17,9 @@ import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 it("preserves a forced Engine choice with no offered grip replacement", () => {
   const input = native(),
     choice = input.playerView.pendingChoice!;
-  choice.options = choice.options.filter((option: {id: string}) => option.id === "pass");
+  choice.options = choice.options.filter(
+    (option: { id: string }) => option.id === "pass",
+  );
   input.legalActions[0]!.choiceRequirements![0]!.optionIds = ["pass"];
   expect(chooseAiAction(input).selectedChoices).toEqual({
     choiceId: choice.choiceId,
@@ -57,7 +59,8 @@ it("binds the native lethal damage replacement to the defense owner", () => {
     rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
     leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
     route: {
-      stepId: "plan:runner.defense_and_recovery:runner:replace_terminal_damage",
+      stepId:
+        "plan:runner.defense_and_recovery:runner:replace_damage_from_grip",
     },
   });
 });

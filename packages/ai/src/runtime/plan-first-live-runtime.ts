@@ -1,4 +1,4 @@
-import { isRunnerTerminalGripReplacementWindow } from "../runner/defense-recovery/terminal-damage-replacement";
+import { isRunnerGripDamageReplacementWindow } from "../runner/defense-recovery/grip-damage-replacement";
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
   bindSelectedRunnerCoverageMultiSearchChoice,
@@ -1275,7 +1275,7 @@ function runnerTransientPlanSignals(
     defense.handSize < defense.minimumHandBuffer ||
     defense.forgoUnsafeRunCapacity ||
     defense.discardChoiceBinding !== undefined ||
-    defense.terminalDamageReplacementBinding !== undefined ||
+    defense.gripDamageReplacementBinding !== undefined ||
     defense.reactionReserveNeed !== undefined ||
     defense.persistentHazardCounterRemovalAvailable ||
     defense.persistentHazardCounterFundingNeed !== undefined ||
@@ -2669,8 +2669,8 @@ export function runnerActionDispositions(
     ...(domain.defense.discardChoiceBinding
       ? [domain.defense.discardChoiceBinding.actionId]
       : []),
-    ...(domain.defense.terminalDamageReplacementBinding
-      ? [domain.defense.terminalDamageReplacementBinding.actionId]
+    ...(domain.defense.gripDamageReplacementBinding
+      ? [domain.defense.gripDamageReplacementBinding.actionId]
       : []),
     ...domain.creditBanks.flatMap((signal) => signal.actionIds),
     ...(domain.recurringEconomy ?? []).flatMap((signal) => signal.actionIds),
@@ -3872,7 +3872,7 @@ function recentServerAccessCount(
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
-  if (isRunnerTerminalGripReplacementWindow(context.input)) return undefined;
+  if (isRunnerGripDamageReplacementWindow(context.input)) return undefined;
   if (
     context.input.playerView.pendingChoice?.source.startsWith(
       "v1922.corp_rd_arrange_top5:",

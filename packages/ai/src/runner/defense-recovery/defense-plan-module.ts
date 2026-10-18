@@ -192,8 +192,8 @@ function defensePhase(
   actionDispositions?: readonly PlanActionDisposition[],
 ): DefenseState["phase"] | undefined {
   const openPhases: DefenseState["phase"][] = [];
-  if (signals.terminalDamageReplacementBinding)
-    openPhases.push("replace_terminal_damage");
+  if (signals.gripDamageReplacementBinding)
+    openPhases.push("replace_damage_from_grip");
   if (signals.discardChoiceBinding) openPhases.push("discard_window");
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
@@ -298,9 +298,9 @@ function defenseCandidates(
       }
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
-      if (phase === "replace_terminal_damage")
+      if (phase === "replace_damage_from_grip")
         return (
-          signals.terminalDamageReplacementBinding?.actionId ===
+          signals.gripDamageReplacementBinding?.actionId ===
           candidate.actionId
         );
       if (
@@ -463,9 +463,9 @@ function defenseCapability(
   phase: DefenseState["phase"],
   candidates: PlanMaterialization["candidates"],
 ): PlanRouteStepCapability {
-  if (phase === "replace_terminal_damage")
+  if (phase === "replace_damage_from_grip")
     return {
-      capabilityId: "replace_terminal_damage",
+      capabilityId: "replace_damage_from_grip",
       semanticActionTypes: ["choice.resolve"],
     };
   if (phase === "discard_window")
@@ -551,7 +551,7 @@ function defensePhaseValue(
   phase: DefenseState["phase"],
   signals: RunnerDefenseSignals,
 ): number {
-  if (phase === "replace_terminal_damage") return 10_000;
+  if (phase === "replace_damage_from_grip") return 10_000;
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
   if (phase === "install_defense_support") return 60;
@@ -569,7 +569,7 @@ function defensePhaseValue(
 function defensePriorityClass(
   signals: RunnerDefenseSignals,
 ): "P2" | "P3" | "P4" | "P5" {
-  if (signals.terminalDamageReplacementBinding) return "P2";
+  if (signals.gripDamageReplacementBinding) return "P2";
   if (signals.discardChoiceBinding) return "P2";
   if (
     signals.pendingDamage > 0 ||

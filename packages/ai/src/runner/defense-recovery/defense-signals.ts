@@ -1,5 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
-import { runnerTerminalDamageReplacementBinding } from "./terminal-damage-replacement";
+import { runnerGripDamageReplacementBinding } from "./grip-damage-replacement";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -445,8 +445,8 @@ export function buildRunnerDefenseSignals(params: {
           evidenceCode: "runner_damage_locked_hand_reaction_reserve",
         }
       : undefined;
-  const terminalDamageReplacementBinding =
-    runnerTerminalDamageReplacementBinding(input);
+  const gripDamageReplacementBinding =
+    runnerGripDamageReplacementBinding(input);
   const defense: RunnerDefenseSignals = {
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,
@@ -494,8 +494,8 @@ export function buildRunnerDefenseSignals(params: {
     forgoExhaustedStandardCapacity,
     forgoTerminalDeckPressureCapacity,
     ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
-    ...(terminalDamageReplacementBinding
-      ? { terminalDamageReplacementBinding }
+    ...(gripDamageReplacementBinding
+      ? { gripDamageReplacementBinding }
       : {}),
     ...(tagClearFundingNeed ? { tagClearFundingNeed } : {}),
     ...(persistentHazardCounterFundingNeed ? { persistentHazardCounterFundingNeed } : {}),
