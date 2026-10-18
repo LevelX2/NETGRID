@@ -31186,6 +31186,8 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
       planningStateIdentity: buildPlanningStateIdentity(second),
     });
 
+    // The completed new-remote setup leaf installed the source. The module's
+    // current support phase now executes under that same resident Ambush root.
     expect(context.chooseSemanticRuntimeAction(second, {})).toMatchObject({
       actionId: installSupport.actionId,
       reasonCode: "plan_first.corp.ambush_and_bluff",
@@ -31193,7 +31195,12 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId: installedPortfolio?.rootForegroundInstanceId,
-          leafExecutorInstanceId: installedPortfolio?.executorInstanceId,
+          leafExecutorInstanceId: installedPortfolio?.rootForegroundInstanceId,
+          route: {
+            actionId: installSupport.actionId,
+            stateVersion: 2,
+            planInstanceId: installedPortfolio?.rootForegroundInstanceId,
+          },
         },
       },
     });
