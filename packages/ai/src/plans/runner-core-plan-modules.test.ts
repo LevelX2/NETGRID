@@ -1903,6 +1903,11 @@ describe("Runner core plan modules", () => {
       "damage.prevent_net",
     );
     const clearTag = candidate("clear", "remove_tag", "tag.remove");
+    clearTag.tagEffectProfile = {
+      kind: "remove_tags", recipient: "runner", mode: "amount", amount: 1,
+      currentTagReduction: 1, acuteTagRemoval: true,
+      source: "legal_action_type", evidence: ["Basic remove_tag contract"],
+    };
     const clearHazardCounter = candidate(
       "clear-mastiff-counter",
       "trigger_ability",

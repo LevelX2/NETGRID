@@ -4,8 +4,9 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { currentRuleTagRemovalCounterInput } from "./current-rule-tag-removal-counter.test-support";
 
-function replay(game: number, number: number) {
+function replay(game: number, number: number, currentRuleCountermodel = false) {
   const cp = JSON.parse(
     readFileSync(
       new URL(
@@ -18,7 +19,14 @@ function replay(game: number, number: number) {
   expect(Object.values(cp.validation).every((value) => value === true)).toBe(
     true,
   );
-  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  let input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  if (currentRuleCountermodel) {
+    // The stored snapshot predates the quantity-preserving DTO. Keep it
+    // immutable and explicitly distinguish this current-rule countermodel.
+    expect(() => chooseAiAction(input)).toThrow(/missing_action_semantics/);
+    resetResidentPlanPortfolioMemory();
+    input = currentRuleTagRemovalCounterInput(cp.input);
+  }
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
@@ -45,7 +53,7 @@ it.each([
 ])(
   "preserves feasible same-turn funding, buffer repair and the exact parent: G%i D%i",
   (game, number, amount) => {
-    const decision = replay(game, number);
+    const decision = replay(game, number, game === 33);
     const copy = game === 33 ? 2 : 1;
     expect(decision.actionId).toBe(
       `runner.play_event.runner_onr_classic_036_do-the-drine_${copy}.runner_onr_classic_036_do-the-drine_${copy}.${amount}`,
