@@ -271,26 +271,32 @@ export function buildCorpTurnPlannerShadow(params: {
     stateIdentity,
     turnKey: params.context.turnKey,
   });
+  const obligationPreservingHeads = heads.filter((head) => {
+    const candidate = params.context.actionCandidates.find(
+      (c) => c.actionId === head.currentBinding.actionId,
+    );
+    return (
+      candidate !== undefined &&
+      candidatePreservesMandatoryCreditObligation(
+        candidate,
+        input.playerView.own.credits,
+        creditObligationAfterHead(input, head, candidate),
+      )
+    );
+  });
   const urgentPriorityClass = highestUrgentPriorityClass(
-    heads.filter((head) => {
-      const candidate = params.context.actionCandidates.find(
-        (c) => c.actionId === head.currentBinding.actionId,
-      );
-      return (
-        candidate !== undefined &&
-        candidatePreservesMandatoryCreditObligation(
-          candidate,
-          input.playerView.own.credits,
-          creditObligationAfterHead(input, head, candidate),
-        )
-      );
-    }),
+    obligationPreservingHeads,
   );
   const offers = offersForHeads({
     input,
     heads,
     candidates: params.context.actionCandidates,
     urgentPriorityClass,
+    urgentExactScoreRootAvailable: obligationPreservingHeads.some(
+      (head) =>
+        head.priorityClass === urgentPriorityClass &&
+        isExactScoreRootHead(head),
+    ),
     preferredRootCandidateIds,
     moduleSelectedActionId: params.runtimeResult.route.head.actionId,
   });
@@ -1545,6 +1551,7 @@ function offersForHeads(params: {
   heads: readonly TurnPlanningHeadCandidate[];
   candidates: readonly ActionSemanticCandidate[];
   urgentPriorityClass: string | undefined;
+  urgentExactScoreRootAvailable: boolean;
   preferredRootCandidateIds: ReadonlySet<string>;
   moduleSelectedActionId: string;
 }): TurnRemainderSearchOffer[] {
@@ -1561,13 +1568,6 @@ function offersForHeads(params: {
         .filter((head) => head.priorityClass === params.urgentPriorityClass)
         .map((head) => head.candidateId)
     : [];
-  const urgentExactScoreRootAvailable = params.urgentPriorityClass
-    ? params.heads.some(
-        (head) =>
-          head.priorityClass === params.urgentPriorityClass &&
-          isExactScoreRootHead(head),
-      )
-    : false;
   return params.heads.flatMap((head) => {
     const candidate = params.candidates.find(
       (entry) => entry.actionId === head.currentBinding.actionId,
@@ -1586,7 +1586,7 @@ function offersForHeads(params: {
     return dependencyVariants.map((dependencyCandidateIds) => {
       const priorityCoverage = corpPlanningHeadPriorityCoverage({
         urgentPriorityClass: params.urgentPriorityClass,
-        urgentExactScoreRootAvailable,
+        urgentExactScoreRootAvailable: params.urgentExactScoreRootAvailable,
         head,
       });
       const groupKey = commutativeGroupKey(candidate);

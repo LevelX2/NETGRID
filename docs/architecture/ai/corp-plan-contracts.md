@@ -255,6 +255,15 @@ Prioritätsklasse P1 bis P4 und Evidence. Ein von ihr angeforderter Defense-
 oder Economy-Support bindet seinerseits exakt diese Score-Planinstanz als
 `parentInstanceId`.
 
+Die exklusive Restzug-Obligation `urgent-exact-score-owner` setzt zusätzlich
+einen aktuell pflichtzahlungssicheren Score-Head voraus. Derselbe vorab
+geprüfte Headbestand bestimmt sowohl das dringende Prioritätsband als auch
+den exklusiven Owner-Anspruch. Ein Advance, der die verpflichtende
+Endzahlungsreserve verbrauchen würde, darf nicht den noch ausführbaren
+Economy-Support seines Score-Parents verdrängen. Finanzierte exakte
+Score-Heads behalten ihren Vorrang. Paarung 536, Originalseed-Nachspiel
+G27/D424, belegt diese Gegenbedingung zu SP-003.
+
 Die Zugplanung materialisiert bei installierten Agenden den aktuell legalen,
 exakt gebundenen Advance- oder Score-Step als `score_continuation`. Eine
 unbekannte Folgeaktion wird dabei nicht vorweggenommen. Ein veröffentlichter
