@@ -909,6 +909,13 @@ Runbedarf vortäuschen, dessen bekannte Pfadkosten nach der Vorbereitung die
 zugelassene Informationsprobe weiterhin ausschließen. Terminale oder
 nachweislich anders verwertbare Runlinien behalten ihre vorhandenen Ausnahmen.
 
+Die terminale Zentralchance bei unerreichbarer Remote-Scorebedrohung verwendet
+für Parent und Coverage-Kind denselben Zulassungsnachweis aus
+`runner-run-purpose.ts`. Überschreibt der Parent damit die gewöhnliche
+Creditreserve-Empfehlung, muss er weiterhin jede in der Quote enthaltene
+Subtypvorbereitung exakt binden und vor dem Run ausführen. Die Ausnahme hebt
+weder bekannte Zugriffssperren noch eine blockierte Runreserve auf.
+
 Der Vergleich sichtbarer Breaker-Modusvarianten erhält bei gleicher
 Zugänglichkeit zuerst bezahlbare Antworten auf bekannte ICE-Gefahren.
 Eine teure Gefahrenvermeidung darf nicht als Ersparnis verschwinden, nur weil

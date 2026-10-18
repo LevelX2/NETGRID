@@ -1,6 +1,7 @@
 import {
   runPurposeForEvaluation,
   runnerInformationProbeCanUseQuotedPath,
+  runnerTerminalRemoteUnreachableCentralLastChance,
 } from "../../plans/runner-run-purpose";
 import {
   runnerCandidateSourceDefinitionId,
@@ -158,7 +159,12 @@ export function uniqueCoverageGaps(
       !preparation?.subtypeChanges?.length ||
       (evaluation.recommendation !== "run_now" &&
         evaluation.recommendation !== "run_if_free" &&
-        !evaluation.scoreThreat)
+        !evaluation.scoreThreat &&
+        !runnerTerminalRemoteUnreachableCentralLastChance(
+          input,
+          evaluation,
+          runTargets,
+        ))
     ) {
       continue;
     }
