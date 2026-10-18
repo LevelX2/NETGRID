@@ -1179,6 +1179,7 @@ function sanitizePlayerView(
             view.own.credits,
             view.own.agendaPoints,
             view.own.scoreArea,
+            view.own.gripOrHq,
             view.own.rig ?? [],
             view.servers,
           ),
@@ -3468,6 +3469,7 @@ function sanitizeVisibleChoiceRequest(
   ownCredits: number,
   ownAgendaPoints: number,
   ownScoreArea: readonly VisibleCard[],
+  ownGrip: readonly VisibleCard[],
   ownRig: readonly VisibleCard[],
   servers: readonly PlayerView["servers"][number][],
 ): VisibleChoiceRequest {
@@ -3529,6 +3531,23 @@ function sanitizeVisibleChoiceRequest(
             ? { amount: Number(option.metadata.amount) }
             : {}),
         };
+      }
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
+        choice.source === "v121.replacement.damage" &&
+        option.metadata?.sourceCardInstanceId !== undefined
+      ) {
+        const sourceId = option.metadata.sourceCardInstanceId;
+        if (
+          !isNonEmptyString(sourceId) ||
+          ![...ownGrip, ...ownRig].some(
+            (card) => card.known && card.instanceId === sourceId,
+          )
+        ) {
+          throw new Error("invalid_runner_damage_replacement_source_binding");
+        }
+        metadata = { ...metadata, sourceCardInstanceId: sourceId };
       }
       if (
         metadata &&

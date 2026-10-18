@@ -647,6 +647,7 @@ export function publicContextForAction(
       "replacementOutcome",
       "originalEventId",
       "originalEventType",
+      "damageType",
       "replacementEventId",
       "replacementEventType",
       "tagsAdded",
@@ -1013,6 +1014,8 @@ export function publicContextForAction(
     context.replacementWindowId = legalAction.payload.replacementWindowId;
     context.originalEventId = legalAction.payload.originalEventId;
     context.originalEventType = legalAction.payload.originalEventType;
+    if (legalAction.payload.originalEventType === "damage")
+      context.damageType = legalAction.payload.damageType;
     context.replacementCandidateCount =
       legalAction.payload.replacementCandidateCount;
     context.affectedSide = legalAction.payload.affectedSide;

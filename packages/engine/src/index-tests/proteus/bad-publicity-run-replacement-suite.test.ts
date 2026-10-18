@@ -3,6 +3,7 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   replayEvents,
 } from "../../index";
@@ -727,6 +728,20 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
       option.id.includes("grip_meat_damage_replacement"),
     )?.id;
     expect(optionId).toBeDefined();
+    expect(
+      state.pendingChoice?.options.find((option) => option.id === optionId)
+        ?.metadata?.sourceCardInstanceId,
+    ).toBe(identityId);
+    expect(
+      getPlayerView(state, "runner").pendingChoice?.options.find(
+        (option) => option.id === optionId,
+      )?.metadata?.sourceCardInstanceId,
+    ).toBe(identityId);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      identityId,
+    );
+    const originalEventId = state.imminentEvent!.eventId;
 
     state = applyChoice(state, "runner", String(optionId));
     expect(state.replacementWindow).toBeUndefined();
@@ -735,6 +750,14 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     expect(state.corp.badPublicity).toBe(7);
     expect(state.winner).toBe("runner");
     expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      originalEventId,
+      originalEventType: "damage",
+      damageType: "meat",
+      originalAmount: 4,
+      preventedAmount: 4,
+      replacementOutcome: "replaced",
+    });
     expectReplayStable(before, state);
   });
 

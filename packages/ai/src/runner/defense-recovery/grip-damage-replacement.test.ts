@@ -46,6 +46,18 @@ it("preserves the certified reactive meat replacement kind in the side-safe DTO"
   );
 });
 
+it.each(["runner_missing_source", "corp_private_source"])(
+  "rejects a replacement source outside the own known zones: %s",
+  (sourceId) => {
+    const input = native();
+    input.playerView.pendingChoice.options[1].metadata.sourceCardInstanceId =
+      sourceId;
+    expect(() => buildAiDecisionInputDto(input)).toThrow(
+      /invalid_runner_damage_replacement_source_binding/,
+    );
+  },
+);
+
 it("binds the native reactive grip replacement to the existing defense owner", () => {
   const input = native(),
     decision = chooseAiAction(input);
@@ -149,6 +161,12 @@ it.each([1, 7])(
       ownDeckSnapshot: original.ownDeckSnapshot,
       eventTail: damage.state.eventLog,
     });
+    const replacementSource = input.playerView.pendingChoice?.options.find(
+      (option) => option.metadata?.optionKind === "play_identity_donor",
+    )?.metadata?.sourceCardInstanceId;
+    expect(replacementSource).toBe(
+      damage.state.runner.grip.find((id) => id.includes("identity-donor")),
+    );
     const decision = chooseAiAction(input);
     const action = {
       matchId: state.matchId,
@@ -159,6 +177,14 @@ it.each([1, 7])(
     };
     const resolved = applyAction(damage.state, action);
     if (!resolved.ok) throw Error(resolved.error.message);
+    expect(resolved.state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      originalEventId: damage.state.imminentEvent!.eventId,
+      originalEventType: "damage",
+      damageType: "meat",
+      originalAmount: 4,
+      preventedAmount: 4,
+      replacementOutcome: "replaced",
+    });
     expect(resolved.state.winner).toBeNull();
     expect(resolved.state.runner.grip).toHaveLength(handSize - 1);
     expect(resolved.state.corp.badPublicity).toBe(2);
