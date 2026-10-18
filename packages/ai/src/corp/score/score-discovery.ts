@@ -29,7 +29,7 @@ import {
   corpNextTurnScoreContinuationProjects,
   corpPreferredDeckoutAgendaRecycleRouteAvailable,
   corpRemoteCreationUnlockScoreProjects,
-  sameTurnScoreConversionProjectForCandidate,
+  sameTurnScoreConversionProjectsForCandidate,
   scoreProjectForCandidate,
   uniqueScoreProjects,
 } from "./score-project-signals";
@@ -153,15 +153,14 @@ export function reconcileCorpScoreProjects({
     ...counterBankScoreProjects,
     ...remoteCreationUnlockScoreProjects,
     ...nextTurnScoreContinuationProjects,
-    ...candidates.flatMap((candidate) => {
-      const conversion = sameTurnScoreConversionProjectForCandidate(
+    ...candidates.flatMap((candidate) =>
+      sameTurnScoreConversionProjectsForCandidate(
         input,
         candidate,
         directScoreProjects,
         candidates,
-      );
-      return conversion ? [conversion] : [];
-    }),
+      ),
+    ),
   ];
   const assetPreservation = corpAssetPreservingSameTurnScoreRoutes(
     input,

@@ -1269,12 +1269,12 @@ function corpAgendaInstallScoreHorizonShortfall(
   return Math.max(0, remaining - nextClicks);
 }
 
-export function sameTurnScoreConversionProjectForCandidate(
+export function sameTurnScoreConversionProjectsForCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   directScoreProjects: readonly CorpScoreProjectSignal[],
   fundingCandidates: readonly ActionSemanticCandidate[],
-): CorpScoreProjectSignal | undefined {
+): CorpScoreProjectSignal[] {
   const matchingProjects: CorpScoreProjectSignal[] = [];
   for (const path of corpSameTurnScoreConversionPaths(
     input,
@@ -1435,7 +1435,7 @@ export function sameTurnScoreConversionProjectForCandidate(
   }
   return matchingProjects.sort((left, right) =>
     compareSameTurnScoreConversionParents(left, right, directScoreProjects),
-  )[0];
+  );
 }
 
 export function sameTurnScoreConversionPreventsTerminalSteal(params: {

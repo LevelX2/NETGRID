@@ -68,6 +68,15 @@ Choice werden vor jedem nativen Schritt erneut gebunden. Der Nachweis aus
 Paarung 492, Diagnose-Runde 2, G26 D299 umfasst zwei Aktivierungen auf derselben
 Agenda; ein Root-Austausch darf die dafür nötige Supportkarte nicht zerstören.
 
+Wenn dieselbe aktuelle Beschleunigungsaktion mehrere gequotete Agenden
+bedienen kann, veröffentlicht die Score-Discovery alle an diese Aktion
+gebundenen Agenda-/Server-Parents. Sie wählt nicht vor der fachlichen
+Zusammenführung nur einen Zielparent und verliert dadurch die übrigen
+Konversionsanfänge. Die bestehende Zusammenführung und Ressourcenprüfung
+vergleichen anschließend die vollständigen Parents; jede Ausführung bindet
+weiter genau eine aktuelle LegalAction und ihre Choices. Aktionsklassifikation
+und Materialisierung erhalten damit dieselben gequoteten Konversionsfakten.
+
 Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
 Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
 Eine mit aktueller Engine-Horizontquote früher abschließbare Agenda verdrängt

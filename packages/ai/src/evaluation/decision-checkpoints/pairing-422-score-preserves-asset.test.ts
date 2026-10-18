@@ -8,7 +8,7 @@ import {
   corpAssetPreservingSameTurnScoreRoutes,
   equivalentSameTurnScoreResources,
 } from "../../corp/score/score-asset-preservation";
-import { sameTurnScoreConversionProjectForCandidate } from "../../corp/score/score-project-signals";
+import { sameTurnScoreConversionProjectsForCandidate } from "../../corp/score/score-project-signals";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -110,15 +110,14 @@ it.each([
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
-    const projects = candidates.flatMap((candidate) => {
-      const project = sameTurnScoreConversionProjectForCandidate(
+    const projects = candidates.flatMap((candidate) =>
+      sameTurnScoreConversionProjectsForCandidate(
         input,
         candidate,
         [],
         candidates,
-      );
-      return project ? [project] : [];
-    });
+      ),
+    );
     if (scenario === "multi-turn route")
       projects.forEach((project) => {
         project.sameTurnCloseout = false;
