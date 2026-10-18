@@ -946,6 +946,17 @@ Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Zielpräferenzen und Vermeidungshinweise eines Hint-Targetprofils ordnen
+Kandidaten innerhalb einer gebundenen Fähigkeit. Sie erzeugen keine
+Kartenrolle oder funktionale Coverage: Eine Präferenz für das Entfernen
+gegnerischer Wirtschaft ist insbesondere kein eigenes Einkommen. Die
+Handentwicklung projiziert diese Beschreibungen deshalb nicht in ihren
+Funktionstext. Die ausdrücklich erzeugte Planrolle
+`protect_virus_counters` liefert weiterhin Virus-Unterstützung für
+Zugriffspläne; sie wird nicht aus einer Zielpräferenz abgeleitet. Der native
+531/R1/G5/D27-Checkpoint und reale Einkommens-, Informations- und
+Virus-Schutzkarten sichern diese Grenze samt fehlender Installationsbank ab.
+
 Die Suchkadenz verwendet ausschließlich ein tatsächlich abgeschlossenes
 `resolve_choice`-Ereignis des aktuellen Runner-Zuges. Die Aktivierung eines
 Suchwerkzeugs mit noch offener Choice ist kein Suchabschluss; frühere Züge

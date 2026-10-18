@@ -714,6 +714,7 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     return "defense_support";
   if (
     context.signals.planRoles.includes("information") ||
+    context.signals.planRoles.includes("protect_virus_counters") ||
     runnerEffectsProvideExposeInformation(context.signals.structuredEffects) ||
     runnerEffectsProvideMultiaccess(context.signals.structuredEffects) ||
     looksLikeAccessPayoff(text)

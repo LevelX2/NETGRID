@@ -236,6 +236,7 @@ export function persistentFunctionalProfileForCard(
   const accessSupport =
     postBreakIceTrash ||
     hint?.planRoles?.includes("information") === true ||
+    hint?.planRoles?.includes("protect_virus_counters") === true ||
     runnerHintProvidesExposeInformation(hint) ||
     runnerHintProvidesMultiaccess(hint) ||
     looksLikeAccessPayoff(text);
@@ -698,14 +699,14 @@ export function structuredHintSignals(hint: {
       ].filter((value): value is string => typeof value === "string"),
     ),
     ...(hint.targetProfiles ?? []).flatMap((profile) =>
+      // Preference/avoid text ranks targets after a capability is bound. It
+      // cannot grant the source card income, access or another capability.
       [
         profile.kind,
         profile.timing,
         profile.targetType,
         profile.purpose,
         profile.hiddenInfoPolicy,
-        ...(Array.isArray(profile.preferences) ? profile.preferences : []),
-        ...(Array.isArray(profile.avoid) ? profile.avoid : []),
       ].filter((value): value is string => typeof value === "string"),
     ),
     ...(hint.lineSupport ?? []),
