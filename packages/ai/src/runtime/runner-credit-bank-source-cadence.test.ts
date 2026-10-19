@@ -274,6 +274,41 @@ describe("runner credit-bank source-bound cadence", () => {
     });
     expect(decision.actionId).toBe("withdraw-broker-2");
   });
+
+  it.each([
+    [16, false],
+    [17, true],
+  ] as const)(
+    "admits another bank only for an unfilled portfolio budget (%i)",
+    (reserve, admitted) => {
+      const source = bank("broker-1", 0);
+      const install = legalAction(
+        "install-broker-1",
+        "runner",
+        "install_card",
+        "Install Broker",
+        { credits: 3, clicks: 1 },
+        {
+          source: source.instanceId,
+          payload: { cardId: source.instanceId, sourceDefinitionId: BROKER },
+        },
+      );
+      const input = aiInput("runner", [install, basicCredit()]);
+      input.playerView.own.credits = 7;
+      input.playerView.own.clicks = 2;
+      input.playerView.own.gripOrHq = [source];
+      input.playerView.own.rig = [bank("broker-2", 9)];
+      const decision = runtimeContext(reserve).chooseSemanticRuntimeAction(
+        input,
+        {},
+      );
+      expect(decision.actionId === install.actionId).toBe(admitted);
+      if (!admitted)
+        expect(decision.evidence).toContain(
+          "plan_portfolio_blocked_evidence:plan:runner.credit_bank:broker-1:runner_credit_bank_install_deferred_portfolio_budget_funded",
+        );
+    },
+  );
 });
 
 function decide(params: {

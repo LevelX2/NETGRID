@@ -1,6 +1,7 @@
 import { corpPunishPreparationConflictsScoreServer } from "../corp/punish/punish-preparation";
 import { corpReservedScoreServerIds } from "../runtime/corp-scoreline/score-hand-support";
 import { corpEconomyActionIsOwned } from "../corp/economy/economy-routes";
+import { corpHostedBankLoadRejectionEvidence } from "../corp/economy/hosted-credit-bank-facts";
 import { type CorpDefenseSignal } from "./corp-defense-contracts";
 import { type CorpScoreProjectSignal } from "./corp-score-contracts";
 import { corpPunishCampaignOwnsCandidate } from "../corp/punish/punish-plan-support";
@@ -276,11 +277,16 @@ function contributeCorpActionDispositionForCandidate(
     action?.side === "corp" &&
     action.type === "activated_card_ability" &&
     action.payload?.cardImplementationAddsHostedCredits === true &&
-    action.payload?.hostedCreditBankCycleQuoteJson === undefined &&
     !domain.economyNeeds.some((signal) =>
       signal.actionIds.includes(candidate.actionId),
     )
   ) {
+    const bankRejection = corpHostedBankLoadRejectionEvidence(input, candidate);
+    if (bankRejection) {
+      add(candidate.actionId, "corp.economy", bankRejection);
+      return;
+    }
+    if (action.payload?.hostedCreditBankCycleQuoteJson !== undefined) return;
     addUnknown(
       candidate.actionId,
       "corp.economy",

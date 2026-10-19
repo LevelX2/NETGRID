@@ -8,7 +8,15 @@ import type { CorpHostedBankInvestment } from "./economy-types";
 export function corpHostedBankLoadMatches(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
-  investment: CorpHostedBankInvestment,
+  investment: Pick<
+    CorpHostedBankInvestment,
+    | "actionId"
+    | "stateVersion"
+    | "sourceInstanceId"
+    | "sourceDefinitionId"
+    | "storedCredits"
+    | "creditsPerLoad"
+  >,
 ): boolean {
   const action = input.legalActions.find(
     (a) => a.actionId === candidate.actionId,
@@ -49,4 +57,30 @@ export function corpHostedBankLoadMatches(
     action.targetRequirements.length === 0 &&
     (action.choiceRequirements?.length ?? 0) === 0
   );
+}
+
+/** Discovery owns admission. A fully known bank load that has no admitted
+ * investment/funding route still needs an explicit owner rejection. The
+ * presence of an Engine same-turn quote alone does not establish demand. */
+export function corpHostedBankLoadRejectionEvidence(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): string | undefined {
+  if (!candidate.sourceDefinitionId || !candidate.sourceCardInstanceId)
+    return undefined;
+  const profile = clickCreditBankProfile(candidate.sourceDefinitionId);
+  const card = input.playerView.servers
+    .flatMap((server) => server.root)
+    .find((entry) => entry.instanceId === candidate.sourceCardInstanceId);
+  if (!profile || !card) return undefined;
+  return corpHostedBankLoadMatches(input, candidate, {
+    actionId: candidate.actionId,
+    stateVersion: input.playerView.stateVersion,
+    sourceInstanceId: card.instanceId,
+    sourceDefinitionId: candidate.sourceDefinitionId,
+    storedCredits: card.counters?.bit ?? 0,
+    creditsPerLoad: profile.creditsPerLoad,
+  })
+    ? "corp_hosted_bank_load_deferred_no_admitted_investment_or_funding_route"
+    : undefined;
 }

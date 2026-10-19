@@ -2714,7 +2714,14 @@ Auszahlung mehr aus. Konkrete, weiterhin exakt zugelassene Run- und
 Development-Finanzierung, ein unterschrittener Liquiditätsboden oder eine
 durch öffentliche Tags und Corpcredits gefährdete Ressourcenbank können
 auch kleine Auszahlungen rechtfertigen. Ein bereits ausreichender Vorrat
-wird gehalten und nicht weiter aufgeladen. Die Regelautorität über das
+wird gehalten und nicht weiter aufgeladen. Das Ausgabenbudget gilt auch vor
+einer weiteren Bankinstallation: Decken liquide
+Credits und bereits gespeichertes Bankguthaben das Ziel, wird eine zusätzliche
+manuelle Bank mit ausdrücklich begründetem Hold abgewiesen. Ein realer
+Restbedarf kann eine weitere Instanz weiterhin zulassen; es gibt kein
+pauschales Kopienlimit. Native und budgetabhängige Gegenproben liegen in
+`meta-541-bank-budget.test.ts` und `runner-credit-bank-source-cadence.test.ts`.
+Die Regelautorität über das
 gemeinsame Einmal-pro-Zug-Limit liegt weiterhin bei den Engine-LegalActions;
 der bestehende quellgebundene Cadence-Nachweis bleibt erhalten. Automatische
 Lifecycle-Banken behalten ihren gesonderten Vertrag. Native Routen,

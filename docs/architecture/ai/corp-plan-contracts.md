@@ -2016,6 +2016,14 @@ Regressionsdatei `hosted-credit-bank-investment.test.ts` prüft Halten, Aufbau
 über den Zugwechsel, rechtzeitige Auszahlung, fehlende Quotes und die
 vollständige Plan-/Step-/Routenwahl.
 
+Eine vollständig gebundene Ladeaktion ohne aktuell zugelassenen Investitions-
+oder Fundingpfad erhält eine ausdrückliche Ablehnung von `corp.economy`, auch
+wenn die Engine eine mögliche Restzugfolge quotiert. Die Quote belegt deren
+Regelausführbarkeit, nicht den wirtschaftlichen Bedarf. Unbekannte oder
+widersprüchliche Bindungen bleiben unbekannt und scheitern am Coverage-Gate.
+Die vier nativen Abbruchzustände der Diagnosepaarung 541 sind in
+`meta-541-bank-budget.test.ts` gegen erneute fehlende Ownership geschützt.
+
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt
 eine einzelne statische Schicht, wenn der verbleibende bekannte Pfad den

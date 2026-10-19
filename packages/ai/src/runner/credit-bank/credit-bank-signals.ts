@@ -87,6 +87,7 @@ export function runnerCreditBankSignals(
   const signals = tools.flatMap((tool): RunnerCreditBankSignal[] => {
     const currentStoredCredits = Math.max(0, tool.currentBankAmount ?? 0);
     const estimatedPayout = Math.max(0, tool.estimatedPayout ?? 0);
+    const bankProfile = clickCreditBankProfile(tool.cardId);
     const exactBankOwnerCandidates = candidates.filter(
       (candidate) =>
         candidate.sourceDefinitionId === tool.cardId &&
@@ -160,6 +161,11 @@ export function runnerCreditBankSignals(
         handEvaluation.liquidityTiming !== "immediate" &&
         !economy.fundingNeed &&
         input.playerView.own.credits >= economy.desiredCreditReserve;
+      const portfolioBudgetAlreadyFunded =
+        bankProfile !== undefined &&
+        portfolioStoredCredits > 0 &&
+        input.playerView.own.credits + portfolioStoredCredits >=
+          economy.desiredCreditReserve;
       const lastActionInstallBreaksHandBuffer =
         prospectivePlan?.install.remainingActions === 0 &&
         input.playerView.own.gripOrHq.length - 1 <
@@ -169,6 +175,7 @@ export function runnerCreditBankSignals(
         prospectivePlan.install.projection !== "feasible_in_projection" ||
         unsatisfiedActivationPrerequisites.length > 0 ||
         delayedInstallWithoutFundingNeed ||
+        portfolioBudgetAlreadyFunded ||
         lastActionInstallBreaksHandBuffer
       )
         return [
@@ -183,6 +190,11 @@ export function runnerCreditBankSignals(
             estimatedPayout,
             value: 0,
             evidenceCodes: [
+              ...(portfolioBudgetAlreadyFunded
+                ? [
+                    "runner_credit_bank_install_deferred_portfolio_budget_funded",
+                  ]
+                : []),
               ...(lastActionInstallBreaksHandBuffer
                 ? ["runner_credit_bank_last_action_install_hand_floor"]
                 : []),
@@ -294,7 +306,6 @@ export function runnerCreditBankSignals(
       matureBankDevelopmentFundingRoute !== undefined;
     const urgentCreditFloor =
       input.playerView.own.credits < economy.minimumCreditFloor;
-    const bankProfile = clickCreditBankProfile(tool.cardId);
     const installedBankProjection =
       !bankProfile && tool.sourceCardInstanceId && input.planningStateIdentity
         ? runnerCreditBankProspectivePlan({
