@@ -542,7 +542,8 @@ export function corpEconomyPriorityClass(
     return signal.delegatedPriorityClass ?? signal.parentPriorityClass ?? "P5";
   if (
     signal.kind === "develop_campaign" &&
-    signal.cadence.kind === "hosted_credit_bank_cycle"
+    (signal.cadence.kind === "hosted_credit_bank_cycle" ||
+      signal.cadence.kind === "hosted_credit_bank_investment")
   )
     return "P4";
   if (signal.kind === "convert_immediate_operation") return "P4";

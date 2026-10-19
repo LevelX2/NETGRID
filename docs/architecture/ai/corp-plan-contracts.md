@@ -1978,8 +1978,9 @@ ICE-Installation darf dadurch nicht ihren letzten Klick verlieren. Andere
 aktuelle Einkommensquellen und ein bereits direkt finanzierbarer Score
 behalten ihre Finanzierung. Eine aktuelle vollständige Auszahlung aus
 sichtbaren Bits braucht kein endliches On-rez-Poolprofil. Laden ohne quotierte
-aktuelle Liquiditätskonversion bleibt als unbekannte spätere Entwicklung
-sichtbar. Engine- und Chooser-Regressionen liegen in
+aktuelle Liquiditätskonversion bleibt außerhalb des nachfolgend begrenzten
+Investitionsvertrags als unbekannte spätere Entwicklung sichtbar.
+Engine- und Chooser-Regressionen liegen in
 `hosted-credit-bank-cycle-quote.test.ts` und
 `meta-472-hosted-bank-cycle.test.ts` (SP-456, G30/D242).
 Die direkte Entnahme bewahrt den nativen Auszahlungsmodus `all_available`
@@ -1989,6 +1990,31 @@ Funding-Parent und bleibt ein eigenes P4-Auszahlungsprojekt. Die Regression
 R6 G1/D200 prüft die vollständige Plan-, Step- und Routenwahl für 15 Credits
 beim letzten Klick sowie die Ablehnung eines widersprüchlichen Bankbestands.
 Feste Teilentnahmen behalten ihren Modus `fixed`.
+
+Bereits gerezzte, kanonisch einfache Lade-/Gesamtauszahlungsbanken besitzen
+zusätzlich einen bedarfsgebundenen Investitionspfad in
+`corp/economy/hosted-credit-bank-investment.ts`. Der bestehende Economy-Owner
+leitet das endliche Ziel aus aktuellen Kosten, vollständigen Engine-Quotes
+für Installation mit späterem Rez, eigener Schutzreserve und veröffentlichten
+Funding-Bedarfen ab. Die weitere Ladezahl ergibt sich daraus neu nach jeder
+Aktion; Guthaben anderer eigener Banken zählt einmal zum Aufbauziel, niemals
+als aktuelle Liquidität. Die Rechnung vergleicht den verbleibenden Aufbau
+einschließlich Auszahlung mit aktuell angebotenen Einkommensalternativen.
+Gedruckte Kartenpreise ersetzen keine fehlenden zukünftigen Kostenquotes.
+
+Ein letzter Ladeklick darf nur über die Zuggrenze wirken, wenn der bestehende
+side-sichere Schutzdienst den Bankserver als aktuell nicht erreichbar bewertet
+und der eigene Pflichtdrawhorizont die Fortsetzung zulässt. Ungeschützte oder
+unbekannte Quellen benötigen eine Auszahlung noch im aktuellen Zug. Ein
+konkreter aktueller Finanzierungsbedarf, eine unterschrittene Schutzreserve,
+erreichtes Auszahlungsbudget oder Deckende beenden weiteren Aufbau. Die
+laufenden Score-/Defense-Finanzierungsrouten und ihre Parent-/Need-Bindungen
+bleiben maßgeblich. Der Owner materialisiert allein die aktuelle native
+Ladeaktion, gebunden an Quelle, Fähigkeit, sichtbaren Bestand und StateVersion;
+der spätere Gegnerzug ist keine garantierte Ressourcenkonversion. Die
+Regressionsdatei `hosted-credit-bank-investment.test.ts` prüft Halten, Aufbau
+über den Zugwechsel, rechtzeitige Auszahlung, fehlende Quotes und die
+vollständige Plan-/Step-/Routenwahl.
 
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt

@@ -10,6 +10,7 @@ import { uniqueBy } from "../../runtime/collection";
 import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-draw-action-facts";
 import { turnKey } from "../../runtime/runtime-identifiers";
 import { corpHostedBankCycleDevelopment } from "./hosted-credit-bank-cycle";
+import { corpHostedBankInvestments } from "./hosted-credit-bank-investment";
 import {
   assessCorpEconomyFundingRoute,
   corpEconomyActionIsOwned,
@@ -84,6 +85,11 @@ export function buildCorpEconomySignals({
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
+  const bankInvestments = corpHostedBankInvestments(
+    input,
+    candidates,
+    requiredEconomyNeeds,
+  );
   const genericTurnLiquidityDevelopment =
     operationThresholdPreparations.length === 0
       ? corpTurnLiquidityDevelopmentNeed(
@@ -139,10 +145,18 @@ export function buildCorpEconomySignals({
       ...(turnLiquidityDevelopment ? [turnLiquidityDevelopment] : []),
       ...operationThresholdPreparations,
       ...corpImmediateOperationEconomyConversions(input, candidates),
-      ...corpVisibleCardEconomyWithdrawals(input, candidates),
+      ...corpVisibleCardEconomyWithdrawals(input, candidates).filter(
+        (signal) =>
+          bankInvestments.get(signal.sourceInstanceId)?.shouldCashout !== false,
+      ),
       ...corpOptionalActionCapacityConversions(input, candidates),
       ...corpEconomyDevelopmentCampaigns(input, candidates, scoreProjects),
-      ...corpHostedBankCycleDevelopment(input, candidates),
+      ...corpHostedBankCycleDevelopment(input, candidates).filter(
+        (signal) => !bankInvestments.has(signal.sourceInstanceId),
+      ),
+      ...[...bankInvestments.values()].flatMap((choice) =>
+        choice.development ? [choice.development] : [],
+      ),
     ],
     (signal) => signal.needId,
   );

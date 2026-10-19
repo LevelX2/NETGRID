@@ -2699,6 +2699,28 @@ es entsteht weder ein Kartenname-Verbot noch ein neuer Safety-Owner.
 
 ## 11. `runner.credit_bank` und `runner.recurring_economy`
 
+Für kanonisch einfache manuell geladene Gesamtauszahlungsbanken leitet
+`runner.credit_bank` den verbleibenden Aufbau aus dem aktuellen
+`desiredCreditReserve`-Ausgabenbudget ab. Eine feste Zahl an Ladungen oder
+ein zwölf Credits großer Pflichtvorrat existiert für diesen Pfad nicht.
+Die Rechnung in `plans/credit-bank-investment.ts` berücksichtigt eigene liquide
+Credits, den Vorrat aller eigenen Bankinstanzen und den verbleibenden
+Lade-/Auszahlungsaufwand gegenüber aktuell angebotenem Einkommen. Das Ziel
+wird nach jeder Aktion und jedem Zugwechsel neu geprüft; gespeichertes Geld
+bleibt bis zur tatsächlich legalen Auszahlung gebunden.
+
+Eine bloß unterschrittene Wunschreserve löst bei diesen Banken keine
+Auszahlung mehr aus. Konkrete, weiterhin exakt zugelassene Run- und
+Development-Finanzierung, ein unterschrittener Liquiditätsboden oder eine
+durch öffentliche Tags und Corpcredits gefährdete Ressourcenbank können
+auch kleine Auszahlungen rechtfertigen. Ein bereits ausreichender Vorrat
+wird gehalten und nicht weiter aufgeladen. Die Regelautorität über das
+gemeinsame Einmal-pro-Zug-Limit liegt weiterhin bei den Engine-LegalActions;
+der bestehende quellgebundene Cadence-Nachweis bleibt erhalten. Automatische
+Lifecycle-Banken behalten ihren gesonderten Vertrag. Native Routen,
+Quellbindung, mehrzügiger Aufbau, größere bedingte Budgets und rechtzeitiger
+Cashout sind in `runner-credit-bank-source-cadence.test.ts` geprüft.
+
 **Status:** separate registrierte Core-Owner innerhalb der Economy-Domäne.
 `credit_bank` besitzt Laden und Auszahlung einer konkreten Bank, einschließlich
 endlichem Ziel, Reserve und Cadence. `recurring_economy` bewertet die aktuelle

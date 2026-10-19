@@ -13,7 +13,7 @@ import twoSourceBalancedLoadJson from "../../../../../data/scenarios/ai-decision
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
-import { applyAction } from "@netgrid/engine";
+import { applyAction, getPlayerView } from "@netgrid/engine";
 
 describe("match ECFE3CE Broker portfolio checkpoints", () => {
   it.each([
@@ -45,16 +45,48 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
       "moves a mature bank into a non-comfortable liquid pool",
       maturePoolCashoutJson,
     ],
-    [
-      "converts the selected Broker bank after the optional run is declined",
-      twoSourceBalancedLoadJson,
-    ],
   ])("%s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("converts Broker credits before pursuing open HQ pressure", () => {
-    expectCheckpointToPass(fixture(holdThreeJson));
+  it("keeps Broker savings while taking already funded free HQ pressure", () => {
+    const checkpoint = fixture(holdThreeJson);
+    // The native captured state is unchanged. Reserve-only cashout is no
+    // longer a correctness requirement when this pressure route is funded.
+    checkpoint.expectation = {
+      contractKind: "correctness",
+      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      forbiddenActions: [
+        {
+          type: "activated_card_ability",
+          sourceDefinitionId: "onr_v1_154_broker",
+        },
+      ],
+      planExecution: {
+        acceptablePlanKinds: ["runner.pressure_central"],
+        acceptableCapabilities: ["pressure_hq_information"],
+      },
+    };
+    expectSavingsPreservedBySelectedAction(checkpoint);
+  });
+
+  it("keeps Broker savings while rebuilding the required hand buffer after declining an optional run", () => {
+    const checkpoint = fixture(twoSourceBalancedLoadJson);
+    checkpoint.expectation = {
+      contractKind: "correctness",
+      acceptableActions: [{ actionId: "runner.draw_card" }],
+      forbiddenActions: [
+        {
+          type: "activated_card_ability",
+          sourceDefinitionId: "onr_v1_154_broker",
+        },
+      ],
+      planExecution: {
+        acceptablePlanKinds: ["runner.defense_and_recovery"],
+        acceptableCapabilities: ["build_required_hand_buffer"],
+      },
+    };
+    expectSavingsPreservedBySelectedAction(checkpoint);
   });
 
   it("uses the last click to store three credits instead of taking one liquid credit", () => {
@@ -74,6 +106,34 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     );
   });
 });
+
+function expectSavingsPreservedBySelectedAction(
+  checkpoint: AiDecisionCheckpointV1,
+) {
+  const decision = expectCheckpointToPass(checkpoint);
+  const state = structuredClone(checkpoint.engine.testOnlyGameState);
+  state.eventLog = checkpoint.engine.eventPrefix.map((event) => ({ ...event }));
+  const balances = (game: typeof state) => {
+    const rig = getPlayerView(game, "runner").own.rig;
+    expect(rig).toBeDefined();
+    return rig!
+      .filter((card) => card.definitionId === "onr_v1_154_broker")
+      .map((card) => card.counters?.bit ?? 0);
+  };
+  const before = balances(state);
+  expect(before.reduce((sum, value) => sum + value, 0)).toBeGreaterThan(0);
+  const applied = applyAction(state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: decision.selectedAction!.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: `${checkpoint.checkpointId}:preserve-bank`,
+  });
+  expect(applied.ok).toBe(true);
+  if (!applied.ok)
+    throw new Error(`Native preservation action failed: ${applied.error.code}`);
+  expect(balances(applied.state)).toEqual(before);
+}
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   const checkpoint = bindHistoricalRunEventCadence(

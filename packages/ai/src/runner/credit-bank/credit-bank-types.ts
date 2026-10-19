@@ -10,6 +10,11 @@ export type RunnerCreditBankSignal = {
   currentStoredCredits: number;
   portfolioStoredCredits: number;
   estimatedPayout: number;
+  investment?: {
+    desiredLiquidity: number;
+    additionalLoadExecutions: number;
+    incrementalCreditsOverAlternative: number;
+  };
   prospectivePlan?: RunnerCreditBankProspectivePlan;
   runFunding?: {
     parentPlanInstanceId: string;

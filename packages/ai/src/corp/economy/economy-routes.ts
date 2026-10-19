@@ -1,4 +1,5 @@
 import { candidateTargetIds } from "../../plans/corp-core-module-support";
+import { corpHostedBankLoadMatches } from "./hosted-credit-bank-facts";
 import { assessCorpIceLiquidation } from "../defense/corp-ice-liquidation";
 
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -142,19 +143,25 @@ export function economyCandidates(
                 candidate.semanticActionType === "choice.resolve"
               : candidate.sourceCardInstanceId === signal.sourceInstanceId &&
                 candidate.sourceDefinitionId === signal.sourceDefinitionId &&
-                (signal.hostedCreditBankCycle
-                  ? currentCorpHostedBankCycleQuotes(context.input).some(
-                      (q) =>
-                        q.actionId === candidate.actionId &&
-                        JSON.stringify(q) ===
-                          JSON.stringify(signal.hostedCreditBankCycle),
+                (signal.hostedCreditBankInvestment
+                  ? corpHostedBankLoadMatches(
+                      context.input,
+                      candidate,
+                      signal.hostedCreditBankInvestment,
                     )
-                  : candidate.semanticActionType ===
-                    (signal.phase === "install"
-                      ? "install.card"
-                      : signal.phase === "advance"
-                        ? "score.advance_card"
-                        : "corp_window.rez"))) &&
+                  : signal.hostedCreditBankCycle
+                    ? currentCorpHostedBankCycleQuotes(context.input).some(
+                        (q) =>
+                          q.actionId === candidate.actionId &&
+                          JSON.stringify(q) ===
+                            JSON.stringify(signal.hostedCreditBankCycle),
+                      )
+                    : candidate.semanticActionType ===
+                      (signal.phase === "install"
+                        ? "install.card"
+                        : signal.phase === "advance"
+                          ? "score.advance_card"
+                          : "corp_window.rez"))) &&
             (signal.cadence.kind !== "immediate_on_rez" ||
               certifiedImmediateRootRezCampaignCandidate(candidate, signal))
           : signal.kind === "convert_immediate_operation"
@@ -525,7 +532,8 @@ function economyDevelopmentStepValue(
 ): number {
   if (
     signal.cadence.kind === "counter_cashout_development" ||
-    signal.cadence.kind === "hosted_credit_bank_cycle"
+    signal.cadence.kind === "hosted_credit_bank_cycle" ||
+    signal.cadence.kind === "hosted_credit_bank_investment"
   )
     return Math.max(1, signal.payback.projectedNetCredits * 10);
   if (signal.phase === "rez")
