@@ -2024,6 +2024,20 @@ widersprüchliche Bindungen bleiben unbekannt und scheitern am Coverage-Gate.
 Die vier nativen Abbruchzustände der Diagnosepaarung 541 sind in
 `meta-541-bank-budget.test.ts` gegen erneute fehlende Ownership geschützt.
 
+Bekannte offene Grenze dieses Investitionspfads ist SP-611: Ein erreichtes
+kurzfristiges Budget beendet weiteren Aufbau auch dann, wenn die aktuelle
+Engine-Quote weiteres Laden mit anschließender Auszahlung im selben Zug als
+profitabler ausweist. In Paarung 541, G4/D441–442, führen drei Credits
+Auszahlung und ein Basic-Credit bei zwei Restaktionen von acht auf zwölf
+liquide Credits; die vorhandene Lade-/Auszahlungsquote erreicht vierzehn.
+Die sichere Zuggrenze ist hier kein Gegenargument, weil beide Folgen den
+Bankpool noch im aktuellen Zug leeren. Der fehlende Restzugvergleich gehört
+zu `corp.economy`; aktuelle Score-, Installations- und Defensefristen dürfen
+dabei nicht verloren gehen. Der Schutzdienst dieses Pfads bewertet bislang
+den bereits gerezzten Pfad. Eine mögliche zusätzliche, finanzierte Rezroute
+ist getrennt mit ihrem eigenen Creditbedarf zu bewerten und beweist allein
+noch keinen wirtschaftlichen Vorteil eines längeren Bankaufbaus.
+
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt
 eine einzelne statische Schicht, wenn der verbleibende bekannte Pfad den
