@@ -3799,6 +3799,7 @@ function buildCorpDomain(
     candidates,
     scoreProjects,
     defenseNeeds,
+    centralDefenseAllocation,
     remoteProjects,
     ambushes,
     punishCampaigns,

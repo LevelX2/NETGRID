@@ -2024,19 +2024,28 @@ widersprüchliche Bindungen bleiben unbekannt und scheitern am Coverage-Gate.
 Die vier nativen Abbruchzustände der Diagnosepaarung 541 sind in
 `meta-541-bank-budget.test.ts` gegen erneute fehlende Ownership geschützt.
 
-Bekannte offene Grenze dieses Investitionspfads ist SP-611: Ein erreichtes
-kurzfristiges Budget beendet weiteren Aufbau auch dann, wenn die aktuelle
-Engine-Quote weiteres Laden mit anschließender Auszahlung im selben Zug als
-profitabler ausweist. In Paarung 541, G4/D441–442, führen drei Credits
-Auszahlung und ein Basic-Credit bei zwei Restaktionen von acht auf zwölf
-liquide Credits; die vorhandene Lade-/Auszahlungsquote erreicht vierzehn.
-Die sichere Zuggrenze ist hier kein Gegenargument, weil beide Folgen den
-Bankpool noch im aktuellen Zug leeren. Der fehlende Restzugvergleich gehört
-zu `corp.economy`; aktuelle Score-, Installations- und Defensefristen dürfen
-dabei nicht verloren gehen. Der Schutzdienst dieses Pfads bewertet bislang
-den bereits gerezzten Pfad. Eine mögliche zusätzliche, finanzierte Rezroute
-ist getrennt mit ihrem eigenen Creditbedarf zu bewerten und beweist allein
-noch keinen wirtschaftlichen Vorteil eines längeren Bankaufbaus.
+Ein erreichtes kurzfristiges Budget schließt eine profitablere, vollständig
+Engine-gequotete Restzugfolge nicht aus (SP-611). Bei bereits gespeichertem
+Geld und sonst ungebundener Kapazität darf Economy neben der direkten
+Auszahlung die aktuelle Lade-/Auszahlungsquote als eigenes gebundenes Projekt
+anbieten. Der bestehende Scheduler und TurnPlanner vergleichen beide Routen;
+ausgeführt wird weiterhin nur der aktuelle native Head. Der Zustand aus
+Paarung 541, G4/D441, bindet so die weitere Ladung: zwei Aktionen liefern
+sechs statt drei Credits Auszahlung und einem Basic-Credit.
+
+Offene Parent-Finanzierung, aktuelle Score-/Defense-/Remote-Fortsetzungen,
+andere aktuelle Einkommen, ein Operationsschwellenschritt und Deckende
+schließen diese zusätzliche Restzugroute aus. Defense prüft außerdem, ob
+eine frühe Auszahlung eine Installation im aktuellen Zug ermöglicht. Seine
+bestehenden Installations- und Stagingdienste erhalten dafür ausschließlich
+das exakt quotierte Zahlungsbudget nach der Auszahlung; PlayerView,
+Geometrie, LegalActions und Kostenquotes bleiben unverändert an den
+beobachteten Zustand gebunden. Fehlende Quotes bleiben ausdrücklich unknown
+und geben keine freie Restzugkapazität frei. Die nativen Gegenproben in
+`meta-542-department-restturn.test.ts` bewahren Crystal-Wall- und
+Shock.r-Installation, Corporate-Coup-Vorbereitung und den finanzierten
+terminalen Tycho-Score. Eine mögliche zusätzliche Rezroute für mehrzügigen
+Bankschutz bleibt davon getrennt mit ihrem eigenen Creditbedarf zu bewerten.
 
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt

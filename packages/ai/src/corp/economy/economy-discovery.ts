@@ -11,6 +11,7 @@ import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-d
 import { turnKey } from "../../runtime/runtime-identifiers";
 import { corpHostedBankCycleDevelopment } from "./hosted-credit-bank-cycle";
 import { corpHostedBankInvestments } from "./hosted-credit-bank-investment";
+import { corpHostedBankRestTurnDevelopment } from "./hosted-credit-bank-restturn";
 import {
   assessCorpEconomyFundingRoute,
   corpEconomyActionIsOwned,
@@ -50,6 +51,7 @@ export function buildCorpEconomySignals({
   candidates,
   scoreProjects,
   defenseNeeds,
+  centralDefenseAllocation,
   remoteProjects,
   ambushes,
   punishCampaigns,
@@ -63,6 +65,7 @@ export function buildCorpEconomySignals({
   candidates: readonly ActionSemanticCandidate[];
   scoreProjects: CorpCorePlanDomain["scoreProjects"];
   defenseNeeds: CorpCorePlanDomain["defenseNeeds"];
+  centralDefenseAllocation: CorpCorePlanDomain["centralDefenseAllocation"];
   remoteProjects: CorpCorePlanDomain["remoteProjects"];
   ambushes: CorpPlanDomain["ambushes"];
   punishCampaigns: CorpPlanDomain["punishCampaigns"];
@@ -154,6 +157,20 @@ export function buildCorpEconomySignals({
       ...corpHostedBankCycleDevelopment(input, candidates).filter(
         (signal) => !bankInvestments.has(signal.sourceInstanceId),
       ),
+      ...(operationThresholdPreparations.length === 0
+        ? corpHostedBankRestTurnDevelopment({
+            input,
+            candidates,
+            requiredNeeds: requiredEconomyNeeds,
+            scoreProjects,
+            defenseNeeds,
+            remoteProjects,
+            ambushes,
+            punishCampaigns,
+            centralAllocation: centralDefenseAllocation,
+            bankChoices: bankInvestments,
+          })
+        : []),
       ...[...bankInvestments.values()].flatMap((choice) =>
         choice.development ? [choice.development] : [],
       ),
