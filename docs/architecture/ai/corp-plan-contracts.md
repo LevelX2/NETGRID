@@ -2036,6 +2036,13 @@ Auch eine leere aktive Bank darf diese Alternative anbieten: Paarung 542,
 Diagnoserunde G2/D421, liefert mit zwei Restaktionen drei statt zwei Credits.
 Eine bestehende bedarfsgebundene Investition bleibt als Alternative erhalten;
 die Restzugfolge muss ihr aktuelles Liquiditätsziel vollständig erreichen.
+Die Auszahlung des begonnenen Restzugzyklus bleibt beim nächsten nativen
+Head zugelassen, auch wenn die Liquidität das kurzfristige Ziel bereits
+erreicht hatte. Dafür müssen vorheriger Economy-Executor, unmittelbar
+folgende StateVersion, unveränderte Liquidität, letzte Restaktion,
+derselbe Bankvorrat und die aktuelle garantierte Auszahlung exakt zur
+vorherigen Ladequote passen. Das ist ein zusätzliches Economy-Angebot;
+aktuelle höherrangige Score- und Defense-Pläne behalten ihre Priorität.
 
 Offene Parent-Finanzierung, aktuelle Score-/Defense-/Remote-Fortsetzungen,
 andere aktuelle Einkommen, ein Operationsschwellenschritt und Deckende

@@ -34,14 +34,16 @@ function namedCapture(name: string): Capture {
 function replay(game: number, d: number) {
   return replayCapture(capture(game, d));
 }
-function replayCapture(f: Capture) {
+function replayCapture(f: Capture, restore = true) {
   const viewBefore = structuredClone(f.input.playerView);
-  resetResidentPlanPortfolioMemory();
-  restoreAiRuntimeCheckpoint(
-    f.input,
-    f.input.ownDeckSnapshot!.deckSnapshotId,
-    f.runtime,
-  );
+  if (restore) {
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      f.input,
+      f.input.ownDeckSnapshot!.deckSnapshotId,
+      f.runtime,
+    );
+  }
   const decision = chooseAiAction(f.input);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).toBe(false);
@@ -61,6 +63,62 @@ function replayCapture(f: Capture) {
 }
 afterEach(() => vi.restoreAllMocks());
 describe("SP-611 native Department rest-turn comparison", () => {
+  it("finishes the begun native cycle with its current payout despite an already funded budget", () => {
+    const first = replayCapture(
+      namedCapture("cp-meta-542-cycle-payoff-d421.json"),
+    );
+    expect(first.selected.payload?.hostedCreditAddAmount).toBe(3);
+    expect(first.plan?.rootPlanInstanceId).toContain(
+      "economy-hosted-bank-cycle",
+    );
+    const second = replayCapture(
+      namedCapture("cp-meta-542-cycle-payoff-d422.json"),
+      false,
+    );
+    expect(second.selected.payload?.hostedCreditTakeAmount).toBe(3);
+    expect(second.plan?.selectedPlan?.moduleId).toBe("corp.economy");
+    expect(second.plan?.rootPlanInstanceId).toContain(
+      "economy-visible-card-payout",
+    );
+    expect(second.f.input.playerView.own.credits).toBe(13);
+    expect(second.f.input.playerView.own.clicks).toBe(1);
+  });
+  it.each([
+    ["cp-meta-542-r1-g2-d370-cycle-entry.json", "load"],
+    ["cp-meta-542-r1-g2-d371-funding-boundary.json", "cashout"],
+  ])(
+    "does not claim free capacity over a published Remote protection need: %s",
+    (name, phase) => {
+      const observed: Parameters<
+        typeof discovery.buildCorpEconomySignals
+      >[0][] = [];
+      const original = discovery.buildCorpEconomySignals;
+      vi.spyOn(discovery, "buildCorpEconomySignals").mockImplementation(
+        (params) => {
+          const result = original(params);
+          observed.push(params);
+          expect(
+            result.some(
+              (n) => n.kind === "develop_campaign" && n.hostedCreditBankCycle,
+            ),
+          ).toBe(false);
+          return result;
+        },
+      );
+      const { selected, plan } = replayCapture(namedCapture(name));
+      expect(
+        observed.some((p) =>
+          p.remoteProjects.some((r) => (r.need?.minimum ?? 0) > 0),
+        ),
+      ).toBe(true);
+      if (phase === "load") {
+        expect(selected.payload?.hostedCreditAddAmount).toBe(3);
+        expect(plan?.rootPlanInstanceId).toContain(
+          "economy-hosted-bank-investment",
+        );
+      } else expect(selected.payload?.hostedCreditTakeAmount).toBe(3);
+    },
+  );
   it("uses an empty active bank instead of two unbound Basic credits", () => {
     const { f, selected, plan } = replayCapture(
       namedCapture("cp-meta-542-r1-g2-d421-idle-department.json"),

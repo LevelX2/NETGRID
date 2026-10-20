@@ -11,7 +11,10 @@ import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-d
 import { turnKey } from "../../runtime/runtime-identifiers";
 import { corpHostedBankCycleDevelopment } from "./hosted-credit-bank-cycle";
 import { corpHostedBankInvestments } from "./hosted-credit-bank-investment";
-import { corpHostedBankRestTurnDevelopment } from "./hosted-credit-bank-restturn";
+import {
+  corpHostedBankRestTurnDevelopment,
+  corpHostedBankRestTurnPayoutContinuation,
+} from "./hosted-credit-bank-restturn";
 import {
   assessCorpEconomyFundingRoute,
   corpEconomyActionIsOwned,
@@ -150,7 +153,14 @@ export function buildCorpEconomySignals({
       ...corpImmediateOperationEconomyConversions(input, candidates),
       ...corpVisibleCardEconomyWithdrawals(input, candidates).filter(
         (signal) =>
-          bankInvestments.get(signal.sourceInstanceId)?.shouldCashout !== false,
+          bankInvestments.get(signal.sourceInstanceId)?.shouldCashout !==
+            false ||
+          corpHostedBankRestTurnPayoutContinuation({
+            input,
+            candidates,
+            previous,
+            signal,
+          }),
       ),
       ...corpOptionalActionCapacityConversions(input, candidates),
       ...corpEconomyDevelopmentCampaigns(input, candidates, scoreProjects),
