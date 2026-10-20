@@ -18,10 +18,13 @@ type Capture = {
   runtime: AiRuntimeCheckpointV1;
 };
 function capture(game: number, d: number): Capture {
+  return namedCapture(`cp-meta-542-before-g${game}-d${d}-department.json`);
+}
+function namedCapture(name: string): Capture {
   return JSON.parse(
     readFileSync(
       new URL(
-        `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-542-before-g${game}-d${d}-department.json`,
+        `../../../../../data/scenarios/ai-decision-checkpoints/${name}`,
         import.meta.url,
       ),
       "utf8",
@@ -29,8 +32,10 @@ function capture(game: number, d: number): Capture {
   );
 }
 function replay(game: number, d: number) {
-  const f = capture(game, d),
-    viewBefore = structuredClone(f.input.playerView);
+  return replayCapture(capture(game, d));
+}
+function replayCapture(f: Capture) {
+  const viewBefore = structuredClone(f.input.playerView);
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     f.input,
@@ -56,6 +61,30 @@ function replay(game: number, d: number) {
 }
 afterEach(() => vi.restoreAllMocks());
 describe("SP-611 native Department rest-turn comparison", () => {
+  it("uses an empty active bank instead of two unbound Basic credits", () => {
+    const { f, selected, plan } = replayCapture(
+      namedCapture("cp-meta-542-r1-g2-d421-idle-department.json"),
+    );
+    expect(f.input.playerView.stateVersion).toBe(420);
+    expect(selected.payload?.hostedCreditAddAmount).toBe(3);
+    expect(plan?.rootPlanInstanceId).toContain("economy-hosted-bank-cycle");
+    expect(
+      JSON.parse(String(selected.payload!.hostedCreditBankCycleQuoteJson)),
+    ).toMatchObject({
+      currentHostedCredits: 0,
+      currentClicks: 2,
+      cashoutCredits: 3,
+      extraLiquidCredits: 1,
+    });
+  });
+  it("preserves the current Score-parent funding milestone at the empty-bank boundary", () => {
+    const { selected, plan } = replayCapture(
+      namedCapture("cp-meta-542-r1-g19-d179-parent-funding.json"),
+    );
+    expect(selected.type).toBe("gain_credit");
+    expect(plan?.rootPlanInstanceId).toContain("corp.score_agenda");
+    expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
+  });
   it("continues the profitable current load with its Economy plan, step and route", () => {
     const { f, selected, plan } = replay(4, 441);
     expect(selected.payload?.hostedCreditAddAmount).toBe(3);

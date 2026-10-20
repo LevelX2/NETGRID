@@ -2025,20 +2025,25 @@ Die vier nativen Abbruchzustände der Diagnosepaarung 541 sind in
 `meta-541-bank-budget.test.ts` gegen erneute fehlende Ownership geschützt.
 
 Ein erreichtes kurzfristiges Budget schließt eine profitablere, vollständig
-Engine-gequotete Restzugfolge nicht aus (SP-611). Bei bereits gespeichertem
-Geld und sonst ungebundener Kapazität darf Economy neben der direkten
-Auszahlung die aktuelle Lade-/Auszahlungsquote als eigenes gebundenes Projekt
+Engine-gequotete Restzugfolge nicht aus (SP-611). Bei einer bereits aktiven
+Bank und sonst ungebundener Kapazität darf Economy neben direkter Auszahlung
+oder Basic-Credits die aktuelle Lade-/Auszahlungsquote als eigenes gebundenes Projekt
 anbieten. Der bestehende Scheduler und TurnPlanner vergleichen beide Routen;
 ausgeführt wird weiterhin nur der aktuelle native Head. Der Zustand aus
 Paarung 541, G4/D441, bindet so die weitere Ladung: zwei Aktionen liefern
 sechs statt drei Credits Auszahlung und einem Basic-Credit.
+Auch eine leere aktive Bank darf diese Alternative anbieten: Paarung 542,
+Diagnoserunde G2/D421, liefert mit zwei Restaktionen drei statt zwei Credits.
+Eine bestehende bedarfsgebundene Investition bleibt als Alternative erhalten;
+die Restzugfolge muss ihr aktuelles Liquiditätsziel vollständig erreichen.
 
 Offene Parent-Finanzierung, aktuelle Score-/Defense-/Remote-Fortsetzungen,
 andere aktuelle Einkommen, ein Operationsschwellenschritt und Deckende
 schließen diese zusätzliche Restzugroute aus. Defense prüft außerdem, ob
 eine frühe Auszahlung eine Installation im aktuellen Zug ermöglicht. Seine
 bestehenden Installations- und Stagingdienste erhalten dafür ausschließlich
-das exakt quotierte Zahlungsbudget nach der Auszahlung; PlayerView,
+das exakt quotierte Zahlungsbudget nach der Auszahlung beziehungsweise dem
+aktuellen Basic-Credit einer leeren Bank; PlayerView,
 Geometrie, LegalActions und Kostenquotes bleiben unverändert an den
 beobachteten Zustand gebunden. Fehlende Quotes bleiben ausdrücklich unknown
 und geben keine freie Restzugkapazität frei. Die nativen Gegenproben in

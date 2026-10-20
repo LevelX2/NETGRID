@@ -3,7 +3,11 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import type { CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { corpFundedDefenseContinuationWindow } from "../defense/corp-funded-continuation-window";
 import { corpHostedBankCycleDevelopment } from "./hosted-credit-bank-cycle";
-import type { CorpEconomyNeedSignal } from "./economy-types";
+import { corpExactCurrentBasicLiquidCreditCandidate } from "./economy-domain-signals";
+import type {
+  CorpEconomyDevelopmentSignal,
+  CorpEconomyNeedSignal,
+} from "./economy-types";
 
 /** Admit a quoted complete rest-turn bank alternative only for unused capacity.
  * Score/Defense/Remote keep their current conversion windows and funding children.
@@ -20,7 +24,10 @@ export function corpHostedBankRestTurnDevelopment(params: {
   ambushes: CorpPlanDomain["ambushes"];
   punishCampaigns: CorpPlanDomain["punishCampaigns"];
   centralAllocation: CorpPlanDomain["centralDefenseAllocation"];
-  bankChoices: ReadonlyMap<string, { shouldCashout: boolean }>;
+  bankChoices: ReadonlyMap<
+    string,
+    { shouldCashout: boolean; development?: CorpEconomyDevelopmentSignal }
+  >;
 }) {
   if (
     params.input.playerView.own.stackOrRdCount <= 1 ||
@@ -37,11 +44,13 @@ export function corpHostedBankRestTurnDevelopment(params: {
   return corpHostedBankCycleDevelopment(params.input, params.candidates).filter(
     (signal) => {
       const q = signal.hostedCreditBankCycle!;
+      const bankChoice = params.bankChoices.get(q.sourceCardInstanceId);
       if (
         q.headKind !== "load" ||
-        q.currentHostedCredits <= 0 ||
-        params.bankChoices.get(q.sourceCardInstanceId)?.shouldCashout !==
-          true ||
+        !bankChoice ||
+        (bankChoice.development?.hostedCreditBankInvestment !== undefined &&
+          q.currentCredits + q.netLiquidCreditGain <
+            bankChoice.development.hostedCreditBankInvestment.targetCredits) ||
         params.candidates.some(
           (c) =>
             c.economyProjection?.kind === "immediate_liquid" &&
@@ -54,25 +63,41 @@ export function corpHostedBankRestTurnDevelopment(params: {
         )
       )
         return false;
-      const cash = params.candidates.find(
-        (c) =>
-          c.sourceCardInstanceId === q.sourceCardInstanceId &&
-          c.abilityId === q.cashoutAbilityId,
-      );
-      if (
-        cash?.economyProjection?.kind !== "immediate_liquid" ||
-        cash.economyProjection.reliability !== "guaranteed" ||
-        cash.economyProjection.netLiquidCreditGain !== q.currentHostedCredits ||
-        cash.costProfile.clickCost !== 1 ||
-        cash.costProfile.creditCost !== 0
-      )
-        return false;
+      let alternativeCredits: number;
+      if (q.currentHostedCredits > 0) {
+        const cash = params.candidates.find(
+          (c) =>
+            c.sourceCardInstanceId === q.sourceCardInstanceId &&
+            c.abilityId === q.cashoutAbilityId,
+        );
+        if (
+          cash?.economyProjection?.kind !== "immediate_liquid" ||
+          cash.economyProjection.reliability !== "guaranteed" ||
+          cash.economyProjection.netLiquidCreditGain !==
+            q.currentHostedCredits ||
+          cash.costProfile.clickCost !== 1 ||
+          cash.costProfile.creditCost !== 0
+        )
+          return false;
+        alternativeCredits = q.currentHostedCredits;
+      } else {
+        const basic = params.candidates.find((c) =>
+          corpExactCurrentBasicLiquidCreditCandidate(params.input, c),
+        );
+        if (
+          basic?.economyProjection?.kind !== "immediate_liquid" ||
+          basic.economyProjection.reliability !== "guaranteed" ||
+          basic.economyProjection.netLiquidCreditGain !== 1
+        )
+          return false;
+        alternativeCredits = 1;
+      }
       const window = corpFundedDefenseContinuationWindow({
         input: params.input,
         candidates: params.candidates,
         centralAllocation: params.centralAllocation,
         available: {
-          credits: q.currentCredits + q.currentHostedCredits,
+          credits: q.currentCredits + alternativeCredits,
           clicks: q.currentClicks - 1,
         },
       });
