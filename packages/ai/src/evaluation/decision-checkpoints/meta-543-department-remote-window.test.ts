@@ -13,13 +13,51 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 afterEach(() => vi.restoreAllMocks());
-it.each(["g5-d333", "g18-d237", "g19-d258", "g19-d259", "g19-d269"])(
+
+it("executes the real defense draw before releasing its consumed receipt to Economy", () => {
+  const observed: Parameters<typeof discovery.buildCorpEconomySignals>[0][] = [];
+  const original = discovery.buildCorpEconomySignals;
+  vi.spyOn(discovery, "buildCorpEconomySignals").mockImplementation((p) => {
+    observed.push(p);
+    return original(p);
+  });
+  resetResidentPlanPortfolioMemory();
+  for (const d of [275, 276]) {
+    const name = d === 275 ? "active-defense-draw" : "completed-defense-draw";
+    const f = JSON.parse(readFileSync(new URL(
+      `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-543-r1-g34-d${d}-${name}.json`, import.meta.url,
+    ), "utf8")) as {input: AiDecisionInputWithDeckCapabilities; runtime: AiRuntimeCheckpointV1};
+    if (d === 275)
+      restoreAiRuntimeCheckpoint(f.input, f.input.ownDeckSnapshot!.deckSnapshotId, f.runtime);
+    const view = structuredClone(f.input.playerView);
+    const decision = chooseAiAction(f.input);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.timeoutUsed).toBe(false);
+    expect(f.input.playerView).toEqual(view);
+    const action = f.input.legalActions.find(a => a.actionId === decision.actionId);
+    expect(action?.expiresAtStateVersion).toBe(f.input.playerView.stateVersion);
+    const plan = decision.decisionDebug?.planFirstDecision;
+    expect(plan?.route?.actionId).toBe(action?.actionId);
+    expect(plan?.route?.stateVersion).toBe(f.input.playerView.stateVersion);
+    if (d === 275) {
+      expect(action?.type).toBe("draw_card");
+      expect(plan?.selectedPlan?.moduleId).toBe("corp.defend_servers");
+    } else {
+      expect(action?.payload?.hostedCreditAddAmount).toBe(3);
+      expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
+    }
+  }
+  expect(observed.some(p => p.defenseNeeds.some(s => s.kind === "generic" && s.drawAttemptState?.remainingAttempts === 1 && s.actionIds?.includes("corp.draw_card")))).toBe(true);
+  expect(observed.some(p => p.defenseNeeds.some(s => s.kind === "generic" && s.drawAttemptState?.remainingAttempts === 0 && s.actionIds?.length === 0))).toBe(true);
+});
+
+it.each(["g5-d333", "g18-d237", "g19-d258", "g19-d259", "g19-d269", "completed-defense-draw"])(
   "admits the profitable bank cycle without an executable Remote protection window: %s",
   (name) => {
     const f = JSON.parse(
       readFileSync(
         new URL(
-          `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-543-before-${name}-remote-bank.json`,
+          `../../../../../data/scenarios/ai-decision-checkpoints/${name === "completed-defense-draw" ? "cp-meta-543-r1-g34-d276-completed-defense-draw.json" : `cp-meta-543-before-${name}-remote-bank.json`}`,
           import.meta.url,
         ),
         "utf8",

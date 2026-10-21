@@ -2073,6 +2073,15 @@ ebenfalls gesperrt. Die fünf nativen Zustände aus Paarung 542 werden in
 geprüft; sie liefern keine zusätzliche Ausführungsautorität außerhalb von
 Scheduler und TurnPlanner.
 
+Ein verbrauchter optionaler Defense-Suchversuch reserviert keine weitere
+Restaktion für sich (SP-613). Sein aktueller, exakt zuggebundener Receipt mit
+null verbleibenden Versuchen, null Wert, ohne Actionkopf und früherer
+Ausführungs-StateVersion bleibt im Defense-Portfolio als Cadence-Gedächtnis
+erhalten. Economy konsumiert ihn nicht als offenes Schutzfenster. Ein noch
+ausführbarer Versuch und jeder andere oder unvollständig gebundene
+Defense-Bedarf behalten das Veto. Die native Folge Paarung 543 R1 G34/D275–276
+prüft den echten Draw und die anschließende Freigabe der Bankkapazität.
+
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt
 eine einzelne statische Schicht, wenn der verbleibende bekannte Pfad den

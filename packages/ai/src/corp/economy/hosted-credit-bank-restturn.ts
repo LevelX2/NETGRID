@@ -2,7 +2,10 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
-import { corpFundedDefenseContinuationWindow } from "../defense/corp-funded-continuation-window";
+import {
+  corpDefenseSignalReservesActionWindow,
+  corpFundedDefenseContinuationWindow,
+} from "../defense/corp-funded-continuation-window";
 import { corpHostedBankCycleDevelopment } from "./hosted-credit-bank-cycle";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "./economy-domain-signals";
 import type {
@@ -38,7 +41,9 @@ export function corpHostedBankRestTurnDevelopment(params: {
       (n) => (n.kind === "parent_funding" || n.kind === "reserve") && n.gap > 0,
     ) ||
     params.scoreProjects.some((p) => p.feasible) ||
-    params.defenseNeeds.length > 0 ||
+    params.defenseNeeds.some((signal) =>
+      corpDefenseSignalReservesActionWindow(params.input, signal),
+    ) ||
     params.remoteProjects.some(
       (p) => p.need?.capability === "credits" && p.need.minimum > 0,
     ) ||
