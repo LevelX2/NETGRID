@@ -84,11 +84,11 @@ describe("SP-611 native Department rest-turn comparison", () => {
     expect(second.f.input.playerView.own.clicks).toBe(1);
   });
   it.each([
-    ["cp-meta-542-r1-g2-d370-cycle-entry.json", "load"],
-    ["cp-meta-542-r1-g2-d371-funding-boundary.json", "cashout"],
+    ["cp-meta-542-r1-g2-d370-cycle-entry.json"],
+    ["cp-meta-542-r1-g2-d371-funding-boundary.json"],
   ])(
-    "does not claim free capacity over a published Remote protection need: %s",
-    (name, phase) => {
+    "compares the bank cycle when the published Remote need has no executable provider: %s",
+    (name) => {
       const observed: Parameters<
         typeof discovery.buildCorpEconomySignals
       >[0][] = [];
@@ -101,7 +101,7 @@ describe("SP-611 native Department rest-turn comparison", () => {
             result.some(
               (n) => n.kind === "develop_campaign" && n.hostedCreditBankCycle,
             ),
-          ).toBe(false);
+          ).toBe(true);
           return result;
         },
       );
@@ -111,12 +111,8 @@ describe("SP-611 native Department rest-turn comparison", () => {
           p.remoteProjects.some((r) => (r.need?.minimum ?? 0) > 0),
         ),
       ).toBe(true);
-      if (phase === "load") {
-        expect(selected.payload?.hostedCreditAddAmount).toBe(3);
-        expect(plan?.rootPlanInstanceId).toContain(
-          "economy-hosted-bank-investment",
-        );
-      } else expect(selected.payload?.hostedCreditTakeAmount).toBe(3);
+      expect(selected.payload?.hostedCreditAddAmount).toBe(3);
+      expect(plan?.rootPlanInstanceId).toContain("economy-hosted-bank-cycle");
     },
   );
   it("uses an empty active bank instead of two unbound Basic credits", () => {
@@ -230,6 +226,8 @@ describe("SP-611 native Department rest-turn comparison", () => {
       input,
       candidates,
       centralAllocation: undefined,
+      remoteProjects: [],
+      scoreProjects: [],
       available: { credits: 8, clicks: 1 },
     });
     expect(window.actionIds).toEqual([]);

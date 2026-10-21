@@ -6,7 +6,10 @@ import {
   corpGlobalDefenseInstallRouteAssessment,
   corpQualitativeIceStagingSignal,
 } from "./corp-defense-domain-signals";
-import { CORP_DEFENSE_DOMAIN_SIGNAL_FACTS } from "./defense-discovery-support";
+import {
+  CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
+  corpLayeredIceStagingParent,
+} from "./defense-discovery-support";
 
 /** Defense owns the value of an installation after an exact current payout.
  * Only its payment budget is projected. Current geometry, Engine quotes and
@@ -16,6 +19,8 @@ export function corpFundedDefenseContinuationWindow(params: {
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"];
+  remoteProjects: CorpCorePlanDomain["remoteProjects"];
+  scoreProjects: CorpCorePlanDomain["scoreProjects"];
   available: Readonly<{ credits: number; clicks: number }>;
 }) {
   const actionIds: string[] = [];
@@ -28,10 +33,25 @@ export function corpFundedDefenseContinuationWindow(params: {
     const serverId = action?.payload?.serverId;
     if (
       action?.payload?.placement !== "ice" ||
-      typeof serverId !== "string" ||
-      serverId === "new_remote" ||
-      !params.input.playerView.servers.some((s) => s.id === serverId)
+      typeof serverId !== "string"
     )
+      continue;
+    const parent = corpLayeredIceStagingParent(
+      params.scoreProjects,
+      params.remoteProjects,
+      serverId,
+      false,
+      false,
+    );
+    if (serverId === "new_remote") {
+      // This budget-only service does not project a new server. An exact
+      // offered head for a bound Remote need therefore keeps its veto until
+      // that whole continuation can be assessed; a need without a head cannot.
+      if (parent)
+        unknown.push(`${candidate.actionId}:bound_new_remote_window_unassessed`);
+      continue;
+    }
+    if (!params.input.playerView.servers.some((s) => s.id === serverId))
       continue;
     if (
       !CORP_DEFENSE_DOMAIN_SIGNAL_FACTS.hasExactNonNegativeCostProfile(
@@ -73,7 +93,7 @@ export function corpFundedDefenseContinuationWindow(params: {
       serverId,
       params.centralAllocation,
       CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
-      undefined,
+      parent,
       params.available,
     );
     if (

@@ -2044,7 +2044,7 @@ derselbe Bankvorrat und die aktuelle garantierte Auszahlung exakt zur
 vorherigen Ladequote passen. Das ist ein zusätzliches Economy-Angebot;
 aktuelle höherrangige Score- und Defense-Pläne behalten ihre Priorität.
 
-Offene Parent-Finanzierung, aktuelle Score-/Defense-/Remote-Fortsetzungen,
+Offene Parent-Finanzierung, aktuelle Score-/Defense-Fortsetzungen,
 andere aktuelle Einkommen, ein Operationsschwellenschritt und Deckende
 schließen diese zusätzliche Restzugroute aus. Defense prüft außerdem, ob
 eine frühe Auszahlung eine Installation im aktuellen Zug ermöglicht. Seine
@@ -2058,6 +2058,20 @@ und geben keine freie Restzugkapazität frei. Die nativen Gegenproben in
 Shock.r-Installation, Corporate-Coup-Vorbereitung und den finanzierten
 terminalen Tycho-Score. Eine mögliche zusätzliche Rezroute für mehrzügigen
 Bankschutz bleibt davon getrennt mit ihrem eigenen Creditbedarf zu bewerten.
+
+Ein abstrakter `improve_remote_protection_path`-Need sperrt die Restzugbank
+nicht allein (SP-612). Der Defense-Owner prüft vorhandene Installationsköpfe
+mit ihrem exakten Remote-/Score-Parent und dem quotierten frühen Geldgewinn.
+Fehlende ICE in HQ oder bekannte wirkungslose beziehungsweise reservewidrige
+Installationen sind kein aktuelles Schutzfenster. Ein echter gebundener
+Staging-Head bleibt geschützt. Für einen angebotenen, exakt gebundenen
+`new_remote`-Head kann der reine Budgetdienst die ganze Fortsetzung noch
+nicht beurteilen: Er meldet ausdrücklich unknown und gibt die Klicks nicht
+frei. Credit-Needs des Remotes und andere benötigte Finanzierung bleiben
+ebenfalls gesperrt. Die fünf nativen Zustände aus Paarung 542 werden in
+`meta-543-department-remote-window.test.ts` samt positiven Remote-Gegenfällen
+geprüft; sie liefern keine zusätzliche Ausführungsautorität außerhalb von
+Scheduler und TurnPlanner.
 
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt

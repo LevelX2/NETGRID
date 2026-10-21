@@ -39,7 +39,9 @@ export function corpHostedBankRestTurnDevelopment(params: {
     ) ||
     params.scoreProjects.some((p) => p.feasible) ||
     params.defenseNeeds.length > 0 ||
-    params.remoteProjects.some((p) => p.need && p.need.minimum > 0) ||
+    params.remoteProjects.some(
+      (p) => p.need?.capability === "credits" && p.need.minimum > 0,
+    ) ||
     params.ambushes.some((p) => p.actionIds.length > 0) ||
     params.punishCampaigns.some((p) => p.feasible)
   )
@@ -99,6 +101,8 @@ export function corpHostedBankRestTurnDevelopment(params: {
         input: params.input,
         candidates: params.candidates,
         centralAllocation: params.centralAllocation,
+        remoteProjects: params.remoteProjects,
+        scoreProjects: params.scoreProjects,
         available: {
           credits: q.currentCredits + alternativeCredits,
           clicks: q.currentClicks - 1,
