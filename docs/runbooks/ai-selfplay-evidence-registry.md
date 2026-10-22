@@ -1,6 +1,13 @@
 # KI-Selbstspiel-Evidenzregistrierung
 
-Stand: 2026-10-08
+Stand: 2026-10-22
+
+Der CLI-Export liest alle Tabellen innerhalb einer gemeinsamen
+Lesetransaktion. Er schreibt JSON in begrenzten UTF-8-Blöcken, damit auch
+vollständige Registry-Snapshots oberhalb der JavaScript-Stringgrenze ohne
+Abschneiden exportiert werden. Das JSON-Format bleibt unverändert; Datei- und
+Standardausgabe verwenden denselben Writer. Die gezielte Prüfung ist
+`node --test scripts/write-json-document.test.mjs scripts/ai-selfplay-evidence-registry.test.mjs`.
 
 Die kanonische 40er-Erfassung erlaubt für nachweislich fortschreitende lange
 Partien ein explizites `--max-batches N` (1–200, Standard 20). Das Limit wird
