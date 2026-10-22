@@ -9510,13 +9510,6 @@ function appendClosedRunnerLongtailEffects(
   if (utility?.kind === "hq_access_expose_all_installed_corp_cards")
     effects.push(
       {
-        kind: "hq_info",
-        scope: "hq",
-        timing: "on_access",
-        resource: "cards",
-        target: "full_reveal",
-      },
-      {
         kind: "expose_info",
         scope: "installed_card",
         timing: "on_access",
@@ -10437,11 +10430,8 @@ function derivedFunctionSignals(
   const runnerUtilityKind = engine.runnerUtilityLongtail?.kind;
   if (runnerUtilityKind === "hq_access_expose_all_installed_corp_cards")
     for (const signal of [
-      "access.hq_full_reveal",
       "info.expose",
       "info.expose_installed_card",
-      "info.hq",
-      "info.hq_information",
     ])
       signals.add(signal);
   if (

@@ -963,6 +963,26 @@ Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Kartenname und Definition-ID dienen der Identität und Bindung, nicht als
+Funktionswörter für die Handentwicklung. Der Funktionstext konsumiert
+Regeltext, Kartentyp/Subtypen und die erzeugten semantischen Signale. So wird
+eine Expose-Karte mit „Search“ im Namen nicht zur Suchmaschine und eine
+einmalige Zahlungsquelle mit „Bank“ im Namen nicht zur manuellen Sparbank.
+
+Eine zugriffsgetriggerte globale Expose-Quelle erhält ihren aktuellen
+Informationsbedarf aus tatsächlich unbekannten installierten Corp-Karten,
+einschließlich Root-Karten. Sind alle relevanten Ziele bekannt, darf ein
+positiver Installationsfit diesen fehlenden Bedarf nicht wieder erzeugen.
+Die Investition garantiert keinen späteren HQ-Erfolg. Andere
+Informationsfähigkeiten behalten ihre eigenen Ziel- und Consumerverträge.
+
+Derez während der Encounter-Auflösung ist bekannte Zugriff-Unterstützung,
+kein `unknown` und kein Einkommen. Die Rollen- und persistente
+Funktionsprojektion erhalten diesen Fakt. Eine ungebundene generische
+Installation entsteht daraus nicht: Der ganze Break-/Derez-/gegnerische
+Re-Rez-/Folgerun-Investitionsconsumer aus SP-307 bleibt eine gesonderte offene
+Frage. Ein Run-Ereignis mit optionalem späterem Derez bleibt ein Run-Ereignis.
+
 Zielpräferenzen und Vermeidungshinweise eines Hint-Targetprofils ordnen
 Kandidaten innerhalb einer gebundenen Fähigkeit. Sie erzeugen keine
 Kartenrolle oder funktionale Coverage: Eine Präferenz für das Entfernen

@@ -3222,13 +3222,6 @@
         "lineSupport": ["runner.hq_pressure"],
         "effects": [
           {
-            "kind": "hq_info",
-            "scope": "hq",
-            "timing": "on_access",
-            "resource": "cards",
-            "target": "full_reveal"
-          },
-          {
             "kind": "expose_info",
             "scope": "installed_card",
             "timing": "on_access",
@@ -3237,17 +3230,12 @@
           }
         ],
         "functionSignals": [
-          "access.hq_full_reveal",
           "info.expose",
-          "info.expose_installed_card",
-          "info.hq",
-          "info.hq_information"
+          "info.expose_installed_card"
         ],
         "actionTacticSignals": [
           "access.payoff",
           "effect:expose_info",
-          "effect:hq_info",
-          "effect_scope:hq",
           "effect_scope:installed_card",
           "effect_timing:on_access"
         ],

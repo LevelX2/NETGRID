@@ -1,7 +1,7 @@
 # AI-Hints: Quelle und Runtime-Vertrag
 
 Status: **aktueller generierter CardSpec-Vertrag**  
-Stand: 2026-10-07
+Stand: 2026-10-22
 
 ## Autorenquelle und Datenpfad
 
@@ -62,6 +62,13 @@ sinnvollen bezahlten Informationsschritt; dieser benötigt weiterhin eine
 side-sichere Neuquote des anschließenden Zugriffs.
 
 ## Typisierte Recovery- und Spielkosten
+
+`hq_access_expose_all_installed_corp_cards` beschreibt einen HQ-Zugriff als
+Auslöser für das Aufdecken installierter Corp-Karten. Daraus entstehen
+`expose_info` und die entsprechenden Expose-Funktionssignale. Weder ein
+vollständiger Blick in die HQ-Hand noch `hq_info` oder `access.hq_full_reveal`
+gehören zu dieser Wirkung. Echte `private_look`-Fähigkeiten behalten ihre
+eigene typisierte Zone und Informationsmenge.
 
 Direktes `lifecycle.on_score.gain_credits` erzeugt aus der mechanischen Quelle
 eine endliche Creditgutschrift mit `when_scored`-Timing und `score.credit_gain`.

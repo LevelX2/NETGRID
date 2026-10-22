@@ -21,6 +21,7 @@ import {
   runnerHintProvidesExposeInformation,
   runnerHintProvidesMultiaccess,
   runnerEffectsProvidePostBreakIceTrash,
+  runnerEffectsProvideEncounterIceDerez,
   runnerHintProvidesNonNoisyBreakerCredits,
   runnerHintProvidesSearch,
   runnerHintProvidesTopTrashRecovery,
@@ -108,12 +109,9 @@ export function signalsForCard(
       .filter((target): target is string => typeof target === "string"),
   ]);
   const text = [
-    card.title,
-    card.definitionId,
     card.type,
     ...(card.subtypes ?? []),
     card.rulesText,
-    definition?.title,
     definition?.type,
     ...(definition?.subtypes ?? []),
     definition?.text,
@@ -226,15 +224,18 @@ export function persistentFunctionalProfileForCard(
   const postBreakIceTrash = runnerEffectsProvidePostBreakIceTrash(
     hint?.effects,
   );
+  const encounterIceDerez = runnerEffectsProvideEncounterIceDerez(hint?.effects);
   const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
   const economyTool =
     !runOnlyEconomyPool &&
     !postBreakIceTrash &&
+    !encounterIceDerez &&
     breakerCoverage.length === 0 &&
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
   const accessSupport =
     postBreakIceTrash ||
+    encounterIceDerez ||
     hint?.planRoles?.includes("information") === true ||
     hint?.planRoles?.includes("protect_virus_counters") === true ||
     runnerHintProvidesExposeInformation(hint) ||
