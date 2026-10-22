@@ -631,6 +631,7 @@ export function scoreProjectForCandidate(
       certifiedMatureRemoteScoreHorizon ||
       boundedStagedScoreWindow;
     const recentlyCompromisedTarget =
+      !forcedAgendaDiscardRelief &&
       serverId !== undefined &&
       serverId !== "new_remote" &&
       recentlyCompromisedRemoteIds.has(serverId) &&

@@ -633,6 +633,15 @@ Notfall-Installationen behalten ihre ausdrückliche Fristzulassung, erhalten dad
 aber keinen Schutzbonus. Der Score-Owner vergleicht die an Parent, Server und
 StateVersion gebundene finanzierte Zugriffschance und die danach verbleibenden
 Runner-Credits. Reine ICE-Anzahl und Rez-Anzahl liefern keinen Konversionsbonus.
+Eine exakt qualifizierte Notfallinstallation gegen erzwungenen Agendaabwurf
+aus einer ausschließlich mit Agenden überfüllten HQ bleibt auch im leeren
+bestehenden Remote nach einem vorherigen Zugriff zugelassen. Die erneute
+Zugriffserinnerung darf diesen riskanten Versuch nicht gegenüber der bereits
+zulässigen nackten Neuinstallation sperren. Beide Ziele behalten ihre aktuelle
+Expositionsquote; die gewöhnliche Reprotektionspflicht außerhalb dieses engen
+Abwurffalls sowie Scorekosten, Verteidigungsreserven und Sofortsiege bleiben
+unverändert. Zwei native Folgeinputs aus Paarung 544 belegen die notwendige
+Kontinuität über den gegnerischen Zug; ein Einzelrestore verbraucht diese Grenze.
 Ein möglicher terminaler Steal erhöht das Gewicht der Exposition. Unbekannte oder
 veraltete Quotes bleiben unbekannt und tragen eine konservative Risikogrenze;
 sie werden weder als sicher noch pauschal als 50-Prozent-Chance behandelt.
