@@ -60,6 +60,10 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
       );
       return directRunDominates !== true;
     }
+    if (target === "matching_printed_rez_cost_surcharge") {
+      // The surcharge changes only a future rez; rezzed ICE cannot pay it again.
+      return server.ice.some((ice) => ice.rezzed === false);
+    }
     if (target === "run.trace_link_bonus") {
       return visibleRunnerTraceThreatOnServer(input, serverId);
     }

@@ -43,6 +43,16 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Ein Kartenrun mit zusätzlichem gedrucktem ICE-Rezpreis besitzt nur dann diesen
+Zusatznutzen, wenn auf seinem tatsächlichen Zielpfad noch ungerezztes ICE liegt.
+Bereits gerezzte ICE werden während desselben Runs nicht erneut bezahlt.
+Central, Remote und Coverage verwenden dafür denselben planlokalen
+Funktionsnachweis; bei gleichzeitig zugelassenem gleichwertigem Basisrun
+rechtfertigt dieser wirkungslose Aufpreis keinen Kartenverbrauch oder
+zusätzlichen Run-Klick. Andere echte Bypass-, Mehrfachzugriffs- und
+Informationswirkungen behalten ihren eigenen Nachweis.
+
+
 Die gemeinsame Runquote trennt mögliche Trace-Effekte von der nach bezahlter
 Abwehr verbleibenden Gefahr. Garantierte Break-, Link- oder Cancel-Kosten
 bleiben im vollständigen Pfadbudget; die ursprünglichen Gefahrenrecords
