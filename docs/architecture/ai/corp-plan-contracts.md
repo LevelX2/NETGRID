@@ -110,6 +110,22 @@ dadurch keine neue Zulassung. Die verdrängte Vorbereitung veröffentlicht
 Score-Finanzierung. Plan-, Step-, Route- und Zugbindungsprüfung bleiben beim
 bestehenden Score-Owner und Scheduler.
 
+Innerhalb bereits zugelassener terminaler Scoreprojekte bewertet der
+Score-Owner den Sieg mit einheitlichem Punktnutzen. Überzählige Agendapunkte
+und Strategieunterstützung für Züge nach dem Spielende erhöhen diesen Wert
+nicht. Verbleibende Advance-Aktionen, Credits, gebundener Fortschritt und die
+aktuelle Expositionsbewertung bleiben wirksam. Die Regel ändert weder
+Zulassung, Prioritätsklasse noch Schutz- oder Finanzierungsnachweise. Vor
+dem Matchpoint behalten Agendapunkte und spätere Strategieunterstützung
+ihren Wert. Der native Nachweis aus Paarung 553, Diagnose-Runde 3, G22 D424
+vergleicht bei sechs Punkten dieselbe Remote mit einer Drei- und einer
+Fünf-Advance-Siegesagenda; die langsamere Route darf keinen Zusatznutzen aus
+ihren überzähligen Punkten ziehen. Derselbe Score-Owner veröffentlicht diesen
+Punktnutzen und die verbleibende Aktions-/Creditbelastung auch in seiner
+Agenda-Zuglinie; die autoritative Restzugsuche darf die Kosten nicht wieder
+verlieren. Eine gespeicherte bereits gewählte Parentbindung wird dadurch
+nicht nachträglich als sicher dominiert behauptet.
+
 Eine Matchpointagenda darf auch auf dem letzten Klick installiert werden,
 wenn die aktuelle, exakt an Agenda und Zielserver gebundene Engine-Quote den
 Abschluss im nächsten Corp-Zug bestätigt und der Defense-Owner bereits
