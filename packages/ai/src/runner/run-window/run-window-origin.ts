@@ -218,6 +218,7 @@ export function reassessActiveInformationRunParent(
       input.playerView.own.credits +
         Math.max(0, input.playerView.run?.badPublicityCredits ?? 0),
       input.playerView.own.rig ?? [],
+      { liquidCredits: input.playerView.own.credits },
     ),
     input.playerView.servers.find(
       (server) => server.id === run.attackedServerId,

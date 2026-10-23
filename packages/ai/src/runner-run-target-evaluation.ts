@@ -442,9 +442,9 @@ function evaluateRunnerRunTarget(
     ? probabilisticPath
     : standardPath;
   const creditsAfterRun = generalCreditsRemainingAfterRun(
+    pathBeforeDamageBudget,
     creditsAfterAction,
     runOnlyCredits,
-    pathBeforeDamageBudget.creditsAfterPath,
   );
   const replacementPayoff = accessReplacementPayoffForTarget(
     params,
@@ -731,9 +731,9 @@ function evaluateRunnerRunTarget(
   const creditsAfterAvoidingVisibleIceHazards =
     path.creditsAfterAvoidingVisibleIceHazards !== undefined
       ? generalCreditsRemainingAfterRun(
+          path,
           creditsAfterAction,
           runOnlyCredits,
-          path.creditsAfterAvoidingVisibleIceHazards,
         )
       : creditsAfterRun;
   const expectedTagsFromVisibleIce = path.expectedTagsFromVisibleIce ?? 0;
@@ -1087,10 +1087,23 @@ function evaluateRunnerRunTarget(
 }
 
 function generalCreditsRemainingAfterRun(
+  path: KnownRezzedIcePathAssessment,
   creditsAfterAction: number,
   temporaryRunCredits: number,
-  routeCreditsAfter: number,
 ): number {
+  if (path.creditBudgetAfterPath) {
+    const eligible = path.creditBudgetAfterPath.traceEligibleCredits;
+    if (eligible === undefined)
+      throw new Error(
+        "runner_completed_path_missing_trace_eligible_credit_ledger",
+      );
+    return eligible;
+  }
+  if (path.canReachAccess)
+    throw new Error("runner_completed_path_missing_credit_ledger");
+  // A blocked prefix has no completed ledger. Preserve its funding deficit;
+  // this value never certifies an affordable completed route.
+  const routeCreditsAfter = path.creditsAfterPath;
   const availableDuringRun = creditsAfterAction + temporaryRunCredits;
   const spentDuringRun = Math.max(0, availableDuringRun - routeCreditsAfter);
   const generalCreditsSpent = Math.max(0, spentDuringRun - temporaryRunCredits);

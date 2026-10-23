@@ -119,6 +119,8 @@ export function visibleIceRunHazardsForQuote(params: {
   iceIndex: number;
   rigCards: VisibleCard[];
   availableCredits: number;
+  /** General-credit subset; omission denotes a single general-credit pool. */
+  availableTraceCredits?: number;
   visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
@@ -133,6 +135,14 @@ export function visibleIceRunHazardsForQuote(params: {
   const hazards: VisibleIceRunHazardProjection[] = [];
   const encounterBreakerStrengths = new Map(params.breakerStrengths);
   let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
+  let remainingTraceCredits =
+    params.availableTraceCredits ?? remainingHazardCredits;
+  if (
+    !Number.isInteger(remainingTraceCredits) ||
+    remainingTraceCredits < 0 ||
+    remainingTraceCredits > remainingHazardCredits
+  )
+    throw new Error("visible_run_hazard_invalid_trace_credit_subset");
   let remainingTraceCreditPool = visibleTraceCreditPool(
     params.runnerTraceSupportQuote,
     params.excludeStealthTraceCredits,
@@ -145,7 +155,7 @@ export function visibleIceRunHazardsForQuote(params: {
         params.runnerTraceSupportQuote,
         consumedTraceSupportSourceIds,
       ),
-      remainingHazardCredits,
+      remainingTraceCredits,
       params.runTraceLinkBonus,
       {
         traceCreditPool: remainingTraceCreditPool,
@@ -181,7 +191,7 @@ export function visibleIceRunHazardsForQuote(params: {
           );
     const traceSuccessCancel = cheapestTraceSuccessCancel(
       traceSupport,
-      remainingHazardCredits,
+      remainingTraceCredits,
     );
     const traceAvoidanceCandidate =
       visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe?.creditCost;
@@ -405,6 +415,9 @@ export function visibleIceRunHazardsForQuote(params: {
     });
     if (!unavoidable && minimumAvoidanceCost !== undefined) {
       remainingHazardCredits -= minimumAvoidanceCost;
+      remainingTraceCredits = usesBreakAvoidance
+        ? Math.min(remainingTraceCredits, remainingHazardCredits)
+        : remainingTraceCredits - minimumAvoidanceCost;
       if (usesBreakAvoidance && breakAssessment) {
         encounterBreakerStrengths.set(
           breakAssessment.breakerInstanceId,

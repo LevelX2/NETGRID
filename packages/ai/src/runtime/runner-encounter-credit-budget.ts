@@ -26,6 +26,7 @@ type MutableEncounterCreditBudget = Omit<
   | "paymentSupportSources"
   | "paymentSupportLiquidCredits"
   | "paymentSupportCreditsGained"
+  | "traceEligibleCredits"
 > & {
   paymentSupportSources?: NonNullable<
     RunnerRunPathCreditBudget["paymentSupportSources"]

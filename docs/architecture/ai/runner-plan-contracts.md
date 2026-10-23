@@ -72,6 +72,23 @@ Pool und eine anschließend unbezahlbare Wirkung getrennt sichtbar. Native
 Paarung-519-Kontrollen sichern Finanzierung, fehlende Coverage, gebundene
 Planroute und tatsächlichen AI→Engine-Zugriff mit identischem Replayhash ab.
 
+Das Pfadbudget führt neben den während des Runs verfügbaren Credits die
+allgemein verfügbaren `traceEligibleCredits` als eigenes Teilkonto. Temporäre
+Run-Credits und Bad-Publicity-Run-Credits dürfen Breaker und zulässige
+Run-Kosten finanzieren, aber keine Trace-Gebote oder allgemeinen Link- und
+Cancel-Aktivierungskosten. Echte allgemeine Einnahmen erhöhen beide Konten;
+Run-Zahlungen verbrauchen zuerst das beschränkte Geld. Trace-Zahlungen
+belasten das allgemeine Teilkonto unmittelbar. Mehrere Trace-Subroutinen und
+aufeinanderfolgende ICE konsumieren denselben Ledger. Dedizierte, von der
+Engine projizierte Trace-Pools bleiben zusätzlich verwendbar.
+
+Eine abgeschlossene Pfadquote liefert diesen Ledger im
+`creditBudgetAfterPath`; Nachlauf- und Zugriffsbudgets übernehmen daraus das
+verbleibende allgemeine Geld. Sie rekonstruieren es nicht aus einer pauschalen
+Ausgabenreihenfolge. Ein fehlender Ledger für einen abgeschlossenen Pfad oder
+ein ungültiges explizites Teilkonto scheitert sichtbar. Ein einzelner
+numerischer Budgetwert bezeichnet ausdrücklich nur allgemeine Credits.
+
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
 verbrauchen den Breakerpreis und zweckgebundene Credits nur einmal. Der

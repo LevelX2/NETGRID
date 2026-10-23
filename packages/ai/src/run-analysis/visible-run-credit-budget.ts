@@ -48,6 +48,7 @@ export function fundRunnerRunPathPayment(
   budget: Pick<
     RunnerRunPathCreditBudget,
     | "credits"
+    | "traceEligibleCredits"
     | "paymentSupportSources"
     | "paymentSupportLiquidCredits"
     | "paymentSupportCreditsGained"
@@ -76,6 +77,8 @@ export function fundRunnerRunPathPayment(
     const net = ability.gainCredits - ability.creditCost;
     liquid += net;
     budget.credits += net;
+    if (budget.traceEligibleCredits !== undefined)
+      budget.traceEligibleCredits += net;
     budget.paymentSupportCreditsGained =
       (budget.paymentSupportCreditsGained ?? 0) + net;
   }
@@ -102,6 +105,10 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
     stealthNonNoisyIcebreakerCredits;
   return {
     credits: normalizeCreditAmount(credits),
+    traceEligibleCredits: traceEligibleCreditAmount(
+      normalizeCreditAmount(credits),
+      options.liquidCredits,
+    ),
     ...(options.liquidCredits !== undefined
       ? runnerPaymentSupportBudgetForRig(options.liquidCredits, rigCards)
       : {}),
@@ -141,6 +148,7 @@ export function visibleRunnerRunPathCreditBudgetForRig(
 ): Omit<
   Required<RunnerRunPathCreditBudget>,
   | "credits"
+  | "traceEligibleCredits"
   | "paymentSupportSources"
   | "paymentSupportLiquidCredits"
   | "paymentSupportCreditsGained"
@@ -217,6 +225,7 @@ export function normalizeRunnerRunPathCreditBudget(
   if (typeof budget === "number") {
     return {
       credits: normalizeCreditAmount(budget),
+      traceEligibleCredits: normalizeCreditAmount(budget),
       icebreakerCredits: 0,
       nonNoisyIcebreakerCredits: 0,
       nonStealthNonNoisyIcebreakerCredits: 0,
@@ -265,6 +274,10 @@ export function normalizeRunnerRunPathCreditBudget(
   }
   return {
     credits: normalizeCreditAmount(budget.credits),
+    traceEligibleCredits: traceEligibleCreditAmount(
+      normalizeCreditAmount(budget.credits),
+      budget.traceEligibleCredits,
+    ),
     ...(budget.paymentSupportSources
       ? {
           paymentSupportSources: budget.paymentSupportSources.map((source) => ({
@@ -322,6 +335,13 @@ export function normalizeCreditAmount(value: number): number {
   return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }
 
+function traceEligibleCreditAmount(credits: number, eligible?: number): number {
+  if (eligible === undefined) return credits;
+  if (!Number.isInteger(eligible) || eligible < 0 || eligible > credits)
+    throw new Error("runner_run_path_invalid_trace_eligible_credit_subset");
+  return eligible;
+}
+
 export function projectGeneralCreditPayment(
   budget: MutableRunnerRunPathCreditBudget,
   cost: number,
@@ -345,11 +365,31 @@ export function spendGeneralCredits(
 ): void {
   if (allowPaymentSupport) fundRunnerRunPathPayment(budget, cost);
   budget.credits -= normalizeCreditAmount(cost);
+  budget.traceEligibleCredits = Math.min(
+    budget.traceEligibleCredits,
+    Math.max(0, budget.credits),
+  );
   if (budget.paymentSupportLiquidCredits !== undefined)
     budget.paymentSupportLiquidCredits = Math.min(
       budget.paymentSupportLiquidCredits,
       Math.max(0, budget.credits),
     );
+}
+
+/** Trace bids and Link/cancel activation consume general money, never run-only money. */
+export function spendTraceEligibleCredits(
+  budget: MutableRunnerRunPathCreditBudget,
+  cost: number,
+): void {
+  if (!Number.isInteger(cost))
+    throw new Error("runner_run_path_invalid_trace_payment");
+  if (cost > budget.traceEligibleCredits)
+    throw new Error("runner_run_path_trace_payment_exceeds_eligible_credits");
+  // The exact support quote may include a reward paid after successful avoidance.
+  budget.credits -= cost;
+  budget.traceEligibleCredits -= cost;
+  if (budget.paymentSupportLiquidCredits !== undefined)
+    budget.paymentSupportLiquidCredits = budget.traceEligibleCredits;
 }
 
 export function projectBreakerCreditPayment(
@@ -420,7 +460,7 @@ export function spendBreakerCredits(
   }
   spend("icebreakerCredits");
   const cash = Math.min(budget.credits, remainingCost);
-  budget.credits -= cash;
+  spendGeneralCredits(budget, cash, false);
 }
 
 export function spendBreakerCreditsAndApplySideEffects(

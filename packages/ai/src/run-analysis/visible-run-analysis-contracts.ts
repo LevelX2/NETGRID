@@ -124,6 +124,8 @@ export type VisibleRunBreakerState = {
 
 export type RunnerRunPathCreditBudget = {
   credits: number;
+  /** General-credit subset of credits; run-only money cannot pay traces. Omission denotes a single general-credit pool. */
+  traceEligibleCredits?: number;
   /** Conditional one-shot sources, usable only at a positive payment window. */
   paymentSupportSources?: readonly {
     cardInstanceId: string;

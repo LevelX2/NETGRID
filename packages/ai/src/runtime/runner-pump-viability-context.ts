@@ -50,7 +50,10 @@ import {
 } from "../run-analysis/visible-run-credit-budget";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
-type MutableEncounterCreditBudget = MutableRunnerRunPathCreditBudget & {
+type MutableEncounterCreditBudget = Omit<
+  MutableRunnerRunPathCreditBudget,
+  "traceEligibleCredits"
+> & {
   runOnlyCredits: number;
 };
 
