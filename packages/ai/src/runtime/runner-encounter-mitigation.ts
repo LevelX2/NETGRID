@@ -201,6 +201,7 @@ export function currentEncounterMitigationForAction(
       {
         ...budgetAfterETR,
         credits: budgetAfterETR.credits + budgetAfterETR.runOnlyCredits,
+        traceEligibleCredits: budgetAfterETR.credits,
       },
       server.root,
       input.playerView.opponent.credits,

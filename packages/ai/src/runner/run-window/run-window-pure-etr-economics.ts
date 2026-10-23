@@ -96,6 +96,7 @@ export function pureEndRunEncounterPayment(
       budget: {
         ...payment.budget,
         credits: payment.budget.credits + payment.budget.runOnlyCredits,
+        traceEligibleCredits: payment.budget.credits,
       },
     };
   }

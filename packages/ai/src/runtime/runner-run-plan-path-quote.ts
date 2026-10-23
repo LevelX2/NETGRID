@@ -1,3 +1,4 @@
+import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
@@ -205,11 +206,7 @@ export function quoteRunnerRunPath(
   ).length;
   const sharedPathGeneralCredits =
     input.playerView.own.credits +
-    Math.max(0, input.playerView.run?.badPublicityCredits ?? 0) +
-    Math.max(
-      0,
-      input.playerView.run?.runnerRunTemporaryCredits?.remaining ?? 0,
-    );
+    visibleRunnerRunOnlyCredits(input.playerView.run);
   const sharedPathAssessment = assessKnownRezzedIcePath(
     sharedPathIce,
     input.playerView.own.rig ?? [],
@@ -597,13 +594,7 @@ function cheapestTraceAccessSequence(params: {
     ? encounterContinueAction(params.input)
     : undefined;
   if (params.currentEncounter && !continueAction) return undefined;
-  let remainingGeneralCredits =
-    params.input.playerView.own.credits +
-    Math.max(0, params.input.playerView.run?.badPublicityCredits ?? 0) +
-    Math.max(
-      0,
-      params.input.playerView.run?.runnerRunTemporaryCredits?.remaining ?? 0,
-    );
+  let remainingGeneralCredits = params.input.playerView.own.credits;
   let guaranteedTraceCost = 0;
   const acceptedEffectTypes: string[] = [];
   const traceRulesProfile =

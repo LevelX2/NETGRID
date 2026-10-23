@@ -89,6 +89,25 @@ Ausgabenreihenfolge. Ein fehlender Ledger für einen abgeschlossenen Pfad oder
 ein ungültiges explizites Teilkonto scheitert sichtbar. Ein einzelner
 numerischer Budgetwert bezeichnet ausdrücklich nur allgemeine Credits.
 
+Im aktiven Run übernehmen Encounter-, Pump-, Restpfad-, Fortgebühren- und
+Informationsgrenzen-Quotes den aktuellen Engine-Pool
+`runnerRunTemporaryCredits.remaining` zusammen mit den Bad-Publicity-Credits.
+Der Runstart darf eine bezahlte Route nicht mit neun temporären Credits
+zulassen, die der spätere Break-Owner als null behandelt. Jede Zahlung wird
+aus den tatsächlichen aktuellen LegalActions und dem verbleibenden Pool
+erneut gebunden. Trace-Zahlungen und der für Trash reservierte allgemeine
+Creditbedarf behalten ihr eigenes Teilkonto; der vorhandene Run-Root und
+Executor bleiben erhalten. Paarung 552 R4/G2/D183 und G5/D87 sichern die
+vorher aufgegebenen bezahlbaren Breaks, G21/D454 den bereits korrekten
+Gegenfall.
+
+Bei der Übergabe eines bezahlten Encounters an die verbleibende Pfadquote
+enthält `credits` das Restgeld einschließlich Run-Pools und
+`traceEligibleCredits` ausschließlich das allgemeine Restgeld. Dies gilt auch
+für Pump-/Vollbreak-Alternativen, optionale Schadensvermeidung und
+ETR-Zahlungen. Der zweite Encounter darf Run-Geld nicht erneut als
+Trace-Budget erhalten.
+
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
 verbrauchen den Breakerpreis und zweckgebundene Credits nur einmal. Der

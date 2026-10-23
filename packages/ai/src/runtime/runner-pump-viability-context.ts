@@ -47,6 +47,7 @@ import type { MutableRunnerRunPathCreditBudget } from "../run-analysis/visible-r
 import {
   fundRunnerRunPathPayment,
   runnerPaymentSupportBudgetForRig,
+  visibleRunnerRunOnlyCredits,
 } from "../run-analysis/visible-run-credit-budget";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
@@ -414,6 +415,7 @@ export function createRunnerPumpViabilityContext(
               credits:
                 breakPayment.budget.credits +
                 breakPayment.budget.runOnlyCredits,
+              traceEligibleCredits: breakPayment.budget.credits,
             },
             currentQuote.subroutines.filter(
               (subroutine, index) =>
@@ -445,37 +447,43 @@ export function createRunnerPumpViabilityContext(
           (breaker.strength ?? 0) + requiredPumps * pumpAmount,
           currentQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
         );
-        const completePayment = completeQuote && spendIcebreakerCredits(
-          pumpPayment.budget,
-          breaker,
-          completeQuote.cost,
-        );
+        const completePayment =
+          completeQuote &&
+          spendIcebreakerCredits(
+            pumpPayment.budget,
+            breaker,
+            completeQuote.cost,
+          );
         if (completePayment?.affordable) {
-          const completeFuture = dependencies.encounterFuturePathAfterPumpBreakAssessment(
-            {
-              ...input,
-              playerView: {
-                ...input.playerView,
-                own: {
-                  ...input.playerView.own,
-                  rig: runnerRigAfterPumpAndEncounter(
-                    input.playerView.own.rig ?? [],
-                    breaker,
-                    currentEncounteredIceCard(input) ?? encounteredIce,
-                    pumpAmount,
-                    requiredPumps,
-                  ),
+          const completeFuture =
+            dependencies.encounterFuturePathAfterPumpBreakAssessment(
+              {
+                ...input,
+                playerView: {
+                  ...input.playerView,
+                  own: {
+                    ...input.playerView.own,
+                    rig: runnerRigAfterPumpAndEncounter(
+                      input.playerView.own.rig ?? [],
+                      breaker,
+                      currentEncounteredIceCard(input) ?? encounteredIce,
+                      pumpAmount,
+                      requiredPumps,
+                    ),
+                  },
                 },
               },
-            },
-            server,
-            {
-              ...completePayment.budget,
-              credits: completePayment.budget.credits + completePayment.budget.runOnlyCredits,
-            },
-            [],
-            requiredHandFloor,
-          );
+              server,
+              {
+                ...completePayment.budget,
+                credits:
+                  completePayment.budget.credits +
+                  completePayment.budget.runOnlyCredits,
+                traceEligibleCredits: completePayment.budget.credits,
+              },
+              [],
+              requiredHandFloor,
+            );
           if (!completeFuture.blocksPump) {
             requiredBreakSubroutines = completeCurrentBreak;
             estimatedBreakCost = completeQuote!.cost;
@@ -483,14 +491,19 @@ export function createRunnerPumpViabilityContext(
             creditsAfterPumpAndBreak = completePayment.budget.credits;
             futurePath = {
               ...completeFuture,
-              evidence: ["pump_complete_current_break_preserves_cumulative_damage_budget", ...completeFuture.evidence],
+              evidence: [
+                "pump_complete_current_break_preserves_cumulative_damage_budget",
+                ...completeFuture.evidence,
+              ],
             };
           }
         }
       }
       if (futurePath.blocksPump) {
         const mitigation = currentEncounterMitigationForAction(
-          input, action, requiredHandFloor,
+          input,
+          action,
+          requiredHandFloor,
         );
         if (mitigation?.supportsCurrentAction) {
           return {
@@ -579,9 +592,7 @@ function encounterCreditBudget(
   );
   return {
     credits: normalizeCreditAmount(input.playerView.own.credits),
-    runOnlyCredits: normalizeCreditAmount(
-      input.playerView.run?.badPublicityCredits ?? 0,
-    ),
+    runOnlyCredits: visibleRunnerRunOnlyCredits(input.playerView.run),
     ...runnerPaymentSupportBudgetForRig(
       input.playerView.own.credits,
       input.playerView.own.rig ?? [],

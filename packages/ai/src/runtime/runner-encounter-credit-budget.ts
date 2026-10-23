@@ -13,6 +13,7 @@ import { breakerIdForEncounterAction } from "./encounter-action";
 import {
   fundRunnerRunPathPayment,
   runnerPaymentSupportBudgetForRig,
+  visibleRunnerRunOnlyCredits,
 } from "../run-analysis/visible-run-credit-budget";
 
 type EncounterCreditBudget = RunnerRunPathCreditBudget & {
@@ -59,9 +60,7 @@ export function runnerEncounterCreditBudgetForInput(
       input.playerView.own.credits,
       input.playerView.own.rig ?? [],
     ),
-    runOnlyCredits: normalizeCreditAmount(
-      input.playerView.run?.badPublicityCredits ?? 0,
-    ),
+    runOnlyCredits: visibleRunnerRunOnlyCredits(input.playerView.run),
     icebreakerCredits: visiblePools.icebreakerCredits,
     nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
     nonStealthNonNoisyIcebreakerCredits:

@@ -160,6 +160,7 @@ export function optionalDamageBreakContinuationPayments(
         budget: {
           ...state.budget,
           credits: state.budget.credits + state.budget.runOnlyCredits,
+          traceEligibleCredits: state.budget.credits,
         },
       });
       continue;

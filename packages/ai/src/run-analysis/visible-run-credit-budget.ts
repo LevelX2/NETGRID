@@ -1,4 +1,8 @@
-import type { CounterCreditUse, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  CounterCreditUse,
+  VisibleCard,
+} from "@netgrid/shared";
 import type {
   BreakAssessment,
   CreditPaymentProjection,
@@ -7,6 +11,25 @@ import type {
   RunnerRunPathCreditBudgetInput,
 } from "./visible-run-analysis-contracts";
 import { subtypeKey } from "./visible-run-subtype-key";
+
+/** Current Engine pools usable for run payments, but never for Trace or access costs. */
+export function visibleRunnerRunOnlyCredits(
+  run: AiDecisionInput["playerView"]["run"],
+): number {
+  const badPublicity = run?.badPublicityCredits ?? 0;
+  const temporary = run?.runnerRunTemporaryCredits;
+  const remaining = temporary?.remaining ?? 0;
+  if (
+    !Number.isSafeInteger(badPublicity) ||
+    badPublicity < 0 ||
+    !Number.isSafeInteger(remaining) ||
+    remaining < 0 ||
+    (temporary && !temporary.sourceDefinitionId) ||
+    !Number.isSafeInteger(badPublicity + remaining)
+  )
+    throw new Error("runner_current_run_invalid_run_only_credit_pool");
+  return badPublicity + remaining;
+}
 
 export function runnerPaymentSupportBudgetForRig(
   liquidCredits: number,
