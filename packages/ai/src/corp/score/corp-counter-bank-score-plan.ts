@@ -10,6 +10,9 @@ import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts"
 import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
 import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { finiteNonNegativeIntegerOrResolutionFailure } from "../../runtime/exact-action-cost-facts";
+import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
+import { corpSpendConsumesKnownCentralRezReserve } from "../defense/corp-defense-domain-signals";
 
 import { readCorpCounterBankPreparationQuote } from "../../plans/corp-counter-bank-preparation-quote";
 
@@ -120,6 +123,31 @@ function counterBankAdvanceProjects(
         candidate.sourceDefinitionId === card.definitionId,
     );
     if (!advance) return [];
+    const advanceCredits = finiteNonNegativeIntegerOrResolutionFailure(
+      input,
+      advance.costProfile.creditCost,
+      `Bind counter-bank preparation ${advance.actionId} to its current credit cost.`,
+    );
+    const advanceClicks = finiteNonNegativeIntegerOrResolutionFailure(
+      input,
+      advance.costProfile.clickCost,
+      `Bind counter-bank preparation ${advance.actionId} to its current click cost.`,
+    );
+    const creditsAfterAdvance = input.playerView.own.credits - advanceCredits;
+    // Defense may liquidate a counter to fund current protection. This future
+    // investment must not spend that funded reserve buying the counter back.
+    // Exact current agenda conversions retain their separate admission proof.
+    if (
+      creditsAfterAdvance < corpFundedCentralProtectionReserve(input) ||
+      corpSpendConsumesKnownCentralRezReserve(
+        input,
+        undefined,
+        creditsAfterAdvance,
+        input.playerView.own.clicks - advanceClicks,
+        { kind: "funded_terminal_score_admission" },
+      )
+    )
+      return [];
     return [
       counterBankProject({
         projectId: `counter-bank:build:${card.instanceId}:${serverId}`,

@@ -173,6 +173,17 @@ Remote-Servers. Sichtbare Agenden in Zentralzonen, insbesondere in Archives,
 sind keine installierten Transfer- oder Scoreziele. Die Root-Darstellung einer
 Zentralzone ersetzt diesen Nachweis nicht (Paarung 482, Runde 1, G20 D378).
 
+Der Aufbau einer Counterbank bewahrt bereits finanzierte zentrale
+Verteidigungsreserven. Der Score-Owner vergleicht dafür die exakten aktuellen
+Advance-Kosten mit den vorhandenen Defense-Facts für Schutz und terminale
+Tax-/Schadenswirkung. Ein zukünftiges Investment darf einen gerade durch
+Counterauszahlung erreichten Rezbedarf nicht sofort wieder öffnen. Der
+Defense-Owner darf die aktuelle Auszahlung weiterhin anfordern; vollständige
+aktuelle Agenda-Konversionen behalten ihre eigene Zulassung und Priorität.
+Damit entsteht weder eine feste Counterzahl noch ein eigener Chooser
+(Regression: Paarung 547, Runde 1, G5 D315–320; positive Aufbau- und
+Konversionsköpfe G1 D265/D275).
+
 Für eine installierte Agenda unterscheidet der Scoreowner die vollständigen
 Kosten der aktuellen Konversion von der bis zum nächsten Corp-Zug nötigen
 Reserve. Eine Engine-Quote mit `creditsRequiredBeforeNextCorpTurn: 0` bedeutet

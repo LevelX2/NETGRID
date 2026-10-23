@@ -9,6 +9,7 @@ import {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { costProfileForAction } from "../actions/action-cost-timing";
 import {
   attachOwnDeckSnapshot,
   aiInput,
@@ -581,6 +582,7 @@ function candidate(
     actionId: action.actionId,
     actionType: action.type,
     semanticActionType,
+    costProfile: costProfileForAction(action),
     sourceCardInstanceId:
       typeof action.source === "string" && action.source !== "basic_action"
         ? action.source
