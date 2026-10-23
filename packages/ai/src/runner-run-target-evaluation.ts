@@ -2201,6 +2201,7 @@ function runnerRdRunBurnsRemotePressureReserve(params: {
   if (
     params.targetKind !== "rd" ||
     params.pathPassability !== "reachable" ||
+    params.creditsAfterRun >= policy.currentCredits ||
     policy.remotePressureReserveActive !== true ||
     policy.reserveOverrides.includes("terminal_central_pressure")
   ) {

@@ -250,6 +250,14 @@ ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
 Pfadkosten und die Reserve für unbekanntes ICE bleiben verbindlich. Eine
 vorhandene Remote-Bedrohung behält ihre Reserve.
 
+Die Reserveverbrauchs-Fakten vergleichen dafür den tatsächlichen marginalen
+liquiden Abfluss. Ein Zentralrun, dessen bekannter Pfad die aktuelle Bank
+unverändert lässt, verbrennt keine Remote-Reserve allein deshalb, weil die
+Startbank unter einem zukünftigen Auffüllziel liegt. Empfehlung und Score
+konsumieren dieselbe korrigierte Tatsache. Reale Bankausgaben, Coverage-,
+Schadens-, Handpuffer- und Prerun-Reserven bleiben verbindlich; unbekannte ICE
+erhalten dadurch keine Zugriffsgarantie.
+
 Ein bekannter Trace-Effekt, der den Zugriff verhindert, ist bei unbezahlbarer
 Basisstärke und ohne bezahlbare Break- oder Abbruchantwort kein bedingt
 erreichbarer Zugriff. Die gemeinsame Runquote weist diesen Pfad als
