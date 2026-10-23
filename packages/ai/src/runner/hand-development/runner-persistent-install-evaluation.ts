@@ -294,6 +294,7 @@ export function persistentFunctionalProfileForCard(
       ? functionalCoverage
       : [`type:${card.type ?? "unknown"}`];
   return {
+    sourceCardInstanceId: card.instanceId,
     persistentEngineKind: persistentEngine.kind,
     persistentEngineCapabilities: persistentEngine.outputCapabilities,
     persistentEngineRepeatable: persistentEngine.repeatable,
@@ -1328,6 +1329,33 @@ export function cumulativeNeedLevel(
           ),
       ) === true;
     if (hasBoundRestrictedRunCreditDemand) return "high";
+    const projection = params.rigDemandProjection;
+    const retained = projection?.cardRetentionFacts.find(
+      (fact) => fact.cardInstanceId === profile.sourceCardInstanceId,
+    );
+    // A preferred, admitted development milestone survives its memory setup.
+    // It is finite support value for this exact hand card, not spare run cash.
+    if (
+      profile.recurringBreakerEconomy &&
+      retained?.retentionValue === "preferred" &&
+      retained.installReadiness === "next_milestone_legal" &&
+      projection?.roleDemands.some(
+        (demand) =>
+          retained.boundDemandIds.includes(demand.demandId) &&
+          demand.ownerModuleId === "runner.develop_board_and_hand" &&
+          demand.sourceKind === "admission_checked_development" &&
+          demand.capabilityId ===
+            "strategic_support:recurring_breaker_credits" &&
+          demand.requirement === "preferred_simultaneously" &&
+          demand.providers.some(
+            (provider) =>
+              provider.cardInstanceId === profile.sourceCardInstanceId &&
+              provider.acquisitionState === "in_hand",
+          ),
+      )
+    ) {
+      return "medium";
+    }
     if (profile.recurringBreakerEconomy && params.rigDemandProjection) {
       return "low";
     }

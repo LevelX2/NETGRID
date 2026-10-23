@@ -880,6 +880,14 @@ aktuellen LegalAction geprüft. Handfülle allein erzeugt weiterhin keinen
 Speicherbedarf. Nach jeder echten Installation wird neu bewertet; es werden
 keine zukünftigen Action-IDs festgeschrieben.
 
+Die kumulative Installationsbewertung konsumiert einen solchen bevorzugten
+Supportbedarf für genau die gebundene Handkarteninstanz auch nach dem
+Speicherausbau. Ein zugelassener endlicher Entwicklungsmeilenstein bleibt
+mittlerer Bedarf; er darf nicht durch eine reine Dublettenprüfung wieder
+verloren gehen. Ungebundene weitere Kopien, fehlende kompatible Verbraucher,
+Reservegrenzen und akute Abschlussfenster erzeugen dadurch keinen neuen
+Investitionsbedarf. Die Auswahl bleibt beim bestehenden Recurring-Owner.
+
 Ein Basic Draw für eine im eigenen Deck side-sicher bekannte Antwort wird als
 exakte Route dieses Coverage-Plans gebunden. Eine volle Hand ist dabei keine
 harte Sperre: Der Plan darf den sichtbaren Cleanup-Trade-off bewerten, wenn die

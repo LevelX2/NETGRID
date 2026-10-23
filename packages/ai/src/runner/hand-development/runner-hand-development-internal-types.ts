@@ -35,6 +35,7 @@ export type CardContext = {
 };
 
 export type PersistentFunctionalProfile = {
+  sourceCardInstanceId: string;
   persistentEngineKind: RunnerPersistentEngineKind;
   persistentEngineCapabilities: RunnerPersistentEngineCapability[];
   persistentEngineRepeatable: boolean;
