@@ -1766,6 +1766,16 @@ beschreibt eine Möglichkeit, keine Zielwahrscheinlichkeit. Der bestehende
 globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu;
 er garantiert weder ihre Auswahl noch eine vollständig bessere Allokation.
 
+Aktionsbasierter ICE-Rez-Support darf eine nach vollständiger aktueller,
+an ICE-Instanz, Definition, Fort und StateVersion gebundener Engine-Projektion
+wirkungslose Zielschicht nicht als direkte Verteidigung aktivieren. Leere
+Subroutinen ohne konditionale Begegnungswirkung, bezahlte Begegnungsabwehr
+oder positives Rezz-Einkommen rechtfertigen weder temporäre Entsorgung noch
+Ratenschuld. Gedrucktes künftiges Potenzial und bloße Stärke ersetzen den
+aktuellen Effekt nicht. Unvollständige beziehungsweise Choice-abhängige
+Projektionen sind kein Beleg für Wirkungslosigkeit. Ein spekulativer Nutzen
+an anderen ICE-Schichten wird damit nicht als bewiesener Schutzeffekt gewertet.
+
 Konditionale Rez-Supportkarten benötigen einen kartenspezifischen
 Folgevertrag. Chester Mix darf nur gerezzt werden, wenn bereits vor dem Rezzen
 genau eine produktive ICE-Installation am selben Fort feststeht, der Discount

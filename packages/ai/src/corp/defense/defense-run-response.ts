@@ -50,6 +50,33 @@ export function corpVisibleHandHasActionIceRezSupport(
   );
 }
 
+/** Only a complete, current Engine quote proves that this direct target is empty.
+ * Incomplete/choice-dependent quotes are not evidence of an empty encounter.
+ * This does not certify a speculative future effect on another ICE layer.
+ */
+export function corpIceRezSupportTargetHasNoCurrentEffect(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+  serverId: string,
+): boolean {
+  const post = ice.effectivePostRezRunQuote;
+  return (
+    post?.complete === true &&
+    post.context === "installed_post_rez" &&
+    post.cardId === ice.instanceId &&
+    post.iceDefinitionId === ice.definitionId &&
+    post.targetServerId === serverId &&
+    post.projectedServerId === serverId &&
+    post.expiresAtStateVersion === input.playerView.stateVersion &&
+    post.effectiveRunQuote.iceInstanceId === ice.instanceId &&
+    post.effectiveRunQuote.iceDefinitionId === ice.definitionId &&
+    post.effectiveRunQuote.subroutines.length === 0 &&
+    (post.effectiveRunQuote.conditionalEncounterEffects?.length ?? 0) === 0 &&
+    post.paidEncounterDefense === undefined &&
+    !(post.creditGainOnRez && post.creditGainOnRez.creditGain > 0)
+  );
+}
+
 export function corpIceRezSupportOperationSignal(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -87,6 +114,9 @@ export function corpIceRezSupportOperationSignal(
   );
   if (matches.length !== 1) return undefined;
   const { ice, serverId } = matches[0]!;
+  if (corpIceRezSupportTargetHasNoCurrentEffect(input, ice, serverId)) {
+    return undefined;
+  }
   const centralEvidence =
     (serverId === "hq" || serverId === "rd") &&
     centralAllocation?.status === "known"
