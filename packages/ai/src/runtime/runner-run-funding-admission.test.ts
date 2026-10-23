@@ -1,3 +1,7 @@
+import {
+  runnerInput,
+  visibleCard,
+} from "../runner-hand-development.test-support";
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
 import { safeRuntimeRunTarget } from "../semantic-ai-runtime-cutover.test-support";
 import { describe, expect, it } from "vitest";
@@ -19,6 +23,7 @@ describe("runner run funding admission", () => {
     });
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -37,6 +42,7 @@ describe("runner run funding admission", () => {
     };
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -63,6 +69,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -85,6 +92,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -106,7 +114,7 @@ describe("runner run funding admission", () => {
       recommendation: "gain_credits_first",
       routeQuote: routeQuote(2),
     });
-    const direct = runTarget("run-archives", "archives", {
+    const direct = runTarget("run-hq", "hq", {
       pathPassability: "reachable",
       pathCost: 0,
       creditsAfterRun: 6,
@@ -117,6 +125,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target, direct],
         economy: { minimumCreditFloor: 3 },
@@ -125,7 +134,72 @@ describe("runner run funding admission", () => {
       admitted: false,
       reasonCode: "nonurgent_funding_yields_to_direct_run",
       concreteFundingGap: 5,
-      alternativeDirectlyConvertibleActionIds: ["run-archives"],
+      alternativeDirectlyConvertibleActionIds: ["run-hq"],
+    });
+  });
+
+  it.each([
+    "unqualified",
+    "visible_agenda",
+    "qualified_hidden",
+    "redirected_hq",
+  ])("uses the existing effective Archives payoff facts for %s", (kind) => {
+    const input = admissionInput();
+    if (kind === "visible_agenda") {
+      input.playerView.opponent.discardCount = 1;
+      input.playerView.servers = [
+        {
+          id: "archives",
+          label: "Archives",
+          ice: [],
+          root: [
+            {
+              ...visibleCard("visible-agenda", {
+                definitionId: "visible-agenda",
+                type: "agenda",
+              }),
+              owner: "corp",
+              controller: "corp",
+            },
+          ],
+        },
+      ];
+    }
+    if (kind === "qualified_hidden")
+      input.playerView.opponent.discardCount = 10;
+    const target = runTarget("run-rd", "rd", {
+      pathPassability: "blocked_unpayable",
+      creditsAfterRun: -2,
+      score: 120,
+      recommendation: "gain_credits_first",
+      routeQuote: routeQuote(2),
+    });
+    const direct = {
+      ...runTarget("run-archives", "archives", {
+        pathPassability: "reachable",
+        creditsAfterRun: 6,
+        score: 160,
+        recommendation: "run_if_free",
+        routeQuote: routeQuote(0),
+      }),
+      ...(kind === "redirected_hq"
+        ? { accessTargetKind: "hq" as const, accessServerId: "hq" }
+        : {}),
+    };
+    const admission = assessRunnerRunFundingAdmission({
+      input,
+      target,
+      runTargets: [target, direct],
+      economy: { minimumCreditFloor: 3 },
+    });
+    expect(admission).toMatchObject({
+      admitted: kind === "unqualified",
+      reasonCode:
+        kind === "unqualified"
+          ? "concrete_funding_gap_admitted"
+          : "nonurgent_funding_yields_to_direct_run",
+      alternativeDirectlyConvertibleActionIds:
+        kind === "unqualified" ? [] : ["run-archives"],
     });
   });
 
@@ -140,7 +214,7 @@ describe("runner run funding admission", () => {
       recommendation: "gain_credits_first",
       routeQuote: routeQuote(2),
     });
-    const direct = runTarget("run-archives", "archives", {
+    const direct = runTarget("run-hq", "hq", {
       creditsAfterRun: 6,
       score: 160,
       recommendation: "run_if_free",
@@ -149,6 +223,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target, direct],
         economy: { minimumCreditFloor: 3 },
@@ -157,7 +232,7 @@ describe("runner run funding admission", () => {
       admitted: true,
       reasonCode: "concrete_funding_gap_admitted",
       urgentScoreThreat: true,
-      alternativeDirectlyConvertibleActionIds: ["run-archives"],
+      alternativeDirectlyConvertibleActionIds: ["run-hq"],
     });
   });
 
@@ -185,6 +260,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target: funded,
         runTargets: [funded, direct],
         economy: { minimumCreditFloor: 3 },
@@ -211,6 +287,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -242,6 +319,7 @@ describe("runner run funding admission", () => {
     ).toBe(false);
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -269,6 +347,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -318,6 +397,7 @@ describe("runner run funding admission", () => {
 
       expect(
         assessRunnerRunFundingAdmission({
+          input: admissionInput(),
           target,
           runTargets: [target],
           economy: { minimumCreditFloor: 3 },
@@ -339,7 +419,7 @@ describe("runner run funding admission", () => {
       recommendation: "gain_credits_first",
       routeQuote: routeQuote(1),
     });
-    const direct = runTarget("run-archives", "archives", {
+    const direct = runTarget("run-rd-direct", "rd", {
       creditsAfterRun: 6,
       score: 160,
       routeQuote: routeQuote(0),
@@ -347,6 +427,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target, direct],
         economy: { minimumCreditFloor: 3 },
@@ -355,7 +436,7 @@ describe("runner run funding admission", () => {
     ).toMatchObject({
       admitted: true,
       urgentScoreThreat: true,
-      alternativeDirectlyConvertibleActionIds: ["run-archives"],
+      alternativeDirectlyConvertibleActionIds: ["run-rd-direct"],
     });
     expect(target.scoreThreat).toBe(false);
   });
@@ -372,6 +453,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -396,6 +478,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -419,6 +502,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -444,6 +528,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -465,6 +550,7 @@ describe("runner run funding admission", () => {
 
     expect(
       assessRunnerRunFundingAdmission({
+        input: admissionInput(),
         target,
         runTargets: [target],
         economy: { minimumCreditFloor: 3 },
@@ -538,4 +624,14 @@ function routeQuote(
     conditionalReasons: [],
     evidence: [`test_funding_gap:${fundingGap}`],
   };
+}
+
+function admissionInput() {
+  return runnerInput({
+    credits: 6,
+    hand: [],
+    legalActions: [],
+    memoryUsed: 0,
+    memoryLimit: 4,
+  });
 }

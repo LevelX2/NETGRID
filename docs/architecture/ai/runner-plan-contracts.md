@@ -1541,8 +1541,13 @@ Runplans. Der Bedarf ist das Maximum aus dem noch offenen Route-Gap und der
 Unterschreitung des nach dem Run zu schützenden Credit-Floors; ein künstliches
 Mindest-Gap ist unzulässig. Ist das Ziel bereits direkt positiv konvertierbar,
 entsteht kein Funding-Step. Existiert ein anderes direkt ausführbares,
-positiv bewertetes Runziel, gibt ein nicht dringlicher Funding-Step diesem
-Run den Vorrang. Nur eine belegte akute Score-Bedrohung darf diese
+positiv bewertetes Runziel mit materiellem Zugriffsnutzen, gibt ein nicht
+dringlicher Funding-Step diesem Run den Vorrang. Die gemeinsame Zulassung
+prüft für effektiven Archiveszugriff dieselben vorhandenen sichtbaren Agenda-
+und qualifizierten Hidden-Payoff-Fakten wie der Central-Owner. Ein materiell
+abgelehnter Archives-Run darf weder Basic- noch Bankfinanzierung sperren.
+Maßgeblich ist das effektive Zugriffsziel, damit ein physischer Archives-Run
+mit Zugriff auf HQ seine echte Konkurrenzwirkung behält. Nur eine belegte akute Score-Bedrohung darf diese
 Alternativsperre überstimmen.
 
 Eine direkt konvertierbare Geschwisterroute auf demselben Server blockiert

@@ -95,7 +95,7 @@ describe("native unknown-ICE reserve bank support", () => {
   it.each([11, 20] as const)("retains the full standard reserve and conditional access in game %s", (game) => {
     const { input } = capture(game);
     const { target, targets, economy, banks, quote } = facts(input);
-    expect(assessRunnerRunFundingAdmission({ target, runTargets: targets, economy })).toMatchObject({
+    expect(assessRunnerRunFundingAdmission({ input, target, runTargets: targets, economy })).toMatchObject({
       admitted: true, targetDirectlyConvertible: false,
       prerunReserveCreditGap: game === 11 ? 17 : 2,
       concreteFundingGap: game === 11 ? 17 : 2,

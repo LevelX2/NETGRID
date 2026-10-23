@@ -738,6 +738,7 @@ function runnerCreditBankRunFundingRoute(params: {
     const requiredPostRunReserve =
       params.services.requiredPostRunReserve(evaluation);
     const admission = assessRunnerRunFundingAdmission({
+      input: params.input,
       target: evaluation,
       runTargets: params.runTargets,
       economy: params.economy,
