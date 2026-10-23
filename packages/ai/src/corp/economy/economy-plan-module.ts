@@ -33,6 +33,7 @@ import {
 } from "./economy-routes";
 import { CorpEconomyNeedSignal } from "./economy-types";
 import { corpHostedBankCycleForParentFunding } from "./hosted-credit-bank-cycle";
+import { corpFreeRezPayoutPreparation } from "./free-rez-payout-preparation";
 
 export function economyModule(): PlanModule {
   return {
@@ -468,6 +469,29 @@ function validatedEconomyNeeds(
           JSON.stringify(signal.fundingRouteAssessment?.hostedCreditBankCycle)
       )
         validFundingActions.add(current.actionId);
+    }
+    if (signal.freeRezPayoutPreparation) {
+      const current = corpFreeRezPayoutPreparation(
+        context.input,
+        context.actionCandidates,
+        signal,
+        signal.freeRezPayoutPreparation.basicFundingActionId,
+        currentDomain.economyNeeds.filter(
+          (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
+            s.kind === "develop_campaign",
+        ),
+      );
+      if (
+        !current ||
+        JSON.stringify(current) !==
+          JSON.stringify(signal.freeRezPayoutPreparation) ||
+        JSON.stringify(current) !==
+          JSON.stringify(
+            signal.fundingRouteAssessment?.freeRezPayoutPreparation,
+          )
+      )
+        return true;
+      validFundingActions.add(current.actionId);
     }
     const requirement = parentNeed
       ? genericDefenseFundingRequirement(

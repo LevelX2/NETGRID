@@ -2035,6 +2035,28 @@ und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
 
+Ein bereits zugelassener Defense-Finanzierungsparent darf seinen aktuellen
+Basic-Credit-Schritt durch die kostenlose Vorbereitung einer besseren
+Auszahlung ersetzen. Dafür muss eine aktuell legale Rez-Action ohne Credit-,
+Klick- oder weitere Kosten exakt an eine installierte ungeresste Quelle und
+einen zugelassenen `finite_pool`-Campaign gebunden sein. Der kanonische
+On-Rez-Pool erlaubt danach im selben Zug eine sonst kostenlose Auszahlung
+pro Klick von mehr als einem Credit. Der erste Betrag darf die Quelle nicht
+leeren. Verzögertes Startzugeinkommen, bezahlter Rez, fehlender Restklick,
+bereits finanzierter Bedarf und andere Funding-Parents tragen diesen engen
+Nachweis nicht.
+
+Die Vorbereitung bleibt beim bestehenden Defense-Parent und dessen Need;
+sie wird ausdrücklich nicht als schon erhaltenes liquides Einkommen
+ausgegeben. Nach dem echten Engine-Rez wird der nun aktuelle Auszahlungskopf
+neu quotiert. Eine wichtigere sofortige Installation behält ihren Vorrang.
+Paarung 552 R4/G26/D26 rekonstruiert den exakten Originalzustand über 25
+Engine-Aktionen: Rez plus Auszahlung liefert bei demselben Restklick sieben
+statt sechs Credits. Der vollständige korrigierte Chooser-Prefix installiert
+zuerst die Neural Blade und führt danach kostenlosen Rez und Auszahlung unter
+dem unveränderten Defense-Finanzierungsparent aus; Replayhash und Endbank
+stimmen.
+
 Eine bereits installierte, aktionsweise geladene Creditbank besitzt einen
 getrennten aktuellen Restzugvertrag. Die Engine bindet Rez beziehungsweise
 Laden, Quellinstanz, kanonische Fähigkeiten, StateVersion, Kosten und die

@@ -32,6 +32,22 @@ export type CorpEconomyFundingRouteAssessment = {
   headActionId?: string;
   evidence: string[];
   hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
+  freeRezPayoutPreparation?: CorpFreeRezPayoutPreparation;
+};
+
+export type CorpFreeRezPayoutPreparation = {
+  actionId: string;
+  basicFundingActionId: string;
+  campaignNeedId: string;
+  stateVersion: number;
+  parentPlanInstanceId: string;
+  parentNeedId: string;
+  sourceInstanceId: string;
+  sourceDefinitionId: string;
+  sourceServerId: string;
+  poolCreditsOnRez: number;
+  payoutCredits: number;
+  payoutClicks: 1;
 };
 
 export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
@@ -51,6 +67,7 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
   };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
   hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
+  freeRezPayoutPreparation?: CorpFreeRezPayoutPreparation;
   restrictedCreditFunding?: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
   restrictedCreditPreparations?: CorpRestrictedRezPreparation[];
 };

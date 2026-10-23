@@ -1,5 +1,6 @@
 import { candidateTargetIds } from "../../plans/corp-core-module-support";
 import { corpHostedBankLoadMatches } from "./hosted-credit-bank-facts";
+import { corpFreeRezPayoutPreparation } from "./free-rez-payout-preparation";
 import { assessCorpIceLiquidation } from "../defense/corp-ice-liquidation";
 
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -38,6 +39,29 @@ export function economyCandidates(
   context: PlanSchedulerContext,
   signal: CorpEconomyNeedSignal,
 ): PlanMaterialization["candidates"] {
+  if (signal.kind === "parent_funding" && signal.freeRezPayoutPreparation) {
+    const current = corpFreeRezPayoutPreparation(
+      context.input,
+      context.actionCandidates,
+      signal,
+      signal.freeRezPayoutPreparation.basicFundingActionId,
+      domain(context).economyNeeds.filter(
+        (s): s is CorpEconomyDevelopmentSignal => s.kind === "develop_campaign",
+      ),
+    );
+    if (
+      !current ||
+      JSON.stringify(current) !==
+        JSON.stringify(signal.freeRezPayoutPreparation)
+    )
+      return [];
+    return context.actionCandidates
+      .filter((c) => c.actionId === current.actionId)
+      .map((candidate) => ({
+        candidate,
+        stepValue: Math.min(signal.gap, current.payoutCredits) * 10,
+      }));
+  }
   if (signal.kind === "parent_funding" && signal.hostedCreditBankCycle) {
     const quote = currentCorpHostedBankCycleQuotes(context.input).find(
       (q) => JSON.stringify(q) === JSON.stringify(signal.hostedCreditBankCycle),
@@ -271,6 +295,7 @@ function certifiedImmediateRootRezCampaignCandidate(
 export function assessCorpEconomyFundingRoute(
   context: PlanSchedulerContext,
   signal: CorpEconomyParentFundingSignal | CorpEconomyReserveSignal,
+  campaigns: readonly CorpEconomyDevelopmentSignal[] = [],
 ): CorpEconomyFundingRouteAssessment {
   let liquidationAdmitted = false;
   const candidates = context.actionCandidates
@@ -481,12 +506,42 @@ export function assessCorpEconomyFundingRoute(
             typeof step.actionId === "string",
         )
       : undefined;
+  const preparation =
+    signal.kind === "parent_funding" && head?.actionId
+      ? corpFreeRezPayoutPreparation(
+          context.input,
+          context.actionCandidates,
+          signal,
+          head.actionId,
+          campaigns,
+        )
+      : undefined;
   return {
-    routeId: route.routeId,
+    routeId: preparation
+      ? `${route.routeId}:free-rez-payout:${preparation.sourceInstanceId}`
+      : route.routeId,
     status: route.status,
     reliability: route.reliability,
-    ...(head?.actionId ? { headActionId: head.actionId } : {}),
-    evidence: [...result.evidence, ...route.evidence, ...progressEvidence],
+    ...(preparation
+      ? {
+          headActionId: preparation.actionId,
+          freeRezPayoutPreparation: preparation,
+        }
+      : head?.actionId
+        ? { headActionId: head.actionId }
+        : {}),
+    evidence: [
+      ...result.evidence,
+      ...route.evidence,
+      ...progressEvidence,
+      ...(preparation
+        ? [
+            "corp_free_rez_prepares_better_current_payout",
+            `corp_free_rez_payout_credits:${preparation.payoutCredits}`,
+            "corp_free_rez_preparation_is_not_immediate_liquid_income",
+          ]
+        : []),
+    ],
   };
 }
 
@@ -575,34 +630,36 @@ export function economyMaterialization(
         ],
       },
       purpose:
-        signal.kind === "develop_campaign"
-          ? `Advance the admitted ${signal.sourceDefinitionId} economy campaign from ${signal.phase} to ${signal.completion.expectedState}.`
-          : signal.kind === "convert_immediate_operation"
-            ? `Convert the Engine-certified immediate ${signal.sourceDefinitionId} operation once, consuming its exact HQ source.`
-            : signal.kind === "convert_visible_card_payout"
-              ? `Take the exact currently quoted visible-card payout from ${signal.sourceDefinitionId}, then revalidate the source.`
-              : signal.kind === "prepare_immediate_operation"
-                ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
-                : signal.kind === "develop_liquidity"
-                  ? signal.residualCapacityOnly
-                    ? `Use one otherwise unbound normal click for explicitly nonstrategic residual capacity in ${signal.turnKey}; claim no campaign or parent progress.`
-                    : `Convert the exact Engine-certified Basic Credit action toward the stable, visible-demand target of ${signal.targetCredits} credits.`
-                  : signal.kind === "resolve_start_rez_choice"
-                    ? "Decline the exact current Corp start-of-turn rez choice because no reviewed economy campaign is admitted."
-                    : signal.kind === "resolve_optional_action_capacity_offer"
-                      ? signal.decision === "accept"
-                        ? `Accept the exact current optional action-capacity offer from ${signal.sourceDefinitionId}; the granted action is replanned by its normal domain owner.`
-                        : `Decline the exact current optional action-capacity offer from ${signal.sourceDefinitionId} because its restricted follow-up has no admitted productive route.`
-                      : signal.kind === "parent_funding" &&
-                          signal.restrictedCreditPreparations?.length
-                        ? "Prepare conditional stored install/rez capacity or liquid funding for the bound installed-ICE reserve; revalidate the remaining gap after this current head."
+        signal.kind === "parent_funding" && signal.freeRezPayoutPreparation
+          ? "Rez the exact free current source for the bound Defense funding parent; revalidate its actual liquid payout after the Engine transition."
+          : signal.kind === "develop_campaign"
+            ? `Advance the admitted ${signal.sourceDefinitionId} economy campaign from ${signal.phase} to ${signal.completion.expectedState}.`
+            : signal.kind === "convert_immediate_operation"
+              ? `Convert the Engine-certified immediate ${signal.sourceDefinitionId} operation once, consuming its exact HQ source.`
+              : signal.kind === "convert_visible_card_payout"
+                ? `Take the exact currently quoted visible-card payout from ${signal.sourceDefinitionId}, then revalidate the source.`
+                : signal.kind === "prepare_immediate_operation"
+                  ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
+                  : signal.kind === "develop_liquidity"
+                    ? signal.residualCapacityOnly
+                      ? `Use one otherwise unbound normal click for explicitly nonstrategic residual capacity in ${signal.turnKey}; claim no campaign or parent progress.`
+                      : `Convert the exact Engine-certified Basic Credit action toward the stable, visible-demand target of ${signal.targetCredits} credits.`
+                    : signal.kind === "resolve_start_rez_choice"
+                      ? "Decline the exact current Corp start-of-turn rez choice because no reviewed economy campaign is admitted."
+                      : signal.kind === "resolve_optional_action_capacity_offer"
+                        ? signal.decision === "accept"
+                          ? `Accept the exact current optional action-capacity offer from ${signal.sourceDefinitionId}; the granted action is replanned by its normal domain owner.`
+                          : `Decline the exact current optional action-capacity offer from ${signal.sourceDefinitionId} because its restricted follow-up has no admitted productive route.`
                         : signal.kind === "parent_funding" &&
-                            signal.restrictedCreditFunding
-                          ? "Take the exact restricted payout for the bound current install/rez consumer, then return control to its resident parent."
+                            signal.restrictedCreditPreparations?.length
+                          ? "Prepare conditional stored install/rez capacity or liquid funding for the bound installed-ICE reserve; revalidate the remaining gap after this current head."
                           : signal.kind === "parent_funding" &&
-                              signal.hostedCreditBankCycle
-                            ? "Execute the current Engine-quoted hosted-bank head for the bound Score funding need; revalidate the source and remaining rest-turn cycle after this transition."
-                            : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+                              signal.restrictedCreditFunding
+                            ? "Take the exact restricted payout for the bound current install/rez consumer, then return control to its resident parent."
+                            : signal.kind === "parent_funding" &&
+                                signal.hostedCreditBankCycle
+                              ? "Execute the current Engine-quoted hosted-bank head for the bound Score funding need; revalidate the source and remaining rest-turn cycle after this transition."
+                              : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };

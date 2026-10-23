@@ -208,6 +208,10 @@ export function buildCorpEconomySignals({
           turnKey: turnKey(input),
         },
         signal,
+        unboundEconomyNeeds.filter(
+          (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
+            s.kind === "develop_campaign",
+        ),
       );
       return {
         ...signal,
@@ -222,6 +226,13 @@ export function buildCorpEconomySignals({
             : []),
         ],
         fundingRouteAssessment,
+        ...(signal.kind === "parent_funding" &&
+        fundingRouteAssessment.freeRezPayoutPreparation
+          ? {
+              freeRezPayoutPreparation:
+                fundingRouteAssessment.freeRezPayoutPreparation,
+            }
+          : {}),
         ...(signal.kind === "parent_funding" &&
         fundingRouteAssessment.hostedCreditBankCycle
           ? {
