@@ -2541,6 +2541,29 @@ Fortsetzung weiterhin fail-closed.
 
 ## 9. `runner.expose_information`
 
+Ein Event-Run mit vorgezogener ICE-Aufdeckung erhält sein statisches Merkmal
+`eventApproachIceExposeBeforeRez` durch den produktiven LegalAction-DTO bis zur
+Runquote. Die generische CardSpec-Übersetzung erhält den Aufdeckeffekt; der
+gemeinsame Run-Nutzenvergleich verlangt dafür eine tatsächlich unbekannte,
+unrezzte ICE am Ziel. Bekannte ICE und leere Forts erzeugen keinen solchen
+Zusatznutzen. Die Remote-Vorbereitung klassifiziert ausschließlich Aktionen
+vor einem Run und weist die aktuelle Aufdeckfolge keinem konkurrierenden
+Vorbereitungsplan zu.
+
+Die Betrachtungsfortsetzung bindet dieselbe Engine-Quelle und ausgewählte
+Aufdeckerinnerung: entweder eine installierte Quelle oder die bekannte eigene
+Eventkarte im Heap bei aktivem Event-Aufdeckmerkmal. Run, Ziel, Parent,
+Ereignisfolge und StateVersion bleiben exakt gebunden. Diese Quellvarianten
+ändern die Zuständigkeit des bestehenden Informations- und Runfenster-Owners
+nicht.
+
+Der Hint-Compiler erhält außerdem den typisierten, periodischen
+Bad-Publicity-Wurf eines Virus als dynamische und zufallsabhängige Wirkung.
+Das ist kein garantierter Ertrag und kein Aufbau- oder Siegplan. Fehlt nach
+dieser Datenkorrektur weiterhin eine Entwicklungsrolle samt begrenztem
+Parentbedarf für den späteren HQ-Ertrag, bleibt diese Strategieanbindung
+ausdrücklich offen.
+
 **Klasse:** `bounded_sequence`
 **Rolle:** enger Informations-Child des aktiven Runplans
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

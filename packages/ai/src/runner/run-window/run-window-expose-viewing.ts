@@ -111,6 +111,16 @@ export function runnerRunExposeViewingBinding(
           (server) => server.id === run?.attackedServerId,
         )?.ice[position.iceIndex]
       : undefined;
+  const sourceIsAvailable =
+    input.playerView.own.rig?.some((card) => card.instanceId === source) ===
+      true ||
+    (run?.eventApproachIceExposeBeforeRez === true &&
+      input.playerView.own.heapOrArchives.some(
+        (card) =>
+          card.instanceId === source &&
+          card.known === true &&
+          card.type === "event",
+      ));
   const memory = previous?.runnerExposeInformationMemory?.find(
     (record) =>
       record.sourceCardInstanceId === source &&
@@ -160,7 +170,7 @@ export function runnerRunExposeViewingBinding(
     finish.costs.length !== 0 ||
     ice?.instanceId !== target ||
     ice.known !== true ||
-    !input.playerView.own.rig?.some((card) => card.instanceId === source) ||
+    !sourceIsAvailable ||
     !memory ||
     !exposeEvent ||
     !runParent ||

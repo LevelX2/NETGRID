@@ -13939,6 +13939,14 @@
             "repeatable": true
           },
           {
+            "kind": "run_tax",
+            "scope": "corp",
+            "timing": "start_of_turn",
+            "target": "virus.bad_publicity_per_counter_roll",
+            "amountKind": "dynamic",
+            "repeatable": true
+          },
+          {
             "kind": "delayed_penalty",
             "scope": "corp",
             "timing": "action",
@@ -13951,14 +13959,18 @@
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
           "virus.corp_purgeable_counter",
+          "corp.bad_publicity_pressure",
+          "risk.random_outcome",
           "virus.purge_tax"
         ],
         "actionTacticSignals": [
           "effect:delayed_penalty",
           "effect:persistent_counter_effect",
+          "effect:run_tax",
           "effect_scope:corp",
           "effect_scope:hq",
           "effect_timing:action",
+          "effect_timing:start_of_turn",
           "effect_timing:successful_run"
         ],
         "conditions": [{ "kind": "requires_successful_run" }],
@@ -14800,9 +14812,20 @@
                 "timing": "action",
                 "target": "make_run",
                 "finite": true
+              },
+              {
+                "kind": "expose_info",
+                "scope": "ice",
+                "timing": "during_run",
+                "target": "run.expose_approached_ice_before_rez",
+                "finite": true
               }
             ],
-            "functionSignals": ["run.any_server", "run.make_run"],
+            "functionSignals": [
+              "info.expose",
+              "run.any_server",
+              "run.make_run"
+            ],
             "targetProfiles": [
               {
                 "schemaVersion": "target-profile-v1",
@@ -14832,13 +14855,23 @@
             "timing": "action",
             "target": "make_run",
             "finite": true
+          },
+          {
+            "kind": "expose_info",
+            "scope": "ice",
+            "timing": "during_run",
+            "target": "run.expose_approached_ice_before_rez",
+            "finite": true
           }
         ],
-        "functionSignals": ["run.make_run", "run.any_server"],
+        "functionSignals": ["run.make_run", "run.any_server", "info.expose"],
         "actionTacticSignals": [
+          "effect:expose_info",
           "effect:future_run_effect",
+          "effect_scope:ice",
           "effect_scope:runner",
-          "effect_timing:action"
+          "effect_timing:action",
+          "effect_timing:during_run"
         ],
         "costProfile": { "clicks": 1, "credits": 0 },
         "riskTags": ["run"],

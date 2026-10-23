@@ -389,7 +389,7 @@ import {
 import { assessRunnerHandRotation } from "./runner-hand-rotation-assessment";
 import {
   runnerCandidateIsCentralInformationAbility,
-  runnerCandidateIsExposeAbility,
+  runnerCandidateIsRemoteExposePreparation,
 } from "./runner-information-action-facts";
 import type { RunnerProgramInstallTrashAssessment } from "./runner-program-install-trash-policy";
 import { runnerCandidateExecutesProgramSearch } from "./runner-program-search-facts";
@@ -2190,7 +2190,7 @@ export function runnerActionDispositions(
       continue;
     }
     if (
-      runnerCandidateIsExposeAbility(input, candidate) &&
+      runnerCandidateIsRemoteExposePreparation(input, candidate) &&
       !remotePreparationActionIds.has(candidate.actionId)
     ) {
       add(

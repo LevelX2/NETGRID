@@ -93,6 +93,18 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
     if (target === "run.trace_link_bonus") {
       return visibleRunnerTraceThreatOnServer(input, serverId);
     }
+    if (target === "run.expose_approached_ice_before_rez") {
+      const quotedRun = runTargetEvaluations?.find(
+        (evaluation) =>
+          evaluation.actionId === candidate.actionId &&
+          evaluation.targetServerId === serverId,
+      );
+      return (
+        quotedRun?.runActionProjection.eventApproachIceExposeBeforeRez ===
+          true &&
+        server.ice.some((ice) => ice.known === false && ice.rezzed === false)
+      );
+    }
     return true;
   });
 }

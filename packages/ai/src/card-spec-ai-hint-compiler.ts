@@ -750,6 +750,31 @@ function deriveGenericTypedHintOverlay(
     });
     overlay.functionSignals.push("info.rnd_top");
   }
+  if (virus?.startOfCorpTurn?.kind === "roll_per_counter_add_bad_publicity") {
+    const start = virus.startOfCorpTurn;
+    if (
+      start.counterSource !== "corp_purgeable_runner_virus_counter" ||
+      start.dieSize !== 6 ||
+      start.successDieValues.length !== 2 ||
+      start.successDieValues[0] !== 5 ||
+      start.successDieValues[1] !== 6 ||
+      start.amountPerSuccess !== 1 ||
+      start.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_virus_bad_publicity_roll_shape");
+    overlay.effects.push({
+      kind: "run_tax",
+      scope: "corp",
+      timing: "start_of_turn",
+      target: "virus.bad_publicity_per_counter_roll",
+      amountKind: "dynamic",
+      repeatable: true,
+    });
+    overlay.functionSignals.push(
+      "corp.bad_publicity_pressure",
+      "risk.random_outcome",
+    );
+  }
   if (virus !== undefined) {
     overlay.effects.push({
       kind: "delayed_penalty",
@@ -2381,6 +2406,16 @@ function appendMakeRunProjection(
       ? `run.${effect.target.server === "rd" ? "rnd" : effect.target.server}`
       : "run.any_server",
   );
+  if (effect.eventApproachIceExposeBeforeRez === true) {
+    overlay.effects.push({
+      kind: "expose_info",
+      scope: "ice",
+      timing: "during_run",
+      target: "run.expose_approached_ice_before_rez",
+      finite: true,
+    });
+    overlay.functionSignals.push("info.expose");
+  }
   if (effect.damagePreventionPool !== undefined) {
     overlay.effects.push({
       kind: "damage_prevention",
@@ -9247,7 +9282,10 @@ function deriveClosedExtendedHintEffects(
         )}_credits`,
         counterRemoval: {
           counterType: counter.counterType,
-          credits: requiredFiniteNumber(counter.removeCost, "runner_counter_effect.remove_cost"),
+          credits: requiredFiniteNumber(
+            counter.removeCost,
+            "runner_counter_effect.remove_cost",
+          ),
           clicks: 1,
           amount: 1,
         },
@@ -9551,15 +9589,13 @@ function appendClosedRunnerLongtailEffects(
 ): void {
   const utility = engine.runnerUtilityLongtail;
   if (utility?.kind === "hq_access_expose_all_installed_corp_cards")
-    effects.push(
-      {
-        kind: "expose_info",
-        scope: "installed_card",
-        timing: "on_access",
-        resource: "cards",
-        target: "installed_corp_cards",
-      },
-    );
+    effects.push({
+      kind: "expose_info",
+      scope: "installed_card",
+      timing: "on_access",
+      resource: "cards",
+      target: "installed_corp_cards",
+    });
   if (
     utility?.kind === "derez_fully_broken_passed_ice" ||
     utility?.kind === "derez_fully_broken_passed_ice_and_end_run"
@@ -10472,10 +10508,7 @@ function derivedFunctionSignals(
     signals.add("breaker.self_trash_risk");
   const runnerUtilityKind = engine.runnerUtilityLongtail?.kind;
   if (runnerUtilityKind === "hq_access_expose_all_installed_corp_cards")
-    for (const signal of [
-      "info.expose",
-      "info.expose_installed_card",
-    ])
+    for (const signal of ["info.expose", "info.expose_installed_card"])
       signals.add(signal);
   if (
     runnerUtilityKind === "derez_fully_broken_passed_ice" ||

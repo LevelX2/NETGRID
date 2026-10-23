@@ -46,7 +46,7 @@ import type {
   RunnerRunTargetEvaluation,
 } from "../../runner-run-target-evaluation";
 import { uniqueBy } from "../../runtime/collection";
-import { runnerCandidateIsExposeAbility } from "../../runtime/runner-information-action-facts";
+import { runnerCandidateIsRemoteExposePreparation } from "../../runtime/runner-information-action-facts";
 import { runnerExposeInstalledOpportunity } from "../expose-information/expose-installed-card-choice";
 import {
   runnerActionRequiresTargetedBypassPlan,
@@ -347,7 +347,7 @@ function runnerRemoteInformationPreparationSignals(
   const exposeCandidates = candidates.filter(
     (candidate) =>
       !runnerActionRequiresTargetedBypassPlan(candidate) &&
-      runnerCandidateIsExposeAbility(input, candidate),
+      runnerCandidateIsRemoteExposePreparation(input, candidate),
   );
   if (exposeCandidates.length === 0) return [];
   const matchpointPressure =

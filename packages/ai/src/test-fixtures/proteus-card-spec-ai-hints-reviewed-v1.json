@@ -7160,7 +7160,10 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": [
+          "build_rig",
+          "safe_probe_run"
+        ],
         "valueHints": {},
         "actionCapacityProfiles": [
           {
@@ -7175,7 +7178,9 @@
             "amountKind": "fixed",
             "bankable": false,
             "repeatable": true,
-            "actionTypes": ["purge_virus_counters"]
+            "actionTypes": [
+              "purge_virus_counters"
+            ]
           }
         ],
         "effects": [
@@ -7186,6 +7191,14 @@
             "resource": "counters",
             "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "run_tax",
+            "scope": "corp",
+            "timing": "start_of_turn",
+            "target": "virus.bad_publicity_per_counter_roll",
+            "amountKind": "dynamic",
             "repeatable": true
           },
           {
@@ -7201,18 +7214,30 @@
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
           "virus.corp_purgeable_counter",
+          "corp.bad_publicity_pressure",
+          "risk.random_outcome",
           "virus.purge_tax"
         ],
         "actionTacticSignals": [
           "effect:delayed_penalty",
           "effect:persistent_counter_effect",
+          "effect:run_tax",
           "effect_scope:corp",
           "effect_scope:hq",
           "effect_timing:action",
+          "effect_timing:start_of_turn",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8016,10 +8041,17 @@
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
-        "roles": ["event", "run_pressure"],
-        "planRoles": ["run_recon"],
+        "roles": [
+          "event",
+          "run_pressure"
+        ],
+        "planRoles": [
+          "run_recon"
+        ],
         "valueHints": {},
-        "lineSupport": ["runner.run_event_tempo"],
+        "lineSupport": [
+          "runner.run_event_tempo"
+        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_run_expose_approached_ice_before_rez",
@@ -8030,9 +8062,20 @@
                 "timing": "action",
                 "target": "make_run",
                 "finite": true
+              },
+              {
+                "kind": "expose_info",
+                "scope": "ice",
+                "timing": "during_run",
+                "target": "run.expose_approached_ice_before_rez",
+                "finite": true
               }
             ],
-            "functionSignals": ["run.any_server", "run.make_run"],
+            "functionSignals": [
+              "info.expose",
+              "run.any_server",
+              "run.make_run"
+            ],
             "targetProfiles": [
               {
                 "schemaVersion": "target-profile-v1",
@@ -8062,16 +8105,35 @@
             "timing": "action",
             "target": "make_run",
             "finite": true
+          },
+          {
+            "kind": "expose_info",
+            "scope": "ice",
+            "timing": "during_run",
+            "target": "run.expose_approached_ice_before_rez",
+            "finite": true
           }
         ],
-        "functionSignals": ["run.make_run", "run.any_server"],
-        "actionTacticSignals": [
-          "effect:future_run_effect",
-          "effect_scope:runner",
-          "effect_timing:action"
+        "functionSignals": [
+          "run.make_run",
+          "run.any_server",
+          "info.expose"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["run"],
+        "actionTacticSignals": [
+          "effect:expose_info",
+          "effect:future_run_effect",
+          "effect_scope:ice",
+          "effect_scope:runner",
+          "effect_timing:action",
+          "effect_timing:during_run"
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
+        "riskTags": [
+          "run"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8080,7 +8142,10 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_event", "start_run"]
+        "requiredMechanics": [
+          "play_event",
+          "start_run"
+        ]
       }
     },
     {
