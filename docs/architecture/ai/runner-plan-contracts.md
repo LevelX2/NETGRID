@@ -1604,6 +1604,26 @@ Die Schwelle „genug Geld“ ist kontextabhängig. Sie berücksichtigt:
 Mehr Geld wird bei vorhandener Reserve nicht automatisch wertlos. Es verliert
 aber gegenüber konkret ausführbaren strategischen Plänen an Priorität.
 
+Die exakte Funding-Suche vergleicht bei vollständig gleichen finanziellen
+Routen zusätzlich den vom Runner-Owner gequoteten, innerhalb des Handlimits
+behaltenen Handgewinn. `runtime/runner-funding-hand-quote.ts` verwendet dafür
+nur aktuelle LegalActions, garantierte unmittelbare allgemeine Credits und
+bekannte Hand-/Stackmengen ohne zusätzliche Risiken oder Ressourcentausch.
+Unvergleichbare Nebenfolgen bleiben ausdrücklich diagnostiziert. Die bestehende
+Routenauswahl konsumiert diese Quote vor ihrer Ergebnisbegrenzung; Cash-Ertrag,
+Klickbedarf, Zuverlässigkeit, Horizont und gleiche Vorabkosten behalten Vorrang.
+Basic Credit bleibt für zusammengesetzte Routen verfügbar. Ein echtes
+Draw-Einkommensereignis kann so denselben Parentbedarf finanzieren und dabei
+zusätzliche Handkarten erhalten; ein gesonderter Kartenbonus entsteht nicht.
+
+Ein günstiges positives Deckverhältnis bei Matchpunkt darf produktive
+Restliquidität nicht selbst ausschließen. `economy-signals.ts` bildet ihre
+endlichen P6-Routen zunächst unabhängig von der Wartebedingung. Erst wenn dabei
+keine solche Route besteht, darf der vorhandene Deckdruck-Wartepfad zusätzlich
+den vollständigen Ablehnungsnachweis aller übrigen freiwilligen Aktionen
+verlangen. Ein regelbewiesener terminaler Sieg bei bereits leerem Corp-R&D
+bleibt beim priorisierten Owner `runner.secure_terminal_win`.
+
 Run-Funding entsteht nur aus einer echten, berechneten Lücke des gebundenen
 Runplans. Der Bedarf ist das Maximum aus dem noch offenen Route-Gap und der
 Unterschreitung des nach dem Run zu schützenden Credit-Floors; ein künstliches

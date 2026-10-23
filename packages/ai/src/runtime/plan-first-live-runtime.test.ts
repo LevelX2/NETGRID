@@ -22781,7 +22781,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("waits under exact match-point deck pressure when every current route is owner-rejected", () => {
+  it("preserves independently positive liquidity before certifying match-point deck-pressure waiting", () => {
     resetResidentPlanPortfolioMemory();
     const runRd = legalAction(
       "run-rd-deck-pressure-wait",
@@ -22833,17 +22833,27 @@ describe("authoritative plan-first live runtime", () => {
       ],
     };
 
-    expect(
-      liveContext({
-        evaluateRunnerRunTargets: () => [blockedRun],
-        buildRunnerEconomyPosture: () => ({
-          minimumCreditFloor: 3,
-          desiredCreditReserve: 10,
-          fundingNeed: false,
-          evidence: ["test_visible_liquidity_demand_satisfied"],
-        }),
-      }).chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [blockedRun],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 10,
+        fundingNeed: false,
+        evidence: ["test_visible_liquidity_demand_satisfied"],
+      }),
+    });
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.economy" },
+    });
+
+    // An actual absence of independently productive liquidity still permits
+    // the existing complete rejection proof, including equal positive deck sizes.
+    resetResidentPlanPortfolioMemory();
+    input.legalActions = [runRd, endTurn];
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: endTurn.actionId,
       reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,

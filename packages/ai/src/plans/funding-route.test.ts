@@ -13,6 +13,55 @@ import {
 } from "./funding-route";
 
 describe("funding routes", () => {
+  it("compares the owner's equal-cost collateral before limiting routes", () => {
+    const result = searchFundingRoutes({
+      demand: runnerDemand({ currentCredits: 0, targetCredits: 1 }),
+      candidates: [
+        liquidCandidate("a-credit", 1),
+        liquidCandidate("z-credit-draw", 1),
+      ],
+      remainingClicks: 1,
+      maxRoutes: 1,
+      compareEquivalentRoutes: (left, right) =>
+        right.routeId.localeCompare(left.routeId),
+    });
+    expect(result.routes).toHaveLength(1);
+    expect(result.bestRoute.steps[0]?.actionId).toBe("z-credit-draw");
+  });
+
+  it("preserves greater cash and faster coverage ahead of collateral", () => {
+    const slower = liquidCandidate("z-slower", 1);
+    slower.economyProjection!.clickCost = 2;
+    for (const competitor of [liquidCandidate("z-smaller", 1), slower]) {
+      const result = searchFundingRoutes({
+        demand: runnerDemand({ currentCredits: 0, targetCredits: 1 }),
+        candidates: [liquidCandidate("a-larger", 2), competitor],
+        remainingClicks: 2,
+        compareEquivalentRoutes: (left, right) =>
+          right.routeId.localeCompare(left.routeId),
+      });
+      expect(result.bestRoute.steps[0]?.actionId).toBe("a-larger");
+    }
+  });
+
+  it("does not call equal-cost collateral for different upfront costs", () => {
+    let comparisons = 0;
+    const result = searchFundingRoutes({
+      demand: runnerDemand({ currentCredits: 1, targetCredits: 2 }),
+      candidates: [
+        liquidCandidate("a-credit", 1),
+        liquidCandidate("z-credit-draw", 2, { creditCost: 1 }),
+      ],
+      remainingClicks: 1,
+      compareEquivalentRoutes: (left, right) => {
+        comparisons += 1;
+        return right.routeId.localeCompare(left.routeId);
+      },
+    });
+    expect(comparisons).toBe(0);
+    expect(result.bestRoute.steps[0]?.actionId).toBe("a-credit");
+  });
+
   it("continues past credit coverage when the bound consumer still needs a quoted draw-tax reserve", () => {
     const result = searchFundingRoutes({
       demand: runnerDemand({ currentCredits: 0, targetCredits: 4 }),
