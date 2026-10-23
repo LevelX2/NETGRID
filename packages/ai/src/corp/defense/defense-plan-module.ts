@@ -1,3 +1,4 @@
+import { corpIceRezSupportEmptyTargetDispositionEvidence } from "./corp-defense-rez-support-facts";
 import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -2197,6 +2198,18 @@ export function corpDefenseActionDispositions(
     .filter((signal) => isDefensePlacementPhase(signal.phase));
   const byActionId = new Map<string, CorpDefenseActionDisposition>();
   for (const candidate of context.actionCandidates) {
+    const emptyRezTargetEvidence =
+      corpIceRezSupportEmptyTargetDispositionEvidence(
+        context.input,
+        candidate,
+      );
+    if (emptyRezTargetEvidence) {
+      byActionId.set(candidate.actionId, {
+        actionId: candidate.actionId,
+        evidenceCode: emptyRezTargetEvidence,
+      });
+      continue;
+    }
     if (materializedActionIds.has(candidate.actionId)) {
       continue;
     }

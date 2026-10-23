@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
-import { corpIceRezSupportTargetHasNoCurrentEffect } from "../../corp/defense/defense-run-response";
+import { corpIceRezSupportTargetHasNoCurrentEffect } from "../../corp/defense/corp-defense-rez-support-facts";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -34,11 +34,12 @@ function decide(key: string) {
 }
 describe("native action ICE rez-support current effect", () => {
   beforeEach(resetResidentPlanPortfolioMemory);
-  it.each(["emptyInstallment", "emptyTemporary", "emptyOuter"])("does not buy the complete empty target in %s", key => {
-    const {input, action} = decide(key);
+  it.each(["emptyInstallment", "emptyTemporary", "emptyOuter", "emptyOverflowInstallment", "emptyOverflowTemporary"])("does not buy the complete empty target in %s", key => {
+    const {input, action, result, observedActionId} = decide(key);
     const target = input.playerView.servers.flatMap(s => s.ice).find(i => i.definitionId === "onr_proteus_031_minotaur")!;
     expect(target.effectivePostRezRunQuote).toMatchObject({complete:true,effectiveRunQuote:{subroutines:[]}});
     expect(action.type === "play_operation" && action.payload?.targetCardId === target.instanceId).toBe(false);
+    expect(result.decisionDebug?.planFirstDecision?.dispositions.some(d => d.actionId === observedActionId && d.ownerModuleId === "corp.defend_servers" && d.evidenceCode.startsWith("corp_rez_support_empty_current_effect:"))).toBe(true);
   });
   it.each(["stopper", "variable", "income"])("retains the original exact operation and owner in %s", key => {
     const {action, observedActionId, result} = decide(key);

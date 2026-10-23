@@ -1775,6 +1775,11 @@ Ratenschuld. Gedrucktes künftiges Potenzial und bloße Stärke ersetzen den
 aktuellen Effekt nicht. Unvollständige beziehungsweise Choice-abhängige
 Projektionen sind kein Beleg für Wirkungslosigkeit. Ein spekulativer Nutzen
 an anderen ICE-Schichten wird damit nicht als bewiesener Schutzeffekt gewertet.
+Der globale Defense-Owner dispositioniert dieselbe exakt gebundene Operation
+auch ohne aktuelle eigene Route. Sein bestehender Dispositionsvertrag gilt
+vor der Handentwicklung; HQ-Overflow darf die abgelehnte wirkungslose Zielwahl
+nicht als Handkonversion erneut öffnen. Nützliche Rezz-Effekte behalten ihre
+eigenständigen aktuellen Zweckprüfungen.
 
 Konditionale Rez-Supportkarten benötigen einen kartenspezifischen
 Folgevertrag. Chester Mix darf nur gerezzt werden, wenn bereits vor dem Rezzen

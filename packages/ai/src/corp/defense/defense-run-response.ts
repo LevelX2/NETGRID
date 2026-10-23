@@ -17,6 +17,7 @@ import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
 import {
   actionIceRezSupportLiability,
+  corpIceRezSupportTargetHasNoCurrentEffect,
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
 import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
@@ -47,33 +48,6 @@ export function corpVisibleHandHasActionIceRezSupport(
       card.known &&
       typeof card.definitionId === "string" &&
       definitionHasActionIceRezSupport(card.definitionId),
-  );
-}
-
-/** Only a complete, current Engine quote proves that this direct target is empty.
- * Incomplete/choice-dependent quotes are not evidence of an empty encounter.
- * This does not certify a speculative future effect on another ICE layer.
- */
-export function corpIceRezSupportTargetHasNoCurrentEffect(
-  input: AiDecisionInput,
-  ice: VisibleCard,
-  serverId: string,
-): boolean {
-  const post = ice.effectivePostRezRunQuote;
-  return (
-    post?.complete === true &&
-    post.context === "installed_post_rez" &&
-    post.cardId === ice.instanceId &&
-    post.iceDefinitionId === ice.definitionId &&
-    post.targetServerId === serverId &&
-    post.projectedServerId === serverId &&
-    post.expiresAtStateVersion === input.playerView.stateVersion &&
-    post.effectiveRunQuote.iceInstanceId === ice.instanceId &&
-    post.effectiveRunQuote.iceDefinitionId === ice.definitionId &&
-    post.effectiveRunQuote.subroutines.length === 0 &&
-    (post.effectiveRunQuote.conditionalEncounterEffects?.length ?? 0) === 0 &&
-    post.paidEncounterDefense === undefined &&
-    !(post.creditGainOnRez && post.creditGainOnRez.creditGain > 0)
   );
 }
 
