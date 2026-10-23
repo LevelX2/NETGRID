@@ -37,6 +37,9 @@ function native(game: number, decision: number) {
 }
 function funding(cp: ReturnType<typeof native>, server: string) {
   const { input } = cp;
+  if (!input.ownRunnerStrategicIntent || !input.ownDeckCapabilities) {
+    throw new Error("Native funding fixture requires its canonical planning profiles");
+  }
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: input.side,
