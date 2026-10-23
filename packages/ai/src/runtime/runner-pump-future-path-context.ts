@@ -1,3 +1,8 @@
+import {
+  normalizeRunnerRunPathCreditBudget,
+  runnerGeneralCreditsAfterCompletedPath,
+} from "../run-analysis/visible-run-credit-budget";
+
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
@@ -51,7 +56,8 @@ export function createRunnerPumpFuturePathContext(
     const creditsAfterPumpAndBreak =
       typeof creditBudgetAfterPumpAndBreak === "number"
         ? creditBudgetAfterPumpAndBreak
-        : creditBudgetAfterPumpAndBreak.credits;
+        : normalizeRunnerRunPathCreditBudget(creditBudgetAfterPumpAndBreak)
+            .traceEligibleCredits;
     const run = input.playerView.run;
     if (run?.position?.kind !== "ice")
       return {
@@ -102,7 +108,9 @@ export function createRunnerPumpFuturePathContext(
           },
           damageIce,
           {
-            generalCredits: rawPath.creditsAfterPath,
+            generalCredits: runnerGeneralCreditsAfterCompletedPath(
+              rawPath.creditBudgetAfterPath,
+            ),
             requiredHandFloor:
               requiredHandFloor ??
               runnerConfirmedDamageRequiredHandFloor(input),
@@ -130,7 +138,9 @@ export function createRunnerPumpFuturePathContext(
       };
     return {
       blocksPump: false,
-      creditsAfterPath: pathAssessment.creditsAfterPath,
+      creditsAfterPath: runnerGeneralCreditsAfterCompletedPath(
+        pathAssessment.creditBudgetAfterPath,
+      ),
       evidence: [pathEvidence],
     };
   };

@@ -123,7 +123,10 @@ export type VisibleRunBreakerState = {
 };
 
 export type RunnerRunPathCreditBudget = {
+  /** Total run-spendable credits; general uses consume the explicit subset below. */
   credits: number;
+  /** Encounter ledgers must be projected explicitly: their credits field is general money only. */
+  runOnlyCredits?: never;
   /** General-credit subset of credits; run-only money cannot pay traces. Omission denotes a single general-credit pool. */
   traceEligibleCredits?: number;
   /** Conditional one-shot sources, usable only at a positive payment window. */
@@ -149,6 +152,7 @@ export type RunnerRunPathCreditBudgetInput = number | RunnerRunPathCreditBudget;
 
 export type MutableRunnerRunPathCreditBudget = Omit<
   Required<RunnerRunPathCreditBudget>,
+  | "runOnlyCredits"
   | "hostedIcebreakerCreditsByBreakerInstanceId"
   | "paymentSupportSources"
   | "paymentSupportLiquidCredits"

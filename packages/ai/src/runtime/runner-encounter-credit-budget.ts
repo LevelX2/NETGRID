@@ -16,7 +16,10 @@ import {
   visibleRunnerRunOnlyCredits,
 } from "../run-analysis/visible-run-credit-budget";
 
-type EncounterCreditBudget = RunnerRunPathCreditBudget & {
+type EncounterCreditBudget = Omit<
+  RunnerRunPathCreditBudget,
+  "runOnlyCredits" | "traceEligibleCredits"
+> & {
   runOnlyCredits?: number;
 };
 
@@ -28,6 +31,7 @@ type MutableEncounterCreditBudget = Omit<
   | "paymentSupportLiquidCredits"
   | "paymentSupportCreditsGained"
   | "traceEligibleCredits"
+  | "runOnlyCredits"
 > & {
   paymentSupportSources?: NonNullable<
     RunnerRunPathCreditBudget["paymentSupportSources"]

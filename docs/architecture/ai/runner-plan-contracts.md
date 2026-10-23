@@ -107,6 +107,13 @@ enthält `credits` das Restgeld einschließlich Run-Pools und
 für Pump-/Vollbreak-Alternativen, optionale Schadensvermeidung und
 ETR-Zahlungen. Der zweite Encounter darf Run-Geld nicht erneut als
 Trace-Budget erhalten.
+Die Umrechnung erfolgt ausschließlich über
+`runnerRunPathCreditBudgetAfterEncounter`: Sie entfernt das getrennte
+Encounter-Feld, addiert den verbleibenden Run-Pool zum Pfadgesamtbudget und
+erhält das allgemeine Teilkonto. Ein unkonvertiertes `runOnlyCredits`-Feld
+ist im Pfadvertrag typseitig ausgeschlossen und scheitert auch zur Laufzeit
+mit einer strukturierten Diagnose. Das gilt insbesondere nach einem
+tatsächlichen Break und nach der vollständigen aktuellen Zwangsbreak-Gruppe.
 
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe

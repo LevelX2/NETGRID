@@ -48,12 +48,13 @@ import {
   fundRunnerRunPathPayment,
   runnerPaymentSupportBudgetForRig,
   visibleRunnerRunOnlyCredits,
+  runnerRunPathCreditBudgetAfterEncounter,
 } from "../run-analysis/visible-run-credit-budget";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
 type MutableEncounterCreditBudget = Omit<
   MutableRunnerRunPathCreditBudget,
-  "traceEligibleCredits"
+  "traceEligibleCredits" | "runOnlyCredits"
 > & {
   runOnlyCredits: number;
 };
@@ -410,13 +411,7 @@ export function createRunnerPumpViabilityContext(
               },
             },
             server,
-            {
-              ...breakPayment.budget,
-              credits:
-                breakPayment.budget.credits +
-                breakPayment.budget.runOnlyCredits,
-              traceEligibleCredits: breakPayment.budget.credits,
-            },
+            runnerRunPathCreditBudgetAfterEncounter(breakPayment.budget),
             currentQuote.subroutines.filter(
               (subroutine, index) =>
                 remainingIndexes.has(index) &&
@@ -474,13 +469,7 @@ export function createRunnerPumpViabilityContext(
                 },
               },
               server,
-              {
-                ...completePayment.budget,
-                credits:
-                  completePayment.budget.credits +
-                  completePayment.budget.runOnlyCredits,
-                traceEligibleCredits: completePayment.budget.credits,
-              },
+              runnerRunPathCreditBudgetAfterEncounter(completePayment.budget),
               [],
               requiredHandFloor,
             );

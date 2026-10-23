@@ -170,6 +170,7 @@ export function visibleRunnerRunPathCreditBudgetForRig(
   rigCards: readonly VisibleCard[],
 ): Omit<
   Required<RunnerRunPathCreditBudget>,
+  | "runOnlyCredits"
   | "credits"
   | "traceEligibleCredits"
   | "paymentSupportSources"
@@ -242,6 +243,47 @@ export function runPathCreditPoolUse(
   return undefined;
 }
 
+/** Convert general-only encounter cash and its separate run pool into a total path ledger. */
+export function runnerRunPathCreditBudgetAfterEncounter(
+  budget: Omit<
+    RunnerRunPathCreditBudget,
+    "traceEligibleCredits" | "runOnlyCredits"
+  > & { runOnlyCredits: number },
+): RunnerRunPathCreditBudget {
+  const { runOnlyCredits, ...generalBudget } = budget;
+  const credits = generalBudget.credits + runOnlyCredits;
+  if (
+    ![generalBudget.credits, runOnlyCredits, credits].every(
+      (amount) => Number.isSafeInteger(amount) && amount >= 0,
+    )
+  )
+    throw new Error("runner_encounter_path_projection_invalid_credit_pool");
+  return {
+    ...generalBudget,
+    credits,
+    traceEligibleCredits: generalBudget.credits,
+  };
+}
+
+/** Exact general remainder of a completed shared path; never infer it from its total pool. */
+export function runnerGeneralCreditsAfterCompletedPath(
+  budget: RunnerRunPathCreditBudget | undefined,
+): number {
+  const general = budget?.traceEligibleCredits;
+  if (
+    !budget ||
+    !Number.isSafeInteger(budget.credits) ||
+    general === undefined ||
+    !Number.isSafeInteger(general) ||
+    general < 0 ||
+    general > budget.credits
+  )
+    throw new Error(
+      "runner_completed_path_missing_valid_general_credit_ledger",
+    );
+  return general;
+}
+
 export function normalizeRunnerRunPathCreditBudget(
   budget: RunnerRunPathCreditBudgetInput,
 ): MutableRunnerRunPathCreditBudget {
@@ -258,6 +300,8 @@ export function normalizeRunnerRunPathCreditBudget(
       hostedIcebreakerCreditsByBreakerInstanceId: {},
     };
   }
+  if ("runOnlyCredits" in budget)
+    throw new Error("runner_encounter_budget_requires_run_path_projection");
   const stealthCreditsBySourceId = Object.fromEntries(
     Object.entries(budget.stealthCreditsBySourceId ?? {}).map(
       ([sourceId, amount]) => [sourceId, normalizeCreditAmount(amount)],

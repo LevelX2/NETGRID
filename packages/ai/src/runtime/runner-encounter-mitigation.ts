@@ -1,3 +1,8 @@
+import {
+  runnerGeneralCreditsAfterCompletedPath,
+  runnerRunPathCreditBudgetAfterEncounter,
+} from "../run-analysis/visible-run-credit-budget";
+
 import type {
   AiDecisionInput,
   LegalAction,
@@ -198,11 +203,7 @@ export function currentEncounterMitigationForAction(
     const path = assessKnownRezzedIcePath(
       currentRunRemainingIce(input),
       rig,
-      {
-        ...budgetAfterETR,
-        credits: budgetAfterETR.credits + budgetAfterETR.runOnlyCredits,
-        traceEligibleCredits: budgetAfterETR.credits,
-      },
+      runnerRunPathCreditBudgetAfterEncounter(budgetAfterETR),
       server.root,
       input.playerView.opponent.credits,
       currentRunPathContext(input),
@@ -213,7 +214,8 @@ export function currentEncounterMitigationForAction(
       : undefined;
     return (
       stealCost !== undefined &&
-      Math.min(budgetAfterETR.credits, path.creditsAfterPath) < stealCost
+      runnerGeneralCreditsAfterCompletedPath(path.creditBudgetAfterPath) <
+        stealCost
     );
   }
 }

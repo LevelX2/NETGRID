@@ -1,3 +1,4 @@
+import { runnerGeneralCreditsAfterCompletedPath } from "../../run-analysis/visible-run-credit-budget";
 import {
   completeEncounterBreakerPayment,
   completeMixedEncounterEconomics,
@@ -383,7 +384,9 @@ export function currentRunAbortAssessment(
   if (
     path.knownPathBlockedOnlyByDamage &&
     !runnerVisibleLethalIceDamageAssessment(input, remainingIce, {
-      generalCredits: path.creditsAfterPath,
+      generalCredits: runnerGeneralCreditsAfterCompletedPath(
+        path.creditBudgetAfterPath,
+      ),
       ...(path.paidSubroutineBreaks
         ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
         : {}),

@@ -1,4 +1,8 @@
-import { visibleRunnerRunOnlyCredits } from "../../run-analysis/visible-run-credit-budget";
+import {
+  runnerGeneralCreditsAfterCompletedPath,
+  visibleRunnerRunOnlyCredits,
+} from "../../run-analysis/visible-run-credit-budget";
+
 import { type AiDecisionInput } from "@netgrid/shared";
 import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import {
@@ -231,7 +235,9 @@ export function reassessActiveInformationRunParent(
     ? knownPathAfterDamageBudget(
         pathBeforeDamageBudget,
         !runnerVisibleLethalIceDamageAssessment(input, remainingIce, {
-          generalCredits: pathBeforeDamageBudget.creditsAfterPath,
+          generalCredits: runnerGeneralCreditsAfterCompletedPath(
+            pathBeforeDamageBudget.creditBudgetAfterPath,
+          ),
           ...(pathBeforeDamageBudget.paidSubroutineBreaks
             ? {
                 paidSubroutineBreaks:

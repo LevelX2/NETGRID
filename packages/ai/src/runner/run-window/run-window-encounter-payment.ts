@@ -1,3 +1,4 @@
+import { runnerRunPathCreditBudgetAfterEncounter } from "../../run-analysis/visible-run-credit-budget";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { creditsToBreakVisibleSubroutinesWithBreaker } from "../../visible-run-analysis";
 import {
@@ -83,11 +84,7 @@ export function completeEncounterBreakerPayment(
     runEndTrashSourceIds: quote.runEndTrashSourceIfUsed
       ? [quote.breakerInstanceId]
       : [],
-    budget: {
-      ...payment.budget,
-      credits: payment.budget.credits + payment.budget.runOnlyCredits,
-      traceEligibleCredits: payment.budget.credits,
-    },
+    budget: runnerRunPathCreditBudgetAfterEncounter(payment.budget),
   };
 }
 

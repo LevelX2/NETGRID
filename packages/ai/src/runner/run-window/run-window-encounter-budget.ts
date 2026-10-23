@@ -1,3 +1,4 @@
+import { runnerRunPathCreditBudgetAfterEncounter } from "../../run-analysis/visible-run-credit-budget";
 import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
 import { breakSubroutineIndexesForAction } from "../../runtime/subroutine-indexes";
 import { currentEncounterRequiresDamagePreservingBreak } from "../../runtime/current-encounter-damage";
@@ -157,11 +158,7 @@ export function optionalDamageBreakContinuationPayments(
       results.push({
         cost: state.cost,
         rig: runnerRigAfterEncounter(input.playerView.own.rig ?? []),
-        budget: {
-          ...state.budget,
-          credits: state.budget.credits + state.budget.runOnlyCredits,
-          traceEligibleCredits: state.budget.credits,
-        },
+        budget: runnerRunPathCreditBudgetAfterEncounter(state.budget),
       });
       continue;
     }

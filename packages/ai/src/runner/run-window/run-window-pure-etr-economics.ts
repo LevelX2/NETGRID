@@ -1,3 +1,8 @@
+import {
+  runnerGeneralCreditsAfterCompletedPath,
+  runnerRunPathCreditBudgetAfterEncounter,
+} from "../../run-analysis/visible-run-credit-budget";
+
 import { completeEncounterBreakerPayment } from "./run-window-encounter-payment";
 import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
 import { parseSubroutineIndexes } from "../../runtime/subroutine-indexes";
@@ -93,11 +98,7 @@ export function pureEndRunEncounterPayment(
       liquidCreditsAfterPayment: payment.budget.credits,
       rig: runnerRigAfterEncounter(input.playerView.own.rig ?? []),
       runEndTrashSourceIds: [] as string[],
-      budget: {
-        ...payment.budget,
-        credits: payment.budget.credits + payment.budget.runOnlyCredits,
-        traceEligibleCredits: payment.budget.credits,
-      },
+      budget: runnerRunPathCreditBudgetAfterEncounter(payment.budget),
     };
   }
   return completeEncounterBreakerPayment(input, action);
@@ -147,12 +148,8 @@ export function pureEndRunEncounterEconomics(
     (path.creditBudgetAfterPath?.paymentSupportCreditsGained ?? 0) > 0
   )
     return undefined;
-  // The canonical path spends remaining run-only credits before cash. Its
-  // general balance includes both; the liquid remainder cannot exceed the
-  // cash that was left after the current complete encounter payment.
-  const liquidCreditsAfterPath = Math.min(
-    payment.liquidCreditsAfterPayment,
-    path.creditsAfterPath,
+  const liquidCreditsAfterPath = runnerGeneralCreditsAfterCompletedPath(
+    path.creditBudgetAfterPath,
   );
   const totalCost = payment.cost + (path.visibleBreakCost ?? 0);
   const alreadyBound = new Set(
