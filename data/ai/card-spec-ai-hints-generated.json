@@ -32130,30 +32130,47 @@
           {
             "kind": "zone_shuffle",
             "scope": "rnd",
-            "timing": "when_scored",
+            "timing": "scored_activated",
             "resource": "cards",
             "target": "score.shuffle_hq_archives_into_rnd",
-            "finite": true
+            "repeatable": true,
+            "finite": false
           },
           {
             "kind": "draw",
             "scope": "corp",
-            "timing": "when_scored",
+            "timing": "scored_activated",
             "resource": "cards",
             "target": "score.draw",
             "amount": 5,
-            "finite": true
+            "repeatable": true,
+            "finite": false
+          },
+          {
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "timing": "scored_activated",
+            "target": "score.scored_agenda_ability",
+            "repeatable": true,
+            "finite": false
           }
         ],
-        "functionSignals": ["setup.draw", "zone.shuffle"],
+        "functionSignals": [
+          "setup.draw",
+          "zone.shuffle",
+          "score.scored_agenda_action"
+        ],
         "tacticSignals": ["draw.card"],
         "actionTacticSignals": [
+          "corp.score_progress",
           "draw.card",
           "effect:draw",
+          "effect:scored_agenda_action",
           "effect:zone_shuffle",
           "effect_scope:corp",
           "effect_scope:rnd",
-          "effect_timing:when_scored"
+          "effect_scope:score_area",
+          "effect_timing:scored_activated"
         ],
         "conditions": [
           { "kind": "requires_score_window" },

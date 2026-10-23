@@ -2743,22 +2743,36 @@ function appendScoredAgendaProjection(
       {
         kind: "zone_shuffle",
         scope: "rnd",
-        timing: "when_scored",
+        timing: "scored_activated",
         resource: "cards",
         target: "score.shuffle_hq_archives_into_rnd",
-        finite: true,
+        repeatable: true,
+        finite: false,
       },
       {
         kind: "draw",
         scope: "corp",
-        timing: "when_scored",
+        timing: "scored_activated",
         resource: "cards",
         target: "score.draw",
         amount: scored.drawCount,
-        finite: true,
+        repeatable: true,
+        finite: false,
+      },
+      {
+        kind: "scored_agenda_action",
+        scope: "score_area",
+        timing: "scored_activated",
+        target: "score.scored_agenda_ability",
+        repeatable: true,
+        finite: false,
       },
     );
-    overlay.functionSignals.push("setup.draw", "zone.shuffle");
+    overlay.functionSignals.push(
+      "setup.draw",
+      "zone.shuffle",
+      "score.scored_agenda_action",
+    );
   }
   if (scored.kind === "meat_damage_bonus") {
     overlay.effects.push({

@@ -199,3 +199,13 @@ konsistent sein; diese Metadaten sind dann keine ungeklärten Zusatzkosten.
 Offene oder widersprüchliche Variablen und nicht monetäre Kosten bleiben
 ausdrücklich erhalten. Der fachliche Owner bewertet weiterhin Ziel, Dauer,
 Reserve und Nutzen; die Kostenprojektion trifft keine Kartenentscheidung.
+
+## Aktiviertes Recycling gescorter Agenden
+
+`scoredAgenda.shuffle_hq_archives_into_rd_then_draw` projiziert das spätere,
+wiederholbare Recycling und Nachziehen als `scored_activated`, einschließlich
+`score.scored_agenda_action`. Der Score allein mischt und zieht keine Karten;
+die bestehende Engine-Aktion und der zuständige Plan bleiben erforderlich.
+Automatische Score-Erträge wie `gain_credits_on_score` behalten dagegen ihr
+Timing `when_scored`. Der Compiler leitet diese Grenze aus dem typisierten
+Mechanismus ab, unabhängig von Kartentitel und Identität.
