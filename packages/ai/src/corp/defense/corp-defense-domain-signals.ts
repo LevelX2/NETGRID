@@ -30,7 +30,10 @@ import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
 } from "../../runtime/runner-visible-breaker-coverage";
-import { visibleCorpIceDefenseProfile } from "../../runtime/semantic-runtime-corp-effective-defense";
+import {
+  corpIceEffectsOnlyReachFutureEncounters,
+  visibleCorpIceDefenseProfile,
+} from "../../runtime/semantic-runtime-corp-effective-defense";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -139,6 +142,70 @@ export function corpIceInstallHasCurrentCompleteRezQuote(
     Number.isSafeInteger(payload.postInstallRezQuoteFinalCredits) &&
     payload.postInstallRezQuoteFinalCredits >= 0
   );
+}
+
+/** Position facts only; the existing defense owner still admits and selects routes. */
+export function corpIceInstallPositionEffect(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceCard: VisibleCard | undefined,
+  serverId: string,
+): "not_excluded_by_position" | "untargeted_future_only" | "unknown" {
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
+  if (
+    !sourceCard ||
+    sourceCard.type !== "ice" ||
+    sourceCard.known === false ||
+    action.side !== "corp" ||
+    action.type !== "install_card" ||
+    action.source !== sourceCard.instanceId ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.payload?.placement !== "ice" ||
+    action.payload.serverId !== serverId ||
+    (serverId !== "new_remote" && !server) ||
+    !corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      action,
+      sourceCard.instanceId,
+      serverId,
+    ) ||
+    (serverId === "new_remote"
+      ? typeof action.payload.postInstallRezQuoteProjectedServerId !==
+          "string" ||
+        !action.payload.postInstallRezQuoteProjectedServerId.startsWith(
+          "remote_",
+        )
+      : action.payload.postInstallRezQuoteProjectedServerId !== serverId)
+  )
+    return "unknown";
+  const quote = readPostInstallEffectiveRunQuote(action, sourceCard);
+  if (!quote) return "unknown";
+  const conditional = quote.conditionalEncounterEffects;
+  if (conditional !== undefined && !Array.isArray(conditional))
+    return "unknown";
+  if (
+    conditional?.some(
+      (effect) =>
+        !effect ||
+        typeof effect !== "object" ||
+        (effect.kind === "corp_paid_add_end_the_run_subroutine" &&
+          (!Number.isSafeInteger(effect.creditCost) || effect.creditCost < 0)),
+    )
+  )
+    return "unknown";
+  const hasQuotedCurrentPaidStop =
+    conditional?.some(
+      (effect) => effect.kind === "corp_paid_add_end_the_run_subroutine",
+    ) === true;
+  return (server?.ice.length ?? 0) === 0 &&
+    !hasQuotedCurrentPaidStop &&
+    corpIceEffectsOnlyReachFutureEncounters(
+      quote.subroutines.map((subroutine) => subroutine.type),
+    )
+    ? "untargeted_future_only"
+    : "not_excluded_by_position";
 }
 
 export function knownInstallRouteHasUsefulEffectBlockedByFunding(
@@ -358,6 +425,12 @@ export function corpQualitativeIceStagingSignal(
       !action.payload.postInstallRezQuoteProjectedServerId.startsWith(
         "remote_",
       ))
+  ) {
+    return undefined;
+  }
+  if (
+    corpIceInstallPositionEffect(input, action, sourceCard, serverId) !==
+    "not_excluded_by_position"
   ) {
     return undefined;
   }
@@ -741,6 +814,25 @@ export function corpGlobalDefenseInstallRouteAssessment(
     (card) => card.instanceId === action.source,
   );
   const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  const positionEffect = corpIceInstallPositionEffect(
+    input,
+    action,
+    sourceCard,
+    serverId,
+  );
+  if (positionEffect !== "not_excluded_by_position") {
+    return positionEffect === "unknown"
+      ? {
+          knowledge: "unknown",
+          evidenceCode: "corp_ice_install_position_effect_quote_unknown",
+        }
+      : {
+          knowledge: "known",
+          disposition: "effect_missing",
+          evidenceCode:
+            "corp_ice_install_future_effect_has_no_following_encounter",
+        };
+  }
   if (
     (server?.ice.length ?? 0) > 0 &&
     corpSpendConsumesKnownCentralRezReserve(

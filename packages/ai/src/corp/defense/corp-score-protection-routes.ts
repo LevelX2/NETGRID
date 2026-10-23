@@ -21,6 +21,7 @@ import {
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import {
   corpIceInstallHasCurrentCompleteRezQuote,
+  corpIceInstallPositionEffect,
   corpSpendConsumesKnownCentralRezReserve,
   knownInstallRouteHasUsefulEffectBlockedByFunding,
 } from "./corp-defense-domain-signals";
@@ -333,6 +334,12 @@ export function corpScoreProtectionStagingInstallSignal(
       candidate.sourceCardInstanceId,
       serverId,
     )
+  ) {
+    return undefined;
+  }
+  if (
+    corpIceInstallPositionEffect(input, action, source, serverId) !==
+    "not_excluded_by_position"
   ) {
     return undefined;
   }

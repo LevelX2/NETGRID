@@ -1704,6 +1704,16 @@ allgemeine Tax-/Disruption-Signale die Route freigeben. Zusätzliche sofortige
 Wirkungen und quotierte bezahlte Encounter-Abwehr bleiben eigenständig
 bewertbar; eine noch vorhandene innere ICE-Schicht bleibt ein mögliches Ziel.
 
+Auch die qualitative ICE-Installation, die Handentlastung durch Schutzaufbau
+und das delegierte Score-Protection-Staging konsumieren diese Positionsgrenze.
+Die aktuelle vollständige Post-Install-Enginequote bindet Quelle, Ziel und
+StateVersion; ohne nachfolgende ICE begründen reine Folgeeffekte keinen
+Schutzfortschritt. Fehlende oder widersprüchliche Quotes bleiben unbekannt
+und geben keine qualitative Route frei. Äußere Folge-ICE, sofortiger Schaden
+und gesondert quotierte bezahlte ETR-Wirkung bleiben bewertbar. Die gemeinsame
+Effektklassifikation liegt beim vorhandenen Defense-Fact-Service; Installation,
+Rez und Choice-Continuation erzeugen dafür keine eigene Klassifikation.
+
 Die Klassifikation schließt `set_run_break_subroutine_cost_modifier` ein:
 Der Effekt verändert erst nach seiner Ausführung spätere Breakzahlungen.
 Ein reiner solcher Effekt ohne verbleibendes inneres ICE begründet keinen
