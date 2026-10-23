@@ -244,6 +244,15 @@ weitere Finanzierungslücke nachweisen. Die vorhandene Handreserveprüfung bleib
 zusätzlich verbindlich. Diese Ressourcenprüfung erzeugt keine LegalAction und
 keine zusätzliche Entscheidungsautorität.
 
+Ein vor der Finanzierung als nicht bestreitbar bewerteter Zugriff sperrt diese
+prospektive Prüfung nicht: `accessPayoffContestable: false` kann allein aus der
+aktuellen Liquiditätslücke folgen. Erst die vollständige Quote nach der realen
+Auszahlung entscheidet über den Zugang. Unbekanntes ICE, unvermeidbare sichtbare
+Gefahren, fehlender aktueller Payoff, fehlender Run-Klick und eine nicht gedeckte
+Gesamtroute bleiben Ausschlussgründe. Der Bank-Executor bindet weiterhin den
+aktuellen Remote-Parent und dessen konkreten Bedarf, statt den Lauf selbst zu
+autorisieren.
+
 Ein Zentralzugriff am Runner-Matchpoint darf ohne aktuelle Remote-Scorebedrohung
 das vorhandene Runbudget verbrauchen. Die allgemeine gewünschte Auffüllreserve
 ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
