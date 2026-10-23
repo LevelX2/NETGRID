@@ -361,6 +361,25 @@ describe("Corp ICE rez projection contract", () => {
     });
   });
 
+  it.each([CREDIT_BLOCKS, "onr_proteus_040_sumo-2008"])(
+    "projects the no-surcharge base subtype before installing %s without mutation",
+    (definitionId) => {
+      const { state, cardId } = stateWithHandIce(definitionId);
+      const before = JSON.stringify(state);
+      for (const action of [
+        buildCorpNewRemoteIceInstallAction(state, cardId),
+        buildCorpServerIceInstallAction(state, cardId, { id: "hq", label: "HQ" }, { baseCost: 0, additionalCost: 0, reduction: 0, totalCost: 0 }),
+      ]) {
+        expect(JSON.parse(action.payload!.postInstallEffectiveRunQuoteJson as string)).toMatchObject({
+          iceInstanceId: cardId, iceDefinitionId: definitionId,
+          subroutines: expect.arrayContaining([expect.objectContaining({ type: "end_the_run" })]),
+        });
+        expect(action.payload?.postInstallRezQuoteVariableBaseSubtypes).toBe("sentry");
+      }
+      expect(JSON.stringify(state)).toBe(before);
+    },
+  );
+
   it("fails closed instead of reconstructing an invalid variable-rez contract", () => {
     const originalLookup =
       cardImplementationRegistry.cardImplementationForDefinitionId;

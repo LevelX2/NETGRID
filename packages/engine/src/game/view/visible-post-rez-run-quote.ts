@@ -27,6 +27,16 @@ export function visibleCorpIcePostRezRunQuote(
   visibleIce: VisibleCard,
   action?: LegalAction,
 ): VisibleCorpIcePostRezRunQuote | undefined {
+  return projectCorpIcePostRezRunQuote(state, iceId, visibleIce, action);
+}
+
+function projectCorpIcePostRezRunQuote(
+  state: GameState,
+  iceId: CardInstanceId,
+  visibleIce: VisibleCard,
+  action?: LegalAction,
+  projectionContext: "installed" | "post_install_minimum" = "installed",
+): VisibleCorpIcePostRezRunQuote | undefined {
   const source = state.cardInstances[iceId];
   const definitionId = visibleIce.definitionId;
   const server = state.corp.servers.find((candidate) =>
@@ -73,7 +83,18 @@ export function visibleCorpIcePostRezRunQuote(
     action.payload.effectiveStrengthAfterRez === value &&
     action.payload.variableRezAdditionalCost ===
       value * variable.additionalCostPerValue;
-  if ((variable && !exactVariableAction) || source.variableIceState) {
+  // Installation cost quotes bind alternate-subtype ICE to its explicit
+  // no-surcharge base branch. This internal projection never chooses an
+  // installed ICE's current rez action or promotes a paid alternate subtype.
+  const exactPostInstallBaseSubtype =
+    projectionContext === "post_install_minimum" &&
+    action === undefined &&
+    variable?.kind === "alternate_subtype" &&
+    variable.baseSubtypes.length > 0;
+  if (
+    (variable && !exactVariableAction && !exactPostInstallBaseSubtype) ||
+    source.variableIceState
+  ) {
     return {
       ...binding,
       complete: false,
@@ -157,6 +178,18 @@ export function visibleCorpIcePostRezRunQuote(
       cap: variable.maxValue,
       additionalCostPaid: value! * variable.additionalCostPerValue,
       ...(variable.traceLimitFromValue ? { traceLimit: value! } : {}),
+    };
+  }
+  if (
+    projectedState &&
+    exactPostInstallBaseSubtype &&
+    variable?.kind === "alternate_subtype"
+  ) {
+    projectedState.cardInstances[iceId]!.variableIceState = {
+      family: "alternate_subtype",
+      value: 0,
+      additionalCostPaid: 0,
+      selectedSubtypes: [...variable.baseSubtypes],
     };
   }
   const projectedVisibleIce = projectedState
@@ -253,7 +286,9 @@ export function visibleCorpIcePostInstallRunQuote(
   };
   const visibleIce = visibleCorpCard(projected, iceId, "corp", "ice");
   return visibleIce
-    ? visibleCorpIcePostRezRunQuote(projected, iceId, visibleIce)
+    ? projectCorpIcePostRezRunQuote(
+        projected, iceId, visibleIce, undefined, "post_install_minimum",
+      )
     : undefined;
 }
 

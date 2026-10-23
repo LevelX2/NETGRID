@@ -1733,6 +1733,15 @@ und gesondert quotierte bezahlte ETR-Wirkung bleiben bewertbar. Die gemeinsame
 Effektklassifikation liegt beim vorhandenen Defense-Fact-Service; Installation,
 Rez und Choice-Continuation erzeugen dafür keine eigene Klassifikation.
 
+Bei `alternate_subtype` bindet die Post-Install-Enginevorschau die ausdrücklich
+quotierte Basisvariante ohne Aufpreis: deren kanonische Subtypen, Stärke und
+Subroutinen werden gemeinsam projiziert. Die bezahlte alternative Variante
+wird dadurch weder gewählt noch als zusätzliche Abdeckung behauptet. Eine
+bereits installierte ICE braucht für variable Rezentscheidungen weiterhin ihre
+aktuelle gebundene Action. Ungebundene X-Stärke und bezahlte Subroutinen bleiben
+unvollständig. Die reale Regression vergleicht Vorschau, Defense-Planroute und
+den tatsächlich angewandten Basisrez sowie die unveränderte Eingabestruktur.
+
 Die Klassifikation schließt `set_run_break_subroutine_cost_modifier` ein:
 Der Effekt verändert erst nach seiner Ausführung spätere Breakzahlungen.
 Ein reiner solcher Effekt ohne verbleibendes inneres ICE begründet keinen
