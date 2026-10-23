@@ -359,16 +359,12 @@ export function residentCorpScoreChoiceBinding(
             option.value ===
             `${move.sourceCardId}|${move.targetCardId}|${move.amount}`,
         )
-      : placement
-        ? selectableOptions.some((option) =>
+      : placement !== undefined &&
+        selectableOptions.some((option) =>
             advancementChoiceOptionMatchesPlacements(
               option.value,
               placement.placements,
             ),
-          )
-        : !isMoveChoice &&
-          selectableOptions.some((option) =>
-            advancementChoiceOptionTargetsCard(option.value, targetCardId),
           ));
   if (!exactContinuation || !executor || !targetCardId) {
     throw new PlanResolutionFailure("window_origin_missing", {
@@ -882,25 +878,6 @@ export function residentCorpScoredAgendaHqShuffleBinding(
     });
   }
   return { planInstanceId: executor.instanceId, selectedOptionIds };
-}
-
-function advancementChoiceOptionTargetsCard(
-  value: PendingChoiceOptions[number]["value"],
-  targetCardId: string,
-): boolean {
-  if (typeof value !== "string") return false;
-  const moveParts = value.split("|");
-  if (moveParts.length === 3 && !value.includes(":")) {
-    return moveParts[1] === targetCardId;
-  }
-  return value.split("|").some((placement) => {
-    const [cardId, amount] = placement.split(":");
-    return (
-      cardId === targetCardId &&
-      Number.isFinite(Number(amount)) &&
-      Number(amount) > 0
-    );
-  });
 }
 
 function advancementChoiceOptionMatchesPlacements(

@@ -1408,9 +1408,7 @@ export function sameTurnScoreConversionProjectsForCandidate(
           }
         : {}),
       ...(step.kind === "place_advancement" &&
-      step.offTargetCardId !== undefined &&
-      step.offTargetAdvancementAmount !== undefined &&
-      step.offTargetAdvancementAmount > 0
+      step.advancementAmount > 0
         ? {
             advancementCounterChoiceBinding: {
               kind: "place_advancement" as const,
@@ -1419,10 +1417,14 @@ export function sameTurnScoreConversionProjectsForCandidate(
                   targetCardId: step.targetCardId,
                   amount: step.advancementAmount,
                 },
-                {
-                  targetCardId: step.offTargetCardId,
-                  amount: step.offTargetAdvancementAmount,
-                },
+                ...(step.offTargetCardId !== undefined &&
+                step.offTargetAdvancementAmount !== undefined &&
+                step.offTargetAdvancementAmount > 0
+                  ? [{
+                      targetCardId: step.offTargetCardId,
+                      amount: step.offTargetAdvancementAmount,
+                    }]
+                  : []),
               ],
             },
           }

@@ -184,6 +184,14 @@ Damit entsteht weder eine feste Counterzahl noch ein eigener Chooser
 (Regression: Paarung 547, Runde 1, G5 D315–320; positive Aufbau- und
 Konversionsköpfe G1 D265/D275).
 
+Jede gewählte Advancement-Verteilung trägt vor der Operation ihre vollständige
+Ziel-/Mengenbindung aus dem gewählten Scorepfad. Das gilt auch für zwei Counter
+auf nur eine Agenda. Die folgende Choice gleicht ausschließlich diese Verteilung
+mit den aktuellen Optionen ab; sie darf keinen Counter auf eine andere fast
+fertige Agenda umleiten. Fehlt die Verteilung im Parent oder in seiner
+Continuation, scheitert der Pfad mit `window_origin_missing` (Paarung 547,
+Runde 1, G12 D175/D176).
+
 Für eine installierte Agenda unterscheidet der Scoreowner die vollständigen
 Kosten der aktuellen Konversion von der bis zum nächsten Corp-Zug nötigen
 Reserve. Eine Engine-Quote mit `creditsRequiredBeforeNextCorpTurn: 0` bedeutet

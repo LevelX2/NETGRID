@@ -89,10 +89,21 @@ export function bindSelectedCorpScoreChoiceContinuation(
   const exactPlacementBinding =
     result.route.head.semanticActionType !==
       "score_conversion.place_advancement" ||
-    moveBinding === undefined ||
-    (moveBinding.kind === "place_advancement" &&
+    (moveBinding?.kind === "place_advancement" &&
       Array.isArray(moveBinding.placements) &&
-      moveBinding.placements.length > 0);
+      moveBinding.placements.length > 0 &&
+      moveBinding.placements.every(
+        (entry) =>
+          entry !== null &&
+          typeof entry === "object" &&
+          typeof entry.targetCardId === "string" &&
+          entry.targetCardId.length > 0 &&
+          Number.isSafeInteger(entry.amount) &&
+          entry.amount > 0,
+      ) &&
+      moveBinding.placements.some(
+        (entry) => entry.targetCardId === targetCardId,
+      ));
   if (
     !executor ||
     moduleState?.kind !== "score" ||
