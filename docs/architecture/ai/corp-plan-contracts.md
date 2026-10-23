@@ -63,7 +63,16 @@ Aktivierung verbraucht erneut ihre vollständigen Kosten. Bei unrezztem
 installiertem Support gilt dieselbe enge mechanische Prüfung aus der
 kanonischen Engine-Projektion; Fähigkeiten mit Limits sind ausgeschlossen.
 Operationen und nicht ausdrücklich wiederholbare Fähigkeiten bleiben
-einmalige Ressourcen. Ziel, Root, Executor, StateVersion und jede folgende
+einmalige Ressourcen. Der Pool bereits verfügbarer Quellen erfasst auch die
+Quellinstanz der nativen LegalAction. Dieselbe Handoperation darf nicht
+zusätzlich als prospektive Operation erzeugt werden, wenn ihr natives
+Capability kein separates `sourceCardId` trägt. Echte weitere Kartenkopien
+behalten ihre eigenen Quellen; ausdrücklich wiederholbare installierte
+Aktivierungen behalten ihre Wiederholbarkeit. Paarung 544, Runde 4, G11 D60
+belegt die doppelt geplante Systematic-Layoffs-Kopie und die dadurch unmögliche
+Retreat-Konversion; native und echte Engine-Gegenfälle sichern Quellenzahl,
+knappe Finanzierung und den bereits installierten Scoreverbraucher.
+Ziel, Root, Executor, StateVersion und jede folgende
 Choice werden vor jedem nativen Schritt erneut gebunden. Der Nachweis aus
 Paarung 492, Diagnose-Runde 2, G26 D299 umfasst zwei Aktivierungen auf derselben
 Agenda; ein Root-Austausch darf die dafür nötige Supportkarte nicht zerstören.

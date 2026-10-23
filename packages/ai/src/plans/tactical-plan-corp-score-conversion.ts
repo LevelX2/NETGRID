@@ -753,7 +753,10 @@ function conversionCapabilities(
 
   const legalSourceIds = new Set(
     legalCapabilities
-      .map((capability) => capability.sourceCardId)
+      .flatMap((capability) => [
+        capability.sourceCardId,
+        capability.action?.source,
+      ])
       .filter((cardId): cardId is string => cardId !== undefined),
   );
   const projectedCapabilities = input.playerView.own.gripOrHq
