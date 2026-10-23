@@ -70,6 +70,17 @@ export function runnerEffectsProvideTopTrashRecovery(
   );
 }
 
+export function runnerEffectsProvideHeapRecovery(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return effects?.some((effect) =>
+    effect.kind === "card_recovery" &&
+    effect.scope === "heap" &&
+    (effect.target === "move_top_trash_to_grip" ||
+      effect.target === "search_trash_to_grip"),
+  ) ?? false;
+}
+
 export function runnerEffectsProvideSearch(
   effects: readonly AiHintStructuredEffect[] | undefined,
 ): boolean {

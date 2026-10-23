@@ -1954,6 +1954,35 @@ function appendGenericAbilityEffect(
       "setup.top_trash_recovery",
     );
   }
+  if (effect.kind === "search_trash_to_grip") {
+    if (
+      entry.definition.side !== "runner" ||
+      !["program", "any_card"].includes(effect.filter) ||
+      effect.visibility !== "hidden_info_barrier"
+    )
+      throw new Error("card_spec_unknown_heap_search_to_grip_shape");
+    overlay.effects.push(
+      {
+        kind: "card_recovery",
+        scope: "heap",
+        timing,
+        resource: "cards",
+        target: "search_trash_to_grip",
+        amount: 1,
+        finite: true,
+      },
+      {
+        kind: "search",
+        scope: "heap",
+        timing,
+        resource: "cards",
+        target: effect.filter,
+        amount: 1,
+        finite: true,
+      },
+    );
+    overlay.functionSignals.push("setup.recovery", "setup.search");
+  }
   if (effect.kind === "search_stack_to_grip") {
     if (
       !["program", "any_card"].includes(effect.filter) ||

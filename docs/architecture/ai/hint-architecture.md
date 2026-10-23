@@ -63,6 +63,14 @@ side-sichere Neuquote des anschließenden Zugriffs.
 
 ## Typisierte Recovery- und Spielkosten
 
+`search_trash_to_grip` projiziert die kanonische Auswahl einer beliebigen
+passenden Heap-Karte als `card_recovery` und `search`, mit dem ursprünglichen
+Filter `program` oder `any_card`. Die Deckdiagnostik zählt beide Formen der
+Heap-Rückgewinnung; der engere Top-Heap-Consumer erkennt weiterhin nur
+`move_top_trash_to_grip`. Stack-Suche begründet keine Recovery. Diese Fakten
+verändern weder Legalität noch die plan-, quellen- und versionsgebundene
+Zielauswahl; unbekannte Effektformen scheitern sichtbar.
+
 `hq_access_expose_all_installed_corp_cards` beschreibt einen HQ-Zugriff als
 Auslöser für das Aufdecken installierter Corp-Karten. Daraus entstehen
 `expose_info` und die entsprechenden Expose-Funktionssignale. Weder ein

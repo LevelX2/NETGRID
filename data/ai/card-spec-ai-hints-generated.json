@@ -24589,7 +24589,30 @@
         "strategicRole": ["enabler"],
         "lineSupport": ["runner.search.breaker"],
         "actionCapabilitySemantics": [
-          { "capabilityKey": "abilities_on_play_search_trash_to_grip" }
+          {
+            "capabilityKey": "abilities_on_play_search_trash_to_grip",
+            "effects": [
+              {
+                "kind": "card_recovery",
+                "scope": "heap",
+                "timing": "action",
+                "resource": "cards",
+                "target": "search_trash_to_grip",
+                "amount": 1,
+                "finite": true
+              },
+              {
+                "kind": "search",
+                "scope": "heap",
+                "timing": "action",
+                "resource": "cards",
+                "target": "program",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.recovery", "setup.search"]
+          }
         ],
         "targetProfiles": [
           {
@@ -24605,6 +24628,33 @@
             "targetType": "card",
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
+        ],
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "scope": "heap",
+            "timing": "action",
+            "resource": "cards",
+            "target": "search_trash_to_grip",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "search",
+            "scope": "heap",
+            "timing": "action",
+            "resource": "cards",
+            "target": "program",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["setup.recovery", "setup.search"],
+        "actionTacticSignals": [
+          "effect:card_recovery",
+          "effect:search",
+          "effect_scope:heap",
+          "effect_timing:action"
         ],
         "costProfile": { "clicks": 1, "credits": 0 },
         "quality": {
@@ -24665,7 +24715,30 @@
         "planRoles": ["recover_cards"],
         "valueHints": {},
         "actionCapabilitySemantics": [
-          { "capabilityKey": "abilities_on_play_search_trash_to_grip" }
+          {
+            "capabilityKey": "abilities_on_play_search_trash_to_grip",
+            "effects": [
+              {
+                "kind": "card_recovery",
+                "scope": "heap",
+                "timing": "action",
+                "resource": "cards",
+                "target": "search_trash_to_grip",
+                "amount": 1,
+                "finite": true
+              },
+              {
+                "kind": "search",
+                "scope": "heap",
+                "timing": "action",
+                "resource": "cards",
+                "target": "any_card",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.recovery", "setup.search"]
+          }
         ],
         "targetProfiles": [
           {
@@ -24680,6 +24753,33 @@
             ],
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
+        ],
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "scope": "heap",
+            "timing": "action",
+            "resource": "cards",
+            "target": "search_trash_to_grip",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "search",
+            "scope": "heap",
+            "timing": "action",
+            "resource": "cards",
+            "target": "any_card",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["setup.recovery", "setup.search"],
+        "actionTacticSignals": [
+          "effect:card_recovery",
+          "effect:search",
+          "effect_scope:heap",
+          "effect_timing:action"
         ],
         "costProfile": { "clicks": 1, "credits": 2 },
         "quality": {

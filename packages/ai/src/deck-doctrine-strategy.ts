@@ -16,7 +16,7 @@ import {
   runnerEffectsProvideMultiaccess,
   runnerEffectsProvideSearch,
   runnerEffectsProvideTagPrevention,
-  runnerEffectsProvideTopTrashRecovery,
+  runnerEffectsProvideHeapRecovery,
   runnerTargetProfilesProvideSearch,
 } from "./runner-canonical-hint-semantics";
 import {
@@ -2130,7 +2130,7 @@ function buildRunnerProfiles(
   );
   const recovery = runnerStructuredFactCount(
     stats,
-    runnerEffectsProvideTopTrashRecovery,
+    runnerEffectsProvideHeapRecovery,
   );
   const rndMultiaccess = runnerStructuredFactCount(stats, (effects) =>
     runnerEffectsProvideMultiaccess(effects, "rd"),
