@@ -97,7 +97,7 @@ export function runnerExactFundingRouteContract(
       runnerFundingRouteConsumerBufferFits(input, candidates, request, route),
   });
   const bestRoute = result.bestRoute;
-  const bufferRepair = runnerSelfDamageFundingBufferRepair(
+  const bufferRepair = runnerFundingBufferRepair(
     input,
     candidates,
     request,
@@ -308,18 +308,8 @@ function runnerFundingRouteConsumerBufferFits(
       fundedTarget.routeQuote.fundingGap !== 0
     ) return false;
   }
-  if (
-    request.purpose !== "current_run" ||
-    !route.steps.some((step) =>
-      candidates.some(
-        (candidate) =>
-          candidate.actionId === step.actionId &&
-          runnerStrategicExchangeKinds(candidate).includes("self_damage"),
-      ),
-    )
-  )
-    return true;
-  const repair = runnerSelfDamageFundingBufferRepair(
+  if (request.purpose !== "current_run") return true;
+  const repair = runnerFundingBufferRepair(
     input,
     candidates,
     request,
@@ -334,7 +324,7 @@ function runnerFundingRouteConsumerBufferFits(
 
 /** Resource feasibility only. The existing hand owner performs later draws;
  * random damage and unknown drawn card identities are never simulated here. */
-function runnerSelfDamageFundingBufferRepair(
+function runnerFundingBufferRepair(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   request: RunnerExactFundingRouteRequest,
@@ -345,12 +335,7 @@ function runnerSelfDamageFundingBufferRepair(
     .map((step) =>
       candidates.find((candidate) => candidate.actionId === step.actionId),
     );
-  const selfDamageFunding = fundingActions.some(
-    (candidate) =>
-      candidate &&
-      runnerStrategicExchangeKinds(candidate).includes("self_damage"),
-  );
-  if (request.purpose !== "current_run" || !selfDamageFunding)
+  if (request.purpose !== "current_run")
     return { clickCost: 0, creditCost: 0, evidence: [] };
 
   const target = request.paymentWindowTarget;
@@ -435,7 +420,7 @@ function runnerSelfDamageFundingBufferRepair(
     clickCost,
     creditCost,
     evidence: [
-      `runner_funding_consumer_hand_after_self_damage:${handAfter}|required:${requiredHandBuffer}`,
+      `runner_funding_consumer_hand_after_funding:${handAfter}|required:${requiredHandBuffer}`,
       `runner_funding_consumer_buffer_repair_reserved:${draws}|clicks:${clickCost}|credits:${creditCost}|action:${draw.actionId}`,
     ],
   };

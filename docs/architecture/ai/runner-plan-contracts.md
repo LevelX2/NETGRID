@@ -1586,8 +1586,10 @@ Die prospektive Einzelquote wird durch
 Bank-Owner konsumieren diese Quote; sie rufen weder eine zweite Runbewertung
 noch eine eigene Actionauswahl auf.
 
-Selbstschaden-Finanzierung für einen aktuellen Run berücksichtigt den
-Handverbrauch aller Finanzierungsaktionen und den bekannten Selbstschaden.
+Jede Finanzierung für einen aktuellen Run berücksichtigt den Handverbrauch
+aller Finanzierungsaktionen, ihren belegten Netto-Handgewinn und bekannten
+Selbstschaden. Auch eine reine Creditfolge darf den bestehenden Handpuffer
+nicht aus der gemeinsamen Aktionsrechnung ausklammern.
 Der Handpuffer stammt aus der Reservequote genau dieses Run-Parents. Fehlt
 die Quote, bleibt die Finanzierung unbewiesen. Sinkt der Puffer darunter,
 reserviert die Finanzierungssuche die mit der aktuellen Engine-Projektion
