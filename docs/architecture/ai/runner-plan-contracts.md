@@ -844,6 +844,14 @@ side-sicherem Planning-Fingerprint neu aufgebaut, scheitert bei fehlenden
 MU-/Providerquotes fail-closed und besitzt weder Plan-, Action-, Executor-
 noch Discard-Autorität.
 
+Mehrere alternative Coverage-Needs dürfen dieselbe wiederverwendbare
+Breakerbelegung über einen expliziten `memoryReuseKey` teilen. Ihre einzelnen
+Parent-/Need-Bindungen bleiben erhalten; innerhalb eines simultanen Sets zählt
+diese Belegung nur einmal. Der Fact-Service verlangt dafür identische
+Capability- und Provider-/MU-Fakten und scheitert bei Widerspruch fail-closed.
+Ohne explizite Wiederverwendung bleiben Bedarfe unabhängig; unterschiedliche
+Programminstanzen und additive Supportpools werden nicht zusammengelegt.
+
 Ein installierter Speicherprovider ist bereits in der aktuellen Kapazität
 enthalten und kein zusätzlicher Ausbau. Bei exklusiver Deck-Hardware zählt
 für einen MU-Bedarf ausschließlich der Zuwachs nach Abzug des ersetzten

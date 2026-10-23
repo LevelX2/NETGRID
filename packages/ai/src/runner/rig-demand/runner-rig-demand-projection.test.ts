@@ -93,6 +93,118 @@ describe("RunnerRigDemandProjection", () => {
     );
   });
 
+  it("counts explicitly reusable coverage once without dropping parent identities", () => {
+    const input = projectionInput({
+      hand: [],
+      legalActions: [],
+      memoryUsed: 3,
+      memoryLimit: 4,
+    });
+    const first = demand(input, {
+      demandId: "wall:basic",
+      capabilityId: "breaker_wall",
+      requirement: "required_simultaneously",
+      provider: { providerId: "wall", definitionId: "wall", memoryUnits: 1 },
+    });
+    const second = {
+      ...first,
+      demandId: "wall:event",
+      sourceNeedId: "wall:event",
+    };
+    const projection = buildRunnerRigDemandProjection({
+      input,
+      demands: [first, second].map((d) => ({
+        ...d,
+        memoryReuseKey: "wall-occupancy",
+      })),
+    });
+    expect(projection.memory.requiredAdditionalGeneralMu).toBe(1);
+    expect(projection.memory.requiredDemandIds).toEqual([
+      "wall:basic",
+      "wall:event",
+    ]);
+    expect(projection.roleDemands.map((d) => d.sourceNeedId)).toEqual([
+      "wall:basic",
+      "wall:event",
+    ]);
+  });
+
+  it("keeps unshared demand and different physical pools additive", () => {
+    const input = projectionInput({
+      hand: [],
+      legalActions: [],
+      memoryUsed: 0,
+      memoryLimit: 4,
+    });
+    const first = demand(input, {
+      demandId: "pool:a",
+      capabilityId: "recurring_credits",
+      requirement: "required_simultaneously",
+      provider: { providerId: "pool:a", definitionId: "pool", memoryUnits: 1 },
+    });
+    const second = {
+      ...first,
+      demandId: "pool:b",
+      providers: [{ ...first.providers[0]!, providerId: "pool:b" }],
+    };
+    expect(
+      buildRunnerRigDemandProjection({ input, demands: [first, second] }).memory
+        .requiredAdditionalGeneralMu,
+    ).toBe(2);
+    expect(
+      buildRunnerRigDemandProjection({
+        input,
+        demands: [first, second].map((d) => ({
+          ...d,
+          memoryReuseKey: d.demandId,
+        })),
+      }).memory.requiredAdditionalGeneralMu,
+    ).toBe(2);
+  });
+
+  it.each(["provider", "memory", "capability"])(
+    "fails closed for conflicting %s facts in an explicitly shared occupancy",
+    (kind) => {
+      const input = projectionInput({
+        hand: [],
+        legalActions: [],
+        memoryUsed: 0,
+        memoryLimit: 4,
+      });
+      const first = {
+        ...demand(input, {
+          demandId: "wall:a",
+          capabilityId: "breaker_wall",
+          requirement: "preferred_simultaneously",
+          provider: {
+            providerId: "wall",
+            definitionId: "wall",
+            memoryUnits: 1,
+          },
+        }),
+        memoryReuseKey: "same",
+      };
+      const second = {
+        ...first,
+        demandId: "wall:b",
+        ...(kind === "capability" ? { capabilityId: "breaker_sentry" } : {}),
+        providers: first.providers.map((p) => ({
+          ...p,
+          ...(kind === "provider" ? { providerId: "other" } : {}),
+          ...(kind === "memory" ? { memoryUnits: 2 } : {}),
+        })),
+      };
+      expect(() =>
+        buildRunnerRigDemandProjection({ input, demands: [first, second] }),
+      ).toThrow(
+        expect.objectContaining({
+          code: "invalid_demand",
+          message: "runner_rig_memory_reuse_facts_conflict:wall:b",
+        }),
+      );
+    },
+  );
+
   it("keeps doctrine and a full hand informational without inventing rig demand", () => {
     const memoryChip = visibleCard("memory-chip-hand", {
       definitionId: "test-memory-chip",
