@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { assessCreditBankInvestment } from "./credit-bank-investment";
+import {
+  assessAutomaticCreditBankInvestment,
+  assessCreditBankInvestment,
+} from "./credit-bank-investment";
 
 describe("demand-bound bank investment economics", () => {
   const base = {
@@ -45,5 +48,110 @@ describe("demand-bound bank investment economics", () => {
         alternativeCreditsPerAction: 2,
       }).incrementalCreditsOverAlternative,
     ).toBeGreaterThan(0);
+  });
+});
+
+describe("marginal automatic bank payout economics", () => {
+  const base = {
+    liquidCredits: 5,
+    desiredLiquidity: 20,
+    storedCredits: 0,
+    creditsPerLoad: 3,
+    loadActionCost: 1,
+    creditsPerTrigger: 1,
+    horizonTurns: 3,
+    alternativeCreditsPerAction: 1,
+  };
+  it("counts only extra payouts, excluding the existing queue", () => {
+    expect(
+      [0, 1, 2, 11].map(
+        (storedCredits) =>
+          assessAutomaticCreditBankInvestment({ ...base, storedCredits })
+            .incrementalCreditsOverAlternative,
+      ),
+    ).toEqual([2, 1, 0, -1]);
+  });
+  it("adapts to payout rate and permits multiple profitable loads", () => {
+    expect(
+      [0, 3, 6, 9].map(
+        (storedCredits) =>
+          assessAutomaticCreditBankInvestment({
+            ...base,
+            storedCredits,
+            creditsPerTrigger: 3,
+          }).incrementalCreditsOverAlternative,
+      ),
+    ).toEqual([2, 2, 2, -1]);
+    expect(
+      assessAutomaticCreditBankInvestment({
+        ...base,
+        storedCredits: 4,
+        creditsPerTrigger: 2,
+      }),
+    ).toMatchObject({
+      status: "quoted",
+      marginalPayout: 2,
+      incrementalCreditsOverAlternative: 1,
+    });
+  });
+  it("respects a shorter public horizon and the actual spending budget", () => {
+    expect(
+      assessAutomaticCreditBankInvestment({ ...base, horizonTurns: 1 }),
+    ).toMatchObject({
+      status: "quoted",
+      marginalPayout: 1,
+      incrementalCreditsOverAlternative: 0,
+    });
+    expect(
+      assessAutomaticCreditBankInvestment({ ...base, horizonTurns: 0 }),
+    ).toMatchObject({
+      status: "quoted",
+      marginalPayout: 0,
+      incrementalCreditsOverAlternative: -1,
+    });
+    expect(
+      assessAutomaticCreditBankInvestment({ ...base, desiredLiquidity: 6 }),
+    ).toMatchObject({
+      status: "quoted",
+      marginalPayout: 1,
+      incrementalCreditsOverAlternative: 0,
+    });
+  });
+  it("compares against offered income and the complete load action cost", () => {
+    expect(
+      assessAutomaticCreditBankInvestment({
+        ...base,
+        storedCredits: 1,
+        alternativeCreditsPerAction: 2,
+      }),
+    ).toMatchObject({
+      status: "quoted",
+      marginalPayout: 2,
+      incrementalCreditsOverAlternative: 0,
+    });
+    expect(
+      assessAutomaticCreditBankInvestment({ ...base, loadActionCost: 2 }),
+    ).toMatchObject({
+      status: "quoted",
+      marginalPayout: 3,
+      incrementalCreditsOverAlternative: 1,
+    });
+  });
+  it("rejects missing or invalid projection facts explicitly", () => {
+    expect(
+      assessAutomaticCreditBankInvestment({
+        ...base,
+        creditsPerTrigger: Number.NaN,
+      }),
+    ).toEqual({
+      status: "unavailable",
+      reason: "invalid_automatic_payout_projection",
+    });
+    expect(
+      assessAutomaticCreditBankInvestment({ ...base, horizonTurns: -1 }),
+    ).toEqual({
+      status: "unavailable",
+      reason: "invalid_automatic_payout_projection",
+    });
   });
 });

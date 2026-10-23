@@ -16,8 +16,12 @@ import { runnerDefinitionRequiresTargetedBypassPlan } from "../run-window/runner
 import { runnerNoRunRecurringEconomyProfile } from "../../runtime/runner-canonical-card-facts";
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
 import { searchFundingRoutes } from "../../plans/funding-route";
-import { runnerCreditBankProspectivePlan } from "./credit-bank-prospective-planning";
 import {
+  rematerializedRunnerCreditBankBuildCandidate,
+  runnerCreditBankProspectivePlan,
+} from "./credit-bank-prospective-planning";
+import {
+  assessAutomaticCreditBankInvestment,
   assessCreditBankInvestment,
   bankAlternativeIncomePerAction,
   clickCreditBankProfile,
@@ -318,6 +322,48 @@ export function runnerCreditBankSignals(
         : undefined;
     const automaticLifecycleBank =
       installedBankProjection?.cashOut.kind === "automatic_lifecycle";
+    const automaticBuildCandidate =
+      automaticLifecycleBank && installedBankProjection
+        ? rematerializedRunnerCreditBankBuildCandidate(
+            installedBankProjection,
+            candidates,
+          )
+        : undefined;
+    const automaticInvestment =
+      automaticBuildCandidate &&
+      installedBankProjection?.build.kind === "activated" &&
+      installedBankProjection.cashOut.kind === "automatic_lifecycle"
+        ? assessAutomaticCreditBankInvestment({
+            liquidCredits: input.playerView.own.credits,
+            storedCredits: currentStoredCredits,
+            desiredLiquidity: economy.desiredCreditReserve,
+            creditsPerLoad: installedBankProjection.build.hostedCreditsAdded,
+            loadActionCost: installedBankProjection.build.actionCost,
+            creditsPerTrigger:
+              installedBankProjection.cashOut.creditsPerTrigger,
+            // A conditional development window, shortened by public Corp deckout.
+            // Future automatic payouts never pay for a current action.
+            horizonTurns: Math.max(
+              0,
+              Math.min(3, input.playerView.opponent.deckCount),
+            ),
+            alternativeCreditsPerAction:
+              bankAlternativeIncomePerAction(candidates),
+          })
+        : undefined;
+    const automaticInvestmentEvidence =
+      automaticInvestment?.status === "quoted"
+        ? [
+            `runner_credit_bank_automatic_payout_horizon:${automaticInvestment.horizonTurns}`,
+            `runner_credit_bank_automatic_remaining_budget:${automaticInvestment.remainingBudget}`,
+            `runner_credit_bank_automatic_payout_without_load:${automaticInvestment.payoutWithoutLoad}`,
+            `runner_credit_bank_automatic_payout_with_load:${automaticInvestment.payoutWithLoad}`,
+            `runner_credit_bank_automatic_marginal_payout:${automaticInvestment.marginalPayout}`,
+            `runner_credit_bank_automatic_incremental_advantage:${automaticInvestment.incrementalCreditsOverAlternative}`,
+          ]
+        : automaticLifecycleBank
+          ? ["runner_credit_bank_automatic_projection_unavailable"]
+          : [];
     const investment = bankProfile
       ? {
           desiredLiquidity: economy.desiredCreditReserve,
@@ -400,12 +446,6 @@ export function runnerCreditBankSignals(
       ];
     }
 
-    const clickLimitedStoredLiquidity = Math.min(
-      currentStoredCredits,
-      estimatedPayout * Math.max(0, input.playerView.own.clicks),
-    );
-    const combinedCreditAccess =
-      input.playerView.own.credits + clickLimitedStoredLiquidity;
     const alreadyBuiltThisTurn = creditBankBuiltThisTurn(input, tool);
     const shouldBuild =
       buildActionLegal &&
@@ -417,10 +457,8 @@ export function runnerCreditBankSignals(
       (investment
         ? investment.additionalLoadExecutions > 0 &&
           investment.incrementalCreditsOverAlternative > 0
-        : automaticLifecycleBank &&
-          input.playerView.own.credits < 15 &&
-          combinedCreditAccess < 20 &&
-          currentStoredCredits < 12);
+        : automaticInvestment?.status === "quoted" &&
+          automaticInvestment.incrementalCreditsOverAlternative > 0);
     if (!shouldBuild)
       return [
         {
@@ -452,8 +490,8 @@ export function runnerCreditBankSignals(
                         buildActionLegal &&
                         !automaticLifecycleBank
                       ? "runner_credit_bank_build_projection_unavailable"
-                      : combinedCreditAccess >= 20 || currentStoredCredits >= 12
-                        ? "runner_credit_bank_hold_comfortable_value"
+                      : automaticInvestment?.status === "quoted"
+                        ? "runner_credit_bank_automatic_load_not_profitable_within_horizon"
                         : convertibleDevelopmentFundingNeed
                           ? "runner_credit_bank_cashout_delegated_to_development_plan"
                           : "runner_credit_bank_hold_no_current_conversion_need",
@@ -462,6 +500,7 @@ export function runnerCreditBankSignals(
             !convertibleDevelopmentFundingNeed
               ? [...(developmentCashOutFundingRoute?.evidenceCodes ?? [])]
               : []),
+            ...automaticInvestmentEvidence,
             ...developmentCashOutAdmission.rejectionCodes,
             ...tool.evidence,
           ],
@@ -471,7 +510,9 @@ export function runnerCreditBankSignals(
       {
         bankId: tool.sourceCardInstanceId ?? tool.cardId,
         phase: "build" as const,
-        actionIds: buildActionIds,
+        actionIds: automaticBuildCandidate
+          ? [automaticBuildCandidate.actionId]
+          : buildActionIds,
         rejectedActionIds: convertibleDevelopmentFundingNeed
           ? []
           : cashOutActionIds,
@@ -485,7 +526,9 @@ export function runnerCreditBankSignals(
           (currentStoredCredits === 0 ? 60 : 40) +
           (investment
             ? investment.incrementalCreditsOverAlternative
-            : Math.max(0, 12 - currentStoredCredits)),
+            : automaticInvestment?.status === "quoted"
+              ? automaticInvestment.incrementalCreditsOverAlternative
+              : 0),
         evidenceCodes: [
           currentStoredCredits === 0
             ? "runner_credit_bank_first_load"
@@ -503,6 +546,7 @@ export function runnerCreditBankSignals(
                 `runner_credit_bank_incremental_income_advantage:${investment.incrementalCreditsOverAlternative}`,
               ]
             : []),
+          ...automaticInvestmentEvidence,
           ...tool.evidence,
         ],
       },

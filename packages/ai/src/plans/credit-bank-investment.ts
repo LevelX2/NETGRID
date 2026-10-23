@@ -126,3 +126,66 @@ export function assessCreditBankInvestment(params: {
       addedCredits - additionalActionCost * params.alternativeCreditsPerAction,
   };
 }
+
+/** Conditional marginal payout within a bounded number of future own turns.
+ * Queued credits remain hosted; this assessment never creates liquid funding. */
+export function assessAutomaticCreditBankInvestment(params: {
+  liquidCredits: number;
+  storedCredits: number;
+  desiredLiquidity: number;
+  creditsPerLoad: number;
+  loadActionCost: number;
+  creditsPerTrigger: number;
+  horizonTurns: number;
+  alternativeCreditsPerAction: number;
+}) {
+  const nonnegative = [
+    params.liquidCredits,
+    params.storedCredits,
+    params.desiredLiquidity,
+    params.horizonTurns,
+  ];
+  const positive = [
+    params.creditsPerLoad,
+    params.loadActionCost,
+    params.creditsPerTrigger,
+  ];
+  if (
+    nonnegative.some((value) => !Number.isSafeInteger(value) || value < 0) ||
+    positive.some((value) => !Number.isSafeInteger(value) || value <= 0) ||
+    !Number.isFinite(params.alternativeCreditsPerAction) ||
+    params.alternativeCreditsPerAction <= 0
+  ) {
+    return {
+      status: "unavailable" as const,
+      reason: "invalid_automatic_payout_projection" as const,
+    };
+  }
+  const remainingBudget = Math.max(
+    0,
+    params.desiredLiquidity - params.liquidCredits,
+  );
+  const payoutCapacity = params.creditsPerTrigger * params.horizonTurns;
+  const payoutWithoutLoad = Math.min(
+    params.storedCredits,
+    payoutCapacity,
+    remainingBudget,
+  );
+  const payoutWithLoad = Math.min(
+    params.storedCredits + params.creditsPerLoad,
+    payoutCapacity,
+    remainingBudget,
+  );
+  const marginalPayout = payoutWithLoad - payoutWithoutLoad;
+  return {
+    status: "quoted" as const,
+    horizonTurns: params.horizonTurns,
+    remainingBudget,
+    payoutWithoutLoad,
+    payoutWithLoad,
+    marginalPayout,
+    incrementalCreditsOverAlternative:
+      marginalPayout -
+      params.loadActionCost * params.alternativeCreditsPerAction,
+  };
+}

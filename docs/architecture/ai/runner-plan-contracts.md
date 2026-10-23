@@ -2888,7 +2888,19 @@ pauschales Kopienlimit. Native und budgetabhängige Gegenproben liegen in
 Die Regelautorität über das
 gemeinsame Einmal-pro-Zug-Limit liegt weiterhin bei den Engine-LegalActions;
 der bestehende quellgebundene Cadence-Nachweis bleibt erhalten. Automatische
-Lifecycle-Banken behalten ihren gesonderten Vertrag. Native Routen,
+Lifecycle-Banken werden getrennt bewertet: Der Bank-Owner vergleicht die durch genau
+eine aktuelle Ladung zusätzlich erreichbaren Auszahlungen mit dem aktuell
+angebotenen Einkommen. Bereits wartende Credits zählen nicht noch einmal als
+Ladeertrag. Der bedingte Horizont beträgt höchstens drei kommende eigene Züge,
+verkürzt durch den öffentlichen Corp-Deckrest; das aktuelle Ausgabenbudget
+begrenzt den nutzbaren Betrag zusätzlich. Höhe und Anzahl der möglichen
+Ladungen folgen aus Ladebetrag, Auszahlungsrate, Warteschlange und Bedarf,
+nicht aus einem festen Guthaben- oder Ladungsziel. Eine fehlende exakte
+Quell-/Fähigkeitsbindung oder ungültige Projektion erhält eine begründete
+Ablehnung. Künftige Auszahlungen sind keine heutigen Zahlungscredits.
+Native Queue-, Leerbank- und Marginalwertgegenfälle liegen in
+`meta553-streetware-payout-horizon.native.test.ts` und
+`credit-bank-investment.test.ts`. Native Routen,
 Quellbindung, mehrzügiger Aufbau, größere bedingte Budgets und rechtzeitiger
 Cashout sind in `runner-credit-bank-source-cadence.test.ts` geprüft.
 
