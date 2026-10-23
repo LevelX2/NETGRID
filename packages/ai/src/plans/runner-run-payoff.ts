@@ -37,9 +37,35 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
       target === "make_chosen_server_run" ||
       (target.startsWith("make_") && target.endsWith("_run")) ||
       target === "ends_run_after_effect" ||
-      target === "run.successful_run_self_tag"
+      target === "run.successful_run_self_tag" ||
+      target === "run.after_completed_self_damage"
     ) {
       return false;
+    }
+    if (target === "run.temporary_credits") {
+      const fundedRun = runTargetEvaluations?.find(
+        (evaluation) => evaluation.actionId === candidate.actionId,
+      );
+      if (
+        !fundedRun ||
+        (fundedRun.runActionProjection.temporaryRunCredits ?? 0) <= 0
+      ) {
+        return false;
+      }
+      // A finite run pool has no carry-over value. Compare the actual route,
+      // keeping potential funding through still unknown ICE explicit.
+      if ((fundedRun.unknownUnrezzedIceCount ?? 0) > 0) return true;
+      return (
+        runTargetEvaluations?.some(
+          (directRun) =>
+            directRun.runActionProjection.sourceKind === "basic_action" &&
+            directRun.targetServerId === fundedRun.targetServerId &&
+            directRun.accessServerId === fundedRun.accessServerId &&
+            (fundedRun.creditsAfterRun > directRun.creditsAfterRun ||
+              (fundedRun.pathPassability === "reachable" &&
+                directRun.pathPassability !== "reachable")),
+        ) === true
+      );
     }
     if (target === "derez" || target.includes("trash_rezzed_ice_on_fort")) {
       return server.ice.some((ice) => ice.rezzed === true);

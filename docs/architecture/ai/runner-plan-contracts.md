@@ -43,6 +43,15 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Ein endlicher Run-Creditpool begründet keinen Zusatznutzen, wenn dieselbe
+aktuelle Route ohne Karte erreichbar ist und danach ebenso viele allgemeine
+Credits übrig bleiben. Die gemeinsame Nutzenprüfung vergleicht die gebundenen
+Runquotes; noch unbekanntes ICE behält seine ausdrücklich unsichere
+Finanzierungswirkung. Nachträglicher Eigenschaden ist ein Preis und niemals
+ein positiver Karteneffekt. Central, Remote und Coverage verwenden denselben
+Nachweis. Native Paarung-552-Zustände sichern drei kostenlose Gegenrouten
+sowie zwei erhaltene echte Finanzierungsrouten ab.
+
 Ein Kartenrun mit zusätzlichem gedrucktem ICE-Rezpreis besitzt nur dann diesen
 Zusatznutzen, wenn auf seinem tatsächlichen Zielpfad noch ungerezztes ICE liegt.
 Bereits gerezzte ICE werden während desselben Runs nicht erneut bezahlt.
@@ -51,7 +60,6 @@ Funktionsnachweis; bei gleichzeitig zugelassenem gleichwertigem Basisrun
 rechtfertigt dieser wirkungslose Aufpreis keinen Kartenverbrauch oder
 zusätzlichen Run-Klick. Andere echte Bypass-, Mehrfachzugriffs- und
 Informationswirkungen behalten ihren eigenen Nachweis.
-
 
 Die gemeinsame Runquote trennt mögliche Trace-Effekte von der nach bezahlter
 Abwehr verbleibenden Gefahr. Garantierte Break-, Link- oder Cancel-Kosten
