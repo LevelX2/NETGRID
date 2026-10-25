@@ -16,10 +16,25 @@ const recorded = JSON.parse(
 );
 beforeEach(resetResidentPlanPortfolioMemory);
 describe("pairing 556 last central counter", () => {
-  it.each([false, true])(
-    "binds the free Archives run to the existing Central owner (DTO=%s)",
-    (dto) => {
-      const cp = structuredClone(recorded);
+  it.each([
+    [false, false],
+    [true, false],
+    [false, true],
+    [true, true],
+  ])(
+    "binds the free Archives run with DTO=%s and known-empty=%s",
+    (dto, knownEmpty) => {
+      const cp = knownEmpty
+        ? JSON.parse(
+            readFileSync(
+              new URL(
+                "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta556-known-empty-last-counter.json",
+                import.meta.url,
+              ),
+              "utf8",
+            ),
+          )
+        : structuredClone(recorded);
       expect(Object.keys(cp.validation)).toHaveLength(9);
       expect(Object.values(cp.validation).every(Boolean)).toBe(true);
       if (dto) cp.input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };

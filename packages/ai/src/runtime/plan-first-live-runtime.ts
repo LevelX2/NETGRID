@@ -1947,6 +1947,12 @@ export function runnerActionDispositions(
       candidate.semanticActionType === "run.start" &&
       candidate.runProjectionSummary?.serverId === "archives" &&
       archivesIsKnownWithoutAgenda(input) &&
+      !domain.centralPressure.some(
+        (signal) =>
+          signal.reachable &&
+          signal.runActionIds?.includes(candidate.actionId) === true &&
+          (signal.runActionExclusions?.[candidate.actionId]?.length ?? 0) === 0,
+      ) &&
       !domain.runWindows.some(
         (signal) =>
           signal.actionAssessments?.[candidate.actionId]?.admissible === true,

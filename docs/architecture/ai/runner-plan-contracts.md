@@ -356,6 +356,10 @@ Aktionsreduktion. Der Owner lässt dafür nur einen aktuell legalen Basisrun
 auf ungeschütztes ICE-freies Ziel ohne Creditkosten zu; Hand-, Schadens- und
 Reserveschutz gelten weiterhin. Er behandelt diesen konkreten Nutzen als
 P3-Konversionsfenster, auch wenn im Archives-Zugriff keine Agenda liegt.
+Die abschließende Actionklassifikation respektiert eine exakt zugelassene
+Central-Route mit diesem konkreten Nutzen; bekannt agenda-leere Archives
+sind dadurch kein pauschaler Widerspruch mehr. Gewöhnliche agenda-leere
+Archives ohne zugelassenen Zweck bleiben ausgeschlossen.
 Terminale P2-Contests behalten ihren Vorrang. Frühere Installation und
 mehrzügiger Aufbau mehrerer fehlender Verbindungen sind damit nicht belegt.
 Nach dem Run entscheidet derselbe Owner anhand neu angebotener LegalActions
