@@ -927,6 +927,9 @@ function sanitizePlayerView(
         : {}),
       deckCount: view.opponent.deckCount,
       discardCount: view.opponent.discardCount,
+      ...(view.side === "corp" && view.opponent.discardCards !== undefined
+        ? { discardCards: view.opponent.discardCards.map(sanitizeVisibleCard) }
+        : {}),
       scoreArea: view.opponent.scoreArea.map(sanitizeVisibleCard),
       ...(view.opponent.rig
         ? { rig: view.opponent.rig.map(sanitizeVisibleCard) }

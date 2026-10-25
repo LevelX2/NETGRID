@@ -1,4 +1,10 @@
 import { readFileSync } from "node:fs";
+import { buildAiDecisionInputDto } from "../../input-dto";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import {
+  restoreAiRuntimeCheckpoint,
+  type AiRuntimeCheckpointV1,
+} from "./runtime-checkpoint";
 import { afterEach, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
@@ -202,3 +208,76 @@ it.each(["heap", "memory", "clicks"])(
     );
   },
 );
+
+it.each(["g4-d595", "g17-d455"])(
+  "retains the complete public Heap through the actual %s DTO and resident decision path",
+  (name) => {
+    const input = fixture(name);
+    const normalized = { ...input, ...buildAiDecisionInputDto(input) };
+    expect(normalized.playerView.opponent.discardCards).toEqual(
+      input.playerView.opponent.discardCards,
+    );
+    const cp = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-555-r4-" +
+            name +
+            ".json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ) as { runtime: AiRuntimeCheckpointV1 };
+    restoreAiRuntimeCheckpoint(
+      normalized,
+      normalized.ownDeckSnapshot!.deckSnapshotId,
+      cp.runtime,
+    );
+    const before = JSON.stringify([
+      normalized.playerView,
+      normalized.legalActions,
+    ]);
+    const result = chooseAiAction(normalized);
+    expect(result.fallbackUsed).toBe(false);
+    expect(result.timeoutUsed).not.toBe(true);
+    expect(
+      normalized.legalActions.some((a) => a.actionId === result.actionId),
+    ).toBe(true);
+    expect(result.decisionDebug!.planFirstDecision!.route).toMatchObject({
+      actionId: result.actionId,
+      stateVersion: normalized.playerView.stateVersion,
+    });
+    expect(
+      JSON.stringify([normalized.playerView, normalized.legalActions]),
+    ).toBe(before);
+    expect(normalized.playerView.opponent).not.toHaveProperty("gripOrHq");
+  },
+);
+
+it("does not admit the Corporation discard zone into a Runner input", () => {
+  const cp = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-555-r2-g5-d282.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  ) as {
+    input: AiDecisionInputWithDeckCapabilities;
+    validation: Record<string, boolean>;
+  };
+  expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
+  expect(cp.input.side).toBe("runner");
+  cp.input.playerView.opponent.discardCards = [
+    {
+      instanceId: "injected-private-corp-discard",
+      definitionId: "private-corp-card",
+      owner: "corp",
+      known: false,
+    },
+  ];
+  const dto = buildAiDecisionInputDto(cp.input);
+  expect(dto.playerView.opponent).not.toHaveProperty("discardCards");
+  expect(JSON.stringify(dto)).not.toContain("private-corp-card");
+});

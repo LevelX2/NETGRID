@@ -713,7 +713,10 @@ Host-Variante muss vorliegen. Der neu installierte Breaker erhält keinen aus de
 Heap übernommenen oder am verpassten Zugbeginn aufgefüllten Kreditpool.
 
 `runtime/corp-public-heap-breaker-preparation.ts` liefert diese öffentlichen Fakten
-für die bestehende Defense-Reifeprüfung und Scoreline-Schutzprojektion. Es erzeugt
+für die bestehende Defense-Reifeprüfung und Scoreline-Schutzprojektion. Die
+KI-Input-Normalisierung bewahrt dazu die von der Engine veröffentlichten
+Runner-Heap-Karten ausschließlich im Corp-Input; gegnerische Corp-Ablagen
+werden dadurch nicht in den Runner-Input aufgenommen. Der Dienst erzeugt
 keine zukünftigen LegalActions und entscheidet keinen Runner-Zug. Verdeckte
 Handkarten und spätere Ziehergebnisse bleiben unbekannt. Unvollständige
 öffentliche Heap-, Speicher- oder Klickfakten scheitern sichtbar. Frühere Zugriffe
