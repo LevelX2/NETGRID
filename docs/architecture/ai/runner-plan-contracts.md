@@ -747,6 +747,13 @@ muss dem ursprünglichen Zahlungs-Origin entsprechen. Ein zwischenzeitlicher
 Economy-Executor darf nicht die folgenden Quellen-, Ziel- oder Speicher-Choices
 besitzen. Das vorab gebundene Suchziel und seine akzeptablen Speicheropfer
 bleiben erhalten; abweichende Root- oder Suchversionsbindungen scheitern.
+Eine erst im privaten Stackfenster sichtbar gewordene Programm-Instanz wird
+vor ihrer Auswahlfortsetzung an denselben Coverage-Executor gebunden, auch
+bei einer Stack-oder-Heap-Suche mit temporärer Installation. Der Owner prüft
+das aktuelle Suchfenster, Quelle, Zieldefinition und ausreichende akzeptable
+MU-Opfer. Bereits bekannte Heap-Ziele behalten ihre Vorbindung. Die spätere
+Speicher-Choice vervollständigt nur dieses exakte Opfer; sie erfindet keine
+neue Auswahl (SP-165, Paarung 555).
 Während der Zahlungsunterstützung bleibt auch die ursprüngliche Parentkette
 der Coverage-Aktion erhalten. Eine allgemeine Neuentdeckung derselben
 Coverage-Instanz darf deren Remote-Parent nicht entfernen. Jede Kante wird

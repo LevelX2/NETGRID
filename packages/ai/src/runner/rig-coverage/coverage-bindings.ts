@@ -286,6 +286,8 @@ export function bindSelectedRunnerCoverageSearchChoiceContinuation(
     !choice ||
     choice.kind !== "select_cards" ||
     (!choice.source.startsWith("p3_38.search_stack_install:") &&
+      (!choice.source.startsWith("p3_38.stack_or_trash_program_install:") ||
+        choice.cardSearchPresentation?.sourceZone !== "stack") &&
       !choice.source.startsWith(
         "card_implementation.pro018_stack_install_run_cleanup:",
       )) ||

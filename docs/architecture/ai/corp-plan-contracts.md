@@ -1457,6 +1457,14 @@ Installation wird gegen Vorher/Nachher dieses Effekts und gegen den
 vollständigen Funding-/Reservevertrag projiziert. Eine Route ist nur
 produktiv, wenn sie das Schutzziel erfüllt oder nachweisbar in dessen Richtung
 fortschreibt; ein zweites ICE ohne zusätzlichen Effekt ist kein Fortschritt.
+Die konservative Corp-Zugriffsprojektion behandelt einen vollständig geprüften
+Pfad mit ausschließlich ungebrochenem direktem Schaden weiterhin als
+erreichbar. Ein vom Runner-Pfaddienst verlangter Schadens-Break ist kein
+Nachweis einer tatsächlichen Zugriffssperre. Das gilt für die finanzierte
+Remote-Reife ebenso wie für den begrenzten Score-Rush; dessen Staging-Pfad
+darf die abgelehnte Schutzbescheinigung nicht erneut zulassen. Unabhängige
+ETR-, Zahlungs- und Folgesperren bleiben wirksam. Ein eigener belegter
+sofortiger Score bleibt bei seinem bisherigen Owner (SP-651, Paarung 555).
 
 Der Schutzeffekt ist dabei nicht auf eine binäre oder unveränderte unmittelbare
 Zugriffs-Erfolgswahrscheinlichkeit verengt. Ein zusätzliches ICE schreibt den

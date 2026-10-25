@@ -142,9 +142,9 @@ function scoringWindowAccessAssessmentForMode(
                 : best,
             );
             return {
-              runnerCanReachAccess:
-                runnerBestPath.assessment.canReachAccess &&
-                runnerBestPath.assessment.creditsAfterPath >= 0,
+              runnerCanReachAccess: scoringWindowRunnerPathCanReachAccess(
+                runnerBestPath.assessment,
+              ),
               runnerCreditsAfterPath:
                 runnerBestPath.assessment.creditsAfterPath,
               runnerVisibleBreakCost:
@@ -217,8 +217,7 @@ function scoringWindowAccessAssessmentForMode(
   const runnerCanReachAccessNow =
     observedReachability?.applies === true ||
     (!unmodeledBlocksVisibleAccess &&
-      assessment.canReachAccess &&
-      assessment.creditsAfterPath >= 0);
+      scoringWindowRunnerPathCanReachAccess(assessment));
   const hazardPenalty = assessment.visibleIceHazardPenalty ?? 0;
   const agendaStealRelevantNow =
     observedReachability?.applies === true ||
@@ -467,6 +466,18 @@ function visibleRunnerStagedProgramFitsMemory(
   return memoryUsed + Math.max(0, card.memoryCost) <= memoryLimit;
 }
 
+// This conservative Corp exposure model does not certify damage as a run stop.
+// The path producer has already checked every independent access barrier.
+function scoringWindowRunnerPathCanReachAccess(
+  assessment: ReturnType<typeof assessKnownRezzedIcePath>,
+): boolean {
+  return (
+    (assessment.canReachAccess ||
+      assessment.knownPathBlockedOnlyByDamage === true) &&
+    assessment.creditsAfterPath >= 0
+  );
+}
+
 function scoringWindowRunnerPathCandidateIsBetter(
   candidate: ScoringWindowRunnerPathCandidate & {
     assessment: ReturnType<typeof assessKnownRezzedIcePath>;
@@ -476,9 +487,10 @@ function scoringWindowRunnerPathCandidateIsBetter(
   },
 ): boolean {
   if (
-    candidate.assessment.canReachAccess !== current.assessment.canReachAccess
+    scoringWindowRunnerPathCanReachAccess(candidate.assessment) !==
+    scoringWindowRunnerPathCanReachAccess(current.assessment)
   ) {
-    return candidate.assessment.canReachAccess;
+    return scoringWindowRunnerPathCanReachAccess(candidate.assessment);
   }
   if (
     candidate.assessment.creditsAfterPath !==

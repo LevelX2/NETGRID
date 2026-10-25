@@ -131,7 +131,11 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
         ).length,
       },
     );
-    return !assessment.canReachAccess;
+    // A conservative Runner damage break requirement is not an access barrier.
+    return (
+      !assessment.canReachAccess &&
+      assessment.knownPathBlockedOnlyByDamage !== true
+    );
   });
 }
 
