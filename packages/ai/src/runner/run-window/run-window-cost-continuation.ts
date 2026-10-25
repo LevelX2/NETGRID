@@ -11,6 +11,7 @@ import {
   bindRunnerDevelopmentSearchEngineContinuation,
   bindRunnerEventInstallChoiceEngineContinuation,
 } from "../hand-development/development-choice-bindings";
+import { preserveSelectedRunnerDevelopmentSearchAcrossPaymentStep } from "../hand-development/development-payment-continuation";
 import { preserveSelectedRunnerCoverageBindingAcrossPaymentStep } from "../rig-coverage/coverage-bindings";
 
 /** A completed Runner movement may cross only Corp rez windows before the
@@ -160,6 +161,12 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         });
       }
       rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
+        input,
+        result,
+        previous,
+        pending,
+      );
+      preserveSelectedRunnerDevelopmentSearchAcrossPaymentStep(
         input,
         result,
         previous,
@@ -403,6 +410,12 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           "Use Runner payment support only while preserving the exact original plan action and current Engine support-window id.",
       });
     }
+    preserveSelectedRunnerDevelopmentSearchAcrossPaymentStep(
+      input,
+      result,
+      previous,
+      pending,
+    );
     preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
       input,
       result,

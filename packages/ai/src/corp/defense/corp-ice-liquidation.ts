@@ -1,3 +1,4 @@
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
@@ -92,6 +93,13 @@ export function assessCorpIceLiquidation(
       ? { runnerMemoryLimit: opponent.memoryLimit }
       : {}),
     runnerCredits: opponent.credits,
+    ...(input.playerView.activeSide === "corp"
+      ? {
+          runnerCreditPoolHorizon: "next_runner_turn" as const,
+          runnerPublicPreparedBreakers:
+            visibleRunnerHeapBreakerPreparations(input),
+        }
+      : {}),
     runnerPreparationCreditClicks: visibleRunnerNextTurnPreparationCreditGain(
       opponent.rig,
       input.playerView.runnerNextTurnCreditClicks,

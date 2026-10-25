@@ -1,3 +1,4 @@
+import type { PublicHeapBreakerPreparation } from "./corp-public-heap-breaker-preparation";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
@@ -129,6 +130,9 @@ export type CorpScoreProtectionAssessmentInput = Readonly<{
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
   runnerCredits: number;
+  runnerCreditPoolHorizon?: "current" | "next_runner_turn";
+  /** Independently quoted public recovery routes with absolute remaining cash. */
+  runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
   /** Engine-published next-turn basic income after reserving the run action. */
   runnerPreparationCreditClicks?: number;
   maximumRunnerAccessSuccessProbability: ExactProbability;
@@ -307,6 +311,9 @@ const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
 export function assessCorpScoreProtection(
   input: CorpScoreProtectionAssessmentInput,
 ): CorpScoreProtectionAssessment {
+  if ((input.runnerPublicPreparedBreakers?.length ?? 0) > 0) {
+    return assessCorpScoreProtectionWithPublicHeapBreakers(input);
+  }
   if (input.runnerPreparationCreditClicks !== undefined) {
     const { runnerPreparationCreditClicks, ...currentRun } = input;
     if (!nonNegativeSafeInteger(runnerPreparationCreditClicks)) {
@@ -471,6 +478,7 @@ export function assessCorpScoreProtection(
         runnerRunPathCreditBudgetWithVisiblePools(
           input.runnerCredits,
           runnerRig,
+          { creditPoolHorizon: input.runnerCreditPoolHorizon ?? "current" },
         ),
       ),
       probability: ONE,
@@ -1540,6 +1548,56 @@ export function visiblePreparedRunnerBreakerCandidates(
       });
   }
   return { status: "known", candidates };
+}
+
+/** Compare independent preparation routes; never add basic income twice or
+ * spend restricted breaker pools on recovery and installation. */
+function assessCorpScoreProtectionWithPublicHeapBreakers(
+  input: CorpScoreProtectionAssessmentInput,
+): CorpScoreProtectionAssessment {
+  const { runnerPublicPreparedBreakers: candidates, ...baseInput } = input;
+  if (input.runnerCreditPoolHorizon !== "next_runner_turn") {
+    return unknownAssessment(
+      input.maximumRunnerAccessSuccessProbability,
+      "unsupported_public_staged_breaker",
+      ["publicHeapPreparationRequiresNextRunnerTurn:true"],
+    );
+  }
+  const base = assessCorpScoreProtection(baseInput);
+  if (base.knowledge === "unknown") return base;
+  let best = base;
+  let selectedEvidence: readonly string[] = [];
+  const {
+    runnerPreparationCreditClicks: _income,
+    runnerSetAside: _setAside,
+    runnerMemoryUsed: _memoryUsed,
+    runnerMemoryLimit: _memoryLimit,
+    ...recoveredInput
+  } = baseInput;
+  void _income;
+  void _setAside;
+  void _memoryUsed;
+  void _memoryLimit;
+  for (const candidate of candidates!) {
+    const assessment = assessCorpScoreProtection({
+      ...recoveredInput,
+      runnerRig: [...input.runnerRig, candidate.card],
+      runnerCredits: candidate.remainingGeneralCredits,
+    });
+    if (assessment.knowledge === "unknown") return assessment;
+    if (scoreProtectionAssessmentIsMoreDangerous(assessment, best)) {
+      best = assessment;
+      selectedEvidence = candidate.evidence;
+    }
+  }
+  return {
+    ...best,
+    evidence: [
+      ...best.evidence,
+      "publicHeapBreakerCandidateCount:" + candidates!.length,
+      ...selectedEvidence,
+    ],
+  };
 }
 
 function assessCorpScoreProtectionWithPreparedBreakers(

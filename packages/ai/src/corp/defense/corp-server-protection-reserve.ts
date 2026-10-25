@@ -1,3 +1,4 @@
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
@@ -71,6 +72,13 @@ export function corpTerminalHqAgendaShuffleExposure(
       runnerRig,
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
+      ...(input.playerView.activeSide === "corp"
+        ? {
+            runnerCreditPoolHorizon: "next_runner_turn" as const,
+            runnerPublicPreparedBreakers:
+              visibleRunnerHeapBreakerPreparations(input),
+          }
+        : {}),
       runnerPreparationCreditClicks: visibleRunnerNextTurnPreparationCreditGain(
         runnerRig,
         preparationClicks!,
@@ -208,6 +216,13 @@ export function corpServerProtectionClaims(
       runnerRig: input.playerView.opponent.rig ?? [],
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
+      ...(input.playerView.activeSide === "corp"
+        ? {
+            runnerCreditPoolHorizon: "next_runner_turn" as const,
+            runnerPublicPreparedBreakers:
+              visibleRunnerHeapBreakerPreparations(input),
+          }
+        : {}),
       ...(input.playerView.phase === "run"
         ? {
             runnerPreparationCreditClicks:

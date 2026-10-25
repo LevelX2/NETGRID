@@ -1151,6 +1151,14 @@ separate Quellwahl, eventuelle Zahlung und anschließende Kartenwahl. Die
 Quellwahl setzt die Continuation-StateVersion fort; der Payloadresolver darf
 kein anderes Ziel erfinden (SP-504/SP-505).
 
+Eine vorgeschaltete Bankzahlung bewahrt die bereits ausgewählte Development-
+Programmsuche oder Heap-Suche mitsamt Quelle, Ziel, Originalaction und
+Auswahlversion. Die Neuentdeckung während der Zahlung darf diese Bindung nicht
+überschreiben. Nach dem exakten Engine-Zahlungsfenster wird derselbe residente
+Executor unter seinem ursprünglichen Root reaktiviert. Widersprüchliche oder
+fehlende Suchbindungen werden sichtbar abgewiesen; die Fortsetzung wählt kein
+neues Suchziel (SP-656, Paarung 555/R5/G11/D155–157).
+
 Vor der Quellenaction prüft derselbe Development-Owner jedes strategische
 Programmziel gegen genau diese aktuelle LegalAction. Bei direkter Installation
 reserviert er Quellenkosten und den kanonischen Zielpreis gemeinsam; kostenlose

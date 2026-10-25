@@ -1,3 +1,4 @@
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -168,6 +169,13 @@ export function corpScoreProtectionInstallRouteScan(
         ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
         : {}),
       runnerCredits: input.playerView.opponent.credits,
+      ...(input.playerView.activeSide === "corp"
+        ? {
+            runnerCreditPoolHorizon: "next_runner_turn" as const,
+            runnerPublicPreparedBreakers:
+              visibleRunnerHeapBreakerPreparations(input),
+          }
+        : {}),
       ...(input.playerView.activeSide === "corp" &&
       input.playerView.runnerNextTurnCreditClicks !== undefined
         ? {

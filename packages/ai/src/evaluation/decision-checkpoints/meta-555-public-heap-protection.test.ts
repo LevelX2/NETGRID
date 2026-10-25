@@ -1,3 +1,4 @@
+import { corpFundedScoreProtectionNeed } from "../../corp/score/score-protection-needs";
 import { readFileSync } from "node:fs";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -295,3 +296,44 @@ it("quotes the same native public Heap route beside an unidentified face-down re
   });
   expect(visibleRunnerHeapBreakerPreparations(input)).toEqual(before);
 });
+
+it.each(["g4-d595", "g17-d455"])(
+  "does not let the funded Score consumer recreate the false native %s certificate",
+  (name) => {
+    const input = fixture(name);
+    const definition =
+      name === "g4-d595" ? "project-babylon" : "tycho-extension";
+    const action = input.legalActions.find(
+      (a) =>
+        a.type === "install_card" &&
+        a.source.includes(definition) &&
+        a.payload?.serverId === "remote_1",
+    )!;
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "corp",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId:
+        visibleSourceDefinitionsByInstanceId(input.playerView),
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+    });
+    const candidate = candidates.find((c) => c.actionId === action.actionId)!;
+    const agenda = input.playerView.own.gripOrHq.find(
+      (c) => c.instanceId === action.source,
+    )!;
+    const need = corpFundedScoreProtectionNeed(
+      input,
+      candidate,
+      agenda,
+      "native-public-heap-" + name,
+      "remote_1",
+      input.playerView.own.agendaPoints + (agenda.agendaPoints ?? 0) >= 7,
+      false,
+    );
+    expect(
+      need.baseline.knowledge === "known" &&
+        need.baseline.protection.protectsScore,
+    ).toBe(false);
+  },
+);

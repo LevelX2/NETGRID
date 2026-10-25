@@ -716,7 +716,12 @@ Programm-/Hardware-Hosts bleiben unbekannt (SP-655). Der neu installierte Breake
 Heap übernommenen oder am verpassten Zugbeginn aufgefüllten Kreditpool.
 
 `runtime/corp-public-heap-breaker-preparation.ts` liefert diese öffentlichen Fakten
-für die bestehende Defense-Reifeprüfung und Scoreline-Schutzprojektion. Die
+für die bestehende Defense-Reifeprüfung, Scoreline-Schutzprojektion und die
+gemeinsame finanzierte Schutzbewertung einschließlich Installationsprojektionen.
+Jede unabhängige Recovery-Route übergibt ihre absoluten Restcredits; das
+Basiseinkommen wird dafür nicht erneut addiert. Der ausdrücklich typisierte
+Horizont `next_runner_turn` füllt passende vorhandene Pools einmal bis zur
+Kapazität auf. Live- und Folgeruns derselben Runner-Phase behalten `current`. Die
 KI-Input-Normalisierung bewahrt dazu die von der Engine veröffentlichten
 Runner-Heap-Karten ausschließlich im Corp-Input; gegnerische Corp-Ablagen
 werden dadurch nicht in den Runner-Input aufgenommen. Der Dienst erzeugt
