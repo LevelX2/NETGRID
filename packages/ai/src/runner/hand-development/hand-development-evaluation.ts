@@ -127,6 +127,7 @@ import {
   persistentDeckReplacementAssessment,
   persistentFunctionalProfileForCard,
   persistentInstallEvidence,
+  persistentIncomeInstallRecovery,
   persistentEngineAssessmentForInstall,
   persistentInstallRouteBlocked,
   persistentProfilesOverlap,
@@ -153,6 +154,8 @@ import {
   runnerEffectsProvideExposeInformation,
   runnerEffectsProvideMultiaccess,
   runnerEffectsProvidePostBreakIceTrash,
+  runnerEffectsProvideEncounterIceDerez,
+  runnerEffectsProvideAccessTriggeredInstalledExpose,
   runnerEffectsProvideNonNoisyBreakerCredits,
   runnerEffectsProvideProgramTrashPrevention,
   runnerEffectsProvideSearch,
@@ -407,7 +410,12 @@ function evaluateHandCard(
   const adjustedNeed =
     (developmentRole === "draw_or_search_engine" &&
       recoveryOnlySearchHasNoVisibleTarget(params.input, context)) ||
-    runnerEffectsProvidePostBreakIceTrash(context.signals.structuredEffects)
+    runnerEffectsProvidePostBreakIceTrash(context.signals.structuredEffects) ||
+    runnerEffectsProvideEncounterIceDerez(context.signals.structuredEffects) ||
+    (developmentRole === "access_payoff" &&
+      runnerEffectsProvideAccessTriggeredInstalledExpose(
+        context.signals.structuredEffects,
+      ))
       ? baseNeed
       : currentNeedAdjustedByPersistentInstall(
           baseNeed,
@@ -695,6 +703,8 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (looksLikeMemorySupport(context.card, text)) return "memory_support";
   if (looksLikeRunEvent(context.card, context.card.rulesText ?? text))
     return "run_event";
+  if (runnerEffectsProvideEncounterIceDerez(context.signals.structuredEffects))
+    return "access_payoff";
   if (cardProvidesTraceDefense(context)) return "defense_support";
   if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
   if (looksLikeBankTool(text)) return "bank_tool";
@@ -854,13 +864,22 @@ function currentNeedForCard(
         : "setup";
     case "access_payoff":
       if (
-        runnerEffectsProvidePostBreakIceTrash(context.signals.structuredEffects)
+        runnerEffectsProvidePostBreakIceTrash(
+          context.signals.structuredEffects,
+        ) ||
+        runnerEffectsProvideEncounterIceDerez(context.signals.structuredEffects)
       ) {
-        // The central run owner prices installation, full breaking and removal
-        // together. Generic hand setup must not invent an unbound income need.
+        // Preparation needs the run owner's complete manipulation sequence.
+        // Derez is not permanent removal; its follow-up remains a separate
+        // investment question. Generic setup must not invent that consumer.
         return "none";
       }
-      if (context.signals.planRoles.includes("information")) {
+      if (
+        context.signals.planRoles.includes("information") ||
+        runnerEffectsProvideAccessTriggeredInstalledExpose(
+          context.signals.structuredEffects,
+        )
+      ) {
         return runnerInformationDevelopmentNeed(params.input, context);
       }
       return intentHasPressure(intent) ? "useful_now" : "setup";
@@ -882,14 +901,19 @@ function runnerInformationDevelopmentNeed(
   input: AiDecisionInput,
   context: CardContext,
 ): RunnerHandDevelopmentCurrentNeed {
-  const unknownUnrezzedIceCount = input.playerView.servers.reduce(
+  const exposesInstalledRoots =
+    runnerEffectsProvideAccessTriggeredInstalledExpose(
+      context.signals.structuredEffects,
+    );
+  const unknownInstalledTargetCount = input.playerView.servers.reduce(
     (count, server) =>
       count +
-      server.ice.filter((ice) => ice.known === false && ice.rezzed !== true)
-        .length,
+      [...server.ice, ...(exposesInstalledRoots ? server.root : [])].filter(
+        (card) => card.known === false && card.rezzed !== true,
+      ).length,
     0,
   );
-  if (unknownUnrezzedIceCount <= 0) return "none";
+  if (unknownInstalledTargetCount <= 0) return "none";
 
   // One-shot information events are emitted as LegalActions only when the
   // Engine has a current, rule-valid exposure target. Persistent information
@@ -1216,9 +1240,21 @@ function evaluateRunnerPersistentInstall(
         ? minimumCreditFloorForPersistentInstall(params.input)
         : desiredCreditReserveForPersistentEngine(params.input)
       : undefined;
+  const incomeRecovery = persistentIncomeInstallRecovery(
+    params.input,
+    context.card,
+    action,
+    installCost,
+    creditsAfterInstall,
+  );
   const safeInstallTargetCredits =
     protectedCreditReserve !== undefined
-      ? installCost + protectedCreditReserve
+      ? Math.max(
+          installCost,
+          installCost +
+            protectedCreditReserve -
+            (incomeRecovery?.creditGain ?? 0),
+        )
       : undefined;
   const memoryCost = context.memoryCost;
   const memoryAfterInstall =
@@ -1340,6 +1376,14 @@ function evaluateRunnerPersistentInstall(
       installedSameRandomBreakProfileCount,
       breakerVariantEvidence: breakerVariant.evidence,
     }).concat(
+      incomeRecovery
+        ? [
+            "persistent_install_guaranteed_income_recovery",
+            `persistent_install_recovery_clicks:${incomeRecovery.recoveryClicks}`,
+            `persistent_install_recovery_credit_gain:${incomeRecovery.creditGain}`,
+            "persistent_install_future_income_not_current_cash",
+          ]
+        : [],
       rigDemandBinding
         ? [
             `runner_rig_demand_retention:${rigDemandBinding.retentionValue}`,

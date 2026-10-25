@@ -19,7 +19,6 @@ import {
 } from "../../runtime/corp-funded-score-protection";
 import { corpHandDuplicateCount } from "../hand-management/hand-inventory-facts";
 import { corpKnownAgendaInventory } from "../../runtime/corp-known-agenda-inventory";
-import { isCorpOpeningTurnSerial } from "../../runtime/corp-opening-rush";
 import {
   readCorpCentralAgendaExposure,
   readKnownCorpCentralAgendaThreat,
@@ -30,7 +29,10 @@ import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
 } from "../../runtime/runner-visible-breaker-coverage";
-import { visibleCorpIceDefenseProfile } from "../../runtime/semantic-runtime-corp-effective-defense";
+import {
+  corpIceEffectsOnlyReachFutureEncounters,
+  visibleCorpIceDefenseProfile,
+} from "../../runtime/semantic-runtime-corp-effective-defense";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -139,6 +141,100 @@ export function corpIceInstallHasCurrentCompleteRezQuote(
     Number.isSafeInteger(payload.postInstallRezQuoteFinalCredits) &&
     payload.postInstallRezQuoteFinalCredits >= 0
   );
+}
+
+/** Position facts only; the existing defense owner still admits and selects routes. */
+export function corpIceInstallPositionEffect(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceCard: VisibleCard | undefined,
+  serverId: string,
+): "not_excluded_by_position" | "untargeted_future_only" | "unknown" {
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
+  if (
+    !sourceCard ||
+    sourceCard.type !== "ice" ||
+    sourceCard.known === false ||
+    action.side !== "corp" ||
+    action.type !== "install_card" ||
+    action.source !== sourceCard.instanceId ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.payload?.placement !== "ice" ||
+    action.payload.serverId !== serverId ||
+    (serverId !== "new_remote" && !server) ||
+    !corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      action,
+      sourceCard.instanceId,
+      serverId,
+    ) ||
+    (serverId === "new_remote"
+      ? typeof action.payload.postInstallRezQuoteProjectedServerId !==
+          "string" ||
+        !action.payload.postInstallRezQuoteProjectedServerId.startsWith(
+          "remote_",
+        )
+      : action.payload.postInstallRezQuoteProjectedServerId !== serverId)
+  )
+    return "unknown";
+  const quote = readPostInstallEffectiveRunQuote(action, sourceCard);
+  if (!quote) return "unknown";
+  const conditional = quote.conditionalEncounterEffects;
+  if (conditional !== undefined && !Array.isArray(conditional))
+    return "unknown";
+  if (
+    conditional?.some(
+      (effect) =>
+        !effect ||
+        typeof effect !== "object" ||
+        (effect.kind === "corp_paid_add_end_the_run_subroutine" &&
+          (!Number.isSafeInteger(effect.creditCost) || effect.creditCost < 0)),
+    )
+  )
+    return "unknown";
+  const hasQuotedCurrentPaidStop =
+    conditional?.some(
+      (effect) => effect.kind === "corp_paid_add_end_the_run_subroutine",
+    ) === true;
+  return (server?.ice.length ?? 0) === 0 &&
+    !hasQuotedCurrentPaidStop &&
+    corpIceEffectsOnlyReachFutureEncounters(
+      quote.subroutines.map((subroutine) => subroutine.type),
+    )
+    ? "untargeted_future_only"
+    : "not_excluded_by_position";
+}
+
+/** Current, bound Engine effects supply qualitative installation value.
+ * Printed future potential never adds a missing current subroutine. An explicit
+ * conditional paid stop remains potential for the existing funding assessment.
+ */
+export function corpIceInstallDefenseProfile(
+  input: AiDecisionInput,
+  action: LegalAction | undefined,
+  source: VisibleCard | undefined,
+  serverId: string,
+) {
+  if (
+    !action ||
+    !source ||
+    corpIceInstallPositionEffect(input, action, source, serverId) !==
+      "not_excluded_by_position"
+  )
+    return undefined;
+  const quote = readPostInstallEffectiveRunQuote(action, source);
+  if (!quote) return undefined;
+  const profile = visibleCorpIceDefenseProfile(source, quote.subroutines);
+  return {
+    ...profile,
+    hasImmediateStop:
+      profile.hasImmediateStop ||
+      quote.conditionalEncounterEffects?.some(
+        (effect) => effect.kind === "corp_paid_add_end_the_run_subroutine",
+      ) === true,
+  };
 }
 
 export function knownInstallRouteHasUsefulEffectBlockedByFunding(
@@ -256,12 +352,14 @@ export function corpQualitativeIceStagingSignal(
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
   facts: CorpDefenseDomainSignalFacts,
   layeredParent?: CorpLayeredIceStagingParent,
+  paymentBudget?: Readonly<{ credits: number; clicks: number }>,
 ): CorpDefenseSignal | undefined {
   const isCentral = serverId === "hq" || serverId === "rd";
   const isExistingRemote = serverId.startsWith("remote_");
   const isBoundNewRemote =
     serverId === "new_remote" && layeredParent?.kind === "remote";
   if (!isCentral && !isExistingRemote && !isBoundNewRemote) return undefined;
+  const available = paymentBudget ?? input.playerView.own;
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === serverId,
   );
@@ -320,10 +418,16 @@ export function corpQualitativeIceStagingSignal(
   const sourceCard = input.playerView.own.gripOrHq.find(
     (card) => card.instanceId === action?.source,
   );
-  const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  const sourceDefense = corpIceInstallDefenseProfile(
+    input,
+    action,
+    sourceCard,
+    serverId,
+  );
   if (
     !action ||
     !sourceCard ||
+    !sourceDefense ||
     action.side !== "corp" ||
     action.type !== "install_card" ||
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
@@ -339,7 +443,7 @@ export function corpQualitativeIceStagingSignal(
     !facts.hasExactNonNegativeCostProfile(candidate) ||
     candidate.costProfile.clickCost !== 1 ||
     candidate.costProfile.creditCost === undefined ||
-    candidate.costProfile.creditCost > input.playerView.own.credits ||
+    candidate.costProfile.creditCost > available.credits ||
     !corpIceInstallHasCurrentCompleteRezQuote(
       input,
       action,
@@ -359,6 +463,12 @@ export function corpQualitativeIceStagingSignal(
   ) {
     return undefined;
   }
+  if (
+    corpIceInstallPositionEffect(input, action, sourceCard, serverId) !==
+    "not_excluded_by_position"
+  ) {
+    return undefined;
+  }
   const rezCredits = action.payload.postInstallRezQuoteFinalCredits;
   if (
     layeredParent?.kind === "remote" &&
@@ -367,7 +477,7 @@ export function corpQualitativeIceStagingSignal(
     return undefined;
   }
   const creditsAfterInstall =
-    input.playerView.own.credits - candidate.costProfile.creditCost;
+    available.credits - candidate.costProfile.creditCost;
   const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
   const boundedRemoteFundingHorizon =
     layeredParent?.kind === "remote" &&
@@ -380,7 +490,7 @@ export function corpQualitativeIceStagingSignal(
       input,
       centralAllocation,
       creditsAfterInstall,
-      input.playerView.own.clicks - candidate.costProfile.clickCost,
+      available.clicks - candidate.costProfile.clickCost,
     )
   ) {
     return undefined;
@@ -669,6 +779,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
   serverId: string,
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
   facts: CorpDefenseDomainSignalFacts,
+  paymentBudget?: Readonly<{ credits: number; clicks: number }>,
 ): CorpGlobalDefenseInstallRouteAssessment {
   if (serverId === "new_remote") {
     return {
@@ -678,6 +789,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
         "corp_global_defense_cannot_invent_an_unbound_new_remote_objective",
     };
   }
+  const available = paymentBudget ?? input.playerView.own;
   if (
     serverId === "archives" &&
     !input.playerView.own.heapOrArchives.some(
@@ -736,14 +848,39 @@ export function corpGlobalDefenseInstallRouteAssessment(
   const sourceCard = input.playerView.own.gripOrHq.find(
     (card) => card.instanceId === action.source,
   );
-  const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  const sourceDefense = corpIceInstallDefenseProfile(
+    input,
+    action,
+    sourceCard,
+    serverId,
+  );
+  const positionEffect = corpIceInstallPositionEffect(
+    input,
+    action,
+    sourceCard,
+    serverId,
+  );
+  if (!sourceDefense || positionEffect !== "not_excluded_by_position") {
+    return positionEffect === "unknown" ||
+      (positionEffect === "not_excluded_by_position" && !sourceDefense)
+      ? {
+          knowledge: "unknown",
+          evidenceCode: "corp_ice_install_position_effect_quote_unknown",
+        }
+      : {
+          knowledge: "known",
+          disposition: "effect_missing",
+          evidenceCode:
+            "corp_ice_install_future_effect_has_no_following_encounter",
+        };
+  }
   if (
     (server?.ice.length ?? 0) > 0 &&
     corpSpendConsumesKnownCentralRezReserve(
       input,
       centralAllocation,
-      input.playerView.own.credits - projectedInstallCredits,
-      input.playerView.own.clicks - projectedInstallClicks,
+      available.credits - projectedInstallCredits,
+      available.clicks - projectedInstallClicks,
     )
   ) {
     return {
@@ -766,7 +903,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     (serverId === "hq" || serverId === "rd") &&
     centralAllocation?.status !== "known" &&
     server?.ice.length === 0 &&
-    input.playerView.own.clicks >= 1 &&
+    available.clicks >= 1 &&
     sourceDefense.isVisibleIce &&
     (sourceDefense.hasImmediateStop ||
       sourceDefense.hasMeaningfulTaxOrDamage ||
@@ -784,7 +921,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     !input.playerView.own.gripOrHq.some(
       (card) => card.known && card.type === "agenda",
     ) &&
-    input.playerView.own.clicks >= 2 &&
+    available.clicks >= 2 &&
     (() => {
       const inventory = corpKnownAgendaInventory(input);
       return (
@@ -823,7 +960,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     input.playerView.own.gripOrHq.some(
       (card) => card.known && card.type === "agenda",
     ) &&
-    input.playerView.own.clicks >= 1 &&
+    available.clicks >= 1 &&
     sourceDefense.isVisibleIce &&
     (sourceDefense.hasImmediateStop ||
       sourceDefense.hasMeaningfulTaxOrDamage ||
@@ -932,7 +1069,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     centralAllocation.selectedServerId === serverId &&
     serverIce.length > 0 &&
     hasResidentRemoteAgenda &&
-    projectedInstallClicks === input.playerView.own.clicks &&
+    projectedInstallClicks === available.clicks &&
     candidate.sourceDefinitionId !== undefined &&
     corpHandDuplicateCount(input, candidate.sourceDefinitionId) > 1 &&
     sourceDefense.isVisibleIce &&
@@ -962,8 +1099,8 @@ export function corpGlobalDefenseInstallRouteAssessment(
     targetServerId:
       serverId as CorpFundedRemoteAccessRiskNeed["targetServerId"],
     observedAtStateVersion: input.playerView.stateVersion,
-    availableCorpCredits: input.playerView.own.credits,
-    availableCorpClicks: input.playerView.own.clicks,
+    availableCorpCredits: available.credits,
+    availableCorpClicks: available.clicks,
     availableCorpAgendaPoints: input.playerView.own.agendaPoints,
     scoreReserve,
     maximumRunnerAccessSuccessProbability,
@@ -1039,8 +1176,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     isEmptyCentral &&
     otherCentralAlreadyProtected &&
     sourceDefense.isVisibleIce &&
-    (isCorpOpeningTurnSerial(input.playerView.turnSerial) ||
-      hasStructuredDefenseValue);
+    hasStructuredDefenseValue;
   const preferQualitativeSourceProgress =
     scorelineCentralTaxAllocation ||
     scoreMaterialCapacityRelease ||
@@ -1054,8 +1190,8 @@ export function corpGlobalDefenseInstallRouteAssessment(
     need,
     action,
     currentStateVersion: input.playerView.stateVersion,
-    currentCorpCredits: input.playerView.own.credits,
-    currentCorpClicks: input.playerView.own.clicks,
+    currentCorpCredits: available.credits,
+    currentCorpClicks: available.clicks,
     currentCorpAgendaPoints: input.playerView.own.agendaPoints,
     visibleCorpHand: input.playerView.own.gripOrHq,
     ...(server ? { currentServer: { id: server.id, ice: serverIce } } : {}),
@@ -1108,7 +1244,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
   }
   const sourceRezFundingGap = Math.max(
     0,
-    sourceRezCredits - (input.playerView.own.credits - projectedInstallCredits),
+    sourceRezCredits - (available.credits - projectedInstallCredits),
   );
   const minimumSatisfyingRezCredits = projection.after.minimumSatisfyingRezCost;
   const postInstallRezCredits =
@@ -1117,8 +1253,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     minimumSatisfyingRezCredits >= 0
       ? minimumSatisfyingRezCredits
       : undefined;
-  const creditsAfterInstall =
-    input.playerView.own.credits - projectedInstallCredits;
+  const creditsAfterInstall = available.credits - projectedInstallCredits;
   const rezFundingGap =
     postInstallRezCredits === undefined
       ? undefined
@@ -1138,7 +1273,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     projection.preservesReserves &&
     (selectedCentralThreat === "acute" ||
       selectedCentralThreat === "terminal") &&
-    projectedInstallClicks === input.playerView.own.clicks &&
+    projectedInstallClicks === available.clicks &&
     routeRezFundingGap > 0 &&
     routeRezFundingGap <= 3;
   const scorelineCentralTaxProgress =

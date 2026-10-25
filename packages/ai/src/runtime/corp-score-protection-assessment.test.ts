@@ -689,6 +689,52 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
+  it.each(["current", "next_runner_turn"] as const)(
+    "uses only the %s recurring-pool horizon in the shared funded-path assessment",
+    (horizon) => {
+      const pool = recurringCreditPool(
+        "cloak",
+        "onr_v1_011_cloak",
+        "using_icebreaker_during_run_non_noisy",
+      );
+      pool.counterDisplays![0]!.amount = 0;
+      pool.counterDisplays![0]!.creditPool = {
+        ...pool.counterDisplays![0]!.creditPool!,
+        capacity: 1,
+        refresh: {
+          timing: "start_of_runner_turn",
+          behavior: "refill_to_capacity_if_used",
+        },
+      };
+      const assessment = assessCorpScoreProtection({
+        serverIce: [ice("filter", "onr_v1_244_filter")],
+        runnerRig: [runnerProgram("decoder", "simple_decoder"), pool],
+        runnerCredits: 0,
+        runnerCreditPoolHorizon: horizon,
+        maximumRunnerAccessSuccessProbability: QUARTER,
+      });
+      expect(assessment).toMatchObject({
+        knowledge: "known",
+        protectsScore: horizon === "current",
+      });
+      const twoLayers = assessCorpScoreProtection({
+        serverIce: [
+          ice("outer", "onr_v1_244_filter"),
+          ice("inner", "onr_v1_244_filter"),
+        ],
+        runnerRig: [runnerProgram("decoder", "simple_decoder"), pool],
+        runnerCredits: 0,
+        runnerCreditPoolHorizon: horizon,
+        maximumRunnerAccessSuccessProbability: QUARTER,
+      });
+      expect(twoLayers).toMatchObject({
+        knowledge: "known",
+        protectsScore: true,
+      });
+      expect(pool.counterDisplays![0]!.amount).toBe(0);
+    },
+  );
+
   it("does not spend a killer-only credit pool through a non-killer breaker", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [ice("filter", "onr_v1_244_filter")],

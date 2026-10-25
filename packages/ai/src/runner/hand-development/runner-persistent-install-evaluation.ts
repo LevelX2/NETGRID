@@ -1,3 +1,5 @@
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
+import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -21,6 +23,7 @@ import {
   runnerHintProvidesExposeInformation,
   runnerHintProvidesMultiaccess,
   runnerEffectsProvidePostBreakIceTrash,
+  runnerEffectsProvideEncounterIceDerez,
   runnerHintProvidesNonNoisyBreakerCredits,
   runnerHintProvidesSearch,
   runnerHintProvidesTopTrashRecovery,
@@ -108,12 +111,9 @@ export function signalsForCard(
       .filter((target): target is string => typeof target === "string"),
   ]);
   const text = [
-    card.title,
-    card.definitionId,
     card.type,
     ...(card.subtypes ?? []),
     card.rulesText,
-    definition?.title,
     definition?.type,
     ...(definition?.subtypes ?? []),
     definition?.text,
@@ -226,15 +226,20 @@ export function persistentFunctionalProfileForCard(
   const postBreakIceTrash = runnerEffectsProvidePostBreakIceTrash(
     hint?.effects,
   );
+  const encounterIceDerez = runnerEffectsProvideEncounterIceDerez(
+    hint?.effects,
+  );
   const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
   const economyTool =
     !runOnlyEconomyPool &&
     !postBreakIceTrash &&
+    !encounterIceDerez &&
     breakerCoverage.length === 0 &&
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
   const accessSupport =
     postBreakIceTrash ||
+    encounterIceDerez ||
     hint?.planRoles?.includes("information") === true ||
     hint?.planRoles?.includes("protect_virus_counters") === true ||
     runnerHintProvidesExposeInformation(hint) ||
@@ -293,6 +298,7 @@ export function persistentFunctionalProfileForCard(
       ? functionalCoverage
       : [`type:${card.type ?? "unknown"}`];
   return {
+    sourceCardInstanceId: card.instanceId,
     persistentEngineKind: persistentEngine.kind,
     persistentEngineCapabilities: persistentEngine.outputCapabilities,
     persistentEngineRepeatable: persistentEngine.repeatable,
@@ -1327,6 +1333,33 @@ export function cumulativeNeedLevel(
           ),
       ) === true;
     if (hasBoundRestrictedRunCreditDemand) return "high";
+    const projection = params.rigDemandProjection;
+    const retained = projection?.cardRetentionFacts.find(
+      (fact) => fact.cardInstanceId === profile.sourceCardInstanceId,
+    );
+    // A preferred, admitted development milestone survives its memory setup.
+    // It is finite support value for this exact hand card, not spare run cash.
+    if (
+      profile.recurringBreakerEconomy &&
+      retained?.retentionValue === "preferred" &&
+      retained.installReadiness === "next_milestone_legal" &&
+      projection?.roleDemands.some(
+        (demand) =>
+          retained.boundDemandIds.includes(demand.demandId) &&
+          demand.ownerModuleId === "runner.develop_board_and_hand" &&
+          demand.sourceKind === "admission_checked_development" &&
+          demand.capabilityId ===
+            "strategic_support:recurring_breaker_credits" &&
+          demand.requirement === "preferred_simultaneously" &&
+          demand.providers.some(
+            (provider) =>
+              provider.cardInstanceId === profile.sourceCardInstanceId &&
+              provider.acquisitionState === "in_hand",
+          ),
+      )
+    ) {
+      return "medium";
+    }
     if (profile.recurringBreakerEconomy && params.rigDemandProjection) {
       return "low";
     }
@@ -1451,6 +1484,88 @@ export function opportunityPenaltyForPersistentInstall(params: {
   return penalty;
 }
 
+/** Bounded conditional investment value, never current cash or future LegalActions.
+ * Only the current exact installation may execute; income is revalidated after it. */
+export function persistentIncomeInstallRecovery(
+  input: AiDecisionInput,
+  card: VisibleCard,
+  action: LegalAction,
+  installCost: number,
+  creditsAfterInstall: number,
+):
+  | { incomePerClick: number; recoveryClicks: number; creditGain: number }
+  | undefined {
+  const own = input.playerView.own;
+  if (
+    input.side !== "runner" ||
+    input.playerView.activeSide !== "runner" ||
+    !Array.isArray(own.rig) ||
+    !own.gripOrHq.some(
+      (c) =>
+        c.instanceId === card.instanceId &&
+        c.definitionId === card.definitionId,
+    ) ||
+    input.playerView.timingPoint !== "runner_action.main" ||
+    action.type !== "install_card" ||
+    action.side !== "runner" ||
+    action.source !== card.instanceId ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    !input.legalActions.some((a) => a.actionId === action.actionId) ||
+    action.payload?.runnerProgramTrashBeforeInstall ||
+    action.payload?.hostOnCardId ||
+    action.targetRequirements.length > 0 ||
+    (action.choiceRequirements?.length ?? 0) > 0 ||
+    action.costs.some((c) =>
+      Object.keys(c).some((k) => k !== "clicks" && k !== "credits"),
+    ) ||
+    actionClickCost(action) !== 1 ||
+    actionCreditCost(action) !== installCost ||
+    !Number.isSafeInteger(creditsAfterInstall) ||
+    creditsAfterInstall < 0 ||
+    creditsAfterInstall !== own.credits - installCost ||
+    !Number.isSafeInteger(own.clicks) ||
+    !card.known ||
+    card.controller !== "runner" ||
+    own.tags > 0 ||
+    runnerVisibleRemoteScoreThreat(input) ||
+    own.agendaPoints >= input.playerView.agendaPointsToWin - 2 ||
+    input.playerView.opponent.agendaPoints >=
+      input.playerView.agendaPointsToWin - 2 ||
+    (card.type === "program" &&
+      (!Number.isSafeInteger(own.memoryUsed) ||
+        !Number.isSafeInteger(own.memoryLimit) ||
+        !Number.isSafeInteger(card.memoryCost) ||
+        own.memoryUsed! + card.memoryCost! > own.memoryLimit!))
+  )
+    return undefined;
+  const damage = runnerDamageThreatAssessment(input).flatlineRisk;
+  if (
+    damage.level === "critical" ||
+    damage.level === "confirmed" ||
+    damage.activeDeliverySourceCount > 0 ||
+    own.gripOrHq.length - 1 < damage.recommendedHandFloor
+  )
+    return undefined;
+  const currentIncome = visibleRunnerPreparationIncomePerClick(own.rig!);
+  // The canonical Engine fact excludes conditional, finite, draw-linked and limited income.
+  const incomePerClick = visibleRunnerPreparationIncomePerClick([card]);
+  if (incomePerClick <= currentIncome) return undefined;
+  const recoveryClicks = Math.max(
+    0,
+    Math.ceil(
+      (desiredCreditReserveForPersistentEngine(input) - creditsAfterInstall) /
+        incomePerClick,
+    ),
+  );
+  if (recoveryClicks === 0 || recoveryClicks > own.clicks - 1) return undefined;
+  return {
+    incomePerClick,
+    recoveryClicks,
+    creditGain: recoveryClicks * incomePerClick,
+  };
+}
+
 export function reservePenaltyForPersistentInstall(params: {
   params: EvaluateRunnerHandDevelopmentParams;
   profile: PersistentFunctionalProfile;
@@ -1471,9 +1586,18 @@ export function reservePenaltyForPersistentInstall(params: {
   const desiredCreditReserve = desiredCreditReserveForPersistentEngine(
     params.params.input,
   );
-  if (params.creditsAfterInstall < minimumCreditFloor) return -900;
-  if (visibleRemoteScoreThreat && params.creditsAfterInstall < 6) return -1300;
-  if (params.creditsAfterInstall < desiredCreditReserve) return -420;
+  const incomeRecovery = persistentIncomeInstallRecovery(
+    params.params.input,
+    params.card,
+    params.action,
+    params.installCost,
+    params.creditsAfterInstall,
+  );
+  const creditsAfterRecovery =
+    params.creditsAfterInstall + (incomeRecovery?.creditGain ?? 0);
+  if (creditsAfterRecovery < minimumCreditFloor) return -900;
+  if (visibleRemoteScoreThreat && creditsAfterRecovery < 6) return -1300;
+  if (creditsAfterRecovery < desiredCreditReserve) return -420;
   return 0;
 }
 

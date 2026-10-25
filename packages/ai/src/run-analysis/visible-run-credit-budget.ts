@@ -1,4 +1,9 @@
-import type { CounterCreditUse, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  CounterDisplay,
+  CounterCreditUse,
+  VisibleCard,
+} from "@netgrid/shared";
 import type {
   BreakAssessment,
   CreditPaymentProjection,
@@ -7,6 +12,25 @@ import type {
   RunnerRunPathCreditBudgetInput,
 } from "./visible-run-analysis-contracts";
 import { subtypeKey } from "./visible-run-subtype-key";
+
+/** Current Engine pools usable for run payments, but never for Trace or access costs. */
+export function visibleRunnerRunOnlyCredits(
+  run: AiDecisionInput["playerView"]["run"],
+): number {
+  const badPublicity = run?.badPublicityCredits ?? 0;
+  const temporary = run?.runnerRunTemporaryCredits;
+  const remaining = temporary?.remaining ?? 0;
+  if (
+    !Number.isSafeInteger(badPublicity) ||
+    badPublicity < 0 ||
+    !Number.isSafeInteger(remaining) ||
+    remaining < 0 ||
+    (temporary && !temporary.sourceDefinitionId) ||
+    !Number.isSafeInteger(badPublicity + remaining)
+  )
+    throw new Error("runner_current_run_invalid_run_only_credit_pool");
+  return badPublicity + remaining;
+}
 
 export function runnerPaymentSupportBudgetForRig(
   liquidCredits: number,
@@ -48,6 +72,7 @@ export function fundRunnerRunPathPayment(
   budget: Pick<
     RunnerRunPathCreditBudget,
     | "credits"
+    | "traceEligibleCredits"
     | "paymentSupportSources"
     | "paymentSupportLiquidCredits"
     | "paymentSupportCreditsGained"
@@ -76,6 +101,8 @@ export function fundRunnerRunPathPayment(
     const net = ability.gainCredits - ability.creditCost;
     liquid += net;
     budget.credits += net;
+    if (budget.traceEligibleCredits !== undefined)
+      budget.traceEligibleCredits += net;
     budget.paymentSupportCreditsGained =
       (budget.paymentSupportCreditsGained ?? 0) + net;
   }
@@ -88,9 +115,13 @@ export function fundRunnerRunPathPayment(
 export function runnerRunPathCreditBudgetWithVisiblePools(
   credits: number,
   rigCards: readonly VisibleCard[],
-  options: { excludeStealthCredits?: boolean; liquidCredits?: number } = {},
+  options: {
+    excludeStealthCredits?: boolean;
+    liquidCredits?: number;
+    creditPoolHorizon?: "current" | "next_runner_turn";
+  } = {},
 ): RunnerRunPathCreditBudget {
-  const rigBudget = visibleRunnerRunPathCreditBudgetForRig(rigCards);
+  const rigBudget = visibleRunnerRunPathCreditBudgetForRig(rigCards, options);
   const stealthCreditsBySourceId = options.excludeStealthCredits
     ? {}
     : rigBudget.stealthCreditsBySourceId;
@@ -102,6 +133,10 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
     stealthNonNoisyIcebreakerCredits;
   return {
     credits: normalizeCreditAmount(credits),
+    traceEligibleCredits: traceEligibleCreditAmount(
+      normalizeCreditAmount(credits),
+      options.liquidCredits,
+    ),
     ...(options.liquidCredits !== undefined
       ? runnerPaymentSupportBudgetForRig(options.liquidCredits, rigCards)
       : {}),
@@ -138,9 +173,12 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
 
 export function visibleRunnerRunPathCreditBudgetForRig(
   rigCards: readonly VisibleCard[],
+  options: { creditPoolHorizon?: "current" | "next_runner_turn" } = {},
 ): Omit<
   Required<RunnerRunPathCreditBudget>,
+  | "runOnlyCredits"
   | "credits"
+  | "traceEligibleCredits"
   | "paymentSupportSources"
   | "paymentSupportLiquidCredits"
   | "paymentSupportCreditsGained"
@@ -157,9 +195,13 @@ export function visibleRunnerRunPathCreditBudgetForRig(
   for (const card of rigCards) {
     if (card.known === false) continue;
     for (const display of card.counterDisplays ?? []) {
-      const amount = normalizeCreditAmount(display.amount);
-      if (amount <= 0) continue;
       const use = runPathCreditPoolUse(display.creditPool?.uses ?? []);
+      if (!use) continue;
+      const amount = visibleRunCreditPoolAmount(
+        display,
+        options.creditPoolHorizon,
+      );
+      if (amount <= 0) continue;
       if (use) {
         if (
           use === "icebreakerCredits" &&
@@ -194,6 +236,29 @@ export function visibleRunnerRunPathCreditBudgetForRig(
   return budget;
 }
 
+/** Only an explicit future horizon may consume the Engine's public refill quote. */
+function visibleRunCreditPoolAmount(
+  display: CounterDisplay,
+  horizon: "current" | "next_runner_turn" | undefined,
+): number {
+  const pool = display.creditPool;
+  if (horizon !== "next_runner_turn" || !pool?.refresh)
+    return normalizeCreditAmount(display.amount);
+  const capacity = pool.capacity;
+  if (
+    pool.refresh.timing !== "start_of_runner_turn" ||
+    pool.refresh.behavior !== "refill_to_capacity_if_used" ||
+    (pool.kind !== "restricted_credit" && pool.kind !== "recurring_credit") ||
+    capacity === undefined ||
+    !Number.isSafeInteger(capacity) ||
+    capacity < 0 ||
+    !Number.isSafeInteger(display.amount) ||
+    display.amount < 0
+  )
+    throw new Error("runner_future_run_credit_pool_invalid_refresh_quote");
+  return Math.max(display.amount, capacity);
+}
+
 export function runPathCreditPoolUse(
   uses: readonly CounterCreditUse[],
 ):
@@ -211,12 +276,54 @@ export function runPathCreditPoolUse(
   return undefined;
 }
 
+/** Convert general-only encounter cash and its separate run pool into a total path ledger. */
+export function runnerRunPathCreditBudgetAfterEncounter(
+  budget: Omit<
+    RunnerRunPathCreditBudget,
+    "traceEligibleCredits" | "runOnlyCredits"
+  > & { runOnlyCredits: number },
+): RunnerRunPathCreditBudget {
+  const { runOnlyCredits, ...generalBudget } = budget;
+  const credits = generalBudget.credits + runOnlyCredits;
+  if (
+    ![generalBudget.credits, runOnlyCredits, credits].every(
+      (amount) => Number.isSafeInteger(amount) && amount >= 0,
+    )
+  )
+    throw new Error("runner_encounter_path_projection_invalid_credit_pool");
+  return {
+    ...generalBudget,
+    credits,
+    traceEligibleCredits: generalBudget.credits,
+  };
+}
+
+/** Exact general remainder of a completed shared path; never infer it from its total pool. */
+export function runnerGeneralCreditsAfterCompletedPath(
+  budget: RunnerRunPathCreditBudget | undefined,
+): number {
+  const general = budget?.traceEligibleCredits;
+  if (
+    !budget ||
+    !Number.isSafeInteger(budget.credits) ||
+    general === undefined ||
+    !Number.isSafeInteger(general) ||
+    general < 0 ||
+    general > budget.credits
+  )
+    throw new Error(
+      "runner_completed_path_missing_valid_general_credit_ledger",
+    );
+  return general;
+}
+
 export function normalizeRunnerRunPathCreditBudget(
   budget: RunnerRunPathCreditBudgetInput,
 ): MutableRunnerRunPathCreditBudget {
   if (typeof budget === "number") {
     return {
       credits: normalizeCreditAmount(budget),
+      traceEligibleCredits: normalizeCreditAmount(budget),
       icebreakerCredits: 0,
       nonNoisyIcebreakerCredits: 0,
       nonStealthNonNoisyIcebreakerCredits: 0,
@@ -226,6 +333,8 @@ export function normalizeRunnerRunPathCreditBudget(
       hostedIcebreakerCreditsByBreakerInstanceId: {},
     };
   }
+  if ("runOnlyCredits" in budget)
+    throw new Error("runner_encounter_budget_requires_run_path_projection");
   const stealthCreditsBySourceId = Object.fromEntries(
     Object.entries(budget.stealthCreditsBySourceId ?? {}).map(
       ([sourceId, amount]) => [sourceId, normalizeCreditAmount(amount)],
@@ -265,6 +374,10 @@ export function normalizeRunnerRunPathCreditBudget(
   }
   return {
     credits: normalizeCreditAmount(budget.credits),
+    traceEligibleCredits: traceEligibleCreditAmount(
+      normalizeCreditAmount(budget.credits),
+      budget.traceEligibleCredits,
+    ),
     ...(budget.paymentSupportSources
       ? {
           paymentSupportSources: budget.paymentSupportSources.map((source) => ({
@@ -322,6 +435,13 @@ export function normalizeCreditAmount(value: number): number {
   return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }
 
+function traceEligibleCreditAmount(credits: number, eligible?: number): number {
+  if (eligible === undefined) return credits;
+  if (!Number.isInteger(eligible) || eligible < 0 || eligible > credits)
+    throw new Error("runner_run_path_invalid_trace_eligible_credit_subset");
+  return eligible;
+}
+
 export function projectGeneralCreditPayment(
   budget: MutableRunnerRunPathCreditBudget,
   cost: number,
@@ -345,11 +465,31 @@ export function spendGeneralCredits(
 ): void {
   if (allowPaymentSupport) fundRunnerRunPathPayment(budget, cost);
   budget.credits -= normalizeCreditAmount(cost);
+  budget.traceEligibleCredits = Math.min(
+    budget.traceEligibleCredits,
+    Math.max(0, budget.credits),
+  );
   if (budget.paymentSupportLiquidCredits !== undefined)
     budget.paymentSupportLiquidCredits = Math.min(
       budget.paymentSupportLiquidCredits,
       Math.max(0, budget.credits),
     );
+}
+
+/** Trace bids and Link/cancel activation consume general money, never run-only money. */
+export function spendTraceEligibleCredits(
+  budget: MutableRunnerRunPathCreditBudget,
+  cost: number,
+): void {
+  if (!Number.isInteger(cost))
+    throw new Error("runner_run_path_invalid_trace_payment");
+  if (cost > budget.traceEligibleCredits)
+    throw new Error("runner_run_path_trace_payment_exceeds_eligible_credits");
+  // The exact support quote may include a reward paid after successful avoidance.
+  budget.credits -= cost;
+  budget.traceEligibleCredits -= cost;
+  if (budget.paymentSupportLiquidCredits !== undefined)
+    budget.paymentSupportLiquidCredits = budget.traceEligibleCredits;
 }
 
 export function projectBreakerCreditPayment(
@@ -420,7 +560,7 @@ export function spendBreakerCredits(
   }
   spend("icebreakerCredits");
   const cash = Math.min(budget.credits, remainingCost);
-  budget.credits -= cash;
+  spendGeneralCredits(budget, cash, false);
 }
 
 export function spendBreakerCreditsAndApplySideEffects(

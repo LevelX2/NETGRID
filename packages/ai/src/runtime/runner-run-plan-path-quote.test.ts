@@ -10,6 +10,63 @@ import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 
 describe("runner run plan path quote", () => {
+  it("keeps temporary run money out of the active Trace route", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceTitle: "Fragmentation Storm",
+      iceStrength: 4,
+      credits: 0,
+      opponentCredits: 0,
+      rig: [],
+      subroutines: [fragmentationStormTraceSubroutine()],
+      legalActions: [
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    input.playerView.run!.runnerRunTemporaryCredits = {
+      sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+      remaining: 9,
+      returnUnusedAtRunEnd: true,
+    };
+    const quote = quoteRunnerRunPath(input, runPlan());
+    expect(
+      quote.iceQuotes[0]?.cheapestAccessPreservingSequence,
+    ).toBeUndefined();
+    expect(quote.canReachAccess).toBe(false);
+  });
+
+  it("uses temporary run money for the actual pump and break sequence", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      credits: 0,
+      legalActions: [
+        pumpAction({ costs: [{ credits: 1 }] }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    input.playerView.run!.runnerRunTemporaryCredits = {
+      sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+      remaining: 9,
+      returnUnusedAtRunEnd: true,
+    };
+    const quote = quoteRunnerRunPath(input, runPlan());
+    expect(quote.iceQuotes[0]?.cheapestAccessPreservingSequence).toMatchObject({
+      totalCost: 4,
+      cashCost: 0,
+      restrictedCreditCost: 4,
+    });
+    expect(quote.expectedRemainingCredits).toBe(0);
+    expect(quote.canReachAccess).toBe(true);
+  });
+
   it("uses the guaranteed visible Trace route when it is cheaper than breaking", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_246_fragmentation-storm",
@@ -815,7 +872,9 @@ function runnerEncounterInput(params: {
     eventTail: [],
     legalActions: params.legalActions.map((action) => {
       if (action.type !== "continue_run") return action;
-      const ids = ice.effectiveRunQuote!.subroutines.map((subroutine) => subroutine.id);
+      const ids = ice.effectiveRunQuote!.subroutines.map(
+        (subroutine) => subroutine.id,
+      );
       // These fixtures start with the whole quoted encounter still open.
       expect(action.payload?.unbrokenSubroutineCount).toBe(ids.length);
       return {

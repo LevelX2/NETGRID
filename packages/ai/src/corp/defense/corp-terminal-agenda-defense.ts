@@ -1,3 +1,5 @@
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
+import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import {
   visibleFortPassProtection,
   visibleRunnerPreparationIncomePerClick,
@@ -72,13 +74,23 @@ export function assessCorpTerminalAgendaDefense(
       ? { runnerMemoryLimit: view.opponent.memoryLimit }
       : {}),
     runnerCredits: view.opponent.credits,
+    ...(input.playerView.activeSide === "corp"
+      ? {
+          runnerCreditPoolHorizon: "next_runner_turn" as const,
+          runnerPublicPreparedBreakers:
+            visibleRunnerHeapBreakerPreparations(input),
+        }
+      : {}),
     ...(view.activeSide === "corp" &&
     view.phase !== "run" &&
     view.runnerNextTurnCreditClicks !== undefined
       ? {
           runnerPreparationCreditClicks:
-            view.runnerNextTurnCreditClicks *
-            visibleRunnerPreparationIncomePerClick(view.opponent.rig ?? []),
+            visibleRunnerNextTurnPreparationCreditGain(
+              view.opponent.rig ?? [],
+              view.runnerNextTurnCreditClicks,
+              visibleRunnerPreparationIncomePerClick(view.opponent.rig ?? []),
+            ),
         }
       : {}),
   };

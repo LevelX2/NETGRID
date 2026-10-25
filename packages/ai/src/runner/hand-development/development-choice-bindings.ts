@@ -12,7 +12,10 @@ import {
   type PlanSchedulerContext,
   type PlanSchedulerResult,
 } from "../../plans/plan-scheduler";
-import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import {
+  type ResidentPlanPortfolio,
+  selectResidentPlanPortfolioExecutor,
+} from "../../plans/resident-plan-portfolio";
 import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import type { RequiredCapabilityKind } from "../../plans/tactical-plan-types";
 import { extractAiFeatures } from "../../runtime/ai-features";
@@ -745,9 +748,8 @@ export function bindRunnerDevelopmentSearchEngineContinuation(
     commitments.length === 1 &&
     state?.kind === "development" &&
     state.signal?.phase === "execute" &&
-    executor?.executionState === "executor" &&
-    portfolio?.rootForegroundInstanceId === pending.rootPlanInstanceId &&
-    portfolio?.executorInstanceId === pending.executorInstanceId &&
+    (executor?.executionState === "executor" ||
+      executor?.executionState === "preempted") &&
     result.origin.rootPlanInstanceId === pending.rootPlanInstanceId &&
     result.origin.leafPlanInstanceId === pending.executorInstanceId &&
     result.actionId === pending.originalActionId &&
@@ -770,7 +772,35 @@ export function bindRunnerDevelopmentSearchEngineContinuation(
         "Bind a development search continuation only to its unchanged selected action, source, target and executor after the exact Engine payment window.",
     });
   }
-  commitment.engineContinuationAtStateVersion = input.playerView.stateVersion;
+  const resumed = selectResidentPlanPortfolioExecutor({
+    portfolio: portfolio!,
+    selectedExecutorInstanceId: pending.executorInstanceId,
+    timingPoint: input.playerView.timingPoint,
+    reason: "executor_selected",
+  });
+  if (resumed.rootForegroundInstanceId !== pending.rootPlanInstanceId) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [pending.originalActionId],
+      owner: "support_graph",
+      planInstanceId: pending.executorInstanceId,
+      stepId: pending.sourceStepId,
+      removalCondition:
+        "Resume the exact selected development search only under its unchanged original root.",
+    });
+  }
+  const resumedState = resumed.instances.find(
+    (instance) => instance.instanceId === pending.executorInstanceId,
+  )!.moduleState as { signal: RunnerDevelopmentSignal };
+  const resumedCommitment =
+    resumedState.signal.programSearchCommitment ??
+    resumedState.signal.recoverySearchCommitment!;
+  resumedCommitment.engineContinuationAtStateVersion =
+    input.playerView.stateVersion;
+  result.portfolio = resumed;
 }
 
 export function bindRunnerEventInstallChoiceEngineContinuation(

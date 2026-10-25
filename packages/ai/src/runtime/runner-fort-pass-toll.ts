@@ -1,3 +1,4 @@
+import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
@@ -92,14 +93,7 @@ export function runnerFortPassTollWindow(input: AiDecisionInput) {
  */
 export function runnerRunWindowCreditBudget(input: AiDecisionInput) {
   const window = runnerFortPassTollWindow(input);
-  const temporary =
-    Math.max(0, input.playerView.run?.badPublicityCredits ?? 0) +
-    (window
-      ? Math.max(
-          0,
-          input.playerView.run?.runnerRunTemporaryCredits?.remaining ?? 0,
-        )
-      : 0);
+  const temporary = visibleRunnerRunOnlyCredits(input.playerView.run);
   const budget = normalizeRunnerRunPathCreditBudget(
     runnerRunPathCreditBudgetWithVisiblePools(
       input.playerView.own.credits + temporary,

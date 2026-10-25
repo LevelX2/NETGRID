@@ -75,6 +75,7 @@ export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
 // Nested AI-input payloads are positive allowlists. New engine/public payload
 // shapes must be added here deliberately instead of being deep-copied.
 const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
+  "eventApproachIceExposeBeforeRez",
   "breakSubroutinePurpose",
   "runnerFortIceTrashQuoteSchemaVersion",
   "runnerFortIceTrashQuoteStateVersion",
@@ -296,6 +297,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "cardImplementationScoresSourceAsAgenda",
   "cardImplementationPrimitiveKind",
   "cardImplementationEffectKind",
+  "cardImplementationTagMode",
+  "cardImplementationTagAmount",
   "creditLoss",
   "targetCount",
   "cardImplementationSearchFilter",
@@ -924,6 +927,9 @@ function sanitizePlayerView(
         : {}),
       deckCount: view.opponent.deckCount,
       discardCount: view.opponent.discardCount,
+      ...(view.side === "corp" && view.opponent.discardCards !== undefined
+        ? { discardCards: view.opponent.discardCards.map(sanitizeVisibleCard) }
+        : {}),
       scoreArea: view.opponent.scoreArea.map(sanitizeVisibleCard),
       ...(view.opponent.rig
         ? { rig: view.opponent.rig.map(sanitizeVisibleCard) }
@@ -1179,6 +1185,7 @@ function sanitizePlayerView(
             view.own.credits,
             view.own.agendaPoints,
             view.own.scoreArea,
+            view.own.gripOrHq,
             view.own.rig ?? [],
             view.servers,
           ),
@@ -2251,6 +2258,12 @@ function sanitizeVisibleCardWithOptions(
       : {}),
     ...(card.advancementRequirement !== undefined
       ? { advancementRequirement: card.advancementRequirement }
+      : {}),
+    ...(card.known && card.overadvanceThreshold !== undefined
+      ? { overadvanceThreshold: card.overadvanceThreshold }
+      : {}),
+    ...(card.known && card.overadvanceReward !== undefined
+      ? { overadvanceReward: card.overadvanceReward }
       : {}),
     ...(card.strength !== undefined ? { strength: card.strength } : {}),
     ...(randomRunStrengthState ? { randomRunStrengthState } : {}),
@@ -3468,6 +3481,7 @@ function sanitizeVisibleChoiceRequest(
   ownCredits: number,
   ownAgendaPoints: number,
   ownScoreArea: readonly VisibleCard[],
+  ownGrip: readonly VisibleCard[],
   ownRig: readonly VisibleCard[],
   servers: readonly PlayerView["servers"][number][],
 ): VisibleChoiceRequest {
@@ -3518,6 +3532,7 @@ function sanitizeVisibleChoiceRequest(
         choice.side === "runner" &&
         choice.source === "v121.replacement.damage" &&
         (option.metadata?.optionKind === "flatline_replacement_from_grip" ||
+          option.metadata?.optionKind === "play_identity_donor" ||
           option.metadata?.optionKind === "do_not_replace")
       ) {
         metadata = {
@@ -3528,6 +3543,23 @@ function sanitizeVisibleChoiceRequest(
             ? { amount: Number(option.metadata.amount) }
             : {}),
         };
+      }
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
+        choice.source === "v121.replacement.damage" &&
+        option.metadata?.sourceCardInstanceId !== undefined
+      ) {
+        const sourceId = option.metadata.sourceCardInstanceId;
+        if (
+          !isNonEmptyString(sourceId) ||
+          ![...ownGrip, ...ownRig].some(
+            (card) => card.known && card.instanceId === sourceId,
+          )
+        ) {
+          throw new Error("invalid_runner_damage_replacement_source_binding");
+        }
+        metadata = { ...metadata, sourceCardInstanceId: sourceId };
       }
       if (
         metadata &&

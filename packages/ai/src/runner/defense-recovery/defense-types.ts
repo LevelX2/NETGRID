@@ -26,12 +26,13 @@ export type RunnerDefenseSignals = {
   forgoExhaustedStandardCapacity?: boolean;
   forgoTerminalDeckPressureCapacity?: boolean;
   discardChoiceBinding?: RunnerDiscardChoiceBinding;
-  terminalDamageReplacementBinding?: {
+  gripDamageReplacementBinding?: {
     actionId: string;
     choiceId: string;
     stateVersion: number;
     sourceCardInstanceId: string;
     sourceDefinitionId: string;
+    replacementKind: "flatline_to_tag" | "prevent_meat_add_bad_publicity";
     selectedOptionId: string;
     optionIds: string[];
   };
@@ -91,7 +92,7 @@ export type DefenseState = {
     | "build_hand_buffer"
     | "build_reaction_reserve"
     | "discard_window"
-    | "replace_terminal_damage"
+    | "replace_damage_from_grip"
     | "forgo_unsafe_run"
     | "forgo_exhausted_options"
     | "forgo_terminal_deck_pressure";

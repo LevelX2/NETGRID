@@ -85,6 +85,11 @@ export function buildRunnerRigDemandProjectionForCoverage(
           gap.requesterPlanInstanceId ??
           gap.targetServerId ??
           `coverage-set:${gap.gapId}`,
+        memoryReuseKey: JSON.stringify([
+          "reusable_breaker_coverage",
+          gap.requiredRole,
+          providers.map((provider) => provider.providerId).sort(),
+        ]),
         providers,
         binding,
         evidenceCodes: [

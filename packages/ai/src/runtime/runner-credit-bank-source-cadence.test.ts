@@ -201,23 +201,168 @@ describe("runner credit-bank source-bound cadence", () => {
       ]),
     );
   });
+
+  it("keeps building the same Broker over successive turns while a spending gap remains", () => {
+    for (const [turn, stored] of [
+      [2, 3],
+      [3, 6],
+    ] as const) {
+      const decision = decide({
+        visibleBanks: [bank("broker-2", stored)],
+        event: bankLoadEvent("broker-2", turn - 1),
+        turnSerial: turn,
+        includeCashout: true,
+      });
+      expect(decision).toMatchObject({
+        actionId: buildActionId("broker-2"),
+        reasonCode: "plan_first.runner.credit_bank",
+        fallbackUsed: false,
+      });
+      expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
+        actionId: buildActionId("broker-2"),
+        stateVersion: 1,
+      });
+    }
+  });
+
+  it("holds the funded bank instead of loading or cashing out merely to meet a wish reserve", () => {
+    const decision = decide({
+      visibleBanks: [bank("broker-2", 9)],
+      event: bankLoadEvent("broker-2", 0),
+      includeCashout: true,
+    });
+    expect(decision.actionId).toBe("runner.gain_credit");
+    expect(decision.evidence).toContain(
+      "plan_portfolio_blocked_evidence:plan:runner.credit_bank:broker-2:runner_credit_bank_hold_spending_budget_funded",
+    );
+  });
+
+  it("continues past twelve stored credits when the actual spending budget is larger", () => {
+    const decision = decide({
+      visibleBanks: [bank("broker-2", 12)],
+      event: bankLoadEvent("broker-2", 0),
+      desiredReserve: 23,
+      includeCashout: true,
+    });
+    expect(decision.actionId).toBe(buildActionId("broker-2"));
+  });
+
+  it("cashouts three immediately to restore a breached safety floor", () => {
+    const decision = decide({
+      visibleBanks: [bank("broker-2", 3)],
+      event: bankLoadEvent("broker-2", 0),
+      credits: 1,
+      includeCashout: true,
+    });
+    expect(decision).toMatchObject({
+      actionId: "withdraw-broker-2",
+      reasonCode: "plan_first.runner.credit_bank",
+      fallbackUsed: false,
+    });
+    expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
+      actionId: "withdraw-broker-2",
+      stateVersion: 1,
+    });
+  });
+
+  it("protects exposed resource savings when tags make the bank trashable", () => {
+    const decision = decide({
+      visibleBanks: [bank("broker-2", 6)],
+      event: bankLoadEvent("broker-2", 0),
+      tags: 1,
+      includeCashout: true,
+    });
+    expect(decision.actionId).toBe("withdraw-broker-2");
+  });
+
+  it.each([
+    [16, false],
+    [17, true],
+  ] as const)(
+    "admits another bank only for an unfilled portfolio budget (%i)",
+    (reserve, admitted) => {
+      const source = bank("broker-1", 0);
+      const install = legalAction(
+        "install-broker-1",
+        "runner",
+        "install_card",
+        "Install Broker",
+        { credits: 3, clicks: 1 },
+        {
+          source: source.instanceId,
+          payload: { cardId: source.instanceId, sourceDefinitionId: BROKER },
+        },
+      );
+      const input = aiInput("runner", [install, basicCredit()]);
+      input.playerView.own.credits = 7;
+      input.playerView.own.clicks = 2;
+      input.playerView.own.gripOrHq = [source];
+      input.playerView.own.rig = [bank("broker-2", 9)];
+      const decision = runtimeContext(reserve).chooseSemanticRuntimeAction(
+        input,
+        {},
+      );
+      expect(decision.actionId === install.actionId).toBe(admitted);
+      if (!admitted)
+        expect(decision.evidence).toContain(
+          "plan_portfolio_blocked_evidence:plan:runner.credit_bank:broker-1:runner_credit_bank_install_deferred_portfolio_budget_funded",
+        );
+    },
+  );
 });
 
 function decide(params: {
   visibleBanks: VisibleCard[];
   event: PublicGameEvent;
+  credits?: number;
+  desiredReserve?: number;
+  turnSerial?: number;
+  includeCashout?: boolean;
+  tags?: number;
 }) {
   const build = bankBuildAction("broker-2");
   const credit = basicCredit();
-  const input = aiInput("runner", [build, credit]);
-  input.playerView.turnSerial = 1;
-  input.playerView.own.credits = 5;
+  const stored =
+    params.visibleBanks.find((b) => b.instanceId === "broker-2")
+      ?.counterDisplays?.[0]?.amount ?? 0;
+  const cashout = legalAction(
+    "withdraw-broker-2",
+    "runner",
+    "activated_card_ability",
+    "Broker auszahlen",
+    { credits: 0, clicks: 1 },
+    {
+      source: "broker-2",
+      payload: {
+        cardId: "broker-2",
+        sourceDefinitionId: BROKER,
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityId: `${BROKER}:withdraw_credits`,
+        cardImplementationAbilityKey: "withdraw_credits",
+        cardImplementationTakesHostedCredits: true,
+        hostedCreditTakeMode: "all",
+        hostedCreditTakeAmount: stored,
+        gainCreditsAmount: stored,
+      },
+    },
+  );
+  const input = aiInput("runner", [
+    build,
+    credit,
+    ...(params.includeCashout ? [cashout] : []),
+  ]);
+  input.playerView.turnSerial = params.turnSerial ?? 1;
+  input.playerView.own.credits = params.credits ?? 5;
+  input.playerView.own.tags = params.tags ?? 0;
   input.playerView.own.clicks = 3;
   input.playerView.own.rig = params.visibleBanks;
   input.playerView.publicEvents = [params.event];
   input.eventTail = input.playerView.publicEvents;
 
-  return runtimeContext().chooseSemanticRuntimeAction(input, {});
+  return runtimeContext(params.desiredReserve).chooseSemanticRuntimeAction(
+    input,
+    {},
+  );
 }
 
 function basicCredit() {
@@ -230,7 +375,7 @@ function basicCredit() {
   );
 }
 
-function runtimeContext() {
+function runtimeContext(desiredReserve = 14) {
   const dependencies = {
     buildActionSemanticCandidates,
     deckCapabilitiesForInput: buildDeckCapabilityProfileFromInput,
@@ -240,7 +385,9 @@ function runtimeContext() {
     evaluateRunnerHandDevelopment: () => [],
     buildRunnerEconomyPosture: () => ({
       minimumCreditFloor: 3,
-      desiredCreditReserve: 5,
+      // Cadence is exercised with a real unfilled spending budget. A fully
+      // funded reserve no longer authorizes arbitrary additional bank loads.
+      desiredCreditReserve: desiredReserve,
       fundingNeed: false,
       evidence: [],
     }),

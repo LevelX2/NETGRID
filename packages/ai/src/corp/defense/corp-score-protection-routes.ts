@@ -1,3 +1,5 @@
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
+import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
@@ -20,7 +22,9 @@ import {
 } from "../score/score-protection-needs";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import {
+  corpIceInstallDefenseProfile,
   corpIceInstallHasCurrentCompleteRezQuote,
+  corpIceInstallPositionEffect,
   corpSpendConsumesKnownCentralRezReserve,
   knownInstallRouteHasUsefulEffectBlockedByFunding,
 } from "./corp-defense-domain-signals";
@@ -36,7 +40,6 @@ import {
 import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import { finiteNonNegativeIntegerOrResolutionFailure } from "../../runtime/exact-action-cost-facts";
 import { visibleOwnCardByInstanceId } from "../../runtime/runner-action-source-facts";
-import { visibleCorpIceDefenseProfile } from "../../runtime/semantic-runtime-corp-effective-defense";
 import { candidateIsVisibleCorpIceInstall } from "../../runtime/visible-action-facts";
 type CorpProductiveScoreProtectionInstallRoute = Readonly<{
   project: CorpScoreProjectSignal;
@@ -166,11 +169,21 @@ export function corpScoreProtectionInstallRouteScan(
         ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
         : {}),
       runnerCredits: input.playerView.opponent.credits,
+      ...(input.playerView.activeSide === "corp"
+        ? {
+            runnerCreditPoolHorizon: "next_runner_turn" as const,
+            runnerPublicPreparedBreakers:
+              visibleRunnerHeapBreakerPreparations(input),
+          }
+        : {}),
       ...(input.playerView.activeSide === "corp" &&
       input.playerView.runnerNextTurnCreditClicks !== undefined
         ? {
             runnerPreparationCreditClicks:
-              input.playerView.runnerNextTurnCreditClicks,
+              visibleRunnerNextTurnPreparationCreditGain(
+                input.playerView.opponent.rig ?? [],
+                input.playerView.runnerNextTurnCreditClicks,
+              ),
           }
         : {}),
       projectedInstallCredits,
@@ -284,7 +297,16 @@ export function corpScoreProtectionStagingInstallSignal(
     candidate.sourceCardInstanceId,
   );
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
-  const sourceDefense = visibleCorpIceDefenseProfile(source);
+  const stagingAction = input.legalActions.find(
+    (a) => a.actionId === candidate.actionId,
+  );
+  const sourceDefense = corpIceInstallDefenseProfile(
+    input,
+    stagingAction,
+    source,
+    serverId,
+  );
+  if (!sourceDefense) return undefined;
   const startsFirstScoreProtectionLayer =
     serverId === "new_remote" || existingRemote?.ice.length === 0;
   const reinforcesExistingIceRole =
@@ -333,6 +355,12 @@ export function corpScoreProtectionStagingInstallSignal(
       candidate.sourceCardInstanceId,
       serverId,
     )
+  ) {
+    return undefined;
+  }
+  if (
+    corpIceInstallPositionEffect(input, action, source, serverId) !==
+    "not_excluded_by_position"
   ) {
     return undefined;
   }

@@ -14,7 +14,10 @@ import {
   readKnownCorpCentralAgendaThreat,
   corpCurrentRunAccessServerId,
 } from "../corp/defense/corp-central-defense-facts-adapter";
-import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
+import {
+  corpIceEffectsOnlyReachFutureEncounters,
+  visibleCorpIceDefenseProfile,
+} from "./semantic-runtime-corp-effective-defense";
 import type { CorpBluffDefenseNeed } from "../plans/corp-bluff-defense-types";
 
 export type CorpExactIceRezRouteProjection = Readonly<{
@@ -614,21 +617,6 @@ function quoteQualitativeEncounterActivationCredits(params: {
     totalRezCredits + activationCredits <= input.playerView.own.credits
     ? activationCredits
     : undefined;
-}
-
-export function corpIceEffectsOnlyReachFutureEncounters(
-  types: readonly string[],
-): boolean {
-  const futureTypes = new Set([
-    "set_run_encounter_tax",
-    "set_run_break_subroutine_cost_modifier",
-    "set_run_future_end_the_run_subroutine",
-    "set_run_future_strength_bonus",
-    "set_next_encounter_unless_fully_break_damage",
-    "set_next_encounter_lock",
-    "set_next_encounter_no_break_subroutines",
-  ]);
-  return types.length > 0 && types.every((type) => futureTypes.has(type));
 }
 
 export function corpEffectiveDefenseActivationCredits(

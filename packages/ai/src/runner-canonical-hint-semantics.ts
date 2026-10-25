@@ -8,6 +8,28 @@ type HintWithStructuredEffects = {
   readonly effects?: readonly AiHintStructuredEffect[];
 };
 
+export function runnerEffectsProvideEncounterIceDerez(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return effects?.some((effect) =>
+    effect.kind === "rez" &&
+    effect.scope === "ice" &&
+    effect.target === "derez" &&
+    effect.timing === "encounter_resolution",
+  ) ?? false;
+}
+
+export function runnerEffectsProvideAccessTriggeredInstalledExpose(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return effects?.some((effect) =>
+    effect.kind === "expose_info" &&
+    effect.scope === "installed_card" &&
+    effect.timing === "on_access" &&
+    effect.target === "installed_corp_cards",
+  ) ?? false;
+}
+
 export function runnerEffectsProvidePostBreakIceTrash(
   effects: readonly AiHintStructuredEffect[] | undefined,
 ): boolean {
@@ -46,6 +68,17 @@ export function runnerEffectsProvideTopTrashRecovery(
         effect.target === "move_top_trash_to_grip",
     ) ?? false
   );
+}
+
+export function runnerEffectsProvideHeapRecovery(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return effects?.some((effect) =>
+    effect.kind === "card_recovery" &&
+    effect.scope === "heap" &&
+    (effect.target === "move_top_trash_to_grip" ||
+      effect.target === "search_trash_to_grip"),
+  ) ?? false;
 }
 
 export function runnerEffectsProvideSearch(

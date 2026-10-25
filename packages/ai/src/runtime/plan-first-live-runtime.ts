@@ -1,4 +1,4 @@
-import { isRunnerTerminalGripReplacementWindow } from "../runner/defense-recovery/terminal-damage-replacement";
+import { isRunnerGripDamageReplacementWindow } from "../runner/defense-recovery/grip-damage-replacement";
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
   bindSelectedRunnerCoverageMultiSearchChoice,
@@ -223,6 +223,7 @@ import { runnerRunFundingParentHasCurrentNeed } from "../plans/runner-funding-pa
 import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
 import {
   runnerDefenseDeferredHandBufferDispositions,
+  runnerDefenseCurrentHeadActionIds,
   runnerDefenseReactionReserveIsCurrentPhase,
   runnerDefenseTagClearFundingIsCurrentPhase,
   runnerDefensePersistentCounterFundingIsCurrentPhase,
@@ -388,7 +389,7 @@ import {
 import { assessRunnerHandRotation } from "./runner-hand-rotation-assessment";
 import {
   runnerCandidateIsCentralInformationAbility,
-  runnerCandidateIsExposeAbility,
+  runnerCandidateIsRemoteExposePreparation,
 } from "./runner-information-action-facts";
 import type { RunnerProgramInstallTrashAssessment } from "./runner-program-install-trash-policy";
 import { runnerCandidateExecutesProgramSearch } from "./runner-program-search-facts";
@@ -1275,7 +1276,7 @@ function runnerTransientPlanSignals(
     defense.handSize < defense.minimumHandBuffer ||
     defense.forgoUnsafeRunCapacity ||
     defense.discardChoiceBinding !== undefined ||
-    defense.terminalDamageReplacementBinding !== undefined ||
+    defense.gripDamageReplacementBinding !== undefined ||
     defense.reactionReserveNeed !== undefined ||
     defense.persistentHazardCounterRemovalAvailable ||
     defense.persistentHazardCounterFundingNeed !== undefined ||
@@ -1946,6 +1947,12 @@ export function runnerActionDispositions(
       candidate.semanticActionType === "run.start" &&
       candidate.runProjectionSummary?.serverId === "archives" &&
       archivesIsKnownWithoutAgenda(input) &&
+      !domain.centralPressure.some(
+        (signal) =>
+          signal.reachable &&
+          signal.runActionIds?.includes(candidate.actionId) === true &&
+          (signal.runActionExclusions?.[candidate.actionId]?.length ?? 0) === 0,
+      ) &&
       !domain.runWindows.some(
         (signal) =>
           signal.actionAssessments?.[candidate.actionId]?.admissible === true,
@@ -2189,7 +2196,7 @@ export function runnerActionDispositions(
       continue;
     }
     if (
-      runnerCandidateIsExposeAbility(input, candidate) &&
+      runnerCandidateIsRemoteExposePreparation(input, candidate) &&
       !remotePreparationActionIds.has(candidate.actionId)
     ) {
       add(
@@ -2253,6 +2260,12 @@ export function runnerActionDispositions(
       .map((candidate) => candidate.actionId),
   );
   const specializedPlanOwnedActionIds = new Set([
+    ...runnerDefenseCurrentHeadActionIds({
+      input,
+      actionCandidates: candidates,
+      signals: domain.defense,
+      actionDispositions: dispositions,
+    }),
     ...boundStrategicExchangeFundingActionIds,
     ...domain.creditBanks.flatMap((signal) => [
       ...signal.actionIds,
@@ -2669,8 +2682,8 @@ export function runnerActionDispositions(
     ...(domain.defense.discardChoiceBinding
       ? [domain.defense.discardChoiceBinding.actionId]
       : []),
-    ...(domain.defense.terminalDamageReplacementBinding
-      ? [domain.defense.terminalDamageReplacementBinding.actionId]
+    ...(domain.defense.gripDamageReplacementBinding
+      ? [domain.defense.gripDamageReplacementBinding.actionId]
       : []),
     ...domain.creditBanks.flatMap((signal) => signal.actionIds),
     ...(domain.recurringEconomy ?? []).flatMap((signal) => signal.actionIds),
@@ -3792,6 +3805,7 @@ function buildCorpDomain(
     candidates,
     scoreProjects,
     defenseNeeds,
+    centralDefenseAllocation,
     remoteProjects,
     ambushes,
     punishCampaigns,
@@ -3872,7 +3886,7 @@ function recentServerAccessCount(
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
-  if (isRunnerTerminalGripReplacementWindow(context.input)) return undefined;
+  if (isRunnerGripDamageReplacementWindow(context.input)) return undefined;
   if (
     context.input.playerView.pendingChoice?.source.startsWith(
       "v1922.corp_rd_arrange_top5:",

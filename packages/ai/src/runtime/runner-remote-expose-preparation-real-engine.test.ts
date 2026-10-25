@@ -4,6 +4,8 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  hashGameState,
+  replayEvents,
 } from "@netgrid/engine";
 import type { GameState } from "@netgrid/shared";
 import catalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
@@ -131,26 +133,57 @@ it("replaces the original blind run with exact Remote information preparation", 
     JSON.stringify([cp.input.playerView, cp.input.legalActions]) === before,
   ).toBe(true);
 });
-it("resolves the native choice to the bound hidden root while preserving the Remote origin", () => {
-  let state = fixture();
-  const first = chooseAiAction(input(state));
-  expect(first.actionId).toContain("seeya");
-  state = apply(state, first.actionId!);
-  const choice = input(state);
-  expect(choice.playerView.pendingChoice?.kind).toBe("select_cards");
-  const decision = chooseAiAction(choice);
-  expect(decision.selectedChoices?.selectedOptionIds).toEqual([
-    `card_${choice.playerView.servers.find((s) => s.id === "remote_1")!.root[0]!.instanceId}`,
-  ]);
-  expect(decision.fallbackUsed).toBe(false);
-  state = apply(state, decision.actionId!, decision.selectedChoices);
-  expect(
-    input(state).playerView.servers.find((s) => s.id === "remote_1")!.root[0]!
-      .definitionId,
-  ).toBe("onr_v1_323_experimental-ai");
-});
+it.each([5, 9])(
+  "resolves the native choice to the bound hidden root at %i credits while preserving the Remote origin",
+  (credits) => {
+    let state = fixture(credits);
+    const initial = structuredClone(state),
+      eventStart = state.eventLog.length;
+    const first = chooseAiAction(input(state));
+    expect(first.actionId).toContain("seeya");
+    state = apply(state, first.actionId!);
+    const choice = input(state);
+    expect(choice.playerView.pendingChoice?.kind).toBe("select_cards");
+    const decision = chooseAiAction(choice);
+    expect(decision.selectedChoices?.selectedOptionIds).toEqual([
+      `card_${choice.playerView.servers.find((s) => s.id === "remote_1")!.root[0]!.instanceId}`,
+    ]);
+    expect(decision.fallbackUsed).toBe(false);
+    state = apply(state, decision.actionId!, decision.selectedChoices);
+    expect(
+      input(state).playerView.servers.find((s) => s.id === "remote_1")!.root[0]!
+        .definitionId,
+    ).toBe("onr_v1_323_experimental-ai");
+    for (let i = 0; i < 3 && input(state).playerView.pendingChoice; i++) {
+      const acknowledgment = chooseAiAction(input(state));
+      state = apply(
+        state,
+        acknowledgment.actionId!,
+        acknowledgment.selectedChoices,
+      );
+    }
+    expect(input(state).playerView.pendingChoice).toBeUndefined();
+    const afterInformation = chooseAiAction(input(state));
+    const next = input(state).legalActions.find(
+      (a) => a.actionId === afterInformation.actionId,
+    )!;
+    expect(
+      next.type === "start_run" && next.payload?.serverId === "remote_1",
+    ).toBe(false);
+    expect(
+      state.runner.rig.programs.some(
+        (id) => state.cardInstances[id]!.definitionId === "onr_v1_039_krash",
+      ),
+    ).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(eventStart));
+    expect(replay.ok).toBe(true);
+    expect(hashGameState(replay.state)).toBe(hashGameState(state));
+  },
+);
 it.each([
   [0, 4],
+  [3, 4],
+  [5, 1],
   [9, 1],
   [9, 4],
 ] as const)(
@@ -219,3 +252,43 @@ it.each(["source", "version", "target", "option", "origin"] as const)(
     ).toThrow("window_origin_missing");
   },
 );
+
+it("keeps the native G14/D49 financed information head despite the general economy preference", () => {
+  const cp = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-554-r4-g14-d49.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  ) as {
+    input: AiDecisionInputWithDeckCapabilities;
+    runtime: AiRuntimeCheckpointV1;
+    validation: Record<string, boolean>;
+  };
+  expect(Object.keys(cp.validation)).toHaveLength(9);
+  expect(Object.values(cp.validation).every(Boolean)).toBe(true);
+  restoreAiRuntimeCheckpoint(
+    cp.input,
+    cp.input.ownDeckSnapshot!.deckSnapshotId,
+    cp.runtime,
+  );
+  const before = JSON.stringify([cp.input.playerView, cp.input.legalActions]);
+  const decision = chooseAiAction(cp.input);
+  expect(cp.input.playerView.own.credits).toBe(5);
+  expect(decision.actionId).toContain("seeya");
+  expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
+  const plan = decision.decisionDebug!.planFirstDecision!;
+  expect(plan.rootPlanInstanceId).toBe(
+    "plan:runner.contest_remote:remote%3Aremote_1",
+  );
+  expect(plan.route?.actionId).toBe(decision.actionId);
+  expect(plan.route?.stateVersion).toBe(cp.input.playerView.stateVersion);
+  expect(plan.route?.planInstanceId).toBe(plan.leafExecutorInstanceId);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.timeoutUsed).toBe(false);
+  expect(JSON.stringify([cp.input.playerView, cp.input.legalActions])).toBe(
+    before,
+  );
+});

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from "node:fs";
+import { closeSync, openSync, readFileSync, writeFileSync, writeSync } from "node:fs";
 import { resolve } from "node:path";
+import { writeJsonDocument } from "./lib/write-json-document.mjs";
 import {
   allocateRegistryId,
   backupEvidenceRegistry,
@@ -44,6 +45,18 @@ function required(opts, key) {
     throw new Error(`--${key} is required`);
   }
   return opts[key];
+}
+
+function writeJsonToDescriptor(descriptor, value) {
+  writeJsonDocument(value, (chunk) => {
+    const bytes = Buffer.from(chunk, "utf8");
+    let offset = 0;
+    while (offset < bytes.length) {
+      const written = writeSync(descriptor, bytes, offset, bytes.length - offset);
+      if (written === 0) throw new Error("JSON export sink made no progress");
+      offset += written;
+    }
+  });
 }
 
 function help() {
@@ -203,16 +216,27 @@ try {
             .map((value) => value.trim())
             .filter(Boolean)
         : [];
-    const output = JSON.stringify(
-      exportEvidenceSnapshot(db, pairingIds),
-      null,
-      2,
-    );
+    db.exec("BEGIN");
+    let snapshot;
+    try {
+      snapshot = exportEvidenceSnapshot(db, pairingIds);
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
     if (opts.output) {
       const outputPath = resolve(opts.output);
-      writeFileSync(outputPath, `${output}\n`, "utf8");
+      const descriptor = openSync(outputPath, "w");
+      try {
+        writeJsonToDescriptor(descriptor, snapshot);
+      } finally {
+        closeSync(descriptor);
+      }
       console.log(JSON.stringify({ databasePath, outputPath, pairingIds }));
-    } else console.log(output);
+    } else {
+      writeJsonToDescriptor(process.stdout.fd, snapshot);
+    }
   } else if (command === "export-report") {
     const report = getStoredReport(db, required(opts, "report-id"));
     const outputPath = resolve(required(opts, "output"));

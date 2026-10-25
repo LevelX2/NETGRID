@@ -53,6 +53,7 @@ import {
   projectGeneralCreditPayment,
   spendBreakerCreditsAndApplySideEffects,
   spendGeneralCredits,
+  spendTraceEligibleCredits,
 } from "./run-analysis/visible-run-credit-budget";
 import {
   blockedPathAssessment,
@@ -975,6 +976,7 @@ function assessKnownRezzedIcePathInternal(
       iceIndex,
       rigCards: rigCardsForEncounter,
       availableCredits: Math.max(0, creditsAfterAvoidingVisibleIceHazards),
+      availableTraceCredits: creditBudget.traceEligibleCredits,
       visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
       additionalBreakCostPerSubroutine,
@@ -1019,7 +1021,7 @@ function assessKnownRezzedIcePathInternal(
         );
       } else if (avoidancePayment?.kind === "general") {
         visibleBreakCost += avoidancePayment.cost;
-        spendGeneralCredits(creditBudget, avoidancePayment.cost);
+        spendTraceEligibleCredits(creditBudget, avoidancePayment.cost);
       }
       if (projection.traceCreditPoolSpent && runnerTraceSupportQuote) {
         runnerTraceSupportQuote = spendVisibleTraceCreditPool(
@@ -1107,7 +1109,7 @@ function assessKnownRezzedIcePathInternal(
         : unbrokenEffectIsUnavoidableTraceRunLock(
             effect,
             sourceSubroutine,
-            creditBudget.credits,
+            creditBudget.traceEligibleCredits,
             {
               ...(deflectorContext.traceRulesProfile
                 ? { traceRulesProfile: deflectorContext.traceRulesProfile }

@@ -1,3 +1,8 @@
+import {
+  runnerGeneralCreditsAfterCompletedPath,
+  runnerRunPathCreditBudgetAfterEncounter,
+} from "../run-analysis/visible-run-credit-budget";
+
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
@@ -368,7 +373,9 @@ export function createRunnerAccessPathContext(
           },
           damageIce,
           {
-            generalCredits: path.creditsAfterPath,
+            generalCredits: runnerGeneralCreditsAfterCompletedPath(
+              path.creditBudgetAfterPath,
+            ),
             ...(path.paidSubroutineBreaks
               ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
               : {}),
@@ -436,7 +443,7 @@ export function createRunnerAccessPathContext(
             dependencies.assessKnownRezzedIcePath(
               futureIce,
               futureRig,
-              state.budget,
+              runnerRunPathCreditBudgetAfterEncounter(state.budget),
               server.root,
               input.playerView.opponent.credits,
               currentRunPathContext(input),
@@ -510,7 +517,7 @@ export function createRunnerAccessPathContext(
       dependencies.assessKnownRezzedIcePath(
         futureIce,
         futureRig,
-        budgetAfterBreak,
+        runnerRunPathCreditBudgetAfterEncounter(budgetAfterBreak),
         server.root,
         input.playerView.opponent.credits,
         currentRunPathContext(input),
@@ -524,7 +531,9 @@ export function createRunnerAccessPathContext(
         input,
         server,
         targetSubroutines,
-        pathAssessment.creditsAfterPath,
+        runnerGeneralCreditsAfterCompletedPath(
+          pathAssessment.creditBudgetAfterPath,
+        ),
         remainingCurrentEndRunAfterBreak,
       );
       if (remotePayoff.blocksBreak)

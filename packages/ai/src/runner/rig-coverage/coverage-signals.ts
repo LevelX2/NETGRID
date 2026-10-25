@@ -338,6 +338,7 @@ export function uniqueCoverageGaps(
         candidates,
         evaluation,
         deckCapabilities,
+        services,
       ) ??
       runnerCostEffectiveCoverageRecovery(
         input,
@@ -450,7 +451,8 @@ export function uniqueCoverageGaps(
       (coverageDevelopment
         ? coverageDevelopment.deckHasAlternative
         : runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole)) ||
-      supportActions.directSearchActionIds.length > 0;
+      supportActions.directSearchActionIds.length > 0 ||
+      supportActionsBeforeCadence.drawForAnswerActionIds.length > 0;
     const heapRecoveryPreparation =
       !visibleAnswer && supportActions.directSearchActionIds.length === 0
         ? runnerCoverageHeapPreparation(
@@ -479,15 +481,17 @@ export function uniqueCoverageGaps(
             .map((candidate) => candidate.actionId)
         : legalCoverageInstallActionIds
       : [];
-    const sameTurnRunConversion = runnerUrgentRemoteCoverageConversionQuote(
-      input,
-      candidates,
-      evaluation,
-      visibleAnswer,
-      answerInstallCost,
-      installActionIds,
-      services,
-    );
+    const sameTurnRunConversion =
+      costRecovery?.sameTurnRunConversion ??
+      runnerUrgentRemoteCoverageConversionQuote(
+        input,
+        candidates,
+        evaluation,
+        visibleAnswer,
+        answerInstallCost,
+        installActionIds,
+        services,
+      );
     const fundingTargetCredits =
       sameTurnRunConversion?.requiredCredits ?? answerInstallCost;
     const fundingGap =

@@ -17,6 +17,7 @@ import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
 import {
   actionIceRezSupportLiability,
+  corpIceRezSupportTargetHasNoCurrentEffect,
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
 import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
@@ -87,6 +88,9 @@ export function corpIceRezSupportOperationSignal(
   );
   if (matches.length !== 1) return undefined;
   const { ice, serverId } = matches[0]!;
+  if (corpIceRezSupportTargetHasNoCurrentEffect(input, ice, serverId)) {
+    return undefined;
+  }
   const centralEvidence =
     (serverId === "hq" || serverId === "rd") &&
     centralAllocation?.status === "known"

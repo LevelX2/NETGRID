@@ -1,3 +1,4 @@
+import { runnerLastCentralCounterConversion } from "./last-central-counter-conversion";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
@@ -82,9 +83,11 @@ import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-d
 import { runnerPostBreakTrashPreparationSignals } from "./post-break-trash-preparation";
 import { runnerRepeatedFreeStopProbeEvidence } from "./central-probe-outcome";
 function runnerAccumulatedCentralPressureConversionSignals(
+  input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   pressureSignals: RunnerPlanDomain["centralPressure"],
   previous: ResidentPlanPortfolio | undefined,
+  strategyLineIds: string[],
 ): RunnerPlanDomain["centralPressure"] {
   const conversions = candidates.filter(
     (candidate) =>
@@ -119,13 +122,63 @@ function runnerAccumulatedCentralPressureConversionSignals(
         right.marginalValue - left.marginalValue ||
         left.serverId.localeCompare(right.serverId),
     )[0];
-  if (!owner) return [];
+  // No new run evaluation exists after the last click. Reuse only the
+  // Central identity and bind the current facts to the offered conversion.
+  const resident = (previous?.instances ?? [])
+    .filter(
+      (i) =>
+        i.moduleId === "runner.pressure_central" &&
+        i.target?.kind === "server" &&
+        ["hq", "rd", "archives"].includes(i.target.id) &&
+        i.viability !== "completed" &&
+        i.viability !== "abandoned",
+    )
+    .sort(
+      (a, b) =>
+        Number(b.instanceId === previous?.rootForegroundInstanceId) -
+          Number(a.instanceId === previous?.rootForegroundInstanceId) ||
+        a.instanceId.localeCompare(b.instanceId),
+    )[0];
+  const publicCounterServer = [...mergedPublicHistory(input)]
+    .reverse()
+    .flatMap((event) =>
+      (event.publicPayload.resolvedEffects ?? []).flatMap((effect) =>
+        effect.kind === "counter_change" &&
+        typeof effect.amount === "number" &&
+        effect.amount > 0 &&
+        effect.sourceDefinitionId !== undefined &&
+        conversions.some(
+          (c) => c.sourceDefinitionId === effect.sourceDefinitionId,
+        ) &&
+        typeof effect.serverId === "string" &&
+        ["hq", "rd", "archives"].includes(effect.serverId)
+          ? [effect.serverId]
+          : [],
+      ),
+    )[0];
+  const serverId =
+    owner?.serverId ?? resident?.target?.id ?? publicCounterServer;
+  if (serverId !== "hq" && serverId !== "rd" && serverId !== "archives")
+    return [];
+  const currentOwner: RunnerPressureSignal = owner ?? {
+    pressureId: resident?.dedupeKey ?? "central:" + serverId,
+    serverId,
+    purpose: "access",
+    strategyLineIds: resident?.strategyLineIds ?? strategyLineIds,
+    priorityClass: "P3",
+    reachable: true,
+    marginalValue: 1,
+    evidenceCode: "runner_current_legal_central_counter_conversion",
+  };
   return [
     {
-      ...owner,
+      pressureId: currentOwner.pressureId,
+      serverId: currentOwner.serverId,
+      purpose: "access",
+      strategyLineIds: currentOwner.strategyLineIds,
       priorityClass: "P3",
       reachable: true,
-      marginalValue: Math.max(1, owner.marginalValue),
+      marginalValue: Math.max(1, currentOwner.marginalValue),
       evidenceCode:
         "runner_accumulated_central_pressure_conversion_is_currently_legal",
       sourceDefinitionIds: [
@@ -217,6 +270,7 @@ function runnerTargetedIceTrashCentralPreparationSignals(
         (signal) => signal.pressureId === commitment.ownerDedupeKey,
       );
       if (!owner) return [];
+      const { supportNeedId: _supersededSupportNeed, ...preparedOwner } = owner;
       const payoffValue =
         planTargets.find(
           (target) =>
@@ -225,7 +279,7 @@ function runnerTargetedIceTrashCentralPreparationSignals(
         )?.payoffValue ?? 0;
       return [
         {
-          ...owner,
+          ...preparedOwner,
           reachable: true,
           marginalValue: payoffValue,
           evidenceCode: `runner_targeted_ice_trash_preflight:${commitment.serverId}:${commitment.targetIceInstanceId}`,
@@ -943,8 +997,13 @@ export function buildRunnerCentralPressureSignals({
                 : [];
             },
           )[0];
-          const hqSuccessWindowSetupAvailable =
-            hqSuccessWindowRoute !== undefined;
+          const lastCounterConversion = runnerLastCentralCounterConversion(
+            input,
+            evaluation,
+          );
+          const concreteRunSetupAvailable =
+            hqSuccessWindowRoute !== undefined ||
+            lastCounterConversion !== undefined;
           const knownNoPayoff =
             evaluation.knownAccessState === "known_no_current_payoff" ||
             (evaluation.accessServerId === "archives" &&
@@ -969,7 +1028,8 @@ export function buildRunnerCentralPressureSignals({
             recentSafetyAbort?.serverId === evaluation.targetServerId ||
             confirmedDamageRouteBlocked;
           const materialMarginalValue =
-            runnerCentralPressureHasMaterialMarginalValue(input, evaluation);
+            runnerCentralPressureHasMaterialMarginalValue(input, evaluation) ||
+            lastCounterConversion !== undefined;
           const costlyInformationRunBelowHandBuffer =
             handSize < minimumHandBuffer &&
             evaluation.pathCost > 0 &&
@@ -998,14 +1058,14 @@ export function buildRunnerCentralPressureSignals({
           // An admitted, fully quoted HQ success-window setup has a concrete
           // access payoff. The one-credit information-probe budget must not
           // replace that route's already validated path and follow-up budget.
-          const executionMode = hqSuccessWindowSetupAvailable
+          const executionMode = concreteRunSetupAvailable
             ? ("access" as const)
             : runPurposeForEvaluation(evaluation);
           const currentPressureRoute =
-            (!knownNoPayoff || hqSuccessWindowSetupAvailable) &&
+            (!knownNoPayoff || concreteRunSetupAvailable) &&
             pressureCadence.routeAvailable &&
             (materialMarginalValue ||
-              hqSuccessWindowSetupAvailable ||
+              concreteRunSetupAvailable ||
               terminalRemoteUnreachableCentralLastChance) &&
             (!costlyInformationRunBelowHandBuffer ||
               terminalRemoteUnreachableCentralLastChance) &&
@@ -1024,9 +1084,10 @@ export function buildRunnerCentralPressureSignals({
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow ||
+              lastCounterConversion !== undefined ||
               terminalRemoteUnreachableCentralLastChance) &&
             (evaluation.score > 0 ||
-              hqSuccessWindowSetupAvailable ||
+              concreteRunSetupAvailable ||
               terminalRemoteUnreachableCentralLastChance);
           const purpose =
             terminalRemoteUnreachableCentralLastChance ||
@@ -1046,10 +1107,12 @@ export function buildRunnerCentralPressureSignals({
               ? ("P2" as const)
               : terminalRemoteUnreachableCentralLastChance
                 ? ("P2" as const)
-                : evaluation.targetServerId === "archives" &&
-                    ["unknown", "fresh"].includes(evaluation.accessPayoff)
-                  ? ("P6" as const)
-                  : ("P4" as const),
+                : lastCounterConversion
+                  ? ("P3" as const)
+                  : evaluation.targetServerId === "archives" &&
+                      ["unknown", "fresh"].includes(evaluation.accessPayoff)
+                    ? ("P6" as const)
+                    : ("P4" as const),
             reachable:
               currentPressureRoute && !safetyBlocked && !forgoUnsafeRunCapacity,
             marginalValue:
@@ -1057,13 +1120,18 @@ export function buildRunnerCentralPressureSignals({
                 ? 1_000
                 : terminalRemoteUnreachableCentralLastChance
                   ? 1_400 + evaluation.score
-                  : hqSuccessWindowRoute
-                    ? Math.max(320, evaluation.score)
-                    : knownAgendaFundingAvailable
+                  : lastCounterConversion
+                    ? Math.max(
+                        120 * lastCounterConversion.actionsDenied,
+                        evaluation.score,
+                      )
+                    : hqSuccessWindowRoute
                       ? Math.max(320, evaluation.score)
-                      : evaluation.recommendation === "run_now"
-                        ? evaluation.score
-                        : Math.min(evaluation.score, 60)) +
+                      : knownAgendaFundingAvailable
+                        ? Math.max(320, evaluation.score)
+                        : evaluation.recommendation === "run_now"
+                          ? evaluation.score
+                          : Math.min(evaluation.score, 60)) +
               bestMultiRunRouteValue,
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"
@@ -1075,24 +1143,26 @@ export function buildRunnerCentralPressureSignals({
                     ? confirmedDamageRouteBlocked
                       ? `runner_confirmed_damage_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
                       : recentSafetyAbort!.evidenceCode
-                    : knownNoPayoff
-                      ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
-                      : !pressureCadence.routeAvailable
-                        ? pressureCadence.evidenceCode
-                        : hqSuccessWindowRoute
-                          ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
-                          : coverageSupport
-                            ? coverageSupport.evidenceCode
-                            : fundingSupport
-                              ? fundingSupport.evidenceCode
-                              : costlyInformationRunBelowHandBuffer
-                                ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
-                                : !materialMarginalValue
-                                  ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
-                                  : !currentPressureRoute
-                                    ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
-                                    : (evaluation.evidence[0] ??
-                                      "runner_run_target"),
+                    : lastCounterConversion
+                      ? `runner_last_central_counter_conversion:${evaluation.targetServerId}:${lastCounterConversion.sourceDefinitionId}`
+                      : knownNoPayoff
+                        ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
+                        : !pressureCadence.routeAvailable
+                          ? pressureCadence.evidenceCode
+                          : hqSuccessWindowRoute
+                            ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
+                            : coverageSupport
+                              ? coverageSupport.evidenceCode
+                              : fundingSupport
+                                ? fundingSupport.evidenceCode
+                                : costlyInformationRunBelowHandBuffer
+                                  ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                                  : !materialMarginalValue
+                                    ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
+                                    : !currentPressureRoute
+                                      ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
+                                      : (evaluation.evidence[0] ??
+                                        "runner_run_target"),
             ...(coverageSupport
               ? { supportNeedId: coverageSupport.gapId }
               : fundingSupport
@@ -1112,6 +1182,7 @@ export function buildRunnerCentralPressureSignals({
                     ...(hqSuccessWindowRoute
                       ? [hqSuccessWindowRoute.actionId]
                       : []),
+                    ...(lastCounterConversion ? [evaluation.actionId] : []),
                   ]),
                 ]
               : [],
@@ -1220,18 +1291,21 @@ export function buildRunnerCentralPressureSignals({
                     evaluation.targetServerId as "hq" | "rd" | "archives",
                     sameServerEvaluations,
                   );
-                const opensHqSuccessWindow =
-                  candidate.actionId === hqSuccessWindowRoute?.actionId;
+                const candidateLastCounterConversion =
+                  runnerLastCentralCounterConversion(input, candidate);
+                const opensConcreteSetupWindow =
+                  candidate.actionId === hqSuccessWindowRoute?.actionId ||
+                  candidateLastCounterConversion !== undefined;
                 const candidateHasNoPayoff =
                   candidate.knownAccessState === "known_no_current_payoff" ||
                   (candidate.accessServerId === "archives" &&
                     archivesIsKnownWithoutAgenda(input));
                 const candidateRouteAdmissible =
                   !forgoUnsafeRunCapacity &&
-                  (!candidateHasNoPayoff || opensHqSuccessWindow) &&
+                  (!candidateHasNoPayoff || opensConcreteSetupWindow) &&
                   pressureCadence.routeAvailable &&
                   (materialMarginalValue ||
-                    opensHqSuccessWindow ||
+                    opensConcreteSetupWindow ||
                     terminalRemoteUnreachableCentralLastChance) &&
                   (!costlyInformationRunBelowHandBuffer ||
                     terminalRemoteUnreachableCentralLastChance) &&
@@ -1241,9 +1315,10 @@ export function buildRunnerCentralPressureSignals({
                   !lacksDifferentialPayoff &&
                   (candidate.recommendation === "run_now" ||
                     candidate.recommendation === "run_if_free" ||
+                    candidateLastCounterConversion !== undefined ||
                     terminalRemoteUnreachableCentralLastChance) &&
                   (candidate.score > 0 ||
-                    opensHqSuccessWindow ||
+                    opensConcreteSetupWindow ||
                     terminalRemoteUnreachableCentralLastChance);
                 if (candidateRouteAdmissible) return [];
                 const spendLimitBlocked =
@@ -1394,9 +1469,11 @@ export function buildRunnerCentralPressureSignals({
         runTargets,
       ),
       ...runnerAccumulatedCentralPressureConversionSignals(
+        input,
         candidates,
         baseCentralPressure,
         previous,
+        [strategicIntent.primaryWinIntent],
       ),
       ...(activeRunRoot?.parentBinding?.moduleId === "runner.pressure_central"
         ? [activeRunRoot.parentBinding.signal]

@@ -61,12 +61,14 @@ export function runnerTerminalRemoteLastChanceKnownPathFundingGap(
   evaluation: RunnerRunTargetEvaluation,
 ): number | undefined {
   const routeFundingGap = evaluation.routeQuote?.fundingGap;
+  // Current liquidity can itself make accessPayoffContestable false. This
+  // admission only permits a prospective funding quote; its consumers must
+  // prove the complete funded path and revalidate the exact Remote parent.
   if (
     !runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) ||
     evaluation.pathPassability !== "blocked_unpayable" ||
     evaluation.recommendation !== "gain_credits_first" ||
     evaluation.knownAccessState === "known_no_current_payoff" ||
-    evaluation.accessPayoffContestable === false ||
     evaluation.visibleTraceTagHazardUnavoidable === true ||
     (evaluation.routeQuote?.unknownIceCount ?? 0) > 0 ||
     (evaluation.unavoidableVisibleIceHazardCount ?? 0) > 0 ||

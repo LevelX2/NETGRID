@@ -104,7 +104,7 @@ export function buildRunnerEconomySignals(params: {
       .map((candidate) => candidate.actionId),
     (actionId) => actionId,
   );
-  const forgoTerminalDeckPressureCapacity =
+  const favorableTerminalDeckRace =
     input.playerView.own.clicks > 0 &&
     input.playerView.own.agendaPoints >=
       input.playerView.agendaPointsToWin - 1 &&
@@ -112,22 +112,24 @@ export function buildRunnerEconomySignals(params: {
     input.playerView.opponent.deckCount <= input.playerView.own.stackOrRdCount;
   const reserveDevelopmentOpen =
     currentCredits < Math.max(10, economy.desiredCreditReserve + 3);
-  const boundedTurnLiquidityActionIds = forgoTerminalDeckPressureCapacity
-    ? []
-    : reserveDevelopmentOpen
-      ? turnLiquidityActionIds
-      : turnLiquidityActionIds.filter((actionId) => {
-          const candidate = candidates.find(
-            (entry) => entry.actionId === actionId,
-          );
-          // The remaining-click contract may use any exact cost-free liquid
-          // route without spending a hand card or another resource. Requiring
-          // the basic-action identity would discard stronger installed tools.
-          return (
-            candidate?.economyProjection?.cardsConsumed === 0 &&
-            candidate.economyProjection.netHandDelta === 0
-          );
-        });
+  // Establish productive liquidity independently before considering a wait.
+  // A favorable deck race cannot erase these routes and then certify their absence.
+  const boundedTurnLiquidityActionIds = reserveDevelopmentOpen
+    ? turnLiquidityActionIds
+    : turnLiquidityActionIds.filter((actionId) => {
+        const candidate = candidates.find(
+          (entry) => entry.actionId === actionId,
+        );
+        // The remaining-click contract may use any exact cost-free liquid
+        // route without spending a hand card or another resource. Requiring
+        // the basic-action identity would discard stronger installed tools.
+        return (
+          candidate?.economyProjection?.cardsConsumed === 0 &&
+          candidate.economyProjection.netHandDelta === 0
+        );
+      });
+  const forgoTerminalDeckPressureCapacity =
+    favorableTerminalDeckRace && boundedTurnLiquidityActionIds.length === 0;
   const residentTurnLiquidityTarget = runnerResidentTurnLiquidityTarget(
     previous,
     currentTurnKey,

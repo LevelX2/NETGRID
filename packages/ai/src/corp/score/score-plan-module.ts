@@ -128,9 +128,15 @@ function scoreAssessmentValue(
   signal: CorpScoreProjectSignal,
   stateVersion: number,
 ): number {
-  const agendaPointValue = Math.max(1, signal.agendaPoints) * 20;
+  // A terminal score has one winner utility. Surplus points and strategy
+  // support after that win cannot compensate for a longer or riskier route.
+  const agendaPointValue = signal.terminalScore
+    ? 20
+    : Math.max(1, signal.agendaPoints) * 20;
   const conversionValue = signal.conversion
-    ? signal.conversion.realizedStrategySupportCount * 4 -
+    ? (signal.terminalScore
+        ? 0
+        : signal.conversion.realizedStrategySupportCount * 4) -
       signal.conversion.remainingAdvancementClicks * 8 -
       signal.conversion.remainingScoreCredits * 2 +
       (signal.conversion.residentParent ? 40 : 0)

@@ -16,7 +16,16 @@ import { runnerDefinitionRequiresTargetedBypassPlan } from "../run-window/runner
 import { runnerNoRunRecurringEconomyProfile } from "../../runtime/runner-canonical-card-facts";
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
 import { searchFundingRoutes } from "../../plans/funding-route";
-import { runnerCreditBankProspectivePlan } from "./credit-bank-prospective-planning";
+import {
+  rematerializedRunnerCreditBankBuildCandidate,
+  runnerCreditBankProspectivePlan,
+} from "./credit-bank-prospective-planning";
+import {
+  assessAutomaticCreditBankInvestment,
+  assessCreditBankInvestment,
+  bankAlternativeIncomePerAction,
+  clickCreditBankProfile,
+} from "../../plans/credit-bank-investment";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
 
 /** Facts/routes from other owners, bound to the same decision input and candidates.
@@ -82,6 +91,7 @@ export function runnerCreditBankSignals(
   const signals = tools.flatMap((tool): RunnerCreditBankSignal[] => {
     const currentStoredCredits = Math.max(0, tool.currentBankAmount ?? 0);
     const estimatedPayout = Math.max(0, tool.estimatedPayout ?? 0);
+    const bankProfile = clickCreditBankProfile(tool.cardId);
     const exactBankOwnerCandidates = candidates.filter(
       (candidate) =>
         candidate.sourceDefinitionId === tool.cardId &&
@@ -155,6 +165,11 @@ export function runnerCreditBankSignals(
         handEvaluation.liquidityTiming !== "immediate" &&
         !economy.fundingNeed &&
         input.playerView.own.credits >= economy.desiredCreditReserve;
+      const portfolioBudgetAlreadyFunded =
+        bankProfile !== undefined &&
+        portfolioStoredCredits > 0 &&
+        input.playerView.own.credits + portfolioStoredCredits >=
+          economy.desiredCreditReserve;
       const lastActionInstallBreaksHandBuffer =
         prospectivePlan?.install.remainingActions === 0 &&
         input.playerView.own.gripOrHq.length - 1 <
@@ -164,6 +179,7 @@ export function runnerCreditBankSignals(
         prospectivePlan.install.projection !== "feasible_in_projection" ||
         unsatisfiedActivationPrerequisites.length > 0 ||
         delayedInstallWithoutFundingNeed ||
+        portfolioBudgetAlreadyFunded ||
         lastActionInstallBreaksHandBuffer
       )
         return [
@@ -178,6 +194,11 @@ export function runnerCreditBankSignals(
             estimatedPayout,
             value: 0,
             evidenceCodes: [
+              ...(portfolioBudgetAlreadyFunded
+                ? [
+                    "runner_credit_bank_install_deferred_portfolio_budget_funded",
+                  ]
+                : []),
               ...(lastActionInstallBreaksHandBuffer
                 ? ["runner_credit_bank_last_action_install_hand_floor"]
                 : []),
@@ -288,16 +309,92 @@ export function runnerCreditBankSignals(
     const matureBankDevelopmentFundingNeed =
       matureBankDevelopmentFundingRoute !== undefined;
     const urgentCreditFloor =
-      input.playerView.own.credits <= 2 ||
       input.playerView.own.credits < economy.minimumCreditFloor;
+    const installedBankProjection =
+      !bankProfile && tool.sourceCardInstanceId && input.planningStateIdentity
+        ? runnerCreditBankProspectivePlan({
+            sourceDefinitionId: tool.cardId,
+            sourceCardInstanceId: tool.sourceCardInstanceId,
+            currentCredits: input.playerView.own.credits,
+            currentActions: input.playerView.own.clicks,
+            stateIdentity: input.planningStateIdentity,
+          })
+        : undefined;
+    const automaticLifecycleBank =
+      installedBankProjection?.cashOut.kind === "automatic_lifecycle";
+    const automaticBuildCandidate =
+      automaticLifecycleBank && installedBankProjection
+        ? rematerializedRunnerCreditBankBuildCandidate(
+            installedBankProjection,
+            candidates,
+          )
+        : undefined;
+    const automaticInvestment =
+      automaticBuildCandidate &&
+      installedBankProjection?.build.kind === "activated" &&
+      installedBankProjection.cashOut.kind === "automatic_lifecycle"
+        ? assessAutomaticCreditBankInvestment({
+            liquidCredits: input.playerView.own.credits,
+            storedCredits: currentStoredCredits,
+            desiredLiquidity: economy.desiredCreditReserve,
+            creditsPerLoad: installedBankProjection.build.hostedCreditsAdded,
+            loadActionCost: installedBankProjection.build.actionCost,
+            creditsPerTrigger:
+              installedBankProjection.cashOut.creditsPerTrigger,
+            // A conditional development window, shortened by public Corp deckout.
+            // Future automatic payouts never pay for a current action.
+            horizonTurns: Math.max(
+              0,
+              Math.min(3, input.playerView.opponent.deckCount),
+            ),
+            alternativeCreditsPerAction:
+              bankAlternativeIncomePerAction(candidates),
+          })
+        : undefined;
+    const automaticInvestmentEvidence =
+      automaticInvestment?.status === "quoted"
+        ? [
+            `runner_credit_bank_automatic_payout_horizon:${automaticInvestment.horizonTurns}`,
+            `runner_credit_bank_automatic_remaining_budget:${automaticInvestment.remainingBudget}`,
+            `runner_credit_bank_automatic_payout_without_load:${automaticInvestment.payoutWithoutLoad}`,
+            `runner_credit_bank_automatic_payout_with_load:${automaticInvestment.payoutWithLoad}`,
+            `runner_credit_bank_automatic_marginal_payout:${automaticInvestment.marginalPayout}`,
+            `runner_credit_bank_automatic_incremental_advantage:${automaticInvestment.incrementalCreditsOverAlternative}`,
+          ]
+        : automaticLifecycleBank
+          ? ["runner_credit_bank_automatic_projection_unavailable"]
+          : [];
+    const investment = bankProfile
+      ? {
+          desiredLiquidity: economy.desiredCreditReserve,
+          ...assessCreditBankInvestment({
+            liquidCredits: input.playerView.own.credits,
+            storedCredits: currentStoredCredits,
+            otherStoredCredits: Math.max(
+              0,
+              portfolioStoredCredits - currentStoredCredits,
+            ),
+            desiredLiquidity: economy.desiredCreditReserve,
+            ...bankProfile,
+            alternativeCreditsPerAction:
+              bankAlternativeIncomePerAction(candidates),
+          }),
+        }
+      : undefined;
+    const exposedResourceBank =
+      bankProfile?.cardType === "resource" &&
+      input.playerView.own.tags > 0 &&
+      input.playerView.opponent.credits >= 2;
     const efficientLiquidityNeed =
       cashOutActionLegal &&
       estimatedPayout > 1 &&
       currentStoredCredits > 0 &&
-      input.playerView.own.credits < economy.desiredCreditReserve;
+      (bankProfile
+        ? urgentCreditFloor || exposedResourceBank
+        : input.playerView.own.credits < economy.desiredCreditReserve);
     // The bank remains the sole action owner. Development plans contribute a
     // typed, visible funding route; they never execute the cashout themselves.
-    // A mature bank may also replace a repeated basic-credit funding sequence
+    // A sufficient bank may also replace a repeated basic-credit funding sequence
     // even when the eventual install remains deferred by another guard.
     const shouldCashOut =
       cashOutActionLegal &&
@@ -323,6 +420,7 @@ export function runnerCreditBankSignals(
           currentStoredCredits,
           portfolioStoredCredits,
           estimatedPayout,
+          ...(investment ? { investment } : {}),
           value: concreteFundingNeed
             ? 1_200 + estimatedPayout
             : 700 + estimatedPayout,
@@ -348,12 +446,6 @@ export function runnerCreditBankSignals(
       ];
     }
 
-    const clickLimitedStoredLiquidity = Math.min(
-      currentStoredCredits,
-      estimatedPayout * Math.max(0, input.playerView.own.clicks),
-    );
-    const combinedCreditAccess =
-      input.playerView.own.credits + clickLimitedStoredLiquidity;
     const alreadyBuiltThisTurn = creditBankBuiltThisTurn(input, tool);
     const shouldBuild =
       buildActionLegal &&
@@ -361,9 +453,12 @@ export function runnerCreditBankSignals(
       !convertibleRunFundingNeed &&
       !convertibleDevelopmentFundingNeed &&
       (!urgentCreditFloor || input.playerView.own.clicks === 1) &&
-      input.playerView.own.credits < 15 &&
-      combinedCreditAccess < 20 &&
-      currentStoredCredits < 12;
+      !exposedResourceBank &&
+      (investment
+        ? investment.additionalLoadExecutions > 0 &&
+          investment.incrementalCreditsOverAlternative > 0
+        : automaticInvestment?.status === "quoted" &&
+          automaticInvestment.incrementalCreditsOverAlternative > 0);
     if (!shouldBuild)
       return [
         {
@@ -378,6 +473,7 @@ export function runnerCreditBankSignals(
           currentStoredCredits,
           portfolioStoredCredits,
           estimatedPayout,
+          ...(investment ? { investment } : {}),
           value: 0,
           evidenceCodes: [
             developmentCashOutAdmission.admitted &&
@@ -385,16 +481,26 @@ export function runnerCreditBankSignals(
               ? `runner_credit_bank_cashout_delegation_missing_exact_route:${developmentCashOutAdmission.route?.targetCardInstanceId ?? "unknown"}`
               : alreadyBuiltThisTurn
                 ? "runner_credit_bank_hold_instance_built_this_turn"
-                : combinedCreditAccess >= 20 || currentStoredCredits >= 12
-                  ? "runner_credit_bank_hold_comfortable_value"
-                  : convertibleDevelopmentFundingNeed
-                    ? "runner_credit_bank_cashout_delegated_to_development_plan"
-                    : "runner_credit_bank_hold_no_current_conversion_need",
+                : investment && investment.additionalLoadExecutions === 0
+                  ? "runner_credit_bank_hold_spending_budget_funded"
+                  : investment &&
+                      investment.incrementalCreditsOverAlternative <= 0
+                    ? "runner_credit_bank_hold_better_current_income"
+                    : !bankProfile &&
+                        buildActionLegal &&
+                        !automaticLifecycleBank
+                      ? "runner_credit_bank_build_projection_unavailable"
+                      : automaticInvestment?.status === "quoted"
+                        ? "runner_credit_bank_automatic_load_not_profitable_within_horizon"
+                        : convertibleDevelopmentFundingNeed
+                          ? "runner_credit_bank_cashout_delegated_to_development_plan"
+                          : "runner_credit_bank_hold_no_current_conversion_need",
             ...(developmentCashOutAdmission.route?.evidenceCodes ?? []),
             ...(developmentCashOutAdmission.admitted &&
             !convertibleDevelopmentFundingNeed
               ? [...(developmentCashOutFundingRoute?.evidenceCodes ?? [])]
               : []),
+            ...automaticInvestmentEvidence,
             ...developmentCashOutAdmission.rejectionCodes,
             ...tool.evidence,
           ],
@@ -404,7 +510,9 @@ export function runnerCreditBankSignals(
       {
         bankId: tool.sourceCardInstanceId ?? tool.cardId,
         phase: "build" as const,
-        actionIds: buildActionIds,
+        actionIds: automaticBuildCandidate
+          ? [automaticBuildCandidate.actionId]
+          : buildActionIds,
         rejectedActionIds: convertibleDevelopmentFundingNeed
           ? []
           : cashOutActionIds,
@@ -413,9 +521,14 @@ export function runnerCreditBankSignals(
         currentStoredCredits,
         portfolioStoredCredits,
         estimatedPayout,
+        ...(investment ? { investment } : {}),
         value:
           (currentStoredCredits === 0 ? 60 : 40) +
-          Math.max(0, 12 - currentStoredCredits),
+          (investment
+            ? investment.incrementalCreditsOverAlternative
+            : automaticInvestment?.status === "quoted"
+              ? automaticInvestment.incrementalCreditsOverAlternative
+              : 0),
         evidenceCodes: [
           currentStoredCredits === 0
             ? "runner_credit_bank_first_load"
@@ -426,6 +539,14 @@ export function runnerCreditBankSignals(
           ...(urgentCreditFloor && input.playerView.own.clicks === 1
             ? ["runner_credit_bank_last_click_deferred_value"]
             : []),
+          ...(investment
+            ? [
+                `runner_credit_bank_spending_budget:${investment.desiredLiquidity}`,
+                `runner_credit_bank_revalidated_remaining_loads:${investment.additionalLoadExecutions}`,
+                `runner_credit_bank_incremental_income_advantage:${investment.incrementalCreditsOverAlternative}`,
+              ]
+            : []),
+          ...automaticInvestmentEvidence,
           ...tool.evidence,
         ],
       },
@@ -513,7 +634,7 @@ function runnerMatureCreditBankDevelopmentFundingRoute(params: {
   estimatedPayout: number;
 }): { evidenceCodes: string[] } | undefined {
   if (
-    params.currentStoredCredits < 12 ||
+    params.currentStoredCredits <= 0 ||
     params.estimatedPayout <= 0 ||
     params.input.playerView.own.clicks < 2
   ) {
@@ -661,6 +782,7 @@ function runnerCreditBankRunFundingRoute(params: {
     const requiredPostRunReserve =
       params.services.requiredPostRunReserve(evaluation);
     const admission = assessRunnerRunFundingAdmission({
+      input: params.input,
       target: evaluation,
       runTargets: params.runTargets,
       economy: params.economy,
@@ -718,7 +840,8 @@ function runnerCreditBankRunFundingRoute(params: {
               deadline: "end_of_current_turn",
               currentCredits: params.input.playerView.own.credits,
               targetCredits:
-                params.input.playerView.own.credits + admission.concreteFundingGap,
+                params.input.playerView.own.credits +
+                admission.concreteFundingGap,
             }),
             candidates: params.candidates.filter(
               (candidate) =>
@@ -739,12 +862,15 @@ function runnerCreditBankRunFundingRoute(params: {
                 evaluation,
                 actionIds as string[],
               );
-              return funded !== undefined &&
+              return (
+                funded !== undefined &&
                 funded.prerunReserveQuote?.status === "satisfied" &&
-                params.services.isDirectlyMandatoryRun(funded);
+                params.services.isDirectlyMandatoryRun(funded)
+              );
             },
           }).routes.find(
-            (route) => route.status === "covered_guaranteed" &&
+            (route) =>
+              route.status === "covered_guaranteed" &&
               route.horizon === "same_turn" &&
               cashOutActionIds.has(route.steps[0]?.actionId ?? ""),
           )
@@ -761,11 +887,11 @@ function runnerCreditBankRunFundingRoute(params: {
     const conversionFundingGap = reserveFundingRoute
       ? admission.concreteFundingGap
       : fundedTerminalTarget
-      ? Math.max(
-          0,
-          params.estimatedPayout - fundedTerminalTarget.creditsAfterRun,
-        )
-      : (terminalVisibleHazardFundingGap ?? admission.concreteFundingGap);
+        ? Math.max(
+            0,
+            params.estimatedPayout - fundedTerminalTarget.creditsAfterRun,
+          )
+        : (terminalVisibleHazardFundingGap ?? admission.concreteFundingGap);
     if (conversionFundingGap <= 0) continue;
     const demand = createRunnerCreditDemand({
       demandId: `run-support:${evaluation.actionId}`,
@@ -785,25 +911,27 @@ function runnerCreditBankRunFundingRoute(params: {
         `run_funding_gap:${conversionFundingGap}`,
       ],
     });
-    const route = reserveFundingRoute ?? searchFundingRoutes({
-      demand,
-      // This certificate belongs to the bank payout itself. An unrelated
-      // loan must not prune it before the bank's route can be materialized.
-      candidates: fundedTerminalTarget
-        ? params.candidates.filter((candidate) =>
-            cashOutActionIds.has(candidate.actionId),
-          )
-        : params.candidates,
-      remainingClicks: remainingFundingClicks,
-      maxSteps: remainingFundingClicks,
-      maxRoutes: 16,
-    }).routes.find(
-      (candidateRoute) =>
-        candidateRoute.status === "covered_guaranteed" &&
-        candidateRoute.horizon === "same_turn" &&
-        candidateRoute.steps[0]?.actionId !== undefined &&
-        cashOutActionIds.has(candidateRoute.steps[0].actionId),
-    );
+    const route =
+      reserveFundingRoute ??
+      searchFundingRoutes({
+        demand,
+        // This certificate belongs to the bank payout itself. An unrelated
+        // loan must not prune it before the bank's route can be materialized.
+        candidates: fundedTerminalTarget
+          ? params.candidates.filter((candidate) =>
+              cashOutActionIds.has(candidate.actionId),
+            )
+          : params.candidates,
+        remainingClicks: remainingFundingClicks,
+        maxSteps: remainingFundingClicks,
+        maxRoutes: 16,
+      }).routes.find(
+        (candidateRoute) =>
+          candidateRoute.status === "covered_guaranteed" &&
+          candidateRoute.horizon === "same_turn" &&
+          candidateRoute.steps[0]?.actionId !== undefined &&
+          cashOutActionIds.has(candidateRoute.steps[0].actionId),
+      );
     if (route) {
       return {
         ...(fundedTerminalTarget || reserveFundingRoute

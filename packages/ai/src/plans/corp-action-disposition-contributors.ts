@@ -1,6 +1,7 @@
 import { corpPunishPreparationConflictsScoreServer } from "../corp/punish/punish-preparation";
 import { corpReservedScoreServerIds } from "../runtime/corp-scoreline/score-hand-support";
 import { corpEconomyActionIsOwned } from "../corp/economy/economy-routes";
+import { corpHostedBankLoadRejectionEvidence } from "../corp/economy/hosted-credit-bank-facts";
 import { type CorpDefenseSignal } from "./corp-defense-contracts";
 import { type CorpScoreProjectSignal } from "./corp-score-contracts";
 import { corpPunishCampaignOwnsCandidate } from "../corp/punish/punish-plan-support";
@@ -276,11 +277,16 @@ function contributeCorpActionDispositionForCandidate(
     action?.side === "corp" &&
     action.type === "activated_card_ability" &&
     action.payload?.cardImplementationAddsHostedCredits === true &&
-    action.payload?.hostedCreditBankCycleQuoteJson === undefined &&
     !domain.economyNeeds.some((signal) =>
       signal.actionIds.includes(candidate.actionId),
     )
   ) {
+    const bankRejection = corpHostedBankLoadRejectionEvidence(input, candidate);
+    if (bankRejection) {
+      add(candidate.actionId, "corp.economy", bankRejection);
+      return;
+    }
+    if (action.payload?.hostedCreditBankCycleQuoteJson !== undefined) return;
     addUnknown(
       candidate.actionId,
       "corp.economy",
@@ -344,6 +350,30 @@ function contributeCorpActionDispositionForCandidate(
       candidate.actionId,
       "corp.score_agenda",
       `capability_plan_owner:${candidate.planOwnerBinding.capabilityKey}`,
+    );
+    return;
+  }
+  const fundedTerminalConversion = domain.scoreProjects.find(
+    (project) =>
+      project.feasible &&
+      project.terminalScore &&
+      project.sameTurnCloseout &&
+      project.sameTurnConversionProof === "engine_quoted_path" &&
+      project.sameTurnConversionResourceCost?.stateVersion ===
+        input.playerView.stateVersion &&
+      project.phase !== "score_agenda" &&
+      project.agendaInstanceId === candidate.sourceCardInstanceId &&
+      (project.actionIds?.length ?? 0) > 0 &&
+      !project.actionIds?.includes(candidate.actionId),
+  );
+  if (
+    candidate.semanticActionType === "score.agenda" &&
+    fundedTerminalConversion
+  ) {
+    add(
+      candidate.actionId,
+      "corp.score_agenda",
+      `corp_immediate_score_rejected_for_funded_terminal_conversion:${fundedTerminalConversion.projectId}`,
     );
     return;
   }

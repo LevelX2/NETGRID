@@ -3,6 +3,7 @@ import type {
   CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
+import { overadvanceAgendaPointBonus } from "../../../ability-engine/overadvance-agenda-points";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
@@ -24,8 +25,10 @@ export function applyOveradvanceScoreEffects(
   let overadvancedBy = 0;
   if (scoredAgenda?.kind === "overadvance_bonus_agenda_points") {
     overadvancedBy = excessAdvancements(instanceBefore, requiredDifficulty);
-    bonusAgendaPoints = Math.floor(
-      overadvancedBy / scoredAgenda.perExcessAdvancementCounters,
+    bonusAgendaPoints = overadvanceAgendaPointBonus(
+      instanceBefore.advancementCounters,
+      requiredDifficulty,
+      scoredAgenda.perExcessAdvancementCounters,
     );
     host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
     if (legalAction) {

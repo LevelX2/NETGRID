@@ -64,6 +64,20 @@ Verträge direkt.
   Replacement-Resolvern. Der ausführbare Boundary-Test schützt diese Autorität.
 - Hidden Runner Resources werden erst über den gemeinsamen Reveal-Payload
   veröffentlicht, wenn ihre Kosten tatsächlich bezahlt werden.
+- Jeder aufgelöste Damage-Replacement-Ausgang behält `originalEventId`,
+  `originalEventType`, `damageType` und die ursprüngliche Menge. Der gemeinsame
+  Dispatcher setzt diese Herkunft vor den speziellen Grip- und installierten
+  Resolvern; die PublicContext-Projektion erhält die nicht privaten Damagefacts.
+  Ein ersetzter Schaden darf in Auswertungen nicht als fehlendes Ereignis oder
+  null verhinderter Schaden verschwinden.
+- Eine kartenbasierte Replacement-Option bindet ihre tatsächliche Quellinstanz
+  über `metadata.sourceCardInstanceId`. Diese Bindung bleibt in der privaten
+  Actor-Choice und der privilegierten historischen Analyse. Andere PlayerViews
+  erhalten die private Choice nicht; das öffentliche Öffnungsereignis verrät
+  keine Gripquelle. Die Quellkarte wird erst durch ihre wirkliche Verwendung
+  öffentlich.
+  Der KI-DTO erhält die Bindung nur gegen eine tatsächlich bekannte eigene
+  Grip- oder Rigquelle; eine fremde oder fehlende Instanz wird abgewiesen.
 
 ## Ausführbare Strukturgrenzen
 

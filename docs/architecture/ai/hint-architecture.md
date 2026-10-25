@@ -1,7 +1,7 @@
 # AI-Hints: Quelle und Runtime-Vertrag
 
 Status: **aktueller generierter CardSpec-Vertrag**  
-Stand: 2026-10-07
+Stand: 2026-10-22
 
 ## Autorenquelle und Datenpfad
 
@@ -62,6 +62,21 @@ sinnvollen bezahlten Informationsschritt; dieser benötigt weiterhin eine
 side-sichere Neuquote des anschließenden Zugriffs.
 
 ## Typisierte Recovery- und Spielkosten
+
+`search_trash_to_grip` projiziert die kanonische Auswahl einer beliebigen
+passenden Heap-Karte als `card_recovery` und `search`, mit dem ursprünglichen
+Filter `program` oder `any_card`. Die Deckdiagnostik zählt beide Formen der
+Heap-Rückgewinnung; der engere Top-Heap-Consumer erkennt weiterhin nur
+`move_top_trash_to_grip`. Stack-Suche begründet keine Recovery. Diese Fakten
+verändern weder Legalität noch die plan-, quellen- und versionsgebundene
+Zielauswahl; unbekannte Effektformen scheitern sichtbar.
+
+`hq_access_expose_all_installed_corp_cards` beschreibt einen HQ-Zugriff als
+Auslöser für das Aufdecken installierter Corp-Karten. Daraus entstehen
+`expose_info` und die entsprechenden Expose-Funktionssignale. Weder ein
+vollständiger Blick in die HQ-Hand noch `hq_info` oder `access.hq_full_reveal`
+gehören zu dieser Wirkung. Echte `private_look`-Fähigkeiten behalten ihre
+eigene typisierte Zone und Informationsmenge.
 
 Direktes `lifecycle.on_score.gain_credits` erzeugt aus der mechanischen Quelle
 eine endliche Creditgutschrift mit `when_scored`-Timing und `score.credit_gain`.
@@ -184,3 +199,13 @@ konsistent sein; diese Metadaten sind dann keine ungeklärten Zusatzkosten.
 Offene oder widersprüchliche Variablen und nicht monetäre Kosten bleiben
 ausdrücklich erhalten. Der fachliche Owner bewertet weiterhin Ziel, Dauer,
 Reserve und Nutzen; die Kostenprojektion trifft keine Kartenentscheidung.
+
+## Aktiviertes Recycling gescorter Agenden
+
+`scoredAgenda.shuffle_hq_archives_into_rd_then_draw` projiziert das spätere,
+wiederholbare Recycling und Nachziehen als `scored_activated`, einschließlich
+`score.scored_agenda_action`. Der Score allein mischt und zieht keine Karten;
+die bestehende Engine-Aktion und der zuständige Plan bleiben erforderlich.
+Automatische Score-Erträge wie `gain_credits_on_score` behalten dagegen ihr
+Timing `when_scored`. Der Compiler leitet diese Grenze aus dem typisierten
+Mechanismus ab, unabhängig von Kartentitel und Identität.

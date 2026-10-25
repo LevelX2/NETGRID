@@ -39,6 +39,18 @@ describe("damage replacement choice", () => {
     expect(choice.options[1]?.metadata).not.toHaveProperty("cardTitle");
     expect(choice.options[2]?.metadata).not.toHaveProperty("cardTitle");
   });
+
+  it("rejects a card replacement without its actual source instance", () => {
+    const source = candidate("replacement_card", 80);
+    source.sourceRef = { kind: "card", label: "Unbound card" };
+    const window = {
+      windowId: "window_unbound",
+      candidates: [source],
+    } as ReplacementWindow;
+    expect(() =>
+      replacementChoice({} as GameState, window, {} as ImminentEvent, 4),
+    ).toThrow(/damage_replacement_source_binding_missing/);
+  });
 });
 
 function candidate(

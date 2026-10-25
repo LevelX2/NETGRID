@@ -1,3 +1,6 @@
+import type { AiDecisionInput } from "@netgrid/shared";
+import { archivesHasVisibleKnownAgenda } from "./visible-server-agenda-facts";
+import { runnerArchivesHasQualifiedHiddenPayoff } from "./runner-archives-score";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -32,6 +35,7 @@ export type RunnerRunFundingAdmission = {
 };
 
 export type AssessRunnerRunFundingAdmissionParams = {
+  input: AiDecisionInput;
   target: RunnerRunTargetEvaluation;
   runTargets: readonly RunnerRunTargetEvaluation[];
   economy: Pick<RunnerEconomyPosture, "minimumCreditFloor">;
@@ -75,6 +79,7 @@ export function assessRunnerRunFundingAdmission(
     nonNegative(params.target.prerunReserveQuote?.creditGap ?? 0),
   );
   const sameServerDirectlyConvertibleActionIds = directAlternativeActionIds({
+    input: params.input,
     target: params.target,
     runTargets: params.runTargets,
     economy: params.economy,
@@ -86,6 +91,7 @@ export function assessRunnerRunFundingAdmission(
     ...new Set([
       ...sameServerDirectlyConvertibleActionIds,
       ...directAlternativeActionIds({
+        input: params.input,
         target: params.target,
         runTargets: params.runTargets,
         economy: params.economy,
@@ -173,6 +179,7 @@ function urgentScoreThreatFor(
 }
 
 function directAlternativeActionIds(params: {
+  input: AiDecisionInput;
   target: RunnerRunTargetEvaluation;
   runTargets: readonly RunnerRunTargetEvaluation[];
   economy: Pick<RunnerEconomyPosture, "minimumCreditFloor">;
@@ -186,6 +193,9 @@ function directAlternativeActionIds(params: {
         .filter(
           (candidate) =>
             candidate.actionId !== params.target.actionId &&
+            (candidate.accessTargetKind !== "archives" ||
+              archivesHasVisibleKnownAgenda(params.input) ||
+              runnerArchivesHasQualifiedHiddenPayoff(params.input)) &&
             (!params.sameServerOnly ||
               candidate.targetServerId === params.target.targetServerId) &&
             runnerRunTargetIsDirectlyConvertible({

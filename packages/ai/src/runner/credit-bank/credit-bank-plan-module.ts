@@ -97,7 +97,7 @@ export function createRunnerCreditBankModule(): PlanModule {
             signal.phase === "install"
               ? "Install the bound multi-turn credit bank."
               : signal.phase === "build"
-                ? "Invest the current once-per-turn bank action."
+                ? "Invest toward the revalidated spending budget without consuming protected liquid reserves."
                 : signal.phase === "cash_out"
                   ? "Convert the stored bank value into a bound funding need."
                   : "Keep the credit-bank plan resident until its next admissible phase.",
@@ -148,7 +148,11 @@ function bankCandidates(
         (signal.phase === "cash_out"
           ? signal.estimatedPayout
           : signal.phase === "build"
-            ? Math.max(0, 12 - signal.currentStoredCredits)
+            ? Math.max(
+                0,
+                signal.investment?.incrementalCreditsOverAlternative ??
+                  12 - signal.currentStoredCredits,
+              )
             : 1),
     }));
 }

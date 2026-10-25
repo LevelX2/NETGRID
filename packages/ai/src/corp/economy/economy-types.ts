@@ -12,6 +12,19 @@ export type CorpEconomySignalBase = {
   evidenceCode: string;
 };
 
+export type CorpHostedBankInvestment = {
+  actionId: string;
+  stateVersion: number;
+  sourceInstanceId: string;
+  sourceDefinitionId: string;
+  storedCredits: number;
+  creditsPerLoad: number;
+  targetCredits: number;
+  protectedLiquidReserve: number;
+  additionalLoadExecutions: number;
+  canCarryAcrossTurn: boolean;
+};
+
 export type CorpEconomyFundingRouteAssessment = {
   routeId: string;
   status: FundingRouteSearchResult["bestRoute"]["status"];
@@ -19,6 +32,22 @@ export type CorpEconomyFundingRouteAssessment = {
   headActionId?: string;
   evidence: string[];
   hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
+  freeRezPayoutPreparation?: CorpFreeRezPayoutPreparation;
+};
+
+export type CorpFreeRezPayoutPreparation = {
+  actionId: string;
+  basicFundingActionId: string;
+  campaignNeedId: string;
+  stateVersion: number;
+  parentPlanInstanceId: string;
+  parentNeedId: string;
+  sourceInstanceId: string;
+  sourceDefinitionId: string;
+  sourceServerId: string;
+  poolCreditsOnRez: number;
+  payoutCredits: number;
+  payoutClicks: 1;
 };
 
 export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
@@ -38,6 +67,7 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
   };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
   hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
+  freeRezPayoutPreparation?: CorpFreeRezPayoutPreparation;
   restrictedCreditFunding?: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
   restrictedCreditPreparations?: CorpRestrictedRezPreparation[];
 };
@@ -98,6 +128,7 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
       | "automatic_start_of_turn"
       | "immediate_on_rez"
       | "hosted_credit_bank_cycle"
+      | "hosted_credit_bank_investment"
       | "counter_cashout_development";
     maximumSetupExecutions: 1;
   };
@@ -130,6 +161,7 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
       | "hosted_credits_added";
   };
   hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
+  hostedCreditBankInvestment?: CorpHostedBankInvestment;
   counterCashout?: {
     currentAdvancementCounters: number;
     targetAdvancementCounters: number;

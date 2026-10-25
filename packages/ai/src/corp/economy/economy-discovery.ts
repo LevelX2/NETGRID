@@ -10,6 +10,11 @@ import { uniqueBy } from "../../runtime/collection";
 import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-draw-action-facts";
 import { turnKey } from "../../runtime/runtime-identifiers";
 import { corpHostedBankCycleDevelopment } from "./hosted-credit-bank-cycle";
+import { corpHostedBankInvestments } from "./hosted-credit-bank-investment";
+import {
+  corpHostedBankRestTurnDevelopment,
+  corpHostedBankRestTurnPayoutContinuation,
+} from "./hosted-credit-bank-restturn";
 import {
   assessCorpEconomyFundingRoute,
   corpEconomyActionIsOwned,
@@ -49,6 +54,7 @@ export function buildCorpEconomySignals({
   candidates,
   scoreProjects,
   defenseNeeds,
+  centralDefenseAllocation,
   remoteProjects,
   ambushes,
   punishCampaigns,
@@ -62,6 +68,7 @@ export function buildCorpEconomySignals({
   candidates: readonly ActionSemanticCandidate[];
   scoreProjects: CorpCorePlanDomain["scoreProjects"];
   defenseNeeds: CorpCorePlanDomain["defenseNeeds"];
+  centralDefenseAllocation: CorpCorePlanDomain["centralDefenseAllocation"];
   remoteProjects: CorpCorePlanDomain["remoteProjects"];
   ambushes: CorpPlanDomain["ambushes"];
   punishCampaigns: CorpPlanDomain["punishCampaigns"];
@@ -84,6 +91,11 @@ export function buildCorpEconomySignals({
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
+  const bankInvestments = corpHostedBankInvestments(
+    input,
+    candidates,
+    requiredEconomyNeeds,
+  );
   const genericTurnLiquidityDevelopment =
     operationThresholdPreparations.length === 0
       ? corpTurnLiquidityDevelopmentNeed(
@@ -139,10 +151,39 @@ export function buildCorpEconomySignals({
       ...(turnLiquidityDevelopment ? [turnLiquidityDevelopment] : []),
       ...operationThresholdPreparations,
       ...corpImmediateOperationEconomyConversions(input, candidates),
-      ...corpVisibleCardEconomyWithdrawals(input, candidates),
+      ...corpVisibleCardEconomyWithdrawals(input, candidates).filter(
+        (signal) =>
+          bankInvestments.get(signal.sourceInstanceId)?.shouldCashout !==
+            false ||
+          corpHostedBankRestTurnPayoutContinuation({
+            input,
+            candidates,
+            previous,
+            signal,
+          }),
+      ),
       ...corpOptionalActionCapacityConversions(input, candidates),
       ...corpEconomyDevelopmentCampaigns(input, candidates, scoreProjects),
-      ...corpHostedBankCycleDevelopment(input, candidates),
+      ...corpHostedBankCycleDevelopment(input, candidates).filter(
+        (signal) => !bankInvestments.has(signal.sourceInstanceId),
+      ),
+      ...(operationThresholdPreparations.length === 0
+        ? corpHostedBankRestTurnDevelopment({
+            input,
+            candidates,
+            requiredNeeds: requiredEconomyNeeds,
+            scoreProjects,
+            defenseNeeds,
+            remoteProjects,
+            ambushes,
+            punishCampaigns,
+            centralAllocation: centralDefenseAllocation,
+            bankChoices: bankInvestments,
+          })
+        : []),
+      ...[...bankInvestments.values()].flatMap((choice) =>
+        choice.development ? [choice.development] : [],
+      ),
     ],
     (signal) => signal.needId,
   );
@@ -167,6 +208,10 @@ export function buildCorpEconomySignals({
           turnKey: turnKey(input),
         },
         signal,
+        unboundEconomyNeeds.filter(
+          (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
+            s.kind === "develop_campaign",
+        ),
       );
       return {
         ...signal,
@@ -181,6 +226,13 @@ export function buildCorpEconomySignals({
             : []),
         ],
         fundingRouteAssessment,
+        ...(signal.kind === "parent_funding" &&
+        fundingRouteAssessment.freeRezPayoutPreparation
+          ? {
+              freeRezPayoutPreparation:
+                fundingRouteAssessment.freeRezPayoutPreparation,
+            }
+          : {}),
         ...(signal.kind === "parent_funding" &&
         fundingRouteAssessment.hostedCreditBankCycle
           ? {

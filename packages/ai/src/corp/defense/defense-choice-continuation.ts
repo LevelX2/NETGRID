@@ -5,7 +5,7 @@ import {
   type PlanSchedulerContext,
 } from "../../plans/plan-scheduler";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
-import { corpIceEffectsOnlyReachFutureEncounters } from "../../runtime/corp-exact-ice-rez-route";
+import { corpIceEffectsOnlyReachFutureEncounters } from "../../runtime/semantic-runtime-corp-effective-defense";
 import { turnKey } from "../../runtime/runtime-identifiers";
 import { preferUnbreakableEquivalentTemporaryIce } from "./temporary-ice-choice";
 

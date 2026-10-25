@@ -1,4 +1,8 @@
-import type { AiDecisionInput, VisibleEffectiveSubroutine } from "@netgrid/shared";
+import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
+import type {
+  AiDecisionInput,
+  VisibleEffectiveSubroutine,
+} from "@netgrid/shared";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import { subroutineOnlyAffectsNextEncounter } from "../run-analysis/visible-run-hazards";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
@@ -26,14 +30,17 @@ export function currentRunFuturePathAssessment(
     server.ice.slice(0, Math.max(0, run.position.iceIndex)),
     runnerRigAfterEncounter(input.playerView.own.rig ?? []),
     runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
+      input.playerView.own.credits +
+        visibleRunnerRunOnlyCredits(input.playerView.run),
       input.playerView.own.rig ?? [],
+      { liquidCredits: input.playerView.own.credits },
     ),
     server.root,
     input.playerView.opponent.credits,
     currentRunPathContext(input),
     effects.map(({ effect, subroutineType }) =>
-      subroutineType && subroutineOnlyAffectsNextEncounter({ type: subroutineType })
+      subroutineType &&
+      subroutineOnlyAffectsNextEncounter({ type: subroutineType })
         ? { ...effect, expiresAfterNextEncounter: true }
         : effect,
     ),

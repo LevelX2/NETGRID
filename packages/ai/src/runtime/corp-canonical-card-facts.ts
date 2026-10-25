@@ -24,12 +24,14 @@ export function corpSameFortAgendaDiscountProfiles(
     modifier.activeWhile === "rezzed" &&
     modifier.appliesTo.sameServerAsSource === true &&
     positiveSafeInteger(modifier.amount)
-      ? [{
-          ...(modifier.appliesTo.subtype !== undefined
-            ? { requiredSubtype: modifier.appliesTo.subtype }
-            : {}),
-          reduction: modifier.amount,
-        }]
+      ? [
+          {
+            ...(modifier.appliesTo.subtype !== undefined
+              ? { requiredSubtype: modifier.appliesTo.subtype }
+              : {}),
+            reduction: modifier.amount,
+          },
+        ]
       : [],
   );
 }
@@ -510,6 +512,60 @@ export function corpHostedCreditBankProfile(
         payoutActionCost,
         payoutTiming: lifecyclePayout ? "start_of_corp_turn" : "action",
       }
+    : undefined;
+}
+
+/** A plain rez-created pool with a single-click, otherwise free current-turn payout. */
+export function corpRezHostedCreditPayoutProfile(
+  definitionId: string | undefined,
+): { poolCredits: number; payoutCredits: number } | undefined {
+  const planning = planningCard(definitionId);
+  const effects = planning?.planning.engine.lifecycle?.on_rez;
+  if (
+    planning?.planning.side !== "corp" ||
+    planning.planning.cardType !== "asset" ||
+    !effects?.length ||
+    !effects.every(
+      (effect) =>
+        effect.kind === "add_hosted_credits" &&
+        effect.target === "source" &&
+        positiveSafeInteger(effect.amount),
+    )
+  )
+    return undefined;
+  const poolCredits = effects.reduce(
+    (sum, effect) =>
+      sum + (effect.kind === "add_hosted_credits" ? effect.amount : 0),
+    0,
+  );
+  const payouts = (planning.planning.engine.abilities ?? []).flatMap(
+    (ability) => {
+      const effect = ability.effects.find(
+        (effect) => effect.kind === "take_hosted_credits",
+      );
+      return ability.kind === "activated" &&
+        ability.timing === "corp_main" &&
+        ability.effects.every(
+          (other) =>
+            other === effect || other.kind === "trash_source_when_empty",
+        ) &&
+        ability.costs.length === 1 &&
+        ability.costs[0]?.kind === "action" &&
+        ability.costs[0].amount === 1 &&
+        ability.condition?.kind === "source_has_hosted_credits" &&
+        effect?.kind === "take_hosted_credits" &&
+        effect.source === "source" &&
+        effect.recipient === "controller" &&
+        effect.mode === "up_to_amount_if_available" &&
+        positiveSafeInteger(effect.amount)
+        ? [effect.amount]
+        : [];
+    },
+  );
+  return payouts.length === 1 &&
+    positiveSafeInteger(poolCredits) &&
+    poolCredits > payouts[0]!
+    ? { poolCredits, payoutCredits: Math.min(poolCredits, payouts[0]!) }
     : undefined;
 }
 

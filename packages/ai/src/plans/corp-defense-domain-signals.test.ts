@@ -340,30 +340,35 @@ function qualitativeCentralRouteFixture(): {
 } {
   const stateVersion = 29;
   const source = {
-    instanceId: "shock-r",
-    definitionId: "onr_v1_268_shock-r",
+    instanceId: "neural-blade",
+    definitionId: "onr_v1_258_neural-blade",
     owner: "corp",
     side: "corp",
     known: true,
     type: "ice",
     rezzed: false,
-    strength: 3,
+    strength: 4,
     subtypes: ["sentry"],
     effectiveRunQuote: {
-      iceInstanceId: "shock-r",
-      iceDefinitionId: "onr_v1_268_shock-r",
-      effectiveStrength: 3,
+      iceInstanceId: "neural-blade",
+      iceDefinitionId: "onr_v1_258_neural-blade",
+      effectiveStrength: 4,
       subroutines: [
         {
-          id: "shock-r-lock",
-          type: "set_next_encounter_lock",
-          breakTags: ["stun"],
+          id: "neural-blade-damage",
+          type: "do_damage",
+          damageType: "net",
+          amount: 1,
+        },
+        {
+          id: "neural-blade-lock",
+          type: "set_next_encounter_no_break_subroutines",
         },
       ],
     },
   };
   const action = {
-    actionId: "install-shock-r-hq",
+    actionId: "install-neural-blade-hq",
     side: "corp",
     type: "install_card",
     source: source.instanceId,
@@ -382,6 +387,9 @@ function qualitativeCentralRouteFixture(): {
       postInstallRezQuoteProjectedServerId: "hq",
       postInstallRezQuoteExpiresAtStateVersion: stateVersion,
       postInstallRezQuoteFinalCredits: 4,
+      postInstallEffectiveRunQuoteJson: JSON.stringify(
+        source.effectiveRunQuote,
+      ),
     },
   } as unknown as LegalAction;
   return {
@@ -491,6 +499,12 @@ function layeredRemoteFixture(
       postInstallRezQuoteProjectedServerId: "remote_1",
       postInstallRezQuoteExpiresAtStateVersion: stateVersion,
       postInstallRezQuoteFinalCredits: rezCredits,
+      postInstallEffectiveRunQuoteJson: JSON.stringify({
+        iceInstanceId: source.instanceId,
+        iceDefinitionId: source.definitionId,
+        effectiveStrength: source.strength,
+        subroutines: [{ id: "printed-etr", type: "end_the_run" }],
+      }),
     },
   } as unknown as LegalAction;
   const input = {

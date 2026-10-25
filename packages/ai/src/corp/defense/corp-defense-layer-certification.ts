@@ -1,3 +1,4 @@
+import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { corpRemoteHasEngineQuotedFundableScoreFriction } from "../score/corp-score-defense-continuity";
@@ -10,6 +11,7 @@ import { corpEffectiveDefenseActivationCredits } from "../../runtime/corp-exact-
 import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 import { visiblePreparedRunnerBreakerCandidates } from "../../runtime/corp-score-protection-assessment";
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 type CorpCertifiedDefenseLayer = Readonly<{
   iceInstanceId: string;
   credits: number;
@@ -76,10 +78,18 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
   visibleCorpCredits: number,
 ): boolean {
   const runnerRig = input.playerView.opponent.rig ?? [];
+  if (
+    input.playerView.activeSide === "corp" &&
+    input.playerView.runnerNextTurnCreditClicks === undefined
+  )
+    return false;
   const runnerCredits =
     input.playerView.opponent.credits +
     (input.playerView.activeSide === "corp"
-      ? (input.playerView.runnerNextTurnCreditClicks ?? 0)
+      ? visibleRunnerNextTurnPreparationCreditGain(
+          runnerRig,
+          input.playerView.runnerNextTurnCreditClicks!,
+        )
       : 0);
   const prepared = visiblePreparedRunnerBreakerCandidates({
     serverIce: [],
@@ -101,6 +111,10 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       rig: [...runnerRig, candidate.card],
       credits: runnerCredits - candidate.installCreditCost,
     })),
+    ...visibleRunnerHeapBreakerPreparations(input).map((candidate) => ({
+      rig: [...runnerRig, candidate.card],
+      credits: candidate.remainingGeneralCredits,
+    })),
   ].every((runner) => {
     const assessment = assessEngineCertifiedPostRezIcePath(
       [...server.ice],
@@ -108,7 +122,12 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       input.playerView.stateVersion,
       new Set(financedLayerInstanceIds),
       runner.rig,
-      runnerRunPathCreditBudgetWithVisiblePools(runner.credits, runner.rig),
+      runnerRunPathCreditBudgetWithVisiblePools(runner.credits, runner.rig, {
+        creditPoolHorizon:
+          input.playerView.activeSide === "corp"
+            ? "next_runner_turn"
+            : "current",
+      }),
       [...server.root],
       visibleCorpCredits,
       {
@@ -122,7 +141,11 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
         ).length,
       },
     );
-    return !assessment.canReachAccess;
+    // A conservative Runner damage break requirement is not an access barrier.
+    return (
+      !assessment.canReachAccess &&
+      assessment.knownPathBlockedOnlyByDamage !== true
+    );
   });
 }
 

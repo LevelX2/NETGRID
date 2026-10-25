@@ -13,6 +13,7 @@ import {
 import type { RunnerDefenseSignals, DefenseState } from "./defense-types";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
+import { currentRunnerTagReduction } from "../../actions/tag-effect-semantics";
 export function createRunnerDefenseModule(): PlanModule {
   return {
     moduleId: "runner.defense_and_recovery",
@@ -21,45 +22,13 @@ export function createRunnerDefenseModule(): PlanModule {
       const signals = runnerPlanDomain<{ defense: RunnerDefenseSignals }>(
         context,
       ).defense;
-      const invalidTagClearFundingContract =
-        signals.tagClearFundingNeed !== undefined &&
-        !validRunnerTagClearFundingNeed(
-          signals.tagClearFundingNeed,
-          context.input.playerView.stateVersion,
-        );
-      const invalidReactionReserveContract =
-        signals.reactionReserveNeed !== undefined &&
-        !validRunnerDefenseFundingNeed(
-          signals.reactionReserveNeed,
-          context.input.playerView.stateVersion,
-        );
-      const phase = invalidTagClearFundingContract
-        ? "fund_tag_clear"
-        : signals.persistentHazardCounterFundingNeed !== undefined &&
-            !validPersistentHazardCounterFundingNeed(signals.persistentHazardCounterFundingNeed,
-              context.input, context.actionCandidates)
-          ? "fund_persistent_hazard_counter"
-        : invalidReactionReserveContract
-          ? "build_reaction_reserve"
-          : defensePhase(
-              context.actionCandidates,
-              context.input.playerView.stateVersion,
-              signals,
-              context.actionDispositions,
-            );
+      const {
+        phase,
+        candidates,
+        invalidTagClearFundingContract,
+        invalidReactionReserveContract,
+      } = currentDefenseHead({ ...context, signals });
       if (!phase) return [];
-      const candidates =
-        invalidTagClearFundingContract || invalidReactionReserveContract ||
-        (signals.persistentHazardCounterFundingNeed !== undefined &&
-          !validPersistentHazardCounterFundingNeed(signals.persistentHazardCounterFundingNeed,
-            context.input, context.actionCandidates))
-          ? []
-          : defenseCandidates(
-              context.actionCandidates,
-              phase,
-              signals,
-              context.actionDispositions,
-            );
       return [
         proposal({
           moduleId: "runner.defense_and_recovery",
@@ -185,6 +154,83 @@ export function createRunnerDefenseModule(): PlanModule {
   };
 }
 
+type DefenseHeadContext = {
+  input: AiDecisionInput;
+  actionCandidates: readonly ActionSemanticCandidate[];
+  signals: RunnerDefenseSignals;
+  actionDispositions?: readonly PlanActionDisposition[];
+};
+
+function currentDefenseHead(context: DefenseHeadContext) {
+  const { signals } = context;
+  const invalidTagClearFundingContract =
+    signals.tagClearFundingNeed !== undefined &&
+    !validRunnerTagClearFundingNeed(
+      signals.tagClearFundingNeed,
+      context.input.playerView.stateVersion,
+    );
+  const invalidReactionReserveContract =
+    signals.reactionReserveNeed !== undefined &&
+    !validRunnerDefenseFundingNeed(
+      signals.reactionReserveNeed,
+      context.input.playerView.stateVersion,
+    );
+  const phase = invalidTagClearFundingContract
+    ? "fund_tag_clear"
+    : signals.persistentHazardCounterFundingNeed !== undefined &&
+        !validPersistentHazardCounterFundingNeed(
+          signals.persistentHazardCounterFundingNeed,
+          context.input,
+          context.actionCandidates,
+        )
+      ? "fund_persistent_hazard_counter"
+      : invalidReactionReserveContract
+        ? "build_reaction_reserve"
+        : defensePhase(
+            context.actionCandidates,
+            context.input.playerView.stateVersion,
+            signals,
+            context.actionDispositions,
+          );
+  if (!phase)
+    return {
+      phase,
+      candidates: [],
+      invalidTagClearFundingContract,
+      invalidReactionReserveContract,
+    };
+  const candidates =
+    invalidTagClearFundingContract ||
+    invalidReactionReserveContract ||
+    (signals.persistentHazardCounterFundingNeed !== undefined &&
+      !validPersistentHazardCounterFundingNeed(
+        signals.persistentHazardCounterFundingNeed,
+        context.input,
+        context.actionCandidates,
+      ))
+      ? []
+      : defenseCandidates(
+          context.actionCandidates,
+          phase,
+          signals,
+          context.actionDispositions,
+        );
+  return {
+    phase,
+    candidates,
+    invalidTagClearFundingContract,
+    invalidReactionReserveContract,
+  };
+}
+
+export function runnerDefenseCurrentHeadActionIds(
+  context: DefenseHeadContext,
+): string[] {
+  const { phase, candidates } = currentDefenseHead(context);
+  if (!phase || phase.startsWith("forgo_")) return [];
+  return candidates.map((entry) => entry.candidate.actionId);
+}
+
 function defensePhase(
   actionCandidates: readonly ActionSemanticCandidate[],
   stateVersion: number,
@@ -192,8 +238,8 @@ function defensePhase(
   actionDispositions?: readonly PlanActionDisposition[],
 ): DefenseState["phase"] | undefined {
   const openPhases: DefenseState["phase"][] = [];
-  if (signals.terminalDamageReplacementBinding)
-    openPhases.push("replace_terminal_damage");
+  if (signals.gripDamageReplacementBinding)
+    openPhases.push("replace_damage_from_grip");
   if (signals.discardChoiceBinding) openPhases.push("discard_window");
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
@@ -298,9 +344,9 @@ function defenseCandidates(
       }
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
-      if (phase === "replace_terminal_damage")
+      if (phase === "replace_damage_from_grip")
         return (
-          signals.terminalDamageReplacementBinding?.actionId ===
+          signals.gripDamageReplacementBinding?.actionId ===
           candidate.actionId
         );
       if (
@@ -342,7 +388,7 @@ function defenseCandidates(
           : phase === "install_defense_support"
             ? (signals.defenseSupportInstallValues?.[candidate.actionId] ?? 50)
             : phase === "clear_tags"
-              ? 80
+              ? 80 * currentRunnerTagReduction(candidate, signals.activeTags)
               : phase === "fund_tag_clear" || phase === "fund_persistent_hazard_counter"
                 ? 85
                 : phase === "clear_persistent_hazard_counter"
@@ -463,9 +509,9 @@ function defenseCapability(
   phase: DefenseState["phase"],
   candidates: PlanMaterialization["candidates"],
 ): PlanRouteStepCapability {
-  if (phase === "replace_terminal_damage")
+  if (phase === "replace_damage_from_grip")
     return {
-      capabilityId: "replace_terminal_damage",
+      capabilityId: "replace_damage_from_grip",
       semanticActionTypes: ["choice.resolve"],
     };
   if (phase === "discard_window")
@@ -551,7 +597,7 @@ function defensePhaseValue(
   phase: DefenseState["phase"],
   signals: RunnerDefenseSignals,
 ): number {
-  if (phase === "replace_terminal_damage") return 10_000;
+  if (phase === "replace_damage_from_grip") return 10_000;
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
   if (phase === "install_defense_support") return 60;
@@ -569,7 +615,7 @@ function defensePhaseValue(
 function defensePriorityClass(
   signals: RunnerDefenseSignals,
 ): "P2" | "P3" | "P4" | "P5" {
-  if (signals.terminalDamageReplacementBinding) return "P2";
+  if (signals.gripDamageReplacementBinding) return "P2";
   if (signals.discardChoiceBinding) return "P2";
   if (
     signals.pendingDamage > 0 ||

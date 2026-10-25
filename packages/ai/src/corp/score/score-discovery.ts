@@ -29,7 +29,7 @@ import {
   corpNextTurnScoreContinuationProjects,
   corpPreferredDeckoutAgendaRecycleRouteAvailable,
   corpRemoteCreationUnlockScoreProjects,
-  sameTurnScoreConversionProjectForCandidate,
+  sameTurnScoreConversionProjectsForCandidate,
   scoreProjectForCandidate,
   uniqueScoreProjects,
 } from "./score-project-signals";
@@ -153,15 +153,14 @@ export function reconcileCorpScoreProjects({
     ...counterBankScoreProjects,
     ...remoteCreationUnlockScoreProjects,
     ...nextTurnScoreContinuationProjects,
-    ...candidates.flatMap((candidate) => {
-      const conversion = sameTurnScoreConversionProjectForCandidate(
+    ...candidates.flatMap((candidate) =>
+      sameTurnScoreConversionProjectsForCandidate(
         input,
         candidate,
         directScoreProjects,
         candidates,
-      );
-      return conversion ? [conversion] : [];
-    }),
+      ),
+    ),
   ];
   const assetPreservation = corpAssetPreservingSameTurnScoreRoutes(
     input,
@@ -266,6 +265,26 @@ export function reconcileCorpScoreProjects({
       )
       .map((project) => project.agendaInstanceId!),
   );
+  const hqAgendaIds = new Set(
+    input.playerView.own.gripOrHq
+      .filter((card) => card.known && visibleCardIsAgenda(input, card))
+      .map((card) => card.instanceId),
+  );
+  const agendaInstancesWithPreparedConversion = new Set(
+    proposedScoreProjects
+      .filter(
+        (project) =>
+          project.phase === "convert_agenda" &&
+          project.sameTurnCloseout &&
+          project.feasible &&
+          project.serverId !== undefined &&
+          project.serverId !== "new_remote" &&
+          !requiresReprotection(project) &&
+          project.agendaInstanceId !== undefined &&
+          hqAgendaIds.has(project.agendaInstanceId),
+      )
+      .map((project) => project.agendaInstanceId!),
+  );
   const concreteScoreProjectsBeforeOpeningRush = uniqueScoreProjects(
     proposedScoreProjects.filter(
       (project) =>
@@ -284,6 +303,13 @@ export function reconcileCorpScoreProjects({
                 project.agendaInstanceId,
               ) ||
                 !actionableScoreProjectIds.has(project.projectId))))
+        ) &&
+        !(
+          project.phase === "convert_agenda" &&
+          project.serverId === "new_remote" &&
+          !assetPreservation.preservingProjectIds.has(project.projectId) &&
+          project.agendaInstanceId !== undefined &&
+          agendaInstancesWithPreparedConversion.has(project.agendaInstanceId)
         ),
     ),
   );

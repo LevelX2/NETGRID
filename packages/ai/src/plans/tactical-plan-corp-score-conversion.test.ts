@@ -887,6 +887,8 @@ describe("Corp same-turn score conversion", () => {
   it("takes a visible overadvance threshold only when it costs no extra step", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,
+      definitionId: "onr_v1_214_project-babylon",
+      agendaPoints: 1,
       overadvanceThreshold: 2,
       overadvanceReward: "agenda_points",
     });
@@ -921,6 +923,8 @@ describe("Corp same-turn score conversion", () => {
   it("keeps exact-fit when an overadvance threshold needs another action", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,
+      definitionId: "onr_v1_214_project-babylon",
+      agendaPoints: 1,
       overadvanceThreshold: 2,
       overadvanceReward: "agenda_points",
     });

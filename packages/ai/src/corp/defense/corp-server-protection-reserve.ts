@@ -1,3 +1,5 @@
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
+import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
 import type { CorpExactIceRezRouteProjection } from "../../runtime/corp-exact-ice-rez-route";
@@ -70,7 +72,18 @@ export function corpTerminalHqAgendaShuffleExposure(
       runnerRig,
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
-      runnerPreparationCreditClicks: income * preparationClicks!,
+      ...(input.playerView.activeSide === "corp"
+        ? {
+            runnerCreditPoolHorizon: "next_runner_turn" as const,
+            runnerPublicPreparedBreakers:
+              visibleRunnerHeapBreakerPreparations(input),
+          }
+        : {}),
+      runnerPreparationCreditClicks: visibleRunnerNextTurnPreparationCreditGain(
+        runnerRig,
+        preparationClicks!,
+        income,
+      ),
       ...(input.playerView.opponent.memoryUsed !== undefined
         ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
         : {}),
@@ -203,6 +216,13 @@ export function corpServerProtectionClaims(
       runnerRig: input.playerView.opponent.rig ?? [],
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
+      ...(input.playerView.activeSide === "corp"
+        ? {
+            runnerCreditPoolHorizon: "next_runner_turn" as const,
+            runnerPublicPreparedBreakers:
+              visibleRunnerHeapBreakerPreparations(input),
+          }
+        : {}),
       ...(input.playerView.phase === "run"
         ? {
             runnerPreparationCreditClicks:
@@ -213,7 +233,11 @@ export function corpServerProtectionClaims(
       input.playerView.runnerNextTurnCreditClicks !== undefined
         ? {
             runnerPreparationCreditClicks:
-              income * input.playerView.runnerNextTurnCreditClicks,
+              visibleRunnerNextTurnPreparationCreditGain(
+                input.playerView.opponent.rig ?? [],
+                input.playerView.runnerNextTurnCreditClicks,
+                income,
+              ),
           }
         : {}),
       ...(input.playerView.opponent.memoryUsed !== undefined

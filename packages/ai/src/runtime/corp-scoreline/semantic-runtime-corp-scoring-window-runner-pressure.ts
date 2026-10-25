@@ -2,12 +2,16 @@ import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
-import { assessEngineCertifiedPostRezIcePath } from "../../visible-run-analysis";
+import {
+  assessEngineCertifiedPostRezIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../../visible-run-analysis";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-route";
 import { semanticRuntimeCorpObservedRemoteReachability } from "../semantic-runtime-corp-remote-reachability";
 import { visibleRunnerExposureCreditValue } from "../visible-runner-action-economy";
 import type { CorpServerLike } from "./semantic-runtime-corp-scoring-window-contracts";
 import { SCORING_WINDOW_AI_HINTS_BY_CARD } from "./semantic-runtime-corp-scoring-window-card-data";
+import { visibleRunnerHeapBreakerPreparations } from "../corp-public-heap-breaker-preparation";
 
 function scoringWindowVisibleCardText(card: VisibleCard): string {
   const runtimeText =
@@ -91,9 +95,7 @@ function scoringWindowAccessAssessmentForMode(
   visibleBreakCost?: number;
   evidence: string[];
 } {
-  const visibleRunnerBaseContestCredits =
-    input.playerView.opponent.credits +
-    visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []);
+  const visibleRunnerBaseContestCredits = input.playerView.opponent.credits;
   const visibleRunnerExtraCredits = Math.max(0, Math.floor(extraRunnerCredits));
   const visibleRunnerPreRunCreditBonus =
     visibleRunnerExtraCredits > 0
@@ -102,16 +104,26 @@ function scoringWindowAccessAssessmentForMode(
           visibleRunnerExtraCredits,
         )
       : 0;
-  const visibleRunnerContestCredits =
+  const visibleRunnerGeneralContestCredits =
     visibleRunnerBaseContestCredits +
     visibleRunnerExtraCredits +
     visibleRunnerPreRunCreditBonus;
   const runnerPathCandidates = visibleRunnerBreakerPathCandidates(
     input,
-    visibleRunnerContestCredits,
+    visibleRunnerGeneralContestCredits,
     input.side === "corp" && input.playerView.activeSide === "corp",
   );
   const baseRunnerPathCandidate = runnerPathCandidates[0]!;
+  const baseBudget = baseRunnerPathCandidate.creditBudget;
+  // Aggregate pressure is separate from payment affordability in the typed ledger.
+  const visibleRunnerContestCredits =
+    baseBudget.credits +
+    (baseBudget.icebreakerCredits ?? 0) +
+    (baseBudget.nonNoisyIcebreakerCredits ?? 0) +
+    (baseBudget.killerCredits ?? 0) +
+    Object.values(
+      baseBudget.hostedIcebreakerCreditsByBreakerInstanceId ?? {},
+    ).reduce((sum, amount) => sum + amount, 0);
   const visibleRunnerIcebreakerCount =
     baseRunnerPathCandidate.visibleIcebreakerCount;
   const postRezProjection =
@@ -132,7 +144,7 @@ function scoringWindowAccessAssessmentForMode(
                 input.playerView.stateVersion,
                 financedIceInstanceIds,
                 candidate.rig,
-                candidate.creditsAfterStagedInstall,
+                candidate.creditBudget,
                 [...server.root],
               ),
             }));
@@ -142,14 +154,15 @@ function scoringWindowAccessAssessmentForMode(
                 : best,
             );
             return {
-              runnerCanReachAccess:
-                runnerBestPath.assessment.canReachAccess &&
-                runnerBestPath.assessment.creditsAfterPath >= 0,
+              runnerCanReachAccess: scoringWindowRunnerPathCanReachAccess(
+                runnerBestPath.assessment,
+              ),
               runnerCreditsAfterPath:
                 runnerBestPath.assessment.creditsAfterPath,
               runnerVisibleBreakCost:
                 (runnerBestPath.assessment.visibleBreakCost ?? 0) +
-                runnerBestPath.stagedInstallCreditCost,
+                runnerBestPath.stagedInstallCreditCost +
+                runnerBestPath.heapPreparationCreditCost,
             };
           },
         )
@@ -182,13 +195,13 @@ function scoringWindowAccessAssessmentForMode(
             input.playerView.stateVersion,
             postRezProjection?.financedIceInstanceIds ?? new Set<string>(),
             candidate.rig,
-            candidate.creditsAfterStagedInstall,
+            candidate.creditBudget,
             [...server.root],
           )
         : assessKnownRezzedIcePath(
             [...server.ice],
             candidate.rig,
-            candidate.creditsAfterStagedInstall,
+            candidate.creditBudget,
             [...server.root],
           ),
   }));
@@ -217,8 +230,7 @@ function scoringWindowAccessAssessmentForMode(
   const runnerCanReachAccessNow =
     observedReachability?.applies === true ||
     (!unmodeledBlocksVisibleAccess &&
-      assessment.canReachAccess &&
-      assessment.creditsAfterPath >= 0);
+      scoringWindowRunnerPathCanReachAccess(assessment));
   const hazardPenalty = assessment.visibleIceHazardPenalty ?? 0;
   const agendaStealRelevantNow =
     observedReachability?.applies === true ||
@@ -241,7 +253,8 @@ function scoringWindowAccessAssessmentForMode(
       ? {
           visibleBreakCost:
             assessment.visibleBreakCost +
-            selectedRunnerPath.stagedInstallCreditCost,
+            selectedRunnerPath.stagedInstallCreditCost +
+            selectedRunnerPath.heapPreparationCreditCost,
         }
       : {}),
     evidence: [
@@ -255,9 +268,13 @@ function scoringWindowAccessAssessmentForMode(
       `public_staged_breaker_used:${selectedRunnerPath.stagedBreakerCount > 0}`,
       `public_staged_breaker_count:${selectedRunnerPath.stagedBreakerCount}`,
       `public_staged_breaker_install_credit_cost:${selectedRunnerPath.stagedInstallCreditCost}`,
+      `public_heap_breaker_used:${selectedRunnerPath.heapRecoveryCount > 0}`,
+      `public_heap_breaker_recovery_count:${selectedRunnerPath.heapRecoveryCount}`,
+      `public_heap_breaker_preparation_credit_cost:${selectedRunnerPath.heapPreparationCreditCost}`,
+      ...selectedRunnerPath.heapEvidenceCodes,
       ...(assessment.visibleBreakCost !== undefined
         ? [
-            `remote_access:visible_break_cost:${assessment.visibleBreakCost + selectedRunnerPath.stagedInstallCreditCost}`,
+            `remote_access:visible_break_cost:${assessment.visibleBreakCost + selectedRunnerPath.stagedInstallCreditCost + selectedRunnerPath.heapPreparationCreditCost}`,
           ]
         : []),
       ...(assessment.noAccessReason
@@ -270,26 +287,6 @@ function scoringWindowAccessAssessmentForMode(
       ...(observedReachability?.evidence ?? []),
     ],
   };
-}
-
-function visibleRunnerRunCreditPool(rig: readonly VisibleCard[]): number {
-  return rig.reduce((sum, card) => {
-    if (card.known === false) return sum;
-    return (
-      sum +
-      (card.counterDisplays ?? []).reduce((cardSum, display) => {
-        const uses = display.creditPool?.uses ?? [];
-        if (
-          uses.includes("using_icebreaker_during_run") ||
-          uses.includes("using_icebreaker_during_run_non_noisy") ||
-          uses.includes("using_killer_during_run")
-        ) {
-          return cardSum + Math.max(0, Math.floor(display.amount));
-        }
-        return cardSum;
-      }, 0)
-    );
-  }, 0);
 }
 
 function visibleRunnerPreRunCreditBurstBonus(
@@ -371,27 +368,63 @@ function visibleRunnerInstalledIcebreakerCount(
 
 type ScoringWindowRunnerPathCandidate = {
   rig: VisibleCard[];
-  creditsAfterStagedInstall: number;
+  creditBudget: ReturnType<typeof runnerRunPathCreditBudgetWithVisiblePools>;
   stagedInstallCreditCost: number;
   stagedBreakerCount: number;
+  heapPreparationCreditCost: number;
+  heapRecoveryCount: number;
+  heapEvidenceCodes: readonly string[];
   visibleIcebreakerCount: number;
 };
 
 function visibleRunnerBreakerPathCandidates(
   input: AiDecisionInput,
-  visibleRunnerContestCredits: number,
+  visibleRunnerGeneralContestCredits: number,
   futureRunnerTurnStartAvailable: boolean,
 ): ScoringWindowRunnerPathCandidate[] {
   const installedRig = [...(input.playerView.opponent.rig ?? [])];
+  const creditPoolHorizon = futureRunnerTurnStartAvailable
+    ? ("next_runner_turn" as const)
+    : ("current" as const);
   const baseCandidate: ScoringWindowRunnerPathCandidate = {
     rig: installedRig,
-    creditsAfterStagedInstall: visibleRunnerContestCredits,
+    creditBudget: runnerRunPathCreditBudgetWithVisiblePools(
+      visibleRunnerGeneralContestCredits,
+      installedRig,
+      { creditPoolHorizon },
+    ),
     stagedInstallCreditCost: 0,
     stagedBreakerCount: 0,
+    heapPreparationCreditCost: 0,
+    heapRecoveryCount: 0,
+    heapEvidenceCodes: [],
     visibleIcebreakerCount: visibleRunnerInstalledIcebreakerCount(installedRig),
   };
+  const baseCandidates: ScoringWindowRunnerPathCandidate[] = [
+    baseCandidate,
+    ...(futureRunnerTurnStartAvailable
+      ? visibleRunnerHeapBreakerPreparations(input).map((preparation) => {
+          const projectedRig = [...installedRig, preparation.card];
+          return {
+            rig: projectedRig,
+            creditBudget: runnerRunPathCreditBudgetWithVisiblePools(
+              preparation.remainingGeneralCredits,
+              projectedRig,
+              { creditPoolHorizon },
+            ),
+            stagedInstallCreditCost: 0,
+            stagedBreakerCount: 0,
+            heapPreparationCreditCost: preparation.preparationCreditCost,
+            heapRecoveryCount: preparation.recoveryCount,
+            heapEvidenceCodes: preparation.evidence,
+            visibleIcebreakerCount:
+              visibleRunnerInstalledIcebreakerCount(projectedRig),
+          };
+        })
+      : []),
+  ];
   if (!visibleRunnerHasPaidDelayedInstallSource(installedRig)) {
-    return [baseCandidate];
+    return baseCandidates;
   }
   const stagedBreakers = (input.playerView.specialZones?.setAside ?? []).filter(
     (card) =>
@@ -399,22 +432,28 @@ function visibleRunnerBreakerPathCandidates(
       visibleRunnerStagedProgramFitsMemory(input, card),
   );
   return [
-    baseCandidate,
+    ...baseCandidates,
     ...stagedBreakers.flatMap((card) => {
       const installCreditCost = Math.max(
         0,
         Math.floor(card.counters?.shell ?? 0) -
           (futureRunnerTurnStartAvailable ? 1 : 0),
       );
-      if (installCreditCost > visibleRunnerContestCredits) return [];
+      if (installCreditCost > visibleRunnerGeneralContestCredits) return [];
       const projectedRig = [...installedRig, card];
       return [
         {
           rig: projectedRig,
-          creditsAfterStagedInstall:
-            visibleRunnerContestCredits - installCreditCost,
+          creditBudget: runnerRunPathCreditBudgetWithVisiblePools(
+            visibleRunnerGeneralContestCredits - installCreditCost,
+            projectedRig,
+            { creditPoolHorizon },
+          ),
           stagedInstallCreditCost: installCreditCost,
           stagedBreakerCount: 1,
+          heapPreparationCreditCost: 0,
+          heapRecoveryCount: 0,
+          heapEvidenceCodes: [],
           visibleIcebreakerCount:
             visibleRunnerInstalledIcebreakerCount(projectedRig),
         },
@@ -467,6 +506,18 @@ function visibleRunnerStagedProgramFitsMemory(
   return memoryUsed + Math.max(0, card.memoryCost) <= memoryLimit;
 }
 
+// This conservative Corp exposure model does not certify damage as a run stop.
+// The path producer has already checked every independent access barrier.
+function scoringWindowRunnerPathCanReachAccess(
+  assessment: ReturnType<typeof assessKnownRezzedIcePath>,
+): boolean {
+  return (
+    (assessment.canReachAccess ||
+      assessment.knownPathBlockedOnlyByDamage === true) &&
+    assessment.creditsAfterPath >= 0
+  );
+}
+
 function scoringWindowRunnerPathCandidateIsBetter(
   candidate: ScoringWindowRunnerPathCandidate & {
     assessment: ReturnType<typeof assessKnownRezzedIcePath>;
@@ -476,9 +527,10 @@ function scoringWindowRunnerPathCandidateIsBetter(
   },
 ): boolean {
   if (
-    candidate.assessment.canReachAccess !== current.assessment.canReachAccess
+    scoringWindowRunnerPathCanReachAccess(candidate.assessment) !==
+    scoringWindowRunnerPathCanReachAccess(current.assessment)
   ) {
-    return candidate.assessment.canReachAccess;
+    return scoringWindowRunnerPathCanReachAccess(candidate.assessment);
   }
   if (
     candidate.assessment.creditsAfterPath !==
@@ -491,14 +543,19 @@ function scoringWindowRunnerPathCandidateIsBetter(
   }
   const candidateTotalCost =
     (candidate.assessment.visibleBreakCost ?? Number.POSITIVE_INFINITY) +
-    candidate.stagedInstallCreditCost;
+    candidate.stagedInstallCreditCost +
+    candidate.heapPreparationCreditCost;
   const currentTotalCost =
     (current.assessment.visibleBreakCost ?? Number.POSITIVE_INFINITY) +
-    current.stagedInstallCreditCost;
+    current.stagedInstallCreditCost +
+    current.heapPreparationCreditCost;
   if (candidateTotalCost !== currentTotalCost) {
     return candidateTotalCost < currentTotalCost;
   }
-  return candidate.stagedBreakerCount < current.stagedBreakerCount;
+  return (
+    candidate.stagedBreakerCount + Number(candidate.heapRecoveryCount > 0) <
+    current.stagedBreakerCount + Number(current.heapRecoveryCount > 0)
+  );
 }
 
 export function iceHasModeledRunImpact(ice: VisibleCard): boolean {

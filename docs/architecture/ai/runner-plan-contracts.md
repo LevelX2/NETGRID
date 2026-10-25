@@ -43,6 +43,24 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Ein endlicher Run-Creditpool begründet keinen Zusatznutzen, wenn dieselbe
+aktuelle Route ohne Karte erreichbar ist und danach ebenso viele allgemeine
+Credits übrig bleiben. Die gemeinsame Nutzenprüfung vergleicht die gebundenen
+Runquotes; noch unbekanntes ICE behält seine ausdrücklich unsichere
+Finanzierungswirkung. Nachträglicher Eigenschaden ist ein Preis und niemals
+ein positiver Karteneffekt. Central, Remote und Coverage verwenden denselben
+Nachweis. Native Paarung-552-Zustände sichern drei kostenlose Gegenrouten
+sowie zwei erhaltene echte Finanzierungsrouten ab.
+
+Ein Kartenrun mit zusätzlichem gedrucktem ICE-Rezpreis besitzt nur dann diesen
+Zusatznutzen, wenn auf seinem tatsächlichen Zielpfad noch ungerezztes ICE liegt.
+Bereits gerezzte ICE werden während desselben Runs nicht erneut bezahlt.
+Central, Remote und Coverage verwenden dafür denselben planlokalen
+Funktionsnachweis; bei gleichzeitig zugelassenem gleichwertigem Basisrun
+rechtfertigt dieser wirkungslose Aufpreis keinen Kartenverbrauch oder
+zusätzlichen Run-Klick. Andere echte Bypass-, Mehrfachzugriffs- und
+Informationswirkungen behalten ihren eigenen Nachweis.
+
 Die gemeinsame Runquote trennt mögliche Trace-Effekte von der nach bezahlter
 Abwehr verbleibenden Gefahr. Garantierte Break-, Link- oder Cancel-Kosten
 bleiben im vollständigen Pfadbudget; die ursprünglichen Gefahrenrecords
@@ -53,6 +71,54 @@ unabgewendete Gefahr entwerten. Bei mehreren Traces bleiben der verbrauchte
 Pool und eine anschließend unbezahlbare Wirkung getrennt sichtbar. Native
 Paarung-519-Kontrollen sichern Finanzierung, fehlende Coverage, gebundene
 Planroute und tatsächlichen AI→Engine-Zugriff mit identischem Replayhash ab.
+
+Das Pfadbudget führt neben den während des Runs verfügbaren Credits die
+allgemein verfügbaren `traceEligibleCredits` als eigenes Teilkonto. Temporäre
+Run-Credits und Bad-Publicity-Run-Credits dürfen Breaker und zulässige
+Run-Kosten finanzieren, aber keine Trace-Gebote oder allgemeinen Link- und
+Cancel-Aktivierungskosten. Echte allgemeine Einnahmen erhöhen beide Konten;
+Run-Zahlungen verbrauchen zuerst das beschränkte Geld. Trace-Zahlungen
+belasten das allgemeine Teilkonto unmittelbar. Mehrere Trace-Subroutinen und
+aufeinanderfolgende ICE konsumieren denselben Ledger. Dedizierte, von der
+Engine projizierte Trace-Pools bleiben zusätzlich verwendbar.
+
+Eine abgeschlossene Pfadquote liefert diesen Ledger im
+`creditBudgetAfterPath`; Nachlauf- und Zugriffsbudgets übernehmen daraus das
+verbleibende allgemeine Geld. Sie rekonstruieren es nicht aus einer pauschalen
+Ausgabenreihenfolge. Ein fehlender Ledger für einen abgeschlossenen Pfad oder
+ein ungültiges explizites Teilkonto scheitert sichtbar. Ein einzelner
+numerischer Budgetwert bezeichnet ausdrücklich nur allgemeine Credits.
+Der gemeinsame Budgetproduzent projiziert erneuerbare öffentliche Rig-Pools
+nur bei ausdrücklich gewähltem `next_runner_turn`-Horizont aus der
+Engine-Auffüllquote. Der Standard und aktive Runs behalten aktuelle Mengen.
+Kapazität ersetzt einen erschöpften Betrag, ohne Zweckbindungen, Stealth-
+Quellkonten oder Hosting zu verlieren; sie wird nicht zu allgemeinem Geld.
+
+Im aktiven Run übernehmen Encounter-, Pump-, Restpfad-, Fortgebühren- und
+Informationsgrenzen-Quotes den aktuellen Engine-Pool
+`runnerRunTemporaryCredits.remaining` zusammen mit den Bad-Publicity-Credits.
+Der Runstart darf eine bezahlte Route nicht mit neun temporären Credits
+zulassen, die der spätere Break-Owner als null behandelt. Jede Zahlung wird
+aus den tatsächlichen aktuellen LegalActions und dem verbleibenden Pool
+erneut gebunden. Trace-Zahlungen und der für Trash reservierte allgemeine
+Creditbedarf behalten ihr eigenes Teilkonto; der vorhandene Run-Root und
+Executor bleiben erhalten. Paarung 552 R4/G2/D183 und G5/D87 sichern die
+vorher aufgegebenen bezahlbaren Breaks, G21/D454 den bereits korrekten
+Gegenfall.
+
+Bei der Übergabe eines bezahlten Encounters an die verbleibende Pfadquote
+enthält `credits` das Restgeld einschließlich Run-Pools und
+`traceEligibleCredits` ausschließlich das allgemeine Restgeld. Dies gilt auch
+für Pump-/Vollbreak-Alternativen, optionale Schadensvermeidung und
+ETR-Zahlungen. Der zweite Encounter darf Run-Geld nicht erneut als
+Trace-Budget erhalten.
+Die Umrechnung erfolgt ausschließlich über
+`runnerRunPathCreditBudgetAfterEncounter`: Sie entfernt das getrennte
+Encounter-Feld, addiert den verbleibenden Run-Pool zum Pfadgesamtbudget und
+erhält das allgemeine Teilkonto. Ein unkonvertiertes `runOnlyCredits`-Feld
+ist im Pfadvertrag typseitig ausgeschlossen und scheitert auch zur Laufzeit
+mit einer strukturierten Diagnose. Das gilt insbesondere nach einem
+tatsächlichen Break und nach der vollständigen aktuellen Zwangsbreak-Gruppe.
 
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
@@ -130,6 +196,16 @@ eigenen Action-Ausschlüssen ist. Ein durch Recurring Economy zurückgestellter
 Folgerun darf deshalb keinen ausführbaren Release-Head behaupten. Die
 Runtime übernimmt den konkreten Ausschluss vom Central-Owner, statt die
 Runsperre ungeprüft zu lösen oder die LegalAction ownerlos zu lassen.
+
+Der Defense-Owner veröffentlicht die LegalAction-IDs seines aktuell
+ausführbaren produktiven Heads aus derselben Phasen- und Quoteprüfung wie
+Discovery. Die generische Handentwicklung darf diese Aktionen nicht wegen
+eines zusätzlichen Draw-Effekts als global unproduktiv klassifizieren. Das
+gilt auch bei bereits vollem Handpuffer und einer von der Engine erlaubten
+Zahlung mit zweckgebundenen Credits. Spätere Defense-Phasen, ungültige
+Fundingbindungen und bloßes Aufgeben von Aktionen erhalten dadurch keine
+produktive Zuständigkeit; bestätigte schadensbehaftete Draws bleiben
+ausgeschlossen.
 
 Mögliche Phasen:
 
@@ -224,11 +300,28 @@ weitere Finanzierungslücke nachweisen. Die vorhandene Handreserveprüfung bleib
 zusätzlich verbindlich. Diese Ressourcenprüfung erzeugt keine LegalAction und
 keine zusätzliche Entscheidungsautorität.
 
+Ein vor der Finanzierung als nicht bestreitbar bewerteter Zugriff sperrt diese
+prospektive Prüfung nicht: `accessPayoffContestable: false` kann allein aus der
+aktuellen Liquiditätslücke folgen. Erst die vollständige Quote nach der realen
+Auszahlung entscheidet über den Zugang. Unbekanntes ICE, unvermeidbare sichtbare
+Gefahren, fehlender aktueller Payoff, fehlender Run-Klick und eine nicht gedeckte
+Gesamtroute bleiben Ausschlussgründe. Der Bank-Executor bindet weiterhin den
+aktuellen Remote-Parent und dessen konkreten Bedarf, statt den Lauf selbst zu
+autorisieren.
+
 Ein Zentralzugriff am Runner-Matchpoint darf ohne aktuelle Remote-Scorebedrohung
 das vorhandene Runbudget verbrauchen. Die allgemeine gewünschte Auffüllreserve
 ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
 Pfadkosten und die Reserve für unbekanntes ICE bleiben verbindlich. Eine
 vorhandene Remote-Bedrohung behält ihre Reserve.
+
+Die Reserveverbrauchs-Fakten vergleichen dafür den tatsächlichen marginalen
+liquiden Abfluss. Ein Zentralrun, dessen bekannter Pfad die aktuelle Bank
+unverändert lässt, verbrennt keine Remote-Reserve allein deshalb, weil die
+Startbank unter einem zukünftigen Auffüllziel liegt. Empfehlung und Score
+konsumieren dieselbe korrigierte Tatsache. Reale Bankausgaben, Coverage-,
+Schadens-, Handpuffer- und Prerun-Reserven bleiben verbindlich; unbekannte ICE
+erhalten dadurch keine Zugriffsgarantie.
 
 Ein bekannter Trace-Effekt, der den Zugriff verhindert, ist bei unbezahlbarer
 Basisstärke und ohne bezahlbare Break- oder Abbruchantwort kein bedingt
@@ -254,6 +347,29 @@ konvertierbar ist und bis zum nächsten gegnerischen Purgefenster an Wert
 verlieren kann, wird die Route als P3-Konvertierungsfenster bewertet. Daraus
 entsteht weder ein kartenbezogener Parallelplan noch eine neue Server- oder
 Runautorität.
+
+Die unmittelbar vervollständigbare letzte Zentralverbindung bleibt ebenfalls
+beim bestehenden Zentralziel. Eine öffentliche Engine-Quote bindet das auf
+installierter Quelle gedruckte Erfolgsrun-Counter, die aktuellen sichtbaren
+Servercounter und die kostenlose Konversion an die tatsächliche gegnerische
+Aktionsreduktion. Der Owner lässt dafür nur einen aktuell legalen Basisrun
+auf ungeschütztes ICE-freies Ziel ohne Creditkosten zu; Hand-, Schadens- und
+Reserveschutz gelten weiterhin. Er behandelt diesen konkreten Nutzen als
+P3-Konversionsfenster, auch wenn im Archives-Zugriff keine Agenda liegt.
+Die abschließende Actionklassifikation respektiert eine exakt zugelassene
+Central-Route mit diesem konkreten Nutzen; bekannt agenda-leere Archives
+sind dadurch kein pauschaler Widerspruch mehr. Gewöhnliche agenda-leere
+Archives ohne zugelassenen Zweck bleiben ausgeschlossen.
+Terminale P2-Contests behalten ihren Vorrang. Frühere Installation und
+mehrzügiger Aufbau mehrerer fehlender Verbindungen sind damit nicht belegt.
+Nach dem Run entscheidet derselbe Owner anhand neu angebotener LegalActions
+über die echte Konversion. Fehlt nach der letzten Aktion ein weiteres Runangebot,
+bleibt nur die residente Zentralidentität erhalten; ihre alten Run-, Kosten-
+und Risikofakten werden nicht als neue Route übernommen. Bei kaltem KI-Start
+bindet der öffentliche, der Quelle zugeordnete letzte Zentralcountereffekt
+die Identität. Ausführbarkeit und Konversionsaktion kommen ausschließlich
+aus dem aktuellen LegalAction-Angebot. Die Engine hält bezahlbare klicklose aktivierte
+Fähigkeiten auch nach der letzten Basisaktion offen.
 
 ### Vertikale Implementierung des Zentraldrucks
 
@@ -362,7 +478,11 @@ Der Plan muss unterscheiden:
 Ein unbekanntes avanciertes Root darf vor einem bereits bezahlbaren Basisrun
 eine exakt gebundene Einzelkarten-Aufdeckung erhalten. Der Remote-Owner prüft
 die aktuellen Aufdeckkosten, mindestens einen verbleibenden Run-Click sowie
-Pfadkosten und native Runreserve gemeinsam. Ein offener Fundingbedarf, ein
+Pfadkosten und native Runreserve gemeinsam. Ein allgemeiner Wunsch nach
+weiterer Liquidität sperrt diesen Schritt nicht, wenn der vorhandene
+Run-Konversionsnachweis die konkrete Route bereits freigibt und nach der
+Aufdeckung deren Geld- und Aktionsbedarf gedeckt bleibt. Ein offener
+Fundingbedarf, ein
 bekanntes oder bereits exakt aufgedecktes Root und der letzte Click erzeugen
 diese Vorbereitung nicht. Der konkrete Informationsschritt bleibt bei
 `runner.contest_remote`; weitere Sabotage- und Bypassrouten behalten ihre
@@ -375,13 +495,21 @@ noch eine neue Strategie. Fehlende oder widersprüchliche Bindung scheitert
 geschlossen. Nach der privaten Beobachtung wird der mögliche Run regulär
 neu bewertet, ohne die bisherige Run-Action über die Informationsgrenze zu
 fixieren. Paarung 493/R1/G7/D44 und native Engine-Gegenfälle sichern diesen
-Übergang; allgemeine ICE-Offenlegung aus SP-358 bleibt eine eigene Frage.
+Übergang; Paarung554/R4/G14/D49 ergänzt den nativen Fall unterhalb der
+allgemeinen Economy-Zielreserve. Allgemeine ICE-Offenlegung aus SP-358
+bleibt eine eigene Frage.
 
 Ein allgemeiner Matchpoint-Fokus wird vor den konkret bewerteten Remote-Routen
 zusammengeführt. Er darf deren aktuelle Finanzierungs- oder Coverage-Bindung,
 Zugriffsvertrag und Risikoquote nicht überschreiben. Ein bereits berechneter
 Bank-Support bleibt damit am selben Remote-Parent und Bedarf gebunden; eine
 fehlende bezahlbare Route wird durch den Bedrohungsfokus nicht ausführbar.
+
+Jede unmittelbar ausführbare Run-Variante prüft ihre eigene Vorabreserve.
+Die Bereitschaft einer Bypass-Variante desselben Servers zertifiziert weder
+den normalen Run noch dessen unbekannte Encounters. Ein blockierter
+Variantenvertrag erhält eine ausdrückliche Ablehnung; der ausführbare
+Geschwisterpfad bleibt beim selben Remote-Parent.
 
 Coverage-Unterstützung gehört zur exakt bewerteten Run-Action. Eine auf demselben
 Server bereits ausführbare Bypass-Variante übernimmt nicht den Breakerbedarf
@@ -391,7 +519,7 @@ sinnvolle Rig-Projekte. Paarung 524 G6 D158 prüft den gesamten Originalpräfix,
 den Remote-Executor und die echte Engine-Anwendung der bereiten Eventroute.
 
 Ersetzt eine aktuell ausführbare gezielte ICE-Entfernung die blockierte
-Runroute, entfernt ihr Remote-Signal den bisherigen `supportNeedId` bereits
+Runroute, entfernen Central- und Remote-Signal den bisherigen `supportNeedId` bereits
 bei der Routenbildung. Der ersetzte Coverage-Bedarf darf nicht zugleich eine
 Child-Bindung verlangen, während der Parent seinen eigenen Vorbereitungsschritt
 ausführt und keine offene Need mehr veröffentlicht. Die bestehende
@@ -399,6 +527,7 @@ Coverage-Reconciliation erhält unabhängig weiterhin sinnvolle Breakersuchen;
 vor dem Routenwechsel bleibt eine tatsächlich benötigte Child-Bindung erhalten.
 Die gespeicherten Entscheidungen D159/D160 aus Paarung 425 prüfen beide Seiten
 dieses Übergangs mit den historischen LegalActions und Runtime-Checkpoints.
+Paarung 557/R1/G18/D320 ergänzt den Zentralfall mit verdrängter Run-Finanzierung: Der aktuelle HQ-Vorbereitungsschritt behält keinen Need des noch nicht neu quotierten Folgeruns. Der Funding-Owner und seine fail-closed Parentprüfung bleiben unverändert.
 
 Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von
 unmittelbarer beziehungsweise Cleanup-Flatline. Ein bekannter Zugriff bleibt
@@ -547,9 +676,18 @@ Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
 
 Ein zusammengesetzter Karteneffekt mit positivem Draw-Anteil darf auch bei
 genau einer Karte den vorhandenen `draw_for_answer`-Bedarf bedienen. Der
-bekannte Stack muss weiterhin eine passende Antwort enthalten, die aktuelle
-native Aktion muss vorhanden sein und die bestehende Draw-Tax-Prüfung bleibt
-wirksam. Der Creditanteil erzeugt keinen zweiten Economy-Executor. Die
+bekannte Stack muss weiterhin eine passende Antwort enthalten. Bei fehlender
+Coverage zählt auch eine nach eigener Deckrekonstruktion verbliebene
+Heap-Suchrückholung, wenn ein passender Breaker sichtbar im Heap liegt und
+die kanonischen Effekte Programme oder beliebige Karten zurückholen.
+Eine reine Top-Heap-Rückholung genügt diesem Suchnachweis nicht. Dies erweitert
+nur die Ziehroute; direkte Stack-Suche und Suchwerkzeug-Aufbau benötigen
+weiterhin eine tatsächliche Stack-Antwort. Explizite Kostenverbesserungsfilter
+bleiben unverändert. Nach dem Ziehen wird die tatsächlich erhaltene Karte
+neu geprüft und gebunden; weder Stackreihenfolge noch sofortige Konversion
+sind zugesichert (SP-653, Paarung 555). Die aktuelle native Aktion muss
+vorhanden sein und die bestehende Draw-Tax-Prüfung bleibt wirksam.
+Der Creditanteil erzeugt keinen zweiten Economy-Executor. Die
 Originalentscheidung und eine echte Engine-Anwendung prüfen Plananschluss,
 Klick-, Credit- und Kartenänderung; bei leerem Stack entsteht kein Coverage-Draw.
 
@@ -647,6 +785,13 @@ muss dem ursprünglichen Zahlungs-Origin entsprechen. Ein zwischenzeitlicher
 Economy-Executor darf nicht die folgenden Quellen-, Ziel- oder Speicher-Choices
 besitzen. Das vorab gebundene Suchziel und seine akzeptablen Speicheropfer
 bleiben erhalten; abweichende Root- oder Suchversionsbindungen scheitern.
+Eine erst im privaten Stackfenster sichtbar gewordene Programm-Instanz wird
+vor ihrer Auswahlfortsetzung an denselben Coverage-Executor gebunden, auch
+bei einer Stack-oder-Heap-Suche mit temporärer Installation. Der Owner prüft
+das aktuelle Suchfenster, Quelle, Zieldefinition und ausreichende akzeptable
+MU-Opfer. Bereits bekannte Heap-Ziele behalten ihre Vorbindung. Die spätere
+Speicher-Choice vervollständigt nur dieses exakte Opfer; sie erfindet keine
+neue Auswahl (SP-165, Paarung 555).
 Während der Zahlungsunterstützung bleibt auch die ursprüngliche Parentkette
 der Coverage-Aktion erhalten. Eine allgemeine Neuentdeckung derselben
 Coverage-Instanz darf deren Remote-Parent nicht entfernen. Jede Kante wird
@@ -807,6 +952,19 @@ kostenneutrale Vorbereitung nicht als beliebige überlappende Installation
 verwerfen. Direkte terminale Runs auf vollständig bekannten, bereits
 bezahlbaren Pfaden behalten ihre bestehende Priorität.
 
+Eine heute zu teure bekannte ICE-Kette darf die Prüfung einer günstigeren
+Handinstallation nicht bereits durch ihren ungeförderten Payoff sperren.
+Der Coverage-Owner quotiert Installation, freie MU, verbleibende Aktionen,
+ganzen Runpfad und aktuelle Engine-Stealkosten gemeinsam neu. Nur eine
+finanzierte, positiv bewertete Konversion erhält die vorhandene
+`sameTurnRunConversion`-Bindung. Der Remote-Owner darf diese günstigere
+Vorbereitung gegenüber einer noch zu finanzierenden Eventroute desselben
+Servers wählen; eine bereits unmittelbar ausführbare Route behält Vorrang.
+Unbekanntes ICE zertifiziert diesen zusätzlichen Konversionsnachweis nicht.
+Die bestehende kostenneutrale Vorbereitung am bekannten Teil eines bedingten
+Pfads bleibt getrennt erhalten. Nach der Installation werden echte
+LegalActions, Zugriffskosten und Risiko erneut bewertet.
+
 Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren
 Einkommenszweck. Eine bereits exakt gebundene Coverage- oder MU-Vorbereitung
 derselben Installation bleibt beim Coverage-Owner ausführbar. Andere,
@@ -823,6 +981,14 @@ möglicher Draw dürfen das nicht. Die Projektion wird je `stateVersion` und
 side-sicherem Planning-Fingerprint neu aufgebaut, scheitert bei fehlenden
 MU-/Providerquotes fail-closed und besitzt weder Plan-, Action-, Executor-
 noch Discard-Autorität.
+
+Mehrere alternative Coverage-Needs dürfen dieselbe wiederverwendbare
+Breakerbelegung über einen expliziten `memoryReuseKey` teilen. Ihre einzelnen
+Parent-/Need-Bindungen bleiben erhalten; innerhalb eines simultanen Sets zählt
+diese Belegung nur einmal. Der Fact-Service verlangt dafür identische
+Capability- und Provider-/MU-Fakten und scheitert bei Widerspruch fail-closed.
+Ohne explizite Wiederverwendung bleiben Bedarfe unabhängig; unterschiedliche
+Programminstanzen und additive Supportpools werden nicht zusammengelegt.
 
 Ein installierter Speicherprovider ist bereits in der aktuellen Kapazität
 enthalten und kein zusätzlicher Ausbau. Bei exklusiver Deck-Hardware zählt
@@ -859,6 +1025,14 @@ zusammen finanzierbar sein; jeder Speicherprovider wird mit seiner eigenen
 aktuellen LegalAction geprüft. Handfülle allein erzeugt weiterhin keinen
 Speicherbedarf. Nach jeder echten Installation wird neu bewertet; es werden
 keine zukünftigen Action-IDs festgeschrieben.
+
+Die kumulative Installationsbewertung konsumiert einen solchen bevorzugten
+Supportbedarf für genau die gebundene Handkarteninstanz auch nach dem
+Speicherausbau. Ein zugelassener endlicher Entwicklungsmeilenstein bleibt
+mittlerer Bedarf; er darf nicht durch eine reine Dublettenprüfung wieder
+verloren gehen. Ungebundene weitere Kopien, fehlende kompatible Verbraucher,
+Reservegrenzen und akute Abschlussfenster erzeugen dadurch keinen neuen
+Investitionsbedarf. Die Auswahl bleibt beim bestehenden Recurring-Owner.
 
 Ein Basic Draw für eine im eigenen Deck side-sicher bekannte Antwort wird als
 exakte Route dieses Coverage-Plans gebunden. Eine volle Hand ist dabei keine
@@ -953,6 +1127,26 @@ Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Kartenname und Definition-ID dienen der Identität und Bindung, nicht als
+Funktionswörter für die Handentwicklung. Der Funktionstext konsumiert
+Regeltext, Kartentyp/Subtypen und die erzeugten semantischen Signale. So wird
+eine Expose-Karte mit „Search“ im Namen nicht zur Suchmaschine und eine
+einmalige Zahlungsquelle mit „Bank“ im Namen nicht zur manuellen Sparbank.
+
+Eine zugriffsgetriggerte globale Expose-Quelle erhält ihren aktuellen
+Informationsbedarf aus tatsächlich unbekannten installierten Corp-Karten,
+einschließlich Root-Karten. Sind alle relevanten Ziele bekannt, darf ein
+positiver Installationsfit diesen fehlenden Bedarf nicht wieder erzeugen.
+Die Investition garantiert keinen späteren HQ-Erfolg. Andere
+Informationsfähigkeiten behalten ihre eigenen Ziel- und Consumerverträge.
+
+Derez während der Encounter-Auflösung ist bekannte Zugriff-Unterstützung,
+kein `unknown` und kein Einkommen. Die Rollen- und persistente
+Funktionsprojektion erhalten diesen Fakt. Eine ungebundene generische
+Installation entsteht daraus nicht: Der ganze Break-/Derez-/gegnerische
+Re-Rez-/Folgerun-Investitionsconsumer aus SP-307 bleibt eine gesonderte offene
+Frage. Ein Run-Ereignis mit optionalem späterem Derez bleibt ein Run-Ereignis.
+
 Zielpräferenzen und Vermeidungshinweise eines Hint-Targetprofils ordnen
 Kandidaten innerhalb einer gebundenen Fähigkeit. Sie erzeugen keine
 Kartenrolle oder funktionale Coverage: Eine Präferenz für das Entfernen
@@ -980,6 +1174,14 @@ Eine vorgebundene Stack-Suche bewahrt Quelle, Ziel und Executor durch die
 separate Quellwahl, eventuelle Zahlung und anschließende Kartenwahl. Die
 Quellwahl setzt die Continuation-StateVersion fort; der Payloadresolver darf
 kein anderes Ziel erfinden (SP-504/SP-505).
+
+Eine vorgeschaltete Bankzahlung bewahrt die bereits ausgewählte Development-
+Programmsuche oder Heap-Suche mitsamt Quelle, Ziel, Originalaction und
+Auswahlversion. Die Neuentdeckung während der Zahlung darf diese Bindung nicht
+überschreiben. Nach dem exakten Engine-Zahlungsfenster wird derselbe residente
+Executor unter seinem ursprünglichen Root reaktiviert. Widersprüchliche oder
+fehlende Suchbindungen werden sichtbar abgewiesen; die Fortsetzung wählt kein
+neues Suchziel (SP-656, Paarung 555/R5/G11/D155–157).
 
 Vor der Quellenaction prüft derselbe Development-Owner jedes strategische
 Programmziel gegen genau diese aktuelle LegalAction. Bei direkter Installation
@@ -1033,6 +1235,22 @@ sie wählen keine neue Action. `development-funding.ts` benutzt die geteilten
 exakten Funding-Routen in `runtime/runner-exact-funding-routes.ts`. Die
 Runtime komponiert die Owner-Fakten und führt weiterhin die gemeinsame
 Zugplanung aus; sie enthält keine zweite Handentwicklungs-Discovery.
+
+Die persistente Installationsbewertung darf eine vorübergehend unterschrittene
+Creditreserve durch noch im selben Zug verfügbare reine Einkommensaktionen
+bewerten. Dafür sind eine aktuelle gewöhnliche LegalAction ohne Opfer-,
+Host- oder Choicebedarf, ausreichender bekannter MU, bessere unbedingte
+wiederholbare Liquidität laut kanonischem Engine-Fakt und genügend restliche
+Aktionen bis zur vollständigen Wunschreserve erforderlich. Tags, akute
+Schadens-/Deliverygefahr, verlorener Handpuffer, sichtbare Scorebedrohung und
+Matchpointnähe erlauben diese Freigabe nicht. Endliche Pools, Draw-Mischungen
+und bedingte Erträge begründen sie nicht. Der gequotete spätere Ertrag wird
+niemals dem aktuellen Geldbestand zugeschlagen; jede Folgeaction wird erneut
+bewertet. Bestehende Bank- und Entwicklungspläne konkurrieren weiter regulär.
+Paarung557/R1/G13/D105 belegt für vier echte Engineaktionen denselben gesamten
+Endzustand mit einer zusätzlichen Credit sowohl bei Newsgroup- als auch bei
+Short-Term-Contract-Installation zuerst. G23/D25 ergänzt die knappe Bank;
+Gegenmodelle sichern Klick-, MU-, Quellen-, Schadens- und Zeitschranken.
 
 Die Admission in `development-discovery.ts` schützt die vorhandene
 Mindesthandreserve auch vor einer optionalen Installation, deren echte
@@ -1480,13 +1698,38 @@ Die Schwelle „genug Geld“ ist kontextabhängig. Sie berücksichtigt:
 Mehr Geld wird bei vorhandener Reserve nicht automatisch wertlos. Es verliert
 aber gegenüber konkret ausführbaren strategischen Plänen an Priorität.
 
+Die exakte Funding-Suche vergleicht bei vollständig gleichen finanziellen
+Routen zusätzlich den vom Runner-Owner gequoteten, innerhalb des Handlimits
+behaltenen Handgewinn. `runtime/runner-funding-hand-quote.ts` verwendet dafür
+nur aktuelle LegalActions, garantierte unmittelbare allgemeine Credits und
+bekannte Hand-/Stackmengen ohne zusätzliche Risiken oder Ressourcentausch.
+Unvergleichbare Nebenfolgen bleiben ausdrücklich diagnostiziert. Die bestehende
+Routenauswahl konsumiert diese Quote vor ihrer Ergebnisbegrenzung; Cash-Ertrag,
+Klickbedarf, Zuverlässigkeit, Horizont und gleiche Vorabkosten behalten Vorrang.
+Basic Credit bleibt für zusammengesetzte Routen verfügbar. Ein echtes
+Draw-Einkommensereignis kann so denselben Parentbedarf finanzieren und dabei
+zusätzliche Handkarten erhalten; ein gesonderter Kartenbonus entsteht nicht.
+
+Ein günstiges positives Deckverhältnis bei Matchpunkt darf produktive
+Restliquidität nicht selbst ausschließen. `economy-signals.ts` bildet ihre
+endlichen P6-Routen zunächst unabhängig von der Wartebedingung. Erst wenn dabei
+keine solche Route besteht, darf der vorhandene Deckdruck-Wartepfad zusätzlich
+den vollständigen Ablehnungsnachweis aller übrigen freiwilligen Aktionen
+verlangen. Ein regelbewiesener terminaler Sieg bei bereits leerem Corp-R&D
+bleibt beim priorisierten Owner `runner.secure_terminal_win`.
+
 Run-Funding entsteht nur aus einer echten, berechneten Lücke des gebundenen
 Runplans. Der Bedarf ist das Maximum aus dem noch offenen Route-Gap und der
 Unterschreitung des nach dem Run zu schützenden Credit-Floors; ein künstliches
 Mindest-Gap ist unzulässig. Ist das Ziel bereits direkt positiv konvertierbar,
 entsteht kein Funding-Step. Existiert ein anderes direkt ausführbares,
-positiv bewertetes Runziel, gibt ein nicht dringlicher Funding-Step diesem
-Run den Vorrang. Nur eine belegte akute Score-Bedrohung darf diese
+positiv bewertetes Runziel mit materiellem Zugriffsnutzen, gibt ein nicht
+dringlicher Funding-Step diesem Run den Vorrang. Die gemeinsame Zulassung
+prüft für effektiven Archiveszugriff dieselben vorhandenen sichtbaren Agenda-
+und qualifizierten Hidden-Payoff-Fakten wie der Central-Owner. Ein materiell
+abgelehnter Archives-Run darf weder Basic- noch Bankfinanzierung sperren.
+Maßgeblich ist das effektive Zugriffsziel, damit ein physischer Archives-Run
+mit Zugriff auf HQ seine echte Konkurrenzwirkung behält. Nur eine belegte akute Score-Bedrohung darf diese
 Alternativsperre überstimmen.
 
 Eine direkt konvertierbare Geschwisterroute auf demselben Server blockiert
@@ -1546,8 +1789,10 @@ Die prospektive Einzelquote wird durch
 Bank-Owner konsumieren diese Quote; sie rufen weder eine zweite Runbewertung
 noch eine eigene Actionauswahl auf.
 
-Selbstschaden-Finanzierung für einen aktuellen Run berücksichtigt den
-Handverbrauch aller Finanzierungsaktionen und den bekannten Selbstschaden.
+Jede Finanzierung für einen aktuellen Run berücksichtigt den Handverbrauch
+aller Finanzierungsaktionen, ihren belegten Netto-Handgewinn und bekannten
+Selbstschaden. Auch eine reine Creditfolge darf den bestehenden Handpuffer
+nicht aus der gemeinsamen Aktionsrechnung ausklammern.
 Der Handpuffer stammt aus der Reservequote genau dieses Run-Parents. Fehlt
 die Quote, bleibt die Finanzierung unbewiesen. Sinkt der Puffer darunter,
 reserviert die Finanzierungssuche die mit der aktuellen Engine-Projektion
@@ -1567,6 +1812,16 @@ sie vor der Payloadauflösung an exakte Quelle, Option, StateVersion und
 LegalAction. Der Resolver validiert ausschließlich diese Bindung. Eine
 unbekannte oder widersprüchliche Ersatzwirkung scheitert sichtbar; sie wird
 nicht aus dem technischen Optionsnamen abgeleitet (SP-508).
+
+Dieselbe Grip-Bindung umfasst eine von der Engine angebotene reaktive
+Meat-Schadensersetzung mit Bad-Publicity-Konversion während des Corpzugs,
+auch wenn der aktuelle Schaden noch nicht tödlich wäre. Die side-sichere
+DTO-Projektion erhält deren semantischen Optionstyp; der Defense-Owner
+verifiziert die eigene Quellinstanz und die kanonischen Präventions- und
+Konversionshints, bevor er `replace_damage_from_grip` materialisiert.
+Der Resolver übernimmt nur diese aktuelle Bindung. Eine angebotene kostenlose
+vollständige Ersatzwirkung benötigt keinen geratenen Schadenswert aus einem
+technischen Choice-Namen. Unbekannte Ersatzwirkungen bleiben fail-closed.
 
 Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
 `defense-signals.ts` bündelt Schutzinstallationen, Handpuffer, Tag-Clear-
@@ -1716,6 +1971,18 @@ Die genaue Ordnung zwischen Tag-Clear, hostile-State-Entfernung,
 Handkarten-Draw und Präventionsinstallation bleibt modulinterne
 Verfeinerung.
 
+Aktuelle Tagentfernung behält den von der Engine gelieferten Modus und Betrag
+in beiden LegalAction-Projektionen des KI-DTO. Fehlende, nicht ganzzahlige oder
+widersprüchliche Mengen scheitern mit einer strukturierten Semantikdiagnose.
+Der Defense-Owner bewertet nur die tatsächlich vorhandenen entfernten Tags:
+Eine Zwei-Tag-Quote zählt bei einem vorhandenen Tag einmal, bei zwei Tags
+zweimal. Eine aktuell legale vollständige Bereinigung erfüllt auch den
+gesamten Bereinigungshorizont; die Finanzierungsprüfung nur wiederholter
+Basisaktionen darf sie nicht als unvollständig einstufen. Bestätigte
+schadensgefährliche Drawsteuer bleibt ein Ausschlussgrund. Historische
+Checkpoints mit damals verlorenen Mengen werden nicht still repariert;
+gezielt rekonstruierte Gegenmodelle bleiben als solche bezeichnet.
+
 Wenn eine notwendige Prävention oder Recovery nicht auf der Hand liegt, darf
 das Modul planintern Draw-, Search-, Funding- und Installations-Steps
 erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell
@@ -1845,6 +2112,14 @@ Runstart, Zahlungen, Breakerfolgen, Trace, Vacuum Link und die zugehörigen
 Choices an die ausgewählte Action und StateVersion. Der Owner konsumiert
 eng typisierte Dienste aus `run-window-services.ts`; er importiert keinen
 Runtime-Dispatcher und keine Planregistry zurück.
+
+Die Vacuum-Link-Fortsetzung erhält auch die bereits vom Runstart-Owner
+zertifizierten obligatorischen Runstart-Choices. Deren Ereignisse liegen nach
+der ausgewählten Runstartaktion und höchstens am gespeicherten
+`continuedThroughStateVersion`. Der fortgesetzte Run behält dieselbe Root,
+denselben Executor, Lease, Server und die lückenlose StateVersion-Kette.
+Eine beliebige spätere Choice, ein fremder Actor/Server oder ein fehlendes
+Runstart-Zertifikat wird dadurch nicht als Runfortsetzung zugelassen.
 
 Der Adapter `runner-access-trash-impact.ts` bindet die gemeinsame fachliche
 Trashbewertung unter `access/` an die angebotene Action und deren Kostenquote.
@@ -2360,6 +2635,29 @@ Fortsetzung weiterhin fail-closed.
 
 ## 9. `runner.expose_information`
 
+Ein Event-Run mit vorgezogener ICE-Aufdeckung erhält sein statisches Merkmal
+`eventApproachIceExposeBeforeRez` durch den produktiven LegalAction-DTO bis zur
+Runquote. Die generische CardSpec-Übersetzung erhält den Aufdeckeffekt; der
+gemeinsame Run-Nutzenvergleich verlangt dafür eine tatsächlich unbekannte,
+unrezzte ICE am Ziel. Bekannte ICE und leere Forts erzeugen keinen solchen
+Zusatznutzen. Die Remote-Vorbereitung klassifiziert ausschließlich Aktionen
+vor einem Run und weist die aktuelle Aufdeckfolge keinem konkurrierenden
+Vorbereitungsplan zu.
+
+Die Betrachtungsfortsetzung bindet dieselbe Engine-Quelle und ausgewählte
+Aufdeckerinnerung: entweder eine installierte Quelle oder die bekannte eigene
+Eventkarte im Heap bei aktivem Event-Aufdeckmerkmal. Run, Ziel, Parent,
+Ereignisfolge und StateVersion bleiben exakt gebunden. Diese Quellvarianten
+ändern die Zuständigkeit des bestehenden Informations- und Runfenster-Owners
+nicht.
+
+Der Hint-Compiler erhält außerdem den typisierten, periodischen
+Bad-Publicity-Wurf eines Virus als dynamische und zufallsabhängige Wirkung.
+Das ist kein garantierter Ertrag und kein Aufbau- oder Siegplan. Fehlt nach
+dieser Datenkorrektur weiterhin eine Entwicklungsrolle samt begrenztem
+Parentbedarf für den späteren HQ-Ertrag, bleibt diese Strategieanbindung
+ausdrücklich offen.
+
 **Klasse:** `bounded_sequence`
 **Rolle:** enger Informations-Child des aktiven Runplans
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
@@ -2658,6 +2956,47 @@ handeln. Zusätzliche Handkarten oberhalb des Bodens bleiben konvertierbar;
 es entsteht weder ein Kartenname-Verbot noch ein neuer Safety-Owner.
 
 ## 11. `runner.credit_bank` und `runner.recurring_economy`
+
+Für kanonisch einfache manuell geladene Gesamtauszahlungsbanken leitet
+`runner.credit_bank` den verbleibenden Aufbau aus dem aktuellen
+`desiredCreditReserve`-Ausgabenbudget ab. Eine feste Zahl an Ladungen oder
+ein zwölf Credits großer Pflichtvorrat existiert für diesen Pfad nicht.
+Die Rechnung in `plans/credit-bank-investment.ts` berücksichtigt eigene liquide
+Credits, den Vorrat aller eigenen Bankinstanzen und den verbleibenden
+Lade-/Auszahlungsaufwand gegenüber aktuell angebotenem Einkommen. Das Ziel
+wird nach jeder Aktion und jedem Zugwechsel neu geprüft; gespeichertes Geld
+bleibt bis zur tatsächlich legalen Auszahlung gebunden.
+
+Eine bloß unterschrittene Wunschreserve löst bei diesen Banken keine
+Auszahlung mehr aus. Konkrete, weiterhin exakt zugelassene Run- und
+Development-Finanzierung, ein unterschrittener Liquiditätsboden oder eine
+durch öffentliche Tags und Corpcredits gefährdete Ressourcenbank können
+auch kleine Auszahlungen rechtfertigen. Ein bereits ausreichender Vorrat
+wird gehalten und nicht weiter aufgeladen. Das Ausgabenbudget gilt auch vor
+einer weiteren Bankinstallation: Decken liquide
+Credits und bereits gespeichertes Bankguthaben das Ziel, wird eine zusätzliche
+manuelle Bank mit ausdrücklich begründetem Hold abgewiesen. Ein realer
+Restbedarf kann eine weitere Instanz weiterhin zulassen; es gibt kein
+pauschales Kopienlimit. Native und budgetabhängige Gegenproben liegen in
+`meta-541-bank-budget.test.ts` und `runner-credit-bank-source-cadence.test.ts`.
+Die Regelautorität über das
+gemeinsame Einmal-pro-Zug-Limit liegt weiterhin bei den Engine-LegalActions;
+der bestehende quellgebundene Cadence-Nachweis bleibt erhalten. Automatische
+Lifecycle-Banken werden getrennt bewertet: Der Bank-Owner vergleicht die durch genau
+eine aktuelle Ladung zusätzlich erreichbaren Auszahlungen mit dem aktuell
+angebotenen Einkommen. Bereits wartende Credits zählen nicht noch einmal als
+Ladeertrag. Der bedingte Horizont beträgt höchstens drei kommende eigene Züge,
+verkürzt durch den öffentlichen Corp-Deckrest; das aktuelle Ausgabenbudget
+begrenzt den nutzbaren Betrag zusätzlich. Höhe und Anzahl der möglichen
+Ladungen folgen aus Ladebetrag, Auszahlungsrate, Warteschlange und Bedarf,
+nicht aus einem festen Guthaben- oder Ladungsziel. Eine fehlende exakte
+Quell-/Fähigkeitsbindung oder ungültige Projektion erhält eine begründete
+Ablehnung. Künftige Auszahlungen sind keine heutigen Zahlungscredits.
+Native Queue-, Leerbank- und Marginalwertgegenfälle liegen in
+`meta553-streetware-payout-horizon.native.test.ts` und
+`credit-bank-investment.test.ts`. Native Routen,
+Quellbindung, mehrzügiger Aufbau, größere bedingte Budgets und rechtzeitiger
+Cashout sind in `runner-credit-bank-source-cadence.test.ts` geprüft.
 
 **Status:** separate registrierte Core-Owner innerhalb der Economy-Domäne.
 `credit_bank` besitzt Laden und Auszahlung einer konkreten Bank, einschließlich

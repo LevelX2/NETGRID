@@ -10,11 +10,12 @@ export function runnerCandidateIsCardAbility(
   );
 }
 
-export function runnerCandidateIsExposeAbility(
-  _input: AiDecisionInput,
+export function runnerCandidateIsRemoteExposePreparation(
+  input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
   return (
+    input.playerView.run === undefined &&
     runnerCandidateIsCardAbility(candidate) &&
     (candidate.actionTacticSignals.includes("effect:expose_info") ||
       candidate.functionalEffects?.some(

@@ -9,6 +9,7 @@ import {
 import { runnerActionDispositions } from "../../runtime/plan-first-live-runtime";
 import {
   createRunnerDefenseModule,
+  runnerDefenseCurrentHeadActionIds,
   runnerDefenseDeferredHandBufferDispositions,
 } from "./defense-plan-module";
 import type { RunnerDefenseSignals } from "./defense-types";
@@ -81,8 +82,42 @@ function fixture(tags = 1) {
 }
 
 describe("Defense hand-buffer phase ownership", () => {
-  it("keeps a canonical tag-clearing draw executable in the current Defense phase", () => {
+  it("publishes only the current productive Defense head for generic ownership", () => {
     const f = fixture();
+    expect(
+      runnerDefenseCurrentHeadActionIds({
+        input: f.input,
+        actionCandidates: f.candidates,
+        signals: f.defense,
+      }),
+    ).toEqual([f.clear.actionId]);
+  });
+
+  it("releases tag-clear ownership when revalidation opens the buffer phase", () => {
+    const f = fixture(0);
+    expect(
+      runnerDefenseCurrentHeadActionIds({
+        input: f.input,
+        actionCandidates: f.candidates,
+        signals: f.defense,
+      }),
+    ).toEqual([f.draw.actionId]);
+  });
+
+  it("does not publish a confirmed damage-taxed action as a productive head", () => {
+    const f = fixture();
+    f.defense.confirmedDamageTaxedDrawActionIds = [f.clear.actionId];
+    expect(
+      runnerDefenseCurrentHeadActionIds({
+        input: f.input,
+        actionCandidates: f.candidates,
+        signals: f.defense,
+      }),
+    ).not.toContain(f.clear.actionId);
+  });
+
+  it.each([1, 2, 5])("values the canonical current tag reduction at %i active tags", (tags) => {
+    const f = fixture(tags);
     const meatUpgrade = legalAction(
       "runner.play_event.meat-upgrade",
       "runner",
@@ -94,6 +129,8 @@ describe("Defense hand-buffer phase ownership", () => {
         payload: {
           cardId: "meat-upgrade",
           cardImplementationEffectKind: "remove_tags",
+          cardImplementationTagMode: "up_to_amount",
+          cardImplementationTagAmount: 2,
           drawCardsAmount: 3,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
@@ -135,7 +172,9 @@ describe("Defense hand-buffer phase ownership", () => {
       [],
       () => undefined,
     );
-    expect(dispositions.map((entry) => entry.actionId)).toContain(f.draw.actionId);
+    expect(dispositions.map((entry) => entry.actionId)).toContain(
+      f.draw.actionId,
+    );
     expect(dispositions.map((entry) => entry.actionId)).not.toContain(
       meatUpgrade.actionId,
     );
@@ -149,13 +188,13 @@ describe("Defense hand-buffer phase ownership", () => {
     };
     const proposal = module.discover(context)[0]!;
     expect(proposal.phase).toBe("clear_tags");
-    expect(
-      module.materialize(
-        { ...proposal, instanceId: "defense-current-phase" } as never,
-        {} as never,
-        context,
-      ).candidates.map((entry) => entry.candidate.actionId),
-    ).toContain(meatUpgrade.actionId);
+    const materialized = module.materialize(
+      { ...proposal, instanceId: "defense-current-phase" } as never,
+      {} as never,
+      context,
+    );
+    expect(materialized.candidates.find(entry => entry.candidate.actionId === meatUpgrade.actionId)?.stepValue).toBe(80 * Math.min(tags, 2));
+    expect(materialized.candidates.find(entry => entry.candidate.actionId === f.clear.actionId)?.stepValue).toBe(80);
   });
 
   it("classifies the pending basic draw under Defense while the same owner clears a tag", () => {

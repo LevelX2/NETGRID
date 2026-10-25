@@ -90,6 +90,7 @@ export type TurnRemainderSearchPruneReason =
   | "candidate_cost_not_exact"
   | "insufficient_action_capacity"
   | "insufficient_credits"
+  | "insufficient_agenda_points"
   | "capacity_projection_not_guaranteed"
   | "priority_obligation_violated"
   | "conflicting_value_claim"
@@ -442,6 +443,10 @@ function applyOffer(params: {
   if (!candidateCostsAreExact(candidate)) {
     return { ok: false, reasonCode: "candidate_cost_not_exact" };
   }
+  const agendaPointCost = candidate.costProfile.agendaPointCost ?? 0;
+  if (frame.ownAgendaPoints.minimum < agendaPointCost) {
+    return { ok: false, reasonCode: "insufficient_agenda_points" };
+  }
   const sourceId = candidate.sourceCardInstanceId;
   if (
     sourceId &&
@@ -508,6 +513,7 @@ function applyOffer(params: {
       ? { restrictedActionCapacityConsumes: capacity.restrictedConsumes }
       : {}),
     creditDelta: exactRange(creditDelta),
+    agendaPointDelta: exactRange(-agendaPointCost),
     handCountDelta: exactRange(handDelta),
     knownZoneMoves: consumesKnownHandCard
       ? [
@@ -1214,7 +1220,13 @@ function candidateConsumesSourceCard(
 function candidateCostsAreExact(candidate: ActionSemanticCandidate): boolean {
   return (
     candidate.costProfile.costKnownStatus === "known" &&
-    candidate.costProfile.additionalCosts.length === 0 &&
+    candidate.costProfile.additionalCosts.every(
+      (cost) => cost === "agendaPointCost",
+    ) &&
+    (candidate.costProfile.additionalCosts.includes("agendaPointCost")
+      ? Number.isSafeInteger(candidate.costProfile.agendaPointCost) &&
+        (candidate.costProfile.agendaPointCost as number) >= 0
+      : candidate.costProfile.agendaPointCost === undefined) &&
     Number.isSafeInteger(candidate.costProfile.clickCost ?? 0) &&
     Number.isSafeInteger(candidate.costProfile.creditCost ?? 0) &&
     (candidate.costProfile.clickCost ?? 0) >= 0 &&

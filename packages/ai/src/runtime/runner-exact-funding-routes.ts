@@ -19,6 +19,10 @@ import { runnerRunTargetIsDirectlyConvertible } from "./runner-run-funding-admis
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import { runnerDebtFinancingProfile } from "./runner-canonical-card-facts";
 import {
+  compareRunnerFundingHandQuotes,
+  runnerFundingHandQuote,
+} from "./runner-funding-hand-quote";
+import {
   runnerStrategicExchangeKinds,
   runnerStrategicExchangeRequiresBoundParent,
 } from "./runner-strategic-exchange";
@@ -95,9 +99,15 @@ export function runnerExactFundingRouteContract(
     maxRoutes: 8,
     acceptRoute: (route) =>
       runnerFundingRouteConsumerBufferFits(input, candidates, request, route),
+    compareEquivalentRoutes: (left, right) =>
+      compareRunnerFundingHandQuotes(
+        runnerFundingHandQuote(input, candidates, left),
+        runnerFundingHandQuote(input, candidates, right),
+      ),
   });
   const bestRoute = result.bestRoute;
-  const bufferRepair = runnerSelfDamageFundingBufferRepair(
+  const handQuote = runnerFundingHandQuote(input, candidates, bestRoute);
+  const bufferRepair = runnerFundingBufferRepair(
     input,
     candidates,
     request,
@@ -143,6 +153,9 @@ export function runnerExactFundingRouteContract(
           ...result.evidence,
           ...bestRoute.evidence,
           ...funding.evidence,
+          handQuote.status === "known"
+            ? `runner_funding_known_retained_hand_gain:${handQuote.retainedGain}`
+            : `runner_funding_hand_collateral_not_comparable:${handQuote.reason}`,
           ...(request.requireCompleteKnownPath
             ? ["runner_funding_complete_known_path_required"]
             : []),
@@ -248,14 +261,17 @@ function runnerFundingRouteConsumerBufferFits(
     if (!Number.isSafeInteger(floor) || floor < 0) return false;
     let hand = input.playerView.own.gripOrHq.length;
     for (const step of route.steps) {
-      const candidate = candidates.find((entry) => entry.actionId === step.actionId);
+      const candidate = candidates.find(
+        (entry) => entry.actionId === step.actionId,
+      );
       const delta = candidate?.economyProjection?.netHandDelta;
       if (
         step.kind !== "legal_action" ||
         step.ownTurnOffset !== 0 ||
         delta === undefined ||
         !Number.isSafeInteger(delta)
-      ) return false;
+      )
+        return false;
       hand += delta - runnerCandidateSelfDamageAmount(candidate!);
       if (hand < floor) return false;
     }
@@ -274,15 +290,18 @@ function runnerFundingRouteConsumerBufferFits(
       route.reliability !== "guaranteed" ||
       route.horizon !== "same_turn" ||
       input.playerView.own.clicks - route.totalClickCost < 1 ||
-      route.steps.some((step) =>
-        step.kind !== "legal_action" ||
-        step.ownTurnOffset !== 0 ||
-        !input.legalActions.some((action) =>
-          action.actionId === step.actionId &&
-          action.expiresAtStateVersion === input.playerView.stateVersion,
-        ),
+      route.steps.some(
+        (step) =>
+          step.kind !== "legal_action" ||
+          step.ownTurnOffset !== 0 ||
+          !input.legalActions.some(
+            (action) =>
+              action.actionId === step.actionId &&
+              action.expiresAtStateVersion === input.playerView.stateVersion,
+          ),
       )
-    ) return false;
+    )
+      return false;
     // Only quote the resources of this admitted route. A blocked path's
     // first unpaid subroutine is a lower bound, never its complete price.
     const fundedInput: AiDecisionInput = {
@@ -306,25 +325,11 @@ function runnerFundingRouteConsumerBufferFits(
       fundedTarget.routeQuote?.reachability !== "guaranteed_access" ||
       fundedTarget.routeQuote.unknownIceCount !== 0 ||
       fundedTarget.routeQuote.fundingGap !== 0
-    ) return false;
-  }
-  if (
-    request.purpose !== "current_run" ||
-    !route.steps.some((step) =>
-      candidates.some(
-        (candidate) =>
-          candidate.actionId === step.actionId &&
-          runnerStrategicExchangeKinds(candidate).includes("self_damage"),
-      ),
     )
-  )
-    return true;
-  const repair = runnerSelfDamageFundingBufferRepair(
-    input,
-    candidates,
-    request,
-    route,
-  );
+      return false;
+  }
+  if (request.purpose !== "current_run") return true;
+  const repair = runnerFundingBufferRepair(input, candidates, request, route);
   return (
     repair !== undefined &&
     route.totalClickCost + repair.clickCost <= request.remainingClicks &&
@@ -334,7 +339,7 @@ function runnerFundingRouteConsumerBufferFits(
 
 /** Resource feasibility only. The existing hand owner performs later draws;
  * random damage and unknown drawn card identities are never simulated here. */
-function runnerSelfDamageFundingBufferRepair(
+function runnerFundingBufferRepair(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   request: RunnerExactFundingRouteRequest,
@@ -345,12 +350,7 @@ function runnerSelfDamageFundingBufferRepair(
     .map((step) =>
       candidates.find((candidate) => candidate.actionId === step.actionId),
     );
-  const selfDamageFunding = fundingActions.some(
-    (candidate) =>
-      candidate &&
-      runnerStrategicExchangeKinds(candidate).includes("self_damage"),
-  );
-  if (request.purpose !== "current_run" || !selfDamageFunding)
+  if (request.purpose !== "current_run")
     return { clickCost: 0, creditCost: 0, evidence: [] };
 
   const target = request.paymentWindowTarget;
@@ -435,7 +435,7 @@ function runnerSelfDamageFundingBufferRepair(
     clickCost,
     creditCost,
     evidence: [
-      `runner_funding_consumer_hand_after_self_damage:${handAfter}|required:${requiredHandBuffer}`,
+      `runner_funding_consumer_hand_after_funding:${handAfter}|required:${requiredHandBuffer}`,
       `runner_funding_consumer_buffer_repair_reserved:${draws}|clicks:${clickCost}|credits:${creditCost}|action:${draw.actionId}`,
     ],
   };

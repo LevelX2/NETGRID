@@ -45,6 +45,23 @@ wegen älterer Signalnamen als fehlende Unterstützung erscheinen. Diese
 statische Kapazität ist keine aktuelle Aktionszulassung: Verbraucher,
 Counterquelle, Kosten und Frist prüft weiterhin der konkrete Score-Owner.
 
+Die Schutzbewertung für den nächsten Runnerzug berücksichtigt neben liquiden
+Credits die öffentlich gespeicherten, dann auszahlbaren Credits. Die Engine
+ermittelt aus kanonischen Fähigkeiten den maximalen garantierten Ertrag in
+den vor dem Run verfügbaren Aktionen: Eine Auszahlung ersetzt einen
+Basiseinkommensklick, jede Quelle wird höchstens einmal genutzt. Verdeckte
+Handkarten, zukünftige Ladungen und während eines laufenden Runs nicht
+ausführbare Auszahlungen gehören nicht zu diesem Budget. Schutzquote,
+finanzierte Installationsroute, Zentralreserve und Reifezertifikat verwenden
+denselben Zukunftshorizont; ein laufender Run behält sein aktuelles Budget.
+
+HQ-Agendaexposition macht die Installation dringlich, reserviert jedoch nicht
+alle späteren Advances als harte Aktionen dieses Zuges. Nur die tatsächliche
+Abschlussfrist `last_draw_window` oder `current_turn_only` bindet diese gesamte
+Aktionsfolge sofort. Der konkrete Schutzparent darf deshalb erst wirksame ICE
+installieren, während Credits für den mehrzügigen Score weiter reserviert
+bleiben. Echte Abschlussfristen werden dadurch nicht verschoben.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence
@@ -63,10 +80,36 @@ Aktivierung verbraucht erneut ihre vollständigen Kosten. Bei unrezztem
 installiertem Support gilt dieselbe enge mechanische Prüfung aus der
 kanonischen Engine-Projektion; Fähigkeiten mit Limits sind ausgeschlossen.
 Operationen und nicht ausdrücklich wiederholbare Fähigkeiten bleiben
-einmalige Ressourcen. Ziel, Root, Executor, StateVersion und jede folgende
+einmalige Ressourcen. Der Pool bereits verfügbarer Quellen erfasst auch die
+Quellinstanz der nativen LegalAction. Dieselbe Handoperation darf nicht
+zusätzlich als prospektive Operation erzeugt werden, wenn ihr natives
+Capability kein separates `sourceCardId` trägt. Echte weitere Kartenkopien
+behalten ihre eigenen Quellen; ausdrücklich wiederholbare installierte
+Aktivierungen behalten ihre Wiederholbarkeit. Paarung 544, Runde 4, G11 D60
+belegt die doppelt geplante Systematic-Layoffs-Kopie und die dadurch unmögliche
+Retreat-Konversion; native und echte Engine-Gegenfälle sichern Quellenzahl,
+knappe Finanzierung und den bereits installierten Scoreverbraucher.
+Ziel, Root, Executor, StateVersion und jede folgende
 Choice werden vor jedem nativen Schritt erneut gebunden. Der Nachweis aus
 Paarung 492, Diagnose-Runde 2, G26 D299 umfasst zwei Aktivierungen auf derselben
 Agenda; ein Root-Austausch darf die dafür nötige Supportkarte nicht zerstören.
+
+Wenn dieselbe aktuelle Beschleunigungsaktion mehrere gequotete Agenden
+bedienen kann, veröffentlicht die Score-Discovery alle an diese Aktion
+gebundenen Agenda-/Server-Parents. Sie wählt nicht vor der fachlichen
+Zusammenführung nur einen Zielparent und verliert dadurch die übrigen
+Konversionsanfänge. Die bestehende Zusammenführung und Ressourcenprüfung
+vergleichen anschließend die vollständigen Parents; jede Ausführung bindet
+weiter genau eine aktuelle LegalAction und ihre Choices. Aktionsklassifikation
+und Materialisierung erhalten damit dieselben gequoteten Konversionsfakten.
+
+Nach der Asseterhaltungsprüfung verdrängt eine vollständig gequotete,
+ausführbare Konversion einer HQ-Agenda in einem vorbereiteten Remote auch
+die entsprechende Konversionsvariante in einem neu zu eröffnenden Remote.
+Diese bereits für direkte Installationen geltende Zielbindung wird damit
+auch vor einem gemeinsamen Beschleunigungsschritt erhalten. Andere
+Zielagenden bleiben verfügbar; ein zur Asseterhaltung benötigter neuer
+Remote wird nicht verdrängt.
 
 Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
 Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
@@ -83,6 +126,43 @@ dadurch keine neue Zulassung. Die verdrängte Vorbereitung veröffentlicht
 `corp_shorter_terminal_score_route_dominates` und beansprucht keine weitere
 Score-Finanzierung. Plan-, Step-, Route- und Zugbindungsprüfung bleiben beim
 bestehenden Score-Owner und Scheduler.
+
+Die gleichzügige Scorekonversion verwendet für sichtbare Bonuspunktagendas
+unter dem bestehenden `corp.score_agenda`-Parent eine reine Enginequote des
+Punktwerts nach den geplanten Advances. Engineeffekt und Quote teilen die
+Bonusberechnung; effektive sichtbare Schwierigkeit und Counterziel bleiben
+explizit gebunden. Der kleinste siegbringende Counterstand darf auch mehrere
+Bonusschwellen umfassen. Quote und Pfad sind keine neue Legalitätsautorität:
+Klicks, Credits, Quelle und aktueller erster Advance müssen vollständig
+finanziert und an die echte LegalAction gebunden sein.
+
+Eine solche belegte terminale Folge darf beim Zusammenführen desselben
+Agendaprojekts nicht durch dessen nichtterminalen Basisscore verdrängt werden.
+Der Score-Owner klassifiziert den verdrängten Sofortscore ausdrücklich.
+Ein bereits siegbringender Sofortscore behält den kürzeren Abschluss; ein
+nichtterminaler Zusatzpunkt rechtfertigt im selben Projekt keine zusätzlichen
+Kosten vor dem direkten Score. Unterschiedliche Agendas behalten außerhalb
+terminaler Siege ihren Punktvergleich. Fehlende Definitionen oder ungültige
+Enginequotes brechen mit strukturierter Ursache ab. Paarung 556 R1 G31 D430
+belegt bei fünf Punkten Babylon mit drei Countern und zwei verfügbaren
+Klicks/Credits: zwei Advances und Score ergeben sieben Punkte; der frühere
+Sofortscore ergab nur sechs.
+
+Innerhalb bereits zugelassener terminaler Scoreprojekte bewertet der
+Score-Owner den Sieg mit einheitlichem Punktnutzen. Überzählige Agendapunkte
+und Strategieunterstützung für Züge nach dem Spielende erhöhen diesen Wert
+nicht. Verbleibende Advance-Aktionen, Credits, gebundener Fortschritt und die
+aktuelle Expositionsbewertung bleiben wirksam. Die Regel ändert weder
+Zulassung, Prioritätsklasse noch Schutz- oder Finanzierungsnachweise. Vor
+dem Matchpoint behalten Agendapunkte und spätere Strategieunterstützung
+ihren Wert. Der native Nachweis aus Paarung 553, Diagnose-Runde 3, G22 D424
+vergleicht bei sechs Punkten dieselbe Remote mit einer Drei- und einer
+Fünf-Advance-Siegesagenda; die langsamere Route darf keinen Zusatznutzen aus
+ihren überzähligen Punkten ziehen. Derselbe Score-Owner veröffentlicht diesen
+Punktnutzen und die verbleibende Aktions-/Creditbelastung auch in seiner
+Agenda-Zuglinie; die autoritative Restzugsuche darf die Kosten nicht wieder
+verlieren. Eine gespeicherte bereits gewählte Parentbindung wird dadurch
+nicht nachträglich als sicher dominiert behauptet.
 
 Eine Matchpointagenda darf auch auf dem letzten Klick installiert werden,
 wenn die aktuelle, exakt an Agenda und Zielserver gebundene Engine-Quote den
@@ -146,6 +226,25 @@ Ein installierter Counterbank-Scoreverbraucher steht im Root eines anderen
 Remote-Servers. Sichtbare Agenden in Zentralzonen, insbesondere in Archives,
 sind keine installierten Transfer- oder Scoreziele. Die Root-Darstellung einer
 Zentralzone ersetzt diesen Nachweis nicht (Paarung 482, Runde 1, G20 D378).
+
+Der Aufbau einer Counterbank bewahrt bereits finanzierte zentrale
+Verteidigungsreserven. Der Score-Owner vergleicht dafür die exakten aktuellen
+Advance-Kosten mit den vorhandenen Defense-Facts für Schutz und terminale
+Tax-/Schadenswirkung. Ein zukünftiges Investment darf einen gerade durch
+Counterauszahlung erreichten Rezbedarf nicht sofort wieder öffnen. Der
+Defense-Owner darf die aktuelle Auszahlung weiterhin anfordern; vollständige
+aktuelle Agenda-Konversionen behalten ihre eigene Zulassung und Priorität.
+Damit entsteht weder eine feste Counterzahl noch ein eigener Chooser
+(Regression: Paarung 547, Runde 1, G5 D315–320; positive Aufbau- und
+Konversionsköpfe G1 D265/D275).
+
+Jede gewählte Advancement-Verteilung trägt vor der Operation ihre vollständige
+Ziel-/Mengenbindung aus dem gewählten Scorepfad. Das gilt auch für zwei Counter
+auf nur eine Agenda. Die folgende Choice gleicht ausschließlich diese Verteilung
+mit den aktuellen Optionen ab; sie darf keinen Counter auf eine andere fast
+fertige Agenda umleiten. Fehlt die Verteilung im Parent oder in seiner
+Continuation, scheitert der Pfad mit `window_origin_missing` (Paarung 547,
+Runde 1, G12 D175/D176).
 
 Für eine installierte Agenda unterscheidet der Scoreowner die vollständigen
 Kosten der aktuellen Konversion von der bis zum nächsten Corp-Zug nötigen
@@ -254,6 +353,15 @@ exakte Planinstanz, Agenda-Instanz, Ziel, aktuell revalidierte
 Prioritätsklasse P1 bis P4 und Evidence. Ein von ihr angeforderter Defense-
 oder Economy-Support bindet seinerseits exakt diese Score-Planinstanz als
 `parentInstanceId`.
+
+Die exklusive Restzug-Obligation `urgent-exact-score-owner` setzt zusätzlich
+einen aktuell pflichtzahlungssicheren Score-Head voraus. Derselbe vorab
+geprüfte Headbestand bestimmt sowohl das dringende Prioritätsband als auch
+den exklusiven Owner-Anspruch. Ein Advance, der die verpflichtende
+Endzahlungsreserve verbrauchen würde, darf nicht den noch ausführbaren
+Economy-Support seines Score-Parents verdrängen. Finanzierte exakte
+Score-Heads behalten ihren Vorrang. Paarung 536, Originalseed-Nachspiel
+G27/D424, belegt diese Gegenbedingung zu SP-003.
 
 Die Zugplanung materialisiert bei installierten Agenden den aktuell legalen,
 exakt gebundenen Advance- oder Score-Step als `score_continuation`. Eine
@@ -539,6 +647,19 @@ zugelassen. Der Economy-Owner liefert nur seine bestehenden Auszahlungsfakten;
 keine Lockerung regulärer Schutzanforderungen über ein Runnerfenster und keine
 vermutete Auszahlung ungeresster oder nicht ausführbarer Assets.
 
+Bei einer übervollen reinen Agendahand umfasst die bestehende riskante
+Entlastungsroute auch eine aktuelle legale Asset-zu-Agenda-Ersetzung in einem
+vorhandenen Fort, wenn die einzige dortige Assetquelle eine Engine-gequotete
+Counterbank mit exakt null Countern ist. Die normale Scorehorizont- und
+Finanzierungsprüfung bleibt erhalten; der Defense-Owner liefert weiterhin die
+aktuelle Zugriffsquote für den Variantenvergleich. Eine gefüllte Bank, eine
+fehlende oder veraltete Quellen-/Serverquote und eine gewöhnliche Hand öffnen
+diese Ausnahme nicht. Andere Assets erhalten keine pauschale Ersetzungsfreigabe.
+Die nativen Zustände aus Paarung 554, Runde 1, G10 D301, G11 D230 und G15 D180
+belegen, dass derselbe Agenda-Score sonst im nackten neuen Remote zugelassen,
+im vorhandenen Fort jedoch vor dem Risiko-/Kostenvergleich ausgeschlossen wurde.
+Die Ausnahme verspricht keinen sicheren Score über den Runnerzug.
+
 ### Vertikale Implementierung der Agendaentscheidung
 
 `packages/ai/src/corp/score/` bündelt den Owner:
@@ -603,10 +724,47 @@ dieselben vorbereiteten Breaker. Kombinierte ETR-Subroutinen müssen vollständi
 die Breaker-Kostenrechnung weitergereicht werden. Fehlende Host-Fakten bleiben
 explizit unbekannt (Regressionen: Match 41df D89, Afreet/Cyfermaster/Puzzle).
 
+Die öffentliche Vorbereitung umfasst außerdem einen bekannten Breaker im Heap,
+wenn eine bereits aktive, unbegrenzte Top-Heap-Rückholung seine Rückholung und
+die normale Installation vor dem reservierten Run ermöglicht. Jede darüberliegende
+Heap-Karte verbraucht die tatsächlichen Rückholkosten und Klicks. Installation
+und Rückholung bezahlen ausschließlich allgemeine Credits; nur übrig bleibende
+Vorbereitungsklicks erzeugen Einkommen. Freier Speicher oder eine Engine-geprüfte
+Host-Variante muss vorliegen. Die kanonische Host-Projektion grenzt öffentlich
+erkennbare Nicht-Host-Kartentypen vor der Identitätsprüfung ab; eine verdeckte
+Ressource macht das übrige öffentliche Rig nicht unbekannt. Unbekannte mögliche
+Programm-/Hardware-Hosts bleiben unbekannt (SP-655). Der neu installierte Breaker erhält keinen aus dem
+Heap übernommenen oder am verpassten Zugbeginn aufgefüllten Kreditpool.
+
+`runtime/corp-public-heap-breaker-preparation.ts` liefert diese öffentlichen Fakten
+für die bestehende Defense-Reifeprüfung, Scoreline-Schutzprojektion und die
+gemeinsame finanzierte Schutzbewertung einschließlich Installationsprojektionen.
+Jede unabhängige Recovery-Route übergibt ihre absoluten Restcredits; das
+Basiseinkommen wird dafür nicht erneut addiert. Der ausdrücklich typisierte
+Horizont `next_runner_turn` füllt passende vorhandene Pools einmal bis zur
+Kapazität auf. Live- und Folgeruns derselben Runner-Phase behalten `current`. Die
+KI-Input-Normalisierung bewahrt dazu die von der Engine veröffentlichten
+Runner-Heap-Karten ausschließlich im Corp-Input; gegnerische Corp-Ablagen
+werden dadurch nicht in den Runner-Input aufgenommen. Der Dienst erzeugt
+keine zukünftigen LegalActions und entscheidet keinen Runner-Zug. Verdeckte
+Handkarten und spätere Ziehergebnisse bleiben unbekannt. Unvollständige
+öffentliche Heap-, Speicher- oder Klickfakten scheitern sichtbar. Frühere Zugriffe
+sperren weiterhin keine nachweislich aktuell geschützte Reprotection; korrigiert
+wird die aktuelle Schutzrechnung (SP-654, Paarung 555/R4 G4 D595 und G17 D455).
+
 Notfall-Installationen behalten ihre ausdrückliche Fristzulassung, erhalten dadurch
 aber keinen Schutzbonus. Der Score-Owner vergleicht die an Parent, Server und
 StateVersion gebundene finanzierte Zugriffschance und die danach verbleibenden
 Runner-Credits. Reine ICE-Anzahl und Rez-Anzahl liefern keinen Konversionsbonus.
+Eine exakt qualifizierte Notfallinstallation gegen erzwungenen Agendaabwurf
+aus einer ausschließlich mit Agenden überfüllten HQ bleibt auch im leeren
+bestehenden Remote nach einem vorherigen Zugriff zugelassen. Die erneute
+Zugriffserinnerung darf diesen riskanten Versuch nicht gegenüber der bereits
+zulässigen nackten Neuinstallation sperren. Beide Ziele behalten ihre aktuelle
+Expositionsquote; die gewöhnliche Reprotektionspflicht außerhalb dieses engen
+Abwurffalls sowie Scorekosten, Verteidigungsreserven und Sofortsiege bleiben
+unverändert. Zwei native Folgeinputs aus Paarung 544 belegen die notwendige
+Kontinuität über den gegnerischen Zug; ein Einzelrestore verbraucht diese Grenze.
 Ein möglicher terminaler Steal erhöht das Gewicht der Exposition. Unbekannte oder
 veraltete Quotes bleiben unbekannt und tragen eine konservative Risikogrenze;
 sie werden weder als sicher noch pauschal als 50-Prozent-Chance behandelt.
@@ -647,6 +805,15 @@ wird neu bewertet. Unbekannte Ziehkarten, mehrere hypothetische Installationen,
 Regionersatz und nicht gequotete Mechaniken sind keine zertifizierten Routen.
 Öffentliches, unbedingtes und unbegrenzt wiederholbares Runner-Krediteinkommen
 wird bei der Vorbereitung berücksichtigt; verdeckte Events bleiben unbekannt.
+Die reife Remote-Zertifizierung und das Scorefenster verwenden für den nächsten
+Runnerzug denselben typisierten Pfadledger. Nur die explizite Engine-Quote
+`start_of_runner_turn/refill_to_capacity_if_used` hebt einen installierten
+öffentlichen Pool auf seine Kapazität an; voller Pool und Auffüllung werden
+nicht addiert. Zweckbindung, Stealth-Quelle und Breaker-Hosting bleiben erhalten.
+Im aktuellen Runnerfenster gilt ausschließlich der aktuelle Betrag.
+Beschränkte Breaker-Credits finanzieren weder die vorbereitete Installation
+noch allgemeine Zahlungen. Fehlende oder ungültige Auffüllquoten scheitern
+sichtbar. Paarung 555 R2 G5 D276/D282 belegt den entscheidenden Credit.
 
 Ziel ist die kleinste belegte Zugriffswahrscheinlichkeit pro Run; bei Gleichstand
 entscheiden Agenda-Punktkosten, gesamte Creditkosten und Installationsklicks.
@@ -1348,6 +1515,14 @@ Installation wird gegen Vorher/Nachher dieses Effekts und gegen den
 vollständigen Funding-/Reservevertrag projiziert. Eine Route ist nur
 produktiv, wenn sie das Schutzziel erfüllt oder nachweisbar in dessen Richtung
 fortschreibt; ein zweites ICE ohne zusätzlichen Effekt ist kein Fortschritt.
+Die konservative Corp-Zugriffsprojektion behandelt einen vollständig geprüften
+Pfad mit ausschließlich ungebrochenem direktem Schaden weiterhin als
+erreichbar. Ein vom Runner-Pfaddienst verlangter Schadens-Break ist kein
+Nachweis einer tatsächlichen Zugriffssperre. Das gilt für die finanzierte
+Remote-Reife ebenso wie für den begrenzten Score-Rush; dessen Staging-Pfad
+darf die abgelehnte Schutzbescheinigung nicht erneut zulassen. Unabhängige
+ETR-, Zahlungs- und Folgesperren bleiben wirksam. Ein eigener belegter
+sofortiger Score bleibt bei seinem bisherigen Owner (SP-651, Paarung 555).
 
 Der Schutzeffekt ist dabei nicht auf eine binäre oder unveränderte unmittelbare
 Zugriffs-Erfolgswahrscheinlichkeit verengt. Ein zusätzliches ICE schreibt den
@@ -1660,6 +1835,25 @@ allgemeine Tax-/Disruption-Signale die Route freigeben. Zusätzliche sofortige
 Wirkungen und quotierte bezahlte Encounter-Abwehr bleiben eigenständig
 bewertbar; eine noch vorhandene innere ICE-Schicht bleibt ein mögliches Ziel.
 
+Auch die qualitative ICE-Installation, die Handentlastung durch Schutzaufbau
+und das delegierte Score-Protection-Staging konsumieren diese Positionsgrenze.
+Die aktuelle vollständige Post-Install-Enginequote bindet Quelle, Ziel und
+StateVersion; ohne nachfolgende ICE begründen reine Folgeeffekte keinen
+Schutzfortschritt. Fehlende oder widersprüchliche Quotes bleiben unbekannt
+und geben keine qualitative Route frei. Äußere Folge-ICE, sofortiger Schaden
+und gesondert quotierte bezahlte ETR-Wirkung bleiben bewertbar. Die gemeinsame
+Effektklassifikation liegt beim vorhandenen Defense-Fact-Service; Installation,
+Rez und Choice-Continuation erzeugen dafür keine eigene Klassifikation.
+
+Bei `alternate_subtype` bindet die Post-Install-Enginevorschau die ausdrücklich
+quotierte Basisvariante ohne Aufpreis: deren kanonische Subtypen, Stärke und
+Subroutinen werden gemeinsam projiziert. Die bezahlte alternative Variante
+wird dadurch weder gewählt noch als zusätzliche Abdeckung behauptet. Eine
+bereits installierte ICE braucht für variable Rezentscheidungen weiterhin ihre
+aktuelle gebundene Action. Ungebundene X-Stärke und bezahlte Subroutinen bleiben
+unvollständig. Die reale Regression vergleicht Vorschau, Defense-Planroute und
+den tatsächlich angewandten Basisrez sowie die unveränderte Eingabestruktur.
+
 Die Klassifikation schließt `set_run_break_subroutine_cost_modifier` ein:
 Der Effekt verändert erst nach seiner Ausführung spätere Breakzahlungen.
 Ein reiner solcher Effekt ohne verbleibendes inneres ICE begründet keinen
@@ -1683,6 +1877,31 @@ gebundenes eigenes Inventar; fehlende Fakten bleiben unknown. Der Fact
 beschreibt eine Möglichkeit, keine Zielwahrscheinlichkeit. Der bestehende
 globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu;
 er garantiert weder ihre Auswahl noch eine vollständig bessere Allokation.
+
+Qualitative ICE-Installationsfreigaben für zentrale Deckung, HQ-Kapazität,
+projektgebundenes Staging und Score-Schutz verwenden denselben aktuellen,
+instanz-, fort- und versionsgebundenen Engine-Subroutinenstand. Gedrucktes
+Potenzial darf keine fehlende aktuelle Wirkung ergänzen. Explizit projizierte
+bezahlte End-the-run-Potenziale bleiben für die vorhandene Fundingprüfung
+erhalten. Auch die erste zentrale Schicht benötigt einen gegenwärtigen
+Schutzeffekt; ein leerer Platz allein erzeugt diesen nicht. Daraus entsteht
+kein Verbot einer konkret modellierten späteren Kombination: Eine weitere
+äußere Installation benötigt ihren eigenen belegten Projekt- und Wirkungsvertrag.
+
+Aktionsbasierter ICE-Rez-Support darf eine nach vollständiger aktueller,
+an ICE-Instanz, Definition, Fort und StateVersion gebundener Engine-Projektion
+wirkungslose Zielschicht nicht als direkte Verteidigung aktivieren. Leere
+Subroutinen ohne konditionale Begegnungswirkung, bezahlte Begegnungsabwehr
+oder positives Rezz-Einkommen rechtfertigen weder temporäre Entsorgung noch
+Ratenschuld. Gedrucktes künftiges Potenzial und bloße Stärke ersetzen den
+aktuellen Effekt nicht. Unvollständige beziehungsweise Choice-abhängige
+Projektionen sind kein Beleg für Wirkungslosigkeit. Ein spekulativer Nutzen
+an anderen ICE-Schichten wird damit nicht als bewiesener Schutzeffekt gewertet.
+Der globale Defense-Owner dispositioniert dieselbe exakt gebundene Operation
+auch ohne aktuelle eigene Route. Sein bestehender Dispositionsvertrag gilt
+vor der Handentwicklung; HQ-Overflow darf die abgelehnte wirkungslose Zielwahl
+nicht als Handkonversion erneut öffnen. Nützliche Rezz-Effekte behalten ihre
+eigenständigen aktuellen Zweckprüfungen.
 
 Konditionale Rez-Supportkarten benötigen einen kartenspezifischen
 Folgevertrag. Chester Mix darf nur gerezzt werden, wenn bereits vor dem Rezzen
@@ -1924,11 +2143,41 @@ Assessment und Materialisierung aus. `economy-routes.ts` bindet aktuelle
 Actions, Kosten und Auszahlungen; Asset-Payback und installierte Erträge
 liegen ebenfalls im Owner. Typen stehen in `economy-types.ts`.
 
+Eine vollständig Engine-gequotete unmittelbare Auszahlung mit bekannten
+Agenda-Punktkosten behält ihren vorhandenen Economy-Owner. Die nachfolgende
+Restzugsuche projiziert diesen Preis gegen den eigenen aktuellen und bereits
+verbrauchten Punktestand, statt ihn als unbekannte Zusatzkosten zu verwerfen
+oder zu übergehen. Pflichtzahlungen behalten ihren Credit-Schutz. Andere
+ungeklärte Zusatzkosten erhalten dadurch keine Freigabe; die nächste reale
+LegalAction wird nach dem Schritt weiterhin neu angefordert.
+
 Score-Reserve und Defense-Funding bleiben fremde Fachverträge in
 `corp/score/corp-score-funding.ts`, `plans/corp-defense-funding-contract.ts`
 und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
+
+Ein bereits zugelassener Defense-Finanzierungsparent darf seinen aktuellen
+Basic-Credit-Schritt durch die kostenlose Vorbereitung einer besseren
+Auszahlung ersetzen. Dafür muss eine aktuell legale Rez-Action ohne Credit-,
+Klick- oder weitere Kosten exakt an eine installierte ungeresste Quelle und
+einen zugelassenen `finite_pool`-Campaign gebunden sein. Der kanonische
+On-Rez-Pool erlaubt danach im selben Zug eine sonst kostenlose Auszahlung
+pro Klick von mehr als einem Credit. Der erste Betrag darf die Quelle nicht
+leeren. Verzögertes Startzugeinkommen, bezahlter Rez, fehlender Restklick,
+bereits finanzierter Bedarf und andere Funding-Parents tragen diesen engen
+Nachweis nicht.
+
+Die Vorbereitung bleibt beim bestehenden Defense-Parent und dessen Need;
+sie wird ausdrücklich nicht als schon erhaltenes liquides Einkommen
+ausgegeben. Nach dem echten Engine-Rez wird der nun aktuelle Auszahlungskopf
+neu quotiert. Eine wichtigere sofortige Installation behält ihren Vorrang.
+Paarung 552 R4/G26/D26 rekonstruiert den exakten Originalzustand über 25
+Engine-Aktionen: Rez plus Auszahlung liefert bei demselben Restklick sieben
+statt sechs Credits. Der vollständige korrigierte Chooser-Prefix installiert
+zuerst die Neural Blade und führt danach kostenlosen Rez und Auszahlung unter
+dem unveränderten Defense-Finanzierungsparent aus; Replayhash und Endbank
+stimmen.
 
 Eine bereits installierte, aktionsweise geladene Creditbank besitzt einen
 getrennten aktuellen Restzugvertrag. Die Engine bindet Rez beziehungsweise
@@ -1944,8 +2193,9 @@ ICE-Installation darf dadurch nicht ihren letzten Klick verlieren. Andere
 aktuelle Einkommensquellen und ein bereits direkt finanzierbarer Score
 behalten ihre Finanzierung. Eine aktuelle vollständige Auszahlung aus
 sichtbaren Bits braucht kein endliches On-rez-Poolprofil. Laden ohne quotierte
-aktuelle Liquiditätskonversion bleibt als unbekannte spätere Entwicklung
-sichtbar. Engine- und Chooser-Regressionen liegen in
+aktuelle Liquiditätskonversion bleibt außerhalb des nachfolgend begrenzten
+Investitionsvertrags als unbekannte spätere Entwicklung sichtbar.
+Engine- und Chooser-Regressionen liegen in
 `hosted-credit-bank-cycle-quote.test.ts` und
 `meta-472-hosted-bank-cycle.test.ts` (SP-456, G30/D242).
 Die direkte Entnahme bewahrt den nativen Auszahlungsmodus `all_available`
@@ -1955,6 +2205,97 @@ Funding-Parent und bleibt ein eigenes P4-Auszahlungsprojekt. Die Regression
 R6 G1/D200 prüft die vollständige Plan-, Step- und Routenwahl für 15 Credits
 beim letzten Klick sowie die Ablehnung eines widersprüchlichen Bankbestands.
 Feste Teilentnahmen behalten ihren Modus `fixed`.
+
+Bereits gerezzte, kanonisch einfache Lade-/Gesamtauszahlungsbanken besitzen
+zusätzlich einen bedarfsgebundenen Investitionspfad in
+`corp/economy/hosted-credit-bank-investment.ts`. Der bestehende Economy-Owner
+leitet das endliche Ziel aus aktuellen Kosten, vollständigen Engine-Quotes
+für Installation mit späterem Rez, eigener Schutzreserve und veröffentlichten
+Funding-Bedarfen ab. Die weitere Ladezahl ergibt sich daraus neu nach jeder
+Aktion; Guthaben anderer eigener Banken zählt einmal zum Aufbauziel, niemals
+als aktuelle Liquidität. Die Rechnung vergleicht den verbleibenden Aufbau
+einschließlich Auszahlung mit aktuell angebotenen Einkommensalternativen.
+Gedruckte Kartenpreise ersetzen keine fehlenden zukünftigen Kostenquotes.
+
+Ein letzter Ladeklick darf nur über die Zuggrenze wirken, wenn der bestehende
+side-sichere Schutzdienst den Bankserver als aktuell nicht erreichbar bewertet
+und der eigene Pflichtdrawhorizont die Fortsetzung zulässt. Ungeschützte oder
+unbekannte Quellen benötigen eine Auszahlung noch im aktuellen Zug. Ein
+konkreter aktueller Finanzierungsbedarf, eine unterschrittene Schutzreserve,
+erreichtes Auszahlungsbudget oder Deckende beenden weiteren Aufbau. Die
+laufenden Score-/Defense-Finanzierungsrouten und ihre Parent-/Need-Bindungen
+bleiben maßgeblich. Der Owner materialisiert allein die aktuelle native
+Ladeaktion, gebunden an Quelle, Fähigkeit, sichtbaren Bestand und StateVersion;
+der spätere Gegnerzug ist keine garantierte Ressourcenkonversion. Die
+Regressionsdatei `hosted-credit-bank-investment.test.ts` prüft Halten, Aufbau
+über den Zugwechsel, rechtzeitige Auszahlung, fehlende Quotes und die
+vollständige Plan-/Step-/Routenwahl.
+
+Eine vollständig gebundene Ladeaktion ohne aktuell zugelassenen Investitions-
+oder Fundingpfad erhält eine ausdrückliche Ablehnung von `corp.economy`, auch
+wenn die Engine eine mögliche Restzugfolge quotiert. Die Quote belegt deren
+Regelausführbarkeit, nicht den wirtschaftlichen Bedarf. Unbekannte oder
+widersprüchliche Bindungen bleiben unbekannt und scheitern am Coverage-Gate.
+Die vier nativen Abbruchzustände der Diagnosepaarung 541 sind in
+`meta-541-bank-budget.test.ts` gegen erneute fehlende Ownership geschützt.
+
+Ein erreichtes kurzfristiges Budget schließt eine profitablere, vollständig
+Engine-gequotete Restzugfolge nicht aus (SP-611). Bei einer bereits aktiven
+Bank und sonst ungebundener Kapazität darf Economy neben direkter Auszahlung
+oder Basic-Credits die aktuelle Lade-/Auszahlungsquote als eigenes gebundenes Projekt
+anbieten. Der bestehende Scheduler und TurnPlanner vergleichen beide Routen;
+ausgeführt wird weiterhin nur der aktuelle native Head. Der Zustand aus
+Paarung 541, G4/D441, bindet so die weitere Ladung: zwei Aktionen liefern
+sechs statt drei Credits Auszahlung und einem Basic-Credit.
+Auch eine leere aktive Bank darf diese Alternative anbieten: Paarung 542,
+Diagnoserunde G2/D421, liefert mit zwei Restaktionen drei statt zwei Credits.
+Eine bestehende bedarfsgebundene Investition bleibt als Alternative erhalten;
+die Restzugfolge muss ihr aktuelles Liquiditätsziel vollständig erreichen.
+Die Auszahlung des begonnenen Restzugzyklus bleibt beim nächsten nativen
+Head zugelassen, auch wenn die Liquidität das kurzfristige Ziel bereits
+erreicht hatte. Dafür müssen vorheriger Economy-Executor, unmittelbar
+folgende StateVersion, unveränderte Liquidität, letzte Restaktion,
+derselbe Bankvorrat und die aktuelle garantierte Auszahlung exakt zur
+vorherigen Ladequote passen. Das ist ein zusätzliches Economy-Angebot;
+aktuelle höherrangige Score- und Defense-Pläne behalten ihre Priorität.
+
+Offene Parent-Finanzierung, aktuelle Score-/Defense-Fortsetzungen,
+andere aktuelle Einkommen, ein Operationsschwellenschritt und Deckende
+schließen diese zusätzliche Restzugroute aus. Defense prüft außerdem, ob
+eine frühe Auszahlung eine Installation im aktuellen Zug ermöglicht. Seine
+bestehenden Installations- und Stagingdienste erhalten dafür ausschließlich
+das exakt quotierte Zahlungsbudget nach der Auszahlung beziehungsweise dem
+aktuellen Basic-Credit einer leeren Bank; PlayerView,
+Geometrie, LegalActions und Kostenquotes bleiben unverändert an den
+beobachteten Zustand gebunden. Fehlende Quotes bleiben ausdrücklich unknown
+und geben keine freie Restzugkapazität frei. Die nativen Gegenproben in
+`meta-542-department-restturn.test.ts` bewahren Crystal-Wall- und
+Shock.r-Installation, Corporate-Coup-Vorbereitung und den finanzierten
+terminalen Tycho-Score. Eine mögliche zusätzliche Rezroute für mehrzügigen
+Bankschutz bleibt davon getrennt mit ihrem eigenen Creditbedarf zu bewerten.
+
+Ein abstrakter `improve_remote_protection_path`-Need sperrt die Restzugbank
+nicht allein (SP-612). Der Defense-Owner prüft vorhandene Installationsköpfe
+mit ihrem exakten Remote-/Score-Parent und dem quotierten frühen Geldgewinn.
+Fehlende ICE in HQ oder bekannte wirkungslose beziehungsweise reservewidrige
+Installationen sind kein aktuelles Schutzfenster. Ein echter gebundener
+Staging-Head bleibt geschützt. Für einen angebotenen, exakt gebundenen
+`new_remote`-Head kann der reine Budgetdienst die ganze Fortsetzung noch
+nicht beurteilen: Er meldet ausdrücklich unknown und gibt die Klicks nicht
+frei. Credit-Needs des Remotes und andere benötigte Finanzierung bleiben
+ebenfalls gesperrt. Die fünf nativen Zustände aus Paarung 542 werden in
+`meta-543-department-remote-window.test.ts` samt positiven Remote-Gegenfällen
+geprüft; sie liefern keine zusätzliche Ausführungsautorität außerhalb von
+Scheduler und TurnPlanner.
+
+Ein verbrauchter optionaler Defense-Suchversuch reserviert keine weitere
+Restaktion für sich (SP-613). Sein aktueller, exakt zuggebundener Receipt mit
+null verbleibenden Versuchen, null Wert, ohne Actionkopf und früherer
+Ausführungs-StateVersion bleibt im Defense-Portfolio als Cadence-Gedächtnis
+erhalten. Economy konsumiert ihn nicht als offenes Schutzfenster. Ein noch
+ausführbarer Versuch und jeder andere oder unvollständig gebundene
+Defense-Bedarf behalten das Veto. Die native Folge Paarung 543 R1 G34/D275–276
+prüft den echten Draw und die anschließende Freigabe der Bankkapazität.
 
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt

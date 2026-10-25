@@ -83,6 +83,8 @@ export type RunnerRigRoleDemandInput = Readonly<{
   guarantee: RunnerRigDemandGuarantee;
   requirement: RunnerRigDemandRequirement;
   simultaneousSetId?: string;
+  /** Explicitly shared occupancy for reusable coverage; absent means independent. */
+  memoryReuseKey?: string;
   providers: readonly RunnerRigDemandProviderInput[];
   binding: RunnerRigDemandBinding;
   evidenceCodes: readonly string[];
@@ -113,6 +115,7 @@ export type RunnerRigRoleDemand = Readonly<{
   guarantee: RunnerRigDemandGuarantee;
   requirement: RunnerRigDemandRequirement;
   simultaneousSetId: string;
+  memoryReuseKey?: string;
   providers: readonly RunnerRigDemandProvider[];
   satisfiedByInstalledProvider: boolean;
   evidenceCodes: readonly string[];
@@ -302,6 +305,7 @@ function normalizeDemand(
     !demand.demandId ||
     !demand.capabilityId ||
     demand.providers.length === 0 ||
+    (demand.memoryReuseKey !== undefined && !demand.memoryReuseKey.trim()) ||
     (demand.sourceKind === "deck_doctrine" &&
       demand.requirement !== "optional_doctrine_reserve")
   ) {
@@ -343,6 +347,9 @@ function normalizeDemand(
     guarantee: demand.guarantee,
     requirement: demand.requirement,
     simultaneousSetId: demand.simultaneousSetId ?? demand.demandId,
+    ...(demand.memoryReuseKey !== undefined
+      ? { memoryReuseKey: demand.memoryReuseKey }
+      : {}),
     providers,
     satisfiedByInstalledProvider,
     evidenceCodes: sortedUnique([
@@ -556,15 +563,43 @@ function memoryProjectionFor(
 function maximumSimultaneousGeneralMu(
   demands: readonly RunnerRigRoleDemand[],
 ): number {
-  const bySet = new Map<string, number>();
+  const reuseFacts = new Map<string, string>();
+  const bySet = new Map<string, Map<string, number>>();
   for (const demand of demands) {
-    const minimumGeneralMu = minimumProviderMemory(demand, "general");
-    bySet.set(
-      demand.simultaneousSetId,
-      (bySet.get(demand.simultaneousSetId) ?? 0) + minimumGeneralMu,
-    );
+    const key = demand.memoryReuseKey;
+    if (key !== undefined) {
+      const facts = JSON.stringify([
+        demand.capabilityId,
+        demand.providers.map((provider) => [
+          provider.providerId,
+          provider.definitionId,
+          provider.cardInstanceId,
+          provider.memoryMode,
+          provider.memoryUnits,
+        ]),
+      ]);
+      const previous = reuseFacts.get(key);
+      if (previous !== undefined && previous !== facts) {
+        throw new RunnerRigDemandProjectionError(
+          "invalid_demand",
+          `runner_rig_memory_reuse_facts_conflict:${demand.demandId}`,
+        );
+      }
+      reuseFacts.set(key, facts);
+    }
+    const occupancyId =
+      key !== undefined ? "reuse:" + key : "demand:" + demand.demandId;
+    const occupancies =
+      bySet.get(demand.simultaneousSetId) ?? new Map<string, number>();
+    occupancies.set(occupancyId, minimumProviderMemory(demand, "general"));
+    bySet.set(demand.simultaneousSetId, occupancies);
   }
-  return Math.max(0, ...bySet.values());
+  return Math.max(
+    0,
+    ...[...bySet.values()].map((occupancies) =>
+      [...occupancies.values()].reduce((sum, memory) => sum + memory, 0),
+    ),
+  );
 }
 
 function minimumProviderMemory(

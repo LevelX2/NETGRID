@@ -110,6 +110,9 @@ export function openReplacementWindow(
     replacementWindowId: window.windowId,
     originalEventId: event.eventId,
     originalEventType: event.eventType,
+    ...(event.eventType === "damage"
+      ? { damageType: damageTypePayload(event) }
+      : {}),
     replacementCandidateCount: window.candidates.length,
     affectedSide: event.affectedSide ?? "",
     redactedKind: "replacement",
@@ -273,6 +276,14 @@ export function replacementChoice(
     0,
     "Replacement-Kandidat fehlt.",
   );
+  for (const availableCandidate of window.candidates) {
+    if (
+      availableCandidate.sourceRef.kind === "card" &&
+      !availableCandidate.sourceRef.instanceId
+    ) {
+      throw new Error("damage_replacement_source_binding_missing");
+    }
+  }
   return {
     choiceId: `v121_choice_${window.windowId}`,
     side: candidate.controller,
@@ -293,7 +304,10 @@ export function replacementChoice(
         publicLabel: "Replacement",
         metadata: {
           ...(availableCandidate.sourceRef.kind === "card"
-            ? { cardTitle: availableCandidate.sourceRef.label }
+            ? {
+                cardTitle: availableCandidate.sourceRef.label,
+                sourceCardInstanceId: availableCandidate.sourceRef.instanceId,
+              }
             : {}),
           amount: availableCandidate.tagAmount ?? 1,
           optionKind:
@@ -337,6 +351,9 @@ export function resolveReplacementChoice(
     replacementWindowId: window.windowId,
     originalEventId: event.eventId,
     originalEventType: event.eventType,
+    ...(event.eventType === "damage"
+      ? { damageType: damageTypePayload(event) }
+      : {}),
     affectedSide: event.affectedSide ?? "",
     redactedKind: "replacement",
   };
@@ -362,6 +379,7 @@ export function resolveReplacementChoice(
     throw new Error(
       "Dieser Replacement-Kandidat wurde in diesem Fenster bereits genutzt.",
     );
+  legalAction.payload = basePayload;
   const flatlineSource = flatlineReplacementSourceForCandidate(
     state,
     candidate,

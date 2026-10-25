@@ -3984,13 +3984,6 @@
         "lineSupport": ["runner.hq_pressure"],
         "effects": [
           {
-            "kind": "hq_info",
-            "scope": "hq",
-            "timing": "on_access",
-            "resource": "cards",
-            "target": "full_reveal"
-          },
-          {
             "kind": "expose_info",
             "scope": "installed_card",
             "timing": "on_access",
@@ -3998,18 +3991,10 @@
             "target": "installed_corp_cards"
           }
         ],
-        "functionSignals": [
-          "access.hq_full_reveal",
-          "info.expose",
-          "info.expose_installed_card",
-          "info.hq",
-          "info.hq_information"
-        ],
+        "functionSignals": ["info.expose", "info.expose_installed_card"],
         "actionTacticSignals": [
           "access.payoff",
           "effect:expose_info",
-          "effect:hq_info",
-          "effect_scope:hq",
           "effect_scope:installed_card",
           "effect_timing:on_access"
         ],
@@ -13954,6 +13939,14 @@
             "repeatable": true
           },
           {
+            "kind": "run_tax",
+            "scope": "corp",
+            "timing": "start_of_turn",
+            "target": "virus.bad_publicity_per_counter_roll",
+            "amountKind": "dynamic",
+            "repeatable": true
+          },
+          {
             "kind": "delayed_penalty",
             "scope": "corp",
             "timing": "action",
@@ -13966,14 +13959,18 @@
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
           "virus.corp_purgeable_counter",
+          "corp.bad_publicity_pressure",
+          "risk.random_outcome",
           "virus.purge_tax"
         ],
         "actionTacticSignals": [
           "effect:delayed_penalty",
           "effect:persistent_counter_effect",
+          "effect:run_tax",
           "effect_scope:corp",
           "effect_scope:hq",
           "effect_timing:action",
+          "effect_timing:start_of_turn",
           "effect_timing:successful_run"
         ],
         "conditions": [{ "kind": "requires_successful_run" }],
@@ -14815,9 +14812,20 @@
                 "timing": "action",
                 "target": "make_run",
                 "finite": true
+              },
+              {
+                "kind": "expose_info",
+                "scope": "ice",
+                "timing": "during_run",
+                "target": "run.expose_approached_ice_before_rez",
+                "finite": true
               }
             ],
-            "functionSignals": ["run.any_server", "run.make_run"],
+            "functionSignals": [
+              "info.expose",
+              "run.any_server",
+              "run.make_run"
+            ],
             "targetProfiles": [
               {
                 "schemaVersion": "target-profile-v1",
@@ -14847,13 +14855,23 @@
             "timing": "action",
             "target": "make_run",
             "finite": true
+          },
+          {
+            "kind": "expose_info",
+            "scope": "ice",
+            "timing": "during_run",
+            "target": "run.expose_approached_ice_before_rez",
+            "finite": true
           }
         ],
-        "functionSignals": ["run.make_run", "run.any_server"],
+        "functionSignals": ["run.make_run", "run.any_server", "info.expose"],
         "actionTacticSignals": [
+          "effect:expose_info",
           "effect:future_run_effect",
+          "effect_scope:ice",
           "effect_scope:runner",
-          "effect_timing:action"
+          "effect_timing:action",
+          "effect_timing:during_run"
         ],
         "costProfile": { "clicks": 1, "credits": 0 },
         "riskTags": ["run"],
@@ -24604,7 +24622,30 @@
         "strategicRole": ["enabler"],
         "lineSupport": ["runner.search.breaker"],
         "actionCapabilitySemantics": [
-          { "capabilityKey": "abilities_on_play_search_trash_to_grip" }
+          {
+            "capabilityKey": "abilities_on_play_search_trash_to_grip",
+            "effects": [
+              {
+                "kind": "card_recovery",
+                "scope": "heap",
+                "timing": "action",
+                "resource": "cards",
+                "target": "search_trash_to_grip",
+                "amount": 1,
+                "finite": true
+              },
+              {
+                "kind": "search",
+                "scope": "heap",
+                "timing": "action",
+                "resource": "cards",
+                "target": "program",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.recovery", "setup.search"]
+          }
         ],
         "targetProfiles": [
           {
@@ -24620,6 +24661,33 @@
             "targetType": "card",
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
+        ],
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "scope": "heap",
+            "timing": "action",
+            "resource": "cards",
+            "target": "search_trash_to_grip",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "search",
+            "scope": "heap",
+            "timing": "action",
+            "resource": "cards",
+            "target": "program",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["setup.recovery", "setup.search"],
+        "actionTacticSignals": [
+          "effect:card_recovery",
+          "effect:search",
+          "effect_scope:heap",
+          "effect_timing:action"
         ],
         "costProfile": { "clicks": 1, "credits": 0 },
         "quality": {
@@ -24680,7 +24748,30 @@
         "planRoles": ["recover_cards"],
         "valueHints": {},
         "actionCapabilitySemantics": [
-          { "capabilityKey": "abilities_on_play_search_trash_to_grip" }
+          {
+            "capabilityKey": "abilities_on_play_search_trash_to_grip",
+            "effects": [
+              {
+                "kind": "card_recovery",
+                "scope": "heap",
+                "timing": "action",
+                "resource": "cards",
+                "target": "search_trash_to_grip",
+                "amount": 1,
+                "finite": true
+              },
+              {
+                "kind": "search",
+                "scope": "heap",
+                "timing": "action",
+                "resource": "cards",
+                "target": "any_card",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.recovery", "setup.search"]
+          }
         ],
         "targetProfiles": [
           {
@@ -24695,6 +24786,33 @@
             ],
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
+        ],
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "scope": "heap",
+            "timing": "action",
+            "resource": "cards",
+            "target": "search_trash_to_grip",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "search",
+            "scope": "heap",
+            "timing": "action",
+            "resource": "cards",
+            "target": "any_card",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["setup.recovery", "setup.search"],
+        "actionTacticSignals": [
+          "effect:card_recovery",
+          "effect:search",
+          "effect_scope:heap",
+          "effect_timing:action"
         ],
         "costProfile": { "clicks": 1, "credits": 2 },
         "quality": {
@@ -32045,30 +32163,47 @@
           {
             "kind": "zone_shuffle",
             "scope": "rnd",
-            "timing": "when_scored",
+            "timing": "scored_activated",
             "resource": "cards",
             "target": "score.shuffle_hq_archives_into_rnd",
-            "finite": true
+            "repeatable": true,
+            "finite": false
           },
           {
             "kind": "draw",
             "scope": "corp",
-            "timing": "when_scored",
+            "timing": "scored_activated",
             "resource": "cards",
             "target": "score.draw",
             "amount": 5,
-            "finite": true
+            "repeatable": true,
+            "finite": false
+          },
+          {
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "timing": "scored_activated",
+            "target": "score.scored_agenda_ability",
+            "repeatable": true,
+            "finite": false
           }
         ],
-        "functionSignals": ["setup.draw", "zone.shuffle"],
+        "functionSignals": [
+          "setup.draw",
+          "zone.shuffle",
+          "score.scored_agenda_action"
+        ],
         "tacticSignals": ["draw.card"],
         "actionTacticSignals": [
+          "corp.score_progress",
           "draw.card",
           "effect:draw",
+          "effect:scored_agenda_action",
           "effect:zone_shuffle",
           "effect_scope:corp",
           "effect_scope:rnd",
-          "effect_timing:when_scored"
+          "effect_scope:score_area",
+          "effect_timing:scored_activated"
         ],
         "conditions": [
           { "kind": "requires_score_window" },

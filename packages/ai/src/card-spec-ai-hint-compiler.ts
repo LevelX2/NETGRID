@@ -750,6 +750,31 @@ function deriveGenericTypedHintOverlay(
     });
     overlay.functionSignals.push("info.rnd_top");
   }
+  if (virus?.startOfCorpTurn?.kind === "roll_per_counter_add_bad_publicity") {
+    const start = virus.startOfCorpTurn;
+    if (
+      start.counterSource !== "corp_purgeable_runner_virus_counter" ||
+      start.dieSize !== 6 ||
+      start.successDieValues.length !== 2 ||
+      start.successDieValues[0] !== 5 ||
+      start.successDieValues[1] !== 6 ||
+      start.amountPerSuccess !== 1 ||
+      start.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_virus_bad_publicity_roll_shape");
+    overlay.effects.push({
+      kind: "run_tax",
+      scope: "corp",
+      timing: "start_of_turn",
+      target: "virus.bad_publicity_per_counter_roll",
+      amountKind: "dynamic",
+      repeatable: true,
+    });
+    overlay.functionSignals.push(
+      "corp.bad_publicity_pressure",
+      "risk.random_outcome",
+    );
+  }
   if (virus !== undefined) {
     overlay.effects.push({
       kind: "delayed_penalty",
@@ -1954,6 +1979,35 @@ function appendGenericAbilityEffect(
       "setup.top_trash_recovery",
     );
   }
+  if (effect.kind === "search_trash_to_grip") {
+    if (
+      entry.definition.side !== "runner" ||
+      !["program", "any_card"].includes(effect.filter) ||
+      effect.visibility !== "hidden_info_barrier"
+    )
+      throw new Error("card_spec_unknown_heap_search_to_grip_shape");
+    overlay.effects.push(
+      {
+        kind: "card_recovery",
+        scope: "heap",
+        timing,
+        resource: "cards",
+        target: "search_trash_to_grip",
+        amount: 1,
+        finite: true,
+      },
+      {
+        kind: "search",
+        scope: "heap",
+        timing,
+        resource: "cards",
+        target: effect.filter,
+        amount: 1,
+        finite: true,
+      },
+    );
+    overlay.functionSignals.push("setup.recovery", "setup.search");
+  }
   if (effect.kind === "search_stack_to_grip") {
     if (
       !["program", "any_card"].includes(effect.filter) ||
@@ -2352,6 +2406,16 @@ function appendMakeRunProjection(
       ? `run.${effect.target.server === "rd" ? "rnd" : effect.target.server}`
       : "run.any_server",
   );
+  if (effect.eventApproachIceExposeBeforeRez === true) {
+    overlay.effects.push({
+      kind: "expose_info",
+      scope: "ice",
+      timing: "during_run",
+      target: "run.expose_approached_ice_before_rez",
+      finite: true,
+    });
+    overlay.functionSignals.push("info.expose");
+  }
   if (effect.damagePreventionPool !== undefined) {
     overlay.effects.push({
       kind: "damage_prevention",
@@ -2714,22 +2778,36 @@ function appendScoredAgendaProjection(
       {
         kind: "zone_shuffle",
         scope: "rnd",
-        timing: "when_scored",
+        timing: "scored_activated",
         resource: "cards",
         target: "score.shuffle_hq_archives_into_rnd",
-        finite: true,
+        repeatable: true,
+        finite: false,
       },
       {
         kind: "draw",
         scope: "corp",
-        timing: "when_scored",
+        timing: "scored_activated",
         resource: "cards",
         target: "score.draw",
         amount: scored.drawCount,
-        finite: true,
+        repeatable: true,
+        finite: false,
+      },
+      {
+        kind: "scored_agenda_action",
+        scope: "score_area",
+        timing: "scored_activated",
+        target: "score.scored_agenda_ability",
+        repeatable: true,
+        finite: false,
       },
     );
-    overlay.functionSignals.push("setup.draw", "zone.shuffle");
+    overlay.functionSignals.push(
+      "setup.draw",
+      "zone.shuffle",
+      "score.scored_agenda_action",
+    );
   }
   if (scored.kind === "meat_damage_bonus") {
     overlay.effects.push({
@@ -9204,7 +9282,10 @@ function deriveClosedExtendedHintEffects(
         )}_credits`,
         counterRemoval: {
           counterType: counter.counterType,
-          credits: requiredFiniteNumber(counter.removeCost, "runner_counter_effect.remove_cost"),
+          credits: requiredFiniteNumber(
+            counter.removeCost,
+            "runner_counter_effect.remove_cost",
+          ),
           clicks: 1,
           amount: 1,
         },
@@ -9508,22 +9589,13 @@ function appendClosedRunnerLongtailEffects(
 ): void {
   const utility = engine.runnerUtilityLongtail;
   if (utility?.kind === "hq_access_expose_all_installed_corp_cards")
-    effects.push(
-      {
-        kind: "hq_info",
-        scope: "hq",
-        timing: "on_access",
-        resource: "cards",
-        target: "full_reveal",
-      },
-      {
-        kind: "expose_info",
-        scope: "installed_card",
-        timing: "on_access",
-        resource: "cards",
-        target: "installed_corp_cards",
-      },
-    );
+    effects.push({
+      kind: "expose_info",
+      scope: "installed_card",
+      timing: "on_access",
+      resource: "cards",
+      target: "installed_corp_cards",
+    });
   if (
     utility?.kind === "derez_fully_broken_passed_ice" ||
     utility?.kind === "derez_fully_broken_passed_ice_and_end_run"
@@ -10436,13 +10508,7 @@ function derivedFunctionSignals(
     signals.add("breaker.self_trash_risk");
   const runnerUtilityKind = engine.runnerUtilityLongtail?.kind;
   if (runnerUtilityKind === "hq_access_expose_all_installed_corp_cards")
-    for (const signal of [
-      "access.hq_full_reveal",
-      "info.expose",
-      "info.expose_installed_card",
-      "info.hq",
-      "info.hq_information",
-    ])
+    for (const signal of ["info.expose", "info.expose_installed_card"])
       signals.add(signal);
   if (
     runnerUtilityKind === "derez_fully_broken_passed_ice" ||

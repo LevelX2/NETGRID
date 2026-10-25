@@ -1,3 +1,8 @@
+import {
+  runnerGeneralCreditsAfterCompletedPath,
+  visibleRunnerRunOnlyCredits,
+} from "../../run-analysis/visible-run-credit-budget";
+
 import { type AiDecisionInput } from "@netgrid/shared";
 import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import {
@@ -216,8 +221,9 @@ export function reassessActiveInformationRunParent(
     input.playerView.own.rig ?? [],
     runnerRunPathCreditBudgetWithVisiblePools(
       input.playerView.own.credits +
-        Math.max(0, input.playerView.run?.badPublicityCredits ?? 0),
+        visibleRunnerRunOnlyCredits(input.playerView.run),
       input.playerView.own.rig ?? [],
+      { liquidCredits: input.playerView.own.credits },
     ),
     input.playerView.servers.find(
       (server) => server.id === run.attackedServerId,
@@ -229,7 +235,9 @@ export function reassessActiveInformationRunParent(
     ? knownPathAfterDamageBudget(
         pathBeforeDamageBudget,
         !runnerVisibleLethalIceDamageAssessment(input, remainingIce, {
-          generalCredits: pathBeforeDamageBudget.creditsAfterPath,
+          generalCredits: runnerGeneralCreditsAfterCompletedPath(
+            pathBeforeDamageBudget.creditBudgetAfterPath,
+          ),
           ...(pathBeforeDamageBudget.paidSubroutineBreaks
             ? {
                 paidSubroutineBreaks:
@@ -257,7 +265,20 @@ export function reassessActiveInformationRunParent(
     root.accessCommitment?.intendedAction === "trash"
       ? reservedAccessTrashCredits(input, root.accessCommitment)
       : 0;
-  const fundingGap = Math.max(0, reservedCredits - knownPath.creditsAfterPath);
+  const generalCreditsAfterPath =
+    knownPath.creditBudgetAfterPath?.traceEligibleCredits;
+  if (knownPath.creditBudgetAfterPath && generalCreditsAfterPath === undefined)
+    throw new Error(
+      "runner_information_boundary_missing_general_credit_ledger",
+    );
+  if (knownPath.canReachAccess && generalCreditsAfterPath === undefined)
+    throw new Error(
+      "runner_information_boundary_completed_path_missing_credit_ledger",
+    );
+  const fundingGap =
+    generalCreditsAfterPath !== undefined
+      ? Math.max(0, reservedCredits - generalCreditsAfterPath)
+      : Math.max(reservedCredits, reservedCredits - knownPath.creditsAfterPath);
   const unavoidableHazardCount = Math.max(
     0,
     knownPath.unavoidableVisibleIceHazardCount ?? 0,
@@ -328,7 +349,11 @@ export function reassessActiveInformationRunParent(
       ? knownPathCost
       : Math.min(
           Math.max(0, root.encounterCreditSpendLimit ?? 0),
-          Math.max(0, input.playerView.own.credits),
+          Math.max(
+            0,
+            input.playerView.own.credits +
+              visibleRunnerRunOnlyCredits(input.playerView.run),
+          ),
         );
   const evidenceCodes = [
     "runner_information_boundary_reassessment",
@@ -341,6 +366,7 @@ export function reassessActiveInformationRunParent(
     ...(conditionalRiskRoute?.evidence ?? []),
     `runner_information_boundary_unknown_ice:${unknownIceCount}`,
     `runner_information_boundary_credits_after_path:${knownPath.creditsAfterPath}`,
+    `runner_information_boundary_general_credits_after_path:${generalCreditsAfterPath ?? "blocked_path_without_completed_ledger"}`,
     `runner_information_boundary_reserved_credits:${reservedCredits}`,
     `runner_information_boundary_funding_gap:${fundingGap}`,
     `runner_information_boundary_unavoidable_hazards:${unavoidableHazardCount}`,

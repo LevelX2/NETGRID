@@ -27,6 +27,7 @@ export type RunnerCostEffectiveCoverageRecovery = Readonly<{
   requiredRole: RunnerCoverageGapSignal["requiredRole"];
   totalRecoveryCost: number;
   remotePreparation?: true;
+  sameTurnRunConversion?: RunnerCoverageGapSignal["sameTurnRunConversion"];
   visibleAnswer?: VisibleCard;
   deckHasAlternative: boolean;
   targetDefinitionId?: string;

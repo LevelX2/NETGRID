@@ -1,5 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
-import { runnerTerminalDamageReplacementBinding } from "./terminal-damage-replacement";
+import { runnerGripDamageReplacementBinding } from "./grip-damage-replacement";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -18,6 +18,7 @@ import type { CreateSideCreditDemandParams } from "../../plans/credit-demand";
 import type { RunnerFundingRouteContract } from "../../plans/runner-funding-contracts";
 import { uniqueBy } from "../../runtime/collection";
 import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
+import { currentRunnerTagReduction } from "../../actions/tag-effect-semantics";
 export type RunnerDefenseServices = {
   findFundingRoute: (
     request: Pick<
@@ -315,12 +316,17 @@ export function buildRunnerDefenseSignals(params: {
         }).routeAssessment
       : undefined;
   const completeTagClearAvailable =
-    fullTagClearFunding !== undefined &&
-    (fullTagClearFunding.status === "funded" ||
-      (fullTagClearFunding.status === "covered_guaranteed" &&
-        fullTagClearFunding.reliability === "guaranteed" &&
-        fullTagClearFunding.horizon === "same_turn" &&
-        fullTagClearFunding.projectedGap === 0));
+    (tags > 0 && candidates.some(candidate =>
+      candidate.semanticActionType === "tag.remove" &&
+      !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
+      currentRunnerTagReduction(candidate, tags) === tags,
+    )) ||
+    (fullTagClearFunding !== undefined &&
+      (fullTagClearFunding.status === "funded" ||
+        (fullTagClearFunding.status === "covered_guaranteed" &&
+          fullTagClearFunding.reliability === "guaranteed" &&
+          fullTagClearFunding.horizon === "same_turn" &&
+          fullTagClearFunding.projectedGap === 0)));
   const preserveHandBeforeIncompleteTagClear =
     taggedDamageBufferRequired && !completeTagClearAvailable;
   const endTurnBuffer = preserveHandBeforeIncompleteTagClear
@@ -445,8 +451,8 @@ export function buildRunnerDefenseSignals(params: {
           evidenceCode: "runner_damage_locked_hand_reaction_reserve",
         }
       : undefined;
-  const terminalDamageReplacementBinding =
-    runnerTerminalDamageReplacementBinding(input);
+  const gripDamageReplacementBinding =
+    runnerGripDamageReplacementBinding(input);
   const defense: RunnerDefenseSignals = {
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,
@@ -494,8 +500,8 @@ export function buildRunnerDefenseSignals(params: {
     forgoExhaustedStandardCapacity,
     forgoTerminalDeckPressureCapacity,
     ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
-    ...(terminalDamageReplacementBinding
-      ? { terminalDamageReplacementBinding }
+    ...(gripDamageReplacementBinding
+      ? { gripDamageReplacementBinding }
       : {}),
     ...(tagClearFundingNeed ? { tagClearFundingNeed } : {}),
     ...(persistentHazardCounterFundingNeed ? { persistentHazardCounterFundingNeed } : {}),

@@ -1,3 +1,4 @@
+import type { PublicHeapBreakerPreparation } from "./corp-public-heap-breaker-preparation";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type LegalAction,
@@ -170,6 +171,8 @@ export type CorpBestFundedScoreProtectionInput = Readonly<{
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
   runnerPreparationCreditClicks?: number;
+  runnerCreditPoolHorizon?: "current" | "next_runner_turn";
+  runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
   runnerCredits: number;
   targetServerId: VisibleCorpRezCostQuote["targetServerId"];
   observedAtStateVersion: number;
@@ -297,6 +300,8 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
   runnerPreparationCreditClicks?: number;
+  runnerCreditPoolHorizon?: "current" | "next_runner_turn";
+  runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
   runnerCredits: number;
   projectedInstallCredits: number;
   projectedInstallClicks: number;
@@ -533,6 +538,12 @@ export function assessBestFundedCorpScoreProtection(
         ? { runnerMemoryLimit: input.runnerMemoryLimit }
         : {}),
       runnerCredits: input.runnerCredits,
+      ...(input.runnerCreditPoolHorizon !== undefined
+        ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
+        : {}),
+      ...(input.runnerPublicPreparedBreakers !== undefined
+        ? { runnerPublicPreparedBreakers: input.runnerPublicPreparedBreakers }
+        : {}),
       ...(input.runnerPreparationCreditClicks !== undefined
         ? { runnerPreparationCreditClicks: input.runnerPreparationCreditClicks }
         : {}),
@@ -820,6 +831,12 @@ export function projectCorpFundedIceInstallRoute(
       ? { runnerMemoryLimit: input.runnerMemoryLimit }
       : {}),
     runnerCredits: input.runnerCredits,
+    ...(input.runnerCreditPoolHorizon !== undefined
+      ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
+      : {}),
+    ...(input.runnerPublicPreparedBreakers !== undefined
+      ? { runnerPublicPreparedBreakers: input.runnerPublicPreparedBreakers }
+      : {}),
     ...(input.runnerPreparationCreditClicks !== undefined
       ? { runnerPreparationCreditClicks: input.runnerPreparationCreditClicks }
       : {}),
@@ -1003,6 +1020,12 @@ export function projectCorpFundedIceInstallRoute(
       ? { runnerMemoryLimit: input.runnerMemoryLimit }
       : {}),
     runnerCredits: input.runnerCredits,
+    ...(input.runnerCreditPoolHorizon !== undefined
+      ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
+      : {}),
+    ...(input.runnerPublicPreparedBreakers !== undefined
+      ? { runnerPublicPreparedBreakers: input.runnerPublicPreparedBreakers }
+      : {}),
     ...(input.runnerPreparationCreditClicks !== undefined
       ? { runnerPreparationCreditClicks: input.runnerPreparationCreditClicks }
       : {}),

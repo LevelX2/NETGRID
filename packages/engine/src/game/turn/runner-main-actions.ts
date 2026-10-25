@@ -366,6 +366,25 @@ export function buildRunnerMainActions(
     flags.bonusRunPending === true &&
     !bodyweightExtraRunPending &&
     nextSequenceServerId === undefined;
+  // Paid abilities stay open after the last basic action. The canonical
+  // generator checks each ability's timing and its actual resource costs.
+  for (const cardId of [
+    ...state.runner.rig.programs,
+    ...state.runner.rig.hardware,
+    ...state.runner.rig.resources,
+  ]
+    .slice()
+    .sort()) {
+    pushActivatedCardImplementationActions(
+      cardImplementationRuntimeDeps,
+      state,
+      actions,
+      "runner",
+      cardId,
+      definitionFor(state, cardId),
+      { canStartRun },
+    );
+  }
   if (
     !hasClicks &&
     !bonusRunPending &&
@@ -980,15 +999,6 @@ export function buildRunnerMainActions(
       .slice()
       .sort()) {
       const definition = definitionFor(state, cardId);
-      pushActivatedCardImplementationActions(
-        cardImplementationRuntimeDeps,
-        state,
-        actions,
-        "runner",
-        cardId,
-        definition,
-        { canStartRun },
-      );
       if (
         runnerUtilityLongtailKindForCard(state, cardId) ===
         "optional_extra_action_with_delayed_damage"

@@ -72,6 +72,7 @@ export function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
         boundRunContinuationEvent(
           input.playerView.run?.attackedServerId,
           event,
+          previous?.selectedActionOrigin,
         ),
       );
   const committedPhase = commitment?.phases?.[commitment.cursor.phaseIndex];
@@ -237,6 +238,7 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
         boundRunContinuationEvent(
           context.input.playerView.run?.attackedServerId,
           event,
+          previous?.selectedActionOrigin,
         ),
       );
   const immediateOriginMatches =
@@ -365,13 +367,14 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
   };
 }
 
-/** The surrounding exact lease chain excludes new runs and non-run actions.
+/** The exact lease chain admits only run steps and certified run-start choices.
  * A native decline event may omit the server field; it cannot change servers.
  * Any explicit server binding must still match the retained current run.
  */
 function boundRunContinuationEvent(
   serverId: string | undefined,
   event: NonNullable<AiDecisionInput["eventTail"]>[number],
+  selectedOrigin: ResidentPlanPortfolio["selectedActionOrigin"],
 ): boolean {
   const payload = event.publicPayload;
   if (
@@ -382,9 +385,14 @@ function boundRunContinuationEvent(
     return false;
   if (payload.actor === "runner")
     return (
-      payload.actionType === "continue_run" &&
-      payload.abilityFamily === "run-access" &&
-      payload.serverId === serverId
+      (payload.actionType === "continue_run" &&
+        payload.abilityFamily === "run-access" &&
+        payload.serverId === serverId) ||
+      (payload.actionType === "resolve_choice" &&
+        selectedOrigin?.immediateChoicePolicy ===
+          "resolve_runner_run_start_order" &&
+        event.stateVersionBefore > selectedOrigin.selectedAtStateVersion &&
+        event.stateVersionBefore <= selectedOrigin.continuedThroughStateVersion)
     );
   if (payload.actor !== "corp") return false;
   return (

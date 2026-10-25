@@ -27,6 +27,142 @@ import {
 } from "./turn-projection";
 
 describe("deterministic remainder-turn search", () => {
+  it.each([0, 4, 7])(
+    "prefers the bound module head at equal value regardless of the agenda resource frame: %s",
+    (points) => {
+      const setup = searchSetup();
+      setup.frame.ownAgendaPoints = { minimum: points, maximum: points };
+      const preferred = offer(setup, "preferred", {
+        root: "root:preferred",
+        milestone: "paid",
+        economy: 5,
+      });
+      const other = offer(setup, "other", {
+        root: "root:other",
+        milestone: "paid",
+        economy: 5,
+      });
+      preferred.moduleCandidatePreferenceRank = 2;
+      other.moduleCandidatePreferenceRank = 1;
+      const result = searchDeterministicRemainderTurnPlans({
+        entryFrame: setup.frame,
+        offers: [other, preferred],
+        budget: { maximumDepth: 1 },
+      });
+      expect(
+        result.lines.find((line) => line.lineId === result.selectedLineId)
+          ?.steps[0]?.candidateId,
+      ).toBe(preferred.head.candidateId);
+    },
+  );
+
+  it("keeps a stronger value ahead of the exact module preference", () => {
+    const setup = searchSetup();
+    const preferred = offer(setup, "preferred", {
+      root: "root:preferred",
+      milestone: "paid",
+      economy: 5,
+    });
+    const stronger = offer(setup, "stronger", {
+      root: "root:stronger",
+      milestone: "paid",
+      economy: 6,
+    });
+    preferred.moduleCandidatePreferenceRank = 2;
+    stronger.moduleCandidatePreferenceRank = 1;
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [preferred, stronger],
+      budget: { maximumDepth: 1 },
+    });
+    expect(
+      result.lines.find((line) => line.lineId === result.selectedLineId)
+        ?.steps[0]?.candidateId,
+    ).toBe(stronger.head.candidateId);
+  });
+
+  it.each([1, 3, 4, undefined, -1, 0.5])(
+    "accounts for a known agenda payment of %s without dropping its price",
+    (cost) => {
+      const setup = searchSetup();
+      setup.frame.ownAgendaPoints = { minimum: 3, maximum: 3 };
+      const payout = offer(setup, "agenda-payout", {
+        root: "root:economy",
+        milestone: "paid",
+        netCredits: 12,
+        economy: 12,
+      });
+      payout.candidate.costProfile.additionalCosts = ["agendaPointCost"];
+      if (cost !== undefined)
+        payout.candidate.costProfile.agendaPointCost = cost;
+      const result = searchDeterministicRemainderTurnPlans({
+        entryFrame: setup.frame,
+        offers: [payout],
+      });
+      const affordable = cost === 1 || cost === 3;
+      expect(result.lines.length > 0).toBe(affordable);
+      if (affordable) {
+        expect(result.lines[0]!.projectedFrame.ownAgendaPoints).toEqual({
+          minimum: 3 - cost!,
+          maximum: 3 - cost!,
+        });
+      } else {
+        expect(result.pruneEvents).toContainEqual(
+          expect.objectContaining({
+            reasonCode:
+              cost === 4
+                ? "insufficient_agenda_points"
+                : "candidate_cost_not_exact",
+          }),
+        );
+      }
+    },
+  );
+
+  it("cannot spend the same agenda point on two projected payouts", () => {
+    const setup = searchSetup();
+    setup.frame.ownAgendaPoints = { minimum: 1, maximum: 1 };
+    const payouts = ["first", "second"].map((id) => {
+      const payout = offer(setup, id, {
+        root: "root:" + id,
+        milestone: "paid",
+        economy: 12,
+        netCredits: 12,
+      });
+      payout.candidate.costProfile.additionalCosts = ["agendaPointCost"];
+      payout.candidate.costProfile.agendaPointCost = 1;
+      return payout;
+    });
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: payouts,
+    });
+    expect(result.lines.length).toBeGreaterThan(0);
+    expect(
+      result.lines.every(
+        (line) =>
+          line.steps.length === 1 &&
+          line.projectedFrame.ownAgendaPoints.minimum === 0,
+      ),
+    ).toBe(true);
+  });
+
+  it("continues rejecting additional costs without a certified resource projection", () => {
+    const setup = searchSetup();
+    const payout = offer(setup, "unknown-cost", {
+      root: "root:economy",
+      milestone: "paid",
+      netCredits: 12,
+    });
+    payout.candidate.costProfile.additionalCosts = ["trashAnotherCard"];
+    expect(
+      searchDeterministicRemainderTurnPlans({
+        entryFrame: setup.frame,
+        offers: [payout],
+      }).lines,
+    ).toEqual([]);
+  });
+
   it.each([3, 4, 5, 7])(
     "requires gross upfront credits at each projected step (cash %s)",
     (credits) => {

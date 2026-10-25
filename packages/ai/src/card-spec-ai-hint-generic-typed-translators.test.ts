@@ -2,6 +2,7 @@ import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
+import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
 
 function syntheticHint(
   engine: Record<string, unknown>,
@@ -82,6 +83,82 @@ const activated = (effects: unknown[]) => ({
 });
 
 describe("generic typed CardSpec AI translators", () => {
+  it("preserves the conditional periodic Bad Publicity payoff from typed virus mechanics", () => {
+    const expected = {
+      kind: "run_tax",
+      scope: "corp",
+      timing: "start_of_turn",
+      target: "virus.bad_publicity_per_counter_roll",
+      amountKind: "dynamic",
+      repeatable: true,
+    };
+    const actual = actualHint("onr_proteus_094_scaldan");
+    expect(actual.effects).toContainEqual(expected);
+    expect(
+      buildActionCardSemanticProfilesByDefinitionId()["onr_proteus_094_scaldan"]
+        ?.functionalEffects,
+    ).toContainEqual(expected);
+    expect(actual.functionSignals).toEqual(
+      expect.arrayContaining([
+        "corp.bad_publicity_pressure",
+        "risk.random_outcome",
+      ]),
+    );
+    const engine = cardSpecPlanningCards().find(
+      (e) => e.definition.id === "onr_proteus_094_scaldan",
+    )!.planning.engine;
+    expect(
+      syntheticHint({ virusCounter: engine.virusCounter }, { type: "program" })
+        .effects,
+    ).toContainEqual(expected);
+    expect(() =>
+      syntheticHint(
+        {
+          virusCounter: {
+            ...engine.virusCounter,
+            startOfCorpTurn: {
+              ...engine.virusCounter!.startOfCorpTurn,
+              successDieValues: [1, 2],
+            },
+          },
+        },
+        { type: "program" },
+      ),
+    ).toThrow("card_spec_unknown_virus_bad_publicity_roll_shape");
+  });
+
+  it("preserves pre-rez approach information without depending on a card name or annotation", () => {
+    const expected = {
+      kind: "expose_info",
+      scope: "ice",
+      timing: "during_run",
+      target: "run.expose_approached_ice_before_rez",
+      finite: true,
+    };
+    expect(actualHint("onr_proteus_104_decoy-signal").effects).toContainEqual(
+      expected,
+    );
+    const effect = {
+      kind: "make_run",
+      target: { kind: "chosen_server" },
+      eventApproachIceExposeBeforeRez: true,
+    };
+    expect(
+      syntheticHint({ abilities: [activated([effect])] }, { type: "event" })
+        .effects,
+    ).toContainEqual(expected);
+    expect(
+      syntheticHint(
+        {
+          abilities: [
+            activated([{ ...effect, eventApproachIceExposeBeforeRez: false }]),
+          ],
+        },
+        { type: "event" },
+      ).effects,
+    ).not.toContainEqual(expected);
+  });
+
   it("projects direct lifecycle score credits without strategy annotations and keeps conditional pools distinct", () => {
     const charity = actualHint("onr_proteus_002_charity-takeover");
     expect(charity.roles).not.toContain("no_ability_agenda");

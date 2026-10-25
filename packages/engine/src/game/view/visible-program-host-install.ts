@@ -21,6 +21,14 @@ export function visibleProgramHostInstallVariants(
     return { complete: true, cards: [] };
   const cards: VisibleCard[] = [];
   for (const host of rig) {
+    // The public type alone can rule out a host. A face-down resource must
+    // not make a separate, fully public program/hardware host unknowable.
+    if (
+      host.type !== undefined &&
+      host.type !== "program" &&
+      host.type !== "hardware"
+    )
+      continue;
     if (!host.known) return { complete: false, reason: "unknown_public_host" };
     if (
       !host.definitionId ||

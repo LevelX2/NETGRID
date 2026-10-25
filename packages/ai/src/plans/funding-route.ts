@@ -85,6 +85,9 @@ export type SearchFundingRoutesParams = {
   /** The owning consumer can reject a credit-covered route whose other
    * quoted resources cannot support its same-turn conversion. */
   acceptRoute?: (route: FundingRoute) => boolean;
+  /** The owning consumer may compare independently quoted collateral only
+   * after the financial ordering and each step's resource costs are equal. */
+  compareEquivalentRoutes?: (left: FundingRoute, right: FundingRoute) => number;
 };
 
 /** A quoted install followed by a single-use payment inside the bound run.
@@ -251,11 +254,14 @@ export function searchFundingRoutes(
     }
   }
 
-  const routes = pruneDominatedRoutes(covered).slice(0, maxRoutes);
+  const routes = pruneDominatedRoutes(
+    covered,
+    params.compareEquivalentRoutes,
+  ).slice(0, maxRoutes);
   if (routes.length === 0) {
     routes.push(uncoveredRoute(params.demand));
   }
-  return result(params.demand, routes);
+  return result(params.demand, routes, params.compareEquivalentRoutes);
 }
 
 function paymentWindowFundingOption(
@@ -344,6 +350,7 @@ export function revalidateFundingRoute(
 
 export function pruneDominatedRoutes(
   routes: readonly FundingRoute[],
+  compareEquivalentRoutes?: SearchFundingRoutesParams["compareEquivalentRoutes"],
 ): FundingRoute[] {
   return routes
     .filter(
@@ -353,7 +360,7 @@ export function pruneDominatedRoutes(
             otherIndex !== index && routeDominates(other, route),
         ),
     )
-    .sort(compareRoutes);
+    .sort((left, right) => compareRoutes(left, right, compareEquivalentRoutes));
 }
 
 function currentFundingOption(
@@ -575,8 +582,11 @@ function uncoveredRoute(demand: CreditDemand): FundingRoute {
 function result(
   demand: CreditDemand,
   routes: FundingRoute[],
+  compareEquivalentRoutes?: SearchFundingRoutesParams["compareEquivalentRoutes"],
 ): FundingRouteSearchResult {
-  const sorted = [...routes].sort(compareRoutes);
+  const sorted = [...routes].sort((left, right) =>
+    compareRoutes(left, right, compareEquivalentRoutes),
+  );
   return {
     demand,
     routes: sorted,
@@ -607,15 +617,34 @@ function routeDominates(left: FundingRoute, right: FundingRoute): boolean {
   return noWorse && strictlyBetter;
 }
 
-function compareRoutes(left: FundingRoute, right: FundingRoute): number {
-  return (
+function compareRoutes(
+  left: FundingRoute,
+  right: FundingRoute,
+  compareEquivalentRoutes?: SearchFundingRoutesParams["compareEquivalentRoutes"],
+): number {
+  const financialOrder =
     coverageRank(right.status) - coverageRank(left.status) ||
     horizonRank(left.horizon) - horizonRank(right.horizon) ||
     left.totalClickCost - right.totalClickCost ||
     left.steps.length - right.steps.length ||
     reliabilityRank(right.reliability) - reliabilityRank(left.reliability) ||
     right.projectedCredits - left.projectedCredits ||
-    compareFrontLoadedLiquidGain(left, right) ||
+    compareFrontLoadedLiquidGain(left, right);
+  if (financialOrder !== 0) return financialOrder;
+  const equalStepCosts =
+    left.projectedGeneralCredits === right.projectedGeneralCredits &&
+    left.steps.every((step, index) => {
+      const other = right.steps[index]!;
+      return (
+        step.clickCost === other.clickCost &&
+        step.creditCost === other.creditCost &&
+        step.ownTurnOffset === other.ownTurnOffset &&
+        step.creditRestriction === other.creditRestriction &&
+        step.reliability === other.reliability
+      );
+    });
+  return (
+    (equalStepCosts ? compareEquivalentRoutes?.(left, right) : undefined) ||
     left.routeId.localeCompare(right.routeId)
   );
 }

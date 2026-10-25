@@ -64,6 +64,7 @@ export function runnerRunFundingSupport(
     evaluation,
   );
   const admission = assessRunnerRunFundingAdmission({
+    input,
     target: evaluation,
     runTargets,
     economy,

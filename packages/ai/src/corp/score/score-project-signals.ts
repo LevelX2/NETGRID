@@ -6,6 +6,7 @@ import {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import { readCorpCounterBankPreparationQuote } from "../../plans/corp-counter-bank-preparation-quote";
 import { corpScorePreservesMandatoryDrawHorizon } from "./score-mandatory-draw-horizon";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -422,7 +423,8 @@ export function scoreProjectForCandidate(
       candidate.actionId,
     );
     // A forced agenda discard creates a new, publicly accessible scoring
-    // source in Archives. An empty remote keeps the same card concealed and
+    // source in Archives. An empty remote or a fort occupied only by an
+    // Engine-certified empty counter bank keeps the same card concealed and
     // preserves a bounded score attempt. This is a risky Score
     // route, never a claim that the Runner cannot steal it.
     const forcedAgendaDiscardRelief =
@@ -431,9 +433,29 @@ export function scoreProjectForCandidate(
         visibleCardIsAgenda(input, card),
       ) &&
       (serverId === "new_remote" ||
-        input.playerView.servers.some(
-          (server) => server.id === serverId && server.root.length === 0,
-        )) &&
+        input.playerView.servers.some((server) => {
+          if (server.id !== serverId) return false;
+          if (server.root.length === 0) return true;
+          const action = input.legalActions.find(
+            (action) => action.actionId === candidate.actionId,
+          );
+          if (action?.payload?.rootReplacement !== "asset_to_agenda")
+            return false;
+          const assets = server.root.filter((card) => card.type === "asset");
+          return (
+            assets.length === 1 &&
+            server.root.every(
+              (card) =>
+                card.known && ["asset", "upgrade"].includes(card.type ?? ""),
+            ) &&
+            readCorpCounterBankPreparationQuote(
+              input,
+              assets[0]!,
+              "installed_root",
+              server.id,
+            )?.advancementCounters === 0
+          );
+        })) &&
       (corpAgendaInstallHasCertifiedNearTermScoreHorizon(
         input,
         candidate,
@@ -465,7 +487,10 @@ export function scoreProjectForCandidate(
             projectId,
             serverId,
             matchpointTarget,
-            deadlinePressure,
+            // HQ exposure makes installation urgent; only a real completion
+            // deadline reserves every advance in the current turn.
+            scorelineFeasibility?.deadline === "last_draw_window" ||
+              scorelineFeasibility?.deadline === "current_turn_only",
           )
         : undefined;
     const residentBoundedStagedScoreWindow =
@@ -631,6 +656,7 @@ export function scoreProjectForCandidate(
       certifiedMatureRemoteScoreHorizon ||
       boundedStagedScoreWindow;
     const recentlyCompromisedTarget =
+      !forcedAgendaDiscardRelief &&
       serverId !== undefined &&
       serverId !== "new_remote" &&
       recentlyCompromisedRemoteIds.has(serverId) &&
@@ -1269,12 +1295,12 @@ function corpAgendaInstallScoreHorizonShortfall(
   return Math.max(0, remaining - nextClicks);
 }
 
-export function sameTurnScoreConversionProjectForCandidate(
+export function sameTurnScoreConversionProjectsForCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   directScoreProjects: readonly CorpScoreProjectSignal[],
   fundingCandidates: readonly ActionSemanticCandidate[],
-): CorpScoreProjectSignal | undefined {
+): CorpScoreProjectSignal[] {
   const matchingProjects: CorpScoreProjectSignal[] = [];
   for (const path of corpSameTurnScoreConversionPaths(
     input,
@@ -1406,10 +1432,7 @@ export function sameTurnScoreConversionProjectForCandidate(
             },
           }
         : {}),
-      ...(step.kind === "place_advancement" &&
-      step.offTargetCardId !== undefined &&
-      step.offTargetAdvancementAmount !== undefined &&
-      step.offTargetAdvancementAmount > 0
+      ...(step.kind === "place_advancement" && step.advancementAmount > 0
         ? {
             advancementCounterChoiceBinding: {
               kind: "place_advancement" as const,
@@ -1418,10 +1441,16 @@ export function sameTurnScoreConversionProjectForCandidate(
                   targetCardId: step.targetCardId,
                   amount: step.advancementAmount,
                 },
-                {
-                  targetCardId: step.offTargetCardId,
-                  amount: step.offTargetAdvancementAmount,
-                },
+                ...(step.offTargetCardId !== undefined &&
+                step.offTargetAdvancementAmount !== undefined &&
+                step.offTargetAdvancementAmount > 0
+                  ? [
+                      {
+                        targetCardId: step.offTargetCardId,
+                        amount: step.offTargetAdvancementAmount,
+                      },
+                    ]
+                  : []),
               ],
             },
           }
@@ -1435,7 +1464,7 @@ export function sameTurnScoreConversionProjectForCandidate(
   }
   return matchingProjects.sort((left, right) =>
     compareSameTurnScoreConversionParents(left, right, directScoreProjects),
-  )[0];
+  );
 }
 
 export function sameTurnScoreConversionPreventsTerminalSteal(params: {
@@ -1511,6 +1540,19 @@ function candidateMatchesScoreConversionStep(
   step: CorpScoreConversionStep,
 ): boolean {
   if (step.actionId === candidate.actionId) return true;
+  if (step.kind === "basic_advance")
+    return (
+      candidate.semanticActionType === "score.advance_card" &&
+      candidate.sourceCardInstanceId === step.targetCardId &&
+      input.legalActions.some(
+        (action) =>
+          action.actionId === candidate.actionId &&
+          action.side === "corp" &&
+          action.type === "advance_card" &&
+          (action.source === step.targetCardId ||
+            action.payload?.cardId === step.targetCardId),
+      )
+    );
   if (
     !step.sourceCardId ||
     step.sourceCardId !== candidate.sourceCardInstanceId
@@ -1762,6 +1804,30 @@ export function uniqueScoreProjects(
   const byProject = new Map<string, CorpScoreProjectSignal>();
   for (const value of values) {
     const previous = byProject.get(value.projectId);
+    if (previous) {
+      const valueWinsNow =
+        value.feasible && value.sameTurnCloseout && value.terminalScore;
+      const previousWinsNow =
+        previous.feasible &&
+        previous.sameTurnCloseout &&
+        previous.terminalScore;
+      // A completed base score must not erase the same parent's funded,
+      // Engine-quoted winning sequence before phase reconciliation.
+      if (
+        valueWinsNow &&
+        !previousWinsNow &&
+        value.sameTurnConversionProof === "engine_quoted_path"
+      ) {
+        byProject.set(value.projectId, value);
+        continue;
+      }
+      if (
+        previousWinsNow &&
+        !valueWinsNow &&
+        previous.sameTurnConversionProof === "engine_quoted_path"
+      )
+        continue;
+    }
     if (!previous || phaseRank[value.phase] > phaseRank[previous.phase]) {
       byProject.set(value.projectId, value);
       continue;

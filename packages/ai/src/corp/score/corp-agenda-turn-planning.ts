@@ -491,8 +491,17 @@ function createLine(
       : line.family === "safe_setup"
         ? 8
         : 35 +
-          Math.max(1, params.project.agendaPoints) * 10 +
-          (line.projectedAdvance ? 8 : 0);
+          (params.project.terminalScore
+            ? 10
+            : Math.max(1, params.project.agendaPoints) * 10) +
+          (line.projectedAdvance ? 8 : 0) -
+          // The terminal objective is the same win for every admitted agenda.
+          // Preserve Score's remaining resource burden in the authoritative
+          // turn line; surplus points cannot hide a longer finishing route.
+          (params.project.terminalScore && params.project.conversion
+            ? params.project.conversion.remainingAdvancementClicks * 8 +
+              params.project.conversion.remainingScoreCredits * 2
+            : 0);
   // Only a bound Defense provider contributes protection. An agenda head
   // supplies score progress and exposure facts, never incremental defense.
   const defense =

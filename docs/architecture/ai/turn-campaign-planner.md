@@ -465,6 +465,7 @@ type ProjectedDecisionFrame = {
   timingPointClass: string;
   actionCapacityLedger: ProjectedActionCapacityLedger;
   ownCredits: ValueRange;
+  ownAgendaPoints: ValueRange;
   ownHandCount: ValueRange;
   ownHandCapacity: number;
   ownKnownZones: ProjectedKnownZoneState[];
@@ -494,6 +495,25 @@ Action-Capacity-Tokens, Reservierungen, einmal-pro-Zug-Nutzungen, relevante
 öffentliche Eventflags, Claims, bereits realisierte Objective-Komponenten
 und Beobachtungsstatus. Board und Credits allein reichen nicht zur
 Zyklenkennung.
+
+Bekannte Agenda-Punktkosten bleiben Teil der exakten Ressourcenprojektion.
+Der Frame übernimmt ausschließlich den eigenen aktuellen Punktestand; ein
+zertifizierter Schritt zieht seinen endlichen `agendaPointCost` ab. Die
+Restzugsuche prüft den verbleibenden Bestand vor jedem weiteren Schritt.
+Unbekannte Zusatzkosten, ungültige Beträge und eine Überziehung bleiben
+ausgeschlossen. Ein im Delta ausgelassenes `agendaPointDelta` bedeutet
+fachlich einen unveränderten Punktestand. Der native Nachweis aus Paarung
+536, G27/D297, bindet den zuvor verworfenen punktbezahlten Economy-Rez;
+Gegenproben verhindern doppelte Punktausgabe und negative Restbestände.
+
+Bei ansonsten gleichwertigen Restzuglinien erhält dieselbe aktuelle
+LegalAction eine Präferenz für den bereits fachlich ausgewählten exakten
+Executor. Die Aktions-ID allein reicht dafür nicht: Root, Supportchild und
+verschiedene Score-Parents können dieselbe Aktion materialisieren. Ein
+veränderter Ressourcen-Fingerprint darf diese Bindung nicht über einen
+lexikografischen Hashgleichstand austauschen. Eine tatsächlich höher
+bewertete ganze Restzuglinie behält ihren Vorrang vor dieser nachgeordneten
+Präferenz.
 
 Das Action-Capacity-Ledger bildet nicht nur normale Klicks ab, sondern:
 
