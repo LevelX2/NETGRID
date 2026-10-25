@@ -703,6 +703,23 @@ dieselben vorbereiteten Breaker. Kombinierte ETR-Subroutinen müssen vollständi
 die Breaker-Kostenrechnung weitergereicht werden. Fehlende Host-Fakten bleiben
 explizit unbekannt (Regressionen: Match 41df D89, Afreet/Cyfermaster/Puzzle).
 
+Die öffentliche Vorbereitung umfasst außerdem einen bekannten Breaker im Heap,
+wenn eine bereits aktive, unbegrenzte Top-Heap-Rückholung seine Rückholung und
+die normale Installation vor dem reservierten Run ermöglicht. Jede darüberliegende
+Heap-Karte verbraucht die tatsächlichen Rückholkosten und Klicks. Installation
+und Rückholung bezahlen ausschließlich allgemeine Credits; nur übrig bleibende
+Vorbereitungsklicks erzeugen Einkommen. Freier Speicher oder eine Engine-geprüfte
+Host-Variante muss vorliegen. Der neu installierte Breaker erhält keinen aus dem
+Heap übernommenen oder am verpassten Zugbeginn aufgefüllten Kreditpool.
+
+`runtime/corp-public-heap-breaker-preparation.ts` liefert diese öffentlichen Fakten
+für die bestehende Defense-Reifeprüfung und Scoreline-Schutzprojektion. Es erzeugt
+keine zukünftigen LegalActions und entscheidet keinen Runner-Zug. Verdeckte
+Handkarten und spätere Ziehergebnisse bleiben unbekannt. Unvollständige
+öffentliche Heap-, Speicher- oder Klickfakten scheitern sichtbar. Frühere Zugriffe
+sperren weiterhin keine nachweislich aktuell geschützte Reprotection; korrigiert
+wird die aktuelle Schutzrechnung (SP-654, Paarung 555/R4 G4 D595 und G17 D455).
+
 Notfall-Installationen behalten ihre ausdrückliche Fristzulassung, erhalten dadurch
 aber keinen Schutzbonus. Der Score-Owner vergleicht die an Parent, Server und
 StateVersion gebundene finanzierte Zugriffschance und die danach verbleibenden

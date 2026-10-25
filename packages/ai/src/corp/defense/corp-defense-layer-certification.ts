@@ -11,6 +11,7 @@ import { corpEffectiveDefenseActivationCredits } from "../../runtime/corp-exact-
 import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 import { visiblePreparedRunnerBreakerCandidates } from "../../runtime/corp-score-protection-assessment";
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 type CorpCertifiedDefenseLayer = Readonly<{
   iceInstanceId: string;
   credits: number;
@@ -109,6 +110,10 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
     ...prepared.candidates.map((candidate) => ({
       rig: [...runnerRig, candidate.card],
       credits: runnerCredits - candidate.installCreditCost,
+    })),
+    ...visibleRunnerHeapBreakerPreparations(input).map((candidate) => ({
+      rig: [...runnerRig, candidate.card],
+      credits: candidate.remainingGeneralCredits,
     })),
   ].every((runner) => {
     const assessment = assessEngineCertifiedPostRezIcePath(
