@@ -281,3 +281,17 @@ it("does not admit the Corporation discard zone into a Runner input", () => {
   expect(dto.playerView.opponent).not.toHaveProperty("discardCards");
   expect(JSON.stringify(dto)).not.toContain("private-corp-card");
 });
+
+it("quotes the same native public Heap route beside an unidentified face-down resource", () => {
+  const input = fixture("g17-d455");
+  const before = visibleRunnerHeapBreakerPreparations(input);
+  input.playerView.opponent.rig!.push({
+    instanceId: "public-hidden-resource",
+    known: false,
+    type: "resource",
+    owner: "runner",
+    controller: "runner",
+    rezzed: false,
+  });
+  expect(visibleRunnerHeapBreakerPreparations(input)).toEqual(before);
+});

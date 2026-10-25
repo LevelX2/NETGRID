@@ -55,3 +55,37 @@ describe("public program host install projection", () => {
     ).toMatchObject({ complete: false });
   });
 });
+
+it("does not mistake a public face-down resource for a possible program host", () => {
+  const host = card("onr_v1_001_afreet");
+  const program = card("onr_v1_016_cyfermaster");
+  const hiddenResource: VisibleCard = {
+    instanceId: "public-hidden-resource",
+    known: false,
+    type: "resource",
+    owner: "runner",
+    controller: "runner",
+    rezzed: false,
+  };
+  const before = JSON.stringify([program, host, hiddenResource]);
+  expect(
+    visibleProgramHostInstallVariants(program, [host, hiddenResource]),
+  ).toEqual(visibleProgramHostInstallVariants(program, [host]));
+  expect(JSON.stringify([program, host, hiddenResource])).toBe(before);
+  expect(hiddenResource).not.toHaveProperty("definitionId");
+});
+it.each(["program", "hardware", undefined] as const)(
+  "keeps an unidentified possible host of public type %s unknown",
+  (type) => {
+    const unknown: VisibleCard = {
+      instanceId: "unknown-possible-host",
+      known: false,
+      ...(type ? { type } : {}),
+    };
+    expect(
+      visibleProgramHostInstallVariants(card("onr_v1_016_cyfermaster"), [
+        unknown,
+      ]),
+    ).toEqual({ complete: false, reason: "unknown_public_host" });
+  },
+);

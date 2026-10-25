@@ -709,7 +709,10 @@ die normale Installation vor dem reservierten Run ermöglicht. Jede darüberlieg
 Heap-Karte verbraucht die tatsächlichen Rückholkosten und Klicks. Installation
 und Rückholung bezahlen ausschließlich allgemeine Credits; nur übrig bleibende
 Vorbereitungsklicks erzeugen Einkommen. Freier Speicher oder eine Engine-geprüfte
-Host-Variante muss vorliegen. Der neu installierte Breaker erhält keinen aus dem
+Host-Variante muss vorliegen. Die kanonische Host-Projektion grenzt öffentlich
+erkennbare Nicht-Host-Kartentypen vor der Identitätsprüfung ab; eine verdeckte
+Ressource macht das übrige öffentliche Rig nicht unbekannt. Unbekannte mögliche
+Programm-/Hardware-Hosts bleiben unbekannt (SP-655). Der neu installierte Breaker erhält keinen aus dem
 Heap übernommenen oder am verpassten Zugbeginn aufgefüllten Kreditpool.
 
 `runtime/corp-public-heap-breaker-preparation.ts` liefert diese öffentlichen Fakten
