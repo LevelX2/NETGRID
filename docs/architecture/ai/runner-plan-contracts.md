@@ -519,7 +519,7 @@ sinnvolle Rig-Projekte. Paarung 524 G6 D158 prüft den gesamten Originalpräfix,
 den Remote-Executor und die echte Engine-Anwendung der bereiten Eventroute.
 
 Ersetzt eine aktuell ausführbare gezielte ICE-Entfernung die blockierte
-Runroute, entfernt ihr Remote-Signal den bisherigen `supportNeedId` bereits
+Runroute, entfernen Central- und Remote-Signal den bisherigen `supportNeedId` bereits
 bei der Routenbildung. Der ersetzte Coverage-Bedarf darf nicht zugleich eine
 Child-Bindung verlangen, während der Parent seinen eigenen Vorbereitungsschritt
 ausführt und keine offene Need mehr veröffentlicht. Die bestehende
@@ -527,6 +527,7 @@ Coverage-Reconciliation erhält unabhängig weiterhin sinnvolle Breakersuchen;
 vor dem Routenwechsel bleibt eine tatsächlich benötigte Child-Bindung erhalten.
 Die gespeicherten Entscheidungen D159/D160 aus Paarung 425 prüfen beide Seiten
 dieses Übergangs mit den historischen LegalActions und Runtime-Checkpoints.
+Paarung 557/R1/G18/D320 ergänzt den Zentralfall mit verdrängter Run-Finanzierung: Der aktuelle HQ-Vorbereitungsschritt behält keinen Need des noch nicht neu quotierten Folgeruns. Der Funding-Owner und seine fail-closed Parentprüfung bleiben unverändert.
 
 Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von
 unmittelbarer beziehungsweise Cleanup-Flatline. Ein bekannter Zugriff bleibt
@@ -1234,6 +1235,22 @@ sie wählen keine neue Action. `development-funding.ts` benutzt die geteilten
 exakten Funding-Routen in `runtime/runner-exact-funding-routes.ts`. Die
 Runtime komponiert die Owner-Fakten und führt weiterhin die gemeinsame
 Zugplanung aus; sie enthält keine zweite Handentwicklungs-Discovery.
+
+Die persistente Installationsbewertung darf eine vorübergehend unterschrittene
+Creditreserve durch noch im selben Zug verfügbare reine Einkommensaktionen
+bewerten. Dafür sind eine aktuelle gewöhnliche LegalAction ohne Opfer-,
+Host- oder Choicebedarf, ausreichender bekannter MU, bessere unbedingte
+wiederholbare Liquidität laut kanonischem Engine-Fakt und genügend restliche
+Aktionen bis zur vollständigen Wunschreserve erforderlich. Tags, akute
+Schadens-/Deliverygefahr, verlorener Handpuffer, sichtbare Scorebedrohung und
+Matchpointnähe erlauben diese Freigabe nicht. Endliche Pools, Draw-Mischungen
+und bedingte Erträge begründen sie nicht. Der gequotete spätere Ertrag wird
+niemals dem aktuellen Geldbestand zugeschlagen; jede Folgeaction wird erneut
+bewertet. Bestehende Bank- und Entwicklungspläne konkurrieren weiter regulär.
+Paarung557/R1/G13/D105 belegt für vier echte Engineaktionen denselben gesamten
+Endzustand mit einer zusätzlichen Credit sowohl bei Newsgroup- als auch bei
+Short-Term-Contract-Installation zuerst. G23/D25 ergänzt die knappe Bank;
+Gegenmodelle sichern Klick-, MU-, Quellen-, Schadens- und Zeitschranken.
 
 Die Admission in `development-discovery.ts` schützt die vorhandene
 Mindesthandreserve auch vor einer optionalen Installation, deren echte

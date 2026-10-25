@@ -270,6 +270,7 @@ function runnerTargetedIceTrashCentralPreparationSignals(
         (signal) => signal.pressureId === commitment.ownerDedupeKey,
       );
       if (!owner) return [];
+      const { supportNeedId: _supersededSupportNeed, ...preparedOwner } = owner;
       const payoffValue =
         planTargets.find(
           (target) =>
@@ -278,7 +279,7 @@ function runnerTargetedIceTrashCentralPreparationSignals(
         )?.payoffValue ?? 0;
       return [
         {
-          ...owner,
+          ...preparedOwner,
           reachable: true,
           marginalValue: payoffValue,
           evidenceCode: `runner_targeted_ice_trash_preflight:${commitment.serverId}:${commitment.targetIceInstanceId}`,
