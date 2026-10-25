@@ -88,6 +88,11 @@ verbleibende allgemeine Geld. Sie rekonstruieren es nicht aus einer pauschalen
 Ausgabenreihenfolge. Ein fehlender Ledger für einen abgeschlossenen Pfad oder
 ein ungültiges explizites Teilkonto scheitert sichtbar. Ein einzelner
 numerischer Budgetwert bezeichnet ausdrücklich nur allgemeine Credits.
+Der gemeinsame Budgetproduzent projiziert erneuerbare öffentliche Rig-Pools
+nur bei ausdrücklich gewähltem `next_runner_turn`-Horizont aus der
+Engine-Auffüllquote. Der Standard und aktive Runs behalten aktuelle Mengen.
+Kapazität ersetzt einen erschöpften Betrag, ohne Zweckbindungen, Stealth-
+Quellkonten oder Hosting zu verlieren; sie wird nicht zu allgemeinem Geld.
 
 Im aktiven Run übernehmen Encounter-, Pump-, Restpfad-, Fortgebühren- und
 Informationsgrenzen-Quotes den aktuellen Engine-Pool

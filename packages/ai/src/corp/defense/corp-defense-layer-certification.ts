@@ -117,7 +117,12 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       input.playerView.stateVersion,
       new Set(financedLayerInstanceIds),
       runner.rig,
-      runnerRunPathCreditBudgetWithVisiblePools(runner.credits, runner.rig),
+      runnerRunPathCreditBudgetWithVisiblePools(runner.credits, runner.rig, {
+        creditPoolHorizon:
+          input.playerView.activeSide === "corp"
+            ? "next_runner_turn"
+            : "current",
+      }),
       [...server.root],
       visibleCorpCredits,
       {

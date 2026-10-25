@@ -756,6 +756,15 @@ wird neu bewertet. Unbekannte Ziehkarten, mehrere hypothetische Installationen,
 Regionersatz und nicht gequotete Mechaniken sind keine zertifizierten Routen.
 Öffentliches, unbedingtes und unbegrenzt wiederholbares Runner-Krediteinkommen
 wird bei der Vorbereitung berücksichtigt; verdeckte Events bleiben unbekannt.
+Die reife Remote-Zertifizierung und das Scorefenster verwenden für den nächsten
+Runnerzug denselben typisierten Pfadledger. Nur die explizite Engine-Quote
+`start_of_runner_turn/refill_to_capacity_if_used` hebt einen installierten
+öffentlichen Pool auf seine Kapazität an; voller Pool und Auffüllung werden
+nicht addiert. Zweckbindung, Stealth-Quelle und Breaker-Hosting bleiben erhalten.
+Im aktuellen Runnerfenster gilt ausschließlich der aktuelle Betrag.
+Beschränkte Breaker-Credits finanzieren weder die vorbereitete Installation
+noch allgemeine Zahlungen. Fehlende oder ungültige Auffüllquoten scheitern
+sichtbar. Paarung 555 R2 G5 D276/D282 belegt den entscheidenden Credit.
 
 Ziel ist die kleinste belegte Zugriffswahrscheinlichkeit pro Run; bei Gleichstand
 entscheiden Agenda-Punktkosten, gesamte Creditkosten und Installationsklicks.

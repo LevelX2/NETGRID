@@ -1,5 +1,6 @@
 import type {
   AiDecisionInput,
+  CounterDisplay,
   CounterCreditUse,
   VisibleCard,
 } from "@netgrid/shared";
@@ -114,9 +115,13 @@ export function fundRunnerRunPathPayment(
 export function runnerRunPathCreditBudgetWithVisiblePools(
   credits: number,
   rigCards: readonly VisibleCard[],
-  options: { excludeStealthCredits?: boolean; liquidCredits?: number } = {},
+  options: {
+    excludeStealthCredits?: boolean;
+    liquidCredits?: number;
+    creditPoolHorizon?: "current" | "next_runner_turn";
+  } = {},
 ): RunnerRunPathCreditBudget {
-  const rigBudget = visibleRunnerRunPathCreditBudgetForRig(rigCards);
+  const rigBudget = visibleRunnerRunPathCreditBudgetForRig(rigCards, options);
   const stealthCreditsBySourceId = options.excludeStealthCredits
     ? {}
     : rigBudget.stealthCreditsBySourceId;
@@ -168,6 +173,7 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
 
 export function visibleRunnerRunPathCreditBudgetForRig(
   rigCards: readonly VisibleCard[],
+  options: { creditPoolHorizon?: "current" | "next_runner_turn" } = {},
 ): Omit<
   Required<RunnerRunPathCreditBudget>,
   | "runOnlyCredits"
@@ -189,9 +195,13 @@ export function visibleRunnerRunPathCreditBudgetForRig(
   for (const card of rigCards) {
     if (card.known === false) continue;
     for (const display of card.counterDisplays ?? []) {
-      const amount = normalizeCreditAmount(display.amount);
-      if (amount <= 0) continue;
       const use = runPathCreditPoolUse(display.creditPool?.uses ?? []);
+      if (!use) continue;
+      const amount = visibleRunCreditPoolAmount(
+        display,
+        options.creditPoolHorizon,
+      );
+      if (amount <= 0) continue;
       if (use) {
         if (
           use === "icebreakerCredits" &&
@@ -224,6 +234,29 @@ export function visibleRunnerRunPathCreditBudgetForRig(
     }
   }
   return budget;
+}
+
+/** Only an explicit future horizon may consume the Engine's public refill quote. */
+function visibleRunCreditPoolAmount(
+  display: CounterDisplay,
+  horizon: "current" | "next_runner_turn" | undefined,
+): number {
+  const pool = display.creditPool;
+  if (horizon !== "next_runner_turn" || !pool?.refresh)
+    return normalizeCreditAmount(display.amount);
+  const capacity = pool.capacity;
+  if (
+    pool.refresh.timing !== "start_of_runner_turn" ||
+    pool.refresh.behavior !== "refill_to_capacity_if_used" ||
+    (pool.kind !== "restricted_credit" && pool.kind !== "recurring_credit") ||
+    capacity === undefined ||
+    !Number.isSafeInteger(capacity) ||
+    capacity < 0 ||
+    !Number.isSafeInteger(display.amount) ||
+    display.amount < 0
+  )
+    throw new Error("runner_future_run_credit_pool_invalid_refresh_quote");
+  return Math.max(display.amount, capacity);
 }
 
 export function runPathCreditPoolUse(

@@ -2,7 +2,10 @@ import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
-import { assessEngineCertifiedPostRezIcePath } from "../../visible-run-analysis";
+import {
+  assessEngineCertifiedPostRezIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../../visible-run-analysis";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-route";
 import { semanticRuntimeCorpObservedRemoteReachability } from "../semantic-runtime-corp-remote-reachability";
 import { visibleRunnerExposureCreditValue } from "../visible-runner-action-economy";
@@ -91,9 +94,7 @@ function scoringWindowAccessAssessmentForMode(
   visibleBreakCost?: number;
   evidence: string[];
 } {
-  const visibleRunnerBaseContestCredits =
-    input.playerView.opponent.credits +
-    visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []);
+  const visibleRunnerBaseContestCredits = input.playerView.opponent.credits;
   const visibleRunnerExtraCredits = Math.max(0, Math.floor(extraRunnerCredits));
   const visibleRunnerPreRunCreditBonus =
     visibleRunnerExtraCredits > 0
@@ -102,16 +103,26 @@ function scoringWindowAccessAssessmentForMode(
           visibleRunnerExtraCredits,
         )
       : 0;
-  const visibleRunnerContestCredits =
+  const visibleRunnerGeneralContestCredits =
     visibleRunnerBaseContestCredits +
     visibleRunnerExtraCredits +
     visibleRunnerPreRunCreditBonus;
   const runnerPathCandidates = visibleRunnerBreakerPathCandidates(
     input,
-    visibleRunnerContestCredits,
+    visibleRunnerGeneralContestCredits,
     input.side === "corp" && input.playerView.activeSide === "corp",
   );
   const baseRunnerPathCandidate = runnerPathCandidates[0]!;
+  const baseBudget = baseRunnerPathCandidate.creditBudget;
+  // Aggregate pressure is separate from payment affordability in the typed ledger.
+  const visibleRunnerContestCredits =
+    baseBudget.credits +
+    (baseBudget.icebreakerCredits ?? 0) +
+    (baseBudget.nonNoisyIcebreakerCredits ?? 0) +
+    (baseBudget.killerCredits ?? 0) +
+    Object.values(
+      baseBudget.hostedIcebreakerCreditsByBreakerInstanceId ?? {},
+    ).reduce((sum, amount) => sum + amount, 0);
   const visibleRunnerIcebreakerCount =
     baseRunnerPathCandidate.visibleIcebreakerCount;
   const postRezProjection =
@@ -132,7 +143,7 @@ function scoringWindowAccessAssessmentForMode(
                 input.playerView.stateVersion,
                 financedIceInstanceIds,
                 candidate.rig,
-                candidate.creditsAfterStagedInstall,
+                candidate.creditBudget,
                 [...server.root],
               ),
             }));
@@ -182,13 +193,13 @@ function scoringWindowAccessAssessmentForMode(
             input.playerView.stateVersion,
             postRezProjection?.financedIceInstanceIds ?? new Set<string>(),
             candidate.rig,
-            candidate.creditsAfterStagedInstall,
+            candidate.creditBudget,
             [...server.root],
           )
         : assessKnownRezzedIcePath(
             [...server.ice],
             candidate.rig,
-            candidate.creditsAfterStagedInstall,
+            candidate.creditBudget,
             [...server.root],
           ),
   }));
@@ -271,26 +282,6 @@ function scoringWindowAccessAssessmentForMode(
   };
 }
 
-function visibleRunnerRunCreditPool(rig: readonly VisibleCard[]): number {
-  return rig.reduce((sum, card) => {
-    if (card.known === false) return sum;
-    return (
-      sum +
-      (card.counterDisplays ?? []).reduce((cardSum, display) => {
-        const uses = display.creditPool?.uses ?? [];
-        if (
-          uses.includes("using_icebreaker_during_run") ||
-          uses.includes("using_icebreaker_during_run_non_noisy") ||
-          uses.includes("using_killer_during_run")
-        ) {
-          return cardSum + Math.max(0, Math.floor(display.amount));
-        }
-        return cardSum;
-      }, 0)
-    );
-  }, 0);
-}
-
 function visibleRunnerPreRunCreditBurstBonus(
   rig: readonly VisibleCard[],
   availableCreditActions: number,
@@ -370,7 +361,7 @@ function visibleRunnerInstalledIcebreakerCount(
 
 type ScoringWindowRunnerPathCandidate = {
   rig: VisibleCard[];
-  creditsAfterStagedInstall: number;
+  creditBudget: ReturnType<typeof runnerRunPathCreditBudgetWithVisiblePools>;
   stagedInstallCreditCost: number;
   stagedBreakerCount: number;
   visibleIcebreakerCount: number;
@@ -378,13 +369,20 @@ type ScoringWindowRunnerPathCandidate = {
 
 function visibleRunnerBreakerPathCandidates(
   input: AiDecisionInput,
-  visibleRunnerContestCredits: number,
+  visibleRunnerGeneralContestCredits: number,
   futureRunnerTurnStartAvailable: boolean,
 ): ScoringWindowRunnerPathCandidate[] {
   const installedRig = [...(input.playerView.opponent.rig ?? [])];
+  const creditPoolHorizon = futureRunnerTurnStartAvailable
+    ? ("next_runner_turn" as const)
+    : ("current" as const);
   const baseCandidate: ScoringWindowRunnerPathCandidate = {
     rig: installedRig,
-    creditsAfterStagedInstall: visibleRunnerContestCredits,
+    creditBudget: runnerRunPathCreditBudgetWithVisiblePools(
+      visibleRunnerGeneralContestCredits,
+      installedRig,
+      { creditPoolHorizon },
+    ),
     stagedInstallCreditCost: 0,
     stagedBreakerCount: 0,
     visibleIcebreakerCount: visibleRunnerInstalledIcebreakerCount(installedRig),
@@ -405,13 +403,16 @@ function visibleRunnerBreakerPathCandidates(
         Math.floor(card.counters?.shell ?? 0) -
           (futureRunnerTurnStartAvailable ? 1 : 0),
       );
-      if (installCreditCost > visibleRunnerContestCredits) return [];
+      if (installCreditCost > visibleRunnerGeneralContestCredits) return [];
       const projectedRig = [...installedRig, card];
       return [
         {
           rig: projectedRig,
-          creditsAfterStagedInstall:
-            visibleRunnerContestCredits - installCreditCost,
+          creditBudget: runnerRunPathCreditBudgetWithVisiblePools(
+            visibleRunnerGeneralContestCredits - installCreditCost,
+            projectedRig,
+            { creditPoolHorizon },
+          ),
           stagedInstallCreditCost: installCreditCost,
           stagedBreakerCount: 1,
           visibleIcebreakerCount:
