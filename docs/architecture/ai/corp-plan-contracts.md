@@ -609,6 +609,19 @@ zugelassen. Der Economy-Owner liefert nur seine bestehenden Auszahlungsfakten;
 keine Lockerung regulärer Schutzanforderungen über ein Runnerfenster und keine
 vermutete Auszahlung ungeresster oder nicht ausführbarer Assets.
 
+Bei einer übervollen reinen Agendahand umfasst die bestehende riskante
+Entlastungsroute auch eine aktuelle legale Asset-zu-Agenda-Ersetzung in einem
+vorhandenen Fort, wenn die einzige dortige Assetquelle eine Engine-gequotete
+Counterbank mit exakt null Countern ist. Die normale Scorehorizont- und
+Finanzierungsprüfung bleibt erhalten; der Defense-Owner liefert weiterhin die
+aktuelle Zugriffsquote für den Variantenvergleich. Eine gefüllte Bank, eine
+fehlende oder veraltete Quellen-/Serverquote und eine gewöhnliche Hand öffnen
+diese Ausnahme nicht. Andere Assets erhalten keine pauschale Ersetzungsfreigabe.
+Die nativen Zustände aus Paarung 554, Runde 1, G10 D301, G11 D230 und G15 D180
+belegen, dass derselbe Agenda-Score sonst im nackten neuen Remote zugelassen,
+im vorhandenen Fort jedoch vor dem Risiko-/Kostenvergleich ausgeschlossen wurde.
+Die Ausnahme verspricht keinen sicheren Score über den Runnerzug.
+
 ### Vertikale Implementierung der Agendaentscheidung
 
 `packages/ai/src/corp/score/` bündelt den Owner:

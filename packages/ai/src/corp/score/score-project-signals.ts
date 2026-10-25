@@ -6,6 +6,7 @@ import {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import { readCorpCounterBankPreparationQuote } from "../../plans/corp-counter-bank-preparation-quote";
 import { corpScorePreservesMandatoryDrawHorizon } from "./score-mandatory-draw-horizon";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -422,7 +423,8 @@ export function scoreProjectForCandidate(
       candidate.actionId,
     );
     // A forced agenda discard creates a new, publicly accessible scoring
-    // source in Archives. An empty remote keeps the same card concealed and
+    // source in Archives. An empty remote or a fort occupied only by an
+    // Engine-certified empty counter bank keeps the same card concealed and
     // preserves a bounded score attempt. This is a risky Score
     // route, never a claim that the Runner cannot steal it.
     const forcedAgendaDiscardRelief =
@@ -431,9 +433,29 @@ export function scoreProjectForCandidate(
         visibleCardIsAgenda(input, card),
       ) &&
       (serverId === "new_remote" ||
-        input.playerView.servers.some(
-          (server) => server.id === serverId && server.root.length === 0,
-        )) &&
+        input.playerView.servers.some((server) => {
+          if (server.id !== serverId) return false;
+          if (server.root.length === 0) return true;
+          const action = input.legalActions.find(
+            (action) => action.actionId === candidate.actionId,
+          );
+          if (action?.payload?.rootReplacement !== "asset_to_agenda")
+            return false;
+          const assets = server.root.filter((card) => card.type === "asset");
+          return (
+            assets.length === 1 &&
+            server.root.every(
+              (card) =>
+                card.known && ["asset", "upgrade"].includes(card.type ?? ""),
+            ) &&
+            readCorpCounterBankPreparationQuote(
+              input,
+              assets[0]!,
+              "installed_root",
+              server.id,
+            )?.advancementCounters === 0
+          );
+        })) &&
       (corpAgendaInstallHasCertifiedNearTermScoreHorizon(
         input,
         candidate,
@@ -1407,8 +1429,7 @@ export function sameTurnScoreConversionProjectsForCandidate(
             },
           }
         : {}),
-      ...(step.kind === "place_advancement" &&
-      step.advancementAmount > 0
+      ...(step.kind === "place_advancement" && step.advancementAmount > 0
         ? {
             advancementCounterChoiceBinding: {
               kind: "place_advancement" as const,
@@ -1420,10 +1441,12 @@ export function sameTurnScoreConversionProjectsForCandidate(
                 ...(step.offTargetCardId !== undefined &&
                 step.offTargetAdvancementAmount !== undefined &&
                 step.offTargetAdvancementAmount > 0
-                  ? [{
-                      targetCardId: step.offTargetCardId,
-                      amount: step.offTargetAdvancementAmount,
-                    }]
+                  ? [
+                      {
+                        targetCardId: step.offTargetCardId,
+                        amount: step.offTargetAdvancementAmount,
+                      },
+                    ]
                   : []),
               ],
             },
