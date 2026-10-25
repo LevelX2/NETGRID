@@ -450,7 +450,11 @@ Der Plan muss unterscheiden:
 Ein unbekanntes avanciertes Root darf vor einem bereits bezahlbaren Basisrun
 eine exakt gebundene Einzelkarten-Aufdeckung erhalten. Der Remote-Owner prüft
 die aktuellen Aufdeckkosten, mindestens einen verbleibenden Run-Click sowie
-Pfadkosten und native Runreserve gemeinsam. Ein offener Fundingbedarf, ein
+Pfadkosten und native Runreserve gemeinsam. Ein allgemeiner Wunsch nach
+weiterer Liquidität sperrt diesen Schritt nicht, wenn der vorhandene
+Run-Konversionsnachweis die konkrete Route bereits freigibt und nach der
+Aufdeckung deren Geld- und Aktionsbedarf gedeckt bleibt. Ein offener
+Fundingbedarf, ein
 bekanntes oder bereits exakt aufgedecktes Root und der letzte Click erzeugen
 diese Vorbereitung nicht. Der konkrete Informationsschritt bleibt bei
 `runner.contest_remote`; weitere Sabotage- und Bypassrouten behalten ihre
@@ -463,7 +467,9 @@ noch eine neue Strategie. Fehlende oder widersprüchliche Bindung scheitert
 geschlossen. Nach der privaten Beobachtung wird der mögliche Run regulär
 neu bewertet, ohne die bisherige Run-Action über die Informationsgrenze zu
 fixieren. Paarung 493/R1/G7/D44 und native Engine-Gegenfälle sichern diesen
-Übergang; allgemeine ICE-Offenlegung aus SP-358 bleibt eine eigene Frage.
+Übergang; Paarung554/R4/G14/D49 ergänzt den nativen Fall unterhalb der
+allgemeinen Economy-Zielreserve. Allgemeine ICE-Offenlegung aus SP-358
+bleibt eine eigene Frage.
 
 Ein allgemeiner Matchpoint-Fokus wird vor den konkret bewerteten Remote-Routen
 zusammengeführt. Er darf deren aktuelle Finanzierungs- oder Coverage-Bindung,

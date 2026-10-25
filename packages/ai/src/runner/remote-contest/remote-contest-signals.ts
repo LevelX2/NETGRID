@@ -341,6 +341,7 @@ function runnerSameTurnAccessRemotePreparationSignals(
 
 function runnerRemoteInformationPreparationSignals(
   input: AiDecisionInput,
+  economy: RunnerEconomyPosture,
   candidates: readonly ActionSemanticCandidate[],
   runTargets: readonly RunnerRunTargetEvaluation[],
 ): RunnerRemoteContestSignalDraft[] {
@@ -396,7 +397,13 @@ function runnerRemoteInformationPreparationSignals(
             action.source === "basic_action",
         ) &&
         (evaluation.recommendation === "run_now" ||
-          evaluation.recommendation === "run_if_free") &&
+          evaluation.recommendation === "run_if_free" ||
+          runnerRunTargetCanConvertNow(
+            input,
+            economy,
+            evaluation,
+            candidates,
+          )) &&
         evaluation.score > 0,
     );
     const unknownAdvancedRoot = remote.root.some(
@@ -1247,7 +1254,12 @@ export function buildRunnerRemoteContestSignals({
     ...baseRemoteContestDrafts,
     // Information is an exact preparation of this remote. Later sabotage and
     // bypass routes still retain their independently certified bindings.
-    ...runnerRemoteInformationPreparationSignals(input, candidates, runTargets),
+    ...runnerRemoteInformationPreparationSignals(
+      input,
+      economy,
+      candidates,
+      runTargets,
+    ),
     ...runnerSameTurnAccessRemotePreparationSignals(
       baseRemoteContestDrafts,
       input,
