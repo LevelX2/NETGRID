@@ -19,7 +19,6 @@ import {
 } from "../../runtime/corp-funded-score-protection";
 import { corpHandDuplicateCount } from "../hand-management/hand-inventory-facts";
 import { corpKnownAgendaInventory } from "../../runtime/corp-known-agenda-inventory";
-import { isCorpOpeningTurnSerial } from "../../runtime/corp-opening-rush";
 import {
   readCorpCentralAgendaExposure,
   readKnownCorpCentralAgendaThreat,
@@ -208,6 +207,36 @@ export function corpIceInstallPositionEffect(
     : "not_excluded_by_position";
 }
 
+/** Current, bound Engine effects supply qualitative installation value.
+ * Printed future potential never adds a missing current subroutine. An explicit
+ * conditional paid stop remains potential for the existing funding assessment.
+ */
+export function corpIceInstallDefenseProfile(
+  input: AiDecisionInput,
+  action: LegalAction | undefined,
+  source: VisibleCard | undefined,
+  serverId: string,
+) {
+  if (
+    !action ||
+    !source ||
+    corpIceInstallPositionEffect(input, action, source, serverId) !==
+      "not_excluded_by_position"
+  )
+    return undefined;
+  const quote = readPostInstallEffectiveRunQuote(action, source);
+  if (!quote) return undefined;
+  const profile = visibleCorpIceDefenseProfile(source, quote.subroutines);
+  return {
+    ...profile,
+    hasImmediateStop:
+      profile.hasImmediateStop ||
+      quote.conditionalEncounterEffects?.some(
+        (effect) => effect.kind === "corp_paid_add_end_the_run_subroutine",
+      ) === true,
+  };
+}
+
 export function knownInstallRouteHasUsefulEffectBlockedByFunding(
   projection: CorpFundedIceInstallRouteProjection,
 ): boolean {
@@ -389,10 +418,16 @@ export function corpQualitativeIceStagingSignal(
   const sourceCard = input.playerView.own.gripOrHq.find(
     (card) => card.instanceId === action?.source,
   );
-  const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  const sourceDefense = corpIceInstallDefenseProfile(
+    input,
+    action,
+    sourceCard,
+    serverId,
+  );
   if (
     !action ||
     !sourceCard ||
+    !sourceDefense ||
     action.side !== "corp" ||
     action.type !== "install_card" ||
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
@@ -813,15 +848,21 @@ export function corpGlobalDefenseInstallRouteAssessment(
   const sourceCard = input.playerView.own.gripOrHq.find(
     (card) => card.instanceId === action.source,
   );
-  const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  const sourceDefense = corpIceInstallDefenseProfile(
+    input,
+    action,
+    sourceCard,
+    serverId,
+  );
   const positionEffect = corpIceInstallPositionEffect(
     input,
     action,
     sourceCard,
     serverId,
   );
-  if (positionEffect !== "not_excluded_by_position") {
-    return positionEffect === "unknown"
+  if (!sourceDefense || positionEffect !== "not_excluded_by_position") {
+    return positionEffect === "unknown" ||
+      (positionEffect === "not_excluded_by_position" && !sourceDefense)
       ? {
           knowledge: "unknown",
           evidenceCode: "corp_ice_install_position_effect_quote_unknown",
@@ -1135,8 +1176,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     isEmptyCentral &&
     otherCentralAlreadyProtected &&
     sourceDefense.isVisibleIce &&
-    (isCorpOpeningTurnSerial(input.playerView.turnSerial) ||
-      hasStructuredDefenseValue);
+    hasStructuredDefenseValue;
   const preferQualitativeSourceProgress =
     scorelineCentralTaxAllocation ||
     scoreMaterialCapacityRelease ||

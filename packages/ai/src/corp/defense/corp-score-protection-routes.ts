@@ -22,6 +22,7 @@ import {
 } from "../score/score-protection-needs";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import {
+  corpIceInstallDefenseProfile,
   corpIceInstallHasCurrentCompleteRezQuote,
   corpIceInstallPositionEffect,
   corpSpendConsumesKnownCentralRezReserve,
@@ -39,7 +40,6 @@ import {
 import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import { finiteNonNegativeIntegerOrResolutionFailure } from "../../runtime/exact-action-cost-facts";
 import { visibleOwnCardByInstanceId } from "../../runtime/runner-action-source-facts";
-import { visibleCorpIceDefenseProfile } from "../../runtime/semantic-runtime-corp-effective-defense";
 import { candidateIsVisibleCorpIceInstall } from "../../runtime/visible-action-facts";
 type CorpProductiveScoreProtectionInstallRoute = Readonly<{
   project: CorpScoreProjectSignal;
@@ -297,7 +297,16 @@ export function corpScoreProtectionStagingInstallSignal(
     candidate.sourceCardInstanceId,
   );
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
-  const sourceDefense = visibleCorpIceDefenseProfile(source);
+  const stagingAction = input.legalActions.find(
+    (a) => a.actionId === candidate.actionId,
+  );
+  const sourceDefense = corpIceInstallDefenseProfile(
+    input,
+    stagingAction,
+    source,
+    serverId,
+  );
+  if (!sourceDefense) return undefined;
   const startsFirstScoreProtectionLayer =
     serverId === "new_remote" || existingRemote?.ice.length === 0;
   const reinforcesExistingIceRole =

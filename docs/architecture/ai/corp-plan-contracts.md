@@ -1878,6 +1878,16 @@ beschreibt eine Möglichkeit, keine Zielwahrscheinlichkeit. Der bestehende
 globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu;
 er garantiert weder ihre Auswahl noch eine vollständig bessere Allokation.
 
+Qualitative ICE-Installationsfreigaben für zentrale Deckung, HQ-Kapazität,
+projektgebundenes Staging und Score-Schutz verwenden denselben aktuellen,
+instanz-, fort- und versionsgebundenen Engine-Subroutinenstand. Gedrucktes
+Potenzial darf keine fehlende aktuelle Wirkung ergänzen. Explizit projizierte
+bezahlte End-the-run-Potenziale bleiben für die vorhandene Fundingprüfung
+erhalten. Auch die erste zentrale Schicht benötigt einen gegenwärtigen
+Schutzeffekt; ein leerer Platz allein erzeugt diesen nicht. Daraus entsteht
+kein Verbot einer konkret modellierten späteren Kombination: Eine weitere
+äußere Installation benötigt ihren eigenen belegten Projekt- und Wirkungsvertrag.
+
 Aktionsbasierter ICE-Rez-Support darf eine nach vollständiger aktueller,
 an ICE-Instanz, Definition, Fort und StateVersion gebundener Engine-Projektion
 wirkungslose Zielschicht nicht als direkte Verteidigung aktivieren. Leere
