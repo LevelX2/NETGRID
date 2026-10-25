@@ -451,7 +451,8 @@ export function uniqueCoverageGaps(
       (coverageDevelopment
         ? coverageDevelopment.deckHasAlternative
         : runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole)) ||
-      supportActions.directSearchActionIds.length > 0;
+      supportActions.directSearchActionIds.length > 0 ||
+      supportActionsBeforeCadence.drawForAnswerActionIds.length > 0;
     const heapRecoveryPreparation =
       !visibleAnswer && supportActions.directSearchActionIds.length === 0
         ? runnerCoverageHeapPreparation(

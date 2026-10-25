@@ -268,6 +268,14 @@ export function coverageSupportActionIds(
   const deckHasStackAnswer =
     options.deckHasStackAnswerOverride ??
     runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole);
+  const deckHasDrawAnswer =
+    deckHasStackAnswer ||
+    (options.deckHasStackAnswerOverride === undefined &&
+      runnerDeckHasHeapRecoveryDrawAnswer(
+        input,
+        deckCapabilities,
+        requiredRole,
+      ));
   const targetDefinitionId =
     options.targetDefinitionIdOverride ??
     runnerPreferredCoverageSearchDefinitionId(deckCapabilities, requiredRole);
@@ -334,7 +342,7 @@ export function coverageSupportActionIds(
     searchEngineSetupCandidates.map((candidate) => candidate.actionId),
   );
   const cardDrawForAnswerCandidates = (
-    deckHasStackAnswer ? candidates : []
+    deckHasDrawAnswer ? candidates : []
   ).filter(
     (candidate) =>
       !matchingSearchActionIds.has(candidate.actionId) &&
@@ -377,7 +385,7 @@ export function coverageSupportActionIds(
       })
     : [];
   const sideSafeRoleBasicDraws =
-    deckHasStackAnswer &&
+    deckHasDrawAnswer &&
     (options.handRotation?.exactKnownNeedDrawAdmissible === true ||
       (options.terminalRemoteCoverageThreat === true &&
         options.handRotation?.stackHasCards === true)) &&
@@ -447,6 +455,45 @@ export function coverageSupportActionIds(
       ...sideSafeRoleBasicDraws,
     ].map((candidate) => candidate.actionId),
   };
+}
+
+function runnerDeckHasHeapRecoveryDrawAnswer(
+  input: AiDecisionInput,
+  deckCapabilities: DeckCapabilityProfile,
+  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+): boolean {
+  if (
+    input.playerView.own.stackOrRdCount <= 0 ||
+    !input.playerView.own.heapOrArchives.some(
+      (card) =>
+        card.known &&
+        visibleCardCoversRequiredCoverage(card, requiredRole, (cardId) =>
+          rolesForDeckDoctrineCard(cardId ?? ""),
+        ),
+    )
+  ) {
+    return false;
+  }
+  return (
+    deckCapabilities.runner?.searchAccess.tools.some((tool) => {
+      if (tool.status !== "in_deck" || !tool.canSearchBreakers) return false;
+      const effects = AI_HINTS_BY_CARD.get(tool.cardId)?.effects;
+      return (
+        effects?.some(
+          (effect) =>
+            effect.kind === "card_recovery" &&
+            effect.scope === "heap" &&
+            effect.target === "search_trash_to_grip",
+        ) === true &&
+        effects.some(
+          (effect) =>
+            effect.kind === "search" &&
+            effect.scope === "heap" &&
+            (effect.target === "program" || effect.target === "any_card"),
+        )
+      );
+    }) ?? false
+  );
 }
 
 export function runnerCoverageSearchTargetIsPayable(

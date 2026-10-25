@@ -652,9 +652,18 @@ Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
 
 Ein zusammengesetzter Karteneffekt mit positivem Draw-Anteil darf auch bei
 genau einer Karte den vorhandenen `draw_for_answer`-Bedarf bedienen. Der
-bekannte Stack muss weiterhin eine passende Antwort enthalten, die aktuelle
-native Aktion muss vorhanden sein und die bestehende Draw-Tax-Prüfung bleibt
-wirksam. Der Creditanteil erzeugt keinen zweiten Economy-Executor. Die
+bekannte Stack muss weiterhin eine passende Antwort enthalten. Bei fehlender
+Coverage zählt auch eine nach eigener Deckrekonstruktion verbliebene
+Heap-Suchrückholung, wenn ein passender Breaker sichtbar im Heap liegt und
+die kanonischen Effekte Programme oder beliebige Karten zurückholen.
+Eine reine Top-Heap-Rückholung genügt diesem Suchnachweis nicht. Dies erweitert
+nur die Ziehroute; direkte Stack-Suche und Suchwerkzeug-Aufbau benötigen
+weiterhin eine tatsächliche Stack-Antwort. Explizite Kostenverbesserungsfilter
+bleiben unverändert. Nach dem Ziehen wird die tatsächlich erhaltene Karte
+neu geprüft und gebunden; weder Stackreihenfolge noch sofortige Konversion
+sind zugesichert (SP-653, Paarung 555). Die aktuelle native Aktion muss
+vorhanden sein und die bestehende Draw-Tax-Prüfung bleibt wirksam.
+Der Creditanteil erzeugt keinen zweiten Economy-Executor. Die
 Originalentscheidung und eine echte Engine-Anwendung prüfen Plananschluss,
 Klick-, Credit- und Kartenänderung; bei leerem Stack entsteht kein Coverage-Draw.
 
