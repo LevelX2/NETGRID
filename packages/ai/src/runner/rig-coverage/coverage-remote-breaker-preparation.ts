@@ -1,7 +1,13 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
-import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
+import {
+  buildRunnerEconomyPosture,
+  evaluateRunnerRunTargets,
+  type RunnerRunTargetEvaluation,
+} from "../../runner-run-target-evaluation";
+import type { RunnerCoverageServices } from "./coverage-services";
+import { runnerAgendaStealCreditRequirement } from "../../run-analysis/runner-agenda-steal-cost";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import {
   runnerBreakerUpgradeRequiredRole,
@@ -15,14 +21,17 @@ export function runnerRemoteBreakerPreparation(
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
   deck: DeckCapabilityProfile,
+  services: Pick<RunnerCoverageServices, "runnerRunTargetCanConvertNow">,
 ): RunnerCostEffectiveCoverageRecovery | undefined {
+  const currentRouteIsCostBlocked =
+    evaluation.pathPassability === "blocked_unpayable";
   if (
     evaluation.targetKind !== "remote" ||
     evaluation.runActionProjection?.sourceKind !== "basic_action" ||
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessPayoff === "known_low_value" ||
-    evaluation.accessPayoffContestable === false ||
-    evaluation.score <= 0
+    (!currentRouteIsCostBlocked &&
+      (evaluation.accessPayoffContestable === false || evaluation.score <= 0))
   )
     return undefined;
   const server = input.playerView.servers.find(
@@ -106,9 +115,74 @@ export function runnerRemoteBreakerPreparation(
       if (
         input.playerView.own.clicks < install.clickCost + runClicks ||
         input.playerView.own.credits < total ||
-        evaluation.stealOrTrashAffordable === false
+        (!currentRouteIsCostBlocked &&
+          evaluation.stealOrTrashAffordable === false)
       )
         return [];
+      let sameTurnRunConversion: RunnerCostEffectiveCoverageRecovery["sameTurnRunConversion"];
+      if (currentRouteIsCostBlocked) {
+        // Current liquidity is not a veto on a cheaper, complete same-turn
+        // route. Requote that exact basic run after the native installation.
+        // Unknown encounters do not certify this cost-blocked conversion.
+        if (server.ice.some((ice) => !ice.known || !ice.rezzed)) return [];
+        const projectedInput: AiDecisionInput = {
+          ...input,
+          playerView: {
+            ...input.playerView,
+            own: {
+              ...input.playerView.own,
+              credits: input.playerView.own.credits - install.creditCost,
+              clicks: input.playerView.own.clicks - install.clickCost,
+              memoryUsed: memoryUsed! + card.memoryCost!,
+              gripOrHq: input.playerView.own.gripOrHq.filter(
+                (entry) => entry.instanceId !== card.instanceId,
+              ),
+              rig: [...rig, { ...card, rezzed: true }],
+            },
+          },
+        };
+        const targetParams = { input: projectedInput, deckCapabilities: deck };
+        const projectedTarget = evaluateRunnerRunTargets(targetParams).find(
+          (target) =>
+            target.actionId === evaluation.actionId &&
+            target.targetServerId === server.id,
+        );
+        if (
+          !projectedTarget ||
+          projectedTarget.score <= 0 ||
+          projectedTarget.accessPayoffContestable === false ||
+          projectedTarget.knownAccessState === "known_no_current_payoff" ||
+          projectedTarget.stealOrTrashAffordable === false ||
+          !services.runnerRunTargetCanConvertNow(
+            projectedInput,
+            buildRunnerEconomyPosture(targetParams),
+            projectedTarget,
+            candidates.filter(
+              (candidate) => candidate.actionId !== install.actionId,
+            ),
+          )
+        )
+          return [];
+        const agendaIds = projectedTarget.accessFacts?.knownTargetDefinitionIds;
+        const stealCredits = runnerAgendaStealCreditRequirement(
+          projectedInput,
+          server.id,
+          agendaIds?.length ? agendaIds : undefined,
+        );
+        if (
+          stealCredits === undefined ||
+          input.playerView.own.credits < total + stealCredits
+        )
+          return [];
+        sameTurnRunConversion = {
+          targetRunActionId: evaluation.actionId,
+          requiredCredits: total + stealCredits,
+          requiredClicksAfterFunding: install.clickCost + runClicks,
+          projectedKnownPathCost: cost!,
+          postRunCreditFloor: 0,
+          installProjection: "current_legal_action",
+        };
+      }
       return [
         {
           requiredRole: role,
@@ -118,6 +192,7 @@ export function runnerRemoteBreakerPreparation(
           targetDefinitionId: breaker.cardId,
           recoveryMode: "install_visible_answer" as const,
           remotePreparation: true as const,
+          ...(sameTurnRunConversion ? { sameTurnRunConversion } : {}),
           evidenceCodes: [
             `remote_breaker_preparation:${server.id}`,
             `remote_breaker_preparation_current_known_cost:${currentCost}`,

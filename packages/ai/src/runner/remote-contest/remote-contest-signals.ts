@@ -674,10 +674,11 @@ function bindRunnerRemoteRunActionAssessments(
     const terminalRemoteContestIsDirectlyMandatory =
       runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
     const directRunRouteReady =
-      evaluation.recommendation === "run_now" ||
-      evaluation.recommendation === "run_if_free" ||
-      productiveProbeCanConvertNow ||
-      directRunCanConvertNow;
+      evaluation.prerunReserveQuote?.status !== "blocked" &&
+      (evaluation.recommendation === "run_now" ||
+        evaluation.recommendation === "run_if_free" ||
+        productiveProbeCanConvertNow ||
+        directRunCanConvertNow);
     const exactUrgentPayoffOverridesNegativeRiskScore =
       runnerRunHasExactUrgency(input, evaluation) &&
       evaluation.recommendation === "run_now";
@@ -695,6 +696,7 @@ function bindRunnerRemoteRunActionAssessments(
       signal.reachable &&
       signal.marginalValue > 0 &&
       !lacksDifferentialPayoff &&
+      evaluation.prerunReserveQuote?.status !== "blocked" &&
       (terminalRemoteContestIsDirectlyMandatory ||
         (specialRouteMembership
           ? preferredActionIds.has(evaluation.actionId)
@@ -779,6 +781,9 @@ function runnerRemoteRunVariantNonproductiveEvidence(
   fundingSupport: RunnerRunFundingSupport | undefined,
   preferredActionIds: ReadonlySet<string>,
 ): string {
+  if (evaluation.prerunReserveQuote?.status === "blocked") {
+    return `runner_remote_run_variant_prerun_reserve_blocked:${signal.serverId}`;
+  }
   if (signal.routePreparation) {
     return `runner_remote_run_deferred_to_bound_preparation:${signal.serverId}:${signal.routePreparation}`;
   }
@@ -898,6 +903,69 @@ export function buildRunnerRemoteContestSignals({
       ];
     }),
     ...bestRunTargetsByServer(input, economy, runTargets, candidates)
+      .map((current) => {
+        if (runnerRunTargetCanConvertNow(input, economy, current, candidates))
+          return current;
+        const currentRun = input.legalActions.find(
+          (action) => action.actionId === current.actionId,
+        );
+        if (!currentRun)
+          throw new PlanResolutionFailure("invalid_support_graph", {
+            side: input.side,
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            legalActionTypes: input.legalActions.map((action) => action.type),
+            unresolvedActionIds: [current.actionId],
+            owner: "plan_module",
+            removalCondition:
+              "A current Remote run evaluation must retain its native LegalAction before route comparison.",
+          });
+        const currentRunCost =
+          current.pathCost +
+          currentRun.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
+        const preparation = coverageGaps
+          .filter(
+            (gap) =>
+              gap.requesterModuleId === "runner.contest_remote" &&
+              gap.targetServerId === current.targetServerId &&
+              gap.needKind === "cost_ineffective_coverage" &&
+              gap.sameTurnRunConversion?.installProjection ===
+                "current_legal_action" &&
+              gap.sameTurnRunConversion.requiredCredits <=
+                input.playerView.own.credits &&
+              gap.sameTurnRunConversion.requiredClicksAfterFunding <=
+                input.playerView.own.clicks &&
+              gap.sameTurnRunConversion.requiredCredits -
+                gap.sameTurnRunConversion.postRunCreditFloor <
+                currentRunCost,
+          )
+          .sort(
+            (a, b) =>
+              a.sameTurnRunConversion!.requiredCredits -
+                a.sameTurnRunConversion!.postRunCreditFloor -
+                (b.sameTurnRunConversion!.requiredCredits -
+                  b.sameTurnRunConversion!.postRunCreditFloor) ||
+              a.gapId.localeCompare(b.gapId),
+          )[0];
+        if (!preparation) return current;
+        const preparedTarget = runTargets.find(
+          (target) =>
+            target.actionId === preparation.targetRunActionId &&
+            target.targetServerId === current.targetServerId,
+        );
+        if (!preparedTarget)
+          throw new PlanResolutionFailure("invalid_support_graph", {
+            side: input.side,
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            legalActionTypes: input.legalActions.map((action) => action.type),
+            unresolvedActionIds: [preparation.targetRunActionId!],
+            owner: "plan_module",
+            removalCondition:
+              "A funded cost-preparation need must retain its exact current run evaluation and Remote parent.",
+          });
+        return preparedTarget;
+      })
       .filter((evaluation) => {
         if (
           evaluation.targetKind === "remote" &&

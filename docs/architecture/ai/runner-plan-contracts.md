@@ -471,6 +471,12 @@ Zugriffsvertrag und Risikoquote nicht überschreiben. Ein bereits berechneter
 Bank-Support bleibt damit am selben Remote-Parent und Bedarf gebunden; eine
 fehlende bezahlbare Route wird durch den Bedrohungsfokus nicht ausführbar.
 
+Jede unmittelbar ausführbare Run-Variante prüft ihre eigene Vorabreserve.
+Die Bereitschaft einer Bypass-Variante desselben Servers zertifiziert weder
+den normalen Run noch dessen unbekannte Encounters. Ein blockierter
+Variantenvertrag erhält eine ausdrückliche Ablehnung; der ausführbare
+Geschwisterpfad bleibt beim selben Remote-Parent.
+
 Coverage-Unterstützung gehört zur exakt bewerteten Run-Action. Eine auf demselben
 Server bereits ausführbare Bypass-Variante übernimmt nicht den Breakerbedarf
 des normalen Runs, auch bei einer terminalen Scorebedrohung. Die bestehende
@@ -894,6 +900,19 @@ Rig erneut; eine Reserve aus dem alten Rig darf eine konkret gebundene,
 kostenneutrale Vorbereitung nicht als beliebige überlappende Installation
 verwerfen. Direkte terminale Runs auf vollständig bekannten, bereits
 bezahlbaren Pfaden behalten ihre bestehende Priorität.
+
+Eine heute zu teure bekannte ICE-Kette darf die Prüfung einer günstigeren
+Handinstallation nicht bereits durch ihren ungeförderten Payoff sperren.
+Der Coverage-Owner quotiert Installation, freie MU, verbleibende Aktionen,
+ganzen Runpfad und aktuelle Engine-Stealkosten gemeinsam neu. Nur eine
+finanzierte, positiv bewertete Konversion erhält die vorhandene
+`sameTurnRunConversion`-Bindung. Der Remote-Owner darf diese günstigere
+Vorbereitung gegenüber einer noch zu finanzierenden Eventroute desselben
+Servers wählen; eine bereits unmittelbar ausführbare Route behält Vorrang.
+Unbekanntes ICE zertifiziert diesen zusätzlichen Konversionsnachweis nicht.
+Die bestehende kostenneutrale Vorbereitung am bekannten Teil eines bedingten
+Pfads bleibt getrennt erhalten. Nach der Installation werden echte
+LegalActions, Zugriffskosten und Risiko erneut bewertet.
 
 Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren
 Einkommenszweck. Eine bereits exakt gebundene Coverage- oder MU-Vorbereitung

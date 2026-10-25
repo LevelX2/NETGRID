@@ -22,6 +22,7 @@ import {
 import { chooseRunnerAction } from "../../index";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { runnerRunTargetCanConvertNow } from "../../run-analysis/runner-plan-run-funding";
 import { runnerRemoteBreakerPreparation } from "../../runner/rig-coverage/coverage-remote-breaker-preparation";
 import {
   buildAiDecisionInput,
@@ -92,6 +93,7 @@ it.each([
     candidates,
     target,
     input.ownDeckCapabilities!,
+    { runnerRunTargetCanConvertNow },
   );
   if (variant === "original" || variant === "hidden_definition") {
     expect(result?.totalRecoveryCost).toBe(14);

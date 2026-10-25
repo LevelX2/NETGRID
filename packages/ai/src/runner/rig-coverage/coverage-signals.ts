@@ -338,6 +338,7 @@ export function uniqueCoverageGaps(
         candidates,
         evaluation,
         deckCapabilities,
+        services,
       ) ??
       runnerCostEffectiveCoverageRecovery(
         input,
@@ -479,15 +480,17 @@ export function uniqueCoverageGaps(
             .map((candidate) => candidate.actionId)
         : legalCoverageInstallActionIds
       : [];
-    const sameTurnRunConversion = runnerUrgentRemoteCoverageConversionQuote(
-      input,
-      candidates,
-      evaluation,
-      visibleAnswer,
-      answerInstallCost,
-      installActionIds,
-      services,
-    );
+    const sameTurnRunConversion =
+      costRecovery?.sameTurnRunConversion ??
+      runnerUrgentRemoteCoverageConversionQuote(
+        input,
+        candidates,
+        evaluation,
+        visibleAnswer,
+        answerInstallCost,
+        installActionIds,
+        services,
+      );
     const fundingTargetCredits =
       sameTurnRunConversion?.requiredCredits ?? answerInstallCost;
     const fundingGap =
