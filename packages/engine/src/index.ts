@@ -152,3 +152,8 @@ export {
   quoteAgendaDefinitionScorePoints,
   type AgendaDefinitionScoreQuote,
 } from "./ability-engine/agenda-definition-score-quote";
+
+export {
+  quoteLastCentralCounterConversion,
+  type CentralCounterConversionQuote,
+} from "./game/view/visible-central-counter-conversion";

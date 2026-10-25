@@ -1,3 +1,4 @@
+import { runnerLastCentralCounterConversion } from "./last-central-counter-conversion";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
@@ -943,8 +944,13 @@ export function buildRunnerCentralPressureSignals({
                 : [];
             },
           )[0];
-          const hqSuccessWindowSetupAvailable =
-            hqSuccessWindowRoute !== undefined;
+          const lastCounterConversion = runnerLastCentralCounterConversion(
+            input,
+            evaluation,
+          );
+          const concreteRunSetupAvailable =
+            hqSuccessWindowRoute !== undefined ||
+            lastCounterConversion !== undefined;
           const knownNoPayoff =
             evaluation.knownAccessState === "known_no_current_payoff" ||
             (evaluation.accessServerId === "archives" &&
@@ -969,7 +975,8 @@ export function buildRunnerCentralPressureSignals({
             recentSafetyAbort?.serverId === evaluation.targetServerId ||
             confirmedDamageRouteBlocked;
           const materialMarginalValue =
-            runnerCentralPressureHasMaterialMarginalValue(input, evaluation);
+            runnerCentralPressureHasMaterialMarginalValue(input, evaluation) ||
+            lastCounterConversion !== undefined;
           const costlyInformationRunBelowHandBuffer =
             handSize < minimumHandBuffer &&
             evaluation.pathCost > 0 &&
@@ -998,14 +1005,14 @@ export function buildRunnerCentralPressureSignals({
           // An admitted, fully quoted HQ success-window setup has a concrete
           // access payoff. The one-credit information-probe budget must not
           // replace that route's already validated path and follow-up budget.
-          const executionMode = hqSuccessWindowSetupAvailable
+          const executionMode = concreteRunSetupAvailable
             ? ("access" as const)
             : runPurposeForEvaluation(evaluation);
           const currentPressureRoute =
-            (!knownNoPayoff || hqSuccessWindowSetupAvailable) &&
+            (!knownNoPayoff || concreteRunSetupAvailable) &&
             pressureCadence.routeAvailable &&
             (materialMarginalValue ||
-              hqSuccessWindowSetupAvailable ||
+              concreteRunSetupAvailable ||
               terminalRemoteUnreachableCentralLastChance) &&
             (!costlyInformationRunBelowHandBuffer ||
               terminalRemoteUnreachableCentralLastChance) &&
@@ -1024,9 +1031,10 @@ export function buildRunnerCentralPressureSignals({
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow ||
+              lastCounterConversion !== undefined ||
               terminalRemoteUnreachableCentralLastChance) &&
             (evaluation.score > 0 ||
-              hqSuccessWindowSetupAvailable ||
+              concreteRunSetupAvailable ||
               terminalRemoteUnreachableCentralLastChance);
           const purpose =
             terminalRemoteUnreachableCentralLastChance ||
@@ -1046,10 +1054,12 @@ export function buildRunnerCentralPressureSignals({
               ? ("P2" as const)
               : terminalRemoteUnreachableCentralLastChance
                 ? ("P2" as const)
-                : evaluation.targetServerId === "archives" &&
-                    ["unknown", "fresh"].includes(evaluation.accessPayoff)
-                  ? ("P6" as const)
-                  : ("P4" as const),
+                : lastCounterConversion
+                  ? ("P3" as const)
+                  : evaluation.targetServerId === "archives" &&
+                      ["unknown", "fresh"].includes(evaluation.accessPayoff)
+                    ? ("P6" as const)
+                    : ("P4" as const),
             reachable:
               currentPressureRoute && !safetyBlocked && !forgoUnsafeRunCapacity,
             marginalValue:
@@ -1057,13 +1067,18 @@ export function buildRunnerCentralPressureSignals({
                 ? 1_000
                 : terminalRemoteUnreachableCentralLastChance
                   ? 1_400 + evaluation.score
-                  : hqSuccessWindowRoute
-                    ? Math.max(320, evaluation.score)
-                    : knownAgendaFundingAvailable
+                  : lastCounterConversion
+                    ? Math.max(
+                        120 * lastCounterConversion.actionsDenied,
+                        evaluation.score,
+                      )
+                    : hqSuccessWindowRoute
                       ? Math.max(320, evaluation.score)
-                      : evaluation.recommendation === "run_now"
-                        ? evaluation.score
-                        : Math.min(evaluation.score, 60)) +
+                      : knownAgendaFundingAvailable
+                        ? Math.max(320, evaluation.score)
+                        : evaluation.recommendation === "run_now"
+                          ? evaluation.score
+                          : Math.min(evaluation.score, 60)) +
               bestMultiRunRouteValue,
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"
@@ -1075,24 +1090,26 @@ export function buildRunnerCentralPressureSignals({
                     ? confirmedDamageRouteBlocked
                       ? `runner_confirmed_damage_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
                       : recentSafetyAbort!.evidenceCode
-                    : knownNoPayoff
-                      ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
-                      : !pressureCadence.routeAvailable
-                        ? pressureCadence.evidenceCode
-                        : hqSuccessWindowRoute
-                          ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
-                          : coverageSupport
-                            ? coverageSupport.evidenceCode
-                            : fundingSupport
-                              ? fundingSupport.evidenceCode
-                              : costlyInformationRunBelowHandBuffer
-                                ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
-                                : !materialMarginalValue
-                                  ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
-                                  : !currentPressureRoute
-                                    ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
-                                    : (evaluation.evidence[0] ??
-                                      "runner_run_target"),
+                    : lastCounterConversion
+                      ? `runner_last_central_counter_conversion:${evaluation.targetServerId}:${lastCounterConversion.sourceDefinitionId}`
+                      : knownNoPayoff
+                        ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
+                        : !pressureCadence.routeAvailable
+                          ? pressureCadence.evidenceCode
+                          : hqSuccessWindowRoute
+                            ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
+                            : coverageSupport
+                              ? coverageSupport.evidenceCode
+                              : fundingSupport
+                                ? fundingSupport.evidenceCode
+                                : costlyInformationRunBelowHandBuffer
+                                  ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                                  : !materialMarginalValue
+                                    ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
+                                    : !currentPressureRoute
+                                      ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
+                                      : (evaluation.evidence[0] ??
+                                        "runner_run_target"),
             ...(coverageSupport
               ? { supportNeedId: coverageSupport.gapId }
               : fundingSupport
@@ -1112,6 +1129,7 @@ export function buildRunnerCentralPressureSignals({
                     ...(hqSuccessWindowRoute
                       ? [hqSuccessWindowRoute.actionId]
                       : []),
+                    ...(lastCounterConversion ? [evaluation.actionId] : []),
                   ]),
                 ]
               : [],
@@ -1220,18 +1238,21 @@ export function buildRunnerCentralPressureSignals({
                     evaluation.targetServerId as "hq" | "rd" | "archives",
                     sameServerEvaluations,
                   );
-                const opensHqSuccessWindow =
-                  candidate.actionId === hqSuccessWindowRoute?.actionId;
+                const candidateLastCounterConversion =
+                  runnerLastCentralCounterConversion(input, candidate);
+                const opensConcreteSetupWindow =
+                  candidate.actionId === hqSuccessWindowRoute?.actionId ||
+                  candidateLastCounterConversion !== undefined;
                 const candidateHasNoPayoff =
                   candidate.knownAccessState === "known_no_current_payoff" ||
                   (candidate.accessServerId === "archives" &&
                     archivesIsKnownWithoutAgenda(input));
                 const candidateRouteAdmissible =
                   !forgoUnsafeRunCapacity &&
-                  (!candidateHasNoPayoff || opensHqSuccessWindow) &&
+                  (!candidateHasNoPayoff || opensConcreteSetupWindow) &&
                   pressureCadence.routeAvailable &&
                   (materialMarginalValue ||
-                    opensHqSuccessWindow ||
+                    opensConcreteSetupWindow ||
                     terminalRemoteUnreachableCentralLastChance) &&
                   (!costlyInformationRunBelowHandBuffer ||
                     terminalRemoteUnreachableCentralLastChance) &&
@@ -1241,9 +1262,10 @@ export function buildRunnerCentralPressureSignals({
                   !lacksDifferentialPayoff &&
                   (candidate.recommendation === "run_now" ||
                     candidate.recommendation === "run_if_free" ||
+                    candidateLastCounterConversion !== undefined ||
                     terminalRemoteUnreachableCentralLastChance) &&
                   (candidate.score > 0 ||
-                    opensHqSuccessWindow ||
+                    opensConcreteSetupWindow ||
                     terminalRemoteUnreachableCentralLastChance);
                 if (candidateRouteAdmissible) return [];
                 const spendLimitBlocked =

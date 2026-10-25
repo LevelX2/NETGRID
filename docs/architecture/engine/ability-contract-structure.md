@@ -185,3 +185,12 @@ allgemeine Äquivalenzanalyse beliebiger Effekte.
 erwartet genau sechs Familienmodule, begrenzt jedes auf 1.200 Zeilen und
 verwirft ausführbare Statements. Damit kann weder der frühere Monolith noch ein
 neuer Runtime-Seiteneffekt unbemerkt zurückkehren.
+
+## Aktivierte Fähigkeiten nach der letzten Runneraktion
+
+Die Runner-Hauptphase hält bezahlbare deklarative aktivierte Fähigkeiten
+auch bei null verbleibenden Basisaktionen offen. Der kanonische Generator
+prüft Timing, aktuelle Kosten, Counter, Ziele und Limits; eine fehlende
+Basisaktion sperrt nur tatsächlich aktionspflichtige Fähigkeiten. Vor dem
+Zugende stehen daher kostenlose Socket-Konversionen weiter zur Verfügung.
+`applyAction` revalidiert unverändert Seite, StateVersion und Kosten.

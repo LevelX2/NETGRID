@@ -348,6 +348,20 @@ verlieren kann, wird die Route als P3-Konvertierungsfenster bewertet. Daraus
 entsteht weder ein kartenbezogener Parallelplan noch eine neue Server- oder
 Runautorität.
 
+Die unmittelbar vervollständigbare letzte Zentralverbindung bleibt ebenfalls
+beim bestehenden Zentralziel. Eine öffentliche Engine-Quote bindet das auf
+installierter Quelle gedruckte Erfolgsrun-Counter, die aktuellen sichtbaren
+Servercounter und die kostenlose Konversion an die tatsächliche gegnerische
+Aktionsreduktion. Der Owner lässt dafür nur einen aktuell legalen Basisrun
+auf ungeschütztes ICE-freies Ziel ohne Creditkosten zu; Hand-, Schadens- und
+Reserveschutz gelten weiterhin. Er behandelt diesen konkreten Nutzen als
+P3-Konversionsfenster, auch wenn im Archives-Zugriff keine Agenda liegt.
+Terminale P2-Contests behalten ihren Vorrang. Frühere Installation und
+mehrzügiger Aufbau mehrerer fehlender Verbindungen sind damit nicht belegt.
+Nach dem Run entscheidet derselbe Owner anhand neu angebotener LegalActions
+über die echte Konversion. Die Engine hält bezahlbare klicklose aktivierte
+Fähigkeiten auch nach der letzten Basisaktion offen.
+
 ### Vertikale Implementierung des Zentraldrucks
 
 Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
