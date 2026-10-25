@@ -359,7 +359,12 @@ P3-Konversionsfenster, auch wenn im Archives-Zugriff keine Agenda liegt.
 Terminale P2-Contests behalten ihren Vorrang. Frühere Installation und
 mehrzügiger Aufbau mehrerer fehlender Verbindungen sind damit nicht belegt.
 Nach dem Run entscheidet derselbe Owner anhand neu angebotener LegalActions
-über die echte Konversion. Die Engine hält bezahlbare klicklose aktivierte
+über die echte Konversion. Fehlt nach der letzten Aktion ein weiteres Runangebot,
+bleibt nur die residente Zentralidentität erhalten; ihre alten Run-, Kosten-
+und Risikofakten werden nicht als neue Route übernommen. Bei kaltem KI-Start
+bindet der öffentliche, der Quelle zugeordnete letzte Zentralcountereffekt
+die Identität. Ausführbarkeit und Konversionsaktion kommen ausschließlich
+aus dem aktuellen LegalAction-Angebot. Die Engine hält bezahlbare klicklose aktivierte
 Fähigkeiten auch nach der letzten Basisaktion offen.
 
 ### Vertikale Implementierung des Zentraldrucks

@@ -83,9 +83,11 @@ import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-d
 import { runnerPostBreakTrashPreparationSignals } from "./post-break-trash-preparation";
 import { runnerRepeatedFreeStopProbeEvidence } from "./central-probe-outcome";
 function runnerAccumulatedCentralPressureConversionSignals(
+  input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   pressureSignals: RunnerPlanDomain["centralPressure"],
   previous: ResidentPlanPortfolio | undefined,
+  strategyLineIds: string[],
 ): RunnerPlanDomain["centralPressure"] {
   const conversions = candidates.filter(
     (candidate) =>
@@ -120,13 +122,63 @@ function runnerAccumulatedCentralPressureConversionSignals(
         right.marginalValue - left.marginalValue ||
         left.serverId.localeCompare(right.serverId),
     )[0];
-  if (!owner) return [];
+  // No new run evaluation exists after the last click. Reuse only the
+  // Central identity and bind the current facts to the offered conversion.
+  const resident = (previous?.instances ?? [])
+    .filter(
+      (i) =>
+        i.moduleId === "runner.pressure_central" &&
+        i.target?.kind === "server" &&
+        ["hq", "rd", "archives"].includes(i.target.id) &&
+        i.viability !== "completed" &&
+        i.viability !== "abandoned",
+    )
+    .sort(
+      (a, b) =>
+        Number(b.instanceId === previous?.rootForegroundInstanceId) -
+          Number(a.instanceId === previous?.rootForegroundInstanceId) ||
+        a.instanceId.localeCompare(b.instanceId),
+    )[0];
+  const publicCounterServer = [...mergedPublicHistory(input)]
+    .reverse()
+    .flatMap((event) =>
+      (event.publicPayload.resolvedEffects ?? []).flatMap((effect) =>
+        effect.kind === "counter_change" &&
+        typeof effect.amount === "number" &&
+        effect.amount > 0 &&
+        effect.sourceDefinitionId !== undefined &&
+        conversions.some(
+          (c) => c.sourceDefinitionId === effect.sourceDefinitionId,
+        ) &&
+        typeof effect.serverId === "string" &&
+        ["hq", "rd", "archives"].includes(effect.serverId)
+          ? [effect.serverId]
+          : [],
+      ),
+    )[0];
+  const serverId =
+    owner?.serverId ?? resident?.target?.id ?? publicCounterServer;
+  if (serverId !== "hq" && serverId !== "rd" && serverId !== "archives")
+    return [];
+  const currentOwner: RunnerPressureSignal = owner ?? {
+    pressureId: resident?.dedupeKey ?? "central:" + serverId,
+    serverId,
+    purpose: "access",
+    strategyLineIds: resident?.strategyLineIds ?? strategyLineIds,
+    priorityClass: "P3",
+    reachable: true,
+    marginalValue: 1,
+    evidenceCode: "runner_current_legal_central_counter_conversion",
+  };
   return [
     {
-      ...owner,
+      pressureId: currentOwner.pressureId,
+      serverId: currentOwner.serverId,
+      purpose: "access",
+      strategyLineIds: currentOwner.strategyLineIds,
       priorityClass: "P3",
       reachable: true,
-      marginalValue: Math.max(1, owner.marginalValue),
+      marginalValue: Math.max(1, currentOwner.marginalValue),
       evidenceCode:
         "runner_accumulated_central_pressure_conversion_is_currently_legal",
       sourceDefinitionIds: [
@@ -1416,9 +1468,11 @@ export function buildRunnerCentralPressureSignals({
         runTargets,
       ),
       ...runnerAccumulatedCentralPressureConversionSignals(
+        input,
         candidates,
         baseCentralPressure,
         previous,
+        [strategicIntent.primaryWinIntent],
       ),
       ...(activeRunRoot?.parentBinding?.moduleId === "runner.pressure_central"
         ? [activeRunRoot.parentBinding.signal]
