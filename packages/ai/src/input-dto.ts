@@ -2259,6 +2259,12 @@ function sanitizeVisibleCardWithOptions(
     ...(card.advancementRequirement !== undefined
       ? { advancementRequirement: card.advancementRequirement }
       : {}),
+    ...(card.known && card.overadvanceThreshold !== undefined
+      ? { overadvanceThreshold: card.overadvanceThreshold }
+      : {}),
+    ...(card.known && card.overadvanceReward !== undefined
+      ? { overadvanceReward: card.overadvanceReward }
+      : {}),
     ...(card.strength !== undefined ? { strength: card.strength } : {}),
     ...(randomRunStrengthState ? { randomRunStrengthState } : {}),
     ...(card.known && card.strengthAfterEncounter !== undefined

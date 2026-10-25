@@ -1540,6 +1540,19 @@ function candidateMatchesScoreConversionStep(
   step: CorpScoreConversionStep,
 ): boolean {
   if (step.actionId === candidate.actionId) return true;
+  if (step.kind === "basic_advance")
+    return (
+      candidate.semanticActionType === "score.advance_card" &&
+      candidate.sourceCardInstanceId === step.targetCardId &&
+      input.legalActions.some(
+        (action) =>
+          action.actionId === candidate.actionId &&
+          action.side === "corp" &&
+          action.type === "advance_card" &&
+          (action.source === step.targetCardId ||
+            action.payload?.cardId === step.targetCardId),
+      )
+    );
   if (
     !step.sourceCardId ||
     step.sourceCardId !== candidate.sourceCardInstanceId
@@ -1791,6 +1804,30 @@ export function uniqueScoreProjects(
   const byProject = new Map<string, CorpScoreProjectSignal>();
   for (const value of values) {
     const previous = byProject.get(value.projectId);
+    if (previous) {
+      const valueWinsNow =
+        value.feasible && value.sameTurnCloseout && value.terminalScore;
+      const previousWinsNow =
+        previous.feasible &&
+        previous.sameTurnCloseout &&
+        previous.terminalScore;
+      // A completed base score must not erase the same parent's funded,
+      // Engine-quoted winning sequence before phase reconciliation.
+      if (
+        valueWinsNow &&
+        !previousWinsNow &&
+        value.sameTurnConversionProof === "engine_quoted_path"
+      ) {
+        byProject.set(value.projectId, value);
+        continue;
+      }
+      if (
+        previousWinsNow &&
+        !valueWinsNow &&
+        previous.sameTurnConversionProof === "engine_quoted_path"
+      )
+        continue;
+    }
     if (!previous || phaseRank[value.phase] > phaseRank[previous.phase]) {
       byProject.set(value.projectId, value);
       continue;

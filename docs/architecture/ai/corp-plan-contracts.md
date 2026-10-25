@@ -127,6 +127,27 @@ dadurch keine neue Zulassung. Die verdrängte Vorbereitung veröffentlicht
 Score-Finanzierung. Plan-, Step-, Route- und Zugbindungsprüfung bleiben beim
 bestehenden Score-Owner und Scheduler.
 
+Die gleichzügige Scorekonversion verwendet für sichtbare Bonuspunktagendas
+unter dem bestehenden `corp.score_agenda`-Parent eine reine Enginequote des
+Punktwerts nach den geplanten Advances. Engineeffekt und Quote teilen die
+Bonusberechnung; effektive sichtbare Schwierigkeit und Counterziel bleiben
+explizit gebunden. Der kleinste siegbringende Counterstand darf auch mehrere
+Bonusschwellen umfassen. Quote und Pfad sind keine neue Legalitätsautorität:
+Klicks, Credits, Quelle und aktueller erster Advance müssen vollständig
+finanziert und an die echte LegalAction gebunden sein.
+
+Eine solche belegte terminale Folge darf beim Zusammenführen desselben
+Agendaprojekts nicht durch dessen nichtterminalen Basisscore verdrängt werden.
+Der Score-Owner klassifiziert den verdrängten Sofortscore ausdrücklich.
+Ein bereits siegbringender Sofortscore behält den kürzeren Abschluss; ein
+nichtterminaler Zusatzpunkt rechtfertigt im selben Projekt keine zusätzlichen
+Kosten vor dem direkten Score. Unterschiedliche Agendas behalten außerhalb
+terminaler Siege ihren Punktvergleich. Fehlende Definitionen oder ungültige
+Enginequotes brechen mit strukturierter Ursache ab. Paarung 556 R1 G31 D430
+belegt bei fünf Punkten Babylon mit drei Countern und zwei verfügbaren
+Klicks/Credits: zwei Advances und Score ergeben sieben Punkte; der frühere
+Sofortscore ergab nur sechs.
+
 Innerhalb bereits zugelassener terminaler Scoreprojekte bewertet der
 Score-Owner den Sieg mit einheitlichem Punktnutzen. Überzählige Agendapunkte
 und Strategieunterstützung für Züge nach dem Spielende erhöhen diesen Wert

@@ -353,6 +353,30 @@ function contributeCorpActionDispositionForCandidate(
     );
     return;
   }
+  const fundedTerminalConversion = domain.scoreProjects.find(
+    (project) =>
+      project.feasible &&
+      project.terminalScore &&
+      project.sameTurnCloseout &&
+      project.sameTurnConversionProof === "engine_quoted_path" &&
+      project.sameTurnConversionResourceCost?.stateVersion ===
+        input.playerView.stateVersion &&
+      project.phase !== "score_agenda" &&
+      project.agendaInstanceId === candidate.sourceCardInstanceId &&
+      (project.actionIds?.length ?? 0) > 0 &&
+      !project.actionIds?.includes(candidate.actionId),
+  );
+  if (
+    candidate.semanticActionType === "score.agenda" &&
+    fundedTerminalConversion
+  ) {
+    add(
+      candidate.actionId,
+      "corp.score_agenda",
+      `corp_immediate_score_rejected_for_funded_terminal_conversion:${fundedTerminalConversion.projectId}`,
+    );
+    return;
+  }
   const exactScoreEffectTargetProject = domain.scoreProjects.find(
     (project) =>
       project.phase === "score_agenda" &&

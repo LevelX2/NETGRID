@@ -147,3 +147,8 @@ export type {
   VisibleCard,
   Winner,
 } from "./game/engine-runtime";
+
+export {
+  quoteAgendaDefinitionScorePoints,
+  type AgendaDefinitionScoreQuote,
+} from "./ability-engine/agenda-definition-score-quote";

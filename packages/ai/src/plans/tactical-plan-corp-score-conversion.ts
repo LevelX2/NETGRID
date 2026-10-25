@@ -1,3 +1,4 @@
+import { quoteAgendaDefinitionScorePoints } from "@netgrid/engine";
 import { corpInstalledAdvancementPreparations } from "./corp-installed-advancement-preparation";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -134,7 +135,7 @@ export function corpSameTurnScoreConversionPaths(
           : [];
       return [...(direct ? [direct] : []), ...recovered];
     })
-    .sort(comparePaths);
+    .sort((left, right) => comparePaths(input, left, right));
 }
 
 export function bestCorpSameTurnScoreConversionPath(
@@ -159,11 +160,23 @@ function conversionPathForTarget(
     : advancementRequirement(target.card);
   if (requirement === undefined) return undefined;
   const initialCounters = Math.max(0, target.card.advancementCounters ?? 0);
+  const terminalBonusTarget =
+    target.card.overadvanceReward === "agenda_points"
+      ? projectedBonusAgendaScore(
+          input,
+          target.card,
+          requirement,
+          initialCounters,
+        ).minimumAdvancementCountersForRequestedPoints
+      : null;
   const desiredTargets = [
-    requirement,
-    ...(target.card.overadvanceThreshold && target.card.overadvanceReward
-      ? [requirement + target.card.overadvanceThreshold]
-      : []),
+    ...new Set([
+      requirement,
+      ...(target.card.overadvanceThreshold && target.card.overadvanceReward
+        ? [requirement + target.card.overadvanceThreshold]
+        : []),
+      ...(terminalBonusTarget !== null ? [terminalBonusTarget] : []),
+    ]),
   ];
   return desiredTargets
     .map((desiredCounters) =>
@@ -178,7 +191,7 @@ function conversionPathForTarget(
       ),
     )
     .filter((path): path is CandidatePath => path !== undefined)
-    .sort(comparePaths)[0];
+    .sort((left, right) => comparePaths(input, left, right))[0];
 }
 
 function conversionPathForDesiredTarget(
@@ -373,7 +386,8 @@ function conversionPathForDesiredTarget(
               ],
             };
           }
-          if (!best || comparePaths(candidate, best) < 0) best = candidate;
+          if (!best || comparePaths(input, candidate, best) < 0)
+            best = candidate;
         },
       });
     }
@@ -1068,7 +1082,15 @@ function completedPath(
         target.card.overadvanceThreshold ?? desiredCounters - requirement
       }`
     : undefined;
-  const agendaPoints = visibleAgendaPoints(input, target.card);
+  const agendaPoints =
+    target.card.overadvanceReward === "agenda_points"
+      ? projectedBonusAgendaScore(
+          input,
+          target.card,
+          requirement,
+          initialCounters + advancementAdded,
+        ).agendaPoints
+      : visibleAgendaPoints(input, target.card);
   return {
     agendaCardId: target.card.instanceId,
     agendaPoints,
@@ -1168,6 +1190,33 @@ function bindOffTargetAdvancementSteps(
       ),
     };
   });
+}
+
+function projectedBonusAgendaScore(
+  input: AiDecisionInput,
+  card: VisibleCard,
+  requirement: number,
+  advancementCounters: number,
+) {
+  const quote = quoteAgendaDefinitionScorePoints(
+    card.definitionId ?? "",
+    requirement,
+    advancementCounters,
+    Math.max(
+      0,
+      input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints,
+    ),
+  );
+  if (!quote.complete)
+    throw new PlanResolutionFailure("missing_card_definition", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "rules_contract",
+      removalCondition: `Provide a complete Engine score-point quote for ${card.definitionId ?? card.instanceId}: ${quote.reason}.`,
+    });
+  return quote;
 }
 
 function visibleAgendaPoints(
@@ -1415,6 +1464,7 @@ function nonNegativeInteger(value: unknown): number | undefined {
 }
 
 function comparePaths(
+  input: AiDecisionInput,
   left: CorpScoreConversionPath | CandidatePath,
   right: CorpScoreConversionPath | CandidatePath,
 ): number {
@@ -1444,8 +1494,17 @@ function comparePaths(
       sum + (step.offTargetCardId ? (step.offTargetAdvancementAmount ?? 0) : 0),
     0,
   );
+  const pointsNeeded =
+    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints;
+  const leftTerminal = left.agendaPoints >= pointsNeeded;
+  const rightTerminal = right.agendaPoints >= pointsNeeded;
+  const comparePointValue =
+    left.agendaCardId === right.agendaCardId || (leftTerminal && rightTerminal)
+      ? 0
+      : right.agendaPoints - left.agendaPoints;
   return (
-    right.agendaPoints - left.agendaPoints ||
+    Number(rightTerminal) - Number(leftTerminal) ||
+    comparePointValue ||
     // Every candidate already completes its score in the current turn.
     // A shorter sequence must not discard a funded, cheaper score route.
     left.creditsRequired - right.creditsRequired ||
@@ -1453,6 +1512,9 @@ function comparePaths(
     leftNetClicks - rightNetClicks ||
     leftSourceOpportunityCost - rightSourceOpportunityCost ||
     rightOffTargetAdvancement - leftOffTargetAdvancement ||
+    (leftTerminal && rightTerminal
+      ? 0
+      : right.agendaPoints - left.agendaPoints) ||
     rightRewarded - leftRewarded ||
     leftOveradvance - rightOveradvance ||
     left.agendaCardId.localeCompare(right.agendaCardId) ||
