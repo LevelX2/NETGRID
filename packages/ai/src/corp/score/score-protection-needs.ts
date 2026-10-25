@@ -1,3 +1,4 @@
+import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -158,7 +159,10 @@ export function corpFundedScoreProtectionNeed(
     input.playerView.runnerNextTurnCreditClicks !== undefined
       ? {
           runnerPreparationCreditClicks:
-            input.playerView.runnerNextTurnCreditClicks,
+            visibleRunnerNextTurnPreparationCreditGain(
+              input.playerView.opponent.rig ?? [],
+              input.playerView.runnerNextTurnCreditClicks,
+            ),
         }
       : {}),
     targetServerId:

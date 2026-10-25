@@ -1,3 +1,4 @@
+import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import {
   visibleFortPassProtection,
   visibleRunnerPreparationIncomePerClick,
@@ -77,8 +78,11 @@ export function assessCorpTerminalAgendaDefense(
     view.runnerNextTurnCreditClicks !== undefined
       ? {
           runnerPreparationCreditClicks:
-            view.runnerNextTurnCreditClicks *
-            visibleRunnerPreparationIncomePerClick(view.opponent.rig ?? []),
+            visibleRunnerNextTurnPreparationCreditGain(
+              view.opponent.rig ?? [],
+              view.runnerNextTurnCreditClicks,
+              visibleRunnerPreparationIncomePerClick(view.opponent.rig ?? []),
+            ),
         }
       : {}),
   };

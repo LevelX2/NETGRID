@@ -61,6 +61,9 @@ function project(cp: ReturnType<typeof fixture>, serverId = "remote_1") {
     input,
     candidate!,
     corpScorelineFeasibilityForDecisionInput(input),
+    undefined,
+    false,
+    false,
   )[0]!;
 }
 function decide(cp: ReturnType<typeof fixture>) {

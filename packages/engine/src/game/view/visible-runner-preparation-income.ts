@@ -38,3 +38,67 @@ export function visibleRunnerPreparationIncomePerClick(
   }
   return income;
 }
+
+/** Next-turn preparation from basic income and public, currently stored pools.
+ * Every cashout replaces one income action. Per-source limits reset before
+ * that future Runner turn; this quote never spends a bank during a live run.
+ */
+export function visibleRunnerNextTurnPreparationCreditGain(
+  rig: readonly VisibleCard[],
+  preparationClicks: number,
+  incomePerClick = 1,
+): number {
+  if (
+    !Number.isSafeInteger(preparationClicks) ||
+    preparationClicks < 0 ||
+    !Number.isSafeInteger(incomePerClick) ||
+    incomePerClick < 1
+  )
+    throw new Error("invalid_visible_runner_preparation_budget");
+  const sources = new Set<string>();
+  const improvements: number[] = [];
+  for (const card of rig) {
+    if (
+      !card.known ||
+      !card.definitionId ||
+      card.controller !== "runner" ||
+      card.rezzed !== true
+    )
+      continue;
+    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+    if (!definition || definition.side !== "runner") continue;
+    const cashout = activatedAbilityBindingsForDefinition(definition).some(
+      ({ ability }) =>
+        ability.timing === "runner_main" &&
+        ability.limit?.kind === "once_per_turn_per_source" &&
+        ability.limit.scope === "any_ability_on_source" &&
+        (!ability.condition ||
+          ability.condition.kind === "source_has_hosted_credits") &&
+        ability.costs.length === 1 &&
+        ability.costs[0]?.kind === "action" &&
+        ability.costs[0].amount === 1 &&
+        ability.effects.length === 1 &&
+        ability.effects[0]?.kind === "take_hosted_credits" &&
+        ability.effects[0].source === "source" &&
+        ability.effects[0].recipient === "controller" &&
+        ability.effects[0].mode === "all",
+    );
+    if (!cashout) continue;
+    if (sources.has(card.instanceId))
+      throw new Error("duplicate_visible_runner_preparation_bank");
+    sources.add(card.instanceId);
+    const stored = card.counters?.bit ?? 0;
+    if (!Number.isSafeInteger(stored) || stored < 0)
+      throw new Error("invalid_visible_runner_preparation_bank_counter");
+    if (stored > incomePerClick) improvements.push(stored - incomePerClick);
+  }
+  const gain =
+    preparationClicks * incomePerClick +
+    improvements
+      .sort((a, b) => b - a)
+      .slice(0, preparationClicks)
+      .reduce((sum, value) => sum + value, 0);
+  if (!Number.isSafeInteger(gain))
+    throw new Error("unsafe_visible_runner_preparation_gain");
+  return gain;
+}

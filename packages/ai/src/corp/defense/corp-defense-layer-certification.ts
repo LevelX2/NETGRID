@@ -1,3 +1,4 @@
+import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { corpRemoteHasEngineQuotedFundableScoreFriction } from "../score/corp-score-defense-continuity";
@@ -76,10 +77,18 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
   visibleCorpCredits: number,
 ): boolean {
   const runnerRig = input.playerView.opponent.rig ?? [];
+  if (
+    input.playerView.activeSide === "corp" &&
+    input.playerView.runnerNextTurnCreditClicks === undefined
+  )
+    return false;
   const runnerCredits =
     input.playerView.opponent.credits +
     (input.playerView.activeSide === "corp"
-      ? (input.playerView.runnerNextTurnCreditClicks ?? 0)
+      ? visibleRunnerNextTurnPreparationCreditGain(
+          runnerRig,
+          input.playerView.runnerNextTurnCreditClicks!,
+        )
       : 0);
   const prepared = visiblePreparedRunnerBreakerCandidates({
     serverIce: [],

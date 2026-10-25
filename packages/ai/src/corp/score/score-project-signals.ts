@@ -487,7 +487,10 @@ export function scoreProjectForCandidate(
             projectId,
             serverId,
             matchpointTarget,
-            deadlinePressure,
+            // HQ exposure makes installation urgent; only a real completion
+            // deadline reserves every advance in the current turn.
+            scorelineFeasibility?.deadline === "last_draw_window" ||
+              scorelineFeasibility?.deadline === "current_turn_only",
           )
         : undefined;
     const residentBoundedStagedScoreWindow =

@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { visibleFortPassProtection } from "./visible-fort-pass-protection";
-import { visibleRunnerPreparationIncomePerClick } from "./visible-runner-preparation-income";
+import {
+  visibleRunnerPreparationIncomePerClick,
+  visibleRunnerNextTurnPreparationCreditGain,
+} from "./visible-runner-preparation-income";
 
 function visible(id: string): VisibleCard {
   const definition = CARD_DEFINITIONS_BY_ID[id]!;
@@ -46,5 +49,63 @@ describe("visible Corp defense mechanics", () => {
     expect(
       visibleRunnerPreparationIncomePerClick([{ ...program, known: false }]),
     ).toBe(1);
+  });
+});
+
+function bank(id: string, amount: number): VisibleCard {
+  return {
+    ...visible("onr_v1_154_broker"),
+    instanceId: id,
+    rezzed: true,
+    counters: { bit: amount },
+  };
+}
+describe("public next-turn bank preparation", () => {
+  it("replaces a basic click with the native three-credit payout", () => {
+    expect(visibleRunnerNextTurnPreparationCreditGain([bank("b", 3)], 3)).toBe(
+      5,
+    );
+  });
+  it("uses separate sources only once within the available actions", () => {
+    const rig = [bank("a", 3), bank("b", 6), bank("c", 9)];
+    expect(visibleRunnerNextTurnPreparationCreditGain(rig, 2)).toBe(15);
+    expect(visibleRunnerNextTurnPreparationCreditGain(rig, 3)).toBe(18);
+    expect(visibleRunnerNextTurnPreparationCreditGain(rig, 4)).toBe(19);
+  });
+  it("does not turn newly loaded or empty pools into same-turn cash", () => {
+    expect(visibleRunnerNextTurnPreparationCreditGain([bank("b", 0)], 3)).toBe(
+      3,
+    );
+    expect(visibleRunnerNextTurnPreparationCreditGain([bank("b", 9)], 0)).toBe(
+      0,
+    );
+  });
+  it("keeps public income policy and excludes hidden or uncontrolled pools", () => {
+    expect(
+      visibleRunnerNextTurnPreparationCreditGain([bank("b", 3)], 3, 2),
+    ).toBe(7);
+    expect(
+      visibleRunnerNextTurnPreparationCreditGain(
+        [{ ...bank("b", 9), known: false }],
+        3,
+      ),
+    ).toBe(3);
+    expect(
+      visibleRunnerNextTurnPreparationCreditGain(
+        [{ ...bank("b", 9), controller: "corp" }],
+        3,
+      ),
+    ).toBe(3);
+  });
+  it("fails closed on invalid counters and duplicate public sources", () => {
+    expect(() =>
+      visibleRunnerNextTurnPreparationCreditGain([bank("b", -1)], 3),
+    ).toThrow("invalid_visible_runner_preparation_bank_counter");
+    expect(() =>
+      visibleRunnerNextTurnPreparationCreditGain(
+        [bank("b", 3), bank("b", 6)],
+        3,
+      ),
+    ).toThrow("duplicate_visible_runner_preparation_bank");
   });
 });

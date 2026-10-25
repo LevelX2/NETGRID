@@ -45,6 +45,23 @@ wegen älterer Signalnamen als fehlende Unterstützung erscheinen. Diese
 statische Kapazität ist keine aktuelle Aktionszulassung: Verbraucher,
 Counterquelle, Kosten und Frist prüft weiterhin der konkrete Score-Owner.
 
+Die Schutzbewertung für den nächsten Runnerzug berücksichtigt neben liquiden
+Credits die öffentlich gespeicherten, dann auszahlbaren Credits. Die Engine
+ermittelt aus kanonischen Fähigkeiten den maximalen garantierten Ertrag in
+den vor dem Run verfügbaren Aktionen: Eine Auszahlung ersetzt einen
+Basiseinkommensklick, jede Quelle wird höchstens einmal genutzt. Verdeckte
+Handkarten, zukünftige Ladungen und während eines laufenden Runs nicht
+ausführbare Auszahlungen gehören nicht zu diesem Budget. Schutzquote,
+finanzierte Installationsroute, Zentralreserve und Reifezertifikat verwenden
+denselben Zukunftshorizont; ein laufender Run behält sein aktuelles Budget.
+
+HQ-Agendaexposition macht die Installation dringlich, reserviert jedoch nicht
+alle späteren Advances als harte Aktionen dieses Zuges. Nur die tatsächliche
+Abschlussfrist `last_draw_window` oder `current_turn_only` bindet diese gesamte
+Aktionsfolge sofort. Der konkrete Schutzparent darf deshalb erst wirksame ICE
+installieren, während Credits für den mehrzügigen Score weiter reserviert
+bleiben. Echte Abschlussfristen werden dadurch nicht verschoben.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence

@@ -1,3 +1,4 @@
+import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
@@ -171,7 +172,10 @@ export function corpScoreProtectionInstallRouteScan(
       input.playerView.runnerNextTurnCreditClicks !== undefined
         ? {
             runnerPreparationCreditClicks:
-              input.playerView.runnerNextTurnCreditClicks,
+              visibleRunnerNextTurnPreparationCreditGain(
+                input.playerView.opponent.rig ?? [],
+                input.playerView.runnerNextTurnCreditClicks,
+              ),
           }
         : {}),
       projectedInstallCredits,
