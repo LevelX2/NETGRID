@@ -465,6 +465,17 @@ export function buildRunnerEncounterActions(
   const encounterSubroutineIds = nextSubroutines
     .map((subroutine) => subroutine.id)
     .join(",");
+  const remainingSubroutines = encounterSubroutines.filter(
+    (subroutine, index) =>
+      !subroutineIsUnavailable(run, index) &&
+      !trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine),
+  );
+  const remainingEncounterQuote = {
+    encounterRemainingSubroutineIds: remainingSubroutines
+      .map((subroutine) => subroutine.id)
+      .join(","),
+    encounterRemainingSubroutineCount: remainingSubroutines.length,
+  };
   const encounterFullBreakDamage =
     run.fatalDamageActiveForEncounter &&
     !encounterWasFullyBrokenByRunner(run, encounterSubroutines)
@@ -496,6 +507,7 @@ export function buildRunnerEncounterActions(
           encounterWillEndRun: false,
           encounterSourceWillTrashAtEndOfTurn,
           encounterSubroutineIds,
+          ...remainingEncounterQuote,
           encounterFullBreakDamage,
           payOrEndRunSubroutineIndexes: payOrEndRunEntries
             .map((entry) => entry.index)
@@ -522,6 +534,7 @@ export function buildRunnerEncounterActions(
         encounterWillEndRun: willEndRun,
         encounterSourceWillTrashAtEndOfTurn,
         encounterSubroutineIds,
+        ...remainingEncounterQuote,
         encounterFullBreakDamage,
       },
     ),

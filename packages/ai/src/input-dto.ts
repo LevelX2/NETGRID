@@ -246,6 +246,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "encounterContinue",
   "unbrokenSubroutineCount",
   "encounterSubroutineIds",
+  "encounterRemainingSubroutineIds",
+  "encounterRemainingSubroutineCount",
   "encounterFullBreakDamage",
   "delayedInstallAbility",
   "encounterWillEndRun",

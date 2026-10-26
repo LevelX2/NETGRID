@@ -144,6 +144,49 @@ export function currentEncounterUnbrokenSubroutineIndexes(
   );
 }
 
+/** The next resolution group and the whole remaining encounter are different
+ * scopes. A group containing every visible subroutine proves completeness by
+ * itself; otherwise complete payment needs the Engine's remaining-scope fact.
+ */
+export function currentEncounterCompleteSubroutineIndexes(
+  input: AiDecisionInput,
+): Set<number> | undefined {
+  const next = currentEncounterUnbrokenSubroutineIndexes(input);
+  const action = input.legalActions.find(
+    (a) => a.type === "continue_run" && a.payload?.encounterContinue === true,
+  );
+  const subroutines =
+    currentEncounteredIceCard(input)!.effectiveRunQuote!.subroutines;
+  const raw = action?.payload?.encounterRemainingSubroutineIds;
+  const count = action?.payload?.encounterRemainingSubroutineCount;
+  if (raw === undefined && count === undefined)
+    return next.size === subroutines.length ? next : undefined;
+  const ids = typeof raw === "string" && raw.length ? raw.split(",") : [];
+  if (
+    typeof raw !== "string" ||
+    !Number.isSafeInteger(count) ||
+    count !== ids.length ||
+    new Set(ids).size !== ids.length ||
+    ids.some((id) => !subroutines.some((s) => s.id === id)) ||
+    [...next].some((i) => !ids.includes(subroutines[i]!.id)) ||
+    action?.expiresAtStateVersion !== input.playerView.stateVersion
+  )
+    throw new PlanResolutionFailure("missing_action_semantics", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((a) => a.type),
+      unresolvedActionIds: action ? [action.actionId] : [],
+      owner: "rules_contract",
+      removalCondition:
+        "Complete encounter payment requires the Engine's exact current remaining subroutine IDs, count and next-group inclusion.",
+    });
+  const remaining = new Set(ids);
+  return new Set(
+    subroutines.flatMap((s, i) => (remaining.has(s.id) ? [i] : [])),
+  );
+}
+
 export function currentRunRemainingIce(input: AiDecisionInput): VisibleCard[] {
   const run = input.playerView.run;
   if (!run || run.position?.kind !== "ice") return [];

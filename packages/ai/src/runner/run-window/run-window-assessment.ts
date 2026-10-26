@@ -2,7 +2,7 @@ import { runnerGeneralCreditsAfterCompletedPath } from "../../run-analysis/visib
 import { paidBreakPrecedesHarmlessResolution } from "./run-window-harmless-resolution";
 import {
   completeEncounterBreakerPayment,
-  completeMixedEncounterEconomics,
+  completeCurrentEncounterEconomics,
 } from "./run-window-encounter-payment";
 import {
   pureEndRunEncounterPayment,
@@ -927,26 +927,27 @@ function runnerRunWindowActionAssessment(
         })
       : undefined;
   const committedParentPayoff = runnerRunOriginCommittedPayoff(runOrigin);
-  const mixedEncounterPayment =
-    !exclusion && !encounterPayment
-      ? completeEncounterBreakerPayment(input, action)
-      : undefined;
-  const mixedPaidRisk =
-    mixedEncounterPayment && runOrigin?.runRiskContract
+  const currentEncounterPayment = !exclusion
+    ? (encounterPayment ?? completeEncounterBreakerPayment(input, action))
+    : undefined;
+  const currentPaidRisk =
+    currentEncounterPayment && runOrigin?.runRiskContract
       ? runnerRunRiskContractReassessment(
           input,
           runOrigin,
-          mixedEncounterPayment,
+          currentEncounterPayment,
         )
       : undefined;
-  const mixedEncounterEconomics =
-    mixedEncounterPayment && mixedPaidRisk?.decision === "preserve_continuation"
-      ? completeMixedEncounterEconomics(input, mixedEncounterPayment)
+  const currentEncounterEconomics =
+    currentEncounterPayment &&
+    currentPaidRisk?.decision === "preserve_continuation"
+      ? completeCurrentEncounterEconomics(input, currentEncounterPayment)
       : undefined;
   const pureEncounterEconomics = encounterPayment
     ? pureEndRunEncounterEconomics(input, encounterPayment)
     : undefined;
-  const encounterEconomics = pureEncounterEconomics ?? mixedEncounterEconomics;
+  const encounterEconomics =
+    pureEncounterEconomics ?? currentEncounterEconomics;
   return exclusion
     ? {
         admissible: false,
@@ -989,11 +990,11 @@ function runnerRunWindowActionAssessment(
                 `runner_pure_etr_new_run_end_trash_sources:${pureEncounterEconomics.newRunEndTrashSourceCount}`,
               ]
             : []),
-          ...(mixedEncounterEconomics
+          ...(currentEncounterEconomics
             ? [
-                `runner_mixed_encounter_complete_cost:${mixedEncounterEconomics.totalCost}`,
-                `runner_mixed_encounter_complete_cash_cost:${mixedEncounterEconomics.cashCost}`,
-                "runner_mixed_encounter_paid_root_reserve_preserved",
+                `runner_current_encounter_complete_cost:${currentEncounterEconomics.totalCost}`,
+                `runner_current_encounter_complete_cash_cost:${currentEncounterEconomics.cashCost}`,
+                "runner_current_encounter_paid_root_reserve_preserved",
               ]
             : []),
           ...(strengthPumpSavings !== undefined
@@ -1378,18 +1379,20 @@ function runnerExactPayOrEndRunAccessRouteActionIds(
   const completeAccessRoutes = input.legalActions.filter((action) => {
     if (!admissibleActionIds.has(action.actionId)) return false;
     if (action.actionId === paidContinuation.action.actionId) return true;
+    if (
+      (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+      pureEndRunEncounterPayment(input, action) !== undefined
+    )
+      return true;
     if (action.type !== "break_subroutine") return false;
     const brokenIndexes = breakSubroutineIndexesForAction(action);
     return [...paidContinuation.indexes].every((index) =>
       brokenIndexes.has(index),
     );
   });
-  const cheapestRouteCost = Math.min(
-    ...completeAccessRoutes.map(legalActionCreditCost),
-  );
-  return completeAccessRoutes
-    .filter((action) => legalActionCreditCost(action) === cheapestRouteCost)
-    .map((action) => action.actionId);
+  // Phase admission must preserve the owner's complete payment comparison.
+  // A first pump and one immediate payment are not equivalent total prices.
+  return completeAccessRoutes.map((action) => action.actionId);
 }
 
 export function runnerBindExactRunWindowPhaseRoute(

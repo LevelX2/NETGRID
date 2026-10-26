@@ -3,7 +3,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { creditsToBreakVisibleSubroutinesWithBreaker } from "../../visible-run-analysis";
 import {
   currentEncounteredIceCard,
-  currentEncounterUnbrokenSubroutineIndexes,
+  currentEncounterCompleteSubroutineIndexes,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
 import {
@@ -11,10 +11,6 @@ import {
   spendRunnerEncounterActionCost,
 } from "../../runtime/runner-encounter-credit-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
-import {
-  isVisibleHardEndRunSubroutine,
-  isVisiblePayEndRunSubroutine,
-} from "../../run-analysis/visible-subroutine-semantics";
 import { breakSubroutineIndexesForAction } from "../../runtime/subroutine-indexes";
 
 /** Complete current encounter payment facts. The Run Window owner alone
@@ -39,9 +35,9 @@ export function completeEncounterBreakerPayment(
     return undefined;
   const ice = currentEncounteredIceCard(input);
   if (!ice?.effectiveRunQuote) return undefined;
-  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
-  // The Continue quote describes its next resolution group. A break of a
-  // later group is not a first step of this quoted complete payment.
+  const unbroken = currentEncounterCompleteSubroutineIndexes(input);
+  if (!unbroken) return undefined;
+  // The selected break must belong to the entire quoted remaining scope.
   if (action.type === "break_subroutine") {
     const targets = breakSubroutineIndexesForAction(action);
     if (!targets.size || [...targets].some((index) => !unbroken.has(index)))
@@ -96,23 +92,16 @@ export function completeEncounterBreakerPayment(
   };
 }
 
-/** Equivalent complete mixed encounters are compared only after admission and
+/** Equivalent complete current encounters are compared only after admission and
  * preservation of the same root risk contract. Carrying strength requires the
  * existing whole-path economics rather than a current-encounter shortcut. */
-export function completeMixedEncounterEconomics(
+export function completeCurrentEncounterEconomics(
   input: AiDecisionInput,
   payment: NonNullable<ReturnType<typeof completeEncounterBreakerPayment>>,
 ) {
-  const ice = currentEncounteredIceCard(input),
-    unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+  const ice = currentEncounteredIceCard(input);
   if (
     !ice?.effectiveRunQuote ||
-    ice.effectiveRunQuote.subroutines
-      .filter((_, i) => unbroken.has(i))
-      .every(
-        (s) =>
-          isVisibleHardEndRunSubroutine(s) || isVisiblePayEndRunSubroutine(s),
-      ) ||
     (payment.carriesStrengthAcrossIce &&
       currentRunRemainingIce(input).length > 0) ||
     (payment.budget.paymentSupportCreditsGained ?? 0) > 0

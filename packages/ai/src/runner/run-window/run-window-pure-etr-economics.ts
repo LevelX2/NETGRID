@@ -12,6 +12,7 @@ import {
   currentEncounteredIceCard,
   currentEncounterRequiresFullBreak,
   currentEncounterUnbrokenSubroutineIndexes,
+  currentEncounterCompleteSubroutineIndexes,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
 import {
@@ -50,7 +51,8 @@ export function pureEndRunEncounterPayment(
     return undefined;
   const ice = currentEncounteredIceCard(input);
   if (!ice?.effectiveRunQuote) return undefined;
-  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+  const unbroken = currentEncounterCompleteSubroutineIndexes(input);
+  if (!unbroken) return undefined;
   const subroutines = ice.effectiveRunQuote.subroutines.filter((_, i) =>
     unbroken.has(i),
   );
@@ -63,26 +65,34 @@ export function pureEndRunEncounterPayment(
   )
     return undefined;
   if (action.type === "continue_run") {
+    const next = currentEncounterUnbrokenSubroutineIndexes(input);
+    const nextSubroutines = ice.effectiveRunQuote.subroutines.filter((_, i) =>
+      next.has(i),
+    );
     const indexes = parseSubroutineIndexes(
       action.payload?.payOrEndRunSubroutineIndexes,
     );
     const cost = subroutines.reduce((sum, s) => sum + (s.amount ?? 0), 0);
+    const immediateCost = nextSubroutines.reduce(
+      (sum, s) => sum + (s.amount ?? 0),
+      0,
+    );
     if (
       currentEncounterRequiresFullBreak(input) ||
       action.choiceRequirements?.length ||
       action.payload?.encounterContinue !== true ||
       action.payload?.encounterWillEndRun !== false ||
       subroutines.some((s) => !isVisiblePayEndRunSubroutine(s)) ||
-      indexes.size !== unbroken.size ||
-      [...unbroken].some((index) => !indexes.has(index)) ||
+      indexes.size !== next.size ||
+      [...next].some((index) => !indexes.has(index)) ||
       action.payload?.payOrEndRunSubroutineIndexes !==
-        [...unbroken].sort((a, b) => a - b).join(",") ||
-      action.payload?.unbrokenSubroutineCount !== unbroken.size ||
+        [...next].sort((a, b) => a - b).join(",") ||
+      action.payload?.unbrokenSubroutineCount !== next.size ||
       !Number.isSafeInteger(cost) ||
       cost <= 0 ||
-      action.payload?.payOrEndRunSubroutinePayment !== cost ||
+      action.payload?.payOrEndRunSubroutinePayment !== immediateCost ||
       Number(action.payload?.payOrTrashProgramSubroutinePayment ?? 0) !== 0 ||
-      legalActionCreditCost(action) !== cost
+      legalActionCreditCost(action) !== immediateCost
     )
       return undefined;
     const payment = spendRunnerEncounterActionCost({
@@ -96,6 +106,7 @@ export function pureEndRunEncounterPayment(
       cost,
       cashCost: payment.cashCost,
       liquidCreditsAfterPayment: payment.budget.credits,
+      carriesStrengthAcrossIce: false,
       rig: runnerRigAfterEncounter(input.playerView.own.rig ?? []),
       runEndTrashSourceIds: [] as string[],
       budget: runnerRunPathCreditBudgetAfterEncounter(payment.budget),

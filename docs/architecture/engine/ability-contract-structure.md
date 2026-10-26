@@ -144,6 +144,18 @@ und eines reservierten Run-Klicks. Zusätzliche freiwillige Kartenaktionen, neue
 Handkarten und optionale Einkommen sind nicht enthalten. Die Projektion liest
 keine gegnerische Hand und verändert den Spielzustand nicht.
 
+## Encounter-Zahlungsgruppen
+
+Eine Encounter-Continue-Action unterscheidet ihre unmittelbar aufzulösende
+Gruppe (`encounterSubroutineIds`, `unbrokenSubroutineCount`) von der ganzen
+noch offenen Menge (`encounterRemainingSubroutineIds`,
+`encounterRemainingSubroutineCount`). Die zweite Quote entfernt bereits
+gebrochene, aufgelöste, ignorierte und durch Trode Set ausgeschlossene
+Subroutinen. Sie enthält auch Wirkungen hinter einer weiteren Zahlungsgrenze.
+Beide Quotes stammen aus demselben aktuellen Encounter. Die Zusatzfakten
+ändern weder Action-ID, tatsächliche Teilkosten, Auflösungsreihenfolge noch
+StateHash und werden nur über die aktuelle actor-private LegalAction geliefert.
+
 ## Verpflichtende Kreditzahlungen
 
 Im aktuellen ICE-Approach kann eine kostenlose reine Root-Rez die gebundene

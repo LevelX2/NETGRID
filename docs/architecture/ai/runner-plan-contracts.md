@@ -2213,6 +2213,28 @@ dieser harmlosen Auflösung. Er verwendet danach neue echte LegalActions und
 erhält Run, Root und Executor. Schaden, Full-Break-Pflichten, kostenpflichtige
 Fortsetzungen und fehlende Zertifikate eröffnen diese Reihenfolge nicht.
 
+Für vollständige Encounterzahlungen liefert die Engine zusätzlich
+`encounterRemainingSubroutineIds` und `encounterRemainingSubroutineCount`.
+Diese Menge enthält alle noch nicht gebrochenen, aufgelösten oder ignorierten
+Subroutinen, auch hinter einer späteren Zahlungsgrenze. Die bisherigen
+`encounterSubroutineIds` und `unbrokenSubroutineCount` behalten ihre Bedeutung
+als nächste tatsächliche Auflösungsgruppe. Vollzahlungen vergleichen den
+gemeinsamen Pump und alle verbleibenden Breaks mit der Summe der festen
+Zahl-oder-ETR-Kosten. Der aktuelle Continue-Kopf muss dabei seine eigene
+Teilzahlung exakt belegen; spätere Actions werden nach jedem Engine-Schritt
+neu materialisiert. Ohne vollständige Mengenquote bescheinigt ein Teilfenster
+keine vollständige Zahlung. Eine nächste Gruppe, die bereits alle sichtbaren
+Subroutinen enthält, beweist ihre Vollständigkeit unmittelbar. Widersprüchliche
+Mengen oder veraltete Bindungen scheitern strukturiert.
+
+Auch bei unbekannter innerer ICE darf der bestehende Owner vollständig
+finanzierte aktuelle Antworten nach verbleibendem Cash vergleichen, wenn
+beide den gleichen neu gequoteten Rootreservevertrag erhalten und keine
+Stärke über die Encountergrenze mitführen. Daraus entsteht keine behauptete
+Quote für unbekannte Folge-ICE. Fortgeltende Stärke braucht weiterhin den
+vollständigen Pfadvergleich. Sicherheitsmitigation, Zahlungsquellenverlust
+und die bestehenden Zulassungsschranken bleiben erhalten.
+
 Öffentlich bereits aufgelöste Brechsperren werden im gemeinsamen
 `currentRunPathContext` an die konkrete ICE-Instanz gebunden. Die aktuelle
 Sperre gilt nur im laufenden Encounter; die vorgemerkte Sperre gilt für den
