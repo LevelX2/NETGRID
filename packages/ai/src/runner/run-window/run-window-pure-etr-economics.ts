@@ -24,6 +24,7 @@ import {
   isVisibleHardEndRunSubroutine,
   isVisiblePayEndRunSubroutine,
 } from "../../run-analysis/visible-subroutine-semantics";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 
 /** Quote the access-only payment before testing the bound continuation reserve.
@@ -82,7 +83,7 @@ export function pureEndRunEncounterPayment(
       action.choiceRequirements?.length ||
       action.payload?.encounterContinue !== true ||
       action.payload?.encounterWillEndRun !== false ||
-      subroutines.some((s) => !isVisiblePayEndRunSubroutine(s)) ||
+      nextSubroutines.some((s) => !isVisiblePayEndRunSubroutine(s)) ||
       indexes.size !== next.size ||
       [...next].some((index) => !indexes.has(index)) ||
       action.payload?.payOrEndRunSubroutineIndexes !==
@@ -95,6 +96,8 @@ export function pureEndRunEncounterPayment(
       legalActionCreditCost(action) !== immediateCost
     )
       return undefined;
+    if (subroutines.some(isVisibleHardEndRunSubroutine))
+      return completeEncounterAfterFixedPayment(input, action, next);
     const payment = spendRunnerEncounterActionCost({
       input,
       action,
@@ -113,6 +116,84 @@ export function pureEndRunEncounterPayment(
     };
   }
   return completeEncounterBreakerPayment(input, action);
+}
+
+/** Bind the real fixed-payment head before quoting only its exact remaining
+ * pure-ETR scope through the existing path-cost service. This is neither a
+ * speculative future Action nor a second action chooser. */
+function completeEncounterAfterFixedPayment(
+  input: AiDecisionInput,
+  action: LegalAction,
+  next: ReadonlySet<number>,
+) {
+  const ice = currentEncounteredIceCard(input)!;
+  const complete = currentEncounterCompleteSubroutineIndexes(input)!;
+  const remaining = ice.effectiveRunQuote!.subroutines.filter(
+    (_, index) => complete.has(index) && !next.has(index),
+  );
+  const first = spendRunnerEncounterActionCost({
+    input,
+    action,
+    budget: runnerEncounterCreditBudgetForInput(input),
+    cost: legalActionCreditCost(action),
+  });
+  if (
+    !first.affordable ||
+    ice.effectiveRunQuote!.conditionalEncounterEffects?.length
+  )
+    return undefined;
+  const path = assessKnownRezzedIcePath(
+    [
+      {
+        ...ice,
+        effectiveRunQuote: {
+          ...ice.effectiveRunQuote!,
+          subroutines: remaining,
+        },
+      },
+    ],
+    input.playerView.own.rig ?? [],
+    runnerRunPathCreditBudgetAfterEncounter(first.budget),
+    [],
+    input.playerView.opponent.credits,
+    currentRunPathContext(input),
+  );
+  if (
+    path.blocked ||
+    !path.canReachAccess ||
+    path.conditionalAccessReasons?.length ||
+    path.conditionalRiskReasons?.length ||
+    path.futureClicksLost ||
+    path.preRunPreparation ||
+    (path.creditBudgetAfterPath?.paymentSupportCreditsGained ?? 0) > 0
+  )
+    return undefined;
+  if (!path.creditBudgetAfterPath || !path.carriedBreakerStrengthAfterPath)
+    throw new PlanResolutionFailure("missing_action_semantics", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((a) => a.type),
+      owner: "rules_contract",
+      removalCondition:
+        "A completed current encounter quote must return its exact credit ledger and carried breaker strength.",
+    });
+  const after = runnerGeneralCreditsAfterCompletedPath(
+    path.creditBudgetAfterPath,
+  );
+  return {
+    cost: legalActionCreditCost(action) + (path.visibleBreakCost ?? 0),
+    cashCost: input.playerView.own.credits - after,
+    liquidCreditsAfterPayment: after,
+    carriesStrengthAcrossIce:
+      Object.keys(path.carriedBreakerStrengthAfterPath).length > 0,
+    rig: runnerRigAfterEncounter(
+      input.playerView.own.rig ?? [],
+      path.carriedBreakerStrengthAfterPath,
+    ),
+    runEndTrashSourceIds: path.runEndTrashSourceIds ?? [],
+    budget: path.creditBudgetAfterPath,
+  };
 }
 
 /** Economic evidence for equivalent, fully paid pure-ETR continuations.

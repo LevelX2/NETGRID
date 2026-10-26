@@ -480,7 +480,10 @@ function assessKnownRezzedIcePathInternal(
   let activeRunPathEffects = initialRunPathEffects.slice();
   const conditionalAccessReasons = new Set<string>();
   const runEndTrashSourceIds = new Set<string>();
+  const carryingBreakerIds = new Set<string>();
   const spendPathBreak = (assessment: BreakAssessment) => {
+    if (assessment.carriesStrengthAcrossIce)
+      carryingBreakerIds.add(assessment.breakerInstanceId);
     if (assessment.runEndTrashSourceIfUsed)
       runEndTrashSourceIds.add(assessment.breakerInstanceId);
     if (assessment.conditionalAccessReason)
@@ -1356,6 +1359,12 @@ function assessKnownRezzedIcePathInternal(
       ),
       creditsAfterPath: creditBudget.credits,
       creditBudgetAfterPath: cloneRunnerRunPathCreditBudget(creditBudget),
+      carriedBreakerStrengthAfterPath: Object.fromEntries(
+        [...carryingBreakerIds].map((id) => [
+          id,
+          carriedBreakerStrengths.get(id)!,
+        ]),
+      ),
       assessedKnownIceCount,
     };
   }
@@ -1385,6 +1394,12 @@ function assessKnownRezzedIcePathInternal(
     knownPathBlockedByEtr: false,
     creditsAfterPath: creditBudget.credits,
     creditBudgetAfterPath: cloneRunnerRunPathCreditBudget(creditBudget),
+    carriedBreakerStrengthAfterPath: Object.fromEntries(
+      [...carryingBreakerIds].map((id) => [
+        id,
+        carriedBreakerStrengths.get(id)!,
+      ]),
+    ),
     canBreakNextIceButNotFullPath: false,
     hasBypassOrSpecialAccessPlan: false,
     reachableAccessReason: "known_path_reachable",

@@ -409,6 +409,7 @@ describe("visible run analysis targeted breaker paths", () => {
       canReachAccess: true,
       visibleBreakCost: 3,
       creditsAfterPath: 0,
+      carriedBreakerStrengthAfterPath: { snowball: 5 },
     });
   });
 

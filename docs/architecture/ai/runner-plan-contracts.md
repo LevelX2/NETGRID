@@ -2222,7 +2222,15 @@ als nächste tatsächliche Auflösungsgruppe. Vollzahlungen vergleichen den
 gemeinsamen Pump und alle verbleibenden Breaks mit der Summe der festen
 Zahl-oder-ETR-Kosten. Der aktuelle Continue-Kopf muss dabei seine eigene
 Teilzahlung exakt belegen; spätere Actions werden nach jedem Engine-Schritt
-neu materialisiert. Ohne vollständige Mengenquote bescheinigt ein Teilfenster
+neu materialisiert. Eine bezahlbare aktuelle Maut darf auch vor einem späteren
+harten Stopp aufgelöst werden: Der bestehende Pfaddienst quotiert nach dieser
+exakten Kopfzahlung ausschließlich die noch offenen Subroutinen derselben ICE.
+So konkurriert Maut plus notwendiger Break mit einem vollständigen Bruch aller
+Subroutinen. Die Quote enthält das vollständige Ressourcenledger und die von
+diesem Pfad gekaufte fortgeltende Breakerstärke; der projizierte Grenzzustand
+darf weder einen temporären Pump mitnehmen noch einen dauerhaften verlieren.
+Ein bezahlbarer erster Credit bescheinigt keine finanzierte Restfolge.
+Ohne vollständige Mengenquote bescheinigt ein Teilfenster
 keine vollständige Zahlung. Eine nächste Gruppe, die bereits alle sichtbaren
 Subroutinen enthält, beweist ihre Vollständigkeit unmittelbar. Widersprüchliche
 Mengen oder veraltete Bindungen scheitern strukturiert.

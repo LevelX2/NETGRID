@@ -4,11 +4,22 @@ import { visibleBreakerEncounterQuote } from "@netgrid/engine";
 /** Apply the Engine's encounter-boundary fact. No card-rule reconstruction. */
 export function runnerRigAfterEncounter(
   rig: readonly VisibleCard[],
+  carriedStrengths: Readonly<Record<string, number>> = {},
 ): VisibleCard[] {
   return rig.map((card) =>
-    card.strengthAfterEncounter !== undefined
-      ? projectPublicBreakerStrength(card, card.strengthAfterEncounter)
-      : card,
+    carriedStrengths[card.instanceId] !== undefined
+      ? {
+          ...projectPublicBreakerStrength(
+            card,
+            carriedStrengths[card.instanceId]!,
+          ),
+          ...(card.strengthAfterEncounter !== undefined
+            ? { strengthAfterEncounter: carriedStrengths[card.instanceId]! }
+            : {}),
+        }
+      : card.strengthAfterEncounter !== undefined
+        ? projectPublicBreakerStrength(card, card.strengthAfterEncounter)
+        : card,
   );
 }
 
@@ -25,7 +36,8 @@ function projectPublicBreakerStrength(
       (!Number.isSafeInteger(card.strength) ||
         !Number.isSafeInteger(random.actualStrength) ||
         !Number.isSafeInteger(random.currentStrengthAdjustment) ||
-        card.strength !== random.actualStrength + random.currentStrengthAdjustment))
+        card.strength !==
+          random.actualStrength + random.currentStrengthAdjustment))
   ) {
     throw new Error("Invalid public breaker encounter-boundary strength.", {
       cause: {

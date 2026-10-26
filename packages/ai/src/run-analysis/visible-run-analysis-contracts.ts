@@ -284,6 +284,8 @@ export type KnownRezzedIcePathAssessment = {
    * from the general-credit total.
    */
   creditBudgetAfterPath?: RunnerRunPathCreditBudget;
+  /** Strength bought by this quoted path that survives its encounter boundary. */
+  carriedBreakerStrengthAfterPath?: Record<string, number>;
   canBreakNextIceButNotFullPath: boolean;
   unpayableIceIndex?: number;
   unbreakableIceIndex?: number;
