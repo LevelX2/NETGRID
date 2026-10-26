@@ -465,6 +465,7 @@ export type ApiLobbyPayload = {
 export type ApiServicePayload = ApiSidePayload | ApiLobbyPayload;
 
 export type ApiServerMessage =
+  | { type: "match_joined"; payload: { matchId: string; side: Side } }
   | {
       type: "state_update";
       payload: {

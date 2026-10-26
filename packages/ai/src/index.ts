@@ -239,6 +239,7 @@ export {
   restoreResidentPlanPortfolioMemorySnapshot,
 } from "./plans/resident-plan-portfolio-memory";
 export type { ResidentPlanPortfolio } from "./plans/resident-plan-portfolio";
+export { releaseAiMatchRuntime } from "./runtime/match-runtime-memory";
 export {
   assertCanonicalLegalActionInvocation,
   assertCurrentLegalActionBinding,

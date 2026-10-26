@@ -1,7 +1,8 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { MatchRuntimeMemory } from "./match-runtime-memory";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 
-const runnerRunPlanMemoryByKey = new Map<string, RunnerRunPlan>();
+const runnerRunPlanMemoryByKey = new MatchRuntimeMemory<RunnerRunPlan>();
 
 export class MissingRunnerRunPlanError extends Error {
   constructor(message: string) {
@@ -60,7 +61,11 @@ export function rememberRunnerRunPlanMemorySnapshot(
   if (input.side !== "runner") {
     throw new Error("runner_run_plan_memory_requires_runner_side");
   }
-  runnerRunPlanMemoryByKey.set(runnerRunPlanMemoryKey(input), plan);
+  runnerRunPlanMemoryByKey.set(
+    runnerRunPlanMemoryKey(input),
+    plan,
+    runnerRunPlanMemoryContextId(input),
+  );
   return plan;
 }
 
@@ -84,7 +89,11 @@ export function restoreRunnerRunPlanMemorySnapshot(
   if (input.side !== "runner" || !runnerHasActiveRun(input)) {
     throw new Error("invalid_runner_run_plan_memory_checkpoint");
   }
-  runnerRunPlanMemoryByKey.set(key, structuredClone(plan));
+  runnerRunPlanMemoryByKey.set(
+    key,
+    structuredClone(plan),
+    runnerRunPlanMemoryContextId(input),
+  );
 }
 
 function runnerRunPlanIsActive(plan: RunnerRunPlan): boolean {

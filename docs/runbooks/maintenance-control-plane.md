@@ -201,6 +201,15 @@ Der Befehl erstellt zuerst ein geprüftes, bereits kompaktes Backup mit dem Grun
 
 Nach dem Lauf die App wieder ausschließlich über `scripts/start-netgrid.ps1` starten.
 
+## Matchlöschung während laufender KI-Aktionen
+
+Die manuelle Cleanup-Ausführung serialisiert Löschungen über die Match-Locks
+auch gegenüber kooperativ laufenden KI-Batches. Sie wartet deren laufenden
+Übergang ab und prüft die ursprünglich bestätigte Vorschau erneut.
+`maintenance_preview_mismatch` bedeutet, dass sich der Bestand währenddessen
+geändert hat: die Vorschau erneut laden und den aktuellen Zuschnitt prüfen.
+Die vorhandene Vorschau wird nicht still an die neue Lage angepasst.
+
 ## Betriebsprüfung
 
 1. Ohne Passwortdatei liefert Maintenance nur `maintenance_auth_uninitialized`.

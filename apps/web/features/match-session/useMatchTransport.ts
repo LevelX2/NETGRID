@@ -3,7 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import type { ApiServerMessage } from "@netgrid/shared";
 
 import type { SessionInfo } from "../../app/session-recovery";
-import { normalizeWebSocketUrl } from "../../lib/client-api";
+import {
+  openMatchConnection,
+  type MatchTransportConnection,
+  type MatchTransportNoticeKey,
+} from "./match-transport-connection";
+export type { MatchTransportNoticeKey } from "./match-transport-connection";
 import type { ConnectionState } from "../app-shell/AppShell";
 
 type MatchTransportOptions = {
@@ -14,13 +19,6 @@ type MatchTransportOptions = {
   translateNotice(key: MatchTransportNoticeKey): string;
 };
 
-export type MatchTransportNoticeKey =
-  | "webSocketStartFailed"
-  | "reconnectCompleted"
-  | "reconnectServerFailed"
-  | "reconnecting"
-  | "serverOffline";
-
 export function useMatchTransport({
   session,
   onMessage,
@@ -28,7 +26,7 @@ export function useMatchTransport({
   setNotice,
   translateNotice,
 }: MatchTransportOptions) {
-  const socketRef = useRef<WebSocket | null>(null);
+  const socketRef = useRef<MatchTransportConnection | null>(null);
   const onMessageRef = useRef(onMessage);
   const translateNoticeRef = useRef(translateNotice);
   const manualReconnectRef = useRef(false);
@@ -44,70 +42,20 @@ export function useMatchTransport({
 
   useEffect(() => {
     if (!session) return;
-    if (!session.sessionToken.trim() || !session.webSocketUrl.trim()) {
-      setConnection("offline");
-      return;
-    }
-    setConnection("connecting");
-    socketRef.current?.close();
-    const socketUrl = normalizeWebSocketUrl(session.webSocketUrl);
-    if (!socketUrl) {
-      setConnection("offline");
-      setNotice(translateNoticeRef.current("webSocketStartFailed"));
-      return;
-    }
-    let socket: WebSocket;
-    try {
-      socket = new WebSocket(socketUrl);
-    } catch {
-      setConnection("offline");
-      setNotice(translateNoticeRef.current("webSocketStartFailed"));
-      return;
-    }
-    socketRef.current = socket;
-    socket.onopen = () => {
-      if (socketRef.current !== socket) return;
-      setConnection("online");
-      socket.send(
-        JSON.stringify({
-          type: "join_match",
-          payload: {
-            matchId: session.matchId,
-            side: session.side,
-            sessionToken: session.sessionToken,
-          },
-        }),
-      );
-      if (manualReconnectRef.current) {
+    const connection = openMatchConnection({
+      session,
+      reconnecting: manualReconnectRef.current,
+      onMessage: (message) => onMessageRef.current(message),
+      setConnection,
+      notice: (key) => setNotice(translateNoticeRef.current(key)),
+      onAttemptSettled: () => {
         manualReconnectRef.current = false;
-        setNotice(translateNoticeRef.current("reconnectCompleted"));
-      }
-    };
-    socket.onclose = () => {
-      if (socketRef.current !== socket) return;
-      setConnection("offline");
-      if (manualReconnectRef.current) {
-        manualReconnectRef.current = false;
-        setNotice(translateNoticeRef.current("reconnectServerFailed"));
-      }
-    };
-    socket.onerror = () => {
-      if (socketRef.current !== socket) return;
-      setConnection("offline");
-      if (manualReconnectRef.current) {
-        manualReconnectRef.current = false;
-        setNotice(translateNoticeRef.current("reconnectServerFailed"));
-      }
-    };
-    socket.onmessage = (event) => {
-      if (socketRef.current !== socket) return;
-      onMessageRef.current(
-        JSON.parse(event.data as string) as ApiServerMessage,
-      );
-    };
+      },
+    });
+    socketRef.current = connection ?? null;
     return () => {
-      if (socketRef.current === socket) socketRef.current = null;
-      socket.close();
+      if (socketRef.current === connection) socketRef.current = null;
+      connection?.dispose();
     };
   }, [
     session?.matchId,
@@ -126,15 +74,14 @@ export function useMatchTransport({
   };
 
   const ensureSocketConnected = () => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) return true;
+    if (socketRef.current?.isJoined()) return true;
     setNotice(translateNoticeRef.current("serverOffline"));
     return false;
   };
 
   const sendSocketMessage = (type: string, payload: unknown): boolean => {
     if (!ensureSocketConnected()) return false;
-    socketRef.current?.send(JSON.stringify({ type, payload }));
-    return true;
+    return socketRef.current?.send(type, payload) ?? false;
   };
 
   const closeSocket = () => {

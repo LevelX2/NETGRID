@@ -19,6 +19,22 @@
 - Normale Player-UI darf keinen FullState bekommen.
 - `page.tsx` soll nicht wieder neue Sammelbereiche für Card-, Action-, Recent-, Storage- oder Overlay-Helfer aufnehmen.
 
+## Bestätigter WebSocket-Matchbeitritt
+
+Ein geöffneter WebSocket bleibt zunächst `connecting`. Erst
+`match_joined { matchId, side }` bestätigt den Beitritt zur exakt angefragten
+Bindung. Der Server sendet diese Quittung nach erfolgreicher Sessionprüfung
+und Bootstrap. Vorher sind Matchactions gesperrt und eine manuelle
+Wiederverbindung wird noch nicht als erfolgreich gemeldet.
+
+Der Controller in `features/match-session/match-transport-connection.ts`
+verwirft fremde Bindungen und Ereignisse bereits entsorgter Socketgenerationen.
+Eine Beitrittsablehnung oder eine nach zehn Sekunden weiterhin fehlende
+Quittung schließt den eigenen Socket, meldet den Fehler und hält Actions
+gesperrt. Normale Aktionsablehnungen nach bestätigtem Beitritt beenden die
+Verbindung nicht. Der React-Hook hält nur die aktuelle Verbindung und
+verweist auf diese testbare Transportlogik.
+
 ## Helle Endstandanzeige und Cyberspace-Hintergrund
 
 Die helle Variante (`data-theme="white"`) verwendet für den Endstand eine

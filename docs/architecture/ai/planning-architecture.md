@@ -665,6 +665,14 @@ Jede Persistence Policy legt fest:
 „Alle relevanten Pläne bleiben resident“ ist eine fachliche Aussage, keine
 unbegrenzte Speicherzusage. Relevanz muss durch Retention-Regeln belegbar sein.
 
+Das technische Prozessgedächtnis gehört einem konkreten Match.
+`releaseAiMatchRuntime` entfernt nach dessen Lifecycle-Abschluss oder Löschung
+die zugehörigen Einträge aller Laufzeitspeicher, ohne aktive Portfolios anderer
+Matches oder persistierte Evidence zu verändern. Freigabe nach Commit,
+Undo und Runtimeende sind im [Controllervertrag](controller-contract.md)
+festgelegt. Die bestehenden Plan-, Step- und Commitmentbindungen werden
+innerhalb eines aktiven Matches dadurch nicht verändert.
+
 ## 9. Portfolio und Ausführungsrollen
 
 ### 9.1 Rollen

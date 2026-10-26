@@ -1,7 +1,7 @@
 # AI Controller Spec
 
 Status: **Current State**
-Stand: 2026-08-14
+Stand: 2026-10-18
 
 ## Ziel
 
@@ -89,6 +89,52 @@ AI konfiguriert ist. Dabei gilt:
 - Runtime-Neustart verwirft ein altes Zugcommitment und plant aus dem
   wiederhergestellten residenten Portfolio neu.
 - Standardpayloads bleiben side-gefiltert.
+
+### Idempotente Aktionsantworten
+
+Nach erfolgreicher Sessionprüfung liefert eine bekannte Idempotenz-ID ihr
+gespeichertes Annahme- oder Ablehnungsergebnis. Eine abgelehnte Quittung bleibt
+abgelehnt und behält ihren Fehlercode; eine angenommene terminale Aktion bleibt
+auch nach Spielende angenommen. Es wird keine zweite Transition ausgeführt.
+Neue Actions werden weiterhin gegen Matchstatus, Spielerzeit und Enginezustand
+geprüft. Fehlt einer gespeicherten Ablehnung ihr Pflichtfehlercode, scheitert
+der Pfad mit `invalid_action_receipt` statt einer Erfolgsantwort.
+
+### Kooperative Serverausführung
+
+`chooseAiAction` und die einzelne Engineaktion laufen weiterhin synchron.
+`runAiUntilNextHuman` führt höchstens 40 Schritte aus und gibt zwischen
+abgeschlossenen Schritten mit einem Timerquantum von fünf Millisekunden an den
+Ereignisloop ab. Dasselbe gilt für automatische Setupfortsetzungen. Die kurze
+Schedulerpause gibt Socketarbeit Zeit zum Abschluss und ist unabhängig von
+der Präsentation der KI-Aktionen.
+
+Match-Lock und Update-Admission bleiben über den gesamten Batch gehalten;
+Persistenz und Erfolgsantwort folgen nach dem bestehenden Commitvertrag.
+Andere Matches und HTTP-Anfragen dürfen in den Zwischenräumen weiterlaufen.
+Manuelle Matchlöschung nimmt die betroffenen Match-Locks in stabiler
+Sortierreihenfolge und revalidiert ihre Storage-Vorschau darunter. Eine
+inzwischen veraltete Vorschau scheitert sichtbar; eine Löschung kann einen
+laufenden Batch nicht unterbrechen und später durch dessen Save rückgängig
+gemacht werden.
+
+### Lebensdauer des Prozessgedächtnisses
+
+`releaseAiMatchRuntime(matchId)` gibt residente Portfolios, Portfolio-
+Snapshots, Strategic Intent und Runner-Runpläne aller Seiten und Profile des
+benannten Matches frei. Die Speicher halten ihre Matchzuständigkeit als
+eigene Metadaten; die Freigabe interpretiert keine opaken Cachekeys.
+
+Der Server gibt dieses Gedächtnis und vorbereitete KI-Debugentscheidungen
+nach erfolgreicher terminaler Persistenz, nach Matchlöschung, nach akzeptiertem
+Undo sowie beim Schließen seiner Runtime frei. Ein fehlgeschlagener Commit
+löscht kein noch gültiges Liveportfolio. Andere aktive Matches einschließlich
+ihrer Commitments bleiben unverändert. Persistierte Portfolios und benötigte
+Trace-/Replay-Evidence werden dadurch nicht gelöscht.
+
+Die Regressionen liegen in `action-idempotency.test.ts`,
+`ai-batch-runtime.test.ts`, `ai-runtime-lifecycle.test.ts` und
+`match-join-contract.test.ts` unter `apps/server/src/`.
 
 ## Debug-Ausnahme des lokalen Betreibers
 
