@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { visibleBreakerEncounterQuote } from "./visible-breaker-encounter-quote";
+import {
+  visibleBreakerEncounterQuote,
+  visibleBreakerCoverageQuote,
+} from "./visible-breaker-encounter-quote";
 
 describe("visibleBreakerEncounterQuote", () => {
   it("preserves Psychic Friend's current-turn pump horizon", () => {
@@ -320,5 +323,61 @@ describe("visibleBreakerEncounterQuote", () => {
         },
       ],
     });
+  });
+});
+
+describe("visibleBreakerCoverageQuote", () => {
+  it.each(["onr_v1_279_wall-of-static", "onr_v1_261_quandary"])(
+    "proves no applicable random Sentry break on %s without a strength",
+    (iceDefinitionId) => {
+      expect(
+        visibleBreakerCoverageQuote({
+          breakerDefinitionId: "onr_v1_002_ai-boon",
+          iceDefinitionId,
+        }),
+      ).toEqual({ breakOptions: [], coverageStatus: "none" });
+    },
+  );
+  it("keeps matching Sentry coverage separate from unresolved strength", () => {
+    expect(
+      visibleBreakerCoverageQuote({
+        breakerDefinitionId: "onr_v1_002_ai-boon",
+        iceDefinitionId: "onr_v1_223_banpei",
+        subroutines: [{ id: "etr", type: "end_the_run" }],
+      }),
+    ).toMatchObject({
+      coverageStatus: "full",
+      breakOptions: [{ breakableSubroutineIndexes: [0] }],
+    });
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerInstanceId: "boon",
+        breakerStrength: 0,
+        iceDefinitionId: "onr_v1_223_banpei",
+      }),
+    ).toBeUndefined();
+  });
+  it("requires a subtype choice rather than declaring no coverage", () => {
+    expect(
+      visibleBreakerCoverageQuote({
+        breakerDefinitionId: "onr_proteus_088_fubar",
+        iceDefinitionId: "onr_v1_223_banpei",
+      })?.coverageStatus,
+    ).toBe("requires_selection");
+  });
+  it("does not invent an unknown ICE or breaker definition", () => {
+    expect(
+      visibleBreakerCoverageQuote({
+        breakerDefinitionId: "onr_v1_002_ai-boon",
+        iceDefinitionId: "missing_ice",
+      }),
+    ).toBeUndefined();
+    expect(
+      visibleBreakerCoverageQuote({
+        breakerDefinitionId: "missing_breaker",
+        iceDefinitionId: "onr_v1_223_banpei",
+      }),
+    ).toBeUndefined();
   });
 });

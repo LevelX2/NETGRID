@@ -3,6 +3,7 @@ import { type VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   assessCorpScoreProtection,
+  corpVisibleSingleSubroutineIsUnbreakable,
   compareExactProbabilities,
   type ExactProbability,
 } from "./corp-score-protection-assessment";
@@ -870,9 +871,9 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
-  it("does not exempt an icebreaker with additional run-flow mechanics", () => {
+  it("keeps a relevant random-strength Sentry breaker unsupported", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("sentry", "onr_v1_223_banpei")],
       runnerRig: [runnerProgram("ai-boon", "onr_v1_002_ai-boon")],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -1144,3 +1145,100 @@ function effectiveQuote(card: VisibleCard) {
     })),
   };
 }
+
+describe("irrelevant unresolved random breaker strength", () => {
+  it.each(["onr_v1_002_ai-boon", "onr_proteus_087_forwards-legacy"])(
+    "certifies a Wall/Gate path independently of %s strength",
+    (definitionId) => {
+      const assessment = assessCorpScoreProtection({
+        serverIce: [
+          ice("wall", "onr_v1_279_wall-of-static"),
+          ice("gate", "onr_v1_261_quandary"),
+        ],
+        runnerRig: [runnerProgram("random", definitionId)],
+        runnerCredits: 20,
+        maximumRunnerAccessSuccessProbability: QUARTER,
+      });
+      expect(assessment).toMatchObject({
+        knowledge: "known",
+        protectsScore: true,
+        runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      });
+    },
+  );
+  it.each([1, 2, 3])(
+    "preserves the actual matching breaker cost at %s credits",
+    (credits) => {
+      const assessment = assessCorpScoreProtection({
+        serverIce: [
+          ice("wall", "onr_v1_279_wall-of-static"),
+          ice("gate", "onr_v1_261_quandary"),
+        ],
+        runnerRig: [
+          runnerProgram("boon", "onr_v1_002_ai-boon"),
+          runnerProgram("dwarf", "onr_v1_021_dwarf"),
+          runnerProgram("cyfer", "onr_v1_016_cyfermaster"),
+        ],
+        runnerCredits: credits,
+        maximumRunnerAccessSuccessProbability: QUARTER,
+      });
+      expect(assessment).toMatchObject({
+        knowledge: "known",
+        runnerAccessSuccessProbability: {
+          numerator: credits >= 3 ? 1 : 0,
+          denominator: 1,
+        },
+      });
+    },
+  );
+  it("keeps an unknown ICE path unknown", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [{ instanceId: "unknown", known: false, rezzed: true }],
+      runnerRig: [runnerProgram("boon", "onr_v1_002_ai-boon")],
+      runnerCredits: 20,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+    expect(assessment.knowledge).toBe("unknown");
+  });
+  it("does not require a future random roll for an irrelevant publicly prepared breaker", () => {
+    const staged = {
+      ...runnerProgram("boon", "onr_v1_002_ai-boon"),
+      memoryCost: 1,
+      counters: { shell: 1 },
+    };
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("wall", "onr_v1_279_wall-of-static")],
+      runnerRig: [shellTraders()],
+      runnerSetAside: [staged],
+      runnerMemoryUsed: 0,
+      runnerMemoryLimit: 4,
+      runnerCredits: 3,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      protectsScore: true,
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+    });
+  });
+});
+
+it("shares the irrelevant-strength proof with a single-subroutine certificate", () => {
+  const wall = ice("wall", "onr_v1_279_wall-of-static");
+  wall.effectiveRunQuote = effectiveQuote(wall);
+  const boon = runnerProgram("boon", "onr_v1_002_ai-boon");
+  expect(
+    corpVisibleSingleSubroutineIsUnbreakable({
+      ice: wall,
+      runnerRig: [boon],
+      runnerCredits: 50,
+    }),
+  ).toBe(true);
+  expect(
+    corpVisibleSingleSubroutineIsUnbreakable({
+      ice: wall,
+      runnerRig: [boon, runnerProgram("dwarf", "onr_v1_021_dwarf")],
+      runnerCredits: 1,
+    }),
+  ).toBe(false);
+});

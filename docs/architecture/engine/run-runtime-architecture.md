@@ -55,6 +55,13 @@ ihnen aber nicht zurückimportiert.
 
 ## Nicht offensichtliche Verträge
 
+- `visibleBreakerCoverageQuote` liefert strukturelle Break-Abdeckung ohne
+  aktuellen Stärkewert und ohne künftigen Zufallswurf. Sie verwendet denselben
+  kanonischen Matcher wie `visibleBreakerEncounterQuote`; letztere ergänzt
+  Stärke, Pumpen und Zufallszustand. Fehlende Abdeckungsdaten und erforderliche
+  Subtypwahlen bleiben ausdrücklich unvollständig. Die Coverage-Quote erzeugt
+  keine LegalActions, führt keinen Wurf aus und zertifiziert keine Zahlung.
+
 - Die kanonische Breakerquote kennzeichnet `run_end_trash_source_if_used`
   ausschließlich an der tatsächlichen Breakfähigkeit. Der öffentliche Run
   projiziert bereits benutzte Instanzen als

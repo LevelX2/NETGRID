@@ -840,6 +840,18 @@ Defense-Owner, Executor, Step und StateVersion.
 Finanzierbare Teilabsicherung terminaler Server bleibt außerdem beim
 Vergleich mit Rezzes auf anderen Servern reservierbar.
 
+Die gemeinsame Schutzbewertung benötigt keine noch unbekannte Zufallsstärke
+für einen öffentlichen Breaker, dessen Engine-Abdeckungsquote auf jedem
+aktuell bekannten aktiven ICE keine anwendbare Breakfähigkeit ausweist.
+Die vollständige Rig bleibt im Creditledger; nur der irrelevante Breaker
+entfällt in der Break-/Stärkefolge. Andere Run-Effekte, passende Sentries,
+unbekannte ICE und ungebundene effektive Quotes behalten ihre Unknown-Grenze.
+Derselbe Nachweis gilt für einzelne Subroutinen und öffentlich vorbereitete
+Breaker. Die Defense-Zielwahl für freie Rez vor Score sowie deren exakte
+Score-/Choice-Executorbindung bleiben unverändert. Paarung 558, R3 G8 D122
+und G9 D391, belegt den vorherigen Abbruch; native Direct-/DTO-Kontrollen
+führen Score und kostenlose Rez durch echte Engine-Aktionen aus.
+
 Die historische Gegenprobe `match_52de6345f1e39802` hat bei D34 sechs Credits und
 drei Klicks, eine 0/4 avancierte Main-Office Relocation und den Runner bei vier
 Agendapunkten. Rio de Janeiro City Grid kostet einschließlich sofortigem Rez

@@ -121,63 +121,15 @@ export function visibleBreakerEncounterQuote(params: {
         currentStrengthAdjustment: number;
       };
 }): VisibleBreakerEncounterQuote | undefined {
-  const breaker = CARD_DEFINITIONS_BY_ID[params.breakerDefinitionId];
-  if (!breaker) return undefined;
-  const ice = CARD_DEFINITIONS_BY_ID[params.iceDefinitionId];
-  const iceSubtypes = params.iceSubtypes ?? ice?.subtypes;
-  if (!iceSubtypes) return undefined;
-  const abilities = icebreakerAbilitiesForDefinition(breaker);
-  const subroutines = params.subroutines ?? [];
+  const coverage = visibleBreakerCoverageQuote(params);
+  if (!coverage) return undefined;
+  const { breakOptions, coverageStatus } = coverage;
+  const abilities = icebreakerAbilitiesForDefinition(
+    CARD_DEFINITIONS_BY_ID[params.breakerDefinitionId]!,
+  );
   const breakAbilities = abilities.filter(
     (ability) => ability.type === "break_subroutine",
   );
-  if (breakAbilities.length === 0) return undefined;
-  const breakOptions = breakAbilities.flatMap((ability) => {
-    const indexes = subroutines
-      .map((subroutine, index) =>
-        breakAbilityMatches(
-          ability,
-          params.selectedSubtype,
-          params.iceDefinitionId,
-          iceSubtypes,
-          subroutine,
-        )
-          ? index
-          : -1,
-      )
-      .filter((index) => index >= 0);
-    const matchesIce =
-      subroutines.length > 0
-        ? indexes.length > 0
-        : breakAbilityMatches(
-            ability,
-            params.selectedSubtype,
-            params.iceDefinitionId,
-            iceSubtypes,
-          );
-    if (!matchesIce) return [];
-    return [
-      {
-        breakableSubroutineIndexes: indexes,
-        creditCost: ability.cost.credits ?? 0,
-        maximumSubroutinesPerUse: Math.max(1, ability.count ?? 1),
-        consequences: consequencesFor(ability),
-      },
-    ];
-  });
-  const unresolvedSelection =
-    !params.selectedSubtype &&
-    breakAbilities.some((ability) => ability.selectedIceSubtypeFromBreaker);
-  const breakable = new Set(
-    breakOptions.flatMap((option) => option.breakableSubroutineIndexes),
-  );
-  const coverageStatus = unresolvedSelection
-    ? "requires_selection"
-    : breakOptions.length === 0
-      ? "none"
-      : subroutines.length > 0 && breakable.size < subroutines.length
-        ? "partial"
-        : "full";
   const pumpOptions = abilities
     .filter((ability) => ability.type === "pump_strength")
     .map((ability) => ({
@@ -235,6 +187,79 @@ export function visibleBreakerEncounterQuote(params: {
       : {}),
     stateChangesAfterUse,
   };
+}
+
+export type VisibleBreakerCoverageQuote = Pick<
+  VisibleBreakerEncounterQuote,
+  "breakOptions" | "coverageStatus"
+>;
+
+/** Structural break coverage only; no current strength or future die roll is inferred. */
+export function visibleBreakerCoverageQuote(params: {
+  breakerDefinitionId: CardDefinitionId;
+  selectedSubtype?: string;
+  iceDefinitionId: CardDefinitionId;
+  iceSubtypes?: readonly string[];
+  subroutines?: readonly VisibleEffectiveSubroutine[];
+}): VisibleBreakerCoverageQuote | undefined {
+  const breaker = CARD_DEFINITIONS_BY_ID[params.breakerDefinitionId];
+  if (!breaker) return undefined;
+  const ice = CARD_DEFINITIONS_BY_ID[params.iceDefinitionId];
+  const iceSubtypes = params.iceSubtypes ?? ice?.subtypes;
+  if (!iceSubtypes) return undefined;
+  const abilities = icebreakerAbilitiesForDefinition(breaker);
+  const subroutines = params.subroutines ?? [];
+  const breakAbilities = abilities.filter(
+    (ability) => ability.type === "break_subroutine",
+  );
+  if (breakAbilities.length === 0) return undefined;
+  const breakOptions = breakAbilities.flatMap((ability) => {
+    const indexes = subroutines
+      .map((subroutine, index) =>
+        breakAbilityMatches(
+          ability,
+          params.selectedSubtype,
+          params.iceDefinitionId,
+          iceSubtypes,
+          subroutine,
+        )
+          ? index
+          : -1,
+      )
+      .filter((index) => index >= 0);
+    const matchesIce =
+      subroutines.length > 0
+        ? indexes.length > 0
+        : breakAbilityMatches(
+            ability,
+            params.selectedSubtype,
+            params.iceDefinitionId,
+            iceSubtypes,
+          );
+    if (!matchesIce) return [];
+    return [
+      {
+        breakableSubroutineIndexes: indexes,
+        creditCost: ability.cost.credits ?? 0,
+        maximumSubroutinesPerUse: Math.max(1, ability.count ?? 1),
+        consequences: consequencesFor(ability),
+      },
+    ];
+  });
+  const unresolvedSelection =
+    !params.selectedSubtype &&
+    breakAbilities.some((ability) => ability.selectedIceSubtypeFromBreaker);
+  const breakable = new Set(
+    breakOptions.flatMap((option) => option.breakableSubroutineIndexes),
+  );
+  const coverageStatus = unresolvedSelection
+    ? "requires_selection"
+    : breakOptions.length === 0
+      ? "none"
+      : subroutines.length > 0 && breakable.size < subroutines.length
+        ? "partial"
+        : "full";
+  return { breakOptions, coverageStatus };
 }
 
 function assertResolvedRandomRunStrengthConsistency(params: {

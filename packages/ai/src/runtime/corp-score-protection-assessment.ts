@@ -9,6 +9,7 @@ import {
 } from "@netgrid/shared";
 import {
   visibleBreakerEncounterQuote,
+  visibleBreakerCoverageQuote,
   visibleProgramHostInstallVariants,
   visibleFortPassProtection,
 } from "@netgrid/engine";
@@ -159,7 +160,7 @@ export function corpVisibleSingleSubroutineIsUnbreakable(params: {
     !nonNegativeSafeInteger(runnerCredits) ||
     runnerRig.some(
       (card) =>
-        !validRunnerRigCard(card) ||
+        !validRunnerRigCard(card, [ice]) ||
         runnerRigCardRequiresUnsupportedAccessProjection(card, [ice]),
     )
   ) {
@@ -190,7 +191,10 @@ export function corpVisibleSingleSubroutineIsUnbreakable(params: {
         ),
       )
       .reduce((sum, credits) => sum + credits, 0);
-  for (const breaker of runnerRig.filter(cardIsIcebreaker)) {
+  for (const breaker of runnerRig.filter(
+    (card) =>
+      cardIsIcebreaker(card) && !randomStrengthCannotAffectIcePath(card, [ice]),
+  )) {
     const definition = CARD_DEFINITIONS_BY_ID[breaker.definitionId!];
     const encounter = visibleBreakerEncounterQuote({
       breakerDefinitionId: breaker.definitionId!,
@@ -268,6 +272,7 @@ type AccessPathState = {
 type SupportedIce = Readonly<{
   card: CorpScoreProtectionIceInput;
   endTheRunCount: number;
+  subroutines: readonly (SubroutineDefinition | VisibleEffectiveSubroutine)[];
   endTheRunSubroutines: readonly (
     | SubroutineDefinition
     | VisibleEffectiveSubroutine
@@ -444,13 +449,16 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "unsupportedRunnerAccessEffect:true"],
     );
   }
-  if (runnerRig.some((card) => !validRunnerRigCard(card))) {
+  if (runnerRig.some((card) => !validRunnerRigCard(card, activeIce))) {
     return unknownAssessment(
       input.maximumRunnerAccessSuccessProbability,
       "unknown_runner_rig_card",
       ["scoreProtectionKnown:false", "unknownRunnerRigCard:true"],
     );
   }
+  const breakRig = runnerRig.filter(
+    (card) => !randomStrengthCannotAffectIcePath(card, activeIce),
+  );
   const supportedIce: SupportedIce[] = [];
   for (const card of activeIce) {
     const readResult = readSupportedIce(card);
@@ -483,7 +491,7 @@ export function assessCorpScoreProtection(
       ),
       probability: ONE,
       breakerStrengths: new Map(
-        runnerRig
+        breakRig
           .filter((card) => cardIsIcebreaker(card))
           .map((card) => [card.instanceId, card.strength!]),
       ),
@@ -514,7 +522,7 @@ export function assessCorpScoreProtection(
         const breakStates = accessPreservingBreakStates({
           state: enteringState,
           ice,
-          runnerRig,
+          runnerRig: breakRig,
           requiredSubroutines: [
             ...ice.endTheRunSubroutines,
             ...(breakLock ? ice.nextBreakLockSubroutines : []),
@@ -682,6 +690,7 @@ function readSupportedIce(card: CorpScoreProtectionIceInput): IceReadResult {
     knowledge: "known",
     ice: {
       card,
+      subroutines,
       endTheRunCount: subroutines.filter(isHardEndTheRunSubroutine).length,
       endTheRunSubroutines: subroutines.filter(isHardEndTheRunSubroutine),
       nextBreakLockSubroutines: subroutines.filter(isNextEncounterBreakLock),
@@ -1164,7 +1173,10 @@ function requiredRandomBreakSuccessCount(
   );
 }
 
-function validRunnerRigCard(card: VisibleCard): boolean {
+function validRunnerRigCard(
+  card: VisibleCard,
+  activeIce: readonly CorpScoreProtectionIceInput[],
+): boolean {
   if (
     card.known !== true ||
     !validIdentifier(card.instanceId) ||
@@ -1188,7 +1200,11 @@ function validRunnerRigCard(card: VisibleCard): boolean {
     return false;
   }
   if (!cardIsIcebreaker(card)) return true;
-  if (card.type !== "program" || !nonNegativeSafeInteger(card.strength)) {
+  if (
+    card.type !== "program" ||
+    (!nonNegativeSafeInteger(card.strength) &&
+      !randomStrengthCannotAffectIcePath(card, activeIce))
+  ) {
     return false;
   }
   return true;
@@ -1235,8 +1251,9 @@ function runnerRigCardRequiresUnsupportedAccessProjection(
   return (
     (hint?.functionSignals?.includes("ice.strength_modifier") === true &&
       !strengthIsQuoted) ||
-    hint?.requiredMechanics?.includes("run_start_random_strength_bonus") ===
-      true ||
+    (hint?.requiredMechanics?.includes("run_start_random_strength_bonus") ===
+      true &&
+      !randomStrengthCannotAffectIcePath(card, activeIce)) ||
     definition.mechanics.some(
       (mechanic) =>
         mechanic === "encounter_ice" ||
@@ -1248,6 +1265,38 @@ function runnerRigCardRequiresUnsupportedAccessProjection(
         (mechanic.includes("ice_strength_modifier") && !strengthIsQuoted),
     )
   );
+}
+
+/** An unresolved strength cannot affect a path with no applicable break ability.
+ * Keep the complete rig in the credit ledger and every other access-effect guard. */
+function randomStrengthCannotAffectIcePath(
+  card: VisibleCard,
+  activeIce: readonly CorpScoreProtectionIceInput[],
+): boolean {
+  if (
+    card.known !== true ||
+    !card.definitionId ||
+    !AI_HINTS_BY_CARD.get(card.definitionId)?.requiredMechanics?.includes(
+      "run_start_random_strength_bonus",
+    ) ||
+    activeIce.length === 0
+  )
+    return false;
+  return activeIce.every((cardIce) => {
+    const result = readSupportedIce(cardIce);
+    if (result.knowledge !== "known") return false;
+    return (
+      visibleBreakerCoverageQuote({
+        breakerDefinitionId: card.definitionId!,
+        ...(card.selectedSubtype
+          ? { selectedSubtype: card.selectedSubtype }
+          : {}),
+        iceDefinitionId: result.ice.card.definitionId!,
+        iceSubtypes: result.ice.effectiveSubtypes,
+        subroutines: result.ice.subroutines,
+      })?.coverageStatus === "none"
+    );
+  });
 }
 
 function cardIsInactiveConcealedRunnerResource(card: VisibleCard): boolean {
@@ -1498,7 +1547,10 @@ export function visiblePreparedRunnerBreakerCandidates(
     }
     if (shellCounters === 0 || !cardIsIcebreaker(card)) continue;
     if (
-      !validRunnerRigCard(card) ||
+      !validRunnerRigCard(
+        card,
+        input.serverIce.filter((ice) => ice.rezzed === true),
+      ) ||
       input.runnerRig.some(
         (installedCard) => installedCard.instanceId === card.instanceId,
       )
