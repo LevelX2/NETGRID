@@ -2202,6 +2202,17 @@ Erhalt eines späteren Ausstiegs. Native Zustände aus Paarung 512 und ihre
 wirklich angewandten Engine-Folgen sichern diese Grenze in
 `meta-512-pairing-causes.test.ts`.
 
+Die Continue-Quote beschreibt die nächste tatsächliche Auflösungsgruppe;
+eine spätere Zahl-oder-ETR-Gruppe kann hinter dieser Informationsgrenze liegen.
+Ein Break einer anderen Gruppe erhält deshalb keine vollständige Kostenquote
+für die aktuelle Gruppe. Sind alle unmittelbar aufzulösenden Subroutinen durch
+konkrete Engine-Breakactions als Nullschaden ohne Nebenwirkung zertifiziert,
+ist die aktuelle Continue-Action kostenlos und besteht keine Full-Break-Pflicht,
+verschiebt der bestehende Run-Owner bezahlte Breaks späterer Gruppen bis nach
+dieser harmlosen Auflösung. Er verwendet danach neue echte LegalActions und
+erhält Run, Root und Executor. Schaden, Full-Break-Pflichten, kostenpflichtige
+Fortsetzungen und fehlende Zertifikate eröffnen diese Reihenfolge nicht.
+
 Öffentlich bereits aufgelöste Brechsperren werden im gemeinsamen
 `currentRunPathContext` an die konkrete ICE-Instanz gebunden. Die aktuelle
 Sperre gilt nur im laufenden Encounter; die vorgemerkte Sperre gilt für den

@@ -1,4 +1,5 @@
 import { runnerGeneralCreditsAfterCompletedPath } from "../../run-analysis/visible-run-credit-budget";
+import { paidBreakPrecedesHarmlessResolution } from "./run-window-harmless-resolution";
 import {
   completeEncounterBreakerPayment,
   completeMixedEncounterEconomics,
@@ -794,8 +795,15 @@ function runnerRunWindowActionAssessment(
       ],
     };
   }
-  const encounterExclusion =
-    action.type === "pump_breaker" || action.type === "break_subroutine"
+  const encounterExclusion = paidBreakPrecedesHarmlessResolution(input, action)
+    ? {
+        key: "paid_break_precedes_engine_certified_harmless_resolution",
+        label:
+          "Harmlose Subroutine vor der nächsten Zahlungsentscheidung auflösen",
+        reason:
+          "next_resolution_group_zero_damage_no_secondary_effect|later_break_requires_fresh_engine_payment_quote",
+      }
+    : action.type === "pump_breaker" || action.type === "break_subroutine"
       ? dependencies.runnerEncounterActionExclusion(
           input,
           action,

@@ -15,6 +15,7 @@ import {
   isVisibleHardEndRunSubroutine,
   isVisiblePayEndRunSubroutine,
 } from "../../run-analysis/visible-subroutine-semantics";
+import { breakSubroutineIndexesForAction } from "../../runtime/subroutine-indexes";
 
 /** Complete current encounter payment facts. The Run Window owner alone
  * admits and ranks their route; this service never selects an action. */
@@ -39,6 +40,13 @@ export function completeEncounterBreakerPayment(
   const ice = currentEncounteredIceCard(input);
   if (!ice?.effectiveRunQuote) return undefined;
   const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+  // The Continue quote describes its next resolution group. A break of a
+  // later group is not a first step of this quoted complete payment.
+  if (action.type === "break_subroutine") {
+    const targets = breakSubroutineIndexesForAction(action);
+    if (!targets.size || [...targets].some((index) => !unbroken.has(index)))
+      return undefined;
+  }
   const subroutines = ice.effectiveRunQuote.subroutines.filter((_, i) =>
     unbroken.has(i),
   );
