@@ -62,7 +62,6 @@ export function completeEncounterBreakerPayment(
     !quote ||
     quote.conditionalRiskReason ||
     quote.conditionalAccessReason ||
-    quote.postBreakStealthLosses?.length ||
     quote.futureClicksLost
   )
     return undefined;
@@ -73,6 +72,21 @@ export function completeEncounterBreakerPayment(
     cost: quote.cost,
   });
   if (!payment.affordable) return undefined;
+  // An optional loss from an empty Stealth ledger has no effect. Dropping
+  // that otherwise complete quote would also drop its bound run-reserve
+  // check. Real losses still require their separate continuation binding.
+  if (
+    quote.postBreakStealthLosses?.some(
+      (loss) =>
+        loss.amount > 0 &&
+        loss.occurrences > 0 &&
+        (!loss.optionalIfUnavailable ||
+          Object.values(payment.budget.stealthCreditsBySourceId).some(
+            (amount) => amount > 0,
+          )),
+    )
+  )
+    return undefined;
   const rig = runnerRigAfterEncounter(input.playerView.own.rig ?? []).map(
     (c) =>
       c.instanceId === breaker.instanceId && quote.carriesStrengthAcrossIce

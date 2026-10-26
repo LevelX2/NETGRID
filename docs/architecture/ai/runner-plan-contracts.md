@@ -2482,6 +2482,15 @@ Die Planübergabe erhält explizite Actionbewertungen auch bei einem gebundenen
 Informationszugriff. Der exakte Checkpoint `cp-meta-467-r1-g2-d257` sichert
 Aktivierung, Owner, Route und unveränderte StateVersion ab.
 
+Ein optionaler Stealthverlust aus einem nach aktueller Zahlung leeren
+Stealthledger verändert den aktuellen Break nicht. Die vollständige
+Encounterquote bleibt dann erhalten, einschließlich der Prüfung des
+gebundenen Run-Risikovertrags. Die bloße Existenz einer solchen Fähigkeit
+darf die tatsächlichen Breakkosten nicht aus dieser Prüfung entfernen.
+Vorhandene Stealthbeträge und verpflichtende Verluste behalten ihre
+gesonderte Fortsetzungsbindung; die Nullwirkung ist keine allgemeine
+Zertifizierung dieser Nebenwirkungen.
+
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
 
