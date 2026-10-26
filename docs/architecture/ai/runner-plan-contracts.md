@@ -1911,6 +1911,11 @@ Eine Mehrzweck-Action, die auch zum aktuell materialisierten Defense-Schritt
 gehört, erhält keine Zurückstellung für ihren späteren Handpufferzweck. Die
 Ausnahme folgt den tatsächlichen Kandidaten derselben Phase und nicht dem
 Karten- oder Actionnamen.
+Auch der generische Economy-Ausschluss konsumiert diese aktuelle Headbindung:
+Ein zusätzlicher Creditgewinn verlangt keinen unabhängigen Geldbedarf, wenn
+dieselbe Action aktuell den echten Defense-Handpuffer herstellt. Ein nur
+späterer Handzweck, fehlender Stack oder bestätigte unsichere Drawroute
+begründen diese Ausnahme nicht (SP-675).
 
 Ist der gewöhnliche Basisdraw die einzige aktuelle Handpufferroute und würde
 seine bereits sichtbare Steuer einen Tag erzeugen, darf Defense zuerst eine

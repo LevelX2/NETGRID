@@ -1678,7 +1678,13 @@ export function runnerActionDispositions(
       !coverageOwnedActionIds.has(candidate.actionId) &&
       !cardDevelopmentOwnsActionRoute &&
       runnerImmediateGeneralLiquidEconomyRoute(candidate) &&
-      !specializedEconomyActionIds.has(candidate.actionId)
+      !specializedEconomyActionIds.has(candidate.actionId) &&
+      !runnerDefenseCurrentHeadActionIds({
+        input,
+        actionCandidates: candidates,
+        signals: domain.defense,
+        actionDispositions: dispositions,
+      }).includes(candidate.actionId)
     ) {
       add(
         candidate.actionId,

@@ -116,86 +116,97 @@ describe("Defense hand-buffer phase ownership", () => {
     ).not.toContain(f.clear.actionId);
   });
 
-  it.each([1, 2, 5])("values the canonical current tag reduction at %i active tags", (tags) => {
-    const f = fixture(tags);
-    const meatUpgrade = legalAction(
-      "runner.play_event.meat-upgrade",
-      "runner",
-      "play_event",
-      "Meat Upgrade",
-      { credits: 2, clicks: 2 },
-      {
-        source: "meat-upgrade",
-        payload: {
-          cardId: "meat-upgrade",
-          cardImplementationEffectKind: "remove_tags",
-          cardImplementationTagMode: "up_to_amount",
-          cardImplementationTagAmount: 2,
-          drawCardsAmount: 3,
-          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-          cardImplementationAbilityId:
-            "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw",
-          cardImplementationAbilityKey: "on_play_remove_tags_and_draw",
+  it.each([1, 2, 5])(
+    "values the canonical current tag reduction at %i active tags",
+    (tags) => {
+      const f = fixture(tags);
+      const meatUpgrade = legalAction(
+        "runner.play_event.meat-upgrade",
+        "runner",
+        "play_event",
+        "Meat Upgrade",
+        { credits: 2, clicks: 2 },
+        {
+          source: "meat-upgrade",
+          payload: {
+            cardId: "meat-upgrade",
+            cardImplementationEffectKind: "remove_tags",
+            cardImplementationTagMode: "up_to_amount",
+            cardImplementationTagAmount: 2,
+            drawCardsAmount: 3,
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw",
+            cardImplementationAbilityKey: "on_play_remove_tags_and_draw",
+          },
         },
-      },
-    );
-    meatUpgrade.expiresAtStateVersion = f.input.playerView.stateVersion;
-    f.input.legalActions.push(meatUpgrade);
-    Object.assign(f.input.playerView.own, { coreDamage: 0, maxHandSize: 5 });
-    f.input.playerView.own.gripOrHq[0] = visibleCard(
-      "meat-upgrade",
-      "runner",
-      "event",
-      { definitionId: "onr_classic_040_meat-upgrade" },
-    );
-    f.defense.handBufferActionIds = [f.draw.actionId, meatUpgrade.actionId];
-    const candidates = buildActionSemanticCandidates({
-      legalActions: f.input.legalActions,
-      observerSide: "runner",
-      stateVersion: f.input.playerView.stateVersion,
-      visibleSourceDefinitionsByInstanceId: {
-        "meat-upgrade": "onr_classic_040_meat-upgrade",
-      },
-      cardSemanticProfilesByDefinitionId:
-        buildActionCardSemanticProfilesByDefinitionId(),
-    });
-    const multiPurpose = candidates.find(
-      (candidate) => candidate.actionId === meatUpgrade.actionId,
-    );
-    expect(multiPurpose?.semanticActionType).toBe("tag.remove");
-    expect(multiPurpose?.economyProjection?.cardsDrawn).toBe(3);
-    const dispositions = runnerActionDispositions(
-      f.input,
-      candidates,
-      f.domain,
-      [],
-      [],
-      () => undefined,
-    );
-    expect(dispositions.map((entry) => entry.actionId)).toContain(
-      f.draw.actionId,
-    );
-    expect(dispositions.map((entry) => entry.actionId)).not.toContain(
-      meatUpgrade.actionId,
-    );
-    const module = createRunnerDefenseModule();
-    const context = {
-      input: f.input,
-      actionCandidates: candidates,
-      actionDispositions: dispositions,
-      turnKey: "runner:0",
-      domain: f.domain,
-    };
-    const proposal = module.discover(context)[0]!;
-    expect(proposal.phase).toBe("clear_tags");
-    const materialized = module.materialize(
-      { ...proposal, instanceId: "defense-current-phase" } as never,
-      {} as never,
-      context,
-    );
-    expect(materialized.candidates.find(entry => entry.candidate.actionId === meatUpgrade.actionId)?.stepValue).toBe(80 * Math.min(tags, 2));
-    expect(materialized.candidates.find(entry => entry.candidate.actionId === f.clear.actionId)?.stepValue).toBe(80);
-  });
+      );
+      meatUpgrade.expiresAtStateVersion = f.input.playerView.stateVersion;
+      f.input.legalActions.push(meatUpgrade);
+      Object.assign(f.input.playerView.own, { coreDamage: 0, maxHandSize: 5 });
+      f.input.playerView.own.gripOrHq[0] = visibleCard(
+        "meat-upgrade",
+        "runner",
+        "event",
+        { definitionId: "onr_classic_040_meat-upgrade" },
+      );
+      f.defense.handBufferActionIds = [f.draw.actionId, meatUpgrade.actionId];
+      const candidates = buildActionSemanticCandidates({
+        legalActions: f.input.legalActions,
+        observerSide: "runner",
+        stateVersion: f.input.playerView.stateVersion,
+        visibleSourceDefinitionsByInstanceId: {
+          "meat-upgrade": "onr_classic_040_meat-upgrade",
+        },
+        cardSemanticProfilesByDefinitionId:
+          buildActionCardSemanticProfilesByDefinitionId(),
+      });
+      const multiPurpose = candidates.find(
+        (candidate) => candidate.actionId === meatUpgrade.actionId,
+      );
+      expect(multiPurpose?.semanticActionType).toBe("tag.remove");
+      expect(multiPurpose?.economyProjection?.cardsDrawn).toBe(3);
+      const dispositions = runnerActionDispositions(
+        f.input,
+        candidates,
+        f.domain,
+        [],
+        [],
+        () => undefined,
+      );
+      expect(dispositions.map((entry) => entry.actionId)).toContain(
+        f.draw.actionId,
+      );
+      expect(dispositions.map((entry) => entry.actionId)).not.toContain(
+        meatUpgrade.actionId,
+      );
+      const module = createRunnerDefenseModule();
+      const context = {
+        input: f.input,
+        actionCandidates: candidates,
+        actionDispositions: dispositions,
+        turnKey: "runner:0",
+        domain: f.domain,
+      };
+      const proposal = module.discover(context)[0]!;
+      expect(proposal.phase).toBe("clear_tags");
+      const materialized = module.materialize(
+        { ...proposal, instanceId: "defense-current-phase" } as never,
+        {} as never,
+        context,
+      );
+      expect(
+        materialized.candidates.find(
+          (entry) => entry.candidate.actionId === meatUpgrade.actionId,
+        )?.stepValue,
+      ).toBe(80 * Math.min(tags, 2));
+      expect(
+        materialized.candidates.find(
+          (entry) => entry.candidate.actionId === f.clear.actionId,
+        )?.stepValue,
+      ).toBe(80);
+    },
+  );
 
   it("classifies the pending basic draw under Defense while the same owner clears a tag", () => {
     const f = fixture();
@@ -278,5 +289,135 @@ describe("Defense hand-buffer phase ownership", () => {
         ],
       }),
     ).toEqual([]);
+  });
+});
+
+function creditDrawBufferFixture(tags = 0) {
+  const f = fixture(tags);
+  const source = "buffer-credit-draw";
+  const action = legalAction(
+    "runner.buffer-credit-draw",
+    "runner",
+    "activated_card_ability",
+    "Credit and draw",
+    { credits: 0, clicks: 1 },
+    {
+      source,
+      payload: {
+        cardId: source,
+        gainCreditsAmount: 1,
+        drawCardsAmount: 1,
+        effectKind: "gain_credits",
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityKey:
+          "abilities_activated_runner_main_gain_credits",
+        cardImplementationAbilityId:
+          "onr_v1_179_silicon-saloon-franchise:abilities_activated_runner_main_gain_credits",
+      },
+    },
+  );
+  action.expiresAtStateVersion = f.input.playerView.stateVersion;
+  f.input.legalActions.push(action);
+  f.input.playerView.own.rig = [
+    visibleCard(source, "runner", "resource", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+    }),
+  ];
+  const candidates = buildActionSemanticCandidates({
+    legalActions: f.input.legalActions,
+    observerSide: "runner",
+    stateVersion: f.input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: {
+      [source]: "onr_v1_179_silicon-saloon-franchise",
+    },
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  });
+  f.defense.handBufferActionIds = [action.actionId];
+  return { ...f, action, candidates };
+}
+function creditDrawDisposition(f: ReturnType<typeof creditDrawBufferFixture>) {
+  return runnerActionDispositions(
+    f.input,
+    f.candidates,
+    f.domain,
+    [],
+    [],
+    () => undefined,
+  ).filter((x) => x.actionId === f.action.actionId);
+}
+describe("current Defense ownership before generic Economy exclusion", () => {
+  it("keeps the actual hand-buffer head despite no independent cash need", () => {
+    const f = creditDrawBufferFixture();
+    expect(
+      f.candidates.find((x) => x.actionId === f.action.actionId)
+        ?.semanticActionType,
+    ).toBe("economy.gain_credit");
+    expect(
+      runnerDefenseCurrentHeadActionIds({
+        input: f.input,
+        actionCandidates: f.candidates,
+        signals: f.defense,
+      }),
+    ).toEqual([f.action.actionId]);
+    expect(creditDrawDisposition(f)).toEqual([]);
+  });
+  it("does not exempt a later buffer action while current tag clearing is available", () => {
+    const f = creditDrawBufferFixture(1);
+    expect(
+      runnerDefenseCurrentHeadActionIds({
+        input: f.input,
+        actionCandidates: f.candidates,
+        signals: f.defense,
+      }),
+    ).toEqual([f.clear.actionId]);
+    expect(
+      creditDrawDisposition(f).some(
+        (x) =>
+          x.evidenceCode ===
+          "runner_immediate_credit_route_has_no_bound_funding_need",
+      ),
+    ).toBe(true);
+  });
+  it("does not exempt cash-only use after the hand requirement is satisfied", () => {
+    const f = creditDrawBufferFixture();
+    f.defense.minimumHandBuffer = f.defense.handSize;
+    expect(
+      creditDrawDisposition(f).some(
+        (x) =>
+          x.evidenceCode ===
+          "runner_immediate_credit_route_has_no_bound_funding_need",
+      ),
+    ).toBe(true);
+  });
+  it("keeps the empty-stack producer countercase unbound", () => {
+    const f = creditDrawBufferFixture();
+    f.input.playerView.own.stackOrRdCount = 0;
+    f.defense.handBufferActionIds = [];
+    expect(
+      creditDrawDisposition(f).some(
+        (x) =>
+          x.evidenceCode ===
+          "runner_immediate_credit_route_has_no_bound_funding_need",
+      ),
+    ).toBe(true);
+  });
+  it("does not waive a confirmed unsafe draw route", () => {
+    const f = creditDrawBufferFixture();
+    f.defense.confirmedDamageTaxedDrawActionIds = [f.action.actionId];
+    expect(
+      runnerDefenseCurrentHeadActionIds({
+        input: f.input,
+        actionCandidates: f.candidates,
+        signals: f.defense,
+      }),
+    ).toEqual([]);
+    expect(
+      creditDrawDisposition(f).some(
+        (x) =>
+          x.evidenceCode ===
+          "runner_immediate_credit_route_has_no_bound_funding_need",
+      ),
+    ).toBe(true);
   });
 });

@@ -1364,6 +1364,11 @@ noch ungerezzten Alternativen darf reine Agenda-Handentlastung ohne aktuelle
 Run-/Multiaccess-Evidence oder akute/terminale Gefahr keine weiteren
 Staging-Kosten erzeugen. Produktiver Score-Support und belegter Central-Schutz
 bleiben eigene Defense-Routen.
+Die bestehende Vorrangregel für einen aktuell ausführbaren Score gilt ebenso
+für zusätzliche ICE zur Kapazitätsfreigabe vor der Suche nach neuem
+Scorematerial. Diese Vorbereitung darf einen bereits gebundenen Score
+nicht erneut offen liegen lassen (SP-676). Echte Zugriffsschutzrouten
+behalten ihren eigenen Bedarf.
 
 Auch ein HQ-Overflow macht Handmanagement nicht zum ICE-Owner:
 `corp.hand_and_agenda_management` darf ICE weder als Discard-Konversion

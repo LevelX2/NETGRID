@@ -226,7 +226,8 @@ export function buildCorpDefenseNeeds({
           if (
             (serverId === "hq" || serverId === "rd") &&
             ((scorePlanPrecedesRedundantCapacityDefense(serverId) &&
-              route?.progressKind === "agenda_capacity_defense_conversion") ||
+              (route?.progressKind === "agenda_capacity_defense_conversion" ||
+                route?.progressKind === "score_material_capacity_release")) ||
               selectedScoreProtectionPrecedesAdditionalCentralLayer)
           ) {
             return [];
