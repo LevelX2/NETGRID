@@ -109,7 +109,11 @@ export function selectedMinimalProgramSacrificeCandidates(
       };
       const key = `${memoryFreed}:${minimumMemoryCost}`;
       const current = selections.get(key);
-      if (!current || compareProgramSacrificeSelections(next, current) < 0) {
+      if (
+        !current ||
+        compareProgramSacrificeSelections(next, current, requiredMemoryToFree) <
+          0
+      ) {
         selections.set(key, next);
       }
     }
@@ -123,16 +127,28 @@ export function selectedMinimalProgramSacrificeCandidates(
           selection.memoryFreed - selection.minimumMemoryCost <
             requiredMemoryToFree,
       )
-      .sort(compareProgramSacrificeSelections)[0]?.candidates ?? []
+      .sort((left, right) =>
+        compareProgramSacrificeSelections(left, right, requiredMemoryToFree),
+      )[0]?.candidates ?? []
   );
 }
 
 function compareProgramSacrificeSelections(
   left: ProgramSacrificeSelection,
   right: ProgramSacrificeSelection,
+  requiredMemoryToFree: number,
 ): number {
   return (
-    right.score - left.score ||
+    sacrificeScoreForMemoryNeed(
+      right.score,
+      right.memoryFreed,
+      requiredMemoryToFree,
+    ) -
+      sacrificeScoreForMemoryNeed(
+        left.score,
+        left.memoryFreed,
+        requiredMemoryToFree,
+      ) ||
     left.sacrificePenalty - right.sacrificePenalty ||
     left.memoryFreed - right.memoryFreed ||
     left.candidates.length - right.candidates.length ||
@@ -145,6 +161,15 @@ function compareProgramSacrificeSelections(
           .join("\u0000"),
       )
   );
+}
+
+function sacrificeScoreForMemoryNeed(
+  score: number,
+  memoryFreed: number,
+  requiredMemoryToFree: number,
+): number {
+  // Unneeded capacity does not compensate for losing another installed role.
+  return score - Math.max(0, memoryFreed - requiredMemoryToFree) * 70;
 }
 
 export function runnerProgramInstallTrashAssessmentEvidence(params: {
@@ -258,7 +283,16 @@ export function runnerProgramInstallTrashAssessmentFromCards(params: {
     .filter((candidate) => candidate.memoryCost > 0)
     .sort(
       (left, right) =>
-        right.score - left.score ||
+        sacrificeScoreForMemoryNeed(
+          right.score,
+          right.memoryCost,
+          requiredMemoryToFree,
+        ) -
+          sacrificeScoreForMemoryNeed(
+            left.score,
+            left.memoryCost,
+            requiredMemoryToFree,
+          ) ||
         right.memoryCost - left.memoryCost ||
         sacrificeCandidateLabel(left).localeCompare(
           sacrificeCandidateLabel(right),

@@ -850,6 +850,13 @@ zyklische eigene Hostbindungen scheitern mit strukturierter Diagnose.
 Choice-ID, StateVersion, Planinstanz, Executor und ursprünglicher Step
 bleiben bei der reinen Optionsauflösung unverändert.
 
+Der MU-Nutzen eines Opfers ist auf den aktuell gebundenen Speicherbedarf
+begrenzt. Eine größere einzelne Karte oder eine ausreichende Opfermenge
+erhält für überschüssige MU keinen Bonus, der höhere Rollenverluste
+kompensiert. Installationsbewertung und verbindlicher Speicher-Checkpoint
+verwenden diese Begrenzung im bestehenden Opfer-Owner. Eine bereits
+gebundene historische Opferwahl wird im Choice-Fenster nicht neu geplant.
+
 Deckinventar und Handantworten übernehmen die ICE-Kategorien aus dem
 kanonischen Breakerprofil. Bedingte Zusatzeffekte im Regeltext erweitern diese
 Abdeckung nicht: Ein Folgeeffekt nach einer vollständig gebrochenen Wall ist

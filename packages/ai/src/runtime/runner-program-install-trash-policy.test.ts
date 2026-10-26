@@ -4,6 +4,7 @@ import type { VisibleCard } from "@netgrid/shared";
 import {
   programSacrificeCandidate,
   runnerProgramInstallTrashAssessmentEvidence,
+  runnerProgramInstallTrashAssessmentFromCards,
   selectedMinimalProgramSacrificeCandidates,
   type ProgramSacrificeCandidate,
 } from "./runner-program-install-trash-policy";
@@ -62,6 +63,57 @@ describe("programSacrificeCandidate", () => {
 });
 
 describe("selectedMinimalProgramSacrificeCandidates", () => {
+  it("does not reward surplus MU beyond the actual deficit", () => {
+    const economy = selectableCandidate("economy", 2, -305, 445);
+    const support = selectableCandidate("support", 1, -335, 405);
+    expect(
+      selectedMinimalProgramSacrificeCandidates([economy, support], 1).map(
+        (entry) => entry.option?.id,
+      ),
+    ).toEqual(["support"]);
+    expect(
+      runnerProgramInstallTrashAssessmentFromCards({
+        memoryUsed: 5,
+        memoryLimit: 5,
+        sourceMemoryCost: 1,
+        candidates: [economy, support],
+      }).selectedCandidates.map((entry) => entry.option?.id),
+    ).toEqual(["support"]);
+  });
+
+  it("still frees two MU when the current installation requires them", () => {
+    const economy = selectableCandidate("economy", 2, -305, 445);
+    const support = selectableCandidate("support", 1, -335, 405);
+    expect(
+      selectedMinimalProgramSacrificeCandidates([economy, support], 2).map(
+        (entry) => entry.option?.id,
+      ),
+    ).toEqual(["economy"]);
+    const assessment = runnerProgramInstallTrashAssessmentFromCards({
+      memoryUsed: 5,
+      memoryLimit: 5,
+      sourceMemoryCost: 2,
+      candidates: [economy, support],
+    });
+    expect(assessment.canFreeRequiredMemory).toBe(true);
+    expect(
+      assessment.selectedCandidates.map((entry) => entry.option?.id),
+    ).toEqual(["economy"]);
+  });
+
+  it("does not reward surplus MU accumulated across a sufficient set", () => {
+    expect(
+      selectedMinimalProgramSacrificeCandidates(
+        [
+          selectableCandidate("two_mu_a", 2, 100, 40),
+          selectableCandidate("one_mu", 1, 40, 30),
+          selectableCandidate("two_mu_b", 2, 100, 40),
+        ],
+        3,
+      ).map((entry) => entry.option?.id),
+    ).toEqual(["one_mu", "two_mu_a"]);
+  });
+
   it("selects a sufficient inclusion-minimal set deterministically", () => {
     const selected = selectedMinimalProgramSacrificeCandidates(
       [
