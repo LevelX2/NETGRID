@@ -1138,6 +1138,18 @@ Defense darf damit einen bezahlbaren Durchlauf, einen erzwungenen Abbruch
 oder einen wirtschaftlich sinnvollen Gebührentausch bewerten. Die spätere
 Access-Rez-Heuristik gilt nicht für vor dem ICE-Pass fällige Gebühren.
 
+Eine kostenlose reine Root-Rez kann im aktuellen Approach eine zuvor
+unbezahlbare ICE-Rez finanzieren. Die Engine bindet
+`CorpRootRezDiscountedIceQuote` an Root-Action, Quelle, ICE, Fort, Run und
+StateVersion und verwendet die normale Discount-Kostenquote auf einem
+unveränderten Zustandsklon. Der bestehende Defense-Owner lässt diese
+Vorbereitung für einen aktuell Engine-gequoteten harten Stop ohne sichtbare
+Breakerantwort zu. Er erfindet weder eine spätere LegalAction noch einen
+permanenten Rezz: Die befristete ICE-Rez wird nach der tatsächlichen
+Root-Zustandsänderung einschließlich Reserven neu bewertet. Andere Forts,
+verbrauchte Quellen, Zusatzkosten, variable ICE und unprojizierte
+Root-Lifecycle-Effekte begründen diese Vorbereitung nicht.
+
 Für feste und variable Trace-ICE validiert Defense die vollständige aktuelle
 Rez-Aktion; bei X zusätzlich Cap, Zusatzkosten, Stärke und Trace-Wert. Eine eigene
 `trace_access_block`-Route verwendet ausschließlich die Engine-Quote für

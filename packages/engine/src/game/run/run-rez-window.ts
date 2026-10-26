@@ -25,6 +25,7 @@ import {
 import type { CostQuote } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
 import { credits } from "../state/economy-mutation";
+import { quoteCorpRootRezDiscountedIce } from "../payment/root-rez-discounted-ice-quote";
 import {
   corpRootRezCreditOutcomeQuotePayload,
   immediateRootRezCreditGainForDefinition,
@@ -228,6 +229,16 @@ export function buildCorpRunRootRezActions(
         action.actionId,
         rezQuote.finalCredits,
       );
+      const discountedIceQuote = quoteCorpRootRezDiscountedIce(
+        host.state,
+        action,
+      );
+      if (discountedIceQuote) {
+        action.payload = {
+          ...(action.payload ?? {}),
+          rootRezDiscountedIceQuoteJson: JSON.stringify(discountedIceQuote),
+        };
+      }
       if (creditOutcomeQuote) {
         action.payload = {
           ...(action.payload ?? {}),

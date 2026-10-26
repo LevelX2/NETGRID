@@ -24,6 +24,7 @@ import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
 import { assessMobileIceRunDefense } from "./mobile-ice-run-defense";
 import { assessCorpTemporaryIceStrengthPulse } from "./corp-temporary-ice-strength-pulse";
 import { corpPassTaxRezAssessment } from "../../runtime/corp-pass-tax-rez-assessment";
+import { corpRootRezDiscountedIceAssessment } from "./corp-root-rez-discounted-ice";
 import { corpRootRezTimingComponent } from "../../runtime/corp-scoreline/semantic-runtime-corp-score-ice-components";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
@@ -598,6 +599,12 @@ export function corpExactCardRezSupportAssessment(
   ) {
     return undefined;
   }
+  const discountedIce = corpRootRezDiscountedIceAssessment(
+    input,
+    candidate,
+    serverId,
+  );
+  if (discountedIce) return discountedIce;
   const pulseAction = input.legalActions.find(
     (a) => a.actionId === candidate.actionId,
   );

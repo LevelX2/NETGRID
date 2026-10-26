@@ -2700,6 +2700,22 @@ export type CorpRootRezIceInstallCostQuote = {
   }>;
 };
 
+/** Actor-private current approach funding, conditional on a free pure root rez.
+ * The discounted ICE action is rediscovered after the actual root transition.
+ */
+export type CorpRootRezDiscountedIceQuote = {
+  schemaVersion: "corp-root-rez-discounted-ice-v1";
+  actionId: string;
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  targetIceInstanceId: CardInstanceId;
+  runId: string;
+  stateVersion: number;
+  ordinaryCredits: number;
+  discountedCredits: number;
+  temporaryDerezAfterRun: true;
+};
+
 /** Actor-private, same-turn income from a pure load/all-cashout bank.
  * Only the head is a current LegalAction; later capabilities are requoted.
  */

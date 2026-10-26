@@ -146,6 +146,15 @@ keine gegnerische Hand und verändert den Spielzustand nicht.
 
 ## Verpflichtende Kreditzahlungen
 
+Im aktuellen ICE-Approach kann eine kostenlose reine Root-Rez die gebundene
+Discount-Rez des bereits angegriffenen ICE vorbereiten. Die actor-private
+`CorpRootRezDiscountedIceQuote` verwendet dieselben Quellenlimits und
+`quoteCorpRezCost` wie die wirkliche nächste Aktion. Sie verändert keinen
+Zustand und enthält keine zukünftige Action-ID. Rezz-Effekte außerhalb der
+reinen Discount-Fähigkeit, variable ICE und Zusatzkosten erhalten diese
+begrenzte Quote nicht. Ausführung und StateHash bleiben unverändert; jede
+tatsächliche Folgeaktion wird nach dem Rez neu erzeugt und validiert.
+
 Aktive verpflichtende Corp-Kreditzahlungen stammen aus dem aktuellen
 Engine-Zustand, nicht aus Karten im Archiv oder historischen Kreditaufnahmen.
 Die eigene Corp-PlayerView trägt bei aktiver Verpflichtung
