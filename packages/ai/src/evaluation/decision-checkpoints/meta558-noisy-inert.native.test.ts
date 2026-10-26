@@ -118,11 +118,11 @@ describe("pairing558: inert optional Noisy loss retains the actual payment (SP-6
         {
           id: "stealth",
           amount: 3,
-          displayKind: "credits",
+          displayKind: "recurring_credit",
           label: "Stealth",
           ariaLabel: "3 Stealth",
           creditPool: {
-            kind: "recurring",
+            kind: "recurring_credit",
             uses: ["using_icebreaker_during_run_non_noisy"],
           },
         },
