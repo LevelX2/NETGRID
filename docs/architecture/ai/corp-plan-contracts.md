@@ -1484,6 +1484,13 @@ bei sechs Credits vor dem gequoteten Sieben-Credit-HQ-Rez. Bei ausreichender
 Bank oder bereits gerezztem HQ-ICE bleibt derselbe delegierte Score-Step
 zugelassen; der Score-Owner trifft keine eigene ICE-Auswahl.
 
+Die Zuglinie bezeichnet gestuftes ICE nur dann als rezbereit, wenn neben den
+Credits auch alle obligatorischen Agendapunkte der aktuellen vollständigen,
+quellen- und zielgebundenen Engine-Quote vorhanden sind. Ein fehlender Punkt
+schließt zweckgebundenes Staging nicht pauschal aus, erhält aber den Meilenstein
+„für späteres Rez vorbereitet“ statt bereits finanzierten Schutz zu behaupten.
+Fehlende oder widersprüchliche Kostendaten scheitern mit strukturierter Diagnose.
+
 Jede generische native Defense-Zuglinie trägt die Prioritätsklasse ihres
 exakten Signals. Ein Remote-Supportbedarf darf weder eine terminale
 Central-Linie auf P6 absenken noch gewöhnlichen Remote-Aufbau durch eine
@@ -1961,12 +1968,24 @@ Die Prüfung vergleicht aktuelle Engine-Quotes; sie vergibt keinen Kartenbonus
 und behauptet keinen garantierten Run-Schutz. Die Defense-ID bindet das
 konkrete Installationsziel, damit die Signalzusammenführung keine Serverrouten
 vermischt. Belegte Asset-/Agenda-Slots werden nicht projiziert oder ersetzt.
+Auch ein noch leerer, aktuell für eine Agenda gebundener Score-Slot bleibt frei:
+Globale Assets müssen ihre Vorbereitung überleben und dürfen nicht unmittelbar
+von derselben Agenda überschrieben werden. Die vorhandene Score-Slotreservierung
+gilt deshalb auch für die Defense-Platzierung. Andere geschützte freie Slots
+bleiben zulässig; andernfalls kann ein neuer Quellfort den globalen Support tragen.
 Fehlende, veraltete oder unfinanzierte Quotes
 und fehlende Ziel-ICE erzeugen keine Installationsroute. Im Folgezustand
 materialisiert derselbe Defense-Owner die tatsächliche neue Rez-LegalAction
 erneut; die Vorbereitung behauptet weder ein ausgeführtes Rez noch sicheren
 Run-Schutz. `corp-structured-ice-support.ts` liefert beiden Phasen dieselben
 Ziel- und Fundingfakten ohne Rückimport in die Discovery.
+
+Ein terminaler Zentral-Rez-Fundingbedarf verlangt weiterhin einen wirksamen
+Verbraucher. Vollständig und aktuell gequotetes reines ETR-ICE, das ein öffentlich
+installierter Breaker bereits ohne Pumpen, Zahlung oder Nebenfolge vollständig
+bricht, erzeugt keine harte Finanzierungsreserve. Zusatzsteuer, weitere Effekte,
+unzureichende Stärke oder unbekannte Quotes erfüllen diesen Ausschlussnachweis
+nicht. Ein unabhängiger dringlicher Bedarf nach besserem Schutz bleibt bestehen.
 
 Gemeinsame Hint-Begriffe rechtfertigen keine gemeinsame Rez-Heuristik.
 Dr. Dreff wird nur im letzten relevanten Begegnungsfenster desselben Forts

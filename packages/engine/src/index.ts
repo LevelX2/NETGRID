@@ -91,6 +91,7 @@ export { visibleFortPassProtection } from "./game/view/visible-fort-pass-protect
 export {
   visibleRunnerPreparationIncomePerClick,
   visibleRunnerNextTurnPreparationCreditGain,
+  visibleRunnerInitialProgramInstallCredits,
 } from "./game/view/visible-runner-preparation-income";
 
 export type {

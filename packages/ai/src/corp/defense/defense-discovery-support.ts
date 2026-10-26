@@ -42,6 +42,8 @@ import {
 } from "../../runtime/visible-action-facts";
 import { archivesHasVisibleKnownAgenda } from "../../runtime/visible-server-agenda-facts";
 import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
+import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-hand-support";
+import { corpInstalledIceHasFreeFullBreak } from "./corp-free-full-break";
 import { CorpDefensiveUpgradePlacement } from "./defense-runtime-types";
 import {
   corpStructuredIceSupportAssessment,
@@ -232,6 +234,7 @@ function corpTerminalServerRezReserveSignals(
       const defense = visibleCorpIceDefenseProfile(ice);
       if (
         ice.rezzed === true ||
+        corpInstalledIceHasFreeFullBreak(input, ice, serverId) ||
         !ice.definitionId ||
         !defense.isVisibleIce ||
         (!defense.hasImmediateStop &&
@@ -494,6 +497,14 @@ function corpGlobalIceSupportPlacementSignal(
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.timingPoint !== input.playerView.timingPoint ||
     !hasExactNonNegativeCostProfile(candidate)
+  )
+    return undefined;
+  // This global asset must survive its preparation. An agenda uses the same
+  // exclusive root slot; placing support in a bound scoring fort would make
+  // the subsequent agenda installation immediately destroy that investment.
+  if (
+    existing &&
+    corpReservedScoreServerIds(input, scoreProjects).has(existing.id)
   )
     return undefined;
   const p = action.payload;

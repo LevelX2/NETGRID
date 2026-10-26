@@ -467,6 +467,18 @@ function coveragePreparationCandidates(
         action.expiresAtStateVersion === context.input.playerView.stateVersion;
       return (
         exactMemorySupportInstall ||
+        (gap.installCreditPreparation?.actionId === candidate.actionId &&
+          gap.installCreditPreparation.stateVersion ===
+            context.input.playerView.stateVersion &&
+          gap.installCreditPreparation.targetDefinitionId ===
+            gap.handAnswerDefinitionId &&
+          action?.source ===
+            gap.installCreditPreparation.sourceCardInstanceId &&
+          action.side === "runner" &&
+          action.type === "install_card" &&
+          action.timingPoint === context.input.playerView.timingPoint &&
+          action.expiresAtStateVersion ===
+            context.input.playerView.stateVersion) ||
         (gap.heapRecoveryPreparation?.actionId === candidate.actionId &&
           gap.heapRecoveryPreparation.stateVersion ===
             context.input.playerView.stateVersion &&

@@ -314,81 +314,101 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
     });
   });
 
-  it("keeps an exact new-remote ICE staging step inside the delegated score-protection defense plan", () => {
-    const input = decisionInput();
-    const staging: CorpScoreProtectionStagingInstallSignal = {
-      kind: "score_protection_staging_install",
-      defenseId: "score-protection-staging-install:agenda-1:install-remote",
-      serverId: "new_remote",
-      phase: "install_ice",
-      parentProjectId: "agenda-1",
-      parentNeedId: "score-protection:agenda-1",
-      delegatedPriorityClass: "P4",
-      actionId: "install-remote",
-      sourceCardInstanceId: "ice-1",
-      sourceDefinitionId: "ice-definition",
-      evidenceCode: "score_protection_staging_install:agenda-1:new_remote",
-    };
-    input.legalActions = [
-      {
-        actionId: "install-remote",
-        side: "corp",
-        type: "install_card",
-        label: "Install ICE",
-        source: "ice-1",
-        timingPoint: "corp_action.main",
-        costs: [{ clicks: 1 }],
-        targetRequirements: [],
-        choiceRequirements: [],
-        visibility: "private_to_actor",
-        expiresAtStateVersion: 30,
-        payload: {
-          placement: "ice",
-          serverId: "new_remote",
-          postInstallRezQuoteComplete: true,
-          postInstallRezQuoteCardId: "ice-1",
-          postInstallRezQuoteTargetServerId: "new_remote",
-          postInstallRezQuoteProjectedServerId: "remote_1",
-          postInstallRezQuoteExpiresAtStateVersion: 30,
-          postInstallRezQuoteFinalCredits: 1,
-        },
-      },
-    ];
-    input.playerView.legalActions = structuredClone(input.legalActions);
-
-    const slice = buildSlice(
-      input,
-      [staging],
-      [],
-      [installCandidate("install-remote", "ice-1", "new_remote")],
-    );
-
-    expect(slice.lines).toHaveLength(1);
-    expect(slice.lines[0]).toMatchObject({
-      disposition: "stage_for_later_rez",
-      targetServerId: "new_remote",
-      supportBinding: {
-        parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+  it.each([
+    { requiredPoints: 0, pointBank: 0, ready: true },
+    { requiredPoints: 1, pointBank: 0, ready: false },
+    { requiredPoints: 1, pointBank: 1, ready: true },
+  ])(
+    "keeps staging delegated and distinguishes mandatory point funding: %j",
+    ({ requiredPoints, pointBank, ready }) => {
+      const input = decisionInput();
+      input.playerView.own.agendaPoints = pointBank;
+      const staging: CorpScoreProtectionStagingInstallSignal = {
+        kind: "score_protection_staging_install",
+        defenseId: "score-protection-staging-install:agenda-1:install-remote",
+        serverId: "new_remote",
+        phase: "install_ice",
+        parentProjectId: "agenda-1",
         parentNeedId: "score-protection:agenda-1",
-      },
-      currentActionId: "install-remote",
-      rezReadyAfterLine: true,
-      priorityClass: "P4",
-      bluffValue: 0,
-    });
-    expect(slice.lines[0]?.nodes).toEqual([
-      expect.objectContaining({
-        ownerModuleId: "corp.defend_servers",
-        projectedOnly: false,
-      }),
-    ]);
-    expect(slice.lines[0]?.evidenceCodes).toEqual(
-      expect.arrayContaining([
-        "score_protection_staging_delegated_to_defense_plan",
-        "ice_decision_owned_by_corp_defend_servers",
-      ]),
-    );
-  });
+        delegatedPriorityClass: "P4",
+        actionId: "install-remote",
+        sourceCardInstanceId: "ice-1",
+        sourceDefinitionId: "ice-definition",
+        evidenceCode: "score_protection_staging_install:agenda-1:new_remote",
+      };
+      input.legalActions = [
+        {
+          actionId: "install-remote",
+          side: "corp",
+          type: "install_card",
+          label: "Install ICE",
+          source: "ice-1",
+          timingPoint: "corp_action.main",
+          costs: [{ clicks: 1 }],
+          targetRequirements: [],
+          choiceRequirements: [],
+          visibility: "private_to_actor",
+          expiresAtStateVersion: 30,
+          payload: {
+            placement: "ice",
+            serverId: "new_remote",
+            postInstallRezQuoteComplete: true,
+            postInstallRezQuoteCardId: "ice-1",
+            postInstallRezQuoteTargetServerId: "new_remote",
+            postInstallRezQuoteProjectedServerId: "remote_1",
+            postInstallRezQuoteExpiresAtStateVersion: 30,
+            postInstallRezQuoteFinalCredits: 1,
+            postInstallRezQuoteMandatoryAgendaPointCost: requiredPoints,
+            ...(requiredPoints > 0
+              ? {
+                  postInstallRezQuoteMandatoryAdditionalCostKind:
+                    "agenda_point",
+                }
+              : {}),
+          },
+        },
+      ];
+      input.playerView.legalActions = structuredClone(input.legalActions);
+
+      const slice = buildSlice(
+        input,
+        [staging],
+        [],
+        [installCandidate("install-remote", "ice-1", "new_remote")],
+      );
+
+      expect(slice.lines).toHaveLength(1);
+      expect(slice.lines[0]).toMatchObject({
+        disposition: "stage_for_later_rez",
+        targetServerId: "new_remote",
+        supportBinding: {
+          parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+          parentNeedId: "score-protection:agenda-1",
+        },
+        currentActionId: "install-remote",
+        rezReadyAfterLine: ready,
+        priorityClass: "P4",
+        bluffValue: 0,
+      });
+      expect(slice.lines[0]?.campaignQuote.nextMilestoneId).toBe(
+        ready
+          ? "score_remote_ice_staged_rez_ready"
+          : "score_remote_ice_staged_for_later_rez",
+      );
+      expect(slice.lines[0]?.nodes).toEqual([
+        expect.objectContaining({
+          ownerModuleId: "corp.defend_servers",
+          projectedOnly: false,
+        }),
+      ]);
+      expect(slice.lines[0]?.evidenceCodes).toEqual(
+        expect.arrayContaining([
+          "score_protection_staging_delegated_to_defense_plan",
+          "ice_decision_owned_by_corp_defend_servers",
+        ]),
+      );
+    },
+  );
 
   it("turns a funded exact score-protection ICE route into a delegated defense line", () => {
     const input = decisionInput();

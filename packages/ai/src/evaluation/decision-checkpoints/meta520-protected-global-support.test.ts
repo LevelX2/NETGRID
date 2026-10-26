@@ -54,7 +54,7 @@ function fixture() {
   return { cp, state, input, candidates, candidate, action };
 }
 afterEach(resetResidentPlanPortfolioMemory);
-it("quotes a native protected placement, chooses it through Defense, rezzes it and retains all four funded ICE", () => {
+it("quotes protected placement but keeps the native scoring slot free, rezzes global support separately and retains all four funded ICE", () => {
   const { cp, state, input, action } = fixture();
   expect(Object.values(checkpoint.validation)).toEqual(Array(9).fill(true));
   expect(hashGameState(state)).toBe(checkpoint.stateHash);
@@ -72,13 +72,20 @@ it("quotes a native protected placement, chooses it through Defense, rezzes it a
     cp.runtime,
   );
   const chosen = chooseAiAction(input);
-  expect(chosen.actionId).toBe(action.actionId);
+  const selectedAction = input.legalActions.find(
+    (a) => a.actionId === chosen.actionId,
+  )!;
+  expect(selectedAction).toMatchObject({
+    type: "install_card",
+    source,
+    payload: { serverId: "new_remote" },
+  });
   expect(chosen.fallbackUsed).toBe(false);
   expect(chosen.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toContain(
     "plan:corp.defend_servers:",
   );
   expect(chosen.decisionDebug?.planFirstDecision?.route).toMatchObject({
-    actionId: action.actionId,
+    actionId: selectedAction.actionId,
     stateVersion: state.stateVersion,
   });
   if (!chosen.actionId) throw Error("native_install_action_missing");
@@ -122,7 +129,11 @@ it("quotes a native protected placement, chooses it through Defense, rezzes it a
     (s) => s.id === "remote_1",
   )!;
   expect(fort.ice).toHaveLength(4);
-  expect(fort.root.find((c) => c.instanceId === source)?.rezzed).toBe(true);
+  expect(
+    getPlayerView(result.state, "corp")
+      .servers.flatMap((s) => s.root)
+      .find((c) => c.instanceId === source)?.rezzed,
+  ).toBe(true);
   expect(
     fort.ice.reduce((n, c) => {
       const quote = c.effectiveRezCostQuote;

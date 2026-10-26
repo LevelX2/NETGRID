@@ -1,6 +1,37 @@
 import type { VisibleCard } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { activatedAbilityBindingsForDefinition } from "../../ability-engine/card-capability-binding";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+
+/** Guaranteed initial program-install pool from the canonical on-install
+ * lifecycle. Conditional or mixed lifecycle effects do not certify this line. */
+export function visibleRunnerInitialProgramInstallCredits(
+  card: VisibleCard,
+): number {
+  if (!card.known || !card.definitionId || card.controller !== "runner")
+    return 0;
+  const implementation = cardImplementationForDefinitionId(card.definitionId);
+  const pool = implementation?.restrictedHostedCreditSource;
+  const effects = implementation?.lifecycle?.on_install;
+  if (
+    pool?.counterType !== "bit" ||
+    !pool.usableFor.includes("install_programs") ||
+    !effects?.length ||
+    effects.some(
+      (effect) =>
+        effect.kind !== "add_hosted_credits" ||
+        effect.target !== "source" ||
+        !Number.isSafeInteger(effect.amount) ||
+        effect.amount < 0,
+    )
+  )
+    return 0;
+  return effects.reduce(
+    (sum, effect) =>
+      sum + (effect.kind === "add_hosted_credits" ? effect.amount : 0),
+    0,
+  );
+}
 
 /** Guaranteed repeatable liquid income from public installed sources. Hidden
  * events, limited payouts and conditional abilities are outside this quote. */

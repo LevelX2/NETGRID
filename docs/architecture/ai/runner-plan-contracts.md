@@ -830,6 +830,17 @@ Verantwortung:
 - Bezahlbarkeit des anschließenden Runpfads;
 - deckstrategischer Rig-first- oder Minimal-Rig-Modus.
 
+Coverage kann vor seiner bereits gebundenen Handantwort eine konkrete Quelle
+für Programminstallationscredits installieren. Die Engine zertifiziert deren
+unbedingten Anfangspool aus dem kanonischen Installations-Lifecycle. Der Owner
+verlangt aktuelle Installationsactions, genügend Aktionen und freie MU für beide
+Karten sowie eine sofortige liquide Ersparnis oberhalb von Quellenkosten und
+entgangenem öffentlichem Klick-Einkommen. Terminale Vorbereitung und eine bereits
+gebundene Konversion im selben Zug werden dadurch nicht verlängert. Quelle,
+Antwortinstanz und StateVersion bleiben an denselben Coverage-Step gebunden;
+nach dem Aufbau wird die tatsächliche bezahlte Installation neu materialisiert.
+Der begrenzte Nachweis behauptet keine vollständige längerfristige Amortisation.
+
 Die Deck-Fähigkeitsmatrix trennt mögliche
 Deck-/Handantworten von der tatsächlich installierten Abdeckung. Bei einem
 kanonischen Break-Matcher mit gewähltem Untertyp zählt nur der öffentlich

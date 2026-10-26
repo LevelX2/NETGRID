@@ -808,8 +808,34 @@ function createScoreProtectionStagingLine(
     quotedRezCredits === undefined
       ? 0
       : Math.max(0, quotedRezCredits - creditsAfterInstall);
+  const mandatoryAgendaPoints =
+    legalAction?.payload?.postInstallRezQuoteMandatoryAgendaPointCost;
+  if (
+    !legalAction ||
+    legalAction.expiresAtStateVersion !== params.stateIdentity.stateVersion ||
+    legalAction.payload?.postInstallRezQuoteTargetServerId !==
+      signal.serverId ||
+    !Number.isSafeInteger(quotedRezCredits) ||
+    Number(quotedRezCredits) < 0 ||
+    !Number.isSafeInteger(mandatoryAgendaPoints) ||
+    Number(mandatoryAgendaPoints) < 0 ||
+    legalAction.payload.postInstallRezQuoteMandatoryAdditionalCostKind !==
+      (Number(mandatoryAgendaPoints) > 0 ? "agenda_point" : undefined)
+  ) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: params.input.side,
+      stateVersion: params.input.playerView.stateVersion,
+      timingPoint: params.input.playerView.timingPoint,
+      legalActionTypes: params.input.legalActions.map((action) => action.type),
+      owner: "plan_module",
+      removalCondition:
+        "A score-protection staging line requires its current source/target-bound complete Engine credit and mandatory agenda-point quote.",
+    });
+  }
   const rezReadyAfterLine =
-    quotedRezCredits !== undefined && fundingGapAfter === 0;
+    quotedRezCredits !== undefined &&
+    fundingGapAfter === 0 &&
+    Number(mandatoryAgendaPoints) <= params.input.playerView.own.agendaPoints;
   const defenseValue = rezReadyAfterLine ? 18 : 12;
   const totalValue = defenseValue - fundingGapAfter * 3;
   const campaignId = "campaign:corp.defend_servers";

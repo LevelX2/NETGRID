@@ -40,6 +40,7 @@ import { coverageSupportActionIds } from "./coverage-support";
 import { runnerDeckHasCoverageAnswer } from "./coverage-support";
 import { planFirstCoverageRole } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
+import { runnerCoverageInstallCreditPreparation } from "./coverage-install-credit-preparation";
 export type RunnerCoverageDrawCadence = Readonly<{
   drawAvailable: boolean;
   evidenceCode: string;
@@ -764,7 +765,9 @@ export function uniqueCoverageGaps(
       });
     }
   }
-  return dedupeCoverageGapsByGapId([...result.values()]);
+  return dedupeCoverageGapsByGapId([...result.values()]).map((gap) =>
+    runnerCoverageInstallCreditPreparation(input, gap),
+  );
 }
 
 export function dedupeCoverageGapsByGapId(
