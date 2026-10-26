@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { runnerInput } from "../runner-hand-development.test-support";
 
 import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 
@@ -96,29 +97,28 @@ function input(params: {
   advancement: number;
   iceCount?: number;
 }): AiDecisionInput {
-  return {
-    side: "runner",
-    playerView: {
-      agendaPointsToWin: 7,
-      opponent: { agendaPoints: params.agendaPoints },
-      publicEvents: [],
-      servers: [
-        {
-          id: "remote_1",
-          ice: Array.from({ length: params.iceCount ?? 0 }, (_, index) => ({
-            instanceId: `hidden-ice-${index}`,
+  const decisionInput = runnerInput({
+    credits: 5,
+    hand: [],
+    legalActions: [],
+    servers: [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: Array.from({ length: params.iceCount ?? 0 }, (_, index) => ({
+          instanceId: `hidden-ice-${index}`,
+          known: false,
+        })),
+        root: [
+          {
+            instanceId: "unknown-root",
             known: false,
-          })),
-          root: [
-            {
-              instanceId: "unknown-root",
-              known: false,
-              advancementCounters: params.advancement,
-            },
-          ],
-        },
-      ],
-    },
-    eventTail: [],
-  } as unknown as AiDecisionInput;
+            advancementCounters: params.advancement,
+          },
+        ],
+      },
+    ],
+  });
+  decisionInput.playerView.opponent.agendaPoints = params.agendaPoints;
+  return decisionInput;
 }

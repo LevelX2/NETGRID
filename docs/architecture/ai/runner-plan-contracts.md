@@ -505,6 +505,15 @@ Zugriffsvertrag und Risikoquote nicht überschreiben. Ein bereits berechneter
 Bank-Support bleibt damit am selben Remote-Parent und Bedarf gebunden; eine
 fehlende bezahlbare Route wird durch den Bedrohungsfokus nicht ausführbar.
 
+Die geteilten terminalen Remote-Fakten berücksichtigen auch das weiterhin
+gültige Positionswissen des Belief-Owners. Eine aufgedeckte und danach wieder
+verdeckte bekannte Nicht-Agenda begründet weder durch Advancement noch durch
+früheres Scoring aus demselben Server einen Agenda-Notfall. Unbekannte weitere
+Root-Karten und erinnerte Agendas behalten ihre Bedrohungsprüfung; Austausch
+und Wissensinvalidierung bleiben beim bestehenden Belief-Owner. Paarung 559
+G10 D239 sichert den Originalzustand nach dem Aufdecken einer TRAP sowie
+die produktive Planentscheidung und die relevanten Gegenfälle.
+
 Jede unmittelbar ausführbare Run-Variante prüft ihre eigene Vorabreserve.
 Die Bereitschaft einer Bypass-Variante desselben Servers zertifiziert weder
 den normalen Run noch dessen unbekannte Encounters. Ein blockierter
@@ -1242,6 +1251,14 @@ sie wählen keine neue Action. `development-funding.ts` benutzt die geteilten
 exakten Funding-Routen in `runtime/runner-exact-funding-routes.ts`. Die
 Runtime komponiert die Owner-Fakten und führt weiterhin die gemeinsame
 Zugplanung aus; sie enthält keine zweite Handentwicklungs-Discovery.
+
+Das persistente Funktionsprofil übernimmt Tag-Prävention aus den kanonischen
+strukturierten Hints als eigene funktionale Abdeckung. Dadurch verliert eine
+finanzierte Schutzinstallation ihren bereits belegten Defense-Bedarf nicht
+beim Vergleich mit dem bestehenden Rig. Vorhandener gleichartiger Schutz,
+Kosten und aktuelle Bedarfsgrenzen bleiben Teil derselben Bewertung. Paarung
+559 G38 D224 prüft Nasuko Cycle am realen Consumer, die unveränderte
+Defense-Ownership und die tatsächliche Engine-Installation.
 
 Die persistente Installationsbewertung darf eine vorübergehend unterschrittene
 Creditreserve durch noch im selben Zug verfügbare reine Einkommensaktionen

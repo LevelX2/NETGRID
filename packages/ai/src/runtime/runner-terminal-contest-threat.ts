@@ -1,5 +1,40 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { reconstructBeliefState } from "../belief-state";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { mergedPublicHistory } from "./public-event-history";
+
+/** Reconcealment does not erase an exposure that the belief owner still validates. */
+function rootMayBeAgenda(
+  input: AiDecisionInput,
+  serverId: string,
+  card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
+  index: number,
+): boolean {
+  if (card.known !== false) return card.type === "agenda";
+  const memory = reconstructBeliefState(
+    input,
+  ).runnerOpponentModel?.knownPositionMemory.find(
+    (entry) =>
+      entry.zone === serverId &&
+      entry.positionKey === `root:${index}` &&
+      entry.invalidatedBy.length === 0,
+  );
+  if (!memory) return true;
+  const definition = CARD_DEFINITIONS_BY_ID[memory.definitionId];
+  if (!definition) {
+    throw new PlanResolutionFailure("missing_card_definition", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "plan_module",
+      removalCondition:
+        "Restore the canonical definition for the validated remembered remote root.",
+    });
+  }
+  return definition.type === "agenda";
+}
 
 export type RunnerTerminalContestThreat = {
   kind:
@@ -50,8 +85,8 @@ export function runnerTerminalContestThreat(
         (server) =>
           server.id.startsWith("remote_") &&
           previouslyScoredRemoteIds.has(server.id) &&
-          server.root.some(
-            (card) => card.known === false || card.type === "agenda",
+          server.root.some((card, index) =>
+            rootMayBeAgenda(input, server.id, card, index),
           ),
       )
       .map((server) => server.id)
@@ -78,8 +113,8 @@ export function runnerTerminalContestThreat(
         (server) =>
           server.id.startsWith("remote_") &&
           server.root.some(
-            (card) =>
-              (card.known === false || card.type === "agenda") &&
+            (card, index) =>
+              rootMayBeAgenda(input, server.id, card, index) &&
               (card.advancementCounters ?? 0) >= 1,
           ),
       )
@@ -105,8 +140,8 @@ export function runnerTerminalContestThreat(
       (server) =>
         server.id.startsWith("remote_") &&
         server.root.some(
-          (card) =>
-            (card.known === false || card.type === "agenda") &&
+          (card, index) =>
+            rootMayBeAgenda(input, server.id, card, index) &&
             (card.advancementCounters ?? 0) >= 2,
         ),
     )
@@ -131,7 +166,11 @@ export function runnerTerminalContestThreat(
       (server) =>
         server.id.startsWith("remote_") &&
         server.ice.length >= 2 &&
-        server.root.some((card) => card.known === false),
+        server.root.some(
+          (card, index) =>
+            card.known === false &&
+            rootMayBeAgenda(input, server.id, card, index),
+        ),
     )
     .map((server) => server.id)
     .sort();
@@ -161,13 +200,12 @@ export function runnerTargetHasTerminalContestThreat(
   );
   const visiblyAdvancedRoot =
     server?.root.some(
-      (card) =>
-        (card.known === false || card.type === "agenda") &&
+      (card, index) =>
+        rootMayBeAgenda(input, server.id, card, index) &&
         (card.advancementCounters ?? 0) > 0,
     ) === true;
-  const repeatedMatchpointRemote = terminalThreat.remoteServerIds.includes(
-    targetServerId,
-  );
+  const repeatedMatchpointRemote =
+    terminalThreat.remoteServerIds.includes(targetServerId);
   if (!visiblyAdvancedRoot && !repeatedMatchpointRemote) {
     return false;
   }

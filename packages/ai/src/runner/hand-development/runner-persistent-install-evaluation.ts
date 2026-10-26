@@ -20,6 +20,7 @@ import { actionClickCost } from "../../runtime/action-cost";
 import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
 import {
   runnerHintProvidesDamagePrevention,
+  runnerHintProvidesTagPrevention,
   runnerHintProvidesExposeInformation,
   runnerHintProvidesMultiaccess,
   runnerEffectsProvidePostBreakIceTrash,
@@ -210,6 +211,7 @@ export function persistentFunctionalProfileForCard(
     (randomBreakOrDamageProfile !== undefined ||
       runnerHandTextHasRiskyBreakerSignal(text));
   const damagePrevention = runnerHintProvidesDamagePrevention(hint);
+  const tagPrevention = runnerHintProvidesTagPrevention(hint);
   const handSizeSupport = runnerHandTextHasHandSizeSignal(text);
   const memorySupport = looksLikeMemorySupport(card, text);
   const breakerStrengthSupport =
@@ -284,6 +286,7 @@ export function persistentFunctionalProfileForCard(
     ...(iceStrengthReduction ? ["ice_strength_reduction"] : []),
     ...(recurringBreakerEconomy ? ["breaker_recurring_economy"] : []),
     ...(damagePrevention ? ["damage_prevention"] : []),
+    ...(tagPrevention ? ["tag_prevention"] : []),
     ...(handSizeSupport ? ["hand_size"] : []),
     ...(bankTool ? ["bank_tool"] : []),
     ...(economyTool ? ["economy_engine"] : []),
