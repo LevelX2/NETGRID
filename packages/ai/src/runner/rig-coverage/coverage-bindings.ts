@@ -36,6 +36,7 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
           requiredRole?: unknown;
           targetServerId?: unknown;
           targetRunActionId?: unknown;
+          preparationActionIds?: unknown;
           installActionIds?: unknown;
           drawForAnswerActionIds?: unknown;
           directSearchChoiceBindings?: Array<{
@@ -66,6 +67,13 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     (previousExecutor.executionState === "executor" ||
       previousExecutor.executionState === "preempted") &&
     previousState?.kind === "coverage";
+  const previousPreparationOriginIsExact =
+    previousCoverageExecutorIsPreservable &&
+    previousState.phase === "prepare_coverage" &&
+    Array.isArray(previousState.gap?.preparationActionIds) &&
+    previousState.gap.preparationActionIds.includes(pending.originalActionId) &&
+    pending.sourceStepId ===
+      `${previousExecutor.instanceId}:prepare:${previousState.gap.requiredRole}`;
   const previousDrawOriginIsExact =
     previousCoverageExecutorIsPreservable &&
     previousState.phase === "draw_for_answer" &&
@@ -84,7 +92,8 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     previousBinding !== undefined;
   if (
     !nextExecutor &&
-    (previousInstallOriginIsExact ||
+    (previousPreparationOriginIsExact ||
+      previousInstallOriginIsExact ||
       previousSearchOriginIsExact ||
       previousDrawOriginIsExact)
   ) {
@@ -96,7 +105,9 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
   }
   const nextState = nextExecutor?.moduleState as typeof previousState;
   const exactActionBinding =
-    (previousInstallOriginIsExact || previousDrawOriginIsExact) &&
+    (previousPreparationOriginIsExact ||
+      previousInstallOriginIsExact ||
+      previousDrawOriginIsExact) &&
     nextExecutor?.moduleId === "runner.rig_and_coverage" &&
     nextState?.kind === "coverage" &&
     nextState.phase === previousState.phase &&
@@ -131,7 +142,7 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
       planInstanceId: pending.executorInstanceId,
       stepId: pending.sourceStepId,
       removalCondition:
-        "Carry the exact selected coverage search, install or draw action and its unchanged coverage binding through every intervening payment-support step.",
+        "Carry the exact selected coverage preparation, search, install or draw action and its unchanged coverage binding through every intervening payment-support step.",
     });
   }
   preserveCoveragePaymentAncestry(input, previous!, result.portfolio, pending);

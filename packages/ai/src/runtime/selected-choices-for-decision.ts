@@ -71,7 +71,7 @@ import { selectableChoiceOptions } from "./choice-option";
 import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
 import { corpInstalledHardwareTrashOperationProfile } from "./corp-canonical-card-facts";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
-import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
+import { selectedCorpHqRetainPaymentOptionIds } from "../corp/hand-management/hq-retain-payment-choice";
 import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
 import { selectedCorpTraceHardwareTrashChoiceOptionIds } from "./corp-trace-hardware-trash-choice";
 import { selectedCorpStartOfTurnOrderChoiceOptionId } from "./corp-start-of-turn-order-choice";

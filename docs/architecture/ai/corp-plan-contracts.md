@@ -2997,3 +2997,5 @@ sein. Nach Rez wird die wirkliche Aktivierungsaction neu von der Engine
 angefordert und im bestehenden Score-Parent bewertet. Eine zukünftige Action-ID
 wird nicht erfunden. Der Regressionstest aus 461 R9 G5 D207 belegt den zuvor
 fehlenden Rezschritt vor dem sofortigen Gewinn.
+
+Die Behaltezahlung nach erfolgreichem HQ-Angriff liegt beim Hand-Owner in `corp/hand-management/hq-retain-payment-choice.ts`. Bei offenen Archives ohne ICE und ohne Runverbot bewertet er die eigene vollständige Archives-/HQ-Agendaexposition einschließlich Runnerpunkten. Eine bezahlbare Auswahl, die terminale Exposition beseitigt, hat Vorrang; dafür wird nur die kleinste zusätzlich nötige Kartenanzahl bezahlt. Nichtterminale oder auch mit vollständiger Zahlung unvermeidbare Exposition behält die normale Rez-/Entwicklungsreserve. Fehlende Optionenbindungen oder Agendapunkte scheitern strukturiert; der Payload-Einstieg konsumiert die Owner-Auswahl.

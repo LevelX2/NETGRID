@@ -10,6 +10,7 @@ import {
 import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { runnerRemoteCoveragePaymentNeed } from "../../runner/remote-contest/remote-contest-payment-need";
+import { preserveSelectedRunnerCoverageBindingAcrossPaymentStep } from "../../runner/rig-coverage/coverage-bindings";
 import { corpDefenseSignalReservesActionWindow } from "../../corp/defense/corp-funded-continuation-window";
 
 function original(kind: string) {
@@ -236,6 +237,86 @@ describe("pairing563 native owner regressions", () => {
         (i: any) => i.instanceId === pending.executorInstanceId,
       ).side = "corp";
     expect(runnerRemoteCoveragePaymentNeed(f.input, previous)).toBeUndefined();
+  });
+
+  it("keeps the exact selected preparation through payment support (SP-684)", () => {
+    const f = original("coverage-payment-preparation");
+    const pending = structuredClone(
+      f.runtime.residentPlanPortfolio.pendingRunnerCostPenaltySupportOrigin,
+    );
+    const decision = choose(f);
+    const portfolio = residentPlanPortfolioSnapshot(f.input)!;
+    const leaf = portfolio.instances.find(
+      (i) => i.instanceId === pending.executorInstanceId,
+    )!;
+    expect(leaf.moduleState).toMatchObject({
+      kind: "coverage",
+      phase: "prepare_coverage",
+      gap: { preparationActionIds: [pending.originalActionId] },
+    });
+    expect(portfolio.pendingRunnerCostPenaltySupportOrigin).toMatchObject({
+      rootPlanInstanceId: pending.rootPlanInstanceId,
+      executorInstanceId: pending.executorInstanceId,
+      originalActionId: pending.originalActionId,
+      sourceStepId: pending.sourceStepId,
+    });
+    expect(decision.actionId).toBeTruthy();
+  });
+
+  it.each([
+    "exact",
+    "wrong_action",
+    "wrong_step",
+    "wrong_phase",
+    "wrong_root",
+    "wrong_side",
+  ])("keeps only the exact preparation origin: %s", (change) => {
+    const f = original("coverage-payment-preparation"),
+      previous = f.runtime.residentPlanPortfolio,
+      pending = previous.pendingRunnerCostPenaltySupportOrigin;
+    const leaf = previous.instances.find(
+      (i: any) => i.instanceId === pending.executorInstanceId,
+    );
+    if (change === "wrong_action")
+      leaf.moduleState.gap.preparationActionIds = ["another-head"];
+    if (change === "wrong_step") pending.sourceStepId = "another-step";
+    if (change === "wrong_phase") leaf.moduleState.phase = "hold";
+    if (change === "wrong_root") pending.rootPlanInstanceId = "another-root";
+    if (change === "wrong_side") previous.side = "corp";
+    const before = JSON.stringify(previous),
+      portfolio = structuredClone(previous);
+    portfolio.instances = portfolio.instances.filter(
+      (i: any) => i.instanceId !== pending.executorInstanceId,
+    );
+    const result: any = { lane: "plan", portfolio };
+    const call = () =>
+      preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
+        f.input,
+        result,
+        previous,
+        pending,
+      );
+    if (change === "exact") {
+      call();
+      expect(
+        result.portfolio.instances.find(
+          (i: any) => i.instanceId === pending.executorInstanceId,
+        ).moduleState,
+      ).toEqual(leaf.moduleState);
+    } else expect(call).toThrow(/invalid_support_graph/);
+    expect(JSON.stringify(previous)).toBe(before);
+  });
+
+  it("retains a payable agenda before exposing terminal open Archives points (SP-686)", () => {
+    const f = original("hq-retain-terminal");
+    const decision = choose(f);
+    const ids = (decision.selectedChoices as { selectedOptionIds: string[] })
+      .selectedOptionIds;
+    expect(ids).toHaveLength(1);
+    const kept = f.input.playerView.own.gripOrHq.find((c: any) =>
+      ids.includes("card_" + c.instanceId),
+    );
+    expect(kept).toMatchObject({ type: "agenda", agendaPoints: 2 });
   });
 
   it("admits Department's complete rest-turn cycle after the Defense draw is rejected (SP-685)", () => {
