@@ -1956,6 +1956,59 @@ describe("belief-state reveal kind classification", () => {
   });
 });
 
+describe("installed-source trash inside an activated ability", () => {
+  it.each(["source", "other", "none"])(
+    "reconciles only a publicly identified departing source: %s",
+    (variant) => {
+      const source = "onr_v1_309_bbs-whispering-campaign";
+      const upgrade = "onr_v1_366_red-herrings";
+      const events = [source, upgrade].map((definitionId, index) =>
+        publicEvent(`root_${index}`, "access_card", index, {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          installPlacement: "root",
+          accessedArea: "root",
+          accessedCardPositionKey: `root:${index}`,
+          installedPositionKey: `installed-position-v1:root${index}`,
+          cardDefinitionId: definitionId,
+        }),
+      );
+      events.push(
+        publicEvent("cash", "activated_card_ability", 2, {
+          actor: "corp",
+          actionType: "activated_card_ability",
+          serverId: "remote_1",
+          installPlacement: "root",
+          installedPositionKey: "installed-position-v1:root0",
+          sourceDefinitionId: source,
+          gainCreditsAmount: 2,
+          ...(variant === "none"
+            ? {}
+            : {
+                trashedCardDefinitionId:
+                  variant === "source" ? source : "different-source",
+              }),
+        }),
+      );
+      const belief = reconstructBeliefState(runnerInput(events));
+      const roots = belief.knownPositionMemory!.filter((m) =>
+        /^root:/.test(m.positionKey),
+      );
+      expect(roots.map((m) => [m.positionKey, m.definitionId])).toEqual(
+        variant === "source"
+          ? [["root:0", upgrade]]
+          : [
+              ["root:0", source],
+              ["root:1", upgrade],
+            ],
+      );
+      // Cashflow remains an ability event; it must not become a phantom HQ departure.
+      expect(belief.eventClassifications.at(-1)?.family).toBe("other");
+    },
+  );
+});
+
 function remoteUpgradeOnlyHistory(): PublicGameEvent[] {
   return [
     publicEvent("evt_first_root", "install_card", 1, {

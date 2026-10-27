@@ -880,9 +880,14 @@ function deriveKnownPositionMemory(
       continue;
     }
     reconcileObservedRootReplacement(memory, classification, eventsById);
-    reconcileObservedRootRemoval(memory, classification, eventsById);
+    const positionEvent = publicInstalledSourceWasTrashed(
+      eventsById.get(classification.eventId),
+    )
+      ? { ...classification, family: "trash" as const }
+      : classification;
+    reconcileObservedRootRemoval(memory, positionEvent, eventsById);
     for (const key of [...memory.keys()]) {
-      if (positionInvalidatesKey(key, classification)) memory.delete(key);
+      if (positionInvalidatesKey(key, positionEvent)) memory.delete(key);
     }
 
     const event = eventsById.get(classification.eventId);
@@ -1645,6 +1650,20 @@ function reconcileHiddenRemoteCandidateMemories(
     exactPosition?.index ??
     (matchingMemories.length === 1 ? matchingMemories[0]!.index : -1);
   if (memoryIndex >= 0) memories.splice(memoryIndex, 1);
+}
+
+/** An activated source can leave its installed position in the same event. */
+function publicInstalledSourceWasTrashed(
+  event: PublicGameEvent | undefined,
+): boolean {
+  const payload = event?.publicPayload;
+  return (
+    payload?.actionType === "activated_card_ability" &&
+    typeof payload.sourceDefinitionId === "string" &&
+    payload.trashedCardDefinitionId === payload.sourceDefinitionId &&
+    typeof payload.installedPositionKey === "string" &&
+    (payload.installPlacement === "root" || payload.installPlacement === "ice")
+  );
 }
 
 function positionInvalidatesKey(

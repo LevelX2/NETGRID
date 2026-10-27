@@ -450,6 +450,15 @@ importiert die Live-Runtime oder eine Planregistry zurück.
 
 ## 3. `runner.contest_remote`
 
+Positionswissen verarbeitet auch eine öffentlich ausgewiesene Selbstentsorgung
+innerhalb einer aktivierten Fähigkeit. Der tatsächliche Trash der Quelle wird
+über Definition und stabile installierte Position gebunden; bekannte
+Geschwisterpositionen werden entsprechend verschoben. Auszahlung ohne Trash
+und die Entsorgung einer anderen Quelle entfernen dieses Wissen nicht. Die
+ursprüngliche Ereignisfamilie bleibt erhalten, damit eine installierte Quelle
+nicht zusätzlich als Abgang aus HQ gezählt wird. Ein später verdeckt
+installiertes Ziel erhält dadurch keine alte Kartenidentität.
+
 **Klasse:** `bounded_sequence` oder bei wiederkehrendem Ziel
 `strategic_campaign`
 **Rolle:** Vordergrund; bei unmittelbarer Score-Threat P2
@@ -2978,6 +2987,16 @@ Run-/Serverbindung und lückenlose Ereigniskette bleiben erforderlich.
 Paarung 529/G19/D205–207 prüft Gebot sieben, die einmalige Swiss-Zahlung
 und das exakt fortgesetzte Gebot nativ. Der ursprüngliche Abbruch erhält
 dadurch keinen nachträglich erfundenen Endstand.
+
+Eine Trace außerhalb eines Runs erhält bei ihrer verpflichtenden Gebotswahl
+den Ursprung `rules` / `rules.window_resolution`. Die exakt gebundene
+Choice, ihre angebotenen Optionen, die Trace-ID und die aktuelle StateVersion
+werden vor einem möglichen Engine-Zahlungsfenster gesichert. Bankauszahlung
+und Fortsetzung behalten diesen Ursprung; sie übernehmen keinen ruhenden
+freiwilligen Runner-Plan. Ein fehlender oder fremder Ursprung wird auch dann
+nicht rekonstruiert, wenn nur eine Bankaktivierung legal ist. Paarung 561
+prüft die vollständige native Folge Gebot sieben → Swiss-Auszahlung →
+derselbe bezahlte Gebotskopf sowie fremde Trace-/Optionsbindungen.
 
 Das Informationsbudget darf ebenso einen bereits zugelassenen bezahlbaren
 Break gegen die unmittelbare Zerstörung eines installierten Programms nicht

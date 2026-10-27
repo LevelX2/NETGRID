@@ -210,6 +210,47 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
     }
+    const ruleChoice = input.playerView.pendingChoice;
+    const trace = input.playerView.trace;
+    const ruleRequirement = selectedAction?.choiceRequirements?.[0];
+    const ruleOptionIds = ruleChoice?.options.map((option) => option.id) ?? [];
+    // A non-run Trace belongs to its mandatory rules window. Preserve that
+    // exact origin through payment, rather than borrowing the idle plan.
+    if (
+      !input.playerView.run &&
+      trace?.phase === "runner_bid" &&
+      ruleChoice?.side === "runner" &&
+      ruleChoice.kind === "bid_amount" &&
+      ruleChoice.source === `trace:${trace.traceId}` &&
+      ruleChoice.stateVersion === input.playerView.stateVersion &&
+      result.origin.rootPlanInstanceId === "rules" &&
+      result.origin.leafPlanInstanceId === "rules.window_resolution" &&
+      result.origin.side === "runner" &&
+      result.origin.windowKind === "mandatory_choice" &&
+      result.origin.stateVersion === input.playerView.stateVersion &&
+      result.origin.timingPoint === input.playerView.timingPoint &&
+      selectedAction?.side === "runner" &&
+      selectedAction.type === "resolve_choice" &&
+      selectedAction.source === "game_rule" &&
+      selectedAction.timingPoint === input.playerView.timingPoint &&
+      selectedAction.expiresAtStateVersion === input.playerView.stateVersion &&
+      selectedAction.choiceRequirements?.length === 1 &&
+      ruleRequirement?.choiceId === ruleChoice.choiceId &&
+      ruleRequirement.minSelections === ruleChoice.minSelections &&
+      ruleRequirement.maxSelections === ruleChoice.maxSelections &&
+      ruleRequirement.optionIds.length === ruleOptionIds.length &&
+      ruleOptionIds.every((id) => ruleRequirement.optionIds.includes(id))
+    ) {
+      result.portfolio.stateVersion = input.playerView.stateVersion;
+      result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
+        rootPlanInstanceId: result.origin.rootPlanInstanceId,
+        executorInstanceId: result.origin.leafPlanInstanceId,
+        sourceStepId: result.origin.windowId,
+        originalActionId: selectedAction.actionId,
+        selectedAtStateVersion: input.playerView.stateVersion,
+      };
+      return;
+    }
     const choice = input.playerView.pendingChoice;
     const run = input.playerView.run;
     const rootPlanInstanceId = previous?.rootForegroundInstanceId;
