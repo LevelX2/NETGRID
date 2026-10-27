@@ -4,6 +4,7 @@ import {
   buildRunnerProgramInstallMemoryChoice,
   parseRunnerProgramInstallMemoryContinuation,
   resolveRunnerProgramInstallMemoryTrashSelection,
+  runnerInstalledProgramMemoryCost,
   runnerProgramInstallMemoryDeficit,
   runnerProgramInstallMemoryReachable,
 } from "./runner-program-install-memory";
@@ -13,6 +14,74 @@ const second = "installed_program_2" as CardInstanceId;
 const target = "target_program" as CardInstanceId;
 
 describe("runner program install memory", () => {
+  it.each(["hidden_search", "nonsearch", "access"] as const)(
+    "uses a converted program's actual MU in the %s continuation",
+    (kind) => {
+      const definition = { id: "converted-agenda", memoryCost: 0 };
+      const instance = {
+        definitionId: definition.id,
+        installedAsRunnerProgram: {
+          memoryCost: 2,
+          scoreAsAgendaAction: true as const,
+          removeFromGameOnLeavePlay: true as const,
+          originalType: "agenda" as const,
+        },
+      };
+      const choice = buildRunnerProgramInstallMemoryChoice({
+        stateVersion: 7,
+        kind,
+        targetCardId: target,
+        originalChoiceId: "original",
+        originalChoiceSource: "original-source",
+        options: [{ id: "converted", label: "Converted", value: first }],
+      });
+      expect(
+        resolveRunnerProgramInstallMemoryTrashSelection({
+          choice,
+          selectedOptionIds: ["converted"],
+          installedProgramIds: [first],
+          memoryUsed: 4,
+          targetMemoryCost: 2,
+          memoryLimit: 4,
+          memoryCostFor: () =>
+            runnerInstalledProgramMemoryCost(instance, definition),
+          usesMemory: () => true,
+        }),
+      ).toMatchObject({ trashCardIds: [first], freedMemory: 2 });
+      expect(() =>
+        resolveRunnerProgramInstallMemoryTrashSelection({
+          choice,
+          selectedOptionIds: ["converted"],
+          installedProgramIds: [first],
+          memoryUsed: 4,
+          targetMemoryCost: 3,
+          memoryLimit: 4,
+          memoryCostFor: () =>
+            runnerInstalledProgramMemoryCost(instance, definition),
+          usesMemory: () => true,
+        }),
+      ).toThrow("nicht genug MU");
+    },
+  );
+
+  it("fails closed for an unbound instance or invalid effective MU", () => {
+    expect(() =>
+      runnerInstalledProgramMemoryCost(undefined, { id: "agenda" }),
+    ).toThrow("Kartenbindung");
+    expect(() =>
+      runnerInstalledProgramMemoryCost(
+        { definitionId: "other" },
+        { id: "agenda" },
+      ),
+    ).toThrow("Kartenbindung");
+    expect(() =>
+      runnerInstalledProgramMemoryCost(
+        { definitionId: "program" },
+        { id: "program", memoryCost: -1 },
+      ),
+    ).toThrow("ungültig");
+  });
+
   it("calculates current, automatic and selectable MU correctly", () => {
     expect(
       runnerProgramInstallMemoryDeficit({

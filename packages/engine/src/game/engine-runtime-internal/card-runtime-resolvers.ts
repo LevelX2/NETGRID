@@ -573,7 +573,10 @@ import type {
   RunnerEventResolver,
   RuntimeDeps,
 } from "./runtime-shared";
-import { runnerProgramInstallMemoryReachable } from "../install/runner-program-install-memory";
+import {
+  runnerInstalledProgramMemoryCost,
+  runnerProgramInstallMemoryReachable,
+} from "../install/runner-program-install-memory";
 
 export function createCardRuntimeResolvers(
   deps: RuntimeDeps,
@@ -801,8 +804,11 @@ export function createCardRuntimeResolvers(
           .filter((installedId) =>
             deps.runnerProgramUsesMemory(state, installedId),
           )
-          .map(
-            (installedId) => definitionFor(state, installedId).memoryCost ?? 0,
+          .map((installedId) =>
+            runnerInstalledProgramMemoryCost(
+              state.cardInstances[installedId],
+              definitionFor(state, installedId),
+            ),
           );
         if (
           !runnerProgramInstallMemoryReachable({

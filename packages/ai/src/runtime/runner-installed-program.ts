@@ -4,11 +4,15 @@ import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 import { type AiDecisionInput } from "@netgrid/shared";
 
+export function isRunnerInstalledProgramCard(card: VisibleCard): boolean {
+  return card.type === "program" || card.installedAsRunnerProgram !== undefined;
+}
+
 export function runnerHasInstalledPrograms(input: AiDecisionInput): boolean {
   const rig = input.playerView.own.rig;
   if (!rig) return false;
   if (!Array.isArray(rig)) return false;
-  return rig.some((card) => card.type === "program");
+  return rig.some(isRunnerInstalledProgramCard);
 }
 
 /** Visible own-rig facts for the Engine's recursive program-trash lifecycle. */
@@ -38,7 +42,7 @@ export function runnerInstalledProgramTrashLoss(
   if (
     !card ||
     !byId.get(card.instanceId)?.known ||
-    byId.get(card.instanceId)?.type !== "program"
+    !isRunnerInstalledProgramCard(byId.get(card.instanceId)!)
   )
     fail(
       "A program-trash candidate must bind an actual known own installed program.",
@@ -65,13 +69,17 @@ export function runnerInstalledProgramTrashLoss(
     visiting.add(entry.instanceId);
     cards.push(entry);
     for (const child of rig) {
-      if (child.type === "program" && child.hostedOn === entry.instanceId)
+      if (
+        isRunnerInstalledProgramCard(child) &&
+        child.hostedOn === entry.instanceId
+      )
         visit(child);
     }
     visiting.delete(entry.instanceId);
   };
   visit(root);
-  let memoryCost = printedMemoryCost(root);
+  let memoryCost =
+    root.installedAsRunnerProgram?.memoryCost ?? printedMemoryCost(root);
   if (!Number.isSafeInteger(memoryCost) || memoryCost < 0)
     fail("Installed program MU must be a nonnegative integer.");
   if (root.hostedOn) {

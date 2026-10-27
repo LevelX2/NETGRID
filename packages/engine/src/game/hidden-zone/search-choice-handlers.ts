@@ -44,6 +44,7 @@ import {
 } from "./post-install-side-effects";
 import {
   buildRunnerProgramInstallMemoryChoice,
+  runnerInstalledProgramMemoryCost,
   resolveRunnerProgramInstallMemoryTrashSelection,
   runnerProgramInstallMemoryDeficit,
   runnerProgramInstallMemoryReachable,
@@ -1073,7 +1074,10 @@ function deferHiddenSearchProgramInstallForMemory(
       automaticFreedMemory,
       trashableMemoryCosts: trashableProgramIds.map((cardId) =>
         host.cards.runnerProgramUsesMemory(cardId)
-          ? (host.cards.definitionFor(cardId).memoryCost ?? 0)
+          ? runnerInstalledProgramMemoryCost(
+              host.state.cardInstances[cardId],
+              host.cards.definitionFor(cardId),
+            )
           : 0,
       ),
     })
@@ -1119,7 +1123,11 @@ function handleHiddenSearchProgramInstallMemoryChoice(
     memoryUsed: host.state.runner.memoryUsed,
     targetMemoryCost: targetDefinition.memoryCost ?? 0,
     memoryLimit: host.runnerMemoryLimit(),
-    memoryCostFor: (cardId) => host.cards.definitionFor(cardId).memoryCost ?? 0,
+    memoryCostFor: (cardId) =>
+      runnerInstalledProgramMemoryCost(
+        host.state.cardInstances[cardId],
+        host.cards.definitionFor(cardId),
+      ),
     usesMemory: host.cards.runnerProgramUsesMemory,
   });
   if (selection.continuation.kind !== "hidden_search")

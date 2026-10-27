@@ -508,6 +508,60 @@ describe("installed program loss with hosted descendants", () => {
     ).toMatchObject({ memoryCost: 1 });
   });
 
+  it("includes the Engine's program form and its effective MU before binding a replacement", () => {
+    const converted = {
+      ...program("converted", 0),
+      type: "agenda",
+      installedAsRunnerProgram: {
+        memoryCost: 2,
+        scoreAsAgendaAction: true,
+        removeFromGameOnLeavePlay: true,
+        originalType: "agenda",
+      },
+    } as VisibleCard;
+    const rig = [converted, ownProgram("wall", "onr_v1_047_pile-driver")];
+    const context = contextFor(rig),
+      input = inputFor(rig, 3);
+    const assessment = context.runnerProgramInstallTrashAssessmentForCard(
+      input,
+      program("incoming", 2),
+    );
+    expect(
+      assessment.candidates.find((c) => c.card?.instanceId === "converted"),
+    ).toMatchObject({ memoryCost: 2 });
+    expect(
+      context.selectedRunnerMemoryCheckpointTrashOptionIds(
+        {
+          ...input,
+          playerView: {
+            ...input.playerView,
+            own: { ...input.playerView.own, memoryLimit: 1 },
+          },
+        },
+        [
+          {
+            id: "converted_option",
+            label: "Converted",
+            value: converted.instanceId,
+          },
+        ],
+      ),
+    ).toEqual(["converted_option"]);
+  });
+
+  it("still rejects a non-program option in a program-only Engine choice", () => {
+    const resource = {
+      ...program("resource", 0),
+      type: "resource",
+    } as VisibleCard;
+    const rig = [resource];
+    expect(() =>
+      contextFor(rig).selectedRunnerForcedProgramTrashOptionIds(inputFor(rig), [
+        { id: "invalid_option", label: "Resource", value: resource.instanceId },
+      ]),
+    ).toThrowError("invalid_player_view_card_projection");
+  });
+
   it.each(["missing-host", "cycle"])(
     "fails closed for a %s own hosting binding",
     (kind) => {

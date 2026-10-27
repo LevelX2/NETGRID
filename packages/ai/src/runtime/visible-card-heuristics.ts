@@ -202,7 +202,9 @@ export function visibleInstallCost(card: VisibleCard | undefined): number {
 }
 
 export function visibleMemoryCost(card: VisibleCard | undefined): number {
-  return safeNonNegativeInteger(card?.memoryCost);
+  return safeNonNegativeInteger(
+    card?.installedAsRunnerProgram?.memoryCost ?? card?.memoryCost,
+  );
 }
 
 export function visibleCardsByInstanceId(

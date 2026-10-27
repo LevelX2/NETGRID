@@ -54,6 +54,11 @@ azyklischer interner Implementierungsschnitt.
 - Steal-, Trash- und Install-Aktionen revalidieren Zustand, Kosten und Choices
   bei der Ausführung. LegalActions sind keine Autorisierung durch Vertrauen in
   den Client.
+- Installations-MU-Prüfungen verwenden für bereits installierte Programme die
+  effektive Instanzform `installedAsRunnerProgram.memoryCost` vor gedruckten
+  MU. Zulassung und spätere Trash-Auswahl teilen diese Fakten auch bei Access-,
+  Such- und sonstigen Installationsfortsetzungen. Fehlende Kartenbindungen und
+  ungültige MU scheitern sichtbar statt stillschweigend ersetzt zu werden.
 - Beim Stehlen werden installierte Counter zuerst durch den kanonischen
   Zonenwechsel entfernt. Erst danach werden neue Agenda-Punktboni auf der
   gestohlenen Karte angelegt und für Punkteschulden ausgewertet. Ein

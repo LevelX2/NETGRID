@@ -17,7 +17,10 @@ import {
 import { runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion } from "./runner-program-sacrifice-exclusion";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import { runnerInstalledProgramTrashLoss } from "./runner-installed-program";
+import {
+  isRunnerInstalledProgramCard,
+  runnerInstalledProgramTrashLoss,
+} from "./runner-installed-program";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -275,7 +278,7 @@ export function createRunnerProgramInstallTrashContext(
           return programSacrificeCandidateForAi(input, card, option);
         })
       : (input.playerView.own.rig ?? [])
-          .filter((card) => card.type === "program")
+          .filter(isRunnerInstalledProgramCard)
           .map((card) => programSacrificeCandidateForAi(input, card));
     return buildRunnerProgramInstallTrashAssessmentFromCards({
       memoryUsed,

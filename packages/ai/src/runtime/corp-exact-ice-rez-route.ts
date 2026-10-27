@@ -19,6 +19,7 @@ import {
   visibleCorpIceDefenseProfile,
 } from "./semantic-runtime-corp-effective-defense";
 import type { CorpBluffDefenseNeed } from "../plans/corp-bluff-defense-types";
+import { visibleDeflectorSubroutineCanResolve } from "../visible-run-analysis";
 
 export type CorpExactIceRezRouteProjection = Readonly<{
   actionId: string;
@@ -550,11 +551,26 @@ function quoteQualitativeEncounterActivationCredits(params: {
   ) {
     return undefined;
   }
+  // A typed deflection is current pressure only if its public target and
+  // post-rez activation budget exist. Independently useful mixed effects
+  // remain productive; the Engine owns legality and actual resolution.
+  const currentEncounterSubroutines =
+    postRezQuote.complete === true
+      ? postRezQuote.effectiveRunQuote.subroutines.filter(
+          (subroutine) =>
+            subroutine.type !== "deflect_run" ||
+            visibleDeflectorSubroutineCanResolve(subroutine, {
+              visibleRemoteServerCount: input.playerView.servers.filter(
+                (candidate) => candidate.id.startsWith("remote_"),
+              ).length,
+              visibleCorpCredits:
+                input.playerView.own.credits - totalRezCredits,
+            }),
+        )
+      : undefined;
   const profile = visibleCorpIceDefenseProfile(
     sourceCard,
-    postRezQuote.complete === true
-      ? postRezQuote.effectiveRunQuote.subroutines
-      : undefined,
+    currentEncounterSubroutines,
   );
   if (
     postRezQuote.complete === true &&
@@ -589,9 +605,7 @@ function quoteQualitativeEncounterActivationCredits(params: {
     run.position.iceIndex === 0 &&
     !hasEngineQuotedPaidEncounterEtr &&
     corpIceEffectsOnlyReachFutureEncounters(
-      postRezQuote.effectiveRunQuote.subroutines.map(
-        (subroutine) => subroutine.type,
-      ),
+      currentEncounterSubroutines!.map((subroutine) => subroutine.type),
     )
   ) {
     return undefined;
@@ -606,9 +620,10 @@ function quoteQualitativeEncounterActivationCredits(params: {
   }
   const activationCredits =
     postRezQuote.complete === true
-      ? (corpEffectiveDefenseActivationCredits(
-          postRezQuote.effectiveRunQuote,
-        ) ?? 0)
+      ? (corpEffectiveDefenseActivationCredits({
+          ...postRezQuote.effectiveRunQuote,
+          subroutines: currentEncounterSubroutines!,
+        }) ?? 0)
       : postRezQuote.reason === "on_rez_lifecycle_projection_required" &&
           totalRezCredits === 0
         ? 0

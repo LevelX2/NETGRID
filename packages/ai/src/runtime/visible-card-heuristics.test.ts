@@ -5,9 +5,27 @@ import {
   runnerBadPublicityOrTraceTechCard,
   runnerCardLooksLikeCreditPayout,
   visibleCardPlayOrInstallCost,
+  visibleMemoryCost,
 } from "./visible-card-heuristics";
 
 describe("visible card heuristics", () => {
+  it("uses the installed program form's MU instead of its printed card type", () => {
+    expect(
+      visibleMemoryCost(
+        card({
+          type: "agenda",
+          memoryCost: 0,
+          installedAsRunnerProgram: {
+            memoryCost: 2,
+            scoreAsAgendaAction: true,
+            removeFromGameOnLeavePlay: true,
+            originalType: "agenda",
+          },
+        }),
+      ),
+    ).toBe(2);
+    expect(visibleMemoryCost(card({ type: "program", memoryCost: 1 }))).toBe(1);
+  });
   it("uses structured bad-publicity and trace roles", () => {
     expect(
       runnerBadPublicityOrTraceTechCard(

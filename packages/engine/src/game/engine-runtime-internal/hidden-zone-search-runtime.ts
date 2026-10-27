@@ -20,7 +20,10 @@ import type {
 } from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import { completeRunnerProgramRigInstall } from "../install/runner-rig-install-finalization";
-import { runnerProgramInstallMemoryReachable } from "../install/runner-program-install-memory";
+import {
+  runnerInstalledProgramMemoryCost,
+  runnerProgramInstallMemoryReachable,
+} from "../install/runner-program-install-memory";
 
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
@@ -320,7 +323,10 @@ export function createHiddenZoneSearchRuntime(
       memoryLimit: deps.runnerMemoryLimit(state),
       trashableMemoryCosts: state.runner.rig.programs.map((installedCardId) =>
         deps.runnerProgramUsesMemory(state, installedCardId)
-          ? (deps.definitionFor(state, installedCardId).memoryCost ?? 0)
+          ? runnerInstalledProgramMemoryCost(
+              state.cardInstances[installedCardId],
+              deps.definitionFor(state, installedCardId),
+            )
           : 0,
       ),
     });

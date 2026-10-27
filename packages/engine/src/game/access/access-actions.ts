@@ -18,7 +18,10 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import { runnerCostPenaltySupportCreditCapacity } from "../payment/runner-payment-support";
-import { runnerProgramInstallMemoryReachable } from "../install/runner-program-install-memory";
+import {
+  runnerInstalledProgramMemoryCost,
+  runnerProgramInstallMemoryReachable,
+} from "../install/runner-program-install-memory";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
@@ -470,7 +473,12 @@ function runnerAgendaProgramInstallMemoryReachable(
           ? host.cards.runnerProgramUsesMemory(cardId)
           : !host.cards.cardInstanceFor(cardId).hostedOn,
       )
-      .map((cardId) => host.cards.definitionFor(cardId).memoryCost ?? 0),
+      .map((cardId) =>
+        runnerInstalledProgramMemoryCost(
+          host.cards.cardInstanceFor(cardId),
+          host.cards.definitionFor(cardId),
+        ),
+      ),
   });
 }
 

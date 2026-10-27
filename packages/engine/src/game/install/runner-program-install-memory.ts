@@ -1,4 +1,27 @@
-import type { CardInstanceId, ChoiceRequest } from "@netgrid/shared";
+import type {
+  CardDefinition,
+  CardInstance,
+  CardInstanceId,
+  ChoiceRequest,
+} from "@netgrid/shared";
+
+/** Current installed form, shared by admission and mandatory MU replacement. */
+export function runnerInstalledProgramMemoryCost(
+  instance:
+    | Pick<CardInstance, "definitionId" | "installedAsRunnerProgram">
+    | undefined,
+  definition: Pick<CardDefinition, "id" | "memoryCost">,
+): number {
+  if (!instance || instance.definitionId !== definition.id)
+    throw new Error(
+      "Die installierten Programm-MU haben keine gültige Kartenbindung.",
+    );
+  const memoryCost =
+    instance.installedAsRunnerProgram?.memoryCost ?? definition.memoryCost ?? 0;
+  if (!Number.isSafeInteger(memoryCost) || memoryCost < 0)
+    throw new Error("Die installierten Programm-MU sind ungültig.");
+  return memoryCost;
+}
 
 export const RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX =
   "runner.program_install_memory";

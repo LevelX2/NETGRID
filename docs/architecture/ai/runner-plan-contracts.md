@@ -879,6 +879,12 @@ zyklische eigene Hostbindungen scheitern mit strukturierter Diagnose.
 Choice-ID, StateVersion, Planinstanz, Executor und ursprünglicher Step
 bleiben bei der reinen Optionsauflösung unverändert.
 
+Die Programmzugehörigkeit im eigenen Rig umfasst auch die von der Engine
+projizierte Form `installedAsRunnerProgram`. Deren effektive MU haben Vorrang
+vor dem gedruckten Kartentyp und den gedruckten MU. Vorprüfung, Opfermenge und
+verbindliche Optionsauflösung verwenden dieselben aktuellen Instanzfakten;
+eine gewöhnliche Ressource wird dadurch kein zulässiges Programmopfer.
+
 Der MU-Nutzen eines Opfers ist auf den aktuell gebundenen Speicherbedarf
 begrenzt. Eine größere einzelne Karte oder eine ausreichende Opfermenge
 erhält für überschüssige MU keinen Bonus, der höhere Rollenverluste

@@ -1864,6 +1864,12 @@ ergänzen. Eine leere Subroutinenliste zertifiziert insbesondere null aktuelle
 Subroutinen; das positionsabhängige Trace-Potenzial allein rechtfertigt kein
 Rez. Separat quotierte konditionale Encounter-Abwehr bleibt bewertbar.
 
+Typisierte Umlenk-Subroutinen zählen nur bei vorhandenem öffentlichen Ziel
+und ausreichenden Aktivierungscredits nach dem Rez als aktuelle Wirkung.
+Der Rez-Consumer verwendet dafür dieselben sichtbaren Deflektor-Fakten wie
+die Runanalyse. Ohne Remote begründet eine reine Subsidiary-Umlenkung keinen
+Rez-Nutzen; unabhängige zusätzliche Wirkungen bleiben bewertbar.
+
 Eine vollständige Enginequote mit ausschließlich zukünftigen
 Encounter-Effekten begründet am innersten ICE keinen aktuellen Rez-Nutzen.
 Der qualitative Rez-Consumer prüft diesen fehlenden Folgezustand, bevor

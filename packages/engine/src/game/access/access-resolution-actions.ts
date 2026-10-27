@@ -22,6 +22,7 @@ import {
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
   buildRunnerProgramInstallMemoryChoice,
+  runnerInstalledProgramMemoryCost,
   resolveRunnerProgramInstallMemoryTrashSelection,
   runnerProgramInstallMemoryDeficit,
   RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX,
@@ -584,7 +585,11 @@ export function resolveAccessProgramInstallMemoryChoice(
     memoryUsed: host.state.runner.memoryUsed,
     targetMemoryCost: replacement.memoryCost,
     memoryLimit: runnerMemoryLimit(host.state),
-    memoryCostFor: (cardId) => host.cards.definitionFor(cardId).memoryCost ?? 0,
+    memoryCostFor: (cardId) =>
+      runnerInstalledProgramMemoryCost(
+        host.cards.cardInstanceFor(cardId),
+        host.cards.definitionFor(cardId),
+      ),
     usesMemory: (cardId) => host.cards.runnerProgramUsesMemory(cardId),
   });
   const trashedDefinitionIds = selection.trashCardIds.map(

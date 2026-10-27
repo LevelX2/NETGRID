@@ -9,6 +9,7 @@ import type {
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
   buildRunnerProgramInstallMemoryChoice,
+  runnerInstalledProgramMemoryCost,
   resolveRunnerProgramInstallMemoryTrashSelection,
   runnerProgramInstallMemoryDeficit,
   runnerProgramInstallMemoryReachable,
@@ -62,8 +63,11 @@ export function deferNonSearchProgramInstallForMemory(
       memoryUsed: state.runner.memoryUsed,
       targetMemoryCost: definition.memoryCost ?? 0,
       memoryLimit: host.runnerMemoryLimit(state),
-      trashableMemoryCosts: trashableIds.map(
-        (cardId) => host.definitionFor(state, cardId).memoryCost ?? 0,
+      trashableMemoryCosts: trashableIds.map((cardId) =>
+        runnerInstalledProgramMemoryCost(
+          state.cardInstances[cardId],
+          host.definitionFor(state, cardId),
+        ),
       ),
     })
   )
@@ -117,7 +121,10 @@ export function resolveNonSearchProgramInstallMemoryChoice(
     targetMemoryCost: targetDefinition.memoryCost ?? 0,
     memoryLimit: host.runnerMemoryLimit(state),
     memoryCostFor: (cardId) =>
-      host.definitionFor(state, cardId).memoryCost ?? 0,
+      runnerInstalledProgramMemoryCost(
+        state.cardInstances[cardId],
+        host.definitionFor(state, cardId),
+      ),
     usesMemory: (cardId) => host.runnerProgramUsesMemory(state, cardId),
   });
   const trashedDefinitionIds = selection.trashCardIds.map(
