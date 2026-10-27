@@ -45,6 +45,34 @@ export function corpScoreFundingMilestone(
       releaseCondition: "parent_invalidated_or_higher_priority_preemption",
     };
   }
+  const protectionNeed = signal.protectionNeed;
+  const protection = protectionNeed?.baseline;
+  // A future score-cost floor cannot finance a known missing protection
+  // path. Preserve the project, but let its actual protection owner supply
+  // the next need; a credit click cannot make this route executable.
+  if (
+    signal.phase === "install_agenda" &&
+    !signal.feasible &&
+    !signal.sameTurnCloseout &&
+    !signal.deadlinePressure &&
+    !signal.lastDrawScoreSurvival &&
+    !signal.continuationReserve &&
+    routeFundingGap === 0 &&
+    typeof signal.conversion?.remainingScoreCredits === "number" &&
+    Number.isSafeInteger(signal.conversion.remainingScoreCredits) &&
+    signal.conversion.remainingScoreCredits > observedCredits &&
+    signal.routeAssessment === "corp_score_protection_required" &&
+    protectionNeed?.parentProjectId === signal.projectId &&
+    protectionNeed.targetServerId === signal.serverId &&
+    protection?.knowledge === "known" &&
+    protection.availableCorpCredits === observedCredits &&
+    !protection.fundedProtection &&
+    !protection.protection.protectsScore &&
+    protection.minimumSatisfyingRezCost === undefined &&
+    protection.minimumAdditionalCreditsToSatisfy === undefined
+  ) {
+    return undefined;
+  }
   const protectionFundingGap = knownScoreProtectionFundingGap(signal);
   const fundingOptions = [routeFundingGap, protectionFundingGap ?? 0].filter(
     (gap) => gap > 0,
@@ -74,7 +102,6 @@ export function corpScoreFundingMilestone(
   );
   if (targetCredits <= 0) return undefined;
   const priorityClass = corpScorePriorityClass(signal);
-  const protectionNeed = signal.protectionNeed;
   const basis: CorpScoreFundingMilestone["basis"] =
     targetCredits === incrementalFundingTarget &&
     protectionFundingGap === fundingGap &&

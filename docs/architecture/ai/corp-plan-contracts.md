@@ -2999,3 +2999,11 @@ wird nicht erfunden. Der Regressionstest aus 461 R9 G5 D207 belegt den zuvor
 fehlenden Rezschritt vor dem sofortigen Gewinn.
 
 Die Behaltezahlung nach erfolgreichem HQ-Angriff liegt beim Hand-Owner in `corp/hand-management/hq-retain-payment-choice.ts`. Bei offenen Archives ohne ICE und ohne Runverbot bewertet er die eigene vollständige Archives-/HQ-Agendaexposition einschließlich Runnerpunkten. Eine bezahlbare Auswahl, die terminale Exposition beseitigt, hat Vorrang; dafür wird nur die kleinste zusätzlich nötige Kartenanzahl bezahlt. Nichtterminale oder auch mit vollständiger Zahlung unvermeidbare Exposition behält die normale Rez-/Entwicklungsreserve. Fehlende Optionenbindungen oder Agendapunkte scheitern strukturiert; der Payload-Einstieg konsumiert die Owner-Auswahl.
+
+Ein zukünftiger Score-Kostenboden erzeugt keinen aktuellen Geldauftrag, wenn
+der Score-Owner den Installationspfad wegen bekannten fehlenden Schutzes
+ablehnt und die vollständige aktuelle Schutzquote keine durch zusätzliche
+Credits befriedigbare Variante ausweist. Der gebundene Score-Parent bleibt
+bestehen; wirksamen weiteren Schutz bewertet weiterhin Defense. Unbekannte
+Quoten, konkrete finanzierbare Schutzlücken, unmittelbare Scorefenster und
+terminale Verteidigung behalten ihre bestehenden Finanzierungsverträge.

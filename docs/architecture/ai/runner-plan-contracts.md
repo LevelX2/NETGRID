@@ -3532,3 +3532,11 @@ Archives erzeugen dadurch keinen neuen Runzweck.
 Die Erhaltung eines Remote-Coverage-Bedarfs im exklusiven Engine-Zahlungsfenster projiziert ausschließlich den bereits gewählten aktuellen Fortsetzungskopf in die Action-Felder. Historische Suchalternativen, Ablehnungen und frühere Vorbereitungsquotes sind keine aktuellen Angebote. Rollen-, Ziel-, Parent-Need- und gewählte Suchzielbindung bleiben erhalten; die Scheduler-Prüfung unbekannter Action-IDs bleibt unverändert fail-closed. Der native Gideon-/Temple-Gegenfall aus Paarung 563 sichert diese Grenze zusätzlich zur Sneak-Fortsetzung ab.
 
 Die exakte `prepare_coverage`-Aktion behält ihre Coverage-Bindung ebenfalls über das aktuelle Engine-Zahlungsfenster. Der bereits gewählte `:prepare:<requiredRole>`-Schritt und seine konkrete `preparationActionIds`-Mitgliedschaft müssen zusammenpassen; fremde Schritte, Phasen, Ziele oder Rootketten werden nicht erzeugt.
+
+Ein ausgewählter Run-Schritt darf sein genaues Eintrittskostenfenster auch
+über die öffentliche temporäre ICE-Intervention erreichen. Die lückenlose
+Runner-Bewegung und genau eine Corp-Choice müssen denselben Run, Server,
+Interventionsursprung und öffentlich enthüllten ICE-Typ belegen. Erst diese
+Engine-Folge bindet das Zahlungsfenster an den ursprünglichen Root und
+Executor. Beliebige Choices, Ereignislücken oder fremde Quellen ersetzen
+diesen Nachweis nicht; die eigentliche Optionswahl bleibt beim Corp-Owner.

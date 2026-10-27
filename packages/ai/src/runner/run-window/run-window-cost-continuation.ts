@@ -14,8 +14,8 @@ import {
 import { preserveSelectedRunnerDevelopmentSearchAcrossPaymentStep } from "../hand-development/development-payment-continuation";
 import { preserveSelectedRunnerCoverageBindingAcrossPaymentStep } from "../rig-coverage/coverage-bindings";
 
-/** A completed Runner movement may cross only Corp rez windows before the
- * Engine opens its exact Runner encounter-entry payment continuation. */
+/** A selected movement may cross witnessed Corp rez windows or the exact
+ * public temporary-encounter intervention before its entry payment. */
 function originalPaymentSelectionReachesWindow(
   input: AiDecisionInput,
   previous: ResidentPlanPortfolio | undefined,
@@ -56,6 +56,25 @@ function originalPaymentSelectionReachesWindow(
   );
   const first = events[0],
     last = events.at(-1);
+  const temporaryEncounterIntervention =
+    events.length === 2 &&
+    first?.publicPayload.hiddenZoneAction ===
+      "p3_54_delayed_success_intervention_choice" &&
+    first.publicPayload.abilityId ===
+      "p3_54_delayed_success_intervention_choice" &&
+    first.publicPayload.hiddenZoneBarrier === true &&
+    typeof first.publicPayload.sourceDefinitionId === "string" &&
+    last?.publicPayload.actionType === "resolve_choice" &&
+    last.publicPayload.hiddenZoneAction ===
+      "successful_run_temporary_encounter" &&
+    last.publicPayload.abilityId === "successful_run_temporary_encounter" &&
+    last.publicPayload.sourceDefinitionId ===
+      first.publicPayload.sourceDefinitionId &&
+    last.publicPayload.serverId === run.attackedServerId &&
+    last.publicPayload.revealKind === "reveal" &&
+    typeof last.publicPayload.cardDefinitionId === "string" &&
+    last.publicPayload.cardDefinitionId ===
+      last.publicPayload.targetIceDefinitionId;
   return (
     events.length >= 2 &&
     first?.stateVersionBefore === previous.stateVersion &&
@@ -74,9 +93,10 @@ function originalPaymentSelectionReachesWindow(
       .every(
         (e) =>
           e.publicPayload.actor === "corp" &&
-          ["rez_ice", "rez_card", "decline_rez"].includes(
+          (["rez_ice", "rez_card", "decline_rez"].includes(
             String(e.publicPayload.actionType),
-          ),
+          ) ||
+            (e === last && temporaryEncounterIntervention)),
       ) &&
     last.publicPayload.runnerCostPenaltySupportWindowOpened === true &&
     last.publicPayload.runnerCostPenaltySupportWindowId === windowId &&
