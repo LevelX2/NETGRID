@@ -142,6 +142,63 @@ describe("pairing563 native owner regressions", () => {
     });
   });
 
+  it("continues Gideon without stale Temple dispositions (SP-684)", () => {
+    const f = original("coverage-payment-rejected-search");
+    const pending =
+      f.runtime.residentPlanPortfolio.pendingRunnerCostPenaltySupportOrigin;
+    const decision = choose(f);
+    const debug = decision.decisionDebug!.planFirstDecision!;
+    expect(decision.actionId).toBe(pending.originalActionId);
+    expect(debug.rootPlanInstanceId).toBe(pending.rootPlanInstanceId);
+    expect(debug.leafExecutorInstanceId).toBe(pending.executorInstanceId);
+    const current = new Set(f.input.legalActions.map((a: any) => a.actionId));
+    expect(debug.dispositions!.every((d: any) => current.has(d.actionId))).toBe(
+      true,
+    );
+  });
+
+  it.each(["coverage-payment", "coverage-payment-rejected-search"])(
+    "preserves current search target without prior alternative offers: %s",
+    (kind) => {
+      const f = original(kind);
+      const previous = f.runtime.residentPlanPortfolio;
+      const pending = previous.pendingRunnerCostPenaltySupportOrigin;
+      const priorGap = previous.instances.find(
+        (i: any) => i.instanceId === pending.executorInstanceId,
+      ).moduleState.gap;
+      const binding = priorGap.directSearchChoiceBindings.find(
+        (b: any) => b.actionId === pending.originalActionId,
+      );
+      const fields = [
+        "installActionIds",
+        "preparationActionIds",
+        "memorySupportActionIds",
+        "fundingActionIds",
+        "rejectedSearchActionIds",
+        "programInstallMemoryRejectedActionIds",
+        "searchEngineSetupActionIds",
+        "drawForAnswerActionIds",
+      ];
+      for (const field of fields) priorGap[field] = ["historical-other-head"];
+      priorGap.directSearchActionIds.push("historical-other-search");
+      priorGap.directSearchChoiceBindings.push({
+        ...binding,
+        actionId: "historical-other-search",
+      });
+      const saved = JSON.stringify(previous);
+      const held = runnerRemoteCoveragePaymentNeed(f.input, previous)!;
+      expect(JSON.stringify(previous)).toBe(saved);
+      expect(held.coverageGap.directSearchActionIds).toEqual([
+        pending.originalActionId,
+      ]);
+      expect(held.coverageGap.directSearchChoiceBindings).toEqual([binding]);
+      for (const field of fields)
+        expect((held.coverageGap as any)[field]).toEqual([]);
+      expect(held.coverageGap.requesterNeedId).toBe(priorGap.requesterNeedId);
+      expect(held.coverageGap.targetServerId).toBe(priorGap.targetServerId);
+    },
+  );
+
   it.each([
     "missing_parent",
     "closed_need",

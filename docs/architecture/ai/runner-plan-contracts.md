@@ -3528,3 +3528,5 @@ Die Disposition prüft dieselbe Action-ID, Erreichbarkeit, positiven Nutzen,
 fehlende Routenausschlüsse und die Ausführungsphase; eine Vorbereitung oder
 bloß gleichnamiger Server genügt nicht. Vollständig bekannte agendalose
 Archives erzeugen dadurch keinen neuen Runzweck.
+
+Die Erhaltung eines Remote-Coverage-Bedarfs im exklusiven Engine-Zahlungsfenster projiziert ausschließlich den bereits gewählten aktuellen Fortsetzungskopf in die Action-Felder. Historische Suchalternativen, Ablehnungen und frühere Vorbereitungsquotes sind keine aktuellen Angebote. Rollen-, Ziel-, Parent-Need- und gewählte Suchzielbindung bleiben erhalten; die Scheduler-Prüfung unbekannter Action-IDs bleibt unverändert fail-closed. Der native Gideon-/Temple-Gegenfall aus Paarung 563 sichert diese Grenze zusätzlich zur Sneak-Fortsetzung ab.

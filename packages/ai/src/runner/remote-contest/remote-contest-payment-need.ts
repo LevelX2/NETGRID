@@ -96,6 +96,48 @@ export function runnerRemoteCoveragePaymentNeed(
     return undefined;
   return {
     signal: structuredClone(signal),
-    coverageGap: structuredClone(coverage.gap),
+    coverageGap: projectCoverageGapForPayment(
+      coverage.gap,
+      continuation.actionId,
+    ),
   };
+}
+
+// The current exclusive payment window retains its selected need and head,
+// not the previous main phase's alternative offers or rejection diagnoses.
+function projectCoverageGapForPayment(
+  previous: RunnerCoverageGapSignal,
+  originalActionId: string,
+): RunnerCoverageGapSignal {
+  const gap = structuredClone(previous);
+  const bound = (ids: string[]) => ids.filter((id) => id === originalActionId);
+  gap.fundingActionIds = bound(gap.fundingActionIds);
+  gap.directSearchActionIds = bound(gap.directSearchActionIds);
+  gap.searchEngineSetupActionIds = bound(gap.searchEngineSetupActionIds);
+  gap.drawForAnswerActionIds = bound(gap.drawForAnswerActionIds);
+  if (gap.installActionIds) gap.installActionIds = bound(gap.installActionIds);
+  if (gap.preparationActionIds)
+    gap.preparationActionIds = bound(gap.preparationActionIds);
+  if (gap.memorySupportActionIds)
+    gap.memorySupportActionIds = bound(gap.memorySupportActionIds);
+  if (gap.rejectedSearchActionIds)
+    gap.rejectedSearchActionIds = bound(gap.rejectedSearchActionIds);
+  if (gap.programInstallMemoryRejectedActionIds)
+    gap.programInstallMemoryRejectedActionIds = bound(
+      gap.programInstallMemoryRejectedActionIds,
+    );
+  if (gap.installActionValues)
+    gap.installActionValues = Object.fromEntries(
+      Object.entries(gap.installActionValues).filter(
+        ([id]) => id === originalActionId,
+      ),
+    );
+  if (gap.directSearchChoiceBindings)
+    gap.directSearchChoiceBindings = gap.directSearchChoiceBindings.filter(
+      (binding) => binding.actionId === originalActionId,
+    );
+  // Historical preparation quotes are not current payment authority.
+  delete gap.installCreditPreparation;
+  delete gap.heapRecoveryPreparation;
+  return gap;
 }
