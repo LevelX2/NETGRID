@@ -817,6 +817,18 @@ gegen die bisherige Bindung, beide residenten Elterninstanzen und den weiterhin
 offenen Supportbedarf geprüft. Fehlende Eltern oder geschlossene Bedarfe werden
 nicht rekonstruiert; sie scheitern mit `invalid_support_graph`.
 
+Öffnet die Engine für die gewählte Coverage-Aktion ein ausschließlich an
+diese Aktion gebundenes Zahlungsfenster, ist der offene Remote-Bedarf noch
+nicht erfüllt. Die Discovery erhält während dieses Fensters die vorhandene
+Remote-Instanz und ihren exakt gebundenen Coverage-Gap gemeinsam. Dass
+vorübergehend kein Start-Run angeboten wird, schließt diesen Bedarf nicht.
+Die Fortsetzung verlangt unveränderte Root-/Child-/Need-Identitäten, den
+aktuellen Engine-Fensterschlüssel und den unmittelbar folgenden Zustand;
+sie erzeugt weder einen fehlenden Parent noch einen geschlossenen Bedarf.
+Nach dem Fenster gilt wieder die normale aktuelle Discovery. Der native
+Sneak-Preview-Zustand aus Paarung 563 G34/D313 und fehlende, veraltete oder
+widersprüchliche Bindungen sind fokussiert geprüft (SP-684).
+
 `coverage-services.ts` benennt sieben Dienste: aktuelles Remote-Material,
 bekannten verzögerten ICE-Abgang, direkte Run-Verwertbarkeit, Run-Funding,
 materiellen Zentraldruck, dessen Kadenz und die gemeinsame Funding-Suche.

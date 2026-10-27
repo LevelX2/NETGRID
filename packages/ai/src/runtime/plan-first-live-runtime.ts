@@ -52,6 +52,7 @@ import {
 import {
   buildCorpEconomySignals,
   corpEconomyFundingActionIds,
+  withCorpHostedBankRestTurnDevelopment,
 } from "../corp/economy/economy-discovery";
 import {
   corpCandidateIsImmediateRootRezEconomySource,
@@ -295,6 +296,7 @@ import {
   runnerRemoteHasCurrentContestMaterial,
   runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash,
 } from "../runner/remote-contest/remote-contest-signals";
+import { runnerRemoteCoveragePaymentNeed } from "../runner/remote-contest/remote-contest-payment-need";
 import { runnerResourceLifecycleActionDispositions } from "../runner/resource-lifecycle/resource-lifecycle-dispositions";
 import { runnerResourceLifecycleFundingNeeds } from "../runner/resource-lifecycle/resource-lifecycle-funding-needs";
 import { runnerResourceLifecycleSignals } from "../runner/resource-lifecycle/resource-lifecycle-signals";
@@ -3002,7 +3004,7 @@ function buildRunnerDomain(
       input,
       Math.max(10, economy.desiredCreditReserve + 3),
     );
-  const projectedCoverageGaps = uniqueCoverageGaps(
+  const discoveredCoverageGaps = uniqueCoverageGaps(
     input,
     candidates,
     runTargets,
@@ -3021,6 +3023,18 @@ function buildRunnerDomain(
       runnerExactFundingRouteContract,
     },
   );
+  const paymentCoverage = runnerRemoteCoveragePaymentNeed(
+    input,
+    previous,
+  )?.coverageGap;
+  const projectedCoverageGaps = paymentCoverage
+    ? [
+        ...discoveredCoverageGaps.filter(
+          (gap) => gap.gapId !== paymentCoverage.gapId,
+        ),
+        paymentCoverage,
+      ]
+    : discoveredCoverageGaps;
   const coverageGaps = rigDemandProjection
     ? bindRunnerRigDemandProjectionToCoverageGaps({
         input,
@@ -3345,6 +3359,7 @@ function buildRunnerDomain(
   });
   const remoteContests = buildRunnerRemoteContestSignals({
     input,
+    previous,
     candidates,
     runTargets,
     runLockReleaseRoutes,
@@ -3570,7 +3585,7 @@ function corpContext(
     domainClaims: corpHandDomainRouteClaims(baseDomain),
     actionDispositions: [],
   });
-  const arbitratedDomain = preArbitrationHandFacts
+  const drawAdmittedDomain = preArbitrationHandFacts
     ? arbitrateCorpHandConversionBeforeDraw(
         input,
         sourceBoundCandidates,
@@ -3578,6 +3593,12 @@ function corpContext(
         preArbitrationHandFacts,
       )
     : baseDomain;
+  const arbitratedDomain = withCorpHostedBankRestTurnDevelopment(
+    input,
+    sourceBoundCandidates,
+    drawAdmittedDomain,
+    baseDomain.defenseNeeds,
+  );
   const actionDispositions = collectCorpActionDispositions(
     input,
     sourceBoundCandidates,

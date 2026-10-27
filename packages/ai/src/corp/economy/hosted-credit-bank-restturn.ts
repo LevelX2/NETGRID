@@ -26,6 +26,7 @@ export function corpHostedBankRestTurnDevelopment(params: {
   requiredNeeds: readonly CorpEconomyNeedSignal[];
   scoreProjects: CorpPlanDomain["scoreProjects"];
   defenseNeeds: CorpPlanDomain["defenseNeeds"];
+  defenseDrawAdmissions?: CorpPlanDomain["drawArbitrations"];
   remoteProjects: CorpPlanDomain["remoteProjects"];
   ambushes: CorpPlanDomain["ambushes"];
   punishCampaigns: CorpPlanDomain["punishCampaigns"];
@@ -42,7 +43,11 @@ export function corpHostedBankRestTurnDevelopment(params: {
     ) ||
     params.scoreProjects.some((p) => p.feasible) ||
     params.defenseNeeds.some((signal) =>
-      corpDefenseSignalReservesActionWindow(params.input, signal),
+      corpDefenseSignalReservesActionWindow(
+        params.input,
+        signal,
+        params.defenseDrawAdmissions,
+      ),
     ) ||
     params.remoteProjects.some(
       (p) => p.need?.capability === "credits" && p.need.minimum > 0,

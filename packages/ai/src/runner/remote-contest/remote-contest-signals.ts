@@ -1,6 +1,8 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import { runnerRemoteCoveragePaymentNeed } from "./remote-contest-payment-need";
 import { type RunnerCorePlanDomain } from "../../plans/runner-core-plan-contracts";
 import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import type { RunnerRunFundingSupport } from "../../plans/runner-funding-service-contract";
@@ -861,6 +863,7 @@ export function buildRunnerRemoteContestSignals({
   handDevelopment,
   recurringEconomyRunDeferralEvidenceCode,
   activeRunRoot,
+  previous,
 }: {
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
@@ -883,7 +886,9 @@ export function buildRunnerRemoteContestSignals({
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[];
   recurringEconomyRunDeferralEvidenceCode: string | undefined;
   activeRunRoot: ActiveRunnerRunRoot | undefined;
+  previous?: ResidentPlanPortfolio | undefined;
 }): RunnerPlanDomain["remoteContests"] {
+  const paymentNeed = runnerRemoteCoveragePaymentNeed(input, previous);
   const baseRemoteContestDrafts: RunnerRemoteContestSignalDraft[] = [
     // General threat focus precedes concrete routes. Deduplication keeps the
     // later draft, including its exact funding/coverage and risk bindings.
@@ -1345,6 +1350,15 @@ export function buildRunnerRemoteContestSignals({
             candidates,
           ),
         ),
+      ...(paymentNeed
+        ? [
+            {
+              ...paymentNeed.signal,
+              reachable: false,
+              runActionAssessments: {},
+            },
+          ]
+        : []),
       ...(activeRunRoot?.parentBinding?.moduleId === "runner.contest_remote"
         ? [
             {

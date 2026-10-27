@@ -1769,11 +1769,32 @@ function reconcileObservedRootRemoval(
       eventsById.get(entry.sourceEventId)?.publicPayload
         .installedPositionKey === event.installedPositionKey,
   );
-  // Without a witnessed position, a root removal cannot preserve its indices.
+  // A single agenda removal cannot precede a fully witnessed prefix whose
+  // opaque identities all differ from the removed card. Beyond the first
+  // unknown position no index remains proven. Other removal families can
+  // remove several siblings and retain their conservative invalidation.
   if (!removed) {
     const raw = eventsById.get(event.eventId);
     if (raw?.publicPayload.installPlacement !== "ice") {
-      for (const [key] of roots) memory.delete(key);
+      const prefix = new Set<string>();
+      if (event.family === "score" || event.family === "steal") {
+        for (let index = 0; ; index++) {
+          const next = roots.find(
+            ([, entry]) => entry.positionKey === `root:${index}`,
+          );
+          if (!next) break;
+          const identity = eventsById.get(next[1].sourceEventId)?.publicPayload
+            .installedPositionKey;
+          if (
+            typeof identity !== "string" ||
+            identity.length === 0 ||
+            identity === event.installedPositionKey
+          )
+            break;
+          prefix.add(next[0]);
+        }
+      }
+      for (const [key] of roots) if (!prefix.has(key)) memory.delete(key);
     }
     return;
   }

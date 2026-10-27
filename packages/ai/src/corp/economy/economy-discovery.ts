@@ -5,6 +5,7 @@ import { currentCorpCreditObligation } from "../../plans/corp-credit-obligation"
 import { corpTurnLiquidityDevelopmentNeed } from "./economy-domain-signals";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
+import { corpDefenseSignalReservesActionWindow } from "../defense/corp-funded-continuation-window";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { uniqueBy } from "../../runtime/collection";
 import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-draw-action-facts";
@@ -243,4 +244,63 @@ export function buildCorpEconomySignals({
       };
     });
   return economyNeeds;
+}
+
+/** Revalidate a pre-admission bank veto only when current Hand admission
+ * releases an optional Defense draw. Bank loads do not release hand capacity. */
+export function withCorpHostedBankRestTurnDevelopment(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  domain: CorpPlanDomain,
+  preAdmissionDefenseNeeds: CorpPlanDomain["defenseNeeds"],
+): CorpPlanDomain {
+  if (
+    !preAdmissionDefenseNeeds.some(
+      (signal) =>
+        corpDefenseSignalReservesActionWindow(input, signal) &&
+        !corpDefenseSignalReservesActionWindow(
+          input,
+          signal,
+          domain.drawArbitrations,
+        ),
+    )
+  )
+    return domain;
+  if (corpImmediateOperationThresholdPreparations(input, candidates).length > 0)
+    return domain;
+  const { immediateFundingActionIds, terminalFundingActionIds } =
+    corpEconomyFundingActionIds(input, candidates);
+  const requiredNeeds = corpRequiredEconomyNeeds(
+    input,
+    domain.scoreProjects,
+    domain.defenseNeeds,
+    domain.remoteProjects,
+    domain.ambushes,
+    domain.punishCampaigns,
+    immediateFundingActionIds,
+    terminalFundingActionIds,
+    candidates,
+  );
+  const signals = corpHostedBankRestTurnDevelopment({
+    input,
+    candidates,
+    requiredNeeds,
+    scoreProjects: domain.scoreProjects,
+    defenseNeeds: preAdmissionDefenseNeeds,
+    defenseDrawAdmissions: domain.drawArbitrations,
+    remoteProjects: domain.remoteProjects,
+    ambushes: domain.ambushes,
+    punishCampaigns: domain.punishCampaigns,
+    centralAllocation: domain.centralDefenseAllocation,
+    bankChoices: corpHostedBankInvestments(input, candidates, requiredNeeds),
+  });
+  return signals.length === 0
+    ? domain
+    : {
+        ...domain,
+        economyNeeds: uniqueBy(
+          [...domain.economyNeeds, ...signals],
+          (signal) => signal.needId,
+        ),
+      };
 }

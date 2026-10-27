@@ -2351,6 +2351,16 @@ ausführbarer Versuch und jeder andere oder unvollständig gebundene
 Defense-Bedarf behalten das Veto. Die native Folge Paarung 543 R1 G34/D275–276
 prüft den echten Draw und die anschließende Freigabe der Bankkapazität.
 
+Das Veto gegen eine zusätzliche Restzug-Bankroute wird nach der aktuellen
+Hand-/Draw-Zulassung erneut geprüft. Lehnt dieser Owner sämtliche ursprünglichen optionalen
+Defense-Drawköpfe ausdrücklich wegen Agenda-Abwurfrisikos ab, beanspruchen
+sie kein ausführbares Schutzfenster. Fehlende oder unvollständige Nachweise,
+Unknown, zugelassene Draws und dringliche Defense behalten ihr Veto. Andere
+Installations-, Score-, Funding- und Einkommensfenster bleiben unverändert
+geschützt. Paarung 563 G27/D177 belegt zwei Ladungen und Auszahlung für
+sechs statt drei Basiscredits bei identischer übriger Restzugwirkung;
+der Fix ändert weder die Handzulassung noch die Defense-Bewertung (SP-685).
+
 Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
 Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt
 eine einzelne statische Schicht, wenn der verbleibende bekannte Pfad den

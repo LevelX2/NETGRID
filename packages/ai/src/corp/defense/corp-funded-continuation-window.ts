@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
+import type { CorpDrawAdmissionAssessment } from "../../runtime/corp-draw-admission";
 import { turnKey } from "../../runtime/runtime-identifiers";
 import {
   corpIceInstallHasCurrentCompleteRezQuote,
@@ -19,7 +20,28 @@ import {
 export function corpDefenseSignalReservesActionWindow(
   input: AiDecisionInput,
   signal: CorpCorePlanDomain["defenseNeeds"][number],
+  drawAdmissions: readonly CorpDrawAdmissionAssessment[] = [],
 ): boolean {
+  // Consume the current hand owner's complete rejection of the original
+  // optional draw heads. An absent/partial assessment or urgent need still
+  // reserves its window; an unadmitted draw cannot veto idle-capacity banking.
+  if (
+    signal.kind === "generic" &&
+    signal.phase === "draw_for_ice" &&
+    !signal.urgent &&
+    (signal.actionIds?.length ?? 0) > 0 &&
+    signal.actionIds!.every((actionId) =>
+      drawAdmissions.some(
+        (a) =>
+          a.routeId === `${signal.defenseId}:${actionId}` &&
+          a.actionId === actionId &&
+          a.ownerModuleId === "corp.defend_servers" &&
+          a.purpose === "central_defense_answer_search" &&
+          a.disposition === "blocked_cleanup_exposure",
+      ),
+    )
+  )
+    return false;
   if (
     signal.kind !== "generic" ||
     signal.phase !== "draw_for_ice" ||
@@ -59,10 +81,7 @@ export function corpFundedDefenseContinuationWindow(params: {
       (a) => a.actionId === candidate.actionId,
     );
     const serverId = action?.payload?.serverId;
-    if (
-      action?.payload?.placement !== "ice" ||
-      typeof serverId !== "string"
-    )
+    if (action?.payload?.placement !== "ice" || typeof serverId !== "string")
       continue;
     const parent = corpLayeredIceStagingParent(
       params.scoreProjects,
@@ -76,7 +95,9 @@ export function corpFundedDefenseContinuationWindow(params: {
       // offered head for a bound Remote need therefore keeps its veto until
       // that whole continuation can be assessed; a need without a head cannot.
       if (parent)
-        unknown.push(`${candidate.actionId}:bound_new_remote_window_unassessed`);
+        unknown.push(
+          `${candidate.actionId}:bound_new_remote_window_unassessed`,
+        );
       continue;
     }
     if (!params.input.playerView.servers.some((s) => s.id === serverId))

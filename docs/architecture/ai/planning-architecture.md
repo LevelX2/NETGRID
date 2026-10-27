@@ -1523,6 +1523,13 @@ Access-Consumer prüft die letzte Beobachtung eines noch vorhandenen Roots:
 Der Steal einer benachbarten Agenda macht den bereits abgelehnten Restinhalt
 nicht zu einem neuen Informationsziel.
 
+Auch beim Scoring oder Steal eines zuvor nicht beobachteten Geschwisters
+bleibt ein lückenloser bekannter Root-Präfix erhalten, wenn jede beobachtete
+undurchsichtige Identität ausdrücklich von der entfernten Karte abweicht.
+Ab der ersten unbekannten Position oder fehlenden Identitätsbindung werden
+keine Indizes zugesichert. Mehrkarten-Trash und andere Entfernungsfamilien
+behalten ihre konservative Invalidation (SP-683, Paarung 563 G6/D253).
+
 Eine öffentliche `asset_to_agenda`-Ersetzung entfernt die bisherigen
 Asset-Beobachtungen. Beobachtete Upgrades rücken nur dann sicher nach, wenn
 alle niedrigeren Root-Positionen bekannt sind; andernfalls bleibt ihre neue
