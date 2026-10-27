@@ -1182,6 +1182,13 @@ positiver Installationsfit diesen fehlenden Bedarf nicht wieder erzeugen.
 Die Investition garantiert keinen späteren HQ-Erfolg. Andere
 Informationsfähigkeiten behalten ihre eigenen Ziel- und Consumerverträge.
 
+Bei Hardware mit Speicherbonus und einer zusätzlichen wiederholbaren Engine
+begrenzt fehlender MU-Bedarf nur den Speicherzweck. Eine eigenständig als
+`ready_now` bewertete Engine mit positivem Installationsfit behält ihren
+Entwicklungsbedarf im bestehenden Owner. Reine Speicherhardware ohne gebundenen
+MU-Bedarf bleibt zurückgestellt; Liquiditätsreserve, konkrete Zugriffe und
+unmittelbare Punkte-Konversionen werden weiterhin separat geprüft.
+
 Derez während der Encounter-Auflösung ist bekannte Zugriff-Unterstützung,
 kein `unknown` und kein Einkommen. Die Rollen- und persistente
 Funktionsprojektion erhalten diesen Fakt. Eine ungebundene generische

@@ -428,7 +428,15 @@ function evaluateHandCard(
       ? "none"
       : params.rigDemandProjection &&
           runnerRigDemandScopedCard(context.card, developmentRole) &&
-          (rigDemandBinding?.boundDemandIds.length ?? 0) === 0
+          (rigDemandBinding?.boundDemandIds.length ?? 0) === 0 &&
+          // The projection owns MU need, not an independent ready engine.
+          !(
+            developmentRole === "memory_support" &&
+            persistentInstallEvaluation?.engineAssessment.readiness ===
+              "ready_now" &&
+            persistentInstallEvaluation.finalInstallFit > 0 &&
+            adjustedNeed !== "none"
+          )
         ? "none"
         : params.rigDemandProjection &&
             rigDemandBinding &&
