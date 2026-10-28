@@ -2292,6 +2292,15 @@ Ein letzter Ladeklick darf nur über die Zuggrenze wirken, wenn der bestehende
 side-sichere Schutzdienst den Bankserver als aktuell nicht erreichbar bewertet
 und der eigene Pflichtdrawhorizont die Fortsetzung zulässt. Ungeschützte oder
 unbekannte Quellen benötigen eine Auszahlung noch im aktuellen Zug. Ein
+Investitionsziel jenseits dieser Zuggrenze darf dann keine zusätzlichen
+Ladungen oder Erträge vortäuschen: Die verbleibende Ladezahl wird durch die
+aktuelle vollständige Engine-Restzugquote einschließlich Auszahlungsaktion
+begrenzt. Ohne passende Quote entsteht kein solcher Investitionspfad;
+widersprüchliche Quotes scheitern weiterhin strukturiert. Der native Zustand
+aus Paarung 565 mit zwei Restaktionen vergleicht deshalb eine Ladung plus
+Auszahlung gegen die bereits verfügbare Drei-Credit-Operation; eine zweite
+Ladung gehört nicht in diese Bewertung. Die Regression liegt in
+`meta-565-hosted-bank-horizon.native.test.ts`. Ein
 konkreter aktueller Finanzierungsbedarf, eine unterschrittene Schutzreserve,
 erreichtes Auszahlungsbudget oder Deckende beenden weiteren Aufbau. Die
 laufenden Score-/Defense-Finanzierungsrouten und ihre Parent-/Need-Bindungen

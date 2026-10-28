@@ -11,6 +11,7 @@ import {
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
 import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
 import { corpVisibleLiquidityDemandTarget } from "./economy-domain-signals";
+import { currentCorpHostedBankCycleQuotes } from "./hosted-credit-bank-cycle";
 import type {
   CorpEconomyDevelopmentSignal,
   CorpEconomyNeedSignal,
@@ -103,14 +104,6 @@ export function corpHostedBankInvestments(
     const canCarry =
       contestability?.contestable === false &&
       input.playerView.own.stackOrRdCount > 1;
-    const investment = assessCreditBankInvestment({
-      liquidCredits: liquid,
-      storedCredits: stored,
-      otherStoredCredits: totalStored - stored,
-      desiredLiquidity: targetCredits,
-      ...profile,
-      alternativeCreditsPerAction: bankAlternativeIncomePerAction(candidates),
-    });
     const shouldCashout =
       stored > 0 &&
       (immediateFunding ||
@@ -129,9 +122,38 @@ export function corpHostedBankInvestments(
       immediateFunding ||
       liquid < reserve ||
       input.playerView.own.stackOrRdCount <= 1 ||
-      investment.additionalLoadExecutions <= 0 ||
-      investment.incrementalCreditsOverAlternative <= 0 ||
       (input.playerView.own.clicks === 1 && !canCarry)
+    )
+      continue;
+    let investmentTarget = targetCredits;
+    if (!canCarry) {
+      const currentCycle = currentCorpHostedBankCycleQuotes(input).find(
+        (quote) =>
+          quote.sourceCardInstanceId === card.instanceId &&
+          quote.headKind === "load",
+      );
+      if (!currentCycle) continue;
+      // A demand beyond this turn is not an executable return when the bank
+      // cannot be carried safely. Reserve the Engine-quoted cashout action;
+      // only the complete remaining cycle may contribute to its valuation.
+      investmentTarget = Math.min(
+        targetCredits,
+        liquid +
+          totalStored +
+          currentCycle.loadExecutions * profile.creditsPerLoad,
+      );
+    }
+    const investment = assessCreditBankInvestment({
+      liquidCredits: liquid,
+      storedCredits: stored,
+      otherStoredCredits: totalStored - stored,
+      desiredLiquidity: investmentTarget,
+      ...profile,
+      alternativeCreditsPerAction: bankAlternativeIncomePerAction(candidates),
+    });
+    if (
+      investment.additionalLoadExecutions <= 0 ||
+      investment.incrementalCreditsOverAlternative <= 0
     )
       continue;
     const load = candidates.find(
