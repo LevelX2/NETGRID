@@ -745,8 +745,8 @@ describe("Corp core plan modules", () => {
       terminalScore: true,
       sameTurnCloseout: false,
       deadlinePressure: false,
-      expectedPriorityClass: "P4",
-      expectedHorizon: "multi_turn",
+      expectedPriorityClass: "P3",
+      expectedHorizon: "current_turn",
       expectedWitnessGuarantee: undefined,
     },
     {
@@ -814,7 +814,7 @@ describe("Corp core plan modules", () => {
     },
   );
 
-  it("keeps a same-turn closeout ahead of a higher-value terminal route without a closeout", () => {
+  it("keeps a same-turn terminal win ahead of a later terminal route", () => {
     const module = corpModule("corp.score_agenda");
     const closeoutAction = targetAction(
       "advance-same-turn-closeout",
@@ -833,6 +833,7 @@ describe("Corp core plan modules", () => {
         {
           ...scoreProject("same-turn-closeout", "P3", "same_turn_closeout"),
           agendaInstanceId: "agenda-same-turn-closeout",
+          terminalScore: true,
         },
         {
           ...scoreProject(
@@ -868,7 +869,7 @@ describe("Corp core plan modules", () => {
       assessments.map(
         (assessment) => assessment.priorityValidation.effectiveClass,
       ),
-    ).toEqual(["P3", "P4"]);
+    ).toEqual(["P1", "P3"]);
   });
 
   it("keeps the agenda-less score root supportable only through its exact current tactical material signal", () => {
@@ -4601,7 +4602,7 @@ describe("Corp core plan modules", () => {
 
     expect(planAssessment).toMatchObject({
       readiness: "executable_now",
-      priorityValidation: { effectiveClass: "P4" },
+      priorityValidation: { effectiveClass: "P3" },
       feasibility: { currentRouteHeadPossible: true },
       resourceGaps: [],
     });

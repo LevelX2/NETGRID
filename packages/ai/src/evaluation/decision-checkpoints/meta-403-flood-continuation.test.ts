@@ -11,7 +11,7 @@ import {
 
 describe("meta 403 deckout flood score continuation", () => {
   it.each([0, 20])(
-    "keeps the ordinary deadline boundaries at %i R&D cards",
+    "keeps the deckout boundary and feasible terminal progress at %i R&D cards",
     (remainingCards) => {
       const { input, runtime } = structuredClone(lastClick) as unknown as {
         input: AiDecisionInputWithDeckCapabilities;
@@ -33,7 +33,7 @@ describe("meta 403 deckout flood score continuation", () => {
       } else {
         expect(
           result.decisionDebug?.planFirstDecision?.priority?.effectiveClass,
-        ).toBe("P4");
+        ).toBe("P3");
       }
       expect(result.fallbackUsed).toBe(false);
     },
