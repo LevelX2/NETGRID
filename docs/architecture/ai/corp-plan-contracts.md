@@ -164,6 +164,14 @@ Agenda-Zuglinie; die autoritative Restzugsuche darf die Kosten nicht wieder
 verlieren. Eine gespeicherte bereits gewählte Parentbindung wird dadurch
 nicht nachträglich als sicher dominiert behauptet.
 
+Ein bereits zugelassenes, aktuell ausführbares terminales Scoreprojekt erhält
+P3 auch dann, wenn die Wertung einen weiteren eigenen Zug benötigt. Es darf
+nicht allein wegen fehlender unmittelbarer Wertung auf P4 hinter den Aufbau
+eines neuen Notfallprojekts fallen. Die vorhandene Zulassung, Schutzquote,
+Finanzierung und vollständige Ressourcenbewertung bleiben Voraussetzung.
+Ein aktueller Sieg bleibt P1, tatsächliche Überlebensarbeit P2; gewöhnlicher
+nichtterminaler Fortschritt erhält dadurch keinen Dringlichkeitsbonus.
+
 Eine Matchpointagenda darf auch auf dem letzten Klick installiert werden,
 wenn die aktuelle, exakt an Agenda und Zielserver gebundene Engine-Quote den
 Abschluss im nächsten Corp-Zug bestätigt und der Defense-Owner bereits

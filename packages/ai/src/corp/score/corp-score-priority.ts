@@ -19,7 +19,12 @@ export function corpScorePriorityClass(
   ) {
     return "P2";
   }
-  if (signal.sameTurnCloseout || signal.deadlinePressure) return "P3";
+  if (
+    signal.sameTurnCloseout ||
+    signal.deadlinePressure ||
+    (signal.terminalScore && signal.feasible)
+  )
+    return "P3";
   return "P4";
 }
 
