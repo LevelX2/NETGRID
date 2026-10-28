@@ -5,6 +5,33 @@ import {
 } from "./visible-breaker-encounter-quote";
 
 describe("visibleBreakerEncounterQuote", () => {
+  it("preserves negative public breaker strength after counter penalties", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_039_krash",
+        breakerInstanceId: "krash",
+        breakerStrength: -1,
+        iceDefinitionId: "onr_proteus_012_bug-zapper",
+      }),
+    ).toMatchObject({ effectiveStrength: -1 });
+  });
+
+  it("preserves a signed resolved random-strength adjustment", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerInstanceId: "boon",
+        breakerStrength: -1,
+        iceDefinitionId: "onr_proteus_012_bug-zapper",
+        randomRunStrengthState: {
+          status: "resolved",
+          actualStrength: 2,
+          currentStrengthAdjustment: -3,
+        },
+      }),
+    ).toMatchObject({ effectiveStrength: -1 });
+  });
+
   it("preserves Psychic Friend's current-turn pump horizon", () => {
     expect(
       visibleBreakerEncounterQuote({

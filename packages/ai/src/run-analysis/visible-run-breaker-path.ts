@@ -702,12 +702,12 @@ export function structuredBreakerAssessment(params: {
   const strengthDeficit = Math.max(
     0,
     iceStrength -
-      Math.max(
-        quote.effectiveStrength,
-        quote.randomRunStrength?.status === "unresolved"
-          ? quote.randomRunStrength.expectedStrength
-          : (quote.randomRunStrength?.actualStrength ?? 0),
-      ),
+      (quote.randomRunStrength?.status === "unresolved"
+        ? Math.max(
+            quote.effectiveStrength,
+            quote.randomRunStrength.expectedStrength,
+          )
+        : quote.effectiveStrength),
   );
   const pumpOption = quote.pumpOptions
     .map((option) => {

@@ -2112,6 +2112,15 @@ ICE- und Subroutine-ID. Nachgelagerte Schadens- und Handreserveprüfungen
 rechnen diese Wirkungen nicht erneut an. Unbezahlte Subroutinen derselben
 ICE bleiben wirksam; ein Teilbruch bescheinigt keinen vollständigen Bruch.
 
+Die Engine-Begegnungsquote und ihre Kostenconsumer erhalten die signierte
+öffentliche Breakerstärke auch unter null. Der Pumpbedarf beginnt bei dieser
+tatsächlichen Stärke; eine fehlende Zufallsstärke ist keine zusätzliche
+Nullstärke. Nach einem bereits aufgelösten Zufallswurf gilt die aktuelle Stärke
+einschließlich ihrer signierten Anpassung, nicht der unveränderte Würfelwert.
+Nur ein noch offener Wurf verwendet weiterhin seine ausdrücklich bedingte
+Erwartungsquote. Eine so erkannte Finanzierungslücke bleibt beim bestehenden
+Runparent und seinen Wirtschafts- beziehungsweise Coverage-Executors.
+
 Eine aktuell unbezahlbare bekannte Route wird zusätzlich mit genau der
 fehlenden Finanzierung gequotet. Entfernt diese finanzierte Folge den Schaden
 durch tatsächliche bezahlbare Breaks, veröffentlicht die aktuelle Route

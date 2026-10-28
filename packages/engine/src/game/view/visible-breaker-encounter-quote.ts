@@ -293,13 +293,12 @@ function effectiveStrength(params: {
   const bonus = cardImplementationForDefinitionId(
     params.breakerDefinitionId,
   )?.icebreakerEncounterStrengthBonus;
-  return Math.max(
-    0,
+  return (
     Math.floor(params.breakerStrength) +
-      (bonus?.kind === "against_selected_installed_ice" &&
-      params.selectedTargetCardId === params.iceInstanceId
-        ? bonus.amount
-        : 0),
+    (bonus?.kind === "against_selected_installed_ice" &&
+    params.selectedTargetCardId === params.iceInstanceId
+      ? bonus.amount
+      : 0)
   );
 }
 

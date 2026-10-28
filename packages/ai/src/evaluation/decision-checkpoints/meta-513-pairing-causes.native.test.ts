@@ -339,6 +339,28 @@ it("preserves signed public adjustments, including a negative visible strength",
       .randomRunStrengthState,
   ).toEqual(card.randomRunStrengthState);
 });
+it("pays the full pump deficit from an already resolved negative strength", () => {
+  const { input } = native("g32d305");
+  const boon = input.playerView.own.rig!.find(
+    (c) => c.definitionId === "onr_v1_002_ai-boon",
+  )!;
+  boon.randomRunStrengthState = {
+    status: "resolved",
+    actualStrength: 2,
+    currentStrengthAdjustment: -3,
+  };
+  boon.strength = -1;
+  const before = structuredClone(boon);
+  const ice = input.playerView.run!.encounteredIce!;
+  expect(
+    creditsToBreakVisibleSubroutinesWithBreaker(
+      boon,
+      ice,
+      ice.effectiveRunQuote!.subroutines,
+    ),
+  ).toMatchObject({ cost: 5, endingStrength: 3 });
+  expect(boon).toEqual(before);
+});
 it("preserves only the public opponent Rig random-strength fact in the Corp DTO", () => {
   const cp = load("g32d305"),
     state = load("g32d305", "engine-state") as GameState;
