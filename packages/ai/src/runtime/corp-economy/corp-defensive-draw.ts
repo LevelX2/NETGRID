@@ -643,7 +643,8 @@ export function corpMissingConcreteDefenseDrawNeed(
 ): CorpMissingConcreteDefenseDrawNeed | undefined {
   const boundedOverflowSearch =
     capacity.maxHandSize > 2 &&
-    capacity.projectedDrawCount === 1 &&
+    capacity.projectedDrawCount > 0 &&
+    projectedDrawHandDelta(action) === 1 &&
     capacity.handCount <= capacity.maxHandSize + 1;
   if (!capacity.eligible && !boundedOverflowSearch) return undefined;
   const followupCapacity = corpPostDrawDefenseFollowupCapacity(input, action);

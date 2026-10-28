@@ -29,7 +29,6 @@ import {
   visibleKnownCardType,
 } from "../../runtime/visible-action-facts";
 import { archivesHasVisibleKnownAgenda } from "../../runtime/visible-server-agenda-facts";
-import { corpDrawCandidatePreservesHandCapacity } from "../hand-management/hand-overflow";
 import { corpScoreFundingMilestone } from "../score/corp-score-funding";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
 import {
@@ -1044,12 +1043,9 @@ export function buildCorpDefenseProtectionSignals({
     if (!protectionNeed) continue;
     const drawSignals: CorpDefenseSignal[] = candidates.flatMap((candidate) => {
       if (!corpCandidateProjectsCardDraw(candidate)) return [];
-      if (
-        !corpDrawCandidatePreservesHandCapacity(input, candidate) &&
-        candidate.semanticActionType !== "draw.card"
-      ) {
-        return [];
-      }
+      // The exact draw need and admission own follow-up capacity, including
+      // a bounded overflow that a subsequent ICE installation can release.
+      // Rejecting an operation here would bypass its net source consumption.
       const action = input.legalActions.find(
         (legalAction) => legalAction.actionId === candidate.actionId,
       );

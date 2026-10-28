@@ -218,6 +218,15 @@ ein konkreter Informations-/Defense-Fall und darf nur aus dafür tatsächlich
 verfügbaren side-sicheren Fakten begründet werden. Weder allgemeine
 Agendadichte noch eine leere Agenda-Hand ersetzen diesen Nachweis.
 
+Bei einer konkret zugelassenen Defense-Suche zählt die Netto-Handänderung
+einschließlich des Verbrauchs einer ausgespielten Operation. Ein voller HQ
+darf eine Operation mit netto einer zusätzlichen Handkarte ebenso wie einen
+einfachen Draw für einen begrenzten Suchschritt zulassen. Die exakte
+Folgekapazität, ein gebundener Installations-/Cleanup-Schritt und die
+verbleibende Pflichtziehreserve werden weiterhin vom Draw-Bedarf und der
+gemeinsamen Zulassung geprüft. Ein früher pauschaler Kapazitätsfilter darf
+diese Prüfung weder ersetzen noch für Operationen verschärfen.
+
 Eine bereits gefüllte Counterbank darf einen vollständig finanzierten Score
 im aktuellen Corp-Zug auch dann bedienen, wenn ihr Remote im nächsten
 Runner-Zug erreichbar wäre. Die Schutzprüfung bleibt Voraussetzung für den

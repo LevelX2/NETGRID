@@ -124,6 +124,95 @@ it("prefers an admitted three-card operation for the same defense search", () =>
     apply(state, decision.actionId!, decision.selectedChoices).corp.hq,
   ).toHaveLength(5);
 });
+it.each([DAY, ANNUAL])(
+  "uses the net HQ change for a bounded full-hand defense search: %s",
+  (drawCard) => {
+    const state = fixture(drawCard, true);
+    RealEngineFixtureBuilder.forState(state).withCorpCardInHq(
+      "onr_v1_292_management-shake-up",
+    );
+    const i = input(state),
+      decision = chooseCorpAction(i);
+    expect(i.playerView.own.gripOrHq).toHaveLength(5);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("corp.defend_servers");
+    if (drawCard === DAY) {
+      expect(decision.actionId).toContain(DAY);
+      expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
+        actionId: decision.actionId,
+        stateVersion: state.stateVersion,
+      });
+      const after = apply(state, decision.actionId!, decision.selectedChoices);
+      expect(after.corp.hq).toHaveLength(6);
+      expect(after.corp.credits).toBe(state.corp.credits + 1);
+      expect(after.corp.clicks).toBe(state.corp.clicks - 1);
+    } else {
+      expect(decision.actionId).toBe("corp.draw_card");
+    }
+  },
+);
+it("admits a net-one draw operation for the full-hand score-protection parent", () => {
+  const makeDeck = (side: "corp" | "runner", id: string) => {
+    const entry = catalog.decks.find((d) => d.standardDeckId === id)!;
+    return {
+      id,
+      name: entry.name,
+      side,
+      identity: entry.identityCardId,
+      cards: entry.cards.map((c) => ({ id: c.cardId, quantity: c.quantity })),
+    };
+  };
+  const corpDeck = makeDeck("corp", "standard_corp_mph465dv");
+  const runnerDeck = makeDeck("runner", "standard_runner_purge_window");
+  let state = createGameAfterSetup({
+    seed: "full-hand-score-defense-draw",
+    corpDeck,
+    runnerDeck,
+  });
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find((a) => a.type === "mandatory_draw")!
+      .actionId,
+  );
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpHqSize(0)
+    .withCorpCredits(3)
+    .withCorpCardInHq("onr_v1_200_encryption-breakthrough")
+    .withCorpCardInHq(DAY)
+    .withCorpCardInHq("onr_v1_326_holovid-campaign")
+    .withCorpCardInHq("onr_v1_193_corporate-coup")
+    .withCorpCardInHq("onr_v1_353_chimera")
+    .withCorpIceOnServer("hq", "onr_v1_229_code-corpse")
+    .withRezzedCorpIceOnServer("rd", "onr_v1_238_data-wall-2-0")
+    .withRunnerCredits(3)
+    .withRunnerProgramInstalled("onr_proteus_083_corrosion");
+  state.turnSerial = 4;
+  const i = buildAiDecisionInput(state, "corp", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: corpDeck.id,
+      side: "corp",
+      cards: corpDeck.cards.map((c) => ({
+        cardId: c.id,
+        quantity: c.quantity,
+      })),
+    },
+  });
+  const decision = chooseCorpAction(i);
+  expect(decision.actionId).toContain(DAY);
+  const plan = decision.decisionDebug?.planFirstDecision;
+  expect(plan?.selectedPlan?.moduleId).toBe("corp.defend_servers");
+  expect(plan?.selectedStep?.parentInstanceId).toContain("corp.score_agenda");
+  expect(plan?.route).toMatchObject({
+    actionId: decision.actionId,
+    stateVersion: state.stateVersion,
+  });
+  const after = apply(state, decision.actionId!, decision.selectedChoices);
+  expect(after.corp.hq).toHaveLength(6);
+  expect(after.corp.credits).toBe(4);
+});
 it("retains the basic draw when a three-card operation would overflow HQ", () => {
   const state = fixture(ANNUAL, true),
     i = input(state);
