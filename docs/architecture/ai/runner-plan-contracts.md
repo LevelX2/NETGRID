@@ -88,6 +88,12 @@ verbleibende allgemeine Geld. Sie rekonstruieren es nicht aus einer pauschalen
 Ausgabenreihenfolge. Ein fehlender Ledger für einen abgeschlossenen Pfad oder
 ein ungültiges explizites Teilkonto scheitert sichtbar. Ein einzelner
 numerischer Budgetwert bezeichnet ausdrücklich nur allgemeine Credits.
+Die Pumpprüfung übernimmt eine ausdrücklich blockierte Restpfadquote auch
+dann, wenn darin keine bekannte ICE bewertet wurde: Eine öffentliche
+Fort-Passgebühr kann bereits vor oder nach unbekanntem ICE unbezahlbar sein.
+Dieser abgebrochene Pfad besitzt keinen abgeschlossenen Credit-Ledger. Erst
+eine erreichbare Restpfadquote darf ihr allgemeines Restgeld für die weitere
+Runbewertung liefern; unbekannte ICE werden dadurch nicht als bekannt bewertet.
 Der gemeinsame Budgetproduzent projiziert erneuerbare öffentliche Rig-Pools
 nur bei ausdrücklich gewähltem `next_runner_turn`-Horizont aus der
 Engine-Auffüllquote. Der Standard und aktive Runs behalten aktuelle Mengen.

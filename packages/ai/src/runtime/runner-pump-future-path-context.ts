@@ -127,10 +127,7 @@ export function createRunnerPumpFuturePathContext(
       pathAssessment,
       server.id,
     );
-    if (
-      pathAssessment.assessedKnownIceCount > 0 &&
-      !pathAssessment.canReachAccess
-    )
+    if (pathAssessment.canReachAccess === false)
       return {
         blocksPump: true,
         creditsAfterPath: pathAssessment.creditsAfterPath,
