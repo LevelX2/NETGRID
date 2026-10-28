@@ -88,7 +88,7 @@ verbleibende allgemeine Geld. Sie rekonstruieren es nicht aus einer pauschalen
 Ausgabenreihenfolge. Ein fehlender Ledger für einen abgeschlossenen Pfad oder
 ein ungültiges explizites Teilkonto scheitert sichtbar. Ein einzelner
 numerischer Budgetwert bezeichnet ausdrücklich nur allgemeine Credits.
-Die Pumpprüfung übernimmt eine ausdrücklich blockierte Restpfadquote auch
+Pump- und Breakprüfung übernehmen eine ausdrücklich blockierte Restpfadquote auch
 dann, wenn darin keine bekannte ICE bewertet wurde: Eine öffentliche
 Fort-Passgebühr kann bereits vor oder nach unbekanntem ICE unbezahlbar sein.
 Dieser abgebrochene Pfad besitzt keinen abgeschlossenen Credit-Ledger. Erst

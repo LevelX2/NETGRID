@@ -21,6 +21,52 @@ function capture() {
 
 afterEach(resetResidentPlanPortfolioMemory);
 
+it("continues the harmless remaining routine without spending the pass-fee reserve", () => {
+  const f = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta564-hidden-rest-path-toll-after-break.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  expect(Object.keys(f.validation)).toHaveLength(9);
+  expect(Object.values(f.validation).every(Boolean)).toBe(true);
+  const input = f.input;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot.deckSnapshotId,
+    f.runtime,
+  );
+  const before = JSON.stringify(input);
+  const continuation = input.legalActions.find(
+    (a: { type: string }) => a.type === "continue_run",
+  );
+  expect(
+    input.playerView.run.encounteredIce.effectiveRunQuote.subroutines[0],
+  ).toMatchObject({
+    type: "do_damage",
+    amount: 0,
+  });
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(continuation.actionId);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.timeoutUsed).toBe(false);
+  const plan = decision.decisionDebug!.planFirstDecision!;
+  expect(plan.selectedPlan!.moduleId).toBe("runner.convert_run_window");
+  expect(plan.rootPlanInstanceId).toBe(
+    "plan:runner.pressure_central:central%3Ard",
+  );
+  expect(plan.route).toMatchObject({
+    actionId: continuation.actionId,
+    stateVersion: 303,
+    planInstanceId: plan.leafExecutorInstanceId,
+  });
+  expect(JSON.stringify(input)).toBe(before);
+});
+
 it("rejects the unaffordable Rasmin suffix and pumps the funded hosted breaker", () => {
   const f = capture();
   expect(Object.keys(f.validation)).toHaveLength(9);

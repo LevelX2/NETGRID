@@ -523,10 +523,7 @@ export function createRunnerAccessPathContext(
         currentRunPathContext(input),
       ),
     );
-    if (
-      pathAssessment.assessedKnownIceCount <= 0 ||
-      pathAssessment.canReachAccess
-    ) {
+    if (pathAssessment.canReachAccess) {
       const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
         input,
         server,
