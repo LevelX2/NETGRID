@@ -3240,6 +3240,17 @@ ohne Projektion. Die strategische Ladetaktung bleibt Entscheidung des Bank-Owner
 Finanzierungsentscheidungen verwenden die bestehenden exakten Demand- und
 Route-Suchen; der Schnitt ergänzt keine neue Parentkante im Scheduler.
 
+Eine reife manuelle Bank darf auch einen nicht dringlichen, bereits vom Central-Owner
+zugelassenen Runbedarf unterstützen, wenn ihre garantierte Auszahlung eine
+aktuell vollständig finanzierbare Folge mehrerer Basiscreditaktionen strikt
+verkürzt. Der Vergleich umfasst auch andere aktuelle garantierte Einnahmerouten;
+eine gleich schnelle Alternative wird nicht allein wegen des Bankguthabens
+verdrängt. Die erneute Quote desselben Runs nach Auszahlung muss die bestehenden
+Hand-, Vorlauf- und Nachlaufreserven erhalten. Die Bank bindet den exakten
+Central-Parent, `supportNeedId`, Run und StateVersion und behält dessen P4-Stufe;
+sie erhält dadurch keinen dringlichen P2-Vorrang. Der bestehende Parent-Abgleich
+zieht die Auszahlung zurück, sobald der konkrete Bedarf entfällt.
+
 Eine prospektiv vollständig finanzierbare Runroute ist noch kein aktuell
 offener Bedarf des Run-Owners. Nach dessen konkreter Routenaufnahme prüft
 `credit-bank-funding-revalidation.ts` StateVersion, exakte Parentinstanz,

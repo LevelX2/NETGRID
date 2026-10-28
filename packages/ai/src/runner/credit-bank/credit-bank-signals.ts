@@ -27,6 +27,7 @@ import {
   clickCreditBankProfile,
 } from "../../plans/credit-bank-investment";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
+import { creditBankReplacesBasicRunFunding } from "./credit-bank-basic-run-funding";
 
 /** Facts/routes from other owners, bound to the same decision input and candidates.
  * These services never choose a bank phase or execute a bank action.
@@ -414,9 +415,9 @@ export function runnerCreditBankSignals(
           phase: "cash_out" as const,
           actionIds: cashOutActionIds,
           rejectedActionIds: buildActionIds,
-          priorityClass: concreteFundingNeed
-            ? ("P2" as const)
-            : ("P4" as const),
+          priorityClass:
+            convertibleRunFundingRoute?.priorityClass ??
+            (concreteFundingNeed ? ("P2" as const) : ("P4" as const)),
           currentStoredCredits,
           portfolioStoredCredits,
           estimatedPayout,
@@ -753,6 +754,7 @@ function runnerCreditBankRunFundingRoute(params: {
   | {
       evidenceCodes: string[];
       runFunding?: RunnerCreditBankSignal["runFunding"];
+      priorityClass?: "P4";
     }
   | undefined {
   const remainingFundingClicks = Math.max(
@@ -805,6 +807,19 @@ function runnerCreditBankRunFundingRoute(params: {
     ) {
       continue;
     }
+    const basicReplacement = creditBankReplacesBasicRunFunding({
+      input: params.input,
+      candidates: params.candidates,
+      economy: params.economy,
+      target: evaluation,
+      admission,
+      cashOutActionIds: params.cashOutActionIds,
+      quoteAfterCashouts: params.services.quoteRunAfterCashoutRoute,
+      ...(requiredPostRunReserve !== undefined
+        ? { requiredPostRunReserve }
+        : {}),
+    });
+    if (basicReplacement) return basicReplacement;
     const fundedTerminalTarget =
       params.services.terminalKnownPathFundingGap(evaluation) !== undefined
         ? params.cashOutActionIds
