@@ -102,6 +102,13 @@ ihnen aber nicht zurückimportiert.
   Projektion setzt nur den öffentlich gewählten X-Zustand in einer lokalen
   Kopie; der eigentliche Zustand, RNG und Eventlog bleiben unverändert.
   Der Runner erhält diese Vorschau für ungerezzt verborgenes ICE nicht.
+- Die Post-Install-Runquote bindet bei X-Stärke ohne variablen Trace die
+  kanonische Mindest-X-Variante aus derselben Rezkostenquote. Die lokale
+  Zustandsprojektion setzt genau diesen Wert und berechnet die tatsächlichen
+  Subroutinen und die effektive Stärke. Sie wählt keinen künftigen Rez und
+  behauptet keine stärkere bezahlte Variante. Bereits installiertes ICE
+  benötigt weiterhin eine aktuelle Rez-Action; variable Trace-/Bidfolgen
+  bleiben ohne vollständige Projektion unvollständig.
 
 - Nach dem tatsächlich ausgeführten Approach-Expose erhält der Runner für
   genau das gezeigte ICE unter `run.approachedIce` dessen aktuelle Rez-Kosten

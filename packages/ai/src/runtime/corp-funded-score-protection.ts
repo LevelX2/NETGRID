@@ -98,6 +98,10 @@ export type CorpSelectedRezCost = Readonly<{
   source: "engine_rez_cost_quote";
   variableRezChoice?:
     | Readonly<{
+        kind: "x_strength";
+        value: number;
+      }>
+    | Readonly<{
         kind: "paid_end_the_run_subroutines";
         subroutineCount: number;
       }>
@@ -1210,10 +1214,30 @@ function fundedRezOptionsForQuote(
           parameter.maxValue,
           parameter.additionalCreditsPerValue,
         ) ||
-      parameter.effectiveStrengthFromValue !== true ||
-      parameter.traceLimitFromValue !== true
+      parameter.effectiveStrengthFromValue !== true
     ) {
       return undefined;
+    }
+    if (parameter.traceLimitFromValue !== true) {
+      // Only the Engine's exact post-install minimum-strength effect quote
+      // supplies this branch. Do not invent installed effects or higher-X
+      // protection from printed potential. The live rez owner re-evaluates X.
+      if (
+        quote.context !== "post_install" ||
+        !ice.effectiveRunQuote ||
+        ice.effectiveRunQuote.iceInstanceId !== ice.instanceId ||
+        ice.effectiveRunQuote.iceDefinitionId !== definition.id ||
+        ice.effectiveRunQuote.effectiveStrength !== parameter.minValue
+      )
+        return undefined;
+      return [
+        {
+          finalCredits: parameter.minValueFinalCredits,
+          mandatoryAgendaPoints: quote.mandatoryAdditionalCosts.agendaPoints,
+          projectedIce: ice,
+          variableRezChoice: { kind: "x_strength", value: parameter.minValue },
+        },
+      ];
     }
     // A variable trace can end the run, but this direct-access model cannot
     // yet prove the cheapest Runner response across breaking and bidding.

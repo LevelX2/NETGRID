@@ -1922,8 +1922,14 @@ quotierte Basisvariante ohne Aufpreis: deren kanonische Subtypen, Stärke und
 Subroutinen werden gemeinsam projiziert. Die bezahlte alternative Variante
 wird dadurch weder gewählt noch als zusätzliche Abdeckung behauptet. Eine
 bereits installierte ICE braucht für variable Rezentscheidungen weiterhin ihre
-aktuelle gebundene Action. Ungebundene X-Stärke und bezahlte Subroutinen bleiben
-unvollständig. Die reale Regression vergleicht Vorschau, Defense-Planroute und
+aktuelle gebundene Action. Bei X-Stärke ohne variablen Trace projiziert die
+Engine außerdem die exakt quotierte Mindest-X-Variante nach Installation.
+Defense übernimmt ihren vollständigen Wirkungsstand, Mindestpreis und
+Variantenwert gemeinsam in die vorhandene Schutz-/Installationsprüfung.
+Eine unfinanzierte Installation bleibt ausdrücklich Staging mit Rezlücke;
+höheres X, variable Traces und ungebundene bezahlte Subroutinen erhalten
+dadurch keinen erfundenen Schutzwert. Die aktuelle Rezentscheidung wird bei
+Erreichen des ICE erneut gebunden. Die realen Regressionen vergleichen Vorschau, Defense-Planroute und
 den tatsächlich angewandten Basisrez sowie die unveränderte Eingabestruktur.
 
 Die Klassifikation schließt `set_run_break_subroutine_cost_modifier` ein:

@@ -91,8 +91,19 @@ function projectCorpIcePostRezRunQuote(
     action === undefined &&
     variable?.kind === "alternate_subtype" &&
     variable.baseSubtypes.length > 0;
+  // The installation quote already binds the minimum X price. Project that
+  // exact strength branch only for non-trace ICE; a future trace/bid exchange
+  // needs its own complete projection. Current rez choices remain action-bound.
+  const exactPostInstallMinimumStrength =
+    projectionContext === "post_install_minimum" &&
+    action === undefined &&
+    variable?.kind === "x_strength" &&
+    variable.traceLimitFromValue !== true;
   if (
-    (variable && !exactVariableAction && !exactPostInstallBaseSubtype) ||
+    (variable &&
+      !exactVariableAction &&
+      !exactPostInstallBaseSubtype &&
+      !exactPostInstallMinimumStrength) ||
     source.variableIceState
   ) {
     return {
@@ -168,16 +179,26 @@ function projectCorpIcePostRezRunQuote(
   }
   if (
     projectedState &&
-    exactVariableAction &&
+    (exactVariableAction || exactPostInstallMinimumStrength) &&
     variable?.kind === "x_strength"
   ) {
+    const projectedValue = exactPostInstallMinimumStrength
+      ? variable.minValue
+      : value!;
+    if (typeof projectedValue !== "number") {
+      return {
+        ...binding,
+        complete: false,
+        reason: "variable_rez_choice_required",
+      };
+    }
     projectedState.cardInstances[iceId]!.variableIceState = {
       family: "x_strength",
-      value: value!,
-      strength: value!,
+      value: projectedValue,
+      strength: projectedValue,
       cap: variable.maxValue,
-      additionalCostPaid: value! * variable.additionalCostPerValue,
-      ...(variable.traceLimitFromValue ? { traceLimit: value! } : {}),
+      additionalCostPaid: projectedValue * variable.additionalCostPerValue,
+      ...(variable.traceLimitFromValue ? { traceLimit: projectedValue } : {}),
     };
   }
   if (
@@ -287,7 +308,11 @@ export function visibleCorpIcePostInstallRunQuote(
   const visibleIce = visibleCorpCard(projected, iceId, "corp", "ice");
   return visibleIce
     ? projectCorpIcePostRezRunQuote(
-        projected, iceId, visibleIce, undefined, "post_install_minimum",
+        projected,
+        iceId,
+        visibleIce,
+        undefined,
+        "post_install_minimum",
       )
     : undefined;
 }

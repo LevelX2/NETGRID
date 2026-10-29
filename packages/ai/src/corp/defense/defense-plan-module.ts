@@ -1073,6 +1073,14 @@ function postInstallRezSelectionMatchesCurrentQuote(
       selectedPostInstallRezCreditsFromCurrentQuote(payload)
     );
   }
+  if (choice.kind === "x_strength") {
+    return (
+      payload.postInstallRezQuoteVariableRezKind === "x_strength" &&
+      choice.value === payload.postInstallRezQuoteVariableMinValue &&
+      selection.credits ===
+        selectedPostInstallRezCreditsFromCurrentQuote(payload)
+    );
+  }
   if (choice.kind === "paid_end_the_run_subroutines") {
     return (
       choice.subroutineCount ===
@@ -2199,10 +2207,7 @@ export function corpDefenseActionDispositions(
   const byActionId = new Map<string, CorpDefenseActionDisposition>();
   for (const candidate of context.actionCandidates) {
     const emptyRezTargetEvidence =
-      corpIceRezSupportEmptyTargetDispositionEvidence(
-        context.input,
-        candidate,
-      );
+      corpIceRezSupportEmptyTargetDispositionEvidence(context.input, candidate);
     if (emptyRezTargetEvidence) {
       byActionId.set(candidate.actionId, {
         actionId: candidate.actionId,

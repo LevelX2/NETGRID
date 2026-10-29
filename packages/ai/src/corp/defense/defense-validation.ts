@@ -79,7 +79,34 @@ export function selectedPostInstallRezCreditsFromCurrentQuote(
   }
   if (payload.postInstallRezQuoteCostKind !== "variable") return undefined;
   const kind = payload.postInstallRezQuoteVariableRezKind;
-  if (kind === "x_strength") return undefined;
+  if (kind === "x_strength") {
+    const additional =
+      payload.postInstallRezQuoteVariableAdditionalCreditsPerValue;
+    const min = payload.postInstallRezQuoteVariableMinValue;
+    const max = payload.postInstallRezQuoteVariableMaxValue;
+    const minCredits = payload.postInstallRezQuoteVariableMinValueFinalCredits;
+    const maxCredits = payload.postInstallRezQuoteVariableMaxValueFinalCredits;
+    return postInstallVariableRezFieldsMatchFamily(payload, [
+      "postInstallRezQuoteVariableRezKind",
+      "postInstallRezQuoteVariableAdditionalCreditsPerValue",
+      "postInstallRezQuoteVariableMinValue",
+      "postInstallRezQuoteVariableMaxValue",
+      "postInstallRezQuoteVariableMinValueFinalCredits",
+      "postInstallRezQuoteVariableMaxValueFinalCredits",
+      "postInstallRezQuoteVariableEffectiveStrengthFromValue",
+    ]) &&
+      knownPositiveInteger(additional) &&
+      knownNonNegativeInteger(min) &&
+      knownNonNegativeInteger(max) &&
+      max >= min &&
+      payload.postInstallRezQuoteVariableEffectiveStrengthFromValue === true &&
+      knownNonNegativeInteger(minCredits) &&
+      knownNonNegativeInteger(maxCredits) &&
+      minCredits === safeRezCreditTotal(finalBaseCredits, min, additional) &&
+      maxCredits === safeRezCreditTotal(finalBaseCredits, max, additional)
+      ? minCredits
+      : undefined;
+  }
   if (kind === "paid_end_the_run_subroutines") {
     if (
       !postInstallVariableRezFieldsMatchFamily(payload, [
