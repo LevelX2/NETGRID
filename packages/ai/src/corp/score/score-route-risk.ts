@@ -59,7 +59,11 @@ export function scoreInstallExposurePenalty(
   project: CorpScoreProjectSignal,
   stateVersion: number,
 ): number {
-  if (project.phase !== "install_agenda" || project.sameTurnCloseout) return 0;
+  if (
+    (project.phase !== "install_agenda" && !project.counterBankReplacement) ||
+    project.sameTurnCloseout
+  )
+    return 0;
   const exposure = scoreRouteExposure(project, stateVersion);
   const stake = project.conversion?.runnerStealIsMatchpoint ? 2 : 1;
   // Unknown is explicitly charged at the conservative risk ceiling. It is not

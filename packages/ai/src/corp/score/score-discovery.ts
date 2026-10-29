@@ -16,6 +16,7 @@ import { type CorpScorelineFeasibility } from "../../runtime/corp-scoreline-feas
 import { visibleCardIsAgenda } from "../../runtime/visible-action-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
+import { withCorpCounterBankReplacementPreparation } from "./score-counter-bank-replacement";
 import { corpAssetPreservingSameTurnScoreRoutes } from "./score-asset-preservation";
 import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
 import { withCorpSameTurnScoreDefenseReserve } from "./score-reserve-restoration";
@@ -404,12 +405,16 @@ export function reconcileCorpScoreProjects({
   // mandatory draw will expose fresh scoring material at its normal cadence.
   const scoreProjects: CorpScoreProjectSignal[] = [
     ...continuityBoundScoreProjects.map((project) =>
-      withCorpSameTurnScoreDefenseReserve(
+      withCorpCounterBankReplacementPreparation(
         input,
-        withCorpTerminalAgendaDefense(
+        candidates,
+        withCorpSameTurnScoreDefenseReserve(
           input,
-          project,
-          continuityBoundScoreProjects,
+          withCorpTerminalAgendaDefense(
+            input,
+            project,
+            continuityBoundScoreProjects,
+          ),
         ),
       ),
     ),

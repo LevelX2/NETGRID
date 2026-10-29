@@ -239,6 +239,19 @@ konkreten Karten- und Serverbindung dem Score-Owner angeboten; seine normale
 Priorisierung wählt den Abschluss. Vollständig avancierte Agenden beanspruchen
 keine Bankcounter (Regressionen: Paarung 461, Runde 5, G10 D139 und G40 D203).
 
+Vor einer bereits zugelassenen Agenda-Installation, die eine gefüllte
+Counterbank ersetzt, erhält derselbe Score-Parent deren kostenlose Liquidität.
+Er bindet zuerst die aktuelle kostenfreie Rez- beziehungsweise Counterauszahlung
+an die genaue zu ersetzende Instanz, den Server und die Installationsaction.
+Nach jedem Schritt werden Installation, Schutz, Finanzierung und Counterzahl
+neu geprüft. Priorität, Agendaziel und Expositionskosten bleiben erhalten.
+Bezahlte Vorbereitungen, nicht zugelassene Installationen, fremde
+Countertransfer-Ansprüche und ein bereits ausführbarer Spielsieg öffnen
+diese Vorbereitung nicht. Die vorhandene sichere Bank wird dadurch nicht zu
+einem freien Economy-Auftrag. Paarung 567, Runde 2, G40 D123 sowie Runde 3,
+G17 D122 belegen den sonst vollständigen Verlust von zwei beziehungsweise
+drei kostenlos auszahlbaren Countern beim Ersetzen durch Tycho Extension.
+
 Ein installierter Counterbank-Scoreverbraucher steht im Root eines anderen
 Remote-Servers. Sichtbare Agenden in Zentralzonen, insbesondere in Archives,
 sind keine installierten Transfer- oder Scoreziele. Die Root-Darstellung einer

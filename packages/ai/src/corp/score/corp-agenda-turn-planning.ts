@@ -578,9 +578,11 @@ function createLine(
         : line.family === "safe_setup"
           ? "opening_foundation_ready"
           : line.family === "score_continuation"
-            ? params.project.phase === "score_agenda"
-              ? "agenda_scored"
-              : "agenda_advanced"
+            ? params.project.counterBankReplacement
+              ? "replacement_counter_liquidity_prepared"
+              : params.project.phase === "score_agenda"
+                ? "agenda_scored"
+                : "agenda_advanced"
             : line.projectedAdvance
               ? "agenda_advanced"
               : "agenda_installed",
@@ -756,14 +758,22 @@ function exactAgendaHead(
 ): ActionSemanticCandidate | undefined {
   return candidates.find(
     (candidate) =>
-      ((project.phase === "install_agenda" &&
-        candidate.semanticActionType === "install.card") ||
+      ((project.counterBankReplacement !== undefined &&
+        ((project.phase === "rez_counter_bank_for_liquidation" &&
+          candidate.semanticActionType === "corp_window.rez") ||
+          (project.phase === "liquidate_counter_bank" &&
+            candidate.semanticActionType === "economy.gain_credit"))) ||
+        (project.phase === "install_agenda" &&
+          candidate.semanticActionType === "install.card") ||
         (project.phase === "advance_agenda" &&
           candidate.semanticActionType === "score.advance_card") ||
         (project.phase === "score_agenda" &&
           candidate.semanticActionType === "score.agenda")) &&
       project.actionIds?.includes(candidate.actionId) === true &&
-      candidate.sourceCardInstanceId === project.agendaInstanceId &&
+      candidate.sourceCardInstanceId ===
+        (project.counterBankReplacement
+          ? project.counterBank?.sourceCardInstanceId
+          : project.agendaInstanceId) &&
       exactCurrentCost(candidate),
   );
 }
@@ -914,6 +924,11 @@ function ownerFor(
   candidate: ActionSemanticCandidate,
   project: CorpScoreProjectSignal,
 ): "corp.score_agenda" | "corp.defend_servers" | "corp.economy" {
+  if (
+    project.counterBankReplacement &&
+    candidate.sourceCardInstanceId === project.counterBank?.sourceCardInstanceId
+  )
+    return "corp.score_agenda";
   if (
     candidate.semanticActionType === "install.ice" ||
     (candidate.semanticActionType === "install.card" &&

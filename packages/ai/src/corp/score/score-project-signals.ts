@@ -1778,6 +1778,7 @@ function sameScoreProjectMergeFacts(
       : project.openingRush?.reason,
     project.setupNeed,
     project.counterBank,
+    project.counterBankReplacement,
     project.lastDrawScoreSurvival,
   ];
   return JSON.stringify(facts(left)) === JSON.stringify(facts(right));

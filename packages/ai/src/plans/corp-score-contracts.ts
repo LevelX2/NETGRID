@@ -182,6 +182,11 @@ export type CorpScoreProjectSignal = {
     counterTarget: number;
     quoteStateVersion: number;
   };
+  /** Free preparation of this same admitted agenda installation, never a separate liquidation goal. */
+  counterBankReplacement?: {
+    installActionId: string;
+    stateVersion: number;
+  };
   terminalScore: boolean;
   preventsTerminalSteal?: boolean;
   /** Exact installation horizon closes a winning score before unavoidable deckout. */
