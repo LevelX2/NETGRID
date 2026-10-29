@@ -109,6 +109,12 @@ ihnen aber nicht zurückimportiert.
   behauptet keine stärkere bezahlte Variante. Bereits installiertes ICE
   benötigt weiterhin eine aktuelle Rez-Action; variable Trace-/Bidfolgen
   bleiben ohne vollständige Projektion unvollständig.
+- Bei bezahlten Stopproutinen bindet die Post-Install-Runquote stattdessen
+  genau den bereits in der Kostenquote ausgewiesenen ersten Stopp:
+  `max(1, minSubroutines)` Routinen samt kanonischem Zusatzpreis. Derselbe
+  abgeleitete ICE-Zustand erzeugt die tatsächlichen Subroutinen; die Vorschau
+  behauptet weder Schutz durch die Nullroutinen-Variante noch eine freie
+  spätere Rez-Auswahl. Installierte variable ICE bleiben separat actiongebunden.
 
 - Nach dem tatsächlich ausgeführten Approach-Expose erhält der Runner für
   genau das gezeigte ICE unter `run.approachedIce` dessen aktuelle Rez-Kosten

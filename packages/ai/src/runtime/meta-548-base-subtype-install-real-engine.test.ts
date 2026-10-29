@@ -64,7 +64,7 @@ it.each([
   expect(getPlayerView(s, "runner").opponent).not.toHaveProperty("gripOrHq");
 });
 
-it.each(["onr_proteus_025_homing-missile", "onr_proteus_036_sandstorm"])("does not invent an unbound variable projection for %s", (card) => {
+it.each(["onr_proteus_025_homing-missile"])("does not invent an unbound variable projection for %s", (card) => {
   const s = fixture(card, 20), before = hashState(s), i = input(s);
   const installs = i.legalActions.filter((a) => a.type === "install_card" && a.source.includes(card));
   expect(installs.length).toBeGreaterThan(0);

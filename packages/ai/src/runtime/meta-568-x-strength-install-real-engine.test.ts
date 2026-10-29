@@ -144,7 +144,7 @@ it.each([["onr_proteus_020_digiconda", 6]] as const)(
   },
 );
 
-it.each(["onr_proteus_025_homing-missile", "onr_proteus_036_sandstorm"])(
+it.each(["onr_proteus_025_homing-missile"])(
   "does not invent an unbound variable projection for %s",
   (card) => {
     const s = fixture(card, 20),
@@ -157,6 +157,70 @@ it.each(["onr_proteus_025_homing-missile", "onr_proteus_036_sandstorm"])(
     for (const a of installs)
       expect(a.payload?.postInstallEffectiveRunQuoteJson).toBeUndefined();
     expect(hashState(s)).toBe(before);
+  },
+);
+
+it.each([
+  ["onr_proteus_024_gatekeeper", 5],
+  ["onr_proteus_036_sandstorm", 6],
+] as const)(
+  "binds the first paid stopping routine, Defense owner and actual rez of %s",
+  (card, credits) => {
+    let s = fixture(card, credits);
+    const before = hashState(s),
+      i = input(s),
+      serialized = JSON.stringify(i);
+    const r = chooseAiAction(i);
+    const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
+    expect(selected.type).toBe("install_card");
+    expect(selected.source).toContain(card);
+    expect(["hq", "rd"]).toContain(selected.payload?.serverId);
+    expect(r.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+      "corp.defend_servers",
+    );
+    expect(r.decisionDebug?.planFirstDecision?.route).toMatchObject({
+      actionId: selected.actionId,
+      stateVersion: s.stateVersion,
+    });
+    expect(
+      selectedPostInstallRezCreditsFromCurrentQuote(selected.payload!),
+    ).toBe(credits);
+    const predicted = JSON.parse(
+      selected.payload!.postInstallEffectiveRunQuoteJson as string,
+    );
+    expect(predicted.subroutines).toHaveLength(1);
+    expect(predicted.subroutines[0].type).toBe("end_the_run");
+    expect(hashState(s)).toBe(before);
+    expect(JSON.stringify(i)).toBe(serialized);
+    expect(r.fallbackUsed).toBe(false);
+    s = apply(s, selected);
+    s = apply(
+      s,
+      getLegalActions(s, "corp").find((a) => a.type === "end_turn")!,
+    );
+    s = apply(
+      s,
+      getLegalActions(s, "runner").find(
+        (a) =>
+          a.type === "start_run" &&
+          a.payload?.serverId === selected.payload?.serverId,
+      )!,
+    );
+    const rez = getLegalActions(s, "corp").find(
+      (a) =>
+        a.type === "rez_ice" &&
+        a.source === selected.source &&
+        a.payload?.variableRezValue === 1,
+    )!;
+    expect(rez.payload?.effectiveSubroutineCountAfterRez).toBe(1);
+    s = apply(s, rez);
+    expect(s.corp.credits).toBe(0);
+    expect(
+      getPlayerView(s, "corp")
+        .servers.flatMap((x) => x.ice)
+        .find((x) => x.instanceId === selected.source)!.effectiveRunQuote,
+    ).toEqual(predicted);
+    expect(getPlayerView(s, "runner").opponent).not.toHaveProperty("gripOrHq");
   },
 );
 
@@ -177,6 +241,50 @@ it("keeps the minimum-X effect quote separate from current installed rez choices
       .effectivePostRezRunQuote,
   ).toMatchObject({ complete: false, reason: "variable_rez_choice_required" });
 });
+
+it.each(["onr_proteus_024_gatekeeper", "onr_proteus_036_sandstorm"])(
+  "does not bind a current installed paid-routine rez choice from the installation quote for %s",
+  (card) => {
+    let s = fixture(card, 20);
+    const install = getLegalActions(s, "corp").find(
+      (a) =>
+        a.type === "install_card" &&
+        a.source.includes(card) &&
+        a.payload?.serverId === "rd",
+    )!;
+    expect(
+      JSON.parse(install.payload!.postInstallEffectiveRunQuoteJson as string)
+        .subroutines,
+    ).toHaveLength(1);
+    s = apply(s, install);
+    expect(
+      getPlayerView(s, "corp").servers.find((x) => x.id === "rd")!.ice[0]!
+        .effectivePostRezRunQuote,
+    ).toMatchObject({
+      complete: false,
+      reason: "variable_rez_choice_required",
+    });
+  },
+);
+
+it.each([
+  ["onr_proteus_024_gatekeeper", 5],
+  ["onr_proteus_036_sandstorm", 6],
+] as const)(
+  "keeps the first-stop qualitative installation fail-closed without the Engine effect quote for %s",
+  (card, credits) => {
+    const i = input(fixture(card, credits));
+    for (const a of i.legalActions.filter(
+      (a) => a.type === "install_card" && a.source.includes(card),
+    ))
+      delete a.payload!.postInstallEffectiveRunQuoteJson;
+    const r = chooseAiAction(i);
+    expect(
+      i.legalActions.find((a) => a.actionId === r.actionId)?.source,
+    ).not.toContain(card);
+    expect(r.fallbackUsed).toBe(false);
+  },
+);
 
 it("keeps an unfunded minimum-X installation at the existing staging milestone", () => {
   const s = fixture("onr_proteus_020_digiconda", 5),

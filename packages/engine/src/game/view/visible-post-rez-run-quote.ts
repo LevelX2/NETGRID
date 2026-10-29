@@ -99,11 +99,19 @@ function projectCorpIcePostRezRunQuote(
     action === undefined &&
     variable?.kind === "x_strength" &&
     variable.traceLimitFromValue !== true;
+  // The cost quote also identifies the first paid stopping branch. Bind the
+  // projected routines to that same branch, rather than the zero-routine
+  // minimum or an arbitrary larger future payment.
+  const exactPostInstallFirstPaidStop =
+    projectionContext === "post_install_minimum" &&
+    action === undefined &&
+    variable?.kind === "paid_end_the_run_subroutines";
   if (
     (variable &&
       !exactVariableAction &&
       !exactPostInstallBaseSubtype &&
-      !exactPostInstallMinimumStrength) ||
+      !exactPostInstallMinimumStrength &&
+      !exactPostInstallFirstPaidStop) ||
     source.variableIceState
   ) {
     return {
@@ -199,6 +207,19 @@ function projectCorpIcePostRezRunQuote(
       cap: variable.maxValue,
       additionalCostPaid: projectedValue * variable.additionalCostPerValue,
       ...(variable.traceLimitFromValue ? { traceLimit: projectedValue } : {}),
+    };
+  }
+  if (
+    projectedState &&
+    exactPostInstallFirstPaidStop &&
+    variable?.kind === "paid_end_the_run_subroutines"
+  ) {
+    const count = Math.max(1, variable.minSubroutines);
+    projectedState.cardInstances[iceId]!.variableIceState = {
+      family: "paid_end_the_run_subroutines",
+      value: count,
+      subroutineCount: count,
+      additionalCostPaid: count * variable.additionalCostPerSubroutine,
     };
   }
   if (

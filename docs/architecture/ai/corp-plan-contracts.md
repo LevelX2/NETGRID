@@ -1926,6 +1926,9 @@ aktuelle gebundene Action. Bei X-Stärke ohne variablen Trace projiziert die
 Engine außerdem die exakt quotierte Mindest-X-Variante nach Installation.
 Defense übernimmt ihren vollständigen Wirkungsstand, Mindestpreis und
 Variantenwert gemeinsam in die vorhandene Schutz-/Installationsprüfung.
+Bei bezahlten Stopproutinen erhält dieselbe Prüfung die Engine-Wirkungsquote
+des bereits quotierten ersten Stopps gemeinsam mit dessen vollständigem
+Preis. Die reine Basiskostenvariante mit null Routinen ist kein Schutz.
 Eine unfinanzierte Installation bleibt ausdrücklich Staging mit Rezlücke;
 höheres X, variable Traces und ungebundene bezahlte Subroutinen erhalten
 dadurch keinen erfundenen Schutzwert. Die aktuelle Rezentscheidung wird bei
