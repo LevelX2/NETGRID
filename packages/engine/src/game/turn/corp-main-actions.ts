@@ -34,6 +34,7 @@ import { quoteCorpScoreRecovery } from "../hidden-zone/corp-score-recovery-quote
 import { quoteCorpRootRezIceInstallCosts } from "../payment/root-rez-ice-install-cost-quote";
 import { quoteCorpHostedCreditBankCycle } from "../payment/hosted-credit-bank-cycle-quote";
 import { corpScoreMandatoryDrawHorizonPayload } from "../corp/score-mandatory-draw-horizon";
+import { operationFreeRezRunQuotePayload } from "../view/visible-post-rez-run-quote";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -921,12 +922,14 @@ export function buildCorpMainActions(
   return filterActionsForRestrictedExtraActions(state, "corp", actions).map(
     (candidate) => {
       const quote = quoteCorpHostedCreditBankCycle(state, candidate);
-      return quote
+      const freeRez = operationFreeRezRunQuotePayload(state, candidate);
+      return quote || freeRez
         ? {
             ...candidate,
             payload: {
               ...candidate.payload,
-              hostedCreditBankCycleQuoteJson: JSON.stringify(quote),
+              ...(quote ? { hostedCreditBankCycleQuoteJson: JSON.stringify(quote) } : {}),
+              ...freeRez,
             },
           }
         : candidate;

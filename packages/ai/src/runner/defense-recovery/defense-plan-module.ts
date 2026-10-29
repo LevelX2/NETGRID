@@ -14,6 +14,7 @@ import type { RunnerDefenseSignals, DefenseState } from "./defense-types";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
 import { currentRunnerTagReduction } from "../../actions/tag-effect-semantics";
+import { RUNNER_TAG_CLEAR_FUNDING_VALUE } from "./tag-clear-bank-funding";
 export function createRunnerDefenseModule(): PlanModule {
   return {
     moduleId: "runner.defense_and_recovery",
@@ -40,7 +41,9 @@ export function createRunnerDefenseModule(): PlanModule {
           } satisfies DefenseState,
           priorityClass: defensePriorityClass(signals),
           target: { kind: "player", id: "runner" },
-          routeExists: candidates.length > 0,
+          routeExists: candidates.length > 0 ||
+            (phase === "fund_tag_clear" && !invalidTagClearFundingContract &&
+              signals.tagClearFundingNeed?.bankFunding !== undefined),
           blockerCode: invalidTagClearFundingContract
             ? "invalid_tag_clear_funding_need"
             : phase === "fund_persistent_hazard_counter" && candidates.length === 0
@@ -82,13 +85,24 @@ export function createRunnerDefenseModule(): PlanModule {
             )
           : [];
       const priorityClass = defensePriorityClass(current.signals);
-      return assessment(
-        instance,
-        priorityClass,
-        candidates.length > 0,
+      const bankNeed = current.phase === "fund_tag_clear" && tagClearFundingContractValid
+        ? current.signals.tagClearFundingNeed?.bankFunding : undefined;
+      const result = assessment(
+        instance, priorityClass, candidates.length > 0,
         defensePhaseValue(current.phase, current.signals),
         portfolio.executorInstanceId,
+        bankNeed ? [{
+          needId: current.signals.tagClearFundingNeed!.needId,
+          capability: "economy.bank_cashout_all",
+          minimum: current.signals.tagClearFundingNeed!.targetCredits,
+          available: context.input.playerView.own.credits, deadline: "current_turn",
+        }] : [],
       );
+      if (bankNeed) result.blockers = [{
+        code: "waiting_for_bound_funding_support", owner: "plan_module", removable: true,
+        resumeCondition: { code: current.signals.tagClearFundingNeed!.needId },
+      }];
+      return result;
     },
     materialize: (instance, _assessment, context) => {
       const current = instance.moduleState as DefenseState;
@@ -278,6 +292,7 @@ function defensePhase(
   return (
     openPhases.find(
       (phase) =>
+        (phase === "fund_tag_clear" && signals.tagClearFundingNeed?.bankFunding !== undefined) ||
         defenseCandidates(actionCandidates, phase, signals, actionDispositions)
           .length > 0,
     ) ?? openPhases[0]
@@ -361,7 +376,7 @@ function defenseCandidates(
       if (phase === "clear_tags")
         return candidate.semanticActionType === "tag.remove";
       if (phase === "fund_tag_clear")
-        return tagClearFundingActionIds.has(candidate.actionId);
+        return !signals.tagClearFundingNeed?.bankFunding && tagClearFundingActionIds.has(candidate.actionId);
       if (phase === "fund_persistent_hazard_counter")
         return persistentCounterFundingActionIds.has(candidate.actionId);
       if (phase === "clear_persistent_hazard_counter")
@@ -602,7 +617,7 @@ function defensePhaseValue(
   if (phase === "prevent_damage") return 100;
   if (phase === "install_defense_support") return 60;
   if (phase === "clear_tags") return 80;
-  if (phase === "fund_tag_clear") return 85;
+  if (phase === "fund_tag_clear") return RUNNER_TAG_CLEAR_FUNDING_VALUE;
   if (phase === "fund_persistent_hazard_counter") return 85;
   if (phase === "clear_persistent_hazard_counter") return 90;
   if (phase === "forgo_unsafe_run") return 60;

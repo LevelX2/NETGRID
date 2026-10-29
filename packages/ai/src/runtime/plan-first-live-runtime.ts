@@ -220,6 +220,7 @@ import {
 import { runnerCreditBankActionDispositions } from "../runner/credit-bank/credit-bank-dispositions";
 import { runnerCreditBankSignals } from "../runner/credit-bank/credit-bank-signals";
 import { reconcileRunnerCreditBankRunFunding } from "../runner/credit-bank/credit-bank-funding-revalidation";
+import { bindRunnerCreditBankDefenseFunding } from "../runner/credit-bank/credit-bank-defense-funding";
 import { runnerRunFundingParentHasCurrentNeed } from "../plans/runner-funding-parent";
 import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
 import {
@@ -3375,10 +3376,11 @@ function buildRunnerDomain(
     activeRunRoot,
   });
   const runFundingParents = { centralPressure, remoteContests };
-  const creditBanks = reconcileRunnerCreditBankRunFunding(
-    prospectiveCreditBanks,
-    input.playerView.stateVersion,
-    runFundingParents,
+  const creditBanks = bindRunnerCreditBankDefenseFunding(
+    input, candidates, defense,
+    reconcileRunnerCreditBankRunFunding(
+      prospectiveCreditBanks, input.playerView.stateVersion, runFundingParents,
+    ),
   );
   const preDevelopmentFundingNeeds = uniqueBy(
     [

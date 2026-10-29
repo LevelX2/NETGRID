@@ -1,5 +1,6 @@
 import type { RunnerCreditBankProspectivePlan } from "./credit-bank-prospective-planning";
 import type { RunnerFundingRouteAssessment } from "../../plans/runner-funding-contracts";
+import type { RunnerDefenseSignals } from "../defense-recovery/defense-types";
 
 export type RunnerCreditBankSignal = {
   bankId: string;
@@ -16,6 +17,7 @@ export type RunnerCreditBankSignal = {
     incrementalCreditsOverAlternative: number;
   };
   prospectivePlan?: RunnerCreditBankProspectivePlan;
+  defenseFunding?: NonNullable<RunnerDefenseSignals["tagClearFundingNeed"]>;
   runFunding?: {
     parentPlanInstanceId: string;
     needId: string;

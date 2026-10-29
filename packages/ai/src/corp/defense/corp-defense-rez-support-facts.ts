@@ -1,6 +1,12 @@
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+  VisibleCorpIcePostRezRunQuote,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
 export type CorpActionIceRezSupportLiability =
   | "bounded"
@@ -58,8 +64,12 @@ export function corpIceRezSupportTargetHasNoCurrentEffect(
   input: AiDecisionInput,
   ice: VisibleCard,
   serverId: string,
+  operation?: LegalAction,
 ): boolean {
-  const post = ice.effectivePostRezRunQuote;
+  const post =
+    operation?.payload?.operationFreeRezRunQuoteJson !== undefined
+      ? boundOperationFreeRezQuote(input, operation)
+      : ice.effectivePostRezRunQuote;
   return (
     post?.complete === true &&
     post.context === "installed_post_rez" &&
@@ -98,17 +108,104 @@ export function corpIceRezSupportEmptyTargetDispositionEvidence(
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.timingPoint !== input.playerView.timingPoint ||
     typeof action.payload?.targetCardId !== "string"
-  ) return undefined;
+  )
+    return undefined;
   for (const server of input.playerView.servers) {
     const ice = server.ice.find(
       (i) => i.instanceId === action.payload!.targetCardId,
     );
     if (
-      ice?.known && ice.type === "ice" && !ice.rezzed &&
-      corpIceRezSupportTargetHasNoCurrentEffect(input, ice, server.id)
+      ice?.known &&
+      ice.type === "ice" &&
+      !ice.rezzed &&
+      corpIceRezSupportTargetHasNoCurrentEffect(input, ice, server.id, action)
     ) {
       return `corp_rez_support_empty_current_effect:${server.id}:${ice.instanceId}`;
     }
   }
   return undefined;
+}
+
+function boundOperationFreeRezQuote(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCorpIcePostRezRunQuote | undefined {
+  const invalid = () =>
+    new PlanResolutionFailure("missing_action_semantics", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: [action.type],
+      unresolvedActionIds: [action.actionId],
+      owner: "action_semantics",
+      removalCondition:
+        "Supply the canonical operationFreeRezRunQuoteJson with exact source, action, target, costs and current StateVersion.",
+    });
+  let decoded: unknown;
+  try {
+    decoded = JSON.parse(
+      action.payload!.operationFreeRezRunQuoteJson as string,
+    );
+  } catch {
+    throw invalid();
+  }
+  const quote = decoded as {
+    operationActionId?: unknown;
+    sourceCardId?: unknown;
+    sourceDefinitionId?: unknown;
+    stateVersion?: unknown;
+    counterType?: unknown;
+    counterAmount?: unknown;
+    creditCost?: unknown;
+    postRez?: VisibleCorpIcePostRezRunQuote;
+  } | null;
+  const source = input.playerView.own.gripOrHq.find(
+    (c) => c.instanceId === action.source,
+  );
+  if (
+    !quote ||
+    typeof quote !== "object" ||
+    !source?.known ||
+    source.type !== "operation" ||
+    action.side !== "corp" ||
+    action.type !== "play_operation" ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    quote.operationActionId !== action.actionId ||
+    quote.sourceCardId !== action.source ||
+    quote.sourceDefinitionId !== source?.definitionId ||
+    quote.stateVersion !== input.playerView.stateVersion ||
+    (quote.counterType !== "term" && quote.counterType !== "kludge") ||
+    quote.counterAmount !==
+      (quote.counterType === "term"
+        ? action.payload?.targetRezCost
+        : action.payload?.xValue) ||
+    quote.creditCost !==
+      action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ||
+    quote.postRez?.cardId !== action.payload?.targetCardId ||
+    quote.postRez?.iceDefinitionId !== action.payload?.targetDefinitionId
+  )
+    throw invalid();
+  const post = quote.postRez;
+  if (!post || typeof post.complete !== "boolean") throw invalid();
+  if (post.complete) {
+    const effect = post.effectiveRunQuote,
+      income = post.creditGainOnRez;
+    if (
+      !effect ||
+      !Array.isArray(effect.subroutines) ||
+      (effect.conditionalEncounterEffects !== undefined &&
+        !Array.isArray(effect.conditionalEncounterEffects)) ||
+      (income !== undefined &&
+        (!income ||
+          ![income.creditsBefore, income.creditGain, income.creditsAfter].every(
+            (n) => Number.isSafeInteger(n) && n >= 0,
+          ) ||
+          income.creditsBefore !==
+            input.playerView.own.credits - Number(quote.creditCost) ||
+          income.creditsBefore + income.creditGain !== income.creditsAfter))
+    )
+      throw invalid();
+  }
+  return quote.postRez;
 }

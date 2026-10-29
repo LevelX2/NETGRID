@@ -391,6 +391,14 @@ Fähigkeiten auch nach der letzten Basisaktion offen.
 
 ### Vertikale Implementierung des Zentraldrucks
 
+Die terminale Central-Letztchancen-Ausnahme setzt zusätzlich voraus, dass kein
+anderer aktuell legaler Remote-Run einen garantiert erreichbaren, finanzierten
+und nach seiner Reservequote zulässigen Zugriff bietet. Die Prüfung umfasst
+auch Remotes außerhalb des unmittelbar bedrohten Score-Forts. Bekannter
+Nullnutzen, unvermeidbare Gefahr, fehlende Zugriffskonversion und veraltete
+Actions begründen keine solche Alternative. Ein unbekanntes Root wird dadurch
+nicht als bekannte Agenda behandelt.
+
 Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
 ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
@@ -1921,6 +1929,16 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Vollständige aktuelle Tagentfernung berücksichtigt auch garantierte
+Auszahlungen bereits installierter Banken. Die Quote reserviert einen
+Entfernungsklick und zwei Credits je vorhandenem Tag; jede endliche Quelle
+zählt höchstens einmal. Eine gleich schnelle gewöhnliche Einnahme bleibt
+erhalten. Nur der bestehende Defense-Parent veröffentlicht diesen aktuellen
+Bedarf. Er wartet mit einem exakten ResourceGap auf den ersten Bank-Support;
+`runner.credit_bank` bleibt dessen einziger Auszahlungsexecutor. Nach jeder
+Engine-Aktion werden Tagzahl, Geld, Klicks und Need neu gebunden. Fehlt die
+vollständige Folge, bleibt die bestehende Überlebenspufferprüfung wirksam.
+
 Ein eigener positiver persistenter Gefahrencounter hält den Defense-Parent
 auch bei fehlender Bank offen (SP-335). Die kanonischen, aus
 `runnerCounterEffects.removeCost` erzeugten Hints liefern eine typisierte
@@ -3189,6 +3207,7 @@ Die produktive Bankentscheidung liegt unter `packages/ai/src/runner/credit-bank/
 | [credit-bank-plan-module.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-plan-module.ts)                   | Discovery, Assessment, exakte Phasenrouten und Fortsetzung nach der Installation                                            |
 | [credit-bank-dispositions.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-dispositions.ts)                 | Begründete Ablehnung konkreter Bankalternativen; aktive Actions anderer Economy-Owner bleiben erhalten                      |
 | [credit-bank-prospective-planning.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-prospective-planning.ts) | Side-sichere CardSpec-Projektion von Installation, Aufbau und Auszahlung; keine zukünftigen LegalAction-IDs                 |
+| [credit-bank-defense-funding.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-defense-funding.ts)           | Revalidierung des vollständigen aktuellen Tag-Clear-Bedarfs und genau eines Bankproviders für dessen ersten Schritt         |
 
 Die Core-Registry registriert `createRunnerCreditBankModule`. Die Live-Runtime
 ruft Signalerzeugung und Disposition auf und aggregiert deren Action-IDs für

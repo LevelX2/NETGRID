@@ -73,6 +73,32 @@ export function runnerTerminalRemoteUnreachableCentralLastChance(
   const threat = runnerTerminalContestThreat(input);
   if (!threat || threat.remoteServerIds.length === 0) return false;
 
+  // A blocked scoring fort does not make centrals the last available access.
+  // Other live remotes keep their own current route and access-risk admission;
+  // their hidden contents are never presumed to contain an agenda.
+  if (
+    runTargets.some(
+      (candidate) =>
+        candidate.targetKind === "remote" &&
+        input.legalActions.some(
+          (action) =>
+            action.actionId === candidate.actionId &&
+            action.side === "runner" &&
+            action.expiresAtStateVersion === input.playerView.stateVersion,
+        ) &&
+        candidate.pathPassability === "reachable" &&
+        candidate.routeQuote?.reachability === "guaranteed_access" &&
+        candidate.routeQuote.fundingGap === 0 &&
+        candidate.prerunReserveQuote?.status !== "blocked" &&
+        candidate.knownAccessState !== "known_no_current_payoff" &&
+        candidate.accessPayoffContestable !== false &&
+        candidate.creditsAfterRun >= 0 &&
+        candidate.visibleTraceTagHazardUnavoidable !== true &&
+        (candidate.unavoidableVisibleIceHazardCount ?? 0) === 0,
+    )
+  )
+    return false;
+
   return threat.remoteServerIds.every((serverId) => {
     const remoteEvaluations = runTargets.filter(
       (candidate) =>

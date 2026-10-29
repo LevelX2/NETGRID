@@ -1,3 +1,5 @@
+import type { RunnerFundingRouteAssessment } from "../../plans/runner-funding-contracts";
+
 export type RunnerDefenseSignals = {
   activeTags: number;
   visibleTagPunish: boolean;
@@ -43,6 +45,10 @@ export type RunnerDefenseSignals = {
     currentCreditsAtRevalidation: number;
     gap: number;
     actionIds: string[];
+    bankFunding?: {
+      activeTags: number;
+      routeAssessment: RunnerFundingRouteAssessment;
+    };
     revalidation: {
       stateVersion: number;
       status: "defense_parent_open";

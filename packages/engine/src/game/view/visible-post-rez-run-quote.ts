@@ -14,11 +14,13 @@ import { visibleCurrentIceBreakExchange } from "./visible-rez-resource-exchange-
 import { projectFixedCorpIcePostRezState } from "./fixed-ice-post-rez-state";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
 import { applyCreditGain } from "../economy/credit-gain";
+import { addCardCounter } from "../state/turn-flags-counters";
 
 /**
  * Quotes the run-facing state of one ICE without mutating GameState. Fixed
- * rez and an exactly bound x-strength LegalAction can be projected. Other
- * choice-dependent rez states remain incomplete. During an active run only
+ * rez, an exactly bound x-strength LegalAction and the actual branch of a
+ * free-rez operation can be projected. Other choice-dependent rez states
+ * remain incomplete. During an active run only
  * the currently approached ICE can be projected.
  */
 export function visibleCorpIcePostRezRunQuote(
@@ -36,6 +38,11 @@ function projectCorpIcePostRezRunQuote(
   visibleIce: VisibleCard,
   action?: LegalAction,
   projectionContext: "installed" | "post_install_minimum" = "installed",
+  freeRez?: {
+    counterType: "term" | "kludge";
+    counterAmount: number;
+    creditCost: number;
+  },
 ): VisibleCorpIcePostRezRunQuote | undefined {
   const source = state.cardInstances[iceId];
   const definitionId = visibleIce.definitionId;
@@ -111,7 +118,8 @@ function projectCorpIcePostRezRunQuote(
       !exactVariableAction &&
       !exactPostInstallBaseSubtype &&
       !exactPostInstallMinimumStrength &&
-      !exactPostInstallFirstPaidStop) ||
+      !exactPostInstallFirstPaidStop &&
+      !freeRez) ||
     source.variableIceState
   ) {
     return {
@@ -142,10 +150,21 @@ function projectCorpIcePostRezRunQuote(
     };
   }
   const projectedState = projectFixedCorpIcePostRezState(state, iceId);
+  const projectedStartingCredits =
+    state.corp.credits - (freeRez?.creditCost ?? 0);
+  if (projectedState && freeRez) {
+    projectedState.corp = { ...state.corp, credits: projectedStartingCredits };
+    addCardCounter(
+      projectedState,
+      iceId,
+      freeRez.counterType,
+      freeRez.counterAmount,
+    );
+  }
   if (projectedState && rezEffects.length > 0) {
     // Only these branches are writable by the admitted credit interpreter.
     // Keep the event log, RNG and unrelated card objects read-only and shared.
-    projectedState.corp = { ...state.corp };
+    projectedState.corp = { ...state.corp, credits: projectedStartingCredits };
     if (state.actionEconomy)
       projectedState.actionEconomy = structuredClone(state.actionEconomy);
     const originalTimingPoint = projectedState.timingPoint;
@@ -272,14 +291,99 @@ function projectCorpIcePostRezRunQuote(
     ...(projectedState && rezEffects.length > 0
       ? {
           creditGainOnRez: {
-            creditsBefore: state.corp.credits,
-            creditGain: projectedState.corp.credits - state.corp.credits,
+            creditsBefore: projectedStartingCredits,
+            creditGain: projectedState.corp.credits - projectedStartingCredits,
             creditsAfter: projectedState.corp.credits,
           },
         }
       : {}),
     ...(paidEncounterDefense ? { paidEncounterDefense } : {}),
   };
+}
+
+/** Free-rez operations preserve the target's actual variable state instead of
+ * purchasing a normal rez branch. Bind their counters and paid operation cost
+ * before projecting the same public encounter/lifecycle facts as the engine. */
+export function operationFreeRezRunQuotePayload(
+  state: GameState,
+  action: LegalAction,
+): Record<string, string> | undefined {
+  const source = state.cardInstances[action.source as CardInstanceId];
+  const targetId = action.payload?.targetCardId;
+  if (
+    action.type !== "play_operation" ||
+    action.side !== "corp" ||
+    action.expiresAtStateVersion !== state.stateVersion ||
+    action.timingPoint !== state.timingPoint ||
+    !source ||
+    source.controller !== "corp" ||
+    source.zone.side !== "corp" ||
+    source.zone.zone !== "hq" ||
+    !state.corp.hq.includes(source.instanceId) ||
+    typeof targetId !== "string"
+  )
+    return undefined;
+  const effects = cardImplementationForDefinitionId(source.definitionId)
+    ?.abilities?.flatMap((ability) => ability.effects ?? [])
+    .filter((effect) => effect.kind === "free_rez_installed_ice_with_counters");
+  if (effects?.length !== 1) return undefined;
+  const effect = effects[0]!;
+  if (effect.kind !== "free_rez_installed_ice_with_counters") return undefined;
+  const target = state.cardInstances[targetId as CardInstanceId];
+  const counterAmount =
+    effect.counterType === "kludge"
+      ? action.payload?.xValue
+      : action.payload?.targetRezCost;
+  const creditCost = action.costs.reduce(
+    (sum, cost) => sum + (cost.credits ?? 0),
+    0,
+  );
+  if (
+    !target ||
+    target.rezzed ||
+    target.definitionId !== action.payload?.targetDefinitionId ||
+    !Number.isSafeInteger(counterAmount) ||
+    typeof counterAmount !== "number" ||
+    counterAmount < 0 ||
+    !Number.isSafeInteger(creditCost) ||
+    creditCost < 0 ||
+    creditCost > state.corp.credits
+  )
+    return undefined;
+  const visible = visibleCorpCard(
+    state,
+    targetId as CardInstanceId,
+    "corp",
+    "ice",
+  );
+  const postRez =
+    visible &&
+    projectCorpIcePostRezRunQuote(
+      state,
+      targetId as CardInstanceId,
+      visible,
+      undefined,
+      "installed",
+      {
+        counterType: effect.counterType,
+        counterAmount,
+        creditCost,
+      },
+    );
+  return postRez
+    ? {
+        operationFreeRezRunQuoteJson: JSON.stringify({
+          operationActionId: action.actionId,
+          sourceCardId: source.instanceId,
+          sourceDefinitionId: source.definitionId,
+          stateVersion: state.stateVersion,
+          counterType: effect.counterType,
+          counterAmount,
+          creditCost,
+          postRez,
+        }),
+      }
+    : undefined;
 }
 
 export function visibleCorpIcePostInstallRunQuote(

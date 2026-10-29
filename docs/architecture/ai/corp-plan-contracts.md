@@ -1984,6 +1984,16 @@ vor der Handentwicklung; HQ-Overflow darf die abgelehnte wirkungslose Zielwahl
 nicht als Handkonversion erneut öffnen. Nützliche Rezz-Effekte behalten ihre
 eigenständigen aktuellen Zweckprüfungen.
 
+Kostenlose Rez-Operationen mit Term- oder Kludge-Countern besitzen zusätzlich
+eine an die konkrete aktuelle Operation gebundene Enginequote. Sie projiziert
+deren echte Counter, vorherige Zahlung und öffentliche Rez-Lifecycle-Wirkung;
+eine normale kostenpflichtige variable Rez-Variante wird dabei nicht gekauft.
+Insbesondere erzeugt Gatekeeper ohne zusätzliche Zahlung keine Stopproutine.
+Der KI-DTO erhält die Quote einschließlich Zieldefinition und Rez-Kostenbindung.
+Defense verwendet denselben aktuellen Wirkungsbeweis für seine Route und seine
+globale Disposition. Widersprüchliche oder beschädigte Operationsquoten scheitern
+mit strukturierter Diagnose; die normale variable Rezentscheidung bleibt separat.
+
 Konditionale Rez-Supportkarten benötigen einen kartenspezifischen
 Folgevertrag. Chester Mix darf nur gerezzt werden, wenn bereits vor dem Rezzen
 genau eine produktive ICE-Installation am selben Fort feststeht, der Discount

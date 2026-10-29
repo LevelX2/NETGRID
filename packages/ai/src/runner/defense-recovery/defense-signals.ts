@@ -19,6 +19,7 @@ import type { RunnerFundingRouteContract } from "../../plans/runner-funding-cont
 import { uniqueBy } from "../../runtime/collection";
 import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
 import { currentRunnerTagReduction } from "../../actions/tag-effect-semantics";
+import { quoteRunnerTagClearBankFunding } from "./tag-clear-bank-funding";
 export type RunnerDefenseServices = {
   findFundingRoute: (
     request: Pick<
@@ -293,6 +294,7 @@ export function buildRunnerDefenseSignals(params: {
   );
   const tagClearTargetCredits = 2;
   const tags = input.playerView.own.tags;
+  const bankTagClearFunding = quoteRunnerTagClearBankFunding(input, candidates);
   const taggedDamageBufferRequired =
     tags > 0 &&
     (damageThreat.flatlineRisk.level === "confirmed" ||
@@ -316,6 +318,7 @@ export function buildRunnerDefenseSignals(params: {
         }).routeAssessment
       : undefined;
   const completeTagClearAvailable =
+    bankTagClearFunding !== undefined ||
     (tags > 0 && candidates.some(candidate =>
       candidate.semanticActionType === "tag.remove" &&
       !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
@@ -335,7 +338,9 @@ export function buildRunnerDefenseSignals(params: {
           damageThreat.flatlineRisk.uncappedRecommendedHandFloor,
       }
     : {};
-  const tagClearFundingActionIds = services.findFundingRoute({
+  const tagClearFundingActionIds = bankTagClearFunding?.firstStepActionId
+    ? [bankTagClearFunding.firstStepActionId]
+    : services.findFundingRoute({
     demandId: "runner-defense-tag-clear-funding",
     sourcePlanId: "runner.defense_and_recovery:runner",
     purpose: "foreground_plan",
@@ -364,10 +369,13 @@ export function buildRunnerDefenseSignals(params: {
       ? {
           needId: "runner-defense-tag-clear-funding",
           parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          targetCredits: tagClearTargetCredits,
+          targetCredits: tagClearTargetCredits * (bankTagClearFunding ? tags : 1),
           currentCreditsAtRevalidation: currentCredits,
-          gap: Math.max(0, tagClearTargetCredits - currentCredits),
+          gap: Math.max(0, tagClearTargetCredits * (bankTagClearFunding ? tags : 1) - currentCredits),
           actionIds: tagClearFundingActionIds,
+          ...(bankTagClearFunding ? {
+            bankFunding: { activeTags: tags, routeAssessment: bankTagClearFunding },
+          } : {}),
           revalidation: {
             stateVersion: input.playerView.stateVersion,
             status: "defense_parent_open",

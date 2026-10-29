@@ -89,7 +89,7 @@ export function corpIceRezSupportOperationSignal(
   );
   if (matches.length !== 1) return undefined;
   const { ice, serverId } = matches[0]!;
-  if (corpIceRezSupportTargetHasNoCurrentEffect(input, ice, serverId)) {
+  if (corpIceRezSupportTargetHasNoCurrentEffect(input, ice, serverId, action)) {
     return undefined;
   }
   const centralEvidence =
