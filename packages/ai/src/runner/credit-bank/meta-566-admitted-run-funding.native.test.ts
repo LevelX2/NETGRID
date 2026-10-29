@@ -164,10 +164,12 @@ it("does not invent a parent when shared run admission rejects the target", () =
   p.admission.admitted = false;
   expect(creditBankReplacesBasicRunFunding(p)).toBeUndefined();
 });
-it("keeps the whole existing basic funding prefix and the run inside the remaining actions", () => {
+it("admits the complete bank route when the basic funding prefix no longer fits", () => {
   const p = fundingParams();
   p.input.playerView.own.clicks = 3;
-  expect(creditBankReplacesBasicRunFunding(p)).toBeUndefined();
+  expect(creditBankReplacesBasicRunFunding(p)).toMatchObject({
+    runFunding: { routeAssessment: { totalClickCost: 1 } },
+  });
 });
 it("rejects a stale payout action at the current funding quote", () => {
   const p = fundingParams();
@@ -198,4 +200,24 @@ it("does not replace a one-action guaranteed income alternative with the bank", 
     },
   });
   expect(creditBankReplacesBasicRunFunding(p)).toBeUndefined();
+});
+
+it("does not treat a raw debt offer as an admitted ordinary income alternative", () => {
+  const p = fundingParams(),
+    basic = p.candidates.find((c) => c.actionType === "gain_credit")!;
+  p.candidates.push({
+    ...basic,
+    actionId: "unbound-debt-offer",
+    actionType: "install_card",
+    semanticActionType: "install.card",
+    strategicExchangeKinds: ["debt_financing"],
+    economyProjection: {
+      ...basic.economyProjection!,
+      grossLiquidCreditGain: 12,
+      netLiquidCreditGain: 12,
+    },
+  });
+  expect(creditBankReplacesBasicRunFunding(p)).toMatchObject({
+    runFunding: { routeAssessment: { totalClickCost: 1 } },
+  });
 });

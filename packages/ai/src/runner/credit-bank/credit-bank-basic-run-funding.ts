@@ -11,9 +11,11 @@ import {
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
 import { searchFundingRoutes } from "../../plans/funding-route";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
+import { runnerStrategicExchangeRequiresBoundParent } from "../../runtime/runner-strategic-exchange";
 
-/** The bank owner may replace an admitted repeated basic-credit prefix. The
- * existing run admission and a fresh quote still own payoff and run safety. */
+/** The bank owner may fund an admitted run with a strictly faster payout,
+ * including when other income cannot complete the current funding horizon.
+ * Existing run admission and a fresh quote still own payoff and run safety. */
 export function creditBankReplacesBasicRunFunding(params: {
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
@@ -43,7 +45,7 @@ export function creditBankReplacesBasicRunFunding(params: {
   )
     return undefined;
   const remainingClicks = input.playerView.own.clicks - 1;
-  if (remainingClicks < 2) return undefined;
+  if (remainingClicks < 1) return undefined;
   const needId = `run-support:central:${target.targetServerId}`;
   const parentPlanInstanceId = `plan:runner.pressure_central:${encodeURIComponent(`central:${target.targetServerId}`)}`;
   const demand = createRunnerCreditDemand({
@@ -72,14 +74,15 @@ export function creditBankReplacesBasicRunFunding(params: {
       (candidate) => candidate.actionType === "gain_credit",
     ),
   ).sort((left, right) => left.totalClickCost - right.totalClickCost)[0];
-  if (!basic || basic.totalClickCost < 2) return undefined;
+  if (basic && basic.totalClickCost < 2) return undefined;
   const cashOutIds = new Set(params.cashOutActionIds);
   const alternative = search(
     params.candidates.filter(
-      (candidate) => !cashOutIds.has(candidate.actionId),
+      (candidate) =>
+        !cashOutIds.has(candidate.actionId) &&
+        !runnerStrategicExchangeRequiresBoundParent(candidate),
     ),
   ).sort((left, right) => left.totalClickCost - right.totalClickCost)[0];
-  if (!alternative) return undefined;
   const bankRoutes = search(
     params.candidates.filter(
       (candidate) =>
@@ -90,8 +93,8 @@ export function creditBankReplacesBasicRunFunding(params: {
   );
   for (const route of bankRoutes) {
     if (
-      route.totalClickCost >= basic.totalClickCost ||
-      route.totalClickCost >= alternative.totalClickCost
+      (basic && route.totalClickCost >= basic.totalClickCost) ||
+      (alternative && route.totalClickCost >= alternative.totalClickCost)
     )
       continue;
     const actionIds = route.steps.map((step) => step.actionId);
@@ -115,7 +118,9 @@ export function creditBankReplacesBasicRunFunding(params: {
       priorityClass: "P4",
       evidenceCodes: [
         "runner_credit_bank_replaces_basic_run_funding",
-        `runner_credit_bank_replaced_basic_clicks:${basic.totalClickCost}`,
+        ...(basic
+          ? [`runner_credit_bank_replaced_basic_clicks:${basic.totalClickCost}`]
+          : ["runner_credit_bank_basic_income_cannot_complete_run_funding"]),
         `runner_credit_bank_cashout_clicks:${route.totalClickCost}`,
         ...admission.evidenceCodes,
       ],

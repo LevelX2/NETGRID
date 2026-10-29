@@ -3254,10 +3254,16 @@ Route-Suchen; der Schnitt ergänzt keine neue Parentkante im Scheduler.
 
 Eine reife manuelle Bank darf auch einen nicht dringlichen, bereits vom Central-Owner
 zugelassenen Runbedarf unterstützen, wenn ihre garantierte Auszahlung eine
-aktuell vollständig finanzierbare Folge mehrerer Basiscreditaktionen strikt
-verkürzt. Der Vergleich umfasst auch andere aktuelle garantierte Einnahmerouten;
+Folge mehrerer Basiscreditaktionen strikt verkürzt oder nur die Bankauszahlung
+die vollständige Finanzierung samt Run noch im Restzug ermöglicht. Eine im
+Restzug unmögliche Basisfolge ist keine Voraussetzung für die Zulassung einer
+vollständig geprüften Bankroute. Der Vergleich umfasst auch andere aktuelle garantierte Einnahmerouten;
 eine gleich schnelle Alternative wird nicht allein wegen des Bankguthabens
-verdrängt. Die erneute Quote desselben Runs nach Auszahlung muss die bestehenden
+verdrängt. Rohe Darlehens- oder Selbstschadensangebote, die einen eigenen
+gebundenen Parent benötigen, gelten dabei nicht als gewöhnliche sichere
+Einnahmealternative. Ihr tatsächlicher Parent konkurriert weiterhin regulär;
+der Bankvergleich erteilt ihm keine Ausführungsfreigabe.
+Die erneute Quote desselben Runs nach Auszahlung muss die bestehenden
 Hand-, Vorlauf- und Nachlaufreserven erhalten. Die Bank bindet den exakten
 Central-Parent, `supportNeedId`, Run und StateVersion und behält dessen P4-Stufe;
 sie erhält dadurch keinen dringlichen P2-Vorrang. Der bestehende Parent-Abgleich
