@@ -861,6 +861,10 @@ function evaluateRunnerRunTarget(
     installedImmediateAccessValue: combinedRunPayoff.immediateAccessValue,
     accessNoveltyRatio: payoff.accessNoveltyRatio,
     accessPayoffScoreAdjustment: payoff.scoreAdjustment,
+    creditDenialReplacesAccess: replacesAccessWithCreditDenial(
+      params.input,
+      projection,
+    ),
     visibleIceHazardPenalty,
     futureClicksLost,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
@@ -1545,11 +1549,14 @@ function accessReplacementPayoffForTarget(
       scoreAdjustment:
         denial > 0
           ? Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, denial * 8) -
-            scoreForPayoff("access_bonus")
+            scoreForPayoff("access_bonus") -
+            8 *
+              Math.max(0, params.input.playerView.own.credits - creditsAfterRun)
           : -640,
       evidence: [
         `central_access_replacement:${projection.accessReplacement}`,
         `central_access_replacement_visible_denial_upper_bound:${denial}`,
+        `central_access_replacement_known_general_credit_cost:${Math.max(0, params.input.playerView.own.credits - creditsAfterRun)}`,
         "central_access_replacement_normal_access:false",
       ],
     };
@@ -2126,6 +2133,7 @@ function scoreRunTargetEvaluation(params: {
   installedImmediateAccessValue: number;
   accessNoveltyRatio: number;
   accessPayoffScoreAdjustment: number;
+  creditDenialReplacesAccess: boolean;
   visibleIceHazardPenalty: number;
   futureClicksLost: number;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
@@ -2161,7 +2169,6 @@ function scoreRunTargetEvaluation(params: {
     params.installedRunPayoffScore - redundantInstalledAccessValue,
   );
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
-  const recommendationScore = recommendationRank(params.recommendation) * 20;
   const visibleIceHazardPenalty = -Math.max(0, params.visibleIceHazardPenalty);
   const futureClickPenalty = -Math.max(0, params.futureClicksLost) * 80;
   const randomBreakOrDamageRiskPenalty = randomBreakOrDamageRiskScorePenalty(
@@ -2172,7 +2179,7 @@ function scoreRunTargetEvaluation(params: {
     accessOutcomeMemorySuppressesCurrentPayoff(params)
       ? -360
       : 0;
-  return (
+  const payoffValue =
     payoffScore +
     pathPenalty +
     reservePenalty +
@@ -2183,9 +2190,15 @@ function scoreRunTargetEvaluation(params: {
     visibleIceHazardPenalty +
     futureClickPenalty +
     randomBreakOrDamageRiskPenalty +
-    accessOutcomeMemoryPenalty +
-    recommendationScore
-  );
+    accessOutcomeMemoryPenalty;
+  // Readiness cannot turn a losing credit exchange into a profitable access.
+  // Preserve the existing readiness preference once the replacement's actual
+  // payoff covers its known general-credit expenditure on the same scale.
+  const recommendationScore =
+    params.creditDenialReplacesAccess && payoffValue <= 0
+      ? 0
+      : recommendationRank(params.recommendation) * 20;
+  return payoffValue + recommendationScore;
 }
 
 function accessOutcomeMemorySuppressesCurrentPayoff(params: {

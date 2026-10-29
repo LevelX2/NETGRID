@@ -276,6 +276,18 @@ Zugriffswert. Verdeckte HQ-Karten, Multiaccess und ein möglicher Agenda-Steal
 begründen für diese Ersatzroute keinen Matchpoint-Bonus. Die normale HQ-
 Action behält ihre eigenständige Bewertung und denselben Central-Owner.
 
+Credit-Ersatzrouten vergleichen ihren begrenzten tatsächlichen Payoff mit dem
+allgemeinen Creditverbrauch der bekannten Runquote einschließlich Spielkosten.
+Beschränkte Run-Pools werden dabei nicht erneut als allgemeine Ausgabe gezählt.
+Beide Seiten des Vergleichs verwenden die vorhandene Credit-Wertskala. Ein
+Bereitschaftsbonus darf einen nichtpositiven Tausch nicht in einen positiven
+Zugriffswert verwandeln. Wirtschaftlich positive Denial-Routen behalten ihre
+Bereitschaftspräferenz; unbekannte spätere Rezzes sind weiterhin keine sicheren
+Kosten oder Erträge. Die nativen Zustände aus Paarung 567 sichern teuren
+Rest-Denial, verlustreiches Successful-Run-Einkommen und kostenlosen nützlichen
+Denial unter unverändertem Central-Owner ab. Selbsttag-Prävention und der
+optimale langfristige Denial-/Zugriffsmix bleiben eigene Bewertungsaufgaben.
+
 Der zusätzliche Wert einer HQ-Erfolgsfenster-Vorbereitung gehört zur konkret
 zugelassenen Runroute des Central-Signals. Ein auf Finanzierung verschobener
 Basisrun darf weder seinen Vorbereitungswert noch seine Begründung an einen
