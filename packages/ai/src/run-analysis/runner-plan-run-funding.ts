@@ -84,6 +84,8 @@ export function runnerRunFundingSupport(
     ? "runner.contest_remote"
     : "runner.pressure_central";
   const parentPlanInstanceId = `plan:${parentModule}:${encodeURIComponent(dedupeKey)}`;
+  const terminalKnownPathGap =
+    runnerTerminalRemoteLastChanceKnownPathFundingGap(input, evaluation);
   let route = runnerExactFundingRouteContract(input, candidates, {
     demandId: `run-support:${dedupeKey}`,
     sourcePlanId: parentPlanInstanceId,
@@ -96,6 +98,9 @@ export function runnerRunFundingSupport(
     targetCredits: input.playerView.own.credits + conservativeGap,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowStrategicExchange: true,
+    ...(terminalKnownPathGap !== undefined
+      ? { requireCompleteKnownPath: true }
+      : {}),
     paymentWindowTarget: evaluation,
     debtFinancingParent: {
       planInstanceId: parentPlanInstanceId,
@@ -116,11 +121,7 @@ export function runnerRunFundingSupport(
       admission.reasonCode,
     ],
   });
-  const terminalKnownPathGap =
-    route.routeActionIds.length === 0
-      ? runnerTerminalRemoteLastChanceKnownPathFundingGap(input, evaluation)
-      : undefined;
-  if (terminalKnownPathGap !== undefined) {
+  if (terminalKnownPathGap !== undefined && route.routeActionIds.length === 0) {
     const terminalRoute = runnerExactFundingRouteContract(input, candidates, {
       demandId: `run-support:${dedupeKey}`,
       sourcePlanId: parentPlanInstanceId,

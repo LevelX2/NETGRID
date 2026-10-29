@@ -93,11 +93,17 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
       );
       const requiredCreditsAfterRez =
         defense.best.totalSelectedRezCost - (selected?.credits ?? 0);
+      const costlessImmediateIncome =
+        route.totalRezCredits === 0 &&
+        (route.currentEncounterDefense?.activationCredits ?? 0) === 0 &&
+        route.quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
+        (route.immediateCorpCreditGain ?? 0) > 0;
       const preservesReserve =
-        selected !== undefined &&
-        route.totalRezCredits <= selected.credits &&
-        route.quote.mandatoryAdditionalCosts.agendaPoints <=
-          (selected.agendaPoints ?? 0) &&
+        (costlessImmediateIncome ||
+          (selected !== undefined &&
+            route.totalRezCredits <= selected.credits &&
+            route.quote.mandatoryAdditionalCosts.agendaPoints <=
+              (selected.agendaPoints ?? 0))) &&
         availableCreditsAfterRez >= requiredCreditsAfterRez;
       return {
         preservesReserve,

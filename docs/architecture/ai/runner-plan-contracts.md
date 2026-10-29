@@ -1863,8 +1863,11 @@ Creditlücke schließen. Der noch unfinanzierte Parent muss dafür nicht bereits
 `reachable` sein. Bei einer exakt dringlichen Score-Bedrohung ist auch seine
 durch `blocked_unpayable` negative aktuelle Bewertung kein Ausschluss der
 Finanzierung. Der garantierte Nettoertrag muss nach dem gesamten bekannten
-Run die vollständige Ausstiegsreserve erhalten; der Konversionsklick bleibt
-reserviert. Fehlende Coverage, andere Pfadsperren, unzureichende Reserve und
+Run die vollständige Ausstiegsreserve erhalten. Nur ein direkt zwingender
+terminaler Remote-Contest mit vollständig bekanntem, garantiert erreichbarem
+Pfad ohne Finanzierungslücke darf diese spätere Rückzahlungsreserve bis auf
+null verbrauchen; der Konversionsklick bleibt reserviert. Fehlende Coverage,
+andere Pfadsperren, außerhalb dieser Ausnahme unzureichende Reserve und
 ungebundene oder spekulative Darlehensverwendung bleiben ausgeschlossen.
 Ein an der ersten unbezahlbaren Subroutine abgebrochener Pfad ist dabei nur
 ein bekannter Kostenpräfix. Die Finanzierungszulassung prüft denselben
@@ -1872,6 +1875,12 @@ Action-/Server-Parent erneut mit dem garantierten Nettobudget und dem
 Handverbrauch der Finanzierungsaktion. Nur dessen vollständiger erreichbarer
 Pfad darf die Ausstiegsreserve belegen; die aktuelle LegalAction und ihre
 StateVersion bleiben die Ausführungsautorität.
+Beim letzten zwingenden Contest gilt die Vollpfadprüfung bereits für die
+erste Funding-Suche. Eine bezahlbare Teilstrecke darf keine unvollständige
+Basic-Credit-Folge zertifizieren und dadurch die vollständige Finanzierung
+verdrängen. Paarung 568 G15 D440 und D442 belegen den bekannten 26-Credit-Pfad:
+Loan finanziert ihn rechtzeitig, während einzelne Basiscredits den letzten
+Run-Klick verbrauchen würden.
 Die Handkosten zählen auch Installationen aus dem von der Engine gebundenen
 Grip-/HQ-Bereich; eine Installation aus einem anderen Bereich verbraucht
 keine Handkarte. Der finanzierte Zustand muss außerdem die bestehende

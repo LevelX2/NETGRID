@@ -1270,6 +1270,14 @@ G15 D87 bleibt als Minotaur ohne äußeres aktives Gate ein Decline-Gegenfall.
 Die Route wird erst nach `assessCorpExactIceRezAgainstScoreReserves`
 zugelassen: veröffentlichte Score-Fortsetzungen, andere bedrohte Agenden und
 notwendige weitere ICE im laufenden Run behalten ihre konkreten Reserven.
+Auch vor einem terminalen Zugriff darf eine solche exakt kostenlose
+Einkommensroute diese Reserven erhalten, obwohl ihre Quelle nicht zum zuvor
+berechneten bezahlten Verteidigungspaket gehört. Die belegte Endbank muss
+weiterhin sämtliche übrigen Rez-Kosten decken; bezahlte Aktivierungen oder
+Agendakosten erhalten keine Ausnahme. Paarung 568 G40 D317 belegt Chihuahua
+für null Credits mit zwei sofortigen Credits und weiterhin fünf Credits für
+Dog Pile. Der native Gegenzweig endet nach dem Rez mit einem Runner-Abbruch;
+ein vollständiger alternativer Matchsieg ist dadurch nicht nachgewiesen.
 Für eine bereits ausgelöste, exakt gebundene bezahlte Umleitungs-Choice
 bewertet ebenfalls `corp.defend_servers` den aktuellen Zugriff. Eine spätere
 Score-Creditreserve darf einen vollständig bezahlbaren Ausweg vor aktuellem

@@ -477,11 +477,7 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
     return false;
   }
   const netGain = projection.netLiquidCreditGain;
-  if (
-    typeof netGain !== "number" ||
-    !Number.isFinite(netGain) ||
-    parent.creditsAfterRun + netGain < profile.leavePlayPayCost
-  )
+  if (typeof netGain !== "number" || !Number.isFinite(netGain) || netGain <= 0)
     return false;
   const action = input.legalActions.find(
     (entry) => entry.actionId === candidate.actionId,
@@ -510,20 +506,31 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
   });
   if (!funded) return false;
   const fundedTarget = funded.target;
+  const mandatoryCompleteContest =
+    runnerTerminalRemoteContestIsDirectlyMandatory(
+      funded.input,
+      fundedTarget,
+    ) &&
+    fundedTarget.routeQuote?.reachability === "guaranteed_access" &&
+    fundedTarget.routeQuote.fundingGap === 0 &&
+    fundedTarget.routeQuote.unknownIceCount === 0;
+  // A fully quoted last-chance contest may consume the repayment reserve:
+  // preserving future debt cash cannot justify conceding the current game.
+  // Every other route still has to retain the complete leave-play payment.
+  const requiredExitReserve = mandatoryCompleteContest
+    ? 0
+    : profile.leavePlayPayCost;
   return (
     !runnerCriticalDamageContestBlocked(funded.input, fundedTarget) &&
     (runnerRunTargetIsDirectlyConvertible({
       target: fundedTarget,
-      economy: { minimumCreditFloor: profile.leavePlayPayCost },
-      requiredPostRunReserve: profile.leavePlayPayCost,
+      economy: { minimumCreditFloor: requiredExitReserve },
+      requiredPostRunReserve: requiredExitReserve,
     }) ||
-      runnerTerminalRemoteContestIsDirectlyMandatory(
-        funded.input,
-        fundedTarget,
-      )) &&
+      mandatoryCompleteContest) &&
     fundedTarget.pathPassability === "reachable" &&
     fundedTarget.prerunReserveQuote?.status !== "blocked" &&
-    fundedTarget.creditsAfterRun >= profile.leavePlayPayCost
+    fundedTarget.creditsAfterRun >= requiredExitReserve
   );
 }
 
