@@ -1,3 +1,4 @@
+import { delayedAgendaAccessReplacementEffect } from "./access-run-effects";
 import type {
   CardDefinition,
   CardInstanceId,
@@ -643,19 +644,6 @@ export function applyPendingAgendaPointBonusToStolenAgenda(
       delayedEffectInstanceIds: bonus.sourceEffectInstanceIds.join(","),
     };
   }
-}
-
-export function delayedAgendaAccessReplacementEffect(
-  run: ActiveRun,
-):
-  | Extract<
-      NonNullable<ActiveRun["runDurationEffects"]>[number],
-      { kind: "delayed_agenda_access_replacement" }
-    >
-  | undefined {
-  return run.runDurationEffects?.find(
-    (effect) => effect.kind === "delayed_agenda_access_replacement",
-  );
 }
 
 export function delayAgendaAccessReplacementScore(

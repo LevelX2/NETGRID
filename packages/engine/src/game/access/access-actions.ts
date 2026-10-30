@@ -23,6 +23,8 @@ import {
   runnerProgramInstallMemoryReachable,
 } from "../install/runner-program-install-memory";
 
+import { delayedAgendaAccessReplacementEffect } from "./access-run-effects";
+
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 type AccessQueueZone = ActiveBreach["queue"][number]["zone"];
@@ -244,6 +246,9 @@ export function buildRunnerAccessActions(
       );
       return { handled: true, legalActions };
     }
+    const replacementPayload = delayedAgendaAccessReplacementEffect(run)
+      ? { agendaAccessReplacement: "delay_score_until_runner_next_turn_start" }
+      : undefined;
     const accessServerId =
       run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
     const stealCostQuote = quoteStealCostForAccessedAgenda(
@@ -295,6 +300,7 @@ export function buildRunnerAccessActions(
             {
               cardId: run.accessedCardId,
               ...stealCostQuote.publicPayload,
+              ...replacementPayload,
             },
           ),
           declineStealAction,
@@ -311,6 +317,8 @@ export function buildRunnerAccessActions(
           "steal_agenda",
           `${definition.title} stehlen`,
           run.accessedCardId,
+          [],
+          replacementPayload,
         ),
       ],
     };

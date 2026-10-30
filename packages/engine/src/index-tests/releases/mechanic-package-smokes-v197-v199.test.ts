@@ -645,83 +645,139 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("delays agenda scoring after Bizarre Encryption Scheme is accessed and resolves it at Runner turn start", () => {
-    let state = toRunnerTurn(v199CardReleaseGame("v199-bizarre-encryption"));
-    state.runner.credits = 20;
-    state.corp.credits = 20;
-    putCorpRootInRemote(state, "onr_v1_351_bizarre-encryption-scheme");
-    const agendaId = putCorpRootInRemote(state, "onr_v1_203_hostile-takeover");
-
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
-    );
-    state = passRootRezWindowBeforeAccessIfOpen(state);
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    state = apply(state, "runner", (action) => action.type === "decline_trash");
-    expect(state.run?.runDurationEffects).toEqual([
-      expect.objectContaining({
-        kind: "delayed_agenda_access_replacement",
-        sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
-        serverId: "remote_1",
-        replacementWindow: "agenda_access",
-        delayUntil: "runner_next_turn_start",
-      }),
-    ]);
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    state = apply(state, "runner", (action) => action.type === "steal_agenda");
-    expect(state.runner.scoreArea).not.toContain(agendaId);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "steal_agenda",
-      agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
-      delayedAgendaAccessScoreScheduled: true,
-      delayedAgendaAccessSourceDefinitionId:
+  it.each([0, 5])(
+    "delays agenda scoring after Bizarre Encryption Scheme is accessed and resolves it at Runner turn start (steal credits %s)",
+    (stealCredits) => {
+      let state = toRunnerTurn(v199CardReleaseGame("v199-bizarre-encryption"));
+      state.runner.credits = 20;
+      state.corp.credits = 20;
+      const bizarreId = putCorpRootInRemote(
+        state,
         "onr_v1_351_bizarre-encryption-scheme",
-    });
-    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
-      "agendaPoints",
-    );
-    expect(state.delayedAccessEffects).toEqual([
-      {
-        kind: "delayed_agenda_access_replacement",
-        agendaId,
-        serverId: "remote_1",
-        sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
-        sourceCardInstanceId: expect.any(String),
-        resolveAt: "runner_start_turn",
-      },
-    ]);
+      );
+      const agendaId = putCorpRootInRemote(
+        state,
+        "onr_v1_203_hostile-takeover",
+      );
+      if (stealCredits > 0) {
+        const redId = "bizarre-paid-steal-red-herrings" as typeof agendaId;
+        state.cardInstances[redId] = {
+          ...state.cardInstances[bizarreId]!,
+          instanceId: redId,
+          definitionId: CARD_DEFINITIONS_BY_ID["onr_v1_366_red-herrings"]!.id,
+          faceup: true,
+          rezzed: true,
+        };
+        state.corp.servers
+          .find((server) => server.id === "remote_1")!
+          .root.push(redId);
+      }
 
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    state = apply(state, "corp", (action) => action.type === "end_turn");
-    if (
-      state.pendingChoice?.source === "discard_phase" &&
-      state.pendingChoice.side === "corp"
-    ) {
-      state = applyChoice(
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.serverId === "remote_1",
+      );
+      state = passRootRezWindowBeforeAccessIfOpen(state);
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "decline_trash",
+      );
+      expect(state.run?.runDurationEffects).toEqual([
+        expect.objectContaining({
+          kind: "delayed_agenda_access_replacement",
+          sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+          serverId: "remote_1",
+          replacementWindow: "agenda_access",
+          delayUntil: "runner_next_turn_start",
+        }),
+      ]);
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      const steal = getLegalActions(state, "runner").find(
+        (action) => action.type === "steal_agenda",
+      )!;
+      expect(
+        steal.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+      ).toBe(stealCredits);
+      expect(steal.payload).toMatchObject({
+        agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+      });
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "steal_agenda",
+      );
+      expect(state.runner.scoreArea).not.toContain(agendaId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "steal_agenda",
+        agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+        delayedAgendaAccessScoreScheduled: true,
+        delayedAgendaAccessSourceDefinitionId:
+          "onr_v1_351_bizarre-encryption-scheme",
+      });
+      expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+        "agendaPoints",
+      );
+      expect(state.delayedAccessEffects).toEqual([
+        {
+          kind: "delayed_agenda_access_replacement",
+          agendaId,
+          serverId: "remote_1",
+          sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+          sourceCardInstanceId: expect.any(String),
+          resolveAt: "runner_start_turn",
+        },
+      ]);
+
+      if (stealCredits > 0) {
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "access_card",
+        );
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "decline_trash",
+        );
+      }
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      state = apply(
         state,
         "corp",
-        String(state.pendingChoice.options[0]?.id),
+        (action) => action.type === "mandatory_draw",
       );
-    }
-    expect(state.runner.scoreArea).toContain(agendaId);
-    expect(state.delayedAccessEffects).toBeUndefined();
-    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          kind: "score_agenda",
-          side: "runner",
-          cardDefinitionId: "onr_v1_203_hostile-takeover",
-          sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
-          reason: "start_of_turn",
-          visibility: "public",
-        }),
-      ]),
-    );
-  });
+      state = apply(state, "corp", (action) => action.type === "end_turn");
+      if (
+        state.pendingChoice?.source === "discard_phase" &&
+        state.pendingChoice.side === "corp"
+      ) {
+        state = applyChoice(
+          state,
+          "corp",
+          String(state.pendingChoice.options[0]?.id),
+        );
+      }
+      expect(state.runner.scoreArea).toContain(agendaId);
+      expect(state.delayedAccessEffects).toBeUndefined();
+      expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "score_agenda",
+            side: "runner",
+            cardDefinitionId: "onr_v1_203_hostile-takeover",
+            sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+            reason: "start_of_turn",
+            visibility: "public",
+          }),
+        ]),
+      );
+    },
+  );
 
   it("allows Bizarre Encryption Scheme installs only in subsidiary data forts", () => {
     let state = v199CardReleaseGame("v199-bizarre-encryption-install");

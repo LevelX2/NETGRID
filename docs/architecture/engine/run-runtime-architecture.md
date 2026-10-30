@@ -55,6 +55,15 @@ ihnen aber nicht zurückimportiert.
 
 ## Nicht offensichtliche Verträge
 
+- Ein aktiver verzögerter Agenda-Zugriffsersatz wird bereits in der freien
+  oder bezahlten `steal_agenda`-LegalAction als
+  `agendaAccessReplacement: delay_score_until_runner_next_turn_start`
+  ausgewiesen. Angebotsprojektion und Ausführung verwenden denselben
+  Run-Effekt aus `access-run-effects.ts`. Die Agenda bleibt dabei bis zur
+  späteren Auflösung im Corp-Fort; der Zugriff ist deshalb kein gewöhnlicher
+  sofortiger Steal. Normale Steals und die gesonderte Installation einer
+  Agenda als Runner-Programm behalten ihren jeweiligen Vertrag.
+
 - `visibleBreakerCoverageQuote` liefert strukturelle Break-Abdeckung ohne
   aktuellen Stärkewert und ohne künftigen Zufallswurf. Sie verwendet denselben
   kanonischen Matcher wie `visibleBreakerEncounterQuote`; letztere ergänzt
