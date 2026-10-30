@@ -292,6 +292,16 @@ export function visibleIceRunHazardsForQuote(params: {
               cheapestCorpMaxTraceAvoidance.creditCost,
           }
         : {}),
+      ...(visibleCorpMaxTraceAvoidance?.minimumSafeGeneralCreditRequirement !==
+      undefined
+        ? {
+            visibleCorpMaxTraceFundingGap: Math.max(
+              0,
+              visibleCorpMaxTraceAvoidance.minimumSafeGeneralCreditRequirement -
+                traceSupport.availableCredits,
+            ),
+          }
+        : {}),
       ...(traceSuccessCancel
         ? { traceSuccessCancelAvoidanceCost: traceSuccessCancel.activationCost }
         : {}),
@@ -343,6 +353,16 @@ export function visibleIceRunHazardsForQuote(params: {
         ...(cheapestCorpMaxTraceAvoidance
           ? [
               `visible_corp_max_trace_avoidance_cost:${cheapestCorpMaxTraceAvoidance.creditCost}`,
+            ]
+          : []),
+        ...(visibleCorpMaxTraceAvoidance?.minimumSafeGeneralCreditRequirement !==
+        undefined
+          ? [
+              `visible_corp_max_trace_funding_gap:${Math.max(
+                0,
+                visibleCorpMaxTraceAvoidance.minimumSafeGeneralCreditRequirement -
+                  traceSupport.availableCredits,
+              )}`,
             ]
           : []),
         ...(traceSuccessCancel
@@ -478,6 +498,7 @@ export function visibleIceRunHazardForTraceEffect(
       | "visibleCorpMaxTraceCovered"
       | "traceAvoidanceCost"
       | "visibleCorpMaxTraceAvoidanceCost"
+      | "visibleCorpMaxTraceFundingGap"
       | "traceBidCost"
       | "baseLinkValue"
       | "baseLinkActivationCost"
@@ -666,6 +687,7 @@ type VisibleTraceAvoidanceCandidate = VisibleRunnerTraceSupportOption & {
 };
 
 type VisibleTraceAvoidanceAssessment = {
+  minimumSafeGeneralCreditRequirement?: number;
   cheapestSafe?: VisibleTraceAvoidanceCandidate;
   cheapestAffordableSafe?: VisibleTraceAvoidanceCandidate;
   cheapestUnsafe?: VisibleTraceAvoidanceCandidate;
@@ -885,6 +907,16 @@ export function visibleTraceAvoidanceForBaseStrength(
     }),
   );
   const assessment: VisibleTraceAvoidanceAssessment = {};
+  const safeCandidates = candidates.filter(
+    (candidate) => candidate.safeForAccess,
+  );
+  if (safeCandidates.length > 0) {
+    // Funding must cover payment before any avoid-trace reward. Trace strength
+    // (including base link) and net cost are not a general-credit budget.
+    assessment.minimumSafeGeneralCreditRequirement = Math.min(
+      ...safeCandidates.map((candidate) => candidate.grossGeneralCreditCost),
+    );
+  }
   const cheapestSafe = cheapestTraceAvoidanceCandidate(
     candidates.filter((candidate) => candidate.safeForAccess),
   );

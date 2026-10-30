@@ -218,6 +218,8 @@ export type VisibleIceRunHazard = {
   visibleCorpMaxTraceCovered?: boolean;
   traceAvoidanceCost?: number;
   visibleCorpMaxTraceAvoidanceCost?: number;
+  /** General cash missing before payment, excluding later avoid-trace rewards. */
+  visibleCorpMaxTraceFundingGap?: number;
   traceSuccessCancelAvoidanceCost?: number;
   traceBidCost?: number;
   baseLinkValue?: number;

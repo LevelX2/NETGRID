@@ -220,7 +220,6 @@ export function runnerTerminalRemoteContestVisibleHazardFundingGap(
     evaluation.pathPassability !== "reachable" ||
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessPayoffContestable === false ||
-    evaluation.recommendation !== "gain_credits_first" ||
     evaluation.visibleTraceTagHazardUnavoidable !== true
   ) {
     return undefined;
@@ -228,13 +227,8 @@ export function runnerTerminalRemoteContestVisibleHazardFundingGap(
   const gap = Math.max(
     0,
     ...(evaluation.visibleIceRunHazards ?? []).map((hazard) =>
-      hazard.unavoidable &&
-      hazard.visibleCorpMaxTraceAvoidanceCost !== undefined
-        ? Math.max(
-            0,
-            hazard.visibleCorpMaxTraceAvoidanceCost -
-              hazard.runnerTraceCapacity,
-          )
+      hazard.unavoidable && hazard.visibleCorpMaxTraceFundingGap !== undefined
+        ? hazard.visibleCorpMaxTraceFundingGap
         : 0,
     ),
   );

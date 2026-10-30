@@ -529,7 +529,9 @@ function runnerFundingRouteConsumerBufferFits(
       fundedTarget?.pathPassability !== "reachable" ||
       fundedTarget.routeQuote?.reachability !== "guaranteed_access" ||
       fundedTarget.routeQuote.unknownIceCount !== 0 ||
-      fundedTarget.routeQuote.fundingGap !== 0
+      fundedTarget.routeQuote.fundingGap !== 0 ||
+      fundedTarget.visibleTraceTagHazardUnavoidable === true ||
+      (fundedTarget.unavoidableVisibleIceHazardCount ?? 0) > 0
     )
       return false;
   }

@@ -82,6 +82,14 @@ belasten das allgemeine Teilkonto unmittelbar. Mehrere Trace-Subroutinen und
 aufeinanderfolgende ICE konsumieren denselben Ledger. Dedizierte, von der
 Engine projizierte Trace-Pools bleiben zusätzlich verwendbar.
 
+Die Finanzierungsquote einer sichtbaren Tracegefahr vergleicht ausschließlich
+allgemeinen Geldbedarf mit dem dafür verfügbaren Geld. Basislink ist Stärke,
+kein Credit. Eine Belohnung nach erfolgreicher Abwehr senkt die Nettokosten,
+bezahlt aber nicht das vorangehende Gebot. Der bestehende Hazardproducer
+liefert dafür die fehlende allgemeine Vorabzahlung einer sicheren gequoteten
+Link-/Gebotsroute; dedizierte Trace-Pools sind bereits abgezogen. Fehlt diese
+Quote, rekonstruiert der Remote-Consumer sie nicht aus Stärke oder Nettopreis.
+
 Eine abgeschlossene Pfadquote liefert diesen Ledger im
 `creditBudgetAfterPath`; Nachlauf- und Zugriffsbudgets übernehmen daraus das
 verbleibende allgemeine Geld. Sie rekonstruieren es nicht aus einer pauschalen
@@ -317,6 +325,15 @@ Consumer muss mit dem tatsächlichen Folgenbudget garantierten Zugriff ohne
 weitere Finanzierungslücke nachweisen. Die vorhandene Handreserveprüfung bleibt
 zusätzlich verbindlich. Diese Ressourcenprüfung erzeugt keine LegalAction und
 keine zusätzliche Entscheidungsautorität.
+
+Auch eine Finanzierung zur Abwehr sichtbarer Tracegefahr verwendet diese
+vollständige Nachprüfung. Die gebundene Fundingfolge muss mit ihrem wirklichen
+Folgebudget den ganzen bekannten Run ohne unvermeidbare Restgefahr erreichen;
+ein kleinerer lokaler Fehlbetrag genügt nicht. Der konkrete Tracebedarf bleibt
+auch bei einer allgemeinen `run_now`-Empfehlung erhalten. Nach realer Auszahlung
+entscheidet derselbe Remote-Parent erneut über den Run. Die native Kontrolle
+prüft den knappen Originalzustand sowie die ausreichend finanzierte Gegenfolge
+einschließlich maximalem gegnerischem Gebot und deterministischem Replay.
 
 Ein vor der Finanzierung als nicht bestreitbar bewerteter Zugriff sperrt diese
 prospektive Prüfung nicht: `accessPayoffContestable: false` kann allein aus der

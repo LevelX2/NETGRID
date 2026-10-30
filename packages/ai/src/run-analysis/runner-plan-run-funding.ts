@@ -98,7 +98,8 @@ export function runnerRunFundingSupport(
     targetCredits: input.playerView.own.credits + conservativeGap,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowStrategicExchange: true,
-    ...(terminalKnownPathGap !== undefined
+    ...(terminalKnownPathGap !== undefined ||
+    terminalVisibleHazardFundingGap !== undefined
       ? { requireCompleteKnownPath: true }
       : {}),
     paymentWindowTarget: evaluation,
