@@ -66,8 +66,9 @@ export function runnerTerminalRemoteLastChanceKnownPathFundingGap(
   // prove the complete funded path and revalidate the exact Remote parent.
   if (
     !runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) ||
-    evaluation.pathPassability !== "blocked_unpayable" ||
-    evaluation.recommendation !== "gain_credits_first" ||
+    ((evaluation.pathPassability !== "blocked_unpayable" ||
+      evaluation.recommendation !== "gain_credits_first") &&
+      !runnerTerminalRemoteContestHasNonlethalDamageFloor(evaluation)) ||
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.visibleTraceTagHazardUnavoidable === true ||
     (evaluation.routeQuote?.unknownIceCount ?? 0) > 0 ||
@@ -219,11 +220,20 @@ function runnerTerminalRemoteContestIsNonlethalDamageFloorLastChance(
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
   return (
+    evaluation.routeQuote !== undefined &&
+    evaluation.routeQuote.fundingGap <= 0 &&
+    runnerTerminalRemoteContestHasNonlethalDamageFloor(evaluation)
+  );
+}
+
+function runnerTerminalRemoteContestHasNonlethalDamageFloor(
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
     evaluation.pathPassability === "blocked_by_visible_damage_hand_buffer" &&
     evaluation.routeQuote !== undefined &&
     (evaluation.routeQuote.reachability !== "no_access" ||
       evaluation.routeQuote.blockedOnlyByDamage === true) &&
-    evaluation.routeQuote.fundingGap <= 0 &&
     evaluation.evidence.some(
       (entry) =>
         entry.startsWith(

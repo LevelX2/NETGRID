@@ -526,7 +526,12 @@ function runnerFundingRouteConsumerBufferFits(
         createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
     }).find((entry) => entry.actionId === target.actionId);
     if (
-      fundedTarget?.pathPassability !== "reachable" ||
+      !fundedTarget ||
+      (fundedTarget.pathPassability !== "reachable" &&
+        !runnerTerminalRemoteContestIsDirectlyMandatory(
+          fundedInput,
+          fundedTarget,
+        )) ||
       fundedTarget.routeQuote?.reachability !== "guaranteed_access" ||
       fundedTarget.routeQuote.unknownIceCount !== 0 ||
       fundedTarget.routeQuote.fundingGap !== 0 ||

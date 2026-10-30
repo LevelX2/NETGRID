@@ -42,7 +42,7 @@ export function runnerAgendaStealCreditRequirement(
     quoteAgendaDefinitionSelfStealCreditCost(id, serverId),
   );
   if (selfCosts.some((cost) => cost === undefined)) return undefined;
-  // Central access may select any known agenda, so reserve the largest single self-cost.
+  // Remembered access may select any known agenda; reserve its largest single self-cost.
   const cost =
     quote.minimumCreditCost + Math.max(...selfCosts.map((cost) => cost!));
   return Number.isSafeInteger(cost) ? cost : undefined;

@@ -37,13 +37,16 @@ export function runnerRunFundingSupport(
 ): RunnerRunFundingSupport | undefined {
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
+  const terminalKnownPathGap =
+    runnerTerminalRemoteLastChanceKnownPathFundingGap(input, evaluation);
   const urgentPayoff = runnerRunHasExactUrgency(input, evaluation);
   const hasStructuredFundingNeed =
     evaluation.fundingNeed !== undefined &&
     evaluation.fundingNeed.reason !== "none";
   if (
     evaluation.knownAccessState === "known_no_current_payoff" ||
-    evaluation.recommendation === "draw_for_damage_buffer" ||
+    (evaluation.recommendation === "draw_for_damage_buffer" &&
+      terminalKnownPathGap === undefined) ||
     evaluation.accessTargetKind === "archives" ||
     input.playerView.own.clicks <= 1 ||
     (evaluation.score <= 0 &&
@@ -71,11 +74,17 @@ export function runnerRunFundingSupport(
     urgentScoreThreat: urgentPayoff,
     ...(requiredPostRunReserve !== undefined ? { requiredPostRunReserve } : {}),
   });
-  if (!admission.admitted && terminalVisibleHazardFundingGap === undefined) {
+  if (
+    !admission.admitted &&
+    terminalVisibleHazardFundingGap === undefined &&
+    terminalKnownPathGap === undefined
+  ) {
     return undefined;
   }
   const conservativeGap =
-    terminalVisibleHazardFundingGap ?? admission.concreteFundingGap;
+    terminalKnownPathGap ??
+    terminalVisibleHazardFundingGap ??
+    admission.concreteFundingGap;
   const remote = evaluation.accessTargetKind === "remote";
   const dedupeKey = remote
     ? `remote:${evaluation.targetServerId}`
@@ -84,8 +93,6 @@ export function runnerRunFundingSupport(
     ? "runner.contest_remote"
     : "runner.pressure_central";
   const parentPlanInstanceId = `plan:${parentModule}:${encodeURIComponent(dedupeKey)}`;
-  const terminalKnownPathGap =
-    runnerTerminalRemoteLastChanceKnownPathFundingGap(input, evaluation);
   let route = runnerExactFundingRouteContract(input, candidates, {
     demandId: `run-support:${dedupeKey}`,
     sourcePlanId: parentPlanInstanceId,

@@ -157,6 +157,13 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       "onr_proteus_004_fetal-ai",
       "evt-access",
     );
+    input.playerView.servers[0]!.root[0]!.effectiveStealCostQuote = {
+      stateVersion: 12,
+      serverId: "remote_1",
+      agendaInstanceId: "known-damage-agenda",
+      creditCost: 2,
+      complete: true,
+    };
 
     const unsafe = evaluateKnownRemoteAccessPayoff(input, "remote_1", belief);
     expect(unsafe).toMatchObject({

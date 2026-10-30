@@ -227,6 +227,7 @@ export function evaluateKnownRemoteAccessPayoff(
     const observedStealCost = runnerAgendaStealCreditRequirement(
       input,
       serverId,
+      agendaRoots.map((root) => root.definitionId),
     );
     const stealAffordable =
       observedStealCost !== undefined && creditsAfterPath >= observedStealCost;

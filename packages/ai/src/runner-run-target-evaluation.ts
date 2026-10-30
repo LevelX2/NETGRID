@@ -547,7 +547,8 @@ function evaluateRunnerRunTarget(
     ? runnerAgendaStealCreditRequirement(
         params.input,
         accessServerId,
-        knownCentralAgenda
+        payoff.accessPayoff === "agenda" &&
+          payoff.accessFacts.knownTargetDefinitionIds.length > 0
           ? payoff.accessFacts.knownTargetDefinitionIds
           : undefined,
       )

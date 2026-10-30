@@ -584,6 +584,18 @@ und Wissensinvalidierung bleiben beim bestehenden Belief-Owner. Paarung 559
 G10 D239 sichert den Originalzustand nach dem Aufdecken einer TRAP sowie
 die produktive Planentscheidung und die relevanten Gegenfälle.
 
+Erinnerte, weiterhin gültige Remoteagenden geben ihre Definitionsidentität
+an dieselbe Engine-Selbstkostenquote wie bekannte Zentralagenden weiter.
+Der aktuelle vollständige Servermodifikator bleibt zusätzlich gebunden; eine
+wieder verdeckte Root wird dadurch nicht öffentlich aufgedeckt.
+Fehlt einer terminalen, vollständig bekannten Route nur die Finanzierung,
+darf der vorhandene Last-Chance-Finanzierungsbedarf auch eine bereits
+zulässige nichttödliche Handreserve-Unterschreitung vorbereiten. Vor der
+Freigabe wird die komplette Route mit den garantierten Ressourcen neu
+gequotet. Unbekannte ICE, tödlicher Schaden oder fehlender Endklick
+erhalten keine Freigabe. Finanzierung und Run behalten denselben
+`runner.contest_remote`-Parent.
+
 Jede unmittelbar ausführbare Run-Variante prüft ihre eigene Vorabreserve.
 Die Bereitschaft einer Bypass-Variante desselben Servers zertifiziert weder
 den normalen Run noch dessen unbekannte Encounters. Ein blockierter
