@@ -1013,7 +1013,7 @@ nicht als `answerInHand` ersetzen. Die Beschaffungsphase behält damit das
 gewählte Ziel; eine weitere Kopie des bereits teuren Breakers wird nicht
 zur Installationsantwort dieses Recovery-Bedarfs.
 
-Ein konkreter Remote-Parent darf außerdem eine sichtbare Handinstallation als
+Ein konkreter Remote- oder Zentraldruck-Parent darf außerdem eine sichtbare Handinstallation als
 Kosten-Vorbereitung binden, auch wenn seine ICE-Kette noch unbekannte Teile
 enthält. Der Coverage-Owner vergleicht dafür den bekannten Pfad mit dem
 aktuellen und dem ergänzten Rig einschließlich sichtbarer zusätzlicher
@@ -1021,12 +1021,24 @@ Break-Gebühren. Die Installation muss legal, ohne Programmopfer und mit freier
 MU ausführbar sein. Ihre Kosten müssen sich bereits auf dem bekannten Pfad
 dieses einen Runs ausgleichen; Installations- und Run-Klick sowie die gesamte
 bekannte Creditquote müssen im aktuellen Zug verfügbar bleiben. Ein bekannter
-nicht finanzierter Zugriff oder ein fehlender positiver Remote-Payoff lässt
+nicht finanzierter Zugriff oder ein fehlender positiver Parent-Payoff lässt
 diese Vorbereitung nicht zu.
+
+Bei Zentraldruck bleiben die aktuelle positive Basisrun-Empfehlung, materieller
+Zugriffswert, verfügbare Zugriffskadenz und erfüllte Prerun-Reserve Voraussetzung.
+Die bekannte Ersparnis muss Installation und entgangene Basiscredit-Klicks
+bereits bei diesem einen Run übersteigen. Nach Verbrauch von Karte, Klicks,
+Credits und MU wird derselbe Run neu gequotet. Zugriff und Hand-/ICE-Reserve
+müssen weiterhin zulässig sein; das Restgeld nach bekanntem Pfad und Zugriff
+darf nicht unter die schon zugelassene Ausgangsroute fallen. Ein allgemeines
+späteres Economy-Auffüllziel ersetzt diesen gebundenen Budgetvergleich nicht.
+Der bestehende Coverage-Kindplan führt ausschließlich die aktuelle
+Installation unter demselben Zentralparent aus. Die tatsächlich neue
+Runbewertung entscheidet anschließend über den Run.
 
 Die Quote garantiert nur die Einsparung am bekannten Pfad. Unbekannte ICE und
 spätere Rez-Entscheidungen bleiben ausdrücklich bedingt. Nach der Installation
-bewertet der bestehende Remote-Parent Pfad, Zugriff und Reserven mit dem neuen
+bewertet der bestehende Parent Pfad, Zugriff und Reserven mit dem neuen
 Rig erneut; eine Reserve aus dem alten Rig darf eine konkret gebundene,
 kostenneutrale Vorbereitung nicht als beliebige überlappende Installation
 verwerfen. Direkte terminale Runs auf vollständig bekannten, bereits

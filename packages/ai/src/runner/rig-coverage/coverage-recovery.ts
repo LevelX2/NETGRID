@@ -26,7 +26,7 @@ import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
 export type RunnerCostEffectiveCoverageRecovery = Readonly<{
   requiredRole: RunnerCoverageGapSignal["requiredRole"];
   totalRecoveryCost: number;
-  remotePreparation?: true;
+  sameTurnPreparation?: true;
   sameTurnRunConversion?: RunnerCoverageGapSignal["sameTurnRunConversion"];
   visibleAnswer?: VisibleCard;
   deckHasAlternative: boolean;

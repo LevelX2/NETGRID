@@ -1,3 +1,7 @@
+import {
+  runnerCentralPressureHasMaterialMarginalValue,
+  runnerCentralPressureCadence,
+} from "../../runner/central-pressure/central-pressure-signals";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import {
@@ -23,7 +27,7 @@ import {
 import { afterEach, expect, it } from "vitest";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
-import { runnerRemoteBreakerPreparation } from "../../runner/rig-coverage/coverage-remote-breaker-preparation";
+import { runnerSameTurnBreakerPreparation } from "../../runner/rig-coverage/coverage-same-turn-breaker-preparation";
 import { runnerRunTargetCanConvertNow } from "../../run-analysis/runner-plan-run-funding";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -154,17 +158,21 @@ it.each([
     )!;
     if (variant === "known_no_payoff")
       target.knownAccessState = "known_no_current_payoff";
-    const result = runnerRemoteBreakerPreparation(
+    const result = runnerSameTurnBreakerPreparation(
       input,
       buildActionSemanticCandidates({ legalActions: input.legalActions }),
       target,
       input.ownDeckCapabilities!,
-      { runnerRunTargetCanConvertNow },
+      {
+        runnerRunTargetCanConvertNow,
+        runnerCentralPressureHasMaterialMarginalValue,
+        runnerCentralPressureCadence,
+      },
     );
     if (variant === "unknown_ice") {
       expect(result?.sameTurnRunConversion).toBeUndefined();
       expect(result?.evidenceCodes).toContain(
-        "remote_breaker_preparation_unknown_ice:1",
+        "same_turn_breaker_preparation_unknown_ice:1",
       );
     } else expect(result).toBeUndefined();
   },
@@ -177,12 +185,16 @@ it("quotes all eight credits and both actions of the native cheaper route", () =
   )!;
   expect(target.pathCost).toBe(16);
   expect(target.accessPayoffContestable).toBe(false);
-  const result = runnerRemoteBreakerPreparation(
+  const result = runnerSameTurnBreakerPreparation(
     input,
     buildActionSemanticCandidates({ legalActions: input.legalActions }),
     target,
     input.ownDeckCapabilities!,
-    { runnerRunTargetCanConvertNow },
+    {
+      runnerRunTargetCanConvertNow,
+      runnerCentralPressureHasMaterialMarginalValue,
+      runnerCentralPressureCadence,
+    },
   )!;
   expect(result.totalRecoveryCost).toBe(8);
   expect(result.sameTurnRunConversion).toMatchObject({

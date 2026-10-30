@@ -1,3 +1,7 @@
+import {
+  runnerCentralPressureHasMaterialMarginalValue,
+  runnerCentralPressureCadence,
+} from "../../runner/central-pressure/central-pressure-signals";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -23,7 +27,7 @@ import { chooseRunnerAction } from "../../index";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { runnerRunTargetCanConvertNow } from "../../run-analysis/runner-plan-run-funding";
-import { runnerRemoteBreakerPreparation } from "../../runner/rig-coverage/coverage-remote-breaker-preparation";
+import { runnerSameTurnBreakerPreparation } from "../../runner/rig-coverage/coverage-same-turn-breaker-preparation";
 import {
   buildAiDecisionInput,
   type AiDecisionInputWithDeckCapabilities,
@@ -88,20 +92,24 @@ it.each([
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
   });
-  const result = runnerRemoteBreakerPreparation(
+  const result = runnerSameTurnBreakerPreparation(
     input,
     candidates,
     target,
     input.ownDeckCapabilities!,
-    { runnerRunTargetCanConvertNow },
+    {
+      runnerRunTargetCanConvertNow,
+      runnerCentralPressureHasMaterialMarginalValue,
+      runnerCentralPressureCadence,
+    },
   );
   if (variant === "original" || variant === "hidden_definition") {
     expect(result?.totalRecoveryCost).toBe(14);
     expect(result?.evidenceCodes).toContain(
-      "remote_breaker_preparation_projected_known_cost:10",
+      "same_turn_breaker_preparation_projected_known_cost:10",
     );
     expect(result?.evidenceCodes).toContain(
-      "remote_breaker_preparation_unknown_ice:1",
+      "same_turn_breaker_preparation_unknown_ice:1",
     );
   } else expect(result).toBeUndefined();
 });
@@ -146,7 +154,7 @@ it("installs the exact cheaper breaker under the remote parent at db3d/163", () 
   );
   expect(debug.selectedStep?.planInstanceId).toBe(debug.leafExecutorInstanceId);
   expect(JSON.stringify(debug)).toContain(
-    "remote_breaker_preparation_total_known_cost:14",
+    "same_turn_breaker_preparation_total_known_cost:14",
   );
 });
 
