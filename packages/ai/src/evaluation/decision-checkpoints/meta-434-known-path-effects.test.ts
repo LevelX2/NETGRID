@@ -8,8 +8,10 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
+import { bindExplicitZeroPublicStealQuotes } from "./synthetic-public-steal-quotes.test-support";
+
 function checkpoint(game: number) {
-  return JSON.parse(
+  const capture = JSON.parse(
     readFileSync(
       new URL(
         `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r14-known-path-g${game}.json`,
@@ -21,6 +23,8 @@ function checkpoint(game: number) {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  bindExplicitZeroPublicStealQuotes(capture.input, []);
+  return capture;
 }
 
 it.each([37, 38, 40])(

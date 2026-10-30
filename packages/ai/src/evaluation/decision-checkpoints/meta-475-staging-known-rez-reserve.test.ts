@@ -109,7 +109,7 @@ describe("pairing 475: local central rez reserve survives unknown global allocat
     },
   );
 
-  it("does not invent a reserve from an expired quote", () => {
+  it("fails closed on an expired quote instead of inventing a free local reserve", () => {
     const { input, runtime } = checkpoint();
     const guard = input.playerView.servers.find((s) => s.id === "hq")!.ice[0]!;
     guard.effectiveRezCostQuote!.expiresAtStateVersion -= 1;
@@ -122,7 +122,7 @@ describe("pairing 475: local central rez reserve survives unknown global allocat
         domain.centralDefenseAllocation,
         CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
       ),
-    ).toBeDefined();
+    ).toBeUndefined();
   });
 
   it.each([

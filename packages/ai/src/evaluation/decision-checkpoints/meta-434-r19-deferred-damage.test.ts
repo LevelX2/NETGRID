@@ -10,6 +10,8 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
+import { bindExplicitZeroPublicStealQuotes } from "./synthetic-public-steal-quotes.test-support";
+
 function load(game: number, decision: number, credits?: number) {
   const { input, runtime } = JSON.parse(
     readFileSync(
@@ -23,6 +25,10 @@ function load(game: number, decision: number, credits?: number) {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  bindExplicitZeroPublicStealQuotes(
+    input,
+    game === 33 ? ["onr_v1_363_olivia-salazar"] : ["onr_v1_352_chester-mix"],
+  );
   if (credits !== undefined) input.playerView.own.credits = credits;
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(

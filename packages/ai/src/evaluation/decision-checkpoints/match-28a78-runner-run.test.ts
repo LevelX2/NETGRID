@@ -13,13 +13,15 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
+import { bindExplicitZeroPublicStealQuotes } from "./synthetic-public-steal-quotes.test-support";
+
 type Capture = {
   input: AiDecisionInputWithDeckCapabilities;
   runtime: AiRuntimeCheckpointV1;
   validation: Record<string, boolean>;
 };
 function capture(index: number): Capture {
-  return JSON.parse(
+  const captured = JSON.parse(
     readFileSync(
       new URL(
         `../../../../../data/scenarios/ai-decision-checkpoints/cp-28a78-d${index}-replay.json`,
@@ -27,7 +29,13 @@ function capture(index: number): Capture {
       ),
       "utf8",
     ),
-  );
+  ) as Capture;
+  if (index === 85 || index === 90) {
+    bindExplicitZeroPublicStealQuotes(captured.input, [
+      "onr_v1_309_bbs-whispering-campaign",
+    ]);
+  }
+  return captured;
 }
 function replay(value: Capture) {
   const { input, runtime } = structuredClone(value);

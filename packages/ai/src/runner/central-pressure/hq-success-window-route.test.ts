@@ -70,7 +70,10 @@ describe("HQ success-window value belongs to its admitted route", () => {
         (e) => e.targetServerId === "hq" && e.actionId !== basic.actionId,
       )!;
       expect(basic.recommendation).toBe("gain_credits_first");
-      expect(event.score).toBe(128);
+      expect(
+        event.evidence.some((e) => e.includes("hq_success_window_setup")),
+      ).toBe(false);
+      expect(event.score).toBeLessThan(0);
       restoreAiRuntimeCheckpoint(
         input,
         cp.input.ownDeckSnapshot.deckSnapshotId,
@@ -87,9 +90,8 @@ describe("HQ success-window value belongs to its admitted route", () => {
           decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
         ).toBe("plan:runner.pressure_central:central%3Ard");
       } else {
-        // Positive denial keeps its own independent value even when the
-        // unavailable future-removal bonus is removed.
-        expect(decision.actionId).toBe(event.actionId);
+        // The one-credit denial does not pay for the six-credit ICE path.
+        expect(decision.actionId).toBe("runner.gain_credit");
       }
       const owner = residentPlanPortfolioSnapshot(input)!.instances.find(
         (p) =>
@@ -97,8 +99,15 @@ describe("HQ success-window value belongs to its admitted route", () => {
       )!;
       expect(owner.moduleState).toMatchObject({
         signal: {
-          marginalValue: event.score,
-          runActionExclusions: { [basic.actionId]: expect.any(Array) },
+          reachable: false,
+          runActionIds: [],
+          runActionExclusions: {
+            [basic.actionId]: expect.any(Array),
+            [event.actionId]: expect.any(Array),
+          },
+          runActionRouteDiagnostics: {
+            [event.actionId]: { rawRouteScore: event.score },
+          },
         },
       });
       expect(

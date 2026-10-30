@@ -14,7 +14,7 @@ import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { corpBasicCreditsDominatedByCurrentScore } from "../../corp/score/score-conditional-credit-funding";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 
-it("scores before the last basic reserve credit that the free score would erase", () => {
+it("preserves current terminal R&D defense instead of emptying its bank for a nonwinning score", () => {
   const { input, runtime } = structuredClone(checkpointJson) as unknown as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
@@ -41,20 +41,33 @@ it("scores before the last basic reserve credit that the free score would erase"
     runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe(score.actionId);
+  expect(decision.actionId).toBe("corp.gain_credit");
   expect(decision.fallbackUsed).toBe(false);
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   const root = portfolio.instances.find(
     (p) => p.instanceId === portfolio.rootForegroundInstanceId,
   )!;
-  expect(root.moduleId).toBe("corp.score_agenda");
+  expect(root.moduleId).toBe("corp.defend_servers");
+  const scoreOwner = portfolio.instances.find(
+    (p) =>
+      p.moduleId === "corp.score_agenda" &&
+      p.instanceId.includes("corporate-war"),
+  )!;
+  expect(scoreOwner.moduleState).toMatchObject({
+    signal: {
+      feasible: false,
+      evidenceCode: expect.stringContaining(
+        "corp_same_turn_score_consumes_funded_defense_reserve",
+      ),
+    },
+  });
   const selected = decision.decisionDebug!.planFirstDecision!;
   expect(selected.selectedPlan).toMatchObject({
-    moduleId: "corp.score_agenda",
-    instanceId: root.instanceId,
+    moduleId: "corp.economy",
+    parentInstanceId: root.instanceId,
   });
   expect(selected.selectedStep).toMatchObject({
-    planInstanceId: root.instanceId,
+    parentInstanceId: root.instanceId,
   });
 });
 

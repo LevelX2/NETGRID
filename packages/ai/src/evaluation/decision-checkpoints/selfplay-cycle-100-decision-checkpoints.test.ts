@@ -13,6 +13,8 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
+import { bindExplicitZeroPublicStealQuotes } from "./synthetic-public-steal-quotes.test-support";
+
 type ReconstructedDecisionCapture = {
   provenance: "reconstructed_from_persisted_decision_sources";
   input: AiDecisionInputWithDeckCapabilities;
@@ -64,6 +66,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     const capture = structuredClone(
       visibleArchivesWinJson,
     ) as ReconstructedDecisionCapture;
+    bindExplicitZeroPublicStealQuotes(capture.input, []);
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();

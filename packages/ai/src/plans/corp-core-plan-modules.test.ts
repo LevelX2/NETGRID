@@ -2545,7 +2545,7 @@ describe("Corp core plan modules", () => {
       false,
       "cross_family_field",
     ],
-    ["X fail-closed", "x_strength", 1, false, undefined],
+    ["X exact", "x_strength", 1, true, undefined],
   ] as const)(
     "binds the source selected rez cost to the current post-install quote: %s",
     (_label, costModel, selectedCredits, expectedExecutable, corruption) => {

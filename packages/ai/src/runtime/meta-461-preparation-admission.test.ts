@@ -14,6 +14,25 @@ import {
   runnerHasExpiringAgendaAccessPayoff,
 } from "../run-analysis/runner-run-preparation";
 
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
+import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
+
+import { bindExplicitZeroPublicStealQuotes } from "../evaluation/decision-checkpoints/synthetic-public-steal-quotes.test-support";
+
+function preparationCandidates(input: AiDecisionInput) {
+  return buildActionSemanticCandidates({
+    legalActions: input.legalActions,
+    observerSide: "runner",
+    stateVersion: input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+      input.playerView,
+    ),
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  });
+}
+
 afterEach(resetResidentPlanPortfolioMemory);
 
 describe("real preparation admission in meta 461", () => {
@@ -31,6 +50,7 @@ describe("real preparation admission in meta 461", () => {
       ...cp.input,
       ...buildAiDecisionInputDto(cp.input),
     };
+    bindExplicitZeroPublicStealQuotes(input, []);
     const preparation = input.legalActions.find(
       (a) => a.type === "play_event" && a.source?.includes("promises-promises"),
     )!;
@@ -43,7 +63,7 @@ describe("real preparation admission in meta 461", () => {
         target,
         {
           economy: buildRunnerEconomyPosture({ input: input }),
-          candidates: [],
+          candidates: preparationCandidates(input),
           minimumHandBuffer: 0,
         },
       ),
@@ -60,7 +80,7 @@ describe("real preparation admission in meta 461", () => {
         fundedTarget,
         {
           economy: buildRunnerEconomyPosture({ input: funded }),
-          candidates: [],
+          candidates: preparationCandidates(funded),
           minimumHandBuffer: 0,
         },
       ),
@@ -72,7 +92,7 @@ describe("real preparation admission in meta 461", () => {
         { ...fundedTarget, accessPayoff: "unknown" },
         {
           economy: buildRunnerEconomyPosture({ input: funded }),
-          candidates: [],
+          candidates: preparationCandidates(funded),
           minimumHandBuffer: funded.playerView.own.gripOrHq.length - 1,
         },
       ),
@@ -84,7 +104,7 @@ describe("real preparation admission in meta 461", () => {
         { ...fundedTarget, accessPayoff: "unknown" },
         {
           economy: buildRunnerEconomyPosture({ input: funded }),
-          candidates: [],
+          candidates: preparationCandidates(funded),
           minimumHandBuffer: funded.playerView.own.gripOrHq.length,
         },
       ),
@@ -97,7 +117,7 @@ describe("real preparation admission in meta 461", () => {
         fundedTarget,
         {
           economy: buildRunnerEconomyPosture({ input: funded }),
-          candidates: [],
+          candidates: preparationCandidates(funded),
           minimumHandBuffer: 0,
         },
       ),
@@ -112,7 +132,7 @@ describe("real preparation admission in meta 461", () => {
         information,
         {
           economy: buildRunnerEconomyPosture({ input: input }),
-          candidates: [],
+          candidates: preparationCandidates(input),
           minimumHandBuffer: 0,
         },
       ),
@@ -132,7 +152,7 @@ describe("real preparation admission in meta 461", () => {
         replacingEvent,
         {
           economy: buildRunnerEconomyPosture({ input: funded }),
-          candidates: [],
+          candidates: preparationCandidates(funded),
           minimumHandBuffer: 0,
         },
       ),

@@ -13,7 +13,7 @@ import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
-it("retains a real reset draw route under the canonically corrected deck profile", () => {
+it("preserves the actual cheaper breaker search under the canonical deck profile before a full-hand reset", () => {
   const fixture = JSON.parse(
     readFileSync(
       new URL("fixtures/meta490-mit-selection.json", import.meta.url),
@@ -49,16 +49,21 @@ it("retains a real reset draw route under the canonically corrected deck profile
   const legal = input.legalActions.find(
     (a) => a.actionId === decision.actionId,
   )!;
-  expect(legal.type).toBe("play_event");
+  expect(input.playerView.own.gripOrHq).toHaveLength(
+    input.playerView.own.maxHandSize,
+  );
+  expect(legal).toMatchObject({ type: "draw_card", source: "basic_action" });
+  expect(decision.decisionDebug?.planKind).toBe("runner.rig_and_coverage");
   expect(
-    input.playerView.own.gripOrHq.find((c) => c.instanceId === legal.source)
-      ?.definitionId,
-  ).toBe("onr_v1_101_mit-west-tier");
+    decision.evidence?.some((e) =>
+      e.startsWith("plan_assessment_evidence:cost_ineffective_coverage:hq:"),
+    ),
+  ).toBe(true);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.route?.stateVersion).toBe(
     input.playerView.stateVersion,
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("runner.develop_board_and_hand");
+  ).toContain("runner.rig_and_coverage");
 });

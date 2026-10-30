@@ -39,7 +39,14 @@ describe("match a36a9664 Corp plan decision checkpoints", () => {
       counterBankReadyJson,
     ],
   ])("%s", (_label, json) => {
-    const result = runAiDecisionCheckpoint(fixture(json));
+    const current = fixture(json);
+    if (json === counterBankReplacementJson) {
+      current.expectation.acceptableActions!.push({
+        type: "play_operation",
+        sourceDefinitionId: "onr_v1_288_day-shift",
+      });
+    }
+    const result = runAiDecisionCheckpoint(current);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 

@@ -138,7 +138,7 @@ describe("plan-first Corp card variant contracts", () => {
     );
   });
 
-  it("dispositions an overflowing Annual Reviews exactly once and lets the regular score-protection Basic Draw decide", () => {
+  it("retains the net-one Annual Reviews draw under its existing score-protection owner", () => {
     const fixture = annualReviewsFixture({
       startingHandSize: 4,
       includeBlockedScoreParent: true,
@@ -150,7 +150,7 @@ describe("plan-first Corp card variant contracts", () => {
       residentPlanPortfolioSnapshot(fixture.input),
     );
 
-    expect(decision.actionId).toBe(fixture.basicDraw.actionId);
+    expect(decision.actionId).toBe(fixture.annualReviews.actionId);
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
@@ -163,8 +163,9 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.consideredActionIds).toContain(
       fixture.annualReviews.actionId,
     );
-    expect(portfolio).toContain(`"actionId":"${fixture.basicDraw.actionId}"`);
-    expect(portfolio).not.toContain(fixture.annualReviews.actionId);
+    expect(portfolio).toContain(
+      `"actionId":"${fixture.annualReviews.actionId}"`,
+    );
     expect(debug).not.toContain("develop%3Aannual-reviews");
     expect(debug).not.toContain("corp_card_development");
   });

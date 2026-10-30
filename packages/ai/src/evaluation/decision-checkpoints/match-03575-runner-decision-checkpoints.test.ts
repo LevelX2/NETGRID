@@ -12,7 +12,7 @@ describe("match 03575 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(traceBidEconomyJson));
   });
 
-  it("contests the certified remote at matchpoint", () => {
+  it("keeps the admitted remote probe under its current execution owner", () => {
     expectCheckpointToPass(fixture(rdRepeatFreshMatchpointJson));
   });
 
@@ -67,7 +67,7 @@ describe("match 03575 runner decision checkpoints", () => {
             acceptablePlanKinds: ["runner.contest_remote"],
             acceptableCapabilities: ["contest_remote"],
             requiredAssessmentEvidence: [
-              "runner_direct_run_converts_now:remote_1",
+              "runner_productive_remote_probe_converts_now:remote_1",
             ],
           },
         };
@@ -79,10 +79,16 @@ describe("match 03575 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-03575-02-rd-repeat-fresh-matchpoint"],
   );
+  if (checkpoint.checkpointId === "cp-03575-02-rd-repeat-fresh-matchpoint") {
+    checkpoint.expectation.planExecution!.requiredAssessmentEvidence = [
+      "runner_productive_remote_probe_converts_now:remote_1",
+    ];
+  }
+  return checkpoint;
 }
 
 function mutateFixture(

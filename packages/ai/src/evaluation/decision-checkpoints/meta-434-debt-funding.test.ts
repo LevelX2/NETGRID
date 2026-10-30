@@ -8,8 +8,10 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
+import { bindExplicitZeroPublicStealQuotes } from "./synthetic-public-steal-quotes.test-support";
+
 function checkpoint() {
-  return JSON.parse(
+  const capture = JSON.parse(
     readFileSync(
       new URL(
         "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r15-debt-funding.json",
@@ -21,6 +23,8 @@ function checkpoint() {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  bindExplicitZeroPublicStealQuotes(capture.input, []);
+  return capture;
 }
 
 it("funds the exact last-chance contest while preserving all ten exit credits", () => {
@@ -62,14 +66,15 @@ it("funds the exact last-chance contest while preserving all ten exit credits", 
 });
 
 it.each([
-  { credits: 15, clicks: 2 },
-  { credits: 16, clicks: 1 },
+  { credits: 15, clicks: 2, terminalThreat: false },
+  { credits: 16, clicks: 1, terminalThreat: true },
 ])(
-  "keeps debt excluded without its full exit reserve or conversion action: %j",
-  ({ credits, clicks }) => {
+  "keeps debt excluded without a terminal threat or conversion action: %j",
+  ({ credits, clicks, terminalThreat }) => {
     const { input, runtime } = checkpoint();
     input.playerView.own.credits = credits;
     input.playerView.own.clicks = clicks;
+    if (!terminalThreat) input.playerView.opponent.agendaPoints = 0;
     restoreAiRuntimeCheckpoint(
       input,
       input.ownDeckSnapshot!.deckSnapshotId,
