@@ -14,6 +14,19 @@ export type RunnerFundingRouteAssessment = {
   projectedGap: number;
   totalClickCost: number;
   firstStepActionId?: string;
+  handPreparation?: {
+    stateVersion: number;
+    drawActionId: string;
+    incomeActionId: string;
+    sourceCardInstanceId: string;
+    drawCount: number;
+    drawClickCost: number;
+    drawCreditCost: number;
+    requiredHandBuffer: number;
+    projectedEndCredits: number;
+    projectedEndHand: number;
+    basicCreditBaseline: number;
+  };
   paymentInstall?: PaymentWindowFundingSetup & {
     targetServerId: string;
     runActionId: string;
@@ -163,11 +176,36 @@ export function validRunnerFundingNeedContract(
     return false;
   }
   if (need.kind === "portfolio_reserve") {
+    const preparation = need.routeAssessment.handPreparation;
+    if (
+      preparation &&
+      !(
+        preparation.stateVersion === stateVersion &&
+        preparation.drawActionId === need.routeAssessment.firstStepActionId &&
+        preparation.incomeActionId.length > 0 &&
+        preparation.sourceCardInstanceId.length > 0 &&
+        Number.isSafeInteger(preparation.drawCount) &&
+        preparation.drawCount > 0 &&
+        Number.isSafeInteger(preparation.drawClickCost) &&
+        preparation.drawClickCost > 0 &&
+        Number.isSafeInteger(preparation.drawCreditCost) &&
+        preparation.drawCreditCost >= 0 &&
+        Number.isSafeInteger(preparation.requiredHandBuffer) &&
+        preparation.requiredHandBuffer >= 0 &&
+        Number.isSafeInteger(preparation.projectedEndCredits) &&
+        preparation.projectedEndCredits > preparation.basicCreditBaseline &&
+        Number.isSafeInteger(preparation.projectedEndHand) &&
+        preparation.projectedEndHand >= preparation.requiredHandBuffer &&
+        Number.isSafeInteger(preparation.basicCreditBaseline)
+      )
+    )
+      return false;
     return (
       need.priorityClass === "P6" &&
       need.revalidation.status === "portfolio_reserve_open"
     );
   }
+  if (need.routeAssessment.handPreparation) return false;
   if (need.driver.kind === "development") {
     const milestone = need.developmentFundingMilestone;
     if (

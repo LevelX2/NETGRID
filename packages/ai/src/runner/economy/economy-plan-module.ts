@@ -249,6 +249,23 @@ function economyCandidates(
     (need.driver.kind === "contest" || need.driver.kind === "run")
       ? need.routeAssessment.paymentInstall
       : undefined;
+  const handPreparation =
+    need.kind === "portfolio_reserve"
+      ? need.routeAssessment.handPreparation
+      : undefined;
+  const isHandPreparation = (candidate: ActionSemanticCandidate) =>
+    handPreparation?.stateVersion === context.input.playerView.stateVersion &&
+    handPreparation.drawActionId === candidate.actionId &&
+    candidate.actionType === "draw_card" &&
+    candidate.sourceKind === "basic_action" &&
+    candidate.costProfile.costKnownStatus === "known" &&
+    candidate.costProfile.clickCost === handPreparation.drawClickCost &&
+    context.input.playerView.own.gripOrHq.some(
+      (card) => card.instanceId === handPreparation.sourceCardInstanceId,
+    ) &&
+    context.actionCandidates.some(
+      (entry) => entry.actionId === handPreparation.incomeActionId,
+    );
   const isPaymentInstall = (candidate: ActionSemanticCandidate) =>
     paymentInstall?.actionId === candidate.actionId &&
     need.kind === "parent_plan_support" &&
@@ -272,12 +289,16 @@ function economyCandidates(
         (need.kind === "develop_liquidity"
           ? runnerTurnLiquidityCandidateIsMaterializable(candidate)
           : runnerFundingRouteCandidateIsMaterializable(candidate) ||
-            isPaymentInstall(candidate)),
+            isPaymentInstall(candidate) ||
+            isHandPreparation(candidate)),
     )
     .map((candidate) => {
-      const netLiquidCreditGain = isPaymentInstall(candidate)
-        ? paymentInstall!.netPaymentGain - paymentInstall!.installCreditCost
-        : candidate.economyProjection!.netLiquidCreditGain!;
+      const netLiquidCreditGain = isHandPreparation(candidate)
+        ? handPreparation!.projectedEndCredits -
+          context.input.playerView.own.credits
+        : isPaymentInstall(candidate)
+          ? paymentInstall!.netPaymentGain - paymentInstall!.installCreditCost
+          : candidate.economyProjection!.netLiquidCreditGain!;
       const fundingGapProgress = Math.min(need.gap, netLiquidCreditGain);
       return {
         candidate,

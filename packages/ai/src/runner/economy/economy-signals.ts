@@ -28,6 +28,7 @@ export type RunnerEconomyFundingSearch = (
     remainingClicks: number;
     allowIncrementalProgress: boolean;
     requiredEndTurnHandBuffer: number;
+    reserveDevelopment?: { minimumHandBuffer: number };
   },
 ) => RunnerFundingRouteContract;
 export function runnerEconomyReserveFacts(
@@ -185,6 +186,7 @@ export function buildRunnerEconomySignals(params: {
     remainingClicks: input.playerView.own.clicks,
     allowIncrementalProgress: true,
     requiredEndTurnHandBuffer: preservedHandBuffer,
+    reserveDevelopment: { minimumHandBuffer: params.minimumHandBuffer },
     evidence: [
       "runner_finite_portfolio_credit_reserve",
       `runner_economy_preserved_hand_buffer:${preservedHandBuffer}`,

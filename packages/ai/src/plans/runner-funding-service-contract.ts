@@ -19,6 +19,9 @@ export type RunnerExactFundingRouteRequest = Pick<
   requireCompleteKnownPath?: boolean;
   /** A consumer-bound defense buffer preserved by every funding step. */
   requiredEndTurnHandBuffer?: number;
+  /** P6 reserve only: quote the remaining turn, including a current basic
+   * draw prefix that preserves the known income source and the hand floor. */
+  reserveDevelopment?: { minimumHandBuffer: number };
   paymentWindowTarget?: RunnerRunTargetEvaluation;
   debtFinancingParent?: Readonly<{
     planInstanceId: string;

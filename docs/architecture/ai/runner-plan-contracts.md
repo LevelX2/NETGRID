@@ -1805,6 +1805,24 @@ Basic Credit bleibt für zusammengesetzte Routen verfügbar. Ein echtes
 Draw-Einkommensereignis kann so denselben Parentbedarf finanzieren und dabei
 zusätzliche Handkarten erhalten; ein gesonderter Kartenbonus entsteht nicht.
 
+Die endliche P6-Portfolioreserve quotiert ihren erreichbaren Restzug statt
+nur einen zusätzlichen Credit. Der bestehende Funding-Dienst darf dafür
+einen aktuellen Basisdraw als Vorbereitung einer bereits bekannten
+Einkommenskarte binden. Die Quote erhält die Karteninstanz, verwendet nur
+die Engine-Drawprojektion und zählt Ziehkosten, sichtbare Drawtax, Stack,
+Klickbudget und den vollständigen Handpuffer. Unbekannte Kartenidentitäten
+haben keinen Wert. Die ganze Folge muss mehr liquide Credits liefern als
+eine konservative Ertragsobergrenze der aktuellen nicht handverbrauchenden
+Einkommensalternativen. Nur ein über diesen ganzen Restzug offener Reservebedarf
+erlaubt den Vergleich; ein früher erreichbares Reserveziel gibt seine Klicks
+weiterhin frei. Der Draw bleibt eine konkrete, versionierte Route
+des Economy-Parents und endet an seiner normalen Beobachtungsgrenze; danach
+wird vollständig neu geprüft. Diese Zulassung gilt ausschließlich für die
+P6-Reserve, niemals als gelockerter Run-, Defense- oder Darlehensnachweis.
+Paarung 569 R2 G2 D370 belegt Draw → Networking → Basiskredit mit elf Credits
+und drei Handkarten gegenüber acht Credits und drei Handkarten der alten
+Vier-Basiskredit-Folge.
+
 Ein günstiges positives Deckverhältnis bei Matchpunkt darf produktive
 Restliquidität nicht selbst ausschließen. `economy-signals.ts` bildet ihre
 endlichen P6-Routen zunächst unabhängig von der Wartebedingung. Erst wenn dabei
