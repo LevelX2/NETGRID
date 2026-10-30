@@ -939,7 +939,14 @@ function accessPreservingBreakStates(params: {
         partialBreakerOptions.map((assessment) => assessment.breakerInstanceId),
       ).size > 1 &&
       !hasDominatingFreeDeterministicFullBreak &&
-      !hasMultipleIndependentRandomOptions
+      !hasMultipleIndependentRandomOptions &&
+      !paidSingleBreakerDominatesMixedBreak({
+        creditBudget: params.state.creditBudget,
+        partialOptions: partialBreakerOptions,
+        fullOptions: breakOptions
+          .filter((option) => option.riskProfile === undefined)
+          .map((option) => option.assessment),
+      })
     ) {
       return {
         knowledge: "unknown",
@@ -994,6 +1001,63 @@ function accessPreservingBreakStates(params: {
     states.push(randomState.state);
   }
   return { knowledge: "known", states };
+}
+
+/** A mixed break uses at least two sources. Their first-use quotes form a
+ * lower bound only without persistent strength, effects or distinct pools.
+ * Retain every full-break state; certify only that no omitted mixed state
+ * improves its remaining general credits or prepares a later encounter.
+ */
+function paidSingleBreakerDominatesMixedBreak(params: {
+  creditBudget: MutableRunnerRunPathCreditBudget;
+  partialOptions: readonly BreakAssessment[];
+  fullOptions: readonly BreakAssessment[];
+}): boolean {
+  const budget = params.creditBudget;
+  if (
+    budget.traceEligibleCredits !== budget.credits ||
+    budget.icebreakerCredits !== 0 ||
+    budget.nonNoisyIcebreakerCredits !== 0 ||
+    budget.killerCredits !== 0 ||
+    budget.stealthNonNoisyIcebreakerCredits !== 0 ||
+    budget.nonStealthNonNoisyIcebreakerCredits !== 0 ||
+    Object.values(budget.hostedIcebreakerCreditsByBreakerInstanceId).some(
+      (amount) => amount !== 0,
+    ) ||
+    Object.values(budget.stealthCreditsBySourceId).some(
+      (amount) => amount !== 0,
+    ) ||
+    budget.paymentSupportSources?.length
+  )
+    return false;
+  const isEncounterLocalPayment = (assessment: BreakAssessment): boolean =>
+    !assessment.carriesStrengthAcrossIce &&
+    !assessment.runStrengthGain &&
+    !assessment.postBreakStealthLosses?.length &&
+    !assessment.futureClicksLost &&
+    !assessment.conditionalAccessReason &&
+    !assessment.conditionalRiskReason &&
+    !assessment.consumedPendingFreeBreak &&
+    !assessment.stateChangesAfterUse?.length;
+  if (!params.partialOptions.every(isEncounterLocalPayment)) return false;
+  const costsBySource = new Map<string, number>();
+  for (const assessment of params.partialOptions) {
+    const prior = costsBySource.get(assessment.breakerInstanceId);
+    if (prior === undefined || assessment.cost < prior)
+      costsBySource.set(assessment.breakerInstanceId, assessment.cost);
+  }
+  const costs = [...costsBySource.values()].sort((a, b) => a - b);
+  if (costs.length < 2) return false;
+  const mixedLowerBound = costs[0]! + costs[1]!;
+  return (
+    Number.isSafeInteger(mixedLowerBound) &&
+    (mixedLowerBound > budget.credits ||
+      params.fullOptions.some(
+        (assessment) =>
+          isEncounterLocalPayment(assessment) &&
+          assessment.cost <= mixedLowerBound,
+      ))
+  );
 }
 
 function randomBreakRiskProfileForEncounter(params: {

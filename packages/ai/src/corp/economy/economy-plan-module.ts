@@ -202,6 +202,29 @@ function validatedEconomyNeeds(
       )
         validFundingActions.add(current.actionId);
     }
+    if (signal.freeRezPayoutPreparation) {
+      const current = corpFreeRezPayoutPreparation(
+        context.input,
+        context.actionCandidates,
+        signal,
+        signal.freeRezPayoutPreparation.basicFundingActionId,
+        currentDomain.economyNeeds.filter(
+          (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
+            s.kind === "develop_campaign",
+        ),
+      );
+      if (
+        !current ||
+        JSON.stringify(current) !==
+          JSON.stringify(signal.freeRezPayoutPreparation) ||
+        JSON.stringify(current) !==
+          JSON.stringify(
+            signal.fundingRouteAssessment?.freeRezPayoutPreparation,
+          )
+      )
+        return true;
+      validFundingActions.add(current.actionId);
+    }
     const validFundingRouteBinding =
       signal.actionIds.length > 0
         ? signal.actionIds.every((actionId) =>

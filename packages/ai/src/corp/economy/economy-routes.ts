@@ -631,7 +631,7 @@ export function economyMaterialization(
       },
       purpose:
         signal.kind === "parent_funding" && signal.freeRezPayoutPreparation
-          ? "Rez the exact free current source for the bound Defense funding parent; revalidate its actual liquid payout after the Engine transition."
+          ? "Prepare the admitted free finite-pool source for the exact funding parent; revalidate rez and liquid payout after each Engine transition."
           : signal.kind === "develop_campaign"
             ? `Advance the admitted ${signal.sourceDefinitionId} economy campaign from ${signal.phase} to ${signal.completion.expectedState}.`
             : signal.kind === "convert_immediate_operation"

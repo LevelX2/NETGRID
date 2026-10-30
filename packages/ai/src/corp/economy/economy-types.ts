@@ -48,6 +48,9 @@ export type CorpFreeRezPayoutPreparation = {
   poolCreditsOnRez: number;
   payoutCredits: number;
   payoutClicks: 1;
+  setupClicks: 0 | 1;
+  currentPayoutExecutions: number;
+  projectedCurrentCredits: number;
 };
 
 export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {

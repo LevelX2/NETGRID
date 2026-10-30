@@ -243,7 +243,33 @@ export function buildCorpEconomySignals({
           : {}),
       };
     });
-  return economyNeeds;
+  const previousExecutor = previous?.instances.find(
+    (instance) => instance.instanceId === previous.executorInstanceId,
+  );
+  const previousFunding =
+    previousExecutor?.moduleId === "corp.economy"
+      ? (previousExecutor.moduleState as import("./economy-types").EconomyState)
+          .signal
+      : undefined;
+  if (previousFunding?.kind !== "parent_funding") return economyNeeds;
+  const continuingFunding = economyNeeds.find(
+    (signal) =>
+      signal.kind === "parent_funding" &&
+      signal.gap > 0 &&
+      signal.needId === previousFunding.needId &&
+      signal.parentNeedId === previousFunding.parentNeedId &&
+      signal.parentPlanInstanceId === previousFunding.parentPlanInstanceId,
+  );
+  if (continuingFunding?.kind !== "parent_funding") return economyNeeds;
+  const currentHead = continuingFunding.fundingRouteAssessment?.headActionId;
+  if (currentHead === undefined) return economyNeeds;
+  // A real payout reached by the current funding sequence remains its child.
+  // An independent copy of that same current head must not discard its Need.
+  return economyNeeds.filter(
+    (signal) =>
+      signal.kind !== "convert_visible_card_payout" ||
+      !signal.actionIds.includes(currentHead),
+  );
 }
 
 /** Revalidate a pre-admission bank veto only when current Hand admission

@@ -873,6 +873,18 @@ Vergleich mit Rezzes auf anderen Servern reservierbar.
 Die gemeinsame Schutzbewertung benötigt keine noch unbekannte Zufallsstärke
 für einen öffentlichen Breaker, dessen Engine-Abdeckungsquote auf jedem
 aktuell bekannten aktiven ICE keine anwendbare Breakfähigkeit ausweist.
+Für mehrere gewöhnliche Breaker an mehreren Stopproutinen genügt außerdem ein
+exakter Dominanznachweis: Jede gemischte Belegung benötigt mindestens zwei
+Quellen. Die Summe ihrer günstigsten ersten Einsätze begrenzt ihre Kosten
+nach unten. Nur bei ausschließlich allgemeinen Credits, begegnungslokaler
+Stärke und ohne zusätzliche Zustands- oder Zufallseffekte darf ein bereits
+gequoteter vollständiger Einzelbreak diese Grenze dominieren. Reicht selbst
+die Untergrenze nicht ins aktuelle Budget, erzeugt die Kombination keinen
+bezahlbaren Pfad. Alle vollständigen Einzelpfade und deren Restcredits bleiben
+erhalten. Persistente Stärke, Spezialpools und ungeklärte Kombinationen bleiben
+unbekannt. Paarung 569 G19 D155 sichert den vorherigen Abbruch vor Priority
+Requisition einschließlich exakt gebundener kostenloser Rez-Choice und Replay.
+
 Die vollständige Rig bleibt im Creditledger; nur der irrelevante Breaker
 entfällt in der Break-/Stärkefolge. Andere Run-Effekte, passende Sentries,
 unbekannte ICE und ungebundene effektive Quotes behalten ihre Unknown-Grenze.
@@ -2289,6 +2301,27 @@ statt sechs Credits. Der vollständige korrigierte Chooser-Prefix installiert
 zuerst die Neural Blade und führt danach kostenlosen Rez und Auszahlung unter
 dem unveränderten Defense-Finanzierungsparent aus; Replayhash und Endbank
 stimmen.
+
+Ein exakt gebundener mehrzügiger P4-Score-Finanzierungsbedarf darf eine bereits
+zugelassene kostenlose `finite_pool`-Kampagne als aktuellen Support übernehmen.
+Der gesamte fehlende Betrag muss mindestens den normalen Restaktionen
+entsprechen. Eine Installation ist nur im neuen Remote mit aktuell gequoteten
+Null-Credit-Kosten, einer kostenlosen Rezvorbereitung und strikt höherer
+Auszahlung noch im aktuellen Zug zulässig. Vorhandene aktuelle Erträge und
+bereits bekannte in diesem Zug erreichbare Burst-Einkommen sperren diesen
+begrenzten Nachweis. Zwei Restaktionen rechtfertigen BBS mit nur einer
+Auszahlung daher nicht. Sofortige Konversionen und P1–P3-Fristen erhalten
+diesen zusätzlichen Aufbaupfad nicht.
+
+Die Vorbereitung bindet den vorhandenen Score-Parent und seinen offenen Need.
+Nach jeder Engine-Transition werden Quelle, Setup, Restklicks und der aktuelle
+Auszahlungskopf neu gebunden; unabhängige Kopien desselben Auszahlungskopfs
+verwerfen eine laufende Funding-Bindung nicht. Erträge gelten erst nach der
+realen Auszahlung als liquide. Paarung 569 G9 D201 belegt Installation,
+kostenlosen Rez und zwei Auszahlungen: vier statt drei Credits bei drei
+normalen Aktionen, durchgehend mit demselben Parent und Engine-Replay.
+G12 D211 erhält zwei Basiskredite und Accounts Receivable mit sechs Credits
+Nettozufluss statt des schwächeren Bankaufbaus.
 
 Eine bereits installierte, aktionsweise geladene Creditbank besitzt einen
 getrennten aktuellen Restzugvertrag. Die Engine bindet Rez beziehungsweise

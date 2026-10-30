@@ -518,12 +518,15 @@ export function corpHostedCreditBankProfile(
 /** A plain rez-created pool with a single-click, otherwise free current-turn payout. */
 export function corpRezHostedCreditPayoutProfile(
   definitionId: string | undefined,
+  installing = false,
 ): { poolCredits: number; payoutCredits: number } | undefined {
   const planning = planningCard(definitionId);
   const effects = planning?.planning.engine.lifecycle?.on_rez;
   if (
     planning?.planning.side !== "corp" ||
     planning.planning.cardType !== "asset" ||
+    (installing &&
+      (planning.planning.engine.lifecycle?.on_install?.length ?? 0) > 0) ||
     !effects?.length ||
     !effects.every(
       (effect) =>

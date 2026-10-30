@@ -473,14 +473,65 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
-  it("fails closed when multiple stable breakers could split multiple ETR subroutines", () => {
+  it.each([3, 4, 5, 7, 8])(
+    "certifies encounter-local paid breakers across two Reinforced Walls at %s credits",
+    (credits) => {
+      const assessment = assessCorpScoreProtection({
+        serverIce: [
+          ice("inner-wall", "onr_v1_263_reinforced-wall"),
+          ice("outer-wall", "onr_v1_263_reinforced-wall"),
+        ],
+        runnerRig: [
+          runnerProgram("worm", "onr_classic_027_early-worm"),
+          runnerProgram("rent", "onr_classic_031_rent-i-con"),
+        ],
+        runnerCredits: credits,
+        maximumRunnerAccessSuccessProbability: QUARTER,
+      });
+
+      expect(assessment).toMatchObject({
+        knowledge: "known",
+        protectsScore: credits < 8,
+        runnerAccessSuccessProbability: {
+          numerator: credits >= 8 ? 1 : 0,
+          denominator: 1,
+        },
+        ...(credits >= 8
+          ? { runnerCreditsRemainingOnBestAccessPath: credits - 8 }
+          : {}),
+      });
+    },
+  );
+
+  it("does not use a general-credit dominance proof for restricted pools", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("wall", "onr_v1_263_reinforced-wall")],
+      runnerRig: [
+        runnerProgram("worm", "onr_classic_027_early-worm"),
+        runnerProgram("rent", "onr_classic_031_rent-i-con"),
+        recurringCreditPool(
+          "cloak",
+          "onr_v1_011_cloak",
+          "using_icebreaker_during_run_non_noisy",
+        ),
+      ],
+      runnerCredits: 4,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+    expect(assessment).toMatchObject({
+      knowledge: "unknown",
+      unknownReason: "unsupported_breaker_combination",
+    });
+  });
+
+  it("fails closed when mixed breakers can preserve strength for later encounters", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [ice("endless-corridor", "onr_v1_239_endless-corridor")],
       runnerRig: [
-        runnerProgram("decoder-1", "simple_decoder"),
-        runnerProgram("decoder-2", "simple_decoder"),
+        runnerProgram("decoder-1", "onr_classic_030_psychic-friend"),
+        runnerProgram("decoder-2", "onr_classic_030_psychic-friend"),
       ],
-      runnerCredits: 2,
+      runnerCredits: 8,
       maximumRunnerAccessSuccessProbability: QUARTER,
     });
 
