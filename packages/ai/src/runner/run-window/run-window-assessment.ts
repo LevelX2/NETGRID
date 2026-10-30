@@ -87,6 +87,7 @@ import { runnerRunStrengthCurrentPumpSavings } from "./run-window-strength-prepa
 import { runnerRunProgramSearchAssessment } from "./run-window-program-search";
 import {
   isRunnerRunWindowCandidate,
+  runnerFreeAgendaStealForCurrentAccess,
   runnerOptionalBonusRunDeclineAction,
   runnerPostPassDerezAndEndRunAction,
   runnerPostPassTrashAction,
@@ -1430,6 +1431,23 @@ function runnerRunWindowPlanStepExclusion(
 ): SemanticRuntimeExclusion | undefined {
   const run = input.playerView.run;
   if (!run) return undefined;
+
+  if (
+    action.type === "trash_accessed_card" &&
+    action.source === run.accessedCard?.instanceId
+  ) {
+    const freeSteal = runnerFreeAgendaStealForCurrentAccess(input);
+    if (freeSteal)
+      return {
+        key: "free_agenda_steal_dominates_current_trash",
+        label: "Kostenloser Agendasteal erhält den eigenen Agendaertrag",
+        reason: [
+          `run_plan_free_steal_action:${freeSteal.actionId}`,
+          `run_plan_accessed_agenda:${freeSteal.source}`,
+          "run_plan_same_corp_agenda_removed_without_trash",
+        ].join("|"),
+      };
+  }
 
   const informationReassessment = runOrigin?.informationBoundaryReassessment;
   if (

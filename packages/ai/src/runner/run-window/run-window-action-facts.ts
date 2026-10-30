@@ -3,6 +3,36 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { runnerCandidateIsCardAbility } from "../../runtime/runner-information-action-facts";
 import { runnerCandidateHasVisibleAdditionalAccessEffect } from "./runner-run-window-additional-access";
 
+export function runnerFreeAgendaStealForCurrentAccess(
+  input: AiDecisionInput,
+): LegalAction | undefined {
+  const run = input.playerView.run;
+  const card = run?.accessedCard;
+  if (
+    input.side !== "runner" ||
+    input.playerView.side !== "runner" ||
+    input.playerView.timingPoint !== "access.resolve_card" ||
+    run?.phase !== "access" ||
+    card?.known !== true ||
+    card.type !== "agenda" ||
+    !Number.isFinite(card.agendaPoints) ||
+    Number(card.agendaPoints) <= 0
+  )
+    return undefined;
+  return input.legalActions.find(
+    (action) =>
+      action.type === "steal_agenda" &&
+      action.side === "runner" &&
+      action.source === card.instanceId &&
+      action.timingPoint === input.playerView.timingPoint &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.costs.length === 0 &&
+      action.targetRequirements.length === 0 &&
+      !action.choiceRequirements?.length &&
+      action.payload?.agendaAccessReplacement === undefined,
+  );
+}
+
 function isRunWindowSemantic(candidate: ActionSemanticCandidate): boolean {
   return (
     candidate.semanticActionType === "run.continue" ||

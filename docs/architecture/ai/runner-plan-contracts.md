@@ -2127,6 +2127,17 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Beim aktuellen Zugriff lässt derselbe Owner einen normalen kostenlosen
+Agendasteal gegenüber dem Trash derselben sichtbaren Agenda dominieren:
+Beide entfernen die Agenda aus dem Zugriff der Corporation, der Steal erhält
+zusätzlich den eigenen Agendaertrag und verbraucht keinen Virus-Trash.
+Der Ausschluss bindet die tatsächlich angebotene Steal-Action an Quelle,
+Timing und StateVersion, positive sichtbare Agendapunkte sowie fehlende
+Kosten, Ziel- und Choice-Anforderungen. Bezahlte Steals und besondere
+Zugriffsersetzungen erhalten diesen Dominanznachweis nicht. Es entsteht
+weder ein Kartenbonus noch ein terminaler Punkteschätzer oder zweiter Chooser;
+die Engine entscheidet weiterhin über Punkte, Ersatzwirkungen und den Sieg.
+
 Engine-gequotete Counter-Zugriffsersetzungen behalten `counterSide`,
 `counterType` und `counterDelta` in der positiven LegalAction-DTO-Projektion.
 Die daraus erkannte Semantik `runner.access_replacement_counter` gehört zur
