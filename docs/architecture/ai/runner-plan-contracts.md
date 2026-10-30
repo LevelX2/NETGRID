@@ -685,6 +685,18 @@ nicht; andere produktive Zielserver behalten ihre eigenen ausführbaren Heads.
 
 ### Vertikale Implementierung des Remote-Contests
 
+Ein terminaler Remote-Contest darf einen bekannten festen Trace-Tag annehmen,
+wenn die vollständige aktuelle Basisrun-Quote garantierten Zugriff ohne
+unbekanntes ICE, weitere Schäden oder sonstige Restwirkungen belegt und noch
+im selben Zug genug Aktionen und freie Credits für die normale Entfernung
+aller Tags verbleiben. Die Zulassung liegt in `remote-contest-admission.ts`;
+sie aktualisiert den bestehenden Remote-Parent nach erfüllter Coverage.
+Sie verändert weder die Gefahrenquote noch die Entscheidungen im Trace- oder
+Tagfenster. Dauerhafte Counter, unbekannte Tagmengen, offene Pfadkosten und
+Run-Geld als Ersatz für freie Entfernungskosten zertifizieren diese Folge
+nicht. Der native Zustand P572/R2/G39/D121 prüft den echten Run, Tycho-Steal,
+Tagabbau und Replay; ein anderer späterer Gesamtsieger folgt daraus nicht.
+
 Auch ein als terminal eingestufter Remote-Contest darf eine explizit
 blockierte Vorabreserve für unbekanntes ICE nicht übergehen. Seine Dringlichkeit
 ersetzt keinen ausführbaren Zugriffspfad. Ein finanzierbarer Bedarf bleibt am

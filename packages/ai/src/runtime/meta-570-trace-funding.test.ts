@@ -84,7 +84,7 @@ it("deducts a dedicated trace pool from the monetary requirement exactly once", 
   expect(result.cheapestSafe?.creditCost).toBe(5);
   expect(result.cheapestAffordableSafe).toBeUndefined();
 });
-it("keeps the original six-credit deficit unexecutable within three funding clicks", () => {
+it("retains the exact avoidance deficit but admits the cheaper complete fixed-tag line", () => {
   const saved = original();
   expect(saved.provenance.checkedStates).toBe(516);
   expect(
@@ -101,12 +101,7 @@ it("keeps the original six-credit deficit unexecutable within three funding clic
   expect(
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, target),
   ).toBe(6);
-  expect(funding).toMatchObject({
-    gap: 6,
-    targetCredits: 18,
-    routeActionIds: [],
-    routeAssessment: { status: "uncovered" },
-  });
+  expect(funding).toBeUndefined();
   input.planningStateIdentity = buildPlanningStateIdentity(input);
   restoreAiRuntimeCheckpoint(
     input,
@@ -117,9 +112,10 @@ it("keeps the original six-credit deficit unexecutable within three funding clic
     decision = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(unchanged);
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
-  expect(
-    decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-  ).not.toBe("plan:runner.contest_remote:remote%3Aremote_2");
+  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+    "plan:runner.contest_remote:remote%3Aremote_2",
+  );
+  expect(decision.actionId).toBe("runner.start_run.remote_2");
 });
 it("does not certify the old three-credit prefix while a known trace hazard remains", () => {
   const input = original().checkpoint.input;
@@ -150,14 +146,19 @@ it("does not reconstruct a missing funding quote from trace strength or net cost
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, target),
   ).toBeUndefined();
 });
-it.each([false, true])(
-  "funds a real complete same-turn route and wins with maximum Corp bid=%s",
-  (maximumCorpBid) => {
+it.each([
+  [12, false],
+  [12, true],
+  [17, false],
+  [17, true],
+] as const)(
+  "closes the whole native run with %i credits and maximum Corp bid=%s",
+  (credits, maximumCorpBid) => {
     const saved = original();
     // Explicit resource-bound countercase, not a second historical original.
     let state = saved.state;
-    state.runner.credits = 17;
-    state.runner.clicks = 2;
+    state.runner.credits = credits;
+    state.runner.clicks = credits === 17 ? 2 : 4;
     const initial = state,
       heads: string[] = [];
     let forcedCorpBids = 0;
@@ -172,15 +173,13 @@ it.each([false, true])(
       input.planningStateIdentity = buildPlanningStateIdentity(input);
       if (n === 0) {
         const { target, funding } = assess(input);
-        expect(target.recommendation).toBe("run_now");
+        expect(target.recommendation).toBe(
+          credits === 17 ? "run_now" : "gain_credits_first",
+        );
         expect(
           runnerTerminalRemoteContestVisibleHazardFundingGap(input, target),
-        ).toBe(1);
-        expect(funding).toMatchObject({
-          targetCredits: 18,
-          routeActionIds: ["runner.gain_credit"],
-          routeAssessment: { status: "covered_guaranteed" },
-        });
+        ).toBe(18 - credits);
+        expect(funding).toBeUndefined();
       }
       const unchanged = JSON.stringify(input),
         decision = chooseAiAction(input);
@@ -190,7 +189,7 @@ it.each([false, true])(
         (a) => a.actionId === decision.actionId,
       )!;
       expect(action).toBeDefined();
-      if (n < 2) {
+      if (n === 0) {
         heads.push(action.type);
         expect(
           decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
@@ -225,11 +224,14 @@ it.each([false, true])(
       if (!applied.ok) throw Error(applied.error.message);
       state = applied.state;
     }
-    expect(heads).toEqual(["gain_credit", "start_run"]);
+    expect(heads).toEqual(["start_run"]);
     expect(state.winner).toBe("runner");
     expect(getPlayerView(state, "runner").own.agendaPoints).toBe(7);
     expect(getPlayerView(state, "runner").own.credits).toBe(
-      maximumCorpBid ? 1 : 7,
+      credits === 17 && !maximumCorpBid ? 6 : credits - 9,
+    );
+    expect(getPlayerView(state, "runner").own.tags).toBe(
+      credits === 17 && !maximumCorpBid ? 0 : 1,
     );
     expect(forcedCorpBids).toBe(maximumCorpBid ? 1 : 0);
     const replay = replayEvents(

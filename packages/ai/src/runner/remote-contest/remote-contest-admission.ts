@@ -111,6 +111,10 @@ export function runnerTerminalRemoteContestIsDirectlyMandatory(
 ): boolean {
   const nonLethalDamageFloorLastChance =
     runnerTerminalRemoteContestIsNonlethalDamageFloorLastChance(evaluation);
+  const fixedTagCleanup = terminalContestHasCompleteFixedTagCleanup(
+    input,
+    evaluation,
+  );
   return (
     runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
     evaluation.prerunReserveQuote?.status !== "blocked" &&
@@ -127,9 +131,87 @@ export function runnerTerminalRemoteContestIsDirectlyMandatory(
     evaluation.creditsAfterRun >= 0 &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
     evaluation.accessPayoffContestable !== false &&
-    evaluation.visibleTraceTagHazardUnavoidable !== true &&
+    (evaluation.visibleTraceTagHazardUnavoidable !== true || fixedTagCleanup) &&
     ((evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0 ||
-      nonLethalDamageFloorLastChance)
+      nonLethalDamageFloorLastChance ||
+      fixedTagCleanup)
+  );
+}
+
+function terminalContestHasCompleteFixedTagCleanup(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  const route = evaluation.routeQuote;
+  const action = input.legalActions.find(
+    (candidate) => candidate.actionId === evaluation.actionId,
+  );
+  const hazards = (evaluation.visibleIceRunHazards ?? []).filter(
+    (hazard) => hazard.unavoidable,
+  );
+  if (
+    input.side !== "runner" ||
+    input.playerView.timingPoint !== "runner_action.main" ||
+    input.playerView.run ||
+    action?.type !== "start_run" ||
+    action.source !== "basic_action" ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    route?.reachability !== "guaranteed_access" ||
+    route.fundingGap !== 0 ||
+    route.unknownIceCount !== 0 ||
+    (evaluation.unknownUnrezzedIceCount ?? 0) !== 0 ||
+    route.conditionalReasons.length !== 0 ||
+    (route.conditionalRiskReasons?.length ?? 0) !== 0 ||
+    hazards.length === 0 ||
+    hazards.some(
+      (hazard) =>
+        hazard.kind !== "trace_tag" ||
+        hazard.effectType !== "add_tag" ||
+        hazard.preventsAccess ||
+        hazard.canCauseFlatlineBeforeAccess ||
+        !Number.isSafeInteger(hazard.expectedTags) ||
+        (hazard.expectedTags ?? 0) <= 0,
+    ) ||
+    route.effects.some(
+      (effect) =>
+        effect.kind !== "tags" ||
+        effect.preventsAccess ||
+        effect.canEndGameBeforeAccess ||
+        !Number.isSafeInteger(effect.amount) ||
+        (effect.amount ?? 0) <= 0,
+    )
+  )
+    return false;
+  const newTags = hazards.reduce(
+    (sum, hazard) => sum + hazard.expectedTags!,
+    0,
+  );
+  if (
+    route.effects.reduce((sum, effect) => sum + effect.amount!, 0) !== newTags
+  )
+    return false;
+  const tagsToClear = input.playerView.own.tags + newTags;
+  const runClicks = action.costs.reduce(
+    (sum, cost) => sum + (cost.clicks ?? 0),
+    0,
+  );
+  const runCredits = action.costs.reduce(
+    (sum, cost) => sum + (cost.credits ?? 0),
+    0,
+  );
+  // The engine's basic remove_tag costs one click and two general credits.
+  // Run-only money, persistent counters and speculative future removal cards
+  // do not certify this complete same-turn sequence.
+  return (
+    input.playerView.own.clicks -
+      runClicks -
+      (evaluation.futureClicksLost ?? 0) >=
+      tagsToClear &&
+    Math.min(
+      evaluation.creditsAfterRun,
+      input.playerView.own.credits - runCredits - route.knownCost,
+    ) >=
+      tagsToClear * 2
   );
 }
 
