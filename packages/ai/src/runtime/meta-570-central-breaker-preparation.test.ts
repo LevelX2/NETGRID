@@ -90,7 +90,7 @@ it("installs the held cheaper decoder before the same central run under its exac
   });
   const next = buildAiDecisionInput(installed.state, "runner", {
     difficulty: "hard",
-    ownDeckSnapshot: input.ownDeckSnapshot,
+    ownDeckSnapshot: input.ownDeckSnapshot!,
     eventTail: installed.state.eventLog,
   });
   const run = chooseAiAction(next);

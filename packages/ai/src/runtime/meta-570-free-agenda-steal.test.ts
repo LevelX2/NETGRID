@@ -113,7 +113,7 @@ it.each([
     state.agendaPointsToWin = 20;
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",
-      ownDeckSnapshot: previous.ownDeckSnapshot,
+      ownDeckSnapshot: previous.ownDeckSnapshot!,
       eventTail: state.eventLog,
     });
     expect(
