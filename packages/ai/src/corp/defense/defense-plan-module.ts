@@ -1880,9 +1880,10 @@ function compareGenericExactInstallRoutes(
   ) {
     return left.signal.installRoute?.disposition === "productive" ? -1 : 1;
   }
-  if (left.projection.effect !== right.projection.effect) {
-    return left.projection.effect === "satisfied" ? -1 : 1;
-  }
+  const effectRank = { satisfied: 0, progress: 1, no_progress: 2 };
+  const effectComparison =
+    effectRank[left.projection.effect] - effectRank[right.projection.effect];
+  if (effectComparison !== 0) return effectComparison;
   const probabilityComparison = compareExactProbabilities(
     left.projection.after.protection.runnerAccessSuccessProbability,
     right.projection.after.protection.runnerAccessSuccessProbability,

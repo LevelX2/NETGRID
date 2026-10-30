@@ -1136,6 +1136,16 @@ Originalseed-Kontrolle G26/D446 auf `2254ba250`.
 
 ### Vertikale Implementierung
 
+Bei gleich dringlichen generischen Installationsrouten ordnet Defense den
+gequoteten Schutzfortschritt strikt: erfüllter Schutz vor Teilfortschritt vor
+reiner Kapazitätsfreigabe ohne Schutzgewinn. Der Vergleich liefert in beiden
+Richtungen dieselbe Rangfolge. Danach gelten Zugriffsrisiko, tatsächlicher
+Runnerpreis und eigene Kosten. Eine schwächere Kapazitätsroute bleibt bei
+fehlender besserer Route zulässig. Der Zugplaner behält die planinterne Wahl
+des bestehenden Defense-Owners. Paarung 572 G38 D84 sichert die native
+Quandary-Alternative gegen eine von Worm kostenlos gebrochene Wall
+einschließlich Angebotsreihenfolge, LegalAction-Bindung und Replay ab.
+
 [`defenseModule`](../../../packages/ai/src/corp/defense/defense-plan-module.ts)
 ist der Einstieg in `corp/defense/`. Der Owner bündelt globale Central-Allokation,
 Schutzrouten, Planphasen, Assessment, Dispositionen und exakte Validierung.
