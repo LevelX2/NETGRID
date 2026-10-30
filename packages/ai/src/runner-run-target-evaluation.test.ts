@@ -1402,7 +1402,17 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("lets a known R&D agenda beat installed HQ multiaccess pressure", () => {
     const input = aiInput({
       credits: 6,
-      servers: [server("hq"), server("rd")],
+      servers: [
+        server("hq"),
+        server("rd", {
+          runnerAgendaStealCostQuote: {
+            stateVersion: 1,
+            serverId: "rd",
+            minimumCreditCost: 0,
+            complete: true,
+          },
+        }),
+      ],
       legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
       rig: [
         visibleCard("hq-interface", {
@@ -2121,7 +2131,16 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const wilson = wilsonRunAbilityAction("wilson-known-agenda-hq", "hq");
     const input = aiInput({
       credits: 6,
-      servers: [server("hq")],
+      servers: [
+        server("hq", {
+          runnerAgendaStealCostQuote: {
+            stateVersion: 1,
+            serverId: "hq",
+            minimumCreditCost: 0,
+            complete: true,
+          },
+        }),
+      ],
       legalActions: [wilson],
       rig: [
         visibleCard("wilson-installed", {
@@ -2134,7 +2153,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     const [evaluation] = evaluateRunnerRunTargets({
       input,
-      beliefState: beliefWithKnownHq(["simple_agenda"], {
+      beliefState: beliefWithKnownHq(["onr_v1_203_hostile-takeover"], {
         handCount: 1,
         unknownRestCount: 0,
       }),

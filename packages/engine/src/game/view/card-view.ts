@@ -34,7 +34,7 @@ import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
-import { quoteStealCostForKnownInstalledAgenda } from "../../ability-engine/steal-cost-modifiers";
+import { quoteStealCostForKnownAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { damagePreventionUsedThisTurn } from "../state/turn-flags-counters";
 import { activatedAbilityBindingsForDefinition } from "../../ability-engine/card-capability-binding";
 import { persistentFortCounterExposureActive } from "../mechanics/fort-counter-exposure";
@@ -336,17 +336,13 @@ function visibleAgendaStealCostQuote(
     referenceViewer !== "runner" ||
     definition.type !== "agenda" ||
     instance.zone.side !== "corp" ||
-    instance.zone.zone !== "serverRoot"
+    (instance.zone.zone !== "serverRoot" && instance.zone.zone !== "archives")
   ) {
     return {};
   }
-  const serverId = instance.zone.serverId;
-  const quote = quoteStealCostForKnownInstalledAgenda(
-    state,
-    serverId,
-    id,
-    definition,
-  );
+  const serverId =
+    instance.zone.zone === "serverRoot" ? instance.zone.serverId : "archives";
+  const quote = quoteStealCostForKnownAgenda(state, serverId, id, definition);
   return {
     effectiveStealCostQuote: {
       stateVersion: state.stateVersion,

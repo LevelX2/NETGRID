@@ -332,21 +332,28 @@ export function currentRunAbortAssessment(
   const preservesKnownAgendaPayoff =
     committedPayoff === "agenda" || committedPayoff === "score_threat";
   const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
+  const criticalUnknownRemoteAccess =
+    run.attackedServerId.startsWith("remote_") &&
+    server.root.some((card) => !card.known) &&
+    input.playerView.own.gripOrHq.length <= 1;
   if (
     input.playerView.timingPoint === "run.jack_out_window" &&
     run.phase === "movement" &&
     run.position?.kind === "server" &&
-    (run.attackedServerId === "hq" || run.attackedServerId === "rd") &&
-    input.playerView.own.gripOrHq.length === 0 &&
+    (((run.attackedServerId === "hq" || run.attackedServerId === "rd") &&
+      input.playerView.own.gripOrHq.length === 0) ||
+      criticalUnknownRemoteAccess) &&
     flatlineRisk.level === "critical" &&
     !preservesKnownAgendaPayoff
   ) {
     return {
       evidenceCode: [
-        "runner_critical_empty_grip_unknown_central_access_requires_jack_out",
+        criticalUnknownRemoteAccess
+          ? "runner_critical_low_grip_unknown_remote_access_requires_jack_out"
+          : "runner_critical_empty_grip_unknown_central_access_requires_jack_out",
         `server:${run.attackedServerId}`,
         `flatline_risk:${flatlineRisk.level}`,
-        "hand:0",
+        `hand:${input.playerView.own.gripOrHq.length}`,
         `committed_payoff:${committedPayoff ?? "none"}`,
       ].join("|"),
     };

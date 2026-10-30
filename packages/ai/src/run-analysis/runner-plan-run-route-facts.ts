@@ -156,31 +156,6 @@ export function witnessedRunActionIds(
     .map((candidate) => candidate.actionId);
 }
 
-export function witnessedReachableRunActionIds(
-  candidates: readonly ActionSemanticCandidate[],
-  evaluations: readonly RunnerRunTargetEvaluation[],
-  serverId: string,
-): string[] {
-  const candidateActionIds = new Set(
-    candidates
-      .filter(
-        (candidate) =>
-          candidate.runProjectionSummary?.serverId === serverId &&
-          (candidate.semanticActionType === "run.start" ||
-            candidate.semanticActionType === "play.runner_event"),
-      )
-      .map((candidate) => candidate.actionId),
-  );
-  return evaluations
-    .filter(
-      (evaluation) =>
-        evaluation.targetServerId === serverId &&
-        evaluation.pathPassability === "reachable" &&
-        candidateActionIds.has(evaluation.actionId),
-    )
-    .map((evaluation) => evaluation.actionId);
-}
-
 export function witnessedKnownAgendaRunEvaluations(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],

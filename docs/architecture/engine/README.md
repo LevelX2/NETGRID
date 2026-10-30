@@ -39,6 +39,17 @@ Dieser Ordner enthält nur die aktuell relevanten Architektur- und Strukturvertr
 - Kartenspezifische Autorenwahrheit liegt in der CardSpec; Engine-Verträge interpretieren deren mechanische Projektion generisch.
 - Fehlende oder mehrdeutige Bindungen scheitern fail-closed statt durch Legacy-Fallbacks kaschiert zu werden.
 
+## PlayerView-Stealquotes
+
+Die Runner-PlayerView veröffentlicht vollständige aktuelle Steal-Creditquotes
+für bekannte installierte Agenden und öffentlich aufgedeckte Agenden in
+Archives. Die Quote bindet StateVersion, tatsächlichen Zugriffsserver und
+Agenda-Instanz; Eigenkosten verwenden die tatsächliche Zugriffszone.
+Der öffentliche allgemeine Serveraufschlag bleibt davon getrennt. Verdeckte
+Archives-Karten erhalten weder Identität noch Quote; Corp-Views erhalten
+diese Runner-Kostenquote ebenfalls nicht. Virtuelle Archives-Roots verleihen
+entsorgten Karten keine installierten Fähigkeiten.
+
 ## Pflegeprinzip
 
 Neue Dokumente gehören nur dauerhaft in diesen Ordner, wenn sie einen aktuellen Engine-Architektur- oder Strukturvertrag beschreiben, der nicht sinnvoll in eines der bestehenden Dokumente integriert werden kann.

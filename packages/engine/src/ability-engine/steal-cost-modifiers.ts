@@ -242,17 +242,22 @@ function currentAccessSelfStealCostsForAgenda(
   );
 }
 
-export function quoteStealCostForKnownInstalledAgenda(
+export function quoteStealCostForKnownAgenda(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
   agendaCardId: CardInstanceId,
   agendaDefinition: CardDefinition,
 ): StealCostQuote {
+  const zone = state.cardInstances[agendaCardId]?.zone;
+  const accessZone = currentAccessZoneForCard(state, agendaCardId);
   if (
     agendaDefinition.type !== "agenda" ||
-    state.cardInstances[agendaCardId]?.zone.side !== "corp" ||
-    state.cardInstances[agendaCardId]?.zone.zone !== "serverRoot" ||
-    state.cardInstances[agendaCardId]?.zone.serverId !== serverId
+    zone?.side !== "corp" ||
+    !(
+      (zone.zone === "serverRoot" && zone.serverId === serverId) ||
+      (zone.zone === "archives" && serverId === "archives")
+    ) ||
+    (accessZone !== "installed" && accessZone !== "archives")
   ) {
     return { totalCost: 0, modifiers: [], publicPayload: {} };
   }
@@ -261,7 +266,7 @@ export function quoteStealCostForKnownInstalledAgenda(
     ...selfStealCostsForAgendaAtZone(
       agendaDefinition,
       agendaCardId,
-      "installed",
+      accessZone,
     ),
   ].sort((a, b) =>
     `${a.sourceDefinitionId}:${a.sourceCardInstanceId ?? ""}`.localeCompare(

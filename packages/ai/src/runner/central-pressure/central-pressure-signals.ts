@@ -25,7 +25,6 @@ import {
   planSafeRunExclusionEvidence,
   runRiskContractForEvaluation,
   sourceDefinitionForEvaluation,
-  witnessedReachableRunActionIds,
   witnessedRunActionIds,
 } from "../../run-analysis/runner-plan-run-route-facts";
 import {
@@ -1425,38 +1424,6 @@ export function buildRunnerCentralPressureSignals({
               : {}),
           };
         }),
-      ...input.playerView.servers.flatMap((server) => {
-        const visibleAgendaRunActionIds = witnessedReachableRunActionIds(
-          candidates,
-          runTargets,
-          "archives",
-        );
-        if (
-          server.id !== "archives" ||
-          !archivesHasVisibleKnownAgenda(input) ||
-          visibleAgendaRunActionIds.length === 0
-        ) {
-          return [];
-        }
-        return [
-          {
-            pressureId: "central:archives",
-            serverId: "archives" as const,
-            purpose: "access" as const,
-            strategyLineIds: [strategicIntent.primaryWinIntent],
-            priorityClass: "P2" as const,
-            reachable: !forgoUnsafeRunCapacity,
-            marginalValue: 1_000,
-            evidenceCode: forgoUnsafeRunCapacity
-              ? "runner_restricted_run_capacity_below_required_hand_buffer"
-              : "visible_known_agenda_in_archives",
-            runActionIds: visibleAgendaRunActionIds,
-            runActionValues: {},
-            runActionEvidence: {},
-            runActionExclusions: {},
-          },
-        ];
-      }),
       ...constrainedRunCandidates.flatMap(
         ({ candidate, serverId, marginalValue, evidenceCode }) => {
           if (serverId !== "hq" && serverId !== "rd" && serverId !== "archives")

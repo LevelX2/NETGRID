@@ -246,10 +246,12 @@ export function assessRunnerRunAfterAccessPreparation(params: {
   if (
     !preparation ||
     (preparation.type !== "play_event" &&
-      !(preparation.type === "install_card" &&
+      !(
+        preparation.type === "install_card" &&
         consumedCard?.definitionId !== undefined &&
         cardSpecPlanningCardByDefinitionId(consumedCard.definitionId)?.planning
-          .engine.tagPreventionSources?.length)) ||
+          .engine.tagPreventionSources?.length
+      )) ||
     !consumedCard ||
     preparation.expiresAtStateVersion !== params.input.playerView.stateVersion
   )
@@ -1491,7 +1493,11 @@ function payoffForTarget(
       ),
     );
   }
-  if (targetServerId === "hq" || targetServerId === "rd") {
+  if (
+    targetServerId === "hq" ||
+    targetServerId === "rd" ||
+    targetServerId === "archives"
+  ) {
     return centralPayoffToRunTarget(
       evaluateKnownCentralAccessPayoff(
         params.input,
@@ -1987,7 +1993,6 @@ function recommendationForRunTarget(params: {
     return "gain_credits_first";
   }
   if (
-    params.targetKind === "remote" &&
     params.accessPayoff === "agenda" &&
     params.accessPayoffContestable === false
   ) {

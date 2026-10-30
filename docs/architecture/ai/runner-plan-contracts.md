@@ -173,6 +173,15 @@ nichtnegatives Budget. Fehlende notwendige Fakten scheitern mit strukturierter
 Plan-Diagnose, ohne Rekonstruktion aus Texten oder Ersatzbudget. Neue Fakten
 erweitern weder den side-sicheren Wissensstand noch die Action-Autorität.
 
+Öffentlich bekannte Agenden in Archives liefern ihre tatsächlichen Identitäten
+an dieselbe Runbewertung wie die übrigen Zentralzugriffe. Ihre vollständigen
+aktuellen Stealpreise kommen aus der Engine-PlayerView. Die zusätzliche
+Archives-Rootdarstellung macht eine entsorgte Agenda nicht zu einer
+installierten Karte. Sichtbarer Agendaertrag erhöht die Priorität, übergeht
+aber weder Stealpreis noch Pfad-, Hand- oder Creditreserve. Ein zweiter
+pauschaler Archives-Zulassungspfad darf die bewertete Route nicht ersetzen;
+bezahlbare sichere Steals behalten ihren normalen Central-Parent.
+
 **Klasse:** `strategic_campaign`
 **Rolle:** Vordergrund, zeitweise präemptierbar
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
@@ -2232,6 +2241,16 @@ erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell
 verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
+
+Vor einem tatsächlich unbekannten Remote-Zugriff prüft der vorhandene
+Run-Abbruch-Owner bei höchstens einer Handkarte erneut die öffentlich belegte
+kritische Schadensgefahr. Die nach der letzten ICE korrekt entfallende
+Unknown-ICE-Reserve ist kein Nachweis eines sicheren unbekannten Zugriffs.
+Nur die aktuelle legale Exit-Action darf ausgeführt werden; Parent, Executor
+und StateVersion bleiben gebunden. Bekannte Agenda-/Score-Threat-Commitments,
+größere Hände und bekannte Roots behalten ihre eigenen Bewertungen. Die
+Prüfung identifiziert keine verdeckte Falle und ersetzt keine allgemeine
+mehrzügige Handvorbereitung.
 
 Beim aktuellen Zugriff lässt derselbe Owner einen normalen kostenlosen
 Agendasteal gegenüber dem Trash derselben sichtbaren Agenda dominieren:

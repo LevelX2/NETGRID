@@ -71,6 +71,29 @@ export function evaluateKnownCentralAccessPayoff(
   serverId: string | undefined,
   beliefState: BeliefState = reconstructBeliefState(input),
 ): KnownCentralAccessPayoff {
+  if (serverId === "archives") {
+    const agendas = input.playerView.servers
+      .find((server) => server.id === "archives")
+      ?.root.filter(
+        (card) => card.known && card.type === "agenda" && card.definitionId,
+      );
+    if (!agendas?.length) return unknownCentralPayoff("archives");
+    return {
+      payoff: "agenda",
+      accessFacts: {
+        knownTargetDefinitionIds: [
+          ...new Set(agendas.map((card) => card.definitionId!)),
+        ],
+        trashBudget: "not_applicable",
+      },
+      knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
+      score: 520,
+      penalty: 0,
+      reasons: ["known_archives_agenda_pressure"],
+      evidence: ["central_target:archives", "central_memory_payoff:agenda"],
+    };
+  }
   if (serverId === "hq") return evaluateKnownHqAccessPayoff(input, beliefState);
   if (serverId !== "rd") return unknownCentralPayoff(serverId ?? "none");
   const freshness = beliefState.runnerOpponentModel?.rndTopFreshness;

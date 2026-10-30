@@ -157,6 +157,7 @@ export function runnerRunTargetIsDirectlyConvertible(params: {
   );
   return (
     params.target.pathPassability === "reachable" &&
+    params.target.accessPayoffContestable !== false &&
     params.target.prerunReserveQuote?.status !== "blocked" &&
     params.target.score > 0 &&
     (params.target.recommendation !== "gain_credits_first" ||
