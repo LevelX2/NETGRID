@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   applyAction,
   hashGameState,
@@ -24,7 +24,7 @@ function choose(
   f: ReturnType<typeof load>,
   order: "original" | "reverse" | "gate_first" = "original",
 ) {
-  const input: AiDecisionInput = {
+  const input: AiDecisionInputWithDeckCapabilities = {
     ...f.checkpoint.input,
     ...buildAiDecisionInputDto(f.checkpoint.input),
   };
