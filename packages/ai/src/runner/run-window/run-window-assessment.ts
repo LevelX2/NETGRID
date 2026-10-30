@@ -33,6 +33,7 @@ import { currentRunPathContext } from "../../run-analysis/current-run-path-conte
 import {
   runnerConfirmedDamageRequiredHandFloor,
   runnerDamageThreatAssessment,
+  runnerKnownRemoteAccessDamageAmbushAssessment,
   runnerVisibleLethalIceDamageAssessment,
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "../../runner-damage-threat-assessment";
@@ -611,6 +612,10 @@ function runnerRunWindowActionAssessment(
       );
       const optionalBonusRun =
         restrictedRunSequenceAction.payload?.optionalBonusRun === true;
+      const knownAccessDamageAmbush =
+        optionalBonusRun && typeof serverId === "string"
+          ? runnerKnownRemoteAccessDamageAmbushAssessment(input, serverId)
+          : undefined;
       const optionalBonusRunHasValue =
         !optionalBonusRun ||
         runnerRunTargetHasOptionalBonusRunValue(targetEvaluation);
@@ -628,6 +633,7 @@ function runnerRunWindowActionAssessment(
         admissible:
           typeof serverId === "string" &&
           serverId.length > 0 &&
+          !knownAccessDamageAmbush &&
           optionalBonusRunHasValue &&
           optionalRestrictedRunIsSafe,
         ...(costFree
@@ -640,6 +646,9 @@ function runnerRunWindowActionAssessment(
           `runner_restricted_run_sequence_action:${restrictedRunSequenceAction.actionId}`,
           `runner_restricted_run_sequence_target:${typeof serverId === "string" ? serverId : "unknown"}`,
           `runner_restricted_run_sequence_remaining:${Number(restrictedRunSequenceAction.payload?.restrictedActionGrantRemainingActions)}`,
+          ...(knownAccessDamageAmbush
+            ? [knownAccessDamageAmbush.evidenceCode]
+            : []),
           ...(targetEvaluation
             ? [
                 `runner_restricted_run_sequence_target_score:${targetEvaluation.score}`,

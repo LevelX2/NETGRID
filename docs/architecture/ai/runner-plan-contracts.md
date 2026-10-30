@@ -3764,6 +3764,14 @@ Run mit `optionalBonusRun`. Der bestehende Run-Window-Owner verlangt dafür
 einen aktuellen Zugriffsnutzen und darf den Bonus ausdrücklich ablehnen.
 Verpflichtende Mehrserverfolgen erhalten diese Kennzeichnung nicht.
 
+Der freiwillige eingeschränkte Zusatzrun übernimmt auch die bestehende
+Bewertung einer einzelnen öffentlich bekannten gerezzten Zugriffsschadensfalle.
+Ein kostenloser Runstart hebt diese konkrete Ablehnung nicht auf. Der
+Run-Window-Owner bietet dann weiterhin die exakt legale Bonusrun-Ablehnung an;
+verdeckte Roots, Agendaangebote, produktive andere Server und verpflichtende
+Mehrserverfolgen erhalten dadurch keine zusätzliche Sperre. Der Nachweis
+verwendet dieselben nativen Zustände und die ganze verbleibende Runnerzugfolge.
+
 Eine vom Central-Owner exakt zugelassene optionale Runroute behält ihre
 Zuständigkeit auch dann, wenn die lokale Run-Window-Nutzenprüfung sie ablehnt.
 Die Disposition prüft dieselbe Action-ID, Erreichbarkeit, positiven Nutzen,
