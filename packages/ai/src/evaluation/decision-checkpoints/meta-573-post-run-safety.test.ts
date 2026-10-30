@@ -157,3 +157,5 @@ it("retains an already bound agenda conversion in the shared self-tag safety fac
     }),
   ).toBeUndefined();
 });
+
+it("does not invent the conditional success tag while the Corporation bank is empty", () => { const f=fixture();f.input.playerView.opponent.credits=0;const t=shipping(f.input);expect(t.evidence.join("|")).not.toContain("runner_post_run_self_tag_hand_buffer_unrecoverable"); });

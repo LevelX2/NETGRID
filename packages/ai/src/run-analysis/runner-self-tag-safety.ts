@@ -13,6 +13,11 @@ export function runnerPostRunSelfTagHandSafety(params: {
   preservesAgendaAccess: boolean;
 }): string | undefined {
   const { input, projection } = params;
+  if (
+    projection.accessReplacementRequiresCorpCredits === true &&
+    input.playerView.opponent.credits <= 0
+  )
+    return undefined;
   const tags = projection.successfulRunSelfTags ?? 0;
   if (tags <= 0 || params.clicksAfterRun > 0 || params.preservesAgendaAccess)
     return undefined;
