@@ -2319,8 +2319,8 @@ Null-Credit-Kosten, einer kostenlosen Rezvorbereitung und strikt höherer
 Auszahlung noch im aktuellen Zug zulässig. Vorhandene aktuelle Erträge und
 bereits bekannte in diesem Zug erreichbare Burst-Einkommen sperren diesen
 begrenzten Nachweis. Zwei Restaktionen rechtfertigen BBS mit nur einer
-Auszahlung daher nicht. Sofortige Konversionen und P1–P3-Fristen erhalten
-diesen zusätzlichen Aufbaupfad nicht.
+Auszahlung daher nicht. Sofortige Konversionen und andere P1–P3-Fristen
+erhalten diesen zusätzlichen Aufbaupfad nicht.
 
 Die Vorbereitung bindet den vorhandenen Score-Parent und seinen offenen Need.
 Nach jeder Engine-Transition werden Quelle, Setup, Restklicks und der aktuelle
@@ -2331,6 +2331,26 @@ kostenlosen Rez und zwei Auszahlungen: vier statt drei Credits bei drei
 normalen Aktionen, durchgehend mit demselben Parent und Engine-Replay.
 G12 D211 erhält zwei Basiskredite und Accounts Receivable mit sechs Credits
 Nettozufluss statt des schwächeren Bankaufbaus.
+
+Ein bereits zugelassener P2-Rezreservebedarf für vorhandenes, ungeresstes ICE
+darf denselben kostenlosen aktuellen Aufbau nutzen, wenn sein absolutes Ziel
+zur beobachteten Bank und Lücke passt. Die gesamte Auszahlung im Restzug muss
+mehr liefern als die Basiscredits. Außerdem dürfen Installation und bis zur
+Schutzreserve nötige Auszahlungen zusammen nicht mehr Aktionen beanspruchen
+als deren Basisfinanzierung. Eine Ein-Credit-Lücke, eine fehlende ICE-Bindung,
+eine andere Prioritätsfrist oder ein konkurrierender erreichbarer Burst tragen
+diesen Nachweis nicht. Die Reserve bleibt vor dem nächsten Runnerzug verfügbar;
+eine wichtige gegenwärtige Installation wird dadurch nicht neu nachrangig.
+
+Defense prüft die Ausführbarkeit seines zertifizierten Fundingkopfs über den
+bestehenden Economy-Routenvertrag. Ein kostenloser Rez-Vorbereitungskopf ist
+noch kein liquides Einkommen, aber eine ausführbare gebundene Vorbereitung;
+sein Fehlen in einem reinen Sofortertragsfilter darf den weiterhin offenen
+Defense-Need nicht durch einen Score-Suchbedarf ersetzen. Paarung570 R6/G3/D102
+belegt die vollständige normale Folge: Installation, kostenloser Rez, Auszahlung
+bis zur HQ-Reserve6 nach denselben zwei Aktionen wie zwei Basiscredits, danach
+freie zweite Auszahlung. Endbank8 statt7, Restpool12 und deterministisches
+Engine-Replay; kein behaupteter anderer Gesamtsieger.
 
 Eine bereits installierte, aktionsweise geladene Creditbank besitzt einen
 getrennten aktuellen Restzugvertrag. Die Engine bindet Rez beziehungsweise

@@ -46,7 +46,6 @@ import { compareExactProbabilities } from "../../runtime/corp-score-protection-a
 import {
   corpEconomyCandidateHasExecutablePayload,
   economyCandidates,
-  immediateCorpLiquidCreditGain,
 } from "../economy/economy-routes";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
@@ -778,18 +777,12 @@ function genericDefenseFundingAlternativeExists(
         requirement.iceInstanceId,
   );
   return (
-    need?.actionIds.some((actionId) =>
-      context.actionCandidates.some(
-        (candidate) =>
-          candidate.actionId === actionId &&
-          (immediateCorpLiquidCreditGain(candidate) > 0 ||
-            (need.kind === "parent_funding" &&
-              need.restrictedCreditPreparations?.some(
-                (preparation) => preparation.actionId === actionId,
-              ) === true)) &&
-          corpEconomyCandidateHasExecutablePayload(context.input, candidate),
-      ),
-    ) === true
+    need !== undefined &&
+    economyCandidates(context, need).some(
+      ({ candidate }) =>
+        need.actionIds.includes(candidate.actionId) &&
+        corpEconomyCandidateHasExecutablePayload(context.input, candidate),
+    )
   );
 }
 

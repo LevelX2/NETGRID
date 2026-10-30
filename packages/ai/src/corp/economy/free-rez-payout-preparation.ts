@@ -38,6 +38,27 @@ export function corpFreeRezPayoutPreparation(
     signal.incrementalDefenseReserve &&
     signal.parentPlanInstanceId ===
       "plan:corp.defend_servers:server-defense-portfolio";
+  // This reserve pays for already installed ICE before the next Runner turn.
+  // Setup may not use more actions before reaching it than the Basic route.
+  const defenseSetupFunding =
+    defenseFunding &&
+    signal.parentPriorityClass === "P2" &&
+    Number.isSafeInteger(signal.gap) &&
+    signal.gap >= 2 &&
+    signal.gap <= clicks &&
+    signal.incrementalDefenseReserve!.targetCredits ===
+      input.playerView.own.credits + signal.gap &&
+    input.playerView.servers.some(
+      (server) =>
+        server.id === signal.incrementalDefenseReserve!.serverId &&
+        server.ice.some(
+          (ice) =>
+            ice.instanceId ===
+              signal.incrementalDefenseReserve!.iceInstanceId &&
+            ice.known &&
+            !ice.rezzed,
+        ),
+    );
   if (
     input.side !== "corp" ||
     input.playerView.timingPoint !== "corp_action.main" ||
@@ -56,7 +77,7 @@ export function corpFreeRezPayoutPreparation(
     const setupClicks = install ? (1 as const) : (0 as const);
     if (
       (install
-        ? !scoreFunding ||
+        ? (!scoreFunding && !defenseSetupFunding) ||
           clicks < 2 ||
           candidate.semanticActionType !== "install.card" ||
           hasUncomparedCurrentFunding(input, candidates)
@@ -115,6 +136,12 @@ export function corpFreeRezPayoutPreparation(
       !campaign
     )
       return [];
+    if (
+      install &&
+      defenseSetupFunding &&
+      setupClicks + Math.ceil(signal.gap / profile.payoutCredits) > signal.gap
+    )
+      return [];
     if (!campaign.riskAdjustment)
       throw new PlanResolutionFailure("missing_plan_module_coverage", {
         side: input.side,
@@ -126,7 +153,10 @@ export function corpFreeRezPayoutPreparation(
         removalCondition:
           "Bind the admitted free finite-pool campaign to its current payout-execution and risk quote before using it for parent funding.",
       });
-    const currentPayoutExecutions = scoreFunding ? clicks - setupClicks : 1;
+    const currentPayoutExecutions =
+      scoreFunding || (install && defenseSetupFunding)
+        ? clicks - setupClicks
+        : 1;
     const projectedCurrentCredits = Math.min(
       profile.poolCredits,
       currentPayoutExecutions * profile.payoutCredits,
@@ -134,7 +164,7 @@ export function corpFreeRezPayoutPreparation(
     if (
       campaign.riskAdjustment.projectedPayoutExecutions <
         currentPayoutExecutions ||
-      projectedCurrentCredits <= (scoreFunding ? clicks : 1)
+      projectedCurrentCredits <= (scoreFunding || install ? clicks : 1)
     )
       return [];
     return [
