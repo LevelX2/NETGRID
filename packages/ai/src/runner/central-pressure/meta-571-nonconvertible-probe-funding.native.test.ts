@@ -12,6 +12,60 @@ import {
 import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 afterEach(resetResidentPlanPortfolioMemory);
+function decideFixture(name: string) {
+  const fixture = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../../../data/scenarios/ai-decision-checkpoints/" + name,
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  ) as {
+    input: AiDecisionInputWithDeckCapabilities;
+    runtime: AiRuntimeCheckpointV1;
+    validation: Record<string, boolean>;
+  };
+  expect(Object.values(fixture.validation)).toEqual(Array(9).fill(true));
+  const { input, runtime } = fixture;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+  const before = JSON.stringify(input),
+    decision = chooseAiAction(input);
+  expect(JSON.stringify(input)).toBe(before);
+  expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
+  expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
+    true,
+  );
+  return { input, decision, portfolio: residentPlanPortfolioSnapshot(input)! };
+}
+
+it.each([
+  ["cp-meta571-terminal-central-funding.json", "rd"],
+  ["cp-meta571-partial-known-funding.json", "hq"],
+])("retains admitted bank funding in %s", (name, server) => {
+  const { input, decision, portfolio } = decideFixture(name);
+  expect(
+    input.legalActions.find((a) => a.actionId === decision.actionId),
+  ).toMatchObject({
+    type: "activated_card_ability",
+    payload: { cardImplementationAbilityKey: "withdraw_credits" },
+  });
+  const parentId = "plan:runner.pressure_central:central%3A" + server;
+  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+    parentId,
+  );
+  expect(
+    portfolio.instances.find((p) => p.instanceId === parentId)?.moduleState,
+  ).toMatchObject({
+    signal: { supportNeedId: "run-support:central:" + server },
+  });
+});
+
 it.each([2, 3, 4])(
   "keeps Broker stored value when the central information path cannot use the funded credits (native G%i)",
   (game) => {
