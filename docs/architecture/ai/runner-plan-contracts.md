@@ -3123,6 +3123,16 @@ Paarung 529/G19/D205–207 prüft Gebot sieben, die einmalige Swiss-Zahlung
 und das exakt fortgesetzte Gebot nativ. Der ursprüngliche Abbruch erhält
 dadurch keinen nachträglich erfundenen Endstand.
 
+Auch ausschließlich verpflichtende Encounter-Fortsetzungen erhalten den
+bestehenden Run-Executor nach einer lückenlosen Movement-/Rez-Folge und nach
+dem exakt gewählten, abgeschlossenen Trace-Gebot. Mehrere Trace-Subroutinen
+derselben Begegnung verlieren dadurch ihre aktuelle Zahlungsbindung nicht.
+Die KI-DTO-Projektion erhält dazu die bereits side-sicheren öffentlichen
+`traceId`, `traceSuccessful` und `choiceId`; sie ergänzt keine verdeckten
+Fakten. Fremde Runs, Server, Executor, Choices oder Ereignislücken erlauben
+keine Ursprungsübernahme. Paarung 570/R3/G38 prüft zwei Gebote sechs und
+die Chiba-Auszahlung erst vor der zweiten Zahlung samt Engine-Replay.
+
 Eine Trace außerhalb eines Runs erhält bei ihrer verpflichtenden Gebotswahl
 den Ursprung `rules` / `rules.window_resolution`. Die exakt gebundene
 Choice, ihre angebotenen Optionen, die Trace-ID und die aktuelle StateVersion

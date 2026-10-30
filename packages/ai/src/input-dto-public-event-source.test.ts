@@ -8,6 +8,53 @@ import {
 } from "./semantic-ai-runtime-cutover.test-support";
 
 describe("AI input DTO public event source binding", () => {
+  it("preserves public trace completion bindings while dropping unapproved fields", () => {
+    const action = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const event: PublicGameEvent = {
+      eventId: "trace-complete",
+      stateHashAfter: "fnv1a:trace-complete",
+      type: "resolve_choice",
+      stateVersionBefore: 184,
+      stateVersionAfter: 185,
+      publicPayload: {
+        actor: "runner",
+        actionType: "resolve_choice",
+        traceId: "run_173.ice.0.trace",
+        choiceId: "run_173.ice.0.trace.runner.bid.184",
+        traceStep: "runner_bid",
+        traceSuccessful: false,
+        unapprovedTraceAlias: "discard",
+      },
+    };
+    const view = playerView("runner", [action]);
+    view.publicEvents = [event];
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: view.publicEvents,
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "public-trace",
+      decisionId: "public-trace:185",
+      actionNumber: 185,
+      profileId: "public-trace",
+    });
+    expect(input.eventTail[0]?.publicPayload).toMatchObject({
+      traceId: "run_173.ice.0.trace",
+      choiceId: "run_173.ice.0.trace.runner.bid.184",
+      traceSuccessful: false,
+    });
+    expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
+      "unapprovedTraceAlias",
+    );
+  });
+
   it("rejects a player view from the wrong actor side", () => {
     const action = legalAction(
       "runner-action",

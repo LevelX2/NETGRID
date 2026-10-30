@@ -380,7 +380,22 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         requirement.optionIds.includes(optionId),
       ) &&
       traceWindowIsContinuous;
-    const exactForcedRunMovementOrigin =
+    const completedSelectedTrace =
+      interveningEvents.length === 1 &&
+      pending?.originalActionId === "runner.resolve_choice" &&
+      pending.selectedAtStateVersion === previous?.stateVersion &&
+      pending.sourceStepId === `run.encounter_ice:${previous?.stateVersion}` &&
+      interveningEvents[0]?.publicPayload.actor === "runner" &&
+      interveningEvents[0]?.publicPayload.actionType === "resolve_choice" &&
+      interveningEvents[0]?.publicPayload.effectKind === "trace" &&
+      interveningEvents[0]?.publicPayload.traceStep === "runner_bid" &&
+      typeof interveningEvents[0]?.publicPayload.traceSuccessful ===
+        "boolean" &&
+      typeof interveningEvents[0]?.publicPayload.traceId === "string" &&
+      interveningEvents[0].publicPayload.traceId.startsWith(`${run?.runId}.`) &&
+      interveningEvents[0].publicPayload.choiceId ===
+        `${interveningEvents[0].publicPayload.traceId}.runner.bid.${previous?.stateVersion}`;
+    const exactForcedRunContinuationOrigin =
       previous !== undefined &&
       previous.side === "runner" &&
       previous.stateVersion < input.playerView.stateVersion &&
@@ -392,11 +407,16 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       executor?.side === "runner" &&
       traceOriginOwnedByRunWindowLeaf &&
       executorState?.signal?.windowId === `run:${run?.runId}` &&
-      run?.phase === "movement" &&
-      input.playerView.timingPoint === "run.jack_out_window" &&
+      !choice &&
+      !trace &&
       selectedAction?.side === "runner" &&
       selectedAction.type === "continue_run" &&
-      selectedAction.actionId === "runner.continue_run" &&
+      ((run?.phase === "movement" &&
+        input.playerView.timingPoint === "run.jack_out_window" &&
+        selectedAction.actionId === "runner.continue_run") ||
+        (run?.phase === "encounter_ice" &&
+          input.playerView.timingPoint === "run.encounter_ice" &&
+          selectedAction.payload?.encounterContinue === true)) &&
       selectedAction.source === "game_rule" &&
       selectedAction.expiresAtStateVersion === input.playerView.stateVersion &&
       input.legalActions.length === 1 &&
@@ -413,16 +433,20 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           event.stateVersionAfter === event.stateVersionBefore + 1 &&
           (index === 0 ||
             event.stateVersionBefore ===
-              interveningEvents[index - 1]!.stateVersionAfter) &&
-          event.publicPayload.serverId === run.attackedServerId &&
-          ((event.publicPayload.actor === "runner" &&
-            event.publicPayload.actionType === "continue_run") ||
-            (event.publicPayload.actor === "corp" &&
-              ["rez_ice", "rez_card", "decline_rez"].includes(
-                String(event.publicPayload.actionType),
-              ))),
-      );
-    if (exactRunTraceBidOrigin || exactForcedRunMovementOrigin) {
+              interveningEvents[index - 1]!.stateVersionAfter),
+      ) &&
+      (completedSelectedTrace ||
+        interveningEvents.every(
+          (event) =>
+            event.publicPayload.serverId === run.attackedServerId &&
+            ((event.publicPayload.actor === "runner" &&
+              event.publicPayload.actionType === "continue_run") ||
+              (event.publicPayload.actor === "corp" &&
+                ["rez_ice", "rez_card", "decline_rez"].includes(
+                  String(event.publicPayload.actionType),
+                ))),
+        ));
+    if (exactRunTraceBidOrigin || exactForcedRunContinuationOrigin) {
       result.portfolio.stateVersion = input.playerView.stateVersion;
       const staleRunStartOrigin = result.portfolio.selectedActionOrigin;
       if (
