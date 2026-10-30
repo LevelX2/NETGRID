@@ -864,6 +864,21 @@ weder die Live-Runtime noch die Core-/Tactical-Registry. Gemeinsame Funding-,
 Rollen-, Quellen- und Run-Payoff-Fakten liegen außerhalb der Registries.
 Die Live-Runtime koordiniert weiterhin Ausschlüsse zwischen mehreren Ownern.
 
+Eine gehaltene günstigere Breaker-Antwort darf auch vor einem aktuell
+unbezahlbaren Remote-Pfad mit unbekanntem ICE vorbereitet werden. Coverage
+quotiert zuerst die native Installation samt MU, Handverlust und Restklicks.
+Der Remote-/Funding-Dienst muss danach entweder die direkte Konversion oder
+eine garantierte Finanzierungsroute innerhalb desselben Zuges zulassen;
+bekannte Pfadkosten, Handpuffer und die Reserve für unbekanntes ICE bleiben
+verbindlich. Die Funding-Garantie betrifft die Ressourcenfolge und behauptet
+keine sichere Passage des unbekannten ICE. Der ursprüngliche Run bleibt
+exakt gebunden. Der Remote-Owner berücksichtigt diese vollständig finanzierbare
+Vorbereitung bereits beim Vergleich seiner Runvarianten, damit ein teureres
+Run-Event den Bedarf des günstigeren Basisruns nicht verdrängt. Finanzierung
+und Installation bleiben Child-Schritte des Remote-Parents, auch bei Matchpoint.
+Paarung 570/R2/G29/D598 prüft den gesamten gewinnenden Restzug und die Grenzen
+für Restklicks, Credits, Handpuffer, fehlende Installationsaction und volle MU.
+
 **Klasse:** `development_project` oder dringender `bounded_sequence`
 **Rolle:** Vordergrund/Background je Dringlichkeit
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

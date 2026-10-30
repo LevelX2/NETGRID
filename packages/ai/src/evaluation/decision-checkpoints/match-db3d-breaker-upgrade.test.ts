@@ -26,7 +26,10 @@ import {
 import { chooseRunnerAction } from "../../index";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
-import { runnerRunTargetCanConvertNow } from "../../run-analysis/runner-plan-run-funding";
+import {
+  runnerRunTargetCanConvertNow,
+  runnerRunFundingSupport,
+} from "../../run-analysis/runner-plan-run-funding";
 import { runnerSameTurnBreakerPreparation } from "../../runner/rig-coverage/coverage-same-turn-breaker-preparation";
 import {
   buildAiDecisionInput,
@@ -99,6 +102,7 @@ it.each([
     input.ownDeckCapabilities!,
     {
       runnerRunTargetCanConvertNow,
+      runnerRunFundingSupport,
       runnerCentralPressureHasMaterialMarginalValue,
       runnerCentralPressureCadence,
     },

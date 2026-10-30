@@ -943,8 +943,10 @@ export function buildRunnerRemoteContestSignals({
               gap.needKind === "cost_ineffective_coverage" &&
               gap.sameTurnRunConversion?.installProjection ===
                 "current_legal_action" &&
-              gap.sameTurnRunConversion.requiredCredits <=
-                input.playerView.own.credits &&
+              (gap.sameTurnRunConversion.requiredCredits <=
+                input.playerView.own.credits ||
+                ((gap.fundingGap ?? 0) > 0 &&
+                  gap.fundingActionIds.length > 0)) &&
               gap.sameTurnRunConversion.requiredClicksAfterFunding <=
                 input.playerView.own.clicks &&
               gap.sameTurnRunConversion.requiredCredits -

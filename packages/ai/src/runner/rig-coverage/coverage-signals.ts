@@ -542,7 +542,9 @@ export function uniqueCoverageGaps(
         ? ("cost_ineffective_coverage" as const)
         : ("missing_coverage" as const);
     const gapId =
-      bindToRequester && !terminalRemotePatternThreat
+      bindToRequester &&
+      (!terminalRemotePatternThreat ||
+        costRecovery?.sameTurnPreparation === true)
         ? `${baseGapId}:run:${encodeURIComponent(evaluation.actionId)}`
         : baseGapId;
     if (result.has(gapId)) continue;

@@ -24,6 +24,7 @@ export function runnerSameTurnBreakerPreparation(
   services: Pick<
     RunnerCoverageServices,
     | "runnerRunTargetCanConvertNow"
+    | "runnerRunFundingSupport"
     | "runnerCentralPressureHasMaterialMarginalValue"
     | "runnerCentralPressureCadence"
   >,
@@ -149,12 +150,8 @@ export function runnerSameTurnBreakerPreparation(
       if (currentRouteIsCostBlocked || central) {
         // Current liquidity is not a veto on a cheaper, complete same-turn
         // route. Requote that exact basic run after the native installation.
-        // Unknown encounters do not certify this cost-blocked conversion.
-        if (
-          currentRouteIsCostBlocked &&
-          server.ice.some((ice) => !ice.known || !ice.rezzed)
-        )
-          return [];
+        // Unknown encounters retain the parent's reserve and hand-buffer
+        // requirements. They do not veto savings on the visible path.
         const projectedInput: AiDecisionInput = {
           ...input,
           playerView: {
@@ -177,6 +174,28 @@ export function runnerSameTurnBreakerPreparation(
             target.actionId === evaluation.actionId &&
             target.targetServerId === server.id,
         );
+        const projectedCandidates = candidates.filter(
+          (candidate) => candidate.actionId !== install.actionId,
+        );
+        const projectedEconomy = buildRunnerEconomyPosture(targetParams);
+        const projectedFunding =
+          !central && projectedTarget
+            ? services.runnerRunFundingSupport(
+                projectedInput,
+                projectedEconomy,
+                projectedTarget,
+                evaluateRunnerRunTargets(targetParams),
+                projectedCandidates,
+              )
+            : undefined;
+        const fundedConversion =
+          projectedFunding !== undefined &&
+          projectedFunding.routeActionIds.length > 0 &&
+          projectedFunding.routeAssessment.status === "covered_guaranteed" &&
+          projectedFunding.routeAssessment.horizon === "same_turn" &&
+          projectedFunding.routeAssessment.projectedGap === 0 &&
+          projectedFunding.routeAssessment.totalClickCost + runClicks <=
+            projectedInput.playerView.own.clicks;
         // Preserve the admitted parent's actual budget. A generic desired
         // post-run top-up is not an additional requirement on a preparation
         // that leaves more cash after the same known path and access.
@@ -197,13 +216,12 @@ export function runnerSameTurnBreakerPreparation(
           projectedTarget.stealOrTrashAffordable === false ||
           !(central
             ? parentBudgetPreserved
-            : services.runnerRunTargetCanConvertNow(
+            : fundedConversion ||
+              services.runnerRunTargetCanConvertNow(
                 projectedInput,
-                buildRunnerEconomyPosture(targetParams),
+                projectedEconomy,
                 projectedTarget,
-                candidates.filter(
-                  (candidate) => candidate.actionId !== install.actionId,
-                ),
+                projectedCandidates,
               ))
         )
           return [];
@@ -221,10 +239,13 @@ export function runnerSameTurnBreakerPreparation(
         if (currentRouteIsCostBlocked)
           sameTurnRunConversion = {
             targetRunActionId: evaluation.actionId,
-            requiredCredits: total + stealCredits,
+            requiredCredits: fundedConversion
+              ? input.playerView.own.credits + projectedFunding!.gap
+              : total + stealCredits,
             requiredClicksAfterFunding: install.clickCost + runClicks,
             projectedKnownPathCost: cost!,
-            postRunCreditFloor: 0,
+            postRunCreditFloor:
+              projectedTarget.prerunReserveQuote?.requiredCredits ?? 0,
             installProjection: "current_legal_action",
           };
       }

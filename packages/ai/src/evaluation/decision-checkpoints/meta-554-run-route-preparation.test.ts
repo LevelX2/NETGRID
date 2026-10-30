@@ -28,7 +28,10 @@ import { afterEach, expect, it } from "vitest";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { runnerSameTurnBreakerPreparation } from "../../runner/rig-coverage/coverage-same-turn-breaker-preparation";
-import { runnerRunTargetCanConvertNow } from "../../run-analysis/runner-plan-run-funding";
+import {
+  runnerRunTargetCanConvertNow,
+  runnerRunFundingSupport,
+} from "../../run-analysis/runner-plan-run-funding";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -165,6 +168,7 @@ it.each([
       input.ownDeckCapabilities!,
       {
         runnerRunTargetCanConvertNow,
+        runnerRunFundingSupport,
         runnerCentralPressureHasMaterialMarginalValue,
         runnerCentralPressureCadence,
       },
@@ -192,6 +196,7 @@ it("quotes all eight credits and both actions of the native cheaper route", () =
     input.ownDeckCapabilities!,
     {
       runnerRunTargetCanConvertNow,
+      runnerRunFundingSupport,
       runnerCentralPressureHasMaterialMarginalValue,
       runnerCentralPressureCadence,
     },

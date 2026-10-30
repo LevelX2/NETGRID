@@ -17,7 +17,10 @@ import { restoreAiRuntimeCheckpoint } from "../evaluation/decision-checkpoints/r
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
-import { runnerRunTargetCanConvertNow } from "../run-analysis/runner-plan-run-funding";
+import {
+  runnerRunTargetCanConvertNow,
+  runnerRunFundingSupport,
+} from "../run-analysis/runner-plan-run-funding";
 import {
   runnerCentralPressureCadence,
   runnerCentralPressureHasMaterialMarginalValue,
@@ -151,6 +154,7 @@ it.each([
     input.ownDeckCapabilities!,
     {
       runnerRunTargetCanConvertNow,
+      runnerRunFundingSupport,
       runnerCentralPressureCadence:
         boundary === "cadence"
           ? () => ({ routeAvailable: false, evidenceCode: "consumed" })
@@ -181,6 +185,7 @@ it("quotes known savings without treating the opaque outer ICE as guaranteed acc
     input.ownDeckCapabilities!,
     {
       runnerRunTargetCanConvertNow,
+      runnerRunFundingSupport,
       runnerCentralPressureCadence,
       runnerCentralPressureHasMaterialMarginalValue,
     },
