@@ -1,3 +1,4 @@
+import { bindRunnerCentralSelfTagProtection } from "../runner/central-pressure/self-tag-protection-preparation";
 import { isRunnerGripDamageReplacementWindow } from "../runner/defense-recovery/grip-damage-replacement";
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
@@ -3155,7 +3156,7 @@ function buildRunnerDomain(
     },
   );
   const {
-    defense,
+    defense: baseDefense,
     forgoUnsafeRunCapacity,
     runOnlyActionCapacity,
     confirmedDamageTaxedDrawActionIdSet,
@@ -3339,7 +3340,7 @@ function buildRunnerDomain(
               : [];
           })
       : [];
-  const centralPressure = buildRunnerCentralPressureSignals({
+  const baseCentralPressure = buildRunnerCentralPressureSignals({
     input,
     candidates,
     strategicIntent,
@@ -3358,6 +3359,10 @@ function buildRunnerDomain(
     effectiveAccessPayoffCampaignSignals,
     activeRunRoot,
     recurringEconomyRunDeferralEvidenceCode,
+  });
+  const { centralPressure, defense } = bindRunnerCentralSelfTagProtection({
+    input, candidates, runTargets,
+    centralPressure: baseCentralPressure, defense: baseDefense,
   });
   const remoteContests = buildRunnerRemoteContestSignals({
     input,

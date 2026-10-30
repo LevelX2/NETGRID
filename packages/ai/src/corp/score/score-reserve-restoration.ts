@@ -1,6 +1,9 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
-import { corpUnconditionalScoreCreditGain } from "../../runtime/corp-canonical-card-facts";
+import {
+  corpConditionalScoreCreditProfile,
+  corpUnconditionalScoreCreditGain,
+} from "../../runtime/corp-canonical-card-facts";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
 import { corpSpendConsumesKnownCentralRezReserve } from "../defense/corp-defense-domain-signals";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -73,16 +76,29 @@ export function withCorpSameTurnScoreDefenseReserve(
     });
   const payout =
     corpUnconditionalScoreCreditGain(project.agendaDefinitionId) ?? 0;
+  const conditional = corpConditionalScoreCreditProfile(
+    project.agendaDefinitionId,
+  );
+  // A known threshold score can erase the balance instead of adding income.
+  // Every funding alternative must cross the threshold before the score; a
+  // credit added below it does not survive into the Runner's rez window.
+  const creditsAfterScore = (before: number) =>
+    conditional
+      ? before >= conditional.threshold
+        ? before + conditional.gainAmount
+        : 0
+      : before + payout;
+  const endCredits = creditsAfterScore(creditsBeforePayout);
   const consumesTerminalTax =
     terminalTaxClaim !== undefined &&
     corpSpendConsumesKnownCentralRezReserve(
       input,
       undefined,
-      creditsBeforePayout + payout,
+      endCredits,
       0,
       terminalTaxClaim,
     );
-  if (creditsBeforePayout + payout >= reserve && !consumesTerminalTax)
+  if (endCredits >= reserve && !consumesTerminalTax)
     return project;
   // A complete fixed-cost route may spend spare current clicks on native
   // Economy support before scoring. Fund the route and the existing Defense
@@ -101,7 +117,7 @@ export function withCorpSameTurnScoreDefenseReserve(
   ) {
     const spareClicks = input.playerView.own.clicks - cost.clicks;
     for (let gap = 1; gap <= spareClicks; gap++) {
-      const fundedEnd = creditsBeforePayout + gap + payout;
+      const fundedEnd = creditsAfterScore(creditsBeforePayout + gap);
       if (
         fundedEnd >= reserve &&
         (!terminalTaxClaim ||
@@ -133,7 +149,7 @@ export function withCorpSameTurnScoreDefenseReserve(
     ...project,
     feasible: false,
     routeAssessment: "corp_same_turn_score_consumes_funded_defense_reserve",
-    evidenceCode: `corp_same_turn_score_consumes_funded_defense_reserve:${creditsBeforePayout}:${payout}:${reserve}${consumesTerminalTax ? ":funded_terminal_tax_or_disruption" : ""}`,
+    evidenceCode: `corp_same_turn_score_consumes_funded_defense_reserve:${creditsBeforePayout}:${endCredits - creditsBeforePayout}:${reserve}${consumesTerminalTax ? ":funded_terminal_tax_or_disruption" : ""}`,
   };
 }
 

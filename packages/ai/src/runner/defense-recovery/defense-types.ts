@@ -1,6 +1,20 @@
 import type { RunnerFundingRouteAssessment } from "../../plans/runner-funding-contracts";
 
+export type RunnerSelfTagPreventionNeed = {
+  needId: string;
+  parentPlanInstanceId: string;
+  stateVersion: number;
+  serverId: string;
+  runActionId: string;
+  installActionId: string;
+  sourceCardInstanceId: string;
+  sourceDefinitionId: string;
+  creditSaving: number;
+  parentValue: number;
+};
+
 export type RunnerDefenseSignals = {
+  selfTagPreventionNeed?: RunnerSelfTagPreventionNeed;
   activeTags: number;
   visibleTagPunish: boolean;
   persistentHazardCounterRemovalAvailable: boolean;

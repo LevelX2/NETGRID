@@ -186,11 +186,26 @@ Paarung 475, Kontrollrunde 2, G20 D355.
 
 Innerhalb derselben Prioritätsklasse bewertet der Score-Owner einen aktuell
 ausführbaren Abschluss höher als bloßes Advancement unter Expositionsdruck.
+
 Die Bedrohung einer zweiten Agenda rechtfertigt keine Verteilung der letzten
 Klicks, durch die beide Abschlüsse ausfallen. Terminale Verlustvermeidung und
 terminaler eigener Score behalten ihre gesonderten Prioritätsklassen; die
 aktuelle Ressourcen- und Routenzulassung wird weiterhin vor jeder Aktion
 revalidiert.
+
+Eine gleichzügige Scorefolge schützt die bestehende finanzierte Zentralreserve
+mit dem liquiden Guthaben nach der tatsächlichen Scorewirkung. Eine kanonische
+Schwellenwirkung kann dieses Guthaben auch vollständig löschen. Die Quote darf
+dann den Wert vor der Auszahlung nicht als verbleibende Rezreserve behandeln.
+Auch vorgeschaltete Finanzierungsklicks werden durch dieselbe Schwellenfunktion
+gerechnet: Ein zusätzlicher Credit unterhalb der Schwelle bleibt nach dem Score
+nicht erhalten. Der bestehende Score-Owner verlangt nur dann diese Vorbereitung,
+wenn alle Finanzierungsschritte und die vollständige Konversion noch in den Zug
+passen. Ein unmittelbar terminaler Score behält seine vorhandene Ausnahme.
+Paarung 571 belegt den Fehler mit Corporate War: 15 Credits vor Installation,
+neun vor dem Score und null danach ließen eine bestehende terminale
+HQ-Rezreserve verschwinden. Die frühere unbedingte Auszahlungskontrolle und
+ausreichend finanzierte beziehungsweise terminale Gegenfälle bleiben erhalten.
 
 Auch bei einer beschleunigten Konversion stammen die verbleibenden
 Advancement-Klicks und Score-Credits aus den Engine-gequoteten Folgeschritten.

@@ -1,4 +1,5 @@
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerTargetHasTerminalContestThreat } from "./runtime/runner-terminal-contest-threat";
 import {
   type AiDecisionInput,
@@ -244,7 +245,11 @@ export function assessRunnerRunAfterAccessPreparation(params: {
   );
   if (
     !preparation ||
-    preparation.type !== "play_event" ||
+    (preparation.type !== "play_event" &&
+      !(preparation.type === "install_card" &&
+        consumedCard?.definitionId !== undefined &&
+        cardSpecPlanningCardByDefinitionId(consumedCard.definitionId)?.planning
+          .engine.tagPreventionSources?.length)) ||
     !consumedCard ||
     preparation.expiresAtStateVersion !== params.input.playerView.stateVersion
   )
@@ -268,6 +273,9 @@ export function assessRunnerRunAfterAccessPreparation(params: {
         gripOrHq: params.input.playerView.own.gripOrHq.filter(
           (card) => card.instanceId !== consumedCard.instanceId,
         ),
+        ...(preparation.type === "install_card"
+          ? { rig: [...(params.input.playerView.own.rig ?? []), consumedCard] }
+          : {}),
       },
     },
   };

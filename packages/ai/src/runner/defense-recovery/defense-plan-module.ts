@@ -52,11 +52,32 @@ export function createRunnerDefenseModule(): PlanModule {
               ? "invalid_reaction_reserve_need"
               : `no_${phase}_route`,
           evidenceCode: signals.evidenceCodes[0] ?? phase,
+          ...(phase === "install_defense_support" && signals.selfTagPreventionNeed
+            ? {
+                parentInstanceId: signals.selfTagPreventionNeed.parentPlanInstanceId,
+                parentNeedId: signals.selfTagPreventionNeed.needId,
+              }
+            : {}),
         }),
       ];
     },
     assess: (instance, context, portfolio) => {
       const current = instance.moduleState as DefenseState;
+      const prevention = current.phase === "install_defense_support"
+        ? current.signals.selfTagPreventionNeed : undefined;
+      const parent = prevention ? portfolio.instances.find((p) =>
+        p.instanceId === prevention.parentPlanInstanceId &&
+        p.moduleId === "runner.pressure_central") : undefined;
+      const parentSignal = (parent?.moduleState as {
+        signal?: { selfTagPreventionNeed?: { needId: string; installActionId: string } };
+      } | undefined)?.signal;
+      const preventionCurrent = !prevention || (
+        prevention.stateVersion === context.input.playerView.stateVersion &&
+        parentSignal?.selfTagPreventionNeed?.needId === prevention.needId &&
+        parentSignal.selfTagPreventionNeed.installActionId === prevention.installActionId &&
+        context.input.legalActions.some((a) => a.actionId === prevention.installActionId &&
+          a.source === prevention.sourceCardInstanceId &&
+          a.expiresAtStateVersion === prevention.stateVersion));
       const tagClearFundingContractValid =
         current.phase !== "fund_tag_clear" ||
         (current.signals.tagClearFundingNeed !== undefined &&
@@ -72,7 +93,7 @@ export function createRunnerDefenseModule(): PlanModule {
             context.input.playerView.stateVersion,
           ));
       const candidates =
-        tagClearFundingContractValid && reactionReserveContractValid &&
+        preventionCurrent && tagClearFundingContractValid && reactionReserveContractValid &&
         (current.phase !== "fund_persistent_hazard_counter" ||
           (current.signals.persistentHazardCounterFundingNeed !== undefined &&
             validPersistentHazardCounterFundingNeed(current.signals.persistentHazardCounterFundingNeed,
@@ -89,7 +110,7 @@ export function createRunnerDefenseModule(): PlanModule {
         ? current.signals.tagClearFundingNeed?.bankFunding : undefined;
       const result = assessment(
         instance, priorityClass, candidates.length > 0,
-        defensePhaseValue(current.phase, current.signals),
+        prevention?.parentValue ?? defensePhaseValue(current.phase, current.signals),
         portfolio.executorInstanceId,
         bankNeed ? [{
           needId: current.signals.tagClearFundingNeed!.needId,

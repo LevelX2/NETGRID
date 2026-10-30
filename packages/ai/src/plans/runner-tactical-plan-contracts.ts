@@ -9,6 +9,7 @@ import { RunnerDevelopmentSignal } from "../runner/hand-development/development-
 import type { RunnerTerminalWinSignal } from "../runner/terminal-win/terminal-win-types";
 import type { RunnerTargetedBypassCommitment } from "../runner/run-window/runner-targeted-bypass-plan";
 import type { RunnerTargetedIceTrashCommitment } from "../runtime/runner-targeted-ice-trash-plan";
+import type { RunnerSelfTagPreventionNeed } from "../runner/defense-recovery/defense-types";
 
 export type RunnerRunRiskContractSignal = {
   schemaVersion: "runner-run-risk-contract-v1";
@@ -42,6 +43,7 @@ export type RunnerRunActionRouteDiagnostic = {
 };
 
 export type RunnerPressureSignal = {
+  selfTagPreventionNeed?: RunnerSelfTagPreventionNeed;
   pressureId: string;
   serverId: "hq" | "rd" | "archives";
   purpose: "access" | "multiaccess" | "information";

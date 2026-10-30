@@ -2143,6 +2143,28 @@ Bedarfsbildung. Untypisierte Textsignale begründen keinen typgebundenen
 Präventionsnutzen. Universelle Flatline- und Runprävention behalten ihren
 allgemeinen Umfang; unbekannte Präventionshints scheitern sichtbar.
 
+Ein eigener, bereits zugelassener Zentralrun kann einen konkreten
+Präventionsbedarf vor seinem Erfolgsfenster erzeugen. Der Central-Owner
+verwendet dafür dieselben ausführbaren Routenwerte wie seine Materialisierung,
+nicht nur die repräsentative Serverbewertung. Bei einem vollständig bekannten,
+gerezzten Pfad und genau einem eigenen Erfolgstag vergleicht er die ganze
+Installation samt tatsächlicher endlicher Präventionszahlung mit der normalen
+Tagentfernung. Nur die günstigere, im selben Zug finanzierte Folge erhält
+diesen Bedarf. Die erneute Runquote berücksichtigt beide verbrauchten
+Handkarten, den bestehenden Handpuffer, Klicks, Pfadkosten und die Reserve vor
+einem erst später ausgezahlten Ertrag. Eine bereits installierte gleich
+günstige Antwort unterdrückt den zusätzlichen Aufbau.
+
+Defense bleibt Installationsexecutor unter dem exakt gebundenen Central-Parent
+und dessen aktuellem Need. StateVersion, Run, Installationsaction und eigene
+Quellinstanz werden erneut geprüft. Der Scheduler erhält einen echten offenen
+Präventionsbedarf; weder ein neuer Plan noch ein Prioritäts-Override entsteht.
+Nach der Installation entscheidet derselbe Run-Owner aus den neuen LegalActions.
+Die belegte Zulassung ist auf gewöhnliche P4-Zentralrouten begrenzt; terminale
+Contests und aktuelle Überlebensarbeit werden dadurch nicht aufgeschoben.
+Paarung 571 prüft zwei vollständige Originalzüge mit zwei zusätzlichen Credits
+bei gleichen nachfolgenden Runs sowie die Handpuffer- und Kosten-Gegenfälle.
+
 Die gebundene Runner-Discard-Choice erhält ihre Keep-Wertung aus demselben
 Owner. Liegt fehlende Breaker-Abdeckung nachweislich nur im eigenen Stack,
 erkennt die Wertung deren Suchzugang über die exakte Kartenbindung in

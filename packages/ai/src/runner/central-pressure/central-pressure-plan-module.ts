@@ -99,7 +99,13 @@ export function centralPressureModule(): PlanModule {
         current.signal.reachable &&
         current.signal.marginalValue > 0 &&
         candidates.length > 0;
-      const resourceGaps = exactRunnerParentSupportResourceGaps(
+      const preventionNeed = current.signal.selfTagPreventionNeed;
+      const resourceGaps = preventionNeed &&
+        preventionNeed.stateVersion === context.input.playerView.stateVersion &&
+        preventionNeed.parentPlanInstanceId === instance.instanceId
+        ? [{ needId: preventionNeed.needId, capability: "defense.tag_prevention",
+            minimum: 1, available: 0, deadline: "current_turn" as const }]
+        : exactRunnerParentSupportResourceGaps(
         context,
         instance,
         current.signal.supportNeedId,
@@ -248,10 +254,22 @@ function pressureCandidates(
         stepValue: signal.marginalValue,
       }));
   }
+  return runnerCentralPressureRunCandidates(context.input, context.actionCandidates,
+    signal, domain(context).runTargetEvaluations);
+}
+
+/** The same admitted route values serve materialization and preparation. A
+ * server's representative evaluation need not be its best executable head. */
+export function runnerCentralPressureRunCandidates(
+  input: PlanSchedulerContext["input"],
+  actionCandidates: PlanSchedulerContext["actionCandidates"],
+  signal: RunnerPressureSignal,
+  runTargets?: readonly RunnerRunTargetEvaluation[],
+): PlanMaterialization["candidates"] {
   const exactDifferentialPayoffActionIds = new Set(
     signal.runActionDifferentialPayoffIds ?? [],
   );
-  const runCandidates = context.actionCandidates.filter(
+  const runCandidates = actionCandidates.filter(
     (candidate) =>
       (signal.runActionIds?.length
         ? signal.runActionIds.includes(candidate.actionId)
@@ -277,10 +295,10 @@ function pressureCandidates(
         !directRunAvailable ||
         exactDifferentialPayoffActionIds.has(candidate.actionId) ||
         runnerCardRunHasVisibleDifferentialPayoff(
-          context.input,
+          input,
           candidate,
           signal.serverId,
-          domain(context).runTargetEvaluations,
+          runTargets,
         ),
     )
     .map((candidate) => ({
@@ -288,18 +306,18 @@ function pressureCandidates(
       stepValue:
         signal.marginalValue +
         runnerCardRunRoutePreference(
-          context,
+          input,
           candidate,
           signal.serverId,
           directRunAvailable,
-          domain(context).runTargetEvaluations,
+          runTargets,
         ) +
         (signal.runActionValues?.[candidate.actionId] ?? 0),
     }));
 }
 
 function runnerCardRunRoutePreference(
-  context: PlanSchedulerContext,
+  input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,
   serverId: RunnerPressureSignal["serverId"],
   directRunAvailable: boolean,
@@ -309,7 +327,7 @@ function runnerCardRunRoutePreference(
   if (
     !directRunAvailable ||
     runnerCardRunHasVisibleDifferentialPayoff(
-      context.input,
+      input,
       candidate,
       serverId,
       runTargetEvaluations,
