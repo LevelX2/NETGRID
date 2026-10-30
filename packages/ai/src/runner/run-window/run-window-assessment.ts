@@ -342,7 +342,7 @@ export function currentRunAbortAssessment(
     run.phase === "movement" &&
     run.position?.kind === "server" &&
     (((run.attackedServerId === "hq" || run.attackedServerId === "rd") &&
-      input.playerView.own.gripOrHq.length === 0) ||
+      input.playerView.own.gripOrHq.length <= 1) ||
       criticalUnknownRemoteAccess) &&
     flatlineRisk.level === "critical" &&
     !preservesKnownAgendaPayoff
@@ -351,7 +351,9 @@ export function currentRunAbortAssessment(
       evidenceCode: [
         criticalUnknownRemoteAccess
           ? "runner_critical_low_grip_unknown_remote_access_requires_jack_out"
-          : "runner_critical_empty_grip_unknown_central_access_requires_jack_out",
+          : input.playerView.own.gripOrHq.length === 0
+            ? "runner_critical_empty_grip_unknown_central_access_requires_jack_out"
+            : "runner_critical_low_grip_unknown_central_access_requires_jack_out",
         `server:${run.attackedServerId}`,
         `flatline_risk:${flatlineRisk.level}`,
         `hand:${input.playerView.own.gripOrHq.length}`,

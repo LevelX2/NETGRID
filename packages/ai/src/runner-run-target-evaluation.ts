@@ -1,3 +1,4 @@
+import { runnerPostRunSelfTagHandSafety } from "./run-analysis/runner-self-tag-safety";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerTargetHasTerminalContestThreat } from "./runtime/runner-terminal-contest-threat";
@@ -609,6 +610,28 @@ function evaluateRunnerRunTarget(
   const accessOutcomeMemory =
     params.accessOutcomeMemory ??
     deriveObservedRemoteNoProgressAccessMemory(params.input, accessServerId);
+  const selfTagHandSafety = runnerPostRunSelfTagHandSafety({
+    input: params.input,
+    projection,
+    preservesAgendaAccess:
+      !replacesAccessWithCreditDenial(params.input, projection) &&
+      (accessPayoff === "agenda" ||
+        accessPayoff === "score_threat" ||
+        scoreThreat ||
+        params.input.playerView.own.agendaPoints >=
+          params.input.playerView.agendaPointsToWin - 2),
+    handAfterAction: projectedGripAfterRunAction,
+    clicksAfterRun: Math.max(
+      0,
+      params.input.playerView.own.clicks - actionClickCost,
+    ),
+    creditsAfterRun:
+      creditsAfterRun +
+      (projection.successfulRunRunnerCreditGainRequiresOpponentCredits &&
+      params.input.playerView.opponent.credits <= 0
+        ? 0
+        : (projection.successfulRunRunnerCreditGain ?? 0)),
+  });
   const randomBreakOrDamageRiskAssessment =
     assessRandomBreakOrDamageRiskForRunAction(params.input, projection.action, {
       accessPayoff,
@@ -644,6 +667,9 @@ function evaluateRunnerRunTarget(
         : basePathPassability === "blocked_unpayable"
           ? "blocked_unpayable"
           : "blocked_unbreakable";
+  }
+  if (selfTagHandSafety && pathPassability === "reachable") {
+    pathPassability = "blocked_by_visible_damage_hand_buffer";
   }
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
@@ -984,6 +1010,7 @@ function evaluateRunnerRunTarget(
       `run_action_credit_cost:${actionCreditCost}`,
       `run_action_grip_cost:${runActionGripCost}`,
       `grip_after_run_action:${projectedGripAfterRunAction}`,
+      ...(selfTagHandSafety ? [selfTagHandSafety] : []),
       ...(knownAccessDamageSurvivalCapacityAfterAction !== undefined
         ? [
             `known_remote_access_damage_survival_capacity_after_action:${knownAccessDamageSurvivalCapacityAfterAction}`,

@@ -3802,3 +3802,16 @@ Interventionsursprung und öffentlich enthüllten ICE-Typ belegen. Erst diese
 Engine-Folge bindet das Zahlungsfenster an den ursprünglichen Root und
 Executor. Beliebige Choices, Ereignislücken oder fremde Quellen ersetzen
 diesen Nachweis nicht; die eigentliche Optionswahl bleibt beim Corp-Owner.
+
+Die gemeinsame Runquote erhält erfolgreiche Self-Tag-Mengen aus der konkreten
+kanonischen Fähigkeit. Bei belegtem gegnerischem Schadenspayoff berücksichtigt
+sie den Handverbrauch des Events und den verbleibenden Aktionshorizont: Ein
+gewöhnlicher Run ohne Agenda-Konversion darf im letzten Klick keinen
+unabwendbaren Self-Tag unterhalb des bestätigten Handpuffers erzeugen. Aktuelle
+installierte Tagvermeidung und deren allgemeines Geld bleiben anrechenbar;
+ein gehaltenes Schutzmittel gilt nicht als bereits installiert. Bekannte
+Agenda-/Score-Threat-Zugriffe sowie mögliche Matchpunktzugriffe behalten ihre
+bestehende Abwägung. Der aktive Run-Owner beendet nach öffentlich eingetretenem
+kritischem Schaden auch einen ungebundenen zentralen Zugriff mit einer
+verbleibenden Handkarte, sofern die Engine jetzt einen Abbruch anbietet.
+Gebundene Agenda-/Score-Threat-Ziele bleiben erhalten.

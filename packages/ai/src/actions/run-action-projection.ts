@@ -68,6 +68,10 @@ export function projectInternalRunnerRunActions(
     const runnerCreditGainOnCorpRez = numberPayloadValue(action, [
       "runnerCreditGainOnCorpRez",
     ]);
+    const successfulRunSelfTags = successfulRunSelfTagsForRunAction(
+      action,
+      hint,
+    );
     const successfulRunRunnerCreditGain =
       successfulRunRunnerCreditGainForRunAction(action, hint);
     const successfulRunRunnerCreditGainRequiresOpponentCredits =
@@ -104,6 +108,7 @@ export function projectInternalRunnerRunActions(
         signals,
       ),
       riskSignals: riskSignalsForRunAction(action, candidate, hint),
+      ...(successfulRunSelfTags > 0 ? { successfulRunSelfTags } : {}),
       ...(temporaryRunCredits > 0 ? { temporaryRunCredits } : {}),
       ...(postRunSelfDamage > 0 ? { postRunSelfDamage } : {}),
       ...(runTraceLinkBonus !== undefined ? { runTraceLinkBonus } : {}),
@@ -1041,13 +1046,10 @@ function tokensIncludePhrase(
   );
 }
 
-function riskSignalsForRunAction(
+function successfulRunSelfTagsForRunAction(
   action: LegalAction,
-  candidate: ActionSemanticCandidate | undefined,
   hint: AiCardHint | undefined,
-): string[] {
-  const riskTags =
-    (hint as { riskTags?: string[] } | undefined)?.riskTags ?? [];
+): number {
   const capabilityKey = stringPayloadValue(
     action,
     "cardImplementationAbilityKey",
@@ -1057,15 +1059,32 @@ function riskSignalsForRunAction(
         (entry) => entry.capabilityKey === capabilityKey,
       )
     : undefined;
-  const successfulRunSelfTag = capability?.effects?.some(
-    (effect) =>
-      effect.kind === "tag" &&
-      effect.scope === "runner" &&
-      effect.timing === "successful_run" &&
-      typeof effect.amount === "number" &&
-      Number.isFinite(effect.amount) &&
-      effect.amount > 0,
-  );
+  return (capability?.effects ?? []).reduce((sum, effect) => {
+    if (
+      effect.kind !== "tag" ||
+      effect.scope !== "runner" ||
+      effect.timing !== "successful_run"
+    )
+      return sum;
+    if (
+      typeof effect.amount !== "number" ||
+      !Number.isSafeInteger(effect.amount) ||
+      effect.amount <= 0
+    )
+      throw new Error("run_successful_self_tag_amount_invalid");
+    return sum + effect.amount;
+  }, 0);
+}
+
+function riskSignalsForRunAction(
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+  hint: AiCardHint | undefined,
+): string[] {
+  const riskTags =
+    (hint as { riskTags?: string[] } | undefined)?.riskTags ?? [];
+  const successfulRunSelfTag =
+    successfulRunSelfTagsForRunAction(action, hint) > 0;
   return uniqueStrings([
     ...riskTags,
     ...(successfulRunSelfTag ? ["tag_self:successful_run"] : []),
