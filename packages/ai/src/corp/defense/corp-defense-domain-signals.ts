@@ -479,6 +479,17 @@ export function corpQualitativeIceStagingSignal(
   const creditsAfterInstall =
     available.credits - candidate.costProfile.creditCost;
   const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
+  // An added layer cannot answer the terminal access before the next Runner
+  // turn when its installation consumes the last click and leaves rez unfunded.
+  // Earlier staging retains its funding-prefix contract; funded layers remain
+  // independently eligible for the existing protection assessment.
+  if (
+    terminalCentralAdditionalLayer &&
+    available.clicks === candidate.costProfile.clickCost &&
+    rezFundingGap > 0
+  ) {
+    return undefined;
+  }
   const boundedRemoteFundingHorizon =
     layeredParent?.kind === "remote" &&
     Number.isSafeInteger(layeredParent.targetRecoveryTurns) &&

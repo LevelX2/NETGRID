@@ -1495,6 +1495,15 @@ einer höheren Priorität behalten ihren Vorrang. Die Zugplanung verwendet
 dieselbe Parentbindung und darf keinen nicht mehr bezahlbaren Zufluss hinter
 der Installation als Konversion verbuchen.
 
+Eine zusätzliche zentrale ICE-Schicht bei terminaler Agendagefahr erhält
+keine qualitative Sofortschutzroute, wenn ihre Installation den letzten Klick
+verbraucht und ihre native Rezquote danach nicht finanziert ist. Die Gefahr
+selbst ersetzt keinen erreichbaren Schutz. Bereits finanzierte Schichten und
+frühere Staging-Schritte behalten ihre eigenen Zulassungen; die bestehende
+Economy entscheidet über verfügbare Finanzierung. Die native Gegenprobe prüft
+den ganzen nächsten Runnerzug und Replay, ohne einen späteren Sieg oder eine
+sichere Tracewirkung zu behaupten.
+
 Ein typisierter Schutzbedarf eines Score- oder Remoteplans erzeugt eine
 explizite Parent-Kind-Delegation. Nur die konkret gebundene
 Defense-Supportroute erbt `parentInstanceId` und Prioritätsklasse des

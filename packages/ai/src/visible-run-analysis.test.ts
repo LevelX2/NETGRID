@@ -1188,7 +1188,7 @@ describe("visible run analysis Deflector paths", () => {
       canReachAccess: true,
       creditsAfterPath: 0,
     });
-    expect(assessment.visibleBreakCost).toBeUndefined();
+    expect(assessment.visibleBreakCost).toBe(0);
   });
 
   it("keeps an any-data-fort Deflector live without a remote", () => {

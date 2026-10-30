@@ -1375,7 +1375,9 @@ function assessKnownRezzedIcePathInternal(
       : {}),
     ...(fullyBrokenIceInstanceIds.length ? { fullyBrokenIceInstanceIds } : {}),
     ...(paidSubroutineBreaks.length ? { paidSubroutineBreaks } : {}),
-    ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
+    ...(visibleBreakCost > 0 || assessedKnownIceCount > 0
+      ? { visibleBreakCost }
+      : {}),
     ...(futureClicksLost > 0 ? { futureClicksLost } : {}),
     ...(preRunPreparation ? { preRunPreparation } : {}),
     ...(conditionalAccessReasons.size > 0

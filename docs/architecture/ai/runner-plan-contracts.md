@@ -755,6 +755,14 @@ Eine solche konkret finanzierbare Remotevorbereitung widerlegt die Behauptung,
 ein zentraler Run sei die letzte verfügbare Gewinnchance; sie erzeugt keinen
 Garantieanspruch auf verdeckte Root- oder ICE-Identitäten.
 
+Die gemeinsame Runanalyse erhält auch exakt null Breakkosten eines tatsächlich
+geprüften bekannten ICE-Pfads als numerisches Ergebnis. Fehlende Bewertung
+bleibt von einer belegten kostenlosen Breakroute unterscheidbar; der
+Coverage-Consumer ergänzt keinen Ersatzwert. Bekannte positive Kosten bleiben
+auch ohne geprüfte ICE erhalten. Die native Kontrolle prüft die
+Codecracker-Installation vor demselben Remote-Run, die unveränderte Planbindung
+und Replay; unbekannte weitere ICE bleiben unbekannt.
+
 Kosten-Recovery vergleicht installiertes Rig, sichtbare Handantwort und
 bekannte Stack-Alternative unter demselben finanzierten Pfadbudget. Die
 aktuelle Run-Finanzierung bleibt davon getrennt: Eine bei Geldmangel größere
