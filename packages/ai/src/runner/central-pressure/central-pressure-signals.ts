@@ -7,6 +7,7 @@ import { ActiveRunnerRunRoot } from "../../plans/runner-run-origin-contract";
 import { runnerCardRunHasVisibleDifferentialPayoff } from "../../plans/runner-run-payoff";
 import {
   runnerInformationProbeCanUseQuotedPath,
+  runnerInformationProbeKnownPathIsAdmitted,
   runnerTerminalRemoteUnreachableCentralLastChance,
   runPurposeForEvaluation,
 } from "../../plans/runner-run-purpose";
@@ -1069,8 +1070,20 @@ export function buildRunnerCentralPressureSignals({
             evaluation.pathCost > 0 &&
             evaluation.accessPayoff !== "agenda" &&
             evaluation.accessPayoff !== "score_threat";
+          const executionMode = concreteRunSetupAvailable
+            ? ("access" as const)
+            : runPurposeForEvaluation(evaluation);
+          const informationKnownPathAdmitted =
+            executionMode !== "information" ||
+            terminalRemoteUnreachableCentralLastChance ||
+            runnerInformationProbeKnownPathIsAdmitted(
+              evaluation,
+              terminalCentralAccess,
+            );
           const fundingSupport =
-            safetyBlocked || !pressureCadence.routeAvailable
+            safetyBlocked ||
+            !pressureCadence.routeAvailable ||
+            !informationKnownPathAdmitted
               ? undefined
               : runnerRunFundingSupport(
                   input,
@@ -1092,9 +1105,6 @@ export function buildRunnerCentralPressureSignals({
           // An admitted, fully quoted HQ success-window setup has a concrete
           // access payoff. The one-credit information-probe budget must not
           // replace that route's already validated path and follow-up budget.
-          const executionMode = concreteRunSetupAvailable
-            ? ("access" as const)
-            : runPurposeForEvaluation(evaluation);
           const currentPressureRoute =
             (!knownNoPayoff || concreteRunSetupAvailable) &&
             pressureCadence.routeAvailable &&
@@ -1189,14 +1199,16 @@ export function buildRunnerCentralPressureSignals({
                               ? coverageSupport.evidenceCode
                               : fundingSupport
                                 ? fundingSupport.evidenceCode
-                                : costlyInformationRunBelowHandBuffer
-                                  ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
-                                  : !materialMarginalValue
-                                    ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
-                                    : !currentPressureRoute
-                                      ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
-                                      : (evaluation.evidence[0] ??
-                                        "runner_run_target"),
+                                : !informationKnownPathAdmitted
+                                  ? `runner_central_information_probe_known_path_not_admitted:${evaluation.targetServerId}`
+                                  : costlyInformationRunBelowHandBuffer
+                                    ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                                    : !materialMarginalValue
+                                      ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
+                                      : !currentPressureRoute
+                                        ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
+                                        : (evaluation.evidence[0] ??
+                                          "runner_run_target"),
             ...(coverageSupport
               ? { supportNeedId: coverageSupport.gapId }
               : fundingSupport

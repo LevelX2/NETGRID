@@ -42,10 +42,22 @@ export function runnerInformationProbeCanUseQuotedPath(
     return true;
   }
   if (!directlyConvertible) return false;
-  return evaluation.evidence.some(
-    (entry) =>
-      entry === "central_memory_payoff:partial_known" ||
-      entry === "remote_memory_payoff:partial_unknown",
+  return runnerInformationProbeKnownPathIsAdmitted(evaluation);
+}
+
+/** Funding cannot change the purpose or known-cost limit of an information probe. */
+export function runnerInformationProbeKnownPathIsAdmitted(
+  evaluation: RunnerRunTargetEvaluation,
+  terminalCentralAccess = false,
+): boolean {
+  return (
+    terminalCentralAccess ||
+    evaluation.pathCost <= INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET ||
+    evaluation.evidence.some(
+      (entry) =>
+        entry === "central_memory_payoff:partial_known" ||
+        entry === "remote_memory_payoff:partial_unknown",
+    )
   );
 }
 

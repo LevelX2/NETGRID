@@ -408,6 +408,15 @@ Fähigkeiten auch nach der letzten Basisaktion offen.
 
 ### Vertikale Implementierung des Zentraldrucks
 
+Ein Informationsrun veröffentlicht keinen Credit-Finanzierungsbedarf, wenn
+seine bekannten Pfadkosten schon unabhängig vom Geld die eigene
+Informationszulassung verletzen. Finanzierung und direkte Ausführung teilen
+denselben Zweck-/Pfadkostenvertrag; mehr liquide Credits ändern weder den
+Runzweck noch die zulässigen bekannten Kosten. Konkrete HQ-Erfolgsfenster,
+bekannter Teilpayoff und die bestehenden terminalen Ausnahmen behalten ihre
+eigenen Bindungen. Die nativen Zustände aus Paarung 571 prüfen die Bank als
+korrekt gebundenen Executor eines zuvor fälschlich veröffentlichten Bedarfs.
+
 Die terminale Central-Letztchancen-Ausnahme setzt zusätzlich voraus, dass kein
 anderer aktuell legaler Remote-Run einen garantiert erreichbaren, finanzierten
 und nach seiner Reservequote zulässigen Zugriff bietet. Die Prüfung umfasst
