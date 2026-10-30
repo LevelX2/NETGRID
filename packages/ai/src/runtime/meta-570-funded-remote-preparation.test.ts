@@ -28,6 +28,14 @@ import {
 import { runnerSameTurnBreakerPreparation } from "../runner/rig-coverage/coverage-same-turn-breaker-preparation";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 
+import { createRunnerProgramInstallTrashContext } from "./runner-program-install-trash-context";
+import { aiLiveRuntimeDependencies } from "../ai-runtime-public-entrypoints";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
+import { cardRolesForId } from "./card-role-lookup";
+const installServices = createRunnerProgramInstallTrashContext({
+  ...aiLiveRuntimeDependencies,
+  rolesForCardId: (id) => cardRolesForId(id, AI_HINTS_BY_CARD),
+});
 afterEach(resetResidentPlanPortfolioMemory);
 function original() {
   const saved = JSON.parse(
@@ -60,6 +68,8 @@ function original() {
   };
 }
 const services = {
+  assessProgramInstallTarget:
+    installServices.runnerProgramInstallTrashAssessmentForCard,
   runnerRunFundingSupport,
   runnerRunTargetCanConvertNow,
   runnerCentralPressureCadence,
@@ -145,15 +155,19 @@ it("funds, installs the held decoder and wins the original remote contest in the
 it.each([
   "short_turn",
   "short_cash",
-  "full_memory",
+  "memory_without_native_trash_route",
   "missing_install",
   "hand_buffer",
 ])("does not admit an incomplete preparation: %s", (boundary) => {
   const { input } = original();
   if (boundary === "short_turn") input.playerView.own.clicks = 3;
   if (boundary === "short_cash") input.playerView.own.credits = 20;
-  if (boundary === "full_memory")
+  if (boundary === "memory_without_native_trash_route") {
     input.playerView.own.memoryUsed = input.playerView.own.memoryLimit!;
+    input.legalActions = input.legalActions.filter(
+      (a) => a.payload?.runnerProgramTrashBeforeInstall !== true,
+    );
+  }
   if (boundary === "missing_install")
     input.legalActions = input.legalActions.filter(
       (a) => a.type !== "install_card",

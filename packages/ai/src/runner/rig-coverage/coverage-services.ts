@@ -5,11 +5,13 @@ import type {
 import type { RunnerFundingRouteAssessment } from "../../plans/runner-funding-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import type { RunnerDevelopmentInstallServices } from "../hand-development/development-services";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../../runner-run-target-evaluation";
 export type RunnerCoverageServices = {
+  assessProgramInstallTarget: RunnerDevelopmentInstallServices["assessCard"];
   runnerRemoteHasCurrentContestMaterial: (
     input: AiDecisionInput,
     serverId: string,

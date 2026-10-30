@@ -3015,6 +3015,7 @@ function buildRunnerDomain(
     economy,
     handRotationAssessment,
     {
+      assessProgramInstallTarget,
       runnerRemoteHasCurrentContestMaterial,
       runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash,
       runnerRunTargetCanConvertNow,

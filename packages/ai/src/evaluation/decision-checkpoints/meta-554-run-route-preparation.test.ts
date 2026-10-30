@@ -1,3 +1,11 @@
+import { createRunnerProgramInstallTrashContext } from "../../runtime/runner-program-install-trash-context";
+import { aiLiveRuntimeDependencies } from "../../ai-runtime-public-entrypoints";
+import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import { cardRolesForId } from "../../runtime/card-role-lookup";
+const installServices = createRunnerProgramInstallTrashContext({
+  ...aiLiveRuntimeDependencies,
+  rolesForCardId: (id) => cardRolesForId(id, AI_HINTS_BY_CARD),
+});
 import {
   runnerCentralPressureHasMaterialMarginalValue,
   runnerCentralPressureCadence,
@@ -167,6 +175,8 @@ it.each([
       target,
       input.ownDeckCapabilities!,
       {
+        assessProgramInstallTarget:
+          installServices.runnerProgramInstallTrashAssessmentForCard,
         runnerRunTargetCanConvertNow,
         runnerRunFundingSupport,
         runnerCentralPressureHasMaterialMarginalValue,
@@ -195,6 +205,8 @@ it("quotes all eight credits and both actions of the native cheaper route", () =
     target,
     input.ownDeckCapabilities!,
     {
+      assessProgramInstallTarget:
+        installServices.runnerProgramInstallTrashAssessmentForCard,
       runnerRunTargetCanConvertNow,
       runnerRunFundingSupport,
       runnerCentralPressureHasMaterialMarginalValue,

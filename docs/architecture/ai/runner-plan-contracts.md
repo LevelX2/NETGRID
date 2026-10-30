@@ -744,6 +744,17 @@ Quellinstanz und die anschließende exakte Programmopfer-Choice behalten
 denselben Executor; eine tatsächlich direkte Installation wird weiterhin
 ohne Opfer ausgeführt.
 
+Eine finanzierbare Same-turn-Breaker-Vorbereitung darf auch eine volle Rig
+ersetzen. Der Coverage-Owner verwendet dafür ausschließlich die ausreichende,
+akzeptable Opfermenge der bestehenden Installationsbewertung und die native
+Programmtrash-Installationsaction. Die Projektion entfernt die vollständige
+Host-Trash-Hülle, erhält die übrigen Breaker und bewertet danach denselben Run
+mit tatsächlichen Installationskosten, Klicks und Reserve erneut. Die spätere
+Choice bleibt an dasselbe vorab gebundene Opfer und denselben Executor gebunden.
+Eine solche konkret finanzierbare Remotevorbereitung widerlegt die Behauptung,
+ein zentraler Run sei die letzte verfügbare Gewinnchance; sie erzeugt keinen
+Garantieanspruch auf verdeckte Root- oder ICE-Identitäten.
+
 Kosten-Recovery vergleicht installiertes Rig, sichtbare Handantwort und
 bekannte Stack-Alternative unter demselben finanzierten Pfadbudget. Die
 aktuelle Run-Finanzierung bleibt davon getrennt: Eine bei Geldmangel größere
@@ -2174,6 +2185,12 @@ Solange die endliche Counter-/Purge-/Folgewirkung gegenüber dem vollständigen
 verlorenen Zugriff nicht bewertet ist, weist die vorhandene lokale Assessment-
 Diagnose die Ersetzung ausdrücklich als nicht zugelassen aus. Der normale
 Zugriff behält seine unabhängig gebundene Route.
+
+Die aktuellen Engine-Reaktionen zum Aufdecken oder Beenden des Ansehens einer
+angefahrenen ICE sind keine neuen Runstarts. Die Runaction-Projektion grenzt
+sie anhand von `approachIceExposeDecision` beziehungsweise
+`approachIceExposeViewDecision` ab. Die Make-run-Hints des ursprünglichen
+Events verleihen seiner späteren Reaktion keine zweite Runbewertung.
 
 Nach dem planselektierten Aufdecken übernimmt dieser Run-Owner die unmittelbare
 Engine-Continuation „Ansehen beenden“. Die KI-Eingabe erhält die skalaren

@@ -27,6 +27,14 @@ import {
 } from "../runner/central-pressure/central-pressure-signals";
 import { runnerSameTurnBreakerPreparation } from "../runner/rig-coverage/coverage-same-turn-breaker-preparation";
 
+import { createRunnerProgramInstallTrashContext } from "./runner-program-install-trash-context";
+import { aiLiveRuntimeDependencies } from "../ai-runtime-public-entrypoints";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
+import { cardRolesForId } from "./card-role-lookup";
+const installServices = createRunnerProgramInstallTrashContext({
+  ...aiLiveRuntimeDependencies,
+  rolesForCardId: (id) => cardRolesForId(id, AI_HINTS_BY_CARD),
+});
 afterEach(resetResidentPlanPortfolioMemory);
 function original() {
   const { checkpoint, state, provenance } = JSON.parse(
@@ -118,7 +126,7 @@ it("installs the held cheaper decoder before the same central run under its exac
 
 it.each([
   "last_click",
-  "full_memory",
+  "memory_without_native_trash_route",
   "missing_install",
   "short_cash",
   "no_savings",
@@ -128,7 +136,7 @@ it.each([
 ])("rejects incomplete or unadmitted central preparation: %s", (boundary) => {
   const { input } = original();
   if (boundary === "last_click") input.playerView.own.clicks = 1;
-  if (boundary === "full_memory")
+  if (boundary === "memory_without_native_trash_route")
     input.playerView.own.memoryUsed = input.playerView.own.memoryLimit!;
   if (boundary === "missing_install")
     input.legalActions = input.legalActions.filter(
@@ -153,6 +161,8 @@ it.each([
     target,
     input.ownDeckCapabilities!,
     {
+      assessProgramInstallTarget:
+        installServices.runnerProgramInstallTrashAssessmentForCard,
       runnerRunTargetCanConvertNow,
       runnerRunFundingSupport,
       runnerCentralPressureCadence:
@@ -184,6 +194,8 @@ it("quotes known savings without treating the opaque outer ICE as guaranteed acc
     target,
     input.ownDeckCapabilities!,
     {
+      assessProgramInstallTarget:
+        installServices.runnerProgramInstallTrashAssessmentForCard,
       runnerRunTargetCanConvertNow,
       runnerRunFundingSupport,
       runnerCentralPressureCadence,

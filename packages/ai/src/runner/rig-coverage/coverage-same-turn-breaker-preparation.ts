@@ -9,10 +9,8 @@ import {
 import type { RunnerCoverageServices } from "./coverage-services";
 import { runnerAgendaStealCreditRequirement } from "../../run-analysis/runner-agenda-steal-cost";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
-import {
-  runnerBreakerUpgradeRequiredRole,
-  runnerVisibleBreakerUpgradeInstallRoute,
-} from "./coverage-breaker-upgrades";
+import { runnerBreakerUpgradeRequiredRole } from "./coverage-breaker-upgrades";
+import { runnerSameTurnInstallProjection } from "./coverage-same-turn-install-projection";
 import type { RunnerCostEffectiveCoverageRecovery } from "./coverage-recovery";
 
 /** A concrete parent preparation, not a claim that unknown ICE is passable. */
@@ -27,6 +25,7 @@ export function runnerSameTurnBreakerPreparation(
     | "runnerRunFundingSupport"
     | "runnerCentralPressureHasMaterialMarginalValue"
     | "runnerCentralPressureCadence"
+    | "assessProgramInstallTarget"
   >,
 ): RunnerCostEffectiveCoverageRecovery | undefined {
   const currentRouteIsCostBlocked =
@@ -101,22 +100,23 @@ export function runnerSameTurnBreakerPreparation(
       )
         return [];
       const role = runnerBreakerUpgradeRequiredRole(breaker, server);
-      const install = runnerVisibleBreakerUpgradeInstallRoute(
+      const projection = runnerSameTurnInstallProjection(
         input,
         candidates,
         card,
+        services,
       );
+      const install = projection?.install;
       if (
         !role ||
+        !projection ||
         !install ||
-        !Number.isSafeInteger(card.memoryCost) ||
-        card.memoryCost! + memoryUsed! > memoryLimit! ||
         input.playerView.own.credits < install.creditCost
       )
         return [];
       const path = assessKnownRezzedIcePath(
         server.ice,
-        [...rig, card],
+        projection.rig,
         Number.MAX_SAFE_INTEGER,
         server.root,
         input.playerView.opponent.credits,
@@ -160,11 +160,13 @@ export function runnerSameTurnBreakerPreparation(
               ...input.playerView.own,
               credits: input.playerView.own.credits - install.creditCost,
               clicks: input.playerView.own.clicks - install.clickCost,
-              memoryUsed: memoryUsed! + card.memoryCost!,
+              memoryUsed: projection.memoryUsed,
               gripOrHq: input.playerView.own.gripOrHq.filter(
                 (entry) => entry.instanceId !== card.instanceId,
               ),
-              rig: [...rig, { ...card, rezzed: true }],
+              rig: projection.rig.map((c) =>
+                c.instanceId === card.instanceId ? { ...c, rezzed: true } : c,
+              ),
             },
           },
         };
@@ -260,6 +262,9 @@ export function runnerSameTurnBreakerPreparation(
           sameTurnPreparation: true as const,
           ...(sameTurnRunConversion ? { sameTurnRunConversion } : {}),
           evidenceCodes: [
+            ...projection.removedIds.map(
+              (id) => `same_turn_breaker_preparation_memory_sacrifice:${id}`,
+            ),
             `same_turn_breaker_preparation:${server.id}`,
             `same_turn_breaker_preparation_current_known_cost:${currentCost}`,
             `same_turn_breaker_preparation_projected_known_cost:${cost}`,

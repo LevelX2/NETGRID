@@ -4,6 +4,45 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { projectRunnerRunActions } from "./run-action-projection";
 
 describe("projectRunnerRunActions", () => {
+  it.each([
+    { approachIceExposeDecision: "expose" },
+    { approachIceExposeDecision: "decline" },
+    { approachIceExposeViewDecision: "finish" },
+  ])(
+    "keeps current ICE exposure reactions out of run-start projections: %j",
+    (reaction) => {
+      const current = action({
+        type: "trigger_ability",
+        source: "decoy",
+        payload: {
+          sourceDefinitionId: "onr_proteus_104_decoy-signal",
+          cardId: "decoy",
+          iceId: "hidden",
+          serverId: "remote_1",
+          ...reaction,
+        },
+      });
+      expect(projectRunnerRunActions({ input: input([current]) })).toEqual([]);
+      const play = action({
+        type: "play_event",
+        source: "decoy",
+        payload: {
+          sourceDefinitionId: "onr_proteus_104_decoy-signal",
+          cardId: "decoy",
+          serverId: "remote_1",
+          runnerEventRun: true,
+          eventApproachIceExposeBeforeRez: true,
+        },
+      });
+      expect(projectRunnerRunActions({ input: input([play]) })).toEqual([
+        expect.objectContaining({
+          actionId: play.actionId,
+          targetServerId: "remote_1",
+          eventApproachIceExposeBeforeRez: true,
+        }),
+      ]);
+    },
+  );
   it("projects declarative activated run payloads without reading their label", () => {
     const activatedRun = action({
       actionId: "activated-rd-scout",

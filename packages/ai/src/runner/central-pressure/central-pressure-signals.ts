@@ -1009,6 +1009,40 @@ export function buildRunnerCentralPressureSignals({
             (evaluation.accessServerId === "archives" &&
               archivesIsKnownWithoutAgenda(input));
           const terminalRemoteUnreachableCentralLastChance =
+            !coverageGaps.some((gap) => {
+              const conversion = gap.sameTurnRunConversion;
+              // A current, fully fundable install-and-run preparation is an
+              // alternative to the last-chance central gamble, even while the
+              // present rig cannot yet pass the scoring fort.
+              return (
+                gap.requesterModuleId === "runner.contest_remote" &&
+                conversion !== undefined &&
+                gap.targetRunActionId === conversion.targetRunActionId &&
+                conversion.requiredClicksAfterFunding <=
+                  input.playerView.own.clicks &&
+                (gap.fundingGap === 0 || gap.fundingActionIds.length > 0) &&
+                (gap.installActionIds ?? []).some((id) =>
+                  input.legalActions.some(
+                    (a) =>
+                      a.actionId === id &&
+                      a.type === "install_card" &&
+                      a.expiresAtStateVersion === input.playerView.stateVersion,
+                  ),
+                ) &&
+                runTargets.some(
+                  (target) =>
+                    target.actionId === conversion.targetRunActionId &&
+                    target.targetServerId === gap.targetServerId &&
+                    target.targetKind === "remote" &&
+                    target.knownAccessState !== "known_no_current_payoff",
+                ) &&
+                input.legalActions.some(
+                  (a) =>
+                    a.actionId === conversion.targetRunActionId &&
+                    a.expiresAtStateVersion === input.playerView.stateVersion,
+                )
+              );
+            }) &&
             runnerTerminalRemoteUnreachableCentralLastChance(
               input,
               evaluation,

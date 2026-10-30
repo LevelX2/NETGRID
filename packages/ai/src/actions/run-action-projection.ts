@@ -306,6 +306,14 @@ function runActionRelevant(
   action: LegalAction,
   signals: readonly string[],
 ): boolean {
+  // These native reactions expose or finish viewing the current approached
+  // ICE. Card-wide make-run hints describe the event's original play only.
+  if (
+    action.payload?.approachIceExposeDecision !== undefined ||
+    action.payload?.approachIceExposeViewDecision !== undefined
+  ) {
+    return false;
+  }
   if (action.payload?.successfulRunExtraRunDecision === "decline") {
     return false;
   }
