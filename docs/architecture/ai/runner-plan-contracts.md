@@ -2270,6 +2270,18 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Eine verpflichtende Credit-Loss-Auswahl nach einem erfolgreichen Run erhält
+den bestehenden Run-Root und seinen Executor über die Zwischenresolution.
+`run-window-successful-replacement-continuation.ts` validiert dafür die
+unmittelbare ausgewählte Runbewegung, das lückenlose öffentliche Ereignis,
+denselben erfolgreichen Run und Server sowie den exakten aktuellen
+Engine-Choice-Vertrag. Erst dann wird das residente Portfolio auf dieses
+Zwischenfenster fortgeschrieben. Eine anschließende Auswahl für Counter auf
+vollständig gebrochenem ICE verlangt weiterhin ihren unmittelbaren gültigen
+Vorgänger; alte Post-Run-Checkpoints werden nicht nachträglich legitimiert.
+Die Counterziele bleiben beim vorhandenen Run-Owner, der Payload-Resolver
+übernimmt nur die dort gebundenen aktuellen Optionen.
+
 Vor einem tatsächlich unbekannten Remote-Zugriff prüft der vorhandene
 Run-Abbruch-Owner bei höchstens einer Handkarte erneut die öffentlich belegte
 kritische Schadensgefahr. Die nach der letzten ICE korrekt entfallende

@@ -7,6 +7,7 @@ import {
 } from "../../plans/plan-scheduler";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { type RunnerTargetedBypassChoiceContinuation } from "./runner-targeted-bypass-plan";
+import { reconcileSelectedRunnerSuccessfulReplacementChoice } from "./run-window-successful-replacement-continuation";
 import {
   bindRunnerDevelopmentSearchEngineContinuation,
   bindRunnerEventInstallChoiceEngineContinuation,
@@ -145,6 +146,15 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       continuation.actionId === pending?.originalActionId);
 
   if (result.lane === "engine_window") {
+    if (
+      reconcileSelectedRunnerSuccessfulReplacementChoice(
+        input,
+        result,
+        previous,
+      )
+    ) {
+      return;
+    }
     if (
       result.diagnostics.some(
         (diagnostic) =>
