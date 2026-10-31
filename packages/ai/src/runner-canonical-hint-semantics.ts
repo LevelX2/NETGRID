@@ -8,6 +8,22 @@ type HintWithStructuredEffects = {
   readonly effects?: readonly AiHintStructuredEffect[];
 };
 
+export function runnerEffectsProvideCorpForcedDraw(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return (
+    effects?.some(
+      (effect) =>
+        effect.kind === "persistent_counter_effect" &&
+        effect.scope === "corp" &&
+        effect.timing === "start_of_turn" &&
+        effect.resource === "cards" &&
+        effect.target === "virus.corp_forced_draw_per_counter" &&
+        (effect.amount ?? 0) > 0,
+    ) ?? false
+  );
+}
+
 export function runnerEffectsProvideEncounterIceDerez(
   effects: readonly AiHintStructuredEffect[] | undefined,
 ): boolean {

@@ -3979,6 +3979,7 @@
           "rnd_deck_pressure"
         ],
         "valueHints": {},
+        "strategyAnchors": ["runner.rnd_pressure"],
         "actionCapacityProfiles": [
           {
             "class": "action_cost",
@@ -4006,6 +4007,16 @@
             "repeatable": true
           },
           {
+            "kind": "persistent_counter_effect",
+            "scope": "corp",
+            "timing": "start_of_turn",
+            "resource": "cards",
+            "target": "virus.corp_forced_draw_per_counter",
+            "amount": 1,
+            "amountKind": "dynamic",
+            "repeatable": true
+          },
+          {
             "kind": "delayed_penalty",
             "scope": "corp",
             "timing": "action",
@@ -4018,6 +4029,7 @@
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
           "virus.corp_purgeable_counter",
+          "virus.corp_forced_draw_per_counter",
           "virus.purge_tax"
         ],
         "actionTacticSignals": [
@@ -4026,10 +4038,19 @@
           "effect_scope:corp",
           "effect_scope:rnd",
           "effect_timing:action",
+          "effect_timing:start_of_turn",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "riskTags": ["virus_purge_risk"],
         "quality": {
           "hintReviewed": true,

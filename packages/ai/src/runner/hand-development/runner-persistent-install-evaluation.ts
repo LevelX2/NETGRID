@@ -19,6 +19,7 @@ import { persistentDevelopmentActionProjection } from "../../actions/persistent-
 import { actionClickCost } from "../../runtime/action-cost";
 import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
 import {
+  runnerEffectsProvideCorpForcedDraw,
   runnerHintProvidesDamagePrevention,
   runnerHintProvidesTagPrevention,
   runnerHintProvidesExposeInformation,
@@ -239,7 +240,9 @@ export function persistentFunctionalProfileForCard(
     breakerCoverage.length === 0 &&
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
+  const corpForcedDraw = runnerEffectsProvideCorpForcedDraw(hint?.effects);
   const accessSupport =
+    corpForcedDraw ||
     postBreakIceTrash ||
     encounterIceDerez ||
     hint?.planRoles?.includes("information") === true ||
@@ -250,7 +253,11 @@ export function persistentFunctionalProfileForCard(
   const searchSupport =
     runnerHintProvidesSearch(hint) ||
     runnerHintProvidesTopTrashRecovery(hint) ||
-    looksLikeDrawOrSearch(text);
+    ((!corpForcedDraw ||
+      hint?.effects?.some(
+        (effect) => effect.kind === "draw" && effect.scope === "runner",
+      ) === true) &&
+      looksLikeDrawOrSearch(text));
   const exclusiveHardwareDeck = Boolean(
     card.type === "hardware" &&
     (hint?.effects?.some(

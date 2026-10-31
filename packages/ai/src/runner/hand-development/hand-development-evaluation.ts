@@ -148,6 +148,7 @@ import {
   visibleRunnerThreat,
 } from "./runner-persistent-install-evaluation";
 import {
+  runnerEffectsProvideCorpForcedDraw,
   runnerEffectsProvideDamagePrevention,
   runnerEffectsDamagePreventionTypes,
   runnerEffectsProvideBreakerCredits,
@@ -694,6 +695,9 @@ function finiteRunnerHandNumber(value: unknown): number {
 
 function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   const text = context.signals.text;
+  // The opponent's mandatory draw is pressure, not our own draw/search.
+  if (runnerEffectsProvideCorpForcedDraw(context.signals.structuredEffects))
+    return "access_payoff";
   // Paying an ICE's rez price is a removal cost, not an income capability.
   if (runnerEffectsProvidePostBreakIceTrash(context.signals.structuredEffects))
     return "access_payoff";

@@ -61,6 +61,10 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
+        kind: "strategy_anchor",
+        strategyKey: "runner.rnd_pressure",
+      },
+      {
         kind: "plan_role",
         role: "build_rig",
       },

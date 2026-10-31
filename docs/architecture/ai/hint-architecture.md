@@ -209,3 +209,16 @@ die bestehende Engine-Aktion und der zuständige Plan bleiben erforderlich.
 Automatische Score-Erträge wie `gain_credits_on_score` behalten dagegen ihr
 Timing `when_scored`. Der Compiler leitet diese Grenze aus dem typisierten
 Mechanismus ab, unabhängig von Kartentitel und Identität.
+
+## Erzwungener Corporation-Draw durch Runner-Viren
+
+`virusCounter.startOfCorpTurn.draw_extra_cards_per_counter` projiziert einen
+wiederholbaren, counterabhängigen Karteneffekt für die Corporation. Der
+positive Betrag je Counter und das Zugbeginn-Timing bleiben erhalten; die
+gezogenen Karten selbst bleiben hinter der Informationsgrenze. Die Wirkung
+ist kein Draw- oder Suchgewinn des Runners. Der Entwicklungsowner erkennt
+sie als Druck-Unterstützung und behält seine normalen Kosten-, MU-, Reserve-
+und Dringlichkeitsprüfungen. Ein expliziter R&D-Strategieanker liegt bei der
+kanonischen Kartenannotation; der Compiler erfindet ihn nicht aus dem Namen.
+Bereits vorhandener erfolgreicher-Run-Counteraufbau und Purge-Tax bleiben die
+Run-Verbraucher. Der Hint garantiert weder künftige Runs noch einen Deckout.

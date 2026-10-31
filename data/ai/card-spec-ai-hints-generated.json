@@ -23004,7 +23004,7 @@
     {
       "cardId": "onr_v1_064_skivviss",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6979e6db3c37f267",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:bd7b19b6e1c79c6a",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:24cde46701d0ac53",
       "hint": {
         "cardId": "onr_v1_064_skivviss",
         "side": "runner",
@@ -23018,6 +23018,7 @@
           "rnd_deck_pressure"
         ],
         "valueHints": {},
+        "strategyAnchors": ["runner.rnd_pressure"],
         "actionCapacityProfiles": [
           {
             "class": "action_cost",
@@ -23045,6 +23046,16 @@
             "repeatable": true
           },
           {
+            "kind": "persistent_counter_effect",
+            "scope": "corp",
+            "timing": "start_of_turn",
+            "resource": "cards",
+            "target": "virus.corp_forced_draw_per_counter",
+            "amount": 1,
+            "amountKind": "dynamic",
+            "repeatable": true
+          },
+          {
             "kind": "delayed_penalty",
             "scope": "corp",
             "timing": "action",
@@ -23057,6 +23068,7 @@
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
           "virus.corp_purgeable_counter",
+          "virus.corp_forced_draw_per_counter",
           "virus.purge_tax"
         ],
         "actionTacticSignals": [
@@ -23065,6 +23077,7 @@
           "effect_scope:corp",
           "effect_scope:rnd",
           "effect_timing:action",
+          "effect_timing:start_of_turn",
           "effect_timing:successful_run"
         ],
         "conditions": [{ "kind": "requires_successful_run" }],

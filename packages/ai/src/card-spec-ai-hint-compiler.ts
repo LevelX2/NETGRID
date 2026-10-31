@@ -750,6 +750,26 @@ function deriveGenericTypedHintOverlay(
     });
     overlay.functionSignals.push("info.rnd_top");
   }
+  if (virus?.startOfCorpTurn?.kind === "draw_extra_cards_per_counter") {
+    const start = virus.startOfCorpTurn;
+    if (
+      !Number.isSafeInteger(start.amountPerCounter) ||
+      start.amountPerCounter <= 0 ||
+      start.visibility !== "hidden_info_barrier"
+    )
+      throw new Error("card_spec_unknown_virus_forced_draw_shape");
+    overlay.effects.push({
+      kind: "persistent_counter_effect",
+      scope: "corp",
+      timing: "start_of_turn",
+      resource: "cards",
+      target: "virus.corp_forced_draw_per_counter",
+      amount: start.amountPerCounter,
+      amountKind: "dynamic",
+      repeatable: true,
+    });
+    overlay.functionSignals.push("virus.corp_forced_draw_per_counter");
+  }
   if (virus?.startOfCorpTurn?.kind === "roll_per_counter_add_bad_publicity") {
     const start = virus.startOfCorpTurn;
     if (
