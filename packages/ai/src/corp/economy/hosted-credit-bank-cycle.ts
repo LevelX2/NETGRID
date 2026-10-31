@@ -1,3 +1,7 @@
+import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
+import type { CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
+import { corpFundedDefenseContinuationWindow } from "../defense/corp-funded-continuation-window";
+import { corpIceInstallHasCurrentCompleteRezQuote } from "../defense/corp-defense-domain-signals";
 import type {
   AiDecisionInput,
   CorpHostedCreditBankCycleQuote,
@@ -138,6 +142,91 @@ export function currentCorpHostedBankCycleQuotes(
   });
 }
 
+export type CorpHostedBankFundingWindowContext = Pick<
+  CorpCorePlanDomain,
+  "centralDefenseAllocation" | "scoreProjects" | "remoteProjects"
+> &
+  Pick<CorpPlanDomain, "ambushes" | "punishCampaigns">;
+
+/** A long-term installation's funding child may improve its current progress
+ * without pretending to finish that installation. Every earlier basic/payout
+ * prefix is checked by Defense for an actual funded continuation. */
+function admitsIncrementalInstallFunding(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  signal: CorpEconomyParentFundingSignal,
+  context: CorpHostedBankFundingWindowContext | undefined,
+  q: CorpHostedCreditBankCycleQuote,
+): boolean {
+  const reserve = signal.incrementalDefenseReserve;
+  if (
+    !context ||
+    !reserve ||
+    signal.parentPlanInstanceId !==
+      "plan:corp.defend_servers:server-defense-portfolio" ||
+    signal.immediateDefenseConversion !== true ||
+    reserve.targetCredits !== input.playerView.own.credits + signal.gap ||
+    reserve.targetCredits <= q.currentCredits + q.baselineLiquidCreditGain ||
+    q.headKind !== "load" ||
+    context.scoreProjects.some((p) => p.feasible) ||
+    input.playerView.own.gripOrHq.some((c) => c.known && c.type === "agenda") ||
+    input.playerView.servers.some(
+      (s) =>
+        s.id.startsWith("remote_") &&
+        s.root.some((c) => c.known && c.type === "agenda"),
+    ) ||
+    context.ambushes.some((p) => p.actionIds.length > 0) ||
+    context.punishCampaigns.some((p) => p.feasible) ||
+    input.legalActions.some(
+      (a) => a.type === "score_agenda" || a.type === "advance_card",
+    )
+  )
+    return false;
+  const install = input.legalActions.find(
+    (a) =>
+      a.type === "install_card" &&
+      a.source === reserve.iceInstanceId &&
+      a.payload?.placement === "ice" &&
+      a.payload.serverId === reserve.serverId &&
+      signal.parentNeedId ===
+        "install:" + reserve.serverId + ":" + a.actionId &&
+      a.expiresAtStateVersion === input.playerView.stateVersion,
+  );
+  if (
+    !install ||
+    !input.playerView.own.gripOrHq.some(
+      (c) => c.instanceId === install.source && c.known,
+    ) ||
+    !corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      install,
+      install.source,
+      reserve.serverId,
+    )
+  )
+    return false;
+  for (let basicActions = 1; basicActions < q.totalClickCost; basicActions++) {
+    const available = {
+      credits:
+        q.currentCredits +
+        (q.currentHostedCredits > 0
+          ? q.currentHostedCredits + basicActions - 1
+          : basicActions),
+      clicks: q.currentClicks - basicActions,
+    };
+    const window = corpFundedDefenseContinuationWindow({
+      input,
+      candidates,
+      centralAllocation: context.centralDefenseAllocation,
+      remoteProjects: context.remoteProjects,
+      scoreProjects: context.scoreProjects,
+      available,
+    });
+    if (window.actionIds.length || window.unknown.length) return false;
+  }
+  return true;
+}
+
 /** A multi-turn Score or exact current installed-ICE reserve funding child
  * can improve its rest-turn credit route.
  * An earlier available conversion or another income source retains its route.
@@ -146,6 +235,7 @@ export function corpHostedBankCycleForParentFunding(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   signal: CorpEconomyParentFundingSignal,
+  fundingContext?: CorpHostedBankFundingWindowContext,
 ): CorpHostedCreditBankCycleQuote | undefined {
   const scoreFunding =
     signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
@@ -172,7 +262,7 @@ export function corpHostedBankCycleForParentFunding(
             input.playerView.stateVersion,
       ) === true;
   if (
-    (!scoreFunding && !installedDefenseFunding) ||
+    (!scoreFunding && !installedDefenseFunding && !fundingContext) ||
     signal.restrictedCreditFunding ||
     signal.restrictedCreditPreparations?.length
   )
@@ -193,12 +283,20 @@ export function corpHostedBankCycleForParentFunding(
               (c.sourceCardInstanceId === q.sourceCardInstanceId &&
                 c.abilityId === q.cashoutAbilityId),
           ) &&
-        (installedDefenseFunding
-          ? q.currentCredits + q.netLiquidCreditGain >=
-              signal.incrementalDefenseReserve!.targetCredits &&
-            !input.legalActions.some((a) => a.type === "score_agenda")
-          : q.currentHostedCredits < signal.gap &&
-            q.totalClickCost <= signal.gap),
+        ((installedDefenseFunding &&
+          q.currentCredits + q.netLiquidCreditGain >=
+            signal.incrementalDefenseReserve!.targetCredits &&
+          !input.legalActions.some((a) => a.type === "score_agenda")) ||
+          (scoreFunding &&
+            q.currentHostedCredits < signal.gap &&
+            q.totalClickCost <= signal.gap) ||
+          admitsIncrementalInstallFunding(
+            input,
+            candidates,
+            signal,
+            fundingContext,
+            q,
+          )),
     )
     .sort(
       (a, b) =>

@@ -2498,6 +2498,32 @@ ebenfalls gesperrt. Die fünf nativen Zustände aus Paarung 542 werden in
 geprüft; sie liefern keine zusätzliche Ausführungsautorität außerhalb von
 Scheduler und TurnPlanner.
 
+Ein reiner langfristiger Fundingbedarf ist kein bereits ausführbares
+Installationsfenster. Der aktuelle Defense-Dienst trennt eine vollständig
+finanzierte produktive Installation von einer bekannten `funding_only`-Route,
+deren Schutzwirkung im aktuellen Budget noch `no_progress` bleibt.
+Bei einem neuen Remote ohne derzeitiges Agenda-Material benötigt das
+aktuelle finanzierte Fenster außerdem die vollständigen Engine-gequoteten
+Installations- und Rezcredits. Ein später möglicherweise nützlicher Layer
+behält seinen Staging-/Fundingparent, beansprucht dadurch aber keine heute
+bereits finanzierte Schutzwirkung. Fehlende Quotes behalten ihr Veto.
+
+Ein exakt gebundener Defense-Fundingchild darf diese noch mehrzügige Lücke
+mit einem profitableren vollständigen Bankzyklus verkleinern. Er behauptet
+keine vollständige Finanzierung des langfristigen Ziels. Diese zusätzliche
+Route verlangt eine aktuelle legale Installationsquelle mit vollständiger
+Engine-Quote, erhält denselben Parent, Need und Prioritätsanspruch und prüft
+jeden früheren Basic-/Auszahlungspräfix auf tatsächlich finanzierte oder
+unbekannte Installationsfenster. Vorhandene Agenden in HQ oder Remotes,
+ausführbare Score-/Advanceköpfe, Ambush-/Punishfenster und anderes sofortiges
+Einkommen schließen sie aus. Die Meilensteinquote und der exklusive
+Bankpool-Claim gelten auch unter diesem Fundingparent.
+Paarung 576 R3/G13/D238 bestätigt nach der bereits ausgeführten wichtigen
+Installation Laden plus Auszahlung: zehn statt neun Endcredits bei gleicher
+Hand und gleichem Brett. Die 32-Credit-Schutzlinie bleibt ein Fundingziel;
+der tatsächlich finanzierte 32-Credit-Gegenfall reserviert weiterhin seine
+Installation. Fehlende aktuelle Rezquotes bleiben unknown.
+
 Die Economy-Zugplanung bindet eine zugelassene vollständige Bankfolge an
 ihre aktuelle Engine-Meilensteinquote. Deren zukünftige Auszahlung und
 Aktionskosten sind bereits enthalten; eine unabhängige Auszahlung desselben

@@ -213,6 +213,13 @@ export function buildCorpEconomySignals({
           (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
             s.kind === "develop_campaign",
         ),
+        {
+          ...(centralDefenseAllocation ? { centralDefenseAllocation } : {}),
+          scoreProjects,
+          remoteProjects,
+          ambushes,
+          punishCampaigns,
+        },
       );
       return {
         ...signal,

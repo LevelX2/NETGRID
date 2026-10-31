@@ -1,3 +1,4 @@
+import type { CorpHostedBankFundingWindowContext } from "./hosted-credit-bank-cycle";
 import { candidateTargetIds } from "../../plans/corp-core-module-support";
 import { corpHostedBankLoadMatches } from "./hosted-credit-bank-facts";
 import { corpFreeRezPayoutPreparation } from "./free-rez-payout-preparation";
@@ -296,6 +297,7 @@ export function assessCorpEconomyFundingRoute(
   context: PlanSchedulerContext,
   signal: CorpEconomyParentFundingSignal | CorpEconomyReserveSignal,
   campaigns: readonly CorpEconomyDevelopmentSignal[] = [],
+  fundingContext?: CorpHostedBankFundingWindowContext,
 ): CorpEconomyFundingRouteAssessment {
   let liquidationAdmitted = false;
   const candidates = context.actionCandidates
@@ -362,6 +364,7 @@ export function assessCorpEconomyFundingRoute(
           context.input,
           context.actionCandidates,
           signal,
+          fundingContext,
         )
       : undefined;
   if (bankCycle)
@@ -658,7 +661,7 @@ export function economyMaterialization(
                             ? "Take the exact restricted payout for the bound current install/rez consumer, then return control to its resident parent."
                             : signal.kind === "parent_funding" &&
                                 signal.hostedCreditBankCycle
-                              ? "Execute the current Engine-quoted hosted-bank head for the bound Score funding need; revalidate the source and remaining rest-turn cycle after this transition."
+                              ? "Execute the current Engine-quoted hosted-bank head for the bound Corp funding need; revalidate the source and remaining rest-turn cycle after this transition."
                               : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,

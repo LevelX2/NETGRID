@@ -113,6 +113,22 @@ export function corpFundedDefenseContinuationWindow(params: {
             serverId,
           )
         ) {
+          // A current funded continuation must also afford its Engine-quoted
+          // rez. Unfunded staging keeps its separate parent/funding need.
+          if (
+            candidate.costProfile.creditCost! +
+              Number(action.payload?.postInstallRezQuoteFinalCredits) >
+              params.available.credits &&
+            !params.input.playerView.own.gripOrHq.some(
+              (c) => c.known && c.type === "agenda",
+            ) &&
+            !params.input.playerView.servers.some(
+              (s) =>
+                s.id.startsWith("remote_") &&
+                s.root.some((c) => c.known && c.type === "agenda"),
+            )
+          )
+            continue;
           const comparison = corpOrderedRemoteInstallPathAssessment(
             params.input,
             [],
@@ -176,7 +192,7 @@ export function corpFundedDefenseContinuationWindow(params: {
     if (
       staging ||
       (assessment.knowledge === "known" &&
-        assessment.disposition !== "effect_missing")
+        assessment.disposition === "productive")
     )
       actionIds.push(candidate.actionId);
     else if (assessment.knowledge === "unknown")

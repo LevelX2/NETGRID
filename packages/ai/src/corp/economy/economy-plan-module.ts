@@ -1,3 +1,5 @@
+import { corpTacticalPlanDomain } from "../../plans/corp-tactical-module-support";
+import type { CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { EconomyState } from "./economy-types";
 
 import {
@@ -192,6 +194,12 @@ function validatedEconomyNeeds(
         context.input,
         context.actionCandidates,
         signal,
+        signal.incrementalDefenseReserve &&
+          signal.hostedCreditBankCycle.currentCredits +
+            signal.hostedCreditBankCycle.netLiquidCreditGain <
+            signal.incrementalDefenseReserve.targetCredits
+          ? corpTacticalPlanDomain<CorpPlanDomain>(context)
+          : undefined,
       );
       if (
         current &&
@@ -483,6 +491,12 @@ function validatedEconomyNeeds(
         context.input,
         context.actionCandidates,
         signal,
+        signal.incrementalDefenseReserve &&
+          signal.hostedCreditBankCycle.currentCredits +
+            signal.hostedCreditBankCycle.netLiquidCreditGain <
+            signal.incrementalDefenseReserve.targetCredits
+          ? corpTacticalPlanDomain<CorpPlanDomain>(context)
+          : undefined,
       );
       if (
         current &&
