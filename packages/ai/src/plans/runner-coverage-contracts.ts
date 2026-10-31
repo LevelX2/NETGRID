@@ -55,6 +55,8 @@ export type RunnerCoverageGapSignal = {
     requiredClicksAfterFunding: number;
     projectedKnownPathCost: number;
     postRunCreditFloor: number;
+    /** Exact central parent value after the quoted current install and run. */
+    projectedCentralPressureValue?: number;
     installProjection:
       | "current_legal_action"
       | "card_spec_requires_rematerialization";

@@ -12,6 +12,7 @@ import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { runnerBreakerUpgradeRequiredRole } from "./coverage-breaker-upgrades";
 import { runnerSameTurnInstallProjection } from "./coverage-same-turn-install-projection";
 import type { RunnerCostEffectiveCoverageRecovery } from "./coverage-recovery";
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 
 /** A concrete parent preparation, not a claim that unknown ICE is passable. */
 export function runnerSameTurnBreakerPreparation(
@@ -29,7 +30,10 @@ export function runnerSameTurnBreakerPreparation(
   >,
 ): RunnerCostEffectiveCoverageRecovery | undefined {
   const currentRouteIsCostBlocked =
-    evaluation.pathPassability === "blocked_unpayable";
+    evaluation.pathPassability === "blocked_unpayable" ||
+    (evaluation.pathPassability === "blocked_by_visible_damage_hand_buffer" &&
+      Number.isSafeInteger(evaluation.pathCost) &&
+      evaluation.pathCost > input.playerView.own.credits);
   const central = evaluation.targetKind !== "remote";
   if (
     evaluation.runActionProjection?.sourceKind !== "basic_action" ||
@@ -42,18 +46,20 @@ export function runnerSameTurnBreakerPreparation(
   if (
     central &&
     (!["hq", "rd"].includes(evaluation.targetServerId) ||
-      evaluation.pathPassability !== "reachable" ||
-      (evaluation.recommendation !== "run_now" &&
-        evaluation.recommendation !== "run_if_free") ||
-      !services.runnerCentralPressureHasMaterialMarginalValue(
-        input,
-        evaluation,
-      ) ||
+      (!currentRouteIsCostBlocked &&
+        (evaluation.pathPassability !== "reachable" ||
+          (evaluation.recommendation !== "run_now" &&
+            evaluation.recommendation !== "run_if_free") ||
+          !services.runnerCentralPressureHasMaterialMarginalValue(
+            input,
+            evaluation,
+          ) ||
+          (evaluation.prerunReserveQuote?.status !== "satisfied" &&
+            evaluation.prerunReserveQuote?.status !== "not_required"))) ||
       !services.runnerCentralPressureCadence(
         input,
         evaluation.targetServerId as "hq" | "rd",
-      ).routeAvailable ||
-      evaluation.prerunReserveQuote?.status !== "satisfied")
+      ).routeAvailable)
   )
     return undefined;
   const server = input.playerView.servers.find(
@@ -171,6 +177,16 @@ export function runnerSameTurnBreakerPreparation(
           },
         };
         const targetParams = { input: projectedInput, deckCapabilities: deck };
+        // A cheaper central route must retain the current damage buffer after
+        // spending the held card. Breaking the ICE does not replenish grip.
+        if (
+          central &&
+          currentRouteIsCostBlocked &&
+          projectedInput.playerView.own.gripOrHq.length <
+            runnerDamageThreatAssessment(projectedInput).flatlineRisk
+              .recommendedHandFloor
+        )
+          return [];
         const projectedTarget = evaluateRunnerRunTargets(targetParams).find(
           (target) =>
             target.actionId === evaluation.actionId &&
@@ -204,9 +220,15 @@ export function runnerSameTurnBreakerPreparation(
         const parentBudgetPreserved =
           central &&
           projectedTarget !== undefined &&
+          projectedTarget.pathPassability === "reachable" &&
           (projectedTarget.recommendation === "run_now" ||
             projectedTarget.recommendation === "run_if_free") &&
-          projectedTarget.prerunReserveQuote?.status === "satisfied" &&
+          (projectedTarget.prerunReserveQuote?.status === "satisfied" ||
+            projectedTarget.prerunReserveQuote?.status === "not_required") &&
+          services.runnerCentralPressureHasMaterialMarginalValue(
+            projectedInput,
+            projectedTarget,
+          ) &&
           projectedTarget.creditsAfterRun >= evaluation.creditsAfterRun &&
           projectedTarget.prerunReserveQuote.creditsAfterKnownPath >=
             evaluation.prerunReserveQuote!.creditsAfterKnownPath;
@@ -248,6 +270,9 @@ export function runnerSameTurnBreakerPreparation(
             projectedKnownPathCost: cost!,
             postRunCreditFloor:
               projectedTarget.prerunReserveQuote?.requiredCredits ?? 0,
+            ...(central
+              ? { projectedCentralPressureValue: projectedTarget.score }
+              : {}),
             installProjection: "current_legal_action",
           };
       }

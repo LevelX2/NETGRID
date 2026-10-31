@@ -969,6 +969,9 @@ export function buildRunnerCentralPressureSignals({
               gap.targetServerId === evaluation.targetServerId &&
               gap.targetRunActionId === evaluation.actionId,
           );
+          const preparedCentralValue =
+            coverageSupport?.sameTurnRunConversion
+              ?.projectedCentralPressureValue;
           const hqSuccessWindowRoute = sameServerEvaluations.flatMap(
             (candidateEvaluation) => {
               // Preparation value belongs to the route represented by this
@@ -1221,9 +1224,11 @@ export function buildRunnerCentralPressureSignals({
                       ? Math.max(320, evaluation.score)
                       : knownAgendaFundingAvailable
                         ? Math.max(320, evaluation.score)
-                        : evaluation.recommendation === "run_now"
-                          ? evaluation.score
-                          : Math.min(evaluation.score, 60)) +
+                        : preparedCentralValue !== undefined
+                          ? preparedCentralValue
+                          : evaluation.recommendation === "run_now"
+                            ? evaluation.score
+                            : Math.min(evaluation.score, 60)) +
               bestMultiRunRouteValue,
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"

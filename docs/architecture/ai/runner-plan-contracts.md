@@ -857,6 +857,20 @@ neuen Installation. Zulassung verlangt niedrigere vollständige
 Installations- plus Pfadkosten als die so gequotete bestehende Abdeckung.
 Gleiche Kosten erzeugen keinen Effizienzbedarf, auch bei kostenloser Kopie.
 
+Eine unbezahlbare vollständige Schadensvermeidung kann den vorhandenen
+Coverage-Owner ebenfalls mit einer günstigeren Handinstallation beauftragen.
+Das gilt auch dann, wenn die aktuelle Runbewertung wegen des unbezahlbaren
+Breakpfads einen Schadenspuffer verlangt. Die Vorbereitung quotiert denselben
+Run nach tatsächlichem Karten-, Klick-, Credit- und MU-Verbrauch erneut;
+der aktuelle empfohlene Handpuffer bleibt erhalten. Eine explizite
+`not_required`-Reserve benötigt keine zusätzliche unbekannte-ICE-Reserve.
+Der Zentralparent übernimmt ausschließlich den positiven gequoteten
+`projectedCentralPressureValue` dieser exakt gebundenen vollständigen Folge,
+statt den negativen Wert des alten unbezahlbaren Pfads weiterzureichen.
+Der Basisrun bleibt bis zur Installation gesperrt. Native Zustände aus
+Paarung 578 prüfen Codecracker vor Brain Wash/Nerve Labyrinth sowie
+Handpuffer und letzten Klick als Gegenfälle.
+
 Eine begrenzte Programmsuche in der eigenen Stack-Spitze
 verwendet den generierten CardSpec-Zieltyp, die Anzahl betrachteter Karten
 und die Kosten je übernommener Karte. Sie ist kein R&D-Informationswerkzeug
