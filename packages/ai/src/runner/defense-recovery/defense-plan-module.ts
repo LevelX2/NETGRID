@@ -498,16 +498,22 @@ export function runnerDefenseDeferredHandBufferDispositions(params: {
   if (!phase) return [];
   if (phase === "build_hand_buffer") {
     return params.signals.preserveHandBeforeIncompleteTagClear
-      ? params.actionCandidates.flatMap((candidate) =>
-          candidate.semanticActionType === "tag.remove"
+      ? params.actionCandidates.flatMap((candidate) => {
+          const evidenceCode = candidate.semanticActionType === "tag.remove"
+            ? "runner_tag_clear_deferred_until_survival_buffer"
+            : candidate.semanticActionType === "counter.remove_trace_tag" ||
+                candidate.semanticActionType === "counter.remove_runner_hazard"
+              ? "runner_persistent_hazard_counter_deferred_until_survival_buffer"
+              : undefined;
+          return evidenceCode && !params.signals.handBufferActionIds?.includes(candidate.actionId)
             ? [{
                 actionId: candidate.actionId,
                 disposition: "explicitly_nonproductive" as const,
                 ownerModuleId: "runner.defense_and_recovery" as const,
-                evidenceCode: "runner_tag_clear_deferred_until_survival_buffer",
+                evidenceCode,
               }]
-            : [],
-        )
+            : [];
+        })
       : [];
   }
   const currentPhaseActionIds = new Set(

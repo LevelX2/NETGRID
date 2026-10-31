@@ -82,6 +82,51 @@ function fixture(tags = 1) {
 }
 
 describe("Defense hand-buffer phase ownership", () => {
+  it.each(["trace_tag_counter", "baskerville", "cerberus", "mastiff", "doppelganger"])(
+    "defers the legal %s removal only while its survival buffer is current",
+    (counterType) => {
+      const f = fixture();
+      const remove = legalAction(
+        "runner.remove-hazard", "runner", "trigger_ability", "Remove hazard",
+        { credits: 1, clicks: 1 },
+        { source: "runner-identity", payload: {
+          cardId: "runner-identity", runnerAbility: "remove_runner_trace_counter",
+          counterType, removeCounterAmount: 1,
+        } },
+      );
+      const candidates = buildActionSemanticCandidates({
+        legalActions: [f.draw, remove], observerSide: "runner", stateVersion: 1,
+      });
+      f.defense.preserveHandBeforeIncompleteTagClear = true;
+      f.defense.persistentHazardCounterRemovalAvailable = true;
+      const dispositions = () => runnerDefenseDeferredHandBufferDispositions({
+        actionCandidates: candidates, stateVersion: 1, signals: f.defense,
+        independentlyOwnedActionIds: new Set(),
+      });
+      expect(dispositions()).toContainEqual({
+        actionId: remove.actionId, disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.defense_and_recovery",
+        evidenceCode: "runner_persistent_hazard_counter_deferred_until_survival_buffer",
+      });
+      f.defense.handSize = f.defense.minimumHandBuffer;
+      f.defense.activeTags = 0;
+      expect(dispositions().some(d => d.actionId === remove.actionId)).toBe(false);
+      expect(runnerDefenseCurrentHeadActionIds({
+        input: f.input, actionCandidates: candidates, signals: f.defense,
+      })).toEqual([remove.actionId]);
+    },
+  );
+
+  it("does not defer a tag-removing current hand-buffer action for its same effect", () => {
+    const f = fixture();
+    f.defense.preserveHandBeforeIncompleteTagClear = true;
+    f.defense.handBufferActionIds = [f.clear.actionId];
+    expect(runnerDefenseDeferredHandBufferDispositions({
+      actionCandidates: f.candidates, stateVersion: 1, signals: f.defense,
+      independentlyOwnedActionIds: new Set(),
+    })).toEqual([]);
+  });
+
   it("publishes only the current productive Defense head for generic ownership", () => {
     const f = fixture();
     expect(

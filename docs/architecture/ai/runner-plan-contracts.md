@@ -2132,7 +2132,10 @@ verbleibenden Klicks. Teilweise Tagentfernung darf den Puffer weder durch
 Selbstschadensfinanzierung noch durch verbrauchte Draw-Klicks unterschreiten.
 `requiredEndTurnHandBuffer` bindet die Finanzierungssuche an den Puffer nach
 jedem tatsächlichen Zahlungsschritt. Während dieser Handpufferphase weist
-Defense die legale Tagentfernung ausdrücklich als zurückgestellt aus. Ein
+Defense die legale Tagentfernung und persistente Gefahrencounter-Entfernung
+ausdrücklich als zurückgestellt aus. Eine zugleich als aktueller
+Handpufferschritt gebundene Mehrzweck-Action bleibt ausführbar. Nach jedem
+Schritt werden Puffer und Bereinigungsphase erneut geprüft. Ein
 vollständig bezahlbarer Tag-Clear bleibt ein eigener zulässiger Gegenfall;
 ein Puffer oberhalb der Maxhand wird nicht als Schutz zum Zugende behauptet.
 
