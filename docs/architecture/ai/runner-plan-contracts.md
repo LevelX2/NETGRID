@@ -53,6 +53,12 @@ passiven Bonus für eine andere Runaktion; ihr Nutzen bleibt an die tatsächlich
 gewählte Fähigkeit gebunden. Echte installierte Zugriffseffekte und sinnvolle
 Informationsrouten bleiben separat bewertbar.
 
+Auch innerhalb derselben Zielservergruppe gilt die Informationszulassung
+pro konkreter Runaktion. Ein zugelassener normaler Zugriff überträgt seinen
+Zweck und seine terminale Zugriffsausnahme nicht auf einen daneben angebotenen
+reinen Informationslauf. Dessen eigener gequoteter Pfad muss die bestehenden
+Informationsgrenzen erfüllen; eine Ablehnung bleibt an der Action sichtbar.
+
 Ein endlicher Run-Creditpool begründet keinen Zusatznutzen, wenn dieselbe
 aktuelle Route ohne Karte erreichbar ist und danach ebenso viele allgemeine
 Credits übrig bleiben. Die gemeinsame Nutzenprüfung vergleicht die gebundenen

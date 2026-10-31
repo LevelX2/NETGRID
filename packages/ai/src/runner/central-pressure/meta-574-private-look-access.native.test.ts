@@ -190,3 +190,32 @@ it("does not treat an installed run-start ability as a passive bonus on another 
     "installed_run_payoff:rd:access_replacement",
   );
 });
+
+it("does not admit an eight-credit private look through its ordinary-access sibling", () => {
+  const { input, runtime } = fixture("cp-meta574-r2-g11-sibling-information.json");
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
+  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, runtime);
+  const before = JSON.stringify(input);
+  const targets = evaluateRunnerRunTargets({ input, deckCapabilities: input.ownDeckCapabilities! });
+  const look = targets.find((t) => t.runActionProjection.accessReplacement === "private_look_top_rd")!;
+  const direct = targets.find((t) => t.actionId === "runner.start_run.rd")!;
+  expect(look).toMatchObject({ pathCost: 8, multiaccessAvailable: false });
+  expect(runPurposeForEvaluation(look)).toBe("information");
+  expect(look.score).toBeGreaterThan(direct.score);
+  const decision = chooseAiAction(input);
+  const central = residentPlanPortfolioSnapshot(input)!.instances.find(
+    (p) => p.instanceId === "plan:runner.pressure_central:central%3Ard",
+  )!;
+  const signal = (central.moduleState as {
+    signal: { runActionIds: string[]; runActionExclusions: Record<string, string[]> };
+  }).signal;
+  expect(signal.runActionIds).toContain(direct.actionId);
+  expect(signal.runActionIds).not.toContain(look.actionId);
+  expect(signal.runActionExclusions[look.actionId]).toContain(
+    "runner_central_information_probe_known_path_not_admitted:rd",
+  );
+  expect(decision.actionId).not.toBe(look.actionId);
+  expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
+  expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(true);
+  expect(JSON.stringify(input)).toBe(before);
+});

@@ -1077,6 +1077,50 @@ export function buildRunnerCentralPressureSignals({
           const executionMode = concreteRunSetupAvailable
             ? ("access" as const)
             : runPurposeForEvaluation(evaluation);
+          const informationRouteExclusions = new Map(
+            sameServerEvaluations.flatMap((candidate) => {
+              if (
+                candidate.actionId === hqSuccessWindowRoute?.actionId ||
+                runnerLastCentralCounterConversion(input, candidate) !==
+                  undefined ||
+                runPurposeForEvaluation(candidate) !== "information"
+              ) {
+                return [];
+              }
+              // Admission belongs to this exact action. A normal-access
+              // sibling cannot lend its purpose or terminal-access exception.
+              const candidateTerminalAccess =
+                runnerRunProjectionPreservesNormalAccess(
+                  input,
+                  candidate.runActionProjection,
+                ) &&
+                (candidate.targetServerId === "hq" ||
+                  candidate.targetServerId === "rd") &&
+                candidate.knownAccessState !== "known_no_current_payoff" &&
+                input.playerView.own.agendaPoints >=
+                  input.playerView.agendaPointsToWin - 1;
+              if (
+                runnerInformationProbeCanUseQuotedPath(
+                  candidate,
+                  runnerRunTargetCanConvertNow(
+                    input,
+                    economy,
+                    candidate,
+                    candidates,
+                  ),
+                  candidateTerminalAccess,
+                )
+              ) {
+                return [];
+              }
+              return [
+                [
+                  candidate.actionId,
+                  `runner_central_information_probe_known_path_not_admitted:${candidate.targetServerId}`,
+                ] as const,
+              ];
+            }),
+          );
           const informationKnownPathAdmitted =
             executionMode !== "information" ||
             terminalRemoteUnreachableCentralLastChance ||
@@ -1225,7 +1269,7 @@ export function buildRunnerCentralPressureSignals({
                       candidates,
                       runTargets,
                       evaluation.targetServerId,
-                    ),
+                    ).filter((id) => !informationRouteExclusions.has(id)),
                     ...(terminalRemoteUnreachableCentralLastChance
                       ? [evaluation.actionId]
                       : []),
@@ -1328,6 +1372,11 @@ export function buildRunnerCentralPressureSignals({
                 const repeatedProbe = probeExclusions.get(candidate.actionId);
                 if (repeatedProbe)
                   return [[candidate.actionId, [repeatedProbe]]];
+                const informationExclusion = informationRouteExclusions.get(
+                  candidate.actionId,
+                );
+                if (informationExclusion)
+                  return [[candidate.actionId, [informationExclusion]]];
                 const actionCandidate = candidates.find(
                   (entry) => entry.actionId === candidate.actionId,
                 );
