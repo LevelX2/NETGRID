@@ -629,6 +629,13 @@ den normalen Run noch dessen unbekannte Encounters. Ein blockierter
 Variantenvertrag erhält eine ausdrückliche Ablehnung; der ausführbare
 Geschwisterpfad bleibt beim selben Remote-Parent.
 
+Das gilt auch ohne entdeckte ausführbare Remote-Planinstanz: Blockiert die
+aktuelle Variante an ihrer typisierten Vorabreserve, klassifiziert der
+Remote-Owner sie ausdrücklich als unproduktiv. Sie darf nicht ownerlos
+bleiben und dadurch den gesamten TurnPlanner trotz ausführbarer Erholung
+abbrechen. Der native Präfix von Paarung 578 G27 sowie die wieder
+aufgefüllte Hand prüfen Sperre, vollständige Coverage und regulären Tagabbau.
+
 Coverage-Unterstützung gehört zur exakt bewerteten Run-Action. Eine auf demselben
 Server bereits ausführbare Bypass-Variante übernimmt nicht den Breakerbedarf
 des normalen Runs, auch bei einer terminalen Scorebedrohung. Die bestehende

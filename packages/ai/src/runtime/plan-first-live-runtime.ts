@@ -2597,7 +2597,9 @@ export function runnerActionDispositions(
         evaluation,
       );
     const evidenceCode =
-      evaluation.knownAccessState === "known_no_current_payoff"
+      evaluation.prerunReserveQuote?.status === "blocked"
+        ? `runner_remote_run_prerun_reserve_blocked:${evaluation.targetServerId}`
+        : evaluation.knownAccessState === "known_no_current_payoff"
         ? `runner_remote_run_known_no_current_payoff:${evaluation.targetServerId}:${evaluation.recommendation}`
         : repeatedTerminalDamageContest
           ? `runner_terminal_remote_contest_repeat_blocked_after_failed_path:${evaluation.targetServerId}`
