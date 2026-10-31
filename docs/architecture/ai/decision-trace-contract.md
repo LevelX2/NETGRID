@@ -200,6 +200,17 @@ dupliziert. Ihre autoritativen Fundstellen sind:
 Fehlt eine dieser Producer-Strukturen, weist die Analyse das Feld als nicht
 gespeichert aus. Eine nachträgliche Schätzung ist unzulässig.
 
+Ein Diagnose-Checkpoint kann bereits die im selben Zustand ausgewählte
+TurnPlan-Lease enthalten. Ein erneuter Aufruf mit dieser Lease prüft ihre
+Fortsetzung, nicht zwingend eine neue Planwahl nach einer Verhaltensänderung.
+Für eine solche Ursachenregression wird der tatsächlich vorherige gespeicherte
+Runtime-Stand derselben Seite verwendet; die dazwischenliegenden gegnerischen
+Entscheidungen und der unveränderte Zielzustand müssen vollständig gebunden
+sein. Quelle, Entscheidungsindex und Lease-StateVersion gehören zum Nachweis.
+Ein Commitment wird nicht pauschal entfernt, um eine gewünschte Wahl zu
+erzwingen. Der vollständige Originalseed bleibt die Kontrolle der normalen
+Runtime-Fortschreibung.
+
 ### Kompakter Checkpoint-Input
 
 `checkpointCapture` speichert keinen vollständigen `AIInput`. Zulässig ist

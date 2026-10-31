@@ -1066,6 +1066,7 @@ function installedTrapFixture(options: {
   ];
   if (options.zeroCostAccessRez) {
     input.playerView.timingPoint = "run.movement_rez_window";
+    accessRez.timingPoint = input.playerView.timingPoint;
     input.playerView.run = {
       runId: "run-access-remote-1",
       attackedServerId: "remote_1",

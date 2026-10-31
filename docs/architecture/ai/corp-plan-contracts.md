@@ -2885,6 +2885,12 @@ nicht durch Definition-, Server- oder Rollenfallbacks ersetzt werden.
 Ein vorbereiteter installierter Access-Effekt kann den Rez seiner Quelle
 benötigen. Am exakt erreichten Quellserver bindet der residente Ambush-Owner
 die aktuelle Root-Rezaktion auch bei positiven Creditkosten als Trigger.
+Diese aktuelle Trigger-Discovery verlangt keine frühere Ambush-Planinstanz:
+Auch eine von einem anderen Owner installierte Quelle wird über ihre eigene
+Instanz, den tatsächlich erreichten Server und den aktuellen LegalAction-Satz
+gebunden. Die vorhandene Vorher-/Nachher-Projektion muss einen bekannten
+zusätzlichen Zugriffseffekt belegen. Das eröffnet keine neue Installation
+ohne den dafür erforderlichen Strategie- und Intentvertrag.
 Er prüft den bekannten zusätzlichen Effekt nach Rez mit dem verbleibenden
 Creditbudget; spätere Access-Zahlungen und gebundene Score-Reserven müssen
 gemeinsam finanzierbar bleiben. Vorherige ICE-Fenster, fremde Zielserver,

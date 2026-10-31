@@ -53,6 +53,10 @@ export function buildCorpAmbushPlanSignals(params: {
   const continuedSourceIds = new Set(
     continued.map((signal) => signal.sourceInstanceId),
   );
+  const currentAccessRez = currentInstalledAccessRezSignals(
+    params,
+    continuedSourceIds,
+  );
   const strategicIntent = (params.input as AiDecisionInputWithDeckCapabilities)
     .ownCorpStrategicIntent;
   if (!strategicIntent || !corpIntentSupportsAmbush(strategicIntent)) {
@@ -61,6 +65,7 @@ export function buildCorpAmbushPlanSignals(params: {
       ...(accessProgramBounce ? [accessProgramBounce] : []),
       ...(accessInstalledTrash ? [accessInstalledTrash] : []),
       ...continued,
+      ...currentAccessRez,
     ];
   }
   const recycling = corpRdRecyclingSignals(
@@ -115,6 +120,7 @@ export function buildCorpAmbushPlanSignals(params: {
     ...(accessProgramBounce ? [accessProgramBounce] : []),
     ...(accessInstalledTrash ? [accessInstalledTrash] : []),
     ...continued,
+    ...currentAccessRez,
     ...plannedDecoys,
     ...recycling,
     ...planned,
@@ -612,6 +618,138 @@ export function corpAmbushAdvanceDispositionEvidence(
   ].join(":");
 }
 
+function currentInstalledAccessRezSignals(
+  params: {
+    input: AiDecisionInput;
+    candidates: readonly ActionSemanticCandidate[];
+    reservedScoreCredits?: number;
+  },
+  continuedSourceIds: ReadonlySet<string>,
+): CorpAmbushSignal[] {
+  const serverId = params.input.playerView.run?.attackedServerId;
+  const server = params.input.playerView.servers.find((s) => s.id === serverId);
+  if (!server || server.id === "archives") return [];
+  return server.root.flatMap((source): CorpAmbushSignal[] => {
+    if (continuedSourceIds.has(source.instanceId)) return [];
+    const routes = accessWindowRezRoutes(params, {
+      card: source,
+      serverId: server.id,
+    });
+    if (routes.length > 1)
+      throw ambushContractFailure(
+        params.input,
+        routes.map((r) => r.candidate.actionId),
+        `Installed access source ${source.instanceId} has ambiguous funded rez actions.`,
+      );
+    const route = routes[0];
+    if (!route || !source.definitionId) return [];
+    return [
+      {
+        commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+        ambushId: `installed-access-rez:${source.instanceId}:${server.id}`,
+        sourceDefinitionId: source.definitionId,
+        sourceInstanceId: source.instanceId,
+        serverId: server.id,
+        phase: "trigger",
+        patternKind: "access_ambush",
+        actionIds: [route.candidate.actionId],
+        purposeCode: `activate_current_installed_access_effect:${source.instanceId}:${server.id}`,
+        assignedDomainPlanIds: ["corp.ambush_bluff"],
+        duplicateAlreadyInstalled: false,
+        affordableOrSupportable: true,
+        plannedAtStateVersion: params.input.playerView.stateVersion,
+        plannedAdvancementTarget: Math.max(0, source.advancementCounters ?? 0),
+        accessThreatProjection: route.afterRez,
+        value: 800,
+        evidenceCode: `corp_ambush_current_installed_access_rez:${source.instanceId}:${server.id}`,
+      },
+    ];
+  });
+}
+
+function accessWindowRezRoutes(
+  params: {
+    input: AiDecisionInput;
+    candidates: readonly ActionSemanticCandidate[];
+    reservedScoreCredits?: number;
+  },
+  location: { card: VisibleCard; serverId: string },
+) {
+  const { input } = params;
+  const sourceDefinitionId = location.card.definitionId;
+  const run = input.playerView.run;
+  if (
+    input.side !== "corp" ||
+    location.card.known !== true ||
+    location.card.owner !== "corp" ||
+    !sourceDefinitionId ||
+    location.card.rezzed === true ||
+    input.playerView.timingPoint !== "run.movement_rez_window" ||
+    run?.phase !== "movement" ||
+    run.position?.kind !== "server" ||
+    run.position.serverId !== location.serverId ||
+    run.attackedServerId !== location.serverId
+  )
+    return [];
+  return params.candidates.flatMap((candidate) => {
+    if (
+      candidate.sourceCardInstanceId !== location.card.instanceId ||
+      candidate.actionType !== "rez_card" ||
+      candidate.semanticActionType !== "corp_window.rez"
+    )
+      return [];
+    const action = input.legalActions.find(
+      (a) => a.actionId === candidate.actionId,
+    );
+    if (
+      !action ||
+      action.side !== "corp" ||
+      action.type !== "rez_card" ||
+      action.source !== location.card.instanceId ||
+      action.payload?.serverId !== location.serverId ||
+      action.timingPoint !== input.playerView.timingPoint ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion
+    )
+      return [];
+    const rezCredits = exactLegalActionCreditCost(action);
+    const reservedCredits = params.reservedScoreCredits ?? 0;
+    if (
+      rezCredits === undefined ||
+      !Number.isSafeInteger(reservedCredits) ||
+      reservedCredits < 0 ||
+      input.playerView.own.credits - rezCredits < reservedCredits
+    )
+      return [];
+    const beforeRez = projectKnownCorpCardAccessEffect({
+      input,
+      sourceDefinitionId,
+      sourceCard: location.card,
+    });
+    const afterRez = projectKnownCorpCardAccessEffect({
+      input: {
+        ...input,
+        playerView: {
+          ...input.playerView,
+          own: {
+            ...input.playerView.own,
+            credits: input.playerView.own.credits - rezCredits,
+          },
+        },
+      },
+      sourceDefinitionId,
+      sourceCard: { ...location.card, rezzed: true },
+    });
+    return beforeRez.status !== "unknown" &&
+      afterRez.status === "complete" &&
+      afterRez.corpCanPayActivation !== false &&
+      (afterRez.activationCreditCost ?? 0) + reservedCredits <=
+        input.playerView.own.credits - rezCredits &&
+      afterRez.threatValue > beforeRez.threatValue
+      ? [{ candidate, afterRez }]
+      : [];
+  });
+}
+
 function continuedAmbushSignals(params: {
   reservedScoreCredits?: number;
   input: AiDecisionInput;
@@ -715,67 +853,10 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous trigger actions; bind the exact on-access ability semantics.`,
       );
     }
-    const accessWindowRezCandidates = params.candidates.filter((candidate) => {
-      if (
-        candidate.sourceCardInstanceId !== sourceInstanceId ||
-        candidate.actionType !== "rez_card" ||
-        candidate.semanticActionType !== "corp_window.rez" ||
-        location.card.rezzed === true
-      ) {
-        return false;
-      }
-      const run = params.input.playerView.run;
-      if (
-        params.input.playerView.timingPoint !== "run.movement_rez_window" ||
-        run?.phase !== "movement" ||
-        run.position?.kind !== "server" ||
-        run.position.serverId !== location.serverId ||
-        run.attackedServerId !== location.serverId
-      ) {
-        return false;
-      }
-      const action = params.input.legalActions.find(
-        (legalAction) => legalAction.actionId === candidate.actionId,
-      );
-      if (action === undefined) return false;
-      const rezCredits = exactLegalActionCreditCost(action);
-      const reservedCredits = params.reservedScoreCredits ?? 0;
-      if (
-        rezCredits === undefined ||
-        !Number.isSafeInteger(reservedCredits) ||
-        reservedCredits < 0 ||
-        params.input.playerView.own.credits - rezCredits < reservedCredits
-      ) {
-        return false;
-      }
-      const beforeRez = projectKnownCorpCardAccessEffect({
-        input: params.input,
-        sourceDefinitionId,
-        sourceCard: location.card,
-      });
-      const afterRez = projectKnownCorpCardAccessEffect({
-        input: {
-          ...params.input,
-          playerView: {
-            ...params.input.playerView,
-            own: {
-              ...params.input.playerView.own,
-              credits: params.input.playerView.own.credits - rezCredits,
-            },
-          },
-        },
-        sourceDefinitionId,
-        sourceCard: { ...location.card, rezzed: true },
-      });
-      return (
-        beforeRez.status !== "unknown" &&
-        afterRez.status === "complete" &&
-        afterRez.corpCanPayActivation !== false &&
-        (afterRez.activationCreditCost ?? 0) + reservedCredits <=
-          params.input.playerView.own.credits - rezCredits &&
-        afterRez.threatValue > beforeRez.threatValue
-      );
-    });
+    const accessWindowRezCandidates = accessWindowRezRoutes(
+      params,
+      location,
+    ).map((route) => route.candidate);
     if (accessWindowRezCandidates.length > 1) {
       throw ambushContractFailure(
         params.input,
