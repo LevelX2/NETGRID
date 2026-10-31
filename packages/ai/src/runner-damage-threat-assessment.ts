@@ -132,12 +132,29 @@ export type RunnerVisibleLethalIceDamageOptions = {
   };
 };
 
+export type RunnerVisibleIceDamageProjection = {
+  projectedDamage: number;
+  projectedCoreDamage: number;
+  projectedHandAfterDamage: number;
+  assessment?: RunnerFutureEncounterDamageJackOutAssessment;
+};
+
 export function runnerVisibleLethalIceDamageAssessment(
   input: AiDecisionInput,
   remainingIce: readonly VisibleCard[],
   options: RunnerVisibleLethalIceDamageOptions = {},
 ): RunnerFutureEncounterDamageJackOutAssessment | undefined {
   if (input.side !== "runner") return undefined;
+  return projectRunnerVisibleIceDamage(input, remainingIce, options).assessment;
+}
+
+export function projectRunnerVisibleIceDamage(
+  input: AiDecisionInput,
+  remainingIce: readonly VisibleCard[],
+  options: RunnerVisibleLethalIceDamageOptions = {},
+): RunnerVisibleIceDamageProjection {
+  if (input.side !== "runner")
+    throw new Error("Visible Runner damage projection requires Runner input");
   const handCount = Math.max(
     0,
     Math.floor(options.handCount ?? input.playerView.own.gripOrHq.length),
@@ -166,6 +183,15 @@ export function runnerVisibleLethalIceDamageAssessment(
   let handFloorAssessment:
     | RunnerFutureEncounterDamageJackOutAssessment
     | undefined;
+
+  const finish = (
+    assessment?: RunnerFutureEncounterDamageJackOutAssessment,
+  ): RunnerVisibleIceDamageProjection => ({
+    projectedDamage,
+    projectedCoreDamage,
+    projectedHandAfterDamage: Math.max(0, handCount - projectedDamage),
+    ...(assessment ? { assessment } : {}),
+  });
 
   for (const ice of remainingIce.slice().reverse()) {
     const quote = ice.effectiveRunQuote;
@@ -280,7 +306,7 @@ export function runnerVisibleLethalIceDamageAssessment(
           "affordable_break:false",
         ].join("|"),
       };
-      if (immediateFlatline || cleanupFlatline) return assessment;
+      if (immediateFlatline || cleanupFlatline) return finish(assessment);
       // A reserve warning is not a terminal projection. Continue accounting
       // for later known damage before deciding whether this route is lethal.
       handFloorAssessment = assessment;
@@ -323,7 +349,7 @@ export function runnerVisibleLethalIceDamageAssessment(
     const nonLethalHandFloorViolation =
       !immediateFlatline && !cleanupFlatline && belowRequiredHandFloor;
     if (immediateFlatline || cleanupFlatline || nonLethalHandFloorViolation) {
-      return {
+      return finish({
         sourceDefinitionId: postPathDamage.sourceDefinitionId,
         projectedDamage,
         damageType: postPathDamage.damageType,
@@ -350,10 +376,10 @@ export function runnerVisibleLethalIceDamageAssessment(
           `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
           `post_path_damage_prevention:${preventedDamage}`,
         ].join("|"),
-      };
+      });
     }
   }
-  return handFloorAssessment;
+  return finish(handFloorAssessment);
 }
 
 function visibleEncounterBreakingProhibited(
@@ -443,6 +469,7 @@ export function runnerCriticalUnknownAccessRequiredHandFloor(
   serverId: string,
   preservesKnownAgendaPayoff: boolean,
   handCount = input.playerView.own.gripOrHq.length,
+  projectedKnownDamage = 0,
 ): number {
   const unknownAccess =
     serverId === "hq" ||
@@ -454,8 +481,9 @@ export function runnerCriticalUnknownAccessRequiredHandFloor(
       ));
   return !preservesKnownAgendaPayoff &&
     unknownAccess &&
-    runnerDamageThreatAssessment(input, handCount).flatlineRisk.level ===
-      "critical"
+    (runnerDamageThreatAssessment(input, handCount).flatlineRisk.level ===
+      "critical" ||
+      (projectedKnownDamage > 0 && handCount <= 1))
     ? 2
     : 0;
 }

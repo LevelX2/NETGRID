@@ -3318,6 +3318,23 @@ der bestehende Continuation-Owner validiert und erhält die ursprüngliche
 Action-, Plan- und Step-Bindung. Im regulären Encounter bleiben fehlende
 Restquoten ein strukturierter Fehler.
 
+Die unbekannte Zugriffskarte behält denselben Mindestpuffer auch nach bereits
+bekanntem ICE-Schaden. Die gemeinsame Schadensprojektion zählt nur aktuell
+gequotete ungebrochene Subroutinen nach bezahlten Breaks und Prävention; die
+Zugriffsreserve verwendet die verbleibende Hand. Vorhersehbar eintretender
+Schaden berücksichtigt dabei den bestehenden kritischen Zustand bei höchstens
+einer verbleibenden Karte, ohne zukünftige Ereignisse oder Karten zu erfinden.
+Defense leitet aus dem konkreten Fehlbetrag die benötigte Starthand ab. Eine
+endliche Folge aktueller unbesteuerter Einzel-Draws muss dieselbe Run-Action
+mit positivem Nutzen, erfüllter Reserve und verbleibendem Runklick erreichen.
+Nach jedem Draw gelten erneut die aktuellen LegalActions. Native Zustände aus
+Paarung 578/G35 belegen Draw–Draw–Run, drei bekannte Data-Darts-Schaden und
+zwei verbleibende Karten vor unbekanntem Zugriff; volle Hand und reale
+Prävention eröffnen die Route, fehlende Klicks und Drawtax keine freie Folge.
+Die Gegenfolge ist bis zu den ausdrücklich bedingten Corp-Rezpässen
+deterministisch geprüft; sie garantiert weder die verdeckte Karte noch den
+Matchsieg.
+
 Das gilt bereits im reinen Finanzierungsfenster vor der ursprünglichen
 Kostenfortsetzung. Side, Timingpunkt, StateVersion, Zahlungsfenster und
 ursprüngliche Action bleiben gebunden. Bei kombinierten Subroutinen ist

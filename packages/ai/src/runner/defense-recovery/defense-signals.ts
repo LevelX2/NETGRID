@@ -4,7 +4,10 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
-import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
+import {
+  quoteRunnerRunAfterHandBufferDraws,
+  type RunnerRunTargetEvaluation,
+} from "../../runner-run-target-evaluation";
 import { runnerEffectsProvideTopTrashRecovery } from "../../runner-canonical-hint-semantics";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { runnerDrawTaxLiabilityProjection } from "../../runtime/runner-draw-tax-liability-score";
@@ -750,23 +753,36 @@ function runnerRiskAdjustedHandBufferForAttractiveRuns(
       (a) => a.actionId === evaluation.actionId,
     );
     const runClicks = action?.costs.reduce((n, c) => n + (c.clicks ?? 0), 0);
+    const prepared =
+      quote?.status === "blocked" && quote.handBufferGap > 0
+        ? quoteRunnerRunAfterHandBufferDraws(input, evaluation)
+        : undefined;
+    const admittedPreparation =
+      prepared?.pathPassability === "reachable" &&
+      prepared.score > 0 &&
+      ["run_now", "run_if_free"].includes(prepared.recommendation) &&
+      prepared.prerunReserveQuote?.status !== "blocked" &&
+      prepared.accessPayoffContestable !== false;
     if (
       !quote ||
       quote.status !== "blocked" ||
       quote.handBufferGap <= 0 ||
       quote.creditGap !== 0 ||
-      evaluation.pathPassability !== "reachable" ||
-      evaluation.score <= 0 ||
-      (!["agenda", "score_threat"].includes(evaluation.accessPayoff) &&
-        quote.purpose !== "information") ||
+      (!admittedPreparation &&
+        (evaluation.pathPassability !== "reachable" ||
+          evaluation.score <= 0 ||
+          (!["agenda", "score_threat"].includes(evaluation.accessPayoff) &&
+            quote.purpose !== "information"))) ||
       evaluation.accessPayoffContestable === false ||
       !runClicks ||
       quote.handBufferGap + runClicks > input.playerView.own.clicks ||
       quote.handBufferGap > input.playerView.own.stackOrRdCount
     )
       continue;
-    if (quote.requiredHandBuffer >= minimumHandBuffer) {
-      minimumHandBuffer = quote.requiredHandBuffer;
+    const requiredStartingHand =
+      input.playerView.own.gripOrHq.length + quote.handBufferGap;
+    if (requiredStartingHand >= minimumHandBuffer) {
+      minimumHandBuffer = requiredStartingHand;
       sameTurnRunPreparation = true;
       evidenceCode = `runner_quoted_prerun_hand_buffer:${minimumHandBuffer}|server:${evaluation.targetServerId}|action:${evaluation.actionId}`;
     }

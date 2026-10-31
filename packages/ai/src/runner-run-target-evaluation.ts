@@ -88,6 +88,7 @@ import {
   runnerConfirmedDamageRequiredHandFloor,
   runnerCriticalUnknownAccessRequiredHandFloor,
   runnerVisibleLethalIceDamageAssessment,
+  projectRunnerVisibleIceDamage,
 } from "./runner-damage-threat-assessment";
 
 export * from "./run-analysis/runner-run-target-types";
@@ -302,6 +303,67 @@ export function assessRunnerRunAfterAccessPreparation(params: {
   return target ? { input, target } : undefined;
 }
 
+/** A bounded resource quote for repeated current one-card draws, without inventing card identities. */
+export function quoteRunnerRunAfterHandBufferDraws(
+  input: AiDecisionInput,
+  target: RunnerRunTargetEvaluation,
+): RunnerRunTargetEvaluation | undefined {
+  const gap = target.prerunReserveQuote?.handBufferGap;
+  const draw = input.legalActions.find((action) => action.type === "draw_card");
+  const run = input.legalActions.find(
+    (action) => action.actionId === target.actionId,
+  );
+  const runClicks = run?.costs.reduce(
+    (sum, cost) => sum + (cost.clicks ?? 0),
+    0,
+  );
+  if (
+    !runClicks ||
+    !gap ||
+    !Number.isSafeInteger(gap) ||
+    gap < 0 ||
+    !draw ||
+    gap + runClicks > input.playerView.own.clicks ||
+    draw.expiresAtStateVersion !== input.playerView.stateVersion ||
+    draw.payload?.projectedNetHandDelta !== 1 ||
+    draw.payload?.visibleDrawTaxSourceCount !== 0 ||
+    draw.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) !== 1 ||
+    draw.costs.some((cost) => (cost.credits ?? 0) !== 0) ||
+    gap > input.playerView.own.stackOrRdCount ||
+    input.playerView.own.gripOrHq.length + gap >
+      input.playerView.own.maxHandSize
+  )
+    return undefined;
+  const quotedInput: AiDecisionInput = {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      own: {
+        ...input.playerView.own,
+        clicks: input.playerView.own.clicks - gap,
+      },
+    },
+  };
+  const params = {
+    input: quotedInput,
+    quotedRunnerGripCount: input.playerView.own.gripOrHq.length + gap,
+  };
+  const projection = projectInternalRunnerRunActions(params).find(
+    (run) =>
+      run.action.actionId === target.actionId &&
+      run.targetServerId === target.targetServerId &&
+      run.projectionStatus === "concrete_target",
+  );
+  if (!projection) return undefined;
+  return evaluateRunnerRunTarget(
+    params,
+    projection,
+    buildRunnerEconomyPosture(params),
+    reconstructBeliefState(quotedInput).runnerOpponentModel
+      ?.unrezzedIceRiskModel ?? [],
+  );
+}
+
 export function evaluateRunnerRunTargets(
   params: EvaluateRunnerRunTargetsParams,
 ): RunnerRunTargetEvaluation[] {
@@ -341,7 +403,7 @@ export function evaluateRunnerRunTargets(
 export { projectRunnerRunActions } from "./actions/run-action-projection";
 
 function evaluateRunnerRunTarget(
-  params: EvaluateRunnerRunTargetsParams,
+  params: EvaluateRunnerRunTargetsParams & { quotedRunnerGripCount?: number },
   projection: InternalRunActionProjection,
   economyPosture: RunnerEconomyPosture,
   unrezzedIceRiskModel: RunnerOpponentModel["unrezzedIceRiskModel"],
@@ -472,10 +534,11 @@ function evaluateRunnerRunTarget(
   const runActionGripCost = runActionGripCardCost(params.input, projection);
   const projectedGripAfterRunAction = Math.max(
     0,
-    params.input.playerView.own.gripOrHq.length - runActionGripCost,
+    (params.quotedRunnerGripCount ??
+      params.input.playerView.own.gripOrHq.length) - runActionGripCost,
   );
-  const damageForPath = (quotedPath: KnownRezzedIcePathAssessment) =>
-    runnerVisibleLethalIceDamageAssessment(params.input, projectedServerIce, {
+  const damageProjectionForPath = (quotedPath: KnownRezzedIcePathAssessment) =>
+    projectRunnerVisibleIceDamage(params.input, projectedServerIce, {
       // The known path has already committed access-preserving breaker and
       // encounter costs.  Optional damage avoidance may only spend what is
       // actually left after those commitments.
@@ -507,7 +570,12 @@ function evaluateRunnerRunTarget(
           }
         : {}),
     });
-  const visibleLethalIceDamage = damageForPath(pathBeforeDamageBudget);
+  const damageForPath = (quotedPath: KnownRezzedIcePathAssessment) =>
+    damageProjectionForPath(quotedPath).assessment;
+  const visibleDamageProjection = damageProjectionForPath(
+    pathBeforeDamageBudget,
+  );
+  const visibleLethalIceDamage = visibleDamageProjection.assessment;
   // Classify the prerequisite that can remove this exact damage blocker.
   // This hypothetical quote never authorizes the presently unfunded run.
   const exactFundingGap = Math.max(
@@ -803,12 +871,13 @@ function evaluateRunnerRunTarget(
     unrezzedIceRiskCreditBuffer,
     riskyUniversalCoverage,
     visibleDuringRunRezSupport,
-    runnerGripCount: projectedGripAfterRunAction,
+    runnerGripCount: visibleDamageProjection.projectedHandAfterDamage,
+    projectedKnownDamage: visibleDamageProjection.projectedDamage,
   });
   // The unknown remainder requires both liquid credits and a surviving grip.
   // Known damage avoidance may spend only the money outside that same reserve.
   const visibleDamageViolatesPrerunReserve =
-    unknownUnrezzedIceCount > 0 && prerunReserveQuote.requiredHandBuffer > 0
+    prerunReserveQuote.requiredHandBuffer > 0
       ? runnerVisibleLethalIceDamageAssessment(
           params.input,
           projectedServerIce,
@@ -1841,6 +1910,7 @@ function quoteRunnerPrerunReserve(params: {
   riskyUniversalCoverage: boolean;
   visibleDuringRunRezSupport: boolean;
   runnerGripCount: number;
+  projectedKnownDamage: number;
 }): RunnerPrerunReserveQuote {
   const installedBreakers =
     params.deckCapabilities?.runner?.breakerInventory.filter((breaker) =>
@@ -1915,6 +1985,7 @@ function quoteRunnerPrerunReserve(params: {
       params.accessPayoff === "agenda" ||
         params.accessPayoff === "score_threat",
       params.runnerGripCount,
+      params.projectedKnownDamage,
     ),
     informationProbeAllowed,
     runnerRig: params.input.playerView.own.rig,
