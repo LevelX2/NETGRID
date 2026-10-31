@@ -6,6 +6,7 @@ import { turnKey } from "../../runtime/runtime-identifiers";
 import {
   corpIceInstallHasCurrentCompleteRezQuote,
   corpGlobalDefenseInstallRouteAssessment,
+  corpOrderedRemoteInstallPathAssessment,
   corpQualitativeIceStagingSignal,
 } from "./corp-defense-domain-signals";
 import {
@@ -91,13 +92,40 @@ export function corpFundedDefenseContinuationWindow(params: {
       false,
     );
     if (serverId === "new_remote") {
-      // This budget-only service does not project a new server. An exact
-      // offered head for a bound Remote need therefore keeps its veto until
-      // that whole continuation can be assessed; a need without a head cannot.
-      if (parent)
+      // Consume the existing Defense staging comparison for this exact head.
+      // A known ineffective first layer reserves no installation window;
+      // useful or unassessed new-server continuations retain their veto.
+      if (parent) {
+        const source = params.input.playerView.own.gripOrHq.find(
+          (card) => card.instanceId === action?.source,
+        );
+        if (
+          source?.known === true &&
+          CORP_DEFENSE_DOMAIN_SIGNAL_FACTS.hasExactNonNegativeCostProfile(
+            candidate,
+          ) &&
+          candidate.costProfile.clickCost! <= params.available.clicks &&
+          candidate.costProfile.creditCost! <= params.available.credits &&
+          corpIceInstallHasCurrentCompleteRezQuote(
+            params.input,
+            action,
+            action.source,
+            serverId,
+          )
+        ) {
+          const comparison = corpOrderedRemoteInstallPathAssessment(
+            params.input,
+            [],
+            source,
+            action,
+          );
+          if (comparison.knowledge === "known" && !comparison.improves)
+            continue;
+        }
         unknown.push(
           `${candidate.actionId}:bound_new_remote_window_unassessed`,
         );
+      }
       continue;
     }
     if (!params.input.playerView.servers.some((s) => s.id === serverId))

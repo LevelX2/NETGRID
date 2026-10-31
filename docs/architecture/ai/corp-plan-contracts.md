@@ -2487,13 +2487,29 @@ mit ihrem exakten Remote-/Score-Parent und dem quotierten frühen Geldgewinn.
 Fehlende ICE in HQ oder bekannte wirkungslose beziehungsweise reservewidrige
 Installationen sind kein aktuelles Schutzfenster. Ein echter gebundener
 Staging-Head bleibt geschützt. Für einen angebotenen, exakt gebundenen
-`new_remote`-Head kann der reine Budgetdienst die ganze Fortsetzung noch
-nicht beurteilen: Er meldet ausdrücklich unknown und gibt die Klicks nicht
-frei. Credit-Needs des Remotes und andere benötigte Finanzierung bleiben
+`new_remote`-Head verwendet Defense denselben geordneten Pfadvergleich wie
+seine Installationsbewertung. Nur ein aktuell vollständig Engine-gequoteter,
+bezahlbarer und nachweislich wirkungsloser erster Layer gibt das Fenster frei.
+Ein nützlicher oder unvollständig bewerteter Pfad bleibt ausdrücklich unknown
+und reserviert die Klicks. Paarung 576 G25/D280 belegt zwei wirkungslose
+Angebote gegen das öffentliche Runner-Rig; fehlende Runquotes bleiben gesperrt. Credit-Needs des Remotes und andere benötigte Finanzierung bleiben
 ebenfalls gesperrt. Die fünf nativen Zustände aus Paarung 542 werden in
 `meta-543-department-remote-window.test.ts` samt positiven Remote-Gegenfällen
 geprüft; sie liefern keine zusätzliche Ausführungsautorität außerhalb von
 Scheduler und TurnPlanner.
+
+Die Economy-Zugplanung bindet eine zugelassene vollständige Bankfolge an
+ihre aktuelle Engine-Meilensteinquote. Deren zukünftige Auszahlung und
+Aktionskosten sind bereits enthalten; eine unabhängige Auszahlung desselben
+Vorrats darf diesen Ertrag nicht erneut beanspruchen. Exklusive, quellen- und
+StateVersion-gebundene Claims verhindern diese Doppelzählung. Nach dem
+aktuellen nativen Kopf endet die unterstützte Projektion: Geänderte
+Bankcounter benötigen eine neue Engine-Quote und aktuelle LegalActions.
+Die Liquidität des späteren Meilensteins wird nicht als bereits vorhandenes
+Geld ausgegeben. Der native Gegenfall 576 G25/D280 wählt dadurch Laden und
+anschließend sechs Credits Auszahlung statt drei Credits und einem
+Basiscredit. Score-, Defense- und sonstige Prioritäten bleiben beim
+bestehenden Scheduler.
 
 Ein verbrauchter optionaler Defense-Suchversuch reserviert keine weitere
 Restaktion für sich (SP-613). Sein aktueller, exakt zuggebundener Receipt mit

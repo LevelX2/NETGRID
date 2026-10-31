@@ -40,6 +40,7 @@ import {
 import {
   quoteCorpRemotePath,
   remoteProtectionPathImproves,
+  type CorpRemotePathQuote,
 } from "../../runtime/corp-remote-maturity-assessment";
 
 export type CorpDefenseDomainSignalFacts = Readonly<{
@@ -565,10 +566,37 @@ function orderedRemotePathImproves(
   sourceIce: VisibleCard,
   action: LegalAction,
 ): boolean {
+  const comparison = corpOrderedRemoteInstallPathAssessment(
+    input,
+    currentIce,
+    sourceIce,
+    action,
+  );
+  return comparison.knowledge === "known" && comparison.improves;
+}
+
+/** The same Defense path comparison serves staging and its funding window.
+ * A missing quote remains unknown rather than certifying idle capacity.
+ */
+export function corpOrderedRemoteInstallPathAssessment(
+  input: AiDecisionInput,
+  currentIce: readonly VisibleCard[],
+  sourceIce: VisibleCard,
+  action: LegalAction,
+):
+  | { knowledge: "unknown"; reason: string }
+  | {
+      knowledge: "known";
+      improves: boolean;
+      before: CorpRemotePathQuote;
+      after: CorpRemotePathQuote;
+    } {
   const opponent = input.playerView.opponent;
-  if (!opponent) return false;
+  if (!opponent)
+    return { knowledge: "unknown", reason: "missing_visible_runner" };
   const targetServerId = action.payload?.serverId;
-  if (typeof targetServerId !== "string") return false;
+  if (typeof targetServerId !== "string")
+    return { knowledge: "unknown", reason: "missing_install_target" };
   const stagedIce = currentIce.flatMap((ice) => {
     const quote =
       ice.rezzed === true
@@ -580,7 +608,8 @@ function orderedRemotePathImproves(
           );
     return quote ? [{ ...ice, rezzed: true, effectiveRunQuote: quote }] : [];
   });
-  if (stagedIce.length !== currentIce.length) return false;
+  if (stagedIce.length !== currentIce.length)
+    return { knowledge: "unknown", reason: "incomplete_existing_path_quote" };
   const runnerRig = opponent.rig ?? [];
   const runnerCreditBudget = runnerRunPathCreditBudgetWithVisiblePools(
     opponent.credits,
@@ -590,7 +619,8 @@ function orderedRemotePathImproves(
     action,
     sourceIce,
   );
-  if (!postInstallEffectiveRunQuote) return false;
+  if (!postInstallEffectiveRunQuote)
+    return { knowledge: "unknown", reason: "incomplete_install_run_quote" };
   const before = quoteCorpRemotePath({
     assessment: assessKnownRezzedIcePath(
       stagedIce,
@@ -616,7 +646,14 @@ function orderedRemotePathImproves(
     expectedKnownIceCount: stagedIce.length + 1,
     runnerCreditBudgetBefore: runnerCreditBudget,
   });
-  return remoteProtectionPathImproves(before, after);
+  if (before.accessStatus === "unknown" || after.accessStatus === "unknown")
+    return { knowledge: "unknown", reason: "path_assessment_unknown" };
+  return {
+    knowledge: "known",
+    improves: remoteProtectionPathImproves(before, after),
+    before,
+    after,
+  };
 }
 
 function completeCurrentPostRezRunQuote(

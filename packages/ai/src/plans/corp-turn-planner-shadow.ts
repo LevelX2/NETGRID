@@ -14,6 +14,8 @@ import type {
   LegalTargetSummary,
 } from "../action-semantic-candidate-types";
 
+import { corpHostedBankTurnPlanningQuote } from "../corp/economy/hosted-credit-bank-turn-planning";
+import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import { currentCorpCreditObligation } from "./corp-credit-obligation";
 import { scoreMilestoneBoundary } from "../corp/score/score-milestone-boundary";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
@@ -185,6 +187,7 @@ export function buildCorpTurnPlannerShadow(params: {
         portfolio: params.runtimeResult.portfolio,
         agendaSlices,
         defenseSlice,
+        economyNeeds: domain?.economyNeeds ?? [],
         selectedChoicesForDecision: params.selectedChoicesForDecision,
       }).map((head) => ({ head, route })),
     );
@@ -894,6 +897,7 @@ function includeSpecializedCurrentRoutes(params: {
 }
 
 function headsForRoute(params: {
+  economyNeeds: readonly CorpEconomyNeedSignal[];
   input: AiDecisionInput;
   stateIdentity: PlanningStateIdentity;
   route: PlanSchedulerPlanningRouteCandidate;
@@ -941,6 +945,21 @@ function headsForRoute(params: {
     params.agendaSlices,
     params.defenseSlice,
   );
+  const economySignal =
+    params.route.instance.moduleId === "corp.economy"
+      ? params.economyNeeds.find(
+          (signal) => signal.needId === params.route.instance.dedupeKey,
+        )
+      : undefined;
+  const bankQuote = economySignal
+    ? corpHostedBankTurnPlanningQuote({
+        input: params.input,
+        stateIdentity: params.stateIdentity,
+        signal: economySignal,
+        actionId: action.actionId,
+        planInstanceId: params.route.instance.instanceId,
+      })
+    : undefined;
   const variants =
     specialized.length > 0
       ? specialized.flatMap((variant) =>
@@ -985,7 +1004,19 @@ function headsForRoute(params: {
   const semanticActionSetFingerprint = buildSemanticActionSetFingerprint(
     params.input.legalActions,
   );
-  return variants.map((variant) => {
+  return variants.map((baseVariant) => {
+    const variant: HeadVariant = bankQuote
+      ? {
+          ...baseVariant,
+          ...bankQuote,
+          instanceHorizon: "multi_turn",
+          nextMilestoneId: bankQuote.campaignQuote.nextMilestoneId,
+          evidenceCodes: [
+            ...baseVariant.evidenceCodes,
+            ...bankQuote.evidenceCodes,
+          ],
+        }
+      : baseVariant;
     const stepFingerprint = turnPlanningFingerprint("planning-head-step", {
       moduleId: params.route.instance.moduleId,
       planInstanceId: params.route.instance.instanceId,
@@ -1607,7 +1638,8 @@ function offersForHeads(params: {
           : 0,
         moduleCandidatePreferenceRank:
           head.currentBinding.actionId === params.moduleSelectedActionId
-            ? head.executorPlanInstanceId === params.moduleSelectedPlanInstanceId
+            ? head.executorPlanInstanceId ===
+              params.moduleSelectedPlanInstanceId
               ? 2
               : 1
             : 0,
@@ -1804,6 +1836,22 @@ function boundaryForCandidate(
       immediateOutcomeCodes: ["current_corp_rez_window_closed"],
       uncertainty: [{ code: "next_run_window_requires_current_legal_actions" }],
       assumptionIds: ["current_decline_rez_route_executable"],
+    });
+  }
+  if (
+    head?.evidenceCodes.includes(
+      "corp_bank_counter_change_requires_current_quote",
+    )
+  ) {
+    return assessTurnObservationBoundary({
+      boundaryKind: "projection_not_supported",
+      remainingActionCapacity,
+      residualTurnValueBasis: "remaining_capacity",
+      immediateOutcomeCodes: ["hosted_bank_current_head_committed"],
+      uncertainty: [
+        { code: "changed_bank_pool_requires_current_engine_quote" },
+      ],
+      assumptionIds: ["current_bank_head_and_milestone_engine_quoted"],
     });
   }
   if (
