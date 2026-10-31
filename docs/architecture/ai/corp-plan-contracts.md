@@ -2759,6 +2759,16 @@ Slice unterstützt feste Klick-/Creditkosten und nicht limitierte Aktivierungen;
 verbrauchende oder anderweitig limitierte Fähigkeiten bleiben fail-closed.
 Auch hier wird eine wiederverwendbare Quelle nach jeder Aktion neu gequotet.
 
+Spezielle Schadensaktivierungen, deren Engine-Aktionsfamilie `gain_credit`
+lautet, veröffentlichen am erzeugenden Engine-Pfad ausdrücklich
+`gainCreditsAmount: 0` und den tatsächlichen Schadenstyp. Ein noch nicht
+aufgelöster Würfel-Tag-Schaden trägt nur `potentialDamageAmount` und
+`randomTagThresholdDamage`, keinen garantierten `damageAmount`. Die vorhandene
+Semantik für exakt null Creditgewinn trennt diese Actions von liquider
+Wirtschaft. Würfel, Schaden, Kosten und Replay bleiben Engine-Autorität;
+diese Faktenkorrektur erteilt keiner unquotierten Zufallsroute eine neue
+Plan- oder Ausführungsautorität.
+
 Die Vorbereitung erkennt Trace-Support an den tatsächlich erzeugten typisierten
 `trace_credit`-Effekten. `scope: trace` unterstützt sichtbare eigene Trace-Quellen
 unabhängig vom Installationsserver; `scope: fort` benötigt eine Trace-Quelle

@@ -7,6 +7,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { stableLegalActionPayload } from "../turn/action-builders";
 import {
   buildCorpSpecialDamageAbilityActionsForCard,
   handleCorpSpecialDamageAbilityAction,
@@ -187,6 +188,65 @@ function makeHost(legalAction?: LegalAction) {
 }
 
 describe("corp special damage abilities", () => {
+  it.each([1, 2, 3, 4, 5, 6])(
+    "uses the actual die result %i without treating potential damage as guaranteed",
+    (roll) => {
+      const legalAction = makeAction({
+        cardId: "dog",
+        v1921AssetAbility: "schlaghund_tag_damage",
+        gainCreditsAmount: 0,
+        damageType: "meat",
+        potentialDamageAmount: 10,
+        randomTagThresholdDamage: true,
+      });
+      const { host, calls } = makeHost(legalAction);
+      host.state.runner.tags = 3;
+      host.rng.rollDie = (purpose) => {
+        calls.rolls.push(purpose);
+        host.state.randomCounter += 1;
+        return roll;
+      };
+      const result = handleCorpSpecialDamageAbilityAction(host);
+      expect(result.handled).toBe(true);
+      expect(result.dieRoll).toBe(roll);
+      expect(result.damageAmount).toBe(roll <= 3 ? 10 : 0);
+      expect(calls.damages).toHaveLength(roll <= 3 ? 1 : 0);
+      expect(calls.trashedCorp).toEqual(roll <= 3 ? ["dog"] : []);
+      expect(host.state.randomCounter).toBe(3);
+    },
+  );
+
+  it.each(["rock", "dog"])(
+    "publishes zero liquid income for special damage source %s",
+    (source) => {
+      const { host, calls } = makeHost();
+      const action = buildCorpSpecialDamageAbilityActionsForCard(
+        host,
+        source as CardInstanceId,
+      ).actions[0]!;
+      const payload = stableLegalActionPayload(
+        action.type,
+        action.payload!,
+        action.visibility,
+      );
+      expect(payload).toMatchObject({
+        gainCreditsAmount: 0,
+        damageType: "meat",
+        effectKind: "damage",
+      });
+      if (source === "dog") {
+        expect(payload).toMatchObject({
+          potentialDamageAmount: 10,
+          randomTagThresholdDamage: true,
+        });
+        expect(payload.damageAmount).toBeUndefined();
+      } else
+        expect(payload).toMatchObject({ damageAmount: 15, agendaPointCost: 3 });
+      expect(calls.rolls).toEqual([]);
+      expect(calls.damages).toEqual([]);
+    },
+  );
+
   it("builds stable I Got a Rock and Schlaghund LegalActions", () => {
     const { host } = makeHost();
 
@@ -209,6 +269,10 @@ describe("corp special damage abilities", () => {
     expect(dog.actions[0]?.payload).toEqual({
       cardId: "dog",
       v1921AssetAbility: "schlaghund_tag_damage",
+      gainCreditsAmount: 0,
+      damageType: "meat",
+      potentialDamageAmount: 10,
+      randomTagThresholdDamage: true,
     });
   });
 
