@@ -679,6 +679,13 @@ geht an den bestehenden Funding-Owner und sperrt auch eine gezielte
 Bypass-Vorbereitung für dieselbe Agenda. Bekannte Trash-Ziele und gequotete
 Access-Replacements behalten ihre eigenen Zugriffsverträge.
 
+Ein bereits zugelassener terminaler Remote-Contest erhält seine gebundene
+nichttödliche Handboden-Ausnahme auch bei noch unbekannter Rootkarte. Der
+Run-Window-Owner prüft dazu den tatsächlichen Contest-Parent, dessen terminale
+Bedrohung, aktiven Zugriffszweck und Run-Risikovertrag; er erfindet keinen
+bekannten Agenda-Payoff. Normale Informationsruns, abgelehnte Zugriffe,
+fehlende Bindungen sowie sofort tödlicher Schaden bleiben ausgeschlossen.
+
 Bei aus der side-sicheren Central-Memory identifizierten Agendas ergänzt die
 kanonische Engine-Definitionsquote die aktuelle öffentliche Fortquote um die
 Eigenkosten der Agenda. Mehrere bekannte Kandidaten reservieren den höchsten

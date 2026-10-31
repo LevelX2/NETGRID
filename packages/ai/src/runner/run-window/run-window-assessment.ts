@@ -456,7 +456,8 @@ export function runnerRunWindowEncounterRequiredHandFloor(
   return runOrigin?.parentBinding?.moduleId === "runner.contest_remote" &&
     runOrigin.parentBinding.signal.terminalPatternThreat === true &&
     runOrigin.purpose === "contest" &&
-    runnerRunOriginCommittedPayoff(runOrigin) === "score_threat" &&
+    runOrigin.accessCommitment !== undefined &&
+    runOrigin.accessCommitment.intendedAction !== "decline" &&
     runOrigin.runRiskContract !== undefined
     ? 0
     : undefined;
