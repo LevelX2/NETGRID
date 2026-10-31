@@ -1,4 +1,5 @@
 import type { RunnerFundingNeedSignal } from "../../plans/runner-funding-contracts";
+import type { InstalledMemorySurplusQuote } from "./installed-memory-surplus";
 export type RunnerInstalledCardLiquidationChoiceSignal = {
   conversionId: string;
   sourceResourceInstanceId: string;
@@ -17,6 +18,7 @@ export type RunnerInstalledCardLiquidationChoiceSignal = {
     retainedCardValue: number;
     netLiquidationValue: number;
     expendability: "proven_redundant" | "unproven";
+    memoryCapacity?: InstalledMemorySurplusQuote;
   }>;
   priorityClass: "P4";
   value: number;

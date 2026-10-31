@@ -1876,6 +1876,21 @@ Geteilte Funding-Kriterien liegen in `plans/runner-funding-candidates.ts`,
 Entwicklungszulassung und begrenzte Funding-Meilensteine in
 `plans/runner-development-contracts.ts`; beide sind unabhängig von der Registry.
 
+Die optionale Verwertung installierter Karten bewertet reine passive
+MU-Provider nach ihrem noch benötigten Kapazitätsbeitrag. Der Economy-Owner
+bindet dafür die aktuelle Verkaufschoice, die kanonisch einzige
+MU-Erhöhung und den vollständigen unveränderlichen eigenen Programmpool.
+Bleibt nach Entfernung bereits genügend MU für sämtliche gedruckten
+Programmkopien dieses Pools, besitzt diese reine Zusatzkapazität keinen
+weiteren Installationsbedarf. Vergangene Installkosten werden dabei nicht
+noch einmal als Erhaltungsnutzen berechnet. Andere Fähigkeiten, gehostete
+Karten, Counter, Lifecyclebindungen, unbekannte eigene Kartendefinitionen,
+zusätzliche Programmkopien und abweichende aktuelle MU-Kosten bleiben
+außerhalb dieses Nachweises. Der gebundene Economy-Step wählt weiterhin
+die genaue Option; der Choice-Resolver bewertet keine Karte neu. Die Quote
+ist eine aktuelle marginale Kapazitätsbewertung, keine Zusage gegen spätere
+gegnerische Eingriffe oder über einen ganzen alternativen Spielausgang.
+
 **Klasse:** je Instanz `bounded_sequence`, `recurring_cycle` oder
 `development_project`
 **Rolle:** Support, Vordergrund oder Background

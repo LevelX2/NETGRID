@@ -4,6 +4,7 @@ import type { AiDeckStrategyProfile } from "../../deck-doctrine-strategy";
 import { rolesMatch } from "../../runtime/role-match";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerInstalledCardLiquidationChoiceSignal } from "./economy-types";
+import { installedMemorySurplusQuote } from "./installed-memory-surplus";
 export function runnerInstalledCardLiquidationChoiceSignal(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -97,10 +98,16 @@ export function runnerInstalledCardLiquidationChoiceSignal(
   }
   const quotedTargets = eligibleCards
     .map((card) => {
-      const retainedCardValue = installedCardRetentionValue(input, card);
-      const expendability = installedCardLiquidationExpendability(input, card);
+      const memoryCapacity = installedMemorySurplusQuote(input, card);
+      const retainedCardValue = memoryCapacity
+        ? 0
+        : installedCardRetentionValue(input, card);
+      const expendability = memoryCapacity
+        ? ("proven_redundant" as const)
+        : installedCardLiquidationExpendability(input, card);
       return {
         card,
+        memoryCapacity,
         optionId: `card_${card.instanceId}`,
         retainedCardValue,
         netLiquidationValue: gainCredits - retainedCardValue,
@@ -125,6 +132,9 @@ export function runnerInstalledCardLiquidationChoiceSignal(
         retainedCardValue: selectedTarget.retainedCardValue,
         netLiquidationValue: selectedTarget.netLiquidationValue,
         expendability: selectedTarget.expendability,
+        ...(selectedTarget.memoryCapacity
+          ? { memoryCapacity: selectedTarget.memoryCapacity }
+          : {}),
       }
     : {
         gainCredits,
@@ -153,6 +163,11 @@ export function runnerInstalledCardLiquidationChoiceSignal(
     value: 1_000,
     evidenceCodes: [
       "runner_installed_card_liquidation_choice_owned_by_economy",
+      ...(selectedTarget?.memoryCapacity
+        ? [
+            `runner_installed_memory_capacity_surplus:${selectedTarget.memoryCapacity.memoryLimitAfterRemoval}:${selectedTarget.memoryCapacity.wholeOwnDeckProgramMemory}`,
+          ]
+        : []),
       selectedTarget
         ? `runner_installed_card_liquidation_proven_redundant:${selectedTarget.card.instanceId}:${selectedTarget.netLiquidationValue}`
         : quote.netLiquidationValue <= 0
