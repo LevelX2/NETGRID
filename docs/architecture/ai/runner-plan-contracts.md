@@ -2321,6 +2321,18 @@ größere Hände und bekannte Roots behalten ihre eigenen Bewertungen. Die
 Prüfung identifiziert keine verdeckte Falle und ersetzt keine allgemeine
 mehrzügige Handvorbereitung.
 
+Die bereits geltende kritische Unknown-Access-Grenze wird auch vor dem
+Runstart in der gemeinsamen Reservequote berücksichtigt. Ein ICE-freier Pfad
+hebt diesen Zugriffspuffer nicht auf. Runstart und aktuelles Exit-Fenster
+verwenden denselben Schadensfakt; Runaktionen mit Kartenverbrauch verwenden
+dabei die projizierte eigene Handgröße. Bekannte Agenda-/Score-Threat-Ziele
+behalten ihre bestehende Ausnahme. Die Quote führt den fehlenden Puffer an die
+vorhandenen Defense-/Fundingowner zurück, statt Aktionen für einen bereits
+vorher absehbaren sofortigen Abbruch zu verbrauchen. Zwei Handkarten erfüllen
+diese konkrete Exit-Grenze, zertifizieren aber keine generell sichere
+Zugriffsfolge. Native Paarung-578-Zustände sichern Runzulassung, Ownerbindung,
+aktuellen Abbruch und Wiederfreigabe nach Handaufbau ab.
+
 Beim aktuellen Zugriff lässt derselbe Owner einen normalen kostenlosen
 Agendasteal gegenüber dem Trash derselben sichtbaren Agenda dominieren:
 Beide entfernen die Agenda aus dem Zugriff der Corporation, der Steal erhält

@@ -436,6 +436,30 @@ export function runnerConfirmedDamageRequiredHandFloor(
     : 0;
 }
 
+/** The existing unknown-access exit policy, shared with prospective run quotes.
+ * This is the minimum buffer to avoid that exit, not a claim of safe access. */
+export function runnerCriticalUnknownAccessRequiredHandFloor(
+  input: AiDecisionInput,
+  serverId: string,
+  preservesKnownAgendaPayoff: boolean,
+  handCount = input.playerView.own.gripOrHq.length,
+): number {
+  const unknownAccess =
+    serverId === "hq" ||
+    serverId === "rd" ||
+    (serverId.startsWith("remote_") &&
+      input.playerView.servers.some(
+        (server) =>
+          server.id === serverId && server.root.some((card) => !card.known),
+      ));
+  return !preservesKnownAgendaPayoff &&
+    unknownAccess &&
+    runnerDamageThreatAssessment(input, handCount).flatlineRisk.level ===
+      "critical"
+    ? 2
+    : 0;
+}
+
 export type RunnerRecentFutureEncounterDamageSafetyAbort = {
   serverId: string;
   sourceDefinitionId: string;

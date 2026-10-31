@@ -86,6 +86,7 @@ import { quoteRunnerConsumableRunOpportunity } from "./run-analysis/runner-consu
 import {
   knownPathAfterDamageBudget,
   runnerConfirmedDamageRequiredHandFloor,
+  runnerCriticalUnknownAccessRequiredHandFloor,
   runnerVisibleLethalIceDamageAssessment,
 } from "./runner-damage-threat-assessment";
 
@@ -790,6 +791,7 @@ function evaluateRunnerRunTarget(
     input: params.input,
     deckCapabilities: params.deckCapabilities,
     projection,
+    targetServerId,
     accessPayoff,
     scoreThreat,
     multiaccessAvailable,
@@ -1826,6 +1828,7 @@ function quoteRunnerPrerunReserve(params: {
   input: AiDecisionInput;
   deckCapabilities: DeckCapabilityProfile | undefined;
   projection: InternalRunActionProjection;
+  targetServerId: string;
   accessPayoff: RunnerAccessPayoff;
   scoreThreat: boolean;
   multiaccessAvailable: boolean;
@@ -1906,6 +1909,13 @@ function quoteRunnerPrerunReserve(params: {
     corpRezExposureActive,
     riskCreditBuffer: params.unrezzedIceRiskCreditBuffer,
     runnerGripCount: params.runnerGripCount,
+    requiredAccessHandBuffer: runnerCriticalUnknownAccessRequiredHandFloor(
+      params.input,
+      params.targetServerId,
+      params.accessPayoff === "agenda" ||
+        params.accessPayoff === "score_threat",
+      params.runnerGripCount,
+    ),
     informationProbeAllowed,
     runnerRig: params.input.playerView.own.rig,
   });

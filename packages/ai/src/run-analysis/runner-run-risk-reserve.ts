@@ -13,6 +13,7 @@ export function quoteRunnerRunRiskReserve(params: {
   corpRezExposureActive: boolean;
   riskCreditBuffer: number;
   runnerGripCount: number;
+  requiredAccessHandBuffer: number;
   informationProbeAllowed: boolean;
   runnerRig: readonly VisibleCard[] | undefined;
 }): RunnerPrerunReserveQuote {
@@ -50,7 +51,7 @@ export function quoteRunnerRunRiskReserve(params: {
         : baseRequiredCredits;
   const requiredCredits = Math.max(ordinaryRequiredCredits, programReserve);
   const creditGap = Math.max(0, requiredCredits - params.creditsAfterKnownPath);
-  const requiredHandBuffer =
+  const requiredIceHandBuffer =
     params.unknownIceCount === 0 || !params.corpRezExposureActive
       ? 0
       : params.riskTolerance === "matchpoint_with_stable_universal_coverage" ||
@@ -59,14 +60,21 @@ export function quoteRunnerRunRiskReserve(params: {
         : params.visibleCoverage === "risky_universal"
           ? 4
           : 3;
+  const requiredHandBuffer = Math.max(
+    requiredIceHandBuffer,
+    params.requiredAccessHandBuffer,
+  );
   const handBufferGap = Math.max(
     0,
     requiredHandBuffer - params.runnerGripCount,
   );
   const status =
-    params.unknownIceCount === 0 || !params.corpRezExposureActive
+    requiredHandBuffer === 0 &&
+    (params.unknownIceCount === 0 || !params.corpRezExposureActive)
       ? ("not_required" as const)
-      : !exposureKnown
+      : params.unknownIceCount > 0 &&
+          params.corpRezExposureActive &&
+          !exposureKnown
         ? ("blocked" as const)
         : creditGap === 0 && handBufferGap === 0
           ? ("satisfied" as const)
@@ -103,6 +111,7 @@ export function quoteRunnerRunRiskReserve(params: {
       `prerun_reserve_required_credits:${requiredCredits}`,
       `prerun_reserve_credit_gap:${creditGap}`,
       `prerun_reserve_required_hand_buffer:${requiredHandBuffer}`,
+      `prerun_reserve_required_access_hand_buffer:${params.requiredAccessHandBuffer}`,
       `prerun_reserve_hand_buffer_gap:${handBufferGap}`,
       `prerun_reserve_program_exposure_known:${exposureKnown}`,
       `prerun_reserve_program_count:${programs?.length ?? "unknown"}`,

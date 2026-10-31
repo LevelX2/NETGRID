@@ -22,6 +22,7 @@ const params: Parameters<typeof quoteRunnerRunRiskReserve>[0] = {
   corpRezExposureActive: true,
   riskCreditBuffer: 3,
   runnerGripCount: 5,
+  requiredAccessHandBuffer: 0,
   informationProbeAllowed: true,
   runnerRig: rig,
 };
@@ -97,4 +98,35 @@ it("never uses a credit-only probe exception to waive its hand reserve", () => {
       visibleCoverage: "stable_universal",
     }),
   ).toMatchObject({ status: "satisfied", requiredHandBuffer: 2 });
+});
+
+it("keeps the access hand reserve without unknown ICE or Corp rez money", () => {
+  const accessOnly = {
+    ...params,
+    unknownIceCount: 0,
+    unknownIcePositions: [],
+    corpRezCredits: 0,
+    corpRezExposureActive: false,
+    requiredAccessHandBuffer: 2,
+    runnerGripCount: 1,
+    runnerRig: undefined,
+  };
+  expect(quoteRunnerRunRiskReserve(accessOnly)).toMatchObject({
+    status: "blocked",
+    requiredCredits: 0,
+    requiredHandBuffer: 2,
+    handBufferGap: 1,
+  });
+  expect(
+    quoteRunnerRunRiskReserve({ ...accessOnly, runnerGripCount: 2 }),
+  ).toMatchObject({
+    status: "satisfied",
+    handBufferGap: 0,
+  });
+  expect(
+    quoteRunnerRunRiskReserve({ ...accessOnly, requiredAccessHandBuffer: 0 }),
+  ).toMatchObject({
+    status: "not_required",
+    requiredHandBuffer: 0,
+  });
 });
