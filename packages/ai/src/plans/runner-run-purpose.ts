@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { runnerRunProjectionPreservesNormalAccess } from "../actions/run-action-projection";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { runnerTerminalContestThreat } from "../runtime/runner-terminal-contest-threat";
 export const INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET = 1;
@@ -6,6 +7,11 @@ export const INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET = 1;
 export function runPurposeForEvaluation(
   evaluation: RunnerRunTargetEvaluation,
 ): "access" | "multiaccess" | "information" | "contest" {
+  if (
+    evaluation.runActionProjection.accessReplacement === "private_look_top_rd"
+  ) {
+    return "information";
+  }
   if (evaluation.scoreThreat) return "contest";
   if (
     evaluation.runCommitment === "probe_only" &&
@@ -67,6 +73,10 @@ export function runnerTerminalRemoteUnreachableCentralLastChance(
   runTargets: readonly RunnerRunTargetEvaluation[],
 ): boolean {
   if (
+    !runnerRunProjectionPreservesNormalAccess(
+      input,
+      evaluation.runActionProjection,
+    ) ||
     input.playerView.own.agendaPoints <
       input.playerView.agendaPointsToWin - 1 ||
     (evaluation.targetServerId !== "hq" &&

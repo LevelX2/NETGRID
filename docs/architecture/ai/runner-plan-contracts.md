@@ -43,6 +43,16 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Eine Runroute mit ersetztem Kartenzugriff erhält weder den normalen
+Multiaccess-Ertrag installierter Karten noch eine terminale Agenda-Zugriffs-
+Ausnahme. Ein privater R&D-Blick behält seinen Informationszweck und dessen
+bestehende Zulassungsgrenzen. Die ausdrücklich bedingte Corp-Credit-Ersetzung
+behält normalen Zugriff, wenn ihre Enginebedingung nicht erfüllt ist.
+Eine Karte mit ausschließlich aktivierten Runstartfähigkeiten liefert keinen
+passiven Bonus für eine andere Runaktion; ihr Nutzen bleibt an die tatsächlich
+gewählte Fähigkeit gebunden. Echte installierte Zugriffseffekte und sinnvolle
+Informationsrouten bleiben separat bewertbar.
+
 Ein endlicher Run-Creditpool begründet keinen Zusatznutzen, wenn dieselbe
 aktuelle Route ohne Karte erreichbar ist und danach ebenso viele allgemeine
 Credits übrig bleiben. Die gemeinsame Nutzenprüfung vergleicht die gebundenen

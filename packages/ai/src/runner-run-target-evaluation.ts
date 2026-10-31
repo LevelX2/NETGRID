@@ -48,6 +48,7 @@ import {
 import {
   projectInternalRunnerRunActions,
   publicRunActionProjection,
+  runnerRunProjectionPreservesNormalAccess,
   type InternalRunActionProjection,
 } from "./actions/run-action-projection";
 import {
@@ -592,7 +593,7 @@ function evaluateRunnerRunTarget(
   const combinedRunPayoff = combineRunPayoffs(
     installedRunPayoff,
     runActionPayoff,
-    !replacesAccessWithCreditDenial(params.input, projection),
+    runnerRunProjectionPreservesNormalAccess(params.input, projection),
   );
   const scoreThreat =
     accessTargetKind === "remote" && remoteHasScoreThreat(accessServer);
@@ -614,7 +615,7 @@ function evaluateRunnerRunTarget(
     input: params.input,
     projection,
     preservesAgendaAccess:
-      !replacesAccessWithCreditDenial(params.input, projection) &&
+      runnerRunProjectionPreservesNormalAccess(params.input, projection) &&
       (accessPayoff === "agenda" ||
         accessPayoff === "score_threat" ||
         scoreThreat ||
@@ -780,7 +781,7 @@ function evaluateRunnerRunTarget(
     path.visibleTraceTagHazardUnavoidable === true;
   const futureClicksLost = path.futureClicksLost ?? 0;
   const runnerMatchpointCentralAccess =
-    !replacesAccessWithCreditDenial(params.input, projection) &&
+    runnerRunProjectionPreservesNormalAccess(params.input, projection) &&
     (accessTargetKind === "rd" || accessTargetKind === "hq") &&
     payoff.knownAccessState !== "known_no_current_payoff" &&
     params.input.playerView.own.agendaPoints >=
@@ -2388,6 +2389,23 @@ function installedRunPayoffForTarget(
   for (const card of input.playerView.own.rig ?? []) {
     if (card.known === false) continue;
     if (!card.definitionId) continue;
+    const abilities = cardSpecPlanningCardByDefinitionId(card.definitionId)
+      ?.planning.engine.abilities;
+    // A card whose only mechanics start their own activated runs grants no
+    // passive payoff to this different route. Its own effect is evaluated
+    // through that exact LegalAction's run projection instead.
+    if (
+      abilities &&
+      abilities.length > 0 &&
+      abilities.every(
+        (ability) =>
+          ability.kind === "activated" &&
+          ability.effects.length > 0 &&
+          ability.effects.every((effect) => effect.kind === "make_run"),
+      )
+    ) {
+      continue;
+    }
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     const contribution = hint
       ? installedRunPayoffContributionForHint(

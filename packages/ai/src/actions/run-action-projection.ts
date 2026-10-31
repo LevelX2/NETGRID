@@ -12,6 +12,19 @@ import type {
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
+/** Whether this exact projected route still performs ordinary card access. */
+export function runnerRunProjectionPreservesNormalAccess(
+  input: AiDecisionInput,
+  projection: RunActionProjection,
+): boolean {
+  return (
+    projection.accessReplacement === undefined ||
+    (projection.accessReplacement === "corp_lose_credits" &&
+      projection.accessReplacementRequiresCorpCredits === true &&
+      input.playerView.opponent.credits <= 0)
+  );
+}
+
 export type InternalRunActionProjection = RunActionProjection & {
   action: LegalAction;
 };

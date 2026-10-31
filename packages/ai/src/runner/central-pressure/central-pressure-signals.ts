@@ -1,4 +1,5 @@
 import { runnerLastCentralCounterConversion } from "./last-central-counter-conversion";
+import { runnerRunProjectionPreservesNormalAccess } from "../../actions/run-action-projection";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
@@ -912,6 +913,10 @@ export function buildRunnerCentralPressureSignals({
             evaluation.targetServerId === "archives" &&
             archivesHasVisibleKnownAgenda(input);
           const terminalCentralAccess =
+            runnerRunProjectionPreservesNormalAccess(
+              input,
+              evaluation.runActionProjection,
+            ) &&
             (evaluation.targetServerId === "hq" ||
               evaluation.targetServerId === "rd") &&
             evaluation.knownAccessState !== "known_no_current_payoff" &&

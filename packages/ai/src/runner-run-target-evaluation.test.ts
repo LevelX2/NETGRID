@@ -890,7 +890,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [protocolRun],
+      legalActions: [runAction("matchpoint-access-rd", "rd")],
       rig: [
         visibleCard("protocol-installed", {
           definitionId: "onr_v1_050_r-and-d-protocol-files",
