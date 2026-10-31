@@ -117,6 +117,7 @@ describe("native trace eligibility of run-only money", () => {
       breakerSubtypes: ["icebreaker"],
       endingStrength: 1,
       carriesStrengthAcrossIce: false,
+      strengthGainAfterEncounter: 0,
     });
     expect(b).toMatchObject({ credits: 2, traceEligibleCredits: 2 });
   });

@@ -2,6 +2,7 @@ import type { VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
+  carryProjectedBreakerStrength,
   effectiveIceForQuote,
   projectIceForRunPathEffects,
   structuredBreakerAssessment,
@@ -58,6 +59,10 @@ describe("visible run breaker path", () => {
       cost: 5,
       endingStrength: 3,
       carriesStrengthAcrossIce: true,
+      strengthGainAfterEncounter: 2,
     });
+    const strengths = new Map([["psychic-friend", 1]]);
+    carryProjectedBreakerStrength(assessment!, strengths);
+    expect(strengths.get("psychic-friend")).toBe(3);
   });
 });

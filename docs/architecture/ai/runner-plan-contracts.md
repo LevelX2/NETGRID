@@ -150,6 +150,17 @@ ist im Pfadvertrag typseitig ausgeschlossen und scheitert auch zur Laufzeit
 mit einer strukturierten Diagnose. Das gilt insbesondere nach einem
 tatsächlichen Break und nach der vollständigen aktuellen Zwangsbreak-Gruppe.
 
+Die gemeinsame Breakquote trennt die aktuelle Begegnungs-Endstärke vom
+zusätzlichen Stärkezuwachs, der nach der Begegnung erhalten bleibt.
+Ein durch einen erfolgreichen Break erzeugter Runbonus verlängert keinen
+separaten Encounter-Pump. Folge-ICE übernehmen ausschließlich den additiven
+Run-/Zug-Zuwachs auf ihren bisherigen dauerhaften Stärkestand; innerhalb
+derselben Begegnung bleibt die vollständig bezahlte Pumpstärke verwendbar.
+Runner-Pfad und Corp-Schutzbewertung konsumieren denselben gequoteten
+Dauerzuwachs. Ein fehlender oder ungültiger benötigter Wert scheitert sichtbar.
+Paarung 576, Runde 3/G19, belegt sieben statt fünf Credits für zwei bekannte
+ICE; unbekannte ICE bleiben davon unabhängig unsicher.
+
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
 verbrauchen den Breakerpreis und zweckgebundene Credits nur einmal. Der

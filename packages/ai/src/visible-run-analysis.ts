@@ -1,3 +1,4 @@
+import { carryProjectedBreakerStrength } from "./run-analysis/visible-run-breaker-path";
 import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import {
   type CardDefinition,
@@ -1550,12 +1551,7 @@ function recordProjectedBreakerStrength(
     assessment.breakerInstanceId,
     assessment.endingStrength,
   );
-  if (assessment.carriesStrengthAcrossIce) {
-    carriedStrengths.set(
-      assessment.breakerInstanceId,
-      assessment.endingStrength,
-    );
-  }
+  carryProjectedBreakerStrength(assessment, carriedStrengths);
 }
 
 function advanceVisibleRunBreakerState(
@@ -1684,12 +1680,7 @@ function runPathEffectBreakAssessment(params: {
     return effectCreatesNoAccess ? breakAssessment : undefined;
   }
   const breakerStrengthsAfterBreak = new Map(params.carriedBreakerStrengths);
-  if (breakAssessment.carriesStrengthAcrossIce) {
-    breakerStrengthsAfterBreak.set(
-      breakAssessment.breakerInstanceId,
-      breakAssessment.endingStrength,
-    );
-  }
+  carryProjectedBreakerStrength(breakAssessment, breakerStrengthsAfterBreak);
   const budgetAfterBreak = cloneRunnerRunPathCreditBudget(params.creditBudget);
   spendBreakerCreditsAndApplySideEffects(budgetAfterBreak, breakAssessment);
   const futureAfterBreak = assessKnownRezzedIcePathInternal(

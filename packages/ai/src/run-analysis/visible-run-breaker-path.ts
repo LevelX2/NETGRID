@@ -560,6 +560,32 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
   return undefined;
 }
 
+/** Advance the persistent baseline, never the pumped encounter total. */
+export function carryProjectedBreakerStrength(
+  assessment: BreakAssessment,
+  strengths: Map<string, number>,
+): void {
+  if (!assessment.carriesStrengthAcrossIce) return;
+  const before = strengths.get(assessment.breakerInstanceId);
+  const gain = assessment.strengthGainAfterEncounter;
+  if (
+    !Number.isSafeInteger(before) ||
+    !Number.isSafeInteger(gain) ||
+    gain < 0
+  ) {
+    throw new Error("Invalid projected persistent breaker strength.", {
+      cause: {
+        code: "invalid_projected_persistent_breaker_strength",
+        owner: "ai.run-analysis.carryProjectedBreakerStrength",
+        breakerInstanceId: assessment.breakerInstanceId,
+        before,
+        gain,
+      },
+    });
+  }
+  strengths.set(assessment.breakerInstanceId, before! + gain);
+}
+
 export function structuredBreakerAssessment(params: {
   breakerCard: VisibleCard;
   breakerDefinition: CardDefinition | undefined;
@@ -766,6 +792,12 @@ export function structuredBreakerAssessment(params: {
       pumpOption?.option.duration === "current_run" ||
       pumpOption?.option.duration === "current_turn" ||
       runStrengthGain > 0,
+    strengthGainAfterEncounter:
+      runStrengthGain +
+      (pumpOption?.option.duration === "current_run" ||
+      pumpOption?.option.duration === "current_turn"
+        ? requiredPumps * pumpStrengthAmount
+        : 0),
     ...(runEndTrashSourceIfUsed
       ? { runEndTrashSourceIfUsed: true as const }
       : {}),
@@ -852,6 +884,7 @@ function pendingFreeBreakAssessment(
         breaker.strength ??
         cardDefinitionStrength(breaker.definitionId),
       carriesStrengthAcrossIce: false,
+      strengthGainAfterEncounter: 0,
       consumedPendingFreeBreak: true,
       consumedPendingFreeBreakSourceBreakerInstanceId:
         pending.sourceBreakerInstanceId,

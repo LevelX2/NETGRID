@@ -80,6 +80,8 @@ export type BreakAssessment = {
   breakerSubtypes: string[];
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
+  /** Only new run/turn-duration strength; excludes encounter-only pumps. */
+  strengthGainAfterEncounter: number;
   /** The selected actual break binds this source to trash at run end. */
   runEndTrashSourceIfUsed?: true;
   runStrengthGain?: number;

@@ -182,6 +182,7 @@ it("preserves the payment purpose and source ledger after the refill", () => {
     breakerSubtypes: ["icebreaker"],
     endingStrength: 2,
     carriesStrengthAcrossIce: false,
+    strengthGainAfterEncounter: 0,
   };
   expect(projectBreakerCreditPayment(budget, breaker).affordable).toBe(true);
   expect(

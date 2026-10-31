@@ -1,3 +1,4 @@
+import { carryProjectedBreakerStrength } from "../run-analysis/visible-run-breaker-path";
 import type { PublicHeapBreakerPreparation } from "./corp-public-heap-breaker-preparation";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
@@ -975,12 +976,7 @@ function accessPreservingBreakStates(params: {
     );
     spendBreakerCreditsAndApplySideEffects(nextCreditBudget, assessment);
     const nextStrengths = new Map(params.state.breakerStrengths);
-    if (assessment.carriesStrengthAcrossIce) {
-      nextStrengths.set(
-        assessment.breakerInstanceId,
-        assessment.endingStrength,
-      );
-    }
+    carryProjectedBreakerStrength(assessment, nextStrengths);
     states.push({
       nextEncounterCannotBreak: params.state.nextEncounterCannotBreak,
       credits: nextCreditBudget.credits,
@@ -1136,12 +1132,7 @@ function independentlyCombinedRandomBreakState(params: {
       allAttemptsFail,
       subtractRational(ONE, perAttempt),
     );
-    if (assessment.carriesStrengthAcrossIce) {
-      nextStrengths.set(
-        assessment.breakerInstanceId,
-        assessment.endingStrength,
-      );
-    }
+    carryProjectedBreakerStrength(assessment, nextStrengths);
     choices.push({
       iceInstanceId: params.ice.card.instanceId,
       iceDefinitionId: params.ice.card.definitionId!,

@@ -21,6 +21,7 @@ function assessment(
     breakerSubtypes: ["icebreaker"],
     endingStrength: 0,
     carriesStrengthAcrossIce: false,
+    strengthGainAfterEncounter: 0,
     ...(options.includeStealthLoss === false
       ? {}
       : {
