@@ -275,11 +275,13 @@ export function createRunnerProgramInstallTrashContext(
             typeof option.value === "string"
               ? installedCards.get(option.value)
               : undefined;
-          return programSacrificeCandidateForAi(input, card, option);
+          return programSacrificeCandidateForAi(input, card, option, source);
         })
       : (input.playerView.own.rig ?? [])
           .filter(isRunnerInstalledProgramCard)
-          .map((card) => programSacrificeCandidateForAi(input, card));
+          .map((card) =>
+            programSacrificeCandidateForAi(input, card, undefined, source),
+          );
     return buildRunnerProgramInstallTrashAssessmentFromCards({
       memoryUsed,
       memoryLimit,
@@ -292,6 +294,7 @@ export function createRunnerProgramInstallTrashContext(
     input: AiDecisionInput,
     card: VisibleCard | undefined,
     option?: PendingChoiceOption,
+    incoming?: VisibleCard,
   ): ProgramSacrificeCandidate {
     const loss = runnerInstalledProgramTrashLoss(
       input,
@@ -305,7 +308,23 @@ export function createRunnerProgramInstallTrashContext(
     const members = loss.cards.map((entry) => {
       // Coverage/redundancy is measured against cards surviving this entire
       // trash closure, rather than another copy also lost with the host.
-      const survivingWithMember = [...survivors, entry];
+      // The exact incoming identical program also replaces this member's
+      // role. It does not replace other programs lost with the same host.
+      const incomingReplacesMember =
+        incoming?.known === true &&
+        incoming.type === "program" &&
+        typeof incoming.definitionId === "string" &&
+        incoming.definitionId === entry.definitionId &&
+        incoming.selectedSubtype === entry.selectedSubtype &&
+        incoming.instanceId !== entry.instanceId &&
+        !(input.playerView.own.rig ?? []).some(
+          (installed) => installed.instanceId === incoming.instanceId,
+        );
+      const survivingWithMember = [
+        ...survivors,
+        ...(incomingReplacesMember ? [incoming] : []),
+        entry,
+      ];
       const roleCounts = new Map<string, number>();
       for (const survivor of survivingWithMember) {
         for (const role of dependencies.visibleBreakerRoles(survivor))

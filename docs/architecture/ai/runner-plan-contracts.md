@@ -1095,6 +1095,19 @@ kompensiert. Installationsbewertung und verbindlicher Speicher-Checkpoint
 verwenden diese Begrenzung im bestehenden Opfer-Owner. Eine bereits
 gebundene historische Opferwahl wird im Choice-Fenster nicht neu geplant.
 
+Die Ersetzungsbewertung berücksichtigt die exakt bekannte eingehende
+definitionsgleiche Programm-Instanz beim Vergleich der verbleibenden Rollen.
+Ein bereits installiertes identisches Programm gilt dadurch nicht als einzige
+Abdeckung, wenn seine gebundene Ersatzkopie dieselbe Rolle übernimmt. Das gilt
+auch für die verpflichtende Speicherwahl einer Shell-Traders-Installation.
+Andere beim Host-Trash verlorene Programme werden dadurch nicht ersetzt;
+unterschiedliche Definitionen, abweichende sichtbare Untertypmodi und reine MU-Checkpoints erhalten diesen
+Duplikatnachweis nicht. Die vorhandene Verlustbewertung entscheidet weiterhin
+zwischen einer zweiten verbrauchbaren Breakerkopie und mehrfacher Economy.
+Paarung 582/G7/D280 und G19/D186 erhalten so Stealth-Quellen; G23/D296 behält
+bei bereits mehrfacher Economy die zweite Breakerkopie. Vorab gebundene
+historische Opferwahlen behalten ihre unveränderte Bindung.
+
 Deckinventar und Handantworten übernehmen die ICE-Kategorien aus dem
 kanonischen Breakerprofil. Bedingte Zusatzeffekte im Regeltext erweitern diese
 Abdeckung nicht: Ein Folgeeffekt nach einer vollständig gebrochenen Wall ist

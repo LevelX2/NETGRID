@@ -342,7 +342,9 @@ describe("installed program loss with hosted descendants", () => {
   function contextFor(rig: VisibleCard[]) {
     const roles = (card: VisibleCard) =>
       card.definitionId === "onr_v1_047_pile-driver" ||
-      card.definitionId === "onr_v1_021_dwarf"
+      card.definitionId === "onr_v1_021_dwarf" ||
+      (card.definitionId === "onr_proteus_092_morphing-tool" &&
+        card.selectedSubtype === "wall")
         ? ["breaker_wall"]
         : card.definitionId === "onr_v1_023_evil-twin"
           ? ["breaker_sentry"]
@@ -392,6 +394,60 @@ describe("installed program loss with hosted descendants", () => {
         specialZones: { setAside: [program("incoming", 1)] },
       },
     }) as unknown as AiDecisionInput;
+
+  it("counts the exact incoming copy when replacing an installed breaker", () => {
+    const wall = ownProgram("wall", "onr_v1_047_pile-driver");
+    const installer = ownProgram("installer", "onr_v1_075_zetatech-software-installer");
+    const rig = [wall, installer], input = inputFor(rig);
+    const incoming = ownProgram("incoming", wall.definitionId!);
+    const assessment = contextFor(rig).runnerProgramInstallTrashAssessmentForCard(input, incoming);
+    expect(assessment.candidates.find(c => c.card?.instanceId === "wall")).toMatchObject({
+      protectedRole: false,
+      reasonCategories: expect.arrayContaining(["redundant_or_replaceable"]),
+    });
+    expect(assessment.selectedCandidates.map(c => c.card?.instanceId)).toEqual(["wall"]);
+  });
+
+  it("does not treat a different incoming breaker as an identical replacement", () => {
+    const wall = ownProgram("wall", "onr_v1_047_pile-driver");
+    const installer = ownProgram("installer", "onr_v1_075_zetatech-software-installer");
+    const rig = [wall, installer], input = inputFor(rig);
+    const assessment = contextFor(rig).runnerProgramInstallTrashAssessmentForCard(
+      input, ownProgram("incoming", "onr_v1_021_dwarf"),
+    );
+    expect(assessment.candidates.find(c => c.card?.instanceId === "wall")).toMatchObject({
+      protectedRole: true,
+    });
+    expect(assessment.selectedCandidates.map(c => c.card?.instanceId)).toEqual(["installer"]);
+  });
+
+  it("preserves a configured installed role when the incoming copy has no matching mode", () => {
+    const wall = { ...ownProgram("wall", "onr_proteus_092_morphing-tool"), selectedSubtype: "wall" };
+    const installer = ownProgram("installer", "onr_v1_075_zetatech-software-installer");
+    const rig = [wall, installer], input = inputFor(rig);
+    const assessment = contextFor(rig).runnerProgramInstallTrashAssessmentForCard(
+      input, ownProgram("incoming", wall.definitionId!),
+    );
+    expect(assessment.candidates.find(c => c.card?.instanceId === "wall")).toMatchObject({
+      protectedRole: true,
+    });
+    expect(assessment.selectedCandidates.map(c => c.card?.instanceId)).toEqual(["installer"]);
+  });
+
+  it("does not replace hosted children merely by installing another copy of their host", () => {
+    const host = ownProgram("host", "onr_v1_001_afreet");
+    const child = ownProgram("child", "onr_v1_023_evil-twin", host.instanceId);
+    const installer = ownProgram("installer", "onr_v1_075_zetatech-software-installer");
+    const rig = [host, child, installer], input = inputFor(rig);
+    const assessment = contextFor(rig).runnerProgramInstallTrashAssessmentForCard(
+      input, ownProgram("incoming", host.definitionId!),
+    );
+    expect(assessment.candidates.find(c => c.card?.instanceId === "host")).toMatchObject({
+      protectedRole: true,
+      reasonCategories: expect.arrayContaining(["unique_breaker_coverage", "hosted_programs_lost"]),
+    });
+    expect(assessment.selectedCandidates.map(c => c.card?.instanceId)).toEqual(["installer"]);
+  });
 
   it("preserves a daemon's actual hosted coverage instead of preferring its cheap printed host", () => {
     const host = ownProgram("host", "onr_v1_001_afreet");
