@@ -1003,7 +1003,7 @@ function directVisibleDamageAmount(
     damageType === "brain" ||
     damageType === "core";
   if (!directDamage) return undefined;
-  return Math.max(1, Math.floor(subroutine.amount ?? 1));
+  return Math.max(0, Math.floor(subroutine.amount ?? 1));
 }
 
 function legalActionRef(action: LegalAction) {

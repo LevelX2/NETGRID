@@ -3227,7 +3227,9 @@ Legalität, Quelle, Subroutinen und StateVersion bleiben unverändert gebunden;
 ein bestehendes Run-Commitment überstimmt die fehlende Wirkung nicht.
 Die ausschließlich schädliche Pflicht, den benutzten Breaker nach Runende
 zu trashen, begründet dabei keinen eigenständigen Nutzen eines Nullschadens-
-Breaks. Die Engine klassifiziert diese mechanische Effektart generisch;
+Breaks. Ebenso erzeugt reiner zufälliger Eigenschaden beim Break keinen
+positiven Zweck für das Verhindern von null Schaden. Die Engine klassifiziert
+diese mechanischen Effektarten generisch;
 positive Erfolgs-/Counter-/Folgebreakeffekte und aktive Vollbruchpflichten
 bleiben ausgeschlossen. Paarung530 G33/D190 reproduziert den ursprünglichen
 Null-Core-Break mit allen 189 Präfixhashes und neun Checkpointbindungen.
@@ -3418,6 +3420,21 @@ Bereits gebrochene oder aufgelöste Subroutinen werden nicht erneut gezählt;
 eine fehlende oder widersprüchliche Restquote scheitert strukturiert.
 `unbrokenEncounterDamageLikely` beschreibt diese gesamte Restmenge, nicht
 nur den gewählten Break-Target.
+Ausdrücklich null direkter Schaden bleibt auch in dieser Summe und der
+Pfadquote null.
+
+Eine begrenzte Ausnahme erhält im aktuellen Encounter eine echte
+Überlebenschance: Wenn nur Breaks und die zwangsläufig runbeendende
+Schadensfortsetzung angeboten sind, der offene direkte Schaden sicher sofort
+oder wegen eines negativen Core-Handlimits beim Cleanup verliert und der
+Erfolgszweig des exakt gewählten Schadensbreaks überlebt, darf dessen
+Fehlschadenrisiko den Rettungsversuch nicht sperren. Die bestehende kumulierte
+Schadensprojektion prüft beide Zweige einschließlich Prävention. Sichere
+Alternativen, unabhängige Vollbruchpflichten und weitere Effekte schließen
+diesen Nachweis aus. Die typisierte Tatsache `certainLossRescue` gilt nur für
+diese Encounterbewertung; sie autorisiert keinen neuen Run. Ein ETR-Break, der
+den tödlichen Schaden offenlässt, erhält keine Ausnahme. Root und Executor
+bleiben beim aktiven Runplan; der mögliche Fehlschlag bleibt sichtbar.
 
 Die Engine begrenzt den unmittelbar gequoteten Kartenbezug eines
 Runner-Draw-Events auf den aktuellen Stackbestand und erhält ausdrücklich

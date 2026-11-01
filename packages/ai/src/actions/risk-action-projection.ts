@@ -64,6 +64,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
   context: "run_path" | "encounter_break";
   riskProfile: RandomBreakOrDamageRiskProfile;
   unbrokenEncounterDamageLikely?: number;
+  certainLossRescue?: true;
   targetServerId?: string;
   evidence?: readonly string[];
 }): RandomBreakOrDamageRiskAssessment {
@@ -108,7 +109,12 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
   const lethalRandomBreakDamageFailureRisk =
     lethalOnAnyFailure || lethalOnHighFailure;
   const pathDependsOnRandomBreakOrDamage = !params.stableCoverageAvailable;
+  const certainLossRescue =
+    params.context === "encounter_break" &&
+    params.payoffOverride === "survival" &&
+    params.certainLossRescue === true;
   const breakWouldBeExcludedInEncounter =
+    !certainLossRescue &&
     pathDependsOnRandomBreakOrDamage &&
     randomBreakOrDamageRiskShouldAvoidRunSeverity(riskSeverity);
   const blockedByHandBuffer =
@@ -136,6 +142,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
   const evidence = [
     "randomBreakDamageRiskApplied:true",
     `randomBreakDamageRiskContext:${params.context}`,
+    `randomBreakDamageCertainLossRescue:${certainLossRescue}`,
     `currentHandCount:${currentHandCount}`,
     `handAfterActionCost:${handAfterActionCost}`,
     `randomBreakDamageHandBuffer:${handAfterActionCost}`,
@@ -195,6 +202,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     blockedByHandBuffer,
     noProgressRunExpected,
     expectedEtrUnbroken,
+    ...(certainLossRescue ? { certainLossRescue: true as const } : {}),
     recentFailure: recent.recentFailure,
     recentDamageAmount: recent.recentDamageAmount,
     sameServerRepeatedRiskPenalty,
@@ -333,6 +341,7 @@ export function randomBreakOrDamageRiskShouldAvoidRun(
   assessment: RandomBreakOrDamageRiskAssessment | undefined,
 ): boolean {
   if (!assessment) return false;
+  if (assessment.certainLossRescue === true) return false;
   if (
     randomBreakOrDamageRiskShouldAvoidRunSeverity(assessment.riskSeverity) &&
     !randomBreakOrDamageRiskHandBufferOverrideAllowed(assessment.payoffOverride)

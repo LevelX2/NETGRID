@@ -245,9 +245,13 @@ describe("runner encounter action generation", () => {
       ).toBe(expected);
     },
   );
-  it.each([0, 1, undefined])(
-    "certifies only explicit zero damage, amount=%s",
-    (amount) => {
+  it.each(
+    ["onr_v1_039_krash", "onr_v1_007_blink"].flatMap((breakerDefinitionId) =>
+      [0, 1, undefined].map((amount) => ({ breakerDefinitionId, amount })),
+    ),
+  )(
+    "certifies only explicit zero damage for $breakerDefinitionId, amount=$amount",
+    ({ amount, breakerDefinitionId }) => {
       const ice = iceDefinition({
         strength: 0,
         subroutines: [
@@ -260,7 +264,7 @@ describe("runner encounter action generation", () => {
           { id: "stop", type: "end_the_run" },
         ],
       });
-      const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+      const state = makeState({ breakerDefinitionId, ice });
       const actions = buildRunnerEncounterActions(
         hostFor(state, definitionsFor(state, ice)),
       ).legalActions;

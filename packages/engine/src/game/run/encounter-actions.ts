@@ -558,9 +558,12 @@ function breakHasNoDamageOrSecondaryPurpose(
     subroutine.type !== "do_damage" ||
     subroutine.amount !== 0 ||
     (ability.special !== undefined &&
-      ability.special !== "run_end_trash_source_if_used") ||
+      ability.special !== "run_end_trash_source_if_used" &&
+      ability.special !== "blink_random_break_or_net_damage") ||
     ability.specialEffects?.some(
-      (effect) => effect.kind !== "run_end_trash_source_if_used",
+      (effect) =>
+        effect.kind !== "run_end_trash_source_if_used" &&
+        effect.kind !== "random_break_or_damage",
     ) ||
     ability.onSuccessfulBreakEffects?.length ||
     ability.onUseEffects?.length ||

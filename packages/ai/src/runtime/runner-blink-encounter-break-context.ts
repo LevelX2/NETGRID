@@ -1,4 +1,9 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { projectRunnerVisibleIceDamage } from "../runner-damage-threat-assessment";
+import {
+  currentEncounteredIceCard,
+  currentEncounterRequiresFullBreak,
+} from "./current-encounter";
 
 import type {
   RandomBreakOrDamageRiskAssessment,
@@ -29,6 +34,7 @@ export type RunnerRandomBreakOrDamageEncounterContextDependencies = {
     context: "encounter_break";
     riskProfile: RandomBreakOrDamageRiskProfile;
     unbrokenEncounterDamageLikely?: number;
+    certainLossRescue?: true;
     evidence?: readonly string[];
   }) => RandomBreakOrDamageRiskAssessment;
   isImmediateSafetyThreatSubroutine: (
@@ -99,6 +105,15 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
       context: "encounter_break",
       riskProfile,
       unbrokenEncounterDamageLikely,
+      ...(randomBreakHasSurvivingBranchAgainstCertainLoss(
+        input,
+        action,
+        breakIndexes,
+        encounteredSubroutines,
+        riskProfile,
+      )
+        ? { certainLossRescue: true as const }
+        : {}),
       evidence: [
         "randomBreakDamageAction:true",
         `randomBreakDamageSubroutineCount:${visibleSubroutinesLikely}`,
@@ -229,5 +244,73 @@ function visibleDirectDamageAmount(
     type === "do_damage" ||
     typeof damageTypeValue === "string";
   if (!directDamage) return 0;
-  return Math.max(1, Math.floor(subroutine.amount ?? 1));
+  return Math.max(0, Math.floor(subroutine.amount ?? 1));
+}
+
+/** Compare the same forced encounter continuation with a successful exact
+ * damage break. A possible rescue may be risky when declining it loses with
+ * certainty; this never admits a new run or overrides an available safe exit. */
+function randomBreakHasSurvivingBranchAgainstCertainLoss(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targets: ReadonlySet<number>,
+  subroutines: readonly VisibleEncounterSubroutine[],
+  profile: RandomBreakOrDamageRiskProfile,
+): boolean {
+  const ice = currentEncounteredIceCard(input);
+  const continuation = input.legalActions.find(
+    (a) => a.type === "continue_run" && a.payload?.encounterContinue === true,
+  );
+  if (
+    input.playerView.run?.phase !== "encounter_ice" ||
+    !ice?.effectiveRunQuote ||
+    action.payload?.iceId !== ice.instanceId ||
+    targets.size === 0 ||
+    profile.successProbabilityPerAttempt <= 0 ||
+    profile.successProbabilityPerAttempt > 1 ||
+    currentEncounterRequiresFullBreak(input) ||
+    continuation?.payload?.encounterWillEndRun !== true ||
+    continuation.choiceRequirements?.length ||
+    continuation.costs.some((c) => (c.credits ?? 0) > 0) ||
+    input.legalActions.some(
+      (a) => a.type !== "continue_run" && a.type !== "break_subroutine",
+    ) ||
+    [...targets].some((i) => subroutines[i]?.type !== "do_damage")
+  )
+    return false;
+  const remaining = unbrokenEncounterSubroutines(input, action, subroutines);
+  if (
+    !remaining.length ||
+    remaining.some((s) => s.type !== "do_damage" && s.type !== "end_the_run")
+  )
+    return false;
+  const remainingIce = {
+    ...ice,
+    effectiveRunQuote: {
+      ...ice.effectiveRunQuote,
+      subroutines: [...remaining],
+    },
+  };
+  const options = {
+    assumeUnbrokenSubroutines: true as const,
+    requiredHandFloor: 0,
+  };
+  const before = projectRunnerVisibleIceDamage(input, [remainingIce], options);
+  const certainLoss =
+    before.projectedDamage > input.playerView.own.gripOrHq.length ||
+    input.playerView.own.maxHandSize - before.projectedCoreDamage < 0;
+  if (!certainLoss) return false;
+  const brokenIds = [...targets].map((i) => subroutines[i]!.id);
+  if (brokenIds.some((id) => !remaining.some((s) => s.id === id))) return false;
+  const success = projectRunnerVisibleIceDamage(input, [remainingIce], {
+    ...options,
+    paidSubroutineBreaks: brokenIds.map((subroutineId) => ({
+      iceInstanceId: ice.instanceId,
+      subroutineId,
+    })),
+  });
+  return (
+    success.projectedDamage <= input.playerView.own.gripOrHq.length &&
+    input.playerView.own.maxHandSize - success.projectedCoreDamage >= 0
+  );
 }

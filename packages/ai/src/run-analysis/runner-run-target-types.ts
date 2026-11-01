@@ -175,6 +175,8 @@ export type RandomBreakOrDamageRiskAssessment = {
   riskSeverity: RandomBreakOrDamageRiskSeverity;
   payoffOverride: RandomBreakOrDamageRiskPayoffOverride;
   stableCoverageAvailable: boolean;
+  /** Exact successful encounter branch survives an otherwise certain loss. */
+  certainLossRescue?: true;
   pathDependsOnRandomBreakOrDamage: boolean;
   breakWouldBeExcludedInEncounter: boolean;
   blockedByHandBuffer: boolean;

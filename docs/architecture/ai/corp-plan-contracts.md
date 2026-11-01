@@ -3080,6 +3080,15 @@ Matchpoint-Haltebonus entfernen. Aktuelle Planbindungen bleiben geschützt;
 fehlende oder veraltete Quotes begründen keine solche Freigabe. Der Score-Owner
 bindet die daraus gewählte Kartenmenge vor dem Score an seine Continuation.
 Der Choice-Resolver übernimmt weiterhin ausschließlich diese exakte Bindung.
+Ist R&D bei einem nullklickigen Score bereits leer und ist der eigene Sieg
+noch nicht erreicht, erhält die gebundene optionale HQ-Agenda-Rückmischung
+mindestens eine Karte. Der Score-Owner verwendet die bestehende
+Zielabwägung für die am wenigsten nachteilige Karte, wenn sonst keine
+Rückmischung produktiv wäre. Damit vermeidet er den sicheren nächsten
+Pflichtzieh-Verlust; eine sichere Verteidigung oder ein späterer Sieg ist
+damit nicht behauptet. Bei vorhandener R&D-Karte bleibt die gewöhnliche
+Score-/Hand-/Defense-Abwägung bestehen. Die Auswahl wird vor dem Score
+gebunden, die Choice trifft keine neue Entscheidung.
 
 `hand-draw-horizon.ts` bindet eine unmittelbar verfügbare, garantierte
 Engine-Zonenänderung als `preserve_draw_horizon`, wenn weniger als drei Karten

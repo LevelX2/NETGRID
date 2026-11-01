@@ -298,6 +298,18 @@ function corpScoredAgendaHqShuffleChoiceBinding(params: {
     selectedCardInstanceIds.push(candidate.card.instanceId);
     remainingFundingGap = Math.max(0, remainingFundingGap - creditGain);
   }
+  // No current-turn score remains after this zero-click choice. Keeping every
+  // agenda in HQ with an empty R&D loses at the next mandatory draw; return
+  // the least costly exact disposition even when ordinary funding is covered.
+  if (
+    selectedCardInstanceIds.length === 0 &&
+    params.input.playerView.own.stackOrRdCount === 0 &&
+    params.input.playerView.own.clicks === 0 &&
+    params.input.playerView.own.agendaPoints <
+      params.input.playerView.agendaPointsToWin
+  ) {
+    selectedCardInstanceIds.push(ranked[0]!.card.instanceId);
+  }
   return {
     sourceCapabilityId: params.profile.sourceCapabilityId,
     creditPerAgendaPoint: params.profile.creditPerAgendaPoint,
