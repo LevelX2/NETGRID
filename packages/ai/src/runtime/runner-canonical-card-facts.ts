@@ -4,6 +4,23 @@ type RunnerPlanningCard = NonNullable<
   ReturnType<typeof cardSpecPlanningCardByDefinitionId>
 >;
 
+/** This temporary bit belongs to the install sequence, never general income. */
+export function runnerHasOnlyProgramInstallActionBundle(
+  definitionId: string | undefined,
+): boolean {
+  if (!definitionId) return false;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  if (planning?.side !== "runner") return false;
+  const abilities = planning.engine.abilities ?? [];
+  return (
+    abilities.length === 1 &&
+    abilities[0]?.kind === "on_play" &&
+    abilities[0].effects.length === 1 &&
+    abilities[0].effects[0]?.kind ===
+      "start_runner_program_install_action_bundle"
+  );
+}
+
 export function runnerEventStartsRunAfterProgramSearch(
   definitionId: string | undefined,
 ): boolean {

@@ -46,7 +46,10 @@ import {
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development-types";
 import type { RunnerRigRoleDemand } from "../rig-demand/runner-rig-demand-projection";
-import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
+import {
+  runnerHasOnlyProgramInstallActionBundle,
+  runnerRestrictedRunCreditProfile,
+} from "../../runtime/runner-canonical-card-facts";
 import { assessHostedBreakerDevelopment } from "./hosted-breaker-development";
 
 export {
@@ -780,6 +783,15 @@ function currentNeedForCard(
   context: CardContext,
   role: RunnerHandDevelopmentRole,
 ): RunnerHandDevelopmentCurrentNeed {
+  // The Engine omits this event when its restricted install window has no
+  // current target. Its expiring install bit cannot create an acute general
+  // credit need merely because the printed text contains "gain".
+  if (
+    !context.legalAction &&
+    runnerHasOnlyProgramInstallActionBundle(context.card.definitionId)
+  ) {
+    return "none";
+  }
   const intent = params.strategicIntent;
   const setupEngine = new Set(intent?.setupEngine ?? []);
   const credits = params.input.playerView.own.credits;

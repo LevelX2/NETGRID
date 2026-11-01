@@ -538,6 +538,23 @@ importiert die Live-Runtime oder eine Planregistry zurück.
 
 ## 3. `runner.contest_remote`
 
+Bei leerer Grip und leerem Stack darf der bestehende Contest-Owner seine
+letzte öffentlich belegte terminale Chance mit einem riskanten Zufallsbruch
+zulassen. Der begrenzte Nachweis verlangt einen aktuellen Basisrun, vollständig
+bekannte gerezzte ICE, genau eine zufällig zu brechende feste ETR und ansonsten
+nur ausdrücklich null Schaden oder vollständig bezahlbare ETR-Maut. Sichere
+Coverage, eine aktuelle Draw-/Installationsalternative, unbekannte ICE,
+positiver Schaden, zusätzliche Stops oder offene Kosten sperren diesen Pfad.
+Der Nachweis bleibt als typisierter Teil des Run-Risikovertrags an Quelle,
+Server, Version, Breaker, ICE und Subroutine gebunden. Der Run-Window-Owner
+revalidiert denselben Restpfad und darf ausschließlich die genau gebundene
+kostenlose ETR-Brechung von der allgemeinen Zufallsbruch-Handreserve ausnehmen.
+Andere Sicherheits-, Zahlungs- und Break-Ausschlüsse bleiben wirksam. Paarung
+581/R4/G34/D408 belegt die sonst sichere Aufgabe der letzten Chance; der
+Originalwürfel verliert weiterhin, zwölf von 24 getrennten Gegenwürfeln
+gewinnen über die vollständige Engine-Folge. Das ist keine sichere Coverage
+und keine allgemeine Zulassung gefährlicher Runs (SP-731; Bezug zu SP-125).
+
 Positionswissen verarbeitet auch eine öffentlich ausgewiesene Selbstentsorgung
 innerhalb einer aktivierten Fähigkeit. Der tatsächliche Trash der Quelle wird
 über Definition und stabile installierte Position gebunden; bekannte
@@ -1366,6 +1383,16 @@ Auswahl. Der gespeicherte Zustand 471/R3/G5/D135 und Gegenfälle sichern
 Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
+
+Ein kanonisch reines Programminstall-Aktionsbundle ohne aktuell angebotenen
+Engine-Spielkopf erzeugt keinen akuten allgemeinen Geldbedarf. Sein nur während
+der Installationsfolge nutzbarer, danach verfallender Credit ist keine liquide
+Economy. Die bestehende Bewertung produktiver legaler Installfolgen bleibt
+beim Development-Owner. Paarung 581/R4/G24/D65 belegt die Wirkung auf den
+Bank-Consumer: Weiterladen erreicht denselben wichtigen Remote-Steal rechtzeitig
+mit drei Restaktionen und insgesamt drei zusätzlichen Credits. Die Korrektur
+entsteht beim falschen Handbedarfsproduzenten, nicht durch Abschwächen der
+Bank-Schutzbedingungen (SP-730; Bezüge zu SP-266 und SP-681).
 
 Kartenname und Definition-ID dienen der Identität und Bindung, nicht als
 Funktionswörter für die Handentwicklung. Der Funktionstext konsumiert

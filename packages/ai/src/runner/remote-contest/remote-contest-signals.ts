@@ -73,6 +73,7 @@ import {
   runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn,
   runnerTerminalRemoteContestIsDirectlyMandatory,
 } from "./remote-contest-admission";
+import { terminalRandomBreakRescueForRun } from "./remote-contest-random-break-rescue";
 type RunnerRemoteContestSignalDraft = Omit<
   RunnerRemoteContestSignal,
   "runActionAssessments"
@@ -1112,7 +1113,22 @@ export function buildRunnerRemoteContestSignals({
           recentSafetyBlocked ||
           criticalDamageContestBlocked ||
           repeatedTerminalDamageContest;
-        const runRiskContract = runRiskContractForEvaluation(input, evaluation);
+        const baseRunRiskContract = runRiskContractForEvaluation(
+          input,
+          evaluation,
+        );
+        const terminalRandomBreakRescue = terminalRandomBreakRescueForRun(
+          input,
+          evaluation,
+        );
+        const runRiskContract = baseRunRiskContract
+          ? {
+              ...baseRunRiskContract,
+              ...(terminalRandomBreakRescue
+                ? { terminalRandomBreakRescue }
+                : {}),
+            }
+          : undefined;
         const directRunRouteReady =
           evaluation.prerunReserveQuote?.status !== "blocked" &&
           (purpose !== "information" ||

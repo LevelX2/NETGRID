@@ -22,6 +22,17 @@ export type RunnerRunRiskContractSignal = {
   visibleDuringRunRezSupport: boolean;
   reserveQuote: RunnerPrerunReserveQuote;
   evidenceCodes: string[];
+  terminalRandomBreakRescue?: Readonly<{
+    ownerModuleId: "runner.contest_remote";
+    sourceActionId: string;
+    serverId: string;
+    observedAtStateVersion: number;
+    breakerInstanceId: string;
+    breakerDefinitionId: string;
+    targetIceInstanceId: string;
+    targetSubroutineId: string;
+    successProbability: number;
+  }>;
 };
 
 export type RunnerRunRiskReassessmentSignal = {

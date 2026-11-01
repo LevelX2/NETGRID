@@ -10,6 +10,7 @@ import {
   runnerDamageThreatAssessment,
   type RunnerDamageThreatAssessment,
 } from "../../runner-damage-threat-assessment";
+import { terminalRandomBreakRescueForRun } from "./remote-contest-random-break-rescue";
 
 export function runnerRemoteRepeatedFreeStopEvidence(
   input: AiDecisionInput,
@@ -112,6 +113,8 @@ export function runnerTerminalRemoteContestIsDirectlyMandatory(
 ): boolean {
   const nonLethalDamageFloorLastChance =
     runnerTerminalRemoteContestIsNonlethalDamageFloorLastChance(evaluation);
+  const randomBreakLastChance =
+    terminalRandomBreakRescueForRun(input, evaluation) !== undefined;
   const fixedTagCleanup = terminalContestHasCompleteFixedTagCleanup(
     input,
     evaluation,
@@ -124,7 +127,8 @@ export function runnerTerminalRemoteContestIsDirectlyMandatory(
       evaluation,
     ) &&
     (evaluation.pathPassability === "reachable" ||
-      nonLethalDamageFloorLastChance) &&
+      nonLethalDamageFloorLastChance ||
+      randomBreakLastChance) &&
     (nonLethalDamageFloorLastChance ||
       evaluation.routeQuote?.reachability !== "no_access") &&
     (nonLethalDamageFloorLastChance ||

@@ -29,6 +29,10 @@ import {
   type RunnerRunWindowActionAssessment,
 } from "../../plans/runner-tactical-plan-contracts";
 import { quoteRunnerRunRiskReserve } from "../../run-analysis/runner-run-risk-reserve";
+import {
+  boundTerminalRandomBreakRescue,
+  boundTerminalRandomBreakRescueBreak,
+} from "../remote-contest/remote-contest-random-break-rescue";
 import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import {
   runnerConfirmedDamageRequiredHandFloor,
@@ -335,6 +339,7 @@ export function currentRunAbortAssessment(
     (entry) => entry.id === run.attackedServerId,
   );
   if (!server) return undefined;
+  if (boundTerminalRandomBreakRescue(input, runOrigin)) return undefined;
   const committedPayoff = runOrigin?.accessCommitment?.payoff;
   const preservesKnownAgendaPayoff =
     committedPayoff === "agenda" || committedPayoff === "score_threat";
@@ -869,13 +874,17 @@ function runnerRunWindowActionAssessment(
   const boundRunReservePreserved =
     encounterExclusion?.key === "encounter_reserve_would_break" &&
     paidRunRisk?.decision === "preserve_continuation";
+  const terminalRandomBreakRescue =
+    encounterExclusion?.key === "random_break_damage_self_damage_risk" &&
+    boundTerminalRandomBreakRescueBreak(input, runOrigin, action);
   const overriddenEncounterExclusion =
     encounterExclusion &&
     ((fullPathCommitmentPreserved &&
       runnerFullPathCommitmentCanOverrideEncounterExclusion(
         encounterExclusion,
       )) ||
-      boundRunReservePreserved)
+      boundRunReservePreserved ||
+      terminalRandomBreakRescue)
       ? encounterExclusion
       : undefined;
   const effectiveEncounterExclusion = overriddenEncounterExclusion
@@ -1031,9 +1040,12 @@ function runnerRunWindowActionAssessment(
           ...(fullPathCommitmentPreserved
             ? ["runner_full_path_commitment_preserved"]
             : []),
+          ...(terminalRandomBreakRescue
+            ? ["runner_bound_terminal_random_break_last_chance"]
+            : []),
           ...(overriddenEncounterExclusion
             ? [
-                `${boundRunReservePreserved ? "runner_bound_paid_reserve" : "runner_full_path_commitment"}_overrode_encounter_exclusion:${overriddenEncounterExclusion.key}`,
+                `${terminalRandomBreakRescue ? "runner_bound_terminal_random_break_rescue" : boundRunReservePreserved ? "runner_bound_paid_reserve" : "runner_full_path_commitment"}_overrode_encounter_exclusion:${overriddenEncounterExclusion.key}`,
                 ...overriddenEncounterExclusion.reason
                   .split("|")
                   .map((entry) => entry.trim())
