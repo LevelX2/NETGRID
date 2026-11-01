@@ -3488,6 +3488,21 @@ manuelle Bank mit ausdrücklich begründetem Hold abgewiesen. Ein realer
 Restbedarf kann eine weitere Instanz weiterhin zulassen; es gibt kein
 pauschales Kopienlimit. Native und budgetabhängige Gegenproben liegen in
 `meta-541-bank-budget.test.ts` und `runner-credit-bank-source-cadence.test.ts`.
+Bei einer bereits gefüllten Bank mit gemeinsamem Einmal-pro-Zug-Limit darf
+der Owner einen bloß unterschrittenen Liquiditätsboden zunächst durch eine
+weitere profitable Ladung und noch im selben Zug mögliche Basiscredits
+behandeln. Die Quote verlangt die aktuelle legale Ladeaktion, garantiertes
+unbeschränktes Basis-Einkommen und genug Restaktionen für den ganzen Boden.
+Sie ersetzt weder aktuelle Credits noch eine künftige LegalAction. Konkrete
+Run- und Development-Finanzierung, akute Handentwicklung, sichtbare
+Scorefristen, Matchpointnähe, Tags, bestätigte Schadensgefahr, fehlender
+Handpuffer und kurze Deckreste schließen dieses Investitionsfenster aus.
+Nach jeder Aktion werden Reserve und Verbraucher neu bewertet. P581/R3/G6
+D128 belegt mit normalen Entscheidungen beider Seiten dieselbe nächste
+R&D-Runfolge bei elf Credits und zwei zusätzlichen Runneraktionen; der
+Bank-Executor bleibt beim aktuellen Central-Parent. Die native Regression
+`meta-581-floor-cashout.native.test.ts` prüft Ownership, Engine-Legalität,
+deterministisches Replay und die unmittelbaren Reservegegenfälle.
 Die Regelautorität über das
 gemeinsame Einmal-pro-Zug-Limit liegt weiterhin bei den Engine-LegalActions;
 der bestehende quellgebundene Cadence-Nachweis bleibt erhalten. Automatische

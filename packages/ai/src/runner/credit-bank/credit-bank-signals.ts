@@ -28,6 +28,7 @@ import {
 } from "../../plans/credit-bank-investment";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
 import { creditBankReplacesBasicRunFunding } from "./credit-bank-basic-run-funding";
+import { creditBankFloorRecoveryWindow } from "./credit-bank-floor-recovery";
 
 /** Facts/routes from other owners, bound to the same decision input and candidates.
  * These services never choose a bank phase or execute a bank action.
@@ -386,12 +387,35 @@ export function runnerCreditBankSignals(
       bankProfile?.cardType === "resource" &&
       input.playerView.own.tags > 0 &&
       input.playerView.opponent.credits >= 2;
+    const deferredFloorCashout =
+      bankProfile?.sharedTurnLimit &&
+      currentStoredCredits > 0 &&
+      buildActionLegal &&
+      !creditBankBuiltThisTurn(input, tool) &&
+      investment &&
+      investment.additionalLoadExecutions > 0 &&
+      investment.incrementalCreditsOverAlternative > 0 &&
+      !convertibleRunFundingNeed &&
+      !convertibleDevelopmentFundingNeed &&
+      !matureBankDevelopmentFundingNeed &&
+      !exposedResourceBank &&
+      !runTargets.some(services.hasExactRunUrgency)
+        ? creditBankFloorRecoveryWindow({
+            input,
+            candidates,
+            economy,
+            runTargets,
+            handDevelopment,
+            minimumHandBuffer,
+            loadActionIds: buildActionIds,
+          })
+        : undefined;
     const efficientLiquidityNeed =
       cashOutActionLegal &&
       estimatedPayout > 1 &&
       currentStoredCredits > 0 &&
       (bankProfile
-        ? urgentCreditFloor || exposedResourceBank
+        ? (urgentCreditFloor && !deferredFloorCashout) || exposedResourceBank
         : input.playerView.own.credits < economy.desiredCreditReserve);
     // The bank remains the sole action owner. Development plans contribute a
     // typed, visible funding route; they never execute the cashout themselves.
@@ -453,7 +477,9 @@ export function runnerCreditBankSignals(
       !alreadyBuiltThisTurn &&
       !convertibleRunFundingNeed &&
       !convertibleDevelopmentFundingNeed &&
-      (!urgentCreditFloor || input.playerView.own.clicks === 1) &&
+      (!urgentCreditFloor ||
+        deferredFloorCashout ||
+        input.playerView.own.clicks === 1) &&
       !exposedResourceBank &&
       (investment
         ? investment.additionalLoadExecutions > 0 &&
@@ -518,19 +544,27 @@ export function runnerCreditBankSignals(
           ? []
           : cashOutActionIds,
         priorityClass:
-          currentStoredCredits === 0 ? ("P4" as const) : ("P5" as const),
+          currentStoredCredits === 0 || deferredFloorCashout
+            ? ("P4" as const)
+            : ("P5" as const),
         currentStoredCredits,
         portfolioStoredCredits,
         estimatedPayout,
         ...(investment ? { investment } : {}),
         value:
-          (currentStoredCredits === 0 ? 60 : 40) +
+          (deferredFloorCashout ? 700 : currentStoredCredits === 0 ? 60 : 40) +
           (investment
             ? investment.incrementalCreditsOverAlternative
             : automaticInvestment?.status === "quoted"
               ? automaticInvestment.incrementalCreditsOverAlternative
               : 0),
         evidenceCodes: [
+          ...(deferredFloorCashout
+            ? [
+                "runner_credit_bank_load_before_recoverable_floor_cashout",
+                `runner_credit_bank_same_turn_floor_projection:${deferredFloorCashout.projectedEndTurnCredits}`,
+              ]
+            : []),
           currentStoredCredits === 0
             ? "runner_credit_bank_first_load"
             : "runner_credit_bank_continue_to_value_target",
