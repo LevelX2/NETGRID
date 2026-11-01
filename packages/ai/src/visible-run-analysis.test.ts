@@ -2850,3 +2850,74 @@ function replicator(instanceId: string): VisibleCard {
     strength: 2,
   };
 }
+
+describe("pre-run subtype preparation credit ledger", () => {
+  const morphingTool: VisibleCard = {
+    instanceId: "prepared-morphing",
+    definitionId: "onr_proteus_092_morphing-tool",
+    type: "program",
+    known: true,
+    strength: 5,
+    subtypes: ["icebreaker"],
+    selectedSubtype: "wall",
+  };
+  it.each([1, 2, 9])(
+    "keeps optional subtype branches valid with %i general credits",
+    (credits) => {
+      const path = assessKnownRezzedIcePath(
+        [doubleTraceTagIce("prep-trace")],
+        [morphingTool],
+        credits,
+        [],
+        0,
+        { availableRunnerClicks: 1 },
+      );
+      expect(
+        path.creditBudgetAfterPath!.traceEligibleCredits,
+      ).toBeLessThanOrEqual(path.creditBudgetAfterPath!.credits);
+      expect(
+        path.creditBudgetAfterPath!.traceEligibleCredits,
+      ).toBeGreaterThanOrEqual(0);
+    },
+  );
+  it("does not spend run-only credits on a pre-run subtype change", () => {
+    const path = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("prep-restricted")],
+      [morphingTool],
+      { credits: 3, traceEligibleCredits: 0 },
+      [],
+      0,
+      { availableRunnerClicks: 1 },
+    );
+    expect(path.canReachAccess).toBe(false);
+    expect(path.preRunPreparation).toBeUndefined();
+  });
+  it("pays preparation from general credits while retaining run-only credits for the breaker", () => {
+    const path = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("prep-mixed")],
+      [morphingTool],
+      { credits: 3, traceEligibleCredits: 1 },
+      [],
+      0,
+      { availableRunnerClicks: 1 },
+    );
+    expect(path).toMatchObject({
+      canReachAccess: true,
+      visibleBreakCost: 3,
+      preRunPreparation: { credits: 1, clicks: 1 },
+      creditBudgetAfterPath: { credits: 0, traceEligibleCredits: 0 },
+    });
+  });
+  it("retains fail-closed validation of inconsistent incoming credit subsets", () => {
+    expect(() =>
+      assessKnownRezzedIcePath(
+        [doubleTraceTagIce("prep-invalid")],
+        [morphingTool],
+        { credits: 1, traceEligibleCredits: 2 },
+        [],
+        0,
+        { availableRunnerClicks: 1 },
+      ),
+    ).toThrow("runner_run_path_invalid_trace_eligible_credit_subset");
+  });
+});

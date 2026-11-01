@@ -161,7 +161,7 @@ export function assessKnownRezzedIcePath(
       deflectorContext.visibleCorpCredits ?? normalizedCorpBidCapacity,
   };
   const availablePreRunCredits =
-    typeof runnerCredits === "number" ? runnerCredits : runnerCredits.credits;
+    normalizeRunnerRunPathCreditBudget(runnerCredits).traceEligibleCredits;
   // A single typed group can pay for both access-preserving subroutines and
   // hazards. Keep the partial route as a candidate: a full break can cost more
   // under per-subroutine taxes or remove an otherwise useful unbroken effect.
@@ -448,7 +448,10 @@ function assessKnownRezzedIcePathInternal(
 ): KnownRezzedIcePathAssessment {
   const creditBudget = normalizeRunnerRunPathCreditBudget(runnerCredits);
   const preRunPreparation = options.preRunPreparation;
-  if (preRunPreparation && creditBudget.credits < preRunPreparation.credits) {
+  if (
+    preRunPreparation &&
+    creditBudget.traceEligibleCredits < preRunPreparation.credits
+  ) {
     return blockedPathAssessment(
       preRunPreparation.credits,
       creditBudget.credits - preRunPreparation.credits,
@@ -461,7 +464,10 @@ function assessKnownRezzedIcePathInternal(
       "ice_unaffordable",
     );
   }
-  if (preRunPreparation) creditBudget.credits -= preRunPreparation.credits;
+  // Preparation occurs before the run and spends general liquid credits.
+  // Retain run-only money for its actual run costs and debit both ledgers.
+  if (preRunPreparation)
+    spendTraceEligibleCredits(creditBudget, preRunPreparation.credits);
   let visibleBreakCost = preRunPreparation?.credits ?? 0;
   const passFee = rootCards.reduce((sum, card) => {
     if (!card.known || card.rezzed !== true || !card.definitionId) return sum;

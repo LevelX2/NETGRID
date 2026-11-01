@@ -98,6 +98,15 @@ belasten das allgemeine Teilkonto unmittelbar. Mehrere Trace-Subroutinen und
 aufeinanderfolgende ICE konsumieren denselben Ledger. Dedizierte, von der
 Engine projizierte Trace-Pools bleiben zusätzlich verwendbar.
 
+Eine bezahlte Subtypvorbereitung vor dem Run benötigt allgemeine liquide
+Credits. Variantenbildung, Finanzierungsprüfung und Abbuchung verwenden
+dieses Teilkonto; die Abbuchung vermindert zugleich das Gesamtbudget.
+Beschränkte Run-Credits bleiben für ihre tatsächlichen Runzahlungen erhalten.
+Eine nur erwogene Morphing-Tool-Variante darf keinen widersprüchlichen
+Trace-Ledger erzeugen. Ungültige eingehende Teilkonten scheitern weiterhin
+sichtbar. Die nativen Abbruchzustände aus Paarung 583 sichern diese Grenze
+zusammen mit DTO-, Engine-, Modus- und Mischbudget-Gegenfällen ab.
+
 Die Finanzierungsquote einer sichtbaren Tracegefahr vergleicht ausschließlich
 allgemeinen Geldbedarf mit dem dafür verfügbaren Geld. Basislink ist Stärke,
 kein Credit. Eine Belohnung nach erfolgreicher Abwehr senkt die Nettokosten,
