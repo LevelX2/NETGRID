@@ -569,6 +569,15 @@ export function isScoreProtectionDrawSignal(
   return signal.kind === "score_protection_draw";
 }
 
+function validArchivesRecoveryBinding(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const binding = value as Record<string, unknown>;
+  return hasOnlyKeys(binding, new Set(["stateVersion", "sourceCardId", "recoveredCardId"])) &&
+    knownNonNegativeInteger(binding.stateVersion) &&
+    nonEmptyString(binding.sourceCardId) && nonEmptyString(binding.recoveredCardId) &&
+    binding.sourceCardId !== binding.recoveredCardId;
+}
+
 export function genericDefensePhase(
   value: unknown,
 ): value is CorpGenericDefenseSignal["phase"] {
@@ -585,6 +594,7 @@ export function genericDefensePhase(
     value === "fund_rez_reserve" ||
     value === "rez_response" ||
     value === "activate_run_defense" ||
+    value === "recover_exposed_agenda" ||
     value === "pass_encounter" ||
     value === "decline_rez"
   );
@@ -899,6 +909,7 @@ export const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "evidenceCode",
   "choiceResolution",
   "drawAttemptState",
+  "archivesRecovery",
 ]);
 
 export const SCORE_PROTECTION_INSTALL_SIGNAL_KEYS = new Set([
@@ -1027,6 +1038,9 @@ export function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
+      (value.phase === "recover_exposed_agenda"
+        ? validArchivesRecoveryBinding(value.archivesRecovery)
+        : value.archivesRecovery === undefined) &&
       (value.iceInstallCostSupportActionId === undefined ||
         (value.phase === "rez_response" &&
           value.immediateInstallSupport === true &&

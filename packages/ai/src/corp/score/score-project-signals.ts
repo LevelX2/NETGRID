@@ -1036,7 +1036,7 @@ export function scoreProjectForCandidate(
   return [];
 }
 
-function corpAgendaRecyclesHqAgendasIntoRd(
+export function corpAgendaRecyclesHqAgendasIntoRd(
   agendaDefinitionId: string,
 ): boolean {
   return (

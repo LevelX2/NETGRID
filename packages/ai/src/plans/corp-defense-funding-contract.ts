@@ -21,6 +21,7 @@ export function corpGenericDefensePriorityClass(
           (signal.phase === "draw_for_ice" &&
             signal.centralPressure === "terminal") ||
           signal.phase === "activate_run_defense" ||
+          signal.phase === "recover_exposed_agenda" ||
           signal.phase === "pass_encounter" ||
           (signal.phase === "rez_response" &&
             signal.rezWindowVerdict === "productive")),

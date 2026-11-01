@@ -22,6 +22,7 @@ import {
 import { type CorpHandManagementSignal } from "./hand-management-types";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { isExactScoreRecoveryChoiceOwner } from "../score/score-recovery-choice-owner";
+import { exactDefenseRecoveryBinding, isExactDefenseRecoveryChoiceOwner } from "../defense/defense-recovery-choice-owner";
 
 export function bindSelectedCorpArchivesToHqChoiceContinuation(
   input: AiDecisionInput,
@@ -60,6 +61,12 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
       ? (signal as CorpScoreProjectSignal)
       : undefined;
   const scoreBinding = scoreSignal?.recoveryChoiceBinding;
+  const defenseBinding = exactDefenseRecoveryBinding(
+    executor,result.route.head.actionId,input.playerView.stateVersion,
+  );
+  const exactDefenseOwner = defenseBinding?.sourceCardId === selectedCandidate?.sourceCardInstanceId &&
+    defenseBinding !== undefined;
+  const exactRecoveryBinding = defenseBinding ?? scoreBinding;
   const exactScoreOwner =
     executor?.moduleId === "corp.score_agenda" &&
     scoreSignal?.phase === "recover_score_support" &&
@@ -74,12 +81,12 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
     : undefined;
   const sourceDefinitionId = source?.definitionId;
   const exactOwningRoute =
-    (exactScoreOwner ||
+    (exactDefenseOwner || exactScoreOwner ||
       (executor?.moduleId === "corp.hand_and_agenda_management" &&
         moduleState?.kind === "hand" &&
         signal?.phase === "resolve_hq_overflow")) &&
-    executor.executionState === "executor" &&
-    signal?.actionIds?.includes(result.route.head.actionId) === true &&
+    executor?.executionState === "executor" &&
+    (exactDefenseOwner || signal?.actionIds?.includes(result.route.head.actionId) === true) &&
     rootPlanInstanceId !== undefined &&
     executorInstanceId !== undefined &&
     selectedAction?.side === "corp" &&
@@ -94,8 +101,8 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
       (instance) =>
         instance.instanceId === rootPlanInstanceId && instance.side === "corp",
     );
-  if (!exactOwningRoute || !selectedAction || !selectedCandidate) return;
-  if (!discardKeepScore && !exactScoreOwner) {
+  if (!exactOwningRoute || !executor || !selectedAction || !selectedCandidate) return;
+  if (!discardKeepScore && !exactScoreOwner && !exactDefenseOwner) {
     throw new PlanResolutionFailure("missing_plan_module_coverage", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -116,17 +123,17 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
       (profile.filterCardType === undefined ||
         card.type === profile.filterCardType),
   );
-  const selection = exactScoreOwner
+  const selection = exactScoreOwner || exactDefenseOwner
     ? profile.maxSelections === 1 &&
-      scoreBinding &&
+      exactRecoveryBinding &&
       eligibleScoreCards.some(
-        (card) => card.instanceId === scoreBinding.recoveredCardId,
+        (card) => card.instanceId === exactRecoveryBinding.recoveredCardId,
       )
       ? {
           eligibleCardInstanceIds: eligibleScoreCards.map(
             (card) => card.instanceId,
           ),
-          selectedCardInstanceIds: [scoreBinding.recoveredCardId],
+          selectedCardInstanceIds: [exactRecoveryBinding.recoveredCardId],
         }
       : undefined
     : selectedCorpArchivesToHqCards(input, profile, discardKeepScore!);
@@ -637,6 +644,7 @@ export function resolvePlanBoundCorpArchivesToHqChoice(
     root !== undefined &&
     root.side === "corp" &&
     (executor?.moduleId === "corp.hand_and_agenda_management" ||
+      isExactDefenseRecoveryChoiceOwner(executor,origin,previous.stateVersion) ||
       isExactScoreRecoveryChoiceOwner(
         executor,
         origin,

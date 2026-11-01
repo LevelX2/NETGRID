@@ -28,6 +28,7 @@ import {
 import {
   corpKnownDeferredLastClickScoreProject,
   corpNextTurnScoreContinuationProjects,
+  corpAgendaRecyclesHqAgendasIntoRd,
   corpPreferredDeckoutAgendaRecycleRouteAvailable,
   corpRemoteCreationUnlockScoreProjects,
   sameTurnScoreConversionProjectsForCandidate,
@@ -149,6 +150,32 @@ export function reconcileCorpScoreProjects({
   const currentInstalledScore = nextTurnScoreContinuationProjects.find(
     (project) => project.sameTurnCloseout,
   );
+  // Finish an already certified recycling route before spending its progress
+  // clicks on another nonwinning emergency agenda. A terminal sibling keeps
+  // its own admission; stale, incomplete and unfundable quotes confer no claim.
+  const preparedRecycleScore =
+    input.playerView.own.stackOrRdCount <= 6 &&
+    input.playerView.own.gripOrHq.filter((card) =>
+      visibleCardIsAgenda(input, card),
+    ).length >= 2
+      ? nextTurnScoreContinuationProjects.find((project) => {
+          if (
+            !project.feasible ||
+            !project.agendaDefinitionId ||
+            !corpAgendaRecyclesHqAgendasIntoRd(project.agendaDefinitionId) ||
+            !project.continuationReserve
+          ) return false;
+          const gap = Math.max(
+            0,
+            project.continuationReserve.requiredCreditsBeforeNextCorpTurn -
+              input.playerView.own.credits,
+          );
+          return gap === 0 ||
+            (gap <= input.playerView.own.clicks && candidates.some((candidate) =>
+              corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
+            ));
+        })
+      : undefined;
   const discoveredScoreProjects = [
     ...directScoreProjects,
     ...counterBankScoreProjects,
@@ -180,7 +207,10 @@ export function reconcileCorpScoreProjects({
         project,
       );
       if (
-        currentInstalledScore &&
+        (currentInstalledScore ||
+          (preparedRecycleScore &&
+            !funded.terminalScore &&
+            funded.routeAssessment !== "corp_forced_agenda_discard_score_attempt")) &&
         funded.phase === "install_agenda" &&
         !funded.sameTurnCloseout
       ) {
@@ -189,7 +219,7 @@ export function reconcileCorpScoreProjects({
           feasible: false,
           routeAssessment:
             "corp_resident_score_parent_dominates_sibling_route" as const,
-          evidenceCode: `corp_resident_score_parent_dominates_sibling_route:${currentInstalledScore.agendaInstanceId}:${currentInstalledScore.serverId}`,
+          evidenceCode: `corp_resident_score_parent_dominates_sibling_route:${(currentInstalledScore ?? preparedRecycleScore)!.agendaInstanceId}:${(currentInstalledScore ?? preparedRecycleScore)!.serverId}`,
         };
       }
       return funded;

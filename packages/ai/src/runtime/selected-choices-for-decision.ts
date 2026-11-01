@@ -31,6 +31,7 @@ import type {
 } from "../corp/economy/economy-types";
 import type { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
 import { isExactScoreRecoveryChoiceOwner } from "../corp/score/score-recovery-choice-owner";
+import { isExactDefenseRecoveryChoiceOwner } from "../corp/defense/defense-recovery-choice-owner";
 import {
   residentCorpScoreChoiceBinding,
   residentCorpScoredAgendaHqShuffleBinding,
@@ -341,6 +342,7 @@ function selectedCorpArchivesToHqOptionIdsFromBoundContinuation(
     root !== undefined &&
     root.side === "corp" &&
     (executor?.moduleId === "corp.hand_and_agenda_management" ||
+      isExactDefenseRecoveryChoiceOwner(executor,origin,portfolio.stateVersion) ||
       isExactScoreRecoveryChoiceOwner(
         executor,
         origin,

@@ -1,4 +1,5 @@
 import { corpProgramTrashDefenseSignals } from "./program-trash-signal";
+import { corpArchivesAgendaRelocationSignal } from "./archives-agenda-relocation";
 import { corpRezOrTrashDefenseChoiceSignal } from "./rez-or-trash-choice";
 import { corpTraceHardwareTrashDefenseSignals } from "./trace-hardware-trash-signal";
 import { type AiDecisionInput } from "@netgrid/shared";
@@ -127,6 +128,10 @@ export function buildCorpDefenseNeeds({
     mergeDefenseSignals([
       ...corpResidentDelayedSuccessDefenseSignals(input),
       ...terminalRezReserveSignals,
+      ...candidates.flatMap(candidate => {
+        const recovery = corpArchivesAgendaRelocationSignal(input, candidate);
+        return recovery ? [recovery] : [];
+      }),
       ...candidates.flatMap((candidate): CorpDefenseSignal[] => {
         const postPassIceLifecycle = corpPostPassIceLifecycleDefenseSignal(
           input,

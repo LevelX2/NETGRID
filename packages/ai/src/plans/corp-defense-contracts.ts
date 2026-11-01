@@ -26,6 +26,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "fund_rez_reserve"
     | "rez_response"
     | "activate_run_defense"
+    | "recover_exposed_agenda"
     | "pass_encounter"
     | "decline_rez";
   sourceDefinitionIds: string[];
@@ -68,6 +69,11 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     quotes: CorpRestrictedCreditRouteQuote[];
   };
   value: number;
+  archivesRecovery?: Readonly<{
+    stateVersion: number;
+    sourceCardId: string;
+    recoveredCardId: string;
+  }>;
   choiceResolution?:
     | {
         kind: "rez_or_trash_ice";

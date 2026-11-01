@@ -533,8 +533,17 @@ Dieselbe Grenze gilt für eine bereits installierte Agenda, deren vollständige
 Konversion einschließlich nötiger Basis-Creditaktionen noch im aktuellen Zug
 Engine-gequotet möglich ist. Dafür ist kein unmittelbarer Spielsieg nötig:
 Der vorhandene Score-Parent und sein gebundener Funding-Step bleiben vor
-pauschalen Notfallinstallationen erhalten. Ein bloßer Next-Turn-Pfad einer
-nicht terminalen Agenda reicht für diese zusätzliche Zulassungsgrenze nicht.
+pauschalen Notfallinstallationen erhalten. Bei höchstens sechs R&D-Karten und
+mindestens zwei HQ-Agenden erhält auch eine bereits installierte Agenda mit
+kanonischer HQ-Agenda-Rückführung Vorrang vor weiteren nichtterminalen
+Notfallinstallationen, wenn ihre aktuelle vollständige Next-Turn-Quote jetzt
+finanziert oder mit den verbleibenden Basiscreditaktionen finanzierbar ist.
+`score-discovery.ts` verwirft diese konkurrierenden Geschwisterprojekte bereits
+bei der Reconciliation. Eine neue terminale Scorelinie und eine unabhängig
+qualifizierte Entlastung bei erzwungenem Agendaabwurf behalten ihre Zulassung.
+Veraltete, unvollständige oder nicht finanzierbare Quotes erzeugen keinen
+Vorrang; der bloße Next-Turn-Pfad einer anderen nichtterminalen Agenda genügt
+weiterhin nicht. Die bestehende Agenda bleibt über den Runnerzug angreifbar.
 
 Nach der exakten Installation bleibt derselbe Nachweis erhalten, wenn die
 Agenda nun im gebundenen Zielserver liegt und weder eine weitere HQ-Agenda
@@ -1121,6 +1130,26 @@ Projektionsdienst. Das Remote-Modul besitzt weiterhin keine eigene ICE-,
 Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
+
+Eine begrenzte Archives→HQ-Route gehört ebenfalls zu diesem Owner:
+`archives-agenda-relocation.ts` bindet eine einzelne eigene Agenda, deren
+Diebstahl den Runner gewinnen ließe, aus offenen Archives an eine aktuell
+legale kostenlose Ein-Karten-Rückholung. Die vollständige eigene Zonenprojektion
+berücksichtigt die verbrauchte Operation, die zurückgeholte Agenda und die
+exakten Aktionskosten. Der bestehende Defense-Factadapter muss danach eine
+geringere gemeinsame HQ-/R&D-/Archives-Agendaexposition belegen. Eine übervolle
+HQ, mehrere Archives-Agenden, vorhandenes Archives-ICE, ein Runverbot oder ein
+unbekannter Vergleich öffnen diese begrenzte Route nicht.
+
+Die Rückholung darf kein aktuell schließbares Scorefenster und keine bereits
+ausführbare dringende Defense-Installation oder deren genaue Reservefinanzierung
+verdrängen. Sie erzeugt keinen allgemeinen Recovery-/Installationsbonus.
+`defense-recovery-choice-owner.ts` liefert ausschließlich die zuvor im
+Defense-Signal gebundene Quelle und Zielkarte. Die vorhandenen Choice-Binder
+und Payload-Verbraucher prüfen Action, Root, Executor, StateVersion und
+vollständige Optionsmenge erneut; sie bewerten kein Ersatz- oder neues Ziel.
+Die Bewertung reduziert modellierte direkte Exposition und verspricht keinen
+späteren Sieg gegen weitere Runneraktionen.
 
 Der aktuelle Run-Response darf mobile ICE aus einem leeren Remote-Fort zum
 angegriffenen Fort bewegen, wenn dort eine bekannte Agenda den Runner gewinnen
