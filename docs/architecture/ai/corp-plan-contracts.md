@@ -62,6 +62,14 @@ Aktionsfolge sofort. Der konkrete Schutzparent darf deshalb erst wirksame ICE
 installieren, während Credits für den mehrzügigen Score weiter reserviert
 bleiben. Echte Abschlussfristen werden dadurch nicht verschoben.
 
+Die mehrzügige Agenda-Flood-Entwicklung bei knappem R&D darf riskante
+Scoreversuche zulassen. Erreicht ein Diebstahl dieser Agenda jedoch unmittelbar
+die Runner-Siegschwelle, ersetzt diese Dringlichkeit keinen Schutzbeleg:
+Dieselbe Route benötigt den erfüllten, aktuellen `protectionNeed` des
+Scoreparents. Nichtterminale Exposition, der eigenständig geprüfte
+Same-Turn-Abschluss und die gesonderte erzwungene Discard-Entlastung behalten
+ihre bestehenden Zulassungsverträge.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence

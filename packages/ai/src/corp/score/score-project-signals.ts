@@ -556,6 +556,16 @@ export function scoreProjectForCandidate(
       !preparedScoreContinuationAvailable &&
       scorelineFeasibility?.deadline !== "current_turn_only" &&
       corpDeckoutAgendaFloodRequiresScoreDevelopment(input) &&
+      // A shrinking R&D permits risky development, but cannot certify
+      // protection against a steal that immediately ends the game.
+      (input.playerView.opponent.agendaPoints + agendaPoints <
+        input.playerView.agendaPointsToWin ||
+        corpScoreProtectionNeedIsSatisfied(
+          input,
+          protectionNeed,
+          projectId,
+          serverId,
+        )) &&
       !(
         centralDefenseAllocation?.status === "known" &&
         centralDefenseAllocation.evidence.hq.expectedAgendaLoss.numerator === 0

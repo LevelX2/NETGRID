@@ -2536,6 +2536,14 @@ noch eine zweite Entscheidungsautorität.
 Auch das Encounterbudget einer Informationsprobe konsumiert diese aktuelle
 Reservequote. Die akzeptierte Startquote bleibt der Vergleichsmaßstab für
 Risikoänderungen; ihr ursprünglicher Creditbetrag ist keine dauerhafte Sperre.
+Die gemeinsame bekannte Pfadquote rechnet auch Engine-gequotete
+Zahl-oder-Programmtrash-Subroutinen ein, solange tatsächlich ein installiertes
+Programm geschützt werden muss. Sie vergleicht die konkrete Zahlung mit dem
+vollständigen finanzierbaren Break und verbraucht dieselben zweckgebundenen
+Pools und gültigen Stärkezustände über den gesamten Pfad. Ohne Programme
+entsteht keine Schutzgebühr. Eine fehlende oder ungültige Zahlungsmenge
+scheitert sichtbar; ein ungeplanter Programmverlust wird nicht als kostenloser
+Zugang angenommen. Startreserve und Restpfad verwenden denselben Dienst.
 Sinkt die gequotete Reserve nach neu aufgedecktem ICE oder ausgegebenen
 Corp-Rez-Credits, darf derselbe Parent den bezahlbaren bekannten Restpfad
 fortsetzen. Sichtbare Rez-Unterstützung bleibt in der aktuellen Quote erhalten.

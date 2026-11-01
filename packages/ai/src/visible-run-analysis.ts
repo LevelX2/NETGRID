@@ -84,6 +84,7 @@ import {
   isVisiblePayEndRunSubroutine,
   isVisibleRunnerCreditLossSubroutine,
   isVisibleSecretSpendEndRunSubroutine,
+  isVisibleTrashUnlessRunnerPaysSubroutine,
   secretSpendAccessPaymentForVisibleCorpCredits,
 } from "./run-analysis/visible-subroutine-semantics";
 
@@ -626,6 +627,23 @@ function assessKnownRezzedIcePathInternal(
         visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext),
       ).length ?? 0;
     const accessPreservingBreakCount = endTheRunCount + deflectorCount;
+    const programProtectionSubroutines = quote.subroutines.filter(
+      isVisibleTrashUnlessRunnerPaysSubroutine,
+    );
+    for (const subroutine of programProtectionSubroutines) {
+      if (!Number.isSafeInteger(subroutine.amount) || subroutine.amount! < 0) {
+        throw new Error(
+          `runner_known_program_protection_payment_invalid_amount:${quote.iceInstanceId}:${subroutine.id}`,
+        );
+      }
+    }
+    // The path preserves the actual rig. Sacrificing a program would need
+    // its own bound projection; a known trash effect is not a free pass.
+    const requiresProgramProtection = rigCards.some(
+      (card) =>
+        card.type === "program" &&
+        !breakersAtRiskOfBeingTrashed.has(card.instanceId),
+    );
     const additionalBreakCostPerSubroutine =
       quote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
     const encounterTax = activeRunPathEffects.reduce(
@@ -659,7 +677,9 @@ function assessKnownRezzedIcePathInternal(
     if (
       requiredFullBreakIceIndex === iceIndex ||
       (options.preferFullGroupedBreak &&
-        accessPreservingBreakCount > 0 &&
+        (accessPreservingBreakCount > 0 ||
+          (requiresProgramProtection &&
+            programProtectionSubroutines.length > 0)) &&
         accessPreservingBreakCount < quote.subroutines.length)
     ) {
       // Both a next-encounter obligation and an optional complete group are
@@ -844,10 +864,16 @@ function assessKnownRezzedIcePathInternal(
         carriedBreakerStrengths,
       );
     }
-    const payOrEndSubroutines =
-      quote?.subroutines.filter(isVisiblePayEndRunSubroutine) ?? [];
-    for (const subroutine of payOrEndSubroutines) {
-      const payCost = Math.max(0, Math.floor(subroutine.amount ?? 0));
+    const preservationPaymentSubroutines = quote.subroutines.filter(
+      (subroutine) =>
+        isVisiblePayEndRunSubroutine(subroutine) ||
+        (requiresProgramProtection &&
+          isVisibleTrashUnlessRunnerPaysSubroutine(subroutine)),
+    );
+    for (const subroutine of preservationPaymentSubroutines) {
+      const payCost = isVisibleTrashUnlessRunnerPaysSubroutine(subroutine)
+        ? subroutine.amount!
+        : Math.max(0, Math.floor(subroutine.amount ?? 0));
       const breakAssessment = runPathEffectsPreventFutureBreaking(
         activeRunPathEffects,
       )
@@ -886,6 +912,13 @@ function assessKnownRezzedIcePathInternal(
       if (payment.breakAssessment) {
         futureClicksLost += payment.breakAssessment.futureClicksLost ?? 0;
         spendPathBreak(payment.breakAssessment);
+        if (isVisibleTrashUnlessRunnerPaysSubroutine(subroutine)) {
+          advanceVisibleRunBreakerState(
+            breakerState,
+            payment.breakAssessment,
+            quote.subroutines.length === 1,
+          );
+        }
       } else {
         spendGeneralCredits(creditBudget, payment.cost);
       }

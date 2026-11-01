@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { applyAction, getLegalActions, hashGameState } from "@netgrid/engine";
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { restoreAiRuntimeCheckpoint } from "../evaluation/decision-checkpoints/runtime-checkpoint";
@@ -22,7 +22,7 @@ describe("SP-723 persistent counter deferral during the survival hand buffer", (
       expect(provenance.eachPrefixHashMatches).toBe(true);
       expect(provenance.legalActionsEachPrefixMatch).toBe(true);
       expect(hashGameState(state)).toBe(cp.stateHash);
-      const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) } as AiDecisionInput;
+      const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) } as AiDecisionInputWithDeckCapabilities;
       input.planningStateIdentity = buildPlanningStateIdentity(input);
       expect(input.playerView.own.gripOrHq).toHaveLength(handSize);
       expect(input.playerView.own.tags).toBe(tags);
