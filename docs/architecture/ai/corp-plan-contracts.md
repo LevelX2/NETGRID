@@ -80,6 +80,18 @@ aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
 Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
 niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
+Bei vollständig gequoteten festen Same-Turn-Pfaden vergleichen Score-Assessment
+und autoritative Agenda-Zuglinie die gesamten verbleibenden Aktionen und Credits
+aus `sameTurnConversionResourceCost` desselben aktuellen Engine-Pfads. Ein
+projizierter Advance nach einer Neuinstallation erzeugt für denselben fertigen
+Score keinen zusätzlichen Fortschrittsbonus. Mehr nichtterminale Punkte bleiben
+ein eigener Nutzen; überschüssige Punkte nach einem Sieg bleiben wertneutral.
+Veraltete oder ungültige veröffentlichte Kosten scheitern strukturiert. Bedingte
+Funding- und aktionsgenerierende Pfade veröffentlichen diese feste Kostenquote
+vertragsgemäß nicht und behalten ihre zuständige Konversionsbewertung. Paarung
+587, Runde 1, G33 D162 belegt zwei Punkte für 3 statt 6 Credits bei jeweils drei
+Aktionen; der native Regressionstest bindet den bestehenden Venice-Parent.
+
 Die Konversionssuche darf eine reine, unbedingte Advancement-Aktivierung mit
 positiven Aktionskosten und ausschließlich festen Aktions-/Creditkosten
 mehrfach verwenden, wenn die Engine ihre Wiederholbarkeit ausdrücklich

@@ -28,6 +28,7 @@ import type {
 } from "../../plans/plan-scheduler";
 import { corpScorePriorityClass } from "./corp-score-priority";
 import { scoreInstallExposurePenalty } from "./score-route-risk";
+import { scoreQuotedResourceCost } from "./score-quoted-resource-cost";
 export function scoreModule(): PlanModule {
   return {
     moduleId: "corp.score_agenda",
@@ -69,10 +70,7 @@ export function scoreModule(): PlanModule {
         resourceGaps.length === 0 &&
           current.signal.feasible &&
           scoreCandidates(context, current.signal).length > 0,
-        scoreAssessmentValue(
-          current.signal,
-          context.input.playerView.stateVersion,
-        ),
+        scoreAssessmentValue(current.signal, context.input),
         portfolio.executorInstanceId,
         resourceGaps,
       );
@@ -126,8 +124,15 @@ export function scoreModule(): PlanModule {
 
 function scoreAssessmentValue(
   signal: CorpScoreProjectSignal,
-  stateVersion: number,
+  input: AiDecisionInput,
 ): number {
+  const quotedCost = scoreQuotedResourceCost(signal, input);
+  const resourceBurden = quotedCost
+    ? quotedCost.clicks * 8 + quotedCost.credits * 2
+    : signal.conversion
+      ? signal.conversion.remainingAdvancementClicks * 8 +
+        signal.conversion.remainingScoreCredits * 2
+      : 0;
   // A terminal score has one winner utility. Surplus points and strategy
   // support after that win cannot compensate for a longer or riskier route.
   const agendaPointValue = signal.terminalScore
@@ -137,12 +142,12 @@ function scoreAssessmentValue(
     ? (signal.terminalScore
         ? 0
         : signal.conversion.realizedStrategySupportCount * 4) -
-      signal.conversion.remainingAdvancementClicks * 8 -
-      signal.conversion.remainingScoreCredits * 2 +
+      resourceBurden +
       (signal.conversion.residentParent ? 40 : 0)
     : 0;
   const routeValue =
-    conversionValue - scoreInstallExposurePenalty(signal, stateVersion);
+    conversionValue -
+    scoreInstallExposurePenalty(signal, input.playerView.stateVersion);
   if (signal.terminalScore) return 1_000 + agendaPointValue + routeValue;
   if (signal.preventsTerminalSteal)
     return 2_000 + agendaPointValue + routeValue;

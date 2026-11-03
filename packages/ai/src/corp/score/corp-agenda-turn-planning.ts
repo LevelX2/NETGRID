@@ -2,6 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { scoreRouteExposure } from "./score-route-risk";
+import { scoreQuotedResourceCost } from "./score-quoted-resource-cost";
 import type { CorpEconomyNeedSignal } from "../economy/economy-types";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -485,6 +486,7 @@ function createLine(
     line.family === "fund_setup"
       ? Math.min(economyGain, line.supportBinding?.fundingGapBefore ?? 0)
       : 0;
+  const quotedCost = scoreQuotedResourceCost(params.project, params.input);
   const agendaProgress =
     line.family === "fund_setup"
       ? 0
@@ -494,14 +496,16 @@ function createLine(
           (params.project.terminalScore
             ? 10
             : Math.max(1, params.project.agendaPoints) * 10) +
-          (line.projectedAdvance ? 8 : 0) -
-          // The terminal objective is the same win for every admitted agenda.
-          // Preserve Score's remaining resource burden in the authoritative
-          // turn line; surplus points cannot hide a longer finishing route.
-          (params.project.terminalScore && params.project.conversion
-            ? params.project.conversion.remainingAdvancementClicks * 8 +
-              params.project.conversion.remainingScoreCredits * 2
-            : 0);
+          (line.projectedAdvance && !quotedCost ? 8 : 0) -
+          // Compare complete fixed score paths on the same horizon. A new
+          // install's projected advance is not extra payoff on top of the
+          // same completed score; every remaining action/credit is a cost.
+          (quotedCost
+            ? quotedCost.clicks * 8 + quotedCost.credits * 2
+            : params.project.terminalScore && params.project.conversion
+              ? params.project.conversion.remainingAdvancementClicks * 8 +
+                params.project.conversion.remainingScoreCredits * 2
+              : 0);
   // Only a bound Defense provider contributes protection. An agenda head
   // supplies score progress and exposure facts, never incremental defense.
   const defense =

@@ -16,6 +16,59 @@ import { campaignDisposition } from "../corp/score/corp-agenda-turn-planning";
 import type { KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-funded-score-protection";
 
 describe("Corp agenda turn-planning vertical slice", () => {
+  it("compares complete fixed score costs without rewarding an install prefix twice", () => {
+    const input = decisionInput();
+    const value = (
+      credits: number,
+      clicks: number,
+      points = 2,
+      terminal = false,
+    ) => {
+      const signal = project(points);
+      delete signal.openingRush;
+      delete signal.protectionNeed;
+      signal.feasible = true;
+      signal.sameTurnCloseout = true;
+      signal.terminalScore = terminal;
+      signal.sameTurnConversionProof = "engine_quoted_path";
+      signal.sameTurnConversionResourceCost = {
+        stateVersion: 20,
+        credits,
+        clicks,
+      };
+      return buildSlice(input, signal, [agendaCandidate()], []).lines.find(
+        (line) => line.family === "pure_rush",
+      )!.evaluation.agendaProgress;
+    };
+    // Equal completed points/actions, different whole-path credit costs.
+    expect(value(3, 3)).toBeGreaterThan(value(6, 3));
+    expect(value(3, 2)).toBeGreaterThan(value(3, 3));
+    // New agendas retain their additional nonterminal payoff; no installed-card override.
+    expect(value(6, 3, 3)).toBeGreaterThan(value(3, 3, 2));
+    // Surplus points after the same immediate win buy no additional utility.
+    expect(value(3, 3, 3, true)).toBe(value(3, 3, 2, true));
+  });
+
+  it.each([
+    { stateVersion: 19, credits: 3, clicks: 3 },
+    { stateVersion: 20, credits: -1, clicks: 3 },
+    { stateVersion: 20, credits: 3, clicks: 1.5 },
+  ])(
+    "rejects invalid complete score cost %j rather than replacing it",
+    (cost) => {
+      const signal = project(2);
+      delete signal.openingRush;
+      delete signal.protectionNeed;
+      signal.feasible = true;
+      signal.sameTurnCloseout = true;
+      signal.sameTurnConversionProof = "engine_quoted_path";
+      signal.sameTurnConversionResourceCost = cost;
+      expect(() =>
+        buildSlice(decisionInput(), signal, [agendaCandidate()], []),
+      ).toThrow("invalid_support_graph");
+    },
+  );
+
   it("carries exact emergency access risk into competing turn lines", () => {
     const input = decisionInput();
     const risk = (
@@ -88,11 +141,23 @@ describe("Corp agenda turn-planning vertical slice", () => {
     ).toHaveLength(4);
     const pure = slice.lines.find((line) => line.family === "pure_rush")!;
     expect(pure.evaluation.defense).toBe(0);
-    expect(pure.valueClaims.some((claim) => claim.ownerModuleId === "corp.defend_servers")).toBe(false);
+    expect(
+      pure.valueClaims.some(
+        (claim) => claim.ownerModuleId === "corp.defend_servers",
+      ),
+    ).toBe(false);
     for (const family of ["combined_rush", "safe_setup"] as const) {
       const protectedLine = slice.lines.find((line) => line.family === family)!;
-      expect(protectedLine.evaluation.defense).toBe(family === "combined_rush" ? 25 : 18);
-      expect(protectedLine.valueClaims.some((claim) => claim.ownerModuleId === "corp.defend_servers" && claim.contributionKind === "risk_reduction")).toBe(true);
+      expect(protectedLine.evaluation.defense).toBe(
+        family === "combined_rush" ? 25 : 18,
+      );
+      expect(
+        protectedLine.valueClaims.some(
+          (claim) =>
+            claim.ownerModuleId === "corp.defend_servers" &&
+            claim.contributionKind === "risk_reduction",
+        ),
+      ).toBe(true);
     }
     for (const line of slice.lines) {
       expect(
@@ -366,7 +431,9 @@ describe("Corp agenda turn-planning vertical slice", () => {
           amount: 3,
         }),
       ]);
-      expect(slice.currentHeadPrerequisiteDisposition).toBe("awaits_published_funding");
+      expect(slice.currentHeadPrerequisiteDisposition).toBe(
+        "awaits_published_funding",
+      );
     },
   );
 
