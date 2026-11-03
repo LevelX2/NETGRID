@@ -32,10 +32,14 @@ export function quoteRunnerRunRiskReserve(params: {
   // A policy reserve for the public investment at stake, not a quote of any
   // hidden ICE. Corp liquidity limits the exposure premium. Prior safe access
   // does not certify this newly exposed rig or the current rez budget.
+  // A publicly terminal Remote deadline makes preserving sunk investment
+  // subordinate to the last contest. The ordinary unknown-ICE cash and hand
+  // buffers still apply; no hidden ICE becomes a certified reachable path.
   const programReserve =
     params.unknownIceCount > 0 &&
     params.corpRezExposureActive &&
     params.riskTolerance !== "matchpoint_with_stable_universal_coverage" &&
+    params.riskTolerance !== "terminal_remote_last_chance" &&
     programInvestmentCredits !== undefined
       ? Math.min(params.corpRezCredits, programInvestmentCredits)
       : 0;

@@ -547,6 +547,15 @@ importiert die Live-Runtime oder eine Planregistry zurück.
 
 ## 3. `runner.contest_remote`
 
+Bei einer vom bestehenden öffentlichen Terminal-Contest-Vertrag erkannten
+Remote-Frist verwendet die gemeinsame Prerun-Quote
+`terminal_remote_last_chance`: Der bereits bezahlte Installationswert des Rigs
+erzeugt keine zusätzliche Investitionsreserve, die das letzte Contestfenster
+verbrauchen würde. Die gewöhnliche Liquiditätsreserve für unbekannte ICE,
+bekannte Pfad- und Stealkosten, Handpuffer, konkrete Gefahren und fehlende
+Abdeckung bleiben verbindlich. Diese Quote gilt auch für die gebundene
+Finanzierung und den laufenden Run; sie zertifiziert keine verdeckte ICE.
+
 Der vorgelagerte Materialfilter erhält eine öffentlich belegte terminale
 Remote-Frist auch bei negativem allgemeinem Risikowert, wenn die exakte
 aktuelle Runquote bereits `reachable` und `run_now` ausweist. Dieselbe

@@ -1956,7 +1956,10 @@ function quoteRunnerPrerunReserve(params: {
           : ("access" as const);
   const corpRezCredits = Math.max(0, params.input.playerView.opponent.credits);
   const riskTolerance =
-    params.runnerMatchpointCentralAccess && stableUniversal
+    purpose === "contest" &&
+    runnerTargetHasTerminalContestThreat(params.input, params.targetServerId)
+      ? ("terminal_remote_last_chance" as const)
+      : params.runnerMatchpointCentralAccess && stableUniversal
       ? ("matchpoint_with_stable_universal_coverage" as const)
       : ("standard" as const);
   const corpRezExposureActive =

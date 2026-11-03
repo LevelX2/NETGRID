@@ -100,6 +100,28 @@ it("never uses a credit-only probe exception to waive its hand reserve", () => {
   ).toMatchObject({ status: "satisfied", requiredHandBuffer: 2 });
 });
 
+it("drops only sunk program investment for a terminal Remote deadline", () => {
+  const terminal = {
+    ...params,
+    purpose: "contest" as const,
+    riskTolerance: "terminal_remote_last_chance" as const,
+    informationProbeAllowed: false,
+    creditsAfterKnownPath: 3,
+  };
+  expect(quoteRunnerRunRiskReserve(terminal)).toMatchObject({
+    status: "satisfied", requiredCredits: 3, requiredHandBuffer: 3,
+  });
+  expect(quoteRunnerRunRiskReserve({ ...terminal, creditsAfterKnownPath: 2 })).toMatchObject({
+    status: "blocked", requiredCredits: 3, creditGap: 1,
+  });
+  expect(quoteRunnerRunRiskReserve({ ...terminal, runnerGripCount: 2 })).toMatchObject({
+    status: "blocked", handBufferGap: 1,
+  });
+  expect(quoteRunnerRunRiskReserve({ ...terminal, requiredAccessHandBuffer: 6 })).toMatchObject({
+    status: "blocked", requiredHandBuffer: 6, handBufferGap: 1,
+  });
+});
+
 it("keeps the access hand reserve without unknown ICE or Corp rez money", () => {
   const accessOnly = {
     ...params,

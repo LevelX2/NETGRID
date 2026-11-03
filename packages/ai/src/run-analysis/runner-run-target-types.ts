@@ -303,7 +303,10 @@ export type RunnerCreditBasePlan = {
 export type RunnerPrerunReserveQuote = {
   purpose: "information" | "access" | "multiaccess" | "contest";
   status: "not_required" | "satisfied" | "information_probe_only" | "blocked";
-  riskTolerance: "standard" | "matchpoint_with_stable_universal_coverage";
+  riskTolerance:
+    | "standard"
+    | "matchpoint_with_stable_universal_coverage"
+    | "terminal_remote_last_chance";
   knownPathCost: number;
   creditsAfterKnownPath: number;
   unknownIceCount: number;

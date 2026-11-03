@@ -92,8 +92,11 @@ describe("native unknown-ICE reserve bank support", () => {
     expect(engineFactsHash(input)).toBe(before);
   });
 
-  it.each([11, 20] as const)("retains the full standard reserve and conditional access in game %s", (game) => {
+  it.each([11, 20] as const)("retains the full standard reserve for the nonterminal variant of game %s", (game) => {
     const { input } = capture(game);
+    // Explicit counterfactual: without a public terminal deadline the full
+    // investment reserve continues to protect this same unknown-ICE route.
+    input.playerView.opponent.agendaPoints = 3;
     const { target, targets, economy, banks, quote } = facts(input);
     expect(assessRunnerRunFundingAdmission({ input, target, runTargets: targets, economy })).toMatchObject({
       admitted: true, targetDirectlyConvertible: false,
@@ -107,6 +110,18 @@ describe("native unknown-ICE reserve bank support", () => {
     expect(funded.routeQuote).toMatchObject({ reachability: "conditional_access", unknownIceCount: game === 11 ? 1 : 2 });
     expect(funded.prerunReserveQuote).toMatchObject({ status: "satisfied", riskTolerance: "standard", requiredCredits: game === 11 ? 14 : 20 });
     expect(funded.creditsAfterRun).toBe(game === 11 ? 15 : 21);
+  });
+
+  it.each([11, 20] as const)("keeps unknown ICE conditional while removing only terminal investment in game %s", (game) => {
+    const { input } = capture(game);
+    const { target, banks, quote } = facts(input);
+    expect(target.prerunReserveQuote).toMatchObject({
+      riskTolerance: "terminal_remote_last_chance", requiredCredits: 4,
+      creditGap: game === 11 ? 7 : 0,
+    });
+    const funded = quote(banks.slice(0, 1))!;
+    expect(funded.routeQuote).toMatchObject({ reachability: "conditional_access", unknownIceCount: game === 11 ? 1 : 2 });
+    expect(funded.prerunReserveQuote).toMatchObject({ status: "satisfied", requiredCredits: 4 });
   });
 
   it.each(["insufficient_payout", "no_run_click", "missing_cashout", "missing_hand_buffer"] as const)("does not bind an incomplete bank proof: %s", (boundary) => {
