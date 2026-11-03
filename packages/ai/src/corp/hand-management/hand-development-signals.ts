@@ -10,6 +10,7 @@ import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { uniqueBy } from "../../runtime/collection";
 import { corpHostedCreditBankProfile } from "../../runtime/corp-canonical-card-facts";
 import { corpCandidateProjectsCardDraw } from "../../runtime/corp-draw-action-facts";
@@ -23,6 +24,10 @@ import {
   candidateIsVisibleCorpIceInstall,
 } from "../../runtime/visible-action-facts";
 import { corpDefinitionSupportsPunishPlan } from "../punish/punish-signals";
+import {
+  corpIceRezSupportOperationHasPositiveCurrentIncome,
+  definitionHasActionIceRezSupport,
+} from "../defense/corp-defense-rez-support-facts";
 import {
   corpDrawCandidatePreservesHandCapacity,
   corpHqOverflowCandidateIsExactCurrentConversion,
@@ -63,7 +68,7 @@ function corpCardDevelopmentSignals(
   candidates: readonly ActionSemanticCandidate[],
   agendaCount: number,
   economyNeeds: CorpCorePlanDomain["economyNeeds"],
-  defenseDispositionActionIds: ReadonlySet<string>,
+  defenseManagedActionIds: ReadonlySet<string>,
   scoreSetupBinding: CorpScoreAccelerationSetupBinding | undefined,
   scoreProjects: readonly CorpScoreProjectSignal[],
   hasDefensePlacement: (candidate: ActionSemanticCandidate) => boolean,
@@ -74,8 +79,33 @@ function corpCardDevelopmentSignals(
   );
   return uniqueBy(
     candidates.flatMap((candidate): CorpPlanDomain["handManagement"] => {
-      if (defenseDispositionActionIds.has(candidate.actionId)) {
+      if (defenseManagedActionIds.has(candidate.actionId)) {
         return [];
+      }
+      // Hand reduction cannot invent an ICE-protection purpose. Defense-owned
+      // routes are excluded above; a bundled, guaranteed positive current
+      // payout is a separate valid reason to consume an operation here.
+      if (
+        candidate.actionType === "play_operation" &&
+        candidate.sourceDefinitionId &&
+        definitionHasActionIceRezSupport(candidate.sourceDefinitionId)
+      ) {
+        const action = input.legalActions.find(
+          (action) => action.actionId === candidate.actionId,
+        );
+        if (!action)
+          throw new PlanResolutionFailure("stale_or_future_action_reference", {
+            side: input.side,
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            legalActionTypes: input.legalActions.map((action) => action.type),
+            unresolvedActionIds: [candidate.actionId],
+            owner: "plan_module",
+            removalCondition:
+              "Bind the hand-conversion candidate to its exact current LegalAction before reading a rez payout.",
+          });
+        if (!corpIceRezSupportOperationHasPositiveCurrentIncome(input, action))
+          return [];
       }
       const exactOverflowConversion =
         input.playerView.own.gripOrHq.length >
@@ -219,7 +249,7 @@ export function buildCorpHandManagementSignals(
   candidates: readonly ActionSemanticCandidate[],
   ownAgendas: number,
   economyNeeds: CorpCorePlanDomain["economyNeeds"],
-  defenseDispositionActionIds: ReadonlySet<string>,
+  defenseManagedActionIds: ReadonlySet<string>,
   scoreSetupBinding: CorpScoreAccelerationSetupBinding | undefined,
   scoreProjects: readonly CorpScoreProjectSignal[],
   previous: ResidentPlanPortfolio | undefined,
@@ -230,7 +260,7 @@ export function buildCorpHandManagementSignals(
     candidates,
     ownAgendas,
     economyNeeds,
-    defenseDispositionActionIds,
+    defenseManagedActionIds,
     scoreSetupBinding,
     scoreProjects,
     hasDefensePlacement,

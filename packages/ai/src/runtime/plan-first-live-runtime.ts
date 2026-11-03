@@ -3853,8 +3853,8 @@ function buildCorpDomain(
     deferredLastClickScoreProject,
   });
   const virusPressure = buildCorpVirusPressureSignals(input);
-  const defenseDispositionActionIds = new Set(
-    corpDefenseActionDispositions(
+  const defenseManagedActionIds = new Set([
+    ...corpDefenseActionDispositions(
       {
         input,
         actionCandidates: candidates,
@@ -3863,7 +3863,12 @@ function buildCorpDomain(
       defenseNeeds,
       centralDefenseAllocation,
     ).map((disposition) => disposition.actionId),
-  );
+    ...defenseNeeds.flatMap((signal) =>
+      signal.kind === "generic" && signal.phase === "activate_run_defense"
+        ? (signal.actionIds ?? [])
+        : [],
+    ),
+  ]);
   const scoreSetupBinding = corpScoreAccelerationSetupBinding(
     input,
     candidates,
@@ -3877,7 +3882,7 @@ function buildCorpDomain(
     candidates,
     ownAgendas,
     economyNeeds,
-    defenseDispositionActionIds,
+    defenseManagedActionIds,
     scoreSetupBinding,
     scoreProjects,
     previous,

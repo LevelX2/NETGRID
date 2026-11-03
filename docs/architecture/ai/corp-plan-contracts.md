@@ -3087,6 +3087,19 @@ Hintergrund gehaltener Overflow-Plan konsistent.
 an ihre exakte Engine-Choice bindet. Inventarfakten und Zielgebietsdisposition
 liegen ebenfalls hier; `hand-management-plan-module.ts` führt die Planroute.
 
+Ein bloßer Kartenverbrauch legitimiert keine ICE-Rez-Operation als
+Handentlastung. Bereits von Defense gebundene Rez-Support-Actions bleiben
+ausschließlich dort. Eine sonstige gebündelte Rez-Operation benötigt für den
+endlichen Handkonversionspfad eine vollständige aktuelle Engine-Quote mit
+positivem Nettobargeld nach Operationskosten. Quelle, Action, Ziel-ICE,
+Counter, Fort, Rezstatus und StateVersion müssen exakt passen. Fehlende oder
+beschädigte Quote scheitert strukturiert; explizit unvollständige Projektionen
+belegen keinen aktuellen Payout. Künftigen Schutz oder längere Lebensdauer
+bewertet Handmanagement nicht ersatzweise. Die nativen Gegenfälle in
+`meta584-rez-purpose.native.test.ts` erhalten aktuelle Einnahmen und dringliche
+Defense-Konversionen. Die übrige zeitliche Rez-/Lebensdauerabwägung aus SP-309
+bleibt davon getrennt.
+
 Score liefert seine Serverreservierung und Setup-Bindung über
 `runtime/corp-scoreline/score-hand-support.ts`. Die Runtime reicht außerdem
 einen eng typisierten Defense-Prüfdienst ein, damit Handentwicklung keine

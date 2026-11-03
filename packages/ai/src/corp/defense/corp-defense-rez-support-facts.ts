@@ -126,6 +126,20 @@ export function corpIceRezSupportEmptyTargetDispositionEvidence(
   return undefined;
 }
 
+/** A current mechanical payout fact for the finite hand-conversion owner.
+ * Future protection and the lifetime investment remain Defense decisions. */
+export function corpIceRezSupportOperationHasPositiveCurrentIncome(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const post = boundOperationFreeRezQuote(input, action);
+  return (
+    post?.complete === true &&
+    post.creditGainOnRez !== undefined &&
+    post.creditGainOnRez.creditsAfter > input.playerView.own.credits
+  );
+}
+
 function boundOperationFreeRezQuote(
   input: AiDecisionInput,
   action: LegalAction,
@@ -191,8 +205,26 @@ function boundOperationFreeRezQuote(
   if (post.complete) {
     const effect = post.effectiveRunQuote,
       income = post.creditGainOnRez;
+    const locations = input.playerView.servers.flatMap((server) =>
+      server.ice
+        .filter((ice) => ice.instanceId === post.cardId)
+        .map((ice) => ({ ice, serverId: server.id })),
+    );
+    const location = locations[0];
     if (
+      locations.length !== 1 ||
+      location?.ice.known !== true ||
+      location.ice.type !== "ice" ||
+      location.ice.controller !== "corp" ||
+      location.ice.rezzed !== false ||
+      location.ice.definitionId !== post.iceDefinitionId ||
+      post.context !== "installed_post_rez" ||
+      post.expiresAtStateVersion !== input.playerView.stateVersion ||
+      post.targetServerId !== location.serverId ||
+      post.projectedServerId !== location.serverId ||
       !effect ||
+      effect.iceInstanceId !== post.cardId ||
+      effect.iceDefinitionId !== post.iceDefinitionId ||
       !Array.isArray(effect.subroutines) ||
       (effect.conditionalEncounterEffects !== undefined &&
         !Array.isArray(effect.conditionalEncounterEffects)) ||
