@@ -584,9 +584,11 @@ function createLine(
           : line.family === "score_continuation"
             ? params.project.counterBankReplacement
               ? "replacement_counter_liquidity_prepared"
-              : params.project.phase === "score_agenda"
-                ? "agenda_scored"
-                : "agenda_advanced"
+              : params.project.phase === "convert_agenda"
+                ? "score_conversion_step_applied"
+                : params.project.phase === "score_agenda"
+                  ? "agenda_scored"
+                  : "agenda_advanced"
             : line.projectedAdvance
               ? "agenda_advanced"
               : "agenda_installed",
@@ -760,13 +762,25 @@ function exactAgendaHead(
   project: CorpScoreProjectSignal,
   candidates: readonly ActionSemanticCandidate[],
 ): ActionSemanticCandidate | undefined {
-  return candidates.find(
-    (candidate) =>
-      ((project.counterBankReplacement !== undefined &&
-        ((project.phase === "rez_counter_bank_for_liquidation" &&
-          candidate.semanticActionType === "corp_window.rez") ||
-          (project.phase === "liquidate_counter_bank" &&
-            candidate.semanticActionType === "economy.gain_credit"))) ||
+  return candidates.find((candidate) => {
+    // Conversion sources are operations or support cards, not the agenda.
+    // The exact current action is already bound to this Score parent by the
+    // existing complete conversion path; no sibling action gains authority.
+    const conversionHead =
+      project.phase === "convert_agenda" &&
+      project.sameTurnCloseout &&
+      project.sameTurnConversionProof === "engine_quoted_path" &&
+      (candidate.semanticActionType === "play.corp_operation" ||
+        project.routeSemanticActionTypes?.includes(
+          candidate.semanticActionType,
+        ) === true);
+    return (
+      (conversionHead ||
+        (project.counterBankReplacement !== undefined &&
+          ((project.phase === "rez_counter_bank_for_liquidation" &&
+            candidate.semanticActionType === "corp_window.rez") ||
+            (project.phase === "liquidate_counter_bank" &&
+              candidate.semanticActionType === "economy.gain_credit"))) ||
         (project.phase === "install_agenda" &&
           candidate.semanticActionType === "install.card") ||
         (project.phase === "advance_agenda" &&
@@ -774,12 +788,14 @@ function exactAgendaHead(
         (project.phase === "score_agenda" &&
           candidate.semanticActionType === "score.agenda")) &&
       project.actionIds?.includes(candidate.actionId) === true &&
-      candidate.sourceCardInstanceId ===
-        (project.counterBankReplacement
-          ? project.counterBank?.sourceCardInstanceId
-          : project.agendaInstanceId) &&
-      exactCurrentCost(candidate),
-  );
+      (conversionHead ||
+        candidate.sourceCardInstanceId ===
+          (project.counterBankReplacement
+            ? project.counterBank?.sourceCardInstanceId
+            : project.agendaInstanceId)) &&
+      exactCurrentCost(candidate)
+    );
+  });
 }
 
 function boundScoreProtectionProvider(

@@ -76,6 +76,16 @@ export type CorpScoreProjectSignal = {
     credits: number;
     clicks: number;
   };
+  /** Whole-path valuation facts for action-generating paths without an income prefix.
+   * Kept separate from fixed reserve/admission costs: generated clicks are not
+   * pre-existing spendable capacity and may not be added to the current budget.
+   */
+  sameTurnConversionGeneratedActionCost?: {
+    stateVersion: number;
+    credits: number;
+    clicksSpent: number;
+    clicksGenerated: number;
+  };
   /** Liquid balance after the complete quoted route, before any on-score payout. */
   sameTurnConversionCreditHorizon?: {
     stateVersion: number;

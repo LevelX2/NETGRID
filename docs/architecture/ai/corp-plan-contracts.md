@@ -86,11 +86,22 @@ aus `sameTurnConversionResourceCost` desselben aktuellen Engine-Pfads. Ein
 projizierter Advance nach einer Neuinstallation erzeugt für denselben fertigen
 Score keinen zusätzlichen Fortschrittsbonus. Mehr nichtterminale Punkte bleiben
 ein eigener Nutzen; überschüssige Punkte nach einem Sieg bleiben wertneutral.
-Veraltete oder ungültige veröffentlichte Kosten scheitern strukturiert. Bedingte
-Funding- und aktionsgenerierende Pfade veröffentlichen diese feste Kostenquote
-vertragsgemäß nicht und behalten ihre zuständige Konversionsbewertung. Paarung
+Veraltete oder ungültige veröffentlichte Kosten scheitern strukturiert.
+Aktionsgenerierende Pfade ohne Einkommenspräfix veröffentlichen getrennt
+`sameTurnConversionGeneratedActionCost` mit vollständigen Creditkosten,
+verbrauchten und erzeugten Aktionen desselben Pfads. Nur die Bewertung zieht
+daraus den verbleibenden Verbrauch ursprünglicher Aktionen; die feste
+Budget-/Reservierungsquote wird dadurch nicht erweitert. Ein Einkommenspräfix
+behält seine gesonderte bestehende Konversionsbewertung. Paarung
 587, Runde 1, G33 D162 belegt zwei Punkte für 3 statt 6 Credits bei jeweils drei
 Aktionen; der native Regressionstest bindet den bestehenden Venice-Parent.
+Auch ein exakt an den Scoreparent gebundener Konversionskopf liefert seine
+Agenda-Zugquote auf derselben Bewertungsskala wie Installation und Advance.
+Die Operation erhält keinen separaten hohen Assessment-Payoff als Ersatz für
+die fehlende Domainquote. Ihr Meilenstein bezeichnet einen angewandten
+Konversionsschritt und behauptet keinen noch nicht ausgeführten Advance.
+Runde2/G3/D235 sichert zusätzlich Layoffs auf der vorhandenen Zurich vor
+Overtime und einer zusätzlichen offenen Marine-Installation.
 
 Die Konversionssuche darf eine reine, unbedingte Advancement-Aktivierung mit
 positiven Aktionskosten und ausschließlich festen Aktions-/Creditkosten

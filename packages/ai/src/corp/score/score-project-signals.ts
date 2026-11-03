@@ -1380,6 +1380,16 @@ export function sameTurnScoreConversionProjectsForCandidate(
           (path.fundingPrefix?.grossCreditGain ?? 0) -
           path.creditsRequired,
       },
+      ...(!path.fundingPrefix && path.clicksGenerated > 0
+        ? {
+            sameTurnConversionGeneratedActionCost: {
+              stateVersion: input.playerView.stateVersion,
+              credits: path.creditsRequired,
+              clicksSpent: path.clicksRequired,
+              clicksGenerated: path.clicksGenerated,
+            },
+          }
+        : {}),
       ...(!path.fundingPrefix && path.clicksGenerated === 0
         ? {
             sameTurnConversionResourceCost: {
@@ -1761,6 +1771,7 @@ function sameScoreProjectMergeFacts(
     project.routeAssessment,
     project.sameTurnConversionProof,
     project.sameTurnConversionResourceCost,
+    project.sameTurnConversionGeneratedActionCost,
     project.sameTurnConversionCreditHorizon,
     project.terminalScore,
     project.preventsTerminalSteal,
