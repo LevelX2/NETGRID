@@ -3,6 +3,9 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { getStructuredBreakerProfileForCard } from "../breaker-ontology-consumer";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   programSacrificeCandidate as buildProgramSacrificeCandidate,
   programSacrificeCategory,
@@ -308,14 +311,17 @@ export function createRunnerProgramInstallTrashContext(
     const members = loss.cards.map((entry) => {
       // Coverage/redundancy is measured against cards surviving this entire
       // trash closure, rather than another copy also lost with the host.
-      // The exact incoming identical program also replaces this member's
-      // role. It does not replace other programs lost with the same host.
+      // A known incoming ordinary breaker can preserve this member's complete
+      // coverage too. This grants no install purpose: the coverage owner must
+      // still quote and bind the exact profitable route. Additional abilities,
+      // restrictions and increased liabilities are not interchangeable.
       const incomingReplacesMember =
         incoming?.known === true &&
         incoming.type === "program" &&
         typeof incoming.definitionId === "string" &&
-        incoming.definitionId === entry.definitionId &&
-        incoming.selectedSubtype === entry.selectedSubtype &&
+        ((incoming.definitionId === entry.definitionId &&
+          incoming.selectedSubtype === entry.selectedSubtype) ||
+          incomingBreakerPreservesMemberCoverage(input, incoming, entry)) &&
         incoming.instanceId !== entry.instanceId &&
         !(input.playerView.own.rig ?? []).some(
           (installed) => installed.instanceId === incoming.instanceId,
@@ -371,6 +377,66 @@ export function createRunnerProgramInstallTrashContext(
         ]),
       ].sort(),
     };
+  }
+
+  function incomingBreakerPreservesMemberCoverage(
+    input: AiDecisionInput,
+    incoming: VisibleCard,
+    member: VisibleCard,
+  ): boolean {
+    if (!member.known || !member.definitionId || !incoming.definitionId)
+      return false;
+    const inventory = (input as AiDecisionInputWithDeckCapabilities)
+      .ownDeckCapabilities?.runner?.breakerInventory;
+    const previous = inventory?.find((b) => b.cardId === member.definitionId);
+    const next = inventory?.find((b) => b.cardId === incoming.definitionId);
+    if (
+      !previous ||
+      !next ||
+      previous.confidence !== "high" ||
+      next.confidence !== "high" ||
+      previous.restrictions.length > 0 ||
+      next.restrictions.length > 0 ||
+      next.risks.some((risk) => !previous.risks.includes(risk))
+    )
+      return false;
+    const roles = dependencies.visibleBreakerRoles(member);
+    const incomingRoles = dependencies.visibleBreakerRoles(incoming);
+    if (
+      roles.length === 0 ||
+      roles.some((role) => !incomingRoles.includes(role))
+    )
+      return false;
+    const oldProfile = getStructuredBreakerProfileForCard(member.definitionId);
+    const newProfile = getStructuredBreakerProfileForCard(
+      incoming.definitionId,
+    );
+    if (
+      !oldProfile ||
+      !newProfile ||
+      (newProfile.sideEffects ?? []).some(
+        (effect) => !(oldProfile.sideEffects ?? []).includes(effect),
+      )
+    )
+      return false;
+    return [member, incoming].every((card) => {
+      const engine = cardSpecPlanningCardByDefinitionId(card.definitionId!)
+        ?.planning.engine;
+      return (
+        engine !== undefined &&
+        (engine.icebreakerAbilities?.length ?? 0) > 0 &&
+        Object.keys(engine).every((key) =>
+          ["schemaVersion", "characteristics", "icebreakerAbilities"].includes(
+            key,
+          ),
+        ) &&
+        engine.icebreakerAbilities!.every(
+          (ability) =>
+            ability.kind === "break_subroutine" ||
+            ability.kind === "increase_strength",
+        )
+      );
+    });
   }
 
   function runnerProgramInstallDisplacementPenalty(

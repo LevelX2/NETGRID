@@ -1426,6 +1426,23 @@ Quellbindung, unveränderte Action/Ownership und exakte Optionszahlen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Die Programm-Austauschbewertung erkennt neben einer identischen Kopie einen
+bekannten gewöhnlichen Breaker als Ersatz seiner vollständigen bisherigen
+Abdeckung. Dafür müssen beide strukturierten Deckfähigkeiten hoch belastbar
+sein, sämtliche Breakerrollen erhalten bleiben und neue Einschränkungen oder
+zusätzliche Nebenwirkungen fehlen. Zusätzliche kanonische Fähigkeiten sind
+kein gleichwertiger Ersatz. Der gesamte Verlust gehosteter Programme wird
+weiterhin einzeln geprüft. Diese Feststellung erzeugt keinen Installationszweck:
+Kosten, Nutzen und die konkrete Parent-/Step-/Routenbindung bleiben beim
+Coverage-Owner.
+
+Bei einer exakt nachgerechneten Vorbereitung im selben Zug darf dieser Owner
+einen ausschließlich optionalen Stealth-Verlust ohne vorhandene Stealth-Credits
+als aktuell folgenlos behandeln. Vorhandene Stealth-Credits, andere Risiken,
+fehlende Abdeckung, MU-, Handpuffer- und Finanzierungsprobleme behalten ihre
+Sperren. Der native Zustand 586/R3/G30/D339 belegt die gebundene Installation
+unter dem terminalen Remote-Parent; die Engine prüft Austausch, Run und Steal.
+
 Ein kanonisch reines Programminstall-Aktionsbundle ohne aktuell angebotenen
 Engine-Spielkopf erzeugt keinen akuten allgemeinen Geldbedarf. Sein nur während
 der Installationsfolge nutzbarer, danach verfallender Credit ist keine liquide

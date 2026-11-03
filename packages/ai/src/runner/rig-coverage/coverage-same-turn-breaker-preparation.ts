@@ -13,6 +13,8 @@ import { runnerBreakerUpgradeRequiredRole } from "./coverage-breaker-upgrades";
 import { runnerSameTurnInstallProjection } from "./coverage-same-turn-install-projection";
 import type { RunnerCostEffectiveCoverageRecovery } from "./coverage-recovery";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
+import { getStructuredBreakerProfileForCard } from "../../breaker-ontology-consumer";
+import { visibleRunnerRunPathCreditBudgetForRig } from "../../run-analysis/visible-run-credit-budget";
 
 /** A concrete parent preparation, not a claim that unknown ICE is passable. */
 export function runnerSameTurnBreakerPreparation(
@@ -101,7 +103,7 @@ export function runnerSameTurnBreakerPreparation(
         !breaker ||
         breaker.confidence !== "high" ||
         breaker.restrictions.length > 0 ||
-        breaker.risks.length > 0 ||
+        breakerPreparationHasCurrentLiability(input, breaker) ||
         rig.some((c) => c.definitionId === card.definitionId)
       )
         return [];
@@ -306,4 +308,25 @@ export function runnerSameTurnBreakerPreparation(
         a.totalRecoveryCost - b.totalRecoveryCost ||
         a.visibleAnswer.instanceId.localeCompare(b.visibleAnswer.instanceId),
     )[0];
+}
+
+/** An optional loss from an empty Stealth pool cannot consume run funding. */
+export function breakerPreparationHasCurrentLiability(
+  input: AiDecisionInput,
+  breaker: NonNullable<
+    DeckCapabilityProfile["runner"]
+  >["breakerInventory"][number],
+): boolean {
+  if (breaker.risks.length === 0) return false;
+  const profile = getStructuredBreakerProfileForCard(breaker.cardId);
+  return !(
+    breaker.risks.includes("stealth_loss") &&
+    breaker.risks.every(
+      (risk) => risk === "stealth_loss" || risk === "side_effect_penalty",
+    ) &&
+    profile?.sideEffects?.length === 1 &&
+    profile.sideEffects[0] === "stealth_loss" &&
+    visibleRunnerRunPathCreditBudgetForRig(input.playerView.own.rig ?? [])
+      .stealthNonNoisyIcebreakerCredits === 0
+  );
 }
