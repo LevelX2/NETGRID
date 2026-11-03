@@ -179,6 +179,32 @@ describe("discard keep score", () => {
     );
   });
 
+  it("does not count counter movement as new advancement without an installed donor", () => {
+    const transfer = corpCard("onr_v1_291_falsified-transactions-expert", "operation");
+    const agenda = corpCard("simple_agenda", "agenda");
+    const donor = { ...corpCard("onr_v1_347_vapor-ops", "asset"), owner: "corp" as const, advancementCounters: 1 };
+    const withDonor = score(transfer, ["operation"], "corp", [], {}, {
+      extraGrip: [agenda], servers: [{ id: "remote_1", label: "Remote", ice: [], root: [donor] }],
+    });
+    const withoutDonor = score(transfer, ["operation"], "corp", [], {}, { extraGrip: [agenda] });
+    const emptyDonor = score(transfer, ["operation"], "corp", [], {}, {
+      extraGrip: [agenda], servers: [{ id: "remote_1", label: "Remote", ice: [], root: [{ ...donor, advancementCounters: 0 }] }],
+    });
+    expect(withDonor.baseValue).toBe(withoutDonor.baseValue + 420);
+    expect(emptyDonor.baseValue).toBe(withoutDonor.baseValue);
+    expect(withoutDonor.evidence).not.toContain("discard_score:corp_visible_agenda_advancement_burst");
+    expect(withDonor.evidence).toContain("discard_score:corp_visible_agenda_advancement_burst");
+  });
+
+  it("does not retain movement for a sole agenda that would have to donate to itself", () => {
+    const transfer = corpCard("onr_v1_291_falsified-transactions-expert", "operation");
+    const agenda = { ...corpCard("simple_agenda", "agenda"), owner: "corp" as const, advancementCounters: 1 };
+    const result = score(transfer, ["operation"], "corp", [], {}, {
+      servers: [{ id: "remote_1", label: "Remote", ice: [], root: [agenda] }],
+    });
+    expect(result.evidence).not.toContain("discard_score:corp_visible_agenda_advancement_burst");
+  });
+
   it("preserves a conditional Corp payoff only while a tag source remains reachable", () => {
     const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
     const reachable = score(

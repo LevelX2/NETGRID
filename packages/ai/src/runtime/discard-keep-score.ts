@@ -193,8 +193,7 @@ export function discardKeepScore(
   const corpAdvancementBurstSupportsVisibleAgenda =
     input.side === "corp" &&
     type === "operation" &&
-    corpCardIsReviewedAdvancementBurst(card.definitionId) &&
-    corpHasVisibleAgendaDevelopmentTarget(input, dependencies);
+    corpAdvancementBurstHasVisibleSupport(input, card.definitionId, dependencies);
   const corpConditionalPayoff =
     input.side === "corp"
       ? corpConditionalPayoffKeepAdjustment(
@@ -742,23 +741,36 @@ function cardSemanticSignals(hint: unknown): ReadonlySet<string> {
   ]);
 }
 
-function corpCardIsReviewedAdvancementBurst(definitionId: string): boolean {
-  return corpScoreConversionProfile(definitionId) !== undefined;
-}
-
-function corpHasVisibleAgendaDevelopmentTarget(
+function corpAdvancementBurstHasVisibleSupport(
   input: AiDecisionInput,
+  definitionId: string,
   dependencies: DiscardKeepScoreDependencies,
 ): boolean {
-  return [
+  const profile = corpScoreConversionProfile(definitionId);
+  if (!profile) return false;
+  const installed = input.playerView.servers
+    .filter((server) => server.id !== "archives")
+    .flatMap((server) => [...server.ice, ...server.root]);
+  const agendaTargets = [
     ...input.playerView.own.gripOrHq,
-    ...input.playerView.servers.flatMap((server) => server.root),
-  ].some(
+    ...installed,
+  ].filter(
     (candidate) =>
       candidate.known !== false &&
       (candidate.type === "agenda" ||
         dependencies.definitionTypeForCardId(candidate.definitionId) ===
           "agenda"),
+  );
+  if (agendaTargets.length === 0) return false;
+  if (profile.placesAdvancementCounters || profile.gainsCorpActions) return true;
+  // Counter movement is useful retention support only while a distinct owned
+  // installed donor actually has counters. It does not create new counters.
+  return profile.movesAdvancementCounters && installed.some((donor) =>
+    donor.known !== false &&
+    (donor.controller === "corp" || donor.owner === "corp") &&
+    Number.isSafeInteger(donor.advancementCounters) &&
+    (donor.advancementCounters ?? 0) > 0 &&
+    agendaTargets.some((target) => target.instanceId !== donor.instanceId),
   );
 }
 

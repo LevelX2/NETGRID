@@ -3062,6 +3062,14 @@ importiert weder die Tactical-Registry noch den allgemeinen Choice-Dispatcher.
 
 ## 10. `corp.hand_and_agenda_management`
 
+Der bestehende Advancement-Haltebonus unterscheidet kanonisch das Erzeugen
+neuer Counter von deren Verschieben. Reine Verschiebung erhält diesen Bonus
+nur mit einem bekannten eigenen installierten Spender mit positiven
+Fortschrittscountern und einer davon verschiedenen eigenen Agenda im HQ oder
+im Spiel. Leere Assets, Archives und eine alleinige Agenda als ihr eigener
+Spender begründen ihn nicht. Dies bewertet das Halten einer Karte; konkrete
+Installations-, Fortschritts- und Scorefolgen bleiben beim Score-Owner.
+
 Eine freie R&D-Spitzensortierung bleibt auch bei `minSelections` gleich
 Optionenzahl eine echte Reihenfolgeentscheidung. Die Engine kennzeichnet
 `selectionOrdering: ordered` und bindet die eigene Quelle. Der Hand-Owner
