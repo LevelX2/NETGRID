@@ -3645,6 +3645,26 @@ Finanzierung eines fremden Ziels bleibt an dessen Bedarf gebunden.
 Die Beschreibung von Economy als gemeinsamer Fachaufgabe in
 Abschnitt 6 hebt diese tatsächlichen Modulidentitäten nicht auf.
 
+Ein aktueller Coverage-Bedarf darf eine bereits gefüllte Bank als genau einen
+Provider binden, wenn eine garantierte Auszahlung eine längere, aktuell
+angebotene Basiscreditfolge für die gehaltene Breakerantwort ersetzt. Der
+Coverage-Owner veröffentlicht den exakten Bedarf; der Bank-Owner behält die
+Auszahlung. Gap, Definition, Bankinstanz, aktuelle Action-ID und StateVersion
+werden gemeinsam gebunden und beim Assessment gegen die residente
+Coverage-Instanz revalidiert. Ein fehlender oder zurückgezogener Bedarf
+entzieht dem Provider seine Route. Die bisherige P4-/P5-Stufe bleibt erhalten;
+eine gleich schnelle gewöhnliche Einnahme, eine nötige Vorbereitung oder ein
+bereits zugelassener dringlicher Bankpfad wird nicht verdrängt. Genau eine
+ausreichende Bank wird gewählt; die anderen Bestände bleiben resident.
+
+Diese begrenzte Route ersetzt mindestens zwei Basiscreditaktionen und lässt
+noch eine Installationsaktion im Restzug übrig. Sie zertifiziert nur die
+aktuelle Auszahlung, keine zukünftige Installations- oder Run-Action. Nach
+Engine-Anwendung werden alle Bedarfe und höher priorisierten Antworten erneut
+bewertet. Die native Ressourcenfolge erreicht dieselbe explizit gewählte
+Installation mit zwei zusätzlichen Aktionen; eine andere normale Fortsetzung
+oder ein besserer Gesamtsieger folgt daraus nicht automatisch.
+
 ### Vertikale Implementierung der Bank
 
 Allgemeine wiederkehrende Breaker-Credits tragen im kanonischen Factsproducer

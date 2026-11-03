@@ -151,7 +151,10 @@ export function createRunnerCoverageModule(
           preparations.length > 0 ||
           installs.length > 0 ||
           (phase === "fund_answer" && funding.length > 0) ||
-          draws.length > 0;
+          draws.length > 0 ||
+          (phase === "fund_answer" &&
+            gap.bankFunding?.stateVersion ===
+              context.input.playerView.stateVersion);
         return proposal({
           moduleId: "runner.rig_and_coverage",
           dedupeKey: gap.gapId,
@@ -195,7 +198,13 @@ export function createRunnerCoverageModule(
                   current.gap,
                   current.phase,
                 );
-      return assessment(
+      const bankNeed =
+        current.phase === "fund_answer" &&
+        current.gap.bankFunding?.stateVersion ===
+          context.input.playerView.stateVersion
+          ? current.gap.bankFunding
+          : undefined;
+      const result = assessment(
         instance,
         current.gap.priorityClass,
         candidates.length > 0,
@@ -209,7 +218,28 @@ export function createRunnerCoverageModule(
               ? 60 + Math.max(0, current.gap.fundingGap ?? 0)
               : 30,
         portfolio.executorInstanceId,
+        bankNeed
+          ? [
+              {
+                needId: bankNeed.needId,
+                capability: "economy.bank_cashout_all",
+                minimum: bankNeed.targetCredits,
+                available: context.input.playerView.own.credits,
+                deadline: "current_turn",
+              },
+            ]
+          : [],
       );
+      if (bankNeed)
+        result.blockers = [
+          {
+            code: "waiting_for_bound_funding_support",
+            owner: "plan_module",
+            removable: true,
+            resumeCondition: { code: bankNeed.needId },
+          },
+        ];
+      return result;
     },
     materialize: (instance, _assessment, context) => {
       const current = instance.moduleState as CoverageState;
@@ -628,7 +658,8 @@ function coverageFundingCandidates(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
 ): PlanMaterialization["candidates"] {
-  if (!gap.answerInHand || (gap.fundingGap ?? 0) <= 0) return [];
+  if (gap.bankFunding || !gap.answerInHand || (gap.fundingGap ?? 0) <= 0)
+    return [];
   const actionIds = new Set(gap.fundingActionIds);
   return context.actionCandidates
     .filter((candidate) => {

@@ -1,3 +1,4 @@
+import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import type { RunnerCreditBankProspectivePlan } from "./credit-bank-prospective-planning";
 import type { RunnerFundingRouteAssessment } from "../../plans/runner-funding-contracts";
 import type { RunnerDefenseSignals } from "../defense-recovery/defense-types";
@@ -18,6 +19,7 @@ export type RunnerCreditBankSignal = {
   };
   prospectivePlan?: RunnerCreditBankProspectivePlan;
   defenseFunding?: NonNullable<RunnerDefenseSignals["tagClearFundingNeed"]>;
+  coverageFunding?: NonNullable<RunnerCoverageGapSignal["bankFunding"]>;
   runFunding?: {
     parentPlanInstanceId: string;
     needId: string;

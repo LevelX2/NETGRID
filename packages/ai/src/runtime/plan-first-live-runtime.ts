@@ -219,6 +219,7 @@ import {
   runnerUnboundCentralDirectRunDispositionEvidence,
 } from "../runner/central-pressure/central-pressure-signals";
 import { runnerCreditBankActionDispositions } from "../runner/credit-bank/credit-bank-dispositions";
+import { bindRunnerCreditBankCoverageFunding } from "../runner/credit-bank/credit-bank-coverage-funding";
 import { runnerCreditBankSignals } from "../runner/credit-bank/credit-bank-signals";
 import { reconcileRunnerCreditBankRunFunding } from "../runner/credit-bank/credit-bank-funding-revalidation";
 import { bindRunnerCreditBankDefenseFunding } from "../runner/credit-bank/credit-bank-defense-funding";
@@ -3040,7 +3041,7 @@ function buildRunnerDomain(
         paymentCoverage,
       ]
     : discoveredCoverageGaps;
-  const coverageGaps = rigDemandProjection
+  let coverageGaps = rigDemandProjection
     ? bindRunnerRigDemandProjectionToCoverageGaps({
         input,
         coverageGaps: projectedCoverageGaps,
@@ -3384,12 +3385,17 @@ function buildRunnerDomain(
     activeRunRoot,
   });
   const runFundingParents = { centralPressure, remoteContests };
-  const creditBanks = bindRunnerCreditBankDefenseFunding(
+  const protectedCreditBanks = bindRunnerCreditBankDefenseFunding(
     input, candidates, defense,
     reconcileRunnerCreditBankRunFunding(
       prospectiveCreditBanks, input.playerView.stateVersion, runFundingParents,
     ),
   );
+  const coverageBankSupport = bindRunnerCreditBankCoverageFunding(
+    input, candidates, coverageGaps, protectedCreditBanks,
+  );
+  coverageGaps = coverageBankSupport.coverageGaps;
+  const creditBanks = coverageBankSupport.creditBanks;
   const preDevelopmentFundingNeeds = uniqueBy(
     [
       ...runFundingNeeds.filter((need) =>

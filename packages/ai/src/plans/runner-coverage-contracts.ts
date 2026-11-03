@@ -49,6 +49,18 @@ export type RunnerCoverageGapSignal = {
     stateVersion: number;
   };
   fundingGap?: number;
+  bankFunding?: {
+    stateVersion: number;
+    needId: string;
+    parentPlanInstanceId: string;
+    gapId: string;
+    targetDefinitionId: string;
+    targetCredits: number;
+    gap: number;
+    bankId: string;
+    actionId: string;
+    replacedBasicClicks: number;
+  };
   sameTurnRunConversion?: {
     targetRunActionId: string;
     requiredCredits: number;
