@@ -2298,6 +2298,18 @@ Bedarfsbildung. Untypisierte Textsignale begründen keinen typgebundenen
 Präventionsnutzen. Universelle Flatline- und Runprävention behalten ihren
 allgemeinen Umfang; unbekannte Präventionshints scheitern sichtbar.
 
+Erkennt derselbe Handconsumer eine passende Schadensprävention bereits als
+akut, darf ihre aktuell bezahlbare Installation die allgemeine liquide
+Aufbaureserve verbrauchen. Die generische Reserve erzeugt dann weder einen
+zusätzlichen Finanzierungsschritt noch einen Ausschluss des Schutzkopfes.
+Die Entscheidung verbleibt bei `runner.defense_and_recovery`; normale
+Priorität, aktuelle LegalAction, tatsächliche Kosten, MU, Austauschverluste,
+Tagbereinigung und terminale Routen werden weiterhin dort beziehungsweise
+an ihren bisherigen Ownern geprüft. Ein bloßer Setupbedarf, eine unpassende
+Schadensart oder fehlendes Installationsgeld erlaubt diesen Reserveverbrauch
+nicht. Der Native-Gegenfall mit Wilsons gewöhnlichem Setup erhält seinen
+ursprünglichen Run-Kopf und dessen Reserveprüfung.
+
 Ein eigener, bereits zugelassener Zentralrun kann einen konkreten
 Präventionsbedarf vor seinem Erfolgsfenster erzeugen. Der Central-Owner
 verwendet dafür dieselben ausführbaren Routenwerte wie seine Materialisierung,

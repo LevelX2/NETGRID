@@ -1301,15 +1301,22 @@ function evaluateRunnerPersistentInstall(
     installCost,
     newFunctionalCoverage,
   });
-  const reservePenalty = reservePenaltyForPersistentInstall({
-    params,
-    profile,
-    card: context.card,
-    action,
-    installCost,
-    creditsAfterInstall,
-    handAfterInstall,
-  });
+  const acuteDamagePreventionReserveSpend =
+    role === "defense_support" &&
+    currentNeed === "acute" &&
+    profile.damagePrevention &&
+    creditsAfterInstall >= 0;
+  const reservePenalty = acuteDamagePreventionReserveSpend
+    ? 0
+    : reservePenaltyForPersistentInstall({
+        params,
+        profile,
+        card: context.card,
+        action,
+        installCost,
+        creditsAfterInstall,
+        handAfterInstall,
+      });
   const handBufferPenalty = handBufferPenaltyForPersistentInstall({
     params,
     profile,
@@ -1400,6 +1407,9 @@ function evaluateRunnerPersistentInstall(
       installedSameRandomBreakProfileCount,
       breakerVariantEvidence: breakerVariant.evidence,
     }).concat(
+      acuteDamagePreventionReserveSpend
+        ? ["persistent_install_acute_damage_prevention_reserve_spend"]
+        : [],
       incomeRecovery
         ? [
             "persistent_install_guaranteed_income_recovery",
