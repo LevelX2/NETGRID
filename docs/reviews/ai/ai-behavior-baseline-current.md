@@ -43,8 +43,12 @@ belegt diesen echten Enginezustand daher nicht. Die native Diagnose reproduziert
 beide Abbrüche. Der Ursachenpatch SP-737 unterscheidet nun die Encounter-Run-ID
 von der Trace-ID und bindet die fortbestehende Pflichtwahl an den Defense-Owner.
 Die zwei unveränderten nativen Zustände, deterministische Engine-Folgen und
-Fehlbindungsgegenproben sind fokussiert geprüft (34 Tests). Vollständige
-Originalseedkontrollen und der spätere gesamte Panelnachlauf bleiben erforderlich.
+Fehlbindungsgegenproben sind fokussiert geprüft (34 Tests). Die vollständigen
+Originalseedkontrollen auf `0906d5c77b54e37614ecc4ad4174a9a853492f19` enden
+nach 477 und 443 Aktionen terminal: keine Runtimefehler, Illegal Actions,
+Fallbacks oder Timeouts; gültige Replays. Die ursprünglichen Aktionspräfixe bis
+97 beziehungsweise 60 sind exakt unverändert. Damit ist der Abbruchfix
+verifiziert. Der gesamte Panelnachlauf nach der Zehnerserie bleibt erforderlich.
 Die KI-Strukturgates bestehen. Der Pakettypcheck mit 12 GiB Heap meldet noch
 14 Fehler in den unveränderten Testdateien zu Paarung 582/583; der Standardlauf
 mit 8 GiB erschöpft zuvor den Heap. Ein grünes Gesamt-Typgate wird nicht behauptet.
