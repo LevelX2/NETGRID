@@ -556,6 +556,17 @@ bekannte Pfad- und Stealkosten, Handpuffer, konkrete Gefahren und fehlende
 Abdeckung bleiben verbindlich. Diese Quote gilt auch für die gebundene
 Finanzierung und den laufenden Run; sie zertifiziert keine verdeckte ICE.
 
+Im bereits gebundenen terminalen Contest darf der Run-Window-Owner die
+gewöhnliche spekulative Cashreserve für eine neu aufgedeckte reine
+ETR-Begegnung verbrauchen, wenn keine Runner-Aktion mehr bleibt und die
+öffentliche terminale Frist weiterhin gilt. Die aktuelle legale Zahlung muss
+den ganzen Encounter finanzieren; bekannte Restkosten, konkrete Gefahren und
+Handpuffer bleiben verbindlich. Unbekanntes ICE bleibt ein bewusst eingegangenes
+Risiko. Normale Runs, ein noch vorhandenes neues Angriffsfenster und Zahlungen
+für gemischte oder optionale Schadenswirkungen behalten die bisherige Reserve.
+Paarung 588 G11 sichert den aktuellen Break, die Parent-/Executorbindung und
+den tatsächlich ausgeführten zwölf Schritte langen Gegenlauf zum Runner-Sieg.
+
 Der vorgelagerte Materialfilter erhält eine öffentlich belegte terminale
 Remote-Frist auch bei negativem allgemeinem Risikowert, wenn die exakte
 aktuelle Runquote bereits `reachable` und `run_now` ausweist. Dieselbe

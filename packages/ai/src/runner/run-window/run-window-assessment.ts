@@ -86,6 +86,7 @@ import {
   visibleDeflectorSubroutineCanResolve,
 } from "../../visible-run-analysis";
 import { reservedAccessTrashCredits } from "./run-window-access";
+import { runnerTargetHasTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
 import { optionalDamageBreakContinuationPayments } from "./run-window-encounter-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
 import { runnerRunStrengthCurrentPumpSavings } from "./run-window-strength-preparation";
@@ -220,6 +221,7 @@ export function runnerRunRiskContractReassessment(
   input: AiDecisionInput,
   runOrigin: RunnerRunOrigin | undefined,
   afterEncounterPayment?: RunnerRunContinuationPayment,
+  paidAction?: LegalAction,
 ): RunnerRunRiskReassessmentSignal | undefined {
   const run = input.playerView.run;
   const contract = runOrigin?.runRiskContract;
@@ -304,9 +306,52 @@ export function runnerRunRiskContractReassessment(
       contract.reserveQuote.status !== "blocked") ||
     currentReserveQuote.creditGap > contract.reserveQuote.creditGap ||
     currentReserveQuote.handBufferGap > contract.reserveQuote.handBufferGap;
-  const decision = materialReserveDegradation
-    ? ("prefer_jack_out" as const)
-    : ("preserve_continuation" as const);
+  const currentEndRunPayment =
+    paidAction &&
+    input.legalActions.some(
+      (action) =>
+        action === paidAction &&
+        action.expiresAtStateVersion === input.playerView.stateVersion,
+    )
+      ? pureEndRunEncounterPayment(input, paidAction)
+      : undefined;
+  // The last terminal contest may spend its speculative cash buffer on a
+  // newly revealed mandatory stop. Keeping that cash while accepting this
+  // ETR abandons the current contest. Hidden ICE remain unquoted risks.
+  const terminalLastActionContinuation =
+    contract.reserveQuote.riskTolerance === "terminal_remote_last_chance" &&
+    contract.reserveQuote.purpose === "contest" &&
+    runOrigin?.accessCommitment?.payoff === "score_threat" &&
+    input.playerView.own.clicks === 0 &&
+    runnerTargetHasTerminalContestThreat(input, run.attackedServerId) &&
+    ((currentEndRunPayment !== undefined &&
+      currentEndRunPayment.cost > 0 &&
+      currentEndRunPayment.cost === afterEncounterPayment?.cost &&
+      currentEndRunPayment.liquidCreditsAfterPayment ===
+        afterEncounterPayment?.liquidCreditsAfterPayment) ||
+      (afterEncounterPayment === undefined &&
+        input.playerView.timingPoint === "run.jack_out_window")) &&
+    currentReserveQuote.creditGap > 0 &&
+    currentReserveQuote.handBufferGap === 0 &&
+    !knownPath.blocked &&
+    knownPath.canReachAccess &&
+    !(knownPath.futureClicksLost ?? 0) &&
+    !(knownPath.conditionalAccessReasons?.length ?? 0) &&
+    !(knownPath.conditionalRiskReasons?.length ?? 0) &&
+    remainingIce.every(
+      (ice) =>
+        !ice.known ||
+        !ice.rezzed ||
+        ice.effectiveRunQuote?.subroutines.every(
+          (subroutine) =>
+            subroutine.type === "end_the_run" ||
+            subroutine.type === "end_the_run_unless_runner_pays",
+        ) === true,
+    );
+  const decision =
+    materialReserveDegradation && !terminalLastActionContinuation
+      ? ("prefer_jack_out" as const)
+      : ("preserve_continuation" as const);
   return {
     schemaVersion: "runner-run-risk-reassessment-v1",
     serverId: run.attackedServerId,
@@ -324,6 +369,9 @@ export function runnerRunRiskContractReassessment(
       `runner_run_risk_contract_current_hand_gap:${currentReserveQuote.handBufferGap}`,
       `runner_run_risk_contract_current_unknown_ice:${unknownIcePositions.length}`,
       `runner_run_risk_contract_current_corp_rez_exposure:${corpRezExposureActive}`,
+      ...(terminalLastActionContinuation
+        ? ["runner_terminal_last_action_spends_unknown_ice_cash_reserve"]
+        : []),
     ],
   };
 }
@@ -867,7 +915,12 @@ function runnerRunWindowActionAssessment(
     optionalPaidRisks.every((risk) => risk?.decision === "prefer_jack_out");
   const paidRunRisk =
     encounterPayment && runOrigin?.runRiskContract
-      ? runnerRunRiskContractReassessment(input, runOrigin, encounterPayment)
+      ? runnerRunRiskContractReassessment(
+          input,
+          runOrigin,
+          encounterPayment,
+          action,
+        )
       : undefined;
   // The root's current, fully paid run reserve owns continuation. A generic
   // turn reserve must not charge a second unrelated floor for the same run.
