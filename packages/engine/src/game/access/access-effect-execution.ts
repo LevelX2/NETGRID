@@ -246,7 +246,8 @@ export function resolveCardImplementationAccessEffects(
   if (
     hiddenReplacementLongtail === "delayed_agenda_access_replacement" &&
     host.state.run &&
-    accessZone === "installed"
+    accessZone === "installed" &&
+    host.cards.mustInstance(cardId).rezzed
   ) {
     const run = host.state.run;
     const serverId = run.breach?.serverId ?? run.attackedServerId;

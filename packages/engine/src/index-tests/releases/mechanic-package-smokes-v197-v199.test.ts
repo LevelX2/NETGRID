@@ -680,6 +680,19 @@ describe("V1.9.9 Mechanikpaket R", () => {
           action.type === "start_run" &&
           action.payload?.serverId === "remote_1",
       );
+      if (state.timingPoint === "run.jack_out_window") {
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
+      }
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_card" && action.payload?.cardId === bizarreId,
+      );
       state = passRootRezWindowBeforeAccessIfOpen(state);
       state = apply(state, "runner", (action) => action.type === "access_card");
       state = apply(

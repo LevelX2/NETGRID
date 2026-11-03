@@ -66,6 +66,11 @@ azyklischer interner Implementierungsschnitt.
   Advancement-Historie wird vor dem Zonenwechsel erfasst.
 - CardImplementation-Effekte und Legacy-Fallbacks sind gegenseitig exklusiv.
   Dadurch wird derselbe Karteneffekt nicht doppelt ausgeführt.
+- Die installierte Quelle eines verzögerten Agenda-Access-Ersatzes muss beim
+  Auslösen gerezzt sein. Erst dann entsteht der Run-Effekt. Dieser bleibt nach
+  dem Trashing der Quelle für denselben Run bestehen; ein neuer Run übernimmt
+  ihn nicht. Die verzögerte Wertung am nächsten Runner-Zugbeginn bleibt an die
+  im selben Remote verbliebene Agenda gebunden.
 - Archives-Autozugriffe verwenden dieselbe Queue und denselben Abschluss wie
   interaktive Zugriffe; nur Karten ohne Entscheidung oder Effekt werden
   automatisch übersprungen.
