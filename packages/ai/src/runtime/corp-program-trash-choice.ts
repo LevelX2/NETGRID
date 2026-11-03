@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { CorpGenericDefenseSignal } from "../plans/corp-defense-contracts";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
+import { corpProgramTrashChoiceContext } from "../corp/defense/program-trash-targets";
 import {
   unresolvedChoiceFailure,
   type PendingChoice,
@@ -34,6 +35,15 @@ export function selectedCorpProgramTrashChoiceOptionIds(
   );
   const resolution = signal?.choiceResolution;
   const requirement = action.choiceRequirements?.[0];
+  const context = corpProgramTrashChoiceContext(input, choice);
+  const sameOrigin =
+    resolution?.kind === "program_trash" &&
+    context &&
+    (resolution.origin.kind === "encounter"
+      ? context.origin.kind === "encounter" &&
+        resolution.origin.runId === context.origin.runId
+      : context.origin.kind === "trace_success" &&
+        resolution.origin.traceId === context.origin.traceId);
   if (
     input.side !== "corp" ||
     state?.kind !== "defense" ||
@@ -49,9 +59,8 @@ export function selectedCorpProgramTrashChoiceOptionIds(
     choice.stateVersion !== input.playerView.stateVersion ||
     resolution.choiceId !== choice.choiceId ||
     resolution.choiceSource !== choice.source ||
-    resolution.runId !== input.playerView.run?.runId ||
-    resolution.sourceIceInstanceId !==
-      input.playerView.run?.encounteredIce?.instanceId ||
+    !sameOrigin ||
+    resolution.sourceIceInstanceId !== context?.sourceIceId ||
     action.side !== "corp" ||
     action.type !== "resolve_choice" ||
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
@@ -70,7 +79,7 @@ export function selectedCorpProgramTrashChoiceOptionIds(
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Bind program trash to the current corp.defend_servers executor, exact run, choice, target and state version.",
+      "Bind program trash to the current corp.defend_servers executor, exact encounter or Trace continuation, choice, target and state version.",
     );
   }
   return [resolution.selectedOptionId];

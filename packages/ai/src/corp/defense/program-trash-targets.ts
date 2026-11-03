@@ -21,7 +21,7 @@ const PROGRAM_TRASH_SUBROUTINE_TYPES = new Set([
 ]);
 
 type ProgramTrashChoiceContext = {
-  runId: string;
+  contextId: string;
   sourceIceId: string;
   subroutineIndex: number;
   sourceDefinitionId: string;
@@ -30,9 +30,81 @@ type ProgramTrashChoiceContext = {
   continuation: "encounter" | "trace_success";
 };
 
+/** The Engine encodes a run id for encounter choices and a trace id for
+ * trace-success choices. The latter remains authoritative after finishRun. */
+export function corpProgramTrashChoiceContext(
+  input: AiDecisionInput,
+  choice: PendingChoice,
+) {
+  const context = parseProgramTrashChoiceSource(choice.source);
+  if (!context) return undefined;
+  const run = input.playerView.run;
+  if (context.continuation === "encounter") {
+    const ice = run?.encounteredIce;
+    const quote = ice?.effectiveRunQuote;
+    const subroutine = quote?.subroutines[context.subroutineIndex];
+    if (
+      run?.runId !== context.contextId ||
+      ice?.instanceId !== context.sourceIceId ||
+      ice.definitionId !== context.sourceDefinitionId ||
+      quote?.iceInstanceId !== context.sourceIceId ||
+      quote.iceDefinitionId !== context.sourceDefinitionId ||
+      subroutine?.id !== context.subroutineId ||
+      subroutine.type !== context.subroutineType ||
+      context.subroutineType === "initiate_trace"
+    )
+      return undefined;
+    return {
+      ...context,
+      serverId: run.attackedServerId,
+      origin: { kind: "encounter" as const, runId: context.contextId },
+    };
+  }
+  const trace = input.playerView.trace;
+  const traceParts = /^(run_[0-9]+)\.(.+)\.([0-9]+)\.trace$/.exec(
+    context.contextId,
+  );
+  const sources = input.playerView.servers.flatMap((server) =>
+    server.ice
+      .filter((ice) => ice.instanceId === context.sourceIceId)
+      .map((ice) => ({ ice, serverId: server.id })),
+  );
+  if (sources.length !== 1) return undefined;
+  const { ice, serverId } = sources[0]!;
+  const quote = ice.effectiveRunQuote;
+  const subroutine = quote?.subroutines[context.subroutineIndex];
+  if (
+    run !== undefined ||
+    trace?.phase !== "trace_success_program_trash" ||
+    trace.traceId !== context.contextId ||
+    trace.sourceCardInstanceId !== context.sourceIceId ||
+    trace.sourceDefinitionId !== context.sourceDefinitionId ||
+    !traceParts ||
+    traceParts[2] !== context.sourceIceId ||
+    traceParts[3] !== String(context.subroutineIndex) ||
+    ice.known !== true ||
+    ice.controller !== "corp" ||
+    ice.type !== "ice" ||
+    ice.rezzed !== true ||
+    ice.definitionId !== context.sourceDefinitionId ||
+    quote?.iceInstanceId !== context.sourceIceId ||
+    quote.iceDefinitionId !== context.sourceDefinitionId ||
+    subroutine?.id !== context.subroutineId ||
+    subroutine.type !== "initiate_trace" ||
+    context.subroutineType !== "initiate_trace" ||
+    subroutine.traceSuccessEffect?.type !== "end_run_trash_program_and_run_lock"
+  )
+    return undefined;
+  return {
+    ...context,
+    serverId,
+    origin: { kind: "trace_success" as const, traceId: trace.traceId },
+  };
+}
+
 /**
  * Validates and ranks the mandatory public target choice opened by a program-trash ICE
- * subroutine. The run and choice have already been selected by the Engine;
+ * subroutine. The encounter/Trace and choice were already selected by the Engine;
  * the Defense owner binds a target before the turn route is selected.
  */
 export function rankCorpProgramTrashChoiceOptionIds(
@@ -42,31 +114,11 @@ export function rankCorpProgramTrashChoiceOptionIds(
   selectableOptions: readonly PendingChoiceOption[],
   rolesForCardId: (cardId: string | undefined) => readonly string[],
 ): string[] | undefined {
-  const context = parseProgramTrashChoiceSource(choice.source);
+  const context = corpProgramTrashChoiceContext(input, choice);
   const requirement = action.choiceRequirements?.[0];
-  const run = input.playerView.run;
-  const encounteredIce = run?.encounteredIce;
-  // The run projection is authoritative for temporary encounters whose ICE is
-  // not installed at the run position, such as Dr. Dreff's set-aside ICE.
-  const encounterQuote = encounteredIce?.effectiveRunQuote;
-  const subroutine =
-    encounterQuote?.subroutines[context?.subroutineIndex ?? -1];
   if (
     !context ||
     input.side !== "corp" ||
-    run?.runId !== context.runId ||
-    encounteredIce?.instanceId !== context.sourceIceId ||
-    encounteredIce.definitionId !== context.sourceDefinitionId ||
-    encounterQuote?.iceInstanceId !== context.sourceIceId ||
-    encounterQuote.iceDefinitionId !== context.sourceDefinitionId ||
-    subroutine?.id !== context.subroutineId ||
-    subroutine.type !== context.subroutineType ||
-    (context.continuation === "encounter" &&
-      context.subroutineType === "initiate_trace") ||
-    (context.continuation === "trace_success" &&
-      (context.subroutineType !== "initiate_trace" ||
-        subroutine.traceSuccessEffect?.type !==
-          "end_run_trash_program_and_run_lock")) ||
     choice.side !== "corp" ||
     choice.kind !== "select_cards" ||
     choice.visibility !== "public" ||
@@ -163,7 +215,7 @@ function parseProgramTrashChoiceSource(
   if (continuation !== "encounter" && continuation !== "trace_success")
     return undefined;
   return {
-    runId: decoded[0]!,
+    contextId: decoded[0]!,
     sourceIceId: decoded[1]!,
     subroutineIndex,
     sourceDefinitionId: decoded[2]!,

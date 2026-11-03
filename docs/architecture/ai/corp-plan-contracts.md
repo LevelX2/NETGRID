@@ -2193,7 +2193,15 @@ nicht als kostenlos brechbar behandelt.
 
 Programmzerstörungs-Choices aus ICE-Subroutinen gehören ebenfalls zu
 `corp.defend_servers`. `program-trash-signal.ts` bindet das Ziel vor der
-TurnPlanner-Routenwahl an Action, Choice, Run und StateVersion. Der
+TurnPlanner-Routenwahl an Action, Choice, Fort, Encounter beziehungsweise Trace
+und StateVersion. Der Ursprung unterscheidet explizit Encounter-Run-ID von
+Trace-ID. Bei `trace_success_program_trash` hat die Engine den Run bereits
+beendet; die aktuelle öffentliche Trace-Fortsetzung samt Quelle und exakter
+Subroutine ist die Bindungsautorität. Sie benötigt keinen künstlich erhaltenen
+Run. Fehlende oder abweichende Trace-, Quellen-, Options- oder Statebindungen
+scheitern weiterhin fail-closed. Die beiden nativen Baselinezustände und ihre
+Engine-Replays in `baseline-trace-program-trash.test.ts` sichern diesen Pfad.
+Der
 Payload-Resolver liest nur diese Bindung; die einzelne Resolve-Action macht
 die fachliche Zielwahl nicht zu einer automatischen Engine-Fensterentscheidung.
 

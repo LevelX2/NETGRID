@@ -2,7 +2,10 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { rankCorpProgramTrashChoiceOptionIds } from "./program-trash-targets";
+import {
+  corpProgramTrashChoiceContext,
+  rankCorpProgramTrashChoiceOptionIds,
+} from "./program-trash-targets";
 import { unresolvedChoiceFailure } from "../../runtime/plan-bound-choice-contract";
 
 export function corpProgramTrashDefenseSignals(
@@ -30,12 +33,11 @@ export function corpProgramTrashDefenseSignals(
     (id) => (id ? (AI_HINTS_BY_CARD.get(id)?.roles ?? []) : []),
   );
   const option = options.find((o) => o.id === selected?.[0]);
-  const run = input.playerView.run;
+  const context = corpProgramTrashChoiceContext(input, choice);
   if (
     !option ||
     typeof option.value !== "string" ||
-    !run?.runId ||
-    !run.encounteredIce?.definitionId ||
+    !context ||
     !candidates.some(
       (c) =>
         c.actionId === action.actionId &&
@@ -45,16 +47,16 @@ export function corpProgramTrashDefenseSignals(
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Produce an exact Defense program-trash target from the public run and current legal choice.",
+      "Produce an exact Defense program-trash target from the public encounter or Trace continuation and current legal choice.",
     );
   }
   return [
     {
       kind: "generic",
       defenseId: `program-trash:${choice.choiceId}`,
-      serverId: run.attackedServerId,
+      serverId: context.serverId,
       phase: "resolve_program_trash",
-      sourceDefinitionIds: [run.encounteredIce.definitionId],
+      sourceDefinitionIds: [context.sourceDefinitionId],
       actionIds: [action.actionId],
       urgent: true,
       value: 1000,
@@ -64,8 +66,8 @@ export function corpProgramTrashDefenseSignals(
         choiceId: choice.choiceId,
         choiceSource: choice.source,
         sourceStateVersion: input.playerView.stateVersion,
-        runId: run.runId,
-        sourceIceInstanceId: run.encounteredIce.instanceId,
+        origin: context.origin,
+        sourceIceInstanceId: context.sourceIceId,
         selectedOptionId: option.id,
         targetCardInstanceId: option.value,
       },

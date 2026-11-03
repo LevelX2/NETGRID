@@ -102,7 +102,9 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         choiceId: string;
         choiceSource: string;
         sourceStateVersion: number;
-        runId: string;
+        origin:
+          | { kind: "encounter"; runId: string }
+          | { kind: "trace_success"; traceId: string };
         sourceIceInstanceId: string;
         selectedOptionId: string;
         targetCardInstanceId: string;

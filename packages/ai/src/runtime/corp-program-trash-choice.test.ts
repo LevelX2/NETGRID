@@ -52,31 +52,9 @@ describe("rankCorpProgramTrashChoiceOptionIds", () => {
     ).toEqual(["card_breaker_1"]);
   });
 
-  it("binds the same target choice after a trace-success trash effect", () => {
-    const { input, action } = fixture();
-    const choice = input.playerView.pendingChoice!;
-    choice.source = [
-      "card_implementation.trash_installed_program",
-      "run_1",
-      "colonel_1",
-      "0",
-      "onr_proteus_029_colonel-failure",
-      "trace_program_trash",
-      "initiate_trace",
-      "trace_success",
-    ].join(":");
-    input.playerView.run!.encounteredIce!.effectiveRunQuote!.subroutines = [
-      {
-        id: "trace_program_trash",
-        type: "initiate_trace",
-        traceLimit: 4,
-        traceSuccessEffect: {
-          type: "end_run_trash_program_and_run_lock",
-          amount: 1,
-        },
-      },
-    ];
-
+  it("rejects a trace-success source that falsely retains an active encounter", () => {
+    const { input, action, choice } = fixture();
+    choice.source = choice.source.replace(/:encounter$/, ":trace_success");
     expect(
       rankCorpProgramTrashChoiceOptionIds(
         input,
@@ -85,7 +63,7 @@ describe("rankCorpProgramTrashChoiceOptionIds", () => {
         choice.options,
         () => [],
       ),
-    ).toEqual(["card_utility_1"]);
+    ).toBeUndefined();
   });
 
   it.each([

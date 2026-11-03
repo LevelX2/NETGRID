@@ -40,7 +40,14 @@ Die noch aktuelle öffentliche Trace-Fortsetzung fordert danach die Programmausw
 Der Defense-Consumer verlangt dafür fälschlich weiter einen aktiven Run. Der
 ursprüngliche Test zur Trace-Fortsetzung injiziert einen noch aktiven Run und
 belegt diesen echten Enginezustand daher nicht. Die native Diagnose reproduziert
-beide Abbrüche; eine Reparatur ist noch nicht verifiziert.
+beide Abbrüche. Der Ursachenpatch SP-737 unterscheidet nun die Encounter-Run-ID
+von der Trace-ID und bindet die fortbestehende Pflichtwahl an den Defense-Owner.
+Die zwei unveränderten nativen Zustände, deterministische Engine-Folgen und
+Fehlbindungsgegenproben sind fokussiert geprüft (34 Tests). Vollständige
+Originalseedkontrollen und der spätere gesamte Panelnachlauf bleiben erforderlich.
+Die KI-Strukturgates bestehen. Der Pakettypcheck mit 12 GiB Heap meldet noch
+14 Fehler in den unveränderten Testdateien zu Paarung 582/583; der Standardlauf
+mit 8 GiB erschöpft zuvor den Heap. Ein grünes Gesamt-Typgate wird nicht behauptet.
 
 Aktionslimits: `strategy_panel_fast_advance_chrome_rush` mit Seeds `-02`
 und `-05`, sowie `strategy_panel_net_damage_black_ice` mit Seed `-03`.

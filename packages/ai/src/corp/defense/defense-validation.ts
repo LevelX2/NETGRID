@@ -572,10 +572,16 @@ export function isScoreProtectionDrawSignal(
 function validArchivesRecoveryBinding(value: unknown): boolean {
   if (!value || typeof value !== "object") return false;
   const binding = value as Record<string, unknown>;
-  return hasOnlyKeys(binding, new Set(["stateVersion", "sourceCardId", "recoveredCardId"])) &&
+  return (
+    hasOnlyKeys(
+      binding,
+      new Set(["stateVersion", "sourceCardId", "recoveredCardId"]),
+    ) &&
     knownNonNegativeInteger(binding.stateVersion) &&
-    nonEmptyString(binding.sourceCardId) && nonEmptyString(binding.recoveredCardId) &&
-    binding.sourceCardId !== binding.recoveredCardId;
+    nonEmptyString(binding.sourceCardId) &&
+    nonEmptyString(binding.recoveredCardId) &&
+    binding.sourceCardId !== binding.recoveredCardId
+  );
 }
 
 export function genericDefensePhase(
@@ -1274,13 +1280,16 @@ function validTraceHardwareTrashResolution(value: unknown): boolean {
 function validProgramTrashResolution(value: unknown): boolean {
   if (!value || typeof value !== "object") return false;
   const r = value as Record<string, unknown>;
+  const origin = r.origin as Record<string, unknown> | undefined;
   return (
     r.kind === "program_trash" &&
+    !!origin &&
+    ((origin.kind === "encounter" && nonEmptyString(origin.runId)) ||
+      (origin.kind === "trace_success" && nonEmptyString(origin.traceId))) &&
     knownNonNegativeInteger(r.sourceStateVersion) &&
     [
       r.choiceId,
       r.choiceSource,
-      r.runId,
       r.sourceIceInstanceId,
       r.selectedOptionId,
       r.targetCardInstanceId,
