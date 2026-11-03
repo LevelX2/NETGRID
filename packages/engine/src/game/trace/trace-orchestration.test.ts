@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { quoteTraceBaseLinkChoices } from "./base-link";
 import { describe, expect, it } from "vitest";
 import {
   handleTraceOrchestrationAction,
@@ -25,6 +26,74 @@ import type {
 } from "../payment";
 
 describe("trace orchestration", () => {
+  it.each([0, 2, 3])(
+    "offers only the remaining run Link budget after %s spent",
+    (spent) => {
+      const sourceId = "source_1" as CardInstanceId;
+      const sourceDefinition = definition("trace_source", "operation");
+      const state = minimalState({
+        cardInstances: {
+          [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        },
+      });
+      state.runner.credits = 22;
+      state.run = {
+        runActionSpendingCap: {
+          sourceCardInstanceId: sourceId,
+          limit: 3,
+          spent,
+        },
+      } as NonNullable<GameState["run"]>;
+      const host = testHost(state, { [sourceDefinition.id]: sourceDefinition });
+      startTraceFromOperation(
+        host,
+        sourceDefinition.id,
+        5,
+        actionFor("corp", "trigger_ability", { cardId: sourceId }),
+      );
+      // A Runner restriction does not cap the Corp's payments.
+      expect(state.pendingChoice?.options.at(-1)?.value).toBe(5);
+      resolveTraceChoice(
+        host,
+        actionFor("corp", "resolve_choice"),
+        playerChoice("bid_0"),
+      );
+      expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
+        Array.from({ length: 4 - spent }, (_, bid) => `bid_${bid}`),
+      );
+    },
+  );
+
+  it("excludes a paid base Link source when the run budget is exhausted", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const linkId = "access_1" as CardInstanceId;
+    const linkDefinition = definition(
+      "onr_v1_150_access-to-kiribati",
+      "resource",
+    );
+    const state = minimalState({
+      cardInstances: {
+        [linkId]: instance(linkId, linkDefinition.id, "runner"),
+      },
+      runnerResources: [linkId],
+    });
+    state.trace = activeTrace(
+      sourceId,
+      "trace_source" as CardDefinitionId,
+      "base_link",
+    );
+    state.run = {
+      runActionSpendingCap: {
+        sourceCardInstanceId: sourceId,
+        limit: 3,
+        spent: 2,
+      },
+    } as NonNullable<GameState["run"]>;
+    expect(quoteTraceBaseLinkChoices(state)).toHaveLength(1);
+    state.run.runActionSpendingCap!.spent = 3;
+    expect(quoteTraceBaseLinkChoices(state)).toHaveLength(0);
+  });
+
   it("starts an operation trace with stable trace choice metadata", () => {
     const sourceId = "source_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");

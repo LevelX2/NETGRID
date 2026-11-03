@@ -100,6 +100,19 @@ die einzige Autorität für Zahlung und Ergebnis. Karten starten oder
 modifizieren den generischen Trace-Vertrag über strukturierte Semantik; es
 gibt keine Karten-ID-Schalter und keine zweite Trace-State-Machine.
 
+Ein aktives `runActionSpendingCap` begrenzt die kumulierten tatsächlichen
+Creditkosten für Icebreaker und Link über den gesamten Run. Dazu zählen
+Modern-Open-Linkzahlungen, die gedruckten Classic-Linkzahlungen sowie
+Base-Link- und Post-Reveal-Linkaktivierungen; bei Classic zählt der bezahlte
+Betrag, nicht der daraus entstehende Linkzuwachs. Normale und spezialisierte
+Credits teilen dasselbe Ausgabenlimit. Corp-Gebote und andere Runkosten wie
+Access-Trash werden dadurch nicht begrenzt. Der gemeinsame reine
+`payment/run-action-spending-cap.ts`-Dienst begrenzt Angebote und Quotes;
+die Zahlung revalidiert die Quote und schreibt den bestehenden Runzähler
+fort. Erschöpfte Limits erlauben weiterhin kostenlose Linkaktionen und das
+Nullgebot. Ein ungültiger Limitzustand scheitert sichtbar mit
+`runtime_invalid_run_action_spending_cap`.
+
 Der technische Profilvertrag führt deshalb die Achse `runnerLinkSpendMode`:
 
 - `generic_credit_per_link` für Modern Open;

@@ -9,6 +9,7 @@ import {
 } from "@netgrid/shared";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { limitRunActionSpendingCapacity } from "../payment/run-action-spending-cap";
 import {
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,
@@ -234,13 +235,7 @@ export function availableRunnerRunCredits(
 ): number {
   const available = availableRunnerRunCreditPool(host, breakerId);
   if (!breakerId) return available;
-  const spendingCap = host.state.run?.runActionSpendingCap;
-  if (!spendingCap) return available;
-  const remainingCap = Math.max(
-    0,
-    Math.floor(spendingCap.limit) - Math.floor(spendingCap.spent),
-  );
-  return Math.min(available, remainingCap);
+  return limitRunActionSpendingCapacity(host.state, available);
 }
 
 function availableRunnerRunCreditsWithoutSupport(
@@ -627,11 +622,11 @@ export function recordRunActionSpendingCapSpend(
 ): RunSpendingCapResult {
   const run = host.state.run;
   if (!run?.runActionSpendingCap) return { handled: false };
-  const nextSpent = run.runActionSpendingCap.spent + amount;
-  if (nextSpent > run.runActionSpendingCap.limit)
+  if (limitRunActionSpendingCapacity(host.state, amount) < amount)
     throw new Error(
       "Diese Run-Aktion erlaubt maximal 3 Credits fuer Icebreaker oder Link.",
     );
+  const nextSpent = run.runActionSpendingCap.spent + amount;
   run.runActionSpendingCap.spent = nextSpent;
   return {
     handled: true,

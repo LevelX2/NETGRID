@@ -19,6 +19,7 @@ import type {
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { selectedChoiceIds } from "../choices/choice-validation";
+import { limitRunActionSpendingCapacity } from "../payment/run-action-spending-cap";
 import { credits } from "../state/economy-mutation";
 import {
   assertPostBidLinkPaymentValid,
@@ -301,7 +302,14 @@ export function traceBidChoice(
   maxBid: number,
   optionUnit = "Credits",
 ): ChoiceRequest {
-  const boundedMax = Math.max(0, Math.floor(maxBid));
+  const boundedMax = Math.max(
+    0,
+    Math.floor(
+      side === "runner"
+        ? limitRunActionSpendingCapacity(state, maxBid)
+        : maxBid,
+    ),
+  );
   const rules = state.trace
     ? traceRulesDefinitionForTrace(state.trace)
     : traceRulesDefinitionForState(state);
@@ -1175,6 +1183,8 @@ function postBidTraceLinkCandidates(
         continue;
       const traceCost = costForTraceAbility(ability);
       const creditCost = traceCost.creditCost;
+      if (limitRunActionSpendingCapacity(state, creditCost) < creditCost)
+        continue;
       if (state.runner.credits + runnerTraceLinkCredits(host) < creditCost)
         continue;
       if (traceCost.tapSource && instance.tapped === true) continue;

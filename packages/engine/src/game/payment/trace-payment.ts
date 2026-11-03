@@ -18,6 +18,7 @@ import type {
   TraceState,
 } from "@netgrid/shared";
 import { traceRulesDefinitionForTrace } from "../trace/trace-rules-profile";
+import { limitRunActionSpendingCapacity } from "./run-action-spending-cap";
 
 export type CorpTracePaymentSourceKind = TraceCorpPaymentSourceKind;
 
@@ -314,6 +315,8 @@ function quoteRunnerTracePayment(
   traceLinkSelections?: RunnerTraceLinkCreditSelection[],
 ): RunnerTracePaymentQuote {
   if (!isValidPaymentAmount(amount))
+    return emptyRunnerTracePaymentQuote(purpose, amount);
+  if (limitRunActionSpendingCapacity(state, amount) < amount)
     return emptyRunnerTracePaymentQuote(purpose, amount);
 
   const traceLinkPools = deps.runnerTraceLinkCreditSources(state).map(
@@ -932,8 +935,7 @@ function payRunnerTracePaymentQuote(
   state: GameState,
   quote: RunnerTracePaymentQuote,
 ): RunnerTracePaymentReceipt {
-  if (quote.purpose === "post_bid_link")
-    deps.recordRunActionSpendingCapSpend(state, quote.amount);
+  deps.recordRunActionSpendingCapSpend(state, quote.amount);
   deps.recordRunnerRunCreditSpend(state, quote.amount);
   for (const entry of quote.breakdown) {
     if (entry.kind !== "runner_trace_link_credit") continue;

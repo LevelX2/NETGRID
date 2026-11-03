@@ -16,6 +16,7 @@ import {
   type LegalAction,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { limitRunActionSpendingCapacity } from "../payment/run-action-spending-cap";
 import type {
   ActivatedCardAbilityImplementation,
   IncreaseTraceLinkEffectImplementation,
@@ -265,6 +266,11 @@ function quoteForAbility(
   if (isTraceLinkForceJackOutSource(state, sourceCardInstanceId) && !state.run)
     return undefined;
   if (state.runner.credits < implementationQuote.creditCost) return undefined;
+  if (
+    limitRunActionSpendingCapacity(state, implementationQuote.creditCost) <
+    implementationQuote.creditCost
+  )
+    return undefined;
   return {
     sourceCardInstanceId,
     sourceDefinitionId: implementationQuote.sourceDefinitionId,

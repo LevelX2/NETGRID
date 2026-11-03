@@ -12,6 +12,7 @@ import {
   payCommittedCorpTraceBidQuote,
   payRunnerTraceBidQuote,
   quoteCorpTraceBidPayment,
+  quotePostBidLinkPayment,
   quoteRunnerTraceBidPayment,
   runnerTracePaymentPublicPayload,
   type CorpTracePaymentDependencies,
@@ -19,6 +20,82 @@ import {
 } from "./trace-payment";
 
 describe("trace payment pools", () => {
+  it.each([0, 1, 3])(
+    "bounds Modern Open Link payments by the remaining run budget after %s spent",
+    (spent) => {
+      const state = stateForTrace(
+        runnerBidTrace({ traceRulesProfile: "modern_open" }),
+        { runnerCredits: 22 },
+      );
+      state.run = {
+        runActionSpendingCap: {
+          sourceCardInstanceId: "run_source" as CardInstanceId,
+          limit: 3,
+          spent,
+        },
+      } as NonNullable<GameState["run"]>;
+      const before = structuredClone(state);
+      expect(
+        quoteRunnerTraceBidPayment(runnerDeps(), state, 3 - spent).canPay,
+      ).toBe(true);
+      expect(
+        quoteRunnerTraceBidPayment(runnerDeps(), state, 4 - spent).canPay,
+      ).toBe(false);
+      expect(
+        quotePostBidLinkPayment(runnerDeps(), state, 4 - spent).canPay,
+      ).toBe(false);
+      expect(state).toEqual(before);
+    },
+  );
+
+  it("records Modern Open Link spending and rejects a now stale payment before mutation", () => {
+    const state = stateForTrace(
+      runnerBidTrace({ traceRulesProfile: "modern_open" }),
+      { runnerCredits: 22 },
+    );
+    state.run = {
+      runActionSpendingCap: {
+        sourceCardInstanceId: "run_source" as CardInstanceId,
+        limit: 3,
+        spent: 0,
+      },
+    } as NonNullable<GameState["run"]>;
+    const deps = runnerDeps({
+      recordRunActionSpendingCapSpend: (current, amount) => {
+        current.run!.runActionSpendingCap!.spent += amount;
+      },
+    });
+    const quote = quoteRunnerTraceBidPayment(deps, state, 3);
+    payRunnerTraceBidQuote(deps, state, quote);
+    expect(state.run.runActionSpendingCap?.spent).toBe(3);
+    expect(state.runner.credits).toBe(19);
+    const before = structuredClone(state);
+    expect(() => payRunnerTraceBidQuote(deps, state, quote)).toThrow();
+    expect(state).toEqual(before);
+  });
+
+  it.each(["classic_blind", "classic_blind_corp_ties"] as const)(
+    "bounds the %s printed-card Link payment in credits as well",
+    (traceRulesProfile) => {
+      const state = stateForTrace(runnerBidTrace({ traceRulesProfile }), {
+        runnerCredits: 22,
+      });
+      state.run = {
+        runActionSpendingCap: {
+          sourceCardInstanceId: "run_source" as CardInstanceId,
+          limit: 3,
+          spent: 3,
+        },
+      } as NonNullable<GameState["run"]>;
+      expect(quoteRunnerTraceBidPayment(runnerDeps(), state, 5).canPay).toBe(
+        false,
+      );
+      expect(quotePostBidLinkPayment(runnerDeps(), state, 1).canPay).toBe(
+        false,
+      );
+    },
+  );
+
   it("requires an actual Hacker Tracker counter for each point above the trace limit", () => {
     const trace = corpBidTrace({
       traceLimit: 2,
