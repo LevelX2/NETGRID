@@ -328,7 +328,10 @@ export function runnerRunRiskContractReassessment(
       currentEndRunPayment.cost > 0 &&
       currentEndRunPayment.cost === afterEncounterPayment?.cost &&
       currentEndRunPayment.liquidCreditsAfterPayment ===
-        afterEncounterPayment?.liquidCreditsAfterPayment) ||
+        (afterEncounterPayment &&
+          runnerGeneralCreditsAfterCompletedPath(
+            afterEncounterPayment.budget,
+          ))) ||
       (afterEncounterPayment === undefined &&
         input.playerView.timingPoint === "run.jack_out_window")) &&
     currentReserveQuote.creditGap > 0 &&
