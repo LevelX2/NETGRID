@@ -325,7 +325,7 @@ export function runnerRunRiskContractReassessment(
     input.playerView.own.clicks === 0 &&
     runnerTargetHasTerminalContestThreat(input, run.attackedServerId) &&
     ((currentEndRunPayment !== undefined &&
-      currentEndRunPayment.cost > 0 &&
+      currentEndRunPayment.cost >= 0 &&
       currentEndRunPayment.cost === afterEncounterPayment?.cost &&
       currentEndRunPayment.liquidCreditsAfterPayment ===
         (afterEncounterPayment &&

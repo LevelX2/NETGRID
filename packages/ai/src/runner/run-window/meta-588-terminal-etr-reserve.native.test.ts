@@ -7,11 +7,11 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 import { runnerRunRiskContractReassessment } from "./run-window-assessment";
 import { pureEndRunEncounterPayment } from "./run-window-pure-etr-economics";
 import type { RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
-function native() {
+function native(fixture = "cp-meta588-terminal-etr-reserve.json") {
   const cp = JSON.parse(
     readFileSync(
       new URL(
-        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta588-terminal-etr-reserve.json",
+        `../../../../../data/scenarios/ai-decision-checkpoints/${fixture}`,
         import.meta.url,
       ),
       "utf8",
@@ -113,3 +113,59 @@ it.each([
     runnerRunRiskContractReassessment(input, origin, payment, action)?.decision,
   ).toBe("prefer_jack_out");
 });
+
+it("keeps the free ETR break after paying Skeleton's strength in the same terminal contest", () => {
+  const { cp, input, origin, action } = native(
+    "cp-meta590-free-terminal-etr.json",
+  );
+  expect(Object.values(cp.validation).every(Boolean)).toBe(true);
+  const payment = pureEndRunEncounterPayment(input, action);
+  expect(payment).toMatchObject({ cost: 0, liquidCreditsAfterPayment: 3 });
+  expect(
+    runnerRunRiskContractReassessment(input, origin, payment, action),
+  ).toMatchObject({ decision: "preserve_continuation" });
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot.deckSnapshotId,
+    cp.runtime,
+  );
+  const before = JSON.stringify({
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+    }),
+    decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(action.actionId);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.timeoutUsed).toBe(false);
+  expect(decision.decisionDebug!.planFirstDecision).toMatchObject({
+    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    selectedPlan: { moduleId: "runner.convert_run_window" },
+    route: { actionId: action.actionId, stateVersion: 342 },
+  });
+  expect(
+    JSON.stringify({
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+    }) === before,
+  ).toBe(true);
+});
+it.each(["ordinary_run", "another_action", "stale_action"] as const)(
+  "keeps the free-break reserve boundary %s",
+  (boundary) => {
+    const { input, origin, action } = native(
+      "cp-meta590-free-terminal-etr.json",
+    );
+    if (boundary === "ordinary_run")
+      origin.runRiskContract!.reserveQuote.riskTolerance = "standard";
+    if (boundary === "another_action") input.playerView.own.clicks = 1;
+    if (boundary === "stale_action") action.expiresAtStateVersion -= 1;
+    expect(
+      runnerRunRiskContractReassessment(
+        input,
+        origin,
+        pureEndRunEncounterPayment(input, action),
+        action,
+      )?.decision,
+    ).toBe("prefer_jack_out");
+  },
+);

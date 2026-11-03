@@ -566,6 +566,10 @@ Risiko. Normale Runs, ein noch vorhandenes neues Angriffsfenster und Zahlungen
 für gemischte oder optionale Schadenswirkungen behalten die bisherige Reserve.
 Paarung 588 G11 sichert den aktuellen Break, die Parent-/Executorbindung und
 den tatsächlich ausgeführten zwölf Schritte langen Gegenlauf zum Runner-Sieg.
+Paarung 590 G4 ergänzt den kostenlosen Break nach bereits bezahltem Pump:
+Auch eine aktuelle vollständige Encounter-Zahlung von null Credits behält
+diese Bindung. Die sieben nativen Folgeschritte erreichen Retreat und verhindern
+den unmittelbar folgenden Corp-Sieg; sie belegen keinen gewonnenen Gesamtgegenlauf.
 
 Der vorgelagerte Materialfilter erhält eine öffentlich belegte terminale
 Remote-Frist auch bei negativem allgemeinem Risikowert, wenn die exakte
