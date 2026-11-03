@@ -29,6 +29,33 @@ const realDoctrineSnapshotIds = [
 ] as const;
 
 describe("DeckDoctrine strategy aggregation diagnostics", () => {
+  it("counts canonical program-trash ICE copies in the diagnostic Corp profile", () => {
+    const deck = standardDeckCatalog.decks.find(
+      (candidate) =>
+        candidate.standardDeckId ===
+        "standard_corp_syds_ice_pfandhaus_2026_07_09",
+    );
+    if (!deck) throw new Error("Missing standard Syd deck.");
+    const profile = buildDeckStrategyProfile({
+      deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
+      side: "corp",
+      cards: deck.cards,
+    });
+
+    expect(profile.functionSignalCounts["corp_ice.program_trash"]).toBe(3);
+    expect(profile.corpProfile?.iceProfile.programTrash).toBe(3);
+    expect(
+      DECK_STRATEGY_METADATA_CONSUMER_CONTRACT["corpProfile.iceProfile"],
+    ).toMatchObject({ mode: "diagnostic_only" });
+
+    const damageOnly = buildDeckStrategyProfile({
+      deckSnapshotId: "corp-damage-without-program-trash",
+      side: "corp",
+      cards: [{ cardId: "onr_proteus_012_bug-zapper", quantity: 3 }],
+    });
+    expect(damageOnly.corpProfile?.iceProfile.programTrash).toBe("unknown");
+  });
+
   it("counts canonical burst-credit copies in the diagnostic Runner economy profile", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "runner-burst-diagnostic",
@@ -40,10 +67,12 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     });
     expect(profile.functionSignalCounts["economy.burst_credit"]).toBe(3);
     expect(profile.runnerProfile?.economyProfile.burst).toBe(3);
-    expect(DECK_STRATEGY_METADATA_CONSUMER_CONTRACT["runnerProfile.economyProfile"])
-      .toMatchObject({ mode: "diagnostic_only" });
+    expect(
+      DECK_STRATEGY_METADATA_CONSUMER_CONTRACT["runnerProfile.economyProfile"],
+    ).toMatchObject({ mode: "diagnostic_only" });
     const gradual = buildDeckStrategyProfile({
-      deckSnapshotId: "runner-gradual-diagnostic", side: "runner",
+      deckSnapshotId: "runner-gradual-diagnostic",
+      side: "runner",
       cards: [{ cardId: "onr_v1_178_short-term-contract", quantity: 2 }],
     });
     expect(gradual.runnerProfile?.economyProfile.burst).toBe(0);

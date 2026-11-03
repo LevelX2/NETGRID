@@ -2233,7 +2233,9 @@ function buildCorpProfiles(
   stats: DeckStrategyStats,
   strategyScores: Record<string, DeckStrategyScore>,
 ): CorpDeckStrategyProfiles {
-  const programTrashCount = legacyValueCount(stats, "program_trash");
+  const programTrashCount = cardsWithSignalsAndType(stats, "ice", [
+    "corp_ice.program_trash",
+  ]);
   const regionSupport = stats.cards
     .filter(
       (card) =>

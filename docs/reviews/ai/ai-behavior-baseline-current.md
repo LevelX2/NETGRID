@@ -1,130 +1,68 @@
-# AI Behavior Baseline v1 – letzte akzeptierte Commit-Referenz
+# AI Behavior Baseline – aktueller Messstand
 
-Stand: 2026-08-13
-Status: Hard Gates auf dem Referenzcommit grün; vor neuem Vergleich zu erneuern
+Stand: 2026-11-03
+Status: **diagnostisch rot; keine akzeptierte aktuelle Vergleichsreferenz**
 
-Die Referenz bleibt vorläufig als kompakter Messvertrag erhalten. Seit ihrem
-Lauf wurden Engine-, Karten-, Deck- und KI-Verträge breit verändert; sie ist
-daher keine aktuelle Vergleichsbasis für den Stand vom 2026-08-30. Vor einer
-neuen Stärke- oder Regressionsaussage wird die Baseline auf einem sauberen
-aktuellen Commit neu erzeugt oder diese Review bewusst entfernt.
+Die Metaserie ergänzt ihre zufälligen 40er-Paarungen um das unveränderte feste
+Vergleichspanel vor und nach der Serie. Zufallsserien dienen der Fehlersuche;
+ein Qualitätsdelta benötigt denselben Messvertrag und vergleichbare
+Abschlusshorizonte. Ein roter Lauf wird nicht durch seine bloße Speicherung zur
+Referenz. Frühere historische grüne Stände sind nach den breiten Änderungen an
+Engine, Karten und KI keine aktuelle Vergleichsbasis.
 
-## Prüfvertrag
+## Reproduzierbarer Prüfvertrag
 
-- sechs feste Deck-Slots;
-- zehn feste Seeds je Slot;
-- höchstens 480 Aktionen je Partie;
-- Runner und Corp jeweils `current_candidate`;
-- 60 Partien mit 14.034 Entscheidungen;
-- sauberer Commitstand `20728ec4e`.
+- sechs Standard-Slots des nativen Baseline-Runners;
+- zehn feste Seeds je Slot: `ai-behavior-baseline-v1-01` bis `-10`;
+- höchstens 480 Aktionen je Partie; beide Seiten `current_candidate`;
+- Ausgangsstand: sauberer Commit `f5374e043668878e00876d526a78149c83266c9e`;
+- zwei Worker; vollständiger Git-Tree-/Clean-Fingerprint separat gesichert.
 
-Der Lauf liegt lokal unter
-`data/local/ai-behavior-baseline-v1-current-20728ec4e-2026-08-13.*`.
-Die Dateien werden nicht versioniert. Aggregate, Slotwerte und Hard-Gate-
-Signatur sind identisch mit dem unmittelbar vorherigen grünen Arbeitsbaumlauf
-auf Basis von `180335e5b`; die Referenz ist nun über `gitHead` reproduzierbar.
+Die aktuelle Ausgangsmessung liegt lokal unter
+`data/local/meta-ten-20261103/benchmark/before.json`,
+`before.md` und `before-raw.json.gz`. Ihr Quellfingerprint steht in
+`before-source-fingerprint.json`, die Diagnose in `before-diagnosis.json`.
+Diese Laufartefakte werden nicht versioniert.
 
-## Ergebnis
+## Aktuelles Gate
 
-Alle technischen Hard Gates sind grün:
+60 Spiele, 14.273 Entscheidungen. Zwei Spiele brechen mit
+`window_origin_missing` ab, drei erreichen das Aktionslimit. Die zwei
+Illegal-Action-Marker und zwei Runtimefehler bezeichnen dieselben beiden
+Abbrüche und dürfen nicht als vier verschiedene defekte Spiele gezählt werden.
+Replayfehler, Fallbacks, Timeouts und Hidden-Info-Findings sind null; die
+redigierten Traces bestehen die Redaction-Prüfung.
 
-- 0 Illegal Actions;
-- 0 Replayfehler;
-- 0 Action-Limit-Partien;
-- 0 Fallbacks und 0 Timeouts;
-- 0 Runtimefehler;
-- 0 klassifizierte oder unklassifizierte Runtime-Abbrüche;
-- 0 Hidden-Info-Findings und 0 `no_legal_action_failure`;
-- Redaction-Safe: ja.
+Beide Abbrüche betreffen `strategy_panel_net_damage_black_ice`, Seeds
+`ai-behavior-baseline-v1-05` und `-07`, bei StateVersion 97 und 60.
+Fragmentation Storm beendet nach erfolgreicher Trace regelgemäß zuerst den Run.
+Die noch aktuelle öffentliche Trace-Fortsetzung fordert danach die Programmauswahl.
+Der Defense-Consumer verlangt dafür fälschlich weiter einen aktiven Run. Der
+ursprüngliche Test zur Trace-Fortsetzung injiziert einen noch aktiven Run und
+belegt diesen echten Enginezustand daher nicht. Die native Diagnose reproduziert
+beide Abbrüche; eine Reparatur ist noch nicht verifiziert.
 
-Die rote Ausgangsbeobachtung `b6a8e4114` enthielt 28 klassifizierte
-Runtimefehler: 14 fehlende oder konkurrierende Planowner, 11 vorzeitige
-EndTurn-Routen, zwei ungültige Search-Support-Graphen und ein Choice-Fenster
-ohne zulässigen Owner. Nach Beseitigung dieser frühen Abbrüche wurden mehrere
-tiefer liegende Ownership-Konflikte sichtbar und ebenfalls geschlossen.
+Aktionslimits: `strategy_panel_fast_advance_chrome_rush` mit Seeds `-02`
+und `-05`, sowie `strategy_panel_net_damage_black_ice` mit Seed `-03`.
+Der Fast-Advance-Fall `-05` bleibt unvollständig klassifiziert. Ein Limit
+beweist allein keine falsche Einzelwahl; Verlauf, verbleibende Mittel und
+legale Alternativen sind dafür gesondert zu prüfen.
 
-Die Korrekturen folgen dem Plan-first-Vertrag:
+## Interpretation und nächste Abnahme
 
-- irreversible Kredit-/Schuldenaktionen gehören ausschließlich zum exakt
-  gebundenen Elternplan und nicht zu generischer Liquidität oder Development;
-- ein Recurring-Economy-Hold besitzt nur konkrete produktive Halteschritte,
-  niemals EndTurn bei verbleibender nutzbarer Kapazität;
-- Search-Choices erhalten strukturierte Source-Bindungen und vervollständigen
-  nur die Payload der bereits gewählten LegalAction;
-- regelgenerierte Runner-Start-of-turn-Reihenfolgen werden in einem engen,
-  deterministischen Window-Resolver aufgelöst;
-- optionale Program-Trash-Installationen und Defense-Reaktionsreserven haben
-  jeweils genau einen aktuell zuständigen Owner.
+Die Ausgangsmessung ist Fehlernachweis und aktueller Nenner. Wegen Runtime- und
+Limitpartien sind ihre Verhaltensraten am Beobachtungshorizont begrenzt. Ein
+späterer reparierter Lauf mit mehr vollständigen Entscheidungen begründet
+allein kein Qualitäts- oder Stärkedelta. Slots, Deckfingerprints, Seedreihenfolge,
+Aktionslimit und Controller müssen vor jedem Vergleich identisch sein. Erst ein
+grüner aktueller Stand darf eine akzeptierte Referenz werden. Die automatisch
+erzeugte Markdown-Schlusszeile über eine eingefrorene Referenz überstimmt
+diesen Gatevertrag bei einem roten Ergebnis nicht.
 
-## Verhaltenswerte und Aussagegrenze
-
-Die grüne Commit-Referenz misst absolut:
-
-- Missed Score Window Rate: 0,146 bei 103 Fenstern;
-- Advanced Remote Contest Skip Rate: 0,831 bei 556 Gelegenheiten;
-- Plan Conversion Rate innerhalb von drei Entscheidungen: 0,688 bei 3.694
-  abgeschlossenen Planintents;
-- Strategic No-Progress: 3,185 je 100 Entscheidungen;
-- Clearly Dominated Plan Choices: 0;
-- Trace Findings: 1,268 je 100 Entscheidungen;
-- durchschnittlich 233,9 Aktionen und 32,817 Züge je Partie.
-
-Die Deltas zur roten Ausgangsbeobachtung sind keine belastbare
-Spielstärke-Aussage. Dort endeten viele Partien am ersten Runtimefehler und
-lieferten nur 6.963 Entscheidungen beziehungsweise durchschnittlich 116,05
-Aktionen. Der grüne Stand beobachtet damit ungefähr die doppelte Spieltiefe.
-Höhere Missed-Score-, Contest-Skip-, No-Progress- und Finding-Raten können
-daher aus neu erreichten späten Spielzuständen stammen. Künftige
-Verhaltensvergleiche verwenden die nächste saubere, committete grüne Referenz.
-
-Die auffälligsten aktuellen Beobachtungsfelder bleiben:
-
-- `strategy_panel_net_damage_black_ice`: Missed Score 0,375 und Contest-Skip
-  0,949;
-- `strategy_panel_hybrid_score_punish_cheap_bag`: Plan Conversion 0,603,
-  No-Progress 5,098/100 und Contest-Skip 0,878;
-- alle Action-Capacity- und Persistent-Install-Raten sind `n/a`, weil das
-  Standardpanel keine qualifizierenden Gelegenheiten erzeugte.
-
-## Sinnvolle Messergänzungen
-
-Priorität 1:
-
-- `worktreeDirty` und ein Diff-Fingerprint im Benchmarkvertrag;
-- Entscheidungstiefe bis zum ersten Hard Failure sowie vollständig erreichte
-  Entscheidungen pro Slot und Seed;
-- verhaltensmetrische Deltas nur auf gemeinsam erreichten Horizonten oder
-  getrennt nach Early-, Mid- und Late-Game;
-- Zähler für Owner-Integrität: doppelte Dispositionen, produktive Aktionen
-  ohne Owner, Route/Disposition-Konflikte und unvollständige Choice-Origin-
-  Bindungen.
-
-Priorität 2:
-
-- Contest-Skips nach `unreachable`, `unaffordable`, `known_no_payoff` und
-  echter verpasster positiver Gelegenheit aufteilen;
-- Plan Conversion nach Planmodul und Abbruchursache statt nur aggregiert;
-- Search-Effektivität messen: Ziel nach Reveal verfügbar, gewählte Alternative
-  und Schließen der Coverage-Lücke innerhalb von N Entscheidungen;
-- Debt-Financing nur als gebundene Nutzung messen, einschließlich erhaltener
-  Exit-/Liability-Reserve;
-- Start-of-turn-Reihenfolgen mit unmittelbarem Wertunterschied protokollieren;
-- gezielte Zusatzpanels für Action Capacity und Persistent Installs ergänzen,
-  statt `n/a` als unauffälliges Ergebnis zu lesen.
-
-## Verifikation und offene breite Gates
-
-- Baseline-Regressions-, Runner-Core-Plan- und Search-Builder-Tests: 58 grün;
-- `plan-first-live-runtime.test.ts`: 212 grün, ein Corp-Score-Funding-Test rot;
-- Engine-Typecheck, Formatierung, Diff-Check, `check:ai` und
-  `check:package-boundaries`: grün;
-- AI-Typecheck: nur vier fehlende historische CardSpec-Migrationsreport-JSONs;
-- vollständige AI-Shards: weiterhin rot, überwiegend durch die gleichzeitig
-  integrierte Originalset-Card-Audit-Umstellung mit ungültig gewordenen
-  Decision-Checkpoint-Hashes und Card-Hint-Goldens;
-- `check:engine-source-structure` hat unabhängig vom Fix einen internen
-  TypeScript-AST-Guard-Fehler im Prüfscript.
-
-Diese breiten Restbefunde ändern den grünen Runtime-/Replay-/Redaction-Status
-des Standardpanels nicht, müssen vor einem allgemeinen Release-Gate aber
-separat bereinigt werden.
+Die diagnostischen Deck-Unterprofile behalten ihre explizite Consumergrenze:
+`corpProfile.iceProfile` dient ausschließlich der Anzeige. Seine
+Programmtrash-Zählung muss kanonische `corp_ice.program_trash`-Signale je
+ICE-Kopie zählen; alte Rollenwörter sind kein Ersatz dafür. Die Korrektur
+SP-736 ist mit dem echten Syd-Standarddeck und einem reinen Schadens-ICE als
+Gegenfall geprüft. Der thematische Profiltest besteht mit 34/34 Tests. Sie
+ändert keine Planauswahl und begründet keinen behaupteten Stärkezuwachs.
