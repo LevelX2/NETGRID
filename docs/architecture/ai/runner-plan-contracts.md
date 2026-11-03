@@ -3656,6 +3656,9 @@ entzieht dem Provider seine Route. Die bisherige P4-/P5-Stufe bleibt erhalten;
 eine gleich schnelle gewöhnliche Einnahme, eine nötige Vorbereitung oder ein
 bereits zugelassener dringlicher Bankpfad wird nicht verdrängt. Genau eine
 ausreichende Bank wird gewählt; die anderen Bestände bleiben resident.
+Beim Wechsel aus einer produktiven Ladephase in die gebundene Auszahlung
+bleiben die bisherigen Ladeaktionen ausdrücklich abgelehnt und im Bank-Owner.
+Ein Phasenwechsel darf keine native Action aus der strengen Zuordnung verlieren.
 
 Diese begrenzte Route ersetzt mindestens zwei Basiscreditaktionen und lässt
 noch eine Installationsaktion im Restzug übrig. Sie zertifiziert nur die

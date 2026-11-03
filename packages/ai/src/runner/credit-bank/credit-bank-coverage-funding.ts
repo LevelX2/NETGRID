@@ -144,9 +144,9 @@ export function bindRunnerCreditBankCoverageFunding(
               ...s,
               phase: "cash_out",
               actionIds: [funding.actionId],
-              rejectedActionIds: (s.rejectedActionIds ?? []).filter(
-                (id) => id !== funding.actionId,
-              ),
+              rejectedActionIds: [
+                ...new Set([...(s.rejectedActionIds ?? []), ...s.actionIds]),
+              ].filter((id) => id !== funding.actionId),
               priorityClass: gap.priorityClass,
               coverageFunding: funding,
               value: 60 + missing,

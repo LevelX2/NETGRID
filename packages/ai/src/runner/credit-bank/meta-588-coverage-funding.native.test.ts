@@ -261,3 +261,43 @@ it("keeps a same-speed guaranteed income alternative and never publishes two ban
   );
   expect(supported.coverageGaps.filter((g) => g.bankFunding)).toHaveLength(1);
 });
+
+it("keeps full native action coverage when a building bank becomes a coverage payout", () => {
+  const f = JSON.parse(
+    readFileSync(
+      new URL(
+        root + "cp-meta588-broker-build-cashout-failure.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  expect(Object.values(f.validation)).toEqual(Array(9).fill(true));
+  restoreAiRuntimeCheckpoint(
+    f.input,
+    f.input.ownDeckSnapshot.deckSnapshotId,
+    f.runtime,
+  );
+  const d = chooseAiAction(f.input);
+  expect(d).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
+  expect(
+    f.input.legalActions.find(
+      (a: { actionId: string }) => a.actionId === d.actionId,
+    ),
+  ).toMatchObject({
+    type: "activated_card_ability",
+    payload: { cardImplementationAbilityKey: "withdraw_credits" },
+  });
+  const bank = residentPlanPortfolioSnapshot(f.input)!.instances.find(
+    (i) => i.moduleId === "runner.credit_bank" && i.phase === "cash_out",
+  )!;
+  const signal = (bank.moduleState as { signal: RunnerCreditBankSignal })
+    .signal;
+  const load = f.input.legalActions.find(
+    (a: { payload?: { cardImplementationAbilityKey?: string } }) =>
+      a.payload?.cardImplementationAbilityKey === "store_credits",
+  );
+  expect(load).toBeDefined();
+  expect(signal.rejectedActionIds).toContain(load.actionId);
+  expect(signal.actionIds).toEqual([d.actionId]);
+});
