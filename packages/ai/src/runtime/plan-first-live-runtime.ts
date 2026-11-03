@@ -3392,7 +3392,7 @@ function buildRunnerDomain(
     ),
   );
   const coverageBankSupport = bindRunnerCreditBankCoverageFunding(
-    input, candidates, coverageGaps, protectedCreditBanks,
+    input, candidates, coverageGaps, protectedCreditBanks, handDevelopment,
   );
   coverageGaps = coverageBankSupport.coverageGaps;
   const creditBanks = coverageBankSupport.creditBanks;

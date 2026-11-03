@@ -1,3 +1,5 @@
+import { evaluateRunnerHandDevelopment } from "../hand-development/hand-development-evaluation";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
 import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { readFileSync } from "node:fs";
@@ -49,19 +51,35 @@ function base() {
   const banks = port.instances
     .filter((i) => i.moduleId === "runner.credit_bank")
     .map((i) => (i.moduleState as { signal: RunnerCreditBankSignal }).signal);
+  const candidates = buildActionSemanticCandidates({
+    legalActions: f.input.legalActions,
+    observerSide: f.input.side,
+    stateVersion: f.input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+      f.input.playerView,
+    ),
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  });
+  const deck = f.input.ownDeckSnapshot,
+    capabilities = f.input.ownDeckCapabilities;
+  if (!deck || !capabilities) throw Error("Native fixture lacks deck context");
+  const development = evaluateRunnerHandDevelopment({
+    input: f.input,
+    actionCandidates: candidates,
+    deckCapabilities: capabilities,
+  });
   return {
     ...f,
+    input: {
+      ...f.input,
+      ownDeckSnapshot: deck,
+      ownDeckCapabilities: capabilities,
+    },
     gaps,
     banks,
-    candidates: buildActionSemanticCandidates({
-      legalActions: f.input.legalActions,
-      observerSide: f.input.side,
-      stateVersion: f.input.playerView.stateVersion,
-      visibleSourceDefinitionsByInstanceId:
-        visibleSourceDefinitionsByInstanceId(f.input.playerView),
-      cardSemanticProfilesByDefinitionId:
-        buildActionCardSemanticProfilesByDefinitionId(),
-    }),
+    candidates,
+    development,
   };
 }
 afterEach(resetResidentPlanPortfolioMemory);
@@ -79,7 +97,7 @@ it("funds the current Sentry answer with one sufficient bank and preserves P4, p
   const a = f.input.legalActions.find((a) => a.actionId === d.actionId)!;
   expect(a).toMatchObject({
     type: "activated_card_ability",
-    source: "runner_onr_v1_154_broker_3",
+    source: "runner_onr_v1_154_broker_2",
     payload: { cardImplementationAbilityKey: "withdraw_credits" },
   });
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
@@ -96,13 +114,14 @@ it("funds the current Sentry answer with one sufficient bank and preserves P4, p
   const signal = (bank.moduleState as { signal: RunnerCreditBankSignal })
     .signal;
   expect(signal).toMatchObject({
-    estimatedPayout: 3,
+    estimatedPayout: 9,
     priorityClass: "P4",
     coverageFunding: {
       stateVersion: 413,
-      gap: 3,
+      gap: 5,
+      targetCredits: 14,
       targetDefinitionId: "onr_v1_002_ai-boon",
-      replacedBasicClicks: 3,
+      replacedBasicClicks: 5,
     },
   });
   const parent = p.instances.find(
@@ -111,7 +130,7 @@ it("funds the current Sentry answer with one sufficient bank and preserves P4, p
   expect(parent.openNeedIds).toContain(bank.parentNeedId);
   expect(
     runnerCreditBankCoverageParentValue(parent, signal.coverageFunding!, 413),
-  ).toBe(63);
+  ).toBe(65);
   expect(
     runnerCreditBankCoverageParentValue(parent, signal.coverageFunding!, 414),
   ).toBeUndefined();
@@ -126,7 +145,7 @@ it("funds the current Sentry answer with one sufficient bank and preserves P4, p
     ),
   ).toBeUndefined();
 });
-it("the native payout and explicitly chosen install save two actions against three credit actions and the same install", () => {
+it("funds the full native install with one payout and lets the next normal decision install the answer", () => {
   const f = base(),
     sf = JSON.parse(
       readFileSync(
@@ -155,45 +174,48 @@ it("the native payout and explicitly chosen install save two actions against thr
     f.runtime,
   );
   const d = chooseAiAction(f.input);
-  function play(bank: boolean) {
-    let s = structuredClone(sf.state);
-    const ids = bank ? [d.actionId] : Array(3).fill("runner.gain_credit");
-    for (const id of ids) {
-      const z = applyAction(s, {
-        matchId: s.matchId,
-        side: "runner",
-        actionId: id,
-        clientKnownStateVersion: s.stateVersion,
-      });
-      expect(z.ok).toBe(true);
-      if (!z.ok) throw Error(z.error.message);
-      s = z.state;
-    }
-    const a = getLegalActions(s, "runner").find(
-      (a) =>
-        a.type === "install_card" && a.source === "runner_onr_v1_002_ai-boon_2",
+  if (!d.actionId) throw Error("Expected the quoted current payout action");
+  const z = applyAction(sf.state, {
+    matchId: sf.state.matchId,
+    side: "runner",
+    actionId: d.actionId,
+    clientKnownStateVersion: sf.state.stateVersion,
+  });
+  expect(z.ok).toBe(true);
+  if (!z.ok) throw Error(z.error.message);
+  expect(getPlayerView(z.state, "runner").own.credits).toBe(18);
+  const nextInput = buildAiDecisionInput(z.state, "runner", {
+    difficulty: f.input.difficulty,
+    profileId: f.input.profileId,
+    ownDeckSnapshot: f.input.ownDeckSnapshot,
+  });
+  const next = chooseAiAction(nextInput),
+    a = getLegalActions(z.state, "runner").find(
+      (a) => a.actionId === next.actionId,
     )!;
-    expect(a).toBeDefined();
-    const z = applyAction(s, {
-      matchId: s.matchId,
-      side: "runner",
-      actionId: a.actionId,
-      clientKnownStateVersion: s.stateVersion,
-    });
-    expect(z.ok).toBe(true);
-    if (!z.ok) throw Error(z.error.message);
-    return getPlayerView(z.state, "runner").own;
-  }
-  const old = play(false),
-    next = play(true);
-  expect(next.clicks).toBe(old.clicks + 2);
-  expect(next.credits).toBe(old.credits);
-  expect(next.rig!.map((c) => c.definitionId)).toEqual(
-    old.rig!.map((c) => c.definitionId),
+  expect(a).toMatchObject({
+    type: "install_card",
+    source: "runner_onr_v1_002_ai-boon_2",
+  });
+  expect(next).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
+  expect(next.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+    "runner.rig_and_coverage",
   );
-  expect(next.gripOrHq.map((c) => c.definitionId)).toEqual(
-    old.gripOrHq.map((c) => c.definitionId),
-  );
+  const zz = applyAction(z.state, {
+    matchId: z.state.matchId,
+    side: "runner",
+    actionId: a.actionId,
+    clientKnownStateVersion: z.state.stateVersion,
+  });
+  expect(zz.ok).toBe(true);
+  if (!zz.ok) throw Error(zz.error.message);
+  const own = getPlayerView(zz.state, "runner").own;
+  expect(own.credits).toBe(6);
+  expect(own.clicks).toBe(2);
+  expect(
+    own.rig!.find((c) => c.instanceId === "runner_onr_v1_154_broker_3")
+      ?.counters?.bit,
+  ).toBe(3);
 });
 it.each([
   "last_action",
@@ -203,8 +225,10 @@ it.each([
   "stale_cashout",
   "restricted_cashout",
   "preparation_required",
+  "missing_development_budget",
 ])("keeps ordinary coverage funding when %s", (mode) => {
   const f = base();
+  if (mode === "missing_development_budget") f.development.length = 0;
   if (mode === "last_action") f.input.playerView.own.clicks = 1;
   if (mode === "one_credit_gap") {
     f.gaps[0]!.fundingGap = 1;
@@ -228,6 +252,7 @@ it.each([
     f.candidates,
     f.gaps,
     f.banks,
+    f.development,
   );
   expect(z.creditBanks.some((b) => b.coverageFunding)).toBe(false);
   expect(z.coverageGaps.some((g) => g.bankFunding)).toBe(false);
@@ -240,14 +265,15 @@ it("keeps a same-speed guaranteed income alternative and never publishes two ban
   other.actionId = "quoted.other-income";
   other.actionType = "activated_card_ability";
   other.sourceKind = "card";
-  other.economyProjection!.netLiquidCreditGain = 3;
-  other.economyProjection!.grossLiquidCreditGain = 3;
+  other.economyProjection!.netLiquidCreditGain = 5;
+  other.economyProjection!.grossLiquidCreditGain = 5;
   expect(
     bindRunnerCreditBankCoverageFunding(
       f.input,
       [...f.candidates, other],
       f.gaps,
       f.banks,
+      f.development,
     ).creditBanks.some((b) => b.coverageFunding),
   ).toBe(false);
   const supported = bindRunnerCreditBankCoverageFunding(
@@ -255,6 +281,7 @@ it("keeps a same-speed guaranteed income alternative and never publishes two ban
     f.candidates,
     f.gaps,
     f.banks,
+    f.development,
   );
   expect(supported.creditBanks.filter((b) => b.coverageFunding)).toHaveLength(
     1,
@@ -281,23 +308,45 @@ it("keeps full native action coverage when a building bank becomes a coverage pa
   const d = chooseAiAction(f.input);
   expect(d).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
   expect(
-    f.input.legalActions.find(
+    f.input.legalActions.some(
       (a: { actionId: string }) => a.actionId === d.actionId,
     ),
-  ).toMatchObject({
-    type: "activated_card_ability",
-    payload: { cardImplementationAbilityKey: "withdraw_credits" },
-  });
-  const bank = residentPlanPortfolioSnapshot(f.input)!.instances.find(
-    (i) => i.moduleId === "runner.credit_bank" && i.phase === "cash_out",
-  )!;
-  const signal = (bank.moduleState as { signal: RunnerCreditBankSignal })
-    .signal;
-  const load = f.input.legalActions.find(
-    (a: { payload?: { cardImplementationAbilityKey?: string } }) =>
-      a.payload?.cardImplementationAbilityKey === "store_credits",
+  ).toBe(true);
+  const p = residentPlanPortfolioSnapshot(f.input)!;
+  expect(
+    p.instances
+      .filter((i) => i.moduleId === "runner.credit_bank")
+      .every(
+        (i) =>
+          !(i.moduleState as { signal: RunnerCreditBankSignal }).signal
+            .coverageFunding,
+      ),
+  ).toBe(true);
+});
+
+it("retains old productive load IDs when a sufficient building bank is rebound to payout", () => {
+  const f = base();
+  for (const bank of f.banks) {
+    bank.phase = "build";
+    bank.actionIds = f.candidates
+      .filter(
+        (c) =>
+          c.sourceCardInstanceId === bank.bankId &&
+          c.planOwnerBinding?.route === "build",
+      )
+      .map((c) => c.actionId);
+  }
+  const z = bindRunnerCreditBankCoverageFunding(
+    f.input,
+    f.candidates,
+    f.gaps,
+    f.banks,
+    f.development,
   );
-  expect(load).toBeDefined();
-  expect(signal.rejectedActionIds).toContain(load.actionId);
-  expect(signal.actionIds).toEqual([d.actionId]);
+  const bank = z.creditBanks.find((b) => b.coverageFunding)!;
+  expect(bank.coverageFunding).toBeDefined();
+  const old = f.banks.find((b) => b.bankId === bank.bankId)!;
+  expect(old.actionIds.length).toBeGreaterThan(0);
+  for (const id of old.actionIds) expect(bank.rejectedActionIds).toContain(id);
+  expect(bank.rejectedActionIds).not.toContain(bank.coverageFunding!.actionId);
 });

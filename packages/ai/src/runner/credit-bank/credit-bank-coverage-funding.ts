@@ -3,6 +3,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import type { PlanInstance } from "../../plans/plan-kernel-types";
 import { runnerStrategicExchangeRequiresBoundParent } from "../../runtime/runner-strategic-exchange";
+import type { RunnerHandDevelopmentEvaluation } from "../hand-development/runner-hand-development-types";
 import type { CoverageState } from "../rig-coverage/coverage-types";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
 
@@ -14,6 +15,7 @@ export function bindRunnerCreditBankCoverageFunding(
   candidates: readonly ActionSemanticCandidate[],
   gaps: readonly RunnerCoverageGapSignal[],
   signals: readonly RunnerCreditBankSignal[],
+  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
 ): {
   coverageGaps: RunnerCoverageGapSignal[];
   creditBanks: RunnerCreditBankSignal[];
@@ -39,16 +41,16 @@ export function bindRunnerCreditBankCoverageFunding(
   );
   if (!basic) return unchanged();
   for (const gap of gaps) {
-    const missing = gap.fundingGap;
+    const installGap = gap.fundingGap;
     if (
       !gap.answerInHand ||
       !gap.handAnswerDefinitionId ||
       (gap.priorityClass !== "P4" && gap.priorityClass !== "P5") ||
-      typeof missing !== "number" ||
-      !Number.isSafeInteger(missing) ||
-      missing < 2 ||
-      missing > clicks - 1 ||
-      gap.answerInstallCost !== input.playerView.own.credits + missing ||
+      typeof installGap !== "number" ||
+      !Number.isSafeInteger(installGap) ||
+      installGap < 2 ||
+      installGap > clicks - 1 ||
+      gap.answerInstallCost !== input.playerView.own.credits + installGap ||
       gap.sameTurnRunConversion ||
       (gap.preparationActionIds?.length ?? 0) > 0 ||
       (gap.installActionIds?.length ?? 0) > 0 ||
@@ -59,6 +61,20 @@ export function bindRunnerCreditBankCoverageFunding(
       )
     )
       continue;
+    const development = handDevelopment.find(
+      (e) =>
+        e.definitionId === gap.handAnswerDefinitionId &&
+        e.fundingNeed?.installOrPlayCost === gap.answerInstallCost,
+    );
+    const targetCredits = development?.fundingNeed?.targetCredits;
+    if (
+      targetCredits === undefined ||
+      !Number.isSafeInteger(targetCredits) ||
+      targetCredits < gap.answerInstallCost!
+    )
+      continue;
+    const missing = targetCredits - input.playerView.own.credits;
+    if (missing < installGap) continue;
     const ordinaryFasterIncome = candidates.some((c) => {
       const p = c.economyProjection;
       return (
@@ -127,7 +143,7 @@ export function bindRunnerCreditBankCoverageFunding(
         "plan:runner.rig_and_coverage:" + encodeURIComponent(gap.gapId),
       gapId: gap.gapId,
       targetDefinitionId: gap.handAnswerDefinitionId,
-      targetCredits: gap.answerInstallCost,
+      targetCredits,
       gap: missing,
       bankId: option.signal.bankId,
       actionId: option.candidate.actionId,
@@ -135,7 +151,7 @@ export function bindRunnerCreditBankCoverageFunding(
     };
     return {
       coverageGaps: gaps.map((g) =>
-        g === gap ? { ...g, bankFunding: funding } : g,
+        g === gap ? { ...g, fundingGap: missing, bankFunding: funding } : g,
       ),
       creditBanks: signals.map((s) =>
         s !== option.signal
@@ -184,7 +200,8 @@ export function runnerCreditBankCoverageParentValue(
     state.gap.fundingGap === need.gap &&
     state.gap.bankFunding?.needId === need.needId &&
     state.gap.bankFunding.stateVersion === stateVersion &&
-    state.gap.bankFunding.actionId === need.actionId
+    state.gap.bankFunding.actionId === need.actionId &&
+    state.gap.bankFunding.targetCredits === need.targetCredits
     ? 60 + need.gap
     : undefined;
 }

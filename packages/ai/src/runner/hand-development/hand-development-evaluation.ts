@@ -1586,10 +1586,19 @@ function fundingNeedForCard(
     persistentInstallEvaluation.reservePenalty <= -900
       ? installOrPlayCost + minimumCreditFloorForPersistentInstall(input)
       : undefined;
+  // The funding goal must include the same protected floor before an
+  // affordable LegalAction exists. This is a budget, not a future action.
+  const breakerFloorTargetCredits =
+    context.card.type === "program" &&
+    installOrPlayCost > 0 &&
+    looksLikeBreaker(context.card, context.signals.text)
+      ? installOrPlayCost + minimumCreditFloorForPersistentInstall(input)
+      : undefined;
   const targetCredits = Math.max(
     installOrPlayCost,
     safeInstallTargetCredits ?? 0,
     hardFloorTargetCredits ?? 0,
+    breakerFloorTargetCredits ?? 0,
   );
   if (
     availability !== "missing_credits" &&

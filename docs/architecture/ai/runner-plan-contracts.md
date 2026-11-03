@@ -3660,6 +3660,14 @@ Beim Wechsel aus einer produktiven Ladephase in die gebundene Auszahlung
 bleiben die bisherigen Ladeaktionen ausdrücklich abgelehnt und im Bank-Owner.
 Ein Phasenwechsel darf keine native Action aus der strengen Zuordnung verlieren.
 
+Der Entwicklungs-Owner berechnet das Breakerbudget einschließlich seines
+aktuellen geschützten Creditbodens bereits vor der ersten bezahlbaren
+Installationsaction. Der Bank-Owner konsumiert diesen typisierten Bedarf und
+wählt die kleinste Bank, die das vollständige Budget in einer Auszahlung deckt.
+Ein bloß ausreichender Installationspreis rechtfertigt keine Teilfinanzierung,
+die unmittelbar eine zweite Auszahlung erfordert. Aktuelle Ausgabenreserve,
+Phase und höher priorisierte Run-/Defense-Bindungen bleiben zuständig.
+
 Diese begrenzte Route ersetzt mindestens zwei Basiscreditaktionen und lässt
 noch eine Installationsaktion im Restzug übrig. Sie zertifiziert nur die
 aktuelle Auszahlung, keine zukünftige Installations- oder Run-Action. Nach
