@@ -1,3 +1,4 @@
+import { runnerPartialProgramSearchProfile } from "../../runtime/runner-partial-program-search-facts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -29,8 +30,17 @@ export function runnerAffordableCoverageSearchActionIds(
     const action = input.legalActions.find((a) => a.actionId === actionId);
     const candidate = candidates.find((c) => c.actionId === actionId);
     if (
-      action?.payload?.cardImplementationEffectKind !==
-        "search_stack_to_grip" ||
+      !action ||
+      runnerPartialProgramSearchProfile(input, binding?.sourceDefinitionId) !==
+        undefined ||
+      candidate?.functionalEffects?.some(
+        (effect) =>
+          effect.kind === "search" &&
+          effect.scope === "stack" &&
+          (effect.target === "program" ||
+            effect.target === "card" ||
+            effect.target === "any_card"),
+      ) !== true ||
       candidate?.costProfile.costKnownStatus !== "known" ||
       candidate.costProfile.creditCost === undefined ||
       target?.confidence !== "high" ||

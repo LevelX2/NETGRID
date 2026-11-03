@@ -991,6 +991,12 @@ Such- und Installationskosten, freie Handkapazität, bekannte eigene
 Stack-Verfügbarkeit und freie MU. Nur die vollständig finanzierte Beschaffung
 erhält die Suchphase und Action-Ownership; eine direkt bezahlbare Handantwort
 und eine bereits zertifizierte Konversion im selben Zug behalten Vorrang.
+Die Suchzulassung konsumiert die an diese aktuelle Action gebundenen
+kanonischen Funktionseffekte für vollständige Stack-Suche. Ein veraltetes
+zusätzliches Payload-Diagnosefeld ist keine Voraussetzung. Begrenzte
+Stack-Spitzensuche und Heap-Rückholung erhalten dadurch keinen garantierten
+Stack-Beschaffungsnachweis. Paarung587/Runde2/G36/D159 sichert Temple vor
+weiterem Ansparen auf die zehnCredit-Handantwort.
 Die gestufte Suche verspricht keinen sofortigen Run. Nach der gebundenen
 Such-Choice wird die tatsächliche Installation neu materialisiert.
 
