@@ -1019,6 +1019,10 @@ export function buildRunnerRemoteContestSignals({
           );
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+        const exactTerminalPayoffOverridesNegativeRiskScore =
+          runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
+          runnerRunHasExactUrgency(input, evaluation) &&
+          evaluation.recommendation === "run_now";
         const coverageSupport = coverageGaps.some(
           (gap) =>
             gap.requesterModuleId === "runner.contest_remote" &&
@@ -1032,7 +1036,8 @@ export function buildRunnerRemoteContestSignals({
               evaluation.recommendation === "run_if_free" ||
               evaluation.recommendation === "gain_credits_first" ||
               productiveProbeCanConvertNow) &&
-            evaluation.score > 0) ||
+            (evaluation.score > 0 ||
+              exactTerminalPayoffOverridesNegativeRiskScore)) ||
             terminalRemoteContestIsDirectlyMandatory ||
             irrecoverableScoreThreatContest ||
             coverageSupport ||

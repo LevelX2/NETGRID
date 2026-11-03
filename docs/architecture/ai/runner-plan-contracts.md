@@ -547,6 +547,17 @@ importiert die Live-Runtime oder eine Planregistry zurück.
 
 ## 3. `runner.contest_remote`
 
+Der vorgelagerte Materialfilter erhält eine öffentlich belegte terminale
+Remote-Frist auch bei negativem allgemeinem Risikowert, wenn die exakte
+aktuelle Runquote bereits `reachable` und `run_now` ausweist. Dieselbe
+Dringlichkeitsregel gilt bei der anschließenden Bindung der konkreten Action.
+Die vorhandenen Prüfungen auf Vorabreserve, Finanzierung, Vorbereitung,
+kritischen Schaden, Wiederholung eines gescheiterten Pfads und konkreten
+Zugriff bleiben wirksam. Das schafft keinen garantierten Steal aus einer
+verdeckten Agenda und öffnet keine Route mit fehlender Abdeckung. Die
+Entscheidung bleibt beim bestehenden Remote-Owner und dessen gebundener
+Run-Action, statt vor dessen Aufnahme am gewöhnlichen Materialwert zu enden.
+
 Bei leerer Grip und leerem Stack darf der bestehende Contest-Owner seine
 letzte öffentlich belegte terminale Chance mit einem riskanten Zufallsbruch
 zulassen. Der begrenzte Nachweis verlangt einen aktuellen Basisrun, vollständig
