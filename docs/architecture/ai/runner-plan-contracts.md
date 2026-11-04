@@ -4236,3 +4236,7 @@ bestehende Abwägung. Der aktive Run-Owner beendet nach öffentlich eingetretene
 kritischem Schaden auch einen ungebundenen zentralen Zugriff mit einer
 verbleibenden Handkarte, sofern die Engine jetzt einen Abbruch anbietet.
 Gebundene Agenda-/Score-Threat-Ziele bleiben erhalten.
+
+### Gebundene Coverage-Suche im exklusiven Zahlungsfenster
+
+Ein exklusives Engine-Zahlungsfenster bietet vorübergehend keine normalen Run- und Suchköpfe an. Diese eingeschränkte Angebotsmenge erfüllt oder ersetzt die bereits gewählte Coverage-Suche nicht. Bei der vorhandenen, exakt verifizierten Zahlungsabstammung erhält der Coverage-Bindungsowner deshalb die ursprüngliche Suchphase, Suchzielbindung und Ausführungsbereitschaft. Eine abweichende Rolle, fehlende Ursprungsbindung oder zerstörte Parent-/Need-Kette bleibt ein sichtbarer Fehler; es werden keine fehlenden Pläne oder Suchziele erfunden.

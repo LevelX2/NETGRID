@@ -269,7 +269,6 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     previousSearchOriginIsExact &&
     nextExecutor?.moduleId === "runner.rig_and_coverage" &&
     nextState?.kind === "coverage" &&
-    nextState.phase === "search_answer" &&
     previousState.gap?.requiredRole === nextState.gap?.requiredRole;
   if (!nextExecutor || !nextState || !exactSearchBinding) {
     throw new PlanResolutionFailure("invalid_support_graph", {
@@ -286,8 +285,14 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     });
   }
   preserveCoveragePaymentAncestry(input, previous!, result.portfolio, pending);
+  nextExecutor.viability = previousExecutor.viability;
+  nextExecutor.blockers = structuredClone(previousExecutor.blockers);
+  // Exclusive payment actions cannot rediscover the ordinary run and search
+  // offers. Retain the already selected search phase with its exact binding;
+  // the restricted offer set has not completed or replaced that search.
   nextExecutor.moduleState = {
     ...nextState,
+    phase: "search_answer",
     gap: structuredClone(previousState.gap),
     selectedSearchActionId: pending.originalActionId,
     selectedSearchStateVersion: pending.selectedAtStateVersion,
