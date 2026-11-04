@@ -363,6 +363,24 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       executor?.executionState === "executor" &&
       (executor.moduleId === "runner.contest_remote" ||
         executor.moduleId === "runner.pressure_central");
+    const directRunRootTraceContinuationIsBound =
+      traceOriginOwnedDirectlyByRunRoot &&
+      traceStartIndex === 0 &&
+      traceStart?.publicPayload.traceId === trace?.traceId &&
+      trace?.sourceCardInstanceId === run?.encounteredIce?.instanceId &&
+      traceStart?.publicPayload.sourceDefinitionId ===
+        run?.encounteredIce?.definitionId &&
+      traceSuffix.every(
+        (event) => event.publicPayload.traceId === trace?.traceId,
+      ) &&
+      pending?.rootPlanInstanceId === rootPlanInstanceId &&
+      pending.executorInstanceId === executorInstanceId &&
+      pending.selectedAtStateVersion === previous?.stateVersion &&
+      pending.sourceStepId === `run.encounter_ice:${previous?.stateVersion}` &&
+      pending.originalActionId.startsWith("runner.continue_run.") &&
+      executorState?.signal?.serverId === run?.attackedServerId &&
+      root?.target.kind === "server" &&
+      root.target.id === run?.attackedServerId;
     const exactRunTraceBidOrigin =
       previous !== undefined &&
       rootPlanInstanceId !== undefined &&
@@ -372,7 +390,8 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       root?.side === "runner" &&
       executor?.side === "runner" &&
       ((traceOriginOwnedByRunWindowLeaf && traceStartIndex === 0) ||
-        (traceOriginOwnedDirectlyByRunRoot && directRunRootPrefixIsBound)) &&
+        (traceOriginOwnedDirectlyByRunRoot && directRunRootPrefixIsBound) ||
+        directRunRootTraceContinuationIsBound) &&
       choice?.side === "runner" &&
       choice.kind === "bid_amount" &&
       choice.source.startsWith(`trace:${run?.runId}.`) &&
@@ -415,8 +434,15 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       result.portfolio.executorInstanceId === executorInstanceId &&
       root?.side === "runner" &&
       executor?.side === "runner" &&
-      traceOriginOwnedByRunWindowLeaf &&
-      executorState?.signal?.windowId === `run:${run?.runId}` &&
+      ((traceOriginOwnedByRunWindowLeaf &&
+        executorState?.signal?.windowId === `run:${run?.runId}`) ||
+        (traceOriginOwnedDirectlyByRunRoot &&
+          completedSelectedTrace &&
+          pending?.rootPlanInstanceId === rootPlanInstanceId &&
+          pending.executorInstanceId === executorInstanceId &&
+          executorState?.signal?.serverId === run?.attackedServerId &&
+          root?.target.kind === "server" &&
+          root.target.id === run?.attackedServerId)) &&
       !choice &&
       !trace &&
       selectedAction?.side === "runner" &&

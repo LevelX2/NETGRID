@@ -276,3 +276,7 @@ Die importierten Paarungen, Spiele, Fälle, Fixe und exakten HTML-Fassungen
 bleiben in der lokalen Registry und ihren Sicherungen erhalten. Neue Jobs
 schreiben ausschließlich Registry-Bundles und lokale, daraus reproduzierbare
 Berichte.
+
+## Vollständige Ereignisse eines aktiven Diagnosepräfixes
+
+Bei einer aktiven Partie begrenzt die Maintenance-API die Ereignisse auf den ausdrücklich abgefragten Entscheidungsbereich. Eine ungescopte Abfrage kann deshalb trotz `hasMoreEvents=false` vor dem neuesten aktiven Zustand enden. Für die Diagnose aller erfassten Entscheidungen werden explizite, lückenlose Entscheidungsfenster abgefragt. Überlappende Ereignisse müssen identisch sein; Ereignisindizes, letzter StateHash und StateVersion müssen zum aktiven Endzustand passen. Ein so geprüftes Präfix bleibt nichtterminal und erhält weder Gewinner noch einen Platz im finalen Spielnenner. Ein größeres Aktionsbudget wird für einen neuen vollständigen Kontrolllauf vorab gebunden; eine ausgeschöpfte ursprüngliche Runde wird nicht nachträglich verlängert.
