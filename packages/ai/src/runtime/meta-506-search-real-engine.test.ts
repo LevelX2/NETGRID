@@ -195,12 +195,19 @@ function complete(state: GameState, target: string) {
   expect(state.pendingChoice).toBeUndefined();
   return state;
 }
-it("binds each actual source to its affordable target, preserving free installation", () => {
+it("binds the permanent source to its affordable target and excludes temporary recurring-income development", () => {
   const { state, input, candidates, signals } = fixture(9);
   const paid = signals.find((s) => s.definitionId === locker)!;
   const free = signals.find((s) => s.definitionId === sneak)!;
   expect(paid.programSearchCommitment?.targetDefinitionId).toBe(vewy);
-  expect(free.programSearchCommitment?.targetDefinitionId).toBe(cloak);
+  expect(free).toBeUndefined();
+  const temporarySource = candidates.find(
+    (c) => c.sourceDefinitionId === sneak && c.actionType === "play_event",
+  )!;
+  // Free installation is executable, but its end-of-turn bounce cannot establish recurring economy.
+  expect(
+    runnerDevelopmentSearchTargetIsExecutable(input, temporarySource, cloak),
+  ).toBe(true);
   const source = candidates.find(
     (c) =>
       c.sourceDefinitionId === locker && paid.actionIds.includes(c.actionId),
@@ -208,10 +215,7 @@ it("binds each actual source to its affordable target, preserving free installat
   expect(runnerDevelopmentSearchTargetIsExecutable(input, source, cloak)).toBe(
     false,
   );
-  for (const [signal, target, remaining] of [
-    [paid, vewy, 0],
-    [free, cloak, 6],
-  ] as const) {
+  for (const [signal, target, remaining] of [[paid, vewy, 0]] as const) {
     const installed = complete(
       apply(structuredClone(state), signal.actionIds[0]!),
       target,
@@ -223,6 +227,30 @@ it("binds each actual source to its affordable target, preserving free installat
       ),
     ).toContain(target);
   }
+});
+it("preserves Sneak Preview's real free install cost and its end-of-turn return", () => {
+  const { state, candidates } = fixture(9);
+  const source = candidates.find(
+    (c) => c.sourceDefinitionId === sneak && c.actionType === "play_event",
+  )!;
+  let next = complete(apply(state, source.actionId), cloak);
+  expect(next.runner.credits).toBe(6);
+  const id = next.runner.rig.programs.find(
+    (id) => next.cardInstances[id]!.definitionId === cloak,
+  )!;
+  expect(id).toBeDefined();
+  while (next.runner.clicks > 0) {
+    const gain = getLegalActions(next, "runner").find(
+      (a) => a.type === "gain_credit",
+    )!;
+    next = apply(next, gain.actionId);
+  }
+  const end = getLegalActions(next, "runner").find(
+    (a) => a.type === "end_turn",
+  )!;
+  next = apply(next, end.actionId);
+  expect(next.runner.rig.programs).not.toContain(id);
+  expect(next.runner.grip).toContain(id);
 });
 it("does not promise direct installation without MU while retaining staged searches", () => {
   const { input, candidates, signals } = fixture(9, true);

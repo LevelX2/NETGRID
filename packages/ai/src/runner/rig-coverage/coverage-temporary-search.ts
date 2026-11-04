@@ -87,7 +87,12 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
     const acquireThenInstall =
       !temporary &&
       modes.size === 0 &&
-      source?.payload?.cardImplementationEffectKind === "search_trash_to_grip";
+      (source?.payload?.cardImplementationEffectKind ===
+        "search_stack_to_grip" ||
+        source?.payload?.cardImplementationEffectKind ===
+          "search_trash_to_grip" ||
+        source?.payload?.cardImplementationEffectKind ===
+          "move_top_trash_to_grip");
     if (
       !source ||
       !run ||

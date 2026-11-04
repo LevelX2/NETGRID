@@ -28298,7 +28298,20 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [run, junkyard, credit]);
     input.playerView.own.credits = 11;
-    input.playerView.own.clicks = 2;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.memoryUsed = 0;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+      visibleCard("livewire", "runner", "event", {
+        definitionId: "onr_v1_097_livewires-contacts",
+      }),
+      visibleCard("bodyweight", "runner", "event", {
+        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+      }),
+    ];
     input.playerView.opponent.agendaPoints = 6;
     input.playerView.agendaPointsToWin = 7;
     input.playerView.own.rig = [
@@ -28311,15 +28324,19 @@ describe("authoritative plan-first live runtime", () => {
         definitionId: "onr_classic_031_rent-i-con",
         title: "Rent-I-Con",
         subtypes: ["icebreaker", "ai"],
-        rulesText: "1 credit: Break 1 ice subroutine.",
+        rulesText:
+          CARD_DEFINITIONS_BY_ID["onr_classic_031_rent-i-con"]!.rulesText,
+        installCost: 3,
+        memoryCost: 2,
+        strength: 2,
       }),
     ];
     const remote = server("remote_1", [
       quotedFixtureIce({
         instanceId: "remote-wall",
-        definitionId: "test-remote-wall",
-        title: "Remote Wall",
-        strength: 3,
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        strength: 0,
         subtypes: ["wall"],
       }),
     ]);
@@ -28330,6 +28347,12 @@ describe("authoritative plan-first live runtime", () => {
         advancementCounters: 2,
       },
     ];
+    remote.runnerAgendaStealCostQuote = {
+      stateVersion: input.playerView.stateVersion,
+      serverId: remote.id,
+      minimumCreditCost: 0,
+      complete: true,
+    };
     input.playerView.servers = [
       server("hq"),
       server("rd"),
@@ -28348,13 +28371,12 @@ describe("authoritative plan-first live runtime", () => {
     };
 
     const decision = liveContext({
-      deckCapabilitiesForInput: () => ({
-        runner: {
-          breakerInventory: [],
-          searchAccess: { tools: [] },
-          economyBankTools: [],
-        },
-      }),
+      deckCapabilitiesForInput: (current: AiDecisionInput) =>
+        buildDeckCapabilityProfileFromInput(current, {
+          deckSnapshotId: "exact-top-heap-recovery",
+          side: "runner",
+          cards: [{ cardId: "onr_classic_031_rent-i-con", quantity: 1 }],
+        }),
       evaluateRunnerRunTargets: () => [target],
     }).chooseSemanticRuntimeAction(input, {});
 
@@ -28377,13 +28399,12 @@ describe("authoritative plan-first live runtime", () => {
       (candidate) => candidate.id === "remote_1",
     )!.root[0]!.advancementCounters = 0;
     liveContext({
-      deckCapabilitiesForInput: () => ({
-        runner: {
-          breakerInventory: [],
-          searchAccess: { tools: [] },
-          economyBankTools: [],
-        },
-      }),
+      deckCapabilitiesForInput: (current: AiDecisionInput) =>
+        buildDeckCapabilityProfileFromInput(current, {
+          deckSnapshotId: "exact-top-heap-recovery",
+          side: "runner",
+          cards: [{ cardId: "onr_classic_031_rent-i-con", quantity: 1 }],
+        }),
       evaluateRunnerRunTargets: () => [target],
     }).chooseSemanticRuntimeAction(unadvanced, {});
     const unadvancedCoverage = residentPlanPortfolioSnapshot(
@@ -28422,13 +28443,12 @@ describe("authoritative plan-first live runtime", () => {
       pathPassability: "blocked_unbreakable" as const,
     };
     const focusedDecision = liveContext({
-      deckCapabilitiesForInput: () => ({
-        runner: {
-          breakerInventory: [],
-          searchAccess: { tools: [] },
-          economyBankTools: [],
-        },
-      }),
+      deckCapabilitiesForInput: (current: AiDecisionInput) =>
+        buildDeckCapabilityProfileFromInput(current, {
+          deckSnapshotId: "exact-top-heap-recovery",
+          side: "runner",
+          cards: [{ cardId: "onr_classic_031_rent-i-con", quantity: 1 }],
+        }),
       evaluateRunnerRunTargets: () => [unbreakableTarget],
     }).chooseSemanticRuntimeAction(repeatedScoringRemote, {});
 
@@ -28468,18 +28488,24 @@ describe("authoritative plan-first live runtime", () => {
       (candidate) => candidate.id === "remote_1",
     )!.root = [
       visibleCard("advanced-remote-agenda", "corp", "agenda", {
-        definitionId: "test-remote-agenda",
+        definitionId: "onr_v1_193_corporate-coup",
         advancementCounters: 2,
+        effectiveStealCostQuote: {
+          stateVersion: input.playerView.stateVersion,
+          serverId: "remote_1",
+          agendaInstanceId: "advanced-remote-agenda",
+          creditCost: 0,
+          complete: true,
+        },
       }),
     ];
     const visibleAgendaDecision = liveContext({
-      deckCapabilitiesForInput: () => ({
-        runner: {
-          breakerInventory: [],
-          searchAccess: { tools: [] },
-          economyBankTools: [],
-        },
-      }),
+      deckCapabilitiesForInput: (current: AiDecisionInput) =>
+        buildDeckCapabilityProfileFromInput(current, {
+          deckSnapshotId: "exact-top-heap-recovery",
+          side: "runner",
+          cards: [{ cardId: "onr_classic_031_rent-i-con", quantity: 1 }],
+        }),
       evaluateRunnerRunTargets: () => [unbreakableTarget],
     }).chooseSemanticRuntimeAction(visibleAgendaRemote, {});
 

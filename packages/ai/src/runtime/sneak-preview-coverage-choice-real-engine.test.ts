@@ -210,7 +210,7 @@ function runHistoricalSneakPreviewCoveragePath() {
   let state = runnerMainState("last-call-cheap-bag-20260814-sneak-preview");
   const fixture = RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(4)
-    .withRunnerClicks(1)
+    .withRunnerClicks(4)
     .withRunnerGripSize(0)
     .withRunnerCardInGrip("onr_v1_110_sneak-preview")
     .withRunnerCardInGrip("onr_v1_045_newsgroup-filter")
@@ -218,7 +218,9 @@ function runHistoricalSneakPreviewCoveragePath() {
     .withRunnerProgramInstalled("onr_v1_074_worm")
     .withRunnerProgramInstalled("onr_v1_017_deep-thought")
     .withRezzedCorpIceOnServer("hq", "onr_v1_244_filter")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_261_quandary");
+    .withRezzedCorpIceOnServer("rd", "onr_v1_261_quandary")
+    .withCorpRemoteRoot("remote_1", "onr_v1_220_tycho-extension", 2)
+    .withRezzedCorpIceOnServer("remote_1", "onr_v1_244_filter");
   moveRunnerCardToStack(state, "onr_v1_014_codecracker");
 
   const openingInput = runnerInput(state);
@@ -319,8 +321,9 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
     MUMIE_DECK,
   );
   RealEngineFixtureBuilder.forState(state)
-    .withRunnerCredits(5)
-    .withRunnerClicks(1)
+    .withRunnerCredits(10)
+    // Three for Sneak, four for the known Bolter route, three retained reserve.
+    .withRunnerClicks(4)
     .withRunnerGripSize(0)
     .withRunnerCardInGrip("onr_v1_110_sneak-preview")
     .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
@@ -332,7 +335,9 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
     .withRezzedCorpIceOnServer("hq", "onr_v1_224_bolter-cluster")
     .withRezzedCorpIceOnServer("rd", "onr_v1_237_data-wall")
     .withRezzedCorpIceOnServer("rd", "onr_v1_238_data-wall-2-0")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall");
+    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall")
+    .withCorpRemoteRoot("remote_1", "onr_v1_193_corporate-coup", 2)
+    .withRezzedCorpIceOnServer("remote_1", "onr_v1_224_bolter-cluster");
   state.runner.memoryUsed = 3;
   const heapRentIConId = moveRunnerCardToHeap(
     state,

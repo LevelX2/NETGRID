@@ -100,7 +100,7 @@ describe("meta 403 pump strength lasts through all subroutines in one encounter"
       ice,
       iceIndex: 0,
       rigCards: input.playerView.own.rig!,
-      availableCredits: 10,
+      creditBudget: 10,
       visibleCorpBidCapacity: 0,
       breakerStrengths: initialStrengths,
       additionalBreakCostPerSubroutine: 0,
