@@ -77,6 +77,8 @@ it.each([
   "wrong_executor",
   "wrong_pending_root",
   "wrong_pending_executor",
+  "missing_pending",
+  "missing_target",
   "wrong_step",
   "missing_event",
   "corp_actor",
@@ -105,6 +107,9 @@ it.each([
       pending.rootPlanInstanceId = "foreign-root";
     if (variant === "wrong_pending_executor")
       pending.executorInstanceId = "foreign-executor";
+    if (variant === "missing_pending")
+      delete previous.pendingRunnerCostPenaltySupportOrigin;
+    if (variant === "missing_target") delete root.target;
     if (variant === "wrong_step")
       pending.sourceStepId = "run.encounter_ice:121";
     if (variant === "missing_event")
@@ -193,7 +198,6 @@ it("executes the full second-trace, Chiba and exact original bid sequence twice 
         actionId: a!.actionId,
         clientKnownStateVersion: state.stateVersion,
         ...(z.selectedChoices ? { selectedChoices: z.selectedChoices } : {}),
-        ...(z.selectedTargets ? { selectedTargets: z.selectedTargets } : {}),
       });
       expect(r.ok).toBe(true);
       if (!r.ok) throw Error(r.error.message);

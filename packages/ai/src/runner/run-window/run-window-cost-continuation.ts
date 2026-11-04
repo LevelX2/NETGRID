@@ -373,13 +373,15 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       traceSuffix.every(
         (event) => event.publicPayload.traceId === trace?.traceId,
       ) &&
-      pending?.rootPlanInstanceId === rootPlanInstanceId &&
+      pending !== undefined &&
+      pending.rootPlanInstanceId === rootPlanInstanceId &&
       pending.executorInstanceId === executorInstanceId &&
       pending.selectedAtStateVersion === previous?.stateVersion &&
       pending.sourceStepId === `run.encounter_ice:${previous?.stateVersion}` &&
       pending.originalActionId.startsWith("runner.continue_run.") &&
       executorState?.signal?.serverId === run?.attackedServerId &&
-      root?.target.kind === "server" &&
+      root?.target !== undefined &&
+      root.target.kind === "server" &&
       root.target.id === run?.attackedServerId;
     const exactRunTraceBidOrigin =
       previous !== undefined &&
@@ -441,7 +443,8 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           pending?.rootPlanInstanceId === rootPlanInstanceId &&
           pending.executorInstanceId === executorInstanceId &&
           executorState?.signal?.serverId === run?.attackedServerId &&
-          root?.target.kind === "server" &&
+          root?.target !== undefined &&
+          root.target.kind === "server" &&
           root.target.id === run?.attackedServerId)) &&
       !choice &&
       !trace &&
