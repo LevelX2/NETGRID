@@ -943,6 +943,36 @@ export function corpTaggedDamagePayoffProfile(
   };
 }
 
+/** Guaranteed placement on one target from a plain unconditional operation.
+ * Distinct-target distribution contributes at most one counter to that agenda. */
+export function corpGuaranteedOnPlayAdvancementCountersPerTarget(
+  definitionId: string | undefined,
+): number {
+  const card = planningCard(definitionId);
+  if (card?.planning.side !== "corp" || card.planning.cardType !== "operation")
+    return 0;
+  const abilities = card.planning.engine.abilities;
+  if (abilities?.length !== 1) return 0;
+  const ability = abilities[0]!;
+  if (
+    ability.kind !== "on_play" ||
+    ability.costs !== "printed" ||
+    ability.condition !== undefined ||
+    ability.effects.length !== 1
+  )
+    return 0;
+  const effect = ability.effects[0]!;
+  if (
+    effect.kind !== "distribute_advancement_counters" ||
+    effect.target !== "installed_advanceable_cards" ||
+    !positiveSafeInteger(effect.amount)
+  )
+    return 0;
+  return effect.distribution === "up_to_distinct_targets_one_each"
+    ? 1
+    : effect.amount;
+}
+
 export function corpScoreConversionProfile(
   definitionId: string | undefined,
 ): CorpScoreConversionProfile | undefined {

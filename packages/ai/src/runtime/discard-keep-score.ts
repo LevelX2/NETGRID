@@ -26,6 +26,7 @@ import type { ProjectedHandDisposition } from "../plans/turn-projection";
 import {
   corpDefinitionHasTagSource,
   corpScoreConversionProfile,
+  corpGuaranteedOnPlayAdvancementCountersPerTarget,
   corpTaggedDamagePayoffProfile,
   corpTaggedMeatDamageOperationProfile,
 } from "./corp-canonical-card-facts";
@@ -200,7 +201,7 @@ export function discardKeepScore(
     );
   const corpFundedMatchpointAcceleration =
     corpAdvancementBurstSupportsVisibleAgenda &&
-    corpAffordableMatchpointAccelerationSupport(input, cost);
+    corpAffordableMatchpointAccelerationSupport(input, card.definitionId, cost);
   const corpConditionalPayoff =
     input.side === "corp"
       ? corpConditionalPayoffKeepAdjustment(
@@ -755,9 +756,13 @@ function cardSemanticSignals(hint: unknown): ReadonlySet<string> {
 /** A retention value, not a certificate of future clicks or a score route. */
 function corpAffordableMatchpointAccelerationSupport(
   input: AiDecisionInput,
+  operationDefinitionId: string,
   operationCost: number,
 ): boolean {
   if (!Number.isSafeInteger(operationCost) || operationCost < 0) return false;
+  const placedCounters = corpGuaranteedOnPlayAdvancementCountersPerTarget(
+    operationDefinitionId,
+  );
   const availableCredits = input.playerView.own.credits - operationCost;
   if (availableCredits < 0) return false;
   const agendas = [
@@ -784,8 +789,10 @@ function corpAffordableMatchpointAccelerationSupport(
     )
       return false;
     return (
-      Math.max(0, requirement - (agenda.advancementCounters ?? 0)) <=
-      availableCredits
+      Math.max(
+        0,
+        requirement - (agenda.advancementCounters ?? 0) - placedCounters,
+      ) <= availableCredits
     );
   });
 }
