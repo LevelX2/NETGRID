@@ -741,11 +741,13 @@ describe("encounter printed effects boundary", () => {
     };
     const legalAction = { payload: {} } as LegalAction;
     let finished: boolean | undefined;
+    let finishingAction: LegalAction | undefined;
 
     applyPrintedTraceSuccessFollowups(
       makeHost(state, legalAction, {
-        finishRun: (successful) => {
+        finishRun: (successful, actionToResolve) => {
           finished = successful;
+          finishingAction = actionToResolve;
           delete state.run;
         },
       }),
@@ -758,6 +760,7 @@ describe("encounter printed effects boundary", () => {
     );
 
     expect(finished).toBe(false);
+    expect(finishingAction).toBe(legalAction);
     expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
     expect(legalAction.payload).toMatchObject({
       traceId: "run_1.ice_1.1.trace",

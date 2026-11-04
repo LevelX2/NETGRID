@@ -169,6 +169,11 @@ ihnen aber nicht zurückimportiert.
   `corp_paid` und für `during_run` zusammen mit `runner_paid`.
 - Run-End-Cleanup ist geordnet: Trigger und Zahlungen lesen Run-Marker, bevor
   diese entfernt oder temporäre Werte zurückgesetzt werden.
+  Tracebedingtes Runende reicht dieselbe auflösende `LegalAction` über den
+  Printed-Effect-Host bis zum Cleanup weiter. Benutzte selbstzerstörende
+  Breaker behalten dadurch ihre Prevention- und Replaybindung; ein zulässiges
+  Tracegebot darf nicht erst beim anschließenden Programmtrash zurückgewiesen
+  werden. Die Action ist am Trace-Runende ein Pflichtargument.
 - `PlayerView.run.accessServerOverride` erhält für beide Seiten den öffentlich
   aufgelösten abweichenden Zugriff des aktiven Runs. Der physische
   `attackedServerId` und die ICE-Position bleiben eigenständig. Fehlt der

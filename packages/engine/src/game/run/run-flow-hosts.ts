@@ -834,7 +834,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         host.damage.createDamageImminentEvent(state, request),
       definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
       ensureRunnerTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
-      finishRun: (successful) => host.callbacks.finishRun(state, successful),
+      finishRun: (successful, actionToResolve) =>
+        host.callbacks.finishRun(state, successful, actionToResolve),
       corpTraceCounterPoolTotal: () =>
         host.trace.corpTraceCounterPoolTotal(state),
       recurringTraceCreditPoolTotal: () =>

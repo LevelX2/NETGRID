@@ -49,7 +49,7 @@ export type EncounterPrintedEffectHost = {
     }) => ImminentEvent;
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
-    finishRun: (successful: boolean) => void;
+    finishRun: (successful: boolean, legalAction: LegalAction) => void;
     corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
     openEventModificationWindow: (
@@ -571,7 +571,7 @@ export function applyPrintedTraceSuccessFollowups(
   ) {
     state.trace = { ...trace, status: "trace_success_program_trash" };
     if (options.deletePendingChoice) delete state.pendingChoice;
-    if (state.run) host.callbacks.finishRun(false);
+    if (state.run) host.callbacks.finishRun(false, legalAction);
     const trashChoice =
       host.callbacks.resolveTraceSuccessTrashProgramSubroutine(
         trace,
@@ -708,7 +708,8 @@ export function applyPrintedTraceSuccessFollowups(
       trace.successEffect.type ===
         "end_run_trash_hardware_and_unpreventable_meat_damage"
     ) {
-      if (!state.winner && state.run) host.callbacks.finishRun(false);
+      if (!state.winner && state.run)
+        host.callbacks.finishRun(false, legalAction);
       const hardwareWrecker = host.callbacks.resolveTraceHardwareWreckerSuccess(
         trace.sourceDefinitionId,
         trace.sourceCardInstanceId,
@@ -740,7 +741,7 @@ export function applyPrintedTraceSuccessFollowups(
         };
       }
     } else if (runnerRunEnded) {
-      host.callbacks.finishRun(false);
+      host.callbacks.finishRun(false, legalAction);
     } else if (
       trace.returnTimingPoint &&
       trace.returnActiveSide &&
