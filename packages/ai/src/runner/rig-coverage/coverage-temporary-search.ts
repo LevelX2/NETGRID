@@ -3,7 +3,11 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
-import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
+import {
+  buildRunnerEconomyPosture,
+  evaluateRunnerRunTargets,
+  quoteRunnerRunAfterHandBufferDraws,
+} from "../../runner-run-target-evaluation";
 import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signals";
 import { runnerVisibleDeckBreaker } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
@@ -19,14 +23,19 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
 ): RunnerCoverageGapSignal {
   const rejected = new Map<string, string>();
   for (const candidate of candidates) {
-    if (
-      !gap.directSearchActionIds.includes(candidate.actionId) ||
-      !candidate.functionalEffects?.some(
+    const temporary =
+      candidate.functionalEffects?.some(
         (e) =>
           e.kind === "delayed_penalty" &&
           e.timing === "runner_turn" &&
           e.target === "end_of_turn_bounce",
-      )
+      ) === true;
+    const terminalRunNeed =
+      gap.priorityClass === "P2" &&
+      gap.requesterModuleId === "runner.contest_remote";
+    if (
+      !gap.directSearchActionIds.includes(candidate.actionId) ||
+      (!temporary && !terminalRunNeed)
     )
       continue;
     const fail = (reason: string) => rejected.set(candidate.actionId, reason);
@@ -61,7 +70,7 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
           }
         : undefined;
     const modes = new Set(
-      candidate.functionalEffects
+      (candidate.functionalEffects ?? [])
         .filter(
           (e) =>
             e.kind === "install" &&
@@ -70,6 +79,10 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
         )
         .map((e) => e.installCost),
     );
+    const acquireThenInstall =
+      !temporary &&
+      modes.size === 0 &&
+      source?.payload?.cardImplementationEffectKind === "search_trash_to_grip";
     if (
       !source ||
       !run ||
@@ -77,14 +90,17 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
       !answer ||
       source.expiresAtStateVersion !== input.playerView.stateVersion ||
       run.expiresAtStateVersion !== input.playerView.stateVersion ||
-      modes.size !== 1 ||
-      (!modes.has("free") && !modes.has("normal"))
+      (!acquireThenInstall &&
+        (modes.size !== 1 || (!modes.has("free") && !modes.has("normal"))))
     ) {
       fail("missing_exact_source_run_or_install_quote");
       continue;
     }
     const installCost = modes.has("free") ? 0 : answer.installCost;
-    const sourceClicks = source.costs.reduce((n, c) => n + (c.clicks ?? 0), 0);
+    // A to-grip recovery still needs the standard program install action.
+    const sourceClicks =
+      source.costs.reduce((n, c) => n + (c.clicks ?? 0), 0) +
+      (acquireThenInstall ? 1 : 0);
     const runClicks = run.costs.reduce((n, c) => n + (c.clicks ?? 0), 0);
     const sourceCredits = source.costs.reduce(
       (n, c) => n + (c.credits ?? 0),
@@ -169,10 +185,8 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
     );
     if (
       !target ||
-      target.accessPayoffContestable === false ||
       target.pathPassability === "blocked_missing_coverage" ||
-      target.pathPassability === "blocked_unbreakable" ||
-      target.recommendation === "do_not_run_now"
+      target.pathPassability === "blocked_unbreakable"
     ) {
       fail("no_convertible_run_after_search");
       continue;
@@ -204,14 +218,66 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
       fail("search_run_and_hand_preparation_do_not_fit");
       continue;
     }
-    const fundingGap = Math.max(
-      0,
-      target.fundingNeed.routeFundingGap,
-      target.fundingNeed.postRunFloorGap,
-      target.prerunReserveQuote?.creditGap ?? 0,
+    const preparedTarget =
+      (target.prerunReserveQuote?.handBufferGap ?? 0) > 0
+        ? quoteRunnerRunAfterHandBufferDraws(projected, target)
+        : target;
+    if (!preparedTarget) {
+      fail("missing_reserved_hand_preparation_quote");
+      continue;
+    }
+    const economy = buildRunnerEconomyPosture({
+      input: projected,
+      deckCapabilities,
+      strategicIntent,
+    });
+    if (
+      services.runnerRunTargetCanConvertNow(
+        projected,
+        economy,
+        preparedTarget,
+        candidates,
+      )
+    )
+      continue;
+    const fundingInput: AiDecisionInput = {
+      ...projected,
+      playerView: {
+        ...projected.playerView,
+        own: {
+          ...projected.playerView.own,
+          clicks:
+            projected.playerView.own.clicks -
+            drawGap -
+            (target.futureClicksLost ?? 0),
+        },
+      },
+    };
+    const support = services.runnerRunFundingSupport(
+      fundingInput,
+      economy,
+      preparedTarget,
+      targets,
+      candidates,
+      {
+        acceptFundedRun: (fundedInput, fundedTarget) =>
+          services.runnerRunTargetCanConvertNow(
+            fundedInput,
+            buildRunnerEconomyPosture({
+              input: fundedInput,
+              deckCapabilities,
+              strategicIntent,
+            }),
+            fundedTarget,
+            candidates,
+          ),
+      },
     );
     if (
-      fundingGap > 0 &&
+      !support ||
+      support.gap <= 0 ||
+      support.routeActionIds.length === 0 ||
+      support.routeAssessment.status !== "covered_guaranteed" ||
       services.runnerExactFundingRouteContract(input, candidates, {
         demandId: gap.gapId + ":temporary-search-horizon",
         sourcePlanId: "runner.rig_and_coverage:" + gap.gapId,
@@ -219,17 +285,20 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
         priority: "current_foreground_plan",
         hardness: "hard",
         deadline: "end_of_current_turn",
-        targetCredits: input.playerView.own.credits + fundingGap,
+        targetCredits: input.playerView.own.credits + support.gap,
         remainingClicks: input.playerView.own.clicks - reservedClicks,
-        requiredEndTurnHandBuffer: input.playerView.own.gripOrHq.length,
+        requiredEndTurnHandBuffer: Math.max(
+          0,
+          buffer.minimumHandBuffer + (consumed ? 1 : 0) - drawGap,
+        ),
         evidence: [
           "temporary_search_exact_run:" + run.actionId,
           "temporary_search_reserved_clicks:" + reservedClicks,
+          support.evidenceCode,
         ],
       }).routeActionIds.length === 0
-    ) {
+    )
       fail("no_complete_same_turn_funding_route");
-    }
   }
   if (!rejected.size) return gap;
   return {

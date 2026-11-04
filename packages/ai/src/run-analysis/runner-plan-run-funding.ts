@@ -12,7 +12,10 @@ import { createRunnerCreditDemand } from "../plans/credit-demand";
 
 import { searchFundingRoutes } from "../plans/funding-route";
 
-import type { RunnerRunFundingSupport } from "../plans/runner-funding-service-contract";
+import type {
+  RunnerRunFundingSupport,
+  RunnerFundedRunAdmission,
+} from "../plans/runner-funding-service-contract";
 
 import type {
   RunnerEconomyPosture,
@@ -34,6 +37,7 @@ export function runnerRunFundingSupport(
   evaluation: RunnerRunTargetEvaluation,
   runTargets: readonly RunnerRunTargetEvaluation[],
   candidates: readonly ActionSemanticCandidate[],
+  options?: { acceptFundedRun: RunnerFundedRunAdmission },
 ): RunnerRunFundingSupport | undefined {
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
@@ -105,6 +109,7 @@ export function runnerRunFundingSupport(
     targetCredits: input.playerView.own.credits + conservativeGap,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowStrategicExchange: true,
+    ...(options ? { acceptFundedRun: options.acceptFundedRun } : {}),
     ...(terminalKnownPathGap !== undefined ||
     terminalVisibleHazardFundingGap !== undefined
       ? { requireCompleteKnownPath: true }
@@ -140,6 +145,7 @@ export function runnerRunFundingSupport(
       targetCredits: input.playerView.own.credits + terminalKnownPathGap,
       remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
       allowStrategicExchange: true,
+      ...(options ? { acceptFundedRun: options.acceptFundedRun } : {}),
       requireCompleteKnownPath: true,
       paymentWindowTarget: evaluation,
       debtFinancingParent: {

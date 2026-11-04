@@ -1,6 +1,7 @@
 import type {
   RunnerExactFundingRouteRequest,
   RunnerRunFundingSupport,
+  RunnerFundedRunAdmission,
 } from "../../plans/runner-funding-service-contract";
 import type { RunnerFundingRouteAssessment } from "../../plans/runner-funding-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
@@ -32,6 +33,7 @@ export type RunnerCoverageServices = {
     evaluation: RunnerRunTargetEvaluation,
     runTargets: readonly RunnerRunTargetEvaluation[],
     candidates: readonly ActionSemanticCandidate[],
+    options?: { acceptFundedRun: RunnerFundedRunAdmission },
   ) => RunnerRunFundingSupport | undefined;
   runnerCentralPressureHasMaterialMarginalValue: (
     input: AiDecisionInput,

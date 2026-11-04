@@ -1123,6 +1123,18 @@ weiterhin am tatsächlichen Folgezustand. Native letzte-Klick-, Handpuffer- und
 unbezahlbare Pfade sowie tatsächlich genutzte temporäre Remote-Antworten
 sichern die Grenze (Paarung 592, SP-757).
 
+Diese Horizontquote übernimmt die Zulassung des bestehenden Run-Owners. Sie
+darf weder eine vorläufige fehlende Zahlbarkeit noch einen allgemeinen
+Post-Run-Reservewert als zweite, strengere Entscheidung verwenden. Garantierte
+Handvorbereitung wird über die gemeinsame Runquote bewertet. Eine weitere
+Finanzierung genügt nur, wenn ihr tatsächlicher Abschluss auch die bestehende
+Run-Zulassung erfüllt: Der Funding-Owner quotiert Bank, Klicks und Handzahl nach
+allen Routenschritten und ruft die gebundene Verbraucherprüfung auf. Evidenztexte
+werden dafür nicht ausgewertet, und gezogene Karten erhalten keine erfundenen
+Identitäten. Bei einem akuten P2-Remote-Bedarf umfasst dieselbe Prüfung auch
+permanente Suchquellen samt noch nötiger normaler Programminstallation. Eine
+erst später installierbare Handkarte erfüllt keinen unmittelbar fälligen Run.
+
 `coverage-services.ts` benennt sieben Dienste: aktuelles Remote-Material,
 bekannten verzögerten ICE-Abgang, direkte Run-Verwertbarkeit, Run-Funding,
 materiellen Zentraldruck, dessen Kadenz und die gemeinsame Funding-Suche.

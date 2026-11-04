@@ -365,7 +365,7 @@ export function quoteRunnerRunAfterHandBufferDraws(
 }
 
 export function evaluateRunnerRunTargets(
-  params: EvaluateRunnerRunTargetsParams,
+  params: EvaluateRunnerRunTargetsParams & { quotedRunnerGripCount?: number },
 ): RunnerRunTargetEvaluation[] {
   const economyPosture = buildRunnerEconomyPosture(params);
   const beliefState =

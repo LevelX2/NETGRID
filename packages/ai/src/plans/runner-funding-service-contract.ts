@@ -1,6 +1,11 @@
 import type { RunnerFundingRouteAssessment } from "./runner-funding-contracts";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { type CreateSideCreditDemandParams } from "./credit-demand";
+import type { AiDecisionInput } from "@netgrid/shared";
+export type RunnerFundedRunAdmission = (
+  input: AiDecisionInput,
+  target: RunnerRunTargetEvaluation,
+) => boolean;
 export type RunnerExactFundingRouteRequest = Pick<
   CreateSideCreditDemandParams,
   | "demandId"
@@ -17,6 +22,8 @@ export type RunnerExactFundingRouteRequest = Pick<
   allowStrategicExchange?: boolean;
   /** A prefix funding gap cannot certify conversion of a fully known run. */
   requireCompleteKnownPath?: boolean;
+  /** Consumer-owned admission after every step of the guaranteed route. */
+  acceptFundedRun?: RunnerFundedRunAdmission;
   /** A consumer-bound defense buffer preserved by every funding step. */
   requiredEndTurnHandBuffer?: number;
   /** P6 reserve only: quote the remaining turn, including a current basic

@@ -481,7 +481,7 @@ function runnerFundingRouteConsumerBufferFits(
       if (hand < floor) return false;
     }
   }
-  if (request.requireCompleteKnownPath) {
+  if (request.requireCompleteKnownPath || request.acceptFundedRun) {
     const target = request.paymentWindowTarget;
     const runAction = input.legalActions.find(
       (action) => action.actionId === target?.actionId,
@@ -509,6 +509,21 @@ function runnerFundingRouteConsumerBufferFits(
       return false;
     // Only quote the resources of this admitted route. A blocked path's
     // first unpaid subroutine is a lower bound, never its complete price.
+    const consumedSources = new Set(
+      route.steps.flatMap((step) => {
+        const candidate = candidates.find(
+          (entry) => entry.actionId === step.actionId,
+        );
+        const action = input.legalActions.find(
+          (entry) => entry.actionId === step.actionId,
+        );
+        return candidate?.economyProjection?.cardsConsumed === 1 && action
+          ? [action.source]
+          : [];
+      }),
+    );
+    const handAfter = runnerFundingProjectedHand(input, candidates, route);
+    if (handAfter === undefined) return false;
     const fundedInput: AiDecisionInput = {
       ...input,
       playerView: {
@@ -517,6 +532,9 @@ function runnerFundingRouteConsumerBufferFits(
           ...input.playerView.own,
           credits: route.projectedGeneralCredits,
           clicks: input.playerView.own.clicks - route.totalClickCost,
+          gripOrHq: input.playerView.own.gripOrHq.filter(
+            (card) => !consumedSources.has(card.instanceId),
+          ),
         },
       },
     };
@@ -524,19 +542,23 @@ function runnerFundingRouteConsumerBufferFits(
       input: fundedInput,
       deckCapabilities:
         createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
+      quotedRunnerGripCount: handAfter,
     }).find((entry) => entry.actionId === target.actionId);
     if (
       !fundedTarget ||
-      (fundedTarget.pathPassability !== "reachable" &&
-        !runnerTerminalRemoteContestIsDirectlyMandatory(
-          fundedInput,
-          fundedTarget,
-        )) ||
-      fundedTarget.routeQuote?.reachability !== "guaranteed_access" ||
-      fundedTarget.routeQuote.unknownIceCount !== 0 ||
-      fundedTarget.routeQuote.fundingGap !== 0 ||
-      fundedTarget.visibleTraceTagHazardUnavoidable === true ||
-      (fundedTarget.unavoidableVisibleIceHazardCount ?? 0) > 0
+      (request.acceptFundedRun &&
+        !request.acceptFundedRun(fundedInput, fundedTarget)) ||
+      (request.requireCompleteKnownPath &&
+        ((fundedTarget.pathPassability !== "reachable" &&
+          !runnerTerminalRemoteContestIsDirectlyMandatory(
+            fundedInput,
+            fundedTarget,
+          )) ||
+          fundedTarget.routeQuote?.reachability !== "guaranteed_access" ||
+          fundedTarget.routeQuote.unknownIceCount !== 0 ||
+          fundedTarget.routeQuote.fundingGap !== 0 ||
+          fundedTarget.visibleTraceTagHazardUnavoidable === true ||
+          (fundedTarget.unavoidableVisibleIceHazardCount ?? 0) > 0))
     )
       return false;
   }
@@ -551,33 +573,16 @@ function runnerFundingRouteConsumerBufferFits(
 
 /** Resource feasibility only. The existing hand owner performs later draws;
  * random damage and unknown drawn card identities are never simulated here. */
-function runnerFundingBufferRepair(
+function runnerFundingProjectedHand(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
-  request: RunnerExactFundingRouteRequest,
   route: FundingRoute,
-): { clickCost: number; creditCost: number; evidence: string[] } | undefined {
+): number | undefined {
   const fundingActions = route.steps
     .filter((step) => step.kind === "legal_action")
     .map((step) =>
       candidates.find((candidate) => candidate.actionId === step.actionId),
     );
-  if (request.purpose !== "current_run")
-    return { clickCost: 0, creditCost: 0, evidence: [] };
-
-  const target = request.paymentWindowTarget;
-  const requiredHandBuffer = target?.prerunReserveQuote?.requiredHandBuffer;
-  if (
-    !request.sourcePlanId ||
-    !target ||
-    !input.legalActions.some((action) => action.actionId === target.actionId) ||
-    !Number.isSafeInteger(requiredHandBuffer) ||
-    requiredHandBuffer === undefined ||
-    requiredHandBuffer < 0 ||
-    fundingActions.some((candidate) => !candidate)
-  )
-    return undefined;
-
   let handAfter = input.playerView.own.gripOrHq.length;
   let randomDamageOccurred = false;
   for (const candidate of fundingActions) {
@@ -600,6 +605,32 @@ function runnerFundingBufferRepair(
     randomDamageOccurred ||= damage > 0;
   }
   if (handAfter < 0) return undefined;
+  return handAfter;
+}
+
+function runnerFundingBufferRepair(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  request: RunnerExactFundingRouteRequest,
+  route: FundingRoute,
+): { clickCost: number; creditCost: number; evidence: string[] } | undefined {
+  if (request.purpose !== "current_run")
+    return { clickCost: 0, creditCost: 0, evidence: [] };
+
+  const target = request.paymentWindowTarget;
+  const requiredHandBuffer = target?.prerunReserveQuote?.requiredHandBuffer;
+  if (
+    !request.sourcePlanId ||
+    !target ||
+    !input.legalActions.some((action) => action.actionId === target.actionId) ||
+    !Number.isSafeInteger(requiredHandBuffer) ||
+    requiredHandBuffer === undefined ||
+    requiredHandBuffer < 0
+  )
+    return undefined;
+
+  const handAfter = runnerFundingProjectedHand(input, candidates, route);
+  if (handAfter === undefined) return undefined;
   const gap = Math.max(0, requiredHandBuffer - handAfter);
   if (gap === 0)
     return {

@@ -161,7 +161,7 @@ it.each([
     "meta592-r4-g05-d254-hand-buffer",
     "search_run_and_hand_preparation_do_not_fit",
   ],
-  ["meta592-r4-g32-d314-funding", "no_convertible_run_after_search"],
+  ["meta592-r4-g32-d314-funding", "no_complete_same_turn_funding_route"],
 ])(
   "does not spend a temporary search before an incomplete current-turn route: %s",
   (fixture, reason) => {
@@ -192,6 +192,67 @@ it.each([
 );
 it("keeps the native three-click temporary search that actually reaches the remote this turn", () => {
   const { input } = original("meta592-r4-g04-d082-used-temporary"),
+    before = JSON.stringify(input),
+    d = chooseAiAction(input);
+  expect(d.actionId).toContain("sneak-preview");
+  expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
+  expect(JSON.stringify(input)).toBe(before);
+});
+
+it("keeps the native terminal remote search with one guaranteed funding click (SP-757)", () => {
+  const { input } = original("meta592-r5-g07-d182-terminal-search"),
+    before = JSON.stringify(input),
+    d = chooseAiAction(input);
+  expect(d.actionId).toContain("sneak-preview");
+  expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
+  expect(JSON.stringify(input)).toBe(before);
+  const gaps = residentPlanPortfolioSnapshot(input)!
+    .instances.filter((x) => x.moduleId === "runner.rig_and_coverage")
+    .map((x) => (x.moduleState as { gap: RunnerCoverageGapSignal }).gap);
+  expect(
+    gaps.some(
+      (g) =>
+        g.targetRunActionId === "runner.start_run.remote_1" &&
+        g.directSearchActionIds.includes(d.actionId!),
+    ),
+  ).toBe(true);
+  expect(
+    gaps
+      .filter((g) =>
+        g.targetRunActionId?.includes("disgruntled-ice-technician"),
+      )
+      .every((g) => !g.directSearchActionIds.includes(d.actionId!)),
+  ).toBe(true);
+});
+it("uses the existing terminal run admission after two actual engine draws, without a second generic reserve floor", () => {
+  const cp = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../runtime/test-fixtures/meta592-r1-g34-engine-two-draws.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  expect(cp.schemaVersion).toBe(
+    "netgrid-engine-generated-counterfactual-input-v1",
+  );
+  expect(cp.engineValidation).toEqual({ ok: true, errors: [] });
+  expect(cp.origin.checkedOriginalPrefix).toBe(159);
+  expect(
+    cp.origin.commands.map((x: { actionId: string }) => x.actionId),
+  ).toEqual(["runner.draw_card", "runner.draw_card"]);
+  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
+  resetResidentPlanPortfolioMemory();
+  const before = JSON.stringify(input),
+    d = chooseAiAction(input);
+  expect(d.actionId).toContain("sneak-preview");
+  expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
+  expect(JSON.stringify(input)).toBe(before);
+});
+it("keeps a native temporary search with two reserved hand-buffer draws before its run", () => {
+  const { input } = original("meta592-r4-g04-d100-planned-draws"),
     before = JSON.stringify(input),
     d = chooseAiAction(input);
   expect(d.actionId).toContain("sneak-preview");
