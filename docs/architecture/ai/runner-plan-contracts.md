@@ -4250,3 +4250,7 @@ Eine aktuell gebundene Programmsuche oder Top-Heap-Rückholung auf die Hand ist 
 ### Direkter Run-Root zwischen aufeinanderfolgenden Traces
 
 Ist der Central- oder Remote-Root selbst Executor, erhält er die Kostenfortsetzung auch zwischen zwei Traces desselben ICE. Die abgeschlossene erste Trace, der exakt gewählte Continue-Schritt und der anschließende Tracebeginn müssen über StateVersion, Run, Server, ICE-Instanz, Quelle, öffentliche Ereignisfolge und dieselbe Root-/Executor-Kette zusammenpassen. Erst dieser Nachweis aktualisiert den Ursprung für ein nachfolgendes Engine-Zahlungsfenster. Eine fremde Choice, Ereignislücke oder abweichende Zuständigkeit bleibt gesperrt.
+
+### Handreserve der konkret gebundenen Suchroute
+
+Die Vorbereitung einer temporären Coverage-Suche quotiert den Handpuffer für den konkret gebundenen Zielrun. Ungewählte andere Runs dürfen keine zusätzlichen Ziehklicks verlangen. Der gemeinsame Service berücksichtigt weiterhin den bestätigten globalen Corp-Schadensbedarf und den Verbrauch eines flüchtigen Breakers; ein tatsächlich fehlender Handpuffer bleibt auch bei leerem Stack ein Ablehnungsgrund.

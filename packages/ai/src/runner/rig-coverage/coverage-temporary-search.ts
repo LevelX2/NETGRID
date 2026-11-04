@@ -201,7 +201,9 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
       fail("no_convertible_run_after_search");
       continue;
     }
-    const buffer = runnerDefenseHandBufferFacts(projected, targets);
+    // Quote preparation for this bound run; global damage and breaker floors
+    // remain in the shared service, other unselected runs do not add draws.
+    const buffer = runnerDefenseHandBufferFacts(projected, [target]);
     const drawGap = Math.max(
       0,
       buffer.minimumHandBuffer - buffer.handSize,
