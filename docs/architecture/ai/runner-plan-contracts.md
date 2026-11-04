@@ -859,6 +859,19 @@ Registry, Live-Runtime oder Central-Implementierung zurück.
 
 ## 4. `runner.rig_and_coverage`
 
+Der generische Aufbau kauft keine zweite Antwort für die letzte offene
+Standardrolle, wenn ein bereits installiertes, noch unkonfiguriertes Programm
+diese Rolle laut kanonischer Engine-Fähigkeit einmalig während eines Runs
+kostenlos wählen kann. Genau eine fehlende Rolle bei bereits installierter
+Wall-/Gate-/Sentry-Restabdeckung begrenzt diese Zurückhaltung. Das ändert
+keinen Installed-Fakt und zertifiziert keinen Run; konkrete servergebundene
+Coverage-Projekte, Noisy-Verbote und Pfadquotes bleiben eigenständig. Mehrere
+offene Rollen, eine bereits verbrauchte Wahl, nur gehaltene Programme und
+kostenpflichtige Konfiguration begründen diese Zurückhaltung nicht.
+`coverage-pending-subtype.ts` liefert den begrenzten Owner-Fakt. Paarung 590
+G17 D280 sichert die vorhandene Fubar-Fähigkeit, zehn native Folgeschritte und
+die normale Auswahl ohne den zusätzlichen Zehncredit-Einbau.
+
 Ein belegter Coverage-Blocker vor einem Remote mit verdecktem oder bekanntem
 Agendamaterial erhält bereits vor Matchpoint ein konkretes P4-Projekt,
 sofern eine eigene Antwort bekannt ist und installiertes gerezztes ICE

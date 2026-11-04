@@ -28,15 +28,9 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 import type { AiRuntimeCheckpointV1 } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
 import type { GameState } from "@netgrid/shared";
 const root = "../../../../../data/scenarios/ai-decision-checkpoints/";
-function base() {
+function base(fixture = "cp-meta588-broker-coverage-funding.json") {
   const f = JSON.parse(
-    readFileSync(
-      new URL(
-        root + "cp-meta588-broker-coverage-funding.json",
-        import.meta.url,
-      ),
-      "utf8",
-    ),
+    readFileSync(new URL(root + fixture, import.meta.url), "utf8"),
   ) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
@@ -349,4 +343,36 @@ it("retains old productive load IDs when a sufficient building bank is rebound t
   expect(old.actionIds.length).toBeGreaterThan(0);
   for (const id of old.actionIds) expect(bank.rejectedActionIds).toContain(id);
   expect(bank.rejectedActionIds).not.toContain(bank.coverageFunding!.actionId);
+});
+
+it("does not cash out two small Brokers when their combined payout still misses the current full breaker reserve", () => {
+  const f = base("cp-meta590-two-broker-coverage.json");
+  expect(f.input.playerView.own).toMatchObject({ credits: 6, clicks: 3 });
+  const need = f.development.find(
+    (entry) => entry.definitionId === "onr_proteus_092_morphing-tool",
+  )!.fundingNeed!;
+  expect(need).toMatchObject({ installOrPlayCost: 10, targetCredits: 16 });
+  expect(f.banks.map((bank) => bank.estimatedPayout)).toEqual([3, 3]);
+  expect(
+    f.input.playerView.own.credits +
+      f.banks.reduce((sum, bank) => sum + bank.estimatedPayout, 0),
+  ).toBeLessThan(need.targetCredits);
+  const bound = bindRunnerCreditBankCoverageFunding(
+    f.input,
+    f.candidates,
+    f.gaps,
+    f.banks,
+    f.development,
+  );
+  expect(bound.creditBanks.some((bank) => bank.coverageFunding)).toBe(false);
+  restoreAiRuntimeCheckpoint(
+    f.input,
+    f.input.ownDeckSnapshot.deckSnapshotId,
+    f.runtime,
+  );
+  expect(chooseAiAction(f.input)).toMatchObject({
+    actionId: "runner.gain_credit",
+    fallbackUsed: false,
+    timeoutUsed: false,
+  });
 });

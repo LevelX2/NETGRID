@@ -41,6 +41,7 @@ import { runnerDeckHasCoverageAnswer } from "./coverage-support";
 import { planFirstCoverageRole } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
 import { runnerCoverageInstallCreditPreparation } from "./coverage-install-credit-preparation";
+import { runnerPendingFreeSubtypeCoverageRole } from "./coverage-pending-subtype";
 export type RunnerCoverageDrawCadence = Readonly<{
   drawAvailable: boolean;
   evidenceCode: string;
@@ -669,6 +670,10 @@ export function uniqueCoverageGaps(
     coverageSearchInterrupt
   ) {
     const matrix = deckCapabilities.runner?.breakerCoverageMatrix;
+    const pendingSelectionRole = runnerPendingFreeSubtypeCoverageRole(
+      input,
+      deckCapabilities,
+    );
     for (const [coverage, role] of [
       ["wall", "breaker_wall"],
       ["code_gate", "breaker_code_gate"],
@@ -679,6 +684,7 @@ export function uniqueCoverageGaps(
         !state ||
         state.installed ||
         installedRoles.has(role) ||
+        pendingSelectionRole === role ||
         (!state.inDeckKnown && !state.inHand)
       ) {
         continue;
