@@ -1,3 +1,8 @@
+import {
+  runPurposeForEvaluation,
+  runnerInformationProbeKnownPathIsAdmitted,
+} from "../../plans/runner-run-purpose";
+import { runnerTerminalRemoteContestIsDirectlyMandatory } from "../remote-contest/remote-contest-admission";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
@@ -224,6 +229,21 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
         : target;
     if (!preparedTarget) {
       fail("missing_reserved_hand_preparation_quote");
+      continue;
+    }
+    // Feasibility alone does not make an information run an admitted consumer.
+    // Use the same existing purpose and known-path boundary as its Remote owner.
+    if (
+      temporary &&
+      gap.requesterModuleId === "runner.contest_remote" &&
+      runPurposeForEvaluation(preparedTarget) === "information" &&
+      !runnerTerminalRemoteContestIsDirectlyMandatory(
+        projected,
+        preparedTarget,
+      ) &&
+      !runnerInformationProbeKnownPathIsAdmitted(preparedTarget)
+    ) {
+      fail("remote_information_consumer_rejects_known_path");
       continue;
     }
     const economy = buildRunnerEconomyPosture({
