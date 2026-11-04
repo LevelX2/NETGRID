@@ -22,6 +22,59 @@ import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
 import { coverageKindForPlanRole } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
+export function runnerCoverageSearchLifecycleBinding(
+  gap: RunnerCoverageGapSignal,
+  candidates: readonly Pick<
+    ActionSemanticCandidate,
+    "actionId" | "functionalEffects"
+  >[],
+): RunnerCoverageGapSignal {
+  if (
+    gap.requesterPlanInstanceId &&
+    gap.requesterNeedId &&
+    gap.requesterModuleId &&
+    gap.targetRunActionId
+  )
+    return gap;
+  const rejected = new Set(
+    candidates
+      .filter(
+        (candidate) =>
+          gap.directSearchActionIds.includes(candidate.actionId) &&
+          candidate.functionalEffects?.some(
+            (effect) =>
+              effect.kind === "delayed_penalty" &&
+              effect.timing === "runner_turn" &&
+              effect.target === "end_of_turn_bounce",
+          ),
+      )
+      .map((candidate) => candidate.actionId),
+  );
+  if (rejected.size === 0) return gap;
+  return {
+    ...gap,
+    directSearchActionIds: gap.directSearchActionIds.filter(
+      (id) => !rejected.has(id),
+    ),
+    ...(gap.directSearchChoiceBindings !== undefined
+      ? {
+          directSearchChoiceBindings: gap.directSearchChoiceBindings.filter(
+            (binding) => !rejected.has(binding.actionId),
+          ),
+        }
+      : {}),
+    rejectedSearchActionIds: [
+      ...new Set([...(gap.rejectedSearchActionIds ?? []), ...rejected]),
+    ],
+    recoveryEvidenceCodes: [
+      ...(gap.recoveryEvidenceCodes ?? []),
+      ...[...rejected].map(
+        (id) => `temporary_search_without_run_consumer:${id}`,
+      ),
+    ],
+  };
+}
+
 export function runnerCoverageGapIsTerminalRemoteThreat(
   input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,

@@ -236,10 +236,19 @@ export function addRunnerCoverageRejectedSearchDispositions(
     }
   }
   for (const [actionId, rejectedGaps] of rejectedCoverageGapsByActionId) {
+    const temporaryWithoutConsumer = rejectedGaps.some((gap) =>
+      gap.recoveryEvidenceCodes?.includes(
+        `temporary_search_without_run_consumer:${actionId}`,
+      ),
+    );
     add(
       actionId,
       "runner.rig_and_coverage",
-      `runner_coverage_search_rejected_without_deck_answer:${rejectedGaps
+      `${
+        temporaryWithoutConsumer
+          ? "runner_temporary_coverage_search_requires_bound_run_consumer"
+          : "runner_coverage_search_rejected_without_deck_answer"
+      }:${rejectedGaps
         .map(
           (gap) => `${gap.requiredRole}@${gap.targetServerId ?? "no_server"}`,
         )

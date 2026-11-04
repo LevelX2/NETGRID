@@ -1080,6 +1080,15 @@ Originalaction, Quelle, unmittelbar folgende StateVersion, Parent-/Need-Kette
 und aktuelle Optionsmenge. Er darf ein fehlendes Ziel nicht durch ein anderes
 Heap-Programm ersetzen. Paarung 592/Runde 3/G29 belegt Rent-I-Con aus dem Stack
 anstelle des zuvor irrtümlich gewählten temporären Cloak aus dem Heap.
+Eine allgemeine Rig-Coverage ohne gebundenen Run-Parent ist dagegen ein
+dauerhaftes Aufbauziel. Sie darf eine ausdrücklich am Zugende zurückkehrende
+Suchinstallation nicht als Antwort materialisieren. Der Need-Produzent entfernt
+diese Route samt Suchzielbindung und liefert einen eigenen Diagnosegrund;
+ein anderer konkreter Coverage-Parent darf dieselbe Quelle weiter zulassen.
+Paarung 592/G29 spart nach der Quellenkorrektur weiterhin nur Credits und
+belegt diese zusätzliche Grenze. Der native akute Remote-Fall G34/D159
+bleibt als Gegenprobe zulässig. Dies erweitert SP-757s Lebensdauerbindung auf
+den allgemeinen Coverage-Aufbau, ohne einen sofortigen Run zu garantieren.
 Während der Zahlungsunterstützung bleibt auch die ursprüngliche Parentkette
 der Coverage-Aktion erhalten. Eine allgemeine Neuentdeckung derselben
 Coverage-Instanz darf deren Remote-Parent nicht entfernen. Jede Kante wird

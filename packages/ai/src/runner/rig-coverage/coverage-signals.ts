@@ -38,6 +38,7 @@ import { runnerCoverageGapIsTerminalRemoteThreat } from "./coverage-support";
 import { runnerUrgentRemoteCoverageConversionQuote } from "./coverage-support";
 import { runnerCoverageFundingActionIds } from "./coverage-support";
 import { coverageSupportActionIds } from "./coverage-support";
+import { runnerCoverageSearchLifecycleBinding } from "./coverage-support";
 import { runnerDeckHasCoverageAnswer } from "./coverage-support";
 import { planFirstCoverageRole } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
@@ -796,7 +797,10 @@ export function uniqueCoverageGaps(
     }
   }
   return dedupeCoverageGapsByGapId([...result.values()]).map((gap) =>
-    runnerCoverageInstallCreditPreparation(input, gap),
+    runnerCoverageInstallCreditPreparation(
+      input,
+      runnerCoverageSearchLifecycleBinding(gap, candidates),
+    ),
   );
 }
 
