@@ -656,6 +656,9 @@ export function uniqueCoverageGaps(
         false,
         sameTurnRunConversion?.requiredClicksAfterFunding ?? 1,
         services,
+        bindToRequester
+          ? undefined
+          : Math.min(handBuffer.handSize, handBuffer.minimumHandBuffer),
       ),
       installActionValues,
       ...supportActions,
@@ -779,6 +782,7 @@ export function uniqueCoverageGaps(
           true,
           undefined,
           services,
+          Math.min(handBuffer.handSize, handBuffer.minimumHandBuffer),
         ),
         installActionValues,
         installActionIds: Object.keys(installActionValues),

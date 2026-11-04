@@ -217,6 +217,7 @@ export function runnerCoverageFundingActionIds(
   allowIncrementalProgress: boolean,
   requiredClicksAfterFunding = 1,
   services: RunnerCoverageServices,
+  requiredEndTurnHandBuffer?: number,
 ): string[] {
   if (
     targetCredits === undefined ||
@@ -239,6 +240,9 @@ export function runnerCoverageFundingActionIds(
     ),
     allowIncrementalProgress,
     allowStrategicExchange: !allowIncrementalProgress,
+    ...(requiredEndTurnHandBuffer !== undefined
+      ? { requiredEndTurnHandBuffer }
+      : {}),
     evidence: [
       `coverage_gap:${gapId}`,
       `coverage_conversion_clicks_reserved:${requiredClicksAfterFunding}`,

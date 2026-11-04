@@ -859,6 +859,18 @@ Registry, Live-Runtime oder Central-Implementierung zurück.
 
 ## 4. `runner.rig_and_coverage`
 
+Die Finanzierung des allgemeinen Rig-Aufbaus erhält denselben aktuellen
+Handpuffer wie die Zulassung einer Handkartenentwicklung. Ein Einkommen aus
+einer Handkarte darf nicht als aktueller Funding-Kopf delegiert werden, wenn
+seine vollständige Quote diesen Puffer unterschreitet. Maßgeblich ist das
+Minimum aus aktueller Handgröße und dem bestehenden Defense-Puffer; bereits
+fehlende Karten werden dadurch nicht zum neuen Aufbauzwang. Der gemeinsame
+Funding-Dienst erzeugt die Quote, Coverage konsumiert ausschließlich deren
+zulässige Action-IDs. Konkrete servergebundene Runvorbereitungen behalten ihren
+eigenen Parentvertrag. Paarung 590, Runde 4, G4 D68 belegt die zuvor fälschlich
+delegierte Score!-Finanzierung mit drei Handkarten. Der normale Suchpfad und
+die getrennte Portfolioreserve mit vorgeschaltetem Draw bleiben verfügbar.
+
 Eine kostenpflichtige Subtypvorbereitung für einen Zentralrun konsumiert
 bereits vor dem Wechsel die Handpufferzulassung des Zentralparents. Derselbe
 gemeinsame Test und die aktuellen Defense-Handfakten gelten vor Vorbereitung
