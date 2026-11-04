@@ -241,13 +241,20 @@ export function addRunnerCoverageRejectedSearchDispositions(
         `temporary_search_without_run_consumer:${actionId}`,
       ),
     );
+    const temporaryIncompleteHorizon = rejectedGaps.some((gap) =>
+      gap.recoveryEvidenceCodes?.some((code) =>
+        code.startsWith(`temporary_search_incomplete_horizon:${actionId}:`),
+      ),
+    );
     add(
       actionId,
       "runner.rig_and_coverage",
       `${
-        temporaryWithoutConsumer
-          ? "runner_temporary_coverage_search_requires_bound_run_consumer"
-          : "runner_coverage_search_rejected_without_deck_answer"
+        temporaryIncompleteHorizon
+          ? "runner_temporary_coverage_search_requires_complete_same_turn_route"
+          : temporaryWithoutConsumer
+            ? "runner_temporary_coverage_search_requires_bound_run_consumer"
+            : "runner_coverage_search_rejected_without_deck_answer"
       }:${rejectedGaps
         .map(
           (gap) => `${gap.requiredRole}@${gap.targetServerId ?? "no_server"}`,

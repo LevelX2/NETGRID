@@ -1108,6 +1108,21 @@ Nach dem Fenster gilt wieder die normale aktuelle Discovery. Der native
 Sneak-Preview-Zustand aus Paarung 563 G34/D313 und fehlende, veraltete oder
 widersprüchliche Bindungen sind fokussiert geprüft (SP-684).
 
+Eine nur bis Zugende gültige Suchinstallation verlangt zusätzlich einen
+vollständigen aktuellen Ressourcenhorizont. `coverage-temporary-search.ts`
+quotiert die exakt gebundene Suchaktion und Runaktion mit ihren aktuellen
+LegalAction-Kosten, dem kanonisch bekannten eigenen Breaker und der vorhandenen
+MU-Opferbewertung. Die gemeinsame Runbewertung liefert danach Pfad-, Risiko-,
+Handpuffer- und Finanzierungsbedarf. Nötige sichere Ziehaktionen und erwarteter
+Klickverlust werden vor der gemeinsamen vollständigen Funding-Suche reserviert.
+Fehlt die gesamte Folge innerhalb dieses Runnerzugs, bleibt die Suchquelle mit
+konkretem Ablehnungsgrund beim Coverage-Owner ausgeschlossen. Ein vollständiger
+Parentbezug allein genügt nicht. Die Quote erzeugt keine LegalAction, keinen
+Engine-Zustand und keine verborgene Karte; jede Ausführung rematerialisiert
+weiterhin am tatsächlichen Folgezustand. Native letzte-Klick-, Handpuffer- und
+unbezahlbare Pfade sowie tatsächlich genutzte temporäre Remote-Antworten
+sichern die Grenze (Paarung 592, SP-757).
+
 `coverage-services.ts` benennt sieben Dienste: aktuelles Remote-Material,
 bekannten verzögerten ICE-Abgang, direkte Run-Verwertbarkeit, Run-Funding,
 materiellen Zentraldruck, dessen Kadenz und die gemeinsame Funding-Suche.

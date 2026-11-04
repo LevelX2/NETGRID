@@ -154,3 +154,47 @@ it.each([
     }
   },
 );
+
+it.each([
+  ["meta592-r4-g03-d128-last-click", "search_and_run_clicks_do_not_fit"],
+  [
+    "meta592-r4-g05-d254-hand-buffer",
+    "search_run_and_hand_preparation_do_not_fit",
+  ],
+  ["meta592-r4-g32-d314-funding", "no_convertible_run_after_search"],
+])(
+  "does not spend a temporary search before an incomplete current-turn route: %s",
+  (fixture, reason) => {
+    const { input } = original(fixture),
+      before = JSON.stringify(input),
+      d = chooseAiAction(input);
+    expect(d.actionId).not.toContain("sneak-preview");
+    expect(
+      input.legalActions.some(
+        (a: { actionId: string }) => a.actionId === d.actionId,
+      ),
+    ).toBe(true);
+    expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
+    expect(JSON.stringify(input)).toBe(before);
+    const gaps = residentPlanPortfolioSnapshot(input)!
+      .instances.filter((x) => x.moduleId === "runner.rig_and_coverage")
+      .map((x) => (x.moduleState as { gap: RunnerCoverageGapSignal }).gap);
+    expect(
+      gaps.some((g) =>
+        g.recoveryEvidenceCodes?.some(
+          (code) =>
+            code.startsWith("temporary_search_incomplete_horizon:") &&
+            code.endsWith(reason),
+        ),
+      ),
+    ).toBe(true);
+  },
+);
+it("keeps the native three-click temporary search that actually reaches the remote this turn", () => {
+  const { input } = original("meta592-r4-g04-d082-used-temporary"),
+    before = JSON.stringify(input),
+    d = chooseAiAction(input);
+  expect(d.actionId).toContain("sneak-preview");
+  expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
+  expect(JSON.stringify(input)).toBe(before);
+});

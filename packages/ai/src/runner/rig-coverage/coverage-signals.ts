@@ -39,6 +39,7 @@ import { runnerUrgentRemoteCoverageConversionQuote } from "./coverage-support";
 import { runnerCoverageFundingActionIds } from "./coverage-support";
 import { coverageSupportActionIds } from "./coverage-support";
 import { runnerCoverageSearchLifecycleBinding } from "./coverage-support";
+import { runnerTemporaryCoverageSearchHorizonBinding } from "./coverage-temporary-search";
 import { runnerDeckHasCoverageAnswer } from "./coverage-support";
 import { planFirstCoverageRole } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
@@ -799,7 +800,14 @@ export function uniqueCoverageGaps(
   return dedupeCoverageGapsByGapId([...result.values()]).map((gap) =>
     runnerCoverageInstallCreditPreparation(
       input,
-      runnerCoverageSearchLifecycleBinding(gap, candidates),
+      runnerTemporaryCoverageSearchHorizonBinding(
+        input,
+        runnerCoverageSearchLifecycleBinding(gap, candidates),
+        candidates,
+        deckCapabilities,
+        services,
+        strategicIntent,
+      ),
     ),
   );
 }
