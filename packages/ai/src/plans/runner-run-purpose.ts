@@ -4,6 +4,20 @@ import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation"
 import { runnerTerminalContestThreat } from "../runtime/runner-terminal-contest-threat";
 export const INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET = 1;
 
+/** Shared central-parent admission, also consumed before paid preparation. */
+export function runnerCostlyCentralRunIsBelowHandBuffer(
+  handSize: number,
+  minimumHandBuffer: number,
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    handSize < minimumHandBuffer &&
+    evaluation.pathCost > 0 &&
+    evaluation.accessPayoff !== "agenda" &&
+    evaluation.accessPayoff !== "score_threat"
+  );
+}
+
 export function runPurposeForEvaluation(
   evaluation: RunnerRunTargetEvaluation,
 ): "access" | "multiaccess" | "information" | "contest" {

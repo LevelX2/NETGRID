@@ -1,4 +1,5 @@
 import {
+  runnerCostlyCentralRunIsBelowHandBuffer,
   runPurposeForEvaluation,
   runnerInformationProbeCanUseQuotedPath,
   runnerTerminalRemoteUnreachableCentralLastChance,
@@ -42,6 +43,7 @@ import { planFirstCoverageRole } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
 import { runnerCoverageInstallCreditPreparation } from "./coverage-install-credit-preparation";
 import { runnerPendingFreeSubtypeCoverageRole } from "./coverage-pending-subtype";
+import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signals";
 export type RunnerCoverageDrawCadence = Readonly<{
   drawAvailable: boolean;
   evidenceCode: string;
@@ -127,6 +129,7 @@ export function uniqueCoverageGaps(
     );
   });
   const terminalContestThreat = runnerTerminalContestThreat(input);
+  const handBuffer = runnerDefenseHandBufferFacts(input, runTargets);
   for (const evaluation of runTargets) {
     if (
       !runnerCoverageRunTargetHasDifferentialPayoff(
@@ -178,6 +181,21 @@ export function uniqueCoverageGaps(
       ...evaluation,
       pathCost: Math.max(0, evaluation.pathCost - preparation.credits),
     };
+    if (
+      evaluation.targetKind !== "remote" &&
+      runnerCostlyCentralRunIsBelowHandBuffer(
+        handBuffer.handSize,
+        handBuffer.minimumHandBuffer,
+        preparedEvaluation,
+      ) &&
+      !runnerTerminalRemoteUnreachableCentralLastChance(
+        input,
+        evaluation,
+        runTargets,
+      )
+    ) {
+      continue;
+    }
     if (
       evaluation.prerunReserveQuote?.status === "blocked" &&
       !services.runnerRunTargetCanConvertNow(

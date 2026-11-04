@@ -7,6 +7,7 @@ import { type RunnerCorePlanDomain } from "../../plans/runner-core-plan-contract
 import { ActiveRunnerRunRoot } from "../../plans/runner-run-origin-contract";
 import { runnerCardRunHasVisibleDifferentialPayoff } from "../../plans/runner-run-payoff";
 import {
+  runnerCostlyCentralRunIsBelowHandBuffer,
   runnerInformationProbeCanUseQuotedPath,
   runnerInformationProbeKnownPathIsAdmitted,
   runnerTerminalRemoteUnreachableCentralLastChance,
@@ -1073,10 +1074,11 @@ export function buildRunnerCentralPressureSignals({
             runnerCentralPressureHasMaterialMarginalValue(input, evaluation) ||
             lastCounterConversion !== undefined;
           const costlyInformationRunBelowHandBuffer =
-            handSize < minimumHandBuffer &&
-            evaluation.pathCost > 0 &&
-            evaluation.accessPayoff !== "agenda" &&
-            evaluation.accessPayoff !== "score_threat";
+            runnerCostlyCentralRunIsBelowHandBuffer(
+              handSize,
+              minimumHandBuffer,
+              evaluation,
+            );
           const executionMode = concreteRunSetupAvailable
             ? ("access" as const)
             : runPurposeForEvaluation(evaluation);

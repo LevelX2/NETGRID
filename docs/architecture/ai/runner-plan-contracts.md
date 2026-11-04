@@ -859,6 +859,17 @@ Registry, Live-Runtime oder Central-Implementierung zurück.
 
 ## 4. `runner.rig_and_coverage`
 
+Eine kostenpflichtige Subtypvorbereitung für einen Zentralrun konsumiert
+bereits vor dem Wechsel die Handpufferzulassung des Zentralparents. Derselbe
+gemeinsame Test und die aktuellen Defense-Handfakten gelten vor Vorbereitung
+und Runstart. Die Vorbereitungskosten werden vom Preis des anschließenden
+Runs getrennt: Ein danach tatsächlich kostenloser Pfad, konkrete Agenden
+und die bestehende terminale Letztchance behalten ihre bisherigen Grenzen.
+Ein Wechsel repariert keinen fehlenden Handpuffer. Paarung 590, Runde 2,
+G33 D166/D168 sichert die zuvor gegensinnigen bezahlten Umstellungen ohne
+anschließenden Run; die vorbereitete Route darf keinen eigenständigen
+Coverage-Auftrag ohne zulässigen Run begründen (SP-026).
+
 Der generische Aufbau kauft keine zweite Antwort für die letzte offene
 Standardrolle, wenn ein bereits installiertes, noch unkonfiguriertes Programm
 diese Rolle laut kanonischer Engine-Fähigkeit einmalig während eines Runs
