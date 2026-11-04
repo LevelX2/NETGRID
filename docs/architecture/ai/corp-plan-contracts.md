@@ -3093,6 +3093,8 @@ im Spiel. Leere Assets, Archives und eine alleinige Agenda als ihr eigener
 Spender begründen ihn nicht. Dies bewertet das Halten einer Karte; konkrete
 Installations-, Fortschritts- und Scorefolgen bleiben beim Score-Owner.
 
+Der bestehende Haltewert für kanonische Scorebeschleuniger erhält einen begrenzten Zusatzwert, wenn eine bekannte eigene Agenda den Matchpoint erreicht und liquide Credits sowohl die Operation als auch ihre verbleibenden regulären Advances decken. Das schützt die finanzierte Kombination gegenüber einer redundanten, nur nichtterminal in Archives exponierten Agenda. Es ist eine Retentionabwägung, kein Nachweis zukünftiger Klicks, einer garantierten Scorefolge oder eines sicheren Gegnerzuges. Sofort terminale Archives-Exposition bleibt im gebundenen Discard-Batch strikt vorrangig; der Choice-Resolver übernimmt ausschließlich die aktuelle Handplanbindung.
+
 Eine freie R&D-Spitzensortierung bleibt auch bei `minSelections` gleich
 Optionenzahl eine echte Reihenfolgeentscheidung. Die Engine kennzeichnet
 `selectionOrdering: ordered` und bindet die eigene Quelle. Der Hand-Owner

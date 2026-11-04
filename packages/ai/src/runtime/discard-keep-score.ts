@@ -193,7 +193,14 @@ export function discardKeepScore(
   const corpAdvancementBurstSupportsVisibleAgenda =
     input.side === "corp" &&
     type === "operation" &&
-    corpAdvancementBurstHasVisibleSupport(input, card.definitionId, dependencies);
+    corpAdvancementBurstHasVisibleSupport(
+      input,
+      card.definitionId,
+      dependencies,
+    );
+  const corpFundedMatchpointAcceleration =
+    corpAdvancementBurstSupportsVisibleAgenda &&
+    corpAffordableMatchpointAccelerationSupport(input, cost);
   const corpConditionalPayoff =
     input.side === "corp"
       ? corpConditionalPayoffKeepAdjustment(
@@ -219,6 +226,7 @@ export function discardKeepScore(
     if (economyRole) baseValue += input.playerView.own.credits < 5 ? 135 : 55;
     if (rolesMatch(roles, ["score", "remote"])) baseValue += 70;
     if (corpAdvancementBurstSupportsVisibleAgenda) baseValue += 420;
+    if (corpFundedMatchpointAcceleration) baseValue += 240;
   } else {
     if (breakerRoleNeedles.length > 0) {
       baseValue += installedSameBreakerRole ? 95 : 210;
@@ -305,6 +313,9 @@ export function discardKeepScore(
       "discard_score:base",
       ...(corpAdvancementBurstSupportsVisibleAgenda
         ? ["discard_score:corp_visible_agenda_advancement_burst"]
+        : []),
+      ...(corpFundedMatchpointAcceleration
+        ? ["discard_score:corp_funded_matchpoint_acceleration_retention"]
         : []),
       ...(input.side === "corp" &&
       type === "operation" &&
@@ -741,6 +752,44 @@ function cardSemanticSignals(hint: unknown): ReadonlySet<string> {
   ]);
 }
 
+/** A retention value, not a certificate of future clicks or a score route. */
+function corpAffordableMatchpointAccelerationSupport(
+  input: AiDecisionInput,
+  operationCost: number,
+): boolean {
+  if (!Number.isSafeInteger(operationCost) || operationCost < 0) return false;
+  const availableCredits = input.playerView.own.credits - operationCost;
+  if (availableCredits < 0) return false;
+  const agendas = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.servers
+      .filter((server) => server.id !== "archives")
+      .flatMap((server) => server.root),
+  ];
+  return agendas.some((agenda) => {
+    if (!agenda.known || !agenda.definitionId) return false;
+    const definition = CARD_DEFINITIONS_BY_ID[agenda.definitionId];
+    const points = agenda.agendaPoints ?? definition?.agendaPoints;
+    const requirement = definition?.advancementRequirement;
+    if (
+      definition?.type !== "agenda" ||
+      typeof points !== "number" ||
+      !Number.isSafeInteger(points) ||
+      points <= 0 ||
+      typeof requirement !== "number" ||
+      !Number.isSafeInteger(requirement) ||
+      requirement < 0 ||
+      input.playerView.own.agendaPoints + points <
+        input.playerView.agendaPointsToWin
+    )
+      return false;
+    return (
+      Math.max(0, requirement - (agenda.advancementCounters ?? 0)) <=
+      availableCredits
+    );
+  });
+}
+
 function corpAdvancementBurstHasVisibleSupport(
   input: AiDecisionInput,
   definitionId: string,
@@ -751,10 +800,7 @@ function corpAdvancementBurstHasVisibleSupport(
   const installed = input.playerView.servers
     .filter((server) => server.id !== "archives")
     .flatMap((server) => [...server.ice, ...server.root]);
-  const agendaTargets = [
-    ...input.playerView.own.gripOrHq,
-    ...installed,
-  ].filter(
+  const agendaTargets = [...input.playerView.own.gripOrHq, ...installed].filter(
     (candidate) =>
       candidate.known !== false &&
       (candidate.type === "agenda" ||
@@ -762,15 +808,20 @@ function corpAdvancementBurstHasVisibleSupport(
           "agenda"),
   );
   if (agendaTargets.length === 0) return false;
-  if (profile.placesAdvancementCounters || profile.gainsCorpActions) return true;
+  if (profile.placesAdvancementCounters || profile.gainsCorpActions)
+    return true;
   // Counter movement is useful retention support only while a distinct owned
   // installed donor actually has counters. It does not create new counters.
-  return profile.movesAdvancementCounters && installed.some((donor) =>
-    donor.known !== false &&
-    (donor.controller === "corp" || donor.owner === "corp") &&
-    Number.isSafeInteger(donor.advancementCounters) &&
-    (donor.advancementCounters ?? 0) > 0 &&
-    agendaTargets.some((target) => target.instanceId !== donor.instanceId),
+  return (
+    profile.movesAdvancementCounters &&
+    installed.some(
+      (donor) =>
+        donor.known !== false &&
+        (donor.controller === "corp" || donor.owner === "corp") &&
+        Number.isSafeInteger(donor.advancementCounters) &&
+        (donor.advancementCounters ?? 0) > 0 &&
+        agendaTargets.some((target) => target.instanceId !== donor.instanceId),
+    )
   );
 }
 
