@@ -107,7 +107,6 @@ it("uses the bound hand reserve through actual Sneak, Heap, Rent and Remote Engi
         actionId: a!.actionId,
         clientKnownStateVersion: state.stateVersion,
         ...(z.selectedChoices ? { selectedChoices: z.selectedChoices } : {}),
-        ...(z.selectedTargets ? { selectedTargets: z.selectedTargets } : {}),
       });
       expect(r.ok).toBe(true);
       if (!r.ok) throw Error(r.error.message);

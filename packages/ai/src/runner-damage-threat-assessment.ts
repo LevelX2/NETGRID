@@ -20,6 +20,7 @@ import {
   creditsToBreakVisibleSubroutinesWithBreaker,
   type assessKnownRezzedIcePath,
 } from "./visible-run-analysis";
+import { projectBreakerCreditPayment } from "./run-analysis/visible-run-credit-budget";
 import { projectVisibleDamagePrevention } from "./run-analysis/visible-damage-prevention";
 
 export function knownPathAfterDamageBudget(
@@ -693,11 +694,10 @@ export function runnerFutureEncounterDamageJackOutAssessment(
       return (
         fullBreak !== undefined &&
         fullBreak.conditionalAccessReason === undefined &&
-        fullBreak.cost <=
-          (runnerFortPassTollWindow(input)
-            ? runnerRunWindowCreditBudget(input).credits
-            : input.playerView.own.credits +
-              (input.playerView.run?.badPublicityCredits ?? 0))
+        projectBreakerCreditPayment(
+          runnerRunWindowCreditBudget(input),
+          fullBreak,
+        ).affordable
       );
     })
   )

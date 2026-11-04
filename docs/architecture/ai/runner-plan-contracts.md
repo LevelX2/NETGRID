@@ -3144,6 +3144,13 @@ vollständigen Break des nächsten ICE, darf die Encounter-Auflösung nicht
 zusätzlich den teureren Break der Quelle erzwingen. Unbekannte Ziele,
 fehlende Engine-Quotes, aktive Break-Verbote und unfinanzierbare oder
 bedingte Folgerouten liefern keine solche Zusage.
+Auch der Bewegungs-Guard verwendet für diese vollständige Folgebrechung den
+aktuellen zweckgefilterten Breaker-Zahlungsledger statt nur Bankguthaben und
+Bad Publicity. Verfügbare Run-Pools zählen nur für den konkret gebundenen
+Breaker und seinen erlaubten Zweck. Bereits ausgegebene Bits, ein erst im
+nächsten Zug möglicher Refill und unpassende Link-, Killer- oder
+Hosted-Pools finanzieren diese Zusage nicht. Eine aktuelle Fort-Pass-Maut
+wird vor der Breakprojektion reserviert.
 Im Ziel-Encounter liefert die Engine auf der aktuellen `continue_run`-Action
 `encounterFullBreakDamage`: den noch drohenden Schaden bei unvollständigem
 Break, beziehungsweise null nach Erfüllung oder ohne aktive Verpflichtung.
