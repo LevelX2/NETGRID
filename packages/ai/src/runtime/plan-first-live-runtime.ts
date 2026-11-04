@@ -312,6 +312,7 @@ import {
   bindSelectedCoverageSearchAction,
   bindSelectedRunnerCoverageSearchChoiceContinuation,
   reconcileRunnerCoverageRequesterBindings,
+  resolvePlanBoundRunnerCoverageSearchSourceChoice,
 } from "../runner/rig-coverage/coverage-bindings";
 import {
   addRunnerCoverageMemoryDispositions,
@@ -578,6 +579,10 @@ export function choosePlanFirstLiveAction(
         previous,
       ) ??
       resolvePlanBoundRunnerDevelopmentSearchChoice(
+        schedulerContext,
+        previous,
+      ) ??
+      resolvePlanBoundRunnerCoverageSearchSourceChoice(
         schedulerContext,
         previous,
       ) ??

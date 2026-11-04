@@ -1,4 +1,5 @@
 import { runnerDevelopmentSearchChoiceBinding } from "../runner/hand-development/development-choice-bindings";
+import { runnerCoverageSearchSourceChoiceBinding } from "../runner/rig-coverage/coverage-bindings";
 import {
   isRunnerGripDamageReplacementWindow,
   selectedRunnerGripDamageReplacement,
@@ -342,7 +343,11 @@ function selectedCorpArchivesToHqOptionIdsFromBoundContinuation(
     root !== undefined &&
     root.side === "corp" &&
     (executor?.moduleId === "corp.hand_and_agenda_management" ||
-      isExactDefenseRecoveryChoiceOwner(executor,origin,portfolio.stateVersion) ||
+      isExactDefenseRecoveryChoiceOwner(
+        executor,
+        origin,
+        portfolio.stateVersion,
+      ) ||
       isExactScoreRecoveryChoiceOwner(
         executor,
         origin,
@@ -1352,6 +1357,23 @@ export function selectedChoicesForDecision(
     );
   }
   if (choice.kind === "select_cards") {
+    const coverageSource = runnerCoverageSearchSourceChoiceBinding(
+      input,
+      currentPortfolio ?? residentPlanPortfolioSnapshot(input),
+    );
+    if (coverageSource) {
+      if (action.actionId !== coverageSource.actionId) {
+        throw unresolvedChoiceFailure(
+          input,
+          action,
+          "Preserve the exact coverage source-choice LegalAction.",
+        );
+      }
+      return resolved(
+        [coverageSource.optionId],
+        "bound_runner_coverage_search_source",
+      );
+    }
     const runSearch = selectedRunnerRunProgramSearchOptionIds(
       input,
       action,

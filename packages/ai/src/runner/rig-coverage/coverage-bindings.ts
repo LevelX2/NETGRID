@@ -4,13 +4,153 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
-import { type PlanSchedulerResult } from "../../plans/plan-scheduler";
+import {
+  type PlanSchedulerResult,
+  type PlanSchedulerContext,
+  type EngineWindowResolution,
+} from "../../plans/plan-scheduler";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { selectResidentPlanPortfolioExecutor } from "../../plans/resident-plan-portfolio";
 import type { RunnerProgramInstallTrashAssessment } from "../../runtime/runner-program-install-trash-policy";
 import { preserveCoveragePaymentAncestry } from "./coverage-payment-ancestry";
+import type { CoverageState } from "./coverage-types";
+import type { PlanExecutionOrigin } from "../../plans/plan-continuation";
+
+export function runnerCoverageSearchSourceChoiceBinding(
+  input: AiDecisionInput,
+  portfolio: ResidentPlanPortfolio | undefined,
+):
+  | { actionId: string; optionId: string; origin: PlanExecutionOrigin }
+  | undefined {
+  const choice = input.playerView.pendingChoice;
+  if (
+    input.side !== "runner" ||
+    !choice?.source.startsWith("p3_38.stack_or_trash_program_install_source:")
+  )
+    return;
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.rig_and_coverage",
+  );
+  if (!executor) return;
+  const state = executor.moduleState as CoverageState | undefined;
+  const bindings =
+    state?.gap?.directSearchChoiceBindings?.filter(
+      (binding) =>
+        binding.actionId === state.selectedSearchActionId &&
+        binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
+        binding.sourceDefinitionId === choice.sourceCardDefinitionId,
+    ) ?? [];
+  const binding = bindings.length === 1 ? bindings[0] : undefined;
+  // An instance-bound recovery target is in Heap; a definition-only Stack
+  // target must never be replaced by an unrelated visible Heap program.
+  const zone = binding?.targetCardInstanceId === undefined ? "stack" : "heap";
+  const options = choice.options.filter(
+    (option) =>
+      option.selectable !== false &&
+      option.id === `source_${zone}` &&
+      option.value === zone &&
+      option.card === undefined,
+  );
+  const action =
+    input.legalActions.length === 1 ? input.legalActions[0] : undefined;
+  const requirement = action?.choiceRequirements?.[0];
+  const root = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.rootForegroundInstanceId &&
+      instance.portfolioRole === "foreground",
+  );
+  const ownership =
+    root !== undefined &&
+    (root.instanceId === executor.instanceId ||
+      (executor.parentInstanceId === root.instanceId &&
+        typeof executor.parentNeedId === "string" &&
+        root.openNeedIds.includes(executor.parentNeedId) &&
+        state?.gap?.requesterPlanInstanceId === root.instanceId &&
+        state?.gap?.requesterNeedId === executor.parentNeedId));
+  const exact =
+    portfolio?.side === "runner" &&
+    ownership &&
+    executor.executionState === "executor" &&
+    state?.kind === "coverage" &&
+    state.phase === "search_answer" &&
+    state.selectedSearchStateVersion === portfolio.stateVersion &&
+    input.playerView.stateVersion === portfolio.stateVersion + 1 &&
+    binding !== undefined &&
+    typeof binding.targetDefinitionId === "string" &&
+    (zone !== "heap" ||
+      input.playerView.own.heapOrArchives.some(
+        (card) =>
+          card.instanceId === binding.targetCardInstanceId &&
+          card.definitionId === binding.targetDefinitionId &&
+          card.known !== false &&
+          card.type === "program",
+      )) &&
+    choice.source ===
+      `p3_38.stack_or_trash_program_install_source:${binding.sourceCardInstanceId}:${binding.sourceDefinitionId}:${choice.stateVersion}` &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    options.length === 1 &&
+    action?.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choice.options.length &&
+    choice.options.every((option) => requirement.optionIds.includes(option.id));
+  if (!exact || !action || !portfolio || !root || !options[0])
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: action ? [action.actionId] : [],
+      owner: "support_graph",
+      planInstanceId: executor.instanceId,
+      removalCondition:
+        "Resolve the search source only from the exact current coverage executor, selected search action and prebound Stack or Heap target.",
+    });
+  return {
+    actionId: action.actionId,
+    optionId: options[0].id,
+    origin: {
+      rootPlanInstanceId: root.instanceId,
+      leafPlanInstanceId: executor.instanceId,
+      side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+    },
+  };
+}
+
+export function resolvePlanBoundRunnerCoverageSearchSourceChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const binding = runnerCoverageSearchSourceChoiceBinding(
+    context.input,
+    previous,
+  );
+  return binding
+    ? {
+        actionId: binding.actionId,
+        origin: binding.origin,
+        reasonCode: "plan_bound_runner_coverage_search_source",
+      }
+    : undefined;
+}
 export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
   input: AiDecisionInput,
   result: Extract<PlanSchedulerResult, { lane: "plan" }>,

@@ -1072,6 +1072,14 @@ das aktuelle Suchfenster, Quelle, Zieldefinition und ausreichende akzeptable
 MU-Opfer. Bereits bekannte Heap-Ziele behalten ihre Vorbindung. Die spätere
 Speicher-Choice vervollständigt nur dieses exakte Opfer; sie erfindet keine
 neue Auswahl (SP-165, Paarung 555).
+Die vorgeschaltete Stack-/Heap-Quellenwahl gehört ebenfalls demselben
+Coverage-Executor. Eine definitionsgebundene Stack-Antwort wählt ausschließlich
+die aktuelle Stack-Option; eine instanzgebundene Heap-Antwort verlangt genau
+diese weiterhin sichtbare Programm-Instanz im eigenen Heap. Der Resolver prüft
+Originalaction, Quelle, unmittelbar folgende StateVersion, Parent-/Need-Kette
+und aktuelle Optionsmenge. Er darf ein fehlendes Ziel nicht durch ein anderes
+Heap-Programm ersetzen. Paarung 592/Runde 3/G29 belegt Rent-I-Con aus dem Stack
+anstelle des zuvor irrtümlich gewählten temporären Cloak aus dem Heap.
 Während der Zahlungsunterstützung bleibt auch die ursprüngliche Parentkette
 der Coverage-Aktion erhalten. Eine allgemeine Neuentdeckung derselben
 Coverage-Instanz darf deren Remote-Parent nicht entfernen. Jede Kante wird
@@ -3553,6 +3561,12 @@ Auch ausschließlich verpflichtende Encounter-Fortsetzungen erhalten den
 bestehenden Run-Executor nach einer lückenlosen Movement-/Rez-Folge und nach
 dem exakt gewählten, abgeschlossenen Trace-Gebot. Mehrere Trace-Subroutinen
 derselben Begegnung verlieren dadurch ihre aktuelle Zahlungsbindung nicht.
+Ein allgemeiner Corp-Rez-Pass hat dabei fachlich keinen Zielserver. In dieser
+bereits lückenlos an Run, Root und Executor gebundenen Ereigniskette darf
+`decline_rez` ohne `serverId` vorkommen. Ein explizit anderer Server, ein
+anderer Akteur, eine fehlende Rez-Zielbindung oder eine Ereignislücke erhält
+keine solche Fortsetzung. Paarung 592/Runde 3/G10 prüft die originale
+Hunter-Trace- und Swiss-Zahlungskette ohne erfundenen Ersatzserver (SP-168).
 Die KI-DTO-Projektion erhält dazu die bereits side-sicheren öffentlichen
 `traceId`, `traceSuccessful` und `choiceId`; sie ergänzt keine verdeckten
 Fakten. Fremde Runs, Server, Executor, Choices oder Ereignislücken erlauben

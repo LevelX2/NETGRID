@@ -448,7 +448,10 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       (completedSelectedTrace ||
         interveningEvents.every(
           (event) =>
-            event.publicPayload.serverId === run.attackedServerId &&
+            (event.publicPayload.serverId === run.attackedServerId ||
+              (event.publicPayload.actor === "corp" &&
+                event.publicPayload.actionType === "decline_rez" &&
+                event.publicPayload.serverId === undefined)) &&
             ((event.publicPayload.actor === "runner" &&
               event.publicPayload.actionType === "continue_run") ||
               (event.publicPayload.actor === "corp" &&
