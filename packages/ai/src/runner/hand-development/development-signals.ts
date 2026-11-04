@@ -648,6 +648,14 @@ export function runnerProgramSearchStrategyDevelopmentSignals(
           runnerCandidateSourceSupportsProgramSearch(input, candidate))
       ) ||
       !runnerPartialProgramSearchIsPayable(input, candidate) ||
+      // These targets build a persistent engine. A current-turn temporary
+      // install must be owned by a concrete coverage/run consumer instead.
+      candidate.functionalEffects?.some(
+        (effect) =>
+          effect.kind === "delayed_penalty" &&
+          effect.timing === "runner_turn" &&
+          effect.target === "end_of_turn_bounce",
+      ) ||
       coverageOwnedActionIds.has(candidate.actionId) ||
       runnerHandDevelopmentRejectionForCandidate(
         input,

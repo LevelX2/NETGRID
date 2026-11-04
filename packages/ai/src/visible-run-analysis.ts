@@ -1018,8 +1018,7 @@ function assessKnownRezzedIcePathInternal(
       ice: effectiveIce,
       iceIndex,
       rigCards: rigCardsForEncounter,
-      availableCredits: Math.max(0, creditsAfterAvoidingVisibleIceHazards),
-      availableTraceCredits: creditBudget.traceEligibleCredits,
+      creditBudget,
       visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
       additionalBreakCostPerSubroutine,
@@ -1744,6 +1743,17 @@ function runPathEffectBreakAssessment(params: {
     return undefined;
   }
   if (effectCreatesNoAccess) return breakAssessment;
+  // A higher nominal break price can be the only fully funded suffix when
+  // the fee requires general money and the breaker can spend restricted pools.
+  if (
+    runnerKnownPathAssessmentIsCostNoAccess(futureWithEffect) &&
+    (futureAfterBreak.canReachAccess ||
+      (runnerKnownPathAssessmentIsCostNoAccess(futureAfterBreak) &&
+        Math.max(0, -futureAfterBreak.creditsAfterPath) <
+          Math.max(0, -futureWithEffect.creditsAfterPath)))
+  ) {
+    return breakAssessment;
+  }
   const futureCostDelta = Math.max(
     0,
     (futureWithEffect.visibleBreakCost ?? 0) -

@@ -6,6 +6,12 @@ import type {
   VisibleEffectiveSubroutine,
   VisibleRunnerTraceSupportQuote,
 } from "@netgrid/shared";
+import {
+  normalizeRunnerRunPathCreditBudget,
+  projectBreakerCreditPayment,
+  spendBreakerCreditsAndApplySideEffects,
+  spendTraceEligibleCredits,
+} from "./visible-run-credit-budget";
 import { isVisibleDirectDamageSubroutine } from "./visible-subroutine-semantics";
 import type {
   BreakAssessment,
@@ -13,6 +19,7 @@ import type {
   IceCardLike,
   KnownRezzedIcePathAssessment,
   MutableRunnerRunPathCreditBudget,
+  RunnerRunPathCreditBudgetInput,
   RunPathProjection,
   RunPathProjectionEffect,
   VisibleIceRunHazard,
@@ -118,9 +125,8 @@ export function visibleIceRunHazardsForQuote(params: {
   ice: IceCardLike;
   iceIndex: number;
   rigCards: VisibleCard[];
-  availableCredits: number;
-  /** General-credit subset; omission denotes a single general-credit pool. */
-  availableTraceCredits?: number;
+  /** Complete current payment ledger; restricted breaker pools never fund traces. */
+  creditBudget: RunnerRunPathCreditBudgetInput;
   visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
@@ -134,15 +140,9 @@ export function visibleIceRunHazardsForQuote(params: {
   const traceRulesProfile = planningTraceRulesProfile(params.traceRulesProfile);
   const hazards: VisibleIceRunHazardProjection[] = [];
   const encounterBreakerStrengths = new Map(params.breakerStrengths);
-  let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
-  let remainingTraceCredits =
-    params.availableTraceCredits ?? remainingHazardCredits;
-  if (
-    !Number.isInteger(remainingTraceCredits) ||
-    remainingTraceCredits < 0 ||
-    remainingTraceCredits > remainingHazardCredits
-  )
-    throw new Error("visible_run_hazard_invalid_trace_credit_subset");
+  const remainingCreditBudget = normalizeRunnerRunPathCreditBudget(
+    params.creditBudget,
+  );
   let remainingTraceCreditPool = visibleTraceCreditPool(
     params.runnerTraceSupportQuote,
     params.excludeStealthTraceCredits,
@@ -155,7 +155,7 @@ export function visibleIceRunHazardsForQuote(params: {
         params.runnerTraceSupportQuote,
         consumedTraceSupportSourceIds,
       ),
-      remainingTraceCredits,
+      remainingCreditBudget.traceEligibleCredits,
       params.runTraceLinkBonus,
       {
         traceCreditPool: remainingTraceCreditPool,
@@ -191,7 +191,7 @@ export function visibleIceRunHazardsForQuote(params: {
           );
     const traceSuccessCancel = cheapestTraceSuccessCancel(
       traceSupport,
-      remainingTraceCredits,
+      remainingCreditBudget.traceEligibleCredits,
     );
     const traceAvoidanceCandidate =
       visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe?.creditCost;
@@ -202,9 +202,14 @@ export function visibleIceRunHazardsForQuote(params: {
       [subroutine],
       encounterBreakerStrengths,
       params.additionalBreakCostPerSubroutine,
+      [],
+      false,
+      remainingCreditBudget,
     );
     const breakAvoidanceCandidate =
-      breakAssessment && breakAssessment.cost <= remainingHazardCredits
+      breakAssessment &&
+      projectBreakerCreditPayment(remainingCreditBudget, breakAssessment)
+        .affordable
         ? breakAssessment.cost
         : undefined;
     const avoidanceCandidates = [
@@ -434,10 +439,14 @@ export function visibleIceRunHazardsForQuote(params: {
         : {}),
     });
     if (!unavoidable && minimumAvoidanceCost !== undefined) {
-      remainingHazardCredits -= minimumAvoidanceCost;
-      remainingTraceCredits = usesBreakAvoidance
-        ? Math.min(remainingTraceCredits, remainingHazardCredits)
-        : remainingTraceCredits - minimumAvoidanceCost;
+      if (usesBreakAvoidance && breakAssessment) {
+        spendBreakerCreditsAndApplySideEffects(
+          remainingCreditBudget,
+          breakAssessment,
+        );
+      } else {
+        spendTraceEligibleCredits(remainingCreditBudget, minimumAvoidanceCost);
+      }
       if (usesBreakAvoidance && breakAssessment) {
         encounterBreakerStrengths.set(
           breakAssessment.breakerInstanceId,

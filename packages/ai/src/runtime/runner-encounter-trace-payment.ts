@@ -41,7 +41,9 @@ export function cheaperSafeCurrentTracePayment(
     ice,
     iceIndex: 0,
     rigCards: input.playerView.own.rig ?? [],
-    availableCredits: input.playerView.own.credits,
+    // This helper compares general-only trace payments; breaker spending is
+    // independently priced by the caller and the complete run path.
+    creditBudget: input.playerView.own.credits,
     visibleCorpBidCapacity: input.playerView.opponent.credits,
     breakerStrengths: new Map(),
     additionalBreakCostPerSubroutine:

@@ -1944,6 +1944,12 @@ Nicht zulässig bleiben:
 
 - Karte spielen, nur weil sie legal und roh positiv bewertet ist;
 - turn-limitierte Vorbereitung ohne Commitment;
+- temporäre Suchinstallationen als dauerhaften Wirtschafts-, Speicher- oder
+  Zentraldruckaufbau behandeln. Suchquellen mit kanonischem End-of-turn-Bounce
+  benötigen einen eigenen aktuellen Coverage-/Runverbraucher; die allgemeine
+  langfristige Strategie-Suchroute kann diesen nicht bescheinigen. Permanente
+  Suchen in die Hand und konkret gebundene temporäre Coverage bleiben bei
+  ihren bestehenden Ownern.
 - Installation ohne absehbaren Nutzen oder mit kritischem Ressourcenbruch;
 - Draw bei voller Hand ohne Überlaufbehandlung.
 
@@ -2481,6 +2487,21 @@ erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell
 verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
+
+Die sichtbare Trace-Gefahrenquote konsumiert den vollständigen aktuellen
+Zahlungsledger. Breaks prüfen und verbrauchen kompatible zweckgebundene Pools
+und allgemeine Credits genau einmal; Trace-Gebote und Link-/Cancel-Zahlungen
+verwenden ausschließlich ihren erlaubten Teilpool. Die Quote verändert den
+Ledger des Aufrufers nicht. Nachfolgende ICE erhalten den tatsächlich
+verbleibenden Ledger, keine erneut verfügbaren Recurring-Credits.
+
+Bei einer optional vermeidbaren Folgegebühr vergleicht die Pfadquote beide
+vollständigen Fortsetzungen. Ein nominell teurerer Break bleibt zulässig, wenn
+er mit zweckgebundenen Credits den einzigen vollständig finanzierten Pfad
+oder die kleinere allgemeine Finanzierungslücke erzeugt. Ein unbezahlter
+Restpfad bleibt ein Fundingbedarf am bestehenden Runparent. Gebühren werden
+nicht mit Breakercredits bezahlt und ein Teilbruch entfernt keine anderen
+Wirkungen.
 
 Die gemeinsame Runquote begrenzt die Reserve vor unbekanntem ICE auf das
 verbleibende Ausgabenlimit der konkreten Runaktion nach dem bekannten Pfad.
