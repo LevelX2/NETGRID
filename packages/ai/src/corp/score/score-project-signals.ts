@@ -1347,6 +1347,7 @@ export function sameTurnScoreConversionProjectsForCandidate(
     const preventsTerminalSteal = sameTurnScoreConversionPreventsTerminalSteal({
       targetServerId: path.targetServerId,
       opponentAgendaPoints: input.playerView.opponent.agendaPoints,
+      agendaPoints: path.agendaPoints,
       agendaPointsToWin: input.playerView.agendaPointsToWin,
       visibleHqAgendaIds: visibleHqAgendas.map((card) => card.instanceId),
       agendaCardId: path.agendaCardId,
@@ -1488,6 +1489,7 @@ export function sameTurnScoreConversionProjectsForCandidate(
 }
 
 export function sameTurnScoreConversionPreventsTerminalSteal(params: {
+  agendaPoints: number;
   targetServerId: string;
   opponentAgendaPoints: number;
   agendaPointsToWin: number;
@@ -1496,6 +1498,17 @@ export function sameTurnScoreConversionPreventsTerminalSteal(params: {
   installedAgendaId?: string | undefined;
   hasOtherInstalledAgenda: boolean;
 }): boolean {
+  // Closing an already installed agenda removes its own terminal steal even
+  // when other agendas remain in HQ. This matches the direct Advance/Score
+  // claim; it does not certify HQ protection or admit a sibling installation.
+  if (
+    params.targetServerId !== "new_remote" &&
+    params.installedAgendaId === params.agendaCardId &&
+    !params.hasOtherInstalledAgenda &&
+    params.opponentAgendaPoints + params.agendaPoints >=
+      params.agendaPointsToWin
+  )
+    return true;
   return (
     // This caller certifies a complete same-turn score, not an isolated install.
     // With no installed sibling it removes the only exposed agenda even in a

@@ -7,6 +7,7 @@ describe("same-turn score conversion terminal-steal ownership", () => {
     const facts = {
       targetServerId: "remote_1",
       opponentAgendaPoints: 6,
+      agendaPoints: 1,
       agendaPointsToWin: 7,
       visibleHqAgendaIds: [],
       agendaCardId: "installed-agenda",
@@ -37,7 +38,7 @@ describe("same-turn score conversion terminal-steal ownership", () => {
         ...facts,
         visibleHqAgendaIds: ["other"],
       }),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       sameTurnScoreConversionPreventsTerminalSteal({
         ...facts,
@@ -50,6 +51,7 @@ describe("same-turn score conversion terminal-steal ownership", () => {
       sameTurnScoreConversionPreventsTerminalSteal({
         targetServerId: "new_remote",
         opponentAgendaPoints: 6,
+        agendaPoints: 1,
         agendaPointsToWin: 7,
         visibleHqAgendaIds: ["agenda-sibling"],
         agendaCardId: "agenda-sibling",
@@ -63,6 +65,7 @@ describe("same-turn score conversion terminal-steal ownership", () => {
       sameTurnScoreConversionPreventsTerminalSteal({
         targetServerId: "remote_1",
         opponentAgendaPoints: 6,
+        agendaPoints: 1,
         agendaPointsToWin: 7,
         visibleHqAgendaIds: ["agenda-exact"],
         agendaCardId: "agenda-exact",
@@ -75,6 +78,7 @@ describe("same-turn score conversion terminal-steal ownership", () => {
     const facts = {
       targetServerId: "new_remote",
       opponentAgendaPoints: 6,
+      agendaPoints: 1,
       agendaPointsToWin: 7,
       visibleHqAgendaIds: ["sole-agenda"],
       agendaCardId: "sole-agenda",

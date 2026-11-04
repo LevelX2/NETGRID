@@ -1681,7 +1681,14 @@ würde ihr Diebstahl dem Runner den Matchpunkt geben, veröffentlicht
 Advance/Score beim bestehenden Score-Owner und konkurriert als belegter P2-Pfad
 gegen terminale Defense. Ein spekulativer Defense-Draw darf diese exakte
 Same-Turn-Fortsetzung nicht durch den Verbrauch eines zwingenden Klicks
-zerstören. Das ist weder eine Kartenregel noch ein Resolver-Override: Agenda,
+zerstören. Für eine vollständig Engine-gequotete Beschleunigungsfolge gilt
+derselbe Claim auch bei weiteren Agenden im HQ: Entscheidend sind die
+bereits installierte exakte Zielagenda und ihre tatsächlichen Steal-Punkte.
+Das bescheinigt keinen vollständigen HQ-Schutz und öffnet keine konkurrierende
+Neuinstallation; eine weitere installierte Agenda behält die bestehende
+Konfliktsperre. Paarung 590, Diagnose-Runde 5, G40 D223 bindet Layoffs,
+Counterwahl, Advance und Score auf Marine Arcology. Das ist weder eine
+Kartenregel noch ein Resolver-Override: Agenda,
 Server, aktuelle `LegalAction` und Folgephase werden weiterhin ausschließlich
 vom residenten Scoreplan materialisiert.
 
