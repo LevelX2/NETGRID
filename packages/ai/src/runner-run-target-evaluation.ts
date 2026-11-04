@@ -1960,22 +1960,32 @@ function quoteRunnerPrerunReserve(params: {
     runnerTargetHasTerminalContestThreat(params.input, params.targetServerId)
       ? ("terminal_remote_last_chance" as const)
       : params.runnerMatchpointCentralAccess && stableUniversal
-      ? ("matchpoint_with_stable_universal_coverage" as const)
-      : ("standard" as const);
+        ? ("matchpoint_with_stable_universal_coverage" as const)
+        : ("standard" as const);
   const corpRezExposureActive =
     corpRezCredits > 0 || params.visibleDuringRunRezSupport;
+  // Cash outside this action's run limit is still owned after the run, but
+  // cannot fund the unknown part of this route. Never certify that reserve
+  // from the ordinary wallet merely because the known path fits the cap.
+  const creditsAvailableAfterKnownPath =
+    params.projection.spendLimit === undefined
+      ? params.creditsAfterKnownPath
+      : Math.min(
+          params.creditsAfterKnownPath,
+          Math.max(0, params.projection.spendLimit - params.knownPathCost),
+        );
   const informationProbeAllowed =
     purpose === "information" &&
     !params.runnerMatchpointCentralAccess &&
     params.knownPathCost <= 1 &&
-    params.creditsAfterKnownPath >=
+    creditsAvailableAfterKnownPath >=
       Math.min(1, params.unrezzedIceRiskCreditBuffer);
   return quoteRunnerRunRiskReserve({
     purpose,
     riskTolerance,
     visibleCoverage,
     knownPathCost: params.knownPathCost,
-    creditsAfterKnownPath: params.creditsAfterKnownPath,
+    creditsAfterKnownPath: creditsAvailableAfterKnownPath,
     unknownIceCount: params.unknownIceCount,
     unknownIcePositions: params.unknownIcePositions,
     corpRezCredits,

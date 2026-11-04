@@ -20,7 +20,10 @@ import { withCorpCounterBankReplacementPreparation } from "./score-counter-bank-
 import { corpAssetPreservingSameTurnScoreRoutes } from "./score-asset-preservation";
 import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
 import { withCorpSameTurnScoreDefenseReserve } from "./score-reserve-restoration";
-import { corpShorterTerminalScoreRouteDominates } from "./score-terminal-route-dominance";
+import {
+  corpShorterTerminalScoreRouteDominates,
+  corpWinningScoreSiblingDominates,
+} from "./score-terminal-route-dominance";
 import {
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreDefenseBinding,
@@ -164,16 +167,20 @@ export function reconcileCorpScoreProjects({
             !project.agendaDefinitionId ||
             !corpAgendaRecyclesHqAgendasIntoRd(project.agendaDefinitionId) ||
             !project.continuationReserve
-          ) return false;
+          )
+            return false;
           const gap = Math.max(
             0,
             project.continuationReserve.requiredCreditsBeforeNextCorpTurn -
               input.playerView.own.credits,
           );
-          return gap === 0 ||
-            (gap <= input.playerView.own.clicks && candidates.some((candidate) =>
-              corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
-            ));
+          return (
+            gap === 0 ||
+            (gap <= input.playerView.own.clicks &&
+              candidates.some((candidate) =>
+                corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
+              ))
+          );
         })
       : undefined;
   const discoveredScoreProjects = [
@@ -210,7 +217,8 @@ export function reconcileCorpScoreProjects({
         (currentInstalledScore ||
           (preparedRecycleScore &&
             !funded.terminalScore &&
-            funded.routeAssessment !== "corp_forced_agenda_discard_score_attempt")) &&
+            funded.routeAssessment !==
+              "corp_forced_agenda_discard_score_attempt")) &&
         funded.phase === "install_agenda" &&
         !funded.sameTurnCloseout
       ) {
@@ -379,6 +387,16 @@ export function reconcileCorpScoreProjects({
     },
   );
   const terminalComparedScoreProjects = concreteScoreProjects.map((project) => {
+    const winning = concreteScoreProjects.find((alternative) =>
+      corpWinningScoreSiblingDominates(input, candidates, alternative, project),
+    );
+    if (winning)
+      return {
+        ...project,
+        feasible: false,
+        routeAssessment: "corp_winning_score_sibling_dominates" as const,
+        evidenceCode: `corp_winning_score_sibling_dominates:${winning.projectId}`,
+      };
     const shorter = concreteScoreProjects.find((alternative) =>
       corpShorterTerminalScoreRouteDominates(
         input,

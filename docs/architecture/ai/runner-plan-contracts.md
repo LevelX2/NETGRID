@@ -2482,6 +2482,16 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Die gemeinsame Runquote begrenzt die Reserve vor unbekanntem ICE auf das
+verbleibende Ausgabenlimit der konkreten Runaktion nach dem bekannten Pfad.
+Außerhalb dieses Limits liegende liquide Credits bleiben Eigentum des Runners,
+sind aber keine Finanzierung für diesen Run. Ein höherer Kontostand allein
+erfüllt diese Reserve daher nicht. Unbeschränkte Runs und vollständig bekannte
+Pfade behalten ihre bisherigen Prüfungen. Paarung 591, G33 D271, belegt den
+Unterschied zwischen zwölf verbleibenden liquiden Credits und nur einem im
+Wilson-Run noch ausgebbaren Credit; die native Regression prüft die bestehende
+Planbindung und Gegenfälle mit größerem Limit beziehungsweise ohne unbekanntes ICE.
+
 Eine verpflichtende Credit-Loss-Auswahl nach einem erfolgreichen Run erhält
 den bestehenden Run-Root und seinen Executor über die Zwischenresolution.
 `run-window-successful-replacement-continuation.ts` validiert dafür die

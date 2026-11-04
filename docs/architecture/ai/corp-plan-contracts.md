@@ -144,6 +144,19 @@ Remote wird nicht verdrängt.
 
 Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
 Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
+Eine bereits zugelassene siegbringende HQ-Agenda verdrängt auch die
+nichtterminale Vorbereitung im selben Remote, wenn die aktuelle Enginequote
+den Abschluss spätestens im nächsten Corp-Zug bestätigt. Dafür sind ein
+vollständiger, aktueller und finanzierter Schutzbeleg mit Zugriffswahrscheinlichkeit
+null, die erhaltene Score-/Aktionsreserve sowie genügend Punkte nach allen
+Verteidigungskosten erforderlich. Eine bereits installierte oder selbst
+siegbringende Vorbereitung, ein anderes Ziel, fehlender Pflichtdraw oder
+unvollständige Quotes erhalten diese Verdrängung nicht. Der zurückgestellte
+Parent veröffentlicht `corp_winning_score_sibling_dominates` und fordert keine
+weitere Finanzierung an. Paarung 591, G40 D274, belegt Theorem Proof zum Sieg
+statt Superserum auf sechs Punkte; der Gegenverlauf umfasst den folgenden
+Runnerzug und den vollständigen Score.
+
 Eine mit aktueller Engine-Horizontquote früher abschließbare Agenda verdrängt
 die langsamere Vorbereitung nur bei höchstens gleichen Installations- und
 Scorekosten, ohne zusätzliche Steal-Punkte oder höheres Zugriffsrisiko und

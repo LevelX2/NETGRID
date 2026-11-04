@@ -5,6 +5,61 @@ import { compareExactProbabilities } from "../../runtime/corp-score-protection-a
 import { hasExactNonNegativeCostProfile } from "../../runtime/exact-action-cost-facts";
 import { corpAgendaInstallHasCertifiedNearTermScoreHorizon } from "./score-project-signals";
 
+/** A certified next-turn win can displace nonwinning HQ preparation. */
+export function corpWinningScoreSiblingDominates(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  winning: CorpScoreProjectSignal,
+  preparation: CorpScoreProjectSignal,
+): boolean {
+  const need = winning.protectionNeed;
+  const protection = need?.baseline;
+  const head =
+    winning.actionIds?.length === 1
+      ? candidates.find(
+          (candidate) => candidate.actionId === winning.actionIds![0],
+        )
+      : undefined;
+  return Boolean(
+    winning.feasible &&
+    preparation.feasible &&
+    winning.terminalScore &&
+    !preparation.terminalScore &&
+    winning.phase === "install_agenda" &&
+    preparation.phase === "install_agenda" &&
+    !winning.sameTurnCloseout &&
+    !preparation.sameTurnCloseout &&
+    winning.serverId?.startsWith("remote_") &&
+    winning.serverId === preparation.serverId &&
+    winning.agendaInstanceId !== preparation.agendaInstanceId &&
+    input.playerView.own.stackOrRdCount > 0 &&
+    input.playerView.own.gripOrHq.some(
+      (card) => card.known && card.instanceId === winning.agendaInstanceId,
+    ) &&
+    input.playerView.own.gripOrHq.some(
+      (card) => card.known && card.instanceId === preparation.agendaInstanceId,
+    ) &&
+    head &&
+    hasExactNonNegativeCostProfile(head) &&
+    corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+      input,
+      head,
+      winning.serverId,
+    ) &&
+    need?.parentProjectId === winning.projectId &&
+    need.targetServerId === winning.serverId &&
+    need.observedAtStateVersion === input.playerView.stateVersion &&
+    protection?.knowledge === "known" &&
+    protection.fundedProtection &&
+    protection.preservesScoreCreditReserve &&
+    protection.preservesHardClickReserve &&
+    protection.protection.runnerAccessSuccessProbability.numerator === 0 &&
+    protection.protection.runnerAccessSuccessProbability.denominator > 0 &&
+    protection.agendaPointsAfterDefense + winning.agendaPoints >=
+      input.playerView.agendaPointsToWin,
+  );
+}
+
 /** Compares already admitted HQ routes before preserving a prepared parent. */
 export function corpShorterTerminalScoreRouteDominates(
   input: AiDecisionInput,
