@@ -1,3 +1,7 @@
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "@netgrid/runtime-data/product-default-decks";
 import { describe, expect, it } from "vitest";
 
 import { InMemoryMatchStorage, MultiplayerService } from "./multiplayer";
@@ -13,10 +17,10 @@ describe("standard deck guide match projection", () => {
       participantADecks: {
         runnerDeckSnapshotId:
           "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",
-        corpDeckSnapshotId: "standard_standard_corp_cheap_bag_tricks_1.0.0",
+        corpDeckSnapshotId: PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
       },
       participantBDecks: {
-        runnerDeckSnapshotId: "standard_standard_runner_bit_denial_lock_1.0.0",
+        runnerDeckSnapshotId: PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
         corpDeckSnapshotId: "standard_standard_corp_chrome_rush_bureau_1.1.0",
       },
       settings: { cardPool: "originalset_classic_proteus" },

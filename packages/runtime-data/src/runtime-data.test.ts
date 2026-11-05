@@ -27,12 +27,29 @@ import { strategyGoalsData } from "./strategy-goals";
 
 describe("product runtime data authority", () => {
   it("points product defaults at curated standard snapshots", () => {
-    expect(PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID).toBe(
-      "standard_standard_runner_bit_denial_lock_1.0.0",
+    const activeDecks = standardDeckCatalogData.decks.filter(
+      (deck) => deck.status === "active",
     );
-    expect(PRODUCT_DEFAULT_CORP_SNAPSHOT_ID).toBe(
-      "standard_standard_corp_cheap_bag_tricks_1.0.0",
-    );
+    expect(
+      activeDecks.find(
+        (deck) =>
+          `standard_${deck.standardDeckId}_${deck.version}` ===
+          PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+      ),
+    ).toMatchObject({
+      standardDeckId: "standard_runner_bit_denial_lock",
+      side: "runner",
+    });
+    expect(
+      activeDecks.find(
+        (deck) =>
+          `standard_${deck.standardDeckId}_${deck.version}` ===
+          PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+      ),
+    ).toMatchObject({
+      standardDeckId: "standard_corp_cheap_bag_tricks",
+      side: "corp",
+    });
   });
 
   it("exports the complete explicitly classified product data set", () => {

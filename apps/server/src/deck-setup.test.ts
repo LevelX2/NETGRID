@@ -1,6 +1,11 @@
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "@netgrid/runtime-data/product-default-decks";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  resolveDeckSetup,
   resolveParticipantDeckPair,
   resolveParticipantDeckSetup,
   standardDeckGuideRefForSnapshot,
@@ -44,18 +49,32 @@ describe("AI deck readiness stages", () => {
     ).toThrow("test_content_forbidden_in_release_profile");
   });
 
+  it("starts the default match with both current standard snapshots", () => {
+    const setup = resolveDeckSetup();
+
+    expect(setup.runnerSnapshot).toMatchObject({
+      name: "Bit-Denial Lock",
+      deckSnapshotId: PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+      validation: { ok: true },
+    });
+    expect(setup.corpSnapshot).toMatchObject({
+      name: "Cheap Bag of Tricks",
+      deckSnapshotId: PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+      validation: { ok: true },
+    });
+  });
+
   it("resolves curated standard decks for match start", () => {
     const participants = resolveParticipantDeckSetup(
       {
         participantADecks: {
           runnerDeckSnapshotId:
             "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",
-          corpDeckSnapshotId: "standard_standard_corp_cheap_bag_tricks_1.0.0",
+          corpDeckSnapshotId: PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
         },
         participantBDecks: {
-          runnerDeckSnapshotId:
-            "standard_standard_runner_bit_denial_lock_1.0.0",
-          corpDeckSnapshotId: "standard_standard_corp_cheap_bag_tricks_1.0.0",
+          runnerDeckSnapshotId: PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+          corpDeckSnapshotId: PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
         },
       },
       {
@@ -84,8 +103,7 @@ describe("AI deck readiness stages", () => {
     const participants = resolveParticipantDeckSetup(
       {
         participantADecks: {
-          runnerDeckSnapshotId:
-            "standard_standard_runner_bit_denial_lock_1.0.0",
+          runnerDeckSnapshotId: PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
         },
       },
       { seed: "standard-guide-copy-guard" },
