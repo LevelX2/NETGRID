@@ -110,9 +110,14 @@ describe("fixed public bad-publicity effect translation", () => {
     expect(hint.strategicExchangeKinds).toContain("self_damage");
   });
   it("translates the typed effect independently of card identity", () => {
-    const renamed = structuredClone(entry);
-    renamed.definition.id = "onr_v1_108_score";
-    renamed.definition.title = "Synthetic Pressure";
+    const renamed = {
+      ...structuredClone(entry),
+      definition: {
+        ...entry.definition,
+        id: "onr_v1_108_score",
+        title: "Synthetic Pressure",
+      },
+    };
     expect(deriveCardSpecAiHint(renamed).effects).toContainEqual(payoff);
   });
   it.each([0, -1, 0.5, Number.NaN])(
