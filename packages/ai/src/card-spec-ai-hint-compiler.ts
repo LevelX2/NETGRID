@@ -1872,6 +1872,23 @@ function appendGenericAbilityEffect(
     });
     overlay.functionSignals.push("runner.agenda_point_conversion");
   }
+  if (effect.kind === "add_bad_publicity") {
+    if (
+      !Number.isSafeInteger(effect.amount) ||
+      effect.amount <= 0 ||
+      effect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_bad_publicity_gain_shape");
+    overlay.effects.push({
+      kind: "run_tax",
+      scope: "corp",
+      timing,
+      target: "bad_publicity_pressure",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("corp.bad_publicity_pressure");
+  }
   if (effect.kind === "damage") {
     overlay.effects.push({
       kind: "damage",

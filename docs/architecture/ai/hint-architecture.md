@@ -222,3 +222,16 @@ und Dringlichkeitsprüfungen. Ein expliziter R&D-Strategieanker liegt bei der
 kanonischen Kartenannotation; der Compiler erfindet ihn nicht aus dem Namen.
 Bereits vorhandener erfolgreicher-Run-Counteraufbau und Purge-Tax bleiben die
 Run-Verbraucher. Der Hint garantiert weder künftige Runs noch einen Deckout.
+
+
+## Öffentliche Bad-Publicity-Effekte
+
+Der generische Ability-Übersetzer erhält `add_bad_publicity` mit positiver
+ganzzahliger Menge und öffentlicher Sichtbarkeit als endlichen Corp-Effekt
+`bad_publicity_pressure` samt `corp.bad_publicity_pressure`-Funktionssignal.
+Ungültige Mengen oder nicht öffentliche Varianten scheitern sichtbar.
+Eigener Schaden bleibt ein getrennter Effekt und wird nicht zum Nutzen der
+Aktion umgedeutet. Die produktiven Karten-/Aktionsprofile konsumieren diese
+Fakten; daraus folgt weder ein garantierter sofortiger Abschluss noch eine
+zusätzliche Auswahlbehörde. Bedingte Runfolgen und mehrzügiger Virenaufbau
+benötigen weiterhin ihren eigenen vollständig gebundenen Bedarf und Payoff.

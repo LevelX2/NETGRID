@@ -8546,13 +8546,25 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["bad_publicity_closeout"],
+        "planRoles": [
+          "bad_publicity_closeout"
+        ],
         "valueHints": {},
-        "strategicExchangeKinds": ["self_damage"],
+        "strategicExchangeKinds": [
+          "self_damage"
+        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_add_bad_publicity_and_core_damage",
             "effects": [
+              {
+                "kind": "run_tax",
+                "scope": "corp",
+                "timing": "action",
+                "target": "bad_publicity_pressure",
+                "amount": 1,
+                "finite": true
+              },
               {
                 "kind": "damage",
                 "scope": "runner",
@@ -8563,10 +8575,21 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["damage.payoff"]
+            "functionSignals": [
+              "corp.bad_publicity_pressure",
+              "damage.payoff"
+            ]
           }
         ],
         "effects": [
+          {
+            "kind": "run_tax",
+            "scope": "corp",
+            "timing": "action",
+            "target": "bad_publicity_pressure",
+            "amount": 1,
+            "finite": true
+          },
           {
             "kind": "damage",
             "scope": "runner",
@@ -8577,14 +8600,24 @@
             "finite": true
           }
         ],
-        "functionSignals": ["damage.payoff"],
+        "functionSignals": [
+          "corp.bad_publicity_pressure",
+          "damage.payoff"
+        ],
         "actionTacticSignals": [
           "effect:damage",
+          "effect:run_tax",
+          "effect_scope:corp",
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 5 },
-        "riskTags": ["unpreventable_core_damage"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 5
+        },
+        "riskTags": [
+          "unpreventable_core_damage"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
