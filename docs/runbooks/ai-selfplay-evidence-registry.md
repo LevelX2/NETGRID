@@ -1,6 +1,6 @@
 # KI-Selbstspiel-Evidenzregistrierung
 
-Stand: 2026-10-22
+Stand: 2026-11-05
 
 Der CLI-Export liest alle Tabellen innerhalb einer gemeinsamen
 Lesetransaktion. Er schreibt JSON in begrenzten UTF-8-Blöcken, damit auch
@@ -83,6 +83,7 @@ corepack pnpm selfplay:evidence -- complete-job --job-id <job-id> --status aband
 corepack pnpm selfplay:evidence -- allocate --kind pairing --job-id <job-id>
 corepack pnpm selfplay:evidence -- allocate --kind case --job-id <job-id>
 corepack pnpm selfplay:evidence -- upsert --input <pairing-bundle.json>
+corepack pnpm selfplay:evidence -- correct-case-pairing --job-id <job-id> --case-id <SP-ID> --pairing-id <ID> --expected-case-fingerprint <sha256> --reason <Begründung>
 corepack pnpm selfplay:evidence -- export --pairings 031,032 --output <report-input.json>
 corepack pnpm selfplay:evidence -- record-report --input <report-state.json>
 corepack pnpm selfplay:evidence -- register-reporting-series --input <series.json>
@@ -136,6 +137,21 @@ Eine bestehende Fall-ID darf weder still einem anderen Cluster noch einer
 anderen Spielseite zugewiesen werden. Neue Paarungsbezüge ergänzen die
 historischen Verknüpfungen; sie ersetzen sie nicht. Eine tatsächlich andere
 Ursache erhält eine neu reservierte Fall-ID.
+
+Eine nachweislich falsche Fall-/Paarungszuordnung wird nach der inhaltlichen
+Korrektur ausdrücklich mit `correct-case-pairing` entfernt. Der Aufruf verlangt
+den aktiven Eigentümerjob der Paarung, die beiden exakten IDs, eine Begründung
+und `--expected-case-fingerprint`. Den Fingerprint berechnet die reine Funktion
+`casePairingCorrectionFingerprint` aus dem vollständigen Fallobjekt eines
+aktuellen CLI-Exports einschließlich aller `pairing_ids`; sie greift auf keine
+Datenbank zu. Jede Änderung seit diesem Export macht den Aufruf ungültig.
+Die kurze Schreibtransaktion entfernt genau diese eine Verknüpfung. Andere
+Bezüge, Spiele, Berichte, Ursachen und Fixes bleiben erhalten. Ein fehlender
+Bezug, fremder oder beendeter Job sowie weiterhin zugeordnete originale
+Match- oder Fixnachweise scheitern mit strukturierter Diagnose. Zuerst wird
+also der falsche Inhalt am erzeugenden Bericht/Fall korrigiert; das Kommando
+ersetzt keine fachliche Neubewertung. Danach stabile Sicherung und betroffene
+Inhalte in Registry und Sicherung prüfen.
 
 ## Bericht und Sicherung
 

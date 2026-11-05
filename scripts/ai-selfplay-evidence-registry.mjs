@@ -6,6 +6,7 @@ import {
   allocateRegistryId,
   backupEvidenceRegistry,
   completeJob,
+  correctCasePairing,
   exportEvidenceSnapshot,
   getStoredReport,
   getReportingSeries,
@@ -70,6 +71,7 @@ Usage:
   node scripts/ai-selfplay-evidence-registry.mjs complete-job --job-id ID [--status completed|abandoned] [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs allocate --kind pairing|case --job-id ID [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs upsert --input pairing.json [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs correct-case-pairing --job-id ID --case-id ID --pairing-id ID --expected-case-fingerprint SHA256 --reason TEXT [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs record-report --input report.json [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs register-reporting-series --input series.json [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs get-reporting-series --series-id ID [--output FILE] [--db PATH]
@@ -138,6 +140,15 @@ try {
       required(opts, "job-id"),
     );
     console.log(JSON.stringify({ kind: opts.kind, id, databasePath }));
+  } else if (command === "correct-case-pairing") {
+    const corrected = correctCasePairing(db, {
+      jobId: required(opts, "job-id"),
+      caseId: required(opts, "case-id"),
+      pairingId: required(opts, "pairing-id"),
+      expectedCaseFingerprint: required(opts, "expected-case-fingerprint"),
+      reason: required(opts, "reason"),
+    });
+    console.log(JSON.stringify({ databasePath, ...corrected }));
   } else if (command === "upsert") {
     const inputPath = resolve(required(opts, "input"));
     const pairingId = importPairingBundle(

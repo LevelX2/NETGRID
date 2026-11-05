@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { backup, DatabaseSync } from "node:sqlite";
@@ -656,6 +657,76 @@ export function importPairingBundle(db, bundle) {
     ).run(timestamp, pairingId);
 
     return pairingId;
+  });
+}
+
+function casePairingCorrectionError(code, details = {}) {
+  return Object.assign(new Error(code), { code, details });
+}
+
+export function casePairingCorrectionFingerprint(evidenceCase) {
+  const fields = [
+    "case_id", "cluster_id", "grade", "side", "match_context", "symptom",
+    "owner_path", "details_markdown", "updated_at",
+  ];
+  if (
+    !evidenceCase ||
+    fields.some(field => !Object.hasOwn(evidenceCase, field) ||
+      evidenceCase[field] !== null && typeof evidenceCase[field] !== "string") ||
+    !Array.isArray(evidenceCase.pairing_ids) ||
+    evidenceCase.pairing_ids.some(id => typeof id !== "string")
+  ) {
+    throw casePairingCorrectionError("case_pairing_correction_snapshot_incomplete");
+  }
+  return createHash("sha256").update(JSON.stringify([
+    ...fields.map(field => evidenceCase[field]), [...evidenceCase.pairing_ids].sort(),
+  ])).digest("hex");
+}
+
+/** Correct one reviewed false association; ordinary evidence upserts remain additive. */
+export function correctCasePairing(db, input) {
+  const fields = ["jobId", "caseId", "pairingId", "expectedCaseFingerprint", "reason"];
+  if (fields.some(field => typeof input?.[field] !== "string" || !input[field].trim()) ||
+      !/^[a-f0-9]{64}$/.test(input.expectedCaseFingerprint)) {
+    throw casePairingCorrectionError("case_pairing_correction_input_invalid");
+  }
+  const { jobId, caseId, pairingId, expectedCaseFingerprint, reason } = input;
+  return withImmediateTransaction(db, () => {
+    const details = { jobId, caseId, pairingId };
+    const reject = code => { throw casePairingCorrectionError(code, details); };
+    if (db.prepare("SELECT status FROM jobs WHERE job_id = ?").get(jobId)?.status !== "active")
+      reject("case_pairing_correction_job_not_active");
+    const pairing = db.prepare("SELECT job_id FROM pairings WHERE pairing_id = ?").get(pairingId);
+    if (!pairing) reject("case_pairing_correction_pairing_missing");
+    if (pairing.job_id !== jobId) reject("case_pairing_correction_wrong_job");
+    const evidenceCase = db.prepare("SELECT * FROM evidence_cases WHERE case_id = ?").get(caseId);
+    if (!evidenceCase) reject("case_pairing_correction_case_missing");
+    const pairingIds = db.prepare(
+      "SELECT pairing_id FROM case_pairings WHERE case_id = ? ORDER BY pairing_id",
+    ).all(caseId).map(row => row.pairing_id);
+    const beforeFingerprint = casePairingCorrectionFingerprint({ ...evidenceCase, pairing_ids: pairingIds });
+    if (beforeFingerprint !== expectedCaseFingerprint)
+      reject("case_pairing_correction_snapshot_conflict");
+    if (!pairingIds.includes(pairingId)) reject("case_pairing_correction_link_missing");
+    if (db.prepare("SELECT 1 FROM fixes WHERE case_id = ? AND pairing_id = ?").get(caseId, pairingId))
+      reject("case_pairing_correction_fix_reference");
+    const caseText = `${evidenceCase.match_context ?? ""}\n${evidenceCase.details_markdown ?? ""}`;
+    if (db.prepare("SELECT match_id FROM games WHERE pairing_id = ?").all(pairingId)
+      .some(row => row.match_id && caseText.includes(row.match_id)))
+      reject("case_pairing_correction_match_reference");
+    const removed = db.prepare(
+      "DELETE FROM case_pairings WHERE case_id = ? AND pairing_id = ?",
+    ).run(caseId, pairingId);
+    if (removed.changes !== 1) reject("case_pairing_correction_delete_mismatch");
+    const timestamp = nowIso();
+    db.prepare("UPDATE evidence_cases SET updated_at = ? WHERE case_id = ?").run(timestamp, caseId);
+    const remainingPairingIds = pairingIds.filter(id => id !== pairingId);
+    return {
+      jobId, caseId, pairingId, reason, removedLinks: 1, remainingPairingIds, beforeFingerprint,
+      afterFingerprint: casePairingCorrectionFingerprint({
+        ...evidenceCase, updated_at: timestamp, pairing_ids: remainingPairingIds,
+      }),
+    };
   });
 }
 
