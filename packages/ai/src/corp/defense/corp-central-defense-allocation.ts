@@ -218,12 +218,20 @@ function isValidFacts(facts: CorpCentralDefenseFacts): boolean {
   )
     return false;
   if (
-    !isSafeWhole(cards.populationCardCount, 1) ||
+    !isSafeWhole(cards.populationCardCount) ||
     !isSafeWhole(cards.agendaCardCount) ||
     !isSafeWhole(cards.agendaPointValue) ||
     !isSafeWhole(cards.importantTrashableCardCount)
   )
     return false;
+  if (cards.populationCardCount === 0) {
+    return (
+      facts.threat === "none" &&
+      cards.agendaCardCount === 0 &&
+      cards.agendaPointValue === 0 &&
+      cards.importantTrashableCardCount === 0
+    );
+  }
   return (
     cards.agendaCardCount <= cards.populationCardCount &&
     cards.importantTrashableCardCount <=
@@ -235,6 +243,8 @@ function expectedLoss(
   facts: CorpCentralDefenseFacts,
   lossValue: number,
 ): Fraction {
+  if (facts.cards.populationCardCount === 0)
+    return { numerator: 0n, denominator: 1n };
   const probability = toFraction(facts.access.successfulAccessProbability)!;
   const exposed = Math.min(
     facts.access.accessibleCardCount,
@@ -294,6 +304,10 @@ function compareFacts(
     expectedLoss(right, right.cards.importantTrashableCardCount),
   );
   if (trash !== 0) return trash;
+  const populated =
+    Number(left.cards.populationCardCount > 0) -
+    Number(right.cards.populationCardCount > 0);
+  if (populated !== 0) return populated;
   if (left.access.isMultiaccess !== right.access.isMultiaccess)
     return left.access.isMultiaccess ? 1 : -1;
   const accessCount =
@@ -350,6 +364,8 @@ function areNearTieFacts(
   right: CorpCentralDefenseFacts,
 ): boolean {
   if (
+    left.cards.populationCardCount === 0 ||
+    right.cards.populationCardCount === 0 ||
     (left.threat === "terminal") !== (right.threat === "terminal") ||
     requiresFirstAgendaCoverageBeforeFurtherLayering(left, right) ||
     requiresFirstAgendaCoverageBeforeFurtherLayering(right, left) ||

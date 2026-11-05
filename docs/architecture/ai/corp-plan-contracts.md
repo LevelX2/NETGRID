@@ -1245,6 +1245,9 @@ Agendapunkt-Exposition vor der ersparten normalen Rez-Zahlung. HQ/R&D
 konsumieren die bestehenden zentralen Defense-Fakten; eigene übrige
 Agenden und der öffentliche Runnerpfad liefern den Remote-/Archivesbedarf.
 Die gerade gescorete Agenda zählt nicht mehr als zu schützende Rootkarte.
+Ein vollständig abgeglichenes leeres HQ oder R&D hat null erreichbare Karten
+und null erwarteten Kartenverlust. Frühere Zugriffe erzeugen für diesen
+aktuellen Bestand keine Agendaexposition.
 Fehlende erforderliche Expositions- oder Pfadfakten scheitern strukturiert.
 Bei Zielen auf demselben Server bleibt der normale Rezpreis das Auswahlkriterium.
 Diese Zielbindung ist keine Zusage eines optimalen zukünftigen Runstopps:

@@ -161,6 +161,46 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       },
     });
   });
+  it.each(["hq", "rd"] as const)(
+    "treats an exactly empty %s as zero exposure",
+    (emptyServer) => {
+      const value = withSnapshot(input());
+      const populatedServer = emptyServer === "hq" ? "rd" : "hq";
+      if (emptyServer === "hq") {
+        value.playerView.own.gripOrHq.length = 0;
+        value.playerView.own.stackOrRdCount = 2;
+      } else {
+        value.playerView.own.gripOrHq.push(agenda("b"));
+        value.playerView.own.stackOrRdCount = 0;
+      }
+
+      expect(
+        allocateCorpCentralDefenseFromAiFacts({ input: value }),
+      ).toMatchObject({
+        status: "known",
+        selectedServerId: populatedServer,
+        canonicalNearTieCandidateServerIds: [],
+        evidence: {
+          [emptyServer]: {
+            threat: "none",
+            accessibleCardCount: 0,
+            expectedAgendaLoss: { numerator: 0, denominator: 1 },
+            expectedTrashableLoss: { numerator: 0, denominator: 1 },
+          },
+          [populatedServer]: {
+            expectedAgendaLoss: { numerator: 3, denominator: 1 },
+          },
+        },
+      });
+    },
+  );
+  it("rejects a reported empty R&D when the deck inventory does not reconcile", () => {
+    const value = withSnapshot(input());
+    value.playerView.own.stackOrRdCount = 0;
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "unknown" });
+  });
   it("uses visible installed ICE depth for symmetric first central coverage", () => {
     const value = withSnapshot(input());
     value.playerView.servers

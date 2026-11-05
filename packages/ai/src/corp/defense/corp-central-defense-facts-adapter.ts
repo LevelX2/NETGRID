@@ -483,7 +483,7 @@ function factsFor(
     (candidate) => candidate.id === serverId,
   );
   const runnerRig = input.playerView.opponent.rig;
-  if (!server || !runnerRig || cards.populationCardCount < 1) return undefined;
+  if (!server || !runnerRig) return undefined;
   const assessment = assessCorpScoreProtection({
     serverIce: server.ice,
     runnerRig,
@@ -504,7 +504,9 @@ function factsFor(
   const { agendaPointCounts: _agendaPointCounts, ...publicCardFacts } = cards;
   void _agendaPointCounts;
   const threat =
-    maximumAccessibleAgendaPointValue >= matchpoint
+    cards.populationCardCount === 0
+      ? "none"
+      : maximumAccessibleAgendaPointValue >= matchpoint
       ? "terminal"
       : quote.isMultiaccess || pressure.successful > 0
         ? "acute"

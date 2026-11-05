@@ -114,6 +114,43 @@ describe("allocateCorpCentralDefense", () => {
     expect(result).toMatchObject({ status: "known", selectedServerId: "rd" });
   });
 
+  it("keeps current access to a populated central ahead of historical empty-server pressure", () => {
+    const hq = central("hq", { threat: "none" });
+    const rd = central("rd", { threat: "none" });
+    const result = allocateCorpCentralDefense(
+      input(
+        {
+          ...hq,
+          access: {
+            ...hq.access,
+            successfulAccessProbability: { numerator: 0, denominator: 1 },
+          },
+        },
+        {
+          ...rd,
+          access: {
+            ...rd.access,
+            accessibleCardCount: 3,
+            isMultiaccess: true,
+            recentRunOrAccessEvents: 3,
+            recentSuccessfulAccessRunnerTurns: 2,
+          },
+          cards: {
+            populationCardCount: 0,
+            agendaCardCount: 0,
+            agendaPointValue: 0,
+            importantTrashableCardCount: 0,
+          },
+        },
+      ),
+    );
+    expect(result).toMatchObject({
+      status: "known",
+      selectedServerId: "hq",
+      canonicalNearTieCandidateServerIds: [],
+    });
+  });
+
   it("keeps pressured HQ agenda exposure as a score deadline even when R&D wins allocation", () => {
     const pressured = allocateCorpCentralDefense(
       input(
