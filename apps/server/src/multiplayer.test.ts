@@ -3497,6 +3497,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     }
     record.eventLog = [firstPublicEvent, ...addedPublicEvents];
     record.gameState.eventLog = [firstEngineEvent, ...addedEngineEvents];
+    record.gameState.runnerTurnFlags!.runAttemptsThisGame = 1;
     record.aiDecisionTraces = traces;
     record.actionReceipts = Array.from({ length: 12 }, (_, index) => ({
       idempotencyKey: `receipt-${index}`,
@@ -3542,8 +3543,8 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     ).not.toContain("EARLY_PUBLIC_PAYLOAD_SENTINEL");
     expect(successfulRunCountForResult(full.eventLog)).toBe(2);
     expect(successfulRunCountForResult(bounded.eventLog)).toBe(2);
-    expect(runCountForResult(full.eventLog)).toBe(1);
-    expect(runCountForResult(bounded.eventLog)).toBe(1);
+    expect(runCountForResult(full.gameState)).toBe(1);
+    expect(runCountForResult(bounded.gameState)).toBe(1);
     expect(stolenAgendaCountForResult(full.eventLog)).toBe(1);
     expect(stolenAgendaCountForResult(bounded.eventLog)).toBe(1);
     expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog);

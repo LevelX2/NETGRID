@@ -208,6 +208,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       stoleBlackOpsAgendaThisTurn: false,
       runAttemptsThisTurn: 0,
       runAttemptsLastTurn: 0,
+      runAttemptsThisGame: 0,
       trashedAdvertisementThisTurn: false,
       trashedTransactionsThisTurn: false,
       successfulHqRunThisTurn: false,

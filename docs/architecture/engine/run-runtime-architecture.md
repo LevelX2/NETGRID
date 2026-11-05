@@ -55,6 +55,15 @@ ihnen aber nicht zurückimportiert.
 
 ## Nicht offensichtliche Verträge
 
+- `startRun` zählt jeden tatsächlich begonnenen Run einmal über
+  `runnerTurnFlags.runAttemptsThisGame`; `createGame` initialisiert den
+  Gesamtzähler ausdrücklich mit null. Auch ein im selben Übergang beendeter
+  Run zählt. Der Server übernimmt diesen Engine-Zähler in das Matchresultat.
+  Aktionsabsichten wie `runnerEventRun`, noch offene Zahlungsfenster und eine
+  spätere Run-Eröffnung innerhalb einer Choice sind keine alternative
+  Zählautorität. Ein fehlender oder ungültiger Gesamtzähler führt bei der
+  Ergebnisprojektion zu einer strukturierten Vertragsdiagnose.
+
 - Ein aktiver verzögerter Agenda-Zugriffsersatz wird bereits in der freien
   oder bezahlten `steal_agenda`-LegalAction als
   `agendaAccessReplacement: delay_score_until_runner_next_turn_start`

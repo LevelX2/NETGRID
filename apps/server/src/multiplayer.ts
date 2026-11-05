@@ -9135,7 +9135,7 @@ function matchResultSnapshotFor(
         : {}),
     },
     actionCount: actionEvents.length,
-    runCount: runCountForResult(actionEvents),
+    runCount: runCountForResult(state),
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
     successfulRunCount: successfulRunCountForResult(actionEvents),
     stolenAgendaCount: stolenAgendaCountForResult(actionEvents),
@@ -9174,12 +9174,21 @@ export function stolenAgendaCountForResult(
   ).length;
 }
 
-export function runCountForResult(events: readonly EventRecord[]): number {
-  return events.filter(
-    (event) =>
-      event.publicPayload.type === "start_run" ||
-      event.publicPayload.publicPayload.runnerEventRun === true,
-  ).length;
+export function runCountForResult(state: GameState): number {
+  const count = state.runnerTurnFlags?.runAttemptsThisGame;
+  if (typeof count !== "number" || !Number.isSafeInteger(count) || count < 0) {
+    const error = new Error("The Engine run counter is missing or invalid.");
+    Object.assign(error, {
+      code: "match_result_run_counter_invalid",
+      owner: "rules_contract",
+      details: {
+        stateVersion: state.stateVersion,
+        source: "runnerTurnFlags.runAttemptsThisGame",
+      },
+    });
+    throw error;
+  }
+  return count;
 }
 
 function resultSummaryFor(
