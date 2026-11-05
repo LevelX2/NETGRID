@@ -2,15 +2,15 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-09-23",
+  "analyzedAt": "2026-11-05",
   "guides": [
     {
       "standardDeckId": "standard_corp_express_shutdown",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:01356c2e",
-      "sourceAnalysisHash": "deck-analysis:1b4ec27a",
+      "sourceAnalysisHash": "deck-analysis:56dc80b3",
       "sourceAnalysisInputHash": "deck-analysis-input:ac1b33c0",
-      "reviewedAt": "2026-09-05",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.tag_trace_punish",
@@ -120,10 +120,11 @@
     },
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:ece21485",
-      "sourceAnalysisHash": "deck-analysis:64ee0425",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:3e25a9a8",
+      "sourceAnalysisHash": "deck-analysis:81513555",
+      "sourceAnalysisInputHash": "deck-analysis-input:2a2080d9",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -133,100 +134,89 @@
         "secondaryStrategyIds": [
           "corp.remote_scoring",
           "corp.ambush_bluff",
+          "corp.fast_advance",
           "corp.asset_economy",
-          "corp.rush_score",
-          "corp.fast_advance"
+          "corp.rush_score"
         ],
-        "reviewStatus": "plausible"
+        "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:63a95a78",
       "contentByLocale": {
         "en": {
-          "summary": "Cheap Bag of Tricks relies primarily on taxing ICE layers, tag and trace punishment and concrete flatline pressure. Additionally, the deck utilizes a protected remote scoring line, uncertain remotes with ambush pressure, a distributed asset economy, early rush score windows, and accelerated scoring.",
-          "deckIdea": "Cheap Bag of Tricks combines taxing ICE layers, tag and trace punishment and concrete flatline pressure. Stagger ICE so that the Runner has to pay repeatedly and your scoring window actually gets bigger. Only create tags or robust trace windows when real punishment can follow. Keep damage cards and credits together so hand pressure turns into a credible flatline threat.",
+          "summary": "Buy time with affordable stopping ICE, then convert the reserve into agenda scoring or tag punishment.",
+          "deckIdea": "A second Wall of Static gives the Corp another straightforward stop. Use cheap barriers to protect the server under pressure and reserve expensive ICE for a concrete scoring window. Keep tag sources and damage available when a finish is realistic.",
           "gamePlan": {
-            "opening": "First secure economy, a sensible early ICE pattern and a credit reserve. Pay particular attention to Ball and Chain and Netwatch Operations Office without leaving an unbalanced starting hand.",
-            "midgame": "Stagger ICE so that the Runner has to pay repeatedly and your scoring window actually gets bigger. Only create tags or robust trace windows when real punishment can follow. Keep damage cards and credits together so hand pressure turns into a credible flatline threat.",
-            "endgame": "Complete using the safest available scoring or flatline window. Have enough reserves so that the decisive move doesn't fail due to Rez, Trace or Advancement costs."
+            "opening": "Develop income and place a first stop on the most exposed server.",
+            "midgame": "Layer the scoring remote with ICE you can afford to rez. Hold enough credits and actions to turn a tag into damage when the opportunity appears.",
+            "endgame": "Choose the funded scoring or damage sequence with the best chance of finishing the game."
           },
           "keyCards": [
             {
+              "cardId": "onr_v1_279_wall-of-static",
+              "title": "Wall of Static",
+              "role": "Provides an affordable End the run layer."
+            },
+            {
               "cardId": "onr_v1_222_ball-and-chain",
               "title": "Ball and Chain",
-              "role": "Carries ICE tax glacier as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Taxes a run before the Runner reaches the inner layers."
             },
             {
               "cardId": "onr_v1_207_netwatch-operations-office",
               "title": "Netwatch Operations Office",
-              "role": "Carries tag/trace punishment as a concrete deck line and should be saved for an appropriate execution window."
+              "role": "Supports a concrete trace or tag window."
             },
             {
               "cardId": "onr_v1_190_bioweapons-engineering",
               "title": "Bioweapons Engineering",
-              "role": "Carries damage pressure as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
-              "cardId": "onr_v1_312_chicago-branch",
-              "title": "Chicago Branch",
-              "role": "Carries remote scoring as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
-              "cardId": "onr_v1_315_corprunners-shattered-remains",
-              "title": "Corprunner's Shattered Remains",
-              "role": "Carries Ambush and Bluff as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Contributes to the damage plan."
             }
           ],
           "pilotingTips": [
-            "Before each move, check whether ICE tax glacier still fits the current board or whether a supplementary line is better prepared.",
-            "Don't just rezz because you can; every expenditure should improve a specific access, tempo or score window."
+            "Reserve the next rez before committing credits to advancement or a trace.",
+            "Use the additional Wall of Static where an End the run subroutine buys time for your agenda."
           ],
           "weaknesses": [
-            "If Ball and Chain and Netwatch Operations Office fail or come too late, the deck loses part of its clearest line.",
-            "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
+            "A developed fracter can reduce the value of the extra wall.",
+            "A damage finish requires a tag, enough damage and the actions to play it."
           ]
         },
         "de": {
-          "summary": "Cheap Bag of Tricks setzt vor allem auf taxierende ICE-Staffeln, Tag- und Trace-Bestrafung und konkreten Flatline-Druck. Ergänzend nutzt das Deck eine geschützte Remote-Scorelinie, unsichere Remotes mit Ambush-Druck, eine verteilte Asset-Economy, frühe Rush-Scorefenster und beschleunigtes Scoring.",
-          "deckIdea": "Cheap Bag of Tricks verbindet taxierende ICE-Staffeln, Tag- und Trace-Bestrafung und konkreten Flatline-Druck. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+          "summary": "Gewinne mit bezahlbarem ICE Zeit und nutze die Reserve für Agendawertungen oder Tags mit anschließender Bestrafung.",
+          "deckIdea": "Eine zweite Wall of Static liefert der Corp einen weiteren direkten Run-Stopp. Günstige Barriers sichern den gerade bedrohten Server. Teures ICE lohnt sich, wenn es ein konkretes Wertungsfenster schützt. Halte Tagquellen und Schaden für einen realistischen Abschluss bereit.",
           "gamePlan": {
-            "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Ball and Chain und Netwatch Operations Office, ohne dafür eine unausgewogene Starthand zu behalten.",
-            "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
-            "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+            "opening": "Baue Einkommen auf und sichere den am stärksten gefährdeten Server mit einem ersten Stopp.",
+            "midgame": "Verstärke das Wertungs-Remote mit ICE, das du bezahlen kannst. Halte Credits und Aktionen frei, um einen Tag auszunutzen, sobald sich die Gelegenheit ergibt.",
+            "endgame": "Wähle die finanzierte Wertungs- oder Schadensfolge mit der besten Aussicht auf den Spielsieg."
           },
           "keyCards": [
             {
+              "cardId": "onr_v1_279_wall-of-static",
+              "title": "Wall of Static",
+              "role": "Liefert eine bezahlbare Schicht mit Run-Stopp."
+            },
+            {
               "cardId": "onr_v1_222_ball-and-chain",
               "title": "Ball and Chain",
-              "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Verteuert den Run vor den inneren ICE-Schichten."
             },
             {
               "cardId": "onr_v1_207_netwatch-operations-office",
               "title": "Netwatch Operations Office",
-              "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Unterstützt ein konkretes Trace- oder Tagfenster."
             },
             {
               "cardId": "onr_v1_190_bioweapons-engineering",
               "title": "Bioweapons Engineering",
-              "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
-              "cardId": "onr_v1_312_chicago-branch",
-              "title": "Chicago Branch",
-              "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
-              "cardId": "onr_v1_315_corprunners-shattered-remains",
-              "title": "Corprunner's Shattered Remains",
-              "role": "Trägt Ambush und Bluff als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Trägt zum Schadensplan bei."
             }
           ],
           "pilotingTips": [
-            "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+            "Plane den nächsten Rez ein, bevor du Credits für Advancement oder einen Trace ausgibst.",
+            "Setze die zusätzliche Wall of Static dort ein, wo ein Run-Stopp Zeit für deine Agenda verschafft."
           ],
           "weaknesses": [
-            "Fallen Ball and Chain und Netwatch Operations Office aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
-            "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+            "Ein ausgebauter Fracter kann den Nutzen der zusätzlichen Wall senken.",
+            "Ein Schadensabschluss braucht einen Tag, genügend Schaden und die nötigen Aktionen."
           ]
         }
       }
@@ -235,12 +225,12 @@
       "standardDeckId": "standard_corp_chrome_rush_bureau",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:6deadd97",
-      "sourceAnalysisHash": "deck-analysis:e2362b2c",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:2a57b587",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
-          "corp.remote_scoring",
           "corp.fast_advance",
+          "corp.remote_scoring",
           "corp.overadvance_value"
         ],
         "secondaryStrategyIds": [
@@ -344,8 +334,8 @@
       "standardDeckId": "standard_classic_corp_remote_lab_deflection_2026_07_01",
       "sourceDeckVersion": "1.2.0",
       "sourceDeckHash": "standard-deck:002eb697",
-      "sourceAnalysisHash": "deck-analysis:804a6ca4",
-      "reviewedAt": "2026-09-08",
+      "sourceAnalysisHash": "deck-analysis:865846ad",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.remote_scoring",
@@ -455,8 +445,8 @@
       "standardDeckId": "standard_classic_corp_superserum_control_grid_2026_07_01",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:6ee14951",
-      "sourceAnalysisHash": "deck-analysis:5668fa95",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:10035429",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.damage_kill",
@@ -566,8 +556,8 @@
       "standardDeckId": "standard_corp_code_rot_bitte_eintreten_2026_07_16",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:a904cbf8",
-      "sourceAnalysisHash": "deck-analysis:6afae145",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:fba872ac",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.tag_trace_punish",
@@ -676,17 +666,17 @@
       "standardDeckId": "standard_corp_mr96xg94",
       "sourceDeckVersion": "1.2.0",
       "sourceDeckHash": "standard-deck:b27802eb",
-      "sourceAnalysisHash": "deck-analysis:c4d700cf",
-      "reviewedAt": "2026-09-04",
+      "sourceAnalysisHash": "deck-analysis:2a4ef848",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
+          "corp.fast_advance",
           "corp.overadvance_value",
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
+          "corp.ice_tax_glacier"
         ],
         "secondaryStrategyIds": [
+          "corp.remote_scoring",
           "corp.action_tempo",
-          "corp.fast_advance",
           "corp.ambush_bluff",
           "corp.asset_economy",
           "corp.rush_score"
@@ -789,8 +779,8 @@
       "standardDeckId": "standard_corp_ivory_bastion",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:8bb5499b",
-      "sourceAnalysisHash": "deck-analysis:b32f5806",
-      "reviewedAt": "2026-09-04",
+      "sourceAnalysisHash": "deck-analysis:9b44cd83",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -899,17 +889,17 @@
       "standardDeckId": "standard_corp_manhunt_pressure_bureau",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:d4fc3d9d",
-      "sourceAnalysisHash": "deck-analysis:7d40a666",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:45ccddb4",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.tag_trace_punish",
           "corp.damage_kill",
-          "corp.rush_score"
+          "corp.fast_advance"
         ],
         "secondaryStrategyIds": [
-          "corp.remote_scoring",
-          "corp.fast_advance"
+          "corp.rush_score",
+          "corp.remote_scoring"
         ],
         "reviewStatus": "plausible"
       },
@@ -1009,12 +999,12 @@
       "standardDeckId": "standard_corp_mph465dv",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:72b50db3",
-      "sourceAnalysisHash": "deck-analysis:13136d4c",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:8e6a6b9d",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
-          "corp.remote_scoring",
           "corp.fast_advance",
+          "corp.remote_scoring",
           "corp.rush_score"
         ],
         "secondaryStrategyIds": [
@@ -1119,8 +1109,8 @@
       "standardDeckId": "standard_corp_neon_guillotine",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:e3eaa4fe",
-      "sourceAnalysisHash": "deck-analysis:3f48e49a",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:59725d70",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.tag_trace_punish",
@@ -1218,17 +1208,17 @@
       "standardDeckId": "standard_corp_neon_escrow",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:a0e5678d",
-      "sourceAnalysisHash": "deck-analysis:187eeced",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:7ba8f611",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
-          "corp.remote_scoring",
+          "corp.fast_advance",
           "corp.overadvance_value",
-          "corp.fast_advance"
+          "corp.remote_scoring"
         ],
         "secondaryStrategyIds": [
-          "corp.rush_score",
           "corp.action_tempo",
+          "corp.rush_score",
           "corp.ambush_bluff"
         ],
         "reviewStatus": "plausible"
@@ -1329,18 +1319,18 @@
       "standardDeckId": "standard_corp_original_speed_v10",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:e2e748fd",
-      "sourceAnalysisHash": "deck-analysis:c2abc80f",
-      "reviewedAt": "2026-08-16",
+      "sourceAnalysisHash": "deck-analysis:1eb1fa7c",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
-          "corp.remote_scoring",
           "corp.fast_advance",
-          "corp.ambush_bluff"
+          "corp.remote_scoring",
+          "corp.draw_engine"
         ],
         "secondaryStrategyIds": [
-          "corp.rush_score",
-          "corp.draw_engine",
-          "corp.overadvance_value"
+          "corp.overadvance_value",
+          "corp.ambush_bluff",
+          "corp.rush_score"
         ],
         "reviewStatus": "plausible"
       },
@@ -1440,8 +1430,8 @@
       "standardDeckId": "standard_proteus_corp_hidden_node_control_2026_05_25",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:0cf1c94a",
-      "sourceAnalysisHash": "deck-analysis:fc7118da",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:e527285b",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.remote_scoring",
@@ -1551,15 +1541,16 @@
       "standardDeckId": "standard_proteus_corp_variable_ice_gauntlet_2026_05_25",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:0f1bed46",
-      "sourceAnalysisHash": "deck-analysis:c77c726c",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:521416ae",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.damage_kill",
-          "corp.action_tempo",
-          "corp.rush_score"
+          "corp.tag_trace_punish",
+          "corp.action_tempo"
         ],
         "secondaryStrategyIds": [
+          "corp.rush_score",
           "corp.remote_scoring",
           "corp.ambush_bluff"
         ],
@@ -1661,17 +1652,17 @@
       "standardDeckId": "standard_corp_rent_to_own_war_engine",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:6b6e3296",
-      "sourceAnalysisHash": "deck-analysis:b3af4261",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:c9a386bd",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
+          "corp.fast_advance",
           "corp.tag_trace_punish",
-          "corp.damage_kill",
-          "corp.rush_score"
+          "corp.damage_kill"
         ],
         "secondaryStrategyIds": [
-          "corp.remote_scoring",
-          "corp.fast_advance"
+          "corp.rush_score",
+          "corp.remote_scoring"
         ],
         "reviewStatus": "plausible"
       },
@@ -1771,8 +1762,8 @@
       "standardDeckId": "standard_corp_shadoe_tag_bag",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:3281775c",
-      "sourceAnalysisHash": "deck-analysis:918d008d",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:04e14d82",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.tag_trace_punish",
@@ -1882,8 +1873,8 @@
       "standardDeckId": "standard_corp_salazar_toll_road",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:011780e8",
-      "sourceAnalysisHash": "deck-analysis:7194eb8c",
-      "reviewedAt": "2026-09-04",
+      "sourceAnalysisHash": "deck-analysis:e5e8ab10",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -1992,8 +1983,8 @@
       "standardDeckId": "standard_corp_siren_fortress",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:1f639d78",
-      "sourceAnalysisHash": "deck-analysis:49015535",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:f2d1d901",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -2103,8 +2094,8 @@
       "standardDeckId": "standard_corp_syds_ice_pfandhaus_2026_07_09",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:c1e7cb29",
-      "sourceAnalysisHash": "deck-analysis:1ff7af07",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:4909cf47",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.remote_scoring",
@@ -2213,8 +2204,8 @@
       "standardDeckId": "standard_corp_mp1ddh7c",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:1380a445",
-      "sourceAnalysisHash": "deck-analysis:d12d4d1e",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:afc837df",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.tag_trace_punish",
@@ -2222,8 +2213,8 @@
           "corp.remote_scoring"
         ],
         "secondaryStrategyIds": [
-          "corp.ambush_bluff",
           "corp.fast_advance",
+          "corp.ambush_bluff",
           "corp.rush_score"
         ],
         "reviewStatus": "plausible"
@@ -2324,16 +2315,16 @@
       "standardDeckId": "standard_corp_tycho_ice_stack",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:44906393",
-      "sourceAnalysisHash": "deck-analysis:c0144588",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:6cb6c680",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.remote_scoring",
           "corp.asset_economy",
-          "corp.rush_score"
+          "corp.fast_advance"
         ],
         "secondaryStrategyIds": [
-          "corp.fast_advance"
+          "corp.rush_score"
         ],
         "reviewStatus": "plausible"
       },
@@ -2431,10 +2422,11 @@
     },
     {
       "standardDeckId": "standard_corp_mp6g9eku",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:84be3937",
-      "sourceAnalysisHash": "deck-analysis:07fdca6d",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "1.2.0",
+      "sourceDeckHash": "standard-deck:6471d557",
+      "sourceAnalysisHash": "deck-analysis:4e240402",
+      "sourceAnalysisInputHash": "deck-analysis-input:8cda3f44",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.tag_trace_punish",
@@ -2446,130 +2438,152 @@
         ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:81b13736",
       "contentByLocale": {
         "en": {
-          "summary": "Vom Tablet primarily relies on tag and trace punishment, early rush score windows and a protected remote scoring line.",
-          "deckIdea": "Vom Tablet connects a protected remote scoring line and early rush score windows. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up. Use cheap early ICE before the Runner rig is complete and force a quick response.",
+          "summary": "Use an affordable scoring remote and turn spare advancement into extra points with Project Babylon.",
+          "deckIdea": "Protect early scoring with cheap ICE. Project Babylon gives the deck an agenda that can yield extra points when the remote and the turn allow additional advancement.",
           "gamePlan": {
-            "opening": "First secure economy, a sensible early ICE pattern and a credit reserve. In your starting hand, look primarily for economy, basic deck function, and a viable first line.",
-            "midgame": "Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up. Use cheap early ICE before the Runner rig is complete and force a quick response.",
-            "endgame": "Complete using the safest available scoring or flatline window. Have enough reserves so that the decisive move doesn't fail due to Rez, Trace or Advancement costs."
+            "opening": "Establish a small, affordable remote and keep enough income to rez its ICE.",
+            "midgame": "Score the early window when the Runner cannot contest it. Advance Babylon further when the extra point and the additional exposure fit the position.",
+            "endgame": "Close with the safest funded agenda line. Use a tag and damage finish when the necessary pieces are already available."
           },
-          "keyCards": [],
-          "noDistinctKeyCardsReason": "The current analysis does not identify any individual stable strategy anchors; the deck function arises from the overall combination.",
+          "keyCards": [
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "title": "Project Babylon",
+              "role": "Offers extra points from advancement beyond its scoring requirement."
+            }
+          ],
           "pilotingTips": [
-            "Before each move, check whether remote scoring still fits the current board or whether an additional line is better prepared.",
-            "Don't just rezz because you can; every expenditure should improve a specific access, tempo or score window."
+            "Price the extra advancement together with the remote's remaining rez costs.",
+            "Treat an early score as a way to put the Runner under time pressure."
           ],
           "weaknesses": [
-            "The analysis recognizes a strategy, but not individual dominant key cards; This means that the implementation depends more on the overall hand.",
-            "A plan that is revealed too early gives the Runner time to specifically build the appropriate counterstructure."
+            "Babylon can expose an agenda for longer if you seek its bonus.",
+            "A visible scoring route gives the Runner time to build the relevant breakers."
           ]
         },
         "de": {
-          "summary": "Vom Tablet setzt vor allem auf Tag- und Trace-Bestrafung, frühe Rush-Scorefenster und eine geschützte Remote-Scorelinie.",
-          "deckIdea": "Vom Tablet verbindet eine geschützte Remote-Scorelinie und frühe Rush-Scorefenster. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Nutze günstiges frühes ICE, bevor das Runner-Rig vollständig ist, und zwinge eine schnelle Antwort.",
+          "summary": "Nutze ein bezahlbares Wertungs-Remote und verwandle freie Advancement-Aktionen mit Project Babylon in Zusatzpunkte.",
+          "deckIdea": "Günstiges ICE schützt frühe Wertungen. Project Babylon kann zusätzliche Punkte bringen, wenn das Remote und die verbleibenden Aktionen weiteres Advancement erlauben.",
           "gamePlan": {
-            "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Prüfe in der Starthand vor allem Economy, grundlegende Deckfunktion und eine umsetzbare erste Linie.",
-            "midgame": "Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Nutze günstiges frühes ICE, bevor das Runner-Rig vollständig ist, und zwinge eine schnelle Antwort.",
-            "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+            "opening": "Baue ein kleines, bezahlbares Remote und halte Einkommen für den Rez bereit.",
+            "midgame": "Nutze das frühe Wertungsfenster, wenn der Runner es nicht angreifen kann. Gib Babylon weitere Advancement-Marker, wenn der Zusatzpunkt die längere Angriffsfrist rechtfertigt.",
+            "endgame": "Schließe über die sicherste finanzierte Agendafolge ab. Nutze einen Tag- und Schadensabschluss, wenn die nötigen Bausteine schon bereitliegen."
           },
-          "keyCards": [],
-          "noDistinctKeyCardsReason": "Die aktuelle Analyse erkennt keine einzelnen stabilen Strategieanker; die Deckfunktion entsteht aus der Gesamtkombination.",
+          "keyCards": [
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "title": "Project Babylon",
+              "role": "Ermöglicht Zusatzpunkte durch Advancement über die Wertungsvoraussetzung hinaus."
+            }
+          ],
           "pilotingTips": [
-            "Prüfe vor jedem Zug, ob Remote Scoring noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+            "Berechne das zusätzliche Advancement zusammen mit den verbleibenden Rez-Kosten des Remotes.",
+            "Eine frühe Wertung setzt den Runner unter Zeitdruck."
           ],
           "weaknesses": [
-            "Die Analyse erkennt eine Strategie, aber keine einzelnen dominanten Schlüsselkarten; dadurch hängt die Umsetzung stärker von der Gesamthand ab.",
-            "Ein zu früh offengelegter Plan gibt dem Runner Zeit, gezielt die passende Gegenstruktur aufzubauen."
+            "Babylon kann länger angreifbar bleiben, wenn du den Bonus vorbereitest.",
+            "Eine sichtbare Wertungsroute gibt dem Runner Zeit für die passenden Breaker."
           ]
         }
       }
     },
     {
       "standardDeckId": "standard_runner_bit_denial_lock",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:23264db8",
-      "sourceAnalysisHash": "deck-analysis:e0f4c46a",
-      "reviewedAt": "2026-09-23",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:176b6c58",
+      "sourceAnalysisHash": "deck-analysis:a8827a14",
+      "sourceAnalysisInputHash": "deck-analysis-input:c286ae79",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.hq_pressure",
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "secondaryStrategyIds": [
           "runner.rig_first"
         ],
-        "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:2f542e1c",
       "contentByLocale": {
         "en": {
-          "summary": "Bit-Denial Lock currently does not have a reliably recognized strategy profile. HQ pressure, rig construction and remote contest remain a plausible playtest hypothesis and should be carefully monitored.",
-          "deckIdea": "Bit-Denial Lock combines targeted HQ pressure, a reliable rig structure and consistent remote contest. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand. Establish a resilient program base before committing to expensive runs. Contest suspicious scoring remotes without attacking any bait unchecked.",
+          "summary": "Use HQ disruption to create windows for agenda access. R&D Interface gives the deck a second central route.",
+          "deckIdea": "Keep the rig small and use disruption to buy time. Jack ’n’ Joe helps find the right breaker or economy card. R&D Interface rewards sustained access once HQ pressure has opened up the board.",
           "gamePlan": {
-            "opening": "Secure credits first, basic coverage and affordable first access. Pay particular attention to Edited Shipping Manifests and Restrictive Net Zoning without leaving an unbalanced starting hand.",
-            "midgame": "Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand. Establish a resilient program base before committing to expensive runs. Contest suspicious scoring remotes without attacking any bait unchecked.",
-            "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
+            "opening": "Find economy and the breaker that opens the first affordable server.",
+            "midgame": "Apply HQ disruption when the loss of credits or cards limits the Corp's next turn. Develop R&D Interface when you can use it more than once.",
+            "endgame": "Turn the pressure into agenda accesses. Choose the server you can reach with the credits and actions left."
           },
           "keyCards": [
             {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
-              "title": "Edited Shipping Manifests",
-              "role": "Carries HQ print as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_v1_095_jack-n-joe",
+              "title": "Jack ’n’ Joe",
+              "role": "Finds income and missing coverage through card draw."
             },
             {
-              "cardId": "onr_v1_173_restrictive-net-zoning",
-              "title": "Restrictive Net Zoning",
-              "role": "Carries Remote Contest as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_v1_139_r-and-d-interface",
+              "title": "R&D Interface",
+              "role": "Adds an extra access on repeatable R&D runs."
+            },
+            {
+              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "title": "Edited Shipping Manifests",
+              "role": "Turns a suitable HQ run into disruption."
             },
             {
               "cardId": "onr_v1_105_priority-wreck",
               "title": "Priority Wreck",
-              "role": "Carries HQ print as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Pressures the Corp's options through HQ."
             }
           ],
           "pilotingTips": [
-            "Before each move, check whether HQ pressure still fits the current board or whether a supplementary line is better prepared.",
-            "Plan run costs and possible punishment together; a legal run is not automatically a good run."
+            "Leave enough credits to exploit the window created by a denial run.",
+            "Use repeated R&D access to finish a game that HQ disruption has slowed down."
           ],
           "weaknesses": [
-            "The current deck analysis does not detect a reliable primary line. HQ pressure, rig construction and remote contest must therefore be confirmed in the playtest.",
-            "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
+            "The compact rig relies on the base memory limit.",
+            "R&D Interface needs investment before it pays off. A fortified R&D can delay that route."
           ]
         },
         "de": {
-          "summary": "Bit-Denial Lock besitzt derzeit kein belastbar erkanntes Strategieprofil. HQ-Druck, Rig-Aufbau und Remote Contest bleiben eine plausible Playtest-Hypothese und sollten gezielt beobachtet werden.",
-          "deckIdea": "Bit-Denial Lock verbindet gezielten HQ-Druck, einen verlässlichen Rig-Aufbau und konsequenten Remote Contest. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst. Bestreite verdächtige Scoring-Remotes, ohne jeden Köder ungeprüft anzulaufen.",
+          "summary": "Setze HQ unter Druck und nutze das entstehende Zeitfenster für Agendazugriffe. R&D Interface eröffnet eine zweite Zentralroute.",
+          "deckIdea": "Halte das Rig klein und gewinne mit Störung Zeit. Jack ’n’ Joe hilft dir, den passenden Breaker oder Wirtschaft zu finden. R&D Interface belohnt wiederholte Zugriffe, sobald der HQ-Druck die Verteidigung gelockert hat.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Edited Shipping Manifests und Restrictive Net Zoning, ohne dafür eine unausgewogene Starthand zu behalten.",
-            "midgame": "Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst. Bestreite verdächtige Scoring-Remotes, ohne jeden Köder ungeprüft anzulaufen.",
-            "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+            "opening": "Suche Wirtschaft und den Breaker, der den ersten bezahlbaren Server öffnet.",
+            "midgame": "Störe HQ, wenn der Verlust von Credits oder Karten den nächsten Corp-Zug einschränkt. Installiere R&D Interface, wenn du es wiederholt nutzen kannst.",
+            "endgame": "Verwandle den Druck in Agendazugriffe. Wähle den Server, den du mit den restlichen Credits und Aktionen erreichst."
           },
           "keyCards": [
             {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
-              "title": "Edited Shipping Manifests",
-              "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_v1_095_jack-n-joe",
+              "title": "Jack ’n’ Joe",
+              "role": "Findet durch Kartennachschub Wirtschaft und fehlende Breaker."
             },
             {
-              "cardId": "onr_v1_173_restrictive-net-zoning",
-              "title": "Restrictive Net Zoning",
-              "role": "Trägt Remote Contest als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_v1_139_r-and-d-interface",
+              "title": "R&D Interface",
+              "role": "Liefert einen zusätzlichen Zugriff bei wiederholbaren R&D-Runs."
+            },
+            {
+              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "title": "Edited Shipping Manifests",
+              "role": "Macht einen passenden HQ-Run zu einer Störungsaktion."
             },
             {
               "cardId": "onr_v1_105_priority-wreck",
               "title": "Priority Wreck",
-              "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Schränkt die Optionen der Corp über HQ ein."
             }
           ],
           "pilotingTips": [
-            "Prüfe vor jedem Zug, ob HQ-Druck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+            "Behalte genug Credits, um das Fenster nach einem Störungs-Run auszunutzen.",
+            "Nutze wiederholte R&D-Zugriffe, wenn der HQ-Druck das Spiel verlangsamt hat."
           ],
           "weaknesses": [
-            "Die aktuelle Deckanalyse erkennt keine belastbare Primärlinie. HQ-Druck, Rig-Aufbau und Remote Contest müssen daher im Playtest bestätigt werden.",
-            "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+            "Das kompakte Rig arbeitet mit den Grund-MU.",
+            "R&D Interface braucht eine Vorleistung. Ein stark verteidigtes R&D verzögert diese Route."
           ]
         }
       }
@@ -2578,8 +2592,8 @@
       "standardDeckId": "standard_runner_blink_pressure_rig",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:5c3b8987",
-      "sourceAnalysisHash": "deck-analysis:5279f157",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:b503235e",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -2685,10 +2699,11 @@
     },
     {
       "standardDeckId": "standard_classic_runner_cybernetics_risk_rig_2026_07_01",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:afcb633a",
-      "sourceAnalysisHash": "deck-analysis:530bc9f1",
-      "reviewedAt": "2026-09-23",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:52897a7d",
+      "sourceAnalysisHash": "deck-analysis:43f6eec2",
+      "sourceAnalysisInputHash": "deck-analysis-input:81262bb6",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -2702,96 +2717,75 @@
           "runner.search.breaker",
           "runner.rig_first"
         ],
-        "reviewStatus": "plausible"
+        "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:477cd018",
       "contentByLocale": {
         "en": {
-          "summary": "Classic Runner - Cybernetics Risk Rig relies primarily on short run event pace lines, targeted HQ pressure and repeated R&D pressure. In addition, the deck uses protection against tags, traces and damage, a multi-access conclusion, consistent remote contest, targeted breaker search and a reliable rig structure.",
-          "deckIdea": "Classic Runner - Cybernetics Risk Rig combines short run event pace lines, targeted HQ pressure and repeated R&D pressure. Combine run events with the right goal and use the gained speed in the same turn. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand. Attack R&D repeatedly and turn information or multiaccess into real agenda opportunities.",
+          "summary": "Prepare short run-event sequences with a larger hand and extra memory from Little Black Box.",
+          "deckIdea": "Little Black Box gives the rig one additional MU and one extra card of hand size. Its damage prevention supports runs through preventable Net or Core damage. Fund breaker use from your own credits.",
           "gamePlan": {
-            "opening": "Secure credits first, basic coverage and affordable first access. Pay particular attention to Gypsy™ Schedule Analyzer and Schematics Search Engine without leaving an unbalanced starting hand.",
-            "midgame": "Combine run events with the right goal and use the gained speed in the same turn. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand. Attack R&D repeatedly and turn information or multiaccess into real agenda opportunities.",
-            "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
+            "opening": "Set up income and search for coverage that opens a usable central route.",
+            "midgame": "Use run events after pricing the whole route. Install Little Black Box when the memory, hand space or prevention will help upcoming runs.",
+            "endgame": "Take the best funded access and keep enough grip for the next damage window."
           },
           "keyCards": [
             {
-              "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
-              "title": "Gypsy™ Schedule Analyzer",
-              "role": "Carries run event tempo as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_classic_047_little-black-box",
+              "title": "Little Black Box",
+              "role": "Adds memory and hand space and prevents a limited amount of Net or Core damage."
             },
             {
               "cardId": "onr_classic_032_schematics-search-engine",
               "title": "Schematics Search Engine",
-              "role": "Carries HQ print as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
-              "cardId": "onr_classic_040_meat-upgrade",
-              "title": "Meat Upgrade",
-              "role": "Carries survival protection as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
-              "cardId": "onr_classic_039_library-search",
-              "title": "Library Search",
-              "role": "Carries interface termination as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Develops targeted coverage for the current route."
             },
             {
               "cardId": "onr_classic_043_running-interference",
               "title": "Running Interference",
-              "role": "Carries Remote Contest as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Creates tempo when the remaining run is funded."
             }
           ],
           "pilotingTips": [
-            "Before each move, check whether the run event tempo still matches the current board or whether an additional line is better prepared.",
-            "Plan run costs and possible punishment together; a legal run is not automatically a good run."
+            "Size the rig for Wet Drive's current hand-dependent memory.",
+            "Check whether damage can be prevented before relying on Little Black Box."
           ],
           "weaknesses": [
-            "If Gypsy™ Schedule Analyzer and Schematics Search Engine fail or come too late, the deck loses part of its clearest line.",
-            "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
+            "The safety-oriented rig has fewer recurring breaker credits.",
+            "A small hand can still make Wet Drive's available memory fall."
           ]
         },
         "de": {
-          "summary": "Classic Runner - Cybernetics Risk Rig setzt vor allem auf kurze Run-Event-Tempolinien, gezielten HQ-Druck und wiederholten R&D-Druck. Ergänzend nutzt das Deck Schutz gegen Tags, Traces und Schaden, einen Multiaccess-Abschluss, konsequenten Remote Contest, gezielte Breaker-Suche und einen verlässlichen Rig-Aufbau.",
-          "deckIdea": "Classic Runner - Cybernetics Risk Rig verbindet kurze Run-Event-Tempolinien, gezielten HQ-Druck und wiederholten R&D-Druck. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen.",
+          "summary": "Bereite kurze Folgen aus Run-Ereignissen vor. Little Black Box gibt dir dafür eine größere Hand und zusätzlichen Speicher.",
+          "deckIdea": "Little Black Box liefert ein zusätzliches MU und erhöht die maximale Handgröße um eine Karte. Die Prävention hilft gegen verhinderbaren Net- oder Core-Schaden. Bezahle Breaker aus deiner eigenen Creditreserve.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Gypsy™ Schedule Analyzer und Schematics Search Engine, ohne dafür eine unausgewogene Starthand zu behalten.",
-            "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen.",
-            "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+            "opening": "Baue Einkommen auf und suche Breaker für einen nutzbaren Zentralzugriff.",
+            "midgame": "Berechne die ganze Route, bevor du Run-Ereignisse spielst. Installiere Little Black Box, wenn Speicher, Handgröße oder Prävention den nächsten Runs helfen.",
+            "endgame": "Nutze den besten finanzierten Zugriff und halte genügend Karten für das nächste Schadensfenster zurück."
           },
           "keyCards": [
             {
-              "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
-              "title": "Gypsy™ Schedule Analyzer",
-              "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_classic_047_little-black-box",
+              "title": "Little Black Box",
+              "role": "Erhöht Speicher und Handgröße und verhindert begrenzt Net- oder Core-Schaden."
             },
             {
               "cardId": "onr_classic_032_schematics-search-engine",
               "title": "Schematics Search Engine",
-              "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
-              "cardId": "onr_classic_040_meat-upgrade",
-              "title": "Meat Upgrade",
-              "role": "Trägt Überlebensschutz als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
-              "cardId": "onr_classic_039_library-search",
-              "title": "Library Search",
-              "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Hilft beim gezielten Aufbau der Breaker für die aktuelle Route."
             },
             {
               "cardId": "onr_classic_043_running-interference",
               "title": "Running Interference",
-              "role": "Trägt Remote Contest als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Erzeugt Tempo, wenn der verbleibende Run finanziert ist."
             }
           ],
           "pilotingTips": [
-            "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+            "Richte das Rig nach den MU aus, die Wet Drive bei der aktuellen Handgröße zulässt.",
+            "Prüfe, ob sich der Schaden verhindern lässt, bevor du dich auf Little Black Box verlässt."
           ],
           "weaknesses": [
-            "Fallen Gypsy™ Schedule Analyzer und Schematics Search Engine aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
-            "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+            "Das sicherere Rig hat weniger wiederkehrende Credits für Breaker.",
+            "Eine kleine Hand kann den verfügbaren Speicher von Wet Drive senken."
           ]
         }
       }
@@ -2800,8 +2794,8 @@
       "standardDeckId": "standard_classic_runner_prep_economy_pressure_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:34b312ba",
-      "sourceAnalysisHash": "deck-analysis:03af6ed3",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:daaf3541",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -2912,8 +2906,8 @@
       "standardDeckId": "standard_runner_deep_market_engine",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:82157891",
-      "sourceAnalysisHash": "deck-analysis:424f56c4",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:24d372f3",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.search.breaker",
@@ -2988,8 +2982,8 @@
       "standardDeckId": "standard_runner_ghost_circuit",
       "sourceDeckVersion": "2.0.0",
       "sourceDeckHash": "standard-deck:6173de6b",
-      "sourceAnalysisHash": "deck-analysis:e4e3ce08",
-      "reviewedAt": "2026-08-23",
+      "sourceAnalysisHash": "deck-analysis:c7ae926e",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -3115,8 +3109,8 @@
       "standardDeckId": "standard_runner_ice_destruction_runner",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:3bf13a4c",
-      "sourceAnalysisHash": "deck-analysis:208eb3bb",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:f92cc0e1",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -3224,8 +3218,8 @@
       "standardDeckId": "standard_runner_inside_forgery_loop",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:618f5760",
-      "sourceAnalysisHash": "deck-analysis:4d1868f4",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:511883e2",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -3288,10 +3282,11 @@
     },
     {
       "standardDeckId": "standard_runner_adb10896",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:fcf8258d",
-      "sourceAnalysisHash": "deck-analysis:4fc81c63",
-      "reviewedAt": "2026-08-30",
+      "sourceDeckVersion": "1.2.0",
+      "sourceDeckHash": "standard-deck:4322dd23",
+      "sourceAnalysisHash": "deck-analysis:10b1216b",
+      "sourceAnalysisInputHash": "deck-analysis-input:f51882a1",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -3303,98 +3298,85 @@
           "runner.search.breaker",
           "runner.interface_closeout"
         ],
-        "reviewStatus": "plausible"
+        "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:0429032f",
       "contentByLocale": {
         "en": {
-          "summary": "King of the Road primarily relies on short run event pace lines, repeated R&D pressure and targeted HQ pressure. Its breaker suite deliberately covers Barrier, Code Gate and Sentry ICE so that targeted search can close the currently missing route instead of merely adding redundant coverage.",
-          "deckIdea": "King of the Road combines short run event pace lines, repeated R&D pressure and targeted HQ pressure. Combine run events with the right goal and use the gained speed in the same turn. Attack R&D repeatedly and turn information or multiaccess into real agenda opportunities. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand.",
+          "summary": "Use dependable credit events to keep HQ and R&D runs funded across different opponents.",
+          "deckIdea": "Livewire’s Contacts and Score! support a broad breaker suite. Search for the coverage that opens a real route, then use run events and follow-up accesses while the window is open.",
           "gamePlan": {
-            "opening": "Secure credits first, basic ICE coverage and an affordable first access. Prefer the breaker subtype that closes an actually exposed route; Hammer and Pile Driver provide the deck's dedicated Barrier coverage.",
-            "midgame": "Combine run events with the right goal and use the gained speed in the same turn. Attack R&D repeatedly and turn information or multiaccess into real agenda opportunities. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand.",
-            "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
+            "opening": "Build credits and install the breaker that opens your cheapest useful access.",
+            "midgame": "Use credit events to fund repeated central runs. Hammer and Pile Driver cover different Wall costs while the rest of the rig handles Code Gates and Sentries.",
+            "endgame": "Convert the remaining credit pool into the strongest agenda access before the Corp closes the route."
           },
           "keyCards": [
             {
-              "cardId": "onr_v1_076_all-nighter",
-              "title": "All-Nighter",
-              "role": "Carries run event tempo as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_v1_097_livewires-contacts",
+              "title": "Livewire’s Contacts",
+              "role": "Supplies immediate income for setup and runs."
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
-              "title": "Temple Microcode Outlet",
-              "role": "Carries breaker search as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_v1_108_score",
+              "title": "Score!",
+              "role": "Builds a credit reserve once the play cost is covered."
             },
             {
               "cardId": "onr_v1_031_hammer",
               "title": "Hammer",
-              "role": "Provides the efficient everyday Barrier answer and should be installed when Wall coverage opens a concrete run route."
+              "role": "Covers ordinary Wall encounters."
             },
             {
               "cardId": "onr_v1_047_pile-driver",
               "title": "Pile Driver",
-              "role": "Provides a high-strength Barrier alternative for demanding Walls and complements Hammer instead of duplicating Sentry coverage."
-            },
-            {
-              "cardId": "onr_v1_085_executive-wiretaps",
-              "title": "Executive Wiretaps",
-              "role": "Carries run event tempo as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Covers higher-strength Walls."
             }
           ],
           "pilotingTips": [
-            "Before each move, check whether the run event tempo still matches the current board or whether an additional line is better prepared.",
-            "Plan run costs and possible punishment together; a legal run is not automatically a good run.",
-            "Install memory and breakers against current plus near-term coverage demand; do not spend scarce credits or MU on redundant subtypes without a strategic route."
+            "Take the easy income while you can still afford the installation and run that follow.",
+            "Spend MU and credits where a breaker improves a route you expect to use."
           ],
           "weaknesses": [
-            "If All-Nighter and Custodial Position fail or come too late, the deck loses part of its clearest line.",
-            "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
+            "A broad breaker suite can draw redundant coverage.",
+            "Score! requires an up-front payment. Runs still need a complete credit reserve."
           ]
         },
         "de": {
-          "summary": "King of the Road setzt vor allem auf kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Die Breaker-Suite deckt Barrieren, Code Gates und Sentry-ICE bewusst ab, damit die gezielte Suche die aktuell fehlende Route schließt statt nur redundante Coverage aufzubauen.",
-          "deckIdea": "King of the Road verbindet kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+          "summary": "Finanziere HQ- und R&D-Runs mit verlässlichen Creditereignissen, auch gegen unterschiedliche Gegner.",
+          "deckIdea": "Livewire’s Contacts und Score! finanzieren eine breite Breaker-Auswahl. Suche den Breaker, der einen echten Zugriff eröffnet. Nutze Run-Ereignisse und Folgezugriffe, solange das Fenster offen ist.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, grundlegende ICE-Coverage und einen bezahlbaren ersten Zugriff. Bevorzuge den Breaker-Subtyp, der eine tatsächlich sichtbare Route öffnet; Hammer und Pile Driver bilden die gezielte Barrieren-Abdeckung.",
-            "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
-            "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+            "opening": "Sammle Credits und installiere den Breaker für den günstigsten sinnvollen Zugriff.",
+            "midgame": "Bezahle mit Creditereignissen wiederholte Zentral-Runs. Hammer und Pile Driver decken unterschiedliche Wall-Kosten ab. Das übrige Rig kümmert sich um Code Gates und Sentries.",
+            "endgame": "Setze die verbleibenden Credits für den stärksten Agendazugriff ein, bevor die Corp die Route schließt."
           },
           "keyCards": [
             {
-              "cardId": "onr_v1_076_all-nighter",
-              "title": "All-Nighter",
-              "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_v1_097_livewires-contacts",
+              "title": "Livewire’s Contacts",
+              "role": "Liefert sofortiges Einkommen für Aufbau und Runs."
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
-              "title": "Temple Microcode Outlet",
-              "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_v1_108_score",
+              "title": "Score!",
+              "role": "Baut nach der Vorleistung eine Creditreserve auf."
             },
             {
               "cardId": "onr_v1_031_hammer",
               "title": "Hammer",
-              "role": "Ist die effiziente Standardantwort auf Barrieren und sollte installiert werden, wenn Wall-Coverage eine konkrete Run-Route öffnet."
+              "role": "Deckt gewöhnliche Wall-Begegnungen ab."
             },
             {
               "cardId": "onr_v1_047_pile-driver",
               "title": "Pile Driver",
-              "role": "Ist die Alternative mit hoher Grundstärke für anspruchsvolle Walls und ergänzt Hammer, statt Sentry-Coverage weiter zu verdoppeln."
-            },
-            {
-              "cardId": "onr_v1_085_executive-wiretaps",
-              "title": "Executive Wiretaps",
-              "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Deckt stärkere Walls ab."
             }
           ],
           "pilotingTips": [
-            "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run.",
-            "Installiere MU und Breaker nach aktuellem sowie absehbarem Coverage-Bedarf; verschwende knappe Credits oder MU nicht ohne strategische Route auf redundante Subtypen."
+            "Nutze frühes Einkommen, wenn du die anschließende Installation und den Run noch finanzieren kannst.",
+            "Gib MU und Credits für Breaker aus, die eine absehbar genutzte Route verbessern."
           ],
           "weaknesses": [
-            "Fallen All-Nighter und Custodial Position aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
-            "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+            "Eine breite Breaker-Auswahl kann mehrfache Abdeckung derselben Aufgabe ziehen.",
+            "Score! braucht eine Vorleistung. Für den Run muss eine vollständige Reserve übrig bleiben."
           ]
         }
       }
@@ -3403,8 +3385,8 @@
       "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:99165f80",
-      "sourceAnalysisHash": "deck-analysis:1b34e0e9",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:4da55065",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.search.breaker",
@@ -3490,8 +3472,8 @@
       "standardDeckId": "standard_runner_last_call_at_rd",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:76a00e66",
-      "sourceAnalysisHash": "deck-analysis:f6b9dc92",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:cd083cd9",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.rnd_pressure",
@@ -3614,8 +3596,8 @@
       "standardDeckId": "standard_runner_lucidrine_shell_traders",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:7214803a",
-      "sourceAnalysisHash": "deck-analysis:00f2be39",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:119ceb69",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.rnd_pressure",
@@ -3714,8 +3696,8 @@
       "standardDeckId": "standard_runner_mit_ansage_der_perfekte_coup_2026_07_09",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:50f16c85",
-      "sourceAnalysisHash": "deck-analysis:bd1c4065",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:0adaaaa7",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -3824,8 +3806,8 @@
       "standardDeckId": "standard_proteus_runner_breaker_lab_2026_05_25",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:1bd2b10a",
-      "sourceAnalysisHash": "deck-analysis:db3e6308",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:0e67e696",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.hq_pressure",
@@ -3933,123 +3915,113 @@
     },
     {
       "standardDeckId": "standard_proteus_runner_hidden_sabotage_2026_05_25",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:2d97ff8d",
-      "sourceAnalysisHash": "deck-analysis:c9c261df",
-      "reviewedAt": "2026-09-23",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:ddbe161a",
+      "sourceAnalysisHash": "deck-analysis:0404c3f7",
+      "sourceAnalysisInputHash": "deck-analysis-input:88ec84cb",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
-          "runner.interface_closeout",
           "runner.hq_pressure",
-          "runner.run_event_tempo"
+          "runner.interface_closeout",
+          "runner.rnd_pressure"
         ],
         "secondaryStrategyIds": [
-          "runner.rnd_pressure",
+          "runner.run_event_tempo",
           "runner.survival_defense",
           "runner.remote_trash",
-          "runner.search.breaker",
-          "runner.remote_contest"
+          "runner.remote_contest",
+          "runner.search.breaker"
         ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:2c594ab1",
       "contentByLocale": {
         "en": {
-          "summary": "Proteus Runner - Hidden Backdoor Sabotage is currently reliably detected through protection against tags, traces and damage. Central pressure, remote sabotage and rig construction remain observed supplementary lines.",
-          "deckIdea": "Proteus Runner - Hidden Backdoor Sabotage protects his risky runs with Identity Donor and holds back enough hand cards and credits against punishment. Highlighter, Crumble, Garbage In and Death from Above open up different lines of sabotage, but are not interchangeable standard moves: only use them against an accessible server and with a specific access or trash target. Establish the necessary coverage beforehand so that conditional run cards do not block the hand.",
+          "summary": "Develop affordable central access and use viruses to turn successful runs into additional accesses or sabotage.",
+          "deckIdea": "Cruising for Netwatch replenishes the hand and Score! builds the credit reserve. Spend that reserve on a concrete HQ or R&D route. Keep remote sabotage available when it has a valuable target.",
           "gamePlan": {
-            "opening": "Secure credits first, basic coverage and affordable first access. Identity Donor is valuable when there is a real threat of tags, traces or damage; Highlighter and Crumble alone do not justify an unbalanced starting hand.",
-            "midgame": "Choose central pressure or remote sabotage only after server availability, run price and specific payoff. Have enough hand cards, credits or protection ready so that a successful run doesn't end in punishment. Draw or develop the rig further if the conditional sabotage cards do not yet have a solid target.",
-            "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
+            "opening": "Draw toward income and enough breaker coverage for your first central target.",
+            "midgame": "Use Vienna 22 or Highlighter to get more from repeatable access. Save Crumble and Garbage In for turns with a reachable server and a useful trash target.",
+            "endgame": "Compare a funded agenda run with a complete bad publicity finish. Count resolved effects and the remaining costs before committing."
           },
           "keyCards": [
             {
-              "cardId": "onr_proteus_112_identity-donor",
-              "title": "Identity Donor",
-              "role": "Supports the resiliently detected line of defense against tags, traces and damage."
+              "cardId": "onr_v1_108_score",
+              "title": "Score!",
+              "role": "Funds a specific central run after the up-front payment."
+            },
+            {
+              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "title": "Cruising for Netwatch",
+              "role": "Adds a credit and two cards during setup."
             },
             {
               "cardId": "onr_proteus_090_highlighter",
               "title": "Highlighter",
-              "role": "Supports the observed R&D sabotage line once the server is actually reachable."
+              "role": "Turns successful R&D runs into more accesses."
             },
             {
               "cardId": "onr_proteus_084_crumble",
               "title": "Crumble",
-              "role": "Supports the observed HQ pressure line in a concrete access window."
-            },
-            {
-              "cardId": "onr_proteus_104_decoy-signal",
-              "title": "Decoy Signal",
-              "role": "Supports an observed run event paceline with an appropriate target."
-            },
-            {
-              "cardId": "onr_proteus_089_garbage-in",
-              "title": "Garbage In",
-              "role": "Supports the observed R&D pressure line if its additional effect is actually usable."
+              "role": "Adds a trash option when HQ is reachable."
             },
             {
               "cardId": "onr_proteus_137_death-from-above",
               "title": "Death from Above",
-              "role": "Supports the observed remote sabotage against a specific valuable target."
+              "role": "Targets a valuable remote once its access is affordable."
             }
           ],
           "pilotingTips": [
-            "Treat central pressure and remote sabotage as conditional playtest lines, not as an automatically executable main strategy.",
-            "Plan run costs and possible punishment together; a legal run is not automatically a good run."
+            "Play Score! while you can cover its up-front cost and still fund the next run.",
+            "Keep enough cards in hand and credits available for the expected retaliation."
           ],
           "weaknesses": [
-            "Apart from the protective line, central pressure, remote sabotage and rig construction have not yet been recognized as strategic anchors and must be confirmed in the playtest.",
-            "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
+            "The rig and conditional events compete for setup time.",
+            "Bad publicity depends on successful runs and follow-up effects. A purge can remove virus counters."
           ]
         },
         "de": {
-          "summary": "Proteus Runner - Hidden Backdoor Sabotage wird aktuell über Schutz gegen Tags, Traces und Schaden belastbar erkannt. Zentraldruck, Remote-Sabotage und Rig-Aufbau bleiben beobachtete Ergänzungslinien.",
-          "deckIdea": "Proteus Runner - Hidden Backdoor Sabotage schützt seine riskanten Runs mit Identity Donor und hält genügend Handkarten und Credits gegen Bestrafung zurück. Highlighter, Crumble, Garbage In und Death from Above eröffnen unterschiedliche Sabotagelinien, sind aber keine austauschbaren Standardzüge: Nutze sie nur gegen einen erreichbaren Server und mit einem konkreten Zugriffs- oder Trashziel. Stelle vorher die notwendige Coverage her, damit konditionale Run-Karten nicht die Hand blockieren.",
+          "summary": "Baue bezahlbare Zugriffe auf HQ und R&D auf. Viren machen erfolgreiche Runs zu zusätzlichen Zugriffen oder Sabotage.",
+          "deckIdea": "Cruising for Netwatch füllt die Hand auf, Score! baut die Creditreserve auf. Verwende das Geld für einen konkreten Weg nach HQ oder R&D. Halte Remote-Sabotage für ein wertvolles Ziel bereit.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Identity Donor ist wertvoll, wenn Tags, Traces oder Schaden konkret drohen; Highlighter und Crumble allein rechtfertigen keine unausgewogene Starthand.",
-            "midgame": "Wähle Zentraldruck oder Remote-Sabotage erst nach Servererreichbarkeit, Runpreis und konkretem Payoff. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet. Ziehe oder entwickle das Rig weiter, wenn die konditionalen Sabotagekarten noch kein belastbares Ziel besitzen.",
-            "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+            "opening": "Ziehe Wirtschaft und die Breaker, die den ersten Zentralzugriff ermöglichen.",
+            "midgame": "Nutze Vienna 22 oder Highlighter für wiederholbare Mehrfachzugriffe. Spiele Crumble und Garbage In erst aus, wenn der Server erreichbar ist und das Trashing einen konkreten Nutzen hat.",
+            "endgame": "Vergleiche einen bezahlbaren Agenda-Run mit einer vollständigen Bad-Publicity-Folge. Zähle ausgelöste Effekte und die Kosten der verbleibenden Aktionen."
           },
           "keyCards": [
             {
-              "cardId": "onr_proteus_112_identity-donor",
-              "title": "Identity Donor",
-              "role": "Stützt die belastbar erkannte Schutzlinie gegen Tags, Traces und Schaden."
+              "cardId": "onr_v1_108_score",
+              "title": "Score!",
+              "role": "Finanziert nach der Vorleistung einen konkreten Zentral-Run."
+            },
+            {
+              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "title": "Cruising for Netwatch",
+              "role": "Liefert im Aufbau einen Credit und zwei Karten."
             },
             {
               "cardId": "onr_proteus_090_highlighter",
               "title": "Highlighter",
-              "role": "Stützt die beobachtete R&D-Sabotagelinie, sobald der Server tatsächlich erreichbar ist."
+              "role": "Macht erfolgreiche R&D-Runs zu Mehrfachzugriffen."
             },
             {
               "cardId": "onr_proteus_084_crumble",
               "title": "Crumble",
-              "role": "Stützt die beobachtete HQ-Drucklinie in einem konkreten Zugriffsfenster."
-            },
-            {
-              "cardId": "onr_proteus_104_decoy-signal",
-              "title": "Decoy Signal",
-              "role": "Stützt eine beobachtete Run-Event-Tempolinie mit passendem Ziel."
-            },
-            {
-              "cardId": "onr_proteus_089_garbage-in",
-              "title": "Garbage In",
-              "role": "Stützt die beobachtete R&D-Drucklinie, wenn ihr zusätzlicher Effekt real nutzbar ist."
+              "role": "Eröffnet eine Trashoption, wenn HQ erreichbar ist."
             },
             {
               "cardId": "onr_proteus_137_death-from-above",
               "title": "Death from Above",
-              "role": "Stützt die beobachtete Remote-Sabotage gegen ein konkret wertvolles Ziel."
+              "role": "Greift ein wertvolles Remote an, sobald der Zugriff bezahlbar ist."
             }
           ],
           "pilotingTips": [
-            "Behandle Zentraldruck und Remote-Sabotage als konditionale Playtestlinien, nicht als automatisch ausführbare Hauptstrategie.",
-            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+            "Spiele Score!, wenn du die Vorleistung bezahlen und danach den nächsten Run finanzieren kannst.",
+            "Halte für die erwartete Gegenwehr genügend Karten auf der Hand und Credits bereit."
           ],
           "weaknesses": [
-            "Außer der Schutzlinie sind Zentraldruck, Remote-Sabotage und Rig-Aufbau noch nicht belastbar als Strategieanker erkannt und müssen im Playtest bestätigt werden.",
-            "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+            "Rig und bedingte Ereignisse konkurrieren um die Aufbauzeit.",
+            "Bad Publicity hängt von erfolgreichen Runs und Folgeeffekten ab. Ein Purge kann die Virusmarker entfernen."
           ]
         }
       }
@@ -4058,8 +4030,8 @@
       "standardDeckId": "standard_runner_rd_express",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:0cb00588",
-      "sourceAnalysisHash": "deck-analysis:89420dee",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:12543064",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -4183,8 +4155,8 @@
       "standardDeckId": "standard_runner_rd_express_v2",
       "sourceDeckVersion": "2.0.0",
       "sourceDeckHash": "standard-deck:cc6565ae",
-      "sourceAnalysisHash": "deck-analysis:22c0042e",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:fde92877",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -4310,8 +4282,8 @@
       "standardDeckId": "standard_runner_rnd_interface_dig",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:be046044",
-      "sourceAnalysisHash": "deck-analysis:90e37089",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:c13978c7",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.rnd_pressure",
@@ -4420,8 +4392,8 @@
       "standardDeckId": "standard_runner_redline_riot",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:30933717",
-      "sourceAnalysisHash": "deck-analysis:3af21cb1",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:178d894b",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -4531,8 +4503,8 @@
       "standardDeckId": "standard_runner_rent_i_con_shellspiel_2026_07_17",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:0697af2f",
-      "sourceAnalysisHash": "deck-analysis:f98b79ae",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:80b5ef3b",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.search.breaker",
@@ -4643,8 +4615,8 @@
       "standardDeckId": "standard_runner_mp48400s",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:d01806fd",
-      "sourceAnalysisHash": "deck-analysis:95074795",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:bb2336d8",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.hq_pressure",
@@ -4732,15 +4704,16 @@
       "standardDeckId": "standard_runner_skivviss_mill_pressure",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:5e6fbf64",
-      "sourceAnalysisHash": "deck-analysis:c9fd5dfa",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:6ffa75c7",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.hq_pressure",
           "runner.search.breaker",
-          "runner.survival_defense"
+          "runner.rnd_pressure"
         ],
         "secondaryStrategyIds": [
+          "runner.survival_defense",
           "runner.run_event_tempo",
           "runner.interface_closeout",
           "runner.rig_first"
@@ -4843,8 +4816,8 @@
       "standardDeckId": "standard_runner_stealth_interface_starter",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:a657c8a8",
-      "sourceAnalysisHash": "deck-analysis:14a9584d",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:e94fa706",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -4954,8 +4927,8 @@
       "standardDeckId": "standard_runner_purge_window",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:6b7eca0c",
-      "sourceAnalysisHash": "deck-analysis:86bea14c",
-      "reviewedAt": "2026-09-23",
+      "sourceAnalysisHash": "deck-analysis:a9f3da2e",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "runner.rnd_pressure",
@@ -5064,12 +5037,12 @@
       "standardDeckId": "standard_corp_universal_fast_advance",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:98dd4655",
-      "sourceAnalysisHash": "deck-analysis:2a26f187",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:c78c5a41",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
-          "corp.remote_scoring",
           "corp.fast_advance",
+          "corp.remote_scoring",
           "corp.rush_score"
         ],
         "secondaryStrategyIds": [],
@@ -5161,8 +5134,8 @@
       "standardDeckId": "standard_corp_dead_channel",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:44c8e308",
-      "sourceAnalysisHash": "deck-analysis:a053fc65",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:fb28ef73",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.damage_kill",
@@ -5275,16 +5248,16 @@
       "standardDeckId": "standard_corp_counter_shell",
       "sourceDeckVersion": "1.3.0",
       "sourceDeckHash": "standard-deck:67fadaeb",
-      "sourceAnalysisHash": "deck-analysis:f89cd49e",
-      "reviewedAt": "2026-08-29",
+      "sourceAnalysisHash": "deck-analysis:c36596fd",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
-          "corp.ambush_bluff",
-          "corp.remote_scoring",
-          "corp.overadvance_value"
+          "corp.fast_advance",
+          "corp.overadvance_value",
+          "corp.ambush_bluff"
         ],
         "secondaryStrategyIds": [
-          "corp.fast_advance",
+          "corp.remote_scoring",
           "corp.draw_engine",
           "corp.rush_score"
         ],
@@ -5402,13 +5375,13 @@
       "standardDeckId": "standard_corp_lucidrine_lockdown",
       "sourceDeckVersion": "1.5.0",
       "sourceDeckHash": "standard-deck:e47da3f0",
-      "sourceAnalysisHash": "deck-analysis:100fb621",
-      "reviewedAt": "2026-09-04",
+      "sourceAnalysisHash": "deck-analysis:56cf8ca6",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
-          "corp.remote_scoring",
-          "corp.fast_advance"
+          "corp.fast_advance",
+          "corp.remote_scoring"
         ],
         "secondaryStrategyIds": [
           "corp.rush_score",
@@ -5526,9 +5499,9 @@
       "standardDeckId": "standard_corp_dr_dreffs_letzte_visite",
       "sourceDeckVersion": "1.3.0",
       "sourceDeckHash": "standard-deck:21c8cd9a",
-      "sourceAnalysisHash": "deck-analysis:e214f86b",
+      "sourceAnalysisHash": "deck-analysis:05d8aec6",
       "sourceAnalysisInputHash": "deck-analysis-input:a52fd3f2",
-      "reviewedAt": "2026-09-13",
+      "reviewedAt": "2026-11-05",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -5654,6 +5627,216 @@
             "Ohne Dreff können teure ICE die HQ verstopfen. Ein fertiges Breaker-Rig kann die temporäre Begegnung überwinden und anschließend das Upgrade trashen.",
             "Wiederholte Runs verbrauchen ICE und Credits. Je eine Kopie von Reclamation Project und Corporate Shuffle erfordert gezieltes Recycling. Data Masons ist mit Trashkosten von einem Credit leicht zu entfernen und braucht Schutz.",
             "Ein stark geschützter Remote lässt die Zentralen angreifbar, wenn zu viel Economy in ihn fließt. Ein Matchup-Vorteil ist noch nicht nachgewiesen."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_connection_pressure_publicity_network",
+      "sourceDeckVersion": "0.1.0",
+      "sourceDeckHash": "standard-deck:48da3268",
+      "sourceAnalysisHash": "deck-analysis:9da639d1",
+      "sourceAnalysisInputHash": "deck-analysis-input:d678444b",
+      "reviewedAt": "2026-11-05",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.rnd_pressure",
+          "runner.rig_first"
+        ],
+        "secondaryStrategyIds": [
+          "runner.interface_closeout"
+        ],
+        "reviewStatus": "observe"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "Pressure HQ and R&D while building a bad publicity finish backed by eleven Connections.",
+          "deckIdea": "Broker and Karl fund repeated runs. Phone Freak supports traces and Nomad Allies helps with tags. Poisoned Water Supply converts two expendable installed Connections into bad publicity. Agenda access supplies a second route to victory.",
+          "gamePlan": {
+            "opening": "Build a reserve and find the coverage for affordable central runs. Install Connections that already help with economy, traces or tags.",
+            "midgame": "Use successful HQ runs to place Scaldan counters. Pair HQ and R&D runs for Frame-Up. Empty a Broker before selecting it as one of the two sacrifices.",
+            "endgame": "Count a fully funded bad publicity sequence or go for agenda points. On a six-sided die Scaldan succeeds on 5 or 6. Budget for the Corp to purge its counters."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_proteus_117_poisoned-water-supply",
+              "title": "Poisoned Water Supply",
+              "role": "Converts two expendable installed Connections into bad publicity."
+            },
+            {
+              "cardId": "onr_v1_154_broker",
+              "title": "Broker",
+              "role": "Builds credits before it becomes an available sacrifice."
+            },
+            {
+              "cardId": "onr_proteus_094_scaldan",
+              "title": "Scaldan",
+              "role": "Adds a purgeable route to bad publicity through HQ pressure."
+            },
+            {
+              "cardId": "onr_proteus_109_frame-up",
+              "title": "Frame-Up",
+              "role": "Rewards successful runs on HQ and R&D."
+            },
+            {
+              "cardId": "onr_v1_170_nomad-allies",
+              "title": "Nomad Allies",
+              "role": "Supports tag protection while the deck prepares its finish."
+            }
+          ],
+          "pilotingTips": [
+            "Keep a Connection that still supplies needed credits or protection.",
+            "Pay the full run and event costs before counting a Frame-Up finish. Three Poisoned Water Supply copies need six sacrifices without recovery."
+          ],
+          "weaknesses": [
+            "Bad publicity needs both setup and actual opportunities to finish.",
+            "Installing and sacrificing Connections costs tempo. The current AI profile recognizes central pressure and rig development. The bad publicity sequence still needs playtesting."
+          ]
+        },
+        "de": {
+          "summary": "Setze HQ und R&D unter Druck und bereite mit elf Connections einen Abschluss über Bad Publicity vor.",
+          "deckIdea": "Broker und Karl finanzieren wiederholte Runs. Phone Freak hilft bei Traces und Nomad Allies bei Tags. Poisoned Water Supply verwandelt zwei entbehrliche installierte Connections in Bad Publicity. Agendazugriffe eröffnen einen zweiten Weg zum Sieg.",
+          "gamePlan": {
+            "opening": "Baue eine Creditreserve und die Breaker für bezahlbare Zentral-Runs auf. Installiere Connections, die bereits Wirtschaft, Trace- oder Tagschutz liefern.",
+            "midgame": "Platziere Scaldan-Marker mit erfolgreichen HQ-Runs. Verbinde HQ- und R&D-Runs für Frame-Up. Leere einen Broker, bevor du ihn als eines der zwei Opfer auswählst.",
+            "endgame": "Berechne eine vollständig finanzierte Bad-Publicity-Folge oder spiele auf Agendapunkte. Scaldan ist bei einer 5 oder 6 auf dem sechsseitigen Würfel erfolgreich. Rechne damit, dass die Corp die Marker per Purge entfernt."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_proteus_117_poisoned-water-supply",
+              "title": "Poisoned Water Supply",
+              "role": "Verwandelt zwei entbehrliche installierte Connections in Bad Publicity."
+            },
+            {
+              "cardId": "onr_v1_154_broker",
+              "title": "Broker",
+              "role": "Baut Credits auf, bevor er als Opfer infrage kommt."
+            },
+            {
+              "cardId": "onr_proteus_094_scaldan",
+              "title": "Scaldan",
+              "role": "Ergänzt den HQ-Druck um Bad Publicity durch Marker, die ein Purge entfernen kann."
+            },
+            {
+              "cardId": "onr_proteus_109_frame-up",
+              "title": "Frame-Up",
+              "role": "Belohnt erfolgreiche Runs auf HQ und R&D."
+            },
+            {
+              "cardId": "onr_v1_170_nomad-allies",
+              "title": "Nomad Allies",
+              "role": "Hilft gegen Tags, während das Deck seinen Abschluss vorbereitet."
+            }
+          ],
+          "pilotingTips": [
+            "Behalte eine Connection, deren Credits oder Schutz du noch brauchst.",
+            "Berechne alle Run- und Ereigniskosten für einen Abschluss mit Frame-Up. Drei Poisoned Water Supply brauchen ohne Rückholung sechs Opfer."
+          ],
+          "weaknesses": [
+            "Bad Publicity braucht Aufbau und tatsächliche Abschlussfenster.",
+            "Connections zu installieren und zu opfern kostet Tempo. Das aktuelle KI-Profil erkennt Zentraldruck und Rigaufbau. Die Bad-Publicity-Folge muss sich noch im Spiel bewähren."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_black_ops_security_foundry",
+      "sourceDeckVersion": "0.1.0",
+      "sourceDeckHash": "standard-deck:e3edc347",
+      "sourceAnalysisHash": "deck-analysis:e540ea5c",
+      "sourceAnalysisInputHash": "deck-analysis-input:b13d878d",
+      "reviewedAt": "2026-11-05",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring",
+          "corp.damage_kill"
+        ],
+        "secondaryStrategyIds": [
+          "corp.asset_economy",
+          "corp.rush_score",
+          "corp.fast_advance"
+        ],
+        "reviewStatus": "observe"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "Use Black Ops agendas to open scoring windows and strengthen a separate package of eight Black ICE.",
+          "deckIdea": "Artificial Security Directors discounts the six Black Ops agenda copies. Black Ice Quality Assurance strengthens the Black ICE package. Skälderviken lowers the rez bill so you can hold credits for agenda advancement.",
+          "gamePlan": {
+            "opening": "Secure early access with Quandary or a wall and build the credit reserve.",
+            "midgame": "Score Directors in a protected window. Develop Black ICE where Quality Assurance and Skälderviken will matter. Keep Fatal Attractor outside another ICE so its effect has a follow-up encounter.",
+            "endgame": "Score Corporate War with twelve credits left after the full advancement sequence. Use Tycho Extension or Project Babylon when the remote and the credit reserve favor them."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_189_artificial-security-directors",
+              "title": "Artificial Security Directors",
+              "role": "Reduces the advancement requirement of Black Ops agendas."
+            },
+            {
+              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "title": "Black Ice Quality Assurance",
+              "role": "Strengthens eight Black ICE copies in the deck."
+            },
+            {
+              "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+              "title": "Skälderviken SA Beta Test Site",
+              "role": "Lowers Black ICE rez costs."
+            },
+            {
+              "cardId": "onr_v1_196_corporate-war",
+              "title": "Corporate War",
+              "role": "Converts a funded score into agenda points and credits."
+            }
+          ],
+          "pilotingTips": [
+            "Plan the rez bill together with the credits needed to score.",
+            "Use a discount to open a real scoring window before committing to more ICE."
+          ],
+          "weaknesses": [
+            "Expensive ICE and Corporate War draw from the same credits.",
+            "The value of the agenda discounts and ICE boosts depends on sequencing. The full strategy still needs playtesting."
+          ]
+        },
+        "de": {
+          "summary": "Öffne mit Black-Ops-Agenden Wertungsfenster und verstärke ein eigenes Paket aus acht Black ICE.",
+          "deckIdea": "Artificial Security Directors senkt die Wertungsvoraussetzung der sechs Black-Ops-Agendakopien. Black Ice Quality Assurance stärkt das Black ICE. Skälderviken senkt die Rez-Kosten und lässt so Credits für Advancement übrig.",
+          "gamePlan": {
+            "opening": "Sichere frühe Zugriffe mit Quandary oder einer Wall und baue die Creditreserve auf.",
+            "midgame": "Werte Directors in einem geschützten Fenster. Installiere Black ICE dort, wo Quality Assurance und Skälderviken helfen. Platziere Fatal Attractor außen vor weiterem ICE, damit eine Folgebegegnung möglich ist.",
+            "endgame": "Werte Corporate War mit zwölf verbleibenden Credits nach der gesamten Advancement-Folge. Nutze Tycho Extension oder Project Babylon, wenn das Remote und die Reserve dafür besser passen."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_189_artificial-security-directors",
+              "title": "Artificial Security Directors",
+              "role": "Senkt die Wertungsvoraussetzung von Black-Ops-Agenden."
+            },
+            {
+              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "title": "Black Ice Quality Assurance",
+              "role": "Stärkt die acht Black-ICE-Kopien des Decks."
+            },
+            {
+              "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+              "title": "Skälderviken SA Beta Test Site",
+              "role": "Senkt die Rez-Kosten von Black ICE."
+            },
+            {
+              "cardId": "onr_v1_196_corporate-war",
+              "title": "Corporate War",
+              "role": "Verwandelt eine finanzierte Wertung in Agendapunkte und Credits."
+            }
+          ],
+          "pilotingTips": [
+            "Plane die Rez-Kosten zusammen mit den Credits für die Agendawertung.",
+            "Nutze einen Rabatt für ein konkretes Wertungsfenster, bevor du mehr ICE bezahlst."
+          ],
+          "weaknesses": [
+            "Teures ICE und Corporate War brauchen dieselbe Creditreserve.",
+            "Agenda-Rabatte und ICE-Verstärkung hängen von der richtigen Reihenfolge ab. Der gesamte Plan muss sich noch im Spiel bewähren."
           ]
         }
       }

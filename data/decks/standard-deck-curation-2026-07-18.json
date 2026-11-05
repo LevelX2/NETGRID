@@ -9,7 +9,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 52,
+      "standard": 54,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -521,6 +521,22 @@
         "classification": "standard",
         "reason": "user_requested_dreff_remote_control",
         "standardDeckId": "standard_corp_dr_dreffs_letzte_visite"
+      },
+      {
+        "sourceDeckId": "local_runner_connection_pressure_publicity_network",
+        "name": "Connection Pressure – Publicity Network",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "user_approved_standard_deck",
+        "standardDeckId": "standard_runner_connection_pressure_publicity_network"
+      },
+      {
+        "sourceDeckId": "local_corp_black_ops_security_foundry",
+        "name": "Black Ops – Security Foundry",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "user_approved_standard_deck",
+        "standardDeckId": "standard_corp_black_ops_security_foundry"
       }
     ]
   },
