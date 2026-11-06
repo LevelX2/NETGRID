@@ -14,6 +14,7 @@ import {
   ORIGINALSET_DEFAULT_DECKS,
   type AiDecision,
   type AiDecisionInput,
+  type DeckDefinition,
   type GameState,
   type LegalAction,
   type Side,
@@ -24,11 +25,9 @@ import {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "../runtime/ai-decision-input";
-import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { assessDecisionOpportunity } from "../runtime/decision-opportunity";
-import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
+import { releaseAiMatchRuntime } from "../runtime/match-runtime-memory";
 import { fnv1a } from "../runtime/stable-hash";
-import { resetStrategicIntentMemory } from "../strategic-intent-memory";
 import { sortedUniqueProgressionCardTargetTypes } from "../runtime/progression-card-target";
 import { advancementCountersAddedForSimulationAction } from "../runtime/simulation-action-event";
 import {
@@ -147,9 +146,6 @@ export function createAiGameSimulator(
   function simulateAiGame(
     config: AiSimulationConfig = {},
   ): AiSimulationSummary {
-    resetResidentPlanPortfolioMemory();
-    resetRunnerRunPlanMemory();
-    resetStrategicIntentMemory();
     const deckSupportErrors = validateSimulationDeckSupport(config);
     if (deckSupportErrors.length > 0) {
       const runtimeFailures = deckSupportErrors.map(() =>
@@ -208,6 +204,37 @@ export function createAiGameSimulator(
       runnerDeckId: runnerDeckDefinition.id,
       corpDeckId: corpDeckDefinition.id,
     });
+    // The decision scope owns simulation memory, even with a supplied replay matchId.
+    releaseAiMatchRuntime(simulationScopeId);
+    try {
+      return runSimulation(config, {
+        seed,
+        simulationRng,
+        simulationScopeId,
+        runnerDeckDefinition,
+        corpDeckDefinition,
+      });
+    } finally {
+      releaseAiMatchRuntime(simulationScopeId);
+    }
+  }
+
+  function runSimulation(
+    config: AiSimulationConfig,
+    {
+      seed,
+      simulationRng,
+      simulationScopeId,
+      runnerDeckDefinition,
+      corpDeckDefinition,
+    }: {
+      seed: string;
+      simulationRng: SimulationRng;
+      simulationScopeId: string;
+      runnerDeckDefinition: DeckDefinition;
+      corpDeckDefinition: DeckDefinition;
+    },
+  ): AiSimulationSummary {
     let state = createGame({
       matchId: config.matchId ?? simulationScopeId,
       seed,

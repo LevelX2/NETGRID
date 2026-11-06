@@ -1,7 +1,87 @@
+import { isDeepStrictEqual } from "node:util";
+import type { AiDecisionInput, Side } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { chooseAiAction } from "../ai-runtime-public-entrypoints";
+import { buildRealEngineDecisionCorpusScenarios } from "../evaluation/real-engine-decision-corpus-fixtures";
+import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
+import { releaseAiMatchRuntime } from "../runtime/match-runtime-memory";
 import { simulateAiGame, summarizeDoctrineQualityMetrics } from "../simulation";
+import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 
 describe("AI simulation harness", () => {
+  it.each(["completion", "abort"] as const)(
+    "isolates runtime memory on simulation %s",
+    (ending) => {
+      const scenarios = buildRealEngineDecisionCorpusScenarios();
+      const liveFixtures = [
+        ["isolation-live-runner", "runner_real_safe_hq_access"],
+        ["isolation-live-corp", "corp_real_advance_not_score_yet"],
+      ] as const;
+      const liveInputs = liveFixtures.map(([matchId, scenarioId]) => {
+        const fixture = scenarios.find(
+          (entry) => entry.scenarioId === scenarioId,
+        );
+        if (!fixture) throw new Error(`Missing fixture: ${scenarioId}`);
+        return {
+          ...fixture.input,
+          matchId,
+          decisionId: `${matchId}:${fixture.input.playerView.stateVersion}:${fixture.input.side}`,
+        };
+      });
+      const readLiveMemory = () =>
+        liveInputs.map((input) => ({
+          portfolio: residentPlanPortfolioSnapshot(input),
+          intent: structuredClone(getStrategicIntentMemorySnapshot(input)),
+        }));
+      const simulationInputs = new Map<Side, AiDecisionInput>();
+      const failure = new Error("synthetic simulation abort");
+      let observedSimulationPortfolio = false;
+      const maxActions = 12;
+      try {
+        for (const input of liveInputs) chooseAiAction(input);
+        const before = readLiveMemory();
+        for (const { portfolio, intent } of before) {
+          expect(portfolio?.turnPlanExecutionLease).toBeDefined();
+          expect(intent).toBeDefined();
+        }
+
+        const run = () =>
+          simulateAiGame({
+            seed: "simulation-runtime-isolation",
+            matchId: liveFixtures[0][0],
+            maxActions,
+            testOnlyDecisionCheckpointCapture: {
+              actionIndices: Array.from({ length: maxActions }, (_, i) => i),
+              capture({ input }) {
+                simulationInputs.set(input.side, input);
+                if (residentPlanPortfolioSnapshot(input)) {
+                  observedSimulationPortfolio = true;
+                  if (ending === "abort") throw failure;
+                }
+              },
+            },
+          });
+
+        if (ending === "abort") expect(run).toThrow(failure);
+        else expect(run()).toMatchObject({ replayOk: true, errors: [] });
+        expect(observedSimulationPortfolio).toBe(true);
+        expect(
+          isDeepStrictEqual(readLiveMemory(), before),
+          "unrelated live portfolios and strategic intent must remain unchanged",
+        ).toBe(true);
+        for (const input of simulationInputs.values()) {
+          expect(residentPlanPortfolioSnapshot(input)).toBeUndefined();
+          expect(getStrategicIntentMemorySnapshot(input)).toBeUndefined();
+        }
+      } finally {
+        for (const [matchId] of liveFixtures) releaseAiMatchRuntime(matchId);
+        for (const input of simulationInputs.values()) {
+          releaseAiMatchRuntime(input.decisionId.split(":")[0]!);
+        }
+      }
+    },
+  );
+
   it("captures defensive exact-state copies before requested selfplay decisions", () => {
     const captures: Array<{ actionIndex: number; stateVersion: number }> = [];
     const result = simulateAiGame({

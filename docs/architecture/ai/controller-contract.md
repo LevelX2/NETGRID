@@ -132,6 +132,13 @@ löscht kein noch gültiges Liveportfolio. Andere aktive Matches einschließlich
 ihrer Commitments bleiben unverändert. Persistierte Portfolios und benötigte
 Trace-/Replay-Evidence werden dadurch nicht gelöscht.
 
+Der Produktsimulator verwendet den in seiner `decisionId` gebundenen
+`simulationScopeId` als Owner des Prozessgedächtnisses. Nach der Deckprüfung
+gibt er ausschließlich diesen Scope vor dem Lauf und im `finally` frei.
+Die Engine-`matchId` bleibt unverändert und bestimmt diese Freigabe nicht.
+Der Simulationsharness prüft, dass fremde Liveportfolios und Strategic
+Intent auch bei einem Abbruch vollständig erhalten bleiben.
+
 Die Regressionen liegen in `action-idempotency.test.ts`,
 `ai-batch-runtime.test.ts`, `ai-runtime-lifecycle.test.ts` und
 `match-join-contract.test.ts` unter `apps/server/src/`.
