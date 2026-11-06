@@ -1,6 +1,11 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { buildRealEngineDecisionCorpusScenarios } from "../evaluation/real-engine-decision-corpus-fixtures";
+import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
+import { resolveTurnPlannerCutover } from "./corp-turn-planner-cutover";
+import { buildCorpTurnPlannerShadow } from "./corp-turn-planner-shadow";
 import {
   CORP_PLAN_PRIORITY_POLICY,
   RUNNER_PLAN_PRIORITY_POLICY,
@@ -8,6 +13,7 @@ import {
   type PriorityClass,
 } from "./plan-assessment";
 import type { PlanProposal } from "./plan-kernel-types";
+import { PlanResolutionFailure } from "./plan-resolution-failure";
 import {
   createSidePlanRegistry,
   enumerateCurrentPlanSchedulerRoutes,
@@ -16,6 +22,7 @@ import {
   type PlanModule,
   type PlanSchedulerContext,
 } from "./plan-scheduler";
+import { buildRunnerTurnPlannerShadow } from "./runner-turn-planner-shadow";
 
 describe("shared plan scheduler", () => {
   it("reserves the EndTurn exception for the game-rule action", () => {
@@ -113,6 +120,157 @@ describe("shared plan scheduler", () => {
     expect(result.route.head.actionId).toBe("corp-credit-higher");
     expect(schedulerContext).toEqual(contextBefore);
     expect(result.portfolio).toEqual(portfolioBefore);
+  });
+
+  it.each(["runner", "corp"] as const)(
+    "requires an admitted %s line and preserves exact commitment revalidation",
+    (side) => {
+      const valid = turnPlannerFixture(side, "gain_credit");
+      const resolved = resolveTurnPlannerCutover(valid);
+      expect(resolved.lease.currentBinding).toMatchObject({
+        actionId: valid.input.legalActions[0]!.actionId,
+        stateVersion: valid.stateIdentity.stateVersion,
+      });
+      expect(resolved.head.moduleId).toBe(`${side}.economy`);
+      expect(resolved.selectedPlanInstanceId).toBe(
+        valid.portfolio.executorInstanceId,
+      );
+
+      const rejected = turnPlannerFixture(side, "gain_credit", 1);
+      expect(rejected.input.legalActions).toEqual(valid.input.legalActions);
+      expect(rejected.planner.coverage.status).toBe("pass");
+      expect(rejected.planner.lines).toEqual([]);
+      const expectedRejection = expect.objectContaining({
+        code: "no_current_route_head",
+        context: expect.objectContaining({
+          stateVersion: valid.stateIdentity.stateVersion,
+          unresolvedActionIds: [valid.input.legalActions[0]!.actionId],
+          removalCondition: expect.stringContaining(
+            `${side}.economy/insufficient_credits`,
+          ),
+        }),
+      });
+      expect(() => resolveTurnPlannerCutover(rejected)).toThrow(
+        expectedRejection,
+      );
+
+      const {
+        selectedLine,
+        selectedHead,
+        selectedPlanInstanceId,
+        ...plannerWithoutLine
+      } = valid.planner;
+      const portfolio = {
+        ...valid.portfolio,
+        turnPlanCommitment: resolved.commitment,
+        turnPlanExecutionLease: resolved.lease,
+      };
+      const revalidated = resolveTurnPlannerCutover({
+        ...valid,
+        planner: { ...plannerWithoutLine, lines: [] },
+        portfolio,
+      });
+      expect(revalidated.lease).toEqual(resolved.lease);
+      expect(() =>
+        resolveTurnPlannerCutover({ ...rejected, portfolio }),
+      ).toThrow(expectedRejection);
+    },
+  );
+
+  it.each(["runner", "corp"] as const)(
+    "admits a %s draw as a checked single step before the private observation",
+    (side) => {
+      const fixture = turnPlannerFixture(side, "draw_card");
+      expect(fixture.planner.selectedLine).toMatchObject({
+        steps: [
+          expect.objectContaining({
+            currentBinding: expect.objectContaining({
+              actionId: fixture.input.legalActions[0]!.actionId,
+            }),
+          }),
+        ],
+        stopReason: "observation_boundary",
+      });
+      const resolved = resolveTurnPlannerCutover({
+        ...fixture,
+        planner: {
+          ...fixture.planner,
+          debug: {
+            ...fixture.planner.debug,
+            selectedLine: {
+              ...fixture.planner.debug.selectedLine,
+              stopReason: "bounded_search_horizon",
+              phases: [],
+            },
+          },
+        },
+      });
+      expect(resolved.lease.actionType).toBe("draw_card");
+      expect(resolved.commitment.phases[0]?.nodes[0]?.boundaryAfter).toBe(
+        "private_observation",
+      );
+    },
+  );
+
+  it("distinguishes a blocked route from a materializer contract failure", () => {
+    const credit = candidate("corp-credit", "corp");
+    const blocked = candidate("corp-blocked", "corp");
+    const schedulerContext = context("corp", [credit, blocked]);
+    const economy = module("corp", "corp.economy", "P5", credit);
+    const defense = module("corp", "corp.defend_servers", "P6", blocked);
+    const registry = createSidePlanRegistry({
+      side: "corp",
+      priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+      modules: [economy, defense],
+    });
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry,
+      resolveEngineWindow: () => undefined,
+    });
+    if (result.lane !== "plan") throw new Error("Expected plan lane.");
+    const params = {
+      context: schedulerContext,
+      registry,
+      portfolio: result.portfolio,
+    };
+    const materialize = defense.materialize;
+    defense.materialize = (...args) => ({
+      ...materialize(...args),
+      candidates: [],
+    });
+    expect(enumerateCurrentPlanSchedulerRoutes(params).issues).toEqual([
+      {
+        instanceId: "plan:corp.defend_servers:general",
+        moduleId: "corp.defend_servers",
+        code: "no_current_compatible_candidate",
+      },
+    ]);
+
+    const failure = new PlanResolutionFailure("invalid_plan_identity", {
+      side: "corp",
+      stateVersion: schedulerContext.input.playerView.stateVersion,
+      timingPoint: schedulerContext.input.playerView.timingPoint,
+      legalActionTypes: [blocked.actionType],
+      unresolvedActionIds: [blocked.actionId],
+      owner: "plan_module",
+      removalCondition: "Bind the test route to its plan instance.",
+    });
+    defense.materialize = () => {
+      throw failure;
+    };
+    expect(() => enumerateCurrentPlanSchedulerRoutes(params)).toThrow(
+      expect.objectContaining({
+        code: failure.code,
+        cause: failure,
+        context: expect.objectContaining({
+          planInstanceId: "plan:corp.defend_servers:general",
+          stateVersion: schedulerContext.input.playerView.stateVersion,
+          unresolvedActionIds: [blocked.actionId],
+          removalCondition: expect.stringContaining(defense.moduleId),
+        }),
+      }),
+    );
   });
 
   it("binds equivalent duplicate card actions to the same canonical instance regardless of input order", () => {
@@ -1531,6 +1689,90 @@ describe("shared plan scheduler", () => {
     ).toEqual(["development-score-funding"]);
   });
 });
+
+function turnPlannerFixture(
+  side: Side,
+  actionType: "gain_credit" | "draw_card",
+  creditCost?: number,
+) {
+  const scenarioId =
+    side === "corp"
+      ? "corp_real_basic_economy_draw"
+      : actionType === "gain_credit"
+        ? "runner_real_low_credits"
+        : "runner_real_empty_hand_draw";
+  const scenario = buildRealEngineDecisionCorpusScenarios().find(
+    (entry) => entry.scenarioId === scenarioId,
+  );
+  const action = scenario?.input.legalActions.find(
+    (entry) => entry.type === actionType,
+  );
+  if (!scenario || !action)
+    throw new Error(`Missing ${scenarioId} ${actionType} fixture.`);
+  const input: AiDecisionInputWithDeckCapabilities = {
+    ...scenario.input,
+    legalActions: [action],
+  };
+  const rulesContext = input.planningRulesContext;
+  const stateIdentity = input.planningStateIdentity;
+  if (!rulesContext || !stateIdentity)
+    throw new Error("Missing planning contracts.");
+  const projected = buildActionSemanticCandidates({
+    legalActions: [action],
+    observerSide: side,
+    stateVersion: stateIdentity.stateVersion,
+  })[0]!;
+  const candidate =
+    creditCost === undefined
+      ? projected
+      : { ...projected, costProfile: { ...projected.costProfile, creditCost } };
+  const context = {
+    input,
+    turnKey: `${side}:turn:${input.playerView.turnSerial}`,
+    actionCandidates: [candidate],
+  };
+  const registry = createSidePlanRegistry({
+    side,
+    priorityPolicy:
+      side === "corp" ? CORP_PLAN_PRIORITY_POLICY : RUNNER_PLAN_PRIORITY_POLICY,
+    modules: [
+      module(
+        side,
+        `${side}.economy`,
+        "P5",
+        candidate,
+        1,
+        candidate.semanticActionType,
+      ),
+    ],
+  });
+  const runtimeResult = runPlanScheduler({
+    context,
+    registry,
+    resolveEngineWindow: () => undefined,
+  });
+  if (runtimeResult.lane !== "plan") throw new Error("Expected plan lane.");
+  const buildPlanner =
+    side === "corp" ? buildCorpTurnPlannerShadow : buildRunnerTurnPlannerShadow;
+  const planner = buildPlanner({
+    input,
+    context,
+    registry,
+    runtimeResult,
+    selectedChoicesForDecision: () => undefined,
+    authorityMode: "cutover",
+  });
+  if (!planner) throw new Error("Expected TurnPlanner result.");
+  return {
+    input,
+    planner,
+    portfolio: runtimeResult.portfolio,
+    rulesContext,
+    stateIdentity,
+    candidates: [candidate],
+    runtimeInstanceId: "test-turn-planner",
+  };
+}
 
 function module(
   side: Side,

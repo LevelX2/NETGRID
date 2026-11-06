@@ -10,22 +10,32 @@ import {
 } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
-it("keeps the native current tag-clear head authoritative over its incidental draw assessment", () => {
+it("rejects the captured tag-clear route when its quoted cost exceeds the current credit pool", () => {
   expect(Object.values(checkpoint.validation).every(Boolean)).toBe(true);
   const { input, runtime } = structuredClone(checkpoint) as unknown as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
-  const actions = input.legalActions.map(action => {
-    const captured = engineActions.find(a => a.actionId === action.actionId)!;
+  const actions = input.legalActions.map((action) => {
+    const captured = engineActions.find((a) => a.actionId === action.actionId)!;
     expect(captured.expiresAtStateVersion).toBe(input.playerView.stateVersion);
     expect(captured.costs).toEqual(action.costs);
     const current = structuredClone(action);
     if (captured.payload === undefined) delete current.payload;
-    else current.payload = structuredClone(captured.payload) as NonNullable<typeof current.payload>;
+    else
+      current.payload = structuredClone(captured.payload) as NonNullable<
+        typeof current.payload
+      >;
     return current;
   });
-  Object.assign(input, buildAiDecisionInputDto({ ...input, legalActions: actions, playerView: { ...input.playerView, legalActions: actions } }));
+  Object.assign(
+    input,
+    buildAiDecisionInputDto({
+      ...input,
+      legalActions: actions,
+      playerView: { ...input.playerView, legalActions: actions },
+    }),
+  );
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     input,
@@ -41,15 +51,13 @@ it("keeps the native current tag-clear head authoritative over its incidental dr
     (a) => a.payload?.cardImplementationEffectKind === "remove_tags",
   )!;
   expect(action.costs).toContainEqual({ credits: 2, clicks: 2 });
-  const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe(action.actionId);
-  expect(decision.fallbackUsed).toBe(false);
-  expect(
-    decision.decisionDebug?.planFirstDecision?.turnPlanning?.coverage,
-  ).toMatchObject({
-    status: "pass",
-    coveragePercent: 100,
-    missingActionCount: 0,
-    conflictingActionCount: 0,
-  });
+  expect(() => chooseAiAction(input)).toThrow(
+    expect.objectContaining({
+      code: "no_current_route_head",
+      context: expect.objectContaining({
+        unresolvedActionIds: [expect.stringContaining(action.source)],
+        removalCondition: expect.stringContaining("insufficient_credits"),
+      }),
+    }),
+  );
 });

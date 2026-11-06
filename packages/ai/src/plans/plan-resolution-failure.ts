@@ -9,6 +9,7 @@ export const PLAN_RESOLUTION_FAILURE_CODES = [
   "step_capability_mismatch",
   "step_target_mismatch",
   "no_current_route_head",
+  "plan_materialization_failed",
   "priority_claim_rejected",
   "resource_claim_conflict",
   "invalid_support_graph",
@@ -86,9 +87,10 @@ export class PlanResolutionFailure extends Error {
   constructor(
     code: PlanResolutionFailureCode,
     context: PlanResolutionFailureContextInput,
+    options?: ErrorOptions,
   ) {
     const normalizedContext = normalizePlanResolutionFailureContext(context);
-    super(formatPlanResolutionFailureMessage(code, normalizedContext));
+    super(formatPlanResolutionFailureMessage(code, normalizedContext), options);
     this.name = "PlanResolutionFailure";
     this.code = code;
     this.context = normalizedContext;

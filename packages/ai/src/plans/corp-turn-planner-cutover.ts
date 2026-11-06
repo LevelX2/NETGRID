@@ -24,7 +24,6 @@ import {
   type PlanningRulesContext,
   type PlanningStateIdentity,
   type TurnPlan,
-  type TurnPlanBoundary,
   type TurnPlanningHeadCandidate,
 } from "./turn-planning-contracts";
 
@@ -74,7 +73,7 @@ export function resolveTurnPlannerCutover(params: {
   stateIdentity: PlanningStateIdentity;
   runtimeInstanceId: string;
 }): TurnPlannerCutoverResult {
-  requireCutoverReady(params);
+  requireCutoverCoverage(params);
   const turnKey = `${params.input.side}:turn:${params.input.playerView.turnSerial ?? "unknown"}`;
   const continuation = continueResidentCommitment({
     ...params,
@@ -239,13 +238,20 @@ function continueResidentCommitment(params: {
           : "commitment_contract_invalid"),
     };
   }
+  let heads = params.planner.heads;
+  if (params.planner.rejectedCurrentSteps.length > 0) {
+    const rejectedIds = new Set(
+      params.planner.rejectedCurrentSteps.map((step) => step.candidateId),
+    );
+    heads = heads.filter((head) => !rejectedIds.has(head.candidateId));
+  }
   const rematerialized = rematerializeCommittedTurnStep({
     commitment,
     rulesContext: params.rulesContext,
     runtimeInstanceId: params.runtimeInstanceId,
     turnKey: params.turnKey,
     stateIdentity: params.stateIdentity,
-    heads: params.planner.heads,
+    heads,
     legalActions: params.input.legalActions,
     continuationEvidence: continuationEvidence(commitment, params.portfolio),
   });
@@ -496,11 +502,34 @@ function createCurrentCommitment(params: {
   const line = params.planner.selectedLine;
   const head = params.planner.selectedHead;
   const selectedPlanInstanceId = params.planner.selectedPlanInstanceId;
-  if (!line || !head || !selectedPlanInstanceId) {
-    throw cutoverFailure(
-      params.input,
-      `A passing ${params.input.side} cutover requires one selected deterministic TurnPlan line and a current executable head.`,
-    );
+  if (
+    !line ||
+    !head ||
+    !selectedPlanInstanceId ||
+    line.steps[0]?.candidateId !== head.candidateId
+  ) {
+    const rejections = params.planner.rejectedCurrentSteps.flatMap((step) => {
+      const rejected = params.planner.heads.find(
+        (entry) => entry.candidateId === step.candidateId,
+      );
+      return rejected
+        ? [
+            {
+              actionId: rejected.currentBinding.actionId,
+              reason: `${rejected.moduleId}/${step.reasonCode}`,
+            },
+          ]
+        : [];
+    });
+    throw new PlanResolutionFailure("no_current_route_head", {
+      side: params.input.side,
+      stateVersion: params.input.playerView.stateVersion,
+      timingPoint: params.input.playerView.timingPoint,
+      legalActionTypes: params.input.legalActions.map((action) => action.type),
+      unresolvedActionIds: rejections.map((rejection) => rejection.actionId),
+      owner: "scheduler",
+      removalCondition: `Admit a current TurnPlan line. Rejected current steps: ${rejections.map((rejection) => rejection.reason).join(",") || "none"}.`,
+    });
   }
   const plan = turnPlanFromLine({
     ...params,
@@ -624,11 +653,14 @@ function turnPlanFromLine(params: {
       nextMilestoneId: first.nextMilestoneId,
     });
     const nextGroup = groups[phaseIndex + 1];
-    const boundary = boundaryForGroup(
-      group,
-      params.planner.debug,
-      phaseIndex === groups.length - 1,
-    );
+    const projectedBoundary =
+      params.line.projectedFrame.pendingBoundary?.boundaryKind;
+    const boundary =
+      phaseIndex === groups.length - 1
+        ? projectedBoundary === "projected_plan_discovery_required"
+          ? "projection_not_supported"
+          : projectedBoundary
+        : undefined;
     return {
       phaseId,
       root: {
@@ -785,37 +817,6 @@ function expectedDeltaCodes(head: TurnPlanningHeadCandidate): string[] {
     `action_applied:${head.invocation.semanticActionType}`,
     `milestone_attempted:${head.nextMilestoneId}`,
   ];
-}
-
-function boundaryForGroup(
-  group: { heads: TurnPlanningHeadCandidate[] },
-  debug: AiTurnPlanningDebug,
-  finalGroup: boolean,
-): TurnPlanBoundary | undefined {
-  if (!finalGroup || debug.selectedLine.stopReason !== "observation_boundary") {
-    return undefined;
-  }
-  const debugBoundary = debug.selectedLine.phases
-    .flatMap((phase) => phase.nodes)
-    .find(
-      (node) =>
-        node.semanticActionType ===
-          group.heads.at(-1)?.invocation.semanticActionType &&
-        node.boundaryAfter !== undefined,
-    )?.boundaryAfter;
-  return isTurnPlanBoundary(debugBoundary)
-    ? debugBoundary
-    : "projection_not_supported";
-}
-
-function isTurnPlanBoundary(value: unknown): value is TurnPlanBoundary {
-  return [
-    "private_observation",
-    "public_random_outcome",
-    "opponent_response_window",
-    "engine_continuation",
-    "projection_not_supported",
-  ].includes(String(value));
 }
 
 function continuationEvidence(
@@ -1009,33 +1010,26 @@ function cutoverDebug(
   };
 }
 
-function requireCutoverReady(params: {
+function requireCutoverCoverage(params: {
   input: AiDecisionInput;
   planner: TurnPlannerShadowResult;
-  stateIdentity: PlanningStateIdentity;
 }): void {
   const coverage = params.planner.coverage;
-  const selected = params.planner.selectedHead;
   if (
     (params.input.side !== "corp" && params.input.side !== "runner") ||
     coverage.status !== "pass" ||
     coverage.coveragePercent !== 100 ||
     coverage.missingActionCount !== 0 ||
-    coverage.conflictingActionCount !== 0 ||
-    !selected ||
-    selected.currentBinding.stateVersion !==
-      params.stateIdentity.stateVersion ||
-    selected.executableWitness.sideSafePlanningFingerprint !==
-      params.stateIdentity.sideSafePlanningFingerprint
+    coverage.conflictingActionCount !== 0
   ) {
     throw cutoverFailure(
       params.input,
-      `${params.input.side} TurnPlanner cutover requires 100% classified LegalActions and one current executable selected head; coverage=${coverage.status}/${coverage.coveragePercent}; issues=${coverage.issues
+      `${params.input.side} TurnPlanner cutover requires 100% classified LegalActions; coverage=${coverage.status}/${coverage.coveragePercent}; issues=${coverage.issues
         .map(
           (issue) =>
             `${issue.code}:${issue.actionId ?? "global"}:${issue.moduleId ?? "none"}:${issue.detail}`,
         )
-        .join("|")}; selected=${selected?.currentBinding.actionId ?? "none"}.`,
+        .join("|")}.`,
     );
   }
 }

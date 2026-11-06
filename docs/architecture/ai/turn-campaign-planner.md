@@ -921,6 +921,23 @@ Fortsetzungsprojektion kann weiterhin eine valide Single-Step-Linie oder
 einen bewusst markierten Boundary-Head anbieten. Es bringt nicht den
 gesamten Zugplaner zum Stillstand.
 
+Ein neues Commitment bindet eine von der Suche zugelassene Linie. Bei einem
+bestehenden Commitment kann der aktuelle Step nach exakter Revalidierung
+fortgesetzt werden. Eine harte Ablehnung des aktuellen Steps sperrt dessen
+Ausführung in beiden Pfaden. Budgetgrenzen und verworfene Folgeschritte
+lassen bereits zugelassene Einzelschritte ausführbar.
+
+Exakt gebundene Sonderzahlungen können einen geprüften Einzelschritt bilden.
+Dazu zählen quantifizierter Eigenschaden, Quellenmarker, vollständig
+gepreiste variable ICE-Rez-Varianten und zweckgebundene Run-Credits im
+Fort-Pass-Zahlungsfenster. Die Suche prüft die aktuellen Ressourcen und
+Pflichten. An der typisierten Grenze bewertet die KI den tatsächlichen
+Folgezustand neu.
+
+Die Routenenumeration meldet fehlende kompatible Kandidaten als fachliches
+Ergebnis. Ein Vertragsfehler beim Materialisieren beendet die Entscheidung
+mit klassifizierter Diagnose zum verantwortlichen Modul und zur Ursache.
+
 ### 2.5 Action Capacity, Tiefe und Budgets
 
 Suchtiefe ist nicht gleich Anzahl normaler Klicks. Jeder Knoten verbraucht

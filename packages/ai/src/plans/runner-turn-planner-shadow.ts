@@ -46,6 +46,7 @@ import {
 import {
   applyCertifiedTurnProjectionDelta,
   assessTurnObservationBoundary,
+  boundCurrentStepProjection,
   buildProjectedDecisionFrame,
   certifiedTurnProjectionDeltaFromCandidate,
   type BoundaryActionAssessment,
@@ -56,6 +57,7 @@ import {
   searchDeterministicRemainderTurnPlans,
   type TurnRemainderSearchLine,
   type TurnRemainderSearchOffer,
+  type TurnRemainderSearchResult,
 } from "./turn-remainder-search";
 
 export const RUNNER_TURN_PLANNER_SHADOW_SCHEMA_VERSION =
@@ -81,6 +83,7 @@ export type RunnerTurnPlannerShadowResult = {
   agreement: boolean;
   heads: TurnPlanningHeadCandidate[];
   lines: TurnRemainderSearchLine[];
+  rejectedCurrentSteps: TurnRemainderSearchResult["rejectedCurrentSteps"];
   selectedLine?: TurnRemainderSearchLine;
   selectedHead?: TurnPlanningHeadCandidate;
   selectedPlanInstanceId?: string;
@@ -182,9 +185,9 @@ export function buildRunnerTurnPlannerShadow(params: {
     entryFrame,
     offers,
   });
-  const selectedLine =
-    search.lines.find((line) => line.lineId === search.selectedLineId) ??
-    fallbackLine(heads, entryFrame, params.runtimeResult.route.head.actionId);
+  const selectedLine = search.lines.find(
+    (line) => line.lineId === search.selectedLineId,
+  );
   const selectedHead = selectedLine?.steps[0]
     ? heads.find(
         (head) => head.candidateId === selectedLine.steps[0]!.candidateId,
@@ -221,6 +224,7 @@ export function buildRunnerTurnPlannerShadow(params: {
     agreement: selectedHead?.currentBinding.actionId === liveActionId,
     heads: structuredClone(heads),
     lines: structuredClone(search.lines),
+    rejectedCurrentSteps: search.rejectedCurrentSteps,
     ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
     ...(selectedHead ? { selectedHead: structuredClone(selectedHead) } : {}),
     ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
@@ -796,6 +800,10 @@ function offersForHeads(params: {
       (entry) => entry.actionId === head.currentBinding.actionId,
     );
     if (!candidate) return [];
+    const currentStepProjection = boundCurrentStepProjection(
+      params.input,
+      candidate,
+    );
     const dependencyVariants =
       record.dependencyCandidateIds.length > 0
         ? [record.dependencyCandidateIds]
@@ -838,6 +846,7 @@ function offersForHeads(params: {
             }
           : {}),
         ...(boundary ? { boundaryAfter: boundary } : {}),
+        ...(currentStepProjection ? { currentStepProjection } : {}),
       };
     });
   });
@@ -1007,52 +1016,6 @@ function priorityCoverageForHead(
     satisfiedObligationIds: [obligationId],
     violatedObligationIds: [],
     deferredObligationIds: [],
-  };
-}
-
-function fallbackLine(
-  heads: readonly TurnPlanningHeadCandidate[],
-  entryFrame: ProjectedDecisionFrame,
-  moduleSelectedActionId: string,
-): TurnRemainderSearchLine | undefined {
-  const head =
-    heads.find(
-      (candidate) =>
-        candidate.currentBinding.actionId === moduleSelectedActionId,
-    ) ?? heads[0];
-  if (!head) return undefined;
-  return {
-    lineId: turnPlanningFingerprint("runner-turn-line-fallback", {
-      candidateId: head.candidateId,
-      projectedFrameKey: entryFrame.projectedFrameKey,
-    }),
-    partitionKey: `runner-fallback:${head.rootPlanInstanceId}`,
-    obligationSignature: "fallback_current_head",
-    rootPlanInstanceId: head.rootPlanInstanceId,
-    nextMilestoneId: head.nextMilestoneId,
-    priorityClass: head.priorityClass,
-    steps: [
-      {
-        candidateId: head.candidateId,
-        invocation: structuredClone(head.invocation),
-        rootPlanInstanceId: head.rootPlanInstanceId,
-        nextMilestoneId: head.nextMilestoneId,
-        currentBinding: structuredClone(head.currentBinding),
-      },
-    ],
-    projectedFrame: structuredClone(entryFrame),
-    evaluationValues: structuredClone(head.evaluationValues),
-    priorityCoverage: {
-      requiredObligationIds: [],
-      satisfiedObligationIds: [],
-      violatedObligationIds: [],
-      deferredObligationIds: [],
-    },
-    valueClaims: structuredClone(head.valueClaims),
-    scalarValue: 0,
-    upperBoundValue: 0,
-    stopReason: "depth_limit",
-    evidenceCodes: ["runner_current_head_fallback_line"],
   };
 }
 

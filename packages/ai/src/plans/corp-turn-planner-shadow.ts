@@ -69,6 +69,7 @@ import {
 } from "./turn-planning-contracts";
 import {
   assessTurnObservationBoundary,
+  boundCurrentStepProjection,
   buildProjectedDecisionFrame,
   type BoundaryActionAssessment,
 } from "./turn-projection";
@@ -76,6 +77,7 @@ import {
   searchDeterministicRemainderTurnPlans,
   type TurnRemainderSearchLine,
   type TurnRemainderSearchOffer,
+  type TurnRemainderSearchResult,
 } from "./turn-remainder-search";
 
 export const CORP_TURN_PLANNER_SHADOW_SCHEMA_VERSION =
@@ -108,6 +110,7 @@ export type CorpTurnPlannerShadowResult = {
   agreement: boolean;
   heads: TurnPlanningHeadCandidate[];
   lines: TurnRemainderSearchLine[];
+  rejectedCurrentSteps: TurnRemainderSearchResult["rejectedCurrentSteps"];
   selectedLine?: TurnRemainderSearchLine;
   selectedHead?: TurnPlanningHeadCandidate;
   selectedPlanInstanceId?: string;
@@ -278,13 +281,15 @@ export function buildCorpTurnPlannerShadow(params: {
     const candidate = params.context.actionCandidates.find(
       (c) => c.actionId === head.currentBinding.actionId,
     );
-    return (
-      candidate !== undefined &&
-      candidatePreservesMandatoryCreditObligation(
-        candidate,
-        input.playerView.own.credits,
-        creditObligationAfterHead(input, head, candidate),
-      )
+    if (!candidate) return false;
+    const requiredCredits = creditObligationAfterHead(input, head, candidate);
+    return candidatePreservesMandatoryCreditObligation(
+      candidate,
+      input.playerView.own.credits,
+      requiredCredits,
+      requiredCredits === undefined
+        ? undefined
+        : boundCurrentStepProjection(input, candidate),
     );
   });
   const urgentPriorityClass = highestUrgentPriorityClass(
@@ -327,15 +332,6 @@ export function buildCorpTurnPlannerShadow(params: {
         "Materialize a turn-plan route that preserves the current mandatory credit obligation or a certified same-turn terminal win.",
     });
   }
-  const plannerBaselineRecord = [...headRecords].sort(
-    (left, right) =>
-      compareValidatedPlanAssessments(
-        left.route.assessment,
-        right.route.assessment,
-      ) ||
-      right.route.stepValue - left.route.stepValue ||
-      left.head.candidateId.localeCompare(right.head.candidateId),
-  )[0];
   const liveActionId = params.runtimeResult.route.head.actionId;
   const boundedSingleStepLine = boundedSingleStepSearch.lines.find(
     (line) => line.lineId === boundedSingleStepSearch.selectedLineId,
@@ -376,14 +372,9 @@ export function buildCorpTurnPlannerShadow(params: {
         !["P1", "P2", "P3"].includes(selectedSearchHead.priorityClass))) &&
     liveHead.currentBinding.actionId !==
       selectedSearchHead.currentBinding.actionId;
-  const selectedLine =
-    (retainsAuthoritativeHead ? liveHeadLine : selectedSearchLine) ??
-    fallbackLine(
-      input,
-      stateIdentity,
-      plannerBaselineRecord?.head.currentBinding.actionId ?? liveActionId,
-      heads,
-    );
+  const selectedLine = retainsAuthoritativeHead
+    ? liveHeadLine
+    : selectedSearchLine;
   const shadowHead = selectedLine?.steps[0]
     ? heads.find(
         (head) => head.candidateId === selectedLine.steps[0]!.candidateId,
@@ -412,7 +403,6 @@ export function buildCorpTurnPlannerShadow(params: {
     defenseSlice,
     enumerationIssues: enumeration.issues,
     portfolio: params.runtimeResult.portfolio,
-    candidates: params.context.actionCandidates,
     authorityMode: params.authorityMode ?? "shadow",
   });
   return {
@@ -424,6 +414,7 @@ export function buildCorpTurnPlannerShadow(params: {
     agreement: shadowActionId === liveActionId,
     heads: structuredClone(heads),
     lines: structuredClone(search.lines),
+    rejectedCurrentSteps: search.rejectedCurrentSteps,
     ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
     ...(shadowHead ? { selectedHead: structuredClone(shadowHead) } : {}),
     ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
@@ -1606,6 +1597,10 @@ function offersForHeads(params: {
       (entry) => entry.actionId === head.currentBinding.actionId,
     );
     if (!candidate) return [];
+    const currentStepProjection = boundCurrentStepProjection(
+      params.input,
+      candidate,
+    );
     const mandatoryCredits = creditObligationAfterHead(
       params.input,
       head,
@@ -1672,6 +1667,7 @@ function offersForHeads(params: {
             }
           : {}),
         ...(boundary ? { boundaryAfter: boundary } : {}),
+        ...(currentStepProjection ? { currentStepProjection } : {}),
       } satisfies TurnRemainderSearchOffer;
     });
   });
@@ -1956,26 +1952,18 @@ function debugForShadow(params: {
     code: string;
   }>;
   portfolio: Extract<PlanSchedulerResult, { lane: "plan" }>["portfolio"];
-  candidates: readonly ActionSemanticCandidate[];
   authorityMode: "shadow" | "cutover";
 }): AiTurnPlanningDebug {
-  const selectedLine =
-    params.selectedLine ??
-    fallbackLine(
-      params.input,
-      params.stateIdentity,
-      params.liveActionId,
-      params.heads,
-    );
-  const selectedHead = params.shadowHead ?? params.heads[0];
-  const phases = debugPhases(
-    selectedLine,
-    params.heads,
-    params.portfolio,
-    params.entryFrameKey,
-    params.input,
-    params.candidates,
-  );
+  const selectedLine = params.selectedLine;
+  const selectedHead = params.shadowHead;
+  const phases = selectedLine
+    ? debugPhases(
+        selectedLine,
+        params.heads,
+        params.portfolio,
+        params.entryFrameKey,
+      )
+    : [];
   const agendaComparisonActionIds = new Set(
     [params.shadowHead?.currentBinding.actionId, params.liveActionId].filter(
       (actionId): actionId is string => actionId !== undefined,
@@ -1992,22 +1980,7 @@ function debugForShadow(params: {
     (line) =>
       line.currentActionId === params.shadowHead?.currentBinding.actionId,
   );
-  const selectedBoundary = selectedLine.steps
-    .map((step) => {
-      const head = params.heads.find(
-        (candidate) => candidate.candidateId === step.candidateId,
-      );
-      const candidate = params.candidates.find(
-        (entry) => entry.actionId === head?.currentBinding.actionId,
-      );
-      return candidate
-        ? boundaryForCandidate(params.input, candidate, head)
-        : undefined;
-    })
-    .find(
-      (boundary): boundary is BoundaryActionAssessment =>
-        boundary !== undefined,
-    );
+  const selectedBoundary = selectedLine?.projectedFrame.pendingBoundary;
 
   return {
     schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
@@ -2030,13 +2003,16 @@ function debugForShadow(params: {
       witnessValid: true,
     })),
     selectedLine: {
-      lineId: selectedLine.lineId,
-      stopReason: debugStopReason(selectedLine),
-      projectedFrameKey: selectedLine.projectedFrame.projectedFrameKey,
+      lineId: selectedLine?.lineId ?? "corp-no-selected-line",
+      stopReason: selectedLine
+        ? debugStopReason(selectedLine)
+        : "projection_not_supported",
+      projectedFrameKey:
+        selectedLine?.projectedFrame.projectedFrameKey ?? params.entryFrameKey,
       cursor: { phaseIndex: 0, nodeIndex: 0 },
       phases,
     },
-    ...(selectedHead
+    ...(selectedLine && selectedHead
       ? {
           commitment: {
             commitmentId: turnPlanningFingerprint("shadow-commitment", {
@@ -2280,8 +2256,8 @@ function debugForShadow(params: {
         params.search.budget.maximumBranchesPerPartition,
       maximumParetoLinesPerPartition:
         params.search.budget.maximumParetoLinesPerPartition,
-      selectedLineScalarValue: selectedLine.scalarValue,
-      selectedLineStepCount: selectedLine.steps.length,
+      selectedLineScalarValue: selectedLine?.scalarValue ?? 0,
+      selectedLineStepCount: selectedLine?.steps.length ?? 0,
     },
     consideredLines: params.search.lines.map((line) => ({
       lineId: line.lineId,
@@ -2332,66 +2308,11 @@ function debugForShadow(params: {
   };
 }
 
-function fallbackLine(
-  input: AiDecisionInput,
-  stateIdentity: PlanningStateIdentity,
-  liveActionId: string,
-  heads: readonly TurnPlanningHeadCandidate[],
-): TurnRemainderSearchLine {
-  const head =
-    heads.find(
-      (candidate) => candidate.currentBinding.actionId === liveActionId,
-    ) ?? heads[0];
-  const frame = buildProjectedDecisionFrame({
-    input,
-    rulesContext: (input as PlanningInput).planningRulesContext!,
-    stateIdentity,
-    turnKey: `corp:turn:${input.playerView.turnSerial ?? "unknown"}`,
-  });
-  return {
-    lineId: turnPlanningFingerprint("shadow-empty-line", {
-      stateIdentity,
-      liveActionId,
-    }),
-    partitionKey: "shadow-empty",
-    obligationSignature: "shadow-empty",
-    rootPlanInstanceId: head?.rootPlanInstanceId ?? "shadow:no-root",
-    nextMilestoneId: head?.nextMilestoneId ?? "shadow:no-milestone",
-    priorityClass: head?.priorityClass ?? "P6",
-    steps: head
-      ? [
-          {
-            candidateId: head.candidateId,
-            invocation: structuredClone(head.invocation),
-            rootPlanInstanceId: head.rootPlanInstanceId,
-            nextMilestoneId: head.nextMilestoneId,
-            currentBinding: structuredClone(head.currentBinding),
-          },
-        ]
-      : [],
-    projectedFrame: frame,
-    evaluationValues: {},
-    priorityCoverage: {
-      requiredObligationIds: [],
-      satisfiedObligationIds: [],
-      violatedObligationIds: [],
-      deferredObligationIds: [],
-    },
-    valueClaims: [],
-    scalarValue: 0,
-    upperBoundValue: 0,
-    stopReason: "search_complete",
-    evidenceCodes: ["shadow_no_search_line"],
-  };
-}
-
 function debugPhases(
   line: TurnRemainderSearchLine,
   heads: readonly TurnPlanningHeadCandidate[],
   portfolio: Extract<PlanSchedulerResult, { lane: "plan" }>["portfolio"],
   entryFrameKey: string,
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
 ): AiTurnPlanningDebug["selectedLine"]["phases"] {
   const groups: Array<{
     rootPlanInstanceId: string;
@@ -2468,22 +2389,17 @@ function debugPhases(
           : debugStopReason(line),
       supportBindings,
       nodes: group.steps.map((step) => {
-        const head = heads.find(
-          (candidate) => candidate.candidateId === step.candidateId,
-        );
-        const candidate = candidates.find(
-          (entry) => entry.actionId === head?.currentBinding.actionId,
-        );
-        const boundary = candidate
-          ? boundaryForCandidate(input, candidate, head)
-          : undefined;
+        const boundary =
+          step === line.steps.at(-1)
+            ? line.projectedFrame.pendingBoundary?.boundaryKind
+            : undefined;
         return {
           nodeId: turnPlanningFingerprint("shadow-turn-node", {
             lineId: line.lineId,
             candidateId: step.candidateId,
           }),
           semanticActionType: step.invocation.semanticActionType,
-          ...(boundary ? { boundaryAfter: boundary.boundaryKind } : {}),
+          ...(boundary ? { boundaryAfter: boundary } : {}),
         };
       }),
     };

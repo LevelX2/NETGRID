@@ -82,6 +82,17 @@ describe("Runner Wilson run action utilization", () => {
       "hq",
       "Wilson-Run auf HQ",
     );
+    Object.assign(wilson.payload!, {
+      actionCapacityTiming: "immediate",
+      actionCapacityRestriction: "run_only",
+      actionCapacityAllowedActionType: "start_run",
+      actionCapacityReliability: "guaranteed",
+      actionCapacityExpiresAt: "side_turn_end",
+      actionCapacitySelfFinancing: true,
+      restrictedActionGrantActionType: "start_run",
+      restrictedActionGrantCostProfile: "extra_click",
+      restrictedActionGrantRemainingActions: 1,
+    });
     const endTurn = endTurnAction();
     const input = runnerInput({
       credits: 5,

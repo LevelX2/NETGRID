@@ -175,7 +175,7 @@ export type PlanSchedulerPlanningEnumeration = {
   issues: Array<{
     instanceId: string;
     moduleId: PlanModuleId;
-    code: "materialization_failed" | "no_current_compatible_candidate";
+    code: "no_current_compatible_candidate";
   }>;
 };
 
@@ -305,7 +305,12 @@ export function runPlanScheduler(
     );
   }
   const module = moduleForInstance(params.registry, instance, context);
-  const materialized = module.materialize(instance, selected, context);
+  const materialized = materializePlanModule(
+    module,
+    instance,
+    selected,
+    context,
+  );
   diagnostics.push({
     stage: "materialize",
     code: materialized.step.stepId,
@@ -430,17 +435,12 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
     );
     if (!instance) continue;
     const module = moduleForInstance(params.registry, instance, context);
-    let materialized: PlanMaterialization;
-    try {
-      materialized = module.materialize(instance, assessment, context);
-    } catch {
-      issues.push({
-        instanceId: instance.instanceId,
-        moduleId: instance.moduleId,
-        code: "materialization_failed",
-      });
-      continue;
-    }
+    const materialized = materializePlanModule(
+      module,
+      instance,
+      assessment,
+      context,
+    );
     const compatible = materialized.candidates
       .filter(
         (entry) =>
@@ -497,6 +497,35 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
         left.code.localeCompare(right.code),
     ),
   };
+}
+
+function materializePlanModule(
+  module: PlanModule,
+  instance: PlanInstance,
+  assessment: ValidatedPlanAssessment,
+  context: PlanSchedulerContext,
+): PlanMaterialization {
+  try {
+    return module.materialize(instance, assessment, context);
+  } catch (cause) {
+    const failure = cause instanceof PlanResolutionFailure ? cause : undefined;
+    throw new PlanResolutionFailure(
+      failure?.code ?? "plan_materialization_failed",
+      {
+        ...failure?.context,
+        side: context.input.side,
+        stateVersion: context.input.playerView.stateVersion,
+        timingPoint: context.input.playerView.timingPoint,
+        legalActionTypes:
+          failure?.context.legalActionTypes ??
+          context.input.legalActions.map((action) => action.type),
+        planInstanceId: instance.instanceId,
+        owner: failure?.context.owner ?? "plan_module",
+        removalCondition: `Materialize ${module.moduleId}: ${failure?.context.removalCondition ?? "unexpected materializer error."}`,
+      },
+      { cause },
+    );
+  }
 }
 
 function currentPlanAssessmentState(params: {

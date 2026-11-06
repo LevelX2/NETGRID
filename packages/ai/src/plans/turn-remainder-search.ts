@@ -12,7 +12,9 @@ import {
 } from "./turn-planning-contracts";
 import {
   applyCertifiedTurnProjectionDelta,
+  assessTurnObservationBoundary,
   type BoundaryActionAssessment,
+  type BoundCurrentStepProjection,
   type ProjectedDecisionFrame,
   type ProjectedRestrictedActionToken,
   type ProjectionValueRange,
@@ -43,6 +45,7 @@ export type TurnRemainderSearchOffer = {
   rootEligible?: boolean;
   continuationScope?: "portfolio" | "same_root";
   boundaryAfter?: BoundaryActionAssessment;
+  currentStepProjection?: BoundCurrentStepProjection;
   /** Validated mandatory payment reserve after this action, allowing funding progress. */
   creditObligationAfterAction?: number;
 };
@@ -113,6 +116,8 @@ export type TurnRemainderSearchResult = {
     prefixLineId?: string;
     reasonCode: TurnRemainderSearchPruneReason;
   }>;
+  /** Hard failures while validating or applying a current step. */
+  rejectedCurrentSteps: TurnRemainderSearchResult["pruneEvents"];
   evidenceCodes: string[];
 };
 
@@ -162,6 +167,7 @@ export function searchDeterministicRemainderTurnPlans(params: {
   const validOffers = params.offers
     .filter((offer) => validateOffer(offer, params.entryFrame, pruneEvents))
     .sort((left, right) => compareOffers(left, right, registry));
+  const rejectedCurrentSteps = [...pruneEvents];
   const partitions = buildPartitions(validOffers);
   const protectedPartitionKeys = partitions.map(
     (partition) => partition.partitionKey,
@@ -213,9 +219,13 @@ export function searchDeterministicRemainderTurnPlans(params: {
         ),
       });
       if (!applied.ok) {
-        pruneEvents.push(
-          pruneEvent(partition.partitionKey, offer, applied.reasonCode),
+        const rejection = pruneEvent(
+          partition.partitionKey,
+          offer,
+          applied.reasonCode,
         );
+        pruneEvents.push(rejection);
+        rejectedCurrentSteps.push(rejection);
         continue;
       }
       const states = initialStatesByPartition.get(partition.partitionKey) ?? [];
@@ -405,6 +415,7 @@ export function searchDeterministicRemainderTurnPlans(params: {
     lines: selectedLines,
     ...(selected ? { selectedLineId: selected.lineId } : {}),
     pruneEvents: pruneEvents.sort(comparePruneEvents),
+    rejectedCurrentSteps: rejectedCurrentSteps.sort(comparePruneEvents),
     evidenceCodes: [
       `deterministic_bounded_remainder_search_depth:${budget.maximumDepth}`,
       "fair_partition_minimum_expansion",
@@ -440,7 +451,11 @@ function applyOffer(params: {
   ) {
     return { ok: false, reasonCode: "dependency_unsatisfied" };
   }
-  if (!candidateCostsAreExact(candidate)) {
+  const currentStepProjection = params.offer.currentStepProjection;
+  if (
+    (currentStepProjection && params.prefix) ||
+    !candidateCostsAreExact(candidate, currentStepProjection !== undefined)
+  ) {
     return { ok: false, reasonCode: "candidate_cost_not_exact" };
   }
   const agendaPointCost = candidate.costProfile.agendaPointCost ?? 0;
@@ -457,21 +472,22 @@ function applyOffer(params: {
   const capacity = capacityApplication(frame, candidate);
   if (!capacity.ok) return capacity;
   const currentCredits = frame.ownCredits.minimum;
-  const creditDelta = exactCreditDelta(candidate);
+  const creditCost = candidate.costProfile.creditCost ?? 0;
+  const liquidCreditCost =
+    currentStepProjection?.liquidCreditCost ?? creditCost;
+  const creditDelta = exactCreditDelta(candidate, currentStepProjection);
   const obligation = params.offer.creditObligationAfterAction;
   if (
     !candidatePreservesMandatoryCreditObligation(
       candidate,
       currentCredits,
       obligation,
+      currentStepProjection,
     )
   ) {
     return { ok: false, reasonCode: "priority_obligation_violated" };
   }
-  if (
-    currentCredits < wholeNonNegative(candidate.costProfile.creditCost ?? 0) ||
-    currentCredits + creditDelta < 0
-  ) {
+  if (currentCredits < liquidCreditCost || currentCredits + creditDelta < 0) {
     return { ok: false, reasonCode: "insufficient_credits" };
   }
   const mergedCoverage = mergePriorityCoverage(
@@ -494,8 +510,16 @@ function applyOffer(params: {
     candidate.sourceCardInstanceId !== undefined &&
     frame.ownHand.knownInstanceIds.includes(candidate.sourceCardInstanceId) &&
     candidateConsumesSourceCard(candidate);
-  const boundary = params.offer.boundaryAfter
-    ? boundaryAtProjectedCapacity(params.offer.boundaryAfter, frame, capacity)
+  const offeredBoundary = currentStepProjection
+    ? assessTurnObservationBoundary({
+        boundaryKind: currentStepProjection.boundaryKind,
+        remainingActionCapacity: frame.actionCapacityLedger.unrestricted,
+        residualTurnValueBasis: "remaining_capacity",
+        immediateOutcomeCodes: ["current_step_payment_bound"],
+      })
+    : params.offer.boundaryAfter;
+  const boundary = offeredBoundary
+    ? boundaryAtProjectedCapacity(offeredBoundary, frame, capacity)
     : undefined;
   const delta: TurnProjectionDelta = {
     schemaVersion: "turn-projection-delta-v1",
@@ -659,13 +683,14 @@ export function candidatePreservesMandatoryCreditObligation(
   candidate: ActionSemanticCandidate,
   currentCredits: number,
   requiredCredits: number | undefined,
+  currentStepProjection?: BoundCurrentStepProjection,
 ): boolean {
   if (requiredCredits === undefined) return true;
   return (
-    candidateCostsAreExact(candidate) &&
+    candidateCostsAreExact(candidate, currentStepProjection !== undefined) &&
     Number.isSafeInteger(requiredCredits) &&
     requiredCredits >= 0 &&
-    currentCredits + exactCreditDelta(candidate) >=
+    currentCredits + exactCreditDelta(candidate, currentStepProjection) >=
       Math.min(currentCredits, requiredCredits)
   );
 }
@@ -1217,12 +1242,16 @@ function candidateConsumesSourceCard(
   );
 }
 
-function candidateCostsAreExact(candidate: ActionSemanticCandidate): boolean {
+function candidateCostsAreExact(
+  candidate: ActionSemanticCandidate,
+  currentStepBound: boolean,
+): boolean {
   return (
     candidate.costProfile.costKnownStatus === "known" &&
-    candidate.costProfile.additionalCosts.every(
-      (cost) => cost === "agendaPointCost",
-    ) &&
+    (currentStepBound ||
+      candidate.costProfile.additionalCosts.every(
+        (cost) => cost === "agendaPointCost",
+      )) &&
     (candidate.costProfile.additionalCosts.includes("agendaPointCost")
       ? Number.isSafeInteger(candidate.costProfile.agendaPointCost) &&
         (candidate.costProfile.agendaPointCost as number) >= 0
@@ -1234,7 +1263,16 @@ function candidateCostsAreExact(candidate: ActionSemanticCandidate): boolean {
   );
 }
 
-function exactCreditDelta(candidate: ActionSemanticCandidate): number {
+function exactCreditDelta(
+  candidate: ActionSemanticCandidate,
+  currentStepProjection?: BoundCurrentStepProjection,
+): number {
+  if (
+    currentStepProjection &&
+    currentStepProjection.liquidCreditCost !== candidate.costProfile.creditCost
+  ) {
+    return -currentStepProjection.liquidCreditCost;
+  }
   if (
     economyProjectionIsExact(candidate) &&
     Number.isSafeInteger(candidate.economyProjection.netLiquidCreditGain)

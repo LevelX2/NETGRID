@@ -1,6 +1,8 @@
 import type { AiDecisionInput, Side, VisibleCard } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { costProfileForAction } from "../actions/action-cost-timing";
+import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
 import type {
   PlanningRulesContext,
   PlanningStateIdentity,
@@ -101,6 +103,148 @@ export type BoundaryActionAssessment = {
   uncertainty: ProjectionUncertainty[];
   assumptionIds: string[];
 };
+
+export type BoundCurrentStepProjection = {
+  liquidCreditCost: number;
+  boundaryKind: TurnBoundaryKind;
+};
+
+/** Certifies the payment of one current action whose full result needs a fresh frame. */
+export function boundCurrentStepProjection(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): BoundCurrentStepProjection | undefined {
+  const cost = candidate.costProfile;
+  const runPayment =
+    input.side === "runner" &&
+    input.playerView.run &&
+    candidate.actionType === "continue_run" &&
+    (cost.creditCost ?? 0) > 0;
+  if (
+    !runPayment &&
+    cost.additionalCosts.every((field) => field === "agendaPointCost")
+  )
+    return undefined;
+  const extras = cost.additionalCosts.filter(
+    (field) => field !== "agendaPointCost",
+  );
+
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  if (
+    !action ||
+    action.side !== input.side ||
+    action.type !== candidate.actionType ||
+    action.expiresAtStateVersion !== candidate.stateVersion
+  )
+    return undefined;
+  const quoted = costProfileForAction(action);
+  if (
+    !isNonNegativeInteger(quoted.creditCost) ||
+    !isNonNegativeInteger(quoted.clickCost) ||
+    cost.creditCost !== quoted.creditCost ||
+    cost.clickCost !== quoted.clickCost ||
+    cost.agendaPointCost !== quoted.agendaPointCost ||
+    cost.additionalCosts.length !== quoted.additionalCosts.length ||
+    cost.additionalCosts.some(
+      (field, index) => field !== quoted.additionalCosts[index],
+    )
+  )
+    return undefined;
+
+  const payload = action.payload;
+  if (!payload) return undefined;
+  if (
+    runPayment &&
+    extras.length === 0 &&
+    payload.fortRunWindowAbility ===
+      "runner_pay_or_end_run_after_passing_ice_on_this_fort" &&
+    payload.decision === "pay" &&
+    payload.paymentAmount === quoted.creditCost
+  ) {
+    const runOnlyCredits = visibleRunnerRunOnlyCredits(input.playerView.run);
+    if (runOnlyCredits > 0)
+      return {
+        liquidCreditCost: Math.max(0, quoted.creditCost - runOnlyCredits),
+        boundaryKind: "engine_continuation",
+      };
+  }
+
+  const damage = quoted.selfDamage?.[0];
+  if (
+    input.side === "runner" &&
+    action.type === "play_event" &&
+    damage &&
+    isNonNegativeInteger(payload.damageAmount) &&
+    damage.amount === payload.damageAmount &&
+    damage.type === payload.damageType &&
+    cost.selfDamage?.length === 1 &&
+    cost.selfDamage[0]?.type === damage.type &&
+    cost.selfDamage[0]?.amount === damage.amount &&
+    (payload.xValue === undefined ||
+      (payload.xValue === damage.amount && cost.xValue === payload.xValue)) &&
+    extras.every((field) =>
+      ["damageType", "damageAmount", "xValue"].includes(field),
+    )
+  ) {
+    return {
+      liquidCreditCost: quoted.creditCost,
+      boundaryKind: "private_observation",
+    };
+  }
+
+  if (
+    action.type === "activated_card_ability" &&
+    typeof payload.cardImplementationSourceCounterType === "string" &&
+    payload.cardImplementationSourceCounterType.length > 0 &&
+    isNonNegativeInteger(payload.cardImplementationSourceCounterCost) &&
+    payload.cardImplementationSourceCounterCost > 0 &&
+    typeof payload.cardImplementationAbilityId === "string" &&
+    candidate.sourceCardInstanceId === action.source &&
+    extras.every((field) =>
+      [
+        "cardImplementationSourceCounterType",
+        "cardImplementationSourceCounterCost",
+      ].includes(field),
+    )
+  ) {
+    return {
+      liquidCreditCost: quoted.creditCost,
+      boundaryKind: "projection_not_supported",
+    };
+  }
+
+  if (
+    action.type === "rez_ice" &&
+    (payload.variableRezKind === "x_strength" ||
+      payload.variableRezKind === "paid_end_the_run_subroutines") &&
+    isNonNegativeInteger(payload.variableRezValue) &&
+    isNonNegativeInteger(payload.variableRezAdditionalCost) &&
+    payload.variableRezAdditionalCost <= quoted.creditCost &&
+    (payload.variableRezCap === undefined ||
+      (isNonNegativeInteger(payload.variableRezCap) &&
+        payload.variableRezValue <= payload.variableRezCap)) &&
+    extras.every((field) =>
+      [
+        "variableRezKind",
+        "variableRezValue",
+        "variableRezAdditionalCost",
+        "variableRezCap",
+      ].includes(field),
+    )
+  ) {
+    return {
+      liquidCreditCost: quoted.creditCost,
+      boundaryKind: "projection_not_supported",
+    };
+  }
+  return undefined;
+}
+
+function isNonNegativeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
 
 export type ProjectedDecisionFrame = {
   schemaVersion: typeof PROJECTED_DECISION_FRAME_SCHEMA_VERSION;
