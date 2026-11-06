@@ -830,6 +830,62 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
   });
 
+  it("keeps trace cancellation separate from unrelated tags and damage", () => {
+    const source = visibleCard("trace-cancellation", {
+      definitionId: "onr_proteus_129_back-door-to-netwatch",
+      title: "Back Door to Netwatch",
+      type: "resource",
+      installCost: 0,
+      rulesText: "[3], [T]: Cancel the effect of a successful trace.",
+    });
+    const damageIce = visibleCard("damage-ice", {
+      definitionId: "onr_v1_269_shotgun-wire",
+      title: "Shotgun Wire",
+      type: "ice",
+      rulesText: "Do 2 net damage. End the run.",
+      rezzed: true,
+    });
+    const traceIce = visibleCard("trace-ice", {
+      definitionId: "onr_v1_249_hunter",
+      title: "Hunter",
+      type: "ice",
+      rezzed: true,
+    });
+    const input = runnerInput({
+      credits: 3,
+      clicks: 1,
+      hand: [source],
+      legalActions: [installAction("install-trace-cancellation", source, 0)],
+      servers: [{ id: "rd", label: "R&D", ice: [damageIce], root: [] }],
+    });
+    input.playerView.own.tags = 3;
+
+    const hint = AI_HINTS_BY_CARD.get(source.definitionId!);
+    expect.soft(hint?.functionSignals).toContain("defense.trace_defense");
+    expect(hint?.effects).not.toContainEqual(
+      expect.objectContaining({ kind: "base_link" }),
+    );
+    expect(hint?.effects).not.toContainEqual(
+      expect.objectContaining({ kind: "link" }),
+    );
+    expect.soft(
+      findByInstance(evaluateRunnerHandDevelopment({ input }), source.instanceId),
+    ).toMatchObject({
+      developmentRole: "defense_support",
+      currentNeed: "none",
+      deferReason: "no_current_need",
+    });
+
+    input.playerView.servers[0]!.ice.push(traceIce);
+    expect(
+      findByInstance(evaluateRunnerHandDevelopment({ input }), source.instanceId),
+    ).toMatchObject({
+      developmentRole: "defense_support",
+      currentNeed: "setup",
+      deferReason: "none",
+    });
+  });
+
   it("opens trace-defense setup only for a visible rezzed trace threat", () => {
     const access = visibleCard("access-1", {
       definitionId: "onr_v1_149_access-to-arasaka",

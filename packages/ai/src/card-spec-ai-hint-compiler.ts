@@ -2249,6 +2249,9 @@ function appendGenericAbilityEffect(
     );
     overlay.functionSignals.push("setup.search", "info.stack_top");
   }
+  if (effect.kind === "cancel_successful_trace_effect") {
+    overlay.functionSignals.push("defense.trace_defense");
+  }
   if (effect.kind === "use_base_link") {
     overlay.effects.push({
       kind: "base_link",

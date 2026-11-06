@@ -2296,6 +2296,13 @@ jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.
 
 ## 7. `runner.defense_and_recovery`
 
+Der Hint-Compiler leitet Trace-Abwehr auch aus dem typisierten Abbruch eines
+erfolgreichen Traces ab (SP-765). Dieser Zweck erzeugt nur bei sichtbarer
+Trace-Gefahr Installationsbedarf. Bestehende Tags oder bestätigter Net-Schaden
+begründen dafür keinen Bedarf. Der aktive Handpufferpfad behält seine eigene
+Bindung. Der Hint enthält keinen Linkbonus und ändert weder die Engine-Regel
+noch die spätere Trace-Choice.
+
 Die Engine-Choice `v121.replacement.damage` kann eine ausdrücklich angebotene
 Rettung aus der eigenen bekannten Grip enthalten. Der Defense-Owner bindet
 sie vor der Payloadauflösung an exakte Quelle, Option, StateVersion und

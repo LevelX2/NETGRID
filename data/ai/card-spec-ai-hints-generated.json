@@ -16771,7 +16771,7 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["risk.self_trash"]
+            "functionSignals": ["defense.trace_defense", "risk.self_trash"]
           }
         ],
         "effects": [
@@ -16783,7 +16783,7 @@
             "finite": true
           }
         ],
-        "functionSignals": ["risk.self_trash"],
+        "functionSignals": ["risk.self_trash", "defense.trace_defense"],
         "actionTacticSignals": [
           "effect:resource_trash",
           "effect_scope:installed_card",
