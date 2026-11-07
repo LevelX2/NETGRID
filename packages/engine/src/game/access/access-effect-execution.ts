@@ -31,10 +31,14 @@ export function cardImplementationAccessZone(
   cardId: CardInstanceId,
 ): CardAccessZone {
   const legalAction = requireLegalAction(host);
+  const instance = host.cards.mustInstance(cardId);
+  // The fort identifies the access destination, not the source card's zone.
+  // An upgrade in a central root is installed just like a remote-root card.
+  if (instance.zone.side === "corp" && instance.zone.zone === "serverRoot")
+    return "installed";
   const serverId = String(legalAction.payload?.serverId ?? "");
   if (serverId === "hq" || serverId === "rd" || serverId === "archives")
     return serverId;
-  const instance = host.cards.mustInstance(cardId);
   if (instance.zone.side === "corp") {
     if (instance.zone.zone === "hq") return "hq";
     if (instance.zone.zone === "rd") return "rd";

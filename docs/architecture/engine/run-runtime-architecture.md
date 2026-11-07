@@ -55,6 +55,14 @@ ihnen aber nicht zurückimportiert.
 
 ## Nicht offensichtliche Verträge
 
+- CardSpec-Zugriffseffekte binden ihre Quellzone an die kanonische
+  Karteninstanz. Eine Karte in `serverRoot` bleibt `installed`, auch an HQ
+  oder R&D. Die Server-ID des Zugriffs bezeichnet den Fort, nicht dessen
+  verdecktes Kartenlager. Installierte Effekte und ihre Rez-Voraussetzung
+  dürfen dadurch weder unterdrückt noch auf uninstallierte HQ-/R&D-Karten
+  ausgeweitet werden. Trace, side-sichere Choice und deterministischer Replay
+  sind für beide Zentralwurzeln gegen den Remote-Kontrollfall geprüft.
+
 - `startRun` zählt jeden tatsächlich begonnenen Run einmal über
   `runnerTurnFlags.runAttemptsThisGame`; `createGame` initialisiert den
   Gesamtzähler ausdrücklich mit null. Auch ein im selben Übergang beendeter
