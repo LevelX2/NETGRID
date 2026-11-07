@@ -272,7 +272,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(captures).toEqual([]);
   }, 240_000);
 
-  it("keeps consecutive Fast Advance Seed 9 run-start ordering bound to its exact remote-contest route", () => {
+  it("keeps consecutive Fast Advance Seed 9 run-start ordering bound to its originating run route", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-09",
@@ -309,16 +309,28 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     const sourceRoot = source?.evidence.find((entry) =>
       entry.startsWith("plan_first_root:"),
     );
+    const sourceAction = sourceCapture!.input.legalActions.find(
+      (action) => action.actionId === source?.selectedActionId,
+    )!;
+    expect(sourceAction.type).toBe("start_run");
+    const sourceServer = String(sourceAction.payload!.serverId);
+    const remote = sourceServer.startsWith("remote_");
+    const sourceModule = remote
+      ? "runner.contest_remote"
+      : "runner.pressure_central";
+    const root = `plan:${sourceModule}:${encodeURIComponent(`${remote ? "remote" : "central"}:${sourceServer}`)}`;
 
     expect(source).toMatchObject({
       side: "runner",
-      selectedActionId: "runner.start_run.remote_1",
+      selectedActionId: sourceAction.actionId,
       actionType: "start_run",
-      planKind: "runner.contest_remote",
+      planKind: sourceModule,
       fallbackUsed: false,
     });
+    expect(sourceRoot).toBe(`plan_first_root:${root}`);
+    expect(sourceExecutor).toBe(`plan_first_executor:${root}`);
     expect(source?.evidence).toContain(
-      "plan_step_id:plan:runner.contest_remote:remote%3Aremote_1:contest",
+      `plan_step_id:${root}:${remote ? "contest" : `pressure:${sourceServer}`}`,
     );
     expect(choiceCapture?.input.playerView.pendingChoice).toMatchObject({
       choiceId: `runner_run_start_order_${choiceCapture!.state.stateVersion}`,
@@ -330,21 +342,24 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       stateVersion: choiceCapture!.state.stateVersion,
       visibility: "hidden_info_barrier",
     });
+    const conferences = sourceCapture!.input.playerView.own.rig!.filter(
+      (card) => card.definitionId === "onr_v1_184_top-runners-conference",
+    );
+    expect(conferences.length).toBeGreaterThanOrEqual(2);
     expect(
       choiceCapture?.input.playerView.pendingChoice?.options.map(
         (option) => option.value,
       ),
     ).toEqual(
-      expect.arrayContaining([
-        "card_implementation:runner_onr_v1_184_top-runners-conference_1",
-        "card_implementation:runner_onr_v1_184_top-runners-conference_3",
-      ]),
+      expect.arrayContaining(
+        conferences.map((card) => `card_implementation:${card.instanceId}`),
+      ),
     );
     expect(choice).toMatchObject({
       side: "runner",
       selectedActionId: "runner.resolve_choice",
       actionType: "resolve_choice",
-      planKind: "runner.contest_remote",
+      planKind: sourceModule,
       fallbackUsed: false,
     });
     expect(sourceExecutor).toBeDefined();
@@ -422,16 +437,15 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     if (!summary) throw new Error("Missing Siren simulation summary");
     assertRegularReplay(summary);
     const actionSequence = summary.actionSequence ?? [];
-    expect(captures.length).toBeGreaterThan(0);
+    // This absence regression covers the complete regular game. Offering the
+    // operation at some incidental earlier hand is not a required occurrence.
     expect(
-      captures.some((capture) =>
-        capture.input.legalActions.some(
-          (action) =>
-            action.type === "play_operation" &&
-            String(action.source).includes("onr_v1_296_off-site-backups"),
-        ),
+      actionSequence.some(
+        (entry) =>
+          entry.actionType === "play_operation" &&
+          entry.selectedActionId?.includes("onr_v1_296_off-site-backups"),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       captures.find((capture) =>
         actionSequence

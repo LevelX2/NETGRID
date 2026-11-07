@@ -172,7 +172,11 @@ it.each([
     if (variant === "credit_gap") evaluation.prerunReserveQuote.creditGap = 1;
     if (variant === "no_payoff") evaluation.accessPayoff = "known_low_value";
     if (variant === "low_max_hand") input.playerView.own.maxHandSize = 2;
-    const facts = runnerDefenseHandBufferFacts(input, [evaluation]);
+    const facts = runnerDefenseHandBufferFacts(
+      input,
+      [evaluation],
+      () => false,
+    );
     expect(facts.riskAdjustedHandBuffer.sameTurnRunPreparation).toBe(
       variant === "current" || variant === "low_max_hand",
     );

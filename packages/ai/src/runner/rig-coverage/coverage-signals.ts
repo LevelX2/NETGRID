@@ -98,10 +98,12 @@ export function runnerCoverageDrawCadence(
 export function uniqueCoverageGaps(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
-  runFacts: {
-    runTargets: readonly RunnerRunTargetEvaluation[];
-    economy: RunnerEconomyPosture;
-  } | undefined,
+  runFacts:
+    | {
+        runTargets: readonly RunnerRunTargetEvaluation[];
+        economy: RunnerEconomyPosture;
+      }
+    | undefined,
   installedRoles: ReadonlySet<string>,
   deckCapabilities: DeckCapabilityProfile,
   strategicIntent: RunnerStrategicIntentProfile,
@@ -143,7 +145,14 @@ export function uniqueCoverageGaps(
     );
   });
   const terminalContestThreat = runnerTerminalContestThreat(input);
-  const handBuffer = runnerDefenseHandBufferFacts(input, runTargets);
+  const handBuffer = runnerDefenseHandBufferFacts(input, runTargets, (target) =>
+    services.runnerRunTargetCanConvertNow(
+      input,
+      runFacts!.economy,
+      target,
+      candidates,
+    ),
+  );
   for (const { evaluation, economy } of runEntries) {
     if (
       !runnerCoverageRunTargetHasDifferentialPayoff(

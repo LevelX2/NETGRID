@@ -574,8 +574,11 @@ den unmittelbar folgenden Corp-Sieg; sie belegen keinen gewonnenen Gesamtgegenla
 
 Der vorgelagerte Materialfilter erhält eine öffentlich belegte terminale
 Remote-Frist auch bei negativem allgemeinem Risikowert, wenn die exakte
-aktuelle Runquote bereits `reachable` und `run_now` ausweist. Dieselbe
-Dringlichkeitsregel gilt bei der anschließenden Bindung der konkreten Action.
+aktuelle Runquote durch die gemeinsame direkte Terminalzulassung gedeckt ist.
+Dieselbe Zulassung gilt bei der anschließenden Bindung der konkreten Action.
+Ein allgemeines `run_now` zusammen mit Dringlichkeit ersetzt diesen Nachweis
+nicht; eine ungeklärte Trace-Gefahr bleibt blockierend. Die bereits getrennt
+zertifizierten Nicht-Flatline- und festen Tag-Cleanup-Routen bleiben erhalten.
 Die vorhandenen Prüfungen auf Vorabreserve, Finanzierung, Vorbereitung,
 kritischen Schaden, Wiederholung eines gescheiterten Pfads und konkreten
 Zugriff bleiben wirksam. Das schafft keinen garantierten Steal aus einer
@@ -2323,6 +2326,14 @@ LegalActions. Das tatsächliche Nachziehen bleibt beim bestehenden Hand-Owner;
 jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.
 
 ## 7. `runner.defense_and_recovery`
+
+Ist bereits eine aktuelle Runroute ohne zusätzliche Vorbereitung konvertierbar,
+erzeugt die Handquote einer anderen optionalen Informationsroute keinen globalen
+P3-Ziehbedarf. Konkrete Agenda- und Scorebedarfe behalten ihre Vorbereitung.
+Die allgemeine Schadensreserve, der Schutz flüchtiger Breaker und der bestehende
+Handpuffer für einen ausführbaren Run mit hohem Risiko bleiben unabhängig davon
+erhalten. Die gemeinsame aktuelle Konversionsprüfung wird vom Run-Service
+geliefert; Defense eröffnet dadurch keine eigene Runwahl.
 
 Der Hint-Compiler leitet Trace-Abwehr auch aus dem typisierten Abbruch eines
 erfolgreichen Traces ab (SP-765). Dieser Zweck erzeugt nur bei sichtbarer

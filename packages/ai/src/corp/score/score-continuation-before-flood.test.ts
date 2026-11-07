@@ -114,17 +114,35 @@ describe("existing terminal score continuation before emergency agenda flood", (
     const root = portfolio.instances.find(
       (instance) => instance.instanceId === portfolio.rootForegroundInstanceId,
     )!;
-    // Emergency development remains admitted under the new agenda. Its
-    // current multi-turn funding head precedes installation at zero credits.
+    // Funding can prepare this project, but deckout pressure cannot certify
+    // its unprotected terminal steal. Nonterminal flood alternatives remain.
     expect(root.moduleState).toMatchObject({
       signal: {
         projectId: "agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
         phase: "install_agenda",
-        feasible: true,
-        routeAssessment: "corp_deckout_agenda_flood_score_install",
+        feasible: false,
+        routeAssessment: "corp_score_protection_required",
         fundingMilestone: { targetCredits: 4, deadline: "multi_turn" },
       },
     });
+    expect(
+      portfolio.instances.some((instance) => {
+        const state = instance.moduleState as {
+          signal?: {
+            feasible?: boolean;
+            routeAssessment?: string;
+            conversion?: { runnerStealIsMatchpoint?: boolean };
+          };
+        };
+        return (
+          instance.moduleId === "corp.score_agenda" &&
+          state.signal?.feasible === true &&
+          state.signal.routeAssessment ===
+            "corp_deckout_agenda_flood_score_install" &&
+          state.signal.conversion?.runnerStealIsMatchpoint === false
+        );
+      }),
+    ).toBe(true);
     expect(
       portfolio.instances.find(
         (instance) => instance.instanceId === portfolio.executorInstanceId,

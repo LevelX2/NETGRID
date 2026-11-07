@@ -2494,7 +2494,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_bad_publicity"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",

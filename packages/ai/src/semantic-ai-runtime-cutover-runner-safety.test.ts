@@ -878,7 +878,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       expect.objectContaining({
         actionId: "run-rd",
         whyNot: expect.arrayContaining([
-          expect.stringContaining("not_selected_by_plan:"),
+          expect.stringContaining(
+            "explicitly_nonproductive:runner.pressure_central:",
+          ),
         ]),
       }),
     );

@@ -191,7 +191,7 @@ it("admits the real G9/D16 bank after Draw when installation preserves the four-
     afterDraw = apply(state, "runner", "runner.draw_card"),
     input = next(afterDraw, cp),
     targets = evaluateRunnerRunTargets({ input }),
-    facts = runnerDefenseHandBufferFacts(input, targets);
+    facts = runnerDefenseHandBufferFacts(input, targets, () => false);
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: "runner",

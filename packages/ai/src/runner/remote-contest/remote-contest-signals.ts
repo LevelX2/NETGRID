@@ -21,7 +21,6 @@ import {
 import {
   bestRunTargetsByServer,
   runnerRunFundingSupport,
-  runnerRunHasExactUrgency,
   runnerRunTargetCanConvertNow,
 } from "../../run-analysis/runner-plan-run-funding";
 import {
@@ -322,8 +321,12 @@ function runnerSameTurnAccessRemotePreparationSignals(
       {
         economy,
         candidates,
-        minimumHandBuffer: runnerDefenseHandBufferFacts(input, runTargets)
-          .minimumHandBuffer,
+        minimumHandBuffer: runnerDefenseHandBufferFacts(
+          input,
+          runTargets,
+          (current) =>
+            runnerRunTargetCanConvertNow(input, economy, current, candidates),
+        ).minimumHandBuffer,
       },
     )
   )
@@ -690,9 +693,6 @@ function bindRunnerRemoteRunActionAssessments(
         evaluation.recommendation === "run_if_free" ||
         productiveProbeCanConvertNow ||
         directRunCanConvertNow);
-    const exactUrgentPayoffOverridesNegativeRiskScore =
-      runnerRunHasExactUrgency(input, evaluation) &&
-      evaluation.recommendation === "run_now";
     const specialRouteMembership =
       signal.constrainedActionCapacity === true ||
       signal.evidenceCode === "visible_known_agenda_remote";
@@ -713,8 +713,7 @@ function bindRunnerRemoteRunActionAssessments(
           ? preferredActionIds.has(evaluation.actionId)
           : irrecoverableScoreThreatContest ||
             (evaluation.pathPassability === "reachable" &&
-              (evaluation.score > 0 ||
-                exactUrgentPayoffOverridesNegativeRiskScore) &&
+              evaluation.score > 0 &&
               fundingSupport === undefined &&
               directRunRouteReady)));
     const evidenceCodes = executable
@@ -1020,10 +1019,6 @@ export function buildRunnerRemoteContestSignals({
           );
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
-        const exactTerminalPayoffOverridesNegativeRiskScore =
-          runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
-          runnerRunHasExactUrgency(input, evaluation) &&
-          evaluation.recommendation === "run_now";
         const coverageSupport = coverageGaps.some(
           (gap) =>
             gap.requesterModuleId === "runner.contest_remote" &&
@@ -1037,8 +1032,7 @@ export function buildRunnerRemoteContestSignals({
               evaluation.recommendation === "run_if_free" ||
               evaluation.recommendation === "gain_credits_first" ||
               productiveProbeCanConvertNow) &&
-            (evaluation.score > 0 ||
-              exactTerminalPayoffOverridesNegativeRiskScore)) ||
+            evaluation.score > 0) ||
             terminalRemoteContestIsDirectlyMandatory ||
             irrecoverableScoreThreatContest ||
             coverageSupport ||

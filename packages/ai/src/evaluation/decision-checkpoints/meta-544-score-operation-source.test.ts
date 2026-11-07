@@ -118,16 +118,25 @@ it.each([
       ).toBeLessThanOrEqual(1);
   },
 );
-it("chooses a realizable HQ Zurich closeout instead of the impossible Retreat", () => {
+it("retains the fully quoted cheaper Marine closeout and Zurich's real one-operation alternative", () => {
   const cp = native(11, 60);
   restore(cp);
   const { action } = decide(cp);
-  expect(action.type).toBe("install_card");
-  expect(action.source).toBe("corp_onr_proteus_008_project-zurich_1");
-  // This real HQ closeout also relieves the six-card hand and retains Marine.
-  // Source validity must not force the cheapest resident target instead.
-  const path = corpSameTurnScoreConversionPaths(cp.input).find(
-    (p) => p.agendaCardId === action.source,
+  expect(action.type).toBe("advance_card");
+  expect(action.source).toBe("corp_onr_v1_206_marine-arcology_1");
+  const paths = corpSameTurnScoreConversionPaths(cp.input);
+  const resident = paths.find((p) => p.agendaCardId === action.source)!;
+  expect(resident).toMatchObject({ clicksRequired: 3, creditsRequired: 3 });
+  expect(resident.steps.map((step) => step.kind)).toEqual([
+    "basic_advance",
+    "basic_advance",
+    "basic_advance",
+    "score_ready",
+  ]);
+  // Zurich remains realizable with one operation, but costs six. The complete
+  // resident quote must not receive another advancement suffix.
+  const path = paths.find(
+    (p) => p.agendaCardId === "corp_onr_proteus_008_project-zurich_1",
   )!;
   expect(path).toMatchObject({ clicksRequired: 3, creditsRequired: 6 });
   expect(path.steps.map((s) => s.kind)).toEqual([
@@ -147,8 +156,8 @@ it("preserves that choice across the actual consecutive Corp decision inputs", (
   const end = chooseAiAction(previous.input);
   expect(end.actionId).toBe("corp.end_turn");
   const { action } = decide(cp);
-  expect(action.type).toBe("install_card");
-  expect(action.source).toBe("corp_onr_proteus_008_project-zurich_1");
+  expect(action.type).toBe("advance_card");
+  expect(action.source).toBe("corp_onr_v1_206_marine-arcology_1");
 });
 it("keeps the genuine current acceleration when two remaining actions need it", () => {
   const cp = native(11, 61);

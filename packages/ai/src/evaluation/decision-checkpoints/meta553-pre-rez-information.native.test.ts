@@ -34,7 +34,9 @@ type RecordedAction = {
   selectedChoices?: PlayerAction["selectedChoices"];
 };
 type Native = {
-  input: AiDecisionInputWithDeckCapabilities & { ownDeckSnapshot: DeckSnapshot };
+  input: AiDecisionInputWithDeckCapabilities & {
+    ownDeckSnapshot: DeckSnapshot;
+  };
   runtime: AiRuntimeCheckpointV1;
   stateHash: string;
   validation: Record<string, boolean>;
@@ -161,7 +163,7 @@ describe("native pre-rez approach information", () => {
     ["g21", "hq"],
     ["g15", "rd"],
   ])(
-    "retains the Engine fact and selects the actual information route within its existing parent: %s",
+    "retains the Engine information fact and its current route admission: %s",
     (key, server) => {
       const { state, input, p } = original(key!);
       const engine = getLegalActions(state, "runner").find(
@@ -179,6 +181,26 @@ describe("native pre-rez approach information", () => {
           ?.eventApproachIceExposeBeforeRez,
       ).toBe(true);
       const { a, p: plan } = normal(input);
+      if (key === "g10") {
+        // The known rezzed Bolter Cluster precedes the unknown inner ICE.
+        // Exposing that inner ICE does not bypass this existing known path.
+        expect(a.type).toBe("draw_card");
+        expect(plan.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
+        const deckCapabilities = input.ownDeckCapabilities;
+        if (!deckCapabilities)
+          throw new Error("Native own-deck capabilities missing.");
+        const route = evaluateRunnerRunTargets({
+          input,
+          actionCandidates: candidates(input),
+          deckCapabilities,
+        }).find((target) => target.actionId === engine.actionId)!;
+        expect(route.prerunReserveQuote?.handBufferGap).toBeGreaterThan(0);
+        expect(route.recommendation).toBe("draw_for_damage_buffer");
+        expect(
+          advance(state, { side: "runner", actionId: a.actionId }).stateVersion,
+        ).toBe(state.stateVersion + 1);
+        return;
+      }
       expect(a.actionId).toBe(engine.actionId);
       expect(plan.rootPlanInstanceId).toBe(
         "plan:runner.pressure_central:central%3A" + server,

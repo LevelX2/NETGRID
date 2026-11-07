@@ -1,4 +1,4 @@
-import { hashGameState } from "@netgrid/engine";
+import { applyAction, getPlayerView, hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import forceShieldJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-01-force-shield-vs-krash.json";
@@ -17,7 +17,6 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 424A runner endgame decision checkpoints", () => {
   it.each([
-    ["424A-F01 Krash before redundant Force Shield", forceShieldJson],
     [
       "424A-F02 builds the liquid reserve instead of using Inside Job on Archives",
       insideJobArchivesJson,
@@ -32,6 +31,39 @@ describe("match 424A runner endgame decision checkpoints", () => {
     ],
   ])("satisfies %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
+  });
+
+  it("uses 424A-F01's cumulative per-copy damage prevention under the current CardSpec", () => {
+    const checkpoint = fixture(forceShieldJson);
+    // The historical expectation treated the second copy as redundant. The
+    // current Engine gives each installed copy its own two-point turn limit.
+    checkpoint.source.kind = "synthetic_companion";
+    checkpoint.expectation.acceptableActions = [
+      { type: "install_card", sourceDefinitionId: "onr_v1_028_force-shield" },
+    ];
+    checkpoint.expectation.forbiddenActions = [];
+    checkpoint.expectation.planExecution = {
+      acceptablePlanKinds: ["runner.defense_and_recovery"],
+      acceptableCapabilities: ["install_defense_support"],
+      requiredAssessmentEvidence: ["runner_defense_support_current_need"],
+    };
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    const state = checkpoint.engine.testOnlyGameState;
+    expect(
+      getPlayerView(state, "runner").own.freeNetOrCoreDamagePreventionRemaining,
+    ).toBe(2);
+    const applied = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: result.selectedAction!.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    if (!applied.ok) throw new Error(applied.error.message);
+    expect(
+      getPlayerView(applied.state, "runner").own
+        .freeNetOrCoreDamagePreventionRemaining,
+    ).toBe(4);
   });
 
   it("keeps corrected MRAM hand-size semantics at the historical decision", () => {

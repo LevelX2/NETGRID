@@ -115,7 +115,9 @@ it.each(["g1d120", "g16d29"])(
   "SP-566 preserves the achieved native damage buffer at %s",
   (key) => {
     const r = decisionAt(key);
-    expect(runnerDefenseHandBufferFacts(r.input, []).minimumHandBuffer).toBe(4);
+    expect(
+      runnerDefenseHandBufferFacts(r.input, [], () => false).minimumHandBuffer,
+    ).toBe(4);
     expect(r.input.playerView.own.gripOrHq).toHaveLength(4);
     expect(r.decision.actionId).toBe("runner.gain_credit");
     expect(r.pf.selectedPlan?.moduleId).toBe("runner.economy");

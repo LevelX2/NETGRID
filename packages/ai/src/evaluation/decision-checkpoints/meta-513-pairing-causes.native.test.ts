@@ -99,25 +99,39 @@ it("admits the native G5/D170 Lucidrine remote contest through the live DTO", ()
     "visible_random_breaker_strength",
   );
 });
-it("keeps the native G8/D334 hand reserve and unknown inner ICE after correcting coverage", () => {
-  const { input } = native("g8d334");
-  const { d, pf } = decide(input);
-  expect(d.actionId).toBe("runner.gain_credit");
-  expect(pf.selectedPlan?.moduleId).toBe("runner.defense_and_recovery");
-  expect(pf.selectedPlan?.evidenceCodes).toContain(
-    "runner_damage_locked_hand_reaction_reserve",
-  );
-  const route = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
-  )!;
-  expect(route.pathPassability).toBe("reachable");
-  expect(route.routeQuote?.conditionalReasons).toEqual(
-    expect.arrayContaining([
-      "visible_random_breaker_strength",
-      "unknown_ice_on_route",
-    ]),
-  );
-});
+it.each([true, false])(
+  "keeps G8/D334 unknown ICE and distinguishes its terminal deadline: %s",
+  (terminal) => {
+    const { input } = native("g8d334");
+    if (!terminal) input.playerView.opponent.agendaPoints = 0;
+    const { d, pf } = decide(input);
+    if (terminal) {
+      expect(d.actionId).toBe("runner.start_run.remote_1");
+      expect(pf.selectedPlan?.moduleId).toBe("runner.contest_remote");
+    } else {
+      expect(d.actionId).toBe("runner.gain_credit");
+      expect(pf.selectedPlan?.moduleId).toBe("runner.defense_and_recovery");
+      expect(pf.selectedPlan?.evidenceCodes).toContain(
+        "runner_damage_locked_hand_reaction_reserve",
+      );
+    }
+    const route = evaluateRunnerRunTargets({ input }).find(
+      (t) => t.actionId === "runner.start_run.remote_1",
+    )!;
+    expect(route.pathPassability).toBe("reachable");
+    expect(route.prerunReserveQuote).toMatchObject({
+      riskTolerance: terminal ? "terminal_remote_last_chance" : "standard",
+      status: terminal ? "satisfied" : "blocked",
+      handBufferGap: 0,
+    });
+    expect(route.routeQuote?.conditionalReasons).toEqual(
+      expect.arrayContaining([
+        "visible_random_breaker_strength",
+        "unknown_ice_on_route",
+      ]),
+    );
+  },
+);
 it("keeps the native G6/D186 real sentry gap when no Boon is installed", () => {
   const { input } = native("g6d186");
   bindPublicBoardStealQuoteCompanion(input);

@@ -10,12 +10,15 @@ import {
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
 it.each([false, true])(
-  "SP-296 retains hazard avoidance and selects the remote contest only with its reserve funded: %s",
+  "SP-296 retains the nonterminal investment reserve after hazard avoidance: %s",
   (funded) => {
     const { input, runtime } = structuredClone(checkpoint) as unknown as {
       input: AiDecisionInputWithDeckCapabilities;
       runtime: AiRuntimeCheckpointV1;
     };
+    // Explicit nonterminal companion. The captured public matchpoint deadline
+    // now removes the rig investment reserve, tested separately below.
+    input.playerView.opponent.agendaPoints = 0;
     if (funded) input.playerView.own.credits += 2;
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
@@ -78,3 +81,33 @@ it.each([false, true])(
     });
   },
 );
+
+it("retains the native last-chance contest without an obsolete rig investment top-up", () => {
+  const { input, runtime } = structuredClone(checkpoint) as unknown as {
+    input: AiDecisionInputWithDeckCapabilities;
+    runtime: AiRuntimeCheckpointV1;
+  };
+  resetResidentPlanPortfolioMemory();
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+  const remote = evaluateRunnerRunTargets({ input }).find(
+    (target) => target.actionId === "runner.start_run.remote_1",
+  )!;
+  expect(remote.visibleTraceTagHazardUnavoidable).toBe(false);
+  expect(remote.prerunReserveQuote).toMatchObject({
+    riskTolerance: "terminal_remote_last_chance",
+    status: "satisfied",
+    requiredCredits: 4,
+    unknownIceCount: 2,
+  });
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(remote.actionId);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
+    actionId: remote.actionId,
+    stateVersion: input.playerView.stateVersion,
+  });
+});

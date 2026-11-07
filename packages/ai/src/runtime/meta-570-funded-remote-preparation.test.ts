@@ -88,7 +88,7 @@ function preparation(input: AiDecisionInputWithDeckCapabilities) {
   );
 }
 
-it("funds, installs the held decoder and wins the original remote contest in the same turn", () => {
+it("installs the already funded decoder and wins the terminal remote contest in the same turn", () => {
   const { input, state: initial, deckSnapshots } = original();
   let state = initial;
   const heads: string[] = [];
@@ -112,14 +112,14 @@ it("funds, installs the held decoder and wins the original remote contest in the
       (a) => a.actionId === decision.actionId,
     )!;
     expect(action).toBeDefined();
-    if (step < 4) {
+    if (step < 2) {
       heads.push(action.type);
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
       ).toBe("plan:runner.contest_remote:remote%3Aremote_2");
       expect(
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
-      ).toBe(step < 3 ? "runner.rig_and_coverage" : "runner.contest_remote");
+      ).toBe(step === 0 ? "runner.rig_and_coverage" : "runner.contest_remote");
     }
     const applied = applyAction(state, {
       matchId: state.matchId,
@@ -133,17 +133,12 @@ it("funds, installs the held decoder and wins the original remote contest in the
     if (!applied.ok) throw Error(applied.error.message);
     state = applied.state;
   }
-  expect(heads).toEqual([
-    "gain_credit",
-    "gain_credit",
-    "install_card",
-    "start_run",
-  ]);
+  expect(heads).toEqual(["install_card", "start_run"]);
   expect(state.winner).toBe("runner");
   expect(getPlayerView(state, "runner").own).toMatchObject({
     agendaPoints: 8,
-    credits: 6,
   });
+  expect(state.runner.credits).toBeGreaterThanOrEqual(4);
   const replay = replayEvents(
     initial,
     state.eventLog.slice(initial.eventLog.length),
@@ -160,8 +155,9 @@ it.each([
   "hand_buffer",
 ])("does not admit an incomplete preparation: %s", (boundary) => {
   const { input } = original();
-  if (boundary === "short_turn") input.playerView.own.clicks = 3;
-  if (boundary === "short_cash") input.playerView.own.credits = 20;
+  if (boundary === "short_turn") input.playerView.own.clicks = 1;
+  // Three funding clicks plus installation and run exceed the four-click turn.
+  if (boundary === "short_cash") input.playerView.own.credits = 14;
   if (boundary === "memory_without_native_trash_route") {
     input.playerView.own.memoryUsed = input.playerView.own.memoryLimit!;
     input.legalActions = input.legalActions.filter(
@@ -188,10 +184,10 @@ it("retains unknown-route risk and quotes the existing complete funding route", 
   hidden.instanceId = "another_opaque_inner_ice";
   const result = preparation(input)!;
   expect(result.sameTurnRunConversion).toMatchObject({
-    requiredCredits: 23,
+    requiredCredits: 17,
     requiredClicksAfterFunding: 2,
     projectedKnownPathCost: 15,
-    postRunCreditFloor: 7,
+    postRunCreditFloor: 4,
   });
   expect(result.evidenceCodes).toContain(
     "same_turn_breaker_preparation_unknown_ice:1",

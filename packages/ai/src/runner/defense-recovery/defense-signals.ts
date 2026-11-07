@@ -118,6 +118,7 @@ export function runnerDefenseSupportSignals(
 export function runnerDefenseHandBufferFacts(
   input: AiDecisionInput,
   runTargets: readonly RunnerRunTargetEvaluation[],
+  runCanConvertNow: RunnerDefenseServices["runCanConvertNow"],
 ) {
   const handSize = input.playerView.own.gripOrHq.length;
   const maxHandSize = Math.max(0, input.playerView.own.maxHandSize ?? 5);
@@ -125,6 +126,7 @@ export function runnerDefenseHandBufferFacts(
   const riskAdjustedHandBuffer = runnerRiskAdjustedHandBufferForAttractiveRuns(
     input,
     runTargets,
+    runCanConvertNow,
   );
   const volatileBreakerFailureDamage = Math.max(
     0,
@@ -322,11 +324,13 @@ export function buildRunnerDefenseSignals(params: {
       : undefined;
   const completeTagClearAvailable =
     bankTagClearFunding !== undefined ||
-    (tags > 0 && candidates.some(candidate =>
-      candidate.semanticActionType === "tag.remove" &&
-      !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
-      currentRunnerTagReduction(candidate, tags) === tags,
-    )) ||
+    (tags > 0 &&
+      candidates.some(
+        (candidate) =>
+          candidate.semanticActionType === "tag.remove" &&
+          !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
+          currentRunnerTagReduction(candidate, tags) === tags,
+      )) ||
     (fullTagClearFunding !== undefined &&
       (fullTagClearFunding.status === "funded" ||
         (fullTagClearFunding.status === "covered_guaranteed" &&
@@ -344,18 +348,18 @@ export function buildRunnerDefenseSignals(params: {
   const tagClearFundingActionIds = bankTagClearFunding?.firstStepActionId
     ? [bankTagClearFunding.firstStepActionId]
     : services.findFundingRoute({
-    demandId: "runner-defense-tag-clear-funding",
-    sourcePlanId: "runner.defense_and_recovery:runner",
-    purpose: "foreground_plan",
-    priority: "acute_hard_plan_blocker",
-    hardness: "hard",
-    deadline: "end_of_current_turn",
-    targetCredits: tagClearTargetCredits,
-    remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
-    allowIncrementalProgress: true,
-    ...endTurnBuffer,
-    evidence: ["runner_visible_tag_punish_requires_clear_funding"],
-  }).routeActionIds;
+        demandId: "runner-defense-tag-clear-funding",
+        sourcePlanId: "runner.defense_and_recovery:runner",
+        purpose: "foreground_plan",
+        priority: "acute_hard_plan_blocker",
+        hardness: "hard",
+        deadline: "end_of_current_turn",
+        targetCredits: tagClearTargetCredits,
+        remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+        allowIncrementalProgress: true,
+        ...endTurnBuffer,
+        evidence: ["runner_visible_tag_punish_requires_clear_funding"],
+      }).routeActionIds;
   const directTagClearAvailable = candidates.some(
     (candidate) =>
       candidate.semanticActionType === "tag.remove" &&
@@ -372,13 +376,23 @@ export function buildRunnerDefenseSignals(params: {
       ? {
           needId: "runner-defense-tag-clear-funding",
           parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          targetCredits: tagClearTargetCredits * (bankTagClearFunding ? tags : 1),
+          targetCredits:
+            tagClearTargetCredits * (bankTagClearFunding ? tags : 1),
           currentCreditsAtRevalidation: currentCredits,
-          gap: Math.max(0, tagClearTargetCredits * (bankTagClearFunding ? tags : 1) - currentCredits),
+          gap: Math.max(
+            0,
+            tagClearTargetCredits * (bankTagClearFunding ? tags : 1) -
+              currentCredits,
+          ),
           actionIds: tagClearFundingActionIds,
-          ...(bankTagClearFunding ? {
-            bankFunding: { activeTags: tags, routeAssessment: bankTagClearFunding },
-          } : {}),
+          ...(bankTagClearFunding
+            ? {
+                bankFunding: {
+                  activeTags: tags,
+                  routeAssessment: bankTagClearFunding,
+                },
+              }
+            : {}),
           revalidation: {
             stateVersion: input.playerView.stateVersion,
             status: "defense_parent_open",
@@ -387,31 +401,54 @@ export function buildRunnerDefenseSignals(params: {
         }
       : undefined;
   const reactionReserveTargetCredits = 10;
-  const persistentHazardCounterRemovalAvailable = candidates.some(candidate =>
-    candidate.semanticActionType === "counter.remove_trace_tag" ||
-    candidate.semanticActionType === "counter.remove_runner_hazard");
+  const persistentHazardCounterRemovalAvailable = candidates.some(
+    (candidate) =>
+      candidate.semanticActionType === "counter.remove_trace_tag" ||
+      candidate.semanticActionType === "counter.remove_runner_hazard",
+  );
   const persistentHazardCounterFundingNeed =
-    runnerPersistentHazardCounterFundingQuotes(input).flatMap(quote => {
-      if (persistentHazardCounterRemovalAvailable || currentCredits >= quote.credits ||
-        input.playerView.own.clicks <= 0) return [];
+    runnerPersistentHazardCounterFundingQuotes(input).flatMap((quote) => {
+      if (
+        persistentHazardCounterRemovalAvailable ||
+        currentCredits >= quote.credits ||
+        input.playerView.own.clicks <= 0
+      )
+        return [];
       const route = services.findFundingRoute({
         demandId: "runner-defense-persistent-hazard-counter-funding",
         sourcePlanId: "runner.defense_and_recovery:runner",
-        purpose: "foreground_plan", priority: "acute_hard_plan_blocker", hardness: "hard",
-        deadline: "end_of_current_turn", targetCredits: quote.credits,
+        purpose: "foreground_plan",
+        priority: "acute_hard_plan_blocker",
+        hardness: "hard",
+        deadline: "end_of_current_turn",
+        targetCredits: quote.credits,
         // The final click may prepare the removal in the following own turn.
-        remainingClicks: input.playerView.own.clicks, allowIncrementalProgress: true,
-        ...endTurnBuffer, evidence: ["runner_persistent_hazard_counter_requires_funding"],
+        remainingClicks: input.playerView.own.clicks,
+        allowIncrementalProgress: true,
+        ...endTurnBuffer,
+        evidence: ["runner_persistent_hazard_counter_requires_funding"],
       });
-      return route.routeActionIds.length === 0 ? [] : [{
-        needId: "runner-defense-persistent-hazard-counter-funding" as const,
-        parentPlanInstanceId: "plan:runner.defense_and_recovery:runner" as const,
-        counterType: quote.counterType, observedAmount: quote.observedAmount,
-        targetCredits: quote.credits, currentCreditsAtRevalidation: currentCredits,
-        gap: quote.credits - currentCredits, actionIds: route.routeActionIds,
-        revalidation: { stateVersion: input.playerView.stateVersion, status: "defense_parent_open" as const },
-        evidenceCode: "runner_persistent_hazard_counter_requires_funding",
-      }];
+      return route.routeActionIds.length === 0
+        ? []
+        : [
+            {
+              needId:
+                "runner-defense-persistent-hazard-counter-funding" as const,
+              parentPlanInstanceId:
+                "plan:runner.defense_and_recovery:runner" as const,
+              counterType: quote.counterType,
+              observedAmount: quote.observedAmount,
+              targetCredits: quote.credits,
+              currentCreditsAtRevalidation: currentCredits,
+              gap: quote.credits - currentCredits,
+              actionIds: route.routeActionIds,
+              revalidation: {
+                stateVersion: input.playerView.stateVersion,
+                status: "defense_parent_open" as const,
+              },
+              evidenceCode: "runner_persistent_hazard_counter_requires_funding",
+            },
+          ];
     })[0];
   const reactionReserveActionIds = services.findFundingRoute({
     demandId: "runner-defense-reaction-reserve",
@@ -511,11 +548,11 @@ export function buildRunnerDefenseSignals(params: {
     forgoExhaustedStandardCapacity,
     forgoTerminalDeckPressureCapacity,
     ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
-    ...(gripDamageReplacementBinding
-      ? { gripDamageReplacementBinding }
-      : {}),
+    ...(gripDamageReplacementBinding ? { gripDamageReplacementBinding } : {}),
     ...(tagClearFundingNeed ? { tagClearFundingNeed } : {}),
-    ...(persistentHazardCounterFundingNeed ? { persistentHazardCounterFundingNeed } : {}),
+    ...(persistentHazardCounterFundingNeed
+      ? { persistentHazardCounterFundingNeed }
+      : {}),
     ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
     defenseSupportInstallActionIds,
     defenseSupportRejectedInstallActionIds,
@@ -532,7 +569,8 @@ export function buildRunnerDefenseSignals(params: {
             : "P5",
     evidenceCodes: [
       ...(persistentHazardCounterFundingNeed
-        ? ["runner_persistent_hazard_counter_requires_funding"] : []),
+        ? ["runner_persistent_hazard_counter_requires_funding"]
+        : []),
       ...(preserveHandBeforeIncompleteTagClear
         ? ["runner_incomplete_tag_clear_requires_preserved_hand_buffer"]
         : []),
@@ -737,6 +775,7 @@ function runnerTraceDefenseInstallValue(
 function runnerRiskAdjustedHandBufferForAttractiveRuns(
   input: AiDecisionInput,
   runTargets: readonly RunnerRunTargetEvaluation[],
+  runCanConvertNow: RunnerDefenseServices["runCanConvertNow"],
 ): {
   minimumHandBuffer: number;
   evidenceCode: string;
@@ -747,7 +786,22 @@ function runnerRiskAdjustedHandBufferForAttractiveRuns(
   let strongestRisk = -1;
   let sameTurnRunPreparation = false;
 
+  // A ready route keeps its own reserve. Preparing a different optional probe
+  // must not raise the global safety floor and preempt that executable route.
+  // Concrete agenda/score consumers can still require their own preparation.
+  const currentRunAvailable = runTargets.some(
+    (target) =>
+      (target.recommendation === "run_now" ||
+        target.recommendation === "run_if_free") &&
+      runCanConvertNow(target),
+  );
+  const optionalAlternative = (target: RunnerRunTargetEvaluation) =>
+    currentRunAvailable &&
+    target.accessPayoff !== "agenda" &&
+    target.accessPayoff !== "score_threat";
+
   for (const evaluation of runTargets) {
+    if (optionalAlternative(evaluation)) continue;
     const quote = evaluation.prerunReserveQuote;
     const action = input.legalActions.find(
       (a) => a.actionId === evaluation.actionId,

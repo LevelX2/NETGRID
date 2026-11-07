@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
+import { applyAction } from "@netgrid/engine";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { corpFreeRezBoardCompanion } from "../corp-free-rez-board.test-support";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
@@ -90,7 +92,10 @@ it("resolves the original mandatory placement without inventing a credit head", 
 });
 
 it("uses the exact printed X payment to fund the unaffordable central ICE", () => {
-  const input = load(28, 164),
+  const { input, state } = corpFreeRezBoardCompanion(
+      load(28, 164),
+      "onr_proteus_049_emergency-rig",
+    ),
     result = chooseAiAction(input);
   const action = input.legalActions.find(
     (a) => a.actionId === result.actionId,
@@ -114,5 +119,19 @@ it("uses the exact printed X payment to fund the unaffordable central ICE", () =
       actionId: action.actionId,
       stateVersion: 163,
     },
+  });
+  const applied = applyAction(state, {
+    matchId: state.matchId,
+    side: "corp",
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+  });
+  if (!applied.ok) throw new Error(applied.error.message);
+  expect(applied.state.corp.credits).toBe(state.corp.credits - 3);
+  expect(
+    applied.state.cardInstances["corp_onr_proteus_015_colonel-failure_2"],
+  ).toMatchObject({
+    rezzed: true,
+    counters: { kludge: 3 },
   });
 });

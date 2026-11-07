@@ -204,7 +204,17 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
     const { target, economy } = quote;
     // Quote preparation for this bound run; global damage and breaker floors
     // remain in the shared service, other unselected runs do not add draws.
-    const buffer = runnerDefenseHandBufferFacts(projected, [target]);
+    const buffer = runnerDefenseHandBufferFacts(
+      projected,
+      [target],
+      (current) =>
+        services.runnerRunTargetCanConvertNow(
+          projected,
+          economy,
+          current,
+          candidates,
+        ),
+    );
     const drawGap = Math.max(
       0,
       buffer.minimumHandBuffer - buffer.handSize,

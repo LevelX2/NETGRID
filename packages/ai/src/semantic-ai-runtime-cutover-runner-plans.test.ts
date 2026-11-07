@@ -2222,6 +2222,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
     bindPlainRemoteAgendaQuote(secondInput);
+    observeFixtureBasicAction(firstInput, secondInput, "gain-credit");
     const second = chooseRunnerAction(secondInput);
     const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
 

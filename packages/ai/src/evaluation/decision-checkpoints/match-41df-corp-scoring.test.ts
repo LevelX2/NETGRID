@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { scoreRouteExposure } from "../../corp/score/score-route-risk";
+import { corpFreeRezBoardCompanion } from "../corp-free-rez-board.test-support";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
   resetResidentPlanPortfolioMemory,
@@ -39,7 +40,7 @@ function decide(index: number) {
   // Current-rule companion: four standard Runner actions, with one reserved
   // for the run. This is an explicit scenario parameter, not a repair of the
   // original capture or a runtime default for missing Engine facts.
-  const input = structuredClone(replay.input);
+  const input = currentOperationCompanion(replay.input);
   input.playerView.runnerNextTurnCreditClicks = 3;
   restoreAiRuntimeCheckpoint(
     input,
@@ -47,6 +48,16 @@ function decide(index: number) {
     replay.runtime,
   );
   return { input, decision: chooseAiAction(input) };
+}
+
+function currentOperationCompanion(input: AiDecisionInputWithDeckCapabilities) {
+  const copy = structuredClone(input);
+  return copy.legalActions.some(
+    (action) =>
+      action.type === "play_operation" && action.payload?.xValue !== undefined,
+  )
+    ? corpFreeRezBoardCompanion(copy, "onr_proteus_049_emergency-rig").input
+    : copy;
 }
 
 describe("match 41df Corp scoring", () => {
@@ -120,7 +131,7 @@ describe("match 41df Corp scoring", () => {
     "continues the installed agenda at D91 with live commitment = %s",
     (live) => {
       const replay = capture(91);
-      const input = replay.input;
+      const input = currentOperationCompanion(replay.input);
       restoreAiRuntimeCheckpoint(
         input,
         input.ownDeckSnapshot!.deckSnapshotId,
@@ -147,7 +158,7 @@ describe("match 41df Corp scoring", () => {
   it("rejects D89's exposed install when three basic credit actions precede the next run", () => {
     const replay = capture(89);
     // Explicit counterfactual with the new Engine horizon; stored capture stays unchanged.
-    const input = structuredClone(replay.input);
+    const input = currentOperationCompanion(replay.input);
     input.playerView.runnerNextTurnCreditClicks = 3;
     restoreAiRuntimeCheckpoint(
       input,
@@ -179,7 +190,7 @@ describe("match 41df Corp scoring", () => {
       const selected = input.legalActions.find(
         (action) => action.actionId === decision.actionId,
       )!;
-      const projects = residentPlanPortfolioSnapshot(input)!
+      const retainedProjects = residentPlanPortfolioSnapshot(input)!
         .instances.filter(
           (instance) => instance.moduleId === "corp.score_agenda",
         )
@@ -188,8 +199,26 @@ describe("match 41df Corp scoring", () => {
             (instance.moduleState as { signal: CorpScoreProjectSignal }).signal,
         )
         .filter(
-          (project) => project.phase === "install_agenda" && project.feasible,
+          (project) =>
+            project.phase === "install_agenda" &&
+            (index === 210 || project.feasible),
         );
+      const projects = retainedProjects.filter(
+        (project) =>
+          project.protectionNeed?.observedAtStateVersion ===
+          input.playerView.stateVersion,
+      );
+      for (const stale of retainedProjects.filter(
+        (project) => !projects.includes(project),
+      )) {
+        expect(stale.feasible).toBe(false);
+        expect(
+          scoreRouteExposure(stale, input.playerView.stateVersion),
+        ).toEqual({
+          knowledge: "unknown",
+          reason: "missing_or_unbound_protection",
+        });
+      }
       expect(projects.length).toBeGreaterThan(1);
       for (const project of projects)
         expect(
@@ -199,6 +228,9 @@ describe("match 41df Corp scoring", () => {
           probability: { numerator: 1, denominator: 1 },
         });
       if (index === 210) {
+        // Current strict terminal-steal protection keeps these unsafe routes
+        // blocked; their exact exposure remains available for comparison.
+        expect(projects.every((project) => !project.feasible)).toBe(true);
         // A concrete installed central reserve now precedes unsafe emergency
         // installs. The route comparison remains independently observable.
         expect(selected.actionId).toBe("corp.gain_credit");

@@ -2661,10 +2661,15 @@ export function runnerDelegatedFundingActionIds(
       actionIds.add(actionId);
     }
   }
-  if (runnerDefensePersistentCounterFundingIsCurrentPhase({
-    actionCandidates: candidates, stateVersion, signals: domain.defense,
-  })) {
-    for (const actionId of domain.defense.persistentHazardCounterFundingNeed?.actionIds ?? [])
+  if (
+    runnerDefensePersistentCounterFundingIsCurrentPhase({
+      actionCandidates: candidates,
+      stateVersion,
+      signals: domain.defense,
+    })
+  ) {
+    for (const actionId of domain.defense.persistentHazardCounterFundingNeed
+      ?.actionIds ?? [])
       actionIds.add(actionId);
   }
   return actionIds;
@@ -2842,7 +2847,12 @@ function prepareRunnerDomain(
   let runOwners: ReturnType<typeof buildRunOwners> | undefined;
   function buildRunOwners() {
     const economyReserve = runnerEconomyReserveFacts(input, economy);
-    const defenseHandBuffer = runnerDefenseHandBufferFacts(input, runTargets);
+    const defenseHandBuffer = runnerDefenseHandBufferFacts(
+      input,
+      runTargets,
+      (target) =>
+        runnerRunTargetCanConvertNow(input, economy, target, candidates),
+    );
     const { handSize, damageThreat, minimumHandBuffer } = defenseHandBuffer;
     const defenseSupport = runnerDefenseSupportSignals(
       input,

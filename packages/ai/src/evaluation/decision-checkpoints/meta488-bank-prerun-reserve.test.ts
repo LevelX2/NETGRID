@@ -14,6 +14,7 @@ import { buildRunnerEconomyPosture } from "../../runner-economy-posture";
 import { assessRunnerRunFundingAdmission } from "../../runtime/runner-run-funding-admission";
 import { runnerTerminalRemoteLastChanceKnownPathFundingGap } from "../../runner/remote-contest/remote-contest-admission";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { runnerDefenseHandBufferFacts } from "../../runner/defense-recovery/defense-signals";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -91,8 +92,21 @@ function facts(input: AiDecisionInputWithDeckCapabilities) {
 describe("native unknown-ICE reserve bank support", () => {
   beforeEach(resetResidentPlanPortfolioMemory);
 
+  it("retains the ordinary high-risk hand floor for an already convertible run", () => {
+    const { input } = capture(20);
+    input.playerView.opponent.agendaPoints = 3;
+    const { target } = facts(input);
+    target.unrezzedIceRisk = 0.9;
+    target.multiaccessAvailable = false;
+    const buffer = runnerDefenseHandBufferFacts(input, [target], () => true);
+    expect(buffer.minimumHandBuffer).toBe(4);
+    expect(buffer.riskAdjustedHandBuffer.evidenceCode).toContain(
+      "runner_high_risk_run_hand_buffer:4",
+    );
+  });
+
   it.each([11, 20] as const)(
-    "executes the real bank under the exact Remote parent in game %s",
+    "uses only the financing still needed by the exact terminal Remote parent in game %s",
     (game) => {
       const { input, runtime, validation } = capture(game);
       expect(Object.values(validation).every(Boolean)).toBe(true);
@@ -106,10 +120,29 @@ describe("native unknown-ICE reserve bank support", () => {
       const action = input.legalActions.find(
         (a) => a.actionId === result.actionId,
       )!;
+      if (game === 20) {
+        expect(action.actionId).toBe("runner.start_run.remote_1");
+        expect(result.fallbackUsed).toBe(false);
+        expect(result.decisionDebug?.planFirstDecision).toMatchObject({
+          rootPlanInstanceId: parentId,
+          leafExecutorInstanceId: parentId,
+          route: {
+            actionId: action.actionId,
+            stateVersion: input.playerView.stateVersion,
+          },
+        });
+        expect(
+          residentPlanPortfolioSnapshot(input)!.instances.filter(
+            (p) => p.parentNeedId === needId,
+          ),
+        ).toHaveLength(0);
+        expect(engineFactsHash(input)).toBe(before);
+        return;
+      }
       expect(
         facts(input).banks.find((c) => c.actionId === action.actionId)
           ?.economyProjection?.storedCreditsTaken,
-      ).toBe(game === 11 ? 9 : 3);
+      ).toBe(9);
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       expect(result.fallbackUsed).toBe(false);
       expect(result.decisionDebug?.planFirstDecision).toMatchObject({
@@ -128,9 +161,9 @@ describe("native unknown-ICE reserve bank support", () => {
       expect(providers[0]!.moduleState).toMatchObject({
         signal: {
           runFunding: {
-            gap: game === 11 ? 17 : 2,
+            gap: 7,
             routeAssessment: {
-              totalClickCost: game === 11 ? 2 : 1,
+              totalClickCost: 1,
               status: "covered_guaranteed",
             },
           },
@@ -184,17 +217,27 @@ describe("native unknown-ICE reserve bank support", () => {
     },
   );
 
-  it.each([11, 20] as const)("keeps unknown ICE conditional while removing only terminal investment in game %s", (game) => {
-    const { input } = capture(game);
-    const { target, banks, quote } = facts(input);
-    expect(target.prerunReserveQuote).toMatchObject({
-      riskTolerance: "terminal_remote_last_chance", requiredCredits: 4,
-      creditGap: game === 11 ? 7 : 0,
-    });
-    const funded = quote(banks.slice(0, 1))!;
-    expect(funded.routeQuote).toMatchObject({ reachability: "conditional_access", unknownIceCount: game === 11 ? 1 : 2 });
-    expect(funded.prerunReserveQuote).toMatchObject({ status: "satisfied", requiredCredits: 4 });
-  });
+  it.each([11, 20] as const)(
+    "keeps unknown ICE conditional while removing only terminal investment in game %s",
+    (game) => {
+      const { input } = capture(game);
+      const { target, banks, quote } = facts(input);
+      expect(target.prerunReserveQuote).toMatchObject({
+        riskTolerance: "terminal_remote_last_chance",
+        requiredCredits: 4,
+        creditGap: game === 11 ? 7 : 0,
+      });
+      const funded = quote(banks.slice(0, 1))!;
+      expect(funded.routeQuote).toMatchObject({
+        reachability: "conditional_access",
+        unknownIceCount: game === 11 ? 1 : 2,
+      });
+      expect(funded.prerunReserveQuote).toMatchObject({
+        status: "satisfied",
+        requiredCredits: 4,
+      });
+    },
+  );
 
   it.each([
     "insufficient_payout",
@@ -203,8 +246,11 @@ describe("native unknown-ICE reserve bank support", () => {
     "missing_hand_buffer",
   ] as const)("does not bind an incomplete bank proof: %s", (boundary) => {
     const { input, runtime } = capture(11);
-    if (boundary === "insufficient_payout") input.playerView.own.credits = 4;
-    if (boundary === "no_run_click") input.playerView.own.clicks = 2;
+    if (boundary === "insufficient_payout") {
+      input.playerView.own.credits = 0;
+      input.playerView.own.clicks = 3;
+    }
+    if (boundary === "no_run_click") input.playerView.own.clicks = 1;
     if (boundary === "missing_cashout")
       input.legalActions = input.legalActions.filter(
         (a) => !a.actionId.includes("withdraw_credits"),

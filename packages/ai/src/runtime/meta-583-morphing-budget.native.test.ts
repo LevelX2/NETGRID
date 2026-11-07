@@ -63,6 +63,8 @@ describe("pairing 583 Morphing Tool preparation uses one coherent general-credit
         });
         expect(p.selectedStep!.planInstanceId).toBe(p.leafExecutorInstanceId);
         expect(JSON.stringify(cp.input)).toBe(before);
+        if (!selected.actionId)
+          throw new Error("Expected a direct native morphing action.");
         const command = {
           matchId: f.state.matchId,
           side: cp.actor,
@@ -70,9 +72,6 @@ describe("pairing 583 Morphing Tool preparation uses one coherent general-credit
           clientKnownStateVersion: f.state.stateVersion,
           ...(selected.selectedChoices
             ? { selectedChoices: selected.selectedChoices }
-            : {}),
-          ...(selected.selectedTargets
-            ? { selectedTargets: selected.selectedTargets }
             : {}),
         };
         const result = applyAction(f.state, command);

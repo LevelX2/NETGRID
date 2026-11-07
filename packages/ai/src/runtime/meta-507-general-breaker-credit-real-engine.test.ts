@@ -6,8 +6,11 @@ import {
   getPlayerView,
   validateGameState,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState, LegalAction } from "@netgrid/shared";
-import { metaTenStandardDecks as catalog } from "../evaluation/meta-ten-standard-decks.test-support";
+import {
+  DEMO_DECKS,
+  type DeckDefinition,
+  type LegalAction,
+} from "@netgrid/shared";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -16,27 +19,28 @@ afterEach(resetResidentPlanPortfolioMemory);
 const spinal = "onr_classic_048_omnitech-spinal-tap-cybermodem",
   ms = "onr_classic_029_ms-todon";
 it("spends genuine general breaker bits on a noisy breaker through the current run owner", () => {
-  const runner = catalog.decks.find(
-    (d) =>
-      d.standardDeckId ===
-      "standard_classic_runner_cybernetics_risk_rig_2026_07_01",
-  )!;
-  const corp = catalog.decks.find(
-    (d) =>
-      d.standardDeckId ===
-      "standard_classic_corp_superserum_control_grid_2026_07_01",
-  )!;
-  const deck = (d: typeof runner): DeckDefinition => ({
-    id: d.standardDeckId,
-    name: d.name,
-    side: d.side,
-    identity: d.identityCardId,
-    cards: d.cards.map((c) => ({ id: c.cardId, quantity: c.quantity })),
-  });
+  // This mechanism owns its required cards independently of product deck edits.
+  const runner: DeckDefinition = {
+    ...DEMO_DECKS.demo_runner_001,
+    id: "fixture_general_breaker_bits_runner",
+    cards: [
+      ...DEMO_DECKS.demo_runner_001.cards,
+      { id: spinal, quantity: 1 },
+      { id: ms, quantity: 1 },
+    ],
+  };
+  const corp: DeckDefinition = {
+    ...DEMO_DECKS.demo_corp_001,
+    id: "fixture_general_breaker_bits_corp",
+    cards: [
+      ...DEMO_DECKS.demo_corp_001.cards,
+      { id: "onr_classic_008_deadeye", quantity: 1 },
+    ],
+  };
   let s = createGameAfterSetup({
     seed: "meta507-general-noisy-credit-owner",
-    runnerDeck: deck(runner),
-    corpDeck: deck(corp),
+    runnerDeck: runner,
+    corpDeck: corp,
   });
   s.activeSide = "runner";
   s.phase = "runner_action_phase";
@@ -90,8 +94,11 @@ it("spends genuine general breaker bits on a noisy breaker through the current r
       decisionId: `general:${s.stateVersion}`,
       ownDeckSnapshot: {
         side: "runner",
-        deckSnapshotId: runner.standardDeckId,
-        cards: runner.cards,
+        deckSnapshotId: runner.id,
+        cards: runner.cards.map((c) => ({
+          cardId: c.id,
+          quantity: c.quantity,
+        })),
       },
     });
     const d = chooseAiAction(input);
