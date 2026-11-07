@@ -333,7 +333,8 @@ export function prepareCorpTurnPlanner(params: {
     currentStepSearch,
     finish(currentStep) {
       const search =
-        currentStep ?? searchDeterministicRemainderTurnPlans({ entryFrame, offers });
+        currentStep ??
+        searchDeterministicRemainderTurnPlans({ entryFrame, offers });
       const boundedSingleStepSearch =
         !currentStep && params.authorityMode !== "cutover"
           ? searchDeterministicRemainderTurnPlans({
@@ -345,7 +346,10 @@ export function prepareCorpTurnPlanner(params: {
       const selectedSearchLine = search.lines.find(
         (line) => line.lineId === search.selectedLineId,
       );
-      if (!selectedSearchLine && currentCorpCreditObligation(input) !== undefined) {
+      if (
+        !selectedSearchLine &&
+        currentCorpCreditObligation(input) !== undefined
+      ) {
         throw new PlanResolutionFailure("missing_plan_module_coverage", {
           side: input.side,
           stateVersion: input.playerView.stateVersion,
@@ -362,7 +366,8 @@ export function prepareCorpTurnPlanner(params: {
       );
       const selectedSearchHead = selectedSearchLine?.steps[0]
         ? heads.find(
-            (head) => head.candidateId === selectedSearchLine.steps[0]!.candidateId,
+            (head) =>
+              head.candidateId === selectedSearchLine.steps[0]!.candidateId,
           )
         : undefined;
       const boundedSingleStepHead = boundedSingleStepLine?.steps[0]
@@ -375,7 +380,9 @@ export function prepareCorpTurnPlanner(params: {
         (head) => head.currentBinding.actionId === liveActionId,
       );
       const liveHeadOffer = liveHead
-        ? offers.find((offer) => offer.head.candidateId === liveHead.candidateId)
+        ? offers.find(
+            (offer) => offer.head.candidateId === liveHead.candidateId,
+          )
         : undefined;
       const canRetainLiveHead =
         !currentStep &&
@@ -410,6 +417,11 @@ export function prepareCorpTurnPlanner(params: {
         rulesContext,
         stateIdentity,
         heads,
+        headRecords: headRecords.map((record) => ({
+          head: record.head,
+          assessment: record.route.assessment,
+          stepValue: record.route.stepValue,
+        })),
         coverage,
         search,
         selectedLine,
@@ -433,7 +445,9 @@ export function prepareCorpTurnPlanner(params: {
         heads: structuredClone(heads),
         lines: structuredClone(search.lines),
         rejectedCurrentSteps: search.rejectedCurrentSteps,
-        ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
+        ...(selectedLine
+          ? { selectedLine: structuredClone(selectedLine) }
+          : {}),
         ...(shadowHead ? { selectedHead: structuredClone(shadowHead) } : {}),
         ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
         headBindings: headRecords.map((record) => ({
@@ -1337,7 +1351,10 @@ export function currentTurnPlanningInvocationVariants(params: {
     params.candidate,
     params.allowEngineOnlyTargetRequirements === true,
   );
-  const boundChoices = bindTurnPlanChoices(params.action, params.selectedChoices);
+  const boundChoices = bindTurnPlanChoices(
+    params.action,
+    params.selectedChoices,
+  );
   if (targetVariants.length === 0 || boundChoices === undefined) return [];
   return targetVariants.map((boundTargets) =>
     buildCanonicalLegalActionInvocation({
@@ -1868,6 +1885,11 @@ function debugForShadow(params: {
   rulesContext: PlanningRulesContext;
   stateIdentity: PlanningStateIdentity;
   heads: TurnPlanningHeadCandidate[];
+  headRecords: readonly {
+    head: TurnPlanningHeadCandidate;
+    assessment: ValidatedPlanAssessment;
+    stepValue: number;
+  }[];
   coverage: CorpTurnPlanningCoverageReport;
   search: ReturnType<typeof searchDeterministicRemainderTurnPlans>;
   selectedLine: TurnRemainderSearchLine | undefined;
@@ -1924,7 +1946,11 @@ function debugForShadow(params: {
       params.stateIdentity.sideSafePlanningFingerprint,
     planningRulesFingerprint: params.rulesContext.fingerprint,
     turnKey: `corp:turn:${params.input.playerView.turnSerial ?? "unknown"}`,
-    heads: params.heads.map((head) => ({
+    candidateAudit: {
+      schemaVersion: "ai-turn-planning-candidate-audit-v1",
+      provenance: "persisted_at_decision",
+    },
+    heads: params.headRecords.map(({ head, assessment, stepValue }) => ({
       candidateId: head.candidateId,
       moduleId: head.moduleId,
       rootPlanInstanceId: head.rootPlanInstanceId,
@@ -1934,7 +1960,34 @@ function debugForShadow(params: {
       actionId: head.currentBinding.actionId,
       semanticActionType: head.invocation.semanticActionType,
       invocationKey: head.invocation.invocationKey,
-      witnessValid: true,
+      witnessValid:
+        head.executableWitness.sideSafePlanningFingerprint ===
+        params.stateIdentity.sideSafePlanningFingerprint,
+      selectedInLine:
+        selectedLine?.steps.some(
+          (step) => step.candidateId === head.candidateId,
+        ) === true,
+      assessment: {
+        requestedPriorityClass: assessment.priorityClaim.requestedClass,
+        effectivePriorityClass: assessment.priorityValidation.effectiveClass,
+        readiness: assessment.readiness,
+        intentFit: assessment.intentFit,
+        withinClassValue: assessment.withinClassValue,
+        stepValue,
+        resourceGaps: assessment.resourceGaps.map((gap) => ({
+          needId: gap.needId,
+          capability: gap.capability,
+          minimum: gap.minimum,
+          available: gap.available,
+          deadline: gap.deadline,
+        })),
+        blockers: assessment.blockers.map((blocker) => ({
+          code: blocker.code,
+          owner: blocker.owner,
+          removable: blocker.removable,
+        })),
+        evidenceCodes: [...assessment.evidenceCodes],
+      },
     })),
     selectedLine: {
       lineId: selectedLine?.lineId ?? "corp-no-selected-line",
@@ -2202,6 +2255,9 @@ function debugForShadow(params: {
       rootPlanInstanceId: line.rootPlanInstanceId,
       stepCount: line.steps.length,
       scalarValue: line.scalarValue,
+      upperBoundValue: line.upperBoundValue,
+      partitionKey: line.partitionKey,
+      priorityClass: line.priorityClass,
       stopReason: debugStopReason(line),
       violatedObligationCount:
         line.priorityCoverage.violatedObligationIds.length,
@@ -2214,12 +2270,30 @@ function debugForShadow(params: {
           ? { currentActionId: step.currentBinding.actionId }
           : {}),
       })),
+      projectedEndState: {
+        creditMinimum: line.projectedFrame.ownCredits.minimum,
+        creditMaximum: line.projectedFrame.ownCredits.maximum,
+        unrestrictedActionMinimum:
+          line.projectedFrame.actionCapacityLedger.unrestricted.minimum,
+        unrestrictedActionMaximum:
+          line.projectedFrame.actionCapacityLedger.unrestricted.maximum,
+        handMinimum: line.projectedFrame.ownHand.count.minimum,
+        handMaximum: line.projectedFrame.ownHand.count.maximum,
+        ...(line.projectedFrame.pendingBoundary
+          ? {
+              pendingBoundaryKind:
+                line.projectedFrame.pendingBoundary.boundaryKind,
+            }
+          : {}),
+      },
       evaluationValues: { ...line.evaluationValues },
       evidenceCodes: [...line.evidenceCodes],
     })),
     pruneEvents: params.search.pruneEvents.map((event) => ({
       candidateId: event.candidateId,
       reasonCode: event.reasonCode,
+      partitionKey: event.partitionKey,
+      ...(event.prefixLineId ? { prefixLineId: event.prefixLineId } : {}),
     })),
     evidenceCodes: [
       ...(params.authorityMode === "cutover"

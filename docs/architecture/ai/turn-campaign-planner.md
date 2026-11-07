@@ -2026,6 +2026,16 @@ type TurnPlannerTrace = {
 
 ### 12.2 Erforderliche Erklärbarkeit
 
+Corp und Runner erzeugen den vollständigen Kandidatenaudit am jeweiligen
+Planungsproduzenten: den Marker `ai-turn-planning-candidate-audit-v1`, die
+validierten Head-Assessments, bewertete Linien mit projizierten Ressourcen am
+Linienende sowie Partitionen und typisierte Prunegründe. Die Maintenance-API
+verlangt diesen Marker für `persisted_at_decision`; ein verkürzter alter
+Planungstrace ist kein vollständiger Audit. Das ist von der unabhängig
+vorhandenen historischen Engine-Zustandskette zu unterscheiden. Der native
+Corp-Checkpoint 620/D4 und das vollständige Same-Seed-Spiel sichern diese
+rein diagnostische Ergänzung ohne geänderte Action-, Root- oder Executorwahl.
+
 Für jede Entscheidung muss sichtbar sein:
 
 - welche vollständigen Linien verglichen wurden;
