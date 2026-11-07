@@ -2852,6 +2852,16 @@ gesamten Nominalkosten. Ein einzelner billiger Pump zertifiziert keine
 günstigere vollständige Folge. Unbekannte innere ICE, gemischte Wirkungen,
 konditionale Folgen oder die Liquidation einer Zahlungsquelle liefern keine
 gleichwertige reine ETR-Kostenrangfolge.
+Ein bereits durch einen tatsächlichen Break gebundener Selbsttrashcheck nach
+dem Passieren ist am innersten ICE dagegen eine gemeinsame Folge aller
+vollständigen Antworten. Die Engine projiziert seine öffentlichen Quellen
+für den aktuellen Encounter; der DTO erhält diese Bindung. Die lokale
+Zahlungsquote darf dann denselben Breaker erneut zum günstigeren vollständigen
+Break einsetzen, ohne einen zusätzlichen Check anzunehmen. Das zertifiziert
+weder den Erhalt des Breakers noch einen sicheren inneren Folgepfad. Neue
+Checks, fremde Quellen und verbleibende innere ICE behalten die bisherige
+konditionale Bewertung. Der native Checkpoint aus Paarung 618/D238 und zwei
+exakte Engine-Zweige belegen einen gesparten Credit bei demselben Zufallscheck.
 Bei gleichen vollständigen Cash- und Nominalkosten berücksichtigt die Quote
 anschließend neu entstehende Quellentrashpflichten am Runende. Die Engine
 kennzeichnet diese Konsequenz am tatsächlichen Break und projiziert bereits

@@ -757,6 +757,18 @@ function sanitizePlayerView(
   publicEvents: PublicGameEvent[],
 ): PlayerView {
   const runEndTrashUsed = view.run?.runEndTrashUsedBreakerIdsThisRun;
+  const postPassTrashCheckUsed =
+    view.run?.postPassTrashCheckUsedBreakerIdsThisEncounter;
+  if (
+    postPassTrashCheckUsed !== undefined &&
+    (!Array.isArray(postPassTrashCheckUsed) ||
+      view.run?.phase !== "encounter_ice" ||
+      postPassTrashCheckUsed.some(
+        (id) => typeof id !== "string" || id.length === 0,
+      ) ||
+      new Set(postPassTrashCheckUsed).size !== postPassTrashCheckUsed.length)
+  )
+    throw new Error("Invalid Engine public post-pass breaker usage.");
   if (
     runEndTrashUsed !== undefined &&
     (!Array.isArray(runEndTrashUsed) ||
@@ -1069,6 +1081,12 @@ function sanitizePlayerView(
               : {}),
             ...(runEndTrashUsed !== undefined
               ? { runEndTrashUsedBreakerIdsThisRun: runEndTrashUsed.slice() }
+              : {}),
+            ...(postPassTrashCheckUsed !== undefined
+              ? {
+                  postPassTrashCheckUsedBreakerIdsThisEncounter:
+                    postPassTrashCheckUsed.slice(),
+                }
               : {}),
             phase: view.run.phase,
             ...(view.run.position

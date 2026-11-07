@@ -291,6 +291,14 @@ export function buildPlayerViewProjection(
               ],
             }
           : {}),
+        ...(state.run.phase === "encounter_ice" &&
+        state.run.bartmossUsedBreakerIdsThisEncounter?.length
+          ? {
+              postPassTrashCheckUsedBreakerIdsThisEncounter: [
+                ...new Set(state.run.bartmossUsedBreakerIdsThisEncounter),
+              ],
+            }
+          : {}),
         phase: state.run.phase,
         position: { ...state.run.position },
         ...(approachedIce

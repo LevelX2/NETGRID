@@ -4284,6 +4284,8 @@ export type PlayerView = {
     accessServerOverride?: Exclude<ServerId, "new_remote">;
     /** Public sources already bound to run-end trash by actual break use. */
     runEndTrashUsedBreakerIdsThisRun?: CardInstanceId[];
+    /** Public sources whose trash check is already bound to passing this encounter. */
+    postPassTrashCheckUsedBreakerIdsThisEncounter?: CardInstanceId[];
     phase: RunState["phase"];
     position?: RunState["position"];
     approachedIce?: VisibleCard;

@@ -131,9 +131,19 @@ export function completeEncounterBreakerPayment(
     breaker.strength,
     ice.effectiveRunQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
   );
+  // At the innermost ICE, this already-bound check is shared by every
+  // complete payment. Using the same source again adds no random check.
+  // Inner ICE still need a full retained/trashed continuation assessment.
+  const alreadyBoundPostPassRisk =
+    quote?.conditionalRiskReason === "visible_breaker_may_trash_after_pass" &&
+    input.playerView.run.position?.kind === "ice" &&
+    input.playerView.run.position.iceIndex === 0 &&
+    input.playerView.run.postPassTrashCheckUsedBreakerIdsThisEncounter?.includes(
+      breaker.instanceId,
+    ) === true;
   if (
     !quote ||
-    quote.conditionalRiskReason ||
+    (quote.conditionalRiskReason && !alreadyBoundPostPassRisk) ||
     quote.conditionalAccessReason ||
     quote.futureClicksLost
   )

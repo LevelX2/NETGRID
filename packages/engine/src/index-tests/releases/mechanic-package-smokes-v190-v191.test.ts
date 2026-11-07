@@ -313,6 +313,9 @@ describe("V1.9.0 Mechanikpaket I", () => {
           "onr_v1_005_bartmoss-memorial-icebreaker",
       );
       expect(bartmossId).toBeDefined();
+      expect(getPlayerView(state, "runner").run).not.toHaveProperty(
+        "postPassTrashCheckUsedBreakerIdsThisEncounter",
+      );
       state = apply(
         state,
         "runner",
@@ -334,10 +337,23 @@ describe("V1.9.0 Mechanikpaket I", () => {
           action.type === "break_subroutine" &&
           String(action.payload?.breakerId) === bartmossId,
       );
+      const beforeProjection = hashState(state);
+      for (const side of ["runner", "corp"] as const) {
+        const view = getPlayerView(state, side);
+        expect(view.run).toHaveProperty(
+          "postPassTrashCheckUsedBreakerIdsThisEncounter",
+          [bartmossId],
+        );
+        expect(view.opponent).not.toHaveProperty("gripOrHq");
+      }
+      expect(hashState(state)).toBe(beforeProjection);
       state = apply(
         state,
         "runner",
         (action) => action.type === "continue_run",
+      );
+      expect(getPlayerView(state, "runner").run).not.toHaveProperty(
+        "postPassTrashCheckUsedBreakerIdsThisEncounter",
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
         record.purpose.startsWith(
