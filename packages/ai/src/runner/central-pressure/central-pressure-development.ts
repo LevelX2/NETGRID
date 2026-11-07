@@ -14,6 +14,7 @@ import {
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 import { runnerDefinitionRequiresTargetedBypassPlan } from "../run-window/runner-targeted-bypass-plan";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
+import { runnerLastClickInstallPreservesHandBuffer } from "../hand-development/last-click-install-admission";
 export function runnerCentralPressureDevelopmentSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -22,6 +23,7 @@ export function runnerCentralPressureDevelopmentSignals(
   coverageGaps: RunnerPlanDomain["coverageGaps"],
   strategicIntent: RunnerStrategicIntentProfile,
   economy: RunnerEconomyPosture,
+  minimumHandBuffer: number,
 ): RunnerPlanDomain["centralPressure"] {
   const eligible = handDevelopment.flatMap((evaluation) => {
     if (
@@ -97,6 +99,16 @@ export function runnerCentralPressureDevelopmentSignals(
       evaluation.deferReason === "missing_credits" &&
       evaluation.fundingNeed !== undefined;
     if (!legalInstall && !waitingForInstallFunding) return [];
+    if (
+      legalInstall &&
+      !runnerLastClickInstallPreservesHandBuffer(
+        input,
+        candidate,
+        evaluation,
+        minimumHandBuffer,
+      )
+    )
+      return [];
     const installCost =
       evaluation.fundingNeed?.installOrPlayCost ??
       evaluation.persistentInstallEvaluation?.installCost ??

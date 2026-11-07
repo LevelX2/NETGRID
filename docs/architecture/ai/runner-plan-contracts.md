@@ -43,6 +43,19 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Die Installation eines Zugriffspayoffs erhält am letzten verfügbaren Klick
+denselben bereits erreichten Handboden wie die allgemeine Handentwicklung.
+Der Zentralparent und die allgemeine Handentwicklung konsumieren dafür dieselbe
+gebundene `persistentInstallEvaluation.handAfterInstall` und den aktuellen
+Defense-Puffer. Eine neutrale Wirtschaftsprojektion ohne verlässlichen
+Kartenverbrauch ist kein Beleg für eine handneutrale Installation. Eine
+fehlende exakte Installationsquote eröffnet diese letzte Vorbereitung nicht. Zusätzliche
+Handkarten oberhalb des Bodens und Vorbereitung mit weiterem normalen Klick
+bleiben zulässig. Paarung 633 D53 sichert den nativen HQ-Interface-Pfad ab;
+der zusätzliche Draw beweist keinen Sieg gegen eine verdeckte Schadensfolge.
+Auch bei bereits unterschrittenem empfohlenem Boden bleiben die schon
+aufgebauten Handkarten erhalten; es entsteht kein unerfüllbarer neuer Handzwang.
+
 Eine Runroute mit ersetztem Kartenzugriff erhält weder den normalen
 Multiaccess-Ertrag installierter Karten noch eine terminale Agenda-Zugriffs-
 Ausnahme. Ein privater R&D-Blick behält seinen Informationszweck und dessen

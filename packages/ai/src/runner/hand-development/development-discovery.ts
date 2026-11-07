@@ -20,6 +20,7 @@ import {
   runnerStrategicExchangeRequiresBoundParent,
 } from "../../runtime/runner-strategic-exchange";
 import { assessRunnerSuccessfulRunCreditInvestment } from "../../runtime/runner-successful-run-credit-investment";
+import { runnerLastClickInstallPreservesHandBuffer } from "./last-click-install-admission";
 import {
   runnerDefinitionRequiresTargetedBypassPlan,
   runnerGenericDevelopmentMayOwnAction,
@@ -185,13 +186,20 @@ export function buildRunnerCardDevelopmentSignals({
         : undefined;
       if (executableNow && !candidate) return [];
       if (
+        candidate &&
+        !runnerLastClickInstallPreservesHandBuffer(
+          input,
+          candidate,
+          evaluation,
+          minimumHandBuffer,
+        )
+      )
+        return [];
+      if (
         candidate?.economyProjection !== undefined &&
-        ((candidate.economyProjection.kind === "immediate_liquid" &&
-          candidate.economyProjection.timing === "immediate" &&
-          candidate.economyProjection.creditRestriction === "general") ||
-          (candidate.semanticActionType === "install.card" &&
-            candidate.costProfile.clickCost !== undefined &&
-            candidate.costProfile.clickCost >= remainingClicks)) &&
+        candidate.economyProjection.kind === "immediate_liquid" &&
+        candidate.economyProjection.timing === "immediate" &&
+        candidate.economyProjection.creditRestriction === "general" &&
         candidate.economyProjection.netHandDelta !== undefined &&
         input.playerView.own.gripOrHq.length +
           candidate.economyProjection.netHandDelta <

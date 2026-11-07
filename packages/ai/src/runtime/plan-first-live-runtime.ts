@@ -2893,6 +2893,7 @@ function prepareRunnerDomain(
       coverageGaps,
       strategicIntent,
       economy,
+      minimumHandBuffer,
     );
     const runLockReleaseRoutes = runnerRunLockReleaseRoutes(
       input,
