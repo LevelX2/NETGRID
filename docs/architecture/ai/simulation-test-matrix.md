@@ -140,50 +140,33 @@ Erreicht der Check dieses Limit, lässt sich derselbe strikte Check zur
 Diagnose mit einem höheren Heaplimit allein für seinen Prozess ausführen.
 Das ändert weder den Prüfgegenstand noch behebt es einen Typfehler.
 
-## Aktuelle offene AI-Gate-Abweichungen
+## Konsolidierter Prüfstand
 
-Der letzte vollständig grüne AI-Lauf vom 2026-10-31 umfasst 8.525 Tests
-über drei Shards. Der lokale
-[Prüfbericht](../../Berichte/Tests-2026-10-31/pruefbericht.json) dokumentiert
-den tatsächlichen Main-Arbeitsstand einschließlich seiner offenen
-Reparaturen. Das zugehörige `ai-shards.log` ist gegen den im Bericht
-gespeicherten SHA-256 geprüft. Unter anderem die Run-Target-Testdatei,
-die Central-Defense-Allokationstests und der Agenda-Steal-Quote-Testhelfer
-liegen am 2026-11-07 noch mit denselben Inhaltshashes außerhalb des
-committeten Standes vor.
+Der lokale [Prüfbericht vom 2026-11-07](../../Berichte/Tests-2026-11-07/pruefbericht.json)
+bindet die Abnahme an Quellcommits, Inhaltsmanifeste und SHA-256 der Logs.
+Alle 292 ursprünglich offenen Quellpfade einschließlich Löschungen sind in
+den Main-Konsolidierungscommits enthalten; die Zuordnung ist im Bericht geprüft.
 
-Der vollständige Lauf vom 2026-11-07 mit 8.834 Tests erfolgte dagegen im
-isolierten Worktree auf Basis von `e4fb1eacf` mit KI-07 bis KI-09, **ohne
-die zusätzlichen offenen Main-Reparaturen**: 8.557 bestehen, 277 scheitern
-in 134 Dateien. Diese 277 Fälle sind einzeln am unveränderten
-Ausgangscommit mit denselben Fehlersignaturen reproduziert. Das belegt
-den Vergleich dieser committeten Stände; es ist **keine aktuelle
-Gesamtfehlerzahl des Main-Arbeitsverzeichnisses**.
+Der vollständige Dreishardlauf auf dem sauberen Main-Commit `8fad19158`
+umfasst 8.943 Tests in 1.088 Dateien: 8.941 bestehen, zwei Testerwartungen
+verlangen noch eine überholte Ausführungsreihenfolge beziehungsweise den
+Coverage-Owner für eine aktuelle Handpuffer-Vorbereitung. Commit `7cebea16e`
+korrigiert ausschließlich diese beiden Tests. Die gezielte Nachprüfung ihrer
+17 Fälle besteht vollständig. Die Abnahme aller 8.943 Fälle verbindet damit
+den vollständigen Lauf mit dieser Nachprüfung bei identischem produktivem KI-Code.
 
-Eine anschließende Gegenprüfung auf dem tatsächlichen Main vom
-2026-11-07 umfasst fünf zuvor betroffene Testdateien mit 490 Tests:
-482 bestehen, acht scheitern. Vier dieser Dateien mit zusammen 34 zuvor
-roten Fällen bestehen vollständig. Die acht verbleibenden Fälle liegen
-in `runtime/meta-ten-access-and-points-real-engine.test.ts`: Die Suche
-nach einem Standarddeck mit `onr_v1_090_hot-tip-for-wns` liefert kein
-Deck; der Zugriff auf `standardDeckId` scheitert bereits beim Testaufbau
-vor dem KI-Aufruf. Ein erneuter vollständiger Lauf auf dem aktuellen
-Main-Arbeitsstand wurde nicht ausgeführt. Seine Gesamtfehlerzahl ist
-damit noch nicht neu bestimmt; mindestens diese acht Testfehler sind
-direkt auf Main belegt.
+Der Recovery-Fall prüft die aktive Defense-Route mit Handpuffer vier und
+gleichzeitig das bereits geplante konkrete Rückholziel. Der noch nicht
+ausgeführte Recovery-Plan erhält keine ausgewählte Action. Der Trace-Fall
+bindet dieselbe sichere Ziehaktion an den tatsächlichen Defense-Owner und
+dessen Step; die getrennten Trace-Geld- und Engine-Gegenfälle bleiben erhalten.
 
-Die fokussierte Abnahme der Owner-, Quote- und Faktenpfade umfasst 101
-bestandene Tests. Paketgrenzen, KI-Struktur, Hint-Verträge, generische
-Karten-ID-Grenzen und Test-Discovery bestehen. Der Typecheck des gesamten
-Produktivpfads und der neuen beziehungsweise strukturell geänderten Tests
-besteht; das ist keine Behauptung über einen vollständigen Paket-Typecheck
-aller übrigen Testdateien.
-
-Auch die Zusammenführung mit den offenen lokalen Main-Änderungen besteht
-diese 101 Prüfungen, den betreffenden Typecheck sowie Paket- und KI-Gates.
-In 53 Engine-Szenarien bleiben Action, Ziele, Choices, Root, Executor und
-Route gegenüber dem jeweiligen Ausgangsstand unverändert. Das belegt den
-Strukturumbau und seine konkrete Verdrahtung, keine globale Spielstärke.
+Zusätzlich sind 6.182 weitere Pakettests, acht Root-Vertragstests, 57
+Werkzeug-/Guardfälle, 26 statische Gates, die Typechecks aller zehn Pakete
+einschließlich strikter Browsertests, der Web-Produktionsbuild und 16
+Firefox-Browserfälle abgedeckt. Wiederverwendete unveränderte Paketprüfungen,
+die gezielte Server-Nachprüfung nach Anpassung eines lokalen Integrationstest-
+Zeitlimits und sämtliche Quellbindungen sind im Bericht einzeln ausgewiesen.
 
 Jede Gate-Aussage benennt Commit und zusätzliche Arbeitsdateien des
 geprüften Standes. Ein aus `HEAD` erzeugter Worktree enthält offene
