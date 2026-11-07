@@ -254,6 +254,9 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     const summary = simulateStandardGame({
       seed: "last-call-panel-cheap-bag-batch-01-game-02",
       corpDeckId: "standard_corp_cheap_bag_tricks",
+      // The current legal sequence ends after 634 actions; keep the complete
+      // game-result and deterministic-replay contract beyond the old 480 cap.
+      maxActions: 720,
       captures,
       capturePredicate: (snapshot) =>
         snapshot.input.playerView.stateVersion === 153 &&
@@ -485,6 +488,7 @@ type StandardDeck = {
 function simulateStandardGame(params: {
   seed: string;
   corpDeckId: string;
+  maxActions?: number;
   captures?: AiSimulationDecisionCheckpointCapture[];
   runnerCards?: StandardDeck["cards"];
   runnerDeckHash?: string;
@@ -499,9 +503,10 @@ function simulateStandardGame(params: {
       ? runner
       : { ...runner, cards: params.runnerCards };
   const corp = standardDeck(params.corpDeckId);
+  const maxActions = params.maxActions ?? 480;
   return simulateAiGame({
     seed: params.seed,
-    maxActions: 480,
+    maxActions,
     runnerDeck: deckDefinition(runnerForSimulation),
     corpDeck: deckDefinition(corp),
     runnerDeckMetadata: deckMetadata(
@@ -519,7 +524,10 @@ function simulateStandardGame(params: {
     ...(params.captures && params.capturePredicate
       ? {
           testOnlyDecisionCheckpointCapture: {
-            actionIndices: Array.from({ length: 480 }, (_, index) => index),
+            actionIndices: Array.from(
+              { length: maxActions },
+              (_, index) => index,
+            ),
             capture: (snapshot: AiSimulationDecisionCheckpointCapture) => {
               params.onCapture?.(snapshot);
               if (params.capturePredicate!(snapshot))

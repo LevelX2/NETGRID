@@ -2334,6 +2334,9 @@ Die allgemeine Schadensreserve, der Schutz flüchtiger Breaker und der bestehend
 Handpuffer für einen ausführbaren Run mit hohem Risiko bleiben unabhängig davon
 erhalten. Die gemeinsame aktuelle Konversionsprüfung wird vom Run-Service
 geliefert; Defense eröffnet dadurch keine eigene Runwahl.
+Die Konversionsprüfung zählt Archives nur bei sichtbarer Agenda oder nach der
+bestehenden Zulassung für verdeckten Archives-Nutzen. Eine erreichbare
+Archives-Pfadquote allein verdrängt keinen konkreten Handpufferbedarf.
 
 Der Hint-Compiler leitet Trace-Abwehr auch aus dem typisierten Abbruch eines
 erfolgreichen Traces ab (SP-765). Dieser Zweck erzeugt nur bei sichtbarer

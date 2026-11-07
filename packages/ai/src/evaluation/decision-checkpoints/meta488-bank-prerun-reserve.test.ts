@@ -95,9 +95,15 @@ describe("native unknown-ICE reserve bank support", () => {
   it("retains the ordinary high-risk hand floor for an already convertible run", () => {
     const { input } = capture(20);
     input.playerView.opponent.agendaPoints = 3;
-    const { target } = facts(input);
-    target.unrezzedIceRisk = 0.9;
-    target.multiaccessAvailable = false;
+    // Explicit attractive-route companion: the native nonterminal quote may
+    // still recommend funding, which does not exercise the high-risk branch.
+    const target = {
+      ...facts(input).target,
+      recommendation: "run_now" as const,
+      score: 100,
+      unrezzedIceRisk: 0.9,
+      multiaccessAvailable: false,
+    };
     const buffer = runnerDefenseHandBufferFacts(input, [target], () => true);
     expect(buffer.minimumHandBuffer).toBe(4);
     expect(buffer.riskAdjustedHandBuffer.evidenceCode).toContain(

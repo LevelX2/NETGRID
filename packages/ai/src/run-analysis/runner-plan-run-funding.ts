@@ -31,6 +31,8 @@ import {
 } from "../runtime/runner-run-funding-admission";
 
 import { runnerTerminalContestThreat } from "../runtime/runner-terminal-contest-threat";
+import { archivesHasVisibleKnownAgenda } from "../runtime/visible-server-agenda-facts";
+import { runnerArchivesHasQualifiedHiddenPayoff } from "../runtime/runner-archives-score";
 
 export function runnerRunFundingSupport(
   input: AiDecisionInput,
@@ -214,6 +216,15 @@ export function runnerRunTargetCanConvertNow(
   evaluation: RunnerRunTargetEvaluation,
   candidates: readonly ActionSemanticCandidate[],
 ): boolean {
+  // A quoted path alone does not make Archives a productive alternative.
+  // Use the same payoff admission as Central discovery and funding admission.
+  if (
+    evaluation.accessTargetKind === "archives" &&
+    !archivesHasVisibleKnownAgenda(input) &&
+    !runnerArchivesHasQualifiedHiddenPayoff(input)
+  ) {
+    return false;
+  }
   const terminalRemoteContestIsDirectlyMandatory =
     runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
   // The terminal route already converts if it can pay the known path and
