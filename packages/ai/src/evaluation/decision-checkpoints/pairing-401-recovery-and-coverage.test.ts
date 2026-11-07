@@ -133,7 +133,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
       fallbackUsed: false,
     });
   });
-  it("binds a useful heap target before the recovery event enters the heap", () => {
+  it("prepares the required hand buffer while retaining the planned source-bound heap target", () => {
     const input = restore(recoveryJson);
     const decision = chooseAiAction(input as AiDecisionInput);
     const portfolio = residentPlanPortfolioSnapshot(input)!;
@@ -141,22 +141,55 @@ describe("pairing 401 source-bound recovery and coverage", () => {
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     )!;
     expect(decision).toMatchObject({
-      actionId:
-        "runner.play_event.runner_onr_v1_089_gideons-pawnshop_1.runner_onr_v1_089_gideons-pawnshop_1.onr_v1_089_gideons-pawnshop:abilities_on_play_search_trash_to_grip",
-      reasonCode: "plan_first.runner.develop_board_and_hand",
+      actionId: "runner.draw_card",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
-    expect(executor.moduleState).toMatchObject({
-      signal: {
-        recoverySearchCommitment: {
-          selectedActionId: decision.actionId,
-          selectedAtStateVersion: 69,
-          sourceCardInstanceId: "runner_onr_v1_089_gideons-pawnshop_1",
-          targetCardInstanceId: "runner_onr_v1_110_sneak-preview_2",
-          targetPurpose: "generic_heap_recovery",
+    expect(executor).toMatchObject({
+      moduleId: "runner.defense_and_recovery",
+      moduleState: {
+        kind: "defense",
+        phase: "build_hand_buffer",
+        signals: { handSize: 3, minimumHandBuffer: 4 },
+      },
+    });
+    expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
+      planInstanceId: executor.instanceId,
+      stepId: `${executor.instanceId}:build_hand_buffer`,
+      actionId: decision.actionId,
+      stateVersion: 69,
+    });
+    // Discovery binds the useful target before play. The selected Defense
+    // step must not give an unexecuted recovery plan action authority.
+    const recovery = portfolio.instances.find(
+      (instance) =>
+        instance.instanceId ===
+        "plan:runner.develop_board_and_hand:recovery%3Arunner_onr_v1_089_gideons-pawnshop_1%3Arunner_onr_v1_110_sneak-preview_2",
+    )!;
+    expect(recovery).toMatchObject({
+      moduleId: "runner.develop_board_and_hand",
+      viability: "ready",
+      moduleState: {
+        signal: {
+          recoverySearchCommitment: {
+            plannedAtStateVersion: 69,
+            sourceCardInstanceId: "runner_onr_v1_089_gideons-pawnshop_1",
+            targetCardInstanceId: "runner_onr_v1_110_sneak-preview_2",
+            targetPurpose: "generic_heap_recovery",
+          },
         },
       },
     });
+    expect(recovery.instanceId).not.toBe(executor.instanceId);
+    expect(recovery.moduleState).not.toHaveProperty(
+      "signal.recoverySearchCommitment.selectedActionId",
+    );
+    expect(
+      input.playerView.own.gripOrHq.map((card) => card.instanceId),
+    ).toContain("runner_onr_v1_089_gideons-pawnshop_1");
+    expect(
+      input.playerView.own.heapOrArchives.map((card) => card.instanceId),
+    ).toContain("runner_onr_v1_110_sneak-preview_2");
   });
 
   it("carries the exact setup-coverage installation through its payment window", () => {

@@ -65,7 +65,7 @@ describe("native trace eligibility of run-only money", () => {
     });
     expect(event.recommendation).toBe("setup_first");
   });
-  it("chooses the current legal setup owner instead of the fatal Lucidrine run", () => {
+  it("builds the required hand buffer instead of the fatal Lucidrine run", () => {
     const f = capture("start");
     expect(Object.values(f.validation).every(Boolean)).toBe(true);
     const hash = () =>
@@ -84,9 +84,16 @@ describe("native trace eligibility of run-only money", () => {
       true,
     );
     const p = d.decisionDebug?.planFirstDecision;
-    expect(p?.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
+    expect(p?.selectedPlan).toMatchObject({
+      moduleId: "runner.defense_and_recovery",
+      phase: "build_hand_buffer",
+    });
+    expect(p?.rootPlanInstanceId).toBe(
+      "plan:runner.defense_and_recovery:runner",
+    );
     expect(p?.route).toMatchObject({
       actionId: d.actionId,
+      capabilityId: "build_required_hand_buffer",
       stateVersion: f.input.playerView.stateVersion,
     });
     expect(p?.route?.planInstanceId).toBe(p?.leafExecutorInstanceId);
