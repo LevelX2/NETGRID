@@ -7,7 +7,10 @@ import {
 } from "./decision/pilot-scope-registry";
 import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
-import { buildPlanningStateIdentity } from "./plans/turn-planning-contracts";
+import {
+  buildPlanningStateIdentity,
+  type ObservedTurnPlanAction,
+} from "./plans/turn-planning-contracts";
 import {
   attachOwnDeckSnapshot,
   aiInput,
@@ -125,6 +128,38 @@ function versionedRunnerTurnInput(
     planningStateIdentity: buildPlanningStateIdentity(input),
   });
   return input;
+}
+
+function observeFixtureBasicAction(
+  before: ReturnType<typeof versionedRunnerTurnInput>,
+  after: ReturnType<typeof versionedRunnerTurnInput>,
+  actionId: string,
+): void {
+  const action = before.legalActions.find((entry) => entry.actionId === actionId);
+  const matchId = before.matchId;
+  if (
+    !action ||
+    (action.type !== "gain_credit" && action.type !== "draw_card") ||
+    !matchId ||
+    matchId !== after.matchId ||
+    before.playerView.stateVersion + 1 !== after.playerView.stateVersion
+  ) {
+    throw new Error("Expected a basic action in the preceding fixture frame.");
+  }
+  const observedTurnPlanAction: ObservedTurnPlanAction = {
+    matchId,
+    side: action.side,
+    stateVersionBefore: before.playerView.stateVersion,
+    stateVersionAfter: after.playerView.stateVersion,
+    actionId,
+    actionType: action.type,
+    source: action.source,
+    boundChoices: [],
+  };
+  Object.assign(after, {
+    planningStateIdentity: buildPlanningStateIdentity(after),
+    observedTurnPlanAction,
+  });
 }
 
 function rdExpressDeckSnapshot() {
@@ -1777,6 +1812,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         server("rd"),
         server("archives"),
       ];
+      secondInput.playerView.own.credits = firstInput.playerView.own.credits + 1;
+      observeFixtureBasicAction(firstInput, secondInput, "gain-credit");
       const second = chooseRunnerAction(secondInput);
       const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
 
@@ -1823,57 +1860,63 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
   );
 
   it("keeps a card-parent funding sequence on the same root when its install milestone becomes legal", () => {
-    const interfaceCard = () =>
-      visibleCard("rnd-interface-card", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
-        title: "R&D Interface",
+    function fundingFrame(stateVersion: number) {
+      const credits = stateVersion + 2;
+      const input = versionedRunnerTurnInput(stateVersion, [
+        legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+          credits: 0,
+        }),
+        ...(credits >= 4
+          ? [
+              legalAction(
+                "install-interface",
+                "runner",
+                "install_card",
+                "Install R&D Interface",
+                { credits: 4 },
+                { source: "rnd-interface-card" },
+              ),
+            ]
+          : []),
+      ]);
+      input.playerView.turnSerial = 34;
+      input.playerView.own.credits = credits;
+      input.playerView.own.clicks = 5 - stateVersion;
+      input.playerView.own.gripOrHq = [
+        visibleCard("rnd-interface-card", "runner", "hardware", {
+          definitionId: "onr_v1_139_r-and-d-interface",
+          title: "R&D Interface",
+        }),
+      ];
+      input.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+      ];
+      Object.assign(input, {
+        planningStateIdentity: buildPlanningStateIdentity(input),
       });
-    const firstInput = versionedRunnerTurnInput(1, [
-      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-        credits: 0,
-      }),
-    ]);
-    firstInput.playerView.turnSerial = 34;
-    firstInput.playerView.own.credits = 3;
-    firstInput.playerView.own.gripOrHq = [interfaceCard()];
-    firstInput.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
-    Object.assign(firstInput, {
-      planningStateIdentity: buildPlanningStateIdentity(firstInput),
-    });
+      return input;
+    }
+
+    const firstInput = fundingFrame(1);
     const first = chooseRunnerAction(firstInput);
     const firstRoot =
       first.decisionDebug?.planFirstDecision?.rootPlanInstanceId;
     const firstLeaf =
       first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId;
 
-    const secondInput = versionedRunnerTurnInput(2, [
-      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-        credits: 0,
-      }),
-      legalAction(
-        "install-interface",
-        "runner",
-        "install_card",
-        "Install R&D Interface",
-        { credits: 4 },
-        { source: "rnd-interface-card" },
-      ),
-    ]);
-    secondInput.playerView.turnSerial = 34;
-    secondInput.playerView.own.credits = 6;
-    secondInput.playerView.own.gripOrHq = [interfaceCard()];
-    secondInput.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
-    Object.assign(secondInput, {
-      planningStateIdentity: buildPlanningStateIdentity(secondInput),
-    });
+    let before = firstInput;
+    for (const version of [2, 3]) {
+      const after = fundingFrame(version);
+      observeFixtureBasicAction(before, after, "gain-credit");
+      const funding = chooseRunnerAction(after);
+      expect(funding.actionId).toBe("gain-credit");
+      expect(funding.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(firstRoot);
+      before = after;
+    }
+    const secondInput = fundingFrame(4);
+    observeFixtureBasicAction(before, secondInput, "gain-credit");
     const second = chooseRunnerAction(secondInput);
     const planFirst = second.decisionDebug?.planFirstDecision;
 
@@ -2162,6 +2205,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("rd"),
       server("archives"),
     ];
+    firstInput.playerView.own.stackOrRdCount = 1;
+    Object.assign(firstInput, {
+      planningStateIdentity: buildPlanningStateIdentity(firstInput),
+    });
     expect(chooseRunnerAction(firstInput).actionId).toBe("draw");
 
     const secondInput = versionedRunnerTurnInput(2, [
@@ -2179,6 +2226,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("rd"),
       server("archives"),
     ];
+    secondInput.playerView.own.gripOrHq = [
+      visibleCard("fixture-drawn-card", "runner", "event"),
+    ];
+    observeFixtureBasicAction(firstInput, secondInput, "draw");
     const second = chooseRunnerAction(secondInput);
     const commitment =
       second.decisionDebug?.planFirstDecision?.turnPlanning?.commitment;
