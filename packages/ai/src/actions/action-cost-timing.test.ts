@@ -6,6 +6,95 @@ import {
 } from "./action-cost-timing";
 
 describe("action cost and timing profiles", () => {
+  it.each([0, 1, 4])(
+    "normalizes a selected alternate-subtype surcharge of %i credits",
+    (additional) => {
+      const profile = costProfileForAction({
+        ...action("rez_ice", {
+          variableRezKind: "alternate_subtype",
+          baseRezCost: 6,
+          variableRezAdditionalCost: additional,
+          variableRezValue: additional === 0 ? 0 : 1,
+          selectedSubtypesAfterRez: additional === 0 ? "sentry" : "wall",
+          rezCostPaid: 6 + additional,
+        }),
+        side: "corp",
+        costs: [{ credits: 6 + additional }],
+      });
+      expect(profile.creditCost).toBe(6 + additional);
+      expect(profile.additionalCosts).toEqual([]);
+    },
+  );
+
+  it.each([
+    { baseRezCost: undefined },
+    { baseRezCost: -1 },
+    { baseRezCost: 6.5 },
+    { variableRezAdditionalCost: undefined },
+    { variableRezAdditionalCost: -1 },
+    { variableRezValue: undefined },
+    { variableRezValue: "choice" },
+    { variableRezValue: 2 },
+    { variableRezValue: 0 },
+    { selectedSubtypesAfterRez: undefined },
+    { selectedSubtypesAfterRez: "" },
+    { rezCostPaid: undefined },
+    { rezCostPaid: 6 },
+    { variableRezKind: "unresolved" },
+  ])("keeps conflicting alternate-subtype costs explicit: %j", (override) => {
+    const payload: NonNullable<LegalAction["payload"]> = {
+      variableRezKind: "alternate_subtype",
+      baseRezCost: 6,
+      variableRezAdditionalCost: 1,
+      variableRezValue: 1,
+      selectedSubtypesAfterRez: "wall",
+      rezCostPaid: 7,
+    };
+    for (const [key, value] of Object.entries(override)) {
+      if (value === undefined) delete payload[key];
+      else payload[key] = value;
+    }
+    const profile = costProfileForAction({
+      ...action("rez_ice", payload),
+      side: "corp",
+      costs: [{ credits: 7 }],
+    });
+    expect(profile.additionalCosts).toContain("variableRezKind");
+  });
+
+  it("does not accept a conflicting Engine price or discard separate costs", () => {
+    const bound = {
+      ...action("rez_ice", {
+        variableRezKind: "alternate_subtype",
+        baseRezCost: 6,
+        variableRezAdditionalCost: 1,
+        variableRezValue: 1,
+        selectedSubtypesAfterRez: "wall",
+        rezCostPaid: 7,
+      }),
+      side: "corp" as const,
+      costs: [{ credits: 7 }],
+    };
+    expect(
+      costProfileForAction({ ...bound, costs: [{ credits: 6 }] })
+        .additionalCosts,
+    ).toContain("variableRezKind");
+    expect(costProfileForAction({ ...bound, costs: [] }).additionalCosts).toContain(
+      "variableRezKind",
+    );
+    expect(
+      costProfileForAction({
+        ...bound,
+        payload: { ...bound.payload, cardImplementationTapSourceCost: true },
+      }).additionalCosts,
+    ).toEqual(["cardImplementationTapSourceCost"]);
+    expect(
+      costProfileForAction({
+        ...bound,
+        payload: { ...bound.payload, variableRezCap: 3 },
+      }).additionalCosts,
+    ).toEqual(["variableRezCap"]);
+  });
   it.each(
     (["clicks", "credits"] as const).flatMap((dimension) =>
       [

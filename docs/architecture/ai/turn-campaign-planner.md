@@ -329,6 +329,19 @@ kein Bestandteil des aktuellen Vertrags. Ein gebundener zukünftiger Phasenroot
 bleibt im residenten Portfolio in seiner aktuellen Rolle und wird erst beim
 real validierten Phase Entry `foreground`.
 
+Die gemeinsame Kostenprojektion behandelt eine vollständig gebundene aktuelle
+`alternate_subtype`-Rezvariante als exakt bezahlte Engine-Aktion. Basispreis,
+Aufschlag, tatsächliche LegalAction-Credits und `rezCostPaid` müssen mit
+sicheren nichtnegativen Ganzzahlen übereinstimmen; die Basisvariante hat
+keinen Aufschlag. Der Variantenwert 0/1 ist eine Subtypwahl, kein weiterer
+Creditpreis. Nur die dazugehörigen bereits gebundenen Variantenfelder werden
+aus `additionalCosts` entfernt. Fehlende oder widersprüchliche Bindungen,
+andere Kostenfamilien und zusätzliche nichtmonetäre Kosten bleiben explizit.
+Die Auswahl der Schutzvariante und ihre Wirkungsquote gehören weiterhin
+`corp.defend_servers`; der Scheduler erhält keine Ersatzentscheidung.
+Paarung 626/D91 sichert beide nativen Preise und den vorher blockierten
+aktuellen Defense-Step.
+
 ### 1.5 `CampaignValueClaim`
 
 Kampagnen melden keine frei gewichteten globalen Fortsetzungswerte. Sie

@@ -366,6 +366,32 @@ function additionalCostFields(
     "variableCostKind",
   ]);
   const p = action.payload;
+  const engineCreditCost = exactCostDimension(action, "credits");
+  const exactAlternateSubtypeRez =
+    action.side === "corp" &&
+    action.type === "rez_ice" &&
+    p?.variableRezKind === "alternate_subtype" &&
+    [p.baseRezCost, p.variableRezAdditionalCost, p.rezCostPaid].every(
+      (value) =>
+        typeof value === "number" && Number.isSafeInteger(value) && value >= 0,
+    ) &&
+    (p.variableRezValue === 0 || p.variableRezValue === 1) &&
+    (p.variableRezValue !== 0 || p.variableRezAdditionalCost === 0) &&
+    typeof p.selectedSubtypesAfterRez === "string" &&
+    p.selectedSubtypesAfterRez.trim().length > 0 &&
+    Number.isSafeInteger(
+      Number(p.baseRezCost) + Number(p.variableRezAdditionalCost),
+    ) &&
+    Number(p.baseRezCost) + Number(p.variableRezAdditionalCost) ===
+      p.rezCostPaid &&
+    p.rezCostPaid === normalizedGrossCredits &&
+    engineCreditCost.status === "known" &&
+    engineCreditCost.value === normalizedGrossCredits;
+  const alternateSubtypeFields = new Set([
+    "variableRezKind",
+    "variableRezAdditionalCost",
+    "variableRezValue",
+  ]);
   const exactPrintedX =
     (action.type === "play_operation" || action.type === "play_event") &&
     p?.variableCostKind === "printed_play_cost" &&
@@ -435,6 +461,10 @@ function additionalCostFields(
     // The fully bound printed X contract is the same cash payment, not an
     // extra unresolved cost. Other variables and conflicting quotes remain.
     if (exactPrintedX && printedXFields.has(field)) return false;
+    // A selected subtype's surcharge is already in the exact Engine payment.
+    // The 0/1 subtype selector is not another credit amount or open choice.
+    if (exactAlternateSubtypeRez && alternateSubtypeFields.has(field))
+      return false;
     // Keep unsupported or conflicting facts explicit. A matching Engine cash
     // quote is already represented by creditCost, not an additional payment.
     return !(
