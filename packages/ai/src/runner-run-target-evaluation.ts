@@ -1,3 +1,8 @@
+import {
+  hasRiskyUniversalPressure,
+  runnerCreditReservePhase,
+  runnerRemoteScoreThreat,
+} from "./run-analysis/runner-visible-economy-facts";
 import { runnerPostRunSelfTagHandSafety } from "./run-analysis/runner-self-tag-safety";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
@@ -364,6 +369,73 @@ export function quoteRunnerRunAfterHandBufferDraws(
   );
 }
 
+export type BoundRunnerRunQuote = Readonly<{
+  target: RunnerRunTargetEvaluation;
+  economy: RunnerEconomyPosture;
+  fundingTargets: () => readonly RunnerRunTargetEvaluation[];
+}>;
+
+/** Quotes the requested current route; alternative routes are evaluated only
+ * when the existing funding admission needs their comparison context. */
+export function quoteRunnerRunTarget(
+  params: EvaluateRunnerRunTargetsParams & {
+    runActionId: string;
+    targetServerId: string;
+    quotedRunnerGripCount?: number;
+  },
+): BoundRunnerRunQuote | undefined {
+  const action = params.input.legalActions.find(
+    (entry) =>
+      entry.actionId === params.runActionId &&
+      entry.side === "runner" &&
+      entry.expiresAtStateVersion === params.input.playerView.stateVersion,
+  );
+  if (!action) return undefined;
+  const projections = projectInternalRunnerRunActions(params).filter(
+    (projection) =>
+      projection.projectionStatus === "concrete_target" &&
+      projection.targetServerId !== undefined,
+  );
+  const exact = projections.filter(
+    (projection) =>
+      projection.action === action &&
+      projection.targetServerId === params.targetServerId,
+  );
+  if (exact.length !== 1) return undefined;
+  const economy = buildRunnerEconomyPosture(params);
+  const riskModel =
+    (params.beliefState ?? reconstructBeliefState(params.input))
+      .runnerOpponentModel?.unrezzedIceRiskModel ?? [];
+  const projection = exact[0]!;
+  const target = evaluateRunnerRunTarget(
+    params,
+    projection,
+    economy,
+    riskModel,
+  );
+  if (!target) return undefined;
+  let fundingTargets: RunnerRunTargetEvaluation[] | undefined;
+  return {
+    target,
+    economy,
+    fundingTargets() {
+      fundingTargets ??= projections
+        .flatMap((alternative) => {
+          if (alternative === projection) return [target];
+          const evaluated = evaluateRunnerRunTarget(
+            params,
+            alternative,
+            economy,
+            riskModel,
+          );
+          return evaluated ? [evaluated] : [];
+        })
+        .sort(compareRunnerRunTargets);
+      return fundingTargets;
+    },
+  };
+}
+
 export type PreparedRunnerRunTargets = Readonly<{
   projections: readonly InternalRunActionProjection[];
   economy: RunnerEconomyPosture;
@@ -399,14 +471,20 @@ export function evaluateRunnerRunTargets(
       (evaluation): evaluation is RunnerRunTargetEvaluation =>
         evaluation !== undefined,
     )
-    .sort(
-      (left, right) =>
-        recommendationRank(right.recommendation) -
-          recommendationRank(left.recommendation) ||
-        right.score - left.score ||
-        left.targetServerId.localeCompare(right.targetServerId) ||
-        left.actionId.localeCompare(right.actionId),
-    );
+    .sort(compareRunnerRunTargets);
+}
+
+function compareRunnerRunTargets(
+  left: RunnerRunTargetEvaluation,
+  right: RunnerRunTargetEvaluation,
+): number {
+  return (
+    recommendationRank(right.recommendation) -
+      recommendationRank(left.recommendation) ||
+    right.score - left.score ||
+    left.targetServerId.localeCompare(right.targetServerId) ||
+    left.actionId.localeCompare(right.actionId)
+  );
 }
 
 export { projectRunnerRunActions } from "./actions/run-action-projection";
@@ -2767,87 +2845,6 @@ function effectTarget(
 ): string | undefined {
   const target = (effect as Record<string, unknown>).target;
   return typeof target === "string" ? target : undefined;
-}
-
-function hasRiskyUniversalPressure(
-  params: EvaluateRunnerRunTargetsParams,
-): boolean {
-  const riskProfile = new Set(params.strategicIntent?.riskProfile ?? []);
-  return (
-    riskProfile.has("runner.risky_universal_breaker_pressure") ||
-    (params.deckCapabilities?.runner?.breakerInventory.some((breaker) => {
-      const coverage = new Set(breaker.coverage);
-      return coverage.has("universal") && breaker.risks.length > 0;
-    }) ??
-      false)
-  );
-}
-
-function runnerCreditReservePhase(
-  input: AiDecisionInput,
-  remoteScoreThreat: RunnerRemoteScoreThreat,
-): RunnerCreditReservePhase {
-  if (
-    remoteScoreThreat === "urgent" ||
-    input.playerView.opponent.agendaPoints >=
-      input.playerView.agendaPointsToWin - 2
-  ) {
-    return "late_contest";
-  }
-  if (remoteScoreThreat === "visible") return "late_contest";
-  return input.playerView.stateVersion <= 8 ? "opening" : "midgame";
-}
-
-function runnerRemoteScoreThreat(
-  input: AiDecisionInput,
-): RunnerRemoteScoreThreat {
-  let threat: RunnerRemoteScoreThreat = "none";
-  for (const server of input.playerView.servers) {
-    if (!server.id.startsWith("remote_")) continue;
-    if (server.root.length === 0) continue;
-    const advancedRoot = server.root.some(
-      (card) => (card.advancementCounters ?? 0) > 0,
-    );
-    const urgentRoot = server.root.some(
-      (card) => (card.advancementCounters ?? 0) >= 2,
-    );
-    const knownAgenda = server.root.some(
-      (card) => card.known && card.type === "agenda",
-    );
-    if (
-      urgentRoot ||
-      knownAgenda ||
-      input.playerView.opponent.agendaPoints >=
-        input.playerView.agendaPointsToWin - 2
-    ) {
-      return "urgent";
-    }
-    if (advancedRoot) threat = maxRemoteScoreThreat(threat, "visible");
-    else threat = maxRemoteScoreThreat(threat, "possible");
-  }
-  return threat;
-}
-
-function maxRemoteScoreThreat(
-  left: RunnerRemoteScoreThreat,
-  right: RunnerRemoteScoreThreat,
-): RunnerRemoteScoreThreat {
-  return remoteScoreThreatRank(right) > remoteScoreThreatRank(left)
-    ? right
-    : left;
-}
-
-function remoteScoreThreatRank(threat: RunnerRemoteScoreThreat): number {
-  switch (threat) {
-    case "urgent":
-      return 3;
-    case "visible":
-      return 2;
-    case "possible":
-      return 1;
-    case "none":
-      return 0;
-  }
 }
 
 function runnerContestReserve(params: {

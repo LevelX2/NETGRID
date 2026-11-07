@@ -135,7 +135,9 @@ function observeFixtureBasicAction(
   after: ReturnType<typeof versionedRunnerTurnInput>,
   actionId: string,
 ): void {
-  const action = before.legalActions.find((entry) => entry.actionId === actionId);
+  const action = before.legalActions.find(
+    (entry) => entry.actionId === actionId,
+  );
   const matchId = before.matchId;
   if (
     !action ||
@@ -1812,7 +1814,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         server("rd"),
         server("archives"),
       ];
-      secondInput.playerView.own.credits = firstInput.playerView.own.credits + 1;
+      secondInput.playerView.own.credits =
+        firstInput.playerView.own.credits + 1;
       observeFixtureBasicAction(firstInput, secondInput, "gain-credit");
       const second = chooseRunnerAction(secondInput);
       const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
@@ -1912,7 +1915,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       observeFixtureBasicAction(before, after, "gain-credit");
       const funding = chooseRunnerAction(after);
       expect(funding.actionId).toBe("gain-credit");
-      expect(funding.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(firstRoot);
+      expect(funding.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+        firstRoot,
+      );
       before = after;
     }
     const secondInput = fundingFrame(4);
@@ -2565,7 +2570,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ).toBe(false);
   });
 
-  it("keeps blocked remote coverage available behind a material central run", () => {
+  it("keeps blocked remote coverage available behind a material central run [legacy_compare]", () => {
     const centralInput = aiInput("runner", [
       legalAction(
         "run-remote",
@@ -2655,7 +2660,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("does not continue a satisfied R&D probe into the same known low-value top card", () => {
+  it("does not continue a satisfied R&D probe into the same known low-value top card [legacy_compare]", () => {
     const initialInput = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -2756,7 +2761,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("uses last productive liquidity instead of repeating stale R&D at the finite reserve", () => {
+  it("uses last productive liquidity instead of repeating stale R&D at the finite reserve [legacy_compare]", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",

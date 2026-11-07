@@ -10,7 +10,7 @@ import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import {
   buildRunnerEconomyPosture,
-  evaluateRunnerRunTargets,
+  quoteRunnerRunTarget,
   quoteRunnerRunAfterHandBufferDraws,
 } from "../../runner-run-target-evaluation";
 import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signals";
@@ -184,23 +184,24 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
       fail("source_install_not_payable");
       continue;
     }
-    const targets = evaluateRunnerRunTargets({
-      input: projected,
-      deckCapabilities,
-      strategicIntent,
-    });
-    const target = targets.find(
-      (t) =>
-        t.actionId === run.actionId && t.targetServerId === gap.targetServerId,
-    );
+    const quote = gap.targetServerId
+      ? quoteRunnerRunTarget({
+          input: projected,
+          deckCapabilities,
+          strategicIntent,
+          runActionId: run.actionId,
+          targetServerId: gap.targetServerId,
+        })
+      : undefined;
     if (
-      !target ||
-      target.pathPassability === "blocked_missing_coverage" ||
-      target.pathPassability === "blocked_unbreakable"
+      !quote ||
+      quote.target.pathPassability === "blocked_missing_coverage" ||
+      quote.target.pathPassability === "blocked_unbreakable"
     ) {
       fail("no_convertible_run_after_search");
       continue;
     }
+    const { target, economy } = quote;
     // Quote preparation for this bound run; global damage and breaker floors
     // remain in the shared service, other unselected runs do not add draws.
     const buffer = runnerDefenseHandBufferFacts(projected, [target]);
@@ -253,11 +254,6 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
       fail("remote_information_consumer_rejects_known_path");
       continue;
     }
-    const economy = buildRunnerEconomyPosture({
-      input: projected,
-      deckCapabilities,
-      strategicIntent,
-    });
     if (
       services.runnerRunTargetCanConvertNow(
         projected,
@@ -284,7 +280,7 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
       fundingInput,
       economy,
       preparedTarget,
-      targets,
+      quote.fundingTargets(),
       candidates,
       {
         acceptFundedRun: (fundedInput, fundedTarget) =>

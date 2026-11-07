@@ -1,4 +1,5 @@
-import { corpExactBasicLiquidCreditCandidate } from "./economy-routes";
+import { exactBasicLiquidCreditCandidate } from "../../actions/action-candidate-facts";
+
 import { type CorpEconomyLiquidityDevelopmentSignal } from "./economy-types";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
@@ -10,7 +11,7 @@ export function corpExactCurrentBasicLiquidCreditCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
-  if (!corpExactBasicLiquidCreditCandidate(candidate)) return false;
+  if (!exactBasicLiquidCreditCandidate(candidate)) return false;
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );

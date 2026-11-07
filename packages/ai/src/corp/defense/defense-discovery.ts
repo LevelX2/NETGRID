@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { corpProgramTrashDefenseSignals } from "./program-trash-signal";
 import { corpArchivesAgendaRelocationSignal } from "./archives-agenda-relocation";
 import { corpRezOrTrashDefenseChoiceSignal } from "./rez-or-trash-choice";
@@ -22,7 +23,6 @@ import { corpRestrictedRezPreparationCandidates } from "../../runtime/corp-restr
 import { technicalIdCompare, turnKey } from "../../runtime/runtime-identifiers";
 import {
   candidateIsVisibleCorpIceInstall,
-  candidateTargetIds,
   isCorpInstallServerId,
   isServerId,
   requireVisibleCandidateSource,

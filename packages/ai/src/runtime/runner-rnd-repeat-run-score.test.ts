@@ -27,7 +27,7 @@ describe("staleKnownRndRepeatRunPenalty", () => {
     expect(staleKnownRndRepeatRunPenalty(input, runRd)).toBe(420);
   });
 
-  it("develops exact basic liquidity after rejecting a repeated low-value R&D run", () => {
+  it("develops exact basic liquidity after rejecting a repeated low-value R&D run [legacy_compare]", () => {
     const runRd = runAction("run-rd", "rd");
     const gain = action("gain", "gain_credit");
     const end = action("end", "end_turn");

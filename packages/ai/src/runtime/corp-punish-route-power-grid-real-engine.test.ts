@@ -39,7 +39,7 @@ const RUNNER_DECK = withCards(
 );
 
 describe("Power Grid decision-local real-Engine punish quote", () => {
-  it("executes the exact X=1 LegalAction and resolves a real X<N target choice deterministically", () => {
+  it("executes the exact X=1 LegalAction and resolves a real X<N target choice deterministically [legacy_compare]", () => {
     let state = powerGridState("power-grid-execute", 3, {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE, CYBERNETICS],
     });
@@ -177,7 +177,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     expect(state.runner.rig.hardware).toHaveLength(hardwareBefore - 1);
   });
 
-  it("funds an exact one-credit gap under the punish parent, then re-quotes, plays and resolves the choice", () => {
+  it("funds an exact one-credit gap under the punish parent, then re-quotes, plays and resolves the choice [legacy_compare]", () => {
     let state = powerGridState("power-grid-funding", 0, {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE],
     });

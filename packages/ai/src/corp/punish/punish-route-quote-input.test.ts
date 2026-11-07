@@ -272,7 +272,7 @@ describe("decision-local Corp punish route quote input", () => {
     expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([]);
   });
 
-  it("binds a legal standalone encounter tag to the punish campaign and exact current action", () => {
+  it("binds a legal standalone encounter tag to the punish campaign and exact current action [legacy_compare]", () => {
     const input = punishInput({ runnerTags: 0, runnerHandCount: 3 });
     const trojan = operation("trojan", TROJAN_HORSE);
     const playTrojan = playOperation(
@@ -426,7 +426,7 @@ describe("decision-local Corp punish route quote input", () => {
       expectedDamageSources: ["scorched", "punitive"],
     },
   ])(
-    "lets the plan runtime choose the minimal quoted route for hand count $runnerHandCount",
+    "lets the plan runtime choose the minimal quoted route for hand count $runnerHandCount [legacy_compare]",
     ({ runnerHandCount, expectedDamageSources }) => {
       const input = punishInput({ runnerTags: 0, runnerHandCount });
       const before = structuredClone(input);

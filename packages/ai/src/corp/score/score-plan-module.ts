@@ -1,7 +1,7 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import {
   assessment,
-  candidateTargetIds,
   domain,
   proposal,
   state,

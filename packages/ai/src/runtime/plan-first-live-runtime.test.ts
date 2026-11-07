@@ -17094,7 +17094,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("reconciles older resident memory before completing an exhausted turn", () => {
+  it("reconciles older resident memory before completing an exhausted turn [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const context = liveContext();
     const credit = legalAction(
@@ -21255,7 +21255,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("opens Valu-Pak only for a concrete multi-program commitment", () => {
+  it("opens Valu-Pak only for a concrete multi-program commitment [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const valuPak = legalAction(
       "valu-pak",
@@ -21917,7 +21917,7 @@ describe("authoritative plan-first live runtime", () => {
     },
   );
 
-  it("uses the active Valu-Pak sequence B instead of completed sequence A", () => {
+  it("uses the active Valu-Pak sequence B instead of completed sequence A [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = activeRestrictedValuPakInput();
     const completedA = restrictedSequencePlanInstance(
@@ -22078,7 +22078,7 @@ describe("authoritative plan-first live runtime", () => {
     ).toThrowError("commitment_invalidated");
   });
 
-  it("permits early EndTurn only through the rules-proven Corp deckout plan", () => {
+  it("permits early EndTurn only through the rules-proven Corp deckout plan [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const action = legalAction(
       "end",
@@ -22922,7 +22922,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("lets a positive current route quote, not no-access action history, govern a 6/7 terminal central probe", () => {
+  it("lets a positive current route quote, not no-access action history, govern a 6/7 terminal central probe [legacy_compare]", () => {
     const runHq = legalAction(
       "run-hq",
       "runner",
@@ -23226,7 +23226,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("consumes 5/7 matchpoint central pressure per server instead of reopening a repeat loop", () => {
+  it("consumes 5/7 matchpoint central pressure per server instead of reopening a repeat loop [legacy_compare]", () => {
     const runHq = legalAction(
       "run-hq",
       "runner",
@@ -24264,7 +24264,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("keeps a safety-aborted server plan blocked until the Runner develops its route", () => {
+  it("keeps a safety-aborted server plan blocked until the Runner develops its route [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
       "run-remote",
@@ -24362,7 +24362,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("uses the current Remote route quote instead of a hidden same-turn no-access cadence", () => {
+  it("uses the current Remote route quote instead of a hidden same-turn no-access cadence [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
       "run-remote",
@@ -24478,7 +24478,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("does not let a safety-aborted run parent authorize higher-class funding", () => {
+  it("does not let a safety-aborted run parent authorize higher-class funding [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
       "run-remote",
@@ -24579,7 +24579,7 @@ describe("authoritative plan-first live runtime", () => {
     ["translated access explanation"],
     ["hq_known_trash_definition:wrong-target", "hq_known_trash_cost:999"],
   ])(
-    "carries the typed HQ trash commitment through the exact pressure/access owners despite evidence %j",
+    "carries the typed HQ trash commitment through the exact pressure/access owners despite evidence %j [legacy_compare]",
     (...evidence) => {
       resetResidentPlanPortfolioMemory();
       const run = legalAction(
@@ -24698,7 +24698,7 @@ describe("authoritative plan-first live runtime", () => {
     },
   );
 
-  it("creates a structured access-step trash commitment after an information run reveals a relevant card", () => {
+  it("creates a structured access-step trash commitment after an information run reveals a relevant card [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
       "run-hq",
@@ -29463,7 +29463,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain("plan_priority_class:P6");
     expect(decision.actionId).not.toBe("search-ap-action");
   });
-  it("uses cutover by default and preserves legacy comparison only as an explicit rollback mode", () => {
+  it("uses cutover by default and preserves legacy comparison only as an explicit comparison mode [mode comparison]", () => {
     const credit = legalAction(
       "credit",
       "corp",

@@ -2470,3 +2470,9 @@ an der jeweils zuständigen Policy mit Gegenproben geändert. Ihre heutigen
 Werte stehen im Code, keine historische Shadow-Messung ist eine aktuelle
 Laufzeitzusage. Mehr Suchkomplexität und weitere Ownerfähigkeiten entstehen
 nur aus einem eigenen belegten Auftrag.
+
+Für die Fortschreibung gilt der [Receipt-Vertrag](#8-revalidierung-und-neuplanung):
+Erwartete Outcome-Codes sind Sollbedingungen; beobachteter Vollzug kommt
+aus dem Engine-Receipt. Fachlicher Rang stammt aus typisierten Owner-Fakten.
+Die [Evidenzmatrix](simulation-test-matrix.md#vergleichsevidenz-und-standardmodus)
+trennt Vergleichsdiagnostik und Abnahme des Standardmodus.

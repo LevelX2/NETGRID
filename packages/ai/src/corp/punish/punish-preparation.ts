@@ -1,10 +1,10 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { corpDefinitionHasTraceSource } from "../../runtime/corp-canonical-card-facts";
 import {
-  candidateTargetIds,
   isCorpInstallServerId,
   isServerId,
   minimumVisiblePlayCost,

@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -37,7 +38,6 @@ import { technicalIdCompare } from "../../runtime/runtime-identifiers";
 import { visibleCorpIceDefenseProfile } from "../../runtime/semantic-runtime-corp-effective-defense";
 import {
   candidateIsVisibleCorpIceInstall,
-  candidateTargetIds,
   isCorpInstallServerId,
 } from "../../runtime/visible-action-facts";
 import { archivesHasVisibleKnownAgenda } from "../../runtime/visible-server-agenda-facts";

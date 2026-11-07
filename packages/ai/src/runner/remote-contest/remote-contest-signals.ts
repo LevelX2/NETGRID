@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -62,7 +63,7 @@ import {
   runnerUnrezzedIceTrashRouteOpeningPayoff,
 } from "../../runtime/runner-targeted-ice-trash-plan";
 import { runnerTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
-import { candidateTargetIds } from "../../runtime/visible-action-facts";
+
 import { visibleKnownAgendaOnServer } from "../../runtime/visible-server-agenda-facts";
 import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signals";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";

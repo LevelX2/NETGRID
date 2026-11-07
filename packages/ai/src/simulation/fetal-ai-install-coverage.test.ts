@@ -55,7 +55,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
     });
   }
 
-  it("does not donate Fetal AI while the score remote still lacks certified defense", () => {
+  it("does not donate Fetal AI while the score remote still lacks certified defense [legacy_compare]", () => {
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
       maxActions: 23,

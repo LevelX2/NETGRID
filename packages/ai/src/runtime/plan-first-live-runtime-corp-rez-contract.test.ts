@@ -18,7 +18,7 @@ import type {
 } from "@netgrid/shared";
 
 describe("plan-first Corp conditional root-rez contract", () => {
-  it("selects an exact guaranteed root-rez credit conversion as a P3 Corp Economy plan", () => {
+  it("selects an exact guaranteed root-rez credit conversion as a P3 Corp Economy plan [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = rootRezEconomyInput("guaranteed");
 
@@ -44,7 +44,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ["nonpositive", "nonpositive"],
     ["malformed", "malformed"],
   ] as const)(
-    "fails closed for a %s root-rez credit outcome and leaves decline_rez as P6 window pass",
+    "fails closed for a %s root-rez credit outcome and leaves decline_rez as P6 window pass [legacy_compare]",
     (_label, outcome) => {
       resetResidentPlanPortfolioMemory();
       const input = rootRezEconomyInput(outcome);
@@ -65,7 +65,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     },
   );
 
-  it("does not infer a Chester Mix continuation without a future engine quote", () => {
+  it("does not infer a Chester Mix continuation without a future engine quote [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const chester = corpUpgrade(
       "chester",
@@ -115,7 +115,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ).toThrowError("missing_plan_module_coverage");
   });
 
-  it("marks Chester Mix nonproductive without a bound productive same-fort ICE route", () => {
+  it("marks Chester Mix nonproductive without a bound productive same-fort ICE route [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const chester = corpUpgrade(
       "chester",
@@ -147,7 +147,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("declines Dr. Dreff without an engine-certified future-encounter rez quote", () => {
+  it("declines Dr. Dreff without an engine-certified future-encounter rez quote [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = drDreffInput({
       attackedServerId: "remote_1",
@@ -211,7 +211,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       credits: 3,
     },
   ] satisfies Array<DrDreffInputParams & { label: string }>)(
-    "does not create a Dr. Dreff rez route for $label",
+    "does not create a Dr. Dreff rez route for $label [legacy_compare]",
     (variant) => {
       resetResidentPlanPortfolioMemory();
       const input = drDreffInput(variant);
@@ -225,7 +225,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     },
   );
 
-  it("rezzes Jenny Jett in the last relevant window on her own fort", () => {
+  it("rezzes Jenny Jett in the last relevant window on her own fort [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = jennyJettInput({
       iceIndex: 0,
@@ -249,7 +249,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     );
   });
 
-  it("defers Jenny Jett before the last relevant ICE window", () => {
+  it("defers Jenny Jett before the last relevant ICE window [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = jennyJettInput({
       iceIndex: 1,
@@ -264,7 +264,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("declines Jenny Jett when the exact Engine quote is unpayable", () => {
+  it("declines Jenny Jett when the exact Engine quote is unpayable [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = jennyJettInput({
       iceIndex: 0,
@@ -278,7 +278,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("declines Jenny Jett when the exact Engine quote is missing", () => {
+  it("declines Jenny Jett when the exact Engine quote is missing [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = jennyJettInput({
       iceIndex: 0,
@@ -365,7 +365,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
         payload.cardImplementationFortRunRezSupportQuoteHasOwnHqIce = false;
       },
     },
-  ])("declines Jenny Jett for $label", ({ mutate }) => {
+  ])("declines Jenny Jett for $label [legacy_compare]", ({ mutate }) => {
     resetResidentPlanPortfolioMemory();
     const input = jennyJettInput({
       iceIndex: 0,
@@ -384,7 +384,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("routes Encoder Inc. only when a visible installed code gate makes its exact rez productive", () => {
+  it("routes Encoder Inc. only when a visible installed code gate makes its exact rez productive [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const encoder = visibleCard("encoder", "corp", "asset", {
       definitionId: "onr_v1_320_encoder-inc",
@@ -414,7 +414,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("disposes Encoder Inc. exactly when no installed code gate can use it", () => {
+  it("disposes Encoder Inc. exactly when no installed code gate can use it [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const encoder = visibleCard("encoder", "corp", "asset", {
       definitionId: "onr_v1_320_encoder-inc",
@@ -447,7 +447,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("rezes a fort-bound stealth-credit lockout through the exact Defense-plan route", () => {
+  it("rezes a fort-bound stealth-credit lockout through the exact Defense-plan route [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const lockout = corpUpgrade(
       "fort-stealth-lockout",
@@ -501,7 +501,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       runServerId: "remote_1" as const,
     },
   ])(
-    "declines a fort-bound stealth-credit lockout $label",
+    "declines a fort-bound stealth-credit lockout $label [legacy_compare]",
     ({ rig, runServerId }) => {
       resetResidentPlanPortfolioMemory();
       const lockout = corpUpgrade(
@@ -555,7 +555,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       includeDecline: true,
     },
   ])(
-    "does not rez zero-counter Pacifica Regional AI $label",
+    "does not rez zero-counter Pacifica Regional AI $label [legacy_compare]",
     ({ timingPoint, includeDecline }) => {
       resetResidentPlanPortfolioMemory();
       const pacifica = visibleCard("pacifica", "corp", "asset", {
@@ -597,7 +597,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     },
   );
 
-  it("routes Data Masons only through visible installed Wall support", () => {
+  it("routes Data Masons only through visible installed Wall support [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const dataMasons = visibleCard("data-masons", "corp", "asset", {
       definitionId: "onr_v1_317_data-masons",
@@ -627,7 +627,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("keeps productive Data Masons executable when central ICE allocation is unknown", () => {
+  it("keeps productive Data Masons executable when central ICE allocation is unknown [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const dataMasons = visibleCard("data-masons", "corp", "asset", {
       definitionId: "onr_v1_317_data-masons",
@@ -706,7 +706,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     );
   });
 
-  it("routes Tesseract only for an upcoming ICE encounter on its exact fort", () => {
+  it("routes Tesseract only for an upcoming ICE encounter on its exact fort [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const tesseract = corpUpgrade(
       "tesseract",
@@ -751,7 +751,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("declines Tesseract after the run has passed the last ICE", () => {
+  it("declines Tesseract after the run has passed the last ICE [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const tesseract = corpUpgrade(
       "tesseract",
@@ -784,7 +784,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("routes persistent fort-wide ICE strength support through the exact defended fort", () => {
+  it("routes persistent fort-wide ICE strength support through the exact defended fort [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const interfaceRoutines = corpUpgrade(
       "interface-routines",
@@ -824,7 +824,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     );
   });
 
-  it("selects a productive fort-wide rez action through the global defense allocation", () => {
+  it("selects a productive fort-wide rez action through the global defense allocation [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const interfaceRoutines = corpUpgrade(
       "interface-routines",
@@ -881,7 +881,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("disposes fort-wide ICE strength support without ICE on its exact fort", () => {
+  it("disposes fort-wide ICE strength support without ICE on its exact fort [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const interfaceRoutines = corpUpgrade(
       "interface-routines",
@@ -913,7 +913,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("disposes a fort ICE swap when HQ has no affordable visible improvement", () => {
+  it("disposes a fort ICE swap when HQ has no affordable visible improvement [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const grid = corpUpgrade(
       "singapore-grid",
@@ -955,7 +955,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
-  it("declines a fort ICE swap without an engine-certified rez quote", () => {
+  it("declines a fort ICE swap without an engine-certified rez quote [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const grid = corpUpgrade(
       "singapore-grid",

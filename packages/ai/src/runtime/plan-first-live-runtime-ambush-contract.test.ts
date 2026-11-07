@@ -23,7 +23,7 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first Corp ambush preplanning contract", () => {
-  it("does not turn an Ambush card role into a plan without strategic intent support", () => {
+  it("does not turn an Ambush card role into a plan without strategic intent support [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const install = installAmbush(trap, "new_remote", "install-trap");
@@ -39,7 +39,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("rejects the exact Ambush install when Corp intent is absent", () => {
+  it("rejects the exact Ambush install when Corp intent is absent [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const install = installAmbush(trap, "new_remote", "install-trap");
@@ -54,7 +54,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("rejects an Experimental AI install until it has a visible program payoff", () => {
+  it("rejects an Experimental AI install until it has a visible program payoff [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = experimentalAi();
     const install = installAmbush(
@@ -87,7 +87,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("does not let Ambush own a nonlethal agenda install while its unsafe score parent stays blocked", () => {
+  it("does not let Ambush own a nonlethal agenda install while its unsafe score parent stays blocked [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
     const install = installAmbush(trap, "new_remote", "install-fetal-ai");
@@ -134,7 +134,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("lets Ambush own an agenda install when the exact access damage is lethal", () => {
+  it("lets Ambush own an agenda install when the exact access damage is lethal [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
     const install = installAmbush(
@@ -170,7 +170,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     );
   });
 
-  it("hands a lethal near-term access-punishing agenda deception to the score owner", () => {
+  it("hands a lethal near-term access-punishing agenda deception to the score owner [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
     const install = installAmbush(
@@ -236,7 +236,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("does not donate a nonlethal access-punishing agenda through the score owner", () => {
+  it("does not donate a nonlethal access-punishing agenda through the score owner [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
     const install = installAmbush(
@@ -282,7 +282,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     );
   });
 
-  it("does not let a prepared sibling score parent reject an exact Ambush install", () => {
+  it("does not let a prepared sibling score parent reject an exact Ambush install [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
     const installNew = installAmbush(
@@ -349,7 +349,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     ).toBe(true);
   });
 
-  it("chooses one exact preplanned server without inventing an install credit cost and retains the exact Ambush sequence", () => {
+  it("chooses one exact preplanned server without inventing an install credit cost and retains the exact Ambush sequence [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
@@ -421,7 +421,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("keeps TRAP! exclusively in the Ambush plan instead of also routing it through a generic punish campaign", () => {
+  it("keeps TRAP! exclusively in the Ambush plan instead of also routing it through a generic punish campaign [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = visibleCard("trap", "corp", "asset", {
       definitionId: "onr_v1_345_trap",
@@ -462,7 +462,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("explicitly rejects further advancement after the committed Ambush target has been reached", () => {
+  it("explicitly rejects further advancement after the committed Ambush target has been reached [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
@@ -530,7 +530,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     ).toThrowError(PlanResolutionFailure);
   });
 
-  it("abandons the resident Ambush normally after access or trash moves its source to Archives", () => {
+  it("abandons the resident Ambush normally after access or trash moves its source to Archives [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
@@ -605,7 +605,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     );
   });
 
-  it("retires a resident Ambush commitment when another owner installs it in a different remote", () => {
+  it("retires a resident Ambush commitment when another owner installs it in a different remote [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
@@ -657,7 +657,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     ).toBe(false);
   });
 
-  it("resolves a sole mandatory draw before revalidating a stale resident Ambush plan", () => {
+  it("resolves a sole mandatory draw before revalidating a stale resident Ambush plan [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
@@ -722,7 +722,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("keeps Lesley install and conversion on the exact resident scalable Ambush root", () => {
+  it("keeps Lesley install and conversion on the exact resident scalable Ambush root [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const lesley = visibleCard("lesley-major", "corp", "upgrade", {

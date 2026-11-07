@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../actions/action-candidate-facts";
 import { EconomyState } from "../corp/economy/economy-types";
 
 import {
@@ -233,24 +234,4 @@ function modulePhase(moduleState: unknown): string {
 
 export function state<T>(instance: PlanInstance): T {
   return instance.moduleState as T;
-}
-
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-
-export function candidateTargetIds(
-  candidate: ActionSemanticCandidate,
-): string[] {
-  const selectedTargets =
-    candidate.targetContext?.selectedTargets.map((target) => target.targetId) ??
-    [];
-  return [
-    ...(selectedTargets.length > 0
-      ? selectedTargets
-      : (candidate.targetContext?.availableTargets?.map(
-          (target) => target.targetId,
-        ) ?? [])),
-    ...(candidate.runProjectionSummary?.serverId
-      ? [candidate.runProjectionSummary.serverId]
-      : []),
-  ];
 }

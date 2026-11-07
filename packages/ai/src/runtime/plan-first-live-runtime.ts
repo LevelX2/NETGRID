@@ -1,3 +1,9 @@
+import {
+  candidateTargetIds,
+  exactBasicLiquidCreditCandidate,
+} from "../actions/action-candidate-facts";
+import { runnerRemoteRunDispositions } from "../runner/remote-contest/remote-contest-dispositions";
+import { runnerCentralRunDispositions } from "../runner/central-pressure/central-pressure-dispositions";
 import { bindRunnerCentralSelfTagProtection } from "../runner/central-pressure/self-tag-protection-preparation";
 import { isRunnerGripDamageReplacementWindow } from "../runner/defense-recovery/grip-damage-replacement";
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
@@ -161,13 +167,14 @@ import { createRunnerCorePlanModules } from "../plans/runner-core-plan-modules";
 import { runnerRolesCoverCoverageGap } from "../plans/runner-coverage-contracts";
 import { runnerDelayedInstallReplanningBoundary } from "../plans/runner-delayed-install-replanning-boundary";
 import { runnerDevelopmentCardAdmission } from "../plans/runner-development-contracts";
-import { runnerExactBasicLiquidCreditCandidate } from "../plans/runner-funding-candidates";
+
 import type { RunnerFundingNeedSignal } from "../plans/runner-funding-contracts";
 import { ActiveRunnerRunRoot } from "../plans/runner-run-origin-contract";
 import {
   type RunnerPlanDomain,
   type RunnerRunRiskReassessmentSignal,
 } from "../plans/runner-tactical-plan-contracts";
+import { runnerDevelopmentProgramTrashInstallDispositions } from "../runner/hand-development/development-install-dispositions";
 import { createRunnerTacticalPlanModules } from "../plans/runner-tactical-plan-modules";
 import { prepareRunnerTurnPlanner } from "../plans/runner-turn-planner-shadow";
 import { assertRunnerTurnPlanningModuleRegistry } from "../plans/runner-turn-planning-coverage";
@@ -196,7 +203,6 @@ import {
   runnerRunRequiredPostRunReserve,
   runnerRunTargetCanConvertNow,
 } from "../run-analysis/runner-plan-run-funding";
-import { runnerKnownAgendaRunEvaluationIsCertified } from "../run-analysis/runner-plan-run-route-facts";
 import { runnerRunLockReleaseRoutes } from "../run-analysis/runner-run-lock-release-routes";
 import { runnerSameTurnAccessPreparationSourceDefinitionId } from "../run-analysis/runner-run-preparation";
 import {
@@ -225,7 +231,6 @@ import {
   buildRunnerCentralPressureSignals,
   runnerCentralPressureCadence,
   runnerCentralPressureHasMaterialMarginalValue,
-  runnerUnboundCentralDirectRunDispositionEvidence,
 } from "../runner/central-pressure/central-pressure-signals";
 import { runnerCreditBankActionDispositions } from "../runner/credit-bank/credit-bank-dispositions";
 import { bindRunnerCreditBankCoverageFunding } from "../runner/credit-bank/credit-bank-coverage-funding";
@@ -233,7 +238,10 @@ import { runnerCreditBankSignals } from "../runner/credit-bank/credit-bank-signa
 import { reconcileRunnerCreditBankRunFunding } from "../runner/credit-bank/credit-bank-funding-revalidation";
 import { bindRunnerCreditBankDefenseFunding } from "../runner/credit-bank/credit-bank-defense-funding";
 import { runnerRunFundingParentHasCurrentNeed } from "../plans/runner-funding-parent";
-import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
+import {
+  runnerDefenseSafetyDispositions,
+  runnerDefenseSupportDispositions,
+} from "../runner/defense-recovery/defense-dispositions";
 import {
   runnerDefenseDeferredHandBufferDispositions,
   runnerDefenseCurrentHeadActionIds,
@@ -298,7 +306,6 @@ import { runnerRecurringEconomyActionDispositions } from "../runner/recurring-ec
 import { runnerRecurringEconomyRunDeferral } from "../runner/recurring-economy/recurring-economy-run-deferral";
 import { runnerRecurringEconomySignals } from "../runner/recurring-economy/recurring-economy-signals";
 import {
-  runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn,
   runnerTerminalRemoteContestIsDirectlyMandatory,
   runnerTerminalRemoteContestVisibleHazardFundingGap,
   runnerTerminalRemoteLastChanceKnownPathFundingGap,
@@ -328,9 +335,10 @@ import {
   addRunnerCoverageRejectedSearchDispositions,
   applyRunnerCoverageCandidateDisposition,
   runnerCoverageInstallDeferrals,
+  runnerCoverageAlternativeCopyDisposition,
+  runnerCoverageDrawPhaseDisposition,
   runnerMatchpointReserveBlocksOverlappingBreakerInstall,
 } from "../runner/rig-coverage/coverage-dispositions";
-import { runnerCoverageCurrentPhase } from "../runner/rig-coverage/coverage-plan-module";
 import { uniqueCoverageGaps } from "../runner/rig-coverage/coverage-signals";
 import type { RunnerRigDemandProjection } from "../runner/rig-demand/runner-rig-demand-projection";
 import { isRunnerRunWindowCandidate } from "../runner/run-window/run-window-action-facts";
@@ -395,7 +403,6 @@ import {
 import {
   runnerCandidateIsOneShotSearch,
   runnerCandidateIsOptionalProgramTrashInstall,
-  runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition,
 } from "./runner-development-action-facts";
 import {
   runnerExactFundingRouteContract,
@@ -430,14 +437,10 @@ import { latestTraceContext } from "./trace-context";
 import {
   candidateIsVisibleCorpAgendaInstall,
   candidateIsVisibleCorpIceInstall,
-  candidateTargetIds,
   isCorpInstallServerId,
   visibleKnownCardType,
 } from "./visible-action-facts";
-import {
-  archivesIsKnownWithoutAgenda,
-  visibleKnownAgendaOnServer,
-} from "./visible-server-agenda-facts";
+import { archivesIsKnownWithoutAgenda } from "./visible-server-agenda-facts";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
 export type PlanFirstLiveDependencies = {
@@ -856,7 +859,9 @@ export function choosePlanFirstLiveAction(
   if (result.lane === "plan" && decision.engineCommand) {
     const lease = result.portfolio.turnPlanExecutionLease;
     if (lease?.stateIdentity.stateVersion === input.playerView.stateVersion) {
-      lease.engineSelectionKey = turnPlanEngineSelectionKey(decision.engineCommand);
+      lease.engineSelectionKey = turnPlanEngineSelectionKey(
+        decision.engineCommand,
+      );
     }
   }
   bindSelectedRunnerCoverageSearchChoiceContinuation(
@@ -1554,8 +1559,6 @@ export function runnerActionDispositions(
     dispositions,
     turnKey(input),
   );
-  const { coveragePlanningContext, coverageGapsByAssignedPlanId } =
-    coverageInstallDeferrals;
   for (const candidate of candidates) {
     if (
       applyRunnerCoverageCandidateDisposition(
@@ -1629,7 +1632,7 @@ export function runnerActionDispositions(
       candidate.sourceKind === "basic_action" &&
       candidate.actionType === "gain_credit" &&
       candidate.semanticActionType === "economy.gain_credit" &&
-      !runnerExactBasicLiquidCreditCandidate(candidate)
+      !exactBasicLiquidCreditCandidate(candidate)
     ) {
       addUnknown(
         candidate.actionId,
@@ -1657,44 +1660,29 @@ export function runnerActionDispositions(
     const cardDevelopmentOwnsActionRoute = cardDevelopmentAdmissions.some(
       ({ admission }) => admission.admitted,
     );
-    const alternativeToBoundCoverageCopy = cardDevelopmentAdmissions.some(
-      ({ development }) =>
-        development.assignedDomainPlanIds.length > 0 &&
-        development.assignedDomainPlanIds.every((planId) => {
-          const gap = coverageGapsByAssignedPlanId.get(planId);
-          return (
-            gap?.answerInHand === true &&
-            !gap.installActionIds?.includes(candidate.actionId) &&
-            gap.installActionIds?.some((actionId) => {
-              const bound = candidates.find(
-                (entry) => entry.actionId === actionId,
-              );
-              return (
-                bound?.semanticActionType === "install.card" &&
-                bound.sourceCardInstanceId !== candidate.sourceCardInstanceId &&
-                runnerCandidateSourceDefinitionId(input, bound) ===
-                  development.definitionId
-              );
-            }) === true
-          );
-        }),
+    const alternativeCopyDisposition = runnerCoverageAlternativeCopyDisposition(
+      {
+        input,
+        candidate,
+        candidates,
+        coverageGaps: domain.coverageGaps,
+        developments: cardDevelopmentAdmissions.map(
+          ({ development }) => development,
+        ),
+      },
     );
     if (
-      candidate.semanticActionType === "install.card" &&
-      alternativeToBoundCoverageCopy &&
+      alternativeCopyDisposition &&
       !cardDevelopmentOwnsActionRoute &&
       !coverageOwnedActionIds.has(candidate.actionId) &&
       !delegatedFundingActionIds.has(candidate.actionId) &&
       !terminalWinOwnedActionIds.has(candidate.actionId) &&
       !runnerCandidateIsOptionalProgramTrashInstall(input, candidate)
     ) {
-      // The coverage owner has already bound a concrete interchangeable copy.
-      // The other copy remains a deferred contribution to that same need, not
-      // a second generic development plan or an unclassified legal install.
       add(
         candidate.actionId,
         "runner.rig_and_coverage",
-        "runner_coverage_install_alternative_to_bound_same_definition_answer",
+        alternativeCopyDisposition,
       );
       continue;
     }
@@ -1753,34 +1741,20 @@ export function runnerActionDispositions(
     }
   }
   for (const candidate of candidates) {
-    const coverageDrawGaps =
-      candidate.semanticActionType === "draw.card"
-        ? domain.coverageGaps.filter(
-            (gap) =>
-              !gap.answerInHand &&
-              gap.deckHasAnswer &&
-              gap.drawForAnswerActionIds.includes(candidate.actionId),
-          )
-        : [];
+    const coverageDrawDisposition = runnerCoverageDrawPhaseDisposition(
+      candidate,
+      domain.coverageGaps,
+      coverageInstallDeferrals,
+    );
     if (
-      coverageDrawGaps.length > 0 &&
-      coverageDrawGaps.every(
-        (gap) =>
-          runnerCoverageCurrentPhase({
-            context: coveragePlanningContext,
-            gap,
-            rolesForDefinitionId: rolesForDeckDoctrineCard,
-          }) !== "draw_for_answer",
-      ) &&
+      coverageDrawDisposition &&
       !runnerDrawActionHasCurrentNonCoveragePlanPurpose(candidate, domain) &&
-      !dispositions.some(
-        (disposition) => disposition.actionId === candidate.actionId,
-      )
+      !dispositions.some((entry) => entry.actionId === candidate.actionId)
     ) {
       add(
         candidate.actionId,
         "runner.rig_and_coverage",
-        "runner_coverage_draw_deferred_for_current_preparation_phase",
+        coverageDrawDisposition,
       );
       continue;
     }
@@ -1810,96 +1784,20 @@ export function runnerActionDispositions(
       );
     }
   }
-  const optionalProgramTrashInstallDispositionActionIds = new Set<string>();
-  for (const candidate of candidates) {
-    if (candidate.semanticActionType !== "install.card") {
-      continue;
-    }
-    const legalAction = input.legalActions.find(
-      (action) => action.actionId === candidate.actionId,
-    );
-    const optionalProgramTrashInstall =
-      runnerCandidateIsOptionalProgramTrashInstall(input, candidate);
-    if (
-      optionalProgramTrashInstall &&
-      dispositions.some((entry) => entry.actionId === candidate.actionId)
-    ) {
-      continue;
-    }
-    const sacrificeAssessment =
-      optionalProgramTrashInstall && legalAction
-        ? runnerProgramInstallTrashAssessmentForAction(input, legalAction)
-        : undefined;
-    if (
-      sacrificeAssessment?.memoryRequired === true &&
-      !sacrificeAssessment.canFreeRequiredMemory
-    ) {
-      optionalProgramTrashInstallDispositionActionIds.add(candidate.actionId);
-      add(
-        candidate.actionId,
-        "runner.develop_board_and_hand",
-        "runner_program_trash_install_has_no_acceptable_sacrifice",
-      );
-      continue;
-    }
-    if (specializedEconomyActionIds.has(candidate.actionId)) {
-      continue;
-    }
-    const sourceCardInstanceId = runnerInstallSourceInstanceId(
-      candidate,
-      legalAction,
-    );
-    if (!sourceCardInstanceId) continue;
-    if (!optionalProgramTrashInstall) continue;
-    const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+  const programTrashInstallDispositions =
+    runnerDevelopmentProgramTrashInstallDispositions({
       input,
-      candidate,
-    );
-    const duplicateDefinitionAlreadyInstalled =
-      runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
-        input,
-        candidate,
-      );
-    if (duplicateDefinitionAlreadyInstalled) {
-      optionalProgramTrashInstallDispositionActionIds.add(candidate.actionId);
-      add(
-        candidate.actionId,
-        "runner.develop_board_and_hand",
-        `runner_program_trash_install_rejected_duplicate_definition:${sourceDefinitionId}`,
-      );
-      continue;
-    }
-    const directInstallAvailable =
-      candidates.some((alternative) => {
-        const nativeAction = input.legalActions.find(
-          (action) => action.actionId === alternative.actionId,
-        );
-        return (
-          alternative.actionId !== candidate.actionId &&
-          alternative.semanticActionType === "install.card" &&
-          nativeAction?.type === "install_card" &&
-          nativeAction.payload?.runnerProgramTrashBeforeInstall !== true &&
-          runnerInstallSourceInstanceId(alternative, nativeAction) ===
-            sourceCardInstanceId
-        );
-      }) ||
-      handDevelopment.some((evaluation) => {
-        const nativeAction = input.legalActions.find(
-          (action) => action.actionId === evaluation.legalActionId,
-        );
-        return (
-          evaluation.cardInstanceId === sourceCardInstanceId &&
-          nativeAction?.type === "install_card" &&
-          nativeAction.payload?.runnerProgramTrashBeforeInstall !== true
-        );
-      });
-    if (!directInstallAvailable) continue;
-    optionalProgramTrashInstallDispositionActionIds.add(candidate.actionId);
-    add(
-      candidate.actionId,
-      "runner.develop_board_and_hand",
-      "runner_program_trash_install_unneeded_direct_install_available",
-    );
+      candidates,
+      handDevelopment,
+      independentlyOwnedActionIds: specializedEconomyActionIds,
+      existingDispositions: dispositions,
+      assessAction: runnerProgramInstallTrashAssessmentForAction,
+    });
+  const optionalProgramTrashInstallDispositionActionIds = new Set(
+    programTrashInstallDispositions.map((entry) => entry.actionId),
+  );
+  for (const disposition of programTrashInstallDispositions) {
+    addDisposition(disposition);
   }
   for (const disposition of runnerCreditBankActionDispositions(
     domain.creditBanks,
@@ -1920,54 +1818,15 @@ export function runnerActionDispositions(
   )) {
     addDisposition(disposition);
   }
-  if (domain.defense.forgoUnsafeRunCapacity) {
-    for (const candidate of candidates) {
-      if (candidate.semanticActionType !== "run.start") continue;
-      if (
-        domain.runWindows.some(
-          (signal) =>
-             signal.actionAssessments?.[candidate.actionId]?.binding ===
-             "engine_restricted_run_sequence",
-        )
-      ) {
-        continue;
-      }
-      add(
-        candidate.actionId,
-        "runner.defense_and_recovery",
-        "runner_restricted_run_capacity_below_required_hand_buffer",
-      );
-    }
-  }
-  for (const actionId of domain.defense.confirmedDamageTaxedDrawActionIds ??
-    []) {
-    if (dispositions.some((entry) => entry.actionId === actionId)) continue;
-    add(
-      actionId,
-      "runner.defense_and_recovery",
-      "runner_confirmed_damage_draw_tax_tag_unsafe",
-    );
-  }
-  if (
-    domain.defense.activeTags > 0 &&
-    (domain.defense.tagClearFundingNeed !== undefined ||
-      candidates.some(
-        (candidate) => candidate.semanticActionType === "tag.remove",
-      ))
-  ) {
-    for (const candidate of candidates) {
-      if (
-        candidate.semanticActionType !== "counter.remove_trace_tag" &&
-        candidate.semanticActionType !== "counter.remove_runner_hazard"
-      ) {
-        continue;
-      }
-      add(
-        candidate.actionId,
-        "runner.defense_and_recovery",
-        "runner_persistent_hazard_counter_deferred_until_active_tag_removed",
-      );
-    }
+  for (const disposition of runnerDefenseSafetyDispositions({
+    candidates,
+    signals: domain.defense,
+    runWindows: domain.runWindows,
+    alreadyClassifiedActionIds: new Set(
+      dispositions.map((entry) => entry.actionId),
+    ),
+  })) {
+    addDisposition(disposition);
   }
   for (const candidate of candidates) {
     if (
@@ -2575,134 +2434,27 @@ export function runnerActionDispositions(
       add(actionId, "runner.pressure_central", signal.evidenceCode);
     }
   }
-  for (const evaluation of runTargets) {
-    if (
-      evaluation.targetKind !== "remote" ||
-      domain.defense.forgoUnsafeRunCapacity ||
-      dispositions.some((entry) => entry.actionId === evaluation.actionId) ||
-      admissibleRunWindowActionIds.has(evaluation.actionId)
-    ) {
-      continue;
-    }
-    if (
-      runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
-        input,
-        evaluation.targetServerId,
-      )
-    ) {
-      add(
-        evaluation.actionId,
-        "runner.contest_remote",
-        `runner_remote_direct_run_waits_for_scheduled_ice_trash:${evaluation.targetServerId}`,
-      );
-      continue;
-    }
-    if (
-      visibleKnownAgendaOnServer(input, evaluation.targetServerId) &&
-      !runnerKnownAgendaRunEvaluationIsCertified(
-        input,
-        candidates,
-        evaluation,
-        evaluation.targetServerId,
-      )
-    ) {
-      add(
-        evaluation.actionId,
-        "runner.contest_remote",
-        `runner_remote_known_agenda_route_not_certified:${evaluation.targetServerId}:${evaluation.routeQuote?.reachability ?? "unknown"}:funding_gap_${evaluation.routeQuote?.fundingGap ?? "unknown"}:unknown_ice_${evaluation.routeQuote?.unknownIceCount ?? "unknown"}`,
-      );
-      continue;
-    }
-    const exactAssessment = domain.remoteContests
-      .filter((signal) => signal.serverId === evaluation.targetServerId)
-      .map((signal) => signal.runActionAssessments[evaluation.actionId])
-      .find((assessment) => assessment !== undefined);
-    if (exactAssessment?.verdict === "executable") continue;
-    if (exactAssessment?.verdict === "explicitly_nonproductive") {
-      add(
-        evaluation.actionId,
-        "runner.contest_remote",
-        exactAssessment.evidenceCodes[0] ??
-          "runner_remote_run_explicitly_nonproductive",
-      );
-      continue;
-    }
-    const repeatedTerminalDamageContest =
-      runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn(
-        input,
-        evaluation,
-      );
-    const evidenceCode =
-      evaluation.prerunReserveQuote?.status === "blocked"
-        ? `runner_remote_run_prerun_reserve_blocked:${evaluation.targetServerId}`
-        : evaluation.knownAccessState === "known_no_current_payoff"
-        ? `runner_remote_run_known_no_current_payoff:${evaluation.targetServerId}:${evaluation.recommendation}`
-        : repeatedTerminalDamageContest
-          ? `runner_terminal_remote_contest_repeat_blocked_after_failed_path:${evaluation.targetServerId}`
-          : evaluation.pathPassability !== "reachable"
-            ? `runner_remote_run_route_blocked:${evaluation.targetServerId}:${evaluation.pathPassability}`
-            : evaluation.score <= 0
-              ? `runner_remote_run_below_material_value:${evaluation.targetServerId}:${evaluation.score}:${evaluation.recommendation}`
-              : undefined;
-    if (!evidenceCode) continue;
-    add(evaluation.actionId, "runner.contest_remote", evidenceCode);
+  for (const disposition of runnerRemoteRunDispositions({
+    input,
+    candidates,
+    runTargets,
+    signals: domain.remoteContests,
+    forgoUnsafeRunCapacity: domain.defense.forgoUnsafeRunCapacity,
+    independentlyOwnedActionIds: admissibleRunWindowActionIds,
+    existingDispositions: dispositions,
+  })) {
+    addDisposition(disposition);
   }
-  for (const evaluation of runTargets) {
-    if (
-      domain.defense.forgoUnsafeRunCapacity ||
-      dispositions.some((entry) => entry.actionId === evaluation.actionId) ||
-      admissibleRunWindowActionIds.has(evaluation.actionId)
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetServerId === "hq" ||
-      evaluation.targetServerId === "rd" ||
-      evaluation.targetServerId === "archives"
-    ) {
-      const matchingSignals = domain.centralPressure.filter(
-        (signal) => signal.serverId === evaluation.targetServerId,
-      );
-      const executableRoute = matchingSignals.some(
-        (signal) =>
-          signal.routePreparation === undefined &&
-          signal.reachable &&
-          signal.marginalValue > 0 &&
-          signal.runActionIds?.includes(evaluation.actionId) === true,
-      );
-      if (executableRoute) continue;
-      const boundSignal = matchingSignals.find(
-        (signal) =>
-          signal.runActionIds?.includes(evaluation.actionId) === true ||
-          signal.runActionExclusions?.[evaluation.actionId] !== undefined ||
-          (signal.preparationActionIds?.length ?? 0) > 0,
-      );
-      if (!boundSignal) {
-        const exactDirectRunDisposition =
-          runnerUnboundCentralDirectRunDispositionEvidence(
-            input,
-            candidates,
-            evaluation,
-          );
-        if (exactDirectRunDisposition) {
-          add(
-            evaluation.actionId,
-            "runner.pressure_central",
-            exactDirectRunDisposition,
-          );
-        }
-        continue;
-      }
-      add(
-        evaluation.actionId,
-        "runner.pressure_central",
-        boundSignal.runActionExclusions?.[evaluation.actionId]?.[0] ??
-          ((boundSignal.preparationActionIds?.length ?? 0) > 0
-            ? `runner_central_run_deferred_to_bound_preparation:${evaluation.targetServerId}`
-            : boundSignal.evidenceCode),
-      );
-      continue;
-    }
+  for (const disposition of runnerCentralRunDispositions({
+    input,
+    candidates,
+    runTargets,
+    signals: domain.centralPressure,
+    forgoUnsafeRunCapacity: domain.defense.forgoUnsafeRunCapacity,
+    independentlyOwnedActionIds: admissibleRunWindowActionIds,
+    existingDispositions: dispositions,
+  })) {
+    addDisposition(disposition);
   }
   addRunnerRunWindowDispositions({ domain, input, candidates, add });
   const optionalBonusRunDeclineActionIds = new Set(
@@ -5079,250 +4831,247 @@ function decisionFromScheduler(
   if (!debugActionWindow.some((candidate) => candidate.actionId === actionId)) {
     debugActionWindow[debugActionWindow.length - 1] = action;
   }
-  const actionAlternatives = debugActionWindow
-    .map((alternative, index) => {
-      const randomizedCandidate =
-        randomizedIceInstallNearTie?.candidates.some(
-          (candidate) => candidate.actionId === alternative.actionId,
-        ) ?? false;
-      const selected =
-        randomizedIceInstallNearTie === undefined &&
-        alternative.actionId === actionId;
-      const encounterExclusion =
-        input.side === "runner" &&
-        (alternative.type === "pump_breaker" ||
-          alternative.type === "break_subroutine")
-          ? dependencies.runnerEncounterActionExclusion(
-              input,
-              alternative,
-              runnerRunWindowEncounterRequiredHandFloor(
-                activeRunRootPlan(result.portfolio, input),
-              ),
-            )
-          : undefined;
-      const rejectionEvidence = encounterExclusion
-        ? [
-            `encounter_action_excluded:${encounterExclusion.key}`,
-            ...encounterExclusion.reason
-              .split("|")
-              .map((entry) => entry.trim())
-              .filter(Boolean),
-          ]
-        : [];
-      const semanticCandidate = candidates.find(
+  const actionAlternatives = debugActionWindow.map((alternative, index) => {
+    const randomizedCandidate =
+      randomizedIceInstallNearTie?.candidates.some(
         (candidate) => candidate.actionId === alternative.actionId,
-      );
-      const actionDisposition = context.actionDispositions?.find(
-        (disposition) => disposition.actionId === alternative.actionId,
-      );
-      const planActionAssessment =
-        result.lane === "plan"
-          ? (
-              result.portfolio.instances.find(
-                (instance) => instance.instanceId === planId,
-              )?.moduleState as
-                | {
-                    signal?: {
-                      actionAssessments?: Record<
-                        string,
-                        {
-                          admissible: boolean;
-                          value?: number;
-                          evidenceCodes: string[];
-                        }
-                      >;
-                    };
-                  }
-                | undefined
-            )?.signal?.actionAssessments?.[alternative.actionId]
-          : undefined;
-      const planActionAssessmentEvidence = planActionAssessment
-        ? [
-            `plan_action_assessment_admissible:${planActionAssessment.admissible}`,
-            ...(planActionAssessment.value !== undefined
-              ? [`plan_action_assessment_value:${planActionAssessment.value}`]
-              : []),
-            ...planActionAssessment.evidenceCodes.map(
-              (code) => `plan_action_assessment_evidence:${code}`,
+      ) ?? false;
+    const selected =
+      randomizedIceInstallNearTie === undefined &&
+      alternative.actionId === actionId;
+    const encounterExclusion =
+      input.side === "runner" &&
+      (alternative.type === "pump_breaker" ||
+        alternative.type === "break_subroutine")
+        ? dependencies.runnerEncounterActionExclusion(
+            input,
+            alternative,
+            runnerRunWindowEncounterRequiredHandFloor(
+              activeRunRootPlan(result.portfolio, input),
             ),
-          ]
-        : [];
-      const candidateTargets = semanticCandidate
-        ? candidateTargetIds(semanticCandidate)
-        : [];
-      const relatedResidentPlans = (result.portfolio?.instances ?? []).filter(
-        (instance) =>
-          instance.instanceId !== planId &&
-          instance.target !== undefined &&
-          ((instance.target.kind === "server" &&
-            candidateTargets.includes(instance.target.id)) ||
-            (instance.target.kind === "bank" &&
-              (semanticCandidate?.sourceDefinitionId === instance.target.id ||
-                semanticCandidate?.sourceCardId === instance.target.id)) ||
-            (instance.target.kind === "card" &&
-              semanticCandidate?.sourceDefinitionId === instance.target.id)),
-      );
-      const residentPlanEvidence = relatedResidentPlans.flatMap((instance) => [
-        `candidate_plan:${instance.instanceId}:${instance.viability}`,
-        ...instance.evidenceRefs.map(
-          (reference) => `candidate_plan_evidence:${reference.code}`,
-        ),
-        ...instance.blockers.map(
-          (blocker) => `candidate_plan_blocker:${blocker.code}`,
-        ),
-      ]);
-      const planRouteEvidence = (result.portfolio?.instances ?? []).flatMap(
-        (instance) => {
-          const moduleState = instance.moduleState as
-            | {
-                kind?: unknown;
-                signal?: {
-                  runActionEvidence?: Record<string, string[]>;
-                  runActionExclusions?: Record<string, string[]>;
-                  runActionAssessments?: Record<
-                    string,
-                    {
-                      evidenceCodes?: string[];
-                    }
-                  >;
-                };
-              }
-            | undefined;
-          if (moduleState?.kind === "central_pressure") {
-            return [
-              ...(moduleState.signal?.runActionEvidence?.[
-                alternative.actionId
-              ] ?? []),
-              ...(!selected
-                ? (moduleState.signal?.runActionExclusions?.[
-                    alternative.actionId
-                  ] ?? [])
-                : []),
-            ];
-          }
-          if (moduleState?.kind === "remote_contest") {
-            return (
-              moduleState.signal?.runActionAssessments?.[alternative.actionId]
-                ?.evidenceCodes ?? []
-            );
-          }
-          return [];
-        },
-      );
-      const planRouteDiagnostic = (result.portfolio?.instances ?? [])
-        .flatMap((instance) => {
-          const moduleState = instance.moduleState as
-            | {
-                kind?: unknown;
-                signal?: {
-                  runActionRouteDiagnostics?: Record<
-                    string,
-                    {
+          )
+        : undefined;
+    const rejectionEvidence = encounterExclusion
+      ? [
+          `encounter_action_excluded:${encounterExclusion.key}`,
+          ...encounterExclusion.reason
+            .split("|")
+            .map((entry) => entry.trim())
+            .filter(Boolean),
+        ]
+      : [];
+    const semanticCandidate = candidates.find(
+      (candidate) => candidate.actionId === alternative.actionId,
+    );
+    const actionDisposition = context.actionDispositions?.find(
+      (disposition) => disposition.actionId === alternative.actionId,
+    );
+    const planActionAssessment =
+      result.lane === "plan"
+        ? (
+            result.portfolio.instances.find(
+              (instance) => instance.instanceId === planId,
+            )?.moduleState as
+              | {
+                  signal?: {
+                    actionAssessments?: Record<
+                      string,
+                      {
+                        admissible: boolean;
+                        value?: number;
+                        evidenceCodes: string[];
+                      }
+                    >;
+                  };
+                }
+              | undefined
+          )?.signal?.actionAssessments?.[alternative.actionId]
+        : undefined;
+    const planActionAssessmentEvidence = planActionAssessment
+      ? [
+          `plan_action_assessment_admissible:${planActionAssessment.admissible}`,
+          ...(planActionAssessment.value !== undefined
+            ? [`plan_action_assessment_value:${planActionAssessment.value}`]
+            : []),
+          ...planActionAssessment.evidenceCodes.map(
+            (code) => `plan_action_assessment_evidence:${code}`,
+          ),
+        ]
+      : [];
+    const candidateTargets = semanticCandidate
+      ? candidateTargetIds(semanticCandidate)
+      : [];
+    const relatedResidentPlans = (result.portfolio?.instances ?? []).filter(
+      (instance) =>
+        instance.instanceId !== planId &&
+        instance.target !== undefined &&
+        ((instance.target.kind === "server" &&
+          candidateTargets.includes(instance.target.id)) ||
+          (instance.target.kind === "bank" &&
+            (semanticCandidate?.sourceDefinitionId === instance.target.id ||
+              semanticCandidate?.sourceCardId === instance.target.id)) ||
+          (instance.target.kind === "card" &&
+            semanticCandidate?.sourceDefinitionId === instance.target.id)),
+    );
+    const residentPlanEvidence = relatedResidentPlans.flatMap((instance) => [
+      `candidate_plan:${instance.instanceId}:${instance.viability}`,
+      ...instance.evidenceRefs.map(
+        (reference) => `candidate_plan_evidence:${reference.code}`,
+      ),
+      ...instance.blockers.map(
+        (blocker) => `candidate_plan_blocker:${blocker.code}`,
+      ),
+    ]);
+    const planRouteEvidence = (result.portfolio?.instances ?? []).flatMap(
+      (instance) => {
+        const moduleState = instance.moduleState as
+          | {
+              kind?: unknown;
+              signal?: {
+                runActionEvidence?: Record<string, string[]>;
+                runActionExclusions?: Record<string, string[]>;
+                runActionAssessments?: Record<
+                  string,
+                  {
+                    evidenceCodes?: string[];
+                  }
+                >;
+              };
+            }
+          | undefined;
+        if (moduleState?.kind === "central_pressure") {
+          return [
+            ...(moduleState.signal?.runActionEvidence?.[alternative.actionId] ??
+              []),
+            ...(!selected
+              ? (moduleState.signal?.runActionExclusions?.[
+                  alternative.actionId
+                ] ?? [])
+              : []),
+          ];
+        }
+        if (moduleState?.kind === "remote_contest") {
+          return (
+            moduleState.signal?.runActionAssessments?.[alternative.actionId]
+              ?.evidenceCodes ?? []
+          );
+        }
+        return [];
+      },
+    );
+    const planRouteDiagnostic = (result.portfolio?.instances ?? [])
+      .flatMap((instance) => {
+        const moduleState = instance.moduleState as
+          | {
+              kind?: unknown;
+              signal?: {
+                runActionRouteDiagnostics?: Record<
+                  string,
+                  {
+                    rawRouteScore: number;
+                    opportunityCost: number;
+                    effectiveRouteScore: number;
+                  }
+                >;
+                runActionAssessments?: Record<
+                  string,
+                  {
+                    routeDiagnostic?: {
                       rawRouteScore: number;
                       opportunityCost: number;
                       effectiveRouteScore: number;
-                    }
-                  >;
-                  runActionAssessments?: Record<
-                    string,
-                    {
-                      routeDiagnostic?: {
-                        rawRouteScore: number;
-                        opportunityCost: number;
-                        effectiveRouteScore: number;
-                      };
-                    }
-                  >;
-                };
-              }
-            | undefined;
-          const diagnostic =
-            moduleState?.kind === "central_pressure"
-              ? moduleState.signal?.runActionRouteDiagnostics?.[
-                  alternative.actionId
-                ]
-              : moduleState?.kind === "remote_contest"
-                ? moduleState.signal?.runActionAssessments?.[
-                    alternative.actionId
-                  ]?.routeDiagnostic
-                : undefined;
-          return diagnostic ? [diagnostic] : [];
-        })
-        .sort(
-          (left, right) =>
-            right.effectiveRouteScore - left.effectiveRouteScore ||
-            right.rawRouteScore - left.rawRouteScore,
-        )[0];
-      return {
-        rank: index + 1,
-        actionId: alternative.actionId,
-        actionType: alternative.type,
-        label: alternative.label,
-        source: String(alternative.source),
-        selected,
-        ...(planRouteDiagnostic
-          ? {
-              score: planRouteDiagnostic.effectiveRouteScore,
-              scoreBreakdown: [
-                {
-                  key: "run_route_raw_score",
-                  label: "Run route before card opportunity cost",
-                  value: planRouteDiagnostic.rawRouteScore,
-                },
-                {
-                  key: "consumable_run_opportunity_cost",
-                  label: "Consumable run-card opportunity cost",
-                  value: -planRouteDiagnostic.opportunityCost,
-                },
-              ],
+                    };
+                  }
+                >;
+              };
             }
-          : {}),
-        ...(encounterExclusion ||
-        actionDisposition ||
-        planActionAssessment?.admissible === false
-          ? { excluded: true }
-          : {}),
-        ...(selected
+          | undefined;
+        const diagnostic =
+          moduleState?.kind === "central_pressure"
+            ? moduleState.signal?.runActionRouteDiagnostics?.[
+                alternative.actionId
+              ]
+            : moduleState?.kind === "remote_contest"
+              ? moduleState.signal?.runActionAssessments?.[alternative.actionId]
+                  ?.routeDiagnostic
+              : undefined;
+        return diagnostic ? [diagnostic] : [];
+      })
+      .sort(
+        (left, right) =>
+          right.effectiveRouteScore - left.effectiveRouteScore ||
+          right.rawRouteScore - left.rawRouteScore,
+      )[0];
+    return {
+      rank: index + 1,
+      actionId: alternative.actionId,
+      actionType: alternative.type,
+      label: alternative.label,
+      source: String(alternative.source),
+      selected,
+      ...(planRouteDiagnostic
+        ? {
+            score: planRouteDiagnostic.effectiveRouteScore,
+            scoreBreakdown: [
+              {
+                key: "run_route_raw_score",
+                label: "Run route before card opportunity cost",
+                value: planRouteDiagnostic.rawRouteScore,
+              },
+              {
+                key: "consumable_run_opportunity_cost",
+                label: "Consumable run-card opportunity cost",
+                value: -planRouteDiagnostic.opportunityCost,
+              },
+            ],
+          }
+        : {}),
+      ...(encounterExclusion ||
+      actionDisposition ||
+      planActionAssessment?.admissible === false
+        ? { excluded: true }
+        : {}),
+      ...(selected
+        ? {
+            whyChosen: [
+              `selected_by_plan:${planId}`,
+              ...(result.lane === "plan"
+                ? [
+                    `selected_for_step:${result.route.step.capability.capabilityId}`,
+                  ]
+                : []),
+              ...planRouteEvidence,
+              ...planActionAssessmentEvidence,
+            ],
+          }
+        : randomizedCandidate
           ? {
-              whyChosen: [
-                `selected_by_plan:${planId}`,
-                ...(result.lane === "plan"
-                  ? [
-                      `selected_for_step:${result.route.step.capability.capabilityId}`,
-                    ]
-                  : []),
-                ...planRouteEvidence,
+              whyNot: [
+                `pending_engine_randomized_selection:${planId}`,
                 ...planActionAssessmentEvidence,
               ],
             }
-          : randomizedCandidate
-            ? {
-                whyNot: [
-                  `pending_engine_randomized_selection:${planId}`,
-                  ...planActionAssessmentEvidence,
-                ],
-              }
-            : {
-                whyNot: [
-                  ...(encounterExclusion
-                    ? rejectionEvidence
-                    : actionDisposition
-                      ? [
-                          `${actionDisposition.disposition}:${actionDisposition.ownerModuleId}:${actionDisposition.evidenceCode}`,
-                          ...residentPlanEvidence,
-                          ...planRouteEvidence,
-                          ...planActionAssessmentEvidence,
-                        ]
-                      : [
-                          `not_selected_by_plan:${planId}`,
-                          ...residentPlanEvidence,
-                          ...planRouteEvidence,
-                          ...planActionAssessmentEvidence,
-                        ]),
-                ],
-              }),
-      };
-    });
+          : {
+              whyNot: [
+                ...(encounterExclusion
+                  ? rejectionEvidence
+                  : actionDisposition
+                    ? [
+                        `${actionDisposition.disposition}:${actionDisposition.ownerModuleId}:${actionDisposition.evidenceCode}`,
+                        ...residentPlanEvidence,
+                        ...planRouteEvidence,
+                        ...planActionAssessmentEvidence,
+                      ]
+                    : [
+                        `not_selected_by_plan:${planId}`,
+                        ...residentPlanEvidence,
+                        ...planRouteEvidence,
+                        ...planActionAssessmentEvidence,
+                      ]),
+              ],
+            }),
+    };
+  });
   const topLevelWhyNot =
     semanticRuntimeDecisionDebugTopLevelWhyNot(actionAlternatives);
   const runtimeWhyNotSection =

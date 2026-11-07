@@ -1,7 +1,7 @@
 # AI Simulation Test Matrix
 
 Status: active_current
-Stand: 2026-09-22
+Stand: 2026-11-07
 
 ## Evidenzstufen
 
@@ -25,11 +25,13 @@ Szenarioerwartung keine strategisch richtige Einzelentscheidung.
 | T-AI-003 | Controller             | Controller-Typen erlauben Human, AI und Replay ohne Engine-Regelautorität. | V03-REQ-003 |
 | T-AI-004 | Runner AI              | Runner-KI wählt nur LegalActions und kann Access/Steal priorisieren.       | V03-REQ-004 |
 | T-AI-005 | Corp AI                | Corp-KI wählt Mandatory/Score/Rez/Economy/Remote-Aufbau priorisiert.       | V03-REQ-005 |
-| T-AI-006 | Fallback               | Ungültige interne Entscheidung wird deterministisch ersetzt.               | V03-REQ-006 |
+| T-AI-006 | Ausführungsfehler      | Ungültige Entscheidung scheitert sichtbar ohne Ersatzaktion.               | Controller  |
 | T-AI-007 | Forbidden Fields       | Serialisierter AI-Input enthält keine verbotenen Felder.                   | V03-REQ-002 |
 | T-AI-008 | Determinismus          | Gleicher Input ergibt gleiche Entscheidung.                                | V03-REQ-007 |
 | T-AI-011 | Explanation            | Decisions enthalten Reason-Code und Erklärung.                             | V03-REQ-010 |
 | T-AI-012 | Explanation Visibility | Erklärungen leaken keine verdeckten Kartentitel.                           | V03-REQ-011 |
+
+Für T-AI-006 gilt der [Fail-closed-Vertrag](controller-contract.md#fail-closed-und-coverage).
 
 ## Scenario/Integration
 
@@ -60,8 +62,42 @@ Karte oder einen bestimmten Zielserver als Produktregel fest.
   nachweislich verletzen.
 - Der Korpus umfasst 53 nicht redundante Engine-Szenarien; reine Engine- oder
   Shadow-Diagnostikszenarien zählen nicht automatisch als Live-Verhaltensbeleg.
+- `packages/ai/src/evaluation/real-engine-default-runtime.test.ts` führt alle
+  53 Eingaben zusätzlich durch den öffentlichen Chooser ohne Modusoverride.
+  Es prüft die aktuelle LegalAction und StateVersion, Root und Executor,
+  Route, zertifizierten Head, rematerialisiertes Commitment und angebotene
+  Choice-Optionen. Planentscheidungen benötigen `cutover` und
+  `turn_plan_commitment`; das einzelne zwingende Engine-Fenster benötigt
+  seine eigene `engine_window`-Bindung. Das ist Wiring- und Vertragsnachweis,
+  keine zusätzliche strategische Annotation aller 53 Szenarien.
+- Gegenproben dieses Gates müssen den expliziten Vergleichsmodus trotz
+  legaler Action sowie beschädigte Owner-, Action-, Ziel-, Versions- und
+  Choice-Bindungen erkennen. Die kontextblinde Gegenprobe des
+  Verhaltensgates bleibt zusätzlich erforderlich.
 - `packages/ai/src/simulation/simulation-harness.test.ts` prüft zusätzlich zum
   Golden Seed drei verschiedene deterministische Live-Verläufe.
+
+## Vergleichsevidenz und Standardmodus
+
+Verhaltensfälle im expliziten `legacy_compare` tragen `[legacy_compare]` im Namen.
+Prüfungen beider Modi sind als `[mode comparison]` benannt. Das gilt auch,
+wenn der Override in einem gemeinsamen Testhelfer sitzt. Andere Tests
+derselben Datei behalten ihre eigene Evidenzstufe. Ein Dateiname mit
+`live`, `cutover` oder `real-engine` allein beweist keinen Standardmodus.
+Negative Modus-Gegenproben des Default-Gates sind als solche benannt.
+
+| Vergleichsfamilie | Belegte Eigenschaft | Ergänzender Standardnachweis |
+| --- | --- | --- |
+| Runner-Sicherheit, wiederholte Central-Runs, Strategie- und Debugfixtures | Scheduler-Vergleich für die ausdrücklich benannte Situation | Default-Engine-Gate und dessen 20 strategisch annotierte Szenarien |
+| Corp-Rez-, Encounter-, Punish- und Ambush-Verträge | Exakte Route, Quote oder Owner-Bindung im Vergleichsmodus | Default-Engine-Gate; spezialisierte Default-Tests bleiben für Kartenbehauptungen nötig |
+| Fetal AI, Pirate Broadcast und Shadow-Baseline-Simulation | Vergleichsverlauf oder gebundener technischer Kartenpfad | Kein pauschaler Default- oder Spielstärkennachweis |
+
+Der Run-Evaluator-Grenztest löst mit dem TypeScript-Symbolgraphen den
+tatsächlichen Produzenten auf. In-memory-Gegenproben prüfen Importalias,
+Namespacezugriff und Reexport; ein Kommentar mit dem Symbolnamen darf
+keinen Verstoß erzeugen. Die Funding-Strukturprüfung folgt der aktuellen
+Funding-Funktion und ihrem AST statt einer bestimmten Schreibweise von
+Optional Chaining oder Zeilenumbrüchen.
 
 ## Server/UI
 
@@ -98,34 +134,31 @@ belegen; parallele Ausführung mit den Shards führte lokal zu weniger als
 0,5 GB freiem RAM und stark verlängerten Laufzeiten. Die drei Testshards
 bleiben untereinander parallel; weitere speicherintensive Gates warten
 auf ihren Abschluss.
-Der Paket-Typecheck kann außerdem seine konfigurierte 8-GB-Heapgrenze
-erreichen. Zur Diagnose lässt sich derselbe vollständige Check isoliert mit
-`pnpm --filter @netgrid/ai exec node --max-old-space-size=10240 ../../node_modules/typescript/bin/tsc -p tsconfig.json --noEmit`
-ausführen. Das ersetzt weder die Typprüfung noch behebt es einen Typfehler;
-es erhöht ausschließlich das Speicherlimit dieses einzelnen Prozesses.
+Das konfigurierte Heaplimit des Paket-Typechecks steht im Skript
+`typecheck` in [packages/ai/package.json](../../../packages/ai/package.json).
+Erreicht der Check dieses Limit, lässt sich derselbe strikte Check zur
+Diagnose mit einem höheren Heaplimit allein für seinen Prozess ausführen.
+Das ändert weder den Prüfgegenstand noch behebt es einen Typfehler.
 
 ## Aktuelle offene AI-Gate-Abweichungen
 
-Nach Integration der synthetischen Fixture-Reparaturen aus
-`codex/meta-five-20260912-b` am 2026-09-22 bestehen alle 533 Tests in den elf
-betroffenen Testdateien. Damit sind die 50 zuvor auf lokalem `main`
-reproduzierten Fehler geschlossen. Der gemeinsame fokussierte Lauf mit den
-beiden übrigen bekannten Fehlerdateien ergibt 533 bestandene und fünf
-fehlgeschlagene Tests. Diese fünf stammen bereits aus dem GitHub-Stand
-`2f214cf93`; die betreffenden Dateien bleiben bei dieser Integration
-unverändert. Ein erneuter vollständiger AI-Shard-Lauf wurde nach den
-Fixture-Reparaturen nicht ausgeführt. Das ist ausdrücklich **kein grünes
-AI-Gate**.
+Der vollständige Lauf vom 2026-11-07 umfasst 8.834 Tests in drei festen
+Shards: 8.557 bestehen, 277 scheitern in 134 Dateien. Alle 277 Fälle wurden
+einzeln am unveränderten Ausgangscommit `e4fb1eacf` mit denselben
+Fehlersignaturen reproduziert. Die zuvor roten Strukturprüfungen zur
+Run-Evaluator-Zuständigkeit und zur aktuellen Defense-Funding-Bindung
+bestehen. Das vollständige AI-Gate bleibt wegen der vorhandenen 277
+Abweichungen **rot**.
 
-| Testdatei unter `packages/ai/src/` | Offene Tests |
-| --- | ---: |
-| `evaluation/decision-checkpoints/meta-403-flood-continuation.test.ts` | 4 |
-| `evaluation/decision-checkpoints/meta-403-score-progress-provider.test.ts` | 1 |
+Die fokussierte Abnahme der Owner-, Quote- und Faktenpfade umfasst 101
+bestandene Tests. Paketgrenzen, KI-Struktur, Hint-Verträge, generische
+Karten-ID-Grenzen und Test-Discovery bestehen. Der Typecheck des gesamten
+Produktivpfads und der neuen beziehungsweise strukturell geänderten Tests
+besteht; das ist keine Behauptung über einen vollständigen Paket-Typecheck
+aller übrigen Testdateien.
 
-Die synthetischen Corp-Testeingaben binden Agenda-Installationsquotes an
-Agenda, Zielserver und StateVersion; der Testhelfer bleibt auf handgebaute
-Fixtures beschränkt. Runner-Testeingaben enthalten die benötigten Ressourcen
-und Encounter-Subroutinen. Der e804-Checkpoint prüft die angebotene
-Trace-Fortsetzung unter Erhalt des Contest-Elternplans. Die verbleibenden
-Abweichungen betreffen Flood-Priorisierung und Score-/Defense-Planbindung;
-sie benötigen eine separate Prüfung gegen die aktuellen Produktverträge.
+Auch die Zusammenführung mit den offenen lokalen Main-Änderungen besteht
+diese 101 Prüfungen, den betreffenden Typecheck sowie Paket- und KI-Gates.
+In 53 Engine-Szenarien bleiben Action, Ziele, Choices, Root, Executor und
+Route gegenüber dem jeweiligen Ausgangsstand unverändert. Das belegt den
+Strukturumbau und seine konkrete Verdrahtung, keine globale Spielstärke.

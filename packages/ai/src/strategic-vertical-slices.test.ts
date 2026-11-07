@@ -64,7 +64,7 @@ describe("Deck strategy runtime vertical slices", () => {
     }
   });
 
-  it("runs Runner central pressure across two decisions and preserves plan progress", () => {
+  it("runs Runner central pressure across two decisions and preserves plan progress [legacy_compare]", () => {
     const runRd = legalAction("run-rd", "runner", "start_run", "Run R&D", {
       payload: { serverId: "rd" },
     });
@@ -123,7 +123,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(second.decisionDebug?.planId).toBe(first.decisionDebug?.planId);
   });
 
-  it("does not invent tag-punish payoff or a speculative agenda-search window", () => {
+  it("does not invent tag-punish payoff or a speculative agenda-search window [legacy_compare]", () => {
     const closedAccounts = visibleCard("closed-accounts", "corp", "operation", {
       definitionId: "onr_v1_285_closed-accounts",
       title: "Closed Accounts",
@@ -193,7 +193,7 @@ describe("Deck strategy runtime vertical slices", () => {
     );
   });
 
-  it("keeps Corp scoreline terminal windows above an unfunded contestable project", () => {
+  it("keeps Corp scoreline terminal windows above an unfunded contestable project [legacy_compare]", () => {
     const scoringAgenda = visibleCard("scoring-agenda", "corp", "agenda", {
       definitionId: "simple_agenda",
       title: "Simple Agenda",
@@ -292,7 +292,7 @@ describe("Deck strategy runtime vertical slices", () => {
     );
   });
 
-  it("uses ICE-tax defense when affordable and economy when the defensive line is unfunded", () => {
+  it("uses ICE-tax defense when affordable and economy when the defensive line is unfunded [legacy_compare]", () => {
     const installedIce = visibleCard("installed-rd-wall", "corp", "ice", {
       definitionId: "onr_v1_237_data-wall",
       title: "Data Wall",
@@ -414,7 +414,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(unfunded.actionId).toBe("gain-credit");
   });
 
-  it("runs Runner remote-contest windows but lets acute hand safety override pressure", () => {
+  it("runs Runner remote-contest windows but lets acute hand safety override pressure [legacy_compare]", () => {
     const runRemote = legalAction(
       "run-remote",
       "runner",

@@ -42,7 +42,7 @@ describe("staleKnownHqRepeatRunPenalty", () => {
     expect(staleKnownHqRepeatRunPenalty(input, runHq)).toBe(0);
   });
 
-  it("develops exact basic liquidity after rejecting a repeated low-value HQ run", () => {
+  it("develops exact basic liquidity after rejecting a repeated low-value HQ run [legacy_compare]", () => {
     const runHq = runAction("run-hq", "hq");
     const gain = action("gain", "gain_credit");
     const end = action("end", "end_turn");

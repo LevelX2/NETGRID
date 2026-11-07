@@ -126,7 +126,7 @@ function installDecoder(
 
 describe("paid encounter defense through normal Engine and plan ownership", () => {
   it.each([RIDDLER, ICEBERG])(
-    "offers Corp activation and pass before Runner continuation for %s",
+    "offers Corp activation and pass before Runner continuation for %s [legacy_compare]",
     (definitionId) => {
       let state = fixture(definitionId);
       const initial = structuredClone(state),
@@ -179,7 +179,7 @@ describe("paid encounter defense through normal Engine and plan ownership", () =
     expect(selectAiDecisionSideForState(state).side).toBe("runner");
   });
 
-  it("passes against an already strong one-credit decoder instead of paying two", () => {
+  it("passes against an already strong one-credit decoder instead of paying two [legacy_compare]", () => {
     const state = fixture();
     installDecoder(state, 2);
     const pass = getLegalActions(state, "corp").find(
@@ -195,7 +195,7 @@ describe("paid encounter defense through normal Engine and plan ownership", () =
     expect(choose(state).actionId).toBe(pass.actionId);
   });
 
-  it("reopens the response after a Runner pump without buying a redundant ETR", () => {
+  it("reopens the response after a Runner pump without buying a redundant ETR [legacy_compare]", () => {
     let state = fixture();
     installDecoder(state, 0);
     const activation = getLegalActions(state, "corp").find(
@@ -222,7 +222,7 @@ describe("paid encounter defense through normal Engine and plan ownership", () =
     expect(state.corp.credits).toBe(4);
   });
 
-  it("fails closed when the exact activation quote is missing", () => {
+  it("fails closed when the exact activation quote is missing [legacy_compare]", () => {
     const state = fixture(),
       current = input(state);
     delete current.playerView.servers.find((server) => server.id === "hq")!
@@ -235,7 +235,7 @@ describe("paid encounter defense through normal Engine and plan ownership", () =
     ).toThrow(/missing_plan_module_coverage/);
   });
 
-  it("does not price a prohibited break as an available one-credit answer", () => {
+  it("does not price a prohibited break as an available one-credit answer [legacy_compare]", () => {
     const state = fixture();
     installDecoder(state, 2);
     state.run!.noBreakSubroutinesActive = true;
@@ -246,7 +246,7 @@ describe("paid encounter defense through normal Engine and plan ownership", () =
     );
   });
 
-  it("keeps a choice-dependent breaker unresolved instead of claiming no eligible breaker", () => {
+  it("keeps a choice-dependent breaker unresolved instead of claiming no eligible breaker [legacy_compare]", () => {
     const state = fixture();
     installDecoder(state, 2, "onr_proteus_088_fubar");
     const exchange = input(state).playerView.servers.find(

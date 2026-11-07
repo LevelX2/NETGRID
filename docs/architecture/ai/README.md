@@ -67,6 +67,22 @@ Bewertungen. Runziele verwenden die Economy Posture desselben Frames.
 Ändern sich relevante Ressourcenfakten durch die Rig-Projektion, werden
 Economy und Runziele erneut bewertet.
 
+Für ein bereits gebundenes Such-, Installations- oder Funding-Angebot liefert
+`quoteRunnerRunTarget` im [Run-Evaluator](../../../packages/ai/src/runner-run-target-evaluation.ts)
+die Bewertung genau einer aktuellen `runActionId × targetServerId`-Route
+mit der Economy desselben projizierten Frames. Die Quote erzeugt keine
+Action und überträgt keine Planentscheidung an Coverage. Nur wenn die
+Funding-Zulassung konkurrierende direkt ausführbare Runs vergleichen muss,
+wertet `fundingTargets()` die übrigen Routen einmal verzögert aus.
+
+Neutrale Fakten haben gemeinsame Produzenten: [Runner-Economy-Fakten](../../../packages/ai/src/run-analysis/runner-visible-economy-facts.ts)
+für sichtbare Remote-Bedrohung, Reservephase und Universalbreaker-Risiko,
+[sichtbare Run-Credit-Pools](../../../packages/ai/src/runtime/visible-run-credit-facts.ts)
+und [Kandidatenfakten](../../../packages/ai/src/actions/action-candidate-facts.ts)
+für ausgewählte Ziele und exakt zertifizierte Basiskredite. Strategische
+Prioritäten, zweckgebundene Ressourcenquotes und die Vereinigung aller
+möglichen Ziele eines Plans bleiben getrennte Fachverträge.
+
 Dateinamen wie `*-shadow.ts` oder `*-cutover.ts` sind bestehende technische
 Namen. Die normale Live-Runtime verwendet für beide Seiten den Modus
 `cutover`. `legacy_compare` ist ausdrücklich angeforderte Vergleichslogik
@@ -173,6 +189,16 @@ Die beiden bereits separaten Turn-Completion-Module bleiben unverändert.
 Die Live-Runtime komponiert Owner und Dienste, koordiniert übergreifende
 Dispositionen und verbindet Scheduler, TurnPlanner, Engine-Fenster und Diagnose.
 Die Owner importieren weder diese Dispatcher noch ihre Planregistries zurück.
+
+Die fachlichen Dispositionsregeln für optionale Program-Trash-Installationen
+liegen bei [Handentwicklung](../../../packages/ai/src/runner/hand-development/development-install-dispositions.ts),
+Coverage-Kopien und Draw-Phasen bei [Coverage](../../../packages/ai/src/runner/rig-coverage/coverage-dispositions.ts),
+Run-Sicherheit und bestätigte Draw-Steuern bei [Defense](../../../packages/ai/src/runner/defense-recovery/defense-dispositions.ts).
+[Remote Contest](../../../packages/ai/src/runner/remote-contest/remote-contest-dispositions.ts)
+und [Central Pressure](../../../packages/ai/src/runner/central-pressure/central-pressure-dispositions.ts)
+klassifizieren ihre übrigen Run-Angebote selbst. Die Runtime reicht dazu
+aktuelle Fakten und bereits gebundene fremde Owner ein und führt die
+Ergebnisse in unveränderter Reihenfolge zusammen.
 
 Nicht registriert sind die konzeptionellen Opening-Module
 `runner.opening_strategy` und `corp.opening_and_board_foundation`. Ihre

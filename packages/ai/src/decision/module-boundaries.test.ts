@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import ts from "typescript";
 
 type ImportReference = {
   importSource: string;
@@ -767,21 +768,98 @@ describe("AI module boundaries", () => {
       "runtime/plan-first-live-runtime.ts",
       "runtime/semantic-runtime.ts",
     ]);
-    const violations = collectSourceFiles(srcDir)
-      .filter((file) => !file.endsWith(".test.ts"))
-      .flatMap((file) => {
-        const content = readFileSync(file, "utf8");
-        if (!content.includes("evaluateRunnerRunTargets")) return [];
-        const relative = relativeFile(file);
-        return allowedFiles.has(relative)
-          ? []
-          : [
-              `${relative} references evaluateRunnerRunTargets outside run-target evaluation ownership`,
-            ];
-      });
-
-    expect(violations).toEqual([]);
-  });
+    const files = collectSourceFiles(srcDir).filter(
+      (file) => !file.endsWith(".test.ts"),
+    );
+    // In-memory counterexamples prove that aliases and re-exports remain
+    // dependencies on the actual producer, while comments are not dependencies.
+    const mutations = new Map([
+      [
+        path.join(srcDir, "runner", "rig-coverage", "__guard_alias.ts"),
+        'import { evaluateRunnerRunTargets as renamed } from "../../runner-run-target-evaluation"; export const illegal = renamed;',
+      ],
+      [
+        path.join(srcDir, "runner", "rig-coverage", "__guard_namespace.ts"),
+        'import * as routes from "../../runner-run-target-evaluation"; export const illegal = routes.evaluateRunnerRunTargets;',
+      ],
+      [
+        path.join(srcDir, "runner", "rig-coverage", "__guard_reexport.ts"),
+        'export { evaluateRunnerRunTargets as illegal } from "../../index";',
+      ],
+      [
+        path.join(srcDir, "runner", "rig-coverage", "__guard_comment.ts"),
+        '// evaluateRunnerRunTargets is owned elsewhere.\nexport const diagnostic = "evaluateRunnerRunTargets";',
+      ],
+    ]);
+    const host = ts.createCompilerHost({});
+    const fileExists = host.fileExists.bind(host);
+    host.fileExists = (file) =>
+      mutations.has(path.normalize(file)) || fileExists(file);
+    const getSourceFile = host.getSourceFile.bind(host);
+    host.getSourceFile = (
+      file,
+      languageVersion,
+      onError,
+      shouldCreateNewSourceFile,
+    ) => {
+      const source = mutations.get(path.normalize(file));
+      return source === undefined
+        ? getSourceFile(
+            file,
+            languageVersion,
+            onError,
+            shouldCreateNewSourceFile,
+          )
+        : ts.createSourceFile(file, source, languageVersion, true);
+    };
+    const program = ts.createProgram(
+      [...files, ...mutations.keys()],
+      {
+        target: ts.ScriptTarget.ESNext,
+        module: ts.ModuleKind.ESNext,
+        moduleResolution: ts.ModuleResolutionKind.Bundler,
+        noLib: true,
+        skipLibCheck: true,
+      },
+      host,
+    );
+    const checker = program.getTypeChecker();
+    const producer = path.join(srcDir, "runner-run-target-evaluation.ts");
+    const violations = [...files, ...mutations.keys()].flatMap((file) => {
+      if (allowedFiles.has(relativeFile(file))) return [];
+      const source = program.getSourceFile(file);
+      if (!source) throw new Error(`Missing architecture source ${file}`);
+      let referencesEvaluator = false;
+      const visit = (node: ts.Node): void => {
+        if (ts.isIdentifier(node)) {
+          let symbol = checker.getSymbolAtLocation(node);
+          if (symbol && symbol.flags & ts.SymbolFlags.Alias)
+            symbol = checker.getAliasedSymbol(symbol);
+          if (
+            symbol?.declarations?.some(
+              (declaration) =>
+                path.normalize(declaration.getSourceFile().fileName) ===
+                  producer &&
+                ts.isFunctionDeclaration(declaration) &&
+                declaration.name?.text === "evaluateRunnerRunTargets",
+            )
+          )
+            referencesEvaluator = true;
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(source);
+      return referencesEvaluator ? [relativeFile(file)] : [];
+    });
+    expect(violations.filter((file) => !file.includes("__guard_"))).toEqual([]);
+    expect(
+      violations.filter((file) => file.includes("__guard_")).sort(),
+    ).toEqual([
+      "runner/rig-coverage/__guard_alias.ts",
+      "runner/rig-coverage/__guard_namespace.ts",
+      "runner/rig-coverage/__guard_reexport.ts",
+    ]);
+  }, 30_000);
 
   it("keeps known access payoff evaluation behind access payoff owners", () => {
     const allowedFiles = new Set([

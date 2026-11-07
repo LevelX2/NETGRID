@@ -11,7 +11,7 @@ import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
 const SLOT_ID = "strategy_panel_net_damage_black_ice";
 
 describe("turn-planner shadow behavior-baseline regressions", () => {
-  it("keeps Top Runners' Conference install plan-owned at the captured opening state", () => {
+  it("keeps Top Runners' Conference install plan-owned at the captured opening state [legacy_compare]", () => {
     const { summary, capture } = runCapturedSeed(
       "ai-behavior-baseline-v1-05",
       8,
@@ -31,7 +31,7 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
     );
   });
 
-  it("keeps score-remote defense preparation clean under conservative uncertainty", () => {
+  it("keeps score-remote defense preparation clean under conservative uncertainty [legacy_compare]", () => {
     const summary = runSeedSummary("ai-behavior-baseline-v1-08", 160);
     const agendaInstallIndex = summary.actionSequence.findIndex(
       (entry) =>

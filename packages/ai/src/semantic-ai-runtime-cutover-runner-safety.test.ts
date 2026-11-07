@@ -259,8 +259,8 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
           sourceDefinitionId: "onr_v1_232_crystal-wall",
-          encounterSubroutineIds: crystalWall.effectiveRunQuote!.subroutines
-            .map((subroutine) => subroutine.id)
+          encounterSubroutineIds: crystalWall
+            .effectiveRunQuote!.subroutines.map((subroutine) => subroutine.id)
             .join(","),
         },
       },
@@ -942,7 +942,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     );
   });
 
-  it("does not let non-basic setup actions suppress survival draw before risky R&D runs", () => {
+  it("does not let non-basic setup actions suppress survival draw before risky R&D runs [legacy_compare]", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",

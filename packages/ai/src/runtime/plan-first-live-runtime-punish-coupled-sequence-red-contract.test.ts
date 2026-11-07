@@ -46,7 +46,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     resetResidentPlanPortfolioMemory();
   });
 
-  it("executes one complete Tag -> 4 Meat -> 2 Meat route through one stable P1 root", () => {
+  it("executes one complete Tag -> 4 Meat -> 2 Meat route through one stable P1 root [legacy_compare]", () => {
     const input = coupledPunishInput({
       stateVersion: 1,
       credits: 10,
@@ -109,7 +109,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     );
   });
 
-  it("funds the whole route only when the funding click and all three sequence clicks fit", () => {
+  it("funds the whole route only when the funding click and all three sequence clicks fit [legacy_compare]", () => {
     const noFundingHorizon = coupledPunishInput({
       stateVersion: 1,
       credits: 9,
@@ -173,7 +173,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     );
   });
 
-  it("keeps the lethal root waiting when too few clicks remain and lets a real score plan act", () => {
+  it("keeps the lethal root waiting when too few clicks remain and lets a real score plan act [legacy_compare]", () => {
     const input = coupledPunishInput({
       stateVersion: 1,
       credits: 10,
@@ -196,7 +196,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     });
   });
 
-  it("does not claim a lethal P1 route through visible meat-damage prevention", () => {
+  it("does not claim a lethal P1 route through visible meat-damage prevention [legacy_compare]", () => {
     const input = coupledPunishInput({
       stateVersion: 1,
       credits: 10,
@@ -247,7 +247,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     });
   });
 
-  it("retains the root but exposes no damage head after the trace loses or the tag is prevented", () => {
+  it("retains the root but exposes no damage head after the trace loses or the tag is prevented [legacy_compare]", () => {
     const initial = coupledPunishInput({
       stateVersion: 1,
       credits: 10,
@@ -291,7 +291,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     });
   });
 
-  it("re-quotes Tag success into 4 Meat and then 2 Meat without admitting a foreign punish interruption", () => {
+  it("re-quotes Tag success into 4 Meat and then 2 Meat without admitting a foreign punish interruption [legacy_compare]", () => {
     const input = coupledPunishInput({
       stateVersion: 1,
       credits: 10,
@@ -356,7 +356,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     ).toHaveLength(1);
   });
 
-  it("executes the affordable lethal damage route instead of waiting for a stronger unaffordable payoff", () => {
+  it("executes the affordable lethal damage route instead of waiting for a stronger unaffordable payoff [legacy_compare]", () => {
     const input = coupledPunishInput({
       stateVersion: 2,
       credits: 3,
@@ -443,7 +443,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
       incompleteReason: "cost_quote_incomplete" as const,
     },
   ])(
-    "does not expose a terminal execution when $label",
+    "does not expose a terminal execution when $label [legacy_compare]",
     ({ runnerHandCount, missingSource, incompleteReason }) => {
       const input = coupledPunishInput({
         stateVersion: 1,
@@ -479,7 +479,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     },
   );
 
-  it("selects the stronger complete route internally without creating a second campaign root", () => {
+  it("selects the stronger complete route internally without creating a second campaign root [legacy_compare]", () => {
     const input = coupledPunishInput({
       stateVersion: 1,
       credits: 10,
@@ -529,7 +529,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
       label: "exactly four damage is not lethal",
     },
   ])(
-    "selects the shortest sufficient complete route when $label",
+    "selects the shortest sufficient complete route when $label [legacy_compare]",
     ({ runnerHandCount, expectedRouteId }) => {
       const input = coupledPunishInput({
         stateVersion: 1,
@@ -551,7 +551,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     },
   );
 
-  it("rates six damage against seven cards as material P4 hand destruction above the same damage against twenty cards", () => {
+  it("rates six damage against seven cards as material P4 hand destruction above the same damage against twenty cards [legacy_compare]", () => {
     const materialInput = coupledPunishInput({
       stateVersion: 1,
       credits: 10,
@@ -609,7 +609,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     expect(exactPunishChild(chipPortfolio?.instances, chipRoot)).toBeDefined();
   });
 
-  it("prefers a resource-efficient material route over marginal extra damage with much higher cost", () => {
+  it("prefers a resource-efficient material route over marginal extra damage with much higher cost [legacy_compare]", () => {
     const input = coupledPunishInput({
       stateVersion: 1,
       credits: 20,
@@ -641,7 +641,7 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     expect(punishRouteId(child)).toBe(FOUR_DAMAGE_ROUTE_ID);
   });
 
-  it("returns the same decision for hidden twins with identical Corp PlayerViews", () => {
+  it("returns the same decision for hidden twins with identical Corp PlayerViews [legacy_compare]", () => {
     const left = coupledPunishInput({
       stateVersion: 1,
       credits: 10,

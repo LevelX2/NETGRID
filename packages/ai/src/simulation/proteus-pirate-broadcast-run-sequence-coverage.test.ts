@@ -9,7 +9,7 @@ import { simulateAiGame } from "../simulation";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 describe("Proteus restricted multi-run plan-first coverage", () => {
-  it("converts Pirate Broadcast's exact R&D and Archives sequence legs through the generic run-window plan", () => {
+  it("converts Pirate Broadcast's exact R&D and Archives sequence legs through the generic run-window plan [legacy_compare]", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-01",

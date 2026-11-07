@@ -1,9 +1,5 @@
-import type {
-  AiDecisionInput,
-  LegalAction,
-  PlayerView,
-  VisibleCard,
-} from "@netgrid/shared";
+import { visibleRunnerRunCreditPool } from "../runtime/visible-run-credit-facts";
+import type { AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { semanticRuntimeCorpObservedRemoteReachability } from "../runtime/semantic-runtime-corp-remote-reachability";
 import { visibleRunnerExposureCreditValue } from "../runtime/visible-runner-action-economy";
@@ -104,26 +100,6 @@ export function corpRemoteContestabilityAssessment(
       ...observedReachability.evidence,
     ],
   };
-}
-
-function visibleRunnerRunCreditPool(rig: readonly VisibleCard[]): number {
-  return rig.reduce((sum, card) => {
-    if (card.known === false) return sum;
-    return (
-      sum +
-      (card.counterDisplays ?? []).reduce((cardSum, display) => {
-        const uses = display.creditPool?.uses ?? [];
-        if (
-          uses.includes("using_icebreaker_during_run") ||
-          uses.includes("using_icebreaker_during_run_non_noisy") ||
-          uses.includes("using_killer_during_run")
-        ) {
-          return cardSum + Math.max(0, Math.floor(display.amount));
-        }
-        return cardSum;
-      }, 0)
-    );
-  }, 0);
 }
 
 export function advanceCompletesScore(

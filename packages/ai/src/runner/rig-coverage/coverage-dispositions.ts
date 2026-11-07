@@ -308,3 +308,76 @@ export function runnerMatchpointReserveBlocksOverlappingBreakerInstall(
     );
   });
 }
+
+export function runnerCoverageAlternativeCopyDisposition(params: {
+  input: AiDecisionInput;
+  candidate: ActionSemanticCandidate;
+  candidates: readonly ActionSemanticCandidate[];
+  coverageGaps: readonly RunnerCoverageGapSignal[];
+  developments: readonly {
+    definitionId?: string;
+    assignedDomainPlanIds: readonly string[];
+  }[];
+}): string | undefined {
+  const { input, candidate, candidates } = params;
+  const coverageGapsByAssignedPlanId = new Map(
+    params.coverageGaps.map((gap) => [
+      `runner.rig_and_coverage:${gap.gapId}`,
+      gap,
+    ]),
+  );
+  const alternativeToBoundCoverageCopy = params.developments.some(
+    (development) =>
+      development.assignedDomainPlanIds.length > 0 &&
+      development.assignedDomainPlanIds.every((planId) => {
+        const gap = coverageGapsByAssignedPlanId.get(planId);
+        return (
+          gap?.answerInHand === true &&
+          !gap.installActionIds?.includes(candidate.actionId) &&
+          gap.installActionIds?.some((actionId) => {
+            const bound = candidates.find(
+              (entry) => entry.actionId === actionId,
+            );
+            return (
+              bound?.semanticActionType === "install.card" &&
+              bound.sourceCardInstanceId !== candidate.sourceCardInstanceId &&
+              runnerCandidateSourceDefinitionId(input, bound) ===
+                development.definitionId
+            );
+          }) === true
+        );
+      }),
+  );
+
+  return candidate.semanticActionType === "install.card" &&
+    alternativeToBoundCoverageCopy
+    ? "runner_coverage_install_alternative_to_bound_same_definition_answer"
+    : undefined;
+}
+
+export function runnerCoverageDrawPhaseDisposition(
+  candidate: ActionSemanticCandidate,
+  coverageGaps: readonly RunnerCoverageGapSignal[],
+  deferrals: ReturnType<typeof runnerCoverageInstallDeferrals>,
+): string | undefined {
+  const gaps =
+    candidate.semanticActionType === "draw.card"
+      ? coverageGaps.filter(
+          (gap) =>
+            !gap.answerInHand &&
+            gap.deckHasAnswer &&
+            gap.drawForAnswerActionIds.includes(candidate.actionId),
+        )
+      : [];
+  return gaps.length > 0 &&
+    gaps.every(
+      (gap) =>
+        runnerCoverageCurrentPhase({
+          context: deferrals.coveragePlanningContext,
+          gap,
+          rolesForDefinitionId: rolesForDeckDoctrineCard,
+        }) !== "draw_for_answer",
+    )
+    ? "runner_coverage_draw_deferred_for_current_preparation_phase"
+    : undefined;
+}

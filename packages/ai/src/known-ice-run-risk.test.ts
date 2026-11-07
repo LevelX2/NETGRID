@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 describe("known visible ICE run risk", () => {
-  it("preserves rezzed Hunter trace fields through Engine PlayerView DTO into runner AI", () => {
+  it("preserves rezzed Hunter trace fields through Engine PlayerView DTO into runner AI [legacy_compare]", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const state = engineRunnerTurnWithRezzedIce(
       "known-ice-run-risk-engine-dto",
@@ -128,7 +128,7 @@ describe("known visible ICE run risk", () => {
     });
   });
 
-  it("chooses credits over an unknown R&D run through unavoidable visible Hunter", () => {
+  it("chooses credits over an unknown R&D run through unavoidable visible Hunter [legacy_compare]", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const run = runAction("run-rd", "rd");
     const gain = gainCreditAction("gain-credit");
@@ -170,7 +170,7 @@ describe("known visible ICE run risk", () => {
     );
   });
 
-  it("keeps a visible remote agenda runnable through unavoidable Hunter risk", () => {
+  it("keeps a visible remote agenda runnable through unavoidable Hunter risk [legacy_compare]", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const run = runAction("run-remote-1", "remote_1");
     const gain = gainCreditAction("gain-credit");
@@ -217,7 +217,7 @@ describe("known visible ICE run risk", () => {
     expect(evaluation?.score).toBeLessThan(0);
   });
 
-  it("fails closed when a visible remote agenda has no exact access route through unknown ICE", () => {
+  it("fails closed when a visible remote agenda has no exact access route through unknown ICE [legacy_compare]", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const run = runAction("run-remote-1", "remote_1");
     const gain = gainCreditAction("gain-credit");
@@ -325,7 +325,7 @@ describe("known visible ICE run risk", () => {
       } satisfies TraceSuccessEffect,
     },
   ])(
-    "chooses setup over unknown R&D run through visible $label trace risk",
+    "chooses setup over unknown R&D run through visible $label trace risk [legacy_compare]",
     ({ effect, expectedGuidance }) => {
       process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
       const run = runAction("run-rd", "rd");

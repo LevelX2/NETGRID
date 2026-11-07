@@ -12,7 +12,7 @@ describe("replay portable fixtures", () => {
     resetResidentPlanPortfolioMemory();
   });
 
-  it("reproduces the coverage/run gap through PlayerView and LegalActions only", () => {
+  it("reproduces the coverage/run gap through PlayerView and LegalActions only [legacy_compare]", () => {
     const fixture = coverageRunGapPortableFixture();
 
     expect(containsForbiddenSemanticMarker(fixture)).toBe(false);
@@ -39,7 +39,7 @@ describe("replay portable fixtures", () => {
     );
   });
 
-  it("does not invent a run when the fixture omits start_run LegalActions", () => {
+  it("does not invent a run when the fixture omits start_run LegalActions [legacy_compare]", () => {
     const fixture = coverageRunGapNoRunNegativeFixture();
 
     expect(containsForbiddenSemanticMarker(fixture)).toBe(false);

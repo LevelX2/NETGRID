@@ -1,19 +1,17 @@
+import { exactBasicLiquidCreditCandidate } from "../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { runnerDrawProjectionFor } from "../actions/action-economy-projection";
 import { createRunnerCreditDemand } from "../plans/credit-demand";
 import { searchFundingRoutes, type FundingRoute } from "../plans/funding-route";
-import {
-  runnerExactBasicLiquidCreditCandidate,
-  runnerFundingRouteCandidateIsMaterializable,
-} from "../plans/runner-funding-candidates";
+import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-funding-candidates";
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
 import { turnPlanningFingerprint } from "../plans/turn-planning-contracts";
 import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
 import {
   assessRunnerRunAfterGuaranteedFunding,
-  evaluateRunnerRunTargets,
+  quoteRunnerRunTarget,
 } from "../runner-run-target-evaluation";
 import {
   runnerCriticalDamageContestBlocked,
@@ -200,7 +198,7 @@ function runnerReserveHandPreparation(
     request.requiredEndTurnHandBuffer ?? -1,
     request.reserveDevelopment?.minimumHandBuffer ?? -1,
   );
-  const basic = candidates.find(runnerExactBasicLiquidCreditCandidate);
+  const basic = candidates.find(exactBasicLiquidCreditCandidate);
   const draw = input.legalActions.find(
     (action) =>
       action.type === "draw_card" &&
@@ -538,12 +536,14 @@ function runnerFundingRouteConsumerBufferFits(
         },
       },
     };
-    const fundedTarget = evaluateRunnerRunTargets({
+    const fundedTarget = quoteRunnerRunTarget({
       input: fundedInput,
       deckCapabilities:
         createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
       quotedRunnerGripCount: handAfter,
-    }).find((entry) => entry.actionId === target.actionId);
+      runActionId: target.actionId,
+      targetServerId: target.targetServerId,
+    })?.target;
     if (
       !fundedTarget ||
       (request.acceptFundedRun &&

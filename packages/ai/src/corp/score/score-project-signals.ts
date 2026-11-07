@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import {
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -43,7 +44,6 @@ import { visibleOwnCardByInstanceId } from "../../runtime/runner-action-source-f
 import { technicalIdCompare } from "../../runtime/runtime-identifiers";
 import {
   candidateIsVisibleCorpAgendaInstall,
-  candidateTargetIds,
   isCorpInstallServerId,
   requireVisibleCandidateSource,
   serverForInstalledCard,

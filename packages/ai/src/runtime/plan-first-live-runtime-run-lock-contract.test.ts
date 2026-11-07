@@ -12,7 +12,7 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first Runner run-lock parent-plan contract", () => {
-  it("uses last productive liquidity when a run lock has no pressure route or bound funding need", () => {
+  it("uses last productive liquidity when a run lock has no pressure route or bound funding need [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const gainCredit = legalAction(
       "runner.gain_credit",
@@ -47,7 +47,7 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
     );
   });
 
-  it("executes the exact release step once costs, path, and reserve are covered", () => {
+  it("executes the exact release step once costs, path, and reserve are covered [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const release = legalAction(
       "runner.release_run_lock",

@@ -1,3 +1,4 @@
+import { exactBasicLiquidCreditCandidate } from "../../actions/action-candidate-facts";
 import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
@@ -28,7 +29,7 @@ import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-h
 import { visibleKnownCardType } from "../../runtime/visible-action-facts";
 import { type CorpPunishCampaignSignal } from "../punish/punish-types";
 import { corpEconomyPriorityClass } from "./economy-plan-module";
-import { corpExactBasicLiquidCreditCandidate } from "./economy-routes";
+
 import {
   type CorpEconomyImmediateOperationSignal,
   type CorpEconomyOperationThresholdSignal,
@@ -1143,7 +1144,7 @@ export function corpImmediateOperationThresholdPreparations(
   candidates: readonly ActionSemanticCandidate[],
 ): CorpEconomyOperationThresholdSignal[] {
   const exactBasicCreditCandidates = candidates.filter(
-    corpExactBasicLiquidCreditCandidate,
+    exactBasicLiquidCreditCandidate,
   );
   if (
     exactBasicCreditCandidates.length !== 1 ||

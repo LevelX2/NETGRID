@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -10,7 +11,6 @@ import { type PlanSchedulerResult } from "../../plans/plan-scheduler";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-hand-support";
 import { technicalIdCompare, turnKey } from "../../runtime/runtime-identifiers";
-import { candidateTargetIds } from "../../runtime/visible-action-facts";
 
 export function bindSelectedCorpHqOverflowConversion(
   input: AiDecisionInput,

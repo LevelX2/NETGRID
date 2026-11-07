@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { corpIceRezSupportEmptyTargetDispositionEvidence } from "./corp-defense-rez-support-facts";
 import { corpArchivesAgendaRelocationSignal } from "./archives-agenda-relocation";
 import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
@@ -5,7 +6,6 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   assessment,
-  candidateTargetIds,
   corpDomainIfAvailable,
   domain,
   proposal,
@@ -515,14 +515,25 @@ function defenseCandidates(
   }
   if (signal.phase === "fund_rez_reserve") return [];
   if (signal.phase === "recover_exposed_agenda") {
-    return context.actionCandidates.filter(candidate => {
-      if (signal.actionIds?.includes(candidate.actionId) !== true) return false;
-      const current = corpArchivesAgendaRelocationSignal(context.input, candidate);
-      return current?.defenseId === signal.defenseId &&
-        current.archivesRecovery?.stateVersion === signal.archivesRecovery?.stateVersion &&
-        current.archivesRecovery?.sourceCardId === signal.archivesRecovery?.sourceCardId &&
-        current.archivesRecovery?.recoveredCardId === signal.archivesRecovery?.recoveredCardId;
-    }).map(candidate => ({candidate,stepValue:signal.value}));
+    return context.actionCandidates
+      .filter((candidate) => {
+        if (signal.actionIds?.includes(candidate.actionId) !== true)
+          return false;
+        const current = corpArchivesAgendaRelocationSignal(
+          context.input,
+          candidate,
+        );
+        return (
+          current?.defenseId === signal.defenseId &&
+          current.archivesRecovery?.stateVersion ===
+            signal.archivesRecovery?.stateVersion &&
+          current.archivesRecovery?.sourceCardId ===
+            signal.archivesRecovery?.sourceCardId &&
+          current.archivesRecovery?.recoveredCardId ===
+            signal.archivesRecovery?.recoveredCardId
+        );
+      })
+      .map((candidate) => ({ candidate, stepValue: signal.value }));
   }
   if (signal.phase === "install_ice") {
     const route = signal.installRoute;
@@ -1411,14 +1422,20 @@ function selectedGenericDefensePortfolioBand(
     const prioritySignals = windowEligibleSignals.filter(
       (signal) => corpGenericDefensePriorityClass([signal]) === priorityClass,
     );
-    const urgentPlacementOrReserve = prioritySignals.some(signal =>
-      signal.urgent && (signal.phase === "fund_rez_reserve" ||
-        ((signal.phase === "install_ice" || signal.phase === "install_defense_support") &&
-          defenseCandidates(context,signal).length > 0)));
+    const urgentPlacementOrReserve = prioritySignals.some(
+      (signal) =>
+        signal.urgent &&
+        (signal.phase === "fund_rez_reserve" ||
+          ((signal.phase === "install_ice" ||
+            signal.phase === "install_defense_support") &&
+            defenseCandidates(context, signal).length > 0)),
+    );
     // Relocation complements the portfolio; it never consumes the action of
     // an already executable urgent installation or its exact reserve funding.
     const eligiblePrioritySignals = urgentPlacementOrReserve
-      ? prioritySignals.filter(signal => signal.phase !== "recover_exposed_agenda")
+      ? prioritySignals.filter(
+          (signal) => signal.phase !== "recover_exposed_agenda",
+        )
       : prioritySignals;
     if (prioritySignals.length === 0) continue;
     const prioritySignalsWithSupport = [

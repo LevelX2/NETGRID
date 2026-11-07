@@ -38,7 +38,7 @@ describe("match series 70BE real Engine regressions", () => {
     resetStrategicIntentMemory();
   });
 
-  it("keeps the full Corporate War same-turn score sequence executable", () => {
+  it("keeps the full Corporate War same-turn score sequence executable [legacy_compare]", () => {
     let state = corpMainState("series-70be-corp-score-sequence");
     RealEngineFixtureBuilder.forState(state)
       .withCorpHqSize(0)
@@ -147,7 +147,7 @@ describe("match series 70BE real Engine regressions", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
-  it("rezes City Surveillance through the Corp pre-draw choice", () => {
+  it("rezes City Surveillance through the Corp pre-draw choice [legacy_compare]", () => {
     let state = runnerTurnState("series-70be-pre-draw-rez-live-input");
     RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(1)

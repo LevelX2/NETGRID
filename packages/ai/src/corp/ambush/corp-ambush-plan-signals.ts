@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { accessInstalledTrashChoiceSignal } from "./corp-access-installed-trash-choice";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { corpRdRecyclingSignals } from "./corp-access-zone-preparation";
@@ -1429,22 +1430,6 @@ function installedCardLocation(
     if (card) return { card, serverId: server.id };
   }
   return undefined;
-}
-
-function candidateTargetIds(candidate: ActionSemanticCandidate): string[] {
-  const selected =
-    candidate.targetContext?.selectedTargets.map((target) => target.targetId) ??
-    [];
-  return [
-    ...(selected.length > 0
-      ? selected
-      : (candidate.targetContext?.availableTargets?.map(
-          (target) => target.targetId,
-        ) ?? [])),
-    ...(candidate.runProjectionSummary?.serverId
-      ? [candidate.runProjectionSummary.serverId]
-      : []),
-  ];
 }
 
 function isAmbushRemoteInstallServer(value: string): boolean {

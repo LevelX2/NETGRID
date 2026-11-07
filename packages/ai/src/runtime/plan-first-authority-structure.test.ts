@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import ts from "typescript";
 
 import {
   CORP_CORE_ACTION_OWNERSHIP,
@@ -260,14 +261,49 @@ describe("plan-first live authority structure", () => {
     expect(
       [planFirstRuntime, reserveSource, economySignals].join("\n"),
     ).not.toContain("function corpCentralRezReserveNeeds(");
-    expect(reserveSource).toContain(
-      'need.installRoute?.disposition === "funding_only"',
+    const reserveAst = ts.createSourceFile(
+      "corp-defense-funding-facts.ts",
+      reserveSource,
+      ts.ScriptTarget.Latest,
+      true,
+    );
+    const pathOf = (node: ts.Node): string | undefined =>
+      ts.isIdentifier(node)
+        ? node.text
+        : ts.isPropertyAccessExpression(node)
+          ? `${pathOf(node.expression)}.${node.name.text}`
+          : undefined;
+    let guardedFundingProjection = false;
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isBinaryExpression(node) &&
+        node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken &&
+        ts.isBinaryExpression(node.left) &&
+        pathOf(node.left.left) === "need.installRoute.disposition" &&
+        node.left.operatorToken.kind ===
+          ts.SyntaxKind.EqualsEqualsEqualsToken &&
+        ts.isStringLiteral(node.left.right) &&
+        node.left.right.text === "funding_only" &&
+        ts.isCallExpression(node.right) &&
+        pathOf(node.right.expression) ===
+          "knownInstallRouteHasUsefulEffectBlockedByFunding" &&
+        node.right.arguments.length === 1 &&
+        pathOf(node.right.arguments[0]!) === "need.installRoute.projection"
+      )
+        guardedFundingProjection = true;
+      ts.forEachChild(node, visit);
+    };
+    visit(reserveAst);
+    expect(guardedFundingProjection).toBe(true);
+    const fundingContract = readSource(
+      "plans",
+      "corp-defense-funding-contract.ts",
+    );
+    expect(fundingContract).toContain(
+      "export function genericDefenseFundingRequirement(",
     );
     expect(reserveSource).toContain(
-      "knownInstallRouteHasUsefulEffectBlockedByFunding(\n        need.installRoute.projection,",
-    );
-    expect(reserveSource).toContain(
-      "installProjection?.after.minimumAdditionalCreditsToSatisfy",
+      "genericDefenseFundingRequirement(need)?.gap",
     );
     expect(reserveSource).toContain('moduleId: "corp.defend_servers"');
     expect(reserveSource).toContain(

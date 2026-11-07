@@ -132,24 +132,6 @@ export function actionIsCurrentlyAffordable(
   );
 }
 
-export function candidateTargetIds(
-  candidate: ActionSemanticCandidate,
-): string[] {
-  const selectedTargets =
-    candidate.targetContext?.selectedTargets.map((target) => target.targetId) ??
-    [];
-  return [
-    ...(selectedTargets.length > 0
-      ? selectedTargets
-      : (candidate.targetContext?.availableTargets?.map(
-          (target) => target.targetId,
-        ) ?? [])),
-    ...(candidate.runProjectionSummary?.serverId
-      ? [candidate.runProjectionSummary.serverId]
-      : []),
-  ];
-}
-
 export function candidateIsVisibleCorpIceInstall(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,

@@ -91,7 +91,7 @@ describe("exact Corp ICE rez route", () => {
     },
     { runnerPrograms: ["onr_v1_002_ai-boon"] },
   ])(
-    "rezzes Pocket VR through the defense owner independently of exact access modeling: $runnerPrograms",
+    "rezzes Pocket VR through the defense owner independently of exact access modeling: $runnerPrograms [legacy_compare]",
     ({ runnerPrograms }) => {
       resetResidentPlanPortfolioMemory();
       const fixture = engineIceRezWindow(
@@ -285,7 +285,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("declines an Engine-quoted empty encounter despite native dynamic trace hints", () => {
+  it("declines an Engine-quoted empty encounter despite native dynamic trace hints [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_proteus_026_hunting-pack", 0, {
       corpCredits: 13,
@@ -365,7 +365,7 @@ describe("exact Corp ICE rez route", () => {
     ["onr_v1_222_ball-and-chain", "set_run_encounter_tax"],
     ["onr_v1_277_virizz", "set_run_break_subroutine_cost_modifier"],
   ])(
-    "declines future-only %s at the innermost ICE",
+    "declines future-only %s at the innermost ICE [legacy_compare]",
     (definitionId, effectType) => {
       resetResidentPlanPortfolioMemory();
       const fixture = engineIceRezWindow(definitionId, 0, {
@@ -426,7 +426,7 @@ describe("exact Corp ICE rez route", () => {
     },
   );
 
-  it("keeps Corp defense ownership for a visible run-cap block despite abundant Runner credits", () => {
+  it("keeps Corp defense ownership for a visible run-cap block despite abundant Runner credits [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_279_wall-of-static", 0, {
       corpCredits: 27,
@@ -504,7 +504,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("uses the exact Engine quote for a paid end-the-run rez variant", () => {
+  it("uses the exact Engine quote for a paid end-the-run rez variant [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_proteus_024_gatekeeper", 0, {
       rezSubroutineCount: 1,
@@ -561,7 +561,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("compares exact alternate-subtype rez variants and chooses the one that blocks the visible rig", () => {
+  it("compares exact alternate-subtype rez variants and chooses the one that blocks the visible rig [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_proteus_017_credit-blocks", 0, {
       corpCredits: 14,
@@ -672,7 +672,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBeUndefined();
   });
 
-  it("keeps ordinary and Olivia-discounted quotes as distinct executable routes for one ICE", () => {
+  it("keeps ordinary and Olivia-discounted quotes as distinct executable routes for one ICE [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineOliviaIceRezWindow();
 
@@ -832,7 +832,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBeUndefined();
   });
 
-  it("uses known encounter pressure on the active run when access probability remains unchanged", () => {
+  it("uses known encounter pressure on the active run when access probability remains unchanged [legacy_compare]", () => {
     const fixture = engineIceRezWindow("onr_v1_249_hunter", 0);
 
     expect(
@@ -854,7 +854,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
-  it("rezzes an affordable paid deflector against a terminal central access and preserves Defense ownership", () => {
+  it("rezzes an affordable paid deflector against a terminal central access and preserves Defense ownership [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_classic_010_entrapment", 0, {
       corpCredits: 4,
@@ -935,7 +935,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("rezzes Riddler when its Engine-quoted paid encounter ETR is affordable at terminal access", () => {
+  it("rezzes Riddler when its Engine-quoted paid encounter ETR is affordable at terminal access [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_proteus_034_riddler", 0, {
       corpCredits: 9,
@@ -1011,7 +1011,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("declines Riddler when rez plus its Engine-quoted encounter ETR is unaffordable", () => {
+  it("declines Riddler when rez plus its Engine-quoted encounter ETR is unaffordable [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_proteus_034_riddler", 0, {
       corpCredits: 3,
@@ -1047,7 +1047,7 @@ describe("exact Corp ICE rez route", () => {
 
   // match_4ac1e3db42b71a47, decision 50: the stored older runtime still
   // projected the exact approached ICE as active_run_context.
-  it("keeps the current Brain Wash route despite an intentionally incomplete breaker-exchange quote", () => {
+  it("keeps the current Brain Wash route despite an intentionally incomplete breaker-exchange quote [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_proteus_011_brain-wash", 0, {
       corpCredits: 9,
@@ -1115,7 +1115,7 @@ describe("exact Corp ICE rez route", () => {
 
   // match_4ac1e3db42b71a47, decision 48: direct damage and encounter
   // disruption are defense progress even without a hard end-the-run path.
-  it("keeps the current Data Darts damage-and-disruption route without a hard end-the-run subroutine", () => {
+  it("keeps the current Data Darts damage-and-disruption route without a hard end-the-run subroutine [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_234_data-darts", 0, {
       corpCredits: 9,
@@ -1183,7 +1183,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("declines the same paid deflector when rez plus activation is not affordable", () => {
+  it("declines the same paid deflector when rez plus activation is not affordable [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_classic_010_entrapment", 0, {
       corpCredits: 2,
@@ -1217,7 +1217,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("rezzes free current-encounter damage when a trace keeps the access assessment unknown", () => {
+  it("rezzes free current-encounter damage when a trace keeps the access assessment unknown [legacy_compare]", () => {
     const fixture = engineIceRezWindow("onr_proteus_014_chihuahua", 0);
 
     expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
@@ -1248,7 +1248,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
-  it("uses a canonical pay-or-end subroutine as qualitative encounter defense without inventing access prevention", () => {
+  it("uses a canonical pay-or-end subroutine as qualitative encounter defense without inventing access prevention [legacy_compare]", () => {
     const fixture = engineIceRezWindow(
       "onr_proteus_032_misleading-access-menus",
       0,
@@ -1280,7 +1280,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
-  it("uses an Engine-certified current-run resource exchange when access remains possible", () => {
+  it("uses an Engine-certified current-run resource exchange when access remains possible [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
       runnerCredits: 1,
@@ -1347,7 +1347,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
-  it("keeps an exact Pile Driver exchange under the Corp defense plan when Stealth loss is unavailable", () => {
+  it("keeps an exact Pile Driver exchange under the Corp defense plan when Stealth loss is unavailable [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
       runnerCredits: 16,
@@ -1525,7 +1525,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("keeps Corp defense ownership when a post-break consequence cannot rescue an unaffordable route", () => {
+  it("keeps Corp defense ownership when a post-break consequence cannot rescue an unaffordable route [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_classic_011_glacier", 2, {
       runnerCredits: 3,
@@ -1646,7 +1646,7 @@ describe("exact Corp ICE rez route", () => {
     expect(exactCorpIceRezRoutesEqual(route, changed)).toBe(false);
   });
 
-  it("carries the chosen Filter/Rent-I-Con rez through the real Engine run and trashes the breaker", () => {
+  it("carries the chosen Filter/Rent-I-Con rez through the real Engine run and trashes the breaker [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
       runnerCredits: 1,
@@ -1788,7 +1788,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("rezzes a free persistent Filter on the active central server even when Codecracker breaks it for free", () => {
+  it("rezzes a free persistent Filter on the active central server even when Codecracker breaks it for free [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
       runnerCredits: 0,
@@ -1818,7 +1818,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
-  it("declines an otherwise stopping R&D rez when the score plan's published next-turn cash and remote rez reserve would be spent", () => {
+  it("declines an otherwise stopping R&D rez when the score plan's published next-turn cash and remote rez reserve would be spent [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0);
     fixture.state.corp.credits = 5;
@@ -1893,7 +1893,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(decline.actionId);
   });
 
-  it("uses the score plan's certified surplus-click conversion instead of reserving advancement credits unnecessarily", () => {
+  it("uses the score plan's certified surplus-click conversion instead of reserving advancement credits unnecessarily [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0);
     fixture.state.corp.credits = 5;
@@ -1917,7 +1917,7 @@ describe("exact Corp ICE rez route", () => {
     );
   });
 
-  it("protects the agenda server under attack before retaining that agenda's later advancement cash", () => {
+  it("protects the agenda server under attack before retaining that agenda's later advancement cash [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineAgendaServerRezWindow();
     const rez = fixture.input.legalActions.find(
@@ -1941,7 +1941,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(rez.actionId);
   });
 
-  it("reserves exact stopping rezzes for each additional score server the Runner can still attack", () => {
+  it("reserves exact stopping rezzes for each additional score server the Runner can still attack [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0);
     fixture.state.corp.credits = 7;
@@ -2029,7 +2029,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(decline.actionId);
   });
 
-  it("selects the cheaper sufficient legal rez receipt when it preserves the other score server's rez reserve", () => {
+  it("selects the cheaper sufficient legal rez receipt when it preserves the other score server's rez reserve [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineOliviaIceRezWindow();
     fixture.state.corp.credits = 5;
@@ -2054,7 +2054,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(discounted.actionId);
   });
 
-  it("certifies the approached outer tax before a visible inner stopping ICE", () => {
+  it("certifies the approached outer tax before a visible inner stopping ICE [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
       runnerCredits: 1,

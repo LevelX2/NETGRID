@@ -1,5 +1,9 @@
+import {
+  candidateTargetIds,
+  exactBasicLiquidCreditCandidate,
+} from "../../actions/action-candidate-facts";
 import type { CorpHostedBankFundingWindowContext } from "./hosted-credit-bank-cycle";
-import { candidateTargetIds } from "../../plans/corp-core-module-support";
+
 import { corpHostedBankLoadMatches } from "./hosted-credit-bank-facts";
 import { corpFreeRezPayoutPreparation } from "./free-rez-payout-preparation";
 import { assessCorpIceLiquidation } from "../defense/corp-ice-liquidation";
@@ -197,10 +201,10 @@ export function economyCandidates(
                 visibleCardPayoutCandidateMatchesSignal(candidate, signal)
               : signal.kind === "prepare_immediate_operation"
                 ? candidate.actionId === operationThresholdActionId &&
-                  corpExactBasicLiquidCreditCandidate(candidate)
+                  exactBasicLiquidCreditCandidate(candidate)
                 : signal.kind === "develop_liquidity"
                   ? candidate.actionId === liquidityActionId &&
-                    corpExactBasicLiquidCreditCandidate(candidate)
+                    exactBasicLiquidCreditCandidate(candidate)
                   : signal.kind === "resolve_start_rez_choice"
                     ? candidate.actionId === startRezChoiceActionId &&
                       candidate.semanticActionType === "choice.resolve"
@@ -235,37 +239,6 @@ export function economyCandidates(
                         : 1
                       : immediateCorpLiquidCreditGain(candidate) * 10,
     }));
-}
-
-export function corpExactBasicLiquidCreditCandidate(
-  candidate: ActionSemanticCandidate,
-): boolean {
-  const projection = candidate.economyProjection;
-  return (
-    candidate.sourceKind === "basic_action" &&
-    candidate.actionType === "gain_credit" &&
-    candidate.semanticActionType === "economy.gain_credit" &&
-    candidate.costProfile.clickCost === 1 &&
-    (candidate.costProfile.creditCost === undefined ||
-      candidate.costProfile.creditCost === 0) &&
-    candidate.costProfile.additionalCosts.length === 0 &&
-    projection?.kind === "immediate_liquid" &&
-    projection.timing === "immediate" &&
-    projection.creditRestriction === "general" &&
-    projection.clickCost === 1 &&
-    projection.creditCost === 0 &&
-    projection.grossLiquidCreditGain === 1 &&
-    projection.netLiquidCreditGain === 1 &&
-    projection.cardsDrawn === 0 &&
-    projection.cardsConsumed === 0 &&
-    projection.netHandDelta === 0 &&
-    projection.payoutMode === "fixed" &&
-    projection.reliability === "guaranteed" &&
-    ((projection.source === "basic_action_contract" &&
-      projection.confidence === "medium") ||
-      (projection.source === "legal_action_payload" &&
-        projection.confidence === "high"))
-  );
 }
 
 function certifiedImmediateRootRezCampaignCandidate(

@@ -139,7 +139,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     );
   });
 
-  it("runs unknown reachable R&D and exposes redacted strategy debug", () => {
+  it("runs unknown reachable R&D and exposes redacted strategy debug [legacy_compare]", () => {
     const input = goldenInput({
       credits: 6,
       servers: [
@@ -191,7 +191,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     );
   });
 
-  it("exposes redacted Runner hand-development and creditbase debugfacts", () => {
+  it("exposes redacted Runner hand-development and creditbase debugfacts [legacy_compare]", () => {
     const input = goldenInput({
       credits: 10,
       servers: [server("hq")],
@@ -239,7 +239,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     );
   });
 
-  it("uses last productive liquidity after rejecting stale known-low R&D and keeps the reason visible in debug", () => {
+  it("uses last productive liquidity after rejecting stale known-low R&D and keeps the reason visible in debug [legacy_compare]", () => {
     const input = goldenInput({
       credits: 6,
       stateVersion: 3,
@@ -377,7 +377,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     });
   });
 
-  it("chooses economy at low credits when no high payoff exists", () => {
+  it("chooses economy at low credits when no high payoff exists [legacy_compare]", () => {
     const input = goldenInput({
       credits: 0,
       servers: [server("hq")],

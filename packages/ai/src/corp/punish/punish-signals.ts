@@ -1,3 +1,4 @@
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-hand-support";
 import { immediateCorpLiquidCreditGain } from "../economy/economy-routes";
@@ -16,7 +17,6 @@ import {
   actionIsCurrentlyAffordable,
   candidateIsVisibleCorpAgendaInstall,
   candidateIsVisibleCorpIceInstall,
-  candidateTargetIds,
   currentLegalActionResourceCost,
   visibleOwnDefinitionIds,
 } from "../../runtime/visible-action-facts";

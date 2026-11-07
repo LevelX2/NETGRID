@@ -2,8 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import {
-  buildRunnerEconomyPosture,
-  evaluateRunnerRunTargets,
+  quoteRunnerRunTarget,
   type RunnerRunTargetEvaluation,
 } from "../../runner-run-target-evaluation";
 import type { RunnerCoverageServices } from "./coverage-services";
@@ -189,22 +188,23 @@ export function runnerSameTurnBreakerPreparation(
               .recommendedHandFloor
         )
           return [];
-        const projectedTarget = evaluateRunnerRunTargets(targetParams).find(
-          (target) =>
-            target.actionId === evaluation.actionId &&
-            target.targetServerId === server.id,
-        );
+        const runQuote = quoteRunnerRunTarget({
+          ...targetParams,
+          runActionId: evaluation.actionId,
+          targetServerId: server.id,
+        });
+        const projectedTarget = runQuote?.target;
         const projectedCandidates = candidates.filter(
           (candidate) => candidate.actionId !== install.actionId,
         );
-        const projectedEconomy = buildRunnerEconomyPosture(targetParams);
+        const projectedEconomy = runQuote?.economy;
         const projectedFunding =
-          !central && projectedTarget
+          !central && projectedTarget && projectedEconomy
             ? services.runnerRunFundingSupport(
                 projectedInput,
                 projectedEconomy,
                 projectedTarget,
-                evaluateRunnerRunTargets(targetParams),
+                runQuote!.fundingTargets(),
                 projectedCandidates,
               )
             : undefined;
@@ -236,6 +236,7 @@ export function runnerSameTurnBreakerPreparation(
             evaluation.prerunReserveQuote!.creditsAfterKnownPath;
         if (
           !projectedTarget ||
+          !projectedEconomy ||
           projectedTarget.score <= 0 ||
           projectedTarget.accessPayoffContestable === false ||
           projectedTarget.knownAccessState === "known_no_current_payoff" ||
