@@ -457,6 +457,9 @@ export function corpScoreProtectionStagingInstallSignal(
     actionId: candidate.actionId,
     sourceCardInstanceId: candidate.sourceCardInstanceId,
     sourceDefinitionId: candidate.sourceDefinitionId,
+    ...(rushRisk.reason === "unmodeled_access_path"
+      ? { developmentRisk: rushRisk.reason }
+      : {}),
     evidenceCode: `score_protection_staging_install:${project.projectId}:${serverId}:development_risk_${rushRisk.reason}`,
   };
 }

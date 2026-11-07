@@ -612,6 +612,7 @@ function runnerRunWindowActionAssessment(
         binding.runId === input.playerView.run?.runId &&
         binding.serverId === input.playerView.run?.attackedServerId,
       value: 100,
+      binding: "current_window",
       evidenceCodes: [
         "runner_run_window_action_plan_admissible",
         "runner_expose_viewing_continuation_bound_to_selected_information",
@@ -652,6 +653,7 @@ function runnerRunWindowActionAssessment(
       return {
         admissible: true,
         value: 0,
+        binding: "current_window",
         evidenceCodes: [
           "runner_optional_bonus_run_decline",
           "runner_optional_bonus_run_decline_preserves_ordinary_actions",
@@ -697,6 +699,7 @@ function runnerRunWindowActionAssessment(
           !knownAccessDamageAmbush &&
           optionalBonusRunHasValue &&
           optionalRestrictedRunIsSafe,
+        binding: "engine_restricted_run_sequence",
         ...(costFree
           ? { value: targetEvaluation?.score ?? 250 }
           : targetEvaluation
@@ -1048,6 +1051,7 @@ function runnerRunWindowActionAssessment(
       }
     : {
         admissible: true,
+        binding: "current_window",
         ...(encounterEconomics !== undefined
           ? { value: encounterEconomics.value }
           : strengthPumpSavings !== undefined
@@ -1207,6 +1211,7 @@ function runnerEncounterSubtypeChangeAssessment(
   return {
     admissible: true,
     value: 500,
+    binding: "current_window",
     evidenceCodes: [
       "runner_run_window_action_plan_admissible",
       "runner_encounter_subtype_change_enables_payable_break_continuation",
@@ -1286,6 +1291,7 @@ function runnerPostPassDerezAndEndRunAssessment(
   return {
     admissible: true,
     value: 140 + Math.min(8, rezCost) * 40 - paidCredits * 60,
+    binding: "current_window",
     evidenceCodes: [
       "runner_post_pass_derez_and_end_run_plan_admissible",
       `runner_post_pass_target:${targetIceId}`,

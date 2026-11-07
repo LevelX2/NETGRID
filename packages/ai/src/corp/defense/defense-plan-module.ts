@@ -1357,9 +1357,8 @@ function selectedDefensePortfolioBand(
         // path cannot displace a same-band, exact central-defense route.
         (scoreProtectionRoute.signal.kind ===
           "score_protection_staging_install" &&
-          scoreProtectionRoute.signal.evidenceCode.includes(
-            "development_risk_unmodeled_access_path",
-          ) === false)) &&
+           scoreProtectionRoute.signal.developmentRisk !==
+             "unmodeled_access_path")) &&
         defensePriorityRank(
           scoreProtectionRoute.signal.delegatedPriorityClass,
         ) === defensePriorityRank(genericPriority)))
@@ -1938,7 +1937,7 @@ function genericDefenseRouteUrgencyRank(
 function isVisibleAgendaExposureDefense(
   signal: CorpGenericDefenseSignal,
 ): boolean {
-  return signal.evidenceCode.includes("visible_agenda_exposure_defense");
+  return signal.visibleAgendaExposureDefense === true;
 }
 
 export function corpDefensePortfolioHasExecutableRoute(

@@ -18,9 +18,8 @@ export function corpScoreFundingMilestone(
     signal.phase === "select_agenda" ||
     signal.routeAssessment === "corp_shorter_terminal_score_route_dominates" ||
     signal.routeAssessment === "corp_winning_score_sibling_dominates" ||
-    signal.evidenceCode.startsWith(
-      "corp_resident_score_parent_dominates_sibling_route:",
-    )
+    signal.routeAssessment ===
+      "corp_resident_score_parent_dominates_sibling_route"
   ) {
     return undefined;
   }

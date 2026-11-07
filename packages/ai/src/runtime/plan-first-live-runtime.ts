@@ -1893,11 +1893,8 @@ export function runnerActionDispositions(
       if (
         domain.runWindows.some(
           (signal) =>
-            signal.actionAssessments?.[
-              candidate.actionId
-            ]?.evidenceCodes.includes(
-              "runner_engine_restricted_run_sequence_continuation",
-            ) === true,
+             signal.actionAssessments?.[candidate.actionId]?.binding ===
+             "engine_restricted_run_sequence",
         )
       ) {
         continue;

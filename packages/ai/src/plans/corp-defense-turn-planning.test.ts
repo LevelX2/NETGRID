@@ -71,6 +71,32 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
     },
   );
 
+  it("values the visible agenda exposure fact independently of its diagnostic code", () => {
+    const input = decisionInput();
+    const defense = defenseSignal({
+      disposition: "productive",
+      effect: "satisfied",
+      fundingGap: 0,
+    });
+    const candidate = installCandidate("install-rd", "ice-1", "rd");
+    const value = (signal: CorpGenericDefenseSignal) =>
+      buildSlice(input, [signal], [], [candidate]).lines[0]!.defenseValue;
+    const formerDiagnostic = "engine_certified_visible_agenda_exposure_defense";
+    expect(value({ ...defense, evidenceCode: formerDiagnostic })).toBe(
+      value(defense),
+    );
+    expect(value({ ...defense, visibleAgendaExposureDefense: true })).toBe(
+      value(defense) + 20,
+    );
+    expect(
+      value({
+        ...defense,
+        visibleAgendaExposureDefense: true,
+        evidenceCode: formerDiagnostic,
+      }),
+    ).toBe(value(defense) + 20);
+  });
+
   it("binds exact funding before the ICE install without duplicating defense value", () => {
     const input = decisionInput();
     offerFundingAction(input, 2);

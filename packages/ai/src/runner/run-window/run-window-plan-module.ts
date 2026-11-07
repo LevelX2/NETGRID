@@ -96,30 +96,8 @@ function runWindowCandidates(
         signal.actionAssessments?.[candidate.actionId]?.admissible === true &&
         (!signal.serverId ||
           candidate.runProjectionSummary?.serverId === signal.serverId ||
-          signal.actionAssessments?.[
-            candidate.actionId
-          ]?.evidenceCodes.includes(
-            "runner_engine_restricted_run_sequence_continuation",
-          ) === true ||
-          signal.actionAssessments?.[
-            candidate.actionId
-          ]?.evidenceCodes.includes(
-            "runner_post_pass_derez_and_end_run_plan_admissible",
-          ) === true ||
-          signal.actionAssessments?.[
-            candidate.actionId
-          ]?.evidenceCodes.includes(
-            "runner_encounter_action_plan_admissible",
-          ) === true ||
-          signal.actionAssessments?.[
-            candidate.actionId
-          ]?.evidenceCodes.includes(
-            "runner_run_window_action_plan_admissible",
-          ) === true ||
-          signal.actionAssessments?.[
-            candidate.actionId
-          ]?.evidenceCodes.includes("runner_optional_bonus_run_decline") ===
-            true ||
+          signal.actionAssessments?.[candidate.actionId]?.binding !==
+            undefined ||
           candidate.semanticActionType.startsWith("access.")),
     )
     .map((candidate) => ({

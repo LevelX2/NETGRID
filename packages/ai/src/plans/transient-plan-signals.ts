@@ -19,6 +19,7 @@ export type TransientPlanSignal = {
   planDedupeKey: string;
   kind: "goal" | "threat";
   scope: "strategic" | "tactical";
+  goalKind?: "missing_score_agenda_material";
   evidenceCode: string;
   guarantee: TransientPlanSignalGuarantee;
   target?: PlanTargetRef;
@@ -39,6 +40,7 @@ const ALLOWED_SIGNAL_KEYS = new Set<keyof TransientPlanSignal>([
   "planDedupeKey",
   "kind",
   "scope",
+  "goalKind",
   "evidenceCode",
   "guarantee",
   "target",
@@ -163,6 +165,14 @@ function transientPlanSignalInvalidReason(
   if (signal.scope !== "strategic" && signal.scope !== "tactical") {
     return "invalid_signal_scope";
   }
+  if (
+    signal.goalKind !== undefined &&
+    (signal.goalKind !== "missing_score_agenda_material" ||
+      signal.kind !== "goal" ||
+      signal.scope !== "tactical" ||
+      signal.planModuleId !== "corp.score_agenda")
+  )
+    return "invalid_goal_kind";
   if (!nonEmptyToken(signal.signalId)) return "invalid_signal_id";
   if (!nonEmptyToken(signal.evidenceCode)) return "missing_evidence";
   if (!GUARANTEES.has(signal.guarantee)) return "weak_or_invalid_guarantee";

@@ -205,6 +205,7 @@ export function runnerRunProgramSearchAssessment(
   return {
     admissible: true,
     value: 450,
+    binding: "current_window",
     evidenceCodes: [
       "runner_run_window_action_plan_admissible",
       "runner_run_program_search_restores_bound_access",

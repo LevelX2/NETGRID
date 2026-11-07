@@ -128,7 +128,7 @@ export function buildCorpDefenseNeeds({
     mergeDefenseSignals([
       ...corpResidentDelayedSuccessDefenseSignals(input),
       ...terminalRezReserveSignals,
-      ...candidates.flatMap(candidate => {
+      ...candidates.flatMap((candidate) => {
         const recovery = corpArchivesAgendaRelocationSignal(input, candidate);
         return recovery ? [recovery] : [];
       }),
@@ -371,6 +371,13 @@ export function buildCorpDefenseNeeds({
                 })();
           const visibleAgendaExposure =
             serverId === "archives" && archivesHasVisibleKnownAgenda(input);
+          const visibleAgendaExposureDefense =
+            visibleAgendaExposure &&
+            route.disposition === "productive" &&
+            route.progressKind !== "scoreline_central_tax_allocation" &&
+            route.progressKind !== "score_material_capacity_release" &&
+            route.progressKind !== "agenda_capacity_defense_conversion" &&
+            route.progressKind !== "staged_central_defense";
           const unfundedOrdinaryCentralStaging =
             (serverId === "hq" || serverId === "rd") &&
             input.playerView.own.credits === 0 &&
@@ -413,6 +420,9 @@ export function buildCorpDefenseNeeds({
               urgent:
                 terminalCentralInstallIsImmediatelyRelevant ||
                 visibleAgendaExposure,
+              ...(visibleAgendaExposureDefense
+                ? { visibleAgendaExposureDefense: true as const }
+                : {}),
               ...(centralPressure ? { centralPressure } : {}),
               ...(centralPressure === undefined &&
               route.progressKind === "scoreline_central_tax_allocation"
@@ -451,7 +461,7 @@ export function buildCorpDefenseNeeds({
                         ? `corp_agenda_capacity_defense_conversion:${serverId}:${candidate.actionId}`
                         : route.progressKind === "staged_central_defense"
                           ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
-                          : visibleAgendaExposure
+                          : visibleAgendaExposureDefense
                             ? "engine_certified_visible_agenda_exposure_defense"
                             : "engine_certified_global_defense_access_probability_reduced",
             },

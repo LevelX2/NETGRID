@@ -38,6 +38,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   targetIceInstanceId?: string;
   followupIceInstanceId?: string;
   urgent: boolean;
+  visibleAgendaExposureDefense?: true;
   centralPressure?: "material" | "acute" | "terminal";
   immediateInstallSupport?: boolean;
   iceInstallCostSupportActionId?: string;
@@ -185,6 +186,7 @@ export type CorpScoreProtectionStagingInstallSignal = CorpDefenseSignalBase & {
   actionId: string;
   sourceCardInstanceId: string;
   sourceDefinitionId: string;
+  developmentRisk?: "unmodeled_access_path";
 };
 
 export type CorpDefenseSignal =

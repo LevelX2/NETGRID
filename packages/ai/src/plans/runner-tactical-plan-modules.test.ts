@@ -1173,6 +1173,7 @@ describe("Runner tactical plan modules", () => {
           actionAssessments: {
             [`bonus-${serverId}`]: {
               admissible: true,
+              binding: "engine_restricted_run_sequence",
               value: serverId === "hq" ? 80 : 140,
               evidenceCodes: [
                 "runner_engine_restricted_run_sequence_continuation",

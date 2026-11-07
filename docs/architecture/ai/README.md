@@ -58,6 +58,12 @@ ihre Extraktion oder Zusammenlegung ist keine erledigte Änderung.
 
 ## Planowner und Implementierungen
 
+Defense bewertet sichtbare Agendaexposition und unmodellierte
+Zugriffsrisiken aus typisierten Merkmalen. Score konsumiert den
+Routenstatus und die exakt gebundene Zielart. Der Runner-Run-Owner
+liefert eine fachliche Fensterbindung für seine aktuellen Aktionen.
+Die zugehörigen Evidence-Codes erläutern diese Entscheidungen.
+
 Die folgenden 25 Module werden durch `currentRunnerPlanModules` und
 `currentCorpPlanModules` in der Live-Runtime zusammengestellt. Core- und
 Tactical-Factories liefern die fachlichen Module, pro Side kommt ein

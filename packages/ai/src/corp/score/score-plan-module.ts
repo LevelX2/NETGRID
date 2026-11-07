@@ -161,11 +161,9 @@ function scoreAssessmentValue(
 function scoreBlockerCode(signal: CorpScoreProjectSignal): string | undefined {
   if (signal.feasible) return undefined;
   if ((signal.fundingGap ?? 0) > 0) return "corp_score_funding_route_required";
-  if (
-    signal.evidenceCode.startsWith("corp_current_turn_scoreline_unreachable:")
-  )
+  if (signal.routeAssessment === "corp_current_turn_scoreline_unreachable")
     return "corp_score_deadline_route_unavailable";
-  if (signal.evidenceCode.startsWith("corp_last_click_score_install_deferred:"))
+  if (signal.routeAssessment === "corp_last_click_score_install_deferred")
     return "corp_score_development_click_unavailable";
   return "corp_score_route_unavailable";
 }
@@ -569,8 +567,7 @@ function genericScoreMaterialIntentFit(
       transientSignal.planDedupeKey === signal.projectId &&
       transientSignal.kind === "goal" &&
       transientSignal.scope === "tactical" &&
-      transientSignal.evidenceCode ===
-        "corp_score_campaign_missing_agenda_material" &&
+      transientSignal.goalKind === "missing_score_agenda_material" &&
       transientSignal.target?.kind === exactTarget.kind &&
       transientSignal.target.id === exactTarget.id,
   );

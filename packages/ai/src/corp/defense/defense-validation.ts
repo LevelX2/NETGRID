@@ -902,6 +902,7 @@ export const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "targetIceInstanceId",
   "followupIceInstanceId",
   "urgent",
+  "visibleAgendaExposureDefense",
   "centralPressure",
   "immediateInstallSupport",
   "iceInstallCostSupportActionId",
@@ -947,6 +948,7 @@ export const SCORE_PROTECTION_STAGING_INSTALL_SIGNAL_KEYS = new Set([
   "actionId",
   "sourceCardInstanceId",
   "sourceDefinitionId",
+  "developmentRisk",
   "evidenceCode",
 ]);
 
@@ -1044,6 +1046,12 @@ export function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
+      (value.visibleAgendaExposureDefense === undefined ||
+        (value.visibleAgendaExposureDefense === true &&
+          value.serverId === "archives" &&
+          validatesInstallRoute &&
+          installRoute?.disposition === "productive" &&
+          value.urgent === true)) &&
       (value.phase === "recover_exposed_agenda"
         ? validArchivesRecoveryBinding(value.archivesRecovery)
         : value.archivesRecovery === undefined) &&
@@ -1199,6 +1207,9 @@ export function isValidDefenseSignal(
   ) {
     return (
       hasOnlyKeys(value, SCORE_PROTECTION_STAGING_INSTALL_SIGNAL_KEYS) &&
+      (value.developmentRisk === undefined ||
+        (value.kind === "score_protection_staging_install" &&
+          value.developmentRisk === "unmodeled_access_path")) &&
       (value.phase === "install_ice" ||
         (value.kind === "score_protection_terminal_install" &&
           value.phase === "install_defense_support")) &&

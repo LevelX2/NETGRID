@@ -212,6 +212,7 @@ export type RunnerRunWindowSignal = {
 
 export type RunnerRunWindowActionAssessment = {
   admissible: boolean;
+  binding?: "engine_restricted_run_sequence" | "current_window";
   value?: number;
   evidenceCodes: string[];
   programSearchCommitment?: {
