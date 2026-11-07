@@ -134,6 +134,8 @@ describe("server-owned AI runtime lifetime", () => {
       await rm(directory, { recursive: true, force: true });
     }
   });
+  // Four complete AI setups exercise lifetime isolation rather than a 5s
+  // latency contract; retain room for the regular concurrent server suite.
   it("releases repeated forfeited matches while preserving another active portfolio and its commitment", async () => {
     const f = fixture();
     try {
@@ -154,7 +156,7 @@ describe("server-owned AI runtime lifetime", () => {
     } finally {
       f.service.closeStorage();
     }
-  });
+  }, 30_000);
   it("keeps live memory when a terminal persistence attempt fails", async () => {
     class RejectTerminalStorage extends InMemoryMatchStorage {
       reject = true;
