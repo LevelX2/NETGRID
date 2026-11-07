@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { backup, DatabaseSync } from "node:sqlite";
+import { writeJsonDocument } from "./write-json-document.mjs";
 
 export const REGISTRY_SCHEMA_VERSION = 1;
 
@@ -666,65 +667,128 @@ function casePairingCorrectionError(code, details = {}) {
 
 export function casePairingCorrectionFingerprint(evidenceCase) {
   const fields = [
-    "case_id", "cluster_id", "grade", "side", "match_context", "symptom",
-    "owner_path", "details_markdown", "updated_at",
+    "case_id",
+    "cluster_id",
+    "grade",
+    "side",
+    "match_context",
+    "symptom",
+    "owner_path",
+    "details_markdown",
+    "updated_at",
   ];
   if (
     !evidenceCase ||
-    fields.some(field => !Object.hasOwn(evidenceCase, field) ||
-      evidenceCase[field] !== null && typeof evidenceCase[field] !== "string") ||
+    fields.some(
+      (field) =>
+        !Object.hasOwn(evidenceCase, field) ||
+        (evidenceCase[field] !== null &&
+          typeof evidenceCase[field] !== "string"),
+    ) ||
     !Array.isArray(evidenceCase.pairing_ids) ||
-    evidenceCase.pairing_ids.some(id => typeof id !== "string")
+    evidenceCase.pairing_ids.some((id) => typeof id !== "string")
   ) {
-    throw casePairingCorrectionError("case_pairing_correction_snapshot_incomplete");
+    throw casePairingCorrectionError(
+      "case_pairing_correction_snapshot_incomplete",
+    );
   }
-  return createHash("sha256").update(JSON.stringify([
-    ...fields.map(field => evidenceCase[field]), [...evidenceCase.pairing_ids].sort(),
-  ])).digest("hex");
+  return createHash("sha256")
+    .update(
+      JSON.stringify([
+        ...fields.map((field) => evidenceCase[field]),
+        [...evidenceCase.pairing_ids].sort(),
+      ]),
+    )
+    .digest("hex");
 }
 
 /** Correct one reviewed false association; ordinary evidence upserts remain additive. */
 export function correctCasePairing(db, input) {
-  const fields = ["jobId", "caseId", "pairingId", "expectedCaseFingerprint", "reason"];
-  if (fields.some(field => typeof input?.[field] !== "string" || !input[field].trim()) ||
-      !/^[a-f0-9]{64}$/.test(input.expectedCaseFingerprint)) {
+  const fields = [
+    "jobId",
+    "caseId",
+    "pairingId",
+    "expectedCaseFingerprint",
+    "reason",
+  ];
+  if (
+    fields.some(
+      (field) => typeof input?.[field] !== "string" || !input[field].trim(),
+    ) ||
+    !/^[a-f0-9]{64}$/.test(input.expectedCaseFingerprint)
+  ) {
     throw casePairingCorrectionError("case_pairing_correction_input_invalid");
   }
   const { jobId, caseId, pairingId, expectedCaseFingerprint, reason } = input;
   return withImmediateTransaction(db, () => {
     const details = { jobId, caseId, pairingId };
-    const reject = code => { throw casePairingCorrectionError(code, details); };
-    if (db.prepare("SELECT status FROM jobs WHERE job_id = ?").get(jobId)?.status !== "active")
+    const reject = (code) => {
+      throw casePairingCorrectionError(code, details);
+    };
+    if (
+      db.prepare("SELECT status FROM jobs WHERE job_id = ?").get(jobId)
+        ?.status !== "active"
+    )
       reject("case_pairing_correction_job_not_active");
-    const pairing = db.prepare("SELECT job_id FROM pairings WHERE pairing_id = ?").get(pairingId);
+    const pairing = db
+      .prepare("SELECT job_id FROM pairings WHERE pairing_id = ?")
+      .get(pairingId);
     if (!pairing) reject("case_pairing_correction_pairing_missing");
     if (pairing.job_id !== jobId) reject("case_pairing_correction_wrong_job");
-    const evidenceCase = db.prepare("SELECT * FROM evidence_cases WHERE case_id = ?").get(caseId);
+    const evidenceCase = db
+      .prepare("SELECT * FROM evidence_cases WHERE case_id = ?")
+      .get(caseId);
     if (!evidenceCase) reject("case_pairing_correction_case_missing");
-    const pairingIds = db.prepare(
-      "SELECT pairing_id FROM case_pairings WHERE case_id = ? ORDER BY pairing_id",
-    ).all(caseId).map(row => row.pairing_id);
-    const beforeFingerprint = casePairingCorrectionFingerprint({ ...evidenceCase, pairing_ids: pairingIds });
+    const pairingIds = db
+      .prepare(
+        "SELECT pairing_id FROM case_pairings WHERE case_id = ? ORDER BY pairing_id",
+      )
+      .all(caseId)
+      .map((row) => row.pairing_id);
+    const beforeFingerprint = casePairingCorrectionFingerprint({
+      ...evidenceCase,
+      pairing_ids: pairingIds,
+    });
     if (beforeFingerprint !== expectedCaseFingerprint)
       reject("case_pairing_correction_snapshot_conflict");
-    if (!pairingIds.includes(pairingId)) reject("case_pairing_correction_link_missing");
-    if (db.prepare("SELECT 1 FROM fixes WHERE case_id = ? AND pairing_id = ?").get(caseId, pairingId))
+    if (!pairingIds.includes(pairingId))
+      reject("case_pairing_correction_link_missing");
+    if (
+      db
+        .prepare("SELECT 1 FROM fixes WHERE case_id = ? AND pairing_id = ?")
+        .get(caseId, pairingId)
+    )
       reject("case_pairing_correction_fix_reference");
     const caseText = `${evidenceCase.match_context ?? ""}\n${evidenceCase.details_markdown ?? ""}`;
-    if (db.prepare("SELECT match_id FROM games WHERE pairing_id = ?").all(pairingId)
-      .some(row => row.match_id && caseText.includes(row.match_id)))
+    if (
+      db
+        .prepare("SELECT match_id FROM games WHERE pairing_id = ?")
+        .all(pairingId)
+        .some((row) => row.match_id && caseText.includes(row.match_id))
+    )
       reject("case_pairing_correction_match_reference");
-    const removed = db.prepare(
-      "DELETE FROM case_pairings WHERE case_id = ? AND pairing_id = ?",
-    ).run(caseId, pairingId);
-    if (removed.changes !== 1) reject("case_pairing_correction_delete_mismatch");
+    const removed = db
+      .prepare("DELETE FROM case_pairings WHERE case_id = ? AND pairing_id = ?")
+      .run(caseId, pairingId);
+    if (removed.changes !== 1)
+      reject("case_pairing_correction_delete_mismatch");
     const timestamp = nowIso();
-    db.prepare("UPDATE evidence_cases SET updated_at = ? WHERE case_id = ?").run(timestamp, caseId);
-    const remainingPairingIds = pairingIds.filter(id => id !== pairingId);
+    db.prepare(
+      "UPDATE evidence_cases SET updated_at = ? WHERE case_id = ?",
+    ).run(timestamp, caseId);
+    const remainingPairingIds = pairingIds.filter((id) => id !== pairingId);
     return {
-      jobId, caseId, pairingId, reason, removedLinks: 1, remainingPairingIds, beforeFingerprint,
+      jobId,
+      caseId,
+      pairingId,
+      reason,
+      removedLinks: 1,
+      remainingPairingIds,
+      beforeFingerprint,
       afterFingerprint: casePairingCorrectionFingerprint({
-        ...evidenceCase, updated_at: timestamp, pairing_ids: remainingPairingIds,
+        ...evidenceCase,
+        updated_at: timestamp,
+        pairing_ids: remainingPairingIds,
       }),
     };
   });
@@ -1480,70 +1544,113 @@ export function getStoredReport(db, reportId) {
 }
 
 export function exportEvidenceSnapshot(db, pairingIds = []) {
+  const snapshot = {
+    schemaVersion: REGISTRY_SCHEMA_VERSION,
+    generatedAt: nowIso(),
+  };
+  for (const section of evidenceSnapshotSections(db, pairingIds)) {
+    snapshot[section.name] = Array.from(section.rows, section.project);
+  }
+  return snapshot;
+}
+
+// The caller owns the read transaction, including iteration and sink writes.
+// Keep at most one SQLite row and its parsed metadata alive at a time.
+export function writeEvidenceSnapshot(db, pairingIds, write) {
+  write(
+    `{\n  "schemaVersion": ${REGISTRY_SCHEMA_VERSION},\n  "generatedAt": ${JSON.stringify(nowIso())}`,
+  );
+  for (const section of evidenceSnapshotSections(db, pairingIds)) {
+    write(`,\n  ${JSON.stringify(section.name)}: [`);
+    let first = true;
+    for (const row of section.rows) {
+      write(first ? "\n" : ",\n");
+      writeJsonDocument(section.project(row), write);
+      first = false;
+    }
+    write("\n  ]");
+  }
+  write("\n}\n");
+}
+
+function* evidenceSnapshotSections(db, pairingIds) {
   const ids = pairingIds.map(String);
   const clause =
     ids.length > 0
       ? `WHERE pairing_id IN (${ids.map(() => "?").join(",")})`
       : "";
-  const pairings = db
-    .prepare(
-      `SELECT * FROM pairings ${clause} ORDER BY CAST(pairing_id AS INTEGER)`,
-    )
-    .all(...ids);
-  const games =
+  const pairings = () =>
+    db
+      .prepare(
+        `SELECT * FROM pairings ${clause} ORDER BY CAST(pairing_id AS INTEGER)`,
+      )
+      .iterate(...ids);
+  const games = () =>
     ids.length > 0
       ? db
           .prepare(
             `SELECT * FROM games WHERE pairing_id IN (${ids.map(() => "?").join(",")}) ORDER BY CAST(pairing_id AS INTEGER), ordinal`,
           )
-          .all(...ids)
+          .iterate(...ids)
       : db
           .prepare(
             `SELECT * FROM games ORDER BY CAST(pairing_id AS INTEGER), ordinal`,
           )
-          .all();
-  const clusters = db
-    .prepare(`SELECT * FROM evidence_clusters ORDER BY cluster_id`)
-    .all();
-  const cases = db
-    .prepare(
-      `
+          .iterate();
+  const clusters = () =>
+    db.prepare(`SELECT * FROM evidence_clusters ORDER BY cluster_id`).iterate();
+  const cases = () =>
+    db
+      .prepare(
+        `
     SELECT c.*, GROUP_CONCAT(cp.pairing_id) AS pairing_ids
     FROM evidence_cases c
     LEFT JOIN case_pairings cp ON cp.case_id = c.case_id
     GROUP BY c.case_id
     ORDER BY c.case_id
   `,
-    )
-    .all();
-  const fixes =
+      )
+      .iterate();
+  const fixes = () =>
     ids.length > 0
       ? db
           .prepare(
             `SELECT * FROM fixes WHERE pairing_id IN (${ids.map(() => "?").join(",")}) ORDER BY fix_id`,
           )
-          .all(...ids)
-      : db.prepare(`SELECT * FROM fixes ORDER BY fix_id`).all();
-  return {
-    schemaVersion: REGISTRY_SCHEMA_VERSION,
-    generatedAt: nowIso(),
-    pairings: pairings.map((row) => ({
+          .iterate(...ids)
+      : db.prepare(`SELECT * FROM fixes ORDER BY fix_id`).iterate();
+  yield {
+    name: "pairings",
+    rows: pairings(),
+    project: (row) => ({
       ...row,
       reproduction_json: parseJson(row.reproduction_json, {}),
-    })),
-    games: games.map((row) => ({
+    }),
+  };
+  yield {
+    name: "games",
+    rows: games(),
+    project: (row) => ({
       ...row,
       metadata_json: parseJson(row.metadata_json, {}),
-    })),
-    clusters,
-    cases: cases.map((row) => ({
+    }),
+  };
+  yield { name: "clusters", rows: clusters(), project: (row) => row };
+  yield {
+    name: "cases",
+    rows: cases(),
+    project: (row) => ({
       ...row,
       pairing_ids: row.pairing_ids?.split(",") ?? [],
-    })),
-    fixes: fixes.map((row) => ({
+    }),
+  };
+  yield {
+    name: "fixes",
+    rows: fixes(),
+    project: (row) => ({
       ...row,
       tests_json: parseJson(row.tests_json, []),
       before_after_json: parseJson(row.before_after_json, {}),
-    })),
+    }),
   };
 }

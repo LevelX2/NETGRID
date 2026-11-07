@@ -2,11 +2,14 @@
 
 Stand: 2026-11-05
 
-Der CLI-Export liest alle Tabellen innerhalb einer gemeinsamen
-Lesetransaktion. Er schreibt JSON in begrenzten UTF-8-Blöcken, damit auch
-vollständige Registry-Snapshots oberhalb der JavaScript-Stringgrenze ohne
-Abschneiden exportiert werden. Das JSON-Format bleibt unverändert; Datei- und
-Standardausgabe verwenden denselben Writer. Die gezielte Prüfung ist
+Der CLI-Export iteriert alle Tabellen zeilenweise innerhalb einer gemeinsamen
+Lesetransaktion, die bis zum Ende der Ausgabe offen bleibt. Er hält jeweils
+nur eine Zeile mit ihren dekodierten Metadaten und schreibt JSON in begrenzten
+UTF-8-Blöcken. Dadurch benötigen vollständige Registry-Snapshots weder einen
+gemeinsamen JavaScript-String noch alle Spielmetadaten gleichzeitig im Heap.
+Das JSON-Schema bleibt unverändert; Datei- und Standardausgabe verwenden
+denselben Writer. Die materialisierte Exportfunktion bleibt für begrenzte
+Consumer verfügbar. Die gezielte Prüfung ist
 `node --test scripts/write-json-document.test.mjs scripts/ai-selfplay-evidence-registry.test.mjs`.
 
 Die kanonische 40er-Erfassung erlaubt für nachweislich fortschreitende lange

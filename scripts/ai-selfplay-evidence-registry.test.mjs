@@ -20,6 +20,7 @@ import {
   registerReportingSeries,
   registryCheck,
   registryStatus,
+  writeEvidenceSnapshot,
 } from "./lib/ai-selfplay-evidence-registry.mjs";
 
 function withRegistry(run) {
@@ -33,6 +34,75 @@ function withRegistry(run) {
     rmSync(directory, { recursive: true, force: true });
   }
 }
+
+test("streams complete registry rows without materializing result tables", () => {
+  const rows = {
+    pairings: [{ pairing_id: "042", reproduction_json: '{"text":"Ä😀"}' }],
+    games: [
+      { pairing_id: "042", metadata_json: '{"deepAnalysis":{"count":3}}' },
+    ],
+    evidence_clusters: [{ cluster_id: "owner" }],
+    evidence_cases: [{ case_id: "SP-001", pairing_ids: "042,043" }],
+    fixes: [
+      { fix_id: "fix", tests_json: '["regression"]', before_after_json: "{}" },
+    ],
+  };
+  const visited = [];
+  const db = {
+    prepare(sql) {
+      const table = /FROM (\w+)/.exec(sql)[1];
+      return {
+        all() {
+          throw new Error("unbounded_table_materialization");
+        },
+        *iterate(...ids) {
+          assert.deepEqual(
+            ids,
+            table === "pairings" || table === "games" || table === "fixes"
+              ? ["042"]
+              : [],
+          );
+          for (const row of rows[table]) {
+            visited.push(table);
+            yield row;
+          }
+        },
+      };
+    },
+  };
+  const chunks = [];
+  writeEvidenceSnapshot(db, ["042"], (chunk) => chunks.push(chunk));
+  const snapshot = JSON.parse(chunks.join(""));
+  assert.equal(snapshot.schemaVersion, 1);
+  assert.equal(snapshot.pairings[0].reproduction_json.text, "Ä😀");
+  assert.equal(snapshot.games[0].metadata_json.deepAnalysis.count, 3);
+  assert.deepEqual(snapshot.cases[0].pairing_ids, ["042", "043"]);
+  assert.deepEqual(snapshot.fixes[0].tests_json, ["regression"]);
+  assert.deepEqual(visited, Object.keys(rows));
+});
+
+test("streaming and materialized exports preserve the same registry contract", () => {
+  withRegistry(({ db }) => {
+    importPairingBundle(db, {
+      schemaVersion: 1,
+      pairing: {
+        id: "042",
+        title: "Formatprüfung",
+        reproduction: { source: "Ä😀" },
+      },
+      games: [{ key: "base", metadata: { deepAnalysis: { count: 3 } } }],
+    });
+    for (const ids of [[], ["042"], ["absent"]]) {
+      const expected = exportEvidenceSnapshot(db, ids);
+      const chunks = [];
+      writeEvidenceSnapshot(db, ids, (chunk) => chunks.push(chunk));
+      const actual = JSON.parse(chunks.join(""));
+      delete expected.generatedAt;
+      delete actual.generatedAt;
+      assert.deepEqual(actual, expected);
+    }
+  });
+});
 
 test("allocates collision-free pairing and case ids across jobs", () => {
   withRegistry(({ db }) => {

@@ -1,13 +1,17 @@
 #!/usr/bin/env node
-import { closeSync, openSync, readFileSync, writeFileSync, writeSync } from "node:fs";
+import {
+  closeSync,
+  openSync,
+  readFileSync,
+  writeFileSync,
+  writeSync,
+} from "node:fs";
 import { resolve } from "node:path";
-import { writeJsonDocument } from "./lib/write-json-document.mjs";
 import {
   allocateRegistryId,
   backupEvidenceRegistry,
   completeJob,
   correctCasePairing,
-  exportEvidenceSnapshot,
   getStoredReport,
   getReportingSeries,
   importLegacyArtifacts,
@@ -19,6 +23,7 @@ import {
   registryCheck,
   registryStatus,
   resolveDefaultEvidenceDatabasePath,
+  writeEvidenceSnapshot,
 } from "./lib/ai-selfplay-evidence-registry.mjs";
 
 function options(args) {
@@ -48,16 +53,21 @@ function required(opts, key) {
   return opts[key];
 }
 
-function writeJsonToDescriptor(descriptor, value) {
-  writeJsonDocument(value, (chunk) => {
+function descriptorSink(descriptor) {
+  return (chunk) => {
     const bytes = Buffer.from(chunk, "utf8");
     let offset = 0;
     while (offset < bytes.length) {
-      const written = writeSync(descriptor, bytes, offset, bytes.length - offset);
+      const written = writeSync(
+        descriptor,
+        bytes,
+        offset,
+        bytes.length - offset,
+      );
       if (written === 0) throw new Error("JSON export sink made no progress");
       offset += written;
     }
-  });
+  };
 }
 
 function help() {
@@ -227,26 +237,22 @@ try {
             .map((value) => value.trim())
             .filter(Boolean)
         : [];
+    const outputPath = opts.output ? resolve(opts.output) : undefined;
+    const descriptor = outputPath
+      ? openSync(outputPath, "w")
+      : process.stdout.fd;
     db.exec("BEGIN");
-    let snapshot;
     try {
-      snapshot = exportEvidenceSnapshot(db, pairingIds);
+      writeEvidenceSnapshot(db, pairingIds, descriptorSink(descriptor));
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
       throw error;
+    } finally {
+      if (outputPath) closeSync(descriptor);
     }
-    if (opts.output) {
-      const outputPath = resolve(opts.output);
-      const descriptor = openSync(outputPath, "w");
-      try {
-        writeJsonToDescriptor(descriptor, snapshot);
-      } finally {
-        closeSync(descriptor);
-      }
+    if (outputPath) {
       console.log(JSON.stringify({ databasePath, outputPath, pairingIds }));
-    } else {
-      writeJsonToDescriptor(process.stdout.fd, snapshot);
     }
   } else if (command === "export-report") {
     const report = getStoredReport(db, required(opts, "report-id"));
