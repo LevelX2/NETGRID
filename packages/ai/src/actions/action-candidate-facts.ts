@@ -1,5 +1,36 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 
+/** A known zone-count change is independent of whether an action gains credits. */
+export function exactImmediateHandDelta(
+  candidate: ActionSemanticCandidate,
+): number | undefined {
+  const projection = candidate.economyProjection;
+  if (
+    !projection ||
+    projection.timing !== "immediate" ||
+    projection.reliability !== "guaranteed" ||
+    !Number.isSafeInteger(projection.netHandDelta)
+  )
+    return undefined;
+  if (
+    projection.source === "legal_action_payload" &&
+    projection.confidence === "high"
+  )
+    return projection.netHandDelta;
+  if (
+    projection.source === "basic_action_contract" &&
+    projection.confidence === "medium" &&
+    candidate.sourceKind === "basic_action" &&
+    candidate.actionType === "draw_card" &&
+    candidate.semanticActionType === "draw.card" &&
+    projection.cardsDrawn === 1 &&
+    projection.cardsConsumed === 0 &&
+    projection.netHandDelta === 1
+  )
+    return projection.netHandDelta;
+  return undefined;
+}
+
 export function candidateTargetIds(
   candidate: ActionSemanticCandidate,
 ): string[] {

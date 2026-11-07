@@ -4,9 +4,70 @@ import { legalAction } from "../semantic-ai-runtime-cutover.test-support";
 import {
   candidateTargetIds,
   exactBasicLiquidCreditCandidate,
+  exactImmediateHandDelta,
 } from "./action-candidate-facts";
 
 describe("shared action candidate facts", () => {
+  it.each(["runner", "corp"] as const)(
+    "retains %s's known basic draw count without inventing a credit payout",
+    (side) => {
+      const [candidate] = buildActionSemanticCandidates({
+        legalActions: [
+          legalAction(`${side}.draw_card`, side, "draw_card", "Draw", {
+            credits: 0,
+            clicks: 1,
+          }),
+        ],
+        observerSide: side,
+        stateVersion: 1,
+      });
+      expect(candidate!.economyProjection?.kind).toBe("non_economy");
+      expect(exactImmediateHandDelta(candidate!)).toBe(1);
+      expect(exactBasicLiquidCreditCandidate(candidate!)).toBe(false);
+      for (const changed of [
+        { ...candidate!, sourceKind: "card" as const },
+        {
+          ...candidate!,
+          economyProjection: {
+            ...candidate!.economyProjection!,
+            reliability: "conditional" as const,
+          },
+        },
+        {
+          ...candidate!,
+          economyProjection: {
+            ...candidate!.economyProjection!,
+            netHandDelta: 0.5,
+          },
+        },
+      ])
+        expect(exactImmediateHandDelta(changed)).toBeUndefined();
+    },
+  );
+
+  it("keeps an operation's net hand change separate from its absent liquid income", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction(
+          "draw-operation",
+          "corp",
+          "play_operation",
+          "Draw three",
+          { credits: 0, clicks: 1 },
+          {
+            source: "draw-operation-card",
+            payload: { drawCardsAmount: 3 },
+          },
+        ),
+      ],
+      observerSide: "corp",
+      stateVersion: 1,
+    });
+    expect(candidate!.economyProjection?.kind).toBe("non_economy");
+    expect(exactImmediateHandDelta(candidate!)).toBe(2);
+    expect(candidate!.economyProjection?.grossLiquidCreditGain).toBeUndefined();
+  });
+
   it.each(["runner", "corp"] as const)(
     "accepts only exact basic liquid credits for %s",
     (side) => {

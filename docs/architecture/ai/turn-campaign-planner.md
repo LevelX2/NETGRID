@@ -496,6 +496,15 @@ Action-Capacity-Tokens, Reservierungen, einmal-pro-Zug-Nutzungen, relevante
 und Beobachtungsstatus. Board und Credits allein reichen nicht zur
 Zyklenkennung.
 
+Ein exakt gequoteter Netto-Handzuwachs wird unabhängig von einem liquiden
+Credit-Ertrag projiziert. Das gilt auch für den normalen Basisdraw und reine
+Ziehoperationen (`non_economy`). An der privaten Beobachtungsgrenze bleibt
+die Identität der neuen Karte unbekannt; ihre bekannte Anzahl und der daraus
+folgende Abwurfbedarf gehören bereits zum Ergebnisframe. Nur garantierte
+aktuelle Payload-Fakten beziehungsweise der exakt gebundene Basisdrawvertrag
+autorisieren diese Änderung. Credit-Projektion und spätere Planwahl erhalten
+dadurch keine zusätzliche Autorität.
+
 Bekannte Agenda-Punktkosten bleiben Teil der exakten Ressourcenprojektion.
 Der Frame übernimmt ausschließlich den eigenen aktuellen Punktestand; ein
 zertifizierter Schritt zieht seinen endlichen `agendaPointCost` ab. Die

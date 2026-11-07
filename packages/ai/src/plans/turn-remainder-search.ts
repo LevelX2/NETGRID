@@ -1,4 +1,5 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { exactImmediateHandDelta } from "../actions/action-candidate-facts";
 import {
   assertTurnPlanningHeadCandidate,
   turnPlanningFingerprint,
@@ -1295,12 +1296,8 @@ function exactHandDelta(
   frame: ProjectedDecisionFrame,
   candidate: ActionSemanticCandidate,
 ): number {
-  if (
-    economyProjectionIsExact(candidate) &&
-    Number.isSafeInteger(candidate.economyProjection.netHandDelta)
-  ) {
-    return candidate.economyProjection.netHandDelta;
-  }
+  const projectedHandDelta = exactImmediateHandDelta(candidate);
+  if (projectedHandDelta !== undefined) return projectedHandDelta;
   return candidate.sourceCardInstanceId &&
     frame.ownHand.knownInstanceIds.includes(candidate.sourceCardInstanceId) &&
     candidateConsumesSourceCard(candidate)

@@ -1,6 +1,7 @@
 import type { AiDecisionInput, Side, VisibleCard } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { exactImmediateHandDelta } from "../actions/action-candidate-facts";
 import { costProfileForAction } from "../actions/action-cost-timing";
 import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
 import type {
@@ -478,10 +479,7 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
     ...(candidate.costProfile.additionalCosts.includes("agendaPointCost")
       ? { agendaPointDelta: exactRange(-exactAgendaPointCost(candidate)) }
       : {}),
-    handCountDelta:
-      exactEconomy && Number.isSafeInteger(economy.netHandDelta)
-        ? exactRange(economy.netHandDelta)
-        : exactRange(0),
+    handCountDelta: exactRange(exactImmediateHandDelta(candidate) ?? 0),
     knownZoneMoves: [],
     boardUpdates: [],
     usageAdds: [],
