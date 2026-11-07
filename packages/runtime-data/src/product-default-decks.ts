@@ -1,11 +1,12 @@
-import catalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
+import catalog from "../../../data/decks/standard-deck-catalog-1.0.0.json" with { type: "json" };
 
 function activeDefaultSnapshotId(
   standardDeckId: string,
   side: "runner" | "corp",
 ): string {
   const matching = catalog.decks.filter(
-    (deck) => deck.standardDeckId === standardDeckId && deck.status === "active",
+    (deck) =>
+      deck.standardDeckId === standardDeckId && deck.status === "active",
   );
   const [deck] = matching;
   if (matching.length !== 1 || !deck || deck.side !== side || !deck.version) {
