@@ -50,7 +50,9 @@ import {
   buildPlanningStateIdentity,
   type PlanningRulesContext,
   type PlanningStateIdentity,
+  type ObservedTurnPlanAction,
 } from "../plans/turn-planning-contracts";
+import { observeTurnPlanAction } from "./turn-plan-observation";
 import {
   buildRemoteDoctrineProfile,
   type RemoteDoctrineProfile,
@@ -82,6 +84,7 @@ export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
    */
   planningRulesContext?: PlanningRulesContext;
   planningStateIdentity?: PlanningStateIdentity;
+  observedTurnPlanAction?: ObservedTurnPlanAction;
   ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
   ownDeckCapabilities?: DeckCapabilityProfile;
   ownDeckStrategyProfile?: AiDeckStrategyProfile;
@@ -239,6 +242,12 @@ export function buildAiDecisionInput(
           strategicIntentState: ownStrategicIntentState,
         })
       : undefined;
+  const observedTurnPlanAction = observeTurnPlanAction({
+    matchId: state.matchId,
+    side,
+    stateVersion: state.stateVersion,
+    event: state.eventLog.at(-1),
+  });
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     planningRulesContext: buildPlanningRulesContext({
@@ -253,6 +262,7 @@ export function buildAiDecisionInput(
         "unknown-card-pool",
     }),
     planningStateIdentity: buildPlanningStateIdentity(input),
+    ...(observedTurnPlanAction ? { observedTurnPlanAction } : {}),
     ownDeckSnapshot,
     ownDeckCapabilities,
     ownDeckStrategyProfile,

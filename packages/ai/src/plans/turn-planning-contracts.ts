@@ -1,4 +1,10 @@
-import type { AiDecisionInput, RulesBaseline, Side } from "@netgrid/shared";
+import type {
+  AiDecision,
+  AiDecisionInput,
+  LegalAction,
+  RulesBaseline,
+  Side,
+} from "@netgrid/shared";
 import { createCurrentCardRegistryRulesContext } from "@netgrid/engine";
 import {
   assertCanonicalCapabilityId,
@@ -82,6 +88,103 @@ export type CanonicalChoiceBinding = {
   role: ChoicePlanningRole;
   value: CanonicalChoiceValue;
 };
+
+/** Actor-private projection of one successfully applied Engine action. */
+export type ObservedTurnPlanAction = {
+  matchId: string;
+  side: Side;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  actionId: string;
+  actionType: LegalAction["type"];
+  source: LegalAction["source"];
+  boundChoices: CanonicalChoiceBinding[];
+  selectedTargets?: Readonly<Record<string, string>>;
+};
+
+export function bindTurnPlanChoices(
+  action: LegalAction,
+  selectedChoices: AiDecision["selectedChoices"] | undefined,
+): CanonicalChoiceBinding[] | undefined {
+  const requirements = action.choiceRequirements ?? [];
+  const bindings: CanonicalChoiceBinding[] = [];
+  const paymentSourceIds = action.payload?.runnerInstallPaymentSourceIds;
+  const paymentSourceAmounts =
+    action.payload?.runnerInstallPaymentSourceAmounts;
+  if (
+    action.type === "install_card" &&
+    typeof paymentSourceIds === "string" &&
+    typeof paymentSourceAmounts === "string"
+  ) {
+    const amounts = paymentSourceAmounts.split(",");
+    for (const [index, sourceId] of paymentSourceIds.split(",").entries()) {
+      bindings.push({
+        choiceId: `runner_install_payment:${sourceId}`,
+        role: "route_defining",
+        value: { kind: "number", value: Number(amounts[index]) },
+      });
+    }
+  }
+  if (action.payload?.runnerProgramTrashBeforeInstall === true) {
+    bindings.push({
+      choiceId: "runner_program_trash_before_install",
+      role: "route_defining",
+      value: { kind: "boolean", value: true },
+    });
+  }
+  if (requirements.length === 0) return bindings;
+  if (!selectedChoices) return undefined;
+  for (const requirement of requirements) {
+    const value =
+      selectedChoices.choiceId === requirement.choiceId &&
+      Array.isArray(selectedChoices.selectedOptionIds)
+        ? selectedChoices.selectedOptionIds
+        : selectedChoices[requirement.choiceId];
+    const selectedOptionIds = choiceOptionIds(value);
+    if (
+      selectedOptionIds.length < requirement.minSelections ||
+      selectedOptionIds.length > requirement.maxSelections ||
+      selectedOptionIds.some(
+        (optionId) => !requirement.optionIds.includes(optionId),
+      )
+    ) {
+      return undefined;
+    }
+    const canonical = canonicalChoiceValue(value);
+    if (!canonical) return undefined;
+    bindings.push({
+      choiceId: requirement.choiceId,
+      role: "route_defining",
+      value: canonical,
+    });
+  }
+  return bindings;
+}
+
+function choiceOptionIds(value: unknown): string[] {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value) && value.every((entry) => typeof entry === "string"))
+    return value;
+  if (typeof value === "boolean" || typeof value === "number")
+    return [String(value)];
+  return [];
+}
+
+function canonicalChoiceValue(
+  value: unknown,
+): CanonicalChoiceValue | undefined {
+  if (typeof value === "boolean") return { kind: "boolean", value };
+  if (typeof value === "number" && Number.isFinite(value))
+    return { kind: "number", value };
+  if (typeof value === "string") return { kind: "string", value };
+  if (Array.isArray(value) && value.every((entry) => typeof entry === "string"))
+    return {
+      kind: "target_list",
+      values: value.map((id) => ({ kind: "value", id })),
+      ordering: "ordered",
+    };
+  return undefined;
+}
 
 /**
  * Semantic invocation for a current or future step. Future invocations never

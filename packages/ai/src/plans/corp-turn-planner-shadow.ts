@@ -54,13 +54,12 @@ import {
 } from "./plan-assessment";
 import type { PlanRouteStep, SemanticContinuation } from "./plan-route";
 import {
+  bindTurnPlanChoices,
   buildCanonicalLegalActionInvocation,
   buildSemanticActionSetFingerprint,
   turnPlanningFingerprint,
   type CampaignMilestoneQuote,
   type CampaignValueClaim,
-  type CanonicalChoiceBinding,
-  type CanonicalChoiceValue,
   type CanonicalLegalActionInvocation,
   type PlanningRulesContext,
   type PlanningStateIdentity,
@@ -1319,7 +1318,7 @@ export function currentTurnPlanningInvocationVariants(params: {
     params.candidate,
     params.allowEngineOnlyTargetRequirements === true,
   );
-  const boundChoices = choiceBindings(params.action, params.selectedChoices);
+  const boundChoices = bindTurnPlanChoices(params.action, params.selectedChoices);
   if (targetVariants.length === 0 || boundChoices === undefined) return [];
   return targetVariants.map((boundTargets) =>
     buildCanonicalLegalActionInvocation({
@@ -1459,90 +1458,6 @@ function targetRef(kind: TargetRequirement["kind"], id: string): PlanTargetRef {
             : "card",
     id,
   };
-}
-
-function choiceBindings(
-  action: LegalAction,
-  selectedChoices: AiDecision["selectedChoices"] | undefined,
-): CanonicalChoiceBinding[] | undefined {
-  const requirements = action.choiceRequirements ?? [];
-  const bindings: CanonicalChoiceBinding[] = [];
-  const paymentSourceIds = action.payload?.runnerInstallPaymentSourceIds;
-  const paymentSourceAmounts =
-    action.payload?.runnerInstallPaymentSourceAmounts;
-  if (
-    action.type === "install_card" &&
-    typeof paymentSourceIds === "string" &&
-    typeof paymentSourceAmounts === "string"
-  ) {
-    const amounts = paymentSourceAmounts.split(",");
-    for (const [index, sourceId] of paymentSourceIds.split(",").entries()) {
-      bindings.push({
-        choiceId: `runner_install_payment:${sourceId}`,
-        role: "route_defining",
-        value: { kind: "number", value: Number(amounts[index]) },
-      });
-    }
-  }
-  if (action.payload?.runnerProgramTrashBeforeInstall === true) {
-    bindings.push({
-      choiceId: "runner_program_trash_before_install",
-      role: "route_defining",
-      value: { kind: "boolean", value: true },
-    });
-  }
-  if (requirements.length === 0) return bindings;
-  if (!selectedChoices) return undefined;
-  for (const requirement of requirements) {
-    const value =
-      selectedChoices.choiceId === requirement.choiceId &&
-      Array.isArray(selectedChoices.selectedOptionIds)
-        ? selectedChoices.selectedOptionIds
-        : selectedChoices[requirement.choiceId];
-    const selectedOptionIds = choiceOptionIds(value);
-    if (
-      selectedOptionIds.length < requirement.minSelections ||
-      selectedOptionIds.length > requirement.maxSelections ||
-      selectedOptionIds.some(
-        (optionId) => !requirement.optionIds.includes(optionId),
-      )
-    ) {
-      return undefined;
-    }
-    const canonical = canonicalChoiceValue(value);
-    if (!canonical) return undefined;
-    bindings.push({
-      choiceId: requirement.choiceId,
-      role: "route_defining",
-      value: canonical,
-    });
-  }
-  return bindings;
-}
-
-function choiceOptionIds(value: unknown): string[] {
-  if (typeof value === "string") return [value];
-  if (Array.isArray(value) && value.every((entry) => typeof entry === "string"))
-    return value;
-  if (typeof value === "boolean" || typeof value === "number")
-    return [String(value)];
-  return [];
-}
-
-function canonicalChoiceValue(
-  value: unknown,
-): CanonicalChoiceValue | undefined {
-  if (typeof value === "boolean") return { kind: "boolean", value };
-  if (typeof value === "number" && Number.isFinite(value))
-    return { kind: "number", value };
-  if (typeof value === "string") return { kind: "string", value };
-  if (Array.isArray(value) && value.every((entry) => typeof entry === "string"))
-    return {
-      kind: "target_list",
-      values: value.map((id) => ({ kind: "value", id })),
-      ordering: "ordered",
-    };
-  return undefined;
 }
 
 function creditObligationAfterHead(

@@ -1,9 +1,13 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
+import { applyAction, createGame, getLegalActions } from "@netgrid/engine";
 import { describe, expect, it, vi } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { buildRealEngineDecisionCorpusScenarios } from "../evaluation/real-engine-decision-corpus-fixtures";
-import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
+import {
+  buildAiDecisionInput,
+  type AiDecisionInputWithDeckCapabilities,
+} from "../runtime/ai-decision-input";
 import { resolveTurnPlannerCutover } from "./corp-turn-planner-cutover";
 import { buildCorpTurnPlannerShadow } from "./corp-turn-planner-shadow";
 import {
@@ -211,6 +215,89 @@ describe("shared plan scheduler", () => {
       );
     },
   );
+
+  it("advances a draw boundary only after the matching successful Engine action", () => {
+    const initial = createGame({
+      seed: "turn-plan-observed-outcome",
+      setupMode: "completed",
+    });
+    function apply(
+      state: typeof initial,
+      type: "mandatory_draw" | "draw_card" | "gain_credit",
+    ) {
+      const action = getLegalActions(state, "corp").find(
+        (entry) => entry.type === type,
+      );
+      if (!action) throw new Error(`Missing legal ${type} action.`);
+      const result = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        clientKnownStateVersion: state.stateVersion,
+        actionId: action.actionId,
+      });
+      if (!result.ok) throw new Error(result.error.message);
+      return result.state;
+    }
+    const deck = (
+      buildRealEngineDecisionCorpusScenarios().find(
+        (entry) => entry.scenarioId === "corp_real_basic_economy_draw",
+      )?.input as AiDecisionInputWithDeckCapabilities | undefined
+    )?.ownDeckSnapshot;
+    if (!deck) throw new Error("Expected a real Corp deck snapshot.");
+    const inputFor = (state: typeof initial) =>
+      buildAiDecisionInput(state, "corp", { ownDeckSnapshot: deck });
+    const before = apply(initial, "mandatory_draw");
+    const draft = turnPlannerFixture(
+      "corp",
+      "draw_card",
+      undefined,
+      inputFor(before),
+    );
+    const selected = resolveTurnPlannerCutover(draft);
+    const portfolio = {
+      ...draft.portfolio,
+      turnPlanCommitment: selected.commitment,
+      turnPlanExecutionLease: selected.lease,
+    };
+    const preview = resolveTurnPlannerCutover({ ...draft, portfolio });
+    expect(preview.lease).toEqual(selected.lease);
+
+    const matching = turnPlannerFixture(
+      "corp",
+      "gain_credit",
+      undefined,
+      inputFor(apply(before, "draw_card")),
+    );
+    const progressed = resolveTurnPlannerCutover({ ...matching, portfolio });
+    expect(progressed.replanReason).toBe("scheduled_information_boundary");
+    const continued = resolveTurnPlannerCutover({
+      ...matching,
+      portfolio: {
+        ...matching.portfolio,
+        turnPlanCommitment: progressed.commitment,
+        turnPlanExecutionLease: progressed.lease,
+      },
+    });
+    expect(continued.lease).toEqual(progressed.lease);
+
+    const otherAction = turnPlannerFixture(
+      "corp",
+      "gain_credit",
+      undefined,
+      inputFor(apply(before, "gain_credit")),
+    );
+    expect(
+      resolveTurnPlannerCutover({ ...otherAction, portfolio }).replanReason,
+    ).toBe("material_outcome_deviation");
+    const { observedTurnPlanAction, ...withoutObservation } = matching.input;
+    expect(
+      resolveTurnPlannerCutover({
+        ...matching,
+        input: withoutObservation,
+        portfolio,
+      }).replanReason,
+    ).toBe("material_outcome_deviation");
+  });
 
   it("distinguishes a blocked route from a materializer contract failure", () => {
     const credit = candidate("corp-credit", "corp");
@@ -1694,6 +1781,7 @@ function turnPlannerFixture(
   side: Side,
   actionType: "gain_credit" | "draw_card",
   creditCost?: number,
+  sourceInput?: AiDecisionInputWithDeckCapabilities,
 ) {
   const scenarioId =
     side === "corp"
@@ -1701,16 +1789,18 @@ function turnPlannerFixture(
       : actionType === "gain_credit"
         ? "runner_real_low_credits"
         : "runner_real_empty_hand_draw";
-  const scenario = buildRealEngineDecisionCorpusScenarios().find(
-    (entry) => entry.scenarioId === scenarioId,
-  );
-  const action = scenario?.input.legalActions.find(
+  const inputForCase =
+    sourceInput ??
+    buildRealEngineDecisionCorpusScenarios().find(
+      (entry) => entry.scenarioId === scenarioId,
+    )?.input;
+  const action = inputForCase?.legalActions.find(
     (entry) => entry.type === actionType,
   );
-  if (!scenario || !action)
+  if (!inputForCase || !action)
     throw new Error(`Missing ${scenarioId} ${actionType} fixture.`);
   const input: AiDecisionInputWithDeckCapabilities = {
-    ...scenario.input,
+    ...inputForCase,
     legalActions: [action],
   };
   const rulesContext = input.planningRulesContext;

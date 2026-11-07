@@ -20,7 +20,9 @@ import {
 import {
   TURN_PLAN_EVALUATION_REGISTRY_VERSION,
   TURN_PLANNING_CONTRACT_SCHEMA_VERSION,
+  canonicalTurnPlanningSerialize,
   turnPlanningFingerprint,
+  type ObservedTurnPlanAction,
   type PlanningRulesContext,
   type PlanningStateIdentity,
   type TurnPlan,
@@ -34,6 +36,10 @@ export const TURN_PLANNER_CUTOVER_VERSION = "turn-planner-cutover-v2" as const;
 type TurnPlannerShadowResult =
   | CorpTurnPlannerShadowResult
   | RunnerTurnPlannerShadowResult;
+
+type TurnPlanInput = AiDecisionInput & {
+  observedTurnPlanAction?: ObservedTurnPlanAction;
+};
 
 export type TurnPlannerCutoverResult = {
   planner: TurnPlannerShadowResult;
@@ -53,7 +59,7 @@ export type TurnPlanContinuationDiagnostic = NonNullable<
 export type CorpTurnPlannerCutoverResult = TurnPlannerCutoverResult;
 
 export function resolveCorpTurnPlannerCutover(params: {
-  input: AiDecisionInput;
+  input: TurnPlanInput;
   planner: CorpTurnPlannerShadowResult;
   portfolio: ResidentPlanPortfolio;
   candidates: readonly ActionSemanticCandidate[];
@@ -65,7 +71,7 @@ export function resolveCorpTurnPlannerCutover(params: {
 }
 
 export function resolveTurnPlannerCutover(params: {
-  input: AiDecisionInput;
+  input: TurnPlanInput;
   planner: TurnPlannerShadowResult;
   portfolio: ResidentPlanPortfolio;
   candidates: readonly ActionSemanticCandidate[];
@@ -141,7 +147,7 @@ export function resolveTurnPlannerCutover(params: {
 }
 
 function continueResidentCommitment(params: {
-  input: AiDecisionInput;
+  input: TurnPlanInput;
   planner: TurnPlannerShadowResult;
   portfolio: ResidentPlanPortfolio;
   candidates: readonly ActionSemanticCandidate[];
@@ -180,12 +186,41 @@ function continueResidentCommitment(params: {
     if (!currentNode) {
       return { kind: "replan", reason: "commitment_contract_invalid" };
     }
+    const observed = params.input.observedTurnPlanAction;
+    const outcomeMatches =
+      observed !== undefined &&
+      observed.matchId === params.input.matchId &&
+      observed.side === commitment.side &&
+      observed.stateVersionBefore === pendingLease.stateIdentity.stateVersion &&
+      observed.stateVersionAfter === params.stateIdentity.stateVersion &&
+      observed.actionId === pendingLease.currentBinding.actionId &&
+      observed.actionType === pendingLease.actionType &&
+      (!currentNode.invocation.sourceCardInstanceId ||
+        currentNode.invocation.sourceCardInstanceId === observed.source) &&
+      canonicalTurnPlanningSerialize(currentNode.invocation.boundChoices) ===
+        canonicalTurnPlanningSerialize(
+          [...observed.boundChoices].sort((left, right) =>
+            left.choiceId.localeCompare(right.choiceId),
+          ),
+        ) &&
+      Object.entries(observed.selectedTargets ?? {}).every(
+        ([slotId, targetId]) =>
+          currentNode.invocation.boundTargets.some(
+            (slot) =>
+              slot.slotId === slotId &&
+              slot.values.length === 1 &&
+              slot.values[0]?.id === targetId,
+          ),
+      );
     const advanced = advanceTurnPlanCommitment(commitment, {
       lease: pendingLease,
       runtimeInstanceId: params.runtimeInstanceId,
       turnKey: params.turnKey,
       stateIdentityAfter: params.stateIdentity,
-      outcomeCodes: [...currentNode.expectation.expectedStateDeltaCodes],
+      outcomeCodes: observed
+        ? [engineActionOutcomeCode(observed.actionType)]
+        : [],
+      materialOutcomeDeviation: !outcomeMatches,
     });
     commitment = advanced.commitment;
     if (advanced.replanReason) {
@@ -208,12 +243,17 @@ function continueResidentCommitment(params: {
         phaseId: phase.phaseId,
         entryFrameKey: phaseEntryKey(phaseHead),
         rootAssessmentFingerprint: rootAssessmentKey(phaseHead),
-        satisfiedConditionCodes: phase.entryConditions.map(
-          (condition) => condition.code,
-        ),
-        supportAssignmentIds: phase.supportLeaves.map(
-          (leaf) => leaf.assignmentId,
-        ),
+        satisfiedConditionCodes: [],
+        supportAssignmentIds: phase.supportLeaves
+          .filter((leaf) =>
+            params.planner.heads.some(
+              (head) =>
+                planningHeadMatchesCommittedPhaseRoot(head, phase.root) &&
+                head.executorPlanInstanceId === leaf.planInstanceId &&
+                head.executorParentNeedId === leaf.parentNeedId,
+            ),
+          )
+          .map((leaf) => leaf.assignmentId),
         resourceHandoffIds: [],
       });
       commitment = validated.commitment;
@@ -693,7 +733,7 @@ function turnPlanFromLine(params: {
         ...(phaseIndex === 0 && nodeIndex === 0
           ? { executionBinding: structuredClone(head.currentBinding) }
           : {}),
-        expectedStateDeltaCodes: expectedDeltaCodes(head),
+        expectedStateDeltaCodes: expectedDeltaCodes(params.input, head),
         ...(boundary && nodeIndex === group.heads.length - 1
           ? { boundaryAfter: boundary }
           : {}),
@@ -812,11 +852,24 @@ function nodeExpectations(
   );
 }
 
-function expectedDeltaCodes(head: TurnPlanningHeadCandidate): string[] {
-  return [
-    `action_applied:${head.invocation.semanticActionType}`,
-    `milestone_attempted:${head.nextMilestoneId}`,
-  ];
+function expectedDeltaCodes(
+  input: AiDecisionInput,
+  head: TurnPlanningHeadCandidate,
+): string[] {
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === head.currentBinding.actionId,
+  );
+  if (!action) {
+    throw cutoverFailure(
+      input,
+      "A TurnPlan node must have a current Engine action type.",
+    );
+  }
+  return [engineActionOutcomeCode(action.type)];
+}
+
+function engineActionOutcomeCode(actionType: string): string {
+  return `engine_action_applied:${actionType}`;
 }
 
 function continuationEvidence(

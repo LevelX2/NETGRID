@@ -132,6 +132,14 @@ löscht kein noch gültiges Liveportfolio. Andere aktive Matches einschließlich
 ihrer Commitments bleiben unverändert. Persistierte Portfolios und benötigte
 Trace-/Replay-Evidence werden dadurch nicht gelöscht.
 
+Server und Simulation projizieren aus dem letzten erfolgreichen Engine-Event
+einen aktorseitigen Ausführungsbeleg. Die Projektion bindet Partie, Seite,
+beide Zustandsversionen, die ausgeführte Action und ihre Auswahlwerte.
+Bei Engine-Zufall bestätigt das actor-private Receipt die gezogene Variante
+aus der exakten Kandidatenmenge. Die KI schreibt ihr Commitment fort, wenn
+der Beleg zum ausstehenden Step passt. Eine Abweichung löst die Revalidierung
+am aktuellen Engine-Zustand aus.
+
 Der Produktsimulator verwendet den in seiner `decisionId` gebundenen
 `simulationScopeId` als Owner des Prozessgedächtnisses. Nach der Deckprüfung
 gibt er ausschließlich diesen Scope vor dem Lauf und im `finally` frei.
