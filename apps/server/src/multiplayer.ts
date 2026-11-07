@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { setTimeout as yieldToEventLoop } from "node:timers/promises";
 import { UpdateAdmission } from "./update-admission";
+import { probeHistoricalEngineState } from "./maintenance-engine-probe";
 import {
   assertValidAiDeckSnapshotForRuntime,
   beliefStateInvariantSignature,
@@ -4914,6 +4915,7 @@ export class MultiplayerService {
   async storageMaintenanceDecisionAnalysis(
     matchId: string,
     decisionIndex: number,
+    probeActions?: unknown,
   ): Promise<Record<string, unknown> | undefined> {
     const source = await this.storage.maintenanceDecisionAnalysisSource?.(
       matchId,
@@ -4973,6 +4975,24 @@ export class MultiplayerService {
         reason: "historical_checkpoint_capture_not_persisted",
       },
       checkpointReplay,
+      ...(probeActions === undefined
+        ? {}
+        : {
+            engineProbe:
+              checkpointReplay.provenance === "reconstructed_from_persisted_decision_sources" &&
+              source.checkpointReplayContext
+                ? probeHistoricalEngineState({
+                    state: source.checkpointReplayContext.state,
+                    expectedStateHash: checkpointReplay.stateHash,
+                    actor: checkpointReplay.actor,
+                    actions: probeActions,
+                  })
+                : {
+                    schemaVersion: "netgrid-historical-engine-probe-v1",
+                    status: "unavailable",
+                    reason: "historical_checkpoint_binding_unavailable",
+                  },
+          }),
       beliefState: beliefState ?? {
         schemaVersion: "netgrid-ai-belief-capture-v1",
         provenance: "unavailable",

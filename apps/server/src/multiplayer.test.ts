@@ -2069,6 +2069,11 @@ describe("Backend 0.5 private storage maintenance", () => {
       );
       const decisionContext = (await decisionResponse.json()) as {
         schemaVersion?: string;
+        aiTrace?: { detail?: { appliedDecision?: {
+          actionId: string;
+          selectedTargets?: Record<string, string>;
+          selectedChoices?: Record<string, unknown>;
+        } } };
         decision?: {
           decisionIndex?: number;
           side?: string;
@@ -2180,6 +2185,28 @@ describe("Backend 0.5 private storage maintenance", () => {
           ?.engineSchemaVersion,
       ).toBeDefined();
       expect(decisionContext.audit?.analysisSnapshot?.actorState).toBeDefined();
+      const recordedInvocation = decisionContext.aiTrace?.detail?.appliedDecision;
+      expect(recordedInvocation).toBeDefined();
+      const probeActionId = recordedInvocation!.actionId;
+      const probeInvocation = {
+        actionId: probeActionId,
+        ...(recordedInvocation!.selectedTargets ? { selectedTargets: recordedInvocation!.selectedTargets } : {}),
+        ...(recordedInvocation!.selectedChoices ? { selectedChoices: recordedInvocation!.selectedChoices } : {}),
+      };
+      const probeResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/decisions/1?probeActions=${encodeURIComponent(JSON.stringify([probeInvocation]))}`,
+      );
+      const probeContext = await probeResponse.json();
+      expect(probeResponse.status).toBe(200);
+      expect(probeContext.engineProbe).toMatchObject({
+        schemaVersion: "netgrid-historical-engine-probe-v1",
+        status: "completed",
+        sourceStateHash: decisionContext.audit?.engineEvidence?.stateHash,
+        sourceStateVersion: decisionContext.decision?.stateVersion,
+        steps: [{ actionId: probeActionId, stateVersion: (decisionContext.decision?.stateVersion ?? -1) + 1 }],
+      });
+      expect(probeContext.engineProbe).not.toHaveProperty("state");
+      expect(probeContext.engineProbe).not.toHaveProperty("gameState");
       expect(decisionContext.checkpointCapture).toMatchObject({
         schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
         provenance: "persisted_at_decision",

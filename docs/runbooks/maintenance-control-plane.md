@@ -327,6 +327,36 @@ betroffenen Abschnitt strukturiert `unavailable` mit
 `historical_audit_not_persisted`; der Server erstellt keinen
 Rückwärtskompatibilitätsadapter.
 
+### Begrenzte historische Engine-Gegenprobe
+
+Ein fehlender vollständiger GameState im KI-Export bedeutet nicht, dass kein
+Engine-Snapshot gespeichert wurde. `maintenanceDecisionAnalysisSource` lädt
+intern den exakten historischen Snapshot und hydratisiert ihn mit seinem
+vollständigen Engine-Ereignispräfix. Der normale Detailexport bleibt actor-sicher.
+
+Der Detailendpunkt akzeptiert optional `probeActions` als URL-kodierte
+JSON-Liste aus einer bis acht expliziten Invocations mit `actionId` sowie bei
+Bedarf `selectedTargets` und `selectedChoices`. Beispiel:
+
+`GET /api/storage/maintenance/analysis/matches/:matchId/decisions/:index?probeActions=%5B%7B%22actionId%22%3A%22runner.gain_credit%22%7D%5D`
+
+`engineProbe` (`netgrid-historical-engine-probe-v1`) führt diese Alternativfolge
+auf einer Kopie des vollständig gebundenen Engine-Zustands aus. StateHash,
+StateVersion und RNG-Zähler des Ausgangspunkts werden ausgewiesen. Jede Aktion
+muss für den ursprünglichen Actor aktuell legal sein und wird durch
+`applyAction` einschließlich ihrer Choice-Werte revalidiert. Fehlende Bindung,
+illegale Aktion oder unvollständige Choice scheitern strukturiert; eine
+Ersatzaktion wird nicht gewählt. Ein gegnerisches Antwortfenster darf nicht
+durch eine eigene Aktionsfolge übersprungen werden.
+
+Die Antwort enthält nur eigene Ressourcenmengen, öffentliche Punkte,
+Timingpunkt, StateVersion, StateHash und RNG-Zähler je Schritt. Rohe
+GameStates, gegnerische Privatkarten und Zufallsreihenfolgen bleiben intern.
+Matchdaten, Events und KI-Runtime-Memory werden nicht verändert. Die bisherigen
+Authentifizierungs-/Loopback-Regeln dieses read-only Endpunkts gelten weiter.
+Eine identische KI-Neuentscheidung ist kein ausgeführter alternativer
+Enginezweig; beide Prüfungen werden im Bericht getrennt gezählt.
+
 Für neue Runner-TurnPlanner-Entscheidungen enthält der Detailendpunkt außerdem
 `turnPlanningAudit` (`netgrid-turn-planning-audit-v1`). Persistiert werden die
 damaligen Kandidaten mit Plan-/Executor-Zuordnung, Bewertung, Abhängigkeiten

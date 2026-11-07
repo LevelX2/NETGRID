@@ -254,6 +254,15 @@ ihre Sicherung gehören nie zu diesem Cleanup.
 
 ## Exakte Engine-Gegenproben
 
+Der historische Engine-Snapshot kann intern vollständig gespeichert sein,
+obwohl `checkpointReplay` ausschließlich actor-sicheren KI-Input exportiert.
+Vor der Aussage „Engine-Zustand fehlt“ werden Persistenz, Hydration, Bindung,
+API-Projektion und Werkzeugfähigkeit getrennt geprüft. Der gebundene
+`probeActions`-Pfad des Decision-Detailendpunkts führt begrenzte Alternativen
+serverintern auf einer Zustandskopie aus; Vertrag und Grenzen stehen in
+`maintenance-control-plane.md`. Wiederholte KI-Neuentscheidungen zählen nicht
+als solche Engine-Gegenproben.
+
 Ein aus Traces rekonstruierter Präfix muss auch die aufgezeichneten atomaren
 Engine-Zufallsauswahlen ausführen. Nur die ausgewählte `PlayerAction` erneut
 anzuwenden lässt deren RNG-Verbrauch aus und kann erst bei späterem Schaden
@@ -281,6 +290,24 @@ Kosten. Ein nichtterminaler Score ist kein bewiesener Gesamtsieg: konkurrierende
 Zentralverlustrisiken, Reserven und die nächste gegnerische Zugfolge bleiben
 zu vergleichen. Verpflichtende Endzahlungen und freiwillige Kreditrückzahlung
 werden als getrennte Ursachen und Zeithorizonte geführt.
+
+## Datensatz-Cleanup für Tiefenselbstspiele
+
+Bei sequenziellen Tiefenselbstspielen werden nach vollständiger Analyse,
+geprüftem Bericht-/Registry-Roundtrip und aktuellem Registry-Backup die
+cycle-eigenen Matchdatensätze über den authentifizierten
+Maintenance-Cleanup-Vorschau-/Apply-Pfad entfernt. Die genaue Match-ID-Menge
+muss dem abgeschlossenen Basis-/Replay-Manifest entsprechen. Der Storage löscht
+abhängige Detaildatensätze transaktional, der Service gibt die KI-Runtime frei.
+Eine fehlerfreie Integritätsprüfung und das leere erwartete Matchinventar
+schließen den Reset ab; erst dann beginnt der nächste Zyklus.
+
+Die isolierte SQLite-Datei darf danach wiederverwendet werden. Ihre physische
+Größe ist kein Datensatznachweis: freie Seiten können für die nächste Partie
+erhalten bleiben. Registry, Sicherung und endgültige Berichte werden dabei
+nicht gelöscht. Überholte Roh-JSON-/Tracekopien im eigenen temporären Bereich
+werden nach gesichertem Abschluss ebenfalls entfernt. Eine Dateilöschung der
+Laufzeitdatenbank ist für diesen Ablauf nicht erforderlich.
 
 ## Abgeschlossene Legacy-Migration
 

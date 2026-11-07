@@ -2974,6 +2974,27 @@ async function routeHttp(
         maintenanceDecisionAnalysisRoute[1] ?? "",
       );
       const decisionIndex = Number(maintenanceDecisionAnalysisRoute[2]);
+      let probeActions: unknown;
+      const probeText = url.searchParams.get("probeActions");
+      if (probeText !== null) {
+        if (probeText.length > 16384) {
+          sendJson(response, 400, {
+            error: { code: "engine_probe_request_invalid", message: "Die Gegenprobe ist zu groß." },
+          });
+          return;
+        }
+        try {
+          probeActions = JSON.parse(probeText);
+        } catch {
+          sendJson(response, 400, {
+            error: {
+              code: "engine_probe_request_invalid",
+              message: "Die Gegenprobe enthält keine gültige Aktionsliste.",
+            },
+          });
+          return;
+        }
+      }
       if (
         !checkRateLimit(
           response,
@@ -2988,6 +3009,7 @@ async function routeHttp(
       const context = await service.storageMaintenanceDecisionAnalysis(
         matchId,
         decisionIndex,
+        probeActions,
       );
       if (!context) {
         sendJson(response, 404, {
