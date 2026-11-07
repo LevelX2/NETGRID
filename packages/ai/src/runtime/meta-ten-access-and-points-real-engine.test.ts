@@ -4,7 +4,11 @@ import {
   createGameAfterSetup,
   getPlayerView,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState } from "@netgrid/shared";
+import {
+  DEMO_DECKS,
+  type DeckDefinition,
+  type GameState,
+} from "@netgrid/shared";
 import { metaTenStandardDecks as catalog } from "../evaluation/meta-ten-standard-decks.test-support";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
@@ -27,10 +31,17 @@ function fixture(runnerId: string, corpId: string) {
     identity: d.identityCardId,
     cards: d.cards.map((c) => ({ id: c.cardId, quantity: c.quantity })),
   });
+  return fixtureFromDecks(deck(runner), deck(corp));
+}
+
+function fixtureFromDecks(
+  runnerDeck: DeckDefinition,
+  corpDeck: DeckDefinition,
+) {
   const state = createGameAfterSetup({
     seed: "meta-ten-cause-control",
-    runnerDeck: deck(runner),
-    corpDeck: deck(corp),
+    runnerDeck,
+    corpDeck,
   });
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
@@ -39,11 +50,37 @@ function fixture(runnerId: string, corpId: string) {
   return {
     state,
     snapshot: {
-      deckSnapshotId: runner.standardDeckId,
+      deckSnapshotId: runnerDeck.id,
       side: "runner" as const,
-      cards: runner.cards,
+      cards: runnerDeck.cards.map((card) => ({
+        cardId: card.id,
+        quantity: card.quantity,
+      })),
     },
   };
+}
+
+/** Card-mechanic fixtures explicitly own their required cards. Product deck
+ * revisions must not decide whether this conditional-point contract is tested. */
+function conditionalPointFixture() {
+  return fixtureFromDecks(
+    {
+      ...DEMO_DECKS.demo_runner_001,
+      id: "fixture_hot_tip_runner",
+      cards: [
+        ...DEMO_DECKS.demo_runner_001.cards,
+        { id: "onr_v1_090_hot-tip-for-wns", quantity: 1 },
+      ],
+    },
+    {
+      ...DEMO_DECKS.demo_corp_001,
+      id: "fixture_hot_tip_corp",
+      cards: [
+        ...DEMO_DECKS.demo_corp_001.cards,
+        { id: "onr_v1_196_corporate-war", quantity: 1 },
+      ],
+    },
+  );
 }
 function apply(state: GameState, side: "runner" | "corp", actionId: string) {
   const r = applyAction(state, {
@@ -101,14 +138,7 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
 it.each([false, true])(
   "uses the conditional points through its existing owner, terminal=%s",
   (terminal) => {
-    const runner = catalog.decks.find((d) =>
-      d.cards.some((c) => c.cardId === "onr_v1_090_hot-tip-for-wns"),
-    )!;
-    const corp = catalog.decks.find((d) => d.side === "corp")!;
-    const { state, snapshot } = fixture(
-      runner.standardDeckId,
-      corp.standardDeckId,
-    );
+    const { state, snapshot } = conditionalPointFixture();
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
@@ -163,14 +193,7 @@ it.each([false, true])(
 it.each(["none", "previous_turn"])(
   "does not claim a conditional point after %s",
   (condition) => {
-    const runner = catalog.decks.find((d) =>
-        d.cards.some((c) => c.cardId === "onr_v1_090_hot-tip-for-wns"),
-      )!,
-      corp = catalog.decks.find((d) => d.side === "corp")!;
-    const { state, snapshot } = fixture(
-      runner.standardDeckId,
-      corp.standardDeckId,
-    );
+    const { state, snapshot } = conditionalPointFixture();
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
@@ -199,14 +222,7 @@ it.each(["none", "previous_turn"])(
 it.each(["missing", "stale", "source", "capability"])(
   "rejects a %s conditional-point quote",
   (boundary) => {
-    const runner = catalog.decks.find((d) =>
-        d.cards.some((c) => c.cardId === "onr_v1_090_hot-tip-for-wns"),
-      )!,
-      corp = catalog.decks.find((d) => d.side === "corp")!;
-    const { state, snapshot } = fixture(
-      runner.standardDeckId,
-      corp.standardDeckId,
-    );
+    const { state, snapshot } = conditionalPointFixture();
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
