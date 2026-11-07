@@ -2681,6 +2681,8 @@ export type CorpRootRezCreditOutcomeQuote = {
 
 export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
   "runner-draw-projection-v1" as const;
+export const RUNNER_RECYCLE_DRAW_PROJECTION_SCHEMA_VERSION =
+  "runner-recycle-draw-projection-v1" as const;
 
 /** Actor-private cost projection, conditional on a free modifier-only root rez.
  * Source location and every affected installation destination are bound separately.
@@ -2764,6 +2766,18 @@ export type RunnerDrawProjection = {
   visibleDrawTaxSourceCount: number;
 };
 
+/** Complete actor-private on-play Grip/Heap/Stack recycling, excluding the played source. */
+export type RunnerRecycleDrawProjection = {
+  schemaVersion: typeof RUNNER_RECYCLE_DRAW_PROJECTION_SCHEMA_VERSION;
+  gripBefore: number;
+  heapBefore: number;
+  stackBefore: number;
+  sourceConsumption: 1;
+  grossDrawCount: number;
+  netHandDelta: number;
+  netStackDelta: number;
+};
+
 /**
  * Actor-private, Engine-certified projection for one currently legal Corp
  * action whose draw and hidden-zone movements form one strategic effect.
@@ -2818,6 +2832,14 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
     projectedPostDrawDispositionCount?: number;
     projectedNetHandDelta?: number;
     visibleDrawTaxSourceCount?: number;
+    runnerRecycleDrawProjectionSchemaVersion?: typeof RUNNER_RECYCLE_DRAW_PROJECTION_SCHEMA_VERSION;
+    runnerRecycleDrawProjectionGripBefore?: number;
+    runnerRecycleDrawProjectionHeapBefore?: number;
+    runnerRecycleDrawProjectionStackBefore?: number;
+    runnerRecycleDrawProjectionSourceConsumption?: number;
+    runnerRecycleDrawProjectionGrossDrawCount?: number;
+    runnerRecycleDrawProjectionNetHandDelta?: number;
+    runnerRecycleDrawProjectionNetStackDelta?: number;
     corpZoneTransitionProjectionSchemaVersion?: typeof CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION;
     corpZoneTransitionProjectionComplete?: boolean;
     corpZoneTransitionProjectionSourceCardInstanceId?: CardInstanceId;

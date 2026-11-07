@@ -1,7 +1,9 @@
-import type {
-  CardDefinition,
-  CardInstanceId,
-  GameState,
+import {
+  RUNNER_RECYCLE_DRAW_PROJECTION_SCHEMA_VERSION,
+  type RunnerRecycleDrawProjection,
+  type CardDefinition,
+  type CardInstanceId,
+  type GameState,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
@@ -56,6 +58,22 @@ export function deterministicOnPlayResourcePayload(
   Record<string, string | number | boolean> {
   const cardImplementation = cardImplementationForDefinitionId(definition.id);
   const implementation = printedCostOnPlayImplementation(definition);
+  const recycle = implementation?.effects.find(
+    (effect) => effect.kind === "shuffle_grip_trash_and_stack_then_draw",
+  );
+  if (controller === "runner" && recycle) {
+    if (implementation!.effects.length !== 1)
+      throw Object.assign(
+        new Error(
+          "Runner recycle projection requires a single compound effect.",
+        ),
+        {
+          code: "unsupported_runner_recycle_projection_effects",
+          definitionId: definition.id,
+        },
+      );
+    return runnerRecycleDrawPayload(definition.id, recycle, state);
+  }
 
   let gainCreditsAmount = 0;
   let drawCardsAmount = 0;
@@ -389,6 +407,70 @@ export function cardImplementationConditionMet(
       );
     }
   }
+}
+
+function runnerRecycleDrawPayload(
+  definitionId: CardDefinition["id"],
+  effect: { drawCount: number; removePlayedCardFromGame: boolean },
+  state: GameState | undefined,
+): Record<string, string | number | boolean> {
+  if (!state)
+    throw Object.assign(
+      new Error("Runner recycle projection requires the current game state."),
+      {
+        code: "missing_runner_recycle_projection_state",
+        owner: "deterministicOnPlayResourcePayload",
+        definitionId,
+      },
+    );
+  if (
+    !Array.isArray(state.runner.grip) ||
+    !Array.isArray(state.runner.heap) ||
+    !Array.isArray(state.runner.stack) ||
+    state.runner.grip.length < 1 ||
+    !Number.isSafeInteger(effect.drawCount) ||
+    effect.drawCount <= 0 ||
+    effect.removePlayedCardFromGame !== true
+  )
+    throw Object.assign(
+      new Error("Invalid Runner recycle projection source or effect."),
+      {
+        code: "invalid_runner_recycle_projection_state",
+        owner: "deterministicOnPlayResourcePayload",
+        definitionId,
+      },
+    );
+  const gripBefore = state.runner.grip.length,
+    heapBefore = state.runner.heap.length,
+    stackBefore = state.runner.stack.length;
+  const available = gripBefore - 1 + heapBefore + stackBefore;
+  if (!Number.isSafeInteger(available))
+    throw Object.assign(
+      new Error("Runner recycle count exceeds safe integer range."),
+      { code: "invalid_runner_recycle_projection_count", definitionId },
+    );
+  const grossDrawCount = Math.min(effect.drawCount, available);
+  const quote: RunnerRecycleDrawProjection = {
+    schemaVersion: RUNNER_RECYCLE_DRAW_PROJECTION_SCHEMA_VERSION,
+    gripBefore,
+    heapBefore,
+    stackBefore,
+    sourceConsumption: 1,
+    grossDrawCount,
+    netHandDelta: grossDrawCount - gripBefore,
+    netStackDelta: gripBefore - 1 + heapBefore - grossDrawCount,
+  };
+  return {
+    runnerRecycleDrawProjectionSchemaVersion: quote.schemaVersion,
+    runnerRecycleDrawProjectionGripBefore: quote.gripBefore,
+    runnerRecycleDrawProjectionHeapBefore: quote.heapBefore,
+    runnerRecycleDrawProjectionStackBefore: quote.stackBefore,
+    runnerRecycleDrawProjectionSourceConsumption: quote.sourceConsumption,
+    runnerRecycleDrawProjectionGrossDrawCount: quote.grossDrawCount,
+    runnerRecycleDrawProjectionNetHandDelta: quote.netHandDelta,
+    runnerRecycleDrawProjectionNetStackDelta: quote.netStackDelta,
+    drawCardsAmount: quote.grossDrawCount,
+  };
 }
 
 export function normalizeSubtypeLabel(subtype: string): string {

@@ -1673,6 +1673,20 @@ Einkommen noch in derselben hypothetischen Linie mehrfach ausgegeben.
 Paarung634 D305 sichert die native legale Tagentfernung bei null freien
 Credits ab, die zuvor als unterfinanziert aus dem einzigen Defensepfad fiel.
 
+Unmittelbare eigene Zonenwechsel zählen auch ohne Einkommen: Ein aktuell
+gebundener Grip-zu-Set-aside-Schritt verbraucht genau seine Zielhandkarte.
+Die öffentliche Pflichtablage ist kein Draw und kein liquider Gewinn.
+Paarung634 D226 sichert den Handbestand neun auf acht am Shell-Parent ab.
+
+Ein vollständiges Grip-/Heap-/Stack-Recycling mit anschließendem Draw erhält
+eine eigene `RunnerRecycleDrawProjection` aus der Engine. Die gespielte,
+anschließend entfernte Quelle wird vor dem Recycling ausgeschlossen. Die Quote
+begrenzt den Draw auf den tatsächlich verfügbaren Bestand und trennt Bruttodraw,
+Nettohandänderung sowie Stackauffüllung. Das strenge KI-DTO erhält diese eigenen
+Zahlen; der Ressourcenframe addiert den Draw nicht nochmals auf die alte Hand.
+Die zufälligen neuen Karten bleiben hinter der Beobachtungsgrenze. Paarung634
+D132 belegt Hand vier auf fünf sowie netto zwei zusätzliche Stackkarten.
+
 ### 7.2 Grenzaktion statt Scheinfortsetzung
 
 Eine Linie, die an einer echten Unsicherheitsgrenze endet, trägt ein

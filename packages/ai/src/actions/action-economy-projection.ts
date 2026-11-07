@@ -2,9 +2,11 @@ import {
   CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
   CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION,
   RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+  RUNNER_RECYCLE_DRAW_PROJECTION_SCHEMA_VERSION,
   type CorpZoneTransitionProjection,
   type LegalAction,
   type RunnerDrawProjection,
+  type RunnerRecycleDrawProjection,
 } from "@netgrid/shared";
 import type {
   ActionEconomyProjection,
@@ -111,6 +113,10 @@ export function actionEconomyProjectionFor(
   );
   const runnerDrawProjection = runnerDrawProjectionFor(action);
   const topHeapReturn = runnerTopHeapReturnStatus(candidate, action);
+  const handSetAside = runnerHandSetAsideStatus(candidate, action);
+  const recycleDraw = runnerRecycleDrawProjectionStatus(candidate, action);
+  const recycleProjection =
+    recycleDraw.status === "guaranteed" ? recycleDraw.projection : undefined;
   const corpZoneTransition = corpZoneTransitionProjectionStatus(
     candidate,
     action,
@@ -120,6 +126,7 @@ export function actionEconomyProjectionFor(
       ? corpZoneTransition.projection
       : undefined;
   const payloadCardsDrawn =
+    recycleProjection?.grossDrawCount ??
     corpZoneProjection?.grossDrawCount ??
     runnerDrawProjection?.projectedGrossDrawCount ??
     firstNonNegativeNumber(action, [
@@ -133,6 +140,8 @@ export function actionEconomyProjectionFor(
       : undefined;
   const cardsDrawn = payloadCardsDrawn ?? basicActionCardsDrawn ?? 0;
   const cardsConsumed =
+    recycleProjection?.sourceConsumption ??
+    (handSetAside === "guaranteed" ? 1 : undefined) ??
     corpZoneProjection?.sourceHqConsumptionCount ??
     (action.type === "play_event" ||
     action.type === "play_operation" ||
@@ -148,20 +157,29 @@ export function actionEconomyProjectionFor(
       ? 1
       : 0);
   const netHandDelta =
+    recycleProjection?.netHandDelta ??
     corpZoneProjection?.netHqDelta ??
     runnerDrawProjection?.projectedNetHandDelta ??
     (topHeapReturn === "guaranteed" ? 1 : cardsDrawn - cardsConsumed);
   const drawPileCardsConsumed =
-    corpZoneProjection?.grossDrawCount ?? (cardsDrawn > 0 ? cardsDrawn : 0);
-  const drawPileCardsReplenished = corpZoneProjection
-    ? corpZoneProjection.hqCardsRecycledBeforeDrawCount +
-      corpZoneProjection.archivesCardsRecycledBeforeDrawCount +
-      corpZoneProjection.rdCardsReplenishedAfterDrawCount
-    : 0;
+    recycleProjection?.grossDrawCount ??
+    corpZoneProjection?.grossDrawCount ??
+    (cardsDrawn > 0 ? cardsDrawn : 0);
+  const drawPileCardsReplenished = recycleProjection
+    ? recycleProjection.gripBefore -
+      recycleProjection.sourceConsumption +
+      recycleProjection.heapBefore
+    : corpZoneProjection
+      ? corpZoneProjection.hqCardsRecycledBeforeDrawCount +
+        corpZoneProjection.archivesCardsRecycledBeforeDrawCount +
+        corpZoneProjection.rdCardsReplenishedAfterDrawCount
+      : 0;
   const netDrawPileDelta = drawPileCardsReplenished - drawPileCardsConsumed;
   const source =
     corpZoneTransition.status === "guaranteed" ||
     topHeapReturn === "guaranteed" ||
+    handSetAside === "guaranteed" ||
+    recycleDraw.status === "guaranteed" ||
     rootRezOutcome.status === "guaranteed_positive" ||
     rootRezOutcome.status === "runner_interruptible" ||
     rootRezOutcome.status === "nonpositive" ||
@@ -183,7 +201,10 @@ export function actionEconomyProjectionFor(
   const timing =
     grossLiquidCreditGain !== undefined
       ? "immediate"
-      : cardsDrawn > 0 || topHeapReturn === "guaranteed"
+      : cardsDrawn > 0 ||
+          topHeapReturn === "guaranteed" ||
+          handSetAside === "guaranteed" ||
+          recycleDraw.status === "guaranteed"
         ? "immediate"
         : storedCreditsAdded !== undefined
           ? "setup"
@@ -238,12 +259,20 @@ export function actionEconomyProjectionFor(
     ...(topHeapReturn !== "not_applicable"
       ? [`runner_top_heap_return:${topHeapReturn}`]
       : []),
+    ...(handSetAside !== "not_applicable"
+      ? [`runner_hand_set_aside:${handSetAside}`]
+      : []),
+    ...(recycleDraw.status !== "not_applicable"
+      ? [`runner_recycle_draw:${recycleDraw.status}`]
+      : []),
   ];
 
   const reliability =
     corpZoneTransition.status === "terminal_deckout" ||
     corpZoneTransition.status === "malformed" ||
-    topHeapReturn === "malformed"
+    topHeapReturn === "malformed" ||
+    handSetAside === "malformed" ||
+    recycleDraw.status === "malformed"
       ? ("unknown" as const)
       : rootRezOutcome.status === "runner_interruptible"
         ? ("conditional" as const)
@@ -258,6 +287,8 @@ export function actionEconomyProjectionFor(
     corpZoneTransition.status === "terminal_deckout" ||
     corpZoneTransition.status === "malformed" ||
     topHeapReturn === "malformed" ||
+    handSetAside === "malformed" ||
+    recycleDraw.status === "malformed" ||
     rootRezOutcome.status === "missing" ||
     rootRezOutcome.status === "malformed"
       ? ("none" as const)
@@ -312,6 +343,8 @@ export function actionEconomyProjectionFor(
       corpZoneTransition.status === "terminal_deckout" ||
       corpZoneTransition.status === "malformed" ||
       topHeapReturn === "malformed" ||
+      handSetAside === "malformed" ||
+      recycleDraw.status === "malformed" ||
       rootRezOutcome.status === "missing" ||
       rootRezOutcome.status === "malformed"
         ? "unknown"
@@ -319,6 +352,119 @@ export function actionEconomyProjectionFor(
     confidence,
     evidence,
   };
+}
+
+function runnerRecycleDrawProjectionStatus(
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+):
+  | { status: "not_applicable" | "malformed" }
+  | { status: "guaranteed"; projection: RunnerRecycleDrawProjection } {
+  const p = action.payload;
+  const schema = p?.runnerRecycleDrawProjectionSchemaVersion,
+    grip = p?.runnerRecycleDrawProjectionGripBefore,
+    heap = p?.runnerRecycleDrawProjectionHeapBefore,
+    stack = p?.runnerRecycleDrawProjectionStackBefore,
+    consumed = p?.runnerRecycleDrawProjectionSourceConsumption,
+    gross = p?.runnerRecycleDrawProjectionGrossDrawCount,
+    netHand = p?.runnerRecycleDrawProjectionNetHandDelta,
+    netStack = p?.runnerRecycleDrawProjectionNetStackDelta;
+  if (
+    [schema, grip, heap, stack, consumed, gross, netHand, netStack].every(
+      (v) => v === undefined,
+    )
+  )
+    return { status: "not_applicable" };
+  const source = candidate.sourceCardInstanceId;
+  if (
+    !p ||
+    schema !== RUNNER_RECYCLE_DRAW_PROJECTION_SCHEMA_VERSION ||
+    candidate.actorSide !== "runner" ||
+    action.side !== "runner" ||
+    candidate.actionType !== "play_event" ||
+    action.type !== candidate.actionType ||
+    candidate.actionId !== action.actionId ||
+    candidate.legalActionRef.actionId !== action.actionId ||
+    candidate.stateVersion !== action.expiresAtStateVersion ||
+    typeof source !== "string" ||
+    source.length === 0 ||
+    action.source !== source ||
+    p.cardId !== source ||
+    action.abilityRef?.sourceCardInstanceId !== source ||
+    p.cardImplementationCapabilityBindingKind !== "card_spec_capability_key" ||
+    p.cardImplementationAbilityId !== action.abilityRef.sourceAbilityId ||
+    (action.choiceRequirements?.length ?? 0) !== 0 ||
+    !isExactPositiveInteger(grip) ||
+    !isExactNonNegativeInteger(heap) ||
+    !isExactNonNegativeInteger(stack) ||
+    consumed !== 1 ||
+    !isExactNonNegativeInteger(gross) ||
+    !isExactInteger(netHand) ||
+    !isExactInteger(netStack) ||
+    !Number.isSafeInteger(grip - 1 + heap + stack) ||
+    gross > grip - 1 + heap + stack ||
+    p.drawCardsAmount !== gross ||
+    netHand !== gross - grip ||
+    netStack !== grip - 1 + heap - gross
+  )
+    return { status: "malformed" };
+  return {
+    status: "guaranteed",
+    projection: {
+      schemaVersion: RUNNER_RECYCLE_DRAW_PROJECTION_SCHEMA_VERSION,
+      gripBefore: grip,
+      heapBefore: heap,
+      stackBefore: stack,
+      sourceConsumption: 1,
+      grossDrawCount: gross,
+      netHandDelta: netHand,
+      netStackDelta: netStack,
+    },
+  };
+}
+
+/** A bound public Grip-to-set-aside transfer consumes the target hand card. */
+function runnerHandSetAsideStatus(
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+): "not_applicable" | "malformed" | "guaranteed" {
+  const payload = action.payload;
+  if (payload?.delayedInstallAbility !== "set_aside_from_grip")
+    return "not_applicable";
+  const source = candidate.sourceCardInstanceId;
+  const target = payload.targetCardId;
+  return candidate.actorSide === "runner" &&
+    action.side === "runner" &&
+    candidate.actionType === "trigger_ability" &&
+    action.type === candidate.actionType &&
+    candidate.actionId === action.actionId &&
+    candidate.stateVersion === action.expiresAtStateVersion &&
+    typeof source === "string" &&
+    source.length > 0 &&
+    action.source === source &&
+    payload.cardId === source &&
+    payload.abilityId === "set_aside_from_grip" &&
+    payload.abilityFamily === "hosting-counters" &&
+    payload.effectKind === "counter_change" &&
+    typeof payload.sourceDefinitionId === "string" &&
+    (candidate.sourceDefinitionId === undefined ||
+      candidate.sourceDefinitionId === payload.sourceDefinitionId) &&
+    typeof target === "string" &&
+    target.length > 0 &&
+    target !== source &&
+    typeof payload.targetCardDefinitionId === "string" &&
+    payload.targetCardDefinitionId.length > 0 &&
+    action.targetRequirements.some(
+      (requirement) =>
+        requirement.kind === "card" &&
+        requirement.side === "runner" &&
+        requirement.zoneScope?.length === 1 &&
+        requirement.zoneScope[0] === "runner.grip" &&
+        requirement.visibility === "known_to_actor",
+    ) &&
+    (action.choiceRequirements?.length ?? 0) === 0
+    ? "guaranteed"
+    : "malformed";
 }
 
 /** The Engine binds this public one-card transfer before offering the action. */
