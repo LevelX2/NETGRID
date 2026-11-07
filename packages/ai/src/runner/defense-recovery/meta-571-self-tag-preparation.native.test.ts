@@ -79,9 +79,17 @@ it.each([
   "cp-meta571-r1-g26-paid-selftag",
 ])("does not prepare a displaced or more expensive run in %s", (name) => {
   const { input, decision, portfolio } = decide(name);
-  expect(
-    input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
-  ).not.toBe("install_card");
+  const action = input.legalActions.find(
+    (a) => a.actionId === decision.actionId,
+  )!;
+  // Normal development may install a resource. This contract excludes the
+  // displaced Fall Guy preparation, not every unrelated installation.
+  if (action.type === "install_card") {
+    const source = input.playerView.own.gripOrHq.find(
+      (card) => card.instanceId === action.source,
+    );
+    expect(source?.definitionId).not.toBe("onr_v1_161_fall-guy");
+  }
   expect(
     portfolio.instances
       .filter((p) => p.moduleId === "runner.pressure_central")

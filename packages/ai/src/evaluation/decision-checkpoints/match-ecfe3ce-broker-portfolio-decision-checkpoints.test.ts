@@ -70,11 +70,13 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     expectSavingsPreservedBySelectedAction(checkpoint);
   });
 
-  it("keeps Broker savings while rebuilding the required hand buffer after declining an optional run", () => {
+  it("rebuilds the required hand buffer with certified recycling while keeping Broker savings", () => {
     const checkpoint = fixture(twoSourceBalancedLoadJson);
     checkpoint.expectation = {
       contractKind: "correctness",
-      acceptableActions: [{ actionId: "runner.draw_card" }],
+      acceptableActions: [
+        { type: "play_event", sourceDefinitionId: "onr_v1_101_mit-west-tier" },
+      ],
       forbiddenActions: [
         {
           type: "activated_card_ability",
@@ -86,7 +88,11 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
         acceptableCapabilities: ["build_required_hand_buffer"],
       },
     };
-    expectSavingsPreservedBySelectedAction(checkpoint);
+    const after = expectSavingsPreservedBySelectedAction(checkpoint);
+    // The Engine-owned recycle quote now certifies the whole hand reset.
+    // A one-card draw would leave this H1 source below the required buffer.
+    expect(after.runner.grip).toHaveLength(5);
+    expect(after.runner.credits).toBe(8);
   });
 
   it("uses the last click to store three credits instead of taking one liquid credit", () => {
@@ -133,6 +139,7 @@ function expectSavingsPreservedBySelectedAction(
   if (!applied.ok)
     throw new Error(`Native preservation action failed: ${applied.error.code}`);
   expect(balances(applied.state)).toEqual(before);
+  return applied.state;
 }
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

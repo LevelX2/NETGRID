@@ -199,7 +199,20 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
   expect(after.view.own.gripOrHq).toEqual(before.view.own.gripOrHq);
   expect(after.state.corp).toEqual(before.state.corp);
   expect(after.view.opponent).toEqual(before.view.opponent);
-  expect(after.state.randomCounter).toBe(before.state.randomCounter);
+  // Changed liquidity can change the conditional reply to Coyote while its
+  // inner ICE is still hidden. Each branch is replayed above; their RNG
+  // counters need not match when only the stored-bank branch tries Blink.
+  expect(after.state.randomCounter).toBe(before.state.randomCounter + 1);
+  expect(after.state.randomDrawRecords.at(-1)).toMatchObject({
+    counter: before.state.randomCounter,
+    purpose: expect.stringContaining(
+      "icebreaker.random_break_or_damage.onr_v1_007_blink",
+    ),
+  });
+  expect(after.steps.some((step) =>
+    step.actionId.startsWith("runner.break_subroutine.") &&
+    step.actionId.includes("onr_v1_007_blink"),
+  )).toBe(true);
   expect(
     after.steps.filter((s) => s.side === "corp").map((s) => s.actionId),
   ).toEqual(
