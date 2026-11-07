@@ -161,6 +161,14 @@ Aufteilungen mit `invalid_runner_install_payment` beim Owner
 `action_semantics` zurück. Der Plan bewertet damit die tatsächliche
 Liquiditätsbelastung; er rekonstruiert keine Zahlung aus Action-IDs oder Labels.
 
+Ungültige Klick- oder Creditkosten, einschließlich nicht endlicher Werte,
+negativer Beträge, Bruchteile und Summenüberläufe, scheitern bereits bei
+der Kostenprojektion mit `invalid_legal_action_cost`. Die Diagnose bindet
+Action-ID, betroffene Dimensionen und den Owner `action_semantics`; ein
+nachgelagerter Plan darf daraus weder null Kosten noch eine harmlose
+Disposition ableiten. Vollständige leere Kostenlisten bleiben die explizite
+Engine-Aussage für null Ausgaben.
+
 Zahlungsquellen mit ihren konkreten Beträgen und optionaler Programmtrash
 gehören als `route_defining`-Bindings zur kanonischen Invocation. Eine
 poolbezahlte Installation ist nicht mit einer weiteren Installation frei

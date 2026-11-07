@@ -289,6 +289,15 @@ selbst binden. Die Projektion verändert keinen Spielzustand und ersetzt weder
 Installation noch Revalidierung. Ein Real-Engine-Test vergleicht sie mit der
 tatsächlichen Installation und deren PlayerView.
 
+## Allgemeine Asset-/Upgrade-Rezfenster
+
+Ein allgemeines Corp-Rezfenster während eines Runs bietet bezahlbare Assets
+und Upgrades in allen Corp-Servern an, auch außerhalb des angegriffenen
+Servers. ICE-Rez und fortgebundene Sonderfenster bleiben an ihren Server
+gebunden. Begegnungen und laufende Traces öffnen kein zusätzliches normales
+Rezfenster. Angebot und Ausführung verwenden dieselbe Engine-Revalidierung;
+der Hacker-Tracker-Gegenfall ist durch Engine-Regressionen abgesichert.
+
 ## Ausführbare Grenzen
 
 `scripts/check-engine-source-structure.mjs` akzeptiert keine relativen

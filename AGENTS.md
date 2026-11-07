@@ -115,6 +115,41 @@ Bedarf zurückgesetzt oder auf den aktuellen Stand gebracht.
 - Remote `origin` ist konfiguriert; Pushes, Pull Requests und Remote-Integrationen erfolgen nur auf Nutzerwunsch oder über die dafür vorgesehenen Abschluss-/GitHub-Workflows.
 - Lokale Laufzeitdaten, SQLite-Dateien, temporäre Daten, Build-Artefakte, Caches und Secrets werden nicht versioniert.
 
+### Dateipflege und Aufräumen
+
+- Jede dauerhaft verbleibende Datei benötigt eine aktuelle Funktion als
+  Produktquelle, Testfixture, Werkzeug, Vertrag, Regelquelle, aktive Aufgabe
+  oder benötigter Nachweis. Alter, Versionsnummer und fehlender Direktimport
+  allein sind keine Löschkriterien; dynamische Consumer und Gates mitprüfen.
+- Abgeschlossene Prozesspläne, Reviews, Diagnoseexports und Activities nach
+  Rückführung der gültigen Erkenntnisse in ihre führende Quelle und Prüfung
+  aller aktiven Referenzen löschen. Keine Archivkopien oder Redirect-Stubs
+  für erledigte Arbeit anlegen; Git hält die Historie versionierter Dateien.
+- Beim Aufgabenabschluss eigene temporäre Skripte, Screenshots, Testausgaben
+  und nicht mehr benötigte Build-/Installer-Zwischenstände entfernen.
+  Ausgaben unter `tmp/`, `.playwright-cli/`, `playwright-report/`,
+  `test-results/` und `output/` sind kein dauerhafter Ablageort.
+- Unversionierte Dateien sind nicht durch Git gesichert. Vor ihrer Löschung
+  Inhalt und aktuelle Verwendung prüfen. Sicherungen uncommitteter Arbeit,
+  unklare Einzelstücke und fremde laufende Arbeit bei Unsicherheit klären.
+- Laufende Server, ihre Buildverzeichnisse, Runtime-Daten, Secrets, private
+  Kartenquellen und Werkzeuginstallationen bleiben bei allgemeinem Cleanup
+  unangetastet. Worktrees nur nach geprüftem Eigentümer- und Integrationsstand
+  entfernen, niemals allein wegen Name oder Alter.
+- Die zentrale KI-Evidence-Registry und ihre Backups sind kein temporärer
+  Analysebestand. Benötigte Baselines, offene Nachweise und finale Berichte
+  erhalten; Paarungsberichte gehören nach `docs/Berichte/`. Duplikate erst
+  nach Inhaltsprüfung entfernen.
+- Nach abgeschlossenen, integrierten KI-Analysen die Übernahme der Ergebnisse
+  in Registry und Backup sowie die lokale Berichtssicherung prüfen. Danach
+  nicht mehr benötigte Spiel-/Trace-Exports, Registry-JSON-Snapshots und
+  temporäre Baseline-Quellkopien oder -archive entfernen. Verschachtelte
+  Worktrees zuerst von innen nach außen über Git entfernen; integrierte,
+  saubere Arbeitszweige anschließend ebenfalls aufräumen.
+- Entfernte Dateien und gewonnene Regeln im Abschluss knapp benennen;
+  Referenzen und Diff prüfen. Tests nur ausführen, wenn ausführbare Quellen,
+  Fixtures, Consumer oder deren Verträge betroffen sind.
+
 ## Testbetrieb
 
 ### Shell-Aufrufe und lokaler Test-TEMP

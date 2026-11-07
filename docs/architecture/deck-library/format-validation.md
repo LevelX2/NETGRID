@@ -6,6 +6,30 @@ und ausgewähltes `DeckFormatProfile` ein; sie implementieren keine eigene
 Agenda-Spanne. Profil-ID, Pool und gegebenenfalls Profilversion werden vor den
 Karten- und Größenregeln geprüft.
 
+## Poolbindung vor dem Beitritt
+
+Die Deckauswahl eines Joiners bindet sich an den Kartenpool der Einladung.
+`GET /api/matches/:matchId/join-info` projiziert ihn aus den gespeicherten
+Match-Einstellungen nach gültiger Join-Token-Prüfung oder der bestehenden
+Freigabe für einen offenen LAN-Beitritt. Private Statusabfragen ohne gültige
+Freigabe erhalten keinen Kartenpool und keine Decklisten.
+
+Der Webclient übernimmt diese Freigabe getrennt von den eigenen
+Host-Starteinstellungen. Er bindet Antworten an Match-ID und Token und
+verwirft veraltete Anfragen beim Wechsel der Einladung. Bis eine vollständige
+Freigabe vorliegt, bleiben Deckauswahl und Beitritt gesperrt. Ein bereits
+validierter Pool bleibt an die unveränderte Einladung gebunden; das Verlassen
+der Lobby löst keine neue Poolabfrage aus und erhält die Austrittsbestätigung.
+Fehlende oder
+widersprüchliche Angaben scheitern mit einer strukturierten
+`match_join_info`-Diagnose; es gibt keinen Rückgriff auf den lokalen Kartenpool.
+Auch lokale Decks werden gegen den Pool der Einladung validiert. Der Server
+prüft Pool und Beitrittsrecht beim tatsächlichen Join erneut.
+
+Nachweise: `apps/server/src/multiplayer-join-card-pool.test.ts`,
+`apps/web/features/match-start/join-card-pool.test.ts` und der reguläre
+Zwei-Browser-Test für eine Classic-/Proteus-Einladung.
+
 ## Corp-Agenda-Spanne
 
 `agenda.policy: official_size_range` aktiviert die deckgrößenabhängige Spanne.

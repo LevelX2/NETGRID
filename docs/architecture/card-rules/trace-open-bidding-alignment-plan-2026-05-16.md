@@ -11,6 +11,11 @@ die gesamte Partie stabil und wird über Persistenz, Runtime-Neustart, Replay,
 Simulation und AI-Decision-Checkpoints weitergereicht. UI- oder Client-State
 ist keine Regelquelle.
 
+Während der Partie zeigt der dritte Optionen-Tab „Sitzung & System“ das
+Trace-Regelprofil einschließlich Gleichstandsregel schreibgeschützt aus der
+aktuellen `PlayerView`. Fehlt das Profil dort, wird dies ausdrücklich angezeigt;
+die lokale Startpräferenz wird nicht als Ersatz verwendet.
+
 `modern_open` bleibt der Default. Ein fehlendes Profil an der autoritativen
 Version-0-Erzeugungs- oder Normalisierungsgrenze wird als `modern_open`
 behandelt. Laufende Trace-Resolutionen raten kein Profil aus Events oder

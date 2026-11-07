@@ -2,7 +2,7 @@
 
 Status: `accepted_current`
 Ursprüngliche Entscheidung: 2026-07-08
-Fortgeschriebener Stand: 2026-08-12
+Fortgeschriebener Stand: 2026-10-11
 Primärer Agent: `release-implementation-agent`
 
 ## Zweck
@@ -80,4 +80,16 @@ Die fachlichen Zielbereiche aus `docs-structure-target-decision-2026-05-18.md` b
 
 ## Aktueller Anwendungsstand
 
-Am 2026-08-12 wurde diese Regel auf den ersten großen Safe-Trash-Schnitt angewendet: historische Archive, UI-Explorationen, abgeschlossene Activity-Bestände sowie obsolete Spotcheck-/Docs-Cleanup-/Chronicle-Reviewbereiche werden aus dem Arbeitsbaum entfernt. Weitere Architektur-, Review- und Release-Cleanups folgen separat mit eigener Referenzprüfung.
+Abgeschlossene Kartenfix-, UI-, Testreparatur-, Deckvergleichs- und Activity-
+Prozesse werden nach Rückführung ihrer gültigen Verträge entfernt. Frühere
+Design-C-/Design-D-Mockups und ihr Realismusreview sind auf Nutzerwunsch keine
+aktuellen Referenzen mehr; Branding bleibt erhalten. Die noch verwendete
+Classic-Deckfixture unter `docs/derived/` bleibt bis zur Ablösung ihres
+Testconsumers bestehen.
+
+Für unversionierte Bestände gelten zusätzlich die Dateipflegeregeln in
+`AGENTS.md`: Laufende Runtime- und Buildpfade, Registry, Backups, private
+Quellen und benötigte Berichte sind kein pauschaler Löschbestand. Eine
+Sicherung uncommitteter Arbeit wird erst nach geklärter Verwendung entfernt.
+Die aktuelle Freigabe zum Entfernen alter Windows-Ausgaben und abgeschlossener
+lokaler KI-Analysen ersetzt weder diese Inhaltsprüfung noch Werkzeugrechte.

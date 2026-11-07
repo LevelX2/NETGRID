@@ -9,8 +9,12 @@
 - `effect-event-chronicle-visibility-audit-2026-05-17.md`
 - `engine-hard-timeout-contract-2026-05-17.md`
 - `mechanics-coverage-matrix.md`
-- `node-access-rez-contract-process-2026-07-15.md`
 - `trace-open-bidding-alignment-plan-2026-05-16.md`
+
+Installierte Node-Zugriffseffekte und deren Rez-Anforderung stehen im
+[Access-Vertrag](../engine/access-runtime-architecture.md#aktivierungszustand-von-zugriffseffekten).
+Abgeschlossene Kartenfix- und Implementierungsprozesse werden nach Rückführung
+in CardSpec, Regressionen und aktuelle Fachverträge entfernt.
 
 ## Regel
 

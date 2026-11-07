@@ -16,6 +16,8 @@ Zu den aktuellen Fachbereichen gehören unter anderem:
 - `deck-library/`: lokale Deckbibliothek und Storage-Verträge;
 - `localization/`: Locale-, Übersetzungs- und Präsentationsverträge der
   normalen Spieleroberfläche;
+- `maintenance/action-persistence-contract.md`: aktueller SQLite-Aktionsload,
+  atomare Delta-Persistenz und Storagegrenzen;
 - `windows/`: installerneutrale Windows-Releasegrenze sowie das beschlossene
   Installer-, Launcher- und Updatezielbild mit sequenziellem Paketprozess;
 - weitere fachlich benannte Bereiche für aktuelle Architekturthemen.

@@ -59,7 +59,8 @@ Stärkt Regression-Sicherheit durch gezielte Testanalyse und priorisierte Testem
   - Replay- und StateHash-Determinismus
   - stale-action-/illegal-action-Abwehr
   - Karten- und KI-Verhalten im freigegebenen Scope
-- Testempfehlungen sollen mit vorhandenen Artefakten in `docs/derived/*_TEST_MATRIX.md` anschlussfähig sein.
+- Testempfehlungen an den aktuellen Fachverträgen, aktiven Activities und
+  `docs/architecture/test-tiers-and-package-boundaries-2026-07-10.md` ausrichten.
 - Typische Prüfbefehle:
   - `pnpm lint`
   - `pnpm typecheck`

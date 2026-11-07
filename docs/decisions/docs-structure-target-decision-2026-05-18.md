@@ -21,7 +21,7 @@ Diese Entscheidung beschreibt die fachliche Zielstruktur unter `docs/`. Die Rete
 | `docs/decisions/`     | dauerhafte Projekt-, Produkt-, Git- und Dokumentationsentscheidungen             |
 | `docs/runbooks/`      | wiederholbare Betriebs-, Diagnose- und Wartungsabläufe                           |
 | `docs/codex/`         | aktueller Codex-Status und noch nicht konsolidierte Steuerungsartefakte          |
-| `docs/ui-designsets/` | aktive UI-/Branding-Referenzen                                                   |
+| `docs/ui-designsets/` | aktuelle Branding-Referenzen; historische UI-Mockups sind entfernt               |
 | `docs/derived/`       | Übergangsbereich ohne neue Dokumente; darf nach Restmigration entfallen          |
 
 Ein separater `docs/archive/`-Zielbereich gehört nicht mehr zur Current-State-Struktur. Historie liegt in Git.

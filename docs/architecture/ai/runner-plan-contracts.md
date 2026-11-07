@@ -98,10 +98,11 @@ belasten das allgemeine Teilkonto unmittelbar. Mehrere Trace-Subroutinen und
 aufeinanderfolgende ICE konsumieren denselben Ledger. Dedizierte, von der
 Engine projizierte Trace-Pools bleiben zusätzlich verwendbar.
 
-Eine bezahlte Subtypvorbereitung vor dem Run benötigt allgemeine liquide
-Credits. Variantenbildung, Finanzierungsprüfung und Abbuchung verwenden
-dieses Teilkonto; die Abbuchung vermindert zugleich das Gesamtbudget.
-Beschränkte Run-Credits bleiben für ihre tatsächlichen Runzahlungen erhalten.
+Bezahlte Vorbereitung vor dem Run, etwa ein Subtypwechsel, benötigt bereits
+verfügbares allgemeines Geld. Ihre Zahlung vermindert das Gesamtbudget und
+das allgemeine Teilkonto gemeinsam, bevor Break- und Trace-Alternativen
+bewertet werden. Run-Credits dürfen diese Vorbereitung weder finanzieren
+noch nachträglich als allgemeines Trace-Geld erscheinen.
 Eine nur erwogene Morphing-Tool-Variante darf keinen widersprüchlichen
 Trace-Ledger erzeugen. Ungültige eingehende Teilkonten scheitern weiterhin
 sichtbar. Die nativen Abbruchzustände aus Paarung 583 sichern diese Grenze
@@ -599,6 +600,16 @@ Originalwürfel verliert weiterhin, zwölf von 24 getrennten Gegenwürfeln
 gewinnen über die vollständige Engine-Folge. Das ist keine sichere Coverage
 und keine allgemeine Zulassung gefährlicher Runs (SP-731; Bezug zu SP-125).
 
+Der gemeinsame Vergleich pro Zielserver berücksichtigt nur Runvarianten, die
+der Run-Owner auch zulässt. Ist ein Basisrun vorhanden, repräsentiert ein
+Kartenevent ohne sichtbaren Mehrwert den Server nicht. Sonst kann eine später
+abgewiesene Eventvariante die exakte Coverage-Bindung des Basisruns verdrängen
+und den Remote-Parent verlieren. Die Prüfung nutzt den bestehenden
+`runnerCardRunHasVisibleDifferentialPayoff`-Vertrag vor der Rangfolge;
+produktive Eventruns und ihre eigenen Ressourcenquoten bleiben erhalten.
+`meta-403-round7-planning.test.ts` sichert den ursprünglichen terminalen
+Parent, Coverage-Executor und P2-Vorrang trotz übervoller Hand ab.
+
 Positionswissen verarbeitet auch eine öffentlich ausgewiesene Selbstentsorgung
 innerhalb einer aktivierten Fähigkeit. Der tatsächliche Trash der Quelle wird
 über Definition und stabile installierte Position gebunden; bekannte
@@ -914,6 +925,16 @@ Kosten-Recovery, Search-/Install-/Funding-Unterstützung, Actionzuordnung,
 Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
+
+Eine durch bekannte Run- und Stealkosten gesperrte Route verliert dadurch
+nicht ihren Nutzen für eine günstigere Breaker-Vorbereitung. Die aktuelle
+Runbewertung kennzeichnet mit `accessPayoffRequiresFunding` ausschließlich
+einen bekannten finanziellen Blocker bei weiterhin sinnvollem Zugang.
+Coverage darf dafür eine Kosten-Recovery suchen; der aktuelle Run bleibt
+gesperrt und jede spätere Installation oder Finanzierung wird neu quotiert.
+Unbekannte Stealkosten, tödlicher Zugang und ein fachlich nicht nutzbares Ziel
+erzeugen diesen Nachweis nicht. Die beiden nativen Meta-490-Drawrouten und
+der Gegenfall ohne vollständige Stealkostenquote sichern die Trennung ab.
 
 Ein zusammengesetzter Karteneffekt mit positivem Draw-Anteil darf auch bei
 genau einer Karte den vorhandenen `draw_for_answer`-Bedarf bedienen. Der
@@ -2093,6 +2114,13 @@ Die Real-Engine-Regression prüft tatsächliche Plan-, Step- und Routenwahl mit
 letztem Klick, direkte Engine-Anwendung, die genannten Gegenfälle und die
 spätere Aktivierung mit normalen Pumpaktionen als Alternative. Gegen bereits
 ohne Pumpen brechbare ICE bleibt der Vorrat in der geprüften Folge erhalten.
+
+Ein aktuell legaler, kanonisch selbstverbrauchender Run-Stärkeboost mit
+nachgewiesener Pumpersparnis verwendet dieselbe vollständige Encounter-
+Zahlungsrechnung wie gewöhnliche Pumps. Die Projektion entfernt die verbrauchte
+Quelle, erhält die zusätzliche Stärke über die Encounter-Grenze und prüft
+Restpfad sowie Root-Reserve mit dem verbleibenden Kreditbudget. Ein separater
+pauschaler Aktionswert darf diese vergleichbaren Zahlungen nicht überstimmen.
 
 ## 6. `runner.economy`
 
@@ -3716,6 +3744,15 @@ es entsteht weder ein Kartenname-Verbot noch ein neuer Safety-Owner.
 
 ## 11. `runner.credit_bank` und `runner.recurring_economy`
 
+Die effiziente Auszahlung einer bereits gefüllten Bank für eine gewöhnliche
+Development-Finanzierung bleibt P4. Ihr Vorteil gegenüber mehreren
+Kreditaktionen begründet allein keine akute P2-Verpflichtung und verdrängt
+keine gebundene terminale Coverage-Suche. Exakte Run-Finanzierung übernimmt
+weiterhin die Priorität ihres aktuellen Parents; akute Defense-Finanzierung
+behält ihre eigene bestätigte Bindung. Der native G6/D186-Gegenfall in
+`meta-513-pairing-causes.native.test.ts` prüft sowohl den Vorrang der Suche
+als auch die weiterhin ausführbare Bank-Auszahlung als P4-Kandidat.
+
 Für kanonisch einfache manuell geladene Gesamtauszahlungsbanken leitet
 `runner.credit_bank` den verbleibenden Aufbau aus dem aktuellen
 `desiredCreditReserve`-Ausgabenbudget ab. Eine feste Zahl an Ladungen oder
@@ -3913,6 +3950,17 @@ Hand-, Vorlauf- und Nachlaufreserven erhalten. Die Bank bindet den exakten
 Central-Parent, `supportNeedId`, Run und StateVersion und behält dessen P4-Stufe;
 sie erhält dadurch keinen dringlichen P2-Vorrang. Der bestehende Parent-Abgleich
 zieht die Auszahlung zurück, sobald der konkrete Bedarf entfällt.
+
+Bei einem dringlichen Remote darf der negative Wert des noch unterfinanzierten
+Runs eine tatsächlich ausführbare Bankroute nicht verwerfen. Der Bank-Owner
+prüft die komplette Route nach den garantierten, endlichen Auszahlungen neu:
+derselbe Run und Server, bekannte vollständige Zugangskosten, nutzbarer Payoff,
+erhaltener Run-Klick und erfüllte bestehende Zugangs-/Reservepolitik. Unbekannte
+ICE, bedingte Restpfade, unbezahlte Kosten und nicht gedeckte Gefahren ergeben
+keinen Nachweis. Die Auszahlung bindet den bestehenden Remote-Parent und
+Funding-Bedarf; die Bank bleibt ihr Executor. Die beiden D153-Fortsetzungen
+prüfen Auszahlung und anschließenden Run mit jeweils frischen Engine-Aktionen,
+einschließlich Brokers einer Nutzung je Quellkarte und Zug.
 
 Eine prospektiv vollständig finanzierbare Runroute ist noch kein aktuell
 offener Bedarf des Run-Owners. Nach dessen konkreter Routenaufnahme prüft
@@ -4250,6 +4298,16 @@ bestehende Abwägung. Der aktive Run-Owner beendet nach öffentlich eingetretene
 kritischem Schaden auch einen ungebundenen zentralen Zugriff mit einer
 verbleibenden Handkarte, sofern die Engine jetzt einen Abbruch anbietet.
 Gebundene Agenda-/Score-Threat-Ziele bleiben erhalten.
+
+Die vollständige Prüfung einer aktuellen Runner-Finanzierungsroute unterscheidet
+allgemeine Liquidität vor dem Run von einer exakt gebundenen späteren Zahlung.
+Ein kompiliertes Einbau-/Zahlungspaar darf den Run finanzieren, wenn Quelle,
+Fähigkeit, unmittelbarer Einbau, Kosten, Einmalverbrauch und derselbe Run
+vollständig belegt sind. Die spätere Zahlung bezahlt keine vorherige
+Handpuffer-Reparatur. Die vollständige Pfadquote berücksichtigt ihren Betrag
+erst im Run und entfernt die eingebaute Karte aus der projizierten Hand.
+Fremde, doppelte, ungebundene oder abweichend bepreiste Projektionen bleiben
+unzulässig. Die Ausführung verwendet in jedem Folgezustand neue LegalActions.
 
 ### Gebundene Coverage-Suche im exklusiven Zahlungsfenster
 

@@ -80,6 +80,23 @@ aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
 Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
 niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
+Ein aktueller `convert_agenda`-Kopf mit diesem Nachweis und gebundenem
+Credit-Horizont erhält ebenfalls eine `score_continuation`-Zuglinie des
+Score-Owners. Die exakte Operation darf dabei eine andere Quellinstanz als
+die Agenda besitzen; Action-ID, semantischer Routentyp und StateVersion
+bleiben an denselben Konversionspfad gebunden. Dadurch werden solche
+Operationsköpfe und direkte Advances mit derselben fachlichen Zugbewertung
+verglichen, statt einen Konversionskopf über die generische Einzelaktion
+anders zu gewichten.
+
+Eine bereits als `sameTurnCloseout` belegte Konversion erhält keinen
+zusätzlichen generischen Advancement-Suffix. Ihre zertifizierte Vollroute
+enthält den benötigten Fortschritt bereits; eine weitere Projektion würde
+eine andere Klick-/Creditfolge erfinden und den Fortschritt doppelt bewerten.
+Nicht abgeschlossene Installationslinien behalten ihre zulässige generische
+Advancement-Projektion. Die ursprüngliche Paarung-422-Konversionsentscheidung
+und beide Zustände im vertikalen Zugplanungstest sichern diese Grenze ab.
+
 Bei vollständig gequoteten festen Same-Turn-Pfaden vergleichen Score-Assessment
 und autoritative Agenda-Zuglinie die gesamten verbleibenden Aktionen und Credits
 aus `sameTurnConversionResourceCost` desselben aktuellen Engine-Pfads. Ein
@@ -246,6 +263,14 @@ gerechnet: Ein zusätzlicher Credit unterhalb der Schwelle bleibt nach dem Score
 nicht erhalten. Der bestehende Score-Owner verlangt nur dann diese Vorbereitung,
 wenn alle Finanzierungsschritte und die vollständige Konversion noch in den Zug
 passen. Ein unmittelbar terminaler Score behält seine vorhandene Ausnahme.
+
+Ein Score-Finanzierungsbedarf erlaubt einzelne garantierte Teilbeträge nur
+bei der ausdrücklichen Frist `multi_turn`. Für `current_turn` und
+`next_corp_turn` muss die gesamte Finanzierung vor dieser Frist erreichbar
+sein. Eine unerreichbare harte Frist erzeugt keinen ausführbaren Teilkopf;
+die Fundingquote weist sie mit
+`corp_score_funding_hard_deadline_unreachable` aus. Die bestehende mehrzügige
+Finanzierung und vollständig gedeckte zeitkritische Routen bleiben erhalten.
 Paarung 571 belegt den Fehler mit Corporate War: 15 Credits vor Installation,
 neun vor dem Score und null danach ließen eine bestehende terminale
 HQ-Rezreserve verschwinden. Die frühere unbedingte Auszahlungskontrolle und
@@ -810,6 +835,10 @@ Ein bereits begonnener Score-Remote erhält bei einer bekannten, ausschließlich
 finanzierungsblockierten Schutzroute keine zusätzliche reine Abschreckungsschicht
 zulasten dieser Finanzierung. Die erste begrenzte Vorbereitung und ein konkret
 wirksamer zusätzlicher Stopper bleiben zulässig (Regression: Match 41df, D13).
+Die aktuelle Effektklassifikation bewahrt auch ein Trace-bedingtes Runende in
+einem zusammengesetzten Erfolgseffekt mit Hardware-Trash und Meat-Schaden.
+Dieses Stopper-Potenzial ist kein garantierter Schutz; die finanzierte
+Zugriffsquote behält ihre eigenständigen Bedingungen und Unbekanntheiten.
 
 Die Schutzprojektion berücksichtigt öffentliche Shell-Vorbereitungen einschließlich
 Engine-geprüfter freier Host-Kapazität und Stärkeänderung. Für die kommende
@@ -840,8 +869,10 @@ gemeinsame finanzierte Schutzbewertung einschließlich Installationsprojektionen
 Jede unabhängige Recovery-Route übergibt ihre absoluten Restcredits; das
 Basiseinkommen wird dafür nicht erneut addiert. Der ausdrücklich typisierte
 Horizont `next_runner_turn` füllt passende vorhandene Pools einmal bis zur
-Kapazität auf. Live- und Folgeruns derselben Runner-Phase behalten `current`. Die
-KI-Input-Normalisierung bewahrt dazu die von der Engine veröffentlichten
+Kapazität auf. Live- und Folgeruns derselben Runner-Phase behalten `current`.
+Corp-Entscheidungsautorität in einem Rez-Fenster ändert diesen Horizont nicht:
+Die Phase `run` schließt künftige Heap-Rückholung und Poolauffüllung aus.
+Die KI-Input-Normalisierung bewahrt dazu die von der Engine veröffentlichten
 Runner-Heap-Karten ausschließlich im Corp-Input; gegnerische Corp-Ablagen
 werden dadurch nicht in den Runner-Input aufgenommen. Der Dienst erzeugt
 keine zukünftigen LegalActions und entscheidet keinen Runner-Zug. Verdeckte
@@ -892,6 +923,14 @@ Scorefortschritt in seiner normalen Prioritätsklasse. Die bloße Existenz von
 `terminalDefense` hebt einen solchen Remote nicht über einen anderen terminalen
 Schutzbedarf. Regression: Paarung 473, G13 D531,
 geschützte Superior Net Barriers gegenüber einem fehlenden HQ-Rezcredit.
+
+Eine Schutzquote hebt keine harte Scorefrist auf. Hat der Score-Owner die
+Fortsetzung bereits als `corp_current_turn_scoreline_unreachable` verworfen,
+darf `terminalDefense` gewöhnliches Advancement nicht erneut als ausführbar
+markieren. Ein leerer R&D-Stapel und zu wenige verbleibende Aktionen werden
+durch einen bezahlbaren Schutzweg nicht zu einem erreichbaren Score.
+Der Null-R&D-Gegenfall in `meta-403-flood-continuation.test.ts` prüft diese
+Grenze zusammen mit den weiterhin zulässigen terminalen Schutzfortsetzungen.
 
 `corp.defend_servers` vergleicht mit dem bestehenden exakten ICE-Subset-Solver
 vorhandene Schichten, eine aktuell legale ICE-Installation und eine aktuell
@@ -1553,6 +1592,20 @@ geforderten Schutzeffekt nach Rezzen erreichen würde, aber den exakten
 Funding-/Reservevertrag verfehlt, ist das `funding_only`: Der Parent fordert
 Economy-Support an; weiterer gezielter Draw ist unzulässig. Unbekannte oder
 unvollständige Quotes werden nicht als Effektlücke umgedeutet.
+
+Diese Unterscheidung gilt für den jeweils gebundenen Schutzeffekt und Server.
+Ein bereits finanzierbarer HQ-Blocker verhindert eine redundante zentrale
+HQ-Suche. Er erfüllt keinen unabhängigen Score-Schutzbedarf auf einem anderen
+Server und sperrt dessen delegierte ICE-Suche nicht. Gleichlautende
+Ziehaktionen werden über Parent, Need und Zielserver auseinandergehalten.
+
+Auch ein zentraler `draw_for_ice` ohne Score-Parent veröffentlicht seine
+eigene Defense-Zuglinie. Sie bindet die aktuelle Ziehaktion mit bekannten
+Kosten und erhält ihre Priorität aus dem bestehenden Defense-Bedarf.
+Ihr Wert beschreibt eine begrenzte Suchmöglichkeit (`option_preservation`),
+keinen bereits gezogenen Blocker oder garantierten Schutzeffekt. Die Linie
+endet an der privaten Beobachtungsgrenze; erst danach wird neu geplant.
+Ein generischer Ziehbedarf erhält dabei keine erfundene Score-Bindung.
 
 Für denselben zugelassenen Draw-Bedarf vergleicht Defense die aktuellen
 Ziehrouten nach Karten pro Aktion, Ziehzahl, Kosten und Netto-Handzuwachs.
@@ -2572,6 +2625,15 @@ Shock.r-Installation, Corporate-Coup-Vorbereitung und den finanzierten
 terminalen Tycho-Score. Eine mögliche zusätzliche Rezroute für mehrzügigen
 Bankschutz bleibt davon getrennt mit ihrem eigenen Creditbedarf zu bewerten.
 
+Dasselbe nachgewiesene Auszahlungsfenster begrenzt den bedarfsgebundenen
+Investitionspfad: Eine erneute Ladung darf die aktuelle garantierte Auszahlung
+nicht unterdrücken, wenn diese noch eine produktive Defense-Installation im
+selben Zug ermöglicht. Economy prüft dafür Quelle, Fähigkeit, aktuelle
+LegalAction, exakte Auszahlung und Kosten; die anschließende Installation
+bewertet weiterhin der bestehende Defense-Dienst mit dem gebundenen
+Planungskontext. Es werden weder eine spätere Ziehkarte noch neue LegalActions
+oder ein anderer Serverzustand angenommen.
+
 Ein abstrakter `improve_remote_protection_path`-Need sperrt die Restzugbank
 nicht allein (SP-612). Der Defense-Owner prüft vorhandene Installationsköpfe
 mit ihrem exakten Remote-/Score-Parent und dem quotierten frühen Geldgewinn.
@@ -3274,6 +3336,11 @@ Advance-/Score-Phase des residenten Projekts erhalten, solange die gebundene
 Linie noch vor dem fehlgeschlagenen Pflicht-Draw schließen kann. Eine
 gewöhnliche erneute Schutzbedarfsprüfung darf das bereits zugelassene Projekt
 nicht nach dem ersten Schritt in garantiertes Deckout-Abwarten überführen.
+Auch der spätere Defense-Discovery-Scan erhält den zertifizierten
+`lastDrawScoreSurvival`-Nachweis: Er darf dem aktuell machbaren, terminalen
+Scoreprojekt keine gewöhnliche Schutzfinanzierung nachträglich hinzufügen.
+Nicht terminale oder unvollständig gequotete Fenster behalten die reguläre
+Schutzprüfung.
 
 Ein bereits zertifiziertes Deckout-Scorefenster bleibt auch gegenüber der
 gewöhnlichen Mindestzahl an ICE nahe dem gegnerischen Matchpoint gültig.
@@ -3343,3 +3410,18 @@ Credits befriedigbare Variante ausweist. Der gebundene Score-Parent bleibt
 bestehen; wirksamen weiteren Schutz bewertet weiterhin Defense. Unbekannte
 Quoten, konkrete finanzierbare Schutzlücken, unmittelbare Scorefenster und
 terminale Verteidigung behalten ihre bestehenden Finanzierungsverträge.
+
+Kartenweite Platzierungspräferenzen einer Corp-Assetquelle mit ausschließlich
+aktivierten Corp-Main-Traces auf Runner-Tags werden als `install_target` auf
+einen Server übersetzt. Die feste Trace-Gegenseite ist keine auswählbare
+Aktivierungsentscheidung. Ohne den mechanischen Trace-/Tag-Owner erzeugt die
+Annotation keine solche Platzierungsbefugnis.
+
+Ein vorbereiteter Remote bleibt nicht allein wegen seiner ICE für eine
+unzulässige Score-Fortsetzung reserviert: Ist die vollständige Scorelinie
+nachweislich unerreichbar oder nur noch der aktuelle Zug verfügbar, gibt der
+Score-Reservierungsowner den Root frei, sofern der konkrete Score-Parent
+weder ausführbar ist noch einen aktuellen Same-Turn-Abschluss besitzt.
+Erreichbare, lediglich noch zu finanzierende oder zu schützende Linien und
+aktuelle Abschlüsse behalten ihren bestehenden Anspruch. Der Punish-Owner
+kann dadurch seine tatsächlich veröffentlichte Installationspräferenz nutzen.

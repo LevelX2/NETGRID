@@ -29,6 +29,20 @@ festen Parallelprozesse oder mehr als ein Worker je Shard werden erst nach
 einer dokumentierten Laufzeit-, RAM- und Stabilitätsmessung zum neuen Standard.
 
 Tests mit Timeout oder abgebrochene Prozesse gelten nicht als bestanden.
+Der paketweite KI-Typecheck einschließlich der Testfixtures benötigt seit
+dem Gesamtlauf vom 31.10.2026 ein Node-Heaplimit von 12 GiB. Der unveränderte
+Prüfumfang umfasst rund 7,63 Millionen JSON-Zeilen; die Messung mit
+`tsc --extendedDiagnostics` ergab 9.705.009 KiB belegten Heap und 139 Sekunden
+Laufzeit. Das frühere 8-GiB-Limit brach reproduzierbar mit Heap-OOM ab.
+`lint`, `typecheck` und `build` verwenden dieselbe Grenze; Testquellen,
+JSON-Typprüfung und strikte Compileroptionen bleiben vollständig enthalten.
+
+`corepack pnpm typecheck:e2e` prüft sämtliche Browserfälle, gemeinsame Helper
+und die Playwright-Konfiguration mit den unveränderten strikten
+Compileroptionen. Der Root-Typecheck enthält diesen Schritt. Auch der lokale
+E2E-Starter führt ihn vor dem Start seiner Testserver aus; ein Typfehler
+beendet den Lauf vor dem Browseraufbau.
+
 Browser-E2E übernimmt die Browserwahl aus `playwright.config.ts` (Firefox als
 NETGRID-UI-Standard). Fachliche Szenarien setzen keinen eigenen `browserName`;
 Locale und fachliche Fixtures dürfen lokal festgelegt werden. Der Nightly-Job
@@ -135,6 +149,11 @@ Ursprungsschicht behoben.
 
 Für KI-Checkpoints gelten zusätzlich folgende Fixture-Verträge:
 
+- Erwartungsfelder sind geschlossen und unbekannte Schlüssel scheitern als
+  `fixture_invalid`. Exakte Aktionsbindungen verwenden
+  `acceptableActions: [{ actionId: ... }]`; Plan- und Capability-Erwartungen
+  liegen unter `planExecution`. Nicht ausgewertete Feldnamen dürfen keinen
+  scheinbar grünen Verhaltenstest erzeugen.
 - Synthetische LegalActions enthalten dieselben aktuellen Bindungen wie die
   Engine: StateVersion, kanonische Fähigkeit, betroffene Subroutinen und
   vollständige Kosten-/Wirkungsquotes. Ein Funding-Kandidat braucht eine
@@ -208,3 +227,13 @@ schlagen fehl.
 `corepack pnpm check:package-boundaries:selftest` belegt mit positiven und
 negativen Beispielen, dass erlaubte Imports passieren und verbotene Shared-
 oder Webclient-Abhängigkeiten das Gate tatsächlich rot schalten.
+
+Bei älteren KI-Checkpoints werden fehlende aktuelle Engine-Quotes nicht im
+Produkt ergänzt. Der unveränderte unvollständige Input bleibt ein negativer
+Vertragstest; positive Begleitfälle deklarieren ihre vollständigen aktuellen
+Fakten ausdrücklich oder erzeugen sie mit der Engine. Ein isolierter Test
+für Finanzierung, Kosten oder Choice-Bindung muss konkurrierende höhere
+Prioritäten kontrollieren. Der ursprüngliche Zustand behält gegebenenfalls
+einen eigenen Test für diese tatsächlich vorrangige Aktion. So bleibt die
+ursprüngliche Fähigkeit geprüft, ohne veraltete Entscheidungsreihenfolgen
+gegen aktuelle Regeln oder Prioritätsverträge durchzusetzen.

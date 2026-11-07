@@ -182,6 +182,36 @@ Subroutine 2. Die Darstellung erfindet bei fehlender Dauer keinen Wert,
 sondern nennt die fehlende Ereignisinformation. Ein Engine-basierter
 Chroniktest prüft beide Einträge in allen drei Sprachen.
 
+## Zugriffspräsentation und Aktionskapazität
+
+Die Oberfläche bündelt öffentliche Karte, Zugriffseffekt, Damage sowie Trash-
+oder Steal-Ergebnis in einer kontrollierten Access-Präsentation. Maximal eine
+blockierende Ereignispräsentation ist gleichzeitig sichtbar; ein Agenda-
+Zugriff erhält kein zweites konkurrierendes Fenster für sein Stehl-Ergebnis.
+Bestätigungspflichtige Stufen halten lokales KI-Pacing an. Bereits eintreffende
+Serverereignisse werden geordnet gepuffert; der Serverzustand bleibt autoritativ.
+
+Multiaccess verwendet Ereignisidentitäten im jeweiligen Matchkontext,
+einschließlich Fortschritt `Zugriff n von m`. Zwei Kopien derselben Karte
+bleiben getrennte Zugriffe. Unbestätigte Zugriffe überleben nachfolgende
+Installations- oder Zugendeereignisse. Ein Matchwechsel setzt bestätigte
+Ereignisidentitäten zurück; redigierte Zugriffe offenbaren keine Karten.
+`access-presentation.test.ts` und `access-presentation-queue.test.ts` prüfen
+diese Präsentationsgrenzen.
+
+Das Access-Start-Runfenster enthält passende angebotene HQ-/R&D-Mole-Aktionen
+und die Fortsetzung `Access beginnen`. Zugehörige Choices bleiben an die
+aktuelle LegalAction gebunden. Die Aktionsleiste zählt eine bezahlte Aktion
+über unterbrechende Zahlungsfenster anhand desselben Aktionsordinals nur
+einmal; echte zusätzliche Aktionen bleiben sichtbar.
+
+Bewegung, Zugriff, Damage, Trace, Pumpen und Trash erhalten ihre Ambience aus
+dem fachlichen Präsentationszustand, nicht aus dem Kartentyp. Ein Zugriff auf
+ICE bleibt daher eine Zugriffspräsentation. Serien zeigen abgeschlossene
+Wertungen als `Endergebnis`, laufende als `Zwischenstand`; Detailwerte sind
+sekundär. Öffentliche Spielelisten bieten kompakte und ausführliche Ansichten
+aus denselben autoritativen Matchdaten.
+
 ## Wo Ändern?
 
 - Spielbrett-/Ressourcenanzeige: `features/game-board/`.

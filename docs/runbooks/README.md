@@ -6,6 +6,7 @@ Wiederholbare lokale Betriebs-, Diagnose-, Wartungs- und Arbeitsabläufe.
 - [Account-Alpha betreiben](account-alpha-operations.md)
 - [Lokale NETGRID-Daten übertragen](netgrid-local-transfer.md)
 - [KI-Selbstspiel-Evidenzregistrierung](ai-selfplay-evidence-registry.md)
+- [KI-Paarungsmatrix aus vorhandener Evidence](ai-pairing-matrix.md)
 - [Windows-Releaseoutput erzeugen und prüfen](windows-release-output.md)
 - [Windows-Updates](windows-updates.md)
 - [Windows-Diagnosepakete](windows-diagnostics.md)

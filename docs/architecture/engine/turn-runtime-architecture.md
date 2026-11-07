@@ -56,6 +56,18 @@ Legalität, Karten oder Zufallszähler und erscheint nur in eigenen Corp-Actions
 - Die Teilmodule enthalten keine neue Kartenregel; sie verdrahten nur die
   bereits vorhandenen Turn-Verträge.
 
+## Zusätzliche Aktionen und Zugbeginn
+
+Project Venice speichert seinen Overadvance-Wert beim Scoren und gewährt
+die daraus folgenden zusätzlichen Corp-Aktionen bereits im Score-Zug sowie
+in späteren Corp-Zügen. Remote Facility gewährt beim Rezzen im eigenen
+Corp-Zug sofort eine zusätzliche Aktion; die spätere Zugstartwirkung bleibt
+erhalten. Bargain with Viacox beginnt im nächsten Runner-Zug nach seiner
+Installation; Würfelergebnisse verwenden den deterministischen RNG-Vertrag
+und erzwingen die jeweils regelgebundene Aktion. Diese Pfade sind in
+`packages/engine/src/index-tests/proteus/action-economy-debt-suite.test.ts`
+und den Originalset-Regressionen verankert.
+
 ## Wachstumsgrenzen
 
 `turn-runtime-resolvers.ts` bleibt unter 150 Zeilen. Jedes fachliche Teilmodul

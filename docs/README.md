@@ -12,7 +12,7 @@ Stand: 2026-08-12
 - `decisions/`: dauerhafte Projekt-, Produkt-, Git- und Dokumentationsentscheidungen.
 - `runbooks/`: wiederholbare lokale Betriebs-, Diagnose- und Wartungsabläufe.
 - `codex/`: kompakter technischer Current-State-Einstieg.
-- `ui-designsets/`: aktive UI-/Branding-Referenzen.
+- `ui-designsets/`: aktuelle Branding-Referenzen; historische UI-Mockups sind entfernt.
 - `derived/`: reiner Übergangsbereich; hier sollen keine neuen Dokumente entstehen.
 
 ## Release- und Review-Evidence

@@ -19,10 +19,9 @@ Plant Releases, Feature-Stages, Prioritäten, Abhängigkeiten und Scope in eine 
 ## Verantwortlichkeiten
 
 - Aktuellen Gate-Stand aus `docs/codex/CODEX_STATUS.md` prüfen.
-- Gültige Planungsartefakte aus `docs/derived/` priorisieren, insbesondere:
-  - `NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
-  - `V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md`
-  - ergänzende releasebezogene `*_REQUIREMENTS.md`, `*_TEST_MATRIX.md`, `*_DETAILED_PLAN.md`.
+- Aktuelle Activities und ausdrücklich aktive Scope-/Releasepläne anhand der
+  Current-State-Dokumentation priorisieren. Historische Roadmaps und der
+  Übergangsbereich `docs/derived/` sind keine Planungsautorität.
 - Größere Ziele in realistische Release-Slices zerlegen.
 - Abhängigkeiten zwischen Engine, UI, Server, KI, Daten und Tests transparent machen.
 - Für jeden Slice klare In-Scope/Out-of-Scope-Grenzen definieren.

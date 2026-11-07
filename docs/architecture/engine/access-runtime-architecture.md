@@ -75,6 +75,17 @@ azyklischer interner Implementierungsschnitt.
   interaktive Zugriffe; nur Karten ohne Entscheidung oder Effekt werden
   automatisch übersprungen.
 
+## Aktivierungszustand von Zugriffseffekten
+
+Installierte Nodes (Corp-Assets) und Upgrades benötigen für ihre
+Zugriffseffekte grundsätzlich einen gerezzten Zustand. Ausnahmen benötigen
+ausdrücklichen Kartentext oder eine führende Einzelregel. `Virus Test Site`
+verursacht installiert und ungerezzed genau einen Net Damage, unabhängig
+von Advancement-Countern. Zugriffe aus HQ, R&D und Archives werden getrennt
+vom Aktivierungszustand installierter Karten behandelt. Führende Regelquelle
+ist `docs/source/Netrunner Errata 1.70.md`; CardSpec und die Node-Access-
+Regressionen sichern die Ausführung ab.
+
 ## Ausführbare Strukturgrenzen
 
 `scripts/check-engine-source-structure.mjs` verlangt die acht neu geschnittenen
