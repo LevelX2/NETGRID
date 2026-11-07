@@ -23,11 +23,14 @@ import {
   canonicalTurnPlanningSerialize,
   turnPlanningFingerprint,
   type ObservedTurnPlanAction,
+  type PlanningActionSet,
   type PlanningRulesContext,
   type PlanningStateIdentity,
   type TurnPlan,
   type TurnPlanningHeadCandidate,
 } from "./turn-planning-contracts";
+
+import type { PreparedTurnPlanner } from "./turn-remainder-search";
 
 export const CORP_TURN_PLANNER_CUTOVER_VERSION =
   "corp-turn-planner-cutover-v1" as const;
@@ -70,51 +73,77 @@ export function resolveCorpTurnPlannerCutover(params: {
   return resolveTurnPlannerCutover(params);
 }
 
-export function resolveTurnPlannerCutover(params: {
+type TurnPlannerCutoverContext = {
   input: TurnPlanInput;
-  planner: TurnPlannerShadowResult;
+  actionSet?: PlanningActionSet;
   portfolio: ResidentPlanPortfolio;
   candidates: readonly ActionSemanticCandidate[];
   rulesContext: PlanningRulesContext;
   stateIdentity: PlanningStateIdentity;
   runtimeInstanceId: string;
-}): TurnPlannerCutoverResult {
+};
+
+export function resolvePreparedTurnPlannerCutover(
+  params: TurnPlannerCutoverContext & {
+    prepared: PreparedTurnPlanner<TurnPlannerShadowResult>;
+  },
+): TurnPlannerCutoverResult {
+  requireCutoverCoverage({ input: params.input, planner: params.prepared });
+  const context = { ...params, actionSet: params.prepared.actionSet };
+  const turnKey = currentTurnKey(params.input);
+  if (params.portfolio.turnPlanCommitment?.status === "active") {
+    const continuation = continueResidentCommitment({
+      ...context,
+      turnKey,
+      heads: params.prepared.heads,
+    });
+    if (
+      continuation?.kind === "executable" &&
+      !params.prepared.heads.some(
+        (head) =>
+          head.rootPlanInstanceId !== continuation.head.rootPlanInstanceId &&
+          isNewUrgentInterrupt(head, continuation.head),
+      )
+    ) {
+      const currentStep = params.prepared.currentStepSearch(
+        continuation.head.candidateId,
+      );
+      if (currentStep.selectedLineId) {
+        const result = continuedCutover(
+          params.prepared.finish(currentStep),
+          continuation,
+        );
+        result.debug.evidenceCodes.push(
+          "turn_commitment_revalidated_before_full_search",
+        );
+        return result;
+      }
+    }
+  }
+  return resolveSearchedTurnPlannerCutover(
+    { ...context, planner: params.prepared.finish() },
+    turnKey,
+  );
+}
+
+export function resolveTurnPlannerCutover(
+  params: TurnPlannerCutoverContext & { planner: TurnPlannerShadowResult },
+): TurnPlannerCutoverResult {
   requireCutoverCoverage(params);
-  const turnKey = `${params.input.side}:turn:${params.input.playerView.turnSerial ?? "unknown"}`;
+  return resolveSearchedTurnPlannerCutover(params, currentTurnKey(params.input));
+}
+
+function resolveSearchedTurnPlannerCutover(
+  params: TurnPlannerCutoverContext & { planner: TurnPlannerShadowResult },
+  turnKey: string,
+): TurnPlannerCutoverResult {
   const continuation = continueResidentCommitment({
     ...params,
     turnKey,
+    heads: params.planner.heads,
   });
   if (continuation?.kind === "executable") {
-    const selectedPlanInstanceId = planInstanceIdForHead(
-      continuation.head,
-      params.planner,
-    );
-    return {
-      planner: params.planner,
-      head: continuation.head,
-      selectedPlanInstanceId,
-      commitment: continuation.commitment,
-      lease: continuation.lease,
-      debug: cutoverDebug(
-        params.planner.debug,
-        continuation.commitment,
-        continuation.lease,
-        continuation.head,
-        continuation.replanReason,
-        continuation.continuationDiagnostic,
-      ),
-      ...(continuation.replanReason
-        ? { replanReason: continuation.replanReason }
-        : {}),
-      ...(continuation.continuationDiagnostic
-        ? {
-            continuationDiagnostic: structuredClone(
-              continuation.continuationDiagnostic,
-            ),
-          }
-        : {}),
-    };
+    return continuedCutover(params.planner, continuation);
   }
 
   const created = createCurrentCommitment({
@@ -146,14 +175,51 @@ export function resolveTurnPlannerCutover(params: {
   };
 }
 
-function continueResidentCommitment(params: {
-  input: TurnPlanInput;
-  planner: TurnPlannerShadowResult;
-  portfolio: ResidentPlanPortfolio;
-  candidates: readonly ActionSemanticCandidate[];
-  rulesContext: PlanningRulesContext;
-  stateIdentity: PlanningStateIdentity;
-  runtimeInstanceId: string;
+function currentTurnKey(input: AiDecisionInput): string {
+  return `${input.side}:turn:${input.playerView.turnSerial ?? "unknown"}`;
+}
+
+function continuedCutover(
+  planner: TurnPlannerShadowResult,
+  continuation: Extract<
+    ReturnType<typeof continueResidentCommitment>,
+    { kind: "executable" }
+  >,
+): TurnPlannerCutoverResult {
+  const selectedPlanInstanceId = planInstanceIdForHead(
+    continuation.head,
+    planner,
+  );
+  return {
+    planner,
+    head: continuation.head,
+    selectedPlanInstanceId,
+    commitment: continuation.commitment,
+    lease: continuation.lease,
+    debug: cutoverDebug(
+      planner.debug,
+      continuation.commitment,
+      continuation.lease,
+      continuation.head,
+      continuation.replanReason,
+      continuation.continuationDiagnostic,
+    ),
+    ...(continuation.replanReason
+      ? { replanReason: continuation.replanReason }
+      : {}),
+    ...(continuation.continuationDiagnostic
+      ? {
+          continuationDiagnostic: structuredClone(
+            continuation.continuationDiagnostic,
+          ),
+        }
+      : {}),
+  };
+}
+
+function continueResidentCommitment(params: TurnPlannerCutoverContext & {
+  heads: readonly TurnPlanningHeadCandidate[];
+  planner?: TurnPlannerShadowResult;
   turnKey: string;
 }):
   | {
@@ -229,7 +295,7 @@ function continueResidentCommitment(params: {
     if (advanced.phaseEntryRequired) {
       const phase = commitment.phases[commitment.cursor.phaseIndex];
       const phaseHead = phase
-        ? params.planner.heads.find((head) =>
+        ? params.heads.find((head) =>
             planningHeadMatchesCommittedPhaseRoot(head, phase.root),
           )
         : undefined;
@@ -246,7 +312,7 @@ function continueResidentCommitment(params: {
         satisfiedConditionCodes: [],
         supportAssignmentIds: phase.supportLeaves
           .filter((leaf) =>
-            params.planner.heads.some(
+            params.heads.some(
               (head) =>
                 planningHeadMatchesCommittedPhaseRoot(head, phase.root) &&
                 head.executorPlanInstanceId === leaf.planInstanceId &&
@@ -267,7 +333,12 @@ function continueResidentCommitment(params: {
       commitment.status === "awaiting_observation" &&
       commitment.observationClass === "plan_internal_continuation_boundary"
     ) {
-      return resumePlanInternalContinuation(params, commitment);
+      return params.planner
+        ? resumePlanInternalContinuation(
+            { ...params, planner: params.planner },
+            commitment,
+          )
+        : undefined;
     }
     return {
       kind: "replan",
@@ -278,10 +349,11 @@ function continueResidentCommitment(params: {
           : "commitment_contract_invalid"),
     };
   }
-  let heads = params.planner.heads;
-  if (params.planner.rejectedCurrentSteps.length > 0) {
+  let heads = params.heads;
+  const rejectedCurrentSteps = params.planner?.rejectedCurrentSteps ?? [];
+  if (rejectedCurrentSteps.length > 0) {
     const rejectedIds = new Set(
-      params.planner.rejectedCurrentSteps.map((step) => step.candidateId),
+      rejectedCurrentSteps.map((step) => step.candidateId),
     );
     heads = heads.filter((head) => !rejectedIds.has(head.candidateId));
   }
@@ -293,6 +365,7 @@ function continueResidentCommitment(params: {
     stateIdentity: params.stateIdentity,
     heads,
     legalActions: params.input.legalActions,
+    actionSet: params.actionSet,
     continuationEvidence: continuationEvidence(commitment, params.portfolio),
   });
   if (rematerialized.kind === "replan_required") {
@@ -321,14 +394,8 @@ export function planningHeadMatchesCommittedPhaseRoot(
 }
 
 function resumePlanInternalContinuation(
-  params: {
-    input: AiDecisionInput;
+  params: TurnPlannerCutoverContext & {
     planner: TurnPlannerShadowResult;
-    portfolio: ResidentPlanPortfolio;
-    candidates: readonly ActionSemanticCandidate[];
-    rulesContext: PlanningRulesContext;
-    stateIdentity: PlanningStateIdentity;
-    runtimeInstanceId: string;
     turnKey: string;
   },
   previous: TurnPlanCommitment,
@@ -529,14 +596,8 @@ function continuationDiagnostic(params: {
   };
 }
 
-function createCurrentCommitment(params: {
-  input: AiDecisionInput;
+function createCurrentCommitment(params: TurnPlannerCutoverContext & {
   planner: TurnPlannerShadowResult;
-  portfolio: ResidentPlanPortfolio;
-  candidates: readonly ActionSemanticCandidate[];
-  rulesContext: PlanningRulesContext;
-  stateIdentity: PlanningStateIdentity;
-  runtimeInstanceId: string;
   turnKey: string;
 }) {
   const line = params.planner.selectedLine;
@@ -595,6 +656,7 @@ function createCurrentCommitment(params: {
     stateIdentity: params.stateIdentity,
     heads: [head],
     legalActions: params.input.legalActions,
+    actionSet: params.actionSet,
     continuationEvidence: continuationEvidence(commitment, params.portfolio),
   });
   if (rematerialized.kind === "replan_required") {
@@ -1065,7 +1127,7 @@ function cutoverDebug(
 
 function requireCutoverCoverage(params: {
   input: AiDecisionInput;
-  planner: TurnPlannerShadowResult;
+  planner: Pick<TurnPlannerShadowResult, "coverage">;
 }): void {
   const coverage = params.planner.coverage;
   if (

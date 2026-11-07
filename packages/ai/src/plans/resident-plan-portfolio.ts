@@ -235,6 +235,16 @@ export type PlanOutcomeReceipt = {
 export function reconcileResidentPlanPortfolio(
   params: ReconcileResidentPlanPortfolioParams,
 ): ResidentPlanPortfolio {
+  return prepareResidentPlanPortfolioReconciliation(params)(
+    params.selectedExecutorInstanceId,
+    params.selectionReason,
+  );
+}
+
+/** Computes lifecycle transitions once, then binds roles for the requested phase. */
+export function prepareResidentPlanPortfolioReconciliation(
+  params: Omit<ReconcileResidentPlanPortfolioParams, "selectedExecutorInstanceId" | "selectionReason">,
+) {
   assertPortfolioInput(params);
   const proposals = deduplicatePlanProposals(
     params.proposals,
@@ -350,7 +360,7 @@ export function reconcileResidentPlanPortfolio(
     );
   }
 
-  let portfolio: ResidentPlanPortfolio = {
+  const portfolio: ResidentPlanPortfolio = {
     schemaVersion: RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
     side: params.side,
     stateVersion: params.stateVersion,
@@ -392,14 +402,14 @@ export function reconcileResidentPlanPortfolio(
         }
       : {}),
   };
-  portfolio = assignExecutor(
-    portfolio,
-    params.selectedExecutorInstanceId,
-    params.selectionReason ?? "executor_selected",
-    params.timingPoint,
-  );
-  assertResidentPlanPortfolio(portfolio, params.timingPoint);
-  return portfolio;
+  return (
+    executorId?: string,
+    reason: ReconcileResidentPlanPortfolioParams["selectionReason"] = "executor_selected",
+  ): ResidentPlanPortfolio => {
+    const assigned = assignExecutor(portfolio, executorId, reason, params.timingPoint);
+    assertResidentPlanPortfolio(assigned, params.timingPoint);
+    return assigned;
+  };
 }
 
 export function applyPlanOutcomeReceipt(

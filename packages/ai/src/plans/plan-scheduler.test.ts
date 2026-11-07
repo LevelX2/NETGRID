@@ -8,8 +8,11 @@ import {
   buildAiDecisionInput,
   type AiDecisionInputWithDeckCapabilities,
 } from "../runtime/ai-decision-input";
-import { resolveTurnPlannerCutover } from "./corp-turn-planner-cutover";
-import { buildCorpTurnPlannerShadow } from "./corp-turn-planner-shadow";
+import {
+  resolvePreparedTurnPlannerCutover,
+  resolveTurnPlannerCutover,
+} from "./corp-turn-planner-cutover";
+import { prepareCorpTurnPlanner } from "./corp-turn-planner-shadow";
 import {
   CORP_PLAN_PRIORITY_POLICY,
   RUNNER_PLAN_PRIORITY_POLICY,
@@ -26,7 +29,7 @@ import {
   type PlanModule,
   type PlanSchedulerContext,
 } from "./plan-scheduler";
-import { buildRunnerTurnPlannerShadow } from "./runner-turn-planner-shadow";
+import { prepareRunnerTurnPlanner } from "./runner-turn-planner-shadow";
 
 describe("shared plan scheduler", () => {
   it("reserves the EndTurn exception for the game-rule action", () => {
@@ -182,6 +185,57 @@ describe("shared plan scheduler", () => {
   );
 
   it.each(["runner", "corp"] as const)(
+    "searches only the admitted %s commitment step when the frame is unchanged",
+    (side) => {
+      const fixture = turnPlannerFixture(side, "gain_credit");
+      const selected = resolveTurnPlannerCutover(fixture);
+      const portfolio = {
+        ...fixture.portfolio,
+        turnPlanCommitment: selected.commitment,
+        turnPlanExecutionLease: selected.lease,
+      };
+      const finish = vi.fn(fixture.prepared.finish);
+      const currentStepSearch = vi.fn(fixture.prepared.currentStepSearch);
+      const prepared = { ...fixture.prepared, finish, currentStepSearch };
+      const continued = resolvePreparedTurnPlannerCutover({
+        ...fixture,
+        portfolio,
+        prepared,
+      });
+
+      expect(continued.lease).toEqual(selected.lease);
+      expect(continued.head).toEqual(selected.head);
+      expect(continued.selectedPlanInstanceId).toBe(selected.selectedPlanInstanceId);
+      expect(continued.commitment).toEqual(selected.commitment);
+      expect(currentStepSearch).toHaveBeenCalledExactlyOnceWith(selected.head.candidateId);
+      expect(finish).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          lines: [expect.objectContaining({ steps: [expect.anything()] })],
+        }),
+      );
+      expect(continued.debug.evidenceCodes).toContain(
+        "turn_commitment_revalidated_before_full_search",
+      );
+
+      currentStepSearch.mockClear();
+      finish.mockClear();
+      const possibleInterrupt = {
+        ...selected.head,
+        candidateId: "urgent-current-head",
+        priorityClass: "P1" as const,
+        rootPlanInstanceId: "urgent-other-root",
+      };
+      resolvePreparedTurnPlannerCutover({
+        ...fixture,
+        portfolio,
+        prepared: { ...prepared, heads: [...prepared.heads, possibleInterrupt] },
+      });
+      expect(currentStepSearch).not.toHaveBeenCalled();
+      expect(finish).toHaveBeenCalledExactlyOnceWith();
+    },
+  );
+
+  it.each(["runner", "corp"] as const)(
     "admits a %s draw as a checked single step before the private observation",
     (side) => {
       const fixture = turnPlannerFixture(side, "draw_card");
@@ -268,7 +322,15 @@ describe("shared plan scheduler", () => {
       undefined,
       inputFor(apply(before, "draw_card")),
     );
-    const progressed = resolveTurnPlannerCutover({ ...matching, portfolio });
+    const finish = vi.fn(matching.prepared.finish);
+    const currentStepSearch = vi.fn(matching.prepared.currentStepSearch);
+    const progressed = resolvePreparedTurnPlannerCutover({
+      ...matching,
+      portfolio,
+      prepared: { ...matching.prepared, finish, currentStepSearch },
+    });
+    expect(finish).toHaveBeenCalledExactlyOnceWith();
+    expect(currentStepSearch).not.toHaveBeenCalled();
     expect(progressed.replanReason).toBe("scheduled_information_boundary");
     const continued = resolveTurnPlannerCutover({
       ...matching,
@@ -1842,9 +1904,9 @@ function turnPlannerFixture(
     resolveEngineWindow: () => undefined,
   });
   if (runtimeResult.lane !== "plan") throw new Error("Expected plan lane.");
-  const buildPlanner =
-    side === "corp" ? buildCorpTurnPlannerShadow : buildRunnerTurnPlannerShadow;
-  const planner = buildPlanner({
+  const preparePlanner =
+    side === "corp" ? prepareCorpTurnPlanner : prepareRunnerTurnPlanner;
+  const prepared = preparePlanner({
     input,
     context,
     registry,
@@ -1852,10 +1914,11 @@ function turnPlannerFixture(
     selectedChoicesForDecision: () => undefined,
     authorityMode: "cutover",
   });
-  if (!planner) throw new Error("Expected TurnPlanner result.");
+  if (!prepared) throw new Error("Expected prepared TurnPlanner.");
   return {
     input,
-    planner,
+    prepared,
+    planner: prepared.finish(),
     portfolio: runtimeResult.portfolio,
     rulesContext,
     stateIdentity,

@@ -50,6 +50,15 @@ werden nicht als zweite Steuerungsschicht gepflegt; Git hält die Historie.
    Persistenz liegt beim Runtime-/Serveranschluss. Simulation verwendet
    denselben Plan-first-Einstieg.
 
+Der Scheduler reconciliert den Lebenszyklus einmal und bindet anschließend
+die Executorrolle. Der TurnPlanner bewertet die gebundene Rolle mit ihren
+offenen Needs und bereitet die aktuellen Routen und den LegalAction-Fingerprint
+einmal für diesen Frame vor. Ist der Commitment-Schritt exakt revalidiert
+und steht kein stärkerer harter Interrupt eines anderen Roots an, genügt
+die Zulassungsprüfung für diesen Schritt. Eine vollständige Restsuche
+bleibt für Neuplanung und die Auswertung von Beobachtungsgrenzen verfügbar.
+Der Greedy-Vergleich läuft im expliziten Vergleichsmodus.
+
 Dateinamen wie `*-shadow.ts` oder `*-cutover.ts` sind bestehende technische
 Namen. Die normale Live-Runtime verwendet für beide Seiten den Modus
 `cutover`. `legacy_compare` ist ausdrücklich angeforderte Vergleichslogik

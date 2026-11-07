@@ -126,10 +126,13 @@ import {
 import { type CorpPlanDomain } from "../plans/corp-tactical-plan-contracts";
 import { createCorpTacticalPlanModules } from "../plans/corp-tactical-plan-modules";
 import {
-  resolveTurnPlannerCutover,
+  resolvePreparedTurnPlannerCutover,
   type TurnPlannerCutoverResult,
 } from "../plans/corp-turn-planner-cutover";
-import { buildCorpTurnPlannerShadow } from "../plans/corp-turn-planner-shadow";
+import {
+  buildCorpTurnPlannerShadow,
+  prepareCorpTurnPlanner,
+} from "../plans/corp-turn-planner-shadow";
 import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
 import {
   CORP_PLAN_PRIORITY_POLICY,
@@ -166,7 +169,7 @@ import {
   type RunnerRunRiskReassessmentSignal,
 } from "../plans/runner-tactical-plan-contracts";
 import { createRunnerTacticalPlanModules } from "../plans/runner-tactical-plan-modules";
-import { buildRunnerTurnPlannerShadow } from "../plans/runner-turn-planner-shadow";
+import { prepareRunnerTurnPlanner } from "../plans/runner-turn-planner-shadow";
 import { assertRunnerTurnPlanningModuleRegistry } from "../plans/runner-turn-planning-coverage";
 import {
   TRANSIENT_PLAN_SIGNAL_SCHEMA_VERSION,
@@ -616,7 +619,8 @@ export function choosePlanFirstLiveAction(
       resolveEngineWindow(schedulerContext)
     );
   };
-  const context = resolveCurrentEngineWindow(windowContext)
+  const boundEngineWindow = resolveCurrentEngineWindow(windowContext);
+  const context = boundEngineWindow
     ? windowContext
     : input.side === "runner"
       ? runnerContext(input, candidates, dependencies, previous)
@@ -628,7 +632,9 @@ export function choosePlanFirstLiveAction(
     context,
     registry,
     ...(previous ? { previousPortfolio: previous } : {}),
-    resolveEngineWindow: resolveCurrentEngineWindow,
+    resolveEngineWindow: boundEngineWindow
+      ? () => boundEngineWindow
+      : resolveCurrentEngineWindow,
   });
   if (result.lane === "engine_window") {
     context.actionDispositions =
@@ -684,7 +690,7 @@ export function choosePlanFirstLiveAction(
         turnPlanningDebug = planner?.debug;
       }
     } else {
-      const planner = buildCorpTurnPlannerShadow({
+      const prepared = prepareCorpTurnPlanner({
         input,
         context,
         registry,
@@ -692,12 +698,12 @@ export function choosePlanFirstLiveAction(
         selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
         authorityMode: "cutover",
       });
-      if (!planner) {
+      if (!prepared) {
         throw new Error("corp_turn_planner_cutover_result_missing");
       }
-      turnPlannerCutover = resolveTurnPlannerCutover({
+      turnPlannerCutover = resolvePreparedTurnPlannerCutover({
         input,
-        planner,
+        prepared,
         portfolio: result.portfolio,
         candidates,
         rulesContext: planningInput.planningRulesContext!,
@@ -736,8 +742,8 @@ export function choosePlanFirstLiveAction(
           "The productive Runner TurnPlanner requires current planning rules and state identity contracts.",
       });
     }
-    const planner = hasTurnPlanningContracts
-      ? buildRunnerTurnPlannerShadow({
+    const prepared = hasTurnPlanningContracts
+      ? prepareRunnerTurnPlanner({
           input,
           context,
           registry,
@@ -750,14 +756,14 @@ export function choosePlanFirstLiveAction(
         })
       : undefined;
     if (options.runnerTurnPlannerMode === "legacy_compare") {
-      turnPlanningDebug = planner?.debug;
+      turnPlanningDebug = prepared?.finish().debug;
     } else {
-      if (!planner) {
+      if (!prepared) {
         throw new Error("runner_turn_planner_cutover_result_missing");
       }
-      turnPlannerCutover = resolveTurnPlannerCutover({
+      turnPlannerCutover = resolvePreparedTurnPlannerCutover({
         input,
-        planner,
+        prepared,
         portfolio: result.portfolio,
         candidates,
         rulesContext: planningInput.planningRulesContext!,

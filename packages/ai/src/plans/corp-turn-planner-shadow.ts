@@ -56,7 +56,7 @@ import type { PlanRouteStep, SemanticContinuation } from "./plan-route";
 import {
   bindTurnPlanChoices,
   buildCanonicalLegalActionInvocation,
-  buildSemanticActionSetFingerprint,
+  PlanningActionSet,
   turnPlanningFingerprint,
   type CampaignMilestoneQuote,
   type CampaignValueClaim,
@@ -74,6 +74,7 @@ import {
 } from "./turn-projection";
 import {
   searchDeterministicRemainderTurnPlans,
+  type PreparedTurnPlanner,
   type TurnRemainderSearchLine,
   type TurnRemainderSearchOffer,
   type TurnRemainderSearchResult,
@@ -122,7 +123,13 @@ export type CorpTurnPlannerShadowResult = {
   }>;
 };
 
-export function buildCorpTurnPlannerShadow(params: {
+export function buildCorpTurnPlannerShadow(
+  params: Parameters<typeof prepareCorpTurnPlanner>[0],
+): CorpTurnPlannerShadowResult | undefined {
+  return prepareCorpTurnPlanner(params)?.finish();
+}
+
+export function prepareCorpTurnPlanner(params: {
   input: AiDecisionInput;
   context: PlanSchedulerContext;
   registry: SidePlanRegistry;
@@ -133,7 +140,7 @@ export function buildCorpTurnPlannerShadow(params: {
     currentPortfolio?: ResidentPlanPortfolio,
   ) => AiDecision["selectedChoices"] | undefined;
   authorityMode?: "shadow" | "cutover";
-}): CorpTurnPlannerShadowResult | undefined {
+}): PreparedTurnPlanner<CorpTurnPlannerShadowResult> | undefined {
   const input = params.input as PlanningInput;
   const rulesContext = input.planningRulesContext;
   const stateIdentity = input.planningStateIdentity;
@@ -141,6 +148,7 @@ export function buildCorpTurnPlannerShadow(params: {
     return undefined;
   }
 
+  const actionSet = new PlanningActionSet(input.legalActions);
   const enumeration = enumerateCurrentPlanSchedulerRoutes({
     context: params.context,
     registry: params.registry,
@@ -185,6 +193,7 @@ export function buildCorpTurnPlannerShadow(params: {
       headsForRoute({
         input,
         stateIdentity,
+        semanticActionSetFingerprint: actionSet.fingerprint,
         route,
         portfolio: params.runtimeResult.portfolio,
         agendaSlices,
@@ -258,6 +267,7 @@ export function buildCorpTurnPlannerShadow(params: {
     heads,
     dispositions: coverageDispositions,
     engineWindowActionIds: [],
+    actionSet,
     progressRoots: corpPlanProgressRoots({
       domain,
       agendaSlices,
@@ -308,124 +318,135 @@ export function buildCorpTurnPlannerShadow(params: {
     moduleSelectedActionId: params.runtimeResult.route.head.actionId,
     moduleSelectedPlanInstanceId: params.runtimeResult.route.planInstanceId,
   });
-  const search = searchDeterministicRemainderTurnPlans({
-    entryFrame,
-    offers,
-  });
-  const boundedSingleStepSearch = searchDeterministicRemainderTurnPlans({
-    entryFrame,
-    offers,
-    budget: { maximumDepth: 1 },
-  });
-  const selectedSearchLine = search.lines.find(
-    (line) => line.lineId === search.selectedLineId,
-  );
-  if (!selectedSearchLine && currentCorpCreditObligation(input) !== undefined) {
-    throw new PlanResolutionFailure("missing_plan_module_coverage", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((a) => a.type),
-      owner: "plan_module",
-      removalCondition:
-        "Materialize a turn-plan route that preserves the current mandatory credit obligation or a certified same-turn terminal win.",
+  function currentStepSearch(candidateId: string): TurnRemainderSearchResult {
+    return searchDeterministicRemainderTurnPlans({
+      entryFrame,
+      offers: offers.filter((offer) => offer.head.candidateId === candidateId),
+      budget: { maximumDepth: 1 },
     });
   }
-  const liveActionId = params.runtimeResult.route.head.actionId;
-  const boundedSingleStepLine = boundedSingleStepSearch.lines.find(
-    (line) => line.lineId === boundedSingleStepSearch.selectedLineId,
-  );
-  const selectedSearchHead = selectedSearchLine?.steps[0]
-    ? heads.find(
-        (head) => head.candidateId === selectedSearchLine.steps[0]!.candidateId,
-      )
-    : undefined;
-  const boundedSingleStepHead = boundedSingleStepLine?.steps[0]
-    ? heads.find(
-        (head) =>
-          head.candidateId === boundedSingleStepLine.steps[0]!.candidateId,
-      )
-    : undefined;
-  const liveHead = heads.find(
-    (head) => head.currentBinding.actionId === liveActionId,
-  );
-  const liveHeadOffer = liveHead
-    ? offers.find((offer) => offer.head.candidateId === liveHead.candidateId)
-    : undefined;
-  const liveHeadSearch = liveHeadOffer
-    ? searchDeterministicRemainderTurnPlans({
-        entryFrame,
-        offers: [liveHeadOffer],
-        budget: { maximumDepth: 1 },
-      })
-    : undefined;
-  const liveHeadLine = liveHeadSearch?.lines.find(
-    (line) => line.lineId === liveHeadSearch.selectedLineId,
-  );
-  const retainsAuthoritativeHead =
-    selectedSearchHead !== undefined &&
-    liveHead !== undefined &&
-    liveHeadLine !== undefined &&
-    (samePlanStepOwner(liveHead, selectedSearchHead) ||
-      (liveHeadOffer?.continuationScope === "same_root" &&
-        !["P1", "P2", "P3"].includes(selectedSearchHead.priorityClass))) &&
-    liveHead.currentBinding.actionId !==
-      selectedSearchHead.currentBinding.actionId;
-  const selectedLine = retainsAuthoritativeHead
-    ? liveHeadLine
-    : selectedSearchLine;
-  const shadowHead = selectedLine?.steps[0]
-    ? heads.find(
-        (head) => head.candidateId === selectedLine.steps[0]!.candidateId,
-      )
-    : undefined;
-  const selectedPlanInstanceId = shadowHead
-    ? headRecords.find(
-        (record) => record.head.candidateId === shadowHead.candidateId,
-      )?.route.instance.instanceId
-    : undefined;
-  const shadowActionId = shadowHead?.currentBinding.actionId;
-  const greedyBaselineHead = boundedSingleStepHead;
-  const debug = debugForShadow({
-    input,
-    rulesContext,
-    stateIdentity,
+
+  return {
     heads,
     coverage,
-    search,
-    selectedLine,
-    entryFrameKey: entryFrame.projectedFrameKey,
-    liveActionId,
-    shadowHead,
-    greedyBaselineHead,
-    agendaSlices,
-    defenseSlice,
-    enumerationIssues: enumeration.issues,
-    portfolio: params.runtimeResult.portfolio,
-    authorityMode: params.authorityMode ?? "shadow",
-  });
-  return {
-    schemaVersion: CORP_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
-    debug,
-    coverage,
-    liveActionId,
-    ...(shadowActionId ? { shadowActionId } : {}),
-    agreement: shadowActionId === liveActionId,
-    heads: structuredClone(heads),
-    lines: structuredClone(search.lines),
-    rejectedCurrentSteps: search.rejectedCurrentSteps,
-    ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
-    ...(shadowHead ? { selectedHead: structuredClone(shadowHead) } : {}),
-    ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
-    headBindings: headRecords.map((record) => ({
-      candidateId: record.head.candidateId,
-      planInstanceId: record.route.instance.instanceId,
-      assessment: structuredClone(record.route.assessment),
-      step: structuredClone(record.route.step),
-      ...(record.route.continuation
-        ? { continuation: structuredClone(record.route.continuation) }
-        : {}),
-    })),
+    actionSet,
+    currentStepSearch,
+    finish(currentStep) {
+      const search =
+        currentStep ?? searchDeterministicRemainderTurnPlans({ entryFrame, offers });
+      const boundedSingleStepSearch =
+        !currentStep && params.authorityMode !== "cutover"
+          ? searchDeterministicRemainderTurnPlans({
+              entryFrame,
+              offers,
+              budget: { maximumDepth: 1 },
+            })
+          : undefined;
+      const selectedSearchLine = search.lines.find(
+        (line) => line.lineId === search.selectedLineId,
+      );
+      if (!selectedSearchLine && currentCorpCreditObligation(input) !== undefined) {
+        throw new PlanResolutionFailure("missing_plan_module_coverage", {
+          side: input.side,
+          stateVersion: input.playerView.stateVersion,
+          timingPoint: input.playerView.timingPoint,
+          legalActionTypes: input.legalActions.map((a) => a.type),
+          owner: "plan_module",
+          removalCondition:
+            "Materialize a turn-plan route that preserves the current mandatory credit obligation or a certified same-turn terminal win.",
+        });
+      }
+      const liveActionId = params.runtimeResult.route.head.actionId;
+      const boundedSingleStepLine = boundedSingleStepSearch?.lines.find(
+        (line) => line.lineId === boundedSingleStepSearch.selectedLineId,
+      );
+      const selectedSearchHead = selectedSearchLine?.steps[0]
+        ? heads.find(
+            (head) => head.candidateId === selectedSearchLine.steps[0]!.candidateId,
+          )
+        : undefined;
+      const boundedSingleStepHead = boundedSingleStepLine?.steps[0]
+        ? heads.find(
+            (head) =>
+              head.candidateId === boundedSingleStepLine.steps[0]!.candidateId,
+          )
+        : undefined;
+      const liveHead = heads.find(
+        (head) => head.currentBinding.actionId === liveActionId,
+      );
+      const liveHeadOffer = liveHead
+        ? offers.find((offer) => offer.head.candidateId === liveHead.candidateId)
+        : undefined;
+      const canRetainLiveHead =
+        !currentStep &&
+        liveHeadOffer !== undefined &&
+        liveHead !== undefined &&
+        selectedSearchHead !== undefined &&
+        liveActionId !== selectedSearchHead.currentBinding.actionId &&
+        (samePlanStepOwner(liveHead, selectedSearchHead) ||
+          (liveHeadOffer.continuationScope === "same_root" &&
+            !["P1", "P2", "P3"].includes(selectedSearchHead.priorityClass)));
+      const liveHeadSearch = canRetainLiveHead
+        ? currentStepSearch(liveHead.candidateId)
+        : undefined;
+      const liveHeadLine = liveHeadSearch?.lines.find(
+        (line) => line.lineId === liveHeadSearch.selectedLineId,
+      );
+      const selectedLine = liveHeadLine ?? selectedSearchLine;
+      const shadowHead = selectedLine?.steps[0]
+        ? heads.find(
+            (head) => head.candidateId === selectedLine.steps[0]!.candidateId,
+          )
+        : undefined;
+      const selectedPlanInstanceId = shadowHead
+        ? headRecords.find(
+            (record) => record.head.candidateId === shadowHead.candidateId,
+          )?.route.instance.instanceId
+        : undefined;
+      const shadowActionId = shadowHead?.currentBinding.actionId;
+      const greedyBaselineHead = boundedSingleStepHead;
+      const debug = debugForShadow({
+        input,
+        rulesContext,
+        stateIdentity,
+        heads,
+        coverage,
+        search,
+        selectedLine,
+        entryFrameKey: entryFrame.projectedFrameKey,
+        liveActionId,
+        shadowHead,
+        greedyBaselineHead,
+        agendaSlices,
+        defenseSlice,
+        enumerationIssues: enumeration.issues,
+        portfolio: params.runtimeResult.portfolio,
+        authorityMode: params.authorityMode ?? "shadow",
+      });
+      return {
+        schemaVersion: CORP_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
+        debug,
+        coverage,
+        liveActionId,
+        ...(shadowActionId ? { shadowActionId } : {}),
+        agreement: shadowActionId === liveActionId,
+        heads: structuredClone(heads),
+        lines: structuredClone(search.lines),
+        rejectedCurrentSteps: search.rejectedCurrentSteps,
+        ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
+        ...(shadowHead ? { selectedHead: structuredClone(shadowHead) } : {}),
+        ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
+        headBindings: headRecords.map((record) => ({
+          candidateId: record.head.candidateId,
+          planInstanceId: record.route.instance.instanceId,
+          assessment: structuredClone(record.route.assessment),
+          step: structuredClone(record.route.step),
+          ...(record.route.continuation
+            ? { continuation: structuredClone(record.route.continuation) }
+            : {}),
+        })),
+      };
+    },
   };
 }
 
@@ -887,6 +908,7 @@ function includeSpecializedCurrentRoutes(params: {
 }
 
 function headsForRoute(params: {
+  semanticActionSetFingerprint: string;
   economyNeeds: readonly CorpEconomyNeedSignal[];
   input: AiDecisionInput;
   stateIdentity: PlanningStateIdentity;
@@ -991,9 +1013,6 @@ function headsForRoute(params: {
     params.portfolio.instances.find(
       (instance) => instance.instanceId === rootPlanInstanceId,
     )?.moduleId ?? params.route.instance.moduleId;
-  const semanticActionSetFingerprint = buildSemanticActionSetFingerprint(
-    params.input.legalActions,
-  );
   return variants.map((baseVariant) => {
     const variant: HeadVariant = bankQuote
       ? {
@@ -1050,14 +1069,14 @@ function headsForRoute(params: {
       currentBinding: {
         actionId: action.actionId,
         stateVersion: params.stateIdentity.stateVersion,
-        semanticActionSetFingerprint,
+        semanticActionSetFingerprint: params.semanticActionSetFingerprint,
         invocationKey: variant.invocation.invocationKey,
       },
       executableWitness: {
         stateVersion: params.stateIdentity.stateVersion,
         sideSafePlanningFingerprint:
           params.stateIdentity.sideSafePlanningFingerprint,
-        semanticActionSetFingerprint,
+        semanticActionSetFingerprint: params.semanticActionSetFingerprint,
         stepFingerprint,
         invocationKey: variant.invocation.invocationKey,
         quoteIds: variant.campaignQuote ? [variant.campaignQuote.quoteId] : [],

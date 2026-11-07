@@ -35,7 +35,7 @@ import {
   type RunnerTurnPlanningCoverageReport,
 } from "./runner-turn-planning-coverage";
 import {
-  buildSemanticActionSetFingerprint,
+  PlanningActionSet,
   turnPlanningFingerprint,
   type CampaignMilestoneQuote,
   type PlanningRulesContext,
@@ -55,6 +55,7 @@ import {
 } from "./turn-projection";
 import {
   searchDeterministicRemainderTurnPlans,
+  type PreparedTurnPlanner,
   type TurnRemainderSearchLine,
   type TurnRemainderSearchOffer,
   type TurnRemainderSearchResult,
@@ -96,7 +97,13 @@ export type RunnerTurnPlannerShadowResult = {
   }>;
 };
 
-export function buildRunnerTurnPlannerShadow(params: {
+export function buildRunnerTurnPlannerShadow(
+  params: Parameters<typeof prepareRunnerTurnPlanner>[0],
+): RunnerTurnPlannerShadowResult | undefined {
+  return prepareRunnerTurnPlanner(params)?.finish();
+}
+
+export function prepareRunnerTurnPlanner(params: {
   input: AiDecisionInput;
   context: PlanSchedulerContext;
   registry: SidePlanRegistry;
@@ -107,7 +114,7 @@ export function buildRunnerTurnPlannerShadow(params: {
     currentPortfolio?: ResidentPlanPortfolio,
   ) => AiDecision["selectedChoices"] | undefined;
   authorityMode?: "shadow" | "cutover";
-}): RunnerTurnPlannerShadowResult | undefined {
+}): PreparedTurnPlanner<RunnerTurnPlannerShadowResult> | undefined {
   const input = params.input as PlanningInput;
   const rulesContext = input.planningRulesContext;
   const stateIdentity = input.planningStateIdentity;
@@ -115,6 +122,7 @@ export function buildRunnerTurnPlannerShadow(params: {
     return undefined;
   }
 
+  const actionSet = new PlanningActionSet(input.legalActions);
   const enumeration = enumerateCurrentPlanSchedulerRoutes({
     context: params.context,
     registry: params.registry,
@@ -132,6 +140,7 @@ export function buildRunnerTurnPlannerShadow(params: {
       headsForRoute({
         input,
         stateIdentity,
+        semanticActionSetFingerprint: actionSet.fingerprint,
         entryFrame,
         route,
         portfolio: params.runtimeResult.portfolio,
@@ -142,6 +151,7 @@ export function buildRunnerTurnPlannerShadow(params: {
     headsForProjectedSemanticContinuation({
       input,
       stateIdentity,
+      semanticActionSetFingerprint: actionSet.fingerprint,
       entryFrame,
       record,
       candidates: params.context.actionCandidates,
@@ -169,6 +179,7 @@ export function buildRunnerTurnPlannerShadow(params: {
     heads,
     dispositions,
     engineWindowActionIds: [],
+    actionSet,
   });
   const urgentPriorityClass = highestUrgentPriorityClass(heads);
   const offers = offersForHeads({
@@ -181,62 +192,76 @@ export function buildRunnerTurnPlannerShadow(params: {
       params.runtimeResult.portfolio.turnPlanCommitment
         ?.sequenceRootPlanInstanceId,
   });
-  const search = searchDeterministicRemainderTurnPlans({
-    entryFrame,
-    offers,
-  });
-  const selectedLine = search.lines.find(
-    (line) => line.lineId === search.selectedLineId,
-  );
-  const selectedHead = selectedLine?.steps[0]
-    ? heads.find(
-        (head) => head.candidateId === selectedLine.steps[0]!.candidateId,
-      )
-    : undefined;
-  const selectedPlanInstanceId = selectedHead
-    ? records.find(
-        (record) => record.head.candidateId === selectedHead.candidateId,
-      )?.route.instance.instanceId
-    : undefined;
-  const liveActionId = params.runtimeResult.route.head.actionId;
-  const debug = debugForRunnerPlanner({
-    input,
-    rulesContext,
-    stateIdentity,
-    heads,
-    records,
-    coverage,
-    search,
-    selectedLine,
-    liveActionId,
-    selectedHead,
-    candidates: params.context.actionCandidates,
-    authorityMode: params.authorityMode ?? "shadow",
-  });
+  function currentStepSearch(candidateId: string): TurnRemainderSearchResult {
+    return searchDeterministicRemainderTurnPlans({
+      entryFrame,
+      offers: offers.filter((offer) => offer.head.candidateId === candidateId),
+      budget: { maximumDepth: 1 },
+    });
+  }
+
   return {
-    schemaVersion: RUNNER_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
-    debug,
+    heads,
     coverage,
-    liveActionId,
-    ...(selectedHead
-      ? { shadowActionId: selectedHead.currentBinding.actionId }
-      : {}),
-    agreement: selectedHead?.currentBinding.actionId === liveActionId,
-    heads: structuredClone(heads),
-    lines: structuredClone(search.lines),
-    rejectedCurrentSteps: search.rejectedCurrentSteps,
-    ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
-    ...(selectedHead ? { selectedHead: structuredClone(selectedHead) } : {}),
-    ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
-    headBindings: records.map((record) => ({
-      candidateId: record.head.candidateId,
-      planInstanceId: record.route.instance.instanceId,
-      assessment: structuredClone(record.route.assessment),
-      step: structuredClone(record.route.step),
-      ...(record.route.continuation
-        ? { continuation: structuredClone(record.route.continuation) }
-        : {}),
-    })),
+    actionSet,
+    currentStepSearch,
+    finish(currentStep) {
+      const search =
+        currentStep ?? searchDeterministicRemainderTurnPlans({ entryFrame, offers });
+      const selectedLine = search.lines.find(
+        (line) => line.lineId === search.selectedLineId,
+      );
+      const selectedHead = selectedLine?.steps[0]
+        ? heads.find(
+            (head) => head.candidateId === selectedLine.steps[0]!.candidateId,
+          )
+        : undefined;
+      const selectedPlanInstanceId = selectedHead
+        ? records.find(
+            (record) => record.head.candidateId === selectedHead.candidateId,
+          )?.route.instance.instanceId
+        : undefined;
+      const liveActionId = params.runtimeResult.route.head.actionId;
+      const debug = debugForRunnerPlanner({
+        input,
+        rulesContext,
+        stateIdentity,
+        heads,
+        records,
+        coverage,
+        search,
+        selectedLine,
+        liveActionId,
+        selectedHead,
+        candidates: params.context.actionCandidates,
+        authorityMode: params.authorityMode ?? "shadow",
+      });
+      return {
+        schemaVersion: RUNNER_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
+        debug,
+        coverage,
+        liveActionId,
+        ...(selectedHead
+          ? { shadowActionId: selectedHead.currentBinding.actionId }
+          : {}),
+        agreement: selectedHead?.currentBinding.actionId === liveActionId,
+        heads: structuredClone(heads),
+        lines: structuredClone(search.lines),
+        rejectedCurrentSteps: search.rejectedCurrentSteps,
+        ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
+        ...(selectedHead ? { selectedHead: structuredClone(selectedHead) } : {}),
+        ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
+        headBindings: records.map((record) => ({
+          candidateId: record.head.candidateId,
+          planInstanceId: record.route.instance.instanceId,
+          assessment: structuredClone(record.route.assessment),
+          step: structuredClone(record.route.step),
+          ...(record.route.continuation
+            ? { continuation: structuredClone(record.route.continuation) }
+            : {}),
+        })),
+      };
+    },
   };
 }
 
@@ -318,6 +343,7 @@ export function runnerCoverageDispositions(params: {
 }
 
 function headsForRoute(params: {
+  semanticActionSetFingerprint: string;
   input: AiDecisionInput;
   stateIdentity: PlanningStateIdentity;
   entryFrame: ProjectedDecisionFrame;
@@ -351,9 +377,6 @@ function headsForRoute(params: {
   const rootPlanInstanceId = findRootPlanInstanceId(
     params.route.instance.instanceId,
     params.portfolio,
-  );
-  const semanticActionSetFingerprint = buildSemanticActionSetFingerprint(
-    params.input.legalActions,
   );
   const campaignCapable =
     moduleCoverage.horizonCapability === "campaign_capable";
@@ -400,14 +423,14 @@ function headsForRoute(params: {
       currentBinding: {
         actionId: action.actionId,
         stateVersion: params.stateIdentity.stateVersion,
-        semanticActionSetFingerprint,
+        semanticActionSetFingerprint: params.semanticActionSetFingerprint,
         invocationKey: invocation.invocationKey,
       },
       executableWitness: {
         stateVersion: params.stateIdentity.stateVersion,
         sideSafePlanningFingerprint:
           params.stateIdentity.sideSafePlanningFingerprint,
-        semanticActionSetFingerprint,
+        semanticActionSetFingerprint: params.semanticActionSetFingerprint,
         stepFingerprint,
         invocationKey: invocation.invocationKey,
         quoteIds: campaignQuote ? [campaignQuote.quoteId] : [],
@@ -494,6 +517,7 @@ function runnerMilestoneValueClaims(params: {
 }
 
 function headsForProjectedSemanticContinuation(params: {
+  semanticActionSetFingerprint: string;
   input: AiDecisionInput;
   stateIdentity: PlanningStateIdentity;
   entryFrame: ProjectedDecisionFrame;
@@ -537,6 +561,7 @@ function headsForProjectedSemanticContinuation(params: {
     return headsForRoute({
       input: params.input,
       stateIdentity: params.stateIdentity,
+      semanticActionSetFingerprint: params.semanticActionSetFingerprint,
       entryFrame: params.entryFrame,
       route,
       portfolio: params.portfolio,

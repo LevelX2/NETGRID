@@ -6,6 +6,7 @@ import type { PlanActionDisposition } from "./plan-scheduler";
 import {
   assertTurnPlanningHeadCandidate,
   buildSemanticActionSetFingerprint,
+  type PlanningActionSet,
   type PlanModuleHorizonCapability,
   type PlanningStateIdentity,
   type TurnPlanningHeadCandidate,
@@ -334,6 +335,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
   heads: readonly TurnPlanningHeadCandidate[];
   dispositions: readonly PlanActionDisposition[];
   engineWindowActionIds: readonly string[];
+  actionSet?: PlanningActionSet;
   progressRoots?: readonly CorpPlanProgressRoot[];
   configuration?: TurnPlanningCoverageConfiguration;
 }): CorpTurnPlanningCoverageReport {
@@ -411,6 +413,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
   const validHeadsByActionId = new Map<string, TurnPlanningHeadCandidate[]>();
   const semanticActionSetFingerprint = buildSemanticActionSetFingerprint(
     params.input.legalActions,
+    params.actionSet,
   );
   for (const head of params.heads) {
     const candidate = params.candidates.find(

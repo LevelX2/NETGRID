@@ -7,6 +7,7 @@ import {
   type CanonicalLegalActionInvocation,
   type CurrentLegalActionBinding,
   type PriorityCoverage,
+  type PlanningActionSet,
   type TurnPlanningHeadCandidate,
   type TurnPlanEvaluationRegistry,
 } from "./turn-planning-contracts";
@@ -119,6 +120,14 @@ export type TurnRemainderSearchResult = {
   /** Hard failures while validating or applying a current step. */
   rejectedCurrentSteps: TurnRemainderSearchResult["pruneEvents"];
   evidenceCodes: string[];
+};
+
+export type PreparedTurnPlanner<Result extends { coverage: unknown }> = {
+  actionSet: PlanningActionSet;
+  heads: TurnPlanningHeadCandidate[];
+  coverage: Result["coverage"];
+  currentStepSearch: (candidateId: string) => TurnRemainderSearchResult;
+  finish: (currentStep?: TurnRemainderSearchResult) => Result;
 };
 
 type SearchState = {

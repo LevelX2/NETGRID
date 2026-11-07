@@ -16,7 +16,7 @@ import type {
 } from "./plan-kernel-types";
 import {
   applyPlanOutcomeReceipt,
-  reconcileResidentPlanPortfolio,
+  prepareResidentPlanPortfolioReconciliation,
   type PlanOutcomeReceipt,
   type ResidentPlanPortfolio,
 } from "./resident-plan-portfolio";
@@ -249,13 +249,14 @@ export function runPlanScheduler(
     });
     return discovered;
   });
-  const reconciled = reconcileResidentPlanPortfolio({
+  const assignCurrentExecutor = prepareResidentPlanPortfolioReconciliation({
     side: params.registry.side,
     stateVersion: context.input.playerView.stateVersion,
     timingPoint: context.input.playerView.timingPoint,
     proposals,
     ...(params.previousPortfolio ? { previous: params.previousPortfolio } : {}),
   });
+  const reconciled = assignCurrentExecutor();
   diagnostics.push({
     stage: "reconcile",
     code: `resident:${reconciled.instances.length}`,
@@ -267,9 +268,7 @@ export function runPlanScheduler(
     portfolio: reconciled,
     diagnostics,
   });
-  const validatedAssessments = supportBindings.assessments.sort(
-    compareValidatedPlanAssessments,
-  );
+  const validatedAssessments = supportBindings.assessments;
   const assessments = validatedAssessments.filter(
     (assessment) =>
       assessment.readiness === "executable_now" &&
@@ -335,19 +334,13 @@ export function runPlanScheduler(
     instance.instanceId,
   );
   assertEarlyEndTurnRoute(context, route, materialized, module.moduleId);
-  const selectedPortfolio = reconcileResidentPlanPortfolio({
-    side: params.registry.side,
-    stateVersion: context.input.playerView.stateVersion,
-    timingPoint: context.input.playerView.timingPoint,
-    proposals,
-    ...(params.previousPortfolio ? { previous: params.previousPortfolio } : {}),
-    selectedExecutorInstanceId: instance.instanceId,
-    selectionReason:
-      params.previousPortfolio?.executorInstanceId &&
-      params.previousPortfolio.executorInstanceId !== instance.instanceId
-        ? "preempted_by_higher_class"
-        : "executor_selected",
-  });
+  const selectedPortfolio = assignCurrentExecutor(
+    instance.instanceId,
+    params.previousPortfolio?.executorInstanceId &&
+    params.previousPortfolio.executorInstanceId !== instance.instanceId
+      ? "preempted_by_higher_class"
+      : "executor_selected",
+  );
   diagnostics.push({
     stage: "route",
     code: route.head.semanticActionType,

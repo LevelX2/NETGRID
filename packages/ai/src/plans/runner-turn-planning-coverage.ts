@@ -9,6 +9,7 @@ import {
   type CorpTurnPlanningModuleCoverage,
 } from "./corp-turn-planning-coverage";
 import type {
+  PlanningActionSet,
   PlanningStateIdentity,
   TurnPlanningHeadCandidate,
 } from "./turn-planning-contracts";
@@ -222,6 +223,7 @@ export function buildRunnerTurnPlanningCoverageReport(params: {
   heads: readonly TurnPlanningHeadCandidate[];
   dispositions: readonly PlanActionDisposition[];
   engineWindowActionIds: readonly string[];
+  actionSet?: PlanningActionSet;
 }): RunnerTurnPlanningCoverageReport {
   const report = buildCorpTurnPlanningCoverageReport({
     ...params,

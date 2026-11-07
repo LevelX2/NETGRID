@@ -562,9 +562,20 @@ export function buildPlanningStateIdentity(
   };
 }
 
+/** A decision-local fingerprint bound to the LegalAction list it describes. */
+export class PlanningActionSet {
+  readonly fingerprint: string;
+
+  constructor(readonly legalActions: readonly LegalAction[]) {
+    this.fingerprint = buildSemanticActionSetFingerprint(legalActions);
+  }
+}
+
 export function buildSemanticActionSetFingerprint(
-  legalActions: AiDecisionInput["legalActions"],
+  legalActions: readonly LegalAction[],
+  prepared?: PlanningActionSet,
 ): string {
+  if (prepared?.legalActions === legalActions) return prepared.fingerprint;
   return turnPlanningFingerprint(
     "semantic-action-set",
     canonicalLegalActionSemantics(legalActions),
@@ -1175,7 +1186,7 @@ function validateTargetList(
 }
 
 function canonicalLegalActionSemantics(
-  legalActions: AiDecisionInput["legalActions"],
+  legalActions: readonly LegalAction[],
 ): unknown[] {
   return legalActions
     .map((action) =>

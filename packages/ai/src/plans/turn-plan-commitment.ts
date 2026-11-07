@@ -15,6 +15,7 @@ import {
   type CampaignMilestoneQuote,
   type CanonicalLegalActionInvocation,
   type CurrentLegalActionBinding,
+  type PlanningActionSet,
   type PlanningRulesContext,
   type PlanningStateIdentity,
   type PriorityCoverage,
@@ -399,6 +400,7 @@ export function rematerializeCommittedTurnStep(params: {
   stateIdentity: PlanningStateIdentity;
   heads: readonly TurnPlanningHeadCandidate[];
   legalActions: readonly LegalAction[];
+  actionSet?: PlanningActionSet | undefined;
   continuationEvidence: TurnPlanContinuationEvidence;
 }): TurnPlanRematerialization {
   const preflight = continuationPreflight(params);
@@ -451,7 +453,8 @@ export function rematerializeCommittedTurnStep(params: {
   }
   const head = structuralMatches[0]!;
   const currentActionSetFingerprint = buildSemanticActionSetFingerprint(
-    params.legalActions as AiDecisionInput["legalActions"],
+    params.legalActions,
+    params.actionSet,
   );
   if (
     head.currentBinding.semanticActionSetFingerprint !==
