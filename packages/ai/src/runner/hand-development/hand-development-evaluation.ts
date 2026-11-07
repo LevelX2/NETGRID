@@ -152,6 +152,7 @@ import {
 } from "./runner-persistent-install-evaluation";
 import {
   runnerEffectsProvideCorpForcedDraw,
+  runnerEffectsOnlyTaxCorpIceInstalls,
   runnerEffectsProvideDamagePrevention,
   runnerEffectsDamagePreventionTypes,
   runnerEffectsProvideBreakerCredits,
@@ -729,6 +730,9 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     return "access_payoff";
   // Paying an ICE's rez price is a removal cost, not an income capability.
   if (runnerEffectsProvidePostBreakIceTrash(context.signals.structuredEffects))
+    return "access_payoff";
+  // Increasing the opponent's future install price is denial, not our income.
+  if (runnerEffectsOnlyTaxCorpIceInstalls(context.signals.structuredEffects))
     return "access_payoff";
   if (successfulRunStrengthCounter(context.card.definitionId))
     return "breaker_or_rig_piece";

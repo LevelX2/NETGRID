@@ -35,6 +35,24 @@ export function runnerEffectsProvideEncounterIceDerez(
   ) ?? false;
 }
 
+export function runnerEffectsOnlyTaxCorpIceInstalls(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return (
+    effects !== undefined &&
+    effects.length > 0 &&
+    effects.every(
+      (effect) =>
+        effect.kind === "run_tax" &&
+        effect.scope === "corp" &&
+        effect.timing === "persistent" &&
+        effect.resource === "credits" &&
+        effect.target === "ice.install_cost_increase" &&
+        (effect.amount ?? 0) > 0,
+    )
+  );
+}
+
 export function runnerEffectsProvideAccessTriggeredInstalledExpose(
   effects: readonly AiHintStructuredEffect[] | undefined,
 ): boolean {

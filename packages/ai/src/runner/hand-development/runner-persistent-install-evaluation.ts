@@ -20,6 +20,7 @@ import { actionClickCost } from "../../runtime/action-cost";
 import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
 import {
   runnerEffectsProvideCorpForcedDraw,
+  runnerEffectsOnlyTaxCorpIceInstalls,
   runnerHintProvidesDamagePrevention,
   runnerHintProvidesTagPrevention,
   runnerHintProvidesExposeInformation,
@@ -232,11 +233,13 @@ export function persistentFunctionalProfileForCard(
   const encounterIceDerez = runnerEffectsProvideEncounterIceDerez(
     hint?.effects,
   );
+  const corpIceInstallTax = runnerEffectsOnlyTaxCorpIceInstalls(hint?.effects);
   const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
   const economyTool =
     !runOnlyEconomyPool &&
     !postBreakIceTrash &&
     !encounterIceDerez &&
+    !corpIceInstallTax &&
     breakerCoverage.length === 0 &&
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
@@ -297,6 +300,7 @@ export function persistentFunctionalProfileForCard(
     ...(handSizeSupport ? ["hand_size"] : []),
     ...(bankTool ? ["bank_tool"] : []),
     ...(economyTool ? ["economy_engine"] : []),
+    ...(corpIceInstallTax ? ["corp_ice_install_tax"] : []),
     ...(actionEconomy ? ["action_economy"] : []),
     ...(accessSupport ? ["access_support"] : []),
     ...(searchSupport ? ["search_support"] : []),

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { AiHintStructuredEffect } from "./hint-ontology";
 import {
+  runnerEffectsOnlyTaxCorpIceInstalls,
   runnerEffectsProvideDamagePrevention,
   runnerEffectsProvideBreakerCredits,
   runnerEffectsProvideExposeInformation,
@@ -21,6 +22,43 @@ function effect(
 }
 
 describe("canonical Runner hint semantics", () => {
+  it("keeps pure opponent install taxes separate from mixed own-income effects", () => {
+    const tax = effect({
+      kind: "run_tax",
+      scope: "corp",
+      timing: "persistent",
+      resource: "credits",
+      target: "ice.install_cost_increase",
+      amount: 2,
+    });
+    expect(runnerEffectsOnlyTaxCorpIceInstalls([tax])).toBe(true);
+    expect(runnerEffectsOnlyTaxCorpIceInstalls(undefined)).toBe(false);
+    expect(runnerEffectsOnlyTaxCorpIceInstalls([])).toBe(false);
+    expect(runnerEffectsOnlyTaxCorpIceInstalls([{ ...tax, amount: 0 }])).toBe(
+      false,
+    );
+    expect(
+      runnerEffectsOnlyTaxCorpIceInstalls([{ ...tax, scope: "runner" }]),
+    ).toBe(false);
+    expect(
+      runnerEffectsOnlyTaxCorpIceInstalls([
+        { ...tax, target: "ice.rez_cost_increase" },
+      ]),
+    ).toBe(false);
+    expect(
+      runnerEffectsOnlyTaxCorpIceInstalls([
+        tax,
+        effect({
+          kind: "economy",
+          scope: "runner",
+          timing: "action",
+          resource: "credits",
+          target: "economy.burst_credit",
+          amount: 3,
+        }),
+      ]),
+    ).toBe(false);
+  });
   it("recognizes exact expose and top-trash-recovery facts", () => {
     expect(
       runnerEffectsProvideExposeInformation([

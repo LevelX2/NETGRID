@@ -1670,6 +1670,18 @@ Run-/Break-/Trash-Folge. Paarung 475/R13/G1/D47 belegt den früheren falschen
 Economy-Zweck; native Eingabe, generierter Hint und echte Engine-Folge sichern
 die Korrektur und ihre Zulassungsgrenzen.
 
+Eine ausschließlich gegnerische permanente ICE-Installationssteuer ist
+Zugriffs-/Denial-Unterstützung, kein eigenes Einkommen. Der Handentwicklungs-
+Owner konsumiert dafür den strukturierten Corp-Scope und den positiven
+Installationskostenaufschlag. Das persistente Funktionsprofil erhält die
+eigene Abdeckung `corp_ice_install_tax`; allgemeine Creditwörter erzeugen
+keine `economy_engine` und niedrige eigene Credits keinen akuten Geldbedarf.
+Gemischte Wirkungen mit eigenem Einkommen fallen nicht unter diesen engen
+Nachweis. Die Bewertung des zukünftigen Serverziels und der ganzen
+Investitionsfolge bleibt gesondert; die Korrektur behauptet weder einen
+optimalen Tax-Server noch einen anderen Sieger. Paarung 625/D19 prüft die
+native Plan-/Actionbindung, eigene Credits und den echten Einkommensgegenfall.
+
 Einmalige Suchereignisse werden auch anhand ihres aktuellen kanonischen
 `effectKind` für Stack- oder Heap-Suche erkannt. Ohne exakt gebundenen
 Zielplan erhält die Aktion die bestehende ausdrückliche Zurückstellung;
