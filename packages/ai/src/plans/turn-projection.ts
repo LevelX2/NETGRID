@@ -121,8 +121,14 @@ export function boundCurrentStepProjection(
     input.playerView.run &&
     candidate.actionType === "continue_run" &&
     (cost.creditCost ?? 0) > 0;
+  const tagPayment =
+    input.side === "runner" &&
+    candidate.actionType === "remove_tag" &&
+    input.playerView.own.tags > 0 &&
+    (cost.creditCost ?? 0) > 0;
   if (
     !runPayment &&
+    !tagPayment &&
     cost.additionalCosts.every((field) => field === "agendaPointCost")
   )
     return undefined;
@@ -137,7 +143,8 @@ export function boundCurrentStepProjection(
     !action ||
     action.side !== input.side ||
     action.type !== candidate.actionType ||
-    action.expiresAtStateVersion !== candidate.stateVersion
+    action.expiresAtStateVersion !== candidate.stateVersion ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion
   )
     return undefined;
   const quoted = costProfileForAction(action);
@@ -154,6 +161,14 @@ export function boundCurrentStepProjection(
   )
     return undefined;
 
+  if (tagPayment && extras.length === 0) {
+    const restrictedCredits = visibleCurrentTagRemovalCredits(input);
+    if (restrictedCredits > 0)
+      return {
+        liquidCreditCost: Math.max(0, quoted.creditCost - restrictedCredits),
+        boundaryKind: "engine_continuation",
+      };
+  }
   const payload = action.payload;
   if (!payload) return undefined;
   if (
@@ -241,6 +256,33 @@ export function boundCurrentStepProjection(
     };
   }
   return undefined;
+}
+
+function visibleCurrentTagRemovalCredits(input: AiDecisionInput): number {
+  let total = 0;
+  const sources = new Set<string>();
+  for (const card of input.playerView.own.rig ?? []) {
+    if (card.known === false || card.rezzed !== true) continue;
+    for (const display of card.counterDisplays ?? []) {
+      if (
+        display.creditPool?.kind !== "restricted_credit" ||
+        !display.creditPool.uses?.includes("remove_tags")
+      )
+        continue;
+      const key = `${card.instanceId}:${display.counterType}`;
+      if (
+        sources.has(key) ||
+        !isNonNegativeInteger(display.amount) ||
+        !Number.isSafeInteger(total + display.amount)
+      )
+        throw new TurnProjectionError("invalid_restricted_tag_credit_pool", [
+          key,
+        ]);
+      sources.add(key);
+      total += display.amount;
+    }
+  }
+  return total;
 }
 
 function isNonNegativeInteger(value: unknown): value is number {

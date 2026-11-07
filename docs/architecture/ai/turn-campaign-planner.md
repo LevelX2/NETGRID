@@ -1663,6 +1663,16 @@ Verbindlich gelten die in Abschnitt 1.8 definierten `TurnBoundaryKind`s:
 Eine kontrollierte, vollständig bestimmte Choice ist damit ausdrücklich
 keine Beobachtungsgrenze.
 
+Der aktuelle gebundene Zahlungsschritt berücksichtigt auch öffentlich
+ausgewiesene eingeschränkte Credits für `remove_tags`. Nominale Aktionskosten
+bleiben von tatsächlich benötigten freien Credits getrennt. Die Projektion
+verwendet nur aktuelle eigene, aufgedeckte Quellen mit passendem typisiertem
+Poolzweck und endet vor der Enginefortsetzung; nach der Zahlung werden Pool,
+Tags und LegalActions neu gebunden. Der Pool wird weder zu allgemeinem
+Einkommen noch in derselben hypothetischen Linie mehrfach ausgegeben.
+Paarung634 D305 sichert die native legale Tagentfernung bei null freien
+Credits ab, die zuvor als unterfinanziert aus dem einzigen Defensepfad fiel.
+
 ### 7.2 Grenzaktion statt Scheinfortsetzung
 
 Eine Linie, die an einer echten Unsicherheitsgrenze endet, trägt ein
