@@ -34,6 +34,24 @@ function fixture(name: string) {
   return cp.input;
 }
 afterEach(resetResidentPlanPortfolioMemory);
+it("does not project next-turn Heap recovery during a Corp rez window in a live run", () => {
+  const input = fixture("g17-d455");
+  expect(visibleRunnerHeapBreakerPreparations(input).length).toBeGreaterThan(0);
+  // The Engine gives the Corp decision authority in this timing window. That
+  // does not start a new Runner turn or make future recovery available now.
+  input.playerView.phase = "run";
+  input.playerView.timingPoint = "run.approach_ice";
+  input.playerView.run = {
+    runId: "current-run",
+    attackedServerId: "remote_1",
+    phase: "approach_ice",
+    position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    successful: false,
+  };
+  expect(input.playerView.activeSide).toBe("corp");
+  expect(visibleRunnerHeapBreakerPreparations(input)).toEqual([]);
+});
+
 it.each(["g4-d595", "g17-d455"])(
   "does not certify the native %s path as protected when a public Heap breaker can be recovered, installed and used next turn",
   (name) => {

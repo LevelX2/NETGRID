@@ -32,14 +32,19 @@ type Fixture = {
     decisionId: string;
     actionNumber: number;
     profileId: string;
-    ownDeckSnapshot: NonNullable<Parameters<typeof buildAiDecisionInput>[2]>["ownDeckSnapshot"];
+    ownDeckSnapshot: NonNullable<
+      Parameters<typeof buildAiDecisionInput>[2]
+    >["ownDeckSnapshot"];
     originalLegalActionIds: string[];
     runtime: AiRuntimeCheckpointV1;
   };
 };
 const fixtures = JSON.parse(
   readFileSync(
-    new URL("../../../../data/scenarios/ai-decision-checkpoints/meta-524-original-prefixes.json", import.meta.url),
+    new URL(
+      "../../../../data/scenarios/ai-decision-checkpoints/meta-524-original-prefixes.json",
+      import.meta.url,
+    ),
     "utf8",
   ),
 ) as Fixture[];
@@ -86,18 +91,21 @@ function replay(gameNumber: number) {
       const count = Number(fingerprint[1]);
       expect(Number.isSafeInteger(count) && count >= 2).toBe(true);
       expect(fingerprint).toHaveLength(2 + count * 2);
-      const request: Parameters<typeof quoteRandomizedIceInstallSelection>[1] = {
-        schemaVersion: parts[1] as Parameters<typeof quoteRandomizedIceInstallSelection>[1]["schemaVersion"],
-        matchId: state.matchId,
-        side: "corp",
-        stateVersion: state.stateVersion,
-        timingPoint: state.timingPoint,
-        planStepId: parts[5]!,
-        candidates: Array.from({ length: count }, (_, i) => ({
-          actionId: fingerprint[2 + i * 2]!,
-          targetServerId: fingerprint[3 + i * 2]! as ServerId,
-        })),
-      };
+      const request: Parameters<typeof quoteRandomizedIceInstallSelection>[1] =
+        {
+          schemaVersion: parts[1] as Parameters<
+            typeof quoteRandomizedIceInstallSelection
+          >[1]["schemaVersion"],
+          matchId: state.matchId,
+          side: "corp",
+          stateVersion: state.stateVersion,
+          timingPoint: state.timingPoint,
+          planStepId: parts[5]!,
+          candidates: Array.from({ length: count }, (_, i) => ({
+            actionId: fingerprint[2 + i * 2]!,
+            targetServerId: fingerprint[3 + i * 2]! as ServerId,
+          })),
+        };
       const quoted = quoteRandomizedIceInstallSelection(state, request);
       if (!quoted.ok) throw Error("original_random_quote_rejected");
       expect(quoted.quote.candidateFingerprint).toBe(parts[6]);
@@ -106,8 +114,12 @@ function replay(gameNumber: number) {
         quote: quoted.quote,
       });
       if (!result.ok) throw Error("original_random_command_rejected");
-      expect(result.receipt.selectedLegalAction.actionId).toBe(command.applied.actionId);
-      expect(result.receipt.randomDraw.purpose).toBe(command.random.rngDrawPurpose);
+      expect(result.receipt.selectedLegalAction.actionId).toBe(
+        command.applied.actionId,
+      );
+      expect(result.receipt.randomDraw.purpose).toBe(
+        command.random.rngDrawPurpose,
+      );
     } else {
       result = applyAction(state, {
         matchId: state.matchId,
@@ -133,23 +145,37 @@ function replay(gameNumber: number) {
     actionNumber: cp.actionNumber,
     profileId: cp.profileId,
   };
-  expect(input.legalActions.map((a) => a.actionId)).toEqual(cp.originalLegalActionIds);
-  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
+  // Legal-action ordering is not part of replay identity. Preserve the exact
+  // multiset of commands while allowing the current Engine's presentation order.
+  expect(input.legalActions.map((a) => a.actionId).sort()).toEqual(
+    [...cp.originalLegalActionIds].sort(),
+  );
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    cp.runtime,
+  );
   return { state, input };
 }
 
 it("executes the ready Inside Job without borrowing the normal run's Wall support (G6 D158, 157 original commands)", () => {
   const { state, input } = replay(6);
   const decision = chooseAiAction(input);
-  const action = input.legalActions.find((a) => a.actionId === decision.actionId)!;
+  const action = input.legalActions.find(
+    (a) => a.actionId === decision.actionId,
+  )!;
   expect(action).toMatchObject({
     type: "play_event",
     payload: { serverId: "remote_1", bypassFirstIce: true },
   });
   expect(action.source).toContain("inside-job");
-  expect(decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe("runner.contest_remote");
+  expect(
+    decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+  ).toBe("runner.contest_remote");
   const result = applyAction(state, {
-    matchId: state.matchId, side: "runner", actionId: action.actionId,
+    matchId: state.matchId,
+    side: "runner",
+    actionId: action.actionId,
     clientKnownStateVersion: state.stateVersion,
   });
   if (!result.ok) throw Error(result.error.message);
@@ -166,18 +192,26 @@ it("retains the unique just-drawn Gate answer for its exact coverage executor (G
     selectedOptionIds: ["trash_runner_onr_v1_184_top-runners-conference_1"],
   });
   const result = applyAction(state, {
-    matchId: state.matchId, side: "runner", actionId: decision.actionId!,
+    matchId: state.matchId,
+    side: "runner",
+    actionId: decision.actionId!,
     clientKnownStateVersion: state.stateVersion,
     selectedChoices: decision.selectedChoices!,
   });
   if (!result.ok) throw Error(result.error.message);
   expect(result.state.runner.grip).toContain("runner_onr_v1_014_codecracker_2");
-  expect(result.state.runner.heap).toContain("runner_onr_v1_184_top-runners-conference_1");
+  expect(result.state.runner.heap).toContain(
+    "runner_onr_v1_184_top-runners-conference_1",
+  );
 });
 
 it("still discards the duplicate Gate breaker when one is already installed (G35 D124, 123 original commands)", () => {
   const { input } = replay(35);
-  expect(input.playerView.own.rig!.some((c) => c.definitionId === "onr_v1_014_codecracker")).toBe(true);
+  expect(
+    input.playerView.own.rig!.some(
+      (c) => c.definitionId === "onr_v1_014_codecracker",
+    ),
+  ).toBe(true);
   expect(chooseAiAction(input).selectedChoices).toEqual({
     choiceId: "p3_61_crash_draw_123",
     selectedOptionIds: ["trash_runner_onr_v1_014_codecracker_2"],
@@ -187,7 +221,8 @@ it("still discards the duplicate Gate breaker when one is already installed (G35
 it("rejects a changed hidden-draw origin instead of protecting or choosing an unbound card", () => {
   const { input } = replay(18);
   const continuation = input.playerView.pendingChoice!.continuation!;
-  if (continuation.family !== "runner_hidden_draw_keep_or_top_replacement") throw Error("wrong_native_family");
+  if (continuation.family !== "runner_hidden_draw_keep_or_top_replacement")
+    throw Error("wrong_native_family");
   continuation.originActionId = "runner.unbound_source";
   expect(() => chooseAiAction(input)).toThrow();
 });

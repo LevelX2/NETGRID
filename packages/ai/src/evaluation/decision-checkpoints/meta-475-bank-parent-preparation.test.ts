@@ -98,7 +98,7 @@ it("withdraws prospective bank funding when the actual remote parent owns ICE pr
   ).toMatchObject({
     actionIds: [],
     evidenceCodes: expect.arrayContaining([
-      "runner_credit_bank_run_funding_parent_need_withdrawn:run-support:remote:remote_1",
+      "runner_credit_bank_hold_spending_budget_funded",
     ]),
   });
 });

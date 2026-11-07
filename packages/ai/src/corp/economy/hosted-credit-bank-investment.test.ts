@@ -159,9 +159,11 @@ function fixture(
 describe("Department demand-bound multi-turn investment", () => {
   it("invests the last action across the turn only behind currently known protection", () => {
     const { input, candidates } = fixture();
-    const choice = corpHostedBankInvestments(input, candidates, []).get(
-      "department",
-    );
+    const choice = corpHostedBankInvestments(input, candidates, [], {
+      centralAllocation: undefined,
+      scoreProjects: [],
+      remoteProjects: [],
+    }).get("department");
     expect(choice).toMatchObject({
       shouldCashout: false,
       development: {
@@ -188,14 +190,22 @@ describe("Department demand-bound multi-turn investment", () => {
   it("cashes out before the opponent can reach an unprotected bank", () => {
     const { input, candidates } = fixture({ protected: false });
     expect(
-      corpHostedBankInvestments(input, candidates, []).get("department"),
+      corpHostedBankInvestments(input, candidates, [], {
+        centralAllocation: undefined,
+        scoreProjects: [],
+        remoteProjects: [],
+      }).get("department"),
     ).toEqual({ shouldCashout: true });
   });
 
   it("cashes out when the current budget is funded instead of adding a fixed fourth load", () => {
     const { input, candidates } = fixture({ stored: 12, clicks: 3 });
     expect(
-      corpHostedBankInvestments(input, candidates, []).get("department"),
+      corpHostedBankInvestments(input, candidates, [], {
+        centralAllocation: undefined,
+        scoreProjects: [],
+        remoteProjects: [],
+      }).get("department"),
     ).toEqual({ shouldCashout: true });
   });
 
@@ -203,7 +213,11 @@ describe("Department demand-bound multi-turn investment", () => {
     const { input, candidates } = fixture();
     input.playerView.own.credits = 14;
     expect(
-      corpHostedBankInvestments(input, candidates, []).get("department"),
+      corpHostedBankInvestments(input, candidates, [], {
+        centralAllocation: undefined,
+        scoreProjects: [],
+        remoteProjects: [],
+      }).get("department"),
     ).toEqual({ shouldCashout: false });
   });
 
@@ -213,16 +227,21 @@ describe("Department demand-bound multi-turn investment", () => {
       (a) => a.actionId === "install-future-ice",
     )!.payload!.postInstallRezQuoteComplete = false;
     expect(
-      corpHostedBankInvestments(input, candidates, []).get("department")
-        ?.development,
+      corpHostedBankInvestments(input, candidates, [], {
+        centralAllocation: undefined,
+        scoreProjects: [],
+        remoteProjects: [],
+      }).get("department")?.development,
     ).toBeUndefined();
   });
 
   it("invalidates the exact load binding after a source or state change", () => {
     const { input, candidates } = fixture();
-    const binding = corpHostedBankInvestments(input, candidates, []).get(
-      "department",
-    )!.development!.hostedCreditBankInvestment!;
+    const binding = corpHostedBankInvestments(input, candidates, [], {
+      centralAllocation: undefined,
+      scoreProjects: [],
+      remoteProjects: [],
+    }).get("department")!.development!.hostedCreditBankInvestment!;
     input.playerView.stateVersion++;
     expect(corpHostedBankLoadMatches(input, candidates[0]!, binding)).toBe(
       false,
@@ -231,19 +250,24 @@ describe("Department demand-bound multi-turn investment", () => {
 
   it("does not turn a background future Remote budget into an immediate cashout deadline", () => {
     const { input, candidates } = fixture();
-    const choice = corpHostedBankInvestments(input, candidates, [
-      {
-        kind: "parent_funding",
-        needId: "remote-budget",
-        parentNeedId: "remote-budget",
-        parentPlanInstanceId: "plan:corp.establish_scoring_remote:future",
-        gap: 6,
-        actionIds: ["department-cash"],
-        parentPriorityClass: "P6",
-        urgentForScore: false,
-        evidenceCode: "future_remote_budget",
-      },
-    ]).get("department");
+    const choice = corpHostedBankInvestments(
+      input,
+      candidates,
+      [
+        {
+          kind: "parent_funding",
+          needId: "remote-budget",
+          parentNeedId: "remote-budget",
+          parentPlanInstanceId: "plan:corp.establish_scoring_remote:future",
+          gap: 6,
+          actionIds: ["department-cash"],
+          parentPriorityClass: "P6",
+          urgentForScore: false,
+          evidenceCode: "future_remote_budget",
+        },
+      ],
+      { centralAllocation: undefined, scoreProjects: [], remoteProjects: [] },
+    ).get("department");
     expect(choice?.shouldCashout).toBe(false);
     expect(choice?.development?.actionIds).toEqual(["department-load"]);
   });
@@ -251,21 +275,26 @@ describe("Department demand-bound multi-turn investment", () => {
   it("yields the bank to an immediate defense funding deadline", () => {
     const { input, candidates } = fixture();
     expect(
-      corpHostedBankInvestments(input, candidates, [
-        {
-          kind: "parent_funding",
-          needId: "defense-now",
-          parentNeedId: "defense-now",
-          parentPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
-          gap: 6,
-          actionIds: ["department-cash"],
-          parentPriorityClass: "P2",
-          immediateDefenseConversion: true,
-          urgentForScore: false,
-          evidenceCode: "current_defense_budget",
-        },
-      ]).get("department"),
+      corpHostedBankInvestments(
+        input,
+        candidates,
+        [
+          {
+            kind: "parent_funding",
+            needId: "defense-now",
+            parentNeedId: "defense-now",
+            parentPlanInstanceId:
+              "plan:corp.defend_servers:server-defense-portfolio",
+            gap: 6,
+            actionIds: ["department-cash"],
+            parentPriorityClass: "P2",
+            immediateDefenseConversion: true,
+            urgentForScore: false,
+            evidenceCode: "current_defense_budget",
+          },
+        ],
+        { centralAllocation: undefined, scoreProjects: [], remoteProjects: [] },
+      ).get("department"),
     ).toEqual({ shouldCashout: true });
   });
 

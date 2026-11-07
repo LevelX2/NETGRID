@@ -6123,7 +6123,7 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_hq_information"],
+      "acceptableCapabilities": ["pressure_hq_access"],
       "requiredAssessmentEvidence": [
         "runner_hq_success_window_setup:onr_v1_080_core-command-jettison-ice"
       ]

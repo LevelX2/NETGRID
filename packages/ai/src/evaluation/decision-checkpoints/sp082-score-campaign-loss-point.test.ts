@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import game36Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-sp082-01-game36-score-parent-funding-gap.json";
 import game34Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-sp082-02-game34-score-parent-funding-gap.json";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
+import { sp082KnownProtectionFundingCompanion } from "./sp082-score-campaign.test-support";
 
 describe("SP-082 score-campaign loss-point checkpoints", () => {
   it("binds game 36's exact current funding step to the known score-conversion floor", () => {
-    const result = runAiDecisionCheckpoint(fixture(game36Json));
+    const result = runAiDecisionCheckpoint(
+      sp082KnownProtectionFundingCompanion(),
+    );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.selectedAction?.type).toBe("gain_credit");

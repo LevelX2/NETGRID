@@ -1,3 +1,4 @@
+import { bindSyntheticAgendaStealQuotes } from "../../agenda-steal-quotes.test-support";
 import { createRunnerProgramInstallTrashContext } from "../../runtime/runner-program-install-trash-context";
 import { aiLiveRuntimeDependencies } from "../../ai-runtime-public-entrypoints";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
@@ -51,7 +52,7 @@ import {
 } from "./runtime-checkpoint";
 
 function capture(index: number) {
-  return JSON.parse(
+  const fixture = JSON.parse(
     readFileSync(
       new URL(
         `../../../../../data/scenarios/ai-decision-checkpoints/cp-db3d-${index}-breaker-upgrade.json`,
@@ -63,6 +64,9 @@ function capture(index: number) {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  // Explicit current companion: no public steal surcharge or known agenda.
+  bindSyntheticAgendaStealQuotes(fixture.input, "remote_1", 0, {});
+  return fixture;
 }
 afterEach(() => resetResidentPlanPortfolioMemory());
 

@@ -36,12 +36,20 @@ const INSTALL_NERVE_LABYRINTH =
   "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_2.corp_onr_v1_257_nerve-labyrinth_1.1";
 
 describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
-  it("draws for the missing concrete HQ defense before prebuilding another remote", () => {
+  it("draws for missing HQ defense when no concrete installation remains", () => {
     const capture = structuredClone(
       d114CaptureJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
+    const ice = new Set(
+      capture.input.playerView.own.gripOrHq
+        .filter((card) => card.type === "ice")
+        .map((card) => card.instanceId),
+    );
+    capture.input.legalActions = capture.input.legalActions.filter(
+      (action) => action.type !== "install_card" || !ice.has(action.source),
+    );
     capture.input.ownRemoteDoctrineProfile = buildRemoteDoctrineProfile({
       ...(capture.input.ownDeckStrategyProfile
         ? { strategyProfile: capture.input.ownDeckStrategyProfile }
@@ -83,5 +91,27 @@ describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
       nodes: [{ semanticActionType: "draw.card" }],
     });
     expect(decision.actionId).not.toBe(INSTALL_NERVE_LABYRINTH);
+  });
+
+  it("keeps native liquidity development ahead of unfunded extra remote staging", () => {
+    const capture = structuredClone(
+      d114CaptureJson,
+    ) as ReconstructedDecisionCapture;
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      capture.input,
+      capture.input.ownDeckSnapshot!.deckSnapshotId,
+      capture.runtime,
+    );
+    const decision = chooseAiAction(capture.input);
+    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).not.toBe(INSTALL_NERVE_LABYRINTH);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+      "plan:corp.economy:economy-visible-liquidity-development%3A8",
+    );
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
+    );
   });
 });

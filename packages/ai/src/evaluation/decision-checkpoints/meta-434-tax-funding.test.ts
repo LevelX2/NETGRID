@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -47,6 +48,10 @@ it.each([
   "funds the exact taxed path with bank=$bankAvailable and safe loan=$loanAvailable",
   ({ loanAvailable, bankAvailable }) => {
     const { input, runtime } = structuredClone(checkpoint);
+    bindPublicBoardStealQuoteCompanion(input);
+    // Debt is warranted only when ordinary income cannot fund the same-turn
+    // route. With three clicks, two basic credits avoid the loan entirely.
+    if (loanAvailable && !bankAvailable) input.playerView.own.clicks = 2;
     if (!bankAvailable)
       input.legalActions = input.legalActions.filter(
         (candidate) => !candidate.actionId.includes("withdraw_credits"),
@@ -68,9 +73,9 @@ it.each([
         ? candidate.actionId ===
           "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits"
         : loanAvailable
-        ? candidate.actionId ===
-          "runner.install_card.runner_onr_v1_168_loan-from-chiba_1.runner_onr_v1_168_loan-from-chiba_1"
-        : candidate.actionId === "runner.gain_credit",
+          ? candidate.actionId ===
+            "runner.install_card.runner_onr_v1_168_loan-from-chiba_1.runner_onr_v1_168_loan-from-chiba_1"
+          : candidate.actionId === "runner.gain_credit",
     )!;
     if (bankAvailable || loanAvailable) {
       const target = evaluateRunnerRunTargets({ input }).find(
@@ -102,3 +107,26 @@ it.each([
     });
   },
 );
+
+it("preserves the native debt-free two-credit route when three clicks remain", () => {
+  const { input, runtime } = structuredClone(checkpoint);
+  bindPublicBoardStealQuoteCompanion(input);
+  input.legalActions = input.legalActions.filter(
+    (candidate) => !candidate.actionId.includes("withdraw_credits"),
+  );
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+  expect(input.playerView.own.clicks).toBe(3);
+  expect(chooseAiAction(input)).toMatchObject({
+    actionId: "runner.gain_credit",
+    fallbackUsed: false,
+    decisionDebug: {
+      planFirstDecision: {
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      },
+    },
+  });
+});

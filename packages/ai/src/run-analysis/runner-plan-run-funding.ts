@@ -21,6 +21,7 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
+import { runnerCardRunHasVisibleDifferentialPayoff } from "../plans/runner-run-payoff";
 
 import { runnerExactFundingRouteContract } from "../runtime/runner-exact-funding-routes";
 
@@ -423,6 +424,27 @@ export function bestRunTargetsByServer(
     return rank;
   };
   for (const evaluation of evaluations) {
+    const candidate = candidates.find(
+      (entry) => entry.actionId === evaluation.actionId,
+    );
+    if (
+      candidate?.semanticActionType === "play.runner_event" &&
+      candidates.some(
+        (entry) =>
+          entry.semanticActionType === "run.start" &&
+          entry.runProjectionSummary?.serverId === evaluation.targetServerId,
+      ) &&
+      !runnerCardRunHasVisibleDifferentialPayoff(
+        input,
+        candidate,
+        evaluation.targetServerId,
+        evaluations,
+      )
+    ) {
+      // A variant already rejected by the run owner cannot become the
+      // representative route and erase the basic run's exact support need.
+      continue;
+    }
     const previous = byServer.get(evaluation.targetServerId);
     const evaluationConversionRank = conversionRank(evaluation);
     const previousConversionRank = previous ? conversionRank(previous) : 0;

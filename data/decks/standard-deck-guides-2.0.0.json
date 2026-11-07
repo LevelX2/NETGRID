@@ -4723,14 +4723,19 @@
       "sourceAnalysisInputHash": "deck-analysis-input:9ac567e7",
       "contentByLocale": {
         "en": {
-          "summary": "Skivviss Mill Pressure relies primarily on targeted HQ pressure, targeted breaker search and protection against tags, traces and damage. In addition, the deck uses a reliable rig structure, short run event pace lines and a multi-access finish.",
-          "deckIdea": "Skivviss Mill Pressure combines targeted HQ pressure, targeted breaker search and protection against tags, traces and damage. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand. Use search, draw and recall to specifically close missing ICE coverage. Have enough hand cards, credits or protection ready so that a successful run doesn't end in punishment.",
+          "summary": "Skivviss Mill Pressure combines targeted HQ pressure and breaker search with R&D pressure through Skivviss. Successful R&D runs force additional Corp draws; rig development, run events, multi-access and protection against tags, traces and damage support the plan.",
+          "deckIdea": "Install Skivviss when you can repeatedly reach R&D safely. Each successful R&D run increases the Corp’s forced draw. Combine this pressure with useful HQ accesses and targeted breaker search. Weigh additional Corp draws against the options those cards provide, and retain protection against punishment.",
           "gamePlan": {
-            "opening": "Secure credits first, basic coverage and affordable first access. Pay particular attention to Priority Wreck and If You Want It Done Right... without leaving an unbalanced starting hand.",
-            "midgame": "Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand. Use search, draw and recall to specifically close missing ICE coverage. Have enough hand cards, credits or protection ready so that a successful run doesn't end in punishment.",
+            "opening": "Secure credits, basic coverage and an affordable access. Skivviss needs repeatable R&D runs; use If You Want It Done Right... to find the missing breakers without keeping an unbalanced opening hand.",
+            "midgame": "Build Skivviss counters through safe R&D runs and use HQ windows when the Corp draws extra cards. Anticipate a virus purge and reassess further runs when the ICE changes. Keep enough cards, credits or protection to survive punishment.",
             "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
           },
           "keyCards": [
+            {
+              "cardId": "onr_v1_064_skivviss",
+              "title": "Skivviss",
+              "role": "Successful R&D runs build Skivviss counters that force extra Corp draws. The pressure needs further safe runs and can be reset by a virus purge."
+            },
             {
               "cardId": "onr_v1_105_priority-wreck",
               "title": "Priority Wreck",
@@ -4758,7 +4763,7 @@
             }
           ],
           "pilotingTips": [
-            "Before each move, check whether HQ pressure still fits the current board or whether a supplementary line is better prepared.",
+            "Compare HQ access with R&D counter pressure on the current board; another run must justify its full cost and risk.",
             "Plan run costs and possible punishment together; a legal run is not automatically a good run."
           ],
           "weaknesses": [
@@ -4767,14 +4772,19 @@
           ]
         },
         "de": {
-          "summary": "Skivviss Mill Pressure setzt vor allem auf gezielten HQ-Druck, gezielte Breaker-Suche und Schutz gegen Tags, Traces und Schaden. Ergänzend nutzt das Deck einen verlässlichen Rig-Aufbau, kurze Run-Event-Tempolinien und einen Multiaccess-Abschluss.",
-          "deckIdea": "Skivviss Mill Pressure verbindet gezielten HQ-Druck, gezielte Breaker-Suche und Schutz gegen Tags, Traces und Schaden. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet.",
+          "summary": "Skivviss Mill Pressure verbindet gezielten HQ-Druck und Breaker-Suche mit R&D-Druck durch Skivviss. Erfolgreiche R&D-Runs erzwingen zusätzliche Korpdraws; Rig-Aufbau, Run-Events, Multiaccess und Schutz gegen Tags, Traces und Schaden stützen die Linie.",
+          "deckIdea": "Installiere Skivviss, wenn du R&D wiederholt sicher erreichen kannst. Jeder erfolgreiche R&D-Run erhöht den erzwungenen Pflichtdraw der Korp. Verbinde diesen Druck mit passenden HQ-Zugriffen und gezielter Breaker-Suche. Wäge zusätzliche Korpdraws gegen die damit verfügbaren Korpoptionen ab und halte Schutz gegen Bestrafung bereit.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Priority Wreck und If You Want It Done Right..., ohne dafür eine unausgewogene Starthand zu behalten.",
-            "midgame": "Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet.",
+            "opening": "Sichere Credits, Grund-Coverage und einen bezahlbaren Zugriff. Skivviss braucht wiederholbare R&D-Runs; nutze If You Want It Done Right... für die dazu fehlenden Breaker, ohne eine unausgewogene Starthand zu behalten.",
+            "midgame": "Baue über sichere R&D-Runs Skivviss-Counter auf und nutze HQ-Fenster, wenn die Korp zusätzliche Karten zieht. Rechne mit einem Virus-Purge und prüfe nach geändertem ICE, ob weitere Runs ihren Preis noch rechtfertigen. Halte Handkarten, Credits oder Schutz gegen Bestrafung bereit.",
             "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
           },
           "keyCards": [
+            {
+              "cardId": "onr_v1_064_skivviss",
+              "title": "Skivviss",
+              "role": "Erfolgreiche R&D-Runs bauen Skivviss-Counter auf, die zusätzliche Korpdraws erzwingen. Der Druck braucht weitere sichere Runs und kann durch einen Virus-Purge zurückgesetzt werden."
+            },
             {
               "cardId": "onr_v1_105_priority-wreck",
               "title": "Priority Wreck",
@@ -4802,7 +4812,7 @@
             }
           ],
           "pilotingTips": [
-            "Prüfe vor jedem Zug, ob HQ-Druck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+            "Vergleiche HQ-Zugriffe und R&D-Counterdruck anhand des aktuellen Boards; ein weiterer Run muss die vollständigen Kosten und Risiken rechtfertigen.",
             "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
           ],
           "weaknesses": [

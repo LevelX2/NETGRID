@@ -50,7 +50,7 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
         actionId:
           "runner.break_subroutine.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.corp_onr_v1_237_data-wall_1.0.printed_subroutines_end_the_run.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
         stateVersion: 275,
-        semanticActionSetFingerprint: "fnv1a:37fee12a",
+        semanticActionSetFingerprint: "fnv1a:5911b86e",
         invocationKey: "fnv1a:95cb89ce",
       },
     });

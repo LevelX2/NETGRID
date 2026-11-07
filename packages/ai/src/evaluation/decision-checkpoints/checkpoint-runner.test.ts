@@ -25,6 +25,32 @@ import { AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION } from "./runtime-checkpoint";
 describe("AI decision checkpoints", () => {
   beforeEach(() => resetResidentPlanPortfolioMemory());
 
+  it.each(["exactActionId", "requiredAction", "acceptablePlanKinds"])(
+    "rejects the unsupported %s expectation instead of silently ignoring it",
+    (key) => {
+      const current = fixture();
+      Object.assign(current.expectation, { [key]: "must-not-be-ignored" });
+      expect(() => runAiDecisionCheckpoint(current)).toThrowError(
+        `Unsupported checkpoint expectation fields: ${key}`,
+      );
+    },
+  );
+
+  it("enforces an exact current action through the supported action matcher", () => {
+    const current = fixture();
+    const baseline = runAiDecisionCheckpoint(current);
+    current.expectation.acceptableActions = [
+      { actionId: baseline.selectedAction!.actionId },
+    ];
+    expect(runAiDecisionCheckpoint(current).ok).toBe(true);
+    current.expectation.acceptableActions = [{ actionId: "wrong-action" }];
+    expect(runAiDecisionCheckpoint(current)).toMatchObject({
+      ok: false,
+      code: "behavior_regression",
+      message: expect.stringContaining("acceptable_action"),
+    });
+  });
+
   it("runs a versioned fixture through Engine input and the productive chooser", () => {
     const result = runAiDecisionCheckpoint(fixture());
 

@@ -6,6 +6,44 @@ import {
 } from "./action-cost-timing";
 
 describe("action cost and timing profiles", () => {
+  it.each(
+    (["clicks", "credits"] as const).flatMap((dimension) =>
+      [
+        Number.NaN,
+        Number.POSITIVE_INFINITY,
+        -1,
+        0.5,
+        Number.MAX_SAFE_INTEGER + 1,
+      ].map((value) => ({ dimension, value })),
+    ),
+  )(
+    "rejects malformed $dimension cost $value before planning",
+    ({ dimension, value }) => {
+      expect(() =>
+        costProfileForAction({
+          ...action("advance_card", {}),
+          costs: [{ [dimension]: value }],
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          code: "invalid_legal_action_cost",
+          owner: "action_semantics",
+          actionId: "cost-timing-advance_card",
+          invalidDimensions: [dimension],
+        }),
+      );
+    },
+  );
+
+  it("rejects overflow when individually valid cost components are combined", () => {
+    expect(() =>
+      costProfileForAction({
+        ...action("advance_card", {}),
+        costs: [{ credits: Number.MAX_SAFE_INTEGER }, { credits: 1 }],
+      }),
+    ).toThrow(expect.objectContaining({ code: "invalid_legal_action_cost" }));
+  });
+
   it.each([0, 3])(
     "does not classify an exactly normalized %i-credit payment twice",
     (credits) => {

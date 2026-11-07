@@ -23239,7 +23239,7 @@
   },
   "expectation": {
     "contractKind": "correctness",
-    "exactActionId": "runner.activated_card_ability.runner_onr_v1_045_newsgroup-filter_1.runner_onr_v1_045_newsgroup-filter_1.activated.onr_v1_045_newsgroup-filter:abilities_activated_runner_main_gain_credits",
+    "acceptableActions": [{ "actionId": "runner.activated_card_ability.runner_onr_v1_045_newsgroup-filter_1.runner_onr_v1_045_newsgroup-filter_1.activated.onr_v1_045_newsgroup-filter:abilities_activated_runner_main_gain_credits" }],
     "planExecution": {
       "acceptablePlanKinds": ["runner.economy"],
       "acceptableCapabilities": ["gain_general_liquid_credits"]

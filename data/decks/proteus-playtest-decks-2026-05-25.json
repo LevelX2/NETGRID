@@ -12,7 +12,6 @@
   "sourceDocuments": [
     "packages/cards/src/sets/proteus.set-spec.ts",
     "packages/cards/src/generated/card-spec-import-index.ts",
-    "docs/reviews/cards/proteus-card-spec-migration-report.json",
     "packages/cards/src/specs/originalset-v1",
     "packages/cards/src/specs/proteus",
     "docs/codex/CODEX_STATUS.md"

@@ -6649,6 +6649,7 @@ function deriveTargetProfiles(
   if (
     preferences.length > 0 &&
     (usesClosedExtendedMechanicalProfile(entry) ||
+      hasCorpMainTraceTagAssetPlacementOwner(entry) ||
       hasClosedTargetPreferenceOwner(entry.planning.engine))
   )
     return preferences.map((targetPreference) =>
@@ -7128,6 +7129,32 @@ function mechanicalOwnerHasCapabilityKey(
   );
 }
 
+/** A targetless, installed Corp trace/tag ability leaves this card-level
+ * preference with the asset's installation owner, not an activation choice. */
+function hasCorpMainTraceTagAssetPlacementOwner(
+  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+): boolean {
+  const abilities = entry.planning.engine.abilities;
+  return (
+    entry.definition.side === "corp" &&
+    entry.definition.type === "asset" &&
+    abilities !== undefined &&
+    abilities.length > 0 &&
+    abilities.every(
+      (ability) =>
+        ability.kind === "activated" &&
+        ability.timing === "corp_main" &&
+        ability.effects.length === 1 &&
+        ability.effects[0]?.kind === "trace" &&
+        ability.effects[0].onSuccess.length > 0 &&
+        ability.effects[0].onSuccess.every(
+          (effect) =>
+            effect.kind === "add_tags" && effect.recipient === "runner",
+        ),
+    )
+  );
+}
+
 function hasClosedTargetPreferenceOwner(
   engine: ReturnType<
     typeof cardSpecPlanningCards
@@ -7226,6 +7253,14 @@ function deriveClosedExtendedTargetProfile(
           ),
         }),
   };
+  if (hasCorpMainTraceTagAssetPlacementOwner(entry))
+    return {
+      ...planningFields,
+      kind: "install_target",
+      timing: "on_install",
+      targetType: "server",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
   const lookTopStack = engine.abilities
     ?.flatMap((ability) => ability.effects ?? [])
     .find((effect) => effect.kind === "look_top_stack_take_matching");

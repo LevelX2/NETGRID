@@ -3,8 +3,15 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { runnerDrawProjectionFor } from "../actions/action-economy-projection";
 import { createRunnerCreditDemand } from "../plans/credit-demand";
-import { searchFundingRoutes, type FundingRoute } from "../plans/funding-route";
-import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-funding-candidates";
+import {
+  searchFundingRoutes,
+  type FundingRoute,
+  type PaymentWindowFundingSetup,
+} from "../plans/funding-route";
+import { runnerFundingPaymentWindowQuote } from "./runner-funding-payment-window-quote";
+import {
+  runnerFundingRouteCandidateIsMaterializable,
+} from "../plans/runner-funding-candidates";
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
 import { turnPlanningFingerprint } from "../plans/turn-planning-contracts";
@@ -109,7 +116,13 @@ export function runnerExactFundingRouteContract(
     ),
     maxRoutes: 8,
     acceptRoute: (route) =>
-      runnerFundingRouteConsumerBufferFits(input, candidates, request, route),
+      runnerFundingRouteConsumerBufferFits(
+        input,
+        candidates,
+        request,
+        route,
+        paymentSetups,
+      ),
     compareEquivalentRoutes: (left, right) =>
       compareRunnerFundingHandQuotes(
         runnerFundingHandQuote(input, candidates, left),
@@ -404,7 +417,13 @@ function runnerExactFundingRouteCandidates(
       maxSteps: Math.max(1, request.remainingClicks),
       maxRoutes: 8,
       acceptRoute: (route) =>
-        runnerFundingRouteConsumerBufferFits(input, candidates, request, route),
+        runnerFundingRouteConsumerBufferFits(
+          input,
+          candidates,
+          request,
+          route,
+          [],
+        ),
     });
     return (
       result.bestRoute.status === "covered_guaranteed" &&
@@ -458,12 +477,16 @@ function runnerFundingRouteConsumerBufferFits(
   candidates: readonly ActionSemanticCandidate[],
   request: RunnerExactFundingRouteRequest,
   route: FundingRoute,
+  paymentSetups: readonly PaymentWindowFundingSetup[],
 ): boolean {
+  const payment = runnerFundingPaymentWindowQuote(route, paymentSetups);
+  if (!payment) return false;
   if (request.requiredEndTurnHandBuffer !== undefined) {
     const floor = request.requiredEndTurnHandBuffer;
     if (!Number.isSafeInteger(floor) || floor < 0) return false;
     let hand = input.playerView.own.gripOrHq.length;
     for (const step of route.steps) {
+      if (step.kind === "future_projection") continue;
       const candidate = candidates.find(
         (entry) => entry.actionId === step.actionId,
       );
@@ -495,13 +518,13 @@ function runnerFundingRouteConsumerBufferFits(
       input.playerView.own.clicks - route.totalClickCost < 1 ||
       route.steps.some(
         (step) =>
-          step.kind !== "legal_action" ||
           step.ownTurnOffset !== 0 ||
-          !input.legalActions.some(
-            (action) =>
-              action.actionId === step.actionId &&
-              action.expiresAtStateVersion === input.playerView.stateVersion,
-          ),
+          (step.kind === "legal_action" &&
+            !input.legalActions.some(
+              (action) =>
+                action.actionId === step.actionId &&
+                action.expiresAtStateVersion === input.playerView.stateVersion,
+            )),
       )
     )
       return false;
@@ -528,10 +551,13 @@ function runnerFundingRouteConsumerBufferFits(
         ...input.playerView,
         own: {
           ...input.playerView.own,
-          credits: route.projectedGeneralCredits,
+          // The exact compiled payment becomes liquid only inside this run.
+          credits: route.projectedGeneralCredits + payment.creditGain,
           clicks: input.playerView.own.clicks - route.totalClickCost,
           gripOrHq: input.playerView.own.gripOrHq.filter(
-            (card) => !consumedSources.has(card.instanceId),
+            (card) =>
+              !payment.installedCardIds.includes(card.instanceId) &&
+              !consumedSources.has(card.instanceId),
           ),
         },
       },
@@ -567,7 +593,9 @@ function runnerFundingRouteConsumerBufferFits(
   return (
     repair !== undefined &&
     route.totalClickCost + repair.clickCost <= request.remainingClicks &&
-    route.projectedGeneralCredits - repair.creditCost >= route.targetCredits
+    route.projectedGeneralCredits >= repair.creditCost &&
+    route.projectedGeneralCredits + payment.creditGain - repair.creditCost >=
+      route.targetCredits
   );
 }
 

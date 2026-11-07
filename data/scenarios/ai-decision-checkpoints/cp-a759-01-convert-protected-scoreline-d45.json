@@ -6542,7 +6542,7 @@
     }
   },
   "expectation": {
-    "exactActionId": "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1",
+    "acceptableActions": [{ "actionId": "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1" }],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
       "acceptableCapabilities": ["develop_score_protection"],

@@ -3,6 +3,10 @@ import { allocateCorpCentralDefenseFromAiFacts } from "../../corp/defense/corp-c
 import { corpTerminalCentralRezReserveSignals } from "../../corp/defense/defense-discovery-support";
 import { corpDefenseReserveNeeds } from "../../corp/defense/corp-defense-funding-facts";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
+import {
+  assessBestFundedCorpScoreProtection,
+  projectCorpFundedIceInstallRoute,
+} from "../../runtime/corp-funded-score-protection";
 import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-terminal-hq-funding-d29.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -179,12 +183,87 @@ it("preserves funding against nominal capacity but gives genuinely productive sa
   const reserve = state.signals.find(
     (s) => s.kind === "generic" && s.phase === "fund_rez_reserve",
   )!;
-  const install = state.signals.find(
-    (s) => s.kind === "generic" && s.phase === "install_ice",
+  // Discovery correctly withholds installations that consume this exact
+  // central reserve. Exercise the funding-priority contract with an explicit
+  // current installation projection, rather than requiring that bad offer.
+  const action = input.legalActions.find(
+    (a) =>
+      a.type === "install_card" &&
+      a.source === "corp_onr_v1_222_ball-and-chain_2" &&
+      a.payload?.serverId === "rd",
   )!;
-  if (install.kind !== "generic" || !install.installRoute)
-    throw Error("installation required");
-  expect(install.installRoute.projection.effect).toBe("no_progress");
+  expect(action).toBeDefined();
+  const server = input.playerView.servers.find((s) => s.id === "rd")!;
+  const scoreReserve = { creditBreakdown: [], hardClickReserve: 0 };
+  const maximumRunnerAccessSuccessProbability = {
+    numerator: 0,
+    denominator: 1,
+  };
+  const baseline = assessBestFundedCorpScoreProtection({
+    serverIce: server.ice,
+    runnerRig: input.playerView.opponent.rig!,
+    runnerCredits: input.playerView.opponent.credits,
+    targetServerId: "rd",
+    observedAtStateVersion: input.playerView.stateVersion,
+    availableCorpCredits: input.playerView.own.credits,
+    availableCorpClicks: input.playerView.own.clicks,
+    availableCorpAgendaPoints: input.playerView.own.agendaPoints,
+    scoreReserve,
+    maximumRunnerAccessSuccessProbability,
+  });
+  const projection = projectCorpFundedIceInstallRoute({
+    need: {
+      needId: "test:terminal-rd-install",
+      parentProjectId: "server-defense-portfolio",
+      targetServerId: "rd",
+      observedAtStateVersion: input.playerView.stateVersion,
+      objective: {
+        kind: "funded_remote_access_risk",
+        maximumRunnerAccessSuccessProbability,
+        policySource: "test:terminal-central",
+      },
+      scoreReserve,
+      baseline,
+    },
+    action,
+    currentStateVersion: input.playerView.stateVersion,
+    currentCorpCredits: input.playerView.own.credits,
+    currentCorpClicks: input.playerView.own.clicks,
+    currentCorpAgendaPoints: input.playerView.own.agendaPoints,
+    visibleCorpHand: input.playerView.own.gripOrHq,
+    currentServer: server,
+    runnerRig: input.playerView.opponent.rig!,
+    runnerCredits: input.playerView.opponent.credits,
+    projectedInstallCredits: action.costs.reduce(
+      (sum, cost) => sum + (cost.credits ?? 0),
+      0,
+    ),
+    projectedInstallClicks: action.costs.reduce(
+      (sum, cost) => sum + (cost.clicks ?? 0),
+      0,
+    ),
+  });
+  expect(projection.knowledge).toBe("known");
+  if (projection.knowledge !== "known") throw Error(projection.unknownReason);
+  const install: Extract<CorpDefenseSignal, { kind: "generic" }> = {
+    kind: "generic",
+    defenseId: `install:rd:${action.actionId}`,
+    phase: "install_ice",
+    serverId: "rd",
+    sourceDefinitionIds: ["onr_v1_222_ball-and-chain"],
+    actionIds: [action.actionId],
+    urgent: true,
+    centralPressure: "terminal",
+    value: 1,
+    evidenceCode: "test:nominal-capacity",
+    installRoute: {
+      disposition: "productive",
+      progressKind: "staged_central_defense",
+      rezFundingGap: 0,
+      projection,
+    },
+  };
+  expect(install.installRoute!.projection.effect).toBe("no_progress");
   expect(
     corpDefenseReserveNeeds(
       input,

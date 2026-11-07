@@ -5,6 +5,7 @@ import d184CaptureJson from "../../../../../data/scenarios/ai-decision-checkpoin
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
@@ -65,6 +66,7 @@ describe("match b244055277fb21bd terminal remote contest", () => {
     // Synthetic companion: preserve the exact legal run and terminal goal,
     // but finance the reserve which the historical position did not cover.
     capture.input.playerView.own.credits = 31;
+    bindPublicBoardStealQuoteCompanion(capture.input);
     expect(
       evaluateRunnerRunTargets({ input: capture.input }).find(
         (t) => t.targetServerId === "remote_1",

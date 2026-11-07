@@ -1,3 +1,4 @@
+import { bindSyntheticAgendaStealQuotes } from "../../agenda-steal-quotes.test-support";
 import { expect, it } from "vitest";
 import derezCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r2-g3-d148.json";
 import preparationCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r2-g13-d104.json";
@@ -11,12 +12,17 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-function decide(checkpoint: unknown, credits?: number) {
+function decide(checkpoint: unknown, credits?: number, clicks?: number) {
   const { input, runtime } = structuredClone(checkpoint) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  if (!input.playerView.run) {
+    bindSyntheticAgendaStealQuotes(input, "rd", 0, {});
+    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
+  }
   if (credits !== undefined) input.playerView.own.credits = credits;
+  if (clicks !== undefined) input.playerView.own.clicks = clicks;
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     input,
@@ -26,8 +32,8 @@ function decide(checkpoint: unknown, credits?: number) {
   return { input, decision: chooseAiAction(input) };
 }
 
-it("retains the preceding admitted R&D preparation before the reserve-blocked remote can interfere", () => {
-  const { input, decision } = decide(admittedPreparationCheckpoint);
+it("retains admitted R&D preparation when the remote funding prefix no longer fits", () => {
+  const { input, decision } = decide(admittedPreparationCheckpoint, 3, 2);
   const preparation = input.legalActions.find(
     (a) =>
       a.payload?.runnerAbility === "change_icebreaker_subtype" &&
@@ -45,6 +51,22 @@ it("retains the preceding admitted R&D preparation before the reserve-blocked re
   ).toContain(
     "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aprepare-run",
   );
+});
+
+it("funds the urgent remote while its two-credit prefix and run still fit", () => {
+  const { input, decision } = decide(admittedPreparationCheckpoint);
+  expect(input.playerView.own.clicks).toBe(4);
+  expect(decision.actionId).toBe("runner.gain_credit");
+  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    leafExecutorInstanceId:
+      "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+  });
+  expect(
+    evaluateRunnerRunTargets({ input }).find(
+      (target) => target.actionId === "runner.start_run.remote_1",
+    )?.prerunReserveQuote,
+  ).toMatchObject({ status: "blocked", creditGap: 2 });
 });
 
 it("continues the actual paid HQ access instead of derezzing a zero-rez-cost passed ICE", () => {
@@ -107,10 +129,10 @@ it("does not undo a prepared R&D mode for a remote whose reserve is still unfund
     )?.selectedSubtype,
   ).toBe("wall");
   expect(input.playerView.own.credits).toBe(3);
-  expect(decision.actionId).toBe("runner.start_run.rd");
+  expect(decision.actionId).toBe("runner.gain_credit");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-    route: { actionId: "runner.start_run.rd", stateVersion: 103 },
+    rootPlanInstanceId: "plan:runner.economy:runner-portfolio-credit-reserve",
+    route: { actionId: "runner.gain_credit", stateVersion: 103 },
   });
 });

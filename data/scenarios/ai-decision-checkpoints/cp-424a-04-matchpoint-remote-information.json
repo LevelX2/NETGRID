@@ -10975,7 +10975,7 @@
     }
   },
   "expectation": {
-    "exactActionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_1.runner_onr_v1_086_forged-activation-orders_1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+    "acceptableActions": [{ "actionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_1.runner_onr_v1_086_forged-activation-orders_1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice" }],
     "planExecution": {
       "acceptablePlanKinds": ["runner.contest_remote"],
       "acceptableCapabilities": ["contest_remote"],

@@ -220,7 +220,7 @@ describe("native free rez before Defense funding", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(improved));
   });
-  it("keeps the important installation first, then performs the free setup and real payout under the same funding parent", () => {
+  it("keeps free setup and real payout under Defense, then revalidates the funded prefix before Score protection", () => {
     const { f, state } = originalState();
     let current = structuredClone(state);
     const actions: string[] = [];
@@ -246,18 +246,24 @@ describe("native free rez before Defense funding", () => {
         stateVersion: current.stateVersion,
       });
       expect(p?.route?.planInstanceId).toBe(p?.leafExecutorInstanceId);
-      if (index > 0) {
+      if (index < 2) {
         expect(p?.rootPlanInstanceId).toBe(
           "plan:corp.defend_servers:server-defense-portfolio",
         );
         expect(p?.selectedPlan?.moduleId).toBe("corp.economy");
+      } else {
+        expect(current.corp.credits).toBe(7);
+        expect(p?.rootPlanInstanceId).toBe(
+          "plan:corp.score_agenda:agenda%3Acorp_onr_v1_220_tycho-extension_1%3Aremote_1",
+        );
+        expect(p?.selectedPlan?.moduleId).toBe("corp.defend_servers");
       }
       current = advance(current, { side: "corp", actionId: a.actionId });
     }
     expect(actions).toEqual([
-      "install_card",
       "rez_card",
       "activated_card_ability",
+      "draw_card",
     ]);
     expect([current.corp.credits, current.corp.clicks]).toEqual([7, 0]);
     const replay = replayEvents(

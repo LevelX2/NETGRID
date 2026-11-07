@@ -60,7 +60,7 @@ function brokerAbilityPayload(
     cardImplementationAbilityId: `onr_v1_154_broker:${capabilityKey}`,
     cardImplementationAbilityKey: capabilityKey,
     ...(route === "build"
-      ? { cardImplementationAddsHostedCredits: true }
+      ? { cardImplementationAddsHostedCredits: true, hostedCreditAddAmount: 3 }
       : { cardImplementationTakesHostedCredits: true }),
   };
 }
@@ -97,6 +97,24 @@ function actionAlternative(decision: RunnerDecision, actionId: string) {
   return decision.decisionDebug?.actionAlternatives?.find(
     (alternative) => alternative.actionId === actionId,
   );
+}
+
+/** The hand-built plain agenda has no self-cost or installed modifier. */
+function bindPlainRemoteAgendaQuote(input: ReturnType<typeof aiInput>): void {
+  const remote = input.playerView.servers.find(
+    (entry) => entry.id === "remote_1",
+  )!;
+  const agenda = remote.root.find(
+    (card) => card.definitionId === "simple_agenda",
+  )!;
+  expect(agenda.type).toBe("agenda");
+  agenda.effectiveStealCostQuote = {
+    stateVersion: input.playerView.stateVersion,
+    serverId: remote.id,
+    agendaInstanceId: agenda.instanceId,
+    creditCost: 0,
+    complete: true,
+  };
 }
 
 function nonEmergencyRunnerHand() {
@@ -325,7 +343,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         credits: 0,
       }),
     ]);
-    stableInput.playerView.own.credits = 6;
+    // A first load is useful only while the current six-credit budget is unfilled.
+    stableInput.playerView.own.credits = 3;
     stableInput.playerView.own.rig = [bankSource];
 
     const stableDecision = chooseRunnerAction(stableInput);
@@ -417,7 +436,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       ),
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
-    input.playerView.own.credits = 9;
+    input.playerView.own.credits = 6;
+    input.playerView.stateVersion = 9;
+    for (const action of input.legalActions) action.expiresAtStateVersion = 9;
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
     input.playerView.own.rig = [bankSource];
     input.playerView.own.gripOrHq = [
       visibleCard("runner-hand-1", "runner", "resource"),
@@ -485,7 +509,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         credits: 0,
       }),
     ]);
-    stableInput.playerView.own.credits = 6;
+    stableInput.playerView.own.credits = 2;
     stableInput.playerView.own.rig = [bankSource];
 
     const buildDecision = chooseRunnerAction(stableInput);
@@ -565,7 +589,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     });
     expect(actionAlternative(decision, "broker-load")?.whyNot).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("not_selected_by_plan:"),
+        expect.stringContaining(
+          "runner_credit_bank_hold_spending_budget_funded",
+        ),
         expect.stringContaining("candidate_plan:plan:runner.credit_bank:"),
       ]),
     );
@@ -606,6 +632,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
+    bindPlainRemoteAgendaQuote(input);
 
     const decision = chooseRunnerAction(input);
 
@@ -832,7 +859,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         },
       ),
     ]);
-    input.playerView.own.credits = 6;
+    input.playerView.own.credits = 3;
+    input.playerView.stateVersion = 9;
+    for (const action of input.legalActions) action.expiresAtStateVersion = 9;
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
       visibleCard("onr_v1_154_broker", "runner", "resource", {
@@ -1014,7 +1046,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     for (const actionId of ["broker-load", "broker-take"]) {
       expect(actionAlternative(decision, actionId)?.whyNot).toEqual(
         expect.arrayContaining([
-          "candidate_plan_evidence:runner_credit_bank_hold_comfortable_value",
+          "candidate_plan_evidence:runner_credit_bank_hold_spending_budget_funded",
           "candidate_plan_blocker:no_credit_bank_hold_route",
         ]),
       );
@@ -1577,6 +1609,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.clicks = 1;
     input.playerView.own.gripOrHq = [
       visibleCard("onr_v1_154_broker", "runner", "resource"),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input);
@@ -2188,6 +2221,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
+    bindPlainRemoteAgendaQuote(secondInput);
     const second = chooseRunnerAction(secondInput);
     const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
 
@@ -2261,6 +2295,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.agendaPoints = input.playerView.agendaPointsToWin - 1;
     input.playerView.own.credits = 100;
+    // The trace must remain unaffordable; four Corp credits no longer create
+    // a negative quote against a Runner holding one hundred general credits.
+    input.playerView.opponent.credits = 1_000;
     input.playerView.own.rig = [
       visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
       visibleCard("onr_v1_007_blink", "runner", "program"),
@@ -2302,7 +2339,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
     expect(rdMatchpointTarget).toMatchObject({
       pathPassability: "reachable",
-      recommendation: "run_now",
+      recommendation: "gain_credits_first",
     });
     expect(rdMatchpointTarget?.score).toBeLessThanOrEqual(0);
 
@@ -2311,7 +2348,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "draw",
       planKind: "runner.develop_board_and_hand",
       capability: "develop_runner_option_development",
-      priorityClass: "P6",
+      priorityClass: "P5",
+      assessmentEvidence:
+        "runner_funded_dead_hand_rotation_before_optional_reserve",
     });
     expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
@@ -2388,6 +2427,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
+    bindPlainRemoteAgendaQuote(input);
 
     const decision = chooseRunnerAction(input);
 

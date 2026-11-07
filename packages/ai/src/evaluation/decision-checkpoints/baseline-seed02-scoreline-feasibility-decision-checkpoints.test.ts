@@ -10,6 +10,9 @@ import {
 import { bindSyntheticAgendaInstallQuotes } from "../../semantic-ai-runtime-cutover.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-hand-support";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 
 describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
   it("invalidates the unreachable score-window plan and develops an independently executable tag engine", () => {
@@ -44,6 +47,24 @@ describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
       deadline: "open",
     });
     expect(corpScorelineAllowsMultiTurnDevelopment(reachable)).toBe(true);
+    const scoreProjects = residentPlanPortfolioSnapshot(result.input)!
+      .instances.filter((instance) => instance.moduleId === "corp.score_agenda")
+      .map(
+        (instance) =>
+          (instance.moduleState as { signal: CorpScoreProjectSignal }).signal,
+      );
+    expect(scoreProjects.length).toBeGreaterThan(0);
+    expect([
+      ...corpReservedScoreServerIds(result.input, scoreProjects),
+    ]).toEqual([]);
+    expect(
+      corpReservedScoreServerIds(reachableInput, scoreProjects).has("remote_1"),
+    ).toBe(true);
+    expect(
+      corpReservedScoreServerIds(result.input, [
+        { ...scoreProjects[0]!, feasible: true, sameTurnCloseout: true },
+      ]).has("remote_1"),
+    ).toBe(true);
   });
 
   it("rejects unconvertible ICE protection at deck zero and starts the bounded tag engine", () => {
@@ -129,6 +150,10 @@ function syntheticAgendaInstall(agenda: VisibleCard): LegalAction {
     targetRequirements: [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 413,
-    payload: { cardId: agenda.instanceId, serverId: "remote_1", placement: "root" },
+    payload: {
+      cardId: agenda.instanceId,
+      serverId: "remote_1",
+      placement: "root",
+    },
   } as LegalAction;
 }

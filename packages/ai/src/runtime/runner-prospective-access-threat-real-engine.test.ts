@@ -10,6 +10,7 @@ import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-buil
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
+import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 
 const decks = Object.fromEntries(
   (["runner", "corp"] as const).map((side) => {
@@ -128,6 +129,12 @@ it("uses observed expose knowledge to reject sacrificing sole coverage to a paya
   expect(payoff.evidence).toContain(
     "known_access_effect_prospective_rez_cost:2",
   );
+  const unsafeTarget = evaluateRunnerRunTargets({ input: i }).find(
+    (target) => target.actionId === "runner.start_run.remote_1",
+  )!;
+  expect(unsafeTarget).toBeDefined();
+  expect(unsafeTarget.accessPayoffContestable).toBe(false);
+  expect(unsafeTarget.accessPayoffRequiresFunding).toBeUndefined();
   const decision = chooseAiAction(i);
   expect(decision.actionId).not.toBe("runner.start_run.remote_1");
   expect(i.legalActions.some((a) => a.actionId === decision.actionId)).toBe(

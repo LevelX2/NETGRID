@@ -133,6 +133,7 @@ function assess(s: GameState) {
 function assertOwner(
   input: ReturnType<typeof assess>["input"],
   definitionId: string,
+  owner = "runner.develop_board_and_hand",
 ) {
   const d = chooseAiAction(input);
   const action = input.legalActions.find((a) => a.actionId === d.actionId)!;
@@ -141,7 +142,7 @@ function assertOwner(
       ?.definitionId,
   ).toBe(definitionId);
   const pf = d.decisionDebug!.planFirstDecision!;
-  expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
+  expect(pf.selectedPlan?.moduleId).toBe(owner);
   expect(pf.route?.actionId).toBe(d.actionId);
   expect(pf.executionOrigin?.leafPlanInstanceId).toBe(
     pf.selectedPlan?.instanceId,
@@ -176,8 +177,18 @@ describe("conditional counter development and its memory milestone", () => {
     s = apply(s, "runner", assertOwner(assess(s).input, memoryId));
     expect(getPlayerView(s, "runner").own.memoryLimit).toBe(6);
     // Preserve the real runtime between steps: no reset may hide commitment bugs.
-    s = apply(s, "runner", assertOwner(assess(s).input, stockId));
+    s = apply(
+      s,
+      "runner",
+      assertOwner(
+        assess(s).input,
+        "onr_v1_011_cloak",
+        "runner.recurring_economy",
+      ),
+    );
     expect(s.runner.memoryUsed).toBe(5);
+    s = apply(s, "runner", assertOwner(assess(s).input, stockId));
+    expect(s.runner.memoryUsed).toBe(6);
   });
   it.each([
     "reserve",

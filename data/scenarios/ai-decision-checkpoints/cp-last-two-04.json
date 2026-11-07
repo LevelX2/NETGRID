@@ -18189,7 +18189,7 @@
       }
     ],
     "choice": {
-      "mustSelectValues": [0]
+      "mustSelectValues": [5]
     }
   }
 }

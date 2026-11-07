@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { corpMissingConcreteDefenseDrawNeed } from "../../runtime/corp-economy/corp-defensive-draw";
+import { allocateCorpCentralDefenseFromAiFacts } from "../../corp/defense/corp-central-defense-facts-adapter";
 import memoryJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-surviving-remote-memory.json";
 import purgeJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-pipe-purge.json";
 import funding18Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-central-funding-g18.json";
@@ -25,6 +27,18 @@ function capture(json: unknown) {
     runtime: AiRuntimeCheckpointV1;
   };
 }
+function missingCentralDefense(input: AiDecisionInputWithDeckCapabilities) {
+  const draw = input.legalActions.find(
+    (action) => action.type === "draw_card",
+  )!;
+  return corpMissingConcreteDefenseDrawNeed(
+    input,
+    draw,
+    undefined,
+    allocateCorpCentralDefenseFromAiFacts({ input }),
+    { knowledge: "known", disposition: "effect_missing" },
+  );
+}
 function choose(json: unknown) {
   const { input, runtime } = capture(json);
   resetResidentPlanPortfolioMemory();
@@ -46,11 +60,16 @@ function choose(json: unknown) {
 }
 describe("meta 403 surviving observations and persistent action denial", () => {
   it.each([funding18Json, funding36Json])(
-    "funds the installed exact blocker instead of searching for missing ICE",
+    "suppresses redundant HQ search without blocking independent Score protection search",
     (json) => {
+      const current = capture(json);
+      expect(missingCentralDefense(current.input)).toBeUndefined();
       const result = choose(json);
-      expect(result.actionId).toBe("corp.gain_credit");
+      expect(result.actionId).toBe("corp.draw_card");
       const plan = result.decisionDebug?.planFirstDecision;
+      expect(plan?.rootPlanInstanceId).toMatch(/^plan:corp\.score_agenda:/);
+      expect(plan?.selectedPlan?.moduleId).toBe("corp.defend_servers");
+      expect(plan?.route?.capabilityId).toBe("develop_score_protection");
       expect(plan?.selectedStep?.planInstanceId).toBe(
         plan?.selectedPlan?.instanceId,
       );
@@ -59,6 +78,7 @@ describe("meta 403 surviving observations and persistent action denial", () => {
   it("keeps the bounded defense search when basic funding cannot reach the blocker", () => {
     const current = capture(funding18Json);
     current.input.playerView.own.credits = 4;
+    expect(missingCentralDefense(current.input)?.serverId).toBe("hq");
     expect(choose(current).actionId).toBe("corp.draw_card");
   });
   it("does not treat an expired rez quote as a proved funding alternative", () => {
@@ -68,6 +88,7 @@ describe("meta 403 surviving observations and persistent action denial", () => {
     )!.ice)
       if (ice.effectiveRezCostQuote)
         ice.effectiveRezCostQuote.expiresAtStateVersion--;
+    expect(missingCentralDefense(current.input)?.serverId).toBe("hq");
     expect(choose(current).actionId).toBe("corp.draw_card");
   });
   it("preserves public opaque identity through the DTO and removes only the stolen root", () => {

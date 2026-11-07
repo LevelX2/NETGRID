@@ -12,11 +12,21 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
+function isolateScoreThreshold(input: AiDecisionInputWithDeckCapabilities) {
+  // The native position also has an independent P2 terminal R&D defense.
+  // This control tests funding versus the free Score head itself.
+  input.legalActions = input.legalActions.filter(
+    (action) => action.type !== "install_card",
+  );
+  input.playerView.legalActions = input.legalActions;
+}
+
 it("funds a reachable conditional score threshold before a nonterminal free score", () => {
   const { input, runtime } = structuredClone(checkpointJson) as unknown as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  isolateScoreThreshold(input);
   expect(input.playerView.own).toMatchObject({
     credits: 11,
     clicks: 1,
@@ -75,6 +85,7 @@ it.each([
     runtime: AiRuntimeCheckpointV1;
   };
   Object.assign(input.playerView.own, { credits, clicks, agendaPoints });
+  isolateScoreThreshold(input);
   if (clicks === 0)
     input.legalActions = input.legalActions.filter(
       (a) => !a.costs.some((cost) => (cost.clicks ?? 0) > 0),
@@ -96,6 +107,7 @@ it("binds a two-credit gap only when both basic credits fit in the current turn"
     runtime: AiRuntimeCheckpointV1;
   };
   Object.assign(input.playerView.own, { credits: 10, clicks: 2 });
+  isolateScoreThreshold(input);
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     input,
@@ -110,4 +122,35 @@ it("binds a two-credit gap only when both basic credits fit in the current turn"
       (p) => p.instanceId === portfolio.rootForegroundInstanceId,
     )?.moduleId,
   ).toBe("corp.score_agenda");
+});
+
+it("keeps actual terminal R&D defense ahead of the native nonwinning score payoff", () => {
+  const { input, runtime } = structuredClone(checkpointJson) as unknown as {
+    input: AiDecisionInputWithDeckCapabilities;
+    runtime: AiRuntimeCheckpointV1;
+  };
+  resetResidentPlanPortfolioMemory();
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(
+    "corp.install_card.corp_onr_v1_222_ball-and-chain_1.rd.corp_onr_v1_222_ball-and-chain_1.1",
+  );
+  expect(
+    decision.decisionDebug?.planFirstDecision?.priority?.effectiveClass,
+  ).toBe("P2");
+  expect(residentPlanPortfolioSnapshot(input)!.instances).toContainEqual(
+    expect.objectContaining({
+      moduleId: "corp.score_agenda",
+      moduleState: expect.objectContaining({
+        signal: expect.objectContaining({
+          fundingGap: 1,
+          sameTurnCloseout: true,
+        }),
+      }),
+    }),
+  );
 });

@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { applyAction, hashGameState } from "@netgrid/engine";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 
 import safeStagedScoreJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-loop-r1-01-safe-staged-score-d138.json";
 import terminalRemoteContestJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-loop-r1-02-terminal-remote-contest-d240.json";
@@ -8,17 +12,44 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("random standard selfplay loop round one", () => {
   it.each([
-    ["starts the bounded staged score line", safeStagedScoreJson],
+    [
+      "finds effective protection for the bounded staged score line",
+      safeStagedScoreJson,
+    ],
     [
       "builds AP coverage before the reachable public terminal remote",
       terminalRemoteContestJson,
     ],
     [
-      "cash-outs the bank for the exact same-turn terminal remote route",
+      "keeps building while the terminal remote's visible Trace remains unfunded",
       terminalBrokerFundingJson,
     ],
   ])("%s", (_label, json) => {
-    const result = runAiDecisionCheckpoint(fixture(json));
+    const checkpoint = fixture(json);
+    if (json === safeStagedScoreJson) {
+      checkpoint.expectation.acceptableActions = [
+        { actionId: "corp.draw_card" },
+      ];
+      checkpoint.expectation.planExecution = {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["develop_score_protection"],
+        requiredAssessmentEvidence: [
+          "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_209_political-coup_2:remote_1:remote_1",
+        ],
+      };
+    }
+    if (json === terminalBrokerFundingJson) {
+      checkpoint.expectation.acceptableActions = [
+        {
+          actionId:
+            "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+        },
+      ];
+      checkpoint.expectation.planExecution!.acceptableCapabilities = [
+        "credit_bank_build",
+      ];
+    }
+    const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, diagnostic(result)).toBe(true);
     expect(result.decision?.decisionDebug?.whyNot?.length).toBeGreaterThan(0);
@@ -27,10 +58,25 @@ describe("random standard selfplay loop round one", () => {
         (section) => section.id === "runtime_why_not",
       ),
     ).toBe(true);
+    if (json === terminalBrokerFundingJson) {
+      expect(
+        evaluateRunnerRunTargets({ input: result.input }).find(
+          (target) => target.actionId === "runner.start_run.remote_1",
+        ),
+      ).toMatchObject({ visibleTraceTagHazardUnavoidable: true });
+    }
   });
 
   it("keeps the Broker cash-out under its own plan owner", () => {
-    const result = runAiDecisionCheckpoint(fixture(terminalBrokerFundingJson));
+    const checkpoint = fixture(terminalBrokerFundingJson);
+    checkpoint.engine.testOnlyGameState.runner.credits = 1;
+    checkpoint.engine.testOnlyGameState.corp.credits = 0;
+    checkpoint.source.kind = "synthetic_companion";
+    checkpoint.engine.stateHash = hashGameState(
+      checkpoint.engine.testOnlyGameState,
+    );
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, diagnostic(result)).toBe(true);
     const evidence = [
       ...(result.decision?.evidence ?? []),
       ...(result.decision?.decisionDebug?.planFirstDecision
@@ -46,9 +92,24 @@ describe("random standard selfplay loop round one", () => {
     expect(
       evidence.some(
         (entry) =>
-          entry === "runner_credit_bank_cashout_for_click_efficient_liquidity",
+          entry ===
+          "runner_credit_bank_bound_run_action:runner.start_run.remote_1",
       ),
     ).toBe(true);
+    const before = checkpoint.engine.testOnlyGameState;
+    const paid = applyAction(before, {
+      matchId: before.matchId,
+      side: "runner",
+      actionId: result.decision!.actionId!,
+      clientKnownStateVersion: before.stateVersion,
+    });
+    expect(paid.ok).toBe(true);
+    if (!paid.ok) throw Error(JSON.stringify(paid.error));
+    const next = buildAiDecisionInput(paid.state, "runner", {
+      ownDeckSnapshot: checkpoint.deckSnapshot,
+      difficulty: "hard",
+    });
+    expect(chooseAiAction(next).actionId).toBe("runner.start_run.remote_1");
   });
 });
 

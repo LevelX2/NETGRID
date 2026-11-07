@@ -399,12 +399,25 @@ export function assessCorpEconomyFundingRoute(
       true &&
     signal.delegatedPriorityClass !== undefined &&
     signal.urgentForScore === true &&
+    signal.scoreFundingMilestone?.deadline === "multi_turn" &&
     signal.scoreFundingMilestone?.remainingGap === signal.gap &&
     signal.scoreFundingMilestone.observedCredits === currentCredits &&
     signal.scoreFundingMilestone.targetCredits ===
       currentCredits + signal.gap &&
     Number.isFinite(signal.gap) &&
     signal.gap > 0;
+  if (
+    signal.kind === "parent_funding" &&
+    signal.scoreFundingMilestone &&
+    signal.scoreFundingMilestone.deadline !== "multi_turn" &&
+    fullTargetResult.bestRoute.status === "uncovered"
+  ) {
+    progressEvidence.push(
+      "corp_score_funding_hard_deadline_unreachable",
+      `corp_score_funding_deadline:${signal.scoreFundingMilestone.deadline}`,
+      `corp_score_funding_required_before_deadline:${fullTargetCredits}`,
+    );
+  }
   const exactIncrementalAmbushFunding =
     signal.kind === "parent_funding" &&
     (signal.needId.startsWith("ambush-funding:") ||

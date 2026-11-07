@@ -719,6 +719,11 @@ function evaluateRunnerRunTarget(
     cumulativeVisibleAndKnownAccessDamageLethal || agendaStealBudgetBlocked
       ? false
       : payoff.accessPayoffContestable;
+  const accessPayoffRequiresFunding =
+    agendaStealBudgetBlocked &&
+    agendaStealCreditRequirement !== undefined &&
+    !cumulativeVisibleAndKnownAccessDamageLethal &&
+    payoff.accessPayoffContestable !== false;
   const knownAccessDamageSurvivalCapacityAfterAction =
     payoff.knownAccessDamage === undefined
       ? undefined
@@ -1090,6 +1095,9 @@ function evaluateRunnerRunTarget(
     actionId: projection.actionId,
     accessPayoff,
     accessFacts: payoff.accessFacts,
+    ...(accessPayoffRequiresFunding
+      ? { accessPayoffRequiresFunding: true as const }
+      : {}),
     ...(effectiveAccessPayoffContestable !== undefined
       ? { accessPayoffContestable: effectiveAccessPayoffContestable }
       : {}),

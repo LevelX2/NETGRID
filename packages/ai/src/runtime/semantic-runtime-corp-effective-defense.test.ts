@@ -8,6 +8,28 @@ import {
 import { withPostRezRunQuote } from "../effective-run-quote.test-support";
 
 describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
+  it("retains the stop potential in a current composite trace-success quote", () => {
+    const cinderella = corpIce("cinderella", {
+      definitionId: "onr_v1_228_cinderella",
+      title: "Cinderella",
+    });
+    expect(
+      visibleCorpIceDefenseProfile(cinderella, [
+        {
+          type: "initiate_trace",
+          traceLimit: 6,
+          traceSuccessEffect: {
+            type: "end_run_trash_hardware_and_unpreventable_meat_damage",
+            amount: 2,
+          },
+        },
+      ]),
+    ).toMatchObject({ hasImmediateStop: true, hasMeaningfulTaxOrDamage: true });
+    expect(visibleCorpIceDefenseProfile(cinderella, [])).toMatchObject({
+      hasImmediateStop: false,
+    });
+  });
+
   it("uses current quoted subroutines instead of printed potential when supplied", () => {
     const hunting = corpIce("hunting", {
       definitionId: "onr_proteus_026_hunting-pack",

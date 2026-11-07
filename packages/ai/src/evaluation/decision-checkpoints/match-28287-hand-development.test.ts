@@ -8,9 +8,19 @@ import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent
 afterEach(resetResidentPlanPortfolioMemory);
 
 it("develops a fully dead hand before extending an already large credit reserve", () => {
-  const { action, plan } = decide(load(171));
+  const funded = load(171);
+  funded.input.playerView.own.credits = 100;
+  const { action, plan } = decide(funded);
   expect(action.type).toBe("draw_card");
   expect(plan.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
+});
+
+it("retains the native profitable first bank load before optional P5 hand rotation", () => {
+  const { action, plan } = decide(load(171));
+  expect(action.actionId).toContain(
+    "broker_1.activated.onr_v1_154_broker:store_credits",
+  );
+  expect(plan.priority?.effectiveClass).toBe("P4");
 });
 
 it("keeps optional draw at P6 for a useful/protected/mixed hand or an unfunded development floor", () => {

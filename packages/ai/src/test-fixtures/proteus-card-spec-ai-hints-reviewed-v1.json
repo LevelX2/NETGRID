@@ -4550,6 +4550,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_doppelganger_remove_for_4_credits",
+            "counterRemoval": {
+              "counterType": "doppelganger",
+              "credits": 4,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },

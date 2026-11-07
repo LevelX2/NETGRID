@@ -341,6 +341,9 @@ export type RunnerRunTargetEvaluation = {
   accessPayoff: RunnerAccessPayoff;
   accessFacts: RunnerAccessFacts;
   accessPayoffContestable?: boolean;
+  /** A known credit shortfall blocks the current route, while its access
+   * payoff remains useful for a separately quoted preparation/funding need. */
+  accessPayoffRequiresFunding?: true;
   knownAccessState: RunnerKnownAccessState;
   accessNoveltyRatio?: number;
   multiaccessAvailable: boolean;

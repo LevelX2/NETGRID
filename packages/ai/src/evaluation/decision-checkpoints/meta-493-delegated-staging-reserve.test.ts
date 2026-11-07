@@ -4,6 +4,10 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
+  corpFundedCentralProtectionReserve,
+  corpServerProtectionClaims,
+} from "../../corp/defense/corp-server-protection-reserve";
+import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
@@ -44,7 +48,7 @@ function decide(cp: ReturnType<typeof checkpoint>) {
   return decision;
 }
 it.each([6, 7])(
-  "rejects delegated staging that consumes the current HQ rez reserve at %i credits",
+  "retains the exact Score delegation against an equal one-point HQ claim at %i credits",
   (credits) => {
     const cp = checkpoint();
     cp.input.playerView.own.credits = credits;
@@ -53,28 +57,36 @@ it.each([6, 7])(
       .ice.find((c) => c.definitionId === "onr_v1_273_triggerman")!;
     expect(triggerman.rezzed).toBe(false);
     const quote = triggerman.effectiveRezCostQuote;
-    if (quote?.complete !== true) throw Error("current_complete_native_rez_quote_required");
+    if (quote?.complete !== true)
+      throw Error("current_complete_native_rez_quote_required");
     expect(quote.finalCredits).toBe(7);
     const decision = decide(cp),
       plan = decision.decisionDebug!.planFirstDecision!;
-    expect(decision.actionId).not.toBe(sleeper);
-    expect(plan.dispositions).toContainEqual(
+    // The physical HQ blocker still costs seven. Its current expected loss
+    // is one point; the existing reserve policy explicitly lets the protected
+    // one-point Score project compete at that same stake. Reserving all seven
+    // here would contradict that policy and suppress the admitted delegation.
+    expect(corpServerProtectionClaims(cp.input).claims).toContainEqual(
       expect.objectContaining({
-        actionId: sleeper,
-        disposition: "explicitly_nonproductive",
-        ownerModuleId: "corp.defend_servers",
+        serverId: "hq",
+        credits: 7,
+        expectedPoints: 1,
       }),
     );
-    // Native zero-credit overflow conversion retains one click to reach seven.
+    expect(corpFundedCentralProtectionReserve(cp.input, undefined, 1)).toBe(0);
+    expect(decision.actionId).toBe(sleeper);
+    expect(plan.rootPlanInstanceId).toBe(
+      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_208_on-call-solo-team_1%3Aremote_1",
+    );
+    expect(plan.selectedPlan?.moduleId).toBe("corp.defend_servers");
     const selected = cp.input.legalActions.find(
       (a) => a.actionId === decision.actionId,
     )!;
-    expect(selected.costs.reduce((n, c) => n + (c.credits ?? 0), 0)).toBe(0);
+    expect(selected.costs.reduce((n, c) => n + (c.credits ?? 0), 0)).toBe(1);
     expect(
       cp.input.playerView.own.clicks -
         selected.costs.reduce((n, c) => n + (c.clicks ?? 0), 0),
     ).toBe(1);
-    expect(plan.rootPlanInstanceId).not.toContain("corp.score_agenda");
   },
 );
 it.each([

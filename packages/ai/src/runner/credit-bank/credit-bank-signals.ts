@@ -29,6 +29,7 @@ import {
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
 import { creditBankReplacesBasicRunFunding } from "./credit-bank-basic-run-funding";
 import { creditBankFloorRecoveryWindow } from "./credit-bank-floor-recovery";
+import { creditBankFundsKnownUrgentRun } from "./credit-bank-known-run-funding";
 
 /** Facts/routes from other owners, bound to the same decision input and candidates.
  * These services never choose a bank phase or execute a bank action.
@@ -439,9 +440,14 @@ export function runnerCreditBankSignals(
           phase: "cash_out" as const,
           actionIds: cashOutActionIds,
           rejectedActionIds: buildActionIds,
+          // A mature bank replaces ordinary development credit clicks. That
+          // efficiency alone is no acute P2 obligation and cannot preempt a
+          // terminal contest's bound coverage search.
           priorityClass:
             convertibleRunFundingRoute?.priorityClass ??
-            (concreteFundingNeed ? ("P2" as const) : ("P4" as const)),
+            (convertibleDevelopmentFundingNeed
+              ? ("P2" as const)
+              : ("P4" as const)),
           currentStoredCredits,
           portfolioStoredCredits,
           estimatedPayout,
@@ -841,6 +847,19 @@ function runnerCreditBankRunFundingRoute(params: {
     ) {
       continue;
     }
+    const knownRunFunding = creditBankFundsKnownUrgentRun({
+      input: params.input,
+      candidates: params.candidates,
+      economy: params.economy,
+      target: evaluation,
+      admission,
+      cashOutActionIds: params.cashOutActionIds,
+      quoteAfterCashouts: params.services.quoteRunAfterCashoutRoute,
+      ...(requiredPostRunReserve !== undefined
+        ? { requiredPostRunReserve }
+        : {}),
+    });
+    if (knownRunFunding) return knownRunFunding;
     const basicReplacement = creditBankReplacesBasicRunFunding({
       input: params.input,
       candidates: params.candidates,

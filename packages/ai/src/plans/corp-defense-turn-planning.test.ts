@@ -18,6 +18,45 @@ import {
 import { buildPlanningStateIdentity } from "./turn-planning-contracts";
 
 describe("Corp defense/economy turn-planning vertical slice", () => {
+  it.each(["current", "wrong_action", "unknown_cost"] as const)(
+    "quotes the bounded generic Defense draw without an invented Score parent: %s",
+    (variant) => {
+      const draw = baseCandidate("draw", "draw.card", "basic_action");
+      const signal: CorpGenericDefenseSignal = {
+        kind: "generic",
+        defenseId: "draw:rd",
+        serverId: "rd",
+        phase: "draw_for_ice",
+        sourceDefinitionIds: [],
+        actionIds: ["draw"],
+        urgent: true,
+        centralPressure: "terminal",
+        value: 1000,
+        evidenceCode: "corp_missing_concrete_defense_draw:rd",
+      };
+      if (variant === "wrong_action") signal.actionIds = ["other-draw"];
+      if (variant === "unknown_cost")
+        draw.costProfile.costKnownStatus = "unknown";
+      const slice = buildSlice(decisionInput(), [signal], [], [draw]);
+      expect(slice.lines.length).toBe(variant === "current" ? 1 : 0);
+      if (variant === "current") {
+        expect(slice.lines[0]).toMatchObject({
+          disposition: "draw_for_ice",
+          currentActionId: "draw",
+          priorityClass: "P2",
+          defenseValue: 12,
+          campaignQuote: { nextMilestoneId: "replan_after_defense_draw" },
+        });
+        expect(slice.lines[0]!.supportBinding).toBeUndefined();
+        expect(slice.lines[0]!.valueClaims[0]).toMatchObject({
+          contributionKind: "option_preservation",
+          amount: 12,
+          dependencyKeys: [],
+        });
+      }
+    },
+  );
+
   it.each([
     {
       urgent: true,

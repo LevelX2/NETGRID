@@ -1,4 +1,5 @@
 import type { PublicGameEvent } from "@netgrid/shared";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
@@ -7,8 +8,8 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
  *
  * Reconstruct only the mechanically recorded turn identity and the server
  * binding of complete run-origin/access event pairs. A run origin is either
- * an explicit `start_run` event or a public event-card resolution that itself
- * records the run phase, target server and access count. The helper
+ * an explicit `start_run` event, a complete public event-card resolution, or
+ * a canonical unconditional on-play run to the recorded fixed central. The helper
  * deliberately throws for an unpaired access instead of inventing tactical
  * history.
  */
@@ -26,6 +27,10 @@ export function bindHistoricalRunEventCadence(
     event.turnSerial = turnSerial;
     if (event.type === "end_turn") {
       turnSerial += 1;
+      activeRunServerId = undefined;
+      continue;
+    }
+    if (event.type === "jack_out") {
       activeRunServerId = undefined;
       continue;
     }
@@ -76,13 +81,36 @@ export function bindHistoricalRunEventCadence(
 function isRecordedEventRunOrigin(event: PublicGameEvent): boolean {
   if (event.type !== "play_event") return false;
   const payload = event.publicPayload as Record<string, unknown>;
-  return (
+  if (
     eventServerId(event) !== undefined &&
     typeof payload.runPhase === "string" &&
     payload.runPhase.length > 0 &&
     typeof payload.effectiveAccessCount === "number" &&
     Number.isInteger(payload.effectiveAccessCount) &&
     payload.effectiveAccessCount > 0
+  )
+    return true;
+  // Older direct event plays lack the resolved run fields. A single,
+  // unconditional canonical on-play run to the recorded fixed central is
+  // still an exact origin; optional/conditional or chosen-target effects are
+  // deliberately not reconstructed from a card-wide run hint.
+  if (
+    payload.actor !== "runner" ||
+    typeof payload.cardDefinitionId !== "string"
+  )
+    return false;
+  const card = cardSpecPlanningCardByDefinitionId(payload.cardDefinitionId);
+  if (card?.definition.side !== "runner" || card.definition.type !== "event")
+    return false;
+  const onPlay = card.planning.engine.abilities?.filter(
+    (ability) => ability.kind === "on_play",
+  );
+  if (onPlay?.length !== 1 || onPlay[0]!.effects.length !== 1) return false;
+  const effect = onPlay[0]!.effects[0]!;
+  return (
+    effect.kind === "make_run" &&
+    effect.target.kind === "central_server" &&
+    effect.target.server === eventServerId(event)
   );
 }
 

@@ -107,13 +107,33 @@ describe("existing terminal score continuation before emergency agenda flood", (
       cp.runtime,
     );
     const decision = chooseAiAction(cp.input);
-    expect(decision.actionId).toContain("corp.install_card.");
-    expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
+    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.reasonCode).toBe("plan_first.corp.economy");
     expect(decision.fallbackUsed).toBe(false);
+    const portfolio = residentPlanPortfolioSnapshot(cp.input)!;
+    const root = portfolio.instances.find(
+      (instance) => instance.instanceId === portfolio.rootForegroundInstanceId,
+    )!;
+    // Emergency development remains admitted under the new agenda. Its
+    // current multi-turn funding head precedes installation at zero credits.
+    expect(root.moduleState).toMatchObject({
+      signal: {
+        projectId: "agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
+        phase: "install_agenda",
+        feasible: true,
+        routeAssessment: "corp_deckout_agenda_flood_score_install",
+        fundingMilestone: { targetCredits: 4, deadline: "multi_turn" },
+      },
+    });
+    expect(
+      portfolio.instances.find(
+        (instance) => instance.instanceId === portfolio.executorInstanceId,
+      )?.parentInstanceId,
+    ).toBe(root.instanceId);
   });
   it.each(
-    ["stale_quote", "incomplete_quote", "unfundable_quote"].flatMap(condition =>
-      ["protected", "exposed"].map(hq => ({ condition, hq })),
+    ["stale_quote", "incomplete_quote", "unfundable_quote"].flatMap(
+      (condition) => ["protected", "exposed"].map((hq) => ({ condition, hq })),
     ),
   )(
     "uses HQ protection when continuation is $condition and HQ is $hq",
@@ -122,11 +142,19 @@ describe("existing terminal score continuation before emergency agenda flood", (
       // At zero credits, unrezzed positive-cost HQ ICE leaves the agendas
       // exposed. This keeps the deck population and remote-install costs intact.
       if (hq === "exposed")
-        cp.input.playerView.servers.find((server: { id: string }) => server.id === "hq").ice.forEach((card: { rezzed: boolean }) => { card.rezzed = false; });
-      const allocation = allocateCorpCentralDefenseFromAiFacts({ input: cp.input });
+        cp.input.playerView.servers
+          .find((server: { id: string }) => server.id === "hq")
+          .ice.forEach((card: { rezzed: boolean }) => {
+            card.rezzed = false;
+          });
+      const allocation = allocateCorpCentralDefenseFromAiFacts({
+        input: cp.input,
+      });
       expect(allocation.status).toBe("known");
       if (allocation.status === "known")
-        expect(allocation.evidence.hq.expectedAgendaLoss.numerator > 0).toBe(hq === "exposed");
+        expect(allocation.evidence.hq.expectedAgendaLoss.numerator > 0).toBe(
+          hq === "exposed",
+        );
       const quote = cp.input.playerView.servers.find(
         (s: { id: string }) => s.id === "remote_1",
       ).root[0].scoreContinuationQuote;
@@ -143,12 +171,28 @@ describe("existing terminal score continuation before emergency agenda flood", (
         cp.runtime,
       );
       const decision = chooseAiAction(cp.input);
+      expect(decision.actionId).toBe("corp.gain_credit");
+      expect(decision.reasonCode).toBe("plan_first.corp.economy");
       if (hq === "exposed") {
-        expect(decision.actionId).toContain("corp.install_card.");
-        expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
-      } else {
-        expect(decision.actionId).toBe("corp.gain_credit");
-        expect(decision.reasonCode).toBe("plan_first.corp.economy");
+        const portfolio = residentPlanPortfolioSnapshot(cp.input)!;
+        const root = portfolio.instances.find(
+          (instance) =>
+            instance.instanceId === portfolio.rootForegroundInstanceId,
+        )!;
+        // The invalid installed continuation cannot own this funding. The
+        // separate HQ-agenda escape project retains its real multi-turn need.
+        expect(root.moduleState).toMatchObject({
+          signal: {
+            projectId: "agenda:corp_onr_v1_204_ice-transmutation_3:remote_2",
+            routeAssessment: "corp_deckout_agenda_flood_score_install",
+            fundingMilestone: { deadline: "multi_turn", targetCredits: 5 },
+          },
+        });
+        expect(
+          portfolio.instances.find(
+            (instance) => instance.instanceId === portfolio.executorInstanceId,
+          )?.parentInstanceId,
+        ).toBe(root.instanceId);
       }
       expect(decision.fallbackUsed).toBe(false);
     },

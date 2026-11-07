@@ -36,6 +36,21 @@ export function applyCostAndTimingProfiles(
 export function costProfileForAction(action: LegalAction): ActionCostProfile {
   const clickCostDimension = exactCostDimension(action, "clicks");
   const creditCostDimension = exactCostDimension(action, "credits");
+  if (
+    clickCostDimension.status === "invalid" ||
+    creditCostDimension.status === "invalid"
+  ) {
+    throw Object.assign(new Error("invalid_legal_action_cost"), {
+      name: "ActionCostProjectionError",
+      code: "invalid_legal_action_cost",
+      owner: "action_semantics",
+      actionId: action.actionId,
+      invalidDimensions: [
+        ...(clickCostDimension.status === "invalid" ? ["clicks"] : []),
+        ...(creditCostDimension.status === "invalid" ? ["credits"] : []),
+      ],
+    });
+  }
   const clickCost =
     clickCostDimension.status === "known"
       ? clickCostDimension.value

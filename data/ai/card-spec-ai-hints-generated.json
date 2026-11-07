@@ -43176,6 +43176,21 @@
             ]
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "establish_tag_source_in_protected_empty_remote",
+            "preferences": [
+              "best_cards_for_current_plan",
+              "use_choice_option_with_visible_board_payoff"
+            ],
+            "avoid": ["option_with_no_visible_current_payoff"],
+            "kind": "install_target",
+            "timing": "on_install",
+            "targetType": "server",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
         "effects": [
           {
             "kind": "trace",

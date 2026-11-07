@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { bindSyntheticAgendaStealQuotes } from "./agenda-steal-quotes.test-support";
 
 import { chooseCorpAction, chooseRunnerAction } from "./index";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
@@ -478,6 +479,7 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "runner.remote_contest",
     });
 
+    bindSyntheticAgendaStealQuotes(remoteInput, "remote_1", 0, { agenda: 0 });
     const remoteDecision = chooseRunnerAction(remoteInput, {
       runnerTurnPlannerMode: "legacy_compare",
     });

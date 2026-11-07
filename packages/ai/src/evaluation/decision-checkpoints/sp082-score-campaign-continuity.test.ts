@@ -6,6 +6,8 @@ import closedGapCaptureJson from "../../../../../data/scenarios/ai-decision-chec
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { sp082KnownProtectionFundingCompanion } from "./sp082-score-campaign.test-support";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -41,6 +43,7 @@ const SCORE_NEED =
 
 function decide(
   source: unknown,
+  knownProtectionCompanion = false,
 ): { capture: ReconstructedDecisionCapture; decision: AiDecision } {
   const capture = structuredClone(source) as ReconstructedDecisionCapture;
   const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -50,18 +53,37 @@ function decide(
     sideSafeInput: true,
     humanPrivateHandExcluded: true,
   });
+  let input = capture.input;
+  if (knownProtectionCompanion) {
+    // Current Engine control; keep the historical capture and validation
+    // facts untouched. Only a genuinely protected fort owns the four-credit floor.
+    const fixture = sp082KnownProtectionFundingCompanion();
+    const state = fixture.engine.testOnlyGameState;
+    expect(input.matchId).toBeDefined();
+    state.matchId = input.matchId!;
+    state.stateVersion = input.playerView.stateVersion;
+    state.turnSerial = input.playerView.turnSerial!;
+    state.corp.credits = input.playerView.own.credits;
+    state.corp.clicks = input.playerView.own.clicks;
+    input = buildAiDecisionInput(state, "corp", {
+      difficulty: input.difficulty,
+      profileId: input.profileId,
+      ownDeckSnapshot: input.ownDeckSnapshot!,
+      decisionId: input.decisionId,
+    });
+  }
   resetResidentPlanPortfolioMemory();
-  restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+  restoreAiRuntimeCheckpoint(input, deckSnapshotId!, capture.runtime);
   return {
     capture,
-    decision: chooseAiAction(capture.input as AiDecisionInput),
+    decision: chooseAiAction(input as AiDecisionInput),
   };
 }
 
 describe("SP-082 score campaign continuity checkpoints", () => {
   it("keeps an exactly quoted current funding head bound across the opponent turn", () => {
-    const first = decide(fundingCaptureJson);
-    const second = decide(fundingCaptureJson);
+    const first = decide(fundingCaptureJson, true);
+    const second = decide(fundingCaptureJson, true);
 
     expect(first.capture.stateVersion).toBe(117);
     expect(first.decision).toMatchObject({
@@ -88,7 +110,8 @@ describe("SP-082 score campaign continuity checkpoints", () => {
       ]),
     );
     expect(
-      first.decision.decisionDebug?.planFirstDecision?.turnPlanning?.selectedLine,
+      first.decision.decisionDebug?.planFirstDecision?.turnPlanning
+        ?.selectedLine,
     ).toMatchObject({
       phases: [
         {
@@ -102,6 +125,15 @@ describe("SP-082 score campaign continuity checkpoints", () => {
       ],
     });
     expect(second.decision).toEqual(first.decision);
+  });
+
+  it("does not publish a score funding need for the native unprotectable fort", () => {
+    const { decision } = decide(fundingCaptureJson);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(
+      decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).not.toBe(SCORE_SUPPORT);
+    expect(decision.evidence).not.toContain(`plan_priority_need:${SCORE_NEED}`);
   });
 
   it("ends the score-labelled funding need as soon as the exact gap is closed", () => {

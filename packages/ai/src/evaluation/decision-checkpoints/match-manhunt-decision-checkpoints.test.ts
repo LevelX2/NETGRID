@@ -1,4 +1,4 @@
-import { hashGameState } from "@netgrid/engine";
+import { applyAction, getLegalActions, hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import cp01Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manhunt-01.json";
@@ -9,6 +9,7 @@ import cp05Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-m
 import cp06Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manhunt-06.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 
 describe("match Manhunt exact decision checkpoints", () => {
   it("treats the coupled Corp tag and damage line as the primary win condition", () => {
@@ -35,10 +36,37 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("hardens the strategic score remote before resolving residual HQ overflow", () => {
-    const result = runAiDecisionCheckpoint(fixture(cp05Json));
+  it("develops executable campaign income before unfunded strategic remote staging", () => {
+    const checkpoint = fixture(cp05Json);
+    const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, result.message).toBe(true);
+    const initial = structuredClone(checkpoint.engine.testOnlyGameState);
+    initial.eventLog = structuredClone(checkpoint.engine.eventPrefix);
+    let state = initial;
+    for (let index = 0; index < 3; index++) {
+      const action = getLegalActions(state, "corp").find((candidate) =>
+        index === 0
+          ? candidate.actionId === result.decision!.actionId
+          : candidate.source === "corp_onr_v1_309_bbs-whispering-campaign_2" &&
+            (index === 1
+              ? candidate.type === "rez_card"
+              : candidate.payload?.cardImplementationTakesHostedCredits ===
+                true),
+      );
+      expect(action).toBeDefined();
+      const applied = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: action!.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(applied.ok).toBe(true);
+      if (!applied.ok) throw Error(JSON.stringify(applied.error));
+      state = applied.state;
+    }
+    expect(state.corp.credits).toBe(initial.corp.credits + 2);
+    expect(state.corp.clicks).toBe(initial.corp.clicks - 2);
   });
 
   it("retains the final visible tag enabler and damage payoff", () => {
@@ -115,16 +143,14 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("keeps the strategic score-remote owner when no visible kill pair remains", () => {
+  it("retains executable campaign development when no visible kill pair remains", () => {
     const noVisibleKillPair = mutateFixture(cp05Json, (fixture) => {
       moveCorpCardsToArchives(
         fixture,
         new Set([AUDIT_OF_CALL_RECORDS, URBAN_RENEWAL]),
       );
       restoreCorpScoredAgendaToRd(fixture);
-      fixture.expectation = (
-        structuredClone(cp05Json) as AiDecisionCheckpointV1
-      ).expectation;
+      fixture.expectation = campaignDevelopmentExpectation();
     });
 
     const result = runAiDecisionCheckpoint(noVisibleKillPair);
@@ -168,7 +194,32 @@ const KILL_LINE_DEFINITION_IDS = new Set([
 ]);
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  const checkpoint = bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+  );
+  if (value === cp05Json)
+    checkpoint.expectation = campaignDevelopmentExpectation();
+  return checkpoint;
+}
+
+function campaignDevelopmentExpectation(): AiDecisionCheckpointV1["expectation"] {
+  return {
+    ...(structuredClone(cp05Json) as AiDecisionCheckpointV1).expectation,
+    acceptableActions: [
+      {
+        actionId:
+          "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_2.remote_1.corp_onr_v1_309_bbs-whispering-campaign_2",
+      },
+    ],
+    planExecution: {
+      acceptablePlanKinds: ["corp.economy"],
+      acceptableCapabilities: ["develop_or_convert_corp_economy"],
+      requiredAssessmentEvidence: [
+        "corp_visible_economy_campaign:install:remote_1:protected_contestable",
+      ],
+      forbiddenPlanKinds: ["corp.execute_punish_sequence"],
+    },
+  };
 }
 
 function mutateFixture(

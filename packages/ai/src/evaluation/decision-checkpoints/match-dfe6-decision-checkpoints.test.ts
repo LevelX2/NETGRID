@@ -16,7 +16,7 @@ describe("match DFE6 exact decision checkpoints", () => {
     ["DFE6-F01 first unsupported Archives run", cp01Json],
     ["DFE6-F01 repeated unsupported Archives run", cp02Json],
     [
-      "DFE6-F01 takes the reachable R&D route instead of repeating Archives",
+      "DFE6-F01 takes current central access without repeating Archives",
       cp03Json,
     ],
     ["DFE6-F02 draw over redundant Fall Guy", cp04Json],
@@ -27,6 +27,22 @@ describe("match DFE6 exact decision checkpoints", () => {
 
   it("keeps the first useful Fall Guy install available", () => {
     expectCheckpointToPass(fixture(cp05Json));
+  });
+
+  it("retains the original R&D route when the known HQ trace layer is unaffordable", () => {
+    const cp = mutateFixture(cp03Json, (checkpoint) => {
+      const state = checkpoint.engine.testOnlyGameState;
+      const fetch = state.corp.servers
+        .find((server) => server.id === "hq")!
+        .ice.map((id) => state.cardInstances[id]!)
+        .find((card) => card.definitionId === "onr_v1_243_fetch-4-0-1")!;
+      fetch.strengthModifier += 10;
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.expectation = structuredClone(
+        cp03Json.expectation,
+      ) as AiDecisionCheckpointV1["expectation"];
+    });
+    expectCheckpointToPass(cp);
   });
 
   it("does not infer an Archives payoff merely from a low Corp deck count", () => {
@@ -76,10 +92,25 @@ describe("match DFE6 exact decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-dfe6-03-archives-before-winning-rd"],
   );
+  if (checkpoint.checkpointId === "cp-dfe6-03-archives-before-winning-rd") {
+    // Both current central access routes have the same public marginal value.
+    // The owner's deterministic choice is HQ; a hidden winning R&D top card
+    // cannot qualify that alternative for preferential treatment.
+    checkpoint.expectation = {
+      ...checkpoint.expectation,
+      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      planExecution: {
+        acceptablePlanKinds: ["runner.pressure_central"],
+        acceptableCapabilities: ["pressure_hq_access"],
+        requiredAssessmentEvidence: ["target:hq"],
+      },
+    };
+  }
+  return checkpoint;
 }
 
 function mutateFixture(

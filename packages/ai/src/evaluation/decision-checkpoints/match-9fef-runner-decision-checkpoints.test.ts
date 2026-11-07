@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { hashGameState } from "@netgrid/engine";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
 import priorityWreckD49Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-01-priority-wreck-spend-d49.json";
 import priorityWreckD76Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-02-priority-wreck-spend-d76.json";
@@ -29,11 +31,11 @@ describe("match 9FEF runner decision checkpoints", () => {
       "F01 chooses a positive Priority Wreck spend at D76",
       priorityWreckD76Json,
     ],
-    ["F02 converts Broker liquidity at D26", jettisonWindowD26Json],
+    ["F02 prepares the current Jettison window at D26", jettisonWindowD26Json],
     ["F02 retains Jettison during the D34 discard", retainJettisonD34Json],
     ["F03 targets useful Corp servers with RNZ at D66", rnzTargetD66Json],
     ["F03 builds the liquid reserve at D159", noLateRnzD159Json],
-    ["F04 starts the available Broker bank at D88", probeNotFundingD88Json],
+    ["F04 funds the current remote access at D88", probeNotFundingD88Json],
     [
       "F05 follows the current HQ pressure route at D95",
       rdAfterKnownTopInvalidatedD95Json,
@@ -56,6 +58,51 @@ describe("match 9FEF runner decision checkpoints", () => {
   ])("keeps the positive information-run control: %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });
+
+  it("retains the same exact Broker payout when current liquidity needs it", () => {
+    const cp = fixture(jettisonWindowD26Json);
+    cp.engine.testOnlyGameState.runner.credits = 1;
+    cp.engine.stateHash = hashGameState(cp.engine.testOnlyGameState);
+    cp.source.kind = "synthetic_companion";
+    cp.expectation = structuredClone(jettisonWindowD26Json.expectation);
+    cp.expectation.planExecution!.requiredAssessmentEvidence = [
+      "runner_credit_bank_cashout_for_development_funding",
+    ];
+    expectCheckpointToPass(cp);
+  });
+
+  it("retains the first Broker load while the exact one-credit remote need takes priority", () => {
+    const result = runAiDecisionCheckpoint(fixture(probeNotFundingD88Json));
+    expect(result.ok, result.message).toBe(true);
+    const portfolio = residentPlanPortfolioSnapshot(result.input)!;
+    expect(
+      portfolio.instances.find(
+        (instance) =>
+          instance.instanceId ===
+          "plan:runner.credit_bank:runner_onr_v1_154_broker_2",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "build",
+      signal: {
+        priorityClass: "P4",
+        actionIds: expect.arrayContaining([
+          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+        ]),
+      },
+    });
+    expect(
+      portfolio.instances.find(
+        (instance) => instance.instanceId === portfolio.executorInstanceId,
+      )?.moduleState,
+    ).toMatchObject({
+      need: {
+        priorityClass: "P2",
+        targetCredits: 10,
+        currentCreditsAtRevalidation: 9,
+        gap: 1,
+      },
+    });
+  });
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
@@ -69,6 +116,32 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       "9FEF-F06-HQ-PROBE-CLASSIFICATION-D109",
     ],
   );
+  if (checkpoint.checkpointId === "9FEF-F02-JETTISON-WINDOW-D26") {
+    // The six liquid credits already fund the successful-HQ-run/Jettison
+    // setup. Cashing three stored credits out first would add an unnecessary prefix.
+    checkpoint.expectation = {
+      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      planExecution: {
+        acceptablePlanKinds: ["runner.pressure_central"],
+        acceptableCapabilities: ["pressure_hq_access"],
+        requiredAssessmentEvidence: [
+          "runner_hq_success_window_setup:onr_v1_080_core-command-jettison-ice",
+        ],
+      },
+    };
+  }
+  if (checkpoint.checkpointId === "9FEF-F04-PROBE-NOT-FUNDING-D88") {
+    checkpoint.expectation = {
+      acceptableActions: [{ actionId: "runner.gain_credit" }],
+      planExecution: {
+        acceptablePlanKinds: ["runner.economy"],
+        acceptableCapabilities: ["gain_general_liquid_credits"],
+        requiredAssessmentEvidence: [
+          "runner_run_support_fund_concrete_gap:remote_1:concrete_funding_gap_admitted",
+        ],
+      },
+    };
+  }
   return checkpoint;
 }
 

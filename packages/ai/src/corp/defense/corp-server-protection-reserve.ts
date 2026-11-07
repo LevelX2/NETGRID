@@ -72,7 +72,8 @@ export function corpTerminalHqAgendaShuffleExposure(
       runnerRig,
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
-      ...(input.playerView.activeSide === "corp"
+      ...(input.playerView.activeSide === "corp" &&
+      input.playerView.phase !== "run"
         ? {
             runnerCreditPoolHorizon: "next_runner_turn" as const,
             runnerPublicPreparedBreakers:
@@ -216,7 +217,8 @@ export function corpServerProtectionClaims(
       runnerRig: input.playerView.opponent.rig ?? [],
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
-      ...(input.playerView.activeSide === "corp"
+      ...(input.playerView.activeSide === "corp" &&
+      input.playerView.phase !== "run"
         ? {
             runnerCreditPoolHorizon: "next_runner_turn" as const,
             runnerPublicPreparedBreakers:

@@ -9,6 +9,7 @@ import terminalRemoteNonlethalDamageJson from "../../../../../data/scenarios/ai-
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
@@ -233,6 +234,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
       observedAccess,
       confirmedDamage,
     ];
+    bindPublicBoardStealQuoteCompanion(input);
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
       input,
@@ -316,6 +318,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         },
       },
     ];
+    bindPublicBoardStealQuoteCompanion(capture.input);
     expect(
       evaluateRunnerRunTargets({ input: capture.input }).find(
         (target) => target.actionId === "runner.start_run.remote_1",

@@ -93,7 +93,8 @@ export function assessCorpIceLiquidation(
       ? { runnerMemoryLimit: opponent.memoryLimit }
       : {}),
     runnerCredits: opponent.credits,
-    ...(input.playerView.activeSide === "corp"
+    ...(input.playerView.activeSide === "corp" &&
+    input.playerView.phase !== "run"
       ? {
           runnerCreditPoolHorizon: "next_runner_turn" as const,
           runnerPublicPreparedBreakers:

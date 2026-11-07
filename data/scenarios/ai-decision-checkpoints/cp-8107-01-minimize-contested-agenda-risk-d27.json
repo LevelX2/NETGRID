@@ -4792,7 +4792,7 @@
     }
   },
   "expectation": {
-    "exactActionId": "corp.draw_card",
+    "acceptableActions": [{ "actionId": "corp.draw_card" }],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
       "acceptableCapabilities": ["allocate_server_defense"],

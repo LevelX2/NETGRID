@@ -11,6 +11,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
+import { bindSyntheticAgendaStealQuotes } from "./agenda-steal-quotes.test-support";
 import {
   createGameAfterSetup,
   getLegalActions,
@@ -190,6 +191,9 @@ describe("known visible ICE run risk", () => {
         }),
       ],
       legalActions: [run, gain],
+    });
+    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {
+      "remote-agenda": 0,
     });
 
     const decision = chooseRunnerAction(input, {

@@ -12,6 +12,8 @@ import { corpFundedCentralProtectionReserve } from "../defense/corp-server-prote
 import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
 import { corpVisibleLiquidityDemandTarget } from "./economy-domain-signals";
 import { currentCorpHostedBankCycleQuotes } from "./hosted-credit-bank-cycle";
+import { corpFundedDefenseContinuationWindow } from "../defense/corp-funded-continuation-window";
+import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import type {
   CorpEconomyDevelopmentSignal,
   CorpEconomyNeedSignal,
@@ -22,6 +24,11 @@ export function corpHostedBankInvestments(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   requiredNeeds: readonly CorpEconomyNeedSignal[],
+  plans: {
+    centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"];
+    scoreProjects: CorpCorePlanDomain["scoreProjects"];
+    remoteProjects: CorpCorePlanDomain["remoteProjects"];
+  },
 ) {
   const choices = new Map<
     string,
@@ -97,6 +104,34 @@ export function corpHostedBankInvestments(
   );
   for (const { server, card, profile } of banks) {
     const stored = card.counters?.bit ?? 0;
+    const payout = candidates.find(
+      (candidate) =>
+        candidate.sourceCardInstanceId === card.instanceId &&
+        candidate.abilityId === profile.cashoutAbilityId &&
+        candidate.costProfile.costKnownStatus === "known" &&
+        candidate.costProfile.creditCost === 0 &&
+        candidate.costProfile.clickCost === 1 &&
+        candidate.economyProjection?.reliability === "guaranteed" &&
+        candidate.economyProjection.netLiquidCreditGain === stored &&
+        input.legalActions.some(
+          (action) =>
+            action.actionId === candidate.actionId &&
+            action.side === "corp" &&
+            action.expiresAtStateVersion === input.playerView.stateVersion,
+        ),
+    );
+    const payoutOpensDefenseWindow =
+      stored > 0 &&
+      payout !== undefined &&
+      corpFundedDefenseContinuationWindow({
+        input,
+        candidates,
+        ...plans,
+        available: {
+          credits: liquid + stored,
+          clicks: input.playerView.own.clicks - 1,
+        },
+      }).actionIds.length > 0;
     const contestability =
       server.ice.length > 0
         ? corpRemoteContestabilityAssessment(input, server.id)
@@ -106,7 +141,8 @@ export function corpHostedBankInvestments(
       input.playerView.own.stackOrRdCount > 1;
     const shouldCashout =
       stored > 0 &&
-      (immediateFunding ||
+      (payoutOpensDefenseWindow ||
+        immediateFunding ||
         liquid < reserve ||
         input.playerView.own.stackOrRdCount <= 1 ||
         (liquid < targetCredits &&

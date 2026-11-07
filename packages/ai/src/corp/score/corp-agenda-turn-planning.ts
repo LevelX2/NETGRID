@@ -112,7 +112,11 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     params.project.openingRush?.status === "qualified"
       ? params.project.openingRush.quote.opportunityKey
       : `agenda:${params.project.projectId}:${params.stateIdentity.sideSafePlanningFingerprint}`;
-  const exactAgenda = exactAgendaHead(params.project, params.candidates);
+  const exactAgenda = exactAgendaHead(
+    params.input,
+    params.project,
+    params.candidates,
+  );
   const fundingGap =
     params.project.fundingMilestone?.remainingGap ??
     params.project.fundingGap ??
@@ -416,6 +420,10 @@ function createLine(
     };
   },
 ): CorpAgendaTurnPlanningLine {
+  // A certified closeout already owns its entire score conversion. Appending
+  // a generic advance would invent a different suffix and reward it twice.
+  const projectedAdvance =
+    line.projectedAdvance && !params.project.sameTurnCloseout;
   const nodes = line.actions.map((candidate, index) => ({
     nodeId: turnPlanningFingerprint("agenda-line-node", {
       opportunityKey: line.opportunityKey,
@@ -432,7 +440,7 @@ function createLine(
     invocation: invocationFor(params.stateIdentity, candidate),
     projectedOnly: index > 0,
   }));
-  if (line.projectedAdvance && params.project.agendaInstanceId) {
+  if (projectedAdvance && params.project.agendaInstanceId) {
     const invocation = buildCanonicalLegalActionInvocation({
       stateIdentity: params.stateIdentity,
       semanticActionType: "score.advance_card",
@@ -459,10 +467,10 @@ function createLine(
   }
   const totalClickCost =
     line.actions.reduce((sum, candidate) => sum + clickCost(candidate), 0) +
-    (line.projectedAdvance ? 1 : 0);
+    (projectedAdvance ? 1 : 0);
   const totalCreditCost =
     line.actions.reduce((sum, candidate) => sum + creditCost(candidate), 0) +
-    (line.projectedAdvance ? 1 : 0);
+    (projectedAdvance ? 1 : 0);
   const economyGain = line.actions.reduce(
     (sum, candidate) =>
       sum + (candidate.economyProjection?.netLiquidCreditGain ?? 0),
@@ -496,7 +504,7 @@ function createLine(
           (params.project.terminalScore
             ? 10
             : Math.max(1, params.project.agendaPoints) * 10) +
-          (line.projectedAdvance && !quotedCost ? 8 : 0) -
+          (projectedAdvance && !quotedCost ? 8 : 0) -
           // Compare complete fixed score paths on the same horizon. A new
           // install's projected advance is not extra payoff on top of the
           // same completed score; every remaining action/credit is a cost.
@@ -589,7 +597,7 @@ function createLine(
                 : params.project.phase === "score_agenda"
                   ? "agenda_scored"
                   : "agenda_advanced"
-            : line.projectedAdvance
+            : projectedAdvance
               ? "agenda_advanced"
               : "agenda_installed",
     commitment:
@@ -759,6 +767,7 @@ function boundScoreFundingProviders(
 }
 
 function exactAgendaHead(
+  input: AiDecisionInput,
   project: CorpScoreProjectSignal,
   candidates: readonly ActionSemanticCandidate[],
 ): ActionSemanticCandidate | undefined {
@@ -770,6 +779,9 @@ function exactAgendaHead(
       project.phase === "convert_agenda" &&
       project.sameTurnCloseout &&
       project.sameTurnConversionProof === "engine_quoted_path" &&
+      project.sameTurnConversionCreditHorizon?.stateVersion ===
+        input.playerView.stateVersion &&
+      project.sameTurnConversionCreditHorizon.creditsBeforeScorePayout >= 0 &&
       (candidate.semanticActionType === "play.corp_operation" ||
         project.routeSemanticActionTypes?.includes(
           candidate.semanticActionType,

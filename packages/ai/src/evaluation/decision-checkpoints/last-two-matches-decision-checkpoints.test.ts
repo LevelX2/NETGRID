@@ -15,7 +15,7 @@ describe("last two matches exact decision checkpoints", () => {
     ["selfplay dead Prearranged Drop", cp02Json],
     ["movement treated as an active encounter", cp03Json],
     [
-      "unguaranteed Trace-Limit bid preserves the visible payoff reserve",
+      "guaranteed open-trace bid preserves the visible payoff reserve",
       cp04Json,
     ],
     ["inevitable Corp deckout not locked", cp05Json],
@@ -23,6 +23,18 @@ describe("last two matches exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
     expect(result.ok, result.message).toBe(true);
+    if (json === cp04Json) {
+      const optionIds = result.decision?.selectedChoices?.selectedOptionIds;
+      if (!Array.isArray(optionIds))
+        throw new Error("Missing native trace bid selection");
+      const selected = result.input.playerView.pendingChoice!.options.find(
+        (option) => optionIds.includes(option.id),
+      )!;
+      expect(result.input.playerView.trace?.profile).toBe("modern_open");
+      expect(result.input.playerView.own.credits - Number(selected.value)).toBe(
+        10,
+      );
+    }
   });
 
   it("funds the missing wall route instead of playing an unbound access payoff", () => {

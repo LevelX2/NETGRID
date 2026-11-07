@@ -46831,7 +46831,7 @@
   },
   "expectation": {
     "contractKind": "correctness",
-    "exactActionId": "corp.gain_credit",
+    "acceptableActions": [{ "actionId": "corp.gain_credit" }],
     "forbiddenActions": [
       {
         "type": "activated_card_ability",

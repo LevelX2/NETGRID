@@ -13670,7 +13670,7 @@
   },
   "expectation": {
     "contractKind": "correctness",
-    "exactActionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+    "acceptableActions": [{ "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits" }],
     "planExecution": {
       "acceptablePlanKinds": ["runner.credit_bank"],
       "acceptableCapabilities": ["credit_bank_cash_out"],

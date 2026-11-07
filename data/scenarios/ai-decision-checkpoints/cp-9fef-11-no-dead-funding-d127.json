@@ -9467,7 +9467,7 @@
     }
   },
   "expectation": {
-    "exactActionId": "runner.gain_credit",
+    "acceptableActions": [{ "actionId": "runner.gain_credit" }],
     "planExecution": {
       "acceptablePlanKinds": ["runner.economy"],
       "acceptableCapabilities": ["gain_general_liquid_credits"],

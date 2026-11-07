@@ -180,7 +180,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("keeps exact score-support ownership while the runner is rich", () => {
+  it("keeps exact immediate economy without certifying mature Score protection against a rich runner", () => {
     const checkpoint = mutateFixture(scorelineSeed004D55Json, (candidate) => {
       candidate.engine.testOnlyGameState.runner.credits = 30;
       candidate.expectation = {
@@ -192,12 +192,12 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         ],
         planExecution: {
           acceptablePlanIds: [
-            "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
+            "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
           ],
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_mature_remote_score_advance:remote_1",
+            "corp_engine_certified_immediate_operation_conversion:onr_v1_290_efficiency-experts",
           ],
         },
       };
@@ -206,8 +206,8 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     const result = expectCheckpointToPass(checkpoint);
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
-        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
+        "plan_first_root:plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
+        "plan_first_executor:plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
       ]),
     );
   });

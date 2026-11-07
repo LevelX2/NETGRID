@@ -36,7 +36,12 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     // The rejected extra HQ installation would leave at most 13 credits.
     const checkpoint = fixture(sameTurnScoreD34Json);
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "corp.gain_credit" }],
+      acceptableActions: [
+        {
+          actionId:
+            "corp.rez_card.corp_onr_v1_309_bbs-whispering-campaign_2.remote_1.corp_onr_v1_309_bbs-whispering-campaign_2",
+        },
+      ],
       forbiddenActions: [{ type: "draw_card" }],
       planExecution: {
         acceptablePlanKinds: ["corp.economy"],

@@ -5743,7 +5743,7 @@
   },
   "expectation": {
     "contractKind": "correctness",
-    "exactActionId": "runner.install_card.runner_onr_v1_184_top-runners-conference_1.runner_onr_v1_184_top-runners-conference_1",
+    "acceptableActions": [{ "actionId": "runner.install_card.runner_onr_v1_184_top-runners-conference_1.runner_onr_v1_184_top-runners-conference_1" }],
     "planExecution": {
       "acceptablePlanKinds": ["runner.recurring_economy"],
       "acceptableCapabilities": ["recurring_economy_install"],

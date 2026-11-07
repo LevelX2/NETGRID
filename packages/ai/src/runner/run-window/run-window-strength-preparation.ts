@@ -1,4 +1,4 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { currentEncounteredIceCard } from "../../runtime/current-encounter";
@@ -13,8 +13,21 @@ export function runnerRunStrengthCurrentPumpSavings(
 ): number | undefined {
   const action = runnerRunRemainderStrengthBoostAction(input, candidate);
   if (!action || !candidate.sourceDefinitionId) return undefined;
-  const boost = cardSpecPlanningCardByDefinitionId(candidate.sourceDefinitionId)
-    ?.planning.engine.runnerRunStrengthBoost;
+  return runnerRunStrengthPumpSavingsForAction(
+    input,
+    action,
+    candidate.sourceDefinitionId,
+  );
+}
+
+export function runnerRunStrengthPumpSavingsForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceDefinitionId: string,
+): number | undefined {
+  const boost =
+    cardSpecPlanningCardByDefinitionId(sourceDefinitionId)?.planning.engine
+      .runnerRunStrengthBoost;
   const breaker = input.playerView.own.rig?.find(
     (card) => card.known && card.instanceId === action.payload?.targetCardId,
   );

@@ -15910,6 +15910,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_cerberus_remove_for_4_credits",
+            "counterRemoval": {
+              "counterType": "cerberus",
+              "credits": 4,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },
@@ -16774,6 +16780,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_trace_tag_counter_remove_for_1_credits",
+            "counterRemoval": {
+              "counterType": "trace_tag_counter",
+              "credits": 1,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },
@@ -18539,6 +18551,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_mastiff_remove_for_4_credits",
+            "counterRemoval": {
+              "counterType": "mastiff",
+              "credits": 4,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },
@@ -23173,6 +23191,23 @@
           "take_click_ability",
           "trace",
           "trash_on_access"
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "establish_tag_source_in_protected_empty_remote",
+            "preferences": [
+              "best_cards_for_current_plan",
+              "use_choice_option_with_visible_board_payoff"
+            ],
+            "avoid": [
+              "option_with_no_visible_current_payoff"
+            ],
+            "kind": "install_target",
+            "timing": "on_install",
+            "targetType": "server",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
         ]
       }
     },
@@ -26666,6 +26701,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_crying_remove_for_2_credits",
+            "counterRemoval": {
+              "counterType": "crying",
+              "credits": 2,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },

@@ -104,7 +104,10 @@ describe("AI behavior baseline runtime regressions", () => {
       corpControllerMode: "current_candidate",
     });
     expect(summary.errors).toEqual([]);
-    // A correctly priced trace can finish before historical checkpoint 111.
+    // Current route validation can keep this seed in preparation rather than
+    // admitting the historically chosen execution by action 111. Guaranteed
+    // execution and its trace/payment windows are covered by the forced-trace
+    // and Closed Accounts real-Engine regressions.
     expect(summary).toMatchObject({
       replayOk: true,
     });
@@ -112,7 +115,12 @@ describe("AI behavior baseline runtime regressions", () => {
     expect(summary.metrics.illegalActions).toBe(0);
     expect(
       summary.actionSequence.some(
-        (entry) => entry.planKind === "corp.execute_punish_sequence",
+        (entry) =>
+          entry.planKind === "corp.execute_punish_sequence" ||
+          (entry.planKind === "corp.punish_campaign" &&
+            entry.debugFacts?.includes(
+              "plan_execution:capability:punish_prepare",
+            ) === true),
       ),
     ).toBe(true);
     expect(summary.actionSequence.every((entry) => !entry.fallbackUsed)).toBe(

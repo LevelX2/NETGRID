@@ -1221,8 +1221,16 @@ describe("exact Corp ICE rez route", () => {
     const fixture = engineIceRezWindow("onr_proteus_014_chihuahua", 0);
 
     expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
-      complete: false,
-      reason: "on_rez_lifecycle_projection_required",
+      complete: true,
+      effectiveRunQuote: {
+        subroutines: [
+          expect.objectContaining({
+            type: "initiate_trace",
+            traceLimit: 1,
+            traceSuccessEffect: { type: "net_damage", amount: 1 },
+          }),
+        ],
+      },
     });
     expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
       complete: false,

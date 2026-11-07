@@ -32,7 +32,7 @@ describe("selfplay cycle 126 decision checkpoints", () => {
     );
 
     expect(selectedAction).toMatchObject({
-      type: "draw_card",
+      type: "gain_credit",
       source: "basic_action",
     });
     expect(selectedAction?.actionId).not.toBe(
@@ -43,18 +43,19 @@ describe("selfplay cycle 126 decision checkpoints", () => {
     );
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId:
+        "plan:corp.economy:economy-residual-capacity%3Acorp%3A24",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "plan:corp.economy:economy-residual-capacity%3Acorp%3A24",
       route: {
         actionId: selectedAction?.actionId,
-        actionType: "draw_card",
-        capabilityId: "allocate_server_defense",
+        actionType: "gain_credit",
+        capabilityId: "develop_or_convert_corp_economy",
       },
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:corp_missing_concrete_defense_draw:hq",
+        "plan_assessment_evidence:corp_non_strategic_residual_capacity_use",
       ]),
     );
   });

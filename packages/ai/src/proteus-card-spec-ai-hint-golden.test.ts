@@ -137,8 +137,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      // Reviewed typed counter semantics and run locks are included in this partition.
-      "sha256:fb5528b124db9ef99abc09abb962fa63873b5bfd57b9552b37f375fc62eef4b6",
+      // Includes exact counter-removal costs and Schematics' installed-card-only disclosure.
+      "sha256:77a47b0ffaaaa2ce8366f8e8f39a0e0fae374fdead438d29377d2a1ac31ab2d6",
     );
   });
 

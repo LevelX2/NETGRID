@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "ai-decision-checkpoint-v1",
+  "schemaVersion": "netgrid-ai-decision-checkpoint-replay-v1",
   "provenance": "reconstructed_from_persisted_decision_sources",
   "input": {
     "matchId": "match_d8f0c959bf3ff48a",

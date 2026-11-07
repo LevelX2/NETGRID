@@ -27,6 +27,16 @@ type Capture = {
 };
 function restore(json: unknown) {
   const capture = structuredClone(json) as Capture;
+  for (const action of capture.input.legalActions) {
+    if (action.source !== "runner_onr_v1_089_gideons-pawnshop_1") continue;
+    Object.assign(
+      action.payload!,
+      deterministicOnPlayResourcePayload(
+        CARD_DEFINITIONS_BY_ID["onr_v1_089_gideons-pawnshop"]!,
+        "runner",
+      ),
+    );
+  }
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     capture.input,
@@ -57,6 +67,11 @@ describe("pairing 401 source-bound recovery and coverage", () => {
       return capture;
     };
     const before = restore(withRetentionCapacity(recoveryBeforePaymentJson));
+    // Isolate the recovery-origin contract from the independently admitted HQ
+    // run. The complete native action set is exercised by the overflow case.
+    before.legalActions = before.legalActions.filter(
+      (action) => action.source === "runner_onr_v1_089_gideons-pawnshop_1",
+    );
     const beforeDecision = chooseAiAction(before as AiDecisionInput);
     const beforeRuntime = exportAiRuntimeCheckpoint(
       before as AiDecisionInput,
@@ -114,23 +129,12 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     expect(input.playerView.own.gripOrHq).toHaveLength(6);
     expect(input.playerView.own.maxHandSize).toBe(5);
     expect(chooseAiAction(input as AiDecisionInput)).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "runner.start_run.hq",
       fallbackUsed: false,
     });
   });
   it("binds a useful heap target before the recovery event enters the heap", () => {
     const input = restore(recoveryJson);
-    // Reproject only the canonical Engine facts missing from this recorded action.
-    for (const action of input.legalActions) {
-      if (action.source !== "runner_onr_v1_089_gideons-pawnshop_1") continue;
-      Object.assign(
-        action.payload!,
-        deterministicOnPlayResourcePayload(
-          CARD_DEFINITIONS_BY_ID["onr_v1_089_gideons-pawnshop"]!,
-          "runner",
-        ),
-      );
-    }
     const decision = chooseAiAction(input as AiDecisionInput);
     const portfolio = residentPlanPortfolioSnapshot(input)!;
     const executor = portfolio.instances.find(
@@ -183,10 +187,10 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     const selected = payment.legalActions.find(
       (action) => action.actionId === continuation.actionId,
     )!;
-    expect(selected.source).toBe("runner_onr_proteus_133_chiba-bank-account_1");
+    expect(selected.source).toBe("runner_onr_classic_031_rent-i-con_3");
     expect(selected.payload).toMatchObject({
-      costPenaltySupportWindowId: "runner_cost_penalty_support.308",
-      costPenaltySupportOriginalActionId: installActionId,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.308",
+      runnerCostPenaltySupportContinuation: true,
     });
     const continued = residentPlanPortfolioSnapshot(payment)!;
     expect(
@@ -199,10 +203,13 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     });
   });
 
-  it("fails closed when the persisted coverage origin has no install binding", () => {
-    const payment = restore(paymentJson);
+  it("fails closed when the persisted coverage origin has no selected install binding", () => {
+    const capture = structuredClone(paymentJson) as Capture;
+    delete capture.runtime.residentPlanPortfolio!
+      .pendingRunnerCostPenaltySupportOrigin;
+    const payment = restore(capture);
     expect(() => chooseAiAction(payment as AiDecisionInput)).toThrow(
-      "invalid_support_graph",
+      "window_origin_missing",
     );
   });
 });

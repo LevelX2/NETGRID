@@ -93,12 +93,12 @@ describe("match 28a78 run costs and admission", () => {
       expect(plan?.route?.actionId).toBe(decision.actionId);
       if (index === 85) {
         expect(plan?.selectedPlan).toMatchObject({
-          moduleId: "runner.economy",
-          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-          parentNeedId: "run-support:remote:remote_1",
+          moduleId: "runner.develop_board_and_hand",
+          instanceId:
+            "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_101_mit-west-tier_1",
         });
         expect(plan?.executionOrigin?.rootPlanInstanceId).toBe(
-          "plan:runner.contest_remote:remote%3Aremote_1",
+          "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_101_mit-west-tier_1",
         );
       } else {
         expect(plan?.selectedPlan?.moduleId).toBe(

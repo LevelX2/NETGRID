@@ -52,15 +52,20 @@ it("funds the known steal surcharge instead of starting the underfunded remote",
           ?.type === "start_run",
     );
   expect(quote()).toMatchObject({
-    creditsAfterRun: 1,
+    // Krash spends fourteen on Zombie before Marionette's first unpaid
+    // two-credit break. This is an underfunded prefix, not a full-path price.
+    pathCost: 16,
+    creditsAfterRun: -1,
     accessPayoffContestable: false,
-    routeQuote: { fundingGap: 4 },
+    routeQuote: { fundingGap: 6 },
   });
   // With more money the path may protect additional damage subroutines;
   // certify conversion from the freshly quoted remaining liquid credits.
   original.input.playerView.own.credits = 25;
   const funded = quote();
   expect(funded).toMatchObject({
+    pathCost: 18,
+    creditsAfterRun: 7,
     accessPayoffContestable: true,
     routeQuote: { fundingGap: 0 },
   });

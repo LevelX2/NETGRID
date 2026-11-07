@@ -10,6 +10,7 @@ import firstEarlyBankLoadJson from "../../../../../data/scenarios/ai-decision-ch
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
 const KRASH_INSTANCE_ID = "runner_onr_v1_039_krash_1";
 const STREETWARE_DEFINITION_ID = "onr_proteus_150_streetware-distributor";
@@ -41,7 +42,13 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
   });
 
   it("keeps early bank loading executable while current coverage search takes priority", () => {
-    const result = runAiDecisionCheckpoint(fixture(firstEarlyBankLoadJson));
+    const control = mutateFixture(firstEarlyBankLoadJson, (checkpoint) => {
+      // A three-credit remaining spending budget makes another load useful
+      // inside the existing three-turn automatic payout horizon.
+      checkpoint.engine.testOnlyGameState.runner.credits = 7;
+      checkpoint.source.kind = "synthetic_companion";
+    });
+    const result = runAiDecisionCheckpoint(control);
     expect(result.ok, result.message).toBe(true);
     const bankId =
       "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_2";
@@ -69,6 +76,33 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         (alternative) => alternative.actionId === bankAction!.actionId,
       )?.whyNot,
     ).toContain(`candidate_plan:${bankId}:ready`);
+  });
+
+  it("holds the native bank when its queued payout already covers the remaining budget", () => {
+    const result = runAiDecisionCheckpoint(fixture(firstEarlyBankLoadJson));
+    expect(result.ok, result.message).toBe(true);
+    const bank = residentPlanPortfolioSnapshot(result.input)!.instances.find(
+      (instance) =>
+        instance.instanceId ===
+        "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_2",
+    )!;
+    expect(bank.moduleState).toMatchObject({
+      phase: "hold",
+      signal: {
+        evidenceCodes: expect.arrayContaining([
+          "runner_credit_bank_automatic_remaining_budget:1",
+          "runner_credit_bank_automatic_marginal_payout:0",
+          "runner_credit_bank_automatic_incremental_advantage:-1",
+        ]),
+      },
+    });
+    expect(
+      result.input.legalActions.some(
+        (action) =>
+          action.source === "runner_onr_proteus_150_streetware-distributor_2" &&
+          action.payload?.cardImplementationAddsHostedCredits === true,
+      ),
+    ).toBe(true);
   });
 
   it("does not release the run lock without a follow-up click", () => {

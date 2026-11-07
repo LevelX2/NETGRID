@@ -417,10 +417,14 @@ describe("plan-first Central information-action ownership", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const input = aiInput("runner", [protocolRun, credit]);
     input.playerView.own.credits = 12;
     input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [1, 2, 3].map((n) =>
+      visibleCard(`protocol-hand-buffer-${n}`, "runner", "event"),
+    );
     input.playerView.own.rig = [protocol];
     input.playerView.opponent.deckCount = 20;
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];

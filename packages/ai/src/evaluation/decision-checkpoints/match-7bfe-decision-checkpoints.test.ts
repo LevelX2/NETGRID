@@ -1,4 +1,4 @@
-import { hashGameState } from "@netgrid/engine";
+import { applyAction, hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import cp01Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-7bfe-01.json";
@@ -9,6 +9,9 @@ import cp04Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-7
 import cp05Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-7bfe-05.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
+import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
 describe("match 7BFE exact decision checkpoints", () => {
   it.each([
@@ -27,9 +30,49 @@ describe("match 7BFE exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("keeps the six-credit Corporate War closeout available", () => {
+  it("retains the six-credit conversion while preserving the funded defense reserve", () => {
     const fixtureAtSix = mutateFixture(cp02aJson, (fixture) => {
       fixture.engine.testOnlyGameState.corp.credits = 6;
+      fixture.expectation = {
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_2.new_remote.corp_onr_v1_309_bbs-whispering-campaign_2",
+          },
+        ],
+      };
+    });
+
+    const result = expectCheckpointToPass(fixtureAtSix);
+    expect(corpSameTurnScoreConversionPaths(result.input)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          agendaCardId: "corp_onr_v1_196_corporate-war_3",
+          sameTurnGuaranteed: true,
+          creditsRequired: 6,
+          clicksRequired: 3,
+        }),
+      ]),
+    );
+    expect(
+      residentPlanPortfolioSnapshot(result.input)!.instances.find(
+        (plan) =>
+          plan.instanceId ===
+          "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_3%3Aremote_1",
+      )?.moduleState,
+    ).toMatchObject({
+      signal: {
+        sameTurnCloseout: true,
+        feasible: false,
+        routeAssessment: "corp_same_turn_score_consumes_funded_defense_reserve",
+      },
+    });
+  });
+
+  it("executes the same Corporate War route when its conditional payout restores the reserve", () => {
+    const checkpoint = mutateFixture(cp02aJson, (fixture) => {
+      // Six route credits leave the canonical twelve-credit payout threshold.
+      fixture.engine.testOnlyGameState.corp.credits = 18;
       fixture.expectation = {
         acceptableActions: [
           {
@@ -39,31 +82,38 @@ describe("match 7BFE exact decision checkpoints", () => {
         ],
       };
     });
-
-    expectCheckpointToPass(fixtureAtSix);
+    expectCheckpointToPass(checkpoint);
   });
 
-  it("keeps score-remote hardening ahead of a nonterminal Closed Accounts payoff", () => {
+  it("executes the currently quoted Closed Accounts payoff before background remote staging", () => {
     const fixtureWithCredits = mutateFixture(cp04Json, (fixture) => {
       fixture.engine.testOnlyGameState.runner.credits = 3;
       fixture.expectation = {
         acceptableActions: [
           {
-            actionId:
-              "corp.install_card.corp_onr_v1_279_wall-of-static_1.new_remote.corp_onr_v1_279_wall-of-static_1",
+            type: "play_operation",
+            sourceDefinitionId: "onr_v1_285_closed-accounts",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: ["improve_remote_protection_path"],
-          requiredAssessmentEvidence: [
-            "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_279_wall-of-static_1.new_remote.corp_onr_v1_279_wall-of-static_1:layers_0:unrezzed_0:rez_gap_2",
-          ],
+          acceptablePlanKinds: ["corp.execute_punish_sequence"],
         },
       };
     });
 
-    expectCheckpointToPass(fixtureWithCredits);
+    const result = expectCheckpointToPass(fixtureWithCredits);
+    const before = structuredClone(fixtureWithCredits.engine.testOnlyGameState);
+    before.eventLog = structuredClone(fixtureWithCredits.engine.eventPrefix);
+    const applied = applyAction(before, {
+      matchId: before.matchId,
+      side: "corp",
+      actionId: result.decision!.actionId!,
+      clientKnownStateVersion: before.stateVersion,
+    });
+    expect(applied.ok).toBe(true);
+    if (!applied.ok) throw Error(JSON.stringify(applied.error));
+    expect(before.runner.credits).toBe(3);
+    expect(applied.state.runner.credits).toBe(0);
   });
 
   it("uses the earlier action for measurable R&D protection", () => {
@@ -116,7 +166,9 @@ describe("match 7BFE exact decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+  );
 }
 
 function mutateFixture(
@@ -129,7 +181,10 @@ function mutateFixture(
   return result;
 }
 
-function expectCheckpointToPass(fixture: AiDecisionCheckpointV1): void {
+function expectCheckpointToPass(
+  fixture: AiDecisionCheckpointV1,
+): ReturnType<typeof runAiDecisionCheckpoint> {
   const result = runAiDecisionCheckpoint(fixture);
   expect(result.ok, result.message).toBe(true);
+  return result;
 }

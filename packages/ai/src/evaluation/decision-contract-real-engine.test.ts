@@ -211,7 +211,10 @@ describe("hardened decision contracts on real Engine inputs", () => {
         upgradePlacementParams(inactiveInput, inactiveInstall),
       ),
     ).toMatchObject({
-      key: "corp_upgrade_region_replacement_without_marginal_value",
+      key: "corp_upgrade_agenda_difficulty_without_eligible_agenda",
+      reason: expect.stringContaining(
+        "restricted_discount_requires_current_eligible_agenda",
+      ),
     });
 
     const active = corpMainState("contract-region-active");

@@ -218,7 +218,9 @@ describe("runnerRunLockReleaseScoreComponent", () => {
 function input(): AiDecisionInput {
   return {
     side: "runner",
+    eventTail: [],
     playerView: {
+      publicEvents: [],
       agendaPointsToWin: 7,
       own: {
         credits: 4,

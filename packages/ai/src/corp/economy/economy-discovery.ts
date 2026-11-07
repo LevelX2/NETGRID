@@ -96,6 +96,11 @@ export function buildCorpEconomySignals({
     input,
     candidates,
     requiredEconomyNeeds,
+    {
+      centralAllocation: centralDefenseAllocation,
+      scoreProjects,
+      remoteProjects,
+    },
   );
   const genericTurnLiquidityDevelopment =
     operationThresholdPreparations.length === 0
@@ -325,7 +330,11 @@ export function withCorpHostedBankRestTurnDevelopment(
     ambushes: domain.ambushes,
     punishCampaigns: domain.punishCampaigns,
     centralAllocation: domain.centralDefenseAllocation,
-    bankChoices: corpHostedBankInvestments(input, candidates, requiredNeeds),
+    bankChoices: corpHostedBankInvestments(input, candidates, requiredNeeds, {
+      centralAllocation: domain.centralDefenseAllocation,
+      scoreProjects: domain.scoreProjects,
+      remoteProjects: domain.remoteProjects,
+    }),
   });
   return signals.length === 0
     ? domain

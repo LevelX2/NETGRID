@@ -3,6 +3,8 @@ import { afterEach, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -29,6 +31,26 @@ it.each(["g25-d46", "g38-d208"])(
       ...fixture.input,
       ...buildAiDecisionInputDto(fixture.input),
     } as AiDecisionInput;
+    bindPublicBoardStealQuoteCompanion(input);
+    if (name === "g38-d208") {
+      const target = evaluateRunnerRunTargets({ input }).find(
+        (entry) => entry.actionId === "runner.start_run.remote_1",
+      )!;
+      expect(target).toMatchObject({
+        pathPassability: "blocked_unpayable",
+        accessPayoffContestable: false,
+        accessPayoffRequiresFunding: true,
+      });
+      const unquoted = structuredClone(input);
+      delete unquoted.playerView.servers.find(
+        (server) => server.id === "remote_1",
+      )!.runnerAgendaStealCostQuote;
+      expect(
+        evaluateRunnerRunTargets({ input: unquoted }).find(
+          (entry) => entry.actionId === target.actionId,
+        )?.accessPayoffRequiresFunding,
+      ).toBeUndefined();
+    }
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
       input,

@@ -6,6 +6,7 @@ import lowValueArchivesJson from "../../../../../data/scenarios/ai-decision-chec
 import deckoutCloseoutJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manhunt-coup-selfplay-005.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 
 describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
   it("does not expose Corporate War without a timely safe completion line", () => {
@@ -53,26 +54,40 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
   });
 
   it("does not expose Corporate War and may instead stage its bound defense", () => {
-    const result = runAiDecisionCheckpoint(fixture(deckoutCloseoutJson));
+    const checkpoint = fixture(deckoutCloseoutJson);
+    checkpoint.expectation = {
+      acceptableActions: [{ actionId: "corp.gain_credit" }],
+      forbiddenActions: [
+        { type: "install_card", sourceDefinitionId: CORPORATE_WAR },
+      ],
+      planExecution: {
+        acceptablePlanKinds: ["corp.economy"],
+        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+      },
+    };
+    const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, diagnostic(result)).toBe(true);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    ).toBe(
+      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_2%3Aremote_1",
+    );
   });
 
   it("still requires protection with a relaxed deckout clock", () => {
     const relaxedClock = mutateFixture(deckoutCloseoutJson, (checkpoint) => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
-        acceptableActions: [
-          {
-            actionId:
-              "corp.install_card.corp_onr_v1_275_vacuum-link_1.remote_1.corp_onr_v1_275_vacuum-link_1.1",
-          },
+        acceptableActions: [{ actionId: "corp.gain_credit" }],
+        forbiddenActions: [
+          { type: "install_card", sourceDefinitionId: CORPORATE_WAR },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: ["improve_remote_protection_path"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_layered_remote_ice_staging:remote:strategic-score-remote:remote_1:corp.install_card.corp_onr_v1_275_vacuum-link_1.remote_1.corp_onr_v1_275_vacuum-link_1.1:layers_1:unrezzed_1:rez_gap_2",
+            "corp_score_protection_required:remote_1",
           ],
         },
       };
@@ -87,7 +102,9 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
 const CORPORATE_WAR = "onr_v1_196_corporate-war";
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+  );
 }
 
 function mutateFixture(

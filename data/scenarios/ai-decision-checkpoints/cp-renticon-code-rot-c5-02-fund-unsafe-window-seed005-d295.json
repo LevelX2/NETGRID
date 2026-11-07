@@ -29061,12 +29061,12 @@
     ],
     "planExecution": {
       "acceptablePlanIds": [
-        "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_1"
+        "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_295_night-shift_3"
       ],
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_mature_remote_score_advance:remote_1"
+        "corp_engine_certified_immediate_operation_conversion:onr_v1_295_night-shift"
       ]
     }
   }

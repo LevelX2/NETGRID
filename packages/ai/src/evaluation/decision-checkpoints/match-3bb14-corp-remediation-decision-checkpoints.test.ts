@@ -5,29 +5,46 @@ import scoredOnlyTimingJson from "../../../../../data/scenarios/ai-decision-chec
 import realisticScoreHorizonJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-02-realistic-score-horizon-d40.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import { scoringWindowPostRezProtectionAssessment } from "../../runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection";
 
 describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it.each([
     [
-      "funds the admitted score parent while keeping Kali protection open beside an independent ambush",
+      "funds terminal HQ defense while keeping Kali protection open beside an independent ambush",
       scoredOnlyTimingJson,
       [
-        "plan_priority_class:P4",
-        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Aremote_1",
+        "plan_priority_class:P2",
+        "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
       ],
     ],
     [
-      "protects HQ at matchpoint before developing the slow Strike Force Kali score parent",
+      "protects terminal central access before developing the slow Strike Force Kali score parent",
       realisticScoreHorizonJson,
       [
         "plan_priority_class:P2",
         "plan_module:corp.defend_servers",
-        "plan_assessment_evidence:corp_terminal_central_additional_layer_staging:hq:corp.install_card.corp_onr_v1_268_shock-r_1.hq.corp_onr_v1_268_shock-r_1.2:rez_gap_0",
+        "plan_assessment_evidence:engine_certified_global_defense_access_probability_reduced",
       ],
     ],
   ] as const)("%s", (_label, json, requiredDecisionEvidence) => {
-    const result = runAiDecisionCheckpoint(fixture(json));
+    const checkpoint = fixture(json);
+    if (json === realisticScoreHorizonJson) {
+      checkpoint.expectation.acceptableActions = [
+        {
+          actionId:
+            "corp.install_card.corp_onr_v1_268_shock-r_1.rd.corp_onr_v1_268_shock-r_1.1",
+        },
+      ];
+      checkpoint.expectation.planExecution = {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["allocate_server_defense"],
+        requiredAssessmentEvidence: [
+          "engine_certified_global_defense_access_probability_reduced",
+        ],
+      };
+    }
+    const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     for (const evidence of requiredDecisionEvidence) {
       expect(result.decision?.evidence).toContain(evidence);
@@ -43,11 +60,14 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     expect(portfolio).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          moduleId: "corp.defend_servers",
-          parentNeedId:
+          moduleId: "corp.score_agenda",
+          instanceId:
+            "plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Aremote_1",
+          openNeedIds: expect.arrayContaining([
             "score-protection:agenda:corp_onr_v1_217_strike-force-kali_1:remote_1",
+          ]),
           evidenceCodes: expect.arrayContaining([
-            "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_217_strike-force-kali_1:remote_1:remote_1",
+            "corp_near_matchpoint_remote_maturity_required:remote_1",
           ]),
         }),
         expect.objectContaining({
@@ -73,6 +93,26 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     expect(after.state.corp.credits).toBe(state.corp.credits + 1);
     expect(after.state.corp.hq).toEqual(state.corp.hq);
     expect(after.state.corp.servers).toEqual(state.corp.servers);
+  });
+
+  it("keeps the native terminal HQ reserve ahead of the independent Score funding need", () => {
+    const checkpoint = fixture(scoredOnlyTimingJson);
+    checkpoint.expectation = {
+      acceptableActions: [{ actionId: "corp.gain_credit" }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.economy"],
+        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+        requiredAssessmentEvidence: [
+          "corp_terminal_central_rez_reserve_required:hq:corp_onr_v1_259_in-the-face_1:gap_2",
+        ],
+      },
+    };
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, result.message).toBe(true);
+    expect(result.decision?.evidence).toContain("plan_priority_class:P2");
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    ).toBe("plan:corp.defend_servers:server-defense-portfolio");
   });
 
   it("counts a public Shell-Traders breaker when it is reachable before scoring", () => {
@@ -144,5 +184,16 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  const checkpoint = bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+  );
+  if (value === scoredOnlyTimingJson)
+    checkpoint.expectation.planExecution = {
+      acceptablePlanKinds: ["corp.economy"],
+      acceptableCapabilities: ["develop_or_convert_corp_economy"],
+      requiredAssessmentEvidence: [
+        "corp_terminal_central_rez_reserve_required:hq:corp_onr_v1_259_in-the-face_1:gap_2",
+      ],
+    };
+  return checkpoint;
 }

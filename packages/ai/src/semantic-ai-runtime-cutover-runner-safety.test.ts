@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { bindSyntheticAgendaStealQuotes } from "./agenda-steal-quotes.test-support";
 import { chooseRunnerAction } from "./index";
+import { evaluateRunnerRunTargets } from "./runner-run-target-evaluation";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
   AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
@@ -1047,6 +1049,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       ),
     ];
 
+    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, { agenda: 0 });
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("run-remote");
@@ -1091,6 +1094,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     hiddenAdvancedRoot.known = false;
     delete hiddenAdvancedRoot.definitionId;
     input.playerView.own.credits = 17;
+    input.playerView.opponent.agendaPoints = 6;
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [];
     input.playerView.own.stackOrRdCount = 0;
@@ -1098,19 +1102,17 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       visibleCard("runner-blink", "runner", "program", {
         definitionId: "onr_v1_007_blink",
         subtypes: ["icebreaker", "random"],
+        strength: 5,
       }),
     ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
-      server(
-        "remote_1",
-        [dataWall("remote-data-wall"), hiddenIce],
-        [hiddenAdvancedRoot],
-      ),
+      server("remote_1", [dataWall("remote-data-wall")], [hiddenAdvancedRoot]),
     ];
 
+    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("run-remote");
@@ -1121,6 +1123,18 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(decision.evidence).not.toContain(
       "fallback_reason:missing_module_coverage",
     );
+    // The irrecoverable known Blink gamble does not certify unknown ICE.
+    const unknownPath = structuredClone(input);
+    unknownPath.decisionId = "irrecoverable-blink-unknown-ice";
+    unknownPath.playerView.servers
+      .find((s) => s.id === "remote_1")!
+      .ice.push(hiddenIce);
+    resetResidentPlanPortfolioMemory();
+    expect(
+      evaluateRunnerRunTargets({ input: unknownPath })[0]?.prerunReserveQuote
+        ?.status,
+    ).toBe("blocked");
+    expect(chooseRunnerAction(unknownPath).actionId).not.toBe("run-remote");
   });
 
   it("keeps Blink recovery ahead of a lethal remote contest when draw exists", () => {
@@ -1159,6 +1173,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       visibleCard("runner-blink", "runner", "program", {
         definitionId: "onr_v1_007_blink",
         subtypes: ["icebreaker", "random"],
+        strength: 5,
       }),
     ];
     input.playerView.servers = [

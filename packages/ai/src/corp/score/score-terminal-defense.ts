@@ -15,6 +15,7 @@ export function withCorpTerminalAgendaDefense(
     !project.agendaInstanceId ||
     project.phase !== "advance_agenda" ||
     project.sameTurnCloseout ||
+    project.routeAssessment === "corp_current_turn_scoreline_unreachable" ||
     projects.some(
       (other) =>
         other.agendaInstanceId === project.agendaInstanceId &&

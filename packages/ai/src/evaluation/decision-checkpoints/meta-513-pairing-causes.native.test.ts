@@ -10,10 +10,14 @@ import type { AiDecisionInput, GameState, PlayerAction } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { creditsToBreakVisibleSubroutinesWithBreaker } from "../../run-analysis/visible-run-breaker-path";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
+import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
 
 function load(key: string, kind = "native") {
   return JSON.parse(
@@ -116,6 +120,7 @@ it("keeps the native G8/D334 hand reserve and unknown inner ICE after correcting
 });
 it("keeps the native G6/D186 real sentry gap when no Boon is installed", () => {
   const { input } = native("g6d186");
+  bindPublicBoardStealQuoteCompanion(input);
   const { d, pf } = decide(input);
   expect(d.actionId).toBe("runner.draw_card");
   expect(pf.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
@@ -123,6 +128,27 @@ it("keeps the native G6/D186 real sentry gap when no Boon is installed", () => {
     (t) => t.actionId === "runner.start_run.remote_1",
   )!;
   expect(route.pathPassability).toBe("blocked_missing_coverage");
+});
+it("retains mature development cashout as an executable ordinary-priority candidate", () => {
+  const { input } = native("g6d186");
+  bindPublicBoardStealQuoteCompanion(input);
+  decide(input);
+  const bank = residentPlanPortfolioSnapshot(input)!.instances.find(
+    (instance) => instance.moduleId === "runner.credit_bank",
+  )!;
+  expect(bank.viability).toBe("ready");
+  expect(bank.moduleState).toMatchObject({
+    phase: "cash_out",
+    signal: {
+      priorityClass: "P4",
+      actionIds: [
+        "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      ],
+      evidenceCodes: expect.arrayContaining([
+        "runner_credit_bank_cashout_for_mature_development_funding",
+      ]),
+    },
+  });
 });
 it("keeps G23/D288 bank cashout but binds it to the newly admitted exact run", () => {
   const { input } = native("g23d288");

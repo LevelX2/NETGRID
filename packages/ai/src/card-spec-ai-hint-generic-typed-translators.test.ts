@@ -83,6 +83,47 @@ const activated = (effects: unknown[]) => ({
 });
 
 describe("generic typed CardSpec AI translators", () => {
+  it("does not create a trace/tag placement owner from the annotation alone", () => {
+    const entry = targetAnnotatedEntry("onr_v1_310_blood-cat");
+    expect(
+      deriveCardSpecAiHint({
+        ...entry,
+        planning: {
+          ...entry.planning,
+          engine: { ...entry.planning.engine, abilities: [] },
+        },
+      }).targetProfiles,
+    ).toBeUndefined();
+  });
+  it.each([false, true])(
+    "retains the installed trace/tag asset's placement preference independent of its identity: renamed=%s",
+    (renamed) => {
+      const original = targetAnnotatedEntry("onr_v1_310_blood-cat");
+      // Keep a supported catalog identity so the independent support-evidence
+      // gate remains active while the mechanical translator is renamed.
+      const entry = renamed
+        ? {
+            ...original,
+            definition: {
+              ...original.definition,
+              id: "onr_v1_309_bbs-whispering-campaign",
+              title: "Synthetic trace asset",
+            },
+          }
+        : original;
+      expect(
+        deriveCardSpecAiHint(entry as never).targetProfiles,
+      ).toContainEqual(
+        expect.objectContaining({
+          schemaVersion: "target-profile-v1",
+          kind: "install_target",
+          timing: "on_install",
+          targetType: "server",
+          purpose: "establish_tag_source_in_protected_empty_remote",
+        }),
+      );
+    },
+  );
   it("preserves the conditional periodic Bad Publicity payoff from typed virus mechanics", () => {
     const expected = {
       kind: "run_tax",
@@ -1187,6 +1228,7 @@ describe("generic typed CardSpec AI translators", () => {
       zone: "stack_top",
       targetCardType: "program",
       lookCount: 4,
+      costPerTaken: 1,
       showToOpponent: true,
       shuffleAfter: true,
     });

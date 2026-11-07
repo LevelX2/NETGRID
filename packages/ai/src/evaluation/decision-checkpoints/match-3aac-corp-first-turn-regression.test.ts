@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { applyAction } from "@netgrid/engine";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3aac-01-corp-first-turn-no-premature-end-d4.json";
 import singleCounterPurgeJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3aac-02-single-tax-counter-no-purge-d67.json";
@@ -7,24 +10,34 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
 describe("match 3aac Corp regression evidence", () => {
-  it("installs the exact measurable HQ-defense route instead of completing the turn", () => {
+  it("funds the exact measurable HQ-defense route and installs it instead of completing the turn", () => {
     const checkpoint = structuredClone(
       checkpointJson,
     ) as AiDecisionCheckpointV1;
+    checkpoint.expectation.acceptableActions = [
+      { actionId: "corp.gain_credit" },
+    ];
+    checkpoint.expectation.planExecution = {
+      acceptablePlanKinds: ["corp.economy"],
+      acceptableCapabilities: ["develop_or_convert_corp_economy"],
+      requiredAssessmentEvidence: [
+        "corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
+      ],
+    };
     const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(checkpoint.difficulty).toBe("hard");
     expect(result.input.playerView.own.clicks).toBe(2);
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
     expect(result.selectedAction).toMatchObject({
-      actionId:
-        "corp.install_card.corp_onr_proteus_025_homing-missile_2.hq.corp_onr_proteus_025_homing-missile_2.0",
-      type: "install_card",
-      payload: { serverId: "hq", placement: "ice" },
+      actionId: "corp.gain_credit",
+      type: "gain_credit",
     });
     const portfolio = residentPlanPortfolioSnapshot(result.input);
     const defenseRootInstanceId =
       "plan:corp.defend_servers:server-defense-portfolio";
+    const fundingExecutorId =
+      "plan:corp.economy:defense-reserve%3Ahq%3Acorp_onr_proteus_017_credit-blocks_2";
     const executor = portfolio?.instances.find(
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     );
@@ -33,7 +46,7 @@ describe("match 3aac Corp regression evidence", () => {
     );
     expect(portfolio).toMatchObject({
       rootForegroundInstanceId: defenseRootInstanceId,
-      executorInstanceId: defenseRootInstanceId,
+      executorInstanceId: fundingExecutorId,
     });
     expect(defenseRoot).toMatchObject({
       moduleId: "corp.defend_servers",
@@ -42,25 +55,28 @@ describe("match 3aac Corp regression evidence", () => {
       persistencePolicy: "locked_sequence",
     });
     expect(executor).toMatchObject({
-      moduleId: "corp.defend_servers",
-      instanceId: defenseRootInstanceId,
+      moduleId: "corp.economy",
+      instanceId: fundingExecutorId,
+      parentInstanceId: defenseRootInstanceId,
+      parentNeedId:
+        "install:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
     });
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         `plan_first_root:${defenseRootInstanceId}`,
-        `plan_first_executor:${defenseRootInstanceId}`,
-        "plan_step_capability:allocate_server_defense",
-        "plan_assessment_evidence:engine_certified_global_defense_access_probability_reduced",
+        `plan_first_executor:${fundingExecutorId}`,
+        "plan_step_capability:develop_or_convert_corp_economy",
+        "plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
       ]),
     );
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
       selectionAuthority: "turn_plan_commitment",
       rootPlanInstanceId: defenseRootInstanceId,
-      leafExecutorInstanceId: defenseRootInstanceId,
+      leafExecutorInstanceId: fundingExecutorId,
       route: {
-        planInstanceId: defenseRootInstanceId,
+        planInstanceId: fundingExecutorId,
         actionId: result.selectedAction?.actionId,
-        capabilityId: "allocate_server_defense",
+        capabilityId: "develop_or_convert_corp_economy",
       },
       turnPlanning: {
         mode: "cutover",
@@ -69,12 +85,52 @@ describe("match 3aac Corp regression evidence", () => {
             expect.objectContaining({
               rootPlanInstanceId: defenseRootInstanceId,
               rootModuleId: "corp.defend_servers",
-              rootProvenance: "resident",
+              rootProvenance: "admitted_support",
+              supportBindings: expect.arrayContaining([
+                expect.objectContaining({
+                  planInstanceId: fundingExecutorId,
+                  parentNeedId:
+                    "install:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
+                }),
+              ]),
             }),
           ],
         },
       },
     });
+    const before = structuredClone(checkpoint.engine.testOnlyGameState);
+    before.eventLog = structuredClone(checkpoint.engine.eventPrefix);
+    const funded = applyAction(before, {
+      matchId: before.matchId,
+      side: "corp",
+      actionId: result.decision!.actionId!,
+      clientKnownStateVersion: before.stateVersion,
+    });
+    expect(funded.ok).toBe(true);
+    if (!funded.ok) throw Error(JSON.stringify(funded.error));
+    expect([funded.state.corp.credits, funded.state.corp.clicks]).toEqual([
+      6, 1,
+    ]);
+    const next = buildAiDecisionInput(funded.state, "corp", {
+      ownDeckSnapshot: checkpoint.deckSnapshot,
+      difficulty: "hard",
+    });
+    const install = chooseAiAction(next);
+    expect(install.actionId).toBe(
+      "corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
+    );
+    expect(install.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: defenseRootInstanceId,
+      leafExecutorInstanceId: defenseRootInstanceId,
+    });
+    expect(
+      applyAction(funded.state, {
+        matchId: before.matchId,
+        side: "corp",
+        actionId: install.actionId!,
+        clientKnownStateVersion: funded.state.stateVersion,
+      }).ok,
+    ).toBe(true);
   });
 
   it("rejects a three-action purge for one visible virus counter", () => {

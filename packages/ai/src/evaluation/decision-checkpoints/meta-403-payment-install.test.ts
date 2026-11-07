@@ -1,3 +1,4 @@
+import { bindSyntheticAgendaStealQuotes } from "../../agenda-steal-quotes.test-support";
 import { describe, expect, it } from "vitest";
 import sequence from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-payment-install-sequence.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -8,6 +9,7 @@ import { runnerPaymentInstallSetups } from "../../plans/runner-payment-install-p
 import { searchFundingRoutes } from "../../plans/funding-route";
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
 import { runnerFundingRouteCandidateIsMaterializable } from "../../plans/runner-funding-candidates";
+import { runnerFundingPaymentWindowQuote } from "../../runtime/runner-funding-payment-window-quote";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -16,10 +18,13 @@ import {
 } from "./runtime-checkpoint";
 
 function fixture(index = 0) {
-  return structuredClone(sequence[index]) as unknown as {
+  const fixture = structuredClone(sequence[index]) as unknown as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  // Explicit current companion: no public steal surcharge or known agenda.
+  bindSyntheticAgendaStealQuotes(fixture.input, "remote_1", 0, {});
+  return fixture;
 }
 function candidates(input: AiDecisionInputWithDeckCapabilities) {
   return buildActionSemanticCandidates({
@@ -134,6 +139,45 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       projectedCredits: 14,
       projectedGeneralCredits: 11,
     });
+    const exact = route(10, 14, 3);
+    expect(runnerFundingPaymentWindowQuote(exact, setups)).toEqual({
+      creditGain: 3,
+      installedCardIds: ["runner_onr_proteus_133_chiba-bank-account_1"],
+    });
+    expect(runnerFundingPaymentWindowQuote(exact, [])).toBeUndefined();
+    for (const boundary of [
+      "identity",
+      "amount",
+      "activation",
+      "restriction",
+      "timing",
+      "install_cost",
+      "missing_install",
+      "duplicate",
+      "liquid_mismatch",
+    ]) {
+      const altered = structuredClone(exact);
+      const index = altered.steps.findIndex(
+        (step) => step.kind === "future_projection",
+      );
+      const payment = altered.steps[index]!;
+      if (boundary === "identity") payment.projectionId = "another-capability";
+      if (boundary === "amount") payment.netLiquidCreditGain++;
+      if (boundary === "activation") payment.creditCost++;
+      if (boundary === "restriction") payment.creditRestriction = "general";
+      if (boundary === "timing") payment.ownTurnOffset = 1;
+      if (boundary === "install_cost") altered.steps[index - 1]!.creditCost++;
+      if (boundary === "missing_install") altered.steps.splice(index - 1, 1);
+      if (boundary === "duplicate")
+        altered.steps.push(
+          ...structuredClone(altered.steps.slice(index - 1, index + 1)),
+        );
+      if (boundary === "liquid_mismatch") altered.projectedGeneralCredits++;
+      expect(
+        runnerFundingPaymentWindowQuote(altered, setups),
+        boundary,
+      ).toBeUndefined();
+    }
     expect(route(10, 14, 1).status).toBe("uncovered");
     expect(route(0, 3, 1).status).toBe("uncovered");
     expect(route(10, 16, 3).status).toBe("uncovered");

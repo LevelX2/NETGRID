@@ -69,6 +69,74 @@ describe("Corp agenda turn-planning vertical slice", () => {
     },
   );
 
+  it.each([false, true])(
+    "adds generic advancement only outside a certified closeout: %s",
+    (sameTurnCloseout) => {
+      const input = decisionInput();
+      const signal = project(3);
+      delete signal.openingRush;
+      signal.feasible = true;
+      signal.sameTurnCloseout = sameTurnCloseout;
+      if (sameTurnCloseout) {
+        signal.sameTurnConversionProof = "engine_quoted_path";
+        signal.sameTurnConversionCreditHorizon = {
+          stateVersion: input.playerView.stateVersion,
+          creditsBeforeScorePayout: 0,
+        };
+      }
+      const slice = buildSlice(input, signal, [agendaCandidate()], []);
+      const line = slice.lines.find((entry) => entry.family === "pure_rush")!;
+      expect(line).toBeDefined();
+      expect(
+        line.nodes.map((node) => node.invocation.semanticActionType),
+      ).toEqual(
+        sameTurnCloseout
+          ? ["install.card"]
+          : ["install.card", "score.advance_card"],
+      );
+      expect(line.evaluation.agendaProgress).toBe(sameTurnCloseout ? 65 : 73);
+    },
+  );
+  it.each(["current", "stale", "missing_proof", "wrong_action"] as const)(
+    "binds the operation head of a quoted same-turn Score conversion: %s",
+    (variant) => {
+      const input = decisionInput();
+      const head = {
+        ...agendaCandidate(),
+        actionId: "overtime",
+        sourceCardInstanceId: "operation-1",
+        actionType: "play_operation",
+        semanticActionType: "score_conversion.gain_action_capacity",
+      } as ActionSemanticCandidate;
+      const { openingRush: _openingRush, ...base } = project(2);
+      const signal: CorpScoreProjectSignal = {
+        ...base,
+        phase: "convert_agenda",
+        feasible: true,
+        sameTurnCloseout: true,
+        sameTurnConversionProof: "engine_quoted_path",
+        sameTurnConversionCreditHorizon: {
+          stateVersion: input.playerView.stateVersion,
+          creditsBeforeScorePayout: 3,
+        },
+        actionIds: [head.actionId],
+        routeSemanticActionTypes: [head.semanticActionType],
+      };
+      if (variant === "stale")
+        signal.sameTurnConversionCreditHorizon!.stateVersion--;
+      if (variant === "missing_proof") delete signal.sameTurnConversionProof;
+      if (variant === "wrong_action") signal.actionIds = ["other-operation"];
+      const slice = buildSlice(input, signal, [head], []);
+      expect(slice.lines.length).toBe(variant === "current" ? 1 : 0);
+      if (variant === "current")
+        expect(slice.lines[0]).toMatchObject({
+          family: "score_continuation",
+          currentActionId: "overtime",
+          evaluation: { defense: 0 },
+        });
+    },
+  );
+
   it("carries exact emergency access risk into competing turn lines", () => {
     const input = decisionInput();
     const risk = (

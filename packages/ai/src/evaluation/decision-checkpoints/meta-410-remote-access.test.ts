@@ -1,3 +1,4 @@
+import { bindSyntheticAgendaStealQuotes } from "../../agenda-steal-quotes.test-support";
 import { describe, expect, it } from "vitest";
 import replacementJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-410-replaced-root-d351.json";
 import trashJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-410-trash-payoff-d400.json";
@@ -21,6 +22,8 @@ function capture(json: unknown) {
 }
 function choose(json: unknown) {
   const { input, runtime } = capture(json);
+  if (json === replacementJson)
+    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     input,

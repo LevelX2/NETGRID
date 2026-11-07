@@ -385,12 +385,25 @@ describe("corp action disposition contributors", () => {
   });
 
   it("disposes an unbound punish-support install without requiring an execution quote", () => {
+    const current = input();
+    current.playerView.own.gripOrHq = [
+      {
+        instanceId: "trace-support",
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        type: "asset",
+        known: true,
+        owner: "corp",
+        controller: "corp",
+      },
+    ];
     const candidate = {
       actionId: "install-trace-support",
       actionType: "install_card",
       semanticActionType: "install.card",
       sourceKind: "card",
-      sourceDefinitionId: "trace-support",
+      sourceCardInstanceId: "trace-support",
+      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      strategySupport: [],
     } as unknown as ActionSemanticCandidate;
     const facts = {
       ...contributorFacts(),
@@ -398,7 +411,7 @@ describe("corp action disposition contributors", () => {
     };
 
     expect(
-      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+      collectCorpActionDispositions(current, [candidate], emptyDomain(), facts),
     ).toEqual([
       {
         actionId: "install-trace-support",
@@ -670,6 +683,8 @@ function input(): AiDecisionInput {
         credits: 0,
         clicks: 1,
         gripOrHq: [],
+        scoreArea: [],
+        heapOrArchives: [],
         maxHandSize: 5,
       },
       servers: [],

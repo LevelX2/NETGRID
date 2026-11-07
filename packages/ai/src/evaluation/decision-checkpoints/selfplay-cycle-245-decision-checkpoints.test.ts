@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import taxedMultiDrawJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-245-01-confirmed-damage-taxed-multidraw-d25.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -26,11 +27,11 @@ describe("selfplay cycle 245 decision checkpoints", () => {
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
+    bindPublicBoardStealQuoteCompanion(capture.input);
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId:
-        "runner.play_event.runner_onr_v1_097_livewires-contacts_3.runner_onr_v1_097_livewires-contacts_3.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+      actionId: "runner.gain_credit",
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
       decisionDebug: {
@@ -40,11 +41,19 @@ describe("selfplay cycle 245 decision checkpoints", () => {
           leafExecutorInstanceId:
             "plan:runner.economy:runner-portfolio-credit-reserve",
           route: {
-            actionType: "play_event",
+            actionType: "gain_credit",
             semanticActionType: "economy.gain_credit",
             capabilityId: "gain_general_liquid_credits",
           },
           dispositions: expect.arrayContaining([
+            expect.objectContaining({
+              actionId:
+                "runner.play_event.runner_onr_v1_097_livewires-contacts_3.runner_onr_v1_097_livewires-contacts_3.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+              disposition: "explicitly_nonproductive",
+              ownerModuleId: "runner.economy",
+              evidenceCode:
+                "runner_immediate_credit_route_has_no_bound_funding_need",
+            }),
             expect.objectContaining({
               actionId:
                 "runner.play_event.runner_onr_v1_095_jack-n-joe_3.runner_onr_v1_095_jack-n-joe_3.onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
@@ -78,6 +87,7 @@ describe("selfplay cycle 245 decision checkpoints", () => {
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
+    bindPublicBoardStealQuoteCompanion(capture.input);
     const decision = chooseAiAction(capture.input as AiDecisionInput);
     const dispositions =
       decision.decisionDebug?.planFirstDecision?.dispositions ?? [];

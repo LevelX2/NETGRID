@@ -464,8 +464,8 @@ function assessKnownRezzedIcePathInternal(
       "ice_unaffordable",
     );
   }
-  // Preparation occurs before the run and spends general liquid credits.
-  // Retain run-only money for its actual run costs and debit both ledgers.
+  // A preparation before the run spends general liquid credits. Consume the
+  // same exact subset used for traces, retaining run-only money for the run.
   if (preRunPreparation)
     spendTraceEligibleCredits(creditBudget, preRunPreparation.credits);
   let visibleBreakCost = preRunPreparation?.credits ?? 0;

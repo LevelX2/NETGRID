@@ -464,7 +464,8 @@ function subroutineLooksLikeImmediateStop(subroutine: unknown): boolean {
     .traceSuccessEffect;
   return (
     effect?.type === "end_run_and_run_lock" ||
-    effect?.type === "end_run_trash_program_and_run_lock"
+    effect?.type === "end_run_trash_program_and_run_lock" ||
+    effect?.type === "end_run_trash_hardware_and_unpreventable_meat_damage"
   );
 }
 

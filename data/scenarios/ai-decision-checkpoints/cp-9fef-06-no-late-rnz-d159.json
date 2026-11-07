@@ -10934,7 +10934,7 @@
       "acceptableCapabilities": ["gain_general_liquid_credits"],
       "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
     },
-    "exactActionId": "runner.gain_credit",
+    "acceptableActions": [{ "actionId": "runner.gain_credit" }],
     "forbiddenActions": [
       {
         "sourceDefinitionId": "onr_v1_173_restrictive-net-zoning"

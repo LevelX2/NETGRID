@@ -764,7 +764,11 @@ describe("AI module boundaries", () => {
       "evaluation/real-engine-decision-corpus-fixtures.ts",
       "index.ts",
       "runner-run-target-evaluation.ts",
+      // These route owners re-quote their projected board/funding through the
+      // shared evaluator; they do not implement a second target evaluator.
+      "runner/rig-coverage/coverage-same-turn-breaker-preparation.ts",
       "runtime/ai-live-runtime-composition.ts",
+      "runtime/runner-exact-funding-routes.ts",
       "runtime/plan-first-live-runtime.ts",
       "runtime/semantic-runtime.ts",
     ]);

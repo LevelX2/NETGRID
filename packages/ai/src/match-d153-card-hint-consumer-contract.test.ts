@@ -55,6 +55,9 @@ describe("match D153 card hint consumer contract", () => {
     const checkpoint = bindHistoricalRunEventCadence(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );
+    checkpoint.expectation.planExecution!.requiredAssessmentEvidence = [
+      "runner_credit_bank_complete_known_run_after_cashout",
+    ];
     const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
 
@@ -128,7 +131,7 @@ describe("match D153 card hint consumer contract", () => {
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:credit_bank_cash_out",
-        "plan_assessment_evidence:runner_credit_bank_cashout_for_click_efficient_liquidity",
+        "plan_assessment_evidence:runner_credit_bank_complete_known_run_after_cashout",
       ]),
     );
 

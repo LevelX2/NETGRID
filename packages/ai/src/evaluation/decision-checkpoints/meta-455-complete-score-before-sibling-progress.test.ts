@@ -19,6 +19,9 @@ it("keeps the currently funded score instead of scattering the last two clicks a
   const runtime = structuredClone(
     checkpoint.runtime,
   ) as unknown as AiRuntimeCheckpointV1;
+  // Isolate the equal-priority Score comparison. The native Runner's four
+  // points also create a distinct terminal HQ-defense interrupt.
+  input.playerView.opponent.agendaPoints = 0;
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     input,
@@ -62,4 +65,24 @@ it("keeps the currently funded score instead of scattering the last two clicks a
       },
     },
   });
+});
+
+it("preserves the native terminal HQ-defense interrupt ahead of the nonterminal score", () => {
+  const input = structuredClone(
+    checkpoint.input,
+  ) as unknown as AiDecisionInputWithDeckCapabilities;
+  resetResidentPlanPortfolioMemory();
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    structuredClone(checkpoint.runtime) as unknown as AiRuntimeCheckpointV1,
+  );
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe("corp.draw_card");
+  expect(
+    decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+  ).toBe("corp.defend_servers");
+  expect(
+    decision.decisionDebug?.planFirstDecision?.priority?.effectiveClass,
+  ).toBe("P2");
 });

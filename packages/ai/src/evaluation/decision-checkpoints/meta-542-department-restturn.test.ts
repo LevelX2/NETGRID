@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, it, expect, vi } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
+import type { EconomyState } from "../../corp/economy/economy-types";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -87,7 +91,7 @@ describe("SP-611 native Department rest-turn comparison", () => {
     ["cp-meta-542-r1-g2-d370-cycle-entry.json"],
     ["cp-meta-542-r1-g2-d371-funding-boundary.json"],
   ])(
-    "compares the bank cycle when the published Remote need has no executable provider: %s",
+    "keeps the finite bank investment when the published Remote need has no executable provider: %s",
     (name) => {
       const observed: Parameters<
         typeof discovery.buildCorpEconomySignals
@@ -99,7 +103,8 @@ describe("SP-611 native Department rest-turn comparison", () => {
           observed.push(params);
           expect(
             result.some(
-              (n) => n.kind === "develop_campaign" && n.hostedCreditBankCycle,
+              (n) =>
+                n.kind === "develop_campaign" && n.hostedCreditBankInvestment,
             ),
           ).toBe(true);
           return result;
@@ -112,7 +117,9 @@ describe("SP-611 native Department rest-turn comparison", () => {
         ),
       ).toBe(true);
       expect(selected.payload?.hostedCreditAddAmount).toBe(3);
-      expect(plan?.rootPlanInstanceId).toContain("economy-hosted-bank-cycle");
+      expect(plan?.rootPlanInstanceId).toContain(
+        "economy-hosted-bank-investment",
+      );
     },
   );
   it("uses an empty active bank instead of two unbound Basic credits", () => {
@@ -131,24 +138,49 @@ describe("SP-611 native Department rest-turn comparison", () => {
       extraLiquidCredits: 1,
     });
   });
-  it("preserves the current Score-parent funding milestone at the empty-bank boundary", () => {
-    const { selected, plan } = replayCapture(
+  it("builds the finite future Score budget while the native Score route is still blocked", () => {
+    const { f, selected, plan } = replayCapture(
       namedCapture("cp-meta-542-r1-g19-d179-parent-funding.json"),
     );
-    expect(selected.type).toBe("gain_credit");
-    expect(plan?.rootPlanInstanceId).toContain("corp.score_agenda");
+    expect(selected.payload?.hostedCreditAddAmount).toBe(3);
+    expect(plan?.rootPlanInstanceId).toContain(
+      "economy-hosted-bank-investment",
+    );
     expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
+    const portfolio = residentPlanPortfolioSnapshot(f.input)!;
+    const executor = portfolio.instances.find(
+      (p) => p.instanceId === portfolio.executorInstanceId,
+    )!;
+    expect((executor.moduleState as EconomyState).signal).toMatchObject({
+      hostedCreditBankInvestment: {
+        targetCredits: 8,
+        storedCredits: 0,
+        additionalLoadExecutions: 1,
+        canCarryAcrossTurn: false,
+      },
+    });
+    const score = portfolio.instances.find(
+      (p) =>
+        p.moduleId === "corp.score_agenda" &&
+        p.dedupeKey.includes("security-net-optimization_2:remote_1"),
+    )!;
+    expect(score.moduleState).toMatchObject({
+      signal: {
+        feasible: false,
+        routeAssessment: "corp_score_protection_funding_gap",
+      },
+    });
   });
   it("continues the profitable current load with its Economy plan, step and route", () => {
     const { f, selected, plan } = replay(4, 441);
     expect(selected.payload?.hostedCreditAddAmount).toBe(3);
     expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
     expect(plan?.selectedPlan?.instanceId).toContain(
-      "economy-hosted-bank-cycle",
+      "economy-hosted-bank-investment",
     );
     expect(f.input.playerView.stateVersion).toBe(440);
   });
-  it("offers both current payout and the complete Engine-quoted alternative to the existing planner", () => {
+  it("keeps the quoted complete unsafe-bank horizon inside the still-unfunded investment", () => {
     const original = discovery.buildCorpEconomySignals;
     const observed: ReturnType<typeof original>[] = [];
     vi.spyOn(discovery, "buildCorpEconomySignals").mockImplementation(
@@ -161,20 +193,25 @@ describe("SP-611 native Department rest-turn comparison", () => {
     replay(4, 441);
     const needs = observed.flat();
     expect(needs.some((n) => n.kind === "convert_visible_card_payout")).toBe(
-      true,
+      false,
     );
-    const cycle = needs.find(
-      (n) => n.kind === "develop_campaign" && n.hostedCreditBankCycle,
+    const investment = needs.find(
+      (n) => n.kind === "develop_campaign" && n.hostedCreditBankInvestment,
     );
-    expect(cycle?.kind).toBe("develop_campaign");
-    if (cycle?.kind !== "develop_campaign")
-      throw Error("Missing admitted bank route");
-    expect(cycle.hostedCreditBankCycle).toMatchObject({
+    if (investment?.kind !== "develop_campaign")
+      throw Error("Missing admitted bank investment");
+    expect(investment.hostedCreditBankInvestment).toMatchObject({
       stateVersion: 440,
-      currentClicks: 2,
-      currentHostedCredits: 3,
-      cashoutCredits: 6,
-      extraLiquidCredits: 2,
+      storedCredits: 3,
+      creditsPerLoad: 3,
+      targetCredits: 15,
+      additionalLoadExecutions: 1,
+      canCarryAcrossTurn: false,
+    });
+    expect(investment.payback).toMatchObject({
+      projectedCredits: 6,
+      projectedNetCredits: 2,
+      horizonTurns: 0,
     });
   });
   it("preserves the Defense-owned installation unlocked by an early payout", () => {

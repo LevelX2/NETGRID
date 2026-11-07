@@ -58,7 +58,8 @@ describe("exclusive deck replacement admission", () => {
         expect.objectContaining({
           actionId: evaluation.legalActionId,
           disposition: "explicitly_nonproductive",
-          ownerModuleId: "runner.develop_board_and_hand",
+          ownerModuleId: "runner.recurring_economy",
+          evidenceCode: "runner_restricted_run_economy_hand_route_deferred",
         }),
       );
       expect(decision.evidence).toContain("plan_first_runtime:true");

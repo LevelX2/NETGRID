@@ -793,6 +793,19 @@ function iceInstall(source: VisibleCard, serverId: "hq" | "rd"): LegalAction {
         postInstallRezQuoteBaseCredits: 1,
         postInstallRezQuoteFinalCredits: 1,
         postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        postInstallEffectiveRunQuoteJson: JSON.stringify({
+          iceInstanceId: source.instanceId,
+          iceDefinitionId: DATA_WALL_DEFINITION_ID,
+          effectiveStrength: 0,
+          subroutines: [
+            {
+              id: "printed_subroutines_end_the_run",
+              type: "end_the_run",
+              sourceDefinitionId: DATA_WALL_DEFINITION_ID,
+              sourceTitle: "Data Wall",
+            },
+          ],
+        }),
       },
     },
   );

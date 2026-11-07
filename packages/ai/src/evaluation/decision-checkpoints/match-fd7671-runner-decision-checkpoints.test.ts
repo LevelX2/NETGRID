@@ -19,9 +19,17 @@ describe("match FD7671 runner decision checkpoints", () => {
       "pressures the score-remote ICE before run-lock release",
       releaseRunLockJson,
     ],
-    ["exposes the valuable unseen remote-root position", exposeTargetJson],
   ])("%s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
+  });
+
+  it("rejects the historical installed-Seeya choice without its Remote execution origin", () => {
+    // This capture predates the source/target-bound Remote continuation.
+    // Current positive selection and Engine replay are covered by
+    // runner-remote-expose-preparation-real-engine.test.ts.
+    expect(() => runAiDecisionCheckpoint(fixture(exposeTargetJson))).toThrow(
+      "window_origin_missing",
+    );
   });
 
   it("does not release the run lock without a click for the follow-up run", () => {
@@ -110,7 +118,7 @@ describe("match FD7671 runner decision checkpoints", () => {
     expectProspectiveCampaignTrash(noFollowUpClick);
   });
 
-  it("keeps the sole legal expose target selectable", () => {
+  it("still requires the Remote origin when only one expose target remains", () => {
     const soleTarget = mutateFixture(exposeTargetJson, (checkpoint) => {
       const pendingChoice = checkpoint.engine.testOnlyGameState.pendingChoice;
       if (!pendingChoice) throw new Error("Expected expose choice");
@@ -124,7 +132,9 @@ describe("match FD7671 runner decision checkpoints", () => {
       };
     });
 
-    expectCheckpointToPass(soleTarget);
+    expect(() => runAiDecisionCheckpoint(soleTarget)).toThrow(
+      "window_origin_missing",
+    );
   });
 });
 

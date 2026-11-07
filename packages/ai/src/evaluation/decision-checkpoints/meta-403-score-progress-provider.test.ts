@@ -8,7 +8,7 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-it("SP-194 replans a feasible agenda's unavailable protection line while retaining global Defense authority", () => {
+it("SP-194 delegates the current terminal-agenda protection provider to Defense", () => {
   const { input, runtime } = structuredClone(checkpoint) as unknown as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
@@ -22,7 +22,9 @@ it("SP-194 replans a feasible agenda's unavailable protection line while retaini
   const decision = chooseAiAction(input);
   const defense = "plan:corp.defend_servers:server-defense-portfolio";
   const actionId =
-    "corp.install_card.corp_onr_v1_229_code-corpse_1.rd.corp_onr_v1_229_code-corpse_1.1";
+    "corp.install_card.corp_onr_v1_229_code-corpse_1.remote_1.corp_onr_v1_229_code-corpse_1.3";
+  const score =
+    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_211_polymer-breakthrough_1%3Aremote_1";
   expect(
     input.legalActions.some((action) => action.actionId === actionId),
   ).toBe(true);
@@ -32,17 +34,20 @@ it("SP-194 replans a feasible agenda's unavailable protection line while retaini
     timeoutUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: defense,
+        rootPlanInstanceId: score,
         leafExecutorInstanceId: defense,
         selectedStep: {
           planInstanceId: defense,
-          stepId: `${defense}:allocate`,
+          stepId: `${defense}:develop_score_protection`,
+          parentInstanceId: score,
+          needId:
+            "score-protection:agenda:corp_onr_v1_211_polymer-breakthrough_1:remote_1",
         },
         route: {
           actionId,
           stateVersion: 309,
           planInstanceId: defense,
-          capabilityId: "allocate_server_defense",
+          capabilityId: "develop_score_protection",
         },
         turnPlanning: {
           coverage: {
@@ -53,9 +58,10 @@ it("SP-194 replans a feasible agenda's unavailable protection line while retaini
                 planInstanceId:
                   "plan:corp.score_agenda:agenda%3Acorp_onr_v1_211_polymer-breakthrough_1%3Aremote_1",
                 blocked: true,
-                blockerCode: "selected_line_without_executable_provider",
-                witnessKind: "replan",
-                reasonCode: "score_campaign_has_no_complete_current_line",
+                blockerCode: "no_complete_line",
+                witnessKind: "support_head",
+                providerInstanceId: defense,
+                providerActionId: actionId,
               }),
             ]),
           },

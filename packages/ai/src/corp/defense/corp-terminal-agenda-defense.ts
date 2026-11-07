@@ -74,7 +74,8 @@ export function assessCorpTerminalAgendaDefense(
       ? { runnerMemoryLimit: view.opponent.memoryLimit }
       : {}),
     runnerCredits: view.opponent.credits,
-    ...(input.playerView.activeSide === "corp"
+    ...(input.playerView.activeSide === "corp" &&
+    input.playerView.phase !== "run"
       ? {
           runnerCreditPoolHorizon: "next_runner_turn" as const,
           runnerPublicPreparedBreakers:

@@ -86,6 +86,41 @@ describe("match f809 Corp defense decision checkpoints", () => {
       acceptableActions: [
         {
           type: "play_operation",
+          sourceDefinitionId: "onr_proteus_049_emergency-rig",
+        },
+      ],
+      planExecution: {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["allocate_server_defense"],
+        requiredAssessmentEvidence: [
+          "corp_revalidated_ice_rez_support:rd:temporary:duration_3:direct_gap_3:action_cost_3",
+        ],
+      },
+    };
+    expectCheckpointToPass(checkpoint);
+  });
+
+  it("retains the exact installment support when the temporary operation is unavailable", () => {
+    const checkpoint = derivedRezSupportFixture(3);
+    const state = checkpoint.engine.testOnlyGameState;
+    const temporary = state.corp.hq.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_proteus_049_emergency-rig",
+    )!;
+    expect(temporary).toBeDefined();
+    state.corp.hq = state.corp.hq.filter((id) => id !== temporary);
+    state.corp.rd.push(temporary);
+    Object.assign(state.cardInstances[temporary]!, {
+      zone: { side: "corp", zone: "rd" },
+      faceup: false,
+      rezzed: false,
+    });
+    checkpoint.engine.stateHash = hashGameState(state);
+    checkpoint.expectation = {
+      acceptableActions: [
+        {
+          type: "play_operation",
           sourceDefinitionId: "onr_proteus_051_rent-to-own-contract",
         },
       ],

@@ -9,7 +9,7 @@ import {
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 afterEach(resetResidentPlanPortfolioMemory);
-function native(refresh = true) {
+function native(refresh = true, isolatedScoreWindow = true) {
   const cp = JSON.parse(
     readFileSync(
       new URL("./fixtures/meta-ten-repairs/506-g39-d306.json", import.meta.url),
@@ -30,6 +30,13 @@ function native(refresh = true) {
     ...cp.input,
     ...buildAiDecisionInputDto(cp.input),
   } as AiDecisionInputWithDeckCapabilities;
+  // This control owns the score/draw contract. The older capture's unrelated
+  // Sterdroid rez lacks the current pulse quote and is tested separately below.
+  if (isolatedScoreWindow)
+    input.legalActions = input.legalActions.filter(
+      (action) => action.type !== "rez_card",
+    );
+  input.playerView.legalActions = input.legalActions;
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
@@ -61,6 +68,12 @@ it("retains the actual current Engine draw fact through the DTO and holds the no
         i.viability !== "ready",
     ),
   ).toBe(true);
+});
+it("rejects the raw unrelated Sterdroid rez without its current Engine pulse quote", () => {
+  const { input } = native(true, false);
+  expect(() => chooseAiAction(input)).toThrow(
+    /missing_action_semantics.*sterdroid/,
+  );
 });
 it.each(["absent", "stale", "contradictory"])(
   "fails closed for the %s mandatory score fact",

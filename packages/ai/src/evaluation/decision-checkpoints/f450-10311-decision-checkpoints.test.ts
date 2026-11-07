@@ -64,7 +64,7 @@ describe("F450 and 10311 exact decision checkpoints", () => {
         acceptableActions: [{ type: "start_run", targetServerId: "hq" }],
         planExecution: {
           acceptablePlanKinds: ["runner.pressure_central"],
-          acceptableCapabilities: ["pressure_hq_access"],
+          acceptableCapabilities: ["pressure_hq_information"],
         },
         runTargets: [
           {

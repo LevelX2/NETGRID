@@ -7,6 +7,7 @@ import {
 } from "../../plans/resident-plan-portfolio-memory";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { withCorpSameTurnScoreDefenseReserve } from "../../corp/score/score-reserve-restoration";
+import { corpFundedCentralProtectionReserve } from "../../corp/defense/corp-server-protection-reserve";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -14,8 +15,8 @@ import {
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
 afterEach(resetResidentPlanPortfolioMemory);
-function checkpoint() {
-  return JSON.parse(
+function checkpoint(runnerCredits = 0) {
+  const cp = JSON.parse(
     readFileSync(
       new URL(
         "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-493-r6-g8-d86.json",
@@ -27,6 +28,11 @@ function checkpoint() {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  // Synthetic reserve contrast: with the native two credits plus three
+  // preparation clicks the Runner can now pay In the Face. Zero current
+  // credits leaves that exact five-credit protection route meaningful.
+  cp.input.playerView.opponent.credits = runnerCredits;
+  return cp;
 }
 function decide(cp: ReturnType<typeof checkpoint>) {
   restoreAiRuntimeCheckpoint(
@@ -49,6 +55,13 @@ function decide(cp: ReturnType<typeof checkpoint>) {
   );
   return result;
 }
+it("does not reserve an unaffordable central route after the native Runner preparation pays HQ", () => {
+  const cp = checkpoint(2);
+  expect(corpFundedCentralProtectionReserve(cp.input)).toBe(0);
+  expect(decide(cp).actionId).toBe(
+    "corp.advance_card.corp_onr_v1_193_corporate-coup_1.corp_onr_v1_193_corporate-coup_1",
+  );
+});
 it("funds the installed same-turn score and funded central reserve jointly under the same Score parent", () => {
   const cp = checkpoint();
   expect(cp.input.playerView.own).toMatchObject({ credits: 6, clicks: 3 });

@@ -44,6 +44,28 @@ it.each([
       input.ownDeckSnapshot!.deckSnapshotId,
       cp.runtime,
     );
+    if (game === 36) {
+      // The current finite bank has a profitable first load at P4. Preserve
+      // that native route, then isolate the still-published P5 recovery phase.
+      const native = chooseAiAction(input);
+      expect(native.actionId).toContain(
+        "broker_2.activated.onr_v1_154_broker:store_credits",
+      );
+      expect(
+        native.decisionDebug?.planFirstDecision?.priority?.effectiveClass,
+      ).toBe("P4");
+      input.legalActions = input.legalActions.filter(
+        (action) =>
+          action.payload?.cardImplementationAddsHostedCredits !== true,
+      );
+      input.playerView.legalActions = input.legalActions;
+      resetResidentPlanPortfolioMemory();
+      restoreAiRuntimeCheckpoint(
+        input,
+        input.ownDeckSnapshot!.deckSnapshotId,
+        cp.runtime,
+      );
+    }
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe("runner.draw_card");
     expect(decision.fallbackUsed).toBe(false);

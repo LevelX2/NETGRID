@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
-import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
@@ -13,7 +16,10 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { corpVisibleCardEconomyWithdrawals } from "../corp/economy/economy-signals";
 import { restoreResidentPlanPortfolioMemorySnapshot } from "../plans/resident-plan-portfolio-memory";
 import { restoreStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
-import type { CorpEconomyParentFundingSignal } from "../corp/economy/economy-types";
+import type {
+  CorpEconomyParentFundingSignal,
+  EconomyState,
+} from "../corp/economy/economy-types";
 
 function checkpoint() {
   return JSON.parse(
@@ -146,9 +152,43 @@ describe("SP-456 actual Engine bank cycle through the normal Corp chooser", () =
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
   });
   it("runs rez, load, load and cashout with the current Score and Defense funding bindings", () => {
-    for (const step of checkpoint().steps) {
+    for (const [index, step] of checkpoint().steps.entries()) {
       const decision = chooseAiAction(step.input);
       const plan = decision.decisionDebug?.planFirstDecision;
+      if (index === 0) {
+        const funding = residentPlanPortfolioSnapshot(step.input)!
+          .instances.filter((instance) => instance.moduleId === "corp.economy")
+          .map((instance) => (instance.moduleState as EconomyState).signal)
+          .filter(
+            (signal): signal is CorpEconomyParentFundingSignal =>
+              signal.kind === "parent_funding",
+          );
+        const short = funding.find(
+          (signal) =>
+            signal.parentNeedId?.endsWith("hostile-takeover_2:remote_1") ===
+            true,
+        )!;
+        const cycle = funding.find(
+          (signal) => signal.parentPlanInstanceId === plan?.rootPlanInstanceId,
+        )!;
+        // The old parent now needs only one credit and deliberately has no
+        // bank cycle. Preserve that earlier-conversion guard and bind the
+        // actual bank preparation to the independently published longer need.
+        expect(short.gap).toBe(1);
+        expect(
+          corpHostedBankCycleForParentFunding(
+            step.input,
+            buildActionSemanticCandidates({
+              legalActions: step.input.legalActions,
+              observerSide: "corp",
+              stateVersion: step.input.playerView.stateVersion,
+            }),
+            short,
+          ),
+        ).toBeUndefined();
+        expect(cycle.gap).toBe(11);
+        expect(cycle.hostedCreditBankCycle?.actionId).toBe(decision.actionId);
+      }
       expect(decision.actionId).toBe(step.expected.actionId);
       expect(plan?.rootPlanInstanceId).toBe(step.expected.root);
       expect(plan?.priority?.effectiveClass).toBe(step.expected.priority);

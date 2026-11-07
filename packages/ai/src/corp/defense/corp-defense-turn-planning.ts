@@ -17,6 +17,7 @@ import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-fundin
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
+import { hasExactNonNegativeCostProfile } from "../../runtime/exact-action-cost-facts";
 export { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 import {
   buildCanonicalLegalActionInvocation,
@@ -107,6 +108,10 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
     (signal): signal is CorpScoreProtectionDrawSignal =>
       signal.kind === "score_protection_draw" &&
       signal.phase === "draw_for_ice",
+  );
+  const genericDraws = params.defenseNeeds.filter(
+    (signal): signal is CorpGenericDefenseSignal =>
+      signal.kind === "generic" && signal.phase === "draw_for_ice",
   );
   const productiveExists = genericInstalls.some(
     (signal) =>
@@ -235,7 +240,24 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       });
       continue;
     }
-    lines.push(createScoreProtectionDrawLine(params, signal, drawCandidate));
+    lines.push(createDefenseDrawLine(params, signal, drawCandidate));
+  }
+  for (const signal of genericDraws) {
+    const drawCandidate = params.candidates.find(
+      (candidate) =>
+        signal.actionIds?.includes(candidate.actionId) &&
+        candidate.semanticActionType === "draw.card" &&
+        candidate.costProfile.costKnownStatus === "known" &&
+        hasExactNonNegativeCostProfile(candidate),
+    );
+    if (!drawCandidate) {
+      rejected.push({
+        defenseId: signal.defenseId,
+        reasonCode: "exact_draw_head_missing",
+      });
+      continue;
+    }
+    lines.push(createDefenseDrawLine(params, signal, drawCandidate));
   }
   for (const signal of params.defenseNeeds) {
     if (signal.kind !== "score_protection_terminal_install") continue;
@@ -1006,14 +1028,32 @@ function createScoreProtectionInstallLine(
   };
 }
 
-function createScoreProtectionDrawLine(
+function createDefenseDrawLine(
   params: {
     input: AiDecisionInput;
     stateIdentity: PlanningStateIdentity;
   },
-  signal: CorpScoreProtectionDrawSignal,
+  signal: CorpScoreProtectionDrawSignal | CorpGenericDefenseSignal,
   draw: ActionSemanticCandidate,
 ): CorpDefenseTurnPlanningLine {
+  const binding =
+    signal.kind === "score_protection_draw"
+      ? {
+          parentPlanInstanceId: planInstanceIdForProposal({
+            moduleId: "corp.score_agenda",
+            dedupeKey: signal.parentProjectId,
+          }),
+          parentNeedId: signal.parentNeedId,
+        }
+      : undefined;
+  const priorityClass =
+    signal.kind === "score_protection_draw"
+      ? signal.delegatedPriorityClass
+      : corpGenericDefensePriorityClass([signal]);
+  const objectiveKey =
+    signal.kind === "score_protection_draw"
+      ? `score-protection:${signal.parentProjectId}`
+      : `server:${signal.serverId}:defense-discovery`;
   const invocation = invocationFor(params.stateIdentity, draw);
   const nodeId = turnPlanningFingerprint("defense-line-node", {
     defenseId: signal.defenseId,
@@ -1055,34 +1095,31 @@ function createScoreProtectionDrawLine(
       ]),
     },
     currentMilestoneId: signal.phase,
-    nextMilestoneId: "replan_after_score_protection_draw",
+    nextMilestoneId: binding
+      ? "replan_after_score_protection_draw"
+      : "replan_after_defense_draw",
     commitment:
-      signal.delegatedPriorityClass === "P1" ||
-      signal.delegatedPriorityClass === "P2"
-        ? "hard"
-        : "soft",
+      priorityClass === "P1" || priorityClass === "P2" ? "hard" : "soft",
     remainingValue: totalValue,
     expiresAt: "current_turn_end",
     revalidationCodes: [
       "own_draw_resolved",
       "replan_remaining_turn_after_private_observation",
-      "parent_score_project_still_current",
-      "parent_protection_need_still_current",
+      ...(binding
+        ? [
+            "parent_score_project_still_current",
+            "parent_protection_need_still_current",
+          ]
+        : ["central_defense_need_still_current"]),
     ],
   };
   return {
     lineId,
     defenseId: signal.defenseId,
     targetServerId: signal.serverId,
-    supportBinding: {
-      parentPlanInstanceId: planInstanceIdForProposal({
-        moduleId: "corp.score_agenda",
-        dedupeKey: signal.parentProjectId,
-      }),
-      parentNeedId: signal.parentNeedId,
-    },
+    ...(binding ? { supportBinding: binding } : {}),
     disposition: "draw_for_ice",
-    currentActionId: signal.actionId,
+    currentActionId: draw.actionId,
     nodes: [
       {
         nodeId,
@@ -1102,14 +1139,14 @@ function createScoreProtectionDrawLine(
     defenseValue,
     economyValue,
     totalValue,
-    priorityClass: signal.delegatedPriorityClass,
+    priorityClass,
     campaignQuote,
     valueClaims: [
       {
         claimId: `${lineId}:defense`,
         campaignId,
         ownerModuleId: "corp.defend_servers",
-        objectiveKey: `score-protection:${signal.parentProjectId}`,
+        objectiveKey,
         componentKey: "ice_search_opportunity",
         evaluationDimensionId: "defense",
         aggregationMode: "delta_from_previous_prefix",
@@ -1117,8 +1154,12 @@ function createScoreProtectionDrawLine(
         beforeQuoteId,
         afterQuoteId,
         amount: defenseValue,
-        dependencyKeys: [signal.parentNeedId],
-        conflictKeys: [`score-protection-draw:${signal.parentProjectId}`],
+        dependencyKeys: binding ? [binding.parentNeedId] : [],
+        conflictKeys: [
+          signal.kind === "score_protection_draw"
+            ? `score-protection-draw:${signal.parentProjectId}`
+            : `server:${signal.serverId}:defense-draw`,
+        ],
         status: "quoted",
       },
     ],
@@ -1126,10 +1167,16 @@ function createScoreProtectionDrawLine(
       "defense_disposition:draw_for_ice",
       `defense_target:${signal.serverId}`,
       signal.evidenceCode,
-      `score_protection_parent:${signal.parentProjectId}`,
-      `score_protection_need:${signal.parentNeedId}`,
+      ...(signal.kind === "score_protection_draw"
+        ? [
+            `score_protection_parent:${signal.parentProjectId}`,
+            `score_protection_need:${signal.parentNeedId}`,
+          ]
+        : []),
       "observation_boundary_after_draw",
-      "score_protection_draw_delegated_to_defense_plan",
+      binding
+        ? "score_protection_draw_delegated_to_defense_plan"
+        : "generic_defense_draw_owned_by_defense_plan",
     ],
   };
 }

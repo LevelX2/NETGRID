@@ -28,10 +28,20 @@ type PersistedDecisionCapture = {
 };
 
 describe("match 76497164832f078c terminal R&D defense", () => {
-  it("draws toward concrete terminal R&D defense before a remote score line", () => {
+  it("draws toward terminal R&D defense when no concrete installation remains", () => {
     const capture = structuredClone(d52CaptureJson) as PersistedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
+    // A proved installation/funding route suppresses speculative search.
+    // Isolate the missing-ICE contract by withholding those installation heads.
+    const ice = new Set(
+      capture.input.playerView.own.gripOrHq
+        .filter((card) => card.type === "ice")
+        .map((card) => card.instanceId),
+    );
+    capture.input.legalActions = capture.input.legalActions.filter(
+      (action) => action.type !== "install_card" || !ice.has(action.source),
+    );
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
@@ -72,5 +82,37 @@ describe("match 76497164832f078c terminal R&D defense", () => {
       "turn_plan_commitment",
     );
     expect(decision.selectedChoices).toBeUndefined();
+  });
+
+  it("keeps the native known preparation route without inventing a repeated missing-ICE draw", () => {
+    const capture = structuredClone(d52CaptureJson) as PersistedDecisionCapture;
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      capture.input,
+      capture.input.ownDeckSnapshot!.deckSnapshotId,
+      capture.runtime,
+    );
+    const decision = chooseAiAction(capture.input);
+    expect(decision.actionId).toBe(
+      "corp.install_card.corp_onr_v1_365_paris-city-grid_1.remote_1.corp_onr_v1_365_paris-city-grid_1",
+    );
+    expect(decision.fallbackUsed).toBe(false);
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("corp.punish_campaign");
+    expect(decision.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
+      "punish_prepare",
+    );
+    expect(decision.decisionDebug?.actionAlternatives).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId: "corp.draw_card",
+          excluded: true,
+          whyNot: expect.arrayContaining([
+            "explicitly_nonproductive:corp.hand_and_agenda_management:corp_exact_draw_projection_exceeds_hand_capacity",
+          ]),
+        }),
+      ]),
+    );
   });
 });

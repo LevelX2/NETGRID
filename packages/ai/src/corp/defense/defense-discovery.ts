@@ -824,6 +824,14 @@ export function buildCorpDefenseProtectionSignals({
     .filter(
       (project) =>
         project.terminalDefense === undefined &&
+        // Score has already certified the last executable winning window.
+        // An ordinary protection scan must not add a funding detour that
+        // consumes that window's required advance clicks.
+        !(
+          project.lastDrawScoreSurvival &&
+          project.terminalScore &&
+          project.feasible
+        ) &&
         !(
           project.routeAssessment ===
           "corp_resident_score_parent_dominates_sibling_route"

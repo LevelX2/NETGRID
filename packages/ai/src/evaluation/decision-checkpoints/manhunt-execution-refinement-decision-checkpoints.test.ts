@@ -130,15 +130,25 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("bids zero when the Trace Limit cannot preserve the visible payoff reserve", () => {
+  it("uses the guaranteed open-trace bid while preserving the visible payoff reserve", () => {
     const livePunishWindow = mutateFixture(cp06Json, (current) => {
       moveFirstCorpCardToHq(current, CLOSED_ACCOUNTS);
-      current.expectation = { choice: { mustSelectValues: [0] } };
+      current.expectation = { choice: { mustSelectValues: [1] } };
     });
 
     const result = runAiDecisionCheckpoint(livePunishWindow);
 
     expect(result.ok, diagnostic(result)).toBe(true);
+    const optionIds = result.decision?.selectedChoices?.selectedOptionIds;
+    if (!Array.isArray(optionIds))
+      throw new Error("Missing native trace bid selection");
+    const selected = result.input.playerView.pendingChoice!.options.find(
+      (option) => optionIds.includes(option.id),
+    )!;
+    expect(result.input.playerView.trace?.profile).toBe("modern_open");
+    expect(result.input.playerView.own.credits - Number(selected.value)).toBe(
+      4,
+    );
   });
 
   it("still bids zero when a limit-sized bid would consume the payoff reserve", () => {

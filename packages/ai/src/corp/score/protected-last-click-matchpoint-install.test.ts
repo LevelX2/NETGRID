@@ -108,6 +108,7 @@ it("admits a funded protected next-turn matchpoint install on the last click und
 
 it("does not claim matchpoint after the protection route consumes an agenda point", () => {
   const { input } = fixture();
+  input.playerView.opponent.credits = 0;
   const signal = project(input, actionId.replace("remote_1", "remote_2"));
   expect(signal.protectionNeed?.baseline).toMatchObject({
     knowledge: "known",

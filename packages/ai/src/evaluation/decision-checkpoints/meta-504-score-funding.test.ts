@@ -18,6 +18,13 @@ it("executes the exact bound funding provider before the currently unfunded urge
   );
   expect(Object.values(capture.validation).every((v) => v === true)).toBe(true);
   const input = capture.input as AiDecisionInputWithDeckCapabilities;
+  // The native eight-credit state already covers the current five-credit
+  // deckout milestone. Keep this provider test genuinely underfunded.
+  expect(input.playerView.own.credits).toBe(8);
+  input.playerView.own.credits = 4;
+  // Keep the Score provider isolated from the independent terminal HQ
+  // reserve, which correctly preempts it at the recorded Runner matchpoint.
+  input.playerView.opponent.agendaPoints = 0;
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,

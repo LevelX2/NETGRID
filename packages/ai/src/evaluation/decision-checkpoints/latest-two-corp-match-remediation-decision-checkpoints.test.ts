@@ -24,7 +24,18 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       startMatchpointJson,
     ],
   ])("%s", (_label, json) => {
-    const result = runAiDecisionCheckpoint(fixture(json));
+    const checkpoint = fixture(json);
+    if (json === convertScorelineJson) {
+      checkpoint.expectation.acceptableActions = [{ type: "draw_card" }];
+      checkpoint.expectation.planExecution = {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["develop_score_protection"],
+        requiredAssessmentEvidence: [
+          "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_203_hostile-takeover_1:remote_1:remote_1",
+        ],
+      };
+    }
+    const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
@@ -36,8 +47,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.expectation = {
         acceptableActions: [
           {
-            actionId:
-              "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1",
+            type: "draw_card",
           },
         ],
         forbiddenActions: [
@@ -77,13 +87,17 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-A2-NO-AGENDA-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_365_paris-city-grid_1.remote_1.corp_onr_v1_365_paris-city-grid_1",
+          },
+        ],
+        forbiddenActions: [{ type: "draw_card" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
-          requiredAssessmentEvidence: [
-            "corp_non_strategic_residual_capacity_use",
-          ],
+          acceptablePlanKinds: ["corp.punish_campaign"],
+          acceptableCapabilities: ["punish_prepare"],
+          requiredAssessmentEvidence: ["visible_prepare_action"],
         },
       };
     });
@@ -95,6 +109,9 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     const checkpoint = mutateFixture(minimizeAgendaRiskJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       state.runner.credits = 0;
+      // A zero pool alone still permits three public preparation credits.
+      // This control leaves only the run action and therefore no preparation.
+      state.runnerActionsPerTurnOverride = 1;
       state.corp.credits = 20;
       const remote = state.corp.servers.find(
         (server) => server.id === "remote_1",
@@ -110,6 +127,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         state.cardInstances[iceId] = {
           ...state.cardInstances[iceId]!,
           rezzed: true,
+          zone: { side: "corp", zone: "serverIce", serverId: remote.id },
         };
       }
       fixture.source.kind = "synthetic_companion";
@@ -134,6 +152,40 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       };
     });
 
+    expectCheckpointToPass(checkpoint);
+  });
+
+  it("retains Data Raven's funded central-defense route without a competing Score material need", () => {
+    const checkpoint = mutateFixture(convertScorelineJson, (fixture) => {
+      const state = fixture.engine.testOnlyGameState;
+      const agendas = state.corp.hq.filter((id) =>
+        A759_AGENDAS.has(state.cardInstances[id]!.definitionId),
+      );
+      state.corp.hq = state.corp.hq.filter((id) => !agendas.includes(id));
+      state.corp.rd.push(...agendas);
+      for (const id of agendas)
+        Object.assign(state.cardInstances[id]!, {
+          zone: { side: "corp", zone: "rd" },
+          faceup: false,
+          rezzed: false,
+        });
+      fixture.source.kind = "synthetic_companion";
+      fixture.expectation = {
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_236_data-raven_1.rd.corp_onr_v1_236_data-raven_1.0",
+          },
+        ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["allocate_server_defense"],
+          requiredAssessmentEvidence: [
+            "engine_certified_global_defense_access_probability_reduced",
+          ],
+        },
+      };
+    });
     expectCheckpointToPass(checkpoint);
   });
 

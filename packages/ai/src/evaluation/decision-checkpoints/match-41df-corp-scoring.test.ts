@@ -36,7 +36,11 @@ function capture(index: number): Replay {
 
 function decide(index: number) {
   const replay = capture(index);
-  const input = replay.input;
+  // Current-rule companion: four standard Runner actions, with one reserved
+  // for the run. This is an explicit scenario parameter, not a repair of the
+  // original capture or a runtime default for missing Engine facts.
+  const input = structuredClone(replay.input);
+  input.playerView.runnerNextTurnCreditClicks = 3;
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
@@ -47,6 +51,19 @@ function decide(index: number) {
 
 describe("match 41df Corp scoring", () => {
   beforeEach(() => resetResidentPlanPortfolioMemory());
+
+  it.each([127, 172, 176, 210])(
+    "rejects the incomplete historical preparation horizon at D%i",
+    (index) => {
+      const replay = capture(index);
+      expect(
+        replay.input.playerView.runnerNextTurnCreditClicks,
+      ).toBeUndefined();
+      expect(() => chooseAiAction(replay.input)).toThrow(
+        "corp_public_heap_preparation:invalid_preparation_click_quote",
+      );
+    },
+  );
 
   it.each([19, 89, 91, 127, 172, 176, 210])(
     "validates actor-safe historical capture D%i",
@@ -152,8 +169,9 @@ describe("match 41df Corp scoring", () => {
     ).toBe(false);
   });
   it.each([
-    [176, 9],
-    [210, 23],
+    // Includes the three basic preparation credits in the current companion.
+    [176, 12],
+    [210, 26],
   ])(
     "compares unsafe emergency routes without inventing protection at D%i",
     (index, remaining) => {

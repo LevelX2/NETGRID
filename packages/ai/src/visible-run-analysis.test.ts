@@ -613,6 +613,43 @@ describe("visible run analysis targeted breaker paths", () => {
     ).toMatchObject({ blocked: true, canReachAccess: false });
   });
 
+  it.each([3, 1, 0])(
+    "keeps the trace budget exact after subtype preparation with %s general credits",
+    (generalCredits) => {
+      const morphingTool: VisibleCard = {
+        instanceId: "morphing-trace-preparation",
+        definitionId: "onr_proteus_092_morphing-tool",
+        type: "program",
+        known: true,
+        strength: 5,
+        subtypes: ["icebreaker"],
+        selectedSubtype: "wall",
+      };
+      const result = assessKnownRezzedIcePath(
+        [hunterTraceTagIce("prepared-trace")],
+        [morphingTool],
+        { credits: 3, traceEligibleCredits: generalCredits },
+        [],
+        0,
+        { availableRunnerClicks: 1 },
+      );
+      if (generalCredits > 0) {
+        expect(result).toMatchObject({
+          canReachAccess: true,
+          visibleBreakCost: 3,
+          creditsAfterPath: 0,
+          preRunPreparation: { credits: 1, clicks: 1 },
+          visibleIceRunHazards: [
+            expect.objectContaining({ kind: "trace_tag", unavoidable: false }),
+          ],
+        });
+      } else {
+        expect(result.preRunPreparation).toBeUndefined();
+        expect(result.visibleTraceTagHazardUnavoidable).toBe(true);
+      }
+    },
+  );
+
   it("does not count Dropp's legal break as an access route", () => {
     const dropp: VisibleCard = {
       instanceId: "dropp",

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   resetResidentPlanPortfolioMemory,
@@ -34,6 +35,7 @@ function checkpoint(name: string) {
   };
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
   const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  if (!input.playerView.run) bindPublicBoardStealQuoteCompanion(input);
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,

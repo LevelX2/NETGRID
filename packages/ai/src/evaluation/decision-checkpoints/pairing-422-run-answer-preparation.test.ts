@@ -16,12 +16,21 @@ import { runnerCoverageHeapPreparation } from "../../runner/rig-coverage/coverag
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { runnerDefenseHandBufferFacts } from "../../runner/defense-recovery/defense-signals";
+import { bindSyntheticAgendaStealQuotes } from "../../agenda-steal-quotes.test-support";
+
+function currentContestInput(input: AiDecisionInputWithDeckCapabilities) {
+  // Explicit current companion: no public steal surcharge and no known agenda.
+  // The unmodified capture remains a missing-quote negative below.
+  bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
+  return input;
+}
 
 function replay(json: unknown) {
   const capture = structuredClone(json) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  currentContestInput(capture.input);
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     capture.input,
@@ -94,6 +103,7 @@ it.each([
   const input = structuredClone(
     heapJson.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
+  currentContestInput(input);
   const evaluation = evaluateRunnerRunTargets({ input }).find(
     (t) => t.targetServerId === "remote_1",
   )!;
@@ -146,6 +156,7 @@ it.each([
     const input = structuredClone(
       handJson.input,
     ) as unknown as AiDecisionInputWithDeckCapabilities;
+    currentContestInput(input);
     const evaluation = evaluateRunnerRunTargets({ input }).find(
       (t) => t.targetServerId === "remote_1",
     )!;
@@ -167,6 +178,22 @@ it.each([
     );
     expect(facts.riskAdjustedHandBuffer.minimumHandBuffer).toBe(
       variant === "current" || variant === "low_max_hand" ? 4 : 3,
+    );
+  },
+);
+
+it.each([heapJson, handJson, temporaryHandJson])(
+  "keeps the raw capture without a steal quote closed to contest preparation",
+  (capture) => {
+    const input = structuredClone(
+      capture.input,
+    ) as unknown as AiDecisionInputWithDeckCapabilities;
+    const target = evaluateRunnerRunTargets({ input }).find(
+      (t) => t.targetServerId === "remote_1",
+    )!;
+    expect(target.accessPayoffContestable).toBe(false);
+    expect(target.evidence).toContain(
+      "run_target_agenda_steal_credit_requirement:unknown",
     );
   },
 );

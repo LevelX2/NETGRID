@@ -242,7 +242,7 @@ describe("plan-first live authority structure", () => {
     );
   });
 
-  it("binds defense funding only to exact funding-only parent projections", () => {
+  it("binds defense funding to exact parent needs and fully financed productive staging", () => {
     const planFirstRuntime = readSource(
       "runtime",
       "plan-first-live-runtime.ts",
@@ -295,6 +295,9 @@ describe("plan-first live authority structure", () => {
     };
     visit(reserveAst);
     expect(guardedFundingProjection).toBe(true);
+    expect(reserveSource).toContain("stagedInstallFundingActionIds.length > 0");
+    expect(reserveSource).toContain("immediateCorpLiquidCreditGain(candidate) >= requirement.gap");
+    expect(reserveSource).toContain("corpEconomyCandidateHasExecutablePayload(input, candidate)");
     const fundingContract = readSource(
       "plans",
       "corp-defense-funding-contract.ts",

@@ -89,7 +89,7 @@ it("recognizes the current canonical search effect without auxiliary search hint
   const candidate = candidates().find(
     (entry) => entry.effectKind === "search_trash_to_grip",
   )!;
-  expect(candidate.effectTargets ?? []).toEqual([]);
+  expect(candidate.effectTargets).toEqual(["search_trash_to_grip", "program"]);
   expect(runnerCandidateIsOneShotSearch(candidate)).toBe(true);
   expect(
     runnerCandidateIsOneShotSearch({
@@ -97,10 +97,13 @@ it("recognizes the current canonical search effect without auxiliary search hint
       effectKind: "search_stack_to_grip",
     }),
   ).toBe(true);
+  const { sourceDefinitionId: _sourceDefinitionId, ...withoutSourceHints } =
+    candidate;
   expect(
     runnerCandidateIsOneShotSearch({
-      ...candidate,
+      ...withoutSourceHints,
       effectKind: "gain_credits",
+      effectTargets: [],
     }),
   ).toBe(false);
   expect(

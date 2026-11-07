@@ -6,8 +6,7 @@ import {
 } from "@netgrid/engine";
 import type { AiDecision } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import checkpointJson from "../../../../data/scenarios/ai-decision-checkpoints/cp-sp082-01-game36-score-parent-funding-gap.json";
-import type { AiDecisionCheckpointV1 } from "../evaluation/decision-checkpoints/checkpoint-types";
+import { sp082KnownProtectionFundingCompanion } from "../evaluation/decision-checkpoints/sp082-score-campaign.test-support";
 import { validateAiDecisionCheckpoint } from "../evaluation/decision-checkpoints/checkpoint-validation";
 import { restoreAiRuntimeCheckpoint } from "../evaluation/decision-checkpoints/runtime-checkpoint";
 import { chooseAiAction } from "../index";
@@ -24,7 +23,7 @@ describe("SP-082 score campaign multi-step regression", () => {
     "preserves funding across the opponent turn from %i credits and releases the closed need",
     (initialCredits) => {
       const fixture = validateAiDecisionCheckpoint(
-        structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+        sp082KnownProtectionFundingCompanion(),
       );
       let state = structuredClone(fixture.engine.testOnlyGameState);
       // Reproduce the funding boundary itself. An independently chosen Runner

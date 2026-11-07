@@ -6,6 +6,7 @@ import chesterBeforeHqIceJson from "../../../../../data/scenarios/ai-decision-ch
 import nightShiftReserveJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e676-03-night-shift-reserve.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 
 describe("match e676 exact decision checkpoints", () => {
   it.each([
@@ -165,7 +166,9 @@ const HQ_ICE_DEFINITION_IDS = new Set([
 ]);
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+  );
 }
 
 function mutateFixture(

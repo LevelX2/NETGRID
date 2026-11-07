@@ -135,8 +135,18 @@ describe("terminal known-path bank support", () => {
     expect(providers[0]!.moduleState).toMatchObject({
       signal: {
         runFunding: {
-          gap: 5,
-          routeAssessment: { status: "covered_guaranteed" },
+          parentPlanInstanceId: parentId,
+          needId,
+          runActionId: "runner.start_run.remote_1",
+          stateVersion: input.playerView.stateVersion,
+          // The admitted current path is short two credits, as proved above.
+          // The full six-credit cashout still needs its funded consumer quote.
+          gap: 2,
+          routeAssessment: {
+            status: "covered_guaranteed",
+            totalClickCost: 1,
+            firstStepActionId: action.actionId,
+          },
         },
       },
     });

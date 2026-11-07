@@ -114,6 +114,6 @@ describe("meta461 paid access ambush rez", () => {
   it("rejects unknown quoted credit cost", () => {
     const f = fixture();
     f.rez.costs = [{ credits: Number.NaN }];
-    expect(signals(f)[0]?.actionIds).toEqual([]);
+    expect(() => signals(f)).toThrow("invalid_legal_action_cost");
   });
 });

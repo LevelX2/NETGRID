@@ -569,6 +569,12 @@
             "timing": "action",
             "resource": "counters",
             "target": "runner_counter_baskerville_remove_for_3_credits",
+            "counterRemoval": {
+              "counterType": "baskerville",
+              "credits": 3,
+              "clicks": 1,
+              "amount": 1
+            },
             "amount": 1,
             "repeatable": true
           },

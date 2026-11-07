@@ -20,7 +20,11 @@ export type PublicHeapBreakerPreparation = Readonly<{
 export function visibleRunnerHeapBreakerPreparations(
   input: AiDecisionInput,
 ): readonly PublicHeapBreakerPreparation[] {
-  if (input.side !== "corp" || input.playerView.activeSide !== "corp")
+  if (
+    input.side !== "corp" ||
+    input.playerView.activeSide !== "corp" ||
+    input.playerView.phase === "run"
+  )
     return [];
   const runner = input.playerView.opponent;
   const rig = runner.rig ?? [];

@@ -612,7 +612,7 @@ describe("canonical passive strength investment", () => {
     ],
     ["onr_v1_011_cloak", "runner.recurring_economy"],
     ["onr_v1_071_vewy-vewy-quiet", "runner.recurring_economy"],
-    ["onr_proteus_134_cortical-cybermodem", "runner.develop_board_and_hand"],
+    ["onr_proteus_134_cortical-cybermodem", "runner.recurring_economy"],
     ["onr_proteus_150_streetware-distributor", "runner.credit_bank"],
   ])("binds canonical core card %s to its existing owner", (cardId, owner) => {
     const state = fixture();

@@ -37,9 +37,11 @@ it("bounds an unsafe-to-carry investment to the currently quoted complete cycle"
     observerSide: "corp",
     stateVersion: input.playerView.stateVersion,
   });
-  const investment = corpHostedBankInvestments(input, candidates, []).get(
-    "corp_onr_v1_318_department-of-truth-enhancement_1",
-  )!.development!;
+  const investment = corpHostedBankInvestments(input, candidates, [], {
+    centralAllocation: undefined,
+    scoreProjects: [],
+    remoteProjects: [],
+  }).get("corp_onr_v1_318_department-of-truth-enhancement_1")!.development!;
   expect(investment.hostedCreditBankInvestment).toMatchObject({
     additionalLoadExecutions: 1,
     canCarryAcrossTurn: false,
@@ -91,5 +93,11 @@ it("rejects a stale current-turn quote instead of valuing an unbound future payo
     observerSide: "corp",
     stateVersion: input.playerView.stateVersion,
   });
-  expect(() => corpHostedBankInvestments(input, candidates, [])).toThrow();
+  expect(() =>
+    corpHostedBankInvestments(input, candidates, [], {
+      centralAllocation: undefined,
+      scoreProjects: [],
+      remoteProjects: [],
+    }),
+  ).toThrow();
 });

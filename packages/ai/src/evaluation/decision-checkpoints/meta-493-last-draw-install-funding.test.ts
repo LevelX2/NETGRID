@@ -73,7 +73,7 @@ function currentProjects(input: AiDecisionInputWithDeckCapabilities) {
       ),
     );
 }
-it("chooses a financeable terminal last-draw install instead of the click-only five-advance route", () => {
+it("funds the financeable terminal last-draw parent before installation instead of the click-only five-advance route", () => {
   const cp = checkpoint();
   expect(cp.input.playerView.own).toMatchObject({
     credits: 1,
@@ -83,10 +83,13 @@ it("chooses a financeable terminal last-draw install instead of the click-only f
   });
   const result = decide(cp),
     plan = result.decisionDebug!.planFirstDecision!;
-  expect(result.actionId).toContain("project-babylon");
-  expect(plan.selectedPlan?.moduleId).toBe("corp.score_agenda");
+  expect(result.actionId).toBe("corp.gain_credit");
+  expect(plan.rootPlanInstanceId).toContain(
+    "corp.score_agenda:agenda%3Acorp_onr_v1_214_project-babylon_1",
+  );
+  expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(plan.priority?.effectiveClass).toBe("P2");
-  expect(plan.rootPlanInstanceId).toBe(plan.selectedPlan?.instanceId);
+  expect(plan.rootPlanInstanceId).not.toBe(plan.selectedPlan?.instanceId);
   expect(plan.selectedStep?.planInstanceId).toBe(plan.leafExecutorInstanceId);
   const projects = currentProjects(cp.input);
   expect(
@@ -101,6 +104,17 @@ it("chooses a financeable terminal last-draw install instead of the click-only f
         p.lastDrawScoreSurvival === true,
     ),
   ).toBe(true);
+});
+it("installs the exact terminal Babylon route after its full three-credit floor is funded", () => {
+  const cp = checkpoint();
+  cp.input.playerView.own.credits = 3;
+  const result = decide(cp);
+  expect(result.actionId).toContain(
+    "install_card.corp_onr_v1_214_project-babylon_1",
+  );
+  expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+    "corp.score_agenda",
+  );
 });
 it("retains the five-advance terminal admission once its whole credit reserve is present", () => {
   const cp = checkpoint();

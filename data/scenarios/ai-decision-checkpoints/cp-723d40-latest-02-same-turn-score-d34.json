@@ -6019,7 +6019,7 @@
     }
   },
   "expectation": {
-    "exactActionId": "corp.install_card.corp_onr_v1_203_hostile-takeover_1.remote_1.corp_onr_v1_203_hostile-takeover_1",
+    "acceptableActions": [{ "actionId": "corp.install_card.corp_onr_v1_203_hostile-takeover_1.remote_1.corp_onr_v1_203_hostile-takeover_1" }],
     "planExecution": {
       "acceptablePlanKinds": ["corp.score_agenda"],
       "acceptableCapabilities": ["install_score_agenda"],

@@ -16,7 +16,12 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
-import { corpScoreProjectHasCurrentProtectionRequote } from "../../corp/score/score-protection-needs";
+import {
+  corpScoreProjectHasCurrentProtectionRequote,
+  corpFundedScoreProtectionNeed,
+} from "../../corp/score/score-protection-needs";
+import { corpMatureRemoteAffordableDefenseLayerCertification } from "../../corp/defense/corp-defense-layer-certification";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 
 function load(key: string, kind: string) {
@@ -249,17 +254,71 @@ it("revalidates the mature fort after the real mandatory draw without clearing t
   const state = take(r.state, "corp", first.decision.actionId),
     next = load("g23d401", "native");
   expect(hashGameState(state)).toBe(next.stateHash);
-  const input = { ...next.input, ...buildAiDecisionInputDto(next.input) };
+  const input: AiDecisionInput = {
+    ...next.input,
+    ...buildAiDecisionInputDto(next.input),
+  };
   const second = decide(input, state);
   expect(second.pf.selectedPlan?.moduleId).toBe("corp.score_agenda");
   expect(second.decision.actionId).toContain(".remote_1.");
   expect(second.decision.actionId).not.toContain(".new_remote.");
   take(state, "corp", second.decision.actionId);
-  const project = residentPlanPortfolioSnapshot(input)!
+  const current = residentPlanPortfolioSnapshot(input)!
     .instances.filter((i) => i.moduleId === "corp.score_agenda")
     .map((i) => (i.moduleState as { signal: CorpScoreProjectSignal }).signal)
-    .find((p) => p.serverId === "remote_1" && p.scoreHorizonCertification)!;
-  expect(project).toBeDefined();
+    .find(
+      (p) =>
+        p.serverId === "remote_1" &&
+        p.agendaInstanceId ===
+          input.legalActions.find(
+            (action) => action.actionId === second.decision.actionId,
+          )!.source,
+    )!;
+  expect(current).toBeDefined();
+  expect(corpScoreProjectHasCurrentProtectionRequote(input, current)).toBe(
+    true,
+  );
+  // Today's native baseline is already funded; an optional extended-horizon
+  // certificate is not needed for that path. Quote a strict current-turn
+  // click reserve to exercise the separate mature-horizon clause exactly.
+  const action = input.legalActions.find(
+    (action) => action.actionId === second.decision.actionId,
+  )!;
+  const agenda = input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === action.source,
+  )!;
+  const candidate = buildActionSemanticCandidates({
+    legalActions: [action],
+    observerSide: "corp",
+    stateVersion: input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: {
+      [agenda.instanceId]: agenda.definitionId!,
+    },
+  })[0]!;
+  const project: CorpScoreProjectSignal = {
+    ...current,
+    protectionNeed: corpFundedScoreProtectionNeed(
+      input,
+      candidate,
+      agenda,
+      current.projectId,
+      "remote_1",
+      current.terminalScore,
+      true,
+    ),
+    scoreHorizonCertification:
+      corpMatureRemoteAffordableDefenseLayerCertification(
+        input,
+        candidate,
+        "remote_1",
+      )!,
+  };
+  expect(project.scoreHorizonCertification).toBeDefined();
+  expect(project.protectionNeed?.baseline).toMatchObject({
+    knowledge: "known",
+    fundedProtection: false,
+    preservesHardClickReserve: false,
+  });
   expect(corpScoreProjectHasCurrentProtectionRequote(input, project)).toBe(
     true,
   );

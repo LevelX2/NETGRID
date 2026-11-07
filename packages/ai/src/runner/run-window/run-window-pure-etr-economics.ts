@@ -38,7 +38,11 @@ export function pureEndRunEncounterPayment(
     input.playerView.run?.phase !== "encounter_ice" ||
     (action.type !== "pump_breaker" &&
       action.type !== "break_subroutine" &&
-      action.type !== "continue_run") ||
+      action.type !== "continue_run" &&
+      !(
+        action.type === "trigger_ability" &&
+        action.payload?.runnerAbility === "boost_icebreaker_for_run"
+      )) ||
     action.payload?.runnerCostPenaltySupportContinuation === true
   )
     return undefined;

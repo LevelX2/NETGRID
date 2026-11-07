@@ -31,9 +31,9 @@
     "status": "baseline_enforced",
     "tokenSource": "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus kanonischen CardSpecs",
     "tokenCount": 1879,
-    "baselineCount": 388,
+    "baselineCount": 390,
     "summary": {
-      "new_unclassified_card_name_leak": 187,
+      "new_unclassified_card_name_leak": 189,
       "runtime_state_field_uses_card_name": 186,
       "resolver_function_uses_card_name": 11,
       "functional_kind_uses_card_name": 4
@@ -384,6 +384,8 @@
       "scripts/audit-ai-economy-contracts.mjs|bbs-whispering-campaign|BBS Whispering Campaign|derived_catalog_token|new_unclassified_card_name_leak|derived_catalog_token",
       "scripts/audit-ai-economy-contracts.mjs|bbs-whispering-campaign|BBS Whispering Campaign|derived_catalog_token|new_unclassified_card_name_leak|derived_catalog_token",
       "scripts/check-ai-generic-card-id-guards.mjs|shell-traders|The Shell Traders|derived_catalog_token|new_unclassified_card_name_leak|derived_catalog_token",
+      "scripts/check-ai-generic-card-id-guards.mjs|shell-traders|The Shell Traders|derived_catalog_token|new_unclassified_card_name_leak|derived_catalog_token",
+      "scripts/check-ai-generic-card-id-guards.mjs|vacuum-link|Vacuum Link|derived_catalog_token|new_unclassified_card_name_leak|derived_catalog_token",
       "scripts/check-engine-cardimplementation-architecture-target.mjs|prearrangedDrop|Prearranged Drop|derived_catalog_token|new_unclassified_card_name_leak|derived_catalog_token",
       "scripts/check-engine-cardimplementation-architecture-target.mjs|promisesPromises|Promises, Promises|derived_catalog_token|new_unclassified_card_name_leak|derived_catalog_token",
       "scripts/check-engine-cardimplementation-architecture-target.mjs|remoteDetonator|Remote Detonator|derived_catalog_token|new_unclassified_card_name_leak|derived_catalog_token",

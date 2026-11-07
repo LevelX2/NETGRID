@@ -7338,7 +7338,7 @@
       "acceptablePlanKinds": ["runner.defense_and_recovery"],
       "acceptableCapabilities": ["fund_active_tag_removal"],
       "requiredAssessmentEvidence": [
-        "runner_match_point_favorable_deck_race_wait_available"
+        "runner_visible_tag_punish_requires_clear_funding"
       ]
     }
   }

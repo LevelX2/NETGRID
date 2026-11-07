@@ -3,6 +3,7 @@ import coverage from "../../../../../data/scenarios/ai-decision-checkpoints/cp-m
 import protection from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-unverified-combined-protection.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
@@ -17,6 +18,7 @@ function decide(
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
+  if (input.side === "runner") bindPublicBoardStealQuoteCompanion(input);
   change?.(input);
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(

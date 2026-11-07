@@ -85,7 +85,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_bad_publicity"
         ],
         "targetProfileCount": 0,
-        "effectCount": 0
+        "effectCount": 1
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -151,7 +151,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
         ],
         "targetProfileCount": 0,
-        "effectCount": 0
+        "effectCount": 1
       },
       "removalConditions": ["pilot_benchmark_coverage"]
     },
@@ -606,7 +606,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_baseline"
         ],
         "targetProfileCount": 0,
-        "effectCount": 0
+        "effectCount": 2
       },
       "removalConditions": ["pilot_benchmark_coverage"]
     },
@@ -1327,7 +1327,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_random_outcome"
         ],
         "targetProfileCount": 0,
-        "effectCount": 0
+        "effectCount": 2
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -1434,7 +1434,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 1,
-        "effectCount": 0
+        "effectCount": 1
       },
       "removalConditions": ["random_outcome_decision_smoke_green"]
     },
@@ -1706,7 +1706,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 1,
-        "effectCount": 0
+        "effectCount": 2
       },
       "removalConditions": [
         "target_choice_decision_smoke_green",
@@ -2151,7 +2151,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
         ],
         "targetProfileCount": 0,
-        "effectCount": 2
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2399,7 +2399,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 1,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "run_modification_decision_smoke_green",

@@ -993,6 +993,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         gainCreditAction("gain-credit"),
       ],
     });
+    bindRemoteAgendaStealQuote(input, "remote-agenda", 0);
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
@@ -2856,6 +2857,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       ],
       legalActions: [runAction("run-remote-1", "remote_1")],
     });
+    bindRemoteAgendaStealQuote(input, "remote-agenda", 0);
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
@@ -2912,6 +2914,8 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       ],
       legalActions: [runAction("run-remote-1", "remote_1")],
     });
+    // Current Fetal AI self-cost, rather than a historical declined-access event.
+    bindRemoteAgendaStealQuote(input, "known-fetal-ai", 2);
 
     expect(evaluateRunnerRunTargets({ input })[0]).toMatchObject({
       accessPayoff: "agenda",
@@ -3072,6 +3076,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       ],
       legalActions: [runAction("run-remote-1", "remote_1")],
     });
+    bindRemoteAgendaStealQuote(input, "known-agenda", 2);
     const [evaluation] = evaluateRunnerRunTargets({
       input,
       beliefState: beliefWithKnownRemoteRoot(
@@ -4147,6 +4152,28 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 });
+
+/** These boards contain one known agenda and no public steal-cost modifier. */
+function bindRemoteAgendaStealQuote(
+  input: AiDecisionInput,
+  agendaInstanceId: string,
+  creditCost: number,
+): void {
+  const remote = input.playerView.servers.find(
+    (entry) => entry.id === "remote_1",
+  )!;
+  const agenda = remote.root.find(
+    (card) => card.instanceId === agendaInstanceId,
+  )!;
+  expect(agenda.type).toBe("agenda");
+  agenda.effectiveStealCostQuote = {
+    stateVersion: input.playerView.stateVersion,
+    serverId: remote.id,
+    agendaInstanceId,
+    creditCost,
+    complete: true,
+  };
+}
 
 function aiInput(params: {
   credits: number;

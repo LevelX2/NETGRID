@@ -18,6 +18,7 @@ import conditionalUpgradeDiscardControlJson from "../../../../../data/scenarios/
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import {
   runAiDecisionCheckpoint,
   type AiDecisionCheckpointRunResult,
@@ -32,15 +33,39 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(turn7AgendaDefenseJson);
   });
 
-  it("continues the same bounded score project in the newly created remote", () => {
-    expectScoreProtectionDevelopmentContinuation(turn7AgendaDefenseJson);
+  it("continues the same bounded score project after both defensive support heads", () => {
+    expectScoreProtectionDevelopmentContinuation(turn7AgendaDefenseJson, 1);
+  });
+
+  it("keeps the native newly bound Score goal while deferring its last-action installation", () => {
+    const { input, decision } = decisionsAfterBoundAgendaDefense(
+      turn7AgendaDefenseJson,
+      1,
+    );
+    expect(input.playerView.own.clicks).toBe(1);
+    expect(decision.actionId).toBe("corp.draw_card");
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId:
+        "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1",
+      selectedPlan: { moduleId: "corp.defend_servers" },
+    });
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId:
+            "corp.install_card.corp_onr_proteus_005_marked-accounts_1.remote_1.corp_onr_proteus_005_marked-accounts_1",
+          disposition: "explicitly_nonproductive",
+          evidenceCode: "corp_last_click_score_install_deferred:remote_1",
+        }),
+      ]),
+    );
   });
 
   it("starts the bound agenda-defense line instead of taking three neutral credits", () => {
     expectCheckpointToPass(turn9AgendaDefenseJson);
   });
 
-  it("uses the third turn-9 action for the globally selected R&D tax layer", () => {
+  it("uses the third turn-9 action for the currently admitted bound agenda", () => {
     const { input, decision } = decisionsAfterBoundAgendaDefense(
       turn9AgendaDefenseJson,
       2,
@@ -50,18 +75,16 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     );
     expect(selected).toMatchObject({
       type: "install_card",
-      source: "corp_onr_v1_251_jack-attack_2",
-      payload: { serverId: "rd" },
+      source: "corp_onr_proteus_005_marked-accounts_1",
+      payload: { serverId: "remote_1" },
     });
-    expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
+    expect(decision.decisionDebug?.planKind).toBe("corp.score_agenda");
     expect(decision.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-      "allocate_server_defense",
+      "install_score_agenda",
     );
-    expect(
-      decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
-        (entry) => entry.includes("corp_scoreline_central_tax_allocation:rd"),
-      ),
-    ).toBe(true);
+    expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+      "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1",
+    );
   });
 
   it("retains Marked Accounts and discards one of three Jack Attacks", () => {
@@ -74,7 +97,9 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+  );
 }
 
 function expectCheckpointToPass(value: unknown): void {
@@ -82,15 +107,37 @@ function expectCheckpointToPass(value: unknown): void {
   expect(result.ok, diagnostic(result)).toBe(true);
 }
 
-function expectScoreProtectionDevelopmentContinuation(value: unknown): void {
+function expectScoreProtectionDevelopmentContinuation(
+  value: unknown,
+  additionalActions = 0,
+): void {
   const checkpoint = fixture(value);
+  if (additionalActions > 0) {
+    checkpoint.engine.testOnlyGameState.corp.clicks += additionalActions;
+    checkpoint.source.kind = "synthetic_companion";
+    checkpoint.engine.stateHash = hashGameState(
+      checkpoint.engine.testOnlyGameState,
+    );
+  }
   const first = runAiDecisionCheckpoint(checkpoint);
   expect(first.ok, diagnostic(first)).toBe(true);
   expect(first.decision).toBeDefined();
 
   let state = checkpointState(checkpoint);
   state = applyDecision(state, first.decision!);
-  const { input, decision: second } = nextDecision(state, checkpoint);
+  let { input, decision: second } = nextDecision(state, checkpoint);
+  if (additionalActions > 0) {
+    expect(second.actionId).toBe(
+      "corp.install_card.corp_onr_v1_251_jack-attack_3.remote_1.corp_onr_v1_251_jack-attack_3.1",
+    );
+    expect(second.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId:
+        "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1",
+      selectedPlan: { moduleId: "corp.defend_servers" },
+    });
+    state = applyDecision(state, second);
+    ({ input, decision: second } = nextDecision(state, checkpoint));
+  }
   const selected = input.legalActions.find(
     (action) => action.actionId === second.actionId,
   );
@@ -128,13 +175,15 @@ function expectScoreProtectionDevelopmentContinuation(value: unknown): void {
     route: { actionId: selected!.actionId, stateVersion: state.stateVersion },
   });
   expect(
-    second.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes,
-  ).toContain("corp_bounded_staged_score_install:remote_1");
-  expect(
     input.playerView.servers
       .find((server) => server.id === "remote_1")
       ?.ice.map((card) => card.instanceId),
-  ).toContain(first.selectedAction!.source);
+  ).toEqual(
+    expect.arrayContaining([
+      first.selectedAction!.source,
+      "corp_onr_v1_251_jack-attack_3",
+    ]),
+  );
   const initial = checkpointState(checkpoint);
   state = applyDecision(state, second);
   const replay = replayEvents(

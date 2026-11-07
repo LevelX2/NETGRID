@@ -183,7 +183,8 @@ export function bindSyntheticAgendaInstallQuotes(
           ? action.source
           : undefined;
     const serverId = action.payload.serverId;
-    const agenda = typeof cardId === "string" ? cardsById.get(cardId) : undefined;
+    const agenda =
+      typeof cardId === "string" ? cardsById.get(cardId) : undefined;
     if (
       !agenda ||
       agenda.type !== "agenda" ||
@@ -372,7 +373,10 @@ export function safeRuntimeRunTarget(actionId: string, targetServerId: string) {
   };
   return {
     schemaVersion: "runner-run-target-evaluation-v1",
-    accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" as const },
+    accessFacts: {
+      knownTargetDefinitionIds: [],
+      trashBudget: "unknown" as const,
+    },
     targetServerId,
     targetKind,
     accessServerId: targetServerId,
@@ -399,6 +403,22 @@ export function safeRuntimeRunTarget(actionId: string, targetServerId: string) {
       ],
     },
     creditsAfterRun: 4,
+    prerunReserveQuote: {
+      purpose: "access" as const,
+      status: "not_required" as const,
+      riskTolerance: "standard" as const,
+      knownPathCost: 0,
+      creditsAfterKnownPath: 4,
+      unknownIceCount: 0,
+      unknownIcePositions: [],
+      corpRezCredits: 0,
+      visibleCoverage: "typed_only" as const,
+      requiredCredits: 0,
+      creditGap: 0,
+      requiredHandBuffer: 0,
+      handBufferGap: 0,
+      evidence: ["prerun_reserve_status:not_required"],
+    },
     fundingNeed: {
       reason: "none" as const,
       routeFundingGap: 0,

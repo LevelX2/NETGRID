@@ -8186,8 +8186,8 @@
       "acceptableCapabilities": ["pressure_hq_information"],
       "requiredAssessmentEvidence": ["target:hq"]
     },
-    "requiredAction": {
+    "acceptableActions": [{
       "actionId": "runner.start_run.hq"
-    }
+    }]
   }
 }

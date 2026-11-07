@@ -63,7 +63,7 @@ describe("Proteus AI readiness typed classifier", () => {
       ["onr_proteus_034_riddler", "x_cost"],
       ["onr_proteus_035_roadblock", "random_outcome"],
       ["onr_proteus_046_corporate-guard-r-temps", "x_cost"],
-      ["onr_proteus_049_emergency-rig", "x_cost"],
+      ["onr_proteus_049_emergency-rig", "target_choice"],
       ["onr_proteus_058_executive-boot-camp", "random_outcome"],
       ["onr_proteus_062_lesley-major", "access_ambush"],
       ["onr_proteus_063_lisa-blight", "random_outcome"],
@@ -75,6 +75,16 @@ describe("Proteus AI readiness typed classifier", () => {
         family,
       });
     }
+    expect(
+      generatedHintsById.get("onr_proteus_049_emergency-rig")?.targetProfiles,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          purpose: "temporarily_rez_relevant_ice",
+          targetType: "installed_ice",
+        }),
+      ]),
+    );
   });
 
   it("leaves Proteus action capacity exclusively with the CardSpec compiler", () => {

@@ -187,7 +187,16 @@ it("binds possible off-server paths to real current own agenda exposure, without
     threat: "none",
     accessServerIds: [],
   });
-  decide({ ...load("g5d172"), input: negative });
+  // This old main-phase capture predates the complete public Heap contract.
+  // It remains invalid for a future recovery projection; do not invent cards.
+  expect(() => decide({ ...load("g5d172"), input: negative })).toThrow(
+    "corp_public_heap_preparation:incomplete_public_heap",
+  );
+  // A separate, explicitly action-constrained companion has no recovery +
+  // install prefix before the reserved run. Its current exposure stays exact.
+  const noRecoveryPrefix = structuredClone(negative);
+  noRecoveryPrefix.playerView.runnerNextTurnCreditClicks = 1;
+  decide({ ...load("g5d172"), input: noRecoveryPrefix });
 });
 it("uses the current breach destination and validates the public DTO destination fail-closed", () => {
   const cp = load("g29d316"),

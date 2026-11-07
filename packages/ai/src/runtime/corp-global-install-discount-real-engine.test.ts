@@ -134,8 +134,11 @@ function addGlobalQuotes(input: AiDecisionInput) {
   Object.assign(input, buildAiDecisionInputDto(input));
 }
 for (const decision of [80, 126])
-  it(`preserves the actual selected installation at G35 D${decision}`, () => {
+  it(`preserves the funded installation and its discount setup at G35 D${decision}`, () => {
     const cp = checkpoint(decision);
+    // At D80 the current complete install/rez route costs five, rather than
+    // the native two credits. Isolate discount ordering after it is funded.
+    if (decision === 80) cp.input.playerView.own.credits = 5;
     const before = choose(cp);
     const install = cp.input.legalActions.find(
       (a) => a.actionId === before.actionId,
@@ -158,3 +161,20 @@ for (const decision of [80, 126])
     );
     expect(after.decisionDebug?.fallbackUsed).toBe(false);
   });
+
+it("funds the actual D80 install/rez gap from the current counter payout first", () => {
+  const cp = checkpoint(80),
+    result = choose(cp);
+  expect(cp.input.playerView.own.credits).toBe(2);
+  expect(result.actionId).toBe(
+    "corp.activated_card_ability.corp_onr_v1_193_corporate-coup_1.corp_onr_v1_193_corporate-coup_1.activated.onr_v1_193_corporate-coup:abilities_activated_corp_main_take_hosted_credits",
+  );
+  expect(result.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    selectedStep: {
+      parentInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      needId:
+        "install:rd:corp.install_card.corp_onr_v1_232_crystal-wall_2.rd.corp_onr_v1_232_crystal-wall_2.1",
+    },
+  });
+});

@@ -1,4 +1,4 @@
-import { hashGameState } from "@netgrid/engine";
+import { applyAction, hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import payForEarlyRemoteAccessD7Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-d153-01-pay-for-early-remote-access-d7.json";
@@ -17,8 +17,83 @@ import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 
 describe("match D153 Runner decision checkpoints", () => {
+  it("still installs Broker when the existing empty bank is unavailable", () => {
+    const cp = fixture(releaseRemotePlanD131Json);
+    const state = cp.engine.testOnlyGameState;
+    const id = "runner_onr_v1_154_broker_2";
+    state.runner.rig.resources = state.runner.rig.resources.filter(
+      (cardId) => cardId !== id,
+    );
+    state.runner.stack.push(id);
+    Object.assign(state.cardInstances[id]!, {
+      zone: { side: "runner", zone: "stack" },
+      faceup: false,
+      rezzed: false,
+    });
+    cp.source.kind = "synthetic_companion";
+    cp.engine.stateHash = hashGameState(state);
+    cp.expectation = structuredClone(releaseRemotePlanD131Json.expectation);
+    expectCheckpointToPass(cp);
+  });
+  it.each([cashoutForRdD179Json, cashoutForRdD185Json])(
+    "executes the finite bank-to-run continuation from $checkpointId with fresh Engine actions",
+    (json) => {
+      const cp = fixture(json);
+      const first = runAiDecisionCheckpoint(cp);
+      expect(first.ok, first.message).toBe(true);
+      let state = structuredClone(cp.engine.testOnlyGameState);
+      state.eventLog = structuredClone(cp.engine.eventPrefix);
+      const payout = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: first.decision!.actionId!,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(payout.ok).toBe(true);
+      if (!payout.ok) throw Error("native bank payout rejected");
+      state = payout.state;
+      const input = buildAiDecisionInput(state, "runner", {
+        difficulty: cp.difficulty,
+        profileId: cp.profileId,
+        ownDeckSnapshot: cp.deckSnapshot,
+        decisionId: `${cp.source.decisionScopeId ?? state.matchId}:${state.stateVersion}:runner`,
+        actionNumber: state.stateVersion,
+      });
+      // Broker permits only one action on this source in this turn.
+      expect(
+        input.legalActions.some(
+          (action) => action.source === "runner_onr_v1_154_broker_2",
+        ),
+      ).toBe(false);
+      expect(
+        evaluateRunnerRunTargets({ input }).find(
+          (target) => target.actionId === "runner.start_run.remote_1",
+        ),
+      ).toMatchObject({
+        pathPassability: "reachable",
+        routeQuote: { reachability: "guaranteed_access", fundingGap: 0 },
+      });
+      const next = chooseAiAction(input);
+      expect(next).toMatchObject({
+        actionId: "runner.start_run.remote_1",
+        fallbackUsed: false,
+      });
+      expect(next.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+        "plan:runner.contest_remote:remote%3Aremote_1",
+      );
+      const run = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: next.actionId!,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(run.ok).toBe(true);
+    },
+  );
   it.each([
     [
       "F01 pays for the early unknown remote access at D7",
@@ -142,6 +217,33 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       "cp-d153-12-cashout-for-rd-d185",
     ],
   );
+  if (
+    [
+      "cp-d153-11-cashout-for-rd-d179",
+      "cp-d153-12-cashout-for-rd-d185",
+    ].includes(checkpoint.checkpointId)
+  ) {
+    checkpoint.expectation.planExecution!.requiredAssessmentEvidence = [
+      "runner_credit_bank_complete_known_run_after_cashout",
+    ];
+  }
+  if (checkpoint.checkpointId === "cp-d153-07-release-low-value-remote-d131") {
+    // The native board already contains an unused, empty Broker. Load it
+    // before paying three credits to install another copy for the same budget.
+    checkpoint.expectation = {
+      acceptableActions: [
+        {
+          actionId:
+            "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+        },
+      ],
+      planExecution: {
+        acceptablePlanKinds: ["runner.credit_bank"],
+        acceptableCapabilities: ["credit_bank_build"],
+        requiredAssessmentEvidence: ["runner_credit_bank_first_load"],
+      },
+    };
+  }
   return checkpoint;
 }
 

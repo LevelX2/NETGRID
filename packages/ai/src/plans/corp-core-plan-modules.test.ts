@@ -5094,7 +5094,7 @@ describe("Corp core plan modules", () => {
     ).toEqual([]);
   });
 
-  it("advances an exactly bound score-funding child by one guaranteed tranche", () => {
+  it("advances an exactly bound multi-turn score-funding child by one guaranteed tranche", () => {
     const economy = corpModule("corp.economy");
     const basicCredit = candidate(
       "basic-credit",
@@ -5103,7 +5103,7 @@ describe("Corp core plan modules", () => {
     );
     const project = scoreProject(
       "agenda:agenda-1:remote_1",
-      "P1",
+      "P2",
       "score_needs_exact_funding",
     );
     project.fundingGap = 5;
@@ -5117,7 +5117,7 @@ describe("Corp core plan modules", () => {
         "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
       parentNeedId: `score-support:${project.projectId}`,
       scoreFundingMilestone: project.fundingMilestone,
-      delegatedPriorityClass: "P1" as const,
+      delegatedPriorityClass: "P2" as const,
       urgentForScore: true,
       evidenceCode: project.evidenceCode,
     };
@@ -5160,17 +5160,62 @@ describe("Corp core plan modules", () => {
     );
     expect(planAssessment).toMatchObject({
       priorityClaim: {
-        requestedClass: "P1",
+        requestedClass: "P2",
       },
       evidenceCodes: [project.evidenceCode],
     });
-    expect(planAssessment.priorityValidation.effectiveClass).toBe("P1");
+    expect(planAssessment.priorityValidation.effectiveClass).toBe("P2");
     expect(
       economy
         .materialize(instance, planAssessment, corpContext)
         .candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["basic-credit"]);
   });
+
+  it.each(["current_turn", "next_corp_turn"] as const)(
+    "does not turn an unreachable hard Score deadline into incremental progress: %s",
+    (deadline) => {
+      const basicCredit = candidate(
+        "basic-credit",
+        "gain_credit",
+        "economy.gain_credit",
+      );
+      const project = scoreProject(
+        "agenda:agenda-1:remote_1",
+        "P1",
+        "score_needs_exact_funding",
+      );
+      project.fundingGap = 5;
+      const milestone = { ...corpScoreFundingMilestone(project, 1)!, deadline };
+      const need = {
+        kind: "parent_funding" as const,
+        needId: `score-support:${project.projectId}`,
+        parentNeedId: `score-support:${project.projectId}`,
+        parentPlanInstanceId:
+          "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+        gap: 5,
+        actionIds: [basicCredit.actionId],
+        scoreFundingMilestone: milestone,
+        delegatedPriorityClass: "P1" as const,
+        urgentForScore: true,
+        evidenceCode: project.evidenceCode,
+      };
+      const corpContext = context(
+        [basicCredit],
+        { economyNeeds: [need] },
+        { credits: 1, clicks: 2 },
+      );
+      const result = assessCorpEconomyFundingRoute(corpContext, need);
+      expect(result.status).toBe("uncovered");
+      expect(result.headActionId).toBeUndefined();
+      expect(result.evidence).toContain(
+        "corp_score_funding_hard_deadline_unreachable",
+      );
+      expect(result.evidence).not.toContain(
+        "corp_incremental_score_funding_incremental_route:true",
+      );
+    },
+  );
 
   it("keeps a score funding target stable while guaranteed credit tranches shrink its gap", () => {
     const first = {

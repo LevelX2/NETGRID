@@ -4,8 +4,22 @@ import { FORBIDDEN_AI_INPUT_FIELDS } from "../../runtime/ai-decision-input";
 import { AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION } from "./runtime-checkpoint";
 import {
   AI_DECISION_CHECKPOINT_SCHEMA_VERSION,
+  type AiDecisionCheckpointExpectationV1,
   type AiDecisionCheckpointV1,
 } from "./checkpoint-types";
+
+const EXPECTATION_FIELDS = {
+  contractKind: true,
+  acceptableActions: true,
+  forbiddenActions: true,
+  choice: true,
+  discardChoice: true,
+  strategicIntent: true,
+  selectedScoreBreakdown: true,
+  planExecution: true,
+  runTargets: true,
+  decisionChain: true,
+} satisfies Record<keyof AiDecisionCheckpointExpectationV1, true>;
 
 export class AiDecisionCheckpointValidationError extends Error {
   constructor(
@@ -63,6 +77,21 @@ export function validateAiDecisionCheckpoint(
     throw new AiDecisionCheckpointValidationError(
       "fixture_redaction_violation",
       `Forbidden transport field in checkpoint surface: ${forbidden}`,
+    );
+  }
+  if (
+    Object.keys(fixture.expectation).some(
+      (key) => !Object.hasOwn(EXPECTATION_FIELDS, key),
+    )
+  ) {
+    throw new AiDecisionCheckpointValidationError(
+      "fixture_invalid",
+      `Unsupported checkpoint expectation fields: ${Object.keys(
+        fixture.expectation,
+      )
+        .filter((key) => !Object.hasOwn(EXPECTATION_FIELDS, key))
+        .sort()
+        .join(",")}`,
     );
   }
   if (

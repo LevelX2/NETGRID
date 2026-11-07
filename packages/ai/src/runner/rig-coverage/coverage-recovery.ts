@@ -88,7 +88,8 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
     !Number.isSafeInteger(evaluation.pathCost) ||
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessPayoff === "known_low_value" ||
-    evaluation.accessPayoffContestable === false
+    (evaluation.accessPayoffContestable === false &&
+      evaluation.accessPayoffRequiresFunding !== true)
   ) {
     return undefined;
   }
