@@ -11,10 +11,12 @@ import { creditsToBreakVisibleSubroutinesWithBreaker } from "../../visible-run-a
 import {
   currentEncounteredIceCard,
   currentEncounterCompleteSubroutineIndexes,
+  currentEncounterRequiresFullBreak,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
 import {
   runnerEncounterCreditBudgetForInput,
+  spendRunnerEncounterGeneralCost,
   spendRunnerEncounterActionCost,
 } from "../../runtime/runner-encounter-credit-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
@@ -29,6 +31,65 @@ type CompleteEncounterPayment = {
   runEndTrashSourceIds: string[];
   budget: ReturnType<typeof runnerRunPathCreditBudgetAfterEncounter>;
 };
+
+/** A pure future-strength effect has an exact post-pass cancellation route.
+ * Quote that complete general-credit payment beside complete breaker payments;
+ * the existing post-pass owner still revalidates the actual Engine actions. */
+export function completeCancellableEncounterPayment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CompleteEncounterPayment | undefined {
+  if (
+    input.playerView.run?.phase !== "encounter_ice" ||
+    action.type !== "continue_run" ||
+    action.payload?.encounterContinue !== true ||
+    action.payload.encounterWillEndRun !== false ||
+    action.payload.encounterSourceWillTrashAtEndOfTurn !== false ||
+    Number(action.payload.encounterFullBreakDamage ?? 0) !== 0 ||
+    action.choiceRequirements?.length ||
+    legalActionCreditCost(action) !== 0 ||
+    currentEncounterRequiresFullBreak(input)
+  )
+    return undefined;
+  const ice = currentEncounteredIceCard(input);
+  if (
+    !ice?.effectiveRunQuote ||
+    ice.effectiveRunQuote.conditionalEncounterEffects?.length ||
+    action.payload.sourceDefinitionId !== ice.definitionId
+  )
+    return undefined;
+  const remaining = currentEncounterCompleteSubroutineIndexes(input);
+  if (!remaining || remaining.size !== 1) return undefined;
+  const subroutine = ice.effectiveRunQuote.subroutines.find((_, index) =>
+    remaining.has(index),
+  );
+  const cost = subroutine?.runFutureStrengthCancelPaymentAmount;
+  if (
+    subroutine?.type !== "set_run_future_strength_bonus" ||
+    typeof cost !== "number" ||
+    !Number.isSafeInteger(cost) ||
+    cost < 0
+  )
+    return undefined;
+  const payment = spendRunnerEncounterGeneralCost(
+    runnerEncounterCreditBudgetForInput(input),
+    cost,
+  );
+  if (
+    !payment.affordable ||
+    (payment.budget.paymentSupportCreditsGained ?? 0) > 0
+  )
+    return undefined;
+  return {
+    cost,
+    cashCost: payment.cashCost,
+    liquidCreditsAfterPayment: payment.budget.credits,
+    carriesStrengthAcrossIce: false,
+    rig: runnerRigAfterEncounter(input.playerView.own.rig ?? []),
+    runEndTrashSourceIds: [],
+    budget: runnerRunPathCreditBudgetAfterEncounter(payment.budget),
+  };
+}
 
 /** Complete current encounter payment facts. The Run Window owner alone
  * admits and ranks their route; this service never selects an action. */

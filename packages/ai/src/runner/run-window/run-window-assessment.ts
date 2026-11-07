@@ -2,6 +2,7 @@ import { runnerGeneralCreditsAfterCompletedPath } from "../../run-analysis/visib
 import { paidBreakPrecedesHarmlessResolution } from "./run-window-harmless-resolution";
 import {
   completeEncounterBreakerPayment,
+  completeCancellableEncounterPayment,
   completeCurrentEncounterEconomics,
 } from "./run-window-encounter-payment";
 import {
@@ -1018,7 +1019,9 @@ function runnerRunWindowActionAssessment(
       : undefined;
   const committedParentPayoff = runnerRunOriginCommittedPayoff(runOrigin);
   const currentEncounterPayment = !exclusion
-    ? (encounterPayment ?? completeEncounterBreakerPayment(input, action))
+    ? (encounterPayment ??
+      completeEncounterBreakerPayment(input, action) ??
+      completeCancellableEncounterPayment(input, action))
     : undefined;
   const currentPaidRisk =
     currentEncounterPayment && runOrigin?.runRiskContract

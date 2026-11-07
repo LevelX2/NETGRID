@@ -2608,6 +2608,19 @@ Restpfad bleibt ein Fundingbedarf am bestehenden Runparent. Gebühren werden
 nicht mit Breakercredits bezahlt und ein Teilbruch entfernt keine anderen
 Wirkungen.
 
+Bei genau einer noch offenen reinen Run-Stärkefolge mit Engine-gequoteter
+Post-Pass-Abwendung nimmt derselbe Run-Window-Owner auch diese vollständige
+Zahlungsantwort in seinen Encounter-Kostenvergleich auf. Er budgetiert den
+gebundenen Abwendungsbetrag aus allgemeinen oder zulässigen Run-Credits;
+Breakercredits finanzieren diese Zahlung nicht. Aktuelle Action und Engine-
+Belastung bleiben unverändert: Die nachfolgende reale Post-Pass-Action wird
+beim bisherigen Owner neu validiert und gewählt. Nur eine finanzierte,
+vollständig gebundene Antwort mit erhaltener Rootreserve erhält die gemeinsame
+Kostenrangfolge. Fehlender Betrag, mehrere offene Wirkungen, andere
+Subroutinentypen und Full-Break-Schadenspflichten liefern diesen Nachweis
+nicht. Paarung 627/D329 belegt den Vergleich zwischen Break6 und Abwendung2
+ohne Karten-ID-Sonderfall.
+
 Die gemeinsame Runquote begrenzt die Reserve vor unbekanntem ICE auf das
 verbleibende Ausgabenlimit der konkreten Runaktion nach dem bekannten Pfad.
 Außerhalb dieses Limits liegende liquide Credits bleiben Eigentum des Runners,
