@@ -11,6 +11,20 @@ Webprozesse auf freien Ports. Der Webprozess erhält die gewählte Serveradresse
 über `NETGRID_SERVER_BASE_URL`. Das Root-Layout projiziert diese Adresse in
 `data-netgrid-server-origin`; die Browserclients lesen sie dort bei Verwendung.
 `NEXT_PUBLIC_NETGRID_SERVER_URL` ist kein Eingang dieses Laufzeitvertrags.
+Der Starter setzt es für die Maintenance-Oberfläche auf denselben Testserver.
+
+Server, Account-Bootstrap, Webprozess und Browserprüfung erhalten dieselbe
+explizite Testumgebung. Match- und Account-SQLite, Backups, Verbindungslog
+und Maintenance-Authentifizierung liegen unter dem eigenen
+`tmp/e2e-runtime-*`-Verzeichnis; geerbte Betreiberpfade werden überschrieben.
+Die normalen Ports `3100` und `8787` bleiben frei vom Testaufbau. Nach dem
+Lauf beendet der Starter nur seine eigenen Prozesse und entfernt deren
+Runtime- und Next-Verzeichnisse.
+
+Die Browserhelfer beziehen ihre beiden Deck-Snapshot-IDs aus
+`packages/runtime-data/src/product-default-decks.ts`. Die aktuelle
+Katalogversion wird damit von derselben Quelle wie die Produktvorbelegung
+bestimmt; ein entfernter Versionssuffix bleibt nicht als Testvoraussetzung stehen.
 
 Fehlende Deckoptionen und ein fehlendes Accountformular können dieselbe
 Ursache haben: Der Browser erreicht den Testserver nicht. In diesem Fall die

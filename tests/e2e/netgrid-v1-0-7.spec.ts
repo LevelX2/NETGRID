@@ -397,18 +397,31 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     request,
   }) => {
     const runtimePath = process.env.NETGRID_E2E_RUNTIME_PATH;
+    const runtimeDir = process.env.NETGRID_E2E_RUNTIME_DIR;
     expect(runtimePath).toBeTruthy();
+    expect(runtimeDir).toBeTruthy();
     expect(path.basename(runtimePath!)).toBe("netgrid.sqlite");
+    expect(path.dirname(runtimePath!)).toBe(runtimeDir);
+    // All writable test paths must override any inherited operator settings.
+    for (const key of [
+      "NETGRID_SQLITE_STORAGE_PATH",
+      "NETGRID_ACCOUNT_SQLITE_PATH",
+      "NETGRID_STORAGE_BACKUP_DIR",
+      "NETGRID_CONNECTION_AUDIT_LOG_PATH",
+      "NETGRID_MAINTENANCE_AUTH_PATH",
+    ]) {
+      const configured = process.env[key];
+      expect(configured, key).toBeTruthy();
+      expect(path.isAbsolute(configured!), key).toBe(true);
+      const relative = path.relative(runtimeDir!, configured!);
+      expect(relative.startsWith(".."), key).toBe(false);
+      expect(path.isAbsolute(relative), key).toBe(false);
+    }
+    expect(process.env.NETGRID_ACCOUNT_SQLITE_PATH).toBe(runtimePath);
     expect(runtimePath).not.toContain(
       "data\\runtime\\multiplayer\\matches.json",
     );
     expect(runtimePath).not.toContain("data/runtime/multiplayer/matches.json");
-    expect(runtimePath).not.toContain(
-      "data\\runtime\\multiplayer\\netgrid.sqlite",
-    );
-    expect(runtimePath).not.toContain(
-      "data/runtime/multiplayer/netgrid.sqlite",
-    );
     expect(runtimePath).not.toContain(
       "data\\runtime\\multiplayer\\netgrid.sqlite",
     );

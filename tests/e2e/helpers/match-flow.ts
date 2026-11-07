@@ -7,11 +7,13 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import { VIEWPORTS, type ViewportName } from "./viewports";
+import {
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID as E2E_RUNNER_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID as E2E_CORP_SNAPSHOT_ID,
+} from "../../../packages/runtime-data/src/product-default-decks";
 
 export const BASE_URL =
   process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3100";
-const E2E_RUNNER_SNAPSHOT_ID = "standard_standard_runner_bit_denial_lock_1.0.0";
-const E2E_CORP_SNAPSHOT_ID = "standard_standard_corp_cheap_bag_tricks_1.0.0";
 const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 
 export async function newContextPage(

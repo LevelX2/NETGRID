@@ -59,6 +59,25 @@ const runtimePath = path.join(runtimeDir, "netgrid.sqlite");
 const backupDir = path.join(runtimeDir, "backups");
 const webDistDirName = `.next-e2e-${Date.now()}`;
 const webDistDir = path.join(root, "apps", "web", webDistDirName);
+const runtimeEnvironment = {
+  NETGRID_STORAGE_KIND: "sqlite",
+  NETGRID_SQLITE_STORAGE_PATH: runtimePath,
+  NETGRID_ACCOUNT_SQLITE_PATH: runtimePath,
+  NETGRID_STORAGE_BACKUP_DIR: backupDir,
+  NETGRID_CONNECTION_AUDIT_LOG_PATH: path.join(
+    runtimeDir,
+    "connection-audit.ndjson",
+  ),
+  NETGRID_MAINTENANCE_AUTH_PATH: path.join(runtimeDir, "maintenance-auth.json"),
+  NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
+  NETGRID_DEPLOYMENT_PROFILE: "local",
+  NETGRID_PUBLIC_HOST: "127.0.0.1",
+  NETGRID_WEB_BASE_URL: webUrl,
+  NETGRID_SERVER_BASE_URL: serverUrl,
+  NEXT_PUBLIC_NETGRID_SERVER_URL: serverUrl,
+  NETGRID_ALLOWED_ORIGINS: webUrl,
+  NETGRID_RATE_LIMIT_PROFILE: "local",
+};
 
 await rm(runtimeDir, { recursive: true, force: true });
 await mkdir(runtimeDir, { recursive: true });
@@ -68,16 +87,9 @@ try {
     "server",
     ["pnpm", "--filter", "@netgrid/server", "exec", "tsx", "src/index.ts"],
     {
+      ...runtimeEnvironment,
       PORT: String(serverPort),
       HOST: "127.0.0.1",
-      NETGRID_SQLITE_STORAGE_PATH: runtimePath,
-      NETGRID_STORAGE_BACKUP_DIR: backupDir,
-      NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
-      NETGRID_DEPLOYMENT_PROFILE: "local",
-      NETGRID_WEB_BASE_URL: webUrl,
-      NETGRID_SERVER_BASE_URL: serverUrl,
-      NETGRID_ALLOWED_ORIGINS: webUrl,
-      NETGRID_RATE_LIMIT_PROFILE: "local",
     },
   );
   await waitForUrl(`${serverUrl}/health`, "server");
@@ -94,10 +106,7 @@ try {
       "Statistik Alpha",
     ],
     {
-      NETGRID_STORAGE_KIND: "sqlite",
-      NETGRID_SQLITE_STORAGE_PATH: runtimePath,
-      NETGRID_STORAGE_BACKUP_DIR: backupDir,
-      NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
+      ...runtimeEnvironment,
       NETGRID_ACCOUNT_BOOTSTRAP_PASSWORD: "Statistik Browser Alpha 2026!",
     },
   );
@@ -119,7 +128,7 @@ try {
       String(webPort),
     ],
     {
-      NETGRID_SERVER_BASE_URL: serverUrl,
+      ...runtimeEnvironment,
       NETGRID_NEXT_DIST_DIR: webDistDirName,
     },
   );
@@ -136,9 +145,11 @@ try {
       ...playwrightArgs,
     ],
     {
+      ...runtimeEnvironment,
       PLAYWRIGHT_BASE_URL: webUrl,
       NETGRID_E2E_SERVER_URL: serverUrl,
       NETGRID_E2E_RUNTIME_PATH: runtimePath,
+      NETGRID_E2E_RUNTIME_DIR: runtimeDir,
       ...browserPairEnvironment,
     },
   );
