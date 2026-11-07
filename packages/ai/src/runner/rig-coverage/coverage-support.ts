@@ -311,7 +311,10 @@ export function coverageSupportActionIds(
   options: Readonly<{
     deckHasStackAnswerOverride?: boolean;
     targetDefinitionIdOverride?: string;
-    handRotation?: RunnerHandRotationAssessment;
+    handRotation?: Pick<
+      RunnerHandRotationAssessment,
+      "exactKnownNeedDrawAdmissible" | "stackHasCards"
+    >;
     terminalRemoteCoverageThreat?: boolean;
   }> = {},
 ): Pick<

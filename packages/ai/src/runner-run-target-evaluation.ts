@@ -364,20 +364,29 @@ export function quoteRunnerRunAfterHandBufferDraws(
   );
 }
 
+export type PreparedRunnerRunTargets = Readonly<{
+  projections: readonly InternalRunActionProjection[];
+  economy: RunnerEconomyPosture;
+}>;
+
 export function evaluateRunnerRunTargets(
   params: EvaluateRunnerRunTargetsParams & { quotedRunnerGripCount?: number },
+  prepared?: PreparedRunnerRunTargets,
 ): RunnerRunTargetEvaluation[] {
-  const economyPosture = buildRunnerEconomyPosture(params);
+  const projections = (
+    prepared?.projections ?? projectInternalRunnerRunActions(params)
+  ).filter(
+    (projection) =>
+      projection.projectionStatus === "concrete_target" &&
+      projection.targetServerId !== undefined,
+  );
+  if (projections.length === 0) return [];
+  const economyPosture = prepared?.economy ?? buildRunnerEconomyPosture(params);
   const beliefState =
     params.beliefState ?? reconstructBeliefState(params.input);
   const unrezzedIceRiskModel =
     beliefState.runnerOpponentModel?.unrezzedIceRiskModel ?? [];
-  return projectInternalRunnerRunActions(params)
-    .filter(
-      (projection) =>
-        projection.projectionStatus === "concrete_target" &&
-        projection.targetServerId !== undefined,
-    )
+  return projections
     .map((projection) =>
       evaluateRunnerRunTarget(
         params,

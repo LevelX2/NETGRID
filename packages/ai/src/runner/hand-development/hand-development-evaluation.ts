@@ -169,19 +169,45 @@ import {
 
 import { successfulRunStrengthCounter } from "./strategic-support-development";
 
+/** Reuses the card and route facts shared by both rig-demand evaluations. */
+export function prepareRunnerHandCards(
+  params: EvaluateRunnerHandDevelopmentParams,
+) {
+  type CardFacts = {
+    context: CardContext;
+    investment: ReturnType<typeof assessHostedBreakerDevelopment>;
+  };
+  const factsByCard = new Map<VisibleCard, CardFacts>();
+  let minimumCreditFloor: number | undefined;
+  return (card: VisibleCard): CardFacts => {
+    const existing = factsByCard.get(card);
+    if (existing) return existing;
+    const facts = {
+      context: buildCardContext(params, card),
+      investment: assessHostedBreakerDevelopment(
+        params.input,
+        card,
+        (minimumCreditFloor ??= minimumCreditFloorForPersistentInstall(
+          params.input,
+        )),
+      ),
+    };
+    factsByCard.set(card, facts);
+    return facts;
+  };
+}
+
 export function evaluateRunnerHandDevelopment(
   params: EvaluateRunnerHandDevelopmentParams,
+  handCards?: ReturnType<typeof prepareRunnerHandCards>,
 ): RunnerHandDevelopmentEvaluation[] {
   if (params.input.side !== "runner") return [];
+  const cardFacts = handCards ?? prepareRunnerHandCards(params);
   const evaluations = params.input.playerView.own.gripOrHq
     .filter((card) => card.known !== false)
     .map((card): RunnerHandDevelopmentEvaluation => {
-      const evaluation = evaluateHandCard(params, card);
-      const investment = assessHostedBreakerDevelopment(
-        params.input,
-        card,
-        minimumCreditFloorForPersistentInstall(params.input),
-      );
+      const { context, investment } = cardFacts(card);
+      const evaluation = evaluateHandCard(params, context);
       if (!investment) return evaluation;
       if (!investment.admitted)
         return {
@@ -367,9 +393,9 @@ export function redactedRunnerHandDevelopmentFacts(
 
 function evaluateHandCard(
   params: EvaluateRunnerHandDevelopmentParams,
-  card: VisibleCard,
+  context: CardContext,
 ): RunnerHandDevelopmentEvaluation {
-  const context = buildCardContext(params, card);
+  const { card } = context;
   const rigDemandBinding = runnerRigDemandBindingForCard(params, card);
   const prospectiveRecoveryInfrastructure =
     doctrineSupportsProspectiveRecoveryInfrastructure(params, context);

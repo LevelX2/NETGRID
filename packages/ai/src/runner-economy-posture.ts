@@ -28,10 +28,61 @@ const RUNNER_ECONOMY_POSTURE_SCHEMA_VERSION =
 const RUNNER_CREDIT_BASE_PLAN_SCHEMA_VERSION =
   "runner-credit-base-plan-v1" as const;
 
-type EconomyPostureParams = EvaluateRunnerRunTargetsParams & {
+type RunnerEconomyHandFact = Pick<
+  RunnerHandDevelopmentEvaluation,
+  | "availability"
+  | "cardInstanceId"
+  | "currentNeed"
+  | "deferReason"
+  | "developmentRole"
+  | "legalActionId"
+  | "priority"
+> & {
+  fundingNeed?: Pick<
+    NonNullable<RunnerHandDevelopmentEvaluation["fundingNeed"]>,
+    "installOrPlayCost" | "missingCredits"
+  >;
+};
+
+type EconomyPostureParams = Omit<
+  EvaluateRunnerRunTargetsParams,
+  "handDevelopmentEvaluations"
+> & {
+  handDevelopmentEvaluations?: readonly RunnerEconomyHandFact[];
   strategicIntent?: RunnerStrategicIntentProfile;
   deckCapabilities?: DeckCapabilityProfile;
 };
+
+export function runnerEconomyHandFacts(
+  evaluations: readonly RunnerHandDevelopmentEvaluation[],
+): RunnerEconomyHandFact[] {
+  return evaluations
+    .filter(
+      (evaluation) =>
+        usefulHandEvaluationAffordableNow(evaluation) ||
+        usefulHandEvaluationBlockedByCredits(evaluation) ||
+        legalHandEconomyEvaluation(evaluation),
+    )
+    .map((evaluation) => ({
+      availability: evaluation.availability,
+      cardInstanceId: evaluation.cardInstanceId,
+      currentNeed: evaluation.currentNeed,
+      deferReason: evaluation.deferReason,
+      developmentRole: evaluation.developmentRole,
+      ...(evaluation.legalActionId !== undefined
+        ? { legalActionId: evaluation.legalActionId }
+        : {}),
+      priority: evaluation.priority,
+      ...(evaluation.fundingNeed
+        ? {
+            fundingNeed: {
+              installOrPlayCost: evaluation.fundingNeed.installOrPlayCost,
+              missingCredits: evaluation.fundingNeed.missingCredits,
+            },
+          }
+        : {}),
+    }));
+}
 
 type RunnerRemotePressureReserveAssessment = {
   active: boolean;
@@ -229,21 +280,26 @@ function runnerPreferredEconomyRoute(
 }
 
 function runnerHandEconomyRoute(
-  evaluations: readonly RunnerHandDevelopmentEvaluation[],
+  evaluations: readonly RunnerEconomyHandFact[],
 ): RunnerEconomyRoute | undefined {
-  const legalEconomy = evaluations.find(
-    (evaluation) =>
-      evaluation.availability === "legal_now" &&
-      evaluation.legalActionId !== undefined &&
-      evaluation.currentNeed !== "none" &&
-      evaluation.currentNeed !== "later" &&
-      (evaluation.developmentRole === "bank_tool" ||
-        evaluation.developmentRole === "economy_engine"),
-  );
+  const legalEconomy = evaluations.find(legalHandEconomyEvaluation);
   if (!legalEconomy) return undefined;
   return legalEconomy.developmentRole === "bank_tool"
     ? "hand_bank_tool"
     : "hand_economy_engine";
+}
+
+function legalHandEconomyEvaluation(
+  evaluation: RunnerEconomyHandFact,
+): boolean {
+  return (
+    evaluation.availability === "legal_now" &&
+    evaluation.legalActionId !== undefined &&
+    evaluation.currentNeed !== "none" &&
+    evaluation.currentNeed !== "later" &&
+    (evaluation.developmentRole === "bank_tool" ||
+      evaluation.developmentRole === "economy_engine")
+  );
 }
 
 function runnerHasInstalledActionEconomy(input: AiDecisionInput): boolean {
@@ -316,7 +372,7 @@ function buildRunnerCreditBasePlan(params: {
   minimumCreditFloor: number;
   creditReservePolicy: RunnerCreditReservePolicy;
   riskAdjustedRunReserve: boolean;
-  handDevelopmentEvaluations: readonly RunnerHandDevelopmentEvaluation[];
+  handDevelopmentEvaluations: readonly RunnerEconomyHandFact[];
   canDraw: boolean;
 }): RunnerCreditBasePlan {
   const usefulBlocked = params.handDevelopmentEvaluations
@@ -422,7 +478,7 @@ function buildRunnerCreditReservePolicy(params: {
   convertibleBankCredits: number;
   economyTurnCreditCeiling: number;
   remotePressureReserve: RunnerRemotePressureReserveAssessment;
-  handDevelopmentEvaluations: readonly RunnerHandDevelopmentEvaluation[];
+  handDevelopmentEvaluations: readonly RunnerEconomyHandFact[];
 }): RunnerCreditReservePolicy {
   const developmentReserve = runnerDevelopmentReserve(
     params.handDevelopmentEvaluations,
@@ -525,7 +581,7 @@ function buildRunnerCreditReservePolicy(params: {
 }
 
 function runnerDevelopmentReserve(
-  evaluations: readonly RunnerHandDevelopmentEvaluation[],
+  evaluations: readonly RunnerEconomyHandFact[],
   baseDesiredCreditReserve: number,
 ): number {
   const topBlocked = evaluations
@@ -563,7 +619,7 @@ function runnerCanContestRemoteIfFunded(
 }
 
 function usefulHandEvaluationBlockedByCredits(
-  evaluation: RunnerHandDevelopmentEvaluation,
+  evaluation: RunnerEconomyHandFact,
 ): boolean {
   return (
     evaluation.availability === "missing_credits" &&
@@ -573,7 +629,7 @@ function usefulHandEvaluationBlockedByCredits(
 }
 
 function usefulHandEvaluationAffordableNow(
-  evaluation: RunnerHandDevelopmentEvaluation,
+  evaluation: RunnerEconomyHandFact,
 ): boolean {
   return (
     evaluation.availability === "legal_now" &&
@@ -582,7 +638,7 @@ function usefulHandEvaluationAffordableNow(
 }
 
 function usefulHandDevelopmentEvaluation(
-  evaluation: RunnerHandDevelopmentEvaluation,
+  evaluation: RunnerEconomyHandFact,
 ): boolean {
   if (
     evaluation.developmentRole === "duplicate_or_low_value" ||
@@ -597,8 +653,8 @@ function usefulHandDevelopmentEvaluation(
 }
 
 function compareHandDevelopmentForCreditBase(
-  left: RunnerHandDevelopmentEvaluation,
-  right: RunnerHandDevelopmentEvaluation,
+  left: RunnerEconomyHandFact,
+  right: RunnerEconomyHandFact,
 ): number {
   return (
     right.priority - left.priority ||
@@ -607,9 +663,7 @@ function compareHandDevelopmentForCreditBase(
   );
 }
 
-function needRank(
-  need: RunnerHandDevelopmentEvaluation["currentNeed"],
-): number {
+function needRank(need: RunnerEconomyHandFact["currentNeed"]): number {
   switch (need) {
     case "acute":
       return 4;
@@ -708,13 +762,7 @@ function buildRunnerEconomyTransitionAssessment(
         evaluation.developmentRole === "bank_tool",
     )
     .sort(compareHandDevelopmentForCreditBase);
-  const legalEconomy = economyEvaluations.find(
-    (evaluation) =>
-      evaluation.availability === "legal_now" &&
-      evaluation.legalActionId !== undefined &&
-      evaluation.currentNeed !== "none" &&
-      evaluation.currentNeed !== "later",
-  );
+  const legalEconomy = economyEvaluations.find(legalHandEconomyEvaluation);
   const blockedEconomy = economyEvaluations.find(
     usefulHandEvaluationBlockedByCredits,
   );

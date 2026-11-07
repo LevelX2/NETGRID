@@ -59,6 +59,14 @@ die Zulassungsprüfung für diesen Schritt. Eine vollständige Restsuche
 bleibt für Neuplanung und die Auswertung von Beobachtungsgrenzen verfügbar.
 Der Greedy-Vergleich läuft im expliziten Vergleichsmodus.
 
+Der Runner bereitet Rig-Demand aus Coverage-Fakten, geprüften Suchoptionen
+und bei Bedarf den bestätigten Bedarfen der zuständigen Pläne vor. Die
+vollständigen Owner-Signale entstehen einmal für den endgültigen Frame.
+Handkarten behalten ihre Sicht- und LegalAction-Bindungen zwischen den
+Bewertungen. Runziele verwenden die Economy Posture desselben Frames.
+Ändern sich relevante Ressourcenfakten durch die Rig-Projektion, werden
+Economy und Runziele erneut bewertet.
+
 Dateinamen wie `*-shadow.ts` oder `*-cutover.ts` sind bestehende technische
 Namen. Die normale Live-Runtime verwendet für beide Seiten den Modus
 `cutover`. `legacy_compare` ist ausdrücklich angeforderte Vergleichslogik

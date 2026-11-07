@@ -98,15 +98,27 @@ export function runnerCoverageDrawCadence(
 export function uniqueCoverageGaps(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
-  runTargets: readonly RunnerRunTargetEvaluation[],
+  runFacts: {
+    runTargets: readonly RunnerRunTargetEvaluation[];
+    economy: RunnerEconomyPosture;
+  } | undefined,
   installedRoles: ReadonlySet<string>,
   deckCapabilities: DeckCapabilityProfile,
   strategicIntent: RunnerStrategicIntentProfile,
-  economy: RunnerEconomyPosture,
-  handRotation: RunnerHandRotationAssessment,
+  handRotation: Pick<
+    RunnerHandRotationAssessment,
+    "exactKnownNeedDrawAdmissible" | "stackHasCards"
+  >,
   services: RunnerCoverageServices,
 ): RunnerCoverageGapSignal[] {
   const result = new Map<string, RunnerCoverageGapSignal>();
+  const runTargets = runFacts?.runTargets ?? [];
+  const runEntries = runFacts
+    ? runFacts.runTargets.map((evaluation) => ({
+        evaluation,
+        economy: runFacts.economy,
+      }))
+    : [];
   const coverageDrawCadence = runnerCoverageDrawCadence(input);
   const coverageSearchInterrupt = runTargets.some((evaluation) => {
     if (
@@ -132,7 +144,7 @@ export function uniqueCoverageGaps(
   });
   const terminalContestThreat = runnerTerminalContestThreat(input);
   const handBuffer = runnerDefenseHandBufferFacts(input, runTargets);
-  for (const evaluation of runTargets) {
+  for (const { evaluation, economy } of runEntries) {
     if (
       !runnerCoverageRunTargetHasDifferentialPayoff(
         input,
@@ -284,9 +296,10 @@ export function uniqueCoverageGaps(
       });
     }
   }
-  for (const evaluation of [...runTargets].sort(
+  for (const { evaluation, economy } of runEntries.sort(
     (left, right) =>
-      right.score - left.score || left.actionId.localeCompare(right.actionId),
+      right.evaluation.score - left.evaluation.score ||
+      left.evaluation.actionId.localeCompare(right.evaluation.actionId),
   )) {
     if (
       !runnerCoverageRunTargetHasDifferentialPayoff(

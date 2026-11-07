@@ -30,10 +30,7 @@ export type RunnerHandRotationAssessment = Readonly<{
  * cleanup trade-off at full hand; generic option development requires either
  * free hand capacity or a known low-retention card.
  */
-export function assessRunnerHandRotation(
-  input: AiDecisionInput,
-  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
-): RunnerHandRotationAssessment {
+export function runnerKnownNeedDrawFacts(input: AiDecisionInput) {
   const handSize = input.playerView.own.gripOrHq.length;
   const maxHandSize = input.playerView.own.maxHandSize;
   const handCapacityGap = maxHandSize - handSize;
@@ -45,6 +42,26 @@ export function assessRunnerHandRotation(
         action.type === "draw_card" &&
         action.source === "basic_action",
     );
+  return {
+    handSize,
+    maxHandSize,
+    handCapacityGap,
+    stackHasCards,
+    exactKnownNeedDrawAdmissible: stackHasCards && handCapacityGap >= 0,
+  };
+}
+
+export function assessRunnerHandRotation(
+  input: AiDecisionInput,
+  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
+): RunnerHandRotationAssessment {
+  const {
+    handSize,
+    maxHandSize,
+    handCapacityGap,
+    stackHasCards,
+    exactKnownNeedDrawAdmissible,
+  } = runnerKnownNeedDrawFacts(input);
   const knownHandInstanceIds = new Set(
     input.playerView.own.gripOrHq
       .filter((card) => card.known)
@@ -82,7 +99,6 @@ export function assessRunnerHandRotation(
   const genericDrawAdmissible =
     stackHasCards &&
     (hasCapacity || (handCapacityGap === 0 && hasKnownRotationTarget));
-  const exactKnownNeedDrawAdmissible = stackHasCards && handCapacityGap >= 0;
   const status = !stackHasCards
     ? "stack_empty"
     : hasCapacity

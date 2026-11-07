@@ -204,11 +204,16 @@ import {
 } from "../run-analysis/runner-run-preparation-choice-binding";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
 import { runnerRecentFutureEncounterDamageSafetyAbort } from "../runner-damage-threat-assessment";
+import { runnerEconomyHandFacts } from "../runner-economy-posture";
+import { projectInternalRunnerRunActions } from "../actions/run-action-projection";
+import type { RunnerCoverageGapSignal } from "../plans/runner-coverage-contracts";
+import { prepareRunnerHandCards } from "../runner/hand-development/hand-development-evaluation";
 import {
   quoteRunnerRunAfterGuaranteedFunding,
   quoteRunnerRunAfterGuaranteedBankCashouts,
 } from "../runner-run-target-evaluation";
 import type {
+  PreparedRunnerRunTargets,
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
@@ -395,7 +400,10 @@ import {
   runnerExactFundingRouteContract,
   runnerImmediateGeneralLiquidEconomyRoute,
 } from "./runner-exact-funding-routes";
-import { assessRunnerHandRotation } from "./runner-hand-rotation-assessment";
+import {
+  assessRunnerHandRotation,
+  runnerKnownNeedDrawFacts,
+} from "./runner-hand-rotation-assessment";
 import {
   runnerCandidateIsCentralInformationAbility,
   runnerCandidateIsRemoteExposePreparation,
@@ -440,25 +448,32 @@ export type PlanFirstLiveDependencies = {
     input: AiDecisionInput,
     deckCapabilities: DeckCapabilityProfile,
   ) => RunnerStrategicIntentProfile;
-  evaluateRunnerHandDevelopment: (input: {
-    input: AiDecisionInput;
-    strategicIntent: RunnerStrategicIntentProfile;
-    deckCapabilities: DeckCapabilityProfile;
-    actionCandidates: readonly ActionSemanticCandidate[];
-  }) => RunnerHandDevelopmentEvaluation[];
+  evaluateRunnerHandDevelopment: (
+    input: {
+      input: AiDecisionInput;
+      strategicIntent: RunnerStrategicIntentProfile;
+      deckCapabilities: DeckCapabilityProfile;
+      actionCandidates: readonly ActionSemanticCandidate[];
+      rigDemandProjection?: RunnerRigDemandProjection;
+    },
+    handCards: ReturnType<typeof prepareRunnerHandCards>,
+  ) => RunnerHandDevelopmentEvaluation[];
   buildRunnerEconomyPosture: (input: {
     input: AiDecisionInput;
     strategicIntent: RunnerStrategicIntentProfile;
     deckCapabilities: DeckCapabilityProfile;
     handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
   }) => RunnerEconomyPosture;
-  evaluateRunnerRunTargets: (input: {
-    input: AiDecisionInput;
-    strategicIntent: RunnerStrategicIntentProfile;
-    deckCapabilities: DeckCapabilityProfile;
-    actionCandidates: readonly ActionSemanticCandidate[];
-    handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
-  }) => RunnerRunTargetEvaluation[];
+  evaluateRunnerRunTargets: (
+    input: {
+      input: AiDecisionInput;
+      strategicIntent: RunnerStrategicIntentProfile;
+      deckCapabilities: DeckCapabilityProfile;
+      actionCandidates: readonly ActionSemanticCandidate[];
+      handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
+    },
+    prepared: PreparedRunnerRunTargets,
+  ) => RunnerRunTargetEvaluation[];
   discardKeepScore?: (
     input: AiDecisionInput,
     card: VisibleCard,
@@ -1045,17 +1060,20 @@ function runnerContext(
     input,
     deckCapabilities,
   );
+  const factsInput = { input, strategicIntent, deckCapabilities };
+  const runInput = { ...factsInput, actionCandidates: candidates };
+  const handCards = prepareRunnerHandCards(runInput);
   const evaluateHandDevelopment = (
     rigDemandProjection?: RunnerRigDemandProjection,
   ) =>
     dependencies
-      .evaluateRunnerHandDevelopment({
-        input,
-        strategicIntent,
-        deckCapabilities,
-        actionCandidates: candidates,
-        ...(rigDemandProjection ? { rigDemandProjection } : {}),
-      })
+      .evaluateRunnerHandDevelopment(
+        {
+          ...runInput,
+          ...(rigDemandProjection ? { rigDemandProjection } : {}),
+        },
+        handCards,
+      )
       .map((evaluation) => {
         if (!evaluation.legalActionId) return evaluation;
         const action = input.legalActions.find(
@@ -1085,20 +1103,6 @@ function runnerContext(
           ],
         };
       });
-  const initialHandDevelopment = evaluateHandDevelopment();
-  const initialEconomy = dependencies.buildRunnerEconomyPosture({
-    input,
-    strategicIntent,
-    deckCapabilities,
-    handDevelopmentEvaluations: initialHandDevelopment,
-  });
-  const initialRunTargets = dependencies.evaluateRunnerRunTargets({
-    input,
-    strategicIntent,
-    deckCapabilities,
-    actionCandidates: candidates,
-    handDevelopmentEvaluations: initialHandDevelopment,
-  });
   assertRunnerRestrictedProgramInstallCommitment(input, candidates, previous);
   const activeRunRoot = reassessActiveInformationRunParent(
     input,
@@ -1113,15 +1117,6 @@ function runnerContext(
     candidates,
     previous,
   );
-  const initialRunWindowActionAssessments = runnerRunWindowActionAssessments(
-    input,
-    candidates,
-    initialRunTargets,
-    initialEconomy,
-    dependencies,
-    activeRunRoot,
-    runRiskReassessment,
-  );
   const discardChoiceBinding = runnerDiscardChoicePlanBinding({
     input,
     candidates,
@@ -1129,58 +1124,100 @@ function runnerContext(
       ? { discardKeepScore: dependencies.discardKeepScore }
       : {}),
   });
-  const preliminaryUnboundDomain = buildRunnerDomain(
-    input,
-    candidates,
-    deckCapabilities,
-    strategicIntent,
-    initialEconomy,
-    initialHandDevelopment,
-    initialRunTargets,
-    initialRunWindowActionAssessments,
+  const assessProgramInstallTarget =
+    dependencies.runnerProgramInstallTrashAssessmentForCard;
+  const projections = projectInternalRunnerRunActions(runInput);
+  function factsForHand(
+    handDevelopment: RunnerHandDevelopmentEvaluation[],
+    previousFacts?: RunnerDecisionFacts,
+  ): RunnerDecisionFacts {
+    if (previousFacts?.handDevelopment === handDevelopment)
+      return previousFacts;
+    const economyKey = JSON.stringify(runnerEconomyHandFacts(handDevelopment));
+    if (previousFacts?.economyKey === economyKey) {
+      return { ...previousFacts, handDevelopment };
+    }
+    const economy = dependencies.buildRunnerEconomyPosture({
+      ...factsInput,
+      handDevelopmentEvaluations: handDevelopment,
+    });
+    const runTargets = dependencies.evaluateRunnerRunTargets(
+      { ...runInput, handDevelopmentEvaluations: handDevelopment },
+      { projections, economy },
+    );
+    return { handDevelopment, economyKey, economy, runTargets };
+  }
+  const domainContext: RunnerDomainContext = {
+    ...runInput,
     activeRunRoot,
     runRiskReassessment,
     exposeInformation,
     previous,
     discardChoiceBinding,
-    dependencies.discardKeepScore,
-    undefined,
-    dependencies.runnerProgramInstallTrashAssessmentForCard,
-  );
-  const preliminaryDomain = bindRunnerCoverageSearchProgramTrashSacrifices(
-    input,
-    preliminaryUnboundDomain,
-    dependencies.runnerProgramInstallTrashAssessmentForCard,
-  );
-  const rigDemandProjection =
-    runnerRigDemandProjectionInputAvailable(input) &&
-    runnerCoverageRigDemandInputsComplete({
-      input,
-      deckCapabilities,
-      coverageGaps: preliminaryDomain.coverageGaps,
-    })
-      ? buildRunnerRigDemandProjectionForCoverage({
-          input,
-          strategicIntent,
-          deckCapabilities,
-          coverageGaps: preliminaryDomain.coverageGaps,
-          rolesForDefinitionId: rolesForDeckDoctrineCard,
-        })
-      : undefined;
-  const handDevelopment = evaluateHandDevelopment(rigDemandProjection);
-  const economy = dependencies.buildRunnerEconomyPosture({
-    input,
-    strategicIntent,
-    deckCapabilities,
-    handDevelopmentEvaluations: handDevelopment,
-  });
-  const runTargets = dependencies.evaluateRunnerRunTargets({
-    input,
-    strategicIntent,
-    deckCapabilities,
-    actionCandidates: candidates,
-    handDevelopmentEvaluations: handDevelopment,
-  });
+    discardKeepScore: dependencies.discardKeepScore,
+    assessProgramInstallTarget,
+  };
+
+  let initialFacts: RunnerDecisionFacts | undefined;
+  let initialDomain: ReturnType<typeof prepareRunnerDomain> | undefined;
+  let coverageWithoutRuns: RunnerCoverageGapSignal[] | undefined;
+  let rigDemandProjection: RunnerRigDemandProjection | undefined;
+  if (runnerRigDemandProjectionInputAvailable(input)) {
+    const needsRunFacts =
+      projections.some(
+        (projection) => projection.projectionStatus === "concrete_target",
+      ) || previous?.pendingRunnerCostPenaltySupportOrigin !== undefined;
+    let coverageGaps: RunnerCoverageGapSignal[];
+    if (!needsRunFacts) {
+      coverageWithoutRuns = discoverRunnerCoverageForFrame(domainContext);
+      coverageGaps = bindRunnerCoverageSearchProgramTrashSacrifices(
+        input,
+        { coverageGaps: coverageWithoutRuns },
+        assessProgramInstallTarget,
+      ).coverageGaps;
+    } else {
+      initialFacts = factsForHand(evaluateHandDevelopment());
+      initialDomain = prepareRunnerDomain(domainContext, initialFacts);
+      coverageGaps = initialDomain.coverageGapsForRigDemand();
+    }
+    if (
+      runnerCoverageRigDemandInputsComplete({
+        input,
+        deckCapabilities,
+        coverageGaps,
+      })
+    ) {
+      rigDemandProjection = buildRunnerRigDemandProjectionForCoverage({
+        input,
+        strategicIntent,
+        deckCapabilities,
+        coverageGaps,
+        rolesForDefinitionId: rolesForDeckDoctrineCard,
+      });
+    }
+  }
+  const handDevelopment =
+    initialFacts &&
+    (!rigDemandProjection || initialFacts.handDevelopment.length === 0)
+      ? initialFacts.handDevelopment
+      : evaluateHandDevelopment(rigDemandProjection);
+  const facts = factsForHand(handDevelopment, initialFacts);
+  const { economy, runTargets } = facts;
+  const reusableCoverage =
+    runTargets === initialFacts?.runTargets
+      ? initialDomain?.rawCoverageGaps
+      : runTargets.length === 0
+        ? coverageWithoutRuns
+        : undefined;
+  const prepared =
+    !rigDemandProjection && initialDomain
+      ? initialDomain
+      : prepareRunnerDomain(
+          domainContext,
+          facts,
+          rigDemandProjection,
+          reusableCoverage,
+        );
   const runWindowActionAssessments = runnerRunWindowActionAssessments(
     input,
     candidates,
@@ -1190,28 +1227,11 @@ function runnerContext(
     activeRunRoot,
     runRiskReassessment,
   );
-  const unboundDomain = buildRunnerDomain(
-    input,
-    candidates,
-    deckCapabilities,
-    strategicIntent,
-    economy,
-    handDevelopment,
-    runTargets,
-    runWindowActionAssessments,
-    activeRunRoot,
-    runRiskReassessment,
-    exposeInformation,
-    previous,
-    discardChoiceBinding,
-    dependencies.discardKeepScore,
-    rigDemandProjection,
-    dependencies.runnerProgramInstallTrashAssessmentForCard,
-  );
+  const unboundDomain = prepared.finish(runWindowActionAssessments);
   const domain = bindRunnerCoverageSearchProgramTrashSacrifices(
     input,
     unboundDomain,
-    dependencies.runnerProgramInstallTrashAssessmentForCard,
+    assessProgramInstallTarget,
   );
   const actionDispositions = runnerActionDispositions(
     input,
@@ -2954,78 +2974,55 @@ function runnerDrawActionHasCurrentNonCoveragePlanPurpose(
   );
 }
 
-function buildRunnerDomain(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  _deckCapabilities: DeckCapabilityProfile,
-  strategicIntent: RunnerStrategicIntentProfile,
-  economy: RunnerEconomyPosture,
-  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
-  runTargets: readonly RunnerRunTargetEvaluation[],
-  runWindowActionAssessments: NonNullable<
-    RunnerPlanDomain["runWindows"][number]["actionAssessments"]
-  >,
-  activeRunRoot: ActiveRunnerRunRoot | undefined,
-  runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
-  exposeInformation: readonly RunnerExposeInformationSignal[],
-  previous: ResidentPlanPortfolio | undefined,
-  discardChoiceBinding: RunnerDiscardChoiceBinding | undefined,
-  discardKeepScore: DiscardKeepScorer | undefined,
-  rigDemandProjection: RunnerRigDemandProjection | undefined,
-  assessProgramInstallTarget: RunnerDevelopmentInstallServices["assessCard"],
-): RunnerPlanDomain {
-  const currentCredits = input.playerView.own.credits;
-  const remainingClicks = input.playerView.own.clicks;
-  const economyReserve = runnerEconomyReserveFacts(input, economy);
-  const defenseHandBuffer = runnerDefenseHandBufferFacts(input, runTargets);
-  const { handSize, damageThreat, minimumHandBuffer } = defenseHandBuffer;
-  const installedCardLiquidationChoice =
-    runnerInstalledCardLiquidationChoiceSignal(input, candidates);
-  const defenseSupport = runnerDefenseSupportSignals(
-    input,
-    candidates,
-    handDevelopment,
-  );
-  const { defenseSupportAllInstallActionIds } = defenseSupport;
+type RunnerDecisionFacts = {
+  handDevelopment: RunnerHandDevelopmentEvaluation[];
+  economyKey: string;
+  economy: RunnerEconomyPosture;
+  runTargets: RunnerRunTargetEvaluation[];
+};
+
+type RunnerCoverageContext = {
+  input: AiDecisionInput;
+  actionCandidates: readonly ActionSemanticCandidate[];
+  deckCapabilities: DeckCapabilityProfile;
+  strategicIntent: RunnerStrategicIntentProfile;
+  previous: ResidentPlanPortfolio | undefined;
+  assessProgramInstallTarget: RunnerDevelopmentInstallServices["assessCard"];
+};
+
+type RunnerDomainContext = RunnerCoverageContext & {
+  activeRunRoot: ActiveRunnerRunRoot | undefined;
+  runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined;
+  exposeInformation: readonly RunnerExposeInformationSignal[];
+  discardChoiceBinding: RunnerDiscardChoiceBinding | undefined;
+  discardKeepScore: DiscardKeepScorer | undefined;
+};
+
+function discoverRunnerCoverageForFrame(
+  context: RunnerCoverageContext,
+  runFacts?: Pick<RunnerDecisionFacts, "runTargets" | "economy">,
+): RunnerCoverageGapSignal[] {
   const {
-    turnLiquidityFundingNeeds,
-    portfolioReserveFundingNeeds,
-    forgoTerminalDeckPressureCapacity,
-  } = buildRunnerEconomySignals({
     input,
-    candidates,
-    economy,
-    handDevelopment,
+    actionCandidates: candidates,
+    deckCapabilities,
+    strategicIntent,
     previous,
-    currentTurnKey: turnKey(input),
-    reserve: economyReserve,
-    minimumHandBuffer,
-    findFundingRoute: (request) =>
-      runnerExactFundingRouteContract(input, candidates, request),
-  });
+    assessProgramInstallTarget,
+  } = context;
   const installedRoles = new Set(
     (input.playerView.own.rig ?? []).flatMap((card) =>
       rolesForDeckDoctrineCard(card.definitionId ?? ""),
     ),
   );
-  const handRotationAssessment = assessRunnerHandRotation(
-    input,
-    handDevelopment,
-  );
-  const liquiditySaturationOptionDevelopment =
-    runnerLiquiditySaturationOptionDevelopment(
-      input,
-      Math.max(10, economy.desiredCreditReserve + 3),
-    );
   const discoveredCoverageGaps = uniqueCoverageGaps(
     input,
     candidates,
-    runTargets,
+    runFacts,
     installedRoles,
-    _deckCapabilities,
+    deckCapabilities,
     strategicIntent,
-    economy,
-    handRotationAssessment,
+    runnerKnownNeedDrawFacts(input),
     {
       assessProgramInstallTarget,
       runnerRemoteHasCurrentContestMaterial,
@@ -3041,7 +3038,7 @@ function buildRunnerDomain(
     input,
     previous,
   )?.coverageGap;
-  const projectedCoverageGaps = paymentCoverage
+  return paymentCoverage
     ? [
         ...discoveredCoverageGaps.filter(
           (gap) => gap.gapId !== paymentCoverage.gapId,
@@ -3049,511 +3046,661 @@ function buildRunnerDomain(
         paymentCoverage,
       ]
     : discoveredCoverageGaps;
-  let coverageGaps = rigDemandProjection
+}
+
+function prepareRunnerDomain(
+  context: RunnerDomainContext,
+  facts: RunnerDecisionFacts,
+  rigDemandProjection?: RunnerRigDemandProjection,
+  discoveredCoverageGaps?: RunnerCoverageGapSignal[],
+) {
+  const {
+    input,
+    actionCandidates: candidates,
+    deckCapabilities,
+    strategicIntent,
+    activeRunRoot,
+    runRiskReassessment,
+    exposeInformation,
+    previous,
+    discardChoiceBinding,
+    discardKeepScore,
+    assessProgramInstallTarget,
+  } = context;
+  const { economy, handDevelopment, runTargets } = facts;
+  const currentCredits = input.playerView.own.credits;
+  const remainingClicks = input.playerView.own.clicks;
+  const projectedCoverageGaps =
+    discoveredCoverageGaps ?? discoverRunnerCoverageForFrame(context, facts);
+  const coverageGaps = rigDemandProjection
     ? bindRunnerRigDemandProjectionToCoverageGaps({
         input,
         coverageGaps: projectedCoverageGaps,
         projection: rigDemandProjection,
       })
     : projectedCoverageGaps;
-  const terminalContestThreat = runnerTerminalContestThreat(input);
-  const exactCoverageRecoveryActionIds = new Set(
-    coverageGaps.flatMap((gap) => [
-      ...gap.directSearchActionIds,
-      ...(gap.heapRecoveryPreparation
-        ? [gap.heapRecoveryPreparation.actionId]
-        : []),
-    ]),
-  );
-  const accessPayoffCampaignSignals = runnerCentralPressureDevelopmentSignals(
-    input,
-    candidates,
-    handDevelopment,
-    runTargets,
-    coverageGaps,
-    strategicIntent,
-    economy,
-  );
-  const shellTradersPipelines = buildRunnerShellTradersPipelineSignals({
-    input,
-    candidates,
-    coverageGaps,
-    handDevelopment,
-    strategicIntent,
-  });
-  const runLockReleaseRoutes = runnerRunLockReleaseRoutes(
-    input,
-    candidates,
-    previous,
-  );
-  const recurringEconomy = runnerRecurringEconomySignals(
-    input,
-    candidates,
-    runTargets,
-    economy,
-    handDevelopment,
-    strategicIntent,
-    (target) => runnerRunHasExactUrgency(input, target),
-    runLockReleaseRoutes,
-  );
-  const recurringEconomyRunDeferralEvidenceCode =
-    runnerRecurringEconomyRunDeferral(recurringEconomy);
-  const resourceLifecycle = runnerResourceLifecycleSignals(
-    input,
-    candidates,
-    (request) => runnerExactFundingRouteContract(input, candidates, request),
-  );
-  const installedAgendaScores = runnerInstalledAgendaScoreSignals(
-    input,
-    candidates,
-    (instanceId) => visibleOwnCardByInstanceId(input, instanceId),
-  );
-  const immediateAgendaPointTerminalWins =
-    runnerImmediateAgendaPointTerminalWinSignals(input, candidates);
-  const immediateAgendaPointDevelopments =
-    runnerImmediateAgendaPointDevelopmentSignals(
+
+  let runOwners: ReturnType<typeof buildRunOwners> | undefined;
+  function buildRunOwners() {
+    const economyReserve = runnerEconomyReserveFacts(input, economy);
+    const defenseHandBuffer = runnerDefenseHandBufferFacts(input, runTargets);
+    const { handSize, damageThreat, minimumHandBuffer } = defenseHandBuffer;
+    const defenseSupport = runnerDefenseSupportSignals(
       input,
       candidates,
-      immediateAgendaPointTerminalWins,
+      handDevelopment,
     );
-  const prospectiveCreditBanks = runnerCreditBankSignals(
-    input,
-    candidates,
-    _deckCapabilities,
-    economy,
-    runTargets,
-    handDevelopment,
-    minimumHandBuffer,
-    {
-      hasExactRunUrgency: (target) => runnerRunHasExactUrgency(input, target),
-      requiredPostRunReserve: (target) =>
-        runnerRunRequiredPostRunReserve(input, candidates, economy, target),
-      terminalVisibleHazardFundingGap: (target) =>
-        runnerTerminalRemoteContestVisibleHazardFundingGap(input, target),
-      isDirectlyMandatoryRun: (target) =>
-        runnerTerminalRemoteContestIsDirectlyMandatory(input, target),
-      terminalKnownPathFundingGap: (target) =>
-        runnerTerminalRemoteLastChanceKnownPathFundingGap(input, target),
-      quoteRunAfterCashout: (target, actionId) => {
-        const fundingCandidate = candidates.find(
-          (candidate) => candidate.actionId === actionId,
-        );
-        return fundingCandidate
-          ? quoteRunnerRunAfterGuaranteedFunding({
-              input,
-              deckCapabilities: _deckCapabilities,
-              fundingCandidate,
-              runActionId: target.actionId,
-              targetServerId: target.targetServerId,
-            })
-          : undefined;
-      },
-      quoteRunAfterCashoutRoute: (target, actionIds) => {
-        const fundingCandidates = actionIds.map((actionId) =>
-          candidates.find((candidate) => candidate.actionId === actionId),
-        );
-        if (fundingCandidates.some((candidate) => candidate === undefined))
-          return undefined;
-        return quoteRunnerRunAfterGuaranteedBankCashouts({
-          input,
-          deckCapabilities: _deckCapabilities,
-          fundingCandidates: fundingCandidates as ActionSemanticCandidate[],
-          runActionId: target.actionId,
-          targetServerId: target.targetServerId,
-        });
-      },
-      developmentFundingRoute: (target) =>
-        runnerSameTurnDevelopmentFundingRoute(input, candidates, target),
-    },
-  );
-  const {
-    defense: baseDefense,
-    forgoUnsafeRunCapacity,
-    runOnlyActionCapacity,
-    confirmedDamageTaxedDrawActionIdSet,
-  } = buildRunnerDefenseSignals({
-    input,
-    candidates,
-    runTargets,
-    strategicIntent,
-    handBuffer: defenseHandBuffer,
-    support: defenseSupport,
-    exactCoverageRecoveryActionIds,
-    forgoTerminalDeckPressureCapacity,
-    discardChoiceBinding,
-    services: {
+    const { defenseSupportAllInstallActionIds } = defenseSupport;
+    const {
+      turnLiquidityFundingNeeds,
+      portfolioReserveFundingNeeds,
+      forgoTerminalDeckPressureCapacity,
+    } = buildRunnerEconomySignals({
+      input,
+      candidates,
+      economy,
+      handDevelopment,
+      previous,
+      currentTurnKey: turnKey(input),
+      reserve: economyReserve,
+      minimumHandBuffer,
       findFundingRoute: (request) =>
         runnerExactFundingRouteContract(input, candidates, request),
-      runCanConvertNow: (target) =>
-        runnerRunTargetCanConvertNow(input, economy, target, candidates),
-    },
-  });
-  const recentSafetyAbort = runnerRecentFutureEncounterDamageSafetyAbort(input);
-  const runFundingNeeds = bestRunTargetsByServer(
-    input,
-    economy,
-    runTargets,
-    candidates,
-  ).flatMap((evaluation) => {
-    const safetyBlocked =
-      recentSafetyAbort?.serverId === evaluation.targetServerId ||
-      forgoUnsafeRunCapacity ||
-      (evaluation.targetKind === "remote" &&
-        runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
-          input,
-          evaluation.targetServerId,
-        ));
-    const support = safetyBlocked
-      ? undefined
-      : runnerRunFundingSupport(
-          input,
-          economy,
-          evaluation,
-          runTargets,
-          candidates,
-        );
-    const bankFunding = support
-      ? prospectiveCreditBanks.find(
-          (bank) =>
-            bank.runFunding?.parentPlanInstanceId ===
-              support.parentPlanInstanceId &&
-            bank.runFunding.needId === support.needId,
-        )?.runFunding
-      : undefined;
-    return support
-      ? [
-          {
-            kind: "parent_plan_support" as const,
-            needId: support.needId,
-            driver: support.driver,
-            targetCredits: support.targetCredits,
-            currentCreditsAtRevalidation: currentCredits,
-            gap: support.gap,
-            priorityClass: support.priorityClass,
-            parentPlanInstanceId: support.parentPlanInstanceId,
-            revalidation: {
-              stateVersion: input.playerView.stateVersion,
-              status: "material_parent_open" as const,
-            },
-            routeActionIds: support.routeActionIds,
-            routeAssessment: support.routeAssessment,
-            evidenceCode: support.evidenceCode,
-            ...(bankFunding
-              ? {
-                  providerModuleId: "runner.credit_bank" as const,
-                  gap: bankFunding.gap,
-                  targetCredits: currentCredits + bankFunding.gap,
-                  routeActionIds: [
-                    bankFunding.routeAssessment.firstStepActionId!,
-                  ],
-                  routeAssessment: bankFunding.routeAssessment,
-                }
-              : {}),
-          },
-        ]
-      : [];
-  });
-  const runLockFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
-    runLockReleaseRoutes.flatMap((route) =>
-      route.supportNeedId && route.fundingGap > 0
-        ? [
-            {
-              kind: "parent_plan_support" as const,
-              needId: route.supportNeedId,
-              driver: {
-                kind: route.serverId.startsWith("remote_")
-                  ? ("contest" as const)
-                  : ("run" as const),
-                targetId: route.serverId,
-                reasonCode: "release_run_lock_for_bound_run_plan",
-              },
-              targetCredits: route.targetCredits,
-              currentCreditsAtRevalidation: currentCredits,
-              gap: route.fundingGap,
-              priorityClass: route.terminal ? ("P2" as const) : ("P4" as const),
-              parentPlanInstanceId: route.parentPlanInstanceId,
-              revalidation: {
-                stateVersion: input.playerView.stateVersion,
-                status: "material_parent_open" as const,
-              },
-              ...runnerExactFundingRouteContract(input, candidates, {
-                demandId: route.supportNeedId,
-                sourcePlanId: route.parentPlanInstanceId,
-                purpose: "foreground_plan",
-                priority: route.terminal
-                  ? "acute_hard_plan_blocker"
-                  : "current_foreground_plan",
-                hardness: "hard",
-                deadline: "end_of_current_turn",
-                targetCredits: route.targetCredits,
-                remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
-                allowStrategicExchange: true,
-                evidence: [
-                  route.projectionEvidenceCode,
-                  "run_lock_release_conversion_click_reserved:1",
-                ],
-              }),
-              evidenceCode: route.projectionEvidenceCode,
-            },
-          ]
-        : [],
+    });
+    const terminalContestThreat = runnerTerminalContestThreat(input);
+    const exactCoverageRecoveryActionIds = new Set(
+      coverageGaps.flatMap((gap) => [
+        ...gap.directSearchActionIds,
+        ...(gap.heapRecoveryPreparation
+          ? [gap.heapRecoveryPreparation.actionId]
+          : []),
+      ]),
     );
-  const resourceLifecycleFundingNeeds = runnerResourceLifecycleFundingNeeds(
-    resourceLifecycle,
-    currentCredits,
-    input.playerView.stateVersion,
-  );
-  const { accessPayoffFundingNeeds, effectiveAccessPayoffCampaignSignals } =
-    buildRunnerCentralPressureFunding({
+    const accessPayoffCampaignSignals = runnerCentralPressureDevelopmentSignals(
       input,
       candidates,
-      accessPayoffCampaignSignals,
-      currentCredits,
-      remainingClicks,
-    });
-  const constrainedRunCandidates =
-    runOnlyActionCapacity && !forgoUnsafeRunCapacity
-      ? bestRunTargetsByServer(input, economy, runTargets, candidates)
-          .filter(
-            (evaluation) =>
-              evaluation.pathPassability === "reachable" &&
-              evaluation.knownAccessState !== "known_no_current_payoff" &&
-              !(
-                evaluation.targetServerId === "archives" &&
-                archivesIsKnownWithoutAgenda(input)
-              ) &&
-              (evaluation.recommendation === "run_now" ||
-                evaluation.recommendation === "run_if_free") &&
-              evaluation.score > 0,
-          )
-          .sort(
-            (left, right) =>
-              right.score - left.score ||
-              left.targetServerId.localeCompare(right.targetServerId) ||
-              left.actionId.localeCompare(right.actionId),
-          )
-          .slice(0, 1)
-          .flatMap((evaluation) => {
-            const candidate = candidates.find(
-              (entry) => entry.actionId === evaluation.actionId,
-            );
-            return candidate
-              ? [
-                  {
-                    candidate,
-                    serverId: evaluation.targetServerId,
-                    marginalValue: evaluation.score,
-                    evidenceCode:
-                      evaluation.evidence[0] ??
-                      "best_restricted_run_capacity_target",
-                  },
-                ]
-              : [];
-          })
-      : [];
-  const baseCentralPressure = buildRunnerCentralPressureSignals({
-    input,
-    candidates,
-    strategicIntent,
-    economy,
-    runTargets,
-    handDevelopment,
-    previous,
-    runLockReleaseRoutes,
-    coverageGaps,
-    damageThreat,
-    recentSafetyAbort,
-    handSize,
-    minimumHandBuffer,
-    forgoUnsafeRunCapacity,
-    constrainedRunCandidates,
-    effectiveAccessPayoffCampaignSignals,
-    activeRunRoot,
-    recurringEconomyRunDeferralEvidenceCode,
-  });
-  const { centralPressure, defense } = bindRunnerCentralSelfTagProtection({
-    input, candidates, runTargets,
-    centralPressure: baseCentralPressure, defense: baseDefense,
-  });
-  const remoteContests = buildRunnerRemoteContestSignals({
-    input,
-    previous,
-    candidates,
-    runTargets,
-    runLockReleaseRoutes,
-    economy,
-    coverageGaps,
-    terminalContestThreat,
-    recentSafetyAbort,
-    damageThreat,
-    forgoUnsafeRunCapacity,
-    constrainedRunCandidates,
-    handDevelopment,
-    recurringEconomyRunDeferralEvidenceCode,
-    activeRunRoot,
-  });
-  const runFundingParents = { centralPressure, remoteContests };
-  const protectedCreditBanks = bindRunnerCreditBankDefenseFunding(
-    input, candidates, defense,
-    reconcileRunnerCreditBankRunFunding(
-      prospectiveCreditBanks, input.playerView.stateVersion, runFundingParents,
-    ),
-  );
-  const coverageBankSupport = bindRunnerCreditBankCoverageFunding(
-    input, candidates, coverageGaps, protectedCreditBanks, handDevelopment,
-  );
-  coverageGaps = coverageBankSupport.coverageGaps;
-  const creditBanks = coverageBankSupport.creditBanks;
-  const preDevelopmentFundingNeeds = uniqueBy(
-    [
-      ...runFundingNeeds.filter((need) =>
-        runnerRunFundingParentHasCurrentNeed(runFundingParents, need),
-      ),
-      ...runLockFundingNeeds.filter(
-        (need) =>
-          need.kind === "parent_plan_support" &&
-          runnerRunFundingParentHasCurrentNeed(runFundingParents, need),
-      ),
-      ...resourceLifecycleFundingNeeds,
-      ...accessPayoffFundingNeeds,
-      ...portfolioReserveFundingNeeds,
-      ...turnLiquidityFundingNeeds,
-    ],
-    (need) => need.needId,
-  );
-  const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
-    input,
-    {
-      fundingNeeds: preDevelopmentFundingNeeds,
-      coverageGaps,
-      defense,
-      resourceLifecycle,
-      centralPressure,
-      remoteContests,
-      developments: [],
-    },
-    candidates,
-    input.playerView.stateVersion,
-  );
-  const rejectedCreditBankActionIds = new Set(
-    creditBanks.flatMap((signal) => signal.rejectedActionIds ?? []),
-  );
-  const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
-    input,
-    candidates,
-    coverageGaps,
-  );
-  const coverageSearchActionIds = new Set(
-    coverageGaps.flatMap((gap) => [
-      ...(gap.directSearchActionIds ?? []),
-      ...(gap.preparationActionIds ?? []),
-      ...(gap.searchEngineSetupActionIds ?? []),
-      ...(gap.drawForAnswerActionIds ?? []),
-      ...(gap.installActionIds ?? []),
-      ...(gap.directSearchChoiceBindings ?? []).map(
-        (binding) => binding.actionId,
-      ),
-    ]),
-  );
-  const { cardDevelopments, developmentFundingNeeds } =
-    buildRunnerCardDevelopmentSignals({
       handDevelopment,
-      effectiveAccessPayoffCampaignSignals,
-      recurringEconomy,
-      candidates,
-      confirmedDamageTaxedDrawActionIdSet,
-      input,
-      coverageOwnedActionIds,
-      coverageGaps,
-      centralPressure,
       runTargets,
-      creditBanks,
-      resourceLifecycle,
-      installedAgendaScores,
-      immediateAgendaPointTerminalWins,
-      immediateAgendaPointDevelopments,
-      shellTradersPipelines,
-      defenseSupportAllInstallActionIds,
-      exposeInformation,
-      delegatedFundingActionIds,
+      coverageGaps,
+      strategicIntent,
       economy,
-      minimumHandBuffer,
-      assessProgramInstallTarget,
-      discardKeepScore,
-      remainingClicks,
-      rejectedCreditBankActionIds,
-      coverageSearchActionIds,
-    });
-  const fundingNeeds = uniqueBy(
-    [...preDevelopmentFundingNeeds, ...developmentFundingNeeds],
-    (need) => need.needId,
-  );
-  const restrictedProgramInstallSequenceDevelopments =
-    runnerRestrictedProgramInstallSequenceSignals(input, candidates, previous);
-  const developments = [
-    ...runnerEventInstallChoiceDevelopmentSignals(input, candidates, previous),
-    ...immediateAgendaPointDevelopments,
-    ...cardDevelopments,
-    ...restrictedProgramInstallSequenceDevelopments,
-    ...runnerProgramSearchStrategyDevelopmentSignals(
+    );
+    const runLockReleaseRoutes = runnerRunLockReleaseRoutes(
       input,
       candidates,
-      strategicIntent,
-      coverageGaps,
+      previous,
+    );
+    const recurringEconomy = runnerRecurringEconomySignals(
+      input,
+      candidates,
+      runTargets,
+      economy,
       handDevelopment,
-    ),
-    ...runnerGenericDrawDevelopmentSignals(
+      strategicIntent,
+      (target) => runnerRunHasExactUrgency(input, target),
+      runLockReleaseRoutes,
+    );
+    const recurringEconomyRunDeferralEvidenceCode =
+      runnerRecurringEconomyRunDeferral(recurringEconomy);
+    const {
+      defense: baseDefense,
+      forgoUnsafeRunCapacity,
+      runOnlyActionCapacity,
+      confirmedDamageTaxedDrawActionIdSet,
+    } = buildRunnerDefenseSignals({
+      input,
+      candidates,
+      runTargets,
+      strategicIntent,
+      handBuffer: defenseHandBuffer,
+      support: defenseSupport,
+      exactCoverageRecoveryActionIds,
+      forgoTerminalDeckPressureCapacity,
+      discardChoiceBinding,
+      services: {
+        findFundingRoute: (request) =>
+          runnerExactFundingRouteContract(input, candidates, request),
+        runCanConvertNow: (target) =>
+          runnerRunTargetCanConvertNow(input, economy, target, candidates),
+      },
+    });
+    const recentSafetyAbort =
+      runnerRecentFutureEncounterDamageSafetyAbort(input);
+    const { accessPayoffFundingNeeds, effectiveAccessPayoffCampaignSignals } =
+      buildRunnerCentralPressureFunding({
+        input,
+        candidates,
+        accessPayoffCampaignSignals,
+        currentCredits,
+        remainingClicks,
+      });
+    const constrainedRunCandidates =
+      runOnlyActionCapacity && !forgoUnsafeRunCapacity
+        ? bestRunTargetsByServer(input, economy, runTargets, candidates)
+            .filter(
+              (evaluation) =>
+                evaluation.pathPassability === "reachable" &&
+                evaluation.knownAccessState !== "known_no_current_payoff" &&
+                !(
+                  evaluation.targetServerId === "archives" &&
+                  archivesIsKnownWithoutAgenda(input)
+                ) &&
+                (evaluation.recommendation === "run_now" ||
+                  evaluation.recommendation === "run_if_free") &&
+                evaluation.score > 0,
+            )
+            .sort(
+              (left, right) =>
+                right.score - left.score ||
+                left.targetServerId.localeCompare(right.targetServerId) ||
+                left.actionId.localeCompare(right.actionId),
+            )
+            .slice(0, 1)
+            .flatMap((evaluation) => {
+              const candidate = candidates.find(
+                (entry) => entry.actionId === evaluation.actionId,
+              );
+              return candidate
+                ? [
+                    {
+                      candidate,
+                      serverId: evaluation.targetServerId,
+                      marginalValue: evaluation.score,
+                      evidenceCode:
+                        evaluation.evidence[0] ??
+                        "best_restricted_run_capacity_target",
+                    },
+                  ]
+                : [];
+            })
+        : [];
+    const baseCentralPressure = buildRunnerCentralPressureSignals({
       input,
       candidates,
       strategicIntent,
-      coverageGaps,
-      handRotationAssessment,
-      liquiditySaturationOptionDevelopment,
       economy,
-    ),
-  ];
-  const { runWindows } = buildRunnerRunWindowSignals({
-    candidates,
-    input,
-    economy,
-    activeRunRoot,
-    runRiskReassessment,
-    runWindowActionAssessments,
-    runTargets,
-  });
-  const coverageGapsWithResidentRequesters =
-    reconcileRunnerCoverageRequesterBindings({
+      runTargets,
+      handDevelopment,
+      previous,
+      runLockReleaseRoutes,
       coverageGaps,
+      damageThreat,
+      recentSafetyAbort,
+      handSize,
+      minimumHandBuffer,
+      forgoUnsafeRunCapacity,
+      constrainedRunCandidates,
+      effectiveAccessPayoffCampaignSignals,
+      activeRunRoot,
+      recurringEconomyRunDeferralEvidenceCode,
+    });
+    const { centralPressure, defense } = bindRunnerCentralSelfTagProtection({
+      input,
+      candidates,
+      runTargets,
+      centralPressure: baseCentralPressure,
+      defense: baseDefense,
+    });
+    const remoteContests = buildRunnerRemoteContestSignals({
+      input,
+      previous,
+      candidates,
+      runTargets,
+      runLockReleaseRoutes,
+      economy,
+      coverageGaps,
+      terminalContestThreat,
+      recentSafetyAbort,
+      damageThreat,
+      forgoUnsafeRunCapacity,
+      constrainedRunCandidates,
+      handDevelopment,
+      recurringEconomyRunDeferralEvidenceCode,
+      activeRunRoot,
+    });
+    return {
       centralPressure,
       remoteContests,
-    });
+      defense,
+      minimumHandBuffer,
+      defenseSupportAllInstallActionIds,
+      effectiveAccessPayoffCampaignSignals,
+      accessPayoffFundingNeeds,
+      recurringEconomy,
+      runLockReleaseRoutes,
+      forgoUnsafeRunCapacity,
+      recentSafetyAbort,
+      confirmedDamageTaxedDrawActionIdSet,
+      turnLiquidityFundingNeeds,
+      portfolioReserveFundingNeeds,
+    };
+  }
+
   return {
-    fundingNeeds,
-    coverageGaps: coverageGapsWithResidentRequesters,
-    creditBanks,
-    recurringEconomy,
-    installedCardLiquidationChoices: installedCardLiquidationChoice
-      ? [installedCardLiquidationChoice]
-      : [],
-    resourceLifecycle,
-    installedAgendaScores,
-    shellTradersPipelines,
-    defense,
-    terminalWins: runnerTerminalWinSignals(
-      input,
-      candidates,
-      immediateAgendaPointTerminalWins,
-    ),
-    centralPressure,
-    remoteContests,
-    developments,
-    exposeInformation: exposeInformation.map((signal) =>
-      structuredClone(signal),
-    ),
-    runWindows,
-    runTargetEvaluations: runTargets.map((evaluation) =>
-      structuredClone(evaluation),
-    ),
+    rawCoverageGaps: projectedCoverageGaps,
+    coverageGapsForRigDemand() {
+      // A gap can supply a parent binding only after the requesting owner
+      // admits that same need in this frame.
+      const gaps = coverageGaps.some((gap) => gap.requesterPlanInstanceId)
+        ? reconcileRunnerCoverageRequesterBindings({
+            coverageGaps,
+            ...(runOwners ??= buildRunOwners()),
+          })
+        : coverageGaps;
+      return bindRunnerCoverageSearchProgramTrashSacrifices(
+        input,
+        { coverageGaps: gaps },
+        assessProgramInstallTarget,
+      ).coverageGaps;
+    },
+    finish(
+      runWindowActionAssessments: NonNullable<
+        RunnerPlanDomain["runWindows"][number]["actionAssessments"]
+      >,
+    ): RunnerPlanDomain {
+      const {
+        centralPressure,
+        remoteContests,
+        defense,
+        minimumHandBuffer,
+        defenseSupportAllInstallActionIds,
+        effectiveAccessPayoffCampaignSignals,
+        accessPayoffFundingNeeds,
+        recurringEconomy,
+        runLockReleaseRoutes,
+        forgoUnsafeRunCapacity,
+        recentSafetyAbort,
+        confirmedDamageTaxedDrawActionIdSet,
+        turnLiquidityFundingNeeds,
+        portfolioReserveFundingNeeds,
+      } = (runOwners ??= buildRunOwners());
+      const handRotationAssessment = assessRunnerHandRotation(
+        input,
+        handDevelopment,
+      );
+      const installedCardLiquidationChoice =
+        runnerInstalledCardLiquidationChoiceSignal(input, candidates);
+      const liquiditySaturationOptionDevelopment =
+        runnerLiquiditySaturationOptionDevelopment(
+          input,
+          Math.max(10, economy.desiredCreditReserve + 3),
+        );
+      const shellTradersPipelines = buildRunnerShellTradersPipelineSignals({
+        input,
+        candidates,
+        coverageGaps,
+        handDevelopment,
+        strategicIntent,
+      });
+      const resourceLifecycle = runnerResourceLifecycleSignals(
+        input,
+        candidates,
+        (request) =>
+          runnerExactFundingRouteContract(input, candidates, request),
+      );
+      const installedAgendaScores = runnerInstalledAgendaScoreSignals(
+        input,
+        candidates,
+        (instanceId) => visibleOwnCardByInstanceId(input, instanceId),
+      );
+      const immediateAgendaPointTerminalWins =
+        runnerImmediateAgendaPointTerminalWinSignals(input, candidates);
+      const immediateAgendaPointDevelopments =
+        runnerImmediateAgendaPointDevelopmentSignals(
+          input,
+          candidates,
+          immediateAgendaPointTerminalWins,
+        );
+      const prospectiveCreditBanks = runnerCreditBankSignals(
+        input,
+        candidates,
+        deckCapabilities,
+        economy,
+        runTargets,
+        handDevelopment,
+        minimumHandBuffer,
+        {
+          hasExactRunUrgency: (target) =>
+            runnerRunHasExactUrgency(input, target),
+          requiredPostRunReserve: (target) =>
+            runnerRunRequiredPostRunReserve(input, candidates, economy, target),
+          terminalVisibleHazardFundingGap: (target) =>
+            runnerTerminalRemoteContestVisibleHazardFundingGap(input, target),
+          isDirectlyMandatoryRun: (target) =>
+            runnerTerminalRemoteContestIsDirectlyMandatory(input, target),
+          terminalKnownPathFundingGap: (target) =>
+            runnerTerminalRemoteLastChanceKnownPathFundingGap(input, target),
+          quoteRunAfterCashout: (target, actionId) => {
+            const fundingCandidate = candidates.find(
+              (candidate) => candidate.actionId === actionId,
+            );
+            return fundingCandidate
+              ? quoteRunnerRunAfterGuaranteedFunding({
+                  input,
+                  deckCapabilities,
+                  fundingCandidate,
+                  runActionId: target.actionId,
+                  targetServerId: target.targetServerId,
+                })
+              : undefined;
+          },
+          quoteRunAfterCashoutRoute: (target, actionIds) => {
+            const fundingCandidates = actionIds.map((actionId) =>
+              candidates.find((candidate) => candidate.actionId === actionId),
+            );
+            if (fundingCandidates.some((candidate) => candidate === undefined))
+              return undefined;
+            return quoteRunnerRunAfterGuaranteedBankCashouts({
+              input,
+              deckCapabilities,
+              fundingCandidates: fundingCandidates as ActionSemanticCandidate[],
+              runActionId: target.actionId,
+              targetServerId: target.targetServerId,
+            });
+          },
+          developmentFundingRoute: (target) =>
+            runnerSameTurnDevelopmentFundingRoute(input, candidates, target),
+        },
+      );
+      const runFundingNeeds = bestRunTargetsByServer(
+        input,
+        economy,
+        runTargets,
+        candidates,
+      ).flatMap((evaluation) => {
+        const safetyBlocked =
+          recentSafetyAbort?.serverId === evaluation.targetServerId ||
+          forgoUnsafeRunCapacity ||
+          (evaluation.targetKind === "remote" &&
+            runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+              input,
+              evaluation.targetServerId,
+            ));
+        const support = safetyBlocked
+          ? undefined
+          : runnerRunFundingSupport(
+              input,
+              economy,
+              evaluation,
+              runTargets,
+              candidates,
+            );
+        const bankFunding = support
+          ? prospectiveCreditBanks.find(
+              (bank) =>
+                bank.runFunding?.parentPlanInstanceId ===
+                  support.parentPlanInstanceId &&
+                bank.runFunding.needId === support.needId,
+            )?.runFunding
+          : undefined;
+        return support
+          ? [
+              {
+                kind: "parent_plan_support" as const,
+                needId: support.needId,
+                driver: support.driver,
+                targetCredits: support.targetCredits,
+                currentCreditsAtRevalidation: currentCredits,
+                gap: support.gap,
+                priorityClass: support.priorityClass,
+                parentPlanInstanceId: support.parentPlanInstanceId,
+                revalidation: {
+                  stateVersion: input.playerView.stateVersion,
+                  status: "material_parent_open" as const,
+                },
+                routeActionIds: support.routeActionIds,
+                routeAssessment: support.routeAssessment,
+                evidenceCode: support.evidenceCode,
+                ...(bankFunding
+                  ? {
+                      providerModuleId: "runner.credit_bank" as const,
+                      gap: bankFunding.gap,
+                      targetCredits: currentCredits + bankFunding.gap,
+                      routeActionIds: [
+                        bankFunding.routeAssessment.firstStepActionId!,
+                      ],
+                      routeAssessment: bankFunding.routeAssessment,
+                    }
+                  : {}),
+              },
+            ]
+          : [];
+      });
+      const runLockFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
+        runLockReleaseRoutes.flatMap((route) =>
+          route.supportNeedId && route.fundingGap > 0
+            ? [
+                {
+                  kind: "parent_plan_support" as const,
+                  needId: route.supportNeedId,
+                  driver: {
+                    kind: route.serverId.startsWith("remote_")
+                      ? ("contest" as const)
+                      : ("run" as const),
+                    targetId: route.serverId,
+                    reasonCode: "release_run_lock_for_bound_run_plan",
+                  },
+                  targetCredits: route.targetCredits,
+                  currentCreditsAtRevalidation: currentCredits,
+                  gap: route.fundingGap,
+                  priorityClass: route.terminal
+                    ? ("P2" as const)
+                    : ("P4" as const),
+                  parentPlanInstanceId: route.parentPlanInstanceId,
+                  revalidation: {
+                    stateVersion: input.playerView.stateVersion,
+                    status: "material_parent_open" as const,
+                  },
+                  ...runnerExactFundingRouteContract(input, candidates, {
+                    demandId: route.supportNeedId,
+                    sourcePlanId: route.parentPlanInstanceId,
+                    purpose: "foreground_plan",
+                    priority: route.terminal
+                      ? "acute_hard_plan_blocker"
+                      : "current_foreground_plan",
+                    hardness: "hard",
+                    deadline: "end_of_current_turn",
+                    targetCredits: route.targetCredits,
+                    remainingClicks: Math.max(
+                      0,
+                      input.playerView.own.clicks - 1,
+                    ),
+                    allowStrategicExchange: true,
+                    evidence: [
+                      route.projectionEvidenceCode,
+                      "run_lock_release_conversion_click_reserved:1",
+                    ],
+                  }),
+                  evidenceCode: route.projectionEvidenceCode,
+                },
+              ]
+            : [],
+        );
+      const resourceLifecycleFundingNeeds = runnerResourceLifecycleFundingNeeds(
+        resourceLifecycle,
+        currentCredits,
+        input.playerView.stateVersion,
+      );
+      const runFundingParents = { centralPressure, remoteContests };
+      const protectedCreditBanks = bindRunnerCreditBankDefenseFunding(
+        input,
+        candidates,
+        defense,
+        reconcileRunnerCreditBankRunFunding(
+          prospectiveCreditBanks,
+          input.playerView.stateVersion,
+          runFundingParents,
+        ),
+      );
+      const coverageBankSupport = bindRunnerCreditBankCoverageFunding(
+        input,
+        candidates,
+        coverageGaps,
+        protectedCreditBanks,
+        handDevelopment,
+      );
+      const { coverageGaps: fundedCoverageGaps, creditBanks } =
+        coverageBankSupport;
+      const preDevelopmentFundingNeeds = uniqueBy(
+        [
+          ...runFundingNeeds.filter((need) =>
+            runnerRunFundingParentHasCurrentNeed(runFundingParents, need),
+          ),
+          ...runLockFundingNeeds.filter(
+            (need) =>
+              need.kind === "parent_plan_support" &&
+              runnerRunFundingParentHasCurrentNeed(runFundingParents, need),
+          ),
+          ...resourceLifecycleFundingNeeds,
+          ...accessPayoffFundingNeeds,
+          ...portfolioReserveFundingNeeds,
+          ...turnLiquidityFundingNeeds,
+        ],
+        (need) => need.needId,
+      );
+      const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
+        input,
+        {
+          fundingNeeds: preDevelopmentFundingNeeds,
+          coverageGaps: fundedCoverageGaps,
+          defense,
+          resourceLifecycle,
+          centralPressure,
+          remoteContests,
+          developments: [],
+        },
+        candidates,
+        input.playerView.stateVersion,
+      );
+      const rejectedCreditBankActionIds = new Set(
+        creditBanks.flatMap((signal) => signal.rejectedActionIds ?? []),
+      );
+      const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
+        input,
+        candidates,
+        fundedCoverageGaps,
+      );
+      const coverageSearchActionIds = new Set(
+        fundedCoverageGaps.flatMap((gap) => [
+          ...(gap.directSearchActionIds ?? []),
+          ...(gap.preparationActionIds ?? []),
+          ...(gap.searchEngineSetupActionIds ?? []),
+          ...(gap.drawForAnswerActionIds ?? []),
+          ...(gap.installActionIds ?? []),
+          ...(gap.directSearchChoiceBindings ?? []).map(
+            (binding) => binding.actionId,
+          ),
+        ]),
+      );
+      const { cardDevelopments, developmentFundingNeeds } =
+        buildRunnerCardDevelopmentSignals({
+          handDevelopment,
+          effectiveAccessPayoffCampaignSignals,
+          recurringEconomy,
+          candidates,
+          confirmedDamageTaxedDrawActionIdSet,
+          input,
+          coverageOwnedActionIds,
+          coverageGaps: fundedCoverageGaps,
+          centralPressure,
+          runTargets,
+          creditBanks,
+          resourceLifecycle,
+          installedAgendaScores,
+          immediateAgendaPointTerminalWins,
+          immediateAgendaPointDevelopments,
+          shellTradersPipelines,
+          defenseSupportAllInstallActionIds,
+          exposeInformation,
+          delegatedFundingActionIds,
+          economy,
+          minimumHandBuffer,
+          assessProgramInstallTarget,
+          discardKeepScore,
+          remainingClicks,
+          rejectedCreditBankActionIds,
+          coverageSearchActionIds,
+        });
+      const fundingNeeds = uniqueBy(
+        [...preDevelopmentFundingNeeds, ...developmentFundingNeeds],
+        (need) => need.needId,
+      );
+      const restrictedProgramInstallSequenceDevelopments =
+        runnerRestrictedProgramInstallSequenceSignals(
+          input,
+          candidates,
+          previous,
+        );
+      const developments = [
+        ...runnerEventInstallChoiceDevelopmentSignals(
+          input,
+          candidates,
+          previous,
+        ),
+        ...immediateAgendaPointDevelopments,
+        ...cardDevelopments,
+        ...restrictedProgramInstallSequenceDevelopments,
+        ...runnerProgramSearchStrategyDevelopmentSignals(
+          input,
+          candidates,
+          strategicIntent,
+          fundedCoverageGaps,
+          handDevelopment,
+        ),
+        ...runnerGenericDrawDevelopmentSignals(
+          input,
+          candidates,
+          strategicIntent,
+          fundedCoverageGaps,
+          handRotationAssessment,
+          liquiditySaturationOptionDevelopment,
+          economy,
+        ),
+      ];
+      const { runWindows } = buildRunnerRunWindowSignals({
+        candidates,
+        input,
+        economy,
+        activeRunRoot,
+        runRiskReassessment,
+        runWindowActionAssessments,
+        runTargets,
+      });
+      const coverageGapsWithResidentRequesters =
+        reconcileRunnerCoverageRequesterBindings({
+          coverageGaps: fundedCoverageGaps,
+          centralPressure,
+          remoteContests,
+        });
+      return {
+        fundingNeeds,
+        coverageGaps: coverageGapsWithResidentRequesters,
+        creditBanks,
+        recurringEconomy,
+        installedCardLiquidationChoices: installedCardLiquidationChoice
+          ? [installedCardLiquidationChoice]
+          : [],
+        resourceLifecycle,
+        installedAgendaScores,
+        shellTradersPipelines,
+        defense,
+        terminalWins: runnerTerminalWinSignals(
+          input,
+          candidates,
+          immediateAgendaPointTerminalWins,
+        ),
+        centralPressure,
+        remoteContests,
+        developments,
+        exposeInformation: exposeInformation.map((signal) =>
+          structuredClone(signal),
+        ),
+        runWindows,
+        runTargetEvaluations: runTargets.map((evaluation) =>
+          structuredClone(evaluation),
+        ),
+      };
+    },
   };
 }
 

@@ -21178,6 +21178,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       liveContext({
         evaluateRunnerHandDevelopment: () => [development],
+        buildRunnerEconomyPosture,
         evaluateRunnerRunTargets,
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
@@ -24239,6 +24240,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     const decision = liveContext({
+      buildRunnerEconomyPosture,
       evaluateRunnerRunTargets,
     }).chooseSemanticRuntimeAction(input, {});
 
@@ -25284,6 +25286,7 @@ describe("authoritative plan-first live runtime", () => {
       recommendation: "do_not_run_now",
     });
     const decision = liveContext({
+      buildRunnerEconomyPosture,
       evaluateRunnerRunTargets,
     }).chooseSemanticRuntimeAction(input, {});
 
