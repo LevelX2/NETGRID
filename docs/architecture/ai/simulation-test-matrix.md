@@ -142,13 +142,35 @@ Das ändert weder den Prüfgegenstand noch behebt es einen Typfehler.
 
 ## Aktuelle offene AI-Gate-Abweichungen
 
-Der vollständige Lauf vom 2026-11-07 umfasst 8.834 Tests in drei festen
-Shards: 8.557 bestehen, 277 scheitern in 134 Dateien. Alle 277 Fälle wurden
-einzeln am unveränderten Ausgangscommit `e4fb1eacf` mit denselben
-Fehlersignaturen reproduziert. Die zuvor roten Strukturprüfungen zur
-Run-Evaluator-Zuständigkeit und zur aktuellen Defense-Funding-Bindung
-bestehen. Das vollständige AI-Gate bleibt wegen der vorhandenen 277
-Abweichungen **rot**.
+Der letzte vollständig grüne AI-Lauf vom 2026-10-31 umfasst 8.525 Tests
+über drei Shards. Der lokale
+[Prüfbericht](../../Berichte/Tests-2026-10-31/pruefbericht.json) dokumentiert
+den tatsächlichen Main-Arbeitsstand einschließlich seiner offenen
+Reparaturen. Das zugehörige `ai-shards.log` ist gegen den im Bericht
+gespeicherten SHA-256 geprüft. Unter anderem die Run-Target-Testdatei,
+die Central-Defense-Allokationstests und der Agenda-Steal-Quote-Testhelfer
+liegen am 2026-11-07 noch mit denselben Inhaltshashes außerhalb des
+committeten Standes vor.
+
+Der vollständige Lauf vom 2026-11-07 mit 8.834 Tests erfolgte dagegen im
+isolierten Worktree auf Basis von `e4fb1eacf` mit KI-07 bis KI-09, **ohne
+die zusätzlichen offenen Main-Reparaturen**: 8.557 bestehen, 277 scheitern
+in 134 Dateien. Diese 277 Fälle sind einzeln am unveränderten
+Ausgangscommit mit denselben Fehlersignaturen reproduziert. Das belegt
+den Vergleich dieser committeten Stände; es ist **keine aktuelle
+Gesamtfehlerzahl des Main-Arbeitsverzeichnisses**.
+
+Eine anschließende Gegenprüfung auf dem tatsächlichen Main vom
+2026-11-07 umfasst fünf zuvor betroffene Testdateien mit 490 Tests:
+482 bestehen, acht scheitern. Vier dieser Dateien mit zusammen 34 zuvor
+roten Fällen bestehen vollständig. Die acht verbleibenden Fälle liegen
+in `runtime/meta-ten-access-and-points-real-engine.test.ts`: Die Suche
+nach einem Standarddeck mit `onr_v1_090_hot-tip-for-wns` liefert kein
+Deck; der Zugriff auf `standardDeckId` scheitert bereits beim Testaufbau
+vor dem KI-Aufruf. Ein erneuter vollständiger Lauf auf dem aktuellen
+Main-Arbeitsstand wurde nicht ausgeführt. Seine Gesamtfehlerzahl ist
+damit noch nicht neu bestimmt; mindestens diese acht Testfehler sind
+direkt auf Main belegt.
 
 Die fokussierte Abnahme der Owner-, Quote- und Faktenpfade umfasst 101
 bestandene Tests. Paketgrenzen, KI-Struktur, Hint-Verträge, generische
@@ -162,3 +184,10 @@ diese 101 Prüfungen, den betreffenden Typecheck sowie Paket- und KI-Gates.
 In 53 Engine-Szenarien bleiben Action, Ziele, Choices, Root, Executor und
 Route gegenüber dem jeweiligen Ausgangsstand unverändert. Das belegt den
 Strukturumbau und seine konkrete Verdrahtung, keine globale Spielstärke.
+
+Jede Gate-Aussage benennt Commit und zusätzliche Arbeitsdateien des
+geprüften Standes. Ein aus `HEAD` erzeugter Worktree enthält offene
+Main-Änderungen nicht automatisch. Vor einem Vergleich sind relevante
+Reparaturen über Inhaltsnachweise einem vollständigen Prüfstand
+zuzuordnen; ein Gegenlauf auf demselben alten Commit ersetzt diese
+Abgrenzung nicht.
