@@ -152,6 +152,7 @@ export type TurnPlanExecutionLease = {
   currentBinding: CurrentLegalActionBinding;
   actionType: string;
   expectationId: string;
+  engineSelectionKey?: string;
 };
 
 export type TurnPlanRematerialization =
@@ -194,6 +195,7 @@ export type TurnPlanExecutionReceipt = {
   stateIdentityAfter: PlanningStateIdentity;
   outcomeCodes: string[];
   materialOutcomeDeviation?: boolean;
+  observationBoundary?: "engine_randomized_selection";
   urgentInterrupt?: boolean;
 };
 
@@ -607,6 +609,9 @@ export function advanceTurnPlanCommitment(
       "urgent_interrupt",
     );
   }
+  const randomizedBoundary =
+    receipt.observationBoundary === "engine_randomized_selection" &&
+    !receipt.materialOutcomeDeviation;
   const expectedCodes = node.expectation.expectedStateDeltaCodes;
   const outcomeMatches =
     !receipt.materialOutcomeDeviation &&
@@ -614,7 +619,7 @@ export function advanceTurnPlanCommitment(
     (node.expectation.expectedNextPlanningFingerprint === undefined ||
       node.expectation.expectedNextPlanningFingerprint ===
         receipt.stateIdentityAfter.sideSafePlanningFingerprint);
-  if (!outcomeMatches) {
+  if (!outcomeMatches && !randomizedBoundary) {
     return continuationReplan(
       commitment,
       "material_outcome_deviation",
@@ -624,7 +629,7 @@ export function advanceTurnPlanCommitment(
   commitment.lastValidatedStateIdentity = structuredClone(
     receipt.stateIdentityAfter,
   );
-  if (node.boundaryAfter) {
+  if (node.boundaryAfter || randomizedBoundary) {
     commitment.status = "awaiting_observation";
     commitment.observationClass = "scheduled_information_boundary";
     commitment.replanReason = "scheduled_information_boundary";

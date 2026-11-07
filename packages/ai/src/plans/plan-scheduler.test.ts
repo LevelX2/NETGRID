@@ -1,5 +1,15 @@
-import type { AiDecisionInput, Side } from "@netgrid/shared";
-import { applyAction, createGame, getLegalActions } from "@netgrid/engine";
+import {
+  ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+  type AiDecisionInput,
+  type Side,
+} from "@netgrid/shared";
+import {
+  applyAction,
+  applyRandomizedTurnPlanSelection,
+  createGame,
+  getLegalActions,
+  quoteRandomizedTurnPlanSelection,
+} from "@netgrid/engine";
 import { describe, expect, it, vi } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -30,6 +40,7 @@ import {
   type PlanSchedulerContext,
 } from "./plan-scheduler";
 import { prepareRunnerTurnPlanner } from "./runner-turn-planner-shadow";
+import { turnPlanEngineSelectionKey } from "./turn-planning-contracts";
 
 describe("shared plan scheduler", () => {
   it("reserves the EndTurn exception for the game-rule action", () => {
@@ -351,6 +362,72 @@ describe("shared plan scheduler", () => {
     expect(
       resolveTurnPlannerCutover({ ...otherAction, portfolio }).replanReason,
     ).toBe("material_outcome_deviation");
+    const actions = getLegalActions(before, "corp");
+    const quoted = quoteRandomizedTurnPlanSelection(before, {
+      schemaVersion: ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+      matchId: before.matchId,
+      side: "corp",
+      stateVersion: before.stateVersion,
+      timingPoint: before.timingPoint,
+      opportunityKey: "cutover:test-observed-branch",
+      candidates: (["gain_credit", "draw_card"] as const).map((type) => ({
+        familyKey: type,
+        lineId: `line:${type}`,
+        actionId: actions.find((action) => action.type === type)!.actionId,
+        weight: 1,
+      })),
+    });
+    if (!quoted.ok) throw new Error(quoted.error.message);
+    const command = {
+      kind: "engine_randomized_turn_plan_selection" as const,
+      quote: quoted.quote,
+    };
+    const randomized = applyRandomizedTurnPlanSelection(before, command);
+    if (!randomized.ok) throw new Error(randomized.error.message);
+    const technicalHead = turnPlannerFixture(
+      "corp",
+      randomized.receipt.selectedLegalAction.type === "draw_card"
+        ? "gain_credit"
+        : "draw_card",
+      undefined,
+      inputFor(before),
+    );
+    const bound = resolveTurnPlannerCutover(technicalHead);
+    expect(bound.lease.currentBinding.actionId).not.toBe(
+      randomized.receipt.selectedLegalAction.actionId,
+    );
+    const randomizedInput = turnPlannerFixture(
+      "corp",
+      "gain_credit",
+      undefined,
+      inputFor(randomized.state),
+    );
+    const randomizedPortfolio = {
+      ...technicalHead.portfolio,
+      turnPlanCommitment: bound.commitment,
+      turnPlanExecutionLease: {
+        ...bound.lease,
+        engineSelectionKey: turnPlanEngineSelectionKey(command),
+      },
+    };
+    expect(
+      resolvePreparedTurnPlannerCutover({
+        ...randomizedInput,
+        portfolio: randomizedPortfolio,
+      }).replanReason,
+    ).toBe("scheduled_information_boundary");
+    randomizedPortfolio.turnPlanExecutionLease.engineSelectionKey =
+      turnPlanEngineSelectionKey({
+        ...command,
+        quote: { ...command.quote, opportunityKey: "cutover:another-request" },
+      });
+    expect(
+      resolvePreparedTurnPlannerCutover({
+        ...randomizedInput,
+        portfolio: randomizedPortfolio,
+      }).replanReason,
+    ).toBe("material_outcome_deviation");
+
     const { observedTurnPlanAction, ...withoutObservation } = matching.input;
     expect(
       resolveTurnPlannerCutover({

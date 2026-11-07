@@ -90,6 +90,10 @@ export type CanonicalChoiceBinding = {
 };
 
 /** Actor-private projection of one successfully applied Engine action. */
+export type TurnPlanEngineSelectionCommand = NonNullable<
+  AiDecision["engineCommand"]
+>;
+
 export type ObservedTurnPlanAction = {
   matchId: string;
   side: Side;
@@ -100,7 +104,29 @@ export type ObservedTurnPlanAction = {
   source: LegalAction["source"];
   boundChoices: CanonicalChoiceBinding[];
   selectedTargets?: Readonly<Record<string, string>>;
+  engineSelectionKey?: string;
 };
+
+export function turnPlanEngineSelectionKey(
+  command: TurnPlanEngineSelectionCommand,
+): string {
+  const { quote } = command;
+  return canonicalTurnPlanningSerialize({
+    kind: command.kind,
+    schemaVersion: quote.schemaVersion,
+    matchId: quote.matchId,
+    side: quote.side,
+    stateVersion: quote.stateVersion,
+    timingPoint: quote.timingPoint,
+    candidateFingerprint: quote.candidateFingerprint,
+    ...("opportunityKey" in quote
+      ? { opportunityKey: quote.opportunityKey }
+      : { planStepId: quote.planStepId }),
+    ...("choiceId" in quote
+      ? { choiceId: quote.choiceId, actionId: quote.actionId }
+      : {}),
+  });
+}
 
 export function bindTurnPlanChoices(
   action: LegalAction,

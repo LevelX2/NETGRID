@@ -253,12 +253,20 @@ function continueResidentCommitment(params: TurnPlannerCutoverContext & {
       return { kind: "replan", reason: "commitment_contract_invalid" };
     }
     const observed = params.input.observedTurnPlanAction;
-    const outcomeMatches =
+    const transitionMatches =
       observed !== undefined &&
       observed.matchId === params.input.matchId &&
       observed.side === commitment.side &&
       observed.stateVersionBefore === pendingLease.stateIdentity.stateVersion &&
-      observed.stateVersionAfter === params.stateIdentity.stateVersion &&
+      observed.stateVersionAfter === params.stateIdentity.stateVersion;
+    const randomizedBoundary =
+      transitionMatches &&
+      pendingLease.engineSelectionKey !== undefined &&
+      pendingLease.engineSelectionKey === observed.engineSelectionKey;
+    const outcomeMatches =
+      transitionMatches &&
+      observed.engineSelectionKey === undefined &&
+      pendingLease.engineSelectionKey === undefined &&
       observed.actionId === pendingLease.currentBinding.actionId &&
       observed.actionType === pendingLease.actionType &&
       (!currentNode.invocation.sourceCardInstanceId ||
@@ -286,7 +294,10 @@ function continueResidentCommitment(params: TurnPlannerCutoverContext & {
       outcomeCodes: observed
         ? [engineActionOutcomeCode(observed.actionType)]
         : [],
-      materialOutcomeDeviation: !outcomeMatches,
+      materialOutcomeDeviation: !outcomeMatches && !randomizedBoundary,
+      ...(randomizedBoundary
+        ? { observationBoundary: "engine_randomized_selection" as const }
+        : {}),
     });
     commitment = advanced.commitment;
     if (advanced.replanReason) {

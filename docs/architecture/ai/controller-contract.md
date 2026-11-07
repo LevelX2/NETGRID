@@ -135,10 +135,12 @@ Trace-/Replay-Evidence werden dadurch nicht gelöscht.
 Server und Simulation projizieren aus dem letzten erfolgreichen Engine-Event
 einen aktorseitigen Ausführungsbeleg. Die Projektion bindet Partie, Seite,
 beide Zustandsversionen, die ausgeführte Action und ihre Auswahlwerte.
-Bei Engine-Zufall bestätigt das actor-private Receipt die gezogene Variante
-aus der exakten Kandidatenmenge. Die KI schreibt ihr Commitment fort, wenn
-der Beleg zum ausstehenden Step passt. Eine Abweichung löst die Revalidierung
-am aktuellen Engine-Zustand aus.
+Bei Engine-Zufall bindet die ausstehende Lease den ausgegebenen Quote.
+Das aktorprivate Receipt bestätigt die gezogene Variante aus genau dieser
+Kandidatenmenge. Ein bestätigter Zufallsschritt bildet eine Beobachtungsgrenze
+für die Planung. Reguläre Aktionen schreiben das Commitment anhand des
+gebundenen Steps fort. Eine Abweichung führt zur Revalidierung am aktuellen
+Engine-Zustand.
 
 Der Produktsimulator verwendet den in seiner `decisionId` gebundenen
 `simulationScopeId` als Owner des Prozessgedächtnisses. Nach der Deckprüfung

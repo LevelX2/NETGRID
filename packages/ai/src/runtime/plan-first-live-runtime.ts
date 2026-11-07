@@ -180,6 +180,7 @@ import {
   buildCanonicalLegalActionInvocation,
   buildPlanningStateIdentity,
   buildSemanticActionSetFingerprint,
+  turnPlanEngineSelectionKey,
   turnPlanningFingerprint,
 } from "../plans/turn-planning-contracts";
 import {
@@ -852,6 +853,12 @@ export function choosePlanFirstLiveAction(
     options,
     turnPlanningDebug,
   );
+  if (result.lane === "plan" && decision.engineCommand) {
+    const lease = result.portfolio.turnPlanExecutionLease;
+    if (lease?.stateIdentity.stateVersion === input.playerView.stateVersion) {
+      lease.engineSelectionKey = turnPlanEngineSelectionKey(decision.engineCommand);
+    }
+  }
   bindSelectedRunnerCoverageSearchChoiceContinuation(
     input,
     result,

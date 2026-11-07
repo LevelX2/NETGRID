@@ -1,9 +1,6 @@
 import type {
-  EngineRandomizedIceInstallSelectionCommand,
   EngineRandomizedIceInstallSelectionReceipt,
-  EngineRandomizedTraceBidSelectionCommand,
   EngineRandomizedTraceBidSelectionReceipt,
-  EngineRandomizedTurnPlanSelectionCommand,
   EngineRandomizedTurnPlanSelectionReceipt,
   GameEvent,
   LegalAction,
@@ -13,13 +10,10 @@ import type {
 import {
   bindTurnPlanChoices,
   canonicalTurnPlanningSerialize,
+  turnPlanEngineSelectionKey,
   type ObservedTurnPlanAction,
+  type TurnPlanEngineSelectionCommand,
 } from "../plans/turn-planning-contracts";
-
-type RandomizedCommand =
-  | EngineRandomizedTurnPlanSelectionCommand
-  | EngineRandomizedIceInstallSelectionCommand
-  | EngineRandomizedTraceBidSelectionCommand;
 
 type RandomizedReceipt =
   | EngineRandomizedTurnPlanSelectionReceipt
@@ -45,7 +39,7 @@ export function observeTurnPlanAction(params: {
   const legalAction = privatePayload?.legalAction as LegalAction | undefined;
   const command = privatePayload?.action as
     | PlayerAction
-    | RandomizedCommand
+    | TurnPlanEngineSelectionCommand
     | undefined;
   if (
     !legalAction ||
@@ -85,6 +79,9 @@ export function observeTurnPlanAction(params: {
     actionType: legalAction.type,
     source: legalAction.source,
     boundChoices,
+    ...("kind" in command
+      ? { engineSelectionKey: turnPlanEngineSelectionKey(command) }
+      : {}),
     ...(applied.selectedTargets
       ? { selectedTargets: { ...applied.selectedTargets } }
       : {}),
@@ -92,7 +89,7 @@ export function observeTurnPlanAction(params: {
 }
 
 function randomizedAppliedAction(
-  command: RandomizedCommand,
+  command: TurnPlanEngineSelectionCommand,
   privatePayload: Readonly<Record<string, unknown>>,
   binding: Pick<
     ObservedTurnPlanAction,
@@ -162,7 +159,7 @@ function randomizedAppliedAction(
 }
 
 function randomizedReceipt(
-  command: RandomizedCommand,
+  command: TurnPlanEngineSelectionCommand,
   privatePayload: Readonly<Record<string, unknown>>,
 ): RandomizedReceipt | undefined {
   switch (command.kind) {
