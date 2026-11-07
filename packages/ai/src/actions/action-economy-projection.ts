@@ -110,6 +110,7 @@ export function actionEconomyProjectionFor(
     action.payload?.hostedCreditTakeAmount,
   );
   const runnerDrawProjection = runnerDrawProjectionFor(action);
+  const topHeapReturn = runnerTopHeapReturnStatus(candidate, action);
   const corpZoneTransition = corpZoneTransitionProjectionStatus(
     candidate,
     action,
@@ -149,7 +150,7 @@ export function actionEconomyProjectionFor(
   const netHandDelta =
     corpZoneProjection?.netHqDelta ??
     runnerDrawProjection?.projectedNetHandDelta ??
-    cardsDrawn - cardsConsumed;
+    (topHeapReturn === "guaranteed" ? 1 : cardsDrawn - cardsConsumed);
   const drawPileCardsConsumed =
     corpZoneProjection?.grossDrawCount ?? (cardsDrawn > 0 ? cardsDrawn : 0);
   const drawPileCardsReplenished = corpZoneProjection
@@ -160,6 +161,7 @@ export function actionEconomyProjectionFor(
   const netDrawPileDelta = drawPileCardsReplenished - drawPileCardsConsumed;
   const source =
     corpZoneTransition.status === "guaranteed" ||
+    topHeapReturn === "guaranteed" ||
     rootRezOutcome.status === "guaranteed_positive" ||
     rootRezOutcome.status === "runner_interruptible" ||
     rootRezOutcome.status === "nonpositive" ||
@@ -181,7 +183,7 @@ export function actionEconomyProjectionFor(
   const timing =
     grossLiquidCreditGain !== undefined
       ? "immediate"
-      : cardsDrawn > 0
+      : cardsDrawn > 0 || topHeapReturn === "guaranteed"
         ? "immediate"
         : storedCreditsAdded !== undefined
           ? "setup"
@@ -233,11 +235,15 @@ export function actionEconomyProjectionFor(
     ...(corpZoneTransition.status !== "not_applicable"
       ? [`corp_zone_transition:${corpZoneTransition.status}`]
       : []),
+    ...(topHeapReturn !== "not_applicable"
+      ? [`runner_top_heap_return:${topHeapReturn}`]
+      : []),
   ];
 
   const reliability =
     corpZoneTransition.status === "terminal_deckout" ||
-    corpZoneTransition.status === "malformed"
+    corpZoneTransition.status === "malformed" ||
+    topHeapReturn === "malformed"
       ? ("unknown" as const)
       : rootRezOutcome.status === "runner_interruptible"
         ? ("conditional" as const)
@@ -251,6 +257,7 @@ export function actionEconomyProjectionFor(
   const confidence =
     corpZoneTransition.status === "terminal_deckout" ||
     corpZoneTransition.status === "malformed" ||
+    topHeapReturn === "malformed" ||
     rootRezOutcome.status === "missing" ||
     rootRezOutcome.status === "malformed"
       ? ("none" as const)
@@ -304,6 +311,7 @@ export function actionEconomyProjectionFor(
     source:
       corpZoneTransition.status === "terminal_deckout" ||
       corpZoneTransition.status === "malformed" ||
+      topHeapReturn === "malformed" ||
       rootRezOutcome.status === "missing" ||
       rootRezOutcome.status === "malformed"
         ? "unknown"
@@ -311,6 +319,41 @@ export function actionEconomyProjectionFor(
     confidence,
     evidence,
   };
+}
+
+/** The Engine binds this public one-card transfer before offering the action. */
+function runnerTopHeapReturnStatus(
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+): "not_applicable" | "malformed" | "guaranteed" {
+  const payload = action.payload;
+  if (payload?.cardImplementationEffectKind !== "move_top_trash_to_grip")
+    return "not_applicable";
+  const source = candidate.sourceCardInstanceId;
+  const target = payload.targetCardId;
+  const topTarget = payload.cardImplementationTopTrashTargetId;
+  return candidate.actorSide === "runner" &&
+    action.side === "runner" &&
+    candidate.actionType === "activated_card_ability" &&
+    action.type === candidate.actionType &&
+    candidate.actionId === action.actionId &&
+    candidate.stateVersion === action.expiresAtStateVersion &&
+    typeof source === "string" &&
+    source.length > 0 &&
+    action.source === source &&
+    payload.cardId === source &&
+    action.abilityRef?.sourceCardInstanceId === source &&
+    payload.cardImplementationCapabilityBindingKind ===
+      "card_spec_capability_key" &&
+    typeof payload.cardImplementationAbilityId === "string" &&
+    payload.cardImplementationAbilityId === action.abilityRef.sourceAbilityId &&
+    typeof target === "string" &&
+    target.length > 0 &&
+    target !== source &&
+    (topTarget === undefined || topTarget === target) &&
+    (action.choiceRequirements?.length ?? 0) === 0
+    ? "guaranteed"
+    : "malformed";
 }
 
 export function corpZoneTransitionProjectionStatus(

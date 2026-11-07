@@ -518,6 +518,13 @@ aktuelle Payload-Fakten beziehungsweise der exakt gebundene Basisdrawvertrag
 autorisieren diese Änderung. Credit-Projektion und spätere Planwahl erhalten
 dadurch keine zusätzliche Autorität.
 
+Die aktuell vom Engine-Angebot exakt an Quelle und Ziel gebundene öffentliche
+Rückgabe der obersten Heapkarte erhöht ebenfalls den Handbestand um eins.
+Sie ist kein Draw, verbraucht keine Stackkarte und erzeugt kein Einkommen.
+Die bestehende Hand-/Cleanup-Projektion übernimmt diesen Fact auch am letzten
+Klick; eine noch offene Such- oder Zielwahl zertifiziert keine fertige Rückgabe.
+Nicht unterstützte Folgeprojektion bleibt weiterhin eine Replan-Grenze.
+
 Bekannte Agenda-Punktkosten bleiben Teil der exakten Ressourcenprojektion.
 Der Frame übernimmt ausschließlich den eigenen aktuellen Punktestand; ein
 zertifizierter Schritt zieht seinen endlichen `agendaPointCost` ab. Die
