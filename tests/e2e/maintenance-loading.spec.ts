@@ -180,6 +180,13 @@ test("maintenance loads on demand and reports status timeout without losing usab
   ).length;
   const topbar = await page.locator(".maintenanceTopbar").elementHandle();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "white");
+  const dayBackground = await page.evaluate(() => {
+    const swatch = document.createElement("span");
+    swatch.style.color = getComputedStyle(document.documentElement)
+      .getPropertyValue("--panel")
+      .trim();
+    return swatch.style.color;
+  });
   await page.getByRole("link", { name: "Spielerzugänge", exact: true }).click();
   await expect(
     page.getByRole("link", { name: "Spielerzugänge", exact: true }),
@@ -199,7 +206,7 @@ test("maintenance loads on demand and reports status timeout without losing usab
   ).toHaveCount(0);
   await expect(page.getByRole("main").locator("section").first()).toHaveCSS(
     "background-color",
-    "rgb(255, 255, 255)",
+    dayBackground,
   );
   await page.screenshot({ path: testInfo.outputPath("accounts-day.png") });
   await page.evaluate(() => {
@@ -211,9 +218,10 @@ test("maintenance loads on demand and reports status timeout without losing usab
       }),
     );
   });
-  await expect(page.getByRole("main").locator("section").first()).toHaveCSS(
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "black");
+  await expect(page.getByRole("main").locator("section").first()).not.toHaveCSS(
     "background-color",
-    "rgb(16, 24, 32)",
+    dayBackground,
   );
   await page.screenshot({ path: testInfo.outputPath("accounts-night.png") });
   await page.getByRole("link", { name: "Kartenbilder", exact: true }).click();

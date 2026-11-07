@@ -296,8 +296,20 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await expectActiveBoardBasics(page);
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await exerciseCardDisplayModes(page);
-    await page.getByTestId("server-run-action").first().click();
-    await expect(page.getByTestId("run-timeline")).toContainText("Run auf");
+    const runAction = page.getByTestId("server-run-action").first();
+    const targetId = await runAction.getAttribute("data-server-id");
+    const target = page.locator(
+      `[data-testid="server"][data-server-id="${targetId}"]`,
+    );
+    const targetLabel = await target
+      .locator(".serverContextButton")
+      .first()
+      .textContent();
+    await runAction.click();
+    await expect(
+      page.getByTestId("run-timeline").locator(".runTimelineTitle > span"),
+    ).toHaveText(targetLabel!);
+    await expect(target).toHaveClass(/activeRunTarget/);
     await expect(page.locator(".activeRunTarget")).toHaveCount(1);
     await expectNoCriticalLayoutOverflow(page);
     await expectNoDomOrLocalStorageLeaks(page);
@@ -322,8 +334,20 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
         .click();
     }
     await exerciseCardDisplayModes(page);
-    await page.getByTestId("server-run-action").first().click();
-    await expect(page.getByTestId("run-timeline")).toContainText("Run auf");
+    const runAction = page.getByTestId("server-run-action").first();
+    const targetId = await runAction.getAttribute("data-server-id");
+    const target = page.locator(
+      `[data-testid="server"][data-server-id="${targetId}"]`,
+    );
+    const targetLabel = await target
+      .locator(".serverContextButton")
+      .first()
+      .textContent();
+    await runAction.click();
+    await expect(
+      page.getByTestId("run-timeline").locator(".runTimelineTitle > span"),
+    ).toHaveText(targetLabel!);
+    await expect(target).toHaveClass(/activeRunTarget/);
     await expectNoCriticalLayoutOverflow(page);
     await expectNoDomOrLocalStorageLeaks(page);
     await saveFlowScreenshot(page, testInfo, "narrow-active-board-run");

@@ -4,6 +4,21 @@ import {
   sanitizeAiDecisionDebug,
 } from "@netgrid/shared";
 
+export function aiAgendaLineFamilyLabel(
+  family: NonNullable<
+    NonNullable<AiPlanFirstDecisionDebug["turnPlanning"]>["agendaComparison"]
+  >["lines"][number]["family"],
+): string {
+  const labels: Record<typeof family, string> = {
+    pure_rush: "Reiner Rush",
+    combined_rush: "Kombinierter Rush",
+    score_continuation: "Score fortsetzen",
+    safe_setup: "Sicherer Aufbau",
+    fund_setup: "Finanzierungsaufbau",
+  };
+  return labels[family];
+}
+
 export function parseAiPlanFirstDecisionDebug(
   value: unknown,
 ): AiPlanFirstDecisionDebug | undefined {

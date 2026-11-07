@@ -62,6 +62,10 @@
     }
   },
   "Settings": {
+    "matchRules": {
+      "fixedForMatch": "Chosen at match start. Remains unchanged for the entire game.",
+      "unavailable": "Trace rule is missing from the match data."
+    },
     "title": "Options",
     "subtitle": "Display, cues, and audio",
     "tabs": {

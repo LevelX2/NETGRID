@@ -528,6 +528,13 @@ describe("fort pass window", () => {
       positionKind: "ice",
       positionIceIndex: 1,
     });
+    // Relocation actions include real Engine rez projections. Every installed
+    // card inspected by that projection must belong to the canonical registry.
+    state.cardInstances.target_root!.definitionId =
+      "onr_v1_189_artificial-security-directors";
+    state.cardInstances.target_root!.rezzed = false;
+    state.cardInstances.ice_inner!.definitionId = "onr_v1_237_data-wall";
+    state.cardInstances.hq_ice!.definitionId = "onr_v1_237_data-wall";
     state.corp.servers.push({
       id: "remote_1",
       kind: "remote",

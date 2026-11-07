@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  aiAgendaLineFamilyLabel,
   aiPlanFirstDispositionSummary,
   aiPlanFirstPriorityLabel,
   aiPlanFirstQuoteStatusLabel,
@@ -11,6 +12,16 @@ import {
 } from "./ai-plan-first-decision-ui";
 
 describe("plan-first AI decision display", () => {
+  it.each([
+    ["pure_rush", "Reiner Rush"],
+    ["combined_rush", "Kombinierter Rush"],
+    ["score_continuation", "Score fortsetzen"],
+    ["safe_setup", "Sicherer Aufbau"],
+    ["fund_setup", "Finanzierungsaufbau"],
+  ] as const)("labels the current agenda family %s", (family, label) => {
+    expect(aiAgendaLineFamilyLabel(family)).toBe(label);
+  });
+
   it("parses the authoritative Root/Leaf/Step/LegalAction contract", () => {
     const decision = parseAiPlanFirstDecisionDebug(planDecision());
 

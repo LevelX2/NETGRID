@@ -62,6 +62,10 @@
     }
   },
   "Settings": {
+    "matchRules": {
+      "fixedForMatch": "Beim Spielstart festgelegt. Gilt unverändert für die gesamte Partie.",
+      "unavailable": "Trace-Regel fehlt in den Spieldaten."
+    },
     "title": "Optionen",
     "subtitle": "Darstellung, Hinweise und Audio",
     "tabs": {

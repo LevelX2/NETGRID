@@ -24,6 +24,7 @@ import {
 import { aiTurnPlanComparison } from "../../app/ai-turn-plan-comparison-ui";
 import { serializeAiPlanFirstDecisionVisibleJsonExport } from "../../app/ai-plan-first-decision-export";
 import {
+  aiAgendaLineFamilyLabel,
   aiPlanFirstDispositionSummary,
   aiPlanFirstIntentFitLabel,
   aiPlanFirstPriorityLabel,
@@ -1396,15 +1397,6 @@ function aiShellTradersPlanRows(
       value("runner_shell_traders_coverage:") ?? "kein akuter Gap gebunden",
     ],
   ];
-}
-
-function aiAgendaLineFamilyLabel(
-  family: "pure_rush" | "combined_rush" | "safe_setup" | "fund_setup",
-): string {
-  if (family === "pure_rush") return "Reiner Rush";
-  if (family === "combined_rush") return "Kombinierter Rush";
-  if (family === "fund_setup") return "Finanzierungsaufbau";
-  return "Sicherer Aufbau";
 }
 
 function aiDefenseLineDispositionLabel(

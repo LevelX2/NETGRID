@@ -253,6 +253,10 @@ import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
 import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
+import {
+  fetchJoinCardPool,
+  JoinCardPoolError,
+} from "../features/match-start/join-card-pool";
 import { AppRuntimeStatus } from "../features/app-shell/AppRuntimeStatus";
 import { userErrorMessageKey } from "../i18n/presentation";
 import {
@@ -682,6 +686,23 @@ export default function Page() {
   const [joinLinkInput, setJoinLinkInput] = useState("");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
+  const [joinCardPoolState, setJoinCardPoolState] = useState<
+    | ({
+        matchId: string;
+        token: string;
+      } & (
+        | { cardPool: ApiMatchCardPool }
+        | { error: { owner: string; code: string } }
+      ))
+    | null
+  >(null);
+  const joinCardPool =
+    joinCardPoolState &&
+    "cardPool" in joinCardPoolState &&
+    joinCardPoolState.matchId === joinMatchId.trim() &&
+    joinCardPoolState.token === joinToken.trim()
+      ? joinCardPoolState.cardPool
+      : undefined;
   const [isPublic, setIsPublic] = useState(true);
   const [openLanMatches, setOpenLanMatches] = useState<PublicMatchEntry[]>([]);
   const [openLanLoading, setOpenLanLoading] = useState(false);
@@ -1125,6 +1146,42 @@ export default function Page() {
   useEffect(() => {
     lobbyRef.current = lobby;
   }, [lobby]);
+
+  useEffect(() => {
+    // The pool is immutable for this invitation, including after leaving its lobby.
+    if (mode !== "join" || session || joinCardPool !== undefined) return;
+    const matchId = joinMatchId.trim();
+    const token = joinToken.trim();
+    setJoinCardPoolState(null);
+    if (!matchId) return;
+    setNotice("");
+    const controller = new AbortController();
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void fetchJoinCardPool(matchId, token, controller.signal)
+        .then((cardPool) => {
+          if (!cancelled) setJoinCardPoolState({ matchId, token, cardPool });
+        })
+        .catch((error: unknown) => {
+          if (cancelled) return;
+          const code =
+            error instanceof JoinCardPoolError
+              ? error.code
+              : "join_info_request_failed";
+          setJoinCardPoolState({
+            matchId,
+            token,
+            error: { owner: "match_join_info", code },
+          });
+          setNotice(localizedUserError({ code }));
+        });
+    }, 150);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [mode, session?.matchId, joinMatchId, joinToken, joinCardPool]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -2053,17 +2110,20 @@ export default function Page() {
     : undefined;
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
+  const selectionCardPool = mode === "join" ? joinCardPool : matchCardPool;
   const runnerSnapshots = deckSnapshots.filter(
     (snapshot) =>
+      selectionCardPool !== undefined &&
       snapshot.side === "runner" &&
       snapshot.validation.ok &&
-      snapshotAllowedForMatchCardPool(snapshot, matchCardPool),
+      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool),
   );
   const corpSnapshots = deckSnapshots.filter(
     (snapshot) =>
+      selectionCardPool !== undefined &&
       snapshot.side === "corp" &&
       snapshot.validation.ok &&
-      snapshotAllowedForMatchCardPool(snapshot, matchCardPool),
+      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool),
   );
   const runnerDeckSlotSnapshots = attachStandardDeckGuides(
     runnerSnapshots,
@@ -2073,8 +2133,10 @@ export default function Page() {
     corpSnapshots,
     standardDecks,
   );
-  const matchStartLocalDecks = localDecks.filter((deck) =>
-    editableDeckAllowedForMatchCardPool(deck, matchCardPool),
+  const matchStartLocalDecks = localDecks.filter(
+    (deck) =>
+      selectionCardPool !== undefined &&
+      editableDeckAllowedForMatchCardPool(deck, selectionCardPool),
   );
   const defaultCorpSnapshot =
     corpSnapshots.find(
@@ -2583,6 +2645,7 @@ export default function Page() {
     joinTokenTrimmed.length === 0 &&
     openLanJoinableIds.has(joinMatchIdTrimmed);
   const canSubmitJoin =
+    joinCardPool !== undefined &&
     joinMatchIdTrimmed.length > 0 &&
     (joinTokenTrimmed.length > 0 || canJoinViaOpenLan);
   const visibleDeckMetadataEntries =
@@ -3464,11 +3527,12 @@ export default function Page() {
     const runnerSnapshotIds = new Set(
       runnerSnapshots.map((snapshot) => snapshot.deckSnapshotId),
     );
-    if (!runnerSnapshotIds.has(selectedRunnerSnapshotId))
+    if (mode !== "join" && !runnerSnapshotIds.has(selectedRunnerSnapshotId))
       setSelectedRunnerSnapshotId(firstRunnerSnapshotId);
     if (!runnerSnapshotIds.has(selectedParticipantBRunnerSnapshotId))
       setSelectedParticipantBRunnerSnapshotId(firstRunnerSnapshotId);
   }, [
+    mode,
     runnerSnapshots,
     selectedRunnerSnapshotId,
     selectedParticipantBRunnerSnapshotId,
@@ -3480,11 +3544,12 @@ export default function Page() {
     const corpSnapshotIds = new Set(
       corpSnapshots.map((snapshot) => snapshot.deckSnapshotId),
     );
-    if (!corpSnapshotIds.has(selectedCorpSnapshotId))
+    if (mode !== "join" && !corpSnapshotIds.has(selectedCorpSnapshotId))
       setSelectedCorpSnapshotId(firstCorpSnapshotId);
     if (!corpSnapshotIds.has(selectedParticipantBCorpSnapshotId))
       setSelectedParticipantBCorpSnapshotId(firstCorpSnapshotId);
   }, [
+    mode,
     corpSnapshots,
     selectedCorpSnapshotId,
     selectedParticipantBCorpSnapshotId,
@@ -4552,7 +4617,11 @@ export default function Page() {
   const updateJoinLinkInput = (value: string) => {
     setJoinLinkInput(value);
     const parsed = parseJoinLinkInput(value);
-    if (!parsed) return;
+    if (!parsed) {
+      setJoinMatchId("");
+      setJoinToken("");
+      return;
+    }
     setJoinMatchId(parsed.matchId);
     setJoinToken(parsed.joinToken);
   };
@@ -6072,6 +6141,8 @@ export default function Page() {
   async function validateDeckForMatch(
     deck: EditableDeck,
   ): Promise<DeckSnapshot> {
+    if (selectionCardPool === undefined)
+      throw new JoinCardPoolError("join_info_card_pool_missing");
     if (accountSession.account) {
       const current = accountDeckRecords.find(
         (record) => record.cloudDeckId === deck.deckId,
@@ -6091,7 +6162,7 @@ export default function Page() {
     const result = await fetch("/api/decks/validate", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ deck, matchCardPool }),
+      body: JSON.stringify({ deck, matchCardPool: selectionCardPool }),
     }).then((response) => response.json() as Promise<DeckValidationResponse>);
     if (result.error) throw new Error(result.error.message);
     if (!result.validation.ok || !result.snapshot) {
@@ -7746,6 +7817,7 @@ export default function Page() {
                     cuePosition,
                     aiPacingMode: localAiPacingMode,
                     session,
+                    matchView: activeView,
                     onActionCueAutoDismissMs: setActionCueAutoDismissMs,
                     onActionCueDisplayMode: setActionCueDisplayMode,
                     onActionCuesEnabled: setActionCuesEnabled,
@@ -7938,6 +8010,7 @@ export default function Page() {
                     aiPacingMode={localAiPacingMode}
                     modal
                     session={session}
+                    matchView={activeView}
                     onActionCueAutoDismissMs={setActionCueAutoDismissMs}
                     onActionCueDisplayMode={setActionCueDisplayMode}
                     onActionCuesEnabled={setActionCuesEnabled}

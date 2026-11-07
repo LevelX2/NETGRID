@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "use-intl/react";
+import type { PlayerView } from "@netgrid/shared";
 
 import type { SessionInfo } from "../../app/session-recovery";
 import { normalizeAppLocale } from "../../i18n/locale";
@@ -83,6 +84,7 @@ export function OptionsPanel({
   aiPacingMode,
   modal = false,
   session = null,
+  matchView,
   onActionCueAutoDismissMs,
   onActionCueDisplayMode,
   onActionCuesEnabled,
@@ -152,6 +154,7 @@ export function OptionsPanel({
   aiPacingMode: AiPacingMode;
   modal?: boolean;
   session?: SessionInfo | null;
+  matchView?: Pick<PlayerView, "traceRulesProfile">;
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
   onActionCueDisplayMode(value: CueDisplayMode): void;
   onActionCuesEnabled(value: boolean): void;
@@ -374,6 +377,7 @@ export function OptionsPanel({
           </>
         ) : (
           <>
+            {matchView ? <MatchRulesSettings view={matchView} /> : null}
             {session ? (
               <SessionAccessSettings
                 session={session}
@@ -387,6 +391,31 @@ export function OptionsPanel({
         )}
       </div>
     </section>
+  );
+}
+
+function MatchRulesSettings({
+  view,
+}: {
+  view: Pick<PlayerView, "traceRulesProfile">;
+}) {
+  const t = useTranslations("Settings.matchRules");
+  const startT = useTranslations("MatchStart.advanced");
+  const profileLabels = {
+    modern_open: startT("trace.modern"),
+    classic_blind: startT("trace.classic"),
+    classic_blind_corp_ties: startT("trace.classicCorpTies"),
+  };
+  return (
+    <div className="sessionAccessSettings">
+      <span className="settingsTitle">{startT("traceRule")}</span>
+      <p>
+        {view.traceRulesProfile
+          ? profileLabels[view.traceRulesProfile]
+          : t("unavailable")}
+      </p>
+      <p className="settingsHelp">{t("fixedForMatch")}</p>
+    </div>
   );
 }
 

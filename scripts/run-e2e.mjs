@@ -43,6 +43,13 @@ const browserPairEnvironment =
         })();
 const started = [];
 
+const typecheckResult = await run(
+  corepackCommand,
+  [...corepackPrefix, "pnpm", "typecheck:e2e"],
+  {},
+);
+if (typecheckResult !== 0) process.exit(typecheckResult);
+
 const serverPort = await freePort();
 const webPort = await freePort();
 const serverUrl = `http://127.0.0.1:${serverPort}`;

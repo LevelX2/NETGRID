@@ -4970,6 +4970,8 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       (action) =>
         action.type === "rez_card" && action.payload?.cardId === vaporId,
     );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    expect(state.timingPoint).toBe("run.encounter_ice");
     const beforePayment = structuredClone(state);
     state = apply(
       state,

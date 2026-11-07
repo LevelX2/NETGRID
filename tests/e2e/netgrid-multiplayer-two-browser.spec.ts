@@ -45,7 +45,8 @@ test.describe("Zwei-Browser-Multiplayer", () => {
       );
 
       await readyAndWaitForActive(pair.host, pair.joiner);
-      await clickAction(pair.joiner, "mandatory_draw");
+      // Mandatory draw is advanced by the UI; the first voluntary action is
+      // the stable boundary for synchronisation and undo.
       await clickAction(pair.joiner, "gain_credit");
       await expectCredits(pair.joiner, "corp", 6);
       await expectCredits(pair.host, "corp", 6);
@@ -162,10 +163,6 @@ test.describe("Zwei-Browser-Multiplayer", () => {
   });
 
   test("überträgt den freigegebenen Classic-/Proteus-Deckpool an den Joiner", async () => {
-    test.fail(
-      true,
-      "Bekannter Fehler: Der erste Joiner sieht trotz Host-Freigabe nur Originalset-Decks.",
-    );
     const pair = await launchMultiplayerBrowserPair();
     try {
       const joinUrl = await createHumanVsHumanSeriesLobby(

@@ -2108,7 +2108,12 @@ export class MultiplayerService {
     matchId: string,
     token?: string,
   ): Promise<
-    | { matchId: string; status: MatchStatus; availableSide?: Side }
+    | {
+        matchId: string;
+        status: MatchStatus;
+        availableSide?: Side;
+        cardPool?: MatchCardPool;
+      }
     | SafeErrorPayload
   > {
     const record = await this.mustLoad(matchId);
@@ -2117,17 +2122,28 @@ export class MultiplayerService {
         "not_found",
         "Dieses private Match ist nicht verfügbar.",
       );
-    if (!token) return { matchId, status: record.match.status };
-    const tokenRecord = this.findToken(record, token, "join");
-    if (!tokenRecord)
+    const tokenRecord = this.resolveJoinTokenForJoinInput(record, token);
+    if (!tokenRecord) {
+      if (!token?.trim()) return { matchId, status: record.match.status };
       return safeError(
         "invalid_token",
         "Der Join-Link ist nicht gültig oder abgelaufen.",
       );
+    }
+    const cardPool = record.match.settings.cardPool;
+    if (cardPool === undefined)
+      return {
+        ...safeError(
+          "server_operation_failed",
+          "Die Match-Freigabe ist nicht verfügbar.",
+        ),
+        diagnosticCode: "join_info_card_pool_missing",
+      };
     return {
       matchId,
       status: record.match.status,
       availableSide: tokenRecord.allowedSide,
+      cardPool,
     };
   }
 

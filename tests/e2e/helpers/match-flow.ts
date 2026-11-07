@@ -164,6 +164,16 @@ export async function joinHumanVsHumanLobby(
     ).toBeAttached();
   }
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
+  if (options.expectedRunnerDeckOption) {
+    const selector = page.getByLabel("Dein Runner-Deck");
+    const option = selector
+      .locator("option")
+      .filter({ hasText: options.expectedRunnerDeckOption })
+      .first();
+    const snapshotId = await option.getAttribute("value");
+    expect(snapshotId).not.toBeNull();
+    await selector.selectOption(snapshotId!);
+  }
   await expect(page.getByTestId("join-link-input")).toHaveValue(/joinToken=/);
   await page.getByTestId("join-match").click();
   if (options.expectedDestination === "active") {
