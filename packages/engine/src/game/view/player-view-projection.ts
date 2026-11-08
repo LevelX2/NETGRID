@@ -335,7 +335,7 @@ export function buildPlayerViewProjection(
               ),
             }
           : {}),
-        ...(runnerSide && state.run.secretSpendGuessRunAutoPassIceId
+        ...(state.run.secretSpendGuessRunAutoPassIceId
           ? {
               pendingAutoPassIceId: state.run.secretSpendGuessRunAutoPassIceId,
             }

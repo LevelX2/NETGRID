@@ -24,7 +24,6 @@ import {
   runnerTargetedBypassPlanCommitment,
   type RunnerTargetedBypassChoiceContinuation,
 } from "../runner/run-window/runner-targeted-bypass-plan";
-import { socialEngineeringCorpGuessAmount } from "./bid-choice-option";
 import { bindSelectedRunnerTargetedBypassChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
@@ -107,7 +106,7 @@ describe("Runner targeted-bypass plan admission", () => {
       icePosition: 0,
       visibleIceInstanceId: "hq-wall",
       intendedHiddenAmount: 2,
-      expectedCorpGuessAmount: 3,
+      guessOutcome: "opponent_choice_unobserved",
     });
   });
 
@@ -178,11 +177,7 @@ describe("Runner targeted-bypass plan admission", () => {
 });
 
 describe("Runner targeted-bypass resident continuation", () => {
-  it("uses the shared Corp-guess policy and materializes the exact planned hide and ICE choices", () => {
-    expect(socialEngineeringCorpGuessAmount("easy", 4)).toBe(2);
-    expect(socialEngineeringCorpGuessAmount("normal", 4)).toBe(3);
-    expect(socialEngineeringCorpGuessAmount("hard", 4)).toBe(4);
-
+  it("keeps the Corp guess unobserved and materializes the exact planned hide and ICE choices", () => {
     const continuation = targetedContinuation();
     rememberContinuation(continuation);
     const hideInput = choiceInput(11, {
@@ -552,7 +547,7 @@ function targetedContinuation(): RunnerTargetedBypassChoiceContinuation {
     icePosition: 1,
     visibleIceInstanceId: "hq-wall",
     intendedHiddenAmount: 2,
-    expectedCorpGuessAmount: 3,
+    guessOutcome: "opponent_choice_unobserved",
     evidenceCodes: ["runner_targeted_bypass_preflight:complete"],
   };
 }

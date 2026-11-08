@@ -5,7 +5,6 @@ import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../../visible-run-analysis";
-import { socialEngineeringCorpGuessAmount } from "../../runtime/bid-choice-option";
 import { runnerActionRequiresTargetedIceTrashPlan } from "../../runtime/runner-targeted-ice-trash-plan";
 import { runnerAgendaStealCreditRequirement } from "../../run-analysis/runner-agenda-steal-cost";
 
@@ -23,7 +22,7 @@ export type RunnerTargetedBypassCommitment = {
   icePosition: number;
   visibleIceInstanceId: string;
   intendedHiddenAmount: number;
-  expectedCorpGuessAmount: number;
+  guessOutcome: "opponent_choice_unobserved";
   evidenceCodes: string[];
 };
 
@@ -100,15 +99,10 @@ export function runnerTargetedBypassPlanCommitment(params: {
     0,
     input.playerView.own.credits - Math.max(0, eventCreditCost),
   );
-  const expectedCorpGuessAmount = socialEngineeringCorpGuessAmount(
-    input.difficulty,
-    projectedCredits,
-  );
-  const intendedHiddenAmount = Array.from(
-    { length: Math.max(0, projectedCredits - 1) },
-    (_unused, index) => index + 2,
-  ).find((amount) => amount !== expectedCorpGuessAmount);
-  if (intendedHiddenAmount === undefined) return undefined;
+  // A sole legal hidden amount is trivially guessable. With several amounts
+  // the opponent response remains unobserved; reserve the smallest full loss.
+  if (projectedCredits < 3) return undefined;
+  const intendedHiddenAmount = 2;
   const rig = input.playerView.own.rig ?? [];
   const routes = params.planTargets.flatMap((target) => {
     if (target.payoffValue < 120) return [];
@@ -204,7 +198,7 @@ export function runnerTargetedBypassPlanCommitment(params: {
             icePosition,
             visibleIceInstanceId: ice.instanceId,
             intendedHiddenAmount,
-            expectedCorpGuessAmount,
+            guessOutcome: "opponent_choice_unobserved" as const,
             evidenceCodes: [
               "runner_targeted_bypass_preflight:complete",
               `runner_targeted_bypass_owner:${target.ownerModuleId}`,
@@ -214,7 +208,7 @@ export function runnerTargetedBypassPlanCommitment(params: {
               `runner_targeted_bypass_guaranteed_savings:${guaranteedVisibleBreakSavings}`,
               `runner_targeted_bypass_required_savings:${minimumMaterialSavings}`,
               `runner_targeted_bypass_hidden_amount:${intendedHiddenAmount}`,
-              `runner_targeted_bypass_expected_guess:${expectedCorpGuessAmount}`,
+              "runner_targeted_bypass_guess_outcome:opponent_choice_unobserved",
               `runner_targeted_bypass_remaining_path_cost:${remainingPath.visibleBreakCost ?? 0}`,
               `runner_targeted_bypass_route_net_value:${routeNetValue}`,
             ],

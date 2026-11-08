@@ -1998,6 +1998,18 @@ Randomisierte Play-Style-Variation darf nur an ausdrücklich freigegebenen,
 nahezu gleichwertigen Stellen und über den deterministischen Match-RNG
 erfolgen.
 
+Für die verpflichtende Corp-Geheimwahl nach einer fremden gezielten
+Bypass-Vorbereitung sind auf normal und schwer die vollständig angebotenen
+Ratewerte gleichgewichtete aktuelle Same-Step-Resolutionen. Die feste Policy
+`uniform_access_denial_v1` maximiert die schlechteste Trefferchance ohne
+Annahme über den verborgenen Betrag. Der vorhandene atomare Betragswahl-Command
+führt dafür den Assessment-Zweig `secret_guess`; die Engine revalidiert
+Actor, Choice, Step und die vollständige Optionsmenge vor genau einem Draw in
+`ai_turn_plan_selection`. Quote und Preview verbrauchen keinen Zufall.
+Ein einzelner legaler Ratewert benötigt keinen Draw. Ohne den gebundenen
+Engine-Provider scheitert die nichttriviale Auswahl sichtbar; der Resolver
+besitzt keine Ersatzwahl. Einfach behält seine ausdrücklich feste Wahl.
+
 Für `corp.defend_servers` ist eine solche Stelle ausschließlich dann gegeben,
 wenn mehrere konkrete `ICE × Server`-Routen:
 

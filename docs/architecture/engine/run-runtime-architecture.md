@@ -200,6 +200,19 @@ ihnen aber nicht zurückimportiert.
   Breaker behalten dadurch ihre Prevention- und Replaybindung; ein zulässiges
   Tracegebot darf nicht erst beim anschließenden Programmtrash zurückgewiesen
   werden. Die Action ist am Trace-Runende ein Pflichtargument.
+- Die atomare Betragswahl akzeptiert nach Abschluss des Versteckens den
+  expliziten Assessment-Zweig `secret_guess` für die Corp. Die vollständige
+  legale Ratewertmenge wird gleichgewichtet Engine-validiert. Der verborgene
+  Betrag beeinflusst weder Quote noch Draw; erst die normale Choice-Auflösung
+  vergleicht ihn mit der gezogenen Antwort. Das private Receipt und der Replay
+  erhalten den Draw aus `ai_turn_plan_selection`; Spielwürfel und Shuffle
+  behalten ihren eigenen unveränderten Zufallszähler.
+- `PlayerView.run.pendingAutoPassIceId` erhält für beide Seiten die nach
+  Abschluss der Zielwahl öffentlich gebundene ICE, die automatisch passiert
+  wird. Der zuvor geheime Creditbetrag und fremde private Zonen bleiben davon
+  getrennt. Die KI-DTO-Grenze erhält die Bindung. Corp-Defense darf aus der
+  übersprungenen Begegnung weder Zugriffsschutz noch Breakkosten ableiten;
+  ein unabhängig gequoteter sofortiger Rez-Ertrag behält seine Zulassung.
 - `PlayerView.run.accessServerOverride` erhält für beide Seiten den öffentlich
   aufgelösten abweichenden Zugriff des aktiven Runs. Der physische
   `attackedServerId` und die ICE-Position bleiben eigenständig. Fehlt der

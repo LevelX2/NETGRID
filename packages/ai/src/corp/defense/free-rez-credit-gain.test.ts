@@ -64,6 +64,19 @@ function routeFor(input: AiDecisionInput) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 describe("Engine-certified costless ICE credit gain under Defense", () => {
+  it("keeps an independent quoted on-rez income when its encounter is bypassed [component]", () => {
+    const input = inputFor(capture().states.singleIce);
+    const action = normalRez(input);
+    if (!input.playerView.run) throw new Error("Missing native run");
+    // Explicit public projection companion; the saved native fixture remains unchanged.
+    input.playerView.run.pendingAutoPassIceId = action.source;
+    expect(routeFor(input)).toMatchObject({
+      routeKind: "costless_immediate_credit_gain",
+      immediateCorpCreditGain: 3,
+      effect: "progress",
+    });
+  });
+
   it.each(["zeroBank", "singleIce"])(
     "chooses and applies the native %s income rez without claiming an ETR",
     (key) => {

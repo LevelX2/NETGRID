@@ -1,11 +1,8 @@
 import {
   applyAction,
-  applyRandomizedIceInstallSelection,
   createGame,
   getPlayerView,
   hashState,
-  quoteCorpPunishRoute,
-  quoteRandomizedIceInstallSelection,
   replayEvents,
 } from "@netgrid/engine";
 import {
@@ -61,6 +58,10 @@ import {
   simulationRuntimeFailureToken,
   type AiSimulationRuntimeFailure,
 } from "./ai-simulation-runtime-failure";
+import {
+  simulationEngineRuntimeOptions,
+  applySimulationEngineSelection,
+} from "./engine-selection";
 import { metricsFor } from "./simulation-quality-adapters";
 import { SOAK_SEEDS } from "./soak-seed-data";
 
@@ -352,10 +353,7 @@ export function createAiGameSimulator(
             ...config,
             aiDecisionRuntimeOptions: {
               ...config.aiDecisionRuntimeOptions,
-              quoteCorpPunishRoute: (request) =>
-                quoteCorpPunishRoute(state, request),
-              quoteRandomizedIceInstallSelection: (request) =>
-                quoteRandomizedIceInstallSelection(state, request),
+              ...simulationEngineRuntimeOptions(state),
             },
           },
           simulationRng,
@@ -370,15 +368,14 @@ export function createAiGameSimulator(
         errors.push(simulationRuntimeFailureToken(failure));
         break;
       }
-      const randomizedResult =
-        decision.selectionKind === "engine_randomized_ice_install_selection"
-          ? applyRandomizedIceInstallSelection(state, {
-              ...decision.engineCommand,
-              idempotencyKey: `ai-sim-${index}`,
-            })
-          : undefined;
+      const randomizedResult = applySimulationEngineSelection(
+        state,
+        decision,
+        `ai-sim-${index}`,
+      );
       const action =
-        decision.selectionKind === "engine_randomized_ice_install_selection"
+        decision.selectionKind === "engine_randomized_ice_install_selection" ||
+        decision.selectionKind === "engine_randomized_trace_bid_selection"
           ? randomizedResult?.ok
             ? randomizedResult.receipt.selectedLegalAction
             : undefined
@@ -389,7 +386,7 @@ export function createAiGameSimulator(
         const failure = classifiedSimulationRuntimeFailure({
           code:
             randomizedResult && !randomizedResult.ok
-              ? `engine_apply_randomized_ice_install_selection_rejected:${randomizedResult.error.code}`
+              ? `engine_apply_${decision.selectionKind}_rejected:${randomizedResult.error.code}`
               : "simulation_selected_action_not_legal",
           owner: randomizedResult ? "rules_contract" : "scheduler",
           side,

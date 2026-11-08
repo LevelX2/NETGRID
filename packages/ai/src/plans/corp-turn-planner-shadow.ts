@@ -15,6 +15,7 @@ import type {
 } from "../action-semantic-candidate-types";
 
 import { corpHostedBankTurnPlanningQuote } from "../corp/economy/hosted-credit-bank-turn-planning";
+import { corpDefensePlanningSignals } from "../corp/defense/defense-plan-module";
 import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import { currentCorpCreditObligation } from "./corp-credit-obligation";
 import { scoreMilestoneBoundary } from "../corp/score/score-milestone-boundary";
@@ -172,7 +173,11 @@ export function prepareCorpTurnPlanner(params: {
   const defenseSlice = domain
     ? buildCorpDefenseTurnPlanningSlice({
         input,
-        defenseNeeds: domain.defenseNeeds,
+        defenseNeeds: corpDefensePlanningSignals(
+          params.context,
+          domain.defenseNeeds,
+          domain.centralDefenseAllocation,
+        ),
         economyNeeds: domain.economyNeeds,
         candidates: params.context.actionCandidates,
         stateIdentity,

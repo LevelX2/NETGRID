@@ -161,6 +161,27 @@ export function projectExactCorpIceRezRoute(params: {
     quote,
     totalRezCredits,
   });
+  // The chosen ICE is public after target resolution. Its skipped encounter
+  // cannot block access or charge a breaker; an independent on-rez payoff
+  // still keeps its own Engine-certified admission below.
+  if (
+    input.playerView.run?.attackedServerId === targetServerId &&
+    input.playerView.run.pendingAutoPassIceId === sourceCard.instanceId
+  ) {
+    return immediateCorpCreditGain === undefined
+      ? undefined
+      : {
+          actionId: candidate.actionId,
+          sourceCardInstanceId: sourceCard.instanceId,
+          sourceDefinitionId: sourceCard.definitionId!,
+          targetServerId,
+          quote,
+          routeKind: "costless_immediate_credit_gain",
+          immediateCorpCreditGain,
+          effect: "progress",
+          totalRezCredits,
+        };
+  }
   const traceQuotes = sourceCard.currentTraceIceRezQuotes?.filter(
     (q) => q.actionId === candidate.actionId,
   );

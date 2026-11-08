@@ -627,7 +627,9 @@ export function buildCorpDefenseNeeds({
                 value: 0,
                 evidenceCode: exactIceRezRoute
                   ? `corp_ice_rez_preserves_score_reserve_required:${scoreReserveAdmission?.requiredCreditsAfterRez ?? "unknown"}:opportunity:${scoreReserveAdmission?.opportunity.reason}:protected_servers:${scoreReserveAdmission?.opportunity.claims.map((c) => `${c.serverId}=${c.credits}`).join(",")}:unknown:${scoreReserveAdmission?.opportunity.unknownServerIds.join(",")}`
-                  : "corp_ice_rez_resource_exchange_unknown",
+                  : input.playerView.run?.pendingAutoPassIceId === targetId
+                    ? "corp_ice_rez_current_encounter_automatically_passed"
+                    : "corp_ice_rez_resource_exchange_unknown",
               },
             ];
           }

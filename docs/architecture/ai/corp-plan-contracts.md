@@ -1233,6 +1233,12 @@ Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
 
+Native Defense-Zuglinien verwenden dieselbe aktuelle zentrale
+Allokationszulassung wie Discovery und Materialisierung. Eine zusätzliche
+Variantenbildung darf ein vom Owner ausgeschlossenes Zentralziel nicht wieder
+als gleichwertigen Head aufnehmen. Echte Nahgleichstände und nicht aktuell
+ausführbare Zielbindungen behalten ihre bestehenden Gegenfälle.
+
 Eine begrenzte Archives→HQ-Route gehört ebenfalls zu diesem Owner:
 `archives-agenda-relocation.ts` bindet eine einzelne eigene Agenda, deren
 Diebstahl den Runner gewinnen ließe, aus offenen Archives an eine aktuell
@@ -2982,6 +2988,16 @@ Eine globale Counter-Pool-Karte erreicht damit den bestehenden vorbereitenden
 Punish-Root und seinen materialisierten Step, aber weder liquide Credits noch eine
 garantierte spätere Trace- oder Lethal-Quote. Score-Slot-Reservierungen und
 Finanzierungsgrenzen bleiben Teil derselben Zulassungsprüfung.
+
+Eine aktuell ausführbare, Engine-gequotete materielle Handzerstörung gegen
+einen bereits getaggten Runner beansprucht bei garantierter oder nur von der
+Runnerantwort abhängiger Wirkung P3 als auslaufende Konversion.
+Dieser Anspruch bleibt am Punish-Root und wird an dessen exakten
+Ausführungsschritt delegiert. Vor der Tag-Erzeugung bleibt eine nichttödliche
+Schadensvorbereitung P4; geringer Chip-Schaden bleibt P5. Terminale Routen
+behalten ihren strengeren Nachweis. Gewöhnlicher Score-Support darf das
+aktuelle Konversionsfenster nicht allein durch eine alte Prioritätsbindung
+verdrängen.
 
 Die ausgewählte Route ist variabel. Sie verwendet nur so viele aktuell
 vorhandene Komponenten, wie nach Runner-Handzahl und sichtbarer Prävention

@@ -1368,8 +1368,8 @@ function selectedDefensePortfolioBand(
         // path cannot displace a same-band, exact central-defense route.
         (scoreProtectionRoute.signal.kind ===
           "score_protection_staging_install" &&
-           scoreProtectionRoute.signal.developmentRisk !==
-             "unmodeled_access_path")) &&
+          scoreProtectionRoute.signal.developmentRisk !==
+            "unmodeled_access_path")) &&
         defensePriorityRank(
           scoreProtectionRoute.signal.delegatedPriorityClass,
         ) === defensePriorityRank(genericPriority)))
@@ -1475,6 +1475,29 @@ function selectedGenericDefensePortfolioBand(
     candidates: [],
     supportable: false,
   };
+}
+
+export function corpDefensePlanningSignals(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  allocation: CorpCentralDefenseAllocation | undefined,
+): readonly CorpDefenseSignal[] {
+  const allocated = new Set(
+    allocatedCentralPlacementSignals(
+      context,
+      urgentDefenseBand(
+        context,
+        signals.filter(
+          (signal): signal is CorpGenericDefenseSignal =>
+            signal.kind === "generic",
+        ),
+      ),
+      allocation,
+    ),
+  );
+  return signals.filter(
+    (signal) => signal.kind !== "generic" || allocated.has(signal),
+  );
 }
 
 function allocatedCentralPlacementSignals(

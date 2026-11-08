@@ -18,7 +18,7 @@ export type CorpPunishCampaignSignal = {
   guarantee: GuaranteeLevel;
   terminalCondition?: "runner_flatline" | "runner_deckout";
   visibleTerminalProjection: boolean;
-  priorityClass?: "P4" | "P5";
+  priorityClass?: "P3" | "P4" | "P5";
   value: number;
   evidenceCode: string;
   evidenceCodes?: string[];

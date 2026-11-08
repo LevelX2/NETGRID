@@ -155,6 +155,59 @@ describe("runnerDamageThreatAssessment", () => {
     );
   });
 
+  it.each([2, 3])(
+    "prepares for observed operation punishment at %i public Corp credits",
+    (credits) => {
+      const current = input({
+        handCount: 3,
+        stateVersion: 14,
+        events: [
+          event("seen-scorched", 10, {
+            actor: "runner",
+            actionType: "access_card",
+            cardDefinitionId: "onr_v1_302_scorched-earth",
+          }),
+          event("seen-urban", 12, {
+            actor: "runner",
+            actionType: "access_card",
+            cardDefinitionId: "onr_v1_307_urban-renewal",
+          }),
+        ],
+      });
+      current.playerView.activeSide = "runner";
+      current.playerView.opponent.credits = credits;
+      expect(runnerDamageThreatAssessment(current).flatlineRisk).toMatchObject({
+        level: credits >= 3 ? "critical" : "suspected",
+        recommendedHandFloor: credits >= 3 ? 4 : 2,
+      });
+    },
+  );
+
+  it("does not claim an upcoming operation when the observed opponent hand is empty", () => {
+    const current = input({
+      handCount: 3,
+      stateVersion: 14,
+      opponentHandCount: 0,
+      events: [
+        event("seen-scorched", 10, {
+          actor: "runner",
+          actionType: "access_card",
+          cardDefinitionId: "onr_v1_302_scorched-earth",
+        }),
+        event("seen-urban", 12, {
+          actor: "runner",
+          actionType: "access_card",
+          cardDefinitionId: "onr_v1_307_urban-renewal",
+        }),
+      ],
+    });
+    current.playerView.activeSide = "runner";
+    current.playerView.opponent.credits = 20;
+    expect(
+      runnerDamageThreatAssessment(current).flatlineRisk.recommendedHandFloor,
+    ).toBe(2);
+  });
+
   it("keeps four cards against a confirmed tagged punish threat", () => {
     const current = input({
       handCount: 3,

@@ -1,5 +1,6 @@
 import {
   ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION,
+  type AiTurnPlanRandomDrawRecord,
   type ApplyActionOptions,
   type EngineError,
   type EngineRandomizedTraceBidCandidate,
@@ -14,7 +15,7 @@ import {
 import { buildApplyAction, type ApplyActionCoreHost } from "./apply-action";
 import { cloneGameStateForAction } from "./apply-action-state";
 import { getLegalActions } from "./legal-actions";
-import { nextRandom } from "./state/draw-random";
+import { deterministicNumber, nextRandom } from "./state/draw-random";
 
 let defaultHost: ApplyActionCoreHost | undefined;
 
@@ -108,8 +109,47 @@ export function quoteRandomizedTraceBidSelection(
     }
   }
   const assessment = request.assessment;
+  if (!assessment || typeof assessment !== "object") {
+    return fail("ERR_INVALID_TARGET", "Die Bewertung der Betragswahl fehlt.");
+  }
   const rationalRange = [candidates[0]!.bid, candidates.at(-1)!.bid] as const;
-  if (
+  if ("kind" in assessment) {
+    if (
+      assessment.kind !== "secret_guess" ||
+      assessment.policy !== "uniform_access_denial_v1" ||
+      request.side !== "corp" ||
+      !choice.source.startsWith(
+        "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:",
+      ) ||
+      choice.source.split(":")[1] !==
+        state.secretSpendGuessRunSecret?.sourceCardId ||
+      assessment.minimumGuess !== 2 ||
+      assessment.maximumGuess !== state.runner.credits ||
+      candidates.length !== choice.options.length ||
+      candidates.length !== assessment.maximumGuess - 1 ||
+      candidates.some(
+        (candidate, index) =>
+          candidate.bid !== index + 2 ||
+          candidate.weight !== 1 ||
+          candidate.utility !== 1,
+      ) ||
+      !Number.isSafeInteger(state.aiTurnPlanRandomCounter) ||
+      state.aiTurnPlanRandomCounter! < 0 ||
+      state.aiTurnPlanRandomCounter! >= Number.MAX_SAFE_INTEGER ||
+      !Array.isArray(state.aiTurnPlanRandomDrawRecords) ||
+      state.aiTurnPlanRandomCounter !==
+        state.aiTurnPlanRandomDrawRecords.length ||
+      state.aiTurnPlanRandomDrawRecords.some(
+        (record, index) =>
+          record.counter !== index ||
+          record.domain !== "ai_turn_plan_selection",
+      )
+    )
+      return fail(
+        "ERR_INVALID_TARGET",
+        "Die Geheimwahl ist nicht an ihre vollständige aktuelle Optionsmenge und RNG-Domäne gebunden.",
+      );
+  } else if (
     assessment.traceId !== state.trace?.traceId ||
     assessment.traceRulesProfile !== state.trace?.traceRulesProfile ||
     (assessment.traceRulesProfile !== "classic_blind" &&
@@ -221,9 +261,14 @@ export function buildApplyRandomizedTraceBidSelection(
   }
 
   const next = cloneGameStateForAction(state);
-  const counterBefore = next.randomCounter;
+  const secretGuess = "kind" in requoted.quote.assessment;
+  const counterBefore = secretGuess
+    ? next.aiTurnPlanRandomCounter!
+    : next.randomCounter;
   const purpose = traceBidSelectionPurpose(requoted.quote);
-  const randomValue = nextRandom(next, purpose);
+  const randomValue = secretGuess
+    ? drawSecretGuess(next, purpose).value
+    : nextRandom(next, purpose);
   const totalWeight = requoted.quote.candidates.reduce(
     (sum, candidate) => sum + candidate.weight,
     0,
@@ -252,7 +297,11 @@ export function buildApplyRandomizedTraceBidSelection(
   };
   const applied = buildApplyAction(host, next, playerAction, options);
   if (!applied.ok) return { ok: false, error: applied.error, state };
-  const randomDraw = applied.state.randomDrawRecords.find(
+  const randomDraw = (
+    secretGuess
+      ? applied.state.aiTurnPlanRandomDrawRecords!
+      : applied.state.randomDrawRecords
+  ).find(
     (record) => record.counter === counterBefore && record.purpose === purpose,
   );
   if (!randomDraw) {
@@ -323,11 +372,34 @@ function traceBidSelectionPurpose(
   return encodeParts([
     "engine.randomized_trace_bid_selection",
     quote.side,
-    quote.assessment.traceId,
+    "kind" in quote.assessment
+      ? quote.assessment.kind
+      : quote.assessment.traceId,
     quote.choiceId,
     quote.planStepId,
     quote.candidateFingerprint,
   ]);
+}
+
+function drawSecretGuess(
+  state: GameState,
+  purpose: string,
+): AiTurnPlanRandomDrawRecord {
+  const counter = state.aiTurnPlanRandomCounter!;
+  const record: AiTurnPlanRandomDrawRecord = {
+    domain: "ai_turn_plan_selection",
+    counter,
+    purpose,
+    value: deterministicNumber(
+      `${state.seed}:ai_turn_plan_selection:${purpose}:${counter}`,
+    ),
+  };
+  state.aiTurnPlanRandomCounter = counter + 1;
+  state.aiTurnPlanRandomDrawRecords = [
+    ...state.aiTurnPlanRandomDrawRecords!,
+    record,
+  ];
+  return record;
 }
 
 function encodeParts(parts: readonly string[]): string {
