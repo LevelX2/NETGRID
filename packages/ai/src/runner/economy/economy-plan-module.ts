@@ -1,5 +1,8 @@
 import type { RunnerFundingNeedSignal } from "../../plans/runner-funding-contracts";
-import { validRunnerFundingNeedContract } from "../../plans/runner-funding-contracts";
+import {
+  RUNNER_TURN_LIQUIDITY_WITHIN_CLASS_VALUE,
+  validRunnerFundingNeedContract,
+} from "../../plans/runner-funding-contracts";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { runnerFundingParentMaterialValue } from "../../plans/runner-funding-parent";
 import type {
@@ -133,7 +136,7 @@ export function createRunnerEconomyModule(): PlanModule {
         need.priorityClass,
         routeExists,
         need.kind === "develop_liquidity"
-          ? -9_999
+          ? RUNNER_TURN_LIQUIDITY_WITHIN_CLASS_VALUE
           : (parentMaterialValue ?? need.gap * 10),
         portfolio.executorInstanceId,
       );

@@ -5,6 +5,8 @@ import type {
   PaymentWindowFundingSetup,
 } from "./funding-route";
 
+export const RUNNER_TURN_LIQUIDITY_WITHIN_CLASS_VALUE = -9_999;
+
 export type RunnerFundingRouteAssessment = {
   stateVersion: number;
   routeId: string;

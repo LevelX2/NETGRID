@@ -3942,6 +3942,24 @@ es entsteht weder ein Kartenname-Verbot noch ein neuer Safety-Owner.
 
 ## 11. `runner.credit_bank` und `runner.recurring_economy`
 
+Ein bereits vorhandener P6-`develop_liquidity`-Bedarf darf die garantierte
+Auszahlung einer endlichen, bei Installation vorgefüllten Quelle verwenden,
+wenn sie pro gleicher Aktion mehr frei verfügbare Credits als sämtliche
+aktuellen gewöhnlichen Routen liefert. Der kanonische Effektvertrag verlangt
+genau eine manuelle Auszahlung ohne weitere Kosten oder Handverbrauch und
+ausschließlich initiale Befüllung; nachladbare Banken, automatische
+Lifecycle-Auszahlungen und gemischte Kartenfunktionen bleiben ausgeschlossen.
+`credit-bank-turn-liquidity.ts` bindet Need, Bank, LegalAction und StateVersion
+und revalidiert den residenten Economy-Parent. Der Bank-Owner bleibt Executor.
+Da der Parent bereits gewöhnliche ausführbare Routen besitzt, ist dies ein
+Kind mit `parentInstanceId`, kein fehlender Ressourcenprovider mit
+`parentNeedId` oder erfundenem `ResourceGap`. Der gemeinsame TurnPlanner
+vergleicht die tatsächlichen Alternativen auf derselben P6-Wertbasis;
+höhere Run-, Coverage- und Defense-Prioritäten bleiben vorrangig. Fehlende
+Income-Projektionen des gebundenen Bedarfs scheitern strukturiert.
+Die native D62-Regression der Paarung 662 belegt zwei statt einem Credit bei
+unverändertem Root; ihr D270-Gegenfall bewahrt den realen P4-Run.
+
 Die effiziente Auszahlung einer bereits gefüllten Bank für eine gewöhnliche
 Development-Finanzierung bleibt P4. Ihr Vorteil gegenüber mehreren
 Kreditaktionen begründet allein keine akute P2-Verpflichtung und verdrängt

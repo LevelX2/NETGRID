@@ -30,11 +30,14 @@ import type { RunnerCreditBankSignal } from "./credit-bank-types";
 import { creditBankReplacesBasicRunFunding } from "./credit-bank-basic-run-funding";
 import { creditBankFloorRecoveryWindow } from "./credit-bank-floor-recovery";
 import { creditBankFundsKnownUrgentRun } from "./credit-bank-known-run-funding";
+import { finiteBankTurnLiquiditySupport } from "./credit-bank-turn-liquidity";
+import type { RunnerFundingNeedSignal } from "../../plans/runner-funding-contracts";
 
 /** Facts/routes from other owners, bound to the same decision input and candidates.
  * These services never choose a bank phase or execute a bank action.
  */
 export type RunnerCreditBankServices = {
+  turnLiquidityFundingNeeds: readonly RunnerFundingNeedSignal[];
   hasExactRunUrgency: (target: RunnerRunTargetEvaluation) => boolean;
   requiredPostRunReserve: (
     target: RunnerRunTargetEvaluation,
@@ -477,6 +480,40 @@ export function runnerCreditBankSignals(
       ];
     }
 
+    const liquiditySupport = tool.sourceCardInstanceId
+      ? finiteBankTurnLiquiditySupport({
+          input,
+          candidates,
+          needs: services.turnLiquidityFundingNeeds,
+          definitionId: tool.cardId,
+          bankId: tool.sourceCardInstanceId,
+          cashOutActionIds,
+          estimatedPayout,
+        })
+      : undefined;
+    if (liquiditySupport)
+      return [
+        {
+          bankId: tool.sourceCardInstanceId!,
+          phase: "cash_out",
+          actionIds: [liquiditySupport.actionId],
+          rejectedActionIds: [
+            ...buildActionIds,
+            ...cashOutActionIds.filter(
+              (id) => id !== liquiditySupport.actionId,
+            ),
+          ],
+          priorityClass: "P6",
+          currentStoredCredits,
+          portfolioStoredCredits,
+          estimatedPayout,
+          liquidityFunding: liquiditySupport.funding,
+          value: 0,
+          evidenceCodes: [
+            "runner_credit_bank_finite_payout_for_bound_turn_liquidity",
+          ],
+        },
+      ];
     const alreadyBuiltThisTurn = creditBankBuiltThisTurn(input, tool);
     const shouldBuild =
       buildActionLegal &&

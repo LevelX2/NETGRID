@@ -3132,6 +3132,7 @@ function prepareRunnerDomain(
         {
           hasExactRunUrgency: (target) =>
             runnerRunHasExactUrgency(input, target),
+          turnLiquidityFundingNeeds,
           requiredPostRunReserve: (target) =>
             runnerRunRequiredPostRunReserve(input, candidates, economy, target),
           terminalVisibleHazardFundingGap: (target) =>

@@ -218,6 +218,7 @@ it("admits the real G9/D16 bank after Draw when installation preserves the four-
     facts.minimumHandBuffer,
     {
       hasExactRunUrgency: unrelated,
+      turnLiquidityFundingNeeds: [],
       requiredPostRunReserve: unrelated,
       terminalVisibleHazardFundingGap: unrelated,
       isDirectlyMandatoryRun: unrelated,

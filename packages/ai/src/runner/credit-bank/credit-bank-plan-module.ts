@@ -15,6 +15,7 @@ import type {
 } from "./credit-bank-types";
 import { runnerFundingParentMaterialValue } from "../../plans/runner-funding-parent";
 import { runnerCreditBankDefenseParentValue } from "./credit-bank-defense-funding";
+import { runnerCreditBankLiquidityParentValue } from "./credit-bank-turn-liquidity";
 
 export function createRunnerCreditBankModule(): PlanModule {
   return {
@@ -40,49 +41,71 @@ export function createRunnerCreditBankModule(): PlanModule {
             signal.evidenceCodes[0] ?? `runner_credit_bank_${signal.phase}`,
           ...(signal.defenseFunding ||
           signal.runFunding ||
-          signal.coverageFunding
+          signal.coverageFunding ||
+          signal.liquidityFunding
             ? {
                 parentInstanceId: (signal.defenseFunding ??
                   signal.runFunding ??
-                  signal.coverageFunding)!.parentPlanInstanceId,
-                parentNeedId: (signal.defenseFunding ??
-                  signal.runFunding ??
-                  signal.coverageFunding)!.needId,
+                  signal.coverageFunding ??
+                  signal.liquidityFunding)!.parentPlanInstanceId,
+                // Liquidity already has executable ordinary routes. This child
+                // is an alternative executor, not a missing-resource provider;
+                // parentNeedId would incorrectly require a blocked parent.
+                ...(!signal.liquidityFunding
+                  ? {
+                      parentNeedId: (signal.defenseFunding ??
+                        signal.runFunding ??
+                        signal.coverageFunding)!.needId,
+                    }
+                  : {}),
               }
             : {}),
         }),
       ),
     assess: (instance, context, portfolio) => {
       const signal = (instance.moduleState as CreditBankState).signal;
-      const parentValue = signal.coverageFunding
+      const parentValue = signal.liquidityFunding
         ? portfolio.instances
             .map((parent) =>
-              runnerCreditBankCoverageParentValue(
+              runnerCreditBankLiquidityParentValue(
                 parent,
-                signal.coverageFunding!,
+                signal.liquidityFunding!,
                 context.input.playerView.stateVersion,
               ),
             )
             .find((value) => value !== undefined)
-        : signal.defenseFunding
+        : signal.coverageFunding
           ? portfolio.instances
               .map((parent) =>
-                runnerCreditBankDefenseParentValue(
+                runnerCreditBankCoverageParentValue(
                   parent,
-                  signal.defenseFunding!,
+                  signal.coverageFunding!,
                   context.input.playerView.stateVersion,
                 ),
               )
               .find((value) => value !== undefined)
-          : signal.runFunding &&
-              signal.runFunding.stateVersion ===
-                context.input.playerView.stateVersion
+          : signal.defenseFunding
             ? portfolio.instances
                 .map((parent) =>
-                  runnerFundingParentMaterialValue(parent, signal.runFunding!),
+                  runnerCreditBankDefenseParentValue(
+                    parent,
+                    signal.defenseFunding!,
+                    context.input.playerView.stateVersion,
+                  ),
                 )
                 .find((value) => value !== undefined)
-            : undefined;
+            : signal.runFunding &&
+                signal.runFunding.stateVersion ===
+                  context.input.playerView.stateVersion
+              ? portfolio.instances
+                  .map((parent) =>
+                    runnerFundingParentMaterialValue(
+                      parent,
+                      signal.runFunding!,
+                    ),
+                  )
+                  .find((value) => value !== undefined)
+              : undefined;
       return assessment(
         instance,
         signal.priorityClass,
@@ -90,7 +113,8 @@ export function createRunnerCreditBankModule(): PlanModule {
           (!(
             signal.defenseFunding ||
             signal.runFunding ||
-            signal.coverageFunding
+            signal.coverageFunding ||
+            signal.liquidityFunding
           ) ||
             parentValue !== undefined),
         parentValue ?? signal.value,
@@ -100,13 +124,24 @@ export function createRunnerCreditBankModule(): PlanModule {
     materialize: (instance, currentAssessment, context) => {
       const signal = (instance.moduleState as CreditBankState).signal;
       const candidates = bankCandidates(context, signal).map((entry) =>
-        signal.defenseFunding || signal.runFunding || signal.coverageFunding
+        signal.liquidityFunding
           ? {
               ...entry,
               stepValue:
-                currentAssessment.withinClassValue + signal.estimatedPayout,
+                Math.min(
+                  signal.liquidityFunding.need.gap,
+                  signal.estimatedPayout,
+                ) *
+                  100 +
+                signal.estimatedPayout,
             }
-          : entry,
+          : signal.defenseFunding || signal.runFunding || signal.coverageFunding
+            ? {
+                ...entry,
+                stepValue:
+                  currentAssessment.withinClassValue + signal.estimatedPayout,
+              }
+            : entry,
       );
       const prospectiveBuild =
         signal.phase === "install" &&
