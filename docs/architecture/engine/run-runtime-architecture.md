@@ -55,6 +55,15 @@ ihnen aber nicht zurückimportiert.
 
 ## Nicht offensichtliche Verträge
 
+- Die sichtbare Subroutinenprojektion von `set_next_encounter_lock` enthält
+  beide echten Wirkungen: `preventsFutureBreaking` und `preventsJackOut`.
+  Eine reine Run-Jack-out-Sperre erhält dagegen kein Break-Verbot. Die
+  Begrenzung auf den nächsten Encounter folgt aus der typisierten Routine.
+  Konsumenten dürfen eine kombinierte Sperre weder als reine Ausstiegssperre
+  quotieren noch bei einer nachfolgenden ETR-ICE einen Break einplanen.
+  Der native Nullcredit-Kontrast und frisch erzeugte Engine-Quotes aus
+  Paarung 644 prüfen sowohl die harmlose als auch die blockierte Fortsetzung.
+
 - CardSpec-Zugriffseffekte binden ihre Quellzone an die kanonische
   Karteninstanz. Eine Karte in `serverRoot` bleibt `installed`, auch an HQ
   oder R&D. Die Server-ID des Zugriffs bezeichnet den Fort, nicht dessen

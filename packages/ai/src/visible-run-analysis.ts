@@ -1166,13 +1166,55 @@ function assessKnownRezzedIcePathInternal(
                 : {}),
             },
           );
-      const hardEffectKinds = hardUnbrokenRunEffectKinds(
+      let hardEffectKinds = hardUnbrokenRunEffectKinds(
         effect,
         futureIce.length,
         unavoidableTraceRunLock === undefined
           ? {}
           : { unavoidableTraceRunLock },
       );
+      if (
+        options.allowBreakingRunPathEffects &&
+        hardEffectKinds.length === 1 &&
+        hardEffectKinds[0] === "jack_out_lock" &&
+        effect.expiresAfterNextEncounter === true &&
+        futureIce.every(
+          (future) =>
+            future.known &&
+            (future.rezzed === true ||
+              future.authoritativePostRezRunProjection === true) &&
+            requireEffectiveRunQuoteForKnownRezzedIce(future) !== undefined,
+        )
+      ) {
+        // The inability to leave is not itself a paid obstacle. Certify the
+        // complete known suffix with the actual no-break restriction still
+        // active. The same projector prices its hazards and conditional access;
+        // disabling optional-effect search keeps this proof bounded.
+        const lockedSuffix = assessKnownRezzedIcePathInternal(
+          futureIce,
+          rigCards,
+          cloneRunnerRunPathCreditBudget(creditBudget),
+          rootCards,
+          visibleCorpCreditsThroughPath,
+          [...activeRunPathEffects, ...newlyQueuedRunPathEffects, effect],
+          {
+            allowBreakingRunPathEffects: false,
+            initialPassCount: 1,
+            preferFullGroupedBreak: options.preferFullGroupedBreak === true,
+          },
+          new Map(carriedBreakerStrengths),
+          deflectorContext,
+        );
+        if (
+          lockedSuffix.canReachAccess &&
+          !lockedSuffix.conditionalRiskReasons?.length &&
+          !lockedSuffix.visibleIceRunHazards?.some(
+            (hazard) => hazard.unavoidable,
+          )
+        ) {
+          hardEffectKinds = [];
+        }
+      }
       const laterEffectPreventsFutureBreaking = runPathEffects
         .slice(effectIndex + 1)
         .some((entry) => entry.effect.preventsFutureBreaking === true);

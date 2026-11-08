@@ -232,8 +232,9 @@ function visibleUnbrokenRunEffectForSubroutine(
     case "set_run_encounter_tax":
       return amount > 0 ? { addsFutureEncounterCost: amount } : undefined;
     case "set_run_jack_out_lock":
-    case "set_next_encounter_lock":
       return { preventsJackOut: true };
+    case "set_next_encounter_lock":
+      return { preventsFutureBreaking: true, preventsJackOut: true };
     case "set_next_encounter_unless_fully_break_damage":
     case "set_run_pass_rezzed_ice_program_trash":
     case "set_run_active_ice_program_trash":

@@ -193,6 +193,17 @@ Dauerzuwachs. Ein fehlender oder ungültiger benötigter Wert scheitert sichtbar
 Paarung 576, Runde 3/G19, belegt sieben statt fünf Credits für zwei bekannte
 ICE; unbekannte ICE bleiben davon unabhängig unsicher.
 
+Eine ausschließlich bis nach dem nächsten Encounter geltende Jack-out-Sperre
+erzwingt keinen bezahlten Quellbreak, wenn derselbe Pfadprojektor die gesamte
+bekannte Fortsetzung mit allen Break-Verboten, Kosten und verbleibenden
+Mitteln als erreichbar und ohne unvermeidbare Gefahr belegt. Die gebundene
+Vergleichsrechnung deaktiviert rekursive optionale Effektsuchen. Unbekannte
+Folge-ICE und gefährliche oder nicht finanzierte Fortsetzungen bleiben
+gesperrt. Ein Zufalls-Rewind bleibt bedingter Zugriff. Paarung 644 Replay D191
+belegt den Nullcredit-Contest; unbekannter Folgezustand und echtes ETR sichern
+die Gegenfälle. Die Engine-Quote für eine kombinierte nächste Encounter-Sperre
+enthält sowohl `preventsFutureBreaking` als auch `preventsJackOut`.
+
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
 verbrauchen den Breakerpreis und zweckgebundene Credits nur einmal. Der
