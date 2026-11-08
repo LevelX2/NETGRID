@@ -1342,6 +1342,16 @@ Defense darf damit einen bezahlbaren Durchlauf, einen erzwungenen Abbruch
 oder einen wirtschaftlich sinnvollen Gebührentausch bewerten. Die spätere
 Access-Rez-Heuristik gilt nicht für vor dem ICE-Pass fällige Gebühren.
 
+Bei einer Agenda-Stehlkosten-Rootkarte bindet die letzte relevante Rez-Phase
+an den tatsächlichen öffentlichen Zugriffsserver: aufgelöste Breach, sonst
+`accessServerOverride`, sonst physischer Eintritt. Ein Shredder-Run über
+Archives darf deshalb eine aktuell legale HQ-Stehlsteuer nicht als fremden
+Run verwerfen. Der bestehende Defense-Owner prüft weiterhin zugängliche
+Agenden, das konkrete Fenster und Reserven. Reine Encounter-, Pass- oder
+sonstige Fortwirkungen bleiben an ihren physischen Runserver gebunden.
+Paarung 662/D257 belegt den alten Fehlpfad und die gebundene HQ-Rez; dies
+erzeugt weder neue LegalActions noch einen zweiten Timing-Owner.
+
 Eine kostenlose reine Root-Rez kann im aktuellen Approach eine zuvor
 unbezahlbare ICE-Rez finanzieren. Die Engine bindet
 `CorpRootRezDiscountedIceQuote` an Root-Action, Quelle, ICE, Fort, Run und

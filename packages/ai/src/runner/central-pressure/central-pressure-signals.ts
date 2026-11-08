@@ -1236,7 +1236,7 @@ export function buildRunnerCentralPressureSignals({
                 ? ("P2" as const)
                 : lastCounterConversion
                   ? ("P3" as const)
-                  : evaluation.targetServerId === "archives" &&
+                  : evaluation.accessServerId === "archives" &&
                       ["unknown", "fresh"].includes(evaluation.accessPayoff)
                     ? ("P6" as const)
                     : ("P4" as const),

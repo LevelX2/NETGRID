@@ -7,6 +7,7 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { corpPurgeImpactScoreComponent } from "../../corp/virus-pressure/corp-purge-impact";
+import { corpCurrentRunAccessServerId } from "../../corp/defense/corp-central-defense-facts-adapter";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import { createAiHintsByCard } from "../../ai-hints";
@@ -152,7 +153,18 @@ export function corpRootRezTimingComponent(
       ].join("|"),
     };
   }
-  if (!run || run.attackedServerId !== location.id) {
+  const taxesAgendaAtAccess =
+    hint?.remoteRole?.kind === "agenda_steal_tax" ||
+    effects.some(
+      (effect) =>
+        effect.kind === "run_tax" &&
+        effect.timing === "on_access" &&
+        effect.target === "agenda_steal_cost",
+    );
+  const relevantServerId = taxesAgendaAtAccess
+    ? corpCurrentRunAccessServerId(input)
+    : run?.attackedServerId;
+  if (!run || relevantServerId !== location.id) {
     return {
       key: "corp_root_rez_defer_until_relevant_run",
       label: "Root-Rez vertagen",

@@ -255,6 +255,13 @@ bewertet. Ein Zugang über Archives mit anschließendem HQ-Zugriff übernimmt
 nicht den bekannten Nullnutzen eines normalen Archives-Runs. Auch innerhalb
 derselben Zielservergruppe bleiben beide Action-Routen getrennt zulässig
 beziehungsweise ausgeschlossen (SP-509).
+Auch die niedrige Priorität eines bloßen frischen Archives-Informationsruns
+folgt dem tatsächlichen Zugriffsziel. Ein physischer Archives-Eingang mit
+HQ-Zugriff erhält deshalb die gewöhnliche Zentraldruckklasse; Root, Pfadquote
+und Executor behalten ihre physische Routenbindung. Paarung 662/D270 belegt
+die zuvor falsche Klasse P6 und ihre Korrektur zu P4. Dieser Klassenfix
+zertifiziert für sich weder die Auswahl der billigsten Route noch einen
+anderen Sieger; der vollständige Kosten-/Hand-/Tempovergleich bleibt getrennt.
 
 Die bekannten Central-/Remote-Access-Payoffs veröffentlichen Zielidentitäten
 und das allgemeine Trash-Creditbudget als `RunnerAccessFacts`. Die Runbewertung
