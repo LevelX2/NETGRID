@@ -183,8 +183,14 @@ export function buildRunnerShellTradersPipelineSignals({
       coverageBinding === undefined &&
       development?.currentNeed !== "acute" &&
       development?.currentNeed !== "useful_now";
+    const noCurrentTargetNeed =
+      ability === "set_aside_from_grip" &&
+      development?.developmentRole === "memory_support" &&
+      development?.currentNeed === "none" &&
+      coverageBinding === undefined;
     const targetRejected =
       targetValue <= 0 ||
+      noCurrentTargetNeed ||
       redundantTarget ||
       pendingDuplicateDefinition ||
       zeroCounterPreparation ||
@@ -276,6 +282,9 @@ export function buildRunnerShellTradersPipelineSignals({
         : []),
       ...(redundantTarget
         ? ["runner_shell_traders_rejected_redundant_target"]
+        : []),
+      ...(noCurrentTargetNeed
+        ? ["runner_shell_traders_rejected_no_current_target_need"]
         : []),
       ...(pendingDuplicateDefinition
         ? ["runner_shell_traders_rejected_pending_duplicate_definition"]

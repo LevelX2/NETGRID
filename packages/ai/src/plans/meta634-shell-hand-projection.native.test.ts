@@ -56,7 +56,7 @@ it("certifies the one-card public set-aside transfer without inventing income or
   expect(exactImmediateHandDelta(candidate)).toBe(-1);
   expect(candidate.economyProjection!.netLiquidCreditGain).toBeUndefined();
 });
-it("projects the native Shell step from hand9 to the actual hand8", () => {
+it("keeps the native transfer valid but does not choose unneeded memory preparation", () => {
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
   const { input, action } = source();
   restoreAiRuntimeCheckpoint(
@@ -67,20 +67,19 @@ it("projects the native Shell step from hand9 to the actual hand8", () => {
   const before = JSON.stringify(input.playerView),
     decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: action.actionId,
+    actionId: "runner.play_event.runner_onr_v1_108_score_1.runner_onr_v1_108_score_1.onr_v1_108_score:abilities_on_play_gain_credits",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   const plan = decision.decisionDebug!.planFirstDecision!;
-  expect(plan.rootPlanInstanceId).toContain("runner.shell_traders_pipeline");
-  expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
-  const line = plan.turnPlanning!.consideredLines!.find(
-    (l) => l.firstActionId === action.actionId && l.stepCount === 1,
-  )!;
-  expect(line.projectedEndState).toMatchObject({
-    handMinimum: 8,
-    handMaximum: 8,
-  });
+  expect(plan.dispositions).toContainEqual(expect.objectContaining({
+    actionId: action.actionId,
+    ownerModuleId: "runner.shell_traders_pipeline",
+    disposition: "explicitly_nonproductive",
+    evidenceCode: "runner_shell_traders_rejected_no_current_target_need",
+  }));
+  expect(input.legalActions.some((a: { actionId: string }) => a.actionId === decision.actionId)).toBe(true);
+  expect(plan.route?.actionId).toBe(decision.actionId);
   expect(JSON.stringify(input.playerView)).toBe(before);
 });
 it.each(["target", "source", "zone", "side", "state"])(

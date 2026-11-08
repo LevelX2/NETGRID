@@ -4278,6 +4278,13 @@ Finanzierungsquotes und fehlende Routen sichern diese Trennung ab.
 
 ## 13. `runner.shell_traders_pipeline`
 
+Speichervorbereitung konsumiert den endgültigen Hand-/Rig-Bedarfsbefund.
+`memory_support` mit `none` ohne konkret gebundene Coverage-Anforderung hält
+das Ziel beim Pipeline-Owner zurück. Statischer Rollenwert und Handentlastung
+dürfen diesen Befund nicht überstimmen. Ein verzögert günstiger Breakeraufbau
+und bereits gebundene Fortschritts-/Installationsfenster behalten ihre eigenen
+Nachweise; fehlender unmittelbarer Installationsbedarf verbietet sie nicht.
+
 In der Runner-Hauptphase benötigt bezahlte Coverage-Beschleunigung einen
 vollständigen aktuell finanzierten Zugriffsnachweis aus
 `shell-traders-access.ts`. Er bindet Quelle, vorbereitete Karten, Server,
