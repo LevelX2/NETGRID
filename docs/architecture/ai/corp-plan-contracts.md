@@ -2311,7 +2311,11 @@ dem aktuellen Runner-Creditbestand, sichtbaren Breaker-Creditpools und den
 Root-Modifikatoren des jeweiligen Forts. Neu unbezahlbare Antworten stehen
 vor bloß verteuerten Antworten; bei gleicher Wirkung entscheiden wie bisher
 Breaker-Rolle, Counter, Installationskosten und Speicherbedarf, zuletzt die
-Options-ID. Redundante und universelle Breaker bleiben im Vergleich enthalten.
+Options-ID. Die Breaker-Rolle stammt exakt aus dem kompilierten Hint
+`icebreaker`; `icebreaker_support` bezeichnet Unterstützung und erhält diesen
+Vorrang nicht. Anders benannte Rollenfragmente ersetzen diesen aktuellen
+Quellvertrag nicht. Redundante und universelle Breaker bleiben im Vergleich
+enthalten.
 
 Bereits vorher blockierte ICE erzeugen keinen zusätzlichen Abdeckungsverlust.
 Unbekannte oder ungerezzte ICE und ausdrücklich bedingte Sonderpfade tragen

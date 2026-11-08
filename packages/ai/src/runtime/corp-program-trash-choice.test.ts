@@ -37,7 +37,7 @@ describe("rankCorpProgramTrashChoiceOptionIds", () => {
       ),
     ).toBeUndefined();
   });
-  it("binds the exact public encounter choice and prefers a valuable breaker", () => {
+  it("binds the exact public encounter choice and distinguishes a compiled breaker from support", () => {
     const { input, action, choice } = fixture();
 
     expect(
@@ -47,7 +47,9 @@ describe("rankCorpProgramTrashChoiceOptionIds", () => {
         choice,
         choice.options,
         (definitionId) =>
-          definitionId === "breaker_program" ? ["breaker_sentry"] : [],
+          definitionId === "breaker_program"
+            ? ["icebreaker", "universal_breaker"]
+            : ["icebreaker_support"],
       ),
     ).toEqual(["card_breaker_1"]);
   });

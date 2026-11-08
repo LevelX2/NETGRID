@@ -5,8 +5,6 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-import { rolesHaveBreakerRole } from "../../runtime/breaker-role-match";
-
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
 >;
@@ -252,7 +250,7 @@ function programTrashTargetScore(
     0,
   );
   return (
-    (rolesHaveBreakerRole(roles) ? 100_000 : 0) +
+    (roles.includes("icebreaker") ? 100_000 : 0) +
     counters * 1_000 +
     Math.max(0, card.installCost ?? 0) * 10 +
     Math.max(0, card.memoryCost ?? 0)
