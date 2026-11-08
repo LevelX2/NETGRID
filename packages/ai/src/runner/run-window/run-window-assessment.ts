@@ -4,6 +4,7 @@ import {
   completeEncounterBreakerPayment,
   completeCancellableEncounterPayment,
   completeCurrentEncounterEconomics,
+  nextEncounterDamageMarkerPayment,
 } from "./run-window-encounter-payment";
 import {
   currentRunRemainderSupportsExactEtrPricing,
@@ -905,7 +906,8 @@ function runnerRunWindowActionAssessment(
     runOrigin,
   );
   const encounterPayment = !planStepExclusion
-    ? pureEndRunEncounterPayment(input, action)
+    ? pureEndRunEncounterPayment(input, action) ??
+      nextEncounterDamageMarkerPayment(input, action)
     : undefined;
   const optionalPayments =
     !planStepExclusion && !encounterExclusion && runOrigin?.runRiskContract

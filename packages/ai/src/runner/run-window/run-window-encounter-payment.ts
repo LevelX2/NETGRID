@@ -32,6 +32,42 @@ type CompleteEncounterPayment = {
   budget: ReturnType<typeof runnerRunPathCreditBudgetAfterEncounter>;
 };
 
+/** A pure next-encounter marker can be passed before a free jack-out.
+ * Its optional full break still has to preserve the existing root reserve. */
+export function nextEncounterDamageMarkerPayment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CompleteEncounterPayment | undefined {
+  const run = input.playerView.run;
+  if (
+    !run ||
+    run.phase !== "encounter_ice" ||
+    (action.type !== "pump_breaker" && action.type !== "break_subroutine") ||
+    !run.afterEncounterJackOut ||
+    run.afterEncounterJackOut.locked ||
+    run.afterEncounterJackOut.additionalCost !== 0 ||
+    currentEncounterRequiresFullBreak(input)
+  )
+    return undefined;
+  const ice = currentEncounteredIceCard(input);
+  if (
+    !ice?.effectiveRunQuote ||
+    ice.effectiveRunQuote.conditionalEncounterEffects?.length
+  )
+    return undefined;
+  const remaining = currentEncounterCompleteSubroutineIndexes(input);
+  if (
+    !remaining?.size ||
+    ![...remaining].every(
+      (index) =>
+        ice.effectiveRunQuote!.subroutines[index]?.type ===
+        "set_next_encounter_unless_fully_break_damage",
+    )
+  )
+    return undefined;
+  return completeEncounterBreakerPayment(input, action);
+}
+
 /** A pure future-strength effect has an exact post-pass cancellation route.
  * Quote that complete general-credit payment beside complete breaker payments;
  * the existing post-pass owner still revalidates the actual Engine actions. */

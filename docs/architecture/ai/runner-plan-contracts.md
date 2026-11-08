@@ -2960,6 +2960,23 @@ die akzeptierte Reserve nicht mehr, lässt der Owner die reine ETR auflösen,
 statt zunächst zu bezahlen und im folgenden unveränderten Fenster abzubrechen.
 Bereits gebrochene Subroutinen werden nicht erneut bezahlt. Die Zahlung führt
 zweckgebundene Pools und über den Encounter hinaus gültige Stärke fort.
+Dieselbe Reserveprüfung gilt für den vollständigen Break eines reinen Markers,
+der Schaden erst beim nächsten Encounter auslösen kann. Ohne aktuelle
+Full-Break-Pflicht, Jack-out-Sperre, Ausstiegsgebühr oder zusätzliche aktuelle
+Wirkung kann der Run-Owner den Marker kostenlos auflösen und im folgenden
+Fenster aussteigen. Vor einem optionalen bezahlten Break quotiert er deshalb
+den ganzen Break samt zweckgebundenen Pools und bekanntem Restpfad gegen den
+bisherigen Rootvertrag. Paarung 661/D267 belegt den vorher bezahlten Break mit
+anschließendem Abbruch sowie die günstigere echte Enginefolge. Ein größerer
+finanzierter Vorrat und Jack-out-Sperren behalten den bisherigen Schutzpfad;
+aktuelle Schäden und gemischte Encounter erhalten diese enge Freigabe nicht.
+Die Engine projiziert dafür `run.afterEncounterJackOut` mit den öffentlichen
+Sperren nach Encounter-Duration-Cleanup und dem kanonischen gesamten
+Jack-out-Aufpreis, einschließlich laufender Active-ICE-Gebühr. Die Quote ist
+keine Garantie einer zukünftigen Action. Der DTO kopiert sie ausdrücklich;
+ohne diese vollständige Quote greift die neue optionale Markerprüfung nicht.
+Historische Checkpoints bleiben unverändert und werden durch ausdrücklich
+benannte Current-Engine-Companions sowie den exakten Seed-Replay ergänzt.
 Bei mehreren finanzierbaren Antworten gegen reine ETR bewertet derselbe
 Run-Window-Owner den vollständigen aktuellen Pump-/Breakpreis und einen
 vollständig bekannten reinen ETR-Restpfad. Die gemeinsame Pfadquote erhält

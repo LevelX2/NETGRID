@@ -4352,6 +4352,11 @@ export type PlayerView = {
     encounterTaxForFutureIce?: number;
     /** Public restriction applying only to the currently encountered ICE. */
     noBreakSubroutinesActive?: boolean;
+    /** Public current restrictions after encounter-duration cleanup; not a future action certificate. */
+    afterEncounterJackOut?: {
+      locked: boolean;
+      additionalCost: number;
+    };
     runnerCreditGainOnCorpRez?: number;
     damagePreventionPool?: {
       sourceDefinitionId: CardDefinitionId;

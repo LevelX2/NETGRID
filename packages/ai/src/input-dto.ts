@@ -1191,6 +1191,9 @@ function sanitizePlayerView(
             ...(view.run.noBreakSubroutinesActive === true
               ? { noBreakSubroutinesActive: true }
               : {}),
+            ...(view.run.afterEncounterJackOut
+              ? { afterEncounterJackOut: { ...view.run.afterEncounterJackOut } }
+              : {}),
             ...(view.run.runnerCreditGainOnCorpRez !== undefined
               ? {
                   runnerCreditGainOnCorpRez: view.run.runnerCreditGainOnCorpRez,

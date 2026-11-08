@@ -12,6 +12,7 @@ import {
   runnerMemoryLimit,
 } from "../../ability-engine/effective-values";
 import { projectInstalledCorpIceRezCost } from "../payment";
+import { runJackOutAdditionalCost } from "../run/run-duration-payment";
 import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
   agendaPoints,
@@ -389,6 +390,16 @@ export function buildPlayerViewProjection(
           : {}),
         ...(state.run.noBreakSubroutinesActive
           ? { noBreakSubroutinesActive: true }
+          : {}),
+        ...(state.run.phase === "encounter_ice"
+          ? {
+              afterEncounterJackOut: {
+                locked:
+                  state.run.nextEncounterJackOutLock === true ||
+                  state.run.jackOutLockedForRun === true,
+                additionalCost: runJackOutAdditionalCost(state.run),
+              },
+            }
           : {}),
         ...(state.run.runnerCreditGainOnCorpRez !== undefined
           ? { runnerCreditGainOnCorpRez: state.run.runnerCreditGainOnCorpRez }
