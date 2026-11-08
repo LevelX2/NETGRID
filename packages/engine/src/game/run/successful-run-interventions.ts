@@ -290,7 +290,7 @@ export function buildSuccessfulRunFollowupActions(
       host.state.runner.rig.resources.includes(sourceCardId)
     ) {
       const server = host.servers.mustServer(successfulServerId);
-      const targetCount = server.root.length + server.ice.length;
+      const targetCount = server.root.length;
       if (targetCount > 0) {
         const primitivePayload = cardImplementationPrimitivePayload({
           sourceCardId,

@@ -2692,6 +2692,14 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Ein erfolgreicher Vorzugriffs-Roottrash konsumiert die aktuelle Zielzahl aus
+dem kanonischen Engine-Angebot. Der Produzent zählt nur die tatsächlich vom
+Effekt erfassten Root-Karten; schützendes ICE ist kein zusätzliches Trashziel.
+Ein Remote ohne Root-Karten bietet diese Fähigkeit nicht an. Die bestehende
+Run-Window-Bewertung, Actionbindung und der erfolgreiche Runabschluss bleiben
+erhalten. Paarung 667/D297 belegt einen Root und zwei verbleibende ICE; der
+zugehörige ICE-only-Gegenfall darf keine nicht ausführbare Action erzeugen.
+
 Die sichtbare Trace-Gefahrenquote konsumiert den vollständigen aktuellen
 Zahlungsledger. Breaks prüfen und verbrauchen kompatible zweckgebundene Pools
 und allgemeine Credits genau einmal; Trace-Gebote und Link-/Cancel-Zahlungen

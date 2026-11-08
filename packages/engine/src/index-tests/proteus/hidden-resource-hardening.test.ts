@@ -1782,6 +1782,104 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     });
   });
 
+  it("quotes only the root cards actually removed by successful remote trash", () => {
+    const state = runnerState("deep667-root-trash-count");
+    installHiddenResource(
+      state,
+      "onr_proteus_137_death-from-above",
+      "deep667_death",
+    );
+    const target = addCorpServerCard(
+      state,
+      "onr_v1_313_city-surveillance",
+      "deep667_city",
+      "remote_1",
+      "root",
+    );
+    const ice = [
+      addCorpServerCard(
+        state,
+        "onr_v1_261_quandary",
+        "deep667_quandary",
+        "remote_1",
+        "ice",
+      ),
+      addCorpServerCard(
+        state,
+        "onr_v1_279_wall-of-static",
+        "deep667_wall",
+        "remote_1",
+        "ice",
+      ),
+    ];
+    state.run = {
+      runId: "deep667_success",
+      attackedServerId: "remote_1",
+      phase: "access",
+      position: { kind: "server", serverId: "remote_1" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+    };
+    state.activeSide = "runner";
+    state.timingPoint = "access.resolve_card";
+    const before = structuredClone(state);
+    const action = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.payload?.cardImplementationEffectKind === "trash_remote_fort",
+    );
+    expect(action).toBeDefined();
+    expect(action!.payload?.targetCount).toBe(1);
+    expect(state).toEqual(before);
+    const result = applyLegal(state, "runner", action!);
+    expect(result.ok).toBe(true);
+    expect(result.state.corp.archives).toContain(target);
+    expect(
+      result.state.corp.servers.find((server) => server.id === "remote_1")!.ice,
+    ).toEqual(ice);
+    expect(result.state.eventLog.at(-1)?.publicPayload.trashedCount).toBe(
+      action!.payload?.targetCount,
+    );
+    expectReplayStable(before, result.state);
+  });
+
+  it("does not offer successful remote root trash when only protecting ICE remain", () => {
+    const state = runnerState("deep667-ice-only-root-trash");
+    const source = installHiddenResource(
+      state,
+      "onr_proteus_137_death-from-above",
+      "deep667_empty_death",
+    );
+    addCorpServerCard(
+      state,
+      "onr_v1_261_quandary",
+      "deep667_empty_quandary",
+      "remote_1",
+      "ice",
+    );
+    state.run = {
+      runId: "deep667_empty_success",
+      attackedServerId: "remote_1",
+      phase: "access",
+      position: { kind: "server", serverId: "remote_1" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+    };
+    state.activeSide = "runner";
+    state.timingPoint = "access.resolve_card";
+    const before = structuredClone(state);
+    expect(
+      getLegalActions(state, "runner").some(
+        (candidate) =>
+          candidate.payload?.cardImplementationEffectKind ===
+          "trash_remote_fort",
+      ),
+    ).toBe(false);
+    expect(state.runner.rig.resources).toContain(source);
+    expect(state).toEqual(before);
+  });
+
   it("PRO012 Credit Subversion, Death from Above, and Mercenary enforce timing, targets, reveal, and trash", () => {
     let creditState = runnerState("pro012-credit-subversion");
     const creditSourceId = installHiddenResource(
