@@ -200,6 +200,16 @@ dupliziert. Ihre autoritativen Fundstellen sind:
 Fehlt eine dieser Producer-Strukturen, weist die Analyse das Feld als nicht
 gespeichert aus. Eine nachträgliche Schätzung ist unzulässig.
 
+`analysisSnapshot.snapshotId` bindet den nativen Snapshot, der unmittelbar
+vor dieser Entscheidung erzeugt wurde. StateVersion allein identifiziert ihn
+nicht eindeutig: `snap_initial` und der Snapshot vor dem ersten Mulligan
+können dieselbe Version besitzen. Der Storage-Lookup verwendet die gespeicherte
+ID und prüft StateVersion, MatchVersion und StateHash gegen denselben Audit.
+Fehlende Referenzen, fehlende Zielobjekte und widersprüchliche Bindungen werden
+getrennt diagnostiziert; weder eine erste Trefferzeile noch eine aus der
+Versionsnummer erfundene ID ersetzt die Referenz. Historische Traces werden
+nicht nachträglich ergänzt.
+
 Ein Diagnose-Checkpoint kann bereits die im selben Zustand ausgewählte
 TurnPlan-Lease enthalten. Ein erneuter Aufruf mit dieser Lease prüft ihre
 Fortsetzung, nicht zwingend eine neue Planwahl nach einer Verhaltensänderung.

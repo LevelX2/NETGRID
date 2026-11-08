@@ -2069,11 +2069,15 @@ describe("Backend 0.5 private storage maintenance", () => {
       );
       const decisionContext = (await decisionResponse.json()) as {
         schemaVersion?: string;
-        aiTrace?: { detail?: { appliedDecision?: {
-          actionId: string;
-          selectedTargets?: Record<string, string>;
-          selectedChoices?: Record<string, unknown>;
-        } } };
+        aiTrace?: {
+          detail?: {
+            appliedDecision?: {
+              actionId: string;
+              selectedTargets?: Record<string, string>;
+              selectedChoices?: Record<string, unknown>;
+            };
+          };
+        };
         decision?: {
           decisionIndex?: number;
           side?: string;
@@ -2185,13 +2189,18 @@ describe("Backend 0.5 private storage maintenance", () => {
           ?.engineSchemaVersion,
       ).toBeDefined();
       expect(decisionContext.audit?.analysisSnapshot?.actorState).toBeDefined();
-      const recordedInvocation = decisionContext.aiTrace?.detail?.appliedDecision;
+      const recordedInvocation =
+        decisionContext.aiTrace?.detail?.appliedDecision;
       expect(recordedInvocation).toBeDefined();
       const probeActionId = recordedInvocation!.actionId;
       const probeInvocation = {
         actionId: probeActionId,
-        ...(recordedInvocation!.selectedTargets ? { selectedTargets: recordedInvocation!.selectedTargets } : {}),
-        ...(recordedInvocation!.selectedChoices ? { selectedChoices: recordedInvocation!.selectedChoices } : {}),
+        ...(recordedInvocation!.selectedTargets
+          ? { selectedTargets: recordedInvocation!.selectedTargets }
+          : {}),
+        ...(recordedInvocation!.selectedChoices
+          ? { selectedChoices: recordedInvocation!.selectedChoices }
+          : {}),
       };
       const probeResponse = await maintenance.request(
         `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/decisions/1?probeActions=${encodeURIComponent(JSON.stringify([probeInvocation]))}`,
@@ -2203,7 +2212,12 @@ describe("Backend 0.5 private storage maintenance", () => {
         status: "completed",
         sourceStateHash: decisionContext.audit?.engineEvidence?.stateHash,
         sourceStateVersion: decisionContext.decision?.stateVersion,
-        steps: [{ actionId: probeActionId, stateVersion: (decisionContext.decision?.stateVersion ?? -1) + 1 }],
+        steps: [
+          {
+            actionId: probeActionId,
+            stateVersion: (decisionContext.decision?.stateVersion ?? -1) + 1,
+          },
+        ],
       });
       expect(probeContext.engineProbe).not.toHaveProperty("state");
       expect(probeContext.engineProbe).not.toHaveProperty("gameState");
@@ -2430,7 +2444,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           },
         },
         provenance: {
-          reconstructed: expect.arrayContaining(["ownDeckZoneBalance"]),
+          reconstructed: [],
         },
         diagnostics: {
           unavailableSections: expect.arrayContaining([
@@ -2440,6 +2454,7 @@ describe("Backend 0.5 private storage maintenance", () => {
             "runAndEncounterProjection",
             "beliefState",
             "checkpointCapture",
+            "ownDeckZoneBalance",
           ]),
         },
         checkpointCapture: {

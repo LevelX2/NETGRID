@@ -523,6 +523,7 @@ export type AiDecisionHistoricalAudit = {
   };
   analysisSnapshot: {
     schemaVersion: "netgrid-actor-analysis-snapshot-v1";
+    snapshotId: string;
     stateHash: string;
     stateVersion: number;
     matchVersion: number;
@@ -625,7 +626,10 @@ export type AiDecisionCheckpointReplayArtifact =
       reason:
         | "historical_checkpoint_capture_not_persisted"
         | "historical_checkpoint_replay_context_unavailable"
-        | "historical_checkpoint_replay_binding_mismatch";
+        | "historical_checkpoint_replay_binding_mismatch"
+        | NonNullable<
+            StorageMaintenanceDecisionAnalysisSource["snapshotIssue"]
+          >;
       bindingFailures?: string[];
     };
 
@@ -7984,6 +7988,7 @@ function historicalAuditFor(
     },
     analysisSnapshot: {
       schemaVersion: "netgrid-actor-analysis-snapshot-v1",
+      snapshotId: snapshot.snapshotId,
       stateHash: snapshot.stateHash,
       stateVersion: snapshot.stateVersion,
       matchVersion: snapshot.matchVersion,
@@ -8109,6 +8114,7 @@ function historicalFailureAuditFor(
     },
     analysisSnapshot: {
       schemaVersion: "netgrid-actor-analysis-snapshot-v1",
+      snapshotId: snapshot.snapshotId,
       stateHash: snapshot.stateHash,
       stateVersion: snapshot.stateVersion,
       matchVersion: snapshot.matchVersion,
@@ -8216,7 +8222,9 @@ export function decisionCheckpointReplayArtifact(
     return {
       schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
       provenance: "unavailable",
-      reason: "historical_checkpoint_replay_context_unavailable",
+      reason:
+        source.snapshotIssue ??
+        "historical_checkpoint_replay_context_unavailable",
     };
   if (
     hashState(context.state) !== snapshot.stateHash ||

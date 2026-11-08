@@ -503,7 +503,11 @@ export type StorageMaintenanceDecisionAnalysisSource = {
     decisionId: string;
     actionNumber: number;
   };
-  snapshotIssue?: "snapshot_missing" | "snapshot_ambiguous";
+  snapshotIssue?:
+    | "snapshot_missing"
+    | "snapshot_ambiguous"
+    | "snapshot_reference_missing"
+    | "snapshot_binding_mismatch";
 };
 
 const MATCH_ANALYSIS_EVENT_LIMIT = 500;
@@ -1322,21 +1326,52 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           }
         | undefined;
       if (!ownDeckRow) return undefined;
-      const snapshots = this.db
-        .prepare(
-          `SELECT snapshot_id AS snapshotId, state_version AS stateVersion,
+      const capturedSnapshot = (
+        JSON.parse(traceRow.traceJson) as {
+          historicalAudit?: {
+            analysisSnapshot?: {
+              snapshotId?: unknown;
+              stateVersion?: unknown;
+              matchVersion?: unknown;
+              stateHash?: unknown;
+            };
+          };
+        }
+      ).historicalAudit?.analysisSnapshot;
+      const snapshotId = capturedSnapshot?.snapshotId;
+      const hasSnapshotReference =
+        typeof snapshotId === "string" && snapshotId.length > 0;
+      const snapshots = hasSnapshotReference
+        ? (this.db
+            .prepare(
+              `SELECT snapshot_id AS snapshotId, state_version AS stateVersion,
              match_version AS matchVersion, state_hash AS stateHash,
              game_state_json AS gameStateJson
-           FROM state_snapshots WHERE match_id = ? AND state_version = ?
-           ORDER BY created_at ASC LIMIT 2`,
-        )
-        .all(matchId, traceRow.stateVersion) as Array<{
-        snapshotId: string;
-        stateVersion: number;
-        matchVersion: number;
-        stateHash: string;
-        gameStateJson: string;
-      }>;
+           FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?`,
+            )
+            .all(matchId, snapshotId) as Array<{
+            snapshotId: string;
+            stateVersion: number;
+            matchVersion: number;
+            stateHash: string;
+            gameStateJson: string;
+          }>)
+        : [];
+      const snapshotIssue: StorageMaintenanceDecisionAnalysisSource["snapshotIssue"] =
+        !hasSnapshotReference
+          ? "snapshot_reference_missing"
+          : snapshots.length === 0
+            ? "snapshot_missing"
+            : snapshots.length > 1
+              ? "snapshot_ambiguous"
+              : snapshots[0]!.stateVersion !== traceRow.stateVersion ||
+                  snapshots[0]!.stateVersion !==
+                    capturedSnapshot?.stateVersion ||
+                  snapshots[0]!.matchVersion !==
+                    capturedSnapshot?.matchVersion ||
+                  snapshots[0]!.stateHash !== capturedSnapshot?.stateHash
+                ? "snapshot_binding_mismatch"
+                : undefined;
       const events = this.db
         .prepare(
           `SELECT event_id AS eventId, event_index AS eventIndex,
@@ -1402,11 +1437,13 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         engineEventRows,
         eventPrefixCount,
         ownDeckRow,
+        snapshotIssue,
       };
     });
     if (!materialized) return undefined;
     const trace = aiDecisionTraceRecordFromRow(matchId, materialized.traceRow);
     const exactState =
+      materialized.snapshotIssue === undefined &&
       materialized.snapshots.length === 1
         ? (JSON.parse(materialized.snapshots[0]!.gameStateJson) as GameState)
         : undefined;
@@ -1440,7 +1477,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       : undefined;
     return {
       trace: { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson },
-      ...(materialized.snapshots.length === 1
+      ...(materialized.snapshotIssue === undefined &&
+      materialized.snapshots.length === 1
         ? { snapshot: materialized.snapshots[0]! }
         : {}),
       surroundingEvents: materialized.events.map((row) => ({
@@ -1468,11 +1506,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         includeZoneBalance: true,
       }),
       ...(checkpointReplayContext ? { checkpointReplayContext } : {}),
-      ...(materialized.snapshots.length === 0
-        ? { snapshotIssue: "snapshot_missing" as const }
-        : {}),
-      ...(materialized.snapshots.length > 1
-        ? { snapshotIssue: "snapshot_ambiguous" as const }
+      ...(materialized.snapshotIssue
+        ? { snapshotIssue: materialized.snapshotIssue }
         : {}),
     };
   }

@@ -334,6 +334,15 @@ Engine-Snapshot gespeichert wurde. `maintenanceDecisionAnalysisSource` lädt
 intern den exakten historischen Snapshot und hydratisiert ihn mit seinem
 vollständigen Engine-Ereignispräfix. Der normale Detailexport bleibt actor-sicher.
 
+Der Decision-Audit nennt dafür `analysisSnapshot.snapshotId`. Mehrere Snapshots
+derselben StateVersion sind etwa am Matchstart zulässig; die Version ist kein
+eindeutiger Lookup-Schlüssel. Die Analyse lädt ausschließlich die referenzierte
+ID und validiert Version, MatchVersion und Hash. Ohne gespeicherte ID meldet sie
+`snapshot_reference_missing`, ohne Ziel `snapshot_missing`, bei abweichender
+Bindung `snapshot_binding_mismatch`. Ein Versionslookup oder die Auswahl des
+ersten Treffers ersetzt diese Bindung nicht. Neue Aufzeichnungen tragen die
+Referenz; ältere Laufzeitdaten werden nicht repariert.
+
 Der Detailendpunkt akzeptiert optional `probeActions` als URL-kodierte
 JSON-Liste aus einer bis acht expliziten Invocations mit `actionId` sowie bei
 Bedarf `selectedTargets` und `selectedChoices`. Beispiel:
