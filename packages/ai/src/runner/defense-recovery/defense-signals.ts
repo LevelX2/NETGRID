@@ -519,6 +519,7 @@ export function buildRunnerDefenseSignals(params: {
       candidates.some(
         (candidate) =>
           candidate.semanticActionType === "draw.card" &&
+          (candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
           (handSize < maxHandSize ||
             riskAdjustedHandBuffer.sameTurnRunPreparation),
       ),
@@ -531,9 +532,9 @@ export function buildRunnerDefenseSignals(params: {
           !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
           !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
           ((input.playerView.own.stackOrRdCount > 0 &&
+            (candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
             (candidate.semanticActionType === "draw.card" ||
-              ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
-                candidate.economyProjection?.timing === "immediate" &&
+              (candidate.economyProjection?.timing === "immediate" &&
                 candidate.semanticActionType !== "install.card"))) ||
             ((candidate.actionType === "activated_card_ability" ||
               candidate.actionType === "trigger_ability") &&

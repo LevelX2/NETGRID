@@ -20,6 +20,7 @@ import type {
   CardEffectImplementation,
 } from "./definition-types";
 import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
+import { runnerDirectDrawProjectionPayload } from "./runner-draw-projection";
 import {
   activatedAbilityBindingPayload,
   type ActivatedAbilityBinding,
@@ -83,6 +84,18 @@ export function activatedAbilityPayload(
         : sum,
     0,
   );
+  const runnerDrawPayload =
+    controller === "runner" && directCardDraw > 0 && state
+      ? runnerDirectDrawProjectionPayload(
+          state,
+          ability.effects.flatMap((effect) =>
+            effect.kind === "draw_cards" &&
+            (effect.recipient === "runner" || effect.recipient === "controller")
+              ? [effect.amount]
+              : [],
+          ),
+        )
+      : undefined;
   const advancementDistribution = distributeAdvancementCountersEffect(ability);
   const advancementMove = ability.effects.find(
     (effect) => effect.kind === "move_advancement_counters",
@@ -168,7 +181,13 @@ export function activatedAbilityPayload(
           gainCreditsAmount: totalImmediateCreditGain,
         }
       : {}),
-    ...(directCardDraw > 0 ? { drawCardsAmount: directCardDraw } : {}),
+    ...(directCardDraw > 0
+      ? {
+          drawCardsAmount:
+            runnerDrawPayload?.projectedGrossDrawCount ?? directCardDraw,
+        }
+      : {}),
+    ...runnerDrawPayload,
     ...(hostedCreditAddAmount > 0
       ? {
           cardImplementationAddsHostedCredits: true,

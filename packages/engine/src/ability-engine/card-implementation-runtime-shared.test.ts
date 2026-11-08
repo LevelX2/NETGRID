@@ -1,19 +1,18 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import { describe, expect, it } from "vitest";
-import type { GameState } from "@netgrid/shared";
 
 import { deterministicOnPlayResourcePayload } from "./card-implementation-runtime-shared";
+import { createGameAfterSetup } from "../index";
 
 describe("deterministic on-play action-capacity payload", () => {
   it.each([0, 1, 3, 8])(
     "quotes only drawable Runner cards with stack size %s",
     (stackSize) => {
       const definition = CARD_DEFINITIONS_BY_ID["onr_v1_095_jack-n-joe"]!;
-      const state = {
-        runner: {
-          stack: Array.from({ length: stackSize }, (_, i) => `card-${i}`),
-        },
-      } as GameState;
+      const state = createGameAfterSetup({
+        seed: `bounded-on-play:${stackSize}`,
+      });
+      state.runner.stack = state.runner.stack.slice(0, stackSize);
       expect(
         deterministicOnPlayResourcePayload(definition, "runner", state),
       ).toMatchObject({ drawCardsAmount: Math.min(3, stackSize) });

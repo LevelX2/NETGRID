@@ -159,7 +159,9 @@ export function actionEconomyProjectionFor(
   const netHandDelta =
     recycleProjection?.netHandDelta ??
     corpZoneProjection?.netHqDelta ??
-    runnerDrawProjection?.projectedNetHandDelta ??
+    (runnerDrawProjection
+      ? runnerDrawProjection.projectedNetHandDelta - cardsConsumed
+      : undefined) ??
     (topHeapReturn === "guaranteed" ? 1 : cardsDrawn - cardsConsumed);
   const drawPileCardsConsumed =
     recycleProjection?.grossDrawCount ??
@@ -678,7 +680,7 @@ export function runnerDrawProjectionFor(
 ): RunnerDrawProjection | undefined {
   const payload = action.payload;
   if (
-    !isBasicDrawAction(action) ||
+    action.side !== "runner" ||
     payload?.runnerDrawProjectionSchemaVersion !==
       RUNNER_DRAW_PROJECTION_SCHEMA_VERSION
   )

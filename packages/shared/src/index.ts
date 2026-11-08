@@ -2759,7 +2759,9 @@ export const RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION =
   "runner-fort-ice-trash-quote-v1" as const;
 
 /**
- * Actor-private planning projection for one currently legal basic Runner draw.
+ * Actor-private planning projection for a currently legal Runner draw action,
+ * including direct on-play and installed abilities. Source-card consumption
+ * is separate from this draw-only net hand delta.
  * It separates gross draws from the post-draw disposition so consumers do not
  * mistake Crash Everett's extra card visibility for net hand growth.
  */

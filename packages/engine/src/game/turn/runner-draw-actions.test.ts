@@ -3,8 +3,19 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { getLegalActions } from "../../index";
 import { buildRunnerDrawCardActions } from "./runner-draw-actions";
+import { runnerDrawProjectionPayload } from "../../ability-engine/runner-draw-projection";
 
 describe("runner draw main actions", () => {
+  it("does not certify later gross draws across an unresolved return-to-stack choice", () => {
+    expect(() => runnerDrawProjectionPayload(1, [1, 1], true, 1)).toThrow(
+      "intervening disposition",
+    );
+    expect(runnerDrawProjectionPayload(1, [1, 1], false, 1)).toMatchObject({
+      projectedGrossDrawCount: 1,
+      projectedPostDrawDispositionCount: 0,
+      projectedNetHandDelta: 1,
+    });
+  });
   it("projects a normal Runner draw as gross and net +1", () => {
     const state = createGame({
       seed: "arch-5-runner-draw-normal",

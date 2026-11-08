@@ -2,6 +2,14 @@
 
 Status: E09 produktiv
 
+Direkte Runner-Ziehaktionen veröffentlichen dieselbe aktuelle Brutto-/Abgabe-/
+Nettoquote für Basisdraw, Event und installierte Fähigkeit. Die Quote zählt
+den begrenzten Stackbestand und die verpflichtende Ersatzkartenabgabe; der
+Verbrauch einer gespielten Eventkarte bleibt ein zusätzlicher eigener Preis.
+Nur gerezzte installierte Corp-Rootquellen zählen als sichtbare Drawsteuer.
+Eine weitere separate Ziehsequenz hinter einer noch offenen Rücklegewahl
+erhält keine erfundene exakte Gesamtquote und scheitert strukturiert.
+
 ## Ziel
 
 Die Turn-Runtime bildet mehrere eigenständige Zustandsmaschinen ab. Sie darf

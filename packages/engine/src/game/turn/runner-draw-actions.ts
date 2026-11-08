@@ -1,9 +1,6 @@
-import {
-  RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
-  type GameState,
-  type LegalAction,
-} from "@netgrid/shared";
+import { type GameState, type LegalAction } from "@netgrid/shared";
 import { buildLegalAction } from "./action-builders";
+import { runnerDrawProjectionPayload } from "../../ability-engine/runner-draw-projection";
 
 export type RunnerDrawActionContext = {
   drawTaxSourceCount: number;
@@ -16,12 +13,6 @@ export function buildRunnerDrawCardActions(
 ): LegalAction[] {
   // Projects side-safe draw-sequence consequences for planning only. Draw
   // execution, taxes, and replacement handling remain runtime-authoritative.
-  const projectedGrossDrawCount = Math.min(
-    state.runner.stack.length,
-    nonNegativeInteger(context.projectedDrawCount),
-  );
-  const projectedPostDrawDispositionCount =
-    context.projectedDrawCount > 1 && projectedGrossDrawCount > 0 ? 1 : 0;
   return [
     buildLegalAction(
       state,
@@ -30,17 +21,12 @@ export function buildRunnerDrawCardActions(
       "Karte ziehen",
       "basic_action",
       [{ clicks: 1 }],
-      {
-        runnerDrawProjectionSchemaVersion:
-          RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
-        projectedGrossDrawCount,
-        projectedPostDrawDispositionCount,
-        projectedNetHandDelta:
-          projectedGrossDrawCount - projectedPostDrawDispositionCount,
-        visibleDrawTaxSourceCount: nonNegativeInteger(
-          context.drawTaxSourceCount,
-        ),
-      },
+      runnerDrawProjectionPayload(
+        state.runner.stack.length,
+        [1],
+        context.projectedDrawCount > 1,
+        nonNegativeInteger(context.drawTaxSourceCount),
+      ),
     ),
   ];
 }

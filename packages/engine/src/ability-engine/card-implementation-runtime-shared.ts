@@ -6,6 +6,7 @@ import {
   type GameState,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import { runnerDirectDrawProjectionPayload } from "./runner-draw-projection";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import type {
   CardAbilityImplementation,
@@ -77,6 +78,10 @@ export function deterministicOnPlayResourcePayload(
 
   let gainCreditsAmount = 0;
   let drawCardsAmount = 0;
+  const directDrawAmounts: number[] = [];
+  let runnerDrawPayload:
+    | ReturnType<typeof runnerDirectDrawProjectionPayload>
+    | undefined;
   let badPublicityAdded = 0;
   const selfDamageEffects = [] as Extract<
     NonNullable<typeof implementation>["effects"][number],
@@ -112,6 +117,7 @@ export function deterministicOnPlayResourcePayload(
             : 0;
     } else if (effect.kind === "draw_cards") {
       drawCardsAmount += Math.max(0, effect.amount);
+      directDrawAmounts.push(Math.max(0, effect.amount));
     }
   }
 
@@ -129,7 +135,11 @@ export function deterministicOnPlayResourcePayload(
         },
       );
     }
-    drawCardsAmount = Math.min(drawCardsAmount, state.runner.stack.length);
+    runnerDrawPayload = runnerDirectDrawProjectionPayload(
+      state,
+      directDrawAmounts,
+    );
+    drawCardsAmount = runnerDrawPayload.projectedGrossDrawCount;
   }
 
   const actionCapacityPayload = implementation
@@ -185,6 +195,7 @@ export function deterministicOnPlayResourcePayload(
   return {
     ...(gainCreditsAmount > 0 ? { gainCreditsAmount } : {}),
     ...(hasDirectDraw ? { drawCardsAmount } : {}),
+    ...runnerDrawPayload,
     ...(badPublicityAdded > 0 ? { badPublicityAdded } : {}),
     ...(selfDamage?.damageAmount ? selfDamage : {}),
     ...(heapRecoveryEffect

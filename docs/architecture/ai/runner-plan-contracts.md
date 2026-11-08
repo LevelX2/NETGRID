@@ -3828,11 +3828,20 @@ diese Encounterbewertung; sie autorisiert keinen neuen Run. Ein ETR-Break, der
 den tödlichen Schaden offenlässt, erhält keine Ausnahme. Root und Executor
 bleiben beim aktiven Runplan; der mögliche Fehlschlag bleibt sichtbar.
 
-Die Engine begrenzt den unmittelbar gequoteten Kartenbezug eines
-Runner-Draw-Events auf den aktuellen Stackbestand und erhält ausdrücklich
-auch eine Nullquote. Die Action-Economy-Projektion trennt diesen tatsächlichen
-Bezug vom Verbrauch der Eventkarte. `runner.develop_board_and_hand` erzeugt
-für ein Draw-Event mit Nullbezug keinen Entwicklungsbedarf.
+Die Engine quotiert den unmittelbaren Kartenbezug von Basisdraw,
+Runner-Draw-Event und direkter installierter Ziehfähigkeit aus demselben
+aktuellen Stackbestand. Die Quote trennt Bruttobezug, verpflichtende
+nachfolgende Abgabe und behaltenen Handzuwachs; auch Nullwerte bleiben
+ausdrücklich erhalten. Die Action-Economy-Projektion zieht den Verbrauch der
+Eventkarte zusätzlich vom Handdelta ab. Defense lässt zur Handpufferreparatur
+nur positiven tatsächlichen Handzuwachs oder gebundene Heap-Recovery zu.
+Ein Ziehen der letzten Karte mit anschließender Pflichtabgabe repariert die
+Hand nicht. Ein zusätzlicher Credit einer Mehrzweckfähigkeit ändert das nicht;
+ein eigener aktueller Economy-Consumer bleibt eine getrennte Zulassung.
+`runner.develop_board_and_hand` erzeugt für ein Draw-Event mit Nullbezug
+keinen Entwicklungsbedarf. Die Handprognose gilt nach der gebundenen
+Pflichtauswahl; die zwischenzeitliche zusätzliche private Karte ist noch kein
+behaltener Handzuwachs.
 
 Generische Heap-Recovery bewertet die nach der Aktion tatsächlich behaltene
 Hand mit dem bestehenden Discard-Vertrag. Bei vollem Handlimit muss das Ziel
