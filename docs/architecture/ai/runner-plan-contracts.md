@@ -3429,6 +3429,12 @@ Bereits gebundene Zahlungsfortsetzungen eröffnen diese strategische Prüfung
 nicht erneut: Ihr Zahlungsfenster bietet keine normale Encounter-Continue-
 Action. Der bestehende Cost-Continuation-Owner validiert weiterhin Original-
 Action, Fenster, Root und Executor vor der Ausführung.
+Auch die optionale Vollzahlungsquote für reine nächste-Encounter-Schadensmarker
+wertet eine markierte Kostenfortsetzung nicht als neue Breakentscheidung aus.
+Das gilt unabhängig davon, ob das aktuelle ICE selbst einen solchen Marker
+besitzt. Paarung 666/D109 belegt die gewöhnliche Quandary-Pumpzahlung mit
+Chiba-Angebot; fehlende Restmengen in einem normalen Encounter bleiben ein
+sichtbarer Faktenfehler.
 
 Im aktuellen Fort-Pass-Fenster unterscheiden sich die beiden angebotenen
 `continue_run`-Actions fachlich: `decision:pay` erhält den Run, `decision:end_run`

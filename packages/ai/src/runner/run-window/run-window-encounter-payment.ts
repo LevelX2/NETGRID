@@ -43,6 +43,7 @@ export function nextEncounterDamageMarkerPayment(
     !run ||
     run.phase !== "encounter_ice" ||
     (action.type !== "pump_breaker" && action.type !== "break_subroutine") ||
+    action.payload?.runnerCostPenaltySupportContinuation === true ||
     !run.afterEncounterJackOut ||
     run.afterEncounterJackOut.locked ||
     run.afterEncounterJackOut.additionalCost !== 0 ||
