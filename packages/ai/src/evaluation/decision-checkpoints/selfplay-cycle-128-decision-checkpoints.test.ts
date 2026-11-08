@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import setAsideProgramTrashChoiceJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-128-01-set-aside-program-trash-choice-d121.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -23,6 +24,14 @@ describe("selfplay cycle 128 decision checkpoints", () => {
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
+    // Both targets tie on current affordable coverage. Both are canonical
+    // icebreakers, so the existing install-cost tie-break selects Rent-I-Con.
+    expect(AI_HINTS_BY_CARD.get("onr_classic_030_psychic-friend")?.roles).toContain(
+      "icebreaker",
+    );
+    expect(AI_HINTS_BY_CARD.get("onr_classic_031_rent-i-con")?.roles).toContain(
+      "icebreaker",
+    );
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
@@ -32,7 +41,7 @@ describe("selfplay cycle 128 decision checkpoints", () => {
       actionId: "corp.resolve_choice",
       selectedChoices: {
         choiceId: "trash_installed_program_120",
-        selectedOptionIds: ["card_runner_onr_classic_030_psychic-friend_2"],
+        selectedOptionIds: ["card_runner_onr_classic_031_rent-i-con_1"],
       },
     });
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
