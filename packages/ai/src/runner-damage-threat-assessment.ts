@@ -1484,7 +1484,9 @@ function activeOpponentCards(input: AiDecisionInput): VisibleCard[] {
     ...(input.playerView.opponent.rig ?? []),
     ...input.playerView.servers.flatMap((server) => [
       ...server.ice,
-      ...server.root,
+      // Archives exposes discarded cards through a virtual root. They remain
+      // deck evidence, but are not installed threats; its protecting ICE is.
+      ...(server.id === "archives" ? [] : server.root),
     ]),
   ].filter((card) => card.known !== false);
 }

@@ -18,6 +18,78 @@ import {
 } from "./runner-damage-threat-assessment";
 
 describe("runnerDamageThreatAssessment", () => {
+  const retiredDamageCards = () => [
+    card({
+      definitionId: "onr_v1_346_vacant-soulkiller",
+      type: "asset",
+      rezzed: true,
+    }),
+    card({
+      definitionId: "onr_v1_356_dedicated-response-team",
+      type: "upgrade",
+      rezzed: true,
+    }),
+    card({ definitionId: "onr_v1_228_cinderella", type: "ice", rezzed: true }),
+  ];
+
+  it("keeps discarded damage cards as deck knowledge without activating the virtual Archives root", () => {
+    const assessment = runnerDamageThreatAssessment(
+      input({
+        handCount: 3,
+        stateVersion: 40,
+        servers: [{ id: "archives", ice: [], root: retiredDamageCards() }],
+      }),
+    );
+    expect(assessment.deckBelief.visibleDamageSourceCount).toBe(3);
+    expect(assessment.flatlineRisk).toMatchObject({
+      level: "suspected",
+      activeDamageSourceCount: 0,
+      activeDeliverySourceCount: 0,
+      recommendedHandFloor: 2,
+    });
+  });
+
+  it("preserves the active damage sources in an installed remote root", () => {
+    const assessment = runnerDamageThreatAssessment(
+      input({
+        handCount: 3,
+        stateVersion: 40,
+        servers: [
+          {
+            id: "remote_1",
+            ice: [],
+            root: retiredDamageCards().filter((c) => c.type !== "ice"),
+          },
+        ],
+      }),
+    );
+    expect(assessment.flatlineRisk.activeDamageSourceCount).toBe(2);
+  });
+
+  it("keeps installed Archives ICE active while excluding its discarded root cards", () => {
+    const assessment = runnerDamageThreatAssessment(
+      input({
+        handCount: 3,
+        stateVersion: 40,
+        servers: [
+          {
+            id: "archives",
+            ice: [
+              card({
+                definitionId: "onr_v1_228_cinderella",
+                type: "ice",
+                rezzed: true,
+              }),
+            ],
+            root: retiredDamageCards().filter((c) => c.type !== "ice"),
+          },
+        ],
+      }),
+    );
+    expect(assessment.flatlineRisk.activeDamageSourceCount).toBe(1);
+    expect(assessment.deckBelief.visibleDamageSourceCount).toBe(3);
+  });
+
   it("raises a warning from a previously revealed trace-tag operation", () => {
     const assessment = runnerDamageThreatAssessment(
       input({

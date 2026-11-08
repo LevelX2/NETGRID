@@ -2450,6 +2450,14 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Die gemeinsame Schadensbewertung trennt bekanntes Deckpotenzial von aktuell
+installierten Quellen. Die virtuelle Rootliste von Archives enthält abgelegte
+Karten; sie bleibt Deck-Evidence, erzeugt aber keine aktiven Schadens- oder
+Tagquellen und keinen akuten Vierkartenpuffer. Tatsächlich vor Archives
+installiertes ICE bleibt eine aktive Quelle. Ein erhaltenes Rezzustandsfeld
+auf einer abgelegten Karte ändert ihre Zone nicht. Central und Defense
+konsumieren diesen gemeinsamen Fact, ohne ihre Sicherheitszulassung zu umgehen.
+
 Vollständige aktuelle Tagentfernung berücksichtigt auch garantierte
 Auszahlungen bereits installierter Banken. Die Quote reserviert einen
 Entfernungsklick und zwei Credits je vorhandenem Tag; jede endliche Quelle
