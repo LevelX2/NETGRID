@@ -207,7 +207,8 @@ export function prepareRunnerTurnPlanner(params: {
     currentStepSearch,
     finish(currentStep) {
       const search =
-        currentStep ?? searchDeterministicRemainderTurnPlans({ entryFrame, offers });
+        currentStep ??
+        searchDeterministicRemainderTurnPlans({ entryFrame, offers });
       const selectedLine = search.lines.find(
         (line) => line.lineId === search.selectedLineId,
       );
@@ -248,8 +249,12 @@ export function prepareRunnerTurnPlanner(params: {
         heads: structuredClone(heads),
         lines: structuredClone(search.lines),
         rejectedCurrentSteps: search.rejectedCurrentSteps,
-        ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
-        ...(selectedHead ? { selectedHead: structuredClone(selectedHead) } : {}),
+        ...(selectedLine
+          ? { selectedLine: structuredClone(selectedLine) }
+          : {}),
+        ...(selectedHead
+          ? { selectedHead: structuredClone(selectedHead) }
+          : {}),
         ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
         headBindings: records.map((record) => ({
           candidateId: record.head.candidateId,
@@ -439,11 +444,13 @@ function headsForRoute(params: {
       },
       ...(campaignQuote ? { campaignQuote } : {}),
       evaluationValues: runnerEvaluationValues(
+        params.input,
         params.route,
         params.entryFrame,
         params.route.candidate,
       ),
       valueClaims: runnerMilestoneValueClaims({
+        input: params.input,
         route: params.route,
         entryFrame: params.entryFrame,
         rootPlanInstanceId,
@@ -453,6 +460,7 @@ function headsForRoute(params: {
       evidenceCodes: [
         "runner_current_plan_module_head",
         ...runnerCandidateCleanupProjection(
+          params.input,
           params.entryFrame,
           params.route.candidate,
         ).evidenceCodes,
@@ -474,6 +482,7 @@ function headsForRoute(params: {
 }
 
 function runnerMilestoneValueClaims(params: {
+  input: AiDecisionInput;
   route: PlanSchedulerPlanningRouteCandidate;
   entryFrame: ProjectedDecisionFrame;
   rootPlanInstanceId: string;
@@ -481,6 +490,7 @@ function runnerMilestoneValueClaims(params: {
   invocationKey: string;
 }): TurnPlanningHeadCandidate["valueClaims"] {
   const evaluationValues = runnerEvaluationValues(
+    params.input,
     params.route,
     params.entryFrame,
     params.route.candidate,
@@ -657,6 +667,7 @@ function runnerPlanHandDispositions(
 }
 
 function runnerCandidateCleanupProjection(
+  input: AiDecisionInput,
   entryFrame: ProjectedDecisionFrame,
   candidate: ActionSemanticCandidate,
 ): {
@@ -668,6 +679,7 @@ function runnerCandidateCleanupProjection(
     const delta = certifiedTurnProjectionDeltaFromCandidate({
       frame: entryFrame,
       candidate,
+      currentStepProjection: boundCurrentStepProjection(input, candidate),
     });
     const projected = applyCertifiedTurnProjectionDelta(entryFrame, delta);
     if (
@@ -721,6 +733,7 @@ function runnerCandidateCleanupProjection(
 }
 
 function runnerEvaluationValues(
+  input: AiDecisionInput,
   route: PlanSchedulerPlanningRouteCandidate,
   entryFrame: ProjectedDecisionFrame,
   candidate: ActionSemanticCandidate,
@@ -741,6 +754,7 @@ function runnerEvaluationValues(
     turn_completion: "flexibility",
   }[ownerKind ?? "turn_completion"];
   const cleanupProjection = runnerCandidateCleanupProjection(
+    input,
     entryFrame,
     candidate,
   );

@@ -2417,6 +2417,14 @@ Jede Finanzierung für einen aktuellen Run berücksichtigt den Handverbrauch
 aller Finanzierungsaktionen, ihren belegten Netto-Handgewinn und bekannten
 Selbstschaden. Auch eine reine Creditfolge darf den bestehenden Handpuffer
 nicht aus der gemeinsamen Aktionsrechnung ausklammern.
+Die allgemeine Economy-Projektion hält Quellenverbrauch und Selbstschaden als
+getrennte Fakten. Die aktuelle Restzugsuche verbindet beide am gebundenen
+unverhinderbaren Selbstschadensschritt: Sie projiziert den gesamten Handverlust,
+die durch Core-Schaden verringerte Handkapazität und anschließend unbekannte
+Handidentitäten. Die bestehende Finanzierungsrechnung zieht den Selbstschaden
+bereits separat ab und darf ihn dabei nicht erneut als Quellenverbrauch zählen.
+Vor jeder weiteren Kartenentscheidung ist die echte private Beobachtung nötig;
+ohne genaue aktuelle Bindung entsteht kein zertifizierter Selbstschadensendstand.
 Der Handpuffer stammt aus der Reservequote genau dieses Run-Parents. Fehlt
 die Quote, bleibt die Finanzierung unbewiesen. Sinkt der Puffer darunter,
 reserviert die Finanzierungssuche die mit der aktuellen Engine-Projektion

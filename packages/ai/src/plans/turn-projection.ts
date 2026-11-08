@@ -9,6 +9,10 @@ import type {
   PlanningStateIdentity,
 } from "./turn-planning-contracts";
 import { turnPlanningFingerprint } from "./turn-planning-contracts";
+import {
+  currentSelfDamageOutcome,
+  type CurrentSelfDamageOutcome,
+} from "./current-self-damage-outcome";
 
 export const PROJECTED_DECISION_FRAME_SCHEMA_VERSION =
   "projected-decision-frame-v1" as const;
@@ -108,6 +112,7 @@ export type BoundaryActionAssessment = {
 export type BoundCurrentStepProjection = {
   liquidCreditCost: number;
   boundaryKind: TurnBoundaryKind;
+  selfDamageOutcome?: CurrentSelfDamageOutcome;
 };
 
 /** Certifies the payment of one current action whose full result needs a fresh frame. */
@@ -204,9 +209,16 @@ export function boundCurrentStepProjection(
       ["damageType", "damageAmount", "xValue"].includes(field),
     )
   ) {
+    const selfDamageOutcome = currentSelfDamageOutcome(
+      input,
+      candidate,
+      action,
+    );
+    if (!selfDamageOutcome) return undefined;
     return {
       liquidCreditCost: quoted.creditCost,
       boundaryKind: "private_observation",
+      selfDamageOutcome,
     };
   }
 
@@ -355,6 +367,8 @@ export type TurnProjectionDelta = {
   /** Omitted when the certified step leaves agenda points unchanged. */
   agendaPointDelta?: ProjectionValueRange;
   handCountDelta: ProjectionValueRange;
+  handCapacityDelta?: number;
+  forgetHandIdentities?: true;
   knownZoneMoves: Array<{
     instanceId: string;
     fromZoneId: string;
@@ -475,6 +489,7 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
   frame: ProjectedDecisionFrame;
   candidate: ActionSemanticCandidate;
   boundary?: BoundaryActionAssessment;
+  currentStepProjection?: BoundCurrentStepProjection | undefined;
 }): TurnProjectionDelta {
   const candidate = params.candidate;
   if (
@@ -485,6 +500,12 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
   ) {
     throw new TurnProjectionError("candidate_not_projectable", [
       "candidate_not_current_or_side_safe",
+    ]);
+  }
+  const selfDamage = params.currentStepProjection?.selfDamageOutcome;
+  if ((candidate.costProfile.selfDamage?.length ?? 0) > 0 && !selfDamage) {
+    throw new TurnProjectionError("candidate_not_projectable", [
+      "self_damage_outcome_not_bound",
     ]);
   }
   const capacity = candidate.actionCapacityProjection;
@@ -521,7 +542,15 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
     ...(candidate.costProfile.additionalCosts.includes("agendaPointCost")
       ? { agendaPointDelta: exactRange(-exactAgendaPointCost(candidate)) }
       : {}),
-    handCountDelta: exactRange(exactImmediateHandDelta(candidate) ?? 0),
+    handCountDelta: exactRange(
+      selfDamage?.handCountDelta ?? exactImmediateHandDelta(candidate) ?? 0,
+    ),
+    ...(selfDamage
+      ? {
+          handCapacityDelta: selfDamage.handCapacityDelta,
+          forgetHandIdentities: selfDamage.forgetHandIdentities,
+        }
+      : {}),
     knownZoneMoves: [],
     boardUpdates: [],
     usageAdds: [],
@@ -574,7 +603,10 @@ export function applyCertifiedTurnProjectionDelta(
       ),
     });
   }
+  if (delta.forgetHandIdentities) zones.set("own_hand", []);
   const ownHandCount = addRanges(frame.ownHand.count, delta.handCountDelta);
+  const ownHandCapacity =
+    frame.ownHand.capacity + (delta.handCapacityDelta ?? 0);
   const dispositions = frame.ownHand.dispositions.filter((entry) =>
     zones.get("own_hand")?.includes(entry.instanceId),
   );
@@ -599,6 +631,7 @@ export function applyCertifiedTurnProjectionDelta(
       : structuredClone(frame.ownAgendaPoints),
     ownHand: {
       ...structuredClone(frame.ownHand),
+      capacity: ownHandCapacity,
       count: nonNegativeRange(ownHandCount),
       knownInstanceIds: [...(zones.get("own_hand") ?? [])].sort(),
       dispositions,
@@ -629,7 +662,7 @@ export function applyCertifiedTurnProjectionDelta(
     ),
     projectedCleanup: cleanupProjection(
       nonNegativeRange(ownHandCount),
-      frame.ownHand.capacity,
+      ownHandCapacity,
       dispositions,
     ),
     ...(delta.boundary
@@ -737,6 +770,12 @@ function validateProjectionDelta(
     }
   }
   validateRestrictedCapacityDelta(frame, delta, issues);
+  if (
+    delta.handCapacityDelta !== undefined &&
+    (!Number.isSafeInteger(delta.handCapacityDelta) ||
+      frame.ownHand.capacity + delta.handCapacityDelta < 0)
+  )
+    issues.push("invalid_hand_capacity_delta");
   if (delta.agendaPointDelta) {
     try {
       validateRange(delta.agendaPointDelta, "agenda_point_delta");

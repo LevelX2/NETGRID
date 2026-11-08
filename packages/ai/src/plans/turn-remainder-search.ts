@@ -514,7 +514,9 @@ function applyOffer(params: {
   if (!mergedClaims) {
     return { ok: false, reasonCode: "conflicting_value_claim" };
   }
-  const handDelta = exactHandDelta(frame, candidate);
+  const selfDamageOutcome = currentStepProjection?.selfDamageOutcome;
+  const handDelta =
+    selfDamageOutcome?.handCountDelta ?? exactHandDelta(frame, candidate);
   const consumesKnownHandCard =
     handDelta < 0 &&
     candidate.sourceCardInstanceId !== undefined &&
@@ -549,6 +551,12 @@ function applyOffer(params: {
     creditDelta: exactRange(creditDelta),
     agendaPointDelta: exactRange(-agendaPointCost),
     handCountDelta: exactRange(handDelta),
+    ...(selfDamageOutcome
+      ? {
+          handCapacityDelta: selfDamageOutcome.handCapacityDelta,
+          forgetHandIdentities: selfDamageOutcome.forgetHandIdentities,
+        }
+      : {}),
     knownZoneMoves: consumesKnownHandCard
       ? [
           {
