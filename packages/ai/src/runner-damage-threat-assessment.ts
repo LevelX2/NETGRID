@@ -22,6 +22,7 @@ import {
 } from "./visible-run-analysis";
 import { projectBreakerCreditPayment } from "./run-analysis/visible-run-credit-budget";
 import { projectVisibleDamagePrevention } from "./run-analysis/visible-damage-prevention";
+import { observedAffordableOperationPunishRisk } from "./runner/defense-recovery/observed-operation-punish-risk";
 
 export function knownPathAfterDamageBudget(
   path: ReturnType<typeof assessKnownRezzedIcePath>,
@@ -554,6 +555,9 @@ export function runnerDamageThreatAssessment(
     attemptedCorpDamageEvents: damageEvents.attempted.length,
     activeSignals,
     runnerTagged: input.playerView.own.tags > 0,
+    upcomingOperationPunish:
+      deckBelief.level === "confirmed" &&
+      observedAffordableOperationPunishRisk(input, history),
   });
   const uncappedRecommendedHandFloor =
     runnerDamageThreatHandFloor(flatlineRiskLevel);
@@ -1066,6 +1070,7 @@ function runnerFlatlineRiskLevel(params: {
   attemptedCorpDamageEvents: number;
   activeSignals: VisibleOpponentDamageSignals;
   runnerTagged: boolean;
+  upcomingOperationPunish: boolean;
 }): RunnerFlatlineRiskLevel {
   const activeSignalScore = params.activeSignals.score;
   const activeDamageSources = params.activeSignals.damageSourceCount;
@@ -1085,11 +1090,13 @@ function runnerFlatlineRiskLevel(params: {
         params.deckBelief.level === "confirmed")) ||
     (params.handCount <= 1 &&
       (recentResolvedDamage || activeSignalScore >= 3)) ||
-    (params.runnerTagged && activeDamageSources > 0)
+    (params.runnerTagged && activeDamageSources > 0) ||
+    (params.upcomingOperationPunish && params.handCount < 4)
   ) {
     return "critical";
   }
   if (
+    params.upcomingOperationPunish ||
     recentResolvedDamage ||
     activeSignalScore >= 4 ||
     (activeDamageSources > 0 && params.effectiveMaxHandSize <= 3) ||
