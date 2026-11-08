@@ -2476,6 +2476,16 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Im eigenen Runnerzug begründet eine durch Zugriffsbeobachtungen bestätigte
+Schadensstrategie mit einer öffentlich finanzierbaren tagabhängigen
+Schadensoperation einen Vierkartenpuffer für die nächste Corpantwort. Unter
+vier Karten wird dieser konkrete Vorbereitungsbedarf P3; bei vier Karten
+bleibt er als Installationsreserve erhalten. Er behauptet weder die aktuelle
+gegnerische Hand noch eine garantierte Tagquelle. Leere gegnerische Hand,
+fehlende Liquidität, unbekanntes Deckpotenzial und reine Archives-Evidence
+begründen diesen zusätzlichen Bedarf nicht. Stärkere aktuelle Terminal- und
+Survival-Verträge bleiben erhalten.
+
 Die gemeinsame Schadensbewertung trennt bekanntes Deckpotenzial von aktuell
 installierten Quellen. Die virtuelle Rootliste von Archives enthält abgelegte
 Karten; sie bleibt Deck-Evidence, erzeugt aber keine aktiven Schadens- oder
@@ -2691,6 +2701,14 @@ erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell
 verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
+
+Bei gezielter Bypass-Vorbereitung bleibt die gegnerische Geheimwahl eine
+unbeobachtete Antwort. Der Runner reserviert den kleinsten vollständigen
+Creditverlust und bindet seine eigene Betrags- und ICE-Zielwahl an den
+aktuellen Parent. Er leitet keine garantierte falsche Rateantwort aus der
+eigenen KI-Schwierigkeit ab; eine einzige mögliche Betragshöhe eröffnet keinen
+sinnvollen Bypass-Versuch. Die erfolgreiche Run-Fortsetzung entsteht erst nach
+der tatsächlich beobachteten Antwort.
 
 Ein erfolgreicher Vorzugriffs-Roottrash konsumiert die aktuelle Zielzahl aus
 dem kanonischen Engine-Angebot. Der Produzent zählt nur die tatsächlich vom
