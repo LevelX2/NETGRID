@@ -2995,6 +2995,15 @@ Erhalt eines späteren Ausstiegs. Native Zustände aus Paarung 512 und ihre
 wirklich angewandten Engine-Folgen sichern diese Grenze in
 `meta-512-pairing-causes.test.ts`.
 
+Liegt hinter einem vollständig gebrochenen gemischten Encounter ein bekannter,
+gerezzter reiner ETR-Restpfad, bewertet derselbe Owner alle vollständigen
+Zahlungsantworten über diesen gesamten Restpfad. Ein lokaler Preis für einen
+gewöhnlichen Breaker darf nicht mit einem vollständigen Restpfadpreis für
+fortgeltende Breakerstärke konkurrieren. Der bestehende Pfaddienst erhält
+Stärke, Ressourcen und Rootreserve; unbekannte oder gemischte innere ICE liefern
+diesen Vergleich nicht. Native Paarung 658/D236 sichert die günstigere aktuelle
+Snowball-Folge sowie den Gegenfall mit unbekanntem inneren ICE ab.
+
 Die Continue-Quote beschreibt die nächste tatsächliche Auflösungsgruppe;
 eine spätere Zahl-oder-ETR-Gruppe kann hinter dieser Informationsgrenze liegen.
 Ein Break einer anderen Gruppe erhält deshalb keine vollständige Kostenquote

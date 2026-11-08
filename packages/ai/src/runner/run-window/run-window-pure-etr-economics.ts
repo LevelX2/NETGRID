@@ -200,7 +200,25 @@ function completeEncounterAfterFixedPayment(
   };
 }
 
-/** Economic evidence for equivalent, fully paid pure-ETR continuations.
+/** The remaining scope is shared by every current payment alternative. */
+export function currentRunRemainderSupportsExactEtrPricing(
+  input: AiDecisionInput,
+): boolean {
+  return currentRunRemainingIce(input).every(
+    (ice) =>
+      ice.known &&
+      ice.rezzed === true &&
+      ice.effectiveRunQuote !== undefined &&
+      ice.effectiveRunQuote.subroutines.every(
+        (subroutine) =>
+          isVisibleHardEndRunSubroutine(subroutine) ||
+          isVisiblePayEndRunSubroutine(subroutine),
+      ),
+  );
+}
+
+/** Price a certified complete current payment and its known pure-ETR suffix.
+ * The current payment can fully break mixed effects; no such effect remains.
  * The Run Window owner consumes this value; this quote never selects an action.
  */
 export function pureEndRunEncounterEconomics(
@@ -209,17 +227,7 @@ export function pureEndRunEncounterEconomics(
 ) {
   const remainingIce = currentRunRemainingIce(input);
   if (
-    remainingIce.some(
-      (ice) =>
-        !ice.known ||
-        ice.rezzed !== true ||
-        !ice.effectiveRunQuote ||
-        ice.effectiveRunQuote.subroutines.some(
-          (subroutine) =>
-            !isVisibleHardEndRunSubroutine(subroutine) &&
-            !isVisiblePayEndRunSubroutine(subroutine),
-        ),
-    ) ||
+    !currentRunRemainderSupportsExactEtrPricing(input) ||
     (payment.budget.paymentSupportCreditsGained ?? 0) > 0
   )
     return undefined;

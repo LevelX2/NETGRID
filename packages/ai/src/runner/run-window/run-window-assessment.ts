@@ -6,6 +6,7 @@ import {
   completeCurrentEncounterEconomics,
 } from "./run-window-encounter-payment";
 import {
+  currentRunRemainderSupportsExactEtrPricing,
   pureEndRunEncounterPayment,
   pureEndRunEncounterEconomics,
 } from "./run-window-pure-etr-economics";
@@ -1034,7 +1035,10 @@ function runnerRunWindowActionAssessment(
   const currentEncounterEconomics =
     currentEncounterPayment &&
     currentPaidRisk?.decision === "preserve_continuation"
-      ? completeCurrentEncounterEconomics(input, currentEncounterPayment)
+      ? currentRunRemainingIce(input).length > 0 &&
+        currentRunRemainderSupportsExactEtrPricing(input)
+        ? pureEndRunEncounterEconomics(input, currentEncounterPayment)
+        : completeCurrentEncounterEconomics(input, currentEncounterPayment)
       : undefined;
   const pureEncounterEconomics = encounterPayment
     ? pureEndRunEncounterEconomics(input, encounterPayment)
