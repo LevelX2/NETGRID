@@ -1068,8 +1068,19 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "runner",
         "play_event",
         "Mantis, Fixer-at-Large spielen",
-        { credits: 3 },
-        { source: "mantis-card" },
+        { credits: 3, clicks: 1 },
+        {
+          source: "mantis-card",
+          payload: {
+            cardId: "mantis-card",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "onr_v1_099_mantis-fixer-at-large:abilities_on_play_search_stack_to_grip",
+            cardImplementationAbilityKey: "abilities_on_play_search_stack_to_grip",
+            cardImplementationEffectKind: "search_stack_to_grip",
+            cardImplementationSearchFilter: "any_card",
+          },
+        },
       ),
       legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
     ]);
@@ -1079,7 +1090,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         definitionId: "onr_v1_099_mantis-fixer-at-large",
         title: "Mantis, Fixer-at-Large",
         rulesText:
-          "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+          "Search your stack for a card and bring it into your grip. Shuffle your stack afterwards.",
       }),
       ...nonEmergencyRunnerHand(),
     ];

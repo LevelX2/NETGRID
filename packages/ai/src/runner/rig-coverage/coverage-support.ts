@@ -1,5 +1,6 @@
 import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
 import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
+import { runnerCandidateExecutesProgramSearch } from "../../runtime/runner-program-search-facts";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 import { uniqueBy } from "../../runtime/collection";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
@@ -363,6 +364,10 @@ export function coverageSupportActionIds(
       sourceDefinitionId !== undefined &&
       searchToolIds.has(sourceDefinitionId) &&
       candidate.semanticActionType !== "install.card" &&
+      (runnerCandidateExecutesProgramSearch(input, candidate) ||
+        candidate.functionalEffects?.some(
+          (effect) => effect.kind === "search" && effect.scope === "stack",
+        ) === true) &&
       runnerPartialProgramSearchIsPayable(input, candidate) &&
       runnerCoverageSearchTargetIsPayable(input, candidate, targetBreaker)
     );

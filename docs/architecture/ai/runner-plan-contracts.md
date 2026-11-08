@@ -1014,6 +1014,14 @@ Der Creditanteil erzeugt keinen zweiten Economy-Executor. Die
 Originalentscheidung und eine echte Engine-Anwendung prüfen Plananschluss,
 Klick-, Credit- und Kartenänderung; bei leerem Stack entsteht kein Coverage-Draw.
 
+Eine deckweite Suchwerkzeug-Fähigkeit zertifiziert keine aktuelle Stack-Suche.
+Der Coverage-Produzent prüft zusätzlich die ausführende Programm-Suchfunktion
+beziehungsweise den an diese Action gebundenen Stack-Sucheffekt. Eine reine
+Heap-Rückholung darf nur mit einer passenden sichtbaren Heap-Zielinstanz
+gebunden werden. Echte Stack-, Stack-oder-Heap- und allgemeine Stack-Kartensuchen
+bleiben zulässig. Paarung 656 sichert die native falsche Worm-Bindung bei
+ausschließlich Afreet im Heap sowie die erhaltene passende Heap-Rückholung ab.
+
 Eine notwendige MU-Ersatzinstallation bleibt auch mit angehängten
 Recurring-Credit-Zahlungsvarianten ausführbar. Ob ein direkter
 Installationsgeschwisterpfad besteht, wird ausschließlich an der vorhandenen
