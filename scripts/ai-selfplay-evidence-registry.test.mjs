@@ -5,6 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 import {
   allocateRegistryId,
+  listRegistryIdAllocations,
   backupEvidenceRegistry,
   completeJob,
   exportEvidenceSnapshot,
@@ -112,6 +113,15 @@ test("allocates collision-free pairing and case ids across jobs", () => {
     assert.equal(allocateRegistryId(db, "pairing", "job-b"), "002");
     assert.equal(allocateRegistryId(db, "case", "job-a"), "SP-001");
     assert.equal(allocateRegistryId(db, "case", "job-b"), "SP-002");
+    const own = listRegistryIdAllocations(db, "case", "job-a");
+    assert.deepEqual(
+      own.map((row) => row.id),
+      ["SP-001"],
+    );
+    assert.equal(own[0].consumedAt, null);
+    assert.ok(own[0].allocatedAt);
+    assert.deepEqual(listRegistryIdAllocations(db, "case", "absent"), []);
+    assert.equal(allocateRegistryId(db, "case", "job-a"), "SP-003");
   });
 });
 

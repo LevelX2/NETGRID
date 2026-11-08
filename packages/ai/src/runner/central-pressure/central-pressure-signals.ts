@@ -600,14 +600,18 @@ export function runnerCentralPressureCadence(
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
+    const runStartEffects = (event.publicPayload.resolvedEffects ?? []).filter(
+      (effect) => effect.kind === "start_run",
+    );
     const runnerCadenceEvent =
-      event.publicPayload.actor === "runner" &&
-      (actionType === "start_run" ||
-        event.type === "run_started" ||
-        actionType === "access_card" ||
-        actionType === "steal_agenda" ||
-        actionType === "trash_accessed_card" ||
-        actionType === "jack_out");
+      runStartEffects.length > 0 ||
+      (event.publicPayload.actor === "runner" &&
+        (actionType === "start_run" ||
+          event.type === "run_started" ||
+          actionType === "access_card" ||
+          actionType === "steal_agenda" ||
+          actionType === "trash_accessed_card" ||
+          actionType === "jack_out"));
     if (!runnerCadenceEvent) continue;
     if (
       !Number.isSafeInteger(event.turnSerial) ||
@@ -619,6 +623,27 @@ export function runnerCentralPressureCadence(
       };
     }
     if (event.turnSerial !== currentTurnSerial) continue;
+    if (runStartEffects.length > 0) {
+      const effect = runStartEffects[0]!;
+      if (
+        runStartEffects.length !== 1 ||
+        effect.visibility !== "public" ||
+        effect.side !== "runner" ||
+        !effect.runId ||
+        !effect.serverId ||
+        effect.serverId === "new_remote" ||
+        !effect.accessServerId
+      ) {
+        return {
+          routeAvailable: false,
+          evidenceCode: `runner_central_pressure_cadence_run_start_invalid:${serverId}:${event.eventId}`,
+        };
+      }
+      activeRunServerId = effect.accessServerId;
+      activeRunServerKnown = true;
+      targetRunHasAccess = false;
+      continue;
+    }
     if (actionType === "start_run" || event.type === "run_started") {
       activeRunServerId = serverIdFromEvent(event);
       activeRunServerKnown = activeRunServerId !== undefined;
@@ -634,17 +659,22 @@ export function runnerCentralPressureCadence(
     if (actionType === "access_card") {
       if (!activeRunServerKnown) {
         unboundAccessObserved = true;
-      } else if (activeRunServerId === serverId && !targetRunHasAccess) {
-        targetRunHasAccess = true;
-        lastAccessIndex = index;
-        lastValueConversionIndex = -1;
+      } else {
+        const accessedServerId = serverIdFromEvent(event);
+        if (accessedServerId !== undefined)
+          activeRunServerId = accessedServerId;
+        if (activeRunServerId === serverId && !targetRunHasAccess) {
+          targetRunHasAccess = true;
+          lastAccessIndex = index;
+          lastValueConversionIndex = -1;
+        }
       }
       continue;
     }
     if (
       (actionType === "steal_agenda" || actionType === "trash_accessed_card") &&
       activeRunServerKnown &&
-      activeRunServerId === serverId &&
+      (serverIdFromEvent(event) ?? activeRunServerId) === serverId &&
       targetRunHasAccess
     ) {
       lastValueConversionIndex = index;

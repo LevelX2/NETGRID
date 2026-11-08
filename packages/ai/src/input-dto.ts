@@ -4144,6 +4144,8 @@ function sanitizeResolvedGameEffect(
       ? { cardDefinitionId: effect.cardDefinitionId }
       : {}),
     ...(effect.cardTitle ? { cardTitle: effect.cardTitle } : {}),
+    ...(effect.runId ? { runId: effect.runId } : {}),
+    ...(effect.accessServerId ? { accessServerId: effect.accessServerId } : {}),
     ...(effect.serverId ? { serverId: effect.serverId } : {}),
     ...(effect.serverLabel ? { serverLabel: effect.serverLabel } : {}),
   };

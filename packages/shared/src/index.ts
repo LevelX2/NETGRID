@@ -489,6 +489,7 @@ export type RunnerVirusPurgeWindowState = {
 };
 
 export type ResolvedGameEffectKind =
+  | "start_run"
   | "gain_credits"
   | "add_bad_publicity"
   | "draw_cards"
@@ -558,6 +559,10 @@ export type ResolvedGameEffect = {
   sourceTitle?: string;
   cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;
+  /** Public binding for a run started inside another action or choice. */
+  runId?: string;
+  /** Actual access destination; serverId remains the attacked server. */
+  accessServerId?: Exclude<ServerId, "new_remote">;
   serverId?: ServerId;
   serverLabel?: string;
 };

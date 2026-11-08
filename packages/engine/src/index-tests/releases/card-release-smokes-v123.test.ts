@@ -2484,9 +2484,17 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_112_stumble-through-wilderspace",
+      serverId: "rd",
+      resolvedEffects: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "start_run",
+          serverId: "rd",
+          accessServerId: "rd",
+        }),
+      ]),
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+      /"(?:privatePayload|cardInstances|grip|hq|rd)"\s*:/,
     );
   });
 

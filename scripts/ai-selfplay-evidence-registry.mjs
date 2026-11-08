@@ -9,6 +9,7 @@ import {
 import { resolve } from "node:path";
 import {
   allocateRegistryId,
+  listRegistryIdAllocations,
   backupEvidenceRegistry,
   completeJob,
   correctCasePairing,
@@ -80,6 +81,7 @@ Usage:
   node scripts/ai-selfplay-evidence-registry.mjs register-series --series-id ID --recipient ADDRESS --interval COUNT [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs complete-job --job-id ID [--status completed|abandoned] [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs allocate --kind pairing|case --job-id ID [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs allocations --kind pairing|case --job-id ID [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs upsert --input pairing.json [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs correct-case-pairing --job-id ID --case-id ID --pairing-id ID --expected-case-fingerprint SHA256 --reason TEXT [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs record-report --input report.json [--db PATH]
@@ -141,6 +143,16 @@ try {
         completed: jobId,
         status: opts.status ?? "completed",
         databasePath,
+      }),
+    );
+  } else if (command === "allocations") {
+    console.log(
+      JSON.stringify({
+        allocations: listRegistryIdAllocations(
+          db,
+          required(opts, "kind"),
+          required(opts, "job-id"),
+        ),
       }),
     );
   } else if (command === "allocate") {

@@ -9,6 +9,7 @@ import {
   type LegalAction,
   type AbilityPayloadDiscriminatorField,
   type PlayerAction,
+  type ResolvedGameEffect,
   type Side,
   type StateHash,
 } from "@netgrid/shared";
@@ -90,6 +91,42 @@ export function buildEventWithHost(
     legalAction,
     host.publicContext.deps,
   );
+  const startedRun =
+    state.run && state.run.runId !== previousState.run?.runId
+      ? state.run
+      : undefined;
+  if (startedRun) {
+    actionContext.serverId = startedRun.attackedServerId;
+    actionContext.abilityFamily = "run-access";
+    actionContext.effectKind = "run";
+    if (legalAction.type !== "start_run") {
+      const runStartEffect: ResolvedGameEffect = {
+        effectId: `${startedRun.runId}.start`,
+        kind: "start_run",
+        visibility: "public",
+        side: "runner",
+        runId: startedRun.runId,
+        serverId: startedRun.attackedServerId,
+        accessServerId:
+          startedRun.accessServerOverride ?? startedRun.attackedServerId,
+      };
+      actionContext.resolvedEffects = [
+        ...(legalAction.resolvedEffects ?? []),
+        runStartEffect,
+      ];
+    }
+  }
+  if (
+    previousState.run &&
+    ["access_card", "trash_accessed_card", "steal_agenda"].includes(
+      legalAction.type,
+    )
+  ) {
+    actionContext.serverId =
+      previousState.run.breach?.serverId ??
+      previousState.run.accessServerOverride ??
+      previousState.run.attackedServerId;
+  }
   const installedPositionContext = publicInstalledPositionContext(
     previousState,
     state,

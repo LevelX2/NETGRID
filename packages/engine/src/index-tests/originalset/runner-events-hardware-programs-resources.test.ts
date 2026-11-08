@@ -740,7 +740,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
 
 describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", () => {
   const privatePayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"(?:cardInstances|privatePayload|grip|stack|hq|rd)"\s*:/;
 
   it("keeps run-start events source-bound, side-safe and replayable", () => {
     for (const [definitionId, game, serverId, expectedPayload] of [
@@ -816,6 +816,17 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
       if (definitionId === "onr_v1_098_lucidrine-booster-drug")
         expect(state.run, definitionId).toBeUndefined();
       else expect(state.run?.attackedServerId, definitionId).toBe(serverId);
+      if (state.run) {
+        expect(
+          state.eventLog.at(-1)?.publicPayload.resolvedEffects,
+        ).toContainEqual(
+          expect.objectContaining({
+            kind: "start_run",
+            serverId,
+            accessServerId: serverId,
+          }),
+        );
+      }
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         cardDefinitionId: definitionId,
         serverLabel:

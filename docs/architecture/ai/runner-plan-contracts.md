@@ -43,6 +43,15 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Die Zugriffskadenz bindet Karten- und Choice-Runs über den öffentlichen
+`ResolvedGameEffect.start_run`, normale Runaktionen über ihren primären
+`start_run`-Vertrag. Bei einer Umleitung zählt das tatsächliche Zugriffsziel,
+nicht automatisch der angegriffene Server. Ein Trash oder Steal wird demselben
+Zugriffsziel zugeordnet. Fehlende oder unvollständige Runbindungen bleiben
+fail-closed; Labels und Kartennamen ersetzen sie nicht. Paarung 644 D53 prüft
+den Engine-Aktionspräfix, DTO, die Umleitung HQ → R&D und den unveränderten
+Central-Owner für einen bezahlbaren bekannten Agenda-Zugriff.
+
 Die Installation eines Zugriffspayoffs erhält am letzten verfügbaren Klick
 denselben bereits erreichten Handboden wie die allgemeine Handentwicklung.
 Der Zentralparent und die allgemeine Handentwicklung konsumieren dafür dieselbe

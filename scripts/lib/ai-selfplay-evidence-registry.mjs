@@ -470,6 +470,23 @@ export function recordReport(db, input) {
   });
 }
 
+export function listRegistryIdAllocations(db, kind, jobId) {
+  if (kind !== "pairing" && kind !== "case") {
+    throw new Error("kind must be pairing or case");
+  }
+  if (typeof jobId !== "string" || jobId.trim().length === 0) {
+    throw new Error("jobId is required");
+  }
+  return db
+    .prepare(
+      `
+    SELECT formatted_id AS id, allocated_at AS allocatedAt, consumed_at AS consumedAt
+    FROM id_allocations WHERE kind = ? AND job_id = ? ORDER BY value
+  `,
+    )
+    .all(kind, jobId);
+}
+
 export function allocateRegistryId(db, kind, jobId) {
   if (kind !== "pairing" && kind !== "case") {
     throw new Error("kind must be pairing or case");

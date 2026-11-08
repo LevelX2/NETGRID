@@ -76,6 +76,18 @@ gemeinsamen Vertrag typgeprüft werden.
 
 ## Sichtbarkeit und Determinismus
 
+Ein innerhalb einer Karte oder Choice neu begonnener Run veröffentlicht einen
+öffentlichen `ResolvedGameEffect` vom Typ `start_run`: `runId`, angegriffene
+`serverId` und tatsächliche `accessServerId` stammen aus dem aufgelösten
+Engine-Runzustand. Vorhandene Nebeneffekte bleiben erhalten. Die äußere Aktion
+bleibt unverändert; ein normaler `start_run` benötigt keinen doppelten Effekt.
+Runstarts erhalten `abilityFamily: run-access` und `effectKind: run`, auch wenn
+ein allgemeiner Schadenswrapper eine Nullschadensauflösung protokolliert.
+Zugriff, Trash und Steal veröffentlichen das tatsächliche Zugriffsziel aus dem
+Breach beziehungsweise dem aufgelösten Run. Installierte Karten behalten ihre
+konkrete öffentliche Position. Serverlabels sind keine maschinelle Bindung.
+Die KI-DTO erhält die öffentlichen Runbindungen ohne private Replay-Daten.
+
 - Nur der normalisierte öffentliche Payload wird in PlayerViews, Chronicle,
   PublicEvents, Serverprojektionen und KI-Inputs übernommen.
 - Hidden-Info-Felder werden weiterhin durch die bestehenden positiven

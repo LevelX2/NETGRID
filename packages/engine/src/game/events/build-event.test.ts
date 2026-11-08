@@ -17,6 +17,77 @@ import {
 import { publicCounterMutation } from "../counters/public-counter-mutations";
 
 describe("game event builder", () => {
+  it.each([
+    "start_run",
+    "play_event",
+    "activated_card_ability",
+    "resolve_choice",
+  ] as const)(
+    "binds an actual run started by %s without duplicate primary semantics",
+    (type) => {
+      const previous = createGame({
+        seed: `run-event-${type}`,
+        setupMode: "completed",
+      });
+      const next = nextState(previous);
+      next.run = {
+        runId: "run_public",
+        attackedServerId: "hq",
+        accessServerOverride: "rd",
+        phase: "access",
+        position: { kind: "server", serverId: "hq" },
+        brokenSubroutineIndexes: [],
+        resolvedSubroutineIndexes: [],
+        successful: true,
+      };
+      const action: LegalAction = {
+        ...mandatoryDrawLegalAction(previous),
+        type,
+        side: "runner",
+      };
+      const event = buildEventWithHost(
+        testBuildEventHost({ damageResolved: true, damageAmount: 0 }),
+        previous.stateVersion,
+        next.stateVersion,
+        hashState(next),
+        previous,
+        next,
+        action,
+        playerActionFor(previous, action),
+      );
+      expect(event.publicPayload).toMatchObject({
+        actionType: type,
+        serverId: "hq",
+        abilityFamily: "run-access",
+        effectKind: "run",
+      });
+      if (type === "start_run")
+        expect(event.publicPayload.resolvedEffects).toBeUndefined();
+      else {
+        expect(event.publicPayload.resolvedEffects).toEqual([
+          {
+            effectId: "run_public.start",
+            kind: "start_run",
+            visibility: "public",
+            side: "runner",
+            runId: "run_public",
+            serverId: "hq",
+            accessServerId: "rd",
+          },
+        ]);
+        for (const side of ["runner", "corp"] as const) {
+          expect(
+            toPublicEventForSide(event, side).publicPayload.resolvedEffects,
+          ).toEqual(event.publicPayload.resolvedEffects);
+        }
+      }
+      expect(event.privatePayload?.runner).toEqual({
+        action: playerActionFor(previous, action),
+        legalAction: action,
+      });
+    },
+  );
+
   it("builds the same basic event shape without exposing private payloads", () => {
     const state = createGame({
       seed: "arch-60-basic-event",
