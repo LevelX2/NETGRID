@@ -225,6 +225,16 @@ Agenda-Zuglinie; die autoritative Restzugsuche darf die Kosten nicht wieder
 verlieren. Eine gespeicherte bereits gewählte Parentbindung wird dadurch
 nicht nachträglich als sicher dominiert behauptet.
 
+Bei einem unmittelbaren nichtterminalen Score unterscheidet der Score-Owner
+Zielvarianten auch nach dem kanonischen Stärkezuwachs auf bereits vorhandener
+eigener ICE im konkret gewählten Fort. Quelle, aktuelle LegalAction,
+StateVersion, Zielserver und endlicher Effektbetrag bleiben gebunden;
+fehlende Bindungen scheitern strukturiert. Das ist keine Schutzquote oder
+neue ICE-Allokation. Leere Forts bleiben legale Angebote, und ein Score ohne
+aktuell verstärkte ICE bleibt ausführbar. Nach einem sofortigen Sieg erhält
+der spätere Stärkezuwachs keinen Zusatzwert. Paarung 657 D55 sichert die
+native Wahl eines wirkenden Ziels statt der ungeschützten Archives ab.
+
 Ein bereits zugelassenes, aktuell ausführbares terminales Scoreprojekt erhält
 P3 auch dann, wenn die Wertung einen weiteren eigenen Zug benötigt. Es darf
 nicht allein wegen fehlender unmittelbarer Wertung auf P4 hinter den Aufbau

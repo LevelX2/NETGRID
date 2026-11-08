@@ -374,7 +374,63 @@ function scoreCandidates(
         candidateTargetIds(candidate).includes(agendaId)
       );
     })
-    .map((candidate) => ({ candidate, stepValue: 100 }));
+    .map((candidate) => ({
+      candidate,
+      stepValue: scoreCandidateStepValue(context, signal, candidate),
+    }));
+}
+
+function scoreCandidateStepValue(
+  context: PlanSchedulerContext,
+  signal: CorpScoreProjectSignal,
+  candidate: PlanSchedulerContext["actionCandidates"][number],
+): number {
+  if (candidate.semanticActionType !== "score.agenda") return 100;
+  const effects = (candidate.cardContextFunctionalEffects ?? []).filter(
+    (effect) =>
+      effect.kind === "global_modifier" &&
+      effect.scope === "ice" &&
+      effect.resource === "strength" &&
+      effect.target === "score.ice_strength_modifier",
+  );
+  if (effects.length === 0) return 100;
+  const input = context.input;
+  const action = input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  );
+  const selectedServer = input.playerView.servers.find(
+    (server) => server.id === action?.payload?.selectedServerId,
+  );
+  if (
+    action?.type !== "score_agenda" ||
+    action.side !== "corp" ||
+    action.source !== candidate.sourceCardInstanceId ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !selectedServer ||
+    effects.some(
+      (effect) =>
+        typeof effect.amount !== "number" ||
+        !Number.isSafeInteger(effect.amount) ||
+        effect.amount < 0,
+    )
+  ) {
+    throw new PlanResolutionFailure("missing_action_semantics", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "plan_module",
+      removalCondition:
+        "Bind the current score-strength effect to its exact agenda, LegalAction, StateVersion and selected fort with a finite canonical amount.",
+    });
+  }
+  // This only values the current, canonical effect on existing own ICE. It
+  // does not certify protection or value future strength after a terminal win.
+  const strength = effects.reduce(
+    (sum, effect) => sum + (effect.amount as number),
+    0,
+  );
+  return 100 + (signal.terminalScore ? 0 : selectedServer.ice.length * strength);
 }
 
 function scoreResourceGaps(
