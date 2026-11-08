@@ -3327,6 +3327,14 @@ dieselbe Bewertung; nach jedem Engine-Schritt werden Restmenge und tatsächlich
 verfügbare Pools neu geprüft. Ein verlorener Zugriffspfad oder fehlender
 Remote-Ertrag verwirft diese aktuelle Schadensabwehr nicht.
 
+Auch die planlokalen Informations-Neuquoten-, Ausgabenlimit- und
+Known-no-payoff-Guards erhalten eine an die aktuelle Action gebundene,
+vollständig finanzierte Teilabwehr. Das gilt insbesondere für vermeidbaren
+Hirnschaden vor einem ohnehin endenden Run, auch wenn noch kein Handfloor
+verletzt wird. Die bestehende Mitigationsquote liefert dafür exakte Restziele,
+Pump- und Breakkosten sowie vermiedenen Verlust. Fehlendes Geld, bereits
+verhinderter Schaden und andere Breakziele begründen keine Ausnahme.
+
 Die Bewertung vergleicht verbleibende Flatline-Gefahr, Hirnschaden,
 Programmverluste und Handschaden. Präventionspools werden in Effektfolge
 einmalig verbraucht; Programmverluste sind auf die tatsächlich installierten

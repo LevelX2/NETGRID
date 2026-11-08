@@ -1547,6 +1547,11 @@ function runnerRunWindowPlanStepExclusion(
       };
   }
 
+  const currentMitigation = currentEncounterMitigationForAction(
+    input,
+    action,
+    runnerRunWindowEncounterRequiredHandFloor(runOrigin),
+  );
   const informationReassessment = runOrigin?.informationBoundaryReassessment;
   if (
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
@@ -1554,6 +1559,7 @@ function runnerRunWindowPlanStepExclusion(
     !runnerInformationProbeRequiresEncounterBreak(input, runOrigin) &&
     !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
     !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
+    !currentMitigation?.supportsCurrentAction &&
     (!informationReassessment.knownPathReachable ||
       informationReassessment.fundingGap > 0 ||
       informationReassessment.unavoidableHazardCount > 0)
@@ -1578,6 +1584,7 @@ function runnerRunWindowPlanStepExclusion(
     runOrigin.encounterCreditSpendLimit !== undefined &&
     !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
     !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
+    !currentMitigation?.supportsCurrentAction &&
     legalActionCreditCost(action) > runOrigin.encounterCreditSpendLimit
   ) {
     return {
@@ -1597,6 +1604,7 @@ function runnerRunWindowPlanStepExclusion(
     currentActiveRunHasKnownNoPayoff(input) &&
     !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
     !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
+    !currentMitigation?.supportsCurrentAction &&
     !runnerRunOriginCommittedPayoff(runOrigin)
   ) {
     return {
