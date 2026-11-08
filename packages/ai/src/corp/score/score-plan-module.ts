@@ -391,7 +391,7 @@ function scoreCandidateStepValue(
       effect.kind === "global_modifier" &&
       effect.scope === "ice" &&
       effect.resource === "strength" &&
-      effect.target === "score.ice_strength_modifier",
+      effect.target === "score.fort_ice_strength_modifier",
   );
   if (effects.length === 0) return 100;
   const input = context.input;

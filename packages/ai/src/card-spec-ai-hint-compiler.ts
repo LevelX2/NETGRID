@@ -2950,7 +2950,10 @@ function appendScoredAgendaProjection(
       scope: "ice",
       timing: "scored_activated",
       resource: "strength",
-      target: "score.ice_strength_modifier",
+      target:
+        scored.kind === "choose_fort_ice_strength_bonus"
+          ? "score.fort_ice_strength_modifier"
+          : "score.selected_ice_strength_modifier",
       amount:
         scored.kind === "choose_fort_ice_strength_bonus"
           ? scored.amount
@@ -3376,6 +3379,34 @@ function deriveClosedMechanicalHintOverlay(
   }
 
   const runnerEvent = engine.runnerEventLongtail;
+  if (
+    runnerEvent?.kind ===
+    "search_stack_install_program_free_then_run_return_or_penalty"
+  ) {
+    if (
+      entry.definition.side !== "runner" ||
+      entry.definition.type !== "event" ||
+      runnerEvent.installCost !== "free" ||
+      runnerEvent.shuffleAfterwards !== true ||
+      !Number.isSafeInteger(runnerEvent.penaltyBase) ||
+      runnerEvent.penaltyBase < 0 ||
+      runnerEvent.penaltyDamageType !== "meat" ||
+      runnerEvent.visibility !== "hidden_info_barrier"
+    )
+      throw new Error("card_spec_unknown_search_install_run_shape");
+    // This proves the source zone and searched type. The compound action's
+    // existing target profile and Engine continuation retain install, run and
+    // return-or-penalty ownership; this is no permanent-install projection.
+    overlay.effects.push({
+      kind: "search",
+      scope: "stack",
+      timing: "action",
+      resource: "cards",
+      target: "program",
+      finite: true,
+    });
+    overlay.functionSignals.push("setup.program_search", "setup.search");
+  }
   if (
     runnerEvent?.kind ===
     "trash_installed_runner_connections_then_add_bad_publicity"

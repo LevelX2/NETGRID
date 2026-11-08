@@ -37,6 +37,14 @@ Deckstrategie, Hand, Agendaexposition und erwarteter früher Run-Gefahr.
 
 ## 2. `corp.score_agenda`
 
+Die aktuelle Variantenwertung eines Fort-Stärkebonus konsumiert ausschließlich
+`score.fort_ice_strength_modifier` und den bereits in der Score-LegalAction
+gebundenen `selectedServerId`. Ein einzelner nach dem Score ausgewählter
+ICE-Marker trägt dagegen `score.selected_ice_strength_modifier`; seine Auswahl
+bleibt beim bestehenden Defense-Dienst und der gebundenen Score-Choice.
+Ein solcher Einzel-ICE-Effekt verlangt keinen erfundenen Fortparameter.
+Fehlende tatsächliche Fortbindungen scheitern weiterhin sichtbar.
+
 Das Deckstrategieprofil übernimmt `score.fast_advance_support` aus den
 aktuellen kanonischen Kartenhints in den Scorebeschleunigungswert sowie die
 Supportnachweise für Fast Advance, Scoreplan und Advancement-Fenster. Ein

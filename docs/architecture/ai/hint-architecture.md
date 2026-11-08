@@ -43,6 +43,15 @@ Hint- und Doctrine-Daten unterstützen den zuständigen Planowner. Die aktuelle
 Ability-, Kosten-, Ziel- und LegalAction-Bindung bleibt Aufgabe der Semantik
 und der Engine; ein Hint allein zertifiziert keinen ausführbaren Step.
 
+Fortweite und nach dem Score einzeln gewählte ICE-Stärkeboni erhalten getrennte
+Effektziele (`score.fort_ice_strength_modifier` beziehungsweise
+`score.selected_ice_strength_modifier`). Die kombinierte kanonische
+Stack-Suche mit kostenloser Programminstallation, Run und Rückgabe oder
+Strafzahlung projiziert ihre genaue Stack-/Programm-Suchfunktion. Ihr
+vorhandenes Zielprofil und die Engine-Fortsetzungen behalten den gesamten
+Lifecycle; der Suchfakt zertifiziert keine dauerhafte Installation oder einen
+erfolgreichen Run. Eine reine Heap-Rückholung erhält dadurch keinen Stackbezug.
+
 `trash_fully_broken_passed_ice` projiziert ICE-Entfernung nach vollständigem
 Break, die Zahlung des aktuellen Rezpreises und den Selbsttrash des Programms.
 Die Installationskosten bleiben davon getrennt. Kosten, Ziel und Timing müssen
