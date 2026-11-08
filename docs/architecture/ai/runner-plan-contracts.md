@@ -204,6 +204,18 @@ belegt den Nullcredit-Contest; unbekannter Folgezustand und echtes ETR sichern
 die Gegenfälle. Die Engine-Quote für eine kombinierte nächste Encounter-Sperre
 enthält sowohl `preventsFutureBreaking` als auch `preventsJackOut`.
 
+Eine solche Sperre bleibt während der gesamten nächsten Begegnung wirksam,
+einschließlich der erst im Run-Effektpfad bewerteten Schadens- und optionalen
+Breaks. Der aktuelle Encounter und die rekursive spätere Fortsetzung besitzen
+deshalb getrennte Effektmengen: Nur die Fortsetzung darf bereits verbrauchte
+Sperren entfernen. Die Sperre darf weder einen noch laufenden Schadensbreak
+erlauben noch nach einer abgeschlossenen harmlosen Begegnung tiefere ICE
+blockieren. Eine frische Engine-Kontrolle für Shock.r vor Neural Blade verlangt
+18 Credits für vollständige Schadensvermeidung; ohne Quellbreak bleibt der
+Neural-Schaden unbrechbar. Historische Checkpoints behalten ihre ursprünglichen
+Fakten; ausdrücklich benannte aktuelle Testgegenmodelle beziehen die
+gedruckte Sperrwirkung erneut vom Engine-Produzenten.
+
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
 verbrauchen den Breakerpreis und zweckgebundene Credits nur einmal. Der

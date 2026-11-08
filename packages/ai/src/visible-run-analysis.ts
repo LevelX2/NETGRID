@@ -1083,18 +1083,16 @@ function assessKnownRezzedIcePathInternal(
       }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
-    // A known encounter consumes its queued next-encounter effects, after all
-    // of this encounter's hazards and breaks have been priced. Unknown ICE
-    // and a quoted random auto-pass cannot certify that consumption.
-    if (
-      !quote.conditionalEncounterEffects?.some(
-        (effect) => effect.kind === "random_strength_or_derez_auto_pass",
-      )
-    ) {
-      activeRunPathEffects = activeRunPathEffects.filter(
-        (effect) => effect.expiresAfterNextEncounter !== true,
-      );
-    }
+    // Current restrictions also cover the late run-effect/damage breaks below.
+    // Only recursive future suffixes may consume this encounter's expiring
+    // effects now. Unknown ICE and random auto-pass cannot prove consumption.
+    const effectsForFutureEncounters = !quote.conditionalEncounterEffects?.some(
+      (effect) => effect.kind === "random_strength_or_derez_auto_pass",
+    )
+      ? activeRunPathEffects.filter(
+          (effect) => effect.expiresAfterNextEncounter !== true,
+        )
+      : activeRunPathEffects.slice();
     const futureIce = iceCards.slice(0, Math.max(0, iceIndex));
     const runPathEffects = pathProjectionEffectsForQuote(quote).filter(
       ({ effect, sourceSubroutine }) =>
@@ -1196,7 +1194,7 @@ function assessKnownRezzedIcePathInternal(
           cloneRunnerRunPathCreditBudget(creditBudget),
           rootCards,
           visibleCorpCreditsThroughPath,
-          [...activeRunPathEffects, ...newlyQueuedRunPathEffects, effect],
+          [...effectsForFutureEncounters, ...newlyQueuedRunPathEffects, effect],
           {
             allowBreakingRunPathEffects: false,
             initialPassCount: 1,
@@ -1330,27 +1328,29 @@ function assessKnownRezzedIcePathInternal(
           ),
         };
       }
-      const breakAssessment = options.allowBreakingRunPathEffects
-        ? runPathEffectBreakAssessment({
-            iceCards,
-            iceIndex,
-            ice: effectiveIce,
-            quote,
-            effect,
-            sourceSubroutine,
-            activeRunPathEffects,
-            rigCards,
-            rigCardsForEncounter,
-            rootCards,
-            creditBudget,
-            visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
-            deflectorContext,
-            breakerStrengths,
-            carriedBreakerStrengths,
-            additionalBreakCostPerSubroutine,
-            preferFullGroupedBreak: options.preferFullGroupedBreak === true,
-          })
-        : undefined;
+      const breakAssessment =
+        options.allowBreakingRunPathEffects &&
+        !runPathEffectsPreventFutureBreaking(activeRunPathEffects)
+          ? runPathEffectBreakAssessment({
+              iceCards,
+              iceIndex,
+              ice: effectiveIce,
+              quote,
+              effect,
+              sourceSubroutine,
+              activeRunPathEffects: effectsForFutureEncounters,
+              rigCards,
+              rigCardsForEncounter,
+              rootCards,
+              creditBudget,
+              visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
+              deflectorContext,
+              breakerStrengths,
+              carriedBreakerStrengths,
+              additionalBreakCostPerSubroutine,
+              preferFullGroupedBreak: options.preferFullGroupedBreak === true,
+            })
+          : undefined;
       if (breakAssessment && "missingSourceCoverage" in breakAssessment) {
         return blockedPathAssessment(
           visibleBreakCost,
@@ -1403,7 +1403,7 @@ function assessKnownRezzedIcePathInternal(
       }
     }
     activeRunPathEffects = [
-      ...activeRunPathEffects,
+      ...effectsForFutureEncounters,
       ...newlyQueuedRunPathEffects,
     ];
     visibleCorpCreditsThroughPath += (quote?.subroutines ?? [])

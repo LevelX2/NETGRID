@@ -1,4 +1,5 @@
 import { bindSyntheticAgendaStealQuotes } from "../../agenda-steal-quotes.test-support";
+import { withCurrentPrintedLockCompanion } from "./current-printed-lock.test-support";
 import { createRunnerProgramInstallTrashContext } from "../../runtime/runner-program-install-trash-context";
 import { aiLiveRuntimeDependencies } from "../../ai-runtime-public-entrypoints";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
@@ -64,7 +65,9 @@ function capture(index: number) {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
-  // Explicit current companion: no public steal surcharge or known agenda.
+  // Explicit current-rule companion; the historical fixture stays unchanged.
+  fixture.input = withCurrentPrintedLockCompanion(fixture.input);
+  // No public steal surcharge or known agenda in this companion.
   bindSyntheticAgendaStealQuotes(fixture.input, "remote_1", 0, {});
   return fixture;
 }

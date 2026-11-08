@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { withCurrentPrintedLockCompanion } from "./current-printed-lock.test-support";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -15,7 +16,7 @@ import {
 } from "./runtime-checkpoint";
 
 function load() {
-  return JSON.parse(
+  const historical = JSON.parse(
     readFileSync(
       new URL(
         "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r19-g4-d215.json",
@@ -26,6 +27,10 @@ function load() {
   ) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
+  };
+  return {
+    ...historical,
+    input: withCurrentPrintedLockCompanion(historical.input),
   };
 }
 

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { withCurrentPrintedLockCompanion } from "./current-printed-lock.test-support";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
@@ -28,7 +29,12 @@ function capture(key: string) {
     validation: Record<string, boolean>;
     observedActionId: string;
   };
-  return { ...f, input: { ...f.input, ...buildAiDecisionInputDto(f.input) } };
+  const current = withCurrentPrintedLockCompanion(f.input);
+  return {
+    ...f,
+    historicalValidation: f.validation,
+    input: { ...current, ...buildAiDecisionInputDto(current) },
+  };
 }
 function candidates(input: AiDecisionInputWithDeckCapabilities) {
   return buildActionSemanticCandidates({
@@ -53,7 +59,7 @@ function hash(input: AiDecisionInputWithDeckCapabilities) {
     )
     .digest("hex");
 }
-describe("native current run-credit differential payoff", () => {
+describe("current-rule companions for captured run-credit differential payoff", () => {
   beforeEach(resetResidentPlanPortfolioMemory);
   it.each(["g13", "g25", "g33"])(
     "does not call unused credits or self damage a benefit in %s",
@@ -63,8 +69,8 @@ describe("native current run-credit differential payoff", () => {
           (c) => c.actionId === f.observedActionId,
         )!,
         targets = evaluateRunnerRunTargets({ input: f.input });
-      expect(Object.keys(f.validation)).toHaveLength(9);
-      expect(Object.values(f.validation).every(Boolean)).toBe(true);
+      expect(Object.keys(f.historicalValidation)).toHaveLength(9);
+      expect(Object.values(f.historicalValidation).every(Boolean)).toBe(true);
       expect(event.effectTargets).toContain("run.after_completed_self_damage");
       expect(targets.find((e) => e.actionId === event.actionId)).toMatchObject({
         pathCost: 0,
@@ -128,7 +134,7 @@ describe("native current run-credit differential payoff", () => {
       )!,
       targets = evaluateRunnerRunTargets({ input: f.input }),
       sid = event.runProjectionSummary!.serverId!;
-    expect(Object.values(f.validation).every(Boolean)).toBe(true);
+    expect(Object.values(f.historicalValidation).every(Boolean)).toBe(true);
     expect(
       runnerCardRunHasVisibleDifferentialPayoff(f.input, event, sid, targets),
     ).toBe(true);

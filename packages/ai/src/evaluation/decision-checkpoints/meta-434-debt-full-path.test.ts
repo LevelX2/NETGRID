@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { withCurrentPrintedLockCompanion } from "./current-printed-lock.test-support";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
@@ -10,7 +11,7 @@ import {
 } from "./runtime-checkpoint";
 
 function checkpoint(name = "debt-full-path") {
-  return JSON.parse(
+  const historical = JSON.parse(
     readFileSync(
       new URL(
         `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r17-${name}.json`,
@@ -21,6 +22,10 @@ function checkpoint(name = "debt-full-path") {
   ) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
+  };
+  return {
+    ...historical,
+    input: withCurrentPrintedLockCompanion(historical.input),
   };
 }
 
