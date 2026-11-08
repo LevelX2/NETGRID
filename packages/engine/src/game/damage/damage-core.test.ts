@@ -254,6 +254,38 @@ describe("damage core", () => {
     expect(state.run).toBeUndefined();
   });
 
+  it.each(["net", "meat", "core"] as const)(
+    "reports the actual retained grip after terminal %s damage without inventing discards",
+    (damageType) => {
+      const grip = ["terminal_a", "terminal_b", "terminal_c", "terminal_d"].map(
+        (id) => id as CardInstanceId,
+      );
+      const state = minimalState({
+        cardInstances: Object.fromEntries(
+          grip.map((id) => [id, instance(id, "grip_card", "runner", "grip")]),
+        ),
+        runnerGrip: grip,
+      });
+      configureDamageCoreHost(testHost());
+      const action = actionFor("corp", "play_operation");
+
+      resolveDamageOperation(state, action, damageType, 5, "terminal_source");
+
+      expect(state.winner).toBe("corp");
+      expect(state.gameEndReason).toBe("flatline");
+      expect(state.runner.grip).toEqual(grip);
+      expect(state.runner.heap).toEqual([]);
+      expect(state.randomCounter).toBe(0);
+      expect(action.payload).toMatchObject({
+        flatline: true,
+        damageAmount: 5,
+        cardsTrashed: 0,
+        runnerGripBefore: 4,
+        runnerGripAfter: state.runner.grip.length,
+      });
+    },
+  );
+
   it("opens and resolves damage prevention choices with stable metadata", () => {
     const gripCardId = "grip_1" as CardInstanceId;
     const state = minimalState({

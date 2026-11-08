@@ -65,7 +65,7 @@ export function doDamage(
       cardsTrashed: 0,
       flatline: true,
       runnerGripBefore,
-      runnerGripAfter: 0,
+        runnerGripAfter: state.runner.grip.length,
     };
   }
 
