@@ -358,8 +358,15 @@ illegale Aktion oder unvollständige Choice scheitern strukturiert; eine
 Ersatzaktion wird nicht gewählt. Ein gegnerisches Antwortfenster darf nicht
 durch eine eigene Aktionsfolge übersprungen werden.
 
-Die Antwort enthält nur eigene Ressourcenmengen, öffentliche Punkte,
-Timingpunkt, StateVersion, StateHash und RNG-Zähler je Schritt. Rohe
+Die Antwort enthält eigene Ressourcenmengen, öffentliche Punkte,
+Timingpunkt, StateVersion, StateHash und RNG-Zähler je Schritt. Nach einer
+vollständig ausgeführten Folge liefert `nextLegalActions` die tatsächlichen
+aktuellen Engine-Angebote ausschließlich des ursprünglichen Actors. Damit
+lassen sich insbesondere Folge-Choices samt aktuellen Optionswerten prüfen,
+ohne Action- oder Choice-IDs zu erfinden. Die Liste gehört zum letzten
+ausgewiesenen Branchzustand; ein gegnerisches Fenster liefert keine
+gegnerischen Angebote. Eine verlängerte Probe wird wieder vom gebundenen
+Ausgangspunkt ausgeführt und bleibt auf acht Invocations begrenzt. Rohe
 GameStates, gegnerische Privatkarten und Zufallsreihenfolgen bleiben intern.
 Matchdaten, Events und KI-Runtime-Memory werden nicht verändert. Die bisherigen
 Authentifizierungs-/Loopback-Regeln dieses read-only Endpunkts gelten weiter.

@@ -4,7 +4,12 @@ import {
   getPlayerView,
   hashState,
 } from "@netgrid/engine";
-import type { GameState, PlayerAction, Side } from "@netgrid/shared";
+import type {
+  GameState,
+  LegalAction,
+  PlayerAction,
+  Side,
+} from "@netgrid/shared";
 
 type ProbeInvocation = Pick<
   PlayerAction,
@@ -35,6 +40,8 @@ export type HistoricalEngineProbeResult = {
   sourceStateVersion?: number;
   sourceRandomCounter?: number;
   steps?: ProbeStep[];
+  /** Only the original actor's current Engine offers, at the final branch state. */
+  nextLegalActions?: LegalAction[];
 };
 
 function validInvocations(value: unknown): value is ProbeInvocation[] {
@@ -149,5 +156,6 @@ export function probeHistoricalEngineState(params: {
       winner: branch.winner,
     });
   }
+  result.nextLegalActions = getLegalActions(branch, params.actor);
   return result;
 }

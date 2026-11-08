@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyAction,
   createGame,
   createGameAfterSetup,
   getLegalActions,
@@ -17,6 +18,36 @@ function checkpoint() {
 }
 
 describe("read-only historical Engine probes", () => {
+  it("returns the exact actor-safe successor actions for a completed branch", () => {
+    const state = checkpoint();
+    const before = hashState(state);
+    const actionId = "corp.gain_credit";
+    const applied = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    expect(applied.ok).toBe(true);
+    if (!applied.ok) throw new Error("fixture_action_rejected");
+    const result = probeHistoricalEngineState({
+      state,
+      expectedStateHash: before,
+      actor: "corp",
+      actions: [{ actionId }],
+    });
+    expect(result.nextLegalActions).toEqual(
+      getLegalActions(applied.state, "corp"),
+    );
+    expect(
+      result.nextLegalActions!.every(
+        (a) => a.expiresAtStateVersion === applied.state.stateVersion,
+      ),
+    ).toBe(true);
+    for (const id of state.runner.grip)
+      expect(JSON.stringify(result)).not.toContain(id);
+    expect(hashState(state)).toBe(before);
+  });
   it("requires complete Choice values and preserves the exact RNG checkpoint", () => {
     const state = createGame({ seed: "historical-probe-mulligan" });
     const action = getLegalActions(state, "runner")[0]!;
@@ -46,6 +77,8 @@ describe("read-only historical Engine probes", () => {
     };
     const result = probeHistoricalEngineState(complete);
     expect(result.status).toBe("completed");
+    // The next setup choice belongs to the opponent, whose offers stay hidden.
+    expect(result.nextLegalActions).toEqual([]);
     expect(result.sourceRandomCounter).toBe(state.randomCounter);
     expect(result.steps![0]!.randomCounter).toBeGreaterThan(
       state.randomCounter,

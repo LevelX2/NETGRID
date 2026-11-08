@@ -2221,6 +2221,15 @@ describe("Backend 0.5 private storage maintenance", () => {
       });
       expect(probeContext.engineProbe).not.toHaveProperty("state");
       expect(probeContext.engineProbe).not.toHaveProperty("gameState");
+      expect(Array.isArray(probeContext.engineProbe.nextLegalActions)).toBe(
+        true,
+      );
+      for (const action of probeContext.engineProbe.nextLegalActions) {
+        expect(action.side).toBe("corp");
+        expect(action.expiresAtStateVersion).toBe(
+          (decisionContext.decision?.stateVersion ?? -1) + 1,
+        );
+      }
       expect(decisionContext.checkpointCapture).toMatchObject({
         schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
         provenance: "persisted_at_decision",
