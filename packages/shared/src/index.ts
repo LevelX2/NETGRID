@@ -2928,6 +2928,13 @@ export type EngineRandomizedTraceBidAssessment = {
   outcomeValue: number;
 };
 
+export type EngineRandomizedSecretGuessAssessment = {
+  kind: "secret_guess";
+  policy: "uniform_access_denial_v1";
+  minimumGuess: number;
+  maximumGuess: number;
+};
+
 export type EngineRandomizedTraceBidSelectionRequest = {
   schemaVersion: typeof ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION;
   matchId: string;
@@ -2937,7 +2944,9 @@ export type EngineRandomizedTraceBidSelectionRequest = {
   actionId: string;
   choiceId: string;
   planStepId: string;
-  assessment: EngineRandomizedTraceBidAssessment;
+  assessment:
+    | EngineRandomizedTraceBidAssessment
+    | EngineRandomizedSecretGuessAssessment;
   candidates: EngineRandomizedTraceBidCandidate[];
 };
 
@@ -3109,11 +3118,11 @@ export type EngineRandomizedTraceBidSelectionReceipt = {
   actionId: string;
   choiceId: string;
   planStepId: string;
-  assessment: EngineRandomizedTraceBidAssessment;
+  assessment: EngineRandomizedTraceBidSelectionRequest["assessment"];
   candidateFingerprint: string;
   selectedCandidate: EngineRandomizedTraceBidCandidate;
   selectedLegalAction: LegalAction;
-  randomDraw: RandomDrawRecord;
+  randomDraw: RandomDrawRecord | AiTurnPlanRandomDrawRecord;
 };
 
 export type EngineError = {
@@ -4320,7 +4329,7 @@ export type PlayerView = {
     approachedIce?: VisibleCard;
     encounteredIce?: VisibleCard;
     accessedCard?: VisibleCard;
-    /** Runner-only engine-certified ICE that will be passed on approach. */
+    /** Publicly chosen, Engine-certified ICE that will be passed on approach. */
     pendingAutoPassIceId?: CardInstanceId;
     breach?: {
       breachId: string;

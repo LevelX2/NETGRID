@@ -1,11 +1,8 @@
 import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgrid/engine";
-import {
-  type AiDecisionInput,
-  type AiDifficulty,
-  type CardDefinitionId,
-} from "@netgrid/shared";
+import { type AiDecisionInput, type CardDefinitionId } from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 import { assessCorpTraceBid } from "./corp-trace-bid-assessment";
 import {
@@ -339,7 +336,18 @@ function corpDesiredBidAmount(
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:",
     )
   ) {
-    return socialEngineeringCorpGuessAmount(input.difficulty, maxBid);
+    if (input.difficulty !== "easy" && maxBid > 2) {
+      throw new PlanResolutionFailure("invalid_support_graph", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((action) => action.type),
+        owner: "rules_contract",
+        removalCondition:
+          "A nontrivial secret guess requires the bound atomic Engine selection, not a resolver policy.",
+      });
+    }
+    return Math.min(2, maxBid);
   }
   if (input.difficulty === "easy") return 0;
   const sourceDefinitionId =
@@ -351,15 +359,4 @@ function corpDesiredBidAmount(
     maxBid,
     ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
   }).recommendedBid;
-}
-
-export function socialEngineeringCorpGuessAmount(
-  difficulty: AiDifficulty,
-  maximumGuess: number,
-): number {
-  if (difficulty === "hard") return maximumGuess;
-  if (difficulty === "normal") {
-    return Math.max(2, Math.ceil(maximumGuess * 0.75));
-  }
-  return Math.min(2, maximumGuess);
 }

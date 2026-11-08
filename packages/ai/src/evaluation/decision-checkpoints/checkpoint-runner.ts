@@ -1,5 +1,9 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { quoteCorpPunishRoute } from "@netgrid/engine";
+import {
+  quoteCorpPunishRoute,
+  quoteRandomizedTraceBidSelection,
+  applyRandomizedTraceBidSelection,
+} from "@netgrid/engine";
 
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -66,9 +70,40 @@ export function runAiDecisionCheckpoint(
     };
   }
   const input = buildAiDecisionInput(state, fixture.actor, options);
-  const decision = chooseAiAction(input, {
+  let decision = chooseAiAction(input, {
     quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+    quoteRandomizedTraceBidSelection: (request) =>
+      quoteRandomizedTraceBidSelection(state, request),
   });
+  if (decision.selectionKind === "engine_randomized_trace_bid_selection") {
+    const applied = applyRandomizedTraceBidSelection(
+      state,
+      decision.engineCommand,
+    );
+    if (!applied.ok) {
+      return {
+        ok: false,
+        code: "engine_legality_drift",
+        message: applied.error.message,
+        input,
+        decision,
+      };
+    }
+    const {
+      engineCommand: _command,
+      selectionKind: _kind,
+      ...resolved
+    } = decision;
+    decision = {
+      ...resolved,
+      selectionKind: "direct",
+      actionId: applied.receipt.selectedLegalAction.actionId,
+      selectedChoices: {
+        choiceId: applied.receipt.choiceId,
+        selectedOptionIds: [applied.receipt.selectedCandidate.optionId],
+      },
+    };
+  }
   const strategicIntent = getStrategicIntentMemorySnapshot(
     input,
     fixture.deckSnapshot.deckSnapshotId,

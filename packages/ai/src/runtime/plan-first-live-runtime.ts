@@ -433,6 +433,7 @@ import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 import { turnKey } from "./runtime-identifiers";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { assessTraceBidCandidates } from "./trace-bid-assessment";
+import { assessSecretGuessCandidates } from "./secret-guess-assessment";
 import { latestTraceContext } from "./trace-context";
 import {
   candidateIsVisibleCorpAgendaInstall,
@@ -4713,14 +4714,18 @@ function decisionFromScheduler(
           latestTraceContext(input),
         )
       : undefined;
+  const randomizedBidAssessment =
+    (pendingChoice
+      ? assessSecretGuessCandidates(input, pendingChoice)
+      : undefined) ?? traceBidAssessment;
   const selectedChoices = randomizedIceInstallNearTie
     ? undefined
     : (boundTraceChoices ??
-      (traceBidAssessment
-        ? traceBidAssessment.candidates.length === 1
+      (randomizedBidAssessment
+        ? randomizedBidAssessment.candidates.length === 1
           ? {
               choiceId: pendingChoice!.choiceId,
-              selectedOptionIds: [traceBidAssessment.selectedOptionId],
+              selectedOptionIds: [randomizedBidAssessment.selectedOptionId],
             }
           : undefined
         : dependencies.selectedChoicesForDecision(
@@ -5275,7 +5280,10 @@ function decisionFromScheduler(
     context,
     result,
   });
-  if (traceBidAssessment && traceBidAssessment.candidates.length >= 2) {
+  if (
+    randomizedBidAssessment &&
+    randomizedBidAssessment.candidates.length >= 2
+  ) {
     const matchId = input.matchId?.trim();
     const quoteSelection = options.quoteRandomizedTraceBidSelection;
     const planStepId =
@@ -5295,7 +5303,7 @@ function decisionFromScheduler(
         planInstanceId: planId,
         stepId: planStepId,
         removalCondition:
-          "A Blind Trace resolution with multiple rational candidates requires the state-bound Engine Trace-Bid RNG quote.",
+          "A bid or secret guess with multiple admissible candidates requires the state-bound atomic Engine selection quote.",
       });
     }
     const quote = quoteSelection({
@@ -5307,8 +5315,8 @@ function decisionFromScheduler(
       actionId: action.actionId,
       choiceId: pendingChoice.choiceId,
       planStepId,
-      assessment: traceBidAssessment.assessment,
-      candidates: traceBidAssessment.candidates,
+      assessment: randomizedBidAssessment.assessment,
+      candidates: randomizedBidAssessment.candidates,
     });
     if (!quote.ok) {
       throw new PlanResolutionFailure("invalid_support_graph", {
@@ -5323,7 +5331,7 @@ function decisionFromScheduler(
         planInstanceId: planId,
         stepId: planStepId,
         removalCondition:
-          "The Engine must revalidate the exact resolve_choice action, Choice and every weighted Trace bid before consuming randomness.",
+          "The Engine must revalidate the exact resolve_choice action, Choice and every weighted bid or guess before consuming randomness.",
       });
     }
     return {

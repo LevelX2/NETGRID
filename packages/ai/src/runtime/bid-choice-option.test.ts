@@ -140,18 +140,18 @@ describe("selectedBidChoiceOptionId", () => {
     ).toBe("bid_0");
   });
 
-  it("biases Social Engineering guesses high on hard without hidden Runner data", () => {
-    expect(
+  it("requires atomic Engine selection for nontrivial hard secret guesses", () => {
+    expect(() =>
       selectedBidChoiceOptionId(
         input("corp", "hard"),
         bidChoice(
           "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:source:42",
-          [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          [2, 3, 4, 5, 6, 7, 8],
           "guess",
         ),
         {},
       ),
-    ).toBe("guess_8");
+    ).toThrow("invalid_support_graph");
   });
 
   it("uses the highest legal Runner bid against a hidden secret-spend comparison", () => {

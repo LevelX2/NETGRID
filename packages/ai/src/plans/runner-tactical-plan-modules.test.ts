@@ -207,7 +207,7 @@ describe("Runner tactical plan modules", () => {
             icePosition: 0,
             visibleIceInstanceId: "hq-wall",
             intendedHiddenAmount: 2,
-            expectedCorpGuessAmount: 3,
+            guessOutcome: "opponent_choice_unobserved",
             evidenceCodes: ["runner_targeted_bypass_preflight:complete"],
           },
         },

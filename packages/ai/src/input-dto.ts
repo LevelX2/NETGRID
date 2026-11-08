@@ -1081,7 +1081,7 @@ function sanitizePlayerView(
               ? { followupRunOpportunity: view.run.followupRunOpportunity }
               : {}),
             attackedServerId: view.run.attackedServerId,
-            ...(view.side === "runner" && view.run.pendingAutoPassIceId
+            ...(view.run.pendingAutoPassIceId
               ? { pendingAutoPassIceId: view.run.pendingAutoPassIceId }
               : {}),
             ...(view.run.accessServerOverride !== undefined
