@@ -291,6 +291,8 @@ function corpScoredAgendaHqShuffleChoiceBinding(params: {
     const creditGain = agendaPoints * params.profile.creditPerAgendaPoint;
     const fundingCreditValue = Math.min(remainingFundingGap, creditGain) * 60;
     const dispositionIsProductive =
+      candidate.disposition.terminalRelocation?.lowerDestinationExposure ===
+        true ||
       candidate.disposition.destinationAdjustment < 0 ||
       (remainingFundingGap > 0 &&
         candidate.disposition.destinationAdjustment - fundingCreditValue < 0);

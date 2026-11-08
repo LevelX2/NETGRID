@@ -17,6 +17,9 @@ export type CorpHandDispositionDestination =
 export type CorpHandDispositionScore = DiscardChoiceKeepScore & {
   readonly destination: CorpHandDispositionDestination;
   readonly destinationAdjustment: number;
+  readonly terminalRelocation?: NonNullable<
+    ReturnType<typeof corpTerminalHqAgendaShuffleExposure>
+  >;
   readonly evidence: readonly string[];
 };
 
@@ -129,6 +132,7 @@ export function corpHandDispositionScore(params: {
     total: baseKeepScore.total + destinationAdjustment,
     destination,
     destinationAdjustment,
+    ...(terminalRelocation ? { terminalRelocation } : {}),
     evidence: [
       ...(baseKeepScore.evidence ?? []),
       `corp_hand_destination:${destination}`,

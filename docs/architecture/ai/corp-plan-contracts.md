@@ -3291,6 +3291,12 @@ Engine-Accessquotes; sie behauptet keine unbekannte R&D-Reihenfolge.
 Nur bei belegter geringerer Zielexposition darf Handmanagement den
 Matchpoint-Haltebonus entfernen. Aktuelle Planbindungen bleiben geschützt;
 fehlende oder veraltete Quotes begründen keine solche Freigabe. Der Score-Owner
+erhält den exakten terminalen Expositionsvergleich als typisierten
+Handdispositionsbeleg. Bei ausgeschöpftem Klickhorizont lässt er die belegte
+risikoärmere Rückmischung auch dann zu, wenn die allgemeine Bewertung nach
+ICE-Anzahl und Scoreeffizienz positiv bleibt; aktuelle Planbindungen
+behalten ihren Schutz. Ein solcher lokaler Risikovergleich beweist keinen
+späteren Gesamtsieg. Der Score-Owner
 bindet die daraus gewählte Kartenmenge vor dem Score an seine Continuation.
 Der Choice-Resolver übernimmt weiterhin ausschließlich diese exakte Bindung.
 Ist R&D bei einem nullklickigen Score bereits leer und ist der eigene Sieg
