@@ -10,6 +10,15 @@ Nur gerezzte installierte Corp-Rootquellen zählen als sichtbare Drawsteuer.
 Eine weitere separate Ziehsequenz hinter einer noch offenen Rücklegewahl
 erhält keine erfundene exakte Gesamtquote und scheitert strukturiert.
 
+`runnerVirusCounterEffectThreshold` veröffentlicht als statischen öffentlichen
+Regelfact die kleinste positive Wirkungsschwelle eines nativen Countertyps.
+Die Quelle sind die aktuellen mechanischen CardSpec-Projektionen, einschließlich
+expliziter Schwellen, Countergruppen und Per-Counter-Formeln. Unbekannte oder
+widersprüchliche Mechaniken scheitern strukturiert. Der Fact behauptet weder
+einen aktuellen Trigger noch einen sicheren Ertrag und benötigt keine
+verdeckten Spielzustandsdaten. Globale Poolwirkungen bleiben von der
+fortdauernden Installation des ursprünglichen Programms getrennt.
+
 ## Ziel
 
 Die Turn-Runtime bildet mehrere eigenständige Zustandsmaschinen ab. Sie darf

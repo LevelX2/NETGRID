@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { runnerVirusCounterEffectThreshold } from "@netgrid/engine";
 import type { CorpVirusPressureSignal } from "./virus-pressure-types";
 import {
   corpPurgeHasVisibleStrategicPressure,
@@ -12,6 +13,7 @@ export function buildCorpVirusPressureSignals(
       action.type === "purge_virus_counters" ||
       action.type === "purge_runner_virus_counters",
   );
+  if (!purgeAction) return [];
   const visibleVirusCounters = visibleRunnerVirusCounters(input);
   const virusPressure: CorpVirusPressureSignal[] = purgeAction
     ? [
@@ -41,13 +43,10 @@ function visibleRunnerVirusCounters(input: AiDecisionInput): number {
     input.playerView.own.identity.counterDisplays?.reduce((sum, display) => {
       if (display.displayKind !== "virus") return sum;
       const amount = Math.max(0, Math.floor(display.amount ?? 0));
-      const activeThreshold =
-        display.counterType === "highlighter" ||
-        display.counterType === "garbage" ||
-        display.counterType === "cascade" ||
-        display.counterType === "crumble"
-          ? 2
-          : 1;
+      if (amount === 0) return sum;
+      const activeThreshold = runnerVirusCounterEffectThreshold(
+        display.counterType,
+      );
       return amount >= activeThreshold ? sum + amount : sum;
     }, 0) ?? 0;
   return installedCounters + identityCounters;

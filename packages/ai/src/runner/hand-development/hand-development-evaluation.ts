@@ -18,6 +18,7 @@ import {
 } from "../../actions/persistent-development-action";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { actionClickCost } from "../../runtime/action-cost";
+import { runnerDrawProjectionFor } from "../../actions/action-economy-projection";
 import {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION,
@@ -838,7 +839,8 @@ function currentNeedForCard(
   if (
     role === "draw_or_search_engine" &&
     context.legalAction?.type === "play_event" &&
-    context.legalAction.payload?.drawCardsAmount === 0
+    (context.legalAction.payload?.drawCardsAmount === 0 ||
+      runnerDrawProjectionFor(context.legalAction)?.projectedNetHandDelta === 0)
   ) {
     return "none";
   }

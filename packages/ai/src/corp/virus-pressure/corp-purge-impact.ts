@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { endTheRunSubroutineCount } from "../../visible-run-analysis";
+import { runnerVirusCounterEffectThreshold } from "@netgrid/engine";
 import type { CorpBoardTriage } from "../../runtime/semantic-runtime-corp-board-triage";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../../runtime/semantic-runtime-corp-central-pressure";
 import { currentCorpMandatoryDrawCardsPerWindow } from "../../runtime/corp-scoreline-feasibility";
@@ -185,16 +186,7 @@ export function corpPurgeHasVisibleStrategicPressure(
 function runnerVirusCounterHasActiveEffect(
   entry: VisibleRunnerVirusCounter,
 ): boolean {
-  switch (entry.counterType) {
-    case "highlighter":
-      return entry.amount >= 2;
-    case "garbage":
-    case "cascade":
-    case "crumble":
-      return entry.amount >= 2;
-    default:
-      return entry.amount > 0;
-  }
+  return entry.amount >= runnerVirusCounterEffectThreshold(entry.counterType);
 }
 
 function visibleRunnerVirusCounters(

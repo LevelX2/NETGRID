@@ -797,7 +797,8 @@ export function runnerGenericDrawDevelopmentSignals(
     (candidate) =>
       (candidate.actionType === "draw_card" &&
         candidate.semanticActionType === "draw.card" &&
-        candidate.sourceKind === "basic_action") ||
+        candidate.sourceKind === "basic_action" &&
+        (candidate.economyProjection?.netHandDelta ?? 0) > 0) ||
       (candidate.sourceKind === "card" &&
         candidate.tagEffectProfile?.acuteTagRemoval !== true &&
         candidate.economyProjection?.timing === "immediate" &&

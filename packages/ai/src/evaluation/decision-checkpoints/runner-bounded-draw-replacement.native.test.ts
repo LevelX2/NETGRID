@@ -22,6 +22,11 @@ import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { runnerGenericDrawDevelopmentSignals } from "../../runner/hand-development/development-signals";
+import { coverageSupportActionIds } from "../../runner/rig-coverage/coverage-support";
+import { assessRunnerHandRotation } from "../../runtime/runner-hand-rotation-assessment";
+import { buildRunnerEconomyPosture } from "../../runner-economy-posture";
+import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 
 const crash = "onr_v1_157_crash-everett-inventive-fixer",
   saloon = "onr_v1_179_silicon-saloon-franchise",
@@ -39,11 +44,11 @@ const deck = {
     { id: jack, quantity: 1 },
   ],
 } as typeof ORIGINALSET_DEFAULT_DECKS.runner;
-function fixture(stackCount = 1, withCrash = true) {
+function fixture(stackCount = 1, withCrash = true, activeDeck = deck) {
   let state = toRunnerTurn(
     createGameAfterSetup({
       seed: `bounded-draw:${stackCount}:${withCrash}`,
-      runnerDeck: deck,
+      runnerDeck: activeDeck,
       corpDeck: {
         ...ORIGINALSET_DEFAULT_DECKS.corp,
         cards: [
@@ -173,6 +178,89 @@ it("subtracts both mandatory disposition and the event source from a bounded bur
   expect(replay.ok).toBe(true);
   if (replay.ok) expect(hashGameState(replay.state)).toBe(hashGameState(state));
 });
+
+function soleAnswerDraw(withCrash: boolean) {
+  const codecracker = "onr_v1_014_codecracker";
+  const activeDeck = {
+    ...deck,
+    cards: [
+      ...deck.cards.filter((card) => card.id !== codecracker),
+      { id: codecracker, quantity: 1 },
+    ],
+  };
+  const state = fixture(1, withCrash, activeDeck);
+  const answer = Object.values(state.cardInstances).find(
+    (card) => card.definitionId === codecracker,
+  )!;
+  removeEverywhere(state, answer.instanceId);
+  for (const id of state.runner.stack.splice(0)) {
+    state.runner.heap.push(id);
+    state.cardInstances[id]!.zone = { side: "runner", zone: "heap" };
+  }
+  state.runner.stack.push(answer.instanceId);
+  answer.zone = { side: "runner", zone: "stack" };
+  answer.faceup = false;
+  const input = buildAiDecisionInput(state, "runner", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: "native-sole-answer-draw",
+      side: "runner",
+      cards: activeDeck.cards.map((c) => ({
+        cardId: c.id,
+        quantity: c.quantity,
+      })),
+    },
+  });
+  const action = input.legalActions.find(
+    (a) => a.type === "draw_card" && a.source === "basic_action",
+  )!;
+  const candidates = buildActionSemanticCandidates({
+    legalActions: [action],
+    observerSide: "runner",
+    stateVersion: state.stateVersion,
+  });
+  const rotation = assessRunnerHandRotation(input, []);
+  expect(rotation.status).toBe("capacity_available");
+  expect(action.payload?.projectedNetHandDelta).toBe(withCrash ? 0 : 1);
+  return { input, action, candidates, rotation };
+}
+
+it.each([true, false])(
+  "admits a native basic draw for option development only if it retains a card (replacement %s)",
+  (withCrash) => {
+    const { input, action, candidates, rotation } = soleAnswerDraw(withCrash);
+    const developments = runnerGenericDrawDevelopmentSignals(
+      input,
+      candidates,
+      {} as RunnerStrategicIntentProfile,
+      [],
+      rotation,
+      { admissible: false, evidenceCodes: [] },
+      buildRunnerEconomyPosture({ input }),
+    );
+    expect(developments.flatMap((d) => d.actionIds)).toEqual(
+      withCrash ? [] : [action.actionId],
+    );
+  },
+);
+
+it.each([true, false])(
+  "admits a native basic draw for an actual stack coverage answer only if it retains a card (replacement %s)",
+  (withCrash) => {
+    const { input, action, candidates, rotation } = soleAnswerDraw(withCrash);
+    expect(input.ownDeckCapabilities).toBeDefined();
+    const support = coverageSupportActionIds(
+      input,
+      candidates,
+      input.ownDeckCapabilities!,
+      "breaker_code_gate",
+      { handRotation: rotation },
+    );
+    expect(support.drawForAnswerActionIds).toEqual(
+      withCrash ? [] : [action.actionId],
+    );
+  },
+);
 
 it("counts actual replaced draws for visible taxes while keeping an unrezzed source private", () => {
   let state = fixture(2);

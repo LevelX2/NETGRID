@@ -2414,6 +2414,17 @@ Highlighter und Cascade mindestens zwei Counter; ein einzelner Vienna-Counter
 ist bereits aktiv. Insbesondere darf Crumble mit einem Counter neben Vienna
 mit einem Counter keine positive Purge-Zulassung erzeugen.
 
+Signalbildung und materieller Purge-Wert verwenden für gemeinsame
+Corp-Counterpools denselben statischen Engine-Fact
+`runnerVirusCounterEffectThreshold`. Dessen Minimum stammt aus der aktuellen
+CardSpec-Mechanik: explizite Schwelle, Countergruppe oder positive
+Per-Counter-Formel. Insbesondere wirkt Thought erst ab drei Countern.
+Fehlende oder mehrdeutige Mechaniken erhalten keinen pauschalen Wert eins.
+Die Schwelle belegt eine mögliche Wirkung, noch keinen künftigen Trigger
+oder sicheren Ertrag. Der Trash des ursprünglichen Virusprogramms löscht
+gemeinsame Counter nicht; maßgeblich bleibt der tatsächliche globale
+Engine-Dispatcher.
+
 **Klasse:** `urgent_response` oder `bounded_sequence`
 **Rolle:** Vordergrund/Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

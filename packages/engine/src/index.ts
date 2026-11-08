@@ -160,3 +160,5 @@ export {
   quoteLastCentralCounterConversion,
   type CentralCounterConversionQuote,
 } from "./game/view/visible-central-counter-conversion";
+
+export { runnerVirusCounterEffectThreshold } from "./game/counters/runner-virus-counter-effect-threshold";

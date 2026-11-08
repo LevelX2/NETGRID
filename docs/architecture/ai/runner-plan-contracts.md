@@ -3839,7 +3839,14 @@ Ein Ziehen der letzten Karte mit anschließender Pflichtabgabe repariert die
 Hand nicht. Ein zusätzlicher Credit einer Mehrzweckfähigkeit ändert das nicht;
 ein eigener aktueller Economy-Consumer bleibt eine getrennte Zulassung.
 `runner.develop_board_and_hand` erzeugt für ein Draw-Event mit Nullbezug
-keinen Entwicklungsbedarf. Die Handprognose gilt nach der gebundenen
+keinen Entwicklungsbedarf. Dasselbe gilt für den generischen Antwort-/
+Entwicklungszweck bei null behaltenen neuen Karten, auch wenn eine Karte
+zwischenzeitlich gezogen und danach zwingend abgegeben wird. Generischer
+Basisdraw verlangt dafür positiven Handzuwachs; Coverage-Draw-Routen schließen
+eine native Draw-Quote mit null behaltenen neuen Karten ebenfalls aus. Andere
+Search-/Recovery-Wirkungsfamilien behalten ihre eigenen Nachweise. Ein Event,
+das seine Quelle verbraucht und eine neue Karte behält, bleibt als mögliche
+Handrotation gesondert zu bewerten. Die Handprognose gilt nach der gebundenen
 Pflichtauswahl; die zwischenzeitliche zusätzliche private Karte ist noch kein
 behaltener Handzuwachs.
 

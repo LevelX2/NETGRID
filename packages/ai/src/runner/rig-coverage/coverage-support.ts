@@ -22,6 +22,8 @@ import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
 import { coverageKindForPlanRole } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
+import { runnerDrawProjectionFor } from "../../actions/action-economy-projection";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 export function runnerCoverageSearchLifecycleBinding(
   gap: RunnerCoverageGapSignal,
   candidates: readonly Pick<
@@ -513,7 +515,25 @@ export function coverageSupportActionIds(
       ...safeCardDrawForAnswerCandidates,
       ...safeBasicDrawSubstitutes,
       ...sideSafeRoleBasicDraws,
-    ].map((candidate) => candidate.actionId),
+    ]
+      .filter((candidate) => {
+        const action = input.legalActions.find(
+          (legalAction) => legalAction.actionId === candidate.actionId,
+        );
+        if (!action)
+          throw new PlanResolutionFailure("stale_or_future_action_reference", {
+            side: input.side,
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            legalActionTypes: input.legalActions.map((a) => a.type),
+            unresolvedActionIds: [candidate.actionId],
+            owner: "plan_module",
+            removalCondition:
+              "Bind coverage draw support to its current native LegalAction.",
+          });
+        return runnerDrawProjectionFor(action)?.projectedNetHandDelta !== 0;
+      })
+      .map((candidate) => candidate.actionId),
   };
 }
 

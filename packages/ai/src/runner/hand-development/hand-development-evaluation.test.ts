@@ -34,6 +34,38 @@ import {
 } from "../../runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
+  it.each([0, 1])(
+    "uses retained draw yield %i, independently of consuming the event",
+    (retained) => {
+      const card = visibleCard("jack", {
+        definitionId: "onr_v1_095_jack-n-joe",
+        title: "Jack ’n’ Joe",
+        type: "event",
+        cost: 0,
+      });
+      const action = playEventAction("play-jack-bounded", card, 0);
+      action.payload = {
+        ...action.payload,
+        drawCardsAmount: 1,
+        runnerDrawProjectionSchemaVersion: "runner-draw-projection-v1",
+        projectedGrossDrawCount: 1,
+        projectedPostDrawDispositionCount: 1 - retained,
+        projectedNetHandDelta: retained,
+        visibleDrawTaxSourceCount: 0,
+      };
+      const input = runnerInput({
+        credits: 15,
+        hand: [card],
+        legalActions: [action],
+      });
+      input.playerView.own.stackOrRdCount = 1;
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        card.instanceId,
+      );
+      expect(evaluation?.currentNeed === "none").toBe(retained === 0);
+    },
+  );
   it.each([1, 5, 8])(
     "requires capacity for an unbound five-card draw with %i cards on the last click",
     (handCount) => {
@@ -868,17 +900,25 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(hint?.effects).not.toContainEqual(
       expect.objectContaining({ kind: "link" }),
     );
-    expect.soft(
-      findByInstance(evaluateRunnerHandDevelopment({ input }), source.instanceId),
-    ).toMatchObject({
-      developmentRole: "defense_support",
-      currentNeed: "none",
-      deferReason: "no_current_need",
-    });
+    expect
+      .soft(
+        findByInstance(
+          evaluateRunnerHandDevelopment({ input }),
+          source.instanceId,
+        ),
+      )
+      .toMatchObject({
+        developmentRole: "defense_support",
+        currentNeed: "none",
+        deferReason: "no_current_need",
+      });
 
     input.playerView.servers[0]!.ice.push(traceIce);
     expect(
-      findByInstance(evaluateRunnerHandDevelopment({ input }), source.instanceId),
+      findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        source.instanceId,
+      ),
     ).toMatchObject({
       developmentRole: "defense_support",
       currentNeed: "setup",
