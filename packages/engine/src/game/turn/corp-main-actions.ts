@@ -34,6 +34,7 @@ import { quoteCorpScoreRecovery } from "../hidden-zone/corp-score-recovery-quote
 import { quoteCorpRootRezIceInstallCosts } from "../payment/root-rez-ice-install-cost-quote";
 import { quoteCorpHostedCreditBankCycle } from "../payment/hosted-credit-bank-cycle-quote";
 import { corpScoreMandatoryDrawHorizonPayload } from "../corp/score-mandatory-draw-horizon";
+import { corpScoreCreditOutcomeQuotePayload } from "../corp/scored-agenda/score-credit-outcome";
 import { operationFreeRezRunQuotePayload } from "../view/visible-post-rez-run-quote";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
@@ -355,6 +356,7 @@ export function buildCorpMainActions(
                   cardId: id,
                   selectedServerId: targetServer.id,
                   ...corpScoreMandatoryDrawHorizonPayload(state, id),
+                  ...corpScoreCreditOutcomeQuotePayload(state, id),
                 },
               ),
             );
@@ -371,6 +373,7 @@ export function buildCorpMainActions(
               {
                 cardId: id,
                 ...corpScoreMandatoryDrawHorizonPayload(state, id),
+                ...corpScoreCreditOutcomeQuotePayload(state, id),
               },
             ),
           );
@@ -928,7 +931,9 @@ export function buildCorpMainActions(
             ...candidate,
             payload: {
               ...candidate.payload,
-              ...(quote ? { hostedCreditBankCycleQuoteJson: JSON.stringify(quote) } : {}),
+              ...(quote
+                ? { hostedCreditBankCycleQuoteJson: JSON.stringify(quote) }
+                : {}),
               ...freeRez,
             },
           }

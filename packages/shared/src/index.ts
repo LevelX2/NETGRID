@@ -2661,6 +2661,19 @@ export type CorpFortRunRezSupportQuote = {
   hasOwnHqIce: boolean;
 };
 
+export const CORP_SCORE_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION =
+  "corp-score-credit-outcome-quote-v1" as const;
+
+/** Exact current credit outcome for a deterministic direct or threshold score effect. */
+export type CorpScoreCreditOutcomeQuote = {
+  schemaVersion: typeof CORP_SCORE_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION;
+  sourceCardInstanceId: CardInstanceId;
+  stateVersion: number;
+  creditsBefore: number;
+  creditsAfter: number;
+  netCreditDelta: number;
+};
+
 export const CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION =
   "corp-root-rez-credit-outcome-quote-v1" as const;
 

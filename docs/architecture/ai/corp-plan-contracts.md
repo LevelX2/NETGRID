@@ -37,6 +37,15 @@ Deckstrategie, Hand, Agendaexposition und erwarteter früher Run-Gefahr.
 
 ## 2. `corp.score_agenda`
 
+Eine aktuelle Score-LegalAction zertifiziert deterministische unmittelbare
+Creditwirkungen über `corp-score-credit-outcome-quote-v1`, gebunden an Quelle
+und StateVersion. Der signierte liquide Saldo umfasst auch den Verlust des
+gesamten Guthabens unter einer Scoreschwelle. Strikter KI-DTO und
+Ressourcenprojektion erhalten diesen Engine-Beleg bis in die Restzugsuche;
+ein kostenloser Score ist deshalb nicht automatisch creditneutral. Gehostete
+Pools und noch offene Choices sind keine zertifizierte liquide Auszahlung.
+Eine widersprüchliche aktuelle Quote scheitert sichtbar am Faktenconsumer.
+
 Die aktuelle Variantenwertung eines Fort-Stärkebonus konsumiert ausschließlich
 `score.fort_ice_strength_modifier` und den bereits in der Score-LegalAction
 gebundenen `selectedServerId`. Ein einzelner nach dem Score ausgewählter

@@ -6,6 +6,7 @@ import type {
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
+import { scoreCreditSwingOutcome } from "./score-credit-outcome";
 
 type ScoreCreditSwingScoredAgenda = Extract<
   CardScoredAgendaImplementation,
@@ -21,7 +22,10 @@ export function resolveScoreCreditSwingOnScore(
   const corpCreditsBefore = host.state.corp.credits;
   const threshold = scoredAgenda.threshold;
   const gainAmount = scoredAgenda.gainAmount;
-  const thresholdMet = corpCreditsBefore >= threshold;
+  const { thresholdMet } = scoreCreditSwingOutcome(
+    corpCreditsBefore,
+    scoredAgenda,
+  );
   if (thresholdMet) {
     host.credits.gainCredits("corp", gainAmount);
   } else {
