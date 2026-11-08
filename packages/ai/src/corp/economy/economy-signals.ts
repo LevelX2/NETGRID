@@ -1404,7 +1404,7 @@ export function corpRequiredEconomyNeeds(
 
 function corpPunishFundingParentPriority(
   signal: CorpPunishCampaignSignal,
-): "P1" | "P4" | "P5" {
+): "P1" | "P3" | "P4" | "P5" {
   if (
     signal.routeContract &&
     signal.terminalCondition === "runner_flatline" &&

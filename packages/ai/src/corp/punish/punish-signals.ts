@@ -411,7 +411,12 @@ function assessQuotedPunishOpportunity(
   const priorityClass = visibleTerminalProjection
     ? ("P1" as const)
     : materialHandDestruction
-      ? ("P4" as const)
+      ? route.tagTrigger.kind === "existing_tag" &&
+        route.tagTrigger.currentRunnerTags > 0 &&
+        (route.guarantee === "guaranteed" ||
+          route.guarantee === "conditional_on_runner_response")
+        ? ("P3" as const)
+        : ("P4" as const)
       : ("P5" as const);
   const outcomeValue = visibleTerminalProjection
     ? 220
@@ -591,7 +596,9 @@ function quotedPunishSignal(
           : route.guarantee === "not_guaranteed"
             ? "belief_supported"
             : "speculative",
-    ...(opportunity.priorityClass === "P4" || opportunity.priorityClass === "P5"
+    ...(opportunity.priorityClass === "P3" ||
+    opportunity.priorityClass === "P4" ||
+    opportunity.priorityClass === "P5"
       ? { priorityClass: opportunity.priorityClass }
       : {}),
     ...(terminal ? { terminalCondition: "runner_flatline" as const } : {}),

@@ -551,6 +551,47 @@ describe("plan-first coupled Corp punish sequence contract", () => {
     },
   );
 
+  it("claims P3 only for reliable material conversion of a current tag [legacy_compare]", () => {
+    for (const variant of [
+      { hand: 7, guarantee: "guaranteed", priority: "P3" },
+      { hand: 7, guarantee: "not_guaranteed", priority: "P4" },
+      { hand: 20, guarantee: "guaranteed", priority: "P5" },
+    ] as const) {
+      resetResidentPlanPortfolioMemory();
+      const current = coupledPunishInput({
+        stateVersion: 1,
+        credits: 10,
+        clicks: 2,
+        runnerHandCount: variant.hand,
+        runnerTags: 1,
+        stage: "scorched",
+      });
+      // Explicit component quote: vary guarantee independently of damage.
+      current.playerView.corpPunishRouteQuoteSet!.routes[0]!.guarantee =
+        variant.guarantee;
+      chooseCorpAction(current);
+      const root = punishRoots(
+        residentPlanPortfolioSnapshot(current)?.instances,
+      ).find((instance) => instance.dedupeKey === CAMPAIGN_ID);
+      expect(punishSignal(root)).toMatchObject({
+        priorityClass: variant.priority,
+        feasible: true,
+        visibleTerminalProjection: false,
+      });
+      if (variant.priority === "P3") {
+        const child = exactPunishChild(
+          residentPlanPortfolioSnapshot(current)?.instances,
+          root,
+        );
+        expect(child).toMatchObject({
+          parentInstanceId: root?.instanceId,
+          moduleId: "corp.execute_punish_sequence",
+        });
+        expect(root?.openNeedIds).toContain(child?.parentNeedId);
+      }
+    }
+  });
+
   it("rates six damage against seven cards as material P4 hand destruction above the same damage against twenty cards [legacy_compare]", () => {
     const materialInput = coupledPunishInput({
       stateVersion: 1,
