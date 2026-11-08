@@ -278,6 +278,10 @@ export type KnownRezzedIcePathAssessment = {
   knownPathBlockedByHardUnbrokenEffect?: boolean;
   /** All known encounters were checked; only unbroken direct damage blocks this quote. */
   knownPathBlockedOnlyByDamage?: true;
+  /** Already priced alternatives retained for the run owner's complete hand/reserve assessment. */
+  damageBudgetAlternatives?: Array<
+    Omit<KnownRezzedIcePathAssessment, "damageBudgetAlternatives">
+  >;
   knownPathBlockedByUnavoidableTraceRunLock?: boolean;
   preventsFutureBreaking?: boolean;
   hardUnbrokenRunEffects?: HardUnbrokenRunEffectKind[];

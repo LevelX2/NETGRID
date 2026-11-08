@@ -494,6 +494,7 @@ function evaluateRunnerRunTarget(
   projection: InternalRunActionProjection,
   economyPosture: RunnerEconomyPosture,
   unrezzedIceRiskModel: RunnerOpponentModel["unrezzedIceRiskModel"],
+  quotedPath?: KnownRezzedIcePathAssessment,
 ): RunnerRunTargetEvaluation | undefined {
   const targetServerId = projection.targetServerId;
   if (!targetServerId) return undefined;
@@ -590,8 +591,9 @@ function evaluateRunnerRunTarget(
           : {}),
       },
     );
-  const standardPath = quoteKnownPath();
+  const standardPath = quotedPath ?? quoteKnownPath();
   const probabilisticPath =
+    !quotedPath &&
     !standardPath.canReachAccess &&
     (params.input.playerView.own.rig ?? []).some(
       (card) =>
@@ -603,6 +605,27 @@ function evaluateRunnerRunTarget(
   const pathBeforeDamageBudget = probabilisticPath?.canReachAccess
     ? probabilisticPath
     : standardPath;
+  if (!quotedPath && pathBeforeDamageBudget.damageBudgetAlternatives?.length) {
+    const { damageBudgetAlternatives, ...selectedPath } =
+      pathBeforeDamageBudget;
+    // Reuse this same route evaluation and ranking for the producer's bounded
+    // alternatives. Every candidate sees the actual action's complete damage,
+    // hand, access and credit reserves before the existing owner compares it.
+    return [selectedPath, ...damageBudgetAlternatives]
+      .map((candidate) =>
+        evaluateRunnerRunTarget(
+          params,
+          projection,
+          economyPosture,
+          unrezzedIceRiskModel,
+          candidate,
+        ),
+      )
+      .filter(
+        (target): target is RunnerRunTargetEvaluation => target !== undefined,
+      )
+      .sort(compareRunnerRunTargets)[0];
+  }
   const creditsAfterRun = generalCreditsRemainingAfterRun(
     pathBeforeDamageBudget,
     creditsAfterAction,

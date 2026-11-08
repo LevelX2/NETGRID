@@ -216,6 +216,19 @@ Neural-Schaden unbrechbar. Historische Checkpoints behalten ihre ursprünglichen
 Fakten; ausdrücklich benannte aktuelle Testgegenmodelle beziehen die
 gedruckte Sperrwirkung erneut vom Engine-Produzenten.
 
+Unterscheiden sich bereits berechnete vollständige deterministische Pfade nur
+durch bezahlte Schadensvermeidung, darf der nominell billigste Schadenspfad die Alternativen
+nicht vor der konkreten Hand-/Zugriffsreserve verdrängen. Der Pfaddienst erhält
+seine begrenzten, deduplizierten Schadensalternativen als typisierte Quotes.
+Die bestehende Runzielbewertung prüft jede durch denselben vollständigen
+Bewertungs- und Rankingpfad: Event-Handverbrauch, Prävention, verbleibende
+Credits und Hand, bekannter Zugriff sowie unbekannte Zugriffsreserve bleiben
+an dieselbe Action gebunden. Die Suche wird nicht erweitert und unabhängige
+ETR-, Coverage- oder Finanzierungssperren werden nicht aufgehoben. Native
+Zweifach-Neural-Blade-Kontrollen belegen die bezahlbare Zwölf-Credit-Route mit
+zwei verbleibenden Handkarten, die günstigere Zehn-Credit-Route bei größerem
+Handpuffer und den gesperrten nicht finanzierten Gegenfall.
+
 Eine bekannte ICE mit gemeinsam bezahlbaren Subroutinen darf als vollständige
 Break-Gruppe gequotet werden. ETR- und Schadensanteile derselben Gruppe
 verbrauchen den Breakerpreis und zweckgebundene Credits nur einmal. Der

@@ -239,19 +239,48 @@ export function assessKnownRezzedIcePath(
       ),
     ),
   );
-  const best = candidates
+  const ranked = candidates
     .slice()
     .sort((left, right) =>
       compareKnownPathAssessments(left.assessment, right.assessment),
-    )[0]!.assessment;
+    );
+  const best = ranked[0]!.assessment;
+  // Nominal cost cannot settle damage tolerance: the route owner also knows
+  // this action's hand consumption, prevention and unknown-access reserve.
+  // Retain only existing, fully checked damage-only candidates, without
+  // expanding the search or relaxing any independent access barrier.
+  const alternatives = new Map<
+    string,
+    Omit<KnownRezzedIcePathAssessment, "damageBudgetAlternatives">
+  >();
+  if (
+    best.knownPathBlockedOnlyByDamage &&
+    !best.conditionalAccessReasons?.length &&
+    !best.conditionalRiskReasons?.length
+  ) {
+    const bestKey = JSON.stringify(best);
+    for (const { assessment } of ranked) {
+      if (
+        !assessment.knownPathBlockedOnlyByDamage ||
+        assessment.conditionalAccessReasons?.length ||
+        assessment.conditionalRiskReasons?.length
+      )
+        continue;
+      const key = JSON.stringify(assessment);
+      if (key !== bestKey) alternatives.set(key, assessment);
+    }
+  }
+  const bestWithDamageAlternatives = alternatives.size
+    ? { ...best, damageBudgetAlternatives: [...alternatives.values()] }
+    : best;
   const bartmossBranches = candidates.filter(({ assessment }) =>
     assessment.conditionalRiskReasons?.includes(
       "visible_breaker_may_trash_after_pass",
     ),
   );
-  if (bartmossBranches.length === 0) return best;
+  if (bartmossBranches.length === 0) return bestWithDamageAlternatives;
   return {
-    ...best,
+    ...bestWithDamageAlternatives,
     postEncounterBreakerBranches: (["retained", "trashed"] as const).map(
       (outcome) => {
         const branch = bartmossBranches
