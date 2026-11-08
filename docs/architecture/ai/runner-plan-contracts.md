@@ -1854,6 +1854,13 @@ Cleanup-Tausch eingehen; Owner, Parent-Need und Draw-Action bleiben dabei exakt
 gebunden. Der tatsächliche Draw ist eine private Beobachtungsgrenze und führt
 danach zur Neuplanung statt zu einer vorweggenommenen Folgekarte.
 
+Eine garantierte aktivierte Ein-Karten-Drawquelle ohne eigenen Kartenverbrauch
+darf dieselbe bekannte Vollhandrotation ausführen. Ihre zusätzliche aktuelle
+Wirkung, etwa Einkommen, bleibt in der gemeinsamen Aktionsprojektion erhalten.
+Die Zulassung erfordert weiterhin das bekannte Rotationsziel; größere Draws
+und handkartenverbrauchende Ereignisse erhalten daraus keine allgemeine
+Überlaufzulassung.
+
 Besteht die volle Hand vollständig aus solchen bekannten Rotationszielen und
 enthält keine geschützte Karte, darf die Handentwicklung vor einer optionalen
 Economy-Reserve auf P5 wechseln. Voraussetzung sind bereits gedeckter

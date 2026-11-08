@@ -798,13 +798,18 @@ export function runnerGenericDrawDevelopmentSignals(
       (candidate.actionType === "draw_card" &&
         candidate.semanticActionType === "draw.card" &&
         candidate.sourceKind === "basic_action") ||
-      (handRotation.handCapacityGap > 0 &&
-        candidate.sourceKind === "card" &&
+      (candidate.sourceKind === "card" &&
         candidate.tagEffectProfile?.acuteTagRemoval !== true &&
         candidate.economyProjection?.timing === "immediate" &&
         (candidate.economyProjection.netHandDelta ?? 0) > 0 &&
-        (candidate.economyProjection.netHandDelta ?? 0) <=
-          Math.max(0, handRotation.handCapacityGap)),
+        ((candidate.economyProjection.netHandDelta ?? 0) <=
+          Math.max(0, handRotation.handCapacityGap) ||
+          (fullHandHasKnownRotationTarget &&
+            candidate.actionType === "activated_card_ability" &&
+            candidate.economyProjection.reliability === "guaranteed" &&
+            candidate.economyProjection.cardsDrawn === 1 &&
+            candidate.economyProjection.cardsConsumed === 0 &&
+            candidate.economyProjection.netHandDelta === 1))),
   );
   if (drawCandidates.length === 0) return [];
   const throughputTendency = strategicIntent.developmentTendencies?.find(
