@@ -1,0 +1,144 @@
+{
+  "source": {
+    "pairingId": "647",
+    "matchId": "match_1bf95349ad528196",
+    "decisionIndex": 22,
+    "stateHash": "fnv1a:962ff4ec"
+  },
+  "ownDeckSnapshot": {
+    "deckSnapshotId": "standard_standard_corp_shadoe_tag_bag_1.1.0",
+    "sourceDeckId": "standard_corp_shadoe_tag_bag",
+    "deckVersion": "1",
+    "name": "Shadoe Tag & Bag",
+    "side": "corp",
+    "identityCardId": "corp_identity_001",
+    "cardPoolSnapshotId": "card-snapshot-0.8",
+    "cardPoolVersion": "private-local-onr-v1",
+    "formatProfileId": "netgrid_private_local_v1",
+    "formatProfileVersion": "1.3.0",
+    "rulesBaselineId": "rules-baseline-mvp-0.1",
+    "immutable": true,
+    "cards": [
+      {
+        "cardId": "onr_v1_192_corporate-boon",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_193_corporate-coup",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_194_corporate-downsizing",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_197_data-fort-reclamation",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_203_hostile-takeover",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_207_netwatch-operations-office",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_208_on-call-solo-team",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_209_political-coup",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_214_project-babylon",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_218_subsidiary-branch",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_237_data-wall",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_244_filter",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_249_hunter",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_261_quandary",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_268_shock-r",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_279_wall-of-static",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_281_accounts-receivable",
+        "quantity": 3
+      },
+      {
+        "cardId": "onr_v1_283_audit-of-call-records",
+        "quantity": 3
+      },
+      {
+        "cardId": "onr_v1_284_chance-observation",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_290_efficiency-experts",
+        "quantity": 3
+      },
+      {
+        "cardId": "onr_v1_297_overtime-incentives",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_301_punitive-counterstrike",
+        "quantity": 3
+      },
+      {
+        "cardId": "onr_v1_302_scorched-earth",
+        "quantity": 3
+      },
+      {
+        "cardId": "onr_v1_306_trojan-horse",
+        "quantity": 3
+      },
+      {
+        "cardId": "onr_v1_307_urban-renewal",
+        "quantity": 3
+      }
+    ],
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "totalCards": 48,
+      "agendaPoints": 20,
+      "influenceSpent": 0
+    },
+    "publicMetadata": {
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "deckName": "Shadoe Tag & Bag",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "deckHash": "fnv1a:8879372f"
+    },
+    "deckHash": "fnv1a:8879372f"
+  }
+}

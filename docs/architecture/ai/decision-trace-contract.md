@@ -220,6 +220,25 @@ Deck-Consumer-Diagnosen. PlayerView, LegalActions und PublicEvents werden
 nicht darin dupliziert: Der sichtbare Zustand liegt in `analysisSnapshot`,
 die historischen legalen Angebote im LegalAction-Audit.
 
+Der Maintenance-Replay-Export trennt diesen gebundenen Basisinput von
+entscheidungsnahen Engine-Diensten. Insbesondere fordert die normale
+Corp-Runtime ihre Punish-Routenquotes erst nach dem Basisinput an. Ein
+isolierter KI-Aufruf ohne diesen Dienst ist deshalb kein vollständiger
+Vergleich mit der historischen Entscheidung.
+
+Nach erfolgreicher Prüfung aller neun Basisbindungen rekonstruiert der
+Maintenance-Exporter die normalen, begrenzten Corp-Punish-Anfragen über
+denselben KI-Request-Builder auf einer privaten Kopie des gebundenen
+Engine-Checkpoints. `decisionLocalEngineQuotes` führt diese Fakten getrennt
+mit Actor, StateVersion, StateHash, Requestanzahl und expliziter Verfügbarkeit.
+Der Basisinput und seine neun Nachweise bleiben unverändert; die Quotes
+gelten als rekonstruiert, nicht als historisch gespeichert. Ein Analysewerkzeug
+bindet verfügbare Quotes vor dem normalen KI-Aufruf ein und weist fehlende
+angeforderte Quotes als technische Analysegrenze aus. Es erfindet weder
+Ersatzwerte noch eine historische Planwahl. Der native Zustand bleibt
+unverändert; vollständiger GameState und verdeckte gegnerische Karten werden
+nicht exportiert.
+
 ### Fehlversuche vor und während der Engine-Anwendung
 
 Fehler an der residenten Portfolio-Bindung tragen zusätzlich

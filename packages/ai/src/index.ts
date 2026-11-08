@@ -61,6 +61,7 @@ export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "./runtime/ai-decision-input";
+export { withDecisionLocalCorpPunishRouteQuotes } from "./corp/punish/punish-route-quote-input";
 export {
   assessTraceBidCandidates,
   type TraceBidCandidateAssessment,

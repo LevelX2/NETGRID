@@ -18,6 +18,7 @@ import {
   releaseAiMatchRuntime,
   restoreResidentPlanPortfolioMemorySnapshot,
   selectAiDecisionSideForState,
+  withDecisionLocalCorpPunishRouteQuotes,
   type AiDeckSnapshotRuntimeErrorCode,
   type AiDeckSnapshotRuntimeExpectation,
   type AiDecisionInputWithDeckCapabilities,
@@ -89,6 +90,7 @@ import {
   type AiDifficulty,
   type AiDecisionDebug,
   type AiDecisionInput,
+  type CorpPunishRouteQuoteSet,
   type DeckPublicMetadata,
   type EngineError,
   type EngineRandomizedIceInstallSelectionCommand,
@@ -592,6 +594,19 @@ export type AiDecisionCheckpointReplayArtifact =
       stateHash: string;
       input: AiDecisionInputWithDeckCapabilities;
       runtime: AiRuntimeCheckpointV1;
+      decisionLocalEngineQuotes: {
+        schemaVersion: "netgrid-decision-local-engine-quotes-v1";
+        provenance: "reconstructed_from_bound_engine_checkpoint";
+        actor: Side;
+        stateVersion: number;
+        stateHash: string;
+        availability: "available" | "not_applicable" | "unavailable";
+        corpPunishRouteQuoteSet?: CorpPunishRouteQuoteSet;
+        requestCount: number;
+        reason?:
+          | "no_corp_punish_request"
+          | "corp_punish_quotes_not_materialized";
+      };
       validation: {
         snapshotHashMatches: true;
         sideSafeInput: true;
@@ -4956,6 +4971,12 @@ export class MultiplayerService {
       diagnostics.unavailableSections.push("checkpointCapture");
     if (checkpointReplay.provenance === "unavailable")
       diagnostics.unavailableSections.push("checkpointReplay");
+    if (
+      checkpointReplay.provenance ===
+        "reconstructed_from_persisted_decision_sources" &&
+      checkpointReplay.decisionLocalEngineQuotes.availability === "unavailable"
+    )
+      diagnostics.unavailableSections.push("decisionLocalEngineQuotes");
     if (ownDeckSnapshot.provenance === "unavailable")
       diagnostics.unavailableSections.push("ownDeckSnapshot");
     if (
@@ -4979,7 +5000,8 @@ export class MultiplayerService {
         ? {}
         : {
             engineProbe:
-              checkpointReplay.provenance === "reconstructed_from_persisted_decision_sources" &&
+              checkpointReplay.provenance ===
+                "reconstructed_from_persisted_decision_sources" &&
               source.checkpointReplayContext
                 ? probeHistoricalEngineState({
                     state: source.checkpointReplayContext.state,
@@ -5035,7 +5057,7 @@ export class MultiplayerService {
         reconstructed: [
           ...(checkpointReplay.provenance ===
           "reconstructed_from_persisted_decision_sources"
-            ? ["checkpointReplay"]
+            ? ["checkpointReplay", "decisionLocalEngineQuotes"]
             : []),
           ...(ownDeckSnapshot.provenance === "persisted" &&
           ownDeckSnapshot.zoneBalance?.provenance === "reconstructed"
@@ -8176,7 +8198,7 @@ function decisionCheckpointInputProjection(
   };
 }
 
-function decisionCheckpointReplayArtifact(
+export function decisionCheckpointReplayArtifact(
   matchId: string,
   source: StorageMaintenanceDecisionAnalysisSource,
   audit: AiDecisionHistoricalAudit | undefined,
@@ -8304,6 +8326,48 @@ function decisionCheckpointReplayArtifact(
       bindingFailures,
     };
 
+  // The persisted base input precedes decision-local Engine requests. Rebind
+  // that service on a private clone instead of mistaking a detached local
+  // redecision's missing quote callback for different historical AI behavior.
+  // Keep these reconstructed facts separate from the nine base-input proofs.
+  const quoteState = structuredClone(context.state);
+  let requestCount = 0;
+  const quotedInput = withDecisionLocalCorpPunishRouteQuotes(
+    structuredClone(input),
+    (request) => {
+      requestCount += 1;
+      return quoteCorpPunishRoute(quoteState, request);
+    },
+  );
+  if (hashState(quoteState) !== persistedCapture.stateHash)
+    throw new Error("maintenance_checkpoint_engine_quote_mutated_state");
+  if (!assertAiInputIsSideSafe(quotedInput))
+    throw new Error("maintenance_checkpoint_engine_quote_not_side_safe");
+  const corpPunishRouteQuoteSet =
+    quotedInput.playerView.corpPunishRouteQuoteSet;
+  const decisionLocalEngineQuotes = {
+    schemaVersion: "netgrid-decision-local-engine-quotes-v1" as const,
+    provenance: "reconstructed_from_bound_engine_checkpoint" as const,
+    actor: persistedCapture.actor,
+    stateVersion: persistedCapture.stateVersion,
+    stateHash: persistedCapture.stateHash,
+    availability: corpPunishRouteQuoteSet
+      ? ("available" as const)
+      : requestCount === 0
+        ? ("not_applicable" as const)
+        : ("unavailable" as const),
+    ...(corpPunishRouteQuoteSet ? { corpPunishRouteQuoteSet } : {}),
+    requestCount,
+    ...(!corpPunishRouteQuoteSet
+      ? {
+          reason:
+            requestCount === 0
+              ? ("no_corp_punish_request" as const)
+              : ("corp_punish_quotes_not_materialized" as const),
+        }
+      : {}),
+  };
+
   return {
     schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
     provenance: "reconstructed_from_persisted_decision_sources",
@@ -8312,6 +8376,7 @@ function decisionCheckpointReplayArtifact(
     stateHash: persistedCapture.stateHash,
     input,
     runtime: structuredClone(persistedCapture.runtime),
+    decisionLocalEngineQuotes,
     validation: {
       snapshotHashMatches: true,
       sideSafeInput: true,
