@@ -9,6 +9,8 @@ import cp04Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { withCurrentF450DamageZoneExpectation } from "./f450-damage-zone-fixture.test-support";
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 
 describe("F450 and 10311 exact decision checkpoints", () => {
   it.each([
@@ -18,11 +20,20 @@ describe("F450 and 10311 exact decision checkpoints", () => {
       cp02Json,
     ],
     ["comfortable Streetware bank is not overfilled", cp03Json],
-    ["confirmed damage floor blocks the captured R&D pressure", cp04Json],
   ])("satisfies %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("does not turn historical Archives damage into an active R&D hand floor", () => {
+    const result = runAiDecisionCheckpoint(
+      withCurrentF450DamageZoneExpectation(fixture(cp04Json)),
+    );
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(runnerDamageThreatAssessment(result.input).flatlineRisk).toMatchObject({
+      level: "suspected", recommendedHandFloor: 2, activeDamageSourceCount: 1,
+    });
   });
 
   it("still scores an installed agenda without opponent matchpoint", () => {
@@ -57,9 +68,12 @@ describe("F450 and 10311 exact decision checkpoints", () => {
     expectCheckpointToPass(fixture(cp03ControlJson));
   });
 
-  it("does not let rich credits override the confirmed R&D damage floor", () => {
+  it("does not let rich credits override a genuine public core-damage hand floor", () => {
     const stillSafe = mutateFixture(cp04Json, (checkpoint) => {
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.source.findingId = "F450-10311-04-CORE-DAMAGE-CONTROL";
       checkpoint.engine.testOnlyGameState.runner.credits = 10;
+      checkpoint.engine.testOnlyGameState.runner.coreDamage = 2;
       checkpoint.expectation = {
         acceptableActions: [{ type: "start_run", targetServerId: "hq" }],
         planExecution: {

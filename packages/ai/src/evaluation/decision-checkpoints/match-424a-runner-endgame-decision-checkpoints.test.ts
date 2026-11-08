@@ -1,4 +1,4 @@
-import { applyAction, getPlayerView, hashGameState } from "@netgrid/engine";
+import { applyAction, getLegalActions, getPlayerView, hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import forceShieldJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-01-force-shield-vs-krash.json";
@@ -33,30 +33,28 @@ describe("match 424A runner endgame decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("uses 424A-F01's cumulative per-copy damage prevention under the current CardSpec", () => {
+  it("builds breaker coverage without treating discarded damage as acute shield demand", () => {
     const checkpoint = fixture(forceShieldJson);
-    // The historical expectation treated the second copy as redundant. The
-    // current Engine gives each installed copy its own two-point turn limit.
-    checkpoint.source.kind = "synthetic_companion";
-    checkpoint.expectation.acceptableActions = [
-      { type: "install_card", sourceDefinitionId: "onr_v1_028_force-shield" },
-    ];
-    checkpoint.expectation.forbiddenActions = [];
-    checkpoint.expectation.planExecution = {
-      acceptablePlanKinds: ["runner.defense_and_recovery"],
-      acceptableCapabilities: ["install_defense_support"],
-      requiredAssessmentEvidence: ["runner_defense_support_current_need"],
-    };
     const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("gives a legally installed second shield its separate two-point prevention capacity", () => {
+    const checkpoint = fixture(forceShieldJson);
     const state = checkpoint.engine.testOnlyGameState;
+    const secondShield = getLegalActions(state, "runner").find(
+      (action) => action.type === "install_card" &&
+        state.cardInstances[action.source!]?.definitionId === "onr_v1_028_force-shield" &&
+        !action.actionId.includes("runner_program_trash_before_install"),
+    );
+    expect(secondShield).toBeDefined();
     expect(
       getPlayerView(state, "runner").own.freeNetOrCoreDamagePreventionRemaining,
     ).toBe(2);
     const applied = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
-      actionId: result.selectedAction!.actionId,
+      actionId: secondShield!.actionId,
       clientKnownStateVersion: state.stateVersion,
     });
     if (!applied.ok) throw new Error(applied.error.message);

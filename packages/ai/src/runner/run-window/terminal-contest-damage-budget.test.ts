@@ -146,7 +146,10 @@ it("keeps ordinary reserve, lethal damage and unfunded future ICE blocked", () =
       knownIcePathReason: (path) => JSON.stringify(path),
     });
   const server = input.playerView.servers.find((s) => s.id === "remote_2")!;
-  expect(assess(input, server, 10, []).blocksPump).toBe(true);
+  // The historical Archives no longer create an acute default reserve.
+  // A genuinely required four-card ordinary reserve still blocks the path.
+  expect(assess(input, server, 10, []).blocksPump).toBe(false);
+  expect(assess(input, server, 10, [], 4).blocksPump).toBe(true);
   expect(assess(input, server, 10, [], 0).blocksPump).toBe(false);
   expect(assess(input, server, 9, [], 0).blocksPump).toBe(true);
   input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.slice(0, 1);

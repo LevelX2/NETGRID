@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import recurringEconomyTaxedDrawJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-318-01-recurring-economy-taxed-draw-d280.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -21,7 +22,7 @@ type ReconstructedDecisionCapture = {
 };
 
 describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
-  it("keeps the resident economy hold but excludes its terminally unsafe taxed draw", () => {
+  it("keeps the resident economy hold without promoting discarded damage to acute draw-tax danger", () => {
     const capture = structuredClone(
       recurringEconomyTaxedDrawJson,
     ) as ReconstructedDecisionCapture;
@@ -31,6 +32,12 @@ describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
+    expect(runnerDamageThreatAssessment(capture.input).flatlineRisk).toMatchObject({
+      level: "suspected", activeDamageSourceCount: 0,
+    });
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).not.toContainEqual(
+      expect.objectContaining({ evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe" }),
+    );
 
     expect(decision).toMatchObject({
       actionId: "runner.gain_credit",
@@ -47,14 +54,6 @@ describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
             semanticActionType: "economy.gain_credit",
             capabilityId: "gain_general_liquid_credits",
           },
-          dispositions: expect.arrayContaining([
-            expect.objectContaining({
-              actionId: "runner.draw_card",
-              disposition: "explicitly_nonproductive",
-              ownerModuleId: "runner.defense_and_recovery",
-              evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
-            }),
-          ]),
         },
       },
     });

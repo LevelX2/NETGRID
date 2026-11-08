@@ -25,7 +25,7 @@ describe("match B008 older decision checkpoints", () => {
     expectCheckpointToPass(noBreakBudget);
   });
 
-  it("holds the agenda-access preparation below the hand floor even with open R&D", () => {
+  it("keeps the coverage draw owner with open R&D and no active archived damage source", () => {
     const openRnd = mutateFixture(cp02Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const rnd = state.corp.servers.find((server) => server.id === "rd");
@@ -42,17 +42,15 @@ describe("match B008 older decision checkpoints", () => {
       fixture.expectation = {
         acceptableActions: [{ type: "draw_card" }],
         planExecution: {
-          acceptablePlanKinds: ["runner.defense_and_recovery"],
-          acceptableCapabilities: ["build_required_hand_buffer"],
-          requiredAssessmentEvidence: [
-            "runner_no_defense_support_current_need",
-          ],
+          acceptablePlanKinds: ["runner.rig_and_coverage"],
         },
       };
     });
 
     const result = runAiDecisionCheckpoint(openRnd);
     expect(result.ok, result.message).toBe(true);
+    expect(result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId)
+      .toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate");
     expect(
       result.input.legalActions.some(
         (action) =>

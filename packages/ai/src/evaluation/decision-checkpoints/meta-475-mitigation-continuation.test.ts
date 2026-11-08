@@ -33,6 +33,7 @@ import {
   spendRunnerEncounterBreakerCost,
 } from "../../runtime/runner-encounter-credit-budget";
 import type { RunnerRemoteContestSignal } from "../../plans/runner-tactical-plan-contracts";
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 
 type Capture = {
   input: AiDecisionInputWithDeckCapabilities;
@@ -67,8 +68,10 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
         .signal.runRiskContract!;
       expect(risk.reserveQuote.requiredHandBuffer).toBe(0);
       if (handFloor === 3) {
-        // Ordinary damage-reserve companion. The historical terminal contest
-        // accepts nonlethal hand loss and instead prioritizes the later trace.
+        // Explicit public core-damage companion: discarded damage cards in
+        // the historical Archives do not establish an active hand floor.
+        input.playerView.own.coreDamage = 2;
+        input.playerView.own.maxHandSize = 3;
         input.playerView.opponent.agendaPoints = 0;
         (
           parent.moduleState as { signal: RunnerRemoteContestSignal }
@@ -80,6 +83,10 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
             ? "prerun_reserve_required_hand_buffer:3"
             : code,
         );
+        expect(runnerDamageThreatAssessment(input).flatlineRisk).toMatchObject({
+          level: "confirmed",
+          recommendedHandFloor: 3,
+        });
       }
       restoreAiRuntimeCheckpoint(
         input,

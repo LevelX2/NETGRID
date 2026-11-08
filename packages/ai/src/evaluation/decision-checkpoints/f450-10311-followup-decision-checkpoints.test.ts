@@ -11,6 +11,7 @@ import { buildAiDecisionInput } from "../../index";
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { withCurrentF450DamageZoneExpectation } from "./f450-damage-zone-fixture.test-support";
 
 const KRASH = "onr_v1_039_krash";
 const TEMPLE_MICROCODE_OUTLET = "onr_v1_114_temple-microcode-outlet";
@@ -25,8 +26,10 @@ describe("F450 and 10311 follow-up decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("keeps the captured confirmed-damage-floor control", () => {
-    expectCheckpointToPass(fixture(activatedAbilityControlJson));
+  it("keeps the current active-zone R&D pressure control", () => {
+    expectCheckpointToPass(
+      withCurrentF450DamageZoneExpectation(fixture(activatedAbilityControlJson)),
+    );
   });
 
   it("retains breaker search access while the rig has no breaker", () => {

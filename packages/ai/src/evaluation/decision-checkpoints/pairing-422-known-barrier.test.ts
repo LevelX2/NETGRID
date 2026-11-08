@@ -20,7 +20,7 @@ it("does not waive a known break lock and ETR as a last-chance damage floor", ()
     (entry) => entry.actionId === "runner.start_run.remote_2",
   );
   expect(target).toMatchObject({
-    pathPassability: "blocked_by_visible_damage_hand_buffer",
+    pathPassability: "blocked_unbreakable",
     routeQuote: { reachability: "no_access", noAccessReason: "harmful_unbroken_run_effect" },
   });
   const decision = chooseAiAction(input);

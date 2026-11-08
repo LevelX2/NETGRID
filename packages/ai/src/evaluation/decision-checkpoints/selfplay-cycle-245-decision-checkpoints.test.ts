@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import taxedMultiDrawJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-245-01-confirmed-damage-taxed-multidraw-d25.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -18,7 +19,7 @@ type ReconstructedDecisionCapture = {
 };
 
 describe("selfplay cycle 245 decision checkpoints", () => {
-  it("rejects a taxed multi-draw as hand buffering under confirmed damage pressure", () => {
+  it("contests the remote without inventing confirmed damage from discarded Setup", () => {
     const capture = structuredClone(
       taxedMultiDrawJson,
     ) as ReconstructedDecisionCapture;
@@ -29,22 +30,23 @@ describe("selfplay cycle 245 decision checkpoints", () => {
 
     bindPublicBoardStealQuoteCompanion(capture.input);
     const decision = chooseAiAction(capture.input as AiDecisionInput);
+    expect(runnerDamageThreatAssessment(capture.input).flatlineRisk).toMatchObject({
+      level: "suspected", activeDamageSourceCount: 0,
+    });
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).not.toContainEqual(
+      expect.objectContaining({ evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe" }),
+    );
 
     expect(decision).toMatchObject({
-      actionId: "runner.gain_credit",
-      reasonCode: "plan_first.runner.economy",
+      actionId: "runner.start_run.remote_2",
+      reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.economy:runner-portfolio-credit-reserve",
+            "plan:runner.contest_remote:remote%3Aremote_2",
           leafExecutorInstanceId:
-            "plan:runner.economy:runner-portfolio-credit-reserve",
-          route: {
-            actionType: "gain_credit",
-            semanticActionType: "economy.gain_credit",
-            capabilityId: "gain_general_liquid_credits",
-          },
+            "plan:runner.contest_remote:remote%3Aremote_2",
           dispositions: expect.arrayContaining([
             expect.objectContaining({
               actionId:
@@ -53,13 +55,6 @@ describe("selfplay cycle 245 decision checkpoints", () => {
               ownerModuleId: "runner.economy",
               evidenceCode:
                 "runner_immediate_credit_route_has_no_bound_funding_need",
-            }),
-            expect.objectContaining({
-              actionId:
-                "runner.play_event.runner_onr_v1_095_jack-n-joe_3.runner_onr_v1_095_jack-n-joe_3.onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
-              disposition: "explicitly_nonproductive",
-              ownerModuleId: "runner.defense_and_recovery",
-              evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
             }),
           ]),
         },
@@ -111,9 +106,42 @@ describe("selfplay cycle 245 decision checkpoints", () => {
     ).toEqual([
       expect.objectContaining({
         disposition: "explicitly_nonproductive",
-        ownerModuleId: "runner.defense_and_recovery",
+        ownerModuleId: "runner.develop_board_and_hand",
+        evidenceCode: "runner_hand_development_rejected:no_current_need:runner_onr_v1_095_jack-n-joe_3",
+      }),
+    ]);
+  });
+
+  it.each([0, 4])("keeps one unsafe taxed-draw owner with active damage and public core damage, overflow %i", (overflow) => {
+    // Explicit public-input companion, not a reconstruction of the old game:
+    // Setup is installed, and two core damage lower the real hand maximum.
+    const capture = structuredClone(taxedMultiDrawJson) as ReconstructedDecisionCapture;
+    const input = capture.input;
+    const archives = input.playerView.servers.find((s) => s.id === "archives")!;
+    const setup = archives.root.find((c) => c.definitionId === "onr_v1_340_setup");
+    if (!setup) throw new Error("Missing known Setup companion source");
+    archives.root = archives.root.filter((c) => c !== setup);
+    input.playerView.servers.find((s) => s.id === "remote_1")!.root.push(setup);
+    input.playerView.own.coreDamage = 2;
+    input.playerView.own.maxHandSize = 3;
+    for (let i = 0; i < overflow; i++) input.playerView.own.gripOrHq.push({
+      ...structuredClone(input.playerView.own.gripOrHq[0]!), instanceId: `active-companion-overflow-${i}`,
+    });
+    expect(runnerDamageThreatAssessment(input).flatlineRisk).toMatchObject({
+      level: "confirmed", activeDamageSourceCount: 1, effectiveMaxHandSize: 3,
+    });
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, capture.runtime);
+    bindPublicBoardStealQuoteCompanion(input);
+    const decision = chooseAiAction(input);
+    expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
+    const dispositions = decision.decisionDebug?.planFirstDecision?.dispositions ?? [];
+    expect(dispositions.filter((d) => d.actionId.includes("jack-n-joe"))).toEqual([
+      expect.objectContaining({
+        disposition: "explicitly_nonproductive", ownerModuleId: "runner.defense_and_recovery",
         evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
       }),
     ]);
+    expect(dispositions.filter((d) => d.actionId === "runner.draw_card")).toHaveLength(1);
   });
 });

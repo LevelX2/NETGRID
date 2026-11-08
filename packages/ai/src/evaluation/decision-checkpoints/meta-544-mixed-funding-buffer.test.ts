@@ -15,6 +15,7 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 
 afterEach(resetResidentPlanPortfolioMemory);
 function native(game: number, decision: number) {
@@ -117,9 +118,16 @@ it.each([
     );
   },
 );
-it("uses the needed hand repair without committing the last two clicks to an impossible mixed route", () => {
-  const { action } = decide(native(22, 176));
-  expect(action.type).toBe("draw_card");
+it("uses independent R&D pressure while the remote mixed funding route remains impossible", () => {
+  const cp = native(22, 176);
+  expect(runnerDamageThreatAssessment(cp.input).flatlineRisk).toMatchObject({
+    level: "suspected", recommendedHandFloor: 2, activeDamageSourceCount: 1,
+  });
+  expect(funding(cp, "remote_1").support?.routeActionIds ?? []).toHaveLength(0);
+  const { action, plan } = decide(cp);
+  expect(action.actionId).toBe("runner.start_run.rd");
+  expect(plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ard");
+  expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
 });
 it("preserves ordinary credit funding when the current hand reserve already fits", () => {
   const cp = native(7, 80);
