@@ -99,3 +99,20 @@ describe("post-break derez support keeps its known function (SP-617)", () => {
     },
   );
 });
+
+describe("tag-removal credit pools keep their restricted function (SP-805)", () => {
+  it.each([
+    "onr_v1_120_armadillo-armored-road-home",
+    "onr_v1_126_drifter-mobile-environment",
+  ])("does not classify %s as general income or manual savings", (id) => {
+    const evaluation = actualCardRole(id, "Unrelated witness");
+    expect(evaluation.developmentRole).toBe("defense_support");
+    expect(evaluation.liquidityTiming).toBe("none");
+    expect(evaluation.persistentInstallEvaluation?.newFunctionalCoverage)
+      .toContain("tag_clear_credit_support");
+    expect(evaluation.persistentInstallEvaluation?.newFunctionalCoverage)
+      .not.toContain("bank_tool");
+    expect(evaluation.persistentInstallEvaluation?.newFunctionalCoverage)
+      .not.toContain("economy_engine");
+  });
+});

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
@@ -12,8 +13,8 @@ function native() {
     "./fixtures/deep657-d55-score-effect-target.json", import.meta.url,
   ), "utf8")).checkpoint;
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
-  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
-  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot.deckSnapshotId, cp.runtime);
+  const input: AiDecisionInputWithDeckCapabilities = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
   return input;
 }
 
@@ -23,7 +24,7 @@ it("uses a presently effective fort-strength variant under the native score owne
   const action = input.legalActions.find(a => a.actionId === decision.actionId)!;
   expect(action.type).toBe("score_agenda");
   expect(action.source).toBe("corp_onr_v1_215_security-net-optimization_2");
-  expect(input.playerView.servers.find(s => s.id === action.payload.selectedServerId)!.ice.length).toBeGreaterThan(0);
+  expect(input.playerView.servers.find(s => s.id === action.payload!.selectedServerId)!.ice.length).toBeGreaterThan(0);
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe("plan:corp.score_agenda:agenda%3Acorp_onr_v1_215_security-net-optimization_2%3Aremote_1");
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
@@ -48,13 +49,13 @@ it("does not value future strength after an immediate win in an explicit termina
   const decision = chooseAiAction(input);
   const action = input.legalActions.find(a => a.actionId === decision.actionId)!;
   expect(action.type).toBe("score_agenda");
-  expect(action.payload.selectedServerId).toBe("archives");
+  expect(action.payload!.selectedServerId).toBe("archives");
   expect(decision.decisionDebug!.planFirstDecision!.priority!.effectiveClass).toBe("P1");
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });
 
 it("fails closed for a prospective score-strength variant with no bound selected fort", () => {
   const input = native();
-  for (const action of input.legalActions) if (action.type === "score_agenda") delete action.payload.selectedServerId;
+  for (const action of input.legalActions) if (action.type === "score_agenda") delete action.payload!.selectedServerId;
   expect(() => chooseAiAction(input)).toThrow(/missing_action_semantics/);
 });

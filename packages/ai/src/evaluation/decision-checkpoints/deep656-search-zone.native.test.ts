@@ -6,6 +6,7 @@ import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
 import { resetResidentPlanPortfolioMemory, residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import { coverageSupportActionIds } from "../../runner/rig-coverage/coverage-support";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
@@ -15,15 +16,15 @@ function native() {
     "./fixtures/deep656-replay1-d193-search-zone.json", import.meta.url,
   ), "utf8")).checkpoint;
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
-  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
-  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot.deckSnapshotId, cp.runtime);
+  const input: AiDecisionInputWithDeckCapabilities = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions, observerSide: input.side,
     stateVersion: input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: Object.fromEntries(
-      [...input.playerView.own.gripOrHq, ...input.playerView.own.rig]
+      [...input.playerView.own.gripOrHq, ...input.playerView.own.rig!]
         .filter(c => c.known && c.definitionId)
-        .map(c => [c.instanceId, c.definitionId]),
+        .map(c => [c.instanceId, c.definitionId!]),
     ),
     cardSemanticProfilesByDefinitionId: buildActionCardSemanticProfilesByDefinitionId(),
   });
@@ -35,7 +36,7 @@ it("does not bind a Stack-only Worm answer to the native heap-only recovery acti
   const { input, candidates, recovery } = native();
   expect(recovery.functionalEffects).toContainEqual(expect.objectContaining({ kind: "search", scope: "heap", target: "program" }));
   expect(input.playerView.own.heapOrArchives.filter(c => c.type === "program").map(c => c.definitionId)).toEqual(["onr_v1_001_afreet"]);
-  const result = coverageSupportActionIds(input, candidates, input.ownDeckCapabilities, "breaker_wall", {
+  const result = coverageSupportActionIds(input, candidates, input.ownDeckCapabilities!, "breaker_wall", {
     deckHasStackAnswerOverride: true, targetDefinitionIdOverride: "onr_v1_074_worm",
   });
   expect(result.directSearchActionIds).not.toContain(recovery.actionId);
@@ -63,7 +64,7 @@ it("preserves exact heap coverage recovery in a prospective target-present compa
   // This explicit prospective companion is not a historical checkpoint proof.
   const target = { instanceId: "prospective-worm-in-heap", definitionId: "onr_v1_074_worm", title: "Worm", known: true, side: "runner" as const, type: "program" as const, subtypes: ["icebreaker", "fracter"] };
   input.playerView.own.heapOrArchives.push(target);
-  const result = coverageSupportActionIds(input, candidates, input.ownDeckCapabilities, "breaker_wall", {
+  const result = coverageSupportActionIds(input, candidates, input.ownDeckCapabilities!, "breaker_wall", {
     deckHasStackAnswerOverride: false,
   });
   expect(result.directSearchActionIds).toContain(recovery.actionId);

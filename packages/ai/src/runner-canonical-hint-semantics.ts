@@ -8,6 +8,33 @@ type HintWithStructuredEffects = {
   readonly effects?: readonly AiHintStructuredEffect[];
 };
 
+/** A hosted refill for tag removal cannot satisfy a general bank need. */
+export function runnerEffectsHaveOnlyTagClearCreditPool(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  const credits = effects?.filter((effect) =>
+    effect.scope === "runner" && effect.resource === "credits",
+  ) ?? [];
+  const restricted = credits.filter((effect) =>
+    effect.kind === "recurring_economy" &&
+    effect.target === "tag_clear" &&
+    effect.economyMode === "restricted_credit" &&
+    (effect.amount ?? 0) > 0,
+  );
+  if (restricted.length === 0) return false;
+  return credits.every((effect) =>
+    restricted.includes(effect) ||
+    // The initial fill describes the same hosted pool, not another payout.
+    (effect.kind === "finite_economy_pool" &&
+      effect.timing === "install" &&
+      effect.target === "economy.hosted_credit_bank" &&
+      effect.economyMode === "fixed_pool" &&
+      effect.finite === true &&
+      (effect.amount ?? 0) > 0 &&
+      restricted.some((pool) => pool.amount === effect.amount)),
+  );
+}
+
 export function runnerEffectsProvideCorpForcedDraw(
   effects: readonly AiHintStructuredEffect[] | undefined,
 ): boolean {

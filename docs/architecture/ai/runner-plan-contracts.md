@@ -1748,6 +1748,17 @@ Investitionsfolge bleibt gesondert; die Korrektur behauptet weder einen
 optimalen Tax-Server noch einen anderen Sieger. Paarung 625/D19 prüft die
 native Plan-/Actionbindung, eigene Credits und den echten Einkommensgegenfall.
 
+Ein ausschließlich für Tagentfernung bestimmter Creditpool ist Defense-Support,
+keine allgemeine Sparbank oder liquide Economy. Der Handentwicklungs-Owner
+konsumiert die erzeugte `restricted_credit`-Wirkung mit Ziel `tag_clear` zusammen
+mit der initialen Befüllung desselben gehosteten Pools. Rollen- und persistente
+Funktionsbewertung erhalten `tag_clear_credit_support`; allgemeine Creditwörter
+erzeugen dafür keinen Bankzweck. Unabhängige echte Auszahlungseffekte gemischter
+Karten bleiben ausgenommen. Die native Eingabe 661/D62 und beide kanonischen
+Tag-Clear-Poolkarten sichern diese Grenze. Der aktuelle Defense-Bedarf und ein
+etwaiger Nutzen der zusätzlichen Schadensprävention bleiben getrennte Fragen;
+die Rollenreparatur belegt keinen besseren Gesamtsieger.
+
 Einmalige Suchereignisse werden auch anhand ihres aktuellen kanonischen
 `effectKind` für Stack- oder Heap-Suche erkannt. Ohne exakt gebundenen
 Zielplan erhält die Aktion die bestehende ausdrückliche Zurückstellung;

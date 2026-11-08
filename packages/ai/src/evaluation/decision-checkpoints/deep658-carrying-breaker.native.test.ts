@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { completeEncounterBreakerPayment } from "../../runner/run-window/run-window-encounter-payment";
 import { pureEndRunEncounterEconomics } from "../../runner/run-window/run-window-pure-etr-economics";
@@ -14,8 +15,8 @@ function native() {
     "./fixtures/deep658-d236-carrying-breaker.json", import.meta.url,
   ), "utf8")).checkpoint;
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
-  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
-  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot.deckSnapshotId, cp.runtime);
+  const input: AiDecisionInputWithDeckCapabilities = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
   return input;
 }
 
@@ -55,7 +56,7 @@ it("does not invent a whole-path price for an explicitly unknown inner-ICE compa
   const input = native();
   // Prospective safety control, not a replacement for the historical binding.
   const server = input.playerView.servers.find(s => s.id === "hq")!;
-  server.ice[0] = { instanceId: server.ice[0].instanceId, known: false };
+  server.ice[0] = { instanceId: server.ice[0]!.instanceId, known: false };
   const action = input.legalActions.find(a => a.type === "break_subroutine" && a.source.includes("snowball"))!;
   const payment = completeEncounterBreakerPayment(input, action)!;
   expect(pureEndRunEncounterEconomics(input, payment)).toBeUndefined();
@@ -68,7 +69,7 @@ it("retains the ordinary breaker when the specialist is absent in an explicit co
   const input = native();
   // Canonical card costs remain untouched; this companion simply removes the
   // current specialist offering and rig source from the prospective input.
-  input.playerView.own.rig = input.playerView.own.rig.filter(c => !c.instanceId.includes("snowball"));
+  input.playerView.own.rig = input.playerView.own.rig!.filter(c => !c.instanceId.includes("snowball"));
   input.legalActions = input.legalActions.filter(a => !a.source?.includes("snowball"));
   const decision = chooseAiAction(input);
   expect(decision.actionId).toContain("break_subroutine.runner_onr_v1_039_krash_2");

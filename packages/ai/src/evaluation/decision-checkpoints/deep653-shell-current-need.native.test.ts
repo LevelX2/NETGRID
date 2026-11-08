@@ -4,6 +4,7 @@ import { aiLiveRuntimeDependencies } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { createAiLiveRuntimeComposition } from "../../runtime/ai-live-runtime-composition";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
@@ -14,7 +15,7 @@ function native(index: number, label: string) {
   ), "utf8"));
   expect(Object.values(fixture.checkpoint.validation)).toEqual(Array(9).fill(true));
   const cp = fixture.checkpoint;
-  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  const input: AiDecisionInputWithDeckCapabilities = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
   return { fixture, input };
 }

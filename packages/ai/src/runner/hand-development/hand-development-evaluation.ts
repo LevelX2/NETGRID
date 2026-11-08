@@ -153,6 +153,7 @@ import {
 } from "./runner-persistent-install-evaluation";
 import {
   runnerEffectsProvideCorpForcedDraw,
+  runnerEffectsHaveOnlyTagClearCreditPool,
   runnerEffectsOnlyTaxCorpIceInstalls,
   runnerEffectsProvideDamagePrevention,
   runnerEffectsDamagePreventionTypes,
@@ -753,6 +754,8 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     return "access_payoff";
   if (cardProvidesTraceDefense(context)) return "defense_support";
   if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
+  if (runnerEffectsHaveOnlyTagClearCreditPool(context.signals.structuredEffects))
+    return "defense_support";
   if (looksLikeBankTool(text)) return "bank_tool";
   if (looksLikeEconomyTool(text)) return "economy_engine";
   if (

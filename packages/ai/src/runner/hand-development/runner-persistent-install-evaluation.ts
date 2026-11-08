@@ -20,6 +20,7 @@ import { actionClickCost } from "../../runtime/action-cost";
 import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
 import {
   runnerEffectsProvideCorpForcedDraw,
+  runnerEffectsHaveOnlyTagClearCreditPool,
   runnerEffectsOnlyTaxCorpIceInstalls,
   runnerHintProvidesDamagePrevention,
   runnerHintProvidesTagPrevention,
@@ -234,9 +235,11 @@ export function persistentFunctionalProfileForCard(
     hint?.effects,
   );
   const corpIceInstallTax = runnerEffectsOnlyTaxCorpIceInstalls(hint?.effects);
-  const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
+  const tagClearCreditPool = runnerEffectsHaveOnlyTagClearCreditPool(hint?.effects);
+  const bankTool = !runOnlyEconomyPool && !tagClearCreditPool && looksLikeBankTool(text);
   const economyTool =
     !runOnlyEconomyPool &&
+    !tagClearCreditPool &&
     !postBreakIceTrash &&
     !encounterIceDerez &&
     !corpIceInstallTax &&
@@ -297,6 +300,7 @@ export function persistentFunctionalProfileForCard(
     ...(recurringBreakerEconomy ? ["breaker_recurring_economy"] : []),
     ...(damagePrevention ? ["damage_prevention"] : []),
     ...(tagPrevention ? ["tag_prevention"] : []),
+    ...(tagClearCreditPool ? ["tag_clear_credit_support"] : []),
     ...(handSizeSupport ? ["hand_size"] : []),
     ...(bankTool ? ["bank_tool"] : []),
     ...(economyTool ? ["economy_engine"] : []),

@@ -4,6 +4,7 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { currentEncounterMitigationForAction } from "../../runtime/runner-encounter-mitigation";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
@@ -14,7 +15,7 @@ function native() {
   ), "utf8"));
   const cp = fixture.checkpoint;
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
-  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  const input: AiDecisionInputWithDeckCapabilities = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
   const pump = input.legalActions.find((a) => a.type === "pump_breaker")!;
   return { fixture, input, pump };
