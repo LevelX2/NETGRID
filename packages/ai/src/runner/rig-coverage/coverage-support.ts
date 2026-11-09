@@ -20,6 +20,7 @@ import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contra
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
 import { runnerTargetHasTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
+import { runnerRunPathCreditBudgetWithVisiblePools } from "../../run-analysis/visible-run-credit-budget";
 import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
 import { coverageKindForPlanRole } from "./coverage-card-facts";
 import type { RunnerCoverageServices } from "./coverage-services";
@@ -137,27 +138,61 @@ export function runnerUrgentRemoteCoverageConversionQuote(
   if (input.playerView.own.clicks < requiredClicksAfterFunding) {
     return undefined;
   }
+  const quoteLiquidity = Number.MAX_SAFE_INTEGER;
   const projectedPath = assessKnownRezzedIcePath(
     server.ice,
     [...(input.playerView.own.rig ?? []), visibleAnswer],
-    Number.MAX_SAFE_INTEGER,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      quoteLiquidity,
+      input.playerView.own.rig ?? [],
+      {
+        excludeStealthCredits:
+          server.statuses?.some(
+            (status) =>
+              status.kind === "run_payment_restriction" &&
+              status.restriction === "runner_stealth_bit_payment_sources",
+          ) === true,
+      },
+    ),
     server.root,
     input.playerView.opponent.credits,
   );
-  const projectedKnownPathCost = projectedPath.visibleBreakCost ?? 0;
+  const projectedKnownPathCost = projectedPath.visibleBreakCost;
   if (
     !projectedPath.canReachAccess ||
     projectedPath.blocked ||
     (projectedPath.futureClicksLost ?? 0) > 0 ||
+    projectedKnownPathCost === undefined ||
     !Number.isSafeInteger(projectedKnownPathCost) ||
     projectedKnownPathCost < 0
   ) {
     return undefined;
   }
+  const remainingLiquidity =
+    projectedPath.creditBudgetAfterPath?.traceEligibleCredits;
+  if (
+    remainingLiquidity === undefined ||
+    !Number.isSafeInteger(remainingLiquidity) ||
+    remainingLiquidity < 0 ||
+    remainingLiquidity > quoteLiquidity
+  ) {
+    throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "plan_module",
+      removalCondition:
+        "Restore the complete current run-payment ledger before quoting urgent coverage funding.",
+    });
+  }
+  // Restricted pools pay only their compatible quoted path steps. They cannot
+  // fund the installation, the run action or the parent's post-run cash floor.
+  const projectedKnownPathLiquidCost = quoteLiquidity - remainingLiquidity;
   const requiredCreditsWithoutFloor =
     (answerInstallCost as number) +
     legalActionCreditCost(runAction) +
-    projectedKnownPathCost;
+    projectedKnownPathLiquidCost;
   const remainingFundingClicks = Math.max(
     0,
     input.playerView.own.clicks - requiredClicksAfterFunding,

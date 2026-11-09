@@ -1475,6 +1475,19 @@ Die bestehende kostenneutrale Vorbereitung am bekannten Teil eines bedingten
 Pfads bleibt getrennt erhalten. Nach der Installation werden echte
 LegalActions, Zugriffskosten und Risiko erneut bewertet.
 
+Die dringende Remote-Coverage trennt dabei den gesamten bekannten Pfadpreis
+vom benötigten Bargeld. Bereits installierte, aktuell gefüllte und kompatible
+Run-Creditpools werden im bestehenden Pfaddienst genau einmal verbraucht;
+dessen vollständiges Zahlungsledger bestimmt den verbleibenden liquiden
+Bedarf. Diese Credits finanzieren weder Installation noch Run-Eintritt oder
+den gebundenen Bargeldrest. Leere Pools werden im aktuellen Zug nicht neu
+gefüllt, Typ- und Stealth-Verbote bleiben wirksam. Paarung 693 D98 belegt die
+unnötige Score!-Zwischenfinanzierung vor Corrosion; deren Kartenverbrauch
+verhindert anschließend den sicheren Zugriff. Der korrigierte Coverage-Child
+installiert dieselbe Antwort direkt unter dem Remote-Parent. Die spätere
+Runzulassung prüft den Handpuffer weiterhin eigenständig; D100 mit zwei
+Handkarten bleibt abgelehnt (SP-826).
+
 Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren
 Einkommenszweck. Eine bereits exakt gebundene Coverage- oder MU-Vorbereitung
 derselben Installation bleibt beim Coverage-Owner ausführbar. Andere,
