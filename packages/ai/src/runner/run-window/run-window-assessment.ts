@@ -848,6 +848,7 @@ function runnerRunWindowActionAssessment(
       input,
       postPassDerezAndEndRun,
       runOrigin,
+      runRiskReassessment,
     );
   }
   if (
@@ -1283,6 +1284,7 @@ function runnerPostPassDerezAndEndRunAssessment(
   input: AiDecisionInput,
   action: LegalAction,
   runOrigin: RunnerRunOrigin | undefined,
+  runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
 ): RunnerRunWindowActionAssessment {
   const run = input.playerView.run;
   const targetIceId = action.payload?.targetIceId;
@@ -1320,6 +1322,23 @@ function runnerPostPassDerezAndEndRunAssessment(
       admissible: false,
       evidenceCodes: [
         "runner_post_pass_derez_and_end_run_would_abandon_known_agenda",
+        `runner_run_target:${run.attackedServerId}`,
+      ],
+    };
+  }
+  if (
+    runnerRunOriginCommittedPayoff(runOrigin) === "access_bonus" &&
+    runnerFullPathCommitmentIsPreserved(
+      input,
+      runOrigin,
+      runRiskReassessment,
+    ) &&
+    !currentRunAbortAssessment(input, runOrigin, runRiskReassessment)
+  ) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_post_pass_derez_would_abandon_preserved_access_bonus",
         `runner_run_target:${run.attackedServerId}`,
       ],
     };

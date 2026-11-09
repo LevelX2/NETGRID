@@ -2754,6 +2754,17 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Ein optionaler Post-Pass-Derez mit Run-Abbruch darf einen gebundenen
+Mehrfachzugriff nicht verdrängen, solange dessen vollständiger bekannter
+Pfadvertrag aktuell erhalten bleibt und der bestehende Abbruch-Owner keinen
+Ausstiegsgrund feststellt. Der Run-Owner konsumiert dafür dieselbe
+Risikoneubewertung wie bei der Fortsetzung. Fehlendes oder abgelehntes
+Zugriffsziel, unbekannte Fortsetzungen und ein nicht finanzierter Restpfad
+erhalten diesen Schutz nicht. Die native Paarung 704/D114 und ihr ausgeführter
+Engine-Gegenast belegen den unnötigen erneuten Break nach einem Derez für
+einen Credit Rezkosten; weder ein Karten-Sonderfall noch eine zweite
+Auswahlstrategie ist erforderlich.
+
 Bei gezielter Bypass-Vorbereitung bleibt die gegnerische Geheimwahl eine
 unbeobachtete Antwort. Der Runner reserviert den kleinsten vollständigen
 Creditverlust und bindet seine eigene Betrags- und ICE-Zielwahl an den
