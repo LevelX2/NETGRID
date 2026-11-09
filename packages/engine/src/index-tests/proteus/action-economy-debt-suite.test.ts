@@ -488,7 +488,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state,
       "corp",
       (action) =>
-        action.payload?.agendaAbility === "proteus_corporate_headhunters",
+        action.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
     );
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
@@ -509,7 +510,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state,
       "corp",
       (action) =>
-        action.payload?.agendaAbility === "proteus_corporate_headhunters",
+        action.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
     );
     state = applyChoice(state, "corp", `replace_${pdcaId}_0`);
     expect(state.runner.grip).toHaveLength(0);
@@ -529,7 +531,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state,
       "corp",
       (action) =>
-        action.payload?.agendaAbility === "proteus_corporate_headhunters",
+        action.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
     );
     const replaceOption = state.pendingChoice?.options.at(-1)?.id;
     expect(replaceOption).toBeDefined();
@@ -579,7 +582,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state,
       "corp",
       (action) =>
-        action.payload?.agendaAbility === "proteus_corporate_headhunters",
+        action.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
     );
     state = applyChoice(
       state,
@@ -613,7 +617,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state,
       "corp",
       (action) =>
-        action.payload?.agendaAbility === "proteus_corporate_headhunters",
+        action.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
     );
     const choiceAction = getLegalActions(state, "corp").find(
       (action) => action.type === "resolve_choice",
@@ -765,7 +770,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state,
       "corp",
       (action) =>
-        action.payload?.agendaAbility === "proteus_corporate_headhunters",
+        action.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
     );
     expect(state.pendingChoice?.source).toContain(
       "v120.event_modification.increase",

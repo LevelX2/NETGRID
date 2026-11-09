@@ -270,7 +270,7 @@ function variableCostForAction(
 function selfDamageForAction(
   action: LegalAction,
 ): NonNullable<ActionCostProfile["selfDamage"]> {
-  if (action.side !== "runner") return [];
+  if (action.side !== "runner" || hasOpposingDamageRecipient(action)) return [];
   const amount = numberPayload(action, "damageAmount");
   if (amount === undefined || amount <= 0) return [];
   return [
@@ -279,6 +279,14 @@ function selfDamageForAction(
       amount: Math.floor(amount),
     },
   ];
+}
+
+function hasOpposingDamageRecipient(action: LegalAction): boolean {
+  const recipient = action.payload?.damageRecipient;
+  return (
+    (recipient === "runner" || recipient === "corp") &&
+    recipient !== action.side
+  );
 }
 
 function damageTypePayload(
@@ -458,6 +466,16 @@ function additionalCostFields(
   return fields.filter((field) => {
     const value = action.payload?.[field];
     if (value === undefined) return false;
+    if (
+      hasOpposingDamageRecipient(action) &&
+      [
+        "damageType",
+        "damageAmount",
+        "preventableDamage",
+        "unpreventableDamage",
+      ].includes(field)
+    )
+      return false;
     // The fully bound printed X contract is the same cash payment, not an
     // extra unresolved cost. Other variables and conflicting quotes remain.
     if (exactPrintedX && printedXFields.has(field)) return false;

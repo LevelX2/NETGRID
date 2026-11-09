@@ -289,6 +289,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "runnerInstalledMultiTrashOrdering",
   "runnerInstalledMultiTrashTargetCount",
   "damageCannotBePrevented",
+  "damageRecipient",
   "damageType",
   "damageAmount",
   "sourceDefinitionId",
@@ -4239,6 +4240,12 @@ function sanitizeLegalActionPayload(
       "Canonical CardSpec capability Action requires an exact payload binding.",
     );
   if (!payload) return {};
+  if (
+    payload.damageRecipient !== undefined &&
+    payload.damageRecipient !== "runner" &&
+    payload.damageRecipient !== "corp"
+  )
+    throw new Error("Invalid Engine damage recipient.");
   const result: NonNullable<LegalAction["payload"]> = {
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };

@@ -11,6 +11,7 @@ import {
 } from "../hidden-zone/corp-zone-transition-projection";
 import { abilityUsageSourceUsed } from "../../ability-engine/card-implementation-ability-limits";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
+import { cardImplementationPrimitivePayload } from "../../ability-engine/card-implementation-primitives";
 
 type ScoredAgendaAbilityPayload = Record<string, string | number | boolean>;
 
@@ -27,6 +28,7 @@ export type ScoredAgendaAbilityHost = {
     ) => CardScoredAgendaImplementation | undefined;
   };
   actions: {
+    spendClick: () => void;
     createLegalAction: (
       side: "corp",
       type: LegalAction["type"],
@@ -123,25 +125,46 @@ export function buildScoredAgendaAbilityActionsForCard(
   ) {
     if (host.state.runner.tags > 0) {
       const implementation = host.cards.scoredAgendaForDefinition(definition);
-      const damageAmount =
-        implementation?.kind ===
+      if (
+        implementation?.kind !==
         "tagged_runner_meat_damage_reduce_hand_size_on_success"
-          ? implementation.damageAmount
-          : 1;
-      actions.push(
-        host.actions.createLegalAction(
-          "corp",
-          "gain_credit",
-          `${definition.title}: 1 Meat Damage`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "proteus_corporate_headhunters",
-            damageAmount,
-          },
-        ),
+      )
+        throw new Error(
+          "Die gescorte Schadensfähigkeit hat keinen vollständigen Mechanikvertrag.",
+        );
+      const damageAmount = implementation.damageAmount;
+      const primitive = cardImplementationPrimitivePayload({
+        sourceCardId: agendaId,
+        sourceDefinitionId: definition.id,
+        primitiveKind: implementation.kind,
+        effectKind: "damage",
+        capabilityKey:
+          "capabilityKey" in implementation &&
+          typeof implementation.capabilityKey === "string"
+            ? implementation.capabilityKey
+            : undefined,
+      });
+      const action = host.actions.createLegalAction(
+        "corp",
+        "activated_card_ability",
+        `${definition.title}: ${damageAmount} Meat Damage`,
+        agendaId,
+        [{ clicks: 1 }],
+        {
+          ...primitive,
+          cardId: agendaId,
+          gainCreditsAmount: 0,
+          effectKind: "damage",
+          damageType: "meat",
+          damageRecipient: "runner",
+          damageAmount,
+        },
       );
+      action.abilityRef = {
+        sourceCardInstanceId: agendaId,
+        sourceAbilityId: primitive.cardImplementationAbilityId as string,
+      };
+      actions.push(action);
     }
     return { handled: true, actions };
   }
@@ -243,6 +266,12 @@ export function handleScoredAgendaActivatedAbilityAction(
 ): ScoredAgendaActivatedAbilityHandlerResult {
   const legalAction = host.legalAction;
   if (!legalAction) return { handled: false };
+  if (
+    legalAction.type === "activated_card_ability" &&
+    legalAction.payload?.cardImplementationPrimitiveKind ===
+      "tagged_runner_meat_damage_reduce_hand_size_on_success"
+  )
+    return resolveCorporateHeadhuntersAction(host);
   if (legalAction.type === "activated_card_ability") {
     if (legalAction.payload?.cardImplementationAbility !== "activated")
       return { handled: false };
@@ -272,8 +301,6 @@ export function handleScoredAgendaActivatedAbilityAction(
     return resolveScoredAgendaInstallRezCreditAction(host);
   if (legalAction.payload?.agendaAbility === "hq_archives_shuffle_draw")
     return resolveHqArchivesShuffleDrawAction(host);
-  if (legalAction.payload?.agendaAbility === "proteus_corporate_headhunters")
-    return resolveCorporateHeadhuntersAction(host);
   return { handled: false };
 }
 
@@ -299,6 +326,7 @@ function resolveCorporateHeadhuntersAction(
     throw new Error("Die Agenda-Aktion passt nicht zu Corporate Headhunters.");
   if (!host.damage)
     throw new Error("Corporate Headhunters braucht Damage-Callbacks.");
+  host.actions.spendClick();
   const summary = host.damage.dealRunnerMeatDamage(
     sourceCardId,
     implementation.damageAmount,

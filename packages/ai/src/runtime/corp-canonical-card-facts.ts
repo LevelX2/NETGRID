@@ -857,6 +857,24 @@ export function corpTaggedMeatDamageOperationProfile(
 export function corpScoredTaggedMeatDamageProfile(
   definitionId: string | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
+  const card = planningCard(definitionId);
+  const scored = card?.planning.engine.scoredAgenda;
+  if (
+    card?.planning.side === "corp" &&
+    card.planning.cardType === "agenda" &&
+    scored?.kind === "tagged_runner_meat_damage_reduce_hand_size_on_success" &&
+    scored.visibility === "public" &&
+    positiveSafeInteger(scored.damageAmount)
+  ) {
+    return {
+      capabilityKey: scored.capabilityKey,
+      sourceCapabilityId: canonicalCapabilityId(
+        card.planning.cardDefinitionId,
+        scored.capabilityKey,
+      ),
+      damageAmount: scored.damageAmount,
+    };
+  }
   return taggedMeatDamageProfile(definitionId, "agenda");
 }
 

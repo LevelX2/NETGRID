@@ -31,12 +31,14 @@ export type HqToNewRemoteInstallRezSequence = Extract<
 export type CardImplementationPrimitiveKind =
   | SuccessfulRunBeforeAccessEffect["kind"]
   | ScoredRezzedIceMarkModifier["kind"]
-  | HqToNewRemoteInstallRezSequence["kind"];
+  | HqToNewRemoteInstallRezSequence["kind"]
+  | "tagged_runner_meat_damage_reduce_hand_size_on_success";
 
 export type CardImplementationEffectKind =
   | SuccessfulRunBeforeAccessEffect["effect"]["kind"]
   | "mark_modifier"
-  | "install_rez_sequence";
+  | "install_rez_sequence"
+  | "damage";
 
 type PrimitivePayload = NonNullable<LegalAction["payload"]>;
 

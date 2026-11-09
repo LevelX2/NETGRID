@@ -1325,6 +1325,7 @@ export function createScoredEconomyRuntimeHosts(
           deps.scoredAgendaImplementationForDefinition(definition),
       },
       actions: {
+        spendClick: () => spendClick(state, "corp"),
         createLegalAction: (side, type, label, source, costs, payload) =>
           action(state, side, type, label, source, costs, payload),
       },

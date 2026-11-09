@@ -109,6 +109,9 @@ function makeHost(input: HostInput = {}) {
         input.implementations?.[cardDefinition.id],
     },
     actions: {
+      spendClick: () => {
+        state.corp.clicks -= 1;
+      },
       createLegalAction: (side, type, label, source, costs, payload) =>
         ({
           actionId: `${side}.${type}.${source}`,
@@ -194,11 +197,7 @@ describe("scored agenda activated abilities", () => {
 
     const actions = buildScoredAgendaAbilityActions(host);
 
-    expect(calls.pushed).toEqual([
-      "ai_cfo",
-      "boon",
-      "retreat",
-    ]);
+    expect(calls.pushed).toEqual(["ai_cfo", "boon", "retreat"]);
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "hq_archives_shuffle_draw",
     );

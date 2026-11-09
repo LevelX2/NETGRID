@@ -1039,6 +1039,56 @@ function certifyActivatedStep(
     return { ok: false, reason: "source_capability_unsupported" };
   if (request.sourceCapabilityBindingKind !== "card_spec_capability_key")
     return { ok: false, reason: "source_capability_missing" };
+  const scoredDomain = engineCardByDefinitionId(definition.id)?.engine
+    .scoredAgenda;
+  if (
+    scored &&
+    scoredDomain?.kind ===
+      "tagged_runner_meat_damage_reduce_hand_size_on_success"
+  ) {
+    if (
+      request.kind !== "meat_damage" ||
+      scoredDomain.visibility !== "public" ||
+      !Number.isSafeInteger(scoredDomain.damageAmount) ||
+      scoredDomain.damageAmount <= 0
+    )
+      return { ok: false, reason: "source_effects_unsupported" };
+    if (
+      request.sourceCapabilityId !==
+      canonicalCapabilityId(definition.id, scoredDomain.capabilityKey)
+    )
+      return { ok: false, reason: "source_capability_missing" };
+    return {
+      ok: true,
+      step: {
+        quote: {
+          stepId: request.stepId,
+          order: request.order,
+          kind: request.kind,
+          sourceCardInstanceId: request.sourceCardInstanceId,
+          sourceCardDefinitionId: instance.definitionId,
+          sourceCapabilityBindingKind: request.sourceCapabilityBindingKind,
+          sourceCapabilityId: request.sourceCapabilityId,
+          clicks: 1,
+          credits: 0,
+        },
+        effects: [
+          {
+            kind: "damage",
+            recipient: "runner",
+            damageType: "meat",
+            amount: scoredDomain.damageAmount,
+            preventable: true,
+            visibility: "public",
+          },
+        ],
+        condition: { kind: "runner_is_tagged" },
+        ...(request.currentLegalActionId
+          ? { currentLegalActionId: request.currentLegalActionId }
+          : {}),
+      },
+    };
+  }
   let binding: ReturnType<typeof activatedAbilityBindingForPersistedIdentity>;
   try {
     binding = activatedAbilityBindingForPersistedIdentity(definition, {

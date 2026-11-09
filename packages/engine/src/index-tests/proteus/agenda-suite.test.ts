@@ -277,7 +277,8 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       state,
       "corp",
       (candidate) =>
-        candidate.payload?.agendaAbility === "proteus_corporate_headhunters",
+        candidate.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
     );
     expect(action.costs).toEqual([{ clicks: 1 }]);
     const before = structuredClone(state);
@@ -307,7 +308,8 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       prevented,
       "corp",
       (candidate) =>
-        candidate.payload?.agendaAbility === "proteus_corporate_headhunters",
+        candidate.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
     );
     prevented = apply(
       prevented,

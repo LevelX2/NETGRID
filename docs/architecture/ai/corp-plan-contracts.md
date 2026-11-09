@@ -2962,6 +2962,17 @@ Quelle im neuen Zustand erneut gequotet; dieselbe Quelle wird nicht doppelt
 in einer vorausberechneten Route gebucht. Ein Profil- oder Legalitätsnachweis
 allein ersetzt diesen produktiven Übergang zur Punish-Route nicht.
 
+Das gilt auch für die deklarierte Scored-Agenda-Domäne mit getaggtenabhängigem
+Meat-Schaden und Handgrößenfolge. Ihr Engine-Produzent veröffentlicht die
+kanonische Capability, Schadenstyp und exakt null Creditgewinn. Discovery und
+Quote konsumieren diesen vorhandenen Mechanikvertrag; die Quote zertifiziert
+Score-Zone, Tagbedingung, Kosten und den aktuellen Head. Die Schadensquelle
+verwendet die aktivierte Action-Familie mit passender Capability-Bindung.
+Der explizite Schadenempfänger bleibt im AI-DTO erhalten: Schaden am Gegner
+ist keine ungeklärte eigene Zusatzkost. Fehlender Empfänger und Eigenschaden
+behalten ihre strikten Kostenprüfungen. Paarung 706/D172 belegt eine legal sofort tödliche Ein-Aktions-Route,
+die sonst hinter Ressourcen-Trash verborgen blieb.
+
 Dieselbe Schadensroute entdeckt gerezzte Assets und Upgrades in tatsächlich
 installierten Roots. Virtuelle Archives-Roots sind keine installierten Quellen.
 Die Engine zertifiziert Root-Zone und Servermitgliedschaft, Rez-Zustand,

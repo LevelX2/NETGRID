@@ -15,6 +15,15 @@ passenden Familie definiert.
 
 ## Familien
 
+Getaggtenabhängiger Meat-Schaden aus der bestehenden Scored-Agenda-Domäne
+erzeugt eine `activated_card_ability` mit kanonischer Capability-Bindung,
+explizitem Schadenempfänger und null Creditgewinn. Die Engine-Quote
+zertifiziert dieselbe Score-Zone, Bedingung, Kosten und Schadenswirkung wie
+die Ausführung. Handgrößenreduktion bleibt an tatsächlich erfolgreichen
+Schaden gebunden. Der AI-DTO erhält den Empfänger; der Kosten-Owner trennt
+ausgehenden Schaden von Eigenkosten. Die vorherige `gain_credit`-Projektion
+wird ersetzt und nicht als parallele Legacy-Aktivierung weitergeführt.
+
 `RunState.startOfRunIceRepositionOpen` markiert das Fenster vor der ersten
 Begegnung beziehungsweise Passage. Die Engine bietet kanonische mobile
 ICE-Aktionen auch vor bereits gerezztem äußerem ICE und vor dem Zugriff auf
