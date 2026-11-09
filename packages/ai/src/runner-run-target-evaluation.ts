@@ -44,7 +44,7 @@ import {
 } from "./visible-run-analysis";
 import { buildRunnerEconomyPosture } from "./runner-economy-posture";
 import {
-  assessRandomBreakOrDamageRiskForRunAction,
+  assessRandomBreakOrDamageRiskForQuotedRunPath,
   randomBreakOrDamageRiskProfileForDefinitionId,
   randomBreakOrDamageRiskCanCarryRunPath,
   randomBreakOrDamageRiskScorePenalty,
@@ -818,7 +818,12 @@ function evaluateRunnerRunTarget(
         : (projection.successfulRunRunnerCreditGain ?? 0)),
   });
   const randomBreakOrDamageRiskAssessment =
-    assessRandomBreakOrDamageRiskForRunAction(params.input, projection.action, {
+    assessRandomBreakOrDamageRiskForQuotedRunPath(params.input, {
+      targetServerId,
+      visibleIce: projectedServerIce,
+      fullPath: pathBeforeDamageBudget,
+      stablePath: quotedPath ? quoteKnownPath() : standardPath,
+      handAfterActionCost: projectedGripAfterRunAction,
       accessPayoff,
       scoreThreat,
     });

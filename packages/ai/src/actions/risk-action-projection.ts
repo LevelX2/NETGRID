@@ -4,6 +4,7 @@ import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
+  type KnownRezzedIcePathAssessment,
 } from "../visible-run-analysis";
 import type {
   RandomBreakOrDamageRiskAssessment,
@@ -264,8 +265,6 @@ export function assessRandomBreakOrDamageRiskForVisibleRunPath(
     input.playerView.opponent.credits,
     { ...currentRunPathContext(input), allowRandomBreakAttempts: true },
   );
-  const visibleBreakworthySubroutineCount =
-    visibleRandomBreakCandidateSubroutineCountForPath(params.visibleIce);
   if (fullPath.assessedKnownIceCount <= 0 || !fullPath.canReachAccess) {
     return undefined;
   }
@@ -284,16 +283,50 @@ export function assessRandomBreakOrDamageRiskForVisibleRunPath(
     input.playerView.opponent.credits,
     currentRunPathContext(input),
   );
+  return assessRandomBreakOrDamageRiskForQuotedRunPath(input, {
+    ...params,
+    fullPath,
+    stablePath,
+    handAfterActionCost:
+      input.playerView.own.gripOrHq.length -
+      (params.consumesKnownOwnHandCard === true ? 1 : 0),
+  });
+}
+
+/** Risk facts for the exact route already quoted by the existing run owner. */
+export function assessRandomBreakOrDamageRiskForQuotedRunPath(
+  input: AiDecisionInput,
+  params: {
+    targetServerId: string;
+    visibleIce: VisibleServerIce[];
+    fullPath: KnownRezzedIcePathAssessment;
+    stablePath: KnownRezzedIcePathAssessment;
+    handAfterActionCost: number;
+    accessPayoff?: RunnerAccessPayoff;
+    scoreThreat?: boolean;
+  },
+): RandomBreakOrDamageRiskAssessment | undefined {
+  if (
+    input.side !== "runner" ||
+    params.visibleIce.length === 0 ||
+    params.fullPath.assessedKnownIceCount <= 0 ||
+    !params.fullPath.canReachAccess
+  )
+    return undefined;
+  const riskProfile = randomBreakOrDamageRiskProfilesForRig(
+    input.playerView.own.rig ?? [],
+  )[0];
+  if (!riskProfile) return undefined;
   const stableCoverageAvailable =
-    stablePath.assessedKnownIceCount > 0 && stablePath.canReachAccess;
+    params.stablePath.assessedKnownIceCount > 0 &&
+    params.stablePath.canReachAccess;
   if (stableCoverageAvailable) return undefined;
 
   const currentHandCount = input.playerView.own.gripOrHq.length;
-  const handAfterActionCost =
-    currentHandCount - (params.consumesKnownOwnHandCard === true ? 1 : 0);
+  const handAfterActionCost = params.handAfterActionCost;
   const visibleSubroutinesLikely = Math.max(
     1,
-    visibleBreakworthySubroutineCount,
+    visibleRandomBreakCandidateSubroutineCountForPath(params.visibleIce),
   );
   const payoffOverride = randomBreakOrDamageRiskPayoffOverride(
     params.accessPayoff,
@@ -312,10 +345,10 @@ export function assessRandomBreakOrDamageRiskForVisibleRunPath(
     targetServerId: params.targetServerId,
     evidence: [
       `randomBreakDamageRunTarget:${params.targetServerId}`,
-      `randomBreakDamageStablePathReachable:${stablePath.canReachAccess}`,
-      `randomBreakDamageFullPathReachable:${fullPath.canReachAccess}`,
-      `randomBreakDamageKnownIceCount:${fullPath.assessedKnownIceCount}`,
-      `randomBreakDamagePathCost:${fullPath.visibleBreakCost ?? 0}`,
+      `randomBreakDamageStablePathReachable:${params.stablePath.canReachAccess}`,
+      `randomBreakDamageFullPathReachable:${params.fullPath.canReachAccess}`,
+      `randomBreakDamageKnownIceCount:${params.fullPath.assessedKnownIceCount}`,
+      `randomBreakDamagePathCost:${params.fullPath.visibleBreakCost ?? 0}`,
       ...recentRandomBreakFailureEvidence(input, params.targetServerId),
       ...(params.accessPayoff
         ? [`randomBreakDamageAccessPayoff:${params.accessPayoff}`]

@@ -99,6 +99,19 @@ rechtfertigt dieser wirkungslose Aufpreis keinen Kartenverbrauch oder
 zusätzlichen Run-Klick. Andere echte Bypass-, Mehrfachzugriffs- und
 Informationswirkungen behalten ihren eigenen Nachweis.
 
+Das Zufallsbreaker-Risiko gilt für jede konkrete Runaktion, einschließlich
+Kartenruns. Die gemeinsame Runbewertung verwendet die Hand nach den
+tatsächlichen Aktionskosten und die bereits gequoteten vollständigen und
+stabilen Pfade derselben Aktion. Run-Creditpools, Bypass und
+Breaker-Einschränkungen bleiben damit an die konkrete Route gebunden. Ein
+Basisrun mit ausreichender Handreserve legitimiert keinen Kartenrun, dessen
+Kartenverbrauch den späteren Breakversuch ausschließt. Central und Remote
+verwenden diese Risikofakten innerhalb ihrer bestehenden Zulassung;
+notwendige Vorbereitung bleibt beim vorhandenen Defense-/Recovery-Owner.
+Der native Paarung-690-Checkpoint sichert die Ablehnung bei zwei Handkarten,
+die erhaltene Route bei drei Handkarten nach Kosten und die tatsächliche
+Übergabe an Defense/Recovery ab.
+
 Die gemeinsame Runquote trennt mögliche Trace-Effekte von der nach bezahlter
 Abwehr verbleibenden Gefahr. Garantierte Break-, Link- oder Cancel-Kosten
 bleiben im vollständigen Pfadbudget; die ursprünglichen Gefahrenrecords
