@@ -17,7 +17,10 @@ import { buildAiDecisionInputDto } from "../../input-dto";
 import { runnerCardRunHasVisibleDifferentialPayoff } from "../../plans/runner-run-payoff";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
-import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
+import {
+  evaluateRunnerRunTargets,
+  quoteRunnerRunAfterHandBufferDraws,
+} from "../../runner-run-target-evaluation";
 import {
   buildAiDecisionInput,
   type AiDecisionInputWithDeckCapabilities,
@@ -185,7 +188,16 @@ describe("native pre-rez approach information", () => {
         // The known rezzed Bolter Cluster precedes the unknown inner ICE.
         // Exposing that inner ICE does not bypass this existing known path.
         expect(a.type).toBe("draw_card");
-        expect(plan.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
+        // SP-833 admits the complete same-turn hand-buffer preparation above
+        // the cleanup limit. Defense owns this preparation before the run.
+        expect(plan.selectedPlan).toMatchObject({
+          moduleId: "runner.defense_and_recovery",
+          phase: "build_hand_buffer",
+        });
+        expect(plan.rootPlanInstanceId).toBe(
+          "plan:runner.defense_and_recovery:runner",
+        );
+        expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
         const deckCapabilities = input.ownDeckCapabilities;
         if (!deckCapabilities)
           throw new Error("Native own-deck capabilities missing.");
@@ -196,9 +208,23 @@ describe("native pre-rez approach information", () => {
         }).find((target) => target.actionId === engine.actionId)!;
         expect(route.prerunReserveQuote?.handBufferGap).toBeGreaterThan(0);
         expect(route.recommendation).toBe("draw_for_damage_buffer");
-        expect(
-          advance(state, { side: "runner", actionId: a.actionId }).stateVersion,
-        ).toBe(state.stateVersion + 1);
+        expect(quoteRunnerRunAfterHandBufferDraws(input, route)).toMatchObject({
+          actionId: engine.actionId,
+          targetServerId: server,
+          pathPassability: "reachable",
+          prerunReserveQuote: { status: "not_required", handBufferGap: 0 },
+        });
+        const afterDraw = advance(state, {
+          side: "runner",
+          actionId: a.actionId,
+        });
+        expect(afterDraw.stateVersion).toBe(state.stateVersion + 1);
+        expect(afterDraw.runner.grip).toHaveLength(
+          input.playerView.own.gripOrHq.length + 1,
+        );
+        expect(afterDraw.runner.grip.length).toBeGreaterThan(
+          input.playerView.own.maxHandSize,
+        );
         return;
       }
       expect(a.actionId).toBe(engine.actionId);
