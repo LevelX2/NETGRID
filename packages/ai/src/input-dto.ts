@@ -500,6 +500,8 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "exposedServerLabels",
   "revealedCount",
   "publicRevealDefinitionIds",
+  "agendaStoredInHq",
+  "storedAgendaDefinitionId",
   "discardResolved",
   "revealKind",
   "abilityFamily",

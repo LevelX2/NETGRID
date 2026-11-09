@@ -35,6 +35,15 @@ Erlaubt sind insbesondere:
 - actor-private Matchbindung ausschließlich für Engine-zertifizierte
   Commands.
 
+Die positive Feldliste des AI-Inputs erhält auch die bereits von der Engine
+veröffentlichten Fakten `agendaStoredInHq` und `storedAgendaDefinitionId`.
+Sie bestätigen eine öffentlich aufgedeckte Agenda-Verschiebung nach HQ; der
+bestehende Belief-Owner verarbeitet ihre Herkunft und spätere unbekannte
+HQ-Abgänge. Eine allgemeine Reveal-Liste ersetzt diesen Zielzonenfakt nicht,
+insbesondere wenn dasselbe Run-Endereignis zusätzlich einen verwendeten
+Breaker trasht. P692/D105–106 sichert den vollständigen PublicEvent→DTO→Belief-
+Pfad einschließlich unveränderter Filterung privater Hand- und Deckdaten.
+
 Verboten sind insbesondere:
 
 - vollständiger `GameState`;
