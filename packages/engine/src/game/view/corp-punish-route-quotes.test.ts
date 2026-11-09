@@ -456,6 +456,14 @@ describe("Corp punish-route quote request", () => {
         complete: true,
         totalClicks: 1,
         totalActionCredits: 2,
+        guarantee: "guaranteed",
+        tagOutcomeEnvelope: {
+          addedTags: { minimum: 1, maximum: 1 },
+        },
+        damageEnvelope: {
+          rawDamage: { total: 0 },
+          effectiveDamage: { minimum: 0, maximum: 0 },
+        },
         tagTrigger: {
           kind: "direct_tag_step",
           sourceStepId: "trojan-tag",

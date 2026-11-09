@@ -260,7 +260,7 @@ it("keeps a native temporary search with two reserved hand-buffer draws before i
   expect(JSON.stringify(input)).toBe(before);
 });
 
-it("does not buy temporary coverage for a remote information path its own consumer rejects (SP-757)", () => {
+it("does not buy temporary coverage when its remote information horizon is unfunded (SP-757)", () => {
   const { input } = original("meta592-r6-g27-d681-information-search"),
     before = JSON.stringify(input),
     d = chooseAiAction(input);
@@ -272,8 +272,10 @@ it("does not buy temporary coverage for a remote information path its own consum
     .map((x) => (x.moduleState as { gap: RunnerCoverageGapSignal }).gap);
   expect(
     gaps.some((g) =>
-      g.recoveryEvidenceCodes?.some((code) =>
-        code.endsWith("remote_information_consumer_rejects_known_path"),
+      g.recoveryEvidenceCodes?.some(
+        (code) =>
+          code.startsWith("temporary_search_incomplete_horizon:") &&
+          code.endsWith(":no_complete_same_turn_funding_route"),
       ),
     ),
   ).toBe(true);

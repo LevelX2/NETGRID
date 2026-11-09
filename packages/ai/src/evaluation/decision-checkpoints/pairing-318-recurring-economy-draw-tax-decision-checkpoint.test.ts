@@ -22,7 +22,7 @@ type ReconstructedDecisionCapture = {
 };
 
 describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
-  it("keeps the resident economy hold without promoting discarded damage to acute draw-tax danger", () => {
+  it("keeps the resident economy hold while respecting observed affordable HQ damage and draw-tax risk", () => {
     const capture = structuredClone(
       recurringEconomyTaxedDrawJson,
     ) as ReconstructedDecisionCapture;
@@ -32,11 +32,18 @@ describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
-    expect(runnerDamageThreatAssessment(capture.input).flatlineRisk).toMatchObject({
-      level: "suspected", activeDamageSourceCount: 0,
+    expect(
+      runnerDamageThreatAssessment(capture.input).flatlineRisk,
+    ).toMatchObject({
+      level: "confirmed",
+      activeDamageSourceCount: 0,
     });
-    expect(decision.decisionDebug?.planFirstDecision?.dispositions).not.toContainEqual(
-      expect.objectContaining({ evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe" }),
+    expect(
+      decision.decisionDebug?.planFirstDecision?.dispositions,
+    ).toContainEqual(
+      expect.objectContaining({
+        evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
+      }),
     );
 
     expect(decision).toMatchObject({

@@ -728,10 +728,10 @@ function completeQuote(
         creditCost: { minimum: 0, maximum: 0 },
       },
     },
-    guarantee:
-      rawDamage > input.playerView.opponent.handCount
-        ? "guaranteed"
-        : "not_guaranteed",
+    // The Engine certifies effect certainty; this is not a flatline predicate.
+    guarantee: request.steps.some((step) => step.kind === "meat_damage")
+      ? "conditional_on_runner_response"
+      : "guaranteed",
     responseKnowledge: "public_exact",
   };
   return { ok: true, quote };
