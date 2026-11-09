@@ -151,7 +151,7 @@ it("prices Manhunt, binds its zero-credit bid and then trashes a visible resourc
     (request) => quoteCorpPunishRoute(state, request),
   );
   expect(quoted.playerView.corpPunishRouteQuoteSet?.routes[0]).toMatchObject({
-    tagOutcomeEnvelope: { addedTags: { minimum: 6, maximum: 6 } },
+    tagOutcomeEnvelope: { addedTags: { minimum: 5, maximum: 6 } },
     responsePaymentEnvelope: { totalCorpCredits: { minimum: 4, maximum: 4 } },
   });
   const head = choose(state);
@@ -205,7 +205,12 @@ it("prices Manhunt, binds its zero-credit bid and then trashes a visible resourc
       .actionId,
     { choiceId: runnerChoice.choiceId, selectedOptionIds: ["bid_1"] },
   );
-  expect(state.runner.tags).toBe(6);
+  expect(state.runner.tags).toBe(5);
+  expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    traceValue: 6,
+    runnerStrength: 1,
+    tagsAdded: 5,
+  });
   const payoff = choose(state);
   const payoffAction = getLegalActions(state, "corp").find(
     (a) => a.actionId === payoff.actionId,
