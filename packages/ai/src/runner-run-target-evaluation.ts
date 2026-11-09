@@ -334,9 +334,7 @@ export function quoteRunnerRunAfterHandBufferDraws(
     draw.payload?.visibleDrawTaxSourceCount !== 0 ||
     draw.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) !== 1 ||
     draw.costs.some((cost) => (cost.credits ?? 0) !== 0) ||
-    gap > input.playerView.own.stackOrRdCount ||
-    input.playerView.own.gripOrHq.length + gap >
-      input.playerView.own.maxHandSize
+    gap > input.playerView.own.stackOrRdCount
   )
     return undefined;
   const quotedInput: AiDecisionInput = {

@@ -2630,6 +2630,14 @@ die nötigen Draws und der Run noch in denselben Zug passen. Nur für diese
 gebundene Vorbereitung darf der temporäre Puffer über dem Cleanup-Handlimit
 liegen. Fehlende Stack-Karten, Folgeaktionen oder Run-Credits lassen diese
 Vorbereitung nicht entstehen; zusätzliche Credits ersetzen keinen Handbedarf.
+Die wiederholte Draw-Quote begrenzt diesen gebundenen Bedarf deshalb nicht
+auf das Cleanup-Handlimit. Sie quotiert die tatsächliche Handzahl vor dem
+Run, ohne unbekannte Kartenidentitäten zu erzeugen. Defense verlangt weiter
+eine danach zugelassene, positiv bewertete Route; unabhängige Letalität durch
+zusätzlichen Core-Schaden und unvollständige Zieh-/Runhorizonte bleiben gesperrt.
+Der native Zustand P701/D534 mit drei Core-Schaden, Handlimit zwei und zwölf
+Stackkarten prüft den Draw statt weiterer gesättigter Liquidität sowie die
+letzte-Aktion-, Leerstack-, Ziehsteuer- und veraltete-Action-Gegenfälle.
 
 **Klasse:** `urgent_response`, `bounded_sequence` oder
 `development_project`
