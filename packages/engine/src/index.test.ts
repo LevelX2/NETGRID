@@ -350,6 +350,32 @@ function resolveTraceWithMaximumCorpBid(state: GameState): GameState {
 }
 
 describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
+  it.each([
+    { bid: 0, tags: 7 },
+    { bid: 6, tags: 1 },
+  ])(
+    "uses the final runner strength for margin tags with bid $bid",
+    ({ bid, tags }) => {
+      let state = corpActionStateForProteusPro007(`margin-tags-${bid}`);
+      state.corp.credits = 11;
+      state.runner.credits = 6;
+      state.runnerTurnFlags!.runAttemptsLastTurn = 1;
+      state = playCorpOperationByDefinition(state, "onr_proteus_050_manhunt");
+      state = applyChoice(state, "corp", "bid_1");
+      state = applyChoice(state, "runner", `bid_${bid}`);
+      if (state.pendingChoice?.source.startsWith("trace_post_bid_link:"))
+        state = applyChoice(state, "runner", "pass");
+      expect(state.runner.tags).toBe(tags);
+      expect(state.runner.credits).toBe(6 - bid);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        traceSuccessful: true,
+        traceValue: 7,
+        runnerStrength: bid,
+        tagsAdded: tags,
+      });
+      expect(validateGameState(state).ok).toBe(true);
+    },
+  );
   it("plays Credit Consolidation and gates Data Sifters on Runner node trash last turn", () => {
     let state = corpActionStateForProteusPro007("proteus-pro007-economy");
     state.corp.credits = 20;

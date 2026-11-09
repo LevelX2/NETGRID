@@ -726,6 +726,66 @@ describe("encounter printed effects boundary", () => {
     });
   });
 
+  it.each([
+    {
+      profile: "modern_open" as const,
+      corp: 7,
+      base: 0,
+      payment: 6,
+      strength: 6,
+      tags: 1,
+    },
+    {
+      profile: "classic_blind" as const,
+      corp: 6,
+      base: 1,
+      payment: 4,
+      strength: 3,
+      tags: 3,
+    },
+    {
+      profile: "classic_blind_corp_ties" as const,
+      corp: 6,
+      base: 1,
+      payment: 10,
+      strength: 6,
+      tags: 0,
+    },
+  ])(
+    "uses final profile strength for a printed margin effect under $profile",
+    ({ profile, corp, base, payment, strength, tags }) => {
+      const state = makeState();
+      state.trace = {
+        traceId: "run_1.ice_1.0.trace",
+        sourceCardInstanceId: "ice_1" as CardInstanceId,
+        sourceDefinitionId: "onr_v1_001_test-ice",
+        subroutineIndex: 0,
+        status: "post_bid_link",
+        traceRulesProfile: profile,
+        traceLimit: 6,
+        corpBid: 1,
+        traceValue: corp,
+        runnerLink: base,
+        runnerBid: payment,
+        runnerStrength: strength,
+        successEffect: { type: "add_tags_by_trace_margin_over_runner_link" },
+      };
+      const legalAction = { payload: {} } as LegalAction;
+      applyPrintedTraceSuccessFollowups(makeHost(state, legalAction), {
+        trace: state.trace,
+        traceStep: "post_bid_link",
+        legalAction,
+      });
+      expect(state.runner.tags).toBe(tags);
+      expect(legalAction.payload).toMatchObject({
+        traceValue: corp,
+        runnerStrength: strength,
+        tagsAdded: tags,
+        traceSuccessful: true,
+      });
+    },
+  );
+
   it("applies printed Trace-success run-lock/end-run followups through callbacks", () => {
     const state = makeState();
     state.trace = {

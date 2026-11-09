@@ -1519,7 +1519,7 @@ function traceSuccessTagAmountForOperation(
     return successEffect.tagAmount;
   if (successEffect.type === "add_tag") return successEffect.amount;
   if (successEffect.type === "add_tags_by_trace_margin_over_runner_link")
-    return Math.max(0, result.traceValue - result.runnerLink);
+    return Math.max(0, result.traceValue - result.runnerStrength);
   if (successEffect.type === "trash_runner_resource_and_add_tag") return 1;
   return 0;
 }

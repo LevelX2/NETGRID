@@ -105,6 +105,15 @@ die einzige Autorität für Zahlung und Ergebnis. Karten starten oder
 modifizieren den generischen Trace-Vertrag über strukturierte Semantik; es
 gibt keine Karten-ID-Schalter und keine zweite Trace-State-Machine.
 
+Ein Effekt nach der Trace-Link-Differenz verwendet die finalen regelwirksamen
+Stärken: `max(0, traceValue - runnerStrength)`. Der getrennt veröffentlichte
+Basiswert `runnerLink` darf dafür nicht anstelle von `runnerStrength` stehen.
+Damit verringern ein wirksames Modern-Link-Payment, gedruckte Classic-Link-
+Modifikatoren und Post-Reveal-Link die Differenz auch dann, wenn der Trace
+weiterhin erfolgreich bleibt. Das gilt für Operationen und Encounter-Effekte
+gleichermaßen. Der Erfolg selbst folgt weiterhin der jeweiligen Tie-Regel;
+ein erfolgloser Trace führt keinen Erfolgseffekt aus.
+
 Ein aktives `runActionSpendingCap` begrenzt die kumulierten tatsächlichen
 Creditkosten für Icebreaker und Link über den gesamten Run. Dazu zählen
 Modern-Open-Linkzahlungen, die gedruckten Classic-Linkzahlungen sowie
