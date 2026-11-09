@@ -1,57 +1,136 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { AiDecisionInput } from "@netgrid/shared";
+import {
+  DEMO_DECKS,
+  type DeckDefinition,
+  type GameState,
+} from "@netgrid/shared";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+} from "@netgrid/engine";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
-import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
-import { projectInstalledCorpIceRezCost } from "../../../../engine/src/game/payment/corp-rez-cost";
 import {
-  MECHANIC_SMOKE_GAMES,
-  putCorpIceOnServer,
-} from "../../../../engine/src/test-fixtures/mechanic-smoke-fixtures";
+  exportAiRuntimeCheckpoint,
+  restoreAiRuntimeCheckpoint,
+} from "./runtime-checkpoint";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 
 const read = (name: string) =>
   JSON.parse(
     readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"),
   );
 const root = "plan:runner.pressure_central:central%3Ahq";
-const leaf = "plan:runner.convert_run_window:run%3Arun_85";
+const SMARTEYE = "onr_v1_065_smarteye";
+const BLOCKS = "onr_proteus_017_credit-blocks";
+const runnerDeck: DeckDefinition = {
+  ...DEMO_DECKS.demo_runner_001,
+  id: "current-smarteye-viewing-runner",
+  cards: [
+    ...DEMO_DECKS.demo_runner_001.cards,
+    ...[
+      "onr_v1_030_grubb",
+      "onr_v1_054_raptor",
+      "onr_v1_014_codecracker",
+      SMARTEYE,
+      "onr_v1_129_hq-interface",
+    ].map((id) => ({ id, quantity: 1 })),
+  ],
+};
+const corpDeck: DeckDefinition = {
+  ...DEMO_DECKS.demo_corp_001,
+  id: "current-smarteye-viewing-corp",
+  cards: [
+    ...DEMO_DECKS.demo_corp_001.cards,
+    ...[BLOCKS, "onr_v1_278_wall-of-ice", "onr_v1_290_efficiency-experts"].map(
+      (id) => ({ id, quantity: 1 }),
+    ),
+  ],
+};
+
+function apply(state: GameState, side: "runner" | "corp", actionId: string) {
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId,
+    clientKnownStateVersion: state.stateVersion,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
 
 function checkpoint() {
-  const native = read("meta489-g4-d92");
-  expect(Object.values(native.validation)).toEqual(Array(9).fill(true));
-  const counterline = read("meta489-g4-d92-viewing-counterline");
-  expect(counterline.provenance.kind).toBe(
-    "real-engine-input-from-exact-native-api-prefix",
-  );
-  // Preserve the origin regression's native counterline. The current producer
-  // additionally quotes this exposed ICE; obtain its public minimum cost from
-  // the Engine, with no active Corp cost modifiers in either board.
-  const current = structuredClone(counterline.input) as AiDecisionInput;
-  const ice = current.playerView.servers.find((s) => s.id === "hq")!.ice[0]!;
-  const state = MECHANIC_SMOKE_GAMES.runAccess("sp472-current-viewing-cost");
-  const id = putCorpIceOnServer(state, "hq", "onr_v1_227_cerberus");
-  state.cardInstances[id]!.definitionId = ice.definitionId!;
-  const quote = projectInstalledCorpIceRezCost(state, id);
-  expect(quote).toMatchObject({ complete: true, finalCredits: 6 });
-  current.playerView.run!.approachedIce = {
-    ...ice,
-    effectiveRezCostQuote: {
-      ...quote!,
-      cardId: ice.instanceId,
-      expiresAtStateVersion: current.playerView.stateVersion,
-    },
-  };
-  const input = {
-    ...current,
-    ...buildAiDecisionInputDto(current),
-  } as AiDecisionInput;
-  const runtime = structuredClone(native.runtime);
+  // A fresh Engine prefix replaces the obsolete positive counterline whose
+  // unrelated Hunt event predates the complete public expose contract.
+  let state = createGameAfterSetup({
+    seed: "current-smarteye-viewing",
+    runnerDeck,
+    corpDeck,
+  });
+  state = apply(state, "corp", "corp.mandatory_draw");
+  RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
+  state = apply(state, "corp", "corp.end_turn");
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerCredits(20)
+    .withRunnerGripSize(5)
+    .withRunnerProgramInstalled("onr_v1_030_grubb")
+    .withRunnerProgramInstalled("onr_v1_054_raptor")
+    .withRunnerProgramInstalled("onr_v1_014_codecracker")
+    .withRunnerProgramInstalled(SMARTEYE)
+    .withRunnerCardInGrip("onr_v1_129_hq-interface")
+    .withCorpCardInHq("simple_agenda")
+    .withCorpCardInHq("onr_v1_290_efficiency-experts")
+    .withCorpIceOnServer("hq", BLOCKS)
+    .withRezzedCorpIceOnServer("rd", "onr_v1_278_wall-of-ice")
+    .withCorpCredits(6);
+  state.runner.memoryUsed = 4;
+  const interfaceAction = getLegalActions(state, "runner").find(
+    (a) =>
+      a.type === "install_card" &&
+      typeof a.payload?.cardId === "string" &&
+      state.cardInstances[a.payload.cardId]?.definitionId ===
+        "onr_v1_129_hq-interface",
+  )!;
+  state = apply(state, "runner", interfaceAction.actionId);
+  const build = (s: GameState) =>
+    buildAiDecisionInput(s, "runner", {
+      difficulty: "hard",
+      ownDeckSnapshot: {
+        deckSnapshotId: runnerDeck.id,
+        side: "runner",
+        cards: runnerDeck.cards.map((c) => ({
+          cardId: c.id,
+          quantity: c.quantity,
+        })),
+      },
+    });
+  const start = chooseAiAction(build(state));
+  expect(start.actionId).toBe("runner.start_run.hq");
+  expect(start.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(root);
+  state = apply(state, "runner", start.actionId!);
+  const expose = chooseAiAction(build(state));
+  expect(expose.actionId).toContain(".expose");
+  state = apply(state, "runner", expose.actionId!);
+  const input = build(state);
+  expect(input.playerView.run?.approachedIce).toMatchObject({
+    definitionId: BLOCKS,
+    effectiveRezCostQuote: { complete: true, finalCredits: 6 },
+  });
+  const runtime = exportAiRuntimeCheckpoint(input, runnerDeck.id);
+  expect(
+    runtime.residentPlanPortfolio?.runnerExposeInformationMemory,
+  ).toHaveLength(1);
+  const leaf = `plan:runner.convert_run_window:run%3A${input.playerView.run!.runId}`;
+  resetResidentPlanPortfolioMemory();
   return {
     input,
     runtime,
-    deckSnapshotId: native.input.ownDeckSnapshot.deckSnapshotId,
+    deckSnapshotId: runnerDeck.id,
+    leaf,
   };
 }
 
@@ -78,7 +157,7 @@ describe("native expose-viewing continuation (SP-472)", () => {
   });
 
   it("finishes the revealed window with the native Root and Run executor", () => {
-    const { input, runtime, deckSnapshotId } = checkpoint();
+    const { input, runtime, deckSnapshotId, leaf } = checkpoint();
     restoreAiRuntimeCheckpoint(input, deckSnapshotId, runtime);
     const selected = chooseAiAction(input);
     expect(selected.actionId).toBe(input.legalActions[0]!.actionId);
@@ -88,7 +167,7 @@ describe("native expose-viewing continuation (SP-472)", () => {
       executionOrigin: {
         rootPlanInstanceId: root,
         leafPlanInstanceId: leaf,
-        stateVersion: 91,
+        stateVersion: input.playerView.stateVersion,
       },
     });
     expect(
@@ -110,23 +189,39 @@ describe("native expose-viewing continuation (SP-472)", () => {
     "event",
     "parent",
   ] as const)("fails closed for a changed %s binding", (boundary) => {
-    const { input, runtime, deckSnapshotId } = checkpoint();
-    const p = runtime.residentPlanPortfolio;
+    const { input, runtime, deckSnapshotId, leaf } = checkpoint();
+    const p = runtime.residentPlanPortfolio!;
+    const remembered = p.runnerExposeInformationMemory?.[0];
+    if (!remembered) throw new Error("Fresh native expose memory is missing");
     if (boundary === "memory") p.runnerExposeInformationMemory = [];
     if (boundary === "source")
-      p.runnerExposeInformationMemory[0].sourceCardInstanceId =
-        "different_source";
+      p.runnerExposeInformationMemory = [
+        { ...remembered, sourceCardInstanceId: "different_source" },
+      ];
     if (boundary === "target")
-      p.runnerExposeInformationMemory[0].targetIceInstanceId = "different_ice";
+      p.runnerExposeInformationMemory = [
+        { ...remembered, targetIceInstanceId: "different_ice" },
+      ];
     if (boundary === "version")
-      p.runnerExposeInformationMemory[0].selectedAtStateVersion--;
+      p.runnerExposeInformationMemory = [
+        {
+          ...remembered,
+          selectedAtStateVersion: remembered.selectedAtStateVersion - 1,
+        },
+      ];
     if (boundary === "run") input.playerView.run!.runId = "different_run";
     if (boundary === "root") p.rootForegroundInstanceId = "different_root";
     if (boundary === "event") input.eventTail = input.eventTail!.slice(0, -1);
-    if (boundary === "parent")
-      p.instances.find(
+    if (boundary === "parent") {
+      const parent = p.instances.find(
         (i: { instanceId: string }) => i.instanceId === leaf,
-      ).moduleState.signal.windowId = "run:different_parent";
+      )!;
+      const state = parent.moduleState as { signal: Record<string, unknown> };
+      parent.moduleState = {
+        ...state,
+        signal: { ...state.signal, windowId: "run:different_parent" },
+      };
+    }
     restoreAiRuntimeCheckpoint(input, deckSnapshotId, runtime);
     expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
   });

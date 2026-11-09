@@ -8,6 +8,7 @@ import {
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 import { decisionDerivedValue } from "./runtime/decision-derived-cache";
+import { publicInstalledExposures } from "./public-installed-exposure";
 
 type PublicHiddenZoneMutation = {
   kind: "move" | "shuffle" | "reorder" | "swap";
@@ -891,6 +892,23 @@ function deriveKnownPositionMemory(
     }
 
     const event = eventsById.get(classification.eventId);
+    const installedExposures = event
+      ? publicInstalledExposures(playerView, event)
+      : [];
+    if (installedExposures.length > 0) {
+      for (const observation of installedExposures) {
+        memory.set(`${observation.serverId}:${observation.positionKey}`, {
+          zone: observation.serverId,
+          positionKey: observation.positionKey,
+          definitionId: observation.definitionId,
+          certainty: "observed",
+          sourceEventId: classification.eventId,
+          sourceKind: "expose",
+          invalidatedBy: [],
+        });
+      }
+      continue;
+    }
     const definitionId = event
       ? publicKnownCardDefinitionId(event, classification)
       : undefined;

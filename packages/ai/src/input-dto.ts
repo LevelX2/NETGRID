@@ -498,6 +498,7 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "exposedPositionKeys",
   "exposedServerIds",
   "exposedServerLabels",
+  "revealedCount",
   "publicRevealDefinitionIds",
   "discardResolved",
   "revealKind",

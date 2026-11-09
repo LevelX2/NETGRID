@@ -261,6 +261,24 @@ export function createCorpZoneRuntimeHosts(
     return targets.sort();
   }
 
+  function installedCorpExposureBindings(
+    state: GameState,
+    cardIds: readonly CardInstanceId[],
+  ): { exposedServerIds: string; exposedPositionKeys: string } {
+    const positions = cardIds.map((cardId) => {
+      const context = installedCorpCardServerContext(state, cardId);
+      if (!context)
+        throw new Error("Dem Expose-Ziel fehlt die aktuelle Serverposition.");
+      return context;
+    });
+    return {
+      exposedServerIds: positions.map(({ server }) => server.id).join(","),
+      exposedPositionKeys: positions
+        .map(({ area, index }) => `${area}:${index}`)
+        .join(","),
+    };
+  }
+
   function exposeInstalledCorpCardLabel(
     state: GameState,
     cardId: CardInstanceId,
@@ -805,6 +823,7 @@ export function createCorpZoneRuntimeHosts(
       publicRevealKind: "expose",
       revealedCount: selectedIds.length,
       publicRevealDefinitionIds: definitionIds.join(","),
+      ...installedCorpExposureBindings(state, selectedIds),
       exposedServerLabels: labels.join(","),
     };
   }
@@ -1013,6 +1032,7 @@ export function createCorpZoneRuntimeHosts(
         serverId,
         revealedCount: selectedIds.length,
         exposedCardInstanceIds: selectedIds.join(","),
+        ...installedCorpExposureBindings(state, selectedIds),
         publicRevealDefinitionIds: definitions
           .map((definition: CardDefinition) => definition.id)
           .join(","),
@@ -1056,6 +1076,7 @@ export function createCorpZoneRuntimeHosts(
       sourceTitle: sourceDefinition.title,
       revealedCount: selectedIds.length,
       exposedCardInstanceIds: selectedIds.join(","),
+      ...installedCorpExposureBindings(state, selectedIds),
       publicRevealDefinitionIds: definitions
         .map((definition: CardDefinition) => definition.id)
         .join(","),

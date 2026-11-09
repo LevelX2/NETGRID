@@ -3584,6 +3584,16 @@ Fortsetzung weiterhin fail-closed.
 
 ## 9. `runner.expose_information`
 
+Mehrfach-Aufdeckungen liefern aus der Engine gleich lange, gleich geordnete
+`publicRevealDefinitionIds`, `exposedServerIds` und `exposedPositionKeys`.
+Informationsowner und bestehende Belief-Projektion konsumieren diese tatsächlichen
+öffentlichen Beobachtungen. Anzeigetexte ersetzen keine Positionsbindung.
+Mehrere Server und ICE-/Root-Positionen bleiben getrennt; installierte R&D-Karten
+erzeugen kein Wissen über die verdeckte R&D-Spitze. Fehlende, widersprüchliche
+oder doppelte Bindungen scheitern mit strukturierter Diagnose. Null ausgewählte
+Ziele erzeugen keine Beobachtung; der AI-DTO erhält dafür das öffentliche
+`revealedCount` einschließlich der Null. Die Erinnerung ist kein zusätzlicher Chooser.
+
 Ein Event-Run mit vorgezogener ICE-Aufdeckung erhält sein statisches Merkmal
 `eventApproachIceExposeBeforeRez` durch den produktiven LegalAction-DTO bis zur
 Runquote. Die generische CardSpec-Übersetzung erhält den Aufdeckeffekt; der

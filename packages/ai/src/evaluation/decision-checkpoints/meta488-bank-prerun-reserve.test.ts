@@ -1,4 +1,5 @@
 import { bindSyntheticAgendaStealQuotes } from "../../agenda-steal-quotes.test-support";
+import { currentRemoteReserveFixture } from "./current-remote-reserve.test-support";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -40,10 +41,13 @@ function engineFactsHash(input: AiDecisionInputWithDeckCapabilities) {
 }
 
 function capture(game: 11 | 20) {
+  // The old game-20 capture contains an unbound positive Hunt observation.
+  // Preserve the reserve/bank geometry through a fresh current Engine input.
+  if (game === 20) return currentRemoteReserveFixture();
   const f = JSON.parse(
     readFileSync(
       new URL(
-        `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta488-r2-g${game}-bank-reserve.json`,
+        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta488-r2-g11-bank-reserve.json",
         import.meta.url,
       ),
       "utf8",

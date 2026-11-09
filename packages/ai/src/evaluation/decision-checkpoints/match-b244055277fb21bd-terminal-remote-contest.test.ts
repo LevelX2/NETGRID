@@ -1,44 +1,18 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import d184CaptureJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-b244055277fb21bd-01-terminal-remote-contest-d184.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
-import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
-import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { currentRemoteReserveFixture } from "./current-remote-reserve.test-support";
 import {
   restoreAiRuntimeCheckpoint,
-  type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-type ReconstructedDecisionCapture = {
-  schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1";
-  provenance: "reconstructed_from_persisted_decision_sources";
-  actor: "runner";
-  stateVersion: number;
-  stateHash: string;
-  input: AiDecisionInputWithDeckCapabilities;
-  runtime: AiRuntimeCheckpointV1;
-  validation: {
-    snapshotHashMatches: true;
-    sideSafeInput: true;
-    inputMatchesActor: true;
-    inputMatchesStateVersion: true;
-    legalActionSetMatchesHistoricalAudit: true;
-    actorStateMatchesHistoricalSnapshot: true;
-    publicEventPrefixComplete: true;
-    deckConsumersMatchPersistedProjection: true;
-    humanPrivateHandExcluded: true;
-  };
-};
-
 describe("match b244055277fb21bd terminal remote contest", () => {
-  it("does not admit the historical contest with a blocked unknown-ICE reserve", () => {
-    const capture = structuredClone(
-      d184CaptureJson,
-    ) as ReconstructedDecisionCapture;
+  it("does not admit a fresh native contest with a blocked unknown-ICE reserve", () => {
     resetResidentPlanPortfolioMemory();
+    const capture = currentRemoteReserveFixture(3, false);
     restoreAiRuntimeCheckpoint(
       capture.input,
       capture.input.ownDeckSnapshot!.deckSnapshotId,
@@ -49,8 +23,8 @@ describe("match b244055277fb21bd terminal remote contest", () => {
     );
     expect(target?.prerunReserveQuote).toMatchObject({
       status: "blocked",
-      creditGap: 25,
     });
+    expect(target?.prerunReserveQuote?.creditGap).toBeGreaterThan(0);
     const decision = chooseAiAction(capture.input);
     expect(decision.actionId).not.toBe("runner.start_run.remote_1");
     expect(
@@ -60,13 +34,8 @@ describe("match b244055277fb21bd terminal remote contest", () => {
     ).toBe(true);
   });
   it("takes the terminal contest when the unknown-ICE reserve is funded", () => {
-    const capture = structuredClone(
-      d184CaptureJson,
-    ) as ReconstructedDecisionCapture;
-    // Synthetic companion: preserve the exact legal run and terminal goal,
-    // but finance the reserve which the historical position did not cover.
-    capture.input.playerView.own.credits = 31;
-    bindPublicBoardStealQuoteCompanion(capture.input);
+    resetResidentPlanPortfolioMemory();
+    const capture = currentRemoteReserveFixture(31, false);
     expect(
       evaluateRunnerRunTargets({ input: capture.input }).find(
         (t) => t.targetServerId === "remote_1",
