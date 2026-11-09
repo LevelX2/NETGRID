@@ -20,7 +20,7 @@ describe("Corporate Downsizing effective-zero score coverage", () => {
 
     const summary = simulateAiGame({
       seed: SEED,
-      maxActions: 600,
+      maxActions: 700,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       ...resolved.config,
@@ -41,8 +41,18 @@ describe("Corporate Downsizing effective-zero score coverage", () => {
         }),
       ]),
     );
-    // Admitted development may now preempt residual liquidity. This seed
-    // completes cleanly after 504 actions; retain a bounded terminal/replay
-    // check with room for that legitimate change in the full-game sequence.
+    expect(
+      summary.actionSequence.some(
+        (action) =>
+          action.actionType === "score_agenda" &&
+          action.debugFacts.some((fact) =>
+            fact.includes("onr_v1_194_corporate-downsizing"),
+          ),
+      ),
+    ).toBe(true);
+    // Action-scoped random-break risk changes the first run-event admission
+    // at D104. The verified legal continuation ends after 649 actions and
+    // scores Corporate Downsizing twice; keep terminal/replay and card-score
+    // coverage without requiring the earlier trajectory's 600-action bound.
   }, 120_000);
 });
