@@ -19271,13 +19271,15 @@
           "baseStrength": 0,
           "maxSubroutinesPerBreak": 1,
           "pumpCost": 1,
-          "pumpStrengthAmount": 1
+          "pumpStrengthAmount": 1,
+          "sideEffects": ["program_trash_risk"]
         },
         "effects": [
           { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
+          "breaker.self_trash_risk",
           "breaker.universal"
         ],
         "tacticSignals": ["coverage.breaker"],

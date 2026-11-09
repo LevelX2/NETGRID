@@ -10,6 +10,13 @@ Die kartenspezifische Autorenwahrheit liegt in CardSpec. Maßgeblich ist die
 Hints projizieren daraus wiederverwendbare Funktionen und Planungsmetadaten;
 sie sind weder zweite manuelle Kartenwahrheit noch Regel- oder Action-Autorität.
 
+Der typisierte Post-Encounter-Selbsttrashcheck eines Breakers projiziert
+`program_trash_risk` im Breakerprofil und `breaker.self_trash_risk` als
+Funktionssignal. Die Austauschbewertung darf eine solche Quelle nicht als
+gleichwertigen Ersatz für die einzige stabile Abdeckung behandeln. Bereits
+gebundene historische Choices behalten ihre Optionsbindung; die Korrektur
+wirkt bei der Vorbereitung einer neuen Installation.
+
 | Schritt                          | Aktuelle Quelle                                                                                                                                                                                      |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CardSpec zu Hint transformieren  | `deriveCardSpecAiHint` in [card-spec-ai-hint-compiler.ts](../../../packages/ai/src/card-spec-ai-hint-compiler.ts)                                                                                    |
@@ -231,7 +238,6 @@ und Dringlichkeitsprüfungen. Ein expliziter R&D-Strategieanker liegt bei der
 kanonischen Kartenannotation; der Compiler erfindet ihn nicht aus dem Namen.
 Bereits vorhandener erfolgreicher-Run-Counteraufbau und Purge-Tax bleiben die
 Run-Verbraucher. Der Hint garantiert weder künftige Runs noch einen Deckout.
-
 
 ## Öffentliche Bad-Publicity-Effekte
 

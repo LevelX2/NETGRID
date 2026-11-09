@@ -8301,7 +8301,9 @@ function deriveBreakerProfile(
             restrictions: ["trashes_self_at_end_of_run_after_break_use"],
             sideEffects: ["program_trash_risk"],
           }
-        : {}),
+        : breaker.special?.kind === "bartmoss_post_encounter_self_trash_check"
+          ? { sideEffects: ["program_trash_risk"] }
+          : {}),
     };
   if (breaker.matches.kind !== "ice_subtype")
     return {
@@ -10609,7 +10611,9 @@ function derivedFunctionSignals(
   }
   if (
     breakerSignalAbility?.kind === "break_subroutine" &&
-    breakerSignalAbility.special?.kind === "run_end_trash_source_if_used"
+    (breakerSignalAbility.special?.kind === "run_end_trash_source_if_used" ||
+      breakerSignalAbility.special?.kind ===
+        "bartmoss_post_encounter_self_trash_check")
   )
     signals.add("breaker.self_trash_risk");
   const runnerUtilityKind = engine.runnerUtilityLongtail?.kind;
