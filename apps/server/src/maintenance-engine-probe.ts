@@ -1,20 +1,30 @@
 import {
   applyAction,
+  applyRandomizedIceInstallSelection,
   getLegalActions,
   getPlayerView,
   hashState,
+  quoteRandomizedIceInstallSelection,
 } from "@netgrid/engine";
 import type {
   GameState,
+  EngineRandomizedIceInstallCandidate,
+  EngineRandomizedIceInstallSelectionQuote,
+  EngineRandomizedIceInstallSelectionRequest,
   LegalAction,
   PlayerAction,
   Side,
 } from "@netgrid/shared";
 
-type ProbeInvocation = Pick<
+type PlayerProbeInvocation = Pick<
   PlayerAction,
   "actionId" | "selectedTargets" | "selectedChoices"
 >;
+type ProbeInvocation =
+  | PlayerProbeInvocation
+  | {
+      randomizedIceInstallSelection: EngineRandomizedIceInstallSelectionRequest;
+    };
 type ProbeResources = {
   credits: number;
   clicks: number;
@@ -30,11 +40,18 @@ type ProbeStep = {
   own: ProbeResources;
   opponentAgendaPoints: number;
   winner: GameState["winner"];
+  randomizedIceInstallSelection?: {
+    quote: EngineRandomizedIceInstallSelectionQuote;
+    selectedCandidate: EngineRandomizedIceInstallCandidate;
+    randomDrawCounter: number;
+    randomDrawPurpose: string;
+  };
 };
 export type HistoricalEngineProbeResult = {
   schemaVersion: "netgrid-historical-engine-probe-v1";
   status: "completed" | "unavailable" | "rejected";
   reason?: string;
+  engineErrorCode?: string;
   rejectedStep?: number;
   sourceStateHash?: string;
   sourceStateVersion?: number;
@@ -52,6 +69,15 @@ function validInvocations(value: unknown): value is ProbeInvocation[] {
     value.every((step) => {
       if (!step || typeof step !== "object" || Array.isArray(step))
         return false;
+      if ("randomizedIceInstallSelection" in step) {
+        const request = step.randomizedIceInstallSelection;
+        return (
+          Object.keys(step).length === 1 &&
+          request !== null &&
+          typeof request === "object" &&
+          !Array.isArray(request)
+        );
+      }
       if (
         Object.keys(step).some(
           (k) =>
@@ -114,34 +140,77 @@ export function probeHistoricalEngineState(params: {
     steps: [],
   };
   for (const [index, invocation] of params.actions.entries()) {
-    if (
-      !getLegalActions(branch, params.actor).some(
-        (a) => a.actionId === invocation.actionId,
+    let actionId: string;
+    let randomizedIceInstallSelection: ProbeStep["randomizedIceInstallSelection"];
+    if ("randomizedIceInstallSelection" in invocation) {
+      const request = invocation.randomizedIceInstallSelection;
+      if (params.actor !== "corp" || request.side !== params.actor)
+        return {
+          ...result,
+          status: "rejected",
+          reason: "engine_selection_wrong_actor",
+          rejectedStep: index + 1,
+        };
+      const quoted = quoteRandomizedIceInstallSelection(branch, request);
+      if (!quoted.ok)
+        return {
+          ...result,
+          status: "rejected",
+          reason: "engine_selection_quote_rejected",
+          engineErrorCode: quoted.error.code,
+          rejectedStep: index + 1,
+        };
+      const applied = applyRandomizedIceInstallSelection(branch, {
+        kind: "engine_randomized_ice_install_selection",
+        quote: quoted.quote,
+      });
+      if (!applied.ok)
+        return {
+          ...result,
+          status: "rejected",
+          reason: "engine_selection_apply_rejected",
+          engineErrorCode: applied.error.code,
+          rejectedStep: index + 1,
+        };
+      branch = applied.state;
+      actionId = applied.receipt.selectedCandidate.actionId;
+      randomizedIceInstallSelection = {
+        quote: quoted.quote,
+        selectedCandidate: applied.receipt.selectedCandidate,
+        randomDrawCounter: applied.receipt.randomDraw.counter,
+        randomDrawPurpose: applied.receipt.randomDraw.purpose,
+      };
+    } else {
+      if (
+        !getLegalActions(branch, params.actor).some(
+          (a) => a.actionId === invocation.actionId,
+        )
       )
-    )
-      return {
-        ...result,
-        status: "rejected",
-        reason: "action_not_legal",
-        rejectedStep: index + 1,
-      };
-    const applied = applyAction(branch, {
-      ...invocation,
-      matchId: branch.matchId,
-      side: params.actor,
-      clientKnownStateVersion: branch.stateVersion,
-    });
-    if (!applied.ok)
-      return {
-        ...result,
-        status: "rejected",
-        reason: "engine_rejected_invocation",
-        rejectedStep: index + 1,
-      };
-    branch = applied.state;
+        return {
+          ...result,
+          status: "rejected",
+          reason: "action_not_legal",
+          rejectedStep: index + 1,
+        };
+      const applied = applyAction(branch, {
+        ...invocation,
+        matchId: branch.matchId,
+        side: params.actor,
+        clientKnownStateVersion: branch.stateVersion,
+      });
+      if (!applied.ok)
+        return {
+          ...result,
+          status: "rejected",
+          reason: "engine_rejected_invocation",
+          rejectedStep: index + 1,
+        };
+      branch = applied.state;
+      actionId = invocation.actionId;
+    }
     const view = getPlayerView(branch, params.actor);
     result.steps!.push({
-      actionId: invocation.actionId,
+      actionId,
       stateVersion: branch.stateVersion,
       stateHash: hashState(branch),
       randomCounter: branch.randomCounter,
@@ -154,6 +223,9 @@ export function probeHistoricalEngineState(params: {
       },
       opponentAgendaPoints: view.opponent.agendaPoints,
       winner: branch.winner,
+      ...(randomizedIceInstallSelection
+        ? { randomizedIceInstallSelection }
+        : {}),
     });
   }
   result.nextLegalActions = getLegalActions(branch, params.actor);

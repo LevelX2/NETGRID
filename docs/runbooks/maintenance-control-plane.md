@@ -349,6 +349,21 @@ Bedarf `selectedTargets` und `selectedChoices`. Beispiel:
 
 `GET /api/storage/maintenance/analysis/matches/:matchId/decisions/:index?probeActions=%5B%7B%22actionId%22%3A%22runner.gain_credit%22%7D%5D`
 
+Für einen vom Planner erzeugten zufälligen ICE-Installationscommand kann eine
+Invocation stattdessen ausschließlich `randomizedIceInstallSelection` mit der
+vollständigen `EngineRandomizedIceInstallSelectionRequest` enthalten. Der
+ursprüngliche Actor muss Corp sein. Die Engine prüft Match, StateVersion,
+Timingpunkt, Planstep und alle konkreten Kandidaten auf dem historischen Clone,
+erstellt ihre aktuelle Quote und führt ihre normale Zufallsauswahl aus. Der
+Schritt nennt die tatsächlich gewählte Action und unter
+`randomizedIceInstallSelection` die Quote, den gewählten Kandidaten sowie
+Zähler und Zweck des verbrauchten Zufallsdraws. Seed, Zufallswert, vollständige
+Drawfolge und GameState werden nicht exportiert. Eine Wiederentscheidung muss
+ihren tatsächlichen Plannerrequest exakt an diese Quote binden; die historische
+Action darf nicht als Ersatz für die Engine-Auswahl eingesetzt werden. Die
+Grenzen von acht Invocations und einem festen ursprünglichen Actor gelten auch
+für gemischte Folgen aus Enginecommands und gewöhnlichen PlayerActions.
+
 `engineProbe` (`netgrid-historical-engine-probe-v1`) führt diese Alternativfolge
 auf einer Kopie des vollständig gebundenen Engine-Zustands aus. StateHash,
 StateVersion und RNG-Zähler des Ausgangspunkts werden ausgewiesen. Jede Aktion
