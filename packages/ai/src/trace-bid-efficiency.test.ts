@@ -5,6 +5,67 @@ import {
 } from "./trace-bid-efficiency";
 
 describe("Trace bid efficiency", () => {
+  it("does not collapse different losing trace margins into the same outcome", () => {
+    const options = Array.from({ length: 7 }, (_, amount) => ({
+      id: `bid_${amount}`,
+      amount,
+    }));
+    expect(
+      selectEfficientTraceBidOption({
+        side: "runner",
+        bidOptions: options,
+        desiredAmount: 6,
+        traceValue: 7,
+        runnerLink: 0,
+        traceRulesProfile: "modern_open",
+        traceSuccessEffect: {
+          type: "add_tags_by_trace_margin_over_runner_link",
+        },
+      }).option?.id,
+    ).toBe("bid_6");
+  });
+  it("still minimizes a losing bid for a fixed tag effect", () => {
+    expect(
+      selectEfficientTraceBidOption({
+        side: "runner",
+        bidOptions: [
+          { id: "zero", amount: 0 },
+          { id: "six", amount: 6 },
+        ],
+        desiredAmount: 6,
+        traceValue: 7,
+        runnerLink: 0,
+        traceRulesProfile: "modern_open",
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
+      }).option?.id,
+    ).toBe("zero");
+  });
+  it("uses the cheapest equal-margin option and preserves winning tie semantics", () => {
+    const options = [
+      { id: "zero", amount: 0, linkDelta: 0 },
+      { id: "two", amount: 2, linkDelta: 3 },
+      { id: "four", amount: 4, linkDelta: 3 },
+      { id: "six", amount: 6, linkDelta: 7 },
+    ];
+    const context = {
+      side: "runner" as const,
+      bidOptions: options,
+      traceValue: 7,
+      runnerLink: 0,
+      traceRulesProfile: "modern_open" as const,
+      traceSuccessEffect: {
+        type: "add_tags_by_trace_margin_over_runner_link" as const,
+      },
+    };
+    expect(
+      selectEfficientTraceBidOption({ ...context, desiredAmount: 4 }).option
+        ?.id,
+    ).toBe("two");
+    expect(
+      selectEfficientTraceBidOption({ ...context, desiredAmount: 6 }).option
+        ?.id,
+    ).toBe("six");
+  });
   it("reduces an unwinnable Runner Trace bid to zero", () => {
     const selection = selectEfficientTraceBidOption({
       side: "runner",

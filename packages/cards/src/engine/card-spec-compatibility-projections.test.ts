@@ -8,10 +8,26 @@ import { CARD_REGISTRY } from "../registry-runtime";
 import {
   projectCardSpecDefinition,
   projectCardSpecImplementation,
+  projectTraceSuccessEffect,
 } from "./card-spec-compatibility-projections";
 import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-ability-contracts";
 
 describe("CardSpec compatibility implementation projection", () => {
+  it("projects one margin-based tag effect and rejects an unrepresented combined effect", () => {
+    const margin = {
+      kind: "add_tags_by_trace_margin_over_runner_link" as const,
+      visibility: "public" as const,
+    };
+    expect(projectTraceSuccessEffect([margin])).toEqual({
+      type: "add_tags_by_trace_margin_over_runner_link",
+    });
+    expect(() =>
+      projectTraceSuccessEffect([
+        margin,
+        { kind: "end_run", visibility: "public" },
+      ]),
+    ).toThrow("card_spec_unsupported_trace_success_effect");
+  });
   it("preserves the explicit copy-order-neutral lifecycle contract", () => {
     const definitionId = "onr_proteus_150_streetware-distributor";
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);

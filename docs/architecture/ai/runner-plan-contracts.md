@@ -3941,6 +3941,16 @@ nicht rekonstruiert, wenn nur eine Bankaktivierung legal ist. Paarung 561
 prüft die vollständige native Folge Gebot sieben → Swiss-Auszahlung →
 derselbe bezahlte Gebotskopf sowie fremde Trace-/Optionsbindungen.
 
+Die Effizienzprüfung einer gebundenen offenen Trace-Choice vergleicht den
+vollständigen sichtbaren Effekt. Bei dem von der Engine quotierten Effekt
+`add_tags_by_trace_margin_over_runner_link` sind zwei verlorene Gebote nur
+bei gleicher verbleibender Differenz gleichwertig. Ein bereits bestimmtes
+Gebot darf deshalb nicht allein wegen des unveränderten binären Trace-Erfolgs
+auf null gekürzt werden. Die Quelle bleibt die typisierte öffentliche
+Engine-Quote; feste Effekte werden weiterhin auf das günstigste gleichwertige
+Gebot reduziert. Action, Choice, StateVersion und Rules-Ursprung bleiben
+unverändert (Paarung 699).
+
 Das Informationsbudget darf ebenso einen bereits zugelassenen bezahlbaren
 Break gegen die unmittelbare Zerstörung eines installierten Programms nicht
 sperren. Der bestehende Run-Executor bindet diese Schutzroute an die exakten

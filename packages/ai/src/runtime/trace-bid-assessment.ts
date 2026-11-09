@@ -589,7 +589,7 @@ function exactNonNegativeInteger(
   return Number.isInteger(value) && (value ?? -1) >= 0 ? value : undefined;
 }
 
-function visibleTraceSuccessEffect(
+export function visibleTraceSuccessEffect(
   input: AiDecisionInput,
   traceContext: LatestTraceContext,
 ): TraceSuccessEffect | undefined {

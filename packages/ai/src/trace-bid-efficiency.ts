@@ -1,4 +1,8 @@
-import type { Side, TraceRulesProfile } from "@netgrid/shared";
+import type {
+  Side,
+  TraceRulesProfile,
+  TraceSuccessEffect,
+} from "@netgrid/shared";
 
 export type TraceBidOption = {
   id: string;
@@ -24,6 +28,7 @@ export type TraceBidEfficiencyInput<
   runnerLink?: number;
   corpBid?: number;
   traceRulesProfile?: TraceRulesProfile;
+  traceSuccessEffect?: TraceSuccessEffect;
 };
 
 export type TraceBidEfficiencySelection<
@@ -106,15 +111,28 @@ export function selectEfficientTraceBidOption<TOption extends TraceBidOption>(
     corpTotal,
     input.traceRulesProfile,
   );
-  const sameOutcomeOptions = bidOptions.filter(
-    (option) =>
-      runnerAvoidsTrace(
-        runnerBase,
-        traceBidLinkDelta(option),
-        corpTotal,
-        input.traceRulesProfile,
-      ) === desiredOutcome,
+  const marginDependent =
+    input.traceSuccessEffect?.type ===
+    "add_tags_by_trace_margin_over_runner_link";
+  const desiredMargin = Math.max(
+    0,
+    corpTotal - runnerBase - traceBidLinkDelta(desiredOption),
   );
+  const sameOutcomeOptions = bidOptions.filter((option) => {
+    const avoidsTrace = runnerAvoidsTrace(
+      runnerBase,
+      traceBidLinkDelta(option),
+      corpTotal,
+      input.traceRulesProfile,
+    );
+    return (
+      avoidsTrace === desiredOutcome &&
+      (!marginDependent ||
+        avoidsTrace ||
+        Math.max(0, corpTotal - runnerBase - traceBidLinkDelta(option)) ===
+          desiredMargin)
+    );
+  });
   const minimalSameOutcome = sameOutcomeOptions[0] ?? desiredOption;
   if (minimalSameOutcome.amount < desiredOption.amount) {
     return {

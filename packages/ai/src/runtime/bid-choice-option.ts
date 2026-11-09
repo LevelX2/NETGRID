@@ -16,6 +16,7 @@ import type {
   RunnerRunPlan,
 } from "./runner-run-plan-types";
 import { type LatestTraceContext } from "./trace-context";
+import { visibleTraceSuccessEffect } from "./trace-bid-assessment";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -87,12 +88,14 @@ export function selectedBidChoiceOptionId(
   let selected: RunnerTraceBidOption =
     bidOptions.find((option) => option.amount === desired) ?? bidOptions[0]!;
   if (input.side === "runner") {
+    const traceSuccessEffect = visibleTraceSuccessEffect(input, traceContext);
     selected =
       selectEfficientTraceBidOption({
         side: input.side,
         bidOptions,
         desiredAmount: desired,
         ...traceContext,
+        ...(traceSuccessEffect ? { traceSuccessEffect } : {}),
       }).option ?? selected;
     selected =
       runnerRunBudgetPreservingBidOption(

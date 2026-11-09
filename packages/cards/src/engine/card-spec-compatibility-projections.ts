@@ -673,7 +673,7 @@ export function projectTraceSuccessEffect(
     trashProgramEffects.length === 0 &&
     trashHardwareEffects.length === 0 &&
     unpreventableMeatEffects.length === 0 &&
-    effects.length === 0
+    effects.length === 1
   )
     return { type: "add_tags_by_trace_margin_over_runner_link" };
   if (

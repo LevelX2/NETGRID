@@ -3,6 +3,21 @@ import { describe, expect, it } from "vitest";
 import { traceSuccessEffectCardImplementationQuotesForDefinition } from "./success-effect-quote";
 
 describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
+  it("quotes the public margin-based operation effect without reducing it to a fixed tag", () => {
+    expect(
+      traceSuccessEffectCardImplementationQuotesForDefinition(
+        "onr_proteus_050_manhunt",
+      ),
+    ).toEqual([
+      {
+        sourceDefinitionId: "onr_proteus_050_manhunt",
+        traceLimit: 6,
+        traceSuccessEffect: {
+          type: "add_tags_by_trace_margin_over_runner_link",
+        },
+      },
+    ]);
+  });
   it("quotes a public dynamic trace tag effect", () => {
     expect(
       traceSuccessEffectCardImplementationQuotesForDefinition(
