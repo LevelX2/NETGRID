@@ -12,6 +12,7 @@ import {
   currentEncounteredIceCard,
   currentEncounterCompleteSubroutineIndexes,
   currentEncounterRequiresFullBreak,
+  currentEncounterUnbrokenSubroutineIndexes,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
 import {
@@ -20,7 +21,12 @@ import {
   spendRunnerEncounterActionCost,
 } from "../../runtime/runner-encounter-credit-budget";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
-import { breakSubroutineIndexesForAction } from "../../runtime/subroutine-indexes";
+import {
+  breakSubroutineIndexesForAction,
+  parseSubroutineIndexes,
+} from "../../runtime/subroutine-indexes";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { isVisibleTrashUnlessRunnerPaysSubroutine } from "../../run-analysis/visible-subroutine-semantics";
 
 type CompleteEncounterPayment = {
   cost: number;
@@ -31,6 +37,85 @@ type CompleteEncounterPayment = {
   runEndTrashSourceIds: string[];
   budget: ReturnType<typeof runnerRunPathCreditBudgetAfterEncounter>;
 };
+
+/** Complete, general-credit payment for a pure program-preservation encounter. */
+export function programProtectionEncounterPayment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CompleteEncounterPayment | undefined {
+  const payload = action.payload;
+  const amount = payload?.payOrTrashProgramSubroutinePayment;
+  if (
+    input.playerView.run?.phase !== "encounter_ice" ||
+    action.type !== "continue_run" ||
+    !payload ||
+    typeof amount !== "number" ||
+    amount <= 0 ||
+    currentEncounterRequiresFullBreak(input)
+  )
+    return undefined;
+  const invalid = (): never => {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((a) => a.type),
+      unresolvedActionIds: [action.actionId],
+      owner: "plan_module",
+      removalCondition:
+        "Bind the current program-preservation payment to the exact Engine subroutines, indices and general-credit cost.",
+    });
+  };
+  const ice = currentEncounteredIceCard(input);
+  const remaining = currentEncounterCompleteSubroutineIndexes(input);
+  if (!ice?.effectiveRunQuote || !remaining?.size) return invalid();
+  if (ice.effectiveRunQuote.conditionalEncounterEffects?.length)
+    return undefined;
+  const subroutines = ice.effectiveRunQuote.subroutines.filter((_, i) =>
+    remaining.has(i),
+  );
+  if (!subroutines.every(isVisibleTrashUnlessRunnerPaysSubroutine))
+    return undefined;
+  if (subroutines.some((s) => !Number.isSafeInteger(s.amount) || s.amount! < 0))
+    return invalid();
+  const next = currentEncounterUnbrokenSubroutineIndexes(input);
+  const selected = parseSubroutineIndexes(
+    action.payload?.payOrTrashProgramSubroutineIndexes,
+  );
+  const immediate = ice.effectiveRunQuote.subroutines.reduce(
+    (sum, s, i) => sum + (next.has(i) ? s.amount! : 0),
+    0,
+  );
+  if (
+    !input.legalActions.includes(action) ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    payload.sourceDefinitionId !== ice.definitionId ||
+    payload.encounterContinue !== true ||
+    payload.encounterWillEndRun !== false ||
+    action.choiceRequirements?.length ||
+    selected.size !== next.size ||
+    [...next].some((i) => !selected.has(i)) ||
+    amount !== immediate ||
+    legalActionCreditCost(action) !== immediate ||
+    payload.payOrEndRunSubroutinePayment !== 0
+  )
+    return invalid();
+  const cost = subroutines.reduce((sum, s) => sum + s.amount!, 0);
+  const payment = spendRunnerEncounterGeneralCost(
+    runnerEncounterCreditBudgetForInput(input),
+    cost,
+  );
+  if (!payment.affordable) return undefined;
+  return {
+    cost,
+    cashCost: payment.cashCost,
+    liquidCreditsAfterPayment: payment.budget.credits,
+    carriesStrengthAcrossIce: false,
+    rig: runnerRigAfterEncounter(input.playerView.own.rig ?? []),
+    runEndTrashSourceIds: [],
+    budget: runnerRunPathCreditBudgetAfterEncounter(payment.budget),
+  };
+}
 
 /** A pure next-encounter marker can be passed before a free jack-out.
  * Its optional full break still has to preserve the existing root reserve. */

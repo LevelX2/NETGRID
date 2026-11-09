@@ -2754,6 +2754,18 @@ Restpfad bleibt ein Fundingbedarf am bestehenden Runparent. Gebühren werden
 nicht mit Breakercredits bezahlt und ein Teilbruch entfernt keine anderen
 Wirkungen.
 
+Bei reinen Programmverlust-gegen-Zahlung-Encountern quotiert derselbe
+Run-Window-Owner auch die vollständige allgemeine Schutzzahlung. Wenn diese
+den gebundenen Runreservevertrag verletzt, bleibt eine exakt finanzierte,
+bereits zulässige vollständige Breakantwort mit erhaltener Reserve bevorzugt.
+Ein offener Programmverlust ist ein sinnvoller Pumpzweck; günstige
+zweckgebundene Breakercredits dürfen dadurch nicht vor der Ownerbewertung
+ausgeschlossen werden. Fehlt eine solche fortsetzbare Breakantwort, bleibt der
+bestehende Programmerhalt auch vor einem anschließenden sicheren Ausstieg
+zulässig. Mehr Bargeld und leere zweckgebundene Pools sind getrennte Gegenfälle.
+Native Paarung-691-Zustände vor und nach dem Coyote-Stärkebonus sichern Root,
+Executor, Route und tatsächliche Engine-Zahlung ab.
+
 Bei genau einer noch offenen reinen Run-Stärkefolge mit Engine-gequoteter
 Post-Pass-Abwendung nimmt derselbe Run-Window-Owner auch diese vollständige
 Zahlungsantwort in seinen Encounter-Kostenvergleich auf. Er budgetiert den

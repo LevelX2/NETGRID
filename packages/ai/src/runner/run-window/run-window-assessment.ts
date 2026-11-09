@@ -5,6 +5,7 @@ import {
   completeCancellableEncounterPayment,
   completeCurrentEncounterEconomics,
   nextEncounterDamageMarkerPayment,
+  programProtectionEncounterPayment,
 } from "./run-window-encounter-payment";
 import {
   currentRunRemainderSupportsExactEtrPricing,
@@ -906,8 +907,8 @@ function runnerRunWindowActionAssessment(
     runOrigin,
   );
   const encounterPayment = !planStepExclusion
-    ? pureEndRunEncounterPayment(input, action) ??
-      nextEncounterDamageMarkerPayment(input, action)
+    ? (pureEndRunEncounterPayment(input, action) ??
+      nextEncounterDamageMarkerPayment(input, action))
     : undefined;
   const optionalPayments =
     !planStepExclusion && !encounterExclusion && runOrigin?.runRiskContract
@@ -978,8 +979,54 @@ function runnerRunWindowActionAssessment(
             ].join("|"),
           }
         : undefined;
+  const programPayment = !planStepExclusion
+    ? programProtectionEncounterPayment(input, action)
+    : undefined;
+  const programPaymentRisk =
+    programPayment && runOrigin?.runRiskContract
+      ? runnerRunRiskContractReassessment(input, runOrigin, programPayment)
+      : undefined;
+  const preservingProgramBreakAvailable =
+    programPaymentRisk?.decision === "prefer_jack_out" &&
+    input.legalActions.some((alternative) => {
+      const payment = completeEncounterBreakerPayment(input, alternative);
+      if (
+        !payment ||
+        runnerRunWindowPlanStepExclusion(
+          input,
+          alternative,
+          dependencies,
+          runOrigin,
+        )
+      )
+        return false;
+      if (
+        (alternative.type === "pump_breaker" ||
+          alternative.type === "break_subroutine") &&
+        dependencies.runnerEncounterActionExclusion(
+          input,
+          alternative,
+          runnerRunWindowEncounterRequiredHandFloor(runOrigin),
+        )
+      )
+        return false;
+      return (
+        runnerRunRiskContractReassessment(input, runOrigin, payment)
+          ?.decision === "preserve_continuation"
+      );
+    });
+  const programPaymentExclusion = preservingProgramBreakAvailable
+    ? {
+        key: "program_payment_degrades_reserve_with_preserving_complete_break",
+        reason:
+          "exact_current_program_break_preserves_bound_run_reserve|cash_program_payment_would_force_exit",
+      }
+    : undefined;
   const exclusion =
-    effectiveEncounterExclusion ?? planStepExclusion ?? reserveExclusion;
+    effectiveEncounterExclusion ??
+    planStepExclusion ??
+    reserveExclusion ??
+    programPaymentExclusion;
   const mitigation = !exclusion
     ? currentEncounterMitigationForAction(
         input,

@@ -37,6 +37,7 @@ import {
 import {
   isVisibleDirectDamageSubroutine,
   isVisibleHardEndRunSubroutine,
+  isVisibleTrashUnlessRunnerPaysSubroutine,
 } from "../run-analysis/visible-subroutine-semantics";
 import type { EncounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import type {
@@ -44,6 +45,7 @@ import type {
   RunnerEncounterViabilityAssessment,
 } from "./runner-encounter-action-exclusion";
 import type { MutableRunnerRunPathCreditBudget } from "../run-analysis/visible-run-analysis-contracts";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   fundRunnerRunPathPayment,
   runnerPaymentSupportBudgetForRig,
@@ -192,11 +194,42 @@ export function createRunnerPumpViabilityContext(
         runEffect.futureCostDelta > 0);
     const hasImmediateThreat =
       dependencies.encounterHasImmediateUnbrokenThreat(input);
+    const currentIndexes = currentEncounterUnbrokenSubroutineIndexes(input);
+    const programProtectionIndexes = new Set(
+      currentQuote.subroutines.flatMap((subroutine, index) => {
+        if (
+          !currentIndexes.has(index) ||
+          !isVisibleTrashUnlessRunnerPaysSubroutine(subroutine)
+        )
+          return [];
+        if (
+          !Number.isSafeInteger(subroutine.amount) ||
+          subroutine.amount! < 0
+        ) {
+          throw new PlanResolutionFailure("missing_plan_module_coverage", {
+            side: input.side,
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            legalActionTypes: input.legalActions.map((a) => a.type),
+            unresolvedActionIds: [action.actionId],
+            owner: "action_semantics",
+            removalCondition:
+              "Provide the current Engine-quoted program-preservation payment amount before assessing a pump.",
+          });
+        }
+        return subroutine.amount! > 0 ? [index] : [];
+      }),
+    );
+    const hasProgramPreservationThreat =
+      (input.playerView.own.rig ?? []).some(
+        (card) => card.type === "program",
+      ) && programProtectionIndexes.size > 0;
     if (
       endTheRunCount === 0 &&
       accessRedirectCount === 0 &&
       !hasUsefulRunRemainderEffect &&
-      !hasImmediateThreat
+      !hasImmediateThreat &&
+      !hasProgramPreservationThreat
     ) {
       return {
         canLeadToBreak: false,
@@ -253,6 +286,8 @@ export function createRunnerPumpViabilityContext(
               subroutine,
               requiredHandFloor,
             ) ||
+              (hasProgramPreservationThreat &&
+                programProtectionIndexes.has(index)) ||
               (subroutine.unbrokenRunEffect !== undefined &&
                 !isVisibleDirectDamageSubroutine(subroutine) &&
                 dependencies.encounterRunRemainderEffectAssessment(
@@ -353,6 +388,7 @@ export function createRunnerPumpViabilityContext(
       endTheRunCount === 0 &&
       accessRedirectCount === 0 &&
       !hasImmediateThreat &&
+      !hasProgramPreservationThreat &&
       runEffect.futureCostDelta <= pumpAndBreakCost
     ) {
       return {

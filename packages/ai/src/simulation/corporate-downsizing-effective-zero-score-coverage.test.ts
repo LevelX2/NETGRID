@@ -45,7 +45,7 @@ describe("Corporate Downsizing effective-zero score coverage", () => {
       summary.actionSequence.some(
         (action) =>
           action.actionType === "score_agenda" &&
-          action.debugFacts.some((fact) =>
+          action.debugFacts?.some((fact) =>
             fact.includes("onr_v1_194_corporate-downsizing"),
           ),
       ),
