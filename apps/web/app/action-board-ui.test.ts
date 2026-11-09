@@ -625,6 +625,31 @@ describe("localized action presentation", () => {
     }
   });
 
+  it.each([
+    ["de", "Keine passende Base-Link-Karte", "nur 0 Credits bieten"],
+    ["en", "No suitable Base Link card", "only bid 0 credits"],
+    ["fr", "Aucune carte de liaison de base", "miser que 0 crédit"],
+  ])("explains the Classic zero-only bid in %s", (locale, reason, limit) => {
+    const pendingChoice = {
+      ...choice("runner"),
+      kind: "bid_amount" as const,
+      presentationKey: "classic_runner_bid_without_base_link" as const,
+      prompt: "Technical prompt must not supply the localized explanation",
+      options: [{ id: "bid_0", label: "0 Credits bieten", value: 0 }],
+    };
+    const prompt = choicePromptPresentationLabel(pendingChoice, locale);
+    expect(prompt).toContain(reason);
+    expect(prompt).toContain(limit);
+    expect(prompt).not.toContain(pendingChoice.prompt);
+    const label = choiceOptionPresentationLabel(
+      pendingChoice,
+      pendingChoice.options[0]!,
+      locale,
+    );
+    expect(label).toContain("0");
+    expect(label).not.toContain("[missing");
+  });
+
   it.each(["de", "en", "fr"] as const)(
     "names the source of successful-run ICE intervention choices in %s",
     (locale) => {

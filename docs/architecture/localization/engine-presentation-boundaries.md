@@ -16,6 +16,8 @@ keine pauschale Migration technischer Texte.
 | Privilegierte KI-Diagnose | Debug-Fehler in `page.tsx` → `features/debug` | Zulässige Diagnoseprosa nach bestehender Ausnahmeregistry. Kein neuer normaler Nutzerpfad daraus ableiten. |
 | Match-/Snapshot-IDs, Hashes, technische Capability-Keys | Engine, Decks, Server → Diagnose bzw. technische Felder | Machine-Daten; unverändert und locale-neutral. |
 
+Die gebundene Classic-Runner-Tracewahl ohne gewählte Base-Link-Karte und mit einzigem Betrag 0 erhält in der Engine-Projektion die Kennung `classic_runner_bid_without_base_link`. DE/EN/FR erklären direkt bei der Wahl, warum vorhandene Credits allein keine Linkausgabe ermöglichen. Modern, Corp-Gebote, andere Betragswahlen und gewählte Base-Link-Karten erhalten diesen Hinweis nicht. Die Projektion verändert weder Choices noch GameState oder Replay.
+
 ## Gates und begrenzte Nacharbeit
 
 `check:i18n` prüft 2444 gleiche Message-Keys in drei Sprachen und 68

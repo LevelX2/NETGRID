@@ -921,6 +921,7 @@ export type ChoicePresentationKey =
   | "delayed_install_destination"
   | "access_ability"
   | "generic_bid_amount"
+  | "classic_runner_bid_without_base_link"
   | "generic_confirm"
   | "generic_select_cards"
   | "trash_installed_program"

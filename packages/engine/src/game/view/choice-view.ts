@@ -12,6 +12,7 @@ import {
 import { definitionFor, visibleOwnCard } from "./card-view";
 import { sanitizeChoiceViewForSurface } from "./surface-policy";
 import { projectHqInstallRezOptionQuote } from "../payment";
+import { isBlindTraceProfile } from "../trace/trace-rules-profile";
 
 export function visibleChoice(
   state: GameState,
@@ -22,6 +23,15 @@ export function visibleChoice(
   const cardSearchPresentation =
     choice.cardSearchPresentation ??
     cardSearchPresentationForChoice(choice, stackSearchResolution);
+  const classicRunnerBidWithoutBaseLink =
+    choice.side === "runner" &&
+    choice.kind === "bid_amount" &&
+    state.trace?.status === "runner_bid" &&
+    choice.source === `trace:${state.trace.traceId}` &&
+    isBlindTraceProfile(state.trace.traceRulesProfile) &&
+    state.trace.baseLinkSourceId === undefined &&
+    choice.options.length === 1 &&
+    choice.options[0]?.value === 0;
   return sanitizeChoiceViewForSurface(
     {
       choiceId: choice.choiceId,
@@ -38,17 +48,19 @@ export function visibleChoice(
         ? { corpStartDrawQuote: { ...choice.corpStartDrawQuote } }
         : {}),
       prompt: choice.prompt,
-      ...(choice.presentationKey
-        ? { presentationKey: choice.presentationKey }
-        : choice.kind === "select_cards"
-          ? { presentationKey: "generic_select_cards" as const }
-          : choice.kind === "bid_amount"
-            ? { presentationKey: "generic_bid_amount" as const }
-            : choice.kind === "select_option"
-              ? { presentationKey: "generic_select_option" as const }
-              : choice.kind === "confirm"
-                ? { presentationKey: "generic_confirm" as const }
-                : {}),
+      ...(classicRunnerBidWithoutBaseLink
+        ? { presentationKey: "classic_runner_bid_without_base_link" as const }
+        : choice.presentationKey
+          ? { presentationKey: choice.presentationKey }
+          : choice.kind === "select_cards"
+            ? { presentationKey: "generic_select_cards" as const }
+            : choice.kind === "bid_amount"
+              ? { presentationKey: "generic_bid_amount" as const }
+              : choice.kind === "select_option"
+                ? { presentationKey: "generic_select_option" as const }
+                : choice.kind === "confirm"
+                  ? { presentationKey: "generic_confirm" as const }
+                  : {}),
       kind: choice.kind,
       options: choice.options.map((option) => {
         const hqInstallRezOptionQuote = projectHqInstallRezOptionQuote(

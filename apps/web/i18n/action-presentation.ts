@@ -160,6 +160,8 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
   choicePromptTrashInstalledProgram:
     "Choose an installed Runner program to trash.",
   choicePromptGenericBidAmount: "Choose an amount",
+  choicePromptClassicRunnerBidWithoutBaseLink:
+    "No suitable Base Link card selected for this trace. In Classic, you need its Link ability to spend credits, so you can only bid 0 credits here.",
   choicePromptGenericSelectOption: "Choose an option",
   choicePromptGenericConfirm: "Confirm the decision",
   choicePromptRunnerDrawTaxRez:
@@ -482,6 +484,8 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   choicePromptTrashInstalledProgram:
     "Wähle ein installiertes Runner-Programm zum Trashen.",
   choicePromptGenericBidAmount: "Betrag auswählen",
+  choicePromptClassicRunnerBidWithoutBaseLink:
+    "Keine passende Base-Link-Karte für diesen Trace gewählt. Im Classic-Profil brauchst du ihre Link-Fähigkeit, um Credits einzusetzen. Deshalb kannst du hier nur 0 Credits bieten.",
   choicePromptGenericSelectOption: "Option auswählen",
   choicePromptGenericConfirm: "Entscheidung bestätigen",
   choicePromptRunnerDrawTaxRez:
@@ -803,6 +807,8 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   choicePromptTrashInstalledProgram:
     "Choisissez un programme installé du Runner à effacer.",
   choicePromptGenericBidAmount: "Choisir un montant",
+  choicePromptClassicRunnerBidWithoutBaseLink:
+    "Aucune carte de liaison de base adaptée n’a été choisie pour cette traque. En Classic, il faut sa capacité de liaison pour dépenser des crédits : vous ne pouvez donc miser que 0 crédit ici.",
   choicePromptGenericSelectOption: "Choisir une option",
   choicePromptGenericConfirm: "Confirmer la décision",
   choicePromptRunnerDrawTaxRez:

@@ -4793,6 +4793,11 @@ export function choicePromptPresentationLabel(
       return actionPresentationText(locale, "choicePromptTrashInstalledProgram");
     case "generic_bid_amount":
       return actionPresentationText(locale, "choicePromptGenericBidAmount");
+    case "classic_runner_bid_without_base_link":
+      return actionPresentationText(
+        locale,
+        "choicePromptClassicRunnerBidWithoutBaseLink",
+      );
     case "generic_select_option":
       return actionPresentationText(locale, "choicePromptGenericSelectOption");
     case "generic_confirm":

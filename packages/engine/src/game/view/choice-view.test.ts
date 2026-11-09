@@ -20,6 +20,71 @@ import {
 } from "../hidden-zone/search-choice-builders";
 
 describe("ChoiceView projection", () => {
+  it.each(["classic_blind", "classic_blind_corp_ties"] as const)(
+    "explains a %s zero-only Runner bid without a selected Base Link",
+    (traceRulesProfile) => {
+      const state = toRunnerTurn(
+        createGameAfterSetup({ seed: "classic-zero-bid" }),
+      );
+      state.runner.credits = 5;
+      state.trace = {
+        traceId: "classic-zero-bid",
+        traceRulesProfile,
+        sourceCardInstanceId: state.corp.identity,
+        sourceDefinitionId:
+          state.cardInstances[state.corp.identity]!.definitionId,
+        traceLimit: 5,
+        status: "runner_bid",
+        successEffect: { type: "add_tag", amount: 1 },
+      };
+      state.pendingChoice = {
+        ...choiceRequest(state, "runner"),
+        source: `trace:${state.trace.traceId}`,
+        kind: "bid_amount",
+        presentationKey: "generic_bid_amount",
+        visibility: "hidden_info_barrier",
+        options: [{ id: "bid_0", label: "0 Credits bieten", value: 0 }],
+      };
+      const before = structuredClone(state);
+      const projected = getPlayerView(state, "runner").pendingChoice;
+      expect(projected?.presentationKey).toBe(
+        "classic_runner_bid_without_base_link",
+      );
+      expect(projected?.options).toEqual(state.pendingChoice.options);
+      expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+      expect(state).toEqual(before);
+
+      state.trace.baseLinkSourceId = state.runner.identity;
+      expect(
+        getPlayerView(state, "runner").pendingChoice?.presentationKey,
+      ).toBe("generic_bid_amount");
+      delete state.trace.baseLinkSourceId;
+      state.trace.traceRulesProfile = "modern_open";
+      expect(
+        getPlayerView(state, "runner").pendingChoice?.presentationKey,
+      ).toBe("generic_bid_amount");
+      state.trace.traceRulesProfile = traceRulesProfile;
+      state.pendingChoice.source = "another_amount_choice";
+      expect(
+        getPlayerView(state, "runner").pendingChoice?.presentationKey,
+      ).toBe("generic_bid_amount");
+      state.pendingChoice.source = `trace:${state.trace.traceId}`;
+      state.pendingChoice.options.push({
+        id: "bid_1",
+        label: "1 Credit bieten",
+        value: 1,
+      });
+      expect(
+        getPlayerView(state, "runner").pendingChoice?.presentationKey,
+      ).toBe("generic_bid_amount");
+      state.pendingChoice.options.pop();
+      state.pendingChoice.side = "corp";
+      expect(getPlayerView(state, "corp").pendingChoice?.presentationKey).toBe(
+        "generic_bid_amount",
+      );
+    },
+  );
+
   it("preserves the specific program-trash prompt key in the player view", () => {
     const state = createGameAfterSetup({ seed: "program-trash-prompt" });
     state.pendingChoice = {
