@@ -9,9 +9,7 @@ import {
   type PaymentWindowFundingSetup,
 } from "../plans/funding-route";
 import { runnerFundingPaymentWindowQuote } from "./runner-funding-payment-window-quote";
-import {
-  runnerFundingRouteCandidateIsMaterializable,
-} from "../plans/runner-funding-candidates";
+import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-funding-candidates";
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
 import { turnPlanningFingerprint } from "../plans/turn-planning-contracts";
@@ -456,6 +454,20 @@ function runnerExactFundingRouteCandidates(
         left.actionId.localeCompare(right.actionId),
     );
   for (const candidate of parentBoundCandidates) {
+    if (
+      request.purpose === "current_run" &&
+      request.paymentWindowTarget &&
+      !runnerFundingCandidatePreservesConsumerSource(
+        input,
+        candidate,
+        request.paymentWindowTarget.actionId,
+      )
+    ) {
+      ordinaryFunding.evidence.push(
+        `runner_funding_consumer_grip_source_not_preserved:${candidate.actionId}|consumer:${request.paymentWindowTarget.actionId}`,
+      );
+      continue;
+    }
     if (!routeCoversDemand([...ordinary, candidate])) {
       ordinaryFunding.evidence.push(
         `runner_funding_consumer_buffer_budget_uncovered:${candidate.actionId}`,
@@ -543,7 +555,12 @@ function runnerFundingRouteConsumerBufferFits(
           : [];
       }),
     );
-    const handAfter = runnerFundingProjectedHand(input, candidates, route);
+    const handAfter = runnerFundingProjectedHand(
+      input,
+      candidates,
+      route,
+      target.actionId,
+    );
     if (handAfter === undefined) return false;
     const fundedInput: AiDecisionInput = {
       ...input,
@@ -605,6 +622,7 @@ function runnerFundingProjectedHand(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   route: FundingRoute,
+  consumerActionId: string,
 ): number | undefined {
   const fundingActions = route.steps
     .filter((step) => step.kind === "legal_action")
@@ -628,12 +646,49 @@ function runnerFundingProjectedHand(
       (randomDamageOccurred && (projection?.cardsConsumed ?? 0) > 0)
     )
       return undefined;
+    // Funding guarantees the exact consumer, not just its numerical hand
+    // buffer. Random damage cannot retain a named grip source, and a known
+    // consumed source cannot be drawn back by a later unknown draw.
+    if (
+      !runnerFundingCandidatePreservesConsumerSource(
+        input,
+        candidate,
+        consumerActionId,
+      )
+    )
+      return undefined;
     handAfter += netHandDelta - damage;
     if (handAfter < 0) return undefined;
     randomDamageOccurred ||= damage > 0;
   }
   if (handAfter < 0) return undefined;
   return handAfter;
+}
+
+/** Resource feasibility of the exact current consumer, without choosing a
+ * different run or assigning known identities to random surviving cards. */
+function runnerFundingCandidatePreservesConsumerSource(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  consumerActionId: string,
+): boolean {
+  const consumer = input.legalActions.find(
+    (action) => action.actionId === consumerActionId,
+  );
+  const gripSource = input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === consumer?.source,
+  );
+  if (!gripSource) return true;
+  const funding = input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  );
+  return (
+    runnerCandidateSelfDamageAmount(candidate) === 0 &&
+    !(
+      (candidate.economyProjection?.cardsConsumed ?? 0) > 0 &&
+      funding?.source === gripSource.instanceId
+    )
+  );
 }
 
 function runnerFundingBufferRepair(
@@ -657,7 +712,12 @@ function runnerFundingBufferRepair(
   )
     return undefined;
 
-  const handAfter = runnerFundingProjectedHand(input, candidates, route);
+  const handAfter = runnerFundingProjectedHand(
+    input,
+    candidates,
+    route,
+    target.actionId,
+  );
   if (handAfter === undefined) return undefined;
   const gap = Math.max(0, requiredHandBuffer - handAfter);
   if (gap === 0)

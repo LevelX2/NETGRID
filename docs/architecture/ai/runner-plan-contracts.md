@@ -2445,6 +2445,16 @@ belegten Basisdraws einschließlich Klickkosten, Stack-Kapazität und sichtbarer
 Draw Taxes. Finanzierung, Pufferreparatur und der bereits reservierte Run-Klick
 müssen zusammen in denselben Zug passen. Ein nach Zufallsschaden noch benötigter
 Grip-Verbrauch einer späteren Finanzierungsaktion ist nicht garantiert.
+Dasselbe gilt für die konkrete Handquelle des finanzierten Runs: Verbraucht
+die Fundingfolge diese Quelle oder kann ihr Zufallsschaden sie verwerfen,
+belegt ein rechnerisch ausreichender Handpuffer keine garantierte
+Konversionsroute. Der bestehende Funding-Service prüft die Quelle der aktuell
+gebundenen Run-LegalAction und weist diese Ursache ausdrücklich aus; er wählt
+keinen Ersatzrun. Reine Creditfolgen mit erhaltener Quelle und finanzierte
+Basisruns ohne Handquelle bleiben zulässig. Der native Checkpoint P692/D117
+sichert diese Grenze: drei Core-Schaden leeren sicher auch die für den
+R&D-Parent benötigte Library Search, kleinere Zufallsschadensvarianten
+garantieren ihre Erhaltung ebenfalls nicht.
 Die Ressourcenprüfung erzeugt keine zukünftigen Kartenidentitäten oder
 LegalActions. Das tatsächliche Nachziehen bleibt beim bestehenden Hand-Owner;
 jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.

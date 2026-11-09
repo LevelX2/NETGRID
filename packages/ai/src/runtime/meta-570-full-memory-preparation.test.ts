@@ -37,6 +37,8 @@ function original() {
     ),
   );
 }
+// This test executes a bounded native AI/Engine chain, not one decision.
+// The unchanged source and the source-retention fix both finish in about 6 s.
 it("replaces the acceptable redundant program, funds and wins the original remote in the same turn", () => {
   const saved = original();
   expect(saved.provenance.checkedStates).toBe(542);
@@ -127,7 +129,7 @@ it("replaces the acceptable redundant program, funds and wins the original remot
   );
   if (!replay.ok) throw Error("Replay failed");
   expect(hashState(replay.state)).toBe(hashState(state));
-});
+}, 15_000);
 
 it.each([
   "unacceptable_sacrifice",
