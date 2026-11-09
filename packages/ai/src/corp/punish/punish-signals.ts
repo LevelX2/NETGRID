@@ -301,7 +301,9 @@ function assessQuotedPunishOpportunity(
     );
     const expiringDirectTag =
       route.tagTrigger.kind === "direct_tag_step" &&
-      route.tagTrigger.status === "projected";
+      route.tagTrigger.status === "projected" &&
+      (route.guarantee === "guaranteed" ||
+        route.guarantee === "conditional_on_runner_response");
     const additionalTagPressure =
       (route.tagTrigger.kind === "existing_tag" &&
         (route.tagOutcomeEnvelope?.addedTags.maximum ?? 0) > 0) ||

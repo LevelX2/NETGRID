@@ -2999,6 +2999,14 @@ behalten ihren strengeren Nachweis. Gewöhnlicher Score-Support darf das
 aktuelle Konversionsfenster nicht allein durch eine alte Prioritätsbindung
 verdrängen.
 
+Auch ein auslaufender direkter Tag benötigt für P3 eine garantierte oder
+öffentlich begrenzt von der Runnerantwort abhängige Engine-Quote. Meldet die
+Engine wegen verdeckter installierter Runnerreaktionen `not_guaranteed`, darf
+der Opportunity-Produzent keinen starken Prioritätsclaim daraus ableiten.
+Ohne einen anderen zertifizierten positiven Payoff bleibt die Route beobachtend;
+eine spätere aktuelle Quote bewertet sie erneut. Die Prioritätsvalidierung und
+die Unkenntnis der verdeckten Karten bleiben unverändert erhalten.
+
 Die ausgewählte Route ist variabel. Sie verwendet nur so viele aktuell
 vorhandene Komponenten, wie nach Runner-Handzahl und sichtbarer Prävention
 notwendig sind. Vier sicher wirksame Damage sind bei drei Runner-Handkarten
