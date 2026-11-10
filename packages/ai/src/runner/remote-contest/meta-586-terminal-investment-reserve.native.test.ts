@@ -9,6 +9,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { runnerTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -67,7 +68,8 @@ it("uses the last terminal Remote opportunity instead of protecting sunk program
 
 it("keeps the investment reserve when the same public Remote is not a terminal threat", () => {
   const input = checkpoint();
-  input.playerView.opponent.agendaPoints = 3;
+  input.playerView.opponent.agendaPoints = 2;
+  expect(runnerTerminalContestThreat(input)).toBeUndefined();
   const decision = chooseAiAction(input);
   expect(decision.actionId).not.toBe("runner.start_run.remote_1");
   const remote = residentPlanPortfolioSnapshot(input)?.instances.find(
@@ -84,5 +86,21 @@ it("keeps the investment reserve when the same public Remote is not a terminal t
     riskTolerance: "standard",
     requiredCredits: 14,
   });
+  expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
+});
+
+it("uses the same last opportunity against the advanced four-point threat", () => {
+  const input = checkpoint();
+  input.playerView.opponent.agendaPoints = 3;
+  expect(runnerTerminalContestThreat(input)).toMatchObject({
+    kind: "visible_four_point_remote",
+    pointsNeeded: 4,
+    remoteServerIds: ["remote_1"],
+  });
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe("runner.start_run.remote_1");
+  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+    "plan:runner.contest_remote:remote%3Aremote_1",
+  );
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });

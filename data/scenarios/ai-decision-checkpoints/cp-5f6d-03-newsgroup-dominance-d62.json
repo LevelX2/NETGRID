@@ -7043,9 +7043,7 @@
     "planExecution": {
       "acceptablePlanKinds": ["runner.rig_and_coverage"],
       "acceptableCapabilities": ["draw_for_answer_breaker_code_gate"],
-      "requiredAssessmentEvidence": [
-        "runner_known_remote_coverage_project:remote_1"
-      ]
+      "requiredAssessmentEvidence": ["terminal_remote_coverage:remote_1"]
     },
     "acceptableActions": [
       {

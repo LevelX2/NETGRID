@@ -16,6 +16,7 @@ import { assessRunnerRunFundingAdmission } from "../../runtime/runner-run-fundin
 import { runnerTerminalRemoteLastChanceKnownPathFundingGap } from "../../runner/remote-contest/remote-contest-admission";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { runnerDefenseHandBufferFacts } from "../../runner/defense-recovery/defense-signals";
+import { runnerTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -98,7 +99,8 @@ describe("native unknown-ICE reserve bank support", () => {
 
   it("retains the ordinary high-risk hand floor for an already convertible run", () => {
     const { input } = capture(20);
-    input.playerView.opponent.agendaPoints = 3;
+    input.playerView.opponent.agendaPoints = 2;
+    expect(runnerTerminalContestThreat(input)).toBeUndefined();
     // Explicit attractive-route companion: the native nonterminal quote may
     // still recommend funding, which does not exercise the high-risk branch.
     const target = {
@@ -188,7 +190,8 @@ describe("native unknown-ICE reserve bank support", () => {
     (game) => {
       const { input } = capture(game);
       // Without a public terminal deadline the full investment reserve stays.
-      input.playerView.opponent.agendaPoints = 3;
+      input.playerView.opponent.agendaPoints = 2;
+      expect(runnerTerminalContestThreat(input)).toBeUndefined();
       const { target, targets, economy, banks, quote } = facts(input);
       expect(
         assessRunnerRunFundingAdmission({

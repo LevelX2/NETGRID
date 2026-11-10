@@ -9,8 +9,14 @@ import {
 } from "../../plans/resident-plan-portfolio-memory";
 import { currentRuleTagRemovalCounterInput } from "./current-rule-tag-removal-counter.test-support";
 import { bindPublicBoardStealQuoteCompanion } from "../../public-board-steal-quotes.test-support";
+import { runnerTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
 
-function replay(game: number, number: number, currentRuleCountermodel = false) {
+function replay(
+  game: number,
+  number: number,
+  currentRuleCountermodel = false,
+  ordinaryCompanion = false,
+) {
   const cp = JSON.parse(
     readFileSync(
       new URL(
@@ -32,6 +38,14 @@ function replay(game: number, number: number, currentRuleCountermodel = false) {
     input = currentRuleTagRemovalCounterInput(cp.input);
   }
   if (!input.playerView.run) bindPublicBoardStealQuoteCompanion(input);
+  if (ordinaryCompanion) {
+    input.playerView.opponent.agendaPoints = 2;
+    expect(runnerTerminalContestThreat(input)).toBeUndefined();
+  } else if (game === 9 || game === 33) {
+    expect(runnerTerminalContestThreat(input)?.kind).toBe(
+      "visible_four_point_remote",
+    );
+  }
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
@@ -47,15 +61,22 @@ function replay(game: number, number: number, currentRuleCountermodel = false) {
     )!;
     expect(executor.moduleState).toMatchObject({
       need: {
-        targetCredits: 10,
+        targetCredits: ordinaryCompanion ? 10 : 8,
         currentCreditsAtRevalidation: 4,
         routeAssessment: {
           status: "covered_guaranteed",
-          evidenceCodes: expect.arrayContaining([
-            "runner_funding_consumer_buffer_budget_uncovered:runner.play_event.runner_onr_classic_036_do-the-drine_1.runner_onr_classic_036_do-the-drine_1.1",
-            "runner_funding_consumer_hand_after_funding:2|required:4",
-            "runner_funding_consumer_buffer_repair_reserved:2|clicks:2|credits:0|action:runner.draw_card",
-          ]),
+          evidenceCodes: expect.arrayContaining(
+            ordinaryCompanion
+              ? [
+                  "runner_funding_consumer_buffer_budget_uncovered:runner.play_event.runner_onr_classic_036_do-the-drine_1.runner_onr_classic_036_do-the-drine_1.1",
+                  "runner_funding_consumer_hand_after_funding:2|required:4",
+                  "runner_funding_consumer_buffer_repair_reserved:2|clicks:2|credits:0|action:runner.draw_card",
+                ]
+              : [
+                  "runner_funding_consumer_hand_after_funding:3|required:4",
+                  "runner_funding_consumer_buffer_repair_reserved:1|clicks:1|credits:0|action:runner.draw_card",
+                ],
+          ),
         },
       },
     });
@@ -72,15 +93,27 @@ it("rejects self-damage funding when buffer repair and the bound run cannot fit:
 });
 
 it.each([
-  // X=1 supplies eight credits; even its spare click reaches only nine.
-  // X=2 supplies twelve and leaves exactly two buffer draws plus the run.
-  [9, 443, 2],
-  [21, 123, 2],
-  [33, 246, 1],
-])(
-  "preserves feasible same-turn funding, buffer repair and the exact parent: G%i D%i",
-  (game, number, amount) => {
-    const decision = replay(game, number, game === 33);
+  // Native four-point threats remove only the investment reserve. Buffer
+  // repair still fits; the ordinary companions retain the original floor.
+  [9, 443, 1, false],
+  [21, 123, 2, false],
+  [33, 246, 0, false],
+  [9, 443, 2, true],
+  [33, 246, 1, true],
+] as const)(
+  "preserves same-turn funding and its buffer: G%i D%i amount%i ordinary%s",
+  (game, number, amount, ordinaryCompanion) => {
+    const decision = replay(game, number, game === 33, ordinaryCompanion);
+    if (amount === 0) {
+      expect(decision.actionId).toBe("runner.start_run.remote_1");
+      expect(
+        decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      ).toBe("plan:runner.contest_remote:remote%3Aremote_1");
+      expect(
+        decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      ).toBe("plan:runner.contest_remote:remote%3Aremote_1");
+      return;
+    }
     const copy = game === 33 ? 2 : 1;
     expect(decision.actionId).toBe(
       `runner.play_event.runner_onr_classic_036_do-the-drine_${copy}.runner_onr_classic_036_do-the-drine_${copy}.${amount}`,
