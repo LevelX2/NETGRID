@@ -19,6 +19,7 @@ import { quoteRunnerRunTarget } from "../runner-run-target-evaluation";
 import {
   runnerCriticalDamageContestBlocked,
   runnerTerminalRemoteContestIsDirectlyMandatory,
+  runnerTerminalRemoteContestVisibleHazardFundingGap,
 } from "../runner/remote-contest/remote-contest-admission";
 import { runnerRunTargetIsDirectlyConvertible } from "./runner-run-funding-admission";
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
@@ -810,6 +811,12 @@ function runnerDebtFinancingCandidateHasBoundRunSource(
   const parent = request.debtFinancingParent;
   const profile = runnerDebtFinancingProfile(candidate.sourceDefinitionId);
   const projection = candidate.economyProjection;
+  const terminalHazardFundingGap = request.paymentWindowTarget
+    ? runnerTerminalRemoteContestVisibleHazardFundingGap(
+        input,
+        request.paymentWindowTarget,
+      )
+    : undefined;
   if (
     !parent ||
     !request.sourcePlanId ||
@@ -825,7 +832,8 @@ function runnerDebtFinancingCandidateHasBoundRunSource(
       parent.pathPassability !== "blocked_unpayable") ||
     (parent.score <= 0 &&
       !(
-        parent.pathPassability === "blocked_unpayable" &&
+        (parent.pathPassability === "blocked_unpayable" ||
+          terminalHazardFundingGap !== undefined) &&
         parent.scoreThreat &&
         request.priority === "acute_hard_plan_blocker"
       )) ||

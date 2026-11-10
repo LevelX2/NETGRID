@@ -2430,8 +2430,10 @@ Eine an einen Run gebundene Darlehensroute darf eine zertifizierte reine
 Creditlücke schließen. Der noch unfinanzierte Parent muss dafür nicht bereits
 `reachable` sein. Bei einer exakt dringlichen Score-Bedrohung ist auch seine
 durch `blocked_unpayable` negative aktuelle Bewertung kein Ausschluss der
-Finanzierung. Der garantierte Nettoertrag muss nach dem gesamten bekannten
-Run die vollständige Ausstiegsreserve erhalten. Nur ein direkt zwingender
+Finanzierung. Auch bei einem `reachable`-Parent mit exakt gebundener
+terminaler Hazard-Finanzierungslücke ist die negative ungeförderte Bewertung
+kein zusätzlicher Ausschluss. Der garantierte Nettoertrag muss nach dem
+gesamten bekannten Run die vollständige Ausstiegsreserve erhalten. Nur ein direkt zwingender
 terminaler Remote-Contest mit vollständig bekanntem, garantiert erreichbarem
 Pfad ohne Finanzierungslücke darf diese spätere Rückzahlungsreserve bis auf
 null verbrauchen; der Konversionsklick bleibt reserviert. Fehlende Coverage,

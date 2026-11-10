@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { sanitizeAiDecisionDebug } from "@netgrid/shared";
 import game28 from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p719-r05-g28-d378-recovery-funding.json";
 import game38 from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p719-r05-g38-d306-recovery-hazard.json";
+import afterRecovery38 from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p719-r05-g38-d307-after-recovery.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -12,6 +13,44 @@ import {
 } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
+
+it("revalidates the actual recovered loan against the same still-unfunded terminal hazards", () => {
+  const cp = structuredClone(afterRecovery38) as unknown as {
+    input: AiDecisionInputWithDeckCapabilities;
+    runtime: AiRuntimeCheckpointV1;
+  };
+  const loan = cp.input.legalActions.find(
+    (action) =>
+      action.type === "install_card" &&
+      cp.input.playerView.own.gripOrHq.some(
+        (card) =>
+          card.instanceId === action.source &&
+          card.definitionId === "onr_v1_168_loan-from-chiba",
+      ),
+  )!;
+  expect(loan).toBeDefined();
+  restoreAiRuntimeCheckpoint(
+    cp.input,
+    cp.input.ownDeckSnapshot!.deckSnapshotId,
+    cp.runtime,
+  );
+  const decision = chooseAiAction(cp.input);
+  expect(decision.actionId).toBe(loan.actionId);
+  expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
+  expect(
+    sanitizeAiDecisionDebug(decision.decisionDebug)?.planFirstDecision,
+  ).toMatchObject({
+    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    selectedPlan: {
+      moduleId: "runner.economy",
+      parentNeedId: "run-support:remote:remote_1",
+    },
+    route: {
+      actionId: loan.actionId,
+      stateVersion: cp.input.playerView.stateVersion,
+    },
+  });
+});
 
 it.each([
   "native",
