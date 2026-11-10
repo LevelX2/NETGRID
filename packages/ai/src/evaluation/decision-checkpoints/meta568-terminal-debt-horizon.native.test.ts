@@ -126,10 +126,27 @@ it.each([
   "nonterminal",
 ] as const)("keeps debt excluded in the %s countercase", (kind) => {
   const f = fixture();
-  if (kind === "insufficient_full_budget") f.input.playerView.own.credits = 13;
+  if (kind === "insufficient_full_budget") {
+    f.input.playerView.own.credits = 13;
+    // One funding action plus the run: Loan gives 25, short of the full 26.
+    // With a third click, Loan plus a basic credit legitimately covers it.
+    f.input.playerView.own.clicks = 2;
+  }
   if (kind === "no_run_action_left") f.input.playerView.own.clicks = 1;
   if (kind === "nonterminal") f.input.playerView.opponent.agendaPoints = 0;
   expect(choose(f).selected.source).not.toContain("loan-from-chiba");
+});
+
+it("includes a basic credit after debt when only the complete route covers the known cost", () => {
+  const f = fixture();
+  f.input.playerView.own.credits = 13;
+  f.input.playerView.own.clicks = 3;
+  expect(choose(f).selected.source).toBe("runner_onr_v1_168_loan-from-chiba_1");
+  expect(facts(f.input).support?.routeAssessment).toMatchObject({
+    status: "covered_guaranteed",
+    totalClickCost: 2,
+    projectedGap: 0,
+  });
 });
 
 it("uses the already funded run without taking a loan", () => {

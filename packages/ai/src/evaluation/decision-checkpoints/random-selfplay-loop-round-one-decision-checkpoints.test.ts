@@ -21,7 +21,7 @@ describe("random standard selfplay loop round one", () => {
       terminalRemoteContestJson,
     ],
     [
-      "keeps building while the terminal remote's visible Trace remains unfunded",
+      "funds the terminal remote's visible Trace through its complete bank quote",
       terminalBrokerFundingJson,
     ],
   ])("%s", (_label, json) => {
@@ -37,17 +37,6 @@ describe("random standard selfplay loop round one", () => {
           "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_209_political-coup_2:remote_1:remote_1",
         ],
       };
-    }
-    if (json === terminalBrokerFundingJson) {
-      checkpoint.expectation.acceptableActions = [
-        {
-          actionId:
-            "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
-        },
-      ];
-      checkpoint.expectation.planExecution!.acceptableCapabilities = [
-        "credit_bank_build",
-      ];
     }
     const result = runAiDecisionCheckpoint(checkpoint);
 
@@ -67,50 +56,65 @@ describe("random standard selfplay loop round one", () => {
     }
   });
 
-  it("keeps the Broker cash-out under its own plan owner", () => {
-    const checkpoint = fixture(terminalBrokerFundingJson);
-    checkpoint.engine.testOnlyGameState.runner.credits = 1;
-    checkpoint.engine.testOnlyGameState.corp.credits = 0;
-    checkpoint.source.kind = "synthetic_companion";
-    checkpoint.engine.stateHash = hashGameState(
-      checkpoint.engine.testOnlyGameState,
-    );
-    const result = runAiDecisionCheckpoint(checkpoint);
-    expect(result.ok, diagnostic(result)).toBe(true);
-    const evidence = [
-      ...(result.decision?.evidence ?? []),
-      ...(result.decision?.decisionDebug?.planFirstDecision
-        ?.assessmentEvidenceCodes ?? []),
-      ...(result.decision?.decisionDebug?.planFirstDecision?.selectedPlan
-        ?.evidenceCodes ?? []),
-    ];
+  it.each(["native", "low_cash_companion"] as const)(
+    "keeps the Broker cash-out and actual funded run under their owners: %s",
+    (variant) => {
+      const checkpoint = fixture(terminalBrokerFundingJson);
+      if (variant === "low_cash_companion") {
+        checkpoint.engine.testOnlyGameState.runner.credits = 1;
+        checkpoint.engine.testOnlyGameState.corp.credits = 0;
+        checkpoint.source.kind = "synthetic_companion";
+        checkpoint.engine.stateHash = hashGameState(
+          checkpoint.engine.testOnlyGameState,
+        );
+      }
+      const result = runAiDecisionCheckpoint(checkpoint);
+      expect(result.ok, diagnostic(result)).toBe(true);
+      const evidence = [
+        ...(result.decision?.evidence ?? []),
+        ...(result.decision?.decisionDebug?.planFirstDecision
+          ?.assessmentEvidenceCodes ?? []),
+        ...(result.decision?.decisionDebug?.planFirstDecision?.selectedPlan
+          ?.evidenceCodes ?? []),
+      ];
 
-    expect(result.decision?.decisionDebug?.planKind).toBe("runner.credit_bank");
-    expect(
-      result.decision?.decisionDebug?.planFirstDecision?.route?.capabilityId,
-    ).toBe("credit_bank_cash_out");
-    expect(
-      evidence.some(
-        (entry) =>
-          entry ===
-          "runner_credit_bank_bound_run_action:runner.start_run.remote_1",
-      ),
-    ).toBe(true);
-    const before = checkpoint.engine.testOnlyGameState;
-    const paid = applyAction(before, {
-      matchId: before.matchId,
-      side: "runner",
-      actionId: result.decision!.actionId!,
-      clientKnownStateVersion: before.stateVersion,
-    });
-    expect(paid.ok).toBe(true);
-    if (!paid.ok) throw Error(JSON.stringify(paid.error));
-    const next = buildAiDecisionInput(paid.state, "runner", {
-      ownDeckSnapshot: checkpoint.deckSnapshot,
-      difficulty: "hard",
-    });
-    expect(chooseAiAction(next).actionId).toBe("runner.start_run.remote_1");
-  });
+      expect(result.decision?.decisionDebug?.planKind).toBe(
+        "runner.credit_bank",
+      );
+      expect(
+        result.decision?.decisionDebug?.planFirstDecision?.route?.capabilityId,
+      ).toBe("credit_bank_cash_out");
+      expect(
+        evidence.some(
+          (entry) =>
+            entry ===
+            "runner_credit_bank_bound_run_action:runner.start_run.remote_1",
+        ),
+      ).toBe(true);
+      const before = checkpoint.engine.testOnlyGameState;
+      const paid = applyAction(before, {
+        matchId: before.matchId,
+        side: "runner",
+        actionId: result.decision!.actionId!,
+        clientKnownStateVersion: before.stateVersion,
+      });
+      expect(paid.ok).toBe(true);
+      if (!paid.ok) throw Error(JSON.stringify(paid.error));
+      const next = buildAiDecisionInput(paid.state, "runner", {
+        ownDeckSnapshot: checkpoint.deckSnapshot,
+        difficulty: "hard",
+      });
+      const decision = chooseAiAction(next);
+      expect(decision.actionId).toBe("runner.start_run.remote_1");
+      const started = applyAction(paid.state, {
+        matchId: paid.state.matchId,
+        side: "runner",
+        actionId: decision.actionId!,
+        clientKnownStateVersion: paid.state.stateVersion,
+      });
+      expect(started.ok).toBe(true);
+    },
+  );
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

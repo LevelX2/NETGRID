@@ -225,6 +225,7 @@ it("admits the real G9/D16 bank after Draw when installation preserves the four-
       terminalKnownPathFundingGap: unrelated,
       quoteRunAfterCashout: unrelated,
       quoteRunAfterCashoutRoute: unrelated,
+      runFundingAfterCashout: unrelated,
       developmentFundingRoute: unrelated,
     },
   );

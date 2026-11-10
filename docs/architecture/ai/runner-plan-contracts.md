@@ -2462,6 +2462,33 @@ Direktkonversions- beziehungsweise Terminalzulassung und die gemeinsame
 Remote-Schadensreserve erfüllen. Ein nach Finanzierung nicht mehr materieller
 oder wegen Handmangels blockierter Parent rechtfertigt kein Darlehen, selbst
 wenn die volle Rückzahlungsreserve vorhanden wäre.
+Die Rückzahlungsprüfung gehört zur vollständigen Funding-Route. Ein einzelnes
+Darlehen darf nicht vorher ausscheiden, wenn Bankauszahlung oder zusätzliche
+Basiskredite innerhalb desselben Zugbudgets erst gemeinsam den bekannten Pfad
+und die Ausstiegsreserve finanzieren. Die Suche setzt nach einer numerisch
+ausreichenden, am Consumer aber abgelehnten Teilroute fort. Ein bereits
+vollständig finanzierender gewöhnlicher Weg behält seinen Executor.
+`runner-bank-run-funding-continuation.ts` quotiert dafür einen garantierten
+Bankpräfix und den vorhandenen Nichtbank-Funding-Dienst. Der Bank-Owner bleibt
+Executor ausschließlich seiner aktuellen Auszahlung; Darlehen und Run werden
+nach dem echten Zustandswechsel neu materialisiert. Paarung719/R5/G27 prüft
+diese Parent-/Needbindung sowie Reserve-, Quellen-, Klick- und Versionsgrenzen.
+
+Eine exakt angebotene Rückholung der bekannten obersten Heapkarte darf eine
+Economy-Vorbereitung desselben terminalen Remote-Funding-Needs bilden.
+`runner-heap-income-preparation.ts` konsumiert den bestehenden Recovery-Vertrag
+und das kanonische Darlehensprofil. Nur die reine, garantierte Einzelrückholung
+einer bekannten Ressource ohne zusätzliche Wirkung oder Choice ist zulässig.
+Die begrenzte Projektion zählt Rückholkosten, spätere normale Installation,
+notwendige Basiskredite und Run-Klick. Sie muss den vollständig bekannten,
+garantiert erreichbaren letzten Contest ohne unfinanzierte Hazard- oder
+Handgrenze belegen. Sie erzeugt keine zukünftige LegalAction und nimmt keine
+unbekannte Heap- oder Stackkarte an. Der Economy-Executor erhält nur die
+aktuelle Rückholaction; nach deren Ausführung muss die Engine die Installation
+tatsächlich anbieten. Generische Recovery-Bewertung bleibt beim bisherigen
+Handentwicklungs-Owner. Paarung719/R5/G28 belegt die26-Credit-Folge und ihre
+Kredit-, Klick-, Quellen-, Sichtbarkeits- und Servergegenfälle.
+
 Die prospektive Einzelquote wird durch
 `quoteRunnerRunAfterGuaranteedFunding` beim Run-Owner erzeugt. Funding- und
 Bank-Owner konsumieren diese Quote; sie rufen weder eine zweite Runbewertung

@@ -16,6 +16,20 @@ export type RunnerFundingRouteAssessment = {
   projectedGap: number;
   totalClickCost: number;
   firstStepActionId?: string;
+  heapIncomePreparation?: {
+    stateVersion: number;
+    recoveryActionId: string;
+    sourceCardInstanceId: string;
+    targetCardInstanceId: string;
+    targetDefinitionId: string;
+    recoveryClickCost: number;
+    recoveryCreditCost: number;
+    runActionId: string;
+    targetServerId: string;
+    basicCreditCount: number;
+    projectedRunCredits: number;
+    completeKnownPathCost: number;
+  };
   handPreparation?: {
     stateVersion: number;
     drawActionId: string;
@@ -152,6 +166,16 @@ export function validRunnerFundingNeedContract(
     return false;
   }
   const routeActionIds = [...new Set(need.routeActionIds)];
+  const heapPreparation = need.routeAssessment.heapIncomePreparation;
+  if (
+    heapPreparation &&
+    (need.kind !== "parent_plan_support" ||
+      (need.driver.kind !== "run" && need.driver.kind !== "contest") ||
+      heapPreparation.stateVersion !== stateVersion ||
+      heapPreparation.recoveryActionId !== routeActionIds[0] ||
+      heapPreparation.targetServerId !== need.driver.targetId)
+  )
+    return false;
   if (
     routeActionIds.length !== need.routeActionIds.length ||
     routeActionIds.length > 1 ||

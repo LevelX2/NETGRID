@@ -18,12 +18,17 @@ it.each(["insufficient_exit_reserve", "no_installed_coverage"] as const)(
       input: AiDecisionInputWithDeckCapabilities;
       runtime: AiRuntimeCheckpointV1;
     };
-    if (change === "insufficient_exit_reserve")
+    if (change === "insufficient_exit_reserve") {
       cp.input.playerView.own.credits = 17;
-    else
-      cp.input.playerView.own.rig = cp.input.playerView.own.rig.filter(
+      // Only one funding click remains before the run. With another click,
+      // Loan plus a basic credit legitimately restores the complete reserve.
+      cp.input.playerView.own.clicks = 2;
+    } else {
+      expect(cp.input.playerView.own.rig).toBeDefined();
+      cp.input.playerView.own.rig = cp.input.playerView.own.rig!.filter(
         (card) => card.type !== "program",
       );
+    }
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
       cp.input,

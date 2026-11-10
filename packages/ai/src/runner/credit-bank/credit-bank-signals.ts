@@ -35,6 +35,7 @@ import { creditBankFloorRecoveryWindow } from "./credit-bank-floor-recovery";
 import { creditBankFundsKnownUrgentRun } from "./credit-bank-known-run-funding";
 import { finiteBankTurnLiquiditySupport } from "./credit-bank-turn-liquidity";
 import type { RunnerFundingNeedSignal } from "../../plans/runner-funding-contracts";
+import type { RunnerRunFundingSupport } from "../../plans/runner-funding-service-contract";
 
 /** Facts/routes from other owners, bound to the same decision input and candidates.
  * These services never choose a bank phase or execute a bank action.
@@ -60,6 +61,10 @@ export type RunnerCreditBankServices = {
     target: RunnerRunTargetEvaluation,
     actionIds: readonly string[],
   ) => RunnerRunTargetEvaluation | undefined;
+  runFundingAfterCashout: (
+    target: RunnerRunTargetEvaluation,
+    actionId: string,
+  ) => RunnerRunFundingSupport | undefined;
   developmentFundingRoute: (target: RunnerHandDevelopmentEvaluation) => {
     actionIds: string[];
     evidenceCodes: string[];
@@ -913,6 +918,26 @@ function runnerCreditBankRunFundingRoute(params: {
         : {}),
     });
     if (basicReplacement) return basicReplacement;
+    if (params.services.hasExactRunUrgency(evaluation)) {
+      for (const actionId of params.cashOutActionIds) {
+        const continuation = params.services.runFundingAfterCashout(
+          evaluation,
+          actionId,
+        );
+        if (continuation)
+          return {
+            runFunding: {
+              parentPlanInstanceId: continuation.parentPlanInstanceId,
+              needId: continuation.needId,
+              runActionId: evaluation.actionId,
+              stateVersion: params.input.playerView.stateVersion,
+              gap: continuation.gap,
+              routeAssessment: continuation.routeAssessment,
+            },
+            evidenceCodes: continuation.routeAssessment.evidenceCodes,
+          };
+      }
+    }
     const fundedTerminalTarget =
       params.services.terminalKnownPathFundingGap(evaluation) !== undefined
         ? params.cashOutActionIds

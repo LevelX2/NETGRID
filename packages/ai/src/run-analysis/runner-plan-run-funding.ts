@@ -33,6 +33,7 @@ import {
 import { runnerTerminalContestThreat } from "../runtime/runner-terminal-contest-threat";
 import { archivesHasVisibleKnownAgenda } from "../runtime/visible-server-agenda-facts";
 import { runnerArchivesHasQualifiedHiddenPayoff } from "../runtime/runner-archives-score";
+import { runnerHeapIncomePreparation } from "./runner-heap-income-preparation";
 
 export function runnerRunFundingSupport(
   input: AiDecisionInput,
@@ -196,8 +197,18 @@ export function runnerRunFundingSupport(
       );
     }
   }
-  const gap =
-    terminalKnownPathGap !== undefined && route.routeActionIds.length > 0
+  const recovery =
+    terminalKnownPathGap !== undefined && route.routeActionIds.length === 0
+      ? runnerHeapIncomePreparation(input, candidates, evaluation)
+      : undefined;
+  if (recovery)
+    route = {
+      routeActionIds: recovery.routeActionIds,
+      routeAssessment: recovery.routeAssessment,
+    };
+  const gap = recovery
+    ? Math.max(0, recovery.targetCredits - input.playerView.own.credits)
+    : terminalKnownPathGap !== undefined && route.routeActionIds.length > 0
       ? terminalKnownPathGap
       : conservativeGap;
   const terminalKnownPathRouteSelected =

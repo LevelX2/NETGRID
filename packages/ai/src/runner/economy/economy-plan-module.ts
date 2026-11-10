@@ -1,4 +1,5 @@
 import type { RunnerFundingNeedSignal } from "../../plans/runner-funding-contracts";
+import { runnerHeapIncomePreparationMatchesCandidate } from "../../run-analysis/runner-heap-income-preparation";
 import {
   RUNNER_TURN_LIQUIDITY_WITHIN_CLASS_VALUE,
   validRunnerFundingNeedContract,
@@ -256,6 +257,13 @@ function economyCandidates(
     need.kind === "portfolio_reserve"
       ? need.routeAssessment.handPreparation
       : undefined;
+  const heapPreparation =
+    need.kind === "parent_plan_support" &&
+    (need.driver.kind === "contest" || need.driver.kind === "run") &&
+    need.driver.targetId ===
+      need.routeAssessment.heapIncomePreparation?.targetServerId
+      ? need.routeAssessment.heapIncomePreparation
+      : undefined;
   const isHandPreparation = (candidate: ActionSemanticCandidate) =>
     handPreparation?.stateVersion === context.input.playerView.stateVersion &&
     handPreparation.drawActionId === candidate.actionId &&
@@ -293,7 +301,13 @@ function economyCandidates(
           ? runnerTurnLiquidityCandidateIsMaterializable(candidate)
           : runnerFundingRouteCandidateIsMaterializable(candidate) ||
             isPaymentInstall(candidate) ||
-            isHandPreparation(candidate)),
+            isHandPreparation(candidate) ||
+            (heapPreparation !== undefined &&
+              runnerHeapIncomePreparationMatchesCandidate(
+                context.input,
+                candidate,
+                heapPreparation,
+              ))),
     )
     .map((candidate) => {
       const netLiquidCreditGain = isHandPreparation(candidate)

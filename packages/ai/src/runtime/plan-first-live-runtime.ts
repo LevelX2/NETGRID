@@ -1,3 +1,4 @@
+import { runnerBankRunFundingContinuation } from "../run-analysis/runner-bank-run-funding-continuation";
 import {
   candidateTargetIds,
   exactBasicLiquidCreditCandidate,
@@ -3172,6 +3173,14 @@ function prepareRunnerDomain(
           },
           developmentFundingRoute: (target) =>
             runnerSameTurnDevelopmentFundingRoute(input, candidates, target),
+          runFundingAfterCashout: (target, actionId) =>
+            runnerBankRunFundingContinuation(
+              input,
+              candidates,
+              deckCapabilities,
+              target,
+              actionId,
+            ),
         },
       );
       const runFundingNeeds = bestRunTargetsByServer(

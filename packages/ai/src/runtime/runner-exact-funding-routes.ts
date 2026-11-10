@@ -1,5 +1,6 @@
 import { exactBasicLiquidCreditCandidate } from "../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { runnerDrawProjectionFor } from "../actions/action-economy-projection";
 import { createRunnerCreditDemand } from "../plans/credit-demand";
@@ -14,10 +15,7 @@ import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contr
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
 import { turnPlanningFingerprint } from "../plans/turn-planning-contracts";
 import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
-import {
-  assessRunnerRunAfterGuaranteedFunding,
-  quoteRunnerRunTarget,
-} from "../runner-run-target-evaluation";
+import { quoteRunnerRunTarget } from "../runner-run-target-evaluation";
 import {
   runnerCriticalDamageContestBlocked,
   runnerTerminalRemoteContestIsDirectlyMandatory,
@@ -438,7 +436,7 @@ function runnerExactFundingRouteCandidates(
       return (
         kinds.includes("self_damage") ||
         (kinds.includes("debt_financing") &&
-          runnerDebtFinancingCandidateHasSafeBoundRunExit(
+          runnerDebtFinancingCandidateHasBoundRunSource(
             input,
             candidate,
             request,
@@ -493,6 +491,26 @@ function runnerFundingRouteConsumerBufferFits(
 ): boolean {
   const payment = runnerFundingPaymentWindowQuote(route, paymentSetups);
   if (!payment) return false;
+  const debts = route.steps.flatMap((step) => {
+    const candidate = candidates.find(
+      (entry) => entry.actionId === step.actionId,
+    );
+    return candidate &&
+      runnerStrategicExchangeKinds(candidate).includes("debt_financing")
+      ? [candidate]
+      : [];
+  });
+  if (
+    debts.some(
+      (candidate) =>
+        !runnerDebtFinancingCandidateHasBoundRunSource(
+          input,
+          candidate,
+          request,
+        ),
+    )
+  )
+    return false;
   if (request.requiredEndTurnHandBuffer !== undefined) {
     const floor = request.requiredEndTurnHandBuffer;
     if (!Number.isSafeInteger(floor) || floor < 0) return false;
@@ -514,7 +532,11 @@ function runnerFundingRouteConsumerBufferFits(
       if (hand < floor) return false;
     }
   }
-  if (request.requireCompleteKnownPath || request.acceptFundedRun) {
+  if (
+    request.requireCompleteKnownPath ||
+    request.acceptFundedRun ||
+    debts.length > 0
+  ) {
     const target = request.paymentWindowTarget;
     const runAction = input.legalActions.find(
       (action) => action.actionId === target?.actionId,
@@ -589,6 +611,14 @@ function runnerFundingRouteConsumerBufferFits(
     })?.target;
     if (
       !fundedTarget ||
+      debts.some(
+        (candidate) =>
+          !runnerDebtFinancingRouteHasSafeRunExit(
+            fundedInput,
+            fundedTarget,
+            candidate,
+          ),
+      ) ||
       (request.acceptFundedRun &&
         !request.acceptFundedRun(fundedInput, fundedTarget)) ||
       (request.requireCompleteKnownPath &&
@@ -772,7 +802,7 @@ function runnerFundingBufferRepair(
   };
 }
 
-function runnerDebtFinancingCandidateHasSafeBoundRunExit(
+function runnerDebtFinancingCandidateHasBoundRunSource(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   request: RunnerExactFundingRouteRequest,
@@ -822,31 +852,36 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
   )
     return false;
 
-  // An unfunded path can stop at its first unaffordable subroutine. Its
-  // remaining balance therefore cannot certify the debt's exit reserve.
-  // Requote this exact consumer with the guaranteed funding and hand cost;
-  // this is prospective assessment only, never a replacement LegalAction.
-  const funded = assessRunnerRunAfterGuaranteedFunding({
-    input,
-    deckCapabilities:
-      createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
-    fundingCandidate: candidate,
-    runActionId: parent.runActionId,
-    targetServerId: parent.targetServerId,
-  });
-  if (!funded) return false;
-  const fundedTarget = funded.target;
+  return (
+    request.paymentWindowTarget?.actionId === parent.runActionId &&
+    request.paymentWindowTarget.targetServerId === parent.targetServerId
+  );
+}
+
+/** The exit belongs to the complete funding route, not to each income source
+ * in isolation. The consumer quote includes all guaranteed costs and gains. */
+function runnerDebtFinancingRouteHasSafeRunExit(
+  fundedInput: AiDecisionInput,
+  fundedTarget: RunnerRunTargetEvaluation,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const profile = runnerDebtFinancingProfile(candidate.sourceDefinitionId);
+  if (!profile) return false;
+  const unknownIceCount = fundedTarget.routeQuote?.unknownIceCount;
   if (
-    fundedTarget.unknownUnrezzedIceCount > 0 &&
+    unknownIceCount === undefined ||
+    !Number.isSafeInteger(unknownIceCount) ||
+    unknownIceCount < 0
+  )
+    return false;
+  if (
+    unknownIceCount > 0 &&
     fundedTarget.prerunReserveQuote?.visibleCoverage !== "stable_universal" &&
     fundedTarget.prerunReserveQuote?.visibleCoverage !== "risky_universal"
   )
     return false;
   const mandatoryCompleteContest =
-    runnerTerminalRemoteContestIsDirectlyMandatory(
-      funded.input,
-      fundedTarget,
-    ) &&
+    runnerTerminalRemoteContestIsDirectlyMandatory(fundedInput, fundedTarget) &&
     fundedTarget.routeQuote?.reachability === "guaranteed_access" &&
     fundedTarget.routeQuote.fundingGap === 0 &&
     fundedTarget.routeQuote.unknownIceCount === 0;
@@ -857,7 +892,7 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
     ? 0
     : profile.leavePlayPayCost;
   return (
-    !runnerCriticalDamageContestBlocked(funded.input, fundedTarget) &&
+    !runnerCriticalDamageContestBlocked(fundedInput, fundedTarget) &&
     (runnerRunTargetIsDirectlyConvertible({
       target: fundedTarget,
       economy: { minimumCreditFloor: requiredExitReserve },

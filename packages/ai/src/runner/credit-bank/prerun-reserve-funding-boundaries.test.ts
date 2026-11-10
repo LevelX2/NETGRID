@@ -108,6 +108,7 @@ it.each(
           runnerTerminalRemoteLastChanceKnownPathFundingGap(input, target),
         quoteRunAfterCashout: (target, id) => quote(target, [id]),
         quoteRunAfterCashoutRoute: quote,
+        runFundingAfterCashout: () => undefined,
         developmentFundingRoute: () => ({ actionIds: [], evidenceCodes: [] }),
       },
     );
