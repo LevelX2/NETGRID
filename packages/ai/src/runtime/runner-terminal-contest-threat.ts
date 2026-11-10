@@ -10,8 +10,15 @@ function rootMayBeAgenda(
   serverId: string,
   card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
   index: number,
+  minimumAgendaPoints = 0,
 ): boolean {
-  if (card.known !== false) return card.type === "agenda";
+  if (card.known !== false)
+    return (
+      card.type === "agenda" &&
+      (minimumAgendaPoints === 0 ||
+        (card.agendaPoints !== undefined &&
+          card.agendaPoints >= minimumAgendaPoints))
+    );
   const memory = reconstructBeliefState(
     input,
   ).runnerOpponentModel?.knownPositionMemory.find(
@@ -33,7 +40,12 @@ function rootMayBeAgenda(
         "Restore the canonical definition for the validated remembered remote root.",
     });
   }
-  return definition.type === "agenda";
+  return (
+    definition.type === "agenda" &&
+    (minimumAgendaPoints === 0 ||
+      (definition.agendaPoints !== undefined &&
+        definition.agendaPoints >= minimumAgendaPoints))
+  );
 }
 
 export type RunnerTerminalContestThreat = {
@@ -41,6 +53,7 @@ export type RunnerTerminalContestThreat = {
     | "opponent_matchpoint"
     | "visible_two_point_remote"
     | "visible_three_point_remote"
+    | "visible_four_point_remote"
     | "protected_two_point_matchpoint_remote";
   pointsNeeded: number;
   remoteServerIds: string[];
@@ -107,28 +120,40 @@ export function runnerTerminalContestThreat(
       ],
     };
   }
-  if (pointsNeeded === 3) {
-    const visibleThreePointRemoteIds = input.playerView.servers
+  if (pointsNeeded === 3 || pointsNeeded === 4) {
+    // A four-point agenda can share the four-advancement scoring clock of
+    // a three-point agenda. Its concealed identity does not erase the same
+    // public next-turn threat; no hidden card identity is inferred here.
+    const visibleRemoteIds = input.playerView.servers
       .filter(
         (server) =>
           server.id.startsWith("remote_") &&
           server.root.some(
             (card, index) =>
-              rootMayBeAgenda(input, server.id, card, index) &&
-              (card.advancementCounters ?? 0) >= 1,
+              rootMayBeAgenda(
+                input,
+                server.id,
+                card,
+                index,
+                pointsNeeded === 4 ? 4 : 0,
+              ) && (card.advancementCounters ?? 0) >= 1,
           ),
       )
       .map((server) => server.id)
       .sort();
-    if (visibleThreePointRemoteIds.length === 0) return undefined;
+    if (visibleRemoteIds.length === 0) return undefined;
+    const kind =
+      pointsNeeded === 3
+        ? "visible_three_point_remote"
+        : "visible_four_point_remote";
     return {
-      kind: "visible_three_point_remote",
+      kind,
       pointsNeeded,
-      remoteServerIds: visibleThreePointRemoteIds,
+      remoteServerIds: visibleRemoteIds,
       evidence: [
-        "terminal_contest_kind:visible_three_point_remote",
+        `terminal_contest_kind:${kind}`,
         `terminal_contest_points_needed:${pointsNeeded}`,
-        `terminal_contest_remote_servers:${visibleThreePointRemoteIds.join("|")}`,
+        `terminal_contest_remote_servers:${visibleRemoteIds.join("|")}`,
         "terminal_contest_public_basis:unknown_or_agenda_root_with_one_advancement_counter",
       ],
     };

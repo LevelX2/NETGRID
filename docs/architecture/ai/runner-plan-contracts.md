@@ -786,6 +786,19 @@ und Wissensinvalidierung bleiben beim bestehenden Belief-Owner. Paarung 559
 G10 D239 sichert den Originalzustand nach dem Aufdecken einer TRAP sowie
 die produktive Planentscheidung und die relevanten Gegenfälle.
 
+Auch vier fehlende Corp-Punkte können durch einen bereits sichtbar avancierten
+Remote im nächsten Zug erreicht werden. Die gemeinsame Bedrohungsquelle
+`runner-terminal-contest-threat.ts` erhält dieses Fenster bereits ab einem
+Counter, wie bei einer möglichen Vier-Advancement-Agenda mit drei Punkten.
+Sie behauptet keine verdeckte Kartenidentität. Eine bekannte oder gültig
+erinnerte kleinere Agenda und eine Nicht-Agenda begründen dieses Vier-Punkte-
+Fenster nicht. Paarung719/R6/G25/D351 belegt die Folge: Der fehlende gemeinsame
+Bedrohungsfakt verhinderte die vollständige Bank→Darlehen→Basiscredit-Finanzierung
+des bekannten 24-Credit-Pfads. Der Bank-Owner führt nur seine Auszahlung aus;
+die bestehende Funding- und Run-Zulassung prüft danach jeden echten Zustand
+erneut. Unvollständige Pfade, unbekannte ICE und fehlende Run-Klicks erhalten
+dadurch keine garantierte Finanzierung.
+
 Erinnerte, weiterhin gültige Remoteagenden geben ihre Definitionsidentität
 an dieselbe Engine-Selbstkostenquote wie bekannte Zentralagenden weiter.
 Der aktuelle vollständige Servermodifikator bleibt zusätzlich gebunden; eine

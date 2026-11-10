@@ -52,6 +52,47 @@ describe("runnerTerminalContestThreat", () => {
     ).toBeUndefined();
   });
 
+  it("recognizes an advanced remote that can complete a four-point Corp win", () => {
+    expect(
+      runnerTerminalContestThreat(input({ agendaPoints: 3, advancement: 2 })),
+    ).toMatchObject({
+      kind: "visible_four_point_remote",
+      pointsNeeded: 4,
+      remoteServerIds: ["remote_1"],
+    });
+  });
+
+  it("includes the first public advancement in a possible four-point scoring turn", () => {
+    expect(
+      runnerTerminalContestThreat(input({ agendaPoints: 3, advancement: 1 })),
+    ).toMatchObject({ remoteServerIds: ["remote_1"] });
+  });
+
+  it("does not infer a four-point win from an unadvanced remote", () => {
+    expect(
+      runnerTerminalContestThreat(input({ agendaPoints: 3, advancement: 0 })),
+    ).toBeUndefined();
+  });
+
+  it("excludes a known non-agenda from the four-point threat", () => {
+    const decisionInput = input({ agendaPoints: 3, advancement: 2 });
+    Object.assign(decisionInput.playerView.servers[0]!.root[0]!, {
+      known: true,
+      type: "asset",
+    });
+    expect(runnerTerminalContestThreat(decisionInput)).toBeUndefined();
+  });
+
+  it("does not turn an exposed smaller agenda into a four-point threat", () => {
+    const decisionInput = input({ agendaPoints: 3, advancement: 2 });
+    Object.assign(decisionInput.playerView.servers[0]!.root[0]!, {
+      known: true,
+      type: "agenda",
+      agendaPoints: 2,
+    });
+    expect(runnerTerminalContestThreat(decisionInput)).toBeUndefined();
+  });
+
   it("focuses an occupied remote that the Corp publicly used to score at matchpoint", () => {
     const decisionInput = input({ agendaPoints: 6, advancement: 0 });
     decisionInput.playerView.publicEvents = [

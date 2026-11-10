@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import checkpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-p719-r05-g27-d211-composite-funding.json";
+import bankDebtCredit from "../../../../data/scenarios/ai-decision-checkpoints/cp-p719-r06-g25-d351-bank-debt-credit.json";
 import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
@@ -7,9 +8,9 @@ import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import { runnerBankRunFundingContinuation } from "./runner-bank-run-funding-continuation";
 
-function facts() {
+function facts(source: unknown = checkpoint) {
   const input = structuredClone(
-    checkpoint.input,
+    (source as typeof checkpoint).input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -30,6 +31,49 @@ function facts() {
   )!;
   return { input, candidates, target, bank };
 }
+
+it("includes the basic credit after bank and loan while preserving the run click", () => {
+  const { input, candidates, target, bank } = facts(bankDebtCredit);
+  expect(
+    runnerBankRunFundingContinuation(
+      input,
+      candidates,
+      input.ownDeckCapabilities!,
+      target,
+      bank.actionId,
+    ),
+  ).toMatchObject({
+    routeActionIds: [bank.actionId],
+    routeAssessment: {
+      status: "covered_guaranteed",
+      projectedGap: 0,
+      totalClickCost: 3,
+      firstStepActionId: bank.actionId,
+    },
+  });
+});
+
+it.each(["one_credit_short", "one_click_short", "no_loan"] as const)(
+  "rejects the three-step native funding route with %s",
+  (variant) => {
+    const { input, candidates, target, bank } = facts(bankDebtCredit);
+    if (variant === "one_credit_short") input.playerView.own.credits = 7;
+    if (variant === "one_click_short") input.playerView.own.clicks = 3;
+    if (variant === "no_loan")
+      input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.filter(
+        (card) => card.definitionId !== "onr_v1_168_loan-from-chiba",
+      );
+    expect(
+      runnerBankRunFundingContinuation(
+        input,
+        candidates,
+        input.ownDeckCapabilities!,
+        target,
+        bank.actionId,
+      ),
+    ).toBeUndefined();
+  },
+);
 
 it("certifies the complete composite route while exposing only the bank's current first step", () => {
   const { input, candidates, target, bank } = facts();
