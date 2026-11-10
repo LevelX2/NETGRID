@@ -43,6 +43,14 @@ Der Plan endet, sobald:
 
 ## 2. `runner.pressure_central`
 
+Die gemeinsame Runzielquote reicht das aktuelle `traceRulesProfile` an die
+bekannte ICE-Pfadanalyse weiter. Classic darf dort weder die gedruckte
+Trace-Stärke als offene Grundstärke noch bloße Runner-Credits als Link
+verwenden. Der aktuelle Runpfad erhält Profil und öffentlichen Run-Linkbonus
+über `currentRunPathContext`; Neuplanung und Fortsetzung behalten damit
+dieselbe Regelsemantik. Dies verändert keinen Informationszweck oder dessen
+Budgetgrenze.
+
 Die Zugriffskadenz bindet Karten- und Choice-Runs über den öffentlichen
 `ResolvedGameEffect.start_run`, normale Runaktionen über ihren primären
 `start_run`-Vertrag. Bei einer Umleitung zählt das tatsächliche Zugriffsziel,

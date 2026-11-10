@@ -79,6 +79,15 @@ export function visibleCorpIceRezResourceExchangeQuote(
       reason: "not_current_approached_ice",
     };
   }
+  if (
+    run.bypassFirstIceRemaining === true ||
+    run.secretSpendGuessRunAutoPassIceId === iceId
+  )
+    return {
+      ...binding,
+      complete: false,
+      reason: "current_encounter_bypassed",
+    };
   const projectedVisibleIce: VisibleCard = {
     ...visibleIce,
     known: true,

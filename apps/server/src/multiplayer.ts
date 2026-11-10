@@ -1933,6 +1933,7 @@ export class MultiplayerService {
       const participantDecks = participantDeckInputsForRecord(record);
       const next = await this.createMatch({
         hostSide: nextHostSide,
+        participantIdentities: record.match.participantIdentities,
         displayName: input.displayName ?? session.displayName,
         seed: `${record.gameState.seed}:series-game-${nextGameNumber}`,
         mode: nextMode,

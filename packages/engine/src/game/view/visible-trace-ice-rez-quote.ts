@@ -28,6 +28,11 @@ export function visibleCorpTraceIceRezQuotes(
 ): VisibleCorpTraceIceRezQuote[] {
   const id = ice.instanceId;
   const run = state.run;
+  if (
+    run?.bypassFirstIceRemaining ||
+    run?.secretSpendGuessRunAutoPassIceId === id
+  )
+    return [];
   const server = state.corp.servers.find((s) => s.ice.includes(id));
   if (
     !ice.known ||

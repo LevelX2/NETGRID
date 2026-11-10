@@ -3405,6 +3405,12 @@ export type VisibleCorpIcePostRezRunQuote =
       expiresAtStateVersion: number;
       complete: true;
       effectiveRunQuote: VisibleEffectiveIceRunQuote;
+      /** Fixed inner-ICE continuation after this run's outer bypass soak. */
+      bypassContinuation?: {
+        runId: string;
+        outerIceId: CardInstanceId;
+        rezCredits: number;
+      };
       /** Canonical public Corp credit-only lifecycle outcome before rez payment. */
       creditGainOnRez?: {
         creditsBefore: number;
@@ -3568,6 +3574,7 @@ export type VisibleCorpIceRezResourceExchangeQuote =
       complete: false;
       reason:
         | "not_current_approached_ice"
+        | "current_encounter_bypassed"
         | "effective_run_projection_unavailable"
         | "no_hard_end_the_run_subroutine"
         | "unsupported_encounter_cost_projection"
@@ -4345,6 +4352,8 @@ export type PlayerView = {
     accessedCard?: VisibleCard;
     /** Publicly chosen, Engine-certified ICE that will be passed on approach. */
     pendingAutoPassIceId?: CardInstanceId;
+    /** Public run effect: skip the first actual rezzed encounter, not an unrezzed pass. */
+    bypassFirstIceRemaining?: boolean;
     breach?: {
       breachId: string;
       serverId: Exclude<ServerId, "new_remote">;

@@ -15,6 +15,7 @@ import { projectFixedCorpIcePostRezState } from "./fixed-ice-post-rez-state";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
 import { applyCreditGain } from "../economy/credit-gain";
 import { addCardCounter } from "../state/turn-flags-counters";
+import { projectInstalledCorpIceRezCost } from "../payment";
 
 /**
  * Quotes the run-facing state of one ICE without mutating GameState. Fixed
@@ -69,7 +70,16 @@ function projectCorpIcePostRezRunQuote(
     projectedServerId: server.id,
     expiresAtStateVersion: state.stateVersion,
   };
-  if (state.run && !isCurrentApproachedIce(state, iceId, server.id)) {
+  const bypassContinuation = fixedInnerBypassContinuation(
+    state,
+    iceId,
+    server.id,
+  );
+  if (
+    state.run &&
+    !isCurrentApproachedIce(state, iceId, server.id) &&
+    !bypassContinuation
+  ) {
     return { ...binding, complete: false, reason: "active_run_context" };
   }
   const implementation = cardImplementationForDefinitionId(definitionId);
@@ -149,7 +159,12 @@ function projectCorpIcePostRezRunQuote(
       reason: "on_rez_lifecycle_projection_required",
     };
   }
-  const projectedState = projectFixedCorpIcePostRezState(state, iceId);
+  const continuationState = bypassContinuation
+    ? projectFixedCorpIcePostRezState(state, bypassContinuation.outerIceId)
+    : state;
+  const projectedState =
+    continuationState &&
+    projectFixedCorpIcePostRezState(continuationState, iceId);
   const projectedStartingCredits =
     state.corp.credits - (freeRez?.creditCost ?? 0);
   if (projectedState && freeRez) {
@@ -288,6 +303,7 @@ function projectCorpIcePostRezRunQuote(
     ...binding,
     complete: true,
     effectiveRunQuote,
+    ...(bypassContinuation ? { bypassContinuation } : {}),
     ...(projectedState && rezEffects.length > 0
       ? {
           creditGainOnRez: {
@@ -299,6 +315,49 @@ function projectCorpIcePostRezRunQuote(
       : {}),
     ...(paidEncounterDefense ? { paidEncounterDefense } : {}),
   };
+}
+
+/** Bounded future fact: one fixed inner layer behind a fixed outer
+ * bypass soak. No lifecycle, alternate rez branch or passive outer modifier
+ * may change that continuation. Its fixed future price is explicit; longer
+ * paths need a separate continuation/budget quote. */
+function fixedInnerBypassContinuation(
+  state: GameState,
+  iceId: CardInstanceId,
+  serverId: ServerId,
+) {
+  const run = state.run;
+  const server = state.corp.servers.find((s) => s.id === serverId);
+  if (
+    !run?.bypassFirstIceRemaining ||
+    run.phase !== "approach_ice" ||
+    run.attackedServerId !== serverId ||
+    run.position.kind !== "ice" ||
+    run.position.iceIndex !== 1 ||
+    server?.ice[0] !== iceId
+  )
+    return undefined;
+  const outerIceId = server.ice[1]!;
+  if (state.cardInstances[outerIceId]?.rezzed) return undefined;
+  for (const id of [outerIceId, iceId]) {
+    const definitionId = state.cardInstances[id]?.definitionId;
+    if (!definitionId) return undefined;
+    const implementation = cardImplementationForDefinitionId(definitionId);
+    if (
+      implementation?.variableRez ||
+      (implementation?.lifecycle?.on_rez?.length ?? 0) > 0 ||
+      (implementation?.modifiers?.length ?? 0) > 0
+    )
+      return undefined;
+  }
+  const cost = projectInstalledCorpIceRezCost(state, iceId);
+  if (
+    cost?.complete !== true ||
+    cost.costKind !== "fixed" ||
+    cost.mandatoryAdditionalCosts.agendaPoints !== 0
+  )
+    return undefined;
+  return { runId: run.runId, outerIceId, rezCredits: cost.finalCredits };
 }
 
 /** Free-rez operations preserve the target's actual variable state instead of

@@ -819,6 +819,11 @@ function sanitizePlayerView(
     throw new Error("Invalid Engine Corp install/rez-only credit pool.");
   const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
   if (
+    view.run?.bypassFirstIceRemaining !== undefined &&
+    typeof view.run.bypassFirstIceRemaining !== "boolean"
+  )
+    throw new Error("Invalid Engine first-encounter bypass state.");
+  if (
     view.side === "runner" &&
     view.run?.pendingAutoPassIceId !== undefined &&
     (typeof view.run.pendingAutoPassIceId !== "string" ||
@@ -1093,6 +1098,9 @@ function sanitizePlayerView(
             attackedServerId: view.run.attackedServerId,
             ...(view.run.pendingAutoPassIceId
               ? { pendingAutoPassIceId: view.run.pendingAutoPassIceId }
+              : {}),
+            ...(view.run.bypassFirstIceRemaining !== undefined
+              ? { bypassFirstIceRemaining: view.run.bypassFirstIceRemaining }
               : {}),
             ...(view.run.accessServerOverride !== undefined
               ? { accessServerOverride: view.run.accessServerOverride }
@@ -2718,6 +2726,7 @@ function validCorpIceRezResourceExchangeIncompleteReason(
 >["reason"] {
   return (
     value === "not_current_approached_ice" ||
+    value === "current_encounter_bypassed" ||
     value === "effective_run_projection_unavailable" ||
     value === "no_hard_end_the_run_subroutine" ||
     value === "unsupported_encounter_cost_projection" ||
@@ -3331,6 +3340,15 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
   }
   if (value.complete !== true) return undefined;
   const creditGainOnRez = value.creditGainOnRez;
+  const bypassContinuation = value.bypassContinuation;
+  if (
+    bypassContinuation !== undefined &&
+    (!isPlainObjectRecord(bypassContinuation) ||
+      !isNonEmptyString(bypassContinuation.runId) ||
+      !isNonEmptyString(bypassContinuation.outerIceId) ||
+      !isNonNegativeSafeInteger(bypassContinuation.rezCredits))
+  )
+    return undefined;
   if (
     creditGainOnRez !== undefined &&
     (!isPlainObjectRecord(creditGainOnRez) ||
@@ -3386,6 +3404,15 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
     ...binding,
     complete: true,
     effectiveRunQuote,
+    ...(bypassContinuation
+      ? {
+          bypassContinuation: {
+            runId: bypassContinuation.runId as string,
+            outerIceId: bypassContinuation.outerIceId as string,
+            rezCredits: bypassContinuation.rezCredits as number,
+          },
+        }
+      : {}),
     ...(creditGainOnRez !== undefined
       ? {
           creditGainOnRez: {

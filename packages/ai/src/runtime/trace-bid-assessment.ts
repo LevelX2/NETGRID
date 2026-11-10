@@ -1,4 +1,8 @@
-import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgrid/engine";
+import {
+  cardImplementationForDefinitionId,
+  traceBaseLinkCardImplementationQuotesForDefinition,
+  traceSuccessEffectCardImplementationQuotesForDefinition,
+} from "@netgrid/engine";
 import type {
   AiDecisionInput,
   EngineRandomizedTraceBidAssessment,
@@ -13,6 +17,7 @@ import type { LatestTraceContext } from "./trace-context";
 import { reconstructBeliefState } from "../belief-state";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -50,7 +55,13 @@ export function assessTraceBidCandidates(
   const allOptions = choice.options
     .flatMap((option) =>
       Number.isSafeInteger(option.value) && Number(option.value) >= 0
-        ? [{ optionId: option.id, bid: Number(option.value) }]
+        ? [
+            {
+              optionId: option.id,
+              bid: Number(option.value),
+              linkDelta: runnerBidLinkDelta(input, option),
+            },
+          ]
         : [],
     )
     .sort(
@@ -60,13 +71,35 @@ export function assessTraceBidCandidates(
   if (allOptions.length === 0) return undefined;
   const fixedAutomaticSuccess =
     trace.bidEffect === "automatic_success_fixed_effect";
-  const options = fixedAutomaticSuccess ? [allOptions[0]!] : allOptions;
+  const effect = visibleTraceSuccessEffect(input, traceContext);
+  const maximumRunnerStrength = comparableClassicRunnerMaximum(
+    input,
+    traceContext,
+  );
+  const guaranteedBid =
+    input.side === "corp" &&
+    maximumRunnerStrength !== undefined &&
+    effect !== undefined &&
+    effect.type !== "none" &&
+    effect.type !== "add_tags_by_trace_margin_over_runner_link"
+      ? maximumRunnerStrength + (profile === "classic_blind_corp_ties" ? 0 : 1)
+      : undefined;
+  // Once every public response loses to a fixed effect, additional spend has
+  // no outcome delta. Blind variation must not reintroduce dominated bids.
+  const ceiling =
+    guaranteedBid === undefined
+      ? undefined
+      : allOptions.find((option) => option.bid >= guaranteedBid)?.bid;
+  const options = fixedAutomaticSuccess
+    ? [allOptions[0]!]
+    : allOptions.filter(
+        (option) => ceiling === undefined || option.bid <= ceiling,
+      );
 
   const currentLink = Math.max(
     0,
     Math.floor(trace.runnerLink ?? traceContext.runnerLink ?? 0),
   );
-  const effect = visibleTraceSuccessEffect(input, traceContext);
   const tagPunishFollowup = effectCreatesTag(effect)
     ? knownTagPunishFollowup(input)
     : { payoffKnown: false, lethalDamage: 0 };
@@ -97,26 +130,30 @@ export function assessTraceBidCandidates(
         bid: option.bid,
         maxBid,
         currentLink,
+        runnerLinkDelta: option.linkDelta,
         outcomeValue,
         reserveTarget,
         specializedCapacity,
         effectiveTraceLimit: trace.effectiveTraceLimit,
+        maximumRunnerStrength,
       }),
     ),
   }));
-  const minimumSafeBid = fixedAutomaticSuccess
+  const minimumSafeStrength = fixedAutomaticSuccess
     ? undefined
-    : runnerMinimumSafeBid({
+    : runnerMinimumSafeStrength({
         input,
         profile,
-        currentLink,
         effect,
         tagPunishFollowup,
       });
   const safeUtilities =
-    minimumSafeBid === undefined
+    minimumSafeStrength === undefined
       ? utilities
-      : utilities.filter((candidate) => candidate.bid >= minimumSafeBid);
+      : utilities.filter(
+          (candidate) =>
+            currentLink + candidate.linkDelta >= minimumSafeStrength,
+        );
   const eligibleUtilities =
     safeUtilities.length > 0 ? safeUtilities : utilities;
   const ranked = eligibleUtilities
@@ -193,10 +230,12 @@ function bidUtility(input: {
   bid: number;
   maxBid: number;
   currentLink: number;
+  runnerLinkDelta: number;
   outcomeValue: number;
   reserveTarget: number;
   specializedCapacity: number;
   effectiveTraceLimit: number;
+  maximumRunnerStrength?: number | undefined;
 }): number {
   const cashCost = Math.max(0, input.bid - input.specializedCapacity);
   const creditsAfter = Math.max(
@@ -217,15 +256,19 @@ function corpSuccessProbability(input: {
   profile: TraceRulesProfile;
   bid: number;
   currentLink: number;
+  maximumRunnerStrength?: number | undefined;
 }): number {
   if (
     input.input.playerView.trace?.bidEffect === "automatic_success_fixed_effect"
   )
     return 1;
-  const visibleRunnerBidCapacity = Math.max(
-    0,
-    Math.floor(input.input.playerView.trace!.visibleOpponentBidCapacity),
-  );
+  const visibleRunnerBidCapacity =
+    input.maximumRunnerStrength !== undefined
+      ? Math.max(0, input.maximumRunnerStrength - input.currentLink)
+      : Math.max(
+          0,
+          Math.floor(input.input.playerView.trace!.visibleOpponentBidCapacity),
+        );
   const tieAdjustment = input.profile === "classic_blind_corp_ties" ? 0 : -1;
   const maximumDefeatedRunnerBid =
     input.bid - input.currentLink + tieAdjustment;
@@ -234,11 +277,42 @@ function corpSuccessProbability(input: {
   );
 }
 
+/** The existing profile-aware context uses canonical Base Link quotes. Do not
+ * turn its pre-reveal bound into a guarantee for hidden rigs or additional
+ * after-reveal Link/cancellation abilities. Those remain uncertain responses. */
+function comparableClassicRunnerMaximum(
+  input: AiDecisionInput,
+  context: LatestTraceContext,
+): number | undefined {
+  if (input.side !== "corp") return undefined;
+  const rig = input.playerView.opponent.rig ?? [];
+  for (const card of rig) {
+    if (!card.known || !card.definitionId) return undefined;
+    const baseLink = traceBaseLinkCardImplementationQuotesForDefinition(
+      card.definitionId,
+    );
+    const extraResponse = cardImplementationForDefinitionId(
+      card.definitionId,
+    )?.abilities?.some(
+      (ability) =>
+        ability.kind === "activated" &&
+        (ability.timing === "trace_success_cancel_window" ||
+          (ability.timing === "trace_post_bid_link_window" &&
+            !(baseLink.length > 0 && ability.limit === undefined))),
+    );
+    if (extraResponse) return undefined;
+  }
+  return context.runnerMaximumPreRevealStrength === undefined
+    ? undefined
+    : Math.max(context.runnerLink ?? 0, context.runnerMaximumPreRevealStrength);
+}
+
 function runnerPreventionProbability(input: {
   input: AiDecisionInput;
   profile: TraceRulesProfile;
   bid: number;
   currentLink: number;
+  runnerLinkDelta: number;
   effectiveTraceLimit: number;
 }): number {
   if (
@@ -252,7 +326,7 @@ function runnerPreventionProbability(input: {
       Math.floor(input.input.playerView.trace!.visibleOpponentBidCapacity),
     ),
   );
-  const runnerStrength = input.currentLink + input.bid;
+  const runnerStrength = input.currentLink + input.runnerLinkDelta;
   const maximumPreventedCorpBid =
     input.profile === "classic_blind_corp_ties"
       ? runnerStrength - 1
@@ -648,10 +722,9 @@ function classifyStakes(
   return "low";
 }
 
-function runnerMinimumSafeBid(input: {
+function runnerMinimumSafeStrength(input: {
   input: AiDecisionInput;
   profile: TraceRulesProfile;
-  currentLink: number;
   effect: TraceSuccessEffect | undefined;
   tagPunishFollowup: KnownTagPunishFollowup;
 }): number | undefined {
@@ -677,7 +750,26 @@ function runnerMinimumSafeBid(input: {
   const strengthNeeded =
     dangerousCorpBidCapacity +
     (input.profile === "classic_blind_corp_ties" ? 1 : 0);
-  return Math.max(0, strengthNeeded - input.currentLink);
+  return strengthNeeded;
+}
+
+function runnerBidLinkDelta(
+  input: AiDecisionInput,
+  option: PendingChoice["options"][number],
+): number {
+  if (input.side !== "runner" || Number(option.value) === 0) return 0;
+  const delta = option.metadata?.amount;
+  if (typeof delta === "number" && Number.isSafeInteger(delta) && delta >= 0)
+    return delta;
+  throw new PlanResolutionFailure("missing_action_semantics", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map((action) => action.type),
+    owner: "rules_contract",
+    removalCondition:
+      "The Classic Runner bid Choice must carry its Engine-certified Link delta for each paid option.",
+  });
 }
 
 function reserveTargetFor(

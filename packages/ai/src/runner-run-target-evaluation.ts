@@ -554,6 +554,9 @@ function evaluateRunnerRunTarget(
       server?.root ?? [],
       params.input.playerView.opponent.credits,
       {
+        ...(params.input.playerView.traceRulesProfile
+          ? { traceRulesProfile: params.input.playerView.traceRulesProfile }
+          : {}),
         requireCoreDamageProtection:
           targetKind !== "remote" ||
           !runnerTargetHasTerminalContestThreat(params.input, targetServerId),

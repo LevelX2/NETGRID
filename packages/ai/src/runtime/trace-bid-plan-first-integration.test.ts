@@ -57,6 +57,11 @@ describe("Plan-first Blind Trace bid integration", () => {
         ),
       ),
     ).toBe(true);
+    expect(
+      decision.engineCommand.quote.candidates.every(
+        (candidate) => candidate.bid <= 1,
+      ),
+    ).toBe(true);
 
     const applied = applyRandomizedTraceBidSelection(state, {
       ...decision.engineCommand,
@@ -80,7 +85,21 @@ function blindCorpTraceState(): GameState {
     setupMode: "completed",
     traceRulesProfile: "classic_blind",
   });
-  const sourceCardInstanceId = state.corp.identity;
+  const sourceCardInstanceId = "native_trace_hunter";
+  state.cardInstances[sourceCardInstanceId] = {
+    instanceId: sourceCardInstanceId,
+    definitionId: "onr_v1_249_hunter",
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  state.corp.servers
+    .find((server) => server.id === "rd")!
+    .ice.push(sourceCardInstanceId);
   const sourceDefinitionId = state.cardInstances[sourceCardInstanceId]
     ?.definitionId as CardDefinitionId | undefined;
   if (!sourceDefinitionId) throw new Error("Corp identity source missing.");
@@ -91,9 +110,9 @@ function blindCorpTraceState(): GameState {
     sourceCardInstanceId,
     sourceDefinitionId,
     traceRulesProfile: "classic_blind",
-    traceLimit: 3,
-    effectiveTraceLimit: 3,
-    corpBidMax: 3,
+    traceLimit: 5,
+    effectiveTraceLimit: 5,
+    corpBidMax: 5,
     status: "corp_bid",
     bidsRevealed: false,
     successEffect: { type: "add_tag", amount: 1 },
@@ -104,7 +123,7 @@ function blindCorpTraceState(): GameState {
     source: "trace:trace_plan_first_1",
     prompt: "Verdecktes Korp-Gebot wählen",
     kind: "bid_amount",
-    options: Array.from({ length: 4 }, (_, bid) => ({
+    options: Array.from({ length: 6 }, (_, bid) => ({
       id: `bid_${bid}`,
       label: `${bid} Credits`,
       publicLabel: "Gebot festlegen",
