@@ -271,6 +271,9 @@ Größenwerte ausweisen. Vollständige Statistikantworten gehören nicht in Logs
   Sessiondaten werden weder in GameState und Replay noch in die öffentliche
   Ergebnisliste übernommen.
 - „Letzte Spiele“ kennzeichnet Teilnehmer als `Account`, `Gast` oder `KI`.
+  Serienfortsetzungen übernehmen die öffentliche Identitätskategorie je
+  stabilem Teilnehmer-Slot auch bei Seitenwechsel. Diese Kategorie ist von
+  der privaten Account-Statistikbindung unabhängig.
   Historische Matches ohne Identitätskategorie werden als Gast behandelt.
 
 ## Noch nicht enthalten
