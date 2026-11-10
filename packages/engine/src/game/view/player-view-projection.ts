@@ -340,6 +340,9 @@ export function buildPlayerViewProjection(
               pendingAutoPassIceId: state.run.secretSpendGuessRunAutoPassIceId,
             }
           : {}),
+        ...(state.run.bypassFirstIceRemaining !== undefined
+          ? { bypassFirstIceRemaining: state.run.bypassFirstIceRemaining }
+          : {}),
         ...(state.run.breach
           ? {
               breach: {

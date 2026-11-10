@@ -330,6 +330,18 @@ der Hacker-Tracker-Gegenfall ist durch Engine-Regressionen abgesichert.
 
 ## Ausführbare Grenzen
 
+Der PlayerView veröffentlicht `bypassFirstIceRemaining` als öffentlichen
+Runzustand. Eine aktuelle ICE-Rez-Austauschquote meldet
+`current_encounter_bypassed`, wenn die Begegnung tatsächlich übersprungen
+wird; sie zertifiziert dann keinen isolierten Breakpreis. Das gilt ebenso
+für einen bereits fest gewählten Auto-Pass. Trace-Rez-Stopquotes folgen
+derselben Grenze.
+Die Post-Rez-Projektion kann während dieses Bypasses eine einzelne feste
+innere ICE-Schicht an Run-ID, äußere Instanz und ihren exakten künftigen
+Rezpreis binden. Variable Rez-Zweige, Rez-Lifecycle und passive Modifikatoren
+bleiben ausgeschlossen. Es entstehen weder neue LegalActions noch eine
+Runner-sichtbare Projektion der verdeckten inneren Karte.
+
 `scripts/check-engine-source-structure.mjs` akzeptiert keine relativen
 Importzyklen mehr und begrenzt die neuen Run-Module. Die vollständige
 Engine-Suite deckt Run, Window, Successful-Run, Replay, StateHash und

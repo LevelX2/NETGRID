@@ -1233,6 +1233,16 @@ Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
 
+Aktuelle Rez-Vergleiche konsumieren den öffentlichen Restzustand des
+Erstbegegnungs-Bypasses. Vorher-/Nachherpfade laufen außen nach innen und
+entfernen jeweils die erste tatsächlich gerezzte Begegnung. Ungerezztes
+Passieren verbraucht den Bypass nicht. Ein übersprungenes ICE erhält keinen
+Breakpreis, Trace-Stop oder qualitativen Begegnungsnutzen.
+Eine Engine-gebundene feste innere Rez-Fortsetzung kann den echten marginalen
+Fortpreis begründen; ihr zusätzlicher Preis bleibt als
+`continuationRezCredits` in der Defense-Reserve. Die gegenwärtige Begrenzung
+auf eine feste innere Schicht ersetzt keinen allgemeinen Mehrschichtplan.
+
 Native Defense-Zuglinien verwenden dieselbe aktuelle zentrale
 Allokationszulassung wie Discovery und Materialisierung. Eine zusätzliche
 Variantenbildung darf ein vom Owner ausgeschlossenes Zentralziel nicht wieder
@@ -3256,6 +3266,13 @@ Bindungsfehler liegen in `runtime/plan-bound-choice-contract.ts`. Der Owner
 importiert weder die Tactical-Registry noch den allgemeinen Choice-Dispatcher.
 
 ## 10. `corp.hand_and_agenda_management`
+
+Der gemeinsame kanonische Tagquellenadapter berücksichtigt neben
+`add_tags` auch deklarative `corpUtility.kind: encounter_tag`-Quellen.
+Damit erhält eine bedingte Tagquelle denselben bestehenden Enabler-Haltewert
+wie andere mechanisch bestätigte Quellen. Die Erkennung behauptet keine
+aktuell erfüllte Spielbedingung; Legalität und konkrete Punish-Routen bleiben
+bei Engine beziehungsweise Punish-Owner.
 
 Der bestehende Advancement-Haltebonus unterscheidet kanonisch das Erzeugen
 neuer Counter von deren Verschieben. Reine Verschiebung erhält diesen Bonus

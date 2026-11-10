@@ -188,7 +188,7 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
       .sort((a, b) => b - a)
       .slice(0, remainingRunnerRuns)
       .reduce((sum, cost) => sum + cost, 0) +
-    (currentRunFollowup?.credits ?? 0);
+    Math.max(currentRunFollowup?.credits ?? 0, route.continuationRezCredits ?? 0);
   const consumesNoReservedResources =
     route.totalRezCredits === 0 &&
     (route.currentEncounterDefense?.activationCredits ?? 0) === 0 &&
