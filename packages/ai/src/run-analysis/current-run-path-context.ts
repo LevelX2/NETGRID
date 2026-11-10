@@ -45,6 +45,12 @@ export function currentRunPathContext(
     }
   }
   return {
+    ...(input.playerView.traceRulesProfile
+      ? { traceRulesProfile: input.playerView.traceRulesProfile }
+      : {}),
+    ...(run.runTraceLinkBonus !== undefined
+      ? { runTraceLinkBonus: run.runTraceLinkBonus }
+      : {}),
     ...(input.playerView.own.runnerTraceSupportQuote
       ? {
           runnerTraceSupportQuote: input.playerView.own.runnerTraceSupportQuote,

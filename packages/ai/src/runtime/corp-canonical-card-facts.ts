@@ -639,7 +639,8 @@ export function corpDefinitionHasTagSource(
   const planning = planningCard(definitionId);
   return (
     planning?.planning.side === "corp" &&
-    containsMechanicalKind(planning.planning.engine, "add_tags")
+    (containsMechanicalKind(planning.planning.engine, "add_tags") ||
+      planning.planning.engine.corpUtility?.kind === "encounter_tag")
   );
 }
 

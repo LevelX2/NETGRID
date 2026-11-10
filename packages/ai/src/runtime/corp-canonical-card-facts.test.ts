@@ -22,6 +22,11 @@ import {
 const hints = createAiHintsByCard();
 
 describe("canonical Corp card facts", () => {
+  it("includes declarative encounter-tag utilities without making the conditional operation live", () => {
+    expect(corpDefinitionHasTagSource("onr_v1_306_trojan-horse")).toBe(true);
+    expect(corpDefinitionHasTagSource("onr_v1_307_urban-renewal")).toBe(false);
+    expect(corpDefinitionHasTagSource("onr_v1_094_inside-job")).toBe(false);
+  });
   it("certifies only a fixed public reusable off-server access path", () => {
     expect(
       corpPublicFixedOffServerRunProfiles(

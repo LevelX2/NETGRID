@@ -1894,6 +1894,18 @@ teureren Gebote ergänzen. Variable Trace-Mengen und unbekannte Wirkungen
 erhalten diese Zertifizierung nicht. Plan-, Action- und Choice-Bindung bleiben
 unverändert.
 
+Bei einer festen Blind-Trace-Wirkung begrenzt die öffentliche, profilgerechte
+Base-Link-Kapazität die rationalen Corp-Gebote auf das kleinste garantiert
+erfolgreiche Gebot. Classic-Credits allein erzeugen keine Linkstärke; gedruckte
+Base-Link-Umrechnung und Gleichstandsregel bleiben maßgeblich. Zusätzliche
+After-Reveal-Link-/Abbruchfähigkeiten oder unbekanntes Rig begründen keine
+solche Garantie. Variable Effektmengen behalten ihren eigenen Vergleich.
+Die Variation und Engine-RNG-Bindung ändern weder Root noch Action oder Choice.
+Auf Runnerseite stammen Linkzuwachs und ein erforderlicher sicherer
+Stärkeboden aus derselben gebundenen Engine-Choice. Der bezahlte Betrag wird
+nicht nochmals als Link addiert. Fehlt bei einem positiven Classic-Gebot die
+Linkquote, scheitert die Auflösung strukturiert im Rules-Vertrag.
+
 ### 24.3 Coverage-Gate
 
 Die Implementierung ist erst vollständig umgestellt, wenn ein automatischer

@@ -14,6 +14,76 @@ import { assessTraceBidCandidates } from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
 
 describe("Blind Trace bid assessment", () => {
+  it("binds a lethal Runner safety floor to quoted Link strength rather than the credit payment", () => {
+    const input = decisionInput({
+      profile: "classic_blind",
+      side: "runner",
+      sourceDefinitionId: "onr_v1_248_homewrecker",
+      printedTrace: 5,
+      bidMax: 6,
+      ownCredits: 8,
+      opponentCredits: 3,
+      visibleOpponentBidCapacity: 3,
+      runnerGripCount: 2,
+    });
+    const choice = requiredChoice(input);
+    choice.options = choice.options
+      .filter((o) => Number(o.value) % 2 === 0)
+      .map((o) => ({ ...o, metadata: { amount: Number(o.value) / 2 } }));
+    const result = assess(input);
+    expect(result.assessment.stakes).toBe("terminal");
+    expect(result.candidates.map((c) => c.bid)).toEqual([6]);
+    delete choice.options[1]!.metadata;
+    expect(() => assess(input)).toThrow(/missing_action_semantics/);
+  });
+  it("does not certify a no-support ceiling for after-reveal Link responses", () => {
+    const input = decisionInput({
+      profile: "classic_blind",
+      side: "corp",
+      sourceDefinitionId: "onr_v1_249_hunter",
+      printedTrace: 5,
+      bidMax: 5,
+      ownCredits: 10,
+    });
+    expect(assess(input).candidates.every((c) => c.bid <= 1)).toBe(true);
+    input.playerView.opponent.rig = [
+      {
+        instanceId: "public-signpost",
+        definitionId: "onr_v1_063_signpost",
+        known: true,
+      },
+    ];
+    expect(assess(input).candidates.some((c) => c.bid > 1)).toBe(true);
+  });
+  it.each(["classic_blind", "classic_blind_corp_ties"] as const)(
+    "caps a fixed Hunter effect at the printed Base Link capacity under %s",
+    (profile) => {
+      const input = decisionInput({
+        profile,
+        side: "corp",
+        sourceDefinitionId: "onr_v1_249_hunter",
+        printedTrace: 12,
+        bidMax: 12,
+        ownCredits: 30,
+        opponentCredits: 6,
+      });
+      input.playerView.opponent.rig = [
+        {
+          instanceId: "public-bakdoor",
+          definitionId: "onr_v1_004_bakdoor",
+          known: true,
+        },
+      ];
+      const context = latestTraceContext(input);
+      expect(context.runnerMaximumPreRevealStrength).toBe(6);
+      const result = assess(input);
+      expect(
+        result.candidates.every(
+          (c) => c.bid <= (profile === "classic_blind" ? 7 : 6),
+        ),
+      ).toBe(true);
+    },
+  );
   it("keeps low-stakes variance inside legal rational candidates and skips Modern", () => {
     const blind = decisionInput({
       profile: "classic_blind",
@@ -174,7 +244,7 @@ describe("Blind Trace bid assessment", () => {
       true,
     );
     expect(
-      specializedCredits.candidates.some((candidate) => candidate.bid > 2),
+      specializedCredits.candidates.every((candidate) => candidate.bid <= 1),
     ).toBe(true);
   });
 
@@ -287,7 +357,8 @@ describe("Blind Trace bid assessment", () => {
       visibleOpponentBidCapacity: 5,
     });
 
-    expect(assess(corpWithVisibleRunnerPool).candidates).not.toEqual(
+    // Classic cash/hosted credits create no Link without a printed converter.
+    expect(assess(corpWithVisibleRunnerPool).candidates).toEqual(
       assess(corpNormalOnly).candidates,
     );
     expect(assess(runnerWithVisibleCorpPool).candidates).not.toEqual(
@@ -305,7 +376,8 @@ describe("Blind Trace bid assessment", () => {
         controller: "runner",
       },
     ];
-    expect(assess(corpWithVisibleRunnerPool)).toEqual(
+    // A concealed rig cannot certify the same exact no-support bound.
+    expect(assess(corpWithVisibleRunnerPool)).not.toEqual(
       assess(
         decisionInput({
           profile: "classic_blind",
@@ -499,6 +571,8 @@ function traceState(input: {
       label: `${bid} Credits`,
       publicLabel: "Gebot festlegen",
       value: bid,
+      // Component fixture with an explicitly quoted unit-rate Link conversion.
+      ...(input.side === "runner" ? { metadata: { amount: bid } } : {}),
     })),
     minSelections: 1,
     maxSelections: 1,
