@@ -4318,6 +4318,21 @@ Bedarf. Der strenge Assessment-Validator und der vorbereitende Remote-Owner
 bleiben unverändert. Der native Zustand 475/R5/G4/D325 und die positive
 Bank-Remote-Gegenprobe sichern diese Grenze.
 
+Der separate Vorlaufreservepfad darf auch einen bereits zugelassenen,
+dringlichen Remote-Scoringbedarf finanzieren, der noch keine terminale
+Pflichtlinie ist. Die neue Quote nach garantierter Bankauszahlung muss
+denselben Run und Server, die erfüllte Vorlaufreserve, erreichbaren bekannten
+Pfad, nutzbaren Zugriff und die bestehende Nachlaufreserve bestätigen.
+Bestätigte unvermeidbare Trace-/Tag- oder ICE-Gefahren eröffnen diesen
+zusätzlichen Pfad nicht; vorhandene vollständig gebundene terminale
+Ausnahmen bleiben gesondert zuständig. Noch unbekannte ICE bleiben
+ausdrücklich unsicher: Zertifiziert wird die aktuelle Finanzierung des
+offenen Parentbedarfs, kein vollständiger Zugriff oder Steal. Eine zusätzliche
+terminale Bedingung darf den aktuellen Bankprovider nicht gegenüber mehreren
+Basiscreditaktionen aussperren. P719/R1 G35 D371 und G37 D305 sichern die
+Bank-Auszahlung mit unverändertem Remote-Root, Need, Step und aktueller
+Actionbindung; G35 D372 hält die Bank bei bereits erfülltem Bedarf.
+
 Für den heutigen Bankpfad existiert kein eigener strategischer Choice-Resolver.
 Die gebundene generische Ausführung bleibt zuständig. CardSpec-Installchoices
 mit `requires_engine_quote` behalten ihre bisherige Projektionsgrenze; daraus

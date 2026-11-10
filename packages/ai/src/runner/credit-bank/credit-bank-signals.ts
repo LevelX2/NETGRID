@@ -11,7 +11,10 @@ import type {
 } from "../../runner-run-target-evaluation";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { assessRunnerDevelopmentCashOutAdmission } from "../../runtime/runner-development-cashout-admission";
-import { assessRunnerRunFundingAdmission } from "../../runtime/runner-run-funding-admission";
+import {
+  assessRunnerRunFundingAdmission,
+  runnerRunTargetIsDirectlyConvertible,
+} from "../../runtime/runner-run-funding-admission";
 import { runnerDefinitionRequiresTargetedBypassPlan } from "../run-window/runner-targeted-bypass-plan";
 import { runnerNoRunRecurringEconomyProfile } from "../../runtime/runner-canonical-card-facts";
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
@@ -967,10 +970,24 @@ function runnerCreditBankRunFundingRoute(params: {
                 evaluation,
                 actionIds as string[],
               );
+              // This certifies the admitted parent's current reserve funding.
+              // Unknown ICE does not become a guaranteed or terminal access.
               return (
                 funded !== undefined &&
+                funded.actionId === evaluation.actionId &&
+                funded.targetServerId === evaluation.targetServerId &&
                 funded.prerunReserveQuote?.status === "satisfied" &&
-                params.services.isDirectlyMandatoryRun(funded)
+                (params.services.isDirectlyMandatoryRun(funded) ||
+                  (funded.visibleTraceTagHazardUnavoidable !== true &&
+                    (funded.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
+                    runnerRunTargetIsDirectlyConvertible({
+                      target: funded,
+                      economy: params.economy,
+                      allowCreditFloorOverride: admission.urgentScoreThreat,
+                      ...(requiredPostRunReserve !== undefined
+                        ? { requiredPostRunReserve }
+                        : {}),
+                    })))
               );
             },
           }).routes.find(
