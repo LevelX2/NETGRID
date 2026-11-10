@@ -60,7 +60,8 @@ export function runnerRunFundingSupport(
       !urgentPayoff &&
       terminalVisibleHazardFundingGap === undefined) ||
     (!hasStructuredFundingNeed &&
-      evaluation.recommendation !== "gain_credits_first")
+      evaluation.recommendation !== "gain_credits_first" &&
+      terminalVisibleHazardFundingGap === undefined)
   ) {
     return undefined;
   }
@@ -100,6 +101,9 @@ export function runnerRunFundingSupport(
     ? "runner.contest_remote"
     : "runner.pressure_central";
   const parentPlanInstanceId = `plan:${parentModule}:${encodeURIComponent(dedupeKey)}`;
+  const conditionalTerminalHazardFunding =
+    terminalVisibleHazardFundingGap !== undefined &&
+    (evaluation.routeQuote?.unknownIceCount ?? 0) > 0;
   let route = runnerExactFundingRouteContract(input, candidates, {
     demandId: `run-support:${dedupeKey}`,
     sourcePlanId: parentPlanInstanceId,
@@ -112,9 +116,23 @@ export function runnerRunFundingSupport(
     targetCredits: input.playerView.own.credits + conservativeGap,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowStrategicExchange: true,
-    ...(options ? { acceptFundedRun: options.acceptFundedRun } : {}),
+    ...(conditionalTerminalHazardFunding
+      ? {
+          acceptFundedRun: (fundedInput, fundedTarget) =>
+            fundedTarget.actionId === evaluation.actionId &&
+            fundedTarget.targetServerId === evaluation.targetServerId &&
+            runnerTerminalRemoteContestIsDirectlyMandatory(
+              fundedInput,
+              fundedTarget,
+            ) &&
+            (!options || options.acceptFundedRun(fundedInput, fundedTarget)),
+        }
+      : options
+        ? { acceptFundedRun: options.acceptFundedRun }
+        : {}),
     ...(terminalKnownPathGap !== undefined ||
-    terminalVisibleHazardFundingGap !== undefined
+    (terminalVisibleHazardFundingGap !== undefined &&
+      !conditionalTerminalHazardFunding)
       ? { requireCompleteKnownPath: true }
       : {}),
     paymentWindowTarget: evaluation,

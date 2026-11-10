@@ -467,12 +467,26 @@ entscheidet derselbe Remote-Parent erneut über den Run. Die native Kontrolle
 prüft den knappen Originalzustand sowie die ausreichend finanzierte Gegenfolge
 einschließlich maximalem gegnerischem Gebot und deterministischem Replay.
 
+Der konkrete terminale Gefahrenbedarf bleibt auch ohne allgemeine
+`route_funding_gap` oder `post_run_floor_gap` erhalten. Enthält die Route noch
+unbekanntes ICE, zertifiziert der Finanzierungsdienst nur die bestehende
+terminale Contest-Zulassung nach der vollständigen neuen Quote: derselbe Run
+und Server, bezahlte bekannte Gefahren, erfüllte Vorabreserve und verbleibender
+Run-Klick. Die Unsicherheit des übrigen Pfads bleibt bestehen. Der Bank-Owner
+bindet seine endliche Auszahlung an genau diesen Parentbedarf und prüft die
+neue Quote ebenfalls; ein lokaler Tracefehlbetrag allein genügt nicht.
+P719/R3 G26 D349 sichert den verlorenen Bedarf bei `run_now`; Gegenfälle mit
+fremdem Ziel, unbezahlter Route, blockierter Reserve, verbleibender Gefahr oder
+fehlendem Payoff halten den Provider zurück.
+
 Ein vor der Finanzierung als nicht bestreitbar bewerteter Zugriff sperrt diese
 prospektive Prüfung nicht: `accessPayoffContestable: false` kann allein aus der
 aktuellen Liquiditätslücke folgen. Erst die vollständige Quote nach der realen
-Auszahlung entscheidet über den Zugang. Unbekanntes ICE, unvermeidbare sichtbare
-Gefahren, fehlender aktueller Payoff, fehlender Run-Klick und eine nicht gedeckte
-Gesamtroute bleiben Ausschlussgründe. Der Bank-Executor bindet weiterhin den
+Auszahlung entscheidet über den Zugang. Für die Garantie des vollständig
+bekannten Pfads bleiben unbekanntes ICE, unvermeidbare sichtbare Gefahren,
+fehlender aktueller Payoff, fehlender Run-Klick und eine nicht gedeckte
+Gesamtroute Ausschlussgründe. Der gesonderte bedingte terminale Contest behält
+seine oben beschriebene Reserve- und Gefahrenprüfung. Der Bank-Executor bindet weiterhin den
 aktuellen Remote-Parent und dessen konkreten Bedarf, statt den Lauf selbst zu
 autorisieren.
 

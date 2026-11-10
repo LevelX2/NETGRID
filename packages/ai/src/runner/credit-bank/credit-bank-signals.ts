@@ -932,11 +932,14 @@ function runnerCreditBankRunFundingRoute(params: {
                 target.visibleTraceTagHazardUnavoidable !== true,
             )
         : undefined;
-    const reserveFundingRoute =
+    const remoteFundingGap =
+      terminalVisibleHazardFundingGap ?? admission.concreteFundingGap;
+    const remoteFundingRoute =
       evaluation.accessTargetKind === "remote" &&
-      admission.admitted &&
-      (evaluation.prerunReserveQuote?.creditGap ?? 0) > 0 &&
-      (evaluation.prerunReserveQuote?.unknownIceCount ?? 0) > 0 &&
+      ((admission.admitted &&
+        (evaluation.prerunReserveQuote?.creditGap ?? 0) > 0 &&
+        (evaluation.prerunReserveQuote?.unknownIceCount ?? 0) > 0) ||
+        terminalVisibleHazardFundingGap !== undefined) &&
       params.services.hasExactRunUrgency(evaluation)
         ? searchFundingRoutes({
             demand: createRunnerCreditDemand({
@@ -948,8 +951,7 @@ function runnerCreditBankRunFundingRoute(params: {
               deadline: "end_of_current_turn",
               currentCredits: params.input.playerView.own.credits,
               targetCredits:
-                params.input.playerView.own.credits +
-                admission.concreteFundingGap,
+                params.input.playerView.own.credits + remoteFundingGap,
             }),
             candidates: params.candidates.filter(
               (candidate) =>
@@ -970,7 +972,8 @@ function runnerCreditBankRunFundingRoute(params: {
                 evaluation,
                 actionIds as string[],
               );
-              // This certifies the admitted parent's current reserve funding.
+              // Certify the admitted parent's actual hazard/reserve funding.
+              // A local hazard gap is only a lower bound on the complete cost.
               // Unknown ICE does not become a guaranteed or terminal access.
               return (
                 funded !== undefined &&
@@ -999,15 +1002,16 @@ function runnerCreditBankRunFundingRoute(params: {
         : undefined;
     const exactUrgentConvertibleTarget =
       params.services.hasExactRunUrgency(evaluation) &&
-      (reserveFundingRoute !== undefined ||
+      (remoteFundingRoute !== undefined ||
         fundedTerminalTarget !== undefined ||
         evaluation.score > 0 ||
         (terminalVisibleHazardFundingGap !== undefined &&
           terminalVisibleHazardFundingGap <= params.estimatedPayout)) &&
-      evaluation.recommendation === "gain_credits_first";
+      (evaluation.recommendation === "gain_credits_first" ||
+        remoteFundingRoute !== undefined);
     if (!exactUrgentConvertibleTarget) continue;
-    const conversionFundingGap = reserveFundingRoute
-      ? admission.concreteFundingGap
+    const conversionFundingGap = remoteFundingRoute
+      ? remoteFundingGap
       : fundedTerminalTarget
         ? Math.max(
             0,
@@ -1034,7 +1038,7 @@ function runnerCreditBankRunFundingRoute(params: {
       ],
     });
     const route =
-      reserveFundingRoute ??
+      remoteFundingRoute ??
       searchFundingRoutes({
         demand,
         // This certificate belongs to the bank payout itself. An unrelated
@@ -1056,7 +1060,7 @@ function runnerCreditBankRunFundingRoute(params: {
       );
     if (route) {
       return {
-        ...(fundedTerminalTarget || reserveFundingRoute
+        ...(fundedTerminalTarget || remoteFundingRoute
           ? {
               runFunding: {
                 parentPlanInstanceId: `plan:runner.contest_remote:${encodeURIComponent(`remote:${evaluation.targetServerId}`)}`,
@@ -1087,8 +1091,12 @@ function runnerCreditBankRunFundingRoute(params: {
           ...(fundedTerminalTarget
             ? ["runner_credit_bank_complete_terminal_path_after_cashout"]
             : []),
-          ...(reserveFundingRoute
-            ? ["runner_credit_bank_complete_prerun_reserve_after_cashout_route"]
+          ...(remoteFundingRoute
+            ? [
+                terminalVisibleHazardFundingGap !== undefined
+                  ? "runner_credit_bank_terminal_hazard_and_reserve_after_cashout_route"
+                  : "runner_credit_bank_complete_prerun_reserve_after_cashout_route",
+              ]
             : []),
           ...(terminalVisibleHazardFundingGap !== undefined
             ? [

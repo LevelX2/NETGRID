@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import original from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p719-g37-d305-bank-original.json";
+import hazardOriginal from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p719-r03-g26-d349-hazard-bank.json";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
@@ -22,7 +23,7 @@ import { runnerCreditBankSignals } from "./credit-bank-signals";
 
 // Canonical hints, capabilities and LegalActions from the native input. Only
 // the returned funding quote is varied to test rejection at this consumer.
-it.each([
+const faults = [
   "wrong_action",
   "wrong_server",
   "unpaid",
@@ -30,9 +31,15 @@ it.each([
   "trace",
   "damage",
   "no_payoff",
-] as const)(
-  "rejects the bank provider when the funded quote is %s",
-  (fault) => {
+] as const;
+it.each(
+  [
+    { label: "prerun reserve", original },
+    { label: "terminal hazard", original: hazardOriginal },
+  ].flatMap((checkpoint) => faults.map((fault) => ({ ...checkpoint, fault }))),
+)(
+  "rejects the $label bank provider when the funded quote is $fault",
+  ({ original, fault }) => {
     const input = structuredClone(
       original.input,
     ) as unknown as AiDecisionInputWithDeckCapabilities;
@@ -49,7 +56,9 @@ it.each([
       input,
       deckCapabilities: input.ownDeckCapabilities!,
       actionCandidates: candidates,
-      strategicIntent: input.ownRunnerStrategicIntent,
+      ...(input.ownRunnerStrategicIntent
+        ? { strategicIntent: input.ownRunnerStrategicIntent }
+        : {}),
     };
     const economy = buildRunnerEconomyPosture(params);
     const targets = evaluateRunnerRunTargets(params);
