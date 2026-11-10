@@ -2391,6 +2391,7 @@ export function runnerActionDispositions(
       !dispositions.some((entry) => entry.actionId === candidate.actionId) &&
       !defenseHandBufferActionIds.has(candidate.actionId) &&
       !coverageOwnedActionIds.has(candidate.actionId) &&
+      !delegatedFundingActionIds.has(candidate.actionId) &&
       !installedRecoveryOwnedActionIds.has(candidate.actionId)
     ) {
       add(

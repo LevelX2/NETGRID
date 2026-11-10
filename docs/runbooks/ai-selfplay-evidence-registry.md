@@ -123,6 +123,16 @@ Entscheidungszahl, `flagsCount` und die menschenverständliche Gewinner- und
 Verlierereinordnung entweder spielbezogen in `metadata` oder aggregiert im
 Pairing.
 
+Leere technische Flags ersetzen keine Vollständigkeitsprüfung der Detailspur.
+Eine autoritative Planentscheidung muss ihren strukturierten
+`planFirstDecision`-Block nach der gemeinsamen Debug-Sanitisierung behalten.
+Fehlt er, scheitert das Capture-Audit mit Entscheidungsindex und Seite; ein
+Rootname in den Text-Evidencecodes ersetzt diesen Vertrag nicht. Neue
+Executorpfade prüfen den Sanitisierungs- und Speicherverbraucher zusätzlich
+zum Ergebnis des Choosers. Nicht endliche Bewertungen werden am erzeugenden
+Plan-Owner korrigiert, ohne den Sanitizer abzuschwächen oder historische
+Spuren aus Textfeldern zu reparieren.
+
 Bei ausdrücklich beauftragtem Mailversand wird die Reporting-Series vor der
 ersten Paarung mit `register-series` angelegt. Derselbe Aufruf erhält beim
 Resume bestehende Zähler und Versanddaten; eine abweichende Empfänger- oder

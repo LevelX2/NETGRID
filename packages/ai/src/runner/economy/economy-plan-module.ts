@@ -290,6 +290,13 @@ function economyCandidates(
     candidate.costProfile.costKnownStatus === "known" &&
     candidate.costProfile.clickCost === paymentInstall.installClickCost &&
     candidate.costProfile.creditCost === paymentInstall.installCreditCost;
+  const isHeapPreparation = (candidate: ActionSemanticCandidate) =>
+    heapPreparation !== undefined &&
+    runnerHeapIncomePreparationMatchesCandidate(
+      context.input,
+      candidate,
+      heapPreparation,
+    );
   return context.actionCandidates
     .filter(
       (candidate) =>
@@ -302,20 +309,18 @@ function economyCandidates(
           : runnerFundingRouteCandidateIsMaterializable(candidate) ||
             isPaymentInstall(candidate) ||
             isHandPreparation(candidate) ||
-            (heapPreparation !== undefined &&
-              runnerHeapIncomePreparationMatchesCandidate(
-                context.input,
-                candidate,
-                heapPreparation,
-              ))),
+            isHeapPreparation(candidate)),
     )
     .map((candidate) => {
-      const netLiquidCreditGain = isHandPreparation(candidate)
-        ? handPreparation!.projectedEndCredits -
+      const netLiquidCreditGain = isHeapPreparation(candidate)
+        ? heapPreparation!.projectedRunCredits -
           context.input.playerView.own.credits
-        : isPaymentInstall(candidate)
-          ? paymentInstall!.netPaymentGain - paymentInstall!.installCreditCost
-          : candidate.economyProjection!.netLiquidCreditGain!;
+        : isHandPreparation(candidate)
+          ? handPreparation!.projectedEndCredits -
+            context.input.playerView.own.credits
+          : isPaymentInstall(candidate)
+            ? paymentInstall!.netPaymentGain - paymentInstall!.installCreditCost
+            : candidate.economyProjection!.netLiquidCreditGain!;
       const fundingGapProgress = Math.min(need.gap, netLiquidCreditGain);
       return {
         candidate,

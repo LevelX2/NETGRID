@@ -2488,6 +2488,18 @@ aktuelle Rückholaction; nach deren Ausführung muss die Engine die Installation
 tatsächlich anbieten. Generische Recovery-Bewertung bleibt beim bisherigen
 Handentwicklungs-Owner. Paarung719/R5/G28 belegt die26-Credit-Folge und ihre
 Kredit-, Klick-, Quellen-, Sichtbarkeits- und Servergegenfälle.
+Dieselbe Vorbereitung ist bei einer aktuell bekannten terminalen
+Hazard-Finanzierungslücke zulässig, wenn die vollständig finanzierte Quote
+danach sämtliche Grenzen erfüllt. Die generische Top-Heap-Zurückstellung
+konsumiert den bestehenden delegierten Funding-Bedarf und verwirft dessen
+gebundene Recovery-Action nicht erneut. Paarung719/R5/G38 prüft dafür einen
+von zunächst24 auf vollständig35Credits steigenden bekannten Pfad und die
+38-Credit-Vorbereitung. Unbekanntes ICE bleibt außerhalb dieser Zulassung.
+Der Economy-Schrittwert konsumiert den gequoteten Ertrag der gesamten
+Vorbereitung statt eines bei reiner Recovery nicht vorhandenen Sofortertrags.
+Der native Regressionstest prüft zusätzlich, dass die strenge gemeinsame
+Debug-Sanitisierung den vollständigen Root-, Need- und Actionblock erhält;
+ein ungültiger Zahlenwert darf dessen gespeicherten Nachweis nicht verlieren.
 
 Die prospektive Einzelquote wird durch
 `quoteRunnerRunAfterGuaranteedFunding` beim Run-Owner erzeugt. Funding- und

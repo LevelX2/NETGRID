@@ -198,7 +198,9 @@ export function runnerRunFundingSupport(
     }
   }
   const recovery =
-    terminalKnownPathGap !== undefined && route.routeActionIds.length === 0
+    (terminalKnownPathGap !== undefined ||
+      terminalVisibleHazardFundingGap !== undefined) &&
+    route.routeActionIds.length === 0
       ? runnerHeapIncomePreparation(input, candidates, evaluation)
       : undefined;
   if (recovery)
