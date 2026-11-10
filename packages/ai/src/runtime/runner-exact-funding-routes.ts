@@ -802,7 +802,6 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
     (!parent.scoreThreat &&
       parent.accessPayoff !== "agenda" &&
       parent.accessPayoff !== "score_threat") ||
-    (parent.unknownUnrezzedIceCount > 0 && !parent.riskyUniversalCoverage) ||
     parent.remainingClicksAfterRun < 0
   ) {
     return false;
@@ -837,6 +836,12 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
   });
   if (!funded) return false;
   const fundedTarget = funded.target;
+  if (
+    fundedTarget.unknownUnrezzedIceCount > 0 &&
+    fundedTarget.prerunReserveQuote?.visibleCoverage !== "stable_universal" &&
+    fundedTarget.prerunReserveQuote?.visibleCoverage !== "risky_universal"
+  )
+    return false;
   const mandatoryCompleteContest =
     runnerTerminalRemoteContestIsDirectlyMandatory(
       funded.input,

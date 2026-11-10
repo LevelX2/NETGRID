@@ -1,6 +1,6 @@
 # KI-Selbstspiel-Evidenzregistrierung
 
-Stand: 2026-11-05
+Stand: 2026-11-10
 
 Der CLI-Export iteriert alle Tabellen zeilenweise innerhalb einer gemeinsamen
 Lesetransaktion, die bis zum Ende der Ausgabe offen bleibt. Er hält jeweils
@@ -28,6 +28,15 @@ zuordenbare Prävention bleibt ein sichtbarer Analysefehler; ähnliche Mengen
 oder benachbarte Ereignisse sind kein Ersatz für die Identitätsbindung.
 Die Skill-Fixture mit Teilprävention und anschließender Auflösung ohne
 wiederholten Ereignistyp sichert diesen Vertrag.
+
+Bei strategischen Wissensbehauptungen führt die historische Actor-View der
+betreffenden Seite. Ein Kartenname aus dem privaten Corp-Discard oder aus einem
+späteren Archives-Zugriff belegt kein vorheriges Runner-Wissen. Die Runner-View
+führt in der Archives-Root nur sichtbare Karten; verdeckte Abwürfe können
+vollständig fehlen. Deshalb zusätzlich `opponent.discardCount` mit der
+projizierten Root vergleichen. Corp-Abwurfqualität und Runner-Entscheidung zum
+Discovery-Run werden getrennt bewertet; nachträglich erkannte Agendapunkte
+machen einen vorherigen Zugriff nicht zu einem damals bekannten sicheren Steal.
 
 ## Berichtsablage ohne regelmäßigen Mailversand
 

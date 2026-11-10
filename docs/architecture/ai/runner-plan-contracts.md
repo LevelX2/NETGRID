@@ -2443,6 +2443,12 @@ Action-/Server-Parent erneut mit dem garantierten Nettobudget und dem
 Handverbrauch der Finanzierungsaktion. Nur dessen vollständiger erreichbarer
 Pfad darf die Ausstiegsreserve belegen; die aktuelle LegalAction und ihre
 StateVersion bleiben die Ausführungsautorität.
+Bei unbekanntem ICE konsumiert diese Prüfung die aktuelle Coverageklasse
+der finanzierten Reservequote: Stabile und riskante Universalabdeckung sind
+beide zulässig, sofern die übrigen Pfad-, Hand- und Rückzahlungsreserven
+erfüllt sind. Das spezielle Risikoflag des ungeförderten Parents ist kein
+allgemeiner Universal-Coverage-Nachweis. Die unbekannte Fortsetzung bleibt
+bedingt; sie erhält insbesondere keine Ausnahme von der Rückzahlungsreserve.
 Beim letzten zwingenden Contest gilt die Vollpfadprüfung bereits für die
 erste Funding-Suche. Eine bezahlbare Teilstrecke darf keine unvollständige
 Basic-Credit-Folge zertifizieren und dadurch die vollständige Finanzierung
