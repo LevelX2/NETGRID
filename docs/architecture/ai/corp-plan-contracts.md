@@ -97,14 +97,19 @@ reicht die zweite offene Zwei-Punkte-Agenda bei vier Runnerpunkten zum Sieg
 im nächsten Zug. Der Gegenfall mit nur einer solchen Agenda bleibt zulässig.
 
 Ein weiterer Zugriff kann über einen bestehenden Remote mit ICE führen.
-Für diesen eng begrenzten Fall reserviert die Quote zwei Runner-Run-Klicks
-und verwendet die danach verbleibende Grundfinanzierung für den vorhandenen
-Pfad. Sie prüft die beste finanzierbare Rezvariante und schließt unbekannte
-oder schadensbehaftete Fortsetzungen aus. Kann die Corp nach dem Einbau
-noch einen bekannten Schutz oder die Wertung der vorhandenen Agenda
-herstellen, liefert dieser Vergleich keinen terminalen Beleg. In Paarung
-735, G20 D300 reichen selbst Fire Wall und der teurere Sphinx-Sentry-Rez
-gegen die finanzierbare Zwei-Run-Folge nicht aus.
+Für diesen eng begrenzten Fall reserviert die Quote zwei Runner-Run-Klicks.
+Eine öffentliche Auszahlung aus einem geladenen Credit-Speicher ersetzt eine
+der übrigen Vorbereitungsaktionen. Aus der gemeinsamen liquiden Bank
+reserviert die Quote zuerst die bekannten Steal-Kosten der neuen Agenda.
+Die beste finanzierbare Rezvariante des vorhandenen Pfads wird mit der
+Restbank und dem rungebundenen Bad-Publicity-Budget geprüft. Der bestehende
+ICE-Pfad muss ohne weitere Schäden durchführbar sein. Ein direkter
+Zugriffsschaden auf der neuen Agenda ist nur quotierbar, wenn der aktuelle
+Runner-Handumfang ihn deckt. Kann die Corp nach dem Einbau noch den Schutz
+oder die Wertung der vorhandenen Agenda herstellen, liefert dieser Vergleich
+keinen terminalen Beleg. In Paarung 735, G20 D300 reichen Broker, aktuelle
+Handkarten und zwei Run-Klicks selbst gegen Fire Wall, den teureren
+Sphinx-Sentry-Rez und zwei Steal-Credits für Fetal AI aus.
 
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und

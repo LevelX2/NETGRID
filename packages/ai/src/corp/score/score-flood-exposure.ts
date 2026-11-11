@@ -1,4 +1,8 @@
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import {
+  quoteAgendaDefinitionSelfStealCreditCost,
+  visibleRunnerNextTurnPreparationCreditGain,
+} from "@netgrid/engine";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -10,6 +14,7 @@ import { corpGuaranteedOnPlayAdvancementCountersPerTarget } from "../../runtime/
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
+import { projectKnownCorpCardAccessEffect } from "../../runtime/known-corp-card-access-effect-projection";
 import { visibleCardIsAgenda } from "../../runtime/visible-action-facts";
 import {
   requireVisibleAgendaAdvancementRequirement,
@@ -48,12 +53,18 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
     !serverId ||
     !isFiniteNonNegativeInteger(otherRunSlots) ||
     otherRunSlots === 0 ||
-    !isPlainStealableAgenda(input, agenda)
+    !visibleCardIsAgenda(input, agenda) ||
+    !agenda.definitionId
   )
     return false;
   if (serverId !== "new_remote") {
     const target = view.servers.find((server) => server.id === serverId);
-    if (!target || target.ice.length !== 0 || target.root.length !== 0)
+    if (
+      !target ||
+      target.ice.length !== 0 ||
+      target.root.length !== 0 ||
+      target.statuses?.some((status) => status.kind === "run_prohibited")
+    )
       return false;
   }
 
@@ -76,12 +87,14 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
   const pointsAfterNewAgenda =
     view.opponent.agendaPoints + requireVisibleAgendaPoints(input, agenda);
   return (
-    (otherOpenAgendaPoints.length > 0 &&
+    (isPlainStealableAgenda(input, agenda) &&
+      otherOpenAgendaPoints.length > 0 &&
       pointsAfterNewAgenda +
         otherOpenAgendaPoints.reduce((total, points) => total + points, 0) >=
         view.agendaPointsToWin) ||
     paidRemoteCompletesFloodExposure(
       input,
+      agenda,
       installActionId,
       serverId,
       pointsAfterNewAgenda,
@@ -92,24 +105,24 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
 
 function paidRemoteCompletesFloodExposure(
   input: AiDecisionInput,
+  agenda: VisibleCard,
   installActionId: string,
   targetServerId: string,
   pointsAfterNewAgenda: number,
   runnerPreparationClicks: number,
 ): boolean {
   const view = input.playerView;
-  const runnerRig = view.opponent.rig?.filter(
-    (card) =>
-      randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId) ===
-      undefined,
-  );
+  const publicRig = view.opponent.rig;
   const install = input.legalActions.find(
     (action) => action.actionId === installActionId,
   );
   if (
-    !runnerRig ||
+    !publicRig ||
     !install ||
     install.type !== "install_card" ||
+    install.source !== agenda.instanceId ||
+    install.payload?.serverId !== targetServerId ||
+    install.payload?.placement !== "root" ||
     install.expiresAtStateVersion !== view.stateVersion ||
     install.costs.reduce((total, cost) => total + (cost.clicks ?? 0), 0) !==
       1 ||
@@ -118,6 +131,17 @@ function paidRemoteCompletesFloodExposure(
     return false;
   const remainingCorpClicks = view.own.clicks - 1;
   if (remainingCorpClicks < 0 || remainingCorpClicks > 1) return false;
+  const runnerRig = publicRig.filter(
+    (card) =>
+      randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId) ===
+      undefined,
+  );
+  const preparedCredits =
+    view.opponent.credits +
+    visibleRunnerNextTurnPreparationCreditGain(
+      publicRig,
+      runnerPreparationClicks,
+    );
 
   return view.servers.some((server) => {
     const existing = server.root[0];
@@ -146,14 +170,23 @@ function paidRemoteCompletesFloodExposure(
       remainingAdvances,
     );
     if (availableCorpCredits === undefined) return false;
+    // The self-cost quote uses only the access zone, shared by both remotes.
+    const bareStealCredits = certifiedBareStealCredits(
+      input,
+      agenda,
+      server.id,
+    );
+    if (bareStealCredits === undefined || preparedCredits < bareStealCredits)
+      return false;
     const access = assessBestFundedCorpScoreProtection({
       serverIce: server.ice,
       serverRoot: server.root,
       runnerRig,
       runnerSetAside: view.specialZones?.setAside ?? [],
-      runnerCredits: view.opponent.credits,
+      // Reserve the second steal's liquid price before quoting the first run.
+      runnerCredits: preparedCredits - bareStealCredits,
+      runnerRunOnlyCredits: view.runnerNextRunBadPublicityCredits ?? 0,
       runnerCreditPoolHorizon: "next_runner_turn",
-      runnerPreparationCreditClicks: runnerPreparationClicks,
       targetServerId: server.id,
       observedAtStateVersion: view.stateVersion,
       availableCorpCredits,
@@ -170,6 +203,49 @@ function paidRemoteCompletesFloodExposure(
       ) === 0
     );
   });
+}
+
+function certifiedBareStealCredits(
+  input: AiDecisionInput,
+  agenda: VisibleCard,
+  installedServerId: string,
+): number | undefined {
+  if (!agenda.definitionId) return undefined;
+  const spec = cardSpecPlanningCardByDefinitionId(agenda.definitionId);
+  if (!spec) return undefined;
+  const effects =
+    spec.planning.engine.accessEffects?.filter(
+      (effect) =>
+        effect.kind === "on_access" &&
+        effect.sourceZones.includes("installed") &&
+        !effect.ignoreIfAccessedFrom?.includes("installed"),
+    ) ?? [];
+  if (effects.length > 0) {
+    const effect = effects[0]!;
+    const damage = effect.effects[0];
+    if (
+      effects.length !== 1 ||
+      effect.condition ||
+      effect.cost ||
+      effect.effects.length !== 1 ||
+      damage?.kind !== "damage" ||
+      damage.recipient !== "runner" ||
+      damage.damageType === "core" ||
+      !isFiniteNonNegativeInteger(damage.amount)
+    )
+      return undefined;
+    const projected = projectKnownCorpCardAccessEffect({
+      input,
+      sourceDefinitionId: agenda.definitionId,
+      sourceCard: { ...agenda, rezzed: false },
+    });
+    if (projected.status !== "complete" || !projected.damage?.runnerSurvivable)
+      return undefined;
+  }
+  return quoteAgendaDefinitionSelfStealCreditCost(
+    agenda.definitionId,
+    installedServerId,
+  );
 }
 
 /** Permit only plain ETR ICE for this proof. The protection calculator can
