@@ -87,6 +87,15 @@ Scoreparents. Nichtterminale Exposition, der eigenständig geprüfte
 Same-Turn-Abschluss und die gesonderte erzwungene Discard-Entlastung behalten
 ihre bestehenden Zulassungsverträge.
 
+Die Agenda-Flood-Ausnahme prüft auch mehrere erreichbare offene Remotes im
+selben Runnerzug. Eine neu installierte Agenda ohne ICE, weitere Rootkarten
+oder eigene Zugriffskosten kann zusammen mit anderen eindeutig offenen Agenden
+die Siegschwelle erreichen. Der Score-Owner berücksichtigt das aktuelle
+Runner-Aktionsbudget und verlangt dann denselben gebundenen Schutzbeleg.
+Andere Zugriffsrisiken behalten ihre regulären Quotes. In Paarung 730, G6 D414
+reicht die zweite offene Zwei-Punkte-Agenda bei vier Runnerpunkten zum Sieg
+im nächsten Zug. Der Gegenfall mit nur einer solchen Agenda bleibt zulässig.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence
