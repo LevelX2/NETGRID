@@ -205,6 +205,12 @@ export type RunnerRunWindowSignal = {
   runRiskReassessment?: RunnerRunRiskReassessmentSignal;
   safetyIntent?: "jack_out";
   safetyEvidenceCode?: string;
+  exposedIceSafetyExit?: {
+    actionId: string;
+    runActionId: string;
+    turnSerial: number;
+    facts: string;
+  };
   encounterIntent?: "mitigate_threat";
   encounterEvidenceCode?: string;
   actionAssessments?: Record<string, RunnerRunWindowActionAssessment>;

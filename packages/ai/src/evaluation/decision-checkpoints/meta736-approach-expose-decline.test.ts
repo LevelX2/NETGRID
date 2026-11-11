@@ -15,18 +15,21 @@ const newTarget = "corp_onr_v1_278_wall-of-ice_1";
 const oldTarget = "corp_onr_v1_268_shock-r_1";
 const sourceId = "runner_onr_v1_065_smarteye_1";
 
-function loadCheckpoint(decision: 171 | 173 | 174 = 171): {
+const checkpoints = {
+  88: "cp-meta-736-r3-g24-d088.json",
+  171: "cp-meta-736-r1-g37-d171.json",
+  173: "cp-meta-736-r2-g16-d173.json",
+  174: "cp-meta-736-g37-control-d174.json",
+} as const;
+
+function loadCheckpoint(decision: keyof typeof checkpoints = 171): {
   input: AiDecisionInputWithDeckCapabilities;
   portfolio: ResidentPlanPortfolio;
 } {
   const fixture = JSON.parse(
     readFileSync(
       new URL(
-        decision === 171
-          ? "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-r1-g37-d171.json"
-          : decision === 173
-            ? "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-r2-g16-d173.json"
-            : "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-g37-control-d174.json",
+        `../../../../../data/scenarios/ai-decision-checkpoints/${checkpoints[decision]}`,
         import.meta.url,
       ),
       "utf8",
@@ -209,6 +212,58 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
       if (defect === "terminal") encounter.publicPayload.encounterWillEndRun = true;
       if (defect === "extra encounter") movement.publicPayload.encounterContinue = true;
       if (defect === "observation") delete input.observedTurnPlanAction;
+      restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
+      expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
+    },
+  );
+});
+
+describe("SP-469: an initial expose child directly under the pressure root", () => {
+  const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
+  const runParent = "plan:runner.convert_run_window:run%3Arun_83";
+  const target = "corp_onr_v1_237_data-wall_3";
+  beforeEach(resetResidentPlanPortfolioMemory);
+
+  it("moves the next exact ICE window under the resident same-run parent", () => {
+    const { input, portfolio } = loadCheckpoint(88);
+    const initialChild = portfolio.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(initialChild?.moduleId).toBe("runner.expose_information");
+    expect(initialChild?.parentInstanceId).toBe(pressureRoot);
+    expect(portfolio.instances.find((instance) => instance.instanceId === runParent))
+      .toMatchObject({
+        moduleId: "runner.convert_run_window",
+        parentInstanceId: pressureRoot,
+        target: { kind: "window", id: "run:run_83" },
+      });
+    restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
+    const selected = chooseAiAction(input);
+    const decline = input.legalActions.find(
+      (action) => action.payload?.approachIceExposeDecision === "decline",
+    );
+    expect(decline?.payload?.iceId).toBe(target);
+    expect(selected.actionId).toBe(decline?.actionId);
+    expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: pressureRoot,
+      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      selectedStep: { parentInstanceId: runParent },
+    });
+    expect(selected.fallbackUsed).toBe(false);
+    expect(selected.timeoutUsed).toBe(false);
+  });
+
+  it.each(["missing", "different run"] as const)(
+    "rejects a direct-root child with a %s run parent",
+    (defect) => {
+      const { input, portfolio } = loadCheckpoint(88);
+      if (defect === "missing") {
+        portfolio.instances = portfolio.instances.filter(
+          (instance) => instance.instanceId !== runParent,
+        );
+      } else {
+        input.playerView.run!.runId = "different-run";
+      }
       restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
       expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
     },

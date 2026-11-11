@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { PlanSchedulerResult } from "../../plans/plan-scheduler";
+import { runnerUnfundedExposedIceRezCredits } from "../run-window/run-window-expose-viewing";
 
 export function bindSelectedRunnerExposeInformationMemory(
   input: AiDecisionInput,
@@ -15,6 +16,25 @@ export function bindSelectedRunnerExposeInformationMemory(
   const targetIceInstanceId = selectedAction?.payload?.iceId;
   const sourceCardInstanceId = selectedAction?.payload?.cardId;
   const serverId = input.playerView.run?.attackedServerId;
+  if (
+    executor?.moduleId === "runner.convert_run_window" &&
+    selectedAction?.type === "trigger_ability" &&
+    selectedAction.payload?.approachIceExposeViewDecision === "finish"
+  ) {
+    const previouslyUnfundedRezCredits = runnerUnfundedExposedIceRezCredits(input);
+    const records = result.portfolio.runnerExposeInformationMemory;
+    if (previouslyUnfundedRezCredits !== undefined && records) {
+      result.portfolio.runnerExposeInformationMemory = records.map((record) =>
+        record.targetIceInstanceId === targetIceInstanceId &&
+        record.sourceCardInstanceId === sourceCardInstanceId &&
+        record.serverId === serverId &&
+        record.selectedAtStateVersion + 1 === input.playerView.stateVersion
+          ? { ...record, previouslyUnfundedRezCredits }
+          : record,
+      );
+    }
+    return;
+  }
   if (
     executor?.moduleId !== "runner.expose_information" ||
     selectedAction?.type !== "trigger_ability" ||

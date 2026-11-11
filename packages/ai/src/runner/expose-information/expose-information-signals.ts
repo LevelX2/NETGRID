@@ -5,6 +5,7 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { runnerExposeInstalledOpportunity } from "./expose-installed-card-choice";
+import { runnerExposedIceHasRezSupport } from "../run-window/run-window-expose-viewing";
 import type {
   ExposeInformationState,
   RunnerExposeInformationSignal,
@@ -349,7 +350,14 @@ function runnerCurrentExposeInformationSignal(
       ? (executor.moduleState as ExposeInformationState).signal
       : undefined;
   const previousRunParent = previous?.instances.find(
-    (instance) => instance.instanceId === executor?.parentInstanceId,
+    (instance) =>
+      runId !== undefined &&
+      instance.side === "runner" &&
+      instance.moduleId === "runner.convert_run_window" &&
+      instance.parentInstanceId === rootPlanInstanceId &&
+      instance.dedupeKey === `run:${runId}` &&
+      instance.target?.kind === "window" &&
+      instance.target.id === instance.dedupeKey,
   );
   const automaticProgress = continuationEvents.slice(1);
   const continuedAfterDecline =
@@ -371,10 +379,11 @@ function runnerCurrentExposeInformationSignal(
     previousExpose.sourceCardInstanceId === sourceCardInstanceId &&
     previousExpose.targetIceInstanceId !== undefined &&
     previousExpose.targetIceInstanceId !== iceId &&
-    previousRunParent?.side === "runner" &&
-    previousRunParent.moduleId === "runner.convert_run_window" &&
-    previousRunParent.parentInstanceId === root.instanceId &&
-    previousRunParent.dedupeKey === `run:${previousExpose.runId}` &&
+    previousRunParent !== undefined &&
+    previousExpose.rootPlanInstanceId === root.instanceId &&
+    previousExpose.parentPlanInstanceId === executor.parentInstanceId &&
+    (executor.parentInstanceId === root.instanceId ||
+      executor.parentInstanceId === previousRunParent.instanceId) &&
     continuationEvents[0]?.publicPayload?.hiddenZoneAction ===
       "approach_ice_expose_decline" &&
     automaticProgress.some(
@@ -435,8 +444,20 @@ function runnerCurrentExposeInformationSignal(
         "Resolve an approach-ICE expose window only from the exact active Runner run-plan origin, current source card and current visible approached ICE.",
     });
   }
+  const previousUnfundedRezCredits = previous?.runnerExposeInformationMemory?.find(
+    (record) =>
+      record.targetIceInstanceId === iceId &&
+      record.sourceCardInstanceId === sourceCardInstanceId &&
+      record.serverId === attackedServerId &&
+      record.selectedAtStateVersion < input.playerView.stateVersion,
+  )?.previouslyUnfundedRezCredits;
+  const priorRezObservationNeedsReview =
+    previousUnfundedRezCredits !== undefined &&
+    (input.playerView.opponent.credits >= previousUnfundedRezCredits ||
+      runnerExposedIceHasRezSupport(approachedServer));
   const exposeUnknownIce =
-    approachedIce.known === false && !rememberedTargetIds.has(iceId);
+    approachedIce.known === false &&
+    (!rememberedTargetIds.has(iceId) || priorRezObservationNeedsReview);
   const action = exposeUnknownIce ? expose : decline;
   const rejectedAction = exposeUnknownIce ? decline : expose;
   return {
@@ -456,6 +477,9 @@ function runnerCurrentExposeInformationSignal(
       exposeUnknownIce
         ? "runner_expose_information_unknown_ice_target"
         : "runner_expose_information_repeated_known_ice_declined",
+      ...(exposeUnknownIce && priorRezObservationNeedsReview
+        ? ["runner_expose_information_prior_unfunded_rez_needs_current_view"]
+        : []),
       `runner_expose_information_server:${input.playerView.run.attackedServerId}`,
       `runner_expose_information_target:${iceId}`,
       `runner_expose_information_source:${sourceCardInstanceId}`,
