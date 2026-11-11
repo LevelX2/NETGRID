@@ -659,7 +659,10 @@ export function assertResidentPlanPortfolio(
         record.selectedAtStateVersion > portfolio.stateVersion ||
         (record.previouslyUnfundedRezCredits !== undefined &&
           (!Number.isSafeInteger(record.previouslyUnfundedRezCredits) ||
-            record.previouslyUnfundedRezCredits <= 0)),
+            record.previouslyUnfundedRezCredits <= 0)) ||
+        (record.previouslyExitedLethalIce !== undefined &&
+          (record.previouslyExitedLethalIce !== true ||
+            record.previouslyUnfundedRezCredits !== undefined)),
     )
   ) {
     throw portfolioFailure(

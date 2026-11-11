@@ -14,16 +14,20 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 const hqRun = "runner.start_run.hq";
 const rdRun = "runner.start_run.rd";
 
-function replaySelectedExit() {
-  const fixture = JSON.parse(
+function nativeReentryFixture(name: string) {
+  return JSON.parse(
     readFileSync(
       new URL(
-        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-r3-g03-exposed-ice-reentry.json",
+        `../../../../../data/scenarios/ai-decision-checkpoints/${name}`,
         import.meta.url,
       ),
       "utf8",
     ),
   );
+}
+
+function replaySelectedExit() {
+  const fixture = nativeReentryFixture("cp-meta-736-r3-g03-exposed-ice-reentry.json");
   for (const validation of fixture.validations) {
     expect(Object.values(validation)).toEqual(Array(9).fill(true));
   }
@@ -78,7 +82,7 @@ describe("SP-523: an immediate repeat after a lethal exposed ICE exit", () => {
       }
       if (change === "rig") entry.playerView.own.rig![0]!.strength = 6;
       if (change === "corp funding") entry.playerView.opponent.credits -= 3;
-      if (change === "turn") entry.playerView.turnSerial += 1;
+      if (change === "turn") entry.playerView.turnSerial = entry.playerView.turnSerial! + 1;
       if (change === "observed action") delete entry.observedTurnPlanAction;
       if (change === "lease") delete portfolio.turnPlanExecutionLease;
       if (change === "card route") {
@@ -88,6 +92,57 @@ describe("SP-523: an immediate repeat after a lethal exposed ICE exit", () => {
       expect(runnerImmediateExposedIceSafetyExit(entry, portfolio)).toBeUndefined();
     },
   );
+
+  it("opens the same known ICE again after an intervening run and replaces the old observation", () => {
+    const { portfolio } = replaySelectedExit();
+    const fixture = nativeReentryFixture("cp-meta-736-r3-g03-delayed-reentry.json");
+    for (const validation of fixture.validations) {
+      expect(Object.values(validation)).toEqual(Array(9).fill(true));
+    }
+    const input: AiDecisionInputWithDeckCapabilities = {
+      ...fixture.input,
+      ...buildAiDecisionInputDto(fixture.input),
+    };
+    const target = "corp_onr_v1_278_wall-of-ice_2";
+    const remembered = portfolio.runnerExposeInformationMemory?.find(
+      (record) => record.targetIceInstanceId === target,
+    );
+    expect(remembered?.previouslyExitedLethalIce).toBe(true);
+    const later: ResidentPlanPortfolio = fixture.previous;
+    later.runnerExposeInformationMemory = later.runnerExposeInformationMemory!.map(
+      (record) => record.targetIceInstanceId === target ? remembered! : record,
+    );
+    restoreResidentPlanPortfolioMemorySnapshot(input, later);
+    const selected = chooseAiAction(input);
+    expect(selected.actionId).toBe(
+      input.legalActions.find(
+        (action) => action.payload?.approachIceExposeDecision === "expose",
+      )?.actionId,
+    );
+    const fresh = residentPlanPortfolioSnapshot(input)?.runnerExposeInformationMemory?.find(
+      (record) => record.targetIceInstanceId === target,
+    );
+    expect(fresh?.selectedAtStateVersion).toBe(input.playerView.stateVersion);
+    expect(fresh?.previouslyExitedLethalIce).toBeUndefined();
+  });
+
+  it("can finish a current viewing after the grip can absorb the quoted damage", () => {
+    const fixture = nativeReentryFixture("cp-meta-736-r3-g03-exposed-ice-reentry.json");
+    const input: AiDecisionInputWithDeckCapabilities = {
+      ...fixture.viewing,
+      ...buildAiDecisionInputDto(fixture.viewing),
+    };
+    input.playerView.own.gripOrHq.push({
+      ...input.playerView.own.gripOrHq[0]!,
+      instanceId: "changed-grip",
+    });
+    restoreResidentPlanPortfolioMemorySnapshot(input, fixture.previous);
+    expect(chooseAiAction(input).actionId).toBe(
+      input.legalActions.find(
+        (action) => action.payload?.approachIceExposeViewDecision === "finish",
+      )?.actionId,
+    );
+  });
 });
 
 describe("SP-523: an old unaffordable ICE needs a current viewing", () => {
@@ -128,7 +183,7 @@ describe("SP-523: an old unaffordable ICE needs a current viewing", () => {
       (record) => record.targetIceInstanceId === target,
     );
     expect(remembered?.previouslyUnfundedRezCredits).toBe(13);
-    portfolio.runnerExposeInformationMemory = portfolio.runnerExposeInformationMemory?.map(
+    portfolio.runnerExposeInformationMemory = portfolio.runnerExposeInformationMemory!.map(
       (record) => record.targetIceInstanceId === target ? remembered! : record,
     );
     return { reentry, portfolio, target };

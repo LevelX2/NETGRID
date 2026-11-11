@@ -444,20 +444,22 @@ function runnerCurrentExposeInformationSignal(
         "Resolve an approach-ICE expose window only from the exact active Runner run-plan origin, current source card and current visible approached ICE.",
     });
   }
-  const previousUnfundedRezCredits = previous?.runnerExposeInformationMemory?.find(
+  const previousViewing = previous?.runnerExposeInformationMemory?.find(
     (record) =>
       record.targetIceInstanceId === iceId &&
       record.sourceCardInstanceId === sourceCardInstanceId &&
       record.serverId === attackedServerId &&
       record.selectedAtStateVersion < input.playerView.stateVersion,
-  )?.previouslyUnfundedRezCredits;
+  );
+  const previousUnfundedRezCredits = previousViewing?.previouslyUnfundedRezCredits;
   const priorRezObservationNeedsReview =
     previousUnfundedRezCredits !== undefined &&
     (input.playerView.opponent.credits >= previousUnfundedRezCredits ||
       runnerExposedIceHasRezSupport(approachedServer));
+  const previouslyExitedLethalIce = previousViewing?.previouslyExitedLethalIce === true;
   const exposeUnknownIce =
     approachedIce.known === false &&
-    (!rememberedTargetIds.has(iceId) || priorRezObservationNeedsReview);
+    (!rememberedTargetIds.has(iceId) || priorRezObservationNeedsReview || previouslyExitedLethalIce);
   const action = exposeUnknownIce ? expose : decline;
   const rejectedAction = exposeUnknownIce ? decline : expose;
   return {
@@ -479,6 +481,9 @@ function runnerCurrentExposeInformationSignal(
         : "runner_expose_information_repeated_known_ice_declined",
       ...(exposeUnknownIce && priorRezObservationNeedsReview
         ? ["runner_expose_information_prior_unfunded_rez_needs_current_view"]
+        : []),
+      ...(exposeUnknownIce && previouslyExitedLethalIce
+        ? ["runner_expose_information_prior_lethal_exit_needs_current_view"]
         : []),
       `runner_expose_information_server:${input.playerView.run.attackedServerId}`,
       `runner_expose_information_target:${iceId}`,

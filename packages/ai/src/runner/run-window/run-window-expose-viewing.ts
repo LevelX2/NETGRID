@@ -73,7 +73,7 @@ export function runnerUnfundedExposedIceRezCredits(
 /** Evaluate the Engine's conditional rez facts, without pretending it rezzed. */
 export function runnerExposedIceSafetyAssessment(
   input: AiDecisionInput,
-  activeRunRoot: ActiveRunnerRunRoot | undefined,
+  activeRunRoot?: ActiveRunnerRunRoot,
 ): { evidenceCode: string; exposedIceSafetyExit?: RunnerRunWindowSignal["exposedIceSafetyExit"] } | undefined {
   const context = runnerExposedIceRezContext(input);
   if (!context || context.cost.costKind === "variable") return undefined;
@@ -149,7 +149,7 @@ function runnerExposedIceReentryFacts(
 function bindLethalExposedIceExit(
   input: AiDecisionInput,
   finish: LegalAction,
-  activeRunRoot: ActiveRunnerRunRoot | undefined,
+  activeRunRoot?: ActiveRunnerRunRoot,
 ): RunnerRunWindowSignal["exposedIceSafetyExit"] {
   const { run, stateVersion, turnSerial } = input.playerView;
   const server = input.playerView.servers.find(
@@ -157,7 +157,7 @@ function bindLethalExposedIceExit(
   );
   const [start, expose] = input.eventTail.slice(-2);
   const runActions =
-    activeRunRoot?.parentBinding.moduleId === "runner.pressure_central"
+    activeRunRoot?.parentBinding?.moduleId === "runner.pressure_central"
       ? activeRunRoot.parentBinding.signal.runActionIds
       : undefined;
   const runActionId = runActions?.length === 1 ? runActions[0] : undefined;
@@ -176,6 +176,7 @@ function bindLethalExposedIceExit(
     !run ||
     !server ||
     !runActionId ||
+    typeof turnSerial !== 'number' ||
     server.ice.length !== 1 ||
     run.position?.kind !== "ice" ||
     run.position.iceIndex !== 0 ||

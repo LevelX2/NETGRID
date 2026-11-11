@@ -225,9 +225,11 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe("corp.resolve_choice");
     expect(decision.selectedChoices?.choiceId).toBe(choice.choiceId);
-    expect(decision.selectedChoices?.selectedOptionIds).toHaveLength(1);
+    const selectedOptions = decision.selectedChoices?.selectedOptionIds;
+    expect(selectedOptions).toHaveLength(1);
+    if (!Array.isArray(selectedOptions)) throw new Error('Missing selected hardware option');
     expect(choice.options.map((option) => option.id)).toContain(
-      decision.selectedChoices?.selectedOptionIds[0],
+      selectedOptions[0],
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
