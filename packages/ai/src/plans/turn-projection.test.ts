@@ -1,9 +1,11 @@
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
+  type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { costProfileForAction } from "../actions/action-cost-timing";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
@@ -13,6 +15,7 @@ import {
 import {
   applyCertifiedTurnProjectionDelta,
   assessTurnObservationBoundary,
+  boundCurrentStepProjection,
   buildProjectedDecisionFrame,
   certifiedTurnProjectionDeltaFromCandidate,
   PROJECTED_DECISION_FRAME_SCHEMA_VERSION,
@@ -20,6 +23,64 @@ import {
 } from "./turn-projection";
 
 describe("turn projection", () => {
+  it.each(["pump_breaker", "break_subroutine"] as const)(
+    "prices only the exact current %s payment-window opening",
+    (type) => {
+      const input = decisionInput();
+      input.side = "runner";
+      input.playerView.side = "runner";
+      input.playerView.timingPoint = "run.encounter_ice";
+      input.playerView.own.credits = 1;
+      const ice = input.playerView.servers[1]!.ice[0]!;
+      input.playerView.run = {
+        runId: "run-current",
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: ice,
+        successful: false,
+      };
+      const action: LegalAction = {
+        actionId: "runner.current_breaker_action",
+        type,
+        side: "runner",
+        label: "Current breaker action",
+        source: "runner-breaker",
+        timingPoint: "run.encounter_ice",
+        expiresAtStateVersion: 10,
+        costs: [{ credits: 2 }],
+        targetRequirements: [],
+        visibility: "public",
+        payload: {
+          breakerId: "runner-breaker",
+          iceId: ice.instanceId,
+          runnerCostPenaltySupportOpeningCreditAmount: 2,
+        },
+      };
+      input.legalActions = [action];
+      const offer = {
+        ...candidate({ netCredits: 0, netHand: 0, netActions: 0 }),
+        actionId: action.actionId,
+        actionType: type,
+        costProfile: costProfileForAction(action),
+      };
+      expect(boundCurrentStepProjection(input, offer)).toEqual({
+        liquidCreditCost: 0,
+        boundaryKind: "engine_continuation",
+      });
+      action.payload!.runnerCostPenaltySupportOpeningCreditAmount = 1;
+      expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
+      action.payload!.runnerCostPenaltySupportOpeningCreditAmount = 2;
+      action.payload!.runnerCostPenaltySupportContinuation = true;
+      expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
+      delete action.payload!.runnerCostPenaltySupportContinuation;
+      action.payload!.iceId = "different-ice";
+      expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
+      action.payload!.iceId = ice.instanceId;
+      action.expiresAtStateVersion++;
+      expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
+    },
+  );
   it("deducts certified agenda costs and rejects a payment below zero", () => {
     const input = decisionInput();
     input.playerView.own.agendaPoints = 1;

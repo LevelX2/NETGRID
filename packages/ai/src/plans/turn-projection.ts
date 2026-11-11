@@ -126,6 +126,12 @@ export function boundCurrentStepProjection(
     input.playerView.run &&
     candidate.actionType === "continue_run" &&
     (cost.creditCost ?? 0) > 0;
+  const breakerPayment =
+    input.side === "runner" &&
+    input.playerView.run?.phase === "encounter_ice" &&
+    (candidate.actionType === "pump_breaker" ||
+      candidate.actionType === "break_subroutine") &&
+    (cost.creditCost ?? 0) > 0;
   const tagPayment =
     input.side === "runner" &&
     candidate.actionType === "remove_tag" &&
@@ -133,6 +139,7 @@ export function boundCurrentStepProjection(
     (cost.creditCost ?? 0) > 0;
   if (
     !runPayment &&
+    !breakerPayment &&
     !tagPayment &&
     cost.additionalCosts.every((field) => field === "agendaPointCost")
   )
@@ -176,6 +183,19 @@ export function boundCurrentStepProjection(
   }
   const payload = action.payload;
   if (!payload) return undefined;
+  if (
+    breakerPayment &&
+    extras.length === 0 &&
+    quoted.clickCost === 0 &&
+    action.timingPoint === input.playerView.timingPoint &&
+    payload.breakerId === action.source &&
+    typeof payload.iceId === "string" &&
+    payload.iceId === input.playerView.run?.encounteredIce?.instanceId &&
+    payload.runnerCostPenaltySupportOpeningCreditAmount === quoted.creditCost &&
+    payload.runnerCostPenaltySupportContinuation !== true
+  ) {
+    return { liquidCreditCost: 0, boundaryKind: "engine_continuation" };
+  }
   if (
     runPayment &&
     extras.length === 0 &&

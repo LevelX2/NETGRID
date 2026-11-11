@@ -97,6 +97,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "restrictedCreditGainUsableFor",
   "restrictedCreditGainCleanup",
   "restrictedCreditGainComplete",
+  "runnerCostPenaltySupportOpeningCreditAmount",
   "runnerCostPenaltySupportContinuation",
   "runnerCostPenaltySupportWindowId",
   "costPenaltySupportWindowId",

@@ -13,6 +13,7 @@ import { limitRunActionSpendingCapacity } from "../payment/run-action-spending-c
 import {
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,
+  quoteRunnerCostPenaltySupportOpening,
   runnerCostPenaltySupportCreditCapacity,
 } from "../payment/runner-payment-support";
 
@@ -249,6 +250,46 @@ function availableRunnerRunCreditsWithoutSupport(
     (state.run?.runnerRunTemporaryCredits?.remaining ?? 0) +
     runnerRunRecurringCredits(host, breakerId)
   );
+}
+
+/** Actor-private quote for a legal breaker action that must open payment support. */
+export function bindRunnerBreakerPaymentSupportOpening(
+  host: RunDurationPaymentHost,
+  action: LegalAction,
+): LegalAction {
+  const amount = action.costs[0]?.credits;
+  const breakerId = action.payload?.breakerId;
+  const iceId = action.payload?.iceId;
+  if (
+    (action.type !== "pump_breaker" && action.type !== "break_subroutine") ||
+    host.state.runnerCostPenaltySupportWindow ||
+    typeof amount !== "number" ||
+    !Number.isSafeInteger(amount) ||
+    amount <= host.state.runner.credits ||
+    typeof breakerId !== "string" ||
+    breakerId !== action.source ||
+    typeof iceId !== "string" ||
+    iceId !== host.state.run?.encounteredIceId
+  )
+    return action;
+  const availableWithoutSupport = availableRunnerRunCreditsWithoutSupport(
+    host,
+    breakerId,
+  );
+  if (availableWithoutSupport >= amount) return action;
+  const opening = quoteRunnerCostPenaltySupportOpening(host.state, action, {
+    amount,
+    availableWithoutSupport,
+    context: "runner_run",
+  });
+  if (!opening) return action;
+  return {
+    ...action,
+    payload: {
+      ...action.payload,
+      runnerCostPenaltySupportOpeningCreditAmount: opening.amountDue,
+    },
+  };
 }
 
 export function availableRunnerRunStartCredits(

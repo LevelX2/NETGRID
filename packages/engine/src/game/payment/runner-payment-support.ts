@@ -110,25 +110,29 @@ export function runnerPoolCreditsWithCostPenaltySupport(
   return state.runner.credits + runnerCostPenaltySupportCreditCapacity(state);
 }
 
-export function openRunnerCostPenaltySupportWindow(
+export function quoteRunnerCostPenaltySupportOpening(
   state: GameState,
   legalAction: LegalAction,
   options: RunnerCostPenaltySupportOpenOptions,
-): boolean {
+): GameState["runnerCostPenaltySupportWindow"] {
   const amount = normalizedPaymentAmount(options.amount);
+  if (
+    legalAction.side !== "runner" ||
+    amount <= 0 ||
+    state.runnerCostPenaltySupportWindow !== undefined
+  )
+    return undefined;
   const availableWithoutSupport = Math.max(
     0,
     Math.floor(options.availableWithoutSupport),
   );
+  const supportCapacity = runnerCostPenaltySupportCreditCapacity(state);
   if (
-    legalAction.side !== "runner" ||
-    amount <= 0 ||
-    state.runnerCostPenaltySupportWindow !== undefined ||
-    runnerCostPenaltySupportCreditCapacity(state) <= 0 ||
-    !runnerCanPayWithCostPenaltySupport(state, amount, availableWithoutSupport)
+    supportCapacity <= 0 ||
+    !(availableWithoutSupport + supportCapacity >= amount)
   )
-    return false;
-  state.runnerCostPenaltySupportWindow = {
+    return undefined;
+  return {
     windowId: `runner_cost_penalty_support.${state.stateVersion + 1}`,
     originalActionId: legalAction.actionId,
     amountDue: amount,
@@ -141,6 +145,20 @@ export function openRunnerCostPenaltySupportWindow(
     ),
     ...(options.context ? { paymentContext: options.context } : {}),
   };
+}
+
+export function openRunnerCostPenaltySupportWindow(
+  state: GameState,
+  legalAction: LegalAction,
+  options: RunnerCostPenaltySupportOpenOptions,
+): boolean {
+  const opening = quoteRunnerCostPenaltySupportOpening(
+    state,
+    legalAction,
+    options,
+  );
+  if (!opening) return false;
+  state.runnerCostPenaltySupportWindow = opening;
   state.activeSide = "runner";
   legalAction.payload = {
     ...(legalAction.payload ?? {}),

@@ -303,7 +303,7 @@ function accessStartActionFor(
 }
 
 describe("PRO011 hidden resource timing hardening", () => {
-  it.each([2, 3])(
+  it.each([1, 2, 3])(
     "funds a four-credit Krash route from %i cash with one timed Chiba withdrawal",
     (credits) => {
       let state = runnerState(`bank-krash-path-${credits}`);
@@ -359,16 +359,26 @@ describe("PRO011 hidden resource timing hardening", () => {
       const initial = structuredClone(state);
       for (const type of ["pump_breaker", "break_subroutine"] as const) {
         const bankAvailable = state.runner.rig.resources.includes(chiba);
+        const breakerAction = getLegalActions(state, "runner").find(
+          (action) =>
+            action.type === type && action.payload?.breakerId === krash,
+        );
+        expect(breakerAction).toBeDefined();
+        expect(
+          breakerAction?.payload?.runnerCostPenaltySupportOpeningCreditAmount,
+        ).toBe(bankAvailable && state.runner.credits < 2 ? 2 : undefined);
         state = apply(
           state,
           "runner",
-          (action) =>
-            action.type === type && action.payload?.breakerId === krash,
+          (action) => action.actionId === breakerAction?.actionId,
+        );
+        expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+          "runnerCostPenaltySupportOpeningCreditAmount",
         );
         if (bankAvailable)
           expect(state.runnerCostPenaltySupportWindow).toBeDefined();
         const useBank =
-          credits === 2 ? type === "pump_breaker" : type === "break_subroutine";
+          credits <= 2 ? type === "pump_breaker" : type === "break_subroutine";
         if (useBank)
           state = apply(
             state,
