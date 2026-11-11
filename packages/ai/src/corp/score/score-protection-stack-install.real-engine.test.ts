@@ -85,7 +85,22 @@ function position({
       };
     }
   }
-  if (readyAgenda) state.corp.agendaPoints = state.agendaPointsToWin - 2;
+  if (readyAgenda) {
+    const scored = state.corp.rd
+      .filter((id) => state.cardInstances[id]!.definitionId === "simple_agenda")
+      .slice(0, 3);
+    if (scored.length !== 3) throw new Error("missing fixture score cards");
+    state.corp.rd = state.corp.rd.filter((id) => !scored.includes(id));
+    state.corp.scoreArea.push(...scored);
+    for (const id of scored) {
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        zone: { side: "corp", zone: "scoreArea" },
+        faceup: true,
+        rezzed: true,
+      };
+    }
+  }
   return buildAiDecisionInput(state, "corp", {
     difficulty: "hard",
     ownDeckSnapshot: {
@@ -167,6 +182,7 @@ describe("Corp score protection with a publicly active hidden-install ability", 
 
   it("keeps the existing legal immediately winning score", () => {
     const input = position({ readyAgenda: true });
+    expect(input.playerView.own.agendaPoints).toBe(6);
     const selected = chooseAiAction(input);
     expect(
       input.legalActions.find((action) => action.actionId === selected.actionId)
