@@ -171,6 +171,7 @@ export type CorpBestFundedScoreProtectionInput = Readonly<{
   postInstallQuoteCardId?: string;
   preferPostInstallSourceProgress?: boolean;
   runnerRig: readonly VisibleCard[];
+  runnerDeckCount?: number;
   runnerSetAside?: readonly VisibleCard[];
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
@@ -301,6 +302,7 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
     root?: readonly VisibleCard[];
   }>;
   runnerRig: readonly VisibleCard[];
+  runnerDeckCount?: number;
   runnerSetAside?: readonly VisibleCard[];
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
@@ -536,6 +538,9 @@ export function assessBestFundedCorpScoreProtection(
         rezzed: ice.rezzed === true || selectedById.has(ice.instanceId),
       })),
       runnerRig: input.runnerRig,
+      ...(input.runnerDeckCount !== undefined
+        ? { runnerDeckCount: input.runnerDeckCount }
+        : {}),
       ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
       ...(input.runnerMemoryUsed !== undefined
         ? { runnerMemoryUsed: input.runnerMemoryUsed }
@@ -832,6 +837,9 @@ export function projectCorpFundedIceInstallRoute(
       : {}),
     serverIce: currentIce,
     runnerRig: input.runnerRig,
+    ...(input.runnerDeckCount !== undefined
+      ? { runnerDeckCount: input.runnerDeckCount }
+      : {}),
     ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
     ...(input.runnerMemoryUsed !== undefined
       ? { runnerMemoryUsed: input.runnerMemoryUsed }
@@ -1024,6 +1032,9 @@ export function projectCorpFundedIceInstallRoute(
       ? { preferPostInstallSourceProgress: true }
       : {}),
     runnerRig: input.runnerRig,
+    ...(input.runnerDeckCount !== undefined
+      ? { runnerDeckCount: input.runnerDeckCount }
+      : {}),
     ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
     ...(input.runnerMemoryUsed !== undefined
       ? { runnerMemoryUsed: input.runnerMemoryUsed }

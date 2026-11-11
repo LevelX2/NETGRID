@@ -532,6 +532,13 @@ die Quellsubroutine zu brechen, bezahlt deren vollständige Strength- und
 Breakkosten zusammen mit vorhandenen ETR-Breaks. Ein hoher Creditstand allein
 zertifiziert keinen Zugriff durch eine ungebrochene Sperre.
 
+Eine sichtbar aktive Installation aus dem Stack während eines Runs kann die
+Breaker-Abdeckung im selben Run ändern. Bei einer darauf beruhenden
+Zugriffssperre liefern der Schutz-Quote und die Rush-Risikobewertung eine
+strukturierte Unsicherheit. Der öffentliche Stack-Zähler grenzt das Fenster
+ab, die Programmauswahl bleibt verborgen. Ein bereits vollständig belegter
+Zugriff und ein aktueller abschließbarer Score behalten ihren Auftrag.
+
 Die Kosten des aktuellen Advance-Steps stammen aus der konkreten
 Engine-LegalAction beziehungsweise einem exakt an StateVersion,
 Agenda-Instanz und Action gebundenen Engine-Quote. Die vollständigen

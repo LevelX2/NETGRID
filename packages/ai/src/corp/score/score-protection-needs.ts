@@ -148,6 +148,7 @@ export function corpFundedScoreProtectionNeed(
   const baseline = assessBestFundedCorpScoreProtection({
     serverIce,
     runnerRig: input.playerView.opponent.rig ?? [],
+    runnerDeckCount: input.playerView.opponent.deckCount,
     runnerSetAside: input.playerView.specialZones?.setAside ?? [],
     ...(input.playerView.opponent.memoryUsed !== undefined
       ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
