@@ -109,11 +109,22 @@ export function microtechHostedProgramIds(
   state: GameState,
   sourceCardId: CardInstanceId,
 ): CardInstanceId[] {
+  return orderedHostedProgramIds(
+    state,
+    sourceCardId,
+    (cardId) => definitionFor(state, cardId).type === "program",
+  );
+}
+
+export function orderedHostedProgramIds(
+  state: Pick<GameState, "cardInstances">,
+  sourceCardId: CardInstanceId,
+  isProgram: (cardId: CardInstanceId) => boolean,
+): CardInstanceId[] {
   return Object.entries(state.cardInstances)
     .filter(
       ([cardId, instance]) =>
-        instance.hostedOn === sourceCardId &&
-        definitionFor(state, cardId).type === "program",
+        instance.hostedOn === sourceCardId && isProgram(cardId),
     )
     .map(([cardId]) => cardId)
     .sort(

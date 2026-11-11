@@ -36,6 +36,7 @@ import {
   runnerCandidateExecutesHeapRecovery,
   runnerCandidateExecutesTopHeapRecovery,
   runnerEventInstallChoiceCommitment,
+  runnerRecoveryActionContract,
   runnerRecoverySearchCommitment,
 } from "./development-search-targets";
 import type { RunnerDevelopmentInstallServices } from "./development-services";
@@ -691,7 +692,8 @@ export function buildRunnerCardDevelopmentSignals({
                 ) !== undefined,
             ) ||
             (!runnerCandidateExecutesHeapRecovery(input, candidate) &&
-              !runnerCandidateExecutesTopHeapRecovery(input, candidate))
+              !runnerCandidateExecutesTopHeapRecovery(input, candidate) &&
+              !runnerRecoveryActionContract(input, candidate)?.hostedTarget)
           ) {
             return [];
           }
