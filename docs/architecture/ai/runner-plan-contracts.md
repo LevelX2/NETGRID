@@ -3769,6 +3769,8 @@ Nach einem ausgeführten Verzicht kann ein weiteres Approach-Fenster desselben
 Runs den vorhandenen Run-Parent übernehmen. Der Owner prüft die ursprüngliche
 Lease, die lückenlose Folge von Rez und weiterlaufenden Run-Fenstern am selben
 Fort sowie die aktuelle Quelle und das neue ICE in den Engine-LegalActions.
+Die Engine kann einen Rez-Verzicht am angeflogenen ICE ohne Serverkennung
+publizieren. Die gebundene Run-Kette hält diesen Regelschritt im selben Run.
 
 Die Live-Runtime ruft die Signalbildung, Dispositionen und den Erinnerungsschreiber
 auf. Der zentrale Choice-Einstieg delegiert an die bestehende Ownerfunktion.

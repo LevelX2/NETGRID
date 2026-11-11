@@ -15,14 +15,16 @@ const newTarget = "corp_onr_v1_278_wall-of-ice_1";
 const oldTarget = "corp_onr_v1_268_shock-r_1";
 const sourceId = "runner_onr_v1_065_smarteye_1";
 
-function loadCheckpoint(): {
+function loadCheckpoint(decision: 171 | 174 = 171): {
   input: AiDecisionInput;
   portfolio: ResidentPlanPortfolio;
 } {
   const fixture = JSON.parse(
     readFileSync(
       new URL(
-        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-r1-g37-d171.json",
+        decision === 171
+          ? "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-r1-g37-d171.json"
+          : "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-g37-control-d174.json",
         import.meta.url,
       ),
       "utf8",
@@ -64,6 +66,43 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     });
     expect(selected.fallbackUsed).toBe(false);
     expect(selected.timeoutUsed).toBe(false);
+  });
+
+  it("reaches the third ICE after the Engine reports a targetless Corp rez decline", () => {
+    const { input, portfolio } = loadCheckpoint(174);
+    const declined = input.eventTail.find(
+      (event) => event.stateVersionBefore === 171,
+    );
+    expect(declined?.type).toBe("decline_rez");
+    expect(declined?.publicPayload.serverId).toBeUndefined();
+    restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
+    const selected = chooseAiAction(input);
+    const target = "corp_onr_v1_238_data-wall-2-0_2";
+    const expose = input.legalActions.find(
+      (action) => action.payload?.approachIceExposeDecision === "expose",
+    );
+    expect(expose).toMatchObject({
+      expiresAtStateVersion: 173,
+      payload: { cardId: sourceId, iceId: target },
+    });
+    expect(selected.actionId).toBe(expose?.actionId);
+    expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: rootId,
+      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      executionOrigin: { rootPlanInstanceId: rootId, stateVersion: 173 },
+    });
+    expect(selected.fallbackUsed).toBe(false);
+    expect(selected.timeoutUsed).toBe(false);
+  });
+
+  it("rejects a Corp rez decline explicitly attached to another server", () => {
+    const { input, portfolio } = loadCheckpoint(174);
+    const declined = input.eventTail.find(
+      (event) => event.stateVersionBefore === 171,
+    )!;
+    declined.publicPayload.serverId = "hq";
+    restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
+    expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
   });
 
   it.each(["lease", "run", "server", "gap", "decline", "parent"] as const)(

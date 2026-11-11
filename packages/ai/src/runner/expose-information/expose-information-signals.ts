@@ -332,11 +332,19 @@ function runnerCurrentExposeInformationSignal(
     ) &&
     automaticProgress.every((event) => {
       const payload = event.publicPayload;
+      if (event.turnSerial !== input.playerView.turnSerial) return false;
+      if (payload?.actor === "corp" && payload.actionType === "decline_rez") {
+        // The approach-ICE decline is a rule action whose public event can
+        // have no target. The surrounding events bind it to the same run.
+        return (
+          event.type === "decline_rez" &&
+          (payload.serverId === undefined ||
+            payload.serverId === attackedServerId)
+        );
+      }
       return (
         payload?.serverId === attackedServerId &&
-        ((payload.actor === "corp" &&
-          (payload.actionType === "rez_ice" ||
-            payload.actionType === "decline_rez")) ||
+        ((payload.actor === "corp" && payload.actionType === "rez_ice") ||
           (payload.actor === "runner" &&
             payload.actionType === "continue_run" &&
             payload.result === "continued" &&
