@@ -20,6 +20,95 @@ import {
 } from "./corp-punish-route-quotes";
 
 describe("Corp punish-route quote request", () => {
+  it("certifies the installed SP-848 damage head with its agenda-point cost", () => {
+    const { state, request } = agendaFundedDamageState();
+    const action = getLegalActions(state, "corp").find(
+      (a) => a.actionId === request.steps[0]!.currentLegalActionId,
+    )!;
+    expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        totalClicks: 1,
+        totalActionCredits: 0,
+        steps: [
+          {
+            agendaPointCost: 3,
+            currentLegalAction: { actionId: action.actionId },
+          },
+        ],
+        damageEnvelope: { effectiveDamage: { minimum: 15, maximum: 15 } },
+      },
+    });
+    const applied = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    expect(applied).toMatchObject({
+      ok: true,
+      state: { winner: "corp", corpBonusAgendaPoints: 0 },
+    });
+  });
+
+  it.each(["tags", "agenda points"])(
+    "rejects an installed damage head without sufficient %s",
+    (missing) => {
+      const { state, request } = agendaFundedDamageState();
+      if (missing === "tags") state.runner.tags = 1;
+      else state.corpBonusAgendaPoints = 2;
+      expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+        ok: true,
+        quote: { complete: false },
+      });
+      expect(
+        getLegalActions(state, "corp").some(
+          (a) => a.actionId === request.steps[0]!.currentLegalActionId,
+        ),
+      ).toBe(false);
+    },
+  );
+
+  it("keeps public prevention bounded and concealed response identity unknown", () => {
+    const { state, request } = agendaFundedDamageState();
+    const fridge = "runner_fridge_rock_test" as CardInstanceId;
+    state.runner.rig.hardware.push(fridge);
+    state.cardInstances[fridge] = {
+      instanceId: fridge,
+      definitionId: "onr_v1_121_armored-fridge",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+      counters: { ablative: 7 },
+    };
+    expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        damageEnvelope: {
+          visiblePrevention: { maximumPreventableDamage: 7 },
+          effectiveDamage: { minimum: 8, maximum: 15 },
+        },
+      },
+    });
+    addConcealedRunnerResource(state, "onr_proteus_142_hq-mole", "rock-hidden");
+    const unknown = quoteCorpPunishRoute(state, request);
+    expect(unknown).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        guarantee: "unknown",
+        responseKnowledge: "unknown",
+      },
+    });
+    expect(JSON.stringify(unknown)).not.toContain("hq-mole");
+  });
+
   it.each([
     { profile: "modern_open" as const, credits: 16, bid: 7, tags: 1 },
     { profile: "modern_open" as const, credits: 8, bid: 5, tags: 0 },
@@ -1331,6 +1420,48 @@ describe("Corp punish-route quote request", () => {
     });
   });
 });
+
+function agendaFundedDamageState() {
+  const state = corpActionState("sp-848-agenda-funded-damage");
+  state.runner.tags = 2;
+  state.corpBonusAgendaPoints = 3;
+  const definitionId = "onr_v1_327_i-got-a-rock";
+  const id = addCorpCardToHqForTest(state, definitionId, "rock");
+  state.corp.hq = state.corp.hq.filter((cardId) => cardId !== id);
+  state.corp.servers.push({
+    id: "remote_1",
+    kind: "remote",
+    label: "Remote 1",
+    ice: [],
+    root: [id],
+  });
+  state.cardInstances[id]!.zone = {
+    side: "corp",
+    zone: "serverRoot",
+    serverId: "remote_1",
+  };
+  state.cardInstances[id]!.faceup = true;
+  state.cardInstances[id]!.rezzed = true;
+  const action = getLegalActions(state, "corp").find(
+    (a) =>
+      a.source === id && a.payload?.v1920AssetAbility === "tagged_meat_damage",
+  );
+  if (!action) throw new Error("Native agenda-funded damage action absent");
+  const step = canonicalStep(
+    "damage",
+    0,
+    "meat_damage",
+    id,
+    definitionId,
+    "unique_direct_longtail_tagged_meat_damage_meat",
+  );
+  return {
+    state,
+    request: routeRequest(state, [
+      { ...step, currentLegalActionId: action.actionId },
+    ]),
+  };
+}
 
 function corpActionState(seed: string): GameState {
   const state = createGame({ seed, setupMode: "completed" });

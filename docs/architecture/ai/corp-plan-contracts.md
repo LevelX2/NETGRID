@@ -3098,6 +3098,15 @@ noch keine aktive Verfolgung der lauernden Kampagne.
 Eine planfremde Aktion wie Closed Accounts darf eine weiterhin lethal
 Drei-Aktionen-Flatline-Sequenz nicht aufbrechen.
 
+Eine installierte Fleischschadensquelle mit Agendapunktkosten kann als
+einzelner, bereits legaler Abschluss eintreten. Der Anfrageadapter bindet
+die sichtbare CardSpec-Capability an die aktuelle Action-ID. Die Engine
+bestätigt Klick, Agendapunktpreis, Schadensempfänger, Taggrenze und
+Präventionsgrenze. Die Quote beschreibt die nachgewiesene Einzelaktion.
+Der Punish-Owner gibt die Punkte nur aus, wenn der bestätigte
+Mindestschaden den aktuellen Handpuffer übersteigt. Verdeckte installierte
+Runner-Ressourcen halten den Antwortausgang offen.
+
 ## 9. `corp.ambush_and_bluff`
 
 Im letzten Root-Rez-Fenster vergleicht der residente Ambush-Owner die
@@ -3284,7 +3293,7 @@ Installations-, Fortschritts- und Scorefolgen bleiben beim Score-Owner.
 
 Die Retentionsfinanzierung zieht fest garantierte Counter einer reinen, unbedingten On-Play-Operation von den noch regulär zu bezahlenden Advances ab. Die Menge stammt aus der kanonischen CardSpec; eine Verteilung auf unterschiedliche Ziele liefert derselben Agenda höchstens einen Counter. Generierte Aktionen und bloße Counterverschiebung erzeugen dadurch keine freien Counter. Paarung 590, Diagnose-Runde 6, G26 D256 belegt Layoffs plus einen regulären Advance bei genau sechs Credits; fünf Credits reichen weiterhin nicht.
 
-Der bestehende Haltewert für kanonische Scorebeschleuniger erhält einen begrenzten Zusatzwert, wenn eine bekannte eigene Agenda den Matchpoint erreicht und liquide Credits sowohl die Operation als auch ihre verbleibenden regulären Advances decken. Das schützt die finanzierte Kombination gegenüber einer redundanten, nur nichtterminal in Archives exponierten Agenda. Es ist eine Retentionabwägung, kein Nachweis zukünftiger Klicks, einer garantierten Scorefolge oder eines sicheren Gegnerzuges. Sofort terminale Archives-Exposition bleibt im gebundenen Discard-Batch strikt vorrangig; der Choice-Resolver übernimmt ausschließlich die aktuelle Handplanbindung.
+Der bestehende Haltewert für kanonische Scorebeschleuniger erhält einen begrenzten Zusatzwert, wenn eine bekannte eigene Agenda den Matchpoint erreicht und liquide Credits sowohl die Operation als auch ihre verbleibenden regulären Advances decken. Das schützt die finanzierte Kombination gegenüber einer redundanten, nur nichtterminal in Archives exponierten Agenda. Es ist eine Retentionabwägung, kein Nachweis zukünftiger Klicks, einer garantierten Scorefolge oder eines sicheren Gegnerzuges. Sofort terminale Archives-Exposition bleibt im gebundenen Discard-Batch strikt vorrangig. Defense kann den direkten Zugriff auch hinter einer einzelnen festen, aktuell finanzierbaren ICE-Schicht ohne Run-Verbot bestätigen. Dafür müssen aktuelle Engine-Quotes und der sichtbare bezahlbare Runner-Pfad übereinstimmen. Die Handentscheidung verwendet diesen Nachweis für terminale Punktesummen. Der Choice-Resolver übernimmt ausschließlich die aktuelle Handplanbindung.
 
 Eine freie R&D-Spitzensortierung bleibt auch bei `minSelections` gleich
 Optionenzahl eine echte Reihenfolgeentscheidung. Die Engine kennzeichnet

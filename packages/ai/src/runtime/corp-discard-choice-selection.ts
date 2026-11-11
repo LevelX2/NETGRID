@@ -1,5 +1,6 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
+import { corpArchivesHasCertifiedPaidAccess } from "../corp/defense/corp-defense-layer-certification";
 import { corpHandDispositionScore } from "../corp/hand-management/hand-disposition-score";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type { ProjectedHandDisposition } from "../plans/turn-projection";
@@ -43,11 +44,15 @@ export function selectedCorpDiscardChoiceOptionIds(
   const archives = input.playerView.servers.find(
     (server) => server.id === "archives",
   );
-  const archivesReachable =
+  const openArchives =
     archives !== undefined &&
     archives.ice.length === 0 &&
     archives.statuses?.some((status) => status.kind === "run_prohibited") !==
       true;
+  const archivesReachable =
+    openArchives ||
+    (archives !== undefined &&
+      corpArchivesHasCertifiedPaidAccess(input, archives));
   if (count <= 0) {
     return {
       selectedOptionIds: [],
@@ -100,6 +105,7 @@ export function selectedCorpDiscardChoiceOptionIds(
           left,
           right,
           archivesReachable,
+          openArchives,
           archivesAgendaPoints,
           exposedAgendaPoints,
           runnerAgendaPoints: input.playerView.opponent.agendaPoints,
@@ -146,6 +152,7 @@ function compareCorpDiscardCandidates(params: {
     score: DiscardChoiceKeepScore;
   };
   archivesReachable: boolean;
+  openArchives: boolean;
   archivesAgendaPoints: number;
   exposedAgendaPoints: number;
   runnerAgendaPoints: number;
@@ -174,6 +181,7 @@ function compareCorpDiscardCandidates(params: {
 function discardExposureCost(
   params: {
     archivesReachable: boolean;
+    openArchives: boolean;
     archivesAgendaPoints: number;
     exposedAgendaPoints: number;
     runnerAgendaPoints: number;
@@ -195,7 +203,10 @@ function discardExposureCost(
     // This is intentionally finite: a nonterminal agenda may still be the
     // correct discard when every alternative protects a materially stronger
     // current route. Terminal exposure is the separate strict batch guard.
-    keepPenalty: candidateAgendaPoints > 0 ? candidateAgendaPoints * 180 : 0,
+    keepPenalty:
+      params.openArchives && candidateAgendaPoints > 0
+        ? candidateAgendaPoints * 180
+        : 0,
   };
 }
 

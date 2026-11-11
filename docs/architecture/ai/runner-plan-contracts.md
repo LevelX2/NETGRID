@@ -2637,6 +2637,16 @@ unterdrücken. Die Ausnahme für eine nur später zurückgestellte Handpufferwir
 bleibt auf aktuell sichere Mehrzweck-Actions begrenzt; echte Draw-Tax-Gefahr wird
 weder durch den Scheduler noch durch die aktuelle Phasenbindung aufgehoben.
 
+Bei kürzlich erlittenem Corp-Schaden kann Defense einen steuerpflichtigen
+Basisdraw als aktuellen Handpufferschritt zulassen. Dafür muss der Runner
+bereits getaggt sein, die vollständige Tagentfernung muss im Restzug fehlen
+und der Schadenpuffer muss mit den verbleibenden Klicks und Stackkarten
+erreichbar sein. Bekannte aktive Schadensquellen, verfügbare Schutzinstallation
+und ein unmittelbar nutzbarer sicherer Handzuwachs erhalten die Sperre.
+Die Zulassung gilt für den aktuellen positiven Basisdraw. Neue Karten,
+Steuerantworten und der verbleibende Bedarf werden nach jeder Aktion neu
+gebunden. P731 G11 D63 belegt den Vierkartenpuffer gegen den anschließenden
+Schaden. Die spätere Entscheidung über den Partieverlauf bleibt offen.
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
 Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda-,
 Score-Threat- oder Informationsroute übernimmt der Defense-Owner den gequoteten Puffer, wenn

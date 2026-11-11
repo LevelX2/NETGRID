@@ -202,6 +202,74 @@ function corpCertifiedDefenseLayer(
   };
 }
 
+/** Certifies a direct next-turn Archives run against one funded, known layer.
+ * The projected Archives root is its discard pile.
+ * The hand plan owns how terminal agenda exposure changes its discard batch.
+ */
+export function corpArchivesHasCertifiedPaidAccess(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
+): boolean {
+  const view = input.playerView;
+  const runnerRig = view.opponent.rig;
+  if (
+    view.phase !== "corp_discard_phase" ||
+    server.id !== "archives" ||
+    server.ice.length !== 1 ||
+    server.statuses?.some((status) => status.kind === "run_prohibited") ||
+    (view.runnerNextTurnCreditClicks ?? 0) < 1 ||
+    !runnerRig
+  ) {
+    return false;
+  }
+  const ice = server.ice[0]!;
+  const rez = ice.effectiveRezCostQuote;
+  if (
+    ice.rezzed !== true &&
+    (rez?.complete !== true || rez.costKind !== "fixed")
+  ) {
+    return false;
+  }
+  const layer = corpCertifiedDefenseLayer(input, server.id, ice);
+  if (
+    !layer ||
+    layer.credits > view.own.credits ||
+    layer.agendaPoints > view.own.agendaPoints
+  ) {
+    return false;
+  }
+  const assessment = assessEngineCertifiedPostRezIcePath(
+    [ice],
+    server.id,
+    view.stateVersion,
+    new Set([ice.instanceId]),
+    runnerRig,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      view.opponent.credits,
+      runnerRig,
+      {
+        creditPoolHorizon: "next_runner_turn",
+      },
+    ),
+    [],
+    view.own.credits,
+    {
+      targetServerId: server.id,
+      visibleCorpCredits: view.own.credits,
+      visibleRemoteServerCount: view.servers.filter(
+        (candidate) => !["hq", "rd", "archives"].includes(candidate.id),
+      ).length,
+    },
+  );
+  return (
+    assessment.assessedKnownIceCount === 1 &&
+    assessment.canReachAccess &&
+    !assessment.conditionalAccessReasons?.length &&
+    !assessment.conditionalRiskReasons?.length &&
+    !assessment.preRunPreparation
+  );
+}
+
 export function corpRemoteHasBoundedStagedIce(
   input: AiDecisionInput,
   serverId: string,
