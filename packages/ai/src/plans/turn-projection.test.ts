@@ -81,6 +81,56 @@ describe("turn projection", () => {
       expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
     },
   );
+  it("prices only the exact legal program-install payment-window opening", () => {
+    const input = decisionInput();
+    input.side = "runner";
+    input.playerView.side = "runner";
+    input.playerView.timingPoint = "runner_action.main";
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 1;
+    const action: LegalAction = {
+      actionId: "runner.install_card.runner-wall-breaker",
+      type: "install_card",
+      side: "runner",
+      label: "Wall-Breaker installieren",
+      source: "runner-wall-breaker",
+      timingPoint: "runner_action.main",
+      expiresAtStateVersion: 10,
+      costs: [{ clicks: 1, credits: 6 }],
+      targetRequirements: [],
+      visibility: "private_to_actor",
+      payload: {
+        cardId: "runner-wall-breaker",
+        runnerCostPenaltySupportOpeningCreditAmount: 6,
+      },
+    };
+    input.legalActions = [action];
+    const offer = {
+      ...candidate({ netCredits: 0, netHand: 0, netActions: 0 }),
+      actionId: action.actionId,
+      actionType: action.type,
+      costProfile: costProfileForAction(action),
+    };
+    const projection = () => boundCurrentStepProjection(input, offer);
+    expect(projection()).toEqual({
+      liquidCreditCost: 0,
+      boundaryKind: "engine_continuation",
+    });
+    action.payload!.runnerCostPenaltySupportOpeningCreditAmount = 5;
+    expect(projection()).toBeUndefined();
+    action.payload!.runnerCostPenaltySupportOpeningCreditAmount = 6;
+    action.payload!.cardId = "different-program";
+    expect(projection()).toBeUndefined();
+    action.payload!.cardId = action.source;
+    action.payload!.runnerCostPenaltySupportContinuation = true;
+    expect(projection()).toBeUndefined();
+    delete action.payload!.runnerCostPenaltySupportContinuation;
+    action.payload!.runnerProgramTrashBeforeInstall = true;
+    expect(projection()).toBeUndefined();
+    delete action.payload!.runnerProgramTrashBeforeInstall;
+    action.expiresAtStateVersion++;
+    expect(projection()).toBeUndefined();
+  });
   it("deducts certified agenda costs and rejects a payment below zero", () => {
     const input = decisionInput();
     input.playerView.own.agendaPoints = 1;

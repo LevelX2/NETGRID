@@ -405,6 +405,108 @@ describe("PRO011 hidden resource timing hardening", () => {
     },
   );
   it.each([
+    { credits: 5, tapped: false, offered: true, opening: 6, finalCredits: 2 },
+    {
+      credits: 6,
+      tapped: true,
+      offered: true,
+      opening: undefined,
+      finalCredits: 0,
+    },
+    {
+      credits: 5,
+      tapped: true,
+      offered: false,
+      opening: undefined,
+      finalCredits: undefined,
+    },
+  ])(
+    "quotes the exact program-install bank window at $credits credits with tapped=$tapped",
+    ({ credits, tapped, offered, opening, finalCredits }) => {
+      let state = runnerState(`install-chiba-${credits}-${tapped}`);
+      state.runner.credits = credits;
+      state.runner.clicks = 1;
+      const chiba = installHiddenResource(
+        state,
+        "onr_proteus_133_chiba-bank-account",
+        "install_bank",
+      );
+      state.cardInstances[chiba]!.tapped = tapped;
+      const dwarf = addRunnerGripCard(
+        state,
+        "onr_v1_021_dwarf",
+        "install_dwarf",
+      );
+      const other = addRunnerGripCard(
+        state,
+        "onr_v1_039_krash",
+        "other_program",
+      );
+      const initial = structuredClone(state);
+      const findDwarf = () =>
+        getLegalActions(state, "runner").find(
+          (action) =>
+            action.type === "install_card" && action.payload?.cardId === dwarf,
+        );
+      const install = findDwarf();
+      expect(Boolean(install)).toBe(offered);
+      expect(
+        install?.payload?.runnerCostPenaltySupportOpeningCreditAmount,
+      ).toBe(opening);
+      if (!install) return;
+      expect(install.costs).toEqual([{ clicks: 1, credits: 6 }]);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === install.actionId,
+      );
+      expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+        "runnerCostPenaltySupportOpeningCreditAmount",
+      );
+      if (opening !== undefined) {
+        expect(state.runner.clicks).toBe(1);
+        expect(state.runner.credits).toBe(5);
+        expect(state.runner.rig.programs).not.toContain(dwarf);
+        expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+          originalActionId: install.actionId,
+          amountDue: 6,
+          paymentContext: "runner_program_install",
+        });
+        expect(
+          getLegalActions(state, "runner").some(
+            (a) => a.payload?.cardId === other,
+          ),
+        ).toBe(false);
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.type === "activated_card_ability" &&
+            action.payload?.cardId === chiba,
+        );
+        const continuation = findDwarf();
+        expect(continuation?.actionId).toBe(install.actionId);
+        expect(
+          continuation?.payload?.runnerCostPenaltySupportContinuation,
+        ).toBe(true);
+        expect(
+          continuation?.payload?.runnerCostPenaltySupportOpeningCreditAmount,
+        ).toBeUndefined();
+        state = apply(
+          state,
+          "runner",
+          (action) => action.actionId === install.actionId,
+        );
+      }
+      expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+      expect(state.runner.rig.programs).toContain(dwarf);
+      expect(state.runner.rig.programs).not.toContain(other);
+      expect(state.runner.credits).toBe(finalCredits);
+      expect(state.runner.clicks).toBe(0);
+      expectReplayStable(initial, state);
+    },
+  );
+  it.each([
     { credits: 13, entry: "runner_continue" },
     { credits: 1, entry: "runner_continue" },
     { credits: 13, entry: "corp_decline" },

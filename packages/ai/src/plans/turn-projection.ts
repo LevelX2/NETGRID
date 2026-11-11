@@ -132,6 +132,12 @@ export function boundCurrentStepProjection(
     (candidate.actionType === "pump_breaker" ||
       candidate.actionType === "break_subroutine") &&
     (cost.creditCost ?? 0) > 0;
+  const programInstallPayment =
+    input.side === "runner" &&
+    input.playerView.timingPoint === "runner_action.main" &&
+    !input.playerView.run &&
+    candidate.actionType === "install_card" &&
+    (cost.creditCost ?? 0) > 0;
   const tagPayment =
     input.side === "runner" &&
     candidate.actionType === "remove_tag" &&
@@ -140,6 +146,7 @@ export function boundCurrentStepProjection(
   if (
     !runPayment &&
     !breakerPayment &&
+    !programInstallPayment &&
     !tagPayment &&
     cost.additionalCosts.every((field) => field === "agendaPointCost")
   )
@@ -191,6 +198,19 @@ export function boundCurrentStepProjection(
     payload.breakerId === action.source &&
     typeof payload.iceId === "string" &&
     payload.iceId === input.playerView.run?.encounteredIce?.instanceId &&
+    payload.runnerCostPenaltySupportOpeningCreditAmount === quoted.creditCost &&
+    payload.runnerCostPenaltySupportContinuation !== true
+  ) {
+    return { liquidCreditCost: 0, boundaryKind: "engine_continuation" };
+  }
+  if (
+    programInstallPayment &&
+    extras.length === 0 &&
+    (quoted.agendaPointCost ?? 0) === 0 &&
+    quoted.clickCost === 1 &&
+    action.timingPoint === input.playerView.timingPoint &&
+    payload.cardId === action.source &&
+    payload.runnerProgramTrashBeforeInstall !== true &&
     payload.runnerCostPenaltySupportOpeningCreditAmount === quoted.creditCost &&
     payload.runnerCostPenaltySupportContinuation !== true
   ) {

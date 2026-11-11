@@ -396,6 +396,15 @@ erhalten. Run, Server, Root, Executor und abschließende Fenster-ID müssen
 übereinstimmen. Fremde Runner-Aktionen, fehlende Ereignisse oder ein anderer
 Run erlauben keine solche Fortsetzung.
 
+Für eine aktuell angebotene direkte Programminstallation mit fehlenden
+verfügbaren Installationscredits bindet der Engine-Owner den exakten
+Öffnungsbetrag aus derselben Zahlungsquote an die LegalAction. Der TurnPlan
+bewertet den Öffnungsschritt und revalidiert die ursprüngliche Installation
+nach der Zahlungshilfe anhand des aktuellen Fensters. Der Installationsklick
+und die vollständigen Kosten werden erst bei der gebundenen Fortsetzung
+bezahlt. Bereits verfügbare Installationscredits und gesonderte
+Programmtrash-/Zahlungsvarianten behalten ihren jeweiligen Vertrag.
+
 Bekannte installierte `runnerPaymentSupportAbilities` gehen als bedingte,
 einmalige Quellen in die Restpfadquote ein. Die Quote benötigt ausdrücklich
 den liquiden Creditbestand für ihre Aktivierung, zählt alternative Fähigkeiten
