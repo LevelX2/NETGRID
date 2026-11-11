@@ -61,7 +61,7 @@ function fixture(firstAgendaExposed: boolean): GameState {
     .withCorpRemoteRoot("remote_1", "onr_v1_208_on-call-solo-team")
     .withRezzedCorpIceOnServer("remote_1", "onr_v1_245_fire-wall")
     .withCorpCredits(19)
-    .withRunnerCredits(24)
+    .withRunnerCredits(firstAgendaExposed ? 24 : 5)
     .withRunnerProgramInstalled("onr_v1_039_krash");
   if (firstAgendaExposed) builder.withCorpRemoteRoot("remote_2", firstAgenda);
   else builder.withCorpCardInHq(firstAgenda);

@@ -561,7 +561,12 @@ export function scoreProjectForCandidate(
       // steal, including several unprotected accesses in the same Runner turn.
       ((input.playerView.opponent.agendaPoints + agendaPoints <
         input.playerView.agendaPointsToWin &&
-        !corpFloodInstallCreatesCombinedTerminalExposure(input, agenda, serverId)) ||
+        !corpFloodInstallCreatesCombinedTerminalExposure(
+          input,
+          agenda,
+          serverId,
+          candidate.actionId,
+        )) ||
         corpScoreProtectionNeedIsSatisfied(
           input,
           protectionNeed,
