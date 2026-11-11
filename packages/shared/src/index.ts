@@ -3931,6 +3931,7 @@ export type CorpPunishRouteStepQuote = {
   sourceCapabilityId: string;
   clicks: number;
   credits: number;
+  agendaPointCost?: number;
   hardwareTrashProjection?: {
     kind: "installed_runner_hardware";
     targetKnowledge: "public_exact";

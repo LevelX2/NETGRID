@@ -3119,6 +3119,15 @@ noch keine aktive Verfolgung der lauernden Kampagne.
 Eine planfremde Aktion wie Closed Accounts darf eine weiterhin lethal
 Drei-Aktionen-Flatline-Sequenz nicht aufbrechen.
 
+Eine installierte Fleischschadensquelle mit Agendapunktkosten kann als
+einzelner, bereits legaler Abschluss eintreten. Der Anfrageadapter bindet
+die sichtbare CardSpec-Capability an die aktuelle Action-ID. Die Engine
+bestätigt Klick, Agendapunktpreis, Schadensempfänger, Taggrenze und
+Präventionsgrenze. Die Quote beschreibt die nachgewiesene Einzelaktion.
+Der Punish-Owner gibt die Punkte nur aus, wenn der bestätigte
+Mindestschaden den aktuellen Handpuffer übersteigt. Verdeckte installierte
+Runner-Ressourcen halten den Antwortausgang offen.
+
 ## 9. `corp.ambush_and_bluff`
 
 Im letzten Root-Rez-Fenster vergleicht der residente Ambush-Owner die

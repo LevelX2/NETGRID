@@ -2528,6 +2528,12 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Hat der Überlebens-Handpuffer Vorrang vor einer nicht vollständig
+finanzierbaren Tagentfernung, klassifiziert Defense auch eine grundsätzlich
+geeignete, in dieser Phase aufgeschobene Schutzinstallation. Die Disposition
+gehört zur aktuellen LegalAction. Eine unabhängig gebundene Route bleibt
+ausführbar. Nach dem Ziehen bewertet Defense die Installation erneut.
+
 Im eigenen Runnerzug begründet eine durch Zugriffsbeobachtungen bestätigte
 Schadensstrategie mit einer öffentlich finanzierbaren tagabhängigen
 Schadensoperation einen Vierkartenpuffer für die nächste Corpantwort. Unter
@@ -2631,6 +2637,16 @@ unterdrücken. Die Ausnahme für eine nur später zurückgestellte Handpufferwir
 bleibt auf aktuell sichere Mehrzweck-Actions begrenzt; echte Draw-Tax-Gefahr wird
 weder durch den Scheduler noch durch die aktuelle Phasenbindung aufgehoben.
 
+Bei kürzlich erlittenem Corp-Schaden kann Defense einen steuerpflichtigen
+Basisdraw als aktuellen Handpufferschritt zulassen. Dafür muss der Runner
+bereits getaggt sein, die vollständige Tagentfernung muss im Restzug fehlen
+und der Schadenpuffer muss mit den verbleibenden Klicks und Stackkarten
+erreichbar sein. Bekannte aktive Schadensquellen, verfügbare Schutzinstallation
+und ein unmittelbar nutzbarer sicherer Handzuwachs erhalten die Sperre.
+Die Zulassung gilt für den aktuellen positiven Basisdraw. Neue Karten,
+Steuerantworten und der verbleibende Bedarf werden nach jeder Aktion neu
+gebunden. P731 G11 D63 belegt den Vierkartenpuffer gegen den anschließenden
+Schaden. Die spätere Entscheidung über den Partieverlauf bleibt offen.
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
 Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda-,
 Score-Threat- oder Informationsroute übernimmt der Defense-Owner den gequoteten Puffer, wenn

@@ -138,6 +138,13 @@ export function quoteCorpPunishRoute(
   }
 
   const head = certifiedSteps[0];
+  const agendaFundedHead = head?.quote.agendaPointCost !== undefined;
+  if (agendaFundedHead && certifiedSteps.length !== 1) {
+    return {
+      ok: true,
+      quote: incompleteQuote(base, "future_state_transition_unavailable"),
+    };
+  }
   const currentHeadAction = head
     ? exactCurrentHeadAction(state, head.quote, head.currentLegalActionId)
     : undefined;
@@ -298,6 +305,11 @@ export function quoteCorpPunishRoute(
     0,
   );
   const hasDamage = maximumDamage > 0;
+  const concealedAgendaDamageResponse =
+    agendaFundedHead &&
+    state.runner.rig.resources.some((id) =>
+      isConcealedRunnerResource(state, id),
+    );
   const hasTraceTagResponse = traceTagResponse !== undefined;
   const hasDirectTagResponse = directTagResponse !== undefined;
   const corpResponseCredits = traceTagResponse?.corpResponseCredits ?? 0;
@@ -322,7 +334,11 @@ export function quoteCorpPunishRoute(
               kind: "existing_tag",
               status: "satisfied",
               currentRunnerTags: state.runner.tags,
-              requiredRunnerTags: 1,
+              requiredRunnerTags:
+                agendaFundedHead &&
+                head?.condition?.kind === "runner_tags_at_least"
+                  ? head.condition.amount
+                  : 1,
             }
           : directTagStepId
             ? {
@@ -448,9 +464,10 @@ export function quoteCorpPunishRoute(
               },
             }
           : {}),
-      guarantee:
-        traceTagResponse?.concealedRunnerResponsesUnknown ||
-        directTagResponse?.concealedRunnerResponsesUnknown
+      guarantee: concealedAgendaDamageResponse
+        ? "unknown"
+        : traceTagResponse?.concealedRunnerResponsesUnknown ||
+            directTagResponse?.concealedRunnerResponsesUnknown
           ? "not_guaranteed"
           : traceTagResponse &&
               traceTagResponse.minimumTagAmount <
@@ -1039,8 +1056,52 @@ function certifyActivatedStep(
     return { ok: false, reason: "source_capability_unsupported" };
   if (request.sourceCapabilityBindingKind !== "card_spec_capability_key")
     return { ok: false, reason: "source_capability_missing" };
-  const scoredDomain = engineCardByDefinitionId(definition.id)?.engine
-    .scoredAgenda;
+  const cardEngine = engineCardByDefinitionId(definition.id)?.engine;
+  const directDamage = cardEngine?.uniqueDirectLongtail;
+  if (installed && directDamage?.kind === "tagged_meat_damage") {
+    if (
+      request.sourceCapabilityId !==
+      canonicalCapabilityId(definition.id, directDamage.capabilityKey)
+    ) {
+      return { ok: false, reason: "source_capability_missing" };
+    }
+    if (request.order !== 0 || request.currentLegalActionId === undefined) {
+      return { ok: false, reason: "head_legal_action_unavailable" };
+    }
+    return {
+      ok: true,
+      step: {
+        quote: {
+          stepId: request.stepId,
+          order: request.order,
+          kind: request.kind,
+          sourceCardInstanceId: request.sourceCardInstanceId,
+          sourceCardDefinitionId: instance.definitionId,
+          sourceCapabilityBindingKind: request.sourceCapabilityBindingKind,
+          sourceCapabilityId: request.sourceCapabilityId,
+          clicks: 1,
+          credits: 0,
+          agendaPointCost: directDamage.agendaPointCost,
+        },
+        effects: [
+          {
+            kind: "damage",
+            recipient: "runner",
+            damageType: directDamage.damageType,
+            amount: directDamage.damageAmount,
+            preventable: true,
+            visibility: directDamage.visibility,
+          },
+        ],
+        condition: {
+          kind: "runner_tags_at_least",
+          amount: directDamage.requiredRunnerTags,
+        },
+        currentLegalActionId: request.currentLegalActionId,
+      },
+    };
+  }
+  const scoredDomain = cardEngine?.scoredAgenda;
   if (
     scored &&
     scoredDomain?.kind ===
@@ -1513,12 +1574,17 @@ function exactCurrentHeadAction(
       (currentLegalActionId === undefined ||
         action.actionId === currentLegalActionId) &&
       action.side === "corp" &&
-      (action.type === "play_operation" ||
-        (action.type === "activated_card_ability" &&
-          action.payload?.cardImplementationAbilityId ===
-            step.sourceCapabilityId &&
-          action.payload?.cardImplementationCapabilityBindingKind ===
-            step.sourceCapabilityBindingKind)) &&
+      (step.agendaPointCost !== undefined
+        ? action.type === "gain_credit" &&
+          action.payload?.v1920AssetAbility === "tagged_meat_damage" &&
+          action.payload.damageRecipient === "runner" &&
+          action.payload.agendaPointCost === step.agendaPointCost
+        : action.type === "play_operation" ||
+          (action.type === "activated_card_ability" &&
+            action.payload?.cardImplementationAbilityId ===
+              step.sourceCapabilityId &&
+            action.payload?.cardImplementationCapabilityBindingKind ===
+              step.sourceCapabilityBindingKind)) &&
       action.source === step.sourceCardInstanceId &&
       action.payload?.cardId === step.sourceCardInstanceId &&
       action.timingPoint === state.timingPoint &&

@@ -499,12 +499,20 @@ export function runnerDefenseDeferredHandBufferDispositions(params: {
   if (phase === "build_hand_buffer") {
     return params.signals.preserveHandBeforeIncompleteTagClear
       ? params.actionCandidates.flatMap((candidate) => {
-          const evidenceCode = candidate.semanticActionType === "tag.remove"
-            ? "runner_tag_clear_deferred_until_survival_buffer"
-            : candidate.semanticActionType === "counter.remove_trace_tag" ||
-                candidate.semanticActionType === "counter.remove_runner_hazard"
-              ? "runner_persistent_hazard_counter_deferred_until_survival_buffer"
-              : undefined;
+          const deferredDefenseSupport =
+            params.signals.defenseSupportInstallActionIds?.includes(candidate.actionId) === true &&
+            !params.independentlyOwnedActionIds.has(candidate.actionId) &&
+            !params.actionDispositions?.some(
+              (entry) => entry.actionId === candidate.actionId,
+            );
+          const evidenceCode = deferredDefenseSupport
+            ? "runner_defense_support_install_deferred_until_survival_buffer"
+            : candidate.semanticActionType === "tag.remove"
+              ? "runner_tag_clear_deferred_until_survival_buffer"
+              : candidate.semanticActionType === "counter.remove_trace_tag" ||
+                  candidate.semanticActionType === "counter.remove_runner_hazard"
+                ? "runner_persistent_hazard_counter_deferred_until_survival_buffer"
+                : undefined;
           return evidenceCode && !params.signals.handBufferActionIds?.includes(candidate.actionId)
             ? [{
                 actionId: candidate.actionId,
