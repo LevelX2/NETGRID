@@ -20,6 +20,7 @@ export type HiddenZoneRuntimeDepsKey =
   | "searchStackToGripTargetCount"
   | "topTrashToGripTargetCount"
   | "topTrashToGripTargetId"
+  | "topHostedProgramToGripTargetId"
   | "searchStackInstallTargetCount"
   | "stackOrTrashProgramInstallTargetCount"
   | "lookTopStackShowToCorpThenInstallMatchingTargetCount"

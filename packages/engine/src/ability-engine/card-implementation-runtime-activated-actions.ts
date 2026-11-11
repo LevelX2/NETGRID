@@ -6,7 +6,6 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
-import { microtechHostedProgramIds } from "../game/state/microtech-backup";
 import {
   activatedAbilityLegalActionCosts,
   canPayActivatedCardImplementationCosts,
@@ -195,7 +194,7 @@ export function pushActivatedCardImplementationActionsForTiming(
     const moveTopHostedProgramEffect =
       moveTopHostedProgramToGripEffect(ability);
     if (moveTopHostedProgramEffect) {
-      const targetCardId = microtechHostedProgramIds(state, sourceCardId).at(-1);
+      const targetCardId = deps.topHostedProgramToGripTargetId(state, sourceCardId);
       if (!targetCardId) continue;
       actions.push(
         createBoundAction(

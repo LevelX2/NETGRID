@@ -64,6 +64,10 @@ export type CardImplementationRuntimeHiddenDependencies = {
   ) => number;
   topTrashToGripTargetCount: (state: GameState) => number;
   topTrashToGripTargetId: (state: GameState) => CardInstanceId | undefined;
+  topHostedProgramToGripTargetId: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+  ) => CardInstanceId | undefined;
   searchStackInstallTargetCount: (
     state: GameState,
     filter: "program",
