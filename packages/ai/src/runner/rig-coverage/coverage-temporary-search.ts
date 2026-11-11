@@ -3,7 +3,11 @@ import {
   runnerInformationProbeKnownPathIsAdmitted,
 } from "../../plans/runner-run-purpose";
 import { runnerTerminalRemoteContestIsDirectlyMandatory } from "../remote-contest/remote-contest-admission";
-import type { AiDecisionInput } from "@netgrid/shared";
+import {
+  canonicalCapabilityId,
+  cardSpecPlanningCardByDefinitionId,
+} from "@netgrid/cards/planning";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
@@ -27,6 +31,7 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
   strategicIntent: RunnerStrategicIntentProfile,
 ): RunnerCoverageGapSignal {
   const rejected = new Map<string, string>();
+  const boundedSearches = new Map<string, number>();
   for (const candidate of candidates) {
     const temporary =
       candidate.functionalEffects?.some(
@@ -84,11 +89,18 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
         )
         .map((e) => e.installCost),
     );
+    const boundedSearch =
+      terminalRunNeed && !temporary && source && binding
+        ? boundedProgramSearchEffect(source, binding)
+        : undefined;
+    if (boundedSearch)
+      boundedSearches.set(candidate.actionId, boundedSearch.count);
     const acquireThenInstall =
       !temporary &&
       modes.size === 0 &&
-      (source?.payload?.cardImplementationEffectKind ===
-        "search_stack_to_grip" ||
+      (boundedSearch !== undefined ||
+        source?.payload?.cardImplementationEffectKind ===
+          "search_stack_to_grip" ||
         source?.payload?.cardImplementationEffectKind ===
           "search_trash_to_grip" ||
         source?.payload?.cardImplementationEffectKind ===
@@ -112,10 +124,9 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
       source.costs.reduce((n, c) => n + (c.clicks ?? 0), 0) +
       (acquireThenInstall ? 1 : 0);
     const runClicks = run.costs.reduce((n, c) => n + (c.clicks ?? 0), 0);
-    const sourceCredits = source.costs.reduce(
-      (n, c) => n + (c.credits ?? 0),
-      0,
-    );
+    const sourceCredits =
+      source.costs.reduce((n, c) => n + (c.credits ?? 0), 0) +
+      (boundedSearch?.costPerTaken ?? 0);
     if (
       !Number.isSafeInteger(installCost) ||
       (installCost ?? -1) < 0 ||
@@ -333,7 +344,13 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
     )
       fail("no_complete_same_turn_funding_route");
   }
-  if (!rejected.size) return gap;
+  const conditionalEvidence = [...boundedSearches]
+    .filter(([actionId]) => !rejected.has(actionId))
+    .map(
+      ([actionId, count]) =>
+        `bounded_search_conditional_reveal:${actionId}:${count}`,
+    );
+  if (!rejected.size && !conditionalEvidence.length) return gap;
   return {
     ...gap,
     directSearchActionIds: gap.directSearchActionIds.filter(
@@ -351,10 +368,51 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
     ],
     recoveryEvidenceCodes: [
       ...(gap.recoveryEvidenceCodes ?? []),
+      ...conditionalEvidence,
       ...[...rejected].map(
         ([id, reason]) =>
           "temporary_search_incomplete_horizon:" + id + ":" + reason,
       ),
     ],
   };
+}
+
+function boundedProgramSearchEffect(
+  action: LegalAction,
+  binding: {
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+  },
+) {
+  const abilityId = action.abilityRef?.sourceAbilityId;
+  if (
+    action.side !== "runner" ||
+    action.type !== "activated_card_ability" ||
+    action.source !== binding.sourceCardInstanceId ||
+    action.abilityRef?.sourceCardInstanceId !== binding.sourceCardInstanceId ||
+    action.payload?.cardImplementationCapabilityBindingKind !==
+      "card_spec_capability_key" ||
+    action.payload.cardImplementationAbilityId !== abilityId
+  )
+    return undefined;
+  const abilities =
+    cardSpecPlanningCardByDefinitionId(binding.sourceDefinitionId)?.planning
+      .engine.abilities ?? [];
+  const ability = abilities.find(
+    (entry) =>
+      entry.kind === "activated" &&
+      entry.timing === "runner_main" &&
+      canonicalCapabilityId(binding.sourceDefinitionId, entry.capabilityKey) ===
+        abilityId,
+  );
+  const effect = ability?.effects.length === 1 ? ability.effects[0] : undefined;
+  return effect?.kind === "look_top_stack_take_matching" &&
+    effect.allowedTypes.length === 1 &&
+    effect.allowedTypes[0] === "program" &&
+    Number.isSafeInteger(effect.count) &&
+    effect.count > 0 &&
+    Number.isSafeInteger(effect.costPerTaken) &&
+    effect.costPerTaken >= 0
+    ? effect
+    : undefined;
 }
