@@ -2528,6 +2528,12 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Hat der Überlebens-Handpuffer Vorrang vor einer nicht vollständig
+finanzierbaren Tagentfernung, klassifiziert Defense auch eine grundsätzlich
+geeignete, in dieser Phase aufgeschobene Schutzinstallation. Die Disposition
+gehört zur aktuellen LegalAction. Eine unabhängig gebundene Route bleibt
+ausführbar. Nach dem Ziehen bewertet Defense die Installation erneut.
+
 Im eigenen Runnerzug begründet eine durch Zugriffsbeobachtungen bestätigte
 Schadensstrategie mit einer öffentlich finanzierbaren tagabhängigen
 Schadensoperation einen Vierkartenpuffer für die nächste Corpantwort. Unter
