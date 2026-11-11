@@ -4693,6 +4693,13 @@ Temporäre Suchantworten für einen Remote-Informationszugriff verwenden außerd
 
 Eine aktuell gebundene Programmsuche oder Top-Heap-Rückholung auf die Hand ist noch keine Installation. Bei den kanonischen Effekten `search_stack_to_grip`, `search_trash_to_grip` und `move_top_trash_to_grip` rechnet der Coverage-Owner daher den zusätzlichen normalen Installationsklick und die exakten Installationskosten in die bereits bestehende Runfolge ein. Die konkrete Quelle, Suchzielinstanz beziehungsweise Deckdefinition, StateVersion, MU-Freigabe, Handvorbereitung und vollständige Finanzierung müssen weiterhin zusammenpassen. Die Rückholung wird dadurch weder zu einer kostenlosen Installation noch zu einer unabhängig zugelassenen Runroute.
 
+Für den bereits gebundenen terminalen Remote-Bedarf darf Coverage außerdem
+eine kanonische begrenzte Programmsuche an der Stack-Spitze versuchen. Die
+Projektion prüft den Erwerbspreis eines passenden Treffers, Einbau, MU,
+Restklicks, Handpuffer und den konkret gebundenen Run. Sie kennzeichnet den
+Treffer als bedingt. Erst die tatsächliche Engine-Choice zeigt die Karten.
+Ohne passenden Treffer bleibt der Run-Bedarf offen.
+
 ### Direkter Run-Root zwischen aufeinanderfolgenden Traces
 
 Ist der Central- oder Remote-Root selbst Executor, erhält er die Kostenfortsetzung auch zwischen zwei Traces desselben ICE. Die abgeschlossene erste Trace, der exakt gewählte Continue-Schritt und der anschließende Tracebeginn müssen über StateVersion, Run, Server, ICE-Instanz, Quelle, öffentliche Ereignisfolge und dieselbe Root-/Executor-Kette zusammenpassen. Erst dieser Nachweis aktualisiert den Ursprung für ein nachfolgendes Engine-Zahlungsfenster. Eine fremde Choice, Ereignislücke oder abweichende Zuständigkeit bleibt gesperrt.
