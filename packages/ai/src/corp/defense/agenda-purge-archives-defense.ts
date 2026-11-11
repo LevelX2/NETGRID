@@ -82,8 +82,6 @@ export function preferredAgendaPurgeArchivesOptions(
       runnerRunOnlyCredits: view.runnerNextRunBadPublicityCredits ?? 0,
       runnerCreditPoolHorizon: "next_runner_turn",
       runnerPreparationCreditClicks: preparationCredits,
-      targetServerId: "archives",
-      observedAtStateVersion: view.stateVersion,
       maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
     });
   const originalProtection = protection(original.archivesIce);
@@ -95,15 +93,17 @@ export function preferredAgendaPurgeArchivesOptions(
     concentratedProtection.runnerAccessSuccessProbability.numerator !== 0
   )
     return undefined;
-  const targets = concentrated.optionIds.flatMap((optionId) => {
+  const targets = concentrated.archivesIce.flatMap((card) => {
+    const optionId = `agenda_purge_${card.instanceId}_archives_fixed`;
     const option = choice.options.find(
       (entry) =>
         entry.id === optionId &&
         entry.selectable !== false &&
-        entry.card?.known &&
-        entry.metadata?.targetServerId === "archives",
+        entry.card?.instanceId === card.instanceId &&
+        entry.card.known &&
+        entry.value === `${card.instanceId}|archives|fixed`,
     );
-    return option?.card
+    return option?.card && concentrated.optionIds.includes(optionId)
       ? [
           {
             cardId: option.card.instanceId,

@@ -2,6 +2,7 @@ import { afterEach, expect, it } from "vitest";
 import capture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-738-r1-g14-d300.json";
 import quoteFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-738-r1-g14-d300-archives-quote.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -31,13 +32,18 @@ afterEach(resetResidentPlanPortfolioMemory);
 function decide(
   adjust?: (input: AiDecisionInputWithDeckCapabilities) => void,
   useQuote = true,
+  useDto = false,
 ) {
-  const input = structuredClone(checkpoint.input);
-  input.playerView.pendingChoice!.agendaPurgeArchivesProtectionQuote =
+  const captured = structuredClone(checkpoint.input);
+  captured.playerView.pendingChoice!.agendaPurgeArchivesProtectionQuote =
     structuredClone(nativeQuote);
-  adjust?.(input);
+  adjust?.(captured);
   if (!useQuote)
-    delete input.playerView.pendingChoice!.agendaPurgeArchivesProtectionQuote;
+    delete captured.playerView.pendingChoice!
+      .agendaPurgeArchivesProtectionQuote;
+  const input = useDto
+    ? { ...captured, ...buildAiDecisionInputDto(captured) }
+    : captured;
   if (!input.ownDeckSnapshot) throw Error("Deck snapshot missing");
   restoreAiRuntimeCheckpoint(
     input,
@@ -60,6 +66,10 @@ function decide(
 it("puts both legal stops in front of the newly revealed winning Archives agenda", () => {
   expect(Object.values(checkpoint.validation)).toEqual(Array(9).fill(true));
   expect(decide()).toEqual(together);
+});
+
+it("binds the same two options after the normal decision DTO sanitizes the choice", () => {
+  expect(decide(undefined, true, true)).toEqual(together);
 });
 
 it("retains the existing allocation without an exact Engine package quote", () => {

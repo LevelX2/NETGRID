@@ -3608,25 +3608,33 @@ function sanitizeAgendaPurgeArchivesProtectionQuote(
   );
   const seen = new Set<string>();
   const packages = quote.packages.map((entry) => {
-    const options = entry.optionIds.map((id) => optionById.get(id));
-    const archives = options.filter(
-      (option) => option?.metadata?.targetServerId === "archives",
-    );
+    const options = entry.optionIds.flatMap((id) => {
+      const option = optionById.get(id);
+      const card = option?.card;
+      if (
+        !option ||
+        option.selectable === false ||
+        !card?.known ||
+        card.type !== "ice"
+      )
+        return [];
+      for (const serverId of ["archives", "rd"] as const) {
+        if (
+          option.id === `agenda_purge_${card.instanceId}_${serverId}_fixed` &&
+          option.value === `${card.instanceId}|${serverId}|fixed`
+        )
+          return [{ card, serverId }];
+      }
+      return [];
+    });
+    const archives = options.filter((option) => option.serverId === "archives");
     const identity = [...entry.optionIds].sort().join("|");
     if (
+      entry.optionIds.length !== 2 ||
       options.length !== 2 ||
       seen.has(identity) ||
       archives.length === 0 ||
-      options.some(
-        (option) =>
-          !option ||
-          option.selectable === false ||
-          !option.card?.known ||
-          option.card.type !== "ice" ||
-          option.metadata?.optionKind !== "fixed" ||
-          !["archives", "rd"].includes(option.metadata.targetServerId ?? ""),
-      ) ||
-      options[0]?.card?.instanceId === options[1]?.card?.instanceId ||
+      options[0]?.card.instanceId === options[1]?.card.instanceId ||
       !nonNegativeInteger(entry.corpCreditsAfter) ||
       !nonNegativeInteger(entry.corpAgendaPointsAfter) ||
       !nonNegativeInteger(entry.corpClicksAfter) ||
@@ -3642,7 +3650,7 @@ function sanitizeAgendaPurgeArchivesProtectionQuote(
           card.effectiveRunQuote.iceDefinitionId !== card.definitionId ||
           !archives.some(
             (option) =>
-              option?.card?.instanceId === card.instanceId &&
+              option.card.instanceId === card.instanceId &&
               option.card.definitionId === card.definitionId,
           ),
       )
