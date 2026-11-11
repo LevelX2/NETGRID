@@ -1,6 +1,7 @@
 import {
   getLegalActions,
   getPlayerView,
+  quoteAgendaPurgeArchivesProtection,
   quoteCorpRestrictedCreditRoute,
 } from "@netgrid/engine";
 import { collectCorpRestrictedCreditInstalledQuotes } from "./corp-restricted-credit-quote-input";
@@ -139,6 +140,20 @@ export function buildAiDecisionInput(
   );
   const playerView = getPlayerView(state, side);
   const legalActions = getLegalActions(state, side);
+  if (side === "corp" && playerView.pendingChoice) {
+    const choice = playerView.pendingChoice;
+    const resolution = legalActions.find(
+      (action) =>
+        action.type === "resolve_choice" &&
+        action.choiceRequirements?.[0]?.choiceId === choice.choiceId,
+    );
+    const quote = quoteAgendaPurgeArchivesProtection(
+      state,
+      playerView,
+      resolution,
+    );
+    if (quote) choice.agendaPurgeArchivesProtectionQuote = quote;
+  }
   const difficulty = options?.difficulty ?? "normal";
   const decisionId =
     options?.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`;
