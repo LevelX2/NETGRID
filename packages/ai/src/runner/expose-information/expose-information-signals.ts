@@ -291,7 +291,7 @@ function runnerCurrentExposeInformationSignal(
     executor?.moduleId === "runner.convert_run_window" &&
     runId !== undefined &&
     executor.dedupeKey === `run:${runId}` &&
-    executor.target.kind === "window" &&
+    executor.target?.kind === "window" &&
     executor.target.id === `run:${runId}` &&
     continuationEvents.length === 1 &&
     encounterResolution?.type === "continue_run" &&
@@ -314,7 +314,8 @@ function runnerCurrentExposeInformationSignal(
     movement.publicPayload.serverId === attackedServerId &&
     movement.publicPayload.encounterContinue === undefined &&
     movement.publicPayload.result === "continued" &&
-    observedMovement?.matchId === input.matchId &&
+    observedMovement !== undefined &&
+    observedMovement.matchId === input.matchId &&
     observedMovement.side === "runner" &&
     observedMovement.actionType === "continue_run" &&
     observedMovement.source === "game_rule" &&
