@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
@@ -15,8 +15,8 @@ const newTarget = "corp_onr_v1_278_wall-of-ice_1";
 const oldTarget = "corp_onr_v1_268_shock-r_1";
 const sourceId = "runner_onr_v1_065_smarteye_1";
 
-function loadCheckpoint(decision: 171 | 174 = 171): {
-  input: AiDecisionInput;
+function loadCheckpoint(decision: 171 | 173 | 174 = 171): {
+  input: AiDecisionInputWithDeckCapabilities;
   portfolio: ResidentPlanPortfolio;
 } {
   const fixture = JSON.parse(
@@ -24,7 +24,9 @@ function loadCheckpoint(decision: 171 | 174 = 171): {
       new URL(
         decision === 171
           ? "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-r1-g37-d171.json"
-          : "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-g37-control-d174.json",
+          : decision === 173
+            ? "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-r2-g16-d173.json"
+            : "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-736-g37-control-d174.json",
         import.meta.url,
       ),
       "utf8",
@@ -133,6 +135,80 @@ describe("SP-469: a later approach window after a declined exposure", () => {
           (instance) => instance.instanceId !== windowId,
         );
       }
+      restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
+      expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
+    },
+  );
+});
+
+describe("SP-469: nonterminal encounter and automatic movement", () => {
+  const runParent = "plan:runner.convert_run_window:run%3Arun_166";
+  const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
+  const target = "corp_onr_v1_222_ball-and-chain_1";
+  beforeEach(resetResidentPlanPortfolioMemory);
+
+  it("lets Smarteye expose the next ICE under the same run parent", () => {
+    const { input, portfolio } = loadCheckpoint(173);
+    expect(portfolio.executorInstanceId).toBe(runParent);
+    expect(portfolio.turnPlanExecutionLease).toMatchObject({
+      actionType: "continue_run",
+      currentBinding: { stateVersion: 170 },
+    });
+    expect(input.eventTail.slice(-2)).toMatchObject([
+      {
+        type: "continue_run",
+        stateVersionBefore: 170,
+        publicPayload: { encounterContinue: true, encounterWillEndRun: false },
+      },
+      {
+        type: "continue_run",
+        stateVersionBefore: 171,
+        publicPayload: { actor: "runner", serverId: "hq", result: "continued" },
+      },
+    ]);
+    expect(input.observedTurnPlanAction).toMatchObject({
+      actionId: "runner.continue_run",
+      source: "game_rule",
+      stateVersionBefore: 171,
+      stateVersionAfter: 172,
+    });
+    restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
+    const selected = chooseAiAction(input);
+    const expose = input.legalActions.find(
+      (action) => action.payload?.approachIceExposeDecision === "expose",
+    );
+    expect(expose?.payload?.iceId).toBe(target);
+    expect(selected.actionId).toBe(expose?.actionId);
+    expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: pressureRoot,
+      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      executionOrigin: { rootPlanInstanceId: pressureRoot, stateVersion: 172 },
+    });
+    expect(selected.fallbackUsed).toBe(false);
+    expect(selected.timeoutUsed).toBe(false);
+  });
+
+  it.each([
+    "lease", "run", "server", "gap", "terminal", "extra encounter", "observation",
+  ] as const)(
+    "rejects an unbound automatic movement with %s",
+    (defect) => {
+      const { input, portfolio } = loadCheckpoint(173);
+      const encounter = input.eventTail.find(
+        (event) => event.stateVersionBefore === 170,
+      )!;
+      const movement = input.eventTail.find(
+        (event) => event.stateVersionBefore === 171,
+      )!;
+      if (defect === "lease") delete portfolio.turnPlanExecutionLease;
+      if (defect === "run") input.playerView.run!.runId = "other-run";
+      if (defect === "server") movement.publicPayload.serverId = "rd";
+      if (defect === "gap") input.eventTail = input.eventTail.filter(
+        (event) => event !== movement,
+      );
+      if (defect === "terminal") encounter.publicPayload.encounterWillEndRun = true;
+      if (defect === "extra encounter") movement.publicPayload.encounterContinue = true;
+      if (defect === "observation") delete input.observedTurnPlanAction;
       restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
       expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
     },

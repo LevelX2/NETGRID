@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -10,7 +11,7 @@ import type {
 } from "./expose-information-types";
 
 export function runnerExposeInformationSignals(
-  input: AiDecisionInput,
+  input: AiDecisionInputWithDeckCapabilities,
   candidates: readonly ActionSemanticCandidate[],
   previous: ResidentPlanPortfolio | undefined,
 ): RunnerExposeInformationSignal[] {
@@ -145,7 +146,7 @@ function runnerProactiveExposeInformationSignals(
 }
 
 function runnerCurrentExposeInformationSignal(
-  input: AiDecisionInput,
+  input: AiDecisionInputWithDeckCapabilities,
   previous: ResidentPlanPortfolio | undefined,
   rememberedTargetIds: ReadonlySet<string>,
 ): RunnerExposeInformationSignal | undefined {
@@ -233,14 +234,16 @@ function runnerCurrentExposeInformationSignal(
       event.stateVersionBefore >= previous.stateVersion &&
       event.stateVersionAfter <= input.playerView.stateVersion,
   );
-  const exactLeaseAndEventSequence =
-    previous !== undefined &&
-    previous.stateVersion < input.playerView.stateVersion &&
+  const exactLeaseBinding =
     turnPlanCommitment?.status === "active" &&
     turnPlanCommitment.sequenceRootPlanInstanceId === rootPlanInstanceId &&
     executionLease !== undefined &&
     executionLease.commitmentId === turnPlanCommitment.commitmentId &&
-    executionLease.sourcePlanId === turnPlanCommitment.sourcePlanId &&
+    executionLease.sourcePlanId === turnPlanCommitment.sourcePlanId;
+  const exactLeaseAndEventSequence =
+    previous !== undefined &&
+    previous.stateVersion < input.playerView.stateVersion &&
+    exactLeaseBinding &&
     executionLease.currentBinding.stateVersion === previous.stateVersion &&
     continuationEvents.length >= 1 &&
     continuationEvents[0]?.stateVersionBefore === previous.stateVersion &&
@@ -272,6 +275,52 @@ function runnerCurrentExposeInformationSignal(
               event.publicPayload?.installPlacement === "root" &&
               event.publicPayload?.serverId === attackedServerId)),
       );
+  const encounterResolution = input.eventTail?.find(
+    (event) =>
+      event.stateVersionBefore === executionLease?.currentBinding.stateVersion,
+  );
+  const [movement] = continuationEvents;
+  const observedMovement = input.observedTurnPlanAction;
+  const runId = input.playerView.run.runId;
+  // The Engine-only move refreshes the portfolio at its pre-action version,
+  // while the decision lease still identifies the previous encounter action.
+  const exactEncounterContinuationLease =
+    previous !== undefined &&
+    exactLeaseBinding &&
+    executionLease.actionType === "continue_run" &&
+    executor?.moduleId === "runner.convert_run_window" &&
+    runId !== undefined &&
+    executor.dedupeKey === `run:${runId}` &&
+    executor.target.kind === "window" &&
+    executor.target.id === `run:${runId}` &&
+    continuationEvents.length === 1 &&
+    encounterResolution?.type === "continue_run" &&
+    encounterResolution.stateVersionBefore + 1 === previous.stateVersion &&
+    encounterResolution.stateVersionAfter === previous.stateVersion &&
+    encounterResolution.turnSerial === input.playerView.turnSerial &&
+    encounterResolution.publicPayload.actor === "runner" &&
+    encounterResolution.publicPayload.actionType === "continue_run" &&
+    encounterResolution.publicPayload.serverId === attackedServerId &&
+    encounterResolution.publicPayload.encounterContinue === true &&
+    encounterResolution.publicPayload.encounterWillEndRun === false &&
+    encounterResolution.publicPayload.result === "continued" &&
+    movement?.type === "continue_run" &&
+    movement.stateVersionBefore === previous.stateVersion &&
+    movement.stateVersionAfter === input.playerView.stateVersion &&
+    movement.stateVersionBefore + 1 === movement.stateVersionAfter &&
+    movement.turnSerial === input.playerView.turnSerial &&
+    movement.publicPayload.actor === "runner" &&
+    movement.publicPayload.actionType === "continue_run" &&
+    movement.publicPayload.serverId === attackedServerId &&
+    movement.publicPayload.encounterContinue === undefined &&
+    movement.publicPayload.result === "continued" &&
+    observedMovement?.matchId === input.matchId &&
+    observedMovement.side === "runner" &&
+    observedMovement.actionType === "continue_run" &&
+    observedMovement.source === "game_rule" &&
+    observedMovement.stateVersionBefore === movement.stateVersionBefore &&
+    observedMovement.stateVersionAfter === movement.stateVersionAfter &&
+    observedMovement.boundChoices.length === 0;
   const exactPlanBinding =
     previous !== undefined &&
     previous.side === "runner" &&
@@ -293,7 +342,7 @@ function runnerCurrentExposeInformationSignal(
       executorState?.kind === "remote_contest" ||
       executorState?.kind === "run_window") &&
     executorState.signal?.serverId === input.playerView.run.attackedServerId &&
-    (exactSelectedOrigin || exactTurnPlanLease);
+    (exactSelectedOrigin || exactTurnPlanLease || exactEncounterContinuationLease);
   const previousExpose =
     executor?.moduleId === "runner.expose_information"
       ? (executor.moduleState as ExposeInformationState).signal
