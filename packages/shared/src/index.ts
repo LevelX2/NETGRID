@@ -2772,6 +2772,17 @@ export const RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION =
 export const RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION =
   "runner-fort-ice-trash-quote-v1" as const;
 
+/** Runner-private binding of a mandatory, currently active run replacement. */
+export type RunnerSuccessfulRunFortIceTrashQuote = {
+  schemaVersion: typeof RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION;
+  runId: string;
+  stateVersion: number;
+  serverId: Exclude<ServerId, "new_remote">;
+  sourceCardInstanceId: CardInstanceId;
+  rezzedIceCount: number;
+  tagsAdded: number;
+};
+
 /**
  * Actor-private planning projection for a currently legal Runner draw action,
  * including direct on-play and installed abilities. Source-card consumption
@@ -4350,6 +4361,7 @@ export type PlayerView = {
     followupRunOpportunity?: "after_run" | "after_successful_run";
     /** Remaining runs of public event sequences, independent of run success. */
     pendingSequenceRunCount?: number;
+    successfulRunFortIceTrashQuote?: RunnerSuccessfulRunFortIceTrashQuote;
     attackedServerId: Exclude<ServerId, "new_remote">;
     /** Public resolved access destination; absent means the attacked server. */
     accessServerOverride?: Exclude<ServerId, "new_remote">;

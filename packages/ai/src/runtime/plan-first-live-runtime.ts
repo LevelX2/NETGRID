@@ -830,7 +830,14 @@ export function choosePlanFirstLiveAction(
     dependencies.discardKeepScore,
   );
   bindSelectedCorpDefenseHqHold(input, result);
-  bindSelectedPlanActionOrigin(input, result, candidates);
+  bindSelectedPlanActionOrigin(
+    input,
+    result,
+    candidates,
+    input.side === "runner"
+      ? (context.domain as RunnerPlanDomain | undefined)?.runTargetEvaluations
+      : undefined,
+  );
   bindSelectedRunnerExposeInformationMemory(input, result);
   bindSelectedEngineWindowRunnerVacuumLinkOrigin(input, result, previous);
   reconcileSelectedRunnerCostPenaltySupportOrigin(input, result, previous);

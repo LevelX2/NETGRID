@@ -14,6 +14,7 @@ import {
 import { projectInstalledCorpIceRezCost } from "../payment";
 import { isV099OrLater } from "../rules-version";
 import { runJackOutAdditionalCost } from "../run/run-duration-payment";
+import { runnerActiveSuccessfulRunFortIceTrashQuote } from "../turn/runner-fort-ice-trash-quote";
 import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
   agendaPoints,
@@ -282,9 +283,15 @@ export function buildPlayerViewProjection(
     runnerSide && approachedIce?.known
       ? projectInstalledCorpIceRezCost(state, approachedIce.instanceId)
       : undefined;
+  const successfulRunFortIceTrashQuote = runnerSide
+    ? runnerActiveSuccessfulRunFortIceTrashQuote(state)
+    : undefined;
   const run = state.run
     ? {
         runId: state.run.runId,
+        ...(successfulRunFortIceTrashQuote
+          ? { successfulRunFortIceTrashQuote }
+          : {}),
         attackedServerId: state.run.attackedServerId,
         ...(state.run.accessServerOverride
           ? { accessServerOverride: state.run.accessServerOverride }

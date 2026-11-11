@@ -331,6 +331,16 @@ export type RunnerRunTargetFundingNeed = {
   protectedLiquidReserve: number;
 };
 
+export type RunnerFortIceTrashObjective = Readonly<{
+  kind: "trash_rezzed_ice_on_fort_and_tag_runner";
+  actionId: string;
+  sourceCardInstanceId: string;
+  serverId: string;
+  observedAtStateVersion: number;
+  tagsAdded: number;
+  followupPayoff: RunnerAccessPayoff;
+}>;
+
 export type RunnerRunTargetEvaluation = {
   schemaVersion: typeof RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION;
   targetServerId: string;
@@ -340,6 +350,7 @@ export type RunnerRunTargetEvaluation = {
   actionId: string;
   accessPayoff: RunnerAccessPayoff;
   accessFacts: RunnerAccessFacts;
+  fortIceTrashObjective?: RunnerFortIceTrashObjective;
   accessPayoffContestable?: boolean;
   /** A known credit shortfall blocks the current route, while its access
    * payoff remains useful for a separately quoted preparation/funding need. */

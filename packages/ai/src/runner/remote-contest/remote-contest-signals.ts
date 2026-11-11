@@ -1143,7 +1143,11 @@ export function buildRunnerRemoteContestSignals({
         return {
           contestId: `remote:${evaluation.targetServerId}`,
           serverId: evaluation.targetServerId,
-          purpose: purpose === "information" ? purpose : ("contest" as const),
+          purpose: evaluation.fortIceTrashObjective
+            ? ("access" as const)
+            : purpose === "information"
+              ? purpose
+              : ("contest" as const),
           knownAgendaThreat: evaluation.scoreThreat,
           terminalPatternThreat: terminalRemoteThreat,
           reachable:

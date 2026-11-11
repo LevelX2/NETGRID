@@ -4716,3 +4716,20 @@ Ist der Central- oder Remote-Root selbst Executor, erhält er die Kostenfortsetz
 ### Handreserve der konkret gebundenen Suchroute
 
 Die Vorbereitung einer temporären Coverage-Suche quotiert den Handpuffer für den konkret gebundenen Zielrun. Ungewählte andere Runs dürfen keine zusätzlichen Ziehklicks verlangen. Der gemeinsame Service berücksichtigt weiterhin den bestätigten globalen Corp-Schadensbedarf und den Verbrauch eines flüchtigen Breakers; ein tatsächlich fehlender Handpuffer bleibt auch bei leerem Stack ein Ablehnungsgrund.
+
+### Fortweiter ICE-Abriss statt Zugriff
+
+Der Start-Owner bindet einen verpflichtenden ICE-Abriss mit eigenen Tags an
+die exakte angebotene Run-Aktion und den gewöhnlichen Nutzen einer späteren
+Route auf demselben Fort. Er berücksichtigt den bekannten Runpreis, die
+Eventkosten und die Kosten der Tagbereinigung. Eine leere Remote-Root,
+unzureichende Liquidität oder ein bereits als wertlos bekannter späterer
+Zugriff begründet keine Abrissinvestition. Unbekannte Schichten bleiben ein
+Risiko der aktuellen und späteren Route.
+
+Die Engine liefert der Runner-Sicht die aktive Ersatzwirkung mit Run,
+StateVersion, Fort, Kartenquelle, öffentlicher Rezzahl und Tagmenge. Der
+residente Run-Owner bindet diese Quelle an das gewählte Ersatzziel. Bei
+Pumpen und Breaks zählt die wirksame ICE-Entfernung als konkreter
+Fortsetzungszweck. Die gewöhnliche Remote-Root-Prüfung und die übrigen
+Sicherheits- und Zahlungsgrenzen behalten ihre eigenen Zuständigkeiten.

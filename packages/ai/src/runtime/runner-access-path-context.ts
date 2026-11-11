@@ -128,6 +128,13 @@ export function createRunnerAccessPathContext(
     if (!targetSubroutines.every(isEndRunSubroutine))
       return { blocksBreak: false, evidence: [] };
 
+    const fortTrash = input.playerView.run?.successfulRunFortIceTrashQuote;
+    if (fortTrash?.serverId === server.id && fortTrash.rezzedIceCount > 0)
+      return {
+        blocksBreak: false,
+        evidence: ["encounter_remote_payoff:fort_ice_trash_replacement"],
+      };
+
     const evidenceBase = [
       "encounter_remote_payoff_check:true",
       "encounter_remote_payoff_blocked:true",

@@ -1072,7 +1072,20 @@ function runnerRunWindowActionAssessment(
             : reservedAccessTrashCredits(input, runOrigin?.accessCommitment),
         })
       : undefined;
-  const committedParentPayoff = runnerRunOriginCommittedPayoff(runOrigin);
+  const fortTrashObjective = runOrigin?.accessCommitment?.fortIceTrashObjective;
+  const activeFortTrash = input.playerView.run?.successfulRunFortIceTrashQuote;
+  const boundFortTrash =
+    fortTrashObjective !== undefined &&
+    activeFortTrash !== undefined &&
+    activeFortTrash.serverId === fortTrashObjective.serverId &&
+    activeFortTrash.sourceCardInstanceId ===
+      fortTrashObjective.sourceCardInstanceId &&
+    activeFortTrash.tagsAdded === fortTrashObjective.tagsAdded &&
+    activeFortTrash.stateVersion > fortTrashObjective.observedAtStateVersion;
+  const committedParentPayoff =
+    !fortTrashObjective || boundFortTrash
+      ? runnerRunOriginCommittedPayoff(runOrigin)
+      : undefined;
   const currentEncounterPayment = !exclusion
     ? (encounterPayment ??
       completeEncounterBreakerPayment(input, action) ??
@@ -1157,6 +1170,9 @@ function runnerRunWindowActionAssessment(
             : []),
           ...(committedParentPayoff
             ? [`runner_run_parent_payoff_preserved:${committedParentPayoff}`]
+            : []),
+          ...(boundFortTrash
+            ? ["runner_run_parent_effect_preserved:fort_ice_trash"]
             : []),
           ...(fullPathCommitmentPreserved
             ? ["runner_full_path_commitment_preserved"]

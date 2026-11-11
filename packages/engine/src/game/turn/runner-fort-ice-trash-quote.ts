@@ -3,6 +3,7 @@ import {
   type CardDefinition,
   type GameState,
   type LegalAction,
+  type RunnerSuccessfulRunFortIceTrashQuote,
 } from "@netgrid/shared";
 import { printedCostOnPlayImplementation } from "../../ability-engine/card-implementation-runtime-shared";
 import type { MakeRunEffectImplementation } from "../../ability-engine/definition-types";
@@ -46,11 +47,44 @@ export function runnerSuccessfulRunFortIceTrashActionPayload(
   };
 }
 
+export function runnerActiveSuccessfulRunFortIceTrashQuote(
+  state: GameState,
+): RunnerSuccessfulRunFortIceTrashQuote | undefined {
+  const run = state.run;
+  if (
+    !run ||
+    run.successfulRunAccessReplacement !==
+      "trash_rezzed_ice_on_fort_and_tag_runner"
+  )
+    return undefined;
+  const tags = run.successfulRunRunnerTagGain;
+  const sourceCardInstanceId = run.successfulRunSourceCardId;
+  if (
+    !sourceCardInstanceId ||
+    tags === undefined ||
+    !Number.isSafeInteger(tags) ||
+    tags <= 0
+  )
+    throw new Error(
+      "runner_active_fort_ice_trash_quote_missing_source_or_tags",
+    );
+  const quote = runnerFortIceTrashQuote(state, run.attackedServerId, tags);
+  return {
+    schemaVersion: quote.runnerFortIceTrashQuoteSchemaVersion,
+    runId: run.runId,
+    stateVersion: quote.runnerFortIceTrashQuoteStateVersion,
+    serverId: run.attackedServerId,
+    sourceCardInstanceId,
+    rezzedIceCount: quote.runnerFortIceTrashRezzedIceCount,
+    tagsAdded: quote.runnerFortIceTrashTagsAdded,
+  };
+}
+
 function runnerFortIceTrashQuote(
   state: GameState,
   serverId: string | undefined,
   tags: number,
-): NonNullable<LegalAction["payload"]> {
+) {
   const server = state.corp.servers.find((entry) => entry.id === serverId);
   if (!server)
     throw new Error("runner_fort_ice_trash_quote_missing_successful_fort");

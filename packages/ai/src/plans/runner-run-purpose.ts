@@ -26,6 +26,7 @@ export function runPurposeForEvaluation(
   ) {
     return "information";
   }
+  if (evaluation.fortIceTrashObjective) return "access";
   if (evaluation.scoreThreat) return "contest";
   if (
     evaluation.runCommitment === "probe_only" &&

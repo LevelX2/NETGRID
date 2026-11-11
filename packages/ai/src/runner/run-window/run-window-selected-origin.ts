@@ -2,6 +2,16 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type PlanSchedulerResult } from "../../plans/plan-scheduler";
+import { runPurposeForEvaluation } from "../../plans/runner-run-purpose";
+import type {
+  RunnerPressureSignal,
+  RunnerRemoteContestSignal,
+} from "../../plans/runner-tactical-plan-contracts";
+import {
+  accessCommitmentForEvaluation,
+  runRiskContractForEvaluation,
+} from "../../run-analysis/runner-plan-run-route-facts";
+import type { RunnerRunTargetEvaluation } from "../../run-analysis/runner-run-target-types";
 import { runnerEventStartsRunAfterProgramSearch } from "../../runtime/runner-canonical-card-facts";
 import { runnerPostBreakStealthLossChoiceBinding } from "./run-window-break-continuation";
 
@@ -9,6 +19,7 @@ export function bindSelectedPlanActionOrigin(
   input: AiDecisionInput,
   result: PlanSchedulerResult,
   candidates: readonly ActionSemanticCandidate[],
+  runTargets: readonly RunnerRunTargetEvaluation[] = [],
 ): void {
   if (input.side !== "runner" || result.lane !== "plan") return;
   const rootPlanInstanceId = result.portfolio.rootForegroundInstanceId;
@@ -53,6 +64,9 @@ export function bindSelectedPlanActionOrigin(
     !postBreakStealthLoss
   )
     return;
+  const selectedRunTarget = canOpenRunnerRunStartOrder
+    ? runTargets.find((target) => target.actionId === selectedAction?.actionId)
+    : undefined;
   const invalidCurrentPlanAction =
     !rootPlanInstanceId ||
     !executorInstanceId ||
@@ -73,7 +87,8 @@ export function bindSelectedPlanActionOrigin(
   if (invalidCurrentPlanAction) {
     if (
       (canOpenRunnerRunStartOrder || canOpenRunnerVacuumLinkRewind) &&
-      !canOpenRunnerDrawReplacement
+      !canOpenRunnerDrawReplacement &&
+      !selectedRunTarget?.fortIceTrashObjective
     )
       return;
     throw new PlanResolutionFailure("window_origin_missing", {
@@ -84,8 +99,47 @@ export function bindSelectedPlanActionOrigin(
       unresolvedActionIds: [result.route.head.actionId],
       owner: "continuation",
       removalCondition:
-        "Persist a possible immediate Runner draw-replacement choice only with the exact selected current draw action, root plan and leaf executor.",
+        "Persist a Runner action continuation only with the exact selected current action, root plan and leaf executor.",
     });
+  }
+  if (selectedRunTarget) {
+    const executor = result.portfolio.instances.find(
+      (instance) => instance.instanceId === executorInstanceId,
+    );
+    const moduleState = executor?.moduleState as
+      | { kind: "central_pressure"; signal: RunnerPressureSignal }
+      | { kind: "remote_contest"; signal: RunnerRemoteContestSignal }
+      | undefined;
+    if (
+      (moduleState?.kind === "central_pressure" ||
+        moduleState?.kind === "remote_contest") &&
+      moduleState.signal.serverId === selectedRunTarget.targetServerId &&
+      (selectedRunTarget.fortIceTrashObjective ||
+        moduleState.signal.accessCommitment?.fortIceTrashObjective)
+    ) {
+      // Sibling routes on the same fort can share one resident plan. Only
+      // the selected action's access/replacement and risk facts may persist.
+      const purpose = runPurposeForEvaluation(selectedRunTarget);
+      moduleState.signal.accessCommitment = accessCommitmentForEvaluation(
+        input,
+        selectedRunTarget,
+      );
+      const riskContract = runRiskContractForEvaluation(
+        input,
+        selectedRunTarget,
+      );
+      if (riskContract) moduleState.signal.runRiskContract = riskContract;
+      else delete moduleState.signal.runRiskContract;
+      if (moduleState.kind === "central_pressure") {
+        moduleState.signal.purpose = purpose === "contest" ? "access" : purpose;
+      } else {
+        moduleState.signal.purpose = selectedRunTarget.fortIceTrashObjective
+          ? "access"
+          : purpose === "information"
+            ? "information"
+            : "contest";
+      }
+    }
   }
   result.portfolio.selectedActionOrigin = postBreakStealthLoss
     ? {

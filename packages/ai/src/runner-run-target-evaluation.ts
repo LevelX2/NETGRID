@@ -7,6 +7,7 @@ import { runnerPostRunSelfTagHandSafety } from "./run-analysis/runner-self-tag-s
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerTargetHasTerminalContestThreat } from "./runtime/runner-terminal-contest-threat";
+import { archivesIsKnownWithoutAgenda } from "./runtime/visible-server-agenda-facts";
 import {
   RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -74,6 +75,7 @@ import {
   type RunnerEconomyPosture,
   type RunnerEconomyRoute,
   type RunnerEconomyTransitionAssessment,
+  type RunnerFortIceTrashObjective,
   type RunnerInstalledRunPayoff,
   type RunnerKnownAccessState,
   type RunnerPathPassability,
@@ -639,6 +641,7 @@ function evaluateRunnerRunTarget(
     projection,
     accessServerId,
     accessTargetKind,
+    economyPosture,
     creditsAfterRun,
     creditsAfterAction,
   );
@@ -1135,6 +1138,9 @@ function evaluateRunnerRunTarget(
     actionId: projection.actionId,
     accessPayoff,
     accessFacts: payoff.accessFacts,
+    ...(payoff.fortIceTrashObjective
+      ? { fortIceTrashObjective: payoff.fortIceTrashObjective }
+      : {}),
     ...(accessPayoffRequiresFunding
       ? { accessPayoffRequiresFunding: true as const }
       : {}),
@@ -1711,6 +1717,7 @@ function payoffForTarget(
 ): {
   accessPayoff: RunnerAccessPayoff;
   accessFacts: RunnerAccessFacts;
+  fortIceTrashObjective?: RunnerFortIceTrashObjective;
   accessPayoffContestable?: boolean;
   knownAccessDamage?: KnownRemoteAccessPayoff["observedAccessDamage"];
   knownAccessState: RunnerKnownAccessState;
@@ -1768,6 +1775,7 @@ function accessReplacementPayoffForTarget(
   projection: InternalRunActionProjection,
   targetServerId: string,
   targetKind: RunnerRunTargetKind,
+  economyPosture: RunnerEconomyPosture,
   creditsAfterRun: number,
   creditsAfterAction: number,
 ): ReturnType<typeof payoffForTarget> | undefined {
@@ -1783,6 +1791,8 @@ function accessReplacementPayoffForTarget(
     const tags = payload?.runnerFortIceTrashTagsAdded;
     if (
       !fort ||
+      fort.id !== targetServerId ||
+      !projection.sourceCardId ||
       projection.action.expiresAtStateVersion !==
         input.playerView.stateVersion ||
       payload?.runnerFortIceTrashQuoteSchemaVersion !==
@@ -1807,22 +1817,81 @@ function accessReplacementPayoffForTarget(
       0,
       input.playerView.own.credits - creditsAfterAction,
     );
-    const cleanupPrice = tags * 3;
-    const netSavings = oneRunSavings - eventSpend - cleanupPrice;
+    const cleanupCredits = tags * 2;
+    const creditsAfterCleanup = creditsAfterRun - cleanupCredits;
+    const netSavings = oneRunSavings - eventSpend - cleanupCredits - tags;
+    // The ordinary payoff owner assesses only a follow-up on this same
+    // fort. Unseen ICE and root contents stay unresolved; this is not
+    // a guarantee of the follow-up access or any Agenda points.
+    const hasFollowupAccess =
+      targetKind === "archives"
+        ? !archivesIsKnownWithoutAgenda(input)
+        : fort.root.length > 0 ||
+          (targetKind === "rd" && input.playerView.opponent.deckCount > 0) ||
+          (targetKind === "hq" && input.playerView.opponent.handCount > 0);
+    const followupPayoff =
+      hasFollowupAccess &&
+      netSavings > 0 &&
+      creditsAfterCleanup >= economyPosture.minimumCreditFloor
+        ? payoffForTarget(
+            {
+              ...params,
+              input: {
+                ...input,
+                playerView: {
+                  ...input.playerView,
+                  own: {
+                    ...input.playerView.own,
+                    credits: creditsAfterCleanup,
+                  },
+                  servers: input.playerView.servers.map((server) =>
+                    server.id === fort.id
+                      ? {
+                          ...server,
+                          ice: server.ice.filter((ice) => ice.rezzed !== true),
+                        }
+                      : server,
+                  ),
+                },
+              },
+            },
+            targetServerId,
+            targetKind,
+            economyPosture,
+          )
+        : undefined;
+    const usefulFollowup =
+      followupPayoff !== undefined &&
+      followupPayoff.knownAccessState !== "known_no_current_payoff" &&
+      followupPayoff.accessPayoffContestable !== false &&
+      followupPayoff.accessPayoff !== "trash_unaffordable";
     return {
-      accessPayoff: netSavings > 0 ? "access_bonus" : "known_low_value",
+      accessPayoff: usefulFollowup ? "access_bonus" : "known_low_value",
+      ...(usefulFollowup
+        ? {
+            fortIceTrashObjective: {
+              kind: projection.accessReplacement,
+              actionId: projection.actionId,
+              sourceCardInstanceId: projection.sourceCardId,
+              serverId: fort.id,
+              observedAtStateVersion: input.playerView.stateVersion,
+              tagsAdded: tags,
+              followupPayoff: followupPayoff.accessPayoff,
+            },
+          }
+        : {}),
       accessFacts: {
         knownTargetDefinitionIds: [],
         trashBudget: "not_applicable",
       },
-      knownAccessState:
-        netSavings > 0 ? "known_payoff" : "known_no_current_payoff",
+      knownAccessState: usefulFollowup
+        ? "known_payoff"
+        : "known_no_current_payoff",
       accessNoveltyRatio: 0,
-      scoreAdjustment:
-        netSavings > 0
-          ? Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, netSavings * 8) -
-            scoreForPayoff("access_bonus")
-          : 0,
+      scoreAdjustment: usefulFollowup
+        ? Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, netSavings * 8) -
+          scoreForPayoff("access_bonus")
+        : 0,
       evidence: [
         "run_access_replacement:trash_rezzed_ice_on_fort_and_tag_runner",
         "run_access_replacement_normal_access:false",
@@ -1830,8 +1899,13 @@ function accessReplacementPayoffForTarget(
         `fort_ice_trash_one_run_liquid_savings:${oneRunSavings}`,
         `fort_ice_trash_event_spend:${eventSpend}`,
         `fort_ice_trash_tags:${tags}`,
-        `fort_ice_trash_basic_cleanup_credits:${tags * 2}`,
+        `fort_ice_trash_basic_cleanup_credits:${cleanupCredits}`,
         `fort_ice_trash_basic_cleanup_clicks:${tags}`,
+        `fort_ice_trash_credits_after_cleanup:${creditsAfterCleanup}`,
+        `fort_ice_trash_useful_followup:${usefulFollowup}`,
+        ...(followupPayoff
+          ? [`fort_ice_trash_followup_payoff:${followupPayoff.accessPayoff}`]
+          : []),
       ],
     };
   }

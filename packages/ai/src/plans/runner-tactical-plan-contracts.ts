@@ -1,6 +1,7 @@
 import { type RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type {
+  RunnerFortIceTrashObjective,
   RunnerPrerunReserveQuote,
   RunnerRunTargetEvaluation,
 } from "../run-analysis/runner-run-target-types";
@@ -114,7 +115,7 @@ export type RunnerPressureSignal = {
 export type RunnerRemoteContestSignal = {
   contestId: string;
   serverId: string;
-  purpose: "contest" | "information";
+  purpose: "contest" | "information" | "access";
   knownAgendaThreat: boolean;
   expiringAgendaAccessPayoff?: boolean;
   terminalPatternThreat?: boolean;
@@ -186,7 +187,8 @@ export type RunnerRunAccessCommitmentSignal = {
     | "unknown"
     | "fresh"
     | "access_bonus";
-  intendedAction: "steal" | "trash" | "decline" | "access";
+  intendedAction: "steal" | "trash" | "decline" | "access" | "replace_access";
+  fortIceTrashObjective?: RunnerFortIceTrashObjective;
   knownTargetDefinitionIds: string[];
   trashBudget: RunnerAccessFacts["trashBudget"];
   evidenceCode: string;

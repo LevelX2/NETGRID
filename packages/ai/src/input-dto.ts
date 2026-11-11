@@ -6,6 +6,7 @@ import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type AiDifficulty,
   type CorpOptionalRezChoiceQuote,
@@ -775,6 +776,26 @@ function sanitizePlayerView(
   view: PlayerView,
   publicEvents: PublicGameEvent[],
 ): PlayerView {
+  const fortTrash = view.run?.successfulRunFortIceTrashQuote;
+  if (
+    fortTrash &&
+    (view.side !== "runner" ||
+      fortTrash.schemaVersion !== RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION ||
+      !fortTrash.runId ||
+      fortTrash.runId !== view.run?.runId ||
+      fortTrash.stateVersion !== view.stateVersion ||
+      fortTrash.serverId !== view.run.attackedServerId ||
+      typeof fortTrash.sourceCardInstanceId !== "string" ||
+      !fortTrash.sourceCardInstanceId ||
+      !Number.isSafeInteger(fortTrash.tagsAdded) ||
+      fortTrash.tagsAdded <= 0 ||
+      !Number.isSafeInteger(fortTrash.rezzedIceCount) ||
+      fortTrash.rezzedIceCount !==
+        view.servers
+          .find((server) => server.id === fortTrash.serverId)
+          ?.ice.filter((ice) => ice.rezzed === true).length)
+  )
+    throw new Error("Invalid Engine active successful-run ICE-trash quote.");
   const runEndTrashUsed = view.run?.runEndTrashUsedBreakerIdsThisRun;
   const postPassTrashCheckUsed =
     view.run?.postPassTrashCheckUsedBreakerIdsThisEncounter;
@@ -1103,6 +1124,19 @@ function sanitizePlayerView(
               ? { followupRunOpportunity: view.run.followupRunOpportunity }
               : {}),
             attackedServerId: view.run.attackedServerId,
+            ...(fortTrash
+              ? {
+                  successfulRunFortIceTrashQuote: {
+                    schemaVersion: fortTrash.schemaVersion,
+                    runId: fortTrash.runId,
+                    stateVersion: fortTrash.stateVersion,
+                    serverId: fortTrash.serverId,
+                    sourceCardInstanceId: fortTrash.sourceCardInstanceId,
+                    rezzedIceCount: fortTrash.rezzedIceCount,
+                    tagsAdded: fortTrash.tagsAdded,
+                  },
+                }
+              : {}),
             ...(view.run.pendingAutoPassIceId
               ? { pendingAutoPassIceId: view.run.pendingAutoPassIceId }
               : {}),
