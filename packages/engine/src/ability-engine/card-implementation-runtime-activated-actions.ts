@@ -6,6 +6,7 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
+import { microtechHostedProgramIds } from "../game/state/microtech-backup";
 import {
   activatedAbilityLegalActionCosts,
   canPayActivatedCardImplementationCosts,
@@ -194,11 +195,18 @@ export function pushActivatedCardImplementationActionsForTiming(
     const moveTopHostedProgramEffect =
       moveTopHostedProgramToGripEffect(ability);
     if (moveTopHostedProgramEffect) {
+      const targetCardId = microtechHostedProgramIds(state, sourceCardId).at(-1);
+      if (!targetCardId) continue;
       actions.push(
         createBoundAction(
           ability.label ??
             `${definition.title}: oberstes gesichertes Programm auf die Hand nehmen`,
-          activatedAbilityPayload(sourceCardId, ability, binding),
+          {
+            ...activatedAbilityPayload(sourceCardId, ability, binding),
+            cardImplementationEffectKind: "move_top_hosted_program_to_grip",
+            targetCardId,
+            targetDefinitionId: deps.definitionFor(state, targetCardId).id,
+          },
         ),
       );
       continue;

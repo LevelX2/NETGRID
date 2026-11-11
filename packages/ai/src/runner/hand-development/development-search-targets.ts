@@ -10,6 +10,7 @@ import {
 } from "../../runtime/discard-choice-selection";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 import { runnerProgramSearchSourceCardInstanceId } from "../../runtime/runner-program-search-facts";
+import { runtimeCardDefinitionForAi } from "../../runtime/card-definition-lookup";
 import type { RunnerDevelopmentInstallServices } from "./development-services";
 import { type RunnerDevelopmentSignal } from "./development-types";
 
@@ -168,7 +169,7 @@ export function runnerCandidateExecutesHeapRecovery(
       candidate.actionType === "activated_card_ability" ||
       candidate.actionType === "trigger_ability") &&
     action?.payload?.cardImplementationEffectKind === "search_trash_to_grip" &&
-    runnerHeapRecoveryActionContract(input, candidate) !== undefined
+    runnerRecoveryActionContract(input, candidate) !== undefined
   );
 }
 
@@ -184,22 +185,67 @@ export function runnerCandidateExecutesTopHeapRecovery(
       candidate.actionType === "trigger_ability") &&
     action?.payload?.cardImplementationEffectKind ===
       "move_top_trash_to_grip" &&
-    runnerHeapRecoveryActionContract(input, candidate) !== undefined
+    runnerRecoveryActionContract(input, candidate) !== undefined
   );
 }
 
-export function runnerHeapRecoveryActionContract(
+type RunnerRecoveryActionContract = {
+  searchFilter: "program" | "any_card";
+  exactTargetCardId?: string;
+  hostedTarget?: VisibleCard;
+};
+
+export function runnerRecoveryActionContract(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
-):
-  | {
-      searchFilter: "program" | "any_card";
-      exactTargetCardId?: string;
-    }
-  | undefined {
+): RunnerRecoveryActionContract | undefined {
   const action = input.legalActions.find(
     (entry) => entry.actionId === candidate.actionId,
   );
+  if (
+    action?.payload?.cardImplementationEffectKind ===
+    "move_top_hosted_program_to_grip"
+  ) {
+    const { targetCardId, targetDefinitionId } = action.payload;
+    const definition =
+      typeof targetDefinitionId === "string"
+        ? runtimeCardDefinitionForAi(targetDefinitionId)
+        : undefined;
+    const source = input.playerView.own.rig?.find(
+      (card) =>
+        card.known &&
+        card.type === "hardware" &&
+        card.instanceId === action.source,
+    );
+    if (
+      input.side !== "runner" ||
+      action.side !== "runner" ||
+      action.type !== "activated_card_ability" ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      !source ||
+      action.payload.cardId !== source.instanceId ||
+      typeof targetCardId !== "string" ||
+      !targetCardId ||
+      definition?.type !== "program"
+    )
+      return;
+    return {
+      searchFilter: "program",
+      exactTargetCardId: targetCardId,
+      hostedTarget: {
+        known: true,
+        instanceId: targetCardId,
+        definitionId: definition.id,
+        type: "program",
+        title: definition.title,
+        subtypes: [...definition.subtypes],
+        rulesText: definition.rulesText,
+        installCost: definition.installCost,
+        memoryCost: definition.memoryCost,
+        hostedOn: source.instanceId,
+      },
+    };
+  }
   if (
     action?.payload?.cardImplementationEffectKind === "search_trash_to_grip"
   ) {
@@ -223,6 +269,23 @@ export function runnerHeapRecoveryActionContract(
     : undefined;
 }
 
+export function runnerRecoveryActionTargets(
+  input: AiDecisionInput,
+  contract: RunnerRecoveryActionContract,
+): VisibleCard[] {
+  const candidates = contract.hostedTarget
+    ? [contract.hostedTarget]
+    : input.playerView.own.heapOrArchives;
+  return candidates.filter(
+    (card) =>
+      card.known &&
+      typeof card.definitionId === "string" &&
+      (contract.searchFilter === "any_card" || card.type === "program") &&
+      (contract.exactTargetCardId === undefined ||
+        card.instanceId === contract.exactTargetCardId),
+  );
+}
+
 export function runnerRecoverySearchCommitment(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -233,7 +296,7 @@ export function runnerRecoverySearchCommitment(
   const action = input.legalActions.find(
     (entry) => entry.actionId === candidate.actionId,
   );
-  const recoveryContract = runnerHeapRecoveryActionContract(input, candidate);
+  const recoveryContract = runnerRecoveryActionContract(input, candidate);
   const searchFilter = recoveryContract?.searchFilter;
   const sourceCardInstanceId = runnerProgramSearchSourceCardInstanceId(
     input,
@@ -251,15 +314,7 @@ export function runnerRecoverySearchCommitment(
   ) {
     return undefined;
   }
-  const target = input.playerView.own.heapOrArchives
-    .filter(
-      (card) =>
-        card.known === true &&
-        typeof card.definitionId === "string" &&
-        (searchFilter === "any_card" || card.type === "program") &&
-        (recoveryContract.exactTargetCardId === undefined ||
-          card.instanceId === recoveryContract.exactTargetCardId),
-    )
+  const target = runnerRecoveryActionTargets(input, recoveryContract)
     .map((card) => {
       const scoringInput = runnerRecoveryScoringInput(input, card, candidate);
       return {
@@ -320,7 +375,9 @@ export function runnerRecoverySearchCommitment(
     searchFilter,
     targetCardInstanceId: target.instanceId,
     targetDefinitionId: target.definitionId,
-    targetPurpose: "generic_heap_recovery",
+    targetPurpose: recoveryContract.hostedTarget
+      ? "generic_hosted_program_recovery"
+      : "generic_heap_recovery",
     plannedAtStateVersion: input.playerView.stateVersion,
   };
 }

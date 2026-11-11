@@ -211,6 +211,7 @@ import {
   bindSelectedRunnerTargetedIceTrashChoiceContinuation,
 } from "../run-analysis/runner-run-preparation-choice-binding";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
+import { runnerRecoveryActionContract } from "../runner/hand-development/development-search-targets";
 import { runnerRecentFutureEncounterDamageSafetyAbort } from "../runner-damage-threat-assessment";
 import { runnerEconomyHandFacts } from "../runner-economy-posture";
 import { projectInternalRunnerRunActions } from "../actions/run-action-projection";
@@ -2387,8 +2388,11 @@ export function runnerActionDispositions(
       (candidate.actionType === "activated_card_ability" ||
         candidate.actionType === "trigger_ability") &&
       runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects);
+    const hostedProgramRecovery =
+      candidate.actionType === "activated_card_ability" &&
+      runnerRecoveryActionContract(input, candidate)?.hostedTarget !== undefined;
     if (
-      structuredTopHeapRecovery &&
+      (structuredTopHeapRecovery || hostedProgramRecovery) &&
       !dispositions.some((entry) => entry.actionId === candidate.actionId) &&
       !defenseHandBufferActionIds.has(candidate.actionId) &&
       !coverageOwnedActionIds.has(candidate.actionId) &&
@@ -2396,8 +2400,12 @@ export function runnerActionDispositions(
     ) {
       add(
         candidate.actionId,
-        "runner.defense_and_recovery",
-        "runner_top_heap_recovery_has_no_active_hand_or_coverage_need",
+        hostedProgramRecovery
+          ? "runner.develop_board_and_hand"
+          : "runner.defense_and_recovery",
+        hostedProgramRecovery
+          ? "runner_hosted_program_recovery_has_no_retained_hand_value"
+          : "runner_top_heap_recovery_has_no_active_hand_or_coverage_need",
       );
     }
   }

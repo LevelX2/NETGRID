@@ -15,6 +15,7 @@ import {
   isP358ConcealAndReorderInstalledIceChoiceSource,
   isP358SuccessfulRunFortIceReorderChoiceSource,
 } from "../../compatibility/payload-compatibility";
+import { microtechHostedProgramIds } from "../state/microtech-backup";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
 
@@ -254,20 +255,7 @@ export function moveTopHostedProgramToGripForCardImplementation(
     !host.state.runner.rig.hardware.includes(input.sourceCardId)
   )
     throw new Error("Die Programm-Hostquelle ist nicht installiert.");
-  const hostedProgramIds = Object.entries(host.state.cardInstances)
-    .filter(
-      ([cardId, instance]) =>
-        instance.hostedOn === input.sourceCardId &&
-        host.cards.definitionFor(cardId).type === "program",
-    )
-    .map(([cardId]) => cardId as CardInstanceId)
-    .sort(
-      (left, right) =>
-        Math.floor(host.state.cardInstances[left]?.microtechBackupOrder ?? 0) -
-          Math.floor(
-            host.state.cardInstances[right]?.microtechBackupOrder ?? 0,
-          ) || left.localeCompare(right),
-    );
+  const hostedProgramIds = microtechHostedProgramIds(host.state, input.sourceCardId);
   const targetCardId = hostedProgramIds.at(-1);
   if (!targetCardId) throw new Error("Auf der Quelle liegt kein Programm.");
   const targetDefinition = host.cards.definitionFor(targetCardId);

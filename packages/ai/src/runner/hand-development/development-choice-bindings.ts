@@ -26,7 +26,7 @@ import {
   runnerProgramSearchSourceCardInstanceId,
 } from "../../runtime/runner-program-search-facts";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
-import { runnerHeapRecoveryActionContract } from "./development-search-targets";
+import { runnerRecoveryActionContract, runnerRecoveryActionTargets } from "./development-search-targets";
 import type { RunnerDevelopmentInstallServices } from "./development-services";
 import { type RunnerDevelopmentSignal } from "./development-types";
 
@@ -987,7 +987,7 @@ export function bindSelectedRunnerRecoverySearchAction(
     (entry) => entry.actionId === result.route.head.actionId,
   );
   const recoveryContract = candidate
-    ? runnerHeapRecoveryActionContract(input, candidate)
+    ? runnerRecoveryActionContract(input, candidate)
     : undefined;
   const exactBinding =
     signal.phase === "execute" &&
@@ -1002,7 +1002,10 @@ export function bindSelectedRunnerRecoverySearchAction(
       commitment.sourceCardInstanceId &&
     runnerCandidateSourceDefinitionId(input, candidate) ===
       commitment.sourceDefinitionId &&
-    input.playerView.own.heapOrArchives.some(
+    (recoveryContract.hostedTarget
+      ? commitment.targetPurpose === "generic_hosted_program_recovery"
+      : commitment.targetPurpose === "generic_heap_recovery") &&
+    runnerRecoveryActionTargets(input, recoveryContract).some(
       (card) =>
         card.known === true &&
         card.instanceId === commitment.targetCardInstanceId &&
@@ -1025,7 +1028,7 @@ export function bindSelectedRunnerRecoverySearchAction(
       planInstanceId: executor.instanceId,
       stepId: result.route.head.stepId,
       removalCondition:
-        "Select a Runner heap-recovery search only from its exact development-plan source, current LegalAction and prebound visible recovery target.",
+        "Select Runner recovery only from its exact development-plan source, current LegalAction and prebound visible recovery target.",
     });
   }
   commitment.selectedActionId = result.route.head.actionId;

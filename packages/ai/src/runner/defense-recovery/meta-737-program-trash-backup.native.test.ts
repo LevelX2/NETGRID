@@ -169,6 +169,28 @@ it("binds both native backup choices to defense and preserves the program for re
   expect(resolved.specialZones?.setAside).toContain(target);
   expect(resolved.runner.rig.programs).not.toContain(target);
   expect(resolved.runner.heap).not.toContain(target);
+
+  const main = apply(resolved, "runner", (a) => a.type === "continue_run");
+  const current = input(main);
+  const recovery = current.legalActions.find(
+    (action) =>
+      action.payload?.cardImplementationEffectKind ===
+      "move_top_hosted_program_to_grip",
+  );
+  expect(recovery?.payload).toMatchObject({
+    cardId: drive,
+    targetCardId: target,
+    targetDefinitionId: PROGRAM,
+  });
+  expect(recovery?.costs).toEqual([{ clicks: 1 }]);
+  expect(chooseRunnerAction(current).fallbackUsed).toBe(false);
+  const retrieved = apply(
+    main,
+    "runner",
+    (a) => a.actionId === recovery!.actionId,
+  );
+  expect(retrieved.runner.grip).toContain(target);
+  expect(retrieved.cardInstances[target]?.hostedOn).toBeUndefined();
 });
 
 it("rejects a backup offer with an unbound source or stale Engine choice", () => {
