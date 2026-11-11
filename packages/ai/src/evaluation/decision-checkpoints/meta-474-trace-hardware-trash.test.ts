@@ -16,11 +16,11 @@ import {
 
 afterEach(resetResidentPlanPortfolioMemory);
 
-function checkpoint() {
+function checkpoint(file = "cp-meta-474-r8-g4-d299.json") {
   const cp = JSON.parse(
     readFileSync(
       new URL(
-        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-474-r8-g4-d299.json",
+        `../../../../../data/scenarios/ai-decision-checkpoints/${file}`,
         import.meta.url,
       ),
       "utf8",
@@ -209,4 +209,42 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     if (kind === "action_state") action.expiresAtStateVersion--;
     expect(() => chooseAiAction(input)).toThrow(PlanResolutionFailure);
   });
+});
+
+describe("SP-473: a Trace completed after the Runner's link window", () => {
+  const nativeCheckpoint = "cp-meta-736-r3-g38-d397.json";
+
+  it("keeps the hardware Choice under Defense after the successful link resolution", () => {
+    const input = checkpoint(nativeCheckpoint);
+    const choice = input.playerView.pendingChoice!;
+    expect(input.eventTail.at(-1)?.publicPayload).toMatchObject({
+      traceId: choice.source.slice("trace_success.hardware_wrecker:".length),
+      traceStep: "post_bid_link",
+      traceSuccessful: true,
+    });
+    const decision = chooseAiAction(input);
+    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.selectedChoices?.choiceId).toBe(choice.choiceId);
+    expect(decision.selectedChoices?.selectedOptionIds).toHaveLength(1);
+    expect(choice.options.map((option) => option.id)).toContain(
+      decision.selectedChoices?.selectedOptionIds[0],
+    );
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    });
+    expect(decision.fallbackUsed).toBe(false);
+  });
+
+  it.each(["trace", "source", "version", "outcome"] as const)(
+    "rejects the post-bid link resolution with a mismatched %s",
+    (kind) => {
+      const input = checkpoint(nativeCheckpoint);
+      const event = input.eventTail.at(-1)!;
+      if (kind === "trace") event.publicPayload.traceId = "different-trace";
+      if (kind === "source") event.publicPayload.sourceDefinitionId = "different-ice";
+      if (kind === "version") event.stateVersionAfter--;
+      if (kind === "outcome") event.publicPayload.traceSuccessful = false;
+      expect(() => chooseAiAction(input)).toThrow(PlanResolutionFailure);
+    },
+  );
 });
