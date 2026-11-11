@@ -136,7 +136,7 @@ export type RunnerDevelopmentSignal = {
     searchFilter: "program" | "any_card";
     targetCardInstanceId: string;
     targetDefinitionId: string;
-    targetPurpose: "generic_heap_recovery";
+    targetPurpose: "generic_heap_recovery" | "generic_hosted_program_recovery";
     plannedAtStateVersion: number;
     selectedActionId?: string;
     selectedAtStateVersion?: number;

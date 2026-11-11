@@ -1,3 +1,7 @@
+import {
+  isRunnerProgramTrashBackupWindow,
+  selectedRunnerProgramTrashBackup,
+} from "../runner/defense-recovery/program-trash-backup";
 import { runnerDevelopmentSearchChoiceBinding } from "../runner/hand-development/development-choice-bindings";
 import { runnerCoverageSearchSourceChoiceBinding } from "../runner/rig-coverage/coverage-bindings";
 import {
@@ -539,6 +543,11 @@ export function selectedChoicesForDecision(
       selectableOptions,
       selectedOptionIds,
       resolverId,
+    );
+  if (isRunnerProgramTrashBackupWindow(input))
+    return resolved(
+      selectedRunnerProgramTrashBackup(input, action, currentPortfolio),
+      "bound_runner_program_trash_backup",
     );
   if (isRunnerGripDamageReplacementWindow(input))
     return resolved(

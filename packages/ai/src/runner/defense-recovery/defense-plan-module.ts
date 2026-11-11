@@ -275,6 +275,8 @@ function defensePhase(
   const openPhases: DefenseState["phase"][] = [];
   if (signals.gripDamageReplacementBinding)
     openPhases.push("replace_damage_from_grip");
+  if (signals.programTrashBackupBinding)
+    openPhases.push("back_up_trashed_programs");
   if (signals.discardChoiceBinding) openPhases.push("discard_window");
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
@@ -380,6 +382,10 @@ function defenseCandidates(
       }
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
+      if (phase === "back_up_trashed_programs")
+        return (
+          signals.programTrashBackupBinding?.actionId === candidate.actionId
+        );
       if (phase === "replace_damage_from_grip")
         return (
           signals.gripDamageReplacementBinding?.actionId ===
@@ -559,6 +565,11 @@ function defenseCapability(
   phase: DefenseState["phase"],
   candidates: PlanMaterialization["candidates"],
 ): PlanRouteStepCapability {
+  if (phase === "back_up_trashed_programs")
+    return {
+      capabilityId: "back_up_trashed_programs",
+      semanticActionTypes: ["choice.resolve"],
+    };
   if (phase === "replace_damage_from_grip")
     return {
       capabilityId: "replace_damage_from_grip",
@@ -648,6 +659,7 @@ function defensePhaseValue(
   signals: RunnerDefenseSignals,
 ): number {
   if (phase === "replace_damage_from_grip") return 10_000;
+  if (phase === "back_up_trashed_programs") return 1_000;
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
   if (phase === "install_defense_support") return 60;
@@ -665,7 +677,8 @@ function defensePhaseValue(
 function defensePriorityClass(
   signals: RunnerDefenseSignals,
 ): "P2" | "P3" | "P4" | "P5" {
-  if (signals.gripDamageReplacementBinding) return "P2";
+  if (signals.gripDamageReplacementBinding || signals.programTrashBackupBinding)
+    return "P2";
   if (signals.discardChoiceBinding) return "P2";
   if (
     signals.pendingDamage > 0 ||

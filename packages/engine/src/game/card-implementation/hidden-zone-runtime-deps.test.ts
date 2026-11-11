@@ -203,6 +203,7 @@ describe("hidden-zone card implementation runtime deps", () => {
       "startTrashOwnInstalledCardsForCreditsChoice",
       "topTrashToGripTargetCount",
       "topTrashToGripTargetId",
+      "topHostedProgramToGripTargetId",
       "trashGripCardTargetCount",
       "trashOwnInstalledCardTargetCount",
     ].sort();

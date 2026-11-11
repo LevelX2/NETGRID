@@ -13,7 +13,18 @@ export type RunnerSelfTagPreventionNeed = {
   parentValue: number;
 };
 
+export type RunnerProgramTrashBackupBinding = {
+  stage: "offer" | "targets";
+  actionId: string;
+  choiceId: string;
+  stateVersion: number;
+  sourceCardInstanceId: string;
+  optionIds: string[];
+  selectedOptionIds: string[];
+};
+
 export type RunnerDefenseSignals = {
+  programTrashBackupBinding?: RunnerProgramTrashBackupBinding;
   selfTagPreventionNeed?: RunnerSelfTagPreventionNeed;
   activeTags: number;
   visibleTagPunish: boolean;
@@ -113,6 +124,7 @@ export type DefenseState = {
     | "build_reaction_reserve"
     | "discard_window"
     | "replace_damage_from_grip"
+    | "back_up_trashed_programs"
     | "forgo_unsafe_run"
     | "forgo_exhausted_options"
     | "forgo_terminal_deck_pressure";
