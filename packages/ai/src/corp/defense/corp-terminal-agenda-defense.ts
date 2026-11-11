@@ -5,6 +5,7 @@ import {
   visibleRunnerPreparationIncomePerClick,
 } from "@netgrid/engine";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { visibleRunnerRunOnlyCredits } from "../../run-analysis/visible-run-credit-budget";
 import {
   assessBestFundedCorpScoreProtection,
   projectCorpFundedIceInstallRoute,
@@ -74,6 +75,10 @@ export function assessCorpTerminalAgendaDefense(
       ? { runnerMemoryLimit: view.opponent.memoryLimit }
       : {}),
     runnerCredits: view.opponent.credits,
+    runnerRunOnlyCredits:
+      view.run?.attackedServerId === serverId
+        ? visibleRunnerRunOnlyCredits(view.run)
+        : (view.runnerNextRunBadPublicityCredits ?? 0),
     ...(input.playerView.activeSide === "corp" &&
     input.playerView.phase !== "run"
       ? {

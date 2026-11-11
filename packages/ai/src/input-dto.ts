@@ -864,6 +864,12 @@ function sanitizePlayerView(
     ...(view.runnerNextTurnCreditClicks !== undefined
       ? { runnerNextTurnCreditClicks: view.runnerNextTurnCreditClicks }
       : {}),
+    ...(view.runnerNextRunBadPublicityCredits !== undefined
+      ? {
+          runnerNextRunBadPublicityCredits:
+            view.runnerNextRunBadPublicityCredits,
+        }
+      : {}),
     traceRulesProfile: view.traceRulesProfile ?? "modern_open",
     ...(view.turnSerial !== undefined ? { turnSerial: view.turnSerial } : {}),
     timingPoint: view.timingPoint,

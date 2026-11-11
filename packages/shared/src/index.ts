@@ -4251,6 +4251,8 @@ export type PlayerView = {
   /** Public baseline next-turn clicks available for credits, reserving one run.
    * Excludes optional income, extra-action cards and unseen draws. */
   runnerNextTurnCreditClicks?: number;
+  /** Public run-only pool at the next run start. Omitted if the pool is empty or unavailable under the rules. */
+  runnerNextRunBadPublicityCredits?: number;
   side: Side;
   stateVersion: number;
   turnSerial?: number;

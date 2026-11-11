@@ -7,6 +7,7 @@ import {
   assessEngineCertifiedPostRezIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../../visible-run-analysis";
+import { runnerRunPathCreditBudgetAfterEncounter } from "../../run-analysis/visible-run-credit-budget";
 import { corpEffectiveDefenseActivationCredits } from "../../runtime/corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
@@ -122,11 +123,18 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       input.playerView.stateVersion,
       new Set(financedLayerInstanceIds),
       runner.rig,
-      runnerRunPathCreditBudgetWithVisiblePools(runner.credits, runner.rig, {
-        creditPoolHorizon:
-          input.playerView.activeSide === "corp"
-            ? "next_runner_turn"
-            : "current",
+      runnerRunPathCreditBudgetAfterEncounter({
+        ...runnerRunPathCreditBudgetWithVisiblePools(
+          runner.credits,
+          runner.rig,
+          {
+            creditPoolHorizon:
+              input.playerView.activeSide === "corp"
+                ? "next_runner_turn"
+                : "current",
+          },
+        ),
+        runOnlyCredits: input.playerView.runnerNextRunBadPublicityCredits ?? 0,
       }),
       [...server.root],
       visibleCorpCredits,

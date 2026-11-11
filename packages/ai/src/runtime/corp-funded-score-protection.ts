@@ -178,6 +178,7 @@ export type CorpBestFundedScoreProtectionInput = Readonly<{
   runnerCreditPoolHorizon?: "current" | "next_runner_turn";
   runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
   runnerCredits: number;
+  runnerRunOnlyCredits?: number;
   targetServerId: VisibleCorpRezCostQuote["targetServerId"];
   observedAtStateVersion: number;
   availableCorpCredits: number;
@@ -307,6 +308,7 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   runnerCreditPoolHorizon?: "current" | "next_runner_turn";
   runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
   runnerCredits: number;
+  runnerRunOnlyCredits?: number;
   projectedInstallCredits: number;
   projectedInstallClicks: number;
   preferPostInstallSourceProgress?: boolean;
@@ -542,6 +544,9 @@ export function assessBestFundedCorpScoreProtection(
         ? { runnerMemoryLimit: input.runnerMemoryLimit }
         : {}),
       runnerCredits: input.runnerCredits,
+      ...(input.runnerRunOnlyCredits !== undefined
+        ? { runnerRunOnlyCredits: input.runnerRunOnlyCredits }
+        : {}),
       ...(input.runnerCreditPoolHorizon !== undefined
         ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
         : {}),
@@ -835,6 +840,9 @@ export function projectCorpFundedIceInstallRoute(
       ? { runnerMemoryLimit: input.runnerMemoryLimit }
       : {}),
     runnerCredits: input.runnerCredits,
+    ...(input.runnerRunOnlyCredits !== undefined
+      ? { runnerRunOnlyCredits: input.runnerRunOnlyCredits }
+      : {}),
     ...(input.runnerCreditPoolHorizon !== undefined
       ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
       : {}),
@@ -1024,6 +1032,9 @@ export function projectCorpFundedIceInstallRoute(
       ? { runnerMemoryLimit: input.runnerMemoryLimit }
       : {}),
     runnerCredits: input.runnerCredits,
+    ...(input.runnerRunOnlyCredits !== undefined
+      ? { runnerRunOnlyCredits: input.runnerRunOnlyCredits }
+      : {}),
     ...(input.runnerCreditPoolHorizon !== undefined
       ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
       : {}),

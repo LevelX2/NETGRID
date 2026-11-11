@@ -72,6 +72,8 @@ export function corpTerminalHqAgendaShuffleExposure(
       runnerRig,
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
+      runnerRunOnlyCredits:
+        input.playerView.runnerNextRunBadPublicityCredits ?? 0,
       ...(input.playerView.activeSide === "corp" &&
       input.playerView.phase !== "run"
         ? {
@@ -217,6 +219,8 @@ export function corpServerProtectionClaims(
       runnerRig: input.playerView.opponent.rig ?? [],
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
+      runnerRunOnlyCredits:
+        input.playerView.runnerNextRunBadPublicityCredits ?? 0,
       ...(input.playerView.activeSide === "corp" &&
       input.playerView.phase !== "run"
         ? {

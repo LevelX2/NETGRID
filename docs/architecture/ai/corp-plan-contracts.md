@@ -887,6 +887,18 @@ dieselben vorbereiteten Breaker. Kombinierte ETR-Subroutinen müssen vollständi
 die Breaker-Kostenrechnung weitergereicht werden. Fehlende Host-Fakten bleiben
 explizit unbekannt (Regressionen: Match 41df D89, Afreet/Cyfermaster/Puzzle).
 
+Der vorhandene Score- und Terminalschutz übernimmt die öffentliche
+Runstart-Gutschrift aus `runnerNextRunBadPublicityCredits` in denselben
+Pfadbudgetvertrag wie die übrigen Run-Credits. Vorbereitung, Rückholung,
+Installation und die freie Liquidität nach dem Pfad verwenden weiterhin
+den allgemeinen Pool. Der laufende Schutzpfad nutzt bei passendem Fort den
+tatsächlich verbliebenen aktuellen Run-Pool. Eine Quote bewertet einen
+einzelnen Lauf. Ein weiterer Run erhält sein eigenes Startguthaben und
+braucht einen gemeinsamen Nachweis der verbleibenden Aktionen und liquiden
+Credits. Der native Grenztest hält einen vollständig rezzten Zwei-ICE-Pfad
+bei sieben liquiden Credits und drei Vorlaufaktionen ohne Publicity
+geschlossen und bestätigt den Zugriff mit dem elften Credit aus dem Run.
+
 Die öffentliche Vorbereitung umfasst außerdem einen bekannten Breaker im Heap,
 wenn eine bereits aktive, unbegrenzte Top-Heap-Rückholung seine Rückholung und
 die normale Installation vor dem reservierten Run ermöglicht. Jede darüberliegende
