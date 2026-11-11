@@ -405,6 +405,12 @@ Run-Credits ersetzen keine Aktivierungscredits. `runner.convert_run_window`
 bindet die konkrete Bankaktion an das aktuelle Zahlungsfenster, bevor dessen
 Engine-quotiertes Cash-Ziel die Aktivierungsliquidität aufbrauchen würde.
 Der Fensterresolver erhält dabei ausschließlich den bestehenden Auftrag.
+Die Engine bindet bei einem nur mit Zahlungssupport bezahlbaren aktuellen
+Breaker-Schritt den Betrag der konkreten Fensteröffnung an dessen LegalAction.
+Die Restzugprojektion endet an dieser Öffnung. Kosten und Auszahlung gehören
+zu den nachfolgenden tatsächlichen Fensterschritten. Setzt der Runner einen
+so bezahlten Runstart fort, wird dessen exakt gebundener Zentral- oder
+Remote-Executor wieder aktiv, bevor Encounter- und Tracefenster folgen.
 
 Eine solche Quelle in der eigenen sichtbaren Hand kann `runner.economy` als
 Installationsschritt für einen exakt gebundenen Run vorbereiten. Der Compiler

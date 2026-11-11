@@ -1,11 +1,14 @@
-import { type AiDecisionInput } from "@netgrid/shared";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   type EngineWindowResolution,
   type PlanSchedulerContext,
   type PlanSchedulerResult,
 } from "../../plans/plan-scheduler";
-import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import {
+  selectResidentPlanPortfolioExecutor,
+  type ResidentPlanPortfolio,
+} from "../../plans/resident-plan-portfolio";
 import { type RunnerTargetedBypassChoiceContinuation } from "./runner-targeted-bypass-plan";
 import { reconcileSelectedRunnerSuccessfulReplacementChoice } from "./run-window-successful-replacement-continuation";
 import {
@@ -237,6 +240,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       bindRunnerEventInstallChoiceEngineContinuation(input, result, pending);
       bindRunnerDevelopmentSearchEngineContinuation(input, result, pending);
       result.portfolio.stateVersion = input.playerView.stateVersion;
+      restorePaidRunnerRunStartExecutor(input, result, pending, selectedAction);
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
     }
@@ -696,6 +700,90 @@ function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
           ...structuredClone(selectedOrigin),
           selectedAtStateVersion: input.playerView.stateVersion,
         };
+}
+
+/** The payment plan completed its job. The Engine resumes the previously
+ * selected Run, so subsequent encounter windows belong to that same plan.
+ */
+function restorePaidRunnerRunStartExecutor(
+  input: AiDecisionInput,
+  result: Extract<PlanSchedulerResult, { lane: "engine_window" }>,
+  pending: NonNullable<
+    ResidentPlanPortfolio["pendingRunnerCostPenaltySupportOrigin"]
+  >,
+  action: LegalAction | undefined,
+): void {
+  const portfolio = result.portfolio!;
+  const original = portfolio.instances.find(
+    (plan) => plan.instanceId === pending.executorInstanceId,
+  );
+  if (
+    !action ||
+    (action.type !== "start_run" &&
+      (action.type !== "play_event" ||
+        action.payload?.runnerEventRun !== true)) ||
+    input.playerView.run ||
+    pending.rootPlanInstanceId !== pending.executorInstanceId ||
+    (original?.moduleId !== "runner.pressure_central" &&
+      original?.moduleId !== "runner.contest_remote") ||
+    portfolio.executorInstanceId === original.instanceId
+  )
+    return;
+  const state = original.moduleState as
+    | { kind?: string; signal?: { serverId?: string } }
+    | undefined;
+  const serverId = action.payload?.serverId;
+  if (
+    original.side !== "runner" ||
+    original.executionState !== "preempted" ||
+    original.viability !== "ready" ||
+    original.parentInstanceId !== undefined ||
+    original.target?.kind !== "server" ||
+    original.target.id !== serverId ||
+    (state?.kind !== "central_pressure" && state?.kind !== "remote_contest") ||
+    state.signal?.serverId !== serverId ||
+    typeof serverId !== "string" ||
+    action.side !== "runner" ||
+    action.actionId !== pending.originalActionId ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.payload?.runnerCostPenaltySupportContinuation !== true ||
+    action.payload.runnerCostPenaltySupportWindowId !== pending.windowId ||
+    result.origin.windowId !== pending.windowId ||
+    result.origin.rootPlanInstanceId !== pending.rootPlanInstanceId ||
+    result.origin.leafPlanInstanceId !== pending.executorInstanceId
+  ) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((entry) => entry.type),
+      unresolvedActionIds: [action.actionId],
+      owner: "continuation",
+      planInstanceId: pending.executorInstanceId,
+      stepId: pending.sourceStepId,
+      removalCondition:
+        "Resume the exact paid Run with its preempted server plan, Engine window and unchanged action.",
+    });
+  }
+  delete portfolio.turnPlanExecutionLease;
+  delete portfolio.turnPlanCommitment;
+  const resumed = selectResidentPlanPortfolioExecutor({
+    portfolio,
+    selectedExecutorInstanceId: original.instanceId,
+    timingPoint: input.playerView.timingPoint,
+    reason: "executor_selected",
+  });
+  resumed.selectedActionOrigin = {
+    rootPlanInstanceId: pending.rootPlanInstanceId,
+    executorInstanceId: pending.executorInstanceId,
+    selectedActionId: action.actionId,
+    selectedAtStateVersion: input.playerView.stateVersion,
+    immediateChoicePolicy: "resolve_runner_run_start_order",
+    sourceStepId: pending.sourceStepId,
+    sourceActionType: action.type,
+    continuedThroughStateVersion: input.playerView.stateVersion,
+  };
+  result.portfolio = resumed;
 }
 
 export function resolvePlanBoundRunnerCostPenaltyContinuation(
