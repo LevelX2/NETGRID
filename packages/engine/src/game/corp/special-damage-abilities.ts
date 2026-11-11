@@ -125,6 +125,7 @@ export function buildCorpSpecialDamageAbilityActionsForCard(
             gainCreditsAmount: 0,
             damageType: implementation.damageType,
             damageAmount: implementation.damageAmount,
+            damageRecipient: "runner",
           },
         ),
       ],

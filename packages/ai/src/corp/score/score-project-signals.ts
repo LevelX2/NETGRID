@@ -62,6 +62,7 @@ import {
   corpExactCurrentBasicLiquidCreditCandidate,
 } from "../economy/economy-domain-signals";
 import { corpScorePriorityClass } from "./corp-score-priority";
+import { corpFloodInstallCreatesCombinedTerminalExposure } from "./score-flood-exposure";
 import { corpInstalledScoreResourceCost } from "./score-reserve-restoration";
 import {
   corpFundedScoreProtectionNeed,
@@ -556,10 +557,16 @@ export function scoreProjectForCandidate(
       !preparedScoreContinuationAvailable &&
       scorelineFeasibility?.deadline !== "current_turn_only" &&
       corpDeckoutAgendaFloodRequiresScoreDevelopment(input) &&
-      // A shrinking R&D permits risky development, but cannot certify
-      // protection against a steal that immediately ends the game.
-      (input.playerView.opponent.agendaPoints + agendaPoints <
-        input.playerView.agendaPointsToWin ||
+      // Development urgency does not certify protection against a terminal
+      // steal, including several unprotected accesses in the same Runner turn.
+      ((input.playerView.opponent.agendaPoints + agendaPoints <
+        input.playerView.agendaPointsToWin &&
+        !corpFloodInstallCreatesCombinedTerminalExposure(
+          input,
+          agenda,
+          serverId,
+          candidate.actionId,
+        )) ||
         corpScoreProtectionNeedIsSatisfied(
           input,
           protectionNeed,

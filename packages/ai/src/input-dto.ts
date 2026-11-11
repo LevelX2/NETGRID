@@ -865,6 +865,12 @@ function sanitizePlayerView(
     ...(view.runnerNextTurnCreditClicks !== undefined
       ? { runnerNextTurnCreditClicks: view.runnerNextTurnCreditClicks }
       : {}),
+    ...(view.runnerNextRunBadPublicityCredits !== undefined
+      ? {
+          runnerNextRunBadPublicityCredits:
+            view.runnerNextRunBadPublicityCredits,
+        }
+      : {}),
     traceRulesProfile: view.traceRulesProfile ?? "modern_open",
     ...(view.turnSerial !== undefined ? { turnSerial: view.turnSerial } : {}),
     timingPoint: view.timingPoint,
@@ -1334,6 +1340,9 @@ export function sanitizeCorpPunishRouteQuoteSet(
         sourceCapabilityId: step.sourceCapabilityId,
         clicks: step.clicks,
         credits: step.credits,
+        ...(step.agendaPointCost !== undefined
+          ? { agendaPointCost: step.agendaPointCost }
+          : {}),
         ...(step.hardwareTrashProjection
           ? {
               hardwareTrashProjection: {
@@ -1615,6 +1624,17 @@ function validOrderedPunishSteps(
         !validPunishStepKind(step.kind) ||
         !nonNegativeInteger(step.clicks) ||
         !nonNegativeInteger(step.credits) ||
+        (step.agendaPointCost !== undefined &&
+          (route.steps.length !== 1 ||
+            step.kind !== "meat_damage" ||
+            !Number.isSafeInteger(step.agendaPointCost) ||
+            step.agendaPointCost <= 0 ||
+            step.agendaPointCost > view.own.agendaPoints ||
+            step.currentLegalAction === undefined ||
+            !canonicalCapabilityMatchesDefinition(
+              step.sourceCapabilityId,
+              step.sourceCardDefinitionId,
+            ))) ||
         !validHardwareTrashProjection(step, view) ||
         (index > 0 && step.currentLegalAction !== undefined),
     )
@@ -1647,7 +1667,15 @@ function validOrderedPunishSteps(
           head.clicks &&
         action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ===
           head.credits &&
-        validCurrentHardwareTrashAction(action, head)))
+        validCurrentHardwareTrashAction(action, head) &&
+        [action, visibleCurrentAction].every((candidate) =>
+          head.agendaPointCost === undefined
+            ? candidate.payload?.v1920AssetAbility !== "tagged_meat_damage"
+            : candidate.type === "gain_credit" &&
+              candidate.payload?.v1920AssetAbility === "tagged_meat_damage" &&
+              candidate.payload.damageRecipient === "runner" &&
+              candidate.payload.agendaPointCost === head.agendaPointCost,
+        )))
   );
 }
 

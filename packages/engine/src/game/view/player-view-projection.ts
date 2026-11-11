@@ -12,6 +12,7 @@ import {
   runnerMemoryLimit,
 } from "../../ability-engine/effective-values";
 import { projectInstalledCorpIceRezCost } from "../payment";
+import { isV099OrLater } from "../rules-version";
 import { runJackOutAdditionalCost } from "../run/run-duration-payment";
 import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
@@ -525,6 +526,9 @@ export function buildPlayerViewProjection(
         ) -
         Number(state.runnerTurnFlags?.forgoNextActionPending === true),
     ),
+    ...(isV099OrLater(state) && state.corp.badPublicity > 0
+      ? { runnerNextRunBadPublicityCredits: state.corp.badPublicity }
+      : {}),
     stateVersion: state.stateVersion,
     turnSerial: Math.max(0, Math.floor(state.turnSerial ?? 0)),
     traceRulesProfile,

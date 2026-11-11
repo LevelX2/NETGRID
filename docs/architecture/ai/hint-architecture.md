@@ -113,6 +113,13 @@ alle realen Quellen, das generierte Artefakt und den Verbrauchsconsumer der
 Handentwicklung; ein korrekter Hint allein belegt weiterhin keinen
 dominanten Installationsplan.
 
+Die typisierte Aufgabe zweier installierter Connections projiziert den
+Verbrauch der eigenen Ressourcen und den festen Bad-Publicity-Punkt als
+getrennte Wirkungen. Das produktive Aktionsprofil übernimmt beide Fakten
+für die aktuelle LegalAction. Auswahl, Kosten und Auflösung der konkreten
+Connections bleiben an die Engine-Choice gebunden. Der öffentliche Nutzen
+zertifiziert keine vollständige Publicity-Abschlussfolge.
+
 `corp_archives_to_hq` beschreibt grundsätzlich Archives-Recovery. Die
 ICE-Spezialisierung entsteht nur aus `filter.cardType: "ice"`, Offenlegung
 nur aus `revealToRunner: true` und Double-Kosten nur aus den ausdrücklich

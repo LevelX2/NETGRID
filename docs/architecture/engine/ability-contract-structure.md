@@ -153,6 +153,12 @@ und eines reservierten Run-Klicks. Zusätzliche freiwillige Kartenaktionen, neue
 Handkarten und optionale Einkommen sind nicht enthalten. Die Projektion liest
 keine gegnerische Hand und verändert den Spielzustand nicht.
 
+`runnerNextRunBadPublicityCredits` zeigt beiden Seiten den öffentlichen
+Pool für den nächsten Runstart, sofern dieser unter derselben Regel wie der
+tatsächliche Runstart verfügbar und positiv ist. Der laufende Run führt
+seinen eigenen verbleibenden Betrag. Beide Werte beziehen sich ausschließlich
+auf Run-Zahlungen. Die allgemeinen Credits bleiben unverändert.
+
 ## Encounter-Zahlungsgruppen
 
 Eine Encounter-Continue-Action unterscheidet ihre unmittelbar aufzulösende

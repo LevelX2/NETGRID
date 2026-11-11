@@ -87,6 +87,30 @@ Scoreparents. Nichtterminale Exposition, der eigenständig geprüfte
 Same-Turn-Abschluss und die gesonderte erzwungene Discard-Entlastung behalten
 ihre bestehenden Zulassungsverträge.
 
+Die Agenda-Flood-Ausnahme prüft auch mehrere erreichbare offene Remotes im
+selben Runnerzug. Eine neu installierte Agenda ohne ICE, weitere Rootkarten
+oder eigene Zugriffskosten kann zusammen mit anderen eindeutig offenen Agenden
+die Siegschwelle erreichen. Der Score-Owner berücksichtigt das aktuelle
+Runner-Aktionsbudget und verlangt dann denselben gebundenen Schutzbeleg.
+Andere Zugriffsrisiken behalten ihre regulären Quotes. In Paarung 730, G6 D414
+reicht die zweite offene Zwei-Punkte-Agenda bei vier Runnerpunkten zum Sieg
+im nächsten Zug. Der Gegenfall mit nur einer solchen Agenda bleibt zulässig.
+
+Ein weiterer Zugriff kann über einen bestehenden Remote mit ICE führen.
+Für diesen eng begrenzten Fall reserviert die Quote zwei Runner-Run-Klicks.
+Eine öffentliche Auszahlung aus einem geladenen Credit-Speicher ersetzt eine
+der übrigen Vorbereitungsaktionen. Aus der gemeinsamen liquiden Bank
+reserviert die Quote zuerst die bekannten Steal-Kosten der neuen Agenda.
+Die beste finanzierbare Rezvariante des vorhandenen Pfads wird mit der
+Restbank und dem rungebundenen Bad-Publicity-Budget geprüft. Der bestehende
+ICE-Pfad muss ohne weitere Schäden durchführbar sein. Ein direkter
+Zugriffsschaden auf der neuen Agenda ist nur quotierbar, wenn der aktuelle
+Runner-Handumfang ihn deckt. Kann die Corp nach dem Einbau noch den Schutz
+oder die Wertung der vorhandenen Agenda herstellen, liefert dieser Vergleich
+keinen terminalen Beleg. In Paarung 735, G20 D300 reichen Broker, aktuelle
+Handkarten und zwei Run-Klicks selbst gegen Fire Wall, den teureren
+Sphinx-Sentry-Rez und zwei Steal-Credits für Fetal AI aus.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence
@@ -877,6 +901,18 @@ Runs behalten ihr aktuelles Budget. Die Reifeprüfung mehrerer ICE berücksichti
 dieselben vorbereiteten Breaker. Kombinierte ETR-Subroutinen müssen vollständig an
 die Breaker-Kostenrechnung weitergereicht werden. Fehlende Host-Fakten bleiben
 explizit unbekannt (Regressionen: Match 41df D89, Afreet/Cyfermaster/Puzzle).
+
+Der vorhandene Score- und Terminalschutz übernimmt die öffentliche
+Runstart-Gutschrift aus `runnerNextRunBadPublicityCredits` in denselben
+Pfadbudgetvertrag wie die übrigen Run-Credits. Vorbereitung, Rückholung,
+Installation und die freie Liquidität nach dem Pfad verwenden weiterhin
+den allgemeinen Pool. Der laufende Schutzpfad nutzt bei passendem Fort den
+tatsächlich verbliebenen aktuellen Run-Pool. Eine Quote bewertet einen
+einzelnen Lauf. Ein weiterer Run erhält sein eigenes Startguthaben und
+braucht einen gemeinsamen Nachweis der verbleibenden Aktionen und liquiden
+Credits. Der native Grenztest hält einen vollständig rezzten Zwei-ICE-Pfad
+bei sieben liquiden Credits und drei Vorlaufaktionen ohne Publicity
+geschlossen und bestätigt den Zugriff mit dem elften Credit aus dem Run.
 
 Die öffentliche Vorbereitung umfasst außerdem einen bekannten Breaker im Heap,
 wenn eine bereits aktive, unbegrenzte Top-Heap-Rückholung seine Rückholung und
@@ -3097,6 +3133,15 @@ noch keine aktive Verfolgung der lauernden Kampagne.
 
 Eine planfremde Aktion wie Closed Accounts darf eine weiterhin lethal
 Drei-Aktionen-Flatline-Sequenz nicht aufbrechen.
+
+Eine installierte Fleischschadensquelle mit Agendapunktkosten kann als
+einzelner, bereits legaler Abschluss eintreten. Der Anfrageadapter bindet
+die sichtbare CardSpec-Capability an die aktuelle Action-ID. Die Engine
+bestätigt Klick, Agendapunktpreis, Schadensempfänger, Taggrenze und
+Präventionsgrenze. Die Quote beschreibt die nachgewiesene Einzelaktion.
+Der Punish-Owner gibt die Punkte nur aus, wenn der bestätigte
+Mindestschaden den aktuellen Handpuffer übersteigt. Verdeckte installierte
+Runner-Ressourcen halten den Antwortausgang offen.
 
 ## 9. `corp.ambush_and_bluff`
 

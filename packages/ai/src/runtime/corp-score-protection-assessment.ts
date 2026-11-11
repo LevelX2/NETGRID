@@ -24,6 +24,7 @@ import {
   cloneRunnerRunPathCreditBudget,
   normalizeRunnerRunPathCreditBudget,
   projectBreakerCreditPayment,
+  runnerRunPathCreditBudgetAfterEncounter,
   runnerRunPathCreditBudgetWithVisiblePools,
   spendBreakerCreditsAndApplySideEffects,
 } from "../run-analysis/visible-run-credit-budget";
@@ -132,6 +133,7 @@ export type CorpScoreProtectionAssessmentInput = Readonly<{
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
   runnerCredits: number;
+  runnerRunOnlyCredits?: number;
   runnerCreditPoolHorizon?: "current" | "next_runner_turn";
   /** Independently quoted public recovery routes with absolute remaining cash. */
   runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
@@ -351,7 +353,12 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "invalidProbabilityThreshold:true"],
     );
   }
-  if (!Number.isSafeInteger(input.runnerCredits) || input.runnerCredits < 0) {
+  const runOnlyCredits = input.runnerRunOnlyCredits ?? 0;
+  if (
+    !nonNegativeSafeInteger(input.runnerCredits) ||
+    !nonNegativeSafeInteger(runOnlyCredits) ||
+    !Number.isSafeInteger(input.runnerCredits + runOnlyCredits)
+  ) {
     return unknownAssessment(
       input.maximumRunnerAccessSuccessProbability,
       "invalid_runner_credits",
@@ -484,11 +491,14 @@ export function assessCorpScoreProtection(
     {
       credits: input.runnerCredits,
       creditBudget: normalizeRunnerRunPathCreditBudget(
-        runnerRunPathCreditBudgetWithVisiblePools(
-          input.runnerCredits,
-          runnerRig,
-          { creditPoolHorizon: input.runnerCreditPoolHorizon ?? "current" },
-        ),
+        runnerRunPathCreditBudgetAfterEncounter({
+          ...runnerRunPathCreditBudgetWithVisiblePools(
+            input.runnerCredits,
+            runnerRig,
+            { creditPoolHorizon: input.runnerCreditPoolHorizon ?? "current" },
+          ),
+          runOnlyCredits,
+        }),
       ),
       probability: ONE,
       breakerStrengths: new Map(
@@ -623,7 +633,8 @@ export function assessCorpScoreProtection(
       (choice): choice is CorpScoreProtectionRandomBreak =>
         choice !== undefined,
     ),
-    runnerCreditsRemainingOnBestAccessPath: bestPath.credits,
+    runnerCreditsRemainingOnBestAccessPath:
+      bestPath.creditBudget.traceEligibleCredits,
     evidence: [
       "scoreProtectionKnown:true",
       "scoreProtectionScope:visible_direct_access_prevention",
@@ -631,7 +642,7 @@ export function assessCorpScoreProtection(
       `runnerAccessSuccessProbability:${accessProbability.numerator}/${accessProbability.denominator}`,
       `maximumRunnerAccessSuccessProbability:${exactThreshold.numerator}/${exactThreshold.denominator}`,
       `requiredRandomBreakSuccesses:${requiredRandomBreakSuccesses}`,
-      `runnerCreditsRemainingOnBestAccessPath:${bestPath.credits}`,
+      `runnerCreditsRemainingOnBestAccessPath:${bestPath.creditBudget.traceEligibleCredits}`,
       `protectsScore:${protectsScore}`,
     ],
   };
@@ -1175,6 +1186,7 @@ function pruneDominatedStates(
       .join(",");
     const budgetKey = [
       state.creditBudget.credits,
+      state.creditBudget.traceEligibleCredits,
       state.creditBudget.icebreakerCredits,
       state.creditBudget.nonNoisyIcebreakerCredits,
       state.creditBudget.nonStealthNonNoisyIcebreakerCredits,
@@ -1206,6 +1218,14 @@ function accessPathIsBetter(
     current.probability,
   );
   if (probabilityComparison !== 0) return probabilityComparison > 0;
+  if (
+    candidate.creditBudget.traceEligibleCredits !==
+    current.creditBudget.traceEligibleCredits
+  )
+    return (
+      candidate.creditBudget.traceEligibleCredits >
+      current.creditBudget.traceEligibleCredits
+    );
   return candidate.credits > current.credits;
 }
 

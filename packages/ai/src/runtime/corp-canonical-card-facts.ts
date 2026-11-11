@@ -119,6 +119,7 @@ export type CorpTaggedMeatDamageProfile = Readonly<{
   capabilityKey: string;
   sourceCapabilityId: string;
   damageAmount: number;
+  agendaPointCost?: number;
 }>;
 
 export type CorpTraceTagSourceProfile = Readonly<{
@@ -882,10 +883,25 @@ export function corpScoredTaggedMeatDamageProfile(
 export function corpInstalledTaggedMeatDamageProfile(
   definitionId: string | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
-  const cardType = planningCard(definitionId)?.planning.cardType;
-  return cardType === "asset" || cardType === "upgrade"
-    ? taggedMeatDamageProfile(definitionId, cardType)
-    : undefined;
+  const card = planningCard(definitionId)?.planning;
+  if (
+    card?.side !== "corp" ||
+    (card.cardType !== "asset" && card.cardType !== "upgrade")
+  )
+    return undefined;
+  const direct = card.engine.uniqueDirectLongtail;
+  if (direct?.kind === "tagged_meat_damage") {
+    return {
+      capabilityKey: direct.capabilityKey,
+      sourceCapabilityId: canonicalCapabilityId(
+        card.cardDefinitionId,
+        direct.capabilityKey,
+      ),
+      damageAmount: direct.damageAmount,
+      agendaPointCost: direct.agendaPointCost,
+    };
+  }
+  return taggedMeatDamageProfile(definitionId, card.cardType);
 }
 
 function taggedMeatDamageProfile(

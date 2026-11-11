@@ -2528,6 +2528,12 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Hat der Überlebens-Handpuffer Vorrang vor einer nicht vollständig
+finanzierbaren Tagentfernung, klassifiziert Defense auch eine grundsätzlich
+geeignete, in dieser Phase aufgeschobene Schutzinstallation. Die Disposition
+gehört zur aktuellen LegalAction. Eine unabhängig gebundene Route bleibt
+ausführbar. Nach dem Ziehen bewertet Defense die Installation erneut.
+
 Im eigenen Runnerzug begründet eine durch Zugriffsbeobachtungen bestätigte
 Schadensstrategie mit einer öffentlich finanzierbaren tagabhängigen
 Schadensoperation einen Vierkartenpuffer für die nächste Corpantwort. Unter
@@ -2631,6 +2637,16 @@ unterdrücken. Die Ausnahme für eine nur später zurückgestellte Handpufferwir
 bleibt auf aktuell sichere Mehrzweck-Actions begrenzt; echte Draw-Tax-Gefahr wird
 weder durch den Scheduler noch durch die aktuelle Phasenbindung aufgehoben.
 
+Bei kürzlich erlittenem Corp-Schaden kann Defense einen steuerpflichtigen
+Basisdraw als aktuellen Handpufferschritt zulassen. Dafür muss der Runner
+bereits getaggt sein, die vollständige Tagentfernung muss im Restzug fehlen
+und der Schadenpuffer muss mit den verbleibenden Klicks und Stackkarten
+erreichbar sein. Bekannte aktive Schadensquellen, verfügbare Schutzinstallation
+und ein unmittelbar nutzbarer sicherer Handzuwachs erhalten die Sperre.
+Die Zulassung gilt für den aktuellen positiven Basisdraw. Neue Karten,
+Steuerantworten und der verbleibende Bedarf werden nach jeder Aktion neu
+gebunden. P731 G11 D63 belegt den Vierkartenpuffer gegen den anschließenden
+Schaden. Die spätere Entscheidung über den Partieverlauf bleibt offen.
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
 Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda-,
 Score-Threat- oder Informationsroute übernimmt der Defense-Owner den gequoteten Puffer, wenn
@@ -4676,6 +4692,13 @@ Temporäre Suchantworten für einen Remote-Informationszugriff verwenden außerd
 ### Coverage-Suche mit separater Installation
 
 Eine aktuell gebundene Programmsuche oder Top-Heap-Rückholung auf die Hand ist noch keine Installation. Bei den kanonischen Effekten `search_stack_to_grip`, `search_trash_to_grip` und `move_top_trash_to_grip` rechnet der Coverage-Owner daher den zusätzlichen normalen Installationsklick und die exakten Installationskosten in die bereits bestehende Runfolge ein. Die konkrete Quelle, Suchzielinstanz beziehungsweise Deckdefinition, StateVersion, MU-Freigabe, Handvorbereitung und vollständige Finanzierung müssen weiterhin zusammenpassen. Die Rückholung wird dadurch weder zu einer kostenlosen Installation noch zu einer unabhängig zugelassenen Runroute.
+
+Für den bereits gebundenen terminalen Remote-Bedarf darf Coverage außerdem
+eine kanonische begrenzte Programmsuche an der Stack-Spitze versuchen. Die
+Projektion prüft den Erwerbspreis eines passenden Treffers, Einbau, MU,
+Restklicks, Handpuffer und den konkret gebundenen Run. Sie kennzeichnet den
+Treffer als bedingt. Erst die tatsächliche Engine-Choice zeigt die Karten.
+Ohne passenden Treffer bleibt der Run-Bedarf offen.
 
 ### Direkter Run-Root zwischen aufeinanderfolgenden Traces
 

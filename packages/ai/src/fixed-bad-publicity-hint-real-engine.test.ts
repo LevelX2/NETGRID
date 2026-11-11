@@ -14,7 +14,9 @@ import { RealEngineFixtureBuilder } from "./evaluation/real-engine-fixture-build
 import { buildAiDecisionInput } from "./runtime/ai-decision-input";
 import { chooseAiAction } from "./ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
+import { runnerStrategicExchangeKinds } from "./runtime/runner-strategic-exchange";
 const id = "onr_proteus_108_faked-hit";
+const poisonedWaterSupply = "onr_proteus_117_poisoned-water-supply";
 const entry = cardSpecPlanningCards().find((c) => c.definition.id === id)!;
 const payoff = {
   kind: "run_tax",
@@ -24,7 +26,7 @@ const payoff = {
   amount: 1,
   finite: true,
 };
-function nativeInput() {
+function nativeInput(eventId = id, additionalCards: readonly string[] = []) {
   let state = createGameAfterSetup({
     seed: "fixed-bad-publicity-profile",
     runnerDeck: {
@@ -33,11 +35,12 @@ function nativeInput() {
       side: "runner",
       identity: "runner_identity_001",
       cards: [
-        id,
+        eventId,
         "onr_v1_108_score",
         "onr_v1_097_livewires-contacts",
         "onr_v1_039_krash",
         "onr_v1_014_codecracker",
+        ...additionalCards,
       ].map((id) => ({ id, quantity: 3 })),
     },
     corpDeck: {
@@ -69,7 +72,7 @@ function nativeInput() {
     .withRunnerGripSize(0)
     .withRunnerCredits(5);
   for (const def of [
-    id,
+    eventId,
     "onr_v1_108_score",
     "onr_v1_097_livewires-contacts",
     "onr_v1_039_krash",
@@ -84,11 +87,12 @@ function nativeInput() {
         deckSnapshotId: "bp-runner",
         side: "runner",
         cards: [
-          id,
+          eventId,
           "onr_v1_108_score",
           "onr_v1_097_livewires-contacts",
           "onr_v1_039_krash",
           "onr_v1_014_codecracker",
+          ...additionalCards,
         ].map((cardId) => ({ cardId, quantity: 3 })),
       },
     }),
@@ -197,5 +201,79 @@ describe("fixed public bad-publicity effect translation", () => {
     expect(
       decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
     ).toBeTruthy();
+  });
+  it("carries the Connection sacrifice and its distinct public benefit to the legal play", () => {
+    const connectionIds = ["onr_v1_154_broker", "onr_v1_170_nomad-allies"];
+    const { state } = nativeInput(poisonedWaterSupply, connectionIds);
+    const fixture = RealEngineFixtureBuilder.forState(state);
+    fixture.withRunnerResourceInstalled(connectionIds[0]!);
+    const isPlay = (action: ReturnType<typeof getLegalActions>[number]) =>
+      action.type === "play_event" &&
+      state.cardInstances[action.source!]?.definitionId === poisonedWaterSupply;
+    expect(getLegalActions(state, "runner").some(isPlay)).toBe(false);
+    fixture.withRunnerResourceInstalled(connectionIds[1]!);
+    const action = getLegalActions(state, "runner").find(isPlay)!;
+    expect(action).toBeDefined();
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "runner",
+      stateVersion: state.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        [action.source!]: poisonedWaterSupply,
+      },
+      cardSemanticProfilesByDefinitionId: profiles,
+    });
+    expect(candidate!.functionalEffects).toContainEqual(payoff);
+    expect(candidate!.functionalEffects).toContainEqual({
+      kind: "resource_trash",
+      scope: "installed_card",
+      timing: "action",
+      resource: "cards",
+      target: "installed_card_trash_cost",
+      amount: 2,
+      finite: true,
+    });
+    expect(candidate!.costProfile.selfDamage).toBeUndefined();
+    expect(runnerStrategicExchangeKinds(candidate!)).toContain(
+      "board_or_hand_sacrifice",
+    );
+    expect(runnerStrategicExchangeKinds(candidate!)).not.toContain(
+      "self_damage",
+    );
+    const opened = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    expect(opened.ok).toBe(true);
+    if (!opened.ok) return;
+    expect(opened.state.runner.credits).toBe(state.runner.credits - 4);
+    expect(opened.state.corp.badPublicity).toBe(state.corp.badPublicity);
+    const choice = opened.state.pendingChoice!;
+    expect(choice.options).toHaveLength(2);
+    const resolution = getLegalActions(opened.state, "runner").find(
+      (a) => a.type === "resolve_choice",
+    )!;
+    const resolved = applyAction(opened.state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: resolution.actionId,
+      clientKnownStateVersion: opened.state.stateVersion,
+      selectedChoices: {
+        choiceId: choice.choiceId,
+        selectedOptionIds: choice.options.map((option) => option.id),
+      },
+    });
+    expect(resolved.ok).toBe(true);
+    if (!resolved.ok) return;
+    expect(resolved.state.corp.badPublicity).toBe(state.corp.badPublicity + 1);
+    expect(resolved.state.runner.coreDamage).toBe(state.runner.coreDamage);
+    expect(resolved.state.runner.rig.resources).toHaveLength(0);
+    const replay = replayEvents(state, [opened.event, resolved.event]);
+    expect(replay.ok).toBe(true);
+    if (replay.ok)
+      expect(hashState(replay.state)).toBe(hashState(resolved.state));
   });
 });
