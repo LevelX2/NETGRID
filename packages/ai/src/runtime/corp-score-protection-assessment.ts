@@ -124,6 +124,7 @@ export type CorpScoreProtectionAssessmentInput = Readonly<{
   serverIce: readonly CorpScoreProtectionIceInput[];
   serverRoot?: readonly VisibleCard[];
   runnerRig: readonly VisibleCard[];
+  runnerDeckCount?: number;
   /**
    * Public, engine-derived delayed-install cards. A Corp-side projection may
    * use these only when the corresponding installed delayed-install source,
@@ -570,6 +571,19 @@ export function assessCorpScoreProtection(
   const bestPath = states.reduce((best, candidate) =>
     accessPathIsBetter(candidate, best) ? candidate : best,
   );
+  if (
+    compareRational(bestPath.probability, ONE) < 0 &&
+    visibleRunnerInRunStackInstallPotential(runnerRig, input.runnerDeckCount)
+  ) {
+    return unknownAssessment(
+      input.maximumRunnerAccessSuccessProbability,
+      "unsupported_runner_access_effect",
+      [
+        "scoreProtectionKnown:false",
+        "publicRunnerInRunStackInstallUnquoted:true",
+      ],
+    );
+  }
   let passProbability = ONE;
   for (const source of input.serverRoot ?? []) {
     if (!source.rezzed) continue;
@@ -1294,6 +1308,40 @@ function cardIsIcebreaker(card: VisibleCard): boolean {
       (subtype) => subtypeKey(subtype) === "icebreaker",
     ),
   );
+}
+
+/** The public source can change coverage inside a run. The possible target
+ * remains hidden, so a missing visible breaker cannot certify a stop. */
+export function visibleRunnerInRunStackInstallPotential(
+  runnerRig: readonly VisibleCard[],
+  runnerDeckCount: number | undefined,
+): boolean {
+  if (runnerDeckCount === 0) return false;
+  return runnerRig.some((card) => {
+    if (
+      card.known !== true ||
+      card.rezzed !== true ||
+      card.controller !== "runner" ||
+      !card.definitionId
+    ) {
+      return false;
+    }
+    const abilities = cardSpecPlanningCardByDefinitionId(card.definitionId)
+      ?.planning.engine.abilities;
+    return (
+      abilities?.some(
+        (ability) =>
+          ability.kind === "activated" &&
+          ability.timing === "during_run" &&
+          ability.costs.every((cost) => cost.kind === "trash_source") &&
+          ability.effects.some(
+            (effect) =>
+              effect.kind === "search_stack_install" &&
+              effect.filter === "program",
+          ),
+      ) === true
+    );
+  });
 }
 
 function runnerRigCardRequiresUnsupportedAccessProjection(

@@ -116,14 +116,23 @@ export function corpTraceHardwareTrashChoiceFacts(
       "Supply the exact current Engine quote for the explicit source rez state and its hardware-trash Trace effect.",
     );
   const event = input.eventTail.at(-1);
+  const payload = event?.publicPayload;
+  const hardwareTraceCompleted =
+    payload?.traceStep === "runner_bid" ||
+    (payload?.traceStep === "post_bid_link" &&
+      payload.traceId === traceId &&
+      payload.traceSuccessful === true);
   if (
+    event?.type !== "resolve_choice" ||
     event?.stateVersionAfter !== version ||
-    event.publicPayload.actor !== "runner" ||
-    event.publicPayload.traceStep !== "runner_bid" ||
-    event.publicPayload.sourceDefinitionId !== ice.definitionId
+    event.stateVersionBefore + 1 !== version ||
+    payload?.actor !== "runner" ||
+    payload.actionType !== "resolve_choice" ||
+    payload.sourceDefinitionId !== ice.definitionId ||
+    !hardwareTraceCompleted
   )
     fail(
-      "Preserve the public Runner-bid event that opened this exact hardware Choice.",
+      "Preserve the final public Runner Trace resolution that opened this exact hardware Choice.",
     );
 
   const hardware = (input.playerView.opponent.rig ?? []).filter(

@@ -2526,6 +2526,24 @@ Der Resolver übernimmt nur diese aktuelle Bindung. Eine angebotene kostenlose
 vollständige Ersatzwirkung benötigt keinen geratenen Schadenswert aus einem
 technischen Choice-Namen. Unbekannte Ersatzwirkungen bleiben fail-closed.
 
+Ein angebotenes Backup für installierte, zum Trash bestimmte Programme
+öffnet eine eigene Phase im bestehenden Defense-Owner. Die Engine markiert
+die Ersatzwirkung mit der bekannten Hardware-Quelle. Im Folgefenster bindet
+sie die geordneten Zieloptionen an dieselbe Quelle. Der Runner-DTO erhält
+diese Fakten nur für den eigenen bekannten Rig. Defense bindet je Fenster
+StateVersion, LegalAction, Quelle und konkrete Optionswerte. Gesicherte
+Programme verlassen den Rig und können später über die Hardware auf die
+Hand zurückgeholt werden. Der Payload-Resolver validiert die aktuelle Bindung
+vor der Engine-Ausführung (SP-853).
+
+Die Rückholung aus der Hardware hat einen eigenen LegalAction-Kopf. Die
+Engine bindet die Instanz und Definition des obersten gehosteten Programms
+mit derselben Reihenfolge wie bei der Ausführung. Der vorhandene
+Entwicklungsplan für Rückholung prüft diese Quelle, den exakten Zielkopf
+und die Handretention. Die Wahl bleibt an den aktuellen Stand gebunden.
+Reicht der zusätzliche Handwert nicht, klassifiziert der Owner den Kopf
+ausdrücklich als zurückgestellt (SP-855).
+
 Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
 `defense-signals.ts` bündelt Schutzinstallationen, Handpuffer, Tag-Clear-
 Funding und Reaktionsreserve. `defense-plan-module.ts` besitzt Phasenwahl,
@@ -3774,6 +3792,12 @@ Planportfolio. Er benötigt keinen injizierten Runtime-Dienst. Run-Root,
 Parent, Executor, Quelle, ICE und StateVersion werden wie bisher exakt
 gebunden. Proaktive Signale berücksichtigen unbekannte installierte Karten,
 passende Informationswerkzeuge und bereits vorhandene Duplikate.
+Nach einem ausgeführten Verzicht kann ein weiteres Approach-Fenster desselben
+Runs den vorhandenen Run-Parent übernehmen. Der Owner prüft die ursprüngliche
+Lease, die lückenlose Folge von Rez und weiterlaufenden Run-Fenstern am selben
+Fort sowie die aktuelle Quelle und das neue ICE in den Engine-LegalActions.
+Die Engine kann einen Rez-Verzicht am angeflogenen ICE ohne Serverkennung
+publizieren. Die gebundene Run-Kette hält diesen Regelschritt im selben Run.
 
 Die Live-Runtime ruft die Signalbildung, Dispositionen und den Erinnerungsschreiber
 auf. Der zentrale Choice-Einstieg delegiert an die bestehende Ownerfunktion.

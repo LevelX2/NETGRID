@@ -1,4 +1,5 @@
 import type { LegalAction } from "@netgrid/shared";
+import { microtechHostedProgramIds } from "../state/microtech-backup";
 import {
   moveTopHostedProgramToGripForCardImplementation,
   moveTopTrashToGripForCardImplementation,
@@ -132,6 +133,8 @@ export function createHiddenZoneCardImplementationRuntimeDeps(
     topTrashToGripTargetCount: (state) =>
       host.cards.topRunnerHeapCardId(state) ? 1 : 0,
     topTrashToGripTargetId: (state) => host.cards.topRunnerHeapCardId(state),
+    topHostedProgramToGripTargetId: (state, sourceCardId) =>
+      microtechHostedProgramIds(state, sourceCardId).at(-1),
     searchStackInstallTargetCount: (state, filter, installCost) =>
       searchStackInstallTargets(
         host.hiddenZone.searchActivationTargetHost(state),

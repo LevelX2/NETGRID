@@ -1,13 +1,18 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { runnerExposeInstalledOpportunity } from "./expose-installed-card-choice";
-import type { RunnerExposeInformationSignal } from "./expose-information-types";
+import { runnerExposedIceHasRezSupport } from "../run-window/run-window-expose-viewing";
+import type {
+  ExposeInformationState,
+  RunnerExposeInformationSignal,
+} from "./expose-information-types";
 
 export function runnerExposeInformationSignals(
-  input: AiDecisionInput,
+  input: AiDecisionInputWithDeckCapabilities,
   candidates: readonly ActionSemanticCandidate[],
   previous: ResidentPlanPortfolio | undefined,
 ): RunnerExposeInformationSignal[] {
@@ -142,7 +147,7 @@ function runnerProactiveExposeInformationSignals(
 }
 
 function runnerCurrentExposeInformationSignal(
-  input: AiDecisionInput,
+  input: AiDecisionInputWithDeckCapabilities,
   previous: ResidentPlanPortfolio | undefined,
   rememberedTargetIds: ReadonlySet<string>,
 ): RunnerExposeInformationSignal | undefined {
@@ -230,18 +235,17 @@ function runnerCurrentExposeInformationSignal(
       event.stateVersionBefore >= previous.stateVersion &&
       event.stateVersionAfter <= input.playerView.stateVersion,
   );
-  const exactTurnPlanLease =
-    previous !== undefined &&
-    previous.stateVersion < input.playerView.stateVersion &&
+  const exactLeaseBinding =
     turnPlanCommitment?.status === "active" &&
     turnPlanCommitment.sequenceRootPlanInstanceId === rootPlanInstanceId &&
     executionLease !== undefined &&
     executionLease.commitmentId === turnPlanCommitment.commitmentId &&
-    executionLease.sourcePlanId === turnPlanCommitment.sourcePlanId &&
+    executionLease.sourcePlanId === turnPlanCommitment.sourcePlanId;
+  const exactLeaseAndEventSequence =
+    previous !== undefined &&
+    previous.stateVersion < input.playerView.stateVersion &&
+    exactLeaseBinding &&
     executionLease.currentBinding.stateVersion === previous.stateVersion &&
-    (executionLease.actionType === "start_run" ||
-      executionLease.actionType === "play_event" ||
-      executionLease.actionType === "continue_run") &&
     continuationEvents.length >= 1 &&
     continuationEvents[0]?.stateVersionBefore === previous.stateVersion &&
     continuationEvents.every(
@@ -255,7 +259,12 @@ function runnerCurrentExposeInformationSignal(
       input.playerView.stateVersion &&
     continuationEvents[0]?.publicPayload?.actor === "runner" &&
     continuationEvents[0]?.publicPayload?.actionType ===
-      executionLease.actionType &&
+      executionLease.actionType;
+  const exactTurnPlanLease =
+    exactLeaseAndEventSequence &&
+    (executionLease.actionType === "start_run" ||
+      executionLease.actionType === "play_event" ||
+      executionLease.actionType === "continue_run") &&
     continuationEvents
       .slice(1)
       .every(
@@ -267,6 +276,53 @@ function runnerCurrentExposeInformationSignal(
               event.publicPayload?.installPlacement === "root" &&
               event.publicPayload?.serverId === attackedServerId)),
       );
+  const encounterResolution = input.eventTail?.find(
+    (event) =>
+      event.stateVersionBefore === executionLease?.currentBinding.stateVersion,
+  );
+  const [movement] = continuationEvents;
+  const observedMovement = input.observedTurnPlanAction;
+  const runId = input.playerView.run.runId;
+  // The Engine-only move refreshes the portfolio at its pre-action version,
+  // while the decision lease still identifies the previous encounter action.
+  const exactEncounterContinuationLease =
+    previous !== undefined &&
+    exactLeaseBinding &&
+    executionLease.actionType === "continue_run" &&
+    executor?.moduleId === "runner.convert_run_window" &&
+    runId !== undefined &&
+    executor.dedupeKey === `run:${runId}` &&
+    executor.target?.kind === "window" &&
+    executor.target.id === `run:${runId}` &&
+    continuationEvents.length === 1 &&
+    encounterResolution?.type === "continue_run" &&
+    encounterResolution.stateVersionBefore + 1 === previous.stateVersion &&
+    encounterResolution.stateVersionAfter === previous.stateVersion &&
+    encounterResolution.turnSerial === input.playerView.turnSerial &&
+    encounterResolution.publicPayload.actor === "runner" &&
+    encounterResolution.publicPayload.actionType === "continue_run" &&
+    encounterResolution.publicPayload.serverId === attackedServerId &&
+    encounterResolution.publicPayload.encounterContinue === true &&
+    encounterResolution.publicPayload.encounterWillEndRun === false &&
+    encounterResolution.publicPayload.result === "continued" &&
+    movement?.type === "continue_run" &&
+    movement.stateVersionBefore === previous.stateVersion &&
+    movement.stateVersionAfter === input.playerView.stateVersion &&
+    movement.stateVersionBefore + 1 === movement.stateVersionAfter &&
+    movement.turnSerial === input.playerView.turnSerial &&
+    movement.publicPayload.actor === "runner" &&
+    movement.publicPayload.actionType === "continue_run" &&
+    movement.publicPayload.serverId === attackedServerId &&
+    movement.publicPayload.encounterContinue === undefined &&
+    movement.publicPayload.result === "continued" &&
+    observedMovement !== undefined &&
+    observedMovement.matchId === input.matchId &&
+    observedMovement.side === "runner" &&
+    observedMovement.actionType === "continue_run" &&
+    observedMovement.source === "game_rule" &&
+    observedMovement.stateVersionBefore === movement.stateVersionBefore &&
+    observedMovement.stateVersionAfter === movement.stateVersionAfter &&
+    observedMovement.boundChoices.length === 0;
   const exactPlanBinding =
     previous !== undefined &&
     previous.side === "runner" &&
@@ -288,7 +344,77 @@ function runnerCurrentExposeInformationSignal(
       executorState?.kind === "remote_contest" ||
       executorState?.kind === "run_window") &&
     executorState.signal?.serverId === input.playerView.run.attackedServerId &&
-    (exactSelectedOrigin || exactTurnPlanLease);
+    (exactSelectedOrigin || exactTurnPlanLease || exactEncounterContinuationLease);
+  const previousExpose =
+    executor?.moduleId === "runner.expose_information"
+      ? (executor.moduleState as ExposeInformationState).signal
+      : undefined;
+  const previousRunParent = previous?.instances.find(
+    (instance) =>
+      runId !== undefined &&
+      instance.side === "runner" &&
+      instance.moduleId === "runner.convert_run_window" &&
+      instance.parentInstanceId === rootPlanInstanceId &&
+      instance.dedupeKey === `run:${runId}` &&
+      instance.target?.kind === "window" &&
+      instance.target.id === instance.dedupeKey,
+  );
+  const automaticProgress = continuationEvents.slice(1);
+  const continuedAfterDecline =
+    exactLeaseAndEventSequence &&
+    previous.side === "runner" &&
+    root?.side === "runner" &&
+    executor?.side === "runner" &&
+    executor.executionState === "executor" &&
+    executor.instanceId === previous.executorInstanceId &&
+    root.instanceId === previous.rootForegroundInstanceId &&
+    executionLease.actionType === "trigger_ability" &&
+    previousExpose?.kind === "run_window" &&
+    previousExpose.phase === "decline_known_ice" &&
+    previousExpose.selectedActionId ===
+      executionLease.currentBinding.actionId &&
+    previousExpose.runId !== undefined &&
+    previousExpose.runId === input.playerView.run.runId &&
+    previousExpose.serverId === attackedServerId &&
+    previousExpose.sourceCardInstanceId === sourceCardInstanceId &&
+    previousExpose.targetIceInstanceId !== undefined &&
+    previousExpose.targetIceInstanceId !== iceId &&
+    previousRunParent !== undefined &&
+    previousExpose.rootPlanInstanceId === root.instanceId &&
+    previousExpose.parentPlanInstanceId === executor.parentInstanceId &&
+    (executor.parentInstanceId === root.instanceId ||
+      executor.parentInstanceId === previousRunParent.instanceId) &&
+    continuationEvents[0]?.publicPayload?.hiddenZoneAction ===
+      "approach_ice_expose_decline" &&
+    automaticProgress.some(
+      (event) => event.publicPayload?.actor === "runner",
+    ) &&
+    automaticProgress.every((event) => {
+      const payload = event.publicPayload;
+      if (event.turnSerial !== input.playerView.turnSerial) return false;
+      if (payload?.actor === "corp" && payload.actionType === "decline_rez") {
+        // The approach-ICE decline is a rule action whose public event can
+        // have no target. The surrounding events bind it to the same run.
+        return (
+          event.type === "decline_rez" &&
+          (payload.serverId === undefined ||
+            payload.serverId === attackedServerId)
+        );
+      }
+      return (
+        payload?.serverId === attackedServerId &&
+        ((payload.actor === "corp" && payload.actionType === "rez_ice") ||
+          (payload.actor === "runner" &&
+            payload.actionType === "continue_run" &&
+            payload.result === "continued" &&
+            payload.encounterWillEndRun !== true))
+      );
+    });
+  const boundParentPlanInstanceId = exactPlanBinding
+    ? executorInstanceId
+    : continuedAfterDecline
+      ? previousRunParent.instanceId
+      : undefined;
   const runPosition = input.playerView.run.position;
   const approachedServer = input.playerView.servers.find(
     (server) => server.id === input.playerView.run?.attackedServerId,
@@ -297,7 +423,15 @@ function runnerCurrentExposeInformationSignal(
     runPosition?.kind === "ice"
       ? approachedServer?.ice[runPosition.iceIndex]
       : undefined;
-  if (!exactWindow || !exactPlanBinding || !approachedIce) {
+  if (
+    !exactWindow ||
+    !rootPlanInstanceId ||
+    !boundParentPlanInstanceId ||
+    !approachedIce ||
+    runPosition?.kind !== "ice" ||
+    runPosition.serverId !== attackedServerId ||
+    (approachedIce.known && approachedIce.instanceId !== iceId)
+  ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -310,15 +444,29 @@ function runnerCurrentExposeInformationSignal(
         "Resolve an approach-ICE expose window only from the exact active Runner run-plan origin, current source card and current visible approached ICE.",
     });
   }
+  const previousViewing = previous?.runnerExposeInformationMemory?.find(
+    (record) =>
+      record.targetIceInstanceId === iceId &&
+      record.sourceCardInstanceId === sourceCardInstanceId &&
+      record.serverId === attackedServerId &&
+      record.selectedAtStateVersion < input.playerView.stateVersion,
+  );
+  const previousUnfundedRezCredits = previousViewing?.previouslyUnfundedRezCredits;
+  const priorRezObservationNeedsReview =
+    previousUnfundedRezCredits !== undefined &&
+    (input.playerView.opponent.credits >= previousUnfundedRezCredits ||
+      runnerExposedIceHasRezSupport(approachedServer));
+  const previouslyExitedLethalIce = previousViewing?.previouslyExitedLethalIce === true;
   const exposeUnknownIce =
-    approachedIce.known === false && !rememberedTargetIds.has(iceId);
+    approachedIce.known === false &&
+    (!rememberedTargetIds.has(iceId) || priorRezObservationNeedsReview || previouslyExitedLethalIce);
   const action = exposeUnknownIce ? expose : decline;
   const rejectedAction = exposeUnknownIce ? decline : expose;
   return {
     kind: "run_window",
     informationId: `ice:${iceId}`,
     rootPlanInstanceId,
-    parentPlanInstanceId: executorInstanceId,
+    parentPlanInstanceId: boundParentPlanInstanceId,
     serverId: input.playerView.run.attackedServerId,
     runId: input.playerView.run.runId ?? String(input.playerView.stateVersion),
     sourceCardInstanceId,
@@ -331,6 +479,12 @@ function runnerCurrentExposeInformationSignal(
       exposeUnknownIce
         ? "runner_expose_information_unknown_ice_target"
         : "runner_expose_information_repeated_known_ice_declined",
+      ...(exposeUnknownIce && priorRezObservationNeedsReview
+        ? ["runner_expose_information_prior_unfunded_rez_needs_current_view"]
+        : []),
+      ...(exposeUnknownIce && previouslyExitedLethalIce
+        ? ["runner_expose_information_prior_lethal_exit_needs_current_view"]
+        : []),
       `runner_expose_information_server:${input.playerView.run.attackedServerId}`,
       `runner_expose_information_target:${iceId}`,
       `runner_expose_information_source:${sourceCardInstanceId}`,

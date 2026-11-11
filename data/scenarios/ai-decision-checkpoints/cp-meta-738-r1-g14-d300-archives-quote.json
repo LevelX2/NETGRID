@@ -1,0 +1,224 @@
+{
+  "choiceId": "choice_agenda_purge_install_targets_299",
+  "stateVersion": 299,
+  "revealedAgendaId": "corp_onr_proteus_008_project-zurich_1",
+  "packages": [
+    {
+      "optionIds": [
+        "agenda_purge_corp_onr_classic_013_puzzle_1_archives_fixed",
+        "agenda_purge_corp_onr_classic_013_puzzle_3_rd_fixed"
+      ],
+      "archivesIce": [
+        {
+          "instanceId": "corp_onr_classic_013_puzzle_1",
+          "known": true,
+          "title": "Puzzle",
+          "definitionId": "onr_classic_013_puzzle",
+          "type": "ice",
+          "subtypes": [
+            "code_gate"
+          ],
+          "rulesText": "*End the run, and trash Puzzle at end of turn. *End the run, and trash Puzzle at end of turn.",
+          "rezCost": 2,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strength": 5,
+          "owner": "corp",
+          "controller": "corp",
+          "effectiveRunQuote": {
+            "iceInstanceId": "corp_onr_classic_013_puzzle_1",
+            "iceDefinitionId": "onr_classic_013_puzzle",
+            "effectiveStrength": 5,
+            "encounterStrength": 4,
+            "subroutines": [
+              {
+                "id": "subroutine_end_run_trash_source_a",
+                "type": "end_the_run_and_trash_source_at_end_of_turn",
+                "sourceDefinitionId": "onr_classic_013_puzzle",
+                "sourceTitle": "Puzzle"
+              },
+              {
+                "id": "subroutine_end_run_trash_source_b",
+                "type": "end_the_run_and_trash_source_at_end_of_turn",
+                "sourceDefinitionId": "onr_classic_013_puzzle",
+                "sourceTitle": "Puzzle"
+              }
+            ]
+          },
+          "effectiveRezResourceExchangeQuote": {
+            "context": "installed",
+            "cardId": "corp_onr_classic_013_puzzle_1",
+            "targetServerId": "archives",
+            "projectedServerId": "archives",
+            "expiresAtStateVersion": 300,
+            "complete": false,
+            "reason": "not_current_approached_ice"
+          }
+        }
+      ],
+      "corpCreditsAfter": 15,
+      "corpAgendaPointsAfter": 4,
+      "corpClicksAfter": 1
+    },
+    {
+      "optionIds": [
+        "agenda_purge_corp_onr_classic_013_puzzle_1_rd_fixed",
+        "agenda_purge_corp_onr_classic_013_puzzle_3_archives_fixed"
+      ],
+      "archivesIce": [
+        {
+          "instanceId": "corp_onr_classic_013_puzzle_3",
+          "known": true,
+          "title": "Puzzle",
+          "definitionId": "onr_classic_013_puzzle",
+          "type": "ice",
+          "subtypes": [
+            "code_gate"
+          ],
+          "rulesText": "*End the run, and trash Puzzle at end of turn. *End the run, and trash Puzzle at end of turn.",
+          "rezCost": 2,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strength": 5,
+          "owner": "corp",
+          "controller": "corp",
+          "effectiveRunQuote": {
+            "iceInstanceId": "corp_onr_classic_013_puzzle_3",
+            "iceDefinitionId": "onr_classic_013_puzzle",
+            "effectiveStrength": 5,
+            "encounterStrength": 4,
+            "subroutines": [
+              {
+                "id": "subroutine_end_run_trash_source_a",
+                "type": "end_the_run_and_trash_source_at_end_of_turn",
+                "sourceDefinitionId": "onr_classic_013_puzzle",
+                "sourceTitle": "Puzzle"
+              },
+              {
+                "id": "subroutine_end_run_trash_source_b",
+                "type": "end_the_run_and_trash_source_at_end_of_turn",
+                "sourceDefinitionId": "onr_classic_013_puzzle",
+                "sourceTitle": "Puzzle"
+              }
+            ]
+          },
+          "effectiveRezResourceExchangeQuote": {
+            "context": "installed",
+            "cardId": "corp_onr_classic_013_puzzle_3",
+            "targetServerId": "archives",
+            "projectedServerId": "archives",
+            "expiresAtStateVersion": 300,
+            "complete": false,
+            "reason": "not_current_approached_ice"
+          }
+        }
+      ],
+      "corpCreditsAfter": 15,
+      "corpAgendaPointsAfter": 4,
+      "corpClicksAfter": 1
+    },
+    {
+      "optionIds": [
+        "agenda_purge_corp_onr_classic_013_puzzle_1_archives_fixed",
+        "agenda_purge_corp_onr_classic_013_puzzle_3_archives_fixed"
+      ],
+      "archivesIce": [
+        {
+          "instanceId": "corp_onr_classic_013_puzzle_1",
+          "known": true,
+          "title": "Puzzle",
+          "definitionId": "onr_classic_013_puzzle",
+          "type": "ice",
+          "subtypes": [
+            "code_gate"
+          ],
+          "rulesText": "*End the run, and trash Puzzle at end of turn. *End the run, and trash Puzzle at end of turn.",
+          "rezCost": 2,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strength": 5,
+          "owner": "corp",
+          "controller": "corp",
+          "effectiveRunQuote": {
+            "iceInstanceId": "corp_onr_classic_013_puzzle_1",
+            "iceDefinitionId": "onr_classic_013_puzzle",
+            "effectiveStrength": 5,
+            "encounterStrength": 4,
+            "subroutines": [
+              {
+                "id": "subroutine_end_run_trash_source_a",
+                "type": "end_the_run_and_trash_source_at_end_of_turn",
+                "sourceDefinitionId": "onr_classic_013_puzzle",
+                "sourceTitle": "Puzzle"
+              },
+              {
+                "id": "subroutine_end_run_trash_source_b",
+                "type": "end_the_run_and_trash_source_at_end_of_turn",
+                "sourceDefinitionId": "onr_classic_013_puzzle",
+                "sourceTitle": "Puzzle"
+              }
+            ]
+          },
+          "effectiveRezResourceExchangeQuote": {
+            "context": "installed",
+            "cardId": "corp_onr_classic_013_puzzle_1",
+            "targetServerId": "archives",
+            "projectedServerId": "archives",
+            "expiresAtStateVersion": 300,
+            "complete": false,
+            "reason": "not_current_approached_ice"
+          }
+        },
+        {
+          "instanceId": "corp_onr_classic_013_puzzle_3",
+          "known": true,
+          "title": "Puzzle",
+          "definitionId": "onr_classic_013_puzzle",
+          "type": "ice",
+          "subtypes": [
+            "code_gate"
+          ],
+          "rulesText": "*End the run, and trash Puzzle at end of turn. *End the run, and trash Puzzle at end of turn.",
+          "rezCost": 2,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strength": 5,
+          "owner": "corp",
+          "controller": "corp",
+          "effectiveRunQuote": {
+            "iceInstanceId": "corp_onr_classic_013_puzzle_3",
+            "iceDefinitionId": "onr_classic_013_puzzle",
+            "effectiveStrength": 5,
+            "encounterStrength": 4,
+            "subroutines": [
+              {
+                "id": "subroutine_end_run_trash_source_a",
+                "type": "end_the_run_and_trash_source_at_end_of_turn",
+                "sourceDefinitionId": "onr_classic_013_puzzle",
+                "sourceTitle": "Puzzle"
+              },
+              {
+                "id": "subroutine_end_run_trash_source_b",
+                "type": "end_the_run_and_trash_source_at_end_of_turn",
+                "sourceDefinitionId": "onr_classic_013_puzzle",
+                "sourceTitle": "Puzzle"
+              }
+            ]
+          },
+          "effectiveRezResourceExchangeQuote": {
+            "context": "installed",
+            "cardId": "corp_onr_classic_013_puzzle_3",
+            "targetServerId": "archives",
+            "projectedServerId": "archives",
+            "expiresAtStateVersion": 300,
+            "complete": false,
+            "reason": "not_current_approached_ice"
+          }
+        }
+      ],
+      "corpCreditsAfter": 15,
+      "corpAgendaPointsAfter": 4,
+      "corpClicksAfter": 1
+    }
+  ]
+}

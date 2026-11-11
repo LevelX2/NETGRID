@@ -32,4 +32,6 @@ export type RunnerExposeInformationMemoryRecord = Readonly<{
   serverId: string;
   sourceCardInstanceId: string;
   selectedAtStateVersion: number;
+  previouslyUnfundedRezCredits?: number;
+  previouslyExitedLethalIce?: true;
 }>;

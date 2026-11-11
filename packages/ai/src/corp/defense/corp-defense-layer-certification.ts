@@ -11,7 +11,10 @@ import { runnerRunPathCreditBudgetAfterEncounter } from "../../run-analysis/visi
 import { corpEffectiveDefenseActivationCredits } from "../../runtime/corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
-import { visiblePreparedRunnerBreakerCandidates } from "../../runtime/corp-score-protection-assessment";
+import {
+  visiblePreparedRunnerBreakerCandidates,
+  visibleRunnerInRunStackInstallPotential,
+} from "../../runtime/corp-score-protection-assessment";
 import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 type CorpCertifiedDefenseLayer = Readonly<{
   iceInstanceId: string;
@@ -79,6 +82,14 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
   visibleCorpCredits: number,
 ): boolean {
   const runnerRig = input.playerView.opponent.rig ?? [];
+  if (
+    visibleRunnerInRunStackInstallPotential(
+      runnerRig,
+      input.playerView.opponent.deckCount,
+    )
+  ) {
+    return false;
+  }
   if (
     input.playerView.activeSide === "corp" &&
     input.playerView.runnerNextTurnCreditClicks === undefined

@@ -6,6 +6,7 @@ import { runnerRemoteRunDispositions } from "../runner/remote-contest/remote-con
 import { runnerCentralRunDispositions } from "../runner/central-pressure/central-pressure-dispositions";
 import { bindRunnerCentralSelfTagProtection } from "../runner/central-pressure/self-tag-protection-preparation";
 import { isRunnerGripDamageReplacementWindow } from "../runner/defense-recovery/grip-damage-replacement";
+import { isRunnerProgramTrashBackupWindow } from "../runner/defense-recovery/program-trash-backup";
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
   bindSelectedRunnerCoverageMultiSearchChoice,
@@ -210,6 +211,7 @@ import {
   bindSelectedRunnerTargetedIceTrashChoiceContinuation,
 } from "../run-analysis/runner-run-preparation-choice-binding";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
+import { runnerRecoveryActionContract } from "../runner/hand-development/development-search-targets";
 import { runnerRecentFutureEncounterDamageSafetyAbort } from "../runner-damage-threat-assessment";
 import { runnerEconomyHandFacts } from "../runner-economy-posture";
 import { projectInternalRunnerRunActions } from "../actions/run-action-projection";
@@ -1333,6 +1335,7 @@ function runnerTransientPlanSignals(
     defense.forgoUnsafeRunCapacity ||
     defense.discardChoiceBinding !== undefined ||
     defense.gripDamageReplacementBinding !== undefined ||
+    defense.programTrashBackupBinding !== undefined ||
     defense.reactionReserveNeed !== undefined ||
     defense.persistentHazardCounterRemovalAvailable ||
     defense.persistentHazardCounterFundingNeed !== undefined ||
@@ -2392,8 +2395,11 @@ export function runnerActionDispositions(
       (candidate.actionType === "activated_card_ability" ||
         candidate.actionType === "trigger_ability") &&
       runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects);
+    const hostedProgramRecovery =
+      candidate.actionType === "activated_card_ability" &&
+      runnerRecoveryActionContract(input, candidate)?.hostedTarget !== undefined;
     if (
-      structuredTopHeapRecovery &&
+      (structuredTopHeapRecovery || hostedProgramRecovery) &&
       !dispositions.some((entry) => entry.actionId === candidate.actionId) &&
       !defenseHandBufferActionIds.has(candidate.actionId) &&
       !coverageOwnedActionIds.has(candidate.actionId) &&
@@ -2401,8 +2407,12 @@ export function runnerActionDispositions(
     ) {
       add(
         candidate.actionId,
-        "runner.defense_and_recovery",
-        "runner_top_heap_recovery_has_no_active_hand_or_coverage_need",
+        hostedProgramRecovery
+          ? "runner.develop_board_and_hand"
+          : "runner.defense_and_recovery",
+        hostedProgramRecovery
+          ? "runner_hosted_program_recovery_has_no_retained_hand_value"
+          : "runner_top_heap_recovery_has_no_active_hand_or_coverage_need",
       );
     }
   }
@@ -2489,6 +2499,9 @@ export function runnerActionDispositions(
     ...(domain.defense.persistentHazardCounterFundingNeed?.actionIds ?? []),
     ...(domain.defense.discardChoiceBinding
       ? [domain.defense.discardChoiceBinding.actionId]
+      : []),
+    ...(domain.defense.programTrashBackupBinding
+      ? [domain.defense.programTrashBackupBinding.actionId]
       : []),
     ...(domain.defense.gripDamageReplacementBinding
       ? [domain.defense.gripDamageReplacementBinding.actionId]
@@ -3868,7 +3881,11 @@ function recentServerAccessCount(
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
-  if (isRunnerGripDamageReplacementWindow(context.input)) return undefined;
+  if (
+    isRunnerGripDamageReplacementWindow(context.input) ||
+    isRunnerProgramTrashBackupWindow(context.input)
+  )
+    return undefined;
   if (
     context.input.playerView.pendingChoice?.source.startsWith(
       "v1922.corp_rd_arrange_top5:",

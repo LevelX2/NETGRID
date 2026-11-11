@@ -78,8 +78,9 @@ export function buildRunnerRunWindowSignals({
             activeRunRoot,
             visibleIceDamageSafetyAssessment,
           );
+        const exposedIceSafety = runnerExposedIceSafetyAssessment(input, activeRunRoot);
         const safetyAssessment =
-          runnerExposedIceSafetyAssessment(input) ??
+          exposedIceSafety ??
           futureEncounterSafetyAssessment ??
           (preservesTerminalNonlethalDamageContest
             ? undefined
@@ -198,6 +199,9 @@ export function buildRunnerRunWindowSignals({
                 safetyIntent: "jack_out" as const,
                 safetyEvidenceCode: safetyAssessment.evidenceCode,
               }
+            : {}),
+          ...(exposedIceSafety?.exposedIceSafetyExit
+            ? { exposedIceSafetyExit: exposedIceSafety.exposedIceSafetyExit }
             : {}),
           ...(encounterMitigation
             ? {

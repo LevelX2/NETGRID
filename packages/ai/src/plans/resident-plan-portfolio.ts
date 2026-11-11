@@ -656,7 +656,13 @@ export function assertResidentPlanPortfolio(
         record.sourceCardInstanceId.trim().length === 0 ||
         !Number.isSafeInteger(record.selectedAtStateVersion) ||
         record.selectedAtStateVersion < 0 ||
-        record.selectedAtStateVersion > portfolio.stateVersion,
+        record.selectedAtStateVersion > portfolio.stateVersion ||
+        (record.previouslyUnfundedRezCredits !== undefined &&
+          (!Number.isSafeInteger(record.previouslyUnfundedRezCredits) ||
+            record.previouslyUnfundedRezCredits <= 0)) ||
+        (record.previouslyExitedLethalIce !== undefined &&
+          (record.previouslyExitedLethalIce !== true ||
+            record.previouslyUnfundedRezCredits !== undefined)),
     )
   ) {
     throw portfolioFailure(

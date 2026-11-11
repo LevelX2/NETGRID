@@ -547,6 +547,13 @@ die Quellsubroutine zu brechen, bezahlt deren vollständige Strength- und
 Breakkosten zusammen mit vorhandenen ETR-Breaks. Ein hoher Creditstand allein
 zertifiziert keinen Zugriff durch eine ungebrochene Sperre.
 
+Eine sichtbar aktive Installation aus dem Stack während eines Runs kann die
+Breaker-Abdeckung im selben Run ändern. Bei einer darauf beruhenden
+Zugriffssperre liefern der Schutz-Quote und die Rush-Risikobewertung eine
+strukturierte Unsicherheit. Der öffentliche Stack-Zähler grenzt das Fenster
+ab, die Programmauswahl bleibt verborgen. Ein bereits vollständig belegter
+Zugriff und ein aktueller abschließbarer Score behalten ihren Auftrag.
+
 Die Kosten des aktuellen Advance-Steps stammen aus der konkreten
 Engine-LegalAction beziehungsweise einem exakt an StateVersion,
 Agenda-Instanz und Action gebundenen Engine-Quote. Die vollständigen
@@ -1277,6 +1284,19 @@ Projektionsdienst. Das Remote-Modul besitzt weiterhin keine eigene ICE-,
 Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
+
+Bei der Security-Purge-Zielwahl gehört eine bereits aufgedeckte, demnächst
+offen in Archives liegende Gewinnagenda zur Verteidigungsentscheidung. Die
+Engine prüft vollständige aktuell angebotene feste Platzierungspakete auf
+getrennten Zuständen. Nur der Corp-Entscheidungsinput erhält die daraus
+entstehenden Archives-ICE und Ressourcen, gebunden an Choice und StateVersion.
+Der vorhandene Defense-Owner ändert eine Aufteilung zwischen R&D und Archives,
+wenn die gemeinsame Archives-Platzierung den sichtbaren Direktzugriff
+vollständig stoppt und die Corp-Ressourcen mindestens erhält. Das Budget
+berücksichtigt den nächsten Runner-Zug einschließlich öffentlicher
+Vorbereitung und erneuerbarer Run-Credits. In Paarung 738, G14 D300 reicht ein
+Puzzle für die offen werdende Project Zurich nicht aus. Zwei legal gerezzte
+Puzzle beenden denselben Angriff vor dem Zugriff.
 
 Aktuelle Rez-Vergleiche konsumieren den öffentlichen Restzustand des
 Erstbegegnungs-Bypasses. Vorher-/Nachherpfade laufen außen nach innen und

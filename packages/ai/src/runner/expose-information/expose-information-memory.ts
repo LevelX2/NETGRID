@@ -1,5 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { PlanSchedulerResult } from "../../plans/plan-scheduler";
+import type { RunnerRunWindowSignal } from "../../plans/runner-tactical-plan-contracts";
+import { runnerUnfundedExposedIceRezCredits } from "../run-window/run-window-expose-viewing";
 
 export function bindSelectedRunnerExposeInformationMemory(
   input: AiDecisionInput,
@@ -15,6 +17,39 @@ export function bindSelectedRunnerExposeInformationMemory(
   const targetIceInstanceId = selectedAction?.payload?.iceId;
   const sourceCardInstanceId = selectedAction?.payload?.cardId;
   const serverId = input.playerView.run?.attackedServerId;
+  if (executor?.moduleId === "runner.convert_run_window" && selectedAction) {
+    const state = executor.moduleState as
+      | { kind: "run_window"; signal: RunnerRunWindowSignal }
+      | undefined;
+    const finishedViewing =
+      selectedAction.type === "trigger_ability" &&
+      selectedAction.payload?.approachIceExposeViewDecision === "finish";
+    const previouslyUnfundedRezCredits = finishedViewing
+      ? runnerUnfundedExposedIceRezCredits(input)
+      : undefined;
+    const previouslyExitedLethalIce =
+      selectedAction.type === "jack_out" &&
+      selectedAction.payload?.approachIceExposeJackOut === true &&
+      state?.kind === "run_window" &&
+      state.signal.exposedIceSafetyExit?.actionId === selectedAction.actionId;
+    const observation = previouslyExitedLethalIce
+      ? { previouslyExitedLethalIce: true as const }
+      : previouslyUnfundedRezCredits !== undefined
+        ? { previouslyUnfundedRezCredits }
+        : undefined;
+    const records = result.portfolio.runnerExposeInformationMemory;
+    if (observation && records) {
+      result.portfolio.runnerExposeInformationMemory = records.map((record) =>
+        record.targetIceInstanceId === targetIceInstanceId &&
+        record.sourceCardInstanceId === sourceCardInstanceId &&
+        record.serverId === serverId &&
+        record.selectedAtStateVersion + 1 === input.playerView.stateVersion
+          ? { ...record, ...observation }
+          : record,
+      );
+    }
+    return;
+  }
   if (
     executor?.moduleId !== "runner.expose_information" ||
     selectedAction?.type !== "trigger_ability" ||

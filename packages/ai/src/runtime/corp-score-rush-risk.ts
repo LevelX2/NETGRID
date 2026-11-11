@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { visibleRunnerInRunStackInstallPotential } from "./corp-score-protection-assessment";
 import { scoringWindowPostRezProtectionAssessment } from "./corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure";
 
 export type CorpScoreRushRiskAssessment = Readonly<{
@@ -7,6 +8,7 @@ export type CorpScoreRushRiskAssessment = Readonly<{
     | "runner_cannot_reach_before_score"
     | "bounded_one_point_economic_pressure"
     | "unmodeled_access_path"
+    | "unquoted_in_run_program_install"
     | "terminal_steal_risk"
     | "multi_point_steal_risk"
     | "score_horizon_too_slow"
@@ -71,6 +73,16 @@ export function assessCorpScoreRushRisk(params: {
     evidence: [...evidence, `rush_admission:${admission}:${reason}`],
   });
 
+  if (
+    !beforeScore.runnerCanReachAccessNow &&
+    beforeScore.missingVisibleBreakerCoverage &&
+    visibleRunnerInRunStackInstallPotential(
+      input.playerView.opponent.rig ?? [],
+      input.playerView.opponent.deckCount,
+    )
+  ) {
+    return result("unknown", "unquoted_in_run_program_install");
+  }
   if (beforeScore.unmodeledIceCount > 0) {
     return result("unknown", "unmodeled_access_path");
   }

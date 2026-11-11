@@ -1194,9 +1194,25 @@ export type ChoiceContinuation =
 
 export type PendingChoice = ChoiceRequest;
 
+/** Engine comparison of complete, actually offered Security Purge choices.
+ * Only the Corp decision adapter receives the result. */
+export type VisibleAgendaPurgeArchivesProtectionQuote = {
+  choiceId: string;
+  stateVersion: number;
+  revealedAgendaId: CardInstanceId;
+  packages: {
+    optionIds: string[];
+    archivesIce: VisibleCard[];
+    corpCreditsAfter: number;
+    corpAgendaPointsAfter: number;
+    corpClicksAfter: number;
+  }[];
+};
+
 export type VisibleChoiceRequest = Omit<ChoiceRequest, "side" | "options"> & {
   side: Side;
   options: VisibleChoiceOption[];
+  agendaPurgeArchivesProtectionQuote?: VisibleAgendaPurgeArchivesProtectionQuote;
 };
 
 export type ChoiceRequirement = {

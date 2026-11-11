@@ -67,6 +67,7 @@ export function assessCorpTerminalAgendaDefense(
   const preparationClicks = canPrepare ? view.own.clicks : 0;
   const runner = {
     runnerRig: view.opponent.rig ?? [],
+    runnerDeckCount: view.opponent.deckCount,
     runnerSetAside: view.specialZones?.setAside ?? [],
     ...(view.opponent.memoryUsed !== undefined
       ? { runnerMemoryUsed: view.opponent.memoryUsed }

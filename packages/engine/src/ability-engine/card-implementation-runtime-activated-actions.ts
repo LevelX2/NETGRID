@@ -194,11 +194,18 @@ export function pushActivatedCardImplementationActionsForTiming(
     const moveTopHostedProgramEffect =
       moveTopHostedProgramToGripEffect(ability);
     if (moveTopHostedProgramEffect) {
+      const targetCardId = deps.topHostedProgramToGripTargetId(state, sourceCardId);
+      if (!targetCardId) continue;
       actions.push(
         createBoundAction(
           ability.label ??
             `${definition.title}: oberstes gesichertes Programm auf die Hand nehmen`,
-          activatedAbilityPayload(sourceCardId, ability, binding),
+          {
+            ...activatedAbilityPayload(sourceCardId, ability, binding),
+            cardImplementationEffectKind: "move_top_hosted_program_to_grip",
+            targetCardId,
+            targetDefinitionId: deps.definitionFor(state, targetCardId).id,
+          },
         ),
       );
       continue;
