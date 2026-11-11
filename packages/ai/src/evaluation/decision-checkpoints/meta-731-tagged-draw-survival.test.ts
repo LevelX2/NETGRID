@@ -21,6 +21,8 @@ afterEach(resetResidentPlanPortfolioMemory);
 function decide(adjust?: (input: AiDecisionInputWithDeckCapabilities) => void) {
   const input = structuredClone(checkpoint.input);
   adjust?.(input);
+  if (!input.ownDeckSnapshot)
+    throw new Error("Deck snapshot missing from checkpoint");
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot.deckSnapshotId,
