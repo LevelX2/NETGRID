@@ -3765,6 +3765,10 @@ Planportfolio. Er benötigt keinen injizierten Runtime-Dienst. Run-Root,
 Parent, Executor, Quelle, ICE und StateVersion werden wie bisher exakt
 gebunden. Proaktive Signale berücksichtigen unbekannte installierte Karten,
 passende Informationswerkzeuge und bereits vorhandene Duplikate.
+Nach einem ausgeführten Verzicht kann ein weiteres Approach-Fenster desselben
+Runs den vorhandenen Run-Parent übernehmen. Der Owner prüft die ursprüngliche
+Lease, die lückenlose Folge von Rez und weiterlaufenden Run-Fenstern am selben
+Fort sowie die aktuelle Quelle und das neue ICE in den Engine-LegalActions.
 
 Die Live-Runtime ruft die Signalbildung, Dispositionen und den Erinnerungsschreiber
 auf. Der zentrale Choice-Einstieg delegiert an die bestehende Ownerfunktion.

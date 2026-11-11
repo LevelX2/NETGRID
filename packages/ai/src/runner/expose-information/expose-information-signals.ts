@@ -4,7 +4,10 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { runnerExposeInstalledOpportunity } from "./expose-installed-card-choice";
-import type { RunnerExposeInformationSignal } from "./expose-information-types";
+import type {
+  ExposeInformationState,
+  RunnerExposeInformationSignal,
+} from "./expose-information-types";
 
 export function runnerExposeInformationSignals(
   input: AiDecisionInput,
@@ -230,7 +233,7 @@ function runnerCurrentExposeInformationSignal(
       event.stateVersionBefore >= previous.stateVersion &&
       event.stateVersionAfter <= input.playerView.stateVersion,
   );
-  const exactTurnPlanLease =
+  const exactLeaseAndEventSequence =
     previous !== undefined &&
     previous.stateVersion < input.playerView.stateVersion &&
     turnPlanCommitment?.status === "active" &&
@@ -239,9 +242,6 @@ function runnerCurrentExposeInformationSignal(
     executionLease.commitmentId === turnPlanCommitment.commitmentId &&
     executionLease.sourcePlanId === turnPlanCommitment.sourcePlanId &&
     executionLease.currentBinding.stateVersion === previous.stateVersion &&
-    (executionLease.actionType === "start_run" ||
-      executionLease.actionType === "play_event" ||
-      executionLease.actionType === "continue_run") &&
     continuationEvents.length >= 1 &&
     continuationEvents[0]?.stateVersionBefore === previous.stateVersion &&
     continuationEvents.every(
@@ -255,7 +255,12 @@ function runnerCurrentExposeInformationSignal(
       input.playerView.stateVersion &&
     continuationEvents[0]?.publicPayload?.actor === "runner" &&
     continuationEvents[0]?.publicPayload?.actionType ===
-      executionLease.actionType &&
+      executionLease.actionType;
+  const exactTurnPlanLease =
+    exactLeaseAndEventSequence &&
+    (executionLease.actionType === "start_run" ||
+      executionLease.actionType === "play_event" ||
+      executionLease.actionType === "continue_run") &&
     continuationEvents
       .slice(1)
       .every(
@@ -289,6 +294,60 @@ function runnerCurrentExposeInformationSignal(
       executorState?.kind === "run_window") &&
     executorState.signal?.serverId === input.playerView.run.attackedServerId &&
     (exactSelectedOrigin || exactTurnPlanLease);
+  const previousExpose =
+    executor?.moduleId === "runner.expose_information"
+      ? (executor.moduleState as ExposeInformationState).signal
+      : undefined;
+  const previousRunParent = previous?.instances.find(
+    (instance) => instance.instanceId === executor?.parentInstanceId,
+  );
+  const automaticProgress = continuationEvents.slice(1);
+  const continuedAfterDecline =
+    exactLeaseAndEventSequence &&
+    previous.side === "runner" &&
+    root?.side === "runner" &&
+    executor?.side === "runner" &&
+    executor.executionState === "executor" &&
+    executor.instanceId === previous.executorInstanceId &&
+    root.instanceId === previous.rootForegroundInstanceId &&
+    executionLease.actionType === "trigger_ability" &&
+    previousExpose?.kind === "run_window" &&
+    previousExpose.phase === "decline_known_ice" &&
+    previousExpose.selectedActionId ===
+      executionLease.currentBinding.actionId &&
+    previousExpose.runId !== undefined &&
+    previousExpose.runId === input.playerView.run.runId &&
+    previousExpose.serverId === attackedServerId &&
+    previousExpose.sourceCardInstanceId === sourceCardInstanceId &&
+    previousExpose.targetIceInstanceId !== undefined &&
+    previousExpose.targetIceInstanceId !== iceId &&
+    previousRunParent?.side === "runner" &&
+    previousRunParent.moduleId === "runner.convert_run_window" &&
+    previousRunParent.parentInstanceId === root.instanceId &&
+    previousRunParent.dedupeKey === `run:${previousExpose.runId}` &&
+    continuationEvents[0]?.publicPayload?.hiddenZoneAction ===
+      "approach_ice_expose_decline" &&
+    automaticProgress.some(
+      (event) => event.publicPayload?.actor === "runner",
+    ) &&
+    automaticProgress.every((event) => {
+      const payload = event.publicPayload;
+      return (
+        payload?.serverId === attackedServerId &&
+        ((payload.actor === "corp" &&
+          (payload.actionType === "rez_ice" ||
+            payload.actionType === "decline_rez")) ||
+          (payload.actor === "runner" &&
+            payload.actionType === "continue_run" &&
+            payload.result === "continued" &&
+            payload.encounterWillEndRun !== true))
+      );
+    });
+  const boundParentPlanInstanceId = exactPlanBinding
+    ? executorInstanceId
+    : continuedAfterDecline
+      ? previousRunParent.instanceId
+      : undefined;
   const runPosition = input.playerView.run.position;
   const approachedServer = input.playerView.servers.find(
     (server) => server.id === input.playerView.run?.attackedServerId,
@@ -297,7 +356,15 @@ function runnerCurrentExposeInformationSignal(
     runPosition?.kind === "ice"
       ? approachedServer?.ice[runPosition.iceIndex]
       : undefined;
-  if (!exactWindow || !exactPlanBinding || !approachedIce) {
+  if (
+    !exactWindow ||
+    !rootPlanInstanceId ||
+    !boundParentPlanInstanceId ||
+    !approachedIce ||
+    runPosition?.kind !== "ice" ||
+    runPosition.serverId !== attackedServerId ||
+    (approachedIce.known && approachedIce.instanceId !== iceId)
+  ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -318,7 +385,7 @@ function runnerCurrentExposeInformationSignal(
     kind: "run_window",
     informationId: `ice:${iceId}`,
     rootPlanInstanceId,
-    parentPlanInstanceId: executorInstanceId,
+    parentPlanInstanceId: boundParentPlanInstanceId,
     serverId: input.playerView.run.attackedServerId,
     runId: input.playerView.run.runId ?? String(input.playerView.stateVersion),
     sourceCardInstanceId,
