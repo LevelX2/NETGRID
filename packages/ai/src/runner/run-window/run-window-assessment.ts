@@ -51,6 +51,7 @@ import type {
 } from "../../runner-run-target-evaluation";
 import { runnerRunTargetHasOptionalBonusRunValue } from "../../runner-run-target-guidance";
 import {
+  currentEncounterCompleteSubroutineIndexes,
   currentEncounteredIceCard,
   currentRunHasPendingAutoPassIce,
   currentRunRemainingIce,
@@ -1593,6 +1594,40 @@ export function runnerBindExactRunWindowPhaseRoute(
   );
 }
 
+function completeInformationLockPumpCost(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number | undefined {
+  const remaining = currentEncounterCompleteSubroutineIndexes(input);
+  const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  if (remaining?.size !== 1 || !quote || quote.conditionalEncounterEffects?.length)
+    return undefined;
+  const lock = quote.subroutines.find((_, index) => remaining.has(index));
+  if (
+    lock?.type !== "set_next_encounter_lock" ||
+    lock.unbrokenRunEffect?.preventsFutureBreaking !== true ||
+    lock.unbrokenRunEffect?.preventsJackOut !== true
+  )
+    return undefined;
+  const canContinueWithoutPaying = input.legalActions.some(
+    (candidate) =>
+      candidate.type === "continue_run" &&
+      candidate.payload?.encounterContinue === true &&
+      candidate.payload.encounterWillEndRun === false &&
+      candidate.payload.sourceDefinitionId === quote.iceDefinitionId &&
+      candidate.payload.encounterFullBreakDamage === 0 &&
+      !candidate.choiceRequirements?.length &&
+      legalActionCreditCost(candidate) === 0,
+  );
+  if (!canContinueWithoutPaying) return undefined;
+  // The first pump only has value if its complete, current-lock break route
+  // fits the same budget. Persistent strength still uses whole-path pricing.
+  const payment = completeEncounterBreakerPayment(input, action);
+  return payment
+    ? completeCurrentEncounterEconomics(input, payment)?.totalCost
+    : undefined;
+}
+
 function runnerRunWindowPlanStepExclusion(
   input: AiDecisionInput,
   action: AiDecisionInput["legalActions"][number],
@@ -1656,19 +1691,29 @@ function runnerRunWindowPlanStepExclusion(
     runOrigin.encounterCreditSpendLimit !== undefined &&
     !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
     !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
-    !currentMitigation?.supportsCurrentAction &&
-    legalActionCreditCost(action) > runOrigin.encounterCreditSpendLimit
+    !currentMitigation?.supportsCurrentAction
   ) {
-    return {
-      key: "run_plan_information_budget_exceeded",
-      label: "Informationsplan erlaubt diese Encounter-Ausgabe nicht",
-      reason: [
-        "run_plan_step:information_probe",
-        `run_plan_target:${run.attackedServerId}`,
-        `run_plan_encounter_spend_limit:${runOrigin.encounterCreditSpendLimit}`,
-        `run_plan_action_credit_cost:${legalActionCreditCost(action)}`,
-      ].join("|"),
-    };
+    const actionCost = legalActionCreditCost(action);
+    const completePayment =
+      action.type === "pump_breaker" &&
+      informationReassessment?.decision === "retain_information"
+        ? completeInformationLockPumpCost(input, action)
+        : undefined;
+    if ((completePayment ?? actionCost) > runOrigin.encounterCreditSpendLimit) {
+      return {
+        key: "run_plan_information_budget_exceeded",
+        label: "Informationsplan erlaubt diese Encounter-Ausgabe nicht",
+        reason: [
+          "run_plan_step:information_probe",
+          `run_plan_target:${run.attackedServerId}`,
+          `run_plan_encounter_spend_limit:${runOrigin.encounterCreditSpendLimit}`,
+          `run_plan_action_credit_cost:${actionCost}`,
+          ...(completePayment !== undefined
+            ? [`run_plan_complete_encounter_payment:${completePayment}`]
+            : []),
+        ].join("|"),
+      };
+    }
   }
 
   if (
