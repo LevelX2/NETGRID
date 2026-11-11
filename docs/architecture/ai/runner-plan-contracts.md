@@ -83,6 +83,15 @@ passiven Bonus für eine andere Runaktion; ihr Nutzen bleibt an die tatsächlich
 gewählte Fähigkeit gebunden. Echte installierte Zugriffseffekte und sinnvolle
 Informationsrouten bleiben separat bewertbar.
 
+Für den Zugriffsersatz durch Abriss gerezzter Fort-ICE bindet die Engine
+den Make-Run-Effekt an die konkrete Startaktion, das Ziel, die aktuell
+gerezzten ICE und die fälligen Tags. Die Runbewertung erhält daraus den
+möglichen Abrisswert, den Eventpreis und den Standardaufwand zur
+Tag-Bereinigung. Die absehbare Ersparnis stammt aus einer weiteren
+bekannten Durchquerung. Die Auswertung schreibt keine späteren unbekannten
+Rezzes oder mehrere zukünftige Läufe gut. Der ersetzte Zugriff erhält
+keinen Agenda-, Multiaccess- oder Contestwert.
+
 Auch innerhalb derselben Zielservergruppe gilt die Informationszulassung
 pro konkreter Runaktion. Ein zugelassener normaler Zugriff überträgt seinen
 Zweck und seine terminale Zugriffsausnahme nicht auf einen daneben angebotenen

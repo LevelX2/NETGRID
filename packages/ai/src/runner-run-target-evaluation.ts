@@ -8,6 +8,7 @@ import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerTargetHasTerminalContestThreat } from "./runtime/runner-terminal-contest-threat";
 import {
+  RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type LegalAction,
   type PublicGameEvent,
@@ -639,6 +640,7 @@ function evaluateRunnerRunTarget(
     accessServerId,
     accessTargetKind,
     creditsAfterRun,
+    creditsAfterAction,
   );
   const payoff =
     replacementPayoff ??
@@ -783,7 +785,10 @@ function evaluateRunnerRunTarget(
     runnerRunProjectionPreservesNormalAccess(params.input, projection),
   );
   const scoreThreat =
-    accessTargetKind === "remote" && remoteHasScoreThreat(accessServer);
+    projection.accessReplacement !==
+      "trash_rezzed_ice_on_fort_and_tag_runner" &&
+    accessTargetKind === "remote" &&
+    remoteHasScoreThreat(accessServer);
   const accessPayoff = accessPayoffWithInstalledRunPayoff({
     basePayoff: payoff.accessPayoff,
     knownAccessState: payoff.knownAccessState,
@@ -1760,11 +1765,76 @@ function replacesAccessWithCreditDenial(
 
 function accessReplacementPayoffForTarget(
   params: EvaluateRunnerRunTargetsParams,
-  projection: RunActionProjection,
+  projection: InternalRunActionProjection,
   targetServerId: string,
   targetKind: RunnerRunTargetKind,
   creditsAfterRun: number,
+  creditsAfterAction: number,
 ): ReturnType<typeof payoffForTarget> | undefined {
+  if (
+    projection.accessReplacement === "trash_rezzed_ice_on_fort_and_tag_runner"
+  ) {
+    const payload = projection.action.payload;
+    const input = params.input;
+    const fort = input.playerView.servers.find(
+      (server) => server.id === projection.targetServerId,
+    );
+    const rezzedIceCount = payload?.runnerFortIceTrashRezzedIceCount;
+    const tags = payload?.runnerFortIceTrashTagsAdded;
+    if (
+      !fort ||
+      projection.action.expiresAtStateVersion !==
+        input.playerView.stateVersion ||
+      payload?.runnerFortIceTrashQuoteSchemaVersion !==
+        RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION ||
+      payload.runnerFortIceTrashQuoteStateVersion !==
+        input.playerView.stateVersion ||
+      payload.runnerFortIceTrashServerId !== fort.id ||
+      typeof rezzedIceCount !== "number" ||
+      rezzedIceCount !== fort.ice.filter((ice) => ice.rezzed === true).length ||
+      typeof tags !== "number" ||
+      tags !== projection.successfulRunSelfTags
+    )
+      throw new Error("runner_fort_ice_trash_replacement_quote_invalid");
+    // On the known path, compare one future traversal with the extra event
+    // spend and the standard cost of clearing the new tags (2 credits and
+    // one income click each). Unknown future rezzes give no current credit.
+    const oneRunSavings =
+      rezzedIceCount > 0
+        ? Math.max(0, creditsAfterAction - creditsAfterRun)
+        : 0;
+    const eventSpend = Math.max(
+      0,
+      input.playerView.own.credits - creditsAfterAction,
+    );
+    const cleanupPrice = tags * 3;
+    const netSavings = oneRunSavings - eventSpend - cleanupPrice;
+    return {
+      accessPayoff: netSavings > 0 ? "access_bonus" : "known_low_value",
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
+      knownAccessState:
+        netSavings > 0 ? "known_payoff" : "known_no_current_payoff",
+      accessNoveltyRatio: 0,
+      scoreAdjustment:
+        netSavings > 0
+          ? Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, netSavings * 8) -
+            scoreForPayoff("access_bonus")
+          : 0,
+      evidence: [
+        "run_access_replacement:trash_rezzed_ice_on_fort_and_tag_runner",
+        "run_access_replacement_normal_access:false",
+        `fort_ice_trash_rezzed_targets:${rezzedIceCount}`,
+        `fort_ice_trash_one_run_liquid_savings:${oneRunSavings}`,
+        `fort_ice_trash_event_spend:${eventSpend}`,
+        `fort_ice_trash_tags:${tags}`,
+        `fort_ice_trash_basic_cleanup_credits:${tags * 2}`,
+        `fort_ice_trash_basic_cleanup_clicks:${tags}`,
+      ],
+    };
+  }
   if (replacesAccessWithCreditDenial(params.input, projection)) {
     // This run never accesses HQ. Its visible upper-bound payload must fit
     // both pools after known path costs; future Corp rez can only reduce it.
