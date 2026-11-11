@@ -1269,6 +1269,19 @@ Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
 
+Bei der Security-Purge-Zielwahl gehört eine bereits aufgedeckte, demnächst
+offen in Archives liegende Gewinnagenda zur Verteidigungsentscheidung. Die
+Engine prüft vollständige aktuell angebotene feste Platzierungspakete auf
+getrennten Zuständen. Nur der Corp-Entscheidungsinput erhält die daraus
+entstehenden Archives-ICE und Ressourcen, gebunden an Choice und StateVersion.
+Der vorhandene Defense-Owner ändert eine Aufteilung zwischen R&D und Archives,
+wenn die gemeinsame Archives-Platzierung den sichtbaren Direktzugriff
+vollständig stoppt und die Corp-Ressourcen mindestens erhält. Das Budget
+berücksichtigt den nächsten Runner-Zug einschließlich öffentlicher
+Vorbereitung und erneuerbarer Run-Credits. In Paarung 738, G14 D300 reicht ein
+Puzzle für die offen werdende Project Zurich nicht aus. Zwei legal gerezzte
+Puzzle beenden denselben Angriff vor dem Zugriff.
+
 Aktuelle Rez-Vergleiche konsumieren den öffentlichen Restzustand des
 Erstbegegnungs-Bypasses. Vorher-/Nachherpfade laufen außen nach innen und
 entfernen jeweils die erste tatsächlich gerezzte Begegnung. Ungerezztes

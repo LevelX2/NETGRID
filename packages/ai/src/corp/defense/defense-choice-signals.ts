@@ -8,6 +8,7 @@ import {
   corpVisibleSingleSubroutineIsUnbreakable,
 } from "../../runtime/corp-score-protection-assessment";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { preferredAgendaPurgeArchivesOptions } from "./agenda-purge-archives-defense";
 import {
   knownNonNegativeInteger,
   nonEmptyString,
@@ -195,24 +196,31 @@ export function corpAgendaPurgeDefenseChoiceSignal(
     });
   }
   if (targets.length !== choice.minSelections || !targets[0]) return undefined;
+  const preferred = preferredAgendaPurgeArchivesOptions(
+    input,
+    targets.map((target) => target.optionId),
+  );
+  const selectedTargets = preferred ?? targets;
 
   return {
     kind: "generic",
     defenseId: `agenda-purge-install-targets:${choice.choiceId}`,
-    serverId: targets[0].serverId,
+    serverId: selectedTargets[0]!.serverId,
     phase: "resolve_install_targets",
     sourceDefinitionIds: [sourceAgenda.definitionId],
     actionIds: [action.actionId],
     urgent: true,
     value: 1_000,
-    evidenceCode: "agenda_purge_ice_allocation_owned_by_corp_defend_servers",
+    evidenceCode: preferred
+      ? "agenda_purge_protected_revealed_terminal_archives_agenda"
+      : "agenda_purge_ice_allocation_owned_by_corp_defend_servers",
     choiceResolution: {
       kind: "agenda_purge_install_targets",
       choiceId: choice.choiceId,
       sourceAgendaId,
       sourceStateVersion,
       revealedCardIds,
-      targets,
+      targets: selectedTargets,
     },
   };
 }

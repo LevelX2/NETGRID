@@ -3577,6 +3577,94 @@ function isPlainObjectRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+function sanitizeAgendaPurgeArchivesProtectionQuote(
+  choice: VisibleChoiceRequest,
+  stateVersion: number,
+  side: Side,
+): VisibleChoiceRequest["agendaPurgeArchivesProtectionQuote"] {
+  const quote = choice.agendaPurgeArchivesProtectionQuote;
+  if (!quote) return undefined;
+  if (
+    side !== "corp" ||
+    choice.side !== "corp" ||
+    !choice.source.startsWith(
+      "card_implementation.agenda_purge_install_targets:",
+    ) ||
+    quote.choiceId !== choice.choiceId ||
+    quote.stateVersion !== stateVersion ||
+    quote.stateVersion !== choice.stateVersion ||
+    quote.packages.length !== 3 ||
+    !choice.options.some(
+      (option) =>
+        option.selectable === false &&
+        option.card?.known &&
+        option.card.type === "agenda" &&
+        option.card.instanceId === quote.revealedAgendaId,
+    )
+  )
+    throw new Error("invalid_agenda_purge_archives_protection_binding");
+  const optionById = new Map(
+    choice.options.map((option) => [option.id, option]),
+  );
+  const seen = new Set<string>();
+  const packages = quote.packages.map((entry) => {
+    const options = entry.optionIds.map((id) => optionById.get(id));
+    const archives = options.filter(
+      (option) => option?.metadata?.targetServerId === "archives",
+    );
+    const identity = [...entry.optionIds].sort().join("|");
+    if (
+      options.length !== 2 ||
+      seen.has(identity) ||
+      archives.length === 0 ||
+      options.some(
+        (option) =>
+          !option ||
+          option.selectable === false ||
+          !option.card?.known ||
+          option.card.type !== "ice" ||
+          option.metadata?.optionKind !== "fixed" ||
+          !["archives", "rd"].includes(option.metadata.targetServerId ?? ""),
+      ) ||
+      options[0]?.card?.instanceId === options[1]?.card?.instanceId ||
+      !nonNegativeInteger(entry.corpCreditsAfter) ||
+      !nonNegativeInteger(entry.corpAgendaPointsAfter) ||
+      !nonNegativeInteger(entry.corpClicksAfter) ||
+      entry.archivesIce.length !== archives.length ||
+      new Set(entry.archivesIce.map((card) => card.instanceId)).size !==
+        archives.length ||
+      entry.archivesIce.some(
+        (card) =>
+          !card.known ||
+          card.type !== "ice" ||
+          card.rezzed !== true ||
+          card.effectiveRunQuote?.iceInstanceId !== card.instanceId ||
+          card.effectiveRunQuote.iceDefinitionId !== card.definitionId ||
+          !archives.some(
+            (option) =>
+              option?.card?.instanceId === card.instanceId &&
+              option.card.definitionId === card.definitionId,
+          ),
+      )
+    )
+      throw new Error("invalid_agenda_purge_archives_protection_package");
+    seen.add(identity);
+    return {
+      optionIds: [...entry.optionIds],
+      archivesIce: entry.archivesIce.map(sanitizeVisibleCard),
+      corpCreditsAfter: entry.corpCreditsAfter,
+      corpAgendaPointsAfter: entry.corpAgendaPointsAfter,
+      corpClicksAfter: entry.corpClicksAfter,
+    };
+  });
+  return {
+    choiceId: quote.choiceId,
+    stateVersion,
+    revealedAgendaId: quote.revealedAgendaId,
+    packages,
+  };
+}
+
 function sanitizeVisibleChoiceRequest(
   choice: VisibleChoiceRequest,
   playerViewStateVersion: number,
@@ -3607,6 +3695,12 @@ function sanitizeVisibleChoiceRequest(
     playerViewStateVersion,
     playerViewSide,
   );
+  const agendaPurgeArchivesProtectionQuote =
+    sanitizeAgendaPurgeArchivesProtectionQuote(
+      choice,
+      playerViewStateVersion,
+      playerViewSide,
+    );
   return {
     choiceId: choice.choiceId,
     side: choice.side,
@@ -3621,6 +3715,9 @@ function sanitizeVisibleChoiceRequest(
       : {}),
     ...(continuation ? { continuation } : {}),
     ...(corpStartDrawQuote ? { corpStartDrawQuote } : {}),
+    ...(agendaPurgeArchivesProtectionQuote
+      ? { agendaPurgeArchivesProtectionQuote }
+      : {}),
     prompt: choice.prompt,
     kind: choice.kind,
     options: choice.options.map((option) => {
