@@ -96,6 +96,16 @@ Andere Zugriffsrisiken behalten ihre regulären Quotes. In Paarung 730, G6 D414
 reicht die zweite offene Zwei-Punkte-Agenda bei vier Runnerpunkten zum Sieg
 im nächsten Zug. Der Gegenfall mit nur einer solchen Agenda bleibt zulässig.
 
+Ein weiterer Zugriff kann über einen bestehenden Remote mit ICE führen.
+Für diesen eng begrenzten Fall reserviert die Quote zwei Runner-Run-Klicks
+und verwendet die danach verbleibende Grundfinanzierung für den vorhandenen
+Pfad. Sie prüft die beste finanzierbare Rezvariante und schließt unbekannte
+oder schadensbehaftete Fortsetzungen aus. Kann die Corp nach dem Einbau
+noch einen bekannten Schutz oder die Wertung der vorhandenen Agenda
+herstellen, liefert dieser Vergleich keinen terminalen Beleg. In Paarung
+735, G20 D300 reichen selbst Fire Wall und der teurere Sphinx-Sentry-Rez
+gegen die finanzierbare Zwei-Run-Folge nicht aus.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence
