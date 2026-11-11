@@ -226,7 +226,9 @@ export function runnerRecoveryActionContract(
       action.payload.cardId !== source.instanceId ||
       typeof targetCardId !== "string" ||
       !targetCardId ||
-      definition?.type !== "program"
+      typeof targetDefinitionId !== "string" ||
+      definition?.type !== "program" ||
+      definition.engineCardId !== targetDefinitionId
     )
       return;
     return {
@@ -235,13 +237,17 @@ export function runnerRecoveryActionContract(
       hostedTarget: {
         known: true,
         instanceId: targetCardId,
-        definitionId: definition.id,
+        definitionId: targetDefinitionId,
         type: "program",
         title: definition.title,
         subtypes: [...definition.subtypes],
-        rulesText: definition.rulesText,
-        installCost: definition.installCost,
-        memoryCost: definition.memoryCost,
+        rulesText: definition.text,
+        ...(definition.numeric.installCost === null
+          ? {}
+          : { installCost: definition.numeric.installCost }),
+        ...(definition.numeric.memoryCost === null
+          ? {}
+          : { memoryCost: definition.numeric.memoryCost }),
         hostedOn: source.instanceId,
       },
     };

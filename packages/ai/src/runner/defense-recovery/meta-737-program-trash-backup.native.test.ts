@@ -183,7 +183,13 @@ it("binds both native backup choices to defense and preserves the program for re
     targetDefinitionId: PROGRAM,
   });
   expect(recovery?.costs).toEqual([{ clicks: 1 }]);
-  expect(chooseRunnerAction(current).fallbackUsed).toBe(false);
+  const planned = chooseRunnerAction(current);
+  expect(planned.fallbackUsed).toBe(false);
+  expect(planned.decisionDebug?.planFirstDecision?.dispositions).toEqual(
+    expect.not.arrayContaining([
+      expect.objectContaining({ actionId: recovery!.actionId }),
+    ]),
+  );
   const retrieved = apply(
     main,
     "runner",
