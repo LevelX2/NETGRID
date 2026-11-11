@@ -62,7 +62,10 @@ import {
   corpExactCurrentBasicLiquidCreditCandidate,
 } from "../economy/economy-domain-signals";
 import { corpScorePriorityClass } from "./corp-score-priority";
-import { corpFloodInstallCreatesCombinedTerminalExposure } from "./score-flood-exposure";
+import {
+  corpFloodInstallCreatesCombinedTerminalExposure,
+  corpForcedAgendaDiscardHasSaferTerminalAlternative,
+} from "./score-flood-exposure";
 import { corpInstalledScoreResourceCost } from "./score-reserve-restoration";
 import {
   corpFundedScoreProtectionNeed,
@@ -468,7 +471,8 @@ export function scoreProjectForCandidate(
       hasExactNonNegativeCostProfile(candidate) &&
       remainingAgendaAdvancementCreditsAfterAction(input, candidate, agenda) +
         candidate.costProfile.creditCost! <=
-        input.playerView.own.credits;
+        input.playerView.own.credits &&
+      !corpForcedAgendaDiscardHasSaferTerminalAlternative(input, agenda);
     const deadlinePressure =
       scorelineFeasibility?.deadline === "last_draw_window" ||
       scorelineFeasibility?.deadline === "current_turn_only" ||

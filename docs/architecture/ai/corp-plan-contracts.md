@@ -957,6 +957,15 @@ Expositionsquote; die gewöhnliche Reprotektionspflicht außerhalb dieses engen
 Abwurffalls sowie Scorekosten, Verteidigungsreserven und Sofortsiege bleiben
 unverändert. Zwei native Folgeinputs aus Paarung 544 belegen die notwendige
 Kontinuität über den gegnerischen Zug; ein Einzelrestore verbraucht diese Grenze.
+Beim Überhang von genau einer Agenda verlangt der Score-Owner für die
+Auslage einer frei stehlbaren Siegagenda den regulären Schutz, wenn ein niedrigerer
+Pflichtabwurf unter Matchpoint bleibt und die vorhandene Defense-Quote beide
+Zentralforts gegen die sichtbare Runner-Vorbereitung absichert. Beide
+Rez-Pläne teilen dieselben Corp-Credits und Agendapunkte. Bereits exponierte
+Remote-Agenden und nicht nachweisbare Zentralpfade lassen die Notfallabwägung
+offen. Der Hand-Owner bindet die tatsächliche Abwurfoption weiterhin erst am
+Engine-Choice. Paarung 734, G34 D327 sichert den Vergleich gegen den sofortigen
+Steal und den nichtterminalen Archives-Zweig.
 Ein möglicher terminaler Steal erhöht das Gewicht der Exposition. Unbekannte oder
 veraltete Quotes bleiben unbekannt und tragen eine konservative Risikogrenze;
 sie werden weder als sicher noch pauschal als 50-Prozent-Chance behandelt.

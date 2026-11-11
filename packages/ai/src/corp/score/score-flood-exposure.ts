@@ -12,6 +12,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { corpGuaranteedOnPlayAdvancementCountersPerTarget } from "../../runtime/corp-canonical-card-facts";
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
+import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 import { projectKnownCorpCardAccessEffect } from "../../runtime/known-corp-card-access-effect-projection";
@@ -34,6 +35,89 @@ function isPlainStealableAgenda(
       (effect) =>
         effect.kind === "on_access" && effect.sourceZones.includes("installed"),
     )
+  );
+}
+
+/**
+ * An ordinary discard can be the safer response to an all-agenda hand.
+ * Compare the exposed points with the existing funded central protection.
+ */
+export function corpForcedAgendaDiscardHasSaferTerminalAlternative(
+  input: AiDecisionInput,
+  agenda: VisibleCard,
+): boolean {
+  const view = input.playerView;
+  const preparationClicks = view.runnerNextTurnCreditClicks;
+  const runnerRig = view.opponent.rig;
+  const hand = view.own.gripOrHq;
+  if (
+    !isPlainStealableAgenda(input, agenda) ||
+    view.opponent.agendaPoints + requireVisibleAgendaPoints(input, agenda) <
+      view.agendaPointsToWin ||
+    hand.length !== view.own.maxHandSize + 1 ||
+    !hand.every((card) => visibleCardIsAgenda(input, card)) ||
+    !runnerRig ||
+    !isFiniteNonNegativeInteger(preparationClicks) ||
+    preparationClicks === 0 ||
+    view.servers.some(
+      (server) =>
+        server.id.startsWith("remote_") &&
+        server.root.some((card) => !card.known || card.type === "agenda"),
+    )
+  )
+    return false;
+
+  const archives = view.own.heapOrArchives;
+  if (archives.some((card) => !card.known || !card.definitionId)) return false;
+  const archivesPoints = archives.reduce(
+    (total, card) =>
+      total +
+      (card.type === "agenda" ? requireVisibleAgendaPoints(input, card) : 0),
+    0,
+  );
+  const safestDiscard = Math.min(
+    ...hand.map((card) => requireVisibleAgendaPoints(input, card)),
+  );
+  if (
+    view.opponent.agendaPoints + archivesPoints + safestDiscard >=
+    view.agendaPointsToWin
+  )
+    return false;
+
+  const runnerCredits =
+    view.opponent.credits +
+    visibleRunnerNextTurnPreparationCreditGain(runnerRig, preparationClicks);
+  const runnerPublicPreparedBreakers = visibleRunnerHeapBreakerPreparations(input);
+  const centralQuotes = (["hq", "rd"] as const).map((targetServerId) => {
+    const server = view.servers.find((entry) => entry.id === targetServerId);
+    if (!server) return undefined;
+    return assessBestFundedCorpScoreProtection({
+      serverIce: server.ice,
+      serverRoot: server.root,
+      runnerRig,
+      runnerSetAside: view.specialZones?.setAside ?? [],
+      runnerPublicPreparedBreakers,
+      runnerCredits,
+      runnerRunOnlyCredits: view.runnerNextRunBadPublicityCredits ?? 0,
+      runnerCreditPoolHorizon: "next_runner_turn",
+      targetServerId,
+      observedAtStateVersion: view.stateVersion,
+      availableCorpCredits: view.own.credits,
+      availableCorpClicks: 0,
+      availableCorpAgendaPoints: view.own.agendaPoints,
+      scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
+      maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+    });
+  });
+  const [hq, rd] = centralQuotes;
+  return (
+    hq?.knowledge === "known" &&
+    rd?.knowledge === "known" &&
+    hq.protection.runnerAccessSuccessProbability.numerator === 0 &&
+    rd.protection.runnerAccessSuccessProbability.numerator === 0 &&
+    hq.totalSelectedRezCost + rd.totalSelectedRezCost <= view.own.credits &&
+    hq.totalSelectedAgendaPointCost + rd.totalSelectedAgendaPointCost <=
+      view.own.agendaPoints
   );
 }
 
