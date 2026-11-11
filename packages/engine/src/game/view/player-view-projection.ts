@@ -35,7 +35,10 @@ import {
   publicRunFollowupOpportunity,
   publicPendingSequenceRunCount,
 } from "./run-followup-opportunity";
-import { visibleTraceBidEffect } from "./visible-trace-bid-effect";
+import {
+  visibleCurrentRunLockBidQuote,
+  visibleTraceBidEffect,
+} from "./visible-trace-bid-effect";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 import { visibleCorpEncounterDefenseQuotes } from "./visible-corp-encounter-defense-quote";
@@ -420,11 +423,16 @@ export function buildPlayerViewProjection(
   const traceRulesProfile = normalizeTraceRulesProfile(state.traceRulesProfile);
   const traceBidsRevealed = trace?.bidsRevealed === true;
   const traceBidEffect = visibleTraceBidEffect(state);
+  const currentRunLockBidQuote =
+    side === "corp" && traceBidEffect === undefined
+      ? visibleCurrentRunLockBidQuote(state, legalActions)
+      : undefined;
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
         sourceCardInstanceId: trace.sourceCardInstanceId,
         ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),
+        ...(currentRunLockBidQuote ? { currentRunLockBidQuote } : {}),
         sourceDefinitionId: trace.sourceDefinitionId,
         profile: normalizeTraceRulesProfile(trace.traceRulesProfile),
         phase: trace.status,

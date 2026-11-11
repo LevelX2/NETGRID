@@ -1472,6 +1472,18 @@ Runner-Stärke 4: Corp-Gebot 2 garantiert den nativen Run-Abbruch. Gebot 0
 garantiert ihn nicht. Ein besserer vollständiger Matchausgang ist damit
 nicht nachgewiesen.
 
+Für den offenen Trace einer laufenden ICE-Begegnung kann die Engine der Corp das kleinste
+angebotene Gebot für einen garantierten Run-Abbruch mit anschließender
+Runsperre quotieren. Die Engine bindet Run, StateVersion, LegalAction und
+Choice-Option an das sichtbare maximale Runner-Link-Budget einschließlich
+Run-Bonus. Verdeckte oder unvollständig quotierte Runner-Antworten, darunter
+Post-Bid-Link und Cancel, schließen die Garantie aus. Die Runner-View
+erhält die Corp-Quote nicht. Der Bid-Owner verwendet sie bei einem aktuellen
+HQ-Zugriff mit einer für den Sieg ausreichenden Agenda im eigenen HQ, wenn
+die letzte ICE-Schicht und das verbleibende Runner-Klickbudget den
+unmittelbaren Schutz belegen. Eine weitere ICE- oder Root-Verteidigung und
+eine eigenständige weitere Runfolge bleiben an ihren bisherigen Schutzpfaden.
+
 Rez ist grundsätzlich eine einmalige Investition in wiederkehrenden Druck.
 Die erzwungene Rez-/Trash-Choice gehört ebenfalls zu `corp.defend_servers`.
 Der Owner bindet die aktuelle Engine-Option an ICE, Action und StateVersion.

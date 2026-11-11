@@ -4228,6 +4228,15 @@ export type VisibleTraceState = {
   bidsRevealed: boolean;
   corpBidCommitted: boolean;
   runnerBidCommitted: boolean;
+  /** Corp-only current choice whose fixed run lock defeats every visible response. */
+  currentRunLockBidQuote?: {
+    runId: string;
+    stateVersion: number;
+    actionId: string;
+    choiceId: string;
+    optionId: string;
+    amount: number;
+  };
   /** Aggregate capacity derived only from information visible to this viewer. */
   visibleOpponentBidCapacity: number;
   ownCommittedPayment?: {

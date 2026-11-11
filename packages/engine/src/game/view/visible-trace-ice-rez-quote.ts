@@ -189,9 +189,16 @@ export function visibleRunnerMaximumTraceStrength(
   )
     return undefined;
   const capacity = visibleRunnerTraceBidCapacity(state, "runner");
-  return Math.max(
-    ...support.baseLinkOptions
-      .filter((o) => o.activationCost <= capacity)
-      .map((o) => o.baseLink + capacity - o.activationCost),
+  const runLinkBonus = Math.max(
+    0,
+    Math.floor(state.run?.runTraceLinkBonus ?? 0),
+  );
+  return (
+    runLinkBonus +
+    Math.max(
+      ...support.baseLinkOptions
+        .filter((o) => o.activationCost <= capacity)
+        .map((o) => o.baseLink + capacity - o.activationCost),
+    )
   );
 }
