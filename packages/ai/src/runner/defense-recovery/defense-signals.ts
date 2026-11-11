@@ -1,5 +1,6 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import { runnerGripDamageReplacementBinding } from "./grip-damage-replacement";
+import { runnerProgramTrashBackupBinding } from "./program-trash-backup";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -540,7 +541,9 @@ export function buildRunnerDefenseSignals(params: {
       : undefined;
   const gripDamageReplacementBinding =
     runnerGripDamageReplacementBinding(input);
+  const programTrashBackupBinding = runnerProgramTrashBackupBinding(input);
   const defense: RunnerDefenseSignals = {
+    ...(programTrashBackupBinding ? { programTrashBackupBinding } : {}),
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,
     persistentHazardCounterRemovalAvailable,

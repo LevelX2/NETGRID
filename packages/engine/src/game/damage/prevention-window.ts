@@ -195,6 +195,23 @@ export function eventModificationChoice(
     },
     ...stageCandidates.flatMap((stageCandidate) => {
       if (
+        event.eventType === "runner_installed_trash" &&
+        stageCandidate.kind === "interrupt" &&
+        stageCandidate.sourceRef.instanceId &&
+        stageCandidate.microtechBackupTargetIds?.length
+      ) {
+        return [{
+          id: stageCandidate.candidateId,
+          label: `${stageCandidate.sourceRef.label}: Programme sichern`,
+          publicLabel: "Event Modification",
+          metadata: {
+            optionKind: "backup_trashed_programs",
+            sourceCardInstanceId: stageCandidate.sourceRef.instanceId,
+            amount: stageCandidate.microtechBackupTargetIds.length,
+          },
+        }];
+      }
+      if (
         event.eventType === "damage" &&
         stageCandidate.kind === "prevent" &&
         stageCandidate.selectablePreventAmount === true
@@ -585,6 +602,7 @@ export function resolveEventModificationChoice(
         choiceId: `v120_microtech_backup_targets_${window.windowId}_${candidate.candidateId}`,
         side: "runner",
         source: `${SELECTABLE_TRASH_TARGET_CHOICE_PREFIX}:${window.windowId}:${candidate.candidateId}`,
+        sourceCardInstanceId: sourceCardId,
         prompt:
           "Programme für Backup Drive auswählen (Auswahlreihenfolge: unten nach oben)",
         kind: "select_cards",
@@ -592,9 +610,11 @@ export function resolveEventModificationChoice(
           id: cardId,
           cardId,
           label: definitionFor(state, cardId).title,
+          metadata: { optionKind: "backup_program_target", targetCardInstanceId: cardId },
         })),
         minSelections: 0,
         maxSelections: candidate.microtechBackupTargetIds.length,
+        selectionOrdering: "ordered",
         stateVersion: state.stateVersion + 1,
         visibility: candidate.visibility,
       };

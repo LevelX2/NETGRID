@@ -6,6 +6,7 @@ import { runnerRemoteRunDispositions } from "../runner/remote-contest/remote-con
 import { runnerCentralRunDispositions } from "../runner/central-pressure/central-pressure-dispositions";
 import { bindRunnerCentralSelfTagProtection } from "../runner/central-pressure/self-tag-protection-preparation";
 import { isRunnerGripDamageReplacementWindow } from "../runner/defense-recovery/grip-damage-replacement";
+import { isRunnerProgramTrashBackupWindow } from "../runner/defense-recovery/program-trash-backup";
 import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
   bindSelectedRunnerCoverageMultiSearchChoice,
@@ -1326,6 +1327,7 @@ function runnerTransientPlanSignals(
     defense.forgoUnsafeRunCapacity ||
     defense.discardChoiceBinding !== undefined ||
     defense.gripDamageReplacementBinding !== undefined ||
+    defense.programTrashBackupBinding !== undefined ||
     defense.reactionReserveNeed !== undefined ||
     defense.persistentHazardCounterRemovalAvailable ||
     defense.persistentHazardCounterFundingNeed !== undefined ||
@@ -2482,6 +2484,9 @@ export function runnerActionDispositions(
     ...(domain.defense.persistentHazardCounterFundingNeed?.actionIds ?? []),
     ...(domain.defense.discardChoiceBinding
       ? [domain.defense.discardChoiceBinding.actionId]
+      : []),
+    ...(domain.defense.programTrashBackupBinding
+      ? [domain.defense.programTrashBackupBinding.actionId]
       : []),
     ...(domain.defense.gripDamageReplacementBinding
       ? [domain.defense.gripDamageReplacementBinding.actionId]
@@ -3861,7 +3866,11 @@ function recentServerAccessCount(
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
-  if (isRunnerGripDamageReplacementWindow(context.input)) return undefined;
+  if (
+    isRunnerGripDamageReplacementWindow(context.input) ||
+    isRunnerProgramTrashBackupWindow(context.input)
+  )
+    return undefined;
   if (
     context.input.playerView.pendingChoice?.source.startsWith(
       "v1922.corp_rd_arrange_top5:",

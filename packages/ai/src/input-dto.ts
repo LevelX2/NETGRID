@@ -3630,6 +3630,36 @@ function sanitizeVisibleChoiceRequest(
         ownRig,
         servers,
       );
+      const optionKind = option.metadata?.optionKind;
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
+        choice.source === "v120.event_modification.interrupt" &&
+        (optionKind === "backup_trashed_programs" || optionKind === "allow_trash")
+      ) {
+        if (
+          optionKind === "backup_trashed_programs" &&
+          (!metadata?.sourceCardInstanceId ||
+            !Number.isSafeInteger(option.metadata?.amount) ||
+            Number(option.metadata?.amount) <= 0)
+        )
+          throw new Error("invalid_runner_program_backup_source_binding");
+        metadata = { ...metadata, optionKind };
+      }
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
+        choice.source.startsWith("v120.event_modification.trash_targets:") &&
+        optionKind === "backup_program_target"
+      ) {
+        const target = option.metadata?.targetCardInstanceId;
+        if (
+          !target ||
+          !ownRig.some((card) => card.known && card.type === "program" && card.instanceId === target)
+        )
+          throw new Error("invalid_runner_program_backup_target_binding");
+        metadata = { ...metadata, optionKind, targetCardInstanceId: target };
+      }
       if (
         playerViewSide === "runner" &&
         choice.side === "runner" &&
