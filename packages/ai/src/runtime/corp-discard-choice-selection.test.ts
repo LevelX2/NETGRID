@@ -1,4 +1,10 @@
 import { describe, expect, it } from "vitest";
+import {
+  applyAction,
+  createGame,
+  getLegalActions,
+  getPlayerView,
+} from "@netgrid/engine";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
@@ -189,6 +195,169 @@ describe("selectedCorpDiscardChoiceOptionIds", () => {
     ).toBeUndefined();
   });
 });
+
+describe("funded Archives exposure (SP-798)", () => {
+  it.each([
+    { name: "payable Mastermind", reachable: true, selected: "Minotaur" },
+    {
+      name: "missing breaker",
+      rig: false,
+      reachable: false,
+      selected: "Corporate War",
+    },
+    {
+      name: "unpayable break",
+      runnerCredits: 1,
+      reachable: false,
+      selected: "Corporate War",
+    },
+    {
+      name: "unfunded rez",
+      corpCredits: 6,
+      reachable: false,
+      selected: "Corporate War",
+    },
+    {
+      name: "missing post-rez quote",
+      missingQuote: true,
+      reachable: false,
+      selected: "Corporate War",
+    },
+    {
+      name: "nonterminal points",
+      runnerMatchpoint: false,
+      reachable: true,
+      selected: "Corporate War",
+    },
+  ])("binds the legal discard with $name", (testCase) => {
+    const input = engineArchivesDiscardInput(testCase);
+    const choice = input.playerView.pendingChoice!;
+    const action = input.legalActions.find((a) => a.type === "resolve_choice");
+    const selection = selectedCorpDiscardChoiceOptionIds(
+      input,
+      choice,
+      choice.options,
+      (_input, card) => ({ total: card.type === "agenda" ? 0 : 500 }),
+    );
+    const expected = choice.options
+      .filter((option) => option.label === testCase.selected)
+      .sort((a, b) => a.id.localeCompare(b.id, "de"))[0];
+    expect(selection).toMatchObject({
+      selectedOptionIds: [expected?.id],
+      archivesReachable: testCase.reachable,
+      terminalAgendaExposure: false,
+    });
+    expect(action?.choiceRequirements?.[0]).toMatchObject({
+      choiceId: choice.choiceId,
+      optionIds: expect.arrayContaining([expected?.id]),
+    });
+    expect(action?.expiresAtStateVersion).toBe(input.playerView.stateVersion);
+  });
+});
+
+function engineArchivesDiscardInput(options: {
+  rig?: boolean;
+  runnerCredits?: number;
+  corpCredits?: number;
+  missingQuote?: boolean;
+  runnerMatchpoint?: boolean;
+}): AiDecisionInput {
+  const state = createGame({
+    seed: "sp-798-archives-discard",
+    setupMode: "completed",
+    runnerDeck: {
+      id: "archives-test-runner",
+      name: "Archives test Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [{ id: "onr_v1_039_krash", quantity: 6 }],
+    },
+    corpDeck: {
+      id: "archives-test-corp",
+      name: "Archives test Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_proteus_030_mastermind", quantity: 1 },
+        { id: "onr_v1_196_corporate-war", quantity: 4 },
+        { id: "onr_v1_203_hostile-takeover", quantity: 1 },
+        { id: "onr_proteus_031_minotaur", quantity: 3 },
+      ],
+    },
+  });
+  const card = (definitionId: string) =>
+    Object.values(state.cardInstances).find(
+      (c) => c.definitionId === definitionId,
+    )!;
+  const mastermind = card("onr_proteus_030_mastermind");
+  const hostile = card("onr_v1_203_hostile-takeover");
+  const scored = card("onr_v1_196_corporate-war");
+  const archives = state.corp.servers.find((s) => s.id === "archives")!;
+  const outsideHq = new Set([
+    mastermind.instanceId,
+    hostile.instanceId,
+    scored.instanceId,
+  ]);
+  state.corp.hq = [...state.corp.hq, ...state.corp.rd].filter(
+    (id) => !outsideHq.has(id),
+  );
+  state.corp.rd = [];
+  for (const id of state.corp.hq)
+    state.cardInstances[id]!.zone = { side: "corp", zone: "hq" };
+  archives.ice.push(mastermind.instanceId);
+  mastermind.zone = { side: "corp", zone: "serverIce", serverId: "archives" };
+  state.corp.archives.push(hostile.instanceId);
+  hostile.zone = { side: "corp", zone: "archives" };
+  state.runner.scoreArea.push(scored.instanceId);
+  scored.zone = { side: "runner", zone: "scoreArea" };
+  scored.faceup = true;
+  if (options.runnerMatchpoint === false) scored.agendaPointsSpent = 1;
+  if (options.rig !== false) {
+    const krash = card("onr_v1_039_krash");
+    state.runner.stack = state.runner.stack.filter(
+      (id) => id !== krash.instanceId,
+    );
+    state.runner.grip = state.runner.grip.filter(
+      (id) => id !== krash.instanceId,
+    );
+    state.runner.rig.programs.push(krash.instanceId);
+    state.runner.memoryUsed = 1;
+    krash.zone = { side: "runner", zone: "rig" };
+    krash.faceup = true;
+    krash.rezzed = true;
+  }
+  state.corp.credits = options.corpCredits ?? 22;
+  state.runner.credits = options.runnerCredits ?? 7;
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.corp.clicks = 0;
+  const endTurn = getLegalActions(state, "corp").find(
+    (a) => a.type === "end_turn",
+  )!;
+  const resolved = applyAction(state, {
+    matchId: state.matchId,
+    side: "corp",
+    actionId: endTurn.actionId,
+    clientKnownStateVersion: state.stateVersion,
+  });
+  if (!resolved.ok) throw new Error(JSON.stringify(resolved.error));
+  const playerView = getPlayerView(resolved.state, "corp");
+  if (options.missingQuote) {
+    const ice = playerView.servers.find((s) => s.id === "archives")!.ice[0]!;
+    delete ice.effectivePostRezRunQuote;
+  }
+  return {
+    side: "corp",
+    playerView,
+    legalActions: getLegalActions(resolved.state, "corp"),
+    eventTail: playerView.publicEvents,
+    difficulty: "hard",
+    seed: state.seed,
+    decisionId: "sp-798-archives-discard",
+    actionNumber: resolved.state.stateVersion,
+    profileId: "corp-ai-v0.9-hard",
+  };
+}
 
 function agenda(instanceId: string, agendaPoints: number): VisibleCard {
   return {
