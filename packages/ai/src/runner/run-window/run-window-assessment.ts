@@ -452,7 +452,10 @@ export function currentRunAbortAssessment(
     continuationBudget,
     server.root,
     input.playerView.opponent.credits,
-    currentRunPathContext(input),
+    {
+      ...currentRunPathContext(input),
+      quoteNextEncounterDamageForHandBudget: true,
+    },
   );
   if (path.canReachAccess) return undefined;
   if (
@@ -464,6 +467,7 @@ export function currentRunAbortAssessment(
       ...(path.paidSubroutineBreaks
         ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
         : {}),
+      deferredNextEncounterDamage: path.deferredNextEncounterDamage,
       requiredHandFloor:
         runnerRunWindowEncounterRequiredHandFloor(runOrigin) ??
         runnerConfirmedDamageRequiredHandFloor(input),

@@ -22,6 +22,7 @@ import {
 } from "./visible-run-analysis";
 import { projectBreakerCreditPayment } from "./run-analysis/visible-run-credit-budget";
 import { projectVisibleDamagePrevention } from "./run-analysis/visible-damage-prevention";
+import type { DeferredNextEncounterDamage } from "./run-analysis/visible-run-analysis-contracts";
 import { observedAffordableOperationPunishRisk } from "./runner/defense-recovery/observed-operation-punish-risk";
 
 export function knownPathAfterDamageBudget(
@@ -127,6 +128,9 @@ export type RunnerVisibleLethalIceDamageOptions = {
   runDamagePreventionRemaining?: number;
   handCount?: number;
   requiredHandFloor?: number;
+  deferredNextEncounterDamage?:
+    | readonly DeferredNextEncounterDamage[]
+    | undefined;
   postPathDamage?: {
     amount: number;
     damageType: "net" | "meat" | "core";
@@ -161,8 +165,16 @@ export function projectRunnerVisibleIceDamage(
     0,
     Math.floor(options.handCount ?? input.playerView.own.gripOrHq.length),
   );
+  const deferredNextEncounterDamage = options.deferredNextEncounterDamage ?? [];
+  const futureEncounterFloor = deferredNextEncounterDamage.length
+    ? Math.max(
+        3,
+        runnerDamageThreatAssessment(input, handCount).flatlineRisk
+          .recommendedHandFloor,
+      )
+    : 0;
   const requiredHandFloor = Math.max(
-    0,
+    futureEncounterFloor,
     Math.floor(options.requiredHandFloor ?? 0),
   );
   const generalCredits =
@@ -315,31 +327,33 @@ export function projectRunnerVisibleIceDamage(
     }
   }
   const postPathDamage = options.postPathDamage;
-  if (
-    postPathDamage &&
-    Number.isSafeInteger(postPathDamage.amount) &&
-    postPathDamage.amount > 0
-  ) {
-    const typedPreventionAvailable =
-      postPathDamage.damageType === "net" ||
-      postPathDamage.damageType === "core"
-        ? netOrCorePreventionRemaining
-        : 0;
-    const typedPrevention = Math.min(
-      postPathDamage.amount,
-      typedPreventionAvailable,
+  const additionalDamage = [
+    ...deferredNextEncounterDamage.map((damage) => ({
+      ...damage,
+      damageType: "net" as const,
+      kind: "next_encounter_damage",
+    })),
+    ...(postPathDamage
+      ? [{ ...postPathDamage, kind: "post_path_damage" }]
+      : []),
+  ];
+  for (const damage of additionalDamage) {
+    if (!Number.isSafeInteger(damage.amount) || damage.amount <= 0) continue;
+    const prevention = projectVisibleDamagePrevention(
+      damage.amount,
+      damage.damageType,
+      {
+        netOrCore: netOrCorePreventionRemaining,
+        run: runPreventionRemaining,
+      },
     );
-    netOrCorePreventionRemaining -= typedPrevention;
-    const runPrevention = Math.min(
-      postPathDamage.amount - typedPrevention,
-      runPreventionRemaining,
-    );
-    runPreventionRemaining -= runPrevention;
-    const preventedDamage = typedPrevention + runPrevention;
-    const resolvedPostPathDamage = postPathDamage.amount - preventedDamage;
+    netOrCorePreventionRemaining = prevention.netOrCore;
+    runPreventionRemaining = prevention.run;
+    const resolvedPostPathDamage = prevention.damage;
+    const preventedDamage = damage.amount - resolvedPostPathDamage;
     const pathDamage = projectedDamage;
     projectedDamage += resolvedPostPathDamage;
-    if (postPathDamage.damageType === "core") {
+    if (damage.damageType === "core") {
       projectedCoreDamage += resolvedPostPathDamage;
     }
     const immediateFlatline = projectedDamage > handCount;
@@ -352,9 +366,9 @@ export function projectRunnerVisibleIceDamage(
       !immediateFlatline && !cleanupFlatline && belowRequiredHandFloor;
     if (immediateFlatline || cleanupFlatline || nonLethalHandFloorViolation) {
       return finish({
-        sourceDefinitionId: postPathDamage.sourceDefinitionId,
+        sourceDefinitionId: damage.sourceDefinitionId,
         projectedDamage,
-        damageType: postPathDamage.damageType,
+        damageType: damage.damageType,
         handCount,
         projectedHandAfterDamage,
         requiredHandFloor,
@@ -362,10 +376,10 @@ export function projectRunnerVisibleIceDamage(
           nonLethalHandFloorViolation
             ? "runner_visible_ice_damage_below_required_hand_floor"
             : "runner_visible_lethal_ice_damage",
-          `source:${postPathDamage.sourceDefinitionId}`,
-          "post_path_damage:true",
-          `post_path_damage_type:${postPathDamage.damageType}`,
-          `post_path_damage_amount:${resolvedPostPathDamage}`,
+          `source:${damage.sourceDefinitionId}`,
+          `${damage.kind}:true`,
+          `${damage.kind}_type:${damage.damageType}`,
+          `${damage.kind}_amount:${resolvedPostPathDamage}`,
           `visible_ice_damage:${pathDamage}`,
           `damage:${projectedDamage}`,
           `cumulative_damage:${projectedDamage}`,
@@ -376,7 +390,7 @@ export function projectRunnerVisibleIceDamage(
           `immediate_flatline:${immediateFlatline}`,
           `cleanup_flatline:${cleanupFlatline}`,
           `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
-          `post_path_damage_prevention:${preventedDamage}`,
+          `${damage.kind}_prevention:${preventedDamage}`,
         ].join("|"),
       });
     }

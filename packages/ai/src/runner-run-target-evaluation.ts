@@ -557,6 +557,7 @@ function evaluateRunnerRunTarget(
         ...(params.input.playerView.traceRulesProfile
           ? { traceRulesProfile: params.input.playerView.traceRulesProfile }
           : {}),
+        quoteNextEncounterDamageForHandBudget: true,
         requireCoreDamageProtection:
           targetKind !== "remote" ||
           !runnerTargetHasTerminalContestThreat(params.input, targetServerId),
@@ -654,6 +655,7 @@ function evaluateRunnerRunTarget(
       // encounter costs.  Optional damage avoidance may only spend what is
       // actually left after those commitments.
       generalCredits: quotedPath.creditsAfterPath,
+      deferredNextEncounterDamage: quotedPath.deferredNextEncounterDamage,
       ...(quotedPath.paidSubroutineBreaks
         ? { paidSubroutineBreaks: quotedPath.paidSubroutineBreaks }
         : {}),
@@ -994,6 +996,9 @@ function evaluateRunnerRunTarget(
     visibleDuringRunRezSupport,
     runnerGripCount: visibleDamageProjection.projectedHandAfterDamage,
     projectedKnownDamage: visibleDamageProjection.projectedDamage,
+    requiredNextEncounterHandBuffer: path.deferredNextEncounterDamage?.length
+      ? (visibleLethalIceDamage?.requiredHandFloor ?? 0)
+      : 0,
   });
   // The unknown remainder requires both liquid credits and a surviving grip.
   // Known damage avoidance may spend only the money outside that same reserve.
@@ -1018,6 +1023,7 @@ function evaluateRunnerRunTarget(
               projection.damagePreventionPool ?? 0,
             ),
             handCount: projectedGripAfterRunAction,
+            deferredNextEncounterDamage: path.deferredNextEncounterDamage,
             requiredHandFloor: prerunReserveQuote.requiredHandBuffer,
           },
         )
@@ -2035,6 +2041,7 @@ function quoteRunnerPrerunReserve(params: {
   visibleDuringRunRezSupport: boolean;
   runnerGripCount: number;
   projectedKnownDamage: number;
+  requiredNextEncounterHandBuffer: number;
 }): RunnerPrerunReserveQuote {
   const installedBreakers =
     params.deckCapabilities?.runner?.breakerInventory.filter((breaker) =>
@@ -2116,13 +2123,16 @@ function quoteRunnerPrerunReserve(params: {
     corpRezExposureActive,
     riskCreditBuffer: params.unrezzedIceRiskCreditBuffer,
     runnerGripCount: params.runnerGripCount,
-    requiredAccessHandBuffer: runnerCriticalUnknownAccessRequiredHandFloor(
-      params.input,
-      params.targetServerId,
-      params.accessPayoff === "agenda" ||
-        params.accessPayoff === "score_threat",
-      params.runnerGripCount,
-      params.projectedKnownDamage,
+    requiredAccessHandBuffer: Math.max(
+      params.requiredNextEncounterHandBuffer,
+      runnerCriticalUnknownAccessRequiredHandFloor(
+        params.input,
+        params.targetServerId,
+        params.accessPayoff === "agenda" ||
+          params.accessPayoff === "score_threat",
+        params.runnerGripCount,
+        params.projectedKnownDamage,
+      ),
     ),
     informationProbeAllowed,
     runnerRig: params.input.playerView.own.rig,

@@ -460,6 +460,14 @@ rechnet diese bereits bezahlten Subroutinen nicht erneut als Schaden oder
 optionale Zusatzzahlung. Runstart und Fortsetzung bleiben beim bestehenden
 Contest-/Runwindow-Owner mit jeweils aktuellen LegalActions; eine Quote
 wählt keine Action und ersetzt keine Engine-Fortsetzung.
+Fehlt der Quellbreaker und kann die Folgeschicht noch eine Begegnung
+erzeugen, bleibt der typisierte Net-Schaden als bedingter Betrag an die
+exakte Quelle gebunden. Runstart, Informationsgrenze sowie Break-, Pump- und
+Bewegungsschritte prüfen ihn zusammen mit weiterem Schaden und der Handreserve.
+Ein behebbarer Handbedarf erreicht die bestehende Vorbereitung vor dem Run.
+Eine unbekannte Schicht bleibt ein möglicher Trigger. Eigenständige Stopps
+behalten ihre Deckungs- und Zahlungsanforderungen.
+
 Auch nach Auflösung der Quelle prüft der Bewegungs-Guard die typisierte
 Vollbruchbedingung gegen die aktuelle Quote des nächsten bekannten,
 gerezzten ICE. Ein deterministischer, mit vorhandenen Credits bezahlbarer

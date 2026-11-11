@@ -229,7 +229,10 @@ export function reassessActiveInformationRunParent(
       (server) => server.id === run.attackedServerId,
     )?.root ?? [],
     input.playerView.opponent.credits,
-    currentRunPathContext(input),
+    {
+      ...currentRunPathContext(input),
+      quoteNextEncounterDamageForHandBudget: true,
+    },
   );
   const knownPath = pathBeforeDamageBudget.knownPathBlockedOnlyByDamage
     ? knownPathAfterDamageBudget(
@@ -245,6 +248,8 @@ export function reassessActiveInformationRunParent(
               }
             : {}),
           requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+          deferredNextEncounterDamage:
+            pathBeforeDamageBudget.deferredNextEncounterDamage,
           ...(pathBeforeDamageBudget.fullyBrokenIceInstanceIds
             ? {
                 fullyBrokenIceInstanceIds:

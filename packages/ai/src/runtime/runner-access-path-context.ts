@@ -379,6 +379,7 @@ export function createRunnerAccessPathContext(
             ...(path.paidSubroutineBreaks
               ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
               : {}),
+            deferredNextEncounterDamage: path.deferredNextEncounterDamage,
             requiredHandFloor:
               requiredHandFloor ??
               runnerConfirmedDamageRequiredHandFloor(input),
@@ -446,7 +447,10 @@ export function createRunnerAccessPathContext(
               runnerRunPathCreditBudgetAfterEncounter(state.budget),
               server.root,
               input.playerView.opponent.credits,
-              currentRunPathContext(input),
+              {
+                ...currentRunPathContext(input),
+                quoteNextEncounterDamageForHandBudget: true,
+              },
             ),
           ).canReachAccess;
           continue;
@@ -520,7 +524,10 @@ export function createRunnerAccessPathContext(
         runnerRunPathCreditBudgetAfterEncounter(budgetAfterBreak),
         server.root,
         input.playerView.opponent.credits,
-        currentRunPathContext(input),
+        {
+          ...currentRunPathContext(input),
+          quoteNextEncounterDamageForHandBudget: true,
+        },
       ),
     );
     if (pathAssessment.canReachAccess) {

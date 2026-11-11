@@ -7,6 +7,7 @@ import type {
 } from "@netgrid/shared";
 
 import {
+  projectRunnerVisibleIceDamage,
   runnerDamageLockedHandScoreComponents,
   runnerDamageThreatAssessment,
   runnerFutureEncounterDamageJackOutAssessment,
@@ -693,6 +694,77 @@ describe("runnerDamageThreatAssessment", () => {
       evidenceCode: expect.stringMatching(
         /runner_visible_ice_damage_below_required_hand_floor.*required_floor:3.*below_required_floor:true/,
       ),
+    });
+  });
+
+  it.each([2, 3])(
+    "checks the minimum grip after possible next-encounter damage at H%s",
+    (handCount) => {
+      const current = input({ handCount, stateVersion: 20 });
+      const result = projectRunnerVisibleIceDamage(current, [], {
+        deferredNextEncounterDamage: [
+          {
+            iceInstanceId: "source",
+            subroutineId: "future-net",
+            sourceDefinitionId: "onr_v1_242_fatal-attractor",
+            amount: 3,
+          },
+        ],
+      });
+      expect(result.assessment).toMatchObject({
+        projectedDamage: 3,
+        requiredHandFloor: 3,
+        evidenceCode: expect.stringContaining("next_encounter_damage_amount:3"),
+      });
+    },
+  );
+
+  it("accounts for the possible follow-up damage and its prevention only once with other damage", () => {
+    const current = input({ handCount: 8, stateVersion: 20 });
+    const followUp = card({
+      definitionId: "test-next-net-ice",
+      type: "ice",
+      rezzed: true,
+    });
+    followUp.effectiveRunQuote = {
+      iceInstanceId: followUp.instanceId,
+      iceDefinitionId: "test-next-net-ice",
+      effectiveStrength: 3,
+      subroutines: [
+        { id: "net", type: "do_damage", amount: 3, damageType: "net" },
+      ],
+    };
+    const damageOptions = {
+      deferredNextEncounterDamage: [
+        {
+          iceInstanceId: "source",
+          subroutineId: "future-net",
+          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          amount: 3,
+        },
+      ],
+    };
+    expect(projectRunnerVisibleIceDamage(current, [], damageOptions)).toEqual({
+      projectedDamage: 3,
+      projectedCoreDamage: 0,
+      projectedHandAfterDamage: 5,
+    });
+    expect(
+      projectRunnerVisibleIceDamage(current, [followUp], damageOptions),
+    ).toMatchObject({
+      projectedDamage: 6,
+      projectedHandAfterDamage: 2,
+      assessment: { requiredHandFloor: 3 },
+    });
+    expect(
+      projectRunnerVisibleIceDamage(current, [followUp], {
+        ...damageOptions,
+        runDamagePreventionRemaining: 1,
+      }),
+    ).toEqual({
+      projectedDamage: 5,
+      projectedCoreDamage: 0,
+      projectedHandAfterDamage: 3,
     });
   });
 
