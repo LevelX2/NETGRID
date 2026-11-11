@@ -79,6 +79,7 @@ export type RunnerAccessActionHost = {
     cardCounter: (cardId: CardInstanceId, counterType: string) => number;
   };
   callbacks: {
+    // Optional activations before the first access.
     successfulRunProgramActions: (run: ActiveRun) => LegalAction[];
     runnerDuringRunCardImplementationLegalActions: () => LegalAction[];
     hiddenStackInstallRunActions: (run: ActiveRun) => LegalAction[];
@@ -108,35 +109,28 @@ export function buildRunnerAccessActions(
       ],
     };
   }
-  const successfulRunActions = host.callbacks.successfulRunProgramActions(run);
-  if (successfulRunActions.length > 0) {
-    const counterAccessReplacement = successfulRunActions.some(
-      (action) =>
-        action.payload?.successfulRunAccessReplacement ===
-        "skip_access_add_purgeable_runner_virus_counter",
-    );
-    if (counterAccessReplacement && !run.accessedCardId) {
+  if (!run.accessedCardId) {
+    const successfulRunActions = host.callbacks.successfulRunProgramActions(run);
+    const accessPending = hasPendingAccessCandidate(host, run);
+    if (successfulRunActions.length > 0) {
       return {
         handled: true,
         legalActions: [
           ...successfulRunActions,
           host.actions.buildLegalAction(
             "runner",
-            "access_card",
-            "Karte accessen",
+            accessPending ? "access_card" : "continue_run",
+            accessPending ? "Karte accessen" : "Zugriff abschließen",
             "game_rule",
           ),
         ],
       };
     }
-    return { handled: true, legalActions: successfulRunActions };
-  }
-  if (!run.accessedCardId) {
     const hiddenStackInstallActions = [
       ...host.callbacks.runnerDuringRunCardImplementationLegalActions(),
       ...host.callbacks.hiddenStackInstallRunActions(run),
     ];
-    if (hasPendingAccessCandidate(host, run))
+    if (accessPending)
       return {
         handled: true,
         legalActions: [
