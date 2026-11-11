@@ -36,6 +36,7 @@ type PunishComponentAdapter = {
   routeOrder: number;
   sourceCapabilityBindingKind: "card_spec_capability_key";
   sourceCapabilityId: string;
+  agendaPointCost?: number;
 };
 
 /**
@@ -128,8 +129,29 @@ export function buildBoundedCorpPunishRouteRequests(
       component.adapter.kind === "trace_tag",
   );
   const damage = components.filter(
-    (component) => component.adapter.kind === "meat_damage",
+    (component) =>
+      component.adapter.kind === "meat_damage" &&
+      component.adapter.agendaPointCost === undefined,
   );
+  const agendaFundedHeads = new Map<string, string>();
+  const agendaFundedDamageRoutes = components.flatMap((component) => {
+    const agendaPointCost = component.adapter.agendaPointCost;
+    if (agendaPointCost === undefined) return [];
+    const action = input.legalActions.find(
+      (candidate) =>
+        candidate.side === "corp" &&
+        candidate.type === "gain_credit" &&
+        candidate.source === component.card.instanceId &&
+        candidate.payload?.cardId === component.card.instanceId &&
+        candidate.payload?.v1920AssetAbility === "tagged_meat_damage" &&
+        candidate.payload.agendaPointCost === agendaPointCost &&
+        candidate.timingPoint === input.playerView.timingPoint &&
+        candidate.expiresAtStateVersion === input.playerView.stateVersion,
+    );
+    if (!action) return [];
+    agendaFundedHeads.set(component.card.instanceId, action.actionId);
+    return [[component]];
+  });
   const otherPunish = components.filter(
     (component) =>
       component.adapter.kind === "other_punish" ||
@@ -138,6 +160,7 @@ export function buildBoundedCorpPunishRouteRequests(
   const standaloneTagRoutes = tags.map((component) => [component]);
   if (
     damage.length === 0 &&
+    agendaFundedDamageRoutes.length === 0 &&
     otherPunish.length === 0 &&
     standaloneTagRoutes.length === 0
   )
@@ -160,6 +183,7 @@ export function buildBoundedCorpPunishRouteRequests(
     otherPunish.map((payoff) => [...(tag ? [tag] : []), payoff]),
   );
   const routeComponents = [
+    ...agendaFundedDamageRoutes,
     ...standaloneTagRoutes,
     ...damageRouteComponents,
     ...otherPunishRouteComponents,
@@ -183,7 +207,7 @@ export function buildBoundedCorpPunishRouteRequests(
             ? currentHardwareTrashActionId(input, component.card.instanceId)
             : order === 0 && component.adapter.kind === "tag"
               ? currentDirectTagActionId(input, component.card.instanceId)
-              : undefined;
+              : agendaFundedHeads.get(component.card.instanceId);
         return {
           stepId: `${routeId}:step:${order}`,
           order,
@@ -403,6 +427,9 @@ function structuredTaggedDamageAdapter(
         routeOrder: 10,
         sourceCapabilityBindingKind: "card_spec_capability_key",
         sourceCapabilityId: profile.sourceCapabilityId,
+        ...(profile.agendaPointCost !== undefined
+          ? { agendaPointCost: profile.agendaPointCost }
+          : {}),
       }
     : undefined;
 }
