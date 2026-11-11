@@ -15820,16 +15820,32 @@
         "valueHints": {},
         "effects": [
           {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "resource": "cards",
+            "target": "installed_card_trash_cost",
+            "amount": 2,
+            "finite": true
+          },
+          {
             "kind": "run_tax",
             "scope": "corp",
-            "target": "bad_publicity_self_damage_cost",
-            "timing": "action"
+            "timing": "action",
+            "target": "bad_publicity_pressure",
+            "amount": 1,
+            "finite": true
           }
         ],
-        "functionSignals": ["corp.bad_publicity_self_damage_cost"],
+        "functionSignals": [
+          "risk.trash_own_installed_cards",
+          "corp.bad_publicity_pressure"
+        ],
         "actionTacticSignals": [
+          "effect:resource_trash",
           "effect:run_tax",
           "effect_scope:corp",
+          "effect_scope:installed_card",
           "effect_timing:action"
         ],
         "costProfile": { "clicks": 1, "credits": 4 },
