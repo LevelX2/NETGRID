@@ -116,7 +116,7 @@ function latestTraceContextFromEventTail(
   return { runnerLink: visibleRunnerLink };
 }
 
-function visibleRunnerTraceEstimateAtCorpBid(
+export function visibleRunnerTraceEstimateAtCorpBid(
   input: AiDecisionInput,
 ): VisibleRunnerTraceEstimate {
   const profile =

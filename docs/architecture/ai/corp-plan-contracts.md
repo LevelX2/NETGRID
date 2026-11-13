@@ -3534,6 +3534,34 @@ Engine-Choice, Action und StateVersion; der Payload-Resolver bewertet nicht
 erneut und öffentliche Archives-Spiegel ersetzen die eigene Zonenprojektion
 nicht.
 
+Der Hand-Owner vergleicht die vollständigen legalen Abwurfgruppen anhand
+des verbleibenden HQ. Bis zu 128 Kombinationen werden vollständig verglichen.
+Bei größerem Überhang bleiben je Abwurfzahl und erreichbarer Archives-
+Punktklasse die besten acht Teilgruppen nach Planschutz und Haltekosten.
+Die Trennung der Punktklassen garantiert, dass eine vorhandene
+nichtterminale Gruppe durch die Begrenzung nicht verloren geht. Choice,
+LegalAction, StateVersion und auswählbare Optionen müssen übereinstimmen.
+
+Nach dem Archives-Schutz und konkreten Score-/Defense-Bindungen zählt der
+begrenzte Wert der Handoptionen. Der Punish-Owner bewertet dafür feste
+Tag- und Meat-Damage-Operationen gemeinsam: unterschiedliche Auslöser,
+sichtbare Reaktionen, verfügbares Geld und die drei regulären Corp-Aktionen.
+Gleich viel Schaden wie Handkarten leert die Grip nur. Mehr Schaden erhält
+einen höheren Retentionswert, aber keine Zusage eines künftigen Flatlines.
+Ein einzelner passender Draw zählt schwächer und nur bei abgeglichener
+eigener R&D-Population; weder abgeworfene Kopien noch die unbekannte
+Ziehreihenfolge liefern dafür Evidenz. Derselbe Schaden- oder
+Beschleunigerwert wird nicht zusätzlich pro Karte addiert.
+
+Der Score-Owner schützt bezahlbare Kombinationen aus Agenda und festen
+Aktionsbeschleunigern stärker als die bloße Entwicklungsoption. Eine
+zweite Kopie zählt, wenn sie den bezahlbaren Score ermöglicht. Defense
+bewertet eine verfügbare finanzierbare ICE, die im sichtbaren Szenario
+einen offenen, akut bedrohten Zentralserver schließt. Eine ICE ohne
+wirksamen Stopp erhält diesen Zusatzwert nicht. Die Bewertung ist auf
+Cleanup beschränkt; sie erzeugt weder Draw-Bedarf noch neue Spielzüge
+oder eine Engine-Quote für ein späteres Fenster.
+
 Das Modul darf Hidden-Info nur aus der eigenen HQ/R&D und öffentlichen
 Ereignissen verwenden.
 

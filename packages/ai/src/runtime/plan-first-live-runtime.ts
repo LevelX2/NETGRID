@@ -393,7 +393,6 @@ import { uniqueBy } from "./collection";
 import { corpCandidateProjectsCardDraw } from "./corp-draw-action-facts";
 import { corpScorelineFeasibilityForDecisionInput } from "./corp-scoreline-feasibility";
 import type { DiscardKeepScorer } from "./discard-choice-selection";
-import { type DiscardChoiceKeepScore } from "./discard-choice-selection";
 import {
   runnerCentralPayoffServer,
   runnerCentralPayoffServerForDefinition,
@@ -482,10 +481,7 @@ export type PlanFirstLiveDependencies = {
     },
     prepared: PreparedRunnerRunTargets,
   ) => RunnerRunTargetEvaluation[];
-  discardKeepScore?: (
-    input: AiDecisionInput,
-    card: VisibleCard,
-  ) => DiscardChoiceKeepScore;
+  discardKeepScore?: DiscardKeepScorer;
   selectedChoicesForDecision: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -3545,7 +3541,12 @@ function corpContext(
       sourceBoundCandidates,
       discardKeepScore,
     ) ??
-    corpDiscardWindowSignal(input, sourceBoundCandidates, discardKeepScore);
+    corpDiscardWindowSignal(
+      input,
+      sourceBoundCandidates,
+      discardKeepScore,
+      discoveredDomain,
+    );
   const baseDomain: CorpPlanDomain = forcedHandChoiceSignal
     ? {
         ...discoveredDomain,

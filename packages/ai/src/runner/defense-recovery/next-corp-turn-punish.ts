@@ -7,23 +7,20 @@ import type {
 } from "@netgrid/shared";
 import { reconstructBeliefState } from "../../belief-state";
 import { visibleRunnerTraceSupport } from "../../run-analysis/visible-run-hazards";
-import { corpFixedOperationPlayCredits } from "../../runtime/corp-canonical-card-facts";
 import { decisionDerivedValue } from "../../runtime/decision-derived-cache";
+import {
+  fixedTagOperation,
+  fixedTaggedDamageOperation,
+  publicRunnerTurnObservations,
+  type FixedTagOperation as TagSource,
+  type FixedTaggedDamageOperation as DamagePayoff,
+} from "../../runtime/corp-fixed-tag-damage-operation-facts";
+import { canAvoidOneNextCorpTag } from "../../runtime/visible-runner-tag-prevention";
 
 const NEXT_CORP_TURN_PUNISH = Symbol("next-corp-turn-punish");
 // Evaluate operations that fit the ordinary Corp turn. Additional actions
 // and unobserved cards never establish a current defense requirement.
 const CORP_ACTIONS = 3;
-
-type TagSource = {
-  trigger:
-    | { kind: "run_attempts"; minimumRuns: number; traceLimit: number }
-    | { kind: "agenda_stolen" };
-  tags: number;
-  credits: number;
-};
-
-type DamagePayoff = { credits: number; damage: number; minimumTags: number };
 
 type NextCorpTurnThreat = {
   tagPreventionNeeded: boolean;
@@ -65,16 +62,19 @@ function assessNextCorpTurn(
       .knownDefinitions ?? [];
   if (knownHq.length === 0) return undefined;
   const tagSources = knownHq.flatMap((id) => {
-    const source = observedOperationTagSource(id);
+    const source = fixedTagOperation(id);
     return source ? [source] : [];
   });
   const payoffs = knownHq.flatMap((id) => {
-    const payoff = observedOperationDamage(id);
+    const payoff = fixedTaggedDamageOperation(id);
     return payoff ? [payoff] : [];
   });
   if (tagSources.length === 0 && (payoffs.length === 0 || view.own.tags === 0))
     return undefined;
-  const { runs, stoleAgenda } = runnerTurnObservations(input);
+  const { runs, stoleAgenda } = publicRunnerTurnObservations(
+    input,
+    view.turnSerial,
+  );
   const ownTraceSupport = view.own.runnerTraceSupportQuote;
   const traceDefense =
     ownTraceSupport &&
@@ -224,70 +224,6 @@ function readyMeatDamagePrevention(input: AiDecisionInput): number {
   );
 }
 
-function runnerTurnObservations(input: AiDecisionInput) {
-  const turn = input.playerView.turnSerial;
-  const starts = new Set<string>();
-  let stoleAgenda = false;
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
-    if (
-      turn === undefined ||
-      event.turnSerial !== turn ||
-      event.stateVersionAfter > input.playerView.stateVersion ||
-      event.publicPayload.actor !== "runner"
-    )
-      continue;
-    if (event.type === "steal_agenda") stoleAgenda = true;
-    if (
-      event.type === "start_run" ||
-      event.publicPayload.resolvedEffects?.some(
-        (effect) => effect.kind === "start_run" && effect.side === "runner",
-      )
-    ) {
-      starts.add(event.eventId);
-    }
-  }
-  return { runs: starts.size, stoleAgenda };
-}
-
-function observedOperationTagSource(
-  definitionId: string,
-): TagSource | undefined {
-  const credits = corpFixedOperationPlayCredits(definitionId);
-  if (credits === undefined) return undefined;
-  const card = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
-  if (card?.engine.corpUtility?.kind === "encounter_tag")
-    return { trigger: { kind: "agenda_stolen" }, tags: 1, credits };
-  for (const ability of card?.engine.abilities ?? []) {
-    if (
-      ability.kind !== "on_play" ||
-      ability.costs !== "printed" ||
-      ability.condition?.kind !== "runner_attempted_run_last_turn" ||
-      ability.effects.length !== 1
-    )
-      continue;
-    const [effect] = ability.effects;
-    if (effect?.kind !== "trace" || effect.onSuccess.length !== 1) continue;
-    const [tag] = effect.onSuccess;
-    if (
-      tag?.kind === "add_tags" &&
-      tag.recipient === "runner" &&
-      tag.visibility === "public" &&
-      tag.amount > 0
-    ) {
-      return {
-        trigger: {
-          kind: "run_attempts",
-          minimumRuns: ability.condition.minimumRuns,
-          traceLimit: effect.traceLimit,
-        },
-        tags: tag.amount,
-        credits,
-      };
-    }
-  }
-  return undefined;
-}
-
 function traceDefenseForNextTurn(
   input: AiDecisionInput,
   quote: VisibleRunnerTraceSupportQuote,
@@ -332,41 +268,6 @@ function visibleTagSourceCost(
   return cost <= availableCredits ? { credits: cost, tags } : undefined;
 }
 
-function observedOperationDamage(
-  definitionId: string,
-): DamagePayoff | undefined {
-  const credits = corpFixedOperationPlayCredits(definitionId);
-  if (credits === undefined) return undefined;
-  const card = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
-  for (const ability of card?.engine.abilities ?? []) {
-    if (
-      ability.kind !== "on_play" ||
-      ability.costs !== "printed" ||
-      ability.effects.length !== 1
-    )
-      continue;
-    const condition = ability.condition;
-    const [effect] = ability.effects;
-    if (
-      (condition?.kind === "runner_is_tagged" ||
-        condition?.kind === "runner_tags_at_least") &&
-      effect?.kind === "damage" &&
-      effect.recipient === "runner" &&
-      effect.damageType === "meat" &&
-      effect.visibility === "public" &&
-      effect.amount > 0
-    ) {
-      return {
-        credits,
-        damage: effect.amount,
-        minimumTags:
-          condition.kind === "runner_is_tagged" ? 1 : condition.amount,
-      };
-    }
-  }
-  return undefined;
-}
-
 function maximumDamage(
   payoffs: readonly DamagePayoff[],
   credits: number,
@@ -392,33 +293,6 @@ function maximumDamage(
     );
   }
   return best;
-}
-
-/** A finite reaction from the card contract. Future optional payments need
- * to remain affordable after the preparation action. */
-export function canAvoidOneNextCorpTag(
-  card: VisibleCard,
-  credits: number,
-  requireFreeReaction = false,
-): boolean {
-  if (!staysInstalledForNextCorpTurn(card) || !card.definitionId) return false;
-  return (
-    cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
-      .tagPreventionSources ?? []
-  ).some((source) => {
-    if (
-      source.kind !== "avoid_tag" ||
-      source.amount !== 1 ||
-      source.visibility !== "public"
-    )
-      return false;
-    const cost = source.cost;
-    if (cost.kind === "credit_and_tap_source" && card.tapped) return false;
-    return (
-      cost.kind === "trash_source" ||
-      cost.amount <= (requireFreeReaction ? 0 : credits)
-    );
-  });
 }
 
 function staysInstalledForNextCorpTurn(card: VisibleCard): boolean {

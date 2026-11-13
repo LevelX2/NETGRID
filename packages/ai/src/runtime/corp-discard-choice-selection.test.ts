@@ -131,6 +131,42 @@ describe("selectedCorpDiscardChoiceOptionIds", () => {
     });
   });
 
+  it("keeps the only safe batch in the bounded search regardless of option order", () => {
+    const safe = Array.from({ length: 8 }, (_, index) =>
+      operation(`safe-${index}`),
+    );
+    const input = discardInput(
+      [
+        ...Array.from({ length: 8 }, (_, index) =>
+          agenda(`agenda-${index}`, 2),
+        ),
+        ...safe,
+      ],
+      { runnerAgendaPoints: 5, count: 8 },
+    );
+    const choice = input.playerView.pendingChoice!;
+    for (const options of [choice.options, [...choice.options].reverse()]) {
+      const selection = selectedCorpDiscardChoiceOptionIds(
+        input,
+        choice,
+        options,
+        (_input, card) => ({
+          total: card.type === "agenda" ? -1_000 : 0,
+          planDisposition:
+            card.type === "agenda" ? "redundant" : "current_plan_route",
+        }),
+      );
+      expect(selection).toMatchObject({
+        selectedOptionIds: safe.map((card) => `option-${card.instanceId}`),
+        exposedAgendaPoints: 0,
+        terminalAgendaExposure: false,
+        evidenceCodes: expect.arrayContaining([
+          "corp_discard_group_search:bounded",
+        ]),
+      });
+    }
+  });
+
   it("does not turn agenda protection into a hard ban when the alternative belongs to the current plan", () => {
     const cards = [agenda("agenda-1", 2), operation("operation-1")];
     const input = discardInput(cards, { runnerAgendaPoints: 4, count: 1 });

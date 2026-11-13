@@ -23,6 +23,7 @@ import { type CorpHandManagementSignal } from "./hand-management-types";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { isExactScoreRecoveryChoiceOwner } from "../score/score-recovery-choice-owner";
 import { exactDefenseRecoveryBinding, isExactDefenseRecoveryChoiceOwner } from "../defense/defense-recovery-choice-owner";
+import { corpAcuteDefenseHandOptions } from "../defense/defense-hand-retention";
 
 export function bindSelectedCorpArchivesToHqChoiceContinuation(
   input: AiDecisionInput,
@@ -260,12 +261,14 @@ export function corpDiscardWindowSignal(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   discardKeepScore: DiscardKeepScorer | undefined,
+  domain?: CorpPlanDomain,
 ): CorpHandManagementSignal | undefined {
   const selection = corpHandChoiceSelection(
     input,
     candidates,
     discardKeepScore,
     "discard",
+    domain,
   );
   if (!selection) return undefined;
   const { choice, resolveAction } = selection;
@@ -284,7 +287,7 @@ export function corpDiscardWindowSignal(
     handSize: input.playerView.own.gripOrHq.length,
     maximumHandSize: input.playerView.own.maxHandSize,
     concretePurposeCode:
-      "Resolve the current Corp overflow with the plan-bound lowest keep-value cards.",
+      "Resolve the current Corp overflow with the best retained legal hand.",
     priorityClass: "P5",
     routeAllowed: true,
     discardChoiceBinding: {
@@ -298,6 +301,7 @@ export function corpDiscardWindowSignal(
         "corp_discard_owned_by_hand_plan",
         "corp_discard_selection_bound_to_current_choice",
         "corp_discard_ranked_by_plan_protection_and_batch_exposure",
+        ...selection.evidenceCodes,
       ],
     },
     value: 1_000,
@@ -408,6 +412,7 @@ function corpHandChoiceSelection(
   candidates: readonly ActionSemanticCandidate[],
   discardKeepScore: DiscardKeepScorer | undefined,
   kind: "discard" | "strategic_planning_group" | "corporate_shuffle",
+  domain?: CorpPlanDomain,
 ):
   | {
       choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
@@ -415,6 +420,7 @@ function corpHandChoiceSelection(
       selectedOptionIds: string[];
       selectedCardInstanceIds: string[];
       retainedCardInstanceIds: string[];
+      evidenceCodes: readonly string[];
     }
   | undefined {
   const choice = input.playerView.pendingChoice;
@@ -435,7 +441,12 @@ function corpHandChoiceSelection(
     return undefined;
 
   const resolveAction = input.legalActions.find(
-    (action) => action.type === "resolve_choice",
+    (action) =>
+      action.type === "resolve_choice" &&
+      (kind !== "discard" ||
+        action.choiceRequirements?.some(
+          (requirement) => requirement.choiceId === choice.choiceId,
+        ) === true),
   );
   const exactCandidate = resolveAction
     ? candidates.find(
@@ -462,6 +473,32 @@ function corpHandChoiceSelection(
     });
   }
   const selectableOptions = selectableChoiceOptions(choice.options);
+  if (kind === "discard") {
+    const requirement = resolveAction.choiceRequirements?.find(
+      (candidate) => candidate.choiceId === choice.choiceId,
+    );
+    const legalOptionIds = new Set(requirement?.optionIds);
+    if (
+      !requirement ||
+      choice.stateVersion !== input.playerView.stateVersion ||
+      resolveAction.expiresAtStateVersion !== input.playerView.stateVersion ||
+      requirement.minSelections !== choice.minSelections ||
+      requirement.maxSelections !== choice.maxSelections ||
+      legalOptionIds.size !== selectableOptions.length ||
+      selectableOptions.some((option) => !legalOptionIds.has(option.id))
+    ) {
+      throw new PlanResolutionFailure("missing_plan_module_coverage", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((action) => action.type),
+        unresolvedActionIds: [resolveAction.actionId],
+        owner: "plan_module",
+        removalCondition:
+          "The current Corp discard choice and LegalAction must agree on version, option set and selection count.",
+      });
+    }
+  }
   const choiceCards =
     kind === "strategic_planning_group"
       ? selectableOptions.flatMap((option) =>
@@ -510,6 +547,29 @@ function corpHandChoiceSelection(
       removalCondition: `Bind a Corp ${label} choice only when every selectable option maps to a known card in the exact current choice or HQ PlayerView.`,
     });
   }
+  const requiredCardIds = new Set<string>();
+  if (kind === "discard" && domain) {
+    for (const score of domain.scoreProjects) {
+      if (
+        !score.feasible ||
+        (!score.continuationReserve && !score.sameTurnCloseout)
+      )
+        continue;
+      if (score.agendaInstanceId) requiredCardIds.add(score.agendaInstanceId);
+      if (score.setupNeed?.sourceCardInstanceId)
+        requiredCardIds.add(score.setupNeed.sourceCardInstanceId);
+    }
+    for (const defense of domain.defenseNeeds) {
+      if (defense.kind === "score_protection_terminal_install")
+        requiredCardIds.add(defense.sourceCardInstanceId);
+      if (
+        defense.kind === "generic" &&
+        defense.urgent &&
+        defense.installRoute?.disposition === "productive"
+      )
+        requiredCardIds.add(defense.installRoute.projection.sourceCardInstanceId);
+    }
+  }
   const corpDiscardBatch =
     kind === "discard"
       ? selectedCorpDiscardChoiceOptionIds(
@@ -517,6 +577,13 @@ function corpHandChoiceSelection(
           choice,
           selectableOptions,
           discardKeepScore,
+          {
+            requiredCardIds,
+            acuteDefenseCardIds: corpAcuteDefenseHandOptions(
+              input,
+              domain?.centralDefenseAllocation,
+            ),
+          },
         )
       : undefined;
   if (kind === "discard" && !corpDiscardBatch) {
@@ -531,25 +598,21 @@ function corpHandChoiceSelection(
         "The Corp hand plan requires known agenda points for the exact discard batch and existing reachable own Archives; unknown cleanup exposure must remain fail-closed.",
     });
   }
-  const selectedOptionIds =
-    corpDiscardBatch?.selectedOptionIds ??
-    selectedDiscardChoiceOptionIds(
-      scoringInput,
-      choice,
-      selectableOptions,
-      (decisionInput, card) =>
-        corpHandDispositionScore({
-          input: decisionInput,
-          card,
-          destination:
-            kind === "discard"
-              ? "archives"
-              : kind === "strategic_planning_group"
-                ? "rd_bottom"
-                : "rd_shuffle",
-          baseKeepScore: discardKeepScore(decisionInput, card),
-        }),
-    );
+  const selectedOptionIds = corpDiscardBatch
+    ? corpDiscardBatch.selectedOptionIds
+    : selectedDiscardChoiceOptionIds(
+        scoringInput,
+        choice,
+        selectableOptions,
+        (decisionInput, card) =>
+          corpHandDispositionScore({
+            input: decisionInput,
+            card,
+            destination:
+              kind === "strategic_planning_group" ? "rd_bottom" : "rd_shuffle",
+            baseKeepScore: discardKeepScore(decisionInput, card),
+          }),
+      );
   const selectedOptionIdSet = new Set(selectedOptionIds);
   const selectedCardInstanceIds = selectableOptions
     .filter((option) => selectedOptionIdSet.has(option.id))
@@ -561,6 +624,7 @@ function corpHandChoiceSelection(
     resolveAction,
     selectedOptionIds,
     selectedCardInstanceIds,
+    evidenceCodes: corpDiscardBatch?.evidenceCodes ?? [],
     retainedCardInstanceIds: optionInstanceIds.filter(
       (instanceId): instanceId is string =>
         instanceId !== undefined && !selectedCardInstanceIdSet.has(instanceId),

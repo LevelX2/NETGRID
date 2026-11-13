@@ -281,6 +281,17 @@ type Inventory = {
 function centralInventory(
   input: AiDecisionInput,
 ): Record<CorpCentralDefenseServerId, Inventory> | undefined {
+  const remaining = knownCorpRdDefinitionCounts(input);
+  if (!remaining) return undefined;
+  const hq = inventoryForCards(input.playerView.own.gripOrHq);
+  const rd = inventoryForDefinitionCounts(remaining);
+  return hq && rd ? { hq, rd } : undefined;
+}
+
+/** Reconciled own deck population without reading the order of R&D. */
+export function knownCorpRdDefinitionCounts(
+  input: AiDecisionInput,
+): ReadonlyMap<CardDefinitionId, number> | undefined {
   const snapshot = (input as AiDecisionInputWithDeckCapabilities)
     .ownDeckSnapshot;
   if (!snapshot || snapshot.side !== "corp" || !Array.isArray(snapshot.cards))
@@ -298,16 +309,15 @@ function centralInventory(
     if (!CARD_DEFINITIONS_BY_ID[entry.cardId]) return undefined;
     remaining.set(entry.cardId, entry.quantity);
   }
-  const hqCards = input.playerView.own.gripOrHq;
   const archivesCards = canonicalCorpArchives(input);
   if (!archivesCards) return undefined;
   const visibleNonRd = [
-    ...hqCards,
+    ...input.playerView.own.gripOrHq,
     ...archivesCards,
     ...input.playerView.own.scoreArea,
     // Zone/controller does not identify deck ownership: the Runner may score
     // its own cards or install Corp-owned cards before scoring them.
-    ...input.playerView.opponent.scoreArea.filter(cardIsCorpOwned),
+    ...(input.playerView.opponent.scoreArea ?? []).filter(cardIsCorpOwned),
     ...(input.playerView.opponent.rig ?? []).filter(cardIsCorpOwned),
     ...(input.playerView.specialZones?.removedFromGame ?? []).filter(
       cardIsCorpOwned,
@@ -332,9 +342,7 @@ function centralInventory(
     remainingCardCount !== input.playerView.own.stackOrRdCount
   )
     return undefined;
-  const hq = inventoryForCards(hqCards);
-  const rd = inventoryForDefinitionCounts(remaining);
-  return hq && rd ? { hq, rd } : undefined;
+  return remaining;
 }
 
 function cardIsCorpOwned(card: VisibleCard): boolean {

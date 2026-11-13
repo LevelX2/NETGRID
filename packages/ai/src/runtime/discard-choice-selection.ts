@@ -14,6 +14,8 @@ type PendingChoiceOption = PendingChoice["options"][number];
 export type DiscardChoiceKeepScore = {
   readonly total: number;
   readonly planDisposition?: ProjectedHandDisposition;
+  /** Full-group cleanup charges the duplicate discount once per copy pair. */
+  readonly duplicateDiscountPerExtraCopy?: number;
 };
 
 export function selectedDiscardChoiceOptionIds(
@@ -152,4 +154,5 @@ function inputWithoutDiscardedCard(
 export type DiscardKeepScorer = (
   input: AiDecisionInput,
   card: VisibleCard,
+  comparison?: "card" | "corp_discard_group",
 ) => DiscardChoiceKeepScore;

@@ -24,10 +24,8 @@ import { uniqueBy } from "../../runtime/collection";
 import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
 import { currentRunnerTagReduction } from "../../actions/tag-effect-semantics";
 import { quoteRunnerTagClearBankFunding } from "./tag-clear-bank-funding";
-import {
-  canAvoidOneNextCorpTag,
-  runnerNextCorpTurnThreat,
-} from "./next-corp-turn-punish";
+import { runnerNextCorpTurnThreat } from "./next-corp-turn-punish";
+import { canAvoidOneNextCorpTag } from "../../runtime/visible-runner-tag-prevention";
 import { currentLegalActionResourceCost } from "../../runtime/visible-action-facts";
 export type RunnerDefenseServices = {
   findFundingRoute: (

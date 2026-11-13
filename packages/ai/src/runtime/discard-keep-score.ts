@@ -23,6 +23,11 @@ import {
   type CorpHandPressureAssessment,
 } from "../corp/hand-management/hand-inventory-facts";
 import type { ProjectedHandDisposition } from "../plans/turn-projection";
+import { fixedCorpScoreActionBurst } from "../corp/score/score-hand-retention";
+import {
+  fixedTagOperation,
+  fixedTaggedDamageOperation,
+} from "./corp-fixed-tag-damage-operation-facts";
 import {
   corpDefinitionHasTagSource,
   corpScoreConversionProfile,
@@ -39,6 +44,7 @@ export type DiscardCandidateScore = {
   planFit: number;
   strategicFit: number;
   planDisposition?: ProjectedHandDisposition;
+  duplicateDiscountPerExtraCopy?: number;
   evidence: string[];
 };
 
@@ -68,6 +74,7 @@ export function discardKeepScore(
   input: AiDecisionInput,
   card: VisibleCard | undefined,
   dependencies: DiscardKeepScoreDependencies,
+  comparison: "card" | "corp_discard_group" = "card",
 ): DiscardCandidateScore {
   if (!card?.definitionId) {
     return {
@@ -191,9 +198,13 @@ export function discardKeepScore(
       ? dependencies.runnerPlanHandDisposition?.(input, card)
       : undefined;
   let baseValue = 100;
+  const scoreBurstComparedAsGroup =
+    comparison === "corp_discard_group" &&
+    fixedCorpScoreActionBurst(card.definitionId) !== undefined;
   const corpAdvancementBurstSupportsVisibleAgenda =
     input.side === "corp" &&
     type === "operation" &&
+    !scoreBurstComparedAsGroup &&
     corpAdvancementBurstHasVisibleSupport(
       input,
       card.definitionId,
@@ -203,7 +214,12 @@ export function discardKeepScore(
     corpAdvancementBurstSupportsVisibleAgenda &&
     corpAffordableMatchpointAccelerationSupport(input, card.definitionId, cost);
   const corpConditionalPayoff =
-    input.side === "corp"
+    input.side === "corp" &&
+    !(
+      comparison === "corp_discard_group" &&
+      (fixedTagOperation(card.definitionId) !== undefined ||
+        fixedTaggedDamageOperation(card.definitionId) !== undefined)
+    )
       ? corpConditionalPayoffKeepAdjustment(
           input,
           card.definitionId,
@@ -217,6 +233,7 @@ export function discardKeepScore(
     duplicateCount,
     corpHandPressure,
   );
+  const duplicateDiscount = runnerNonAdditiveDuplicate ? 170 : 75;
 
   if (input.side === "corp") {
     if (type === "agenda") baseValue += 330 + corpAgendaOverflowValue.value;
@@ -278,7 +295,7 @@ export function discardKeepScore(
     baseValue += 100;
   }
   if (duplicateCount > 1 && type !== "agenda")
-    baseValue -= (runnerNonAdditiveDuplicate ? 170 : 75) * (duplicateCount - 1);
+    baseValue -= duplicateDiscount * (duplicateCount - 1);
   if (runnerNonAdditiveDuplicate && installedSameDefinition) baseValue -= 180;
   if (runnerRedundantBreakerDuplicate) {
     baseValue -= 220 + Math.max(0, duplicateCount - 1) * 180;
@@ -309,6 +326,16 @@ export function discardKeepScore(
     strategicFit,
     ...(runnerPlanDisposition
       ? { planDisposition: runnerPlanDisposition }
+      : {}),
+    ...(comparison === "corp_discard_group" &&
+    input.side === "corp" &&
+    duplicateCount > 1
+      ? {
+          duplicateDiscountPerExtraCopy:
+            type === "agenda"
+              ? corpAgendaOverflowValue.duplicateDiscount
+              : duplicateDiscount,
+        }
       : {}),
     evidence: sortedUnique([
       "discard_score:base",
@@ -838,14 +865,14 @@ function corpAgendaOverflowKeepAdjustment(
   type: string | undefined,
   duplicateCount: number,
   handPressure: CorpHandPressureAssessment | undefined,
-): { value: number; evidence: string[] } {
+): { value: number; evidence: string[]; duplicateDiscount: number } {
   if (
     input.side !== "corp" ||
     type !== "agenda" ||
     handPressure?.status !== "overflow" ||
     handPressure.agendaCount < 2
   ) {
-    return { value: 0, evidence: [] };
+    return { value: 0, evidence: [], duplicateDiscount: 0 };
   }
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   const agendaPoints = definition?.agendaPoints;
@@ -856,13 +883,17 @@ function corpAgendaOverflowKeepAdjustment(
   ) {
     return {
       value: 0,
+      duplicateDiscount: 0,
       evidence: ["discard_score:corp_agenda_value_unknown"],
     };
   }
   const scoreEfficiencyValue = agendaPoints * 70 - advancementRequirement * 25;
-  const redundantCopyPenalty = Math.max(0, duplicateCount - 1) * 260;
+  const duplicateDiscount = 260;
+  const redundantCopyPenalty =
+    Math.max(0, duplicateCount - 1) * duplicateDiscount;
   return {
     value: scoreEfficiencyValue - redundantCopyPenalty,
+    duplicateDiscount,
     evidence: [
       "discard_score:corp_agenda_overflow_value",
       ...(redundantCopyPenalty > 0
@@ -877,6 +908,8 @@ export function createDiscardKeepScore(
 ): (
   input: AiDecisionInput,
   card: VisibleCard | undefined,
+  comparison?: "card" | "corp_discard_group",
 ) => DiscardCandidateScore {
-  return (input, card) => discardKeepScore(input, card, dependencies);
+  return (input, card, comparison) =>
+    discardKeepScore(input, card, dependencies, comparison);
 }
