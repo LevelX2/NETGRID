@@ -84,6 +84,7 @@ import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signal
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 import { runnerPostBreakTrashPreparationSignals } from "./post-break-trash-preparation";
 import { runnerRepeatedFreeStopProbeEvidence } from "./central-probe-outcome";
+import { runnerImmediateExposedIceSafetyExit } from "../run-window/run-window-expose-viewing";
 function runnerAccumulatedCentralPressureConversionSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -866,6 +867,7 @@ export function buildRunnerCentralPressureSignals({
   activeRunRoot: ActiveRunnerRunRoot | undefined;
   recurringEconomyRunDeferralEvidenceCode: string | undefined;
 }): RunnerPlanDomain["centralPressure"] {
+  const exposedIceExit = runnerImmediateExposedIceSafetyExit(input, previous);
   const baseCentralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
     [
       ...runLockReleaseRoutes.flatMap((route) => {
@@ -924,10 +926,10 @@ export function buildRunnerCentralPressureSignals({
           );
           const probeExclusions = new Map(
             sameServerEvaluations.flatMap((candidate) => {
-              const evidence = runnerRepeatedFreeStopProbeEvidence(
-                input,
-                candidate,
-              );
+              const evidence =
+                exposedIceExit?.actionId === candidate.actionId
+                  ? exposedIceExit.evidenceCode
+                  : runnerRepeatedFreeStopProbeEvidence(input, candidate);
               return evidence ? [[candidate.actionId, evidence] as const] : [];
             }),
           );

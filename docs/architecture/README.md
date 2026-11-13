@@ -18,6 +18,8 @@ Zu den aktuellen Fachbereichen gehören unter anderem:
   normalen Spieleroberfläche;
 - `maintenance/action-persistence-contract.md`: aktueller SQLite-Aktionsload,
   atomare Delta-Persistenz und Storagegrenzen;
+- `internet-access-sites-supabase.md`: Machbarkeit und offene Entscheidungen
+  für Internetzugang über Sites, Supabase und einen gehosteten Spielserver;
 - `windows/`: installerneutrale Windows-Releasegrenze sowie das beschlossene
   Installer-, Launcher- und Updatezielbild mit sequenziellem Paketprozess;
 - weitere fachlich benannte Bereiche für aktuelle Architekturthemen.

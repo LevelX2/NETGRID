@@ -165,8 +165,9 @@ export function buildEventWithHost(
   for (const field of ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS) {
     delete publicPayload[field];
   }
-  // Future private defense quotes must never become public action context.
+  // Actor-private action quotes are never public event context.
   delete publicPayload.corpTemporaryIceStrengthPulseQuoteJson;
+  delete publicPayload.runnerCostPenaltySupportOpeningCreditAmount;
   if (state.gameEndReason === "bad_publicity_7") {
     publicPayload.badPublicityThreshold =
       host.constants.badPublicityLossThreshold;

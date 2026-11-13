@@ -24,6 +24,7 @@ import {
   cloneRunnerRunPathCreditBudget,
   normalizeRunnerRunPathCreditBudget,
   projectBreakerCreditPayment,
+  runnerRunPathCreditBudgetAfterEncounter,
   runnerRunPathCreditBudgetWithVisiblePools,
   spendBreakerCreditsAndApplySideEffects,
 } from "../run-analysis/visible-run-credit-budget";
@@ -123,6 +124,7 @@ export type CorpScoreProtectionAssessmentInput = Readonly<{
   serverIce: readonly CorpScoreProtectionIceInput[];
   serverRoot?: readonly VisibleCard[];
   runnerRig: readonly VisibleCard[];
+  runnerDeckCount?: number;
   /**
    * Public, engine-derived delayed-install cards. A Corp-side projection may
    * use these only when the corresponding installed delayed-install source,
@@ -132,6 +134,7 @@ export type CorpScoreProtectionAssessmentInput = Readonly<{
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
   runnerCredits: number;
+  runnerRunOnlyCredits?: number;
   runnerCreditPoolHorizon?: "current" | "next_runner_turn";
   /** Independently quoted public recovery routes with absolute remaining cash. */
   runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
@@ -351,7 +354,12 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "invalidProbabilityThreshold:true"],
     );
   }
-  if (!Number.isSafeInteger(input.runnerCredits) || input.runnerCredits < 0) {
+  const runOnlyCredits = input.runnerRunOnlyCredits ?? 0;
+  if (
+    !nonNegativeSafeInteger(input.runnerCredits) ||
+    !nonNegativeSafeInteger(runOnlyCredits) ||
+    !Number.isSafeInteger(input.runnerCredits + runOnlyCredits)
+  ) {
     return unknownAssessment(
       input.maximumRunnerAccessSuccessProbability,
       "invalid_runner_credits",
@@ -484,11 +492,14 @@ export function assessCorpScoreProtection(
     {
       credits: input.runnerCredits,
       creditBudget: normalizeRunnerRunPathCreditBudget(
-        runnerRunPathCreditBudgetWithVisiblePools(
-          input.runnerCredits,
-          runnerRig,
-          { creditPoolHorizon: input.runnerCreditPoolHorizon ?? "current" },
-        ),
+        runnerRunPathCreditBudgetAfterEncounter({
+          ...runnerRunPathCreditBudgetWithVisiblePools(
+            input.runnerCredits,
+            runnerRig,
+            { creditPoolHorizon: input.runnerCreditPoolHorizon ?? "current" },
+          ),
+          runOnlyCredits,
+        }),
       ),
       probability: ONE,
       breakerStrengths: new Map(
@@ -560,6 +571,19 @@ export function assessCorpScoreProtection(
   const bestPath = states.reduce((best, candidate) =>
     accessPathIsBetter(candidate, best) ? candidate : best,
   );
+  if (
+    compareRational(bestPath.probability, ONE) < 0 &&
+    visibleRunnerInRunStackInstallPotential(runnerRig, input.runnerDeckCount)
+  ) {
+    return unknownAssessment(
+      input.maximumRunnerAccessSuccessProbability,
+      "unsupported_runner_access_effect",
+      [
+        "scoreProtectionKnown:false",
+        "publicRunnerInRunStackInstallUnquoted:true",
+      ],
+    );
+  }
   let passProbability = ONE;
   for (const source of input.serverRoot ?? []) {
     if (!source.rezzed) continue;
@@ -623,7 +647,8 @@ export function assessCorpScoreProtection(
       (choice): choice is CorpScoreProtectionRandomBreak =>
         choice !== undefined,
     ),
-    runnerCreditsRemainingOnBestAccessPath: bestPath.credits,
+    runnerCreditsRemainingOnBestAccessPath:
+      bestPath.creditBudget.traceEligibleCredits,
     evidence: [
       "scoreProtectionKnown:true",
       "scoreProtectionScope:visible_direct_access_prevention",
@@ -631,7 +656,7 @@ export function assessCorpScoreProtection(
       `runnerAccessSuccessProbability:${accessProbability.numerator}/${accessProbability.denominator}`,
       `maximumRunnerAccessSuccessProbability:${exactThreshold.numerator}/${exactThreshold.denominator}`,
       `requiredRandomBreakSuccesses:${requiredRandomBreakSuccesses}`,
-      `runnerCreditsRemainingOnBestAccessPath:${bestPath.credits}`,
+      `runnerCreditsRemainingOnBestAccessPath:${bestPath.creditBudget.traceEligibleCredits}`,
       `protectsScore:${protectsScore}`,
     ],
   };
@@ -1175,6 +1200,7 @@ function pruneDominatedStates(
       .join(",");
     const budgetKey = [
       state.creditBudget.credits,
+      state.creditBudget.traceEligibleCredits,
       state.creditBudget.icebreakerCredits,
       state.creditBudget.nonNoisyIcebreakerCredits,
       state.creditBudget.nonStealthNonNoisyIcebreakerCredits,
@@ -1206,6 +1232,14 @@ function accessPathIsBetter(
     current.probability,
   );
   if (probabilityComparison !== 0) return probabilityComparison > 0;
+  if (
+    candidate.creditBudget.traceEligibleCredits !==
+    current.creditBudget.traceEligibleCredits
+  )
+    return (
+      candidate.creditBudget.traceEligibleCredits >
+      current.creditBudget.traceEligibleCredits
+    );
   return candidate.credits > current.credits;
 }
 
@@ -1274,6 +1308,40 @@ function cardIsIcebreaker(card: VisibleCard): boolean {
       (subtype) => subtypeKey(subtype) === "icebreaker",
     ),
   );
+}
+
+/** The public source can change coverage inside a run. The possible target
+ * remains hidden, so a missing visible breaker cannot certify a stop. */
+export function visibleRunnerInRunStackInstallPotential(
+  runnerRig: readonly VisibleCard[],
+  runnerDeckCount: number | undefined,
+): boolean {
+  if (runnerDeckCount === 0) return false;
+  return runnerRig.some((card) => {
+    if (
+      card.known !== true ||
+      card.rezzed !== true ||
+      card.controller !== "runner" ||
+      !card.definitionId
+    ) {
+      return false;
+    }
+    const abilities = cardSpecPlanningCardByDefinitionId(card.definitionId)
+      ?.planning.engine.abilities;
+    return (
+      abilities?.some(
+        (ability) =>
+          ability.kind === "activated" &&
+          ability.timing === "during_run" &&
+          ability.costs.every((cost) => cost.kind === "trash_source") &&
+          ability.effects.some(
+            (effect) =>
+              effect.kind === "search_stack_install" &&
+              effect.filter === "program",
+          ),
+      ) === true
+    );
+  });
 }
 
 function runnerRigCardRequiresUnsupportedAccessProjection(

@@ -87,6 +87,30 @@ Scoreparents. Nichtterminale Exposition, der eigenständig geprüfte
 Same-Turn-Abschluss und die gesonderte erzwungene Discard-Entlastung behalten
 ihre bestehenden Zulassungsverträge.
 
+Die Agenda-Flood-Ausnahme prüft auch mehrere erreichbare offene Remotes im
+selben Runnerzug. Eine neu installierte Agenda ohne ICE, weitere Rootkarten
+oder eigene Zugriffskosten kann zusammen mit anderen eindeutig offenen Agenden
+die Siegschwelle erreichen. Der Score-Owner berücksichtigt das aktuelle
+Runner-Aktionsbudget und verlangt dann denselben gebundenen Schutzbeleg.
+Andere Zugriffsrisiken behalten ihre regulären Quotes. In Paarung 730, G6 D414
+reicht die zweite offene Zwei-Punkte-Agenda bei vier Runnerpunkten zum Sieg
+im nächsten Zug. Der Gegenfall mit nur einer solchen Agenda bleibt zulässig.
+
+Ein weiterer Zugriff kann über einen bestehenden Remote mit ICE führen.
+Für diesen eng begrenzten Fall reserviert die Quote zwei Runner-Run-Klicks.
+Eine öffentliche Auszahlung aus einem geladenen Credit-Speicher ersetzt eine
+der übrigen Vorbereitungsaktionen. Aus der gemeinsamen liquiden Bank
+reserviert die Quote zuerst die bekannten Steal-Kosten der neuen Agenda.
+Die beste finanzierbare Rezvariante des vorhandenen Pfads wird mit der
+Restbank und dem rungebundenen Bad-Publicity-Budget geprüft. Der bestehende
+ICE-Pfad muss ohne weitere Schäden durchführbar sein. Ein direkter
+Zugriffsschaden auf der neuen Agenda ist nur quotierbar, wenn der aktuelle
+Runner-Handumfang ihn deckt. Kann die Corp nach dem Einbau noch den Schutz
+oder die Wertung der vorhandenen Agenda herstellen, liefert dieser Vergleich
+keinen terminalen Beleg. In Paarung 735, G20 D300 reichen Broker, aktuelle
+Handkarten und zwei Run-Klicks selbst gegen Fire Wall, den teureren
+Sphinx-Sentry-Rez und zwei Steal-Credits für Fetal AI aus.
+
 Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
 typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
 zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence
@@ -523,6 +547,13 @@ die Quellsubroutine zu brechen, bezahlt deren vollständige Strength- und
 Breakkosten zusammen mit vorhandenen ETR-Breaks. Ein hoher Creditstand allein
 zertifiziert keinen Zugriff durch eine ungebrochene Sperre.
 
+Eine sichtbar aktive Installation aus dem Stack während eines Runs kann die
+Breaker-Abdeckung im selben Run ändern. Bei einer darauf beruhenden
+Zugriffssperre liefern der Schutz-Quote und die Rush-Risikobewertung eine
+strukturierte Unsicherheit. Der öffentliche Stack-Zähler grenzt das Fenster
+ab, die Programmauswahl bleibt verborgen. Ein bereits vollständig belegter
+Zugriff und ein aktueller abschließbarer Score behalten ihren Auftrag.
+
 Die Kosten des aktuellen Advance-Steps stammen aus der konkreten
 Engine-LegalAction beziehungsweise einem exakt an StateVersion,
 Agenda-Instanz und Action gebundenen Engine-Quote. Die vollständigen
@@ -878,6 +909,18 @@ dieselben vorbereiteten Breaker. Kombinierte ETR-Subroutinen müssen vollständi
 die Breaker-Kostenrechnung weitergereicht werden. Fehlende Host-Fakten bleiben
 explizit unbekannt (Regressionen: Match 41df D89, Afreet/Cyfermaster/Puzzle).
 
+Der vorhandene Score- und Terminalschutz übernimmt die öffentliche
+Runstart-Gutschrift aus `runnerNextRunBadPublicityCredits` in denselben
+Pfadbudgetvertrag wie die übrigen Run-Credits. Vorbereitung, Rückholung,
+Installation und die freie Liquidität nach dem Pfad verwenden weiterhin
+den allgemeinen Pool. Der laufende Schutzpfad nutzt bei passendem Fort den
+tatsächlich verbliebenen aktuellen Run-Pool. Eine Quote bewertet einen
+einzelnen Lauf. Ein weiterer Run erhält sein eigenes Startguthaben und
+braucht einen gemeinsamen Nachweis der verbleibenden Aktionen und liquiden
+Credits. Der native Grenztest hält einen vollständig rezzten Zwei-ICE-Pfad
+bei sieben liquiden Credits und drei Vorlaufaktionen ohne Publicity
+geschlossen und bestätigt den Zugriff mit dem elften Credit aus dem Run.
+
 Die öffentliche Vorbereitung umfasst außerdem einen bekannten Breaker im Heap,
 wenn eine bereits aktive, unbegrenzte Top-Heap-Rückholung seine Rückholung und
 die normale Installation vor dem reservierten Run ermöglicht. Jede darüberliegende
@@ -921,6 +964,15 @@ Expositionsquote; die gewöhnliche Reprotektionspflicht außerhalb dieses engen
 Abwurffalls sowie Scorekosten, Verteidigungsreserven und Sofortsiege bleiben
 unverändert. Zwei native Folgeinputs aus Paarung 544 belegen die notwendige
 Kontinuität über den gegnerischen Zug; ein Einzelrestore verbraucht diese Grenze.
+Beim Überhang von genau einer Agenda verlangt der Score-Owner für die
+Auslage einer frei stehlbaren Siegagenda den regulären Schutz, wenn ein niedrigerer
+Pflichtabwurf unter Matchpoint bleibt und die vorhandene Defense-Quote beide
+Zentralforts gegen die sichtbare Runner-Vorbereitung absichert. Beide
+Rez-Pläne teilen dieselben Corp-Credits und Agendapunkte. Bereits exponierte
+Remote-Agenden und nicht nachweisbare Zentralpfade lassen die Notfallabwägung
+offen. Der Hand-Owner bindet die tatsächliche Abwurfoption weiterhin erst am
+Engine-Choice. Paarung 734, G34 D327 sichert den Vergleich gegen den sofortigen
+Steal und den nichtterminalen Archives-Zweig.
 Ein möglicher terminaler Steal erhöht das Gewicht der Exposition. Unbekannte oder
 veraltete Quotes bleiben unbekannt und tragen eine konservative Risikogrenze;
 sie werden weder als sicher noch pauschal als 50-Prozent-Chance behandelt.
@@ -1233,6 +1285,19 @@ Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
 
+Bei der Security-Purge-Zielwahl gehört eine bereits aufgedeckte, demnächst
+offen in Archives liegende Gewinnagenda zur Verteidigungsentscheidung. Die
+Engine prüft vollständige aktuell angebotene feste Platzierungspakete auf
+getrennten Zuständen. Nur der Corp-Entscheidungsinput erhält die daraus
+entstehenden Archives-ICE und Ressourcen, gebunden an Choice und StateVersion.
+Der vorhandene Defense-Owner ändert eine Aufteilung zwischen R&D und Archives,
+wenn die gemeinsame Archives-Platzierung den sichtbaren Direktzugriff
+vollständig stoppt und die Corp-Ressourcen mindestens erhält. Das Budget
+berücksichtigt den nächsten Runner-Zug einschließlich öffentlicher
+Vorbereitung und erneuerbarer Run-Credits. In Paarung 738, G14 D300 reicht ein
+Puzzle für die offen werdende Project Zurich nicht aus. Zwei legal gerezzte
+Puzzle beenden denselben Angriff vor dem Zugriff.
+
 Aktuelle Rez-Vergleiche konsumieren den öffentlichen Restzustand des
 Erstbegegnungs-Bypasses. Vorher-/Nachherpfade laufen außen nach innen und
 entfernen jeweils die erste tatsächlich gerezzte Begegnung. Ungerezztes
@@ -1426,6 +1491,18 @@ Der native Zustand Paarung 474 G40 D250 belegt Trace 3 gegen höchstens
 Runner-Stärke 4: Corp-Gebot 2 garantiert den nativen Run-Abbruch. Gebot 0
 garantiert ihn nicht. Ein besserer vollständiger Matchausgang ist damit
 nicht nachgewiesen.
+
+Für den offenen Trace einer laufenden ICE-Begegnung kann die Engine der Corp das kleinste
+angebotene Gebot für einen garantierten Run-Abbruch mit anschließender
+Runsperre quotieren. Die Engine bindet Run, StateVersion, LegalAction und
+Choice-Option an das sichtbare maximale Runner-Link-Budget einschließlich
+Run-Bonus. Verdeckte oder unvollständig quotierte Runner-Antworten, darunter
+Post-Bid-Link und Cancel, schließen die Garantie aus. Die Runner-View
+erhält die Corp-Quote nicht. Der Bid-Owner verwendet sie bei einem aktuellen
+HQ-Zugriff mit einer für den Sieg ausreichenden Agenda im eigenen HQ, wenn
+die letzte ICE-Schicht und das verbleibende Runner-Klickbudget den
+unmittelbaren Schutz belegen. Eine weitere ICE- oder Root-Verteidigung und
+eine eigenständige weitere Runfolge bleiben an ihren bisherigen Schutzpfaden.
 
 Rez ist grundsätzlich eine einmalige Investition in wiederkehrenden Druck.
 Die erzwungene Rez-/Trash-Choice gehört ebenfalls zu `corp.defend_servers`.
@@ -3098,6 +3175,15 @@ noch keine aktive Verfolgung der lauernden Kampagne.
 Eine planfremde Aktion wie Closed Accounts darf eine weiterhin lethal
 Drei-Aktionen-Flatline-Sequenz nicht aufbrechen.
 
+Eine installierte Fleischschadensquelle mit Agendapunktkosten kann als
+einzelner, bereits legaler Abschluss eintreten. Der Anfrageadapter bindet
+die sichtbare CardSpec-Capability an die aktuelle Action-ID. Die Engine
+bestätigt Klick, Agendapunktpreis, Schadensempfänger, Taggrenze und
+Präventionsgrenze. Die Quote beschreibt die nachgewiesene Einzelaktion.
+Der Punish-Owner gibt die Punkte nur aus, wenn der bestätigte
+Mindestschaden den aktuellen Handpuffer übersteigt. Verdeckte installierte
+Runner-Ressourcen halten den Antwortausgang offen.
+
 ## 9. `corp.ambush_and_bluff`
 
 Im letzten Root-Rez-Fenster vergleicht der residente Ambush-Owner die
@@ -3284,7 +3370,7 @@ Installations-, Fortschritts- und Scorefolgen bleiben beim Score-Owner.
 
 Die Retentionsfinanzierung zieht fest garantierte Counter einer reinen, unbedingten On-Play-Operation von den noch regulär zu bezahlenden Advances ab. Die Menge stammt aus der kanonischen CardSpec; eine Verteilung auf unterschiedliche Ziele liefert derselben Agenda höchstens einen Counter. Generierte Aktionen und bloße Counterverschiebung erzeugen dadurch keine freien Counter. Paarung 590, Diagnose-Runde 6, G26 D256 belegt Layoffs plus einen regulären Advance bei genau sechs Credits; fünf Credits reichen weiterhin nicht.
 
-Der bestehende Haltewert für kanonische Scorebeschleuniger erhält einen begrenzten Zusatzwert, wenn eine bekannte eigene Agenda den Matchpoint erreicht und liquide Credits sowohl die Operation als auch ihre verbleibenden regulären Advances decken. Das schützt die finanzierte Kombination gegenüber einer redundanten, nur nichtterminal in Archives exponierten Agenda. Es ist eine Retentionabwägung, kein Nachweis zukünftiger Klicks, einer garantierten Scorefolge oder eines sicheren Gegnerzuges. Sofort terminale Archives-Exposition bleibt im gebundenen Discard-Batch strikt vorrangig; der Choice-Resolver übernimmt ausschließlich die aktuelle Handplanbindung.
+Der bestehende Haltewert für kanonische Scorebeschleuniger erhält einen begrenzten Zusatzwert, wenn eine bekannte eigene Agenda den Matchpoint erreicht und liquide Credits sowohl die Operation als auch ihre verbleibenden regulären Advances decken. Das schützt die finanzierte Kombination gegenüber einer redundanten, nur nichtterminal in Archives exponierten Agenda. Es ist eine Retentionabwägung, kein Nachweis zukünftiger Klicks, einer garantierten Scorefolge oder eines sicheren Gegnerzuges. Sofort terminale Archives-Exposition bleibt im gebundenen Discard-Batch strikt vorrangig. Defense kann den direkten Zugriff auch hinter einer einzelnen festen, aktuell finanzierbaren ICE-Schicht ohne Run-Verbot bestätigen. Dafür müssen aktuelle Engine-Quotes und der sichtbare bezahlbare Runner-Pfad übereinstimmen. Die Handentscheidung verwendet diesen Nachweis für terminale Punktesummen. Der Choice-Resolver übernimmt ausschließlich die aktuelle Handplanbindung.
 
 Eine freie R&D-Spitzensortierung bleibt auch bei `minSelections` gleich
 Optionenzahl eine echte Reihenfolgeentscheidung. Die Engine kennzeichnet

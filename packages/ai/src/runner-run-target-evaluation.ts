@@ -7,7 +7,9 @@ import { runnerPostRunSelfTagHandSafety } from "./run-analysis/runner-self-tag-s
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerTargetHasTerminalContestThreat } from "./runtime/runner-terminal-contest-threat";
+import { archivesIsKnownWithoutAgenda } from "./runtime/visible-server-agenda-facts";
 import {
+  RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type LegalAction,
   type PublicGameEvent,
@@ -73,6 +75,7 @@ import {
   type RunnerEconomyPosture,
   type RunnerEconomyRoute,
   type RunnerEconomyTransitionAssessment,
+  type RunnerFortIceTrashObjective,
   type RunnerInstalledRunPayoff,
   type RunnerKnownAccessState,
   type RunnerPathPassability,
@@ -557,6 +560,7 @@ function evaluateRunnerRunTarget(
         ...(params.input.playerView.traceRulesProfile
           ? { traceRulesProfile: params.input.playerView.traceRulesProfile }
           : {}),
+        quoteNextEncounterDamageForHandBudget: true,
         requireCoreDamageProtection:
           targetKind !== "remote" ||
           !runnerTargetHasTerminalContestThreat(params.input, targetServerId),
@@ -637,7 +641,9 @@ function evaluateRunnerRunTarget(
     projection,
     accessServerId,
     accessTargetKind,
+    economyPosture,
     creditsAfterRun,
+    creditsAfterAction,
   );
   const payoff =
     replacementPayoff ??
@@ -654,6 +660,7 @@ function evaluateRunnerRunTarget(
       // encounter costs.  Optional damage avoidance may only spend what is
       // actually left after those commitments.
       generalCredits: quotedPath.creditsAfterPath,
+      deferredNextEncounterDamage: quotedPath.deferredNextEncounterDamage,
       ...(quotedPath.paidSubroutineBreaks
         ? { paidSubroutineBreaks: quotedPath.paidSubroutineBreaks }
         : {}),
@@ -781,7 +788,10 @@ function evaluateRunnerRunTarget(
     runnerRunProjectionPreservesNormalAccess(params.input, projection),
   );
   const scoreThreat =
-    accessTargetKind === "remote" && remoteHasScoreThreat(accessServer);
+    projection.accessReplacement !==
+      "trash_rezzed_ice_on_fort_and_tag_runner" &&
+    accessTargetKind === "remote" &&
+    remoteHasScoreThreat(accessServer);
   const accessPayoff = accessPayoffWithInstalledRunPayoff({
     basePayoff: payoff.accessPayoff,
     knownAccessState: payoff.knownAccessState,
@@ -994,6 +1004,9 @@ function evaluateRunnerRunTarget(
     visibleDuringRunRezSupport,
     runnerGripCount: visibleDamageProjection.projectedHandAfterDamage,
     projectedKnownDamage: visibleDamageProjection.projectedDamage,
+    requiredNextEncounterHandBuffer: path.deferredNextEncounterDamage?.length
+      ? (visibleLethalIceDamage?.requiredHandFloor ?? 0)
+      : 0,
   });
   // The unknown remainder requires both liquid credits and a surviving grip.
   // Known damage avoidance may spend only the money outside that same reserve.
@@ -1018,6 +1031,7 @@ function evaluateRunnerRunTarget(
               projection.damagePreventionPool ?? 0,
             ),
             handCount: projectedGripAfterRunAction,
+            deferredNextEncounterDamage: path.deferredNextEncounterDamage,
             requiredHandFloor: prerunReserveQuote.requiredHandBuffer,
           },
         )
@@ -1124,6 +1138,9 @@ function evaluateRunnerRunTarget(
     actionId: projection.actionId,
     accessPayoff,
     accessFacts: payoff.accessFacts,
+    ...(payoff.fortIceTrashObjective
+      ? { fortIceTrashObjective: payoff.fortIceTrashObjective }
+      : {}),
     ...(accessPayoffRequiresFunding
       ? { accessPayoffRequiresFunding: true as const }
       : {}),
@@ -1700,6 +1717,7 @@ function payoffForTarget(
 ): {
   accessPayoff: RunnerAccessPayoff;
   accessFacts: RunnerAccessFacts;
+  fortIceTrashObjective?: RunnerFortIceTrashObjective;
   accessPayoffContestable?: boolean;
   knownAccessDamage?: KnownRemoteAccessPayoff["observedAccessDamage"];
   knownAccessState: RunnerKnownAccessState;
@@ -1754,11 +1772,143 @@ function replacesAccessWithCreditDenial(
 
 function accessReplacementPayoffForTarget(
   params: EvaluateRunnerRunTargetsParams,
-  projection: RunActionProjection,
+  projection: InternalRunActionProjection,
   targetServerId: string,
   targetKind: RunnerRunTargetKind,
+  economyPosture: RunnerEconomyPosture,
   creditsAfterRun: number,
+  creditsAfterAction: number,
 ): ReturnType<typeof payoffForTarget> | undefined {
+  if (
+    projection.accessReplacement === "trash_rezzed_ice_on_fort_and_tag_runner"
+  ) {
+    const payload = projection.action.payload;
+    const input = params.input;
+    const fort = input.playerView.servers.find(
+      (server) => server.id === projection.targetServerId,
+    );
+    const rezzedIceCount = payload?.runnerFortIceTrashRezzedIceCount;
+    const tags = payload?.runnerFortIceTrashTagsAdded;
+    if (
+      !fort ||
+      fort.id !== targetServerId ||
+      !projection.sourceCardId ||
+      projection.action.expiresAtStateVersion !==
+        input.playerView.stateVersion ||
+      payload?.runnerFortIceTrashQuoteSchemaVersion !==
+        RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION ||
+      payload.runnerFortIceTrashQuoteStateVersion !==
+        input.playerView.stateVersion ||
+      payload.runnerFortIceTrashServerId !== fort.id ||
+      typeof rezzedIceCount !== "number" ||
+      rezzedIceCount !== fort.ice.filter((ice) => ice.rezzed === true).length ||
+      typeof tags !== "number" ||
+      tags !== projection.successfulRunSelfTags
+    )
+      throw new Error("runner_fort_ice_trash_replacement_quote_invalid");
+    // On the known path, compare one future traversal with the extra event
+    // spend and the standard cost of clearing the new tags (2 credits and
+    // one income click each). Unknown future rezzes give no current credit.
+    const oneRunSavings =
+      rezzedIceCount > 0
+        ? Math.max(0, creditsAfterAction - creditsAfterRun)
+        : 0;
+    const eventSpend = Math.max(
+      0,
+      input.playerView.own.credits - creditsAfterAction,
+    );
+    const cleanupCredits = tags * 2;
+    const creditsAfterCleanup = creditsAfterRun - cleanupCredits;
+    const netSavings = oneRunSavings - eventSpend - cleanupCredits - tags;
+    // The ordinary payoff owner assesses only a follow-up on this same
+    // fort. Unseen ICE and root contents stay unresolved; this is not
+    // a guarantee of the follow-up access or any Agenda points.
+    const hasFollowupAccess =
+      targetKind === "archives"
+        ? !archivesIsKnownWithoutAgenda(input)
+        : fort.root.length > 0 ||
+          (targetKind === "rd" && input.playerView.opponent.deckCount > 0) ||
+          (targetKind === "hq" && input.playerView.opponent.handCount > 0);
+    const followupPayoff =
+      hasFollowupAccess &&
+      netSavings > 0 &&
+      creditsAfterCleanup >= economyPosture.minimumCreditFloor
+        ? payoffForTarget(
+            {
+              ...params,
+              input: {
+                ...input,
+                playerView: {
+                  ...input.playerView,
+                  own: {
+                    ...input.playerView.own,
+                    credits: creditsAfterCleanup,
+                  },
+                  servers: input.playerView.servers.map((server) =>
+                    server.id === fort.id
+                      ? {
+                          ...server,
+                          ice: server.ice.filter((ice) => ice.rezzed !== true),
+                        }
+                      : server,
+                  ),
+                },
+              },
+            },
+            targetServerId,
+            targetKind,
+            economyPosture,
+          )
+        : undefined;
+    const usefulFollowup =
+      followupPayoff !== undefined &&
+      followupPayoff.knownAccessState !== "known_no_current_payoff" &&
+      followupPayoff.accessPayoffContestable !== false &&
+      followupPayoff.accessPayoff !== "trash_unaffordable";
+    return {
+      accessPayoff: usefulFollowup ? "access_bonus" : "known_low_value",
+      ...(usefulFollowup
+        ? {
+            fortIceTrashObjective: {
+              kind: projection.accessReplacement,
+              actionId: projection.actionId,
+              sourceCardInstanceId: projection.sourceCardId,
+              serverId: fort.id,
+              observedAtStateVersion: input.playerView.stateVersion,
+              tagsAdded: tags,
+              followupPayoff: followupPayoff.accessPayoff,
+            },
+          }
+        : {}),
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
+      knownAccessState: usefulFollowup
+        ? "known_payoff"
+        : "known_no_current_payoff",
+      accessNoveltyRatio: 0,
+      scoreAdjustment: usefulFollowup
+        ? Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, netSavings * 8) -
+          scoreForPayoff("access_bonus")
+        : 0,
+      evidence: [
+        "run_access_replacement:trash_rezzed_ice_on_fort_and_tag_runner",
+        "run_access_replacement_normal_access:false",
+        `fort_ice_trash_rezzed_targets:${rezzedIceCount}`,
+        `fort_ice_trash_one_run_liquid_savings:${oneRunSavings}`,
+        `fort_ice_trash_event_spend:${eventSpend}`,
+        `fort_ice_trash_tags:${tags}`,
+        `fort_ice_trash_basic_cleanup_credits:${cleanupCredits}`,
+        `fort_ice_trash_basic_cleanup_clicks:${tags}`,
+        `fort_ice_trash_credits_after_cleanup:${creditsAfterCleanup}`,
+        `fort_ice_trash_useful_followup:${usefulFollowup}`,
+        ...(followupPayoff
+          ? [`fort_ice_trash_followup_payoff:${followupPayoff.accessPayoff}`]
+          : []),
+      ],
+    };
+  }
   if (replacesAccessWithCreditDenial(params.input, projection)) {
     // This run never accesses HQ. Its visible upper-bound payload must fit
     // both pools after known path costs; future Corp rez can only reduce it.
@@ -2035,6 +2185,7 @@ function quoteRunnerPrerunReserve(params: {
   visibleDuringRunRezSupport: boolean;
   runnerGripCount: number;
   projectedKnownDamage: number;
+  requiredNextEncounterHandBuffer: number;
 }): RunnerPrerunReserveQuote {
   const installedBreakers =
     params.deckCapabilities?.runner?.breakerInventory.filter((breaker) =>
@@ -2116,13 +2267,16 @@ function quoteRunnerPrerunReserve(params: {
     corpRezExposureActive,
     riskCreditBuffer: params.unrezzedIceRiskCreditBuffer,
     runnerGripCount: params.runnerGripCount,
-    requiredAccessHandBuffer: runnerCriticalUnknownAccessRequiredHandFloor(
-      params.input,
-      params.targetServerId,
-      params.accessPayoff === "agenda" ||
-        params.accessPayoff === "score_threat",
-      params.runnerGripCount,
-      params.projectedKnownDamage,
+    requiredAccessHandBuffer: Math.max(
+      params.requiredNextEncounterHandBuffer,
+      runnerCriticalUnknownAccessRequiredHandFloor(
+        params.input,
+        params.targetServerId,
+        params.accessPayoff === "agenda" ||
+          params.accessPayoff === "score_threat",
+        params.runnerGripCount,
+        params.projectedKnownDamage,
+      ),
     ),
     informationProbeAllowed,
     runnerRig: params.input.playerView.own.rig,

@@ -1,5 +1,6 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import { runnerGripDamageReplacementBinding } from "./grip-damage-replacement";
+import { runnerProgramTrashBackupBinding } from "./program-trash-backup";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -339,6 +340,45 @@ export function buildRunnerDefenseSignals(params: {
           fullTagClearFunding.projectedGap === 0)));
   const preserveHandBeforeIncompleteTagClear =
     taggedDamageBufferRequired && !completeTagClearAvailable;
+  const handFloor = damageThreat.flatlineRisk.recommendedHandFloor;
+  const survivalDraw = input.legalActions.find(
+    (action) =>
+      action.type === "draw_card" &&
+      action.source === "basic_action" &&
+      action.side === "runner" &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      confirmedDamageTaxedDrawActionIdSet.has(action.actionId) &&
+      !exactCoverageRecoveryActionIds.has(action.actionId) &&
+      candidates.some(
+        (candidate) =>
+          candidate.actionId === action.actionId &&
+          candidate.semanticActionType === "draw.card" &&
+          candidate.economyProjection?.netHandDelta === 1 &&
+          candidate.economyProjection.clickCost === 1,
+      ),
+  );
+  // The draw tax deepens an existing tag liability here. Funding each
+  // future draw instead would consume the clicks needed for the hand buffer.
+  // Keep the current draw bound to Defense and re-evaluate after observation.
+  const acceptMarginalDrawTaxForSurvival =
+    survivalDraw !== undefined &&
+    preserveHandBeforeIncompleteTagClear &&
+    damageThreat.flatlineRisk.recentResolvedCorpDamageEvents > 0 &&
+    damageThreat.flatlineRisk.activeDamageSourceCount === 0 &&
+    damageThreat.flatlineRisk.activeDamagePayoffCount === 0 &&
+    handSize < handFloor &&
+    handFloor - handSize <=
+      Math.min(input.playerView.own.clicks, input.playerView.own.stackOrRdCount) &&
+    defenseSupportInstallActionIds.length === 0 &&
+    !candidates.some(
+      (candidate) =>
+        !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
+        candidate.economyProjection?.timing === "immediate" &&
+        (candidate.economyProjection.netHandDelta ?? 0) > 0,
+    );
+  if (acceptMarginalDrawTaxForSurvival) {
+    confirmedDamageTaxedDrawActionIdSet.delete(survivalDraw.actionId);
+  }
   const endTurnBuffer = preserveHandBeforeIncompleteTagClear
     ? {
         requiredEndTurnHandBuffer:
@@ -501,7 +541,9 @@ export function buildRunnerDefenseSignals(params: {
       : undefined;
   const gripDamageReplacementBinding =
     runnerGripDamageReplacementBinding(input);
+  const programTrashBackupBinding = runnerProgramTrashBackupBinding(input);
   const defense: RunnerDefenseSignals = {
+    ...(programTrashBackupBinding ? { programTrashBackupBinding } : {}),
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,
     persistentHazardCounterRemovalAvailable,
@@ -544,7 +586,7 @@ export function buildRunnerDefenseSignals(params: {
         );
       })
       .map((candidate) => candidate.actionId),
-    confirmedDamageTaxedDrawActionIds,
+    confirmedDamageTaxedDrawActionIds: [...confirmedDamageTaxedDrawActionIdSet],
     forgoUnsafeRunCapacity,
     forgoExhaustedStandardCapacity,
     forgoTerminalDeckPressureCapacity,

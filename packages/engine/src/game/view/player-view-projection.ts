@@ -12,7 +12,9 @@ import {
   runnerMemoryLimit,
 } from "../../ability-engine/effective-values";
 import { projectInstalledCorpIceRezCost } from "../payment";
+import { isV099OrLater } from "../rules-version";
 import { runJackOutAdditionalCost } from "../run/run-duration-payment";
+import { runnerActiveSuccessfulRunFortIceTrashQuote } from "../turn/runner-fort-ice-trash-quote";
 import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
   agendaPoints,
@@ -34,7 +36,10 @@ import {
   publicRunFollowupOpportunity,
   publicPendingSequenceRunCount,
 } from "./run-followup-opportunity";
-import { visibleTraceBidEffect } from "./visible-trace-bid-effect";
+import {
+  visibleCurrentRunLockBidQuote,
+  visibleTraceBidEffect,
+} from "./visible-trace-bid-effect";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 import { visibleCorpEncounterDefenseQuotes } from "./visible-corp-encounter-defense-quote";
@@ -278,9 +283,15 @@ export function buildPlayerViewProjection(
     runnerSide && approachedIce?.known
       ? projectInstalledCorpIceRezCost(state, approachedIce.instanceId)
       : undefined;
+  const successfulRunFortIceTrashQuote = runnerSide
+    ? runnerActiveSuccessfulRunFortIceTrashQuote(state)
+    : undefined;
   const run = state.run
     ? {
         runId: state.run.runId,
+        ...(successfulRunFortIceTrashQuote
+          ? { successfulRunFortIceTrashQuote }
+          : {}),
         attackedServerId: state.run.attackedServerId,
         ...(state.run.accessServerOverride
           ? { accessServerOverride: state.run.accessServerOverride }
@@ -419,11 +430,16 @@ export function buildPlayerViewProjection(
   const traceRulesProfile = normalizeTraceRulesProfile(state.traceRulesProfile);
   const traceBidsRevealed = trace?.bidsRevealed === true;
   const traceBidEffect = visibleTraceBidEffect(state);
+  const currentRunLockBidQuote =
+    side === "corp" && traceBidEffect === undefined
+      ? visibleCurrentRunLockBidQuote(state, legalActions)
+      : undefined;
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
         sourceCardInstanceId: trace.sourceCardInstanceId,
         ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),
+        ...(currentRunLockBidQuote ? { currentRunLockBidQuote } : {}),
         sourceDefinitionId: trace.sourceDefinitionId,
         profile: normalizeTraceRulesProfile(trace.traceRulesProfile),
         phase: trace.status,
@@ -525,6 +541,9 @@ export function buildPlayerViewProjection(
         ) -
         Number(state.runnerTurnFlags?.forgoNextActionPending === true),
     ),
+    ...(isV099OrLater(state) && state.corp.badPublicity > 0
+      ? { runnerNextRunBadPublicityCredits: state.corp.badPublicity }
+      : {}),
     stateVersion: state.stateVersion,
     turnSerial: Math.max(0, Math.floor(state.turnSerial ?? 0)),
     traceRulesProfile,

@@ -67,6 +67,7 @@ import {
 } from "./run-end-cleanup";
 import {
   availableRunnerRunCredits,
+  bindRunnerBreakerPaymentSupportOpening,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
   restrictedHostedCreditSourceIds,
@@ -322,15 +323,18 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       actions: {
         buildLegalAction: (type, label, source, costs, payload, metadata) =>
-          action(
-            state,
-            "runner",
-            type,
-            label,
-            source,
-            costs,
-            payload,
-            metadata,
+          bindRunnerBreakerPaymentSupportOpening(
+            runDurationPaymentHost(state),
+            action(
+              state,
+              "runner",
+              type,
+              label,
+              source,
+              costs,
+              payload,
+              metadata,
+            ),
           ),
         abilityMetadata: host.effects.abilityMetadata,
       },

@@ -1652,6 +1652,22 @@ function appendGenericAbilityCosts(
   overlay.functionSignals.push("risk.self_trash");
 }
 
+function appendFixedBadPublicityHint(
+  overlay: Pick<GenericTypedHintOverlay, "effects" | "functionSignals">,
+  timing: ReturnType<typeof typedEffectTiming>,
+  amount: number,
+): void {
+  overlay.effects.push({
+    kind: "run_tax",
+    scope: "corp",
+    timing,
+    target: "bad_publicity_pressure",
+    amount,
+    finite: true,
+  });
+  overlay.functionSignals.push("corp.bad_publicity_pressure");
+}
+
 function appendGenericAbilityEffect(
   overlay: GenericTypedHintOverlay,
   entry: PlanningEntry,
@@ -1879,15 +1895,7 @@ function appendGenericAbilityEffect(
       effect.visibility !== "public"
     )
       throw new Error("card_spec_unknown_bad_publicity_gain_shape");
-    overlay.effects.push({
-      kind: "run_tax",
-      scope: "corp",
-      timing,
-      target: "bad_publicity_pressure",
-      amount: effect.amount,
-      finite: true,
-    });
-    overlay.functionSignals.push("corp.bad_publicity_pressure");
+    appendFixedBadPublicityHint(overlay, timing, effect.amount);
   }
   if (effect.kind === "damage") {
     overlay.effects.push({
@@ -3412,18 +3420,26 @@ function deriveClosedMechanicalHintOverlay(
     "trash_installed_runner_connections_then_add_bad_publicity"
   ) {
     if (
+      entry.definition.side !== "runner" ||
+      entry.definition.type !== "event" ||
       runnerEvent.count !== 2 ||
       runnerEvent.badPublicity !== 1 ||
       runnerEvent.visibility !== "hidden_info_barrier"
     )
-      throw new Error("card_spec_unknown_bad_publicity_self_cost_shape");
+      throw new Error(
+        "card_spec_unknown_bad_publicity_connection_sacrifice_shape",
+      );
     overlay.effects.push({
-      kind: "run_tax",
-      scope: "corp",
-      target: "bad_publicity_self_damage_cost",
+      kind: "resource_trash",
+      scope: "installed_card",
       timing: "action",
+      resource: "cards",
+      target: "installed_card_trash_cost",
+      amount: runnerEvent.count,
+      finite: true,
     });
-    overlay.functionSignals.push("corp.bad_publicity_self_damage_cost");
+    overlay.functionSignals.push("risk.trash_own_installed_cards");
+    appendFixedBadPublicityHint(overlay, "action", runnerEvent.badPublicity);
   }
 
   const runnerUtility = engine.runnerUtilityLongtail;

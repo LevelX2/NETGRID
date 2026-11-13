@@ -4,6 +4,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { createAiHintsByCard } from "../ai-hints";
 import { corpVisibleCardPlayCost } from "./corp-tag-punish-payoff-profiles";
 import type { LatestTraceContext } from "./trace-context";
+import { corpCurrentRunAgendaExposure } from "../corp/defense/corp-server-protection-reserve";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -12,6 +13,7 @@ export type CorpTraceBidAssessment = {
   reason:
     | "guaranteed_visible_payoff"
     | "guaranteed_native_trace_payoff"
+    | "guaranteed_current_terminal_run_lock"
     | "no_visible_payoff"
     | "unconvertible_visible_payoff"
     | "unknown_trace_context";
@@ -40,6 +42,17 @@ export function assessCorpTraceBid(params: {
   maxBid: number;
   sourceDefinitionId?: string;
 }): CorpTraceBidAssessment {
+  const terminalRunLockBid = currentTerminalRunLockBid(
+    params.input,
+    params.maxBid,
+  );
+  if (terminalRunLockBid !== undefined) {
+    return {
+      recommendedBid: terminalRunLockBid,
+      reason: "guaranteed_current_terminal_run_lock",
+      minimumGuaranteedBid: terminalRunLockBid,
+    };
+  }
   const runnerLink = params.traceContext.runnerLink;
   if (!Number.isInteger(runnerLink) || typeof runnerLink !== "number") {
     return {
@@ -136,6 +149,70 @@ export function assessCorpTraceBid(params: {
     followupCreditReserve: payoff.cost,
     followupCardId: payoff.card.instanceId,
   };
+}
+
+function currentTerminalRunLockBid(
+  input: AiDecisionInput,
+  maxBid: number,
+): number | undefined {
+  const { playerView: view } = input;
+  const { run, pendingChoice: choice, trace } = view;
+  const quote = trace?.currentRunLockBidQuote;
+  if (
+    input.side !== "corp" ||
+    !trace ||
+    !quote ||
+    !run?.runId ||
+    quote.runId !== run.runId ||
+    quote.stateVersion !== view.stateVersion ||
+    !Number.isSafeInteger(quote.amount) ||
+    quote.amount <= 0 ||
+    quote.amount > maxBid ||
+    quote.amount > view.own.credits ||
+    choice?.choiceId !== quote.choiceId ||
+    choice.stateVersion !== quote.stateVersion ||
+    choice.source !== `trace:${trace.traceId}` ||
+    !choice.options.some(
+      (option) => option.id === quote.optionId && option.value === quote.amount,
+    ) ||
+    !input.legalActions.some(
+      (action) =>
+        action.actionId === quote.actionId &&
+        action.expiresAtStateVersion === quote.stateVersion &&
+        action.choiceRequirements?.some(
+          (requirement) =>
+            requirement.choiceId === quote.choiceId &&
+            requirement.optionIds.includes(quote.optionId),
+        ),
+    )
+  )
+    return undefined;
+  // The one-click lock exhausts the current turn's ordinary run horizon.
+  // Keep the existing reserve for other continuations and credible fallbacks.
+  if (
+    view.own.clicks !== 0 ||
+    run.breach !== undefined ||
+    !Number.isSafeInteger(view.opponent.clicks) ||
+    view.opponent.clicks < 0 ||
+    view.opponent.clicks > 1 ||
+    (run.pendingSequenceRunCount ?? 0) > 0 ||
+    run.followupRunOpportunity !== undefined ||
+    run.attackedServerId !== "hq" ||
+    (run.accessServerOverride !== undefined &&
+      run.accessServerOverride !== "hq") ||
+    run.position?.kind !== "ice" ||
+    run.position.iceIndex !== 0 ||
+    run.encounteredIce?.instanceId !== trace.sourceCardInstanceId ||
+    run.encounteredIce?.effectiveRunQuote?.subroutines.length !== 1 ||
+    view.servers.find((server) => server.id === "hq")?.root.length !== 0
+  )
+    return undefined;
+  const exposure = corpCurrentRunAgendaExposure(input, run.attackedServerId);
+  return exposure &&
+    exposure.maximumPoints >=
+      view.agendaPointsToWin - view.opponent.agendaPoints
+    ? quote.amount
+    : undefined;
 }
 
 function sourceHasNativeTraceSuccessPayoff(

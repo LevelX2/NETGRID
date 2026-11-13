@@ -1,0 +1,2585 @@
+{
+  "paymentInput": {
+    "side": "runner",
+    "matchId": "match_d814beba5ba72ceb",
+    "legalActions": [
+      {
+        "actionId": "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice",
+        "side": "runner",
+        "type": "play_event",
+        "label": "Ohne weiteren Bank-Support fortfahren: Disgruntled Ice Technician auf R&D",
+        "source": "runner_onr_proteus_106_disgruntled-ice-technician_2",
+        "timingPoint": "runner_action.main",
+        "costs": [{ "clicks": 1, "credits": 2 }],
+        "targetRequirements": [],
+        "abilityRef": {
+          "sourceCardInstanceId": "runner_onr_proteus_106_disgruntled-ice-technician_2",
+          "sourceAbilityId": "onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice"
+        },
+        "visibility": "private_to_actor",
+        "expiresAtStateVersion": 151,
+        "payload": {
+          "runnerCostPenaltySupportContinuation": true,
+          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+          "serverId": "rd",
+          "runnerEventRun": true,
+          "cardId": "runner_onr_proteus_106_disgruntled-ice-technician_2",
+          "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+          "cardImplementationAbilityId": "onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice",
+          "cardImplementationAbilityKey": "on_play_run_with_post_pass_derez_fully_broken_ice"
+        }
+      }
+    ],
+    "difficulty": "hard",
+    "seed": "meta-734-round1-009",
+    "decisionId": "ai-sim_match_d814beba5ba72ceb_standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.1.0_standard_standard_corp_cheap_bag_tricks_1.1.0:151:runner",
+    "actionNumber": 151,
+    "profileId": "runner-ai-v0.9-hard",
+    "playerView": {
+      "side": "runner",
+      "stateVersion": 151,
+      "runnerNextTurnCreditClicks": 3,
+      "traceRulesProfile": "modern_open",
+      "turnSerial": 23,
+      "timingPoint": "runner_action.main",
+      "activeSide": "runner",
+      "phase": "runner_action_phase",
+      "own": {
+        "identity": {
+          "instanceId": "runner_runner_identity_001_0",
+          "known": true,
+          "title": "Runner",
+          "definitionId": "runner_identity_001",
+          "type": "identity",
+          "subtypes": [],
+          "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
+          "baseLink": 0,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "owner": "runner",
+          "controller": "runner"
+        },
+        "credits": 10,
+        "clicks": 2,
+        "agendaPoints": 0,
+        "gripOrHq": [
+          {
+            "instanceId": "runner_onr_proteus_125_subliminal-corruption_1",
+            "known": true,
+            "title": "Subliminal Corruption",
+            "definitionId": "onr_proteus_125_subliminal-corruption",
+            "type": "event",
+            "subtypes": ["bad_publicity"],
+            "rulesText": "Make a run. Give the Corp 1 Bad Publicity point for each advertisement you trash during the run. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+            "cost": 2,
+            "playCost": { "kind": "fixed", "credits": 2 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_106_disgruntled-ice-technician_2",
+            "known": true,
+            "title": "Disgruntled Ice Technician",
+            "definitionId": "onr_proteus_106_disgruntled-ice-technician",
+            "type": "event",
+            "subtypes": ["sabotage"],
+            "rulesText": "Make a run. After passing a piece of ice during this run, you may derez that ice and end your run if you broke all the subroutines of that ice.",
+            "cost": 2,
+            "playCost": { "kind": "fixed", "credits": 2 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_109_frame-up_2",
+            "known": true,
+            "title": "Frame-Up",
+            "definitionId": "onr_proteus_109_frame-up",
+            "type": "event",
+            "subtypes": ["bad_publicity"],
+            "rulesText": "Play only if you made a successful run on both HQ and R&D this turn. Give the Corp 1 Bad Publicity point. Give the Corp 1 additional Bad Publicity point if you liberated or trashed any Black Ops cards during those runs. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+            "cost": 2,
+            "playCost": { "kind": "fixed", "credits": 2 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_084_crumble_2",
+            "known": true,
+            "title": "Crumble",
+            "definitionId": "onr_proteus_084_crumble",
+            "type": "program",
+            "subtypes": ["virus"],
+            "rulesText": "After each successful run on HQ, give the Corp a Crumble counter. Two or more Crumble counters allow you trash, at no cost, any cards accessed from HQ, even if the cards cannot normally be trashed. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+            "installCost": 3,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          }
+        ],
+        "stackOrRdCount": 30,
+        "heapOrArchives": [
+          {
+            "instanceId": "runner_onr_proteus_142_hq-mole_1",
+            "known": true,
+            "title": "HQ Mole",
+            "definitionId": "onr_proteus_142_hq-mole",
+            "type": "resource",
+            "subtypes": ["hidden"],
+            "rulesText": "[4], [T]: Access two additional cards from HQ. Use this ability only when accessing cards from HQ. Hidden resources are installed face down, but are put into the trash face up.",
+            "installCost": 0,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_137_death-from-above_1",
+            "known": true,
+            "title": "Death from Above",
+            "definitionId": "onr_proteus_137_death-from-above",
+            "type": "resource",
+            "subtypes": ["hidden", "sabotage"],
+            "rulesText": "[T]: Trash, at no cost, all cards installed in a subsidiary data fort, even if they cannot normally be trashed. Use this ability only when you have just successfully made a run on that fort, and before accessing cards from that fort. Hidden resources are installed face down, but are put into the trash face up.",
+            "installCost": 0,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_108_faked-hit_1",
+            "known": true,
+            "title": "Faked Hit",
+            "definitionId": "onr_proteus_108_faked-hit",
+            "type": "event",
+            "subtypes": ["bad_publicity"],
+            "rulesText": "Give the Corp 1 Bad Publicity point. Take 2 brain damage. This damage cannot be prevented. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+            "cost": 5,
+            "playCost": { "kind": "fixed", "credits": 5 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_v1_108_score_2",
+            "known": true,
+            "title": "Score!",
+            "definitionId": "onr_v1_108_score",
+            "type": "event",
+            "subtypes": [],
+            "rulesText": "Gain [9].",
+            "cost": 5,
+            "playCost": { "kind": "fixed", "credits": 5 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_103_cruising-for-netwatch_2",
+            "known": true,
+            "title": "Cruising for Netwatch",
+            "definitionId": "onr_proteus_103_cruising-for-netwatch",
+            "type": "event",
+            "subtypes": [],
+            "rulesText": "Gain [1] and draw two cards.",
+            "cost": 0,
+            "playCost": { "kind": "fixed", "credits": 0 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_106_disgruntled-ice-technician_1",
+            "known": true,
+            "title": "Disgruntled Ice Technician",
+            "definitionId": "onr_proteus_106_disgruntled-ice-technician",
+            "type": "event",
+            "subtypes": ["sabotage"],
+            "rulesText": "Make a run. After passing a piece of ice during this run, you may derez that ice and end your run if you broke all the subroutines of that ice.",
+            "cost": 2,
+            "playCost": { "kind": "fixed", "credits": 2 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_133_chiba-bank-account_1",
+            "known": true,
+            "title": "Chiba Bank Account",
+            "definitionId": "onr_proteus_133_chiba-bank-account",
+            "type": "resource",
+            "subtypes": ["hidden"],
+            "rulesText": "[1], [T]: Gain [4]. You may use this ability whenever you pay any cost or penalty. Hidden resources are installed face down, but are put into the trash face up.",
+            "installCost": 0,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          }
+        ],
+        "scoreArea": [],
+        "rig": [
+          {
+            "instanceId": "runner_onr_v1_021_dwarf_1",
+            "known": true,
+            "title": "Dwarf",
+            "definitionId": "onr_v1_021_dwarf",
+            "type": "program",
+            "subtypes": ["icebreaker", "worm"],
+            "rulesText": "[1]: Break wall subroutine.\n[1]: +1 strength.",
+            "installCost": 6,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "strength": 3,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_084_crumble_1",
+            "known": true,
+            "title": "Crumble",
+            "definitionId": "onr_proteus_084_crumble",
+            "type": "program",
+            "subtypes": ["virus"],
+            "rulesText": "After each successful run on HQ, give the Corp a Crumble counter. Two or more Crumble counters allow you trash, at no cost, any cards accessed from HQ, even if the cards cannot normally be trashed. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+            "installCost": 3,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_090_highlighter_2",
+            "known": true,
+            "title": "Highlighter",
+            "definitionId": "onr_proteus_090_highlighter",
+            "type": "program",
+            "subtypes": ["virus"],
+            "rulesText": "After each successful run on R&D, give the Corp a Highlighter counter. Each Highlighter counter after the first allows you to access an additional card from R&D whenever you access cards from R&D. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+            "installCost": 3,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_130_back-door-to-rivals_1",
+            "known": true,
+            "title": "Back Door to Rivals",
+            "definitionId": "onr_proteus_130_back-door-to-rivals",
+            "type": "resource",
+            "subtypes": ["base_link"],
+            "rulesText": "[0]: Base link 2. [3]: +1 link. Gain [1] whenever you successfully use Back Door to Rivals to avoid a trace. Use only one base link card for each trace attempt made against you.",
+            "installCost": 2,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_150_streetware-distributor_1",
+            "known": true,
+            "title": "Streetware Distributor",
+            "definitionId": "onr_proteus_150_streetware-distributor",
+            "type": "resource",
+            "subtypes": ["bbs", "position"],
+            "rulesText": "Take [1] from Streetware Distributor, if it has any bits, at the start of each of your turns. A: Put [3] from the bank on Streetware Distributor.",
+            "installCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          }
+        ],
+        "memoryUsed": 3,
+        "memoryLimit": 4,
+        "maxHandSize": 5,
+        "coreDamage": 0,
+        "tags": 0,
+        "freeNetOrCoreDamagePreventionRemaining": 0,
+        "runnerTraceSupportQuote": {
+          "traceCreditPool": 0,
+          "traceCreditSources": [],
+          "baseLinkOptions": [
+            { "baseLink": 0, "activationCost": 0, "safeForAccess": true },
+            {
+              "baseLink": 2,
+              "activationCost": 0,
+              "rewardCreditsOnAvoidTrace": 1,
+              "safeForAccess": true,
+              "sourceDefinitionId": "onr_proteus_130_back-door-to-rivals",
+              "sourceTitle": "Back Door to Rivals"
+            }
+          ],
+          "postBidLinkOptions": [
+            {
+              "sourceCardInstanceId": "runner_onr_proteus_130_back-door-to-rivals_1",
+              "sourceDefinitionId": "onr_proteus_130_back-door-to-rivals",
+              "sourceTitle": "Back Door to Rivals",
+              "linkDelta": 1,
+              "activationCost": 3,
+              "tapSource": false,
+              "trashSource": false,
+              "safeForAccess": true,
+              "useLimit": { "kind": "repeatable_while_legal" },
+              "rewardCreditsOnAvoidTrace": 1
+            }
+          ],
+          "traceSuccessCancelOptions": []
+        },
+        "availableBadPublicityRunCredits": 0
+      },
+      "opponent": {
+        "identity": {
+          "instanceId": "corp_corp_identity_001_0",
+          "known": true,
+          "title": "Korp",
+          "definitionId": "corp_identity_001",
+          "type": "identity",
+          "subtypes": [],
+          "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
+          "rezzed": true,
+          "advancementCounters": 0,
+          "owner": "corp",
+          "controller": "corp"
+        },
+        "credits": 0,
+        "clicks": 0,
+        "agendaPoints": 3,
+        "tags": 0,
+        "handCount": 4,
+        "maxHandSize": 5,
+        "deckCount": 41,
+        "discardCount": 2,
+        "scoreArea": [
+          {
+            "instanceId": "corp_onr_v1_195_corporate-retreat_1",
+            "known": true,
+            "title": "Corporate Retreat",
+            "definitionId": "onr_v1_195_corporate-retreat",
+            "type": "agenda",
+            "subtypes": ["gray_ops"],
+            "rulesText": "You lose the following ability as soon as you rez or install any card. A: Gain [2].",
+            "rezzed": true,
+            "advancementCounters": 0,
+            "advancementRequirement": 4,
+            "agendaPoints": 3,
+            "owner": "corp",
+            "controller": "corp"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "id": "hq",
+          "label": "HQ",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "hq",
+            "stateVersion": 151,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [
+            {
+              "instanceId": "corp_onr_v1_279_wall-of-static_2",
+              "known": true,
+              "title": "Wall of Static",
+              "definitionId": "onr_v1_279_wall-of-static",
+              "type": "ice",
+              "subtypes": ["wall"],
+              "rulesText": "[Subroutine] End the run.",
+              "rezCost": 3,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "strength": 2,
+              "owner": "corp",
+              "controller": "corp",
+              "effectiveRunQuote": {
+                "iceInstanceId": "corp_onr_v1_279_wall-of-static_2",
+                "iceDefinitionId": "onr_v1_279_wall-of-static",
+                "effectiveStrength": 2,
+                "encounterStrength": 2,
+                "subroutines": [
+                  {
+                    "id": "printed_subroutines_end_the_run",
+                    "type": "end_the_run",
+                    "sourceDefinitionId": "onr_v1_279_wall-of-static",
+                    "sourceTitle": "Wall of Static"
+                  }
+                ]
+              }
+            },
+            {
+              "instanceId": "hidden_26c7fac7",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            },
+            {
+              "instanceId": "hidden_bf4789a6",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            }
+          ],
+          "root": [
+            {
+              "instanceId": "corp_onr_v1_367_rio-de-janeiro-city-grid_1",
+              "known": true,
+              "title": "Rio de Janeiro City Grid",
+              "definitionId": "onr_v1_367_rio-de-janeiro-city-grid",
+              "type": "upgrade",
+              "subtypes": ["random", "region"],
+              "rulesText": "Roll a die whenever Runner passes a piece of rezzed ice during a run on this fort. On a 1, end the run.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+              "rezCost": 1,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "trashCost": 6,
+              "owner": "corp",
+              "controller": "corp"
+            }
+          ]
+        },
+        {
+          "id": "rd",
+          "label": "R&D",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "rd",
+            "stateVersion": 151,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [
+            {
+              "instanceId": "hidden_d4a44c12",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            },
+            {
+              "instanceId": "corp_onr_v1_228_cinderella_1",
+              "known": true,
+              "title": "Cinderella",
+              "definitionId": "onr_v1_228_cinderella",
+              "type": "ice",
+              "subtypes": ["ap", "black_ice", "firestarter", "sentry"],
+              "rulesText": "[Subroutine] Trace 6 - If trace is successful, end the run, trash a piece of hardware, and do 2 meat damage. This damage cannot be prevented.",
+              "rezCost": 8,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "strength": 6,
+              "owner": "corp",
+              "controller": "corp",
+              "effectiveRunQuote": {
+                "iceInstanceId": "corp_onr_v1_228_cinderella_1",
+                "iceDefinitionId": "onr_v1_228_cinderella",
+                "effectiveStrength": 6,
+                "encounterStrength": 6,
+                "subroutines": [
+                  {
+                    "id": "printed_subroutines_trace",
+                    "type": "initiate_trace",
+                    "traceLimit": 6,
+                    "traceSuccessEffect": {
+                      "type": "end_run_trash_hardware_and_unpreventable_meat_damage",
+                      "amount": 2
+                    },
+                    "sourceDefinitionId": "onr_v1_228_cinderella",
+                    "sourceTitle": "Cinderella"
+                  }
+                ]
+              }
+            }
+          ],
+          "root": []
+        },
+        {
+          "id": "archives",
+          "label": "Archives",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "archives",
+            "stateVersion": 151,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [],
+          "root": [
+            {
+              "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_1",
+              "known": true,
+              "title": "BBS Whispering Campaign",
+              "definitionId": "onr_v1_309_bbs-whispering-campaign",
+              "type": "asset",
+              "subtypes": ["advertisement"],
+              "rulesText": "Put [16] from the bank on BBS Whispering Campaign when you rez it.  When all the bits have been removed, trash BBS Whispering Campaign. A: Take [2] from BBS Whispering Campaign.",
+              "rezCost": 0,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "trashCost": 4,
+              "owner": "corp",
+              "controller": "corp"
+            },
+            {
+              "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_2",
+              "known": true,
+              "title": "BBS Whispering Campaign",
+              "definitionId": "onr_v1_309_bbs-whispering-campaign",
+              "type": "asset",
+              "subtypes": ["advertisement"],
+              "rulesText": "Put [16] from the bank on BBS Whispering Campaign when you rez it.  When all the bits have been removed, trash BBS Whispering Campaign. A: Take [2] from BBS Whispering Campaign.",
+              "rezCost": 0,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "trashCost": 4,
+              "owner": "corp",
+              "controller": "corp"
+            }
+          ]
+        },
+        {
+          "id": "remote_1",
+          "label": "Remote 1",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "remote_1",
+            "stateVersion": 151,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [
+            {
+              "instanceId": "hidden_4cf3e180",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            },
+            {
+              "instanceId": "corp_onr_v1_271_tko-2-0_1",
+              "known": true,
+              "title": "TKO 2.0",
+              "definitionId": "onr_v1_271_tko-2-0",
+              "type": "ice",
+              "subtypes": ["ap", "knockout", "sentry"],
+              "rulesText": "[Subroutine] End the run, and Runner forgoes his or her next action.",
+              "rezCost": 7,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "strength": 4,
+              "owner": "corp",
+              "controller": "corp",
+              "effectiveRunQuote": {
+                "iceInstanceId": "corp_onr_v1_271_tko-2-0_1",
+                "iceDefinitionId": "onr_v1_271_tko-2-0",
+                "effectiveStrength": 4,
+                "encounterStrength": 4,
+                "subroutines": [
+                  {
+                    "id": "printed_subroutines_end_run_and_runner_forgoes_next_action",
+                    "type": "end_the_run_and_runner_forgoes_next_action",
+                    "breakTags": ["knockout"],
+                    "sourceDefinitionId": "onr_v1_271_tko-2-0",
+                    "sourceTitle": "TKO 2.0",
+                    "unbrokenRunEffect": { "createsRunLockOrActionTax": 1 }
+                  }
+                ]
+              }
+            }
+          ],
+          "root": []
+        },
+        {
+          "id": "remote_2",
+          "label": "Remote 2",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "remote_2",
+            "stateVersion": 151,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [
+            {
+              "instanceId": "hidden_b8d5cc83",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            }
+          ],
+          "root": [
+            {
+              "instanceId": "hidden_5751ef9a",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            }
+          ]
+        }
+      ],
+      "specialZones": {
+        "setAside": [],
+        "removedFromGame": [],
+        "setAsideCount": 0,
+        "removedFromGameCount": 0
+      },
+      "deckMetadata": {
+        "own": {
+          "side": "runner",
+          "identityCardId": "runner_identity_001",
+          "deckName": "Proteus Runner - Hidden Backdoor Sabotage",
+          "cardPoolSnapshotId": "card-snapshot-0.8",
+          "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+          "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+          "formatProfileVersion": "1.0.0",
+          "deckHash": "fnv1a:c8dbd8fd"
+        },
+        "opponent": {
+          "side": "corp",
+          "identityCardId": "corp_identity_001",
+          "deckName": "Cheap Bag of Tricks",
+          "cardPoolSnapshotId": "card-snapshot-0.8",
+          "cardPoolVersion": "private-local-onr-v1",
+          "formatProfileId": "netgrid_private_local_v1",
+          "formatProfileVersion": "1.3.0",
+          "deckHash": "fnv1a:e607eeb3"
+        }
+      },
+      "publicEvents": [],
+      "legalActions": [
+        {
+          "actionId": "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice",
+          "side": "runner",
+          "type": "play_event",
+          "label": "Ohne weiteren Bank-Support fortfahren: Disgruntled Ice Technician auf R&D",
+          "source": "runner_onr_proteus_106_disgruntled-ice-technician_2",
+          "timingPoint": "runner_action.main",
+          "costs": [{ "clicks": 1, "credits": 2 }],
+          "targetRequirements": [],
+          "abilityRef": {
+            "sourceCardInstanceId": "runner_onr_proteus_106_disgruntled-ice-technician_2",
+            "sourceAbilityId": "onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice"
+          },
+          "visibility": "private_to_actor",
+          "expiresAtStateVersion": 151,
+          "payload": {
+            "runnerCostPenaltySupportContinuation": true,
+            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+            "serverId": "rd",
+            "runnerEventRun": true,
+            "cardId": "runner_onr_proteus_106_disgruntled-ice-technician_2",
+            "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
+            "cardImplementationAbilityId": "onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice",
+            "cardImplementationAbilityKey": "on_play_run_with_post_pass_derez_fully_broken_ice"
+          }
+        }
+      ],
+      "winner": null,
+      "agendaPointsToWin": 7
+    },
+    "eventTail": [
+      {
+        "eventId": "evt_146",
+        "type": "install_card",
+        "stateVersionBefore": 145,
+        "stateVersionAfter": 146,
+        "turnSerial": 22,
+        "stateHashAfter": "fnv1a:61220bd9",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "serverId": "remote_2",
+          "serverLabel": "Remote 2",
+          "installPlacement": "ice",
+          "redactedKind": "installed_card",
+          "installedPositionKey": "installed-position-v1:aa4cbcf3",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "Remote 2",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_147",
+        "type": "end_turn",
+        "stateVersionBefore": 146,
+        "stateVersionAfter": 147,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:529e2ac8",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": { "class": "private_to_side" },
+          "resolvedEffects": [
+            {
+              "effectId": "onr_proteus_150_streetware-distributor.runner_onr_proteus_150_streetware-distributor_1.effect.0.take_hosted_credits",
+              "kind": "take_hosted_credits",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 1,
+              "reason": "start_of_turn",
+              "counterType": "bit",
+              "removedCounterAmount": 1,
+              "remainingCounters": 0,
+              "sourceDefinitionId": "onr_proteus_150_streetware-distributor",
+              "sourceTitle": "Streetware Distributor"
+            }
+          ]
+        }
+      },
+      {
+        "eventId": "evt_148",
+        "type": "install_card",
+        "stateVersionBefore": 147,
+        "stateVersionAfter": 148,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:e06a5365",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "Kostenfenster geöffnet.",
+          "title": "Highlighter",
+          "cardDefinitionId": "onr_proteus_090_highlighter",
+          "runnerCostPenaltySupportWindowOpened": true,
+          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+          "runnerCostPenaltySupportOriginalActionId": "runner.install_card.runner_onr_proteus_090_highlighter_2.runner_onr_proteus_090_highlighter_2",
+          "effectKind": "install_card",
+          "visibility": { "class": "public" }
+        }
+      },
+      {
+        "eventId": "evt_149",
+        "type": "install_card",
+        "stateVersionBefore": 148,
+        "stateVersionAfter": 149,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:2c095825",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "Ohne weiteren Bank-Support fortfahren: Highlighter installieren",
+          "title": "Highlighter",
+          "cardDefinitionId": "onr_proteus_090_highlighter",
+          "effectKind": "install_card",
+          "runnerCreditsAfter": 7,
+          "amounts": { "runnerCreditsAfter": 7 },
+          "visibility": { "class": "public" }
+        }
+      },
+      {
+        "eventId": "evt_150",
+        "type": "play_event",
+        "stateVersionBefore": 149,
+        "stateVersionAfter": 150,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:565d6cc0",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Kostenfenster geöffnet.",
+          "title": "Disgruntled Ice Technician",
+          "cardDefinitionId": "onr_proteus_106_disgruntled-ice-technician",
+          "serverLabel": "R&D",
+          "runnerCostPenaltySupportWindowOpened": true,
+          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+          "runnerCostPenaltySupportOriginalActionId": "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice",
+          "targets": { "serverLabel": "R&D" },
+          "visibility": { "class": "public" }
+        }
+      },
+      {
+        "eventId": "evt_151",
+        "type": "activated_card_ability",
+        "stateVersionBefore": 150,
+        "stateVersionAfter": 151,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:9be64ed9",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "activated_card_ability",
+          "label": "Chiba Bank Account: 4 Credits nehmen",
+          "title": "Chiba Bank Account",
+          "cardDefinitionId": "onr_proteus_133_chiba-bank-account",
+          "sourceCardInstanceId": "runner_onr_proteus_133_chiba-bank-account_1",
+          "sourceDefinitionId": "onr_proteus_133_chiba-bank-account",
+          "trashedCardDefinitionId": "onr_proteus_133_chiba-bank-account",
+          "hiddenResourceSlotId": "hidden_runner_resource_d5a0dbd7",
+          "hiddenRunnerResourceRevealed": true,
+          "abilityFamily": "payment-costs",
+          "effectKind": "gain_credits",
+          "amount": 4,
+          "gainedCredits": 4,
+          "gainCreditsAmount": 4,
+          "runnerCreditsAfter": 10,
+          "amounts": {
+            "amount": 4,
+            "gainedCredits": 4,
+            "gainCreditsAmount": 4,
+            "runnerCreditsAfter": 10
+          },
+          "targets": {
+            "sourceDefinitionId": "onr_proteus_133_chiba-bank-account",
+            "trashedCardDefinitionId": "onr_proteus_133_chiba-bank-account"
+          },
+          "visibility": { "class": "public" }
+        }
+      }
+    ]
+  },
+  "previous": {
+    "schemaVersion": "resident-plan-portfolio-v2",
+    "side": "runner",
+    "stateVersion": 150,
+    "instances": [
+      {
+        "instanceId": "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_1",
+        "dedupeKey": "runner_onr_proteus_150_streetware-distributor_1",
+        "moduleId": "runner.credit_bank",
+        "moduleVersion": "1",
+        "side": "runner",
+        "strategyLineIds": [],
+        "executionClass": "development_project",
+        "viability": "blocked",
+        "portfolioRole": "background",
+        "executionState": "idle",
+        "persistencePolicy": "sticky_goal",
+        "retentionPolicy": {
+          "blockedStateVersionTtl": 2,
+          "dormantStateVersionTtl": 2,
+          "completedHistoryStateVersionTtl": 4,
+          "abandonWhenTargetMissing": true,
+          "protectedWhileNeedOpen": true,
+          "protectedWhileCommitted": true
+        },
+        "target": {
+          "kind": "bank",
+          "id": "runner_onr_proteus_150_streetware-distributor_1"
+        },
+        "openNeedIds": [],
+        "phase": "hold",
+        "milestone": "need_open",
+        "moduleState": {
+          "kind": "credit_bank",
+          "phase": "hold",
+          "signal": {
+            "bankId": "runner_onr_proteus_150_streetware-distributor_1",
+            "phase": "hold",
+            "actionIds": [],
+            "rejectedActionIds": [],
+            "priorityClass": "P5",
+            "currentStoredCredits": 0,
+            "portfolioStoredCredits": 0,
+            "estimatedPayout": 0,
+            "value": 0,
+            "evidenceCodes": [
+              "runner_credit_bank_hold_no_current_conversion_need",
+              "runner_credit_bank_automatic_projection_unavailable",
+              "development_cashout_rejected:no_bound_convertible_route",
+              "development_cashout_rejected:no_positive_payout",
+              "capability_source:structured",
+              "bank_source_instance:runner_onr_proteus_150_streetware-distributor_1",
+              "bank_status:installed",
+              "bank_build_legal:false",
+              "bank_cashout_legal:false"
+            ]
+          }
+        },
+        "blockers": [
+          {
+            "code": "no_credit_bank_hold_route",
+            "owner": "plan_module",
+            "removable": true,
+            "resumeCondition": { "code": "compatible_route_available" }
+          }
+        ],
+        "resumeConditions": [{ "code": "compatible_route_available" }],
+        "completionConditions": [{ "code": "need_satisfied" }],
+        "abandonmentConditions": [{ "code": "need_disappeared" }],
+        "resourceClaimIds": [],
+        "acceptedReservationIds": [],
+        "progress": {
+          "status": "not_started",
+          "value": 0,
+          "milestone": "need_open",
+          "reasonCode": "plan_instance_created"
+        },
+        "createdAtStateVersion": 76,
+        "updatedAtStateVersion": 150,
+        "evidenceRefs": [
+          {
+            "code": "runner_credit_bank_hold_no_current_conversion_need",
+            "source": "visible_state"
+          }
+        ]
+      },
+      {
+        "instanceId": "plan:runner.economy:run-support%3Acentral%3Ard",
+        "dedupeKey": "run-support:central:rd",
+        "moduleId": "runner.economy",
+        "moduleVersion": "1",
+        "side": "runner",
+        "strategyLineIds": [],
+        "executionClass": "development_project",
+        "viability": "blocked",
+        "portfolioRole": "background",
+        "executionState": "idle",
+        "persistencePolicy": "sticky_goal",
+        "retentionPolicy": {
+          "blockedStateVersionTtl": 2,
+          "dormantStateVersionTtl": 2,
+          "completedHistoryStateVersionTtl": 4,
+          "abandonWhenTargetMissing": true,
+          "protectedWhileNeedOpen": true,
+          "protectedWhileCommitted": true
+        },
+        "target": { "kind": "capability", "id": "run-support:central:rd" },
+        "parentInstanceId": "plan:runner.pressure_central:central%3Ard",
+        "parentNeedId": "run-support:central:rd",
+        "openNeedIds": [],
+        "phase": "economy",
+        "milestone": "need_open",
+        "moduleState": {
+          "kind": "economy",
+          "need": {
+            "kind": "parent_plan_support",
+            "needId": "run-support:central:rd",
+            "driver": {
+              "kind": "run",
+              "targetId": "rd",
+              "reasonCode": "concrete_funding_gap_admitted"
+            },
+            "targetCredits": 15,
+            "currentCreditsAtRevalidation": 7,
+            "gap": 8,
+            "priorityClass": "P4",
+            "parentPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
+            "revalidation": {
+              "stateVersion": 150,
+              "status": "material_parent_open"
+            },
+            "routeActionIds": [],
+            "routeAssessment": {
+              "stateVersion": 150,
+              "routeId": "run-support:central:rd:uncovered",
+              "status": "uncovered",
+              "reliability": "contingent",
+              "horizon": "same_turn",
+              "projectedGap": 8,
+              "totalClickCost": 0,
+              "evidenceCodes": [
+                "funding_route_count:1",
+                "funding_route_best_status:uncovered",
+                "funding_route_best_id:run-support:central:rd:uncovered",
+                "funding_route_status:uncovered",
+                "funding_route_projected_gap:8",
+                "runner_funding_known_retained_hand_gain:0",
+                "runner_funding_consumer_hand_buffer_preserved:4|required:0"
+              ]
+            },
+            "evidenceCode": "runner_run_support_fund_concrete_gap:rd:concrete_funding_gap_admitted"
+          }
+        },
+        "blockers": [
+          {
+            "code": "no_compatible_credit_route",
+            "owner": "plan_module",
+            "removable": true,
+            "resumeCondition": { "code": "compatible_route_available" }
+          }
+        ],
+        "resumeConditions": [{ "code": "compatible_route_available" }],
+        "completionConditions": [{ "code": "need_satisfied" }],
+        "abandonmentConditions": [{ "code": "need_disappeared" }],
+        "resourceClaimIds": [],
+        "acceptedReservationIds": [],
+        "progress": {
+          "status": "not_started",
+          "value": 0,
+          "milestone": "need_open",
+          "reasonCode": "plan_instance_created"
+        },
+        "createdAtStateVersion": 150,
+        "updatedAtStateVersion": 150,
+        "evidenceRefs": [
+          {
+            "code": "runner_run_support_fund_concrete_gap:rd:concrete_funding_gap_admitted",
+            "source": "visible_state"
+          }
+        ]
+      },
+      {
+        "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+        "dedupeKey": "runner-portfolio-credit-reserve",
+        "moduleId": "runner.economy",
+        "moduleVersion": "1",
+        "side": "runner",
+        "strategyLineIds": [],
+        "executionClass": "development_project",
+        "viability": "ready",
+        "portfolioRole": "foreground",
+        "executionState": "executor",
+        "persistencePolicy": "sticky_goal",
+        "retentionPolicy": {
+          "blockedStateVersionTtl": 2,
+          "dormantStateVersionTtl": 2,
+          "completedHistoryStateVersionTtl": 4,
+          "abandonWhenTargetMissing": true,
+          "protectedWhileNeedOpen": true,
+          "protectedWhileCommitted": true
+        },
+        "target": {
+          "kind": "capability",
+          "id": "runner-portfolio-credit-reserve"
+        },
+        "openNeedIds": [],
+        "phase": "economy",
+        "milestone": "need_open",
+        "moduleState": {
+          "kind": "economy",
+          "need": {
+            "kind": "portfolio_reserve",
+            "needId": "runner-portfolio-credit-reserve",
+            "targetCredits": 10,
+            "currentCreditsAtRevalidation": 7,
+            "gap": 3,
+            "priorityClass": "P6",
+            "revalidation": {
+              "stateVersion": 150,
+              "status": "portfolio_reserve_open"
+            },
+            "routeActionIds": [
+              "runner.activated_card_ability.runner_onr_proteus_133_chiba-bank-account_1.runner_onr_proteus_133_chiba-bank-account_1.activated.onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits"
+            ],
+            "routeAssessment": {
+              "stateVersion": 150,
+              "routeId": "runner-portfolio-credit-reserve:legal_action:runner.activated_card_ability.runner_onr_proteus_133_chiba-bank-account_1.runner_onr_proteus_133_chiba-bank-account_1.activated.onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits",
+              "status": "covered_guaranteed",
+              "reliability": "guaranteed",
+              "horizon": "same_turn",
+              "projectedGap": 0,
+              "totalClickCost": 0,
+              "firstStepActionId": "runner.activated_card_ability.runner_onr_proteus_133_chiba-bank-account_1.runner_onr_proteus_133_chiba-bank-account_1.activated.onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits",
+              "evidenceCodes": [
+                "funding_route_count:1",
+                "funding_route_best_status:covered_guaranteed",
+                "funding_route_best_id:runner-portfolio-credit-reserve:legal_action:runner.activated_card_ability.runner_onr_proteus_133_chiba-bank-account_1.runner_onr_proteus_133_chiba-bank-account_1.activated.onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits",
+                "funding_route_status:covered_guaranteed",
+                "funding_route_reliability:guaranteed",
+                "funding_route_horizon:same_turn",
+                "funding_route_projected_credits:10",
+                "funding_route_projected_general_credits:10",
+                "funding_route_projected_gap:0",
+                "runner_funding_hand_collateral_not_comparable:unquoted_or_adverse_collateral"
+              ]
+            },
+            "evidenceCode": "runner_finite_portfolio_credit_reserve"
+          }
+        },
+        "blockers": [],
+        "resumeConditions": [{ "code": "compatible_route_available" }],
+        "completionConditions": [{ "code": "need_satisfied" }],
+        "abandonmentConditions": [{ "code": "need_disappeared" }],
+        "resourceClaimIds": [],
+        "acceptedReservationIds": [],
+        "progress": {
+          "status": "not_started",
+          "value": 0,
+          "milestone": "need_open",
+          "reasonCode": "plan_instance_created"
+        },
+        "createdAtStateVersion": 149,
+        "updatedAtStateVersion": 150,
+        "evidenceRefs": [
+          {
+            "code": "runner_finite_portfolio_credit_reserve",
+            "source": "visible_state"
+          }
+        ]
+      },
+      {
+        "instanceId": "plan:runner.pressure_central:central%3Ard",
+        "dedupeKey": "central:rd",
+        "moduleId": "runner.pressure_central",
+        "moduleVersion": "1",
+        "side": "runner",
+        "strategyLineIds": ["runner.steal_agendas_default"],
+        "executionClass": "strategic_campaign",
+        "viability": "ready",
+        "portfolioRole": "background",
+        "executionState": "preempted",
+        "persistencePolicy": "sticky_goal",
+        "retentionPolicy": {
+          "blockedStateVersionTtl": 2,
+          "dormantStateVersionTtl": 2,
+          "completedHistoryStateVersionTtl": 4,
+          "abandonWhenTargetMissing": true,
+          "protectedWhileNeedOpen": true,
+          "protectedWhileCommitted": true
+        },
+        "target": { "kind": "server", "id": "rd" },
+        "openNeedIds": ["run-support:central:rd"],
+        "phase": "execute",
+        "milestone": "admitted",
+        "moduleState": {
+          "kind": "central_pressure",
+          "signal": {
+            "pressureId": "central:rd",
+            "serverId": "rd",
+            "purpose": "multiaccess",
+            "strategyLineIds": ["runner.steal_agendas_default"],
+            "priorityClass": "P4",
+            "reachable": false,
+            "marginalValue": 464,
+            "evidenceCode": "runner_run_support_fund_concrete_gap:rd:concrete_funding_gap_admitted",
+            "supportNeedId": "run-support:central:rd",
+            "runActionIds": [
+              "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice"
+            ],
+            "runActionValues": {
+              "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice": 0
+            },
+            "runActionDifferentialPayoffIds": [],
+            "runActionEvidence": {
+              "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice": [
+                "run_route_raw_score:464",
+                "run_route_opportunity_cost:0",
+                "run_route_effective_score:464",
+                "run_route_relative_value:0",
+                "consumable_run_route:true",
+                "consumable_run_route_kind:card_backed_run",
+                "consumable_run_grip_copy_count:1",
+                "consumable_run_hand_at_capacity:false",
+                "consumable_run_base_opportunity_cost:20",
+                "consumable_run_duplicate_relief:0",
+                "consumable_run_hand_capacity_relief:0",
+                "consumable_run_immediate_payoff_relief:20",
+                "consumable_run_opportunity_cost:0",
+                "consumable_run_raw_route_score:464",
+                "consumable_run_effective_route_score:464"
+              ]
+            },
+            "runActionRouteDiagnostics": {
+              "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice": {
+                "rawRouteScore": 464,
+                "opportunityCost": 0,
+                "effectiveRouteScore": 464
+              }
+            },
+            "runActionExclusions": {},
+            "accessCommitment": {
+              "payoff": "access_bonus",
+              "intendedAction": "access",
+              "knownTargetDefinitionIds": [],
+              "trashBudget": "unknown",
+              "evidenceCode": "access_payoff:access_bonus"
+            },
+            "runRiskContract": {
+              "schemaVersion": "runner-run-risk-contract-v1",
+              "serverId": "rd",
+              "observedAtStateVersion": 150,
+              "runCommitment": "probe_only",
+              "unrezzedIceRisk": 0.51,
+              "runnerCreditsAtEntry": 7,
+              "runnerHandCountAtEntry": 4,
+              "visibleDuringRunRezSupport": false,
+              "reserveQuote": {
+                "purpose": "multiaccess",
+                "status": "not_required",
+                "riskTolerance": "standard",
+                "knownPathCost": 3,
+                "creditsAfterKnownPath": 2,
+                "unknownIceCount": 1,
+                "unknownIcePositions": [0],
+                "corpRezCredits": 0,
+                "visibleCoverage": "typed_only",
+                "requiredCredits": 0,
+                "creditGap": 0,
+                "requiredHandBuffer": 0,
+                "handBufferGap": 0,
+                "evidence": [
+                  "prerun_reserve_purpose:multiaccess",
+                  "prerun_reserve_status:not_required",
+                  "prerun_reserve_risk_tolerance:standard",
+                  "prerun_reserve_known_path_cost:3",
+                  "prerun_reserve_credits_after_known_path:2",
+                  "prerun_reserve_unknown_ice_count:1",
+                  "prerun_reserve_unknown_ice_positions:0",
+                  "prerun_reserve_corp_rez_credits:0",
+                  "prerun_reserve_corp_rez_exposure_active:false",
+                  "prerun_reserve_visible_coverage:typed_only",
+                  "prerun_reserve_required_credits:0",
+                  "prerun_reserve_credit_gap:0",
+                  "prerun_reserve_required_hand_buffer:0",
+                  "prerun_reserve_required_access_hand_buffer:0",
+                  "prerun_reserve_hand_buffer_gap:0",
+                  "prerun_reserve_program_exposure_known:true",
+                  "prerun_reserve_program_count:3",
+                  "prerun_reserve_program_install_investment_credits:12",
+                  "prerun_reserve_program_investment_buffer:0"
+                ]
+              },
+              "evidenceCodes": [
+                "runner_run_risk_contract_bound",
+                "runner_run_risk_contract_server:rd",
+                "runner_run_risk_contract_commitment:probe_only",
+                "runner_run_risk_contract_reserve_status:not_required"
+              ]
+            },
+            "sourceDefinitionIds": [
+              "onr_proteus_106_disgruntled-ice-technician"
+            ]
+          }
+        },
+        "blockers": [],
+        "resumeConditions": [{ "code": "route_becomes_available" }],
+        "completionConditions": [{ "code": "purpose_converted" }],
+        "abandonmentConditions": [
+          { "code": "target_invalidated" },
+          { "code": "marginal_value_exhausted" }
+        ],
+        "resourceClaimIds": [],
+        "acceptedReservationIds": [],
+        "progress": {
+          "status": "not_started",
+          "value": 0,
+          "milestone": "admitted",
+          "reasonCode": "plan_instance_created"
+        },
+        "createdAtStateVersion": 147,
+        "updatedAtStateVersion": 150,
+        "evidenceRefs": [
+          {
+            "code": "runner_run_support_fund_concrete_gap:rd:concrete_funding_gap_admitted",
+            "source": "visible_state"
+          }
+        ]
+      },
+      {
+        "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+        "dedupeKey": "coverage:breaker_code_gate",
+        "moduleId": "runner.rig_and_coverage",
+        "moduleVersion": "1",
+        "side": "runner",
+        "strategyLineIds": [],
+        "executionClass": "development_project",
+        "viability": "blocked",
+        "portfolioRole": "background",
+        "executionState": "idle",
+        "persistencePolicy": "sticky_goal",
+        "retentionPolicy": {
+          "blockedStateVersionTtl": 2,
+          "dormantStateVersionTtl": 2,
+          "completedHistoryStateVersionTtl": 4,
+          "abandonWhenTargetMissing": true,
+          "protectedWhileNeedOpen": true,
+          "protectedWhileCommitted": true
+        },
+        "target": { "kind": "capability", "id": "breaker_code_gate" },
+        "openNeedIds": [],
+        "phase": "draw_for_answer",
+        "milestone": "need_open",
+        "moduleState": {
+          "kind": "coverage",
+          "gap": {
+            "gapId": "coverage:breaker_code_gate",
+            "requiredRole": "breaker_code_gate",
+            "priorityClass": "P5",
+            "evidenceCode": "deck_strategy_open_code_gate_coverage",
+            "deckHasAnswer": true,
+            "answerInHand": false,
+            "fundingActionIds": [],
+            "installActionValues": {},
+            "installActionIds": [],
+            "directSearchActionIds": [],
+            "directSearchChoiceBindings": [],
+            "rejectedSearchActionIds": [],
+            "searchEngineSetupActionIds": [],
+            "drawForAnswerActionIds": []
+          },
+          "phase": "draw_for_answer"
+        },
+        "blockers": [
+          {
+            "code": "no_exact_coverage_route",
+            "owner": "plan_module",
+            "removable": true,
+            "resumeCondition": { "code": "compatible_route_available" }
+          }
+        ],
+        "resumeConditions": [{ "code": "compatible_route_available" }],
+        "completionConditions": [{ "code": "need_satisfied" }],
+        "abandonmentConditions": [{ "code": "need_disappeared" }],
+        "resourceClaimIds": [],
+        "acceptedReservationIds": [],
+        "progress": {
+          "status": "not_started",
+          "value": 0,
+          "milestone": "need_open",
+          "reasonCode": "plan_instance_created"
+        },
+        "createdAtStateVersion": 7,
+        "updatedAtStateVersion": 150,
+        "evidenceRefs": [
+          {
+            "code": "deck_strategy_open_code_gate_coverage",
+            "source": "visible_state"
+          }
+        ]
+      },
+      {
+        "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+        "dedupeKey": "coverage:breaker_sentry",
+        "moduleId": "runner.rig_and_coverage",
+        "moduleVersion": "1",
+        "side": "runner",
+        "strategyLineIds": [],
+        "executionClass": "development_project",
+        "viability": "blocked",
+        "portfolioRole": "background",
+        "executionState": "idle",
+        "persistencePolicy": "sticky_goal",
+        "retentionPolicy": {
+          "blockedStateVersionTtl": 2,
+          "dormantStateVersionTtl": 2,
+          "completedHistoryStateVersionTtl": 4,
+          "abandonWhenTargetMissing": true,
+          "protectedWhileNeedOpen": true,
+          "protectedWhileCommitted": true
+        },
+        "target": { "kind": "capability", "id": "breaker_sentry" },
+        "openNeedIds": [],
+        "phase": "draw_for_answer",
+        "milestone": "need_open",
+        "moduleState": {
+          "kind": "coverage",
+          "gap": {
+            "gapId": "coverage:breaker_sentry",
+            "requiredRole": "breaker_sentry",
+            "priorityClass": "P5",
+            "evidenceCode": "deck_strategy_open_sentry_coverage",
+            "deckHasAnswer": true,
+            "answerInHand": false,
+            "fundingActionIds": [],
+            "installActionValues": {},
+            "installActionIds": [],
+            "directSearchActionIds": [],
+            "directSearchChoiceBindings": [],
+            "rejectedSearchActionIds": [],
+            "searchEngineSetupActionIds": [],
+            "drawForAnswerActionIds": []
+          },
+          "phase": "draw_for_answer"
+        },
+        "blockers": [
+          {
+            "code": "no_exact_coverage_route",
+            "owner": "plan_module",
+            "removable": true,
+            "resumeCondition": { "code": "compatible_route_available" }
+          }
+        ],
+        "resumeConditions": [{ "code": "compatible_route_available" }],
+        "completionConditions": [{ "code": "need_satisfied" }],
+        "abandonmentConditions": [{ "code": "need_disappeared" }],
+        "resourceClaimIds": [],
+        "acceptedReservationIds": [],
+        "progress": {
+          "status": "not_started",
+          "value": 0,
+          "milestone": "need_open",
+          "reasonCode": "plan_instance_created"
+        },
+        "createdAtStateVersion": 7,
+        "updatedAtStateVersion": 150,
+        "evidenceRefs": [
+          {
+            "code": "deck_strategy_open_sentry_coverage",
+            "source": "visible_state"
+          }
+        ]
+      }
+    ],
+    "completionHistory": [],
+    "transitions": [
+      {
+        "instanceId": "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_1",
+        "stateVersion": 150,
+        "reason": "retained",
+        "detailCode": "proposal_still_relevant"
+      },
+      {
+        "instanceId": "plan:runner.economy:run-support%3Acentral%3Ard",
+        "stateVersion": 150,
+        "reason": "discovered",
+        "detailCode": "new_proposal"
+      },
+      {
+        "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+        "stateVersion": 150,
+        "reason": "retained",
+        "detailCode": "proposal_still_relevant"
+      },
+      {
+        "instanceId": "plan:runner.pressure_central:central%3Ard",
+        "stateVersion": 150,
+        "reason": "retained",
+        "detailCode": "proposal_still_relevant"
+      },
+      {
+        "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+        "stateVersion": 150,
+        "reason": "retained",
+        "detailCode": "proposal_still_relevant"
+      },
+      {
+        "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+        "stateVersion": 150,
+        "reason": "retained",
+        "detailCode": "proposal_still_relevant"
+      },
+      {
+        "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+        "stateVersion": 150,
+        "reason": "target_disappeared",
+        "detailCode": "proposal_missing_target_contract"
+      },
+      {
+        "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A23",
+        "stateVersion": 150,
+        "reason": "target_disappeared",
+        "detailCode": "proposal_missing_target_contract"
+      },
+      {
+        "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+        "stateVersion": 150,
+        "reason": "target_disappeared",
+        "detailCode": "proposal_missing_target_contract"
+      },
+      {
+        "instanceId": "plan:runner.pressure_central:central%3Ahq",
+        "stateVersion": 150,
+        "reason": "target_disappeared",
+        "detailCode": "proposal_missing_target_contract"
+      },
+      {
+        "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+        "stateVersion": 150,
+        "reason": "preempted_by_higher_class",
+        "fromExecutionState": "idle",
+        "toExecutionState": "executor",
+        "detailCode": "validated_scheduler_selection"
+      },
+      {
+        "instanceId": "plan:runner.pressure_central:central%3Ard",
+        "stateVersion": 150,
+        "reason": "preempted_by_higher_class",
+        "fromExecutionState": "executor",
+        "toExecutionState": "preempted",
+        "detailCode": "scheduler_changed_executor"
+      }
+    ],
+    "turnPlanCommitment": {
+      "schemaVersion": "turn-plan-commitment-v2",
+      "commitmentId": "fnv1a:77adfc99",
+      "sourcePlanId": "fnv1a:333e434e",
+      "sourceLineHash": "fnv1a:50476229",
+      "sequenceRootPlanInstanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+      "side": "runner",
+      "turnKey": "runner:turn:23",
+      "planningRulesFingerprint": "fnv1a:ce3968ab",
+      "runtimeInstanceId": "runner-turn-planner-runtime-v1",
+      "createdAtStateIdentity": {
+        "stateVersion": 150,
+        "sideSafePlanningFingerprint": "fnv1a:46de120c"
+      },
+      "lastValidatedStateIdentity": {
+        "stateVersion": 150,
+        "sideSafePlanningFingerprint": "fnv1a:46de120c"
+      },
+      "phases": [
+        {
+          "phaseId": "fnv1a:ef65c0ed",
+          "root": {
+            "planInstanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+            "moduleId": "runner.economy",
+            "milestoneId": "gain_general_liquid_credits",
+            "provenance": "resident"
+          },
+          "rootAssessmentFingerprint": "fnv1a:bf5835cb",
+          "entryFrameKey": "fnv1a:ec277986",
+          "entryConditions": [],
+          "completionCondition": {
+            "code": "turn_plan_milestone:gain_general_liquid_credits"
+          },
+          "supportLeaves": [],
+          "nodes": [
+            {
+              "nodeId": "fnv1a:32e360fe",
+              "invocation": {
+                "semanticActionType": "economy.gain_credit",
+                "sourceCardInstanceId": "runner_onr_proteus_133_chiba-bank-account_1",
+                "sourceAbilityBinding": {
+                  "kind": "card_spec_capability_key",
+                  "sourceAbilityId": "onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits"
+                },
+                "boundTargets": [],
+                "boundChoices": [],
+                "routeKey": "fnv1a:0f1c8761"
+              },
+              "expectation": {
+                "nodeId": "fnv1a:32e360fe",
+                "actionType": "activated_card_ability",
+                "semanticActionFingerprint": "fnv1a:67df0fcb",
+                "costFingerprint": "fnv1a:a533a523",
+                "targetRequirementFingerprint": "fnv1a:531ed5b6",
+                "choiceRequirementFingerprint": "fnv1a:205cdce0",
+                "payloadFingerprint": "fnv1a:5197faa9",
+                "expectedStateDeltaCodes": [
+                  "engine_action_applied:activated_card_ability"
+                ]
+              }
+            }
+          ],
+          "protectedValueClaimIds": ["fnv1a:b7e7734f"],
+          "transition": { "kind": "projected_plan_discovery_required" }
+        }
+      ],
+      "cursor": { "phaseIndex": 0, "nodeIndex": 0 },
+      "phaseEntry": {
+        "phaseId": "fnv1a:ef65c0ed",
+        "status": "validated",
+        "validatedAtStateVersion": 150,
+        "reasonCode": "initial_phase_entry_validated"
+      },
+      "hardPlanCommitmentIds": [],
+      "campaignIds": [],
+      "quoteIds": [],
+      "valueClaimIds": [],
+      "priorityCoverage": {
+        "requiredObligationIds": [],
+        "satisfiedObligationIds": [],
+        "violatedObligationIds": [],
+        "deferredObligationIds": []
+      },
+      "nextExpectedTransition": {
+        "expectationId": "fnv1a:ece92072",
+        "phaseId": "fnv1a:ef65c0ed",
+        "nodeId": "fnv1a:32e360fe",
+        "routeKey": "fnv1a:0f1c8761",
+        "expectedStateDeltaCodes": [
+          "engine_action_applied:activated_card_ability"
+        ]
+      },
+      "status": "active",
+      "observationClass": "expected_no_material_change"
+    },
+    "turnPlanExecutionLease": {
+      "leaseId": "fnv1a:6d3dad29",
+      "commitmentId": "fnv1a:77adfc99",
+      "sourcePlanId": "fnv1a:333e434e",
+      "phaseId": "fnv1a:ef65c0ed",
+      "nodeId": "fnv1a:32e360fe",
+      "routeKey": "fnv1a:0f1c8761",
+      "stateIdentity": {
+        "stateVersion": 150,
+        "sideSafePlanningFingerprint": "fnv1a:46de120c"
+      },
+      "currentBinding": {
+        "actionId": "runner.activated_card_ability.runner_onr_proteus_133_chiba-bank-account_1.runner_onr_proteus_133_chiba-bank-account_1.activated.onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits",
+        "stateVersion": 150,
+        "semanticActionSetFingerprint": "fnv1a:424a72b4",
+        "invocationKey": "fnv1a:7a76b6ad"
+      },
+      "actionType": "activated_card_ability",
+      "expectationId": "fnv1a:ece92072"
+    },
+    "pendingRunnerCostPenaltySupportOrigin": {
+      "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
+      "executorInstanceId": "plan:runner.pressure_central:central%3Ard",
+      "sourceStepId": "plan:runner.pressure_central:central%3Ard:pressure:rd",
+      "originalActionId": "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice",
+      "selectedAtStateVersion": 149,
+      "windowId": "runner_cost_penalty_support.150"
+    },
+    "rootForegroundInstanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+    "executorInstanceId": "plan:runner.economy:runner-portfolio-credit-reserve"
+  },
+  "traceInput": {
+    "side": "runner",
+    "matchId": "match_d814beba5ba72ceb",
+    "legalActions": [
+      {
+        "actionId": "runner.resolve_choice",
+        "side": "runner",
+        "type": "resolve_choice",
+        "label": "Base-Link-Karte fuer Trace nutzen",
+        "source": "game_rule",
+        "timingPoint": "run.encounter_ice",
+        "costs": [],
+        "targetRequirements": [],
+        "choiceRequirements": [
+          {
+            "choiceId": "run_152.corp_onr_v1_228_cinderella_1.0.trace.base_link.155",
+            "minSelections": 1,
+            "maxSelections": 1,
+            "optionIds": [
+              "pass",
+              "trace_base_link_runner_onr_proteus_130_back-door-to-rivals_1"
+            ]
+          }
+        ],
+        "visibility": "private_to_actor",
+        "expiresAtStateVersion": 155,
+        "payload": {}
+      }
+    ],
+    "difficulty": "hard",
+    "seed": "meta-734-round1-009",
+    "decisionId": "ai-sim_match_d814beba5ba72ceb_standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.1.0_standard_standard_corp_cheap_bag_tricks_1.1.0:155:runner",
+    "actionNumber": 155,
+    "profileId": "runner-ai-v0.9-hard",
+    "playerView": {
+      "side": "runner",
+      "stateVersion": 155,
+      "runnerNextTurnCreditClicks": 3,
+      "traceRulesProfile": "modern_open",
+      "turnSerial": 23,
+      "timingPoint": "run.encounter_ice",
+      "activeSide": "runner",
+      "phase": "run",
+      "trace": {
+        "traceId": "run_152.corp_onr_v1_228_cinderella_1.0.trace",
+        "sourceCardInstanceId": "corp_onr_v1_228_cinderella_1",
+        "sourceDefinitionId": "onr_v1_228_cinderella",
+        "profile": "modern_open",
+        "phase": "base_link",
+        "printedTrace": 6,
+        "effectiveTraceLimit": 6,
+        "bidsRevealed": true,
+        "corpBidCommitted": true,
+        "runnerBidCommitted": false,
+        "visibleOpponentBidCapacity": 0,
+        "corpBid": 0,
+        "corpStrength": 6,
+        "runnerLink": 0
+      },
+      "own": {
+        "identity": {
+          "instanceId": "runner_runner_identity_001_0",
+          "known": true,
+          "title": "Runner",
+          "definitionId": "runner_identity_001",
+          "type": "identity",
+          "subtypes": [],
+          "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
+          "baseLink": 0,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "owner": "runner",
+          "controller": "runner"
+        },
+        "credits": 8,
+        "clicks": 1,
+        "agendaPoints": 0,
+        "gripOrHq": [
+          {
+            "instanceId": "runner_onr_proteus_125_subliminal-corruption_1",
+            "known": true,
+            "title": "Subliminal Corruption",
+            "definitionId": "onr_proteus_125_subliminal-corruption",
+            "type": "event",
+            "subtypes": ["bad_publicity"],
+            "rulesText": "Make a run. Give the Corp 1 Bad Publicity point for each advertisement you trash during the run. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+            "cost": 2,
+            "playCost": { "kind": "fixed", "credits": 2 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_109_frame-up_2",
+            "known": true,
+            "title": "Frame-Up",
+            "definitionId": "onr_proteus_109_frame-up",
+            "type": "event",
+            "subtypes": ["bad_publicity"],
+            "rulesText": "Play only if you made a successful run on both HQ and R&D this turn. Give the Corp 1 Bad Publicity point. Give the Corp 1 additional Bad Publicity point if you liberated or trashed any Black Ops cards during those runs. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+            "cost": 2,
+            "playCost": { "kind": "fixed", "credits": 2 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_084_crumble_2",
+            "known": true,
+            "title": "Crumble",
+            "definitionId": "onr_proteus_084_crumble",
+            "type": "program",
+            "subtypes": ["virus"],
+            "rulesText": "After each successful run on HQ, give the Corp a Crumble counter. Two or more Crumble counters allow you trash, at no cost, any cards accessed from HQ, even if the cards cannot normally be trashed. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+            "installCost": 3,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          }
+        ],
+        "stackOrRdCount": 30,
+        "heapOrArchives": [
+          {
+            "instanceId": "runner_onr_proteus_142_hq-mole_1",
+            "known": true,
+            "title": "HQ Mole",
+            "definitionId": "onr_proteus_142_hq-mole",
+            "type": "resource",
+            "subtypes": ["hidden"],
+            "rulesText": "[4], [T]: Access two additional cards from HQ. Use this ability only when accessing cards from HQ. Hidden resources are installed face down, but are put into the trash face up.",
+            "installCost": 0,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_137_death-from-above_1",
+            "known": true,
+            "title": "Death from Above",
+            "definitionId": "onr_proteus_137_death-from-above",
+            "type": "resource",
+            "subtypes": ["hidden", "sabotage"],
+            "rulesText": "[T]: Trash, at no cost, all cards installed in a subsidiary data fort, even if they cannot normally be trashed. Use this ability only when you have just successfully made a run on that fort, and before accessing cards from that fort. Hidden resources are installed face down, but are put into the trash face up.",
+            "installCost": 0,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_108_faked-hit_1",
+            "known": true,
+            "title": "Faked Hit",
+            "definitionId": "onr_proteus_108_faked-hit",
+            "type": "event",
+            "subtypes": ["bad_publicity"],
+            "rulesText": "Give the Corp 1 Bad Publicity point. Take 2 brain damage. This damage cannot be prevented. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+            "cost": 5,
+            "playCost": { "kind": "fixed", "credits": 5 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_v1_108_score_2",
+            "known": true,
+            "title": "Score!",
+            "definitionId": "onr_v1_108_score",
+            "type": "event",
+            "subtypes": [],
+            "rulesText": "Gain [9].",
+            "cost": 5,
+            "playCost": { "kind": "fixed", "credits": 5 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_103_cruising-for-netwatch_2",
+            "known": true,
+            "title": "Cruising for Netwatch",
+            "definitionId": "onr_proteus_103_cruising-for-netwatch",
+            "type": "event",
+            "subtypes": [],
+            "rulesText": "Gain [1] and draw two cards.",
+            "cost": 0,
+            "playCost": { "kind": "fixed", "credits": 0 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_106_disgruntled-ice-technician_1",
+            "known": true,
+            "title": "Disgruntled Ice Technician",
+            "definitionId": "onr_proteus_106_disgruntled-ice-technician",
+            "type": "event",
+            "subtypes": ["sabotage"],
+            "rulesText": "Make a run. After passing a piece of ice during this run, you may derez that ice and end your run if you broke all the subroutines of that ice.",
+            "cost": 2,
+            "playCost": { "kind": "fixed", "credits": 2 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_133_chiba-bank-account_1",
+            "known": true,
+            "title": "Chiba Bank Account",
+            "definitionId": "onr_proteus_133_chiba-bank-account",
+            "type": "resource",
+            "subtypes": ["hidden"],
+            "rulesText": "[1], [T]: Gain [4]. You may use this ability whenever you pay any cost or penalty. Hidden resources are installed face down, but are put into the trash face up.",
+            "installCost": 0,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_106_disgruntled-ice-technician_2",
+            "known": true,
+            "title": "Disgruntled Ice Technician",
+            "definitionId": "onr_proteus_106_disgruntled-ice-technician",
+            "type": "event",
+            "subtypes": ["sabotage"],
+            "rulesText": "Make a run. After passing a piece of ice during this run, you may derez that ice and end your run if you broke all the subroutines of that ice.",
+            "cost": 2,
+            "playCost": { "kind": "fixed", "credits": 2 },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          }
+        ],
+        "scoreArea": [],
+        "rig": [
+          {
+            "instanceId": "runner_onr_v1_021_dwarf_1",
+            "known": true,
+            "title": "Dwarf",
+            "definitionId": "onr_v1_021_dwarf",
+            "type": "program",
+            "subtypes": ["icebreaker", "worm"],
+            "rulesText": "[1]: Break wall subroutine.\n[1]: +1 strength.",
+            "installCost": 6,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "strength": 3,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_084_crumble_1",
+            "known": true,
+            "title": "Crumble",
+            "definitionId": "onr_proteus_084_crumble",
+            "type": "program",
+            "subtypes": ["virus"],
+            "rulesText": "After each successful run on HQ, give the Corp a Crumble counter. Two or more Crumble counters allow you trash, at no cost, any cards accessed from HQ, even if the cards cannot normally be trashed. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+            "installCost": 3,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_090_highlighter_2",
+            "known": true,
+            "title": "Highlighter",
+            "definitionId": "onr_proteus_090_highlighter",
+            "type": "program",
+            "subtypes": ["virus"],
+            "rulesText": "After each successful run on R&D, give the Corp a Highlighter counter. Each Highlighter counter after the first allows you to access an additional card from R&D whenever you access cards from R&D. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+            "installCost": 3,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_130_back-door-to-rivals_1",
+            "known": true,
+            "title": "Back Door to Rivals",
+            "definitionId": "onr_proteus_130_back-door-to-rivals",
+            "type": "resource",
+            "subtypes": ["base_link"],
+            "rulesText": "[0]: Base link 2. [3]: +1 link. Gain [1] whenever you successfully use Back Door to Rivals to avoid a trace. Use only one base link card for each trace attempt made against you.",
+            "installCost": 2,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_proteus_150_streetware-distributor_1",
+            "known": true,
+            "title": "Streetware Distributor",
+            "definitionId": "onr_proteus_150_streetware-distributor",
+            "type": "resource",
+            "subtypes": ["bbs", "position"],
+            "rulesText": "Take [1] from Streetware Distributor, if it has any bits, at the start of each of your turns. A: Put [3] from the bank on Streetware Distributor.",
+            "installCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          }
+        ],
+        "memoryUsed": 3,
+        "memoryLimit": 4,
+        "maxHandSize": 5,
+        "coreDamage": 0,
+        "tags": 0,
+        "freeNetOrCoreDamagePreventionRemaining": 0,
+        "runnerTraceSupportQuote": {
+          "traceCreditPool": 0,
+          "traceCreditSources": [],
+          "baseLinkOptions": [
+            { "baseLink": 0, "activationCost": 0, "safeForAccess": true },
+            {
+              "baseLink": 2,
+              "activationCost": 0,
+              "rewardCreditsOnAvoidTrace": 1,
+              "safeForAccess": true,
+              "sourceDefinitionId": "onr_proteus_130_back-door-to-rivals",
+              "sourceTitle": "Back Door to Rivals"
+            }
+          ],
+          "postBidLinkOptions": [
+            {
+              "sourceCardInstanceId": "runner_onr_proteus_130_back-door-to-rivals_1",
+              "sourceDefinitionId": "onr_proteus_130_back-door-to-rivals",
+              "sourceTitle": "Back Door to Rivals",
+              "linkDelta": 1,
+              "activationCost": 3,
+              "tapSource": false,
+              "trashSource": false,
+              "safeForAccess": true,
+              "useLimit": { "kind": "repeatable_while_legal" },
+              "rewardCreditsOnAvoidTrace": 1
+            }
+          ],
+          "traceSuccessCancelOptions": []
+        },
+        "availableBadPublicityRunCredits": 0
+      },
+      "opponent": {
+        "identity": {
+          "instanceId": "corp_corp_identity_001_0",
+          "known": true,
+          "title": "Korp",
+          "definitionId": "corp_identity_001",
+          "type": "identity",
+          "subtypes": [],
+          "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
+          "rezzed": true,
+          "advancementCounters": 0,
+          "owner": "corp",
+          "controller": "corp"
+        },
+        "credits": 0,
+        "clicks": 0,
+        "agendaPoints": 3,
+        "tags": 0,
+        "handCount": 4,
+        "maxHandSize": 5,
+        "deckCount": 41,
+        "discardCount": 2,
+        "scoreArea": [
+          {
+            "instanceId": "corp_onr_v1_195_corporate-retreat_1",
+            "known": true,
+            "title": "Corporate Retreat",
+            "definitionId": "onr_v1_195_corporate-retreat",
+            "type": "agenda",
+            "subtypes": ["gray_ops"],
+            "rulesText": "You lose the following ability as soon as you rez or install any card. A: Gain [2].",
+            "rezzed": true,
+            "advancementCounters": 0,
+            "advancementRequirement": 4,
+            "agendaPoints": 3,
+            "owner": "corp",
+            "controller": "corp"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "id": "hq",
+          "label": "HQ",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "hq",
+            "stateVersion": 155,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [
+            {
+              "instanceId": "corp_onr_v1_279_wall-of-static_2",
+              "known": true,
+              "title": "Wall of Static",
+              "definitionId": "onr_v1_279_wall-of-static",
+              "type": "ice",
+              "subtypes": ["wall"],
+              "rulesText": "[Subroutine] End the run.",
+              "rezCost": 3,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "strength": 2,
+              "owner": "corp",
+              "controller": "corp",
+              "effectiveRunQuote": {
+                "iceInstanceId": "corp_onr_v1_279_wall-of-static_2",
+                "iceDefinitionId": "onr_v1_279_wall-of-static",
+                "effectiveStrength": 2,
+                "encounterStrength": 2,
+                "subroutines": [
+                  {
+                    "id": "printed_subroutines_end_the_run",
+                    "type": "end_the_run",
+                    "sourceDefinitionId": "onr_v1_279_wall-of-static",
+                    "sourceTitle": "Wall of Static"
+                  }
+                ]
+              }
+            },
+            {
+              "instanceId": "hidden_26c7fac7",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            },
+            {
+              "instanceId": "hidden_bf4789a6",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            }
+          ],
+          "root": [
+            {
+              "instanceId": "corp_onr_v1_367_rio-de-janeiro-city-grid_1",
+              "known": true,
+              "title": "Rio de Janeiro City Grid",
+              "definitionId": "onr_v1_367_rio-de-janeiro-city-grid",
+              "type": "upgrade",
+              "subtypes": ["random", "region"],
+              "rulesText": "Roll a die whenever Runner passes a piece of rezzed ice during a run on this fort. On a 1, end the run.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+              "rezCost": 1,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "trashCost": 6,
+              "owner": "corp",
+              "controller": "corp"
+            }
+          ]
+        },
+        {
+          "id": "rd",
+          "label": "R&D",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "rd",
+            "stateVersion": 155,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [
+            {
+              "instanceId": "hidden_d4a44c12",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            },
+            {
+              "instanceId": "corp_onr_v1_228_cinderella_1",
+              "known": true,
+              "title": "Cinderella",
+              "definitionId": "onr_v1_228_cinderella",
+              "type": "ice",
+              "subtypes": ["ap", "black_ice", "firestarter", "sentry"],
+              "rulesText": "[Subroutine] Trace 6 - If trace is successful, end the run, trash a piece of hardware, and do 2 meat damage. This damage cannot be prevented.",
+              "rezCost": 8,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "strength": 6,
+              "owner": "corp",
+              "controller": "corp",
+              "effectiveRunQuote": {
+                "iceInstanceId": "corp_onr_v1_228_cinderella_1",
+                "iceDefinitionId": "onr_v1_228_cinderella",
+                "effectiveStrength": 6,
+                "encounterStrength": 6,
+                "subroutines": [
+                  {
+                    "id": "printed_subroutines_trace",
+                    "type": "initiate_trace",
+                    "traceLimit": 6,
+                    "traceSuccessEffect": {
+                      "type": "end_run_trash_hardware_and_unpreventable_meat_damage",
+                      "amount": 2
+                    },
+                    "sourceDefinitionId": "onr_v1_228_cinderella",
+                    "sourceTitle": "Cinderella"
+                  }
+                ]
+              }
+            }
+          ],
+          "root": []
+        },
+        {
+          "id": "archives",
+          "label": "Archives",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "archives",
+            "stateVersion": 155,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [],
+          "root": [
+            {
+              "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_1",
+              "known": true,
+              "title": "BBS Whispering Campaign",
+              "definitionId": "onr_v1_309_bbs-whispering-campaign",
+              "type": "asset",
+              "subtypes": ["advertisement"],
+              "rulesText": "Put [16] from the bank on BBS Whispering Campaign when you rez it.  When all the bits have been removed, trash BBS Whispering Campaign. A: Take [2] from BBS Whispering Campaign.",
+              "rezCost": 0,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "trashCost": 4,
+              "owner": "corp",
+              "controller": "corp"
+            },
+            {
+              "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_2",
+              "known": true,
+              "title": "BBS Whispering Campaign",
+              "definitionId": "onr_v1_309_bbs-whispering-campaign",
+              "type": "asset",
+              "subtypes": ["advertisement"],
+              "rulesText": "Put [16] from the bank on BBS Whispering Campaign when you rez it.  When all the bits have been removed, trash BBS Whispering Campaign. A: Take [2] from BBS Whispering Campaign.",
+              "rezCost": 0,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "trashCost": 4,
+              "owner": "corp",
+              "controller": "corp"
+            }
+          ]
+        },
+        {
+          "id": "remote_1",
+          "label": "Remote 1",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "remote_1",
+            "stateVersion": 155,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [
+            {
+              "instanceId": "hidden_4cf3e180",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            },
+            {
+              "instanceId": "corp_onr_v1_271_tko-2-0_1",
+              "known": true,
+              "title": "TKO 2.0",
+              "definitionId": "onr_v1_271_tko-2-0",
+              "type": "ice",
+              "subtypes": ["ap", "knockout", "sentry"],
+              "rulesText": "[Subroutine] End the run, and Runner forgoes his or her next action.",
+              "rezCost": 7,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "strength": 4,
+              "owner": "corp",
+              "controller": "corp",
+              "effectiveRunQuote": {
+                "iceInstanceId": "corp_onr_v1_271_tko-2-0_1",
+                "iceDefinitionId": "onr_v1_271_tko-2-0",
+                "effectiveStrength": 4,
+                "encounterStrength": 4,
+                "subroutines": [
+                  {
+                    "id": "printed_subroutines_end_run_and_runner_forgoes_next_action",
+                    "type": "end_the_run_and_runner_forgoes_next_action",
+                    "breakTags": ["knockout"],
+                    "sourceDefinitionId": "onr_v1_271_tko-2-0",
+                    "sourceTitle": "TKO 2.0",
+                    "unbrokenRunEffect": { "createsRunLockOrActionTax": 1 }
+                  }
+                ]
+              }
+            }
+          ],
+          "root": []
+        },
+        {
+          "id": "remote_2",
+          "label": "Remote 2",
+          "runnerAgendaStealCostQuote": {
+            "serverId": "remote_2",
+            "stateVersion": 155,
+            "minimumCreditCost": 0,
+            "complete": true
+          },
+          "ice": [
+            {
+              "instanceId": "hidden_b8d5cc83",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            }
+          ],
+          "root": [
+            {
+              "instanceId": "hidden_5751ef9a",
+              "known": false,
+              "rezzed": false,
+              "advancementCounters": 0
+            }
+          ]
+        }
+      ],
+      "specialZones": {
+        "setAside": [],
+        "removedFromGame": [],
+        "setAsideCount": 0,
+        "removedFromGameCount": 0
+      },
+      "run": {
+        "runId": "run_152",
+        "attackedServerId": "rd",
+        "phase": "encounter_ice",
+        "position": { "kind": "ice", "serverId": "rd", "iceIndex": 1 },
+        "encounteredIce": {
+          "instanceId": "corp_onr_v1_228_cinderella_1",
+          "known": true,
+          "title": "Cinderella",
+          "definitionId": "onr_v1_228_cinderella",
+          "type": "ice",
+          "subtypes": ["ap", "black_ice", "firestarter", "sentry"],
+          "rulesText": "[Subroutine] Trace 6 - If trace is successful, end the run, trash a piece of hardware, and do 2 meat damage. This damage cannot be prevented.",
+          "rezCost": 8,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strength": 6,
+          "owner": "corp",
+          "controller": "corp",
+          "effectiveRunQuote": {
+            "iceInstanceId": "corp_onr_v1_228_cinderella_1",
+            "iceDefinitionId": "onr_v1_228_cinderella",
+            "effectiveStrength": 6,
+            "encounterStrength": 6,
+            "subroutines": [
+              {
+                "id": "printed_subroutines_trace",
+                "type": "initiate_trace",
+                "traceLimit": 6,
+                "traceSuccessEffect": {
+                  "type": "end_run_trash_hardware_and_unpreventable_meat_damage",
+                  "amount": 2
+                },
+                "sourceDefinitionId": "onr_v1_228_cinderella",
+                "sourceTitle": "Cinderella"
+              }
+            ]
+          }
+        },
+        "badPublicityCredits": 0,
+        "afterEncounterJackOut": { "locked": false, "additionalCost": 0 },
+        "successful": false
+      },
+      "deckMetadata": {
+        "own": {
+          "side": "runner",
+          "identityCardId": "runner_identity_001",
+          "deckName": "Proteus Runner - Hidden Backdoor Sabotage",
+          "cardPoolSnapshotId": "card-snapshot-0.8",
+          "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+          "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+          "formatProfileVersion": "1.0.0",
+          "deckHash": "fnv1a:c8dbd8fd"
+        },
+        "opponent": {
+          "side": "corp",
+          "identityCardId": "corp_identity_001",
+          "deckName": "Cheap Bag of Tricks",
+          "cardPoolSnapshotId": "card-snapshot-0.8",
+          "cardPoolVersion": "private-local-onr-v1",
+          "formatProfileId": "netgrid_private_local_v1",
+          "formatProfileVersion": "1.3.0",
+          "deckHash": "fnv1a:e607eeb3"
+        }
+      },
+      "pendingChoice": {
+        "choiceId": "run_152.corp_onr_v1_228_cinderella_1.0.trace.base_link.155",
+        "side": "runner",
+        "source": "trace_base_link:run_152.corp_onr_v1_228_cinderella_1.0.trace",
+        "prompt": "Base-Link-Karte fuer Trace nutzen",
+        "kind": "select_option",
+        "options": [
+          { "id": "pass", "label": "Keine Base-Link-Karte nutzen" },
+          {
+            "id": "trace_base_link_runner_onr_proteus_130_back-door-to-rivals_1",
+            "label": "Back Door to Rivals: Base Link 2",
+            "publicLabel": "Base Link",
+            "value": "runner_onr_proteus_130_back-door-to-rivals_1"
+          }
+        ],
+        "minSelections": 1,
+        "maxSelections": 1,
+        "stateVersion": 155,
+        "visibility": "public"
+      },
+      "publicEvents": [],
+      "legalActions": [
+        {
+          "actionId": "runner.resolve_choice",
+          "side": "runner",
+          "type": "resolve_choice",
+          "label": "Base-Link-Karte fuer Trace nutzen",
+          "source": "game_rule",
+          "timingPoint": "run.encounter_ice",
+          "costs": [],
+          "targetRequirements": [],
+          "choiceRequirements": [
+            {
+              "choiceId": "run_152.corp_onr_v1_228_cinderella_1.0.trace.base_link.155",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "optionIds": [
+                "pass",
+                "trace_base_link_runner_onr_proteus_130_back-door-to-rivals_1"
+              ]
+            }
+          ],
+          "visibility": "private_to_actor",
+          "expiresAtStateVersion": 155,
+          "payload": {}
+        }
+      ],
+      "winner": null,
+      "agendaPointsToWin": 7
+    },
+    "eventTail": [
+      {
+        "eventId": "evt_150",
+        "type": "play_event",
+        "stateVersionBefore": 149,
+        "stateVersionAfter": 150,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:565d6cc0",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Kostenfenster geöffnet.",
+          "title": "Disgruntled Ice Technician",
+          "cardDefinitionId": "onr_proteus_106_disgruntled-ice-technician",
+          "serverLabel": "R&D",
+          "runnerCostPenaltySupportWindowOpened": true,
+          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+          "runnerCostPenaltySupportOriginalActionId": "runner.play_event.runner_onr_proteus_106_disgruntled-ice-technician_2.rd.runner_onr_proteus_106_disgruntled-ice-technician_2.onr_proteus_106_disgruntled-ice-technician:on_play_run_with_post_pass_derez_fully_broken_ice",
+          "targets": { "serverLabel": "R&D" },
+          "visibility": { "class": "public" }
+        }
+      },
+      {
+        "eventId": "evt_151",
+        "type": "activated_card_ability",
+        "stateVersionBefore": 150,
+        "stateVersionAfter": 151,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:9be64ed9",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "activated_card_ability",
+          "label": "Chiba Bank Account: 4 Credits nehmen",
+          "title": "Chiba Bank Account",
+          "cardDefinitionId": "onr_proteus_133_chiba-bank-account",
+          "sourceCardInstanceId": "runner_onr_proteus_133_chiba-bank-account_1",
+          "sourceDefinitionId": "onr_proteus_133_chiba-bank-account",
+          "trashedCardDefinitionId": "onr_proteus_133_chiba-bank-account",
+          "hiddenResourceSlotId": "hidden_runner_resource_d5a0dbd7",
+          "hiddenRunnerResourceRevealed": true,
+          "abilityFamily": "payment-costs",
+          "effectKind": "gain_credits",
+          "amount": 4,
+          "gainedCredits": 4,
+          "gainCreditsAmount": 4,
+          "runnerCreditsAfter": 10,
+          "amounts": {
+            "amount": 4,
+            "gainedCredits": 4,
+            "gainCreditsAmount": 4,
+            "runnerCreditsAfter": 10
+          },
+          "targets": {
+            "sourceDefinitionId": "onr_proteus_133_chiba-bank-account",
+            "trashedCardDefinitionId": "onr_proteus_133_chiba-bank-account"
+          },
+          "visibility": { "class": "public" }
+        }
+      },
+      {
+        "eventId": "evt_152",
+        "type": "play_event",
+        "stateVersionBefore": 151,
+        "stateVersionAfter": 152,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:21b8ad91",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Ohne weiteren Bank-Support fortfahren: Disgruntled Ice Technician auf R&D",
+          "title": "Disgruntled Ice Technician",
+          "cardDefinitionId": "onr_proteus_106_disgruntled-ice-technician",
+          "serverId": "rd",
+          "serverLabel": "R&D",
+          "baseAccessCount": 1,
+          "installedAccessBonus": 0,
+          "effectiveAccessCount": 1,
+          "abilityFamily": "run-access",
+          "effectKind": "run",
+          "damageResolved": true,
+          "damageAmount": 0,
+          "runnerCreditsAfter": 8,
+          "amounts": { "damageAmount": 0, "runnerCreditsAfter": 8 },
+          "targets": { "serverLabel": "R&D" },
+          "visibility": { "class": "hidden_info_barrier" },
+          "resolvedEffects": [
+            {
+              "effectId": "run_152.start",
+              "kind": "start_run",
+              "visibility": "public",
+              "side": "runner",
+              "runId": "run_152",
+              "accessServerId": "rd",
+              "serverId": "rd"
+            }
+          ]
+        }
+      },
+      {
+        "eventId": "evt_153",
+        "type": "decline_rez",
+        "stateVersionBefore": 152,
+        "stateVersionAfter": 153,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:fc1c4f77",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "decline_rez",
+          "label": "Keine weitere Karte rezzen / Begegnung beginnen",
+          "visibility": { "class": "public" }
+        }
+      },
+      {
+        "eventId": "evt_154",
+        "type": "continue_run",
+        "stateVersionBefore": 153,
+        "stateVersionAfter": 154,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:333412b1",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "result": "continued",
+          "encounterContinue": true,
+          "encounterWillEndRun": false,
+          "actor": "runner",
+          "actionType": "continue_run",
+          "label": "Subroutinen auslösen",
+          "sourceDefinitionId": "onr_v1_228_cinderella",
+          "serverId": "rd",
+          "serverLabel": "R&D",
+          "abilityFamily": "run-access",
+          "effectKind": "trace",
+          "traceStarted": true,
+          "traceId": "run_152.corp_onr_v1_228_cinderella_1.0.trace",
+          "traceLimit": 6,
+          "effectiveTraceLimit": 6,
+          "targets": {
+            "sourceDefinitionId": "onr_v1_228_cinderella",
+            "serverLabel": "R&D"
+          },
+          "visibility": { "class": "public" },
+          "resolvedEffects": [
+            {
+              "effectId": "subroutine_1",
+              "kind": "resolve_subroutine",
+              "visibility": "public",
+              "side": "runner",
+              "reason": "ice_subroutine",
+              "sourceDefinitionId": "onr_v1_228_cinderella",
+              "sourceTitle": "Cinderella"
+            }
+          ]
+        }
+      },
+      {
+        "eventId": "evt_155",
+        "type": "resolve_choice",
+        "stateVersionBefore": 154,
+        "stateVersionAfter": 155,
+        "turnSerial": 23,
+        "stateHashAfter": "fnv1a:fed6f12a",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "resolve_choice",
+          "label": "Choice wurde beantwortet.",
+          "sourceDefinitionId": "onr_v1_228_cinderella",
+          "abilityFamily": "trace-tags",
+          "effectKind": "trace",
+          "traceId": "run_152.corp_onr_v1_228_cinderella_1.0.trace",
+          "choiceId": "run_152.corp_onr_v1_228_cinderella_1.0.trace.corp.bid.154",
+          "traceStep": "corp_bid",
+          "corpBid": 0,
+          "traceLimit": 6,
+          "effectiveTraceLimit": 6,
+          "traceValue": 6,
+          "runnerLink": 0,
+          "targets": {
+            "sourceDefinitionId": "onr_v1_228_cinderella",
+            "choiceVisibility": "public"
+          },
+          "visibility": { "class": "public" }
+        }
+      }
+    ]
+  }
+}

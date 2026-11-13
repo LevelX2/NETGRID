@@ -49,6 +49,10 @@ azyklischer interner Implementierungsschnitt.
 - `revealAccessedCard` ist der einzige gemeinsame Übergang, der die konkret
   zugegriffene Karte aufdeckt. Queue-Aufbau und Navigation bleiben davor
   side-sicher.
+- Freiwillige Fähigkeiten aus dem erfolgreichen Run-Fenster stehen vor dem
+  ersten Zugriff neben der regulären Zugriffsaktion. Bei leerer Breach-Queue
+  bleibt der reguläre Abschluss möglich. Nach Beginn des Zugriffs schließen
+  sich diese Vorzugriffsoptionen für den laufenden Breach.
 - HQ-Auswahl bleibt Seed-/RandomCounter-gesteuert; die Modultrennung erzeugt
   keinen zusätzlichen Zufallszug und verändert keine Zieh-Reihenfolge.
 - Steal-, Trash- und Install-Aktionen revalidieren Zustand, Kosten und Choices

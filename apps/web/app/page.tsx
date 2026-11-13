@@ -448,6 +448,7 @@ import {
   localActionSoundKey,
   localActionSoundKind,
   publicEventsAfter,
+  resourceEffectSounds,
 } from "../features/actions/local-action-sounds";
 import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
@@ -3924,6 +3925,8 @@ export default function Page() {
     if (!audioEnabled || newEvents.length === 0) return;
     const overlayEventIds = new Set(cues.map((cue) => cue.eventId));
     for (const event of newEvents) {
+      for (const cue of resourceEffectSounds(event))
+        playActionCueSound(cue.sound, audioVolume, cue.soundCount);
       const damageAudioCue = damageAudioCueFromPublicPayload(
         event.publicPayload,
       );

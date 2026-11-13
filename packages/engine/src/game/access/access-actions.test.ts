@@ -254,6 +254,7 @@ describe("access action generation", () => {
 
   it("keeps normal R&D access legal when Armageddon offers its optional replacement", () => {
     const host = makeHost({ serverId: "rd" });
+    host.state.corp.rd = ["asset"];
     host.callbacks.successfulRunProgramActions = () => [
       buildLegalAction(
         host.state,
@@ -287,6 +288,40 @@ describe("access action generation", () => {
         source: "game_rule",
       },
     ]);
+  });
+
+  it("offers ordinary access beside an optional remote trash and closes the trigger after access", () => {
+    const beforeAccess = makeHost({ cardType: "agenda" });
+    const afterAccess = makeHost({ accessedCardId: "asset", cardType: "agenda" });
+    beforeAccess.callbacks.successfulRunProgramActions = () => [
+      buildLegalAction(
+        beforeAccess.state,
+        "runner",
+        "trigger_ability",
+        "Remote-Fort trashen",
+        "remote-trash-resource",
+        [],
+        {
+          cardImplementationPrimitiveKind: "successful_run_before_access_effect",
+          cardImplementationEffectKind: "trash_remote_fort",
+        },
+      ),
+    ];
+    afterAccess.callbacks.successfulRunProgramActions = () => {
+      throw new Error("before-access ability reopened during access");
+    };
+
+    expect(
+      buildRunnerAccessActions(beforeAccess).legalActions.map((action) => action.type),
+    ).toEqual(["trigger_ability", "access_card"]);
+    expect(
+      buildRunnerAccessActions(afterAccess).legalActions.map((action) => action.type),
+    ).toEqual(["steal_agenda"]);
+
+    beforeAccess.state.corp.servers[0]!.root = [];
+    expect(
+      buildRunnerAccessActions(beforeAccess).legalActions.map((action) => action.type),
+    ).toEqual(["trigger_ability", "continue_run"]);
   });
 
   it("builds stable steal actions only for accessed agendas", () => {

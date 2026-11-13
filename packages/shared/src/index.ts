@@ -1194,9 +1194,25 @@ export type ChoiceContinuation =
 
 export type PendingChoice = ChoiceRequest;
 
+/** Engine comparison of complete, actually offered Security Purge choices.
+ * Only the Corp decision adapter receives the result. */
+export type VisibleAgendaPurgeArchivesProtectionQuote = {
+  choiceId: string;
+  stateVersion: number;
+  revealedAgendaId: CardInstanceId;
+  packages: {
+    optionIds: string[];
+    archivesIce: VisibleCard[];
+    corpCreditsAfter: number;
+    corpAgendaPointsAfter: number;
+    corpClicksAfter: number;
+  }[];
+};
+
 export type VisibleChoiceRequest = Omit<ChoiceRequest, "side" | "options"> & {
   side: Side;
   options: VisibleChoiceOption[];
+  agendaPurgeArchivesProtectionQuote?: VisibleAgendaPurgeArchivesProtectionQuote;
 };
 
 export type ChoiceRequirement = {
@@ -2772,6 +2788,17 @@ export const RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION =
 export const RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION =
   "runner-fort-ice-trash-quote-v1" as const;
 
+/** Runner-private binding of a mandatory, currently active run replacement. */
+export type RunnerSuccessfulRunFortIceTrashQuote = {
+  schemaVersion: typeof RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION;
+  runId: string;
+  stateVersion: number;
+  serverId: Exclude<ServerId, "new_remote">;
+  sourceCardInstanceId: CardInstanceId;
+  rezzedIceCount: number;
+  tagsAdded: number;
+};
+
 /**
  * Actor-private planning projection for a currently legal Runner draw action,
  * including direct on-play and installed abilities. Source-card consumption
@@ -3931,6 +3958,7 @@ export type CorpPunishRouteStepQuote = {
   sourceCapabilityId: string;
   clicks: number;
   credits: number;
+  agendaPointCost?: number;
   hardwareTrashProjection?: {
     kind: "installed_runner_hardware";
     targetKnowledge: "public_exact";
@@ -4227,6 +4255,15 @@ export type VisibleTraceState = {
   bidsRevealed: boolean;
   corpBidCommitted: boolean;
   runnerBidCommitted: boolean;
+  /** Corp-only current choice whose fixed run lock defeats every visible response. */
+  currentRunLockBidQuote?: {
+    runId: string;
+    stateVersion: number;
+    actionId: string;
+    choiceId: string;
+    optionId: string;
+    amount: number;
+  };
   /** Aggregate capacity derived only from information visible to this viewer. */
   visibleOpponentBidCapacity: number;
   ownCommittedPayment?: {
@@ -4251,6 +4288,8 @@ export type PlayerView = {
   /** Public baseline next-turn clicks available for credits, reserving one run.
    * Excludes optional income, extra-action cards and unseen draws. */
   runnerNextTurnCreditClicks?: number;
+  /** Public run-only pool at the next run start. Omitted if the pool is empty or unavailable under the rules. */
+  runnerNextRunBadPublicityCredits?: number;
   side: Side;
   stateVersion: number;
   turnSerial?: number;
@@ -4338,6 +4377,7 @@ export type PlayerView = {
     followupRunOpportunity?: "after_run" | "after_successful_run";
     /** Remaining runs of public event sequences, independent of run success. */
     pendingSequenceRunCount?: number;
+    successfulRunFortIceTrashQuote?: RunnerSuccessfulRunFortIceTrashQuote;
     attackedServerId: Exclude<ServerId, "new_remote">;
     /** Public resolved access destination; absent means the attacked server. */
     accessServerOverride?: Exclude<ServerId, "new_remote">;

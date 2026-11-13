@@ -148,6 +148,7 @@ export function corpFundedScoreProtectionNeed(
   const baseline = assessBestFundedCorpScoreProtection({
     serverIce,
     runnerRig: input.playerView.opponent.rig ?? [],
+    runnerDeckCount: input.playerView.opponent.deckCount,
     runnerSetAside: input.playerView.specialZones?.setAside ?? [],
     ...(input.playerView.opponent.memoryUsed !== undefined
       ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
@@ -156,6 +157,8 @@ export function corpFundedScoreProtectionNeed(
       ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
       : {}),
     runnerCredits: input.playerView.opponent.credits,
+    runnerRunOnlyCredits:
+      input.playerView.runnerNextRunBadPublicityCredits ?? 0,
     ...(input.playerView.activeSide === "corp" &&
     input.playerView.phase !== "run"
       ? {

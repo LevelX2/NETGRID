@@ -275,6 +275,8 @@ function defensePhase(
   const openPhases: DefenseState["phase"][] = [];
   if (signals.gripDamageReplacementBinding)
     openPhases.push("replace_damage_from_grip");
+  if (signals.programTrashBackupBinding)
+    openPhases.push("back_up_trashed_programs");
   if (signals.discardChoiceBinding) openPhases.push("discard_window");
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
@@ -380,6 +382,10 @@ function defenseCandidates(
       }
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
+      if (phase === "back_up_trashed_programs")
+        return (
+          signals.programTrashBackupBinding?.actionId === candidate.actionId
+        );
       if (phase === "replace_damage_from_grip")
         return (
           signals.gripDamageReplacementBinding?.actionId ===
@@ -499,12 +505,20 @@ export function runnerDefenseDeferredHandBufferDispositions(params: {
   if (phase === "build_hand_buffer") {
     return params.signals.preserveHandBeforeIncompleteTagClear
       ? params.actionCandidates.flatMap((candidate) => {
-          const evidenceCode = candidate.semanticActionType === "tag.remove"
-            ? "runner_tag_clear_deferred_until_survival_buffer"
-            : candidate.semanticActionType === "counter.remove_trace_tag" ||
-                candidate.semanticActionType === "counter.remove_runner_hazard"
-              ? "runner_persistent_hazard_counter_deferred_until_survival_buffer"
-              : undefined;
+          const deferredDefenseSupport =
+            params.signals.defenseSupportInstallActionIds?.includes(candidate.actionId) === true &&
+            !params.independentlyOwnedActionIds.has(candidate.actionId) &&
+            !params.actionDispositions?.some(
+              (entry) => entry.actionId === candidate.actionId,
+            );
+          const evidenceCode = deferredDefenseSupport
+            ? "runner_defense_support_install_deferred_until_survival_buffer"
+            : candidate.semanticActionType === "tag.remove"
+              ? "runner_tag_clear_deferred_until_survival_buffer"
+              : candidate.semanticActionType === "counter.remove_trace_tag" ||
+                  candidate.semanticActionType === "counter.remove_runner_hazard"
+                ? "runner_persistent_hazard_counter_deferred_until_survival_buffer"
+                : undefined;
           return evidenceCode && !params.signals.handBufferActionIds?.includes(candidate.actionId)
             ? [{
                 actionId: candidate.actionId,
@@ -551,6 +565,11 @@ function defenseCapability(
   phase: DefenseState["phase"],
   candidates: PlanMaterialization["candidates"],
 ): PlanRouteStepCapability {
+  if (phase === "back_up_trashed_programs")
+    return {
+      capabilityId: "back_up_trashed_programs",
+      semanticActionTypes: ["choice.resolve"],
+    };
   if (phase === "replace_damage_from_grip")
     return {
       capabilityId: "replace_damage_from_grip",
@@ -640,6 +659,7 @@ function defensePhaseValue(
   signals: RunnerDefenseSignals,
 ): number {
   if (phase === "replace_damage_from_grip") return 10_000;
+  if (phase === "back_up_trashed_programs") return 1_000;
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
   if (phase === "install_defense_support") return 60;
@@ -657,7 +677,8 @@ function defensePhaseValue(
 function defensePriorityClass(
   signals: RunnerDefenseSignals,
 ): "P2" | "P3" | "P4" | "P5" {
-  if (signals.gripDamageReplacementBinding) return "P2";
+  if (signals.gripDamageReplacementBinding || signals.programTrashBackupBinding)
+    return "P2";
   if (signals.discardChoiceBinding) return "P2";
   if (
     signals.pendingDamage > 0 ||

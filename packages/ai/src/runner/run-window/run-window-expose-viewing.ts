@@ -1,13 +1,13 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
-import type { RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
+import type { ActiveRunnerRunRoot, RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
+import type { RunnerRunWindowSignal } from "../../plans/runner-tactical-plan-contracts";
+import { turnPlanningFingerprint } from "../../plans/turn-planning-contracts";
 import { runnerVisibleLethalIceDamageAssessment } from "../../runner-damage-threat-assessment";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
-/** Evaluate the Engine's conditional rez facts, without pretending it rezzed. */
-export function runnerExposedIceSafetyAssessment(
-  input: AiDecisionInput,
-): { evidenceCode: string } | undefined {
+function runnerExposedIceRezContext(input: AiDecisionInput) {
   const finish = input.legalActions.find(
     (a) => a.payload?.approachIceExposeViewDecision === "finish",
   );
@@ -15,7 +15,6 @@ export function runnerExposedIceSafetyAssessment(
   const run = input.playerView.run;
   const ice = run?.approachedIce;
   const cost = ice?.effectiveRezCostQuote;
-  const projection = ice?.effectivePostRezRunQuote;
   const valid =
     run?.phase === "approach_ice" &&
     input.playerView.timingPoint === "run.approach_ice" &&
@@ -40,16 +39,46 @@ export function runnerExposedIceSafetyAssessment(
         "Provide the exact Engine rez-cost projection for the exposed approach ICE before selecting its viewing continuation.",
     });
   }
-  // Choice-dependent rez stays in the existing variable-rez risk contract;
-  // this assessment consumes an exact fixed transition, never a guessed choice.
-  if (cost.costKind === "variable") return undefined;
-  const visibleRezSupport =
-    input.playerView.servers
-      .find((server) => server.id === run.attackedServerId)
-      ?.statuses?.some(
-        (status) => status.kind === "during_run_ice_rez_support",
-      ) === true;
+  const visibleRezSupport = runnerExposedIceHasRezSupport(
+    input.playerView.servers.find((server) => server.id === run.attackedServerId),
+  );
   const directlyFunded = cost.finalCredits <= input.playerView.opponent.credits;
+  return { finish, run, ice, cost, visibleRezSupport, directlyFunded };
+}
+
+export function runnerExposedIceHasRezSupport(
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): boolean {
+  return server?.statuses?.some(
+    (status) => status.kind === "during_run_ice_rez_support",
+  ) === true;
+}
+
+/** A previous exact, unaffordable viewing may later need a fresh quote. */
+export function runnerUnfundedExposedIceRezCredits(
+  input: AiDecisionInput,
+): number | undefined {
+  const context = runnerExposedIceRezContext(input);
+  if (
+    !context ||
+    context.cost.costKind !== "fixed" ||
+    context.cost.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+    context.directlyFunded ||
+    context.visibleRezSupport
+  )
+    return undefined;
+  return context.cost.finalCredits;
+}
+
+/** Evaluate the Engine's conditional rez facts, without pretending it rezzed. */
+export function runnerExposedIceSafetyAssessment(
+  input: AiDecisionInput,
+  activeRunRoot?: ActiveRunnerRunRoot,
+): { evidenceCode: string; exposedIceSafetyExit?: RunnerRunWindowSignal["exposedIceSafetyExit"] } | undefined {
+  const context = runnerExposedIceRezContext(input);
+  if (!context || context.cost.costKind === "variable") return undefined;
+  const { finish, run, ice, cost, visibleRezSupport, directlyFunded } = context;
+  const projection = ice.effectivePostRezRunQuote;
   // Public during-run support can change the otherwise unaffordable payment.
   if (
     (!directlyFunded && !visibleRezSupport) ||
@@ -84,9 +113,181 @@ export function runnerExposedIceSafetyAssessment(
       effectiveRunQuote: projection.effectiveRunQuote,
     },
   ]);
-  return damage
+  if (!damage) return undefined;
+  const exposedIceSafetyExit =
+    directlyFunded &&
+    cost.mandatoryAdditionalCosts.agendaPoints === 0 &&
+    damage.projectedDamage > damage.handCount &&
+    !projection.effectiveRunQuote.conditionalEncounterEffects?.length &&
+    projection.effectiveRunQuote.subroutines.every(
+      (subroutine) => subroutine.type === "do_damage" || subroutine.type === "end_the_run",
+    )
+      ? bindLethalExposedIceExit(input, finish, activeRunRoot)
+      : undefined;
+  return {
+    evidenceCode: `runner_exposed_ice_lethal_after_${directlyFunded ? "funded" : "possible_supported"}_rez|${damage.evidenceCode}`,
+    ...(exposedIceSafetyExit ? { exposedIceSafetyExit } : {}),
+  };
+}
+
+function runnerExposedIceReentryFacts(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
+): string {
+  return turnPlanningFingerprint("runner_exposed_ice_reentry", {
+    own: input.playerView.own,
+    opponent: input.playerView.opponent,
+    root: server.root,
+    statuses: server.statuses,
+    ice: server.ice.map(({ rezzed, advancementCounters }) => ({
+      rezzed,
+      advancementCounters,
+    })),
+  });
+}
+
+function bindLethalExposedIceExit(
+  input: AiDecisionInput,
+  finish: LegalAction,
+  activeRunRoot?: ActiveRunnerRunRoot,
+): RunnerRunWindowSignal["exposedIceSafetyExit"] {
+  const { run, stateVersion, turnSerial } = input.playerView;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === run?.attackedServerId,
+  );
+  const [start, expose] = input.eventTail.slice(-2);
+  const runActions =
+    activeRunRoot?.parentBinding?.moduleId === "runner.pressure_central"
+      ? activeRunRoot.parentBinding.signal.runActionIds
+      : undefined;
+  const runActionId = runActions?.length === 1 ? runActions[0] : undefined;
+  const exit = input.legalActions.find(
+    (action) =>
+      action.side === "runner" &&
+      action.type === "jack_out" &&
+      action.source === "game_rule" &&
+      action.expiresAtStateVersion === stateVersion &&
+      action.costs.length === 0 &&
+      action.payload?.approachIceExposeJackOut === true &&
+      action.payload.cardId === finish.payload?.cardId &&
+      action.payload.iceId === finish.payload?.iceId,
+  );
+  if (
+    !run ||
+    !server ||
+    !runActionId ||
+    typeof turnSerial !== 'number' ||
+    server.ice.length !== 1 ||
+    run.position?.kind !== "ice" ||
+    run.position.iceIndex !== 0 ||
+    run.position.serverId !== server.id ||
+    run.eventApproachIceExposeBeforeRez === true ||
+    start?.type !== "start_run" ||
+    start.turnSerial !== turnSerial ||
+    start.stateVersionBefore !== stateVersion - 2 ||
+    start.stateVersionAfter !== stateVersion - 1 ||
+    start.publicPayload.actor !== "runner" ||
+    start.publicPayload.actionType !== "start_run" ||
+    start.publicPayload.serverId !== server.id ||
+    start.publicPayload.damageAmount !== 0 ||
+    expose?.type !== "trigger_ability" ||
+    expose.turnSerial !== turnSerial ||
+    expose.stateVersionBefore !== stateVersion - 1 ||
+    expose.stateVersionAfter !== stateVersion ||
+    expose.publicPayload.actor !== "runner" ||
+    expose.publicPayload.hiddenZoneAction !== "approach_ice_expose" ||
+    !exit
+  )
+    return undefined;
+  return {
+    actionId: exit.actionId,
+    runActionId,
+    turnSerial,
+    facts: runnerExposedIceReentryFacts(input, server),
+  };
+}
+
+/** Consume the current run owner's prior safety observation only after the
+ * exact selected exit, with no intervening action or relevant fact change. */
+export function runnerImmediateExposedIceSafetyExit(
+  input: AiDecisionInputWithDeckCapabilities,
+  previous: ResidentPlanPortfolio | undefined,
+): { actionId: string; evidenceCode: string } | undefined {
+  const { stateVersion, turnSerial, run, timingPoint } = input.playerView;
+  if (
+    input.side !== "runner" ||
+    run ||
+    timingPoint !== "runner_action.main" ||
+    previous?.side !== "runner" ||
+    previous.stateVersion + 1 !== stateVersion
+  )
+    return undefined;
+  const executor = previous.instances.find(
+    (instance) => instance.instanceId === previous.executorInstanceId,
+  );
+  if (
+    executor?.moduleId !== "runner.convert_run_window" ||
+    executor.executionState !== "executor" ||
+    executor.parentInstanceId !== previous.rootForegroundInstanceId
+  )
+    return undefined;
+  const owner = executor.moduleState as
+    | { kind: "run_window"; signal: RunnerRunWindowSignal }
+    | undefined;
+  const signal = owner?.kind === "run_window" ? owner.signal : undefined;
+  const exit = signal?.exposedIceSafetyExit;
+  const observation = input.observedTurnPlanAction;
+  const lastEvent = input.eventTail.at(-1);
+  const lease = previous.turnPlanExecutionLease;
+  const commitment = previous.turnPlanCommitment;
+  if (
+    !signal ||
+    !exit ||
+    signal.safetyIntent !== "jack_out" ||
+    signal.rootPlanInstanceId !== previous.rootForegroundInstanceId ||
+    signal.leafPlanInstanceId !== executor.instanceId ||
+    exit.turnSerial !== turnSerial ||
+    lease?.actionType !== "jack_out" ||
+    lease.currentBinding.actionId !== exit.actionId ||
+    lease.currentBinding.stateVersion !== previous.stateVersion ||
+    commitment?.status !== "active" ||
+    commitment.commitmentId !== lease.commitmentId ||
+    commitment.sourcePlanId !== lease.sourcePlanId ||
+    !observation ||
+    observation.matchId !== input.matchId ||
+    observation.side !== "runner" ||
+    observation.actionType !== "jack_out" ||
+    observation.actionId !== exit.actionId ||
+    observation.source !== "game_rule" ||
+    observation.stateVersionBefore !== previous.stateVersion ||
+    observation.stateVersionAfter !== stateVersion ||
+    observation.boundChoices.length !== 0 ||
+    lastEvent?.type !== "jack_out" ||
+    lastEvent.turnSerial !== turnSerial ||
+    lastEvent.stateVersionBefore !== previous.stateVersion ||
+    lastEvent.stateVersionAfter !== stateVersion ||
+    lastEvent.publicPayload.actor !== "runner" ||
+    lastEvent.publicPayload.actionType !== "jack_out" ||
+    lastEvent.publicPayload.resolvedEffects?.length
+  )
+    return undefined;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === signal.serverId,
+  );
+  const repeatedRun = input.legalActions.find(
+    (action) =>
+      action.actionId === exit.runActionId &&
+      action.expiresAtStateVersion === stateVersion &&
+      action.side === "runner" &&
+      action.type === "start_run" &&
+      action.source === "basic_action" &&
+      action.payload?.serverId === server?.id,
+  );
+  return server && repeatedRun &&
+    runnerExposedIceReentryFacts(input, server) === exit.facts
     ? {
-        evidenceCode: `runner_exposed_ice_lethal_after_${directlyFunded ? "funded" : "possible_supported"}_rez|${damage.evidenceCode}`,
+        actionId: repeatedRun.actionId,
+        evidenceCode: `runner_repeated_basic_run_after_lethal_expose_exit:${server.id}`,
       }
     : undefined;
 }

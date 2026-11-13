@@ -128,6 +128,13 @@ export function createRunnerAccessPathContext(
     if (!targetSubroutines.every(isEndRunSubroutine))
       return { blocksBreak: false, evidence: [] };
 
+    const fortTrash = input.playerView.run?.successfulRunFortIceTrashQuote;
+    if (fortTrash?.serverId === server.id && fortTrash.rezzedIceCount > 0)
+      return {
+        blocksBreak: false,
+        evidence: ["encounter_remote_payoff:fort_ice_trash_replacement"],
+      };
+
     const evidenceBase = [
       "encounter_remote_payoff_check:true",
       "encounter_remote_payoff_blocked:true",
@@ -379,6 +386,7 @@ export function createRunnerAccessPathContext(
             ...(path.paidSubroutineBreaks
               ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
               : {}),
+            deferredNextEncounterDamage: path.deferredNextEncounterDamage,
             requiredHandFloor:
               requiredHandFloor ??
               runnerConfirmedDamageRequiredHandFloor(input),
@@ -446,7 +454,10 @@ export function createRunnerAccessPathContext(
               runnerRunPathCreditBudgetAfterEncounter(state.budget),
               server.root,
               input.playerView.opponent.credits,
-              currentRunPathContext(input),
+              {
+                ...currentRunPathContext(input),
+                quoteNextEncounterDamageForHandBudget: true,
+              },
             ),
           ).canReachAccess;
           continue;
@@ -520,7 +531,10 @@ export function createRunnerAccessPathContext(
         runnerRunPathCreditBudgetAfterEncounter(budgetAfterBreak),
         server.root,
         input.playerView.opponent.credits,
-        currentRunPathContext(input),
+        {
+          ...currentRunPathContext(input),
+          quoteNextEncounterDamageForHandBudget: true,
+        },
       ),
     );
     if (pathAssessment.canReachAccess) {

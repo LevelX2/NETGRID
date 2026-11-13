@@ -2,15 +2,15 @@
 
 ## Entscheidung
 
-NETGRID nutzt vorerst synthetische Web-Audio-Sounds. Es werden keine externen Soundassets importiert, damit Lizenzlage, Offline-Nutzung und Repository-Groesse einfach bleiben. Audio bleibt lokal, optional und an die bestehende Lautstaerkeregelung gebunden.
+NETGRID nutzt lokale WAV-Assets gemäß `apps/web/lib/audio-manifest.ts` und synthetische Web-Audio-Sounds. Credits und Kartenziehen werden direkt mit Web Audio erzeugt; dafür sind keine externen Soundassets nötig. Audio bleibt lokal, optional und an die bestehende Lautstärkeregelung gebunden.
 
 ## Matrix
 
 | Ereignisfamilie              | Action-/Event-Typen                                                                           | Soundart                  | Wirkung                                                                                          | Prioritaet |
 | ---------------------------- | --------------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ | ---------- |
 | Zugwechsel                   | `end_turn`                                                                                    | `turn`                    | kurzer, tiefer Statuswechsel                                                                     | mittel     |
-| Kartenziehen                 | `mandatory_draw`, `draw_card`                                                                 | `draw`                    | Papier-/Snap-Anmutung mit kurzem Noise                                                           | hoch       |
-| Credits                      | `gain_credit`                                                                                 | `credit`                  | dezenter Chip-/Kassenimpuls                                                                      | hoch       |
+| Kartenziehen                 | `mandatory_draw`, `draw_card`, öffentliche aufgelöste `draw_cards`-Effekte                    | `draw`                    | kurzer Papier-Snap je tatsächlich gezogener Karte, höchstens fünf je Ereignis                    | hoch       |
+| Credits                      | `gain_credit`, öffentliche aufgelöste `gain_credits`-Effekte                                  | `credit`                  | kurzes metallisches Münzklimpern, einmal je Ereignis                                             | hoch       |
 | Installation verdeckt        | `install_card` redacted                                                                       | `install_hidden`          | gedeckter mechanischer Klick ohne Kartenhinweis                                                  | hoch       |
 | Installation offen / Advance | `install_card`, `advance_card` public                                                         | `install_known`           | kurzer technischer Klick                                                                         | mittel     |
 | Karte spielen                | `play_event`, `play_operation`                                                                | `play`                    | zweistufiger Ausspiel-Akzent                                                                     | mittel     |
@@ -30,6 +30,8 @@ NETGRID nutzt vorerst synthetische Web-Audio-Sounds. Es werden keine externen So
 - Sichtbar redigierte/hidden Aktionen bekommen nur generische Soundfamilien, z. B. `install_hidden`; kein Sound darf verdeckte Kartentypen, Kartennamen oder Zielinhalte verraten.
 - Automatische Systemeffekte bleiben standardmaessig still, solange `includeAutomaticEffectCues` nicht aktiv ist.
 - Ein tatsächlich erhaltener Runner-Tag und tatsächlich erlittener Schaden sind davon ausgenommen: Bei aktiviertem Audio erklingen `gain_tag` und `damage` auch dann, wenn visuelle Action-Cues deaktiviert sind. Mehrere gleichzeitig erhaltene Tags spielen das Tag-Motiv einmal; jeder Schadenspunkt erzeugt dagegen einen eigenen Damage-Impuls. Vollständig verhinderter Schaden bleibt still.
+- Dasselbe gilt für öffentliche aufgelöste Credit- und Zieheffekte: `resourceEffectSounds` liest ausschließlich positive öffentliche `resolvedEffects` aus neu empfangenen Ereignissen, unabhängig von visuellen oder automatischen Action-Cues. Ausspielkosten, Angebotsmengen, Kartentexte und verdeckte Karteninhalte werden dafür nicht ausgewertet. Nullbeträge, private Effekte und nicht aufgelöste Angebote bleiben still.
+- Eine Karte mit Credit- und Zieheffekt spielt beide Soundfamilien. Der sofortige lokale Ausspielton unterdrückt die bestätigten Effektsounds nicht; normale `gain_credit`-, `draw_card`- und `mandatory_draw`-Aktionen erhalten durch ihre Effekte keinen doppelten Primärsound. Mehrere Effekte derselben Familie werden pro Ereignis zusammengefasst.
 - Sehr haeufige Kleinstereignisse bleiben leise und kurz, damit KI-gegen-KI oder lange Runs nicht akustisch ueberladen.
 
 ## Naechste Kandidaten

@@ -49,9 +49,11 @@ export function accessCommitmentForEvaluation(
             evaluation.accessPayoff === "known_low_value"
           ? "decline"
           : "access";
+  const fortIceTrashObjective = evaluation.fortIceTrashObjective;
   return {
     payoff: evaluation.accessPayoff,
-    intendedAction,
+    intendedAction: fortIceTrashObjective ? "replace_access" : intendedAction,
+    ...(fortIceTrashObjective ? { fortIceTrashObjective } : {}),
     knownTargetDefinitionIds: [
       ...new Set(facts.knownTargetDefinitionIds),
     ].sort(),

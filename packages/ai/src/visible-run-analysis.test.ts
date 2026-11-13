@@ -1114,6 +1114,65 @@ describe("visible run analysis access-preserving effect choices", () => {
     expect(inside.visibleBreakCost).toBe(4);
   });
 
+  it("keeps unknown follow-up ICE conditional when only encounter damage needs a hand budget", () => {
+    const unknown: VisibleCard = {
+      instanceId: "unknown",
+      known: false,
+      rezzed: false,
+    };
+    const outer = dataWallTwoPointZeroIce("outer-wall");
+    const source = fatalAttractorIce("damage-source");
+    const dwarf: VisibleCard = {
+      ...krashBreaker("runner-dwarf"),
+      definitionId: "onr_v1_021_dwarf",
+      title: "Dwarf",
+      strength: 1,
+    };
+    const context = { quoteNextEncounterDamageForHandBudget: true } as const;
+    const quote = assessKnownRezzedIcePath(
+      [unknown, source, outer],
+      [dwarf],
+      11,
+      [],
+      1,
+      context,
+    );
+    expect(quote).toMatchObject({
+      canReachAccess: false,
+      knownPathBlockedOnlyByDamage: true,
+      visibleBreakCost: 1,
+      deferredNextEncounterDamage: [
+        {
+          iceInstanceId: "damage-source",
+          subroutineId: "damage-source:next-encounter-damage",
+          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          amount: 3,
+        },
+      ],
+    });
+    expect(quote.fullyBrokenIceInstanceIds ?? []).not.toContain(
+      unknown.instanceId,
+    );
+    const inner = keeperIce("inner-etr");
+    expect(
+      assessKnownRezzedIcePath(
+        [inner, source, outer],
+        [dwarf],
+        11,
+        [],
+        1,
+        context,
+      ),
+    ).toMatchObject({
+      canReachAccess: false,
+      knownPathBlockedByMissingCoverage: true,
+      missingCoverage: ["code_gate"],
+    });
+    expect(
+      assessKnownRezzedIcePath([source, outer], [dwarf], 11, [], 1, context),
+    ).toMatchObject({ canReachAccess: true, visibleBreakCost: 1 });
+  });
+
   it("uses the cheaper complete follow-up break for conditional setup damage", () => {
     const assessment = assessKnownRezzedIcePath(
       [

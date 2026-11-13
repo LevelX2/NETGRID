@@ -404,6 +404,19 @@ function assessQuotedPunishOpportunity(
   }
 
   const visibleTerminalProjection = minimumDamage > runnerHandCount;
+  if (
+    !visibleTerminalProjection &&
+    route.steps.some((step) => step.agendaPointCost !== undefined)
+  ) {
+    return {
+      disposition: "watch",
+      priorityClass: "P5",
+      value: 0,
+      visibleTerminalProjection: false,
+      evidenceCode:
+        "corp_punish_opportunity_watch:agenda_points_reserved_without_flatline",
+    };
+  }
   const safelyDestroyedCards = Math.min(minimumDamage, runnerHandCount);
   const destroyedHandShare =
     runnerHandCount === 0 ? 1 : safelyDestroyedCards / runnerHandCount;

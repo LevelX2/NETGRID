@@ -113,7 +113,9 @@ export function remoteContestModule(): PlanModule {
                   id: current.signal.serverId,
                 },
               }),
-          purpose: `Contest visible remote ${current.signal.serverId}.`,
+          purpose: current.signal.accessCommitment?.fortIceTrashObjective
+            ? `Resolve successful-run ICE removal on ${current.signal.serverId}.`
+            : `Contest visible remote ${current.signal.serverId}.`,
         },
         candidates,
       };

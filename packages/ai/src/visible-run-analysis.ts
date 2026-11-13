@@ -543,6 +543,9 @@ function assessKnownRezzedIcePathInternal(
   const paidSubroutineBreaks: NonNullable<
     KnownRezzedIcePathAssessment["paidSubroutineBreaks"]
   > = [];
+  const deferredNextEncounterDamage: NonNullable<
+    KnownRezzedIcePathAssessment["deferredNextEncounterDamage"]
+  > = [];
   let requiredFullBreakIceIndex: number | undefined;
   const breakerState: VisibleRunBreakerState = {
     strengthByBreakerInstanceId: new Map(
@@ -1336,6 +1339,34 @@ function assessKnownRezzedIcePathInternal(
                 ? "later_ice_unaffordable_after_prior_ice_cost"
                 : "ice_unaffordable",
         });
+        const deferredDamageAmount = sourceSubroutine.amount;
+        if (
+          !breakAssessment &&
+          deflectorContext.quoteNextEncounterDamageForHandBudget === true &&
+          sourceSubroutine.type ===
+            "set_next_encounter_unless_fully_break_damage" &&
+          sourceSubroutine.damageType === "net" &&
+          typeof deferredDamageAmount === "number" &&
+          Number.isSafeInteger(deferredDamageAmount) &&
+          deferredDamageAmount > 0 &&
+          hardEffectKinds.length === 1 &&
+          hardEffectKinds[0] === "damage_or_program_trash" &&
+          effect.preventsFutureBreaking !== true &&
+          effect.preventsJackOut !== true
+        ) {
+          // The next actual encounter can cause damage. A face-down ICE
+          // neither certifies an encounter nor rules one out. Continue
+          // checking the suffix for independent access barriers.
+          deferredNextEncounterDamage.push({
+            iceInstanceId: quote.iceInstanceId,
+            subroutineId: sourceSubroutine.id,
+            sourceDefinitionId:
+              sourceSubroutine.sourceDefinitionId ?? iceDefinitionId,
+            amount: deferredDamageAmount,
+          });
+          damageOnlyBlock ??= blockedAssessment;
+          continue;
+        }
         if (
           sourceSubroutine.type === "do_damage" &&
           !coreProtectionRequired &&
@@ -1451,6 +1482,9 @@ function assessKnownRezzedIcePathInternal(
     return {
       ...damageOnlyBlock,
       knownPathBlockedOnlyByDamage: true,
+      ...(deferredNextEncounterDamage.length
+        ? { deferredNextEncounterDamage }
+        : {}),
       ...(runEndTrashSourceIds.size
         ? { runEndTrashSourceIds: [...runEndTrashSourceIds] }
         : {}),

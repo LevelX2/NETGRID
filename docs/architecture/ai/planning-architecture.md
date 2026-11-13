@@ -396,6 +396,15 @@ erhalten. Run, Server, Root, Executor und abschließende Fenster-ID müssen
 übereinstimmen. Fremde Runner-Aktionen, fehlende Ereignisse oder ein anderer
 Run erlauben keine solche Fortsetzung.
 
+Für eine aktuell angebotene direkte Programminstallation mit fehlenden
+verfügbaren Installationscredits bindet der Engine-Owner den exakten
+Öffnungsbetrag aus derselben Zahlungsquote an die LegalAction. Der TurnPlan
+bewertet den Öffnungsschritt und revalidiert die ursprüngliche Installation
+nach der Zahlungshilfe anhand des aktuellen Fensters. Der Installationsklick
+und die vollständigen Kosten werden erst bei der gebundenen Fortsetzung
+bezahlt. Bereits verfügbare Installationscredits und gesonderte
+Programmtrash-/Zahlungsvarianten behalten ihren jeweiligen Vertrag.
+
 Bekannte installierte `runnerPaymentSupportAbilities` gehen als bedingte,
 einmalige Quellen in die Restpfadquote ein. Die Quote benötigt ausdrücklich
 den liquiden Creditbestand für ihre Aktivierung, zählt alternative Fähigkeiten
@@ -405,6 +414,12 @@ Run-Credits ersetzen keine Aktivierungscredits. `runner.convert_run_window`
 bindet die konkrete Bankaktion an das aktuelle Zahlungsfenster, bevor dessen
 Engine-quotiertes Cash-Ziel die Aktivierungsliquidität aufbrauchen würde.
 Der Fensterresolver erhält dabei ausschließlich den bestehenden Auftrag.
+Die Engine bindet bei einem nur mit Zahlungssupport bezahlbaren aktuellen
+Breaker-Schritt den Betrag der konkreten Fensteröffnung an dessen LegalAction.
+Die Restzugprojektion endet an dieser Öffnung. Kosten und Auszahlung gehören
+zu den nachfolgenden tatsächlichen Fensterschritten. Setzt der Runner einen
+so bezahlten Runstart fort, wird dessen exakt gebundener Zentral- oder
+Remote-Executor wieder aktiv, bevor Encounter- und Tracefenster folgen.
 
 Eine solche Quelle in der eigenen sichtbaren Hand kann `runner.economy` als
 Installationsschritt für einen exakt gebundenen Run vorbereiten. Der Compiler
@@ -454,6 +469,14 @@ rechnet diese bereits bezahlten Subroutinen nicht erneut als Schaden oder
 optionale Zusatzzahlung. Runstart und Fortsetzung bleiben beim bestehenden
 Contest-/Runwindow-Owner mit jeweils aktuellen LegalActions; eine Quote
 wählt keine Action und ersetzt keine Engine-Fortsetzung.
+Fehlt der Quellbreaker und kann die Folgeschicht noch eine Begegnung
+erzeugen, bleibt der typisierte Net-Schaden als bedingter Betrag an die
+exakte Quelle gebunden. Runstart, Informationsgrenze sowie Break-, Pump- und
+Bewegungsschritte prüfen ihn zusammen mit weiterem Schaden und der Handreserve.
+Ein behebbarer Handbedarf erreicht die bestehende Vorbereitung vor dem Run.
+Eine unbekannte Schicht bleibt ein möglicher Trigger. Eigenständige Stopps
+behalten ihre Deckungs- und Zahlungsanforderungen.
+
 Auch nach Auflösung der Quelle prüft der Bewegungs-Guard die typisierte
 Vollbruchbedingung gegen die aktuelle Quote des nächsten bekannten,
 gerezzten ICE. Ein deterministischer, mit vorhandenen Credits bezahlbarer

@@ -171,6 +171,7 @@ export type CorpBestFundedScoreProtectionInput = Readonly<{
   postInstallQuoteCardId?: string;
   preferPostInstallSourceProgress?: boolean;
   runnerRig: readonly VisibleCard[];
+  runnerDeckCount?: number;
   runnerSetAside?: readonly VisibleCard[];
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
@@ -178,6 +179,7 @@ export type CorpBestFundedScoreProtectionInput = Readonly<{
   runnerCreditPoolHorizon?: "current" | "next_runner_turn";
   runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
   runnerCredits: number;
+  runnerRunOnlyCredits?: number;
   targetServerId: VisibleCorpRezCostQuote["targetServerId"];
   observedAtStateVersion: number;
   availableCorpCredits: number;
@@ -300,6 +302,7 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
     root?: readonly VisibleCard[];
   }>;
   runnerRig: readonly VisibleCard[];
+  runnerDeckCount?: number;
   runnerSetAside?: readonly VisibleCard[];
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
@@ -307,6 +310,7 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   runnerCreditPoolHorizon?: "current" | "next_runner_turn";
   runnerPublicPreparedBreakers?: readonly PublicHeapBreakerPreparation[];
   runnerCredits: number;
+  runnerRunOnlyCredits?: number;
   projectedInstallCredits: number;
   projectedInstallClicks: number;
   preferPostInstallSourceProgress?: boolean;
@@ -534,6 +538,9 @@ export function assessBestFundedCorpScoreProtection(
         rezzed: ice.rezzed === true || selectedById.has(ice.instanceId),
       })),
       runnerRig: input.runnerRig,
+      ...(input.runnerDeckCount !== undefined
+        ? { runnerDeckCount: input.runnerDeckCount }
+        : {}),
       ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
       ...(input.runnerMemoryUsed !== undefined
         ? { runnerMemoryUsed: input.runnerMemoryUsed }
@@ -542,6 +549,9 @@ export function assessBestFundedCorpScoreProtection(
         ? { runnerMemoryLimit: input.runnerMemoryLimit }
         : {}),
       runnerCredits: input.runnerCredits,
+      ...(input.runnerRunOnlyCredits !== undefined
+        ? { runnerRunOnlyCredits: input.runnerRunOnlyCredits }
+        : {}),
       ...(input.runnerCreditPoolHorizon !== undefined
         ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
         : {}),
@@ -827,6 +837,9 @@ export function projectCorpFundedIceInstallRoute(
       : {}),
     serverIce: currentIce,
     runnerRig: input.runnerRig,
+    ...(input.runnerDeckCount !== undefined
+      ? { runnerDeckCount: input.runnerDeckCount }
+      : {}),
     ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
     ...(input.runnerMemoryUsed !== undefined
       ? { runnerMemoryUsed: input.runnerMemoryUsed }
@@ -835,6 +848,9 @@ export function projectCorpFundedIceInstallRoute(
       ? { runnerMemoryLimit: input.runnerMemoryLimit }
       : {}),
     runnerCredits: input.runnerCredits,
+    ...(input.runnerRunOnlyCredits !== undefined
+      ? { runnerRunOnlyCredits: input.runnerRunOnlyCredits }
+      : {}),
     ...(input.runnerCreditPoolHorizon !== undefined
       ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
       : {}),
@@ -1016,6 +1032,9 @@ export function projectCorpFundedIceInstallRoute(
       ? { preferPostInstallSourceProgress: true }
       : {}),
     runnerRig: input.runnerRig,
+    ...(input.runnerDeckCount !== undefined
+      ? { runnerDeckCount: input.runnerDeckCount }
+      : {}),
     ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
     ...(input.runnerMemoryUsed !== undefined
       ? { runnerMemoryUsed: input.runnerMemoryUsed }
@@ -1024,6 +1043,9 @@ export function projectCorpFundedIceInstallRoute(
       ? { runnerMemoryLimit: input.runnerMemoryLimit }
       : {}),
     runnerCredits: input.runnerCredits,
+    ...(input.runnerRunOnlyCredits !== undefined
+      ? { runnerRunOnlyCredits: input.runnerRunOnlyCredits }
+      : {}),
     ...(input.runnerCreditPoolHorizon !== undefined
       ? { runnerCreditPoolHorizon: input.runnerCreditPoolHorizon }
       : {}),

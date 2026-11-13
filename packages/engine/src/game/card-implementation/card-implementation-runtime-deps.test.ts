@@ -398,6 +398,7 @@ describe("game card implementation runtime deps root", () => {
         "searchStackToGripTargetCount",
         "topTrashToGripTargetCount",
         "topTrashToGripTargetId",
+        "topHostedProgramToGripTargetId",
         "searchStackInstallTargetCount",
         "stackOrTrashProgramInstallTargetCount",
         "lookTopStackShowToCorpThenInstallMatchingTargetCount",

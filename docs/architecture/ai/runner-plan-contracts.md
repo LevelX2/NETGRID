@@ -83,6 +83,15 @@ passiven Bonus für eine andere Runaktion; ihr Nutzen bleibt an die tatsächlich
 gewählte Fähigkeit gebunden. Echte installierte Zugriffseffekte und sinnvolle
 Informationsrouten bleiben separat bewertbar.
 
+Für den Zugriffsersatz durch Abriss gerezzter Fort-ICE bindet die Engine
+den Make-Run-Effekt an die konkrete Startaktion, das Ziel, die aktuell
+gerezzten ICE und die fälligen Tags. Die Runbewertung erhält daraus den
+möglichen Abrisswert, den Eventpreis und den Standardaufwand zur
+Tag-Bereinigung. Die absehbare Ersparnis stammt aus einer weiteren
+bekannten Durchquerung. Die Auswertung schreibt keine späteren unbekannten
+Rezzes oder mehrere zukünftige Läufe gut. Der ersetzte Zugriff erhält
+keinen Agenda-, Multiaccess- oder Contestwert.
+
 Auch innerhalb derselben Zielservergruppe gilt die Informationszulassung
 pro konkreter Runaktion. Ein zugelassener normaler Zugriff überträgt seinen
 Zweck und seine terminale Zugriffsausnahme nicht auf einen daneben angebotenen
@@ -2591,6 +2600,24 @@ Der Resolver übernimmt nur diese aktuelle Bindung. Eine angebotene kostenlose
 vollständige Ersatzwirkung benötigt keinen geratenen Schadenswert aus einem
 technischen Choice-Namen. Unbekannte Ersatzwirkungen bleiben fail-closed.
 
+Ein angebotenes Backup für installierte, zum Trash bestimmte Programme
+öffnet eine eigene Phase im bestehenden Defense-Owner. Die Engine markiert
+die Ersatzwirkung mit der bekannten Hardware-Quelle. Im Folgefenster bindet
+sie die geordneten Zieloptionen an dieselbe Quelle. Der Runner-DTO erhält
+diese Fakten nur für den eigenen bekannten Rig. Defense bindet je Fenster
+StateVersion, LegalAction, Quelle und konkrete Optionswerte. Gesicherte
+Programme verlassen den Rig und können später über die Hardware auf die
+Hand zurückgeholt werden. Der Payload-Resolver validiert die aktuelle Bindung
+vor der Engine-Ausführung (SP-853).
+
+Die Rückholung aus der Hardware hat einen eigenen LegalAction-Kopf. Die
+Engine bindet die Instanz und Definition des obersten gehosteten Programms
+mit derselben Reihenfolge wie bei der Ausführung. Der vorhandene
+Entwicklungsplan für Rückholung prüft diese Quelle, den exakten Zielkopf
+und die Handretention. Die Wahl bleibt an den aktuellen Stand gebunden.
+Reicht der zusätzliche Handwert nicht, klassifiziert der Owner den Kopf
+ausdrücklich als zurückgestellt (SP-855).
+
 Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
 `defense-signals.ts` bündelt Schutzinstallationen, Handpuffer, Tag-Clear-
 Funding und Reaktionsreserve. `defense-plan-module.ts` besitzt Phasenwahl,
@@ -2601,6 +2628,12 @@ Schutzinstallationen gegenüber Statusbereinigung. Die Live-Runtime reicht
 Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
+
+Hat der Überlebens-Handpuffer Vorrang vor einer nicht vollständig
+finanzierbaren Tagentfernung, klassifiziert Defense auch eine grundsätzlich
+geeignete, in dieser Phase aufgeschobene Schutzinstallation. Die Disposition
+gehört zur aktuellen LegalAction. Eine unabhängig gebundene Route bleibt
+ausführbar. Nach dem Ziehen bewertet Defense die Installation erneut.
 
 Im eigenen Runnerzug begründet eine durch Zugriffsbeobachtungen bestätigte
 Schadensstrategie mit einer öffentlich finanzierbaren tagabhängigen
@@ -2705,6 +2738,16 @@ unterdrücken. Die Ausnahme für eine nur später zurückgestellte Handpufferwir
 bleibt auf aktuell sichere Mehrzweck-Actions begrenzt; echte Draw-Tax-Gefahr wird
 weder durch den Scheduler noch durch die aktuelle Phasenbindung aufgehoben.
 
+Bei kürzlich erlittenem Corp-Schaden kann Defense einen steuerpflichtigen
+Basisdraw als aktuellen Handpufferschritt zulassen. Dafür muss der Runner
+bereits getaggt sein, die vollständige Tagentfernung muss im Restzug fehlen
+und der Schadenpuffer muss mit den verbleibenden Klicks und Stackkarten
+erreichbar sein. Bekannte aktive Schadensquellen, verfügbare Schutzinstallation
+und ein unmittelbar nutzbarer sicherer Handzuwachs erhalten die Sperre.
+Die Zulassung gilt für den aktuellen positiven Basisdraw. Neue Karten,
+Steuerantworten und der verbleibende Bedarf werden nach jeder Aktion neu
+gebunden. P731 G11 D63 belegt den Vierkartenpuffer gegen den anschließenden
+Schaden. Die spätere Entscheidung über den Partieverlauf bleibt offen.
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
 Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda-,
 Score-Threat- oder Informationsroute übernimmt der Defense-Owner den gequoteten Puffer, wenn
@@ -3823,6 +3866,12 @@ Planportfolio. Er benötigt keinen injizierten Runtime-Dienst. Run-Root,
 Parent, Executor, Quelle, ICE und StateVersion werden wie bisher exakt
 gebunden. Proaktive Signale berücksichtigen unbekannte installierte Karten,
 passende Informationswerkzeuge und bereits vorhandene Duplikate.
+Nach einem ausgeführten Verzicht kann ein weiteres Approach-Fenster desselben
+Runs den vorhandenen Run-Parent übernehmen. Der Owner prüft die ursprüngliche
+Lease, die lückenlose Folge von Rez und weiterlaufenden Run-Fenstern am selben
+Fort sowie die aktuelle Quelle und das neue ICE in den Engine-LegalActions.
+Die Engine kann einen Rez-Verzicht am angeflogenen ICE ohne Serverkennung
+publizieren. Die gebundene Run-Kette hält diesen Regelschritt im selben Run.
 
 Die Live-Runtime ruft die Signalbildung, Dispositionen und den Erinnerungsschreiber
 auf. Der zentrale Choice-Einstieg delegiert an die bestehende Ownerfunktion.
@@ -4766,6 +4815,13 @@ Temporäre Suchantworten für einen Remote-Informationszugriff verwenden außerd
 
 Eine aktuell gebundene Programmsuche oder Top-Heap-Rückholung auf die Hand ist noch keine Installation. Bei den kanonischen Effekten `search_stack_to_grip`, `search_trash_to_grip` und `move_top_trash_to_grip` rechnet der Coverage-Owner daher den zusätzlichen normalen Installationsklick und die exakten Installationskosten in die bereits bestehende Runfolge ein. Die konkrete Quelle, Suchzielinstanz beziehungsweise Deckdefinition, StateVersion, MU-Freigabe, Handvorbereitung und vollständige Finanzierung müssen weiterhin zusammenpassen. Die Rückholung wird dadurch weder zu einer kostenlosen Installation noch zu einer unabhängig zugelassenen Runroute.
 
+Für den bereits gebundenen terminalen Remote-Bedarf darf Coverage außerdem
+eine kanonische begrenzte Programmsuche an der Stack-Spitze versuchen. Die
+Projektion prüft den Erwerbspreis eines passenden Treffers, Einbau, MU,
+Restklicks, Handpuffer und den konkret gebundenen Run. Sie kennzeichnet den
+Treffer als bedingt. Erst die tatsächliche Engine-Choice zeigt die Karten.
+Ohne passenden Treffer bleibt der Run-Bedarf offen.
+
 ### Direkter Run-Root zwischen aufeinanderfolgenden Traces
 
 Ist der Central- oder Remote-Root selbst Executor, erhält er die Kostenfortsetzung auch zwischen zwei Traces desselben ICE. Die abgeschlossene erste Trace, der exakt gewählte Continue-Schritt und der anschließende Tracebeginn müssen über StateVersion, Run, Server, ICE-Instanz, Quelle, öffentliche Ereignisfolge und dieselbe Root-/Executor-Kette zusammenpassen. Erst dieser Nachweis aktualisiert den Ursprung für ein nachfolgendes Engine-Zahlungsfenster. Eine fremde Choice, Ereignislücke oder abweichende Zuständigkeit bleibt gesperrt.
@@ -4773,3 +4829,20 @@ Ist der Central- oder Remote-Root selbst Executor, erhält er die Kostenfortsetz
 ### Handreserve der konkret gebundenen Suchroute
 
 Die Vorbereitung einer temporären Coverage-Suche quotiert den Handpuffer für den konkret gebundenen Zielrun. Ungewählte andere Runs dürfen keine zusätzlichen Ziehklicks verlangen. Der gemeinsame Service berücksichtigt weiterhin den bestätigten globalen Corp-Schadensbedarf und den Verbrauch eines flüchtigen Breakers; ein tatsächlich fehlender Handpuffer bleibt auch bei leerem Stack ein Ablehnungsgrund.
+
+### Fortweiter ICE-Abriss statt Zugriff
+
+Der Start-Owner bindet einen verpflichtenden ICE-Abriss mit eigenen Tags an
+die exakte angebotene Run-Aktion und den gewöhnlichen Nutzen einer späteren
+Route auf demselben Fort. Er berücksichtigt den bekannten Runpreis, die
+Eventkosten und die Kosten der Tagbereinigung. Eine leere Remote-Root,
+unzureichende Liquidität oder ein bereits als wertlos bekannter späterer
+Zugriff begründet keine Abrissinvestition. Unbekannte Schichten bleiben ein
+Risiko der aktuellen und späteren Route.
+
+Die Engine liefert der Runner-Sicht die aktive Ersatzwirkung mit Run,
+StateVersion, Fort, Kartenquelle, öffentlicher Rezzahl und Tagmenge. Der
+residente Run-Owner bindet diese Quelle an das gewählte Ersatzziel. Bei
+Pumpen und Breaks zählt die wirksame ICE-Entfernung als konkreter
+Fortsetzungszweck. Die gewöhnliche Remote-Root-Prüfung und die übrigen
+Sicherheits- und Zahlungsgrenzen behalten ihre eigenen Zuständigkeiten.

@@ -7,10 +7,14 @@ import {
   assessEngineCertifiedPostRezIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../../visible-run-analysis";
+import { runnerRunPathCreditBudgetAfterEncounter } from "../../run-analysis/visible-run-credit-budget";
 import { corpEffectiveDefenseActivationCredits } from "../../runtime/corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
-import { visiblePreparedRunnerBreakerCandidates } from "../../runtime/corp-score-protection-assessment";
+import {
+  visiblePreparedRunnerBreakerCandidates,
+  visibleRunnerInRunStackInstallPotential,
+} from "../../runtime/corp-score-protection-assessment";
 import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 type CorpCertifiedDefenseLayer = Readonly<{
   iceInstanceId: string;
@@ -79,6 +83,14 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
 ): boolean {
   const runnerRig = input.playerView.opponent.rig ?? [];
   if (
+    visibleRunnerInRunStackInstallPotential(
+      runnerRig,
+      input.playerView.opponent.deckCount,
+    )
+  ) {
+    return false;
+  }
+  if (
     input.playerView.activeSide === "corp" &&
     input.playerView.runnerNextTurnCreditClicks === undefined
   )
@@ -122,11 +134,18 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       input.playerView.stateVersion,
       new Set(financedLayerInstanceIds),
       runner.rig,
-      runnerRunPathCreditBudgetWithVisiblePools(runner.credits, runner.rig, {
-        creditPoolHorizon:
-          input.playerView.activeSide === "corp"
-            ? "next_runner_turn"
-            : "current",
+      runnerRunPathCreditBudgetAfterEncounter({
+        ...runnerRunPathCreditBudgetWithVisiblePools(
+          runner.credits,
+          runner.rig,
+          {
+            creditPoolHorizon:
+              input.playerView.activeSide === "corp"
+                ? "next_runner_turn"
+                : "current",
+          },
+        ),
+        runOnlyCredits: input.playerView.runnerNextRunBadPublicityCredits ?? 0,
       }),
       [...server.root],
       visibleCorpCredits,
@@ -200,6 +219,74 @@ function corpCertifiedDefenseLayer(
     credits: rezQuote.finalCredits + activationCredits,
     agendaPoints: rezQuote.mandatoryAdditionalCosts.agendaPoints,
   };
+}
+
+/** Certifies a direct next-turn Archives run against one funded, known layer.
+ * The projected Archives root is its discard pile.
+ * The hand plan owns how terminal agenda exposure changes its discard batch.
+ */
+export function corpArchivesHasCertifiedPaidAccess(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
+): boolean {
+  const view = input.playerView;
+  const runnerRig = view.opponent.rig;
+  if (
+    view.phase !== "corp_discard_phase" ||
+    server.id !== "archives" ||
+    server.ice.length !== 1 ||
+    server.statuses?.some((status) => status.kind === "run_prohibited") ||
+    (view.runnerNextTurnCreditClicks ?? 0) < 1 ||
+    !runnerRig
+  ) {
+    return false;
+  }
+  const ice = server.ice[0]!;
+  const rez = ice.effectiveRezCostQuote;
+  if (
+    ice.rezzed !== true &&
+    (rez?.complete !== true || rez.costKind !== "fixed")
+  ) {
+    return false;
+  }
+  const layer = corpCertifiedDefenseLayer(input, server.id, ice);
+  if (
+    !layer ||
+    layer.credits > view.own.credits ||
+    layer.agendaPoints > view.own.agendaPoints
+  ) {
+    return false;
+  }
+  const assessment = assessEngineCertifiedPostRezIcePath(
+    [ice],
+    server.id,
+    view.stateVersion,
+    new Set([ice.instanceId]),
+    runnerRig,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      view.opponent.credits,
+      runnerRig,
+      {
+        creditPoolHorizon: "next_runner_turn",
+      },
+    ),
+    [],
+    view.own.credits,
+    {
+      targetServerId: server.id,
+      visibleCorpCredits: view.own.credits,
+      visibleRemoteServerCount: view.servers.filter(
+        (candidate) => !["hq", "rd", "archives"].includes(candidate.id),
+      ).length,
+    },
+  );
+  return (
+    assessment.assessedKnownIceCount === 1 &&
+    assessment.canReachAccess &&
+    !assessment.conditionalAccessReasons?.length &&
+    !assessment.conditionalRiskReasons?.length &&
+    !assessment.preRunPreparation
+  );
 }
 
 export function corpRemoteHasBoundedStagedIce(

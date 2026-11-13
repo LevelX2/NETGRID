@@ -191,6 +191,10 @@ function playSyntheticActionCueSound(
     playCardDrawSnap(context, safeVolume, repeatCount);
     return;
   }
+  if (kind === "credit") {
+    playCoinClink(context, safeVolume);
+    return;
+  }
   if (kind === "damage" || kind.startsWith("damage_")) {
     playDamageLaserBursts(context, safeVolume, repeatCount);
     return;
@@ -385,6 +389,36 @@ function playDamageLaserBursts(
   }
 }
 
+function playCoinClink(context: AudioContext, volume: number): void {
+  const now = context.currentTime;
+  [
+    { frequency: 2100, offset: 0 },
+    { frequency: 2800, offset: 0.055 },
+    { frequency: 2400, offset: 0.125 },
+  ].forEach(({ frequency, offset }) => {
+    const start = now + offset;
+    // Inharmonic partials and sharp attacks give each small impact a metallic
+    // ring; the whole coin cluster stays short regardless of credit amount.
+    [1, 2.76].forEach((ratio, partial) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const duration = partial === 0 ? 0.13 : 0.065;
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency * ratio, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(
+        Math.max(0.0001, volume * (partial === 0 ? 0.075 : 0.025)),
+        start + 0.002,
+      );
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.01);
+    });
+  });
+}
+
 function playCardDrawSnap(
   context: AudioContext,
   volume: number,
@@ -444,11 +478,6 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{
   switch (kind) {
     case "draw":
       return [{ frequency: 660, duration: 0.11, gain: 0.07, type: "sine" }];
-    case "credit":
-      return [
-        { frequency: 988, duration: 0.035, gain: 0.055, type: "triangle" },
-        { frequency: 1480, duration: 0.05, gain: 0.035, type: "triangle" },
-      ];
     case "install_hidden":
       return [{ frequency: 185, duration: 0.12, gain: 0.05, type: "triangle" }];
     case "install_known":

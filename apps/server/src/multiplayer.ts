@@ -7920,6 +7920,18 @@ function historicalAuditFor(
   decisionInput: AiDecisionInputWithDeckCapabilities,
 ): AiDecisionHistoricalAudit {
   const actorView = getPlayerView(state, side);
+  const choiceQuote =
+    decisionInput.playerView.pendingChoice?.agendaPurgeArchivesProtectionQuote;
+  if (choiceQuote) {
+    const choice = actorView.pendingChoice;
+    if (
+      side !== "corp" ||
+      choice?.choiceId !== choiceQuote.choiceId ||
+      actorView.stateVersion !== choiceQuote.stateVersion
+    )
+      throw new Error("ai_trace_agenda_purge_archives_quote_binding_mismatch");
+    choice.agendaPurgeArchivesProtectionQuote = structuredClone(choiceQuote);
+  }
   const {
     legalActions: _legalActions,
     publicEvents: _publicEvents,

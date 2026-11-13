@@ -464,11 +464,22 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     expect(hints.get("onr_proteus_117_poisoned-water-supply")).toMatchObject({
       effects: [
         {
+          kind: "resource_trash",
+          scope: "installed_card",
+          target: "installed_card_trash_cost",
+          amount: 2,
+        },
+        {
           kind: "run_tax",
-          target: "bad_publicity_self_damage_cost",
+          scope: "corp",
+          target: "bad_publicity_pressure",
+          amount: 1,
         },
       ],
-      functionSignals: ["corp.bad_publicity_self_damage_cost"],
+      functionSignals: [
+        "risk.trash_own_installed_cards",
+        "corp.bad_publicity_pressure",
+      ],
     });
     expect(hints.get("onr_proteus_141_get-ready-to-rumble")).toMatchObject({
       effects: expect.arrayContaining([

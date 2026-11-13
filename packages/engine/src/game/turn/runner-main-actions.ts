@@ -16,10 +16,14 @@ import {
 } from "../../ability-engine/card-implementation-runtime-shared";
 import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
 import { fixedPlayCostCredits } from "../payment/play-cost";
+import { quoteRunnerCostPenaltySupportOpening } from "../payment/runner-payment-support";
 import { restrictedHostedCredits } from "../run/run-duration-payment";
 import { evaluateRunStartEligibility } from "../run/run-start-eligibility";
 import { runnerCanStartRun } from "../run/run-start-lock";
-import { runnerFortIceTrashActionPayload } from "./runner-fort-ice-trash-quote";
+import {
+  runnerFortIceTrashActionPayload,
+  runnerSuccessfulRunFortIceTrashActionPayload,
+} from "./runner-fort-ice-trash-quote";
 import { withRunnerPostBreakTrashQuote } from "./runner-post-break-trash-quote";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
@@ -311,12 +315,41 @@ export function buildRunnerMainActions(
     installAction: LegalAction,
     definition: { installCost?: number },
   ) => {
+    const installCost = definition.installCost ?? 0;
+    const availableProgramInstallCredits =
+      availableRunnerProgramInstallCredits(state);
+    const paymentActions = expandRunnerProgramInstallPaymentActions(
+      state,
+      installAction,
+      {
+        installCost,
+        availableProgramInstallCredits,
+      },
+    );
+    const opening =
+      paymentActions.length === 1 &&
+      paymentActions[0] === installAction &&
+      installCost > availableProgramInstallCredits &&
+      installAction.payload?.runnerProgramTrashBeforeInstall !== true &&
+      installAction.payload?.v1922ValuPakInstallAction !== true
+        ? quoteRunnerCostPenaltySupportOpening(state, installAction, {
+            amount: installCost,
+            availableWithoutSupport: availableProgramInstallCredits,
+            context: "runner_program_install",
+          })
+        : undefined;
     actions.push(
-      ...expandRunnerProgramInstallPaymentActions(state, installAction, {
-        installCost: definition.installCost ?? 0,
-        availableProgramInstallCredits:
-          availableRunnerProgramInstallCredits(state),
-      }),
+      ...(opening
+        ? [
+            {
+              ...installAction,
+              payload: {
+                ...installAction.payload,
+                runnerCostPenaltySupportOpeningCreditAmount: opening.amountDue,
+              },
+            },
+          ]
+        : paymentActions),
     );
   };
   const flags = ensureRunnerTurnFlags(state);
@@ -901,6 +934,11 @@ export function buildRunnerMainActions(
                 serverId: server.id,
                 runnerEventRun: true,
                 ...deterministicResourcePayload,
+                ...runnerSuccessfulRunFortIceTrashActionPayload(
+                  state,
+                  server.id,
+                  makeRunEffect,
+                ),
                 ...eventCapabilityBinding?.payload,
               },
               eventAbilityMetadata,
@@ -925,6 +963,11 @@ export function buildRunnerMainActions(
                   serverId: server.id,
                   runnerEventRun: true,
                   ...deterministicResourcePayload,
+                  ...runnerSuccessfulRunFortIceTrashActionPayload(
+                    state,
+                    server.id,
+                    makeRunEffect,
+                  ),
                   ...eventCapabilityBinding?.payload,
                 },
                 eventAbilityMetadata,

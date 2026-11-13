@@ -6,6 +6,7 @@ import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type AiDifficulty,
   type CorpOptionalRezChoiceQuote,
@@ -97,6 +98,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "restrictedCreditGainUsableFor",
   "restrictedCreditGainCleanup",
   "restrictedCreditGainComplete",
+  "runnerCostPenaltySupportOpeningCreditAmount",
   "runnerCostPenaltySupportContinuation",
   "runnerCostPenaltySupportWindowId",
   "costPenaltySupportWindowId",
@@ -774,6 +776,26 @@ function sanitizePlayerView(
   view: PlayerView,
   publicEvents: PublicGameEvent[],
 ): PlayerView {
+  const fortTrash = view.run?.successfulRunFortIceTrashQuote;
+  if (
+    fortTrash &&
+    (view.side !== "runner" ||
+      fortTrash.schemaVersion !== RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION ||
+      !fortTrash.runId ||
+      fortTrash.runId !== view.run?.runId ||
+      fortTrash.stateVersion !== view.stateVersion ||
+      fortTrash.serverId !== view.run.attackedServerId ||
+      typeof fortTrash.sourceCardInstanceId !== "string" ||
+      !fortTrash.sourceCardInstanceId ||
+      !Number.isSafeInteger(fortTrash.tagsAdded) ||
+      fortTrash.tagsAdded <= 0 ||
+      !Number.isSafeInteger(fortTrash.rezzedIceCount) ||
+      fortTrash.rezzedIceCount !==
+        view.servers
+          .find((server) => server.id === fortTrash.serverId)
+          ?.ice.filter((ice) => ice.rezzed === true).length)
+  )
+    throw new Error("Invalid Engine active successful-run ICE-trash quote.");
   const runEndTrashUsed = view.run?.runEndTrashUsedBreakerIdsThisRun;
   const postPassTrashCheckUsed =
     view.run?.postPassTrashCheckUsedBreakerIdsThisEncounter;
@@ -863,6 +885,12 @@ function sanitizePlayerView(
     stateVersion: view.stateVersion,
     ...(view.runnerNextTurnCreditClicks !== undefined
       ? { runnerNextTurnCreditClicks: view.runnerNextTurnCreditClicks }
+      : {}),
+    ...(view.runnerNextRunBadPublicityCredits !== undefined
+      ? {
+          runnerNextRunBadPublicityCredits:
+            view.runnerNextRunBadPublicityCredits,
+        }
       : {}),
     traceRulesProfile: view.traceRulesProfile ?? "modern_open",
     ...(view.turnSerial !== undefined ? { turnSerial: view.turnSerial } : {}),
@@ -1096,6 +1124,19 @@ function sanitizePlayerView(
               ? { followupRunOpportunity: view.run.followupRunOpportunity }
               : {}),
             attackedServerId: view.run.attackedServerId,
+            ...(fortTrash
+              ? {
+                  successfulRunFortIceTrashQuote: {
+                    schemaVersion: fortTrash.schemaVersion,
+                    runId: fortTrash.runId,
+                    stateVersion: fortTrash.stateVersion,
+                    serverId: fortTrash.serverId,
+                    sourceCardInstanceId: fortTrash.sourceCardInstanceId,
+                    rezzedIceCount: fortTrash.rezzedIceCount,
+                    tagsAdded: fortTrash.tagsAdded,
+                  },
+                }
+              : {}),
             ...(view.run.pendingAutoPassIceId
               ? { pendingAutoPassIceId: view.run.pendingAutoPassIceId }
               : {}),
@@ -1333,6 +1374,9 @@ export function sanitizeCorpPunishRouteQuoteSet(
         sourceCapabilityId: step.sourceCapabilityId,
         clicks: step.clicks,
         credits: step.credits,
+        ...(step.agendaPointCost !== undefined
+          ? { agendaPointCost: step.agendaPointCost }
+          : {}),
         ...(step.hardwareTrashProjection
           ? {
               hardwareTrashProjection: {
@@ -1614,6 +1658,17 @@ function validOrderedPunishSteps(
         !validPunishStepKind(step.kind) ||
         !nonNegativeInteger(step.clicks) ||
         !nonNegativeInteger(step.credits) ||
+        (step.agendaPointCost !== undefined &&
+          (route.steps.length !== 1 ||
+            step.kind !== "meat_damage" ||
+            !Number.isSafeInteger(step.agendaPointCost) ||
+            step.agendaPointCost <= 0 ||
+            step.agendaPointCost > view.own.agendaPoints ||
+            step.currentLegalAction === undefined ||
+            !canonicalCapabilityMatchesDefinition(
+              step.sourceCapabilityId,
+              step.sourceCardDefinitionId,
+            ))) ||
         !validHardwareTrashProjection(step, view) ||
         (index > 0 && step.currentLegalAction !== undefined),
     )
@@ -1646,7 +1701,15 @@ function validOrderedPunishSteps(
           head.clicks &&
         action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ===
           head.credits &&
-        validCurrentHardwareTrashAction(action, head)))
+        validCurrentHardwareTrashAction(action, head) &&
+        [action, visibleCurrentAction].every((candidate) =>
+          head.agendaPointCost === undefined
+            ? candidate.payload?.v1920AssetAbility !== "tagged_meat_damage"
+            : candidate.type === "gain_credit" &&
+              candidate.payload?.v1920AssetAbility === "tagged_meat_damage" &&
+              candidate.payload.damageRecipient === "runner" &&
+              candidate.payload.agendaPointCost === head.agendaPointCost,
+        )))
   );
 }
 
@@ -3549,6 +3612,102 @@ function isPlainObjectRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+function sanitizeAgendaPurgeArchivesProtectionQuote(
+  choice: VisibleChoiceRequest,
+  stateVersion: number,
+  side: Side,
+): VisibleChoiceRequest["agendaPurgeArchivesProtectionQuote"] {
+  const quote = choice.agendaPurgeArchivesProtectionQuote;
+  if (!quote) return undefined;
+  if (
+    side !== "corp" ||
+    choice.side !== "corp" ||
+    !choice.source.startsWith(
+      "card_implementation.agenda_purge_install_targets:",
+    ) ||
+    quote.choiceId !== choice.choiceId ||
+    quote.stateVersion !== stateVersion ||
+    quote.stateVersion !== choice.stateVersion ||
+    quote.packages.length !== 3 ||
+    !choice.options.some(
+      (option) =>
+        option.selectable === false &&
+        option.card?.known &&
+        option.card.type === "agenda" &&
+        option.card.instanceId === quote.revealedAgendaId,
+    )
+  )
+    throw new Error("invalid_agenda_purge_archives_protection_binding");
+  const optionById = new Map(
+    choice.options.map((option) => [option.id, option]),
+  );
+  const seen = new Set<string>();
+  const packages = quote.packages.map((entry) => {
+    const options = entry.optionIds.flatMap((id) => {
+      const option = optionById.get(id);
+      const card = option?.card;
+      if (
+        !option ||
+        option.selectable === false ||
+        !card?.known ||
+        card.type !== "ice"
+      )
+        return [];
+      for (const serverId of ["archives", "rd"] as const) {
+        if (
+          option.id === `agenda_purge_${card.instanceId}_${serverId}_fixed` &&
+          option.value === `${card.instanceId}|${serverId}|fixed`
+        )
+          return [{ card, serverId }];
+      }
+      return [];
+    });
+    const archives = options.filter((option) => option.serverId === "archives");
+    const identity = [...entry.optionIds].sort().join("|");
+    if (
+      entry.optionIds.length !== 2 ||
+      options.length !== 2 ||
+      seen.has(identity) ||
+      archives.length === 0 ||
+      options[0]?.card.instanceId === options[1]?.card.instanceId ||
+      !nonNegativeInteger(entry.corpCreditsAfter) ||
+      !nonNegativeInteger(entry.corpAgendaPointsAfter) ||
+      !nonNegativeInteger(entry.corpClicksAfter) ||
+      entry.archivesIce.length !== archives.length ||
+      new Set(entry.archivesIce.map((card) => card.instanceId)).size !==
+        archives.length ||
+      entry.archivesIce.some(
+        (card) =>
+          !card.known ||
+          card.type !== "ice" ||
+          card.rezzed !== true ||
+          card.effectiveRunQuote?.iceInstanceId !== card.instanceId ||
+          card.effectiveRunQuote.iceDefinitionId !== card.definitionId ||
+          !archives.some(
+            (option) =>
+              option.card.instanceId === card.instanceId &&
+              option.card.definitionId === card.definitionId,
+          ),
+      )
+    )
+      throw new Error("invalid_agenda_purge_archives_protection_package");
+    seen.add(identity);
+    return {
+      optionIds: [...entry.optionIds],
+      archivesIce: entry.archivesIce.map(sanitizeVisibleCard),
+      corpCreditsAfter: entry.corpCreditsAfter,
+      corpAgendaPointsAfter: entry.corpAgendaPointsAfter,
+      corpClicksAfter: entry.corpClicksAfter,
+    };
+  });
+  return {
+    choiceId: quote.choiceId,
+    stateVersion,
+    revealedAgendaId: quote.revealedAgendaId,
+    packages,
+  };
+}
+
 function sanitizeVisibleChoiceRequest(
   choice: VisibleChoiceRequest,
   playerViewStateVersion: number,
@@ -3579,6 +3738,12 @@ function sanitizeVisibleChoiceRequest(
     playerViewStateVersion,
     playerViewSide,
   );
+  const agendaPurgeArchivesProtectionQuote =
+    sanitizeAgendaPurgeArchivesProtectionQuote(
+      choice,
+      playerViewStateVersion,
+      playerViewSide,
+    );
   return {
     choiceId: choice.choiceId,
     side: choice.side,
@@ -3593,6 +3758,9 @@ function sanitizeVisibleChoiceRequest(
       : {}),
     ...(continuation ? { continuation } : {}),
     ...(corpStartDrawQuote ? { corpStartDrawQuote } : {}),
+    ...(agendaPurgeArchivesProtectionQuote
+      ? { agendaPurgeArchivesProtectionQuote }
+      : {}),
     prompt: choice.prompt,
     kind: choice.kind,
     options: choice.options.map((option) => {
@@ -3602,6 +3770,36 @@ function sanitizeVisibleChoiceRequest(
         ownRig,
         servers,
       );
+      const optionKind = option.metadata?.optionKind;
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
+        choice.source === "v120.event_modification.interrupt" &&
+        (optionKind === "backup_trashed_programs" || optionKind === "allow_trash")
+      ) {
+        if (
+          optionKind === "backup_trashed_programs" &&
+          (!metadata?.sourceCardInstanceId ||
+            !Number.isSafeInteger(option.metadata?.amount) ||
+            Number(option.metadata?.amount) <= 0)
+        )
+          throw new Error("invalid_runner_program_backup_source_binding");
+        metadata = { ...metadata, optionKind };
+      }
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
+        choice.source.startsWith("v120.event_modification.trash_targets:") &&
+        optionKind === "backup_program_target"
+      ) {
+        const target = option.metadata?.targetCardInstanceId;
+        if (
+          !target ||
+          !ownRig.some((card) => card.known && card.type === "program" && card.instanceId === target)
+        )
+          throw new Error("invalid_runner_program_backup_target_binding");
+        metadata = { ...metadata, optionKind, targetCardInstanceId: target };
+      }
       if (
         playerViewSide === "runner" &&
         choice.side === "runner" &&

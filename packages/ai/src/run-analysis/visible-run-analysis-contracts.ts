@@ -48,6 +48,8 @@ export type VisibleDeflectorContext = {
   targetServerId?: string;
   /** Ordinary run-start policy: finance positive Core protection required by the run window. */
   requireCoreDamageProtection?: boolean;
+  /** The caller checks the exact conditional damage against its remaining hand. */
+  quoteNextEncounterDamageForHandBudget?: true;
   /** Remaining free Net/Core damage prevention for this turn. */
   netOrCoreDamagePreventionRemaining?: number;
   /** Remaining run-scoped prevention that applies to all damage types. */
@@ -254,6 +256,13 @@ export type VisibleIceRunHazardProjection = {
     | { kind: "breaker"; assessment: BreakAssessment };
 };
 
+export type DeferredNextEncounterDamage = {
+  iceInstanceId: string;
+  subroutineId: string;
+  sourceDefinitionId: string;
+  amount: number;
+};
+
 export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
   /** Run-end trash obligations of the selected path; sources remain usable inside it. */
@@ -276,8 +285,10 @@ export type KnownRezzedIcePathAssessment = {
   knownPathBlockedByMissingCoverage: boolean;
   knownPathBlockedByEtr: boolean;
   knownPathBlockedByHardUnbrokenEffect?: boolean;
-  /** All known encounters were checked; only unbroken direct damage blocks this quote. */
+  /** All known encounters were checked; only unbroken damage blocks this quote. */
   knownPathBlockedOnlyByDamage?: true;
+  /** The unbroken source can deal Net damage at a later actual encounter. */
+  deferredNextEncounterDamage?: DeferredNextEncounterDamage[];
   /** Already priced alternatives retained for the run owner's complete hand/reserve assessment. */
   damageBudgetAlternatives?: Array<
     Omit<KnownRezzedIcePathAssessment, "damageBudgetAlternatives">

@@ -1,4 +1,8 @@
-import type { GameState, VisibleTraceState } from "@netgrid/shared";
+import type {
+  GameState,
+  LegalAction,
+  VisibleTraceState,
+} from "@netgrid/shared";
 import {
   definitionFor,
   runnerInstalledCardIds,
@@ -9,6 +13,72 @@ import {
   traceCorpBaseStrength,
   traceComparisonIsSuccessful,
 } from "../trace/trace-rules-profile";
+
+/** Corp-owned quote for the live trace, independent of strategic exposure. */
+export function visibleCurrentRunLockBidQuote(
+  state: GameState,
+  legalActions: readonly LegalAction[],
+): VisibleTraceState["currentRunLockBidQuote"] {
+  const { trace, run, pendingChoice: choice } = state;
+  if (
+    trace?.status !== "corp_bid" ||
+    trace.traceRulesProfile !== "modern_open" ||
+    trace.successEffect.type !== "end_run_and_run_lock" ||
+    trace.successEffect.amount <= 0 ||
+    trace.subroutineIndex === undefined ||
+    !run ||
+    run.phase !== "encounter_ice" ||
+    run.encounteredIceId !== trace.sourceCardInstanceId ||
+    choice?.side !== "corp" ||
+    choice.kind !== "bid_amount" ||
+    choice.source !== `trace:${trace.traceId}` ||
+    choice.stateVersion !== state.stateVersion
+  )
+    return undefined;
+  const maximum = visibleRunnerMaximumTraceStrength(state);
+  if (maximum === undefined) return undefined;
+  const base = traceCorpBaseStrength(trace);
+  if (traceComparisonIsSuccessful(trace.traceRulesProfile, base, maximum))
+    return undefined;
+  for (const action of legalActions) {
+    if (
+      action.side !== "corp" ||
+      action.type !== "resolve_choice" ||
+      action.expiresAtStateVersion !== state.stateVersion
+    )
+      continue;
+    const requirement = action.choiceRequirements?.find(
+      (candidate) => candidate.choiceId === choice.choiceId,
+    );
+    if (!requirement) continue;
+    const option = choice.options
+      .flatMap((entry) =>
+        entry.selectable !== false &&
+        typeof entry.value === "number" &&
+        Number.isSafeInteger(entry.value) &&
+        entry.value > 0 &&
+        requirement.optionIds.includes(entry.id) &&
+        traceComparisonIsSuccessful(
+          trace.traceRulesProfile,
+          base + entry.value,
+          maximum,
+        )
+          ? [{ id: entry.id, amount: entry.value }]
+          : [],
+      )
+      .sort((left, right) => left.amount - right.amount)[0];
+    if (option)
+      return {
+        runId: run.runId,
+        stateVersion: state.stateVersion,
+        actionId: action.actionId,
+        choiceId: choice.choiceId,
+        optionId: option.id,
+        amount: option.amount,
+      };
+  }
+  return undefined;
+}
 
 /** Public rule facts only; bid-dependent magnitudes remain uncertified. */
 export function visibleTraceBidEffect(

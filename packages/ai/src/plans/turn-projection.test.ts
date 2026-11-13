@@ -1,9 +1,11 @@
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
+  type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { costProfileForAction } from "../actions/action-cost-timing";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
@@ -13,6 +15,7 @@ import {
 import {
   applyCertifiedTurnProjectionDelta,
   assessTurnObservationBoundary,
+  boundCurrentStepProjection,
   buildProjectedDecisionFrame,
   certifiedTurnProjectionDeltaFromCandidate,
   PROJECTED_DECISION_FRAME_SCHEMA_VERSION,
@@ -20,6 +23,114 @@ import {
 } from "./turn-projection";
 
 describe("turn projection", () => {
+  it.each(["pump_breaker", "break_subroutine"] as const)(
+    "prices only the exact current %s payment-window opening",
+    (type) => {
+      const input = decisionInput();
+      input.side = "runner";
+      input.playerView.side = "runner";
+      input.playerView.timingPoint = "run.encounter_ice";
+      input.playerView.own.credits = 1;
+      const ice = input.playerView.servers[1]!.ice[0]!;
+      input.playerView.run = {
+        runId: "run-current",
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: ice,
+        successful: false,
+      };
+      const action: LegalAction = {
+        actionId: "runner.current_breaker_action",
+        type,
+        side: "runner",
+        label: "Current breaker action",
+        source: "runner-breaker",
+        timingPoint: "run.encounter_ice",
+        expiresAtStateVersion: 10,
+        costs: [{ credits: 2 }],
+        targetRequirements: [],
+        visibility: "public",
+        payload: {
+          breakerId: "runner-breaker",
+          iceId: ice.instanceId,
+          runnerCostPenaltySupportOpeningCreditAmount: 2,
+        },
+      };
+      input.legalActions = [action];
+      const offer = {
+        ...candidate({ netCredits: 0, netHand: 0, netActions: 0 }),
+        actionId: action.actionId,
+        actionType: type,
+        costProfile: costProfileForAction(action),
+      };
+      expect(boundCurrentStepProjection(input, offer)).toEqual({
+        liquidCreditCost: 0,
+        boundaryKind: "engine_continuation",
+      });
+      action.payload!.runnerCostPenaltySupportOpeningCreditAmount = 1;
+      expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
+      action.payload!.runnerCostPenaltySupportOpeningCreditAmount = 2;
+      action.payload!.runnerCostPenaltySupportContinuation = true;
+      expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
+      delete action.payload!.runnerCostPenaltySupportContinuation;
+      action.payload!.iceId = "different-ice";
+      expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
+      action.payload!.iceId = ice.instanceId;
+      action.expiresAtStateVersion++;
+      expect(boundCurrentStepProjection(input, offer)).toBeUndefined();
+    },
+  );
+  it("prices only the exact legal program-install payment-window opening", () => {
+    const input = decisionInput();
+    input.side = "runner";
+    input.playerView.side = "runner";
+    input.playerView.timingPoint = "runner_action.main";
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 1;
+    const action: LegalAction = {
+      actionId: "runner.install_card.runner-wall-breaker",
+      type: "install_card",
+      side: "runner",
+      label: "Wall-Breaker installieren",
+      source: "runner-wall-breaker",
+      timingPoint: "runner_action.main",
+      expiresAtStateVersion: 10,
+      costs: [{ clicks: 1, credits: 6 }],
+      targetRequirements: [],
+      visibility: "private_to_actor",
+      payload: {
+        cardId: "runner-wall-breaker",
+        runnerCostPenaltySupportOpeningCreditAmount: 6,
+      },
+    };
+    input.legalActions = [action];
+    const offer = {
+      ...candidate({ netCredits: 0, netHand: 0, netActions: 0 }),
+      actionId: action.actionId,
+      actionType: action.type,
+      costProfile: costProfileForAction(action),
+    };
+    const projection = () => boundCurrentStepProjection(input, offer);
+    expect(projection()).toEqual({
+      liquidCreditCost: 0,
+      boundaryKind: "engine_continuation",
+    });
+    action.payload!.runnerCostPenaltySupportOpeningCreditAmount = 5;
+    expect(projection()).toBeUndefined();
+    action.payload!.runnerCostPenaltySupportOpeningCreditAmount = 6;
+    action.payload!.cardId = "different-program";
+    expect(projection()).toBeUndefined();
+    action.payload!.cardId = action.source;
+    action.payload!.runnerCostPenaltySupportContinuation = true;
+    expect(projection()).toBeUndefined();
+    delete action.payload!.runnerCostPenaltySupportContinuation;
+    action.payload!.runnerProgramTrashBeforeInstall = true;
+    expect(projection()).toBeUndefined();
+    delete action.payload!.runnerProgramTrashBeforeInstall;
+    action.expiresAtStateVersion++;
+    expect(projection()).toBeUndefined();
+  });
   it("deducts certified agenda costs and rejects a payment below zero", () => {
     const input = decisionInput();
     input.playerView.own.agendaPoints = 1;

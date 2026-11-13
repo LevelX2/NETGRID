@@ -79,7 +79,10 @@ export function createRunnerPumpFuturePathContext(
       creditBudgetAfterPumpAndBreak,
       server.root,
       input.playerView.opponent.credits,
-      currentRunPathContext(input),
+      {
+        ...currentRunPathContext(input),
+        quoteNextEncounterDamageForHandBudget: true,
+      },
     );
     const currentIce = currentEncounteredIceCard(input);
     const damageIce =
@@ -111,6 +114,7 @@ export function createRunnerPumpFuturePathContext(
             generalCredits: runnerGeneralCreditsAfterCompletedPath(
               rawPath.creditBudgetAfterPath,
             ),
+            deferredNextEncounterDamage: rawPath.deferredNextEncounterDamage,
             requiredHandFloor:
               requiredHandFloor ??
               runnerConfirmedDamageRequiredHandFloor(input),
