@@ -7,6 +7,8 @@ import {
   type CorpPunishRouteQuoteResult,
   type CorpPunishRouteStepQuote,
   type EngineError,
+  type EngineResult,
+  type GameEvent,
   type GameState,
   type LegalAction,
 } from "@netgrid/shared";
@@ -44,6 +46,7 @@ import {
   runnerInstalledCardIds,
 } from "../state/card-server-lookup";
 import { traceAutoSuccessSource } from "../trace/trace-auto-success";
+import { traceRulesDefinitionForTrace } from "../trace/trace-rules-profile";
 import { isConcealedRunnerResource } from "./card-view";
 
 type CertifiedStep = {
@@ -56,6 +59,7 @@ type CertifiedStep = {
 type CertifiedTraceTagResponse = {
   sourceStepId: string;
   traceLimit: number;
+  bid: number;
   corpResponseCredits: number;
   runnerResponseCredits: number;
   minimumTagAmount: number;
@@ -328,6 +332,14 @@ export function quoteCorpPunishRoute(
       steps: certifiedSteps.map(({ quote }) => quote),
       totalClicks,
       totalActionCredits,
+      ...(traceTagResponse
+        ? {
+            traceBid: {
+              sourceStepId: traceTagResponse.sourceStepId,
+              amount: traceTagResponse.bid,
+            },
+          }
+        : {}),
       tagTrigger:
         state.runner.tags > 0
           ? {
@@ -695,6 +707,8 @@ function certifyExactTraceTagResponse(
   let selected:
     | {
         afterCorpBid: GameState;
+        bid: number;
+        corpResponseCredits: number;
         successfulOutcomes: NonNullable<
           ReturnType<typeof exactTagApplicationOutcomes>
         >;
@@ -707,13 +721,14 @@ function certifyExactTraceTagResponse(
   for (const bid of corpBidOptions
     .filter((option) => !automaticSuccess || option.value === 0)
     .sort((left, right) => left.value - right.value)) {
-    const afterBid = applyExactChoice(
+    const corpChoice = applyExactChoice(
       structuredClone(verifiedAfterHead),
       "corp",
       bid.id,
     );
+    if (!corpChoice) return undefined;
+    const afterBid = corpChoice.state;
     if (
-      !afterBid ||
       afterBid.trace?.status !== "runner_bid" ||
       afterBid.pendingChoice?.side !== "runner" ||
       afterBid.pendingChoice.kind !== "bid_amount" ||
@@ -724,19 +739,39 @@ function certifyExactTraceTagResponse(
     const maximumBid = runnerOptions.sort((a, b) => b.value - a.value)[0];
     const zeroBid = runnerOptions.find((option) => option.value === 0);
     if (!maximumBid || !zeroBid) return undefined;
-    const zeroState = applyExactChoice(
+    const zeroResponse = applyExactChoice(
       structuredClone(afterBid),
       "runner",
       zeroBid.id,
     );
-    const maximumState = applyExactChoice(
-      structuredClone(afterBid),
-      "runner",
-      maximumBid.id,
+    const maximumResponse =
+      maximumBid.id === zeroBid.id
+        ? zeroResponse
+        : applyExactChoice(structuredClone(afterBid), "runner", maximumBid.id);
+    if (!zeroResponse || !maximumResponse) return undefined;
+    const { traceId } = afterBid.trace;
+    const blind =
+      traceRulesDefinitionForTrace(afterBid.trace).resolutionMode ===
+      "hidden_commit_reveal";
+    const corpResponseCredits = exactCorpTracePaymentCredits(
+      blind ? zeroResponse.event : corpChoice.event,
+      traceId,
+      bid.value,
     );
-    const zeroOutcomes = zeroState && exactTagApplicationOutcomes(zeroState);
-    const maximumOutcomes =
-      maximumState && exactTagApplicationOutcomes(maximumState);
+    if (
+      corpResponseCredits === undefined ||
+      (blind &&
+        corpResponseCredits !==
+          exactCorpTracePaymentCredits(
+            maximumResponse.event,
+            traceId,
+            bid.value,
+          ))
+    ) {
+      return undefined;
+    }
+    const zeroOutcomes = exactTagApplicationOutcomes(zeroResponse.state);
+    const maximumOutcomes = exactTagApplicationOutcomes(maximumResponse.state);
     if (!zeroOutcomes || !maximumOutcomes) return undefined;
     const amounts = [...zeroOutcomes.states, ...maximumOutcomes.states].map(
       (outcome) => outcome.runner.tags - simulationState.runner.tags,
@@ -752,6 +787,8 @@ function certifyExactTraceTagResponse(
       return undefined;
     const attempt = {
       afterCorpBid: afterBid,
+      bid: bid.value,
+      corpResponseCredits,
       successfulOutcomes: zeroOutcomes,
       maximumResponseOutcomes: maximumOutcomes,
     };
@@ -765,8 +802,13 @@ function certifyExactTraceTagResponse(
   }
   selected ??= reactivePrintedLimitAttempt;
   if (!selected) return undefined;
-  const { afterCorpBid, successfulOutcomes, maximumResponseOutcomes } =
-    selected;
+  const {
+    afterCorpBid,
+    bid,
+    corpResponseCredits,
+    successfulOutcomes,
+    maximumResponseOutcomes,
+  } = selected;
   const responseOutcomes = [
     ...successfulOutcomes.states,
     ...maximumResponseOutcomes.states,
@@ -778,16 +820,12 @@ function certifyExactTraceTagResponse(
     ? 0
     : Math.min(...tagAmounts);
   const maximumTagAmount = Math.max(...tagAmounts);
-  const corpResponseCredits =
-    verifiedAfterHead.corp.credits - afterCorpBid.corp.credits;
   const runnerResponseCredits = Math.max(
     ...responseOutcomes.map(
       (outcome) => afterCorpBid.runner.credits - outcome.runner.credits,
     ),
   );
   if (
-    !Number.isSafeInteger(corpResponseCredits) ||
-    corpResponseCredits < 0 ||
     !Number.isSafeInteger(runnerResponseCredits) ||
     runnerResponseCredits < 0
   ) {
@@ -796,6 +834,7 @@ function certifyExactTraceTagResponse(
   return {
     sourceStepId: traceStep.quote.stepId,
     traceLimit: traceEffect.traceLimit,
+    bid,
     corpResponseCredits,
     runnerResponseCredits,
     minimumTagAmount,
@@ -805,6 +844,26 @@ function certifyExactTraceTagResponse(
       successfulOutcomes.usedTagPreventionWindow ||
       maximumResponseOutcomes.usedTagPreventionWindow,
   };
+}
+
+function exactCorpTracePaymentCredits(
+  event: GameEvent,
+  traceId: string,
+  bid: number,
+): number | undefined {
+  const {
+    corpCreditBid,
+    corpBid,
+    traceId: paymentTraceId,
+  } = event.publicPayload;
+  return paymentTraceId === traceId &&
+    corpBid === bid &&
+    typeof corpCreditBid === "number" &&
+    Number.isSafeInteger(corpCreditBid) &&
+    corpCreditBid >= 0 &&
+    corpCreditBid <= bid
+    ? corpCreditBid
+    : undefined;
 }
 
 function exactTagApplicationOutcomes(
@@ -837,7 +896,7 @@ function exactTagApplicationOutcomes(
       option.id,
     );
     if (!resolved) return undefined;
-    const branch = exactTagApplicationOutcomes(resolved, depth + 1);
+    const branch = exactTagApplicationOutcomes(resolved.state, depth + 1);
     if (!branch) return undefined;
     states.push(...branch.states);
   }
@@ -893,24 +952,28 @@ function applyExactChoice(
   state: GameState,
   side: "corp" | "runner",
   optionId: string,
-): GameState | undefined {
+): Extract<EngineResult, { ok: true }> | undefined {
   const choice = state.pendingChoice;
   if (!choice || choice.side !== side) return undefined;
   const action = getLegalActions(state, side).find(
     (candidate) => candidate.type === "resolve_choice",
   );
   if (!action) return undefined;
-  const result = applyAction(state, {
-    matchId: state.matchId,
-    side,
-    actionId: action.actionId,
-    clientKnownStateVersion: state.stateVersion,
-    selectedChoices: {
-      choiceId: choice.choiceId,
-      selectedOptionIds: [optionId],
+  const result = applyAction(
+    state,
+    {
+      matchId: state.matchId,
+      side,
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: choice.choiceId,
+        selectedOptionIds: [optionId],
+      },
     },
-  });
-  return result.ok ? result.state : undefined;
+    { publicEventsMode: "latest" },
+  );
+  return result.ok ? result : undefined;
 }
 
 export function corpPunishRouteRequestFingerprint(

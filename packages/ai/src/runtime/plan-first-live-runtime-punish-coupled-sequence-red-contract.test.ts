@@ -1026,6 +1026,14 @@ function punishRouteQuote(params: {
     steps,
     totalClicks: steps.length,
     totalActionCredits: deterministicCredits,
+    ...(params.stage === "tag"
+      ? {
+          traceBid: {
+            sourceStepId: `${params.routeId}:tag`,
+            amount: responseCredits,
+          },
+        }
+      : {}),
     tagTrigger:
       params.stage === "tag"
         ? {

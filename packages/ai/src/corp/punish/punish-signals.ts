@@ -637,13 +637,13 @@ function quotedPunishSignal(
       executionNeedId,
       fundingNeedId,
       currentHeadStepId: head.stepId,
-      ...(head.kind === "trace_tag" && currentHeadAvailable
+      ...(route.traceBid?.sourceStepId === head.stepId && currentHeadAvailable
         ? {
             traceBidBinding: {
               sourceCardInstanceId: head.sourceCardInstanceId,
               sourceDefinitionId: head.sourceCardDefinitionId,
               quotedAtStateVersion: route.stateVersion,
-              amount: route.responsePaymentEnvelope.corpResponseCredits.maximum,
+              amount: route.traceBid.amount,
             },
           }
         : {}),

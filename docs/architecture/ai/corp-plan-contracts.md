@@ -3136,6 +3136,13 @@ gequotete Gebot an die aktuelle private Engine-Choice. Der Root bleibt
 `corp.punish_campaign`; Funding-Need, Execution-Need und Plan-IDs ändern sich
 durch diese Quellcodestruktur nicht.
 
+Bei einem Trace-Head enthält die vollständige Engine-Quote das Gebot für
+genau diesen Step. Das Budget der Route verwendet den Betrag an regulären
+Corp-Credits aus der Zahlungsauflösung. In Classic Blind wird der Betrag
+erst beim Aufdecken gebucht. Die simulierten Runner-Antworten müssen
+denselben Zahlungsbetrag belegen. Zusätzliche Zahlungs- und Linkfenster
+liegen außerhalb dieser Quote.
+
 **Klasse:** `bounded_sequence`
 **Rolle:** P1-/P3-Vordergrund; Kind von `corp.punish_campaign`
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

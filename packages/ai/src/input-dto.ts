@@ -1392,6 +1392,14 @@ export function sanitizeCorpPunishRouteQuoteSet(
       })),
       totalClicks: route.totalClicks,
       totalActionCredits: route.totalActionCredits,
+      ...(route.traceBid
+        ? {
+            traceBid: {
+              sourceStepId: route.traceBid.sourceStepId,
+              amount: route.traceBid.amount,
+            },
+          }
+        : {}),
       tagTrigger: { ...route.tagTrigger },
       ...(route.tagOutcomeEnvelope
         ? {
@@ -1495,6 +1503,7 @@ function validCorpPunishRouteQuote(
     !validTagTrigger(route, quoteSet) ||
     !validTagOutcomeEnvelope(route, quoteSet) ||
     !validResponsePaymentEnvelope(route, quoteSet, view) ||
+    !validPunishTraceBid(route) ||
     !validDamageEnvelope(route, quoteSet) ||
     !validNonDamageEnvelope(route, quoteSet) ||
     (route.responseKnowledge !== "public_exact" &&
@@ -1508,6 +1517,19 @@ function validCorpPunishRouteQuote(
     route.guarantee === "conditional_on_runner_response" ||
     route.guarantee === "not_guaranteed" ||
     route.guarantee === "unknown"
+  );
+}
+
+function validPunishTraceBid(route: CorpPunishRouteQuote): boolean {
+  const traceHead = route.steps.find((step) => step.kind === "trace_tag");
+  if (!traceHead) return route.traceBid === undefined;
+  return (
+    traceHead === route.steps[0] &&
+    route.traceBid != null &&
+    route.traceBid.sourceStepId === traceHead.stepId &&
+    Number.isSafeInteger(route.traceBid.amount) &&
+    route.traceBid.amount >=
+      route.responsePaymentEnvelope.corpResponseCredits.maximum
   );
 }
 
@@ -1600,6 +1622,7 @@ function validCanonicalIncompletePunishRoute(
     route.steps.length === 0 &&
     route.totalClicks === 0 &&
     route.totalActionCredits === 0 &&
+    route.traceBid === undefined &&
     route.tagTrigger.kind === "unknown" &&
     route.tagTrigger.status === "unknown" &&
     route.tagTrigger.currentRunnerTags === 0 &&

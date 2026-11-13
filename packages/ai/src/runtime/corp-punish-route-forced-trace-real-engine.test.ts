@@ -10,8 +10,10 @@ import {
   type DeckDefinition,
   type GameState,
   type LegalAction,
+  type Side,
+  type TraceRulesProfile,
 } from "@netgrid/shared";
-import { expect, it } from "vitest";
+import { beforeEach, expect, it } from "vitest";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { chooseCorpAction, chooseRunnerAction } from "../index";
@@ -20,13 +22,149 @@ import { assessTraceBidCandidates } from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
 const CHANCE = "onr_v1_284_chance-observation";
+const AUDIT = "onr_v1_283_audit-of-call-records";
+const PUNITIVE = "onr_v1_301_punitive-counterstrike";
 const URBAN = "onr_v1_307_urban-renewal";
 const CORP_DECK = withCards(DEMO_DECKS.demo_corp_001, "forced-trace-punish", [
   CHANCE,
+  AUDIT,
+  PUNITIVE,
   URBAN,
 ]);
+
+beforeEach(resetResidentPlanPortfolioMemory);
+
+it.each([
+  {
+    profile: "classic_blind",
+    source: CHANCE,
+    damage: PUNITIVE,
+    bid: 1,
+    cost: 3,
+    grip: 1,
+  },
+  {
+    profile: "classic_blind",
+    source: AUDIT,
+    damage: URBAN,
+    bid: 1,
+    cost: 7,
+    grip: 4,
+  },
+  {
+    profile: "classic_blind_corp_ties",
+    source: AUDIT,
+    damage: URBAN,
+    bid: 0,
+    cost: 6,
+    grip: 4,
+  },
+  {
+    profile: "modern_open",
+    source: AUDIT,
+    damage: URBAN,
+    bid: 0,
+    cost: 6,
+    grip: 4,
+  },
+] as const)(
+  "executes $source and $damage for $cost credits with bid $bid in $profile",
+  ({ profile, source, damage, bid, cost, grip }) => {
+    let current = punishState(profile, source, damage, cost, 2, grip);
+    const input = decisionInput(current);
+    const quoted = withDecisionLocalCorpPunishRouteQuotes(input, (request) =>
+      quoteCorpPunishRoute(current, request),
+    );
+    expect(quoted.playerView.corpPunishRouteQuoteSet?.routes).toContainEqual(
+      expect.objectContaining({
+        complete: true,
+        traceBid: { sourceStepId: expect.any(String), amount: bid },
+        responsePaymentEnvelope: expect.objectContaining({
+          corpResponseCredits: { minimum: 0, maximum: bid },
+          totalCorpCredits: { minimum: cost - bid, maximum: cost },
+        }),
+        steps: [
+          expect.objectContaining({ sourceCardDefinitionId: source }),
+          expect.objectContaining({ sourceCardDefinitionId: damage }),
+        ],
+      }),
+    );
+
+    const head = chooseCorpAction(quoted);
+    expect(head.actionId).toBe(
+      playOperation(input.legalActions, input, source).actionId,
+    );
+    expect(head.evidence).toContain("plan_priority_class:P1");
+    current = applySelected(current, "corp", head.actionId!);
+    const corpChoice = current.pendingChoice!;
+    const creditsBeforeBid = current.corp.credits;
+    const commit = chooseCorpAction(decisionInput(current));
+    expect(commit.selectedChoices).toEqual({
+      choiceId: corpChoice.choiceId,
+      selectedOptionIds: [`bid_${bid}`],
+    });
+    expect(commit.fallbackUsed).toBe(false);
+    current = applySelected(
+      current,
+      "corp",
+      commit.actionId!,
+      commit.selectedChoices,
+    );
+    if (profile !== "modern_open") {
+      expect(current.corp.credits).toBe(creditsBeforeBid);
+      expect(getPlayerView(current, "runner").trace?.corpBid).toBeUndefined();
+      expect(current.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+        "corpCreditBid",
+      );
+    }
+    const runnerChoice = current.pendingChoice!;
+    expect(runnerChoice.options.map((option) => option.id)).toEqual(["bid_0"]);
+    current = applySelected(
+      current,
+      "runner",
+      getLegalActions(current, "runner").find(
+        (action) => action.type === "resolve_choice",
+      )!.actionId,
+      { choiceId: runnerChoice.choiceId, selectedOptionIds: ["bid_0"] },
+    );
+    expect(current.runner.tags).toBe(1);
+    expect(current.corp.credits).toBe(creditsBeforeBid - bid);
+    const followUpInput = decisionInput(current);
+    const followUp = chooseCorpAction(followUpInput, {
+      quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(current, request),
+    });
+    expect(followUp.actionId).toBe(
+      playOperation(followUpInput.legalActions, followUpInput, damage).actionId,
+    );
+    current = applySelected(current, "corp", followUp.actionId!);
+    expect(current.winner).toBe("corp");
+    expect(current.corp.credits).toBe(0);
+  },
+);
+
+it.each([2, 3])(
+  "accounts for the blind bid when six credits and %i clicks remain",
+  (clicks) => {
+    const state = punishState("classic_blind", AUDIT, URBAN, 6, clicks, 4);
+    const input = decisionInput(state);
+    const decision = chooseCorpAction(input, {
+      quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+    });
+    if (clicks === 2) {
+      expect(decision.evidence).not.toContain("plan_priority_class:P1");
+    } else {
+      expect(
+        input.legalActions.find(
+          (action) => action.actionId === decision.actionId,
+        )?.type,
+      ).toBe("gain_credit");
+      expect(decision.evidence).toContain("plan_priority_class:P1");
+    }
+  },
+);
 
 it.each(["modern_open", "classic_blind", "classic_blind_corp_ties"] as const)(
   "executes the fixed automatic trace kill without extra bids under %s",
@@ -63,41 +201,37 @@ it.each(["modern_open", "classic_blind", "classic_blind_corp_ties"] as const)(
     };
     const input = decisionInput(state);
     const action = playOperation(input.legalActions, input, CHANCE);
-    // Full campaign selection is certified for Modern Open; the Blind cases
-    // independently exercise the real trace resolution from the same legal head.
-    if (profile === "modern_open") {
-      const quoted = withDecisionLocalCorpPunishRouteQuotes(input, (request) =>
-        quoteCorpPunishRoute(state, request),
-      );
-      expect(quoted.playerView.corpPunishRouteQuoteSet?.routes).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            complete: true,
-            totalActionCredits: 8,
-            responsePaymentEnvelope: expect.objectContaining({
-              totalCorpCredits: { minimum: 8, maximum: 8 },
-            }),
+    const quoted = withDecisionLocalCorpPunishRouteQuotes(input, (request) =>
+      quoteCorpPunishRoute(state, request),
+    );
+    expect(quoted.playerView.corpPunishRouteQuoteSet?.routes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          complete: true,
+          totalActionCredits: 8,
+          traceBid: { sourceStepId: expect.any(String), amount: 0 },
+          responsePaymentEnvelope: expect.objectContaining({
+            totalCorpCredits: { minimum: 8, maximum: 8 },
           }),
-        ]),
-      );
-      const decision = chooseCorpAction(quoted, {
-        quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
-        persistTacticalPlanMemory: false,
-      });
-      expect(decision.actionId).toBe(action.actionId);
-      expect(decision.fallbackUsed).toBe(false);
-      expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId:
+        }),
+      ]),
+    );
+    const decision = chooseCorpAction(quoted, {
+      persistTacticalPlanMemory: false,
+    });
+    expect(decision.actionId).toBe(action.actionId);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId:
+        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+      selectedStep: {
+        parentInstanceId:
           "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
-        selectedStep: {
-          parentInstanceId:
-            "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
-        },
-      });
-      expect(JSON.stringify(decision.decisionDebug)).toContain(
-        "module:corp.execute_punish_sequence",
-      );
-    }
+      },
+    });
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "module:corp.execute_punish_sequence",
+    );
 
     let current = state;
     function applySelected(
@@ -195,6 +329,51 @@ function decisionInput(state: GameState) {
     profileId: "forced-trace-punish",
     ownDeckSnapshot: snapshot(CORP_DECK),
   });
+}
+
+function punishState(
+  profile: TraceRulesProfile,
+  source: string,
+  damage: string,
+  credits: number,
+  clicks: number,
+  grip: number,
+): GameState {
+  const state = applyMandatoryDraw(
+    createGameAfterSetup({
+      seed: `trace-punish:${profile}:${source}:${credits}:${clicks}`,
+      corpDeck: CORP_DECK,
+      traceRulesProfile: profile,
+    }),
+  );
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpHqSize(0)
+    .withCorpCardInHq(source)
+    .withCorpCardInHq(damage)
+    .withCorpCredits(credits)
+    .withRunnerCredits(profile === "modern_open" ? 0 : 12)
+    .withRunnerTags(0)
+    .withRunnerGripSize(grip);
+  state.corp.clicks = clicks;
+  state.runnerTurnFlags!.runAttemptsLastTurn = 2;
+  return state;
+}
+
+function applySelected(
+  state: GameState,
+  side: Side,
+  actionId: string,
+  selectedChoices?: Record<string, unknown>,
+): GameState {
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId,
+    clientKnownStateVersion: state.stateVersion,
+    ...(selectedChoices ? { selectedChoices } : {}),
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
 }
 
 function playOperation(

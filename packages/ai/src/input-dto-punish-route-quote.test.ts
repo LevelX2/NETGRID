@@ -77,6 +77,39 @@ describe("AI input DTO Corp punish-route quote contract", () => {
     );
   });
 
+  it("preserves a trace bid independently of cash cost and requires its exact head binding", () => {
+    const action = damageAction("tag-source", "tag-action");
+    const input = aiInput("corp", [action]);
+    const quoteSet = completeQuoteSet(action);
+    const route = quoteSet.routes[0]!;
+    route.steps[0]!.kind = "trace_tag";
+    route.requestEcho.steps[0]!.kind = "trace_tag";
+    route.requestFingerprint = corpPunishRouteRequestFingerprint(
+      route.requestEcho,
+    );
+    route.tagTrigger = {
+      kind: "trace_tag_step",
+      status: "response_required",
+      currentRunnerTags: 0,
+      requiredRunnerTags: 1,
+      sourceStepId: "tag",
+      traceLimit: 5,
+    };
+    route.responsePaymentEnvelope.responseKind = "trace_bid";
+    input.playerView.corpPunishRouteQuoteSet = quoteSet;
+    const project = () =>
+      dtoFor(input.playerView, [action]).corpPunishRouteQuoteSet;
+
+    expect(project()).toBeUndefined();
+    route.traceBid = { sourceStepId: "damage-4", amount: 1 };
+    expect(project()).toBeUndefined();
+    route.traceBid = { sourceStepId: "tag", amount: 1 };
+    expect(project()?.routes[0]).toMatchObject({
+      traceBid: { sourceStepId: "tag", amount: 1 },
+      responsePaymentEnvelope: { corpResponseCredits: { maximum: 0 } },
+    });
+  });
+
   it("preserves one canonical incomplete route without invalidating its quote-set siblings", () => {
     const action = damageAction("tag-source", "tag-action");
     const input = aiInput("corp", [action]);

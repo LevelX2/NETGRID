@@ -4104,6 +4104,8 @@ export type CorpPunishRouteQuote = {
   /** Fixed credits paid by the ordered LegalAction sequence itself. */
   totalActionCredits: number;
   tagTrigger: CorpPunishRouteTagTriggerQuote;
+  /** Exact bid certified for a trace head, independent of its normal credit cost. */
+  traceBid?: { sourceStepId: string; amount: number };
   /** Exact or public-bounded tag delta certified by the Engine route probe. */
   tagOutcomeEnvelope?: CorpPunishRouteTagOutcomeEnvelope;
   responsePaymentEnvelope: CorpPunishRouteResponsePaymentEnvelope;
