@@ -51,9 +51,69 @@ describe("playMatchStartJingle", () => {
   });
 });
 
+describe("resource sound playback", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("plays a short metallic coin cluster at the configured volume", async () => {
+    vi.resetModules();
+    const context = resourceAudioContext();
+    vi.stubGlobal("window", { AudioContext: context.AudioContext });
+    const { playActionCueSound } = await import("./audio");
+
+    playActionCueSound("credit", 0.5, 100);
+
+    expect(context.oscillators).toHaveLength(6);
+    expect(
+      context.oscillators.every((oscillator) => oscillator.type === "sine"),
+    ).toBe(true);
+    expect(
+      context.oscillators.every(
+        (oscillator) =>
+          oscillator.startedAt! >= 10 && oscillator.stoppedAt! < 10.3,
+      ),
+    ).toBe(true);
+    const peaks = context.gains.flatMap((gain) =>
+      gain.gain.ramps.map((ramp) => ramp.value),
+    );
+    expect(Math.max(...peaks)).toBeCloseTo(0.5 * 0.075);
+    expect(context.sources).toHaveLength(0);
+  });
+
+  it.each([
+    [3, 3],
+    [12, 5],
+  ])(
+    "plays %i drawn cards as %i bounded paper snaps",
+    async (amount, count) => {
+      vi.resetModules();
+      const context = resourceAudioContext();
+      vi.stubGlobal("window", { AudioContext: context.AudioContext });
+      const { playActionCueSound } = await import("./audio");
+
+      playActionCueSound("draw", 0.4, amount);
+
+      expect(context.sources).toHaveLength(count);
+      expect(context.oscillators).toHaveLength(count);
+      expect(
+        context.sources.every((source) =>
+          source.buffer?.getChannelData(0).some((sample) => sample !== 0),
+        ),
+      ).toBe(true);
+      expect(
+        context.sources.every(
+          (source) => source.startedAt! >= 10 && source.stoppedAt! < 10.5,
+        ),
+      ).toBe(true);
+    },
+  );
+});
+
 class FakeAudioParam {
   initial: number | null = null;
   ramp: { value: number; at: number } | null = null;
+  ramps: Array<{ value: number; at: number }> = [];
 
   setValueAtTime(value: number) {
     this.initial = value;
@@ -61,6 +121,7 @@ class FakeAudioParam {
 
   exponentialRampToValueAtTime(value: number, at: number) {
     this.ramp = { value, at };
+    this.ramps.push(this.ramp);
   }
 }
 
@@ -68,6 +129,7 @@ class FakeOscillator {
   type: OscillatorType = "sine";
   frequency = new FakeAudioParam();
   startedAt: number | null = null;
+  stoppedAt: number | null = null;
 
   connect() {}
 
@@ -75,11 +137,57 @@ class FakeOscillator {
     this.startedAt = at;
   }
 
-  stop() {}
+  stop(at: number) {
+    this.stoppedAt = at;
+  }
 }
 
 class FakeGain {
   gain = new FakeAudioParam();
 
   connect() {}
+}
+
+function resourceAudioContext() {
+  const oscillators: FakeOscillator[] = [];
+  const gains: FakeGain[] = [];
+  const sources: FakeBufferSource[] = [];
+  class ResourceAudioContext {
+    currentTime = 10;
+    state = "running";
+    destination = {};
+    sampleRate = 48000;
+
+    createOscillator() {
+      const oscillator = new FakeOscillator();
+      oscillators.push(oscillator);
+      return oscillator;
+    }
+
+    createGain() {
+      const gain = new FakeGain();
+      gains.push(gain);
+      return gain;
+    }
+
+    createBuffer(_channels: number, length: number) {
+      const samples = new Float32Array(length);
+      return { getChannelData: () => samples };
+    }
+
+    createBufferSource() {
+      const source = new FakeBufferSource();
+      sources.push(source);
+      return source;
+    }
+
+    createBiquadFilter() {
+      return { type: "", frequency: new FakeAudioParam(), connect() {} };
+    }
+  }
+  return { AudioContext: ResourceAudioContext, oscillators, gains, sources };
+}
+
+class FakeBufferSource extends FakeOscillator {
+  buffer: { getChannelData: (channel: number) => Float32Array } | null = null;
 }

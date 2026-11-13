@@ -40,6 +40,41 @@ export function localActionSoundKind(
   return actionSoundForActionType(action.type, visibility) ?? "choice";
 }
 
+export function resourceEffectSounds(event: PublicGameEvent): Array<{
+  sound: "credit" | "draw";
+  soundCount: number;
+}> {
+  const primarySound = actionSoundForActionType(
+    eventActionType(event),
+    "public",
+  );
+  const counts = new Map<"credit" | "draw", number>();
+  for (const effect of event.publicPayload.resolvedEffects ?? []) {
+    const amount = effect.amount;
+    if (
+      effect.visibility !== "public" ||
+      typeof amount !== "number" ||
+      !Number.isSafeInteger(amount) ||
+      amount <= 0
+    )
+      continue;
+    const sound =
+      effect.kind === "gain_credits"
+        ? "credit"
+        : effect.kind === "draw_cards"
+          ? "draw"
+          : undefined;
+    // Basic credit/draw actions already play their primary sound. Card effects
+    // are confirmed separately, even when the local play sound ran on submit.
+    if (!sound || sound === primarySound) continue;
+    counts.set(
+      sound,
+      sound === "credit" ? 1 : Math.min(5, (counts.get(sound) ?? 0) + amount),
+    );
+  }
+  return Array.from(counts, ([sound, soundCount]) => ({ sound, soundCount }));
+}
+
 function payloadString(
   payload: Record<string, unknown>,
   key: string,
