@@ -1,5 +1,22 @@
 import type { GuaranteeLevel } from "../../plans/plan-assessment";
 
+export const PUNISH_PAYOFF_CAMPAIGN_ID = "corp-punish:engine-certified-payoff";
+
+export type CorpPunishDrawNeed = Readonly<{
+  needId: string;
+  turnKey: string;
+  stateVersion: number;
+  actionId: string;
+  remainingAttempts: 0 | 1;
+  protectedHqCardIds: readonly string[];
+  hits: number;
+  population: number;
+  missingRoles: readonly ("tag" | "damage")[];
+  leastLineCredits: number;
+  leastLineClicks: number;
+  nextMandatoryDrawCount: number | undefined;
+}>;
+
 export type CorpPunishCampaignSignal = {
   campaignId: string;
   phase:
@@ -22,6 +39,7 @@ export type CorpPunishCampaignSignal = {
   value: number;
   evidenceCode: string;
   evidenceCodes?: string[];
+  developmentDrawNeed?: CorpPunishDrawNeed;
   routeContract?: {
     contractVersion: "corp_punish_route_signal_v1";
     quoteStatus: "complete" | "unknown";

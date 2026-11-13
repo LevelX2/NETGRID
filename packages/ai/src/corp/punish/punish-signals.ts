@@ -32,7 +32,11 @@ import {
   corpTraceSupportTargetHasVisibleTraceSource,
   visibleTagPayoffConversionIsAffordable,
 } from "./punish-preparation";
-import { type CorpPunishCampaignSignal } from "./punish-types";
+import {
+  PUNISH_PAYOFF_CAMPAIGN_ID,
+  type CorpPunishCampaignSignal,
+} from "./punish-types";
+import { corpPunishDevelopmentDrawNeed } from "./punish-development-draw";
 
 export function punishSignals(
   input: AiDecisionInput,
@@ -59,7 +63,41 @@ export function punishSignals(
         ),
     ),
   );
-  return [...quoted, ...legacyRoots];
+  if (
+    quoted.some(
+      (signal) =>
+        signal.routeContract?.horizon === "execute" ||
+        signal.routeContract?.horizon === "fund",
+    )
+  )
+    return [...quoted, ...legacyRoots];
+  const need = corpPunishDevelopmentDrawNeed(input, candidates);
+  if (!need) return [...quoted, ...legacyRoots];
+  const development: CorpPunishCampaignSignal = {
+    campaignId: PUNISH_PAYOFF_CAMPAIGN_ID,
+    phase: "assemble_components",
+    sourceDefinitionIds: [],
+    actionIds: [],
+    feasible: false,
+    guarantee: "speculative",
+    visibleTerminalProjection: false,
+    priorityClass: "P5",
+    value: Math.min(120, Math.floor((600 * need.hits) / need.population)),
+    developmentDrawNeed: need,
+    evidenceCode: "corp_punish_single_missing_component",
+    evidenceCodes: [
+      "corp_punish_single_missing_component",
+      `corp_punish_draw_hits:${need.hits}/${need.population}`,
+      `corp_punish_draw_missing_roles:${need.missingRoles.join(",")}`,
+      `corp_punish_draw_line_min_credits:${need.leastLineCredits}`,
+      `corp_punish_draw_line_min_clicks:${need.leastLineClicks}`,
+    ],
+  };
+  return [
+    development,
+    ...quoted.filter((signal) => signal.campaignId !== development.campaignId),
+    ...legacyRoots,
+  ];
 }
 
 function mergeStableLegacyPunishRoots(
@@ -178,6 +216,7 @@ function retainedUnknownPunishSignals(
       terminalCondition: _previousTerminalCondition,
       actionIds: _previousActionIds,
       initiatingSemanticActionType: _previousSemanticActionType,
+      developmentDrawNeed: _previousDrawNeed,
       ...retainedSignal
     } = previousSignal;
     const {

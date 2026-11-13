@@ -1,7 +1,10 @@
+import type { CorpPunishDrawNeed } from "../punish/punish-types";
+
 export type CorpHandManagementSignal = {
   handPlanId: string;
   parentPlanInstanceId?: string;
   parentNeedId?: string;
+  punishDrawNeed?: CorpPunishDrawNeed;
   phase:
     | "draw_for_plan"
     | "develop_card"

@@ -89,6 +89,7 @@ export {
 } from "./game/view/visible-breaker-encounter-quote";
 export { visibleProgramHostInstallVariants } from "./game/view/visible-program-host-install";
 export { visibleFortPassProtection } from "./game/view/visible-fort-pass-protection";
+export { visibleCorpMandatoryDrawCount } from "./game/view/visible-corp-mandatory-draw-count";
 export {
   visibleRunnerPreparationIncomePerClick,
   visibleRunnerNextTurnPreparationCreditGain,

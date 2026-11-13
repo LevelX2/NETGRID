@@ -11,6 +11,7 @@ import {
   hashState,
   replayEvents,
   validateGameState,
+  visibleCorpMandatoryDrawCount,
 } from "../../index";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -935,6 +936,10 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "skivviss_aggregate_start",
     );
     state.purgeableRunnerVirusCounters = { corp: { skivviss: 2 } };
+    expect(visibleCorpMandatoryDrawCount(getPlayerView(state, "corp"))).toBe(4);
+    expect(
+      visibleCorpMandatoryDrawCount(getPlayerView(state, "runner")),
+    ).toBeUndefined();
     state = toRunnerTurnFromCorpMain(state);
     for (const definitionId of [
       "simple_agenda",

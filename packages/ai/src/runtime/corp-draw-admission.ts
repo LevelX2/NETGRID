@@ -6,7 +6,8 @@ export type CorpDrawAdmissionPriority = "P1" | "P2" | "P3" | "P4" | "P5" | "P6";
 export type CorpDrawAdmissionPurpose =
   | "score_defense_answer_search"
   | "central_defense_answer_search"
-  | "score_material_search";
+  | "score_material_search"
+  | "punish_component_search";
 
 export type CorpDrawCapacityReleaseRoute = {
   actionId: string;
@@ -45,6 +46,8 @@ export type CorpDrawAdmissionAssessment = {
     | "blocked_unknown_projection"
     | "blocked_end_turn_overflow"
     | "blocked_cleanup_exposure"
+    | "blocked_mandatory_draw_hand_capacity"
+    | "blocked_competing_score_or_defense"
     | "blocked_deckout_horizon";
   evidence: string[];
 };
@@ -77,6 +80,11 @@ export function assessCorpDrawAdmission(params: {
     terminalNeedBeforeMandatoryDraw: boolean;
   };
   allowFinalClickScoreMaterialReplacement?: boolean;
+  punishSearch?: {
+    nextMandatoryDrawCount: number | undefined;
+    spareNonAgendaCount: number;
+    competingActionIds: readonly string[];
+  };
 }): CorpDrawAdmissionAssessment {
   const projection = params.drawProjection;
   const validProjection =
@@ -138,6 +146,16 @@ export function assessCorpDrawAdmission(params: {
     netDeckConsumption,
     terminalNeedBeforeMandatoryDraw,
   });
+  const punishSearch = params.punishSearch;
+  const mandatoryCount = punishSearch?.nextMandatoryDrawCount;
+  const mandatoryCountKnown =
+    mandatoryCount !== undefined && positiveSafeInteger(mandatoryCount);
+  const projectedNextStartOverflow = mandatoryCountKnown
+    ? Math.max(
+        0,
+        projectedHandAfterDraw + mandatoryCount - params.maximumHandSize,
+      )
+    : undefined;
   const exactCompositeScoreMaterialRotation =
     validProjection &&
     params.purpose === "score_material_search" &&
@@ -188,6 +206,26 @@ export function assessCorpDrawAdmission(params: {
     disposition = "blocked_attempt_budget";
   } else if (!validProjection || !consequenceFactsKnown) {
     disposition = "blocked_unknown_projection";
+  } else if (
+    params.purpose === "punish_component_search" &&
+    (!punishSearch || !mandatoryCountKnown || clickCost > params.currentClicks)
+  ) {
+    disposition = "blocked_unknown_projection";
+  } else if (punishSearch && punishSearch.competingActionIds.length > 0) {
+    disposition = "blocked_competing_score_or_defense";
+  } else if (punishSearch && projectedEndTurnOverflow > 0) {
+    disposition = "blocked_end_turn_overflow";
+  } else if (
+    punishSearch &&
+    (projectedNextStartOverflow! > 1 ||
+      projectedNextStartOverflow! > punishSearch.spareNonAgendaCount)
+  ) {
+    disposition = "blocked_mandatory_draw_hand_capacity";
+  } else if (
+    punishSearch &&
+    mandatoryDrawHorizonAfterDraw < mandatoryCount! + 1
+  ) {
+    disposition = "blocked_deckout_horizon";
   } else if (deckoutHorizonUnsafe) {
     disposition = "blocked_deckout_horizon";
   } else if (
@@ -280,6 +318,14 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_final_click_score_material_replacement:${
         params.allowFinalClickScoreMaterialReplacement === true
       }`,
+      ...(punishSearch
+        ? [
+            `corp_punish_next_mandatory_draw_count:${mandatoryCount ?? "unknown"}`,
+            `corp_punish_projected_next_start_overflow:${projectedNextStartOverflow ?? "unknown"}`,
+            `corp_punish_spare_non_agendas:${punishSearch.spareNonAgendaCount}`,
+            `corp_punish_competing_actions:${punishSearch.competingActionIds.join(",") || "none"}`,
+          ]
+        : []),
       `corp_draw_admission:${disposition}`,
     ],
   };

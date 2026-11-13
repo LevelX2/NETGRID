@@ -18,6 +18,7 @@ import {
   type CorpHandInventoryFacts,
 } from "./hand-inventory-facts";
 import { corpHandPriorityClass } from "./hand-management-plan-module";
+import { corpDefenseSignalOwnsAction } from "../defense/defense-discovery-support";
 
 export function corpHandDomainRouteClaims(
   domain: CorpPlanDomain,
@@ -209,6 +210,9 @@ export function arbitrateCorpHandConversionBeforeDraw(
     parentProvidesExactSameTurnCapacityRelease?: boolean;
     allowFinalClickScoreMaterialReplacement?: boolean;
     terminalNeedBeforeMandatoryDraw?: boolean;
+    punishSearch?: NonNullable<
+      Parameters<typeof assessCorpDrawAdmission>[0]["punishSearch"]
+    >;
   }) => {
     const candidate = candidates.find(
       (entry) => entry.actionId === params.actionId,
@@ -300,18 +304,52 @@ export function arbitrateCorpHandConversionBeforeDraw(
       return signal;
     }
     const priorityClass = corpEffectiveHandPriorityClass(domain, signal);
+    const need = signal.punishDrawNeed;
+    const punishSearch = need
+      ? {
+          nextMandatoryDrawCount: need.nextMandatoryDrawCount,
+          spareNonAgendaCount: input.playerView.own.gripOrHq.filter((card) => {
+            if (
+              !card.known ||
+              !card.definitionId ||
+              !card.type ||
+              card.type === "agenda" ||
+              need.protectedHqCardIds.includes(card.instanceId)
+            )
+              return false;
+            const record = facts.records.find(
+              (entry) => entry.sourceInstanceId === card.instanceId,
+            );
+            return (
+              record !== undefined &&
+              record.planningDisposition !== "assessment_unknown" &&
+              !record.domainClaims.some(
+                (claim) =>
+                  claim.readiness === "executable_now" ||
+                  claim.parentNeedId !== undefined,
+              )
+            );
+          }).length,
+          competingActionIds: corpPunishDrawCompetingActions(
+            input,
+            domain,
+            defenseNeeds,
+          ),
+        }
+      : undefined;
     const admittedActionIds = signal.actionIds.filter((actionId) =>
       assess({
         routeId: `${signal.handPlanId}:${actionId}`,
         ownerModuleId: "corp.hand_and_agenda_management",
         actionId,
-        purpose: "score_material_search",
+        purpose: need ? "punish_component_search" : "score_material_search",
         priorityClass,
         remainingAttempts: signal.drawAttemptState?.remainingAttempts ?? 0,
         allowFinalClickScoreMaterialReplacement:
           signal.handPlanId === "draw-for-score-material",
         terminalNeedBeforeMandatoryDraw:
           priorityClass === "P1" || priorityClass === "P2",
+        ...(punishSearch ? { punishSearch } : {}),
       }),
     );
     return { ...signal, actionIds: admittedActionIds };
@@ -326,6 +364,38 @@ export function arbitrateCorpHandConversionBeforeDraw(
         left.actionId.localeCompare(right.actionId),
     ),
   };
+}
+
+function corpPunishDrawCompetingActions(
+  input: AiDecisionInput,
+  domain: CorpPlanDomain,
+  defenseNeeds: CorpPlanDomain["defenseNeeds"],
+): string[] {
+  return input.legalActions
+    .filter(
+      (action) =>
+        action.expiresAtStateVersion === input.playerView.stateVersion &&
+        (domain.scoreProjects.some(
+          (signal) =>
+            signal.feasible &&
+            signal.agendaInstanceId &&
+            signal.actionIds?.includes(action.actionId),
+        ) ||
+          defenseNeeds.some(
+            (signal) =>
+              corpDefenseSignalOwnsAction(signal, action.actionId) &&
+              (signal.kind === "score_protection_terminal_install" ||
+                signal.kind === "score_protection_install" ||
+                signal.kind === "score_protection_staging_install" ||
+                signal.kind === "score_protection_draw" ||
+                (signal.kind === "generic" &&
+                  (signal.urgent ||
+                    signal.centralPressure === "acute" ||
+                    signal.centralPressure === "terminal"))),
+          )),
+    )
+    .map((action) => action.actionId)
+    .sort();
 }
 
 function corpExactHandCapacityReleaseRoutes(

@@ -51,7 +51,7 @@ export function punishCampaignModule(): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const current = state<PunishState>(instance);
-      return current.signal.routeContract
+      return current.signal.routeContract || current.signal.developmentDrawNeed
         ? {
             step: {
               stepId: `${instance.instanceId}:${current.signal.phase}`,
@@ -60,7 +60,7 @@ export function punishCampaignModule(): PlanModule {
                 semanticActionTypes: [],
               },
               purpose:
-                "Hold the quoted punish opportunity while its exact support or execution child acts.",
+                "Hold the punish opportunity while its exact support or execution child acts.",
             },
             candidates: [],
           }
@@ -89,6 +89,18 @@ function punishCampaignPriority(
 function punishRootResourceGaps(
   signal: CorpPunishCampaignSignal,
 ): ResourceGap[] {
+  const draw = signal.developmentDrawNeed;
+  if (draw?.remainingAttempts === 1) {
+    return [
+      {
+        needId: draw.needId,
+        capability: "draw_punish_component",
+        minimum: 1,
+        available: 0,
+        deadline: "current_turn",
+      },
+    ];
+  }
   const route = signal.routeContract;
   if (!route || route.quoteStatus !== "complete") return [];
   if (route.horizon === "fund" && route.fundingGap > 0) {

@@ -25,10 +25,10 @@ import {
   corpInstalledTaggedMeatDamageProfile,
 } from "../../runtime/corp-canonical-card-facts";
 import { currentLegalActionResourceCost } from "../../runtime/visible-action-facts";
+import { PUNISH_PAYOFF_CAMPAIGN_ID } from "./punish-types";
 
 const MAX_PUNISH_ROUTES = 8;
 const MAX_PUNISH_ROUTE_STEPS = 6;
-const PUNISH_CAMPAIGN_ID = "corp-punish:engine-certified-payoff";
 
 type PunishComponentAdapter = {
   kind: Extract<
@@ -214,7 +214,7 @@ export function buildBoundedCorpPunishRouteRequests(
       side: "corp",
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
-      campaignId: PUNISH_CAMPAIGN_ID,
+      campaignId: PUNISH_PAYOFF_CAMPAIGN_ID,
       routeId,
       steps: route.map((component, order) => {
         const currentLegalActionId =

@@ -20,6 +20,17 @@ type Retention = Readonly<{
   damage: number;
   drawOptions: number;
 }>;
+type DevelopmentLine = {
+  damage: number;
+  credits: number;
+  cardInstanceIds: readonly string[];
+};
+type DevelopmentOption = {
+  definitionId: string;
+  copies: number;
+  missingRole: "tag" | "damage";
+  line: DevelopmentLine;
+};
 type Operations = {
   tags: FixedTagOperation[];
   damage: FixedTaggedDamageOperation[];
@@ -29,11 +40,11 @@ const ordinaryCorpClicks = 3;
 const noRetention: Retention = { value: 0, damage: 0, drawOptions: 0 };
 
 /**
- * Continuation value for the Hand owner. A fixed-cost scenario with the
+ * Retention and single-card development facts. A fixed-cost scenario with the
  * currently visible budget, grip and reactions, never a Punish route quote.
  * The intervening Runner turn can change every condition assessed here.
  */
-export function prepareCorpPunishHandRetention(input: AiDecisionInput) {
+export function prepareCorpPunishHandAssessment(input: AiDecisionInput) {
   const { own, opponent, turnSerial, traceRulesProfile } = input.playerView;
   const liquidCredits =
     own.credits -
@@ -52,7 +63,10 @@ export function prepareCorpPunishHandRetention(input: AiDecisionInput) {
     !opponent.identity?.known ||
     !opponent.rig?.every((card) => card.known && card.definitionId)
   ) {
-    return () => noRetention;
+    return {
+      assess: () => noRetention,
+      developmentOptions: (): DevelopmentOption[] => [],
+    };
   }
 
   const rig = opponent.rig;
@@ -125,7 +139,7 @@ export function prepareCorpPunishHandRetention(input: AiDecisionInput) {
     if (copies === 0) return [];
     const option = operations(definitionId);
     return option.tags.length > 0 || option.damage.length > 0
-      ? [{ ...option, copies }]
+      ? [{ ...option, definitionId, copies }]
       : [];
   });
 
@@ -196,14 +210,20 @@ export function prepareCorpPunishHandRetention(input: AiDecisionInput) {
     };
   }
 
-  return (remainingHq: readonly VisibleCard[]): Retention => {
-    const held: Operations = { tags: [], damage: [] };
-    for (const card of remainingHq) {
-      if (!card.known || !card.definitionId) continue;
-      const profile = operations(card.definitionId);
-      held.tags.push(...profile.tags);
-      held.damage.push(...profile.damage);
-    }
+  function knownHandOperations(hq: readonly VisibleCard[]) {
+    return hq.flatMap((card) =>
+      card.known && card.definitionId
+        ? [{ instanceId: card.instanceId, ...operations(card.definitionId) }]
+        : [],
+    );
+  }
+
+  function assessRetention(remainingHq: readonly VisibleCard[]): Retention {
+    const instances = knownHandOperations(remainingHq);
+    const held = {
+      tags: instances.flatMap((card) => card.tags),
+      damage: instances.flatMap((card) => card.damage),
+    };
     if (held.tags.length === 0 && held.damage.length === 0) return noRetention;
     const current = assess(held);
     let bestExtension = 0;
@@ -234,7 +254,109 @@ export function prepareCorpPunishHandRetention(input: AiDecisionInput) {
       damage: current.damage,
       drawOptions: usefulCopies,
     };
-  };
+  }
+
+  function developmentOptions(): DevelopmentOption[] {
+    if (visibleMeatPrevention || !inDeck) return [];
+    const instances = knownHandOperations(own.gripOrHq);
+    const tags = instances.flatMap((card) =>
+      card.tags.map((operation) => ({
+        operation,
+        instanceId: card.instanceId,
+      })),
+    );
+    const payoffs = instances.flatMap((card) =>
+      card.damage.map((operation) => ({
+        operation,
+        instanceId: card.instanceId,
+      })),
+    );
+    const grip = Math.max(opponent.handCount, opponent.maxHandSize);
+    const retainedDamage = assess({
+      tags: tags.map((entry) => entry.operation),
+      damage: payoffs.map((entry) => entry.operation),
+    }).damage;
+    if (retainedDamage > grip) return [];
+    const result: DevelopmentOption[] = [];
+    for (const {
+      definitionId,
+      copies,
+      tags: drawableTags,
+      damage: drawableDamage,
+    } of drawOptions) {
+      let best: Omit<DevelopmentOption, "definitionId" | "copies"> | undefined;
+      const consider = (
+        tag: FixedTagOperation,
+        damage: readonly FixedTaggedDamageOperation[],
+        cardInstanceIds: readonly string[],
+        missingRole: DevelopmentOption["missingRole"],
+      ) => {
+        const tagsAfterResponse = tag.tags - avoidedTags;
+        const credits =
+          tag.credits + damage.reduce((sum, card) => sum + card.credits, 0);
+        const amount = damage.reduce((sum, card) => sum + card.damage, 0);
+        if (
+          tagsAfterResponse <= 0 ||
+          credits > liquidCredits ||
+          amount <= grip ||
+          damage.some((card) => card.minimumTags > tagsAfterResponse)
+        )
+          return;
+        if (
+          !best ||
+          credits < best.line.credits ||
+          (credits === best.line.credits &&
+            cardInstanceIds.length < best.line.cardInstanceIds.length) ||
+          (credits === best.line.credits &&
+            cardInstanceIds.length === best.line.cardInstanceIds.length &&
+            amount > best.line.damage)
+        ) {
+          best = {
+            missingRole,
+            line: {
+              damage: amount,
+              credits,
+              cardInstanceIds,
+            },
+          };
+        }
+      };
+      for (const payoff of drawableDamage) {
+        for (const tag of tags) {
+          consider(tag.operation, [payoff], [tag.instanceId], "damage");
+          for (const held of payoffs) {
+            if (held.instanceId === tag.instanceId) continue;
+            consider(
+              tag.operation,
+              [payoff, held.operation],
+              [tag.instanceId, held.instanceId],
+              "damage",
+            );
+          }
+        }
+      }
+      for (const tag of drawableTags) {
+        for (const [index, first] of payoffs.entries()) {
+          consider(tag, [first.operation], [first.instanceId], "tag");
+          for (const second of payoffs.slice(index + 1))
+            consider(
+              tag,
+              [first.operation, second.operation],
+              [first.instanceId, second.instanceId],
+              "tag",
+            );
+        }
+      }
+      if (best) result.push({ definitionId, copies, ...best });
+    }
+    return result;
+  }
+
+  return { assess: assessRetention, developmentOptions };
+}
+
+export function prepareCorpPunishHandRetention(input: AiDecisionInput) {
+  return prepareCorpPunishHandAssessment(input).assess;
 }
 
 function maximumDamage(

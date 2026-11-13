@@ -7,6 +7,17 @@ import { purgeableRunnerVirusCounterAmount } from "./turn-basic-execution";
 
 /** Shared rule authority for actual Corp start draws and current planning facts. */
 export function virusCounterDrawsAtCorpStart(state: GameState): number {
+  return corpStartVirusDrawCount((counterType) =>
+    purgeableRunnerVirusCounterAmount(
+      state.purgeableRunnerVirusCounters?.corp,
+      counterType,
+    ),
+  );
+}
+
+export function corpStartVirusDrawCount(
+  amountForCounter: (kind: PurgeableRunnerVirusCounterType) => number,
+): number {
   return CARD_IMPLEMENTATIONS.reduce((sum, implementation) => {
     const virusCounter = implementation.virusCounter;
     const start = virusCounter?.startOfCorpTurn;
@@ -18,8 +29,7 @@ export function virusCounterDrawsAtCorpStart(state: GameState): number {
       return sum;
     return (
       sum +
-      purgeableRunnerVirusCounterAmount(
-        state.purgeableRunnerVirusCounters?.corp,
+      amountForCounter(
         virusCounter.counterKind as PurgeableRunnerVirusCounterType,
       ) *
         start.amountPerCounter

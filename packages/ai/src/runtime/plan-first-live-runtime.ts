@@ -82,6 +82,7 @@ import {
   arbitrateCorpHandConversionBeforeDraw,
   corpHandDomainRouteClaims,
 } from "../corp/hand-management/hand-draw-arbitration";
+import { corpPunishHandDrawSignals } from "../corp/hand-management/hand-punish-draw";
 import { buildCorpHandInventoryFacts } from "../corp/hand-management/hand-inventory-facts";
 import {
   bindSelectedCorpHqOverflowConversion,
@@ -3868,7 +3869,7 @@ function buildCorpDomain(
     virusPressure,
     punishCampaigns,
     ambushes,
-    handManagement,
+    handManagement: [...handManagement, ...corpPunishHandDrawSignals(input, punishCampaigns)],
   };
 }
 

@@ -3024,14 +3024,28 @@ reserviert ist. Andere Remotes, kompatible Upgrades und aktuell quotierte
 Punish-Konversionen bleiben davon unberührt. Die Sperre entsteht im
 Punish-Signal-Owner; die Action-Disposition nennt den Reservierungskonflikt.
 
-Der Normalzustand dieser Kampagne ist ein lauerndes `watch_window`, kein aktiv
-abzuarbeitender Komponentenaufbau. Fehlende Damage-, Tag- oder
-Trace-Komponenten sind beobachtete Kampagnenfakten, aber noch keine offenen
-Action-Needs. Insbesondere erzeugt die Kampagne keinen wiederholten
-Targeted-Basic-Draw. Sie wird bei relevanten Änderungen an eigener Hand,
-öffentlichem Runnerzustand, Triggern, Credits oder Klicks neu bewertet und
-übernimmt erst dann den Vordergrund, wenn eine ausreichend vollständige Route
-das Opportunity-Gate erreicht.
+Der Normalzustand dieser Kampagne ist ein lauerndes `watch_window`.
+Ein einzelner fehlender Tag- oder Schadensbaustein darf im selben Root als
+`assemble_components` genau einen P5-Draw-Bedarf öffnen. Voraussetzung sind
+bekannte HQ-Komponenten und genügend passende Karten im abgeglichenen R&D
+(mindestens 10 %). Jeder Treffer muss mit dem sichtbaren Geld, den sichtbaren
+Reaktionen und höchstens drei regulären Corp-Aktionen in einer bedingten Linie
+mehr Schaden als den aktuellen Grip und das aktuelle Handlimit erlauben.
+Erfüllte künftige Auslöser, verdeckte Karten und garantierte Flatlines werden
+daraus nicht abgeleitet. Eine bereits vollständige Hand oder eine aktuelle
+ausführbare bzw. finanzierbare Punish-Route erzeugt keinen Suchbedarf.
+
+Der bestehende Hand-Owner bindet den Bedarf an genau einen aktuellen
+Basisdraw. Die Draw-Arbitration sperrt ihn bei einer konkreten ausführbaren
+Score-Linie, akuter ausführbarer Verteidigung oder fehlendem Hand- bzw.
+Deckhorizont. Der eigene Cleanup bleibt ohne Zusatzabwurf. Nach dem nächsten
+Pflichtdraw ist höchstens eine überzählige Karte zulässig, wenn eine bekannte
+Nichtagenda außerhalb des Pakets und der aktuellen Planbindungen als
+Abwurfoption übrig bleibt. Der Engine-Horizont nutzt die derzeit sichtbaren
+Pflichtquellen (einschließlich gescorter Agenda und Viruszählern); ein neuer
+Runnerzug kann ihn verändern. Die Spezialroute für Draw-Ersetzung bleibt
+getrennt. Nach dem Ziehen wird mit der beobachteten Karte neu geplant, auch
+bei einem Fehlschlag gibt es keinen zweiten Versuch im selben Corp-Zug.
 
 Trace-Tag-Routen entdecken neben Operationen in HQ auch kanonisch deklarierte
 Corp-Main-Aktivierungen gescorter Agendas. Die Engine zertifiziert dafür die
