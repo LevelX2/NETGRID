@@ -24,6 +24,11 @@ import { uniqueBy } from "../../runtime/collection";
 import { runnerPersistentHazardCounterFundingQuotes } from "./persistent-hazard-counter-funding";
 import { currentRunnerTagReduction } from "../../actions/tag-effect-semantics";
 import { quoteRunnerTagClearBankFunding } from "./tag-clear-bank-funding";
+import {
+  canAvoidOneNextCorpTag,
+  runnerNextCorpTurnThreat,
+} from "./next-corp-turn-punish";
+import { currentLegalActionResourceCost } from "../../runtime/visible-action-facts";
 export type RunnerDefenseServices = {
   findFundingRoute: (
     request: Pick<
@@ -189,6 +194,7 @@ export function buildRunnerDefenseSignals(params: {
     defenseSupportInstallValues,
   } = params.support;
   const currentCredits = input.playerView.own.credits;
+  const nextCorpTurn = runnerNextCorpTurnThreat(input);
   const riskAdjustedHandBufferOpen = handSize < minimumHandBuffer;
   const damageBufferForecast =
     damageThreat.flatlineRisk.level === "critical" ||
@@ -338,8 +344,50 @@ export function buildRunnerDefenseSignals(params: {
           fullTagClearFunding.reliability === "guaranteed" &&
           fullTagClearFunding.horizon === "same_turn" &&
           fullTagClearFunding.projectedGap === 0)));
-  const preserveHandBeforeIncompleteTagClear =
+  const broadPreserveHandBeforeIncompleteTagClear =
     taggedDamageBufferRequired && !completeTagClearAvailable;
+  const nextCorpTurnDamage = nextCorpTurn?.incomingMeatDamage ?? 0;
+  const preserveAgainstNextCorpTurn =
+    !completeTagClearAvailable || nextCorpTurn?.retagsAfterClear === true;
+  const protectNextCorpTurn =
+    nextCorpTurnDamage > handSize && preserveAgainstNextCorpTurn;
+  const nextTurnDrawActions =
+    protectNextCorpTurn && nextCorpTurnDamage <= maxHandSize
+      ? nextCorpTurnBufferDraws(
+          input,
+          candidates,
+          nextCorpTurnDamage,
+          exactCoverageRecoveryActionIds,
+        )
+      : [];
+  const nextTurnTagProtection = nextCorpTurn?.tagPreventionNeeded
+    ? nextCorpTurnTagProtectionActions(
+        input,
+        candidates,
+        minimumHandBuffer,
+        nextCorpTurn.postProtectionMeatDamage,
+        protectNextCorpTurn,
+      )
+    : [];
+  const nextTurnTagProtectionIds = new Set(
+    nextTurnTagProtection.map((entry) => entry.actionId),
+  );
+  const nextCorpTurnBufferTarget =
+    preserveAgainstNextCorpTurn &&
+    nextCorpTurnDamage > 0 &&
+    nextCorpTurnDamage <= maxHandSize &&
+    (handSize >= nextCorpTurnDamage || nextTurnDrawActions.length > 0)
+      ? nextCorpTurnDamage
+      : undefined;
+  const preservesBuiltNextTurnGrip =
+    nextCorpTurnBufferTarget !== undefined &&
+    handSize >= nextCorpTurnBufferTarget &&
+    !canRepairGripAfterAnotherAction(input);
+  const preserveHandBeforeIncompleteTagClear =
+    broadPreserveHandBeforeIncompleteTagClear ||
+    (tags > 0 &&
+      nextTurnDrawActions.length > 0 &&
+      nextCorpTurn?.retagsAfterClear === true);
   const handFloor = damageThreat.flatlineRisk.recommendedHandFloor;
   const survivalDraw = input.legalActions.find(
     (action) =>
@@ -554,7 +602,24 @@ export function buildRunnerDefenseSignals(params: {
         candidate.actionTacticSignals.includes("damage_prevention"),
     ),
     handSize,
-    minimumHandBuffer,
+    minimumHandBuffer: Math.max(
+      minimumHandBuffer,
+      nextCorpTurnBufferTarget ?? 0,
+    ),
+    ...(nextCorpTurnBufferTarget !== undefined
+      ? {
+          nextCorpTurnBufferTarget,
+          ...(preservesBuiltNextTurnGrip
+            ? { nextCorpTurnGripPreservation: true as const }
+            : {}),
+        }
+      : {}),
+    ...(nextTurnTagProtection.length > 0
+      ? { nextCorpTurnTagProtectionActionIds: [...nextTurnTagProtectionIds] }
+      : {}),
+    ...(nextCorpTurn?.additionalRunEnablesPunish
+      ? { optionalRunEnablesNextCorpPunish: true }
+      : {}),
     preserveHandBeforeIncompleteTagClear,
     drawAllowed:
       input.playerView.own.stackOrRdCount > 0 &&
@@ -565,27 +630,30 @@ export function buildRunnerDefenseSignals(params: {
           (handSize < maxHandSize ||
             riskAdjustedHandBuffer.sameTurnRunPreparation),
       ),
-    handBufferActionIds: candidates
-      .filter((candidate) => {
-        return (
-          (handSize < maxHandSize ||
-            riskAdjustedHandBuffer.sameTurnRunPreparation) &&
-          handSize < minimumHandBuffer &&
-          !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
-          !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
-          ((input.playerView.own.stackOrRdCount > 0 &&
-            (candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
-            (candidate.semanticActionType === "draw.card" ||
-              (candidate.economyProjection?.timing === "immediate" &&
-                candidate.semanticActionType !== "install.card"))) ||
-            ((candidate.actionType === "activated_card_ability" ||
-              candidate.actionType === "trigger_ability") &&
-              runnerEffectsProvideTopTrashRecovery(
-                candidate.functionalEffects,
-              )))
-        );
-      })
-      .map((candidate) => candidate.actionId),
+    handBufferActionIds:
+      nextTurnDrawActions.length > 0
+        ? nextTurnDrawActions
+        : candidates
+            .filter((candidate) => {
+              return (
+                (handSize < maxHandSize ||
+                  riskAdjustedHandBuffer.sameTurnRunPreparation) &&
+                handSize < minimumHandBuffer &&
+                !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
+                !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
+                ((input.playerView.own.stackOrRdCount > 0 &&
+                  (candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
+                  (candidate.semanticActionType === "draw.card" ||
+                    (candidate.economyProjection?.timing === "immediate" &&
+                      candidate.semanticActionType !== "install.card"))) ||
+                  ((candidate.actionType === "activated_card_ability" ||
+                    candidate.actionType === "trigger_ability") &&
+                    runnerEffectsProvideTopTrashRecovery(
+                      candidate.functionalEffects,
+                    )))
+              );
+            })
+            .map((candidate) => candidate.actionId),
     confirmedDamageTaxedDrawActionIds: [...confirmedDamageTaxedDrawActionIdSet],
     forgoUnsafeRunCapacity,
     forgoExhaustedStandardCapacity,
@@ -597,9 +665,22 @@ export function buildRunnerDefenseSignals(params: {
       ? { persistentHazardCounterFundingNeed }
       : {}),
     ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
-    defenseSupportInstallActionIds,
-    defenseSupportRejectedInstallActionIds,
-    defenseSupportInstallValues,
+    defenseSupportInstallActionIds: [
+      ...new Set([
+        ...defenseSupportInstallActionIds,
+        ...nextTurnTagProtectionIds,
+      ]),
+    ],
+    defenseSupportRejectedInstallActionIds:
+      defenseSupportRejectedInstallActionIds.filter(
+        (id) => !nextTurnTagProtectionIds.has(id),
+      ),
+    defenseSupportInstallValues: {
+      ...defenseSupportInstallValues,
+      ...Object.fromEntries(
+        nextTurnTagProtection.map(({ actionId, value }) => [actionId, value]),
+      ),
+    },
     handBufferPriorityClass:
       riskAdjustedHandBufferOpen && riskAdjustedHandBuffer.minimumHandBuffer > 3
         ? "P3"
@@ -611,6 +692,12 @@ export function buildRunnerDefenseSignals(params: {
             ? "P4"
             : "P5",
     evidenceCodes: [
+      ...(nextTurnTagProtection.length > 0
+        ? ["runner_next_corp_turn_tag_protection"]
+        : []),
+      ...(nextTurnDrawActions.length > 0
+        ? [`runner_next_corp_turn_damage_hand_buffer:${nextCorpTurnDamage}`]
+        : []),
       ...(persistentHazardCounterFundingNeed
         ? ["runner_persistent_hazard_counter_requires_funding"]
         : []),
@@ -667,6 +754,155 @@ export function buildRunnerDefenseSignals(params: {
     runOnlyActionCapacity,
     confirmedDamageTaxedDrawActionIdSet,
   };
+}
+
+function canRepairGripAfterAnotherAction(input: AiDecisionInput): boolean {
+  const { own } = input.playerView;
+  return (
+    own.stackOrRdCount > 0 &&
+    input.legalActions.some(
+      (action) =>
+        action.type === "draw_card" &&
+        action.source === "basic_action" &&
+        currentLegalActionResourceCost(action, "clicks") < own.clicks &&
+        runnerDrawTaxLiabilityProjection(input, action).sourceCount === 0,
+    )
+  );
+}
+
+function nextCorpTurnTagProtectionActions(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  minimumHandBuffer: number,
+  residualDamage: number,
+  confirmedDamage: boolean,
+): { actionId: string; value: number }[] {
+  const { own, stateVersion, timingPoint } = input.playerView;
+  const hand = own.gripOrHq.length;
+  const handAfterInstall = hand - 1;
+  const minimumAfterInstall = Math.max(
+    residualDamage,
+    Math.min(
+      own.maxHandSize,
+      minimumHandBuffer,
+      confirmedDamage ? handAfterInstall : hand,
+    ),
+  );
+  const basicDraw = input.legalActions.find(
+    (action) => action.type === "draw_card" && action.source === "basic_action",
+  );
+  return candidates.flatMap((candidate) => {
+    if (
+      candidate.actionType !== "install_card" ||
+      candidate.semanticActionType !== "install.card" ||
+      candidate.costProfile.costKnownStatus !== "known" ||
+      candidate.costProfile.additionalCosts.length > 0 ||
+      (candidate.costProfile.selfDamage?.length ?? 0) > 0 ||
+      (candidate.costProfile.selfTag ?? 0) > 0
+    )
+      return [];
+    const install = input.legalActions.find(
+      (action) =>
+        action.actionId === candidate.actionId &&
+        action.side === "runner" &&
+        action.timingPoint === timingPoint &&
+        action.expiresAtStateVersion === stateVersion &&
+        (action.choiceRequirements?.length ?? 0) === 0,
+    );
+    const card = own.gripOrHq.find(
+      (entry) => entry.instanceId === install?.source,
+    );
+    if (!install || !card) return [];
+    const credits = currentLegalActionResourceCost(install, "credits");
+    const clicks = currentLegalActionResourceCost(install, "clicks");
+    const remainingCredits = own.credits - credits;
+    const restoreGrip = handAfterInstall < minimumAfterInstall;
+    if (
+      remainingCredits < 0 ||
+      clicks > own.clicks ||
+      (!confirmedDamage && (credits > 0 || clicks > 1)) ||
+      (restoreGrip &&
+        (!basicDraw ||
+          clicks + currentLegalActionResourceCost(basicDraw, "clicks") >
+            own.clicks ||
+          own.stackOrRdCount < minimumAfterInstall - handAfterInstall ||
+          runnerDrawTaxLiabilityProjection(input, basicDraw).sourceCount >
+            0)) ||
+      !canAvoidOneNextCorpTag(card, remainingCredits, !confirmedDamage)
+    )
+      return [];
+    return [
+      {
+        actionId: install.actionId,
+        value: Math.max(1, 160 - credits * 3 - clicks * 4),
+      },
+    ];
+  });
+}
+
+function nextCorpTurnBufferDraws(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  target: number,
+  excludedActionIds: ReadonlySet<string>,
+): string[] {
+  const { own, stateVersion, timingPoint } = input.playerView;
+  const gap = target - own.gripOrHq.length;
+  if (gap <= 0 || own.stackOrRdCount < gap) return [];
+  const draws = candidates.flatMap((candidate) => {
+    const projection = candidate.economyProjection;
+    if (
+      excludedActionIds.has(candidate.actionId) ||
+      candidate.semanticActionType === "install.card" ||
+      projection?.reliability !== "guaranteed" ||
+      (candidate.semanticActionType !== "draw.card" &&
+        projection?.timing !== "immediate") ||
+      projection.netHandDelta <= 0 ||
+      (candidate.costProfile.selfDamage?.length ?? 0) > 0 ||
+      (candidate.costProfile.selfTag ?? 0) > 0
+    )
+      return [];
+    const action = input.legalActions.find(
+      (legal) =>
+        legal.actionId === candidate.actionId &&
+        legal.side === "runner" &&
+        legal.timingPoint === timingPoint &&
+        legal.expiresAtStateVersion === stateVersion,
+    );
+    if (!action) return [];
+    const tax = runnerDrawTaxLiabilityProjection(input, action, candidate);
+    const credits =
+      currentLegalActionResourceCost(action, "credits") +
+      tax.projectedCreditsPaid;
+    const clicks = currentLegalActionResourceCost(action, "clicks");
+    const handGain = projection.netHandDelta;
+    if (
+      credits > own.credits ||
+      clicks > own.clicks ||
+      tax.projectedTagsAdded > 0 ||
+      (tax.drawCount > 0 && tax.drawCount > own.stackOrRdCount)
+    )
+      return [];
+    return [
+      { action, clicks, credits, handGain, drawTaxSources: tax.sourceCount },
+    ];
+  });
+  const basic = draws.find(
+    ({ action }) =>
+      action.type === "draw_card" && action.source === "basic_action",
+  );
+  return draws
+    .filter(({ clicks, credits, handGain }) => {
+      if (handGain >= gap) return true;
+      const remaining = gap - handGain;
+      return (
+        basic !== undefined &&
+        clicks + remaining * basic.clicks <= own.clicks &&
+        credits + remaining * basic.credits <= own.credits &&
+        basic.drawTaxSources === 0
+      );
+    })
+    .map(({ action }) => action.actionId);
 }
 
 function bindVisibleDrawTaxPreparation(

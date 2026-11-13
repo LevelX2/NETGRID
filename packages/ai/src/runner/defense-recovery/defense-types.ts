@@ -45,6 +45,10 @@ export type RunnerDefenseSignals = {
   damagePreventionNeeded: boolean;
   handSize: number;
   minimumHandBuffer: number;
+  nextCorpTurnBufferTarget?: number;
+  nextCorpTurnTagProtectionActionIds?: string[];
+  nextCorpTurnGripPreservation?: true;
+  optionalRunEnablesNextCorpPunish?: true;
   preserveHandBeforeIncompleteTagClear?: boolean;
   drawAllowed: boolean;
   handBufferActionIds?: string[];

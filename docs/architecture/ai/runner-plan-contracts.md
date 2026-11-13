@@ -2565,6 +2565,26 @@ jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.
 
 ## 7. `runner.defense_and_recovery`
 
+Der Defense-Owner bewertet Tag-and-Bag für den nächsten Corp-Zug aus dem
+aktuellen HQ-Gedächtnis des Runners. Erkannte Operationen brauchen einen
+erfüllten Trigger, sichtbares Corp-Budget und Platz im regulären
+Drei-Klick-Zug. Ein reines Tag-ICE oder eine abgegangene HQ-Karte belegt
+diese Folge nicht. Ein erfüllter einzelner Tag-Trigger mit offenen HQ-Slots
+kann eine kostenlose, legale Tag-Prävention rechtfertigen, sofern die Hand
+nach der Installation ausreicht oder mit einem sicheren Draw wieder aufgefüllt
+werden kann.
+
+Für bekannte, erreichbare Schadensfolgen erhält Defense ein Zugendeziel in
+Höhe des wirksamen Schadens. Fünf Karten überleben fünf Schaden. Das Ziel
+braucht einen finanzierbaren Ziehpfad oder einen bereits vorhandenen Puffer
+innerhalb des Handlimits. Es beeinflusst weder die allgemeine Handreserve noch
+die Pfadquote für laufende Runs. Eine freiwillige Informationsroute kann
+entfallen, wenn genau dieser Run den bekannten, mit der Hand nicht abfangbaren
+Gegenschlag auslöst. Unmittelbare Siegoptionen und konkrete Agenda- oder
+Scorefenster behalten ihre eigene Zuständigkeit. Der gespeicherte
+Entscheidungspunkt D12 aus `match_e38d41799172088f` prüft den Übergang zur
+Tag-Prävention.
+
 Ist bereits eine aktuelle Runroute ohne zusätzliche Vorbereitung konvertierbar,
 erzeugt die Handquote einer anderen optionalen Informationsroute keinen globalen
 P3-Ziehbedarf. Konkrete Agenda- und Scorebedarfe behalten ihre Vorbereitung.

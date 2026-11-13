@@ -1831,9 +1831,12 @@ export function runnerActionDispositions(
     addDisposition(disposition);
   }
   for (const disposition of runnerDefenseSafetyDispositions({
+    input,
     candidates,
     signals: domain.defense,
     runWindows: domain.runWindows,
+    runTargets,
+    terminalActionIds: new Set((domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? [])),
     alreadyClassifiedActionIds: new Set(
       dispositions.map((entry) => entry.actionId),
     ),

@@ -39,7 +39,7 @@ export function createRunnerDefenseModule(): PlanModule {
             phase,
             signals,
           } satisfies DefenseState,
-          priorityClass: defensePriorityClass(signals),
+          priorityClass: defensePriorityClass(signals, phase),
           target: { kind: "player", id: "runner" },
           routeExists: candidates.length > 0 ||
             (phase === "fund_tag_clear" && !invalidTagClearFundingContract &&
@@ -105,7 +105,7 @@ export function createRunnerDefenseModule(): PlanModule {
               context.actionDispositions,
             )
           : [];
-      const priorityClass = defensePriorityClass(current.signals);
+      const priorityClass = defensePriorityClass(current.signals, current.phase);
       const bankNeed = current.phase === "fund_tag_clear" && tagClearFundingContractValid
         ? current.signals.tagClearFundingNeed?.bankFunding : undefined;
       const result = assessment(
@@ -285,6 +285,11 @@ function defensePhase(
     (signals.handBufferActionIds?.length ?? 0) > 0 &&
     signals.handSize < signals.minimumHandBuffer
   ) openPhases.push("build_hand_buffer");
+  if (
+    signals.nextCorpTurnBufferTarget !== undefined &&
+    signals.handSize < signals.nextCorpTurnBufferTarget &&
+    (signals.nextCorpTurnTagProtectionActionIds?.length ?? 0) === 0
+  ) openPhases.push("build_hand_buffer");
   if ((signals.defenseSupportInstallActionIds?.length ?? 0) > 0)
     openPhases.push("install_defense_support");
   if (signals.activeTags > 0) openPhases.push("clear_tags");
@@ -363,7 +368,9 @@ function defenseCandidates(
   const handBufferActionIds = new Set(signals.handBufferActionIds ?? []);
   const persistentCounterFundingActionIds = new Set(signals.persistentHazardCounterFundingNeed?.actionIds ?? []);
   const defenseSupportInstallActionIds = new Set(
-    signals.defenseSupportInstallActionIds ?? [],
+    signals.nextCorpTurnTagProtectionActionIds ??
+      signals.defenseSupportInstallActionIds ??
+      [],
   );
   const confirmedDamageTaxedDrawActionIds = new Set(
     signals.confirmedDamageTaxedDrawActionIds ?? [],
@@ -662,7 +669,9 @@ function defensePhaseValue(
   if (phase === "back_up_trashed_programs") return 1_000;
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
-  if (phase === "install_defense_support") return 60;
+  if (phase === "install_defense_support") {
+    return signals.nextCorpTurnTagProtectionActionIds?.length ? 160 : 60;
+  }
   if (phase === "clear_tags") return 80;
   if (phase === "fund_tag_clear") return RUNNER_TAG_CLEAR_FUNDING_VALUE;
   if (phase === "fund_persistent_hazard_counter") return 85;
@@ -676,6 +685,7 @@ function defensePhaseValue(
 
 function defensePriorityClass(
   signals: RunnerDefenseSignals,
+  phase: DefenseState["phase"],
 ): "P2" | "P3" | "P4" | "P5" {
   if (signals.gripDamageReplacementBinding || signals.programTrashBackupBinding)
     return "P2";
@@ -687,6 +697,15 @@ function defensePriorityClass(
     signals.persistentHazardCounterFundingNeed !== undefined
   ) {
     return "P2";
+  }
+  if (
+    (phase === "install_defense_support" &&
+      signals.nextCorpTurnTagProtectionActionIds?.length) ||
+    (phase === "build_hand_buffer" &&
+      signals.nextCorpTurnBufferTarget !== undefined &&
+      signals.handSize < signals.nextCorpTurnBufferTarget)
+  ) {
+    return "P3";
   }
   if (signals.reactionReserveNeed) return "P3";
   if ((signals.defenseSupportInstallActionIds?.length ?? 0) > 0) return "P4";
