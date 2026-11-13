@@ -8,7 +8,7 @@ import type {
 } from "../plans/runner-funding-contracts";
 import { runnerDebtFinancingProfile } from "../runtime/runner-canonical-card-facts";
 import { createDeckCapabilitiesContext } from "../runtime/deck-capabilities-context";
-import { runnerHeapRecoveryActionContract } from "../runner/hand-development/development-search-targets";
+import { runnerRecoveryActionContract } from "../runner/hand-development/development-search-targets";
 import {
   quoteRunnerRunTarget,
   type RunnerRunTargetEvaluation,
@@ -26,7 +26,7 @@ function exactTopHeapIncomeSource(
   const source = input.playerView.own.rig?.find(
     (card) => card.instanceId === action?.source,
   );
-  const contract = runnerHeapRecoveryActionContract(input, candidate);
+  const contract = runnerRecoveryActionContract(input, candidate);
   const projection = candidate.economyProjection;
   const ability = source?.definitionId
     ? cardImplementationForDefinitionId(source.definitionId)?.abilities?.find(
