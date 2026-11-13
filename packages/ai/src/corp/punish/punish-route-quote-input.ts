@@ -7,6 +7,7 @@ import {
   type CorpPunishRouteQuoteResult,
   type CorpPunishRouteQuoteSet,
   type CorpPunishRouteStepKind,
+  type LegalAction,
   type PlayerView,
   type VisibleCard,
 } from "@netgrid/shared";
@@ -14,6 +15,7 @@ import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { sanitizeCorpPunishRouteQuoteSet } from "../../input-dto";
 import {
   corpDirectTagOperationProfile,
+  corpPunishFixedCapabilityCost,
   corpInstalledHardwareTrashOperationProfile,
   corpTaggedCreditDenialOperationProfile,
   corpTraceTagSourceProfile,
@@ -22,6 +24,7 @@ import {
   corpScoredTaggedMeatDamageProfile,
   corpInstalledTaggedMeatDamageProfile,
 } from "../../runtime/corp-canonical-card-facts";
+import { currentLegalActionResourceCost } from "../../runtime/visible-action-facts";
 
 const MAX_PUNISH_ROUTES = 8;
 const MAX_PUNISH_ROUTE_STEPS = 6;
@@ -37,16 +40,19 @@ type PunishComponentAdapter = {
   sourceCapabilityBindingKind: "card_spec_capability_key";
   sourceCapabilityId: string;
   agendaPointCost?: number;
+  damageAmount?: number;
 };
 
 /**
  * A semantic adapter only states which visible Engine capability may be
- * probed. It never supplies costs, damage totals or condition outcomes; those
- * remain state-bound Engine-quote facts.
+ * probed. Printed costs and damage guide the request shortlist. Only the
+ * Engine quote can certify the route's actual costs and outcomes.
  */
 type VisiblePunishComponent = {
   card: VisibleCard;
   adapter: PunishComponentAdapter;
+  fixedCost?: { clicks: number; credits: number };
+  headAction?: LegalAction;
 };
 
 export type QuoteCorpPunishRoute = (
@@ -104,15 +110,15 @@ export function buildBoundedCorpPunishRouteRequests(
   }
   const components = [
     ...input.playerView.own.gripOrHq.map((card) =>
-      visiblePunishComponent(card, "hq"),
+      visiblePunishComponent(input, card, "hq"),
     ),
     ...input.playerView.own.scoreArea.map((card) =>
-      visiblePunishComponent(card, "scoreArea"),
+      visiblePunishComponent(input, card, "scoreArea"),
     ),
     ...input.playerView.servers
       .filter((server) => server.id !== "archives")
       .flatMap((server) => server.root)
-      .map((card) => visiblePunishComponent(card, "installed")),
+      .map((card) => visiblePunishComponent(input, card, "installed")),
   ]
     .filter(
       (component): component is VisiblePunishComponent =>
@@ -150,7 +156,7 @@ export function buildBoundedCorpPunishRouteRequests(
     );
     if (!action) return [];
     agendaFundedHeads.set(component.card.instanceId, action.actionId);
-    return [[component]];
+    return [[{ ...component, headAction: action }]];
   });
   const otherPunish = components.filter(
     (component) =>
@@ -158,13 +164,6 @@ export function buildBoundedCorpPunishRouteRequests(
       component.adapter.kind === "hardware_trash",
   );
   const standaloneTagRoutes = tags.map((component) => [component]);
-  if (
-    damage.length === 0 &&
-    agendaFundedDamageRoutes.length === 0 &&
-    otherPunish.length === 0 &&
-    standaloneTagRoutes.length === 0
-  )
-    return [];
   const tagHeads =
     input.playerView.opponent.tags > 0
       ? [undefined]
@@ -175,8 +174,11 @@ export function buildBoundedCorpPunishRouteRequests(
 
   const damageRouteComponents = tagHeads.flatMap((tag) => {
     const maximumDamageSteps = MAX_PUNISH_ROUTE_STEPS - (tag ? 1 : 0);
-    return boundedDamageCombinations(damage, maximumDamageSteps).map(
-      (damageSteps) => [...(tag ? [tag] : []), ...damageSteps],
+    return boundedDamageCombinations(
+      input.playerView,
+      damage,
+      maximumDamageSteps,
+      tag,
     );
   });
   const otherPunishRouteComponents = tagHeads.flatMap((tag) =>
@@ -188,7 +190,20 @@ export function buildBoundedCorpPunishRouteRequests(
     ...damageRouteComponents,
     ...otherPunishRouteComponents,
   ];
-  const selectedRoutes = selectBoundedRoutes(routeComponents);
+  const selectedRoutes = selectBoundedRoutes(
+    input.playerView,
+    routeComponents,
+    [
+      agendaFundedDamageRoutes,
+      standaloneTagRoutes.filter(([tag]) => tag?.headAction !== undefined),
+      otherPunishRouteComponents.filter(
+        (route) => route.at(-1)?.adapter.kind === "other_punish",
+      ),
+      otherPunishRouteComponents.filter(
+        (route) => route.at(-1)?.adapter.kind === "hardware_trash",
+      ),
+    ],
+  );
   return selectedRoutes.map((route, routeIndex) => {
     const routeId = `engine-certified-payoff:${routeIndex}:${route
       .map((component) => component.card.instanceId)
@@ -277,10 +292,11 @@ function currentHardwareTrashActionId(
 function legalActionCreditCost(
   action: AiDecisionInput["legalActions"][number],
 ): number {
-  return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
+  return currentLegalActionResourceCost(action, "credits");
 }
 
 function visiblePunishComponent(
+  input: AiDecisionInput,
   card: VisibleCard,
   sourceZone: "hq" | "scoreArea" | "installed",
 ): VisiblePunishComponent | undefined {
@@ -298,7 +314,34 @@ function visiblePunishComponent(
   }
   const adapter = structuredPunishComponentAdapter(card.definitionId);
   if (!adapter) return undefined;
-  return { card, adapter };
+  const headAction = input.legalActions.find(
+    (action) =>
+      action.side === "corp" &&
+      action.source === card.instanceId &&
+      action.payload?.cardId === card.instanceId &&
+      action.timingPoint === input.playerView.timingPoint &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.targetRequirements.length === 0 &&
+      (action.choiceRequirements?.length ?? 0) === 0 &&
+      (sourceZone === "hq"
+        ? action.type === "play_operation"
+        : action.type === "activated_card_ability" &&
+          action.payload.cardImplementationAbilityId ===
+            adapter.sourceCapabilityId),
+  );
+  const fixedCost =
+    adapter.agendaPointCost === undefined
+      ? corpPunishFixedCapabilityCost(
+          card.definitionId,
+          adapter.sourceCapabilityId,
+        )
+      : undefined;
+  return {
+    card,
+    adapter,
+    ...(headAction ? { headAction } : {}),
+    ...(fixedCost ? { fixedCost } : {}),
+  };
 }
 
 function structuredPunishComponentAdapter(
@@ -427,6 +470,7 @@ function structuredTaggedDamageAdapter(
         routeOrder: 10,
         sourceCapabilityBindingKind: "card_spec_capability_key",
         sourceCapabilityId: profile.sourceCapabilityId,
+        damageAmount: profile.damageAmount,
         ...(profile.agendaPointCost !== undefined
           ? { agendaPointCost: profile.agendaPointCost }
           : {}),
@@ -435,42 +479,141 @@ function structuredTaggedDamageAdapter(
 }
 
 function boundedDamageCombinations(
+  view: PlayerView,
   damage: readonly VisiblePunishComponent[],
   maximumSteps: number,
+  tag: VisiblePunishComponent | undefined,
 ): VisiblePunishComponent[][] {
-  const boundedDamage = damage.slice(0, MAX_PUNISH_ROUTES - 1);
-  const combinations = boundedDamage.map((component) => [component]);
-  const longestLength = Math.min(maximumSteps, boundedDamage.length);
-  for (let length = 2; length <= longestLength; length += 1) {
-    const forward = boundedDamage.slice(0, length);
-    combinations.push(forward, forward.slice().reverse());
+  const prefix = tag ? [tag] : [];
+  const byLength: VisiblePunishComponent[][][] = [[prefix]];
+  const orderedDamage = damage
+    .slice()
+    .sort(
+      (left, right) =>
+        Number(right.headAction !== undefined) -
+          Number(left.headAction !== undefined) ||
+        (right.adapter.damageAmount ?? 0) - (left.adapter.damageAmount ?? 0) ||
+        left.card.instanceId.localeCompare(right.card.instanceId),
+    );
+  // Retain a bounded shortlist at each length. Visiting each card once
+  // preserves the number of available copies without enumerating permutations.
+  for (const component of orderedDamage) {
+    for (let length = maximumSteps; length > 0; length -= 1) {
+      const shorter = byLength[length - 1];
+      if (!shorter) continue;
+      byLength[length] = bestRouteProbes(view, [
+        ...(byLength[length] ?? []),
+        ...shorter.map((route) => [...route, component]),
+      ]).slice(0, MAX_PUNISH_ROUTES);
+    }
   }
-  return selectBoundedRoutes(combinations);
+  return byLength.slice(1).flat();
 }
 
 function selectBoundedRoutes(
+  view: PlayerView,
+  routes: readonly VisiblePunishComponent[][],
+  protectedGroups: readonly VisiblePunishComponent[][][],
+): VisiblePunishComponent[][] {
+  const unique = uniqueRouteProbes(routes);
+  if (unique.length <= MAX_PUNISH_ROUTES) return unique;
+  const protectedRoutes = protectedGroups.flatMap((group) =>
+    bestRouteProbes(view, group).slice(0, 1),
+  );
+  return uniqueRouteProbes([
+    ...protectedRoutes,
+    ...bestRouteProbes(view, unique),
+  ]).slice(0, MAX_PUNISH_ROUTES);
+}
+
+function bestRouteProbes(
+  view: PlayerView,
   routes: readonly VisiblePunishComponent[][],
 ): VisiblePunishComponent[][] {
-  const unique = [
-    ...new Map(
-      routes.map((route) => [routeComponentKey(route), route]),
-    ).values(),
-  ];
-  if (unique.length <= MAX_PUNISH_ROUTES) return unique;
-  const selected = unique.slice(0, MAX_PUNISH_ROUTES - 1);
-  const longest = [...unique].sort(
-    (left, right) =>
-      right.length - left.length ||
-      routeComponentKey(left).localeCompare(routeComponentKey(right)),
-  )[0]!;
-  if (
-    !selected.some(
-      (route) => routeComponentKey(route) === routeComponentKey(longest),
+  return uniqueRouteProbes(routes)
+    .map((route) => ({ route, ...routeProbeOrder(view, route) }))
+    .sort(
+      (left, right) =>
+        left.horizon - right.horizon ||
+        Number(right.lethal) - Number(left.lethal) ||
+        (left.lethal && right.lethal
+          ? left.clicks - right.clicks || left.credits - right.credits
+          : right.damage - left.damage) ||
+        left.clicks - right.clicks ||
+        left.credits - right.credits ||
+        routeComponentKey(left.route).localeCompare(
+          routeComponentKey(right.route),
+        ),
     )
-  ) {
-    selected.push(longest);
+    .map(({ route }) => route);
+}
+
+function routeProbeOrder(view: PlayerView, route: VisiblePunishComponent[]) {
+  const head = route[0]!;
+  const damage = route.reduce(
+    (sum, component) => sum + (component.adapter.damageAmount ?? 0),
+    0,
+  );
+  let clicks = 0;
+  let credits = 0;
+  let costUnknown = false;
+  for (const [index, component] of route.entries()) {
+    const action = index === 0 ? component.headAction : undefined;
+    if (action) {
+      clicks += currentLegalActionResourceCost(action, "clicks");
+      credits += currentLegalActionResourceCost(action, "credits");
+    } else if (component.fixedCost) {
+      clicks += component.fixedCost.clicks;
+      credits += component.fixedCost.credits;
+    } else {
+      costUnknown = true;
+    }
   }
-  return selected;
+  const current = head.headAction !== undefined;
+  const headNeedsFunding =
+    head.fixedCost !== undefined && head.fixedCost.credits > view.own.credits;
+  let horizon = 3;
+  if (
+    clicks <= view.own.clicks &&
+    (current || headNeedsFunding || !head.fixedCost)
+  ) {
+    horizon = costUnknown
+      ? 2
+      : current && credits <= view.own.credits
+        ? 0
+        : clicks < view.own.clicks
+          ? 1
+          : 3;
+  }
+  return {
+    horizon,
+    lethal: damage > view.opponent.handCount,
+    damage,
+    clicks,
+    credits,
+  };
+}
+
+function uniqueRouteProbes(
+  routes: readonly VisiblePunishComponent[][],
+): VisiblePunishComponent[][] {
+  const byKey = new Map<string, VisiblePunishComponent[]>();
+  for (const route of routes) {
+    const key = route
+      .map((component, index) =>
+        component.card.type === "operation" && component.fixedCost
+          ? JSON.stringify([
+              component.adapter.sourceCapabilityId,
+              index === 0 && component.headAction
+                ? component.headAction.costs
+                : undefined,
+            ])
+          : component.card.instanceId,
+      )
+      .join("\u0000");
+    if (!byKey.has(key)) byKey.set(key, route);
+  }
+  return [...byKey.values()];
 }
 
 function routeComponentKey(route: readonly VisiblePunishComponent[]): string {

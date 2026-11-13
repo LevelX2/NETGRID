@@ -3143,6 +3143,16 @@ erst beim Aufdecken gebucht. Die simulierten Runner-Antworten müssen
 denselben Zahlungsbetrag belegen. Zusätzliche Zahlungs- und Linkfenster
 liegen außerhalb dieser Quote.
 
+Die Routensuche hält pro Länge eine begrenzte Auswahl sichtbarer
+Schadenskombinationen. Sie berücksichtigt aktuelle Heads, gedruckte
+Aktionskosten, verbleibende Klicks und die Runner-Handgröße, bevor sie bis
+zu acht Routen mit höchstens sechs Steps anfragt. Austauschbare Kopien
+einer Operation belegen für dieselbe Reihenfolge einen Platz. Mehrere
+Steps dürfen verschiedene Instanzen dieser Operation verwenden. Die
+Auswahl behält Vertreter für Tag-Druck, Credit-Denial, Hardware-Trash und
+Schaden gegen Agendapunkte. Ausführbarkeit und Priorität folgen erst aus
+der aktuellen Engine-Quote.
+
 **Klasse:** `bounded_sequence`
 **Rolle:** P1-/P3-Vordergrund; Kind von `corp.punish_campaign`
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

@@ -132,6 +132,59 @@ export type CorpOnPlayCapabilityProfile = Readonly<{
   sourceCapabilityId: string;
 }>;
 
+/** Fixed printed cost for a visible operation, independent of its play conditions. */
+export function corpFixedOperationPlayCredits(
+  definitionId: string | undefined,
+): number | undefined {
+  const card = planningCard(definitionId)?.planning;
+  if (card?.side !== "corp" || card.cardType !== "operation") return undefined;
+  const cost = card.engine.characteristics.playCost;
+  return cost?.kind === "fixed" ? cost.credits : undefined;
+}
+
+export function corpPunishFixedCapabilityCost(
+  definitionId: string,
+  capabilityId: string,
+): { clicks: number; credits: number } | undefined {
+  const card = planningCard(definitionId)?.planning;
+  if (card?.side !== "corp") return undefined;
+  if (card.cardType === "operation") {
+    const credits = corpFixedOperationPlayCredits(definitionId);
+    return credits === undefined ? undefined : { clicks: 1, credits };
+  }
+  const scored = card.engine.scoredAgenda;
+  if (
+    scored?.kind === "tagged_runner_meat_damage_reduce_hand_size_on_success" &&
+    canonicalCapabilityId(card.cardDefinitionId, scored.capabilityKey) ===
+      capabilityId
+  ) {
+    return { clicks: 1, credits: 0 };
+  }
+  const ability = card.engine.abilities?.find(
+    (candidate) =>
+      canonicalCapabilityId(card.cardDefinitionId, candidate.capabilityKey) ===
+      capabilityId,
+  );
+  if (ability?.kind !== "activated" || ability.timing !== "corp_main")
+    return undefined;
+  if (
+    ability.costs.some(
+      (cost) => cost.kind !== "action" && cost.kind !== "credit",
+    )
+  )
+    return undefined;
+  return {
+    clicks: ability.costs.reduce(
+      (sum, cost) => sum + (cost.kind === "action" ? cost.amount : 0),
+      0,
+    ),
+    credits: ability.costs.reduce(
+      (sum, cost) => sum + (cost.kind === "credit" ? cost.amount : 0),
+      0,
+    ),
+  };
+}
+
 export type CorpScoreConversionProfile = Readonly<{
   movesAdvancementCounters: boolean;
   placesAdvancementCounters: boolean;

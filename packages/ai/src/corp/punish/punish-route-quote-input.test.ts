@@ -1,5 +1,6 @@
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  DEMO_DECKS,
   type AiDecisionInput,
   type CorpPunishRouteQuote,
   type CorpPunishRouteQuoteRequest,
@@ -7,16 +8,29 @@ import {
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
-import { corpPunishRouteRequestFingerprint } from "@netgrid/engine";
+import {
+  applyAction,
+  corpPunishRouteRequestFingerprint,
+  createGameAfterSetup,
+  getLegalActions,
+  quoteCorpPunishRoute,
+} from "@netgrid/engine";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { chooseCorpAction } from "../../index";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { RealEngineFixtureBuilder } from "../../evaluation/real-engine-fixture-builder";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
+import type { PunishState } from "./punish-types";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import {
   buildBoundedCorpPunishRouteRequests,
   withDecisionLocalCorpPunishRouteQuotes,
 } from "./punish-route-quote-input";
 
 const DATA_SIFTERS = "onr_proteus_048_data-sifters";
+const AUDIT = "onr_v1_283_audit-of-call-records";
 const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
 const MANHUNT = "onr_proteus_050_manhunt";
 const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
@@ -58,6 +72,112 @@ describe("decision-local Corp punish route quote input", () => {
   afterEach(() => {
     resetResidentPlanPortfolioMemory();
   });
+
+  it.each([
+    { clicks: 3, credits: 9, runs: 2, terminal: true },
+    { clicks: 2, credits: 9, runs: 2, terminal: false },
+    { clicks: 3, credits: 2, runs: 2, terminal: false },
+    { clicks: 3, credits: 9, runs: 1, terminal: false },
+  ])(
+    "searches the real Audit routes with $clicks clicks, $credits credits and $runs runs",
+    ({ clicks, credits, runs, terminal }) => {
+      const corpDeck = {
+        ...DEMO_DECKS.demo_corp_001,
+        cards: [
+          ...DEMO_DECKS.demo_corp_001.cards.filter(
+            (card) => ![AUDIT, PUNITIVE, SCORCHED].includes(card.id),
+          ),
+          { id: AUDIT, quantity: 1 },
+          { id: PUNITIVE, quantity: 2 },
+          { id: SCORCHED, quantity: 2 },
+        ],
+      };
+      const start = createGameAfterSetup({
+        corpDeck,
+        traceRulesProfile: "modern_open",
+        seed: "bounded-audit-routes",
+      });
+      const mandatoryDraw = getLegalActions(start, "corp").find(
+        (action) => action.type === "mandatory_draw",
+      )!;
+      const result = applyAction(start, {
+        matchId: start.matchId,
+        side: "corp",
+        actionId: mandatoryDraw.actionId,
+        clientKnownStateVersion: start.stateVersion,
+      });
+      if (!result.ok) throw new Error(result.error.message);
+      const state = result.state;
+      RealEngineFixtureBuilder.forState(state)
+        .withCorpHqSize(0)
+        .withCorpCredits(credits)
+        .withRunnerCredits(0)
+        .withRunnerGripSize(5)
+        .withRunnerTags(0);
+      for (const id of state.corp.rd.slice()) {
+        const card = state.cardInstances[id]!;
+        if (![AUDIT, PUNITIVE, SCORCHED].includes(card.definitionId)) continue;
+        state.corp.rd = state.corp.rd.filter((other) => other !== id);
+        state.corp.hq.push(id);
+        card.zone = { side: "corp", zone: "hq" };
+      }
+      state.corp.clicks = clicks;
+      state.runnerTurnFlags!.runAttemptsLastTurn = runs;
+      const input = buildAiDecisionInput(state, "corp", {
+        ownDeckSnapshot: {
+          deckSnapshotId: corpDeck.id,
+          side: "corp",
+          cards: corpDeck.cards.map((card) => ({
+            cardId: card.id,
+            quantity: card.quantity,
+          })),
+        },
+      });
+      const quote = (request: CorpPunishRouteQuoteRequest) =>
+        quoteCorpPunishRoute(state, request);
+      const quoted = withDecisionLocalCorpPunishRouteQuotes(input, quote);
+      const routes = quoted.playerView.corpPunishRouteQuoteSet?.routes ?? [];
+      expect(routes.length).toBeLessThanOrEqual(8);
+      const decision = chooseCorpAction(quoted);
+      expect(decision.evidence?.includes("plan_priority_class:P1")).toBe(
+        terminal,
+      );
+      if (terminal) {
+        const sixDamage = routes.find(
+          (route) =>
+            route.complete &&
+            route.totalClicks === 3 &&
+            route.damageEnvelope.effectiveDamage.minimum === 6,
+        );
+        expect(
+          sixDamage?.responsePaymentEnvelope.totalCorpCredits.maximum,
+        ).toBe(3);
+        const portfolio = residentPlanPortfolioSnapshot(input);
+        const executor = portfolio?.instances.find(
+          (instance) => instance.instanceId === portfolio.executorInstanceId,
+        );
+        expect(
+          (executor?.moduleState as PunishState | undefined)?.signal
+            .routeContract?.routeId,
+        ).toBe(sixDamage?.routeId);
+        const eightDamage = routes.filter(
+          (route) =>
+            route.complete &&
+            route.totalClicks === 3 &&
+            route.damageEnvelope.effectiveDamage.minimum === 8,
+        );
+        expect(eightDamage).toHaveLength(1);
+        expect(
+          eightDamage[0]?.steps
+            .slice(1)
+            .map((step) => step.sourceCardDefinitionId),
+        ).toEqual([SCORCHED, SCORCHED]);
+        expect(eightDamage[0]?.steps[1]?.sourceCardInstanceId).not.toBe(
+          eightDamage[0]?.steps[2]?.sourceCardInstanceId,
+        );
+      }
+    },
+  );
 
   it("builds bounded visible Tag -> 4 and Tag -> 4 -> 2 route probes without inventing outcomes", () => {
     const input = punishInput({ runnerTags: 0, runnerHandCount: 3 });
@@ -193,6 +313,36 @@ describe("decision-local Corp punish route quote input", () => {
     expect(first).toHaveLength(8);
     expect(Math.max(...first.map((request) => request.steps.length))).toBe(6);
     expect(second).toEqual(first);
+  });
+
+  it("reserves damage and both utility payoffs when cheap combinations fill the quote budget", () => {
+    const input = punishInput({ runnerTags: 1, runnerHandCount: 5 });
+    input.playerView.own.gripOrHq.push(
+      operation("scorched-copy", SCORCHED),
+      operation("punitive-copy", PUNITIVE),
+      operation("closed-accounts", CLOSED_ACCOUNTS),
+      operation("power-grid", "onr_v1_299_power-grid-overload"),
+    );
+    const first = buildBoundedCorpPunishRouteRequests(input);
+    expect(first).toHaveLength(8);
+    expect(first).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          steps: [expect.objectContaining({ kind: "other_punish" })],
+        }),
+        expect.objectContaining({
+          steps: [expect.objectContaining({ kind: "hardware_trash" })],
+        }),
+        expect.objectContaining({
+          steps: [
+            expect.objectContaining({ sourceCardInstanceId: "scorched" }),
+            expect.objectContaining({ sourceCardInstanceId: "punitive" }),
+          ],
+        }),
+      ]),
+    );
+    input.playerView.own.gripOrHq.reverse();
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual(first);
   });
 
   it("retains damage-only routes and probes standalone additional tags when the Runner is already tagged", () => {
