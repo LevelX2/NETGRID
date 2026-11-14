@@ -353,28 +353,52 @@ export function buildRunnerDefenseSignals(params: {
       candidate.semanticActionType === "counter.remove_trace_tag" ||
       candidate.semanticActionType === "counter.remove_runner_hazard",
   );
-  const conditionalNextCorpTurnDamage = nextCorpTurn?.conditionalMeatDamage ?? 0;
+  const conditionalNextCorpTurnDamage =
+    nextCorpTurn?.conditionalMeatDamage ?? 0;
   const exactNextCorpTurnDamage = nextCorpTurn?.incomingMeatDamage ?? 0;
-  const nextCorpTurnDamage = Math.max(
+  const knownThreatDamage = Math.max(
     exactNextCorpTurnDamage,
     conditionalNextCorpTurnDamage,
   );
   const preserveAgainstNextCorpTurn =
     !completeTagClearAvailable || nextCorpTurn?.retagsAfterClear === true;
-  const protectNextCorpTurn =
-    nextCorpTurnDamage > handSize && preserveAgainstNextCorpTurn;
-  const nextTurnDrawActions =
-    protectNextCorpTurn &&
-    nextCorpTurnDamage <= maxHandSize &&
-    (conditionalNextCorpTurnDamage === 0 ||
-      !persistentHazardCounterRemovalAvailable)
+  const observedPayoffDamage = nextCorpTurn?.observedPayoffMeatDamage ?? 0;
+  // A historical payoff is evidence of risk, with no current HQ binding.
+  // Prefer a reachable free draw while leaving the existing bank available
+  // for Breaks, Steal costs and reactive defense.
+  const observedPayoffDrawActions =
+    observedPayoffDamage > Math.max(knownThreatDamage, handSize) &&
+    observedPayoffDamage <= maxHandSize &&
+    preserveAgainstNextCorpTurn &&
+    !persistentHazardCounterRemovalAvailable
       ? nextCorpTurnBufferDrawActionIds(
           input,
           candidates,
-          nextCorpTurnDamage,
+          observedPayoffDamage,
           exactCoverageRecoveryActionIds,
+          0,
         )
       : [];
+  const nextCorpTurnDamage =
+    observedPayoffDrawActions.length > 0
+      ? observedPayoffDamage
+      : knownThreatDamage;
+  const protectNextCorpTurn =
+    nextCorpTurnDamage > handSize && preserveAgainstNextCorpTurn;
+  const nextTurnDrawActions =
+    observedPayoffDrawActions.length > 0
+      ? observedPayoffDrawActions
+      : protectNextCorpTurn &&
+          nextCorpTurnDamage <= maxHandSize &&
+          (conditionalNextCorpTurnDamage === 0 ||
+            !persistentHazardCounterRemovalAvailable)
+        ? nextCorpTurnBufferDrawActionIds(
+            input,
+            candidates,
+            nextCorpTurnDamage,
+            exactCoverageRecoveryActionIds,
+          )
+        : [];
   const nextTurnTagProtection =
     nextCorpTurn?.tagPreventionNeeded ||
     (nextCorpTurn?.conditionalTagPreventionNeeded &&
@@ -751,7 +775,10 @@ export function buildRunnerDefenseSignals(params: {
       ...(nextTurnCapacityInstallIds.length > 0
         ? [`runner_next_corp_turn_extend_hand_limit:${nextCorpTurnDamage}`]
         : []),
-      ...(nextCorpTurnDamage > exactNextCorpTurnDamage &&
+      ...(observedPayoffDrawActions.length > 0
+        ? ["runner_next_corp_turn_observed_damage_payoff"]
+        : []),
+      ...(knownThreatDamage > exactNextCorpTurnDamage &&
       (nextTurnDrawActions.length > 0 ||
         nextTurnTagProtection.length > 0 ||
         nextTurnCapacityInstallIds.length > 0)

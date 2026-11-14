@@ -1,6 +1,8 @@
 import fixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261113-runner-next-corp-turn.json";
 import preparationFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261114-runner-punish-preparation.json";
 import creditBankFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p743-g37-d132.json";
+import knownNextDrawFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p747-g9-d211.json";
+import observedPayoffFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p747-g23-d67.json";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -41,6 +43,87 @@ const BODYWEIGHT = "onr_v1_079_bodyweight-synthetic-blood";
 const JETTISON_ICE = "onr_v1_080_core-command-jettison-ice";
 
 afterEach(resetResidentPlanPortfolioMemory);
+
+it.each([
+  ["a known mandatory draw", knownNextDrawFixture, "fnv1a:87d6a59b", 4],
+  ["a witnessed second tag source", observedPayoffFixture, "fnv1a:65334106", 5],
+] as const)(
+  "uses the free Grip buffer for %s before an optional bank deposit",
+  (_label, fixture, hash, damage) => {
+    const { input, runtime, validation, stateHash } = capture(
+      fixture,
+    );
+    expect(stateHash).toBe(hash);
+    expect(Object.values(validation).every(Boolean)).toBe(true);
+    expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
+    expect(input.playerView.own.clicks).toBe(1);
+    expect(runnerNextCorpTurnThreat(input)).toMatchObject({
+      incomingMeatDamage: 0,
+      observedPayoffMeatDamage: damage,
+    });
+    restoreAiRuntimeCheckpoint(
+      input,
+      input.ownDeckSnapshot!.deckSnapshotId,
+      runtime,
+    );
+
+    const decision = chooseAiAction(input);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.evidence).toContain("plan_priority_class:P3");
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+      route: {
+        actionId: "runner.draw_card",
+        stateVersion: input.playerView.stateVersion,
+      },
+    });
+    expect(
+      input.legalActions.find((action) => action.actionId === decision.actionId)
+        ?.costs,
+    ).toEqual([{ clicks: 1 }]);
+  },
+);
+
+it.each(["unknown top", "unfunded follow-up", "no observed payoff"] as const)(
+  "leaves the mandatory-draw threat unestablished with %s",
+  (condition) => {
+    const { input } = capture(
+      knownNextDrawFixture,
+    );
+    if (condition === "unknown top") {
+      changeHistory(input, (events) =>
+        events.filter((event) => event.eventId !== "evt_210"),
+      );
+    } else if (condition === "unfunded follow-up") {
+      input.playerView.opponent.credits = 4;
+    } else {
+      changeHistory(input, (events) =>
+        events.filter(
+          (event) => event.publicPayload.cardDefinitionId !== SCORCHED,
+        ),
+      );
+    }
+    expect(
+      runnerNextCorpTurnThreat(input)?.observedPayoffMeatDamage,
+    ).toBeUndefined();
+    expect(chooseAiAction(input).evidence).not.toContain(
+      "plan_assessment_evidence:runner_next_corp_turn_observed_damage_payoff",
+    );
+  },
+);
+
+it("respects the installed tag shield when the observed backup trace has no trigger", () => {
+  const { input } = capture(
+    observedPayoffFixture,
+  );
+  changeHistory(input, (events) =>
+    events.filter((event) => event.eventId !== "evt_61"),
+  );
+  expect(
+    runnerNextCorpTurnThreat(input)?.observedPayoffMeatDamage,
+  ).toBeUndefined();
+});
 
 it("prepares the fifth Grip card at manual D61 when the payoff is known but the tag source is concealed", () => {
   const { input, runtime, validation, stateHash } = capture(preparationFixture);

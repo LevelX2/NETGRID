@@ -41,12 +41,13 @@ export function nextCorpTurnBufferDrawActionIds(
   candidates: readonly ActionSemanticCandidate[],
   target: number,
   excludedActionIds: ReadonlySet<string>,
+  creditBudget = input.playerView.own.credits,
 ): string[] {
   const { own } = input.playerView;
   return nextCorpTurnBufferDraws(input, candidates, target, excludedActionIds, {
     handSize: own.gripOrHq.length,
     clicks: own.clicks,
-    credits: own.credits,
+    credits: creditBudget,
   }).map(({ actionId }) => actionId);
 }
 

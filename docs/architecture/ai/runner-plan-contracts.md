@@ -2566,7 +2566,8 @@ jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.
 ## 7. `runner.defense_and_recovery`
 
 Der Defense-Owner bewertet Tag-and-Bag für den nächsten Corp-Zug aus dem
-aktuellen HQ-Gedächtnis des Runners. Erkannte Operationen brauchen einen
+aktuellen HQ-Gedächtnis und der weiterhin bekannten obersten R&D-Karte für
+den Pflichtdraw. Erkannte Operationen brauchen einen
 erfüllten Trigger, sichtbares Corp-Budget und Platz im regulären
 Drei-Klick-Zug. Kennt der Runner einen erreichbaren Finisher im HQ,
 prüft Defense bei einem offenen HQ-Slot auch einen möglichen verdeckten
@@ -2577,6 +2578,20 @@ einem finanzierten einzelnen Finisher. Ein erfüllter einzelner Tag-Trigger
 mit offenen HQ-Slots kann eine kostenlose, legale Tag-Prävention
 rechtfertigen, sofern die Hand danach ausreicht oder mit einem sicheren
 Draw wieder aufgefüllt werden kann.
+
+Eine tatsächlich gesehene Schadensoperation darf einen bedingten Einzelhit
+begründen, wenn eine bekannte Tagquelle im nächsten Corp-Zug ausgelöst und
+finanziert werden kann. Die gesehene Operation bleibt ein Hinweis auf das
+Schadenspotenzial. Ein noch offener HQ-Platz trägt die Annahme. Ist eine
+zweite Tagquelle nötig, erfordert die Projektion auch für sie einen
+beobachteten Kartentyp, einen erfüllten Auslöser, einen weiteren offenen
+HQ-Platz und dieselbe finanzierte Zugfolge. Einmalige Präventionen werden
+dabei nach ihrer Rolle in der Folge verrechnet. Dieser bedingte Puffer
+bekommt eine Route nur bei einem vollständig erreichbaren, creditfreien
+Draw. Bereits gebundene Break-, Steal- und Reaktionscredits stehen damit
+weiter zur Verfügung. P747 G9/D211 und G23/D67 prüfen beide Fälle. Fehlende
+Sichtung, zu geringe Corp-Bank und eine noch wirksame Tagprävention senken
+die belegte Drohung.
 
 Für bekannte Schadensfolgen und den bedingten einzelnen Treffer erhält
 Defense ein erreichbares Zugendeziel in Höhe des wirksamen Schadens. Fünf
