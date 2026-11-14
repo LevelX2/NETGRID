@@ -216,6 +216,7 @@ export function addRunnerCoverageRejectedSearchDispositions(
   domain: Pick<CoverageDispositionDomain, "coverageGaps">,
   coverageOwnedActionIds: ReadonlySet<string>,
   developmentOwnedActionIds: ReadonlySet<string>,
+  defenseRejectedActionIds: ReadonlySet<string>,
   add: AddDisposition,
 ): void {
   const rejectedCoverageGapsByActionId = new Map<
@@ -226,7 +227,8 @@ export function addRunnerCoverageRejectedSearchDispositions(
     for (const actionId of gap.rejectedSearchActionIds ?? []) {
       if (
         coverageOwnedActionIds.has(actionId) ||
-        developmentOwnedActionIds.has(actionId)
+        developmentOwnedActionIds.has(actionId) ||
+        defenseRejectedActionIds.has(actionId)
       ) {
         continue;
       }

@@ -133,6 +133,7 @@ it.each([
         { coverageGaps: [bound] },
         new Set(),
         new Set(),
+        new Set(),
         (_id, _owner, reason) => {
           dispositions.push(reason);
         },
@@ -145,6 +146,7 @@ it.each([
       addRunnerCoverageRejectedSearchDispositions(
         { coverageGaps: [bound] },
         new Set(["search"]),
+        new Set(),
         new Set(),
         (_id, _owner, reason) => {
           admitted.push(reason);

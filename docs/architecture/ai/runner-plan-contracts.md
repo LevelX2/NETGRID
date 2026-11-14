@@ -2595,6 +2595,17 @@ Der gespeicherte Entscheidungspunkt D12 aus `match_e38d41799172088f` prüft
 den Übergang zur Tag-Prävention. D61 aus `match_0d2aa0beed915b0d` prüft den
 Basisdraw auf fünf Karten bei sichtbarem Finisher und verdecktem Tag-Auslöser.
 
+Central und Remote lassen gezielte ICE-Entfernung und Bypass-Vorbereitung
+erst mit derselben Grip-Zugendprüfung zu, die Defense für die aktuelle Action
+verwendet. Das schließt eine optionale Vorbereitung aus, die mit dem letzten
+Klick einen bereits erreichten Puffer unterschreitet. Ein bezahlbarer
+Wiederaufbau und die exakt belegte Dringlichkeit einer Run-Action behalten ihre
+Zulassung. Hat Defense eine Suche bereits aus Sicherheitsgründen klassifiziert,
+übernimmt Coverage die Action nicht zusätzlich mit einer Suchablehnung. Ohne
+aktive Sicherheitssperre bleibt die Ablehnung mangels Deckantwort bei Coverage.
+Die drei nativen Zustände aus Paarung 745 prüfen ICE-Entfernung, Bypass und
+Suchablehnung mit sowie ohne den aktiven letzten-Klick-Schutz.
+
 Ist bereits eine aktuelle Runroute ohne zusätzliche Vorbereitung konvertierbar,
 erzeugt die Handquote einer anderen optionalen Informationsroute keinen globalen
 P3-Ziehbedarf. Konkrete Agenda- und Scorebedarfe behalten ihre Vorbereitung.

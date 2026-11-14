@@ -824,6 +824,7 @@ export function runnerUnboundCentralDirectRunDispositionEvidence(
 export function buildRunnerCentralPressureSignals({
   input,
   candidates,
+  targetedPreparationCandidates,
   strategicIntent,
   economy,
   runTargets,
@@ -843,6 +844,7 @@ export function buildRunnerCentralPressureSignals({
 }: {
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
+  targetedPreparationCandidates: readonly ActionSemanticCandidate[];
   strategicIntent: RunnerStrategicIntentProfile;
   economy: RunnerEconomyPosture;
   runTargets: readonly RunnerRunTargetEvaluation[];
@@ -1564,13 +1566,13 @@ export function buildRunnerCentralPressureSignals({
       ),
       ...runnerTargetedIceTrashCentralPreparationSignals(
         input,
-        candidates,
+        targetedPreparationCandidates,
         baseCentralPressure,
         runTargets,
       ),
       ...runnerTargetedBypassCentralPreparationSignals(
         input,
-        candidates,
+        targetedPreparationCandidates,
         baseCentralPressure,
         runTargets,
       ),

@@ -122,12 +122,7 @@ export function runnerDefenseSafetyDispositions(params: {
           "runner.defense_and_recovery",
           "runner_optional_run_would_enable_known_next_corp_turn_flatline",
         );
-      } else if (
-        signals.nextCorpTurnGripPreservation &&
-        signals.nextCorpTurnBufferTarget !== undefined &&
-        signals.handSize + handDeltaForVoluntaryAction(input, candidate) <
-          signals.nextCorpTurnBufferTarget
-      ) {
+      } else if (runnerNextCorpTurnGripBlocksAction(input, candidate, signals)) {
         add(
           id,
           "runner.defense_and_recovery",
@@ -185,6 +180,19 @@ export function runnerDefenseSafetyDispositions(params: {
     }
   }
   return result;
+}
+
+export function runnerNextCorpTurnGripBlocksAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  signals: RunnerDefenseSignals,
+): boolean {
+  return (
+    signals.nextCorpTurnGripPreservation === true &&
+    signals.nextCorpTurnBufferTarget !== undefined &&
+    signals.handSize + handDeltaForVoluntaryAction(input, candidate) <
+      signals.nextCorpTurnBufferTarget
+  );
 }
 
 function handDeltaForVoluntaryAction(

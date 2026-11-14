@@ -245,6 +245,7 @@ import { runnerRunFundingParentHasCurrentNeed } from "../plans/runner-funding-pa
 import {
   runnerDefenseSafetyDispositions,
   runnerDefenseSupportDispositions,
+  runnerNextCorpTurnGripBlocksAction,
 } from "../runner/defense-recovery/defense-dispositions";
 import {
   runnerDefenseDeferredHandBufferDispositions,
@@ -1827,7 +1828,7 @@ export function runnerActionDispositions(
   )) {
     addDisposition(disposition);
   }
-  for (const disposition of runnerDefenseSafetyDispositions({
+  const defenseSafetyDispositions = runnerDefenseSafetyDispositions({
     input,
     candidates,
     signals: domain.defense,
@@ -1837,7 +1838,8 @@ export function runnerActionDispositions(
     alreadyClassifiedActionIds: new Set(
       dispositions.map((entry) => entry.actionId),
     ),
-  })) {
+  });
+  for (const disposition of defenseSafetyDispositions) {
     addDisposition(disposition);
   }
   for (const candidate of candidates) {
@@ -1907,6 +1909,7 @@ export function runnerActionDispositions(
     domain,
     coverageOwnedActionIds,
     developmentOwnedActionIds,
+    new Set(defenseSafetyDispositions.map((entry) => entry.actionId)),
     add,
   );
   const centralPreparationActionIds = new Set(
@@ -2959,6 +2962,17 @@ function prepareRunnerDomain(
     });
     const recentSafetyAbort =
       runnerRecentFutureEncounterDamageSafetyAbort(input);
+    // A preparation head and Defense must share the same current Grip
+    // constraint. Keep exact urgent run offers eligible for their own owner.
+    const targetedPreparationCandidates = candidates.filter(
+      (candidate) =>
+        !runnerNextCorpTurnGripBlocksAction(input, candidate, baseDefense) ||
+        runTargets.some(
+          (target) =>
+            target.actionId === candidate.actionId &&
+            runnerRunHasExactUrgency(input, target),
+        ),
+    );
     const { accessPayoffFundingNeeds, effectiveAccessPayoffCampaignSignals } =
       buildRunnerCentralPressureFunding({
         input,
@@ -3010,6 +3024,7 @@ function prepareRunnerDomain(
     const baseCentralPressure = buildRunnerCentralPressureSignals({
       input,
       candidates,
+      targetedPreparationCandidates,
       strategicIntent,
       economy,
       runTargets,
@@ -3038,6 +3053,7 @@ function prepareRunnerDomain(
       input,
       previous,
       candidates,
+      targetedPreparationCandidates,
       runTargets,
       runLockReleaseRoutes,
       economy,

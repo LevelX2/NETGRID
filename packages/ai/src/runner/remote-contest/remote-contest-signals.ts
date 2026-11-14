@@ -852,6 +852,7 @@ export function runnerRemoteHasCurrentContestMaterial(
 export function buildRunnerRemoteContestSignals({
   input,
   candidates,
+  targetedPreparationCandidates,
   runTargets,
   runLockReleaseRoutes,
   economy,
@@ -868,6 +869,7 @@ export function buildRunnerRemoteContestSignals({
 }: {
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
+  targetedPreparationCandidates: readonly ActionSemanticCandidate[];
   runTargets: readonly RunnerRunTargetEvaluation[];
   runLockReleaseRoutes: ReturnType<typeof runnerRunLockReleaseRoutes>;
   economy: RunnerEconomyPosture;
@@ -1297,13 +1299,13 @@ export function buildRunnerRemoteContestSignals({
     ),
     ...runnerTargetedIceTrashRemotePreparationSignals(
       input,
-      candidates,
+      targetedPreparationCandidates,
       baseRemoteContestDrafts,
       runTargets,
     ),
     ...runnerTargetedBypassRemotePreparationSignals(
       input,
-      candidates,
+      targetedPreparationCandidates,
       baseRemoteContestDrafts,
       runTargets,
     ),
