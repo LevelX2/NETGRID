@@ -50,6 +50,7 @@ import {
 } from "../economy/economy-routes";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
+import { readCorpPublicOffServerAccessThreat } from "./corp-central-defense-facts-adapter";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 import { prepareSelectedCorpIceInstallation } from "./corp-ice-install-cost-support";
 import { corpPostPassIceLifecycleComponent } from "./post-pass-ice-lifecycle";
@@ -1355,8 +1356,28 @@ function selectedDefensePortfolioBand(
         },
       ]
     : [];
+  // The unfinished remote is an option for a future turn. In the same
+  // priority band, protect a repeatedly accessed central with real Agenda
+  // exposure when an immediately funded installation changes the route.
+  const repeatedCentralAccessPrecedesRemoteStaging =
+    scoreProtectionRoute?.signal.kind === "score_protection_install" &&
+    scoreProtectionRoute.signal.effect === "progress" &&
+    scoreProtectionRoute.signal.delegatedPriorityClass === "P3" &&
+    genericPriority === "P3" &&
+    (scoreProtectionRoute.signal.serverId === "new_remote" ||
+      context.input.playerView.servers.some(
+        (server) =>
+          server.id === scoreProtectionRoute.signal.serverId &&
+          server.root.length === 0,
+      )) &&
+    hasFundedDefenseAgainstRepeatedCentralAccess(
+      centralAllocation,
+      selectedGenericBand.eligibleSignals,
+      genericCandidates,
+    );
   if (
     scoreProtectionRoute &&
+    !repeatedCentralAccessPrecedesRemoteStaging &&
     (!genericBandAvailable ||
       defensePriorityRank(scoreProtectionRoute.signal.delegatedPriorityClass) <
         defensePriorityRank(genericPriority) ||
@@ -1395,6 +1416,40 @@ function selectedDefensePortfolioBand(
     priorityClass: scoreProtectionRoute.signal.delegatedPriorityClass,
     candidates: scoreCandidates,
   };
+}
+
+function hasFundedDefenseAgainstRepeatedCentralAccess(
+  allocation: CorpCentralDefenseAllocation | undefined,
+  signals: readonly CorpGenericDefenseSignal[],
+  candidates: PlanMaterialization["candidates"],
+): boolean {
+  if (allocation?.status !== "known") return false;
+  const target = allocation.selectedServerId;
+  const pressure = allocation.evidence[target];
+  if (
+    pressure.threat !== "acute" ||
+    pressure.recentSuccessfulAccessRunnerTurns < 2 ||
+    pressure.expectedAgendaLoss.numerator <= 0
+  )
+    return false;
+  return signals.some((signal) => {
+    const route = signal.installRoute;
+    if (
+      signal.serverId !== target ||
+      signal.phase !== "install_ice" ||
+      route?.disposition !== "productive" ||
+      route.progressKind !== "engine_certified_access" ||
+      route.rezFundingGap !== 0 ||
+      !route.projection.preservesReserves ||
+      !route.projection.selectedRezCosts.some(
+        (cost) => cost.iceInstanceId === route.projection.sourceCardInstanceId,
+      )
+    )
+      return false;
+    return candidates.some(
+      ({ candidate }) => candidate.actionId === route.projection.actionId,
+    );
+  });
 }
 
 function selectedGenericDefensePortfolioBand(
@@ -1870,12 +1925,93 @@ function selectedExactGenericDefenseRoutes(
       stepValue,
     }));
   }
-  const selected = [...eligibleRoutes].sort(
-    compareGenericExactInstallRoutes,
-  )[0];
+  const sorted = [...eligibleRoutes].sort(compareGenericExactInstallRoutes);
+  const selected =
+    strongerTerminalEntryProtection(context.input, sorted) ?? sorted[0];
   return selected
     ? [{ candidate: selected.candidate, stepValue: selected.stepValue }]
     : supportRoutes;
+}
+
+type GenericIceInstallRoute = {
+  candidate: ActionSemanticCandidate;
+  signal: CorpGenericDefenseSignal;
+  projection: KnownCorpFundedIceInstallRouteProjection;
+  stepValue: number;
+};
+
+/** The same Agenda can be reached through two different forts. Improve the
+ * cheaper reachable entrance only if the funded defense of the other remains
+ * affordable from the remaining shared credits and Agenda points. */
+function strongerTerminalEntryProtection(
+  input: AiDecisionInput,
+  routes: readonly GenericIceInstallRoute[],
+): GenericIceInstallRoute | undefined {
+  const direct = routes[0];
+  if (
+    !direct ||
+    direct.signal.centralPressure !== "terminal" ||
+    (direct.signal.serverId !== "hq" && direct.signal.serverId !== "rd") ||
+    direct.projection.before.knowledge !== "known"
+  )
+    return undefined;
+  const accessServer = direct.signal.serverId;
+  const offServerEntries = input.playerView.servers.filter(
+    (server) =>
+      server.id !== accessServer &&
+      !server.statuses?.some((status) => status.kind === "run_prohibited") &&
+      readCorpPublicOffServerAccessThreat(
+        input,
+        server.id,
+      )?.accessServerIds.includes(accessServer),
+  );
+  if (offServerEntries.length !== 1) return undefined;
+  const entry = offServerEntries[0]!.id;
+  const directBefore = direct.projection.before;
+  return routes.find(({ signal, projection }) => {
+    if (
+      signal.serverId !== entry ||
+      signal.centralPressure !== "terminal" ||
+      signal.installRoute?.disposition !== "productive" ||
+      signal.installRoute.progressKind !== "engine_certified_access" ||
+      signal.installRoute.rezFundingGap !== 0 ||
+      projection.before.knowledge !== "known" ||
+      !projection.preservesReserves ||
+      !projection.selectedRezCosts.some(
+        (cost) => cost.iceInstanceId === projection.sourceCardInstanceId,
+      ) ||
+      projection.creditsAfterDefense -
+        projection.after.totalScoreReserveCredits <
+        directBefore.totalSelectedRezCost ||
+      projection.creditsAfterDefense - directBefore.totalSelectedRezCost <
+        direct.projection.creditsAfterDefense ||
+      projection.after.agendaPointsAfterDefense -
+        directBefore.totalSelectedAgendaPointCost <
+        direct.projection.after.agendaPointsAfterDefense
+    )
+      return false;
+    const weakestPath = projection.before.protection;
+    return (
+      compareEffectiveAccess(weakestPath, directBefore.protection) === 1 &&
+      compareEffectiveAccess(weakestPath, projection.after.protection) === 1
+    );
+  });
+}
+
+function compareEffectiveAccess(
+  left: KnownCorpFundedIceInstallRouteProjection["after"]["protection"],
+  right: KnownCorpFundedIceInstallRouteProjection["after"]["protection"],
+): -1 | 0 | 1 | undefined {
+  const odds = compareExactProbabilities(
+    left.runnerAccessSuccessProbability,
+    right.runnerAccessSuccessProbability,
+  );
+  if (odds !== 0 || left.runnerAccessSuccessProbability.numerator === 0)
+    return odds;
+  const credits =
+    left.runnerCreditsRemainingOnBestAccessPath -
+    right.runnerCreditsRemainingOnBestAccessPath;
+  return credits > 0 ? 1 : credits < 0 ? -1 : 0;
 }
 
 function selectedCentralAccessRiskRemains(

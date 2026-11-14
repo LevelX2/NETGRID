@@ -1410,8 +1410,28 @@ Score, Remote und Ambush liefern weiterhin ihre typisierten Projekte und Bedarfe
 Die Live-Runtime komponiert diese Schritte; sie importiert den Owner, der keine
 Runtime-Dispatcher oder Planregistries zurückimportiert. Geteilte Defense- und
 Funding-Vertragstypen bleiben unter `plans/`, reine Engine-Quote-/Pfadprojektionen
-bleiben wiederverwendbare Dienste. Die 25 registrierten Module, Prioritäten und
-Entscheidungsregeln bleiben unverändert.
+bleiben wiederverwendbare Dienste. Die 25 registrierten Module folgen dem
+gemeinsamen Prioritätsvertrag.
+
+Im selben P3-Band erhält die Verbesserung einer wiederholt erfolgreich
+angegriffenen Zentrale Vorrang vor einem weiteren Schutzschritt am leeren
+Scoring-Remote. Die Engine-gebundene Installation muss die reale
+Zugriffsroute verbessern, sichtbare Agendaexposition adressieren und ihre
+Rez-Zahlung samt bestehenden Reserven decken. Das delegierte
+Scoring-Projekt bleibt bei bereits hinreichendem Schutz oder aktiver Agenda
+eigenständig. D30 und D33 aus `match_d09dda4456c9eefc` binden den Wechsel
+zu HQ. Eine einzelne frühere HQ-Sichtung und unmittelbar wirksamer
+Remote-Schutz prüfen die Grenzen der Priorisierung.
+
+Bei zwei öffentlich belegten Eingängen zum selben spielentscheidenden
+Zentralzugriff vergleicht Defense die tatsächlich leichter erreichbare
+Route. Ein finanzierter Ausbau des schwächeren Eingangs ist vorzuziehen,
+wenn er dessen Zugriffsquote oder Breakkosten nachweislich verbessert und
+die bisher finanzierte Deckung des anderen Eingangs aus der gemeinsamen
+Bank erhalten bleibt. Die verfügbare Restbank und Agendapunkte für andere
+Schutzbedarfe dürfen dabei gegenüber dem direkten Ausbau nicht sinken.
+P742 G11/D277 prüft die über Archives umgeleitete HQ-Route mit und ohne
+sichtbare Umleitung.
 
 Vor einer ausgewählten ICE-Installation kann Defense eine kostenlose Root-Rez
 als exakt gebundene Kostenvorbereitung ausführen. Die Engine veröffentlicht
