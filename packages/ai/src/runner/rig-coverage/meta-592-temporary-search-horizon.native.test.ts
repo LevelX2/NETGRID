@@ -153,6 +153,17 @@ it.each([
         },
       );
       expect(admitted).toEqual([]);
+      const rejectedByDefense: string[] = [];
+      addRunnerCoverageRejectedSearchDispositions(
+        { coverageGaps: [bound] },
+        new Set(),
+        new Set(),
+        new Set(["search"]),
+        (_id, _owner, reason) => {
+          rejectedByDefense.push(reason);
+        },
+      );
+      expect(rejectedByDefense).toEqual([]);
     }
   },
 );

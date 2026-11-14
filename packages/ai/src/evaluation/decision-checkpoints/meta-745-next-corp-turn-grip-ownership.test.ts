@@ -1,6 +1,7 @@
 import jettison from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p745-g18-d72.json";
 import bypass from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p745-g31-d61.json";
 import search from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p745-g39-d69.json";
+import boundSearch from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p746-g31-d20.json";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -13,7 +14,7 @@ import {
 afterEach(resetResidentPlanPortfolioMemory);
 
 function decide(
-  checkpoint: typeof jettison | typeof bypass | typeof search,
+  checkpoint: typeof jettison | typeof bypass | typeof search | typeof boundSearch,
   event: string,
   extraClick = false,
 ) {
@@ -78,10 +79,17 @@ it.each([
   });
 });
 
-it("assigns a rejected search to Defense once while Grip is protected", () => {
+it("keeps the Coverage rejection when a Grip-neutral search has no useful answer", () => {
   expect(search.stateHash).toBe("fnv1a:5f7140ae");
   const guarded = decide(search, "mantis-fixer-at-large");
-  expect(guarded.dispositions).toEqual([{ ...protection, actionId: guarded.actionId }]);
+  expect(guarded.dispositions).toEqual([
+    {
+      actionId: guarded.actionId,
+      ownerModuleId: "runner.rig_and_coverage",
+      disposition: "explicitly_nonproductive",
+      evidenceCode: "runner_coverage_search_rejected_without_deck_answer:breaker_sentry@no_server+breaker_wall@no_server",
+    },
+  ]);
   expect(guarded.selectedActionId).toBe("runner.gain_credit");
 
   resetResidentPlanPortfolioMemory();
@@ -94,4 +102,22 @@ it("assigns a rejected search to Defense once while Grip is protected", () => {
       evidenceCode: "runner_coverage_search_rejected_without_deck_answer:breaker_sentry@no_server+breaker_wall@no_server",
     },
   ]);
+});
+
+it("executes a bound mandatory search that returns the spent card count to Grip", () => {
+  expect(boundSearch.stateHash).toBe("fnv1a:afe9fa72");
+  const ready = decide(boundSearch, "mantis-fixer-at-large");
+  expect(ready.selectedActionId).toBe(ready.actionId);
+  expect(ready.dispositions).toEqual([]);
+  expect(ready.plan.rootPlanInstanceId).toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate");
+  expect(ready.plan.route).toMatchObject({
+    actionId: ready.actionId,
+    stateVersion: boundSearch.input.playerView.stateVersion,
+  });
+  expect(ready.plan.dispositions).toContainEqual(
+    expect.objectContaining({
+      ...protection,
+      actionId: expect.stringContaining("core-command-jettison-ice"),
+    }),
+  );
 });

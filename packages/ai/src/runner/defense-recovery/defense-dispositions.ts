@@ -1,4 +1,5 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunWindowSignal } from "../../plans/runner-tactical-plan-contracts";
 import type { RunnerDefenseSignals } from "./defense-types";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -212,6 +213,14 @@ function handDeltaForVoluntaryAction(
   const action = input.legalActions.find(
     (legal) => legal.actionId === candidate.actionId,
   );
+  // An exact search-to-Grip play opens a mandatory one-card selection. The
+  // native offer certifies a target exists. This move is outside draw taxes.
+  const searchReturn =
+    handCardSpent === 1 &&
+    action !== undefined &&
+    isBoundSingleStackSearchPlay(input, candidate, action)
+      ? 1
+      : 0;
   const safeDraw =
     projection !== undefined &&
     (candidate.semanticActionType === "draw.card" ||
@@ -225,7 +234,7 @@ function handDeltaForVoluntaryAction(
     if (typeof cost.amount !== "number") return -Infinity;
     selfDamage += cost.amount;
   }
-  if (safeDraw <= 0) return -handCardSpent - selfDamage;
+  if (safeDraw <= 0) return searchReturn - handCardSpent - selfDamage;
   return (
     (action &&
     runnerDrawTaxLiabilityProjection(input, action, candidate)
@@ -234,5 +243,43 @@ function handDeltaForVoluntaryAction(
       : 0) -
     handCardSpent -
     selfDamage
+  );
+}
+
+function isBoundSingleStackSearchPlay(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+): boolean {
+  const { sourceCardInstanceId, sourceDefinitionId, abilityId, abilityKey } =
+    candidate;
+  if (
+    action.type !== "play_event" ||
+    action.side !== input.side ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.source !== sourceCardInstanceId ||
+    candidate.abilityBindingMethod !== "canonical_capability_id" ||
+    !sourceDefinitionId ||
+    !abilityKey ||
+    abilityId !== `${sourceDefinitionId}:${abilityKey}` ||
+    action.abilityRef?.sourceCardInstanceId !== sourceCardInstanceId ||
+    action.abilityRef?.sourceAbilityId !== abilityId ||
+    !input.playerView.own.gripOrHq.some(
+      (card) =>
+        card.known &&
+        card.instanceId === sourceCardInstanceId &&
+        card.definitionId === sourceDefinitionId,
+    )
+  ) {
+    return false;
+  }
+  const ability = cardSpecPlanningCardByDefinitionId(
+    sourceDefinitionId,
+  )?.planning.engine.abilities?.find((entry) => entry.capabilityKey === abilityKey);
+  return (
+    ability?.kind === "on_play" &&
+    ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "search_stack_to_grip"
   );
 }

@@ -2606,6 +2606,15 @@ aktive Sicherheitssperre bleibt die Ablehnung mangels Deckantwort bei Coverage.
 Die drei nativen Zustände aus Paarung 745 prüfen ICE-Entfernung, Bypass und
 Suchablehnung mit sowie ohne den aktiven letzten-Klick-Schutz.
 
+Die Grip-Zugendprüfung zählt bei einer aktuell vom Engine-Angebot und der
+kanonischen On-Play-Fähigkeit gebundenen Suche mit genau einem verpflichtenden
+`search_stack_to_grip` die zurückkehrende Karte. Das Ereignis verbraucht eine
+Karte und gibt bei regulärer Choice-Auflösung eine Karte in den Grip. Die
+Planbindung der konkreten Suchantwort bleibt bei Coverage. Der Nachweis deckt
+weder fakultative Suchen noch Installationen aus dem Stack oder unbekannte
+weitere Effekte ab. Paarung 746 G31/D20 belegt die Grip-neutrale, gebundene
+Suche. Im selben Zustand bleibt das Grip-verbrauchende Sabotage-Event gesperrt.
+
 Ist bereits eine aktuelle Runroute ohne zusätzliche Vorbereitung konvertierbar,
 erzeugt die Handquote einer anderen optionalen Informationsroute keinen globalen
 P3-Ziehbedarf. Konkrete Agenda- und Scorebedarfe behalten ihre Vorbereitung.
