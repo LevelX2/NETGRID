@@ -1,18 +1,22 @@
 import fixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261113-runner-next-corp-turn.json";
+import preparationFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261114-runner-punish-preparation.json";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
   ORIGINALSET_DEFAULT_DECKS,
   type GameState,
   type LegalAction,
+  type PublicGameEvent,
 } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { runnerNextCorpTurnThreat } from "../../runner/defense-recovery/next-corp-turn-punish";
+import { currentRemoteReserveFixture } from "./current-remote-reserve.test-support";
 import {
   buildAiDecisionInput,
   type AiDecisionInputWithDeckCapabilities,
@@ -20,6 +24,7 @@ import {
 import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 import {
   restoreAiRuntimeCheckpoint,
+  exportAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
@@ -30,8 +35,100 @@ const HUNTER = "onr_v1_249_hunter";
 const URBAN = "onr_v1_307_urban-renewal";
 const SCORCHED = "onr_v1_302_scorched-earth";
 const PUNITIVE = "onr_v1_301_punitive-counterstrike";
+const MRAM = "onr_v1_134_mram-chip";
+const BODYWEIGHT = "onr_v1_079_bodyweight-synthetic-blood";
+const JETTISON_ICE = "onr_v1_080_core-command-jettison-ice";
 
 afterEach(resetResidentPlanPortfolioMemory);
+
+it("prepares the fifth Grip card at manual D61 when the payoff is known but the tag source is concealed", () => {
+  const { input, runtime, validation, stateHash } = capture(preparationFixture);
+  expect(stateHash).toBe("fnv1a:84ccdf9b");
+  expect(Object.values(validation).every(Boolean)).toBe(true);
+  expect(input.playerView.own.gripOrHq).toHaveLength(4);
+  expect(input.playerView.own.clicks).toBe(2);
+  expect(runnerNextCorpTurnThreat(input)).toMatchObject({
+    incomingMeatDamage: 0,
+    conditionalMeatDamage: 5,
+  });
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+
+  const decision = chooseAiAction(input);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.evidence).toContain("plan_priority_class:P3");
+
+  // Recheck planning after the basis draw. The captured Grip remains actor-only.
+  const afterDraw = structuredClone(input);
+  const { playerView: view } = afterDraw;
+  const drawnCard =
+    cardSpecPlanningCardByDefinitionId(JETTISON_ICE)!.definition;
+  if (drawnCard.type !== "event") throw new Error("Expected a Runner event");
+  view.own.gripOrHq.push({
+    instanceId: "runner_onr_v1_080_core-command-jettison-ice_3",
+    known: true,
+    owner: "runner",
+    title: drawnCard.title,
+    type: drawnCard.type,
+    definitionId: drawnCard.id,
+    playCost: drawnCard.playCost,
+  });
+  view.own.stackOrRdCount -= 1;
+  view.own.clicks -= 1;
+  view.stateVersion += 1;
+  afterDraw.actionNumber += 1;
+  afterDraw.decisionId = `${input.matchId}:${view.stateVersion}:runner`;
+  const drawEvent: PublicGameEvent = {
+    ...afterDraw.eventTail.at(-1)!,
+    eventId: "test-basis-draw",
+    type: "draw_card",
+    stateVersionBefore: view.stateVersion - 1,
+    stateVersionAfter: view.stateVersion,
+    publicPayload: { actor: "runner", actionType: "draw_card", drawnCount: 1 },
+  };
+  changeHistory(afterDraw, (events) => [...events, drawEvent]);
+  afterDraw.legalActions = afterDraw.legalActions.map((action) => ({
+    ...action,
+    expiresAtStateVersion: view.stateVersion,
+  }));
+  view.legalActions = afterDraw.legalActions;
+  const deckId = input.ownDeckSnapshot!.deckSnapshotId;
+  restoreAiRuntimeCheckpoint(
+    afterDraw,
+    deckId,
+    exportAiRuntimeCheckpoint(input, deckId),
+  );
+  const continuation = chooseAiAction(afterDraw);
+  expect(continuation.fallbackUsed).toBe(false);
+  expect(continuation.actionId).toBe("runner.start_run.rd");
+  expect(
+    continuation.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+  ).toBe("runner.pressure_central");
+});
+
+it.each(["unfunded", "known HQ", "inactive trigger"] as const)(
+  "does not prepare for a concealed tag source with %s",
+  (variant) => {
+    const { input } = capture(preparationFixture);
+    if (variant === "unfunded") input.playerView.opponent.credits = 5;
+    if (variant === "known HQ") input.playerView.opponent.handCount = 2;
+    if (variant === "inactive trigger")
+      changeHistory(input, (events) =>
+        events.filter(
+          (event) => event.turnSerial !== input.playerView.turnSerial,
+        ),
+      );
+    expect(runnerNextCorpTurnThreat(input)?.conditionalMeatDamage ?? 0).toBe(0);
+    const decision = chooseAiAction(input);
+    expect(decision.evidence).not.toContain(
+      "plan_assessment_evidence:runner_next_corp_turn_damage_hand_buffer:5",
+    );
+  },
+);
 
 it("prepares the legal tag protection after the two runs at manual D12", () => {
   const { input, runtime, validation, stateHash } = capture();
@@ -313,6 +410,148 @@ it("retains the immediately proven Runner win even with a funded damage threat",
   expect(decision.evidence).toContain("plan_priority_class:P1");
 });
 
+it("keeps an immediately executable terminal remote contest above the concealed-tag buffer", () => {
+  const { input, runtime } = currentRemoteReserveFixture(31, false);
+  const { input: retaliation } = capture(preparationFixture);
+  input.playerView.opponent.credits = 14;
+  input.playerView.opponent.handCount = 5;
+  input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.slice(0, 4);
+  input.playerView.own.runnerTraceSupportQuote =
+    retaliation.playerView.own.runnerTraceSupportQuote!;
+  input.playerView.traceRulesProfile = "classic_blind";
+  const observed = visibleRetaliationEvents(input, [URBAN], true);
+  changeHistory(input, (events) => [...events, ...observed]);
+  expect(runnerNextCorpTurnThreat(input)?.conditionalMeatDamage).toBe(5);
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe("runner.start_run.remote_1");
+  expect(decision.evidence).toContain("plan_priority_class:P2");
+});
+
+it("installs hand capacity, fills it, and survives two real Classic Blind damage operations", () => {
+  const { deckSnapshot, state: initial } = capacityFixture();
+  const decisionInput = (state: GameState) => {
+    const input = buildAiDecisionInput(state, "runner", {
+      ownDeckSnapshot: deckSnapshot,
+    });
+    changeHistory(input, (events) => [
+      ...events,
+      ...visibleRetaliationEvents(input, [AUDIT, SCORCHED, PUNITIVE]),
+    ]);
+    return input;
+  };
+  let state = initial;
+  let input = decisionInput(state);
+  expect(input.playerView.own.maxHandSize).toBe(5);
+  expect(runnerNextCorpTurnThreat(input)?.incomingMeatDamage).toBe(6);
+  const install = legal(state, "runner", "install_card", MRAM);
+  let decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(install.actionId);
+  expect(decision.evidence).toContain(
+    "plan_assessment_evidence:runner_next_corp_turn_extend_hand_limit:6",
+  );
+  state = execute(state, install);
+  input = decisionInput(state);
+  expect(input.playerView.own.maxHandSize).toBe(7);
+  expect(state.runner.grip).toHaveLength(4);
+  expect(state.runner.clicks).toBe(1);
+  const draw = legal(state, "runner", "play_event", BODYWEIGHT);
+  decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(draw.actionId);
+  expect(decision.evidence).toContain(
+    "plan_assessment_evidence:runner_next_corp_turn_damage_hand_buffer:6",
+  );
+  state = execute(state, draw);
+  state = finishTurn(state, "runner");
+  expect(state.runner.grip).toHaveLength(7);
+  state = execute(state, legal(state, "corp", "mandatory_draw"));
+  state = execute(state, legal(state, "corp", "play_operation", AUDIT));
+  state = execute(state, legal(state, "corp", "resolve_choice"), ["bid_1"]);
+  state = execute(state, legal(state, "runner", "resolve_choice"), ["bid_0"]);
+  state = execute(state, legal(state, "corp", "play_operation", SCORCHED));
+  state = execute(state, legal(state, "corp", "play_operation", PUNITIVE));
+  expect(state.winner).toBeNull();
+  expect(state.runner.grip).toHaveLength(1);
+});
+
+it("uses the last click to preserve enough Grip already above the current limit", () => {
+  const { deckSnapshot, state: initial } = capacityFixture();
+  const refill = legal(initial, "runner", "play_event", BODYWEIGHT);
+  const state = execute(initial, refill);
+  const input = buildAiDecisionInput(state, "runner", {
+    ownDeckSnapshot: deckSnapshot,
+  });
+  changeHistory(input, (events) => [
+    ...events,
+    ...visibleRetaliationEvents(input, [AUDIT, SCORCHED, PUNITIVE]),
+  ]);
+  expect(input.playerView.own.maxHandSize).toBe(5);
+  expect(state.runner.clicks).toBe(1);
+  expect(state.runner.grip).toHaveLength(9);
+  const install = legal(state, "runner", "install_card", MRAM);
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(install.actionId);
+  expect(decision.evidence).toContain(
+    "plan_assessment_evidence:runner_next_corp_turn_extend_hand_limit:6",
+  );
+  expect(finishTurn(execute(state, install), "runner").runner.grip).toHaveLength(7);
+});
+
+it.each([
+  "no spare click",
+  "unfunded refill",
+  "clearable tag",
+  "buffer already built",
+] as const)(
+  "does not promote hand-capacity installation with %s",
+  (variant) => {
+    const { deckSnapshot, state } = capacityFixture();
+    if (variant === "no spare click" || variant === "buffer already built")
+      state.runner.clicks = 1;
+    if (variant === "unfunded refill") state.runner.credits = 2;
+    if (variant === "clearable tag") state.runner.tags = 1;
+    const input = buildAiDecisionInput(state, "runner", {
+      ownDeckSnapshot: deckSnapshot,
+    });
+    const observed =
+      variant === "clearable tag"
+        ? [SCORCHED, PUNITIVE]
+        : variant === "buffer already built"
+          ? [AUDIT, URBAN]
+          : [AUDIT, SCORCHED, PUNITIVE];
+    changeHistory(input, (events) => [
+      ...events,
+      ...visibleRetaliationEvents(input, observed),
+    ]);
+
+    const decision = chooseAiAction(input);
+    expect(decision.fallbackUsed).toBe(false);
+    const install = legal(state, "runner", "install_card", MRAM);
+    expect(decision.evidence).not.toContain(
+      "plan_assessment_evidence:runner_next_corp_turn_extend_hand_limit:6",
+    );
+    if (variant === "clearable tag")
+      expect(decision.actionId).toBe("runner.remove_tag");
+    if (variant === "buffer already built") {
+      expect(runnerNextCorpTurnThreat(input)?.incomingMeatDamage).toBe(5);
+      expect(decision.actionId).not.toBe(install.actionId);
+      expect(
+        decision.decisionDebug?.planFirstDecision?.dispositions,
+      ).toContainEqual(
+        expect.objectContaining({
+          actionId: install.actionId,
+          evidenceCode:
+            "runner_last_action_would_lose_next_corp_turn_hand_buffer",
+        }),
+      );
+    }
+  },
+);
+
 it.each([
   { protection: true, damage: URBAN, grip: 4, survives: true },
   { protection: false, damage: URBAN, grip: 4, survives: false },
@@ -460,8 +699,117 @@ function execute(
   return result.state;
 }
 
-function capture() {
-  return structuredClone(fixture) as unknown as {
+function capacityFixture() {
+  const corpDeck = {
+    ...ORIGINALSET_DEFAULT_DECKS.corp,
+    cards: [
+      ...ORIGINALSET_DEFAULT_DECKS.corp.cards.filter(
+        (card) => ![AUDIT, SCORCHED, PUNITIVE, URBAN].includes(card.id),
+      ),
+      ...[AUDIT, SCORCHED, PUNITIVE, URBAN].map((id) => ({ id, quantity: 1 })),
+    ],
+  };
+  const runnerDeck = {
+    ...ORIGINALSET_DEFAULT_DECKS.runner,
+    cards: [
+      ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter(
+        (card) => ![FALL_GUY, MRAM, BODYWEIGHT].includes(card.id),
+      ),
+      ...[MRAM, BODYWEIGHT].map((id) => ({ id, quantity: 1 })),
+    ],
+  };
+  let state = createGameAfterSetup({
+    seed: "runner-capacity-and-refill",
+    traceRulesProfile: "classic_blind",
+    corpDeck,
+    runnerDeck,
+  });
+  state = execute(state, legal(state, "corp", "mandatory_draw"));
+  state = finishTurn(state, "corp");
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpHqSize(0)
+    .withCorpCardInHq(AUDIT)
+    .withCorpCardInHq(SCORCHED)
+    .withCorpCardInHq(PUNITIVE)
+    .withCorpCardInHq(URBAN)
+    .withCorpCredits(10)
+    .withRunnerCredits(5)
+    .withRunnerClicks(2)
+    .withRunnerGripSize(3)
+    .withRunnerCardInGrip(MRAM)
+    .withRunnerCardInGrip(BODYWEIGHT);
+  state.runnerTurnFlags!.runAttemptsThisTurn = 2;
+  const deckSnapshot = {
+    side: "runner" as const,
+    deckSnapshotId: runnerDeck.id,
+    cards: runnerDeck.cards.map(({ id, quantity }) => ({
+      cardId: id,
+      quantity,
+    })),
+  };
+  return { deckSnapshot, state };
+}
+
+function visibleRetaliationEvents(
+  input: AiDecisionInputWithDeckCapabilities,
+  definitions: readonly string[],
+  stoleAgenda = false,
+): PublicGameEvent[] {
+  const view = input.playerView;
+  const turnSerial = view.turnSerial;
+  if (turnSerial === undefined)
+    throw new Error("Expected a Runner turn serial");
+  const {
+    input: { eventTail },
+  } = capture();
+  const runAttempts = eventTail
+    .filter((event) => event.type === "start_run")
+    .slice(-2);
+  const before = Math.max(0, view.stateVersion - 1);
+  const observation = {
+    ...eventTail.at(-1)!,
+    turnSerial,
+    stateVersionBefore: before,
+    stateVersionAfter: view.stateVersion,
+  };
+  return [
+    ...runAttempts.map((event, index) => ({
+      ...event,
+      eventId: `test-run-attempt-${index}`,
+      turnSerial,
+      stateVersionBefore: before,
+      stateVersionAfter: view.stateVersion,
+    })),
+    ...definitions.map<PublicGameEvent>((id, index) => ({
+      ...observation,
+      type: "access_card",
+      eventId: `test-hq-observation-${index}`,
+      publicPayload: {
+        actionType: "access_card",
+        actor: "runner",
+        cardDefinitionId: id,
+        serverId: "hq",
+      },
+    })),
+    ...(stoleAgenda
+      ? [
+          {
+            ...observation,
+            eventId: "test-agenda-stolen",
+            type: "steal_agenda",
+            publicPayload: {
+              actionType: "steal_agenda",
+              actor: "runner",
+              serverId: "rd",
+            },
+          } satisfies PublicGameEvent,
+        ]
+      : []),
+  ];
+}
+
+function capture(checkpoint: unknown = fixture) {
+  return structuredClone(checkpoint) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
     validation: Record<string, boolean>;

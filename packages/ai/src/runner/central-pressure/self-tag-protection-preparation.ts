@@ -53,6 +53,7 @@ export function bindRunnerCentralSelfTagProtection(params: {
     defense.persistentHazardCounterFundingNeed ||
     defense.gripDamageReplacementBinding ||
     defense.discardChoiceBinding ||
+    defense.nextCorpTurnCapacityInstallActionIds?.length ||
     (defense.defenseSupportInstallActionIds?.length ?? 0) > 0
   )
     return { centralPressure, defense };

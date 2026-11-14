@@ -2568,22 +2568,32 @@ jede Folgeentscheidung wird aus dem aktuellen Zustand neu geprüft.
 Der Defense-Owner bewertet Tag-and-Bag für den nächsten Corp-Zug aus dem
 aktuellen HQ-Gedächtnis des Runners. Erkannte Operationen brauchen einen
 erfüllten Trigger, sichtbares Corp-Budget und Platz im regulären
-Drei-Klick-Zug. Ein reines Tag-ICE oder eine abgegangene HQ-Karte belegt
-diese Folge nicht. Ein erfüllter einzelner Tag-Trigger mit offenen HQ-Slots
-kann eine kostenlose, legale Tag-Prävention rechtfertigen, sofern die Hand
-nach der Installation ausreicht oder mit einem sicheren Draw wieder aufgefüllt
-werden kann.
+Drei-Klick-Zug. Kennt der Runner einen erreichbaren Finisher im HQ,
+prüft Defense bei einem offenen HQ-Slot auch einen möglichen verdeckten
+Tag-Auslöser. Zwei Runversuche oder ein Agendadiebstahl begründen diese
+Prüfung. Bei einem einzelnen Run braucht es eine bereits beobachtete
+passende Tag-Operation. Die Einschätzung bleibt bedingt und rechnet mit
+einem finanzierten einzelnen Finisher. Ein erfüllter einzelner Tag-Trigger
+mit offenen HQ-Slots kann eine kostenlose, legale Tag-Prävention
+rechtfertigen, sofern die Hand danach ausreicht oder mit einem sicheren
+Draw wieder aufgefüllt werden kann.
 
-Für bekannte, erreichbare Schadensfolgen erhält Defense ein Zugendeziel in
-Höhe des wirksamen Schadens. Fünf Karten überleben fünf Schaden. Das Ziel
-braucht einen finanzierbaren Ziehpfad oder einen bereits vorhandenen Puffer
-innerhalb des Handlimits. Es beeinflusst weder die allgemeine Handreserve noch
-die Pfadquote für laufende Runs. Eine freiwillige Informationsroute kann
-entfallen, wenn genau dieser Run den bekannten, mit der Hand nicht abfangbaren
-Gegenschlag auslöst. Unmittelbare Siegoptionen und konkrete Agenda- oder
-Scorefenster behalten ihre eigene Zuständigkeit. Der gespeicherte
-Entscheidungspunkt D12 aus `match_e38d41799172088f` prüft den Übergang zur
-Tag-Prävention.
+Für bekannte Schadensfolgen und den bedingten einzelnen Treffer erhält
+Defense ein erreichbares Zugendeziel in Höhe des wirksamen Schadens. Fünf
+Karten überleben fünf Schaden. Defense bindet den schnellsten verlässlichen
+Ziehpfad und bevorzugt bei gleichem Klickbedarf den günstigeren. Liegt das
+Ziel über dem Limit, muss nach der Installation genug Grip übrig bleiben
+oder ein gebundener Draw bis zum Ziel reichen. Die Prüfung berücksichtigt
+Installationskosten, Grip-Verbrauch, verbleibende Klicks und sichtbare Draw
+Taxes. Nach der Installation bindet Defense den benötigten Draw am neuen
+Zustand. Eine sofort mögliche vollständige Tag-Entfernung
+hat Vorrang, wenn sie den bekannten Gegenschlag abwendet. Eine freiwillige
+Informationsroute kann entfallen, wenn genau dieser Run den bekannten, mit
+der Hand nicht abfangbaren Gegenschlag auslöst. Unmittelbare Siegoptionen
+und konkrete Agenda- oder Scorefenster behalten ihre eigene Zuständigkeit.
+Der gespeicherte Entscheidungspunkt D12 aus `match_e38d41799172088f` prüft
+den Übergang zur Tag-Prävention. D61 aus `match_0d2aa0beed915b0d` prüft den
+Basisdraw auf fünf Karten bei sichtbarem Finisher und verdecktem Tag-Auslöser.
 
 Ist bereits eine aktuelle Runroute ohne zusätzliche Vorbereitung konvertierbar,
 erzeugt die Handquote einer anderen optionalen Informationsroute keinen globalen

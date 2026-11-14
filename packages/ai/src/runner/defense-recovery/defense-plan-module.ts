@@ -290,7 +290,10 @@ function defensePhase(
     signals.handSize < signals.nextCorpTurnBufferTarget &&
     (signals.nextCorpTurnTagProtectionActionIds?.length ?? 0) === 0
   ) openPhases.push("build_hand_buffer");
-  if ((signals.defenseSupportInstallActionIds?.length ?? 0) > 0)
+  if (
+    signals.nextCorpTurnCapacityInstallActionIds?.length ||
+    signals.defenseSupportInstallActionIds?.length
+  )
     openPhases.push("install_defense_support");
   if (signals.activeTags > 0) openPhases.push("clear_tags");
   if (
@@ -369,6 +372,7 @@ function defenseCandidates(
   const persistentCounterFundingActionIds = new Set(signals.persistentHazardCounterFundingNeed?.actionIds ?? []);
   const defenseSupportInstallActionIds = new Set(
     signals.nextCorpTurnTagProtectionActionIds ??
+      signals.nextCorpTurnCapacityInstallActionIds ??
       signals.defenseSupportInstallActionIds ??
       [],
   );
@@ -424,7 +428,14 @@ function defenseCandidates(
           runnerEffectsProvideDamagePrevention(candidate.functionalEffects)
         );
       if (phase === "install_defense_support")
-        return defenseSupportInstallActionIds.has(candidate.actionId);
+        return (
+          defenseSupportInstallActionIds.has(candidate.actionId) &&
+          !(actionDispositions ?? []).some(
+            (entry) =>
+              entry.actionId === candidate.actionId &&
+              entry.evidenceCode === "runner_last_action_would_lose_next_corp_turn_hand_buffer",
+          )
+        );
       if (phase === "build_reaction_reserve")
         return reactionReserveActionIds.has(candidate.actionId);
       return handBufferActionIds.has(candidate.actionId);
@@ -670,7 +681,10 @@ function defensePhaseValue(
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
   if (phase === "install_defense_support") {
-    return signals.nextCorpTurnTagProtectionActionIds?.length ? 160 : 60;
+    return signals.nextCorpTurnTagProtectionActionIds?.length ||
+      signals.nextCorpTurnCapacityInstallActionIds?.length
+      ? 160
+      : 60;
   }
   if (phase === "clear_tags") return 80;
   if (phase === "fund_tag_clear") return RUNNER_TAG_CLEAR_FUNDING_VALUE;
@@ -700,7 +714,8 @@ function defensePriorityClass(
   }
   if (
     (phase === "install_defense_support" &&
-      signals.nextCorpTurnTagProtectionActionIds?.length) ||
+      (signals.nextCorpTurnTagProtectionActionIds?.length ||
+        signals.nextCorpTurnCapacityInstallActionIds?.length)) ||
     (phase === "build_hand_buffer" &&
       signals.nextCorpTurnBufferTarget !== undefined &&
       signals.handSize < signals.nextCorpTurnBufferTarget)

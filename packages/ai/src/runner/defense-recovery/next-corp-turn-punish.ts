@@ -1,4 +1,7 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import {
+  cardSpecPlanningCardByDefinitionId,
+  cardSpecPlanningCards,
+} from "@netgrid/cards/planning";
 import { traceRulesDefinition } from "@netgrid/engine";
 import type {
   AiDecisionInput,
@@ -18,17 +21,25 @@ import {
 import { canAvoidOneNextCorpTag } from "../../runtime/visible-runner-tag-prevention";
 
 const NEXT_CORP_TURN_PUNISH = Symbol("next-corp-turn-punish");
-// Evaluate operations that fit the ordinary Corp turn. Additional actions
-// and unobserved cards never establish a current defense requirement.
+// Evaluate operations that fit the ordinary Corp turn.
 const CORP_ACTIONS = 3;
 
 type NextCorpTurnThreat = {
   tagPreventionNeeded: boolean;
   incomingMeatDamage: number;
+  conditionalMeatDamage: number;
+  conditionalTagPreventionNeeded: boolean;
   postProtectionMeatDamage: number;
   retagsAfterClear: boolean;
   additionalRunEnablesPunish: boolean;
 };
+
+const possibleTagOperations = cardSpecPlanningCards().flatMap(
+  ({ definition }) => {
+    const source = fixedTagOperation(definition.id);
+    return source ? [{ definitionId: definition.id, ...source }] : [];
+  },
+);
 
 /**
  * A decision-local risk assessment from Runner-visible HQ memory and own
@@ -69,16 +80,34 @@ function assessNextCorpTurn(
     const payoff = fixedTaggedDamageOperation(id);
     return payoff ? [payoff] : [];
   });
-  if (tagSources.length === 0 && (payoffs.length === 0 || view.own.tags === 0))
-    return undefined;
+  if (tagSources.length === 0 && payoffs.length === 0) return undefined;
   const { runs, stoleAgenda } = publicRunnerTurnObservations(
     input,
     view.turnSerial,
   );
+  const triggerMet = (source: TagSource) =>
+    source.trigger.kind === "run_attempts"
+      ? source.trigger.minimumRuns <= runs
+      : stoleAgenda;
+  const possibleSources =
+    view.own.tags === 0 &&
+    tagSources.length === 0 &&
+    payoffs.length > 0 &&
+    knownHq.length < view.opponent.handCount
+      ? possibleTagOperations.filter(
+          (source) =>
+            triggerMet(source) &&
+            (runs >= 2 ||
+              stoleAgenda ||
+              observedTagOperation(input, source.definitionId)),
+        )
+      : [];
   const ownTraceSupport = view.own.runnerTraceSupportQuote;
   const traceDefense =
     ownTraceSupport &&
-    tagSources.some((source) => source.trigger.kind === "run_attempts")
+    [...tagSources, ...possibleSources].some(
+      (source) => source.trigger.kind === "run_attempts",
+    )
       ? traceDefenseForNextTurn(input, ownTraceSupport)
       : undefined;
   const automaticTag = (view.own.rig ?? []).some(
@@ -88,7 +117,7 @@ function assessNextCorpTurn(
       cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
         .runnerUtilityLongtail?.kind === "trace_attempts_auto_success_add_tag",
   );
-  const pricedSources = tagSources.flatMap((source) => {
+  const priceTagSource = (source: TagSource) => {
     const price = visibleTagSourceCost(
       view.opponent.credits,
       source,
@@ -96,11 +125,8 @@ function assessNextCorpTurn(
       traceDefense,
     );
     return price ? [{ ...source, ...price }] : [];
-  });
-  const triggerMet = (trace: TagSource) =>
-    trace.trigger.kind === "run_attempts"
-      ? trace.trigger.minimumRuns <= runs
-      : stoleAgenda;
+  };
+  const pricedSources = tagSources.flatMap(priceTagSource);
   const incoming = pricedSources.filter(triggerMet);
   const handCount = view.own.gripOrHq.length;
   const readyPrevention = readyMeatDamagePrevention(input);
@@ -171,6 +197,31 @@ function assessNextCorpTurn(
       : damageAfterRetag;
   const projectedDamage = (damage: number) =>
     Math.max(0, damage - readyPrevention);
+  // Open HQ slots and a live trigger make one concealed tag plausible.
+  // Prepare for a single observed payoff without assuming the Corp has a combo.
+  const possiblePunishes = possibleSources
+    .flatMap(priceTagSource)
+    .map((source) => ({
+      tags: source.tags,
+      damage: projectedDamage(
+        maximumDamage(
+          payoffs,
+          view.opponent.credits - source.credits,
+          source.tags - Number(avoidsOneTag),
+          1,
+        ),
+      ),
+    }));
+  const conditionalMeatDamage = Math.max(
+    0,
+    ...possiblePunishes.map(({ damage }) => damage),
+  );
+  const conditionalTagPreventionNeeded =
+    !avoidsOneTag &&
+    conditionalMeatDamage > handCount &&
+    possiblePunishes.every(
+      ({ tags, damage }) => tags === 1 || damage <= handCount,
+    );
   const additionalRunEnablesPunish =
     view.own.tags === 0 &&
     incomingMeatDamage <= handCount &&
@@ -184,10 +235,28 @@ function assessNextCorpTurn(
   return {
     tagPreventionNeeded,
     incomingMeatDamage: projectedDamage(incomingMeatDamage),
+    conditionalMeatDamage,
+    conditionalTagPreventionNeeded,
     postProtectionMeatDamage: projectedDamage(repeatTraceDamage),
     retagsAfterClear: projectedDamage(damageAfterRetag) > handCount,
     additionalRunEnablesPunish,
   };
+}
+
+function observedTagOperation(
+  input: AiDecisionInput,
+  definitionId: string,
+): boolean {
+  return [...input.playerView.publicEvents, ...input.eventTail].some(
+    (event) =>
+      event.stateVersionAfter <= input.playerView.stateVersion &&
+      ((event.type === "play_operation" &&
+        event.publicPayload.actor === "corp") ||
+        (event.type === "access_card" &&
+          event.publicPayload.actor === "runner")) &&
+      (event.publicPayload.cardDefinitionId === definitionId ||
+        event.publicPayload.sourceDefinitionId === definitionId),
+  );
 }
 
 /** Count a single currently ready, unavoidable prevention source. Other

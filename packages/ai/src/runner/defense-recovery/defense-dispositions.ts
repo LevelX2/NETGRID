@@ -91,7 +91,13 @@ export function runnerDefenseSafetyDispositions(params: {
       if (
         alreadyClassifiedActionIds.has(id) ||
         terminalActionIds.has(id) ||
-        signals.defenseSupportInstallActionIds?.includes(id) ||
+        signals.nextCorpTurnTagProtectionActionIds?.includes(id) ||
+        (signals.defenseSupportInstallActionIds?.includes(id) &&
+          !input.playerView.own.gripOrHq.some(
+            (card) =>
+              card.instanceId === candidate.sourceCardInstanceId &&
+              (card.maxHandSizeBonus ?? 0) > 0,
+          )) ||
         runWindows.some(
           (window) =>
             window.actionAssessments?.[id]?.binding ===
