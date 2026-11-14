@@ -4230,6 +4230,15 @@ es entsteht weder ein Kartenname-Verbot noch ein neuer Safety-Owner.
 
 ## 11. `runner.credit_bank` und `runner.recurring_economy`
 
+Die Bankinstallation verwendet den wirksamen Handpuffer des Defense-Owners,
+einschließlich eines für den nächsten Corp-Zug ermittelten Puffers. Verbraucht
+eine Bankinstallation mit der letzten Aktion eine dafür nötige Handkarte,
+hält der Bank-Owner die Karte zurück und dispositioniert die genaue
+Installationsaction. Eine Auszahlung oder Ladung ohne Handverbrauch bleibt
+nach ihren eigenen Bedingungen prüfbar. Paarung 743, G37 D132 belegt den
+Fünf-Karten-Fall mit einer legalen Broker-Ladung. Die native Vier-Karten-Probe
+aus Paarung 514 lässt eine Installation mit ausreichendem Puffer weiter zu.
+
 Ein bereits vorhandener P6-`develop_liquidity`-Bedarf darf die garantierte
 Auszahlung einer endlichen, bei Installation vorgefüllten Quelle verwenden,
 wenn sie pro gleicher Aktion mehr frei verfügbare Credits als sämtliche

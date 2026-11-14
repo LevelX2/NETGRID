@@ -3151,7 +3151,7 @@ function prepareRunnerDomain(
         economy,
         runTargets,
         handDevelopment,
-        minimumHandBuffer,
+        defense.minimumHandBuffer,
         {
           hasExactRunUrgency: (target) =>
             runnerRunHasExactUrgency(input, target),

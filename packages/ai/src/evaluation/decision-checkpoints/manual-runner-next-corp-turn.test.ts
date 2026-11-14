@@ -1,5 +1,6 @@
 import fixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261113-runner-next-corp-turn.json";
 import preparationFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261114-runner-punish-preparation.json";
+import creditBankFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p743-g37-d132.json";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -235,6 +236,57 @@ it("retains the fifth card with the last click even when the economy install is 
       evidenceCode: "runner_last_action_would_lose_next_corp_turn_hand_buffer",
     }),
   );
+});
+
+it("holds a legal credit bank installation that would spend the fifth Grip card at P743 G37 D132", () => {
+  const { input, runtime, validation, stateHash } = capture(creditBankFixture);
+  expect(stateHash).toBe("fnv1a:16832234");
+  expect(Object.values(validation).every(Boolean)).toBe(true);
+  expect(input.playerView.own.gripOrHq).toHaveLength(5);
+  expect(input.playerView.own.clicks).toBe(1);
+  expect(runnerNextCorpTurnThreat(input)?.conditionalMeatDamage).toBe(5);
+  const install = input.legalActions.find(
+    (action) =>
+      action.type === "install_card" &&
+      input.playerView.own.gripOrHq.some(
+        (card) =>
+          card.instanceId === action.source &&
+          card.definitionId === "onr_v1_178_short-term-contract",
+      ),
+  );
+  expect(install).toBeDefined();
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+
+  const decision = chooseAiAction(input);
+  const plan = decision.decisionDebug?.planFirstDecision;
+  const load = input.legalActions.find(
+    (action) => action.actionId === decision.actionId,
+  );
+  expect(load).toMatchObject({
+    type: "activated_card_ability",
+    expiresAtStateVersion: input.playerView.stateVersion,
+    payload: {
+      cardImplementationAbilityKey: "store_credits",
+      hostedCreditAddAmount: 3,
+    },
+  });
+  expect(decision.fallbackUsed).toBe(false);
+  expect(plan?.selectedPlan?.moduleId).toBe("runner.credit_bank");
+  expect(plan?.route).toMatchObject({
+    actionId: load?.actionId,
+    planInstanceId: plan?.leafExecutorInstanceId,
+    stateVersion: input.playerView.stateVersion,
+  });
+  expect(plan?.dispositions).toContainEqual({
+    actionId: install!.actionId,
+    disposition: "explicitly_nonproductive",
+    ownerModuleId: "runner.credit_bank",
+    evidenceCode: "runner_credit_bank_last_action_install_hand_floor",
+  });
 });
 
 it("detects a second run from an observed event-started attempt, and counts it once", () => {
