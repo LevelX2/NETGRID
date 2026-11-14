@@ -19,7 +19,159 @@ import {
   quoteCorpPunishRoute,
 } from "./corp-punish-route-quotes";
 
+const WILSON = "onr_v1_187_wilson-weeflerunner-apprentice";
+const URBAN = "onr_v1_307_urban-renewal";
+const SCORCHED = "onr_v1_302_scorched-earth";
+
 describe("Corp punish-route quote request", () => {
+  it.each([true, false])(
+    "counts one sacrifice across two damage packets (public source: %s)",
+    (publicSource) => {
+      const state = corpActionState("one-public-sacrifice");
+      state.runner.tags = 1;
+      const wilson = addConcealedRunnerResource(state, WILSON, "damage");
+      state.cardInstances[wilson]!.faceup = publicSource;
+      state.cardInstances[wilson]!.rezzed = publicSource;
+      const urban = addCorpCardToHqForTest(state, URBAN, "five");
+      const scorched = addCorpCardToHqForTest(state, SCORCHED, "four");
+      // The source can be held through the first packet for the larger one.
+      const request = routeRequest(state, [
+        step(state, "damage-four", 0, "meat_damage", scorched),
+        step(state, "damage-five", 1, "meat_damage", urban),
+      ]);
+      const before = structuredClone(state);
+      expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+        ok: true,
+        quote: {
+          complete: true,
+          totalActionCredits: 9,
+          damageEnvelope: {
+            rawDamage: { meat: 9, total: 9 },
+            effectiveDamage: { minimum: publicSource ? 4 : 9, maximum: 9 },
+            visiblePrevention: {
+              knowledge: publicSource ? "bounded_public" : "none_visible",
+              maximumPreventableDamage: publicSource ? 5 : 0,
+            },
+          },
+        },
+      });
+      expect(state).toEqual(before);
+    },
+  );
+
+  it.each(["direct", "trace"] as const)(
+    "uses the actual %s tag outcome before pricing the damage",
+    (source) => {
+      const state = corpActionState("public-tag-and-damage-sacrifice");
+      state.traceRulesProfile = "modern_open";
+      state.runnerTurnFlags!.stoleAgendaLastTurn = true;
+      state.runnerTurnFlags!.runAttemptsLastTurn = 1;
+      state.runner.credits = 3;
+      const wilson = addConcealedRunnerResource(state, WILSON, "tag");
+      state.cardInstances[wilson]!.faceup = true;
+      state.cardInstances[wilson]!.rezzed = true;
+      const tag = addCorpCardToHqForTest(
+        state,
+        source === "direct"
+          ? "onr_v1_306_trojan-horse"
+          : "onr_v1_284_chance-observation",
+        "tag",
+      );
+      const damage = addCorpCardToHqForTest(state, URBAN, "damage");
+      const request = routeRequest(state, [
+        step(state, "tag", 0, source === "direct" ? "tag" : "trace_tag", tag),
+        step(state, "damage", 1, "meat_damage", damage),
+      ]);
+      expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+        ok: true,
+        quote: {
+          complete: true,
+          tagOutcomeEnvelope: { addedTags: { minimum: 0, maximum: 1 } },
+          damageEnvelope: {
+            effectiveDamage: { minimum: 0, maximum: 5 },
+            visiblePrevention: { maximumPreventableDamage: 5 },
+          },
+        },
+      });
+    },
+  );
+
+  it("never prices damage prevention from a source already spent on a tag", () => {
+    const state = corpActionState("spent-public-sacrifice");
+    state.runner.tags = 1;
+    state.runnerTurnFlags!.stoleAgendaLastTurn = true;
+    const wilson = addConcealedRunnerResource(state, WILSON, "spent");
+    state.cardInstances[wilson]!.faceup = true;
+    state.cardInstances[wilson]!.rezzed = true;
+    const tag = addCorpCardToHqForTest(state, "onr_v1_306_trojan-horse", "tag");
+    const damage = addCorpCardToHqForTest(state, URBAN, "damage");
+    const action = getLegalActionForCard(state, tag);
+    const started = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    if (!started.ok) throw new Error(started.error.message);
+    const choice = started.state.pendingChoice!;
+    const prevent = choice.options.find(
+      (option) => option.metadata?.optionKind === "prevent_tag",
+    )!;
+    expect(prevent).toBeDefined();
+    const resolve = getLegalActions(started.state, "runner").find(
+      (candidate) => candidate.type === "resolve_choice",
+    )!;
+    const resolved = applyAction(started.state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: resolve.actionId,
+      clientKnownStateVersion: started.state.stateVersion,
+      selectedChoices: {
+        choiceId: choice.choiceId,
+        selectedOptionIds: [prevent.id],
+      },
+    });
+    if (!resolved.ok) throw new Error(resolved.error.message);
+    expect(resolved.state.runner.tags).toBe(1);
+    expect(resolved.state.runner.rig.resources).not.toContain(wilson);
+    expect(
+      quoteCorpPunishRoute(
+        resolved.state,
+        routeRequest(resolved.state, [
+          step(resolved.state, "damage", 0, "meat_damage", damage),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        damageEnvelope: { effectiveDamage: { minimum: 5, maximum: 5 } },
+      },
+    });
+  });
+
+  it("keeps a public permanent prevention outside the one-shot quote", () => {
+    const state = corpActionState("public-permanent-prevention");
+    state.runner.tags = 1;
+    state.runnerPermanentMeatDamagePrevention = true;
+    const wilson = addConcealedRunnerResource(state, WILSON, "public");
+    state.cardInstances[wilson]!.faceup = true;
+    state.cardInstances[wilson]!.rezzed = true;
+    const damage = addCorpCardToHqForTest(state, URBAN, "damage");
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [step(state, "damage", 0, "meat_damage", damage)]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: false,
+        incompleteReasons: ["damage_prevention_quote_incomplete"],
+      },
+    });
+  });
+
   it("certifies the installed SP-848 damage head with its agenda-point cost", () => {
     const { state, request } = agendaFundedDamageState();
     const action = getLegalActions(state, "corp").find(

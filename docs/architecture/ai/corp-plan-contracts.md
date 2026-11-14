@@ -3074,6 +3074,17 @@ verwendet denselben side-sicheren Trace-/Präventionsvertrag wie für Operatione
 Eine Agenda in HQ ist keine aktivierbare Quelle. Verdeckte Runnerreaktionen
 bleiben unbekannt und werden nicht durch den Quelltypwechsel aufgewertet.
 
+Die Engine-Schadensquote erhält die öffentlichen Zustände nach dem
+Tagfenster eines einzelnen direkten Tag- oder Trace-Heads. In jedem Zweig
+kann eine sichtbare, durch Trash bezahlte Vollprävention einen passenden
+Schadenstreffer abfangen. Eine im Tagfenster geopferte Instanz entfällt,
+eine erhaltene darf bewusst für einen späteren, größeren Treffer warten.
+Die Vorschau verwendet die kanonischen Präventionskandidaten der Engine
+und veröffentlicht nur aggregierte Grenzen. Der bestehende Punish-Owner
+bewertet dieselbe Quote und bindet nach der tatsächlichen Antwort erneut.
+Kombinationen mit zusätzlichen Tagquellen, gekoppelten Präventions- oder
+Ersatzwirkungen behalten ihre ausdrückliche Quote-Grenze.
+
 Auch getaggtenabhängiger Meat-Schaden aus einer gescorten Agenda gehört in
 diese Quote-Anfragen. Die kanonische aktivierte Corp-Main-Fähigkeit liefert
 die Capability-Identität; die Engine prüft Score-Zone, Tagbedingung, Kosten,
