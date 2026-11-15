@@ -136,6 +136,36 @@ it("quotes and executes scored damage through the existing punish owner", () => 
   expect(pf.route).toBeDefined();
   expect(apply(s, action.actionId).winner).toBe("corp");
 });
+it("converts a current tag before advancing a score project that cannot close this turn", () => {
+  const s = fixture(5, false);
+  RealEngineFixtureBuilder.forState(s)
+    .withCorpRemoteRoot("remote_1", SOLO, 1)
+    .withCorpCardInHq("onr_v1_302_scorched-earth")
+    .withCorpCardInHq("onr_v1_284_chance-observation")
+    .withCorpCardInHq(URBAN)
+    .withCorpCredits(3)
+    .withRunnerCredits(11);
+  s.corp.clicks = 1;
+
+  const { i, decision, action } = decide(s);
+  expect(i.legalActions.some((candidate) => candidate.type === "advance_card"))
+    .toBe(true);
+  expect(i.legalActions.some((candidate) => candidate.type === "score_agenda"))
+    .toBe(false);
+  expect(action).toMatchObject({
+    type: "play_operation",
+    payload: {
+      cardImplementationAbilityId: "onr_v1_302_scorched-earth:abilities_on_play_damage",
+    },
+  });
+  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId: expect.stringContaining("corp.punish_campaign"),
+    leafExecutorInstanceId: expect.stringContaining("corp.execute_punish_sequence"),
+    route: { actionId: action.actionId, stateVersion: s.stateVersion },
+  });
+  expect(apply(s, action.actionId).runner.grip).toHaveLength(1);
+});
+
 it("requotes the reusable source after a nonlethal activation", () => {
   let s = fixture(1);
   const first = decide(s);
