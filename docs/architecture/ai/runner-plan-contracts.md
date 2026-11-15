@@ -1826,10 +1826,13 @@ Installationskostenaufschlag. Das persistente Funktionsprofil erhält die
 eigene Abdeckung `corp_ice_install_tax`; allgemeine Creditwörter erzeugen
 keine `economy_engine` und niedrige eigene Credits keinen akuten Geldbedarf.
 Gemischte Wirkungen mit eigenem Einkommen fallen nicht unter diesen engen
-Nachweis. Die Bewertung des zukünftigen Serverziels und der ganzen
-Investitionsfolge bleibt gesondert; die Korrektur behauptet weder einen
-optimalen Tax-Server noch einen anderen Sieger. Paarung 625/D19 prüft die
-native Plan-/Actionbindung, eigene Credits und den echten Einkommensgegenfall.
+Nachweis. Bei servergebundener Installation bindet Development eine aktuelle
+LegalAction für einen Server mit sichtbarem Verteidigungsanreiz. Sichtbare
+Agendas und konkrete Score-Remotes haben Vorrang vor dem gewöhnlichen
+Zentraldruck auf HQ und R&D. Unter gleichwertigen Zielen bevorzugt der Plan
+weniger ICE und danach jüngere Run-Aktivität. Archives kommt nur bei einer
+öffentlich bekannten Agenda infrage. In Match 32b2 D45 bindet die KI dadurch
+das offene HQ. Paarung 625/D19 prüft die Abgrenzung zu eigenem Einkommen.
 
 Ein ausschließlich für Tagentfernung bestimmter Creditpool ist Defense-Support,
 keine allgemeine Sparbank oder liquide Economy. Der Handentwicklungs-Owner

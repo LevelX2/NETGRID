@@ -42,6 +42,7 @@ import {
 import type { RunnerDevelopmentInstallServices } from "./development-services";
 import { runnerAccessPayoffDevelopmentLacksBoundAccessRoute } from "./development-signals";
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
+import { runnerInstallTaxTarget } from "./ice-install-tax-target";
 import { assessPassiveStrengthInvestment } from "./passive-strength-investment";
 import { assessRunStrengthStock } from "./run-strength-stock";
 import { assessSuccessfulRunCounterDevelopment } from "./successful-run-counter-development";
@@ -299,6 +300,16 @@ export function buildRunnerCardDevelopmentSignals({
               );
             })
           : [];
+      const installTax =
+        candidate?.actionType === "install_card"
+          ? runnerInstallTaxTarget(
+              input,
+              evaluation.definitionId,
+              executableCardActionCandidates,
+              runTargets,
+            )
+          : undefined;
+      if (installTax && !installTax.target) return [];
       const specialistOwnedActionIds = new Set([
         ...creditBanks.flatMap((signal) => [
           ...signal.actionIds,
@@ -584,9 +595,11 @@ export function buildRunnerCardDevelopmentSignals({
               },
             )
           : undefined;
-      const actionIds = candidate
-        ? executableCardActionCandidates.map((entry) => entry.actionId)
-        : [];
+      const actionIds = installTax?.target
+        ? [installTax.target.actionId]
+        : candidate
+          ? executableCardActionCandidates.map((entry) => entry.actionId)
+          : [];
       const semanticActionTypes = candidate
         ? [candidate.semanticActionType]
         : [];
@@ -648,7 +661,9 @@ export function buildRunnerCardDevelopmentSignals({
               ? ("P4" as const)
               : developmentPriorityClass,
           value: normalizedDevelopmentValue,
-          evidenceCode: evaluation.evidence[0] ?? "runner_hand_development",
+          evidenceCode: installTax?.target
+            ? `runner_ice_install_tax_target:${installTax.target.serverId}`
+            : evaluation.evidence[0] ?? "runner_hand_development",
           ...(strengthInvestment
             ? { evidenceCodes: strengthInvestment.evidenceCodes }
             : runCreditInvestment
