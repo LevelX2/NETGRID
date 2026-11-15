@@ -24,6 +24,17 @@ const capture = JSON.parse(
   validation: Record<string, boolean>;
 };
 
+const definitionId = "onr_v1_173_restrictive-net-zoning";
+const instanceId = "runner_onr_v1_173_restrictive-net-zoning_1";
+
+function taxOffers(input: AiDecisionInputWithDeckCapabilities) {
+  return buildActionSemanticCandidates(input).filter(
+    (entry) =>
+      entry.actionType === "install_card" &&
+      entry.sourceCardInstanceId === instanceId,
+  );
+}
+
 afterEach(resetResidentPlanPortfolioMemory);
 
 describe("match 32b2 D45 ICE install-tax target", () => {
@@ -44,7 +55,7 @@ describe("match 32b2 D45 ICE install-tax target", () => {
     expect(action).toMatchObject({
       type: "install_card",
       payload: {
-        cardId: "runner_onr_v1_173_restrictive-net-zoning_1",
+        cardId: instanceId,
         selectedServerId: "hq",
       },
     });
@@ -55,7 +66,7 @@ describe("match 32b2 D45 ICE install-tax target", () => {
   });
 
   it.each([false, true])(
-    "treats Archives as a worthwhile tax target only with a visible agenda (%s)",
+    "excludes Archives from the installment tax even with a visible agenda (%s)",
     (visibleAgenda) => {
       const { input } = structuredClone(capture);
       const archives = input.playerView.servers.find(
@@ -70,49 +81,26 @@ describe("match 32b2 D45 ICE install-tax target", () => {
         });
         input.playerView.opponent.discardCount! += 1;
       }
-      const source = "runner_onr_v1_173_restrictive-net-zoning_1";
-      const candidates = buildActionSemanticCandidates(input).filter(
-        (entry) =>
-          entry.actionType === "install_card" &&
-          entry.sourceCardInstanceId === source,
-      );
+      const candidates = taxOffers(input);
       const archivesOffer = input.legalActions.find(
         (offer) =>
-          offer.source === source &&
+          offer.source === instanceId &&
           offer.payload?.selectedServerId === "archives",
       )!;
       const archivesOnly = candidates.filter(
         (entry) => entry.actionId === archivesOffer.actionId,
       );
-      expect(
-        runnerInstallTaxTarget(
-          input,
-          "onr_v1_173_restrictive-net-zoning",
-          archivesOnly,
-          [],
-        ),
-      ).toEqual(
-        visibleAgenda
-          ? {
-              target: {
-                actionId: archivesOffer.actionId,
-                serverId: "archives",
-              },
-            }
-          : {},
+      expect(runnerInstallTaxTarget(input, definitionId, archivesOnly)).toEqual(
+        {},
       );
       expect(
-        runnerInstallTaxTarget(
-          input,
-          "onr_v1_173_restrictive-net-zoning",
-          candidates,
-          [],
-        )?.target?.serverId,
-      ).toBe(visibleAgenda ? "archives" : "hq");
+        runnerInstallTaxTarget(input, definitionId, candidates)?.target
+          ?.serverId,
+      ).toBe("hq");
     },
   );
 
-  it("prefers a visible scoring remote over the open central server", () => {
+  it("does not let a single scoring opportunity displace the persistent HQ target", () => {
     const { input } = structuredClone(capture);
     const remote = input.playerView.servers.find(
       (server) => server.id === "remote_1",
@@ -123,17 +111,64 @@ describe("match 32b2 D45 ICE install-tax target", () => {
       type: "agenda",
       agendaPoints: 2,
     });
-    const definitionId = "onr_v1_173_restrictive-net-zoning";
-    const candidates = buildActionSemanticCandidates(input).filter(
-      (entry) =>
-        entry.actionType === "install_card" &&
-        entry.sourceCardInstanceId ===
-          "runner_onr_v1_173_restrictive-net-zoning_1",
-    );
-    const result = runnerInstallTaxTarget(input, definitionId, candidates, []);
-    const offer = input.legalActions.find(
-      (action) => action.actionId === result?.target?.actionId,
-    );
-    expect(offer?.payload?.selectedServerId).toBe("remote_1");
+    expect(
+      runnerInstallTaxTarget(input, definitionId, taxOffers(input))?.target
+        ?.serverId,
+    ).toBe("hq");
+  });
+
+  it("supports the current R&D strategy even when the recent runs favor HQ", () => {
+    const { input } = structuredClone(capture);
+    input.ownStrategicIntentState!.targetVector = {
+      kind: "central",
+      targetId: "rd",
+      evidence: [],
+    };
+    expect(
+      runnerInstallTaxTarget(input, definitionId, taxOffers(input))?.target
+        ?.serverId,
+    ).toBe("rd");
+  });
+
+  it("holds the card when no current strategy or repeated run identifies a target", () => {
+    const { input } = structuredClone(capture);
+    input.ownStrategicIntentState!.stateVersion -= 1;
+    input.eventTail = [];
+    input.playerView.publicEvents = [];
+    expect(
+      runnerInstallTaxTarget(input, definitionId, taxOffers(input)),
+    ).toEqual({});
+  });
+
+  it("only taxes a planned remote after pressure in separate runner turns", () => {
+    const { input } = structuredClone(capture);
+    input.ownStrategicIntentState!.targetVector = {
+      kind: "remote",
+      targetId: "remote_1",
+      evidence: [],
+    };
+    const candidates = taxOffers(input);
+    expect(
+      runnerInstallTaxTarget(input, definitionId, candidates)?.target?.serverId,
+    ).toBe("hq");
+
+    for (const event of [
+      ...input.playerView.publicEvents,
+      ...input.eventTail,
+    ]) {
+      if (
+        event.type === "start_run" &&
+        (event.turnSerial === 9 || event.turnSerial === 11)
+      ) {
+        event.publicPayload.serverId = "remote_1";
+      }
+    }
+    expect(
+      runnerInstallTaxTarget(input, definitionId, candidates)?.target?.serverId,
+    ).toBe("remote_1");
+
+    input.playerView.servers.find((server) => server.id === "remote_1")!.ice =
+      [];
+    expect(runnerInstallTaxTarget(input, definitionId, candidates)).toEqual({});
   });
 });

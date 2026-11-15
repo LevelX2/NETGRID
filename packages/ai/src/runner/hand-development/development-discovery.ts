@@ -306,7 +306,6 @@ export function buildRunnerCardDevelopmentSignals({
               input,
               evaluation.definitionId,
               executableCardActionCandidates,
-              runTargets,
             )
           : undefined;
       if (installTax && !installTax.target) return [];
