@@ -1,4 +1,6 @@
+import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { runnerRunProjectionPreservesNormalAccess } from "../../actions/run-action-projection";
 import type {
   PlanMaterialization,
   PlanModule,
@@ -14,7 +16,10 @@ import {
   state,
 } from "../../plans/runner-tactical-module-support";
 import { RunnerPressureSignal } from "../../plans/runner-tactical-plan-contracts";
-import type { RunnerRunTargetEvaluation } from "../../run-analysis/runner-run-target-types";
+import type {
+  RunActionProjection,
+  RunnerRunTargetEvaluation,
+} from "../../run-analysis/runner-run-target-types";
 type PressureState = {
   kind: "central_pressure";
   signal: RunnerPressureSignal;
@@ -205,7 +210,7 @@ export function centralPressureModule(): PlanModule {
             current.signal.routePreparation === "targeted_bypass"
               ? `Execute the preflighted targeted bypass route on ${current.signal.serverId}.`
               : current.signal.routePreparation === "targeted_ice_trash"
-                ? `Remove the preflighted rezzed ICE target from ${current.signal.serverId}.`
+                ? targetedIcePreparationPurpose(current.signal)
                 : current.signal.routePreparation ===
                     "convert_accumulated_pressure"
                   ? "Convert the accumulated multi-central pressure into its current action-denial payoff."
@@ -234,6 +239,35 @@ export function centralPressureModule(): PlanModule {
       };
     },
   };
+}
+
+function targetedIcePreparationPurpose(signal: RunnerPressureSignal): string {
+  const targetState = signal.targetedIceTrashCommitment?.targetIceState;
+  switch (targetState) {
+    case "rezzed":
+    case "unrezzed":
+      return `Remove the preflighted ${targetState} ICE target from ${signal.serverId}.`;
+    case "rez_or_trash":
+      return `Make the Corp rez or trash the preflighted ICE target on ${signal.serverId}.`;
+    default:
+      return `Prepare ICE disruption on ${signal.serverId}.`;
+  }
+}
+
+/** Describes the selected action's actual replacement in the current view. */
+export function runnerCentralPressureRunTracePurpose(
+  input: AiDecisionInput,
+  projection: RunActionProjection,
+): string | undefined {
+  if (
+    projection.targetServerId !== "hq" ||
+    (projection.accessReplacement !== "corp_lose_credits" &&
+      projection.accessReplacement !== "runner_spend_corp_lose_credits") ||
+    runnerRunProjectionPreservesNormalAccess(input, projection)
+  ) {
+    return undefined;
+  }
+  return "Execute credit-denial pressure on hq.";
 }
 
 function pressureCandidates(

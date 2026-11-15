@@ -30,12 +30,59 @@ import {
 import { runnerActionDispositions } from "./plan-first-live-runtime";
 import { bindSelectedRunnerTargetedIceTrashChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
+import { centralPressureModule } from "../runner/central-pressure/central-pressure-plan-module";
 
 afterEach(() => {
   resetResidentPlanPortfolioMemory();
 });
 
-describe("Runner targeted rezzed-ICE trash plan", () => {
+describe("Runner targeted ICE disruption plan", () => {
+  it.each([
+    ["rezzed removal", targetedTrashCandidate, "Remove the preflighted rezzed ICE target from rd."],
+    ["unrezzed removal", targetedUnrezzedTrashCandidate, "Remove the preflighted unrezzed ICE target from rd."],
+    ["rez or trash", canonicalForgedCandidate, "Make the Corp rez or trash the preflighted ICE target on rd."],
+  ] as const)("describes the committed target for %s", (kind, buildCandidate, purpose) => {
+    const candidate = buildCandidate();
+    const input = kind === "rezzed removal"
+      ? planningInput()
+      : planningInput({
+          credits: 20,
+          ice: [blockingIce("rd-wall", "wall", 1), unrezzedIce("rd-hidden")],
+        });
+    const commitment = runnerTargetedIceTrashPlanCommitment({
+      input,
+      candidate,
+      planTargets: [{
+        ownerModuleId: "runner.pressure_central",
+        ownerDedupeKey: "central:rd",
+        serverId: "rd",
+        payoffValue: 1_000,
+      }],
+    });
+    expect(commitment).toBeDefined();
+    const [instance] = pressurePortfolio(commitment!).instances;
+    instance!.moduleState = {
+      kind: "central_pressure",
+      signal: {
+        routePreparation: "targeted_ice_trash",
+        serverId: commitment!.serverId,
+        marginalValue: 1_000,
+        preparationActionIds: [commitment!.sourceActionId],
+        sourceDefinitionIds: [commitment!.sourceDefinitionId],
+        targetedIceTrashCommitment: commitment,
+      },
+    };
+    const pressure = centralPressureModule();
+    const materialized = pressure.materialize(instance!, {} as never, {
+      input,
+      actionCandidates: [candidate],
+      turnKey: "runner:turn:1",
+    });
+    expect(materialized?.step.purpose).toBe(purpose);
+    expect(materialized?.step.stepId).toBe(`${instance!.instanceId}:pressure:rd`);
+    expect(materialized?.candidates.map(({ candidate }) => candidate.actionId))
+      .toEqual([commitment!.sourceActionId]);
+  });
   it.each([
     ["rezzed removal", targetedTrashCandidate],
     ["unrezzed removal", targetedUnrezzedTrashCandidate],

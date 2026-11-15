@@ -9,10 +9,47 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
+import { projectRunnerRunActions } from "../../actions/run-action-projection";
+import { runnerCentralPressureRunTracePurpose } from "./central-pressure-plan-module";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
 describe("HQ success-window value belongs to its admitted route", () => {
+  it.each([
+    [13, "corp_lose_credits", 0, true],
+    [5, "runner_spend_corp_lose_credits", 3, true],
+    [27, "corp_lose_credits", 3, true],
+    [27, "corp_lose_credits", 0, false],
+  ] as const)(
+    "describes the selected HQ replacement from G%i with replacement %s and %i Corp credits",
+    (game, replacement, credits, isCreditDenial) => {
+      const fixture = JSON.parse(
+        readFileSync(
+          new URL(
+            `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r8-hq-window-g${game}.json`,
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+      const input: AiDecisionInput = {
+        ...fixture.input,
+        ...buildAiDecisionInputDto(fixture.input),
+      };
+      input.playerView.opponent.credits = credits;
+      const projections = projectRunnerRunActions({ input });
+      const event = projections.find(
+        (projection) => projection.accessReplacement === replacement,
+      )!;
+      const basic = projections.find(
+        (projection) => projection.actionId === "runner.start_run.hq",
+      )!;
+      expect(runnerCentralPressureRunTracePurpose(input, event)).toBe(
+        isCreditDenial ? "Execute credit-denial pressure on hq." : undefined,
+      );
+      expect(runnerCentralPressureRunTracePurpose(input, basic)).toBeUndefined();
+    },
+  );
   it("retains the original basic HQ preparation preceding the actual G27 removal", () => {
     const cp = JSON.parse(
       readFileSync(

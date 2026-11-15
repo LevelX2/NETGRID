@@ -96,6 +96,14 @@ Die Entscheidungskette nutzt denselben Persistenzvertrag. Bei
 `traceLevel: summary`-Projektion; bei `aiTraceMode: detailed` enthält derselbe
 Schlüssel die vollständige sanitizierte `AiDecisionChainDebug` mit
 `traceLevel: detailed`. Es gibt dafür keine weitere Tabelle oder Logdatei.
+
+Bei Runner-Zentraldruck nennt die Detailspur den Effekt der konkret gewählten
+Run-Aktion. Ein Credit-Entzug, der den HQ-Zugriff ersetzt, wird als Entzug
+beschrieben. Bedingte Ersetzungen werden nach der aktuellen sichtbaren
+Bedingung ausgewiesen. Gezielte ICE-Vorbereitung beschreibt den tatsächlich
+gebundenen Rez-Zustand oder die gebundene Rez-/Trash-Wahl. Diese Texte
+ändern die Aktions- und Choice-Bindungen nicht.
+
 Die genaue Feldabgrenzung liefern `AiDecisionChainDebug` und
 `sanitizeAiDecisionChainDebug` in [shared](../../../packages/shared/src/index.ts);
 der Decision-Episode-Vertrag unten erläutert ihre fachliche Bedeutung.

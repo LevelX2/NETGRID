@@ -217,6 +217,7 @@ import { runnerRecoveryActionContract } from "../runner/hand-development/develop
 import { runnerRecentFutureEncounterDamageSafetyAbort } from "../runner-damage-threat-assessment";
 import { runnerEconomyHandFacts } from "../runner-economy-posture";
 import { projectInternalRunnerRunActions } from "../actions/run-action-projection";
+import { runnerCentralPressureRunTracePurpose } from "../runner/central-pressure/central-pressure-plan-module";
 import type { RunnerCoverageGapSignal } from "../plans/runner-coverage-contracts";
 import { prepareRunnerHandCards } from "../runner/hand-development/hand-development-evaluation";
 import {
@@ -4231,6 +4232,18 @@ function planFirstDecisionDebug(params: {
     params.context,
     params.action,
   );
+  const selectedCentralRun =
+    selectedPlan.moduleId === "runner.pressure_central"
+      ? (params.context.domain as RunnerPlanDomain).runTargetEvaluations?.find(
+          (evaluation) => evaluation.actionId === params.action.actionId,
+        )
+      : undefined;
+  const centralRunPurpose = selectedCentralRun
+    ? runnerCentralPressureRunTracePurpose(
+        params.input,
+        selectedCentralRun.runActionProjection,
+      )
+    : undefined;
 
   return {
     ...base,
@@ -4310,7 +4323,7 @@ function planFirstDecisionDebug(params: {
       planInstanceId: params.result.route.planInstanceId,
       stepId: params.result.route.step.stepId,
       capabilityId: params.result.route.step.capability.capabilityId,
-      purpose: params.result.route.step.purpose,
+      purpose: centralRunPurpose ?? params.result.route.step.purpose,
       actionId: params.result.route.head.actionId,
       actionType: params.result.route.head.actionType,
       semanticActionType: params.result.route.head.semanticActionType,
@@ -5202,6 +5215,18 @@ function decisionFromScheduler(
           },
         ]
       : [];
+  const planFirstDecision = planFirstDecisionDebug({
+    input,
+    context,
+    result,
+    registry,
+    selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
+    action,
+    planId,
+    planKind,
+    assessmentEvidenceCodes: planEvidence,
+    ...(turnPlanningDebug ? { turnPlanningDebug } : {}),
+  });
   const detailSections =
     result.lane === "plan"
       ? [
@@ -5213,7 +5238,7 @@ function decisionFromScheduler(
               `module:${planKind ?? "unknown"}`,
               `step:${result.route.step.stepId}`,
               `capability:${result.route.step.capability.capabilityId}`,
-              `purpose:${result.route.step.purpose}`,
+              `purpose:${planFirstDecision.route?.purpose ?? result.route.step.purpose}`,
               `priority_class:${result.selectedAssessment.priorityValidation.effectiveClass}`,
               `priority_reason:${result.selectedAssessment.priorityClaim.reasonCode}`,
               `within_class_value:${result.selectedAssessment.withinClassValue}`,
@@ -5272,18 +5297,6 @@ function decisionFromScheduler(
           ...corpDrawArbitrationSection,
           ...runtimeWhyNotSection,
         ];
-  const planFirstDecision = planFirstDecisionDebug({
-    input,
-    context,
-    result,
-    registry,
-    selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
-    action,
-    planId,
-    planKind,
-    assessmentEvidenceCodes: planEvidence,
-    ...(turnPlanningDebug ? { turnPlanningDebug } : {}),
-  });
   const decisionBase = {
     reasonCode:
       result.lane === "plan"
