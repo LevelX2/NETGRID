@@ -267,19 +267,13 @@ export function selectedCorpDelayedSuccessOptionId(
   return [selectedOption.id];
 }
 
-export function residentCorpScoreChoiceBinding(
+export function selectedCorpScoreAdvancementOptionId(
   input: AiDecisionInput,
+  action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
   portfolio = residentPlanPortfolioSnapshot(input),
-): {
-  planInstanceId: string;
-  targetCardId: string;
-  move?: { sourceCardId: string; targetCardId: string; amount: number };
-  placement?: {
-    placements: Array<{ targetCardId: string; amount: number }>;
-  };
-} {
+): string {
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -308,36 +302,40 @@ export function residentCorpScoreChoiceBinding(
       ? continuation.targetCardId
       : undefined;
   const isMoveChoice = choice.source.startsWith("p3_34.move_advancement:");
-  const move =
+  const isPlacementChoice = choice.source.startsWith(
+    "p3_34.distribute_advancement:",
+  );
+  const sourceCardId = continuation?.sourceCardId;
+  const amount = continuation?.amount;
+  const moveValue =
     isMoveChoice &&
-    typeof continuation?.sourceCardId === "string" &&
-    typeof continuation.amount === "number" &&
-    Number.isInteger(continuation.amount) &&
-    continuation.amount > 0 &&
-    targetCardId !== undefined
-      ? {
-          sourceCardId: continuation.sourceCardId,
-          targetCardId,
-          amount: continuation.amount,
-        }
+    typeof sourceCardId === "string" &&
+    sourceCardId.length > 0 &&
+    !sourceCardId.includes("|") &&
+    targetCardId !== undefined &&
+    targetCardId.length > 0 &&
+    !targetCardId.includes("|") &&
+    sourceCardId !== targetCardId &&
+    typeof amount === "number" &&
+    Number.isSafeInteger(amount) &&
+    amount > 0
+      ? `${sourceCardId}|${targetCardId}|${amount}`
       : undefined;
-  const placement =
-    !isMoveChoice &&
-    Array.isArray(continuation?.placements) &&
-    continuation.placements.every(
-      (entry): entry is { targetCardId: string; amount: number } =>
-        entry !== null &&
-        typeof entry === "object" &&
-        typeof (entry as { targetCardId?: unknown }).targetCardId ===
-          "string" &&
-        typeof (entry as { amount?: unknown }).amount === "number" &&
-        Number.isInteger((entry as { amount: number }).amount) &&
-        (entry as { amount: number }).amount > 0,
-    )
-      ? { placements: continuation.placements }
-      : undefined;
+  const placementSignature = isPlacementChoice
+    ? advancementPlacementSignature(continuation?.placements)
+    : undefined;
+  const matches = selectableOptions.filter(({ value }) =>
+    moveValue !== undefined
+      ? value === moveValue
+      : placementSignature !== undefined &&
+        typeof value === "string" &&
+        value.split("|").sort().join("|") === placementSignature,
+  );
+  const optionId = matches.length === 1 ? matches[0]!.id : undefined;
+  const requirement = action.choiceRequirements?.[0];
   const exactContinuation =
-    portfolio !== undefined &&
+    input.side === "corp" &&
+    portfolio?.side === "corp" &&
     executor !== undefined &&
     moduleState?.kind === "score" &&
     typeof moduleState.signal?.agendaInstanceId === "string" &&
@@ -351,40 +349,42 @@ export function residentCorpScoreChoiceBinding(
       input.playerView.stateVersion &&
     continuation.selectedAtStateVersion === portfolio.stateVersion &&
     portfolio.stateVersion + 1 === input.playerView.stateVersion &&
+    choice.side === "corp" &&
+    choice.kind === "select_option" &&
     choice.stateVersion === input.playerView.stateVersion &&
-    targetCardId !== undefined &&
-    (move
-      ? selectableOptions.some(
-          (option) =>
-            option.value ===
-            `${move.sourceCardId}|${move.targetCardId}|${move.amount}`,
-        )
-      : placement !== undefined &&
-        selectableOptions.some((option) =>
-            advancementChoiceOptionMatchesPlacements(
-              option.value,
-              placement.placements,
-            ),
-          ));
-  if (!exactContinuation || !executor || !targetCardId) {
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    Array.isArray(requirement.optionIds);
+  if (
+    !exactContinuation ||
+    typeof optionId !== "string" ||
+    optionId.length === 0 ||
+    !requirement.optionIds.includes(optionId)
+  ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [action.actionId],
       owner: "continuation",
       removalCondition:
-        "Bind the advancement choice to the immediately preceding resident Corp score executor, selected score-conversion action and exact agenda target.",
+        "Bind the advancement choice to the preceding Corp score executor, current LegalAction and one exact selectable move or placement.",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
     });
   }
-  return {
-    planInstanceId: executor.instanceId,
-    targetCardId,
-    ...(move ? { move } : {}),
-    ...(placement ? { placement } : {}),
-  };
+  return optionId;
 }
+
 
 export function selectedCorpScoredAgendaSubtypeRevealOptionIds(
   input: AiDecisionInput,
@@ -880,22 +880,28 @@ export function residentCorpScoredAgendaHqShuffleBinding(
   return { planInstanceId: executor.instanceId, selectedOptionIds };
 }
 
-function advancementChoiceOptionMatchesPlacements(
-  value: PendingChoiceOptions[number]["value"],
-  placements: Array<{ targetCardId: string; amount: number }>,
-): boolean {
-  if (typeof value !== "string" || !value.includes(":")) return false;
-  const valueSignature = value
-    .split("|")
-    .map((placement) => {
-      const [cardId, amount] = placement.split(":");
-      return `${cardId}:${Number(amount)}`;
-    })
-    .sort()
-    .join("|");
-  const plannedSignature = placements
-    .map((placement) => `${placement.targetCardId}:${placement.amount}`)
-    .sort()
-    .join("|");
-  return valueSignature === plannedSignature;
+function advancementPlacementSignature(
+  placements: unknown,
+): string | undefined {
+  if (!Array.isArray(placements) || placements.length === 0) return undefined;
+  const targets = new Set<string>();
+  const parts: string[] = [];
+  for (const placement of placements) {
+    const targetId = placement?.targetCardId;
+    const amount = placement?.amount;
+    if (
+      typeof targetId !== "string" ||
+      targetId.length === 0 ||
+      /[|:]/.test(targetId) ||
+      targets.has(targetId) ||
+      typeof amount !== "number" ||
+      !Number.isSafeInteger(amount) ||
+      amount <= 0
+    ) {
+      return undefined;
+    }
+    targets.add(targetId);
+    parts.push(`${targetId}:${amount}`);
+  }
+  return parts.sort().join("|");
 }

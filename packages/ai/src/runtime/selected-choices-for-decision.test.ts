@@ -2411,7 +2411,7 @@ describe("selectedChoicesForDecision", () => {
     );
     const decision = selectedChoicesForDecision(
       input,
-      resolveChoiceAction(),
+      resolveChoiceActionForInput(input),
       unusedDependencies(),
     );
 
@@ -2472,6 +2472,67 @@ describe("selectedChoicesForDecision", () => {
         resolveChoiceAction(),
         unusedDependencies(),
       ),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it("selects the exact multi-target Corp advancement placement", () => {
+    const input = advancementPlacementInput([
+      { id: "malformed", label: "Invalid", value: "agenda_1:1:extra|bank_1:1" },
+      { id: "agenda_only", label: "Agenda", value: "agenda_1:1" },
+      { id: "both", label: "Both", value: "bank_1:1|agenda_1:1" },
+    ]);
+    const action = resolveChoiceActionForInput(input);
+    input.legalActions = [action];
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({ choiceId: "choice_multi", selectedOptionIds: ["both"] });
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        { ...action, expiresAtStateVersion: input.playerView.stateVersion - 1 },
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        {
+          ...action,
+          choiceRequirements: [
+            { ...action.choiceRequirements![0]!, optionIds: ["agenda_only"] },
+          ],
+        },
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it.each([
+    "agenda_1:1:extra|bank_1:1",
+    "agenda_1:01|bank_1:1",
+    "agenda_1:1|bank_1:1|",
+    "agenda_1:1|agenda_1:1",
+  ])("rejects a mismatched Corp advancement placement %s", (value) => {
+    const input = advancementPlacementInput([
+      { id: "wrong", label: "Wrong", value },
+    ]);
+    const action = resolveChoiceActionForInput(input);
+    input.legalActions = [action];
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it("rejects two equally bound Corp advancement options", () => {
+    const input = advancementPlacementInput([
+      { id: "first", label: "First", value: "agenda_1:1|bank_1:1" },
+      { id: "second", label: "Second", value: "bank_1:1|agenda_1:1" },
+    ]);
+    const action = resolveChoiceActionForInput(input);
+    input.legalActions = [action];
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
     ).toThrowError("window_origin_missing");
   });
 
@@ -2854,13 +2915,45 @@ function satelliteMonitorsChoiceInput(): AiDecisionInput {
   return input;
 }
 
+function advancementPlacementInput(
+  options: Array<{ id: string; label: string; value: string }>,
+): AiDecisionInput {
+  const input = inputWithChoice({
+    kind: "select_option",
+    source:
+      "p3_34.distribute_advancement:team_restructuring:source_1:2:up_to_distinct_targets_one_each:7",
+    continuation: {
+      family: "corp_advancement_counter",
+      originActionId: "corp.score-conversion",
+      createdAtStateVersion: 7,
+    },
+    minSelections: 1,
+    maxSelections: 1,
+    options,
+  });
+  rememberResidentScoreChoiceContinuation(
+    input,
+    "agenda_1",
+    "corp_advancement_counter",
+    {
+      placements: [
+        { targetCardId: "agenda_1", amount: 1 },
+        { targetCardId: "bank_1", amount: 1 },
+      ],
+    },
+  );
+  return input;
+}
+
 function rememberResidentScoreChoiceContinuation(
   input: AiDecisionInput,
   targetCardId: string,
   family:
     | "corp_advancement_counter"
     | "corp_scored_agenda_on_score" = "corp_advancement_counter",
-  move?: { sourceCardId: string; amount: number },
+  advancement?:
+    | { sourceCardId: string; amount: number }
+    | { placements: Array<{ targetCardId: string; amount: number }> },
   freeRezChoiceBinding?: {
     sourceCapabilityId: string;
     targetPurpose: "rez_best_defensive_ice";
@@ -2903,9 +2996,7 @@ function rememberResidentScoreChoiceContinuation(
             selectedActionId: "corp.score-conversion",
             selectedAtStateVersion: priorInput.playerView.stateVersion,
             targetCardId,
-            ...(move
-              ? { sourceCardId: move.sourceCardId, amount: move.amount }
-              : {}),
+            ...advancement,
             ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
             ...(iceMarkChoiceBinding ? { iceMarkChoiceBinding } : {}),
             ...(hqAgendaShuffleChoiceBinding

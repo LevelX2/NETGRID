@@ -47,6 +47,50 @@ describe("Score counter-bank funding resources", () => {
       scoreFundingPreservesCounterBanks(input, parent(), [], [a.actionId]),
     ).toEqual([a.actionId]);
   });
+  it.each([NaN, -1, 0.5, "1"])(
+    "rejects counter funding with malformed cost %s",
+    (cost) => {
+      const input = fixture();
+      const action = withdrawal(input);
+      action.payload!.cardImplementationAdvancementCounterCost = cost;
+      expect(() =>
+        scoreFundingPreservesCounterBanks(
+          input,
+          parent(),
+          [],
+          [action.actionId],
+        ),
+      ).toThrow(
+        expect.objectContaining({
+          code: "missing_action_semantics",
+          context: expect.objectContaining({
+            unresolvedActionIds: [expect.stringContaining(action.source)],
+          }),
+        }),
+      );
+    },
+  );
+
+  it("rejects a withdrawal without its current source binding", () => {
+    const input = fixture();
+    const action = withdrawal(input);
+    const source = action.source;
+    Reflect.deleteProperty(action, "source");
+    expect(() =>
+      scoreFundingPreservesCounterBanks(
+        input,
+        parent(),
+        [parent()],
+        [action.actionId],
+      ),
+    ).toThrow("missing_action_semantics");
+    action.source = source;
+    action.expiresAtStateVersion -= 1;
+    expect(() =>
+      scoreFundingPreservesCounterBanks(input, parent(), [], [action.actionId]),
+    ).toThrow("missing_action_semantics");
+  });
+
   it("releases an unsafe bank for funding", () => {
     const input = fixture(),
       a = withdrawal(input);

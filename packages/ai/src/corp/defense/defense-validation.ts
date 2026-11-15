@@ -33,16 +33,47 @@ export function selectedRezCostSetsEqual(
   );
   return (
     rightByInstanceId.size === right.length &&
+    new Set(left.map((cost) => cost.iceInstanceId)).size === left.length &&
     left.every((cost) => {
       const matching = rightByInstanceId.get(cost.iceInstanceId);
       return (
         matching?.iceDefinitionId === cost.iceDefinitionId &&
         matching.credits === cost.credits &&
         (matching.agendaPoints ?? 0) === (cost.agendaPoints ?? 0) &&
-        matching.source === cost.source
+        matching.source === cost.source &&
+        variableRezChoicesEqual(
+          matching.variableRezChoice,
+          cost.variableRezChoice,
+        )
       );
     })
   );
+}
+
+function variableRezChoicesEqual(left: unknown, right: unknown): boolean {
+  const leftKey = variableRezChoiceKey(left);
+  return leftKey !== undefined && leftKey === variableRezChoiceKey(right);
+}
+
+function variableRezChoiceKey(value: unknown): string | undefined {
+  if (value === undefined) return "fixed";
+  const choice = defenseRecord(value);
+  switch (choice?.kind) {
+    case "x_strength":
+      return knownNonNegativeInteger(choice.value)
+        ? `x_strength:${choice.value}`
+        : undefined;
+    case "paid_end_the_run_subroutines":
+      return knownPositiveInteger(choice.subroutineCount)
+        ? `paid_end_the_run_subroutines:${choice.subroutineCount}`
+        : undefined;
+    case "alternate_subtype": {
+      const subtypes = canonicalSubtypeArray(choice.selectedSubtypes);
+      return subtypes ? `alternate_subtype:${subtypes.join(",")}` : undefined;
+    }
+    default:
+      return undefined;
+  }
 }
 
 const POST_INSTALL_VARIABLE_REZ_FIELDS = [
@@ -411,8 +442,11 @@ export function validDefenseSignals(
   signals: readonly CorpDefenseSignal[],
   context: PlanSchedulerContext,
 ): CorpDefenseSignal[] {
-  const invalid = signals.find((signal) => !isValidDefenseSignal(signal));
-  if (!invalid) return [...signals];
+  const invalidIndex = signals.findIndex(
+    (signal) => !isValidDefenseSignal(signal),
+  );
+  if (invalidIndex === -1) return [...signals];
+  const invalid = signals[invalidIndex]!;
   throw new PlanResolutionFailure("missing_plan_module_coverage", {
     side: context.input.side,
     stateVersion: context.input.playerView.stateVersion,
@@ -421,7 +455,7 @@ export function validDefenseSignals(
     unresolvedActionIds: defenseSignalActionIds(invalid),
     owner: "plan_module",
     removalCondition: `Replace incomplete or legacy Corp defense signal ${String(
-      (invalid as { defenseId?: unknown }).defenseId ?? "unknown",
+      defenseRecord(invalid)?.defenseId ?? "unknown",
     )} with a complete discriminated defense contract.`,
   });
 }
@@ -689,7 +723,8 @@ export function validKnownInstallProjection(
         knownNonNegativeInteger(rezCost.credits) &&
         (rezCost.agendaPoints === undefined ||
           knownNonNegativeInteger(rezCost.agendaPoints)) &&
-        rezCost.source === "engine_rez_cost_quote"
+        rezCost.source === "engine_rez_cost_quote" &&
+        variableRezChoiceKey(rezCost.variableRezChoice) !== undefined
       );
     }) &&
     knownNonNegativeInteger(projection.creditsAfterDefense) &&
@@ -705,26 +740,30 @@ export function validKnownInstallProjection(
 }
 
 export function validExactIceRezRoute(value: unknown): boolean {
-  if (!value || typeof value !== "object") return false;
-  const route = value as Record<string, unknown>;
-  const quote = route.quote as Record<string, unknown> | undefined;
-  const before = route.before as Record<string, unknown> | undefined;
-  const after = route.after as Record<string, unknown> | undefined;
-  const resourceExchange = route.resourceExchange as
-    | Record<string, unknown>
-    | undefined;
+  const route = defenseRecord(value);
+  if (!route) return false;
+  const quote = defenseRecord(route.quote);
+  const before = defenseRecord(route.before);
+  const after = defenseRecord(route.after);
+  const resourceExchange = defenseRecord(route.resourceExchange);
   const hasKnownHolisticAssessment =
     before?.knowledge === "known" &&
     after?.knowledge === "known" &&
     validExactProbability(before.runnerAccessSuccessProbability) &&
     validExactProbability(after.runnerAccessSuccessProbability);
   const hasExactResourceExchange =
-    route.routeKind === "exact_resource_exchange" &&
     resourceExchange !== undefined &&
     knownNonNegativeInteger(resourceExchange.runnerRequiredCredits) &&
     knownNonNegativeInteger(resourceExchange.runnerPumpCredits) &&
     knownNonNegativeInteger(resourceExchange.runnerBreakCredits) &&
     knownNonNegativeInteger(resourceExchange.runnerBreakUses) &&
+    knownNonNegativeInteger(resourceExchange.runnerNormalCreditsRequired) &&
+    knownNonNegativeInteger(
+      resourceExchange.runnerNonNormalRunCreditsApplied,
+    ) &&
+    knownNonNegativeInteger(
+      resourceExchange.runnerNormalCreditsLostOnAccessPath,
+    ) &&
     nonEmptyString(resourceExchange.runnerBreakerInstanceId) &&
     nonEmptyString(resourceExchange.runnerBreakerDefinitionId) &&
     Array.isArray(resourceExchange.runnerConsumedCardInstanceIds) &&
@@ -749,17 +788,15 @@ export function validExactIceRezRoute(value: unknown): boolean {
               (consequence.numerator as number)
           );
         })));
-  const accessBlock = route.accessBlock as Record<string, unknown> | undefined;
+  const accessBlock = defenseRecord(route.accessBlock);
   const hasExactAccessBlock =
-    route.routeKind === "access_reduction" &&
     accessBlock !== undefined &&
     knownNonNegativeInteger(accessBlock.hardEndTheRunSubroutineCount) &&
     (accessBlock.hardEndTheRunSubroutineCount as number) > 0 &&
     (accessBlock.reason === "no_visible_eligible_breaker" ||
       accessBlock.reason === "visible_break_route_unaffordable");
-  const trace = route.traceAccessBlock as Record<string, unknown> | undefined;
+  const trace = defenseRecord(route.traceAccessBlock);
   const hasExactTraceBlock =
-    route.routeKind === "trace_access_block" &&
     trace !== undefined &&
     trace.actionId === route.actionId &&
     trace.sourceCardInstanceId === route.sourceCardInstanceId &&
@@ -776,11 +813,7 @@ export function validExactIceRezRoute(value: unknown): boolean {
     trace.corpTraceStrength > trace.maximumRunnerTraceStrength &&
     trace.runnerCanBreak === false &&
     trace.guaranteedRunEnd === true;
-  const hasExactMarginalDefenseThreat =
-    route.routeKind === "qualitative_encounter_defense" &&
-    (route.marginalDefenseThreat === "visible_agenda_remote" ||
-      route.marginalDefenseThreat === "terminal_central_access");
-  const bluff = route.bluffDefenseNeed as Record<string, unknown> | undefined;
+  const bluff = defenseRecord(route.bluffDefenseNeed);
   const hasBoundBluffDefense =
     bluff !== undefined &&
     bluff.serverId === route.targetServerId &&
@@ -793,17 +826,77 @@ export function validExactIceRezRoute(value: unknown): boolean {
     (bluff.outcome === "access_cost" ||
       bluff.outcome === "visible_stop" ||
       bluff.outcome === "paid_encounter_opportunity");
-  const currentEncounterDefense = route.currentEncounterDefense as
-    | Record<string, unknown>
-    | undefined;
+  const currentEncounterDefense = defenseRecord(route.currentEncounterDefense);
   const hasExactCurrentEncounterDefense =
-    route.routeKind === "qualitative_encounter_defense" &&
     currentEncounterDefense?.effect ===
       "meaningful_tax_or_damage_or_disruption" &&
     currentEncounterDefense.evidenceSource ===
       "visible_corp_ice_defense_profile" &&
     knownNonNegativeInteger(currentEncounterDefense.activationCredits);
+  const routeKind = route.routeKind;
+  if (
+    ((route.before !== undefined || route.after !== undefined) &&
+      !hasKnownHolisticAssessment) ||
+    (route.resourceExchange !== undefined &&
+      (routeKind !== "exact_resource_exchange" || !hasExactResourceExchange)) ||
+    (route.accessBlock !== undefined &&
+      (routeKind !== "access_reduction" || !hasExactAccessBlock)) ||
+    (route.traceAccessBlock !== undefined &&
+      (routeKind !== "trace_access_block" || !hasExactTraceBlock)) ||
+    (route.currentEncounterDefense !== undefined &&
+      (routeKind !== "qualitative_encounter_defense" ||
+        !hasExactCurrentEncounterDefense)) ||
+    (route.knownAccessPathTax !== undefined &&
+      (routeKind !== "known_access_path_tax" ||
+        !knownPositiveInteger(route.knownAccessPathTax))) ||
+    (route.bluffDefenseNeed !== undefined && !hasBoundBluffDefense) ||
+    (route.marginalDefenseThreat !== undefined &&
+      route.marginalDefenseThreat !== "visible_agenda_remote" &&
+      route.marginalDefenseThreat !== "terminal_central_access") ||
+    (route.immediateCorpCreditGain !== undefined &&
+      (!knownPositiveInteger(route.immediateCorpCreditGain) ||
+        route.totalRezCredits !== 0)) ||
+    (route.continuationRezCredits !== undefined &&
+      !knownPositiveInteger(route.continuationRezCredits))
+  ) {
+    return false;
+  }
+
+  let hasRouteEvidence: boolean;
+  switch (routeKind) {
+    case "access_reduction":
+      hasRouteEvidence = hasExactAccessBlock || hasKnownHolisticAssessment;
+      break;
+    case "exact_resource_exchange":
+      hasRouteEvidence = hasExactResourceExchange;
+      break;
+    case "trace_access_block":
+      hasRouteEvidence = hasExactTraceBlock && route.effect === "satisfied";
+      break;
+    case "qualitative_encounter_defense":
+      hasRouteEvidence = hasExactCurrentEncounterDefense;
+      break;
+    case "known_access_path_tax":
+      hasRouteEvidence =
+        hasKnownHolisticAssessment &&
+        knownPositiveInteger(route.knownAccessPathTax);
+      break;
+    case "free_persistent_defense":
+      hasRouteEvidence =
+        hasKnownHolisticAssessment && route.totalRezCredits === 0;
+      break;
+    case "costless_immediate_credit_gain":
+      hasRouteEvidence =
+        knownPositiveInteger(route.immediateCorpCreditGain) &&
+        route.totalRezCredits === 0 &&
+        route.effect === "progress";
+      break;
+    default:
+      return false;
+  }
+
   return (
+    hasRouteEvidence &&
     nonEmptyString(route.actionId) &&
     nonEmptyString(route.sourceCardInstanceId) &&
     nonEmptyString(route.sourceDefinitionId) &&
@@ -814,13 +907,6 @@ export function validExactIceRezRoute(value: unknown): boolean {
     quote.targetServerId === route.targetServerId &&
     knownNonNegativeInteger(quote.expiresAtStateVersion) &&
     knownNonNegativeInteger(quote.finalCredits) &&
-    (hasKnownHolisticAssessment ||
-      hasExactResourceExchange ||
-      hasExactAccessBlock ||
-      hasExactTraceBlock ||
-      hasBoundBluffDefense ||
-      hasExactMarginalDefenseThreat ||
-      hasExactCurrentEncounterDefense) &&
     (route.effect === "progress" || route.effect === "satisfied") &&
     knownNonNegativeInteger(route.totalRezCredits) &&
     quote.finalCredits === route.totalRezCredits
@@ -1010,7 +1096,8 @@ export function exactInstallRouteCreditCost(
 }
 
 export function defenseSignalActionIds(signal: CorpDefenseSignal): string[] {
-  const value = signal as unknown as Record<string, unknown>;
+  const value = defenseRecord(signal);
+  if (!value) return [];
   if (
     (value.kind === "score_protection_terminal_install" ||
       value.kind === "score_protection_install" ||
@@ -1028,8 +1115,9 @@ export function defenseSignalActionIds(signal: CorpDefenseSignal): string[] {
 export function isValidDefenseSignal(
   signal: CorpDefenseSignal,
 ): signal is CorpDefenseSignal {
-  const value = signal as unknown as Record<string, unknown>;
+  const value = defenseRecord(signal);
   if (
+    !value ||
     !nonEmptyString(value.defenseId) ||
     !nonEmptyString(value.serverId) ||
     !nonEmptyString(value.evidenceCode)
@@ -1123,27 +1211,7 @@ export function isValidDefenseSignal(
           value.centralPressure === "terminal" &&
           value.urgent === true
         : value.rezReserveNeed === undefined) &&
-      (value.choiceResolution === undefined ||
-        (value.phase === "resolve_rez_or_trash" &&
-          validCorpRezOrTrashChoiceResolution(value.choiceResolution, value)) ||
-        (value.phase === "resolve_hardware_trash" &&
-          validTraceHardwareTrashResolution(value.choiceResolution)) ||
-        (value.phase === "resolve_program_trash" &&
-          validProgramTrashResolution(value.choiceResolution)) ||
-        (value.phase === "resolve_install_targets" &&
-          validAgendaPurgeDefenseChoiceResolution(
-            value.choiceResolution,
-            value,
-          )) ||
-        (value.phase === "resolve_run_redirect" &&
-          validClassicDeflectorDefenseChoiceResolution(
-            value.choiceResolution,
-            value,
-          ))) &&
-      (value.phase !== "resolve_hardware_trash" ||
-        validTraceHardwareTrashResolution(value.choiceResolution)) &&
-      (value.phase !== "resolve_rez_or_trash" ||
-        validCorpRezOrTrashChoiceResolution(value.choiceResolution, value)) &&
+      validDefenseChoiceResolution(value) &&
       (value.phase !== "resolve_post_pass_ice_lifecycle" ||
         (value.sourceDefinitionIds.length === 1 &&
           Array.isArray(value.actionIds) &&
@@ -1244,6 +1312,36 @@ export function isValidDefenseSignal(
     );
   }
   return false;
+}
+
+function validDefenseChoiceResolution(
+  signal: Record<string, unknown>,
+): boolean {
+  const resolution = signal.choiceResolution;
+  switch (signal.phase) {
+    case "resolve_rez_or_trash":
+      return validCorpRezOrTrashChoiceResolution(resolution, signal);
+    case "resolve_hardware_trash":
+      return validTraceHardwareTrashResolution(resolution);
+    case "resolve_program_trash":
+      return (
+        Array.isArray(signal.actionIds) &&
+        signal.actionIds.length === 1 &&
+        validProgramTrashResolution(resolution)
+      );
+    case "resolve_install_targets":
+      return validAgendaPurgeDefenseChoiceResolution(resolution, signal);
+    case "resolve_run_redirect":
+      return validClassicDeflectorDefenseChoiceResolution(resolution, signal);
+    default:
+      return resolution === undefined;
+  }
+}
+
+function defenseRecord(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 function validTraceHardwareTrashResolution(value: unknown): boolean {

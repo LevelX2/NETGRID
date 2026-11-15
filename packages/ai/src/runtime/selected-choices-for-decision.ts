@@ -38,7 +38,7 @@ import type { CorpHandManagementSignal } from "../corp/hand-management/hand-mana
 import { isExactScoreRecoveryChoiceOwner } from "../corp/score/score-recovery-choice-owner";
 import { isExactDefenseRecoveryChoiceOwner } from "../corp/defense/defense-recovery-choice-owner";
 import {
-  residentCorpScoreChoiceBinding,
+  selectedCorpScoreAdvancementOptionId,
   residentCorpScoredAgendaHqShuffleBinding,
   selectedCorpDelayedSuccessOptionId,
   selectedCorpSatelliteMonitorsStartOptionId,
@@ -74,7 +74,6 @@ import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import type { StrategicIntentState } from "../strategic-intent-state";
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
 import { selectableChoiceOptions } from "./choice-option";
-import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
 import { corpInstalledHardwareTrashOperationProfile } from "./corp-canonical-card-facts";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "../corp/hand-management/hq-retain-payment-choice";
@@ -1021,22 +1020,16 @@ export function selectedChoicesForDecision(
       choice.source.startsWith("p3_34.distribute_advancement:") ||
       choice.source.startsWith("p3_34.move_advancement:"))
   ) {
-    const scoreBinding = residentCorpScoreChoiceBinding(
-      input,
-      choice,
-      selectableOptions,
-      currentPortfolio,
-    );
-    const selected = selectedCorpAdvancementCounterChoiceOptionId(
-      input,
-      selectableOptions,
-      scoreBinding.targetCardId,
-      undefined,
-      scoreBinding.move,
-      scoreBinding.placement,
-    );
     return resolved(
-      selected ? [selected] : [],
+      [
+        selectedCorpScoreAdvancementOptionId(
+          input,
+          action,
+          choice,
+          selectableOptions,
+          currentPortfolio,
+        ),
+      ],
       "resident_corp_score_advancement",
     );
   }

@@ -863,6 +863,14 @@ Die Ausnahme verspricht keinen sicheren Score über den Runnerzug.
 - `score-choice-continuation.ts` und `score-choice-binding.ts`: Bindung und
   Vervollständigung der ausgewählten Advancement-/Agenda-/Folge-Choices.
 
+Bei Advancement bindet `score-choice-binding.ts` die vorausgehende
+Ausführungsabsicht an die aktuelle Engine-Choice und die LegalAction
+derselben StateVersion. Der gebundene Move oder die vollständige Menge
+gebundener Placements muss zu genau einer angebotenen Option passen.
+Bei Placements darf nur die Reihenfolge der kanonischen Zielsegmente
+abweichen. Fehlende, mehrdeutige oder abweichende Optionen scheitern
+strukturiert.
+
 Die Runtime entdeckt zuerst direkte Scorevorhaben, gibt deren Reserven an
 Ambush und reicht die entdeckten Ambush-Fakten zur Score-Reconciliation zurück.
 Anschließend komponiert sie die verbleibenden Defense-, Economy- und Handbedarfe.
@@ -1378,6 +1386,10 @@ Choice-Signale, Fortsetzungen und Payload-Bindungen liegen ebenfalls hier.
 die aktuelle LegalAction, den relevanten Server, den ICE-Typ, den Punktestand
 und die exakte Quotenvariante. `defense-plan-module.ts` vergleicht die
 fachlichen Routen und trifft die Allokationsentscheidung.
+`defense-validation.ts` verlangt je Rez-Routenart ihren zugehörigen
+Nachweis und für die Programm-Trash-Phase eine konkrete Choice-Bindung.
+Die Gleichheit ausgewählter Rez-Kosten umfasst die konkrete Variante
+für Stärke, Subroutinen oder Subtypen.
 
 Die aktuelle Installationsroute bindet neben Credits auch obligatorische
 Rez-Punktkosten an die vollständige Engine-Quote, die ausgewählten ICE und
@@ -2908,7 +2920,10 @@ gewöhnlicher Liquiditätsbedarf darf ihn nicht auszahlen und danach erneut
 aufbauen. Eine höher priorisierte aktuelle Konversion darf eine fremde
 Investition freigeben, aber dieselben Counter niemals zugleich als Transfer-
 und Creditquelle beanspruchen. Unsichere, nicht anderweitig gebundene Banken
-behalten ihre Liquidationsroute.
+behalten ihre Liquidationsroute. Eine ausdrückliche Counter-Kostenangabe
+muss eine nichtnegative sichere Ganzzahl sein und zur Quellenkarte,
+Timingphase und StateVersion der aktuellen Corp-LegalAction gehören.
+Widersprüche scheitern mit einer strukturierten Regeldiagnose.
 
 Der residente Ambush-Owner beendet neue Advancement- und Support-Investitionen,
 wenn die Karte dem Runner exakt bekannt ist und die kanonische Access-Projektion

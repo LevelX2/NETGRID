@@ -11,7 +11,9 @@ Portfolioübergabe und der erste Schnitt zwischen Runtime, Diagnose und
 Runner-Owner. Die Befunde F1 und F2 unten beschreiben den Ausgangszustand
 und sind umgesetzt. Bei F3 und F5 sind die ersten Schnitte umgesetzt.
 F4 und F6 haben weiterhin offene Entscheidungen. Die zweite Stichprobe
-und ihre Prioritäten stehen am Ende dieses Dokuments.
+und ihre Prioritäten stehen am Ende dieses Dokuments. Die drei dort
+empfohlenen Corp-Vertragshärtungen sind umgesetzt. Die beschriebenen
+Gegenproben halten ihren Ausgangszustand fest.
 
 ## Gesamturteil
 
@@ -399,12 +401,19 @@ nicht beobachtet. P2 für einen einzigen exakten Parser an der
 Score-Fortsetzung und für das Entfernen der planlosen Rangfolge nach
 Prüfung ihrer restlichen Testfunktion. Abnahme über gültige Mehrfachziele,
 Move-Bindung, fehlerhafte Segmente und richtige StateVersion.
-[Optionsauflösung](../../../packages/ai/src/runtime/corp-advancement-counter-choice.ts#L22) ·
-[Parser](../../../packages/ai/src/runtime/corp-advancement-counter-choice.ts#L137) ·
-[Score-Bindung](../../../packages/ai/src/corp/score/score-choice-binding.ts#L348)
+Die alte Optionsauflösung ist entfernt. Der Score-Owner bestimmt heute
+die exakte Engine-Option in einer gemeinsamen Bindung.
+[Score-Bindung](../../../packages/ai/src/corp/score/score-choice-binding.ts#L270) ·
+[Choice-Tests](../../../packages/ai/src/runtime/selected-choices-for-decision.test.ts)
 
-Für den nächsten Umsetzungsschnitt zuerst die Defense-Validatoren mit den
-konkreten Gegenfällen absichern. Danach die beiden Corp-Eingangsgrenzen
-für Advancement und Counter-Funding korrigieren. Die Benchmarks können
-separat auf eine belastbare Ergebnisdarstellung und Laufidentität umgestellt
-werden. Die neuen Stichprobenbefunde wurden als Review dokumentiert.
+Die Corp-Vertragshärtungen bestanden 502 fokussierte Tests in 17 Dateien.
+Die beiden Vergleichsläufe mit `maintainability-1` und `maintainability-2`
+lieferten über je 160 Aktionen identische Aktions-, Zielserver-, Owner-
+und StateHash-Folgen. Die neuen Gegenproben prüfen Routenart,
+Programm-Trash-Bindung, konkrete Rez-Variante, Advancement-Optionswert
+und Counter-Funding-Eingaben.
+
+Als eigenständiger offener Dateibefund bleiben die Benchmark-Aggregation
+und die Kennung der effektiven Simulation. Die kanonischen Corp-Verträge
+enthalten die jetzt abgesicherten Regeln für Defense, Advancement und
+Counter-Funding.
