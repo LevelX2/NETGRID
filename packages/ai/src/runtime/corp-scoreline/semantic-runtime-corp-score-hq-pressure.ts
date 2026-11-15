@@ -8,7 +8,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { actionHasImmediateCreditGain } from "../../actions/action-effect-classification";
 import { semanticRuntimeCorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 import { visibleCardDefinition } from "../card-definition-lookup";
-import { rolesMatch } from "../role-match";
+import { rolesMatch } from "../../role-match";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
 import { corpKnownAgendaInventory } from "../corp-known-agenda-inventory";

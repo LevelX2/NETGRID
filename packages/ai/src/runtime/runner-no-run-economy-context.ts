@@ -6,7 +6,7 @@ import type {
 } from "@netgrid/shared";
 import { runnerNoRunEconomyCommitmentScoreComponents as buildRunnerNoRunEconomyCommitmentScoreComponents } from "./runner-economy-commitment-score";
 import { mergedPublicHistory } from "./public-event-history";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 type RunnerNoRunEconomyCommitmentStatus =
   | "inactive"

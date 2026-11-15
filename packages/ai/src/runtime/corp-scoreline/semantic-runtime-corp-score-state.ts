@@ -6,7 +6,7 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { visibleCardDefinition } from "../card-definition-lookup";
-import { rolesMatch } from "../role-match";
+import { rolesMatch } from "../../role-match";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import { corpKnownAgendaInventory } from "../corp-known-agenda-inventory";
 import { semanticRuntimeCorpBoardTriage } from "../semantic-runtime-corp-board-triage";

@@ -13,7 +13,8 @@ und sind umgesetzt. Bei F3 und F5 sind die ersten Schnitte umgesetzt.
 F4 und F6 haben weiterhin offene Entscheidungen. Die zweite Stichprobe
 und ihre Prioritäten stehen am Ende dieses Dokuments. Die drei dort
 empfohlenen Corp-Vertragshärtungen sind umgesetzt. Die beschriebenen
-Gegenproben halten ihren Ausgangszustand fest.
+Gegenproben halten ihren Ausgangszustand fest. Die kleinen Folgeänderungen
+am Benchmark, am Rollenabgleich und an den taktischen Typen sind umgesetzt.
 
 ## Gesamturteil
 
@@ -124,20 +125,16 @@ ersten Defense-Schnitt.
 [Defense-Modul](../../../packages/ai/src/corp/defense/defense-plan-module.ts#L812) · [Zweckgebundener Schutzbedarf](../../architecture/ai/corp-plan-contracts.md#ownership-zwischen-score-remote-und-defense) · [Coverage-Phasen](../../../packages/ai/src/runner/rig-coverage/coverage-plan-module.ts#L330)
 
 **P3 · F6 · Erreichbarkeit und Live-Bedarf fallen bei älteren Exporten auseinander.**
-Statischer Befund. Der Reachability-Check verwendet veröffentlichte Paketexporte
-als Wurzeln. Er findet im aktuellen Bestand keine als ungenutzt
-klassifizierten Dateien. Die öffentlich exportierte taktische Portfolio-API
-trägt jedoch ein anderes Typmodell und einen zweiten Speicher neben dem
-residenten Portfolio. Die Checkpoint-Hilfen lesen und restaurieren beide. Im
-untersuchten aktuellen Entscheidungspfad gibt es für den älteren Speicher
-keinen regulären Schreiber. Maßnahme aktuelle Test-/Tool-Consumer pro Export
-nachweisen. Bei einer Entfernung die Checkpoint-Evidence bewusst auf ihre
-aktuelle Funktion prüfen. In der Strukturprüfung zwischen durch Export
-erreichbarem Code und vom tatsächlichen Entscheidungsablauf genutztem Code
-unterscheiden. Abnahme über gleiche Produktentscheidung und Replay-Bindung
-sowie den dokumentierten Verwendungsnachweis der verbleibenden API. Aufwand
-1–2 Tage für das Inventar.
-[Wurzelbildung](../../../scripts/audit-ai-source-reachability.mjs#L53) · [Exports](../../../packages/ai/src/index.ts#L522) · [Checkpoint-Consumer](../../../packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts#L37)
+Der Reachability-Check verwendet Paketexporte als Wurzeln. Das taktische
+Portfolio besitzt ein eigenes Typmodell und einen zweiten Speicher neben dem
+residenten Portfolio. Der produktive Entscheidungsablauf schreibt in das
+residente Portfolio. Die ältere Oberfläche wird im Portfoliotest sowie bei
+Export und Restore von Entscheidungs-Checkpoints verwendet. 243 eingecheckte
+JSON-Artefakte enthalten die Schema-ID `plan-portfolio-v1`, darunter weiterhin
+genutzte Regressionsevidenz. Die drei gemeinsamen Typen tragen jetzt einen
+taktischen Namen. Eine weitergehende Ablösung erfordert die Einzelprüfung
+der Nachweise und gegebenenfalls native Regressionstests für dieselben Fälle.
+[Wurzelbildung](../../../scripts/audit-ai-source-reachability.mjs#L53) · [Portfoliotests](../../../packages/ai/src/plans/plan-portfolio.test.ts) · [Checkpoint-Consumer](../../../packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts#L37)
 
 ## Verantwortungsbereiche
 
@@ -211,14 +208,11 @@ ersten fünf zulässigen Treffer einer zufälligen Reihenfolge der 984 Dateien.
    [Signal](../../../packages/ai/src/corp/defense/program-trash-signal.ts#L15) · [Resolver](../../../packages/ai/src/runtime/corp-program-trash-choice.ts#L12) · [Ranking-Test](../../../packages/ai/src/runtime/corp-program-trash-choice.test.ts)
 3. [role-match.ts](../../../packages/ai/src/role-match.ts)
    · **Kleine, weitgehend gute Utility.** Exakte Tokens, Präfixe und mehrteilige
-   Rollen sind mit Gegenfällen getestet. Beide Token-Caches sind begrenzt. Ein
-   `Set` je Einzelwortvergleich ist für eine Mitgliedschaftsabfrage unnötig und
-   kann durch `tokens.includes(needle)` ersetzt werden, wenn sich dieser Pfad
-   in einer Messung lohnt. Die größere Auffindbarkeitsfrage ist der zweite
-   Importpfad über den reinen Re-Export `runtime/role-match.ts`. Vier Dateien
-   importieren die Quelle direkt und 62 den Re-Export. Eine neutrale kanonische
-   Adresse erst mit Aktualisierung des Exportvertrags festlegen. Es existiert
-   genau eine Implementierung. [Matcher](../../../packages/ai/src/role-match.ts#L21) · [Re-Export](../../../packages/ai/src/runtime/role-match.ts) · [Tests](../../../packages/ai/src/runtime/role-match.test.ts)
+   Rollen sind mit Gegenfällen getestet. Beide Token-Caches sind begrenzt.
+   Alle Aufrufer verwenden jetzt die gemeinsame private Quelldatei. Der
+   Exportvertrag schützt diesen Pfad und der reine Runtime-Re-Export ist
+   entfernt. Der mögliche Wechsel von `Set` zu `includes` bleibt eine
+   Messfrage. [Matcher](../../../packages/ai/src/role-match.ts) · [Tests](../../../packages/ai/src/role-match.test.ts)
 4. [punish-route-quote-input.ts](../../../packages/ai/src/corp/punish/punish-route-quote-input.ts)
    · **Sinnvolle Quote-Grenze mit Fehlerbehandlungsbedarf.** Sichtbare Quellen
    werden fachlich klassifiziert und als begrenzte Anfrage an die Engine gegeben.
@@ -230,14 +224,12 @@ ersten fünf zulässigen Treffer einer zufälligen Reihenfolge der 984 Dateien.
    Anfragen und Antwortverarbeitung eigene Funktionsgrenzen brauchen. Die
    begrenzte Kandidatensuche ist eine Vorschau, deren Ergebnisse allein keine
    Ausführung autorisieren. [Anfragen](../../../packages/ai/src/corp/punish/punish-route-quote-input.ts#L100) · [Begrenzte Kombinationen](../../../packages/ai/src/corp/punish/punish-route-quote-input.ts#L481) · [Antwortbindung](../../../packages/ai/src/corp/punish/punish-route-quote-input.ts#L623)
-5. [plan-contract-types.ts](../../../packages/ai/src/plans/plan-contract-types.ts)
-   · **Saubere Typdatei mit historisch unscharfem Namen.** Die drei Typen
-   beschreiben taktische Kategorien, Steps und Ziele. Der allgemeine Dateiname
-   lässt den heutigen gemeinsamen Live-Vertrag erwarten. Die einzigen direkten
-   Consumer sind `tactical-plan-types.ts` und `plan-portfolio-types.ts`. F6
-   entscheidet, ob die Oberfläche erhalten bleibt und enger benannt wird.
-   Die IDs in die aktuellen Owner-IDs umzudeuten würde zwei unterschiedliche
-   Rollen des Codes vermengen. [Taktisches Portfolio](../../../packages/ai/src/plans/plan-portfolio-types.ts#L34) · [Live-Planmodulvertrag](../../../packages/ai/src/plans/plan-scheduler.ts#L97)
+5. [tactical-plan-contract-types.ts](../../../packages/ai/src/plans/tactical-plan-contract-types.ts)
+   · **Die Bezeichnung präzisiert die Zuständigkeit.** Die gemeinsame
+   Typdatei beschreibt taktische Kategorien, Steps und Ziele. Sie wird vom
+   taktischen Plan und von der taktischen Portfolioprojektion importiert.
+   Gespeicherte Typkennungen bleiben an die jeweiligen Checkpoints gebunden.
+   [Taktisches Portfolio](../../../packages/ai/src/plans/plan-portfolio-types.ts#L34) · [Live-Planmodulvertrag](../../../packages/ai/src/plans/plan-scheduler.ts#L97)
 
 ## Abnahme der ersten Prüfung
 
@@ -315,12 +307,9 @@ eine lesbare Anzeige. Gleiche IDs ergeben für gespeicherte und eingefrorene
 Snapshots bewusst denselben Text. Der Slot-Runner übernimmt das Label auch
 bei ausstehenden oder abgewiesenen Decks und verwendet den Resolver mit der
 vollen Referenz für den tatsächlichen Benchmark. `slotId` bleibt ein eigenes
-Feld. Ein fehlender neuer Variantenzweig würde unter dem strikten Typecheck
-auffallen, sobald der lokale Eingabetyp erweitert wird. Dieser Eingabetyp
-wiederholt allerdings den Diskriminator und Teile der kanonischen Union.
-Wenn eine weitere Referenzfamilie hinzukommt, wäre die kanonische Union als
-Parameter die kleinere und besser überprüfbare Lösung. Abnahme über gleiche
-Labels für alle bestehenden Slotarten. [Formatter](../../../packages/ai/src/simulation/benchmark-deck-reference-label.ts#L1) ·
+Feld. Der Formatter verwendet jetzt die kanonische Referenzunion. Der
+Typecheck prüft bei Erweiterungen unmittelbar die Vollständigkeit der
+Variantenzweige. [Formatter](../../../packages/ai/src/simulation/benchmark-deck-reference-label.ts) ·
 [Kanonische Typen](../../../packages/ai/src/simulation/benchmark-deck-types.ts#L38) ·
 [Verbraucher](../../../packages/ai/src/simulation/benchmark-deck-slot-runner.ts#L17)
 
@@ -377,14 +366,14 @@ Seed bei `maxActions: 1` hat dieselbe `simulationId`, obwohl die beiden
 Läufe unterschiedliche Grenzen und Rohresultate besitzen. Zudem fließen
 `runtime_failure`-Ergebnisse in den Nenner, erscheinen jedoch in keinem
 eigenen Ergebnisanteil. Replayfehler und Rohsummaries bleiben sichtbar.
-Aktionen und Nenner getrennt berechnen. Die Kennung sollte an eine
-kanonische effektive Konfiguration gebunden sein. Technische Ausgänge
-explizit ausweisen und die Auswirkung auf das Quality Gate prüfen. Abnahme
-mit Null-Aktionen, zwei unterschiedlichen Konfigurationen und einem
-gemischten Satz regulärer und technischer Ergebnisse.
-[Berechnung](../../../packages/ai/src/simulation/simulation-profile-run.ts#L60) ·
-[Ergebniskennung](../../../packages/ai/src/simulation/simulation-profile-run.ts#L89) ·
-[Quality Gate](../../../packages/ai/src/simulation/simulation-quality-gate.ts#L57)
+Die Korrektur hält die Aktionssumme unverändert und berechnet Raten mit
+eigenen Nennern. Die Kennung verwendet die geordnete Seedliste und die
+effektive Spiel- und Regressionseinstellung. Technische Ausgänge erhalten
+einen eigenen Ergebnisanteil. Das Quality Gate erkennt eine Zunahme auch
+bei intaktem Replay.
+[Berechnung und Kennung](../../../packages/ai/src/simulation/simulation-profile-run.ts) ·
+[Quality Gate](../../../packages/ai/src/simulation/simulation-quality-gate.ts) ·
+[Regressionstests](../../../packages/ai/src/simulation/simulation-quality-gate.test.ts)
 
 ### `corp-advancement-counter-choice.ts`
 
@@ -413,7 +402,12 @@ und StateHash-Folgen. Die neuen Gegenproben prüfen Routenart,
 Programm-Trash-Bindung, konkrete Rez-Variante, Advancement-Optionswert
 und Counter-Funding-Eingaben.
 
-Als eigenständiger offener Dateibefund bleiben die Benchmark-Aggregation
-und die Kennung der effektiven Simulation. Die kanonischen Corp-Verträge
-enthalten die jetzt abgesicherten Regeln für Defense, Advancement und
-Counter-Funding.
+Die kanonischen Corp-Verträge enthalten die abgesicherten Regeln für
+Defense, Advancement und Counter-Funding. Die
+[Simulationstestmatrix](../../architecture/ai/simulation-test-matrix.md#benchmarkprofile)
+enthält den Vertrag für Benchmark-Kennung und Ergebnisanteile.
+
+Die Folgeänderungen bestanden 85 fokussierte Tests in zehn Dateien.
+Darunter sind Grenzfälle für Laufkennungen und technische Abbrüche, die
+fünf Deckreferenzarten, Rollenabgleich, Portfolios und das Live-Engine-Gate
+des Standardmodus.

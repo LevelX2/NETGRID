@@ -7,7 +7,7 @@ import type {
 
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import { decisionDerivedValue } from "./decision-derived-cache";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 export type CorpCentralServerId = "hq" | "rd";
 

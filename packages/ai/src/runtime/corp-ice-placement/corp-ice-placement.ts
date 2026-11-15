@@ -6,7 +6,7 @@ import {
 } from "@netgrid/shared";
 
 import { createAiHintsByCard, RUNTIME_CARDS } from "../../ai-hints";
-import { rolesMatch } from "../role-match";
+import { rolesMatch } from "../../role-match";
 
 export type CorpIceCostFact =
   | {

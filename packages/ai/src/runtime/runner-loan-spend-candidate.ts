@@ -1,7 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { RunnerLoanSpendCandidateKind } from "./runner-loan-projected-spend";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 export type RunnerLoanSpendCandidateKindDependencies = {
   cardAddressesVisibleBreakerNeed: (

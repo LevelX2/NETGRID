@@ -1,7 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import type { AiDeckStrategyProfile } from "../../deck-doctrine-strategy";
-import { rolesMatch } from "../../runtime/role-match";
+import { rolesMatch } from "../../role-match";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerInstalledCardLiquidationChoiceSignal } from "./economy-types";
 import { installedMemorySurplusQuote } from "./installed-memory-surplus";

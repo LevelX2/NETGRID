@@ -4,7 +4,7 @@ import {
   cardIdHasGeneratedCardSpecAiHint,
   RUNTIME_CARDS,
 } from "./ai-hints";
-import { rolesMatch } from "./runtime/role-match";
+import { rolesMatch } from "./role-match";
 
 export function deckDoctrineCardIsAiSupported(cardId: string): boolean {
   return RUNTIME_CARDS[cardId]?.statuses.ai_supported === true;

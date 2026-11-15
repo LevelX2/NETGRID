@@ -7,7 +7,7 @@ import type {
 } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
-import { rolesMatch } from "./runtime/role-match";
+import { rolesMatch } from "./role-match";
 import {
   estimateBreakerCostProfileFromOntology,
   getStructuredBreakerProfileForCard,

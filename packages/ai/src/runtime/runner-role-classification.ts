@@ -1,4 +1,4 @@
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 export function isRunnerEconomyRole(role: string): boolean {
   return rolesMatch([role], ["economy", "tempo"]);

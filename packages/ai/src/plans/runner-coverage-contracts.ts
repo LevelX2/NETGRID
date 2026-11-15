@@ -1,4 +1,4 @@
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 
 export type RunnerCoverageGapSignal = {
   gapId: string;

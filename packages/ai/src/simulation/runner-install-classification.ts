@@ -4,7 +4,7 @@ import {
   isRunnerNonAdditiveUtilityRole,
   isRunnerPressureRole,
 } from "../runtime/runner-role-classification";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 
 type RunnerInstallClassificationDependencies = {
   sourceDefinitionIdForAction: (

@@ -4,7 +4,7 @@ import {
   rolesHaveBreakerRole,
   rolesHaveUnmatchedBreakerRole,
 } from "../../runtime/breaker-role-match";
-import { rolesMatch } from "../../runtime/role-match";
+import { rolesMatch } from "../../role-match";
 import { shellTradersTargetValue } from "./shell-traders-action";
 
 type PendingChoice = NonNullable<

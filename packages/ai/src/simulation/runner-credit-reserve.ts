@@ -1,5 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import {
   assessKnownRezzedIcePath,

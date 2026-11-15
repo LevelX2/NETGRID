@@ -1,7 +1,7 @@
 # AI Simulation Test Matrix
 
 Status: active_current
-Stand: 2026-11-07
+Stand: 2026-11-15
 
 ## Evidenzstufen
 
@@ -76,6 +76,18 @@ Karte oder einen bestimmten Zielserver als Produktregel fest.
   Verhaltensgates bleibt zusätzlich erforderlich.
 - `packages/ai/src/simulation/simulation-harness.test.ts` prüft zusätzlich zum
   Golden Seed drei verschiedene deterministische Live-Verläufe.
+
+## Benchmarkprofile
+
+Die `simulationId` identifiziert die geordnete Seedliste und die effektive
+Konfiguration eines Profils. In den SHA-256-Fingerprint gehen die
+Controllerprofile, die Deckbindung, die Spielgrenzen und beim
+`current_candidate` die gebundenen Einstellungen der Regressionstestfälle
+ein. Zum Vergleich verschiedener Quellstände gehört zusätzlich der Commit.
+Die mittlere Aktionszahl ist bei
+einem Lauf ohne Aktionen null. Der Ergebnisanteil `runtime_failure` macht
+technische Abbrüche sichtbar. Eine höhere technische Abbruchrate lässt das
+Quality Gate auch bei intaktem Replay scheitern.
 
 ## Vergleichsevidenz und Standardmodus
 

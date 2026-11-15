@@ -19,7 +19,7 @@ import {
   createRunnerViral15JackOutContext,
   type RunnerViral15JackOutContextDependencies,
 } from "./runner-viral15-jack-out-context";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 type RunnerDevelopmentCardDefinition = {
   title?: string;

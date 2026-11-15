@@ -4,7 +4,7 @@ import {
   centralServerId,
   type CentralServerId,
 } from "../runtime/server-target";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
 import type {
   BestTrueCentralCloseoutProfile,

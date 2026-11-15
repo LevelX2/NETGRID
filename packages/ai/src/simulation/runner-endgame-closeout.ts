@@ -1,5 +1,5 @@
 import { hasEvidenceFlag } from "../runtime/evidence-value";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 
 export type RunnerEndgameCloseoutWindowSummary = {

@@ -21,7 +21,7 @@ import {
   type RunnerRigDemandProviderInput,
   type RunnerRigRoleDemandInput,
 } from "../runner/rig-demand/runner-rig-demand-projection";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import { strategicSupportDemands } from "../runner/hand-development/strategic-support-development";
 import { minimumCreditFloorForPersistentInstall } from "../runner/hand-development/runner-persistent-install-evaluation";
 

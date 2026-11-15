@@ -8,7 +8,7 @@ import {
 import { discardCurrentPlanKind } from "./discard-plan";
 import { sortedUnique } from "./collection";
 import { matchingBreakerRoleNeedles } from "./breaker-role-match";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import { createAiHintsByCard } from "../ai-hints";
 import {
   runnerHintProvidesExposeInformation,

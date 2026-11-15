@@ -1,7 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { icebreakerAbilitiesForDefinition } from "@netgrid/engine";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 type KnownPathAssessment = {
   assessedKnownIceCount: number;

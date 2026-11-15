@@ -33,7 +33,7 @@ import { rolesHaveBreakerRole } from "../../runtime/breaker-role-match";
 
 import { mergedPublicHistory } from "../../runtime/public-event-history";
 
-import { rolesMatch } from "../../runtime/role-match";
+import { rolesMatch } from "../../role-match";
 
 import {
   runnerCentralPayoffServer,

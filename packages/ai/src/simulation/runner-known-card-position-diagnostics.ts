@@ -1,7 +1,7 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import { reconstructBeliefState } from "../belief-state";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { isLowValueKnownAccessCard } from "../runtime/runner-low-value-known-access-card";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import {

@@ -5,7 +5,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import { createAiHintsByCard } from "../ai-hints";
 import {
   buildCorpIceCardFacts,

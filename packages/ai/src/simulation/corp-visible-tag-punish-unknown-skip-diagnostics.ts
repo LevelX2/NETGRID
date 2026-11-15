@@ -9,7 +9,7 @@ import type {
   CorpTagPunishUnknownSkipPlausibility,
   CorpVisibleTagPayoffCategory,
 } from "../runtime/corp-tag-punish-types";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-taken-diagnostics";
 

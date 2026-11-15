@@ -5,7 +5,7 @@ import type {
 } from "@netgrid/shared";
 import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 type CorpScoreTerminalWindowLike = {
   terminalWindow: boolean;

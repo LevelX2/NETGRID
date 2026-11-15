@@ -11,7 +11,7 @@ import { corpCurrentRunAccessServerId } from "../../corp/defense/corp-central-de
 import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import { createAiHintsByCard } from "../../ai-hints";
-import { rolesMatch } from "../role-match";
+import { rolesMatch } from "../../role-match";
 import {
   candidateRequiresSuccessfulTrace,
   traceActionLeavesImmediatePunishWindow,

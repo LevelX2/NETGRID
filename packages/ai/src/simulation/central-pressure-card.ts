@@ -1,6 +1,6 @@
 import { createAiHintsByCard } from "../ai-hints";
 import { cardRolesForId } from "../runtime/card-role-lookup";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { isRunnerPressureRole } from "../runtime/runner-role-classification";
 import type { CentralServerId } from "../runtime/server-target";
 import { sortedUnique } from "../runtime/collection";

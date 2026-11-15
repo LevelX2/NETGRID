@@ -9,7 +9,7 @@ import type {
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import { rolesHaveBreakerRole } from "../../runtime/breaker-role-match";
-import { rolesMatch } from "../../runtime/role-match";
+import { rolesMatch } from "../../role-match";
 import { nonNegativeActionCreditCost as legalActionCreditCost } from "../../runtime/action-cost";
 import {
   runnerNoRunRecurringEconomyProfile,

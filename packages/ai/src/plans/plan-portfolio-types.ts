@@ -3,7 +3,7 @@ import type {
   PlanStepKind,
   PlanTarget,
   TacticalPlanType,
-} from "./plan-contract-types";
+} from "./tactical-plan-contract-types";
 import type { CreditDemand } from "./credit-demand";
 import type { FundingRoute } from "./funding-route";
 import type { ActionDemand } from "./action-demand";

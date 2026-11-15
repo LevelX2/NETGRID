@@ -8,7 +8,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { classifyTagSourceFromOntology } from "../tag-punish-ontology-consumer";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type CorpTagCreationDiagnosticsDependencies = {

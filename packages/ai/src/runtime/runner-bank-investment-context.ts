@@ -9,7 +9,7 @@ import { planPortfolioTurnKey } from "../plans/plan-portfolio";
 import { runnerBankInvestmentCommitmentScoreComponents as buildRunnerBankInvestmentCommitmentScoreComponents } from "./runner-economy-commitment-score";
 import type { RunnerHandFundingTarget } from "./runner-hand-funding-target";
 import { mergedPublicHistory } from "./public-event-history";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import { runnerHqSuccessWindowSetupAssessment } from "./runner-start-run-score";
 import { exactBankCashOutPayout } from "../actions/action-economy-projection";
 

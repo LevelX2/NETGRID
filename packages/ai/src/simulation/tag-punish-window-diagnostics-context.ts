@@ -7,7 +7,7 @@ import type {
 
 import { corpTagPunishSkipReason } from "../runtime/corp-tag-punish-skip-reason";
 import { sortedUnique } from "../runtime/collection";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { traceTagExpectedSuccessEstimate } from "../runtime/trace-tag-success-estimate";
 import type { StructuredTagPunishLegalActionAssessment } from "../tag-punish-ontology-consumer";
 import type { AiSimulationSummary } from "./ai-simulation-summary";

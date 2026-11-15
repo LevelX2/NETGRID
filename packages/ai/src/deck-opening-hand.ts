@@ -6,7 +6,7 @@ import {
   deckDoctrineRoleIsIce,
   rolesForDeckDoctrineCard,
 } from "./deck-doctrine-card-roles";
-import { rolesMatch } from "./runtime/role-match";
+import { rolesMatch } from "./role-match";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 

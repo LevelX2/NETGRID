@@ -1,5 +1,5 @@
 import { rolesHaveBreakerRole } from "../../runtime/breaker-role-match";
-import { rolesMatch } from "../../runtime/role-match";
+import { rolesMatch } from "../../role-match";
 
 export function shellTradersTargetValue(
   roles: string[],

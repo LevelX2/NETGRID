@@ -1,7 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { rolesHaveBreakerRole } from "./breaker-role-match";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 export type ProgramSacrificeCategory = "critical" | "high" | "medium" | "low";
 

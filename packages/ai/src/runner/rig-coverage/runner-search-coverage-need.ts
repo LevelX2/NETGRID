@@ -7,7 +7,7 @@ import {
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../../visible-run-analysis";
-import { rolesMatch } from "../../runtime/role-match";
+import { rolesMatch } from "../../role-match";
 
 export type RunnerVisibleSearchCoverageNeed = {
   readonly requiredCoverage: RequiredCapabilityKind;

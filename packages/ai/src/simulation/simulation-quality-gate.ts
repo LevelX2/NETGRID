@@ -25,6 +25,7 @@ export type AiSimulationQualityGateResult = {
     winRate: number;
     fallbackRate: number;
     timeoutRate: number;
+    runtimeFailureRate: number;
     illegalActions: number;
     replayFailures: number;
   };
@@ -59,6 +60,8 @@ export function evaluateSimulationQualityGate(
   candidate: AiSimulationRunResult,
   baseline: AiSimulationRunResult,
 ): AiSimulationQualityGateResult {
+  const runtimeFailureRateDelta =
+    runtimeFailureRate(candidate) - runtimeFailureRate(baseline);
   const holdoutDelta = {
     winRate: round(
       (candidate.winRates.runner ?? 0) - (baseline.winRates.runner ?? 0),
@@ -68,13 +71,15 @@ export function evaluateSimulationQualityGate(
       candidate.timeouts / Math.max(candidate.games, 1) -
         baseline.timeouts / Math.max(baseline.games, 1),
     ),
+    runtimeFailureRate: runtimeFailureRateDelta,
     illegalActions: candidate.illegalActions - baseline.illegalActions,
     replayFailures: candidate.replayFailures - baseline.replayFailures,
   };
   const hardRegression =
     holdoutDelta.illegalActions > 0 ||
     holdoutDelta.replayFailures > 0 ||
-    holdoutDelta.timeoutRate > 0;
+    holdoutDelta.timeoutRate > 0 ||
+    runtimeFailureRateDelta > 0;
   if (hardRegression) {
     return {
       accepted: false,
@@ -93,4 +98,11 @@ export function evaluateSimulationQualityGate(
       ? "holdout_improved_or_stable"
       : "tradeoff_review_required",
   };
+}
+
+function runtimeFailureRate(result: AiSimulationRunResult): number {
+  const failures = result.summaries.filter(
+    ({ terminationKind }) => terminationKind === "runtime_failure",
+  ).length;
+  return failures / Math.max(result.games, 1);
 }

@@ -5,7 +5,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import { iceHasEndTheRun } from "../visible-run-analysis";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";

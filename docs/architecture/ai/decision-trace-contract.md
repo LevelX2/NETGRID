@@ -1,7 +1,7 @@
 # KI-Entscheidungslog-Vertrag
 
 Status: aktueller Architekturvertrag.  
-Stand: 2026-09-10
+Stand: 2026-11-15
 
 Dieser Vertrag beschreibt, wie NETGRID KI-Entscheidungen lokal nachvollziehbar macht, ohne die bestehenden Engine-, Replay-, Hidden-Info- und Observability-Grenzen aufzuweichen. Er gibt keine Karten frei und ändert keine Regelentscheidung.
 
@@ -230,6 +230,11 @@ sein. Quelle, Entscheidungsindex und Lease-StateVersion gehören zum Nachweis.
 Ein Commitment wird nicht pauschal entfernt, um eine gewünschte Wahl zu
 erzwingen. Der vollständige Originalseed bleibt die Kontrolle der normalen
 Runtime-Fortschreibung.
+
+Das optionale Feld `planPortfolio` enthält taktische Plankategorien und
+Schritte für gespeicherte Regressionsevidenz. Der produktive Planablauf
+bindet seine Planinstanzen über `residentPlanPortfolio`. Die beiden Felder
+werden beim Checkpoint-Restore mit ihren jeweiligen Typverträgen geladen.
 
 ### Kompakter Checkpoint-Input
 

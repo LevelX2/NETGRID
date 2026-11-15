@@ -1,5 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import {
   runnerRunPathCreditBudgetWithVisiblePools,
   type KnownRezzedIcePathAssessment,

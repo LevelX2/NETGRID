@@ -181,7 +181,7 @@ describe("AI public export contract", () => {
       "./runtime/simulation-action-event",
       "./runtime/stable-hash",
       "./runtime/choice-option",
-      "./runtime/role-match",
+      "./role-match",
       "./runtime/semantic-runtime-choice-builder",
       "./runtime/semantic-runtime-choice-builder-context",
       "./runtime/semantic-runtime-action-exclusion",

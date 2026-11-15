@@ -7,7 +7,7 @@ import {
   remoteRoleIsScoringProtectionKind,
 } from "../remote-role-ontology-consumer";
 import { cardRolesForId } from "../runtime/card-role-lookup";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 
 export type RemoteTrashRole =

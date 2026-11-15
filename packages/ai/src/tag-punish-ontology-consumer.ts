@@ -6,7 +6,7 @@ import type {
   KnownHintConditionKind,
   KnownHintEffectKind,
 } from "./hint-ontology";
-import { rolesMatch } from "./runtime/role-match";
+import { rolesMatch } from "./role-match";
 
 const AI_HINTS = createAiHintsByCard();
 

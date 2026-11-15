@@ -5,7 +5,7 @@ import {
 } from "@netgrid/shared";
 
 import { remoteTrashCostBucket } from "../runtime/remote-trash-cost";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import {
   isRunnerEconomyRole,
   isRunnerPressureRole,

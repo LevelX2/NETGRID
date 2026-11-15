@@ -1,6 +1,6 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 export function discardPlanFitBonus(

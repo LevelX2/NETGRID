@@ -18,7 +18,7 @@ import type {
   PlanStepKind,
   PlanTarget,
   TacticalPlanType,
-} from "./plan-contract-types";
+} from "./tactical-plan-contract-types";
 import type {
   PlanActionContributionScore,
   PlanPortfolioSnapshot,
@@ -32,7 +32,7 @@ export type {
   PlanStepKind,
   PlanTarget,
   TacticalPlanType,
-} from "./plan-contract-types";
+} from "./tactical-plan-contract-types";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
 

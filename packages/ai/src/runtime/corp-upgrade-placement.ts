@@ -8,7 +8,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { createAiHintsByCard } from "../ai-hints";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { corpSameFortAgendaDiscountProfiles } from "./corp-canonical-card-facts";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];

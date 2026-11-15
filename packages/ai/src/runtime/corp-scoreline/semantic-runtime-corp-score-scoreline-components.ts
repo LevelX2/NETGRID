@@ -9,7 +9,7 @@ import {
   semanticRuntimeCorpBoardTriage,
   type CorpBoardTriage,
 } from "../semantic-runtime-corp-board-triage";
-import { rolesMatch } from "../role-match";
+import { rolesMatch } from "../../role-match";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
 import { bestCorpSameTurnScoreConversionPath } from "../../plans/tactical-plan-corp-score-conversion";

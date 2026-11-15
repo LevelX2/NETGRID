@@ -11,7 +11,7 @@ import {
   corpRegionReplacementComponent,
   corpUpgradeInstallPlacementComponent,
 } from "../corp-upgrade-placement";
-import { rolesMatch } from "../role-match";
+import { rolesMatch } from "../../role-match";
 import type { SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score-contracts";
 import { corpConditionalScoreEconomyComponent } from "./semantic-runtime-corp-score-conditional-economy";
 import {

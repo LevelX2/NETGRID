@@ -6,7 +6,7 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { actionHasImmediateCreditGain } from "../../actions/action-effect-classification";
-import { rolesMatch } from "../role-match";
+import { rolesMatch } from "../../role-match";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import {
   visibleBreakerCardCanAddressIce,

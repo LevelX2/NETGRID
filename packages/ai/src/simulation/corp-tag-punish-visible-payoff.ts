@@ -1,7 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 
 type AiCardHintWithSignals = AiCardHint & { tacticSignals?: string[] };

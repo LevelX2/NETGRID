@@ -6,7 +6,7 @@ import {
 } from "../tag-punish-ontology-consumer";
 import { corpPunishKindFromOntologyPayoff } from "../runtime/tag-punish-payoff-mapping";
 import type { CorpPunishKind } from "../runtime/corp-tag-punish-types";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 
 export type CorpTagPunishActionContextDependencies = {
   sourceDefinitionIdForAction: (

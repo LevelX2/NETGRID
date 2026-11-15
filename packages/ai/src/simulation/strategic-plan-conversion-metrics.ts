@@ -1,6 +1,6 @@
 import type { Side } from "@netgrid/shared";
 import { hasEvidenceFlag } from "../runtime/evidence-value";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";

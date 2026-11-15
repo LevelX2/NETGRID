@@ -9,7 +9,7 @@ import type { TacticalGoalLike } from "../../decision/semantic-decision-frame";
 import { actionProvidesCredits } from "../../actions/action-effect-classification";
 import { scoreEconomyAction } from "../../economy/economy-action-score";
 import { visibleCardDefinition } from "../card-definition-lookup";
-import { rolesMatch } from "../role-match";
+import { rolesMatch } from "../../role-match";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
 import {
   type CorpBurstEconomyOperation,

@@ -4,7 +4,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 export function isRunnerProgramInstallActionForMuPressure(
   action: LegalAction,
