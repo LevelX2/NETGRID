@@ -1,10 +1,103 @@
-import { describe, expect, it } from "vitest";
-import type { AiDecisionInput } from "@netgrid/shared";
+import { describe, expect, it, vi } from "vitest";
+import {
+  ORIGINALSET_DEFAULT_DECKS,
+  type AiDecisionInput,
+} from "@netgrid/shared";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+} from "@netgrid/engine";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
+import { buildAiDecisionInput } from "../runtime/ai-decision-input";
+import { buildCorpScoringRemoteDiscovery } from "../corp/scoring-remote/scoring-remote-discovery";
 import type { RemoteDoctrineProfile } from "../remote-doctrine-profile";
 import { buildCorpScoringRemoteProjectSignals } from "../corp/scoring-remote/scoring-remote-signals";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 
 describe("resident Corp scoring remote project", () => {
+  it.each([
+    ["classic_blind", "blocked", "payload_ready"],
+    ["modern_open", "reachable", "harden_to_protection_target"],
+  ] as const)(
+    "quotes the real Remote Rex path in %s",
+    (traceRulesProfile, accessStatus, phase) => {
+      const agenda = "onr_v1_207_netwatch-operations-office";
+      const rex = "onr_v1_264_rex";
+      const deck = ORIGINALSET_DEFAULT_DECKS.corp;
+      const corpDeck = {
+        ...deck,
+        cards: [
+          ...deck.cards.filter(({ id }) => id !== agenda && id !== rex),
+          { id: agenda, quantity: 1 },
+          { id: rex, quantity: 1 },
+        ],
+      };
+      const setup = createGameAfterSetup({
+        seed: "remote-rex-trace-profile",
+        traceRulesProfile,
+        corpDeck,
+        runnerDeck: ORIGINALSET_DEFAULT_DECKS.runner,
+      });
+      const draw = getLegalActions(setup, "corp").find(
+        (action) => action.type === "mandatory_draw",
+      )!;
+      const opening = applyAction(setup, {
+        matchId: setup.matchId,
+        side: "corp",
+        actionId: draw.actionId,
+        clientKnownStateVersion: setup.stateVersion,
+      });
+      if (!opening.ok) throw new Error(opening.error.message);
+      const state = opening.state;
+      state.turnSerial = 8;
+      state.corp.servers.push({
+        id: "remote_1",
+        kind: "remote",
+        label: "Remote 1",
+        ice: [],
+        root: [],
+      });
+      RealEngineFixtureBuilder.forState(state)
+        .withCorpCardInHq(agenda)
+        .withRezzedCorpIceOnServer("remote_1", rex)
+        .withCorpCredits(1)
+        .withRunnerCredits(5);
+      const currentInput = {
+        ...buildAiDecisionInput(state, "corp", {
+          ownDeckSnapshot: {
+            deckSnapshotId: corpDeck.id,
+            side: "corp",
+            cards: corpDeck.cards.map(({ id, quantity }) => ({
+              cardId: id,
+              quantity,
+            })),
+          },
+        }),
+        ownRemoteDoctrineProfile: doctrine({ protectionTarget: "glacier" }),
+      };
+      const { playerView } = currentInput;
+      expect(playerView.traceRulesProfile).toBe(traceRulesProfile);
+      const [signal] = buildCorpScoringRemoteDiscovery({
+        input: currentInput,
+        previous: undefined,
+        scoreProjects: [],
+        ambushes: [],
+        availableRemoteRezCredits: 1,
+      });
+      expect(signal).toMatchObject({
+        projectId: "strategic-score-remote",
+        serverId: "remote_1",
+        phase,
+        maturity: {
+          knowledge: "known",
+          observedAtStateVersion: playerView.stateVersion,
+          fundedPath: { accessStatus },
+          stagedPath: { accessStatus },
+        },
+      });
+    },
+  );
   it("rebinds the executed TurnPlanner defense install and consumes its cadence once", () => {
     const { currentInput, previous } = executedRemoteInstall();
     const [signal] = buildCorpScoringRemoteProjectSignals({
@@ -12,7 +105,7 @@ describe("resident Corp scoring remote project", () => {
       previous,
       remoteDoctrine: doctrine(),
       scoreProjects: [],
-      maturityByServerId: new Map(),
+      assessMaturityForServer: () => undefined,
     });
     expect(signal).toMatchObject({
       serverId: "remote_2",
@@ -43,7 +136,7 @@ describe("resident Corp scoring remote project", () => {
       previous,
       remoteDoctrine: doctrine(),
       scoreProjects: [],
-      maturityByServerId: new Map(),
+      assessMaturityForServer: () => undefined,
     });
     expect(signal).toMatchObject({
       serverId: "new_remote",
@@ -56,40 +149,59 @@ describe("resident Corp scoring remote project", () => {
     ["no protection", doctrine({ protectionTarget: "none" })],
     ["no cadence", doctrine({ backgroundActionsPerTurn: 0 })],
     ["no score purpose", doctrine({ purposes: ["asset_economy"] })],
-  ])("does not admit %s", (_name, remoteDoctrine) => {
+  ])("does not quote a remote with %s", (_name, remoteDoctrine) => {
+    const assessMaturityForServer = vi.fn();
     expect(
       buildCorpScoringRemoteProjectSignals({
         input: input(),
         remoteDoctrine,
         scoreProjects: [],
-        maturityByServerId: new Map(),
+        assessMaturityForServer,
       }),
     ).toEqual([]);
+    expect(assessMaturityForServer).not.toHaveBeenCalled();
+  });
+
+  it("does not quote a resident remote during the opening", () => {
+    const currentInput = input();
+    currentInput.playerView.turnSerial = 4;
+    const assessMaturityForServer = vi.fn();
+    expect(
+      buildCorpScoringRemoteProjectSignals({
+        input: currentInput,
+        remoteDoctrine: doctrine(),
+        scoreProjects: [],
+        assessMaturityForServer,
+      }),
+    ).toEqual([]);
+    expect(assessMaturityForServer).not.toHaveBeenCalled();
   });
 
   it("re-emits one stable prebuild project and prefers a partially built empty remote", () => {
-    const signals = buildCorpScoringRemoteProjectSignals({
-      input: input(),
-      remoteDoctrine: doctrine(),
-      scoreProjects: [],
-      maturityByServerId: new Map([
-        [
-          "remote_2",
-          {
-            knowledge: "known",
+    const assessMaturityForServer = vi.fn((serverId: string) =>
+      serverId === "remote_2"
+        ? {
+            knowledge: "known" as const,
             observedAtStateVersion: 10,
-            policyVersion: "corp-remote-protection-v1",
+            policyVersion: "corp-remote-protection-v1" as const,
             fundedPath: pathQuote(),
             stagedPath: pathQuote(),
-            targetBand: "taxing",
+            targetBand: "taxing" as const,
             fundedTargetReached: false,
             stagedTargetReached: false,
             selectedFundedRezIceIds: [],
             minimumSatisfyingStagedIceIds: [],
-          },
-        ],
-      ]),
+          }
+        : undefined,
+    );
+    const signals = buildCorpScoringRemoteProjectSignals({
+      input: input(),
+      remoteDoctrine: doctrine(),
+      scoreProjects: [],
+      assessMaturityForServer,
     });
+    expect(assessMaturityForServer).toHaveBeenCalledTimes(1);
+    expect(assessMaturityForServer).toHaveBeenCalledWith("remote_2", "taxing");
     expect(signals).toHaveLength(1);
     expect(signals[0]).toMatchObject({
       projectId: "strategic-score-remote",
@@ -123,7 +235,8 @@ describe("resident Corp scoring remote project", () => {
           feasible: true,
         },
       ],
-      maturityByServerId: new Map([["remote_2", ready]]),
+      assessMaturityForServer: (serverId) =>
+        serverId === "remote_2" ? ready : undefined,
     });
     expect(signal?.phase).toBe("leased_to_score_project");
     expect(signal?.need).toBeUndefined();
@@ -148,7 +261,7 @@ describe("resident Corp scoring remote project", () => {
           feasible: false,
         },
       ],
-      maturityByServerId: new Map(),
+      assessMaturityForServer: () => undefined,
     });
 
     expect(signal).toMatchObject({
@@ -175,7 +288,7 @@ describe("resident Corp scoring remote project", () => {
           feasible: false,
         },
       ],
-      maturityByServerId: new Map(),
+      assessMaturityForServer: () => undefined,
     });
 
     expect(signal).toMatchObject({
@@ -212,7 +325,7 @@ describe("resident Corp scoring remote project", () => {
       input: input(),
       remoteDoctrine: doctrine({ buildTiming: "on_demand" }),
       scoreProjects: [scoreProject(10)],
-      maturityByServerId: new Map(),
+      assessMaturityForServer: () => undefined,
     });
     const nextInput = input();
     nextInput.playerView.stateVersion = 11;
@@ -236,7 +349,7 @@ describe("resident Corp scoring remote project", () => {
       previous,
       remoteDoctrine: doctrine({ buildTiming: "on_demand" }),
       scoreProjects: [scoreProject(11)],
-      maturityByServerId: new Map(),
+      assessMaturityForServer: () => undefined,
     });
 
     expect(second?.target.targetBindingRevision).toBe(

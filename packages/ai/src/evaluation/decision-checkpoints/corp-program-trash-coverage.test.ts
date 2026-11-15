@@ -5,6 +5,7 @@ import {
   ORIGINALSET_DEFAULT_DECKS,
   type GameState,
   type LegalAction,
+  type TraceRulesProfile,
 } from "@netgrid/shared";
 import {
   createGameAfterSetup,
@@ -21,7 +22,69 @@ import { buildAiDecisionInput, chooseCorpAction } from "../../index";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { selectedCorpProgramTrashChoiceOptionIds } from "../../runtime/corp-program-trash-choice";
 
+const REX = "onr_v1_264_rex";
+const RAPTOR = "onr_v1_054_raptor";
+
 afterEach(resetResidentPlanPortfolioMemory);
+
+// Marionette accounts for one lost response in both profiles. Rex adds one in Classic.
+it.each([
+  ["classic_blind", 2],
+  ["modern_open", 1],
+] as const)(
+  "prices Raptor's native Rex coverage in %s",
+  (traceRulesProfile, lostAffordableIce) => {
+    const state = choiceState({ rexTraceProfile: traceRulesProfile });
+    const input = corpInput(state);
+    const rig = input.playerView.opponent.rig!;
+    const raptor = rig.find((card) => card.definitionId === RAPTOR)!;
+    const action = input.legalActions[0]!;
+    const choice = input.playerView.pendingChoice!;
+    expect(input.playerView.traceRulesProfile).toBe(traceRulesProfile);
+    expect(input.playerView.own.credits).toBe(1);
+    expect(input.playerView.opponent.credits).toBe(5);
+    expect(choice.options).toHaveLength(2);
+    expect(
+      programTrashCoverageLosses(input, rig).get(raptor.instanceId),
+    ).toEqual({
+      lostAffordableIce,
+      additionalCredits: 0,
+    });
+
+    const decision = chooseCorpAction(input);
+    expect(decision).toMatchObject({
+      actionId: action.actionId,
+      fallbackUsed: false,
+      selectedChoices: { choiceId: choice.choiceId },
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          route: { actionId: action.actionId },
+        },
+      },
+    });
+    if (traceRulesProfile === "classic_blind") {
+      expect(selectedTarget(input, decision)).toBe(raptor.instanceId);
+      const applied = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: action.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        selectedChoices: decision.selectedChoices!,
+      });
+      if (!applied.ok) throw new Error(applied.error.message);
+      expect(applied.state.runner.rig.programs).not.toContain(
+        raptor.instanceId,
+      );
+      const replay = replayEvents(state, [applied.event]);
+      expect(replay.ok).toBe(true);
+      expect(hashGameState(replay.state)).toBe(hashGameState(applied.state));
+    }
+  },
+);
 
 it("destroys the sole affordable Wall response and applies the exact Defense choice deterministically", () => {
   const initial = choiceState();
@@ -187,21 +250,25 @@ function choiceState(
     krash?: boolean;
     unrezzedWall?: boolean;
     credits?: number;
+    rexTraceProfile?: TraceRulesProfile;
   } = {},
 ): GameState {
   const corp = [
     "onr_proteus_029_marionette",
-    "onr_v1_238_data-wall-2-0",
+    options.rexTraceProfile ? REX : "onr_v1_238_data-wall-2-0",
     "onr_v1_247_haunting-inquisition",
   ];
   const runner = [
     "onr_v1_074_worm",
-    "onr_v1_016_cyfermaster",
+    options.rexTraceProfile ? RAPTOR : "onr_v1_016_cyfermaster",
     "onr_v1_021_dwarf",
     "onr_v1_039_krash",
   ];
   let state = createGameAfterSetup({
     seed: "program-trash-coverage",
+    ...(options.rexTraceProfile
+      ? { traceRulesProfile: options.rexTraceProfile }
+      : {}),
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
@@ -223,9 +290,9 @@ function choiceState(
   });
   state = applyMatching(state, (a) => a.type === "mandatory_draw");
   const marionette = putCorpIceOnServer(state, "hq", corp[0]!);
-  const wall = putCorpIceOnServer(state, "rd", corp[1]!);
-  state.cardInstances[wall]!.rezzed = !options.unrezzedWall;
-  state.cardInstances[wall]!.faceup = !options.unrezzedWall;
+  const coverageIce = putCorpIceOnServer(state, "rd", corp[1]!);
+  state.cardInstances[coverageIce]!.rezzed = !options.unrezzedWall;
+  state.cardInstances[coverageIce]!.faceup = !options.unrezzedWall;
   if (options.gate) {
     const gate = putCorpIceOnServer(state, "archives", corp[2]!);
     state.cardInstances[gate]!.rezzed = true;
@@ -235,8 +302,8 @@ function choiceState(
   installRunnerProgramForTest(state, runner[1]!);
   if (options.dwarf) installRunnerProgramForTest(state, runner[2]!);
   if (options.krash) installRunnerProgramForTest(state, runner[3]!);
-  state.runner.credits = options.credits ?? 6;
-  state.corp.credits = 20;
+  state.runner.credits = options.rexTraceProfile ? 5 : (options.credits ?? 6);
+  state.corp.credits = options.rexTraceProfile ? 4 : 20;
   state.corp.clicks = 0;
   state = applyMatching(state, (a) => a.type === "end_turn");
   state = applyMatching(

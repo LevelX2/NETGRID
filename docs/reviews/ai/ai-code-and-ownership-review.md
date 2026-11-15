@@ -1101,3 +1101,21 @@ Zuerst den gemeinsamen Trace-Kontext für Defense und Scoring Remote
 absichern. Danach sind die Hint-Grenze, der Run-Ursprung und die
 Baseline-Kennzahl jeweils eigenständig testbar. Die kleineren
 Wartbarkeitsänderungen können jeweils im zugehörigen Pfad folgen.
+
+### Umsetzung der Punkte 2 und 10
+
+Programm-Trash und Remote-Reife reichen das Trace-Profil der aktuellen
+Corp-Spielersicht an den gemeinsamen Run-Pfaddienst durch. Der native
+Classic-Fall zählt den Verlust von Raptor gegen Rex zusätzlich zur
+verlorenen Marionette-Antwort und prüft die Defense-Choice bis zum
+deterministischen Replay. Modern bleibt als Gegenprobe abgedeckt. Die
+Remote-Discovery qualifiziert das reale Rex-Fort im Classic-Fall als
+`payload_ready` und im Modern-Fall als `harden_to_protection_target`.
+Die Schutzquote wird nach der bestehenden Zulassung und Zielbindung
+ausschließlich für das gewählte Fort angefordert. Die Tests belegen
+null Aufrufe bei gesperrter Doctrine oder während der Eröffnung und
+genau einen Aufruf für das ausgewählte Remote.
+
+Die thematische Prüfung umfasst 623 bestandene Tests in 15 Dateien. Die
+beiden direkt geänderten Testdateien wurden im endgültigen Stand mit
+29 bestandenen Tests geprüft.

@@ -27,7 +27,10 @@ export function buildCorpScoringRemoteProjectSignals(
     remoteDoctrine?: RemoteDoctrineProfile;
     scoreProjects: readonly ScoreConsumer[];
     remoteOccupancyClaims?: readonly CorpRemoteOccupancyClaim[];
-    maturityByServerId: ReadonlyMap<string, CorpRemoteMaturityAssessment>;
+    assessMaturityForServer: (
+      serverId: string,
+      targetBand: RemoteDoctrineProfile["protectionTarget"],
+    ) => CorpRemoteMaturityAssessment | undefined;
   }>,
 ): CorpRemoteProjectSignal[] {
   const doctrine =
@@ -35,6 +38,7 @@ export function buildCorpScoringRemoteProjectSignals(
     (params.input as AiDecisionInputWithDeckCapabilities)
       .ownRemoteDoctrineProfile;
   if (
+    !doctrine ||
     !remoteDoctrineAllowsResidentScoreRemote(doctrine, params.scoreProjects)
   ) {
     return [];
@@ -93,7 +97,7 @@ export function buildCorpScoringRemoteProjectSignals(
     (previousSignal?.target.targetBindingRevision ?? 0) +
     (bindingChanged ? 1 : 0);
   const maturity =
-    params.maturityByServerId.get(targetServerId) ??
+    params.assessMaturityForServer(targetServerId, doctrine.protectionTarget) ??
     ({
       knowledge: "unknown",
       observedAtStateVersion: params.input.playerView.stateVersion,
@@ -129,7 +133,7 @@ export function buildCorpScoringRemoteProjectSignals(
     params.input,
     params.previous,
     previousSignal,
-    doctrine!.investmentBudget.backgroundActionsPerTurn,
+    doctrine.investmentBudget.backgroundActionsPerTurn,
   );
   const need = remoteNeed({
     phase,
@@ -144,16 +148,16 @@ export function buildCorpScoringRemoteProjectSignals(
     {
       projectId: STRATEGIC_SCORE_REMOTE_PROJECT_ID,
       purpose: "scoring_remote",
-      purposes: [...doctrine!.purposes],
+      purposes: [...doctrine.purposes],
       target: {
         status: targetStatus,
         serverId: targetServerId,
         targetBindingRevision,
       },
       serverId: targetServerId,
-      protectionTarget: doctrine!.protectionTarget,
-      buildTiming: doctrine!.buildTiming,
-      targetRecoveryTurns: doctrine!.investmentBudget.targetRecoveryTurns,
+      protectionTarget: doctrine.protectionTarget,
+      buildTiming: doctrine.buildTiming,
+      targetRecoveryTurns: doctrine.investmentBudget.targetRecoveryTurns,
       phase,
       maturity,
       ...(need ? { need } : {}),

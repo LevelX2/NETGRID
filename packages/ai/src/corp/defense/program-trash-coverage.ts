@@ -12,6 +12,7 @@ export function programTrashCoverageLosses(
   input: AiDecisionInput,
   targets: readonly VisibleCard[],
 ): Map<string, CoverageLoss> {
+  const { traceRulesProfile } = input.playerView;
   const rig = input.playerView.opponent.rig ?? [];
   const losses = new Map(
     targets.map((card) => [
@@ -49,7 +50,10 @@ export function programTrashCoverageLosses(
           ),
           server.root,
           input.playerView.own.credits,
-          { targetServerId: server.id },
+          {
+            targetServerId: server.id,
+            ...(traceRulesProfile !== undefined ? { traceRulesProfile } : {}),
+          },
         );
       const before = assess(rig);
       // Conditional/special routes do not prove a coverage loss. Never promote
