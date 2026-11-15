@@ -4155,6 +4155,12 @@ Fakten. Fremde Runs, Server, Executor, Choices oder Ereignislücken erlauben
 keine Ursprungsübernahme. Paarung 570/R3/G38 prüft zwei Gebote sechs und
 die Chiba-Auszahlung erst vor der zweiten Zahlung samt Engine-Replay.
 
+Die klassische Blind-Trace-Bewertung verwendet nur auswählbare Gebote
+der aktuellen Engine-Choice. Die Engine projiziert den Subroutinenindex
+für die sichtbare, tatsächlich auslösende Begegnungsquelle. Bei direktem
+Schaden stimmen Priorität und Mindest-Link auf dieselbe Flatline-Grenze
+ab. Der Schaden muss die Anzahl der Handkarten überschreiten.
+
 Eine Trace außerhalb eines Runs erhält bei ihrer verpflichtenden Gebotswahl
 den Ursprung `rules` / `rules.window_resolution`. Die exakt gebundene
 Choice, ihre angebotenen Optionen, die Trace-ID und die aktuelle StateVersion

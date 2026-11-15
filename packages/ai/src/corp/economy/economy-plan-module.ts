@@ -33,7 +33,11 @@ import {
   economyMaterialization,
   immediateCorpLiquidCreditGain,
 } from "./economy-routes";
-import { CorpEconomyNeedSignal } from "./economy-types";
+import type {
+  CorpEconomyDevelopmentSignal,
+  CorpEconomyNeedSignal,
+  CorpEconomyParentFundingSignal,
+} from "./economy-types";
 import { corpHostedBankCycleForParentFunding } from "./hosted-credit-bank-cycle";
 import { corpFreeRezPayoutPreparation } from "./free-rez-payout-preparation";
 
@@ -184,55 +188,12 @@ function validatedEconomyNeeds(
     const hasMilestoneContract =
       expectedMilestone !== undefined ||
       signal.scoreFundingMilestone !== undefined;
-    const validFundingActions = new Set(
-      context.actionCandidates
-        .filter(immediateCorpLiquidCreditGain)
-        .map((candidate) => candidate.actionId),
+    const validFundingActions = currentParentFundingActions(
+      context,
+      signal,
+      currentDomain,
     );
-    if (signal.hostedCreditBankCycle) {
-      const current = corpHostedBankCycleForParentFunding(
-        context.input,
-        context.actionCandidates,
-        signal,
-        signal.incrementalDefenseReserve &&
-          signal.hostedCreditBankCycle.currentCredits +
-            signal.hostedCreditBankCycle.netLiquidCreditGain <
-            signal.incrementalDefenseReserve.targetCredits
-          ? corpTacticalPlanDomain<CorpPlanDomain>(context)
-          : undefined,
-      );
-      if (
-        current &&
-        JSON.stringify(current) ===
-          JSON.stringify(signal.hostedCreditBankCycle) &&
-        JSON.stringify(current) ===
-          JSON.stringify(signal.fundingRouteAssessment?.hostedCreditBankCycle)
-      )
-        validFundingActions.add(current.actionId);
-    }
-    if (signal.freeRezPayoutPreparation) {
-      const current = corpFreeRezPayoutPreparation(
-        context.input,
-        context.actionCandidates,
-        signal,
-        signal.freeRezPayoutPreparation.basicFundingActionId,
-        currentDomain.economyNeeds.filter(
-          (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
-            s.kind === "develop_campaign",
-        ),
-      );
-      if (
-        !current ||
-        JSON.stringify(current) !==
-          JSON.stringify(signal.freeRezPayoutPreparation) ||
-        JSON.stringify(current) !==
-          JSON.stringify(
-            signal.fundingRouteAssessment?.freeRezPayoutPreparation,
-          )
-      )
-        return true;
-      validFundingActions.add(current.actionId);
-    }
+    if (!validFundingActions) return true;
     const validFundingRouteBinding =
       signal.actionIds.length > 0
         ? signal.actionIds.every((actionId) =>
@@ -481,55 +442,12 @@ function validatedEconomyNeeds(
         economyCandidates(context, signal).length === 0
       );
     }
-    const validFundingActions = new Set(
-      context.actionCandidates
-        .filter(immediateCorpLiquidCreditGain)
-        .map((candidate) => candidate.actionId),
+    const validFundingActions = currentParentFundingActions(
+      context,
+      signal,
+      currentDomain,
     );
-    if (signal.hostedCreditBankCycle) {
-      const current = corpHostedBankCycleForParentFunding(
-        context.input,
-        context.actionCandidates,
-        signal,
-        signal.incrementalDefenseReserve &&
-          signal.hostedCreditBankCycle.currentCredits +
-            signal.hostedCreditBankCycle.netLiquidCreditGain <
-            signal.incrementalDefenseReserve.targetCredits
-          ? corpTacticalPlanDomain<CorpPlanDomain>(context)
-          : undefined,
-      );
-      if (
-        current &&
-        JSON.stringify(current) ===
-          JSON.stringify(signal.hostedCreditBankCycle) &&
-        JSON.stringify(current) ===
-          JSON.stringify(signal.fundingRouteAssessment?.hostedCreditBankCycle)
-      )
-        validFundingActions.add(current.actionId);
-    }
-    if (signal.freeRezPayoutPreparation) {
-      const current = corpFreeRezPayoutPreparation(
-        context.input,
-        context.actionCandidates,
-        signal,
-        signal.freeRezPayoutPreparation.basicFundingActionId,
-        currentDomain.economyNeeds.filter(
-          (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
-            s.kind === "develop_campaign",
-        ),
-      );
-      if (
-        !current ||
-        JSON.stringify(current) !==
-          JSON.stringify(signal.freeRezPayoutPreparation) ||
-        JSON.stringify(current) !==
-          JSON.stringify(
-            signal.fundingRouteAssessment?.freeRezPayoutPreparation,
-          )
-      )
-        return true;
-      validFundingActions.add(current.actionId);
-    }
+    if (!validFundingActions) return true;
     const requirement = parentNeed
       ? genericDefenseFundingRequirement(
           parentNeed,
@@ -594,6 +512,56 @@ function validatedEconomyNeeds(
     });
   }
   return currentDomain;
+}
+
+function currentParentFundingActions(
+  context: PlanSchedulerContext,
+  signal: CorpEconomyParentFundingSignal,
+  currentDomain: CorpCorePlanDomain,
+): Set<string> | undefined {
+  const validFundingActions = new Set(
+    context.actionCandidates
+      .filter(immediateCorpLiquidCreditGain)
+      .map((candidate) => candidate.actionId),
+  );
+  const { hostedCreditBankCycle, freeRezPayoutPreparation } =
+    signal.fundingRouteAssessment ?? {};
+  if (hostedCreditBankCycle) {
+    const current = corpHostedBankCycleForParentFunding(
+      context.input,
+      context.actionCandidates,
+      signal,
+      signal.incrementalDefenseReserve &&
+        hostedCreditBankCycle.currentCredits +
+          hostedCreditBankCycle.netLiquidCreditGain <
+          signal.incrementalDefenseReserve.targetCredits
+        ? corpTacticalPlanDomain<CorpPlanDomain>(context)
+        : undefined,
+    );
+    if (
+      current &&
+      JSON.stringify(current) === JSON.stringify(hostedCreditBankCycle)
+    )
+      validFundingActions.add(current.actionId);
+  }
+  if (freeRezPayoutPreparation) {
+    const current = corpFreeRezPayoutPreparation(
+      context.input,
+      context.actionCandidates,
+      signal,
+      freeRezPayoutPreparation.basicFundingActionId,
+      currentDomain.economyNeeds.filter(
+        (s): s is CorpEconomyDevelopmentSignal => s.kind === "develop_campaign",
+      ),
+    );
+    if (
+      !current ||
+      JSON.stringify(current) !== JSON.stringify(freeRezPayoutPreparation)
+    )
+      return undefined;
+    validFundingActions.add(current.actionId);
+  }
+  return validFundingActions;
 }
 
 export function corpEconomyPriorityClass(

@@ -290,3 +290,23 @@ function actionAlternative(
     ...overrides,
   };
 }
+
+it("keeps distinct snapshot file names when a long scenario prefix is truncated", () => {
+  const base = {
+    category: "promote_to_real_engine_corpus" as const,
+    scenarioHint: "runner-run-same-".repeat(12),
+    evidence: [],
+  };
+  const entries = [
+    { ...base, snapshotId: "snapshot:a" },
+    { ...base, snapshotId: "snapshot_a" },
+  ];
+  const forward = formatSelfplayPromotionActivityCandidates(entries);
+  const reversed = formatSelfplayPromotionActivityCandidates(
+    [...entries].reverse(),
+  );
+  expect(new Set(forward.map(({ fileName }) => fileName)).size).toBe(2);
+  expect(reversed.map(({ fileName }) => fileName)).toEqual(
+    forward.map(({ fileName }) => fileName).reverse(),
+  );
+});

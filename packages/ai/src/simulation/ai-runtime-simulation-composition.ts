@@ -44,8 +44,7 @@ type RuntimeRunnerSupportDependencyKeys =
   | "programInstallTrashAssessmentForAction"
   | "riskAssessment"
   | "runnerMultiRunEventExclusion"
-  | "runnerRunTargetEvaluationForAction"
-  | "viral15JackOutScoreComponent";
+  | "runnerRunTargetEvaluationForAction";
 
 type AiContextDiagnosticsOutputs = ReturnType<
   typeof createAiContextDiagnosticsComposition

@@ -30,7 +30,6 @@ import {
   corpProtectedEmptyRemoteTagSourcePlacementIsPreferred,
   corpStrategicFundingPhaseBlocksPreparation,
   corpTraceSupportTargetHasVisibleTraceSource,
-  visibleTagPayoffConversionIsAffordable,
 } from "./punish-preparation";
 import {
   PUNISH_PAYOFF_CAMPAIGN_ID,
@@ -46,21 +45,12 @@ export function punishSignals(
   scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpPunishCampaignSignal[] {
   const quoted = quotedPunishSignals(input, candidates, previous);
-  const legacyRoots = mergeStableLegacyPunishRoots(
-    legacyPunishSignals(
+  const preparationAndTrash = mergeStablePunishRoots(
+    preparationAndResourceTrashSignals(
       input,
       candidates,
       scorelineFeasibility,
       corpReservedScoreServerIds(input, scoreProjects),
-    ).filter(
-      (signal) =>
-        signal.phase === "prepare" ||
-        signal.evidenceCode.startsWith(
-          "corp_tagged_runner_visible_resource_trash",
-        ) ||
-        signal.evidenceCode.startsWith(
-          "corp_tagged_runner_visible_credit_bank_trash",
-        ),
     ),
   );
   if (
@@ -70,9 +60,9 @@ export function punishSignals(
         signal.routeContract?.horizon === "fund",
     )
   )
-    return [...quoted, ...legacyRoots];
+    return [...quoted, ...preparationAndTrash];
   const need = corpPunishDevelopmentDrawNeed(input, candidates);
-  if (!need) return [...quoted, ...legacyRoots];
+  if (!need) return [...quoted, ...preparationAndTrash];
   const development: CorpPunishCampaignSignal = {
     campaignId: PUNISH_PAYOFF_CAMPAIGN_ID,
     phase: "assemble_components",
@@ -96,11 +86,11 @@ export function punishSignals(
   return [
     development,
     ...quoted.filter((signal) => signal.campaignId !== development.campaignId),
-    ...legacyRoots,
+    ...preparationAndTrash,
   ];
 }
 
-function mergeStableLegacyPunishRoots(
+function mergeStablePunishRoots(
   signals: readonly CorpPunishCampaignSignal[],
 ): CorpPunishCampaignSignal[] {
   const merged = new Map<string, CorpPunishCampaignSignal>();
@@ -258,10 +248,20 @@ function selectQuotedPunishSignal(
   routes: readonly CorpPunishRouteQuote[],
 ): CorpPunishCampaignSignal | undefined {
   return routes
-    .map((route) => ({
-      route,
-      signal: quotedPunishSignal(input, candidates, campaignId, route),
-    }))
+    .map((route) => {
+      const opportunity = assessQuotedPunishOpportunity(route);
+      return {
+        route,
+        opportunity,
+        signal: quotedPunishSignal(
+          input,
+          candidates,
+          campaignId,
+          route,
+          opportunity,
+        ),
+      };
+    })
     .sort((left, right) => {
       const readinessOrder =
         quotedPunishSignalReadinessRank(left.signal) -
@@ -272,7 +272,7 @@ function selectQuotedPunishSignal(
         quotedPunishHorizonRank(right.signal.routeContract?.horizon);
       return horizonOrder !== 0
         ? horizonOrder
-        : compareQuotedPunishRoutes(left.route, right.route);
+        : compareQuotedPunishRoutes(left, right);
     })[0]?.signal;
 }
 
@@ -289,7 +289,7 @@ function quotedPunishHorizonRank(
   return horizon === "execute" ? 0 : horizon === "fund" ? 1 : 2;
 }
 
-export type QuotedPunishOpportunityAssessment = {
+type QuotedPunishOpportunityAssessment = {
   disposition: "opportunity" | "watch";
   priorityClass: "P1" | "P3" | "P4" | "P5";
   value: number;
@@ -297,7 +297,7 @@ export type QuotedPunishOpportunityAssessment = {
   evidenceCode: string;
 };
 
-export const QUOTED_PUNISH_PRIORITY_RANK = {
+const QUOTED_PUNISH_PRIORITY_RANK = {
   P1: 1,
   P3: 3,
   P4: 4,
@@ -519,11 +519,21 @@ function assessQuotedPunishOpportunity(
 }
 
 function compareQuotedPunishRoutes(
-  left: CorpPunishRouteQuote,
-  right: CorpPunishRouteQuote,
+  {
+    route: left,
+    opportunity: leftAssessment,
+  }: {
+    route: CorpPunishRouteQuote;
+    opportunity: QuotedPunishOpportunityAssessment;
+  },
+  {
+    route: right,
+    opportunity: rightAssessment,
+  }: {
+    route: CorpPunishRouteQuote;
+    opportunity: QuotedPunishOpportunityAssessment;
+  },
 ): number {
-  const leftAssessment = assessQuotedPunishOpportunity(left);
-  const rightAssessment = assessQuotedPunishOpportunity(right);
   const priorityOrder =
     QUOTED_PUNISH_PRIORITY_RANK[leftAssessment.priorityClass] -
     QUOTED_PUNISH_PRIORITY_RANK[rightAssessment.priorityClass];
@@ -548,9 +558,9 @@ function quotedPunishSignal(
   candidates: readonly ActionSemanticCandidate[],
   campaignId: string,
   route: CorpPunishRouteQuote,
+  opportunity: QuotedPunishOpportunityAssessment,
 ): CorpPunishCampaignSignal {
   const head = route.steps[0]!;
-  const opportunity = assessQuotedPunishOpportunity(route);
   const actionable = opportunity.disposition === "opportunity";
   const headActionId = head.currentLegalAction?.actionId;
   const headCandidate = headActionId
@@ -706,22 +716,28 @@ function punishPhaseForQuotedHead(
   return "kill";
 }
 
-function legacyPunishSignals(
+function preparationAndResourceTrashSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
   reservedScoreServerIds: ReadonlySet<string>,
 ): CorpPunishCampaignSignal[] {
+  const runnerTagged = input.playerView.opponent.tags > 0;
+  const visibleTagSource = [...visibleOwnDefinitionIds(input)].some(
+    (definitionId) =>
+      getStructuredTagPunishProfileForCard(definitionId)?.tagSource === true ||
+      corpDefinitionIsTraceSource(definitionId),
+  );
   return candidates.flatMap((candidate): CorpPunishCampaignSignal[] => {
     if (corpCandidateIsAmbushInstall(candidate)) return [];
     const legalAction = input.legalActions.find(
       (action) => action.actionId === candidate.actionId,
     );
+    if (!legalAction || !actionIsCurrentlyAffordable(input, legalAction))
+      return [];
     if (
       candidate.semanticActionType === "tag.trash_runner_resource" &&
-      input.playerView.opponent.tags > 0 &&
-      legalAction &&
-      actionIsCurrentlyAffordable(input, legalAction)
+      runnerTagged
     ) {
       const targetId =
         candidateTargetIds(candidate)[0] ??
@@ -733,12 +749,10 @@ function legacyPunishSignals(
         (card) => card.instanceId === targetId,
       );
       if (!target) return [];
-      const storedValue = target
-        ? Object.values(target.counters ?? {}).reduce(
-            (sum, amount) => sum + Math.max(0, amount),
-            0,
-          )
-        : 0;
+      const storedValue = Object.values(target.counters ?? {}).reduce(
+        (sum, amount) => sum + Math.max(0, amount),
+        0,
+      );
       return [
         {
           campaignId: `punish:resource-trash:${targetId}`,
@@ -757,134 +771,64 @@ function legacyPunishSignals(
         },
       ];
     }
+    if (
+      (candidate.semanticActionType !== "install.card" &&
+        candidate.semanticActionType !== "corp_window.rez") ||
+      candidateIsVisibleCorpIceInstall(input, candidate) ||
+      candidateIsVisibleCorpAgendaInstall(input, candidate) ||
+      legalAction.type === "rez_ice" ||
+      !corpPunishCandidateHasVisibleEffect(input, candidate)
+    )
+      return [];
+
     const profile = getStructuredTagPunishProfileForCard(
       candidate.sourceDefinitionId,
     );
     const tagPunishPayoff =
       profile?.payoff === true && profile.requiresRunnerTagged;
-    const traceSupport = corpDefinitionIsTraceSupport(
-      candidate.sourceDefinitionId,
-    );
-    const runnerTagged = input.playerView.opponent.tags > 0;
-    const visibleDefinitions = visibleOwnDefinitionIds(input);
-    const visibleTagSource = [...visibleDefinitions].some(
-      (definitionId) =>
-        getStructuredTagPunishProfileForCard(definitionId)?.tagSource ===
-          true || corpDefinitionIsTraceSource(definitionId),
-    );
-    const visiblePayoff = [...visibleDefinitions].some((definitionId) => {
-      const visibleProfile = getStructuredTagPunishProfileForCard(definitionId);
-      return (
-        visibleProfile?.payoff === true && visibleProfile.requiresRunnerTagged
-      );
-    });
-    if (!legalAction || !actionIsCurrentlyAffordable(input, legalAction))
-      return [];
-    if (
-      corpInstallTargetProfileHasPurpose(
-        candidate,
-        "establish_tag_source_in_protected_empty_remote",
-      ) &&
-      candidate.semanticActionType === "install.card" &&
-      !corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(input, candidate)
-    ) {
-      return [];
-    }
-    if (!corpPunishCandidateHasVisibleEffect(input, candidate)) return [];
-    if (
-      candidateIsVisibleCorpIceInstall(input, candidate) ||
-      candidateIsVisibleCorpAgendaInstall(input, candidate) ||
-      legalAction.type === "rez_ice" ||
-      candidate.semanticActionType === "score.advance_card"
-    )
-      return [];
-    const immediatePayoffConversion =
-      profile?.tagSource === true &&
-      visibleTagPayoffConversionIsAffordable(input, legalAction);
-    const startsImmediateTagSequence =
-      profile?.tagSource === true &&
-      candidate.semanticActionType !== "install.card" &&
-      candidate.semanticActionType !== "corp_window.rez";
-    if (startsImmediateTagSequence && !immediatePayoffConversion) return [];
-    const preparationAction =
-      candidate.semanticActionType === "install.card" ||
-      candidate.semanticActionType === "corp_window.rez" ||
-      candidate.semanticActionType === "score.advance_card";
     const targetBoundTraceSupport =
-      traceSupport &&
+      corpDefinitionIsTraceSupport(candidate.sourceDefinitionId) &&
       corpTraceSupportTargetHasVisibleTraceSource(input, candidate);
     if (
-      targetBoundTraceSupport &&
-      corpInstallTargetProfileHasPurpose(
-        candidate,
-        "establish_fort_trace_support",
-      ) &&
-      candidate.semanticActionType === "install.card" &&
-      !corpFortTraceSupportPlacementIsPreferred(input, candidate)
-    ) {
-      return [];
-    }
-    const profilePhase: CorpPunishCampaignSignal["phase"] | undefined =
-      preparationAction &&
-      (profile?.tagSource ||
+      !(
+        profile?.tagSource ||
         tagPunishPayoff ||
-        (targetBoundTraceSupport && visibleTagSource))
-        ? "prepare"
-        : tagPunishPayoff && runnerTagged
-          ? "damage"
-          : profile?.tagSource && visiblePayoff
-            ? profile.traceTagSource
-              ? "trace"
-              : "tag"
-            : undefined;
-    const phase =
-      profilePhase ??
-      (candidate.semanticActionType.startsWith("trace.")
-        ? "trace"
-        : candidate.semanticActionType.startsWith("tag.")
-          ? "tag"
-          : candidate.semanticActionType.startsWith("damage.") && runnerTagged
-            ? "damage"
-            : undefined);
-    if (!phase) return [];
-    if (
-      phase === "prepare" &&
+        (targetBoundTraceSupport && visibleTagSource)
+      ) ||
+      (tagPunishPayoff && !runnerTagged) ||
+      (profile?.requiresScoredAgenda &&
+        (input.playerView.own.scoreArea.length === 0 ||
+          scorelineFeasibility?.remainingMandatoryDraws === 0)) ||
+      (scorelineFeasibility?.feasible === true &&
+        scorelineFeasibility.currentAgendaPoints >=
+          scorelineFeasibility.pointsToWin - 1) ||
       corpPunishPreparationConflictsScoreServer(
         input,
         candidate,
         reservedScoreServerIds,
-      )
-    )
-      return [];
-    if (
-      phase === "prepare" &&
+      ) ||
       corpStrategicFundingPhaseBlocksPreparation(input, candidate, legalAction)
-    ) {
-      return [];
-    }
-    if (tagPunishPayoff && !runnerTagged) return [];
-    if (profile?.tagSource && !visiblePayoff && !preparationAction) return [];
-    if (tagPunishPayoff && !visibleTagSource && !runnerTagged) return [];
-    if (
-      phase === "prepare" &&
-      profile?.requiresScoredAgenda &&
-      input.playerView.own.scoreArea.length === 0
     )
       return [];
+
     if (
-      phase === "prepare" &&
-      profile?.requiresScoredAgenda &&
-      scorelineFeasibility?.remainingMandatoryDraws === 0
+      candidate.semanticActionType === "install.card" &&
+      ((corpInstallTargetProfileHasPurpose(
+        candidate,
+        "establish_tag_source_in_protected_empty_remote",
+      ) &&
+        !corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(
+          input,
+          candidate,
+        )) ||
+        (targetBoundTraceSupport &&
+          corpInstallTargetProfileHasPurpose(
+            candidate,
+            "establish_fort_trace_support",
+          ) &&
+          !corpFortTraceSupportPlacementIsPreferred(input, candidate)))
     )
       return [];
-    if (
-      phase === "prepare" &&
-      scorelineFeasibility?.feasible === true &&
-      scorelineFeasibility.currentAgendaPoints >=
-        scorelineFeasibility.pointsToWin - 1
-    )
-      return [];
-    if (phase !== "prepare") return [];
     const stableSourceId =
       candidate.sourceCardInstanceId ?? candidate.sourceDefinitionId;
     const stablePurpose = profile?.tagSource
@@ -903,7 +847,7 @@ function legacyPunishSignals(
     return [
       {
         campaignId: `punish:prepare:${stableSourceId}:${stablePurpose}`,
-        phase,
+        phase: "prepare",
         sourceDefinitionIds: candidate.sourceDefinitionId
           ? [candidate.sourceDefinitionId]
           : [],
@@ -915,8 +859,8 @@ function legacyPunishSignals(
         ...(profile === undefined ? { priorityClass: "P5" as const } : {}),
         value,
         evidenceCode: profile
-          ? `tag_punish_ontology_${phase}:${candidate.sourceDefinitionId}`
-          : `visible_${phase}_action`,
+          ? `tag_punish_ontology_prepare:${candidate.sourceDefinitionId}`
+          : `visible_prepare_action`,
       },
     ];
   });

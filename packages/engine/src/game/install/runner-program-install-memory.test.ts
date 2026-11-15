@@ -189,3 +189,11 @@ describe("runner program install memory", () => {
     ).toThrow("nicht genug MU");
   });
 });
+
+it.each([
+  "runner.program_install_memory:nonsearch:card:0:%ZZ:original",
+  "runner.program_install_memory:nonsearch:card:0:choice:original:extra",
+  "runner.program_install_memory:nonsearch:card::choice:original",
+])("rejects invalid Engine memory continuation sources", (source) => {
+  expect(parseRunnerProgramInstallMemoryContinuation(source)).toBeUndefined();
+});

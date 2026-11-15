@@ -15,10 +15,6 @@ import {
   createRunnerPersistentInstallContext,
   type RunnerPersistentInstallContextDependencies,
 } from "./runner-persistent-install-context";
-import {
-  createRunnerViral15JackOutContext,
-  type RunnerViral15JackOutContextDependencies,
-} from "./runner-viral15-jack-out-context";
 import { rolesMatch } from "../role-match";
 
 type RunnerDevelopmentCardDefinition = {
@@ -33,7 +29,6 @@ export type RunnerDevelopmentSupportCompositionDependencies =
     RunnerStrategicIntentProfile,
     RunnerHandDevelopmentEvaluation
   > &
-    RunnerViral15JackOutContextDependencies &
     Omit<RunnerHandFundingTargetDependencies, "rolesMatch"> &
     Omit<
       RunnerPersistentInstallContextDependencies<
@@ -80,12 +75,6 @@ export function createRunnerDevelopmentSupportComposition(
     rolesForAction: dependencies.rolesForAction,
     hasKnownUnaffordableLegalRun: dependencies.hasKnownUnaffordableLegalRun,
   });
-
-  const { runnerViral15JackOutScoreComponent } =
-    createRunnerViral15JackOutContext({
-      actionCreditCost: dependencies.actionCreditCost,
-      isVisibleIcebreakerProgram: dependencies.isVisibleIcebreakerProgram,
-    });
 
   const { runnerHandFundingTarget } = createRunnerHandFundingContext({
     rolesForCardId: dependencies.rolesForCardId,
@@ -146,7 +135,6 @@ export function createRunnerDevelopmentSupportComposition(
 
   return {
     runnerLoanLiabilityAssessment,
-    runnerViral15JackOutScoreComponent,
     runnerHandFundingTarget,
     runnerBankInvestmentCommitmentScoreComponents,
     runnerBankInvestmentCommitmentEvidence,

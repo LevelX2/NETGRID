@@ -187,7 +187,9 @@ describe("SP-456 actual Engine bank cycle through the normal Corp chooser", () =
           ),
         ).toBeUndefined();
         expect(cycle.gap).toBe(11);
-        expect(cycle.hostedCreditBankCycle?.actionId).toBe(decision.actionId);
+        expect(
+          cycle.fundingRouteAssessment?.hostedCreditBankCycle?.actionId,
+        ).toBe(decision.actionId);
       }
       expect(decision.actionId).toBe(step.expected.actionId);
       expect(plan?.rootPlanInstanceId).toBe(step.expected.root);

@@ -44,12 +44,16 @@ export function economyCandidates(
   context: PlanSchedulerContext,
   signal: CorpEconomyNeedSignal,
 ): PlanMaterialization["candidates"] {
-  if (signal.kind === "parent_funding" && signal.freeRezPayoutPreparation) {
+  if (
+    signal.kind === "parent_funding" &&
+    signal.fundingRouteAssessment?.freeRezPayoutPreparation
+  ) {
     const current = corpFreeRezPayoutPreparation(
       context.input,
       context.actionCandidates,
       signal,
-      signal.freeRezPayoutPreparation.basicFundingActionId,
+      signal.fundingRouteAssessment?.freeRezPayoutPreparation
+        .basicFundingActionId,
       domain(context).economyNeeds.filter(
         (s): s is CorpEconomyDevelopmentSignal => s.kind === "develop_campaign",
       ),
@@ -57,7 +61,7 @@ export function economyCandidates(
     if (
       !current ||
       JSON.stringify(current) !==
-        JSON.stringify(signal.freeRezPayoutPreparation)
+        JSON.stringify(signal.fundingRouteAssessment?.freeRezPayoutPreparation)
     )
       return [];
     return context.actionCandidates
@@ -67,9 +71,14 @@ export function economyCandidates(
         stepValue: Math.min(signal.gap, current.payoutCredits) * 10,
       }));
   }
-  if (signal.kind === "parent_funding" && signal.hostedCreditBankCycle) {
+  if (
+    signal.kind === "parent_funding" &&
+    signal.fundingRouteAssessment?.hostedCreditBankCycle
+  ) {
     const quote = currentCorpHostedBankCycleQuotes(context.input).find(
-      (q) => JSON.stringify(q) === JSON.stringify(signal.hostedCreditBankCycle),
+      (q) =>
+        JSON.stringify(q) ===
+        JSON.stringify(signal.fundingRouteAssessment?.hostedCreditBankCycle),
     );
     return quote
       ? context.actionCandidates
@@ -619,7 +628,8 @@ export function economyMaterialization(
         ],
       },
       purpose:
-        signal.kind === "parent_funding" && signal.freeRezPayoutPreparation
+        signal.kind === "parent_funding" &&
+        signal.fundingRouteAssessment?.freeRezPayoutPreparation
           ? "Prepare the admitted free finite-pool source for the exact funding parent; revalidate rez and liquid payout after each Engine transition."
           : signal.kind === "develop_campaign"
             ? `Advance the admitted ${signal.sourceDefinitionId} economy campaign from ${signal.phase} to ${signal.completion.expectedState}.`
@@ -646,7 +656,8 @@ export function economyMaterialization(
                               signal.restrictedCreditFunding
                             ? "Take the exact restricted payout for the bound current install/rez consumer, then return control to its resident parent."
                             : signal.kind === "parent_funding" &&
-                                signal.hostedCreditBankCycle
+                                signal.fundingRouteAssessment
+                                  ?.hostedCreditBankCycle
                               ? "Execute the current Engine-quoted hosted-bank head for the bound Corp funding need; revalidate the source and remaining rest-turn cycle after this transition."
                               : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },

@@ -1,3 +1,4 @@
+import { parseRunnerProgramInstallMemoryContinuation } from "@netgrid/engine";
 import type { AiDecision, LegalAction } from "@netgrid/shared";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import { unresolvedChoiceFailure } from "../../runtime/plan-bound-choice-contract";
@@ -26,7 +27,10 @@ import {
   runnerProgramSearchSourceCardInstanceId,
 } from "../../runtime/runner-program-search-facts";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
-import { runnerRecoveryActionContract, runnerRecoveryActionTargets } from "./development-search-targets";
+import {
+  runnerRecoveryActionContract,
+  runnerRecoveryActionTargets,
+} from "./development-search-targets";
 import type { RunnerDevelopmentInstallServices } from "./development-services";
 import { type RunnerDevelopmentSignal } from "./development-types";
 
@@ -410,10 +414,12 @@ export function resolvePlanBoundRunnerEventInstallMemoryChoice(
   ) {
     return undefined;
   }
-  const sourceParts = choice.source.split(":");
-  const targetCardInstanceId = sourceParts[2];
-  const originalChoiceId = decodeURIComponent(sourceParts[4] ?? "");
-  const originalChoiceSource = decodeURIComponent(sourceParts[5] ?? "");
+  const continuation = parseRunnerProgramInstallMemoryContinuation(
+    choice.source,
+  );
+  const targetCardInstanceId = continuation?.targetCardId;
+  const originalChoiceId = continuation?.originalChoiceId;
+  const originalChoiceSource = continuation?.originalChoiceSource;
   const executor = previous?.instances.find(
     (instance) =>
       instance.instanceId === previous.executorInstanceId &&
@@ -450,7 +456,8 @@ export function resolvePlanBoundRunnerEventInstallMemoryChoice(
     coverageState?.gap?.directSearchChoiceBindings?.filter(
       (candidate) =>
         candidate.actionId === coverageState.selectedSearchActionId &&
-        candidate.resolvedSearchChoice?.choiceId === originalChoiceId &&
+        candidate.resolvedSearchChoice !== undefined &&
+        candidate.resolvedSearchChoice.choiceId === originalChoiceId &&
         candidate.resolvedSearchChoice.choiceSource === originalChoiceSource &&
         candidate.resolvedSearchChoice.stateVersion ===
           previous?.stateVersion &&
@@ -471,10 +478,7 @@ export function resolvePlanBoundRunnerEventInstallMemoryChoice(
   const requirement = action?.choiceRequirements?.[0];
   const optionIds = choice.options.map((option) => option.id);
   const exactBinding =
-    sourceParts.length === 6 &&
-    sourceParts[0] === "runner.program_install_memory" &&
-    sourceParts[1] === "nonsearch" &&
-    typeof targetCardInstanceId === "string" &&
+    continuation?.kind === "nonsearch" &&
     previous?.side === "runner" &&
     previous.stateVersion === context.input.playerView.stateVersion - 1 &&
     previous.rootForegroundInstanceId === root?.instanceId &&

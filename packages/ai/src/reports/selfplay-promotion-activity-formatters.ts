@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type {
   SelfplayDecisionSnapshotPromotionCategory,
   SelfplayDecisionSnapshotPromotionQueueEntry,
@@ -29,9 +30,14 @@ export function formatSelfplayPromotionActivityCandidates(
 function activityCandidateFromQueueEntry(
   entry: SelfplayDecisionSnapshotPromotionQueueEntry,
 ): SelfplayPromotionActivityCandidate {
-  const slug = slugify(
-    `${entry.category}-${entry.scenarioHint}-${entry.snapshotId}`,
-  );
+  const fingerprint = createHash("sha256")
+    .update(entry.snapshotId)
+    .digest("hex")
+    .slice(0, 24);
+  const prefix = slugify(`${entry.category}-${entry.scenarioHint}`)
+    .slice(0, 95)
+    .replace(/-+$/, "");
+  const slug = `${prefix}-${fingerprint}`;
   const title = `Selfplay Promotion: ${entry.scenarioHint}`;
   const candidate: SelfplayPromotionActivityCandidate = {
     fileName: `docs/activities/inbox/${slug}.md`,
@@ -96,6 +102,5 @@ function slugify(value: string): string {
   return value
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 120);
+    .replace(/^-+|-+$/g, "");
 }

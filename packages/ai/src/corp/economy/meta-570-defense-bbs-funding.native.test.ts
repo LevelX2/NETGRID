@@ -141,14 +141,19 @@ it.each([
       .map((i) => (i.moduleState as EconomyState).signal);
     const signal = structuredClone(
       signals.find(
-        (s) => s.kind === "parent_funding" && s.freeRezPayoutPreparation,
+        (s) =>
+          s.kind === "parent_funding" &&
+          s.fundingRouteAssessment?.freeRezPayoutPreparation,
       ),
     ) as CorpEconomyParentFundingSignal;
-    expect(signal.freeRezPayoutPreparation).toBeDefined();
+    expect(
+      signal.fundingRouteAssessment?.freeRezPayoutPreparation,
+    ).toBeDefined();
     const campaigns = signals.filter(
       (s): s is CorpEconomyDevelopmentSignal => s.kind === "develop_campaign",
     );
-    const head = signal.freeRezPayoutPreparation!.actionId;
+    const head =
+      signal.fundingRouteAssessment!.freeRezPayoutPreparation!.actionId;
     if (change === "two_clicks") input.playerView.own.clicks = 2;
     if (change === "near_target") {
       signal.gap = 1;
@@ -173,7 +178,8 @@ it.each([
         input,
         candidates,
         signal,
-        signal.freeRezPayoutPreparation!.basicFundingActionId,
+        signal.fundingRouteAssessment!.freeRezPayoutPreparation!
+          .basicFundingActionId,
         campaigns,
       ),
     ).toBeUndefined();

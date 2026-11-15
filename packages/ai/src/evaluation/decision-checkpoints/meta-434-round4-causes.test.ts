@@ -133,6 +133,7 @@ it.each([
   "unknown_quote",
   "hand_overflow",
   "stale_action",
+  "wrong_timing",
 ] as const)(
   "does not certify draw-horizon preservation with %s",
   (boundary) => {
@@ -157,6 +158,10 @@ it.each([
       input.legalActions.find(
         (a) => a.actionId === candidate.actionId,
       )!.expiresAtStateVersion -= 1;
+    if (boundary === "wrong_timing")
+      input.legalActions.find(
+        (a) => a.actionId === candidate.actionId,
+      )!.timingPoint = "game.checkpoint";
     expect(
       corpDrawHorizonPreservationSignals(input, [candidate], 0),
     ).toHaveLength(0);

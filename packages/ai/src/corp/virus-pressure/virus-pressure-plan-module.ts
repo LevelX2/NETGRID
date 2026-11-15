@@ -29,7 +29,7 @@ export function createCorpVirusPressureModule(): PlanModule {
             signal.pressureId,
             { kind: "virus", signal } satisfies VirusState,
             signal.critical ? "P2" : "P5",
-            purgeCandidates(context),
+            purgeCandidates(context, signal),
             signal.evidenceCode,
             { kind: "capability", id: "runner_virus_pressure" },
             "recurring_cadence",
@@ -40,7 +40,7 @@ export function createCorpVirusPressureModule(): PlanModule {
       return assessment(
         instance,
         current.signal.critical ? "P2" : "P5",
-        purgeCandidates(context).length > 0,
+        purgeCandidates(context, current.signal).length > 0,
         current.signal.strategicDamage,
         portfolio.executorInstanceId,
         "visible_state_forced",
@@ -58,19 +58,29 @@ export function createCorpVirusPressureModule(): PlanModule {
         },
         purpose: "Remove strategically material visible virus pressure.",
       },
-      candidates: purgeCandidates(context),
+      candidates: purgeCandidates(
+        context,
+        (instance.moduleState as VirusState).signal,
+      ),
     }),
   };
 }
 
 function purgeCandidates(
   context: PlanSchedulerContext,
+  signal: CorpVirusPressureSignal,
 ): PlanMaterialization["candidates"] {
+  if (
+    signal.stateVersion !== context.input.playerView.stateVersion ||
+    !signal.purgeUseful
+  )
+    return [];
   return context.actionCandidates
     .filter(
       (candidate) =>
-        candidate.semanticActionType === "counter.purge_virus" ||
-        candidate.semanticActionType === "counter.purge_runner_virus",
+        candidate.actionId === signal.actionId &&
+        (candidate.semanticActionType === "counter.purge_virus" ||
+          candidate.semanticActionType === "counter.purge_runner_virus"),
     )
     .map((candidate) => ({ candidate, stepValue: 1 }));
 }

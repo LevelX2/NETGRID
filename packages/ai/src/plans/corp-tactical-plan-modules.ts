@@ -40,7 +40,9 @@ export function corpTacticalActionFamilyOwner(
     candidate.semanticActionType === "counter.purge_virus" ||
     candidate.semanticActionType === "counter.purge_runner_virus"
   )
-    return planDomain.virusPressure.some((signal) => signal.purgeUseful)
+    return planDomain.virusPressure.some(
+      (signal) => signal.actionId === candidate.actionId && signal.purgeUseful,
+    )
       ? "corp.respond_to_virus_pressure"
       : undefined;
   if (

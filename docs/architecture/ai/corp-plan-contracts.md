@@ -2604,6 +2604,12 @@ Verantwortung:
 - nach Wirkung zum vorherigen Root-Foreground zurückkehren.
 
 Der Purge folgt der aktuellen Engine-LegalAction samt Action-Debt-Quote.
+Der Basis-Purge und der Runner-Virus-Purge erhalten pro aktueller
+LegalAction einen eigenen Beleg mit StateVersion, Kosten, Counterbereich
+und Nutzen. Der Basis-Purge bewertet die sichtbaren betroffenen
+Kartencounter. Der Runner-Virus-Purge bewertet die sichtbaren
+Corp- und Serverpools der Runner-Viren. Owner-Erkennung, Disposition
+und Materialisierung verwenden nur die Aktion des jeweiligen Signals.
 Das Modul erzeugt keine eigene Purge-Legalität. Die Nutzenbewertung trennt
 Counter-Zahl von Effekt: Ein einzelner Pipe-Counter verursacht bereits
 wiederkehrenden Aktionsverlust. Dessen Beseitigung wird gegen die Purge-Kosten
@@ -2617,6 +2623,9 @@ klassifizieren.
 ## 6. `corp.economy`
 
 Die Implementierung liegt unter `packages/ai/src/corp/economy/`.
+Engine-Quotes für Hosted-Bank- und Free-Rez-Pfade eines Parent-Fundings
+liegen im gemeinsamen `fundingRouteAssessment`. Discovery, Routenbindung
+und Revalidierung beziehen sich auf diesen Beleg.
 `economy-discovery.ts` komponiert die aktuellen endlichen Needs und bindet
 ihre Funding-Routen; `economy-signals.ts` besitzt Investitionen, Auszahlungen,
 Operationen und die Übernahme konkreter Parent-Bedarfe.
@@ -3429,7 +3438,7 @@ Der Owner liegt unter `packages/ai/src/corp/ambush/`:
 - `ambush-plan-module.ts`: Parent, Setup-Step, Priorität, Needs und aktuelle Routen;
 - `corp-ambush-plan-signals.ts`: Intent- und Quellenbindung, Köder, Fortsetzung und Disposition;
 - `corp-access-zone-preparation.ts`: begrenzte Install-/Halte-/Rückmischfolge und Zugriffszonenwert;
-- `corp-access-payment-choice.ts`: Bewertung und Bindung bezahlter Zugriffseffekte;
+- `corp-access-payment-choice.ts` prüft und bindet den indexierten Engine-Zugriffseffekt samt Zone, Quelle, Kosten und Version. Diese Bindung wird bei der Payload-Auflösung erneut geprüft.
 - `corp-access-installed-trash-choice.ts`: Bewertung und typisierte Bindung öffentlicher Programm-/Hardware-Trash-Ziele beim Zugriff;
 - `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-/Trash-Choice.
 

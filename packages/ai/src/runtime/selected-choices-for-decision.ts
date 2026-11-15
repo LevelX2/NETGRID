@@ -1,3 +1,4 @@
+import { parseRunnerProgramInstallMemoryContinuation } from "@netgrid/engine";
 import {
   isRunnerProgramTrashBackupWindow,
   selectedRunnerProgramTrashBackup,
@@ -1926,14 +1927,24 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   selectableOptions: PendingChoiceOptions,
   portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
-  const sourceParts = choice.source.split(":");
-  const targetCardInstanceId = sourceParts[2];
-  const automaticFreedMemory = Number(sourceParts[3]);
-  const originalChoiceSource = decodeChoiceSourcePart(sourceParts[5]);
-  const originalChoiceId = decodeChoiceSourcePart(sourceParts[4]);
+  const continuation = parseRunnerProgramInstallMemoryContinuation(
+    choice.source,
+  );
+  if (!continuation)
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Engine memory continuation source is malformed.",
+    );
+  const {
+    targetCardId: targetCardInstanceId,
+    automaticFreedMemory,
+    originalChoiceSource,
+    originalChoiceId,
+  } = continuation;
   const delayedSearch =
-    sourceParts[1] === "nonsearch" &&
-    originalChoiceSource?.startsWith(
+    continuation.kind === "nonsearch" &&
+    originalChoiceSource.startsWith(
       "card_implementation.pro018_stack_install_run_cleanup:",
     ) === true;
   const originalSourceBinding = originalChoiceSource
@@ -2060,10 +2071,9 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
       moduleState?.gap?.requesterPlanInstanceId === root.instanceId &&
       moduleState.gap.requesterNeedId === executor.parentNeedId);
   const exactBinding =
-    sourceParts.length === 6 &&
     (delayedSearch
       ? portfolio?.stateVersion === input.playerView.stateVersion - 1
-      : sourceParts[1] === "hidden_search" &&
+      : continuation.kind === "hidden_search" &&
         originalSourceBinding !== undefined &&
         originalSourceBinding.selectedAtStateVersion + 1 ===
           input.playerView.stateVersion) &&
@@ -2130,15 +2140,6 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
     );
   }
   return selectedOptionIds;
-}
-
-function decodeChoiceSourcePart(value: string | undefined): string | undefined {
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return undefined;
-  }
 }
 
 function runnerHiddenSearchProgramInstallSourceBinding(source: string):
@@ -2293,11 +2294,21 @@ function selectedRunnerEventInstallMemoryOptionIds(
       portfolio,
     );
   }
-  const sourceParts = choice.source.split(":");
-  const targetCardInstanceId = sourceParts[2];
-  const automaticFreedMemory = Number(sourceParts[3]);
-  const originalChoiceId = decodeURIComponent(sourceParts[4] ?? "");
-  const originalChoiceSource = decodeURIComponent(sourceParts[5] ?? "");
+  const continuation = parseRunnerProgramInstallMemoryContinuation(
+    choice.source,
+  );
+  if (continuation?.kind !== "nonsearch")
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Engine nonsearch memory continuation source is malformed.",
+    );
+  const {
+    targetCardId: targetCardInstanceId,
+    automaticFreedMemory,
+    originalChoiceId,
+    originalChoiceSource,
+  } = continuation;
   const installedRigCardIds = new Set(
     (input.playerView.own.rig ?? []).map((card) => card.instanceId),
   );
@@ -2352,15 +2363,6 @@ function selectedRunnerEventInstallMemoryOptionIds(
     0,
   );
   const bindingChecks: Array<readonly [string, boolean]> = [
-    [
-      "source_contract",
-      sourceParts.length === 6 &&
-        sourceParts[0] === "runner.program_install_memory" &&
-        sourceParts[1] === "nonsearch" &&
-        typeof targetCardInstanceId === "string" &&
-        Number.isInteger(automaticFreedMemory) &&
-        automaticFreedMemory >= 0,
-    ],
     ["options_contract", exactOptions],
     ["action_contract", exactActionBinding],
     [

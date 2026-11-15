@@ -146,7 +146,8 @@ function offers() {
     .map((p) => (p.moduleState as EconomyState).signal);
   const signal = signals.find(
     (s): s is CorpEconomyParentFundingSignal =>
-      s.kind === "parent_funding" && !!s.freeRezPayoutPreparation,
+      s.kind === "parent_funding" &&
+      !!s.fundingRouteAssessment?.freeRezPayoutPreparation,
   )!;
   expect(signal).toBeDefined();
   const campaigns = signals.filter(
@@ -175,7 +176,9 @@ describe("native free rez before Defense funding", () => {
   it("fails closed when an admitted campaign loses its required payout proof", () => {
     const { input, signal, campaigns, candidates } = offers();
     const source = campaigns.find(
-      (c) => c.needId === signal.freeRezPayoutPreparation!.campaignNeedId,
+      (c) =>
+        c.needId ===
+        signal.fundingRouteAssessment!.freeRezPayoutPreparation!.campaignNeedId,
     )!;
     delete source.riskAdjustment;
     expect(() =>
@@ -183,7 +186,8 @@ describe("native free rez before Defense funding", () => {
         input,
         candidates,
         signal,
-        signal.freeRezPayoutPreparation!.basicFundingActionId,
+        signal.fundingRouteAssessment!.freeRezPayoutPreparation!
+          .basicFundingActionId,
         campaigns,
       ),
     ).toThrow("missing_plan_module_coverage");
@@ -275,7 +279,7 @@ describe("native free rez before Defense funding", () => {
   });
   it("binds the exact current legal source, admitted campaign and resident Defense need", () => {
     const { input, signal, campaigns, candidates } = offers(),
-      expected = signal.freeRezPayoutPreparation!;
+      expected = signal.fundingRouteAssessment!.freeRezPayoutPreparation!;
     expect(
       corpFreeRezPayoutPreparation(
         input,
@@ -306,7 +310,7 @@ describe("native free rez before Defense funding", () => {
     "other_parent",
   ])("does not authorize an unproved preparation: %s", (kind) => {
     const { input, signal, campaigns, candidates } = offers(),
-      quote = signal.freeRezPayoutPreparation!;
+      quote = signal.fundingRouteAssessment!.freeRezPayoutPreparation!;
     if (kind === "stale") input.playerView.stateVersion++;
     if (kind === "paid")
       input.legalActions.find((a) => a.actionId === quote.actionId)!.costs = [

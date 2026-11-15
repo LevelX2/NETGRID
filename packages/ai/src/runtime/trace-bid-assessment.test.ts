@@ -1,3 +1,4 @@
+import traceCheckpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-03575-01-trace-bid-economy.json";
 import { createGame, getLegalActions, getPlayerView } from "@netgrid/engine";
 import type {
   AiDecisionInput,
@@ -10,7 +11,10 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import { reconstructBeliefState } from "../belief-state";
-import { assessTraceBidCandidates } from "./trace-bid-assessment";
+import {
+  assessTraceBidCandidates,
+  visibleTraceSuccessEffect,
+} from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
 
 describe("Blind Trace bid assessment", () => {
@@ -24,7 +28,7 @@ describe("Blind Trace bid assessment", () => {
       ownCredits: 8,
       opponentCredits: 3,
       visibleOpponentBidCapacity: 3,
-      runnerGripCount: 2,
+      runnerGripCount: 1,
     });
     const choice = requiredChoice(input);
     choice.options = choice.options
@@ -36,6 +40,78 @@ describe("Blind Trace bid assessment", () => {
     delete choice.options[1]!.metadata;
     expect(() => assess(input)).toThrow(/missing_action_semantics/);
   });
+  it.each([
+    [0, "terminal"],
+    [2, "high"],
+    [3, "high"],
+  ])(
+    "classifies Homewrecker damage with %i grip as %s",
+    (runnerGripCount, stakes) => {
+      const input = decisionInput({
+        profile: "classic_blind",
+        side: "runner",
+        sourceDefinitionId: "onr_v1_248_homewrecker",
+        printedTrace: 5,
+        bidMax: 5,
+        runnerGripCount,
+      });
+      expect(assess(input).assessment.stakes).toBe(stakes);
+      const choice = requiredChoice(input);
+      const blocked = assess(input).selectedOptionId;
+      choice.options.find((option) => option.id === blocked)!.selectable =
+        false;
+      expect(
+        assess(input).candidates.map(({ optionId }) => optionId),
+      ).not.toContain(blocked);
+    },
+  );
+
+  it("uses only the indexed subroutine of the current trace source", () => {
+    const input = decisionInput({
+      profile: "classic_blind",
+      side: "runner",
+      sourceDefinitionId: "onr_v1_248_homewrecker",
+      printedTrace: 5,
+      bidMax: 5,
+    });
+    const trace = input.playerView.trace!;
+    const tag = { type: "add_tag", amount: 1 } as const;
+    const damage = { type: "net_damage", amount: 2 } as const;
+    const ice = {
+      instanceId: "unrelated_ice",
+      definitionId: trace.sourceDefinitionId,
+      effectiveRunQuote: {
+        subroutines: [{ traceSuccessEffect: tag }] as Array<{
+          traceSuccessEffect: typeof tag | typeof damage;
+        }>,
+      },
+    };
+    input.playerView.run = {
+      encounteredIce: ice,
+    } as unknown as NonNullable<AiDecisionInput["playerView"]["run"]>;
+    const context = latestTraceContext(input);
+    expect(visibleTraceSuccessEffect(input, context)?.type).toBe(
+      "end_run_trash_hardware_and_unpreventable_meat_damage",
+    );
+    ice.effectiveRunQuote.subroutines.push({ traceSuccessEffect: damage });
+    trace.sourceSubroutineIndex = 1;
+    trace.sourceCardInstanceId = "unrelated_ice";
+    expect(visibleTraceSuccessEffect(input, context)).toEqual(damage);
+  });
+
+  it("projects the native trace subroutine only for its visible encounter source", () => {
+    const state = structuredClone(
+      traceCheckpoint.engine.testOnlyGameState,
+    ) as unknown as GameState;
+    const version = state.stateVersion;
+    expect(getPlayerView(state, "runner").trace?.sourceSubroutineIndex).toBe(0);
+    state.trace!.sourceCardInstanceId = state.corp.identity;
+    expect(
+      getPlayerView(state, "runner").trace?.sourceSubroutineIndex,
+    ).toBeUndefined();
+    expect(state.stateVersion).toBe(version);
+  });
+
   it("does not certify a no-support ceiling for after-reveal Link responses", () => {
     const input = decisionInput({
       profile: "classic_blind",
@@ -146,7 +222,7 @@ describe("Blind Trace bid assessment", () => {
         printedTrace: 5,
         bidMax: 5,
         ownCredits: 5,
-        runnerGripCount: 2,
+        runnerGripCount: 1,
       }),
     );
 
@@ -402,7 +478,7 @@ describe("Blind Trace bid assessment", () => {
       ownCredits: 10,
       opponentCredits: 6,
       visibleOpponentBidCapacity: 5,
-      runnerGripCount: 5,
+      runnerGripCount: 4,
     });
     input.playerView.opponent.clicks = 2;
     const hqLook = runnerHqLookEvent(

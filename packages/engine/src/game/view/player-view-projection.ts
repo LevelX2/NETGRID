@@ -438,6 +438,11 @@ export function buildPlayerViewProjection(
     ? {
         traceId: trace.traceId,
         sourceCardInstanceId: trace.sourceCardInstanceId,
+        ...(trace.subroutineIndex !== undefined &&
+        run?.encounteredIce?.instanceId === trace.sourceCardInstanceId &&
+        run.encounteredIce.known
+          ? { sourceSubroutineIndex: trace.subroutineIndex }
+          : {}),
         ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),
         ...(currentRunLockBidQuote ? { currentRunLockBidQuote } : {}),
         sourceDefinitionId: trace.sourceDefinitionId,

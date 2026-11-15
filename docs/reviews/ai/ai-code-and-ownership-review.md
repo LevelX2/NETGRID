@@ -541,7 +541,7 @@ Consumer. Nach einem direkten Vorher-nachher-Lauf mit der bestehenden
 Viral-15-Evidence den Score, seinen Adapter und tote Schlüssel zusammen
 entfernen. Geschätzt ein halber Tag. Abnahme über dieselbe gebundene
 Mitigation, LegalAction und StateHash-Folge im Vergleichsfall.
-[Score](../../../packages/ai/src/runtime/runner-viral15-jack-out-score.ts#L13) · [Verdrahtung](../../../packages/ai/src/runtime/runner-development-support-composition.ts#L84) · [Viral-15-Checkpoint](../../../packages/ai/src/evaluation/decision-checkpoints/match-23d6-runner-remediation-decision-checkpoints.test.ts)
+[Viral-15-Checkpoint](../../../packages/ai/src/evaluation/decision-checkpoints/match-23d6-runner-remediation-decision-checkpoints.test.ts)
 
 ### 8. `corp/punish/punish-signals.ts`
 
@@ -612,3 +612,22 @@ Quellstand. Für die stärksten Befunde stammen Sicht und LegalActions von
 der Engine. Die Schadens- und Purge-Wirkung wurden zusätzlich direkt mit
 der Engine geprüft. Aussageumfang sind die dokumentierten Situationen.
 
+
+### Umsetzung der dritten Stichprobe
+
+Der Virus-Owner bindet seine Bewertung an die jeweils betroffene aktuelle
+Purge-Aktion. Die Trace-Bewertung prüft den aktiven Effekt und die
+auswählbaren Gebote und verwendet die Flatline-Grenze der Engine. Die
+Vertragskorrekturen für Zugriff, Draw-Horizont, MU-Fortsetzung und
+Report-Dateinamen sind umgesetzt. Parent-Funding verwendet einen
+kanonischen Routenbeleg. Punish bewertet jede Quote beim Aufbau einmal
+und hält die Vorbereitung und den Basic Resource Trash als eigene
+Signalwege. Der alte Viral-15-Score und sein Adapter sind entfernt. Im
+Checkpoint `cp-23d6-01` lieferten beide Stände dieselbe LegalAction,
+dieselbe Run-Window-Planinstanz und nach Engine-Ausführung den StateHash
+`fnv1a:d911db11`.
+
+Die Abnahme umfasst 298 fokussierte KI-Tests in 23 Dateien und
+15 Engine-Tests in drei Dateien. Sie enthält native Fälle für beide
+Purge-Aktionen, den Blind-Trace mit sichtbarer Auslösequelle, den
+R&D-Timing-Gegenfall und die Free-Rez- und Bankfinanzierung.

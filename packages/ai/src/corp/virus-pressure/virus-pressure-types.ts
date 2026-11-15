@@ -1,5 +1,8 @@
 export type CorpVirusPressureSignal = {
   pressureId: string;
+  actionId: string;
+  stateVersion: number;
+  actionCost: number;
   virusCounters: number;
   strategicDamage: number;
   critical: boolean;

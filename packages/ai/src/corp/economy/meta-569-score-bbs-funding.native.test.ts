@@ -135,13 +135,15 @@ it.each([
     .map((i) => (i.moduleState as EconomyState).signal);
   const signal = structuredClone(
     signals.find(
-      (s) => s.kind === "parent_funding" && s.freeRezPayoutPreparation,
+      (s) =>
+        s.kind === "parent_funding" &&
+        s.fundingRouteAssessment?.freeRezPayoutPreparation,
     )! as CorpEconomyParentFundingSignal,
   );
   const campaigns = signals.filter(
     (s): s is CorpEconomyDevelopmentSignal => s.kind === "develop_campaign",
   );
-  expect(signal.freeRezPayoutPreparation).toBeDefined();
+  expect(signal.fundingRouteAssessment?.freeRezPayoutPreparation).toBeDefined();
   if (change === "two_clicks") input.playerView.own.clicks = 2;
   if (change === "one_click") input.playerView.own.clicks = 1;
   if (change === "urgent_parent") signal.delegatedPriorityClass = "P2";
@@ -155,7 +157,9 @@ it.each([
   }
   if (change === "stale")
     input.legalActions.find(
-      (a) => a.actionId === signal.freeRezPayoutPreparation!.actionId,
+      (a) =>
+        a.actionId ===
+        signal.fundingRouteAssessment!.freeRezPayoutPreparation!.actionId,
     )!.expiresAtStateVersion--;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -167,7 +171,8 @@ it.each([
       input,
       candidates,
       signal,
-      signal.freeRezPayoutPreparation!.basicFundingActionId,
+      signal.fundingRouteAssessment!.freeRezPayoutPreparation!
+        .basicFundingActionId,
       campaigns,
     ),
   ).toBeUndefined();

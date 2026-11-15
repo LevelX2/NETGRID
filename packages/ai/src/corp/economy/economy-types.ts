@@ -69,8 +69,6 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
     iceInstanceId: string;
   };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
-  hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
-  freeRezPayoutPreparation?: CorpFreeRezPayoutPreparation;
   restrictedCreditFunding?: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
   restrictedCreditPreparations?: CorpRestrictedRezPreparation[];
 };

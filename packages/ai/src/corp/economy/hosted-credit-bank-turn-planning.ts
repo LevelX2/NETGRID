@@ -27,9 +27,11 @@ export function corpHostedBankTurnPlanningQuote(params: {
   | undefined {
   const { signal, input } = params;
   const cycle =
-    signal.kind === "develop_campaign" || signal.kind === "parent_funding"
-      ? signal.hostedCreditBankCycle
-      : undefined;
+    signal.kind === "parent_funding"
+      ? signal.fundingRouteAssessment?.hostedCreditBankCycle
+      : signal.kind === "develop_campaign"
+        ? signal.hostedCreditBankCycle
+        : undefined;
   const payout =
     signal.kind === "convert_visible_card_payout" &&
     signal.conversion.hostedCreditTakeMode === "all"

@@ -239,20 +239,6 @@ export function buildCorpEconomySignals({
             : []),
         ],
         fundingRouteAssessment,
-        ...(signal.kind === "parent_funding" &&
-        fundingRouteAssessment.freeRezPayoutPreparation
-          ? {
-              freeRezPayoutPreparation:
-                fundingRouteAssessment.freeRezPayoutPreparation,
-            }
-          : {}),
-        ...(signal.kind === "parent_funding" &&
-        fundingRouteAssessment.hostedCreditBankCycle
-          ? {
-              hostedCreditBankCycle:
-                fundingRouteAssessment.hostedCreditBankCycle,
-            }
-          : {}),
       };
     });
   const previousExecutor = previous?.instances.find(

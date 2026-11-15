@@ -72,6 +72,7 @@ export {
 
 export type { TraceRulesProfile } from "@netgrid/shared";
 
+export { parseRunnerProgramInstallMemoryContinuation } from "./game/install/runner-program-install-memory";
 export { cardImplementationForDefinitionId } from "./card-implementations/registry";
 
 export { icebreakerAbilitiesForDefinition } from "./ability-engine/icebreaker-abilities";

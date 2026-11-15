@@ -799,7 +799,9 @@ function contributeCorpActionDispositionForCandidate(
   if (
     (candidate.semanticActionType === "counter.purge_virus" ||
       candidate.semanticActionType === "counter.purge_runner_virus") &&
-    !domain.virusPressure.some((signal) => signal.purgeUseful)
+    !domain.virusPressure.some(
+      (signal) => signal.actionId === candidate.actionId && signal.purgeUseful,
+    )
   ) {
     add(
       candidate.actionId,

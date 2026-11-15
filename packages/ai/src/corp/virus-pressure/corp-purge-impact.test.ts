@@ -1,3 +1,14 @@
+import {
+  applyAction,
+  createGame,
+  getLegalActions,
+  getPlayerView,
+} from "@netgrid/engine";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { instantiatePlanProposal } from "../../plans/plan-instance";
+import type { PlanSchedulerContext } from "../../plans/plan-scheduler";
+import { createCorpVirusPressureModule } from "./virus-pressure-plan-module";
+import { buildCorpVirusPressureSignals } from "./virus-pressure-signals";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -103,6 +114,87 @@ describe("corpPurgeImpactScoreComponent", () => {
     ).toBe(true);
   });
 });
+
+it.each([0, 1, 2])(
+  "binds each native purge independently with two ICE counters and %i Tax counters",
+  (tax) => {
+    const state = createGame({
+      seed: "third-source-review-purge",
+      setupMode: "completed",
+    });
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    const iceId = [...state.corp.hq, ...state.corp.rd].find((id) =>
+      id.includes("data-wall"),
+    )!;
+    state.corp.hq = state.corp.hq.filter((id) => id !== iceId);
+    state.corp.rd = state.corp.rd.filter((id) => id !== iceId);
+    const server = state.corp.servers.find(({ id }) => id === "rd")!;
+    server.ice.push(iceId);
+    const ice = state.cardInstances[iceId]!;
+    ice.zone = { side: "corp", zone: "serverIce", serverId: "rd" };
+    ice.rezzed = true;
+    ice.faceup = true;
+    ice.counters = { ...ice.counters, virus: 2 };
+    if (tax > 0) state.purgeableRunnerVirusCounters = { corp: { tax } };
+    const legalActions = getLegalActions(state, "corp");
+    const input: AiDecisionInput = {
+      matchId: state.matchId,
+      side: "corp",
+      legalActions,
+      playerView: getPlayerView(state, "corp"),
+      eventTail: [],
+      seed: state.seed,
+      decisionId: "native-purge-binding",
+      actionNumber: state.stateVersion,
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.2-normal",
+    };
+    const signals = buildCorpVirusPressureSignals(input);
+    const context: PlanSchedulerContext = {
+      input,
+      turnKey: "native-purge-binding",
+      actionCandidates: buildActionSemanticCandidates({ legalActions }),
+      domain: {
+        virusPressure: signals,
+        handManagement: [],
+        ambushes: [],
+        punishCampaigns: [],
+      },
+    };
+    const owner = createCorpVirusPressureModule();
+    const routes = owner.discover(context).map((proposal) => {
+      const instance = instantiatePlanProposal(proposal, state.stateVersion);
+      const materialized = owner.materialize(instance, {} as never, context);
+      expect(materialized.candidates).toHaveLength(1);
+      return materialized.candidates[0]!.candidate;
+    });
+    expect(routes.map(({ actionType }) => actionType).sort()).toEqual(
+      tax >= 2
+        ? ["purge_runner_virus_counters", "purge_virus_counters"]
+        : ["purge_virus_counters"],
+    );
+    for (const route of routes) {
+      const result = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: route.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error(result.error.message);
+      const basic = route.actionType === "purge_virus_counters";
+      expect(result.state.cardInstances[iceId]?.counters?.virus ?? 0).toBe(
+        basic ? 0 : 2,
+      );
+      expect(result.state.purgeableRunnerVirusCounters?.corp?.tax ?? 0).toBe(
+        basic ? tax : 0,
+      );
+    }
+  },
+);
 
 function inputWithVirusCounters(amount: number): AiDecisionInput {
   const bugZapper: VisibleCard = {

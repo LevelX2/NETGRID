@@ -89,6 +89,10 @@ einem Lauf ohne Aktionen null. Der Ergebnisanteil `runtime_failure` macht
 technische Abbrüche sichtbar. Eine höhere technische Abbruchrate lässt das
 Quality Gate auch bei intaktem Replay scheitern.
 
+Die Activity-Vorschläge der Selfplay-Snapshot-Auswertung reservieren einen
+stabilen Namenssuffix für die Snapshot-ID. Ein langer Szenariohinweis darf
+diese Zuordnung nicht abschneiden.
+
 ## Vergleichsevidenz und Standardmodus
 
 Verhaltensfälle im expliziten `legacy_compare` tragen `[legacy_compare]` im Namen.

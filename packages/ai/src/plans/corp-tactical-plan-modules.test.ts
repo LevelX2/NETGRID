@@ -30,6 +30,9 @@ describe("Corp tactical plan modules", () => {
           virusPressure: [
             {
               pressureId: "virus",
+              actionId: purge.actionId,
+              stateVersion: 10,
+              actionCost: 3,
               virusCounters: 3,
               strategicDamage: 10,
               critical: true,
@@ -49,6 +52,9 @@ describe("Corp tactical plan modules", () => {
           virusPressure: [
             {
               pressureId: "virus",
+              actionId: purge.actionId,
+              stateVersion: 10,
+              actionCost: 3,
               virusCounters: 3,
               strategicDamage: 0,
               critical: false,

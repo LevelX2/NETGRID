@@ -1,3 +1,5 @@
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { corpAccessPaymentChoiceSignal } from "../corp/ambush/corp-access-payment-choice";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { applyAction, getLegalActions, hashGameState } from "@netgrid/engine";
@@ -182,3 +184,16 @@ it.each(["run", "targets", "remaining_access", "selected_option"])(
     ).toThrow(expect.objectContaining({ code: "window_origin_missing" }));
   },
 );
+
+it("rejects an invalid indexed payment effect on the native expiry input", () => {
+  const { input } = fixture("g3d108");
+  const candidates = buildActionSemanticCandidates({
+    legalActions: input.legalActions,
+  });
+  expect(corpAccessPaymentChoiceSignal(input, candidates)).toBeDefined();
+  const choice = input.playerView.pendingChoice!;
+  const parts = choice.source.split(":");
+  parts[2] = "97";
+  choice.source = parts.join(":");
+  expect(corpAccessPaymentChoiceSignal(input, candidates)).toBeUndefined();
+});

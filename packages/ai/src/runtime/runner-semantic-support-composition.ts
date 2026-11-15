@@ -53,7 +53,6 @@ export function createRunnerSemanticSupportComposition(
     visibleCardPlayOrInstallCost: baseline.visibleCardPlayOrInstallCostForAi,
     cardAddressesVisibleBreakerNeed:
       baseline.runnerCardAddressesVisibleBreakerNeed,
-    isVisibleIcebreakerProgram: baseline.isVisibleIcebreakerProgram,
     cardLooksLikeCreditPayout: baseline.runnerCardLooksLikeCreditPayout,
     badPublicityOrTraceTechCard: baseline.runnerBadPublicityOrTraceTechCard,
     runnerRunTargetEvaluation:
