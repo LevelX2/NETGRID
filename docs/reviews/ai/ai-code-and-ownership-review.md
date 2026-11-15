@@ -1132,11 +1132,21 @@ ursprünglichen Root und Executor.
 P3 aus Punkt 5 und der kleine Signaturschnitt aus Punkt 6 sind umgesetzt.
 Der Corp-Scoring-Kontext erstellt nur die verwendeten Komponenten und
 die reine Weiterleitungsdatei entfiel. Der Economy-Adapter erhält keine
-ungenutzte Bewertungsabhängigkeit mehr. Die Coverage-Suchbindung aus Punkt
-8 bleibt ein eigener möglicher Änderungsschnitt. Beim Advance-Preis aus
-Punkt 6 belegt die Gegenprobe eine Änderungsfalle für eine spätere Engine-
-Erweiterung.
+ungenutzte Bewertungsabhängigkeit mehr. Beim Advance-Preis aus Punkt 6
+belegt die Gegenprobe eine Änderungsfalle für eine spätere Engine-Erweiterung.
 
 681 fokussierte Tests in 28 Dateien bestanden. Der KI-Typecheck,
 `check:ai` und die Reproduzierbarkeitsprüfung für das generierte
 CardSpec-Hint-Artefakt sind grün.
+
+### Umsetzung der Coverage-Suchbindung aus Punkt 8
+
+Die Coverage-Suchbindung enthält Action-ID und StateVersion als gemeinsames
+Paar. Stack-/Heap-Auswahl, Mehrkartensuche, Zahlungsfortsetzung und spätere
+Programminstallation prüfen es über denselben Guard. Die bestehenden Felder
+in den gespeicherten Checkpoints bleiben als Paar lesbar. Die nativen
+Gegenfälle entfernen beide Felder einzeln und prüfen die sichtbare Ablehnung.
+Gültige Suchen behalten Ziel, Root und Executor. 484 fokussierte Tests in
+15 Dateien bestanden.
+Der KI-Typecheck, die Strukturgates und der abschließende Lauf mit
+15 Zahlungstests waren grün.

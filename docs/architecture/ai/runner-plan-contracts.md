@@ -1692,6 +1692,12 @@ Rolle und Parent gebunden; die Engine-basierte Pfadprüfung wahrt Moduskosten
 und die Bindung einer einmaligen Moduswahl. Feste Deckdoktrin-Rollen dürfen
 diesen nachgewiesenen Installationspfad nicht erneut verwerfen.
 
+Die Coverage-Suchbindung fasst die gewählte Action-ID und die zugehörige
+StateVersion zusammen. Die Fortsetzungen über Stack-/Heap-Auswahl,
+Zahlung, Programminstallation und Mehrkartensuche prüfen die vollständige
+Bindung mit demselben Guard. Die nachgelagerten Choice- und
+Ownership-Prüfungen binden weiterhin die konkrete Engine-Aktion und ihr Ziel.
+
 Eine Coverage-Suche mehrerer Stackkarten in die Hand bleibt im privaten
 Suchfenster unter ihrem ursprünglichen Root und Coverage-Executor.
 `coverage-multi-search-choice.ts` prüft die gewählte Quellenaction,

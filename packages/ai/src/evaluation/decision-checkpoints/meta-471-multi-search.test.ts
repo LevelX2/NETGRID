@@ -8,8 +8,9 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import type { StrategicIntentMemorySnapshot } from "../../strategic-intent-memory";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import { selectedBoundRunnerCoverageMultiSearchChoiceOptionIds } from "../../runner/rig-coverage/coverage-multi-search-choice";
+import type { CoverageSearchBinding } from "../../runner/rig-coverage/coverage-types";
 
-function restoredInput() {
+function restoredInput(incompleteBinding?: keyof CoverageSearchBinding) {
   const input = structuredClone(
     checkpoint.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
@@ -19,12 +20,17 @@ function restoredInput() {
       .strategicIntent as unknown as StrategicIntentMemorySnapshot,
     input.ownDeckSnapshot!.deckSnapshotId,
   );
-  restoreResidentPlanPortfolioMemorySnapshot(
-    input,
-    structuredClone(
-      checkpoint.runtime.residentPlanPortfolio,
-    ) as unknown as ResidentPlanPortfolio,
-  );
+  const portfolio = structuredClone(
+    checkpoint.runtime.residentPlanPortfolio,
+  ) as unknown as ResidentPlanPortfolio;
+  if (incompleteBinding) {
+    const executor = portfolio.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    )!;
+    const state = executor.moduleState as Partial<CoverageSearchBinding>;
+    delete state[incompleteBinding];
+  }
+  restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
   return input;
 }
 
@@ -73,6 +79,15 @@ it("keeps legal duplicates when the exact engine selection count requires them",
   ).toBe(true);
   expect(decision.fallbackUsed).toBe(false);
 });
+
+it.each(["selectedSearchActionId", "selectedSearchStateVersion"] as const)(
+  "rejects a multi-search origin with missing %s",
+  (missingField) => {
+    expect(() => chooseAiAction(restoredInput(missingField))).toThrow(
+      /window_origin_missing/,
+    );
+  },
+);
 
 it("fails closed when the search observation no longer belongs to the selected source", () => {
   const input = restoredInput();

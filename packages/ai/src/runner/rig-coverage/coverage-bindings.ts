@@ -15,7 +15,11 @@ import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { selectResidentPlanPortfolioExecutor } from "../../plans/resident-plan-portfolio";
 import type { RunnerProgramInstallTrashAssessment } from "../../runtime/runner-program-install-trash-policy";
 import { preserveCoveragePaymentAncestry } from "./coverage-payment-ancestry";
-import type { CoverageState } from "./coverage-types";
+import {
+  hasCoverageSearchBinding,
+  type CoverageSearchBinding,
+  type CoverageState,
+} from "./coverage-types";
 import type { PlanExecutionOrigin } from "../../plans/plan-continuation";
 
 export function runnerCoverageSearchSourceChoiceBinding(
@@ -37,10 +41,11 @@ export function runnerCoverageSearchSourceChoiceBinding(
   );
   if (!executor) return;
   const state = executor.moduleState as CoverageState | undefined;
+  const searchState = hasCoverageSearchBinding(state) ? state : undefined;
   const bindings =
-    state?.gap?.directSearchChoiceBindings?.filter(
+    searchState?.gap?.directSearchChoiceBindings?.filter(
       (binding) =>
-        binding.actionId === state.selectedSearchActionId &&
+        binding.actionId === searchState.selectedSearchActionId &&
         binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
         binding.sourceDefinitionId === choice.sourceCardDefinitionId,
     ) ?? [];
@@ -77,7 +82,8 @@ export function runnerCoverageSearchSourceChoiceBinding(
     executor.executionState === "executor" &&
     state?.kind === "coverage" &&
     state.phase === "search_answer" &&
-    state.selectedSearchStateVersion === portfolio.stateVersion &&
+    searchState !== undefined &&
+    searchState.selectedSearchStateVersion === portfolio.stateVersion &&
     input.playerView.stateVersion === portfolio.stateVersion + 1 &&
     binding !== undefined &&
     typeof binding.targetDefinitionId === "string" &&
@@ -170,8 +176,6 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     | {
         kind?: unknown;
         phase?: unknown;
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
         gap?: {
           requiredRole?: unknown;
           targetServerId?: unknown;
@@ -226,6 +230,7 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
   const previousSearchOriginIsExact =
     previousCoverageExecutorIsPreservable &&
     previousState.phase === "search_answer" &&
+    hasCoverageSearchBinding(previousState) &&
     previousState.selectedSearchActionId === pending.originalActionId &&
     previousState.selectedSearchStateVersion ===
       pending.selectedAtStateVersion &&
@@ -290,12 +295,15 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
   // Exclusive payment actions cannot rediscover the ordinary run and search
   // offers. Retain the already selected search phase with its exact binding;
   // the restricted offer set has not completed or replaced that search.
+  const selectedSearch: CoverageSearchBinding = {
+    selectedSearchActionId: pending.originalActionId,
+    selectedSearchStateVersion: pending.selectedAtStateVersion,
+  };
   nextExecutor.moduleState = {
     ...nextState,
     phase: "search_answer",
     gap: structuredClone(previousState.gap),
-    selectedSearchActionId: pending.originalActionId,
-    selectedSearchStateVersion: pending.selectedAtStateVersion,
+    ...selectedSearch,
   };
 }
 
@@ -337,8 +345,6 @@ export function bindSelectedCoverageSearchAction(
           }>;
           rejectedSearchActionIds?: Array<unknown>;
         };
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
       }
     | undefined;
   if (moduleState?.kind !== "coverage") {
@@ -372,6 +378,7 @@ export function bindSelectedCoverageSearchAction(
     (continuation!.originalActionId === selectedActionId &&
       result.origin.rootPlanInstanceId === continuation!.rootPlanInstanceId &&
       result.origin.leafPlanInstanceId === continuation!.executorInstanceId &&
+      hasCoverageSearchBinding(moduleState) &&
       moduleState.selectedSearchActionId === selectedActionId &&
       moduleState.selectedSearchStateVersion ===
         continuation!.selectedAtStateVersion);
@@ -397,7 +404,7 @@ export function bindSelectedCoverageSearchAction(
     ...moduleState,
     selectedSearchActionId: selectedActionId,
     selectedSearchStateVersion: selectedStateVersion,
-  };
+  } satisfies typeof moduleState & CoverageSearchBinding;
   if (continuation) {
     // Payment support may temporarily execute under Economy. The exact
     // original search must regain its resident executor before its choice
@@ -462,8 +469,6 @@ export function bindSelectedRunnerCoverageSearchChoiceContinuation(
     | {
         kind?: unknown;
         phase?: unknown;
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
         gap?: {
           requesterPlanInstanceId?: unknown;
           requesterNeedId?: unknown;
@@ -496,9 +501,12 @@ export function bindSelectedRunnerCoverageSearchChoiceContinuation(
         )
       : undefined;
   const selectedTarget = selectedOption?.card;
-  const bindings = moduleState?.gap?.directSearchChoiceBindings?.filter(
+  const searchState = hasCoverageSearchBinding(moduleState)
+    ? moduleState
+    : undefined;
+  const bindings = searchState?.gap?.directSearchChoiceBindings?.filter(
     (binding) =>
-      binding.actionId === moduleState.selectedSearchActionId &&
+      binding.actionId === searchState.selectedSearchActionId &&
       binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
       binding.sourceDefinitionId === choice.sourceCardDefinitionId &&
       binding.targetDefinitionId === selectedTarget?.definitionId &&
@@ -534,9 +542,8 @@ export function bindSelectedRunnerCoverageSearchChoiceContinuation(
     exactCoverageExecutorOwnership &&
     moduleState?.kind === "coverage" &&
     moduleState.phase === "search_answer" &&
-    typeof moduleState.selectedSearchActionId === "string" &&
-    typeof moduleState.selectedSearchStateVersion === "number" &&
-    moduleState.selectedSearchStateVersion === portfolio.stateVersion &&
+    searchState !== undefined &&
+    searchState.selectedSearchStateVersion === portfolio.stateVersion &&
     binding !== undefined;
   if (!exactChoice || !selectedTarget || !binding) {
     throw new PlanResolutionFailure("invalid_support_graph", {
@@ -612,7 +619,7 @@ export function bindSelectedRunnerCoverageSearchChoiceContinuation(
       : {}),
   };
   executor.moduleState = {
-    ...moduleState,
+    ...searchState,
     selectedSearchStateVersion: input.playerView.stateVersion,
     gap: {
       ...moduleState.gap,

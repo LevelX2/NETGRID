@@ -5,6 +5,7 @@ import {
 } from "../runner/defense-recovery/program-trash-backup";
 import { runnerDevelopmentSearchChoiceBinding } from "../runner/hand-development/development-choice-bindings";
 import { runnerCoverageSearchSourceChoiceBinding } from "../runner/rig-coverage/coverage-bindings";
+import { hasCoverageSearchBinding } from "../runner/rig-coverage/coverage-types";
 import {
   isRunnerGripDamageReplacementWindow,
   selectedRunnerGripDamageReplacement,
@@ -1960,8 +1961,6 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
     | {
         kind?: unknown;
         phase?: unknown;
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
         gap?: {
           requesterPlanInstanceId?: unknown;
           requesterNeedId?: unknown;
@@ -1989,9 +1988,12 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
         };
       }
     | undefined;
-  const bindings = moduleState?.gap?.directSearchChoiceBindings?.filter(
+  const searchState = hasCoverageSearchBinding(moduleState)
+    ? moduleState
+    : undefined;
+  const bindings = searchState?.gap?.directSearchChoiceBindings?.filter(
     (binding) =>
-      binding.actionId === moduleState.selectedSearchActionId &&
+      binding.actionId === searchState.selectedSearchActionId &&
       (delayedSearch
         ? binding.resolvedSearchChoice?.choiceId === originalChoiceId &&
           binding.resolvedSearchChoice?.choiceSource === originalChoiceSource &&
@@ -2099,9 +2101,8 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
     exactCoverageExecutorOwnership &&
     moduleState?.kind === "coverage" &&
     moduleState.phase === "search_answer" &&
-    typeof moduleState.selectedSearchActionId === "string" &&
-    typeof moduleState.selectedSearchStateVersion === "number" &&
-    moduleState.selectedSearchStateVersion === portfolio.stateVersion &&
+    searchState !== undefined &&
+    searchState.selectedSearchStateVersion === portfolio.stateVersion &&
     binding !== undefined &&
     typeof binding.targetDefinitionId === "string" &&
     typeof targetCardInstanceId === "string" &&
@@ -2784,8 +2785,6 @@ function runnerCoverageSearchChoiceBinding(
     | {
         kind?: unknown;
         phase?: unknown;
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
         gap?: {
           requiredRole?: unknown;
           targetServerId?: unknown;
@@ -2802,8 +2801,7 @@ function runnerCoverageSearchChoiceBinding(
   if (
     moduleState?.kind !== "coverage" ||
     moduleState.phase !== "search_answer" ||
-    typeof moduleState.selectedSearchActionId !== "string" ||
-    typeof moduleState.selectedSearchStateVersion !== "number" ||
+    !hasCoverageSearchBinding(moduleState) ||
     moduleState.selectedSearchStateVersion !== portfolio?.stateVersion ||
     moduleState.selectedSearchStateVersion > input.playerView.stateVersion ||
     typeof moduleState.gap?.requiredRole !== "string"
