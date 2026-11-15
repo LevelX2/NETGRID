@@ -3226,7 +3226,9 @@ Erhalt bereits ausführbarer Remote-Routen.
 Informationsgrenzen. Die Dateien `run-window-*-continuation.ts` sowie
 `run-window-selected-origin.ts` und `run-window-choice-binding.ts` binden
 Runstart, Zahlungen, Breakerfolgen, Trace, Vacuum Link und die zugehörigen
-Choices an die ausgewählte Action und StateVersion. Der Owner konsumiert
+Choices an die ausgewählte Action und StateVersion. Vor dem Speichern
+eines Ursprungs aus einer Planroute müssen LegalAction, Timingpunkt,
+StateVersion und Step-Bindung übereinstimmen. Der Owner konsumiert
 eng typisierte Dienste aus `run-window-services.ts`; er importiert keinen
 Runtime-Dispatcher und keine Planregistry zurück.
 

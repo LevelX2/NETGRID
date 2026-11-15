@@ -111,7 +111,6 @@ export function corpPreparedScoreRemoteAgendaSearchComponent<
   const burstEconomy = corpBurstEconomyOperationForAction(
     input,
     action,
-    dependencies,
     actionSemanticCandidate,
   );
   const drawsCards =

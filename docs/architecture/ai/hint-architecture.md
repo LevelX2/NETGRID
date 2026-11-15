@@ -32,7 +32,10 @@ wirkt bei der Vorbereitung einer neuen Installation.
 Mechanische oder annotierte Fakten werden an ihrer Autorenquelle geändert,
 anschließend wird das Bündel erzeugt. Generierte Hintdatensätze werden nicht
 von Hand korrigiert. Schema-/Compilerstand und Quellenfingerprints werden
-beim Laden validiert; ein fehlerhaftes Artefakt verlangt einen Ursachenfix.
+beim Laden validiert. Der Loader verwendet für Capability-Semantik dieselbe
+Ontologieprüfung wie die übrige Hint-Validierung, einschließlich Effekt,
+Zielprofil und Strategiebindung. Ein fehlerhaftes Artefakt verlangt einen
+Ursachenfix.
 
 Aktuelle Befehle aus [package.json](../../../package.json):
 

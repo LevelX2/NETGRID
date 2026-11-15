@@ -409,10 +409,9 @@ export function corpVisibleCardIsAgenda(card: VisibleCard): boolean {
   );
 }
 
-export function corpBurstEconomyOperationForAction<TConsumer extends string>(
+export function corpBurstEconomyOperationForAction(
   input: AiDecisionInput,
   action: LegalAction,
-  _dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): CorpBurstEconomyOperation | undefined {
   if (

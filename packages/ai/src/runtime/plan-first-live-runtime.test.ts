@@ -23155,7 +23155,7 @@ describe("authoritative plan-first live runtime", () => {
       { source: "game_rule" },
     );
     const input = aiInput("runner", [runHq, credit, endTurn]);
-    input.playerView.stateVersion = 20;
+    reissueActionsAtStateVersion(input, 20);
     input.playerView.turnSerial = 9;
     input.playerView.own.agendaPoints = 6;
     input.playerView.own.clicks = 3;
@@ -23204,7 +23204,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const noAccess = structuredClone(input);
-    noAccess.playerView.stateVersion = 22;
+    reissueActionsAtStateVersion(noAccess, 22);
     noAccess.eventTail = [
       {
         eventId: "hq-run-start-no-access",
@@ -23244,7 +23244,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(noAccessDecision.actionId).not.toBe(runHq.actionId);
 
     const developedAfterNoAccess = structuredClone(noAccess);
-    developedAfterNoAccess.playerView.stateVersion = 23;
+    reissueActionsAtStateVersion(developedAfterNoAccess, 23);
     developedAfterNoAccess.playerView.own.clicks = 2;
     developedAfterNoAccess.playerView.own.credits = 6;
     developedAfterNoAccess.eventTail.push({
@@ -23281,7 +23281,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const accessed = structuredClone(input);
-    accessed.playerView.stateVersion = 22;
+    reissueActionsAtStateVersion(accessed, 22);
     accessed.eventTail = [
       {
         eventId: "hq-run-start",
@@ -23337,7 +23337,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const stateVersionOnly = structuredClone(dtoAccessed);
-    stateVersionOnly.playerView.stateVersion = 40;
+    reissueActionsAtStateVersion(stateVersionOnly, 40);
     resetResidentPlanPortfolioMemory();
     expect(
       context.chooseSemanticRuntimeAction(stateVersionOnly, {
@@ -23394,7 +23394,7 @@ describe("authoritative plan-first live runtime", () => {
     }
 
     const refreshed = structuredClone(dtoAccessed);
-    refreshed.playerView.stateVersion = 24;
+    reissueActionsAtStateVersion(refreshed, 24);
     refreshed.eventTail.push({
       eventId: "corp-draw",
       type: "draw_card",
@@ -23421,7 +23421,7 @@ describe("authoritative plan-first live runtime", () => {
 
     const nextTurn = structuredClone(dtoAccessed);
     nextTurn.playerView.turnSerial = 10;
-    nextTurn.playerView.stateVersion = 30;
+    reissueActionsAtStateVersion(nextTurn, 30);
     resetResidentPlanPortfolioMemory();
     expect(
       context.chooseSemanticRuntimeAction(nextTurn, {
@@ -23459,7 +23459,7 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
     );
     const input = aiInput("runner", [runHq, runRd, credit]);
-    input.playerView.stateVersion = 32;
+    reissueActionsAtStateVersion(input, 32);
     input.playerView.turnSerial = 12;
     input.playerView.own.agendaPoints = 5;
     input.playerView.own.clicks = 3;
@@ -23519,7 +23519,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const bothConsumed = structuredClone(input);
-    bothConsumed.playerView.stateVersion = 36;
+    reissueActionsAtStateVersion(bothConsumed, 36);
     bothConsumed.eventTail.push(
       {
         eventId: "rd-run-start",
@@ -23587,7 +23587,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const converted = structuredClone(bothConsumed);
-    converted.playerView.stateVersion = 38;
+    reissueActionsAtStateVersion(converted, 38);
     converted.eventTail.push({
       eventId: "rd-trash",
       type: "trash_accessed_card",
@@ -23613,7 +23613,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const convertedDuringMultiaccess = structuredClone(input);
-    convertedDuringMultiaccess.playerView.stateVersion = 36;
+    reissueActionsAtStateVersion(convertedDuringMultiaccess, 36);
     convertedDuringMultiaccess.eventTail.push(
       {
         eventId: "rd-multiaccess-run-start",
@@ -23681,7 +23681,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const laterUnconvertedRun = structuredClone(convertedDuringMultiaccess);
-    laterUnconvertedRun.playerView.stateVersion = 39;
+    reissueActionsAtStateVersion(laterUnconvertedRun, 39);
     laterUnconvertedRun.eventTail.push(
       {
         eventId: "rd-later-run-start",
@@ -31486,6 +31486,17 @@ function bindDataWallInstallRunQuotes(input: AiDecisionInput): void {
       }).effectiveRunQuote,
     );
   }
+}
+
+function reissueActionsAtStateVersion(
+  input: AiDecisionInput,
+  stateVersion: number,
+): void {
+  input.playerView.stateVersion = stateVersion;
+  input.legalActions = input.legalActions.map((action) => ({
+    ...action,
+    expiresAtStateVersion: stateVersion,
+  }));
 }
 
 function liveContext(overrides: Record<string, unknown> = {}) {

@@ -10,35 +10,17 @@ import {
   type SemanticRuntimeCorpScoreDependencies,
 } from "./semantic-runtime-corp-score";
 
-export type SemanticRuntimeCorpScoreContext = {
-  semanticRuntimeCorpScore: (
-    input: AiDecisionInput,
-    action: LegalAction,
-    scopeId: string,
-    actionSemanticCandidate?: ActionSemanticCandidate,
-    creditDemands?: readonly CreditDemand[],
-  ) => number;
-  semanticRuntimeCorpScoreComponents: (
-    input: AiDecisionInput,
-    action: LegalAction,
-    scopeId: string,
-    actionSemanticCandidate?: ActionSemanticCandidate,
-    creditDemands?: readonly CreditDemand[],
-  ) => AiDecisionScoreComponent[];
-};
-
-export function createSemanticRuntimeCorpScoreContext<TConsumer extends string>(
-  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
-  scoreFromComponents: (components: AiDecisionScoreComponent[]) => number,
-): SemanticRuntimeCorpScoreContext {
-  function semanticRuntimeCorpScoreComponents(
+export function createSemanticRuntimeCorpScoreComponents<
+  TConsumer extends string,
+>(dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>) {
+  return (
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
     creditDemands: readonly CreditDemand[] = [],
-  ): AiDecisionScoreComponent[] {
-    return buildSemanticRuntimeCorpScoreComponents(
+  ): AiDecisionScoreComponent[] =>
+    buildSemanticRuntimeCorpScoreComponents(
       input,
       action,
       scopeId,
@@ -46,25 +28,4 @@ export function createSemanticRuntimeCorpScoreContext<TConsumer extends string>(
       actionSemanticCandidate,
       creditDemands,
     );
-  }
-
-  return {
-    semanticRuntimeCorpScore: (
-      input,
-      action,
-      scopeId,
-      actionSemanticCandidate,
-      creditDemands = [],
-    ) =>
-      scoreFromComponents(
-        semanticRuntimeCorpScoreComponents(
-          input,
-          action,
-          scopeId,
-          actionSemanticCandidate,
-          creditDemands,
-        ),
-      ),
-    semanticRuntimeCorpScoreComponents,
-  };
 }

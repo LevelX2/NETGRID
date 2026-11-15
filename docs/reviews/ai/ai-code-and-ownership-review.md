@@ -973,7 +973,6 @@ Die bereits vorhandene tiefe Capability-Validierung im Artefakt-Loader
 wiederverwenden und dessen Feld-Whitelist erhalten. Abnahme mit dem
 gültigen Artefakt und gezielt ungültigen Effekt-, Ziel- und Strategiefeldern.
 Aufwand ein halber bis ein Tag.
-[Flache Validierung](../../../packages/ai/src/ai-hint-contracts.ts#L143) ·
 [Ontologie](../../../packages/ai/src/hint-ontology.ts#L1845) ·
 [Loader](../../../packages/ai/src/generated-ai-hint-artifact-validation.ts#L79) ·
 [Abnehmer](../../../packages/ai/src/actions/action-card-semantic-profiles.ts#L160)
@@ -990,7 +989,7 @@ Den ungenutzten skalaren Corp-Pfad aus der Factory entfernen und die
 Komposition auf den tatsächlich übergebenen Komponentenprovider
 zusammenziehen. Abnahme mit gleichen Komponenten und gleicher Reihenfolge
 für die bestehenden Corp-Diagnosefälle. Aufwand ungefähr zwei bis vier Stunden.
-[Context](../../../packages/ai/src/runtime/semantic-runtime-corp-score-context.ts#L30) ·
+[Context](../../../packages/ai/src/runtime/semantic-runtime-corp-score-context.ts#L13) ·
 [Einziger Anschluss](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts#L128)
 
 ### 6. `runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts`
@@ -1119,3 +1118,25 @@ genau einen Aufruf für das ausgewählte Remote.
 Die thematische Prüfung umfasst 623 bestandene Tests in 15 Dateien. Die
 beiden direkt geänderten Testdateien wurden im endgültigen Stand mit
 29 bestandenen Tests geprüft.
+
+### Umsetzung der offenen P2-Befunde und der kleinen P3-Bereinigungen
+
+P2 aus Punkt 4, 7 und 9 ist umgesetzt. Der Hint-Loader verwendet die
+kanonische Capability-Validierung und meldet unzulässige Werte mit dem
+Feldpfad. Die Kennzahl verlangt einen tatsächlich unmittelbar eingetretenen
+Corp-Deckout. Der Runner-Planbinder verlangt ein aktuelles LegalAction-Angebot
+und prüft dessen Timingpunkt und die aktuelle Step-/Routenbindung, bevor er
+die Fortsetzung speichert. Die nativen Vacuum-Link-Gegenproben erhalten den
+ursprünglichen Root und Executor.
+
+P3 aus Punkt 5 und der kleine Signaturschnitt aus Punkt 6 sind umgesetzt.
+Der Corp-Scoring-Kontext erstellt nur die verwendeten Komponenten und
+die reine Weiterleitungsdatei entfiel. Der Economy-Adapter erhält keine
+ungenutzte Bewertungsabhängigkeit mehr. Die Coverage-Suchbindung aus Punkt
+8 bleibt ein eigener möglicher Änderungsschnitt. Beim Advance-Preis aus
+Punkt 6 belegt die Gegenprobe eine Änderungsfalle für eine spätere Engine-
+Erweiterung.
+
+681 fokussierte Tests in 28 Dateien bestanden. Der KI-Typecheck,
+`check:ai` und die Reproduzierbarkeitsprüfung für das generierte
+CardSpec-Hint-Artefakt sind grün.

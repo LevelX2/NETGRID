@@ -22,6 +22,59 @@ import {
 import { validateGeneratedArtifact } from "./generated-ai-hint-artifact-validation";
 
 describe("CardSpec generated AI hint artifact", () => {
+  it.each([
+    [{ effects: [{ kind: "nonexistent_effect" }] }, "[0].effects[0].kind"],
+    [
+      { targetProfiles: [{ zone: "foreign_zone" }] },
+      "[0].targetProfiles[0].zone",
+    ],
+    [
+      {
+        strategySupportPairs: [
+          {
+            strategyId: "score",
+            role: "nonexistent_role",
+            confidence: "metadata",
+            evidence: ["fixture"],
+          },
+        ],
+      },
+      "[0].strategySupportPairs[0].role",
+    ],
+    [{ costProfile: { credits: -1 } }, "[0].costProfile.credits"],
+    [{ unexpectedField: true }, "[0]"],
+  ] as const)(
+    "validates stored capability semantics at %s",
+    (changes, field) => {
+      const cardId = "onr_classic_001_data-fort-remapping";
+      const artifact = {
+        ...generatedArtifact,
+        cards: generatedArtifact.cards.map((record) =>
+          record.cardId === cardId
+            ? {
+                ...record,
+                hint: {
+                  ...record.hint,
+                  actionCapabilitySemantics: [
+                    {
+                      capabilityKey: "spend_remap_counter_end_run",
+                      ...changes,
+                    },
+                  ],
+                },
+              }
+            : record,
+        ),
+      };
+      expect(() => validateGeneratedArtifact(artifact)).toThrow(
+        "invalid_card_spec_ai_hint_artifact_hint:" +
+          cardId +
+          ":$.actionCapabilitySemantics" +
+          field,
+      );
+    },
+  );
+
   it("is the canonical active output of the current compiler inputs", async () => {
     const compiled = buildCardSpecAiHintArtifact();
 
@@ -207,6 +260,7 @@ describe("CardSpec generated AI hint artifact", () => {
         "packages/ai/src/catalog-ai-hint-authority.ts",
         "packages/ai/src/catalog-ai-hint-public.ts",
         "packages/ai/src/generated-ai-hint-artifact-validation.ts",
+        "packages/ai/src/hint-ontology.ts",
         "packages/runtime-data/src/card-spec-ai-hints.ts",
       ].sort(),
     );

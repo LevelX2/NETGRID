@@ -4,19 +4,25 @@ import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { summarizeRunnerActionValuationBaselineMetrics } from "./runner-action-valuation-baseline-metrics";
 
 describe("summarizeRunnerActionValuationBaselineMetrics", () => {
-  it("separates premature Runner yield from zero-click and deckout controls", () => {
+  it("counts a premature yield even when a stale marker claims deckout", () => {
     const metrics = summarizeRunnerActionValuationBaselineMetrics([
-      summary([
-        action("end_turn", 4),
-        action("end_turn", 0),
-        action("end_turn", 4, ["runner_inevitable_corp_deckout:true"]),
-      ]),
+      summary(
+        [
+          action("end_turn", 4),
+          action("end_turn", 0),
+          {
+            ...action("end_turn", 4, ["runner_inevitable_corp_deckout:true"]),
+            actionableAlternativeCount: 2,
+          },
+        ],
+        { winner: "corp", gameEndReason: "agenda_points" },
+      ),
     ]);
 
     expect(metrics).toMatchObject({
       runnerEndTurnsWithClicks: 2,
-      runnerInevitableCorpDeckoutEndTurnsWithClicks: 1,
-      runnerPrematureEndTurnsWithClicks: 1,
+      runnerInevitableCorpDeckoutEndTurnsWithClicks: 0,
+      runnerPrematureEndTurnsWithClicks: 2,
     });
   });
 
