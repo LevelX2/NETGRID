@@ -795,6 +795,10 @@ Die Runtime orchestriert folgende Schritte:
 
 Die [Zug-/Kampagnendetails](turn-campaign-planner.md) definieren Suche,
 Prioritätspflichten, Informationsgrenzen, Rematerialisierung und Fortschreibung.
+Das Assessment des Schedulers arbeitet vor der Executor-Bindung. Die
+TurnPlanner-Vorbereitung verwendet das gebundene Portfolio. Wiederverwendung
+von Assessments oder daraus abgeleiteten Routen muss deshalb die
+Executorrolle, offene Needs, Support und aktuelle Dispositionen einbeziehen.
 Dieser Ablauf ist keine Aufforderung, eine zweite Scheduler-API einzuführen.
 
 ## 11. Planpriorisierung

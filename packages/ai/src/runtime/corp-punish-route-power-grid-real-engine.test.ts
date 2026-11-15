@@ -39,7 +39,7 @@ const RUNNER_DECK = withCards(
 );
 
 describe("Power Grid decision-local real-Engine punish quote", () => {
-  it("executes the exact X=1 LegalAction and resolves a real X<N target choice deterministically [legacy_compare]", () => {
+  it("executes the exact X=1 LegalAction and resolves a real X<N target choice deterministically", () => {
     let state = powerGridState("power-grid-execute", 3, {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE, CYBERNETICS],
     });
@@ -126,9 +126,11 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const playDecision = chooseCorpAction(input, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(playDecision.actionId).toBe(actions[1]!.actionId);
+    expect(
+      playDecision.decisionDebug?.planFirstDecision?.selectionAuthority,
+    ).toBe("turn_plan_commitment");
     expect(playDecision.fallbackUsed).toBe(false);
     state = applyDecision(state, playDecision);
 
@@ -164,7 +166,6 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
 
     const choiceDecision = chooseCorpAction(decisionInput(state), {
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, choiceDecision)).toBe("resolve_choice");
     expect(choiceDecision.selectedChoices).toEqual({
@@ -177,7 +178,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     expect(state.runner.rig.hardware).toHaveLength(hardwareBefore - 1);
   });
 
-  it("funds an exact one-credit gap under the punish parent, then re-quotes, plays and resolves the choice [legacy_compare]", () => {
+  it("funds an exact one-credit gap under the punish parent, then re-quotes, plays and resolves the choice", () => {
     let state = powerGridState("power-grid-funding", 0, {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE],
     });
@@ -220,7 +221,6 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const fundingDecision = chooseCorpAction(initialInput, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, fundingDecision)).toBe("gain_credit");
     expect(fundingDecision.evidence).toContain(
@@ -241,13 +241,11 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const playDecision = chooseCorpAction(fundedInput, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(playDecision.actionId).toBe(fundedActions[1]!.actionId);
     state = applyDecision(state, playDecision);
     const choiceDecision = chooseCorpAction(decisionInput(state), {
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, choiceDecision)).toBe("resolve_choice");
     expect(choiceDecision.selectedChoices?.selectedOptionIds).toHaveLength(1);

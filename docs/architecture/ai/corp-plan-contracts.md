@@ -1374,6 +1374,10 @@ Score und die aktuellen Defense-Needs in derselben Reihenfolge wie die bisherige
 Runtime. `defense-memory.ts` bindet Draw-Versuche und HQ-Halteentscheidungen.
 `defense-run-response.ts` besitzt aktuelle Rez- und Encounterbewertungen;
 Choice-Signale, Fortsetzungen und Payload-Bindungen liegen ebenfalls hier.
+`defense-current-route-quotes.ts` bindet die Installations- und Rez-Routen an
+die aktuelle LegalAction, den relevanten Server, den ICE-Typ, den Punktestand
+und die exakte Quotenvariante. `defense-plan-module.ts` vergleicht die
+fachlichen Routen und trifft die Allokationsentscheidung.
 
 Die aktuelle Installationsroute bindet neben Credits auch obligatorische
 Rez-Punktkosten an die vollständige Engine-Quote, die ausgewählten ICE und
