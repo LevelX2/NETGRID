@@ -5,6 +5,7 @@ import {
   BASE_URL,
   createHumanVsAiGame,
   createHumanVsHumanLobby,
+  createHumanVsHumanSeriesLobby,
   exerciseCardDisplayModes,
   expectActiveBoardBasics,
   expectNoCriticalLayoutOverflow,
@@ -286,6 +287,55 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await page.getByRole("button", { name: "Board ansehen" }).click();
     await page.getByRole("button", { name: "Startbildschirm" }).click();
     await expect(page.getByTestId("setup-screen")).toBeVisible();
+  });
+
+  test("bestätigt das Verlassen einer laufenden Matchserie im Ergebnisfenster", async ({
+    page,
+    browser,
+  }) => {
+    await page.setViewportSize(VIEWPORTS.desktop);
+    const joiner = await newContextPage(browser, "desktop");
+    try {
+      const joinUrl = await createHumanVsHumanSeriesLobby(
+        page,
+        "leave-series-confirmation",
+      );
+      await joinHumanVsHumanLobby(joiner.page, joinUrl);
+      await readyAndWaitForActive(page, joiner.page);
+
+      await page.getByRole("button", { name: "Aufgeben", exact: true }).click();
+      await page
+        .getByRole("alertdialog", { name: "Spiel aufgeben?" })
+        .getByRole("button", { name: "Aufgeben", exact: true })
+        .click();
+
+      const result = page.getByRole("dialog");
+      const leaveSeries = result.getByRole("button", { name: "Serie verlassen" });
+      const confirmation = page.getByRole("alertdialog", {
+        name: "Matchserie verlassen?",
+      });
+      await expect(result).toContainText("Serienspiel 1/2");
+      await leaveSeries.click();
+      await expect(confirmation).toBeVisible();
+      const cancel = confirmation.getByRole("button", { name: "Abbrechen" });
+      await expect(cancel).toBeFocused();
+      await cancel.click();
+      await expect(confirmation).toBeHidden();
+      await expect(leaveSeries).toBeFocused();
+      await expect(result).toContainText("Serienspiel 1/2");
+
+      await leaveSeries.click();
+      await page.keyboard.press("Escape");
+      await expect(confirmation).toBeHidden();
+      await expect(leaveSeries).toBeFocused();
+
+      await leaveSeries.click();
+      await confirmation.getByRole("button", { name: "Serie verlassen" }).click();
+      await expect(page.getByTestId("setup-screen")).toBeVisible();
+      await expect(result).toBeHidden();
+    } finally {
+      await joiner.context.close();
+    }
   });
 
   test("Tablet-Viewport prüft Board, Run-Ziel, direkte Server-Run-Actions und Card Display", async ({

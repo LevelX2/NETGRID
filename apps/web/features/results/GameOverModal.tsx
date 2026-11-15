@@ -1,7 +1,9 @@
 import { Award, Save } from "lucide-react";
 import type { ApiGameResultSummary, Side } from "@netgrid/shared";
+import { useId, useRef, useState } from "react";
 import { useTranslations } from "use-intl/react";
 
+import { ConfirmationDialog } from "../app-shell/ConfirmationDialog";
 import { Stat } from "../game-board/ResourceStrip";
 import { shortDiagnosticsHash } from "../debug/DiagnosticsDrawer";
 import {
@@ -45,6 +47,8 @@ export function GameOverModal({
   nextSeriesPending?: boolean;
 }) {
   const t = useTranslations("Results.gameOver");
+  const [confirmingSeriesExit, setConfirmingSeriesExit] = useState(false);
+  const exitButtonRef = useRef<HTMLButtonElement>(null);
   const sideName = (value: Side) => t(value);
   const playerLabel = (value: Side) => {
     const name = value === side ? playerName?.trim() : opponentName?.trim();
@@ -68,12 +72,7 @@ export function GameOverModal({
             player: playerLabel(result.winner),
             side: sideName(result.winner),
           });
-  const gameStanding = gameStandingForResult(
-    result,
-    side,
-    playerName,
-    opponentName,
-  );
+  const gameStanding = gameStandingForResult(result, side);
   const winnerMotif = resultWinnerMotifFor(result.winner);
   const winnerMotifImage =
     winnerMotif === "runner"
@@ -81,24 +80,15 @@ export function GameOverModal({
       : winnerMotif === "corp"
         ? "/result-motifs/result-corp-victory.png"
         : undefined;
-  const opponentSideLabel = opponentSide(side);
+  const opponent = opponentSide(side);
+  const series = result.series;
   const playerSeriesLabel = observerMode ? t("aiA") : playerLabel(side);
-  const opponentSeriesLabel = observerMode
-    ? t("aiB")
-    : playerLabel(opponentSideLabel);
-  const playerStandingLabel = playerRoleLabel(side);
-  const opponentStandingLabel = playerRoleLabel(opponentSideLabel);
-  const seriesViewerScoreLabel = observerMode
-    ? playerSeriesLabel
-    : playerStandingLabel;
-  const seriesOpponentScoreLabel = observerMode
-    ? opponentSeriesLabel
-    : opponentStandingLabel;
+  const opponentSeriesLabel = observerMode ? t("aiB") : playerLabel(opponent);
   const seriesHeadline =
-    result.series?.status === "finished"
-      ? result.series.viewerSeriesOutcome === "won"
+    series?.status === "finished"
+      ? series.viewerSeriesOutcome === "won"
         ? t("seriesWon", { player: playerSeriesLabel })
-        : result.series.viewerSeriesOutcome === "lost"
+        : series.viewerSeriesOutcome === "lost"
           ? t("seriesWon", { player: opponentSeriesLabel })
           : t("seriesDraw")
       : null;
@@ -111,17 +101,6 @@ export function GameOverModal({
   const reasonText = seriesHeadline
     ? t("lastGame", { outcome: lastGameOutcomeText, reason: resultReason })
     : resultReason;
-  const seriesText = result.series
-    ? t("seriesStatus", {
-        player: playerSeriesLabel,
-        opponent: opponentSeriesLabel,
-        playerWins: result.series.viewerWins,
-        opponentWins: result.series.opponentWins,
-        draws: result.series.draws,
-      })
-    : null;
-  const seriesScoreLabel =
-    result.series?.status === "finished" ? t("finalScore") : t("interimScore");
   const retentionLabel = retentionProtected
     ? t("removeReplayProtection")
     : t("protectReplay");
@@ -130,22 +109,31 @@ export function GameOverModal({
     : t("protectReplayHelp");
   const exitNeedsConfirmation = Boolean(onNextSeriesGame);
   const exitLabel = exitNeedsConfirmation ? t("leaveSeries") : t("backToStart");
+  const showExitConfirmation = exitNeedsConfirmation && confirmingSeriesExit;
   const handleNewMatch = () => {
-    if (exitNeedsConfirmation && !window.confirm(t("leaveSeriesConfirm"))) {
+    if (exitNeedsConfirmation) {
+      setConfirmingSeriesExit(true);
       return;
     }
     onNewMatch();
   };
+  const cancelSeriesExit = () => {
+    setConfirmingSeriesExit(false);
+    requestAnimationFrame(() => exitButtonRef.current?.focus());
+  };
+  const confirmSeriesExit = () => {
+    setConfirmingSeriesExit(false);
+    onNewMatch();
+  };
   return (
-    <div
-      className={`gameOverOverlay ${result.viewerOutcome}`}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="game-over-title"
-    >
+    <div className={`gameOverOverlay ${result.viewerOutcome}`}>
       <div className="gameOverBackdrop" aria-hidden="true" />
       <section
         className={`gameOverPanel ${winnerMotifImage ? "withMotifHero" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="game-over-title"
+        inert={showExitConfirmation}
       >
         <div
           className={`gameOverHero ${winnerMotifImage ? "withVisualMotif" : ""}`}
@@ -155,37 +143,53 @@ export function GameOverModal({
             <h2 id="game-over-title">{headlineText}</h2>
             <p>{reasonText}</p>
           </div>
+          <div className="gameOverScoreboard">
+            {series ? (
+              <MatchPointScore
+                title={t(
+                  series.status === "finished" ? "finalScore" : "interimScore",
+                )}
+                viewer={{
+                  label: playerSeriesLabel,
+                  points: series.viewerMatchPoints,
+                  detail: t("seriesPlayerStats", {
+                    wins: series.viewerWins,
+                    agenda: series.viewerAgendaPoints,
+                  }),
+                }}
+                opponent={{
+                  label: opponentSeriesLabel,
+                  points: series.opponentMatchPoints,
+                  detail: t("seriesPlayerStats", {
+                    wins: series.opponentWins,
+                    agenda: series.opponentAgendaPoints,
+                  }),
+                }}
+                note={t("draws", { count: series.draws })}
+              />
+            ) : null}
+            <MatchPointScore
+              title={
+                series
+                  ? t("seriesGame", {
+                      game: series.gameNumber,
+                      total: series.gamesPlanned,
+                    })
+                  : t("gameScore")
+              }
+              viewer={{
+                label: playerRoleLabel(side),
+                points: gameStanding.viewerMatchPoints,
+              }}
+              opponent={{
+                label: playerRoleLabel(opponent),
+                points: gameStanding.opponentMatchPoints,
+              }}
+              compact={Boolean(series)}
+            />
+          </div>
           <ResultWinnerMotif motif={winnerMotif} />
         </div>
-        {gameStanding ? (
-          <div className="gameStandingStrip" aria-label={t("gameScore")}>
-            <div>
-              <span>{t("gameScore")}</span>
-              <small>
-                {result.winner === "draw"
-                  ? t("standingDraw")
-                  : t("standingWinner", {
-                      winner: playerRoleLabel(result.winner),
-                      loser: playerRoleLabel(opponentSide(result.winner)),
-                      points:
-                        result.winner === "runner"
-                          ? result.corpAgendaPoints
-                          : result.runnerAgendaPoints,
-                    })}
-              </small>
-            </div>
-            <div className="gameStandingScore">
-              <span>
-                {playerStandingLabel} {gameStanding.viewerMatchPoints} MP ·{" "}
-                {gameStanding.viewerAgendaPoints} Agenda
-              </span>
-              <span>
-                {opponentStandingLabel} {gameStanding.opponentMatchPoints} MP ·{" "}
-                {gameStanding.opponentAgendaPoints} Agenda
-              </span>
-            </div>
-          </div>
-        ) : null}
         <div className="gameOverStats">
           <Stat
             label={t("agenda")}
@@ -206,70 +210,6 @@ export function GameOverModal({
           <Stat value={result.stolenAgendaCount} unit={t("stolen")} />
           <Stat value={result.scoredAgendaCount} unit={t("scored")} />
         </div>
-        {result.series ? (
-          <div
-            className={`seriesStrip ${result.series.status === "finished" ? "finished" : "inProgress"}`}
-          >
-            <div>
-              <span>
-                {t("seriesGame", {
-                  game: result.series.gameNumber,
-                  total: result.series.gamesPlanned,
-                })}
-              </span>
-              <small>{seriesText}</small>
-            </div>
-            {result.series ? (
-              <div
-                className="seriesResultScore"
-                aria-label={t("seriesScoreAria", {
-                  label: seriesScoreLabel,
-                  player: seriesViewerScoreLabel,
-                  playerPoints: result.series.viewerMatchPoints,
-                  opponent: seriesOpponentScoreLabel,
-                  opponentPoints: result.series.opponentMatchPoints,
-                })}
-              >
-                <span className="seriesResultLabel">{seriesScoreLabel}</span>
-                <strong>
-                  {result.series.viewerMatchPoints} :{" "}
-                  {result.series.opponentMatchPoints}
-                </strong>
-                <small>
-                  <span>{seriesViewerScoreLabel}</span>
-                  <span>{seriesOpponentScoreLabel}</span>
-                </small>
-              </div>
-            ) : null}
-            <div className="seriesScore">
-              <span>
-                {t("wins", {
-                  player: seriesViewerScoreLabel,
-                  count: result.series.viewerWins,
-                })}
-              </span>
-              <span>
-                {t("wins", {
-                  player: seriesOpponentScoreLabel,
-                  count: result.series.opponentWins,
-                })}
-              </span>
-              <span>{t("draws", { count: result.series.draws })}</span>
-              <span>
-                {t("agendaPlayer", {
-                  player: seriesViewerScoreLabel,
-                  points: result.series.viewerAgendaPoints,
-                })}
-              </span>
-              <span>
-                {t("agendaPlayer", {
-                  player: seriesOpponentScoreLabel,
-                  points: result.series.opponentAgendaPoints,
-                })}
-              </span>
-            </div>
-          </div>
-        ) : null}
         <div className="gameOverFooter">
           <div>
             <span>
@@ -311,15 +251,79 @@ export function GameOverModal({
               </button>
             ) : null}
             <button
+              ref={exitButtonRef}
               className={`button ${onNextSeriesGame ? "seriesExitButton" : "primary"}`}
               onClick={handleNewMatch}
               title={exitLabel}
+              disabled={nextSeriesPending}
             >
               {exitLabel}
             </button>
           </div>
         </div>
       </section>
+      {showExitConfirmation ? (
+        <ConfirmationDialog
+          request={{
+            title: t("leaveSeriesTitle"),
+            message: t("leaveSeriesConfirm"),
+            confirmLabel: exitLabel,
+            tone: "danger",
+            onConfirm: confirmSeriesExit,
+          }}
+          onCancel={cancelSeriesExit}
+          onConfirm={confirmSeriesExit}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+type ScoreParticipant = {
+  label: string;
+  points: number;
+  detail?: string;
+};
+
+function MatchPointScore({
+  title,
+  viewer,
+  opponent,
+  note,
+  compact = false,
+}: {
+  title: string;
+  viewer: ScoreParticipant;
+  opponent: ScoreParticipant;
+  note?: string;
+  compact?: boolean;
+}) {
+  const t = useTranslations("Results.gameOver");
+  const headingId = useId();
+  return (
+    <section
+      className={`resultScore ${compact ? "compact" : ""}`}
+      aria-labelledby={headingId}
+    >
+      <h3 id={headingId}>{t("matchPointScore", { title })}</h3>
+      <div className="resultScorePair">
+        <ScoreSide participant={viewer} />
+        <span className="resultScoreSeparator" aria-hidden="true">
+          :
+        </span>
+        <ScoreSide participant={opponent} />
+      </div>
+      {note ? <small className="resultScoreNote">{note}</small> : null}
+    </section>
+  );
+}
+
+function ScoreSide({ participant }: { participant: ScoreParticipant }) {
+  return (
+    <div className="resultScoreSide">
+      <span>{participant.label}</span>
+      <strong>{participant.points}</strong>
+      {participant.detail ? <small>{participant.detail}</small> : null}
     </div>
   );
 }

@@ -15,7 +15,6 @@ import { useLocale, useTranslations } from "use-intl/react";
 import { tooltipCardRulesText } from "../../i18n/card-rule-translations";
 
 import {
-  CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS,
   CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS,
   CARD_TOOLTIP_PIN_EVENT,
   type CardDisplayMode,
@@ -63,9 +62,11 @@ import {
   type DisplayVisibleCard,
 } from "./card-view-model";
 import { CardActionsPopover } from "./CardActionsPopover";
+import { useCardTooltipHover } from "./useCardTooltipHover";
 import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import {
   AdvancementGems,
+  AgendaDifficultyBadge,
   CounterDisplayBadge,
   IceModifierBadges,
   IceStrengthBadge,
@@ -179,12 +180,6 @@ export function CardView({
   const { tooltipPercent } = useCardScaleSettings();
   const tooltipViewId = useId();
   const cardRef = useRef<HTMLButtonElement | null>(null);
-  const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-  const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
   const tooltipOutsideCloseTimerRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -192,6 +187,7 @@ export function CardView({
   const lastTouchTooltipPinRef = useRef(0);
   const tooltipPinnedVisibleRef = useRef(false);
   const tooltipRef = useRef<HTMLSpanElement | null>(null);
+  const hover = useCardTooltipHover(cardRef, tooltipRef, hoverOpenDelayMs);
   const [tooltipPositionStyle, setTooltipPositionStyle] =
     useState<CSSProperties>({});
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">(
@@ -203,7 +199,6 @@ export function CardView({
   const [actionMenuPositionStyle, setActionMenuPositionStyle] =
     useState<CSSProperties>({});
   const [suppressCardTooltip, setSuppressCardTooltip] = useState(false);
-  const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipPinnedVisible, setTooltipPinnedVisible] = useState(false);
   const [cardImageUnavailable, setCardImageUnavailable] = useState(false);
@@ -311,7 +306,7 @@ export function CardView({
     tooltipAvailable && (!suppressCardTooltip || tooltipPinnedVisible);
   const showTooltip =
     tooltipEnabled &&
-    (tooltipHoverVisible || tooltipFocusVisible || tooltipPinnedVisible);
+    (hover.visible || tooltipFocusVisible || tooltipPinnedVisible);
   const tooltipDomId = `${card.instanceId}-${tooltipViewId}`.replace(
     /[^A-Za-z0-9_-]/g,
     "-",
@@ -444,6 +439,28 @@ export function CardView({
         count: advancementDisplay.amount,
       })
     : null;
+  const { advancementRequirement, agendaDifficultyModifier } = card;
+  let agendaDifficultyBadge: { value: string; tooltip: string } | undefined;
+  if (
+    card.known &&
+    card.type === "agenda" &&
+    !preview &&
+    !forceCardBack &&
+    advancementRequirement !== undefined &&
+    agendaDifficultyModifier !== undefined &&
+    agendaDifficultyModifier !== 0
+  ) {
+    const sign = agendaDifficultyModifier < 0 ? "−" : "+";
+    const value = `${sign}${Math.abs(agendaDifficultyModifier)}`;
+    agendaDifficultyBadge = {
+      value,
+      tooltip: t("agendaDifficultyModifier", {
+        value,
+        printed: advancementRequirement - agendaDifficultyModifier,
+        current: advancementRequirement,
+      }),
+    };
+  }
   const strengthModifier = strengthModifierBadgeValue(card, {
     preview,
     forceCardBack: Boolean(forceCardBack),
@@ -501,6 +518,7 @@ export function CardView({
     concealedRunnerResourceAriaSuffix,
     visibleStrengthAriaSuffix,
     strengthModifierAriaSuffix,
+    agendaDifficultyBadge?.tooltip,
     counterAriaSuffix,
     scoreStateAriaSuffix,
   ]
@@ -550,20 +568,6 @@ export function CardView({
     const viewportLimit = Math.max(160, window.innerWidth - 32);
     const unscaled = showImageTooltip ? 220 : 300;
     return Math.min(Math.round(unscaled * tooltipScale), viewportLimit);
-  };
-
-  const clearTooltipOpenTimer = () => {
-    if (tooltipOpenTimerRef.current !== null) {
-      clearTimeout(tooltipOpenTimerRef.current);
-      tooltipOpenTimerRef.current = null;
-    }
-  };
-
-  const clearTooltipCloseTimer = () => {
-    if (tooltipCloseTimerRef.current !== null) {
-      clearTimeout(tooltipCloseTimerRef.current);
-      tooltipCloseTimerRef.current = null;
-    }
   };
 
   const clearTooltipOutsideCloseTimer = () => {
@@ -663,32 +667,10 @@ export function CardView({
     }
   };
 
-  const scheduleTooltipOpen = () => {
-    if (!tooltipEnabled) return;
-    clearTooltipCloseTimer();
-    if (tooltipHoverVisible) return;
-    clearTooltipOpenTimer();
-    tooltipOpenTimerRef.current = setTimeout(() => {
-      tooltipOpenTimerRef.current = null;
-      setTooltipHoverVisible(true);
-    }, hoverOpenDelayMs);
-  };
-
-  const scheduleTooltipClose = () => {
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
-    tooltipCloseTimerRef.current = setTimeout(() => {
-      tooltipCloseTimerRef.current = null;
-      setTooltipHoverVisible(false);
-    }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
-  };
-
   const setCounterHelpTooltipActive = (active: boolean) => {
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
     setSuppressCardTooltip(active);
     if (active) {
-      setTooltipHoverVisible(false);
+      hover.close();
       setTooltipFocusVisible(false);
     }
   };
@@ -699,10 +681,8 @@ export function CardView({
 
   useEffect(() => {
     if (tooltipAvailable) return;
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
+    hover.close();
     clearTooltipOutsideCloseTimer();
-    setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
     setPinnedTooltipVisible(false);
     setTooltipPositionStyle({});
@@ -710,11 +690,9 @@ export function CardView({
 
   const togglePinnedTooltip = () => {
     if (!canPinTooltip) return;
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
+    hover.close();
     clearTooltipOutsideCloseTimer();
     setSuppressCardTooltip(false);
-    setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
     const nextVisible = !tooltipPinnedVisibleRef.current;
     setPinnedTooltipVisible(nextVisible);
@@ -729,10 +707,8 @@ export function CardView({
   };
 
   const closePinnedTooltip = () => {
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
+    hover.close();
     clearTooltipOutsideCloseTimer();
-    setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
     setPinnedTooltipVisible(false);
   };
@@ -749,11 +725,9 @@ export function CardView({
           ? (event.detail as { ownerId?: unknown } | null)?.ownerId
           : undefined;
       if (ownerId === tooltipOwnerId) return;
-      clearTooltipOpenTimer();
-      clearTooltipCloseTimer();
+      hover.close();
       clearTooltipOutsideCloseTimer();
       setPinnedTooltipVisible(false);
-      setTooltipHoverVisible(false);
       setTooltipFocusVisible(false);
     };
     window.addEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipPins);
@@ -810,8 +784,6 @@ export function CardView({
 
   useEffect(
     () => () => {
-      clearTooltipOpenTimer();
-      clearTooltipCloseTimer();
       clearTooltipOutsideCloseTimer();
     },
     [],
@@ -833,16 +805,7 @@ export function CardView({
         onPointerDown={(event) => {
           if (tooltipPinnedVisible) event.stopPropagation();
         }}
-        onPointerEnter={(event) => {
-          if (event.pointerType === "touch") return;
-          clearTooltipCloseTimer();
-          clearTooltipOpenTimer();
-          if (!tooltipHoverVisible) setTooltipHoverVisible(true);
-        }}
-        onPointerLeave={(event) => {
-          if (event.pointerType === "touch") return;
-          scheduleTooltipClose();
-        }}
+        onPointerEnter={(event) => hover.open(event, true)}
       >
         {showImageTooltip ? (
           <CardImage
@@ -994,8 +957,7 @@ export function CardView({
         }}
         onPointerEnter={(event) => {
           updateOverlayPlacement();
-          if (event.pointerType === "touch") return;
-          scheduleTooltipOpen();
+          if (tooltipEnabled) hover.open(event);
         }}
         onPointerMove={(event) => {
           if (event.pointerType === "touch") return;
@@ -1006,17 +968,7 @@ export function CardView({
           )
             return;
           if (suppressCardTooltip) setSuppressCardTooltip(false);
-          if (
-            !tooltipAvailable ||
-            tooltipHoverVisible ||
-            tooltipOpenTimerRef.current !== null
-          )
-            return;
-          clearTooltipCloseTimer();
-          tooltipOpenTimerRef.current = setTimeout(() => {
-            tooltipOpenTimerRef.current = null;
-            setTooltipHoverVisible(true);
-          }, hoverOpenDelayMs);
+          if (tooltipAvailable) hover.open(event);
         }}
         onPointerUp={(event) => {
           if (event.pointerType !== "touch" || !canPinTooltip) return;
@@ -1030,9 +982,9 @@ export function CardView({
           }
         }}
         onPointerLeave={(event) => {
-          setSuppressCardTooltip(false);
           if (event.pointerType === "touch") return;
-          scheduleTooltipClose();
+          setSuppressCardTooltip(false);
+          hover.leave(event);
         }}
         aria-label={cardAriaLabel}
         aria-pressed={onSelect ? choiceSelected : undefined}
@@ -1168,6 +1120,12 @@ export function CardView({
         ) : null}
         {advancementDisplay ? (
           <AdvancementGems card={card} display={advancementDisplay} />
+        ) : null}
+        {agendaDifficultyBadge ? (
+          <AgendaDifficultyBadge
+            {...agendaDifficultyBadge}
+            onHelpTooltipVisibilityChange={setCounterHelpTooltipActive}
+          />
         ) : null}
         {iceStrength !== null ? (
           <IceStrengthBadge strength={iceStrength} />

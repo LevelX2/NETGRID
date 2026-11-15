@@ -16,7 +16,10 @@ import {
   type ChronicleVisibility,
 } from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
-import { publicAccessOwnsOutcomeEvent } from "./access-presentation";
+import {
+  coalesceAccessActionCues,
+  publicAccessOwnsOutcomeEvent,
+} from "./access-presentation";
 import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
 import { payloadHasAbility } from "./action-payload";
 
@@ -45,7 +48,17 @@ export type OpponentActionCue = {
   iconBadge?: string;
   presentationKind?: "trace_bid" | "trace_result";
   presentationLabel?: string;
+  traceTagOutcome?: TraceTagOutcome;
 };
+
+type TraceTagOutcome =
+  | { pending: true }
+  | {
+      pending: false;
+      tagsAdded: number;
+      preventedTags: number;
+      preventionCardIds: string[];
+    };
 
 export type DamageImpactCue = {
   cueId: string;
@@ -164,7 +177,10 @@ export function deriveOpponentActionCues(
     input.events,
     input.translate,
   );
-  const relevantEvents = eventsAfter(input.events, input.lastPresentedEventId);
+  const { events: relevantEvents, outcomes } = traceTagPresentationEvents(
+    input.events,
+    input.lastPresentedEventId,
+  );
   const presentationEvents = coalesceAiPumpPresentationEvents(relevantEvents);
   const localAttention = hasLocalAttention(input.playerView, input.viewerSide);
   const visibleCards = visibleCardsByDefinition(input.playerView);
@@ -182,6 +198,7 @@ export function deriveOpponentActionCues(
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
     const tracePresentation = traceCuePresentation(payload, input.translate);
+    const traceTagOutcome = outcomes.get(event.eventId);
     const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);
     const forcedEffectCueEntries = localizedForcedEffectCueItems(
       event,
@@ -245,9 +262,10 @@ export function deriveOpponentActionCues(
     const hasDedicatedImpactEffect = forcedEffectCueEntries.some(
       (entry) => entry.tagGain || entry.damage,
     );
-    const sound = hasDedicatedImpactEffect
-      ? undefined
-      : actionSoundForActionType(actionType, visibility);
+    const sound =
+      hasDedicatedImpactEffect || traceTagOutcome?.pending === false
+        ? undefined
+        : actionSoundForActionType(actionType, visibility);
     const soundCount = sound
       ? actionSoundCountForAction(actionType, payload)
       : 1;
@@ -287,6 +305,7 @@ export function deriveOpponentActionCues(
       ...(tracePresentation?.badge
         ? { iconBadge: tracePresentation.badge }
         : {}),
+      ...(traceTagOutcome ? { traceTagOutcome } : {}),
     };
     const effectCues = forcedEffectCueEntries.map(
       ({ item: effectItem, tagGain, damage }, index): OpponentActionCue => {
@@ -352,6 +371,105 @@ export function deriveOpponentActionCues(
   return cues;
 }
 
+export function coalesceActionCues(
+  current: OpponentActionCue | null,
+  queued: OpponentActionCue[],
+  incoming: OpponentActionCue[],
+) {
+  const updates = new Map(
+    incoming
+      .filter((cue) => cue.traceTagOutcome)
+      .map((cue) => [cue.cueId, cue]),
+  );
+  const update = (cue: OpponentActionCue) => {
+    const result = updates.get(cue.cueId);
+    if (!result) return cue;
+    updates.delete(cue.cueId);
+    return result;
+  };
+  return coalesceAccessActionCues(
+    current ? update(current) : null,
+    queued.map(update),
+    incoming.filter((cue) => !cue.traceTagOutcome || updates.has(cue.cueId)),
+  );
+}
+
+function isTraceResult(payload: Record<string, unknown>): boolean {
+  return (
+    (payload.traceStep === "runner_bid" ||
+      payload.traceStep === "post_bid_link") &&
+    typeof payload.traceSuccessful === "boolean"
+  );
+}
+
+function traceTagPresentationEvents(
+  events: PublicGameEvent[],
+  lastPresentedEventId?: string | null,
+) {
+  const openings = new Map<string, PublicGameEvent>();
+  const owners = new Map<string, PublicGameEvent>();
+  const prevention = new Map<
+    string,
+    { amount: number; cardIds: Set<string> }
+  >();
+  const outcomes = new Map<string, TraceTagOutcome>();
+  for (const event of events) {
+    const payload = event.publicPayload;
+    const tagEventId = stringValue(payload.imminentEventId);
+    if (payload.imminentEventType !== "add_tag" || !tagEventId) continue;
+    if (
+      payload.eventModificationWindowOpened === true &&
+      isTraceResult(payload)
+    ) {
+      openings.set(tagEventId, event);
+      outcomes.set(event.eventId, { pending: true });
+      continue;
+    }
+    const opening = openings.get(tagEventId);
+    if (!opening || typeof payload.eventModificationDecision !== "string")
+      continue;
+    owners.set(event.eventId, opening);
+    const prevented = positiveIntegerValue(payload.preventedTags);
+    if (
+      payload.eventModificationDecision === "apply" &&
+      prevented !== undefined
+    ) {
+      const source =
+        stringValue(payload.trashedCardDefinitionId) ??
+        stringValue(payload.sourceDefinitionId);
+      const summary = prevention.get(tagEventId) ?? {
+        amount: 0,
+        cardIds: new Set<string>(),
+      };
+      summary.amount += prevented;
+      if (source && payload.sourceVisibility !== "redacted")
+        summary.cardIds.add(source);
+      prevention.set(tagEventId, summary);
+    }
+    const tagsAdded = nonNegativeIntegerValue(payload.tagsAdded);
+    if (
+      tagsAdded === undefined ||
+      payload.eventModificationOutcome === "next_window_opened"
+    )
+      continue;
+    const summary = prevention.get(tagEventId);
+    outcomes.set(opening.eventId, {
+      pending: false,
+      tagsAdded,
+      preventedTags: summary?.amount ?? 0,
+      preventionCardIds: summary ? [...summary.cardIds] : [],
+    });
+  }
+
+  const relevant = new Set<PublicGameEvent>();
+  for (const event of eventsAfter(events, lastPresentedEventId)) {
+    const opening = owners.get(event.eventId);
+    if (!opening || outcomes.get(opening.eventId)?.pending === false)
+      relevant.add(opening ?? event);
+  }
+  return { events: [...relevant], outcomes };
+}
+
 function traceCuePresentation(
   payload: Record<string, unknown>,
   translate?: ChronicleTranslate,
@@ -363,10 +481,7 @@ function traceCuePresentation(
     }
   | undefined {
   const traceStep = stringValue(payload.traceStep);
-  const resolved =
-    (traceStep === "runner_bid" || traceStep === "post_bid_link") &&
-    typeof payload.traceSuccessful === "boolean";
-  if (resolved) {
+  if (isTraceResult(payload)) {
     const traceValue = nonNegativeIntegerValue(payload.traceValue);
     const runnerStrength = nonNegativeIntegerValue(payload.runnerStrength);
     return {

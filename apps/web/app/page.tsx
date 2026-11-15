@@ -87,6 +87,7 @@ import {
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
+  coalesceActionCues,
   damageAudioCueFromPublicPayload,
   deriveDamageImpactCues,
   deriveOpponentActionCues,
@@ -99,7 +100,6 @@ import {
 import {
   actionCueAfterAiAdvanceRequest,
   accessPresentationOwnsActionCue,
-  coalesceAccessActionCues,
   interactionPresentationBlocksAi,
   latestStolenAgendaEvent,
   observerAccessAutoDismissMs,
@@ -405,6 +405,7 @@ import {
 } from "../features/game-board/RunnerBoardStrips";
 import { ActiveServerGrid } from "../features/game-board/ActiveServerGrid";
 import { ActiveRunnerZoneBoard } from "../features/game-board/ActiveRunnerZoneBoard";
+import { ScoredAgendaActions } from "../features/game-board/ScoredAgendaActions";
 import { ScoredAgendaOverlay } from "../features/game-board/ScoredAgendaOverlay";
 import { RunTimelineOverlay } from "../features/game-board/RunTimelineOverlay";
 import { SpecialZonesStrip } from "../features/game-board/SpecialZonesStrip";
@@ -1035,6 +1036,7 @@ export default function Page() {
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const hasStoredMatchStartSettingsRef = useRef(false);
   const statusPanelsRef = useRef<HTMLElement | null>(null);
+  const resourceStripRef = useRef<HTMLElement | null>(null);
   const lastActionSlotTurnRef = useRef<{
     matchId: string;
     activeSide: Side;
@@ -2576,6 +2578,8 @@ export default function Page() {
   const hasPendingAiCue =
     currentActionCue?.source === "ai" ||
     actionCueQueue.some((cue) => cue.source === "ai");
+  const traceTagConfirmationRequired =
+    currentActionCue?.traceTagOutcome?.pending === false;
   const aiPacingFallbackDelay = aiPacingFallbackDelayMs(
     localAiPacingMode,
     hasPendingAiCue,
@@ -2594,6 +2598,7 @@ export default function Page() {
   const showAiPacingFallbackControls = Boolean(
     aiTurnPresentation?.canAdvanceAi &&
     !matchEnded &&
+    !traceTagConfirmationRequired &&
     (isAiVsAiMatch ||
       (aiPacingFallbackDelay !== null &&
         (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible))),
@@ -3171,7 +3176,7 @@ export default function Page() {
         }
       : null;
   useEffect(() => {
-    if (!activeMatchIsGame) {
+    if (!activeMatchIsGame || resourceStripMode !== "auto") {
       setStatusPanelsVisible(true);
       return;
     }
@@ -3180,18 +3185,22 @@ export default function Page() {
       setStatusPanelsVisible(true);
       return;
     }
+    const resourceRows = Array.from(
+      statusPanels.querySelectorAll(".sideStatusPanel > .stats"),
+    );
     let animationFrame = 0;
     const topOffset = topbarStickyEnabled ? topbarHeightPx : 0;
-    const hideBelow = topOffset + 24;
-    const showAbove = topOffset + 72;
     const updateVisibility = () => {
       animationFrame = 0;
-      const rect = statusPanels.getBoundingClientRect();
-      setStatusPanelsVisible((current) => {
-        if (current && rect.bottom <= hideBelow) return false;
-        if (!current && rect.bottom >= showAbove) return true;
-        return current;
-      });
+      const resourceRowsBottom = Math.max(
+        ...resourceRows.map((row) => row.getBoundingClientRect().bottom),
+      );
+      const stripHeight = resourceStripRef.current?.offsetHeight ?? 0;
+      // A returning row counts as visible once it clears the pinned strip.
+      const visibleTop = topOffset + stripHeight;
+      setStatusPanelsVisible(
+        (current) => resourceRowsBottom > visibleTop + (current ? 0 : 8),
+      );
     };
     const scheduleUpdate = () => {
       if (animationFrame) return;
@@ -3208,6 +3217,7 @@ export default function Page() {
   }, [
     activeMatchIsGame,
     payload?.matchId,
+    resourceStripMode,
     topbarHeightPx,
     topbarStickyEnabled,
   ]);
@@ -3882,6 +3892,16 @@ export default function Page() {
       lastSeenCueEventIdRef.current = latestId;
       return;
     }
+    if (!payload.eventTail.some((event) => event.eventId === lastSeen)) {
+      // Undo removes the previous end of the event history. Replayed choices
+      // must derive their display from the new history.
+      lastSeenCueEventIdRef.current = latestId;
+      setCurrentActionCue((current) =>
+        current?.traceTagOutcome ? null : current,
+      );
+      setActionCueQueue((queue) => queue.filter((cue) => !cue.traceTagOutcome));
+      return;
+    }
     const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
     const contextByEventId = chronicleContextByEventId(
       payload.playerView.publicEvents,
@@ -3912,7 +3932,7 @@ export default function Page() {
     });
     lastSeenCueEventIdRef.current = latestId;
     if (cues.length > 0) {
-      const coalescedCues = coalesceAccessActionCues(
+      const coalescedCues = coalesceActionCues(
         currentActionCue,
         actionCueQueue,
         cues,
@@ -3993,16 +4013,18 @@ export default function Page() {
     if (!showSuccessfulRunOutcome || !outcomeEventId || !sourceDefinitionId)
       return;
     setCurrentActionCue((current) =>
-      current?.eventId === outcomeEventId ||
-      current?.cardDefinitionId === sourceDefinitionId
+      !current?.traceTagOutcome &&
+      (current?.eventId === outcomeEventId ||
+        current?.cardDefinitionId === sourceDefinitionId)
         ? null
         : current,
     );
     setActionCueQueue((current) =>
       current.filter(
         (cue) =>
-          cue.eventId !== outcomeEventId &&
-          cue.cardDefinitionId !== sourceDefinitionId,
+          cue.traceTagOutcome ||
+          (cue.eventId !== outcomeEventId &&
+            cue.cardDefinitionId !== sourceDefinitionId),
       ),
     );
   }, [
@@ -4090,6 +4112,7 @@ export default function Page() {
         audioVolume,
         currentActionCue.soundCount,
       );
+    if (currentActionCue.traceTagOutcome) return;
     if (
       localAiPacingMode === "manual" &&
       currentActionCue.source === "ai" &&
@@ -4122,7 +4145,8 @@ export default function Page() {
       priorityWindowHoldEnabled ||
       humanCorpRunServerActionBlocksAiPacing ||
       aiDecisionDebugShouldWaitForPreparation ||
-      interactionPresentationBlocked
+      interactionPresentationBlocked ||
+      traceTagConfirmationRequired
     )
       return;
     const delayMs = aiPacingDelayMs(
@@ -4171,6 +4195,7 @@ export default function Page() {
     connection,
     currentActionCue,
     interactionPresentationBlocked,
+    traceTagConfirmationRequired,
     isAiVsAiMatch,
     localAiPacingMode,
     payload?.matchId,
@@ -7082,55 +7107,67 @@ export default function Page() {
                   </div>
                 </div>
               ) : null}
-              <ActiveMatchTopbar
-                topbarRef={topbarRef}
-                appName={APP_NAME}
-                appStatusLabel={APP_STATUS_LABEL}
-                appIconSrc={APP_ICON_SRC}
-                appWordmarkSrc={APP_WORDMARK_SRC}
-                statusText={statusText}
-                connection={connection}
-                workspace={activeMatchWorkspace}
-                activeMatchIsGame={activeMatchIsGame}
-                undoPanelOpen={undoPanelOpen}
-                pendingUndo={payload.pendingUndo}
-                canReconnect={canReconnect}
-                matchDetailsOpen={matchDetailsOpen}
-                canStartNextSeriesGame={canStartNextSeriesGame}
-                seriesTransitioning={seriesTransitioning}
-                canReturnToStart={canReturnToStart}
-                canForfeit={canForfeit}
-                canCancelSimulation={canCancelSimulation}
-                rightRailCollapsed={rightRailCollapsed}
-                chronicleWidth={chronicleWidth}
-                canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
-                canOpenDeckGuide={Boolean(activeStandardDeckGuide)}
-                humanAiAdvice={humanAiAdvice}
-                humanAiAdviceError={aiDecisionDebugPreviewError}
-                humanAiAdviceLoading={aiDecisionDebugPreviewLoading}
-                onWorkspace={setActiveMatchWorkspace}
-                onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
-                onReconnect={reconnect}
-                onToggleMatchDetails={() =>
-                  setMatchDetailsOpen((open) => !open)
-                }
-                onStartNextSeriesGame={startNextSeriesGame}
-                onLeaveMatch={leaveMatch}
-                onRequestForfeitMatch={requestForfeitMatch}
-                onRequestCancelSimulation={requestCancelSimulation}
-                onToggleRightRail={() =>
-                  setChronicleWidth(nextChronicleWidth)
-                }
-                onRequestHumanAiAdvice={() =>
-                  void requestHumanAiDecisionPreview()
-                }
-                onOpenDeckGuide={() => setMatchDeckGuideOpen(true)}
-                onCloseHumanAiAdvice={() => {
-                  setAiDecisionDebugPreview(null);
-                  setAiDecisionDebugPreviewError("");
-                  setAiDecisionDebugPreviewLoading(false);
-                }}
-              />
+              <div className="activeMatchChrome">
+                <ActiveMatchTopbar
+                  topbarRef={topbarRef}
+                  appName={APP_NAME}
+                  appStatusLabel={APP_STATUS_LABEL}
+                  appIconSrc={APP_ICON_SRC}
+                  appWordmarkSrc={APP_WORDMARK_SRC}
+                  statusText={statusText}
+                  connection={connection}
+                  workspace={activeMatchWorkspace}
+                  activeMatchIsGame={activeMatchIsGame}
+                  undoPanelOpen={undoPanelOpen}
+                  pendingUndo={payload.pendingUndo}
+                  canReconnect={canReconnect}
+                  matchDetailsOpen={matchDetailsOpen}
+                  canStartNextSeriesGame={canStartNextSeriesGame}
+                  seriesTransitioning={seriesTransitioning}
+                  canReturnToStart={canReturnToStart}
+                  canForfeit={canForfeit}
+                  canCancelSimulation={canCancelSimulation}
+                  rightRailCollapsed={rightRailCollapsed}
+                  chronicleWidth={chronicleWidth}
+                  canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
+                  canOpenDeckGuide={Boolean(activeStandardDeckGuide)}
+                  humanAiAdvice={humanAiAdvice}
+                  humanAiAdviceError={aiDecisionDebugPreviewError}
+                  humanAiAdviceLoading={aiDecisionDebugPreviewLoading}
+                  onWorkspace={setActiveMatchWorkspace}
+                  onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
+                  onReconnect={reconnect}
+                  onToggleMatchDetails={() =>
+                    setMatchDetailsOpen((open) => !open)
+                  }
+                  onStartNextSeriesGame={startNextSeriesGame}
+                  onLeaveMatch={leaveMatch}
+                  onRequestForfeitMatch={requestForfeitMatch}
+                  onRequestCancelSimulation={requestCancelSimulation}
+                  onToggleRightRail={() =>
+                    setChronicleWidth(nextChronicleWidth)
+                  }
+                  onRequestHumanAiAdvice={() =>
+                    void requestHumanAiDecisionPreview()
+                  }
+                  onOpenDeckGuide={() => setMatchDeckGuideOpen(true)}
+                  onCloseHumanAiAdvice={() => {
+                    setAiDecisionDebugPreview(null);
+                    setAiDecisionDebugPreviewError("");
+                    setAiDecisionDebugPreviewLoading(false);
+                  }}
+                />
+                {activeMatchIsGame && activeView ? (
+                  <ActiveMatchResourceStrip
+                    ref={resourceStripRef}
+                    view={activeView}
+                    agendaPointsToWin={effectiveAgendaTarget}
+                    actionCapacities={actionSlotCapacities}
+                    ariaHidden={!resourceStripVisible}
+                    observerMode={isAiVsAiMatch}
+                  />
+                ) : null}
+              </div>
 
               {matchDetailsOpen ? (
                 <div
@@ -7206,7 +7243,9 @@ export default function Page() {
                   cueDisplayMode={actionCueDisplayMode}
                   autoDismissMs={actionCueAutoDismissMs}
                   canAdvanceAi={Boolean(
-                    aiTurnPresentation?.canAdvanceAi && connection === "online",
+                    aiTurnPresentation?.canAdvanceAi &&
+                    connection === "online" &&
+                    !traceTagConfirmationRequired,
                   )}
                   manualAdvanceRequired={Boolean(
                     localAiPacingMode === "manual" &&
@@ -7377,17 +7416,6 @@ export default function Page() {
                 />
               ) : null}
 
-              {activeMatchIsGame && activeView ? (
-                <ActiveMatchResourceStrip
-                  view={activeView}
-                  agendaPointsToWin={effectiveAgendaTarget}
-                  actionCapacities={actionSlotCapacities}
-                  ariaHidden={!resourceStripVisible}
-                  topOffsetPx={topbarStickyEnabled ? topbarHeightPx : 0}
-                  observerMode={isAiVsAiMatch}
-                />
-              ) : null}
-
               {activeMatchIsGame ? (
                 <div
                   className={`main chronicle-${chronicleWidth}${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
@@ -7399,6 +7427,7 @@ export default function Page() {
                   >
                     <OpponentPanel
                       view={activeView}
+                      showResourceStats={resourceStripMode !== "on"}
                       scoreAreaCards={scoreAreaCardsBySide(
                         opponentSide(activeView.side),
                       )}
@@ -7485,6 +7514,7 @@ export default function Page() {
                     )}
                     <PlayerPanel
                       view={activeView}
+                      showResourceStats={resourceStripMode !== "on"}
                       title={
                         isAiVsAiMatch
                           ? gameT("aiPlayerTitle", {
@@ -7505,7 +7535,18 @@ export default function Page() {
                       onToggleScoreArea={() =>
                         toggleScoreAreaOverlay(activeView.side)
                       }
-                    />
+                    >
+                      {activeView.side === "corp" && !isAiVsAiMatch ? (
+                        <ScoredAgendaActions
+                          view={activeView}
+                          actions={payload.legalActions}
+                          disabled={
+                            Boolean(payload.winner) || connection !== "online"
+                          }
+                          onAction={submitAction}
+                        />
+                      ) : null}
+                    </PlayerPanel>
                     <SpecialZonesStrip
                       view={activeView}
                       cardDetailsById={catalogDetailsById}

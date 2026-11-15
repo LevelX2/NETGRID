@@ -5,6 +5,7 @@ import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
+  coalesceActionCues,
   cueHasHiddenLeak,
   damageAudioCueFromPublicPayload,
   deriveDamageImpactCues,
@@ -13,6 +14,7 @@ import {
   turnStartAudioCue,
   type CueDerivationInput,
 } from "./action-cues";
+import { actionCueAfterAiAdvanceRequest } from "./access-presentation";
 import type { ChronicleTranslate } from "./chronicle";
 
 const TEST_CARD_PRESENTATIONS = {
@@ -707,6 +709,99 @@ describe("deriveOpponentActionCues", () => {
         "Bids: Corp 2 credits, You 1 credits. Final: 2:1; run ended; lock 1.",
     });
   });
+
+  it.each(["runner", "corp"] as const)(
+    "updates Hunter's trace window in place after Fall Guy for %s",
+    (viewerSide) => {
+      const trace = event("evt_hunter_trace", "resolve_choice", {
+        actor: "runner",
+        traceStep: "runner_bid",
+        traceSuccessful: true,
+        traceValue: 5,
+        runnerStrength: 0,
+        sourceDefinitionId: "onr_v1_249_hunter",
+        tagsAdded: 0,
+        eventModificationWindowOpened: true,
+        imminentEventId: "hunter_tag",
+        imminentEventType: "add_tag",
+      });
+      const unrelated = event("evt_unrelated_tag", "resolve_choice", {
+        actor: "runner",
+        imminentEventType: "add_tag",
+        imminentEventId: "unrelated_tag",
+        eventModificationDecision: "apply",
+        preventedTags: 1,
+        sourceDefinitionId: "onr_v1_161_fall-guy",
+        tagsAdded: 0,
+      });
+      const avoided = event("evt_hunter_tag", "resolve_choice", {
+        ...unrelated.publicPayload,
+        imminentEventId: "hunter_tag",
+        eventModificationOutcome: "avoided",
+      });
+      const input = { viewerSide, playerView: view(viewerSide) };
+      const [pending] = deriveOpponentActionCues({ ...input, events: [trace] });
+      expect(pending).toMatchObject({
+        presentationKind: "trace_result",
+        iconBadge: "5:0",
+        traceTagOutcome: { pending: true },
+      });
+      expect(JSON.stringify(pending)).not.toContain("fall-guy");
+      expect(actionCueAfterAiAdvanceRequest(pending!)).toBe(pending);
+
+      const updates = deriveOpponentActionCues({
+        ...input,
+        events: [trace, unrelated, avoided],
+        lastPresentedEventId: unrelated.eventId,
+      });
+      expect(updates).toEqual([
+        expect.objectContaining({
+          cueId: pending!.cueId,
+          eventId: trace.eventId,
+          title: pending!.title,
+          traceTagOutcome: {
+            pending: false,
+            tagsAdded: 0,
+            preventedTags: 1,
+            preventionCardIds: ["onr_v1_161_fall-guy"],
+          },
+        }),
+      ]);
+      expect(coalesceActionCues(pending!, [], updates)).toEqual({
+        current: updates[0],
+        queue: [],
+      });
+      expect(coalesceActionCues(null, [pending!], updates)).toEqual({
+        current: null,
+        queue: updates,
+      });
+      expect(
+        deriveOpponentActionCues({ ...input, events: [trace, avoided] }),
+      ).toEqual(updates);
+
+      const passed = event("evt_hunter_tag_pass", "resolve_choice", {
+        actor: "runner",
+        imminentEventId: "hunter_tag",
+        imminentEventType: "add_tag",
+        eventModificationDecision: "pass",
+        eventModificationOutcome: "original_resolved",
+        tagsAdded: 1,
+      });
+      expect(
+        deriveOpponentActionCues({ ...input, events: [trace, passed] }),
+      ).toEqual([
+        expect.objectContaining({
+          cueId: pending!.cueId,
+          traceTagOutcome: {
+            pending: false,
+            tagsAdded: 1,
+            preventedTags: 0,
+            preventionCardIds: [],
+          },
+        }),
+      ]);
+    },
+  );
 
   it("keeps a blind Corp bid hidden while marking it as a trace cue", () => {
     const cues = deriveOpponentActionCues({

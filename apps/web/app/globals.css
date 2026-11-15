@@ -13,7 +13,8 @@
   flex-direction: column;
 }
 
-.app > .topbar {
+.app > .topbar,
+.app > .activeMatchChrome {
   position: sticky;
   top: 0;
   z-index: var(--z-active-match-topbar);
@@ -22,6 +23,10 @@
 .app.topbarStickyDisabled > .topbar {
   position: relative;
   top: auto;
+}
+
+.app.topbarStickyDisabled > .activeMatchChrome {
+  display: contents;
 }
 
 .app.topbarStickyDisabled .entryTabs {
@@ -184,6 +189,7 @@
 
 .topbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -199,6 +205,7 @@
 
 .brand {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -207,6 +214,7 @@
 .topbarStatusGroup {
   min-width: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
@@ -251,19 +259,24 @@
 }
 
 .topbarMeta {
+  min-width: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
 
 .appRuntimeStatus {
+  min-width: 0;
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
 
 .topbarVersion {
   min-height: 32px;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   border: 1px solid color-mix(in srgb, var(--line), transparent 34%);
@@ -274,6 +287,7 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .topbarModeBadge {
@@ -5686,9 +5700,11 @@ select {
   top: 50%;
   left: 50%;
   width: min(520px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
   display: grid;
   gap: 13px;
   padding: 16px;
+  overflow: auto;
   transform: translate(-50%, -50%);
   border: 1px solid color-mix(in srgb, var(--damage-impact), var(--line) 26%);
   border-radius: 8px;
@@ -5729,7 +5745,7 @@ select {
 }
 
 .damageImpactHeader {
-  align-items: flex-start;
+  --damage-impact-motif-size: clamp(56px, 18vw, 80px);
 }
 
 .damageImpactHeader > div {
@@ -5738,29 +5754,35 @@ select {
   gap: 4px;
 }
 
-.damageImpactHeader strong {
+.damageImpactHeader h2 {
+  margin: 0;
   font-size: 20px;
   line-height: 1.12;
   overflow-wrap: anywhere;
 }
 
-.damageImpactHeader span:not(.damageImpactIcon) {
+.damageImpactHeader p {
+  margin: 0;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
-.damageImpactIcon {
-  flex: 0 0 auto;
-  width: 44px;
-  height: 44px;
+.damageImpactGrip {
   display: grid;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--damage-impact), transparent 38%);
-  border-radius: 8px;
-  color: color-mix(in srgb, var(--damage-impact), white 18%);
-  background: color-mix(in srgb, var(--damage-impact), transparent 86%);
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.damageImpactGrip strong {
+  font-size: 16px;
+}
+
+.damageImpactGrip small {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .damageImpactMeter {
@@ -5806,8 +5828,8 @@ select {
 }
 
 .damageImpactSegment.lost {
-  border: 1px solid color-mix(in srgb, var(--damage-impact), transparent 48%);
-  background: color-mix(in srgb, var(--damage-impact), transparent 34%);
+  border: 1px solid color-mix(in srgb, var(--danger), transparent 48%);
+  background: color-mix(in srgb, var(--danger), transparent 34%);
 }
 
 .damageImpactSegment.overkill {
@@ -5846,25 +5868,6 @@ select {
   color: color-mix(in srgb, var(--danger), white 12%);
 }
 
-.damageImpactStats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-width: 0;
-}
-
-.damageImpactStats span {
-  min-width: 0;
-  padding: 4px 8px;
-  border: 1px solid color-mix(in srgb, var(--damage-impact), transparent 58%);
-  border-radius: 6px;
-  color: color-mix(in srgb, var(--damage-impact), var(--text) 26%);
-  background: color-mix(in srgb, var(--damage-impact), transparent 90%);
-  font-size: 12px;
-  font-weight: 800;
-  overflow-wrap: anywhere;
-}
-
 .damageImpactFooter small {
   color: var(--muted);
   font-size: 12px;
@@ -5872,6 +5875,7 @@ select {
 
 .damageImpactDismiss {
   flex: 0 0 auto;
+  margin-inline-start: auto;
 }
 
 .cueAdvanceButton {
@@ -5935,7 +5939,19 @@ select {
 }
 
 .damageImpactHeader .windowEventIcon {
-  margin: -5px -5px -30px 8px;
+  width: var(--damage-impact-motif-size);
+  height: var(--damage-impact-motif-size);
+  flex-basis: var(--damage-impact-motif-size);
+}
+
+.damageImpactHeader .windowEventIconSide {
+  width: 24px;
+  height: 24px;
+}
+
+.damageImpactHeader .windowEventIconSide svg {
+  width: 14px;
+  height: 14px;
 }
 
 .ambience-damage {
@@ -6588,6 +6604,10 @@ select {
 
 .sideStatusPanel .stats {
   grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
+}
+
+.app.resourceStrip-on .sideStatusPanel .stats {
+  grid-template-columns: minmax(52px, max-content);
 }
 
 .identityCounterStrip {
@@ -10540,6 +10560,33 @@ section[data-testid="legal-actions"].cueHighlight {
   pointer-events: none;
 }
 
+.agendaDifficultyBadge {
+  position: absolute;
+  top: 13%;
+  right: 4%;
+  z-index: 43;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: max(20px, 20%);
+  min-height: max(15px, 13%);
+  padding: 1px 4px;
+  border: 1px solid color-mix(in srgb, var(--corp), white 42%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--corp), black 72%);
+  color: white;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+  font-size: clamp(10px, calc(11px * var(--lane-card-scale, 1)), 14px);
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.card:not(.withImage) .agendaDifficultyBadge {
+  inset: auto auto 5px 5px;
+}
+
 .iceStrengthBadge {
   position: absolute;
   left: 6px;
@@ -12062,6 +12109,9 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .gameOverHero {
   display: grid;
+  grid-template-areas:
+    "copy motif"
+    "scoreboard scoreboard";
   grid-template-columns: minmax(0, 1fr) minmax(150px, 210px);
   align-items: center;
   gap: 18px;
@@ -12074,9 +12124,11 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .gameOverHeroCopy {
+  grid-area: copy;
   display: grid;
   min-width: 0;
   gap: 7px;
+  overflow-wrap: anywhere;
 }
 
 .gameOverHero h2 {
@@ -12085,12 +12137,13 @@ section[data-testid="legal-actions"].cueHighlight {
   line-height: 1.08;
 }
 
-.gameOverHero p:last-child {
+.gameOverHeroCopy p:last-child {
   margin: 0;
   color: var(--muted);
 }
 
 .resultWinnerMotif {
+  grid-area: motif;
   position: relative;
   display: grid;
   justify-items: center;
@@ -12306,113 +12359,77 @@ section[data-testid="legal-actions"].cueHighlight {
   gap: 8px;
 }
 
-.gameStandingStrip {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px;
-  border: 1px solid rgb(216 189 95 / 0.28);
-  border-radius: 8px;
-  background: rgb(216 189 95 / 0.08);
-}
-
-.gameStandingStrip div:first-child {
+.gameOverScoreboard {
+  grid-area: scoreboard;
   display: grid;
-  gap: 3px;
-}
-
-.gameStandingStrip span {
-  font-weight: 800;
-}
-
-.gameStandingStrip small,
-.gameStandingScore {
-  color: var(--muted);
-}
-
-.gameStandingScore {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  font-size: 12px;
-}
-
-.seriesStrip {
-  display: grid;
-  grid-template-columns: minmax(150px, 0.8fr) minmax(190px, 0.7fr) minmax(
-      260px,
-      1.25fr
-    );
-  align-items: center;
-  gap: 18px;
-  padding: 14px 16px;
-  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 52%);
-  border-radius: 10px;
-  background:
-    linear-gradient(
-      100deg,
-      color-mix(in srgb, var(--runner), transparent 93%),
-      transparent 42%
-    ),
-    rgb(255 255 255 / 0.06);
-}
-
-.seriesStrip div:first-child {
-  display: grid;
-  gap: 3px;
-}
-
-.seriesStrip span {
-  font-weight: 800;
-}
-
-.seriesStrip small,
-.seriesScore {
-  color: var(--muted);
-}
-
-.seriesResultScore {
-  display: grid;
-  justify-items: center;
-  gap: 3px;
   min-width: 0;
-  padding: 8px 18px;
-  border-inline: 1px solid color-mix(in srgb, var(--runner), var(--line) 58%);
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 72%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--runner) 7%, transparent);
+}
+
+.resultScore {
+  --result-score-size: clamp(42px, 6vw, 64px);
+  display: grid;
+  gap: 6px;
+  padding: 12px;
   text-align: center;
 }
 
-.seriesResultScore .seriesResultLabel {
-  color: color-mix(in srgb, var(--runner), white 38%);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.resultScore.compact {
+  --result-score-size: clamp(26px, 4vw, 34px);
+  border-top: 1px solid color-mix(in srgb, var(--runner), var(--line) 80%);
 }
 
-.seriesResultScore strong {
-  color: var(--text);
-  font-size: clamp(30px, 4vw, 46px);
+.resultScore h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.resultScorePair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(8px, 2vw, 16px);
+}
+
+.resultScoreSide {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.resultScoreSide:first-child {
+  text-align: right;
+}
+
+.resultScoreSide > span {
+  font-weight: 700;
+}
+
+.resultScoreSide strong {
+  order: -1;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.resultScoreSide strong,
+.resultScoreSeparator {
+  font-size: var(--result-score-size);
   line-height: 1;
-  letter-spacing: 0.04em;
-  text-shadow: 0 0 24px color-mix(in srgb, var(--runner), transparent 58%);
 }
 
-.seriesResultScore small {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 10px;
-  font-size: 10px;
+.resultScoreSeparator {
+  color: var(--muted);
 }
 
-.seriesScore {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
+.resultScoreSide small,
+.resultScoreNote {
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -12427,6 +12444,7 @@ section[data-testid="legal-actions"].cueHighlight {
 .gameOverFooter div:first-child {
   display: grid;
   gap: 4px;
+  overflow-wrap: anywhere;
 }
 
 .gameOverFooter small {
@@ -12467,17 +12485,9 @@ section[data-testid="legal-actions"].cueHighlight {
   box-shadow: 0 8px 24px rgb(28 48 72 / 0.14);
 }
 
-:root[data-theme="white"] .gameOverPanel .gameStandingStrip {
+:root[data-theme="white"] .gameOverScoreboard {
   background: #edf4fc;
   border-color: #b9cee5;
-}
-
-:root[data-theme="white"] .gameOverPanel .gameStandingScore {
-  color: #284866;
-}
-
-:root[data-theme="white"] .gameOverPanel .seriesResultLabel {
-  color: var(--runner);
 }
 
 :root[data-theme="white"] .gameOverFooter {
@@ -14117,11 +14127,6 @@ select,
 
 .matchResourceStrip {
   display: none;
-  position: sticky;
-  top: var(--resource-strip-top, 0px);
-  left: 0;
-  right: 0;
-  z-index: var(--z-active-match-resource-strip);
   box-sizing: border-box;
   width: 100%;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -14134,8 +14139,14 @@ select,
   box-shadow: 0 10px 18px rgb(0 0 0 / 0.18);
 }
 
-.app.resourceStrip-on .matchResourceStrip {
+.app.resourceStripVisible .matchResourceStrip {
   display: grid;
+}
+
+.app.topbarStickyDisabled > .activeMatchChrome > .matchResourceStrip {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-active-match-topbar);
 }
 
 .resourceStripSide,
@@ -17196,10 +17207,6 @@ select,
 }
 
 @media (max-width: 1180px) {
-  .app.resourceStrip-auto.resourceStripVisible .matchResourceStrip {
-    display: grid;
-  }
-
   .main {
     grid-template-columns: 1fr;
   }
@@ -17456,14 +17463,12 @@ select,
     flex-direction: column;
   }
 
-  .topbarStatusGroup,
-  .topbarMeta {
+  .topbarStatusGroup {
     width: 100%;
-    min-width: 0;
-    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  .topbarStatusGroup {
+  .topbarMeta {
     justify-content: center;
   }
 
@@ -17526,27 +17531,9 @@ select,
     flex-basis: 100%;
   }
 
-  .gameStandingStrip {
-    flex-direction: column;
-  }
-
-  .seriesStrip {
-    grid-template-columns: 1fr;
-  }
-
-  .seriesResultScore {
-    border-inline: 0;
-    border-block: 1px solid color-mix(in srgb, var(--runner), var(--line) 58%);
-  }
-
   .undoBox,
   .undoPanel .button.wide {
     width: 100%;
-  }
-
-  .gameStandingScore,
-  .seriesScore {
-    justify-content: flex-start;
   }
 
   .audioSettings {
@@ -17859,6 +17846,10 @@ select,
   }
 
   .gameOverHero {
+    grid-template-areas:
+      "copy"
+      "scoreboard"
+      "motif";
     grid-template-columns: 1fr;
   }
 

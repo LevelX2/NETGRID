@@ -1307,15 +1307,23 @@ export function visibleCorpCard(
     };
   }
   const visibleCard = visibleOwnCard(state, id);
+  const definition = definitionFor(state, id);
+  const printedRequirement = definition.advancementRequirement;
+  const effectiveRequirement = visibleCard.advancementRequirement;
+  const agendaDifficultyModifier =
+    area === "root" &&
+    instance.zone.side === "corp" &&
+    instance.zone.zone === "serverRoot" &&
+    serverId?.startsWith("remote_") &&
+    definition.type === "agenda" &&
+    printedRequirement !== undefined &&
+    effectiveRequirement !== undefined
+      ? effectiveRequirement - printedRequirement
+      : 0;
   return {
     ...visibleCard,
-    ...visibleAgendaStealCostQuote(
-      state,
-      id,
-      definitionFor(state, id),
-      instance,
-      viewer,
-    ),
+    ...(agendaDifficultyModifier !== 0 ? { agendaDifficultyModifier } : {}),
+    ...visibleAgendaStealCostQuote(state, id, definition, instance, viewer),
   };
 }
 

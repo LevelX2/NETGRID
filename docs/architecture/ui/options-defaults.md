@@ -26,6 +26,16 @@ Karten-Einstellungshooks. Gemeinsame Darstellungsdefaults liegen in
 `apps/web/features/settings/settings-model.ts`; Replay und Kartenkontexte
 verwenden dieselben Vorgaben. Die Browserwerte werden pro Origin gespeichert.
 
+„Kopfzeile fixieren“ steuert die Kopfzeile. Ein sichtbarer Spielstandsstreifen
+bleibt beim Scrollen direkt darunter oder übernimmt den oberen Rand, sobald
+die unfixierte Kopfzeile wegscrollt. Das gilt für das aktive Spiel und Replays.
+„Spielstandsstreifen → Ein“ zeigt die Ressourcenzähler dauerhaft im Streifen.
+„Auto“ blendet den Streifen im aktiven Spiel ein, sobald die Ressourcenzähler
+der Statusfelder nach oben aus dem sichtbaren Bereich scrollen. Beim
+Zurückscrollen übernehmen die Statusfelder die Anzeige wieder.
+„Aus“ blendet den Streifen aus. Die beiden Einstellungen werden unabhängig
+gespeichert.
+
 ## Chronik und visuelle Zustandsmarkierungen
 
 Der Chronikknopf im aktiven Spiel schaltet zyklisch zwischen Aus, Breit,

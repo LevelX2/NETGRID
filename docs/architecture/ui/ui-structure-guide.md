@@ -37,10 +37,19 @@ verweist auf diese testbare Transportlogik.
 
 ## Helle Endstandanzeige und Cyberspace-Hintergrund
 
+Der Ergebnisdialog zeigt die Matchpunkte als zentrale, paarige Wertung mit
+den Teilnehmernamen unter den Zahlen. Bei Serien steht der Zwischen- oder
+Endstand der Serie über der kompakteren Wertung des gerade beendeten Spiels.
+Auf schmalen Displays erscheinen die Wertungen vor der Illustration.
+
 Die helle Variante (`data-theme="white"`) verwendet für den Endstand eine
 helle, deckende Panel- und Footerfläche mit dunkler Schrift. Die dunkle
 Gewinnerillustration bleibt als abgegrenztes Motiv erhalten. Auf schmalen
 Displays bleibt das Panel scrollbar und der Aktionsfooter hell.
+
+„Serie verlassen“ öffnet bei verfügbarem Folgespiel den gemeinsamen
+Bestätigungsdialog über dem Ergebnisfenster. Die Ergebnisaktionen sind während
+der Abfrage gesperrt. Beim Abbrechen kehrt der Fokus zu „Serie verlassen“ zurück.
 
 Der bestehende Cyberspace-Schalter steuert beide Themen. Nur bei aktiviertem
 Schalter lädt das helle Thema
@@ -73,6 +82,18 @@ auf der gescorten Agenda dargestellt. Nach Verbrauch entfällt der Badge.
 Tooltip und Aktionstext erklären das Beenden des Runs in Deutsch, Englisch
 und Französisch; der Aktionstext ist an die Capability
 `onr_classic_001_data-fort-remapping:spend_remap_counter_end_run` gebunden.
+
+Unter dem eigenen Corp-Statusblock erscheinen verfügbare Fähigkeiten aus
+der eigenen Agenda-Auslage als Standard-Aktionsbuttons mit Agenda-Symbol.
+Quelle und Vorrat stammen aus dem PlayerView, Effektmenge und Kosten aus
+der aktuellen LegalAction. Der Einstieg verwendet denselben Submit-Pfad
+wie das Agenda-Fenster.
+
+Karten-Hover-Tooltips in der Chronik, auf dem Brett und im Deckeditor bleiben
+bei Layoutverschiebungen unter einem stehenden Zeiger offen. Zum Schließen
+zählt die tatsächliche Zeigerbewegung aus Auslöser und Tooltip heraus.
+Chronikgruppen behalten beim Voranstellen neuer Einträge den ältesten
+Eintrag als Teil ihres React-Schlüssels.
 
 Die aktuelle Stufe hebt ihren Namen mit fetter Schrift und ihre Symbole
 mit höherer Deckkraft und Strichstärke hervor. Die zusätzliche Umrandung
@@ -191,6 +212,12 @@ Zugriff erhält kein zweites konkurrierendes Fenster für sein Stehl-Ergebnis.
 Bestätigungspflichtige Stufen halten lokales KI-Pacing an. Bereits eintreffende
 Serverereignisse werden geordnet gepuffert; der Serverzustand bleibt autoritativ.
 
+Im eigenständigen Schadensfenster stehen Schadenshöhe und -art in der
+Überschrift, die Quelle darunter und das Motiv rechts im Kopfbereich. Der
+Grip-Wechsel steht als Text direkt über den Segmenten für verlorene und
+verbliebene Karten. Nur eine vom Ereignis bestätigte Flatline erhält eine
+Markierung in der Leiste und die Überschrift „Flatline“.
+
 Multiaccess verwendet Ereignisidentitäten im jeweiligen Matchkontext,
 einschließlich Fortschritt `Zugriff n von m`. Zwei Kopien derselben Karte
 bleiben getrennte Zugriffe. Unbestätigte Zugriffe überleben nachfolgende
@@ -211,6 +238,13 @@ ICE bleibt daher eine Zugriffspräsentation. Serien zeigen abgeschlossene
 Wertungen als `Endergebnis`, laufende als `Zwischenstand`; Detailwerte sind
 sekundär. Öffentliche Spielelisten bieten kompakte und ausführliche Ansichten
 aus denselben autoritativen Matchdaten.
+
+Öffnet ein Trace ein Tag-Verhinderungsfenster, zeigt das Trace-Ergebnis zunächst
+die offene Entscheidung. Folgeereignisse mit derselben öffentlichen
+`imminentEventId` aktualisieren dieselbe Meldung mit den verhinderten und den
+tatsächlich erhaltenen Tags. Öffentlich identifizierte Verhinderungsquellen
+erscheinen mit Kartennamen. Das bestätigte Ergebnis bleibt bis „Weiter“ stehen
+und hält bis dahin die automatische KI-Fortsetzung an.
 
 ## Wo Ändern?
 

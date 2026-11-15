@@ -4181,6 +4181,8 @@ export type VisibleCard = {
   rezzed?: boolean;
   advancementCounters?: number;
   advancementRequirement?: number;
+  /** Effective requirement minus printed requirement. Present for known remote-root agendas with a nonzero change. */
+  agendaDifficultyModifier?: number;
   overadvanceThreshold?: number;
   overadvanceReward?:
     | "agenda_points"

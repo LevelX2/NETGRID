@@ -147,6 +147,28 @@ export function StrengthModifierBadge({ amount }: { amount: number }) {
   );
 }
 
+export function AgendaDifficultyBadge({
+  value,
+  tooltip,
+  onHelpTooltipVisibilityChange,
+}: {
+  value: string;
+  tooltip: string;
+  onHelpTooltipVisibilityChange(visible: boolean): void;
+}) {
+  return (
+    <CounterHelpTooltipTrigger
+      className="agendaDifficultyBadge"
+      ariaLabel={tooltip}
+      data-testid="agenda-difficulty-badge"
+      tooltip={tooltip}
+      onVisibilityChange={onHelpTooltipVisibilityChange}
+    >
+      {value}
+    </CounterHelpTooltipTrigger>
+  );
+}
+
 export function IceStrengthBadge({ strength }: { strength: number }) {
   const t = useTranslations("Cards");
   return (

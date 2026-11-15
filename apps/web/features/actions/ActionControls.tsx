@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Award,
   PanelTopClose,
   PanelTopOpen,
   Pause,
@@ -229,6 +230,7 @@ type OverflowAwareActionButtonProps = Omit<
   tooltipLabel?: string;
   displayCostChips?: CostChipView[] | undefined;
   iconSize?: number;
+  agendaIcon?: boolean;
   tone?: ActionButtonTone;
   serverTargetId?: string | null;
 };
@@ -252,6 +254,7 @@ export function OverflowAwareActionButton({
   tooltipLabel,
   displayCostChips,
   iconSize,
+  agendaIcon,
   tone = "default",
   serverTargetId,
   className,
@@ -317,10 +320,14 @@ export function OverflowAwareActionButton({
       data-tooltip={tooltipLabel ?? (tooltipEnabled ? label : undefined)}
       data-action-tone={tone === "default" ? undefined : tone}
     >
-      <ActionLeadIcon
-        action={action}
-        {...(iconSize !== undefined ? { size: iconSize } : {})}
-      />
+      {agendaIcon ? (
+        <Award size={iconSize ?? 15} aria-hidden="true" />
+      ) : (
+        <ActionLeadIcon
+          action={action}
+          {...(iconSize !== undefined ? { size: iconSize } : {})}
+        />
+      )}
       {targetServerId ? (
         <ZoneIdentityIcon
           side="corp"

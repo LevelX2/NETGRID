@@ -49,9 +49,13 @@ export function observerAccessAutoDismissMs(input: {
 }
 
 export function actionCueAfterAiAdvanceRequest<
-  T extends { actionType: string },
+  T extends { actionType: string; traceTagOutcome?: { pending: boolean } },
 >(current: T | null): T | null {
-  if (current && isAccessPreludeActionType(current.actionType)) return current;
+  if (
+    current?.traceTagOutcome ||
+    (current && isAccessPreludeActionType(current.actionType))
+  )
+    return current;
   return null;
 }
 

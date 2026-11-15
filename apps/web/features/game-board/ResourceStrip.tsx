@@ -3,7 +3,7 @@
 import { Award, Brain, Goal, PanelTopClose, PanelTopOpen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactNode, Ref } from "react";
 import type { PlayerView, Side } from "@netgrid/shared";
 import { useTranslations } from "use-intl/react";
 import { actionSlotDisplay } from "../../app/action-board-ui";
@@ -16,16 +16,16 @@ export function ActiveMatchResourceStrip({
   view,
   agendaPointsToWin,
   actionCapacities,
-  topOffsetPx,
   ariaHidden,
   observerMode = false,
+  ref,
 }: {
   view: PlayerView;
   agendaPointsToWin: number;
   actionCapacities: Record<Side, number>;
-  topOffsetPx: number;
   ariaHidden: boolean;
   observerMode?: boolean;
+  ref?: Ref<HTMLElement>;
 }) {
   const t = useTranslations("Board.resources");
   const opponent = opponentSide(view.side);
@@ -39,13 +39,10 @@ export function ActiveMatchResourceStrip({
     turnCapacity,
     true,
   );
-  const stripStyle = {
-    "--resource-strip-top": `${topOffsetPx}px`,
-  } as CSSProperties;
   return (
     <section
       className="matchResourceStrip"
-      style={stripStyle}
+      ref={ref}
       aria-hidden={ariaHidden}
       data-testid="match-resource-strip"
     >
@@ -139,15 +136,23 @@ function CompactResourceSide({
         </strong>
       </span>
       {tags > 0 ? (
-        <span className="resourceStripMetric quiet">
-          <TagIcon size={13} />
-          <strong>{tags}</strong>
+        <span
+          className="resourceStripMetric quiet"
+          role="group"
+          aria-label={t("tagCount", { count: tags })}
+        >
+          <TagIcon size={13} aria-hidden="true" />
+          <strong aria-hidden="true">{tags}</strong>
         </span>
       ) : null}
       {coreDamage > 0 ? (
-        <span className="resourceStripMetric quiet">
-          <CoreDamageIcon size={13} />
-          <strong>{coreDamage}</strong>
+        <span
+          className="resourceStripMetric quiet"
+          role="group"
+          aria-label={t("coreDamageCount", { count: coreDamage })}
+        >
+          <CoreDamageIcon size={13} aria-hidden="true" />
+          <strong aria-hidden="true">{coreDamage}</strong>
         </span>
       ) : null}
     </div>
@@ -340,7 +345,7 @@ export function ScoreAreaStat({
   interactive,
   onToggle,
 }: {
-  value: string;
+  value: string | undefined;
   open: boolean;
   highlighted: boolean;
   interactive: boolean;
@@ -349,28 +354,25 @@ export function ScoreAreaStat({
   const t = useTranslations("Board.resources");
   const toggleLabel = open ? t("hideAgendas") : t("showAgendas");
   const agendaHelpText = t("agendaHelp");
-  const valueStat = (
-    <Stat
-      value={value}
-      icon={<AgendaIcon size={14} />}
-      helpText={agendaHelpText}
-    />
-  );
-
-  if (!interactive) {
-    return valueStat;
-  }
-
   return (
     <>
-      {valueStat}
-      <ScoreAreaToggleButton
-        open={open}
-        highlighted={highlighted}
-        label={`${toggleLabel}. ${agendaHelpText}`}
-        helpText={agendaHelpText}
-        onToggle={onToggle}
-      />
+      {value !== undefined ? (
+        <Stat
+          value={value}
+          icon={<AgendaIcon size={14} />}
+          helpText={agendaHelpText}
+          testId="agenda-points-stat"
+        />
+      ) : null}
+      {interactive ? (
+        <ScoreAreaToggleButton
+          open={open}
+          highlighted={highlighted}
+          label={`${toggleLabel}. ${agendaHelpText}`}
+          helpText={agendaHelpText}
+          onToggle={onToggle}
+        />
+      ) : null}
     </>
   );
 }

@@ -7,6 +7,7 @@ import type {
 } from "react";
 import type { Side, VisibleCard } from "@netgrid/shared";
 import { useTranslations } from "use-intl/react";
+import { publicCardTitle } from "../../app/public-card-presentation";
 
 import {
   actionCueInteractionAmbience,
@@ -22,6 +23,7 @@ import {
   enrichVisibleCard,
   type DisplayVisibleCard,
 } from "../cards/card-view-model";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import type {
   CardDisplayMode,
   CueDisplayMode,
@@ -73,10 +75,13 @@ export function OpponentActionOverlay({
   onAdvanceAi?(): void;
 }) {
   const t = useTranslations("Actions.opponentCue");
+  const cardPresentations = useCatalogCardPresentations();
   const overlayRef = useRef<HTMLElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const showAiAdvanceButton = Boolean(
-    cue?.source === "ai" && canAdvanceAi && onAdvanceAi,
+    (cue?.source === "ai" || cue?.traceTagOutcome?.pending) &&
+    canAdvanceAi &&
+    onAdvanceAi,
   );
   const showFloatingCue = Boolean(
     cue &&
@@ -142,7 +147,18 @@ export function OpponentActionOverlay({
   const showHiddenCardBack =
     cue.visibility === "redacted" && cue.actionType === "install_card";
   const hasCueVisual = Boolean(relatedCard || showHiddenCardBack);
-  const dismissLabel = showAiAdvanceButton ? t("continue") : t("dismiss");
+  const tagOutcome = cue.traceTagOutcome;
+  const dismissLabel =
+    showAiAdvanceButton || tagOutcome ? t("continue") : t("dismiss");
+  const preventionCardNames =
+    tagOutcome?.pending === false
+      ? tagOutcome.preventionCardIds.flatMap((id) => {
+          const title =
+            publicCardTitle(id, cardPresentations) ??
+            cardDetailsById[id]?.title;
+          return title ? [title] : [];
+        })
+      : [];
   const cueStyle = {
     ...cuePositionStyle(position),
     "--cue-duration": `${autoDismissMs}ms`,
@@ -287,6 +303,28 @@ export function OpponentActionOverlay({
           />
           <div className="opponentCueText">
             <strong>{renderTitle(cue)}</strong>
+            {tagOutcome?.pending ? <p>{t("traceTagPending")}</p> : null}
+            {tagOutcome?.pending === false ? (
+              <>
+                {tagOutcome.preventedTags > 0 ? (
+                  <strong>
+                    {preventionCardNames.length > 0
+                      ? t("traceTagsPreventedBy", {
+                          cards: preventionCardNames.join(", "),
+                          count: tagOutcome.preventedTags,
+                        })
+                      : t("traceTagsPrevented", {
+                          count: tagOutcome.preventedTags,
+                        })}
+                  </strong>
+                ) : null}
+                {tagOutcome.tagsAdded > 0 ? (
+                  <strong>
+                    {t("traceTagsAdded", { count: tagOutcome.tagsAdded })}
+                  </strong>
+                ) : null}
+              </>
+            ) : null}
             {cue.description ? <p>{cue.description}</p> : null}
           </div>
         </div>
@@ -297,16 +335,20 @@ export function OpponentActionOverlay({
         ) : (
           <span aria-hidden="true" />
         )}
-        <button
-          className="button cueAdvanceButton"
-          onClick={showAiAdvanceButton && onAdvanceAi ? onAdvanceAi : onDismiss}
-          aria-label={dismissLabel}
-          title={dismissLabel}
-          type="button"
-        >
-          {showAiAdvanceButton ? <Play size={14} /> : <Check size={14} />}
-          {dismissLabel}
-        </button>
+        {(!tagOutcome?.pending || showAiAdvanceButton) && (
+          <button
+            className="button cueAdvanceButton"
+            onClick={
+              showAiAdvanceButton && onAdvanceAi ? onAdvanceAi : onDismiss
+            }
+            aria-label={dismissLabel}
+            title={dismissLabel}
+            type="button"
+          >
+            {showAiAdvanceButton ? <Play size={14} /> : <Check size={14} />}
+            {dismissLabel}
+          </button>
+        )}
       </div>
     </aside>
   );

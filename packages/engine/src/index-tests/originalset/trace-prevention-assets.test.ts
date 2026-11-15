@@ -454,120 +454,149 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     });
   });
 
-  it("offers Fall Guy for Fetch 4.0.1 trace tags at zero credits and resumes the run after either decision", () => {
-    let state = toRunnerTurn(
-      createGameAfterSetup({
-        seed: "spotcheck-fetch-fall-guy-tag-prevention",
-        runnerDeck: {
-          ...MECHANIC_SMOKE_DECKS.traceTags.runner,
-          id: "spotcheck_fetch_fall_guy_runner",
-          name: "Spotcheck Fetch Fall Guy Runner",
-          cards: [
-            { id: "onr_v1_161_fall-guy", quantity: 1 },
-            ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
-          ],
-        },
-        corpDeck: {
-          ...MECHANIC_SMOKE_DECKS.traceTags.corp,
-          id: "spotcheck_fetch_fall_guy_corp",
-          name: "Spotcheck Fetch Fall Guy Corp",
-          cards: [
-            { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
-            ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards,
-          ],
-        },
-        agendaPointsToWin: 7,
-      }),
-    );
-    state.runner.credits = 5;
-    const fallGuyId = moveRunnerCardToGrip(state, "onr_v1_161_fall-guy");
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "install_card" &&
-        String(action.payload?.cardId) === fallGuyId,
-    );
-    state.runner.credits = 0;
-    state.corp.credits = 1;
-    putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
+  it.each([
+    ["Fetch 4.0.1", "onr_v1_243_fetch-4-0-1", 0],
+    ["Hunter", "onr_v1_249_hunter", 2],
+  ])(
+    "offers Fall Guy for %s trace tags at zero credits and resumes the run after either decision",
+    (_title, iceDefinitionId, rezCost) => {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: "spotcheck-fetch-fall-guy-tag-prevention",
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.traceTags.runner,
+            id: "spotcheck_fetch_fall_guy_runner",
+            name: "Spotcheck Fetch Fall Guy Runner",
+            cards: [
+              { id: "onr_v1_161_fall-guy", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
+            ],
+          },
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.traceTags.corp,
+            id: "spotcheck_fetch_fall_guy_corp",
+            name: "Spotcheck Fetch Fall Guy Corp",
+            cards: [
+              { id: iceDefinitionId, quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards,
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 5;
+      const fallGuyId = moveRunnerCardToGrip(state, "onr_v1_161_fall-guy");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          String(action.payload?.cardId) === fallGuyId,
+      );
+      state.runner.credits = 0;
+      state.corp.credits = rezCost + 1;
+      putCorpIceOnServer(state, "rd", iceDefinitionId);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
 
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "rd",
-    );
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_243_fetch-4-0-1",
-    );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
-    state = applyChoice(state, "corp", "bid_1");
-    state = applyChoice(state, "runner", "bid_0");
-
-    expect(state.runner.credits).toBe(0);
-    expect(state.corp.credits).toBe(0);
-    expect(state.runner.tags).toBe(0);
-    expect(state.pendingChoice).toMatchObject({
-      side: "runner",
-      source: "v120.event_modification.avoid",
-      prompt: "Tag vermeiden",
-    });
-    expect(getPlayerView(state, "runner").pendingChoice?.prompt).toBe(
-      "Tag vermeiden",
-    );
-    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
-    expect(
-      getLegalActions(state, "corp").some(
-        (action) => action.type === "resolve_choice",
-      ),
-    ).toBe(false);
-    const fallGuyOption = state.pendingChoice?.options.find((option) =>
-      option.id.includes(String(fallGuyId)),
-    )?.id;
-    expect(fallGuyOption).toBeDefined();
-
-    let avoidState = structuredClone(state);
-    avoidState = applyChoice(avoidState, "runner", String(fallGuyOption));
-    expect(avoidState.runner.tags).toBe(0);
-    expect(avoidState.runner.heap).toContain(fallGuyId);
-    expect(avoidState.run).toBeDefined();
-    expect(avoidState.timingPoint).toBe("run.encounter_ice");
-    expect(
-      getLegalActions(avoidState, "runner").some(
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === iceDefinitionId,
+      );
+      state = apply(
+        state,
+        "runner",
         (action) => action.type === "continue_run",
-      ),
-    ).toBe(true);
-    expect(avoidState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      eventModificationOutcome: "avoided",
-      sourceDefinitionId: "onr_v1_161_fall-guy",
-      tagsAdded: 0,
-    });
+      );
+      state = applyChoice(state, "corp", "bid_1");
+      state = applyChoice(state, "runner", "bid_0");
 
-    let passState = structuredClone(state);
-    passState = applyChoice(passState, "runner", "pass");
-    expect(passState.runner.tags).toBe(1);
-    expect(passState.runner.rig.resources).toContain(fallGuyId);
-    expect(passState.run).toBeDefined();
-    expect(passState.timingPoint).toBe("run.encounter_ice");
-    expect(
-      getLegalActions(passState, "runner").some(
-        (action) => action.type === "continue_run",
-      ),
-    ).toBe(true);
+      expect(state.runner.credits).toBe(0);
+      expect(state.corp.credits).toBe(0);
+      expect(state.runner.tags).toBe(0);
+      expect(state.pendingChoice).toMatchObject({
+        side: "runner",
+        source: "v120.event_modification.avoid",
+        prompt: "Tag vermeiden",
+      });
+      expect(getPlayerView(state, "runner").pendingChoice?.prompt).toBe(
+        "Tag vermeiden",
+      );
+      expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+      const traceResult = getPlayerView(state, "corp").publicEvents.at(-1);
+      expect(traceResult?.publicPayload).toMatchObject({
+        traceSuccessful: true,
+        imminentEventType: "add_tag",
+        imminentEventId: expect.any(String),
+        eventModificationWindowOpened: true,
+      });
+      expect(
+        getLegalActions(state, "corp").some(
+          (action) => action.type === "resolve_choice",
+        ),
+      ).toBe(false);
+      const fallGuyOption = state.pendingChoice?.options.find((option) =>
+        option.id.includes(String(fallGuyId)),
+      )?.id;
+      expect(fallGuyOption).toBeDefined();
 
-    for (const branch of [avoidState, passState]) {
-      const replay = replayEvents(initial, branch.eventLog.slice(replayStart));
-      expect(replay.ok).toBe(true);
-      expect(hashState(replay.state)).toBe(hashState(branch));
-    }
-  });
+      let avoidState = structuredClone(state);
+      avoidState = applyChoice(avoidState, "runner", String(fallGuyOption));
+      expect(avoidState.runner.tags).toBe(0);
+      expect(avoidState.runner.heap).toContain(fallGuyId);
+      expect(avoidState.run).toBeDefined();
+      expect(avoidState.timingPoint).toBe("run.encounter_ice");
+      expect(
+        getLegalActions(avoidState, "runner").some(
+          (action) => action.type === "continue_run",
+        ),
+      ).toBe(true);
+      expect(avoidState.eventLog.at(-1)?.publicPayload).toMatchObject({
+        eventModificationOutcome: "avoided",
+        sourceDefinitionId: "onr_v1_161_fall-guy",
+        tagsAdded: 0,
+      });
+      expect(
+        getPlayerView(avoidState, "corp").publicEvents.at(-1)?.publicPayload,
+      ).toMatchObject({
+        imminentEventId: traceResult?.publicPayload.imminentEventId,
+        imminentEventType: "add_tag",
+        preventedTags: 1,
+        trashedCardDefinitionId: "onr_v1_161_fall-guy",
+        tagsAdded: 0,
+      });
+
+      let passState = structuredClone(state);
+      passState = applyChoice(passState, "runner", "pass");
+      expect(passState.runner.tags).toBe(1);
+      expect(passState.runner.rig.resources).toContain(fallGuyId);
+      expect(passState.run).toBeDefined();
+      expect(passState.timingPoint).toBe("run.encounter_ice");
+      expect(
+        getLegalActions(passState, "runner").some(
+          (action) => action.type === "continue_run",
+        ),
+      ).toBe(true);
+
+      for (const branch of [avoidState, passState]) {
+        const replay = replayEvents(
+          initial,
+          branch.eventLog.slice(replayStart),
+        );
+        expect(replay.ok).toBe(true);
+        expect(hashState(replay.state)).toBe(hashState(branch));
+      }
+    },
+  );
 
   it("uses the same Fall Guy choice for a printed non-trace tag subroutine", () => {
     let state = toRunnerTurn(

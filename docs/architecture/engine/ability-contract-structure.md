@@ -196,6 +196,11 @@ die bestehende Zahlungs- und Ablöseregel nicht.
 deklarierten `agenda_difficulty`-Modifikatoren und dem ausdrücklich gebundenen
 Server-Run-Counter-Zuschlag. PlayerView, Installations-/Score-Quotes,
 LegalActions und Ausführung verwenden diese gemeinsame Berechnung.
+Bekannte Agendas im Remote-Root erhalten in der Kartenansicht bei einer
+Änderung zusätzlich `agendaDifficultyModifier`. Der Wert ist die Differenz
+zwischen der wirksamen Anforderung nach der Untergrenze von null und der
+gedruckten Anforderung. Das Karten-Badge zeigt diese vorzeichenbehaftete
+Differenz. Der Tooltip nennt den gedruckten und den aktuellen Wert.
 `fortRunWindows` beschreibt ausschließlich Run-Zulässigkeit; daraus wird kein
 Agenda-Rabatt abgeleitet. Ein Regionsrabatt wie Washington wird nur einmal über
 den deklarierten Modifikator angewendet.

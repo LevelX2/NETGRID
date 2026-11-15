@@ -365,9 +365,9 @@ export function ChroniclePanel({
               group.label,
               group.kind,
               group.turnGroupLabel,
-              group.firstItemId,
+              group.oldestItemId,
             );
-            const groupRenderKey = `${groupKey}:${group.firstItemId}`;
+            const groupRenderKey = `${groupKey}:${group.oldestItemId}`;
             const turnKey = group.turnGroupLabel
               ? chronicleTurnGroupCollapseKey(group.turnGroupLabel)
               : null;
@@ -447,11 +447,11 @@ function chronicleGroupCollapseKey(
   label: string,
   kind: ChronicleGroupKind,
   turnGroupLabel: string | null,
-  firstItemId: string,
+  oldestItemId: string,
 ): string {
   if (turnGroupLabel && label === turnGroupLabel)
     return chronicleTurnGroupCollapseKey(label);
-  return `${kind}:${turnGroupLabel ?? "none"}:${label}:${firstItemId}`;
+  return `${kind}:${turnGroupLabel ?? "none"}:${label}:${oldestItemId}`;
 }
 
 function chronicleGroupShouldRender(

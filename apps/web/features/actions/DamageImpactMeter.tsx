@@ -10,7 +10,7 @@ export function DamageImpactMeter({
   compact = false,
 }: {
   cue: DamageImpactCue;
-  ariaLabel: string;
+  ariaLabel?: string;
   compact?: boolean;
 }) {
   const t = useTranslations("Actions.damage");
@@ -19,7 +19,9 @@ export function DamageImpactMeter({
   return (
     <div
       className={`damageImpactMeter${compact ? " is-compact" : ""}`}
+      role={ariaLabel ? "img" : undefined}
       aria-label={ariaLabel}
+      aria-hidden={ariaLabel ? undefined : true}
       data-testid="damage-impact-meter"
     >
       {units.map((unit, index) =>
@@ -27,7 +29,6 @@ export function DamageImpactMeter({
           <span
             key={`flatline-${index}`}
             className="damageImpactFlatline"
-            aria-label={t("flatlineBoundary")}
             title={t("flatlineBoundary")}
           >
             <Skull size={14} aria-hidden="true" />

@@ -12,10 +12,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl/react";
 import type { CSSProperties } from "react";
 
-import {
-  actionSlotCapacityForTurn,
-  groupRunnerRigCards,
-} from "../../app/action-board-ui";
+import { groupRunnerRigCards } from "../../app/action-board-ui";
 import { ReadOnlyTurnActionPanel } from "../actions/LegalActionsPanel";
 import { CardPreviewPanel } from "../cards/CardPreviewPanel";
 import {
@@ -28,7 +25,6 @@ import {
 } from "../cards/card-view-model";
 import { ActiveRunnerZoneBoard } from "../game-board/ActiveRunnerZoneBoard";
 import { ActiveServerGrid } from "../game-board/ActiveServerGrid";
-import { ActiveMatchResourceStrip } from "../game-board/ResourceStrip";
 import {
   RunnerOpponentZonesStrip,
   RunnerRigStrip,
@@ -57,6 +53,8 @@ export function ReplayBoard({
   perspective,
   displayNames,
   publicEvents,
+  actionCapacities,
+  showResourceStats,
   cardPresentationsById,
   cardDetailsById,
   cardDisplayMode,
@@ -66,6 +64,8 @@ export function ReplayBoard({
   perspective: Side;
   displayNames: Partial<Record<Side, string>>;
   publicEvents: PublicGameEvent[];
+  actionCapacities: Record<Side, number>;
+  showResourceStats: boolean;
   cardPresentationsById: PublicCardPresentationsById;
   cardDetailsById: Record<string, CatalogCardDetail>;
   cardDisplayMode: CardDisplayMode;
@@ -156,22 +156,6 @@ export function ReplayBoard({
     view.run?.encounteredIce?.instanceId ??
     view.run?.approachedIce?.instanceId ??
     null;
-  const actionCapacities = useMemo(
-    () => ({
-      runner: actionSlotCapacityForTurn(
-        "runner",
-        view.side === "runner" ? view.own.clicks : view.opponent.clicks,
-        publicEvents,
-      ),
-      corp: actionSlotCapacityForTurn(
-        "corp",
-        view.side === "corp" ? view.own.clicks : view.opponent.clicks,
-        publicEvents,
-      ),
-    }),
-    [publicEvents, view],
-  );
-
   const noAction = (_action: LegalAction) => undefined;
   const noFocusAction = (_card: DisplayVisibleCard, _hiddenSide?: Side) =>
     undefined;
@@ -222,18 +206,11 @@ export function ReplayBoard({
         />
       ) : null}
 
-      <ActiveMatchResourceStrip
-        view={view}
-        agendaPointsToWin={view.agendaPointsToWin}
-        actionCapacities={actionCapacities}
-        ariaHidden={false}
-        topOffsetPx={58}
-      />
-
       <div className="main" data-testid="replay-normal-game-surface">
         <aside className="column panel sidePanel">
           <OpponentPanel
             view={view}
+            showResourceStats={showResourceStats}
             {...(displayNames[opponentSide(view.side)]
               ? {
                   displayName:
@@ -258,6 +235,7 @@ export function ReplayBoard({
           />
           <PlayerPanel
             view={view}
+            showResourceStats={showResourceStats}
             title={`${displayNames[view.side] ?? t(`side.${view.side}`)} · ${t(`side.${view.side}`)}`}
             scoreAreaCards={scoreAreaCardsBySide(view.side)}
             agendaPointsToWin={view.agendaPointsToWin}

@@ -21,7 +21,7 @@ import {
   useCardTooltipSettings,
   usePreferredCardImageSource,
 } from "../cards/card-display-settings";
-import { CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS } from "../settings/settings-model";
+import { useCardTooltipHover } from "../cards/useCardTooltipHover";
 import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
 
 type DeckTooltipCard = {
@@ -62,18 +62,13 @@ export function DeckCardTooltipTrigger({
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
   const triggerRef = useRef<HTMLElement | null>(null);
-  const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-  const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const tooltipRef = useRef<HTMLSpanElement | null>(null);
+  const hover = useCardTooltipHover(triggerRef, tooltipRef, hoverOpenDelayMs);
   const [tooltipPositionStyle, setTooltipPositionStyle] =
     useState<CSSProperties>({});
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">(
     "below",
   );
-  const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipImageUnavailable, setTooltipImageUnavailable] = useState(false);
 
@@ -182,22 +177,7 @@ export function DeckCardTooltipTrigger({
     isSubroutineRuleLine(card?.type ?? "", rulesText, line),
   );
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
-  const showTooltip =
-    tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
-
-  const clearTooltipOpenTimer = () => {
-    if (tooltipOpenTimerRef.current !== null) {
-      clearTimeout(tooltipOpenTimerRef.current);
-      tooltipOpenTimerRef.current = null;
-    }
-  };
-
-  const clearTooltipCloseTimer = () => {
-    if (tooltipCloseTimerRef.current !== null) {
-      clearTimeout(tooltipCloseTimerRef.current);
-      tooltipCloseTimerRef.current = null;
-    }
-  };
+  const showTooltip = tooltipEnabled && (hover.visible || tooltipFocusVisible);
 
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
@@ -255,31 +235,9 @@ export function DeckCardTooltipTrigger({
     if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);
   };
 
-  const scheduleTooltipOpen = () => {
-    if (!tooltipEnabled) return;
-    clearTooltipCloseTimer();
-    if (tooltipHoverVisible) return;
-    clearTooltipOpenTimer();
-    tooltipOpenTimerRef.current = setTimeout(() => {
-      tooltipOpenTimerRef.current = null;
-      setTooltipHoverVisible(true);
-    }, hoverOpenDelayMs);
-  };
-
-  const scheduleTooltipClose = () => {
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
-    tooltipCloseTimerRef.current = setTimeout(() => {
-      tooltipCloseTimerRef.current = null;
-      setTooltipHoverVisible(false);
-    }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
-  };
-
   useEffect(() => {
     if (tooltipEnabled) return;
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
-    setTooltipHoverVisible(false);
+    hover.close();
     setTooltipFocusVisible(false);
     setTooltipPositionStyle({});
   }, [tooltipEnabled]);
@@ -288,14 +246,6 @@ export function DeckCardTooltipTrigger({
     if (!showTooltip) return;
     updateTooltipPlacement();
   }, [showTooltip, effectiveTooltipMode]);
-
-  useEffect(
-    () => () => {
-      clearTooltipOpenTimer();
-      clearTooltipCloseTimer();
-    },
-    [],
-  );
 
   return (
     <article
@@ -312,32 +262,22 @@ export function DeckCardTooltipTrigger({
       }}
       onBlur={() => setTooltipFocusVisible(false)}
       onPointerEnter={(event) => {
-        if (event.pointerType === "touch") return;
-        updateTooltipPlacement();
-        scheduleTooltipOpen();
+        if (tooltipEnabled) hover.open(event);
       }}
-      onPointerLeave={(event) => {
-        if (event.pointerType === "touch") return;
-        scheduleTooltipClose();
+      onPointerMove={(event) => {
+        if (tooltipEnabled) hover.open(event);
       }}
+      onPointerLeave={hover.leave}
     >
       {children}
       {showTooltip && tooltipId && card ? (
         <span
+          ref={tooltipRef}
           className={`cardTooltip cardTooltipType-${card.type} ${tooltipPlacement} mode-${effectiveTooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
           id={tooltipId}
           role="tooltip"
           style={tooltipPositionStyle}
-          onPointerEnter={(event) => {
-            if (event.pointerType === "touch") return;
-            clearTooltipCloseTimer();
-            clearTooltipOpenTimer();
-            if (!tooltipHoverVisible) setTooltipHoverVisible(true);
-          }}
-          onPointerLeave={(event) => {
-            if (event.pointerType === "touch") return;
-            scheduleTooltipClose();
-          }}
+          onPointerEnter={(event) => hover.open(event, true)}
         >
           {showImageTooltip ? (
             <>

@@ -11,10 +11,16 @@ import {
   ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
   ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
   putCorpRootInRemote,
+  scoreCorpAgendaForTest,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { visibleCorpScoreContinuationQuote } from "../view/visible-corp-score-continuation-quote";
 
-function prepare(region?: string) {
+const tycho = "onr_v1_220_tycho-extension";
+const corporateWar = "onr_v1_196_corporate-war";
+const directors = "onr_v1_189_artificial-security-directors";
+const washington = "onr_v1_374_washington-d-c-city-grid";
+
+function prepare(region?: string, agenda = tycho, directorsCount = 1) {
   const state = apply(
     createGameAfterSetup({
       seed: "agenda-difficulty-modifier-authority",
@@ -22,15 +28,19 @@ function prepare(region?: string) {
       corpDeck: {
         ...ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
         cards: [
-          ...ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK.cards,
-          { id: "onr_v1_220_tycho-extension", quantity: 1 },
+          ...ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK.cards.map((entry) =>
+            entry.id === directors
+              ? { ...entry, quantity: directorsCount }
+              : entry,
+          ),
+          { id: agenda, quantity: 1 },
         ],
       },
     }),
     "corp",
     (action) => action.type === "mandatory_draw",
   );
-  const agendaId = putCorpRootInRemote(state, "onr_v1_220_tycho-extension");
+  const agendaId = putCorpRootInRemote(state, agenda);
   state.cardInstances[agendaId]!.advancementCounters = 3;
   if (region) {
     const regionId = putCorpRootInRemote(state, region);
@@ -44,7 +54,7 @@ describe("agenda difficulty follows declared modifiers", () => {
   it.each([
     [undefined, 4, 1],
     ["onr_v1_368_roving-submarine", 4, 1],
-    ["onr_v1_374_washington-d-c-city-grid", 3, 0],
+    [washington, 3, 0],
   ] as const)(
     "projects and quotes %s without an unrelated or duplicate discount",
     (region, requirement, remaining) => {
@@ -72,8 +82,56 @@ describe("agenda difficulty follows declared modifiers", () => {
     },
   );
 
+  it("projects the net difficulty change only while a remote agenda is known", () => {
+    const { state, agendaId } = prepare(washington, corporateWar, 3);
+    const agenda = state.cardInstances[agendaId]!;
+    const remoteRoot = (side: "corp" | "runner") =>
+      getPlayerView(state, side).servers.find((s) => s.id === "remote_1")!.root;
+    const visibleAgenda = (side: "corp" | "runner") =>
+      remoteRoot(side).find((card) => card.instanceId === agendaId);
+
+    scoreCorpAgendaForTest(state, directors);
+    expect(visibleAgenda("corp")).toMatchObject({
+      advancementRequirement: 1,
+      agendaDifficultyModifier: -2,
+    });
+    const hiddenAgenda = remoteRoot("runner").find((card) => !card.known);
+    expect(hiddenAgenda).toBeDefined();
+    expect(hiddenAgenda).not.toHaveProperty("agendaDifficultyModifier");
+    agenda.faceup = true;
+    expect(visibleAgenda("runner")).toMatchObject({
+      advancementRequirement: 1,
+      agendaDifficultyModifier: -2,
+    });
+
+    state.serverAgendaCostCountersByServer = { remote_1: 4 };
+    expect(visibleAgenda("corp")?.advancementRequirement).toBe(3);
+    expect(visibleAgenda("corp")).not.toHaveProperty(
+      "agendaDifficultyModifier",
+    );
+    state.serverAgendaCostCountersByServer = { remote_1: 6 };
+    expect(visibleAgenda("corp")).toMatchObject({
+      advancementRequirement: 4,
+      agendaDifficultyModifier: 1,
+    });
+
+    state.serverAgendaCostCountersByServer = {};
+    scoreCorpAgendaForTest(state, directors);
+    scoreCorpAgendaForTest(state, directors);
+    expect(visibleAgenda("corp")).toMatchObject({
+      advancementRequirement: 0,
+      agendaDifficultyModifier: -3,
+    });
+    scoreCorpAgendaForTest(state, corporateWar);
+    const scoredAgenda = getPlayerView(state, "corp").own.scoreArea.find(
+      (card) => card.instanceId === agendaId,
+    );
+    expect(scoredAgenda).toBeDefined();
+    expect(scoredAgenda).not.toHaveProperty("agendaDifficultyModifier");
+  });
+
   it("rejects a formerly offered score after its actual difficulty modifier leaves", () => {
-    const { state, agendaId } = prepare("onr_v1_374_washington-d-c-city-grid");
+    const { state, agendaId } = prepare(washington);
     const score = getLegalActions(state, "corp").find(
       (a) => a.type === "score_agenda",
     )!;

@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createTranslator } from "use-intl/core";
 import { describe, expect, it } from "vitest";
 import deMessages from "../messages/de.json";
 
@@ -21,27 +22,32 @@ describe("DamageImpactOverlay lifecycle", () => {
     );
     expect(source).toContain('aria-label={t("confirmWindow")}');
     expect(source).toMatch(
-      /<Check size=\{14\} \/>\s+\{t\("continue"\)\}\s+<\/button>/,
+      /<Check size=\{14\} aria-hidden="true" \/>\s+\{t\("continue"\)\}\s+<\/button>/,
     );
     expect(deMessages.Actions.damage.confirmWindow).toBe(
       "Damage-Fenster bestätigen",
     );
   });
 
-  it("shows a flatline boundary and overkill labels instead of an unlabeled Grip-Pool delta", () => {
+  it("puts the grip transition directly above the damage segments", () => {
     const source = overlaySource();
-    const meterSource = readFileSync(
-      new URL("../features/actions/DamageImpactMeter.tsx", import.meta.url),
-      "utf8",
-    );
+    const translate = createTranslator({
+      locale: "de",
+      messages: deMessages,
+      namespace: "Actions.damage",
+    });
 
-    expect(source).toContain("<DamageImpactMeter");
-    expect(meterSource).toContain('className="damageImpactFlatline"');
-    expect(meterSource).toContain('t("flatlineBoundary")');
-    expect(source).toContain('t("flatlineOverkillSummary"');
-    expect(source).toContain('t("overkill"');
-    expect(deMessages.Actions.damage.flatlineBoundary).toBe("Flatline-Grenze");
-    expect(source).not.toContain("<span>-{cue.amount}</span>");
+    expect(source).toContain("<strong>{gripLabel}</strong>");
+    expect(source).toContain("<DamageImpactMeter cue={cue} />");
+    expect(
+      translate("impactTitle", { amount: 2, type: translate("type.meat") }),
+    ).toBe("2 Meat Damage");
+    expect(translate("gripTransition", { before: 3, after: 1 })).toBe(
+      "3 → 1 Karte im Grip",
+    );
+    expect(translate("gripTransition", { before: 3, after: 0 })).toBe(
+      "3 → 0 Karten im Grip",
+    );
   });
 
   it("renders prevented zero damage without the impact meter", () => {
@@ -52,8 +58,8 @@ describe("DamageImpactOverlay lifecycle", () => {
     );
     expect(source).toContain('preventedDamage ? "is-prevented" : ""');
     expect(source).toContain('t("preventedTitle"');
-    expect(source).toContain("!preventedDamage ? (");
-    expect(source).toContain('t("prevented")');
+    expect(source).toContain("!preventedDamage ? <DamageImpactMeter");
+    expect(source).toContain('"preventedSource"');
   });
 
   it("uses the defined success token for visible remaining grip segments", () => {
@@ -76,7 +82,7 @@ describe("DamageImpactOverlay lifecycle", () => {
     expect(source).toContain('t("queued"');
     expect(source).toMatch(/cue\.flatline\s*\?\s*t\("flatline"\)/);
     expect(source).toContain('cue.damageType === "core"');
-    expect(source).toContain('t("type.core")');
+    expect(source).toContain('t("coreDamageValue"');
     expect(source).toContain("runnerMaxHandSizeAfter");
     expect(source).toContain('interactionAmbienceClassName("damage")');
     expect(source).toContain('t("damageSummary"');

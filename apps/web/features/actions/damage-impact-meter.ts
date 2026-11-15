@@ -17,7 +17,7 @@ export function damageImpactMeterUnits(
       ...Array.from({ length: fallbackCount }, () => ({
         kind: "unknown" as const,
       })),
-      { kind: "flatline" },
+      ...(cue.flatline ? [{ kind: "flatline" as const }] : []),
     ];
   }
 
@@ -31,7 +31,7 @@ export function damageImpactMeterUnits(
     ...Array.from({ length: remaining }, () => ({
       kind: "remaining" as const,
     })),
-    { kind: "flatline" },
+    ...(cue.flatline ? [{ kind: "flatline" as const }] : []),
     ...Array.from({ length: overkill }, () => ({
       kind: "overkill" as const,
     })),

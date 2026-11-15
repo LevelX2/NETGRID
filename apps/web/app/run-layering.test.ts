@@ -340,7 +340,7 @@ describe("run window layering", () => {
     expect(pageSource).toContain("interactionPresentationBlocked");
     expect(pageSource).toContain("damageImpact={accessDamageImpact}");
     expect(pageSource).toContain("interactionPresentationBlocksAi({");
-    expect(pageSource).toContain("coalesceAccessActionCues(");
+    expect(pageSource).toContain("coalesceActionCues(");
     expect(accessReviewModalSource).toContain(
       'data-testid="access-damage-stage"',
     );
