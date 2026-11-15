@@ -14,6 +14,7 @@ import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/act
 import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { assessRunnerHandRotation } from "../../runtime/runner-hand-rotation-assessment";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { runnerCoverageDrawCadence } from "./coverage-signals";
 import { coverageSupportActionIds } from "./coverage-support";
 
 const SILICON = "onr_v1_179_silicon-saloon-franchise";
@@ -147,6 +148,21 @@ it("admits the native one-card plus credit route under the exact Coverage draw n
   expect(result.state.runner.credits).toBe(11);
   expect(result.state.runner.grip).toHaveLength(6);
   expect(result.state.runner.clicks).toBe(2);
+  const drawEvent = result.event;
+  expect(
+    runnerCoverageDrawCadence({ ...input, eventTail: [drawEvent] })
+      .drawAvailable,
+  ).toBe(true);
+  expect(
+    runnerCoverageDrawCadence({
+      ...input,
+      playerView: {
+        ...input.playerView,
+        stateVersion: drawEvent.stateVersionAfter,
+      },
+      eventTail: [drawEvent],
+    }).drawAvailable,
+  ).toBe(false);
   const replay = replayEvents(state, [result.event]);
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(result.state));

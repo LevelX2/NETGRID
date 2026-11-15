@@ -15,6 +15,7 @@ import {
 import {
   applyCertifiedTurnProjectionDelta,
   assessTurnObservationBoundary,
+  exactCreditDelta,
   type BoundaryActionAssessment,
   type BoundCurrentStepProjection,
   type ProjectedDecisionFrame,
@@ -823,6 +824,7 @@ function capacityApplication(
     projection.followupActionCapacity > 0 &&
     projection.restriction !== "unknown"
   ) {
+    const expiresAt = projection.expiresAt ?? "side_turn_end";
     restrictedAdds.push({
       tokenId: turnPlanningFingerprint("restricted-turn-capacity", {
         sourceCardInstanceId: candidate.sourceCardInstanceId,
@@ -830,10 +832,11 @@ function capacityApplication(
         semanticActionType: candidate.semanticActionType,
         restriction: projection.restriction,
         allowedActionTypes: [...projection.allowedActionTypes].sort(),
+        expiresAt,
       }),
       remaining: wholeNonNegative(projection.followupActionCapacity),
       allowedActionTypes: [...projection.allowedActionTypes].sort(),
-      expiresAt: projection.expiresAt ?? "side_turn_end",
+      expiresAt,
     });
   } else if (
     projection?.kind === "action_debt" &&
@@ -1281,25 +1284,6 @@ function candidateCostsAreExact(
   );
 }
 
-function exactCreditDelta(
-  candidate: ActionSemanticCandidate,
-  currentStepProjection?: BoundCurrentStepProjection,
-): number {
-  if (
-    currentStepProjection &&
-    currentStepProjection.liquidCreditCost !== candidate.costProfile.creditCost
-  ) {
-    return -currentStepProjection.liquidCreditCost;
-  }
-  if (
-    economyProjectionIsExact(candidate) &&
-    Number.isSafeInteger(candidate.economyProjection.netLiquidCreditGain)
-  ) {
-    return candidate.economyProjection.netLiquidCreditGain ?? 0;
-  }
-  return -wholeNonNegative(candidate.costProfile.creditCost ?? 0);
-}
-
 function exactHandDelta(
   frame: ProjectedDecisionFrame,
   candidate: ActionSemanticCandidate,
@@ -1311,26 +1295,6 @@ function exactHandDelta(
     candidateConsumesSourceCard(candidate)
     ? -1
     : 0;
-}
-
-function economyProjectionIsExact(
-  candidate: ActionSemanticCandidate,
-): candidate is ActionSemanticCandidate & {
-  economyProjection: NonNullable<ActionSemanticCandidate["economyProjection"]>;
-} {
-  const economy = candidate.economyProjection;
-  return (
-    economy?.kind === "immediate_liquid" &&
-    economy.timing === "immediate" &&
-    economy.creditRestriction === "general" &&
-    economy.reliability === "guaranteed" &&
-    ((economy.source === "legal_action_payload" &&
-      economy.confidence === "high") ||
-      (economy.source === "basic_action_contract" &&
-        economy.confidence === "medium" &&
-        candidate.actionType === "gain_credit" &&
-        candidate.semanticActionType === "economy.gain_credit"))
-  );
 }
 
 function normalizedBudget(

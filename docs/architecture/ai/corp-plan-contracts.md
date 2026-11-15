@@ -2413,6 +2413,10 @@ auf Jenny übertragen werden; weitere Karten derselben groben Effektfamilie
 benötigen ebenfalls ein eigenes Modell.
 
 Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
+Defense und Payload-Erzeugung prüfen denselben Choice-Vertrag. Aktueller
+Timingpunkt, StateVersion, angegriffener Server und auswählbare Options-IDs
+müssen mit dem LegalAction-Angebot übereinstimmen. Defense prüft diese Bindung,
+bevor es eine ICE-Option oder das auswählbare Decline in den Plan übernimmt.
 Bei einer exponierten eigenen Agenda im angegriffenen Fort oder HQ und
 mehreren vollständig quotierten produktiven Optionen vergleicht derselbe
 Owner die aktuelle sichtbare Runner-Breakantwort. Die

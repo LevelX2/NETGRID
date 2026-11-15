@@ -65,6 +65,7 @@ export function runnerCoverageDrawCadence(
   const drawObserved = mergedPublicHistory(input).some((event) => {
     if (
       event.turnSerial !== currentTurnSerial ||
+      event.stateVersionAfter > input.playerView.stateVersion ||
       event.publicPayload.actor !== "runner"
     ) {
       return false;
@@ -116,10 +117,27 @@ export function uniqueCoverageGaps(
   const result = new Map<string, RunnerCoverageGapSignal>();
   const runTargets = runFacts?.runTargets ?? [];
   const runEntries = runFacts
-    ? runFacts.runTargets.map((evaluation) => ({
-        evaluation,
-        economy: runFacts.economy,
-      }))
+    ? runTargets.flatMap((evaluation) => {
+        if (
+          !runnerCoverageRunTargetHasDifferentialPayoff(
+            input,
+            candidates,
+            evaluation,
+            runTargets,
+          ) ||
+          (evaluation.targetKind === "remote" &&
+            (!services.runnerRemoteHasCurrentContestMaterial(
+              input,
+              evaluation.targetServerId,
+            ) ||
+              services.runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+                input,
+                evaluation.targetServerId,
+              )))
+        )
+          return [];
+        return [{ evaluation, economy: runFacts.economy }];
+      })
     : [];
   const coverageDrawCadence = runnerCoverageDrawCadence(input);
   const coverageSearchInterrupt = runTargets.some((evaluation) => {
@@ -154,34 +172,6 @@ export function uniqueCoverageGaps(
     ),
   );
   for (const { evaluation, economy } of runEntries) {
-    if (
-      !runnerCoverageRunTargetHasDifferentialPayoff(
-        input,
-        candidates,
-        evaluation,
-        runTargets,
-      )
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetKind === "remote" &&
-      !services.runnerRemoteHasCurrentContestMaterial(
-        input,
-        evaluation.targetServerId,
-      )
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetKind === "remote" &&
-      services.runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
-        input,
-        evaluation.targetServerId,
-      )
-    ) {
-      continue;
-    }
     const preparation = evaluation.routeQuote?.preRunPreparation;
     if (
       !preparation?.subtypeChanges?.length ||
@@ -310,34 +300,6 @@ export function uniqueCoverageGaps(
       right.evaluation.score - left.evaluation.score ||
       left.evaluation.actionId.localeCompare(right.evaluation.actionId),
   )) {
-    if (
-      !runnerCoverageRunTargetHasDifferentialPayoff(
-        input,
-        candidates,
-        evaluation,
-        runTargets,
-      )
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetKind === "remote" &&
-      !services.runnerRemoteHasCurrentContestMaterial(
-        input,
-        evaluation.targetServerId,
-      )
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetKind === "remote" &&
-      services.runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
-        input,
-        evaluation.targetServerId,
-      )
-    ) {
-      continue;
-    }
     const outsideMissingCoverageScope =
       evaluation.recommendation !== "find_breaker_first" &&
       evaluation.pathPassability !== "blocked_missing_coverage" &&

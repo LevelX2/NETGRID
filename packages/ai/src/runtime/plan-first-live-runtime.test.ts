@@ -27682,8 +27682,8 @@ describe("authoritative plan-first live runtime", () => {
       {
         eventId: "runner-concrete-coverage-draw-turn-7",
         type: "draw_card",
-        stateVersionBefore: 1,
-        stateVersionAfter: 2,
+        stateVersionBefore: afterDraw.playerView.stateVersion - 1,
+        stateVersionAfter: afterDraw.playerView.stateVersion,
         turnSerial: currentTurnSerial,
         stateHashAfter: "fnv1a:runner-concrete-coverage-draw-turn-7",
         publicPayload: {
@@ -28996,8 +28996,8 @@ describe("authoritative plan-first live runtime", () => {
       {
         eventId: "runner-basic-draw-turn-7",
         type: "draw_card",
-        stateVersionBefore: 1,
-        stateVersionAfter: 2,
+        stateVersionBefore: afterDraw.playerView.stateVersion - 1,
+        stateVersionAfter: afterDraw.playerView.stateVersion,
         turnSerial: 7,
         stateHashAfter: "fnv1a:runner-basic-draw-turn-7",
         publicPayload: {
@@ -30014,7 +30014,11 @@ describe("plan-bound approach-ICE information continuation", () => {
         successful: false,
       };
       const outerIce = visibleCard("hidden_outer", "corp", "ice");
-      const approachedIce = visibleCard("hidden_approached", "corp", "ice");
+      const approachedIce = visibleCard(
+        approachedIceKnown ? "corp_private_ice_1" : "hidden_approached",
+        "corp",
+        "ice",
+      );
       approachedIce.known = approachedIceKnown;
       input.playerView.servers = [
         server("hq"),

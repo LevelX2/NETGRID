@@ -50,7 +50,6 @@ import {
 import { semanticRuntimeActionTypeIsReactive } from "./runtime/reactive-action";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import { corpVisibleRunnerHardwarePayoffEvidence } from "./runtime/runner-hardware-payoff-evidence";
-import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import { runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason } from "./runtime/runner-known-ice-path-score";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
@@ -234,7 +233,6 @@ export const aiLiveRuntimeDependencies = {
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
   staleKnownRndRepeatRunPenalty,
   rndFreshRepeatRunBoost,
-  staleKnownHqRepeatRunPenalty,
   publicHistory: mergedAiPublicHistory,
   eventVersion: aiEventVersion,
   serverIdFromEvent: aiServerIdFromEvent,

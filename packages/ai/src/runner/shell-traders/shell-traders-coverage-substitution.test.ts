@@ -72,13 +72,34 @@ describe("Shell current coverage development substitution", () => {
         a.type === "install_card" &&
         a.payload?.runnerProgramTrashBeforeInstall !== true,
     )!;
-    expect(runnerShellTradersActionDispositions(signals)).toContainEqual(
-      expect.objectContaining({
+    const held = {
+      ...signal,
+      phase: "hold" as const,
+      rejectedActions: [
+        {
+          actionId: direct.actionId,
+          evidenceCode: "runner_shell_traders_holds_harmful_completion",
+        },
+      ],
+    };
+    const expected = [
+      {
         actionId: direct.actionId,
         ownerModuleId: "runner.shell_traders_pipeline",
         disposition: "explicitly_nonproductive",
-      }),
-    );
+        evidenceCode: "runner_shell_traders_dominates_current_coverage_install",
+      },
+    ];
+    expect(
+      runnerShellTradersActionDispositions([held, ...signals, signal]).filter(
+        (entry) => entry.actionId === direct.actionId,
+      ),
+    ).toEqual(expected);
+    expect(
+      runnerShellTradersActionDispositions([...signals, signal, held]).filter(
+        (entry) => entry.actionId === direct.actionId,
+      ),
+    ).toEqual(expected);
   });
   it.each([
     "no_install",

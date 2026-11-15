@@ -656,7 +656,6 @@ Aktualität separat am Run aus. Den alten Score samt Verdrahtung nach einem
 Vorher-nachher-Vergleich entfernen. Abnahme mit bekannt wertlosem HQ,
 geänderter Hand und identischer aktueller Route beziehungsweise Disposition.
 Geschätzt ein halber Tag.
-[Score](../../../packages/ai/src/runtime/runner-hq-repeat-run-score.ts#L5) ·
 [Komposition](../../../packages/ai/src/ai-runtime-public-entrypoints.ts#L235) ·
 [Aktueller Routenpfad](../../../packages/ai/src/run-analysis/runner-plan-run-route-facts.ts)
 
@@ -747,7 +746,7 @@ produktive Ownership behaupten, die heutige Disposition oder die
 Materialisierung mit exakter Action-ID prüfen. Den testexklusiven
 Klassifizierer anschließend entfernen oder zum Test verschieben. Eine
 kleine Änderung, geschätzt ein halber Tag.
-[Factory und Klassifizierer](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L18) ·
+[Factory](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts) ·
 [Verwendung im Test](../../../packages/ai/src/plans/corp-tactical-plan-modules.test.ts) ·
 [Produktive Dispositionen](../../../packages/ai/src/plans/corp-action-disposition-contributors.ts)
 
@@ -778,7 +777,7 @@ Gleiche kompatible Grants bleiben als Gegenprobe addierbar.
 Geschätzt ein halber bis ganzer Tag.
 [Credit-Projection](../../../packages/ai/src/plans/turn-projection.ts#L528) ·
 [Netto-Producer](../../../packages/ai/src/actions/action-economy-projection.ts#L316) ·
-[Restzugsuche](../../../packages/ai/src/plans/turn-remainder-search.ts#L1283) ·
+[Restzugsuche](../../../packages/ai/src/plans/turn-remainder-search.ts) ·
 [Grant-Validierung](../../../packages/ai/src/plans/turn-projection.ts#L864) ·
 [Grant-Producer](../../../packages/ai/src/plans/turn-remainder-search.ts#L827)
 
@@ -857,3 +856,37 @@ für Approach-Expose und die zugehörigen Checkpoints sind grün.
 Die Gegenproben wurden direkt auf dem geprüften Quellstand im
 Arbeitsspeicher ausgeführt. Der Commit enthält die Befunde und die
 Abnahmekriterien.
+
+### Umsetzung der vierten Stichprobe
+
+- Einzelprojektion und Restzugsuche teilen die Liquidberechnung. Der native
+  Accounts-Receivable-Test bestätigt 5 Credits vor der Aktion, 4 Nettoertrag
+  und 9 Credits danach. Kapazitätsgrants mit widersprüchlichen Typen oder
+  Ablaufpunkten werden abgewiesen.
+- Central Pressure respektiert leere Run-Bindungen und wertet den
+  Zusatznutzen eines Run-Events einmal pro Kandidat aus. Coverage verwendet
+  eine gemeinsame Run-Zulassung und zählt Draws bis zur aktuellen
+  StateVersion. Cashout prüft Kosten, Zielbestand und Lücke gemeinsam.
+- Defense bindet Dr. Dreffs auswählbare Optionen und das LegalAction-Angebot
+  vor der Planfortsetzung. Shell Traders meldet je Aktion eine eindeutige
+  Disposition. Die Corp-Ownership-Tests prüfen die Materialisierung der
+  tatsächlichen Module.
+- Die Plan-Builder erzeugen eigenständige Snapshots. Der Score-Pilot
+  verwendet den Utility-Fit einmal. Der ungenutzte HQ-Score samt Verdrahtung
+  entfiel bei gleicher Aktion, Planroute und Fortsetzung in Match 678d D50.
+  Die Smarteye-Fixture verwendet für bekanntes ICE dieselbe Instanz-ID wie
+  das LegalAction-Angebot.
+
+KI-Typecheck und `check:ai` sind grün. Im vollständigen KI-Testlauf
+bestehen 9.575 von 9.584 Tests in 1.173 Dateien. Die neun roten Fälle
+liefern auf dem unveränderten Ausgangsstand `0b9164443` dieselben Fehler.
+
+- `meta-512-pairing-causes`,
+  `baseline-seed02-effect-activation-decision-checkpoints`,
+  `series-82b2-remediation-decision-checkpoints`,
+  `terminal-defense-advance-binding` und `meta576-department-new-remote`
+  betreffen Defense und Platzierung.
+- `meta-590-placement-retention`,
+  `match-manhunt-decision-checkpoints`,
+  `match-e8047b3e-runner-remediation-decision-checkpoints` und
+  `trace-profile-scenario-comparison` betreffen Hand und Trace.

@@ -125,39 +125,50 @@ describe("Runner tactical plan modules", () => {
     ).toBeUndefined();
   });
 
-  it("binds central pressure to its exact server and purpose", () => {
-    const rd = run("run-rd", "rd");
-    const hq = run("run-hq", "hq");
-    const module = tacticalModule("runner.pressure_central");
-    const runnerContext = context([rd, hq], {
-      centralPressure: [
-        {
-          pressureId: "rd-pressure",
-          serverId: "rd",
-          purpose: "multiaccess",
-          strategyLineIds: ["rd_lock"],
-          priorityClass: "P4",
-          reachable: true,
-          marginalValue: 8,
-          evidenceCode: "deck_strategy_rd",
-        },
-      ],
-    });
-    const instance = instantiatePlanProposal(
-      module.discover(runnerContext)[0]!,
-      10,
-    );
-    const materialized = module.materialize(
-      instance,
-      {} as never,
-      runnerContext,
-    );
+  it.each([
+    { runActionIds: undefined, expectedActions: ["run-rd"] },
+    { runActionIds: [], expectedActions: [] },
+    { runActionIds: ["run-rd"], expectedActions: ["run-rd"] },
+    { runActionIds: ["unavailable-run"], expectedActions: [] },
+  ])(
+    "binds central pressure to its exact server and run offers ($runActionIds)",
+    ({ runActionIds, expectedActions }) => {
+      const rd = run("run-rd", "rd");
+      const hq = run("run-hq", "hq");
+      const module = tacticalModule("runner.pressure_central");
+      const runnerContext = context([rd, hq], {
+        centralPressure: [
+          {
+            pressureId: "rd-pressure",
+            serverId: "rd",
+            purpose: "multiaccess",
+            strategyLineIds: ["rd_lock"],
+            priorityClass: "P4",
+            reachable: true,
+            ...(runActionIds !== undefined ? { runActionIds } : {}),
+            marginalValue: 8,
+            evidenceCode: "deck_strategy_rd",
+          },
+        ],
+      });
+      const instance = instantiatePlanProposal(
+        module.discover(runnerContext)[0]!,
+        10,
+      );
+      const materialized = module.materialize(
+        instance,
+        {} as never,
+        runnerContext,
+      );
 
-    expect(materialized.step.target).toEqual({ kind: "server", id: "rd" });
-    expect(
-      materialized.candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual(["run-rd"]);
-  });
+      if (!runActionIds?.length) {
+        expect(materialized.step.target).toEqual({ kind: "server", id: "rd" });
+      }
+      expect(
+        materialized.candidates.map((entry) => entry.candidate.actionId),
+      ).toEqual(expectedActions);
+    },
+  );
 
   it("assesses targeted-bypass preparation as contingent rather than visible-state forced", () => {
     const social = {

@@ -119,17 +119,17 @@ export function runnerPostBreakTrashPreparationSignals(
     );
     if (!quote || !target) return [];
     const minimumCreditsAfterPath = deferredRun?.minimumCreditsAfterPath ?? 0;
-    const approvedSignal: RunnerPressureSignal =
-      !signal.reachable && deferredRun?.actionId === run.actionId
-        ? {
-            ...signal,
-            purpose: "access",
-            reachable: true,
-            supportNeedId: undefined,
-            runActionIds: [run.actionId],
-            runActionExclusions: {},
-          }
-        : signal;
+    let approvedSignal = signal;
+    if (!signal.reachable && deferredRun?.actionId === run.actionId) {
+      approvedSignal = {
+        ...signal,
+        purpose: "access",
+        reachable: true,
+        runActionIds: [run.actionId],
+        runActionExclusions: {},
+      };
+      delete approvedSignal.supportNeedId;
+    }
     const priorState = previous?.instances.find(
       (instance) =>
         instance.moduleId === "runner.pressure_central" &&

@@ -35,10 +35,11 @@ export function corpScoreWindowDecision(
       evidence,
     );
   }
+  const scorelineAllowed = hasUtilityFamily(top, "corp_scoreline");
   return decision(
     CORP_SCORE_WINDOW_PILOT_MODE,
-    hasUtilityFamily(top, "corp_scoreline"),
-    hasUtilityFamily(top, "corp_scoreline")
+    scorelineAllowed,
+    scorelineAllowed
       ? "corp_score_window_scoreline_allowed"
       : "corp_score_window_scoreline_missing",
     evidence,

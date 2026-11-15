@@ -4,7 +4,11 @@ import { CARD_DEFINITIONS_BY_ID } from "@netgrid/engine";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-dreff-future-only.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
+import { resolvePlanBoundCorpDelayedSuccessChoice } from "../../corp/defense/defense-choice-continuation";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
@@ -121,6 +125,36 @@ it.each<{ definitionId: string; types: SubroutineType[]; useIce: boolean }>([
       },
     });
     expect(choice).toEqual(choiceBefore);
+  },
+);
+
+it.each(["wrong_timing", "disabled_decline"] as const)(
+  "rejects %s in the Defense continuation before payload binding",
+  (invalidContract) => {
+    const input = fixture();
+    const previous = residentPlanPortfolioSnapshot(input);
+    expect(previous).toBeDefined();
+    if (invalidContract === "wrong_timing") {
+      input.legalActions[0]!.timingPoint = "corp_action.main";
+    } else {
+      input.playerView.pendingChoice!.options.find(
+        (option) => option.id === "decline",
+      )!.selectable = false;
+    }
+    expect(() =>
+      resolvePlanBoundCorpDelayedSuccessChoice(
+        { input, actionCandidates: [], turnKey: "unused" },
+        previous,
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "window_origin_missing",
+        context: expect.objectContaining({
+          owner: "continuation",
+          removalCondition: expect.stringContaining("Failed=choice_contract"),
+        }),
+      }),
+    );
   },
 );
 

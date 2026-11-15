@@ -51,6 +51,10 @@ verwenden. Der aktuelle Runpfad erhält Profil und öffentlichen Run-Linkbonus
 dieselbe Regelsemantik. Dies verändert keinen Informationszweck oder dessen
 Budgetgrenze.
 
+Bei Central Pressure ist eine vorhandene Liste von `runActionIds` verbindlich.
+Eine leere Liste lässt keine Runroute zu. Nur ohne diese Liste wird eine Route
+über Server und gegebenenfalls Kartenquelle zugeordnet.
+
 Die Zugriffskadenz bindet Karten- und Choice-Runs über den öffentlichen
 `ResolvedGameEffect.start_run`, normale Runaktionen über ihren primären
 `start_run`-Vertrag. Bei einer Umleitung zählt das tatsächliche Zugriffsziel,
@@ -1083,6 +1087,8 @@ vorhanden sein und die bestehende Draw-Tax-Prüfung bleibt wirksam.
 Der Creditanteil erzeugt keinen zweiten Economy-Executor. Die
 Originalentscheidung und eine echte Engine-Anwendung prüfen Plananschluss,
 Klick-, Credit- und Kartenänderung; bei leerem Stack entsteht kein Coverage-Draw.
+Die Ziehkadenz zählt öffentliche Runner-Ziehereignisse des aktuellen Zuges
+bis zur StateVersion der aktuellen Spielersicht.
 
 Eine deckweite Suchwerkzeug-Fähigkeit zertifiziert keine aktuelle Stack-Suche.
 Der Coverage-Produzent prüft zusätzlich die ausführende Programm-Suchfunktion
@@ -2446,7 +2452,9 @@ negative Credits nach dem Run. Diese Fälle bleiben echte Fundingbedarfe.
 Ein Bank-Cashout wie Broker ist ebenfalls kein allgemein positiver
 Economy-Step. Er wird an eine konkrete, planfähige Kartenentwicklung mit
 echtem Credit-Gap gebunden und muss dieses Gap mit verbleibendem
-Same-Turn-Konversionsfenster vollständig schließen. Nach Cashout und
+Same-Turn-Konversionsfenster vollständig schließen. Der Zielbestand muss die
+Kosten der Kartenentwicklung abdecken, und die gemeldete Lücke muss der
+Differenz aus Zielbestand und aktuellem Guthaben entsprechen. Nach Cashout und
 Entwicklung muss der erforderliche Handpuffer erhalten bleiben. Eine
 Unterschreitung ist nur mit einem expliziten, an dieselbe Zielkarteninstanz
 gebundenen akuten Survival- oder Coverage-Nachweis zulässig. Fehlt eine
@@ -4726,6 +4734,10 @@ Owner-Grenztests sowie Tests gegen vertauschte Elternpläne, veraltete
 Finanzierungsquotes und fehlende Routen sichern diese Trennung ab.
 
 ## 13. `runner.shell_traders_pipeline`
+
+Shell-Signale binden den Grund einer zurückgestellten Aktion direkt an deren
+Action-ID. Pro Aktion liefert der Owner eine Disposition. Bei überlappenden
+Signalen hat die konkret gebundene Coverage-Substitution Vorrang.
 
 Speichervorbereitung konsumiert den endgültigen Hand-/Rig-Bedarfsbefund.
 `memory_support` mit `none` ohne konkret gebundene Coverage-Anforderung hält

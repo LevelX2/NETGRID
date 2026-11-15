@@ -509,6 +509,14 @@ Action-Capacity-Tokens, Reservierungen, einmal-pro-Zug-Nutzungen, relevante
 und Beobachtungsstatus. Board und Credits allein reichen nicht zur
 Zyklenkennung.
 
+Die zertifizierte Einzelprojektion und die Restzugsuche verwenden dieselbe
+Berechnung für liquide Credits. Ein garantierter unmittelbarer Nettoertrag
+enthält die Aktionskosten bereits. Zahlungsfenster mit einer exakt gebundenen
+abweichenden Liquidbelastung projizieren den tatsächlich fälligen Anteil.
+Kapazitätsgrants mit derselben Token-ID sind nur bei identischen erlaubten
+Aktionstypen und gleichem Ablaufpunkt addierbar. Die Restzugsuche bindet den
+Ablaufpunkt in der Token-ID.
+
 Ein exakt gequoteter Netto-Handzuwachs wird unabhängig von einem liquiden
 Credit-Ertrag projiziert. Das gilt auch für den normalen Basisdraw und reine
 Ziehoperationen (`non_economy`). An der privaten Beobachtungsgrenze bleibt
