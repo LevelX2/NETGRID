@@ -631,3 +631,229 @@ Die Abnahme umfasst 298 fokussierte KI-Tests in 23 Dateien und
 15 Engine-Tests in drei Dateien. Sie enthält native Fälle für beide
 Purge-Aktionen, den Blind-Trace mit sichtbarer Auslösequelle, den
 R&D-Timing-Gegenfall und die Free-Rez- und Bankfinanzierung.
+
+## Vierte Zufallsstichprobe mit zehn Dateien
+
+Geprüfter Quellstand `848bc7ffe`. Ziehung ohne Zurücklegen aus 963 ordinal
+sortierten Git-Pfaden unter `packages/ai/src` mit `.NET System.Random` und
+Seed `1178214394`. Für Positionen 0 bis 9 jeweils `Next(i, pool.Count)`
+ziehen und tauschen. Tests, Testhilfen und die Dateinamen der drei
+bisherigen Stichproben einschließlich umbenannter Verträge waren
+ausgeschlossen. Geprüft wurden Verantwortung, Datenfluss, aktuelle
+Nutzung, Fehlergrenzen, Determinismus und Testabdeckung. P1 steht für
+den nächsten fachlichen Fix, P2 für begrenzte Vertragskorrekturen und P3
+für Wartbarkeit. Aufwand jeweils grob einschließlich fokussierter Tests.
+
+### 1. `runtime/runner-hq-repeat-run-score.ts`
+
+**P3, statisch.** Die kleine Funktion verwendet reines Runner-Wissen und
+besitzt Tests für bekannte beziehungsweise veränderte HQ-Handinformation.
+Der Funktionswert wird in der Runtime-Komposition weitergereicht. Eine
+Suche nach dem Symbol im Workspace findet außerhalb seiner Definition
+nur Import und Übergabe, keinen lesenden Consumer. Die aktuelle
+Central-Pressure-Strecke wertet den konkreten Access-Payoff und dessen
+Aktualität separat am Run aus. Den alten Score samt Verdrahtung nach einem
+Vorher-nachher-Vergleich entfernen. Abnahme mit bekannt wertlosem HQ,
+geänderter Hand und identischer aktueller Route beziehungsweise Disposition.
+Geschätzt ein halber Tag.
+[Score](../../../packages/ai/src/runtime/runner-hq-repeat-run-score.ts#L5) ·
+[Komposition](../../../packages/ai/src/ai-runtime-public-entrypoints.ts#L235) ·
+[Aktueller Routenpfad](../../../packages/ai/src/run-analysis/runner-plan-run-route-facts.ts)
+
+### 2. `runner/shell-traders/shell-traders-dispositions.ts`
+
+**P3, synthetisch reproduziert.** Der Producer kennzeichnet sowohl verdrängte
+Coverage-Installationen als auch fachlich abgelehnte Shell-Traders-Aktionen.
+Zwei absichtlich überlappende Signale liefern zweimal dieselbe Action-ID
+mit unterschiedlichen Gründen. Die aktuelle Runtime dedupliziert gleiche
+Action, Owner und Disposition und behält den zuerst gelieferten Grund.
+Der Scheduler bekommt im geprüften aktuellen Pfad somit einen Eintrag.
+Die Diagnose hängt jedoch von der Signalreihenfolge ab. Bei der nächsten
+Änderung an diesem Vertrag die Ablehnung pro Action explizit benennen und
+bei Überlappung die Begründung deterministisch auswählen oder bewahren.
+Der aktuelle Coverage-Substitutionstest ist eine gute positive Kontrolle.
+Geschätzt zwei bis vier Stunden.
+[Producer](../../../packages/ai/src/runner/shell-traders/shell-traders-dispositions.ts#L18) ·
+[Runtime-Deduplizierung](../../../packages/ai/src/runtime/plan-first-live-runtime.ts#L1437) ·
+[Substitutionstest](../../../packages/ai/src/runner/shell-traders/shell-traders-coverage-substitution.test.ts)
+
+### 3. `runner/central-pressure/central-pressure-plan-module.ts`
+
+**P2, reproduziert mit echter LegalAction und mutiertem Plan-Signal.**
+Mit der HQ-LegalAction aus `cp-678d-d50-post-break-trash` liefert der
+Kandidatendienst dieselbe Route bei fehlendem `runActionIds`, bei explizitem
+`runActionIds: []` und bei der Liste mit genau dieser ID. Eine leere Liste
+öffnet die breite Serversuche. Der reguläre Signal-Producer setzt bei
+gesperrter Cadence zusätzlich `reachable: false`. Die Gegenprobe belegt
+eine Vertragslücke, keine Umgehung der Cadence im Originalspiel. Fehlend
+und ausdrücklich leer unterscheiden. Eine leere exakte Liste muss null
+Routen ergeben. Derselbe Routenwert sollte außerdem den Differential-Payoff
+eines Run-Events einmal ermitteln. Die beiden heutigen Aufrufe dienen
+Filter und Routenbewertung. Geschätzt ein halber bis ganzer Tag. Abnahme
+mit HQ-Kontrollfall und dem nativen Post-Break-Trash-Checkpoint.
+[Routenkandidaten](../../../packages/ai/src/runner/central-pressure/central-pressure-plan-module.ts#L297) ·
+[Cadence-Producer](../../../packages/ai/src/runner/central-pressure/central-pressure-signals.ts#L1338) ·
+[Nativer Test](../../../packages/ai/src/evaluation/decision-checkpoints/match-678d-post-break-trash.test.ts)
+
+### 4. `runtime/runner-development-cashout-admission.ts`
+
+**P2, synthetisch reproduziert.** Die Aufnahmebedingung schützt das
+Handpolster und lässt Ausnahmen nur mit passendem Acute-Witness zu.
+Bei 2 Credits, 3 Auszahlung und einem widersprüchlichen Need mit Ziel 5,
+Lücke 3 und Installationskosten 8 lässt sie die Auszahlung zu und
+projiziert nach Installation −3 Credits. Der normale Producer verwendet
+mindestens die Installationskosten als Ziel und leitet die Lücke vom
+aktuellen Guthaben ab. Daher ist dies eine Lücke an der geprüften
+Datenvertragsgrenze. Das Tupel aus Kosten, Ziel und Lücke gemeinsam
+validieren. Als separaten Wartbarkeitsschritt Priorität mit dem Kandidaten
+führen. Heute schlägt der Sortiervergleich sie je Vergleich erneut in der
+gesamten Evaluationsliste nach. Geschätzt ein halber Tag. Die Regression
+soll auch den nativen Bank-Floor-Cashout erhalten.
+[Aufnahmeprüfung](../../../packages/ai/src/runtime/runner-development-cashout-admission.ts#L106) ·
+[Route und Sortierung](../../../packages/ai/src/runtime/runner-development-cashout-admission.ts#L149) ·
+[Need-Producer](../../../packages/ai/src/runner/hand-development/hand-development-evaluation.ts#L1631) ·
+[Nativer Banktest](../../../packages/ai/src/runner/credit-bank/meta-581-floor-cashout.native.test.ts)
+
+### 5. `runner/rig-coverage/coverage-signals.ts`
+
+**P2 für die Cadence-Grenze, P3 für die Struktur.** Ein künstlich
+um eine StateVersion vorausliegender Draw mit derselben `turnSerial`
+verbraucht die Draw-Cadence bereits im früheren Frame. Die gemeinsame
+History vereinigt View und EventTail. Der Cadence-Vertrag verlangt
+zusätzlich die Zeitgrenze des aktuellen Frames. Die Probe zeigt keinen
+solchen gemischten Zeitstand im normalen Engine-Lauf. Ein aktueller
+Basic Draw oder beobachteter Draw-Effekt muss zählen, das zukünftige
+Ereignis nicht. Der terminale Remote-Gegenfall bleibt separat abgedeckt.
+Die großen Schleifen für Subtype-Vorbereitung und allgemeine
+Breaker-Lücken prüfen denselben Differential-Payoff und dieselben
+Remote-Bedingungen wiederholt. Gemeinsame pro Route berechnete Fakten
+reduzieren die Gefahr, dass die beiden Pfade künftig auseinanderlaufen.
+Geschätzt zwei bis vier Stunden für die Cadence, ein bis zwei Tage für
+das gemeinsame Routing mit unveränderten Parent- und Need-Bindungen.
+[Cadence](../../../packages/ai/src/runner/rig-coverage/coverage-signals.ts#L54) ·
+[Vorbereitungs- und Lückenpfade](../../../packages/ai/src/runner/rig-coverage/coverage-signals.ts#L158) ·
+[History](../../../packages/ai/src/runtime/public-event-history.ts#L18) ·
+[Nativer Coverage-Test](../../../packages/ai/src/runner/rig-coverage/coverage-credit-draw-real-engine.test.ts)
+
+### 6. `plans/corp-tactical-plan-modules.ts`
+
+**P3, statisch.** Die Factory registriert die taktischen Corp-Module und
+hält die Owner übersichtlich. Der separate `corpTacticalActionFamilyOwner`
+hat nur Testaufrufer. Sein Choice-Zweig ordnet jede `choice.resolve` dem
+Hand-Owner zu, sobald ein erlaubter Handplan existiert, auch ohne
+passende Action-ID. Dieser vereinfachte Diagnosepfad sollte keine
+eigenständige Aussage über tatsächliche Ownership liefern. Wo die Tests
+produktive Ownership behaupten, die heutige Disposition oder die
+Materialisierung mit exakter Action-ID prüfen. Den testexklusiven
+Klassifizierer anschließend entfernen oder zum Test verschieben. Eine
+kleine Änderung, geschätzt ein halber Tag.
+[Factory und Klassifizierer](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L18) ·
+[Verwendung im Test](../../../packages/ai/src/plans/corp-tactical-plan-modules.test.ts) ·
+[Produktive Dispositionen](../../../packages/ai/src/plans/corp-action-disposition-contributors.ts)
+
+### 7. `plans/turn-projection.ts`
+
+**P1, direkt mit der Engine reproduziert.** Accounts Receivable kostet
+5 Credits und bringt 9. Die Engine-LegalAction liefert eine Semantik
+mit Nettozuwachs 4. `certifiedTurnProjectionDeltaFromCandidate` zieht
+von den 4 erneut die 5 Kosten ab. Bei Startguthaben 5 weist der
+projizierte Frame 4 aus, die Engine nach `applyAction` dagegen 9.
+Die Restzugsuche hat eine eigene Transferfunktion, die hier den
+Nettozuwachs direkt verwendet. Der fehlerhafte Helper ist an aktueller
+Diagnose und beim Runner an der Cleanup-Projektion beteiligt. Eine
+geänderte endgültige Spielaktion ist durch den Corp-Fall nicht belegt.
+Empfehlung ist eine gemeinsame, eng gebundene Credit-Transferregel für
+beide Ableitungen. Abnahme gegen die native Aktion, einen reinen
+Kostenpfad und einen Pfad mit zweckgebundenen Credits. Geschätzt ein
+bis zwei Tage inklusive Regression.
+
+**P2, synthetische Kapazitätsprobe.** Zwei Additionen mit derselben
+Token-ID, aber den abweichenden Typen `install_card` und `start_run`
+sowie verschiedenen Ablaufpunkten ergeben einen Token mit Kapazität 2,
+beiden Typen und dem neueren Ablaufpunkt. Der aktuelle Restzugsuche-
+Producer kodiert die erlaubten Typen in der ID, den Ablaufpunkt aber
+nicht. Eine künstlich gleiche ID mit widersprüchlichen Feldern muss
+abgewiesen werden oder die Grants müssen getrennt identifiziert sein.
+Gleiche kompatible Grants bleiben als Gegenprobe addierbar.
+Geschätzt ein halber bis ganzer Tag.
+[Credit-Projection](../../../packages/ai/src/plans/turn-projection.ts#L528) ·
+[Netto-Producer](../../../packages/ai/src/actions/action-economy-projection.ts#L316) ·
+[Restzugsuche](../../../packages/ai/src/plans/turn-remainder-search.ts#L1283) ·
+[Grant-Validierung](../../../packages/ai/src/plans/turn-projection.ts#L864) ·
+[Grant-Producer](../../../packages/ai/src/plans/turn-remainder-search.ts#L827)
+
+### 8. `corp/defense/defense-choice-continuation.ts`
+
+**P2, Gegenprobe auf gespeichertem Engine-Checkpoint.** Der Origin-Guard
+prüft Quelle, angegriffenen Server, Owner und lückenlose Versionen. Mit
+`cp-meta-403-dreff-future-only` erzeugt er dennoch `corp.resolve_choice`,
+wenn der LegalAction-Timingpunkt künstlich durch `game.checkpoint`
+ersetzt wurde. Mit beibehaltenem Timing, aber künstlich gesperrtem
+`decline` bindet er weiterhin diese Option. Die nachgelagerte
+Payload-Funktion weist beide Fälle mit `window_origin_missing` zurück.
+Der gültige Ausgangsfall liefert durch beide Stufen `decline`. Die
+exakten LegalAction- und auswählbaren Optionsregeln früh im Defense-Owner
+prüfen. Für gemeinsame Choice-Fakten einen gemeinsamen Beleg verwenden.
+Die Liste fehlgeschlagener Checks aus denselben Guards bilden, um die
+derzeit doppelte Fehlerdiagnose zu vermeiden. Geschätzt ein halber bis
+ganzer Tag. Abnahme mit funktionierendem Bezahl-, Decline- und
+abgewiesenem Timing-/Optionsfall.
+[Origin und Option](../../../packages/ai/src/corp/defense/defense-choice-continuation.ts#L197) ·
+[Payload-Prüfung](../../../packages/ai/src/corp/score/score-choice-binding.ts#L230) ·
+[Checkpoint-Tests](../../../packages/ai/src/evaluation/decision-checkpoints/meta-403-dreff-future-only.test.ts)
+
+### 9. `decision/pilot/corp-score-window-pilot.ts`
+
+**Tragfähige Diagnosegrenze.** Der isolierte Scope prüft Corp-Seite,
+`score_agenda` und die passende Goal-Fit-Familie. Die Shadow-Auswertung
+verwendet seine Klassifikation. Die nachgewiesenen Aufrufer liegen bei
+Shadow-Auswertung, Registry und Tests. Der Vertrag ist durch
+Scope- und Schichttests belegt. Beim nächsten Eingriff genügt es,
+`hasUtilityFamily` einmal zu berechnen und für Entscheidung sowie
+Begründung zu verwenden. Das ist eine optionale Kleinigkeit.
+[Scope](../../../packages/ai/src/decision/pilot/corp-score-window-pilot.ts#L13) ·
+[Shadow-Auswertung](../../../packages/ai/src/evaluation/semantic-shadow-league.ts) ·
+[Scope-Tests](../../../packages/ai/src/decision/pilot/pilot-scope-registry.test.ts)
+
+### 10. `plans/tactical-plan-builders.ts`
+
+**P3, synthetisch reproduziert.** Der Builder kopiert Credit- und
+Action-Demands tief, behält aber den übergebenen `currentStep` per
+Referenz. Nach Erzeugung eines Plans fügt ein Push auf die ursprünglichen
+Step-Kandidaten dem Plan denselben Kandidaten hinzu. `createTacticalPlan`
+ist gegenwärtig testseitig genutzt. `createPlanStep` wird noch in der
+taktischen Portfolioprojektion für Funding und Action Capacity verwendet.
+Zuerst festlegen, wo die mutierbaren Eingaben in den alten
+Portfolio-Snapshot übergehen. Dort einen konsistenten Snapshot-Vertrag
+mit Mutationstest wählen. Für den reinen Test-Builder lohnt kein
+breiter Umbau. Aufwand zwei bis vier Stunden bei einer Änderung.
+[Builder](../../../packages/ai/src/plans/tactical-plan-builders.ts#L65) ·
+[Funding-Consumer](../../../packages/ai/src/plans/plan-portfolio-funding.ts#L179) ·
+[Action-Capacity-Consumer](../../../packages/ai/src/plans/plan-portfolio-action-capacity.ts#L240)
+
+### Empfohlene Reihenfolge
+
+Zuerst den mit der Engine belegten Credit-Transfer korrigieren und die
+beiden Ableitungen absichern. Danach die eng begrenzten Verträge für
+Kapazität, Central Pressure, Cashout, Coverage-Cadence und Dr. Dreff.
+Verdrahtungs- und Diagnosepflege können separat mit Vorher-nachher-
+Belegen folgen.
+
+
+### Prüfstand
+
+691 Tests in 23 Dateien sind grün, darunter die Projektions-, Central-
+Pressure-, Coverage-, Dr.-Dreff-, Cashout-, Pilot- und Portfoliotests.
+Ein zusätzlicher Smarteye-Fall scheitert bereits auf dem unveränderten
+Quellstand mit `window_origin_missing`. Die synthetische Fixture setzt
+die bekannte ICE-Instanz auf `hidden_approached`, die angebotenen
+Aktionen referenzieren `corp_private_ice_1`. Der Owner prüft die
+Übereinstimmung sichtbarer Zielinstanzen. Die ergänzenden 32 Tests
+für Approach-Expose und die zugehörigen Checkpoints sind grün.
+[Smarteye-Fixture](../../../packages/ai/src/runtime/plan-first-live-runtime.test.ts#L29966) ·
+[ICE-Bindung](../../../packages/ai/src/runner/expose-information/expose-information-signals.ts#L422) ·
+[Approach-Expose-Regression](../../../packages/ai/src/evaluation/decision-checkpoints/meta736-approach-expose-decline.test.ts)
+
+Die Gegenproben wurden direkt auf dem geprüften Quellstand im
+Arbeitsspeicher ausgeführt. Der Commit enthält die Befunde und die
+Abnahmekriterien.
