@@ -13,6 +13,7 @@ import {
   isDataFortReclamationRezPayload,
   isExposeOutermostIceEachDataFortPayload,
   isExposeServerCardPayload,
+  isRunCreditLossReplacementPayload,
   isSecurityPurgePayload,
   payloadAbilityId,
   payloadRandomRoll,
@@ -1199,6 +1200,27 @@ export function formatChronicleEvent(
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (
+        isRunCreditLossReplacementPayload(payload) &&
+        payload.choiceVisibility === "public"
+      ) {
+        const paid = numberValue(payload.runnerPaidAmount);
+        const lost = numberValue(payload.corpLostCredits);
+        const source = sourceTitle ?? titleForDefinitionId(sourceDefinitionId);
+        const outcome =
+          paid === undefined || lost === undefined
+            ? ". Angaben zu Zahlung oder Creditverlust fehlen"
+            : ` und ${creditText(paid)} gezahlt. Die Korp verlor ${creditText(lost)}`;
+        category = "run";
+        visibility = "public";
+        cardDefinitionId = sourceDefinitionId;
+        cardTitle = source;
+        title = phrase(
+          subject,
+          `Zugriff durch ${source ?? "eine Karte"} ersetzt${outcome}`,
+        );
+        break;
+      }
       {
         const citySurveillanceDetails = citySurveillanceChronicleDetails(
           payload,
@@ -3672,7 +3694,8 @@ export function formatChronicleEvent(
       }
       if (
         actionType === "play_event" &&
-        stringValue(payload.accessReplacement)
+        stringValue(payload.accessReplacement) &&
+        !isRunCreditLossReplacementPayload(payload)
       ) {
         const creditLoss = numberValue(payload.creditLoss) ?? 0;
         const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
@@ -5716,6 +5739,11 @@ export function formatChronicleEffectItems(
   const effects = resolvedEffectsFromPayload(
     event.publicPayload.resolvedEffects,
   );
+  const payload = event.publicPayload;
+  const runStartAlreadyShown =
+    (stringValue(payload.actionType) ?? event.type) === "play_event" &&
+    payload.runnerEventRun === true &&
+    isRunCreditLossReplacementPayload(payload);
   const turnEndTrashItems = endTurnTrashChronicleItems(
     event,
     cardPresentationsById,
@@ -5723,6 +5751,17 @@ export function formatChronicleEffectItems(
   );
   const mergedRecurringCreditPayoutCounters =
     recurringCreditPayoutCounterEffects(effects);
+  const displayedEffects = effects.filter(
+    (effect) =>
+      !(
+        runStartAlreadyShown &&
+        effect.kind === "start_run" &&
+        effect.visibility === "public"
+      ) &&
+      !mergedRecurringCreditPayoutCounters.has(effect) &&
+      !shouldMergeCardResolverEffect(event, effect) &&
+      !shouldSuppressPaymentSupportCreditEffect(event, effect),
+  );
   const successfulRunCreditItem = successfulRunCreditGainChronicleItem(
     event,
     side,
@@ -5753,34 +5792,27 @@ export function formatChronicleEffectItems(
       cardPresentationsById,
       translate,
     );
-    const effectItems = effects
-      .filter(
-        (effect) =>
-          !mergedRecurringCreditPayoutCounters.has(effect) &&
-          !shouldMergeCardResolverEffect(event, effect) &&
-          !shouldSuppressPaymentSupportCreditEffect(event, effect),
-      )
-      .map((effect, index) => {
-        const item = formatSemanticChronicleEffect(
+    const effectItems = displayedEffects.map((effect, index) => {
+      const item = formatSemanticChronicleEffect(
+        event,
+        effect,
+        index,
+        side,
+        translate,
+        cardPresentationsById,
+      );
+      return {
+        ...item,
+        ...chronicleEffectDetail(
           event,
           effect,
-          index,
+          item,
           side,
           translate,
           cardPresentationsById,
-        );
-        return {
-          ...item,
-          ...chronicleEffectDetail(
-            event,
-            effect,
-            item,
-            side,
-            translate,
-            cardPresentationsById,
-          ),
-        };
-      });
+        ),
+      };
+    });
     const tagGainItem = tagGainChronicleItem(
       event,
       side,
@@ -5799,16 +5831,9 @@ export function formatChronicleEffectItems(
       ...(terminalItem ? [terminalItem] : []),
     ];
   }
-  const effectItems = effects
-    .filter(
-      (effect) =>
-        !mergedRecurringCreditPayoutCounters.has(effect) &&
-        !shouldMergeCardResolverEffect(event, effect) &&
-        !shouldSuppressPaymentSupportCreditEffect(event, effect),
-    )
-    .map((effect, index) =>
-      formatChronicleEffect(event, effect, index, side, cardPresentationsById),
-    );
+  const effectItems = displayedEffects.map((effect, index) =>
+    formatChronicleEffect(event, effect, index, side, cardPresentationsById),
+  );
   const payloadItem = endTurnCreditPayoutChronicleItem(
     event,
     side,

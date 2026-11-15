@@ -2418,6 +2418,8 @@
       "accessReplaced": "L'accès normal a été remplacé ; aucune carte Corpo cachée n'est révélée.",
       "accessReplacement": "{subject} : accès remplacé par {source} – la Corpo perd {credits} {credits, select, 1 {crédit} other {crédits}} et pioche {drawn} {drawn, select, 1 {carte} other {cartes}} ; le Runner reçoit {gained} {gained, select, 1 {crédit} other {crédits}} et {tags} {tags, select, 1 {tag} other {tags}}.",
       "eventRun": "{subject} : {source} joué et piratage de {server} lancé.",
+      "runCreditLossReplacement": "{subject} : accès remplacé par {source} et paiement de {paid} {paid, select, 1 {crédit} other {crédits}}. La Corpo a perdu {lost} {lost, select, 1 {crédit} other {crédits}}.",
+      "runCreditLossReplacementAmountsMissing": "{subject} : accès remplacé par {source}. Le montant payé ou perdu est manquant.",
       "declineTrash": "{subject} : effacement refusé pendant l'accès à {server}.",
       "setAside": "{subject} : {source} mis de côté.",
       "removedFromGame": "{subject} : {source} retiré de la partie.",

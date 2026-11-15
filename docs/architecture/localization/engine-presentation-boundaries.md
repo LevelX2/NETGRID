@@ -68,6 +68,9 @@ Karteneffekte, die mit einem Spieleintrag zusammengefasst werden, stehen mit
 ihrem tatsächlichen Ergebnis im Titel und bleiben damit auch im einfachen
 Chronikmodus sichtbar. Unterstützende Informationen (etwa Zahlungsquellen,
 MU danach oder Listen aufgedeckter Karten) stehen in der Beschreibung.
+Bei Priority Wreck beschreibt der Spieleintrag den Runstart einmal. Der
+darauffolgende Auflösungseintrag nennt die tatsächlich gezahlten und
+verlorenen Credits aus den beiden öffentlichen Ergebnisfeldern.
 Geplante Mengen sind kein Ergebnis: Bei unterbrochenem Kartenziehen zählt
 `resolvedEffects[].amount`, nicht die ursprünglich geplante `drawCardsAmount`.
 Verzögertes Agenda-Stehlen darf noch keine gewonnenen Agendapunkte melden.

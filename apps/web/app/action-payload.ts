@@ -6,6 +6,12 @@ import {
 
 type PayloadLike = Record<string, unknown> | undefined;
 
+export function isRunCreditLossReplacementPayload(
+  payload: PayloadLike,
+): boolean {
+  return payload?.accessReplacement === "runner_spend_corp_lose_credits";
+}
+
 export function payloadAbilityId(payload: PayloadLike): string | null {
   const stable = stringValue(payload?.abilityId);
   if (stable) return stable;

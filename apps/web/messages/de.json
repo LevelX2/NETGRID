@@ -2342,6 +2342,8 @@
       "accessReplaced": "Der normale Zugriff wurde ersetzt; keine verdeckten Korp-Karten werden aufgedeckt.",
       "accessReplacement": "{subject}: Zugriff durch {source} ersetzt – Korp verliert {credits} {credits, select, 1 {Credit} other {Credits}} und zieht {drawn} {drawn, select, 1 {Karte} other {Karten}}; Runner erhält {gained} {gained, select, 1 {Credit} other {Credits}} und {tags} {tags, select, 1 {Tag} other {Tags}}.",
       "eventRun": "{subject}: {source} gespielt und einen Run auf {server} gestartet.",
+      "runCreditLossReplacement": "{subject}: Zugriff durch {source} ersetzt und {paid} {paid, select, 1 {Credit} other {Credits}} gezahlt. Die Korp verlor {lost} {lost, select, 1 {Credit} other {Credits}}.",
+      "runCreditLossReplacementAmountsMissing": "{subject}: Zugriff durch {source} ersetzt. Angaben zu Zahlung oder Creditverlust fehlen.",
       "declineTrash": "{subject}: beim Zugriff auf {server} auf Trash verzichtet.",
       "setAside": "{subject}: {source} beiseitegelegt.",
       "removedFromGame": "{subject}: {source} aus dem Spiel entfernt.",

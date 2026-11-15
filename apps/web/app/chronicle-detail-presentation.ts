@@ -8,6 +8,7 @@ import {
   payloadRandomRoll,
   isDataFortReclamationInstallPayload,
   isDataFortReclamationRezPayload,
+  isRunCreditLossReplacementPayload,
   isSecurityPurgePayload,
 } from "./action-payload";
 import {
@@ -1044,6 +1045,27 @@ export function chronicleEventDetail(
       detail("accessReplaced"),
       "run",
     );
+  if (isRunCreditLossReplacementPayload(p)) {
+    if (action === "play_event" && b("runnerEventRun") === true)
+      return say("eventRun", {}, undefined, "run");
+    if (action === "resolve_choice" && s("choiceVisibility") === "public") {
+      const paid = n("runnerPaidAmount");
+      const lost = n("corpLostCredits");
+      return paid === undefined || lost === undefined
+        ? say(
+            "runCreditLossReplacementAmountsMissing",
+            {},
+            detail("accessReplaced"),
+            "run",
+          )
+        : say(
+            "runCreditLossReplacement",
+            { paid, lost },
+            detail("accessReplaced"),
+            "run",
+          );
+    }
+  }
   if (action === "play_event" && s("accessReplacement")) {
     const clauses: string[] = [];
     for (const [field, key, recipient] of [
