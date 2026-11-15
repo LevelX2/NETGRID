@@ -271,6 +271,7 @@ export function residentCorpScoreChoiceBinding(
   input: AiDecisionInput,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
+  portfolio = residentPlanPortfolioSnapshot(input),
 ): {
   planInstanceId: string;
   targetCardId: string;
@@ -279,7 +280,6 @@ export function residentCorpScoreChoiceBinding(
     placements: Array<{ targetCardId: string; amount: number }>;
   };
 } {
-  const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -747,8 +747,8 @@ export function residentCorpScoredAgendaHqShuffleBinding(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
+  portfolio = residentPlanPortfolioSnapshot(input),
 ): { planInstanceId: string; selectedOptionIds: string[] } {
-  const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&

@@ -1,3 +1,4 @@
+import { corpProgramTrashDefenseSignals } from "../../corp/defense/program-trash-signal";
 import { programTrashCoverageLosses } from "../../corp/defense/program-trash-coverage";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -106,6 +107,16 @@ it("requires current Engine quotes for known rezzed ICE", () => {
   delete input.playerView.servers.find((s) => s.id === "rd")!.ice[0]!
     .effectiveRunQuote;
   expect(() => chooseCorpAction(input)).toThrow("missing_action_semantics");
+});
+
+it("diagnoses a pending Defense program-trash choice without its LegalAction", () => {
+  const input = corpInput(choiceState());
+  expect(() =>
+    corpProgramTrashDefenseSignals({ ...input, legalActions: [] }, []),
+  ).toThrow(expect.objectContaining({
+    code: "missing_action_semantics",
+    context: expect.objectContaining({ owner: "rules_contract" }),
+  }));
 });
 
 it("requires the selected Defense executor instead of ranking targets again in the resolver", () => {

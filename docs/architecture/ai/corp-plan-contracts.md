@@ -3006,6 +3006,13 @@ Materialisierung des Roots. Typen und Routenkriterien werden innerhalb der
 Familie mit dem Ausführungs-Owner geteilt. Gemeinsame side-sichere Karten-,
 Ziel- und Kostenfakten liegen in `runtime/visible-action-facts.ts`.
 
+Der entscheidungslokale Quote-Adapter fragt Routen im Corp-Hauptfenster an.
+Fachlich unvollständige Engine-Quotes bleiben auswertbar und können neben
+zertifizierten Routen stehen. Ein technischer Aufruffehler, eine abgelehnte
+Anfrage oder eine ungültige Antwortbindung beendet die betroffene Entscheidung
+mit `engine_quote_contract_failed`. Die strukturierte Diagnose nennt die
+gebundene Anfrage und den technischen Grund ohne den Rohfehler des Anbieters.
+
 **Klasse:** `strategic_campaign` oder `development_project`
 **Rolle:** dormant/Background/Vordergrund
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

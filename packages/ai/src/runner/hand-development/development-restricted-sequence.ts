@@ -1,14 +1,12 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import type { PlanActionDisposition } from "../../plans/plan-scheduler";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { type RunnerPlanDomain } from "../../plans/runner-tactical-plan-contracts";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
-import type {
-  RunnerEconomyPosture,
-  RunnerRunTargetEvaluation,
-} from "../../runner-run-target-evaluation";
+import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
 import {
   type RunnerRestrictedProgramInstallSequenceCommitment,
   type RunnerRestrictedProgramInstallSequenceStep,
@@ -17,9 +15,8 @@ import {
 export function runnerRestrictedProgramInstallSequenceCommitment(
   input: AiDecisionInput,
   source: ActionSemanticCandidate,
-  _candidates: readonly ActionSemanticCandidate[],
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
-  economy: RunnerEconomyPosture,
+  minimumCreditFloor: number,
 ): RunnerRestrictedProgramInstallSequenceCommitment | undefined {
   const projection = source.actionCapacityProjection;
   if (
@@ -67,10 +64,21 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         "Define finite non-negative temporary program-install credits for Valu-Pak.",
     });
   }
-  const temporaryInstallCredits = Math.max(
-    0,
-    Math.floor(projection.temporaryCredits ?? 0),
-  );
+  const temporaryInstallCredits = Math.floor(rawTemporaryInstallCredits);
+  const expectedProjection =
+    temporaryInstallCredits > 0 ? temporaryInstallCredits : undefined;
+  if (projection.temporaryCredits !== expectedProjection) {
+    throw new PlanResolutionFailure("stale_or_future_action_reference", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [source.actionId],
+      owner: "action_semantics",
+      removalCondition:
+        "Project temporary program-install credits from the same current LegalAction used by the restricted sequence.",
+    });
+  }
   if (temporaryInstallCredits <= 0) return undefined;
 
   const options = handDevelopment
@@ -148,7 +156,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
           right.evaluation.cardInstanceId,
         ),
     );
-  if (options.length === 0 || options.length > 20) return undefined;
+  if (options.length === 0) return undefined;
 
   const availableMemory = Math.max(
     0,
@@ -164,6 +172,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
   const maxTargets = Math.min(
     projection.followupActionCapacity,
     options.length,
+    gripCountAfterOpening - minimumHandBuffer,
   );
   let best:
     | {
@@ -174,12 +183,10 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         totalMemory: number;
       }
     | undefined;
-  for (let mask = 1; mask < 2 ** options.length; mask += 1) {
-    const indices: number[] = [];
-    for (let index = 0; index < options.length; index += 1) {
-      if ((mask & (2 ** index)) !== 0) indices.push(index);
-    }
-    if (indices.length < 2 || indices.length > maxTargets) continue;
+  for (const indices of boundedProgramInstallSubsets(
+    options.length,
+    maxTargets,
+  )) {
     const totalCost = indices.reduce(
       (sum, index) => sum + options[index]!.installCost,
       0,
@@ -191,7 +198,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
     const normalCreditsSpent = Math.max(0, totalCost - temporaryInstallCredits);
     if (
       input.playerView.own.credits - normalCreditsSpent <
-        economy.minimumCreditFloor ||
+        minimumCreditFloor ||
       totalMemory > availableMemory ||
       gripCountAfterOpening - indices.length < minimumHandBuffer
     ) {
@@ -232,7 +239,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         memoryCost <= availableMemory &&
         input.playerView.own.credits -
           Math.max(0, installCost - temporaryInstallCredits) >=
-          economy.minimumCreditFloor &&
+          minimumCreditFloor &&
         gripCountAfterOpening - 1 >= minimumHandBuffer,
     );
     if (!acuteBridge) return undefined;
@@ -275,7 +282,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
     runnerCreditsBeforeOpening: input.playerView.own.credits,
     grantedActionCount: projection.followupActionCapacity,
     temporaryInstallCredits,
-    minimumCreditFloor: economy.minimumCreditFloor,
+    minimumCreditFloor,
     minimumHandBuffer,
     ordinaryClicksAfterOpening: Math.max(
       0,
@@ -293,7 +300,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         0,
       )}`,
       `runner_restricted_program_sequence_temporary_credits:${temporaryInstallCredits}`,
-      `runner_restricted_program_sequence_credit_floor:${economy.minimumCreditFloor}`,
+      `runner_restricted_program_sequence_credit_floor:${minimumCreditFloor}`,
       `runner_restricted_program_sequence_hand_floor:${minimumHandBuffer}`,
       `runner_restricted_program_sequence_ordinary_clicks_after_opening:${Math.max(
         0,
@@ -301,6 +308,23 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
       )}`,
     ],
   };
+}
+
+function* boundedProgramInstallSubsets(
+  optionCount: number,
+  maximumTargets: number,
+  selected: readonly number[] = [],
+): Generator<number[]> {
+  // Visit subsets in the previous increasing bit-mask order, without
+  // generating subsets that exceed the actual action capacity.
+  if (maximumTargets < 2) return;
+  for (let index = 0; index < optionCount; index += 1) {
+    const indices = [index, ...selected];
+    if (indices.length >= 2) yield indices;
+    if (indices.length < maximumTargets) {
+      yield* boundedProgramInstallSubsets(index, maximumTargets, indices);
+    }
+  }
 }
 
 function runnerDevelopmentNeedSequenceValue(
@@ -500,14 +524,6 @@ function runnerRestrictedProgramInstallSequenceProgress(
   };
 }
 
-export function assertRunnerRestrictedProgramInstallCommitment(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  previous: ResidentPlanPortfolio | undefined,
-): void {
-  runnerRestrictedProgramInstallSequenceProgress(input, candidates, previous);
-}
-
 export function runnerRestrictedProgramInstallSequenceSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -623,4 +639,30 @@ export function restrictedActionCapacityHasProductiveFollowup(
     }
     return false;
   });
+}
+
+export function runnerRestrictedActionCapacityDisposition(
+  source: ActionSemanticCandidate,
+  candidates: readonly ActionSemanticCandidate[],
+  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
+  runTargets: readonly RunnerRunTargetEvaluation[],
+  developments: readonly RunnerPlanDomain["developments"][number][],
+): PlanActionDisposition | undefined {
+  if (
+    restrictedActionCapacityHasProductiveFollowup(
+      source,
+      candidates,
+      handDevelopment,
+      runTargets,
+      developments,
+    )
+  ) {
+    return undefined;
+  }
+  return {
+    actionId: source.actionId,
+    disposition: "explicitly_nonproductive",
+    ownerModuleId: "runner.develop_board_and_hand",
+    evidenceCode: "runner_restricted_action_capacity_has_no_productive_followup",
+  };
 }

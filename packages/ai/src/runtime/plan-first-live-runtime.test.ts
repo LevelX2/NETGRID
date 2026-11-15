@@ -1,3 +1,4 @@
+import { runnerRestrictedProgramInstallSequenceCommitment } from "../runner/hand-development/development-restricted-sequence";
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../runner/hand-development/development-types";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -3082,7 +3083,11 @@ describe("authoritative plan-first live runtime", () => {
     ).toBeDefined();
 
     const decision = liveContext({
-      selectedChoicesForDecision,
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        action: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) => selectedChoicesForDecision(decisionInput, action, {} as never, portfolio),
     }).chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
@@ -4556,7 +4561,11 @@ describe("authoritative plan-first live runtime", () => {
               evidence: ["test_exact_sacrifice"],
             }
           : undefined,
-      selectedChoicesForDecision,
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        action: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) => selectedChoicesForDecision(decisionInput, action, {} as never, portfolio),
     });
     const decision = runtime.chooseSemanticRuntimeAction(input, {});
 
@@ -5315,14 +5324,20 @@ describe("authoritative plan-first live runtime", () => {
       _decisionInput: unknown,
       card: { instanceId: string },
     ) => ({ total: card.instanceId === lowValueCard.instanceId ? 0 : 100 });
-    const decision = liveContext({
+    let choiceCalls = 0;
+    let failOnChoiceCall: number | undefined;
+    const choiceFailure = new Error("test_abort_final_choice");
+    const runtime = liveContext({
       discardKeepScore,
       selectedChoicesForDecision: (
         decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
         selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
         portfolio: Parameters<typeof selectedChoicesForDecision>[3],
-      ) =>
-        selectedChoicesForDecision(
+      ) => {
+        choiceCalls += 1;
+        expect(residentPlanPortfolioSnapshot(decisionInput)).toBeUndefined();
+        if (choiceCalls === failOnChoiceCall) throw choiceFailure;
+        return selectedChoicesForDecision(
           decisionInput,
           selectedAction,
           {
@@ -5343,8 +5358,12 @@ describe("authoritative plan-first live runtime", () => {
             effectsForCardId: () => [],
           } as Parameters<typeof selectedChoicesForDecision>[2],
           portfolio,
-        ),
-    }).chooseSemanticRuntimeAction(input, {});
+        );
+      },
+    });
+    const decision = runtime.chooseSemanticRuntimeAction(input, {});
+    expect(residentPlanPortfolioSnapshot(input)?.executorInstanceId).toBeDefined();
+    expect(choiceCalls).toBeGreaterThan(0);
 
     expect(decision).toMatchObject({
       actionId: action.actionId,
@@ -5396,6 +5415,13 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+    failOnChoiceCall = choiceCalls;
+    choiceCalls = 0;
+    resetResidentPlanPortfolioMemory();
+    expect(() => runtime.chooseSemanticRuntimeAction(input, {})).toThrow(
+      choiceFailure,
+    );
+    expect(residentPlanPortfolioSnapshot(input)).toBeUndefined();
   });
 
   it("returns a flooded duplicate agenda through the exact Corporate Shuffle hand-plan route", () => {
@@ -21497,6 +21523,61 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.develop_board_and_hand",
       fallbackUsed: false,
     });
+
+    const source = buildActionSemanticCandidates({
+      legalActions: [valuPak],
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    })[0]!;
+    const moreOptions = Array.from({ length: 19 }, (_, index) =>
+      handEvaluation({
+        cardInstanceId: `additional-program-${index}`,
+        definitionId: "onr_v1_007_blink",
+        legalActionId: `additional-install-${index}`,
+        priority: 50,
+        duplicateRole: "none",
+        finalInstallFit: 50,
+        cardType: "program",
+        installCost: 6,
+        memoryCost: 1,
+        creditsAfterInstall: 0,
+      }),
+    );
+    const largerHand = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          gripOrHq: [
+            ...input.playerView.own.gripOrHq,
+            ...moreOptions.map((option) =>
+              visibleCard(option.cardInstanceId, "runner", "program", {
+                definitionId: "onr_v1_007_blink",
+              }),
+            ),
+          ],
+        },
+      },
+    };
+    expect(runnerRestrictedProgramInstallSequenceCommitment(
+      largerHand,
+      source,
+      [...handDevelopment, ...moreOptions],
+      0,
+    )?.targetSteps.map((step) => step.cardInstanceId)).toEqual([
+      "program-a",
+      "program-b",
+    ]);
+    expect(() => runnerRestrictedProgramInstallSequenceCommitment(
+      largerHand,
+      {
+        ...source,
+        actionCapacityProjection: { ...source.actionCapacityProjection!, temporaryCredits: 2 },
+      },
+      handDevelopment,
+      0,
+    )).toThrow("stale_or_future_action_reference");
 
     const restrictedPayload = {
       actionCapacityRestriction: "program_install_only",

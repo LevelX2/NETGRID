@@ -24,9 +24,9 @@ export function selectedRunnerTargetedIceTrashChoiceOptionId(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
+  portfolio = residentPlanPortfolioSnapshot(input),
 ): string {
   const source = targetedIceTrashChoiceSource(choice);
-  const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&

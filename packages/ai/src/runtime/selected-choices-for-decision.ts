@@ -151,9 +151,8 @@ function selectedCorpDiscardOptionIdsFromResidentHandPlan(
   input: AiDecisionInput,
   action: LegalAction,
   choice: PendingChoice,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) => instance.instanceId === portfolio.executorInstanceId,
   );
@@ -182,9 +181,8 @@ function selectedRunnerDiscardOptionIdsFromResidentDefensePlan(
   input: AiDecisionInput,
   action: LegalAction,
   choice: PendingChoice,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) => instance.instanceId === portfolio.executorInstanceId,
   );
@@ -224,9 +222,8 @@ function selectedCorpDrawFilterOptionIdsFromResidentHandPlan(
   input: AiDecisionInput,
   action: LegalAction,
   choice: PendingChoice,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) => instance.instanceId === portfolio.executorInstanceId,
   );
@@ -255,9 +252,8 @@ function selectedCorpHqShuffleOptionIdsFromResidentHandPlan(
   input: AiDecisionInput,
   action: LegalAction,
   choice: PendingChoice,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) => instance.instanceId === portfolio.executorInstanceId,
   );
@@ -287,9 +283,8 @@ function selectedCorpArchivesToHqOptionIdsFromBoundContinuation(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const origin = portfolio?.selectedActionOrigin;
   const executor = portfolio?.instances.find(
     (instance) =>
@@ -398,9 +393,8 @@ function selectedCorpStartRezOptionIdFromEconomyPlan(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -531,6 +525,7 @@ export function selectedChoicesForDecision(
 ): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
+  currentPortfolio ??= residentPlanPortfolioSnapshot(input);
   const selectableOptions = selectableChoiceOptions(choice.options);
   const resolved = (
     selectedOptionIds: readonly string[],
@@ -822,7 +817,7 @@ export function selectedChoicesForDecision(
     );
   }
   if (choice.source.startsWith("runner.delayed_install_destination:")) {
-    const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+    const portfolio = currentPortfolio;
     const executor = portfolio?.instances.find(
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     );
@@ -1030,6 +1025,7 @@ export function selectedChoicesForDecision(
       input,
       choice,
       selectableOptions,
+      currentPortfolio,
     );
     const selected = selectedCorpAdvancementCounterChoiceOptionId(
       input,
@@ -1054,6 +1050,7 @@ export function selectedChoicesForDecision(
       action,
       choice,
       selectableOptions,
+      currentPortfolio,
     );
     return resolved(
       binding.selectedOptionIds,
@@ -1190,6 +1187,7 @@ export function selectedChoicesForDecision(
         action,
         choice,
         selectableOptions,
+        currentPortfolio,
       ),
       "corp_agenda_purge_install_targets",
     );
@@ -1225,6 +1223,7 @@ export function selectedChoicesForDecision(
       action,
       choice,
       selectableOptions,
+      currentPortfolio,
     );
     return resolved(selected, "corp_program_trash_subroutine");
   }
@@ -1239,6 +1238,7 @@ export function selectedChoicesForDecision(
         action,
         choice,
         selectableOptions,
+        currentPortfolio,
       ),
       "corp_trace_hardware_trash_subroutine",
     );
@@ -1302,6 +1302,7 @@ export function selectedChoicesForDecision(
           action,
           choice,
           selectableOptions,
+          currentPortfolio,
         ),
       ],
       "runner_targeted_bypass_hide",
@@ -1319,6 +1320,7 @@ export function selectedChoicesForDecision(
           action,
           choice,
           selectableOptions,
+          currentPortfolio,
         ),
       ],
       "runner_targeted_bypass",
@@ -1336,6 +1338,7 @@ export function selectedChoicesForDecision(
           action,
           choice,
           selectableOptions,
+          currentPortfolio,
         ),
       ],
       "runner_targeted_ice_trash",
@@ -1368,7 +1371,7 @@ export function selectedChoicesForDecision(
   if (choice.kind === "select_cards") {
     const coverageSource = runnerCoverageSearchSourceChoiceBinding(
       input,
-      currentPortfolio ?? residentPlanPortfolioSnapshot(input),
+      currentPortfolio,
     );
     if (coverageSource) {
       if (action.actionId !== coverageSource.actionId) {
@@ -1405,6 +1408,7 @@ export function selectedChoicesForDecision(
       action,
       choice,
       selectableOptions,
+      currentPortfolio,
     );
     if (remoteExpose)
       return resolved(remoteExpose, "bound_runner_remote_expose");
@@ -1420,14 +1424,23 @@ export function selectedChoicesForDecision(
       selectedBoundRunnerCoverageMultiSearchChoiceOptionIds(
         input,
         action,
-        currentPortfolio ?? residentPlanPortfolioSnapshot(input),
+        currentPortfolio,
       );
     if (boundMultiSearch)
       return resolved(boundMultiSearch, "bound_runner_coverage_multi_search");
-    const coverageBinding = runnerCoverageSearchChoiceBinding(input, choice);
+    const coverageBinding = runnerCoverageSearchChoiceBinding(
+      input,
+      choice,
+      currentPortfolio,
+    );
     const developmentBinding = coverageBinding
       ? undefined
-      : runnerDevelopmentSearchChoiceBinding(input, action, choice);
+      : runnerDevelopmentSearchChoiceBinding(
+          input,
+          action,
+          choice,
+          currentPortfolio,
+        );
     if (developmentBinding?.sourceOptionId)
       return resolved(
         [developmentBinding.sourceOptionId],
@@ -1799,7 +1812,7 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
   const sourceMatch =
     /^runner_program_trash_before_install:([^:\s]+):([0-9]+)(?::payment=ids=[^:\s;]*;amounts=[^:\s]*)?(?::valu_pak)?$/.exec(
@@ -1808,7 +1821,6 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
   const sourceCardInstanceId = sourceMatch?.[1];
   const originStateVersion = Number(sourceMatch?.[2]);
   const choiceContinuation = choice.continuation;
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const origin = portfolio?.selectedActionOrigin;
   const bound =
     origin?.immediateChoicePolicy ===
@@ -1919,7 +1931,7 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
   const sourceParts = choice.source.split(":");
   const targetCardInstanceId = sourceParts[2];
@@ -1934,7 +1946,6 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   const originalSourceBinding = originalChoiceSource
     ? runnerHiddenSearchProgramInstallSourceBinding(originalChoiceSource)
     : undefined;
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -2172,7 +2183,7 @@ function selectedRunnerEventInstallChoiceOptionId(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
   const continuation = choice.continuation;
   const requirement = action.choiceRequirements?.[0];
@@ -2199,7 +2210,6 @@ function selectedRunnerEventInstallChoiceOptionId(
     choiceOptionIds.every((optionId) =>
       requirement.optionIds.includes(optionId),
     );
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -2272,9 +2282,8 @@ function selectedRunnerEventInstallMemoryOptionIds(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   if (
     portfolio?.instances.some(
       (instance) =>
@@ -2430,7 +2439,11 @@ function selectedRunnerDelayedProgramSearchChoiceOptionIds(
   currentPortfolio?: ResidentPlanPortfolio,
   dependencies?: SelectedChoicesForDecisionDependencies,
 ): string[] {
-  const coverageBinding = runnerCoverageSearchChoiceBinding(input, choice);
+  const coverageBinding = runnerCoverageSearchChoiceBinding(
+    input,
+    choice,
+    currentPortfolio,
+  );
   if (coverageBinding) {
     const selectedOptionIds = dependencies
       ? selectedSearchChoiceOptionIds(choice, selectableOptions, {
@@ -2494,7 +2507,7 @@ function selectedRunnerDelayedProgramSearchChoiceOptionIds(
     }
     return selectedOptionIds;
   }
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const portfolio = currentPortfolio;
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -2559,7 +2572,7 @@ function selectedRunnerInstalledCardLiquidationOptionId(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
+  portfolio: ResidentPlanPortfolio | undefined,
 ): string[] {
   const sourceMatch =
     /^runner\.installed_resource_trash_for_credits:([^:]+):([0-9]+):([0-9]+)$/.exec(
@@ -2600,7 +2613,6 @@ function selectedRunnerInstalledCardLiquidationOptionId(
     choiceOptionIds.every((optionId) =>
       requirement.optionIds.includes(optionId),
     );
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -2754,6 +2766,7 @@ function runnerStrategicSearchTarget(
 function runnerCoverageSearchChoiceBinding(
   input: AiDecisionInput,
   choice: PendingChoice,
+  portfolio: ResidentPlanPortfolio | undefined,
 ):
   | {
       planInstanceId: string;
@@ -2766,7 +2779,6 @@ function runnerCoverageSearchChoiceBinding(
     }
   | undefined {
   if (input.side !== "runner") return undefined;
-  const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&

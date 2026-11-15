@@ -14,11 +14,11 @@ export function selectedRunnerRemoteExposeChoiceOptionIds(
   options: NonNullable<
     AiDecisionInput["playerView"]["pendingChoice"]
   >["options"],
+  portfolio = residentPlanPortfolioSnapshot(input),
 ): string[] | undefined {
   const prefix = "p3_36.expose_installed_card:";
   if (!choice.source.startsWith(prefix)) return undefined;
   const source = choice.source.slice(prefix.length).split(":");
-  const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&

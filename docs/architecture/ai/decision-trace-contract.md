@@ -14,6 +14,8 @@ Das Log ist Diagnosematerial. Es ist kein Teil von `AIInput`, FullState, Engine-
 ## Bestehende Grenzen
 
 - `packages/shared/src/index.ts` definiert `AiDecisionDebug`, `AI_DECISION_DEBUG_SCHEMA_VERSION` und `sanitizeAiDecisionDebug`.
+- `packages/ai/src/runtime/plan-first-decision-debug.ts` erstellt die
+  Diagnoseprojektion des ausgewählten Plans aus dem Entscheidungsframe.
 - `apps/server/src/multiplayer.ts` projiziert `aiDecisionDebug` bereits nur sanitisiert und perspektivabhängig in Replay-Daten.
 - Der [Controllervertrag](controller-contract.md) grenzt KI-Inputs und normale
   Spielerkanäle ab.

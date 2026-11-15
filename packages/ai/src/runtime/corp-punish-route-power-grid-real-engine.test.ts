@@ -335,27 +335,36 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     "current action drift",
     "capability drift",
     "target envelope drift",
-  ] as const)("rejects %s at the actor-private DTO boundary", (drift) => {
+  ] as const)("diagnoses %s at the actor-private DTO boundary", (drift) => {
     const state = powerGridState(`power-grid-dto-${drift}`, 3, {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE],
     });
     const input = decisionInput(state);
     const actions = powerGridActions(input.legalActions);
-    const quoted = withDecisionLocalCorpPunishRouteQuotes(input, (request) => {
-      const result = quoteCorpPunishRoute(state, request);
-      if (!result.ok || !result.quote.complete) return result;
-      const forged = structuredClone(result);
-      const head = forged.quote.steps[0]!;
-      if (drift === "current action drift") {
-        head.currentLegalAction!.actionId = actions[2]!.actionId;
-      } else if (drift === "capability drift") {
-        head.sourceCapabilityId = "ability:on_play:0";
-      } else {
-        head.hardwareTrashProjection!.eligibleTargetCount += 1;
-      }
-      return forged;
-    });
-    expect(quoted.playerView.corpPunishRouteQuoteSet).toBeUndefined();
+    expect(() =>
+      withDecisionLocalCorpPunishRouteQuotes(input, (request) => {
+        const result = quoteCorpPunishRoute(state, request);
+        if (!result.ok || !result.quote.complete) return result;
+        const forged = structuredClone(result);
+        const head = forged.quote.steps[0]!;
+        if (drift === "current action drift") {
+          head.currentLegalAction!.actionId = actions[2]!.actionId;
+        } else if (drift === "capability drift") {
+          head.sourceCapabilityId = "ability:on_play:0";
+        } else {
+          head.hardwareTrashProjection!.eligibleTargetCount += 1;
+        }
+        return forged;
+      }),
+    ).toThrow(expect.objectContaining({
+      code: "engine_quote_contract_failed",
+      context: expect.objectContaining({
+        removalCondition: expect.stringContaining(
+          "corp_punish_quote:invalid_response_schema",
+        ),
+      }),
+    }));
+    expect(input.playerView.corpPunishRouteQuoteSet).toBeUndefined();
   });
 });
 

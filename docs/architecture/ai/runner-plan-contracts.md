@@ -1860,6 +1860,15 @@ exakten Funding-Routen in `runtime/runner-exact-funding-routes.ts`. Die
 Runtime komponiert die Owner-Fakten und führt weiterhin die gemeinsame
 Zugplanung aus; sie enthält keine zweite Handentwicklungs-Discovery.
 
+Der Entwicklungsowner liefert die Disposition für eingeschränkte
+Aktionskapazität ohne produktive Folgeaktion. Für Programminstallationsfolgen
+bindet er die temporären Credits an die aktuelle LegalAction und deren
+Semantikprojektion. Die Zahl der noch verfügbaren Aktionen und der
+Handpuffer begrenzen die betrachteten Zielkombinationen. Gleiche
+Bewertungen behalten die deterministische Zielreihenfolge. Die Runtime
+verwendet das aktuelle Fortschrittssignal in allen Projektionen desselben
+Entscheidungsframes.
+
 Das persistente Funktionsprofil übernimmt Tag-Prävention aus den kanonischen
 strukturierten Hints als eigene funktionale Abdeckung. Dadurch verliert eine
 finanzierte Schutzinstallation ihren bereits belegten Defense-Bedarf nicht

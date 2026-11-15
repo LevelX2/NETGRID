@@ -513,9 +513,15 @@ describe("decision-local Corp punish route quote input", () => {
     ).toBe(true);
   });
 
-  it.each(["stale", "malformed", "thrown", "rejected"] as const)(
-    "fails closed a %s callback result without mutating the decision input",
-    (failure) => {
+  it.each([
+    ["stale", "response_binding_mismatch"],
+    ["malformed", "response_binding_mismatch"],
+    ["invalid_schema", "invalid_response_schema"],
+    ["thrown", "provider_threw"],
+    ["rejected", "request_rejected"],
+  ] as const)(
+    "diagnoses a %s callback result without mutating the decision input",
+    (failure, reason) => {
       const input = punishInput({ runnerTags: 1, runnerHandCount: 3 });
       const before = structuredClone(input);
       const callback = (
@@ -531,19 +537,34 @@ describe("decision-local Corp punish route quote input", () => {
         const result = completeQuote(input, request);
         if (!result.ok) return result;
         if (failure === "stale") result.quote.stateVersion += 1;
+        if (failure === "invalid_schema") result.quote.totalClicks = -1;
         if (failure === "malformed") {
           result.quote.requestEcho.routeId = "foreign-route";
         }
         return result;
       };
 
-      const quoted = withDecisionLocalCorpPunishRouteQuotes(input, callback);
-
-      expect(quoted).toBe(input);
+      expect(() => withDecisionLocalCorpPunishRouteQuotes(input, callback))
+        .toThrow(expect.objectContaining({
+          code: "engine_quote_contract_failed",
+          context: expect.objectContaining({
+            owner: "rules_contract",
+            stateVersion: input.playerView.stateVersion,
+            removalCondition: expect.stringContaining(`corp_punish_quote:${reason}`),
+          }),
+        }));
       expect(input).toEqual(before);
       expect(input.playerView.corpPunishRouteQuoteSet).toBeUndefined();
     },
   );
+
+  it("does not ask the Engine to quote a route outside Corp main", () => {
+    const input = punishInput({ runnerTags: 1, runnerHandCount: 3 });
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    const callback = vi.fn();
+    expect(withDecisionLocalCorpPunishRouteQuotes(input, callback)).toBe(input);
+    expect(callback).not.toHaveBeenCalled();
+  });
 
   it("leaves normal planning untouched without a callback or a complete visible route", () => {
     const missingCallback = punishInput({

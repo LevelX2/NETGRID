@@ -211,6 +211,7 @@ export function selectedCorpAgendaPurgeInstallTargetOptionIds(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
+  portfolio = residentPlanPortfolioSnapshot(input),
 ): string[] {
   const sourceMatch =
     /^card_implementation\.agenda_purge_install_targets:([^:]+):([^:]+):([0-9]+)$/.exec(
@@ -316,7 +317,6 @@ export function selectedCorpAgendaPurgeInstallTargetOptionIds(
     );
   }
 
-  const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&

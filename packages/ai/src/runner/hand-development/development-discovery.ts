@@ -387,9 +387,8 @@ export function buildRunnerCardDevelopmentSignals({
           ? runnerRestrictedProgramInstallSequenceCommitment(
               input,
               candidate,
-              candidates,
               handDevelopment,
-              economy,
+              economy.minimumCreditFloor,
             )
           : undefined;
       const eventInstallChoiceCommitment = candidate

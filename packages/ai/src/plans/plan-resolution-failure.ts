@@ -2,6 +2,7 @@ import type { Side } from "@netgrid/shared";
 
 export const PLAN_RESOLUTION_FAILURE_CODES = [
   "missing_plan_module_coverage",
+  "engine_quote_contract_failed",
   "missing_action_semantics",
   "missing_card_definition",
   "invalid_player_view_card_projection",

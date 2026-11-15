@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import {
   corpProgramTrashChoiceContext,
@@ -15,7 +16,8 @@ export function corpProgramTrashDefenseSignals(
   const choice = input.playerView.pendingChoice;
   if (
     input.side !== "corp" ||
-    !choice?.source.startsWith("card_implementation.trash_installed_program:")
+    choice?.side !== "corp" ||
+    !choice.source.startsWith("card_implementation.trash_installed_program:")
   )
     return [];
   const action = input.legalActions.find(
@@ -23,7 +25,17 @@ export function corpProgramTrashDefenseSignals(
       a.type === "resolve_choice" &&
       a.choiceRequirements?.[0]?.choiceId === choice.choiceId,
   );
-  if (!action) return [];
+  if (!action) {
+    throw new PlanResolutionFailure("missing_action_semantics", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((entry) => entry.type),
+      owner: "rules_contract",
+      removalCondition:
+        "Expose a current LegalAction bound to the pending Corp Defense program-trash choice.",
+    });
+  }
   const options = choice.options.filter((o) => o.selectable !== false);
   const selected = rankCorpProgramTrashChoiceOptionIds(
     input,

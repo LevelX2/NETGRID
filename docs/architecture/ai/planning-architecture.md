@@ -778,15 +778,19 @@ Die Runtime orchestriert folgende Schritte:
    Claimvalidierung und die zunächst gebundene Route zusammen. Dieses Ergebnis
    ist im normalen Planpfad Eingabe des TurnPlanners, noch nicht die endgültige
    ungeprüfte Action-Ausgabe.
-3. `buildCorpTurnPlannerShadow` beziehungsweise `buildRunnerTurnPlannerShadow`
-   enumeriert die aktuellen Modulrouten und vergleicht unterstützte Linien
-   im produktiven Modus `cutover`. Ein ausdrücklich gewähltes `legacy_compare`
-   ist ein separater Vergleichsmodus, kein automatischer Fehlerfallback.
-4. `resolveTurnPlannerCutover` revalidiert Commitment und aktuellen Step;
-   `applyTurnPlannerCutoverSelection` bindet die ausgewählte Route und ihren
-   Root-/Leaf-Pfad zurück an das Schedulerergebnis.
-5. Die Runtime bindet Folge-Choices und `PlanExecutionOrigin`, erzeugt die
-   Entscheidung und speichert den aktuellen Portfolio-/Commitmentstand.
+3. `prepareCorpTurnPlanner` beziehungsweise `prepareRunnerTurnPlanner`
+   bewertet das Portfolio mit der gebundenen Executorrolle erneut und
+   materialisiert die aktuellen Routen der einschlägigen Planmodule. Der
+   ausdrücklich gewählte Modus `legacy_compare` behält den Scheduler-Sieger und
+   stellt die Zugplanung zum Vergleich bereit.
+4. `resolvePreparedTurnPlannerCutover` revalidiert Commitment und aktuellen
+   Step. Die Runtime verwendet die aktuelle Bindung oder vergleicht die
+   unterstützten Restzuglinien. `applyTurnPlannerCutoverSelection` bindet die
+   ausgewählte Route und ihren Root-/Leaf-Pfad an das Schedulerergebnis zurück.
+5. Die Choice-Auflösung erhält das entscheidungslokale Portfolio als Eingabe.
+   Sobald Entscheidung, Folge-Choices, Origin und Lease vollständig gebunden
+   sind, speichert die Runtime das aktuelle Portfolio genau einmal. Ein
+   Bindungsfehler vor diesem Zeitpunkt lässt den residenten Snapshot intakt.
    Die Engine revalidiert und vollzieht die eingereichte Action.
 
 Die [Zug-/Kampagnendetails](turn-campaign-planner.md) definieren Suche,

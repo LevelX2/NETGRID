@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import {
   SOCIAL_ENGINEERING_DEFINITION_ID,
@@ -32,11 +33,13 @@ export function selectedRunnerTargetedBypassHideChoiceOptionId(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
+  portfolio = residentPlanPortfolioSnapshot(input),
 ): string {
   const { continuation, executor } = targetedBypassContinuation({
     input,
     action,
     choice,
+    portfolio,
     sourcePrefix: TARGETED_BYPASS_HIDE_CHOICE_SOURCE,
     expectedChoiceKind: "bid_amount",
     stateVersionOffset: 1,
@@ -62,11 +65,13 @@ export function selectedRunnerTargetedBypassChoiceOptionId(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
+  portfolio = residentPlanPortfolioSnapshot(input),
 ): string {
   const { continuation, executor } = targetedBypassContinuation({
     input,
     action,
     choice,
+    portfolio,
     sourcePrefix: TARGETED_BYPASS_TARGET_CHOICE_SOURCE,
     expectedChoiceKind: "select_cards",
     stateVersionOffset: 3,
@@ -103,15 +108,14 @@ function targetedBypassContinuation(params: {
   sourcePrefix: string;
   expectedChoiceKind: PendingChoice["kind"];
   stateVersionOffset: number;
+  portfolio: ResidentPlanPortfolio | undefined;
 }): {
   continuation: RunnerTargetedBypassChoiceContinuation;
-  executor: NonNullable<
-    ReturnType<typeof residentPlanPortfolioSnapshot>
-  >["instances"][number];
+  executor: ResidentPlanPortfolio["instances"][number];
 } {
   const { input, action, choice } = params;
   const source = targetedBypassChoiceSource(choice, params.sourcePrefix);
-  const portfolio = residentPlanPortfolioSnapshot(input);
+  const portfolio = params.portfolio;
   const ownerCandidates =
     portfolio?.instances.filter((instance) => {
       if (
