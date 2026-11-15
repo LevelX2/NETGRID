@@ -411,3 +411,204 @@ Die Folgeänderungen bestanden 85 fokussierte Tests in zehn Dateien.
 Darunter sind Grenzfälle für Laufkennungen und technische Abbrüche, die
 fünf Deckreferenzarten, Rollenabgleich, Portfolios und das Live-Engine-Gate
 des Standardmodus.
+
+## Dritte Zufallsstichprobe mit zehn Dateien
+
+Quellstand `a7893afaf`. Ziehung ohne Zurücklegen aus 975 ordinal sortierten
+Git-Pfaden unter `packages/ai/src` mit `.NET System.Random`, Seed `1171637022`.
+Für die Positionen 0 bis 9 wurde jeweils `Next(i, pool.Count)` gezogen und
+getauscht. Tests, Testhilfen und die Dateinamen der beiden bisherigen
+Stichproben einschließlich des umbenannten taktischen Typvertrags waren
+ausgeschlossen.
+
+Die Datei mit dem Purge-Typvertrag führte zu einem reproduzierten Owner-
+Problem. Im Trace-Pfad liegen widersprüchliche Bewertungen desselben
+Schadensfalls vor. Die übrigen konkreten Gegenproben betreffen Vertragsgrenzen
+und Berichtsqualität. Kleine Typdateien können als gemeinsame Grenze sinnvoll
+sein. Bei den großen Dateien lohnt ein Schnitt entlang der belegten
+Verantwortungen. P1 bezeichnet den nächsten fachlichen Fix, P2 einen
+Vertrags- oder Befundfix und P3 eine Wartbarkeitsmaßnahme. Aufwände sind grobe
+Schätzungen inklusive fokussierter Regression.
+
+### 1. `corp-access-payment-choice.ts`
+
+**P2, Gegenprobe auf nativem Checkpoint.** Die vorhandene Bindung schützt
+Choice, Kosten, aktuelle LegalAction und StateVersion. Die nativen Beispiele
+prüfen sowohl die berechtigte Ablehnung beim letzten Zugriff als auch den
+sinnvollen Pay-Fall. Im Checkpoint `meta-530-g3d108` erzeugt der künstlich von
+0 auf 97 geänderte Effektindex denselben `decline`-Witness. Die Engine
+erzeugt den Index für den konkreten Zugriffseffekt. Die KI prüft nur, ob
+er eine nichtnegative Ganzzahl ergibt. Die Ablaufprüfung wählt den Effekt
+anschließend nach Zone und Eindeutigkeit. Ein heutiger normaler Engine-Lauf
+mit falschem Index ist hier unbelegt. Eine gemeinsame Bindung des exakten Zugriffseffekts für Signal und
+Payload-Resolver kostet geschätzt einen halben bis ganzen Tag. Abnahme über die bestehenden nativen Pay- und
+Decline-Fälle sowie die Gegenprobe mit falschem Index.
+[Signal](../../../packages/ai/src/corp/ambush/corp-access-payment-choice.ts#L35) · [Ablaufprüfung](../../../packages/ai/src/corp/ambush/access-target-expiry.ts#L16) · [Engine-Quelle](../../../packages/engine/src/game/access/access-effect-execution.ts#L407) · [Native Tests](../../../packages/ai/src/runtime/meta-530-access-target-expiry.test.ts)
+
+### 2. `hand-draw-horizon.ts`
+
+**P2, Gegenprobe auf gespeichertem Engine-Input.** Zweck und feste
+Schwelle von drei R&D-Karten sind im Owner-Vertrag beschrieben. Die
+Guard-Kette deckt insbesondere Netto-Handgröße, unbekannte Quote und
+unauflösbare Ziele ab. In `cp-meta-434-r4-g34-d436` liefert die Funktion
+weiterhin genau ein `exactActionRoute`-Signal, wenn nur der Timingpunkt der
+Replenishment-LegalAction von `corp_action.main` auf `game.checkpoint`
+verändert wird. Der normale Engine-Input lieferte die korrekte Bindung.
+Timing und Version lassen sich im selben Guard binden. Einmal gelesene
+Netto-Deltas direkt verengen und die berechnete R&D-Restgröße wiederverwenden.
+Geschätzt zwei bis vier Stunden. Abnahme mit verändertem Timing, unveränderter
+Engine-Route und den vorhandenen Handkapazitätsfällen.
+[Signal](../../../packages/ai/src/corp/hand-management/hand-draw-horizon.ts#L14) · [Vertrag](../../architecture/ai/corp-plan-contracts.md#10-corphand_and_agenda_management) · [Replenishment-Tests](../../../packages/ai/src/evaluation/decision-checkpoints/meta-434-round4-causes.test.ts#L110)
+
+### 3. `selfplay-promotion-activity-formatters.ts`
+
+**P2, mit zwei synthetischen Queue-Einträgen reproduziert.** Zwei
+verschiedene IDs mit demselben langen Szenariohinweis erzeugen denselben
+Dateinamen. Die Trunkierung auf 120 Zeichen schneidet die abschließende
+Snapshot-ID ab. Der Formatter liefert einen Vorschlag mit
+`writeAllowed: false`. Der gefundene Aufrufer ist ein Test und es
+wurde keine Datei überschrieben. Bei Nutzung für manuelle Triage
+einen festen Teil des Dateinamens für einen stabilen Fingerprint aus der
+rohen Snapshot-ID reservieren. Aufwand zwei bis vier Stunden. Abnahme mit
+beiden langen Einträgen, normalisierten Satzzeichen und stabiler Zuordnung
+auch bei umgekehrter Queue-Reihenfolge.
+[Dateiname](../../../packages/ai/src/reports/selfplay-promotion-activity-formatters.ts#L29) · [Trunkierung](../../../packages/ai/src/reports/selfplay-promotion-activity-formatters.ts#L95) · [Queue](../../../packages/ai/src/evaluation/selfplay-decision-snapshot-mining.ts#L232)
+
+### 4. `corp/economy/economy-types.ts`
+
+**P3, statischer Vertragsbefund.** Die diskriminierte Union für Economy-
+Needs kennzeichnet die einzelnen Pfade gut. Nur der Parent-Funding-Vertrag
+speichert Hosted-Bank-Quote und Free-Rez-Payout sowohl oben am Signal als
+auch innerhalb von `fundingRouteAssessment`. Discovery kopiert dieselben
+Werte in beide Felder. Der Owner hält die beiden Kopien in mehreren Phasen
+mit `JSON.stringify` paarweise gleich. Das Typsystem lässt widersprüchliche
+Kopien zu und zusätzliche Felder müssen in mehreren Prüfungen gepflegt
+werden. Je aktiver Funding-Route einen kanonischen Beleg verwenden und die
+vorhandene Revalidierung gegen die aktuelle Engine-Quote erhalten.
+Aufwand ein bis zwei Tage. Abnahme über Hosted-Bank-Funding für Score und
+Defense, Free-Rez und einen veralteten Routenbeleg.
+[Doppelter Vertrag](../../../packages/ai/src/corp/economy/economy-types.ts#L28) · [Discovery](../../../packages/ai/src/corp/economy/economy-discovery.ts#L210) · [Revalidierung](../../../packages/ai/src/corp/economy/economy-plan-module.ts#L192)
+
+### 5. `runtime/trace-bid-assessment.ts`
+
+**P1, Engine-Resolver und synthetische Gegenproben.** Bei zwei Punkten
+unvermeidbarem Homewrecker-Schaden bewertet die KI zwei Handkarten als
+`terminal`, der Engine-Schadensresolver entfernt beide Karten, der Runner
+lebt. Mit leerer Hand bewertet die KI den Effekt als `high`, derselbe
+Resolver liefert einen Flatline. Der Unterschied wirkt auf Reserve, Varianz
+und die Auswahl sicherer Gebote. Eine mutierte klassische Choice behält
+zudem ein gesperrtes `bid_5` als gewählten Kandidaten. Eine künstlich
+hinzugefügte Encounter-Quote von Hunter überstimmt den laufenden
+Homewrecker-Trace mit einem Tag-Effekt. Aktuell angebotene Engine-Trace-
+Gebote mit gesperrten Optionen wurden nicht beobachtet. Die beiden
+Mutationen belegen die jeweiligen Vertragslücken.
+
+Die Flatline-Grenze in Einstufung und Mindest-Link einheitlich an der
+Engine-Regel ausrichten. Geschätzt ein bis zwei Tage für die fachlichen
+Korrekturen. Den Effekt einmal
+am aktiven Trace und, soweit erforderlich, an seiner genauen Quelle und
+Subroutine binden. Die zugelassenen Gebote gegen das aktuelle Choice-Angebot
+filtern. Getrennt davon lassen sich die wiederholte Effektauflösung und der
+zweifache Aufbau von Schadensprofilen konsolidieren. Abnahme für leere,
+genau ausreichende und größere Hand, konkurrierende Trace-Quellen, gesperrte
+Gebote und deterministisches Replay.
+[Gebotsfilter](../../../packages/ai/src/runtime/trace-bid-assessment.ts#L55) · [Effektauflösung](../../../packages/ai/src/runtime/trace-bid-assessment.ts#L666) · [Stakes und Mindest-Link](../../../packages/ai/src/runtime/trace-bid-assessment.ts#L688) · [Engine-Schadensgrenze](../../../packages/engine/src/game/damage/damage-event-resolution.ts#L53)
+
+### 6. `runner-run-origin-contract.ts`
+
+**Tragfähige Schichtgrenze, kein eigener Umbau.** Ein kleiner Typvertrag
+bewahrt Parent, Run-Zweck, Zugriffsbudget, Risk- und Information-Witness
+zwischen Central Pressure, Remote Contest und dem Run-Window.
+Der diskriminierte Parent schützt die Zuordnung von Signal und Modul-ID.
+Der wirksame Prüfpunkt liegt beim Producer. Er liest heterogenen residenten
+`moduleState`, kopiert Teilobjekte und validiert sie mit unterschiedlichen
+Guards. Falls eine weitere Run-Herkunft nötig wird, dort einen gemeinsamen
+typisierten Producer mit Gegenprobe für widersprüchliche Parent-/Server-
+Bindung verwenden. Bestehende Post-Pass- und Multiaccess-Evidence schützt
+die aktuelle Übergabe.
+[Typgrenze](../../../packages/ai/src/plans/runner-run-origin-contract.ts#L9) · [Producer](../../../packages/ai/src/runner/run-window/run-window-origin.ts#L44) · [Nativer Multiaccess-Test](../../../packages/ai/src/runner/run-window/deep704-bound-multiaccess-post-pass.native.test.ts)
+
+### 7. `runner-viral15-jack-out-score.ts`
+
+**P3, statischer Aufrufbefund.** Die Funktion und ihr Context-Wrapper
+werden über die Runner-Support-Composition verdrahtet. Die Rückgabeeigenschaft
+`runnerViral15JackOutScoreComponent` hat außerhalb der Verdrahtung
+keinen lesenden Consumer im Workspace, in der Simulations-Composition
+steht ein alter Typname. Die aktive Run-Window-Bewertung nutzt ihre
+eigenen gebundenen Encounter-Fakten. Die alte Datei ist damit über Imports
+erreichbar, ihr Score hat keinen belegten Entscheidungs- oder Diagnose-
+Consumer. Nach einem direkten Vorher-nachher-Lauf mit der bestehenden
+Viral-15-Evidence den Score, seinen Adapter und tote Schlüssel zusammen
+entfernen. Geschätzt ein halber Tag. Abnahme über dieselbe gebundene
+Mitigation, LegalAction und StateHash-Folge im Vergleichsfall.
+[Score](../../../packages/ai/src/runtime/runner-viral15-jack-out-score.ts#L13) · [Verdrahtung](../../../packages/ai/src/runtime/runner-development-support-composition.ts#L84) · [Viral-15-Checkpoint](../../../packages/ai/src/evaluation/decision-checkpoints/match-23d6-runner-remediation-decision-checkpoints.test.ts)
+
+### 8. `corp/punish/punish-signals.ts`
+
+**P3, statischer Pflege- und Arbeitsaufwand.** Das Modul hält unbekannte
+Quotes als Beobachtungszustand ohne ausführbare Action. Für gültige Quotes
+bewertet es jede Route bei der Signalerzeugung und erneut im Sortiervergleich.
+Der ältere Pfad ist weiterhin produktiv für Vorbereitung und Basic Resource
+Trash. Er bildet für viele einzelne Kandidaten dieselben sichtbaren
+Definitionsdaten und berechnet Nicht-Prepare-Phasen, die er am Ende
+verwirft. Die fachliche Quote-Bewertung je Route wiederverwenden. Die produktive
+Preparation/Trash-Projektion mit entscheidungslokalen Fakten präzise
+benennen und abgrenzen. Geschätzt ein bis zwei Tage. Die
+bestehenden Tie-Breaker, die Behandlung unbekannter Quotes und die
+Score-Remote-Grenze mit nativen Linien für Credit Trash und Trace prüfen.
+Eine messbare Laufzeitersparnis ist noch offen.
+[Route-Auswahl](../../../packages/ai/src/corp/punish/punish-signals.ts#L254) · [Erneute Bewertung](../../../packages/ai/src/corp/punish/punish-signals.ts#L521) · [Vorbereitung](../../../packages/ai/src/corp/punish/punish-signals.ts#L709) · [Closed-Accounts-Fachtest](../../../packages/ai/src/runtime/corp-punish-route-closed-accounts-real-engine.test.ts)
+
+### 9. `runner/hand-development/development-choice-bindings.ts`
+
+**P2, Gegenprobe an der Fortsetzungsgrenze.** Die Datei bindet Delayed
+Program Search, Recovery, Event Install und MU-Trash an ihre jeweiligen
+Owner und vorherigen Aktionen. Eine mutierte `nonsearch`-Quellkennung
+mit `%ZZ` wirft beim Decode einen rohen `URIError`, noch bevor die
+strukturierte Fortsetzungsdiagnose greift. Dieselbe Quellkennung wird in
+der Payload-Auflösung separat dekodiert. Die Engine erzeugt gültige Teile
+mit `encodeURIComponent`. Ein gemeinsamer Parser für dieses Quellformat kann beide Grenzen bedienen
+und die strukturierten Choice-Diagnosen erhalten. Geschätzt ein halber bis
+ganzer Tag. Danach bei Bedarf
+nach fachlicher Choice-Familie schneiden. Für Delayed Search und MU keine
+allgemeine Auswahlroutine einführen. Abnahme über native Suche und
+Memory-Fortsetzung sowie falsche Quelle, Version und Optionsmenge.
+[Window-Auflösung](../../../packages/ai/src/runner/hand-development/development-choice-bindings.ts#L402) · [Payload-Auflösung](../../../packages/ai/src/runtime/selected-choices-for-decision.ts#L2299) · [Engine-Erzeugung](../../../packages/engine/src/game/install/runner-program-install-memory.ts#L92)
+
+### 10. `corp/virus-pressure/virus-pressure-types.ts`
+
+**P1, mit Engine-LegalActions und `applyAction` reproduziert.** In einem
+kontrollierten Corp-Hauptfenster mit zwei Virus-Countern auf rezzter Data
+Wall in R&D bewertet der Purge-Scorer `purge_virus_counters` mit +1350.
+Der Signal-Producer meldet `virusCounters: 0` und `purgeUseful: true`.
+Der Owner findet keinen Plan. Die Engine lässt die Aktion zu und entfernt
+beide ICE-Counter. Mit zusätzlich zwei Tax-Countern liefert die Engine
+gleichzeitig zwei Purge-Aktionen. Der Basis-Purge entfernt ausschließlich
+die beiden ICE-Counter dieses Aufbaus, der Runner-Virus-Purge ausschließlich
+die beiden Tax-Counter. Das aktuelle Signal stammt von der ersten
+Purge-Aktion und der Owner materialisiert generisch beide Typen. Sogar der
+Impact-Scorer rechnet Karten-Counter in den Runner-Virus-Purge ein.
+
+Im bestehenden Owner pro aktueller Purge-Action Wirkungsbereich,
+LegalAction, Kosten und Nutzen einmal binden. Geschätzt ein bis zwei Tage. Signal, Disposition und Materialisierung
+auf denselben Beleg beziehen. Den kleinen Typvertrag dafür erweitern.
+Abnahme mit ausschließlich ICE-Druck, ausschließlich Runner-Identitätspool,
+beiden verschiedenen Purges und einem unterhalb der Wirkschwelle
+liegenden Gegenfall. Beide tatsächlich entfernten Mengen mit der Engine
+gegenprüfen.
+[Signaltyp](../../../packages/ai/src/corp/virus-pressure/virus-pressure-types.ts) · [Producer](../../../packages/ai/src/corp/virus-pressure/virus-pressure-signals.ts#L8) · [Owner](../../../packages/ai/src/corp/virus-pressure/virus-pressure-plan-module.ts#L19) · [Impact](../../../packages/ai/src/corp/virus-pressure/corp-purge-impact.ts#L31) · [Engine-Ausführung](../../../packages/engine/src/game/turn/turn-basic-execution.ts#L145)
+
+### Abnahme und Reihenfolge
+
+Zuerst die beiden P1-Befunde separat beheben und an nativen Engine-
+Aktionen beziehungsweise einem laufenden Trace nachweisen. Danach die
+engen Vertragskorrekturen zu Paid Access, Draw-Horizont und Memory-
+Fortsetzung sowie den Berichtsnamen. Die drei Wartbarkeitsarbeiten
+brauchen jeweils einen eigenen Vorher-nachher-Beleg.
+
+240 bestehende fokussierte Tests in 15 Dateien waren grün. Die separat
+beschriebenen Gegenproben liefen im Arbeitsspeicher auf dem geprüften
+Quellstand. Für die stärksten Befunde stammen Sicht und LegalActions von
+der Engine. Die Schadens- und Purge-Wirkung wurden zusätzlich direkt mit
+der Engine geprüft. Aussageumfang sind die dokumentierten Situationen.
+
