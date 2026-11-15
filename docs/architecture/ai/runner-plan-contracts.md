@@ -611,12 +611,18 @@ terminale Contests und garantierter Zugriff bleiben separat zugelassen.
 Eine bezahlte Verteidigung belegt keine kostenlose Wiederholung: Der erneute
 Run kann die Corp weiter Credits kosten und wird regulär bewertet.
 
-Post-Break-ICE-Trash wird als Vorbereitung einer bereits zugelassenen
-Central-Instanz behandelt. `post-break-trash-preparation.ts` vergleicht die
+Post-Break-ICE-Trash ist eine Vorbereitung der bestehenden
+Central-Instanz. `post-break-trash-preparation.ts` vergleicht die
 verbleibenden Zugriffe im aktuellen Zug mit Installation und exakt reservierten
 Trash-Credits. Die erste Route setzt ein einzelnes bekanntes, gerezztes ICE mit
 vollständig brechbaren End-the-Run-Subroutinen voraus. Verdeckte, bedingte oder
-nur teilweise mitigierte Pfade begründen diese Vorbereitung nicht. Quelle,
+nur teilweise mitigierte Pfade begründen diese Vorbereitung nicht. Wartet ein
+ansonsten sicherer, wertvoller HQ- oder R&D-Basisrun allein wegen der
+Liquiditätsreserve nach einem Einzelzugriff auf Finanzierung, kann die
+vollständig finanzierte Entfernung bei positivem Ertrag über mehrere
+verbleibende Zugriffe zugelassen werden. Dafür bleiben Mindestliquidität,
+Remote-Reserve, Zugriffskadenz und Handpuffer verbindlich. Die Zulassung ist
+an genau diesen Run und die gequotete Entfernung gebunden. Quelle,
 ICE-Ziel, Server, Kosten und Beobachtungs-StateVersion bleiben am Parent
 gebunden; Installation und Run werden nach jeder Engine-Änderung neu bewertet.
 Priorität und Grenzwert des bestehenden Central-Owners bleiben erhalten.

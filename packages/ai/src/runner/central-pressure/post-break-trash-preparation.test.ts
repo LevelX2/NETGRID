@@ -337,6 +337,58 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     ]);
   });
   it.each([
+    { credits: 14, clicks: 4, reserve: 4, expected: true },
+    { credits: 10, clicks: 4, reserve: 4, expected: true },
+    { credits: 9, clicks: 4, reserve: 4, expected: false },
+    { credits: 14, clicks: 2, reserve: 4, expected: false },
+    { credits: 14, clicks: 4, reserve: 9, expected: false },
+  ])(
+    "prices the deferred removal with $credits credits, $clicks clicks and $reserve protected credits",
+    ({ credits, clicks, reserve, expected }) => {
+      const { state, startup } = fixture();
+      state.runner.credits = credits;
+      state.runner.clicks = clicks;
+      const input = inputFor(state);
+      const runActionId = "runner.start_run.hq";
+      const result = runnerPostBreakTrashPreparationSignals(
+        input,
+        buildActionSemanticCandidates(input),
+        [
+          {
+            ...pressure,
+            reachable: false,
+            runActionIds: [],
+            runActionExclusions: { [runActionId]: ["deferred_paid_probe"] },
+          },
+        ],
+        undefined,
+        new Map([
+          [
+            pressure.pressureId,
+            {
+              actionId: runActionId,
+              minimumCreditsAfterPath: reserve,
+            },
+          ],
+        ]),
+      );
+      expect(result).toEqual(
+        expected
+          ? [
+              expect.objectContaining({
+                reachable: true,
+                runActionIds: [runActionId],
+                routePreparation: "develop_payoff",
+                preparationActionIds: [
+                  expect.stringContaining(startup.instanceId),
+                ],
+              }),
+            ]
+          : [],
+      );
+    },
+  );
+  it.each([
     "insufficient_credits",
     "last_click",
     "hidden_ice",

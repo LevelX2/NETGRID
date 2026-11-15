@@ -82,7 +82,10 @@ import {
 } from "../../runtime/visible-server-agenda-facts";
 import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signals";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
-import { runnerPostBreakTrashPreparationSignals } from "./post-break-trash-preparation";
+import {
+  runnerPostBreakTrashPreparationSignals,
+  type DeferredPostBreakTrashRun,
+} from "./post-break-trash-preparation";
 import { runnerRepeatedFreeStopProbeEvidence } from "./central-probe-outcome";
 import { runnerImmediateExposedIceSafetyExit } from "../run-window/run-window-expose-viewing";
 function runnerAccumulatedCentralPressureConversionSignals(
@@ -870,6 +873,7 @@ export function buildRunnerCentralPressureSignals({
   recurringEconomyRunDeferralEvidenceCode: string | undefined;
 }): RunnerPlanDomain["centralPressure"] {
   const exposedIceExit = runnerImmediateExposedIceSafetyExit(input, previous);
+  const deferredPostBreakTrashRuns = new Map<string, DeferredPostBreakTrashRun>();
   const baseCentralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
     [
       ...runLockReleaseRoutes.flatMap((route) => {
@@ -1229,6 +1233,34 @@ export function buildRunnerCentralPressureSignals({
             input,
             evaluation,
           );
+          // A paid probe can be poor on its own while a quoted removal
+          // amortizes the same encounter over multiple accesses this turn.
+          if (
+            evaluation.targetServerId !== "archives" &&
+            evaluation.runActionProjection.sourceKind === "basic_action" &&
+            evaluation.targetServerId === evaluation.accessServerId &&
+            evaluation.recommendation === "gain_credits_first" &&
+            evaluation.fundingNeed.reason === "post_run_floor_gap" &&
+            evaluation.pathPassability === "reachable" &&
+            evaluation.prerunReserveQuote?.status !== "blocked" &&
+            pressureCadence.routeAvailable &&
+            materialMarginalValue &&
+            !knownNoPayoff &&
+            !costlyInformationRunBelowHandBuffer &&
+            !safetyBlocked &&
+            !forgoUnsafeRunCapacity
+          ) {
+            deferredPostBreakTrashRuns.set(
+              `central:${evaluation.targetServerId}`,
+              {
+                actionId: evaluation.actionId,
+                minimumCreditsAfterPath: Math.max(
+                  economy.minimumCreditFloor,
+                  economy.creditReservePolicy.remotePressureReserve ?? 0,
+                ),
+              },
+            );
+          }
           return {
             pressureId: `central:${evaluation.targetServerId}`,
             serverId: evaluation.targetServerId as "hq" | "rd" | "archives",
@@ -1563,6 +1595,7 @@ export function buildRunnerCentralPressureSignals({
         candidates,
         baseCentralPressure,
         previous,
+        deferredPostBreakTrashRuns,
       ),
       ...runnerTargetedIceTrashCentralPreparationSignals(
         input,
