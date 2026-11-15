@@ -890,3 +890,214 @@ liefern auf dem unveränderten Ausgangsstand `0b9164443` dieselben Fehler.
   `match-manhunt-decision-checkpoints`,
   `match-e8047b3e-runner-remediation-decision-checkpoints` und
   `trace-profile-scenario-comparison` betreffen Hand und Trace.
+
+## Fünfte Zufallsstichprobe mit zehn Dateien
+
+Geprüfter Quellstand `8c39d15b1` im Worktree `codex/ai-maintainability`.
+Zum Prüfzeitpunkt haben alle zehn gezogenen Dateien auf lokalem `main`
+denselben Inhalt. Die Ziehung verwendete `.NET System.Random` mit Seed
+`1074870289` und 954 ordinal sortierte Git-Pfade unter `packages/ai/src`.
+Für die Positionen 0 bis 9 wurde jeweils `Next(i, pool.Count)` gezogen
+und getauscht. Tests, Testhilfen und die 30 bisherigen Stichproben
+blieben außerhalb des Pools.
+
+Die Stichprobe umfasst produktive Plan- und Choice-Pfade, Diagnose,
+Vertragsvalidierung und Baseline-Auswertung. Die bestätigten Schwächen
+liegen vor allem an den Übergaben. Defense und Scoring Remote verlieren
+denselben Regelkontext, und die Hint- sowie Choice-Verträge werden an
+verschiedenen Stellen unterschiedlich streng geprüft. Die bestehenden
+Owner-Grenzen bleiben dafür eine geeignete Grundlage. P1 bezeichnet den
+nächsten fachlichen Fix, P2 eine konkrete Vertragshärtung und P3
+Wartbarkeit. Aufwände sind grobe Schätzungen einschließlich Abnahme.
+
+### 1. `corp/score/score-route-risk.ts`
+
+**Tragfähig.** Die Risikoableitung prüft Projekt, Server und StateVersion
+gegen das Protection Need. Sie verwendet die exakte Wahrscheinlichkeit
+der Defense-Quote und behandelt unbekannte Werte konservativ. Beide
+aktuellen Abnehmer, Score-Plan und Agenda-TurnPlanner, teilen den
+Risikobegriff. Der schnelle Null-Risiko-Pfad stützt sich auf das vorgelagerte
+`sameTurnCloseout`. Die fachliche Abnahme liegt daher am Nachweis dieses
+Signals und an den nativen Fällen zur exponierten Installation.
+[Risikoableitung](../../../packages/ai/src/corp/score/score-route-risk.ts#L8) ·
+[TurnPlanner-Abnehmer](../../../packages/ai/src/corp/score/corp-agenda-turn-planning.ts#L479) ·
+[Native Exposure-Tests](../../../packages/ai/src/corp/score/score-flood-multi-remote-exposure.real-engine.test.ts)
+
+### 2. `corp/defense/program-trash-coverage.ts`
+
+**P1, mit Engine-PlayerView reproduziert.** Die Coverage-Bewertung reicht
+das sichtbare Trace-Profil nicht an die Pfadanalyse weiter. Dadurch wird
+in diesem Consumer `modern_open` verwendet. In einer echten
+`classic_blind`-Spielersicht mit rezztem Rex, fünf Runner-Credits und
+einem Corp-Credit hält Raptor den Zugriff offen. Ohne Raptor bewertet
+der korrekt profilgebundene Pfad den Zugriff als blockiert. Die vom
+Trash-Owner verwendete Funktion meldet trotzdem null verlorene
+erschwingliche ICE-Antworten und null Mehrkosten. Der Befund ist in der
+Zielbewertung reproduziert. Die tatsächlich gewählte Trash-Option hängt
+auch von den weiteren angebotenen Programmen ab.
+
+Das Profil und die zulässigen öffentlichen Trace-Fakten am Eingang der
+gemeinsamen Pfadanalyse binden. Den nativen Programm-Trash mit Rex und
+mindestens zwei legalen Optionen in Classic prüfen. Modern dient als
+Gegenprobe. Aufwand ungefähr ein bis zwei Tage gemeinsam mit Befund 10.
+[Trash-Vergleich](../../../packages/ai/src/corp/defense/program-trash-coverage.ts#L42) ·
+[Zielrangfolge](../../../packages/ai/src/corp/defense/program-trash-targets.ts#L168) ·
+[Profil-Default](../../../packages/ai/src/run-analysis/trace-rules-profile-planning.ts#L17)
+
+### 3. `corp/defense/forced-rez-variant-selection.ts`
+
+**Tragfähig.** Die vorgelagerte Choice-Grenze prüft die Engine-Quoten
+für ICE, Fort, Choice, aktuelle Version und Ressourcen. Das Modul beginnt
+mit der günstigsten zertifizierten Variante. Eine Aufwertung erfordert
+einen bekannten Mehrwert und schützt den veröffentlichten Score-Bedarf.
+Native Fälle bestätigen die billigste wirksame ETR-Variante, den auf das
+sichtbare Rig abgestimmten Subtyp, die Zurückhaltung bei nicht bewertbarer
+Trace-Stärke und den Score-Boden. Die konservative Behandlung von
+unbekanntem Nutzen ist eine sinnvolle Grenze.
+[Variantenvergleich](../../../packages/ai/src/corp/defense/forced-rez-variant-selection.ts#L23) ·
+[Choice-Eingang](../../../packages/ai/src/corp/defense/rez-or-trash-choice.ts#L139) ·
+[Native Varianten](../../../packages/ai/src/corp/defense/rez-or-trash-variants-real-engine.test.ts#L214)
+
+### 4. `ai-hint-contracts.ts`
+
+**P2, mit aktivem Artefakt als Vorlage reproduziert.** Im Speicher wurde
+im Hint von Data Fort Remapping der erste Effekt von
+`spend_remap_counter_end_run` durch einen unbekannten Effekt ersetzt.
+Der Artefakt-Loader akzeptiert die Kopie. Die kanonische Ontologie weist
+denselben Wert mit `unknown_effect_kind` am exakten Feldpfad ab.
+Der konsumierende Capability-Adapter übernimmt Effekte in sein
+Semantikprofil. Der aktuelle generierte Bestand besteht seine
+Identitätsprüfung. Die Gegenprobe belegt die Lücke beim Laden.
+
+Die bereits vorhandene tiefe Capability-Validierung im Artefakt-Loader
+wiederverwenden und dessen Feld-Whitelist erhalten. Abnahme mit dem
+gültigen Artefakt und gezielt ungültigen Effekt-, Ziel- und Strategiefeldern.
+Aufwand ein halber bis ein Tag.
+[Flache Validierung](../../../packages/ai/src/ai-hint-contracts.ts#L143) ·
+[Ontologie](../../../packages/ai/src/hint-ontology.ts#L1845) ·
+[Loader](../../../packages/ai/src/generated-ai-hint-artifact-validation.ts#L79) ·
+[Abnehmer](../../../packages/ai/src/actions/action-card-semantic-profiles.ts#L160)
+
+### 5. `runtime/semantic-runtime-corp-score-context.ts`
+
+**P3, statisch.** Die Context-Factory baut Scoring-Komponenten und eine
+zusätzliche skalare Scorefunktion. Der einzige Produktionsanschluss der
+Corp-Komposition entnimmt die Komponenten. Die skalare Funktion hat
+keinen lesenden Aufrufer im Repository. Die beiden Fassaden reichen
+zudem Teile derselben Abhängigkeiten weiter.
+
+Den ungenutzten skalaren Corp-Pfad aus der Factory entfernen und die
+Komposition auf den tatsächlich übergebenen Komponentenprovider
+zusammenziehen. Abnahme mit gleichen Komponenten und gleicher Reihenfolge
+für die bestehenden Corp-Diagnosefälle. Aufwand ungefähr zwei bis vier Stunden.
+[Context](../../../packages/ai/src/runtime/semantic-runtime-corp-score-context.ts#L30) ·
+[Einziger Anschluss](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts#L128)
+
+### 6. `runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts`
+
+**P3, statisch und synthetisch abgegrenzt.** Die Datei verbindet
+Scoring-Diagnose, Kosten, Kartensuche und Economy-Profile. Der
+Closeout-Helfer setzt die Kosten der bereits angebotenen Advance-Aktion
+auf mindestens einen Credit und Klick. Eine synthetische freie letzte
+Advance-Aktion meldet deshalb bei 0 Credits keinen Closeout. Der aktuelle
+Engine-Producer bietet die normale `advance_card` mit exakt einem Credit
+und einem Klick an. Der Gegenfall zeigt eine künftige Änderungsfalle.
+`corpBurstEconomyOperationForAction` bekommt zudem eine generische
+Abhängigkeit, die es gar nicht liest.
+
+Als kleinen Schnitt die ungenutzte Abhängigkeit entfernen. Bei einer
+Erweiterung des Advance-Vertrags den aktuellen LegalAction-Preis separat
+vom Preis möglicher Folgeschritte prüfen. Abnahme zunächst mit unveränderten
+Corp-Economy-Komponenten für die bekannten nativen Preise.
+Aufwand für die Signaturpflege ungefähr zwei bis vier Stunden.
+[Closeout](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts#L92) ·
+[Economy-Helfer](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts#L412) ·
+[Engine-Angebot](../../../packages/engine/src/game/turn/corp-main-actions.ts#L730)
+
+### 7. `simulation/runner-action-valuation-baseline-metrics.ts`
+
+**P2, synthetisch reproduziert.** Ein Runner-Zugende mit verbleibenden
+Klicks und zwei Alternativen zählt allein durch den alten Evidence-String
+`runner_inevitable_corp_deckout:true` als unvermeidlicher Deckout.
+Die Zusammenfassung kann dennoch einen Corp-Sieg nach Agendapunkten
+ausweisen. Dadurch fällt der Zähler für vorzeitige Zugenden von eins
+auf null. Außer dem Leser und seinem Unit-Test wurde im aktuellen
+TypeScript-Quellstand kein Producer für diesen String gefunden.
+
+Die Ausnahme an den vorhandenen nachgewiesenen unmittelbaren Deckout
+binden. Gegenprobe mit belegtem Deckout, widersprüchlichem Ergebnis,
+fehlender Aktion und zertifiziertem Zugende nach erschöpften Routen.
+Aufwand ungefähr ein halber Tag.
+[Kennzahl](../../../packages/ai/src/simulation/runner-action-valuation-baseline-metrics.ts#L22) ·
+[Auswirkung im Baseline-Gate](../../../packages/ai/src/simulation/ai-behavior-baseline.ts#L247)
+
+### 8. `runner/rig-coverage/coverage-types.ts`
+
+**P3, statisch.** Das kleine Modul definiert verständlich die Coverage-Phasen
+und den Gap. Die Suchbindung besteht aus zwei unabhängig optionalen
+Feldern. Multi-Search und mehrere Fortsetzungen definieren parallele
+Formen dafür. Die aktuellen Entscheidungen prüfen die Paarung und die
+StateVersion zur Laufzeit. Für einen konkreten Suchfall mit Teilbindung
+wurde keine akzeptierte Aktion belegt.
+
+Beim nächsten Eingriff in Coverage-Search die Paarung als gemeinsam
+typisierten Bindungswert führen und den Eingangs-Guard wiederverwenden.
+Abnahme mit regulärer Suche, Multi-Search und getrennt fehlender Action-ID
+oder StateVersion. Aufwand ungefähr ein halber Tag für den gezielten Schnitt.
+[Coverage-Zustand](../../../packages/ai/src/runner/rig-coverage/coverage-types.ts#L2) ·
+[Lokale Multi-Search-Form](../../../packages/ai/src/runner/rig-coverage/coverage-multi-search-choice.ts#L22) ·
+[Fortsetzungsbindung](../../../packages/ai/src/runner/rig-coverage/coverage-bindings.ts#L229)
+
+### 9. `runner/run-window/run-window-selected-origin.ts`
+
+**P2, mit mutiertem Engine-Angebot reproduziert.** Aus dem nativen
+Vacuum-Link-Checkpoint D80 wurde `runner.start_run.hq` übernommen und
+in ein synthetisches Scheduler-Ergebnis mit Root und Executor eingesetzt. Ersetzt man lediglich dessen
+Timingpunkt durch `game.checkpoint`, speichert der Binder weiter einen
+`resolve_runner_run_start_order`-Ursprung. Bei abgelaufener StateVersion
+überspringt er denselben Run dagegen geräuschlos. Es wurde keine
+Engine-Anwendung einer falschen Aktion beobachtet.
+
+Timingpunkt und aktuelle Route vor dem Schreiben des Ursprungs abgleichen.
+Die Behandlung explizit erlaubter Run-/Window-Sonderfälle anhand des
+Aufrufpfads scharf abgrenzen. Abnahme mit den nativen D80–D85-Fortsetzungen
+und den gezielt alten beziehungsweise falsch getimten Angeboten.
+Aufwand ungefähr ein halber bis ein Tag.
+[Origin-Guard](../../../packages/ai/src/runner/run-window/run-window-selected-origin.ts#L67) ·
+[Native Fortsetzungen](../../../packages/ai/src/evaluation/decision-checkpoints/meta-536-run-start-vacuum.test.ts)
+
+### 10. `corp/scoring-remote/scoring-remote-discovery.ts`
+
+**P1 gemeinsam mit Befund 2, mit Engine-PlayerView reproduziert.** Auch
+dieser Pfad verliert das Trace-Profil. Die Maturity-Funktion reicht nur
+Corp-Bid-Capacity an die Pfadanalyse weiter. Auf derselben Classic-Sicht
+weist die finanzierte Remote-Quote für Rex ohne Raptor einen erreichbaren
+Zugriff mit vier Credits Zugriffskosten aus. Die mit `classic_blind` aufgerufene
+Pfadanalyse weist den Zugriff als blockiert aus.
+
+**P3, statisch.** Discovery berechnet alle Remote-Maturities vor den
+Doctrine- und Opening-Guards des Signal-Builders. Danach liest dieser nur
+die Maturity für den einen gewählten Zielserver. Jeder vorhandene Remote
+kann bis zu 4.096 Rez-Teilmengen quotieren. Die Zahl ist ein Code-Maximum
+pro Server, keine Laufzeitmessung. Die Quote nach der Zielbindung nur
+für das ausgewählte Fort berechnen. Die Abnahme soll null Quotes bei
+deaktivierter Doctrine und höchstens eine Bewertung bei gleichem Signal
+zeigen. Aufwand für diesen separaten Schnitt ungefähr ein halber bis ein Tag.
+[Eager Discovery](../../../packages/ai/src/corp/scoring-remote/scoring-remote-discovery.ts#L56) ·
+[Zielbindung und einziger Zugriff](../../../packages/ai/src/corp/scoring-remote/scoring-remote-signals.ts#L37) ·
+[Teilmenge und Pfadquote](../../../packages/ai/src/runtime/corp-remote-maturity-assessment.ts#L193)
+
+### Prüfstand und Reihenfolge
+
+137 fokussierte Tests in 17 Dateien sind grün. Dazu kommen die fünf
+Gegenproben im Arbeitsspeicher für Trace, Hint-Validierung, Kennzahl,
+Run-Ursprung und hypothetischen Free Advance. Die native Trace-Spielersicht
+stammt aus `createGameAfterSetup` und `getPlayerView` mit Rex, Raptor
+und `classic_blind`. Die Probe verglich die aktuellen Consumer mit
+`assessKnownRezzedIcePath` unter explizitem Profil. Die Kosten- und
+Timing-Gegenproben veränderten nur ihre lokalen Eingabekopien.
+
+Zuerst den gemeinsamen Trace-Kontext für Defense und Scoring Remote
+absichern. Danach sind die Hint-Grenze, der Run-Ursprung und die
+Baseline-Kennzahl jeweils eigenständig testbar. Die kleineren
+Wartbarkeitsänderungen können jeweils im zugehörigen Pfad folgen.
