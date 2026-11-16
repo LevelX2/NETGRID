@@ -39,6 +39,28 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each([
+    ["de", "Der Runner: den Zugriff auf R&D abgeschlossen."],
+    ["en", "The Runner: finished accessing a card on R&D."],
+    ["fr", "Le Runner : accès à une carte de R&D terminé."],
+  ] as const)(
+    "omits redundant access confirmations from the log in %s",
+    (locale, title) => {
+      const access = event("access_card", { serverId: "rd" });
+      const confirmation = event("decline_trash", { serverId: "rd" });
+      const trash = event("trash_accessed_card", { serverId: "rd" });
+
+      expect(shouldSuppressChronicleEventItem(access)).toBe(false);
+      expect(shouldSuppressChronicleEventItem(confirmation)).toBe(true);
+      expect(shouldSuppressChronicleEventItem(trash)).toBe(false);
+      expect(
+        formatChronicleEvent(confirmation, "corp", {
+          translate: translate(locale),
+        }).title,
+      ).toBe(title);
+    },
+  );
+
   it.each(["de", "en", "fr"] as const)(
     "shows Social Engineering results and consequences from public event facts in %s",
     (locale) => {

@@ -6537,7 +6537,8 @@ export function shouldSuppressChronicleEventItem(
   if (projectionSuppressedEventIds.has(event.eventId)) return true;
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
-  if (actionType === "decline_rez") return true;
+  if (actionType === "decline_rez" || actionType === "decline_trash")
+    return true;
   if (isSocialEngineeringHiddenAmountSelectionEvent(event)) return true;
   if (
     actionType === "resolve_choice" &&

@@ -74,6 +74,10 @@ verlorenen Credits aus den beiden öffentlichen Ergebnisfeldern.
 Geplante Mengen sind kein Ergebnis: Bei unterbrochenem Kartenziehen zählt
 `resolvedEffects[].amount`, nicht die ursprünglich geplante `drawCardsAmount`.
 Verzögertes Agenda-Stehlen darf noch keine gewonnenen Agendapunkte melden.
+Die Chronik blendet die Zugriffsbestätigung `decline_trash` aus und zeigt
+öffentliche Effekte desselben Ereignisses weiterhin als eigene Einträge.
+Der gemeinsame Formatter beschreibt die Aktion als Zugriffsabschluss, da sie
+auch bei Zugriffen ohne legale Trash-Option verwendet wird.
 
 Nur öffentliche oder für die Betrachtungsseite freigegebene Ereignisfelder
 sind Datenquellen. Texte aus `label`, Regeltexten oder KI-Begründungen werden
