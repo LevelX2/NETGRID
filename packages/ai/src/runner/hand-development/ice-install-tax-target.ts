@@ -1,9 +1,8 @@
 import { cardImplementationForDefinitionId } from "@netgrid/engine";
-import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { runnerEffectsOnlyTaxCorpIceInstalls } from "../../runner-canonical-hint-semantics";
-import type { RunnerRunTargetEvaluation } from "../../run-analysis/runner-run-target-types";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   mergedPublicHistory,
   serverIdFromEvent,
@@ -11,10 +10,9 @@ import {
 import { isRemoteServerTarget } from "../../runtime/server-target";
 
 export function runnerInstallTaxTarget(
-  input: AiDecisionInput,
+  input: AiDecisionInputWithDeckCapabilities,
   definitionId: string,
   candidates: readonly ActionSemanticCandidate[],
-  runTargets: readonly RunnerRunTargetEvaluation[],
 ): { target?: { actionId: string; serverId: string } } | undefined {
   if (
     !runnerEffectsOnlyTaxCorpIceInstalls(
@@ -27,6 +25,13 @@ export function runnerInstallTaxTarget(
   }
 
   const { playerView, legalActions } = input;
+  const strategy = input.ownStrategicIntentState;
+  const plannedTarget =
+    strategy?.side === "runner" &&
+    strategy.stateVersion === playerView.stateVersion &&
+    strategy.transition.status !== "abandoned"
+      ? strategy.targetVector
+      : undefined;
   const currentTurn = playerView.turnSerial;
   const recentRuns = mergedPublicHistory(input).filter(
     (event) =>
@@ -48,37 +53,42 @@ export function runnerInstallTaxTarget(
     const server = playerView.servers.find(
       (entry) => entry.id === action?.payload?.selectedServerId,
     );
-    if (!action || !server) return [];
+    if (!action || !server || server.id === "archives") return [];
 
-    const visibleAgenda = server.root.some(
-      (card) => card.known && card.type === "agenda",
-    );
-    const scoringRemote =
-      isRemoteServerTarget(server.id) &&
-      runTargets.some(
-        (run) => run.targetServerId === server.id && run.scoreThreat,
-      );
     const central = server.id === "hq" || server.id === "rd";
-    const value = visibleAgenda || scoringRemote ? 2 : central ? 1 : 0;
-    if (value === 0) return [];
+    const planned =
+      plannedTarget?.kind === (central ? "central" : "remote") &&
+      plannedTarget.targetId === server.id;
+    const recentRunTurns = new Set(
+      recentRuns
+        .filter((event) => serverIdFromEvent(event) === server.id)
+        .map((event) => event.turnSerial),
+    ).size;
+    // Changing scoring remotes avoids the tax. An isolated agenda access
+    // cannot establish recurring demand for ICE at that specific server.
+    const establishedRemote =
+      isRemoteServerTarget(server.id) &&
+      planned &&
+      recentRunTurns >= 2 &&
+      server.ice.length > 0;
+    if (central ? !planned && recentRunTurns < 2 : !establishedRemote)
+      return [];
 
     return [
       {
         actionId: action.actionId,
         serverId: server.id,
-        value,
+        planned,
         installedIce: server.ice.length,
-        recentRuns: recentRuns.filter(
-          (event) => serverIdFromEvent(event) === server.id,
-        ).length,
+        recentRunTurns,
       },
     ];
   });
   const best = ranked.sort(
     (a, b) =>
-      b.value - a.value ||
+      Number(b.planned) - Number(a.planned) ||
+      b.recentRunTurns - a.recentRunTurns ||
       a.installedIce - b.installedIce ||
-      b.recentRuns - a.recentRuns ||
       a.actionId.localeCompare(b.actionId),
   )[0];
   return best
