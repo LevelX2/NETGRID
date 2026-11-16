@@ -2600,6 +2600,14 @@ oder sicheren Ertrag. Der Trash des ursprünglichen Virusprogramms löscht
 gemeinsame Counter nicht; maßgeblich bleibt der tatsächliche globale
 Engine-Dispatcher.
 
+Für verbrauchbare zentrale Counter aus einer aktivierten Konversion liefert
+`quoteConvertibleCentralCounterAmount` die aus allen Zentralpools bezahlbare Menge
+pro Countertyp. Socket-Counter werden wirksam, sobald das öffentlich installierte
+Quellprogramm und die vollständige Finanzierung aus allen erforderlichen
+Zentralpools sichtbar vorliegen. Einzelne Socket-Counter und unvollständige
+Gruppen zählen für den aktuellen Purge-Wert als Vorbereitung. Bereits erzeugte
+Pipe-Counter bleiben ein eigener Effekt des gemeinsamen Corp-Pools.
+
 **Klasse:** `urgent_response` oder `bounded_sequence`
 **Rolle:** Vordergrund/Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

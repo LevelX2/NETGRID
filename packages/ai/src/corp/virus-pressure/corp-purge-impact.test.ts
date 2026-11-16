@@ -11,6 +11,7 @@ import { createCorpVirusPressureModule } from "./virus-pressure-plan-module";
 import { buildCorpVirusPressureSignals } from "./virus-pressure-signals";
 import type {
   AiDecisionInput,
+  CardInstanceId,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
@@ -196,6 +197,85 @@ it.each([0, 1, 2])(
   },
 );
 
+it.each([
+  { archives: 0, rd: 0, installed: true, active: 0 },
+  { archives: 1, rd: 0, installed: true, active: 0 },
+  { archives: 1, rd: 1, installed: false, active: 0 },
+  { archives: 1, rd: 1, installed: true, active: 3 },
+] as const)(
+  "uses all central pools and the public source for socket conversion ($archives Archives, $rd R&D, source $installed)",
+  ({ archives, rd, installed, active }) => {
+    const state = createGame({ seed: "socket-purge", setupMode: "completed" });
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    if (installed) {
+      const source = "viral_pipeline_1" as CardInstanceId;
+      state.runner.rig.programs.push(source);
+      state.cardInstances[source] = {
+        instanceId: source,
+        definitionId: "onr_proteus_099_viral-pipeline",
+        owner: "runner",
+        controller: "runner",
+        zone: { side: "runner", zone: "rig" },
+        faceup: true,
+        rezzed: true,
+        advancementCounters: 0,
+        strengthModifier: 0,
+      };
+    }
+    state.purgeableRunnerVirusCounters = {
+      servers: {
+        hq: { socket_hq: 2 },
+        ...(archives ? { archives: { socket_archives: archives } } : {}),
+        ...(rd ? { rd: { socket_rd: rd } } : {}),
+      },
+    };
+    const legalActions = getLegalActions(state, "corp");
+    const input: AiDecisionInput = {
+      ...inputWithVirusCounters(0),
+      matchId: state.matchId,
+      seed: state.seed,
+      legalActions,
+      playerView: getPlayerView(state, "corp"),
+    };
+    const purge = legalActions.find(
+      ({ type }) => type === "purge_runner_virus_counters",
+    );
+    if (!purge) throw new Error("Missing runner-virus purge LegalAction");
+    const [signal] = buildCorpVirusPressureSignals(input);
+    expect(signal).toMatchObject({
+      actionId: purge.actionId,
+      stateVersion: state.stateVersion,
+      actionCost: 3,
+      virusCounters: active,
+      purgeUseful: active > 0,
+    });
+    const context: PlanSchedulerContext = {
+      input,
+      turnKey: "socket-purge-binding",
+      actionCandidates: buildActionSemanticCandidates({ legalActions }),
+      domain: {
+        virusPressure: [signal!],
+        handManagement: [],
+        ambushes: [],
+        punishCampaigns: [],
+      },
+    };
+    const owner = createCorpVirusPressureModule();
+    const proposals = owner.discover(context);
+    expect(proposals).toHaveLength(active > 0 ? 1 : 0);
+    if (proposals.length > 0) {
+      const plan = instantiatePlanProposal(proposals[0]!, state.stateVersion);
+      const route = owner.materialize(plan, {} as never, context);
+      expect(route.step.stepId).toBe(`${plan.instanceId}:purge`);
+      expect(
+        route.candidates.map(({ candidate }) => candidate.actionId),
+      ).toEqual([purge.actionId]);
+    }
+  },
+);
 function inputWithVirusCounters(amount: number): AiDecisionInput {
   const bugZapper: VisibleCard = {
     instanceId: "bug-zapper",
