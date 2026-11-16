@@ -358,6 +358,8 @@ describe("known visible ICE run risk", () => {
   );
 });
 
+const FIXTURE_STATE_VERSION = 1;
+
 function aiInput(params: {
   credits: number;
   servers: PlayerView["servers"];
@@ -365,7 +367,7 @@ function aiInput(params: {
   rig?: VisibleCard[];
 }): AiDecisionInput {
   const playerView: PlayerView = {
-    stateVersion: 1,
+    stateVersion: FIXTURE_STATE_VERSION,
     turnSerial: 1,
     side: "runner",
     activeSide: "runner",
@@ -439,7 +441,7 @@ function runAction(actionId: string, serverId: string): LegalAction {
     costs: [{ clicks: 1 }],
     targetRequirements: [],
     visibility: "public",
-    expiresAtStateVersion: 2,
+    expiresAtStateVersion: FIXTURE_STATE_VERSION,
     payload: { serverId },
   };
 }
@@ -455,7 +457,7 @@ function gainCreditAction(actionId: string): LegalAction {
     costs: [{ clicks: 1 }],
     targetRequirements: [],
     visibility: "public",
-    expiresAtStateVersion: 2,
+    expiresAtStateVersion: FIXTURE_STATE_VERSION,
   };
 }
 

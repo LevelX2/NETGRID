@@ -12,11 +12,13 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { corpIceRezSupportEmptyTargetDispositionEvidence } from "../corp/defense/corp-defense-rez-support-facts";
+import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 function fixture(
   operation = "onr_proteus_051_rent-to-own-contract",
   target = "onr_proteus_024_gatekeeper",
+  overflow = false,
 ) {
   const d = catalog.decks.find(
     (d) =>
@@ -44,11 +46,20 @@ function fixture(
   });
   if (!r.ok) throw Error(JSON.stringify(r.error));
   s = r.state;
-  RealEngineFixtureBuilder.forState(s)
+  const builder = RealEngineFixtureBuilder.forState(s)
     .withCorpHqSize(0)
     .withCorpCardInHq(operation)
     .withCorpIceOnServer("rd", target)
     .withCorpCredits(1);
+  if (overflow) {
+    builder
+      .withCorpCardInHq("onr_proteus_002_charity-takeover")
+      .withCorpCardInHq("onr_proteus_007_project-venice")
+      .withCorpCardInHq("onr_proteus_008_project-zurich")
+      .withCorpCardInHq("onr_proteus_005_marked-accounts")
+      .withCorpCardInHq("onr_proteus_011_brain-wash");
+    s.corp.clicks = 1;
+  }
   const i = buildAiDecisionInput(s, "corp", {
     difficulty: "hard",
     ownDeckSnapshot: {
@@ -122,3 +133,34 @@ it.each(["stale", "source", "action", "target", "cost"])(
     ).toThrow(PlanResolutionFailure);
   },
 );
+
+it.each([
+  "onr_proteus_051_rent-to-own-contract",
+  "onr_proteus_049_emergency-rig",
+])("keeps %s out of an empty encounter even with HQ overflow", (operation) => {
+  const { i, action } = fixture(operation, "onr_proteus_024_gatekeeper", true);
+  expect(i.playerView.own.gripOrHq.length).toBeGreaterThan(
+    i.playerView.own.maxHandSize,
+  );
+  const decision = chooseAiAction(i, { persistTacticalPlanMemory: false });
+  expect(decision.fallbackUsed).toBe(false);
+  const selected = i.legalActions.find(
+    (candidate) => candidate.actionId === decision.actionId,
+  );
+  expect(selected).toBeDefined();
+  expect(
+    selected?.type === "play_operation" &&
+      selected.payload?.targetCardId === action.payload?.targetCardId,
+  ).toBe(false);
+  expect(
+    decision.decisionDebug?.planFirstDecision?.dispositions,
+  ).toContainEqual(
+    expect.objectContaining({
+      actionId: action.actionId,
+      ownerModuleId: "corp.defend_servers",
+      evidenceCode: expect.stringMatching(
+        /^corp_rez_support_empty_current_effect:rd:/,
+      ),
+    }),
+  );
+});

@@ -455,20 +455,25 @@ function goldenInput(params: {
   snapshot?: AiDeckStrategyDeckSnapshot;
 }): AiDecisionInputWithRunnerProjection {
   const snapshot = params.snapshot ?? goldenBlinkSnapshot();
+  const stateVersion = params.stateVersion ?? 1;
+  const legalActions = params.legalActions.map((action) => ({
+    ...action,
+    expiresAtStateVersion: stateVersion,
+  }));
   const view = playerView({
     credits: params.credits,
     servers: params.servers,
-    legalActions: params.legalActions,
+    legalActions,
     ...(params.rig ? { rig: params.rig } : {}),
     ...(params.grip ? { grip: params.grip } : {}),
-    ...(params.stateVersion ? { stateVersion: params.stateVersion } : {}),
+    stateVersion,
     ...(params.eventTail ? { eventTail: params.eventTail } : {}),
   });
   const input: AiDecisionInput = {
     side: "runner",
     playerView: view,
     eventTail: params.eventTail ?? [],
-    legalActions: params.legalActions,
+    legalActions,
     difficulty: "normal",
     seed: "runner-golden-deck-debug-test",
     decisionId: `runner-golden-deck-debug-test:${view.stateVersion}:runner`,
@@ -478,7 +483,7 @@ function goldenInput(params: {
   const ownDeckCapabilities = buildDeckCapabilityProfile({
     side: "runner",
     playerView: view,
-    legalActions: params.legalActions,
+    legalActions,
     deckSnapshot: snapshot,
   });
   const ownRunnerStrategicIntent = buildRunnerStrategicIntentProfile({

@@ -92,14 +92,21 @@ describe("Deck strategy runtime vertical slices", () => {
     const first = chooseRunnerAction(input, {
       runnerTurnPlannerMode: "legacy_compare",
     });
+    const nextStateVersion = 2;
+    const legalActions = input.legalActions.map((action) => ({
+      ...action,
+      expiresAtStateVersion: nextStateVersion,
+    }));
     const second = chooseRunnerAction(
       {
         ...input,
         decisionId: input.decisionId.replace(":1", ":2"),
         actionNumber: 2,
+        legalActions,
         playerView: {
           ...input.playerView,
-          stateVersion: 2,
+          stateVersion: nextStateVersion,
+          legalActions,
         },
       },
       { runnerTurnPlannerMode: "legacy_compare" },

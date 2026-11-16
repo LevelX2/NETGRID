@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { stat } from "node:fs/promises";
 import path from "node:path";
+import aiDeckPool from "../../data/ai/ai-deck-pool-1.1.0.json" with { type: "json" };
+import deckSnapshots from "../../data/decks/deck-snapshots-0.8.json" with { type: "json" };
+import deckCatalog from "../../data/decks/standard-deck-catalog-1.0.0.json" with { type: "json" };
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "../../packages/runtime-data/src/product-default-decks";
 import {
   BASE_URL,
   createHumanVsAiGame,
@@ -23,6 +30,24 @@ import {
 } from "./helpers/leak-scan";
 import { VIEWPORTS } from "./helpers/viewports";
 
+function standardDeckName(snapshotId: string): string {
+  const deck = deckCatalog.decks.find(
+    (entry) => `standard_${entry.standardDeckId}_${entry.version}` === snapshotId,
+  );
+  if (!deck) throw new Error(`Missing browser test deck for ${snapshotId}`);
+  return deck.name;
+}
+
+const runnerDeckName = standardDeckName(PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID);
+const corpDeckName = standardDeckName(PRODUCT_DEFAULT_CORP_SNAPSHOT_ID);
+const fixedOriginalsetCorp = aiDeckPool.entries.find(
+  (entry) => entry.side === "corp" && entry.tags.includes("fixed_originalset"),
+);
+const fixedCorpDeckName = deckSnapshots.snapshots.find(
+  (snapshot) => snapshot.deckSnapshotId === fixedOriginalsetCorp?.snapshotId,
+)?.name;
+if (!fixedCorpDeckName) throw new Error("Missing fixed Corp browser test deck");
+
 test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
   test("Human-vs-KI Desktop prüft aktives Board, KI-Takt, Cue, Aktionen, Credits und Artefakte", async ({
     page,
@@ -32,6 +57,14 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await createHumanVsAiGame(page, "v1-0-7-ai-desktop");
 
     await expectActiveBoardBasics(page);
+    await page.locator(".matchDetailsToggle").click();
+    const details = page.locator("#match-details-strip");
+    await expect(details).toContainText("Eigenes Deck");
+    await expect(details).toContainText("KI-Deck");
+    const fields = details.locator(":scope > :not(.matchStripNotice)");
+    await expect(fields.filter({ hasText: runnerDeckName })).toBeVisible();
+    await expect(fields.filter({ hasText: fixedCorpDeckName! })).toBeVisible();
+    await page.locator(".matchDetailsToggle").click();
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await expect(page.getByTestId("server-run-action").first()).toHaveAttribute(
       "aria-label",
@@ -89,6 +122,14 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
 
       await expectActiveBoardBasics(host.page);
       await expectActiveBoardBasics(joiner.page);
+      await host.page.locator(".matchDetailsToggle").click();
+      const details = host.page.locator("#match-details-strip");
+      await expect(details).toContainText("Eigenes Deck");
+      await expect(details).not.toContainText("KI-Deck");
+      const fields = details.locator(":scope > :not(.matchStripNotice)");
+      await expect(fields.filter({ hasText: runnerDeckName })).toBeVisible();
+      await expect(fields.filter({ hasText: corpDeckName })).toHaveCount(0);
+      await host.page.locator(".matchDetailsToggle").click();
       await expectNoDomOrLocalStorageLeaks(host.page);
       await expectNoDomOrLocalStorageLeaks(joiner.page);
       expectNoServerPayloadLeaks(hostFrames);
@@ -314,7 +355,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       const confirmation = page.getByRole("alertdialog", {
         name: "Matchserie verlassen?",
       });
-      await expect(result).toContainText("Serienspiel 1/2");
+      await expect(
+        result.getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
+      ).toBeVisible();
       await leaveSeries.click();
       await expect(confirmation).toBeVisible();
       const cancel = confirmation.getByRole("button", { name: "Abbrechen" });
@@ -322,7 +365,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       await cancel.click();
       await expect(confirmation).toBeHidden();
       await expect(leaveSeries).toBeFocused();
-      await expect(result).toContainText("Serienspiel 1/2");
+      await expect(
+        result.getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
+      ).toBeVisible();
 
       await leaveSeries.click();
       await page.keyboard.press("Escape");
@@ -344,6 +389,10 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await page.setViewportSize(VIEWPORTS.tablet);
     await createHumanVsAiGame(page, "v1-0-7-tablet-board");
     await expectActiveBoardBasics(page);
+    const catalogTab = page.getByRole("button", { name: "Katalog öffnen" });
+    await catalogTab.hover();
+    await expect(catalogTab.getByRole("tooltip")).toBeVisible();
+    await expectNoCriticalLayoutOverflow(page);
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await exerciseCardDisplayModes(page);
     const runAction = page.getByTestId("server-run-action").first();

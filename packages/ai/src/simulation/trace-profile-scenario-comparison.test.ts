@@ -59,7 +59,7 @@ const SCENARIOS = [
     runnerLink: 0,
     corpCredits: 8,
     runnerCredits: 6,
-    runnerGripCount: 2,
+    runnerGripCount: 1,
     successEffect: {
       type: "end_run_trash_hardware_and_unpreventable_meat_damage",
       amount: 2,
@@ -141,9 +141,13 @@ describe("Trace profile scenario comparison", () => {
       (sample) =>
         sample.scenario === "terminal" && sample.profile !== "modern_open",
     );
-    expect(terminalBlindSamples.every((sample) => sample.corpBid >= 3)).toBe(
-      true,
-    );
+    // The Runner has neither starting Link nor a Classic Link converter.
+    // A guaranteed terminal trace needs one credit when ties favor the Runner.
+    for (const sample of terminalBlindSamples) {
+      expect(sample.runnerBidMax).toBe(0);
+      expect(sample.successful).toBe(true);
+      expect(sample.corpBid).toBe(sample.profile === "classic_blind" ? 1 : 0);
+    }
     expect(
       first.metrics.classic_blind_corp_ties.successRate,
     ).toBeGreaterThanOrEqual(first.metrics.classic_blind.successRate);

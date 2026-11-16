@@ -2765,6 +2765,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ]);
     followupInput.playerView.stateVersion = 3;
+    for (const action of followupInput.legalActions)
+      action.expiresAtStateVersion = followupInput.playerView.stateVersion;
     followupInput.playerView.servers = initialInput.playerView.servers;
     const followupTurnSerial = followupInput.playerView.turnSerial;
     if (followupTurnSerial === undefined) {

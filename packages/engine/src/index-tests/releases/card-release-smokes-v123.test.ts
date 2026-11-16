@@ -2039,7 +2039,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(wrong.pendingChoice?.source).toContain(
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target",
     );
-    expect(getPlayerView(wrong, "corp").pendingChoice).toBeUndefined();
+    const corpBeforeTarget = getPlayerView(wrong, "corp");
+    expect(corpBeforeTarget.pendingChoice).toBeUndefined();
+    expect(corpBeforeTarget.run?.pendingAutoPassIceId).toBeUndefined();
     wrong = applyChoice(wrong, "runner", `ice_${iceId}`);
     expect(wrong.timingPoint).toBe("run.approach_ice");
     expect(wrong.activeSide).toBe("corp");
@@ -2051,9 +2053,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(getPlayerView(wrong, "runner").run?.pendingAutoPassIceId).toBe(
       iceId,
     );
-    expect(
-      getPlayerView(wrong, "corp").run?.pendingAutoPassIceId,
-    ).toBeUndefined();
+    expect(getPlayerView(wrong, "corp").run?.pendingAutoPassIceId).toBe(iceId);
     expect(
       getLegalActions(wrong, "corp").some(
         (action) => action.type === "rez_ice" && action.source === iceId,

@@ -376,7 +376,7 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translate(-50%, -4px);
+  transform: translate(var(--workspace-tooltip-offset, -50%), -4px);
   transition:
     opacity 120ms ease,
     transform 120ms ease,
@@ -397,39 +397,45 @@
 
 .activeWorkspaceButton:first-child .workspaceNavTooltip {
   left: 0;
-  transform: translate(0, -4px);
+  --workspace-tooltip-offset: 0%;
 }
 
 .activeWorkspaceButton:last-child .workspaceNavTooltip {
   right: 0;
   left: auto;
-  transform: translate(0, -4px);
+  --workspace-tooltip-offset: 0%;
 }
 
 @media (hover: hover) {
   .activeWorkspaceButton:hover .workspaceNavTooltip {
     opacity: 1;
     visibility: visible;
-    transform: translate(-50%, 0);
+    transform: translate(var(--workspace-tooltip-offset, -50%), 0);
     transition-delay: 1s;
-  }
-
-  .activeWorkspaceButton:first-child:hover .workspaceNavTooltip,
-  .activeWorkspaceButton:last-child:hover .workspaceNavTooltip {
-    transform: translate(0, 0);
   }
 }
 
 .activeWorkspaceButton:focus-visible .workspaceNavTooltip {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, 0);
+  transform: translate(var(--workspace-tooltip-offset, -50%), 0);
   transition-delay: 0s;
 }
 
-.activeWorkspaceButton:first-child:focus-visible .workspaceNavTooltip,
-.activeWorkspaceButton:last-child:focus-visible .workspaceNavTooltip {
-  transform: translate(0, 0);
+@media (max-width: 1080px) {
+  .activeWorkspaceNav {
+    position: relative;
+  }
+
+  .activeWorkspaceNav .activeWorkspaceButton {
+    position: static;
+  }
+
+  .activeWorkspaceNav .activeWorkspaceButton .workspaceNavTooltip {
+    --workspace-tooltip-offset: 0%;
+    right: 0;
+    left: auto;
+  }
 }
 
 .activeWorkspaceButton.active {
