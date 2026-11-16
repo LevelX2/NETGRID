@@ -1238,6 +1238,10 @@ weiteres ICE folgt. Unvollständige Einzelpfade löschen keine unabhängig
 bekannten Teilmengen; ohne mindestens einen bekannten Pfad lautet der Status
 `assessment_unknown`.
 
+Die Remote-Contest-Quote hält das allgemeine Guthaben und die sichtbaren
+Breaker-Pools auch bei der Vorfinanzierung getrennt. Für Trashkosten nach
+dem Zugriff zählt das verbleibende allgemeine Guthaben des gequoteten Pfads.
+
 Bei `new_remote` darf nur eine exakt an Parent und Need gebundene
 Defense-Route genau eine aktuelle ICE-Install-`LegalAction` verwenden. Die
 Engine liefert dafür neben Installations- und Post-Install-Rez-Quote auch die

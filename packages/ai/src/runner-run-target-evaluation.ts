@@ -1225,6 +1225,9 @@ function evaluateRunnerRunTarget(
     accessNoveltyRatio: payoff.accessNoveltyRatio,
     multiaccessAvailable,
     pathPassability,
+    ...(path.missingCoverage?.length
+      ? { missingCoverage: path.missingCoverage }
+      : {}),
     pathCost: routeQuote.guaranteedKnownCost,
     ...(futureClicksLost > 0 ? { futureClicksLost } : {}),
     routeQuote,

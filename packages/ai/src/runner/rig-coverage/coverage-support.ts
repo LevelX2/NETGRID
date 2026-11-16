@@ -22,7 +22,7 @@ import { runnerTargetHasTerminalContestThreat } from "../../runtime/runner-termi
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { runnerRunPathCreditBudgetWithVisiblePools } from "../../run-analysis/visible-run-credit-budget";
 import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
-import { coverageKindForPlanRole } from "./coverage-card-facts";
+import { RUNNER_BREAKER_COVERAGE } from "../../plans/runner-coverage-contracts";
 import type { RunnerCoverageServices } from "./coverage-services";
 import { runnerDrawProjectionFor } from "../../actions/action-economy-projection";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -739,7 +739,7 @@ export function runnerDeckHasCoverageAnswer(
   deckCapabilities: DeckCapabilityProfile,
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
 ): boolean {
-  const requiredCoverage = coverageKindForPlanRole(requiredRole);
+  const requiredCoverage = RUNNER_BREAKER_COVERAGE[requiredRole].deckKind;
   return (
     deckCapabilities.runner?.breakerInventory.some(
       (breaker) =>

@@ -1,3 +1,4 @@
+import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type {
@@ -56,7 +57,6 @@ import type {
   RunnerRunIceEncounterQuote,
   RunnerRunModifierQuote,
   RunnerRunPathQuote,
-  RunnerRunPlan,
   RunnerRunPlanServerId,
   RunnerRunSubroutineQuote,
   RunnerRunSubroutineThreatClass,

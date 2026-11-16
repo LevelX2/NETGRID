@@ -1,3 +1,4 @@
+import type { KnownRezzedIcePathAssessment } from "./visible-run-analysis-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -359,6 +360,9 @@ export type RunnerRunTargetEvaluation = {
   accessNoveltyRatio?: number;
   multiaccessAvailable: boolean;
   pathPassability: RunnerPathPassability;
+  missingCoverage?: NonNullable<
+    KnownRezzedIcePathAssessment["missingCoverage"]
+  >;
   pathCost: number;
   futureClicksLost?: number;
   routeQuote?: RunnerRunRouteQuote;

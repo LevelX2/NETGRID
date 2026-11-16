@@ -1,7 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
-import type { RunnerRunPlan } from "./runner-run-plan-types";
+import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 
 export type RunnerRunReleaseDecision = {
   status: "released_guaranteed" | "released_conditional" | "blocked";

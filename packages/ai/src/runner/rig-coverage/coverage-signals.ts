@@ -1,3 +1,4 @@
+import { coverageKindForAssessment } from "../../plans/tactical-plan-coverage-kinds";
 import {
   runnerCostlyCentralRunIsBelowHandBuffer,
   runPurposeForEvaluation,
@@ -144,17 +145,14 @@ export function uniqueCoverageGaps(
     if (
       (evaluation.pathPassability !== "blocked_missing_coverage" &&
         evaluation.pathPassability !== "blocked_unbreakable") ||
-      !evaluation.evidence.some((entry) =>
-        entry.startsWith("missing_coverage:"),
-      )
+      !evaluation.missingCoverage?.length
     ) {
       return false;
     }
-    const preciseCoverage = missingBreakerCoverageKind(
-      input.playerView,
-      evaluation.targetServerId,
-    );
-    const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
+    const preciseCoverage =
+      coverageKindForAssessment(evaluation) ??
+      missingBreakerCoverageKind(input.playerView, evaluation.targetServerId);
+    const role = planFirstCoverageRole(preciseCoverage);
     return (
       runnerDeckHasCoverageAnswer(deckCapabilities, role) &&
       coverageSupportActionIds(input, candidates, deckCapabilities, role, {
@@ -333,11 +331,10 @@ export function uniqueCoverageGaps(
       )
     )
       continue;
-    const preciseCoverage = missingBreakerCoverageKind(
-      input.playerView,
-      evaluation.targetServerId,
-    );
-    const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
+    const preciseCoverage =
+      coverageKindForAssessment(evaluation) ??
+      missingBreakerCoverageKind(input.playerView, evaluation.targetServerId);
+    const role = planFirstCoverageRole(preciseCoverage);
     const costRecovery =
       runnerSameTurnBreakerPreparation(
         input,

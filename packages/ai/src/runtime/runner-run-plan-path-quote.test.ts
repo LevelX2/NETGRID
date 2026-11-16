@@ -7,7 +7,7 @@ import type {
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
-import type { RunnerRunPlan } from "./runner-run-plan-types";
+import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 
 describe("runner run plan path quote", () => {
   it("keeps temporary run money out of the active Trace route", () => {

@@ -100,6 +100,9 @@ den Zähler ein, wenn das angegriffene Fort zum Zeitpunkt des Run-Starts
 contestierbar war. Blocker werden am betroffenen Fort erfasst. Für die
 Run-Reserve zählt die letzte beobachtete Access-Reserve je Run. Bekannte
 ICE-Pfade verwenden das Trace-Profil und Corp-Creditbudget der Entscheidung.
+Bei Trash-Entscheidungen erfasst der Benchmark das legale Angebot, die
+ausgeführte Trash-Aktion und den ausdrücklichen Verzicht. Die Bewertung der
+verbleibenden Creditreserve wird zusätzlich erfasst.
 Das R&D-Regressionsfixture für wiederholten Zugriff erzeugt den beobachteten
 Vorzustand durch Engine-Aktionen mit einer fest gebundenen Deckpaarung.
 Vor der Wahlprüfung muss der aktuelle Belief die bekannte, unveränderte und

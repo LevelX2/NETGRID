@@ -820,6 +820,11 @@ diese Vorbereitung nicht. Der konkrete Informationsschritt bleibt bei
 `runner.contest_remote`; weitere Sabotage- und Bypassrouten behalten ihre
 eigenen Nachweise.
 
+Das Aufdeckgedächtnis verliert die Positionsbindung beim bestätigten
+ICE-Tausch. Eine ICE-Verschiebung kann mehrere Indizes verändern und
+invalidiert die ICE-Positionen der betroffenen Forts. Zur Auswahl muss
+die aktuelle Option an eine sichtbare Position gebunden sein.
+
 Quelle, Action, side-sichere Root-Instanz, Position und StateVersion werden
 vor der Aufdeckung gebunden. Die anschließende Engine-Choice übernimmt nur
 das eine passende aktuelle Optionsfeld; sie wählt weder ein anderes Fort

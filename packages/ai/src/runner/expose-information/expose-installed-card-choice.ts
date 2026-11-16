@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -37,13 +38,11 @@ export function selectedRunnerExposeInstalledCardChoiceOptionIds(
 
   const history = exposeHistory(input);
   const ranked = selectableOptions
-    .map((option, order) => {
+    .flatMap((option, order) => {
       const position = optionPosition(input, option, history);
-      return {
-        option,
-        order,
-        score: position ? exposePositionScore(position) : -20_000,
-      };
+      return position
+        ? [{ option, order, score: exposePositionScore(position) }]
+        : [];
     })
     .sort(
       (left, right) => right.score - left.score || left.order - right.order,
@@ -52,6 +51,17 @@ export function selectedRunnerExposeInstalledCardChoiceOptionIds(
     choice.maxSelections,
     Math.max(choice.minSelections, 1),
   );
+  if (ranked.length < selectionCount) {
+    throw new PlanResolutionFailure("step_target_mismatch", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "continuation",
+      removalCondition:
+        "Bind selectable exposure targets to current side-safe installed positions.",
+    });
+  }
   return ranked.slice(0, selectionCount).map((entry) => entry.option.id);
 }
 
@@ -193,8 +203,26 @@ function invalidateExposedPositionsForBoardMutation(
   exactPositions: Set<string>,
   event: AiDecisionInput["eventTail"][number],
 ): void {
-  const actionType =
-    stringValue(event.publicPayload.actionType) ?? stringValue(event.type);
+  const payload = event.publicPayload;
+  if (payload.hiddenZoneAction === "hq_ice_swap_swap") {
+    const serverId = stringValue(payload.serverId);
+    const index = numberValue(payload.iceIndex);
+    if (serverId && index !== undefined)
+      exactPositions.delete(positionKey(serverId, "ice", index));
+    else if (serverId) forgetExposedArea(exactPositions, serverId, "ice");
+    return;
+  }
+  if (typeof payload.movedIceCount === "number" && payload.movedIceCount > 0) {
+    for (const serverId of new Set(
+      [payload.serverId, payload.sourceServerId, payload.targetServerId].map(
+        stringValue,
+      ),
+    )) {
+      if (serverId) forgetExposedArea(exactPositions, serverId, "ice");
+    }
+    return;
+  }
+  const actionType = stringValue(payload.actionType) ?? stringValue(event.type);
   if (
     ![
       "install_card",
@@ -215,11 +243,17 @@ function invalidateExposedPositionsForBoardMutation(
     stringValue(event.publicPayload.installedArea);
   const areas: InstalledArea[] =
     placement === "ice" || placement === "root" ? [placement] : ["ice", "root"];
-  for (const area of areas) {
-    const prefix = `${serverId}:${area}:`;
-    for (const key of exactPositions) {
-      if (key.startsWith(prefix)) exactPositions.delete(key);
-    }
+  for (const area of areas) forgetExposedArea(exactPositions, serverId, area);
+}
+
+function forgetExposedArea(
+  exactPositions: Set<string>,
+  serverId: string,
+  area: InstalledArea,
+): void {
+  const prefix = `${serverId}:${area}:`;
+  for (const key of exactPositions) {
+    if (key.startsWith(prefix)) exactPositions.delete(key);
   }
 }
 

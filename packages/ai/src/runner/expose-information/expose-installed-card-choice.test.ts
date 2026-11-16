@@ -34,6 +34,47 @@ describe("runner installed-card expose choice", () => {
     ).toEqual(["card_hidden_remote_ice"]);
   });
 
+  it("forgets the ICE slot replaced by a public Singapore City Grid swap", () => {
+    const current = input();
+    current.eventTail.push(exposeEvent("remote_1", "ice", 0), {
+      eventId: "swap",
+      type: "resolve_choice",
+      stateVersionBefore: 2,
+      stateVersionAfter: 3,
+      stateHashAfter: "swap",
+      publicPayload: {
+        actor: "corp",
+        actionType: "resolve_choice",
+        hiddenZoneAction: "hq_ice_swap_swap",
+        serverId: "remote_1",
+        iceIndex: 0,
+      },
+    });
+    expect(runnerExposeInstalledOpportunity(current).unseenPositions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          serverId: "remote_1",
+          area: "ice",
+          index: 0,
+        }),
+      ]),
+    );
+  });
+
+  it("diagnoses a required expose target with no visible position binding", () => {
+    const current = input();
+    current.legalActions = [];
+    current.playerView.stateVersion = 1;
+    current.playerView.timingPoint = "runner_action.main";
+    expect(() =>
+      selectedRunnerExposeInstalledCardChoiceOptionIds(
+        current,
+        current.playerView.pendingChoice!,
+        [{ id: "card_unbound", label: "Unbound" }],
+      ),
+    ).toThrow(expect.objectContaining({ code: "step_target_mismatch" }));
+  });
+
   it("reports no unseen position after every hidden target was exposed", () => {
     const current = input();
     current.eventTail.push(

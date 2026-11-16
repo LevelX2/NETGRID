@@ -1817,7 +1817,9 @@ export function runnerActionDispositions(
     signals: domain.defense,
     runWindows: domain.runWindows,
     runTargets,
-    terminalActionIds: new Set((domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? [])),
+    terminalActionIds: new Set(
+      (domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? []),
+    ),
     alreadyClassifiedActionIds: new Set(
       dispositions.map((entry) => entry.actionId),
     ),
@@ -2377,7 +2379,8 @@ export function runnerActionDispositions(
       runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects);
     const hostedProgramRecovery =
       candidate.actionType === "activated_card_ability" &&
-      runnerRecoveryActionContract(input, candidate)?.hostedTarget !== undefined;
+      runnerRecoveryActionContract(input, candidate)?.hostedTarget !==
+        undefined;
     if (
       (structuredTopHeapRecovery || hostedProgramRecovery) &&
       !dispositions.some((entry) => entry.actionId === candidate.actionId) &&
@@ -3699,8 +3702,8 @@ function buildCorpDomain(
   });
   const {
     requiredScoreCreditFloor,
-    scoreProjects,
-    deferredLastClickScoreProject,
+    scoreProjects: initialScoreProjects,
+    deferredLastClickScoreProject: initialDeferredLastClickScoreProject,
     exactLastClickLiquidityHeadAvailable,
     ownAgendas,
   } = reconcileCorpScoreProjects({
@@ -3720,7 +3723,7 @@ function buildCorpDomain(
     requiredScoreCreditFloor,
   );
   const scoreOwnedAgendaInstallInstanceIds = new Set(
-    scoreProjects.flatMap((project) =>
+    initialScoreProjects.flatMap((project) =>
       project.feasible &&
       project.phase === "install_agenda" &&
       project.agendaInstanceId
@@ -3733,6 +3736,7 @@ function buildCorpDomain(
       !scoreOwnedAgendaInstallInstanceIds.has(signal.sourceInstanceId),
   );
   const {
+    scoreProjects,
     terminalRezReserveSignals,
     exactScoreProtectionInstallActionIds,
     selectedScoreProtectionSignals,
@@ -3741,7 +3745,7 @@ function buildCorpDomain(
     exactExecutableScoreProjectAvailable,
     defenseDrawSignals,
   } = buildCorpDefenseProtectionSignals({
-    scoreProjects,
+    scoreProjects: initialScoreProjects,
     input,
     residentScoreAgendaInstanceId,
     candidates,
@@ -3752,6 +3756,10 @@ function buildCorpDomain(
     currentTurnKey,
     defenseDrawAttemptConsumed,
   });
+  const deferredLastClickScoreProject = scoreProjects.find(
+    (project) =>
+      project.projectId === initialDeferredLastClickScoreProject?.projectId,
+  );
   const remoteProjects = buildCorpScoringRemoteDiscovery({
     input,
     previous,
@@ -3858,7 +3866,10 @@ function buildCorpDomain(
     virusPressure,
     punishCampaigns,
     ambushes,
-    handManagement: [...handManagement, ...corpPunishHandDrawSignals(input, punishCampaigns)],
+    handManagement: [
+      ...handManagement,
+      ...corpPunishHandDrawSignals(input, punishCampaigns),
+    ],
   };
 }
 

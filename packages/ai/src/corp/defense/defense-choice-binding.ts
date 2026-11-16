@@ -356,14 +356,24 @@ export function selectedCorpAgendaPurgeInstallTargetOptionIds(
       candidate.choiceResolution.choiceId === choice.choiceId,
   );
   const planResolution = signal?.choiceResolution;
-  const planTargets = planResolution?.targets;
+  const rawTargets = planResolution?.targets;
+  const planTargets =
+    Array.isArray(rawTargets) &&
+    rawTargets.every(
+      (
+        target,
+      ): target is { cardId: string; serverId: string; optionId: string } =>
+        target !== null &&
+        typeof target === "object" &&
+        typeof target.cardId === "string" &&
+        typeof target.serverId === "string" &&
+        typeof target.optionId === "string",
+    )
+      ? rawTargets
+      : undefined;
   const planRevealedCardIds = Array.isArray(planResolution?.revealedCardIds)
     ? planResolution.revealedCardIds
     : undefined;
-  const selectedOptionIds =
-    planTargets?.map((target) =>
-      typeof target.optionId === "string" ? target.optionId : "",
-    ) ?? [];
   const exactPlanBinding =
     portfolio?.side === "corp" &&
     portfolio.stateVersion === input.playerView.stateVersion &&
@@ -377,34 +387,23 @@ export function selectedCorpAgendaPurgeInstallTargetOptionIds(
     revealedIds.every(
       (cardId, index) => planRevealedCardIds[index] === cardId,
     ) &&
-    Array.isArray(planTargets) &&
+    planTargets !== undefined &&
     planTargets.length === choice.minSelections &&
-    new Set(
-      planTargets.map((target) =>
-        typeof target.cardId === "string" ? target.cardId : "",
-      ),
-    ).size === planTargets.length &&
-    planTargets.every((target) => {
-      if (
-        typeof target.cardId !== "string" ||
-        typeof target.serverId !== "string" ||
-        typeof target.optionId !== "string"
-      ) {
-        return false;
-      }
-      return (
+    new Set(planTargets.map((target) => target.cardId)).size ===
+      planTargets.length &&
+    planTargets.every(
+      (target) =>
         optionsByCardId
           .get(target.cardId)
           ?.get(target.serverId)
-          ?.some((option) => option.id === target.optionId) === true
-      );
-    });
-  if (!exactPlanBinding) {
+          ?.some((option) => option.id === target.optionId) === true,
+    );
+  if (!exactPlanBinding || !planTargets) {
     throw unresolvedChoiceFailure(
       input,
       action,
       "Materialize Security Purge only from the current corp.defend_servers executor and its exact plan-bound ICE-to-server allocation.",
     );
   }
-  return selectedOptionIds;
+  return planTargets.map((target) => target.optionId);
 }

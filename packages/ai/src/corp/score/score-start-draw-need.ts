@@ -1,8 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import {
-  corpRemoteHasEngineQuotedReusableScoreFriction,
-  corpRemoteHasEngineQuotedFundableScoreFriction,
-} from "./corp-score-defense-continuity";
+import { corpRemoteHasEngineQuotedFundableScoreFriction } from "./corp-score-defense-continuity";
 
 /** Score owns the concrete agenda-search purpose; Hand owns draw capacity. */
 export function corpStartDrawAgendaSearchServerId(
@@ -21,7 +18,8 @@ export function corpStartDrawAgendaSearchServerId(
     return undefined;
   return input.playerView.servers.find(
     (server) =>
-      corpRemoteHasEngineQuotedReusableScoreFriction(input, server.id) &&
+      server.id.startsWith("remote_") &&
+      server.root.length === 0 &&
       (server.ice.some(
         (ice) =>
           ice.rezzed === true &&

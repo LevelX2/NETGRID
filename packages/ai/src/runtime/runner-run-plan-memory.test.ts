@@ -8,7 +8,7 @@ import {
   requireActiveRunnerRunPlan,
   resetRunnerRunPlanMemory,
 } from "./runner-run-plan-memory";
-import type { RunnerRunPlan } from "./runner-run-plan-types";
+import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 
 describe("runner run plan memory", () => {
   beforeEach(() => resetRunnerRunPlanMemory());

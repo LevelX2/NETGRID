@@ -14,7 +14,7 @@ import {
   getRunnerRunPlanMemorySnapshot,
   restoreRunnerRunPlanMemorySnapshot,
 } from "../../runtime/runner-run-plan-memory";
-import type { RunnerRunPlan } from "../../runtime/runner-run-plan-types";
+import type { RunnerRunPlan } from "../../runtime/runner-run-plan-snapshot";
 import {
   residentPlanPortfolioSnapshot,
   restoreResidentPlanPortfolioMemorySnapshot,

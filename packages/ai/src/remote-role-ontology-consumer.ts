@@ -1,13 +1,10 @@
 import type { VisibleCard } from "@netgrid/shared";
-import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
+import { AI_HINTS_BY_CARD as AI_HINTS, type AiCardHint } from "./ai-hints";
 import type {
   AiHintRemoteRole,
   AiHintStructuredEffect,
   KnownHintRemoteRoleKind,
 } from "./hint-ontology";
-import { rolesMatch } from "./role-match";
-
-const AI_HINTS = createAiHintsByCard();
 
 export type StructuredRemoteRoleSafetyAssessment = {
   role?: AiHintRemoteRole;
@@ -127,63 +124,6 @@ export function structuredRemoteRoleSafetyAssessmentForCard(
           ]
         : []),
     ],
-  };
-}
-
-export function structuredRemoteRoleConflictWithLegacy(
-  role: AiHintRemoteRole | undefined,
-  legacyRoles: string[],
-): boolean {
-  if (!role) return false;
-  const legacyClaimsScoringProtection = rolesMatch(legacyRoles, [
-    "scoring",
-    "protect_remote",
-    "remote_agenda_protection",
-    "agenda_steal_tax",
-    "remote_upgrade_tax",
-  ]);
-  if (
-    remoteRoleIsNonScoringProtectionKind(role.kind) &&
-    legacyClaimsScoringProtection
-  )
-    return true;
-  const legacyClaimsEconomy = rolesMatch(legacyRoles, ["economy"]);
-  return role.kind === "run_tax" && legacyClaimsEconomy;
-}
-
-export function structuredRemoteRoleSafetyBonusForServer(
-  cards: Array<Pick<VisibleCard, "definitionId" | "known" | "rezzed">>,
-  context: {
-    agendaContext: boolean;
-    runnerCreditsAfterKnownPath?: number | undefined;
-  },
-): {
-  activeProtectionCount: number;
-  blocksAgendaSteal: boolean;
-  safetyBonus: number;
-  assessments: StructuredRemoteRoleSafetyAssessment[];
-  evidence: string[];
-} {
-  const assessments = cards
-    .map((card) => structuredRemoteRoleSafetyAssessmentForCard(card, context))
-    .filter((assessment) => assessment.role !== undefined);
-  const safetyAssessments = assessments.filter(
-    (assessment) => assessment.raisesSafety,
-  );
-  return {
-    activeProtectionCount: safetyAssessments.length,
-    blocksAgendaSteal: assessments.some(
-      (assessment) => assessment.blocksAgendaSteal,
-    ),
-    safetyBonus: Math.min(
-      70,
-      safetyAssessments.reduce(
-        (sum, assessment) => sum + assessment.safetyBonus,
-        0,
-      ),
-    ),
-    assessments,
-    evidence: assessments.flatMap((assessment) => assessment.evidence),
   };
 }
 

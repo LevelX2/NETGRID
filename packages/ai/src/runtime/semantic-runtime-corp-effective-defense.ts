@@ -1,4 +1,8 @@
-import { visibleRunnerRunCreditPool } from "./visible-run-credit-facts";
+import {
+  normalizeRunnerRunPathCreditBudget,
+  projectBreakerCreditPayment,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../run-analysis/visible-run-credit-budget";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -115,11 +119,9 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
     input,
     action,
   );
-  const visibleBreakCost = visibleRunnerBreakCostForRezzedIce(input, action);
-  const runnerCanAffordVisibleBreak =
-    visibleBreakCost !== undefined
-      ? visibleRunnerContestCredits(input) >= visibleBreakCost
-      : undefined;
+  const visibleBreak = visibleRunnerBreakForRezzedIce(input, action);
+  const visibleBreakCost = visibleBreak?.cost;
+  const runnerCanAffordVisibleBreak = visibleBreak?.affordable;
   const hasVisibleBreakerTax =
     visibleBreakerCoverage &&
     visibleBreakCost !== undefined &&
@@ -220,10 +222,10 @@ function visibleRezCreditGain(
   return Math.max(0, Number(match?.[1] ?? match?.[2] ?? 0));
 }
 
-function visibleRunnerBreakCostForRezzedIce(
+function visibleRunnerBreakForRezzedIce(
   input: AiDecisionInput,
   action: LegalAction,
-): number | undefined {
+): { cost: number; affordable: boolean } | undefined {
   const sourceCard = visibleActionSourceCard(input, action);
   if (!sourceCard?.definitionId) return undefined;
   const selectedSubtypes = selectedSubtypesAfterRez(action);
@@ -236,12 +238,27 @@ function visibleRunnerBreakCostForRezzedIce(
       : sourceCard;
   const endTheRunCount = visibleEndTheRunSubroutineCount(sourceCard);
   if (endTheRunCount <= 0) return undefined;
-  return minimumCreditsToBreakEndTheRunSubroutines(
+  const rig = input.playerView.opponent.rig ?? [];
+  const budget = normalizeRunnerRunPathCreditBudget(
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.opponent.credits,
+      rig,
+    ),
+  );
+  const assessedBreak = minimumCreditsToBreakEndTheRunSubroutines(
     assessedIce,
-    input.playerView.opponent.rig ?? [],
+    rig,
     endTheRunCount,
     new Map(),
-  )?.cost;
+    0,
+    [],
+    undefined,
+    false,
+    budget,
+  );
+  return assessedBreak
+    ? projectBreakerCreditPayment(budget, assessedBreak)
+    : undefined;
 }
 
 function visibleEndTheRunSubroutineCount(sourceCard: {
@@ -256,13 +273,6 @@ function visibleEndTheRunSubroutineCount(sourceCard: {
   return sourceCard.definitionId
     ? endTheRunSubroutineCount(sourceCard.definitionId)
     : 0;
-}
-
-function visibleRunnerContestCredits(input: AiDecisionInput): number {
-  return (
-    input.playerView.opponent.credits +
-    visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? [])
-  );
 }
 
 export function visibleCorpIceDefenseProfile(

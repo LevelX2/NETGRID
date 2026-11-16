@@ -51,6 +51,37 @@ describe("buildRunnerRemoteTrashAccessContext", () => {
     );
   });
 
+  it("records an executed all-in trash and counts only explicit declines as skips", () => {
+    const card = visibleCorpCard("crybaby", "onr_v1_354_crybaby", "upgrade", 2);
+    const trash = accessAction("trash", "trash_accessed_card", {
+      accessTrashTotalCost: 2,
+    });
+    const decline = accessAction("decline", "decline_trash");
+    const input = runnerAccessInput({
+      accessedCard: card,
+      legalActions: [trash, decline],
+      attackedServerId: "hq",
+      credits: 2,
+    });
+    expect(buildRunnerRemoteTrashAccessContext(input, trash, 4)).toMatchObject({
+      deferredByBudget: true,
+      affordableRelevant: true,
+      relevantTaken: true,
+      skippedAffordableRelevant: false,
+    });
+    expect(
+      buildRunnerRemoteTrashAccessContext(input, decline, 4)
+        .skippedAffordableRelevant,
+    ).toBe(true);
+    expect(
+      buildRunnerRemoteTrashAccessContext(
+        input,
+        { ...decline, type: "resolve_choice" },
+        4,
+      ).skippedAffordableRelevant,
+    ).toBe(false);
+  });
+
   it("recognizes an installed central-root Crybaby as a paid ambush", () => {
     const crybaby = visibleCorpCard(
       "crybaby-root",

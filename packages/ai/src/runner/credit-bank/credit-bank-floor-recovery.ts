@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type {
   RunnerEconomyPosture,
@@ -46,8 +47,8 @@ export function creditBankFloorRecoveryWindow(params: {
     );
     const quote = candidate.economyProjection;
     return (
-      action?.type === "gain_credit" &&
-      action.expiresAtStateVersion === view.stateVersion &&
+      actionMatchesCurrentDecision(input, action) &&
+      action.type === "gain_credit" &&
       quote?.kind === "immediate_liquid" &&
       quote.reliability === "guaranteed" &&
       quote.repeatable === true &&
@@ -62,7 +63,7 @@ export function creditBankFloorRecoveryWindow(params: {
   const load = input.legalActions.find(
     (action) =>
       params.loadActionIds.includes(action.actionId) &&
-      action.expiresAtStateVersion === view.stateVersion &&
+      actionMatchesCurrentDecision(input, action) &&
       action.costs.length === 1 &&
       action.costs[0]?.clicks === 1 &&
       (action.costs[0].credits ?? 0) === 0,

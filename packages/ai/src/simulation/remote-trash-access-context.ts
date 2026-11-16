@@ -96,12 +96,13 @@ export function buildRunnerRemoteTrashAccessContext(
     accessed.definitionId,
   );
   const role = remoteTrashRoleForAccessedVisibleCard(input, accessed);
-  const trashAction = input.legalActions.find(
+  const trashActions = input.legalActions.filter(
     (candidate) => candidate.type === "trash_accessed_card",
   );
-  const legalTrashActionCount = input.legalActions.filter(
-    (candidate) => candidate.type === "trash_accessed_card",
-  ).length;
+  const trashAction =
+    trashActions.find((candidate) => candidate.actionId === action.actionId) ??
+    trashActions[0];
+  const legalTrashActionCount = trashActions.length;
   const trashCost = trashAction
     ? remoteTrashActionTotalCost(trashAction)
     : (remoteTrashCostForVisibleCard(accessed) ?? 0);
@@ -168,10 +169,11 @@ export function buildRunnerRemoteTrashAccessContext(
       dedicatedTrashCredits <= 0 &&
       !acuteThreat &&
       !highRemainingFinitePool);
-  const affordableRelevant =
-    relevant && trashAction !== undefined && !deferredByBudget;
+  const affordableRelevant = relevant && trashAction !== undefined;
   const relevantTaken =
-    affordableRelevant && action.type === "trash_accessed_card";
+    relevant &&
+    trashActions.some((candidate) => candidate.actionId === action.actionId) &&
+    action.type === "trash_accessed_card";
   const accessDecisionProjection = projectAccessWindowChoice({
     actionType: action.type,
     serverId: accessServerId,
@@ -192,7 +194,7 @@ export function buildRunnerRemoteTrashAccessContext(
     affordableRelevant,
     relevantTaken,
     skippedAffordableRelevant:
-      affordableRelevant && action.type !== "trash_accessed_card",
+      affordableRelevant && action.type === "decline_trash",
     expensive,
     highImpact,
     acuteThreat,

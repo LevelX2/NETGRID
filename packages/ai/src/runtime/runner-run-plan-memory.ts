@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { MatchRuntimeMemory } from "./match-runtime-memory";
-import type { RunnerRunPlan } from "./runner-run-plan-types";
+import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 
 const runnerRunPlanMemoryByKey = new MatchRuntimeMemory<RunnerRunPlan>();
 

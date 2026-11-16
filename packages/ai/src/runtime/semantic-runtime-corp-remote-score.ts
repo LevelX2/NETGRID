@@ -1,4 +1,3 @@
-import { visibleRunnerRunCreditPool } from "./visible-run-credit-facts";
 import { visibleRunnerExposureCreditValue } from "./visible-runner-action-economy";
 import {
   type AiDecisionInput,
@@ -293,7 +292,6 @@ function semanticRuntimeCorpRemoteSupportInstallIsContestable(
   if (!server) return false;
   const visibleRunnerContestCredits =
     input.playerView.opponent.credits +
-    visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []) +
     visibleRunnerExposureCreditValue(
       input,
       semanticRuntimeCorpRunnerExposureCreditActions(input),
@@ -310,9 +308,7 @@ function semanticRuntimeCorpRemoteSupportInstallIsContestable(
   );
   return (
     assessment.runnerCanReachAccessNow &&
-    assessment.visibleRunnerContestCredits -
-      (assessment.visibleBreakCost ?? 0) >=
-      Math.max(0, trashCost)
+    assessment.runnerGeneralCreditsAfterPath >= Math.max(0, trashCost)
   );
 }
 

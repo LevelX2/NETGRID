@@ -92,6 +92,7 @@ function scoringWindowAccessAssessmentForMode(
   unmodeledIceCount: number;
   visibleRunnerIcebreakerCount: number;
   visibleRunnerContestCredits: number;
+  runnerGeneralCreditsAfterPath: number;
   visibleBreakCost?: number;
   evidence: string[];
 } {
@@ -172,6 +173,7 @@ function scoringWindowAccessAssessmentForMode(
       unmodeledIceCount: 0,
       visibleRunnerIcebreakerCount,
       visibleRunnerContestCredits,
+      runnerGeneralCreditsAfterPath: visibleRunnerGeneralContestCredits,
       visibleBreakCost: 0,
       evidence: [
         "remote_access:unprotected",
@@ -245,6 +247,7 @@ function scoringWindowAccessAssessmentForMode(
     unmodeledIceCount,
     visibleRunnerIcebreakerCount: effectiveVisibleRunnerIcebreakerCount,
     visibleRunnerContestCredits,
+    runnerGeneralCreditsAfterPath: assessment.creditsAfterPath,
     ...(assessment.visibleBreakCost !== undefined
       ? {
           visibleBreakCost:

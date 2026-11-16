@@ -1,3 +1,4 @@
+import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgrid/engine";
 import { type AiDecisionInput, type CardDefinitionId } from "@netgrid/shared";
 
@@ -11,10 +12,7 @@ import {
 } from "./current-encounter";
 import { getRunnerRunPlanMemorySnapshot } from "./runner-run-plan-memory";
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
-import type {
-  RunnerRunIceEncounterQuote,
-  RunnerRunPlan,
-} from "./runner-run-plan-types";
+import type { RunnerRunIceEncounterQuote } from "./runner-run-plan-types";
 import { type LatestTraceContext } from "./trace-context";
 import { visibleTraceSuccessEffect } from "./trace-bid-assessment";
 

@@ -3087,7 +3087,13 @@ describe("authoritative plan-first live runtime", () => {
         decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
         action: Parameters<typeof selectedChoicesForDecision>[1],
         portfolio: Parameters<typeof selectedChoicesForDecision>[3],
-      ) => selectedChoicesForDecision(decisionInput, action, {} as never, portfolio),
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          action,
+          {} as never,
+          portfolio,
+        ),
     }).chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
@@ -4565,7 +4571,13 @@ describe("authoritative plan-first live runtime", () => {
         decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
         action: Parameters<typeof selectedChoicesForDecision>[1],
         portfolio: Parameters<typeof selectedChoicesForDecision>[3],
-      ) => selectedChoicesForDecision(decisionInput, action, {} as never, portfolio),
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          action,
+          {} as never,
+          portfolio,
+        ),
     });
     const decision = runtime.chooseSemanticRuntimeAction(input, {});
 
@@ -5362,7 +5374,9 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
     const decision = runtime.chooseSemanticRuntimeAction(input, {});
-    expect(residentPlanPortfolioSnapshot(input)?.executorInstanceId).toBeDefined();
+    expect(
+      residentPlanPortfolioSnapshot(input)?.executorInstanceId,
+    ).toBeDefined();
     expect(choiceCalls).toBeGreaterThan(0);
 
     expect(decision).toMatchObject({
@@ -8319,7 +8333,8 @@ describe("authoritative plan-first live runtime", () => {
       recommendation: "find_breaker_first" as const,
       scoreThreat: false,
       score: 200,
-      evidence: ["missing_coverage:breaker_sentry"],
+      missingCoverage: ["sentry" as const],
+      evidence: ["missing_coverage:sentry"],
     };
 
     const decision = liveContext({
@@ -21563,24 +21578,28 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     };
-    expect(runnerRestrictedProgramInstallSequenceCommitment(
-      largerHand,
-      source,
-      [...handDevelopment, ...moreOptions],
-      0,
-    )?.targetSteps.map((step) => step.cardInstanceId)).toEqual([
-      "program-a",
-      "program-b",
-    ]);
-    expect(() => runnerRestrictedProgramInstallSequenceCommitment(
-      largerHand,
-      {
-        ...source,
-        actionCapacityProjection: { ...source.actionCapacityProjection!, temporaryCredits: 2 },
-      },
-      handDevelopment,
-      0,
-    )).toThrow("stale_or_future_action_reference");
+    expect(
+      runnerRestrictedProgramInstallSequenceCommitment(
+        largerHand,
+        source,
+        [...handDevelopment, ...moreOptions],
+        0,
+      )?.targetSteps.map((step) => step.cardInstanceId),
+    ).toEqual(["program-a", "program-b"]);
+    expect(() =>
+      runnerRestrictedProgramInstallSequenceCommitment(
+        largerHand,
+        {
+          ...source,
+          actionCapacityProjection: {
+            ...source.actionCapacityProjection!,
+            temporaryCredits: 2,
+          },
+        },
+        handDevelopment,
+        0,
+      ),
+    ).toThrow("stale_or_future_action_reference");
 
     const restrictedPayload = {
       actionCapacityRestriction: "program_install_only",

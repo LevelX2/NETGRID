@@ -56,7 +56,7 @@ export function missingCoverageBlockerKind(
 }
 
 export function coverageKindForAssessment(
-  assessment: KnownRezzedIcePathAssessment,
+  assessment: Pick<KnownRezzedIcePathAssessment, "missingCoverage">,
 ): RequiredCapabilityKind | undefined {
   // Missing coverage is sorted for diagnostics. Structural ICE categories
   // determine the answer before supplementary AP/trace tags on the same ICE.
