@@ -5276,21 +5276,45 @@ select {
   white-space: nowrap;
 }
 
-.matchStrip .matchStripMatchId {
+.matchStrip.matchDetailsStrip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  padding-block: 7px;
   overflow: visible;
-  text-overflow: clip;
-  white-space: normal;
-  overflow-wrap: anywhere;
 }
 
-.matchStrip strong {
-  margin-right: 4px;
+.matchDetailsFields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 18px;
+  margin: 0;
+}
+
+.matchDetailsFields > div {
+  flex: 0 0 auto;
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+}
+
+.matchDetailsFields dt {
   color: var(--text);
   font-weight: 700;
 }
 
+.matchDetailsFields dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .matchStripNotice {
-  flex: 1 1 auto;
+  margin: 0;
+  overflow-wrap: anywhere;
   color: var(--text);
 }
 
@@ -5346,8 +5370,15 @@ select {
   animation: floating-cue-lifecycle var(--cue-duration, 2500ms) ease-out both;
 }
 
-.floatingCueMessage strong {
+.floatingCueHeadline {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   max-width: 100%;
+}
+
+.floatingCueHeadline strong {
+  min-width: 0;
 }
 
 .floatingCueMessage > span:not(.floatingCueActor) {
@@ -11400,37 +11431,53 @@ section[data-testid="legal-actions"].cueHighlight {
   );
 }
 
-.chronicleActionOrdinal {
+.turnActionBadge {
+  --turn-action-accent: var(--chronicle-system);
   position: relative;
+  flex: 0 0 auto;
   min-width: 18px;
   height: 18px;
   display: inline-grid;
   place-items: center;
   padding: 0 4px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-accent), white 18%);
+  border: 1px solid color-mix(in srgb, var(--turn-action-accent), white 18%);
   border-radius: 4px;
   color: var(--text);
-  background: color-mix(in srgb, var(--chronicle-accent), var(--panel) 42%);
+  background: color-mix(in srgb, var(--turn-action-accent), var(--panel) 68%);
   box-shadow: 0 2px 6px rgb(0 0 0 / 0.28);
   font-size: 11px;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
+  white-space: nowrap;
+  text-shadow: none;
+}
+
+.turnActionBadge.side-runner {
+  --turn-action-accent: var(--chronicle-economy);
+}
+
+.turnActionBadge.side-corp {
+  --turn-action-accent: var(--chronicle-card);
+}
+
+.turnActionBadge[tabindex] {
   cursor: help;
-  outline: 0;
 }
 
-.chronicleActionOrdinal:focus {
-  border-color: color-mix(in srgb, var(--chronicle-accent), white 45%);
+.turnActionBadge:focus-visible {
+  outline: 2px solid var(--turn-action-accent);
+  outline-offset: 2px;
 }
 
-.chronicleActionTooltip {
+.turnActionTooltip {
   position: absolute;
   left: calc(100% + 10px);
   top: 50%;
   width: max-content;
   max-width: min(220px, calc(100vw - 32px));
   padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line));
+  border: 1px solid color-mix(in srgb, var(--turn-action-accent), var(--line));
   border-radius: 7px;
   background: var(--tooltip-bg);
   color: var(--text);
@@ -11438,6 +11485,7 @@ section[data-testid="legal-actions"].cueHighlight {
   font-size: 12px;
   font-weight: 500;
   line-height: 1.35;
+  white-space: normal;
   opacity: 0;
   pointer-events: none;
   transform: translateY(-50%) translateX(-3px);
@@ -11448,8 +11496,8 @@ section[data-testid="legal-actions"].cueHighlight {
   z-index: 41;
 }
 
-.chronicleActionOrdinal:hover .chronicleActionTooltip,
-.chronicleActionOrdinal:focus .chronicleActionTooltip {
+.turnActionBadge:hover .turnActionTooltip,
+.turnActionBadge:focus-visible .turnActionTooltip {
   opacity: 1;
   transform: translateY(-50%) translateX(0);
   visibility: visible;

@@ -2180,6 +2180,7 @@
       "runContinuedToIce": "{subject}: Run auf {server} zu ICE {number} fortgesetzt.",
       "runContinuedToRoot": "{subject}: Run auf {server} zum Root fortgesetzt.",
       "runJackedOut": "{subject}: aus dem Run ausgestiegen.",
+      "optionalBonusRunDeclined": "{subject}: auf den Bonus-Run verzichtet.",
       "runEnded": "Der Run wurde beendet.",
       "cardAccessed": "{subject}: auf {card} zugegriffen.",
       "cardAccessedInServer": "{subject}: auf {card} in {server} zugegriffen.",

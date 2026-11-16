@@ -15,7 +15,10 @@ import {
   type CueDerivationInput,
 } from "./action-cues";
 import { actionCueAfterAiAdvanceRequest } from "./access-presentation";
-import type { ChronicleTranslate } from "./chronicle";
+import {
+  chronicleActionUseByEventId,
+  type ChronicleTranslate,
+} from "./chronicle";
 
 const TEST_CARD_PRESENTATIONS = {
   simple_agenda: { title: "Simple Agenda", type: "agenda" },
@@ -1702,6 +1705,18 @@ describe("deriveOpponentActionCues", () => {
           turnActionOrdinalStart: 1,
           turnActionOrdinalEnd: 1,
         }),
+        event("evt_6", "draw_card", {
+          actor: "corp",
+          actionCostClicks: 1,
+          turnActionOrdinalStart: 6,
+          turnActionOrdinalEnd: 6,
+        }),
+        event("evt_7", "gain_credit", {
+          actor: "corp",
+          actionCostClicks: 1,
+          turnActionOrdinalStart: 7,
+          turnActionOrdinalEnd: 7,
+        }),
       ],
     });
 
@@ -1711,8 +1726,50 @@ describe("deriveOpponentActionCues", () => {
       "3",
       "4",
       "5",
+      "6",
+      "7",
     ]);
-    expect(cues[4]?.actionUse?.title).toBe("5. Aktion in diesem Zug");
+    expect(cues[6]?.actionUse?.title).toBe("7. Aktion in diesem Zug");
+  });
+
+  it("shares the chronicle range and leaves the resulting effect unnumbered", () => {
+    const events = [
+      event("evt_paid_damage", "play_operation", {
+        actor: "corp",
+        actionCostClicks: 2,
+        turnActionOrdinalStart: 3,
+        turnActionOrdinalEnd: 4,
+        resolvedEffects: [
+          {
+            effectId: "test.paid-action.damage",
+            kind: "damage",
+            visibility: "hidden_info_barrier",
+            side: "runner",
+            damageType: "net",
+            amount: 1,
+            cardsTrashed: 1,
+            reason: "access_effect",
+            sourceDefinitionId: "simple_damage_source",
+            sourceTitle: "Simple Damage Source",
+          },
+        ],
+      }),
+      event("evt_free_draw", "mandatory_draw", { actor: "corp" }),
+    ];
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events,
+    });
+    const chronicleUses = chronicleActionUseByEventId(events);
+
+    expect(cues).toHaveLength(3);
+    expect(cues[0]?.actionUse).toEqual(chronicleUses.evt_paid_damage);
+    expect(cues[0]?.actionUse?.label).toBe("3-4");
+    expect(cues.slice(1).map((cue) => cue.actionUse)).toEqual([
+      undefined,
+      undefined,
+    ]);
   });
 
   it("does not replay an older event tail when undo removes the last presented event", () => {

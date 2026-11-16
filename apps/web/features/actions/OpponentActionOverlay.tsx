@@ -29,6 +29,7 @@ import type {
   CueDisplayMode,
 } from "../settings/settings-model";
 import { shouldUseFloatingCue } from "./cue-display";
+import { TurnActionBadge } from "./TurnActionBadge";
 import { WindowEventIcon } from "./WindowEventIcon";
 import { windowEventIconKindForActionCue } from "./window-event-icon-kind";
 
@@ -208,7 +209,12 @@ export function OpponentActionOverlay({
       >
         <div className="floatingCueMessage">
           <span className="floatingCueActor">{cue.actorLabel}</span>
-          <strong>{renderTitle(cue)}</strong>
+          <div className="floatingCueHeadline">
+            {cue.actionUse ? (
+              <TurnActionBadge actionUse={cue.actionUse} side={cue.actor} />
+            ) : null}
+            <strong>{renderTitle(cue)}</strong>
+          </div>
           {cue.description ? <span>{cue.description}</span> : null}
         </div>
       </aside>

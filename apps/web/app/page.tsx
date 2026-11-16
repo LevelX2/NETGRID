@@ -7171,41 +7171,53 @@ export default function Page() {
 
               {matchDetailsOpen ? (
                 <div
-                  className="matchStrip"
+                  className="matchStrip matchDetailsStrip"
                   id="match-details-strip"
-                  aria-label={gameT("activeGameStatus")}
                 >
-                  <span title={payload.matchStatus}>
-                    <strong>{gameT("status")}</strong> {payload.matchStatus}
-                  </span>
-                  <span className="matchStripMatchId" title={payload.matchId}>
-                    <strong>{gameT("match")}</strong> {payload.matchId}
-                  </span>
-                  <span>
-                    <strong>{gameT("opponent")}</strong>{" "}
-                    {opponentDisplayName ??
-                      sideLabel(payload.opponentStatus.side)}
-                  </span>
-                  {activeView.deckMetadata ? (
-                    <span title={activeView.deckMetadata.own.deckName}>
-                      <strong>{gameT("ownDeck")}</strong>{" "}
-                      {activeView.deckMetadata.own.deckName}
-                    </span>
-                  ) : null}
-                  {activeView.deckMetadata && humanOpponentIsAi ? (
-                    <span title={activeView.deckMetadata.opponent.deckName}>
-                      <strong>{gameT("aiDeck")}</strong>{" "}
-                      {activeView.deckMetadata.opponent.deckName}
-                    </span>
-                  ) : null}
-                  <span>
-                    <strong>{gameT("version")}</strong> {payload.matchVersion}
-                  </span>
-                  <span>
-                    <strong>{gameT("state")}</strong> {activeView.stateVersion}
-                  </span>
+                  <dl
+                    className="matchDetailsFields"
+                    aria-label={gameT("activeGameStatus")}
+                  >
+                    <div>
+                      <dt>{gameT("status")}</dt>
+                      <dd>{payload.matchStatus}</dd>
+                    </div>
+                    <div>
+                      <dt>{gameT("match")}</dt>
+                      <dd>{payload.matchId}</dd>
+                    </div>
+                    <div>
+                      <dt>{gameT("opponent")}</dt>
+                      <dd>
+                        {opponentDisplayName ??
+                          sideLabel(payload.opponentStatus.side)}
+                      </dd>
+                    </div>
+                    {activeView.deckMetadata ? (
+                      <div>
+                        <dt>{gameT("ownDeck")}</dt>
+                        <dd>{activeView.deckMetadata.own.deckName}</dd>
+                      </div>
+                    ) : null}
+                    {activeView.deckMetadata && humanOpponentIsAi ? (
+                      <div>
+                        <dt>{gameT("aiDeck")}</dt>
+                        <dd>{activeView.deckMetadata.opponent.deckName}</dd>
+                      </div>
+                    ) : null}
+                    <div>
+                      <dt>{gameT("version")}</dt>
+                      <dd>{payload.matchVersion}</dd>
+                    </div>
+                    <div>
+                      <dt>{gameT("state")}</dt>
+                      <dd>{activeView.stateVersion}</dd>
+                    </div>
+                  </dl>
                   {notice ? (
-                    <span className="matchStripNotice">{notice}</span>
+                    <p className="matchStripNotice" role="status">
+                      {notice}
+                    </p>
                   ) : null}
                 </div>
               ) : notice ? (

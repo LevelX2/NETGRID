@@ -2256,6 +2256,7 @@
       "runContinuedToIce": "{subject} : poursuite de l'exécution sur {server} vers ICE {number}.",
       "runContinuedToRoot": "{subject} : poursuite de l'exécution sur {server} vers la racine.",
       "runJackedOut": "{subject} : débranché.",
+      "optionalBonusRunDeclined": "{subject} : a renoncé au piratage bonus.",
       "runEnded": "La course s'est terminée.",
       "cardAccessed": "{subject} : accès à {card}.",
       "cardAccessedInServer": "{subject} : accès à {card} dans {server}.",
