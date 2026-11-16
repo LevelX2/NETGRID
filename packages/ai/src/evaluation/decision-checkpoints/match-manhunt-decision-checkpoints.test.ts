@@ -10,6 +10,7 @@ import cp06Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-m
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
+import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 
 describe("match Manhunt exact decision checkpoints", () => {
   it("treats the coupled Corp tag and damage line as the primary win condition", () => {
@@ -69,9 +70,39 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(state.corp.clicks).toBe(initial.corp.clicks - 2);
   });
 
-  it("retains the final visible tag enabler and damage payoff", () => {
-    const result = runAiDecisionCheckpoint(fixture(cp06Json));
+  it("can discard the damage payoff without a funded and observable route", () => {
+    const checkpoint = fixture(cp06Json);
+    expect(checkpoint.engine.testOnlyGameState.corp.credits).toBe(4);
+    checkpoint.expectation = {
+      discardChoice: { mustDiscardDefinitionIds: [URBAN_RENEWAL] },
+      planExecution: {
+        acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+      },
+    };
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, result.message).toBe(true);
+    expect(
+      result.input.playerView.opponent.rig?.some((card) => card.concealed),
+    ).toBe(true);
+  });
 
+  it("retains the funded damage payoff against a tagged Runner with a public rig", () => {
+    const checkpoint = mutateFixture(cp06Json, ({ engine }) => {
+      const state = engine.testOnlyGameState;
+      RealEngineFixtureBuilder.forState(state)
+        .withCorpCredits(10)
+        .withRunnerTags(1)
+        .withRunnerGripSize(4);
+      for (const id of state.runner.rig.resources)
+        state.cardInstances[id]!.faceup = true;
+    });
+    checkpoint.expectation = {
+      discardChoice: { mustRetainDefinitionIds: [URBAN_RENEWAL] },
+      planExecution: {
+        acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+      },
+    };
+    const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, result.message).toBe(true);
   });
 

@@ -435,7 +435,10 @@ terminalen Agenda-Schutzprüfung die aktuell validierte Advance-Action.
 Verbraucht dieser Advance die letzte erforderliche Rezreserve, bleibt er
 unter `corp.score_agenda` ausdrücklich zurückgestellt. Ein bereits vollständig
 finanzierter Schutz mit Funding-Gap null macht den Advance nicht ownerlos;
-nur der verfügbare Überschuss darf Fortschritt finanzieren (Paarung 458, D304).
+nur der verfügbare Überschuss darf Fortschritt finanzieren. Paarung 458 D304
+belegt den gebundenen Advance bei leerem Stack als Gegenprobe. Im nativen
+Zustand kann die öffentliche Programmsuche die Rez-Pfade offenlassen. Dann
+belegt die Quote keine finanzierte Verteidigung.
 
 Eine vollständig gequotete leere Kostenliste zertifiziert null Klicks und
 Credits. Ein nur mit Klickkosten ausgewiesener Advance kostet null Credits;
@@ -1985,10 +1988,11 @@ bekannte ICE, reale Rez-/Agendapunktkosten und die vollständige Creditreserve
 bleiben bindend. Die normale Same-Turn-Klickreserve wird dadurch nicht
 abgeschwächt. Projekterkennung und Schwesterprojektverdrängung konsumieren
 diesen selben Nachweis; veraltete, falsch gebundene, ungeschützte oder
-unfinanzierte Projekte bleiben gesperrt. Paarung 512 G23 D400–401 sichert die
-erneute Allokation nach dem tatsächlichen Pflichtziehen ohne erneutes Laden
-des residenten Portfolios; der bestehende ungeschützte Reprotection-Gegenfall
-bleibt erhalten.
+unfinanzierte Projekte bleiben gesperrt. Paarung 512 G23 D400–401 verwendet
+nach dem tatsächlichen Pflichtziehen die neu erzeugte Engine-Sicht und das
+residente Portfolio. Die öffentliche Programmsuche hält die Reichweite im
+nativen Zustand offen. Die Gegenprobe ohne verfügbare Suche belegt die erneute
+Allokation am selben Fort und prüft veraltete sowie falsch gebundene Quotes.
 
 Die Vorfinanzierungsregel bleibt symmetrisch und begrenzt: Wenn die erste
 Schutzschicht eines langfristigen Scoreprojekts unter den makrostrategischen
@@ -2867,8 +2871,12 @@ seine Installationsbewertung. Nur ein aktuell vollständig Engine-gequoteter,
 bezahlbarer und nachweislich wirkungsloser erster Layer gibt das Fenster frei.
 Ein nützlicher oder unvollständig bewerteter Pfad bleibt ausdrücklich unknown
 und reserviert die Klicks. Paarung 576 G25/D280 belegt zwei wirkungslose
-Angebote gegen das öffentliche Runner-Rig; fehlende Runquotes bleiben gesperrt. Credit-Needs des Remotes und andere benötigte Finanzierung bleiben
-ebenfalls gesperrt. Die fünf nativen Zustände aus Paarung 542 werden in
+Angebote für ein neues Remote. Im vollständigen Zustand bleiben zugleich
+Installationspfade in HQ und einem bestehenden Remote unbewertet. Economy
+zahlt in diesem Fall den vorhandenen Vorrat aus. Die Gegenprobe mit den
+exakt gebundenen neuen Remote-Angeboten gibt den Restzugzyklus frei.
+Fehlende Runquotes, Credit-Needs und andere benötigte Finanzierung behalten
+ihr Veto. Die fünf nativen Zustände aus Paarung 542 werden in
 `meta-543-department-remote-window.test.ts` samt positiven Remote-Gegenfällen
 geprüft; sie liefern keine zusätzliche Ausführungsautorität außerhalb von
 Scheduler und TurnPlanner.
@@ -2907,9 +2915,10 @@ StateVersion-gebundene Claims verhindern diese Doppelzählung. Nach dem
 aktuellen nativen Kopf endet die unterstützte Projektion: Geänderte
 Bankcounter benötigen eine neue Engine-Quote und aktuelle LegalActions.
 Die Liquidität des späteren Meilensteins wird nicht als bereits vorhandenes
-Geld ausgegeben. Der native Gegenfall 576 G25/D280 wählt dadurch Laden und
-anschließend sechs Credits Auszahlung statt drei Credits und einem
-Basiscredit. Score-, Defense- und sonstige Prioritäten bleiben beim
+Geld ausgegeben. Der native Gegenfall zu 576 G25/D280 wählt mit den isolierten neuen Remote-Angeboten
+Laden und anschließend sechs Credits Auszahlung. Bei offenen Pfaden in den
+bestehenden Servern bleiben Laden und sofortige Auszahlung verschiedene
+aktuelle Angebote. Score-, Defense- und sonstige Prioritäten bleiben beim
 bestehenden Scheduler.
 
 Ein verbrauchter optionaler Defense-Suchversuch reserviert keine weitere

@@ -47,16 +47,14 @@ it.each([
       fallbackUsed: false,
       timeoutUsed: false,
     });
-    expect(d.selectedChoices?.selectedOptionIds).toEqual(
-      keep
-        ? [
-            "card_corp_onr_proteus_021_dog-pile_1",
-            "card_corp_onr_proteus_007_project-venice_1",
-          ]
-        : [
-            "card_corp_onr_v1_304_systematic-layoffs_1",
-            "card_corp_onr_proteus_021_dog-pile_1",
-          ],
+    expect(d.selectedChoices?.selectedOptionIds).toHaveLength(2);
+    expect(new Set(d.selectedChoices?.selectedOptionIds)).toEqual(
+      new Set([
+        "card_corp_onr_proteus_021_dog-pile_1",
+        keep
+          ? "card_corp_onr_proteus_007_project-venice_1"
+          : "card_corp_onr_v1_304_systematic-layoffs_1",
+      ]),
     );
     expect(d.decisionDebug!.planFirstDecision!).toMatchObject({
       rootPlanInstanceId: root,

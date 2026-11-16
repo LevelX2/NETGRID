@@ -71,33 +71,31 @@ function decide(key: string) {
 }
 describe("native action ICE rez-support current effect", () => {
   beforeEach(resetResidentPlanPortfolioMemory);
-  it.each([
-    "emptyInstallment",
-    "emptyTemporary",
-    "emptyOverflowInstallment",
-    "emptyOverflowTemporary",
-  ])("does not buy the complete empty target in %s", (key) => {
-    const { input, action, result, observedActionId } = decide(key);
-    const target = input.playerView.servers
-      .flatMap((s) => s.ice)
-      .find((i) => i.definitionId === "onr_proteus_031_minotaur")!;
-    expect(target.effectivePostRezRunQuote).toMatchObject({
-      complete: true,
-      effectiveRunQuote: { subroutines: [] },
-    });
-    expect(
-      action.type === "play_operation" &&
-        action.payload?.targetCardId === target.instanceId,
-    ).toBe(false);
-    expect(
-      result.decisionDebug?.planFirstDecision?.dispositions.some(
-        (d) =>
-          d.actionId === observedActionId &&
-          d.ownerModuleId === "corp.defend_servers" &&
-          d.evidenceCode.startsWith("corp_rez_support_empty_current_effect:"),
-      ),
-    ).toBe(true);
-  });
+  it.each(["emptyInstallment", "emptyTemporary"])(
+    "does not buy the complete empty target in %s",
+    (key) => {
+      const { input, action, result, observedActionId } = decide(key);
+      const target = input.playerView.servers
+        .flatMap((s) => s.ice)
+        .find((i) => i.definitionId === "onr_proteus_031_minotaur")!;
+      expect(target.effectivePostRezRunQuote).toMatchObject({
+        complete: true,
+        effectiveRunQuote: { subroutines: [] },
+      });
+      expect(
+        action.type === "play_operation" &&
+          action.payload?.targetCardId === target.instanceId,
+      ).toBe(false);
+      expect(
+        result.decisionDebug?.planFirstDecision?.dispositions.some(
+          (d) =>
+            d.actionId === observedActionId &&
+            d.ownerModuleId === "corp.defend_servers" &&
+            d.evidenceCode.startsWith("corp_rez_support_empty_current_effect:"),
+        ),
+      ).toBe(true);
+    },
+  );
   it.each(["stopper"])(
     "retains the original exact operation and owner in %s",
     (key) => {
@@ -108,13 +106,24 @@ describe("native action ICE rez-support current effect", () => {
       ).toMatch(/^plan:corp.defend_servers:/);
     },
   );
-  it.each(["income", "variable", "emptyOuter"])(
+  it.each([
+    "income",
+    "variable",
+    "emptyOuter",
+    "emptyOverflowInstallment",
+    "emptyOverflowTemporary",
+  ])(
     "requires current operation payout quotes instead of adapting the old %s fixture",
     (key) => {
       // Current native income positives live in meta584-rez-purpose.native.test.ts.
       // This captured older input predates operationFreeRezRunQuoteJson.
       const { input } = capture(key);
-      expect(() => chooseAiAction(input)).toThrowError(expect.objectContaining({ code: "missing_action_semantics", context: expect.objectContaining({ owner: "action_semantics" }) }));
+      expect(() => chooseAiAction(input)).toThrowError(
+        expect.objectContaining({
+          code: "missing_action_semantics",
+          context: expect.objectContaining({ owner: "action_semantics" }),
+        }),
+      );
     },
   );
 });

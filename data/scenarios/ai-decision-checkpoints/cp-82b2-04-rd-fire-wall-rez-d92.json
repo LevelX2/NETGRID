@@ -11282,12 +11282,12 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.rez_ice.corp_onr_v1_245_fire-wall_1.corp_onr_v1_245_fire-wall_1"
+        "actionId": "corp.decline_rez"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "corp.decline_rez"
+        "actionId": "corp.rez_ice.corp_onr_v1_245_fire-wall_1.corp_onr_v1_245_fire-wall_1"
       }
     ],
     "planExecution": {

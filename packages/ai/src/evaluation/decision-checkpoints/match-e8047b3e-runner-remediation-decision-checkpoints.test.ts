@@ -132,26 +132,25 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
     );
   });
 
-  it("spends the full visible safe bid against Neon Guillotine's credible tag-kill turn", () => {
+  it("rejects the old Neon Guillotine capture without Classic Link deltas", () => {
     const capture = structuredClone(
       lethalTraceJson,
     ) as ReconstructedRunnerDecisionCapture;
     const choice = capture.input.playerView.pendingChoice;
     if (!choice) throw new Error("Expected the persisted Trace choice.");
 
-    const result = assessTraceBidCandidates(
-      capture.input as AiDecisionInput,
-      choice,
-      latestTraceContext(capture.input),
+    expect(() =>
+      assessTraceBidCandidates(
+        capture.input as AiDecisionInput,
+        choice,
+        latestTraceContext(capture.input),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "missing_action_semantics",
+        context: expect.objectContaining({ owner: "rules_contract" }),
+      }),
     );
-
-    expect(result?.assessment).toMatchObject({
-      stakes: "terminal",
-      rationalTarget: 5,
-      rationalRange: [5, 5],
-      reserveTarget: 0,
-    });
-    expect(result?.candidates.map((candidate) => candidate.bid)).toEqual([5]);
   });
 });
 

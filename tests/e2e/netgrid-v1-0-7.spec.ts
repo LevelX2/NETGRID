@@ -32,6 +32,11 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await createHumanVsAiGame(page, "v1-0-7-ai-desktop");
 
     await expectActiveBoardBasics(page);
+    await page.locator(".matchDetailsToggle").click();
+    const details = page.locator("#match-details-strip");
+    await expect(details).toContainText("Eigenes Deck");
+    await expect(details).toContainText("KI-Deck");
+    await page.locator(".matchDetailsToggle").click();
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await expect(page.getByTestId("server-run-action").first()).toHaveAttribute(
       "aria-label",
@@ -89,6 +94,11 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
 
       await expectActiveBoardBasics(host.page);
       await expectActiveBoardBasics(joiner.page);
+      await host.page.locator(".matchDetailsToggle").click();
+      const details = host.page.locator("#match-details-strip");
+      await expect(details).toContainText("Eigenes Deck");
+      await expect(details).not.toContainText("KI-Deck");
+      await host.page.locator(".matchDetailsToggle").click();
       await expectNoDomOrLocalStorageLeaks(host.page);
       await expectNoDomOrLocalStorageLeaks(joiner.page);
       expectNoServerPayloadLeaks(hostFrames);
@@ -314,7 +324,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       const confirmation = page.getByRole("alertdialog", {
         name: "Matchserie verlassen?",
       });
-      await expect(result).toContainText("Serienspiel 1/2");
+      await expect(
+        result.getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
+      ).toBeVisible();
       await leaveSeries.click();
       await expect(confirmation).toBeVisible();
       const cancel = confirmation.getByRole("button", { name: "Abbrechen" });
@@ -322,7 +334,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       await cancel.click();
       await expect(confirmation).toBeHidden();
       await expect(leaveSeries).toBeFocused();
-      await expect(result).toContainText("Serienspiel 1/2");
+      await expect(
+        result.getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
+      ).toBeVisible();
 
       await leaveSeries.click();
       await page.keyboard.press("Escape");
@@ -344,6 +358,10 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await page.setViewportSize(VIEWPORTS.tablet);
     await createHumanVsAiGame(page, "v1-0-7-tablet-board");
     await expectActiveBoardBasics(page);
+    const catalogTab = page.getByRole("button", { name: "Katalog öffnen" });
+    await catalogTab.hover();
+    await expect(catalogTab.getByRole("tooltip")).toBeVisible();
+    await expectNoCriticalLayoutOverflow(page);
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await exerciseCardDisplayModes(page);
     const runAction = page.getByTestId("server-run-action").first();

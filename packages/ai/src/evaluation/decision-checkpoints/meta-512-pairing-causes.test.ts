@@ -11,6 +11,7 @@ import type { AiDecisionInput, GameState } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -247,17 +248,48 @@ it("retains an actually free temporary Data Wall activation at G22", () => {
     r.state.corp.credits,
   );
 });
-it("revalidates the mature fort after the real mandatory draw without clearing the resident portfolio", () => {
+it("keeps the mature fort unproven after mandatory draw with a public stack search", () => {
+  const r = source("g23d400");
+  const first = decide(r.input, r.state);
+  expect(first.decision.actionId).toBe("corp.mandatory_draw");
+  const state = take(r.state, "corp", first.decision.actionId);
+  const next = load("g23d401", "native");
+  expect(hashGameState(state)).toBe(next.stateHash);
+  const input = liveInput(state, next);
+  const { decision } = decide(input, state);
+  const portfolio = residentPlanPortfolioSnapshot(input)!;
+  const projects = portfolio.instances
+    .filter((instance) => instance.moduleId === "corp.score_agenda")
+    .map(
+      (instance) =>
+        (instance.moduleState as { signal: CorpScoreProjectSignal }).signal,
+    );
+  const matureProjects = projects.filter(
+    (project) => project.serverId === "remote_1",
+  );
+  expect(matureProjects.length).toBeGreaterThan(0);
+  expect(
+    matureProjects.every(
+      (project) =>
+        project.protectionNeed?.baseline.knowledge === "unknown" &&
+        project.protectionNeed.baseline.evidence.includes(
+          "protectionUnknownReason:unsupported_runner_access_effect",
+        ),
+    ),
+  ).toBe(true);
+  take(state, "corp", decision.actionId);
+});
+it("revalidates the mature fort after mandatory draw when public stack search is unavailable", () => {
   const r = source("g23d400"),
     first = decide(r.input, r.state);
   expect(first.decision.actionId).toBe("corp.mandatory_draw");
   const state = take(r.state, "corp", first.decision.actionId),
     next = load("g23d401", "native");
   expect(hashGameState(state)).toBe(next.stateHash);
-  const input: AiDecisionInput = {
-    ...next.input,
-    ...buildAiDecisionInputDto(next.input),
-  };
+  RealEngineFixtureBuilder.forState(state).withRunnerCardInGrip(
+    "onr_v1_059_self-modifying-code",
+  );
+  const input = liveInput(state, next);
   const second = decide(input, state);
   expect(second.pf.selectedPlan?.moduleId).toBe("corp.score_agenda");
   expect(second.decision.actionId).toContain(".remote_1.");

@@ -118,9 +118,11 @@ test.describe("Zwei-Browser-Multiplayer", () => {
       await expectOwnSide(pair.joiner, "corp");
 
       await forfeit(pair.host);
-      await expect(pair.host.getByRole("dialog")).toContainText(
-        "Serienspiel 1/2",
-      );
+      await expect(
+        pair.host
+          .getByRole("dialog")
+          .getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
+      ).toBeVisible();
       await pair.host
         .getByRole("button", { name: "Nächstes Serienspiel", exact: true })
         .click();
@@ -141,7 +143,11 @@ test.describe("Zwei-Browser-Multiplayer", () => {
 
       await forfeit(pair.joiner);
       const finalResult = pair.host.getByRole("dialog");
-      await expect(finalResult).toContainText("Serienspiel 2/2");
+      await expect(
+        finalResult.getByRole("region", {
+          name: "Spiel 2 von 2 · Matchpunkte",
+        }),
+      ).toBeVisible();
       await expect(finalResult).toContainText(/Matchserie|Endergebnis/);
       await expect(
         pair.host.getByRole("button", {

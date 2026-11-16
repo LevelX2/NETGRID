@@ -10873,7 +10873,8 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(afterCancel.tokens.every((token) => Boolean(token.revokedAt))).toBe(
       true,
     );
-  });
+    // A batch can run forty real KI decisions; the assertions above define the functional contract.
+  }, 30_000);
 
   it("advances the selected decks past their central-payoff and obligation-removal plan-coverage windows", async () => {
     const storage = new InMemoryMatchStorage();

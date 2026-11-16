@@ -4,6 +4,7 @@ import { hashGameState } from "@netgrid/engine";
 import inactiveAgendaProtectionJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed02-01-inactive-agenda-protection-d181.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 
 describe("baseline Seed 02 effect-activation checkpoint", () => {
   it("funds the agenda protection gap through its exact economy continuation", () => {
@@ -29,19 +30,54 @@ describe("baseline Seed 02 effect-activation checkpoint", () => {
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
   });
 
-  it("searches for effective protection when the native public rig defeats the installed ICE", () => {
+  it("preserves hand capacity when the native public rig defeats the installed ICE", () => {
     const fixture = structuredClone(
       inactiveAgendaProtectionJson,
     ) as AiDecisionCheckpointV1;
     fixture.expectation = {
-      acceptableActions: [{ type: "draw_card" }],
-      planExecution: {
-        acceptablePlanKinds: ["corp.defend_servers"],
-        acceptableCapabilities: ["develop_score_protection"],
-      },
+      acceptableActions: [{ type: "gain_credit" }],
+      planExecution: { acceptablePlanKinds: ["corp.economy"] },
     };
     const result = runAiDecisionCheckpoint(fixture);
     expect(result.ok, result.message).toBe(true);
+    expect(result.input.playerView.own.gripOrHq).toHaveLength(
+      result.input.playerView.own.maxHandSize,
+    );
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.dispositions,
+    ).toContainEqual(
+      expect.objectContaining({
+        actionId: "corp.draw_card",
+        ownerModuleId: "corp.hand_and_agenda_management",
+        evidenceCode: "corp_exact_draw_projection_exceeds_hand_capacity",
+      }),
+    );
+  });
+
+  it("does not claim a hand-capacity blocker when the Corp has room to draw", () => {
+    const fixture = structuredClone(
+      inactiveAgendaProtectionJson,
+    ) as AiDecisionCheckpointV1;
+    const state = fixture.engine.testOnlyGameState;
+    RealEngineFixtureBuilder.forState(state).withCorpHqSize(4);
+    fixture.source.kind = "synthetic_companion";
+    fixture.engine.stateHash = hashGameState(state);
+    fixture.expectation = {
+      acceptableActions: [{}],
+    };
+    const result = runAiDecisionCheckpoint(fixture);
+    expect(result.ok, result.message).toBe(true);
+    expect(
+      result.input.legalActions.some((action) => action.type === "draw_card"),
+    ).toBe(true);
     expect(result.decision?.fallbackUsed).toBe(false);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.dispositions,
+    ).not.toContainEqual(
+      expect.objectContaining({
+        actionId: "corp.draw_card",
+        evidenceCode: "corp_exact_draw_projection_exceeds_hand_capacity",
+      }),
+    );
   });
 });

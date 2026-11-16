@@ -147,6 +147,17 @@ Fehlerfreiheit und der aktuelle Fachvertrag das beobachtete Verhalten gemeinsam
 tragen. Andernfalls bleibt der Test rot und der Produktfehler wird an seiner
 Ursprungsschicht behoben.
 
+Wenn eine gemeinsame Engine-Quote oder Bindung strenger wird, gehören die
+betroffenen Consumer und Test-Fixtures in dieselbe fokussierte Prüfung.
+Ein historischer Input mit Engine-Zustand wird für den positiven Nachweis
+neu aus PlayerView und LegalActions aufgebaut. Fehlt der Zustand, bleibt der
+historische Input ein Test des geschlossenen Fehlerpfads. Ein passender mit
+der Engine erzeugter Gegenfall belegt die produktive Fähigkeit.
+
+Browserregressionen prüfen sichtbare Inhalte, Rollen und Verhalten an
+der Oberfläche. Quelltextvergleiche auf Tag-Namen oder JSX-Form ersetzen
+keine Anzeige- oder Sichtbarkeitsprüfung.
+
 Für KI-Checkpoints gelten zusätzlich folgende Fixture-Verträge:
 
 - Erwartungsfelder sind geschlossen und unbekannte Schlüssel scheitern als
