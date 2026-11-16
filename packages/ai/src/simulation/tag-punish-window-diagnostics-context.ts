@@ -3,11 +3,11 @@ import type {
   AiDecisionInput,
   GameState,
   LegalAction,
+  PublicGameEvent,
 } from "@netgrid/shared";
 
 import { corpTagPunishSkipReason } from "../runtime/corp-tag-punish-skip-reason";
 import { sortedUnique } from "../runtime/collection";
-import { rolesMatch } from "../role-match";
 import { traceTagExpectedSuccessEstimate } from "../runtime/trace-tag-success-estimate";
 import type { StructuredTagPunishLegalActionAssessment } from "../tag-punish-ontology-consumer";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
@@ -52,17 +52,12 @@ export type TagPunishWindowDiagnosticsContextDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => boolean;
-  applyCorpTagSourceWindowDiagnostics: (
-    diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => void;
   applyActualTagCreationDiagnostics: (
     diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
     input: AiDecisionInput,
     action: LegalAction,
-    decision: AiDecision,
     stateBeforeAction: GameState,
+    result: PublicGameEvent["publicPayload"],
   ) => void;
 };
 
@@ -75,6 +70,7 @@ export function createTagPunishWindowDiagnosticsContext(
     decision: AiDecision,
     stateBeforeAction: GameState,
     stateAfterAction: GameState,
+    publicResult: PublicGameEvent["publicPayload"],
   ) => Partial<AiSimulationSummary["actionSequence"][number]>;
 } {
   function tagPunishWindowDiagnosticsForSimulationAction(
@@ -83,6 +79,7 @@ export function createTagPunishWindowDiagnosticsContext(
     decision: AiDecision,
     stateBeforeAction: GameState,
     stateAfterAction: GameState,
+    publicResult: PublicGameEvent["publicPayload"],
   ): Partial<AiSimulationSummary["actionSequence"][number]> {
     const runnerTagsBefore = stateBeforeAction.runner.tags;
     const runnerTagsAfter = stateAfterAction.runner.tags;
@@ -247,11 +244,6 @@ export function createTagPunishWindowDiagnosticsContext(
           diagnostics.runnerLinkDefenseVisibleAtTrace = true;
         if (action.actionId === tagSourceOpportunity.action.actionId) {
           diagnostics.corpTagSourceTaken = true;
-          dependencies.applyCorpTagSourceWindowDiagnostics(
-            diagnostics,
-            input,
-            tagSourceOpportunity.action,
-          );
           if (diagnostics.corpFunnelSourcePayoffPairSeenInDeck === true)
             diagnostics.corpFunnelSourceActionTakenWithPayoffInDeck = true;
           if (tagSourceOntology?.isTagSource) {
@@ -298,15 +290,9 @@ export function createTagPunishWindowDiagnosticsContext(
         diagnostics,
         input,
         action,
-        decision,
         stateBeforeAction,
+        publicResult,
       );
-      if (
-        stateBeforeAction.run ||
-        rolesMatch([decision.reasonCode], ["trace"]) ||
-        action.type === "resolve_choice"
-      )
-        diagnostics.runnerTaggedAfterTraceDuringRun = true;
     }
     if (runnerTagsAfter < runnerTagsBefore)
       diagnostics.runnerTagClearedByAction = true;

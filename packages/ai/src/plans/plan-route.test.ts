@@ -63,6 +63,21 @@ describe("plan route binding", () => {
     );
   });
 
+  it("enforces one current offer for the plan's side", () => {
+    const entry = routeCandidate(candidate("credit"), 4);
+    const otherSide = routeCandidate(
+      { ...candidate("credit"), actorSide: "corp" },
+      4,
+    );
+    for (const candidates of [[otherSide], [entry, entry]]) {
+      expect(() =>
+        bindBestCurrentPlanRoute({ ...baseParams(), candidates }),
+      ).toThrow(
+        expect.objectContaining({ code: "stale_or_future_action_reference" }),
+      );
+    }
+  });
+
   it("does not treat any install as exact breaker coverage", () => {
     const breakerStep: PlanRouteStep = {
       stepId: "install_missing_sentry_breaker",

@@ -139,6 +139,9 @@ gezählt. Die Kreditreserve zählt je Runner-Zug höchstens einmal. Ein Run mit
 beobachtetem Zugriff zählt auch bei Multiaccess einmal. Der Druckindikator
 für spielbare Karten im Runner-Handeinsatz zählt nur Kartenaktionen.
 Das Doctrine-Gate prüft Laufzeitabbrüche des Kandidaten auch bei gültigem Replay.
+Tatsächlich erzeugte Tags werden anhand des Engine-Ergebnisses und der
+unterbrochenen Zugphase zugeordnet. Ein begonnenes Trace-Angebot wird als
+Quellenaktion erfasst, bis ein Engine-Ergebnis den Tag belegt.
 
 ## Vergleichsevidenz und Standardmodus
 

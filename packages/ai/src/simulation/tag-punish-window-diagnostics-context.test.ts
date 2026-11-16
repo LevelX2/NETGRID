@@ -24,19 +24,17 @@ describe("tag punish window diagnostics", () => {
     });
   });
 
-  it("matches runner trace tag reason codes by bounded terms", () => {
-    expect(diagnosticsForReason("corp.trace.bid_visible_amount")).toMatchObject(
-      {
-        runnerTaggedAfterTraceDuringRun: true,
-      },
+  it("passes resolved Engine trace evidence to the tag creation classifier", () => {
+    const received: unknown[] = [];
+    const diagnostics = diagnosticsForTag((...args) =>
+      received.push(args.at(-1)),
     );
-    expect(diagnosticsForReason("traceroute_noise")).not.toHaveProperty(
-      "runnerTaggedAfterTraceDuringRun",
-    );
+    expect(diagnostics.runnerTagAddedByAction).toBe(true);
+    expect(received).toEqual([{ traceSuccessful: true }]);
   });
 });
 
-function diagnosticsForReason(reasonCode: string) {
+function diagnosticsForTag(record: (...args: unknown[]) => void) {
   return createTagPunishWindowDiagnosticsContext({
     corpVisibleTagPunishOpportunities: () => [],
     runnerSurvivalCounterContextForInput: () => ({
@@ -52,14 +50,14 @@ function diagnosticsForReason(reasonCode: string) {
     applyCorpVisibleTagPunishUnknownSkipDiagnostics: () => undefined,
     strongestCorpTagSourceOpportunity: () => undefined,
     corpOntologyPayoffAvailableForTagSource: () => false,
-    applyCorpTagSourceWindowDiagnostics: () => undefined,
-    applyActualTagCreationDiagnostics: () => undefined,
+    applyActualTagCreationDiagnostics: record,
   }).tagPunishWindowDiagnosticsForSimulationAction(
     input(),
     action(),
-    { reasonCode } as AiDecision,
+    { reasonCode: "any" } as AiDecision,
     state(0),
     state(1),
+    { traceSuccessful: true },
   );
 }
 

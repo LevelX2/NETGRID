@@ -14,6 +14,7 @@ import {
   type DeckDefinition,
   type GameState,
   type LegalAction,
+  type PublicGameEvent,
   type Side,
 } from "@netgrid/shared";
 
@@ -114,6 +115,7 @@ export type AiGameSimulatorDependencies = {
     decision: AiDecision,
     stateBeforeAction: GameState,
     stateAfterAction: GameState,
+    publicResult: PublicGameEvent["publicPayload"],
   ) => ActionSequenceEntryDiagnostics;
   corpFutureRunIceDiagnosticsForSimulationAction: (
     input: AiDecisionInput,
@@ -510,6 +512,7 @@ export function createAiGameSimulator(
           decision,
           stateBeforeAction,
           result.state,
+          result.event.publicPayload,
         );
       const corpFutureRunIce = corpFutureRunIceDiagnosticsForSimulationAction(
         input,

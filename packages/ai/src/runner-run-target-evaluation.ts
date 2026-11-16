@@ -477,12 +477,17 @@ export function evaluateRunnerRunTargets(
   const boundReserves = new Map(
     comparisons.map(
       ({ preferred, protectedReserve }) =>
-        [preferred.actionId, protectedReserve] as const,
+        [
+          JSON.stringify([preferred.actionId, preferred.targetServerId]),
+          protectedReserve,
+        ] as const,
     ),
   );
   return evaluated
     .map(({ projection, target }) => {
-      const centralPostRunReserve = boundReserves.get(target.actionId);
+      const centralPostRunReserve = boundReserves.get(
+        JSON.stringify([target.actionId, target.targetServerId]),
+      );
       if (
         centralPostRunReserve === undefined ||
         target.recommendation !== "gain_credits_first" ||

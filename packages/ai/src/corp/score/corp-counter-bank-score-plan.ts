@@ -3,6 +3,7 @@ import {
   type VisibleCard,
   type VisibleCorpCounterBankPreparationQuote,
 } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
@@ -123,6 +124,9 @@ function counterBankAdvanceProjects(
         candidate.sourceDefinitionId === card.definitionId,
     );
     if (!advance) return [];
+    const action = exactCurrentLegalAction(input, advance.actionId);
+    if (action?.type !== "advance_card" || action.source !== card.instanceId)
+      return [];
     const advanceCredits = finiteNonNegativeIntegerOrResolutionFailure(
       input,
       advance.costProfile.creditCost,
@@ -249,7 +253,7 @@ function counterBankAgendaInstallProjects(
             phase: "install_agenda_from_counter_bank",
             evidenceCode: `engine_certified_counter_bank_cross_remote_handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
           }),
-          agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
+          agendaDefinitionId: agenda.definitionId,
           agendaPoints,
           agendaInstanceId: agenda.instanceId,
           serverId: targetServerId,
@@ -267,8 +271,11 @@ function counterBankHandoffRezProjects(
   bank: InstalledCounterBank,
 ): CorpScoreProjectSignal[] {
   if (bank.card.rezzed) return [];
+  const rezAction = exactCounterBankRezAction(input, bank.card.instanceId);
+  if (!rezAction) return [];
   const rez = candidates.find(
     (candidate) =>
+      candidate.actionId === rezAction.actionId &&
       candidate.semanticActionType === "corp_window.rez" &&
       candidate.sourceCardInstanceId === bank.card.instanceId &&
       candidate.sourceDefinitionId === bank.card.definitionId,
@@ -287,7 +294,7 @@ function counterBankHandoffRezProjects(
         phase: "rez_counter_bank_for_handoff",
         evidenceCode: `engine_certified_counter_bank_rez_for_cross_remote_handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
       }),
-      agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
+      agendaDefinitionId: agenda.definitionId,
       agendaPoints: agenda.agendaPoints ?? 0,
       agendaInstanceId: agenda.instanceId,
       serverId: targetServerId,
@@ -477,11 +484,13 @@ function counterBankTargetFromKnownDeck(
   const deckRequirements = (
     (input as AiDecisionInputWithDeckCapabilities).ownDeckSnapshot?.cards ?? []
   ).flatMap((entry) => {
+    if (entry.quantity <= 0) return [];
     const definition = CARD_DEFINITIONS_BY_ID[entry.cardId];
     const requirement = definition?.advancementRequirement;
     return definition?.side === "corp" &&
       definition.type === "agenda" &&
       typeof requirement === "number" &&
+      Number.isSafeInteger(requirement) &&
       requirement > 0
       ? [requirement]
       : [];
@@ -556,8 +565,7 @@ function exactCounterBankRezAction(
       action.type === "rez_card" &&
       action.source === sourceCardId &&
       action.payload?.cardId === sourceCardId &&
-      action.expiresAtStateVersion === input.playerView.stateVersion &&
-      action.timingPoint === input.playerView.timingPoint,
+      actionMatchesCurrentDecision(input, action),
   );
 }
 
@@ -597,8 +605,15 @@ function legalActionCost(
   );
 }
 
-function isKnownAgenda(card: VisibleCard): boolean {
-  return card.known === true && card.type === "agenda";
+function isKnownAgenda(
+  card: VisibleCard,
+): card is VisibleCard & { definitionId: string } {
+  return (
+    card.known === true &&
+    card.type === "agenda" &&
+    typeof card.definitionId === "string" &&
+    card.definitionId.length > 0
+  );
 }
 
 function agendaAdvancementRequirement(card: VisibleCard): number | undefined {

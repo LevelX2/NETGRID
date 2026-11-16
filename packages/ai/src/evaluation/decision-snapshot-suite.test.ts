@@ -58,6 +58,18 @@ describe("DecisionSnapshotSuite", () => {
     expect(evaluation.preferredGoalFamilyMatched).toBe(true);
   });
 
+  it("rejects a trace with a valid action id from a different state", () => {
+    const snapshot = playStrengthSnapshotCorpus()[0]!;
+    const frame = buildDecisionSnapshotFrame(snapshot);
+    const trace = buildSemanticShadowDecision(frame);
+    trace.frameSummary.stateVersion -= 1;
+    const evaluation = evaluateDecisionSnapshot({ snapshot, frame, trace });
+    expect(evaluation.passed).toBe(false);
+    expect(evaluation.evidence).toContain(
+      "snapshot_trace_identity_matched:false",
+    );
+  });
+
   it("evaluates the play-strength snapshot corpus without forbidden mistakes", () => {
     const evaluations = playStrengthSnapshotCorpus().map((snapshot) =>
       evaluateDecisionSnapshotFromBuilder(snapshot),

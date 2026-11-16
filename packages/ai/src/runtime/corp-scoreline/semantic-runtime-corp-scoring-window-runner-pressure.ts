@@ -123,6 +123,10 @@ function scoringWindowAccessAssessmentForMode(
     ).reduce((sum, amount) => sum + amount, 0);
   const visibleRunnerIcebreakerCount =
     baseRunnerPathCandidate.visibleIcebreakerCount;
+  const traceContext =
+    input.playerView.traceRulesProfile === undefined
+      ? {}
+      : { traceRulesProfile: input.playerView.traceRulesProfile };
   const postRezProjection =
     mode === "engine_post_rez" && server
       ? financedScoringProtectionPostRezIce(
@@ -132,7 +136,7 @@ function scoringWindowAccessAssessmentForMode(
             corpRezCredits,
             corpRezCreditReserve,
           },
-          (financedIceInstanceIds) => {
+          (financedIceInstanceIds, creditsAfterRez) => {
             const evaluatedPaths = runnerPathCandidates.map((candidate) => ({
               ...candidate,
               assessment: assessEngineCertifiedPostRezIcePath(
@@ -143,6 +147,8 @@ function scoringWindowAccessAssessmentForMode(
                 candidate.rig,
                 candidate.creditBudget,
                 [...server.root],
+                creditsAfterRez,
+                traceContext,
               ),
             }));
             const runnerBestPath = evaluatedPaths.reduce((best, candidate) =>
@@ -195,12 +201,16 @@ function scoringWindowAccessAssessmentForMode(
             candidate.rig,
             candidate.creditBudget,
             [...server.root],
+            postRezProjection?.creditsAfterRez ?? 0,
+            traceContext,
           )
         : assessKnownRezzedIcePath(
             [...server.ice],
             candidate.rig,
             candidate.creditBudget,
             [...server.root],
+            input.playerView.own.credits,
+            traceContext,
           ),
   }));
   const selectedRunnerPath = evaluatedRunnerPaths.reduce((best, candidate) =>
@@ -553,10 +563,12 @@ function financedScoringProtectionPostRezIce(
   },
   assessSubset: (
     financedIceInstanceIds: ReadonlySet<string>,
+    creditsAfterRez: number,
   ) => ScoringProtectionSubsetAssessment,
 ): {
   financedIceInstanceIds: ReadonlySet<string>;
   unmodeledIceInstanceIds: ReadonlySet<string>;
+  creditsAfterRez: number;
   evidence: string[];
 } {
   const validBudget =
@@ -593,7 +605,12 @@ function financedScoringProtectionPostRezIce(
         unmodeledIceInstanceIds.add(ice.instanceId);
       }
     }
-    return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+    return {
+      financedIceInstanceIds,
+      unmodeledIceInstanceIds,
+      creditsAfterRez: 0,
+      evidence,
+    };
   }
   const candidates: Array<{ ice: VisibleCard; rezCredits: number }> = [];
   // Candidate order is outermost to innermost. Exact subset comparison keeps
@@ -643,7 +660,12 @@ function financedScoringProtectionPostRezIce(
       `corp_post_rez_budget:candidate_count:${candidates.length}`,
       "corp_post_rez_budget:financed_ice_count:0",
     );
-    return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+    return {
+      financedIceInstanceIds,
+      unmodeledIceInstanceIds,
+      creditsAfterRez: budget.corpRezCredits,
+      evidence,
+    };
   }
   let evaluatedSubsetCount = 0;
   let best: ScoringProtectionSubset | undefined;
@@ -663,7 +685,10 @@ function financedScoringProtectionPostRezIce(
     const subset: ScoringProtectionSubset = {
       selectedIds,
       totalRezCredits,
-      assessment: assessSubset(selectedIds),
+      assessment: assessSubset(
+        selectedIds,
+        budget.corpRezCredits - totalRezCredits,
+      ),
     };
     evaluatedSubsetCount += 1;
     if (!best || scoringProtectionSubsetIsBetter(subset, best)) best = subset;
@@ -690,7 +715,12 @@ function financedScoringProtectionPostRezIce(
     `corp_post_rez_budget:financed_ice_count:${financedIceInstanceIds.size}`,
     `corp_post_rez_budget:remaining:${availableCredits - (best?.totalRezCredits ?? 0)}`,
   );
-  return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+  return {
+    financedIceInstanceIds,
+    unmodeledIceInstanceIds,
+    creditsAfterRez: budget.corpRezCredits - (best?.totalRezCredits ?? 0),
+    evidence,
+  };
 }
 
 type ScoringProtectionSubsetAssessment = Readonly<{

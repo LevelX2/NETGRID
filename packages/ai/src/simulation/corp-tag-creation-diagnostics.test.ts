@@ -1,55 +1,78 @@
 import { describe, expect, it } from "vitest";
 import type {
-  AiDecision,
   AiDecisionInput,
   GameState,
   LegalAction,
+  PublicGameEvent,
 } from "@netgrid/shared";
 import { createCorpTagCreationDiagnosticsContext } from "./corp-tag-creation-diagnostics";
 
-describe("corp tag creation diagnostics", () => {
-  it("matches trace reason codes by bounded terms", () => {
-    expect(diagnosticsForReason("corp.trace.bid_visible_amount")).toMatchObject(
-      {
-        corpTagCreatedDuringEncounter: true,
-        corpTagCreatedByTraceSuccess: true,
-      },
-    );
-    expect(diagnosticsForReason("traceroute_noise")).not.toHaveProperty(
-      "corpTagCreatedByTraceSuccess",
-    );
-  });
-});
+const action: LegalAction = {
+  actionId: "tag",
+  side: "runner",
+  type: "resolve_choice",
+  label: "Trace beantworten",
+  source: "game_rule",
+  timingPoint: "corp_action.main",
+  costs: [],
+  targetRequirements: [],
+  visibility: "public",
+  expiresAtStateVersion: 1,
+};
 
-function diagnosticsForReason(reasonCode: string) {
+function diagnosticsForTag(
+  state: Partial<GameState>,
+  result: PublicGameEvent["publicPayload"],
+) {
   const diagnostics: Record<string, unknown> = {};
   createCorpTagCreationDiagnosticsContext({
     sourceDefinitionIdForAction: () => "source",
   }).applyActualTagCreationDiagnostics(
     diagnostics,
-    input(),
-    action(),
-    { reasonCode } as AiDecision,
-    {} as GameState,
+    { side: "runner" } as AiDecisionInput,
+    action,
+    state as GameState,
+    result,
   );
   return diagnostics;
 }
 
-function input(): AiDecisionInput {
-  return { side: "runner" } as AiDecisionInput;
-}
+describe("corp tag creation diagnostics", () => {
+  it("retains the Corp turn when the Runner answers an operation trace", () => {
+    const diagnostics = diagnosticsForTag(
+      {
+        activeSide: "runner",
+        phase: "run",
+        trace: { returnPhase: "corp_action_phase" } as NonNullable<
+          GameState["trace"]
+        >,
+      },
+      {
+        traceSuccessful: true,
+        sourceDefinitionId: "onr_v1_257_viral-pipeline",
+      },
+    );
+    expect(diagnostics).toMatchObject({
+      corpTagCreatedDuringCorpTurn: true,
+      corpTagCreatedByTraceSuccess: true,
+    });
+    expect(diagnostics).not.toHaveProperty("corpTagCreatedDuringEncounter");
+    expect(diagnostics).not.toHaveProperty("runnerTaggedAfterTraceDuringRun");
+  });
 
-function action(): LegalAction {
-  return {
-    actionId: "tag",
-    side: "corp",
-    type: "trigger_ability",
-    label: "Tag runner",
-    source: "basic_action",
-    timingPoint: "runner_action.main",
-    costs: [],
-    targetRequirements: [],
-    visibility: "public",
-    expiresAtStateVersion: 1,
-  };
-}
+  it("distinguishes untraced encounter and access tags", () => {
+    const diagnostics = diagnosticsForTag(
+      {
+        activeSide: "corp",
+        phase: "run",
+        run: { encounteredIceId: "ice" } as NonNullable<GameState["run"]>,
+      },
+      {},
+    );
+    expect(diagnostics).toMatchObject({
+      corpTagCreatedDuringRunnerTurn: true,
+      corpTagCreatedDuringEncounter: true,
+    });
+    expect(diagnostics).not.toHaveProperty("corpTagCreatedByTraceSuccess");
+  });
+});

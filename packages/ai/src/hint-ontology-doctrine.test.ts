@@ -30,6 +30,25 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.remoteRoles.roleCounts.agenda_steal_tax).toBe(1);
   });
 
+  it("counts repeated deck rows once and ignores entries with no copies", () => {
+    const summary = buildAiDeckOntologySummary({
+      deckSnapshotId: "split-deck",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_302_scorched-earth", quantity: 1 },
+        { cardId: "onr_v1_302_scorched-earth", quantity: 2 },
+        { cardId: "onr_v1_249_hunter", quantity: 0 },
+      ],
+    });
+    expect(summary).toMatchObject({
+      totalCardQuantity: 3,
+      uniqueCardCount: 1,
+      structuredCardCount: 1,
+      tagPunish: { hasTagSourceAndPayoff: false, tagSourceCardIds: [] },
+    });
+    expect(summary.effectCounts.byKind.tag_punish_payoff).toBe(3);
+  });
+
   it("aggregates runner breaker coverage and search ontology fields", () => {
     const summary = buildAiDeckOntologySummary({
       deckSnapshotId: "ontology-runner-pilot",

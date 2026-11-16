@@ -623,7 +623,7 @@ describe("corp action disposition contributors", () => {
       actionType: "play_operation",
       semanticActionType: "economy.gain_credit",
       sourceKind: "card",
-      economyProjection: { cardsDrawn: 1 },
+      economyProjection: { cardsDrawn: 1, netDrawPileDelta: -1 },
     } as unknown as ActionSemanticCandidate;
     const projectId = "terminal-score-project";
     const parentPlanInstanceId = planInstanceIdForProposal({
@@ -638,7 +638,7 @@ describe("corp action disposition contributors", () => {
           agendaPoints: 1,
           phase: "advance_agenda",
           sameTurnCloseout: true,
-          terminalScore: false,
+          terminalScore: true,
           feasible: true,
           evidenceCode: "exact-terminal-score",
         },
@@ -666,6 +666,27 @@ describe("corp action disposition contributors", () => {
       expect.arrayContaining([
         expect.objectContaining({
           actionId: candidate.actionId,
+          evidenceCode: expect.stringContaining(
+            "corp_voluntary_draw_blocked_deckout_horizon",
+          ),
+        }),
+      ]),
+    );
+
+    const nonterminal = {
+      ...domain,
+      scoreProjects: domain.scoreProjects.map((project) => ({
+        ...project,
+        terminalScore: false,
+      })),
+    };
+    expect(
+      collectCorpActionDispositions(current, [candidate], nonterminal, facts),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId: candidate.actionId,
+          disposition: "explicitly_nonproductive",
           evidenceCode: expect.stringContaining(
             "corp_voluntary_draw_blocked_deckout_horizon",
           ),

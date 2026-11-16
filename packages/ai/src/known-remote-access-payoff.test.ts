@@ -24,6 +24,20 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     });
   });
 
+  it("ignores remembered root positions outside the current server", () => {
+    const input = inputWithUnidentifiedKnownRoot("remote_1");
+    input.playerView.servers[0]!.root[0]!.known = false;
+    const belief = beliefWithKnownRemoteRoot(
+      "remote_1",
+      "root:4",
+      "onr_v1_210_political-overthrow",
+      "old-access",
+    );
+    expect(
+      evaluateKnownRemoteAccessPayoff(input, "remote_1", belief).payoff,
+    ).toBe("unknown");
+  });
+
   it("matches remote invalidation entries by bounded server id", () => {
     expect(
       evaluateKnownRemoteAccessPayoff(

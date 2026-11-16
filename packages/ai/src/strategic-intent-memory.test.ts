@@ -51,6 +51,29 @@ describe("StrategicIntent memory", () => {
     );
   });
 
+  it("does not read or overwrite a newer decision's memory", () => {
+    const input = aiInput("runner", "match-a", "deck-runner-a");
+    const state = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: input.playerView.stateVersion,
+      strategyProfile: strategyProfile("runner", "runner.rnd_pressure"),
+      availableCredits: 8,
+    });
+    rememberStrategicIntentState(input, state);
+    const older = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        stateVersion: input.playerView.stateVersion - 1,
+      },
+    };
+    expect(getStrategicIntentMemorySnapshot(older)).toBeUndefined();
+    expect(rememberStrategicIntentState(older, state)).toBeUndefined();
+    expect(getStrategicIntentMemorySnapshot(input)?.updatedAtStateVersion).toBe(
+      input.playerView.stateVersion,
+    );
+  });
+
   it("isolates memory by match, side, profile and deck snapshot", () => {
     const input = aiInput("corp", "match-a", "deck-corp-a", "corp-profile-a");
     const state = buildStrategicIntentState({

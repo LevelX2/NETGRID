@@ -9,6 +9,7 @@ import {
   type PlanSchedulerResult,
 } from "../../plans/plan-scheduler";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
 import { corpArchivesToHqOperationProfile } from "../../runtime/corp-canonical-card-facts";
 import { selectedCorpDiscardChoiceOptionIds } from "../../runtime/corp-discard-choice-selection";
@@ -22,7 +23,10 @@ import {
 import { type CorpHandManagementSignal } from "./hand-management-types";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { isExactScoreRecoveryChoiceOwner } from "../score/score-recovery-choice-owner";
-import { exactDefenseRecoveryBinding, isExactDefenseRecoveryChoiceOwner } from "../defense/defense-recovery-choice-owner";
+import {
+  exactDefenseRecoveryBinding,
+  isExactDefenseRecoveryChoiceOwner,
+} from "../defense/defense-recovery-choice-owner";
 import { corpAcuteDefenseHandOptions } from "../defense/defense-hand-retention";
 
 export function bindSelectedCorpArchivesToHqChoiceContinuation(
@@ -63,9 +67,12 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
       : undefined;
   const scoreBinding = scoreSignal?.recoveryChoiceBinding;
   const defenseBinding = exactDefenseRecoveryBinding(
-    executor,result.route.head.actionId,input.playerView.stateVersion,
+    executor,
+    result.route.head.actionId,
+    input.playerView.stateVersion,
   );
-  const exactDefenseOwner = defenseBinding?.sourceCardId === selectedCandidate?.sourceCardInstanceId &&
+  const exactDefenseOwner =
+    defenseBinding?.sourceCardId === selectedCandidate?.sourceCardInstanceId &&
     defenseBinding !== undefined;
   const exactRecoveryBinding = defenseBinding ?? scoreBinding;
   const exactScoreOwner =
@@ -82,12 +89,14 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
     : undefined;
   const sourceDefinitionId = source?.definitionId;
   const exactOwningRoute =
-    (exactDefenseOwner || exactScoreOwner ||
+    (exactDefenseOwner ||
+      exactScoreOwner ||
       (executor?.moduleId === "corp.hand_and_agenda_management" &&
         moduleState?.kind === "hand" &&
         signal?.phase === "resolve_hq_overflow")) &&
     executor?.executionState === "executor" &&
-    (exactDefenseOwner || signal?.actionIds?.includes(result.route.head.actionId) === true) &&
+    (exactDefenseOwner ||
+      signal?.actionIds?.includes(result.route.head.actionId) === true) &&
     rootPlanInstanceId !== undefined &&
     executorInstanceId !== undefined &&
     selectedAction?.side === "corp" &&
@@ -102,7 +111,8 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
       (instance) =>
         instance.instanceId === rootPlanInstanceId && instance.side === "corp",
     );
-  if (!exactOwningRoute || !executor || !selectedAction || !selectedCandidate) return;
+  if (!exactOwningRoute || !executor || !selectedAction || !selectedCandidate)
+    return;
   if (!discardKeepScore && !exactScoreOwner && !exactDefenseOwner) {
     throw new PlanResolutionFailure("missing_plan_module_coverage", {
       side: input.side,
@@ -124,20 +134,21 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
       (profile.filterCardType === undefined ||
         card.type === profile.filterCardType),
   );
-  const selection = exactScoreOwner || exactDefenseOwner
-    ? profile.maxSelections === 1 &&
-      exactRecoveryBinding &&
-      eligibleScoreCards.some(
-        (card) => card.instanceId === exactRecoveryBinding.recoveredCardId,
-      )
-      ? {
-          eligibleCardInstanceIds: eligibleScoreCards.map(
-            (card) => card.instanceId,
-          ),
-          selectedCardInstanceIds: [exactRecoveryBinding.recoveredCardId],
-        }
-      : undefined
-    : selectedCorpArchivesToHqCards(input, profile, discardKeepScore!);
+  const selection =
+    exactScoreOwner || exactDefenseOwner
+      ? profile.maxSelections === 1 &&
+        exactRecoveryBinding &&
+        eligibleScoreCards.some(
+          (card) => card.instanceId === exactRecoveryBinding.recoveredCardId,
+        )
+        ? {
+            eligibleCardInstanceIds: eligibleScoreCards.map(
+              (card) => card.instanceId,
+            ),
+            selectedCardInstanceIds: [exactRecoveryBinding.recoveredCardId],
+          }
+        : undefined
+      : selectedCorpArchivesToHqCards(input, profile, discardKeepScore!);
   if (!selection) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
@@ -440,18 +451,12 @@ function corpHandChoiceSelection(
   )
     return undefined;
 
-  const resolveAction = input.legalActions.find(
-    (action) =>
-      action.type === "resolve_choice" &&
-      (kind !== "discard" ||
-        action.choiceRequirements?.some(
-          (requirement) => requirement.choiceId === choice.choiceId,
-        ) === true),
-  );
+  const resolveAction = exactCurrentChoiceAction(input, choice);
   const exactCandidate = resolveAction
     ? candidates.find(
         (candidate) =>
           candidate.actionId === resolveAction.actionId &&
+          candidate.actorSide === input.side &&
           candidate.semanticActionType === "choice.resolve",
       )
     : undefined;
@@ -473,32 +478,6 @@ function corpHandChoiceSelection(
     });
   }
   const selectableOptions = selectableChoiceOptions(choice.options);
-  if (kind === "discard") {
-    const requirement = resolveAction.choiceRequirements?.find(
-      (candidate) => candidate.choiceId === choice.choiceId,
-    );
-    const legalOptionIds = new Set(requirement?.optionIds);
-    if (
-      !requirement ||
-      choice.stateVersion !== input.playerView.stateVersion ||
-      resolveAction.expiresAtStateVersion !== input.playerView.stateVersion ||
-      requirement.minSelections !== choice.minSelections ||
-      requirement.maxSelections !== choice.maxSelections ||
-      legalOptionIds.size !== selectableOptions.length ||
-      selectableOptions.some((option) => !legalOptionIds.has(option.id))
-    ) {
-      throw new PlanResolutionFailure("missing_plan_module_coverage", {
-        side: input.side,
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: input.legalActions.map((action) => action.type),
-        unresolvedActionIds: [resolveAction.actionId],
-        owner: "plan_module",
-        removalCondition:
-          "The current Corp discard choice and LegalAction must agree on version, option set and selection count.",
-      });
-    }
-  }
   const choiceCards =
     kind === "strategic_planning_group"
       ? selectableOptions.flatMap((option) =>
@@ -567,7 +546,9 @@ function corpHandChoiceSelection(
         defense.urgent &&
         defense.installRoute?.disposition === "productive"
       )
-        requiredCardIds.add(defense.installRoute.projection.sourceCardInstanceId);
+        requiredCardIds.add(
+          defense.installRoute.projection.sourceCardInstanceId,
+        );
     }
   }
   const corpDiscardBatch =
@@ -655,9 +636,7 @@ export function resolvePlanBoundCorpArchivesToHqChoice(
   const choiceActions = context.input.legalActions.filter(
     (action) => action.type === "resolve_choice",
   );
-  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
-  const [requirement] = action?.choiceRequirements ?? [];
-  const optionIds = choice.options.map((option) => option.id);
+  const action = exactCurrentChoiceAction(context.input, choice);
   const originIsArchivesToHq =
     origin?.immediateChoicePolicy === "select_bound_corp_archives_cards_to_hq";
   const expectedChoiceSource = originIsArchivesToHq
@@ -708,22 +687,18 @@ export function resolvePlanBoundCorpArchivesToHqChoice(
     root !== undefined &&
     root.side === "corp" &&
     (executor?.moduleId === "corp.hand_and_agenda_management" ||
-      isExactDefenseRecoveryChoiceOwner(executor,origin,previous.stateVersion) ||
+      isExactDefenseRecoveryChoiceOwner(
+        executor,
+        origin,
+        previous.stateVersion,
+      ) ||
       isExactScoreRecoveryChoiceOwner(
         executor,
         origin,
         previous.stateVersion,
       )) &&
     action !== undefined &&
-    action.side === "corp" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    choice.options.every((option) => option.selectable !== false);
   if (!exactBinding || !action || !previous || !origin) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: context.input.side,

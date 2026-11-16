@@ -337,7 +337,7 @@ export function runPlanScheduler(
   const selectedPortfolio = assignCurrentExecutor(
     instance.instanceId,
     params.previousPortfolio?.executorInstanceId &&
-    params.previousPortfolio.executorInstanceId !== instance.instanceId
+      params.previousPortfolio.executorInstanceId !== instance.instanceId
       ? "preempted_by_higher_class"
       : "executor_selected",
   );
@@ -445,6 +445,7 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
             entry.candidate,
             entry.sourceRoles ?? [],
             context.input.playerView.stateVersion,
+            context.input.side,
           ).status === "compatible",
       )
       .sort((left, right) => comparePlanRouteCandidates(left, right));

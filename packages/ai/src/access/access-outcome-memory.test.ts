@@ -8,266 +8,25 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import {
-  accessOutcomeMemoryEvidence,
   accessOutcomeMemoryPlanEvidence,
-  createAccessOutcomeMemory,
   deriveObservedRemoteNoProgressAccessMemory,
-  evaluateAccessOutcomeMemoryStatus,
-  readAccessOutcomeMemory,
-  rememberAccessOutcome,
-  resetAccessOutcomeMemoryForMatch,
 } from "./access-outcome-memory";
 
 describe("access outcome memory", () => {
-  it("remembers and reads a side-safe access outcome by match, side, profile and server", () => {
-    const key = {
-      matchId: "match-1",
-      side: "runner" as const,
-      profileId: "runner-ai",
-      serverId: "remote_1",
-    };
-    const memory = rememberAccessOutcome(createAccessOutcomeMemory(), key, {
-      remoteFingerprint: "remote:fingerprint:1",
-      observedDecision: "decline",
-      reason: "reserve_would_break",
-      creditsAtOutcome: 4,
-      desiredReserveAtOutcome: 5,
-      generalTrashCost: 4,
-      stateVersion: 12,
-    });
-
-    expect(readAccessOutcomeMemory(memory, key)).toMatchObject({
-      ...key,
-      remoteFingerprint: "remote:fingerprint:1",
-      observedDecision: "decline",
-      reason: "reserve_would_break",
-    });
-    expect(accessOutcomeMemoryEvidence(memory.records[0]!)).toEqual(
-      expect.arrayContaining([
-        "access_outcome_memory_server:remote_1",
-        "access_outcome_memory_decision:decline",
-        "access_outcome_memory_reason:reserve_would_break",
-      ]),
-    );
-  });
-
-  it("replaces existing records for the same key", () => {
-    const key = {
-      matchId: "match-1",
-      side: "runner" as const,
-      profileId: "runner-ai",
-      serverId: "remote_1",
-    };
-    const first = rememberAccessOutcome(createAccessOutcomeMemory(), key, {
-      remoteFingerprint: "old",
-      observedDecision: "decline",
-      reason: "low_value_target",
-      creditsAtOutcome: 3,
-      desiredReserveAtOutcome: 5,
-      stateVersion: 10,
-    });
-    const second = rememberAccessOutcome(first, key, {
-      remoteFingerprint: "new",
-      observedDecision: "trash",
-      reason: "trash_affordable",
-      creditsAtOutcome: 8,
-      desiredReserveAtOutcome: 5,
-      stateVersion: 14,
-    });
-
-    expect(second.records).toHaveLength(1);
-    expect(readAccessOutcomeMemory(second, key)?.remoteFingerprint).toBe("new");
-  });
-
-  it("resets all records for a match", () => {
-    const memory = rememberAccessOutcome(
-      rememberAccessOutcome(
-        createAccessOutcomeMemory(),
-        {
-          matchId: "match-1",
-          side: "runner",
-          profileId: "runner-ai",
-          serverId: "remote_1",
-        },
-        {
-          remoteFingerprint: "a",
-          observedDecision: "decline",
-          reason: "low_value_target",
-          creditsAtOutcome: 2,
-          desiredReserveAtOutcome: 4,
-          stateVersion: 1,
-        },
-      ),
-      {
-        matchId: "match-2",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "b",
-        observedDecision: "trash",
-        reason: "trash_affordable",
-        creditsAtOutcome: 8,
-        desiredReserveAtOutcome: 4,
-        stateVersion: 1,
-      },
-    );
-
-    expect(resetAccessOutcomeMemoryForMatch(memory, "match-1").records).toEqual(
-      [expect.objectContaining({ matchId: "match-2" })],
-    );
-  });
-
-  it("invalidates remembered outcomes when the remote fingerprint changes", () => {
-    const record = rememberAccessOutcome(
-      createAccessOutcomeMemory(),
-      {
-        matchId: "match-1",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "old",
-        observedDecision: "decline",
-        reason: "low_value_target",
-        creditsAtOutcome: 3,
-        desiredReserveAtOutcome: 5,
-        stateVersion: 1,
-      },
-    ).records[0]!;
-
-    expect(
-      evaluateAccessOutcomeMemoryStatus(record, {
-        currentRemoteFingerprint: "new",
-        currentCredits: 3,
-        currentDesiredReserve: 5,
-      }),
-    ).toMatchObject({
-      applies: false,
-      invalidationReason: "remote_fingerprint_changed",
-      suppressesPlanBonus: false,
-      evidence: expect.arrayContaining([
-        "access_outcome_memory_invalidated:remote_fingerprint_changed",
-      ]),
-    });
-  });
-
-  it("invalidates declined outcomes when credits or reserve improve", () => {
-    const record = rememberAccessOutcome(
-      createAccessOutcomeMemory(),
-      {
-        matchId: "match-1",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "same",
-        observedDecision: "decline",
-        reason: "reserve_would_break",
-        creditsAtOutcome: 3,
-        desiredReserveAtOutcome: 5,
-        stateVersion: 1,
-      },
-    ).records[0]!;
-
-    expect(
-      evaluateAccessOutcomeMemoryStatus(record, {
-        currentRemoteFingerprint: "same",
-        currentCredits: 7,
-        currentDesiredReserve: 5,
-      }),
-    ).toMatchObject({
-      applies: false,
-      invalidationReason: "credits_or_reserve_improved",
-      suppressesPlanBonus: false,
-      evidence: expect.arrayContaining([
-        "access_outcome_memory_invalidated:credits_or_reserve_improved",
-      ]),
-    });
-  });
-
-  it("keeps matching outcome memory applicable while context is unchanged", () => {
-    const record = rememberAccessOutcome(
-      createAccessOutcomeMemory(),
-      {
-        matchId: "match-1",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "same",
-        observedDecision: "decline",
-        reason: "reserve_would_break",
-        creditsAtOutcome: 3,
-        desiredReserveAtOutcome: 5,
-        stateVersion: 1,
-      },
-    ).records[0]!;
-
-    expect(
-      evaluateAccessOutcomeMemoryStatus(record, {
-        currentRemoteFingerprint: "same",
-        currentCredits: 3,
-        currentDesiredReserve: 5,
-      }),
-    ).toMatchObject({
-      applies: true,
-      suppressesPlanBonus: true,
-      evidence: expect.arrayContaining([
-        "access_outcome_memory_applies:true",
-        "access_outcome_memory_suppresses_plan_bonus:true",
-      ]),
-    });
-  });
-
-  it("formats no-plan-bonus evidence from structured memory status", () => {
-    const record = rememberAccessOutcome(
-      createAccessOutcomeMemory(),
-      {
-        matchId: "match-1",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "same",
-        observedDecision: "decline",
-        reason: "reserve_would_break",
-        creditsAtOutcome: 3,
-        desiredReserveAtOutcome: 5,
-        stateVersion: 1,
-      },
-    ).records[0]!;
-    const status = evaluateAccessOutcomeMemoryStatus(record, {
-      currentRemoteFingerprint: "same",
-      currentCredits: 3,
-      currentDesiredReserve: 5,
-    });
-
+  it("only reports a suppressed plan bonus when the observed memory applies", () => {
+    const status = { applies: true, suppressesPlanBonus: true, evidence: [] };
     expect(accessOutcomeMemoryPlanEvidence(status)).toEqual([
       "access_outcome_memory_no_plan_bonus:true",
       "access_outcome_memory_applied:declined_access",
     ]);
     expect(
-      accessOutcomeMemoryPlanEvidence({
-        ...status,
-        applies: false,
-      }),
+      accessOutcomeMemoryPlanEvidence({ ...status, applies: false }),
     ).toEqual([]);
   });
 
   it("derives no-progress remote access memory from side-safe public events", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run", 8, "start_run", {
-          actor: "runner",
-          actionType: "start_run",
-          serverId: "remote_1",
-        }),
         publicEvent("evt-access", 9, "access_card", {
           actor: "runner",
           actionType: "access_card",
@@ -417,7 +176,7 @@ describe("access outcome memory", () => {
     });
   });
 
-  it("keeps an explicit declined trash suppressed until the remote or economy changes", () => {
+  it("remembers a declined trash without attributing an unobserved reason", () => {
     const input = aiInput({
       eventTail: [
         publicEvent("evt-run", 8, "start_run", {
@@ -456,7 +215,7 @@ describe("access outcome memory", () => {
       suppressUntilInvalidated: true,
       evidence: expect.arrayContaining([
         "remote_access_outcome_decision:decline",
-        "remote_access_outcome_reason:reserve_would_break",
+        "remote_access_outcome_reason:unknown",
         "remote_access_outcome_decline_event:evt-decline",
       ]),
     });

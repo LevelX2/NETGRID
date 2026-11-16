@@ -76,12 +76,10 @@ export function createAiFacadeFoundationContext(
       corpVisibleTagPayoffCategoryForAction,
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     });
-  const {
-    applyCorpTagSourceWindowDiagnostics,
-    applyActualTagCreationDiagnostics,
-  } = createCorpTagCreationDiagnosticsContext({
-    sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
-  });
+  const { applyActualTagCreationDiagnostics } =
+    createCorpTagCreationDiagnosticsContext({
+      sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+    });
 
   return {
     hintForDefinitionId,
@@ -95,7 +93,6 @@ export function createAiFacadeFoundationContext(
     corpTagPunishOntologyAssessmentForAction,
     applyCorpVisibleTagPunishUnknownSkipDiagnostics,
     corpVisibleTagPunishOpportunities,
-    applyCorpTagSourceWindowDiagnostics,
     applyActualTagCreationDiagnostics,
   };
 }

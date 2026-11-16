@@ -154,12 +154,11 @@ export function evaluateKnownRemoteAccessPayoff(
   }
 
   const rootCount = server.root.length;
-  const knownPositions = new Set(knownRoots.map((root) => root.positionKey));
-  const allRootsKnown = knownPositions.size >= rootCount;
+  const allRootsKnown = knownRoots.length === rootCount;
   if (!allRootsKnown) {
     return unknownRemotePayoff(serverId, [
       `known_remote_cards:${knownRoots.length}`,
-      `remote_memory_known_root_positions:${knownPositions.size}`,
+      `remote_memory_known_root_positions:${knownRoots.length}`,
       `remote_memory_root_count:${rootCount}`,
       "remote_memory_payoff:partial_unknown",
     ]);
@@ -209,10 +208,12 @@ export function evaluateKnownRemoteAccessPayoff(
   const accessThreatUnknown = accessThreatProjections.some(
     (projection) => projection.status === "unknown",
   );
-  const unsafeKnownAccessThreat =
-    knownAccessThreatProjection?.status === "complete" &&
-    (knownAccessThreatProjection.damage?.runnerSurvivable === false ||
-      knownAccessThreatProjection.damage?.runnerHandBufferPreserved === false);
+  const unsafeKnownAccessThreat = accessThreatProjections.some(
+    (projection) =>
+      projection.status === "complete" &&
+      (projection.damage?.runnerSurvivable === false ||
+        projection.damage?.runnerHandBufferPreserved === false),
+  );
   const accessThreatEvidence = accessThreatProjections.flatMap((projection) => [
     `known_access_effect_source:${projection.sourceDefinitionId}`,
     `known_access_effect_status:${projection.status}`,
@@ -622,40 +623,36 @@ function knownRemoteRoots(
       entry,
     ]),
   );
-  const byPosition = new Map<string, KnownRemoteRoot>();
-  server?.root.forEach((card, index) => {
-    if (!card.known || !card.definitionId) return;
-    const positionKey = `root:${index}`;
-    const memory = memoryByPosition.get(positionKey);
-    byPosition.set(positionKey, {
-      definitionId: card.definitionId,
-      positionKey,
-      source: "player_view",
-      ...(memory?.definitionId === card.definitionId
-        ? { sourceEventId: memory.sourceEventId }
-        : {}),
-      visibleCard: card,
-    });
-  });
-  for (const entry of knownRemoteRootMemory(beliefState, serverId)) {
-    if (byPosition.has(entry.positionKey)) continue;
-    byPosition.set(entry.positionKey, {
-      definitionId: entry.definitionId,
-      positionKey: entry.positionKey,
-      source: "position_memory",
-      sourceEventId: entry.sourceEventId,
-      ...(server?.root[Number.parseInt(entry.positionKey.slice(5), 10)] !==
-      undefined
-        ? {
-            visibleCard:
-              server.root[Number.parseInt(entry.positionKey.slice(5), 10)]!,
-          }
-        : {}),
-    });
-  }
-  return [...byPosition.values()].sort((left, right) =>
-    left.positionKey.localeCompare(right.positionKey),
-  );
+  return (server?.root ?? [])
+    .flatMap((card, index): KnownRemoteRoot[] => {
+      const positionKey = `root:${index}`;
+      const memory = memoryByPosition.get(positionKey);
+      if (card.known && card.definitionId) {
+        return [
+          {
+            definitionId: card.definitionId,
+            positionKey,
+            source: "player_view",
+            ...(memory?.definitionId === card.definitionId
+              ? { sourceEventId: memory.sourceEventId }
+              : {}),
+            visibleCard: card,
+          },
+        ];
+      }
+      return memory
+        ? [
+            {
+              definitionId: memory.definitionId,
+              positionKey,
+              source: "position_memory",
+              sourceEventId: memory.sourceEventId,
+              visibleCard: card,
+            },
+          ]
+        : [];
+    })
+    .sort((left, right) => left.positionKey.localeCompare(right.positionKey));
 }
 
 function invalidationEntryReferencesServer(
@@ -704,6 +701,10 @@ function knownRemotePathCost(
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
     server.root,
+    input.playerView.opponent.credits,
+    input.playerView.traceRulesProfile === undefined
+      ? {}
+      : { traceRulesProfile: input.playerView.traceRulesProfile },
   );
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
   return {

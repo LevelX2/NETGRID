@@ -130,9 +130,21 @@ const ACTIVE_HINT_ONTOLOGY_BY_CARD = new Map(
 export function buildAiDeckOntologySummary(
   snapshot: AiDeckOntologyDeckSnapshot,
 ): AiDeckOntologySummary {
-  const sortedCards = snapshot.cards
-    .slice()
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+  const quantities = new Map<string, number>();
+  for (const entry of snapshot.cards) {
+    const quantity = requiredDeckQuantity(entry.quantity, entry.cardId);
+    if (quantity === 0) continue;
+    quantities.set(
+      entry.cardId,
+      requiredDeckQuantity(
+        (quantities.get(entry.cardId) ?? 0) + quantity,
+        entry.cardId,
+      ),
+    );
+  }
+  const sortedCards = [...quantities].sort(([left], [right]) =>
+    left.localeCompare(right),
+  );
   const effectCounts: AiDeckOntologyEffectCounts = {
     byKind: {},
     byTiming: {},
@@ -182,19 +194,16 @@ export function buildAiDeckOntologySummary(
   let structuredCardCount = 0;
   let structuredCardQuantity = 0;
 
-  for (const entry of sortedCards) {
-    const quantity = requiredDeckQuantity(entry.quantity, entry.cardId);
+  for (const [cardId, quantity] of sortedCards) {
     totalCardQuantity += quantity;
-    const hint = ACTIVE_HINT_ONTOLOGY_BY_CARD.get(entry.cardId);
+    const hint = ACTIVE_HINT_ONTOLOGY_BY_CARD.get(cardId);
     if (!hint) continue;
 
     const result = validateAiHintOntologyFields(hint);
     validation.errorCount += result.errors.length;
     validation.warningCount += result.warnings.length;
-    if (result.errors.length > 0)
-      validation.cardIdsWithErrors.push(entry.cardId);
-    if (result.warnings.length > 0)
-      validation.cardIdsWithWarnings.push(entry.cardId);
+    if (result.errors.length > 0) validation.cardIdsWithErrors.push(cardId);
+    if (result.warnings.length > 0) validation.cardIdsWithWarnings.push(cardId);
 
     const structured = hasStructuredOntologyFields(hint);
     if (structured) {
@@ -204,7 +213,7 @@ export function buildAiDeckOntologySummary(
 
     aggregateEffects(
       hint.effects ?? [],
-      entry.cardId,
+      cardId,
       quantity,
       effectCounts,
       scoredAgendaActions,
@@ -213,18 +222,18 @@ export function buildAiDeckOntologySummary(
     aggregateConditions(hint.conditions ?? [], quantity, conditionCounts);
     aggregateLineSupport(
       hint.lineSupport ?? [],
-      entry.cardId,
+      cardId,
       quantity,
       lineSupportCounts,
     );
     aggregateBreakerProfile(
       hint.breakerProfile,
-      entry.cardId,
+      cardId,
       quantity,
       breakerCoverage,
     );
-    aggregateRemoteRole(hint.remoteRole, entry.cardId, quantity, remoteRoles);
-    aggregateQuality(hint.quality, entry.cardId, quality);
+    aggregateRemoteRole(hint.remoteRole, cardId, quantity, remoteRoles);
+    aggregateQuality(hint.quality, cardId, quality);
   }
 
   scoredAgendaActions.cardIds = sortedUnique(scoredAgendaActions.cardIds);

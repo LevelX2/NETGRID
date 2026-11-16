@@ -97,6 +97,12 @@ export function bindBestCurrentPlanRoute(
   params: BindPlanRouteParams,
 ): PlanRoute {
   assertSemanticContinuation(params, params.continuation);
+  const currentIds = params.candidates.map(
+    ({ candidate }) => candidate.actionId,
+  );
+  if (new Set(currentIds).size !== currentIds.length) {
+    throw routeFailure("stale_or_future_action_reference", params, 0);
+  }
   const matches = params.candidates.map((entry) => ({
     entry,
     match: matchPlanStepCandidate(
@@ -104,6 +110,7 @@ export function bindBestCurrentPlanRoute(
       entry.candidate,
       entry.sourceRoles ?? [],
       params.stateVersion,
+      params.side,
     ),
   }));
   const compatible = matches
@@ -153,10 +160,15 @@ export function assertCurrentPlanRoute(
     "side" | "stateVersion" | "timingPoint" | "candidates"
   >,
 ): void {
-  const currentCandidate = current.candidates.find(
+  const matching = current.candidates.filter(
     (entry) => entry.candidate.actionId === route.head.actionId,
-  )?.candidate;
+  );
+  const currentCandidate =
+    matching.length === 1 ? matching[0]?.candidate : undefined;
   if (
+    route.head.planInstanceId !== route.planInstanceId ||
+    route.head.stepId !== route.step.stepId ||
+    currentCandidate?.actorSide !== current.side ||
     route.head.stateVersion !== current.stateVersion ||
     currentCandidate?.stateVersion !== current.stateVersion ||
     currentCandidate.actionType !== route.head.actionType ||
@@ -185,8 +197,12 @@ export function matchPlanStepCandidate(
   candidate: ActionSemanticCandidate,
   sourceRoles: readonly string[],
   stateVersion: number,
+  side?: Side,
 ): MatchResult {
-  if (candidate.stateVersion !== stateVersion) {
+  if (
+    candidate.stateVersion !== stateVersion ||
+    (side !== undefined && candidate.actorSide !== side)
+  ) {
     return {
       status: "incompatible",
       code: "stale_or_future_action_reference",
@@ -317,7 +333,10 @@ function targetKindsCompatible(
   candidateKind: string,
 ): boolean {
   if (planKind === candidateKind) return true;
-  return planKind === "card" && candidateKind !== "server";
+  return (
+    planKind === "card" &&
+    ["ice", "program", "resource", "hardware", "agenda"].includes(candidateKind)
+  );
 }
 
 function allRequiredPresent(

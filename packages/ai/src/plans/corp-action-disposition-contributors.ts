@@ -313,7 +313,8 @@ function contributeCorpActionDispositionForCandidate(
     domain,
   );
   if (deckoutHorizonDisposition) {
-    add(
+    const record = deckoutHorizonDisposition.unknown ? addUnknown : add;
+    record(
       candidate.actionId,
       deckoutHorizonDisposition.ownerModuleId,
       deckoutHorizonDisposition.evidenceCode,
@@ -1254,6 +1255,7 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
   | {
       ownerModuleId: PlanActionDisposition["ownerModuleId"];
       evidenceCode: string;
+      unknown?: true;
     }
   | undefined {
   const cardsDrawn =
@@ -1274,6 +1276,7 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
     return {
       ownerModuleId: "corp.hand_and_agenda_management",
       evidenceCode: "corp_draw_net_deck_projection_unknown",
+      unknown: true,
     };
   }
   const admittedTerminalDraw = (domain.drawArbitrations ?? []).some(
@@ -1285,7 +1288,8 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
   const exactTerminalScoreSupport = domain.scoreProjects.some((project) => {
     if (
       !project.feasible ||
-      (!project.sameTurnCloseout && !project.terminalScore)
+      !project.sameTurnCloseout ||
+      !project.terminalScore
     ) {
       return false;
     }

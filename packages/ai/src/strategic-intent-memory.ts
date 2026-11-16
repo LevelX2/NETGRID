@@ -44,7 +44,11 @@ export function getStrategicIntentMemorySnapshot(
     return undefined;
   }
   const snapshot = strategicIntentMemoryByKey.get(key);
-  if (!snapshot) return undefined;
+  if (
+    !snapshot ||
+    snapshot.updatedAtStateVersion > input.playerView.stateVersion
+  )
+    return undefined;
   if (
     snapshot.side !== input.side ||
     snapshot.deckSnapshotId !== deckId(input, deckSnapshotId)
@@ -71,6 +75,11 @@ export function rememberStrategicIntentState(
   }
   if (state.side !== input.side) return undefined;
   const previous = strategicIntentMemoryByKey.get(key);
+  if (
+    previous &&
+    previous.updatedAtStateVersion > input.playerView.stateVersion
+  )
+    return undefined;
   const snapshot = createStrategicIntentMemorySnapshot({
     input,
     state,

@@ -17,7 +17,8 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
 ): Partial<AiSimulationSummary["actionSequence"][number]> {
   if (input.side !== "runner" || action.side !== "runner") return {};
   const belief = reconstructBeliefState(input);
-  const memory = belief.runnerOpponentModel?.knownPositionMemory ?? [];
+  const allMemory = belief.runnerOpponentModel?.knownPositionMemory ?? [];
+  const memory = allMemory.filter((entry) => entry.invalidatedBy.length === 0);
   const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
   const invalidationReasons = [
     ...(belief.runnerOpponentModel?.rndTopFreshness.invalidationReasons ?? []),
@@ -65,8 +66,11 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
     false;
   const hqKnownAgendaFromRnd =
     hqKnownFromRndDraw &&
-    (hqMemory?.knownDefinitions ?? []).some(
-      (definitionId) => definitionTypeForMetrics(definitionId) === "agenda",
+    memory.some(
+      (entry) =>
+        entry.zone === "hq" &&
+        entry.sourceKind === "rd_top_to_hq_draw" &&
+        definitionTypeForMetrics(entry.definitionId) === "agenda",
     );
   const rndFreshness = belief.runnerOpponentModel?.rndTopFreshness;
   const rndTopRemoved = rndFreshness?.freshness === "fresh_after_top_removed";
@@ -78,9 +82,15 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
   const rndStaleKnownTop = rndFreshness?.freshness === "stale_known_same_top";
   const isRndRun = action.type === "start_run" && runTarget === "rd";
   const rndFreshOpportunity =
-    rndTopRemoved ||
-    rndKnownTopAgenda ||
-    rndFreshness?.freshenedByRunnerAccess === true;
+    (rndTopRemoved ||
+      rndKnownTopAgenda ||
+      rndFreshness?.freshenedByRunnerAccess === true) &&
+    input.legalActions.some(
+      (candidate) =>
+        candidate.side === "runner" &&
+        candidate.type === "start_run" &&
+        candidate.payload?.serverId === "rd",
+    );
   return {
     ...(memory.some(
       (entry) => entry.zone === "rd" && entry.positionKey === "top",
@@ -177,7 +187,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
       ? { remoteMemoryRetainedAfterAccess: true }
       : {}),
     ...(invalidationFlags.remoteMemoryInvalidatedByInstallOrMove ||
-    memory.some((entry) =>
+    allMemory.some((entry) =>
       entry.invalidatedBy.some(
         knownPositionInvalidationReferencesInstallOrMove,
       ),
