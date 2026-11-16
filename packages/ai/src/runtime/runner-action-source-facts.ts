@@ -33,10 +33,11 @@ export function visibleOwnCardByInstanceId(
     ...input.playerView.own.gripOrHq,
     ...input.playerView.own.scoreArea,
     ...(input.playerView.own.rig ?? []),
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.root,
-      ...server.ice,
-    ]),
+    ...input.playerView.servers.flatMap((server) =>
+      [...server.root, ...server.ice].filter(
+        (card) => card.controller === input.side,
+      ),
+    ),
   ].find((card) => card.instanceId === instanceId);
 }
 

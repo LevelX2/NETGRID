@@ -19,6 +19,10 @@ import {
 } from "../packages/ai/src/evaluation/current-ai-holdout-runner";
 import { replayDecisionCaseSplit } from "../packages/ai/src/evaluation/replay-decision-case-extraction";
 import { assertSemanticObjectSideSafe } from "../packages/ai/src/diagnostics/semantic-redaction";
+import {
+  applySimulationEngineSelection,
+  simulationEngineRuntimeOptions,
+} from "../packages/ai/src/simulation/engine-selection";
 
 type TraceRow = {
   matchId: string;
@@ -167,6 +171,8 @@ function evaluateTrace(
   trace: TraceRow,
 ): CurrentAiHoldoutEvaluation {
   const base = baseEvaluation(trace);
+  let failureStage: "reconstruction_error" | "ai_error" =
+    "reconstruction_error";
   try {
     const state = stateForTrace(db, trace);
     if (!state) {
@@ -203,10 +209,22 @@ function evaluateTrace(
       ownDeckSnapshot,
     });
     assertSemanticObjectSideSafe(input, "CurrentAiHoldoutAiInput");
-    const decision = chooseAiAction(input);
-    const selected = legalActions.find(
-      (action) => action.actionId === decision.actionId,
+    failureStage = "ai_error";
+    const decision = chooseAiAction(
+      input,
+      simulationEngineRuntimeOptions(state),
     );
+    const randomizedResult = applySimulationEngineSelection(
+      state,
+      decision,
+      `holdout:${base.caseKey}`,
+    );
+    const selected =
+      randomizedResult === undefined
+        ? legalActions.find((action) => action.actionId === decision.actionId)
+        : randomizedResult.ok
+          ? randomizedResult.receipt.selectedLegalAction
+          : undefined;
     return {
       ...base,
       status: "evaluated",
@@ -221,7 +239,7 @@ function evaluateTrace(
       ...base,
       status: message.includes("forbidden hidden-info marker")
         ? "redaction_violation"
-        : "ai_error",
+        : failureStage,
       errorCode: safeErrorCode(message),
     };
   }
@@ -368,9 +386,12 @@ function currentDecisionSummary(
   selected: LegalAction | undefined,
   legalActions: readonly LegalAction[],
 ): NonNullable<CurrentAiHoldoutEvaluation["current"]> {
+  const actionId = selected?.actionId ?? decision.actionId;
   return {
     ...(selected ? { actionType: selected.type } : {}),
-    actionIdDigest: currentAiHoldoutActionDigest(decision.actionId),
+    ...(actionId
+      ? { actionIdDigest: currentAiHoldoutActionDigest(actionId) }
+      : {}),
     ...(decision.decisionDebug?.planKind
       ? { planKind: decision.decisionDebug.planKind }
       : {}),

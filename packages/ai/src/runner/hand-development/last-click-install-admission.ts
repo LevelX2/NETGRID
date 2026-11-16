@@ -11,7 +11,8 @@ export function runnerLastClickInstallPreservesHandBuffer(
 ): boolean {
   if (candidate.semanticActionType !== "install.card") return true;
   const clicks = candidate.costProfile.clickCost;
-  if (clicks === undefined) return false;
+  if (clicks === undefined || !Number.isSafeInteger(clicks) || clicks < 0)
+    return false;
   if (clicks < input.playerView.own.clicks) return true;
   const install = evaluation.persistentInstallEvaluation;
   if (

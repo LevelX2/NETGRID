@@ -2,7 +2,16 @@ export function incrementStringCounter(
   counter: Record<string, number>,
   key: string,
 ): void {
-  counter[key] = (counter[key] ?? 0) + 1;
+  if (Object.hasOwn(counter, key)) {
+    counter[key]! += 1;
+  } else {
+    Object.defineProperty(counter, key, {
+      value: 1,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
 }
 
 export function incrementTypedCounter<T extends string>(

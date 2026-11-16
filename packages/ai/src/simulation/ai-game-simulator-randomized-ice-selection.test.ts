@@ -2,13 +2,95 @@ import { describe, expect, it } from "vitest";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
+  ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   type AiDecision,
 } from "@netgrid/shared";
 
 import { chooseAiAction } from "../index";
 import { createAiGameSimulator } from "./ai-game-simulator";
 
-describe("AI game simulator randomized ICE-install selection", () => {
+describe("AI game simulator Engine-randomized decisions", () => {
+  it("applies and replays the actual head from a randomized TurnPlan", () => {
+    let selections = 0;
+    const simulator = createAiGameSimulator({
+      chooseDecisionForSimulation: (side, input, config): AiDecision => {
+        const credit = input.legalActions.find(
+          (action) => action.type === "gain_credit",
+        );
+        const draw = input.legalActions.find(
+          (action) => action.type === "draw_card",
+        );
+        if (
+          selections ||
+          side !== "corp" ||
+          !credit ||
+          !draw ||
+          !input.matchId
+        ) {
+          return chooseAiAction(input, config.aiDecisionRuntimeOptions);
+        }
+        const quoted =
+          config.aiDecisionRuntimeOptions?.quoteRandomizedTurnPlanSelection?.({
+            schemaVersion: ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+            matchId: input.matchId,
+            side,
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            opportunityKey: "simulation:test-turn-plan",
+            candidates: [
+              {
+                familyKey: "safe_setup",
+                lineId: "simulation:credit",
+                actionId: credit.actionId,
+                weight: 1,
+              },
+              {
+                familyKey: "pure_rush",
+                lineId: "simulation:draw",
+                actionId: draw.actionId,
+                weight: 1,
+              },
+            ],
+          });
+        if (!quoted?.ok)
+          throw new Error("The simulator did not quote the TurnPlan heads.");
+        selections += 1;
+        return {
+          selectionKind: "engine_randomized_turn_plan_selection",
+          engineCommand: {
+            kind: "engine_randomized_turn_plan_selection",
+            quote: quoted.quote,
+          },
+          reasonCode: "test.simulation_randomized_turn_plan",
+          explanation: "Exercise the state-bound randomized head selection.",
+          consideredActionIds: [credit.actionId, draw.actionId],
+          fallbackUsed: false,
+        };
+      },
+      simulationSideUsesSemanticRuntime: () => true,
+      runnerHandUseDiagnosticsForSimulationAction: () => ({}),
+      runnerReserveDiagnosticsForSimulationAction: () => ({}),
+      runnerCentralPressureDiagnosticsForSimulationAction: () => ({}),
+      runnerBreakerCoverageDiagnosticsForSimulationAction: () => ({}),
+      runnerEconomySetupDiagnosticsForSimulationAction: () => ({}),
+      tagPunishWindowDiagnosticsForSimulationAction: () => ({}),
+      corpFutureRunIceDiagnosticsForSimulationAction: () => ({}),
+      qualityTagsForAction: () => [],
+    });
+    const result = simulator.simulateAiGame({
+      seed: "turn-plan-simulation",
+      maxActions: 12,
+    });
+    expect(selections).toBe(1);
+    expect(result.errors).toEqual([]);
+    expect(result.replayOk).toBe(true);
+    const randomizedEntry = result.actionSequence.find(
+      (entry) => entry.reasonCode === "test.simulation_randomized_turn_plan",
+    );
+    expect(["gain_credit", "draw_card"]).toContain(randomizedEntry?.actionType);
+    expect(randomizedEntry?.side).toBe("corp");
+  });
+
   it("binds Punish route quotes to the current simulation state and overrides foreign callbacks", () => {
     let stateBoundQuotes = 0;
     let foreignQuotes = 0;

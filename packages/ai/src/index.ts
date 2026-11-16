@@ -76,10 +76,8 @@ export type {
   AiDecisionInputWithDeckCapabilities,
   AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
-export {
-  buildCorpIceCardFacts,
-  corpIcePlacementPostInstallRezCostFact,
-} from "./runtime/corp-ice-placement/corp-ice-placement";
+export { buildCorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
+export { corpIcePlacementPostInstallRezCostFact } from "./runtime/corp-ice-placement/corp-ice-placement-costs";
 export type { CorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
 export { buildCorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
 export type { CorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";

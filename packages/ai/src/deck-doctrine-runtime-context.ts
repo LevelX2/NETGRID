@@ -29,8 +29,8 @@ export function buildDeckDoctrineRuntimeContext(params: {
   const deckSnapshot = assertValidAiDeckSnapshotForRuntime(
     params.deckSnapshot,
     {
-      side: params.side,
       ...params.expectedDeckSnapshot,
+      side: params.side,
     },
   );
   const strategyProfile = buildDeckStrategyProfile(deckSnapshot);

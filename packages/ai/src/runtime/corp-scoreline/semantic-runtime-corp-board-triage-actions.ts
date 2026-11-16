@@ -18,7 +18,7 @@ import { semanticRuntimeCorpCentralIceProfile } from "../semantic-runtime-corp-r
 import {
   corpIcePlacementActionCreditCostFact,
   corpIcePlacementPostInstallRezCostFact,
-} from "../corp-ice-placement/corp-ice-placement";
+} from "../corp-ice-placement/corp-ice-placement-costs";
 import type {
   CorpScoringWindowAssessment,
   CorpScoringWindowAgendaStealSeverity,

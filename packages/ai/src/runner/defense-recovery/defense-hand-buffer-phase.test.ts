@@ -82,6 +82,33 @@ function fixture(tags = 1) {
 }
 
 describe("Defense hand-buffer phase ownership", () => {
+  it("revalidates the reaction-reserve need when materializing its route", () => {
+    const f = fixture(0);
+    f.defense.handBufferActionIds = [];
+    f.defense.reactionReserveNeed = {
+      needId: "runner-defense-reaction-reserve",
+      parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+      targetCredits: 8,
+      currentCreditsAtRevalidation: 6,
+      gap: 2,
+      actionIds: [f.draw.actionId],
+      revalidation: { stateVersion: f.input.playerView.stateVersion, status: "defense_parent_open" },
+      evidenceCode: "test_reserve",
+    };
+    const module = createRunnerDefenseModule();
+    const context = {
+      input: f.input,
+      actionCandidates: f.candidates,
+      turnKey: "runner:0",
+      domain: f.domain,
+    };
+    const proposal = module.discover(context)[0]!;
+    expect(proposal.phase).toBe("build_reaction_reserve");
+    const instance = { ...proposal, instanceId: "defense-current-phase" } as never;
+    expect(module.materialize(instance, {} as never, context).candidates).toHaveLength(1);
+    f.input.playerView.stateVersion += 1;
+    expect(module.materialize(instance, {} as never, context).candidates).toEqual([]);
+  });
   it.each(["trace_tag_counter", "baskerville", "cerberus", "mastiff", "doppelganger"])(
     "defers the legal %s removal only while its survival buffer is current",
     (counterType) => {

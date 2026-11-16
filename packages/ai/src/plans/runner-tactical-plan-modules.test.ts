@@ -101,6 +101,11 @@ describe("Runner tactical plan modules", () => {
         reasonCode: "terminal_win",
         witness: { guarantee: "rules_proven" },
       },
+      expectedOutcome: {
+        outcomeKind: "terminal_win",
+        terminal: true,
+        guarantee: "rules_proven",
+      },
     });
     const materialization = module.materialize(
       instance,

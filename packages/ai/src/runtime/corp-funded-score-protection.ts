@@ -12,7 +12,7 @@ import {
   type VisibleEffectiveIceRunQuote,
   type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
-import { corpIcePlacementActionCostAgreementFact } from "./corp-ice-placement/corp-ice-placement";
+import { corpIcePlacementActionCostAgreementFact } from "./corp-ice-placement/corp-ice-placement-costs";
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,

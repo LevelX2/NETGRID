@@ -123,8 +123,8 @@ export function corpResidentScoreDefenseBinding(
   visibleCardIsAgenda: CorpVisibleAgendaPredicate,
 ): CorpResidentScoreDefenseBinding | undefined {
   const commitment = previous?.turnPlanCommitment;
-  const committedRootPlanInstanceId =
-    commitment?.phases[commitment.cursor.phaseIndex]?.root.planInstanceId;
+  const currentPhase = commitment?.phases[commitment.cursor.phaseIndex];
+  const committedRootPlanInstanceId = currentPhase?.root.planInstanceId;
   const executorScoreAncestor = (() => {
     if (!previous?.executorInstanceId) return undefined;
     const visited = new Set<string>();
@@ -196,22 +196,29 @@ export function corpResidentScoreDefenseBinding(
         )
       : undefined;
   const lease = previous?.turnPlanExecutionLease;
-  const currentNode =
-    commitment?.phases[commitment.cursor.phaseIndex]?.nodes[
-      commitment.cursor.nodeIndex
-    ];
+  const currentNode = commitment
+    ? currentPhase?.nodes[commitment.cursor.nodeIndex]
+    : undefined;
   const stagedIceInstanceId = currentNode?.invocation.sourceCardInstanceId;
   const exactImmediateStagingServers =
     stagedIceInstanceId === undefined
       ? []
-      : input.playerView.servers.filter((server) =>
-          server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
+      : input.playerView.servers.filter(
+          (server) =>
+            server.id.startsWith("remote_") &&
+            (residentScoreServerId === "new_remote" ||
+              server.id === residentScoreServerId) &&
+            server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
         );
   const exactImmediateStagingReceipt =
     root !== undefined &&
     lease !== undefined &&
     commitment !== undefined &&
+    committedRootPlanInstanceId === root.instanceId &&
     lease.commitmentId === commitment.commitmentId &&
+    currentPhase?.phaseId === lease.phaseId &&
+    currentNode?.nodeId === lease.nodeId &&
+    currentNode?.invocation.routeKey === lease.routeKey &&
     lease.actionType === "install_card" &&
     lease.stateIdentity.stateVersion + 1 === input.playerView.stateVersion &&
     currentNode?.invocation.semanticActionType === "install.card" &&

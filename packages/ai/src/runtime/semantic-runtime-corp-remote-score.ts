@@ -7,11 +7,11 @@ import {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { rolesMatch } from "../role-match";
 import { createAiHintsByCard } from "../ai-hints";
+import { buildCorpIceCardFacts } from "./corp-ice-placement/corp-ice-placement";
 import {
-  buildCorpIceCardFacts,
   corpIcePlacementActionCreditCostFact,
   corpIcePlacementPostInstallRezCostFact,
-} from "./corp-ice-placement/corp-ice-placement";
+} from "./corp-ice-placement/corp-ice-placement-costs";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import {
   semanticRuntimeCorpScoringWindowAssessment,

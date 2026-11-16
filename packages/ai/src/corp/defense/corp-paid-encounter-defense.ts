@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
 /** Facts and valuation for the existing corp.defend_servers owner. */
@@ -23,7 +24,7 @@ export function assessCorpPaidEncounterDefense(
     !run ||
     run.phase !== "encounter_ice" ||
     run.encounteredIce?.instanceId !== action.source ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !actionMatchesCurrentDecision(input, action) ||
     !quote ||
     quote.exchange.expiresAtStateVersion !== input.playerView.stateVersion ||
     quote.exchange.cardId !== action.source ||

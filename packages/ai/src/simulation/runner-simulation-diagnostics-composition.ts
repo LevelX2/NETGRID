@@ -126,6 +126,8 @@ export function createRunnerSimulationDiagnosticsComposition(
   const runnerEconomySetupDiagnosticsForSimulationAction =
     createRunnerEconomySetupDiagnosticsForSimulationAction({
       runnerEconomySetupActionClass,
+      rolesForAction: dependencies.rolesForAction,
+      isRunnerPressureAction: dependencies.isRunnerPressureAction,
       runnerCreditReserveTargetForInput:
         dependencies.runnerCreditReserveTargetForInput,
       runnerHasKnownUnaffordableLegalRun:

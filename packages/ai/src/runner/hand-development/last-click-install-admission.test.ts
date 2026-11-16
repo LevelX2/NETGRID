@@ -18,6 +18,8 @@ it.each([
   "missing_quote",
   "wrong_action",
   "missing_clicks",
+  "negative_clicks",
+  "fractional_clicks",
   "negative_hand",
   "unknown_hand",
 ])("does not admit a last-click install with %s", (variant) => {
@@ -43,6 +45,8 @@ it.each([
   if (variant === "wrong_action")
     evaluation.persistentInstallEvaluation!.actionId = "another-action";
   if (variant === "missing_clicks") delete candidate.costProfile.clickCost;
+  if (variant === "negative_clicks") candidate.costProfile.clickCost = -1;
+  if (variant === "fractional_clicks") candidate.costProfile.clickCost = 0.5;
   if (variant === "negative_hand")
     evaluation.persistentInstallEvaluation!.handAfterInstall = -1;
   if (variant === "unknown_hand")

@@ -4,6 +4,7 @@ import {
   assertSemanticObjectSideSafe,
   redactSemanticString,
 } from "../diagnostics/semantic-redaction";
+import { incrementStringCounter } from "../runtime/counter";
 
 export const CURRENT_AI_HOLDOUT_RUNNER_SCHEMA_VERSION =
   "current-ai-holdout-runner-v1" as const;
@@ -95,17 +96,21 @@ export function buildCurrentAiHoldoutRunnerReport(
     maxExamples?: number;
   },
 ): CurrentAiHoldoutRunnerReport {
-  const fixedPatternHistoricalCases = options.fixedPattern
+  const fixedPattern = options.fixedPattern;
+  const historicalPatternCases = fixedPattern
     ? evaluations.filter((entry) =>
-        matchesHistoricalPattern(entry, options.fixedPattern!),
-      ).length
-    : 0;
-  const fixedPatternCurrentRecurrence = options.fixedPattern
-    ? evaluations.filter((entry) =>
-        matchesCurrentRecurrence(entry, options.fixedPattern!),
+        matchesHistoricalPattern(entry, fixedPattern),
+      )
+    : [];
+  const fixedPatternCurrentRecurrence = fixedPattern
+    ? historicalPatternCases.filter((entry) =>
+        matchesCurrentRecurrence(entry, fixedPattern),
       ).length
     : 0;
   const evaluated = evaluations.filter((entry) => entry.status === "evaluated");
+  const illegalActions = evaluated.filter(
+    (entry) => entry.current?.legal !== true,
+  ).length;
   const report: CurrentAiHoldoutRunnerReport = {
     schemaVersion: CURRENT_AI_HOLDOUT_RUNNER_SCHEMA_VERSION,
     scope: "current_ai_holdout_runner",
@@ -121,9 +126,7 @@ export function buildCurrentAiHoldoutRunnerReport(
       evaluated: evaluated.length,
       changedDecisions: evaluated.filter((entry) => entry.changedDecision)
         .length,
-      illegalActions: evaluated.filter(
-        (entry) => entry.current?.legal === false,
-      ).length,
+      illegalActions,
       reconstructionErrors: evaluations.filter(
         (entry) => entry.status === "reconstruction_error",
       ).length,
@@ -132,7 +135,7 @@ export function buildCurrentAiHoldoutRunnerReport(
       redactionViolations: evaluations.filter(
         (entry) => entry.status === "redaction_violation",
       ).length,
-      fixedPatternHistoricalCases,
+      fixedPatternHistoricalCases: historicalPatternCases.length,
       fixedPatternCurrentRecurrence,
     },
     bySide: countBy(evaluations, (entry) => entry.side),
@@ -146,19 +149,22 @@ export function buildCurrentAiHoldoutRunnerReport(
       (entry) => entry.current?.actionType ?? "none",
     ),
     examples: evaluations
-      .filter((entry) => entry.status !== "evaluated" || entry.changedDecision)
+      .filter(
+        (entry) =>
+          entry.status !== "evaluated" ||
+          entry.changedDecision ||
+          entry.current?.legal !== true,
+      )
       .slice(0, options.maxExamples ?? 8)
       .map(safeEvaluation),
     gates: {
       currentAiHoldoutEvaluated: evaluated.length > 0,
-      noIllegalActions: evaluated.every(
-        (entry) => entry.current?.legal !== false,
-      ),
+      noIllegalActions: illegalActions === 0,
       noRedactionViolations: evaluations.every(
         (entry) => entry.status !== "redaction_violation",
       ),
       reconstructionComplete: evaluations.every(
-        (entry) => entry.status === "evaluated",
+        (entry) => entry.status !== "reconstruction_error",
       ),
       productiveUseDisabled: true,
     },
@@ -269,7 +275,7 @@ function conclusions(report: CurrentAiHoldoutRunnerReport): string[] {
   }
   if (!report.gates.noIllegalActions) {
     result.push(
-      "Mindestens eine aktuelle KI-Ausgabe lag nicht in LegalActions.",
+      "Mindestens eine ausgewertete Entscheidung besitzt keine bestätigte LegalAction.",
     );
   }
   return result;
@@ -300,7 +306,8 @@ function matchesCurrentRecurrence(
   pattern: CurrentAiHoldoutFixedPattern,
 ): boolean {
   return (
-    matchesHistoricalPattern(entry, pattern) &&
+    entry.status === "evaluated" &&
+    entry.current?.legal === true &&
     entry.current?.actionType === pattern.historicalActionType &&
     (entry.current.planKind ?? "none") === pattern.historicalPlanKind
   );
@@ -417,7 +424,7 @@ function countBy<T>(
   const counts: Record<string, number> = {};
   for (const value of values) {
     const key = safeText(keyFor(value));
-    counts[key] = (counts[key] ?? 0) + 1;
+    incrementStringCounter(counts, key);
   }
   return Object.fromEntries(
     Object.entries(counts).sort(([left], [right]) => left.localeCompare(right)),

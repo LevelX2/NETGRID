@@ -15,39 +15,48 @@ const visibleCardIsAgenda = (
 ): boolean => card.known && card.type === "agenda";
 
 describe("corp score defense continuity", () => {
-  it("accepts the exact immediate ICE-install execution receipt", () => {
-    const input = decisionInput(11);
-    const previous = portfolio({
-      executorInstanceId: "score-root",
-      instances: [scoreRoot()],
-      commitment: {
-        commitmentId: "commitment-1",
-        cursor: { phaseIndex: 0, nodeIndex: 0 },
-        phases: [
-          {
-            root: { planInstanceId: "score-root" },
-            nodes: [
-              {
-                invocation: {
-                  semanticActionType: "install.card",
-                  sourceCardInstanceId: "ice-1",
+  it.each([true, false])(
+    "binds a staging receipt only to its selected node (matching = %s)",
+    (matching) => {
+      const input = decisionInput(11);
+      const previous = portfolio({
+        executorInstanceId: "score-root",
+        instances: [scoreRoot("new_remote")],
+        commitment: {
+          commitmentId: "commitment-1",
+          cursor: { phaseIndex: 0, nodeIndex: 0 },
+          phases: [
+            {
+              phaseId: "score-phase",
+              root: { planInstanceId: "score-root" },
+              nodes: [
+                {
+                  nodeId: "stage-ice",
+                  invocation: {
+                    routeKey: "staging-route",
+                    semanticActionType: "install.card",
+                    sourceCardInstanceId: "ice-1",
+                  },
                 },
-              },
-            ],
-          },
-        ],
-      },
-      lease: {
-        commitmentId: "commitment-1",
-        actionType: "install_card",
-        stateIdentity: { stateVersion: 10 },
-      },
-    });
+              ],
+            },
+          ],
+        },
+        lease: {
+          commitmentId: "commitment-1",
+          actionType: "install_card",
+          phaseId: "score-phase",
+          nodeId: matching ? "stage-ice" : "different-install",
+          routeKey: "staging-route",
+          stateIdentity: { stateVersion: 10 },
+        },
+      });
 
-    expect(
-      corpResidentScoreAgendaInstanceId(previous, input, visibleCardIsAgenda),
-    ).toBe("agenda-1");
-  });
+      expect(
+        corpResidentScoreAgendaInstanceId(previous, input, visibleCardIsAgenda),
+      ).toBe(matching ? "agenda-1" : undefined);
+    },
+  );
 
   it("accepts a recent resident defense staging receipt for the score parent", () => {
     const input = decisionInput(11);

@@ -14,12 +14,12 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import { buildCorpIceDensityProfile } from "../corp-economy/corp-ice-density";
+import { buildCorpIceCardFacts } from "./corp-ice-placement";
 import {
-  buildCorpIceCardFacts,
   corpIcePlacementActionCostAgreementFact,
   corpIcePlacementActionCreditCostFact,
   corpIcePlacementPostInstallRezCostFact,
-} from "./corp-ice-placement";
+} from "./corp-ice-placement-costs";
 import {
   assessCorpIcePlacementForDiagnostics,
   classifyCorpFutureRunIcePlacementProfile,

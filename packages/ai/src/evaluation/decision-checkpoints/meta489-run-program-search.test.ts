@@ -6,6 +6,7 @@ import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { resolvePlanBoundRunnerRunProgramSearchChoice } from "../../runner/run-window/run-window-program-search-binding";
 
 const sourceId = "runner_onr_v1_059_self-modifying-code_1";
 const root = "plan:runner.contest_remote:remote%3Aremote_1";
@@ -93,6 +94,24 @@ describe("native in-run program search (SP-333)", () => {
       memoryUsed: 5,
       memoryLimit: 7,
     });
+  });
+
+  it("uses the same remembered plan for the choice and its origin", () => {
+    selectSource();
+    const input = nextSearchInput();
+    const context = { input, turnKey: "runner:search", actionCandidates: [] };
+    expect(
+      resolvePlanBoundRunnerRunProgramSearchChoice(context, undefined),
+    ).toMatchObject({
+      actionId: "runner.resolve_choice",
+      origin: { rootPlanInstanceId: root, leafPlanInstanceId: leaf },
+    });
+    input.legalActions.find(
+      (action) => action.type === "resolve_choice",
+    )!.timingPoint = "runner_action.main";
+    expect(() =>
+      resolvePlanBoundRunnerRunProgramSearchChoice(context, undefined),
+    ).toThrow(/window_origin_missing/);
   });
 
   it.each([

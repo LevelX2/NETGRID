@@ -79,6 +79,15 @@ Karte oder einen bestimmten Zielserver als Produktregel fest.
 
 ## Benchmarkprofile
 
+Die Kennzahl `runnerEconomySkippedFor*` ordnet das Ökonomiefenster der
+gewählten Aktion zu. Ungenutzte Gelegenheiten für Druck, Contest,
+Breaker-Installation oder Trash werden separat erfasst. Beim Holdout
+prüfen Rekonstruktion, Legalität und Redaction jeweils den eigenen Schritt.
+Ein als ausgewertet markierter Fall ohne bestätigte LegalAction verfehlt
+das Legalitätsgate. Simulator und Holdout führen zufällige ICE-, Trace- und
+TurnPlan-Entscheidungen über das aktuelle Engine-Angebot aus und werten die
+tatsächlich ausgewählte LegalAction aus.
+
 Die `simulationId` identifiziert die geordnete Seedliste und die effektive
 Konfiguration eines Profils. In den SHA-256-Fingerprint gehen die
 Controllerprofile, die Deckbindung, die Spielgrenzen und beim

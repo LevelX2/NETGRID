@@ -49,7 +49,7 @@ export function corpEmptyRdDrawOperationDispositionEvidence(
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
-  const drawCardsAmount = Number(action?.payload?.drawCardsAmount ?? 0);
+  const drawCardsAmount = action?.payload?.drawCardsAmount;
   const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
   const definitionRequiresDraw =
     hint?.effects?.some(
@@ -58,7 +58,10 @@ export function corpEmptyRdDrawOperationDispositionEvidence(
         typeof effect.amount === "number" &&
         effect.amount > 0,
     ) === true;
-  return drawCardsAmount > 0 && definitionRequiresDraw
+  return typeof drawCardsAmount === "number" &&
+    Number.isSafeInteger(drawCardsAmount) &&
+    drawCardsAmount > 0 &&
+    definitionRequiresDraw
     ? `corp_empty_rd_draw_operation_has_no_executable_payload:${candidate.sourceDefinitionId}`
     : undefined;
 }

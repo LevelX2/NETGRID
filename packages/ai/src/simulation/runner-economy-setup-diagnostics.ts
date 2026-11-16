@@ -5,6 +5,7 @@ import {
 } from "@netgrid/shared";
 
 import { sortedUnique } from "../runtime/collection";
+import { rolesMatch } from "../role-match";
 import {
   runnerEconomySkipReasonForDiagnostics,
   runnerEconomySubcounts,
@@ -53,6 +54,11 @@ export type RunnerEconomySetupDiagnosticsDependencies = {
     excludeActionId?: string,
   ) => boolean;
   hasRunnerRemoteTrashAction: (input: AiDecisionInput) => boolean;
+  rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+  isRunnerPressureAction: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
   runnerDrawKindForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -150,20 +156,21 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
       action,
     ).draw;
     const runAction = action.type === "start_run";
+    const installsBreaker =
+      action.type === "install_card" &&
+      rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"]);
     const setupAction =
       action.type === "install_card" &&
-      (dependencies.isRunnerRigInstallAction(input, action) ||
-        installableBreaker);
+      dependencies.isRunnerRigInstallAction(input, action);
     const relevantSkippedReason = economySkipped
       ? runnerEconomySkipReasonForDiagnostics({
           action,
           draw,
-          runAction,
           setupAction,
-          installableBreaker,
-          remoteTrashAvailable,
-          advancedRemoteContestSkipped: advancedRemoteContest.skipped,
-          freshPressureAvailable,
+          installsBreaker,
+          advancedRemoteContestTaken: advancedRemoteContest.taken,
+          pressureAction:
+            !runAction && dependencies.isRunnerPressureAction(input, action),
         })
       : undefined;
     const rich = creditsBefore >= Math.max(8, reserveTarget + 3);
