@@ -61,8 +61,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     const details = page.locator("#match-details-strip");
     await expect(details).toContainText("Eigenes Deck");
     await expect(details).toContainText("KI-Deck");
-    await expect(details.getByText(runnerDeckName, { exact: true })).toBeVisible();
-    await expect(details.getByText(fixedCorpDeckName!, { exact: true })).toBeVisible();
+    const fields = details.locator(":scope > :not(.matchStripNotice)");
+    await expect(fields.filter({ hasText: runnerDeckName })).toBeVisible();
+    await expect(fields.filter({ hasText: fixedCorpDeckName! })).toBeVisible();
     await page.locator(".matchDetailsToggle").click();
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await expect(page.getByTestId("server-run-action").first()).toHaveAttribute(
@@ -125,8 +126,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       const details = host.page.locator("#match-details-strip");
       await expect(details).toContainText("Eigenes Deck");
       await expect(details).not.toContainText("KI-Deck");
-      await expect(details.getByText(runnerDeckName, { exact: true })).toBeVisible();
-      await expect(details.getByText(corpDeckName, { exact: true })).toHaveCount(0);
+      const fields = details.locator(":scope > :not(.matchStripNotice)");
+      await expect(fields.filter({ hasText: runnerDeckName })).toBeVisible();
+      await expect(fields.filter({ hasText: corpDeckName })).toHaveCount(0);
       await host.page.locator(".matchDetailsToggle").click();
       await expectNoDomOrLocalStorageLeaks(host.page);
       await expectNoDomOrLocalStorageLeaks(joiner.page);
