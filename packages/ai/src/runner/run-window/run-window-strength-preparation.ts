@@ -51,7 +51,7 @@ export function runnerRunStrengthPumpSavingsForAction(
         entry.type === "pump_breaker" && entry.source === breaker.instanceId,
     )
     .flatMap((pump) => {
-      const gain = pumpStrengthAmountForAction(pump, breaker.definitionId!);
+      const gain = pumpStrengthAmountForAction(pump);
       if (!gain || gain <= 0) return [];
       const cost = legalActionCreditCost(pump);
       return [

@@ -1,6 +1,7 @@
 import type { LegalAction } from "@netgrid/shared";
 
-type RunnerLoanGamePhase = "opening" | "midgame" | "late";
+import type { RunnerLoanGamePhase } from "./runner-loan-state-context";
+
 type RunnerLoanLiabilitySeverity = "low" | "medium" | "high" | "critical";
 type RunnerLoanUseCase =
   | "emergency_funding"

@@ -10,6 +10,7 @@ import {
   corpProtectionConvertsToScoreSafety,
   corpRemoteBuildConvertsToAdvanceProtectOrScore,
   isStrategicPlanDecision,
+  ownStrategicWindow,
   planKindForConversion,
   runnerCentralPressureConvertsToStealOrFreshValue,
   runnerEconomyConvertsToRunOrRig,
@@ -20,6 +21,8 @@ import {
 } from "./plan-conversion-predicates";
 import { progressionEntriesWithRunTargets } from "./progression-action-sequence";
 import { averageNumber } from "./simulation-metric-aggregation";
+
+const PLAN_INTENT_WINDOW = 3;
 
 function round(value: number): number {
   return Math.round(value * 1000) / 1000;
@@ -87,9 +90,23 @@ export function summarizeStrategicPlanConversionMetrics(
   for (const summary of summaries) {
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
     let strategicChain = 0;
+    const lastPlanBySide: Partial<
+      Record<Side, { planKind: string; progressSince: boolean }>
+    > = {};
     for (const entry of sequence) {
       const hasProgress = isMeaningfulBoardProgress(entry);
-      if (!isStrategicPlanDecision(entry)) {
+      const strategic = isStrategicPlanDecision(entry);
+      const planKind = strategic ? planKindForConversion(entry) : undefined;
+      const lastPlan = lastPlanBySide[entry.side];
+      if (planKind) {
+        if (lastPlan?.planKind === planKind && !lastPlan.progressSince) {
+          sameStrategicPlanRepeatedWithoutProgress += 1;
+        }
+        lastPlanBySide[entry.side] = { planKind, progressSince: hasProgress };
+      } else if (lastPlan && hasProgress) {
+        lastPlan.progressSince = true;
+      }
+      if (!strategic) {
         if (!hasProgress) microActionNoProgressContribution += 1;
         continue;
       }
@@ -127,16 +144,9 @@ export function summarizeStrategicPlanConversionMetrics(
     }
 
     const strategicEntries = sequence.filter(isStrategicPlanDecision);
-    const lastPlanBySide: Partial<
-      Record<Side, { planKind: string; progressSince: boolean }>
-    > = {};
     strategicEntries.forEach((entry, index) => {
       const planKind = planKindForConversion(entry);
       if (!planKind) return;
-      const lastPlan = lastPlanBySide[entry.side];
-      if (lastPlan?.planKind === planKind && !lastPlan.progressSince) {
-        sameStrategicPlanRepeatedWithoutProgress += 1;
-      }
       const planConvertsWithinOwnDecisions = (ownDecisions: number) =>
         strategicPlanConvertsWithinOwnDecisions(
           strategicEntries,
@@ -148,13 +158,31 @@ export function summarizeStrategicPlanConversionMetrics(
         planIntentConvertedWithin1OwnDecision += 1;
       if (planConvertsWithinOwnDecisions(2))
         planIntentConvertedWithin2OwnDecisions += 1;
-      if (planConvertsWithinOwnDecisions(3))
+      if (planConvertsWithinOwnDecisions(PLAN_INTENT_WINDOW)) {
         planIntentConvertedWithin3OwnDecisions += 1;
-      else if (
-        !hasEvidenceFlag(entry, "plan_abort_taken:true") &&
-        !hasEvidenceFlag(entry, "plan_intent_expired:true")
-      )
-        planIntentAbandonedWithoutReason += 1;
+      } else {
+        const following = ownStrategicWindow(
+          strategicEntries,
+          index,
+          PLAN_INTENT_WINDOW,
+        );
+        if (
+          following.length === PLAN_INTENT_WINDOW &&
+          ![entry, ...following].some(
+            (decision) =>
+              hasEvidenceFlag(decision, "plan_abort_taken:true") ||
+              hasEvidenceFlag(decision, "plan_intent_expired:true") ||
+              decision.evidence.some((value) =>
+                value.startsWith("plan_abort_reason:"),
+              ),
+          ) &&
+          following.every((decision) => {
+            const followingPlan = planKindForConversion(decision);
+            return followingPlan !== undefined && followingPlan !== planKind;
+          })
+        )
+          planIntentAbandonedWithoutReason += 1;
+      }
 
       if (
         entry.side === "runner" &&
@@ -257,14 +285,6 @@ export function summarizeStrategicPlanConversionMetrics(
       ) {
         if (corpProtectionConvertsToScoreSafety(strategicEntries, index))
           corpProtectionConvertedToScoreSafety += 1;
-      }
-
-      lastPlanBySide[entry.side] = { planKind, progressSince: false };
-      if (isMeaningfulBoardProgress(entry)) {
-        for (const side of Object.keys(lastPlanBySide) as Side[]) {
-          const last = lastPlanBySide[side];
-          if (last) last.progressSince = true;
-        }
       }
     });
   }

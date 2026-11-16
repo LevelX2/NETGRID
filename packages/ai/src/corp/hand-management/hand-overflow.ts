@@ -1,9 +1,16 @@
-import { candidateTargetIds } from "../../actions/action-candidate-facts";
+import {
+  candidateTargetIds,
+  exactImmediateHandDelta,
+} from "../../actions/action-candidate-facts";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 
+import {
+  corpIceRezSupportOperationHasPositiveCurrentIncome,
+  definitionHasActionIceRezSupport,
+} from "../defense/corp-defense-rez-support-facts";
 import { isQuotedCorpCounterBankInHq } from "../score/corp-counter-bank-score-plan";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -326,17 +333,23 @@ export function corpHqOverflowCandidateIsExactCurrentConversion(
   }
   if (action.type === "play_operation") {
     const projection = candidate.economyProjection;
-    return (
-      projection?.cardsConsumed === 1 &&
-      typeof projection.netHandDelta === "number" &&
-      projection.netHandDelta <= -1 &&
+    if (
+      projection?.cardsConsumed !== 1 ||
+      projection.cardsDrawn !== 0 ||
+      projection.netHandDelta !== -1 ||
       candidate.functionalEffects?.some(
         (effect) =>
           effect.kind === "card_recovery" &&
           effect.timing === "action" &&
           effect.resource === "cards",
-      ) !== true
-    );
+      )
+    )
+      return false;
+    // A bundled ICE rez has its own Engine certificate for the current
+    // operation and payout. Generic Economy projections do not price it.
+    return definitionHasActionIceRezSupport(candidate.sourceDefinitionId)
+      ? corpIceRezSupportOperationHasPositiveCurrentIncome(input, action)
+      : exactImmediateHandDelta(candidate) === -1;
   }
   // Converting an ICE out of HQ may relieve hand pressure, but choosing a
   // server for that ICE is exclusively corp.defend_servers' responsibility.

@@ -89,6 +89,12 @@ einem Lauf ohne Aktionen null. Der Ergebnisanteil `runtime_failure` macht
 technische Abbrüche sichtbar. Eine höhere technische Abbruchrate lässt das
 Quality Gate auch bei intaktem Replay scheitern.
 
+Die strategische Planwiederholung ordnet Fortschritt nur der handelnden
+Seite zu. Ein Planabbruch ohne Grund erfordert drei beobachtete eigene
+strategische Entscheidungen mit jeweils einem anderen Plan als dem
+ausgewerteten, ohne Fortschritt, gemeldeten Abbruchgrund oder Ablauf. Ein kürzerer Export lässt die Aussage
+offen. Benchmarks dieser beiden Kennzahlen benötigen denselben Messvertrag.
+
 Die Activity-Vorschläge der Selfplay-Snapshot-Auswertung reservieren einen
 stabilen Namenssuffix für die Snapshot-ID. Ein langer Szenariohinweis darf
 diese Zuordnung nicht abschneiden.

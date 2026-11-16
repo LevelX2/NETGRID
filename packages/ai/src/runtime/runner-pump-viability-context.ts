@@ -241,10 +241,7 @@ export function createRunnerPumpViabilityContext(
     }
 
     const pumpCost = dependencies.actionCreditCost(action);
-    const pumpAmount = pumpStrengthAmountForAction(
-      action,
-      breaker.definitionId,
-    );
+    const pumpAmount = pumpStrengthAmountForAction(action);
     if (pumpCost < 0 || pumpAmount === undefined || pumpAmount <= 0)
       return {
         canLeadToBreak: false,

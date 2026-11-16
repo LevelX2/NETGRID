@@ -2732,6 +2732,8 @@ describe("selectedChoicesForDecision", () => {
       },
     );
     const action = resolveChoiceActionForInput(input);
+    input.playerView.activeSide = "runner";
+    input.legalActions = [action];
     rememberResidentRunnerDiscardBinding(input, action.actionId, [
       "discard_low",
     ]);

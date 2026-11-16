@@ -780,10 +780,7 @@ function pumpBreakSequenceForAction(params: {
   }
   const breaker = findVisibleCard(input, breakerId);
   if (!breaker?.definitionId) return undefined;
-  const pumpAmount = pumpStrengthAmountForAction(
-    pumpAction,
-    breaker.definitionId,
-  );
+  const pumpAmount = pumpStrengthAmountForAction(pumpAction);
   const pumpCost = actionCreditCost(pumpAction);
   if (pumpAmount === undefined || pumpAmount <= 0 || pumpCost < 0)
     return undefined;

@@ -96,15 +96,33 @@ export function runnerInstalledCardLiquidationChoiceSignal(
   ) {
     return undefined;
   }
+  const copiesByDefinition = new Map<string, number>();
+  const childrenByHost = new Map<string, number>();
+  for (const card of rig) {
+    if (card.definitionId)
+      copiesByDefinition.set(
+        card.definitionId,
+        (copiesByDefinition.get(card.definitionId) ?? 0) + 1,
+      );
+    if (card.hostedOn)
+      childrenByHost.set(
+        card.hostedOn,
+        (childrenByHost.get(card.hostedOn) ?? 0) + 1,
+      );
+  }
   const quotedTargets = eligibleCards
     .map((card) => {
       const memoryCapacity = installedMemorySurplusQuote(input, card);
-      const retainedCardValue = memoryCapacity
-        ? 0
-        : installedCardRetentionValue(input, card);
-      const expendability = memoryCapacity
-        ? ("proven_redundant" as const)
-        : installedCardLiquidationExpendability(input, card);
+      const { retainedCardValue, expendability } = memoryCapacity
+        ? { retainedCardValue: 0, expendability: "proven_redundant" as const }
+        : assessInstalledCardRetention(
+            input,
+            card,
+            card.definitionId
+              ? (copiesByDefinition.get(card.definitionId) ?? 0)
+              : 0,
+            childrenByHost.get(card.instanceId) ?? 0,
+          );
       return {
         card,
         memoryCapacity,
@@ -177,15 +195,20 @@ export function runnerInstalledCardLiquidationChoiceSignal(
   };
 }
 
-function installedCardLiquidationExpendability(
+function assessInstalledCardRetention(
   input: AiDecisionInput,
   card: VisibleCard,
-): "proven_redundant" | "unproven" {
-  if (!card.known || !card.definitionId) return "unproven";
-  const rig = input.playerView.own.rig ?? [];
-  const duplicateCount = rig.filter(
-    (candidate) => candidate.definitionId === card.definitionId,
-  ).length;
+  duplicateCount: number,
+  hostedCardCount: number,
+): {
+  retainedCardValue: number;
+  expendability: "proven_redundant" | "unproven";
+} {
+  if (!card.known || !card.definitionId)
+    return {
+      retainedCardValue: Number.MAX_SAFE_INTEGER,
+      expendability: "unproven",
+    };
   const strategyProfile = (
     input as AiDecisionInput & {
       ownDeckStrategyProfile?: AiDeckStrategyProfile;
@@ -196,64 +219,11 @@ function installedCardLiquidationExpendability(
       (provider) => provider.cardId === card.definitionId,
     );
   const roles = rolesForDeckDoctrineCard(card.definitionId);
-  const hostedCardCount = rig.filter(
-    (candidate) => candidate.hostedOn === card.instanceId,
-  ).length;
   const counterCount = Object.values(card.counters ?? {}).reduce(
     (sum, count) => sum + Math.max(0, count ?? 0),
     0,
   );
-  const structurallyActive =
-    rolesMatch(roles, [
-      "breaker",
-      "coverage",
-      "damage_prevention",
-      "survive_meat_damage",
-      "tag_prevention",
-      "tag_clear",
-      "economy",
-      "draw",
-      "search",
-      "link",
-      "trace",
-      "access",
-      "run",
-      "engine",
-      "build_rig",
-      "delayed_install",
-      "resource_value_engine",
-      "credit_bank",
-    ]) ||
-    (card.memoryLimitBonus ?? 0) > 0 ||
-    (card.maxHandSizeBonus ?? 0) > 0 ||
-    (card.baseLink ?? 0) > 0 ||
-    hostedCardCount > 0 ||
-    counterCount > 0 ||
-    (card.lifecycleMarkers?.length ?? 0) > 0;
-  return duplicateCount > 1 &&
-    doctrineProvider?.additivity === "redundant_by_default" &&
-    !structurallyActive
-    ? "proven_redundant"
-    : "unproven";
-}
-
-function installedCardRetentionValue(
-  input: AiDecisionInput,
-  card: VisibleCard,
-): number {
-  if (!card.known || !card.definitionId) return Number.MAX_SAFE_INTEGER;
-  const rig = input.playerView.own.rig ?? [];
-  const roles = rolesForDeckDoctrineCard(card.definitionId);
-  const duplicateCount = rig.filter(
-    (candidate) => candidate.definitionId === card.definitionId,
-  ).length;
-  const hostedCardCount = rig.filter(
-    (candidate) => candidate.hostedOn === card.instanceId,
-  ).length;
-  const counterCount = Object.values(card.counters ?? {}).reduce(
-    (sum, count) => sum + Math.max(0, count ?? 0),
-    0,
-  );
+  const lifecycleCount = card.lifecycleMarkers?.length ?? 0;
   const memoryWouldOverflow =
     (card.memoryLimitBonus ?? 0) > 0 &&
     (input.playerView.own.memoryUsed ?? 0) >
@@ -283,7 +253,16 @@ function installedCardRetentionValue(
     "resource_value_engine",
     "credit_bank",
   ]);
-  return Math.max(
+  const structurallyActive =
+    criticalRigRole ||
+    activeEngineRole ||
+    (card.memoryLimitBonus ?? 0) > 0 ||
+    (card.maxHandSizeBonus ?? 0) > 0 ||
+    (card.baseLink ?? 0) > 0 ||
+    hostedCardCount > 0 ||
+    counterCount > 0 ||
+    lifecycleCount > 0;
+  const retainedCardValue = Math.max(
     0,
     1 +
       Math.max(0, card.installCost ?? card.cost ?? 0) +
@@ -296,6 +275,15 @@ function installedCardRetentionValue(
       (memoryWouldOverflow ? 30 : 0) +
       hostedCardCount * 10 +
       counterCount * 2 +
-      (card.lifecycleMarkers?.length ?? 0) * 4,
+      lifecycleCount * 4,
   );
+  return {
+    retainedCardValue,
+    expendability:
+      duplicateCount > 1 &&
+      doctrineProvider?.additivity === "redundant_by_default" &&
+      !structurallyActive
+        ? "proven_redundant"
+        : "unproven",
+  };
 }

@@ -63,7 +63,7 @@ export function assessHostedBreakerDevelopment(
   card: VisibleCard,
   minimumCreditFloor: number,
 ): HostedBreakerDevelopment | undefined {
-  const own = input.playerView.own;
+  const { own, traceRulesProfile } = input.playerView;
   const rig = own.rig ?? [];
   const installingHost = profile(card) !== undefined;
   const actions = input.legalActions.filter(
@@ -210,6 +210,7 @@ export function assessHostedBreakerDevelopment(
             runnerRunPathCreditBudgetWithVisiblePools(cash, cards),
             server.root,
             input.playerView.opponent.credits,
+            traceRulesProfile ? { traceRulesProfile } : undefined,
           );
           if (
             !path.canReachAccess ||

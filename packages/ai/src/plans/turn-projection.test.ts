@@ -13,6 +13,8 @@ import {
   getPlayerView,
 } from "@netgrid/engine";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { corpEconomyCandidateHasExecutablePayload } from "../corp/economy/economy-routes";
+import { corpHqOverflowCandidateIsExactCurrentConversion } from "../corp/hand-management/hand-overflow";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { costProfileForAction } from "../actions/action-cost-timing";
 
@@ -71,12 +73,46 @@ describe("turn projection", () => {
         entry.sourceCardInstanceId === card.instanceId &&
         entry.actionType === "play_operation",
     )!;
-    const frame = projectedFrame({
+    const input = {
       ...decisionInput(),
       matchId: state.matchId,
       playerView,
       legalActions,
-    });
+    };
+    expect(corpEconomyCandidateHasExecutablePayload(input, offer)).toBe(true);
+    const staleOffer = {
+      ...input,
+      legalActions: legalActions.map((action) =>
+        action.actionId === offer.actionId
+          ? { ...action, timingPoint: "game.checkpoint" as const }
+          : action,
+      ),
+    };
+    expect(corpEconomyCandidateHasExecutablePayload(staleOffer, offer)).toBe(
+      false,
+    );
+    expect(corpHqOverflowCandidateIsExactCurrentConversion(input, offer)).toBe(
+      true,
+    );
+    for (const netHandDelta of [-Infinity, -1.5, -2]) {
+      expect(
+        corpHqOverflowCandidateIsExactCurrentConversion(input, {
+          ...offer,
+          economyProjection: { ...offer.economyProjection!, netHandDelta },
+        }),
+      ).toBe(false);
+    }
+    expect(
+      corpHqOverflowCandidateIsExactCurrentConversion(input, {
+        ...offer,
+        economyProjection: {
+          ...offer.economyProjection!,
+          reliability: "unknown",
+        },
+      }),
+    ).toBe(false);
+
+    const frame = projectedFrame(input);
     const delta = certifiedTurnProjectionDeltaFromCandidate({
       frame,
       candidate: offer,

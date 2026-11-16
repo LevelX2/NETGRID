@@ -282,34 +282,31 @@ export function assessCorpEconomyFundingRoute(
   fundingContext?: CorpHostedBankFundingWindowContext,
 ): CorpEconomyFundingRouteAssessment {
   let liquidationAdmitted = false;
-  const candidates = context.actionCandidates
-    .filter(
-      (candidate) =>
-        signal.actionIds.includes(candidate.actionId) &&
-        immediateCorpLiquidCreditGain(candidate) > 0 &&
-        candidate.economyProjection?.reliability === "guaranteed" &&
-        corpEconomyCandidateHasExecutablePayload(context.input, candidate),
+  const candidates = context.actionCandidates.filter((candidate) => {
+    if (
+      !signal.actionIds.includes(candidate.actionId) ||
+      immediateCorpLiquidCreditGain(candidate) <= 0 ||
+      candidate.economyProjection?.reliability !== "guaranteed"
     )
-    .filter((candidate) => {
-      const action = context.input.legalActions.find(
-        (a) => a.actionId === candidate.actionId,
-      );
-      if (!action) return false;
-      const assessment = assessCorpIceLiquidation(context.input, action);
-      if (assessment.status === "not_applicable") return true;
-      // Two individually redundant layers must never be sold together in a
-      // precomputed funding route. Execute one head, then requote the board.
-      if (
-        assessment.status !== "preserved" ||
-        signal.kind !== "parent_funding" ||
-        !signal.parentPlanInstanceId ||
-        !signal.parentNeedId ||
-        liquidationAdmitted
-      )
-        return false;
-      liquidationAdmitted = true;
-      return true;
-    });
+      return false;
+    const assessment = corpEconomyExecutableAssessment(
+      context.input,
+      candidate,
+    );
+    if (!assessment) return false;
+    if (assessment.status === "not_applicable") return true;
+    // Two individually redundant layers must never be sold together in a
+    // precomputed funding route. Execute one head, then requote the board.
+    if (
+      signal.kind !== "parent_funding" ||
+      !signal.parentPlanInstanceId ||
+      !signal.parentNeedId ||
+      liquidationAdmitted
+    )
+      return false;
+    liquidationAdmitted = true;
+    return true;
+  });
   const currentCredits = context.input.playerView.own.credits;
   const demandForTarget = (
     targetCredits: number,
@@ -567,15 +564,30 @@ export function corpEconomyCandidateHasExecutablePayload(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
+  return corpEconomyExecutableAssessment(input, candidate) !== undefined;
+}
+
+function corpEconomyExecutableAssessment(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+) {
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
-  const drawCardsAmount = Number(action?.payload?.drawCardsAmount ?? 0);
-  if (!action) return false;
+  if (
+    input.side !== "corp" ||
+    action?.side !== "corp" ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    (Number(action.payload?.drawCardsAmount ?? 0) > 0 &&
+      input.playerView.own.stackOrRdCount <= 0)
+  )
+    return undefined;
   const liquidation = assessCorpIceLiquidation(input, action);
-  if (liquidation.status === "blocked" || liquidation.status === "unknown")
-    return false;
-  return !(drawCardsAmount > 0 && input.playerView.own.stackOrRdCount <= 0);
+  return liquidation.status === "not_applicable" ||
+    liquidation.status === "preserved"
+    ? liquidation
+    : undefined;
 }
 
 function economyDevelopmentStepValue(

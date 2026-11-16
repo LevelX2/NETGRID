@@ -1980,7 +1980,8 @@ Die gespeicherten D54/D120-Zustände aus `match_26a1db342966ffbe` bleiben
 negative Kontrollen für einen nicht rentablen Hostaufbau.
 
 Die Bewertung vergleicht die liquiden Kosten vollständig bekannter zentraler
-ICE-Pfade mit und ohne Hosting. Vorhandene erneuerbare Pools werden in beiden
+ICE-Pfade mit und ohne Hosting. Beide Pfadquoten verwenden das Trace-Profil der
+aktuellen Runner-Sicht. Vorhandene erneuerbare Pools werden in beiden
 Alternativen aufgefüllt; nur die zusätzliche Ersparnis zählt. Der bedingte
 Horizont beträgt höchstens fünf Runnerzüge, begrenzt durch beide Deckreste.
 Installcredits und zusätzliche Installklicks werden abgezogen. Ein beim ersten
@@ -2722,8 +2723,10 @@ Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
 `defense-signals.ts` bündelt Schutzinstallationen, Handpuffer, Tag-Clear-
 Funding und Reaktionsreserve. `defense-plan-module.ts` besitzt Phasenwahl,
 Funding-Revalidierung, Priorität und Materialisierung;
-`runner-discard-choice-plan.ts` bindet die Pflichtauswahl an die aktuelle
-Action und Choice. `defense-dispositions.ts` priorisiert verfügbare
+`runner-discard-choice-plan.ts` prüft vor der Kartenwertung die eindeutige
+aktuelle Engine-Action, Choice-Version und vollständige Optionsmenge. Der
+Resolver übernimmt die gebundenen Karten, sofern ihre unterschiedlichen
+Optionen weiterhin auswählbar sind. `defense-dispositions.ts` priorisiert verfügbare
 Schutzinstallationen gegenüber Statusbereinigung. Die Live-Runtime reicht
 Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.

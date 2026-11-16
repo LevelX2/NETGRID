@@ -107,6 +107,13 @@ it.each([
       selectedOptionIds: [`bid_${bid}`],
     });
     expect(commit.fallbackUsed).toBe(false);
+    const originEvidence = head.evidence?.filter(
+      (entry) =>
+        entry.startsWith("plan_first_root:") ||
+        entry.startsWith("plan_first_executor:"),
+    );
+    expect(originEvidence).toHaveLength(2);
+    expect(commit.evidence).toEqual(expect.arrayContaining(originEvidence!));
     current = applySelected(
       current,
       "corp",
@@ -142,6 +149,31 @@ it.each([
     current = applySelected(current, "corp", followUp.actionId!);
     expect(current.winner).toBe("corp");
     expect(current.corp.credits).toBe(0);
+  },
+);
+
+it.each(["locked", "side", "timing", "missing"] as const)(
+  "rejects a %s native Punish bid offer at the bound continuation",
+  (kind) => {
+    const state = punishState("modern_open", AUDIT, URBAN, 6, 2, 4);
+    const head = chooseCorpAction(decisionInput(state), {
+      quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+    });
+    expect(head.evidence).toContain("plan_priority_class:P1");
+    const bidState = applySelected(state, "corp", head.actionId!);
+    const input = decisionInput(bidState);
+    const action = input.legalActions.find(
+      (offer) => offer.type === "resolve_choice",
+    )!;
+    const choice = input.playerView.pendingChoice!;
+    if (kind === "locked") {
+      const option = choice.options.find((option) => option.id === "bid_0")!;
+      option.selectable = false;
+    }
+    if (kind === "side") action.side = "runner";
+    if (kind === "timing") action.timingPoint = "game.checkpoint";
+    if (kind === "missing") input.legalActions = [];
+    expect(() => chooseCorpAction(input)).toThrow("invalid_support_graph");
   },
 );
 

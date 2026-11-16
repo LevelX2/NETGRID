@@ -90,6 +90,7 @@ import { type DiscardChoiceKeepScore } from "./discard-choice-selection";
 import {
   PendingChoice,
   PendingChoiceOptions,
+  exactCurrentChoiceAction,
   unresolvedChoiceFailure,
 } from "./plan-bound-choice-contract";
 import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
@@ -208,12 +209,29 @@ function selectedRunnerDiscardOptionIdsFromResidentDefensePlan(
     moduleState.phase !== "discard_window" ||
     binding?.actionId !== action.actionId ||
     binding.choiceId !== choice.choiceId ||
-    binding.observedAtStateVersion !== input.playerView.stateVersion
+    binding.observedAtStateVersion !== input.playerView.stateVersion ||
+    exactCurrentChoiceAction(input, choice) !== action
   ) {
     throw unresolvedChoiceFailure(
       input,
       action,
       "The Runner defense plan must bind the exact discard choice and LegalAction before the resolver completes its payload.",
+    );
+  }
+  const selectableIds = new Set(
+    selectableChoiceOptions(choice.options).map((option) => option.id),
+  );
+  const boundIds = new Set(binding.selectedOptionIds);
+  if (
+    boundIds.size !== binding.selectedOptionIds.length ||
+    boundIds.size !== choice.minSelections ||
+    boundIds.size !== choice.maxSelections ||
+    [...boundIds].some((id) => !selectableIds.has(id))
+  ) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Runner defense plan must bind the required number of distinct, selectable discard options.",
     );
   }
   return [...binding.selectedOptionIds];

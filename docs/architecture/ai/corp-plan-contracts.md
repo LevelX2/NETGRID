@@ -2640,6 +2640,10 @@ Operationen und die Übernahme konkreter Parent-Bedarfe.
 Assessment und Materialisierung aus. `economy-routes.ts` bindet aktuelle
 Actions, Kosten und Auszahlungen; Asset-Payback und installierte Erträge
 liegen ebenfalls im Owner. Typen stehen in `economy-types.ts`.
+Die Zulassung verlangt das aktuelle Corp-Angebot mit passendem Timingpunkt
+und passender StateVersion. Eine ICE-Liquidation verwendet den Schutzbeleg
+von Defense einmal pro Funding-Kandidat und verlangt nach der Ausführung
+eine neue Boardbewertung.
 
 Eine vollständig Engine-gequotete unmittelbare Auszahlung mit bekannten
 Agenda-Punktkosten behält ihren vorhandenen Economy-Owner. Die nachfolgende
@@ -3219,7 +3223,10 @@ Fortschrittsbegriffe nicht mehr sinnvoll gemeinsam modellierbar sind.
 Kindplan. `punish-plan-support.ts` bindet aktuelle Head-Kandidaten und
 beobachtungsabhängige Fortsetzungen; `punish-route-quote-input.ts` erzeugt
 begrenzte Quote-Anfragen und `punish-trace-binding.ts` bindet das bereits
-gequotete Gebot an die aktuelle private Engine-Choice. Der Root bleibt
+gequotete Gebot an die aktuelle private Engine-Choice. Angebot und Choice
+müssen in Seite, Timing, StateVersion und Optionsmenge übereinstimmen.
+Das bereits gequotete Gebot muss genau einer auswählbaren Option entsprechen.
+Der Root bleibt
 `corp.punish_campaign`; Funding-Need, Execution-Need und Plan-IDs ändern sich
 durch diese Quellcodestruktur nicht.
 
@@ -3490,6 +3497,9 @@ mehrere geordnete Optionen nicht als erzwungen übernehmen (SP-513).
 Der Owner liegt unter `packages/ai/src/corp/hand-management/`.
 `hand-development-signals.ts` komponiert Kartenentwicklung und den endlichen
 Overflow-Parent; `hand-overflow.ts` revalidiert dessen konkrete Konversionen.
+Eine gewöhnliche Operationskonversion verlangt die garantierte unmittelbare
+Handreduktion um genau eine Karte aus dem aktuellen Angebot. Der Auswahlbeleg
+erwartet dieselbe Reduktion.
 Der endliche Konversionsrest zählt ausschließlich ausgewählte Schritte
 dieses Owners. Handverkleinerung oder Klickverbrauch durch Score/Economy
 begrenzen das aktuelle Angebot, verbrauchen aber keinen Overflow-Schritt.

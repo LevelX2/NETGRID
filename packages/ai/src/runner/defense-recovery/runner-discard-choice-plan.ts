@@ -5,6 +5,7 @@ import type { RunnerDiscardChoiceBinding } from "./defense-types";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { discardOptionInstanceId } from "../../runtime/discard-choice-option";
 import {
   selectedDiscardChoiceOptionIds,
@@ -35,13 +36,13 @@ export function runnerDiscardChoicePlanBinding(params: {
   ) {
     return undefined;
   }
-  const resolveAction = input.legalActions.find(
-    (action) => action.type === "resolve_choice",
-  );
+  const resolveAction = exactCurrentChoiceAction(input, choice);
   const exactCandidate = resolveAction
     ? params.candidates.find(
         (candidate) =>
           candidate.actionId === resolveAction.actionId &&
+          candidate.actorSide === "runner" &&
+          candidate.stateVersion === input.playerView.stateVersion &&
           candidate.semanticActionType === "choice.resolve",
       )
     : undefined;
@@ -54,6 +55,18 @@ export function runnerDiscardChoicePlanBinding(params: {
     );
   }
   const selectableOptions = selectableChoiceOptions(choice.options);
+  if (
+    !Number.isSafeInteger(choice.minSelections) ||
+    choice.minSelections < 1 ||
+    choice.minSelections !== choice.maxSelections ||
+    choice.minSelections > selectableOptions.length
+  ) {
+    throw missingRunnerDiscardCoverage(
+      input,
+      resolveAction.actionId,
+      "The Runner discard offer must bind the required count to its selectable options.",
+    );
+  }
   const knownHandByInstanceId = new Map(
     input.playerView.own.gripOrHq
       .filter((card) => card.known && card.definitionId)
@@ -61,6 +74,7 @@ export function runnerDiscardChoicePlanBinding(params: {
   );
   const optionInstanceIds = selectableOptions.map(discardOptionInstanceId);
   if (
+    new Set(optionInstanceIds).size !== optionInstanceIds.length ||
     optionInstanceIds.some(
       (instanceId) => !instanceId || !knownHandByInstanceId.has(instanceId),
     )
