@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { stat } from "node:fs/promises";
 import path from "node:path";
+import aiDeckPool from "../../data/ai/ai-deck-pool-1.1.0.json" with { type: "json" };
+import deckSnapshots from "../../data/decks/deck-snapshots-0.8.json" with { type: "json" };
+import deckCatalog from "../../data/decks/standard-deck-catalog-1.0.0.json" with { type: "json" };
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "../../packages/runtime-data/src/product-default-decks";
 import {
   BASE_URL,
   createHumanVsAiGame,
@@ -23,6 +30,24 @@ import {
 } from "./helpers/leak-scan";
 import { VIEWPORTS } from "./helpers/viewports";
 
+function standardDeckName(snapshotId: string): string {
+  const deck = deckCatalog.decks.find(
+    (entry) => `standard_${entry.standardDeckId}_${entry.version}` === snapshotId,
+  );
+  if (!deck) throw new Error(`Missing browser test deck for ${snapshotId}`);
+  return deck.name;
+}
+
+const runnerDeckName = standardDeckName(PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID);
+const corpDeckName = standardDeckName(PRODUCT_DEFAULT_CORP_SNAPSHOT_ID);
+const fixedOriginalsetCorp = aiDeckPool.entries.find(
+  (entry) => entry.side === "corp" && entry.tags.includes("fixed_originalset"),
+);
+const fixedCorpDeckName = deckSnapshots.snapshots.find(
+  (snapshot) => snapshot.deckSnapshotId === fixedOriginalsetCorp?.snapshotId,
+)?.name;
+if (!fixedCorpDeckName) throw new Error("Missing fixed Corp browser test deck");
+
 test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
   test("Human-vs-KI Desktop prüft aktives Board, KI-Takt, Cue, Aktionen, Credits und Artefakte", async ({
     page,
@@ -36,6 +61,8 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     const details = page.locator("#match-details-strip");
     await expect(details).toContainText("Eigenes Deck");
     await expect(details).toContainText("KI-Deck");
+    await expect(details.getByText(runnerDeckName, { exact: true })).toBeVisible();
+    await expect(details.getByText(fixedCorpDeckName!, { exact: true })).toBeVisible();
     await page.locator(".matchDetailsToggle").click();
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await expect(page.getByTestId("server-run-action").first()).toHaveAttribute(
@@ -98,6 +125,8 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       const details = host.page.locator("#match-details-strip");
       await expect(details).toContainText("Eigenes Deck");
       await expect(details).not.toContainText("KI-Deck");
+      await expect(details.getByText(runnerDeckName, { exact: true })).toBeVisible();
+      await expect(details.getByText(corpDeckName, { exact: true })).toHaveCount(0);
       await host.page.locator(".matchDetailsToggle").click();
       await expectNoDomOrLocalStorageLeaks(host.page);
       await expectNoDomOrLocalStorageLeaks(joiner.page);

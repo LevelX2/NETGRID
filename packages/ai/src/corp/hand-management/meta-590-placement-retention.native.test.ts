@@ -48,8 +48,8 @@ it.each([
       timeoutUsed: false,
     });
     expect(d.selectedChoices?.selectedOptionIds).toHaveLength(2);
-    expect(new Set(d.selectedChoices?.selectedOptionIds)).toEqual(
-      new Set([
+    expect(d.selectedChoices?.selectedOptionIds).toEqual(
+      expect.arrayContaining([
         "card_corp_onr_proteus_021_dog-pile_1",
         keep
           ? "card_corp_onr_proteus_007_project-venice_1"
