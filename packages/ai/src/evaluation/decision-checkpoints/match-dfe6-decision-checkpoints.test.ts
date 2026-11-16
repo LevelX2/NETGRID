@@ -37,6 +37,14 @@ describe("match DFE6 exact decision checkpoints", () => {
         .ice.map((id) => state.cardInstances[id]!)
         .find((card) => card.definitionId === "onr_v1_243_fetch-4-0-1")!;
       fetch.strengthModifier += 10;
+      // Isolate the unmitigated Trace: the original position has two Fall Guys.
+      state.runner.rig.resources = state.runner.rig.resources.filter((id) => {
+        const card = state.cardInstances[id]!;
+        if (card.definitionId !== "onr_v1_161_fall-guy") return true;
+        card.zone = { side: "runner", zone: "heap" };
+        state.runner.heap.push(id);
+        return false;
+      });
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.expectation = structuredClone(
         cp03Json.expectation,

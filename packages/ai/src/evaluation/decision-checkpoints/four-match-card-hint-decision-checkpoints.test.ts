@@ -105,9 +105,25 @@ describe("four-match card-hint decision checkpoints", () => {
         fundingGap: 0,
         unknownIceCount: 0,
       },
-      unavoidableVisibleIceHazardCount: 1,
+      unavoidableVisibleIceHazardCount: 0,
+      visibleIceRunHazards: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "trace_tag",
+          minimumAvoidanceCost: 0,
+          unavoidable: false,
+        }),
+      ]),
     });
-    expect(directHqEvaluation?.score).toBeLessThan(0);
+
+    const unprotected = structuredClone(result.input);
+    unprotected.playerView.own.rig = unprotected.playerView.own.rig!.filter(
+      (card) => card.definitionId !== "onr_v1_161_fall-guy",
+    );
+    const unprotectedHq = evaluateRunnerRunTargets({ input: unprotected }).find(
+      (entry) => entry.actionId === "runner.start_run.hq",
+    );
+    expect(unprotectedHq?.unavoidableVisibleIceHazardCount).toBe(1);
+    expect(unprotectedHq?.score).toBeLessThan(0);
   });
 });
 

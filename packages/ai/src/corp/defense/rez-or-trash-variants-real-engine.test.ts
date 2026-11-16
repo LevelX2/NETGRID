@@ -122,15 +122,16 @@ function fixture(definitionId: string, credits = 20, worm = false) {
   });
   return { state, initial, start, target };
 }
-function inputFor(state: GameState) {
-  return buildAiDecisionInput(state, "corp", {
+function inputFor(state: GameState, side: "corp" | "runner" = "corp") {
+  const deck = side === "corp" ? corpDeck : runnerDeck;
+  return buildAiDecisionInput(state, side, {
     difficulty: "hard",
     decisionId: "forced:" + state.stateVersion,
     profileId: "forced-native",
     ownDeckSnapshot: {
       deckSnapshotId: "forced-native",
-      side: "corp",
-      cards: corpDeck.cards.map((c) => ({
+      side,
+      cards: deck.cards.map((c) => ({
         cardId: c.id,
         quantity: c.quantity,
       })),
@@ -315,22 +316,31 @@ describe("native mandatory variable ICE rez", () => {
     );
   });
   it("strips unapproved quote fields and never admits them to a Runner DTO", () => {
-    const input = inputFor(fixture(GATEKEEPER).state),
-      q = input.playerView.pendingChoice!.options[0]!.forcedIceRezQuote!;
-    Object.assign(q, {
+    const { state } = fixture(GATEKEEPER);
+    const input = inputFor(state);
+    const choice = input.playerView.pendingChoice!;
+    const quote = choice.options[0]!.forcedIceRezQuote!;
+    Object.assign(quote, {
       hiddenRunnerHand: ["secret"],
       rawGameState: { secret: true },
     });
     const dto = buildAiDecisionInputDto(input);
+    expect(
+      dto.playerView.pendingChoice?.options[0]?.forcedIceRezQuote,
+    ).toBeDefined();
     expect(JSON.stringify(dto)).not.toContain("hiddenRunnerHand");
     expect(JSON.stringify(dto)).not.toContain("rawGameState");
-    input.playerView.side = "runner";
-    input.side = "runner";
-    input.legalActions = [];
-    input.playerView.legalActions = [];
+
+    const runnerInput = inputFor(state, "runner");
+    expect(runnerInput.playerView.pendingChoice).toBeUndefined();
+    runnerInput.playerView.pendingChoice = choice;
+    const runnerDto = buildAiDecisionInputDto(runnerInput);
+    expect(runnerDto.playerView.pendingChoice?.options).toHaveLength(
+      choice.options.length,
+    );
     expect(
-      buildAiDecisionInputDto(input).playerView.pendingChoice!.options.every(
-        (o) => !o.forcedIceRezQuote,
+      runnerDto.playerView.pendingChoice?.options.every(
+        (option) => !option.forcedIceRezQuote,
       ),
     ).toBe(true);
   });

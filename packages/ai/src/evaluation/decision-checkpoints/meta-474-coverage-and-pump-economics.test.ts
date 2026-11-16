@@ -74,6 +74,8 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
           ],
         },
       });
+      const coverageInstanceId =
+        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Aremote_1%3Arun%3Arunner.start_run.remote_1";
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject(
         name === "r9-g1-d142"
           ? {
@@ -86,16 +88,30 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
               },
             }
           : {
-              rootPlanInstanceId:
-                "plan:runner.contest_remote:remote%3Aremote_1",
-              leafExecutorInstanceId:
-                "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Aremote_1%3Arun%3Arunner.start_run.remote_1",
+              rootPlanInstanceId: coverageInstanceId,
+              leafExecutorInstanceId: coverageInstanceId,
               route: {
                 actionId:
                   "runner.install_card.runner_onr_v1_074_worm_1.runner_onr_v1_074_worm_1",
               },
             },
       );
+      if (name === "r9-g17-d176") {
+        // The funded Inside Job path leaves the remote with no open support need.
+        const remote = residentPlanPortfolioSnapshot(input)!.instances.find(
+          (instance) =>
+            instance.instanceId ===
+            "plan:runner.contest_remote:remote%3Aremote_1",
+        );
+        expect(remote).toMatchObject({
+          openNeedIds: [],
+          evidenceRefs: expect.arrayContaining([
+            expect.objectContaining({
+              code: "runner_direct_run_converts_now:remote_1",
+            }),
+          ]),
+        });
+      }
     },
   );
 

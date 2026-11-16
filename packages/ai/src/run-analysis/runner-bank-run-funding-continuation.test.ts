@@ -8,10 +8,18 @@ import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import { runnerBankRunFundingContinuation } from "./runner-bank-run-funding-continuation";
 
-function facts(source: unknown = checkpoint) {
+function facts(
+  source: unknown = checkpoint,
+  options?: { withoutTagPrevention: true },
+) {
   const input = structuredClone(
     (source as typeof checkpoint).input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
+  if (options?.withoutTagPrevention) {
+    input.playerView.own.rig = input.playerView.own.rig!.filter(
+      (card) => card.definitionId !== "onr_v1_135_nasuko-cycle",
+    );
+  }
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: input.side,
@@ -75,8 +83,10 @@ it.each(["one_credit_short", "one_click_short", "no_loan"] as const)(
   },
 );
 
-it("certifies the complete composite route while exposing only the bank's current first step", () => {
-  const { input, candidates, target, bank } = facts();
+it("certifies the composite route without installed tag prevention and exposes the bank's first step", () => {
+  const { input, candidates, target, bank } = facts(checkpoint, {
+    withoutTagPrevention: true,
+  });
   const quote = runnerBankRunFundingContinuation(
     input,
     candidates,
@@ -97,6 +107,25 @@ it("certifies the complete composite route while exposing only the bank's curren
   });
 });
 
+it("does not require the composite bank prefix when installed prevention covers Hunter", () => {
+  const { input, candidates, target, bank } = facts();
+  expect(target.routeQuote?.knownCost).toBe(13);
+  expect(target.visibleIceRunHazards?.[0]).toMatchObject({
+    kind: "trace_tag",
+    minimumAvoidanceCost: 3,
+    unavoidable: false,
+  });
+  expect(
+    runnerBankRunFundingContinuation(
+      input,
+      candidates,
+      input.ownDeckCapabilities!,
+      target,
+      bank.actionId,
+    ),
+  ).toBeUndefined();
+});
+
 it.each([
   "insufficient_total_exit",
   "no_run_click",
@@ -107,7 +136,9 @@ it.each([
   "nonfinite_source",
   "central_consumer",
 ] as const)("does not bind an unsupported composite prefix: %s", (variant) => {
-  const { input, candidates, target, bank } = facts();
+  const { input, candidates, target, bank } = facts(checkpoint, {
+    withoutTagPrevention: true,
+  });
   if (variant === "insufficient_total_exit") input.playerView.own.credits = 12;
   if (variant === "no_run_click") input.playerView.own.clicks = 2;
   if (variant === "unheld_loan")

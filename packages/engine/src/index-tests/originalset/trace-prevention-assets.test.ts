@@ -455,11 +455,12 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
   });
 
   it.each([
-    ["Fetch 4.0.1", "onr_v1_243_fetch-4-0-1", 0],
-    ["Hunter", "onr_v1_249_hunter", 2],
-  ])(
-    "offers Fall Guy for %s trace tags at zero credits and resumes the run after either decision",
-    (_title, iceDefinitionId, rezCost) => {
+    ["Fetch 4.0.1", "onr_v1_243_fetch-4-0-1", 0, "onr_v1_161_fall-guy", 0],
+    ["Hunter", "onr_v1_249_hunter", 2, "onr_v1_161_fall-guy", 0],
+    ["Hunter", "onr_v1_249_hunter", 2, "onr_v1_135_nasuko-cycle", 3],
+  ] as const)(
+    "offers avoidance for %s trace tags and resumes the run after either decision (%s, rez %i, %s)",
+    (_title, iceDefinitionId, rezCost, sourceDefinitionId, avoidanceCost) => {
       let state = toRunnerTurn(
         createGameAfterSetup({
           seed: "spotcheck-fetch-fall-guy-tag-prevention",
@@ -468,7 +469,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
             id: "spotcheck_fetch_fall_guy_runner",
             name: "Spotcheck Fetch Fall Guy Runner",
             cards: [
-              { id: "onr_v1_161_fall-guy", quantity: 1 },
+              { id: sourceDefinitionId, quantity: 1 },
               ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
             ],
           },
@@ -485,15 +486,15 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         }),
       );
       state.runner.credits = 5;
-      const fallGuyId = moveRunnerCardToGrip(state, "onr_v1_161_fall-guy");
+      const sourceId = moveRunnerCardToGrip(state, sourceDefinitionId);
       state = apply(
         state,
         "runner",
         (action) =>
           action.type === "install_card" &&
-          String(action.payload?.cardId) === fallGuyId,
+          String(action.payload?.cardId) === sourceId,
       );
-      state.runner.credits = 0;
+      state.runner.credits = avoidanceCost;
       state.corp.credits = rezCost + 1;
       putCorpIceOnServer(state, "rd", iceDefinitionId);
       const initial = structuredClone(state);
@@ -520,7 +521,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       state = applyChoice(state, "corp", "bid_1");
       state = applyChoice(state, "runner", "bid_0");
 
-      expect(state.runner.credits).toBe(0);
+      expect(state.runner.credits).toBe(avoidanceCost);
       expect(state.corp.credits).toBe(0);
       expect(state.runner.tags).toBe(0);
       expect(state.pendingChoice).toMatchObject({
@@ -544,15 +545,20 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
           (action) => action.type === "resolve_choice",
         ),
       ).toBe(false);
-      const fallGuyOption = state.pendingChoice?.options.find((option) =>
-        option.id.includes(String(fallGuyId)),
+      const avoidanceOption = state.pendingChoice?.options.find((option) =>
+        option.id.includes(String(sourceId)),
       )?.id;
-      expect(fallGuyOption).toBeDefined();
+      expect(avoidanceOption).toBeDefined();
 
       let avoidState = structuredClone(state);
-      avoidState = applyChoice(avoidState, "runner", String(fallGuyOption));
+      avoidState = applyChoice(avoidState, "runner", String(avoidanceOption));
       expect(avoidState.runner.tags).toBe(0);
-      expect(avoidState.runner.heap).toContain(fallGuyId);
+      expect(avoidState.runner.credits).toBe(0);
+      if (avoidanceCost === 0) {
+        expect(avoidState.runner.heap).toContain(sourceId);
+      } else {
+        expect(avoidState.runner.rig.hardware).toContain(sourceId);
+      }
       expect(avoidState.run).toBeDefined();
       expect(avoidState.timingPoint).toBe("run.encounter_ice");
       expect(
@@ -562,7 +568,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       ).toBe(true);
       expect(avoidState.eventLog.at(-1)?.publicPayload).toMatchObject({
         eventModificationOutcome: "avoided",
-        sourceDefinitionId: "onr_v1_161_fall-guy",
+        sourceDefinitionId,
         tagsAdded: 0,
       });
       expect(
@@ -571,14 +577,21 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         imminentEventId: traceResult?.publicPayload.imminentEventId,
         imminentEventType: "add_tag",
         preventedTags: 1,
-        trashedCardDefinitionId: "onr_v1_161_fall-guy",
+        ...(avoidanceCost === 0
+          ? { trashedCardDefinitionId: sourceDefinitionId }
+          : { paidCredits: avoidanceCost }),
         tagsAdded: 0,
       });
 
       let passState = structuredClone(state);
       passState = applyChoice(passState, "runner", "pass");
       expect(passState.runner.tags).toBe(1);
-      expect(passState.runner.rig.resources).toContain(fallGuyId);
+      expect(passState.runner.credits).toBe(avoidanceCost);
+      const installedSources =
+        avoidanceCost === 0
+          ? passState.runner.rig.resources
+          : passState.runner.rig.hardware;
+      expect(installedSources).toContain(sourceId);
       expect(passState.run).toBeDefined();
       expect(passState.timingPoint).toBe("run.encounter_ice");
       expect(

@@ -9284,14 +9284,16 @@ describe("authoritative plan-first live runtime", () => {
       server("rd"),
       server("archives"),
       server("remote_1", [
-        visibleCard("remote-data-wall", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
-          title: "Data Wall",
+        {
+          ...quotedFixtureIce({
+            instanceId: "remote-data-wall",
+            definitionId: "onr_v1_237_data-wall",
+            title: "Data Wall",
+            strength: 0,
+            subtypes: ["wall"],
+          }),
           rezCost: 1,
-          strength: 0,
-          subtypes: ["wall"],
-          rezzed: true,
-        }),
+        },
       ]),
     ];
     for (const action of input.legalActions) {
@@ -16230,6 +16232,7 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("corp", [install, credit]);
     input.playerView.own.credits = 8;
     input.playerView.own.clicks = 3;
+    input.playerView.own.corpFutureFlexibleClicks = [2, 0];
     input.playerView.own.gripOrHq = [
       visibleCard("protected-finite-pool-card", "corp", "asset", {
         definitionId: "onr_v1_309_bbs-whispering-campaign",
