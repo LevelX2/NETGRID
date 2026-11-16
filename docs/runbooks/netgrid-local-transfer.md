@@ -90,6 +90,21 @@ installierten LAN-Betrieb ist im
 beschrieben; dort wird eine eindeutige neue Adresse beim Prozessstart in die
 Laufzeitkonfiguration übernommen.
 
+## Build-Wechsel beim lokalen Entwicklungsstart
+
+Bei jedem Aufruf von `scripts/start-netgrid.ps1` vergleicht der Starter die
+unter `/health` gemeldete Produktversion, Buildnummer und Commitkennung des
+laufenden Servers mit der Kennung im HTML des Webclients. Bei abweichender
+oder fehlender Webkennung startet er den Webclient automatisch neu. Das
+gilt auch für den normalen Aufruf ohne `-RestartWeb`, nachdem der Server
+bereits auf einen anderen Build gewechselt hat. Stimmen die Kennungen
+überein, kann der laufende Webclient weiterverwendet werden.
+
+Der Starter öffnet den Browser erst, wenn beide Kennungen übereinstimmen.
+Meldet ein laufender Server nach einem Wechsel des Checkouts weiterhin den
+vorherigen Stand, lädt `scripts/start-netgrid.ps1 -RestartServer` den
+aktuellen Quellstand und zieht den Webclient automatisch nach.
+
 ## Hinweise
 
 - Die SQLite-Runtime ist nicht mergebar. Für einen Rechnerwechsel ist ein einmaliger Transfer sinnvoll; parallele Runtime-Fortschritte auf zwei Rechnern sollten nicht zusammengeführt werden.

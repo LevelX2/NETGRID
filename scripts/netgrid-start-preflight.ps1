@@ -43,18 +43,41 @@ function Test-NetgridBrowserConnection {
   }
 }
 
-function Test-NetgridWebServerBinding {
+function Get-NetgridServerBuildIdentity {
+  param([Parameter(Mandatory = $true)][string]$Url)
+  try {
+    $health = Invoke-RestMethod -Uri $Url -TimeoutSec 4 -ErrorAction Stop
+    $build = $health.build
+    if ($health.ok -is [bool] -and $health.ok -and $build.source -cin @('git', 'embedded') -and
+        $build.productVersion -is [string] -and -not [string]::IsNullOrWhiteSpace($build.productVersion) -and
+        $build.buildNumber -is [string] -and $build.buildNumber -cmatch '^[0-9]+$' -and
+        $build.commit -is [string] -and $build.commit -cmatch '^[0-9a-f]{7,40}$') {
+      return "$($build.productVersion)/$($build.buildNumber)/$($build.commit)"
+    }
+  } catch {
+    return $null
+  }
+  return $null
+}
+
+function Get-NetgridWebStartupStatus {
   param(
     [Parameter(Mandatory = $true)][string]$ServerUrl,
     [Parameter(Mandatory = $true)][string]$WebUrl
   )
   try {
     $response = Invoke-WebRequest -UseBasicParsing -Uri $WebUrl -TimeoutSec 4 -ErrorAction Stop
+    if ($response.StatusCode -ne 200) { return $null }
+
     $binding = [regex]::Match($response.Content, 'data-netgrid-server-origin="([^"]+)"')
-    return $response.StatusCode -eq 200 -and $binding.Success -and
-      [System.Net.WebUtility]::HtmlDecode($binding.Groups[1].Value) -eq $ServerUrl.TrimEnd('/')
+    $build = [regex]::Match($response.Content, 'data-netgrid-build="([^"]+)"')
+    return [pscustomobject]@{
+      BindingMatches = $binding.Success -and
+        [System.Net.WebUtility]::HtmlDecode($binding.Groups[1].Value) -eq $ServerUrl.TrimEnd('/')
+      BuildIdentity = [System.Net.WebUtility]::HtmlDecode($build.Groups[1].Value)
+    }
   } catch {
-    return $false
+    return $null
   }
 }
 

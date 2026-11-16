@@ -100,27 +100,61 @@ Describe "Browser-Verbindung vor Startfreigabe" {
     $script:reply.Content = '{"ok":false}'
     Test-NetgridBrowserConnection -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
   }
-  It "prüft die tatsächlich ausgelieferte Serveradresse im Webclient" {
-    $script:reply.Content = '<html data-netgrid-server-origin="http://192.168.68.58:8787">'
-    Test-NetgridWebServerBinding -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $true
-    Test-NetgridWebServerBinding -ServerUrl 'http://192.168.68.54:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+  It "liest Serverbindung und Build aus der ausgelieferten Weboberfläche" {
+    $script:reply.Content = '<html data-netgrid-server-origin="http://192.168.68.58:8787" data-netgrid-build="1.0/9323/0505e46af">'
+    $status = Get-NetgridWebStartupStatus -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100'
+    $status.BindingMatches | Should Be $true
+    $status.BuildIdentity | Should Be '1.0/9323/0505e46af'
+    $status = Get-NetgridWebStartupStatus -ServerUrl 'http://192.168.68.54:8787' -WebUrl 'http://192.168.68.58:3100'
+    $status.BindingMatches | Should Be $false
     $script:reply.Content = '<html>Fehlerseite</html>'
-    Test-NetgridWebServerBinding -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+    $status = Get-NetgridWebStartupStatus -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100'
+    $status.BindingMatches | Should Be $false
+    $status.BuildIdentity | Should BeNullOrEmpty
   }
 }
 
-Describe "Neustart nach OK im Netzwerkdialog" {
+Describe "Buildkennung des laufenden Servers" {
+  BeforeEach {
+    $script:health = [pscustomobject]@{
+      ok = $true
+      build = [pscustomobject]@{ source = 'git'; productVersion = '1.0'; buildNumber = '9323'; commit = '0505e46af' }
+    }
+    Mock Invoke-RestMethod { $script:health }
+  }
+  It "verwendet die vom Server gemeldete Produktversion, Buildnummer und Commitkennung" {
+    Get-NetgridServerBuildIdentity -Url 'http://192.168.68.58:8787/health' | Should Be '1.0/9323/0505e46af'
+  }
+  It "verwirft eine fehlende oder ungültige Buildkennung" {
+    $script:health.build.source = 'unavailable'
+    Get-NetgridServerBuildIdentity -Url 'http://192.168.68.58:8787/health' | Should BeNullOrEmpty
+    $script:health.build.source = 'git'
+    $script:health.build.commit = 'invalid'
+    Get-NetgridServerBuildIdentity -Url 'http://192.168.68.58:8787/health' | Should BeNullOrEmpty
+  }
+}
+
+Describe "Neustart bei neuer Buildkennung oder geänderter Netzwerkbindung" {
   function Request-NetgridStartupRestart { param($Message) throw 'Dialog must be mocked' }
+  function Write-LauncherLog { param($Message) throw 'Log must be mocked' }
+  function Stop-PortListeners { param($Ports) throw 'Stop must be mocked' }
+  function Start-NetgridProcess { param($Command, $LogPath, $Environment) throw 'Start must be mocked' }
   BeforeEach {
     $ast = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot '..\start-netgrid.ps1'), [ref]$null, [ref]$null)
     $serverBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item1.Extent.Text -like '*$serverReadyLanBefore*browserConnectionReady*' }, $true).Extent.Text
-    $webBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item1.Extent.Text -like '*$webReadyLanBefore*Test-NetgridWebServerBinding*' }, $true).Extent.Text
+    $webBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item2.Extent.Text -like '*$webStatusBefore = Get-NetgridWebStartupStatus*' -and $node.Parent -is [System.Management.Automation.Language.NamedBlockAst] }, $true).Extent.Text
+    $startWebBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item2.Extent.Text -like '*Starting web command*' }, $true).Extent.Text
+    $script:webStatus = [pscustomobject]@{ BindingMatches = $true; BuildIdentity = '1.0/9323/0505e46af' }
     Mock Request-NetgridStartupRestart { $true }
-    Mock Test-NetgridWebServerBinding { $false }
+    Mock Get-NetgridWebStartupStatus { $script:webStatus }
+    Mock Write-LauncherLog {}
+    Mock Stop-PortListeners {}
+    Mock Start-NetgridProcess {}
     $RestartServer = $false
     $RestartWeb = $false
     $serverReadyLanBefore = $true
     $browserConnectionReady = $false
+    $serverBuild = '1.0/9323/0505e46af'
     $webReadyLanBefore = $true
     $serverEnvironment = @{ NETGRID_SERVER_BASE_URL = 'http://192.168.68.58:8787' }
     $targetWebUrl = 'http://192.168.68.58:3100'
@@ -133,6 +167,7 @@ Describe "Neustart nach OK im Netzwerkdialog" {
     Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 1 -Exactly
   }
   It "startet bei ausschließlich veralteter Webbindung nur den Webclient neu" {
+    $script:webStatus.BindingMatches = $false
     Invoke-Expression $webBranch
     $RestartWeb | Should Be $true
     $RestartServer | Should Be $false
@@ -142,5 +177,38 @@ Describe "Neustart nach OK im Netzwerkdialog" {
     $RestartServer = $true
     Invoke-Expression $serverBranch
     Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 0 -Exactly
+  }
+  It "stoppt und startet den alten Webclient bei einem neuen Serverbuild ohne Dialog" {
+    $RestartServer = $true
+    $script:webStatus.BuildIdentity = '1.0/9300/1b7795f40'
+    Invoke-Expression $webBranch
+    Invoke-Expression $startWebBranch
+    Assert-MockCalled Stop-PortListeners -Scope It -Times 1 -Exactly -ParameterFilter { $Ports -contains 3100 }
+    Assert-MockCalled Start-NetgridProcess -Scope It -Times 1 -Exactly -ParameterFilter { $Command -like '*@netgrid/web*' }
+    Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 0 -Exactly
+  }
+  It "startet auch bei gleicher Buildnummer und anderem Commit neu" {
+    $script:webStatus.BuildIdentity = '1.0/9323/1b7795f40'
+    Invoke-Expression $webBranch
+    $RestartWeb | Should Be $true
+  }
+  It "startet eine Weboberfläche ohne Buildkennung neu" {
+    $script:webStatus.BuildIdentity = ''
+    Invoke-Expression $webBranch
+    $RestartWeb | Should Be $true
+  }
+  It "verwendet den Webclient beim Serverneustart auf demselben Build weiter" {
+    $RestartServer = $true
+    Invoke-Expression $webBranch
+    Invoke-Expression $startWebBranch
+    Assert-MockCalled Stop-PortListeners -Scope It -Times 0 -Exactly
+    Assert-MockCalled Start-NetgridProcess -Scope It -Times 0 -Exactly
+  }
+  It "lässt den Webprozess bei fehlender Server-Buildkennung weiterlaufen" {
+    $serverBuild = $null
+    Invoke-Expression $webBranch
+    Invoke-Expression $startWebBranch
+    Assert-MockCalled Stop-PortListeners -Scope It -Times 0 -Exactly
+    Assert-MockCalled Start-NetgridProcess -Scope It -Times 0 -Exactly
   }
 }
