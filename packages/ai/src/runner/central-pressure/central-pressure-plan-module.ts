@@ -76,7 +76,7 @@ export function centralPressureModule(): PlanModule {
           "runner.pressure_central",
           signal.pressureId,
           { kind: "central_pressure", signal } satisfies PressureState,
-          signal.priorityClass,
+          centralPressurePriority(signal),
           signal.strategyLineIds,
           { kind: "server", id: signal.serverId },
           (signal.supportNeedId !== undefined ||
@@ -127,7 +127,7 @@ export function centralPressureModule(): PlanModule {
             );
       const result = assessment(
         instance,
-        current.signal.priorityClass,
+        centralPressurePriority(current.signal),
         routeExists,
         current.signal.marginalValue,
         portfolio.executorInstanceId,
@@ -261,6 +261,18 @@ function targetedIcePreparationPurpose(signal: RunnerPressureSignal): string {
     default:
       return `Prepare ICE disruption on ${signal.serverId}.`;
   }
+}
+
+function centralPressurePriority(
+  signal: RunnerPressureSignal,
+): RunnerPressureSignal["priorityClass"] {
+  if (
+    signal.routePreparation === "targeted_bypass" &&
+    (signal.priorityClass === "P2" || signal.priorityClass === "P3")
+  ) {
+    return "P4";
+  }
+  return signal.priorityClass;
 }
 
 /** Describes the selected action's actual replacement in the current view. */

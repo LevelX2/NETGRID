@@ -416,6 +416,12 @@ eines Run-Events. Die Vorbereitung erbt die Admission, Priorität und Bewertung
 des bereits ausführbaren Parents. Ein bekannter reiner Trash-Zugriff trägt
 keinen Agenda-Bonus.
 
+Übernimmt eine gezielte ICE-Umgehung einen Zentralplan, fordert der Owner
+für den vorbereitenden Schritt höchstens P4 an. Die verdeckte Antwort der Korp
+bestimmt weiterhin, ob die Umgehung gelingt. Dringlichkeit aus dem bisherigen
+Runpfad bleibt ein Zielsignal, während der aktuelle Step seine eigene belegte
+Erfolgsaussicht und die gebundene Server- und ICE-Position behält.
+
 Ein öffentlich ausgespielter, noch nicht verbrauchter Agenda-Zugriffsbonus
 verfällt am Runner-Zugende. Die Run-Owner lesen diesen Zustand aus kanonischem
 Karteneffekt und den Engine-Ereignissen zu Spiel, Verbrauch und TurnSerial.
