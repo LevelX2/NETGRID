@@ -6,7 +6,7 @@ import {
   type CorpScoreConversionPath,
 } from "../../plans/tactical-plan-corp-score-conversion";
 import { corpVisibleCardEconomyWithdrawals } from "../economy/economy-signals";
-import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
+import { corpRemoteContestabilityAssessment } from "../defense/corp-remote-contestability";
 import { corpRezHostedCreditPayoutProfile } from "../../runtime/corp-canonical-card-facts";
 import { corpAgendaInstallHasCertifiedNearTermScoreHorizon } from "./score-project-signals";
 import { corpScorePriorityClass } from "./corp-score-priority";
