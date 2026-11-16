@@ -26,10 +26,7 @@ export function summarizeRunnerActionValuationBaselineMetrics(
         (entry.actionsRemainingBefore ?? 0) > 0
       ) {
         metrics.runnerEndTurnsWithClicks += 1;
-        if (
-          entry.evidence.includes("runner_inevitable_corp_deckout:true") ||
-          isVerifiedPlanFirstCorpDeckoutCloseout(summary, index)
-        ) {
+        if (isVerifiedPlanFirstCorpDeckoutCloseout(summary, index)) {
           metrics.runnerInevitableCorpDeckoutEndTurnsWithClicks += 1;
         } else if (isCertifiedPlanFirstRouteExhaustion(entry)) {
           continue;

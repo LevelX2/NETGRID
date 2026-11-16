@@ -254,6 +254,29 @@ export function buildRunnerShellTradersPipelineSignals({
         shellCountersAfterAction * 8 -
         replacementAssessment.displacedValue,
     );
+    const holdEvidence = [
+      ...(paidCoverageWithoutAccess
+        ? ["runner_shell_traders_holds_unfunded_access"]
+        : []),
+      ...(redundantTarget
+        ? ["runner_shell_traders_rejected_redundant_target"]
+        : []),
+      ...(noCurrentTargetNeed
+        ? ["runner_shell_traders_rejected_no_current_target_need"]
+        : []),
+      ...(pendingDuplicateDefinition
+        ? ["runner_shell_traders_rejected_pending_duplicate_definition"]
+        : []),
+      ...(zeroCounterPreparation
+        ? ["runner_shell_traders_rejected_zero_counter_preparation"]
+        : []),
+      ...(completionWouldBeHarmful
+        ? ["runner_shell_traders_holds_harmful_completion"]
+        : []),
+      ...(paidAccelerationWithoutCurrentUse
+        ? ["runner_shell_traders_holds_unneeded_paid_acceleration"]
+        : []),
+    ];
     const evidenceCodes = [
       ...(coverageSubstitution
         ? ["runner_shell_traders_substitutes_current_coverage_install"]
@@ -277,27 +300,7 @@ export function buildRunnerShellTradersPipelineSignals({
             `runner_shell_traders_access:${accessAssessment.status}:${accessAssessment.reason}`,
           ]
         : []),
-      ...(paidCoverageWithoutAccess
-        ? ["runner_shell_traders_holds_unfunded_access"]
-        : []),
-      ...(redundantTarget
-        ? ["runner_shell_traders_rejected_redundant_target"]
-        : []),
-      ...(noCurrentTargetNeed
-        ? ["runner_shell_traders_rejected_no_current_target_need"]
-        : []),
-      ...(pendingDuplicateDefinition
-        ? ["runner_shell_traders_rejected_pending_duplicate_definition"]
-        : []),
-      ...(zeroCounterPreparation
-        ? ["runner_shell_traders_rejected_zero_counter_preparation"]
-        : []),
-      ...(completionWouldBeHarmful
-        ? ["runner_shell_traders_holds_harmful_completion"]
-        : []),
-      ...(paidAccelerationWithoutCurrentUse
-        ? ["runner_shell_traders_holds_unneeded_paid_acceleration"]
-        : []),
+      ...holdEvidence,
       ...(doctrineStageBeforeOverflow
         ? [
             "runner_engine_doctrine:stage_before_overflow_draw",
@@ -318,7 +321,18 @@ export function buildRunnerShellTradersPipelineSignals({
         targetDefinitionId,
         targetCardType: targetCard.type,
         actionIds: phase === "hold" ? [] : [action.actionId],
-        ...(phase === "hold" ? { rejectedActionIds: [action.actionId] } : {}),
+        ...(phase === "hold"
+          ? {
+              rejectedActions: [
+                {
+                  actionId: action.actionId,
+                  evidenceCode:
+                    holdEvidence[0] ??
+                    "runner_shell_traders_rejected_target_fit",
+                },
+              ],
+            }
+          : {}),
         priorityClass,
         value,
         shellCountersBefore,

@@ -7,10 +7,8 @@ import { createSemanticRuntimeCorpPassiveScoreLineContext } from "./semantic-run
 import type { SemanticRuntimeCorpPassiveScoreLineDependencies } from "./semantic-runtime-corp-passive-scoreline";
 import { createSemanticRuntimeCorpScoreSafetyContext } from "./semantic-runtime-corp-score-safety-context";
 import type { SemanticRuntimeCorpScoreSafetyDependencies } from "./semantic-runtime-corp-score-safety";
-import {
-  createSemanticRuntimeCorpScoreComposition,
-  type SemanticRuntimeCorpScoreCompositionDependencies,
-} from "./semantic-runtime-corp-score-composition";
+import { createSemanticRuntimeCorpScoreComponents } from "./semantic-runtime-corp-score-context";
+import type { SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
@@ -22,7 +20,7 @@ export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
   Omit<SemanticRuntimeCorpPassiveScoreLineDependencies, "actionIsScoreLine"> &
   SemanticRuntimeCorpScoreSafetyDependencies &
   Omit<
-    SemanticRuntimeCorpScoreCompositionDependencies<TConsumer>,
+    SemanticRuntimeCorpScoreDependencies<TConsumer>,
     | "corpScoreNowSafetyGate"
     | "corpAdvancementCounterPlacementAssessment"
     | "corpPassiveScoreLinePenalty"
@@ -125,8 +123,8 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
       remoteRezFloorAssessment: dependencies.corpRemoteRezFloorAssessment,
     });
 
-  const { semanticRuntimeCorpScoreComponents } =
-    createSemanticRuntimeCorpScoreComposition({
+  const semanticRuntimeCorpScoreComponents =
+    createSemanticRuntimeCorpScoreComponents({
       actionCreditCost: dependencies.actionCreditCost,
       rolesForAction: dependencies.rolesForAction,
       corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
@@ -153,7 +151,6 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
       corpTaggedPayoffWindowPassiveActionPenalty:
         dependencies.corpTaggedPayoffWindowPassiveActionPenalty,
       corpPassiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
-      scoreFromComponents: dependencies.scoreFromComponents,
     });
 
   return {

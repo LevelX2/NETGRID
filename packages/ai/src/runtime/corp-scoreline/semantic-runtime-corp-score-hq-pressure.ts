@@ -583,7 +583,6 @@ export function corpHqAgendaFloodDrawRiskComponent<TConsumer extends string>(
   const burstEconomyOperation = corpBurstEconomyOperationForAction(
     input,
     action,
-    dependencies,
     actionSemanticCandidate,
   );
   const drawCards =

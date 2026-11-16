@@ -107,7 +107,12 @@ describe("runner Shell Traders pipeline signals", () => {
       expect.objectContaining({
         phase: "hold",
         actionIds: [],
-        rejectedActionIds: ["remove-last-cyfermaster"],
+        rejectedActions: [
+          {
+            actionId: "remove-last-cyfermaster",
+            evidenceCode: "runner_shell_traders_holds_harmful_completion",
+          },
+        ],
         replacementAssessment: expect.objectContaining({
           status: "harmful",
           selectedProgramInstanceIds: ["dwarf-installed"],
@@ -307,7 +312,13 @@ describe("runner Shell Traders pipeline signals", () => {
       expect.objectContaining({
         phase: "hold",
         actionIds: [],
-        rejectedActionIds: ["prepare-zero-cost-program"],
+        rejectedActions: [
+          {
+            actionId: "prepare-zero-cost-program",
+            evidenceCode:
+              "runner_shell_traders_rejected_zero_counter_preparation",
+          },
+        ],
         evidenceCodes: expect.arrayContaining([
           "runner_shell_traders_rejected_zero_counter_preparation",
         ]),

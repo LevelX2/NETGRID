@@ -8,7 +8,11 @@ import type {
   PlanSchedulerResult,
 } from "../../plans/plan-scheduler";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
-import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
+import {
+  hasCoverageSearchBinding,
+  type CoverageSearchBinding,
+  type CoverageState,
+} from "./coverage-types";
 import { extractAiFeatures } from "../../runtime/ai-features";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
 import { runnerPartialProgramSearchProfile } from "../../runtime/runner-partial-program-search-facts";
@@ -19,12 +23,7 @@ import {
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
 
 type Choice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
-type CoverageState = {
-  kind?: string;
-  phase?: string;
-  selectedSearchActionId?: string;
-  selectedSearchStateVersion?: number;
-  gap?: RunnerCoverageGapSignal;
+type MultiSearchCoverageState = CoverageState & {
   multiSearchChoiceBinding?: {
     actionId: string;
     choiceId: string;
@@ -46,7 +45,7 @@ function isMultiGripSearch(choice: Choice | undefined): choice is Choice {
 
 function hasBoundPartialProgramSearch(
   input: AiDecisionInput,
-  state: CoverageState,
+  state: CoverageState & CoverageSearchBinding,
 ): boolean {
   return (
     state.gap?.directSearchChoiceBindings?.some(
@@ -85,8 +84,8 @@ export function resolvePlanBoundRunnerCoverageMultiSearchChoice(
   const root = previous?.instances.find(
     (p) => p.instanceId === previous.rootForegroundInstanceId,
   );
-  const state = executor.moduleState as CoverageState;
-  if (!state || state.kind !== "coverage")
+  const state = executor.moduleState as MultiSearchCoverageState | undefined;
+  if (state?.kind !== "coverage" || !hasCoverageSearchBinding(state))
     throw failure(input, executor.instanceId);
   if (hasBoundPartialProgramSearch(input, state)) return undefined;
   const bindings = state.gap?.directSearchChoiceBindings?.filter(
@@ -176,7 +175,9 @@ export function bindSelectedRunnerCoverageMultiSearchChoice(
     !result.portfolio
   )
     throw failure(input);
-  const state = executor.moduleState as CoverageState;
+  const state = executor.moduleState as MultiSearchCoverageState | undefined;
+  if (state?.kind !== "coverage" || !hasCoverageSearchBinding(state))
+    throw failure(input, executor.instanceId);
   const bindings = state.gap?.directSearchChoiceBindings?.filter(
     (b) =>
       b.actionId === state.selectedSearchActionId &&
@@ -282,16 +283,16 @@ export function selectedBoundRunnerCoverageMultiSearchChoiceOptionIds(
     (p) => p.instanceId === portfolio.executorInstanceId,
   );
   if (executor?.moduleId !== "runner.rig_and_coverage") return undefined;
-  if (
-    hasBoundPartialProgramSearch(input, executor.moduleState as CoverageState)
-  )
-    return undefined;
-  const bound = (executor.moduleState as CoverageState)
-    .multiSearchChoiceBinding;
+  const state = executor.moduleState as MultiSearchCoverageState | undefined;
+  if (state?.kind !== "coverage" || !hasCoverageSearchBinding(state))
+    throw failure(input, executor.instanceId);
+  if (hasBoundPartialProgramSearch(input, state)) return undefined;
+  const bound = state.multiSearchChoiceBinding;
   const requirement = action.choiceRequirements?.[0];
   const ids = selectableChoiceOptions(choice.options).map((o) => o.id);
   const exact =
     portfolio?.stateVersion === input.playerView.stateVersion &&
+    state.selectedSearchStateVersion === portfolio.stateVersion &&
     bound?.stateVersion === input.playerView.stateVersion &&
     choice.stateVersion === bound.stateVersion &&
     bound.actionId === action.actionId &&

@@ -50,7 +50,6 @@ import {
 import { semanticRuntimeActionTypeIsReactive } from "./runtime/reactive-action";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import { corpVisibleRunnerHardwarePayoffEvidence } from "./runtime/runner-hardware-payoff-evidence";
-import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import { runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason } from "./runtime/runner-known-ice-path-score";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
@@ -76,10 +75,7 @@ import {
 import { isSearchChoice } from "./runtime/search-choice-option";
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
-import {
-  scrubEvidence,
-  semanticRuntimeScoreFromComponents,
-} from "./runtime/semantic-runtime-score-components";
+import { scrubEvidence } from "./runtime/semantic-runtime-score-components";
 import { isRemoteServerTarget } from "./runtime/server-target";
 import { breakSubroutineIndexesForAction } from "./runtime/subroutine-indexes";
 import { corpVisibleCardStoredCredits } from "./runtime/visible-card-credit";
@@ -228,13 +224,11 @@ export const aiLiveRuntimeDependencies = {
   runnerSurvivalCounterContextForInput,
   applyTagPunishOntologyDiagnostics,
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
-  scoreFromComponents: semanticRuntimeScoreFromComponents,
   shouldAvoidRandomBreakOrDamageRisk: randomBreakOrDamageRiskShouldAvoidRun,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
   staleKnownRndRepeatRunPenalty,
   rndFreshRepeatRunBoost,
-  staleKnownHqRepeatRunPenalty,
   publicHistory: mergedAiPublicHistory,
   eventVersion: aiEventVersion,
   serverIdFromEvent: aiServerIdFromEvent,

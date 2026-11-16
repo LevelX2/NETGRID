@@ -1,3 +1,4 @@
+import { currentDelayedSuccessChoice } from "../defense/temporary-ice-choice";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { HandState } from "../hand-management/hand-management-plan-module";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -170,11 +171,7 @@ export function selectedCorpDelayedSuccessOptionId(
   currentPortfolio?: ResidentPlanPortfolio,
 ): string[] {
   const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
-  const sourceMatch =
-    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:([^:]+):([0-9]+)$/.exec(
-      choice.source,
-    );
-  const sourceServerId = sourceMatch?.[2];
+  const current = currentDelayedSuccessChoice(input, action, choice);
   const boundDefensePlans = (portfolio?.instances ?? []).filter((instance) => {
     if (instance.moduleId !== "corp.defend_servers") return false;
     const state = instance.moduleState as
@@ -194,8 +191,8 @@ export function selectedCorpDelayedSuccessOptionId(
       state?.kind === "defense" &&
       candidateBinding?.choiceId === choice.choiceId &&
       candidateBinding.actionId === action.actionId &&
-      candidateBinding.sourceCardInstanceId === sourceMatch?.[1] &&
-      candidateBinding.serverId === sourceServerId &&
+      candidateBinding.sourceCardInstanceId === current?.sourceCardId &&
+      candidateBinding.serverId === current?.serverId &&
       candidateBinding.observedAtStateVersion === input.playerView.stateVersion
     );
   });
@@ -216,10 +213,13 @@ export function selectedCorpDelayedSuccessOptionId(
     | undefined;
   const binding = moduleState?.delayedSuccessChoiceBinding;
   const selectedOption = selectableOptions.find(
-    (option) => option.id === binding?.selectedOptionId,
+    (option) =>
+      option.id === binding?.selectedOptionId &&
+      current?.options.some(
+        (available) =>
+          available.id === option.id && available.value === option.value,
+      ),
   );
-  const [requirement] = action.choiceRequirements ?? [];
-  const optionIds = selectableOptions.map((option) => option.id);
   const exactBinding =
     portfolio?.side === "corp" &&
     executor !== undefined &&
@@ -227,15 +227,10 @@ export function selectedCorpDelayedSuccessOptionId(
     binding?.choiceId === choice.choiceId &&
     binding.actionId === action.actionId &&
     binding.selectedOptionId === selectedOption?.id &&
-    binding.sourceCardInstanceId === sourceMatch?.[1] &&
-    binding.serverId === sourceServerId &&
+    binding.sourceCardInstanceId === current?.sourceCardId &&
+    binding.serverId === current?.serverId &&
     binding.observedAtStateVersion === input.playerView.stateVersion &&
-    sourceMatch?.[3] === String(input.playerView.stateVersion) &&
-    choice.side === "corp" &&
-    choice.stateVersion === input.playerView.stateVersion &&
-    choice.visibility === "hidden_info_barrier" &&
-    choice.minSelections === 1 &&
-    choice.maxSelections === 1 &&
+    current !== undefined &&
     selectedOption !== undefined &&
     typeof selectedOption.value === "string" &&
     ((selectedOption.id === "decline" && selectedOption.value === "decline") ||
@@ -245,18 +240,7 @@ export function selectedCorpDelayedSuccessOptionId(
             card.instanceId === selectedOption.value &&
             card.known &&
             card.type === "ice",
-        ))) &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+        )));
   if (!exactBinding || !selectedOption) {
     throw unresolvedChoiceFailure(
       input,
@@ -384,7 +368,6 @@ export function selectedCorpScoreAdvancementOptionId(
   }
   return optionId;
 }
-
 
 export function selectedCorpScoredAgendaSubtypeRevealOptionIds(
   input: AiDecisionInput,

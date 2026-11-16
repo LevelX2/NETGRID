@@ -8,10 +8,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 
-import {
-  corpTacticalActionFamilyOwner,
-  createCorpTacticalPlanModules,
-} from "./corp-tactical-plan-modules";
+import { createCorpTacticalPlanModules } from "./corp-tactical-plan-modules";
 import { instantiatePlanProposal } from "./plan-instance";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { PlanSchedulerContext } from "./plan-scheduler";
@@ -87,7 +84,8 @@ describe("Corp tactical plan modules", () => {
 
   it("assigns a bound punish-support rez to the preparation campaign", () => {
     const rez = cardAction("rez-support", "corp_window.rez", "punish-card");
-    const planDomain = domain({
+    const module = tacticalModule("corp.punish_campaign");
+    const moduleContext = context([rez], {
       punishCampaigns: [
         {
           ...punishSignal("prepare"),
@@ -95,10 +93,15 @@ describe("Corp tactical plan modules", () => {
         },
       ],
     });
-
-    expect(corpTacticalActionFamilyOwner(rez, planDomain)).toBe(
-      "corp.punish_campaign",
+    const instance = instantiatePlanProposal(
+      module.discover(moduleContext)[0]!,
+      10,
     );
+    expect(
+      module
+        .materialize(instance, {} as never, moduleContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([rez.actionId]);
   });
 
   it("binds a punish-support preparation to its exact planned placement action", () => {
@@ -118,7 +121,6 @@ describe("Corp tactical plan modules", () => {
       actionIds: [hq.actionId],
       initiatingSemanticActionType: "install.card",
     };
-    const planDomain = domain({ punishCampaigns: [signal] });
     const module = tacticalModule("corp.punish_campaign");
     const moduleContext = context([hq, rd], {
       punishCampaigns: [signal],
@@ -128,10 +130,6 @@ describe("Corp tactical plan modules", () => {
       10,
     );
 
-    expect(corpTacticalActionFamilyOwner(hq, planDomain)).toBe(
-      "corp.punish_campaign",
-    );
-    expect(corpTacticalActionFamilyOwner(rd, planDomain)).toBeUndefined();
     expect(
       module
         .materialize(instance, {} as never, moduleContext)
@@ -318,21 +316,6 @@ describe("Corp tactical plan modules", () => {
           .candidates.map((entry) => entry.candidate.actionId);
       }),
     ).toEqual([["install-a"], ["install-b"]]);
-    expect(
-      corpTacticalActionFamilyOwner(
-        installA,
-        corpContext.domain as CorpPlanDomain,
-      ),
-    ).toBe("corp.ambush_and_bluff");
-    expect(
-      corpTacticalActionFamilyOwner(
-        {
-          ...installA,
-          actionId: "unbound-sibling-action",
-        },
-        corpContext.domain as CorpPlanDomain,
-      ),
-    ).toBeUndefined();
   });
 
   it("materializes recycling from the recycler source to the exact Ambush target", () => {
@@ -438,40 +421,57 @@ describe("Corp tactical plan modules", () => {
     }
   });
 
-  it("owns only a draw explicitly materialized by an allowed hand plan", () => {
+  it("materializes only the exact allowed draw or choice offer", () => {
     const draw = candidate("draw", "draw_card", "draw.card");
-    const planDomain = domain({
-      handManagement: [
-        {
-          handPlanId: "draw-for-plan",
-          phase: "draw_for_plan",
-          agendaCount: 0,
-          handSize: 2,
-          maximumHandSize: 5,
-          actionIds: ["draw"],
-          concretePurposeCode: "find_plan_material",
-          value: 20,
-          evidenceCode: "concrete_draw_need",
-        },
-      ],
-    });
-    expect(corpTacticalActionFamilyOwner(draw, planDomain)).toBe(
-      "corp.hand_and_agenda_management",
-    );
+    const choice = candidate("discard", "resolve_choice", "choice.resolve");
+    const candidates = [
+      draw,
+      { ...draw, actionId: "unbound-draw" },
+      choice,
+      { ...choice, actionId: "unbound-choice" },
+    ];
+    const signal = {
+      handPlanId: "hand-plan",
+      agendaCount: 0,
+      handSize: 2,
+      maximumHandSize: 5,
+      concretePurposeCode: "handle_exact_hand_need",
+      value: 20,
+      evidenceCode: "concrete_hand_need",
+    };
+    const module = tacticalModule("corp.hand_and_agenda_management");
+    const materialize = (
+      handSignal: CorpTacticalPlanDomain["handManagement"][number],
+    ) => {
+      const moduleContext = context(candidates, {
+        handManagement: [handSignal],
+      });
+      const instance = instantiatePlanProposal(
+        module.discover(moduleContext)[0]!,
+        10,
+      );
+      return module
+        .materialize(instance, {} as never, moduleContext)
+        .candidates.map((entry) => entry.candidate.actionId);
+    };
+    const drawSignal = {
+      ...signal,
+      phase: "draw_for_plan" as const,
+      actionIds: [draw.actionId],
+      parentPlanInstanceId: "plan:corp.create_score_window:target",
+      parentNeedId: "draw-one",
+    };
+
+    expect(materialize(drawSignal)).toEqual([draw.actionId]);
+    expect(materialize({ ...drawSignal, routeAllowed: false })).toEqual([]);
     expect(
-      corpTacticalActionFamilyOwner(
-        draw,
-        domain({
-          handManagement: [
-            {
-              ...planDomain.handManagement[0]!,
-              routeAllowed: false,
-            },
-          ],
-        }),
-      ),
-    ).toBeUndefined();
-    expect(corpTacticalActionFamilyOwner(draw, domain({}))).toBeUndefined();
+      materialize({
+        ...signal,
+        phase: "discard_window",
+        actionIds: [choice.actionId],
+      }),
+    ).toEqual([choice.actionId]);
+    expect(module.discover(context(candidates, {}))).toEqual([]);
   });
 
   it("materializes an exact mixed economy action only when it projects a draw", () => {
@@ -619,7 +619,11 @@ describe("Corp tactical plan modules", () => {
       "purge_virus_counters",
       "counter.purge_runner_virus",
     );
-    expect(corpTacticalActionFamilyOwner(purge, domain({}))).toBeUndefined();
+    expect(
+      tacticalModule("corp.respond_to_virus_pressure").discover(
+        context([purge], {}),
+      ),
+    ).toEqual([]);
   });
 });
 

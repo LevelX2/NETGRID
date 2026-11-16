@@ -558,16 +558,7 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
           Number.isSafeInteger(candidate.costProfile.clickCost)
         ? exactRange(-(candidate.costProfile.clickCost ?? 0))
         : range(0, 0);
-  const economy = candidate.economyProjection;
-  const exactEconomy =
-    economy?.source === "legal_action_payload" &&
-    economy.reliability === "guaranteed" &&
-    economy.confidence === "high";
-  const exactCreditCost =
-    candidate.costProfile.costKnownStatus === "known" &&
-    Number.isSafeInteger(candidate.costProfile.creditCost)
-      ? (candidate.costProfile.creditCost ?? 0)
-      : 0;
+  const exactEconomy = economyProjectionIsExact(candidate);
   return {
     schemaVersion: TURN_PROJECTION_DELTA_SCHEMA_VERSION,
     deltaId: `candidate:${candidate.actionId}`,
@@ -575,9 +566,7 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
     certification: "legal_action_semantics",
     actionCapacityDelta,
     creditDelta: exactRange(
-      (exactEconomy && Number.isSafeInteger(economy.netLiquidCreditGain)
-        ? (economy.netLiquidCreditGain ?? 0)
-        : 0) - exactCreditCost,
+      exactCreditDelta(candidate, params.currentStepProjection),
     ),
     ...(candidate.costProfile.additionalCosts.includes("agendaPointCost")
       ? { agendaPointDelta: exactRange(-exactAgendaPointCost(candidate)) }
@@ -604,6 +593,49 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
         : []),
     ],
   };
+}
+
+export function exactCreditDelta(
+  candidate: ActionSemanticCandidate,
+  currentStepProjection?: BoundCurrentStepProjection,
+): number {
+  if (
+    currentStepProjection &&
+    currentStepProjection.liquidCreditCost !== candidate.costProfile.creditCost
+  ) {
+    return -currentStepProjection.liquidCreditCost;
+  }
+  if (
+    economyProjectionIsExact(candidate) &&
+    Number.isSafeInteger(candidate.economyProjection.netLiquidCreditGain)
+  ) {
+    return candidate.economyProjection.netLiquidCreditGain ?? 0;
+  }
+  const cost = candidate.costProfile.creditCost;
+  return isNonNegativeInteger(cost) &&
+    candidate.costProfile.costKnownStatus === "known"
+    ? -cost
+    : 0;
+}
+
+function economyProjectionIsExact(
+  candidate: ActionSemanticCandidate,
+): candidate is ActionSemanticCandidate & {
+  economyProjection: NonNullable<ActionSemanticCandidate["economyProjection"]>;
+} {
+  const economy = candidate.economyProjection;
+  return (
+    economy?.kind === "immediate_liquid" &&
+    economy.timing === "immediate" &&
+    economy.creditRestriction === "general" &&
+    economy.reliability === "guaranteed" &&
+    ((economy.source === "legal_action_payload" &&
+      economy.confidence === "high") ||
+      (economy.source === "basic_action_contract" &&
+        economy.confidence === "medium" &&
+        candidate.actionType === "gain_credit" &&
+        candidate.semanticActionType === "economy.gain_credit"))
+  );
 }
 
 export function applyCertifiedTurnProjectionDelta(
@@ -888,6 +920,12 @@ function validateRestrictedCapacityDelta(
     }
     remainingByTokenId.set(consume.tokenId, remaining - consume.amount);
   }
+  const tokenById = new Map(
+    frame.actionCapacityLedger.restrictedTokens.map((token) => [
+      token.tokenId,
+      token,
+    ]),
+  );
   const addedTokenIds = new Set<string>();
   for (const add of delta.restrictedActionCapacityAdds ?? []) {
     if (
@@ -895,6 +933,7 @@ function validateRestrictedCapacityDelta(
       addedTokenIds.has(add.tokenId) ||
       !Number.isSafeInteger(add.remaining) ||
       add.remaining <= 0 ||
+      add.expiresAt.trim().length === 0 ||
       add.allowedActionTypes.length === 0 ||
       add.allowedActionTypes.some(
         (actionType) => actionType.trim().length === 0,
@@ -904,6 +943,24 @@ function validateRestrictedCapacityDelta(
       continue;
     }
     addedTokenIds.add(add.tokenId);
+    const existing = tokenById.get(add.tokenId);
+    const remaining = remainingByTokenId.get(add.tokenId) ?? 0;
+    if (existing) {
+      const previousTypes = sortedUnique(existing.allowedActionTypes);
+      const addedTypes = sortedUnique(add.allowedActionTypes);
+      if (
+        existing.expiresAt !== add.expiresAt ||
+        previousTypes.length !== addedTypes.length ||
+        previousTypes.some(
+          (actionType, index) => actionType !== addedTypes[index],
+        )
+      ) {
+        issues.push("conflicting_restricted_capacity_add");
+      }
+    }
+    if (!Number.isSafeInteger(remaining + add.remaining)) {
+      issues.push("invalid_restricted_capacity_total");
+    }
   }
 }
 
@@ -929,10 +986,7 @@ function applyRestrictedCapacityDelta(
     tokens.set(add.tokenId, {
       ...structuredClone(add),
       remaining: (current?.remaining ?? 0) + add.remaining,
-      allowedActionTypes: sortedUnique([
-        ...(current?.allowedActionTypes ?? []),
-        ...add.allowedActionTypes,
-      ]),
+      allowedActionTypes: sortedUnique(add.allowedActionTypes),
     });
   }
   return [...tokens.values()].sort((left, right) =>

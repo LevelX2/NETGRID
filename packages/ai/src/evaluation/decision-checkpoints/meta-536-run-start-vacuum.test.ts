@@ -3,6 +3,8 @@ import ordered from "../../../../../data/scenarios/ai-decision-checkpoints/cp-me
 import start from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-536-r2-g27-d80-vacuum-link.json";
 import forced from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-536-r2-g27-d84-vacuum-link.json";
 import choice from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-536-r2-g27-d85-vacuum-link.json";
+import type { PlanSchedulerResult } from "../../plans/plan-scheduler";
+import { bindSelectedPlanActionOrigin } from "../../runner/run-window/run-window-selected-origin";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
   resetResidentPlanPortfolioMemory,
@@ -26,6 +28,75 @@ function restore(cp: ReturnType<typeof native>) {
     cp.runtime.residentPlanPortfolio,
   );
 }
+it.each([
+  "current",
+  "wrong_timing",
+  "stale_action",
+  "stale_route",
+  "foreign_step",
+  "missing_action",
+] as const)(
+  "checks the native start offer and route before saving the origin (%s)",
+  (variant) => {
+    const { input, runtime } = native(start);
+    const portfolio = runtime.residentPlanPortfolio!;
+    const recorded = portfolio.selectedActionOrigin;
+    if (recorded?.immediateChoicePolicy !== "resolve_runner_run_start_order") {
+      throw new Error("Expected the captured native run-start origin");
+    }
+    const planInstanceId = recorded.executorInstanceId;
+    const stepId = recorded.sourceStepId!;
+    const action = input.legalActions.find(
+      ({ actionId }) => actionId === recorded.selectedActionId,
+    )!;
+    delete portfolio.selectedActionOrigin;
+    const route = {
+      planInstanceId,
+      step: {
+        stepId,
+        capability: {
+          capabilityId: "run_start",
+          semanticActionTypes: ["run.start"],
+        },
+        purpose: "Start the bound native run.",
+      },
+      head: {
+        planInstanceId,
+        stepId: variant === "foreign_step" ? "unbound-step" : stepId,
+        actionId: action.actionId,
+        actionType: action.type,
+        semanticActionType: "run.start",
+        stateVersion:
+          input.playerView.stateVersion - (variant === "stale_route" ? 1 : 0),
+      },
+    };
+    const result = { lane: "plan", portfolio, route } as PlanSchedulerResult;
+    if (variant === "wrong_timing") action.timingPoint = "game.checkpoint";
+    if (variant === "stale_action") action.expiresAtStateVersion--;
+    if (variant === "missing_action") {
+      input.legalActions = input.legalActions.filter(
+        ({ actionId }) => actionId !== action.actionId,
+      );
+    }
+    const bind = () => bindSelectedPlanActionOrigin(input, result, []);
+    if (variant === "current") {
+      bind();
+      expect(portfolio.selectedActionOrigin).toEqual(recorded);
+    } else {
+      expect(bind).toThrow(
+        expect.objectContaining({
+          code: "window_origin_missing",
+          context: expect.objectContaining({
+            owner: "continuation",
+            unresolvedActionIds: [action.actionId],
+          }),
+        }),
+      );
+      expect(portfolio.selectedActionOrigin).toBeUndefined();
+    }
+  },
+);
+
 it("retains the exact native run owner across its certified run-start ordering", () => {
   const cp = native();
   restore(cp);

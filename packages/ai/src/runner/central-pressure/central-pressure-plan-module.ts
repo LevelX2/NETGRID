@@ -106,17 +106,25 @@ export function centralPressureModule(): PlanModule {
         current.signal.marginalValue > 0 &&
         candidates.length > 0;
       const preventionNeed = current.signal.selfTagPreventionNeed;
-      const resourceGaps = preventionNeed &&
+      const resourceGaps =
+        preventionNeed &&
         preventionNeed.stateVersion === context.input.playerView.stateVersion &&
         preventionNeed.parentPlanInstanceId === instance.instanceId
-        ? [{ needId: preventionNeed.needId, capability: "defense.tag_prevention",
-            minimum: 1, available: 0, deadline: "current_turn" as const }]
-        : exactRunnerParentSupportResourceGaps(
-        context,
-        instance,
-        current.signal.supportNeedId,
-        routeExists,
-      );
+          ? [
+              {
+                needId: preventionNeed.needId,
+                capability: "defense.tag_prevention",
+                minimum: 1,
+                available: 0,
+                deadline: "current_turn" as const,
+              },
+            ]
+          : exactRunnerParentSupportResourceGaps(
+              context,
+              instance,
+              current.signal.supportNeedId,
+              routeExists,
+            );
       const result = assessment(
         instance,
         current.signal.priorityClass,
@@ -309,10 +317,14 @@ export function runnerCentralPressureRunCandidates(
   const exactDifferentialPayoffActionIds = new Set(
     signal.runActionDifferentialPayoffIds ?? [],
   );
+  const boundRunActionIds =
+    signal.runActionIds === undefined
+      ? undefined
+      : new Set(signal.runActionIds);
   const runCandidates = actionCandidates.filter(
     (candidate) =>
-      (signal.runActionIds?.length
-        ? signal.runActionIds.includes(candidate.actionId)
+      (boundRunActionIds
+        ? boundRunActionIds.has(candidate.actionId)
         : (candidate.semanticActionType === "run.start" &&
             candidate.runProjectionSummary?.serverId === signal.serverId) ||
           (candidate.semanticActionType === "play.runner_event" &&
@@ -328,53 +340,47 @@ export function runnerCentralPressureRunCandidates(
   const directRunAvailable = runCandidates.some(
     (candidate) => candidate.semanticActionType === "run.start",
   );
-  return runCandidates
-    .filter(
-      (candidate) =>
-        candidate.semanticActionType !== "play.runner_event" ||
-        !directRunAvailable ||
-        exactDifferentialPayoffActionIds.has(candidate.actionId) ||
-        runnerCardRunHasVisibleDifferentialPayoff(
-          input,
-          candidate,
-          signal.serverId,
-          runTargets,
-        ),
+  return runCandidates.flatMap((candidate) => {
+    const event = candidate.semanticActionType === "play.runner_event";
+    const differentialPayoff =
+      event &&
+      directRunAvailable &&
+      runnerCardRunHasVisibleDifferentialPayoff(
+        input,
+        candidate,
+        signal.serverId,
+        runTargets,
+      );
+    if (
+      event &&
+      directRunAvailable &&
+      !differentialPayoff &&
+      !exactDifferentialPayoffActionIds.has(candidate.actionId)
     )
-    .map((candidate) => ({
-      candidate,
-      stepValue:
-        signal.marginalValue +
-        runnerCardRunRoutePreference(
-          input,
-          candidate,
-          signal.serverId,
-          directRunAvailable,
-          runTargets,
-        ) +
-        (signal.runActionValues?.[candidate.actionId] ?? 0),
-    }));
+      return [];
+    return [
+      {
+        candidate,
+        stepValue:
+          signal.marginalValue +
+          runnerCardRunRoutePreference(
+            candidate,
+            event,
+            !directRunAvailable || differentialPayoff,
+          ) +
+          (signal.runActionValues?.[candidate.actionId] ?? 0),
+      },
+    ];
+  });
 }
 
 function runnerCardRunRoutePreference(
-  input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,
-  serverId: RunnerPressureSignal["serverId"],
-  directRunAvailable: boolean,
-  runTargetEvaluations?: readonly RunnerRunTargetEvaluation[],
+  event: boolean,
+  preferable: boolean,
 ): number {
-  if (candidate.semanticActionType !== "play.runner_event") return 0;
-  if (
-    !directRunAvailable ||
-    runnerCardRunHasVisibleDifferentialPayoff(
-      input,
-      candidate,
-      serverId,
-      runTargetEvaluations,
-    )
-  ) {
-    return 5;
-  }
+  if (!event) return 0;
+  if (preferable) return 5;
   const knownCreditCost =
     candidate.costProfile.costKnownStatus === "known" &&
     Number.isSafeInteger(candidate.costProfile.creditCost) &&

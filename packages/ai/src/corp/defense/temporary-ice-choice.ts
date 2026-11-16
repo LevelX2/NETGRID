@@ -1,9 +1,56 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { selectableChoiceOptions } from "../../runtime/choice-option";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
-type Option = NonNullable<
+type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
->["options"][number];
+>;
+type Option = PendingChoice["options"][number];
+
+export function currentDelayedSuccessChoice(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+) {
+  const source =
+    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceCardId = source?.[1];
+  const serverId = source?.[2];
+  const { stateVersion, timingPoint } = input.playerView;
+  const [requirement] = action.choiceRequirements ?? [];
+  const options = selectableChoiceOptions(choice.options);
+  const optionIds = new Set(options.map(({ id }) => id));
+  if (
+    input.side !== "corp" ||
+    !sourceCardId ||
+    !serverId ||
+    source?.[3] !== String(stateVersion) ||
+    input.playerView.run?.attackedServerId !== serverId ||
+    choice.side !== "corp" ||
+    choice.kind !== "select_option" ||
+    choice.visibility !== "hidden_info_barrier" ||
+    choice.stateVersion !== stateVersion ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1 ||
+    action.side !== "corp" ||
+    action.type !== "resolve_choice" ||
+    action.source !== "game_rule" ||
+    action.timingPoint !== timingPoint ||
+    action.expiresAtStateVersion !== stateVersion ||
+    action.choiceRequirements?.length !== 1 ||
+    requirement?.choiceId !== choice.choiceId ||
+    requirement.minSelections !== 1 ||
+    requirement.maxSelections !== 1 ||
+    optionIds.size !== options.length ||
+    requirement.optionIds.length !== options.length ||
+    new Set(requirement.optionIds).size !== optionIds.size ||
+    !requirement.optionIds.every((id) => optionIds.has(id))
+  )
+    return undefined;
+  return { sourceCardId, serverId, options };
+}
 
 /** The caller sorted legal effect-bearing choices by their Engine cost.
  * null is a proved absence of current defense value, not missing information.

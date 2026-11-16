@@ -32,6 +32,29 @@ describe("runner development cashout admission", () => {
     });
   });
 
+  it.each([
+    { installOrPlayCost: 8, targetCredits: 5, missingCredits: 3 },
+    { installOrPlayCost: 5, targetCredits: 5, missingCredits: 2 },
+  ])(
+    "rejects an inconsistent funding need ($installOrPlayCost/$targetCredits/$missingCredits)",
+    (funding) => {
+      const assessment = assessRunnerDevelopmentCashOutAdmission({
+        evaluations: [
+          development({ fundingNeed: { ...funding, reason: "cannot_pay" } }),
+        ],
+        currentCredits: 2,
+        estimatedPayout: 3,
+        clicksRemaining: 3,
+        gripCount: 4,
+        minimumHandBuffer: 3,
+      });
+      expect(assessment.admitted).toBe(false);
+      expect(assessment.rejectionCodes).toContain(
+        "development_cashout_rejected:invalid_funding_need:development-1",
+      );
+    },
+  );
+
   it("rejects the one-card Dwarf shape because conversion would consume the required hand buffer", () => {
     const assessment = assessRunnerDevelopmentCashOutAdmission({
       evaluations: [

@@ -26,23 +26,16 @@ export function createPlanStep(params: {
   rationale?: string[];
   followupBudget?: PlanFollowupActionBudget;
 }): PlanStep {
-  return {
+  return structuredClone({
     stepId: params.stepId,
     kind: params.kind,
-    desiredActionSemantics: [...params.desiredActionSemantics],
-    requiredCapabilities: [...(params.requiredCapabilities ?? [])],
+    desiredActionSemantics: params.desiredActionSemantics,
+    requiredCapabilities: params.requiredCapabilities ?? [],
     ...(params.mappingStatus ? { mappingStatus: params.mappingStatus } : {}),
-    actionCandidateIds: [...(params.actionCandidateIds ?? [])],
-    rationale: [...(params.rationale ?? [])],
-    ...(params.followupBudget
-      ? {
-          followupBudget: {
-            ...params.followupBudget,
-            evidence: [...params.followupBudget.evidence],
-          },
-        }
-      : {}),
-  };
+    actionCandidateIds: params.actionCandidateIds ?? [],
+    rationale: params.rationale ?? [],
+    ...(params.followupBudget ? { followupBudget: params.followupBudget } : {}),
+  });
 }
 
 export function createTacticalPlan(params: {
@@ -63,10 +56,10 @@ export function createTacticalPlan(params: {
   scoreBreakdown?: PlanScoreBreakdown[];
   stateVersion: number;
 }): TacticalPlan {
-  const blockers = [...(params.blockers ?? [])];
+  const blockers = params.blockers ?? [];
   const status =
     params.status ?? (blockers.length > 0 ? "blocked" : "proposed");
-  return {
+  return structuredClone({
     schemaVersion: TACTICAL_PLAN_SCHEMA_VERSION,
     planId: params.planId,
     side: params.side,
@@ -74,16 +67,16 @@ export function createTacticalPlan(params: {
     status,
     priority: params.priority,
     horizonTurns: params.horizonTurns,
-    creditDemands: structuredClone(params.creditDemands ?? []),
-    actionDemands: structuredClone(params.actionDemands ?? []),
+    creditDemands: params.creditDemands ?? [],
+    actionDemands: params.actionDemands ?? [],
     ...(params.target ? { target: params.target } : {}),
-    requiredCapabilities: [...(params.requiredCapabilities ?? [])],
+    requiredCapabilities: params.requiredCapabilities ?? [],
     blockers,
     currentStep: params.currentStep,
-    nextSteps: [...(params.nextSteps ?? [])],
-    evidence: [...(params.evidence ?? [])],
-    scoreBreakdown: [...(params.scoreBreakdown ?? [])],
+    nextSteps: params.nextSteps ?? [],
+    evidence: params.evidence ?? [],
+    scoreBreakdown: params.scoreBreakdown ?? [],
     createdAtStateVersion: params.stateVersion,
     updatedAtStateVersion: params.stateVersion,
-  };
+  });
 }

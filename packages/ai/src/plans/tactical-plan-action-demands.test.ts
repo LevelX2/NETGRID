@@ -4,6 +4,40 @@ import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import { deriveTacticalPlanActionDemands } from "./tactical-plan-action-demands";
 
 describe("tactical plan action demands", () => {
+  it("keeps plan steps and blockers independent of the builder input", () => {
+    const step = createPlanStep({
+      stepId: "draw",
+      kind: "gain_action_capacity",
+      desiredActionSemantics: ["draw.card"],
+    });
+    const blockerEvidence = ["initial-evidence"];
+    const plan = createTacticalPlan({
+      planId: "corp:draw-plan",
+      side: "corp",
+      type: "corp.create_score_window",
+      priority: 1,
+      horizonTurns: 1,
+      currentStep: step,
+      nextSteps: [step],
+      blockers: [
+        {
+          blockerId: "missing-action",
+          kind: "missing_legal_action",
+          severity: "hard",
+          evidence: blockerEvidence,
+        },
+      ],
+      stateVersion: 1,
+    });
+
+    step.desiredActionSemantics.push("install.card");
+    blockerEvidence.push("new-evidence");
+
+    expect(plan.currentStep.desiredActionSemantics).toEqual(["draw.card"]);
+    expect(plan.nextSteps[0]?.desiredActionSemantics).toEqual(["draw.card"]);
+    expect(plan.blockers[0]?.evidence).toEqual(["initial-evidence"]);
+  });
+
   it("derives an exact hard Corp score sequence demand", () => {
     const plan = createTacticalPlan({
       planId: "corp:score",

@@ -101,6 +101,9 @@ it.each([
   "missing_target",
   "duplicate_binding",
   "missing_state",
+  "missing_search_action",
+  "missing_search_version",
+  "invalid_search_version",
   "wrong_root",
   "unavailable_heap_target",
 ])("rejects an unbound source choice: %s", (variant) => {
@@ -124,6 +127,9 @@ it.each([
   if (variant === "duplicate_binding")
     state.gap.directSearchChoiceBindings.push(structuredClone(binding));
   if (variant === "missing_state") delete executor.moduleState;
+  if (variant === "missing_search_action") delete state.selectedSearchActionId;
+  if (variant === "missing_search_version") delete state.selectedSearchStateVersion;
+  if (variant === "invalid_search_version") state.selectedSearchStateVersion = Number.NaN;
   if (variant === "wrong_root") portfolio.rootForegroundInstanceId = "other";
   if (variant === "unavailable_heap_target")
     binding.targetCardInstanceId = "absent-program";

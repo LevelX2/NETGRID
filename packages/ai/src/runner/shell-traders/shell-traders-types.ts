@@ -13,7 +13,7 @@ export type RunnerShellTradersPipelineSignal = {
   targetDefinitionId: string;
   targetCardType: "program" | "hardware";
   actionIds: string[];
-  rejectedActionIds?: string[];
+  rejectedActions?: { actionId: string; evidenceCode: string }[];
   priorityClass: "P2" | "P4" | "P5";
   value: number;
   shellCountersBefore: number;

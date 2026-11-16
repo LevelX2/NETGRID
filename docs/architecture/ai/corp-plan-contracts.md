@@ -1221,8 +1221,11 @@ Ohne diesen Beleg wird die kombinierte Linie mit einer Diagnose verworfen;
 die eigenständigen Score- und gebundenen Vorbereitungsrouten bleiben separat
 bewertet.
 
-Die Remote-Reife verwendet den Engine-zertifizierten geordneten Runpfad und
-trennt aktuell finanzierbare von nur gestagten Rez-Teilmengen. Allgemeine,
+Das Scoring-Remote-Projekt prüft Doctrine und Eröffnungsgrenze vor der
+Schutzbewertung. Nach der Zielbindung wird die Remote-Reife für dieses
+Fort berechnet. Sie verwendet den Engine-zertifizierten geordneten
+Runpfad mit dem veröffentlichten Trace-Profil und trennt aktuell
+finanzierbare von nur gestagten Rez-Teilmengen. Allgemeine,
 Breaker-, Stealth-, Hosted- und weitere eingeschränkte Runner-Credits bleiben
 getrennte Größen. Blockierung, unvermeidbarer Schaden, Tags, Program-Trash,
 Action-Tax und Break-Verhinderung erfüllen ausschließlich ihre versionierten
@@ -2413,6 +2416,10 @@ auf Jenny übertragen werden; weitere Karten derselben groben Effektfamilie
 benötigen ebenfalls ein eigenes Modell.
 
 Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
+Defense und Payload-Erzeugung prüfen denselben Choice-Vertrag. Aktueller
+Timingpunkt, StateVersion, angegriffener Server und auswählbare Options-IDs
+müssen mit dem LegalAction-Angebot übereinstimmen. Defense prüft diese Bindung,
+bevor es eine ICE-Option oder das auswählbare Decline in den Plan übernimmt.
 Bei einer exponierten eigenen Agenda im angegriffenen Fort oder HQ und
 mehreren vollständig quotierten produktiven Optionen vergleicht derselbe
 Owner die aktuelle sichtbare Runner-Breakantwort. Die
@@ -2473,8 +2480,8 @@ die fachliche Zielwahl nicht zu einer automatischen Engine-Fensterentscheidung.
 `program-trash-coverage.ts` vergleicht pro bereits gerezztem, bekanntem ICE
 die vorhandene sichtbare Runner-Antwort vor und nach Entfernung jedes legalen
 Programmziels. Es verwendet den bestehenden Run-Pfaddienst mit Engine-Quotes,
-dem aktuellen Runner-Creditbestand, sichtbaren Breaker-Creditpools und den
-Root-Modifikatoren des jeweiligen Forts. Neu unbezahlbare Antworten stehen
+dem aktuellen Runner-Creditbestand, sichtbaren Breaker-Creditpools, dem
+veröffentlichten Trace-Profil und den Root-Modifikatoren des jeweiligen Forts. Neu unbezahlbare Antworten stehen
 vor bloß verteuerten Antworten; bei gleicher Wirkung entscheiden wie bisher
 Breaker-Rolle, Counter, Installationskosten und Speicherbedarf, zuletzt die
 Options-ID. Die Breaker-Rolle stammt exakt aus dem kompilierten Hint

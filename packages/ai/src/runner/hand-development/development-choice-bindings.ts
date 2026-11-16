@@ -17,7 +17,10 @@ import {
   type ResidentPlanPortfolio,
   selectResidentPlanPortfolioExecutor,
 } from "../../plans/resident-plan-portfolio";
-import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
+import {
+  hasCoverageSearchBinding,
+  type CoverageState,
+} from "../rig-coverage/coverage-types";
 import type { RequiredCapabilityKind } from "../../plans/tactical-plan-types";
 import { extractAiFeatures } from "../../runtime/ai-features";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
@@ -65,8 +68,6 @@ export function resolvePlanBoundRunnerDelayedProgramSearchChoice(
     | {
         kind?: unknown;
         phase?: unknown;
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
         gap?: {
           directSearchChoiceBindings?: Array<{
             actionId?: unknown;
@@ -90,10 +91,13 @@ export function resolvePlanBoundRunnerDelayedProgramSearchChoice(
     developmentSignal.definitionId === choice.sourceCardDefinitionId &&
     developmentSignal.actionIds.includes(origin?.selectedActionId ?? "") &&
     origin?.selectedAtStateVersion === previous?.stateVersion;
+  const searchState = hasCoverageSearchBinding(coverageState)
+    ? coverageState
+    : undefined;
   const coverageBindings =
-    coverageState?.gap?.directSearchChoiceBindings?.filter(
+    searchState?.gap?.directSearchChoiceBindings?.filter(
       (binding) =>
-        binding.actionId === coverageState.selectedSearchActionId &&
+        binding.actionId === searchState.selectedSearchActionId &&
         binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
         binding.sourceDefinitionId === choice.sourceCardDefinitionId,
     ) ?? [];
@@ -101,8 +105,9 @@ export function resolvePlanBoundRunnerDelayedProgramSearchChoice(
     executor?.moduleId === "runner.rig_and_coverage" &&
     coverageState?.kind === "coverage" &&
     coverageState.phase === "search_answer" &&
-    coverageState.selectedSearchActionId === origin?.selectedActionId &&
-    coverageState.selectedSearchStateVersion === previous?.stateVersion &&
+    searchState !== undefined &&
+    searchState.selectedSearchActionId === origin?.selectedActionId &&
+    searchState.selectedSearchStateVersion === previous?.stateVersion &&
     coverageBindings.length === 1;
   const exactBinding =
     previous?.side === "runner" &&
@@ -190,8 +195,6 @@ export function bindSelectedRunnerDelayedProgramSearchChoice(
     const coverageState = executor.moduleState as {
       kind?: unknown;
       phase?: unknown;
-      selectedSearchActionId?: unknown;
-      selectedSearchStateVersion?: unknown;
       gap?: {
         requiredRole?: unknown;
         directSearchChoiceBindings?: Array<{
@@ -203,9 +206,12 @@ export function bindSelectedRunnerDelayedProgramSearchChoice(
         }>;
       };
     };
-    const bindings = coverageState.gap?.directSearchChoiceBindings?.filter(
+    const searchState = hasCoverageSearchBinding(coverageState)
+      ? coverageState
+      : undefined;
+    const bindings = searchState?.gap?.directSearchChoiceBindings?.filter(
       (binding) =>
-        binding.actionId === coverageState.selectedSearchActionId &&
+        binding.actionId === searchState.selectedSearchActionId &&
         binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
         binding.sourceDefinitionId === choice.sourceCardDefinitionId,
     );
@@ -245,8 +251,7 @@ export function bindSelectedRunnerDelayedProgramSearchChoice(
     const exactCoverageBinding =
       coverageState.kind === "coverage" &&
       coverageState.phase === "search_answer" &&
-      typeof coverageState.selectedSearchActionId === "string" &&
-      typeof coverageState.selectedSearchStateVersion === "number" &&
+      searchState !== undefined &&
       binding !== undefined &&
       action?.type === "resolve_choice" &&
       selectedOption?.card?.known !== false &&
@@ -274,7 +279,7 @@ export function bindSelectedRunnerDelayedProgramSearchChoice(
       targetDefinitionId: selectedOption.card.definitionId,
     };
     executor.moduleState = {
-      ...coverageState,
+      ...searchState,
       selectedSearchStateVersion: input.playerView.stateVersion,
       gap: {
         ...coverageState.gap,
@@ -443,33 +448,27 @@ export function resolvePlanBoundRunnerEventInstallMemoryChoice(
     delayedBinding?.installMemorySacrificeBinding;
   const boundTargetCardInstanceId =
     commitment?.targetCardInstanceId ?? delayedBinding?.targetCardInstanceId;
-  const coverageState = executor?.moduleState as
-    | {
-        kind?: string;
-        phase?: string;
-        selectedSearchActionId?: string;
-        selectedSearchStateVersion?: number;
-        gap?: RunnerCoverageGapSignal;
-      }
-    | undefined;
-  const coverageBindings =
-    coverageState?.gap?.directSearchChoiceBindings?.filter(
-      (candidate) =>
-        candidate.actionId === coverageState.selectedSearchActionId &&
-        candidate.resolvedSearchChoice !== undefined &&
-        candidate.resolvedSearchChoice.choiceId === originalChoiceId &&
-        candidate.resolvedSearchChoice.choiceSource === originalChoiceSource &&
-        candidate.resolvedSearchChoice.stateVersion ===
-          previous?.stateVersion &&
-        candidate.targetCardInstanceId === targetCardInstanceId &&
-        candidate.installMemorySacrificeBinding?.targetCardInstanceId ===
-          targetCardInstanceId,
-    );
+  const coverageState = executor?.moduleState as CoverageState | undefined;
+  const searchState = hasCoverageSearchBinding(coverageState)
+    ? coverageState
+    : undefined;
+  const coverageBindings = searchState?.gap?.directSearchChoiceBindings?.filter(
+    (candidate) =>
+      candidate.actionId === searchState.selectedSearchActionId &&
+      candidate.resolvedSearchChoice !== undefined &&
+      candidate.resolvedSearchChoice.choiceId === originalChoiceId &&
+      candidate.resolvedSearchChoice.choiceSource === originalChoiceSource &&
+      candidate.resolvedSearchChoice.stateVersion === previous?.stateVersion &&
+      candidate.targetCardInstanceId === targetCardInstanceId &&
+      candidate.installMemorySacrificeBinding?.targetCardInstanceId ===
+        targetCardInstanceId,
+  );
   const exactCoverageBinding =
     executor?.moduleId === "runner.rig_and_coverage" &&
     coverageState?.kind === "coverage" &&
     coverageState.phase === "search_answer" &&
-    coverageState.selectedSearchStateVersion === previous?.stateVersion &&
+    searchState !== undefined &&
+    searchState.selectedSearchStateVersion === previous?.stateVersion &&
     coverageBindings?.length === 1;
   const action =
     context.input.legalActions.length === 1

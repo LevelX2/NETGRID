@@ -1860,6 +1860,26 @@ function validateActionCapabilitySemanticsValue(
       addIssue(issues, "error", "invalid_shape", entryPath, "Expected object.");
       return;
     }
+    const unknownKeys = Object.keys(entry).filter(
+      (key) =>
+        ![
+          "capabilityKey",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "conditions",
+          "targetProfiles",
+          "strategySupportPairs",
+        ].includes(key),
+    );
+    if (unknownKeys.length > 0)
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        entryPath,
+        "Unknown fields: " + unknownKeys.join(", ") + ".",
+      );
     if (
       typeof entry.capabilityKey !== "string" ||
       entry.capabilityKey.length === 0
@@ -1895,6 +1915,19 @@ function validateActionCapabilitySemanticsValue(
       previousCapabilityKey = entry.capabilityKey;
     }
     validateCostProfile(entry.costProfile, `${entryPath}.costProfile`, issues);
+    if (isRecord(entry.costProfile)) {
+      for (const key of ["clicks", "credits"] as const) {
+        const value = entry.costProfile[key];
+        if (typeof value === "number" && value < 0)
+          addIssue(
+            issues,
+            "error",
+            "invalid_shape",
+            entryPath + ".costProfile." + key,
+            "Expected a finite non-negative number.",
+          );
+      }
+    }
     validateEffects(entry.effects, `${entryPath}.effects`, issues);
     validateConditions(entry.conditions, `${entryPath}.conditions`, issues);
     validateTargetProfiles(

@@ -328,7 +328,7 @@ export function buildRunnerCardDevelopmentSignals({
         ),
         ...shellTradersPipelines.flatMap((signal) => [
           ...signal.actionIds,
-          ...(signal.rejectedActionIds ?? []),
+          ...(signal.rejectedActions ?? []).map(({ actionId }) => actionId),
         ]),
         ...defenseSupportAllInstallActionIds,
         ...exposeInformation.flatMap(
@@ -662,7 +662,7 @@ export function buildRunnerCardDevelopmentSignals({
           value: normalizedDevelopmentValue,
           evidenceCode: installTax?.target
             ? `runner_ice_install_tax_target:${installTax.target.serverId}`
-            : evaluation.evidence[0] ?? "runner_hand_development",
+            : (evaluation.evidence[0] ?? "runner_hand_development"),
           ...(strengthInvestment
             ? { evidenceCodes: strengthInvestment.evidenceCodes }
             : runCreditInvestment

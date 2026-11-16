@@ -5,7 +5,7 @@ import type {
   RunnerRunPathCreditBudget,
 } from "../run-analysis/visible-run-analysis-contracts";
 import { normalizeRunnerRunPathCreditBudget } from "../run-analysis/visible-run-credit-budget";
-import type { VisibleCard } from "@netgrid/shared";
+import type { TraceRulesProfile, VisibleCard } from "@netgrid/shared";
 import { assessEngineCertifiedPostRezIcePath } from "../visible-run-analysis";
 import {
   selectCorpFundedAndStagedProtectionRoutes,
@@ -132,6 +132,7 @@ export function assessCorpRemoteMaturityFromVisibleServer(
     runnerCreditBudget: RunnerRunPathCreditBudget;
     availableCorpRezCredits: number;
     visibleCorpBidCapacity?: number;
+    traceRulesProfile?: TraceRulesProfile;
   }>,
 ): CorpRemoteMaturityAssessment {
   const objective: Extract<
@@ -192,6 +193,10 @@ export function assessCorpRemoteMaturityFromVisibleServer(
     quote: CorpRemotePathQuote;
     reachesTarget: boolean;
   }> = [];
+  const traceContext =
+    params.traceRulesProfile === undefined
+      ? {}
+      : { traceRulesProfile: params.traceRulesProfile };
   for (let mask = 0; mask < 2 ** quotedCandidates.length; mask += 1) {
     const selected = quotedCandidates.filter((_, index) =>
       Boolean(mask & (1 << index)),
@@ -207,6 +212,7 @@ export function assessCorpRemoteMaturityFromVisibleServer(
       params.runnerCreditBudget,
       [...(params.serverRoot ?? [])],
       params.visibleCorpBidCapacity ?? 0,
+      traceContext,
     );
     const quote = quotePath({
       assessment,
