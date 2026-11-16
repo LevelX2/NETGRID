@@ -78,7 +78,7 @@ it("develops funded economy before speculative agenda search and takes the actua
   expect(campaign.moduleState).toMatchObject({
     signal: {
       phase: "install",
-      payback: { projectedNetCredits: 3 },
+      payback: { projectedNetCredits: 5 },
       riskAdjustment: { protectionState: "protected_not_contestable" },
     },
   });
@@ -138,8 +138,8 @@ it("develops funded economy before speculative agenda search and takes the actua
     signal: {
       withdrawalCampaign: {
         remainingPoolCredits: 15,
-        projectedNetCredits: 8,
-        projectedPayoutExecutions: 4,
+        projectedNetCredits: 10,
+        projectedPayoutExecutions: 5,
       },
     },
   });

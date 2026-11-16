@@ -195,7 +195,10 @@ it("already values a BBS pool more highly behind effective protection", () => {
   expect(openQuote.protectionState).toBe("unprotected");
   expect(openQuote.projectedCredits).toBe(4);
   expect(protectedQuote.protectionState).toBe("protected_not_contestable");
-  expect(protectedQuote.projectedCredits).toBe(8);
+  expect(protectedQuote).toMatchObject({
+    projectedPayoutsByTurn: [2, 3, 3],
+    projectedCredits: 16,
+  });
   expect(protectedQuote.projectedNetCredits).toBeGreaterThan(
     openQuote.projectedNetCredits,
   );
