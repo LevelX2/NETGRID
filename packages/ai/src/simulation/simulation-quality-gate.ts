@@ -9,7 +9,9 @@ export type AiSimulationRunResult = {
   benchmarkProfile: SimulationBenchmarkProfileId;
   games: number;
   illegalActions: number;
+  runtimeFailures: number;
   timeouts: number;
+  timeoutRate: number;
   fallbackRate: number;
   winRates: Record<string, number>;
   agendaPoints: Record<string, number>;
@@ -67,10 +69,7 @@ export function evaluateSimulationQualityGate(
       (candidate.winRates.runner ?? 0) - (baseline.winRates.runner ?? 0),
     ),
     fallbackRate: round(candidate.fallbackRate - baseline.fallbackRate),
-    timeoutRate: round(
-      candidate.timeouts / Math.max(candidate.games, 1) -
-        baseline.timeouts / Math.max(baseline.games, 1),
-    ),
+    timeoutRate: candidate.timeoutRate - baseline.timeoutRate,
     runtimeFailureRate: runtimeFailureRateDelta,
     illegalActions: candidate.illegalActions - baseline.illegalActions,
     replayFailures: candidate.replayFailures - baseline.replayFailures,

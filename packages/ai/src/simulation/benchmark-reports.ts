@@ -26,6 +26,7 @@ export function evaluateDoctrineQualityGate(
 ): AiDoctrineQualityGateResult {
   const resolved: AiDoctrineQualityGateThresholds = {
     maxCandidateIllegalActions: thresholds.maxCandidateIllegalActions ?? 0,
+    maxCandidateRuntimeFailures: thresholds.maxCandidateRuntimeFailures ?? 0,
     maxCandidateReplayFailures: thresholds.maxCandidateReplayFailures ?? 0,
     maxTimeoutRateDelta: thresholds.maxTimeoutRateDelta ?? 0,
     maxFallbackRateDelta: thresholds.maxFallbackRateDelta ?? 0.02,
@@ -39,6 +40,10 @@ export function evaluateDoctrineQualityGate(
     ...(benchmark.candidateRun.illegalActions >
     resolved.maxCandidateIllegalActions
       ? [`candidate_illegal_actions:${benchmark.candidateRun.illegalActions}`]
+      : []),
+    ...(benchmark.candidateRun.runtimeFailures >
+    resolved.maxCandidateRuntimeFailures
+      ? [`candidate_runtime_failures:${benchmark.candidateRun.runtimeFailures}`]
       : []),
     ...(benchmark.candidateRun.replayFailures >
     resolved.maxCandidateReplayFailures
@@ -142,6 +147,7 @@ export function formatDoctrineQualityBenchmarkReport(
   ];
   const safetyRows = [
     ["illegalActionDelta", benchmark.safety.illegalActionDelta],
+    ["runtimeFailureDelta", benchmark.safety.runtimeFailureDelta],
     ["replayFailureDelta", benchmark.safety.replayFailureDelta],
     ["timeoutRateDelta", benchmark.safety.timeoutRateDelta],
     ["fallbackRateDelta", benchmark.safety.fallbackRateDelta],

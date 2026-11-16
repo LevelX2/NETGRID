@@ -110,7 +110,12 @@ export function createSimulationProfileRunner(
         (sum, summary) => sum + summary.metrics.illegalActions,
         0,
       ),
+      runtimeFailures: summaries.reduce(
+        (sum, summary) => sum + summary.metrics.runtimeFailures,
+        0,
+      ),
       timeouts: timeoutActions,
+      timeoutRate: totalActions === 0 ? 0 : timeoutActions / totalActions,
       fallbackRate:
         totalActions === 0 ? 0 : round(fallbackActions / totalActions),
       winRates,

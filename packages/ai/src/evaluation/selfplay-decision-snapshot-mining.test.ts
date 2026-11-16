@@ -228,6 +228,7 @@ function selfplaySummary(
     cardPoolVersion: "0.99.0",
     metrics: {
       illegalActions: 0,
+      runtimeFailures: 0,
       fallbackRate: 0,
       timeoutRate: 0,
       reasonCodeCoverage: [],

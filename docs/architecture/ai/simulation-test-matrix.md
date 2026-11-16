@@ -89,6 +89,14 @@ einem Lauf ohne Aktionen null. Der Ergebnisanteil `runtime_failure` macht
 technische Abbrüche sichtbar. Eine höhere technische Abbruchrate lässt das
 Quality Gate auch bei intaktem Replay scheitern.
 
+Die Timeout-Rate ist der Anteil der erfassten Aktionen mit Timeout
+an allen erfassten Aktionen des Profils. Bei null Aktionen beträgt
+die Rate null. Beide Quality Gates vergleichen die ungerundeten
+Profilraten. Die Auswahl außerhalb der LegalActions und die Ablehnung
+bei der Engine-Revalidierung zählen zu `illegalActions`. Sonstige
+technische Fehler zählen zu `runtimeFailures`, auch vor der
+ersten Aktion. Das Doctrine-Gate bewertet beide Zähler getrennt.
+
 Die strategische Planwiederholung ordnet Fortschritt nur der handelnden
 Seite zu. Ein Planabbruch ohne Grund erfordert drei beobachtete eigene
 strategische Entscheidungen mit jeweils einem anderen Plan als dem

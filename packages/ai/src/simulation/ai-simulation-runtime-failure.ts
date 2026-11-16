@@ -8,6 +8,7 @@ import {
 export type AiSimulationRuntimeFailure = {
   classified: boolean;
   code: string;
+  illegalAction?: true;
   owner?: PlanResolutionFailureOwner;
   side: Side;
   stateVersion: number;
@@ -21,6 +22,7 @@ export type AiSimulationRuntimeFailure = {
 
 export function classifiedSimulationRuntimeFailure(params: {
   code: string;
+  illegalAction?: true;
   owner: PlanResolutionFailureOwner;
   side: Side;
   stateVersion: number;
@@ -34,6 +36,7 @@ export function classifiedSimulationRuntimeFailure(params: {
   return {
     classified: true,
     code: redactedToken(params.code, "unknown_runtime_failure"),
+    ...(params.illegalAction ? { illegalAction: true } : {}),
     owner: params.owner,
     side: params.side,
     stateVersion: nonNegativeInteger(params.stateVersion),

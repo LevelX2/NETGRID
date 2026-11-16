@@ -1270,6 +1270,7 @@ function benchmarkDeckFromAnySnapshot(
 function selfplayMetricsFixture(): AiSimulationSummary["metrics"] {
   return {
     illegalActions: 0,
+    runtimeFailures: 0,
     fallbackRate: 0,
     timeoutRate: 0,
     reasonCodeCoverage: [],

@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import { simulateAiGame } from "../product-simulation";
 import { runSimulationLeague } from "../simulation";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
+import { classifiedSimulationRuntimeFailure } from "./ai-simulation-runtime-failure";
+import { evaluateDoctrineQualityGate } from "./benchmark-reports";
+import { createDoctrineQualityBenchmarkRunner } from "./doctrine-quality-benchmark-runner";
+import { metricsFor } from "./simulation-quality-adapters";
 import { createSimulationProfileRunner } from "./simulation-profile-run";
 import type { SimulationBenchmarkProfile } from "./simulation-types";
 import { CURRENT_BENCHMARK_SEEDS } from "./soak-seed-data";
@@ -37,6 +41,54 @@ describe("current simulation quality gate", () => {
       accepted: false,
       reason: "holdout_regression_on_safety_or_replay",
     });
+  });
+
+  it("uses per-action timeout rates in both gates and keeps failures distinct", () => {
+    const baseline = simulateAiGame({ maxActions: 4 });
+    expect(baseline.actionSequence).toHaveLength(4);
+    const actionSequence = baseline.actionSequence.map((action, index) => ({
+      ...action,
+      timeoutUsed: index < 2,
+    }));
+    const context = { side: "runner", stateVersion: 4, timingPoint: "runner_action.main" } as const;
+    const runtimeFailure = classifiedSimulationRuntimeFailure({
+      ...context,
+      code: "uncovered_route",
+      owner: "scheduler",
+    });
+    const illegalAction = classifiedSimulationRuntimeFailure({
+      ...context,
+      code: "simulation_selected_action_not_legal",
+      illegalAction: true,
+      owner: "scheduler",
+    });
+    expect(metricsFor([], [runtimeFailure], true, false)).toMatchObject({
+      illegalActions: 0,
+      runtimeFailures: 1,
+      timeoutRate: 0,
+    });
+    const metrics = metricsFor(actionSequence, [runtimeFailure, illegalAction], true, false);
+    expect(metrics).toMatchObject({ illegalActions: 1, runtimeFailures: 1, timeoutRate: 0.5 });
+    const { runSimulationProfile } = createSimulationProfileRunner({
+      simulateAiGame: (config) =>
+        config?.runnerControllerMode === "current_candidate"
+          ? { ...baseline, actionSequence, metrics }
+          : baseline,
+      runExploitRegressionFixtures: () => [],
+    });
+    const { runDoctrineQualityBenchmark } = createDoctrineQualityBenchmarkRunner({
+      runSimulationProfile,
+    });
+    const benchmark = runDoctrineQualityBenchmark({ seeds: ["metric-units"] });
+    expect(benchmark.safety).toMatchObject({
+      illegalActionDelta: 1,
+      runtimeFailureDelta: 1,
+      timeoutRateDelta: 0.5,
+    });
+    expect(evaluateSimulationQualityGate(benchmark.candidateRun, benchmark.baselineRun))
+      .toMatchObject({ holdoutDelta: { timeoutRate: 0.5 } });
+    expect(evaluateDoctrineQualityGate(benchmark, { maxTimeoutRateDelta: 0.5 }).hardFailures)
+      .toEqual(["candidate_illegal_actions:1", "candidate_runtime_failures:1"]);
   });
 
   it("reports zero actions at the action limit and fingerprints different limits", () => {
@@ -213,7 +265,9 @@ function simulationRun(
     benchmarkProfile: "current_candidate",
     games: 1,
     illegalActions: 0,
+    runtimeFailures: 0,
     timeouts: 0,
+    timeoutRate: 0,
     fallbackRate: 0,
     winRates: { runner: 0.5 },
     agendaPoints: { runner: 0, corp: 0 },

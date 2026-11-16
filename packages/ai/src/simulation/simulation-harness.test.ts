@@ -121,6 +121,7 @@ describe("AI simulation harness", () => {
     expect(result.terminationKind).toBe("runtime_failure");
     expect(result.winner).toBe("runtime_failure");
     expect(result.actions).toBe(0);
+    expect(result.metrics).toMatchObject({ illegalActions: 0, runtimeFailures: 1 });
     expect(result.runtimeFailures).toEqual([
       expect.objectContaining({
         code: "simulation_deck_support_invalid",

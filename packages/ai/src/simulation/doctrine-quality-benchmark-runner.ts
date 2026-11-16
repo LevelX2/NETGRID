@@ -71,12 +71,11 @@ export function createDoctrineQualityBenchmarkRunner(
       safety: {
         illegalActionDelta:
           candidateRun.illegalActions - baselineRun.illegalActions,
+        runtimeFailureDelta:
+          candidateRun.runtimeFailures - baselineRun.runtimeFailures,
         replayFailureDelta:
           candidateRun.replayFailures - baselineRun.replayFailures,
-        timeoutRateDelta: round(
-          candidateRun.timeouts / Math.max(candidateRun.games, 1) -
-            baselineRun.timeouts / Math.max(baselineRun.games, 1),
-        ),
+        timeoutRateDelta: candidateRun.timeoutRate - baselineRun.timeoutRate,
         fallbackRateDelta: round(
           candidateRun.fallbackRate - baselineRun.fallbackRate,
         ),

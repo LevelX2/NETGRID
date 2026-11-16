@@ -175,7 +175,7 @@ export function createAiGameSimulator(
         cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
         metrics: metricsFor(
           [],
-          deckSupportErrors,
+          runtimeFailures,
           false,
           isHoldoutSeed(
             config.seed ?? "ai-vs-ai-smoke",
@@ -388,6 +388,7 @@ export function createAiGameSimulator(
             randomizedResult && !randomizedResult.ok
               ? `engine_apply_${decision.selectionKind}_rejected:${randomizedResult.error.code}`
               : "simulation_selected_action_not_legal",
+          illegalAction: true,
           owner: randomizedResult ? "rules_contract" : "scheduler",
           side,
           stateVersion: state.stateVersion,
@@ -413,6 +414,7 @@ export function createAiGameSimulator(
       if (!result.ok) {
         const failure = classifiedSimulationRuntimeFailure({
           code: `engine_apply_action_rejected:${result.error.code}`,
+          illegalAction: true,
           owner: "rules_contract",
           side,
           stateVersion: state.stateVersion,
@@ -629,7 +631,7 @@ export function createAiGameSimulator(
       cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
       metrics: metricsFor(
         actionSequence,
-        errors,
+        runtimeFailures,
         replay.ok,
         isHoldoutSeed(seed, SOAK_SEEDS.holdoutSeeds),
       ),

@@ -1,3 +1,4 @@
+import type { AiSimulationRuntimeFailure } from "./ai-simulation-runtime-failure";
 import type {
   AiDecision,
   AiDecisionInput,
@@ -16,13 +17,13 @@ import {
 
 export function metricsFor(
   actionSequence: AiSimulationSummary["actionSequence"],
-  errors: string[],
+  failures: readonly AiSimulationRuntimeFailure[],
   replayOk: boolean,
   holdout: boolean,
 ): AiQualityMetrics {
   return metricsForSimulationActionSequence(
     actionSequence,
-    errors,
+    failures,
     replayOk,
     holdout,
     summarizeDoctrineQualityMetrics,

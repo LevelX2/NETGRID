@@ -1,3 +1,4 @@
+import type { AiSimulationRuntimeFailure } from "./ai-simulation-runtime-failure";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { sortedUnique } from "../runtime/collection";
 import type { AiDoctrineQualityMetrics } from "./doctrine-quality-types";
@@ -9,6 +10,7 @@ export type AiSoakResult = {
   aggregate: {
     seeds: number;
     illegalActions: number;
+    runtimeFailures: number;
     replayFailures: number;
     fallbackRate: number;
     timeoutRate: number;
@@ -20,7 +22,7 @@ export type AiSoakResult = {
 
 export function metricsForSimulationActionSequence(
   actionSequence: AiSimulationSummary["actionSequence"],
-  errors: string[],
+  failures: readonly AiSimulationRuntimeFailure[],
   replayOk: boolean,
   holdout: boolean,
   summarizeDoctrineQualityMetrics: (
@@ -34,8 +36,12 @@ export function metricsForSimulationActionSequence(
     ),
   );
   const doctrine = summarizeDoctrineQualityMetrics(actionSequence);
+  const illegalActions = failures.filter(
+    (failure) => failure.illegalAction,
+  ).length;
   return {
-    illegalActions: errors.length,
+    illegalActions,
+    runtimeFailures: failures.length - illegalActions,
     fallbackRate: round(
       actionSequence.filter((entry) => entry.fallbackUsed).length / actions,
     ),
@@ -54,7 +60,7 @@ export function metricsForSimulationActionSequence(
       ),
     ),
     progressScore: round(
-      actionSequence.length + (replayOk ? 10 : 0) - errors.length * 10,
+      actionSequence.length + (replayOk ? 10 : 0) - failures.length * 10,
     ),
     holdout,
     doctrine,

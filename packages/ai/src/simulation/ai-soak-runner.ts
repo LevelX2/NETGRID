@@ -70,6 +70,10 @@ export function createAiSoakRunner(dependencies: AiSoakRunnerDependencies): {
           (sum, summary) => sum + summary.metrics.illegalActions,
           0,
         ),
+        runtimeFailures: summaries.reduce(
+          (sum, summary) => sum + summary.metrics.runtimeFailures,
+          0,
+        ),
         replayFailures: summaries.filter((summary) => !summary.replayOk).length,
         fallbackRate: round(fallbacks / totalActions),
         timeoutRate: round(timeouts / totalActions),

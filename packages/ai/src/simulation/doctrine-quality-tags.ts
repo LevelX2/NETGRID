@@ -72,6 +72,7 @@ export type AiDoctrineQualityCaseAnalysis = {
 
 export type AiDoctrineQualityGateThresholds = {
   maxCandidateIllegalActions: number;
+  maxCandidateRuntimeFailures: number;
   maxCandidateReplayFailures: number;
   maxTimeoutRateDelta: number;
   maxFallbackRateDelta: number;
