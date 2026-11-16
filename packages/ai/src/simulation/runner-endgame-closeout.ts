@@ -1,4 +1,3 @@
-import { hasEvidenceFlag } from "../runtime/evidence-value";
 import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 
@@ -422,16 +421,7 @@ export function isEndgameLowValueRepeatAction(
   return (
     entry.runnerRepeatedLowValueCentralRun === true ||
     entry.runnerNoFreshCentralRunTaken === true ||
-    entry.runnerRepeatedCentralRunWithoutFreshValue === true ||
-    hasEndgameEvidenceFlag(entry, "runner_access_no_value_repeated:true") ||
-    hasEndgameEvidenceFlag(
-      entry,
-      "runner_central_success_followed_by_repeat_no_value:true",
-    ) ||
-    hasEndgameEvidenceFlag(
-      entry,
-      "runner_jack_out_repeated_same_server_without_new_info:true",
-    )
+    entry.runnerRepeatedCentralRunWithoutFreshValue === true
   );
 }
 
@@ -460,18 +450,9 @@ export function isCorpEndgameStallSymptom(
 ): boolean {
   const planKind = options.planKind;
   return (
-    hasEndgameEvidenceFlag(entry, "corp_remote_build_followup_noop:true") ||
-    hasEndgameEvidenceFlag(
-      entry,
-      "corp_score_window_overridden_by_followup:true",
-    ) ||
-    hasEndgameEvidenceFlag(
-      entry,
-      "outcome_followup_delayed_score_window:true",
-    ) ||
-    (entry.side === "corp" &&
-      !options.meaningfulBoardProgress &&
-      endgamePlanKindMatches(planKind, ["remote_build", "protect", "economy"]))
+    entry.side === "corp" &&
+    !options.meaningfulBoardProgress &&
+    endgamePlanKindMatches(planKind, ["remote_build", "protect", "economy"])
   );
 }
 
@@ -529,11 +510,4 @@ function isCorpRemoteBuildActionForEndgame(
     isRemoteServerTarget(entry.targetServerId) &&
     (entry.actionType === "install_card" || entry.actionType === "rez_ice")
   );
-}
-
-function hasEndgameEvidenceFlag(
-  entry: RunnerEndgameCloseoutEntry,
-  flag: string,
-): boolean {
-  return hasEvidenceFlag({ evidence: entry.evidence ?? [] }, flag);
 }

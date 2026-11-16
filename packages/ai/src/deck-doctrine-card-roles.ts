@@ -7,19 +7,23 @@ import {
 import { rolesMatch } from "./role-match";
 
 export function deckDoctrineCardIsAiSupported(cardId: string): boolean {
-  return RUNTIME_CARDS[cardId]?.statuses.ai_supported === true;
+  return RUNTIME_CARDS[cardId]?.statuses?.ai_supported === true;
 }
 
 export function rolesForDeckDoctrineCard(cardId: string): string[] {
   if (!cardId) return [];
   const runtimeCard = RUNTIME_CARDS[cardId];
   const hint = AI_HINTS_BY_CARD.get(cardId);
-  if (cardIdHasGeneratedCardSpecAiHint(cardId)) {
+  if (
+    cardIdHasGeneratedCardSpecAiHint(cardId) ||
+    runtimeCard?.statuses?.ai_supported === true
+  ) {
     if (hint === undefined)
       throw new Error(`missing_generated_card_spec_ai_hint: ${cardId}`);
     return sortedUnique([...(hint.roles ?? []), ...(hint.planRoles ?? [])]);
   }
-  const inferred = inferredRoles(runtimeCard);
+  const inferred =
+    runtimeCard?.setId === "testset" ? inferredRoles(runtimeCard) : [];
   return sortedUnique([
     ...(hint?.roles ?? []),
     ...(hint?.planRoles ?? []),

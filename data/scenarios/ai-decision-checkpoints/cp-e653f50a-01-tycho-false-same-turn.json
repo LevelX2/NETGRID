@@ -11614,6 +11614,9 @@
         "type": "gain_credit"
       },
       {
+        "actionId": "corp.draw_card"
+      },
+      {
         "type": "install_card",
         "sourceDefinitionId": "onr_v1_323_experimental-ai",
         "targetServerId": "new_remote"

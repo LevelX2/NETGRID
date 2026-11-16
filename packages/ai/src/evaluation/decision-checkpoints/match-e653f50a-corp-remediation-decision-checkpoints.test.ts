@@ -51,6 +51,15 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
+    if (
+      json === tychoFalseSameTurnJson &&
+      result.decision?.actionId === "corp.draw_card"
+    ) {
+      expect(result.decision.reasonCode).toBe("plan_first.corp.defend_servers");
+      expect(result.decision.evidence).toContain(
+        "plan_assessment_evidence:corp_missing_concrete_defense_draw:hq",
+      );
+    }
     if (json === avoidZeroNeedArchivesIceJson) {
       const before = structuredClone(checkpoint.engine.testOnlyGameState);
       before.eventLog = structuredClone(checkpoint.engine.eventPrefix);

@@ -130,8 +130,10 @@ function visibleCorpCardsOutsideRd(input: AiDecisionInput): VisibleCard[] {
       ...server.ice,
       ...server.root,
     ]),
-    ...(input.playerView.specialZones?.setAside ?? []),
-    ...(input.playerView.specialZones?.removedFromGame ?? []),
+    ...[
+      ...(input.playerView.specialZones?.setAside ?? []),
+      ...(input.playerView.specialZones?.removedFromGame ?? []),
+    ].filter((card) => card.owner === "corp"),
   ].filter((card) => card.known !== false);
   const unique = new Map(cards.map((card) => [card.instanceId, card]));
   return [...unique.values()];

@@ -10,15 +10,12 @@ import {
   programSacrificeCandidate as buildProgramSacrificeCandidate,
   programSacrificeCategory,
   programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
-  runnerProgramInstallDisplacementPenalty as buildRunnerProgramInstallDisplacementPenalty,
   runnerProgramInstallTrashAssessmentFromCards as buildRunnerProgramInstallTrashAssessmentFromCards,
   sacrificeCandidateLabel,
   selectedMinimalProgramSacrificeCandidates,
   type ProgramSacrificeCandidate,
   type RunnerProgramInstallTrashAssessment,
 } from "./runner-program-install-trash-policy";
-import { runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion } from "./runner-program-sacrifice-exclusion";
-import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   isRunnerInstalledProgramCard,
@@ -75,13 +72,6 @@ export type RunnerProgramInstallTrashContext = {
     input: AiDecisionInput,
     card: VisibleCard,
   ) => RunnerProgramInstallTrashAssessment;
-  runnerProgramInstallDisplacementPenalty: (
-    assessment: RunnerProgramInstallTrashAssessment | undefined,
-  ) => number;
-  runnerProgramSacrificeExclusion: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => SemanticRuntimeExclusion | undefined;
 };
 
 export function createRunnerProgramInstallTrashContext(
@@ -439,27 +429,6 @@ export function createRunnerProgramInstallTrashContext(
     });
   }
 
-  function runnerProgramInstallDisplacementPenalty(
-    assessment: RunnerProgramInstallTrashAssessment | undefined,
-  ): number {
-    return buildRunnerProgramInstallDisplacementPenalty(assessment);
-  }
-
-  function runnerProgramSacrificeExclusion(
-    input: AiDecisionInput,
-    action: LegalAction,
-  ): SemanticRuntimeExclusion | undefined {
-    const assessment = runnerProgramInstallTrashAssessmentForAction(
-      input,
-      action,
-    );
-    return buildRunnerProgramSacrificeExclusion(input, action, {
-      assessmentForAction: () => assessment,
-      displacementPenalty: () =>
-        runnerProgramInstallDisplacementPenalty(assessment),
-    });
-  }
-
   return {
     selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds,
@@ -467,7 +436,5 @@ export function createRunnerProgramInstallTrashContext(
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallTrashAssessmentForCard,
-    runnerProgramInstallDisplacementPenalty,
-    runnerProgramSacrificeExclusion,
   };
 }

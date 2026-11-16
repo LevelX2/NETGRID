@@ -1,19 +1,9 @@
-import { visibleRunnerRunCreditPool } from "../runtime/visible-run-credit-facts";
-import type { AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
-import { semanticRuntimeCorpObservedRemoteReachability } from "../runtime/semantic-runtime-corp-remote-reachability";
-import { visibleRunnerExposureCreditValue } from "../runtime/visible-runner-action-economy";
-import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
-
-export function remoteIsProtected(
-  playerView: PlayerView,
-  serverId: string,
-): boolean {
-  const server = playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  return (server?.ice.length ?? 0) > 0;
-}
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { visibleRunnerRunCreditPool } from "../../runtime/visible-run-credit-facts";
+import type { AiDecisionInput } from "@netgrid/shared";
+import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
+import { semanticRuntimeCorpObservedRemoteReachability } from "../../runtime/semantic-runtime-corp-remote-reachability";
+import { visibleRunnerExposureCreditValue } from "../../runtime/visible-runner-action-economy";
 
 export function corpRemoteContestabilityAssessment(
   input: AiDecisionInput,
@@ -43,14 +33,19 @@ export function corpRemoteContestabilityAssessment(
     3,
     Math.floor((playerView.opponent.clicks ?? 4) - 1),
   );
+  const additionalExposureCredits = visibleRunnerExposureCreditValue(
+    input,
+    runnerExposureCreditActions,
+  );
   const visibleRunnerExposureContestCredits =
-    visibleRunnerContestCredits +
-    visibleRunnerExposureCreditValue(input, runnerExposureCreditActions);
+    visibleRunnerContestCredits + additionalExposureCredits;
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     runnerRig,
     visibleRunnerExposureContestCredits,
     server.root,
+    input.playerView.own.credits,
+    visibleIcePathTraceContext(input),
   );
   if (assessment.assessedKnownIceCount <= 0) return undefined;
   const observedReachability = semanticRuntimeCorpObservedRemoteReachability(
@@ -84,7 +79,7 @@ export function corpRemoteContestabilityAssessment(
       `runner_credits:${playerView.opponent.credits}`,
       `runner_visible_contest_credits:${visibleRunnerContestCredits}`,
       `runner_exposure_credit_actions:${runnerExposureCreditActions}`,
-      `runner_exposure_credit_value:${visibleRunnerExposureCreditValue(input, runnerExposureCreditActions)}`,
+      `runner_exposure_credit_value:${additionalExposureCredits}`,
       `runner_visible_exposure_contest_credits:${visibleRunnerExposureContestCredits}`,
       `runner_visible_rig_count:${runnerRig.length}`,
       `assessed_known_ice_count:${assessment.assessedKnownIceCount}`,
@@ -100,56 +95,4 @@ export function corpRemoteContestabilityAssessment(
       ...observedReachability.evidence,
     ],
   };
-}
-
-export function advanceCompletesScore(
-  playerView: PlayerView,
-  action: LegalAction,
-): boolean {
-  const sourceCard = visibleCardByInstanceId(playerView, String(action.source));
-  if (!sourceCard) return false;
-  const currentAdvancement = sourceCard.advancementCounters ?? 0;
-  const requirement = sourceCard.advancementRequirement;
-  return requirement !== undefined && currentAdvancement + 1 >= requirement;
-}
-
-export function advanceCanCloseScoreThisTurn(
-  playerView: PlayerView,
-  action: LegalAction,
-): boolean {
-  const sourceCard = visibleCardByInstanceId(playerView, String(action.source));
-  if (!sourceCard) return false;
-  const requirement = sourceCard.advancementRequirement;
-  if (requirement === undefined) return false;
-  const currentAdvancement = sourceCard.advancementCounters ?? 0;
-  if (currentAdvancement >= requirement) return false;
-  const countersAfterCurrentAction = currentAdvancement + 1;
-  const additionalAdvancesNeeded = Math.max(
-    0,
-    requirement - countersAfterCurrentAction,
-  );
-  if (additionalAdvancesNeeded === 0) {
-    return advanceCompletesScore(playerView, action);
-  }
-  const remainingClicks = playerView.own.clicks - 1;
-  const remainingCredits = playerView.own.credits - 1;
-  return (
-    remainingClicks >= additionalAdvancesNeeded &&
-    remainingCredits >= additionalAdvancesNeeded
-  );
-}
-
-export function corpHasSafeScoreAlternative(
-  input: AiDecisionInput,
-  actionToSkip: LegalAction,
-): boolean {
-  return input.legalActions.some(
-    (action) =>
-      action.actionId !== actionToSkip.actionId &&
-      (action.type === "gain_credit" ||
-        action.type === "draw_card" ||
-        action.type === "install_card" ||
-        action.type === "rez_ice" ||
-        action.type === "score_agenda"),
-  );
 }

@@ -8,7 +8,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
-import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
+import { corpRemoteContestabilityAssessment } from "../defense/corp-remote-contestability";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { finiteNonNegativeIntegerOrResolutionFailure } from "../../runtime/exact-action-cost-facts";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";

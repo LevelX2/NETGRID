@@ -738,7 +738,6 @@ describe("AI module boundaries", () => {
   it("keeps semantic runtime score summation owned by score components", () => {
     const allowedFiles = new Set([
       "ai-runtime-public-entrypoints.ts",
-      "runtime/semantic-runtime-choice-builder.ts",
       "runtime/semantic-runtime-score-components.ts",
     ]);
     const violations = collectSourceFiles(srcDir)
@@ -1016,7 +1015,7 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps goal and strategic fit evaluation behind scoring owners", () => {
+  it("keeps goal fit evaluation behind scoring owners", () => {
     const allowedFilesBySymbol = new Map<string, Set<string>>([
       [
         "scoreActionGoalFit",
@@ -1035,20 +1034,6 @@ describe("AI module boundaries", () => {
           "evaluation/doctrine-goal-action-fit.ts",
         ]),
       ],
-      [
-        "semanticRuntimeStrategicActionFitScoreComponents",
-        new Set([
-          "runtime/strategic-action-fit.ts",
-          "runtime/semantic-runtime-score-breakdown.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeStrategicActionFitEvidence",
-        new Set([
-          "runtime/strategic-action-fit.ts",
-          "runtime/semantic-runtime-choice-builder.ts",
-        ]),
-      ],
     ]);
     const violations = collectSourceFiles(srcDir)
       .filter((file) => !file.endsWith(".test.ts"))
@@ -1061,7 +1046,7 @@ describe("AI module boundaries", () => {
               return [];
             }
             return [
-              `${relative} references ${symbol} outside goal or strategic fit ownership`,
+              `${relative} references ${symbol} outside goal fit ownership`,
             ];
           },
         );

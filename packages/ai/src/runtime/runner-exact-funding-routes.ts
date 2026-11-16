@@ -1,4 +1,3 @@
-import { exactBasicLiquidCreditCandidate } from "../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -13,7 +12,7 @@ import { runnerFundingPaymentWindowQuote } from "./runner-funding-payment-window
 import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-funding-candidates";
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
-import { turnPlanningFingerprint } from "../plans/turn-planning-contracts";
+import { runnerReserveHandPreparation } from "./runner-reserve-hand-preparation";
 import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
 import { quoteRunnerRunTarget } from "../runner-run-target-evaluation";
 import {
@@ -25,8 +24,10 @@ import { runnerRunTargetIsDirectlyConvertible } from "./runner-run-funding-admis
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import { runnerDebtFinancingProfile } from "./runner-canonical-card-facts";
 import {
+  advanceRunnerFundingCardBudget,
   compareRunnerFundingHandQuotes,
   runnerFundingHandQuote,
+  type RunnerFundingCardBudget,
 } from "./runner-funding-hand-quote";
 import {
   runnerStrategicExchangeKinds,
@@ -191,194 +192,6 @@ export function runnerExactFundingRouteContract(
   };
 }
 
-/** An additional exact route of this funding service. Only a known income
- * card retained through basic draws is quoted; drawn identities have no value.
- * Every prefix head is an actual current LegalAction and is revalidated after
- * its private observation boundary. No run or strategic exchange is admitted. */
-function runnerReserveHandPreparation(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  request: RunnerExactFundingRouteRequest,
-  targetCredits: number,
-):
-  | { routeActionIds: string[]; routeAssessment: RunnerFundingRouteAssessment }
-  | undefined {
-  const own = input.playerView.own;
-  const requiredHandBuffer = Math.max(
-    request.requiredEndTurnHandBuffer ?? -1,
-    request.reserveDevelopment?.minimumHandBuffer ?? -1,
-  );
-  const basic = candidates.find(exactBasicLiquidCreditCandidate);
-  const draw = input.legalActions.find(
-    (action) =>
-      action.type === "draw_card" &&
-      action.side === "runner" &&
-      action.source === "basic_action" &&
-      action.expiresAtStateVersion === input.playerView.stateVersion,
-  );
-  const projection = draw && runnerDrawProjectionFor(draw);
-  if (
-    !basic ||
-    !draw ||
-    !projection ||
-    !Number.isSafeInteger(requiredHandBuffer) ||
-    requiredHandBuffer < own.gripOrHq.length ||
-    requiredHandBuffer > own.maxHandSize ||
-    projection.projectedNetHandDelta <= 0 ||
-    projection.projectedPostDrawDispositionCount !== 0
-  )
-    return undefined;
-  const drawClickCost = draw.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
-  const drawCreditCost =
-    draw.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) +
-    projection.projectedGrossDrawCount * projection.visibleDrawTaxSourceCount;
-  if (
-    ![drawClickCost, drawCreditCost].every(Number.isSafeInteger) ||
-    drawClickCost <= 0 ||
-    drawCreditCost < 0
-  )
-    return undefined;
-  const ordinary = candidates.filter(
-    (candidate) =>
-      runnerFundingRouteCandidateIsMaterializable(candidate) &&
-      !runnerStrategicExchangeRequiresBoundParent(candidate),
-  );
-  // A conservative upper bound for current non-consuming income prevents this
-  // preparation from displacing a stronger installed source or draw-income.
-  let alternativeRate = 1;
-  for (const candidate of ordinary) {
-    const income = candidate.economyProjection!;
-    if (income.netHandDelta < 0) continue;
-    if (
-      candidate.costProfile.costKnownStatus !== "known" ||
-      !Number.isSafeInteger(income.clickCost) ||
-      income.clickCost <= 0 ||
-      !Number.isFinite(income.netLiquidCreditGain)
-    )
-      return undefined;
-    alternativeRate = Math.max(
-      alternativeRate,
-      income.netLiquidCreditGain! / income.clickCost,
-    );
-  }
-  const basicCreditBaseline = Math.ceil(
-    own.credits + request.remainingClicks * alternativeRate,
-  );
-  // A small reserve gap may finish early and release clicks to other plans.
-  // Only a still-open whole-turn reserve justifies this whole-turn comparison.
-  if (request.targetCredits < basicCreditBaseline) return undefined;
-  const quotes: NonNullable<RunnerFundingRouteAssessment["handPreparation"]>[] =
-    [];
-  for (const candidate of ordinary) {
-    const income = candidate.economyProjection!;
-    const action = input.legalActions.find(
-      (entry) => entry.actionId === candidate.actionId,
-    );
-    if (
-      candidate.actionType !== "play_event" ||
-      !action ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion ||
-      (action.choiceRequirements?.length ?? 0) !== 0 ||
-      !candidate.sourceCardInstanceId ||
-      !own.gripOrHq.some(
-        (card) => card.instanceId === candidate.sourceCardInstanceId,
-      ) ||
-      candidate.costProfile.costKnownStatus !== "known" ||
-      candidate.costProfile.additionalCosts.length !== 0 ||
-      candidate.risks.length !== 0 ||
-      !candidate.functionalEffects?.length ||
-      candidate.functionalEffects.some(
-        (effect) => effect.scope !== "runner" || effect.kind !== "economy",
-      ) ||
-      income.reliability !== "guaranteed" ||
-      income.source !== "legal_action_payload" ||
-      income.cardsConsumed !== 1 ||
-      income.netHandDelta !== -1 ||
-      income.cardsDrawn !== 0 ||
-      income.payoutMode !== "fixed" ||
-      ![income.clickCost, income.creditCost, income.netLiquidCreditGain].every(
-        Number.isSafeInteger,
-      ) ||
-      income.clickCost <= 0 ||
-      income.creditCost < 0 ||
-      own.gripOrHq.length + income.netHandDelta >= requiredHandBuffer
-    )
-      continue;
-    const drawCount = Math.ceil(
-      (requiredHandBuffer - own.gripOrHq.length - income.netHandDelta) /
-        projection.projectedNetHandDelta,
-    );
-    const clicks = drawCount * drawClickCost + income.clickCost;
-    const upfront = drawCount * drawCreditCost + income.creditCost;
-    const projectedEndCredits =
-      own.credits -
-      drawCount * drawCreditCost +
-      income.netLiquidCreditGain! +
-      request.remainingClicks -
-      clicks;
-    const projectedEndHand =
-      own.gripOrHq.length +
-      drawCount * projection.projectedNetHandDelta +
-      income.netHandDelta;
-    if (
-      clicks > request.remainingClicks ||
-      upfront > own.credits ||
-      drawCount * projection.projectedGrossDrawCount > own.stackOrRdCount ||
-      projectedEndCredits < targetCredits ||
-      projectedEndCredits <= basicCreditBaseline ||
-      projectedEndHand < requiredHandBuffer ||
-      projectedEndHand > own.maxHandSize
-    )
-      continue;
-    quotes.push({
-      stateVersion: input.playerView.stateVersion,
-      drawActionId: draw.actionId,
-      incomeActionId: candidate.actionId,
-      sourceCardInstanceId: candidate.sourceCardInstanceId,
-      drawCount,
-      drawClickCost,
-      drawCreditCost,
-      requiredHandBuffer,
-      projectedEndCredits,
-      projectedEndHand,
-      basicCreditBaseline,
-    });
-  }
-  const quote = quotes.sort(
-    (left, right) =>
-      right.projectedEndCredits - left.projectedEndCredits ||
-      right.projectedEndHand - left.projectedEndHand ||
-      left.drawCount - right.drawCount ||
-      left.incomeActionId.localeCompare(right.incomeActionId),
-  )[0];
-  if (!quote) return undefined;
-  return {
-    routeActionIds: [quote.drawActionId],
-    routeAssessment: {
-      stateVersion: input.playerView.stateVersion,
-      routeId: turnPlanningFingerprint(
-        "runner-reserve-hand-preparation",
-        quote,
-      ),
-      status: "covered_guaranteed",
-      reliability: "guaranteed",
-      horizon: "same_turn",
-      projectedGap: 0,
-      totalClickCost: request.remainingClicks,
-      firstStepActionId: quote.drawActionId,
-      handPreparation: quote,
-      evidenceCodes: [
-        "runner_reserve_income_current_hand_preparation",
-        `runner_reserve_preparation_end_credits:${quote.projectedEndCredits}|alternative_upper_bound:${quote.basicCreditBaseline}`,
-        `runner_reserve_preparation_hand:${quote.projectedEndHand}|required:${quote.requiredHandBuffer}`,
-      ],
-    },
-  };
-}
-
 function runnerExactFundingRouteCandidates(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -515,22 +328,24 @@ function runnerFundingRouteConsumerBufferFits(
   if (request.requiredEndTurnHandBuffer !== undefined) {
     const floor = request.requiredEndTurnHandBuffer;
     if (!Number.isSafeInteger(floor) || floor < 0) return false;
-    let hand = input.playerView.own.gripOrHq.length;
+    let budget: RunnerFundingCardBudget = {
+      hand: input.playerView.own.gripOrHq.length,
+      stack: input.playerView.own.stackOrRdCount,
+    };
     for (const step of route.steps) {
       if (step.kind === "future_projection") continue;
       const candidate = candidates.find(
         (entry) => entry.actionId === step.actionId,
       );
-      const delta = candidate?.economyProjection?.netHandDelta;
-      if (
-        step.kind !== "legal_action" ||
-        step.ownTurnOffset !== 0 ||
-        delta === undefined ||
-        !Number.isSafeInteger(delta)
-      )
+      if (step.ownTurnOffset !== 0 || !candidate?.economyProjection)
         return false;
-      hand += delta - runnerCandidateSelfDamageAmount(candidate!);
-      if (hand < floor) return false;
+      const next = advanceRunnerFundingCardBudget(
+        budget,
+        candidate.economyProjection,
+        runnerCandidateSelfDamageAmount(candidate),
+      );
+      if (!next || next.hand < floor) return false;
+      budget = next;
     }
   }
   if (
@@ -578,13 +393,13 @@ function runnerFundingRouteConsumerBufferFits(
           : [];
       }),
     );
-    const handAfter = runnerFundingProjectedHand(
+    const cardBudget = runnerFundingProjectedCardBudget(
       input,
       candidates,
       route,
       target.actionId,
     );
-    if (handAfter === undefined) return false;
+    if (!cardBudget) return false;
     const fundedInput: AiDecisionInput = {
       ...input,
       playerView: {
@@ -594,6 +409,7 @@ function runnerFundingRouteConsumerBufferFits(
           // The exact compiled payment becomes liquid only inside this run.
           credits: route.projectedGeneralCredits + payment.creditGain,
           clicks: input.playerView.own.clicks - route.totalClickCost,
+          stackOrRdCount: cardBudget.stack,
           gripOrHq: input.playerView.own.gripOrHq.filter(
             (card) =>
               !payment.installedCardIds.includes(card.instanceId) &&
@@ -606,7 +422,7 @@ function runnerFundingRouteConsumerBufferFits(
       input: fundedInput,
       deckCapabilities:
         createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
-      quotedRunnerGripCount: handAfter,
+      quotedRunnerGripCount: cardBudget.hand,
       runActionId: target.actionId,
       targetServerId: target.targetServerId,
     })?.target;
@@ -649,33 +465,29 @@ function runnerFundingRouteConsumerBufferFits(
 
 /** Resource feasibility only. The existing hand owner performs later draws;
  * random damage and unknown drawn card identities are never simulated here. */
-function runnerFundingProjectedHand(
+function runnerFundingProjectedCardBudget(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   route: FundingRoute,
   consumerActionId: string,
-): number | undefined {
+): RunnerFundingCardBudget | undefined {
   const fundingActions = route.steps
     .filter((step) => step.kind === "legal_action")
     .map((step) =>
       candidates.find((candidate) => candidate.actionId === step.actionId),
     );
-  let handAfter = input.playerView.own.gripOrHq.length;
+  let budget: RunnerFundingCardBudget = {
+    hand: input.playerView.own.gripOrHq.length,
+    stack: input.playerView.own.stackOrRdCount,
+  };
   let randomDamageOccurred = false;
   for (const candidate of fundingActions) {
     if (!candidate) return undefined;
     const projection = candidate.economyProjection;
-    const netHandDelta = projection?.netHandDelta;
     const damage = runnerCandidateSelfDamageAmount(candidate);
     // A later grip source may have been randomly discarded. Such a sequence
     // cannot be guaranteed; already consumed sources before damage are safe.
-    if (
-      !Number.isSafeInteger(netHandDelta) ||
-      netHandDelta === undefined ||
-      !Number.isSafeInteger(damage) ||
-      damage < 0 ||
-      (randomDamageOccurred && (projection?.cardsConsumed ?? 0) > 0)
-    )
+    if (!projection || (randomDamageOccurred && projection.cardsConsumed > 0))
       return undefined;
     // Funding guarantees the exact consumer, not just its numerical hand
     // buffer. Random damage cannot retain a named grip source, and a known
@@ -688,12 +500,12 @@ function runnerFundingProjectedHand(
       )
     )
       return undefined;
-    handAfter += netHandDelta - damage;
-    if (handAfter < 0) return undefined;
+    const next = advanceRunnerFundingCardBudget(budget, projection, damage);
+    if (!next) return undefined;
+    budget = next;
     randomDamageOccurred ||= damage > 0;
   }
-  if (handAfter < 0) return undefined;
-  return handAfter;
+  return budget;
 }
 
 /** Resource feasibility of the exact current consumer, without choosing a
@@ -743,27 +555,29 @@ function runnerFundingBufferRepair(
   )
     return undefined;
 
-  const handAfter = runnerFundingProjectedHand(
+  const cardBudget = runnerFundingProjectedCardBudget(
     input,
     candidates,
     route,
     target.actionId,
   );
-  if (handAfter === undefined) return undefined;
-  const gap = Math.max(0, requiredHandBuffer - handAfter);
+  if (!cardBudget) return undefined;
+  const gap = Math.max(0, requiredHandBuffer - cardBudget.hand);
   if (gap === 0)
     return {
       clickCost: 0,
       creditCost: 0,
       evidence: [
-        `runner_funding_consumer_hand_buffer_preserved:${handAfter}|required:${requiredHandBuffer}`,
+        `runner_funding_consumer_hand_buffer_preserved:${cardBudget.hand}|required:${requiredHandBuffer}`,
       ],
     };
   const draw = input.legalActions.find(
     (action) =>
       action.side === "runner" &&
       action.type === "draw_card" &&
-      action.source === "basic_action",
+      action.source === "basic_action" &&
+      action.timingPoint === input.playerView.timingPoint &&
+      action.expiresAtStateVersion === input.playerView.stateVersion,
   );
   const projection = draw && runnerDrawProjectionFor(draw);
   if (!draw || !projection || projection.projectedNetHandDelta <= 0)
@@ -789,15 +603,14 @@ function runnerFundingBufferRepair(
     !Number.isSafeInteger(drawCredits) ||
     drawCredits < 0 ||
     clickCost > request.remainingClicks ||
-    draws * projection.projectedGrossDrawCount >
-      input.playerView.own.stackOrRdCount
+    draws * projection.projectedGrossDrawCount > cardBudget.stack
   )
     return undefined;
   return {
     clickCost,
     creditCost,
     evidence: [
-      `runner_funding_consumer_hand_after_funding:${handAfter}|required:${requiredHandBuffer}`,
+      `runner_funding_consumer_hand_after_funding:${cardBudget.hand}|required:${requiredHandBuffer}`,
       `runner_funding_consumer_buffer_repair_reserved:${draws}|clicks:${clickCost}|credits:${creditCost}|action:${draw.actionId}`,
     ],
   };

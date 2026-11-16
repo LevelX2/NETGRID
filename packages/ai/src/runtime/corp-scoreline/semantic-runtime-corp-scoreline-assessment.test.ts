@@ -425,6 +425,7 @@ function inputWithActions(
     playerView: {
       stateVersion: 1,
       side: "corp",
+      timingPoint: "corp_action.main",
       own: {
         clicks: 3,
         credits: options.credits ?? 5,

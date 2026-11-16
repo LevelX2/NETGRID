@@ -152,6 +152,20 @@ export function assessKnownRezzedIcePath(
   deflectorContext: VisibleDeflectorContext = {},
   unbrokenRunPathEffects: RunPathProjectionEffect[] = [],
 ): KnownRezzedIcePathAssessment {
+  if (
+    deflectorContext.traceRulesProfile === undefined &&
+    deflectorContext.onMissingTraceRulesProfile &&
+    iceCards.some(
+      (ice) =>
+        ice.known &&
+        (ice.rezzed === true || ice.authoritativePostRezRunProjection === true) &&
+        ice.effectiveRunQuote?.subroutines.some(
+          (subroutine) => subroutine.type === "initiate_trace",
+        ),
+    )
+  ) {
+    deflectorContext.onMissingTraceRulesProfile();
+  }
   const normalizedCorpBidCapacity = normalizeVisibleCorpBidCapacity(
     visibleCorpBidCapacity,
   );

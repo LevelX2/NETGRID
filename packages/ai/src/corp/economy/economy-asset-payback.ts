@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
+import { corpRemoteContestabilityAssessment } from "../defense/corp-remote-contestability";
 
 export type CorpEconomyAssetPaybackRisk = Readonly<{
   serverId: string;
@@ -85,6 +85,7 @@ export function assessCorpEconomyAssetPayback(params: {
     params.payoutActionCost === 0
       ? maximumFinitePoolExecutions
       : Math.floor(currentPayoutActionCapacity / params.payoutActionCost);
+  // Forecast only the Engine-quoted flexible clicks in the selected horizon.
   const clicksByTurn = [
     currentPayoutActionCapacity,
     ...(params.input.playerView.own.corpFutureFlexibleClicks ?? []).map(

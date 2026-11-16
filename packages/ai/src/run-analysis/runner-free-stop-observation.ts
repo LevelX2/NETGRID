@@ -95,3 +95,21 @@ export function runnerObservedFreeStopEventId(
   }
   return stoppedEventId;
 }
+
+/** Bind the owner's probe evaluation to the same current Engine run offer. */
+export function runnerHasCurrentBasicProbeAction(
+  input: AiDecisionInput,
+  actionId: string,
+  serverId: string,
+): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.actionId === actionId &&
+      action.side === "runner" &&
+      action.type === "start_run" &&
+      action.source === "basic_action" &&
+      action.payload?.serverId === serverId &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.timingPoint === input.playerView.timingPoint,
+  );
+}

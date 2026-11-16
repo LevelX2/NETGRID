@@ -17,9 +17,14 @@ export function runnerDelayedInstallReplanningBoundary(
   );
   if (
     !action ||
+    input.side !== "runner" ||
     action.side !== "runner" ||
     action.type !== "trigger_ability" ||
+    action.timingPoint !== input.playerView.timingPoint ||
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    candidate.stateVersion !== input.playerView.stateVersion ||
+    candidate.actorSide !== "runner" ||
+    candidate.actionType !== action.type ||
     candidate.sourceKind !== "card" ||
     candidate.sourceCardInstanceId === undefined ||
     candidate.sourceCardInstanceId !== action.source ||

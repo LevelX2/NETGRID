@@ -7,6 +7,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type {
   CorpBoardTriage,
   CorpBoardTriageDependencies,
+  ForcedScorelineClockPressure,
   ScoredLegalAction,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-contracts";
 import {
@@ -149,19 +150,7 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     dependencies,
   );
   if (forcedScorelinePressure) {
-    return {
-      primary: "force_scoreline_clock",
-      severity: forcedScorelinePressure.severity,
-      targetServerId: forcedScorelinePressure.targetServerId,
-      scoreRemoteServerId: forcedScorelinePressure.scoreRemoteServerId,
-      requiredRezFloor: forcedScorelinePressure.requiredRezFloor,
-      currentCredits,
-      evidence: [
-        "corp_board_triage_primary:force_scoreline_clock",
-        `corp_board_triage_severity:${forcedScorelinePressure.severity}`,
-        ...forcedScorelinePressure.evidence,
-      ],
-    };
+    return forceScorelineTriage(forcedScorelinePressure, currentCredits);
   }
 
   const pressureInput = inputWithOpponentDefaults(input);
@@ -272,19 +261,7 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     dependencies,
   );
   if (activeScorelineClock) {
-    return {
-      primary: "force_scoreline_clock",
-      severity: activeScorelineClock.severity,
-      targetServerId: activeScorelineClock.targetServerId,
-      scoreRemoteServerId: activeScorelineClock.scoreRemoteServerId,
-      requiredRezFloor: activeScorelineClock.requiredRezFloor,
-      currentCredits,
-      evidence: [
-        "corp_board_triage_primary:force_scoreline_clock",
-        `corp_board_triage_severity:${activeScorelineClock.severity}`,
-        ...activeScorelineClock.evidence,
-      ],
-    };
+    return forceScorelineTriage(activeScorelineClock, currentCredits);
   }
 
   if (
@@ -346,7 +323,7 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     scorelineDevelopmentAllowed &&
     (!corpTriageIsPunishPrimary(input) ||
       corpRemoteScoringStrategyWantsRemoteDevelopment(input))
-      ? actions.find((entry) => actionBuildsScoreRemote(entry))
+      ? highestPriorityScoreRemoteEntry(actions.filter(actionBuildsScoreRemote))
       : undefined;
   if (setupRemote) {
     return {
@@ -375,6 +352,25 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
             "corp_board_triage_scoreline_development:false",
           ]
         : []),
+    ],
+  };
+}
+
+function forceScorelineTriage(
+  pressure: ForcedScorelineClockPressure,
+  currentCredits: number,
+): CorpBoardTriage {
+  return {
+    primary: "force_scoreline_clock",
+    severity: pressure.severity,
+    targetServerId: pressure.targetServerId,
+    scoreRemoteServerId: pressure.scoreRemoteServerId,
+    requiredRezFloor: pressure.requiredRezFloor,
+    currentCredits,
+    evidence: [
+      "corp_board_triage_primary:force_scoreline_clock",
+      `corp_board_triage_severity:${pressure.severity}`,
+      ...pressure.evidence,
     ],
   };
 }

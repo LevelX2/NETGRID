@@ -2430,6 +2430,9 @@ Routen zusätzlich den vom Runner-Owner gequoteten, innerhalb des Handlimits
 behaltenen Handgewinn. `runtime/runner-funding-hand-quote.ts` verwendet dafür
 nur aktuelle LegalActions, garantierte unmittelbare allgemeine Credits und
 bekannte Hand-/Stackmengen ohne zusätzliche Risiken oder Ressourcentausch.
+Funding-Folge und Run-Quote führen dieselben Hand- und Stackbestände nach
+jedem Schritt fort. Eine Handpuffer-Reparatur kann nur aus dem nach der
+Finanzierung verbleibenden Stack reserviert werden.
 Unvergleichbare Nebenfolgen bleiben ausdrücklich diagnostiziert. Die bestehende
 Routenauswahl konsumiert diese Quote vor ihrer Ergebnisbegrenzung; Cash-Ertrag,
 Klickbedarf, Zuverlässigkeit, Horizont und gleiche Vorabkosten behalten Vorrang.

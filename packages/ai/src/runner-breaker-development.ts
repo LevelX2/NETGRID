@@ -20,7 +20,6 @@ export type RunnerBreakerDevelopmentAssessment = {
   minimumCoverageComplete: boolean;
   architecture: RunnerBreakerArchitecture;
   optionalBreakerIds: string[];
-  searchableOptionalBreakerIds: string[];
   primaryBreakerNeed: boolean;
   evidence: string[];
 };
@@ -34,7 +33,6 @@ export function assessRunnerBreakerDevelopment(
       minimumCoverageComplete: false,
       architecture: "unknown",
       optionalBreakerIds: [],
-      searchableOptionalBreakerIds: [],
       primaryBreakerNeed: true,
       evidence: ["breaker_architecture:unknown", "breaker_profile:missing"],
     };
@@ -88,9 +86,6 @@ export function assessRunnerBreakerDevelopment(
     minimumCoverageComplete,
     architecture,
     optionalBreakerIds: optionalBreakers.map((breaker) => breaker.cardId),
-    searchableOptionalBreakerIds: searchableOptionalBreakers.map(
-      (breaker) => breaker.cardId,
-    ),
     primaryBreakerNeed: !minimumCoverageComplete,
     evidence: [
       `breaker_architecture:${architecture}`,

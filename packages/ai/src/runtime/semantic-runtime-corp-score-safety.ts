@@ -5,25 +5,13 @@ import type {
   CorpScorelineWindowAssessment,
 } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
-type CorpScoreTerminalWindowLike = {
-  terminalWindow: boolean;
-  scoreActionIds: readonly string[];
-  blockedByCredits?: boolean;
-  blockedByCheapContest?: boolean;
-  blockedByRunnerContest?: boolean;
-  blockedByHqThreat?: boolean;
-  runnerAccessThreatHigh: boolean;
-  protectedRemoteIds: readonly string[];
-};
-
 export type SemanticRuntimeCorpScoreSafetyGate = {
   allowed: boolean;
   evidence: string[];
 };
 
 export type SemanticRuntimeCorpScoreSafetyDependencies = {
-  scoreTerminalWindow?: (input: AiDecisionInput) => CorpScoreTerminalWindowLike;
-  scorelineWindowAssessment?: (
+  scorelineWindowAssessment: (
     input: AiDecisionInput,
   ) => CorpScorelineWindowAssessment;
 };
@@ -39,19 +27,19 @@ export function semanticRuntimeCorpScoreNowSafetyGate(
   if (
     input.side !== "corp" ||
     action.side !== "corp" ||
-    action.type !== "score_agenda"
+    action.type !== "score_agenda" ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !input.legalActions.some(
+      (offer) =>
+        offer.actionId === action.actionId &&
+        offer.source === action.source &&
+        offer.side === action.side &&
+        offer.type === action.type &&
+        offer.timingPoint === action.timingPoint &&
+        offer.expiresAtStateVersion === action.expiresAtStateVersion,
+    )
   ) {
-    return {
-      allowed: false,
-      evidence: ["unsafe_score_unknown_higher_priority"],
-    };
-  }
-  const scoreline = dependencies.scorelineWindowAssessment?.(input);
-  if (scoreline) {
-    return scoreNowSafetyGateFromScoreline(action, scoreline);
-  }
-  const terminal = dependencies.scoreTerminalWindow?.(input);
-  if (!terminal) {
     return {
       allowed: false,
       evidence: [
@@ -60,21 +48,10 @@ export function semanticRuntimeCorpScoreNowSafetyGate(
       ],
     };
   }
-  const scoreActionIdSet = new Set(terminal.scoreActionIds);
-  const scoreLegal = scoreActionIdSet.has(action.actionId);
-  const reasons = semanticRuntimeCorpUnsafeScoreReasons(terminal, scoreLegal);
-  const allowed = reasons.length === 0;
-  return {
-    allowed,
-    evidence: allowed
-      ? [
-          "corp_scoreline_safety_gate_passed:true",
-          `protected_remote_ready:${terminal.protectedRemoteIds.length > 0}`,
-          `runner_access_threat_high:${terminal.runnerAccessThreatHigh}`,
-          ...terminalOutcomeEvidence(true),
-        ]
-      : [...reasons, ...terminalOutcomeEvidence(false)],
-  };
+  return scoreNowSafetyGateFromScoreline(
+    action,
+    dependencies.scorelineWindowAssessment(input),
+  );
 }
 
 function scoreNowSafetyGateFromScoreline(
@@ -84,6 +61,7 @@ function scoreNowSafetyGateFromScoreline(
   const path = scoreline.paths.find(
     (candidate) =>
       candidate.actionId === action.actionId &&
+      candidate.actionType === action.type &&
       candidate.actionRoles.includes("score_now"),
   );
   if (!path) {
@@ -111,7 +89,13 @@ function scoreNowSafetyGateFromScoreline(
           ...terminalOutcomeEvidence(true),
           ...path.evidence,
         ]
-      : [...reasons, ...terminalOutcomeEvidence(false), ...path.evidence],
+      : [
+          ...(reasons.length > 0
+            ? reasons
+            : ["unsafe_score_unknown_higher_priority"]),
+          ...terminalOutcomeEvidence(false),
+          ...path.evidence,
+        ],
   };
 }
 
@@ -154,36 +138,6 @@ function terminalOutcomeEvidence(allowed: boolean): string[] {
     `terminal_outcome_raw_value:${rawValue}`,
     `terminal_outcome_normalized_value:${normalizedValue}`,
   ];
-}
-
-function semanticRuntimeCorpUnsafeScoreReasons(
-  terminal: CorpScoreTerminalWindowLike,
-  scoreLegal: boolean,
-): string[] {
-  const reasons: string[] = [];
-  if (!terminal.terminalWindow || !scoreLegal) {
-    reasons.push("unsafe_score_unknown_higher_priority");
-  }
-  if (terminal.blockedByCredits) {
-    reasons.push("unsafe_score_insufficient_rez_reserve");
-  }
-  if (terminal.blockedByCheapContest) {
-    reasons.push("unsafe_score_cheap_contest_available");
-  }
-  if (terminal.blockedByRunnerContest) {
-    reasons.push("unsafe_score_runner_access_threat_high");
-  }
-  if (terminal.blockedByHqThreat) {
-    reasons.push("unsafe_score_hq_or_rnd_threat");
-  }
-  if (
-    terminal.runnerAccessThreatHigh &&
-    terminal.protectedRemoteIds.length === 0
-  ) {
-    reasons.push("unsafe_score_unprotected_remote");
-    reasons.push("unsafe_score_missing_protected_remote_signal");
-  }
-  return sortedUnique(reasons);
 }
 
 function sortedUnique(values: string[]): string[] {

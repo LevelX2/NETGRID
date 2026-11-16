@@ -748,6 +748,33 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("picks the same remote from equivalent setup offers in either order", () => {
+    const first = corpAction("install-first", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const second = corpAction("install-second", "install_card", {
+      placement: "ice",
+      serverId: "remote_2",
+    });
+    for (const legalActions of [
+      [first, second],
+      [second, first],
+    ]) {
+      const input = corpInput({
+        legalActions,
+        corpCredits: 8,
+        servers: [remoteServer("remote_1", []), remoteServer("remote_2", [])],
+      });
+      expect(
+        semanticRuntimeCorpBoardTriage(input, testDependencies()),
+      ).toMatchObject({
+        primary: "setup_score_remote",
+        targetServerId: "remote_1",
+      });
+    }
+  });
+
   it("lets a remote-scoring deck build a score remote instead of overlayering an already stopped central", () => {
     const rdIce = corpAction("install-rd-extra-ice", "install_card", {
       placement: "ice",
