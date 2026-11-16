@@ -118,6 +118,7 @@ export type CorpScoreProtectionIceInput = Readonly<{
   strength?: number;
   subtypes?: string[];
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
+  certifiedZeroBidTraceStopId?: string;
 }>;
 
 export type CorpScoreProtectionAssessmentInput = Readonly<{
@@ -697,14 +698,24 @@ function readSupportedIce(card: CorpScoreProtectionIceInput): IceReadResult {
     | SubroutineDefinition
     | VisibleEffectiveSubroutine
   )[] = quote?.subroutines ?? definition.subroutines ?? [];
+  const isAccessStop = (
+    subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+  ) =>
+    isHardEndTheRunSubroutine(subroutine) ||
+    (subroutine.type === "initiate_trace" &&
+      subroutine.id === card.certifiedZeroBidTraceStopId);
   if (
     subroutines.some((subroutine) => !validSubroutineIdentity(subroutine)) ||
     new Set(subroutines.map((subroutine) => subroutine.id)).size !==
       subroutines.length ||
-    subroutines.some((subroutine) => !supportedSubroutine(subroutine)) ||
+    subroutines.some(
+      (subroutine) =>
+        !isAccessStop(subroutine) && !supportedSubroutine(subroutine),
+    ) ||
     catalogMechanicsContradictDirectSubroutines(
       definition.mechanics,
       subroutines,
+      isAccessStop,
     )
   ) {
     return {
@@ -717,8 +728,8 @@ function readSupportedIce(card: CorpScoreProtectionIceInput): IceReadResult {
     ice: {
       card,
       subroutines,
-      endTheRunCount: subroutines.filter(isHardEndTheRunSubroutine).length,
-      endTheRunSubroutines: subroutines.filter(isHardEndTheRunSubroutine),
+      endTheRunCount: subroutines.filter(isAccessStop).length,
+      endTheRunSubroutines: subroutines.filter(isAccessStop),
       nextBreakLockSubroutines: subroutines.filter(isNextEncounterBreakLock),
       effectiveStrength:
         quote?.encounterStrength ?? quote?.effectiveStrength ?? card.strength!,
@@ -772,10 +783,13 @@ function validSubroutineIdentity(
 function catalogMechanicsContradictDirectSubroutines(
   mechanics: readonly string[],
   subroutines: readonly (SubroutineDefinition | VisibleEffectiveSubroutine)[],
+  isAccessStop: (
+    subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+  ) => boolean,
 ): boolean {
   const directCanEndRun = subroutines.some(
     (subroutine) =>
-      isHardEndTheRunSubroutine(subroutine) ||
+      isAccessStop(subroutine) ||
       (subroutine.type === "initiate_trace" &&
         subroutine.traceSuccessEffect !== undefined &&
         (subroutine.traceSuccessEffect.type === "end_run_and_run_lock" ||

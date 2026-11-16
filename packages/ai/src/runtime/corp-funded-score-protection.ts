@@ -1,3 +1,7 @@
+import {
+  traceComparisonIsSuccessful,
+  traceCorpBaseStrength,
+} from "@netgrid/engine";
 import type { PublicHeapBreakerPreparation } from "./corp-public-heap-breaker-preparation";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
@@ -12,6 +16,7 @@ import { corpIcePlacementActionCostAgreementFact } from "./corp-ice-placement/co
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,
+  corpVisibleSingleSubroutineIsUnbreakable,
   type CorpScoreProtectionIceInput,
   type ExactProbability,
   type KnownCorpScoreProtectionAssessment,
@@ -242,6 +247,7 @@ export type KnownCorpFundedIceInstallRouteProjection =
     Readonly<{
       knowledge: "known";
       effect: "no_progress" | "progress" | "satisfied";
+      certifiedZeroBidTraceStopId?: string;
       sourceCardInstanceId: string;
       sourceDefinitionId: string;
       targetServerId: string;
@@ -313,6 +319,10 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   runnerRunOnlyCredits?: number;
   projectedInstallCredits: number;
   projectedInstallClicks: number;
+  terminalOffServerTraceBudget?: Readonly<{
+    runnerCredits: number;
+    runnerMaximumTraceStrength: number;
+  }>;
   preferPostInstallSourceProgress?: boolean;
 }>;
 
@@ -698,6 +708,44 @@ export function assessBestFundedCorpScoreProtection(
   };
 }
 
+/** Keep the exact Engine quote and admit only its specific, proven trace stop. */
+function certifyPostInstallTraceStop(
+  input: CorpFundedIceInstallRouteInput,
+  source: CorpFundedScoreProtectionIceInput,
+  creditsAfterInstall: number,
+): CorpFundedScoreProtectionIceInput | undefined {
+  const budget = input.terminalOffServerTraceBudget;
+  const trace = source.effectiveRunQuote?.subroutines[0];
+  if (
+    !budget ||
+    input.currentServer?.ice.length !== 0 ||
+    source.effectiveRezCostQuote?.complete !== true ||
+    source.effectiveRezCostQuote.costKind !== "fixed" ||
+    source.effectiveRezCostQuote.finalCredits > creditsAfterInstall ||
+    trace?.type !== "initiate_trace" ||
+    (trace.traceSuccessEffect?.type !== "end_run_and_run_lock" &&
+      trace.traceSuccessEffect?.type !==
+        "end_run_trash_hardware_and_unpreventable_meat_damage") ||
+    !nonNegativeSafeInteger(trace.traceLimit) ||
+    !traceComparisonIsSuccessful(
+      "modern_open",
+      traceCorpBaseStrength({
+        traceRulesProfile: "modern_open",
+        traceLimit: trace.traceLimit!,
+      }),
+      budget.runnerMaximumTraceStrength,
+    ) ||
+    !corpVisibleSingleSubroutineIsUnbreakable({
+      ice: source,
+      runnerRig: input.runnerRig,
+      runnerCredits: budget.runnerCredits,
+    })
+  )
+    return undefined;
+
+  return { ...source, certifiedZeroBidTraceStopId: trace.id };
+}
+
 export function projectCorpFundedIceInstallRoute(
   input: CorpFundedIceInstallRouteInput,
 ): CorpFundedIceInstallRouteProjection {
@@ -1022,11 +1070,16 @@ export function projectCorpFundedIceInstallRoute(
         : {}),
     effectiveRezCostQuote: projectedRezQuote.quote,
   };
+  const certifiedTraceIce = certifyPostInstallTraceStop(
+    input,
+    projectedSource,
+    creditsAfterInstall,
+  );
   const after = assessBestFundedCorpScoreProtection({
     ...(input.currentServer?.root
       ? { serverRoot: input.currentServer.root }
       : {}),
-    serverIce: [...currentIce, projectedSource],
+    serverIce: [...currentIce, certifiedTraceIce ?? projectedSource],
     postInstallQuoteCardId: sourceCard.instanceId,
     ...(input.preferPostInstallSourceProgress === true
       ? { preferPostInstallSourceProgress: true }
@@ -1123,6 +1176,15 @@ export function projectCorpFundedIceInstallRoute(
     installClicks: clickCost.amount,
     installCostSource: "legal_action_agreed_projection",
     selectedRezCosts: after.selectedRezCosts,
+    ...(certifiedTraceIce?.certifiedZeroBidTraceStopId &&
+    after.selectedRezCosts.some(
+      (cost) => cost.iceInstanceId === sourceCard.instanceId,
+    )
+      ? {
+          certifiedZeroBidTraceStopId:
+            certifiedTraceIce.certifiedZeroBidTraceStopId,
+        }
+      : {}),
     creditsAfterDefense: after.creditsAfterDefense,
     clicksAfterDefense: after.clicksAfterDefense,
     preservesScoreCreditReserve: after.preservesScoreCreditReserve,

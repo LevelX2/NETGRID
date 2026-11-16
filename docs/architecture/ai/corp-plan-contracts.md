@@ -2335,6 +2335,18 @@ beschreibt eine Möglichkeit, keine Zielwahrscheinlichkeit. Der bestehende
 globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu;
 er garantiert weder ihre Auswahl noch eine vollständig bessere Allokation.
 
+Für einen offenen, legalen Eintritt zu einer unmittelbar siegbringenden
+Zentralagenda kann eine einzelne feste Trace-ICE-Schicht den direkten
+Zugriffsschutz verbessern. Dazu muss die gebundene Engine-Quote einen
+Run-Stopp bei erfolgreicher Trace belegen. Im unterstützten Modern-Open-Fall
+liegt die Trace-Stärke bereits ohne Corp-Gebot über der maximalen sichtbaren
+Runner-Stärke nach Vorbereitung. Der Runner kann die Subroutine mit seinem
+sichtbaren Rig und Budget auch nicht brechen. Der Defense-Owner berücksichtigt
+den vollständigen Rezpreis sowie die bekannten Reserven an den Zentralen.
+P751 G19 D134 sichert die legale Installationsroute und den ausgewählten
+Defense-Step. Die Projektion reicht bis zum nächsten sichtbaren Zugriffspfad.
+Spätere Informationen und neu vorbereitete Antworten öffnen eine neue Quote.
+
 Qualitative ICE-Installationsfreigaben für zentrale Deckung, HQ-Kapazität,
 projektgebundenes Staging und Score-Schutz verwenden denselben aktuellen,
 instanz-, fort- und versionsgebundenen Engine-Subroutinenstand. Gedrucktes
