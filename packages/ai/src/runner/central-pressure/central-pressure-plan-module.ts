@@ -12,6 +12,7 @@ import {
   runnerTacticalAssessment as assessment,
   domain,
   exactRunnerParentSupportResourceGaps,
+  runnerTacticalAvailableCandidates,
   runnerTacticalProposal as proposal,
   state,
 } from "../../plans/runner-tactical-module-support";
@@ -274,12 +275,7 @@ function pressureCandidates(
   context: PlanSchedulerContext,
   signal: RunnerPressureSignal,
 ): PlanMaterialization["candidates"] {
-  const availableCandidates = context.actionCandidates.filter(
-    (candidate) =>
-      !context.actionDispositions?.some(
-        (disposition) => disposition.actionId === candidate.actionId,
-      ),
-  );
+  const availableCandidates = runnerTacticalAvailableCandidates(context);
   if (
     signal.routePreparation === "develop_payoff" ||
     signal.routePreparation === "convert_accumulated_pressure" ||

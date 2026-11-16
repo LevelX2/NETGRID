@@ -7,6 +7,7 @@ import {
   runnerTacticalAssessment as assessment,
   domain,
   exactRunnerParentSupportResourceGaps,
+  runnerTacticalAvailableCandidates,
   runnerTacticalProposal as proposal,
   state,
 } from "../../plans/runner-tactical-module-support";
@@ -139,6 +140,7 @@ function remoteCandidates(
   context: PlanSchedulerContext,
   signal: RunnerRemoteContestSignal,
 ): PlanMaterialization["candidates"] {
+  const availableCandidates = runnerTacticalAvailableCandidates(context);
   if (
     signal.routePreparation === "expose_remote" ||
     signal.routePreparation === "prepare_access_payoff" ||
@@ -146,14 +148,14 @@ function remoteCandidates(
     signal.routePreparation === "targeted_ice_trash"
   ) {
     const preparationActionIds = new Set(signal.preparationActionIds ?? []);
-    return context.actionCandidates
+    return availableCandidates
       .filter((candidate) => preparationActionIds.has(candidate.actionId))
       .map((candidate) => ({
         candidate,
         stepValue: signal.marginalValue,
       }));
   }
-  return context.actionCandidates.flatMap((candidate) => {
+  return availableCandidates.flatMap((candidate) => {
     const assessment = signal.runActionAssessments[candidate.actionId];
     if (
       assessment?.verdict !== "executable" ||

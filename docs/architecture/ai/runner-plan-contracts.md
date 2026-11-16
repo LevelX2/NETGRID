@@ -316,10 +316,11 @@ bezahlbare sichere Steals behalten ihren normalen Central-Parent.
 
 Die Nullnutzen-Disposition für normale Archives-Runs gilt für unklassifizierte
 LegalActions. Ein bereits vom Abwehrplan wegen konkreter Flatline-Gefahr
-abgelehnter Run behält dessen Owner und Ausgeschlossenheitsgrund.
-Discovery, Assessment und Materialisierung des Zentraldrucks binden nur
-Action-IDs ohne aktuelle Disposition. Ein erreichbarer Zentralpfad kann so
-als Kampagnenziel fortbestehen, während seine konkrete Ausführung gesperrt ist.
+abgelehnter Run behält den Abwehrplan als Owner und dessen Ablehnungsgrund.
+Zentraldruck und Remote Contest verwenden bei Discovery, Assessment und
+Materialisierung ausschließlich Action-IDs ohne aktuelle Disposition. Ein
+erreichbarer Pfad kann als Kampagnenziel fortbestehen, während die konkrete
+Ausführung vorläufig gesperrt ist.
 
 **Klasse:** `strategic_campaign`
 **Rolle:** Vordergrund, zeitweise präemptierbar

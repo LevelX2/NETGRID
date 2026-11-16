@@ -285,6 +285,15 @@ export function exactRunnerParentSupportResourceGaps(
   ];
 }
 
+export function runnerTacticalAvailableCandidates(context: PlanSchedulerContext) {
+  return context.actionCandidates.filter(
+    (candidate) =>
+      !context.actionDispositions?.some(
+        (disposition) => disposition.actionId === candidate.actionId,
+      ),
+  );
+}
+
 export function domain(context: PlanSchedulerContext): RunnerPlanDomain {
   return runnerTacticalPlanDomain<RunnerPlanDomain>(context);
 }
