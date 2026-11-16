@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type {
   AiDecisionInput,
   CorpTemporaryIceStrengthPulseQuote,
@@ -174,6 +175,7 @@ export function assessCorpTemporaryIceStrengthPulse(
       budget(),
       root,
       input.playerView.own.credits - q.sourceRezCredits - q.iceRezCredits,
+      visibleIcePathTraceContext(input),
     ),
     expectedKnownIceCount: 1,
     runnerCreditBudgetBefore: budget(),
@@ -184,6 +186,7 @@ export function assessCorpTemporaryIceStrengthPulse(
     budget(),
     root,
     q.corpCreditsAfterDefense,
+    visibleIcePathTraceContext(input),
   );
   if (
     before.accessStatus !== "reachable" ||

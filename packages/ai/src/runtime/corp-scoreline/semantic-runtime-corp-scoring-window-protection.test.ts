@@ -173,6 +173,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
         ]),
       ]),
     });
+    input.playerView.traceRulesProfile = "modern_open";
     const remote = input.playerView.servers.find(
       (candidate) => candidate.id === "remote_1",
     );
@@ -1155,21 +1156,20 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
       agenda.instanceId,
     );
 
-    const assessment = assess(
-      corpInput({
-        ownCredits: 4,
-        runnerCredits: 6,
-        runnerAgendaPoints: 5,
-        runnerRig: [simpleKiller("runner-killer")],
-        hq: [agenda],
-        servers: protectedCentralServers([
-          remoteServer("remote_1", [
-            hunterTraceTagIce("remote-hunter", { rezCost: 2 }),
-          ]),
+    const input = corpInput({
+      ownCredits: 4,
+      runnerCredits: 6,
+      runnerAgendaPoints: 5,
+      runnerRig: [simpleKiller("runner-killer")],
+      hq: [agenda],
+      servers: protectedCentralServers([
+        remoteServer("remote_1", [
+          hunterTraceTagIce("remote-hunter", { rezCost: 2 }),
         ]),
-      }),
-      action,
-    );
+      ]),
+    });
+    input.playerView.traceRulesProfile = "modern_open";
+    const assessment = assess(input, action);
 
     expect(assessment).toMatchObject({
       windowKind: "unsafe",

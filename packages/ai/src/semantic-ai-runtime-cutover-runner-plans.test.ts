@@ -2307,6 +2307,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.agendaPoints = input.playerView.agendaPointsToWin - 1;
     input.playerView.own.credits = 100;
+    input.playerView.traceRulesProfile = "modern_open";
     // The trace must remain unaffordable; four Corp credits no longer create
     // a negative quote against a Runner holding one hundred general credits.
     input.playerView.opponent.credits = 1_000;

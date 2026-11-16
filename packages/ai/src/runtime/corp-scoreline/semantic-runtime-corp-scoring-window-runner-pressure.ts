@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
@@ -126,6 +127,7 @@ function scoringWindowAccessAssessmentForMode(
     ).reduce((sum, amount) => sum + amount, 0);
   const visibleRunnerIcebreakerCount =
     baseRunnerPathCandidate.visibleIcebreakerCount;
+  const traceContext = visibleIcePathTraceContext(input);
   const postRezProjection =
     mode === "engine_post_rez" && server
       ? financedScoringProtectionPostRezIce(
@@ -135,7 +137,7 @@ function scoringWindowAccessAssessmentForMode(
             corpRezCredits,
             corpRezCreditReserve,
           },
-          (financedIceInstanceIds) => {
+          (financedIceInstanceIds, remainingCorpCredits) => {
             const evaluatedPaths = runnerPathCandidates.map((candidate) => ({
               ...candidate,
               assessment: assessEngineCertifiedPostRezIcePath(
@@ -146,6 +148,8 @@ function scoringWindowAccessAssessmentForMode(
                 candidate.rig,
                 candidate.creditBudget,
                 [...server.root],
+                remainingCorpCredits,
+                traceContext,
               ),
             }));
             const runnerBestPath = evaluatedPaths.reduce((best, candidate) =>
@@ -188,21 +192,25 @@ function scoringWindowAccessAssessmentForMode(
   const evaluatedRunnerPaths = runnerPathCandidates.map((candidate) => ({
     ...candidate,
     assessment:
-      mode === "engine_post_rez"
+      postRezProjection
         ? assessEngineCertifiedPostRezIcePath(
             [...server.ice],
             server.id,
             input.playerView.stateVersion,
-            postRezProjection?.financedIceInstanceIds ?? new Set<string>(),
+            postRezProjection.financedIceInstanceIds,
             candidate.rig,
             candidate.creditBudget,
             [...server.root],
+            postRezProjection.remainingCorpCredits,
+            traceContext,
           )
         : assessKnownRezzedIcePath(
             [...server.ice],
             candidate.rig,
             candidate.creditBudget,
             [...server.root],
+            input.playerView.own.credits,
+            traceContext,
           ),
   }));
   const selectedRunnerPath = evaluatedRunnerPaths.reduce((best, candidate) =>
@@ -618,10 +626,12 @@ function financedScoringProtectionPostRezIce(
   },
   assessSubset: (
     financedIceInstanceIds: ReadonlySet<string>,
+    remainingCorpCredits: number,
   ) => ScoringProtectionSubsetAssessment,
 ): {
   financedIceInstanceIds: ReadonlySet<string>;
   unmodeledIceInstanceIds: ReadonlySet<string>;
+  remainingCorpCredits: number;
   evidence: string[];
 } {
   const validBudget =
@@ -658,7 +668,12 @@ function financedScoringProtectionPostRezIce(
         unmodeledIceInstanceIds.add(ice.instanceId);
       }
     }
-    return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+    return {
+      financedIceInstanceIds,
+      unmodeledIceInstanceIds,
+      remainingCorpCredits: availableCredits,
+      evidence,
+    };
   }
   const candidates: Array<{ ice: VisibleCard; rezCredits: number }> = [];
   // Candidate order is outermost to innermost. Exact subset comparison keeps
@@ -708,7 +723,12 @@ function financedScoringProtectionPostRezIce(
       `corp_post_rez_budget:candidate_count:${candidates.length}`,
       "corp_post_rez_budget:financed_ice_count:0",
     );
-    return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+    return {
+      financedIceInstanceIds,
+      unmodeledIceInstanceIds,
+      remainingCorpCredits: availableCredits,
+      evidence,
+    };
   }
   let evaluatedSubsetCount = 0;
   let best: ScoringProtectionSubset | undefined;
@@ -728,7 +748,7 @@ function financedScoringProtectionPostRezIce(
     const subset: ScoringProtectionSubset = {
       selectedIds,
       totalRezCredits,
-      assessment: assessSubset(selectedIds),
+      assessment: assessSubset(selectedIds, availableCredits - totalRezCredits),
     };
     evaluatedSubsetCount += 1;
     if (!best || scoringProtectionSubsetIsBetter(subset, best)) best = subset;
@@ -749,13 +769,19 @@ function financedScoringProtectionPostRezIce(
       );
     }
   }
+  const remainingCorpCredits = availableCredits - (best?.totalRezCredits ?? 0);
   evidence.push(
     "corp_post_rez_budget:selection:exact_subset",
     `corp_post_rez_budget:evaluated_subset_count:${evaluatedSubsetCount}`,
     `corp_post_rez_budget:financed_ice_count:${financedIceInstanceIds.size}`,
-    `corp_post_rez_budget:remaining:${availableCredits - (best?.totalRezCredits ?? 0)}`,
+    `corp_post_rez_budget:remaining:${remainingCorpCredits}`,
   );
-  return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+  return {
+    financedIceInstanceIds,
+    unmodeledIceInstanceIds,
+    remainingCorpCredits,
+    evidence,
+  };
 }
 
 type ScoringProtectionSubsetAssessment = Readonly<{

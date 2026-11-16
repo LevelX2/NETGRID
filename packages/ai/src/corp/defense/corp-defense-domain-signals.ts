@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import type {
@@ -621,11 +622,17 @@ export function corpOrderedRemoteInstallPathAssessment(
   );
   if (!postInstallEffectiveRunQuote)
     return { knowledge: "unknown", reason: "incomplete_install_run_quote" };
+  // Structural staging compares the two paths without allocating a bid budget.
+  // Funding and the paid post-rez comparison belong to the funded route.
+  const traceContext = visibleIcePathTraceContext(input);
   const before = quoteCorpRemotePath({
     assessment: assessKnownRezzedIcePath(
       stagedIce,
       runnerRig,
       runnerCreditBudget,
+      [],
+      0,
+      traceContext,
     ),
     expectedKnownIceCount: stagedIce.length,
     runnerCreditBudgetBefore: runnerCreditBudget,
@@ -642,6 +649,9 @@ export function corpOrderedRemoteInstallPathAssessment(
       ],
       runnerRig,
       runnerCreditBudget,
+      [],
+      0,
+      traceContext,
     ),
     expectedKnownIceCount: stagedIce.length + 1,
     runnerCreditBudgetBefore: runnerCreditBudget,

@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -46,15 +47,16 @@ export function corpMatureRemoteAffordableDefenseLayerCertification(
   const availableAgendaPoints = input.playerView.own.agendaPoints;
   for (let left = 0; left < layers.length; left += 1) {
     for (let right = left + 1; right < layers.length; right += 1) {
+      const layerCredits = layers[left]!.credits + layers[right]!.credits;
       if (
-        layers[left]!.credits + layers[right]!.credits <= availableCredits &&
+        layerCredits <= availableCredits &&
         layers[left]!.agendaPoints + layers[right]!.agendaPoints <=
           availableAgendaPoints &&
         corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
           input,
           server,
           [layers[left]!.iceInstanceId, layers[right]!.iceInstanceId],
-          availableCredits,
+          availableCredits - layerCredits,
         )
       ) {
         return {
@@ -65,7 +67,7 @@ export function corpMatureRemoteAffordableDefenseLayerCertification(
             layers[left]!.iceInstanceId,
             layers[right]!.iceInstanceId,
           ],
-          requiredCredits: layers[left]!.credits + layers[right]!.credits,
+          requiredCredits: layerCredits,
           requiredAgendaPoints:
             layers[left]!.agendaPoints + layers[right]!.agendaPoints,
         };
@@ -150,6 +152,7 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       [...server.root],
       visibleCorpCredits,
       {
+        ...visibleIcePathTraceContext(input),
         targetServerId: server.id,
         visibleCorpCredits,
         visibleRemoteServerCount: input.playerView.servers.filter(
@@ -257,6 +260,7 @@ export function corpArchivesHasCertifiedPaidAccess(
   ) {
     return false;
   }
+  const remainingCorpCredits = view.own.credits - layer.credits;
   const assessment = assessEngineCertifiedPostRezIcePath(
     [ice],
     server.id,
@@ -271,10 +275,11 @@ export function corpArchivesHasCertifiedPaidAccess(
       },
     ),
     [],
-    view.own.credits,
+    remainingCorpCredits,
     {
+      ...visibleIcePathTraceContext(input),
       targetServerId: server.id,
-      visibleCorpCredits: view.own.credits,
+      visibleCorpCredits: remainingCorpCredits,
       visibleRemoteServerCount: view.servers.filter(
         (candidate) => !["hq", "rd", "archives"].includes(candidate.id),
       ).length,

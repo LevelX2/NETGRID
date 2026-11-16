@@ -27,9 +27,16 @@ type PersistedDecisionCapture = {
   };
 };
 
+function captureWithTraceProfile(): PersistedDecisionCapture {
+  const capture = structuredClone(d52CaptureJson) as PersistedDecisionCapture;
+  // This capture is from the default Modern rules and omits that field.
+  capture.input.playerView.traceRulesProfile = "modern_open";
+  return capture;
+}
+
 describe("match 76497164832f078c terminal R&D defense", () => {
   it("draws toward terminal R&D defense when no concrete installation remains", () => {
-    const capture = structuredClone(d52CaptureJson) as PersistedDecisionCapture;
+    const capture = captureWithTraceProfile();
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     // A proved installation/funding route suppresses speculative search.
@@ -85,7 +92,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
   });
 
   it("keeps the native known preparation route without inventing a repeated missing-ICE draw", () => {
-    const capture = structuredClone(d52CaptureJson) as PersistedDecisionCapture;
+    const capture = captureWithTraceProfile();
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
       capture.input,

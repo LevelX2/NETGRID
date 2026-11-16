@@ -993,6 +993,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         gainCreditAction("gain-credit"),
       ],
     });
+    input.playerView.traceRulesProfile = "modern_open";
     bindRemoteAgendaStealQuote(input, "remote-agenda", 0);
 
     const [evaluation] = evaluateRunnerRunTargets({ input });

@@ -371,6 +371,7 @@ function aiInput(params: {
     activeSide: "runner",
     phase: "runner_action_phase",
     timingPoint: "runner_action.main",
+    traceRulesProfile: "modern_open",
     own: {
       identity: visibleIdentity("runner"),
       credits: params.credits,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
 
 import {
   isBreakerInstallAction,
@@ -88,7 +88,7 @@ describe("missingBreakerCoverageKind", () => {
   it("uses a known ICE definition when its visible fixture omits subtypes", () => {
     expect(
       missingBreakerCoverageKind(
-        playerViewWithIce(
+        inputWithCoverageIce(
           visibleCard({
             instanceId: "wall-of-static",
             definitionId: "onr_v1_279_wall-of-static",
@@ -153,9 +153,20 @@ function playerViewWithIce(ice: VisibleCard): PlayerView {
   } as unknown as PlayerView;
 }
 
+function inputWithCoverageIce(ice: VisibleCard): AiDecisionInput {
+  return {
+    side: "runner",
+    playerView: {
+      ...playerViewWithIce(ice),
+      opponent: { credits: 0 },
+    },
+    legalActions: [],
+  } as unknown as AiDecisionInput;
+}
+
 function missingCoverageForIceText(text: string) {
   return missingBreakerCoverageKind(
-    playerViewWithIce(
+    inputWithCoverageIce(
       visibleCard({
         instanceId: "ice",
         type: "ice",

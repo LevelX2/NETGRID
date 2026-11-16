@@ -64,6 +64,8 @@ export type VisibleDeflectorContext = {
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
   /** Active trace rules profile used by run-path trace projections. */
   traceRulesProfile?: TraceRulesProfile;
+  /** Fail closed when the bound quote includes a visible Trace and lacks its rules profile. */
+  onMissingTraceRulesProfile?: () => never;
   /** Structured server restriction for trace-credit sources with Stealth. */
   excludeStealthTraceCredits?: boolean;
   /** Explicit current or projected run-duration Link bonus. */

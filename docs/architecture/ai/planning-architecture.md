@@ -614,6 +614,13 @@ Owner und werden nicht erneut disponiert. Die Disposition wählt weder ein
 anderes Ziel noch eine Ersatzaktion; die Choice bleibt an die gewählte Route
 gebunden.
 
+Bypass, gezieltes ICE-Trash und die Coverage-Quotes binden vor dem Run
+das Trace-Regelprofil der aktuellen Engine-Spielersicht. Ein Vergleich
+des ursprünglichen mit dem verbleibenden Pfad verwendet dieselben
+sichtbaren Corp-Credits und dasselbe Profil. Bekanntes ICE mit einer
+Trace-Quote und fehlendem Profil beendet die Pfadbewertung mit einem
+strukturierten Vertragsfehler.
+
 ## 7. Planinstanz-Vertrag
 
 Maßgebliche API: [PlanInstance](../../../packages/ai/src/plans/plan-kernel-types.ts).

@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { cardImplementationForDefinitionId } from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -131,6 +132,7 @@ export function runnerCoverageHeapPreparation(
       ),
       server.root,
       input.playerView.opponent.credits,
+      visibleIcePathTraceContext(input),
     );
     if (
       !path.canReachAccess ||

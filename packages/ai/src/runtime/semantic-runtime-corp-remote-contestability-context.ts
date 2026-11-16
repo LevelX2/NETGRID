@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
@@ -49,6 +50,8 @@ export function createSemanticRuntimeCorpRemoteContestabilityContext(
       runnerRig,
       input.playerView.opponent.credits,
       server.root,
+      input.playerView.own.credits,
+      visibleIcePathTraceContext(input),
     );
     if (assessment.assessedKnownIceCount <= 0) return undefined;
     const contestable =

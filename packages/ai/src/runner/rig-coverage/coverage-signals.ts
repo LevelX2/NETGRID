@@ -151,7 +151,7 @@ export function uniqueCoverageGaps(
       return false;
     }
     const preciseCoverage = missingBreakerCoverageKind(
-      input.playerView,
+      input,
       evaluation.targetServerId,
     );
     const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
@@ -334,7 +334,7 @@ export function uniqueCoverageGaps(
     )
       continue;
     const preciseCoverage = missingBreakerCoverageKind(
-      input.playerView,
+      input,
       evaluation.targetServerId,
     );
     const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);

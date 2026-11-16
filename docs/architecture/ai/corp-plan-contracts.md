@@ -905,6 +905,12 @@ Die aktuelle Effektklassifikation bewahrt auch ein Trace-bedingtes Runende in
 einem zusammengesetzten Erfolgseffekt mit Hardware-Trash und Meat-Schaden.
 Dieses Stopper-Potenzial ist kein garantierter Schutz; die finanzierte
 Zugriffsquote behält ihre eigenständigen Bedingungen und Unbekanntheiten.
+Die aktuelle sowie die Engine-zertifizierte Post-Rez-Pfadquote binden
+dafür das Trace-Regelprofil der Engine-Spielersicht. Finanzierte
+Rez-Alternativen geben ausschließlich die nach ihren bekannten Kosten
+und gebundenen Reserven übrigen Corp-Credits an die Trace-Quote weiter.
+Strukturelles ICE-Staging vergleicht seine Varianten vor der Zuteilung
+eines Gebotbudgets.
 
 Die Schutzprojektion berücksichtigt öffentliche Shell-Vorbereitungen einschließlich
 Engine-geprüfter freier Host-Kapazität und Stärkeänderung. Für die kommende

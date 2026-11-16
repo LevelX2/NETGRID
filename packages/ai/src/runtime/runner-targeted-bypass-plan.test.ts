@@ -486,6 +486,7 @@ function planningInput(params: {
       stateVersion: 10,
       timingPoint: "runner_action.main",
       winner: null,
+      opponent: { credits: 0 },
       own: {
         credits: params.credits ?? 5,
         rig: params.rig,

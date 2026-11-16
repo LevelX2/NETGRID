@@ -1,7 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { breakerCardBlocksAccessReachability } from "../../breaker-ontology-consumer";
-import { runnerInvestmentTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -204,7 +204,7 @@ export function assessHostedBreakerDevelopment(
           s.ice.every((c) => c.known && c.rezzed),
       )
       .flatMap((server) => {
-        const traceContext = runnerInvestmentTraceContext(input, server.ice);
+        const traceContext = visibleIcePathTraceContext(input);
         const cost = (cards: readonly VisibleCard[]) => {
           const path = assessKnownRezzedIcePath(
             server.ice,

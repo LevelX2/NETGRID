@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -162,6 +163,7 @@ export function assessMobileIceRunDefense(
     budget(),
     target.root,
     input.playerView.own.credits,
+    visibleIcePathTraceContext(input),
   );
   const before = quoteCorpRemotePath({
     assessment: beforeAssessment,
@@ -174,6 +176,7 @@ export function assessMobileIceRunDefense(
     budget(),
     target.root,
     payment.corpCreditsAfterDefense,
+    visibleIcePathTraceContext(input),
   );
   // The path assessor stops at a proven unaffordable ETR. Its assessed prefix
   // therefore need not contain inner ICE, whose complete Engine quotes were

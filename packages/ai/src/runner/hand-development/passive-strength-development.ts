@@ -1,6 +1,6 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { projectVisibleIceAfterPassiveRunnerInstall } from "@netgrid/engine";
-import { runnerInvestmentTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { buildDeckCapabilityProfileFromInput } from "../../deck-capabilities";
 import { breakerCardBlocksAccessReachability } from "../../breaker-ontology-consumer";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -115,7 +115,7 @@ export function assessPassiveStrengthDevelopment(
           projectVisibleIceAfterPassiveRunnerInstall(definitionId, c),
         );
         if (after.some((c) => !c)) return [];
-        const traceContext = runnerInvestmentTraceContext(input, ice);
+        const traceContext = visibleIcePathTraceContext(input);
         const cost = (cards: readonly VisibleCard[]) => {
           const path = assessKnownRezzedIcePath(
             [...cards],

@@ -6,7 +6,6 @@ import type {
   AiDecisionInput,
   CardDefinitionId,
   TraceRulesProfile,
-  VisibleCard,
   VisibleEffectiveIceRunQuote,
   VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
@@ -24,31 +23,28 @@ export function planningTraceRulesProfile(
   return profile ?? "modern_open";
 }
 
-/** Trace facts for a Runner-main quote of the same known ICE before and after investment. */
-export function runnerInvestmentTraceContext(
+/** Bind visible and hypothetical path quotes to the active game's trace rules. */
+export function visibleIcePathTraceContext(
   input: AiDecisionInput,
-  ice: readonly VisibleCard[],
-): Pick<VisibleDeflectorContext, "traceRulesProfile"> {
+): Pick<
+  VisibleDeflectorContext,
+  "traceRulesProfile" | "onMissingTraceRulesProfile"
+> {
   const { traceRulesProfile } = input.playerView;
   if (traceRulesProfile !== undefined) return { traceRulesProfile };
-  if (
-    ice.some((card) =>
-      card.effectiveRunQuote?.subroutines.some(
-        (subroutine) => subroutine.type === "initiate_trace",
-      ),
-    )
-  ) {
-    throw new PlanResolutionFailure("invalid_player_view_card_projection", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map(({ type }) => type),
-      owner: "rules_contract",
-      removalCondition:
-        "A Runner investment quote across a visible ICE Trace requires the current Engine trace rules profile.",
-    });
-  }
-  return {};
+  return {
+    onMissingTraceRulesProfile: () => {
+      throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map(({ type }) => type),
+        owner: "rules_contract",
+        removalCondition:
+          "A visible ICE Trace path quote requires the current Engine trace rules profile.",
+      });
+    },
+  };
 }
 
 export function planningTraceCorpBaseStrength(

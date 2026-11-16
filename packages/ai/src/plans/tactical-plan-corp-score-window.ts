@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import { visibleRunnerRunCreditPool } from "../runtime/visible-run-credit-facts";
 import type { AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
@@ -51,6 +52,8 @@ export function corpRemoteContestabilityAssessment(
     runnerRig,
     visibleRunnerExposureContestCredits,
     server.root,
+    input.playerView.own.credits,
+    visibleIcePathTraceContext(input),
   );
   if (assessment.assessedKnownIceCount <= 0) return undefined;
   const observedReachability = semanticRuntimeCorpObservedRemoteReachability(

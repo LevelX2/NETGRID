@@ -1,4 +1,5 @@
-import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { cardProvidesBreakerCoverage } from "../../plans/tactical-plan-breaker-cards";
 import { missingBreakerCoverageKind } from "../../plans/tactical-plan-breaker-coverage";
 import type { RequiredCapabilityKind } from "../../plans/tactical-plan-types";
@@ -48,12 +49,11 @@ export function runnerVisibleSearchCoverageNeed(
         playerView.own.rig ?? [],
       ),
       server.root ?? [],
+      playerView.opponent.credits,
+      visibleIcePathTraceContext(input),
     );
     if (!runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)) continue;
-    const requiredCoverage = missingBreakerCoverageKind(
-      playerView as PlayerView,
-      server.id,
-    );
+    const requiredCoverage = missingBreakerCoverageKind(input, server.id);
     if (!searchCoverageKindIsActionable(requiredCoverage)) continue;
     candidates.push({
       serverId: server.id,

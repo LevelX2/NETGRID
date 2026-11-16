@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import {
   runnerCandidateExecutesProgramSearch,
   runnerProgramSearchSourceCardInstanceId,
@@ -204,6 +205,7 @@ export function runnerBreakerCoverageUpgrade(
         Math.max(evaluation.pathCost, input.playerView.own.credits),
         server.root,
         input.playerView.opponent.credits,
+        visibleIcePathTraceContext(input),
       );
       const projectedPathCost = path.visibleBreakCost;
       if (

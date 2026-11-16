@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
@@ -704,6 +705,8 @@ function knownRemotePathCost(
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
     server.root,
+    input.playerView.opponent.credits,
+    visibleIcePathTraceContext(input),
   );
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
   return {

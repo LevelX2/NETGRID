@@ -195,7 +195,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       ),
     ];
 
-    expect(missingBreakerCoverageKind(input.playerView, "remote_1")).toBe(
+    expect(missingBreakerCoverageKind(input, "remote_1")).toBe(
       "breaker_wall",
     );
     const decision = chooseRunnerAction(input);
