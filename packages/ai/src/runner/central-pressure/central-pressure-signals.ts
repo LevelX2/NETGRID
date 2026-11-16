@@ -6,6 +6,7 @@ import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { type RunnerCorePlanDomain } from "../../plans/runner-core-plan-contracts";
 import { ActiveRunnerRunRoot } from "../../plans/runner-run-origin-contract";
 import { runnerCardRunHasVisibleDifferentialPayoff } from "../../plans/runner-run-payoff";
+import { compareRunnerCentralAccessRoutes } from "../../run-analysis/runner-central-access-comparison";
 import {
   runnerCostlyCentralRunIsBelowHandBuffer,
   runnerInformationProbeCanUseQuotedPath,
@@ -873,7 +874,59 @@ export function buildRunnerCentralPressureSignals({
   recurringEconomyRunDeferralEvidenceCode: string | undefined;
 }): RunnerPlanDomain["centralPressure"] {
   const exposedIceExit = runnerImmediateExposedIceSafetyExit(input, previous);
-  const deferredPostBreakTrashRuns = new Map<string, DeferredPostBreakTrashRun>();
+  const cadenceByServer = new Map<string, RunnerCentralPressureCadence>();
+  const pressureCadenceForServer = (serverId: "hq" | "rd" | "archives") => {
+    const cached = cadenceByServer.get(serverId);
+    if (cached) return cached;
+    const cadence = runnerCentralPressureCadence(input, serverId);
+    cadenceByServer.set(serverId, cadence);
+    return cadence;
+  };
+  const flatlineRisk = damageThreat.flatlineRisk;
+  const confirmedDamageRequiresHandBuffer = (serverId: string) =>
+    (flatlineRisk.level === "confirmed" || flatlineRisk.level === "critical") &&
+    flatlineRisk.handCount < flatlineRisk.recommendedHandFloor &&
+    flatlineRisk.riskyRunServerIds.includes(serverId);
+  const sameAccessExclusions = new Map<string, string>();
+  if (!forgoUnsafeRunCapacity && !recurringEconomyRunDeferralEvidenceCode) {
+    for (const { preferred, alternative } of compareRunnerCentralAccessRoutes(
+      input,
+      economy,
+      runTargets,
+    )) {
+      const preferredActionId = preferred.actionId;
+      const serverId = preferred.targetServerId as "hq" | "rd" | "archives";
+      if (
+        exposedIceExit?.actionId === preferredActionId ||
+        recentSafetyAbort?.serverId === serverId ||
+        runnerRepeatedFreeStopProbeEvidence(input, preferred) ||
+        !pressureCadenceForServer(serverId).routeAvailable ||
+        !runnerCentralPressureHasMaterialMarginalValue(input, preferred) ||
+        runnerCostlyCentralRunIsBelowHandBuffer(
+          handSize,
+          minimumHandBuffer,
+          preferred,
+        ) ||
+        confirmedDamageRequiresHandBuffer(serverId) ||
+        coverageGaps.some(
+          (gap) => gap.targetRunActionId === preferredActionId,
+        ) ||
+        (preferred.recommendation !== "run_now" &&
+          preferred.recommendation !== "run_if_free") ||
+        (runPurposeForEvaluation(preferred) === "information" &&
+          !runnerInformationProbeKnownPathIsAdmitted(preferred))
+      )
+        continue;
+      sameAccessExclusions.set(
+        alternative.actionId,
+        `runner_central_same_access_preferred:${preferredActionId}`,
+      );
+    }
+  }
+  const deferredPostBreakTrashRuns = new Map<
+    string,
+    DeferredPostBreakTrashRun
+  >();
   const baseCentralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
     [
       ...runLockReleaseRoutes.flatMap((route) => {
@@ -935,7 +988,8 @@ export function buildRunnerCentralPressureSignals({
               const evidence =
                 exposedIceExit?.actionId === candidate.actionId
                   ? exposedIceExit.evidenceCode
-                  : runnerRepeatedFreeStopProbeEvidence(input, candidate);
+                  : (runnerRepeatedFreeStopProbeEvidence(input, candidate) ??
+                    sameAccessExclusions.get(candidate.actionId));
               return evidence ? [[candidate.actionId, evidence] as const] : [];
             }),
           );
@@ -961,8 +1015,7 @@ export function buildRunnerCentralPressureSignals({
             evaluation.knownAccessState !== "known_no_current_payoff" &&
             input.playerView.own.agendaPoints >=
               input.playerView.agendaPointsToWin - 1;
-          const ordinaryPressureCadence = runnerCentralPressureCadence(
-            input,
+          const ordinaryPressureCadence = pressureCadenceForServer(
             evaluation.targetServerId as "hq" | "rd" | "archives",
           );
           const probeExclusion = probeExclusions.get(evaluation.actionId);
@@ -1098,13 +1151,7 @@ export function buildRunnerCentralPressureSignals({
           const confirmedDamageRouteBlocked =
             !terminalCentralAccess &&
             !terminalRemoteUnreachableCentralLastChance &&
-            (damageThreat.flatlineRisk.level === "confirmed" ||
-              damageThreat.flatlineRisk.level === "critical") &&
-            damageThreat.flatlineRisk.handCount <
-              damageThreat.flatlineRisk.recommendedHandFloor &&
-            damageThreat.flatlineRisk.riskyRunServerIds.includes(
-              evaluation.targetServerId,
-            );
+            confirmedDamageRequiresHandBuffer(evaluation.targetServerId);
           const safetyBlocked =
             recentSafetyAbort?.serverId === evaluation.targetServerId ||
             confirmedDamageRouteBlocked;
@@ -1342,7 +1389,11 @@ export function buildRunnerCentralPressureSignals({
                       candidates,
                       runTargets,
                       evaluation.targetServerId,
-                    ).filter((id) => !informationRouteExclusions.has(id)),
+                    ).filter(
+                      (id) =>
+                        !informationRouteExclusions.has(id) &&
+                        !sameAccessExclusions.has(id),
+                    ),
                     ...(terminalRemoteUnreachableCentralLastChance
                       ? [evaluation.actionId]
                       : []),

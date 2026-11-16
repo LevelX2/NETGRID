@@ -89,6 +89,7 @@ import {
   type RunnerRunTargetRecommendation,
 } from "./run-analysis/runner-run-target-types";
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
+import { compareRunnerCentralAccessRoutes } from "./run-analysis/runner-central-access-comparison";
 import { quoteRunnerRunRiskReserve } from "./run-analysis/runner-run-risk-reserve";
 import { quoteRunnerConsumableRunOpportunity } from "./run-analysis/runner-consumable-run-opportunity";
 import {
@@ -459,19 +460,49 @@ export function evaluateRunnerRunTargets(
     params.beliefState ?? reconstructBeliefState(params.input);
   const unrezzedIceRiskModel =
     beliefState.runnerOpponentModel?.unrezzedIceRiskModel ?? [];
-  return projections
-    .map((projection) =>
-      evaluateRunnerRunTarget(
-        params,
+  const evaluated = projections.flatMap((projection) => {
+    const target = evaluateRunnerRunTarget(
+      params,
+      projection,
+      economyPosture,
+      unrezzedIceRiskModel,
+    );
+    return target ? [{ projection, target }] : [];
+  });
+  const comparisons = compareRunnerCentralAccessRoutes(
+    params.input,
+    economyPosture,
+    evaluated.map(({ target }) => target),
+  );
+  const boundReserves = new Map(
+    comparisons.map(
+      ({ preferred, protectedReserve }) =>
+        [preferred.actionId, protectedReserve] as const,
+    ),
+  );
+  return evaluated
+    .map(({ projection, target }) => {
+      const centralPostRunReserve = boundReserves.get(target.actionId);
+      if (
+        centralPostRunReserve === undefined ||
+        target.recommendation !== "gain_credits_first" ||
+        target.fundingNeed.reason !== "post_run_floor_gap"
+      ) {
+        return target;
+      }
+      const comparedTarget = evaluateRunnerRunTarget(
+        { ...params, centralPostRunReserve },
         projection,
         economyPosture,
         unrezzedIceRiskModel,
-      ),
-    )
-    .filter(
-      (evaluation): evaluation is RunnerRunTargetEvaluation =>
-        evaluation !== undefined,
-    )
+      );
+      // A reserve comparison cannot enable a different, conditional path.
+      return comparedTarget?.routeQuote?.reachability === "guaranteed_access" &&
+        comparedTarget.routeQuote.effects.length === 0 &&
+        (comparedTarget.routeQuote.conditionalRiskReasons?.length ?? 0) === 0
+        ? comparedTarget
+        : target;
+    })
     .sort(compareRunnerRunTargets);
 }
 
@@ -491,7 +522,10 @@ function compareRunnerRunTargets(
 export { projectRunnerRunActions } from "./actions/run-action-projection";
 
 function evaluateRunnerRunTarget(
-  params: EvaluateRunnerRunTargetsParams & { quotedRunnerGripCount?: number },
+  params: EvaluateRunnerRunTargetsParams & {
+    quotedRunnerGripCount?: number;
+    centralPostRunReserve?: number;
+  },
   projection: InternalRunActionProjection,
   economyPosture: RunnerEconomyPosture,
   unrezzedIceRiskModel: RunnerOpponentModel["unrezzedIceRiskModel"],
@@ -1075,13 +1109,13 @@ function evaluateRunnerRunTarget(
           (outerIce?.known === false &&
             outerIce.rezzed === false &&
             corpCanRezUnknownIce))));
+  const boundPostRunReserve =
+    lastClickBypassReserve ?? params.centralPostRunReserve;
   const targetFundingNeed = runnerRunTargetFundingNeed({
     routeQuote,
     creditsAfterRun,
     economyPosture,
-    ...(lastClickBypassReserve !== undefined
-      ? { boundPostRunReserve: lastClickBypassReserve }
-      : {}),
+    ...(boundPostRunReserve !== undefined ? { boundPostRunReserve } : {}),
     consumeCurrentGoalReserve:
       guaranteedRemoteBypassAccess ||
       (scoreThreat &&
@@ -1260,6 +1294,9 @@ function evaluateRunnerRunTarget(
       `path_cost:${routeQuote.guaranteedKnownCost}`,
       `visible_break_cost:${path.visibleBreakCost ?? 0}`,
       ...routeQuote.evidence,
+      ...(params.centralPostRunReserve !== undefined
+        ? ["runner_central_same_access_uses_compared_reserve"]
+        : []),
       ...(lastClickBypassReserve !== undefined
         ? ["runner_last_click_rezzed_bypass_uses_access_budget"]
         : []),

@@ -64,6 +64,20 @@ fail-closed; Labels und Kartennamen ersetzen sie nicht. Paarung 644 D53 prüft
 den Engine-Aktionspräfix, DTO, die Umleitung HQ → R&D und den unveränderten
 Central-Owner für einen bezahlbaren bekannten Agenda-Zugriff.
 
+Beim Vergleich gewöhnlicher Zugriffe auf dieselbe unbekannte Zentralzone
+zählt das tatsächliche Zugriffsziel auch bei unterschiedlichen Eintrittsservern.
+Ein vollständig bezahlter Pfad ohne offene ICE-Wirkung kann eine gleichwertige
+Route ablösen, wenn er mehr liquide Credits schützt oder bei bedingtem Zugriff
+mindestens so viel Geld wie die Alternative nach ihrer Vorabreserve übrig
+lässt. Nur für diesen Vergleich darf der sichere Pfad die allgemeine
+Entwicklungsreserve einsetzen. Mindest-, Notfall- und gebundene Contest-Reserven
+bleiben erhalten. Ein bloß möglicher Gratis-Trash rechtfertigt die schlechtere
+Route bei Unterschreiten dieser Reserven nicht. Konkrete Zusatzwirkungen und
+Mehrfachzugriffe bleiben eigenständige Angebote. Die gewöhnliche Zulassung
+für Handpuffer, Deckung und Zugriffskadenz gilt auch für den bevorzugten Pfad.
+Match 5a983612 D60 und D77 prüfen Direktzugriff und Bypass über die gespeicherten
+Engine-Quotes.
+
 Die Installation eines Zugriffspayoffs erhält am letzten verfügbaren Klick
 denselben bereits erreichten Handboden wie die allgemeine Handentwicklung.
 Der Zentralparent und die allgemeine Handentwicklung konsumieren dafür dieselbe
