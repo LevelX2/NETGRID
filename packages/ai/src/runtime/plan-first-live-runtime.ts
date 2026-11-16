@@ -203,6 +203,7 @@ import {
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
 import { runnerRecoveryActionContract } from "../runner/hand-development/development-search-targets";
 import { runnerRecentFutureEncounterDamageSafetyAbort } from "../runner-damage-threat-assessment";
+import { corpScoreProjectReservesSlotAfterCampaign } from "./corp-scoreline/score-hand-support";
 import { runnerEconomyHandFacts } from "../runner-economy-posture";
 import { projectInternalRunnerRunActions } from "../actions/run-action-projection";
 import type { RunnerCoverageGapSignal } from "../plans/runner-coverage-contracts";
@@ -3685,7 +3686,9 @@ function buildCorpDomain(
     ),
     reservedScoreServerIds: new Set(
       directScoreProjects.flatMap((project) =>
-        project.serverId && project.serverId !== "new_remote"
+        project.serverId &&
+        project.serverId !== "new_remote" &&
+        corpScoreProjectReservesSlotAfterCampaign(input, project)
           ? [project.serverId]
           : [],
       ),

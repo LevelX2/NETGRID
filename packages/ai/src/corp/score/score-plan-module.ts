@@ -163,6 +163,8 @@ function scoreBlockerCode(signal: CorpScoreProjectSignal): string | undefined {
   if ((signal.fundingGap ?? 0) > 0) return "corp_score_funding_route_required";
   if (signal.routeAssessment === "corp_current_turn_scoreline_unreachable")
     return "corp_score_deadline_route_unavailable";
+  if (signal.campaignSlotRelease)
+    return "corp_score_awaits_campaign_slot_release";
   if (signal.routeAssessment === "corp_last_click_score_install_deferred")
     return "corp_score_development_click_unavailable";
   return "corp_score_route_unavailable";
@@ -430,7 +432,9 @@ function scoreCandidateStepValue(
     (sum, effect) => sum + (effect.amount as number),
     0,
   );
-  return 100 + (signal.terminalScore ? 0 : selectedServer.ice.length * strength);
+  return (
+    100 + (signal.terminalScore ? 0 : selectedServer.ice.length * strength)
+  );
 }
 
 function scoreResourceGaps(

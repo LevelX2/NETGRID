@@ -869,6 +869,16 @@ function sanitizePlayerView(
       view.runnerNextTurnCreditClicks < 0)
   )
     throw new Error("Invalid Engine Runner next-turn credit-click forecast.");
+  const futureCorpClicks = view.own.corpFutureFlexibleClicks;
+  if (
+    futureCorpClicks !== undefined &&
+    (view.side !== "corp" ||
+      !Array.isArray(futureCorpClicks) ||
+      futureCorpClicks.length !== 2 ||
+      !futureCorpClicks.every(nonNegativeInteger))
+  ) {
+    throw new Error("Invalid Engine Corp future flexible-click forecast.");
+  }
   const obligation = view.own.corpEndTurnCreditObligation;
   if (
     obligation !== undefined &&
@@ -904,6 +914,9 @@ function sanitizePlayerView(
       credits: view.own.credits,
       ...(view.side === "corp" && view.own.installRezOnlyCredits !== undefined
         ? { installRezOnlyCredits: view.own.installRezOnlyCredits }
+        : {}),
+      ...(futureCorpClicks
+        ? { corpFutureFlexibleClicks: [...futureCorpClicks] as [number, number] }
         : {}),
       ...(obligation
         ? {

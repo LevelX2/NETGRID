@@ -573,7 +573,9 @@ export function corpHostedCreditBankProfile(
 export function corpRezHostedCreditPayoutProfile(
   definitionId: string | undefined,
   installing = false,
-): { poolCredits: number; payoutCredits: number } | undefined {
+):
+  | { poolCredits: number; payoutCredits: number; trashesWhenEmpty: boolean }
+  | undefined {
   const planning = planningCard(definitionId);
   const effects = planning?.planning.engine.lifecycle?.on_rez;
   if (
@@ -615,14 +617,21 @@ export function corpRezHostedCreditPayoutProfile(
         effect.recipient === "controller" &&
         effect.mode === "up_to_amount_if_available" &&
         positiveSafeInteger(effect.amount)
-        ? [effect.amount]
+        ? [
+            {
+              payoutCredits: effect.amount,
+              trashesWhenEmpty: ability.effects.some(
+                (other) => other.kind === "trash_source_when_empty",
+              ),
+            },
+          ]
         : [];
     },
   );
   return payouts.length === 1 &&
     positiveSafeInteger(poolCredits) &&
-    poolCredits > payouts[0]!
-    ? { poolCredits, payoutCredits: Math.min(poolCredits, payouts[0]!) }
+    poolCredits > payouts[0]!.payoutCredits
+    ? { poolCredits, ...payouts[0]! }
     : undefined;
 }
 

@@ -35,6 +35,44 @@ export function corpReservedScoreServerIds(
   );
 }
 
+/** Require the actual Engine trash and the current empty agenda/asset slot. */
+export function corpCampaignSlotJustCleared(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const root = input.playerView.servers.find(
+    (server) => server.id === serverId,
+  )?.root;
+  return (
+    input.side === "corp" &&
+    root !== undefined &&
+    root.every((card) => card.known && card.type === "upgrade") &&
+    [...input.playerView.publicEvents, ...input.eventTail].some(
+      (event) =>
+        event.stateVersionAfter === input.playerView.stateVersion &&
+        event.type === "activated_card_ability" &&
+        event.publicPayload.actor === "corp" &&
+        event.publicPayload.serverId === serverId &&
+        event.publicPayload.resolvedEffects?.some(
+          (effect) => effect.kind === "trash_source_when_empty",
+        ),
+    )
+  );
+}
+
+export function corpScoreProjectReservesSlotAfterCampaign(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+): boolean {
+  return (
+    project.feasible ||
+    project.sameTurnCloseout ||
+    project.deadlinePressure === true ||
+    !project.serverId ||
+    !corpCampaignSlotJustCleared(input, project.serverId)
+  );
+}
+
 export type CorpScoreAccelerationSetupBinding = Readonly<{
   parent: CorpScoreProjectSignal;
   setupNeed: NonNullable<CorpScoreProjectSignal["setupNeed"]>;

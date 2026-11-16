@@ -12,6 +12,11 @@ export type CorpEconomyAssetPaybackRisk = Readonly<{
   baselineHorizonTurns: number;
   riskAdjustedHorizonTurns: number;
   projectedPayoutExecutions: number;
+  projectedPayoutsByTurn?: readonly number[];
+  projectedExhaustion?: {
+    turnsFromNow: number;
+    remainingFlexibleClicks: number;
+  };
   unadjustedProjectedCredits: number;
   projectedCredits: number;
   setupCreditCost: number;
@@ -30,6 +35,7 @@ export function assessCorpEconomyAssetPayback(params: {
   payoutActionCost: number;
   setupCreditCost: number;
   setupActionCost: number;
+  reservedNextTurnClicks?: number;
 }): CorpEconomyAssetPaybackRisk | undefined {
   const numeric = [
     params.baselineHorizonTurns,
@@ -38,6 +44,7 @@ export function assessCorpEconomyAssetPayback(params: {
     params.payoutActionCost,
     params.setupCreditCost,
     params.setupActionCost,
+    params.reservedNextTurnClicks ?? 0,
   ];
   if (
     !numeric.every((value) => Number.isSafeInteger(value) && value >= 0) ||
@@ -78,18 +85,44 @@ export function assessCorpEconomyAssetPayback(params: {
     params.payoutActionCost === 0
       ? maximumFinitePoolExecutions
       : Math.floor(currentPayoutActionCapacity / params.payoutActionCost);
-  const payoutExecutionCapacity = (horizonTurns: number): number =>
-    params.cadence === "finite_pool" && horizonTurns > 0
-      ? currentPayoutExecutionCapacity + Math.max(0, horizonTurns - 1)
-      : horizonTurns;
-  const unadjustedPayoutExecutions = Math.min(
-    payoutExecutionCapacity(params.baselineHorizonTurns),
-    maximumFinitePoolExecutions,
-  );
-  const projectedPayoutExecutions = Math.min(
-    payoutExecutionCapacity(riskAdjustedHorizonTurns),
-    maximumFinitePoolExecutions,
-  );
+  const clicksByTurn = [
+    currentPayoutActionCapacity,
+    ...(params.input.playerView.own.corpFutureFlexibleClicks ?? []).map(
+      (clicks, index) =>
+        index === 0
+          ? Math.max(0, clicks - (params.reservedNextTurnClicks ?? 0))
+          : clicks,
+    ),
+  ];
+  const payoutsByTurn = (horizon: number) => {
+    let remaining = maximumFinitePoolExecutions;
+    return clicksByTurn.slice(0, horizon).map((clicks) => {
+      const payouts =
+        params.payoutActionCost === 0
+          ? remaining
+          : Math.min(remaining, Math.floor(clicks / params.payoutActionCost));
+      remaining -= payouts;
+      return payouts;
+    });
+  };
+  const count = (payouts: readonly number[]) =>
+    payouts.reduce((sum, executions) => sum + executions, 0);
+  const projectedPayoutsByTurn =
+    params.cadence === "finite_pool"
+      ? payoutsByTurn(riskAdjustedHorizonTurns)
+      : undefined;
+  const unadjustedPayoutExecutions =
+    params.cadence === "finite_pool"
+      ? count(payoutsByTurn(params.baselineHorizonTurns))
+      : params.baselineHorizonTurns;
+  const projectedPayoutExecutions = projectedPayoutsByTurn
+    ? count(projectedPayoutsByTurn)
+    : riskAdjustedHorizonTurns;
+  const exhaustionTurn =
+    projectedPayoutsByTurn?.reduce(
+      (lastTurn, payouts, turn) => (payouts > 0 ? turn : lastTurn),
+      -1,
+    ) ?? -1;
   const unadjustedProjectedCredits =
     params.cadence === "finite_pool"
       ? Math.min(
@@ -115,6 +148,19 @@ export function assessCorpEconomyAssetPayback(params: {
     baselineHorizonTurns: params.baselineHorizonTurns,
     riskAdjustedHorizonTurns,
     projectedPayoutExecutions,
+    ...(projectedPayoutsByTurn ? { projectedPayoutsByTurn } : {}),
+    ...(projectedPayoutsByTurn &&
+    exhaustionTurn >= 0 &&
+    projectedPayoutExecutions === maximumFinitePoolExecutions
+      ? {
+          projectedExhaustion: {
+            turnsFromNow: exhaustionTurn,
+            remainingFlexibleClicks:
+              clicksByTurn[exhaustionTurn]! -
+              projectedPayoutsByTurn[exhaustionTurn]! * params.payoutActionCost,
+          },
+        }
+      : {}),
     unadjustedProjectedCredits,
     projectedCredits,
     setupCreditCost: params.setupCreditCost,
@@ -128,6 +174,11 @@ export function assessCorpEconomyAssetPayback(params: {
       `corp_economy_asset_current_payout_action_capacity:${currentPayoutActionCapacity}`,
       `corp_economy_asset_current_payout_execution_capacity:${currentPayoutExecutionCapacity}`,
       `corp_economy_asset_payout_executions:${projectedPayoutExecutions}`,
+      ...(projectedPayoutsByTurn
+        ? [
+            `corp_economy_asset_payouts_by_turn:${projectedPayoutsByTurn.join(",")}`,
+          ]
+        : []),
       `corp_economy_asset_unadjusted_credits:${unadjustedProjectedCredits}`,
       `corp_economy_asset_projected_credits:${projectedCredits}`,
       `corp_economy_asset_opportunity_cost:${projectedOpportunityCostCredits}`,
