@@ -5,10 +5,12 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import {
+  chronicleActionUseByEventId,
   formatChronicleEffectItems,
   formatChronicleEvent,
   isSocialEngineeringHiddenAmountSelectionEvent,
   tagGainAmountFromPublicPayload,
+  type ChronicleActionUse,
   type ChronicleContext,
   type ChronicleImportance,
   type ChronicleItem,
@@ -29,7 +31,7 @@ export type OpponentActionCue = {
   viewerSide: Side;
   actor?: Side;
   actorLabel: string;
-  actionUse?: CueActionUse;
+  actionUse?: ChronicleActionUse;
   opponent: boolean;
   source: "human" | "ai" | "system";
   actionType: string;
@@ -78,14 +80,6 @@ export type DamageImpactCue = {
 export type DamageImpactAudioCue = {
   sound: "damage_net" | "damage_meat" | "damage_core" | "flatline";
   soundCount: number;
-};
-
-export type CueActionUse = {
-  label: string;
-  title: string;
-  clicks: number;
-  start: number;
-  end: number;
 };
 
 export type BoardHighlight =
@@ -173,7 +167,7 @@ export type CueDerivationInput = {
 export function deriveOpponentActionCues(
   input: CueDerivationInput,
 ): OpponentActionCue[] {
-  const actionUsesByEventId = deriveTurnActionUses(
+  const actionUsesByEventId = chronicleActionUseByEventId(
     input.events,
     input.translate,
   );
@@ -337,9 +331,6 @@ export function deriveOpponentActionCues(
             "system",
             input.translate,
           ),
-          ...(actionUsesByEventId[event.eventId]
-            ? { actionUse: actionUsesByEventId[event.eventId] }
-            : {}),
           opponent: Boolean(
             (effectItem.actor ?? actor) &&
             (effectItem.actor ?? actor) !== input.viewerSide,
@@ -650,45 +641,6 @@ export function eventsAfter(
     (event) => event.eventId === lastPresentedEventId,
   );
   return index >= 0 ? events.slice(index + 1) : [];
-}
-
-function deriveTurnActionUses(
-  events: PublicGameEvent[],
-  translate?: ChronicleTranslate,
-): Record<string, CueActionUse> {
-  const spentBySide: Partial<Record<Side, number>> = {};
-  const result: Record<string, CueActionUse> = {};
-  for (const event of events) {
-    const payload = event.publicPayload ?? {};
-    const actionType = stringValue(payload.actionType) ?? event.type;
-    const actor = sideValue(payload.actor);
-    if (!actor) continue;
-
-    const clicks = positiveIntegerValue(payload.actionCostClicks);
-    if (clicks !== undefined) {
-      const runningStart = (spentBySide[actor] ?? 0) + 1;
-      const payloadStart = positiveIntegerValue(payload.turnActionOrdinalStart);
-      const start = Math.max(runningStart, payloadStart ?? 0);
-      const payloadEnd = positiveIntegerValue(payload.turnActionOrdinalEnd);
-      const end = Math.max(start + clicks - 1, payloadEnd ?? 0);
-      result[event.eventId] = {
-        label: start === end ? String(start) : `${start}-${end}`,
-        title:
-          start === end
-            ? (translate?.("actionUse.single", { start }) ??
-              `${start}. Aktion in diesem Zug`)
-            : (translate?.("actionUse.range", { start, end }) ??
-              `Aktionen ${start} bis ${end} in diesem Zug`),
-        clicks,
-        start,
-        end,
-      };
-      spentBySide[actor] = end;
-    }
-
-    if (actionType === "end_turn") spentBySide[actor] = 0;
-  }
-  return result;
 }
 
 function deriveHighlight(

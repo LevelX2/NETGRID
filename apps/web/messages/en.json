@@ -2172,6 +2172,7 @@
       "runContinuedToIce": "{subject}: continued the run on {server} to ICE {number}.",
       "runContinuedToRoot": "{subject}: continued the run on {server} to the root.",
       "runJackedOut": "{subject}: jacked out.",
+      "optionalBonusRunDeclined": "{subject}: declined the bonus run.",
       "runEnded": "The run ended.",
       "cardAccessed": "{subject}: accessed {card}.",
       "cardAccessedInServer": "{subject}: accessed {card} in {server}.",

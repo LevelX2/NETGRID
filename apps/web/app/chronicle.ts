@@ -348,20 +348,31 @@ function semanticServerLabel(
   return value.replace(/^Remote[_ ]?/i, `${translate("server.remote")} `);
 }
 
-function semanticActionUse(
+function actionUseFromPayload(
   payload: Record<string, unknown>,
-  translate: ChronicleTranslate,
+  translate?: ChronicleTranslate,
 ): ChronicleActionUse | undefined {
   const clicks = positiveIntegerValue(payload.actionCostClicks);
   const start = positiveIntegerValue(payload.turnActionOrdinalStart);
   const end = positiveIntegerValue(payload.turnActionOrdinalEnd) ?? start;
   if (!clicks || !start || !end) return undefined;
+  return formatActionUse(clicks, start, end, translate);
+}
+
+function formatActionUse(
+  clicks: number,
+  start: number,
+  end: number,
+  translate?: ChronicleTranslate,
+): ChronicleActionUse {
   return {
     label: start === end ? String(start) : `${start}-${end}`,
     title:
       start === end
-        ? translate("actionUse.single", { start })
-        : translate("actionUse.range", { start, end }),
+        ? (translate?.("actionUse.single", { start }) ??
+          `${start}. Aktion in diesem Zug`)
+        : (translate?.("actionUse.range", { start, end }) ??
+          `Aktionen ${start} bis ${end} in diesem Zug`),
     clicks,
     start,
     end,
@@ -582,6 +593,9 @@ function formatSemanticChronicleEvent(
   const actionType = stringValue(payload.actionType) ?? event.type;
   const abilityId = payloadAbilityId(payload);
   const actor = sideValue(payload.actor);
+  const optionalBonusRunDeclined =
+    actionType === "trigger_ability" &&
+    abilityId === "decline_optional_bonus_run";
   const socialEngineeringChoice =
     actionType === "resolve_choice" &&
     stringValue(payload.sourceDefinitionId) === SOCIAL_ENGINEERING_ID;
@@ -820,6 +834,9 @@ function formatSemanticChronicleEvent(
       translate("trace.creditsPaidChip", { amount: paid }),
     ];
     category = "run";
+  } else if (optionalBonusRunDeclined) {
+    titleKey = "event.optionalBonusRunDeclined";
+    category = "run";
   } else if (actionType === "install_card" && actor === "corp") {
     const installPlacement = stringValue(payload.installPlacement);
     if (installPlacement === "ice") titleKey = "event.corpIceInstalled";
@@ -957,7 +974,8 @@ function formatSemanticChronicleEvent(
       ice: targetIceTitle,
       number: rawSubroutineIndex !== undefined ? rawSubroutineIndex + 1 : 1,
     });
-  const actionUse = context.actionUse ?? semanticActionUse(payload, translate);
+  const actionUse =
+    context.actionUse ?? actionUseFromPayload(payload, translate);
   const publiclyIdentifiedAccessResult =
     ["access_card", "steal_agenda", "trash_accessed_card"].includes(
       actionType,
@@ -981,8 +999,13 @@ function formatSemanticChronicleEvent(
           ? "redacted"
           : "public";
   const visibleCardDefinitionId =
-    visibility === "redacted" ? undefined : cardDefinitionId;
-  const visibleCardTitle = visibility === "redacted" ? undefined : cardTitle;
+    visibility === "redacted" || optionalBonusRunDeclined
+      ? undefined
+      : cardDefinitionId;
+  const visibleCardTitle =
+    visibility === "redacted" || optionalBonusRunDeclined
+      ? undefined
+      : cardTitle;
   const turnNumber = positiveIntegerValue(context.turnNumber);
   const groupLabel =
     category === "system"
@@ -4993,6 +5016,13 @@ export function formatChronicleEvent(
       break;
     case "trigger_ability": {
       const resourceAbility = abilityId;
+      if (abilityId === "decline_optional_bonus_run") {
+        category = "run";
+        title = phrase(subject, "auf den Bonus-Run verzichtet");
+        cardDefinitionId = undefined;
+        cardTitle = undefined;
+        break;
+      }
       if (isISpySuccessfulRunFollowupPayload(payload)) {
         const targetServerLabel =
           serverLabel ??
@@ -5740,10 +5770,11 @@ export function formatChronicleEffectItems(
     event.publicPayload.resolvedEffects,
   );
   const payload = event.publicPayload;
-  const runStartAlreadyShown =
+  const shownRunStartServer =
     (stringValue(payload.actionType) ?? event.type) === "play_event" &&
-    payload.runnerEventRun === true &&
-    isRunCreditLossReplacementPayload(payload);
+    payload.runnerEventRun === true
+      ? stringValue(payload.serverId)
+      : undefined;
   const turnEndTrashItems = endTurnTrashChronicleItems(
     event,
     cardPresentationsById,
@@ -5754,9 +5785,10 @@ export function formatChronicleEffectItems(
   const displayedEffects = effects.filter(
     (effect) =>
       !(
-        runStartAlreadyShown &&
+        shownRunStartServer !== undefined &&
         effect.kind === "start_run" &&
-        effect.visibility === "public"
+        effect.visibility === "public" &&
+        effect.serverId === shownRunStartServer
       ) &&
       !mergedRecurringCreditPayoutCounters.has(effect) &&
       !shouldMergeCardResolverEffect(event, effect) &&
@@ -6643,6 +6675,7 @@ function isDiscardPhaseResolution(event: PublicGameEvent): boolean {
 
 export function chronicleActionUseByEventId(
   events: PublicGameEvent[],
+  translate?: ChronicleTranslate,
 ): Record<string, ChronicleActionUse> {
   const spentBySide: Partial<Record<Side, number>> = {};
   const result: Record<string, ChronicleActionUse> = {};
@@ -6660,12 +6693,7 @@ export function chronicleActionUseByEventId(
       const start = Math.max(runningStart, payloadStart ?? 0);
       const payloadEnd = positiveIntegerValue(payload.turnActionOrdinalEnd);
       const end = Math.max(start + clicks - 1, payloadEnd ?? 0);
-      const label = start === end ? String(start) : `${start}-${end}`;
-      const title =
-        start === end
-          ? `${start}. Aktion in diesem Zug`
-          : `Aktionen ${start} bis ${end} in diesem Zug`;
-      result[event.eventId] = { label, title, clicks, start, end };
+      result[event.eventId] = formatActionUse(clicks, start, end, translate);
       spentBySide[actor] = end;
     }
 
@@ -6677,8 +6705,9 @@ export function chronicleActionUseByEventId(
 
 export function chronicleEventProjectionPlan(
   events: PublicGameEvent[],
+  translate?: ChronicleTranslate,
 ): ChronicleEventProjectionPlan {
-  const actionUseByEventId = chronicleActionUseByEventId(events);
+  const actionUseByEventId = chronicleActionUseByEventId(events, translate);
   const pendingSingleExposeActivations = new Map<string, PublicGameEvent[]>();
   const suppressedEventIds = new Set<string>();
 
@@ -7894,21 +7923,6 @@ function redactedChronicleEffectItem(
       undefined,
     ),
   };
-}
-
-function actionUseFromPayload(
-  payload: Record<string, unknown>,
-): ChronicleActionUse | undefined {
-  const clicks = positiveIntegerValue(payload.actionCostClicks);
-  const start = positiveIntegerValue(payload.turnActionOrdinalStart);
-  const end = positiveIntegerValue(payload.turnActionOrdinalEnd) ?? start;
-  if (!clicks || !start || !end) return undefined;
-  const label = start === end ? String(start) : `${start}-${end}`;
-  const title =
-    start === end
-      ? `${start}. Aktion in diesem Zug`
-      : `Aktionen ${start} bis ${end} in diesem Zug`;
-  return { label, title, clicks, start, end };
 }
 
 export function chronicleGroupLabel(item: ChronicleItem): string {

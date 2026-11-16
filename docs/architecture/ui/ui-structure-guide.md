@@ -35,6 +35,10 @@ gesperrt. Normale Aktionsablehnungen nach bestätigtem Beitritt beenden die
 Verbindung nicht. Der React-Hook hält nur die aktuelle Verbindung und
 verweist auf diese testbare Transportlogik.
 
+Der aufklappbare Matchstatus ordnet Bezeichnung und Wert als Feld an. Bei
+wenig Platz wechseln ganze Felder in die nächste Zeile. Werte, die für eine
+volle Zeile zu lang sind, dürfen innerhalb ihres Felds umbrechen.
+
 ## Helle Endstandanzeige und Cyberspace-Hintergrund
 
 Der Ergebnisdialog zeigt die Matchpunkte als zentrale, paarige Wertung mit
@@ -177,6 +181,10 @@ Kartenstand ist dafür keine Quelle.
 Runstartende Events erhalten in der lokalisierten Chronik ihre Run-Farbe
 aus dem öffentlichen Kennzeichen `runnerEventRun: true` bei `play_event`.
 Kartenname, Regeltext und ein Serverziel allein bestimmen diese Zuordnung nicht.
+Der Karteneintrag fasst Ausspielen und gleichzeitigen Runstart zusammen. Der
+öffentliche `start_run`-Folgeeffekt zum selben Server erscheint darin einmal.
+Der Verzicht auf einen optionalen Bonus-Run bleibt als Entscheidung in der
+Gruppe des gerade abgeschlossenen Runs.
 
 Chronikeinträge trennen Aktions- und Gruppenfarben: Symbol und linke Markierung
 zeigen die Aktionskategorie, Fläche und Rahmen die Gruppe (Corp blau,
@@ -184,6 +192,12 @@ Runner/Run violett). Diese Trennung gilt auch im hellen Farbschema; dort
 mischt der Hintergrund 12 % Gruppenfarbe in die Panel-Farbe.
 Kartenaktionen verwenden Orange für Symbol und linke Markierung, damit sie
 sich in beiden Farbschemata deutlich von grünen Credit-Aktionen unterscheiden.
+
+Die Chronik und schwebende Aktionshinweise verwenden dasselbe abgerundete
+Badge für die Aktionsnummer im Zug. Runner-Aktionen erhalten ein grünes,
+Korp-Aktionen ein oranges Badge. Es verwendet dieselbe öffentliche
+Aktionsnummerierung und zeigt bei mehreren verbrauchten Aktionen den Bereich.
+Automatische Folgeeffekte erhalten im schwebenden Hinweis keine Aktionsnummer.
 
 Programm-Trash-Subroutinen bleiben einschließlich Zielauswahl und Auflösung
 in der aktiven Run-Gruppe. Die Engine kennzeichnet ihre Zielauswahl mit

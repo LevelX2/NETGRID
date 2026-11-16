@@ -18,6 +18,7 @@ import {
   type ChronicleIcon as ChronicleIconKind,
   type ChronicleItem,
 } from "../../app/chronicle";
+import { TurnActionBadge } from "../actions/TurnActionBadge";
 import {
   visibleCardFromCatalogDetail,
   type DisplayVisibleCard,
@@ -68,16 +69,11 @@ export function ChronicleEntry({
           <ChronicleIcon category={item.category} icon={item.icon} />
         </span>
         {item.actionUse ? (
-          <span
-            className="chronicleActionOrdinal"
-            tabIndex={0}
-            aria-label={item.actionUse.title}
-          >
-            {item.actionUse.label}
-            <span className="chronicleActionTooltip" role="tooltip">
-              {item.actionUse.title}
-            </span>
-          </span>
+          <TurnActionBadge
+            actionUse={item.actionUse}
+            side={item.actor}
+            showTooltip
+          />
         ) : null}
       </div>
       <div className="chronicleContent">

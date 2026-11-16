@@ -24,6 +24,7 @@ import {
   type ChronicleTranslate,
 } from "../../app/chronicle";
 import { coalesceAiPumpPresentationEvents } from "../../app/ai-pump-presentation";
+import { payloadHasAbility } from "../../app/action-payload";
 import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
@@ -215,7 +216,10 @@ export function chronicleContextByEventId(
 ): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
-  const projectionPlan = chronicleEventProjectionPlan(events);
+  const projectionPlan = chronicleEventProjectionPlan(
+    events,
+    options.translate,
+  );
   const hasServerTurnContext = events.some((event) =>
     payloadPositiveInteger(event.publicPayload, "chronicleTurnNumber"),
   );
@@ -692,7 +696,8 @@ function chronicleActionContinuesCompletedRun(
 ): boolean {
   if (
     actionType === "trigger_ability" &&
-    isISpySuccessfulRunFollowupPayload(event.publicPayload)
+    (isISpySuccessfulRunFollowupPayload(event.publicPayload) ||
+      payloadHasAbility(event.publicPayload, "decline_optional_bonus_run"))
   )
     return true;
   return (
