@@ -35,6 +35,16 @@ export type RunnerRestrictedProgramInstallSequenceCommitment = {
   evidenceCodes: string[];
 };
 
+type DevelopmentInstallMemorySacrificeBinding = {
+  targetCardInstanceId: string;
+  targetMemoryCost: number;
+  requiredMemoryToFree: number;
+  selectedCards: Array<{
+    cardInstanceId: string;
+    memoryCost: number;
+  }>;
+};
+
 export type RunnerDevelopmentSignal = {
   developmentId: string;
   definitionId: string;
@@ -73,15 +83,7 @@ export type RunnerDevelopmentSignal = {
     engineContinuationAtStateVersion?: number;
     targetCardInstanceId: string;
     targetDefinitionId: string;
-    installMemorySacrificeBinding?: {
-      targetCardInstanceId: string;
-      targetMemoryCost: number;
-      requiredMemoryToFree: number;
-      selectedCards: Array<{
-        cardInstanceId: string;
-        memoryCost: number;
-      }>;
-    };
+    installMemorySacrificeBinding?: DevelopmentInstallMemorySacrificeBinding;
   };
   eventInstallChoiceBinding?: {
     choiceId: string;
@@ -106,15 +108,7 @@ export type RunnerDevelopmentSignal = {
     selectedOptionId: string;
     targetCardInstanceId: string;
     targetDefinitionId: string;
-    installMemorySacrificeBinding?: {
-      targetCardInstanceId: string;
-      targetMemoryCost: number;
-      requiredMemoryToFree: number;
-      selectedCards: Array<{
-        cardInstanceId: string;
-        memoryCost: number;
-      }>;
-    };
+    installMemorySacrificeBinding?: DevelopmentInstallMemorySacrificeBinding;
   };
   programSearchCommitment?: {
     sourceCardInstanceId: string;

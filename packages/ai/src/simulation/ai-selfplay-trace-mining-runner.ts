@@ -135,10 +135,9 @@ export function createAiSelfplayTraceMiningRunner(
         : DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS;
     const progression =
       dependencies.summarizeMatchProgressionMetrics(summaries);
-    const allRedactionSafe = isSelfplayTraceRedactionSafe({
-      findings,
-      topFindings,
-    });
+    const allRedactionSafe =
+      isSelfplayTraceRedactionSafe(findings) &&
+      summaries.every(isSelfplayTraceRedactionSafe);
     const aggregate = {
       games: summaries.length,
       decisions: summaries.reduce((sum, summary) => sum + summary.actions, 0),

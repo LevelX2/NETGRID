@@ -108,6 +108,28 @@ describe("Corp turn planning coverage", () => {
     ).toContain("economy.gain_credit");
   });
 
+  it("rejects duplicate Engine offer IDs and stale timing before certifying even an Engine-owned action", () => {
+    const setup = coverageSetup();
+    const action = setup.input.legalActions.find((entry) =>
+      setup.engineWindowActionIds.includes(entry.actionId))!;
+    const stale = { ...action, timingPoint: "runner_action.main" as const };
+    const report = buildCorpTurnPlanningCoverageReport({
+      ...setup,
+      input: {
+        ...setup.input,
+        playerView: {
+          ...setup.input.playerView,
+          own: { ...setup.input.playerView.own, clicks: 3 },
+        },
+        legalActions: [...setup.input.legalActions, stale],
+      },
+    });
+    expect(report.status).toBe("fail");
+    expect(report.issues.map((issue) => issue.code)).toEqual(
+      expect.arrayContaining(["duplicate_legal_action", "stale_legal_action"]),
+    );
+  });
+
   it("reports 100 percent classified current Corp LegalActions across every owner", () => {
     const setup = coverageSetup();
     const report = buildCorpTurnPlanningCoverageReport(setup);
@@ -719,7 +741,7 @@ function coverageSetup() {
   ];
   const input = {
     side: "corp",
-    playerView: { stateVersion: 40 },
+    playerView: { stateVersion: 40, timingPoint: "corp_action.main" },
     legalActions,
   } as Pick<AiDecisionInput, "side" | "playerView" | "legalActions">;
   return {

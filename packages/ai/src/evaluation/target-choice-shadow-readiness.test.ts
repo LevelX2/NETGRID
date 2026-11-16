@@ -87,6 +87,29 @@ describe("TargetChoice selectedChoices readiness", () => {
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });
 
+  it("keeps an isolated but unscored target in shadow", () => {
+    const target = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "only-target",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+            allowedServers: ["hq"],
+          },
+        ],
+      }),
+    });
+    expect(target.scorecard.coverageStatus).toBe("covered");
+    expect(target.selectionOutput.wouldSelect).toBeUndefined();
+    expect(
+      buildTargetChoiceSelectedChoicesReadinessReport([
+        { scenarioId: "single-target", reports: [target] },
+      ]).cases[0]?.category,
+    ).toBe("ready_for_shadow_only");
+  });
+
   it("emits concrete followup candidates for unclear target-choice dry-runs", () => {
     const tie = buildTargetChoiceShadowReport({
       action: action({

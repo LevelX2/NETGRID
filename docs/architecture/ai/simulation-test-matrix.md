@@ -90,6 +90,11 @@ das Legalitätsgate. Simulator und Holdout führen zufällige ICE-, Trace- und
 TurnPlan-Entscheidungen über das aktuelle Engine-Angebot aus und werten die
 tatsächlich ausgewählte LegalAction aus.
 
+Der Zufallsbenchmark bindet Pflichtauswahlen direkt an das aktuelle
+Engine-Angebot. Er zieht aus den auswählbaren Optionen mit dem gesetzten
+Simulationsseed und beachtet die vorgegebene Anzahl. Die Redaction-Prüfung
+berücksichtigt auch die ausgegebenen Simulationszusammenfassungen.
+
 Die `simulationId` identifiziert die geordnete Seedliste und die effektive
 Konfiguration eines Profils. In den SHA-256-Fingerprint gehen die
 Controllerprofile, die Deckbindung, die Spielgrenzen und beim

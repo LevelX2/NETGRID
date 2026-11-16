@@ -505,11 +505,12 @@ export function projectBreakerCreditPayment(
   const budgetAfterPayment = cloneRunnerRunPathCreditBudget(budget);
   fundRunnerRunPathPayment(budgetAfterPayment, cost);
   const creditsAfterPath = budgetAfterPayment.credits - cashNeeded;
-  spendBreakerCredits(budgetAfterPayment, breakAssessment);
+  const affordable = creditsAfterPath >= 0;
+  if (affordable) spendBreakerCredits(budgetAfterPayment, breakAssessment);
   return {
     affordable:
-      creditsAfterPath >= 0 &&
-      canApplyPostBreakStealthLosses(budgetAfterPayment, breakAssessment),
+      affordable &&
+      applyPostBreakStealthLosses(budgetAfterPayment, breakAssessment),
     cost,
     cashSpent: Math.min(budget.credits, cashNeeded),
     creditsAfterPath,
@@ -567,52 +568,24 @@ export function spendBreakerCreditsAndApplySideEffects(
   budget: MutableRunnerRunPathCreditBudget,
   breakAssessment: BreakAssessment,
 ): void {
-  const projectedBudget = cloneRunnerRunPathCreditBudget(budget);
-  spendBreakerCredits(projectedBudget, breakAssessment);
-  if (!canApplyPostBreakStealthLosses(projectedBudget, breakAssessment)) {
+  if (!breakAssessment.postBreakStealthLosses?.length) {
+    spendBreakerCredits(budget, breakAssessment);
+    return;
+  }
+  const projected = cloneRunnerRunPathCreditBudget(budget);
+  spendBreakerCredits(projected, breakAssessment);
+  if (!applyPostBreakStealthLosses(projected, breakAssessment))
     throw new Error(
       "Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.",
     );
-  }
-  spendBreakerCredits(budget, breakAssessment);
-  for (const loss of breakAssessment.postBreakStealthLosses ?? []) {
-    for (let occurrence = 0; occurrence < loss.occurrences; occurrence += 1) {
-      const amount = normalizeCreditAmount(loss.amount);
-      const sources = Object.keys(budget.stealthCreditsBySourceId).sort();
-      if (loss.sourceMode === "single_stealth_card") {
-        const source = sources.find(
-          (sourceId) =>
-            (budget.stealthCreditsBySourceId[sourceId] ?? 0) >= amount,
-        );
-        if (!source) {
-          if (loss.optionalIfUnavailable) continue;
-          throw new Error(
-            "Verpflichtender Stealth-Credit-Verlust hat keine Quelle.",
-          );
-        }
-        spendStealthCreditsFromSource(budget, source, amount);
-        continue;
-      }
-      let remaining = amount;
-      for (const source of sources) {
-        const spent = Math.min(
-          budget.stealthCreditsBySourceId[source] ?? 0,
-          remaining,
-        );
-        spendStealthCreditsFromSource(budget, source, spent);
-        remaining -= spent;
-        if (remaining === 0) break;
-      }
-    }
-  }
+  Object.assign(budget, projected);
 }
 
-function canApplyPostBreakStealthLosses(
+function applyPostBreakStealthLosses(
   budget: MutableRunnerRunPathCreditBudget,
   breakAssessment: BreakAssessment,
 ): boolean {
   for (const loss of breakAssessment.postBreakStealthLosses ?? []) {
-    if (loss.optionalIfUnavailable) continue;
     for (let occurrence = 0; occurrence < loss.occurrences; occurrence += 1) {
       const amount = normalizeCreditAmount(loss.amount);
       if (loss.sourceMode === "single_stealth_card") {
@@ -622,10 +595,16 @@ function canApplyPostBreakStealthLosses(
             (sourceId) =>
               (budget.stealthCreditsBySourceId[sourceId] ?? 0) >= amount,
           );
-        if (!source) return false;
+        if (source === undefined) {
+          if (!loss.optionalIfUnavailable) return false;
+          continue;
+        }
         spendStealthCreditsFromSource(budget, source, amount);
       } else {
-        if (totalStealthCredits(budget.stealthCreditsBySourceId) < amount)
+        if (
+          !loss.optionalIfUnavailable &&
+          totalStealthCredits(budget.stealthCreditsBySourceId) < amount
+        )
           return false;
         spendStealthCredits(budget, amount);
       }

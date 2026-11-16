@@ -298,6 +298,9 @@ den gemeinsamen Preis, echte Zugriffskonversion und deterministisches Replay.
 Beim verdeckten Creditvergleich beendet die Engine den Run, wenn der
 Runner mehr als die Corp bietet. Das legale Nullgebot erhält den Zugang
 kostenlos. Pfadquote und Choice-Ausführung verwenden dieselbe Regel.
+Bei Break-Kosten werden anschließende Stealth-Verluste in der angebotenen
+Reihenfolge ins Ledger gebucht. Die Quote und ihre Anwendung verwenden
+dieselbe Reihenfolge und veröffentlichen eine vollständige Buchung.
 
 Die gewöhnliche Run-Startquote finanziert positiven bekannten Hirnschaden-
 Schutz gemeinsam mit allen unabhängigen ETR-Breaks. Die aktuelle

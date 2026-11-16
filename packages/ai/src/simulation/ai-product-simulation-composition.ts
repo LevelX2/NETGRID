@@ -79,7 +79,6 @@ export function createAiProductSimulationComposition(
       chooseAiAction: runtime.chooseAiAction,
       chooseRunnerAction: runtime.chooseRunnerAction,
       chooseCorpAction: runtime.chooseCorpAction,
-      selectedChoicesForDecision: runtime.selectedChoicesForDecision,
     });
   const { simulateAiGame } = createAiGameSimulator({
     chooseDecisionForSimulation,

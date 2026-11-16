@@ -443,22 +443,11 @@ export function runnerStartOfTurnCreditProfileFromPlanningCard(
         amount: effect.amount,
         sourceEffect: "take_hosted_credits",
       });
+      continue;
     }
+    if (effect.kind !== "trash_source_when_empty") return undefined;
   }
-  const allEffectsAreProfiled = effects.every(
-    (effect) =>
-      effect.kind === "lose_credits" ||
-      effect.kind === "gain_credits" ||
-      effect.kind === "take_hosted_credits" ||
-      effect.kind === "trash_source_when_empty",
-  );
-  if (
-    !allEffectsAreProfiled ||
-    creditEffects.length !== 1 ||
-    !positiveSafeInteger(creditEffects[0]?.amount)
-  ) {
-    return undefined;
-  }
+  if (creditEffects.length !== 1) return undefined;
   return creditEffects[0]!;
 }
 

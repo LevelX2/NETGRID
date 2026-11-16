@@ -44,6 +44,13 @@ describe("Corp opening rush admission", () => {
     });
   });
 
+  it("rejects a project if its selected install belongs to a sibling remote", () => {
+    expect(assess("sibling", { installServerId: "remote_2" })).toMatchObject({
+      status: "blocked",
+      reason: "missing_exact_action",
+    });
+  });
+
   it("blocks a public Shell-Traders breaker staged for delayed install", () => {
     const decision = assess("staged-breaker", {
       stagedBreaker: true,
@@ -97,6 +104,7 @@ function assess(
     preservesReserve?: boolean;
     accessProbability?: { numerator: number; denominator: number };
     centralThreat?: "none" | "acute";
+    installServerId?: string;
   } = {},
 ) {
   const stateVersion = options.stateVersion ?? 1;
@@ -108,8 +116,20 @@ function assess(
     side: "corp",
     seed,
     actionNumber: options.actionNumber ?? 1,
+    legalActions: [
+      {
+        actionId: "install-agenda",
+        side: "corp",
+        type: "install_card",
+        source: "agenda-1",
+        timingPoint: "corp_action.main",
+        expiresAtStateVersion: stateVersion,
+        payload: { serverId: options.installServerId ?? "remote_1" },
+      },
+    ],
     playerView: {
       stateVersion,
+      timingPoint: "corp_action.main",
       turnSerial: options.turnSerial ?? 2,
       servers: [
         { id: "hq", ice: [], root: [] },

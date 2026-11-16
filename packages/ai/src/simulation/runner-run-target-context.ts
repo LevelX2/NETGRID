@@ -1,5 +1,8 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import { serverIdFromEvent } from "../runtime/public-event-history";
+import {
+  mergedPublicHistory,
+  serverIdFromEvent,
+} from "../runtime/public-event-history";
 
 export function runnerRunTargetHasOnlyUnknownOrUnrezzedIce(
   input: AiDecisionInput,
@@ -19,11 +22,20 @@ export function runnerHasRecentRunOnServer(
   input: AiDecisionInput,
   serverId: string,
 ): boolean {
-  return input.playerView.publicEvents
+  return mergedPublicHistory(input)
     .slice(-24)
-    .some(
-      (event) =>
-        event.publicPayload.actionType === "start_run" &&
-        serverIdFromEvent(event) === serverId,
-    );
+    .some((event) => {
+      const payload = event.publicPayload;
+      return (
+        ((payload.actionType ?? event.type) === "start_run" &&
+          payload.actor === "runner" &&
+          serverIdFromEvent(event) === serverId) ||
+        (payload.resolvedEffects ?? []).some(
+          (effect) =>
+            effect.kind === "start_run" &&
+            effect.side === "runner" &&
+            effect.serverId === serverId,
+        )
+      );
+    });
 }

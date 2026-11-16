@@ -1,4 +1,5 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 export type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -11,7 +12,7 @@ export function exactCurrentChoiceAction(
   input: AiDecisionInput,
   choice: PendingChoice | undefined,
 ): LegalAction | undefined {
-  const { stateVersion, timingPoint, activeSide } = input.playerView;
+  const { stateVersion, activeSide } = input.playerView;
   if (
     !choice ||
     choice.side !== input.side ||
@@ -27,11 +28,8 @@ export function exactCurrentChoiceAction(
   const requirement = action?.choiceRequirements?.[0];
   if (
     actions.length !== 1 ||
-    !action ||
-    action.side !== input.side ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.source !== "game_rule" ||
-    action.timingPoint !== timingPoint ||
-    action.expiresAtStateVersion !== stateVersion ||
     action.choiceRequirements?.length !== 1 ||
     requirement?.choiceId !== choice.choiceId ||
     requirement.minSelections !== choice.minSelections ||

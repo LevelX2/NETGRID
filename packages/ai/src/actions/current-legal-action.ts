@@ -1,7 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 export function actionMatchesCurrentDecision(
-  input: AiDecisionInput,
+  input: Pick<AiDecisionInput, "side" | "playerView">,
   action: LegalAction | undefined,
 ): action is LegalAction {
   return (

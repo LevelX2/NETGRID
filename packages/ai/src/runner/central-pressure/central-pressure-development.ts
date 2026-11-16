@@ -58,20 +58,15 @@ export function runnerCentralPressureDevelopmentSignals(
     const target = [...runTargets]
       .filter(
         (entry) =>
-          entry.targetServerId === serverId ||
-          entry.accessServerId === serverId,
+          (entry.targetServerId === serverId || entry.accessServerId === serverId) &&
+          runnerAccessPayoffCampaignTargetIsViable(input, entry, coverageGaps),
       )
       .sort(
         (left, right) =>
           right.score - left.score ||
           left.actionId.localeCompare(right.actionId),
       )[0];
-    if (
-      !target ||
-      !runnerAccessPayoffCampaignTargetIsViable(input, target, coverageGaps)
-    ) {
-      return [];
-    }
+    if (!target) return [];
     const installedCopyCount =
       evaluation.persistentInstallEvaluation?.installedSameDefinitionCount ??
       (input.playerView.own.rig ?? []).filter(

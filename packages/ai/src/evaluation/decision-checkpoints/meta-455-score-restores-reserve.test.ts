@@ -109,6 +109,8 @@ it.each([
   "clicks",
   "stale_cost",
   "stale_action",
+  "wrong_timing",
+  "expiring_credit_pool",
   "missing_action",
   "no_quote",
   "later_turn",
@@ -125,6 +127,10 @@ it.each([
     project.sameTurnConversionResourceCost!.stateVersion--;
   if (kind === "stale_action")
     for (const a of input.legalActions) a.expiresAtStateVersion--;
+  if (kind === "wrong_timing")
+    for (const a of input.legalActions) a.timingPoint = "run.approach_ice";
+  if (kind === "expiring_credit_pool")
+    input.playerView.own.installRezOnlyCredits = input.playerView.own.credits;
   if (kind === "missing_action") project.actionIds = [];
   if (kind === "no_quote") delete project.sameTurnConversionProof;
   if (kind === "later_turn") project.sameTurnCloseout = false;

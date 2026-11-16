@@ -26,7 +26,7 @@ const LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
       slotId: slot.slotId,
       label: slot.label,
       slotType: slot.slotType,
-      status: slot.status,
+      status: runner && corp ? slot.status : "pending",
       runner: runner
         ? { kind: "frozen_local_snapshot", snapshotId: runner.snapshotId }
         : {

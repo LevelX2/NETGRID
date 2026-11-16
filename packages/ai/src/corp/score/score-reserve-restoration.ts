@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
   corpConditionalScoreCreditProfile,
@@ -98,8 +99,7 @@ export function withCorpSameTurnScoreDefenseReserve(
       0,
       terminalTaxClaim,
     );
-  if (endCredits >= reserve && !consumesTerminalTax)
-    return project;
+  if (endCredits >= reserve && !consumesTerminalTax) return project;
   // A complete fixed-cost route may spend spare current clicks on native
   // Economy support before scoring. Fund the route and the existing Defense
   // claim together; no future-turn income or score payout pays earlier costs.
@@ -207,6 +207,18 @@ export function corpScoreRestoresRezReserveBeforeRunnerTurn(
     targetCredits <= input.playerView.own.credits
   )
     return false;
+  // A temporary install/rez pool is removed before the Runner can contest.
+  // Only a route affordable with general liquidity independently certifies
+  // this reserve; its persisted credit-cost quote has no per-step pool split.
+  const currentCredits = input.playerView.own.credits;
+  const restrictedCredits = input.playerView.own.installRezOnlyCredits ?? 0;
+  if (
+    !Number.isSafeInteger(restrictedCredits) ||
+    restrictedCredits < 0 ||
+    restrictedCredits > currentCredits
+  )
+    return false;
+  const generalCredits = currentCredits - restrictedCredits;
   return projects.some((project) => {
     const cost = project.sameTurnConversionResourceCost;
     const payout = corpUnconditionalScoreCreditGain(project.agendaDefinitionId);
@@ -225,14 +237,13 @@ export function corpScoreRestoresRezReserveBeforeRunnerTurn(
       cost.credits >= 0 &&
       Number.isSafeInteger(cost.clicks) &&
       cost.clicks >= 0 &&
-      cost.credits <= input.playerView.own.credits &&
+      cost.credits <= generalCredits &&
       cost.clicks <= input.playerView.own.clicks &&
       payout !== undefined &&
-      input.playerView.own.credits - cost.credits + payout >= targetCredits &&
+      generalCredits - cost.credits + payout >= targetCredits &&
       input.legalActions.some(
         (action) =>
-          action.side === "corp" &&
-          action.expiresAtStateVersion === input.playerView.stateVersion &&
+          actionMatchesCurrentDecision(input, action) &&
           project.actionIds?.includes(action.actionId),
       )
     );
