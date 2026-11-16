@@ -255,7 +255,8 @@ export type VisibleIceRunHazardProjection = {
   traceSupportSourceIdsConsumed?: string[];
   avoidancePayment?:
     | { kind: "general"; cost: number }
-    | { kind: "breaker"; assessment: BreakAssessment };
+    | { kind: "breaker"; assessment: BreakAssessment }
+    | { kind: "tag_prevention"; cost: number; trashedSourceIds: string[] };
 };
 
 export type DeferredNextEncounterDamage = {

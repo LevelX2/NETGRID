@@ -12,6 +12,7 @@ import {
   spendBreakerCreditsAndApplySideEffects,
   spendTraceEligibleCredits,
 } from "./visible-run-credit-budget";
+import { quoteInstalledFixedTagAvoidance } from "./installed-tag-avoidance-quote";
 import { isVisibleDirectDamageSubroutine } from "./visible-subroutine-semantics";
 import type {
   BreakAssessment,
@@ -125,6 +126,11 @@ export function visibleIceRunHazardsForQuote(params: {
   ice: IceCardLike;
   iceIndex: number;
   rigCards: VisibleCard[];
+  /** Full installed rig, including cards that cannot break this encounter. */
+  tagPrevention?: {
+    rigCards: readonly VisibleCard[];
+    consumedSourceIds: ReadonlySet<string>;
+  };
   /** Complete current payment ledger; restricted breaker pools never fund traces. */
   creditBudget: RunnerRunPathCreditBudgetInput;
   visibleCorpBidCapacity: number;
@@ -148,6 +154,9 @@ export function visibleIceRunHazardsForQuote(params: {
     params.excludeStealthTraceCredits,
   );
   const consumedTraceSupportSourceIds = new Set<string>();
+  const consumedTagPreventionSourceIds = new Set(
+    params.tagPrevention?.consumedSourceIds,
+  );
   quote.subroutines.forEach((subroutine) => {
     if (subroutine.type !== "initiate_trace") return;
     const traceSupport = visibleRunnerTraceSupport(
@@ -212,15 +221,30 @@ export function visibleIceRunHazardsForQuote(params: {
         .affordable
         ? breakAssessment.cost
         : undefined;
+    const tagAvoidance =
+      successEffect?.type === "add_tag" && params.tagPrevention
+        ? quoteInstalledFixedTagAvoidance(
+            params.tagPrevention.rigCards,
+            successEffect.amount,
+            remainingCreditBudget.traceEligibleCredits,
+            consumedTagPreventionSourceIds,
+          )
+        : undefined;
     const avoidanceCandidates = [
       traceAvoidanceCandidate,
       traceSuccessCancelCandidate,
       breakAvoidanceCandidate,
     ].filter((cost): cost is number => cost !== undefined);
-    const minimumAvoidanceCost =
-      avoidanceCandidates.length > 0
-        ? Math.min(...avoidanceCandidates)
+    const minimumTraceOrBreakCost = Math.min(...avoidanceCandidates);
+    const selectedTagAvoidance =
+      tagAvoidance && tagAvoidance.cost < minimumTraceOrBreakCost
+        ? tagAvoidance
         : undefined;
+    const minimumAvoidanceCost =
+      selectedTagAvoidance?.cost ??
+      (minimumTraceOrBreakCost < Infinity
+        ? minimumTraceOrBreakCost
+        : undefined);
     const usesBreakAvoidance =
       breakAvoidanceCandidate !== undefined &&
       minimumAvoidanceCost === breakAvoidanceCandidate &&
@@ -395,6 +419,11 @@ export function visibleIceRunHazardsForQuote(params: {
         ...(breakAssessment
           ? [`visible_trace_break_cost:${breakAssessment.cost}`]
           : []),
+        ...(selectedTagAvoidance
+          ? [
+              `visible_installed_tag_avoidance_cost:${selectedTagAvoidance.cost}`,
+            ]
+          : []),
         `visible_ice_hazard_unavoidable:${unavoidable}`,
       ],
     };
@@ -423,21 +452,30 @@ export function visibleIceRunHazardsForQuote(params: {
             }
           : {}),
       ...(!unavoidable && minimumAvoidanceCost !== undefined
-        ? usesBreakAvoidance && breakAssessment
+        ? selectedTagAvoidance
           ? {
               avoidancePayment: {
-                kind: "breaker" as const,
-                assessment: breakAssessment,
+                kind: "tag_prevention" as const,
+                ...selectedTagAvoidance,
               },
             }
-          : {
-              avoidancePayment: {
-                kind: "general" as const,
-                cost: minimumAvoidanceCost,
-              },
-            }
+          : usesBreakAvoidance && breakAssessment
+            ? {
+                avoidancePayment: {
+                  kind: "breaker" as const,
+                  assessment: breakAssessment,
+                },
+              }
+            : {
+                avoidancePayment: {
+                  kind: "general" as const,
+                  cost: minimumAvoidanceCost,
+                },
+              }
         : {}),
     });
+    for (const sourceId of selectedTagAvoidance?.trashedSourceIds ?? [])
+      consumedTagPreventionSourceIds.add(sourceId);
     if (!unavoidable && minimumAvoidanceCost !== undefined) {
       if (usesBreakAvoidance && breakAssessment) {
         spendBreakerCreditsAndApplySideEffects(

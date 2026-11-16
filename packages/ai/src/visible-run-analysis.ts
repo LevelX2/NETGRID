@@ -158,7 +158,8 @@ export function assessKnownRezzedIcePath(
     iceCards.some(
       (ice) =>
         ice.known &&
-        (ice.rezzed === true || ice.authoritativePostRezRunProjection === true) &&
+        (ice.rezzed === true ||
+          ice.authoritativePostRezRunProjection === true) &&
         ice.effectiveRunQuote?.subroutines.some(
           (subroutine) => subroutine.type === "initiate_trace",
         ),
@@ -485,11 +486,15 @@ function assessKnownRezzedIcePathInternal(
     preRunPreparation?: KnownRezzedIcePathAssessment["preRunPreparation"];
     /** Passages before this suffix, whose encounter cost was handled by its caller. */
     initialPassCount?: number;
+    consumedTagPreventionSourceIds?: ReadonlySet<string>;
   },
   initialBreakerStrengths?: Map<string, number>,
   deflectorContext: VisibleDeflectorContext = {},
 ): KnownRezzedIcePathAssessment {
   const creditBudget = normalizeRunnerRunPathCreditBudget(runnerCredits);
+  const consumedTagPreventionSourceIds = new Set(
+    options.consumedTagPreventionSourceIds,
+  );
   const preRunPreparation = options.preRunPreparation;
   if (
     preRunPreparation &&
@@ -1064,6 +1069,10 @@ function assessKnownRezzedIcePathInternal(
       ice: effectiveIce,
       iceIndex,
       rigCards: rigCardsForEncounter,
+      tagPrevention: {
+        rigCards,
+        consumedSourceIds: consumedTagPreventionSourceIds,
+      },
       creditBudget,
       visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
@@ -1091,7 +1100,7 @@ function assessKnownRezzedIcePathInternal(
         hazard.freeDamagePreventionApplied ?? 0;
       runDamagePreventionRemaining -= hazard.runDamagePreventionApplied ?? 0;
       visibleIceRunHazards.push(hazard);
-      if (avoidancePayment) {
+      if (avoidancePayment && avoidancePayment.kind !== "tag_prevention") {
         avoidedVisibleHazardSubroutineIds.add(hazard.subroutineId);
       }
       if (avoidancePayment?.kind === "breaker") {
@@ -1107,9 +1116,13 @@ function assessKnownRezzedIcePathInternal(
           breakerStrengths,
           carriedBreakerStrengths,
         );
-      } else if (avoidancePayment?.kind === "general") {
+      } else if (avoidancePayment) {
         visibleBreakCost += avoidancePayment.cost;
         spendTraceEligibleCredits(creditBudget, avoidancePayment.cost);
+        if (avoidancePayment.kind === "tag_prevention") {
+          for (const sourceId of avoidancePayment.trashedSourceIds)
+            consumedTagPreventionSourceIds.add(sourceId);
+        }
       }
       if (projection.traceCreditPoolSpent && runnerTraceSupportQuote) {
         runnerTraceSupportQuote = spendVisibleTraceCreditPool(
@@ -1245,6 +1258,7 @@ function assessKnownRezzedIcePathInternal(
             allowBreakingRunPathEffects: false,
             initialPassCount: 1,
             preferFullGroupedBreak: options.preferFullGroupedBreak === true,
+            consumedTagPreventionSourceIds,
           },
           new Map(carriedBreakerStrengths),
           deflectorContext,
@@ -1415,6 +1429,7 @@ function assessKnownRezzedIcePathInternal(
               activeRunPathEffects: effectsForFutureEncounters,
               rigCards,
               rigCardsForEncounter,
+              consumedTagPreventionSourceIds,
               rootCards,
               creditBudget,
               visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
@@ -1760,6 +1775,7 @@ function runPathEffectBreakAssessment(params: {
   activeRunPathEffects: RunPathProjectionEffect[];
   rigCards: VisibleCard[];
   rigCardsForEncounter: VisibleCard[];
+  consumedTagPreventionSourceIds: ReadonlySet<string>;
   rootCards: RootCardLike[];
   creditBudget: MutableRunnerRunPathCreditBudget;
   visibleCorpBidCapacity: number;
@@ -1794,6 +1810,7 @@ function runPathEffectBreakAssessment(params: {
       allowBreakingRunPathEffects: false,
       initialPassCount: 1,
       preferFullGroupedBreak: params.preferFullGroupedBreak === true,
+      consumedTagPreventionSourceIds: params.consumedTagPreventionSourceIds,
     },
     new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
@@ -1809,6 +1826,7 @@ function runPathEffectBreakAssessment(params: {
       allowBreakingRunPathEffects: false,
       initialPassCount: 1,
       preferFullGroupedBreak: params.preferFullGroupedBreak === true,
+      consumedTagPreventionSourceIds: params.consumedTagPreventionSourceIds,
     },
     new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
@@ -1851,6 +1869,7 @@ function runPathEffectBreakAssessment(params: {
       allowBreakingRunPathEffects: false,
       initialPassCount: 1,
       preferFullGroupedBreak: params.preferFullGroupedBreak === true,
+      consumedTagPreventionSourceIds: params.consumedTagPreventionSourceIds,
     },
     breakerStrengthsAfterBreak,
     params.deflectorContext,

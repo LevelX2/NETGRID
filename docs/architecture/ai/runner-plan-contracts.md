@@ -154,6 +154,14 @@ belasten das allgemeine Teilkonto unmittelbar. Mehrere Trace-Subroutinen und
 aufeinanderfolgende ICE konsumieren denselben Ledger. Dedizierte, von der
 Engine projizierte Trace-Pools bleiben zusätzlich verwendbar.
 
+Enthält der Trace-Erfolg ausschließlich eine feste Anzahl Tags, kann die
+Pfadquote zusätzlich sichtbare, bereits installierte Tag-Vermeidung ansetzen.
+Allgemeine Credits finanzieren wiederholbare Zahlungen. Eine reine
+Tag-Vermeidungsquelle mit Trash-Kosten ist über alle Subroutinen und ICE
+hinweg nur einmal verfügbar. Die Quote bewertet die verbleibenden Tags und
+lässt unabhängige Folgen der Subroutine bestehen. Das spätere
+Prevention-Fenster wird aus den dann legalen Engine-Aktionen aufgelöst.
+
 Bezahlte Vorbereitung vor dem Run, etwa ein Subtypwechsel, benötigt bereits
 verfügbares allgemeines Geld. Ihre Zahlung vermindert das Gesamtbudget und
 das allgemeine Teilkonto gemeinsam, bevor Break- und Trace-Alternativen
