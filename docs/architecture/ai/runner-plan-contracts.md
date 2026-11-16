@@ -857,14 +857,18 @@ bleiben und dadurch den gesamten TurnPlanner trotz ausführbarer Erholung
 abbrechen. Der native Präfix von Paarung 578 G27 sowie die wieder
 aufgefüllte Hand prüfen Sperre, vollständige Coverage und regulären Tagabbau.
 
-Ein Erstbegegnungs-Bypass um unbekanntes, rezzbares ICE erhält den Wert
-eines frischen Zugriffs, wenn er den Pfad zur unbekannten Remote-Root
-vollständig finanziert und die Mindestreserve erhält. Bei einem garantierten
-Pfad ohne offene ICE-Wirkungen darf er die allgemeine Entwicklungsreserve
-nutzen. Eine akute Scorebedrohung behält ihre Reserve. Die Root bleibt
-unbekannt und der Verbrauch der Eventkarte fließt in die Bewertung ein.
-Match 734d6341 D34 belegt den bezahlbaren Bypass und den Gegenfall mit
-weiterem unbekanntem ICE.
+Ein Erstbegegnungs-Bypass um gerezztes oder unbekanntes, rezzbares ICE
+erhält den Wert eines frischen Zugriffs, wenn die Route zur unbekannten
+Remote-Root garantiert und vollständig bezahlt ist. Ohne offene ICE-Wirkungen
+darf sie die allgemeine Entwicklungsreserve bis zur Mindestreserve einsetzen.
+Beim letzten Klick darf ein Bypass um bereits gerezztes ICE auch die
+allgemeine Mindestreserve nutzen. Die Kosten des Run-Events, sichtbare
+Steal-Kosten, die Notfallreserve und die Sicherheitsprüfung des Runpfads
+bleiben bindend. Eine akute Scorebedrohung behält ihren eigenen Reservevertrag.
+Die Root bleibt unbekannt und der Verbrauch der Eventkarte fließt in die
+Bewertung ein. Match 7097801c D33 belegt den Bypass mit drei Credits und
+einem Klick. Match 734d6341 D34 und die Gegenfälle mit unbekanntem Rest-ICE
+oder offenen Steal-Kosten sichern die Grenzen.
 
 Coverage-Unterstützung gehört zur exakt bewerteten Run-Action. Eine auf demselben
 Server bereits ausführbare Bypass-Variante übernimmt nicht den Breakerbedarf

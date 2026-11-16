@@ -1041,26 +1041,47 @@ function evaluateRunnerRunTarget(
   }
   const unrezzedIceRiskUnderfunded = prerunReserveQuote.creditGap > 0;
   const outerIce = visibleServerIce.at(-1);
-  const guaranteedRemoteBypassAccess =
+  const remoteBypassHasGuaranteedPath =
     accessTargetKind === "remote" &&
     accessPayoff === "unknown" &&
     payoff.knownAccessState === "unknown" &&
     effectiveAccessPayoffContestable === true &&
     bypassedFirstIce &&
-    outerIce?.known === false &&
-    outerIce.rezzed === false &&
-    corpCanRezUnknownIce &&
     pathPassability === "reachable" &&
     routeQuote.reachability === "guaranteed_access" &&
     routeQuote.fundingGap === 0 &&
     routeQuote.effects.length === 0 &&
     prerunReserveQuote.status !== "blocked" &&
-    economyPosture.creditReservePolicy.remoteScoreThreat !== "urgent" &&
-    creditsAfterRun >= economyPosture.minimumCreditFloor;
+    economyPosture.creditReservePolicy.remoteScoreThreat !== "urgent";
+  const emergencyReserve = economyPosture.creditReservePolicy.emergencyReserve;
+  const fundedRezzedBypass =
+    outerIce?.known === true &&
+    outerIce.rezzed === true &&
+    creditsAfterRun >= emergencyReserve;
+  // Funding would use the only click that can take this quoted access.
+  const lastClickBypassReserve =
+    remoteBypassHasGuaranteedPath &&
+    fundedRezzedBypass &&
+    actionClickCost > 0 &&
+    params.input.playerView.own.clicks === actionClickCost &&
+    creditsAfterRun < economyPosture.minimumCreditFloor
+      ? emergencyReserve
+      : undefined;
+  const guaranteedRemoteBypassAccess =
+    remoteBypassHasGuaranteedPath &&
+    (lastClickBypassReserve !== undefined ||
+      (creditsAfterRun >= economyPosture.minimumCreditFloor &&
+        (fundedRezzedBypass ||
+          (outerIce?.known === false &&
+            outerIce.rezzed === false &&
+            corpCanRezUnknownIce))));
   const targetFundingNeed = runnerRunTargetFundingNeed({
     routeQuote,
     creditsAfterRun,
     economyPosture,
+    ...(lastClickBypassReserve !== undefined
+      ? { boundPostRunReserve: lastClickBypassReserve }
+      : {}),
     consumeCurrentGoalReserve:
       guaranteedRemoteBypassAccess ||
       (scoreThreat &&
@@ -1239,6 +1260,9 @@ function evaluateRunnerRunTarget(
       `path_cost:${routeQuote.guaranteedKnownCost}`,
       `visible_break_cost:${path.visibleBreakCost ?? 0}`,
       ...routeQuote.evidence,
+      ...(lastClickBypassReserve !== undefined
+        ? ["runner_last_click_rezzed_bypass_uses_access_budget"]
+        : []),
       `run_action_credit_cost:${actionCreditCost}`,
       `run_action_grip_cost:${runActionGripCost}`,
       `grip_after_run_action:${projectedGripAfterRunAction}`,
@@ -2523,18 +2547,19 @@ function runnerRunTargetFundingNeed(params: {
   creditsAfterRun: number;
   economyPosture: RunnerEconomyPosture;
   consumeCurrentGoalReserve: boolean;
+  boundPostRunReserve?: number;
 }): RunnerRunTargetFundingNeed {
   const routeFundingGap = Math.max(0, params.routeQuote.fundingGap ?? 0);
   const liquidCreditsSpent =
     params.creditsAfterRun <
     params.economyPosture.creditReservePolicy.currentCredits;
-  const protectedLiquidReserve = params.consumeCurrentGoalReserve
-    ? params.economyPosture.minimumCreditFloor
-    : liquidCreditsSpent
-      ? params.economyPosture.creditReservePolicy.phase === "opening"
-        ? params.economyPosture.minimumCreditFloor
-        : params.economyPosture.desiredCreditReserve
-      : params.economyPosture.minimumCreditFloor;
+  const protectedLiquidReserve =
+    params.boundPostRunReserve ??
+    (params.consumeCurrentGoalReserve ||
+    !liquidCreditsSpent ||
+    params.economyPosture.creditReservePolicy.phase === "opening"
+      ? params.economyPosture.minimumCreditFloor
+      : params.economyPosture.desiredCreditReserve);
   const postRunFloorGap = Math.max(
     0,
     protectedLiquidReserve - params.creditsAfterRun,
