@@ -12,6 +12,7 @@ import {
   runnerTacticalAssessment as assessment,
   domain,
   exactRunnerParentSupportResourceGaps,
+  runnerTacticalAvailableCandidates,
   runnerTacticalProposal as proposal,
   state,
 } from "../../plans/runner-tactical-module-support";
@@ -75,7 +76,7 @@ export function centralPressureModule(): PlanModule {
           "runner.pressure_central",
           signal.pressureId,
           { kind: "central_pressure", signal } satisfies PressureState,
-          signal.priorityClass,
+          centralPressurePriority(signal),
           signal.strategyLineIds,
           { kind: "server", id: signal.serverId },
           (signal.supportNeedId !== undefined ||
@@ -126,7 +127,7 @@ export function centralPressureModule(): PlanModule {
             );
       const result = assessment(
         instance,
-        current.signal.priorityClass,
+        centralPressurePriority(current.signal),
         routeExists,
         current.signal.marginalValue,
         portfolio.executorInstanceId,
@@ -262,6 +263,18 @@ function targetedIcePreparationPurpose(signal: RunnerPressureSignal): string {
   }
 }
 
+function centralPressurePriority(
+  signal: RunnerPressureSignal,
+): RunnerPressureSignal["priorityClass"] {
+  if (
+    signal.routePreparation === "targeted_bypass" &&
+    (signal.priorityClass === "P2" || signal.priorityClass === "P3")
+  ) {
+    return "P4";
+  }
+  return signal.priorityClass;
+}
+
 /** Describes the selected action's actual replacement in the current view. */
 export function runnerCentralPressureRunTracePurpose(
   input: AiDecisionInput,
@@ -282,6 +295,7 @@ function pressureCandidates(
   context: PlanSchedulerContext,
   signal: RunnerPressureSignal,
 ): PlanMaterialization["candidates"] {
+  const availableCandidates = runnerTacticalAvailableCandidates(context);
   if (
     signal.routePreparation === "develop_payoff" ||
     signal.routePreparation === "convert_accumulated_pressure" ||
@@ -289,7 +303,7 @@ function pressureCandidates(
     signal.routePreparation === "targeted_ice_trash"
   ) {
     const preparationActionIds = new Set(signal.preparationActionIds ?? []);
-    return context.actionCandidates
+    return availableCandidates
       .filter((candidate) => preparationActionIds.has(candidate.actionId))
       .map((candidate) => ({
         candidate,
@@ -298,7 +312,7 @@ function pressureCandidates(
   }
   return runnerCentralPressureRunCandidates(
     context.input,
-    context.actionCandidates,
+    availableCandidates,
     signal,
     domain(context).runTargetEvaluations,
   );

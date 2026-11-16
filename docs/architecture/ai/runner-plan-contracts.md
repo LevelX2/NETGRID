@@ -318,6 +318,14 @@ aber weder Stealpreis noch Pfad-, Hand- oder Creditreserve. Ein zweiter
 pauschaler Archives-Zulassungspfad darf die bewertete Route nicht ersetzen;
 bezahlbare sichere Steals behalten ihren normalen Central-Parent.
 
+Die Nullnutzen-Disposition für normale Archives-Runs gilt für unklassifizierte
+LegalActions. Ein bereits vom Abwehrplan wegen konkreter Flatline-Gefahr
+abgelehnter Run behält den Abwehrplan als Owner und dessen Ablehnungsgrund.
+Zentraldruck und Remote Contest verwenden bei Discovery, Assessment und
+Materialisierung ausschließlich Action-IDs ohne aktuelle Disposition. Ein
+erreichbarer Pfad kann als Kampagnenziel fortbestehen, während die konkrete
+Ausführung vorläufig gesperrt ist.
+
 **Klasse:** `strategic_campaign`
 **Rolle:** Vordergrund, zeitweise präemptierbar
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
@@ -407,6 +415,12 @@ und Kartenverbrauch neu gequotet; dazu zählt die eigene Handkartenanforderung
 eines Run-Events. Die Vorbereitung erbt die Admission, Priorität und Bewertung
 des bereits ausführbaren Parents. Ein bekannter reiner Trash-Zugriff trägt
 keinen Agenda-Bonus.
+
+Übernimmt eine gezielte ICE-Umgehung einen Zentralplan, fordert der Owner
+für den vorbereitenden Schritt höchstens P4 an. Die verdeckte Antwort der Korp
+bestimmt weiterhin, ob die Umgehung gelingt. Dringlichkeit aus dem bisherigen
+Runpfad bleibt ein Zielsignal, während der aktuelle Step seine eigene belegte
+Erfolgsaussicht und die gebundene Server- und ICE-Position behält.
 
 Ein öffentlich ausgespielter, noch nicht verbrauchter Agenda-Zugriffsbonus
 verfällt am Runner-Zugende. Die Run-Owner lesen diesen Zustand aus kanonischem
@@ -2659,9 +2673,11 @@ Suchablehnung mit sowie ohne den aktiven letzten-Klick-Schutz.
 
 Die Grip-Zugendprüfung zählt bei einer aktuell vom Engine-Angebot und der
 kanonischen On-Play-Fähigkeit gebundenen Suche mit genau einem verpflichtenden
-`search_stack_to_grip` die zurückkehrende Karte. Das Ereignis verbraucht eine
+`search_stack_to_grip` oder `search_trash_to_grip` die zurückkehrende Karte. Das Ereignis verbraucht eine
 Karte und gibt bei regulärer Choice-Auflösung eine Karte in den Grip. Die
-Planbindung der konkreten Suchantwort bleibt bei Coverage. Der Nachweis deckt
+Planbindung der konkreten Suchantwort bleibt bei Coverage. Paarung 759
+G29/D50 belegt die gebundene Heap-Rückholung mit unverändert fünf Handkarten
+nach der verpflichtenden Choice. Der Nachweis deckt
 weder fakultative Suchen noch Installationen aus dem Stack oder unbekannte
 weitere Effekte ab. Paarung 746 G31/D20 belegt die Grip-neutrale, gebundene
 Suche. Im selben Zustand bleibt das Grip-verbrauchende Sabotage-Event gesperrt.
@@ -4137,8 +4153,9 @@ Plan, Quelle, ursprüngliche Action und Engine-Fenster bleiben dabei gebunden.
 Ein durch Zahlungsunterstützung unterbrochenes Encounter ist keine neue
 Entscheidung über ungeblockten Schaden. Während die Engine ausschließlich
 die markierte Kostenfortsetzung und ihre Zahlungshilfen anbietet, verlangt
-die Schadensbewertung keine dort nicht angebotene Encounter-Continue-Quote;
-der bestehende Continuation-Owner validiert und erhält die ursprüngliche
+weder die Schadensbewertung noch die vollständige Pump-Kostenprognose
+des Informationsplans eine dort nicht angebotene Encounter-Continue-Quote.
+Der bestehende Continuation-Owner validiert und erhält die ursprüngliche
 Action-, Plan- und Step-Bindung. Im regulären Encounter bleiben fehlende
 Restquoten ein strukturierter Fehler.
 

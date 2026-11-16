@@ -6,7 +6,10 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { endTheRunSubroutineCount } from "../../visible-run-analysis";
-import { runnerVirusCounterEffectThreshold } from "@netgrid/engine";
+import {
+  quoteConvertibleCentralCounterAmount,
+  runnerVirusCounterEffectThreshold,
+} from "@netgrid/engine";
 import type { CorpBoardTriage } from "../../runtime/semantic-runtime-corp-board-triage";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../../runtime/semantic-runtime-corp-central-pressure";
 import { currentCorpMandatoryDrawCardsPerWindow } from "../../runtime/corp-scoreline-feasibility";
@@ -50,13 +53,15 @@ export function assessCorpPurgeImpact(
     (sum, entry) => sum + entry.amount,
     0,
   );
-  const activeRunnerVirusCounters = runnerVirusCounters.filter(
-    runnerVirusCounterHasActiveEffect,
-  );
+  const activeRunnerVirusCounters = runnerVirusCounters.flatMap((entry) => {
+    const amount = activeRunnerVirusCounterAmount(input, entry);
+    return amount > 0 ? [{ ...entry, amount }] : [];
+  });
+  const materiallyAffected = [...affected, ...activeRunnerVirusCounters];
   const activeCounterTotal =
     affected.reduce((sum, entry) => sum + entry.amount, 0) +
     activeRunnerVirusCounters.reduce((sum, entry) => sum + entry.amount, 0);
-  const criticalIce = allAffected.filter(
+  const criticalIce = materiallyAffected.filter(
     ({ card }) =>
       card.type === "ice" &&
       ((card.definitionId ? endTheRunSubroutineCount(card.definitionId) : 0) >
@@ -64,7 +69,7 @@ export function assessCorpPurgeImpact(
         visibleIceHasMaterialHazard(card)),
   );
   const pressuredCentralServers = ["hq", "rd"].filter((serverId) => {
-    const directlyAffected = allAffected.some(
+    const directlyAffected = materiallyAffected.some(
       (entry) => entry.serverId === serverId,
     );
     const highlighterAffectsRd =
@@ -193,10 +198,20 @@ export function corpPurgeHasVisibleStrategicPressure(
   );
 }
 
-function runnerVirusCounterHasActiveEffect(
+function activeRunnerVirusCounterAmount(
+  input: AiDecisionInput,
   entry: VisibleRunnerVirusCounter,
-): boolean {
-  return entry.amount >= runnerVirusCounterEffectThreshold(entry.counterType);
+): number {
+  const convertibleAmount = quoteConvertibleCentralCounterAmount(
+    entry.counterType,
+    entry.serverId,
+    input.playerView.servers,
+    input.playerView.opponent.rig,
+  );
+  if (convertibleAmount !== undefined) return convertibleAmount;
+  return entry.amount >= runnerVirusCounterEffectThreshold(entry.counterType)
+    ? entry.amount
+    : 0;
 }
 
 function visibleRunnerVirusCounters(

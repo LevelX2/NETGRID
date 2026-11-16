@@ -161,6 +161,7 @@ export {
 
 export {
   quoteLastCentralCounterConversion,
+  quoteConvertibleCentralCounterAmount,
   type CentralCounterConversionQuote,
 } from "./game/view/visible-central-counter-conversion";
 

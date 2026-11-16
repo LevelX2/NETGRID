@@ -419,6 +419,42 @@ it("recognizes the optional run that would activate an unaffordable-to-buffer co
   );
 });
 
+it("keeps the survival owner for an optional run on empty Archives", () => {
+  const input = withKnownDamage([SCORCHED, PUNITIVE]);
+  changeHistory(input, (events) =>
+    events.filter((event) => event.stateVersionAfter !== 20),
+  );
+  input.playerView.opponent.discardCount = 0;
+  const archives = input.playerView.servers.find(
+    (server) => server.id === "archives",
+  )!;
+  expect(archives.root).toEqual([]);
+  expect(input.legalActions).toContainEqual(
+    expect.objectContaining({
+      actionId: "runner.start_run.archives",
+      expiresAtStateVersion: input.playerView.stateVersion,
+    }),
+  );
+  expect(runnerNextCorpTurnThreat(input)?.additionalRunEnablesPunish).toBe(
+    true,
+  );
+
+  const decision = chooseAiAction(input);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(
+    decision.decisionDebug?.planFirstDecision?.dispositions?.filter(
+      (entry) => entry.actionId === "runner.start_run.archives",
+    ),
+  ).toEqual([
+    {
+      actionId: "runner.start_run.archives",
+      disposition: "explicitly_nonproductive",
+      ownerModuleId: "runner.defense_and_recovery",
+      evidenceCode: "runner_optional_run_would_enable_known_next_corp_turn_flatline",
+    },
+  ]);
+});
+
 it("prefers tag protection to an unreachable six-card grip", () => {
   const input = withKnownDamage([SCORCHED, PUNITIVE], true);
   expect(runnerNextCorpTurnThreat(input)).toMatchObject({

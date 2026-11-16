@@ -82,6 +82,44 @@ describe("Defense-owned scored-agenda free rez", () => {
     },
   );
 
+  it("binds the exact winning Score without requiring a post-game free-rez target", () => {
+    const capture = fixture("free-rez-central-loss");
+    const view = capture.input.playerView;
+    const agenda = view.servers
+      .flatMap(
+        (server: { root: { instanceId: string; agendaPoints: number }[] }) =>
+          server.root,
+      )
+      .find(
+        (card: { instanceId: string }) => card.instanceId === sourceAgendaId,
+      )!;
+    view.agendaPointsToWin = view.own.agendaPoints + agenda.agendaPoints;
+    delete view.corpCentralAccessQuotes;
+    const input: AiDecisionInput = {
+      ...capture.input,
+      ...buildAiDecisionInputDto(capture.input),
+    };
+    restoreAiRuntimeCheckpoint(
+      input,
+      capture.input.ownDeckSnapshot.deckSnapshotId,
+      capture.runtime,
+    );
+    const score = chooseAiAction(input);
+    const legal = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    expect(score.actionId).toBe(legal?.actionId);
+    expect(score.fallbackUsed).toBe(false);
+    const portfolio = residentPlanPortfolioSnapshot(input)!;
+    const executor = portfolio.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor?.moduleId).toBe("corp.score_agenda");
+    expect(executor?.moduleState).not.toHaveProperty(
+      "choiceContinuation.freeRezChoiceBinding",
+    );
+  });
+
   it("prioritizes current R&D agenda exposure over the more expensive HQ ICE", () => {
     const { input } = fixture("free-rez-central-loss");
     const target = corpScoredAgendaFreeRezDefenseTarget(input, sourceAgendaId)!;

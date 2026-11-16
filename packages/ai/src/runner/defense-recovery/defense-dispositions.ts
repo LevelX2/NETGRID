@@ -218,7 +218,7 @@ function handDeltaForVoluntaryAction(
   const searchReturn =
     handCardSpent === 1 &&
     action !== undefined &&
-    isBoundSingleStackSearchPlay(input, candidate, action)
+    isBoundSingleSearchToGripPlay(input, candidate, action)
       ? 1
       : 0;
   const safeDraw =
@@ -246,7 +246,7 @@ function handDeltaForVoluntaryAction(
   );
 }
 
-function isBoundSingleStackSearchPlay(
+function isBoundSingleSearchToGripPlay(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   action: LegalAction,
@@ -280,6 +280,7 @@ function isBoundSingleStackSearchPlay(
   return (
     ability?.kind === "on_play" &&
     ability.effects.length === 1 &&
-    ability.effects[0]?.kind === "search_stack_to_grip"
+    (ability.effects[0]?.kind === "search_stack_to_grip" ||
+      ability.effects[0]?.kind === "search_trash_to_grip")
   );
 }

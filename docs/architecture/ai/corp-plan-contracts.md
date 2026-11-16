@@ -1405,8 +1405,10 @@ Paarung 525 G2 D268 belegt den zuvor verworfenen finanzierten Glacier-RD-Pfad
 mit zwei Punkten; die reale spätere Rez verbraucht genau einen Punkt.
 
 Für den an einen Agenda-Score gebundenen kostenlosen ICE-Rez bestimmt
-`scored-agenda-free-rez-defense-target.ts` das installierte Ziel vor dem
-Score. Bei mehreren Zielservern steht ihre aktuelle erwartete
+`scored-agenda-free-rez-defense-target.ts` nach einem nichtterminalen
+Score-Ausblick das installierte Ziel vor dem Score. Einen exakt ausgewählten,
+spielentscheidenden Score führt der Score-Executor ohne Gratis-Rez-Zielbindung
+aus. Die Engine beendet das Spiel mit der Wertung. Bei mehreren Zielservern steht ihre aktuelle erwartete
 Agendapunkt-Exposition vor der ersparten normalen Rez-Zahlung. HQ/R&D
 konsumieren die bestehenden zentralen Defense-Fakten; eigene übrige
 Agenden und der öffentliche Runnerpfad liefern den Remote-/Archivesbedarf.
@@ -2597,6 +2599,14 @@ Die Schwelle belegt eine mögliche Wirkung, noch keinen künftigen Trigger
 oder sicheren Ertrag. Der Trash des ursprünglichen Virusprogramms löscht
 gemeinsame Counter nicht; maßgeblich bleibt der tatsächliche globale
 Engine-Dispatcher.
+
+Für verbrauchbare zentrale Counter aus einer aktivierten Konversion liefert
+`quoteConvertibleCentralCounterAmount` die aus allen Zentralpools bezahlbare Menge
+pro Countertyp. Socket-Counter werden wirksam, sobald das öffentlich installierte
+Quellprogramm und die vollständige Finanzierung aus allen erforderlichen
+Zentralpools sichtbar vorliegen. Einzelne Socket-Counter und unvollständige
+Gruppen zählen für den aktuellen Purge-Wert als Vorbereitung. Bereits erzeugte
+Pipe-Counter bleiben ein eigener Effekt des gemeinsamen Corp-Pools.
 
 **Klasse:** `urgent_response` oder `bounded_sequence`
 **Rolle:** Vordergrund/Urgent Response

@@ -41,6 +41,7 @@ export function bindSelectedCorpScoreChoiceContinuation(
         signal?: {
           agendaInstanceId?: unknown;
           fundingGap?: unknown;
+          terminalScore?: unknown;
           advancementCounterChoiceBinding?: {
             kind?: unknown;
             sourceCardId?: unknown;
@@ -127,7 +128,8 @@ export function bindSelectedCorpScoreChoiceContinuation(
     ? visibleInstalledCard(input, selectedAction.source)?.definitionId
     : undefined;
   const freeRezProfile =
-    continuationFamily === "corp_scored_agenda_on_score"
+    continuationFamily === "corp_scored_agenda_on_score" &&
+    moduleState.signal?.terminalScore !== true
       ? corpScoredAgendaFreeRezProfile(sourceDefinitionId)
       : undefined;
   const freeRezTarget = freeRezProfile

@@ -170,98 +170,107 @@ describe("Runner tactical plan modules", () => {
     },
   );
 
-  it("assesses targeted-bypass preparation as contingent rather than visible-state forced", () => {
-    const social = {
-      ...candidate("play-social", "play_event", "play.runner_event"),
-      sourceKind: "card" as const,
-      sourceDefinitionId: "onr_v1_111_social-engineering",
-      sourceCardInstanceId: "social-card",
-      functionalEffects: [
-        {
-          kind: "future_run_effect" as const,
-          timing: "action" as const,
-          scope: "server" as const,
-          target: "make_run",
-        },
-        {
-          kind: "future_encounter_effect" as const,
-          timing: "during_run" as const,
-          scope: "ice" as const,
-          target: "bypass_chosen_ice",
-        },
-      ],
-    };
-    const module = tacticalModule("runner.pressure_central");
-    const runnerContext = context([social], {
-      centralPressure: [
-        {
-          pressureId: "central:hq",
-          serverId: "hq",
-          purpose: "access",
-          strategyLineIds: ["runner.access_agendas"],
-          priorityClass: "P4",
-          reachable: true,
-          marginalValue: 120,
-          evidenceCode: "runner_targeted_bypass_preflight:hq:0",
-          sourceDefinitionIds: ["onr_v1_111_social-engineering"],
-          preparationActionIds: ["play-social"],
-          routePreparation: "targeted_bypass",
-          targetedBypassCommitment: {
-            kind: "targeted_bypass_run",
-            sourceActionId: "play-social",
-            sourceCardInstanceId: "social-card",
-            sourceDefinitionId: "onr_v1_111_social-engineering",
-            plannedAtStateVersion: 10,
-            ownerModuleId: "runner.pressure_central",
-            ownerDedupeKey: "central:hq",
-            serverId: "hq",
-            icePosition: 0,
-            visibleIceInstanceId: "hq-wall",
-            intendedHiddenAmount: 2,
-            guessOutcome: "opponent_choice_unobserved",
-            evidenceCodes: ["runner_targeted_bypass_preflight:complete"],
+  it.each(["P2", "P3", "P4"] as const)(
+    "binds contingent targeted-bypass preparation with a strategic claim from %s",
+    (priorityClass) => {
+      const social = {
+        ...candidate("play-social", "play_event", "play.runner_event"),
+        sourceKind: "card" as const,
+        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceCardInstanceId: "social-card",
+        functionalEffects: [
+          {
+            kind: "future_run_effect" as const,
+            timing: "action" as const,
+            scope: "server" as const,
+            target: "make_run",
           },
+          {
+            kind: "future_encounter_effect" as const,
+            timing: "during_run" as const,
+            scope: "ice" as const,
+            target: "bypass_chosen_ice",
+          },
+        ],
+      };
+      const module = tacticalModule("runner.pressure_central");
+      const runnerContext = context([social], {
+        centralPressure: [
+          {
+            pressureId: "central:hq",
+            serverId: "hq",
+            purpose: "access",
+            strategyLineIds: ["runner.access_agendas"],
+            priorityClass,
+            reachable: true,
+            marginalValue: 120,
+            evidenceCode: "runner_targeted_bypass_preflight:hq:0",
+            sourceDefinitionIds: ["onr_v1_111_social-engineering"],
+            preparationActionIds: ["play-social"],
+            routePreparation: "targeted_bypass",
+            targetedBypassCommitment: {
+              kind: "targeted_bypass_run",
+              sourceActionId: "play-social",
+              sourceCardInstanceId: "social-card",
+              sourceDefinitionId: "onr_v1_111_social-engineering",
+              plannedAtStateVersion: 10,
+              ownerModuleId: "runner.pressure_central",
+              ownerDedupeKey: "central:hq",
+              serverId: "hq",
+              icePosition: 0,
+              visibleIceInstanceId: "hq-wall",
+              intendedHiddenAmount: 2,
+              guessOutcome: "opponent_choice_unobserved",
+              evidenceCodes: ["runner_targeted_bypass_preflight:complete"],
+            },
+          },
+        ],
+      });
+      const instance = instantiatePlanProposal(
+        module.discover(runnerContext)[0]!,
+        10,
+      );
+
+      expect(
+        module.materialize(instance, {} as never, runnerContext).step
+          .capability,
+      ).toMatchObject({
+        requiredFunctionalEffects: [
+          { kind: "future_run_effect", target: "make_run" },
+          { kind: "future_encounter_effect", target: "bypass_chosen_ice" },
+        ],
+      });
+      expect(
+        module.materialize(instance, {} as never, runnerContext).step
+          .capability,
+      ).not.toHaveProperty("requiredSourceDefinitionIds");
+      expect(
+        bindBestCurrentPlanRoute({
+          side: "runner",
+          stateVersion: 10,
+          timingPoint: "runner.action",
+          planInstanceId: instance.instanceId,
+          ...module.materialize(instance, {} as never, runnerContext),
+        }).head.actionId,
+      ).toBe("play-social");
+
+      expect(
+        module.assess(instance, runnerContext, emptyPortfolio()),
+      ).toMatchObject({
+        priorityClaim: {
+          requestedClass: "P4",
+          reasonCode: "strategic_campaign",
         },
-      ],
-    });
-    const instance = instantiatePlanProposal(
-      module.discover(runnerContext)[0]!,
-      10,
-    );
-
-    expect(
-      module.materialize(instance, {} as never, runnerContext).step.capability,
-    ).toMatchObject({
-      requiredFunctionalEffects: [
-        { kind: "future_run_effect", target: "make_run" },
-        { kind: "future_encounter_effect", target: "bypass_chosen_ice" },
-      ],
-    });
-    expect(
-      module.materialize(instance, {} as never, runnerContext).step.capability,
-    ).not.toHaveProperty("requiredSourceDefinitionIds");
-    expect(
-      bindBestCurrentPlanRoute({
-        side: "runner",
-        stateVersion: 10,
-        timingPoint: "runner.action",
-        planInstanceId: instance.instanceId,
-        ...module.materialize(instance, {} as never, runnerContext),
-      }).head.actionId,
-    ).toBe("play-social");
-
-    expect(
-      module.assess(instance, runnerContext, emptyPortfolio()),
-    ).toMatchObject({
-      feasibility: {
-        opponentCanReact: true,
-        confidence: "belief_supported",
-      },
-      expectedOutcome: {
-        guarantee: "belief_supported",
-      },
-    });
-  });
+        feasibility: {
+          opponentCanReact: true,
+          confidence: "belief_supported",
+        },
+        expectedOutcome: {
+          guarantee: "belief_supported",
+        },
+      });
+    },
+  );
 
   it("binds central pressure to the exact evaluated run producer", () => {
     const basic = run("run-rd-basic", "rd");
