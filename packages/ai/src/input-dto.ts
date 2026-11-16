@@ -437,6 +437,7 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "result",
   "encounterContinue",
   "encounterWillEndRun",
+  "passedIcePosition",
   "actor",
   "side",
   "actionType",

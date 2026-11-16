@@ -2672,6 +2672,14 @@ und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
 
+Eine für eine konkrete Agenda-Installation geführte Score-Reservierung
+sperrt neue Kampagnen im selben Remote. Die Wirtschaftlichkeitsprüfung einer
+Kampagne mit endlichem Pool verwendet die im aktuellen Zug verbleibenden
+Auszahlungsklicks. Für jeden weiteren Zug im risikobereinigten Horizont
+rechnet sie mit einer zusätzlichen Auszahlung. Ein vollständiger
+Kampagnenabbau mit mehreren Auszahlungen je Folgezug und anschließender
+Agenda-Installation ist damit eine offene mehrzügige Planung.
+
 Ein bereits zugelassener Defense-Finanzierungsparent darf seinen aktuellen
 Basic-Credit-Schritt durch die kostenlose Vorbereitung einer besseren
 Auszahlung ersetzen. Dafür muss eine aktuell legale Rez-Action ohne Credit-,

@@ -1040,11 +1040,29 @@ function evaluateRunnerRunTarget(
     pathPassability = "blocked_by_visible_damage_hand_buffer";
   }
   const unrezzedIceRiskUnderfunded = prerunReserveQuote.creditGap > 0;
+  const outerIce = visibleServerIce.at(-1);
+  const guaranteedRemoteBypassAccess =
+    accessTargetKind === "remote" &&
+    accessPayoff === "unknown" &&
+    payoff.knownAccessState === "unknown" &&
+    effectiveAccessPayoffContestable === true &&
+    bypassedFirstIce &&
+    outerIce?.known === false &&
+    outerIce.rezzed === false &&
+    corpCanRezUnknownIce &&
+    pathPassability === "reachable" &&
+    routeQuote.reachability === "guaranteed_access" &&
+    routeQuote.fundingGap === 0 &&
+    routeQuote.effects.length === 0 &&
+    prerunReserveQuote.status !== "blocked" &&
+    economyPosture.creditReservePolicy.remoteScoreThreat !== "urgent" &&
+    creditsAfterRun >= economyPosture.minimumCreditFloor;
   const targetFundingNeed = runnerRunTargetFundingNeed({
     routeQuote,
     creditsAfterRun,
     economyPosture,
     consumeCurrentGoalReserve:
+      guaranteedRemoteBypassAccess ||
       (scoreThreat &&
         economyPosture.creditReservePolicy.remoteScoreThreat === "urgent" &&
         creditsAfterRun >= economyPosture.minimumCreditFloor) ||
@@ -1094,6 +1112,7 @@ function evaluateRunnerRunTarget(
   const rawRouteScore = scoreRunTargetEvaluation({
     targetKind: accessTargetKind,
     accessPayoff,
+    guaranteedRemoteBypassAccess,
     knownAccessState: payoff.knownAccessState,
     pathPassability,
     creditsAfterRun,
@@ -2536,6 +2555,7 @@ function runnerRunTargetFundingNeed(params: {
 function scoreRunTargetEvaluation(params: {
   targetKind: RunnerRunTargetKind;
   accessPayoff: RunnerAccessPayoff;
+  guaranteedRemoteBypassAccess: boolean;
   knownAccessState: RunnerKnownAccessState;
   pathPassability: RunnerPathPassability;
   creditsAfterRun: number;
@@ -2553,7 +2573,11 @@ function scoreRunTargetEvaluation(params: {
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
 }): number {
-  const payoffScore = scoreForPayoff(params.accessPayoff);
+  // Use the fresh-access value for a certified first look at the Remote.
+  // The root contents and the card's opportunity cost are evaluated separately.
+  const payoffScore = scoreForPayoff(
+    params.guaranteedRemoteBypassAccess ? "fresh" : params.accessPayoff,
+  );
   const pathPenalty =
     params.pathPassability === "reachable"
       ? 0
