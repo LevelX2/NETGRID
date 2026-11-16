@@ -41,7 +41,9 @@ function replayCentralRoute(
   const planId = "plan:runner.pressure_central:central%3A" + accessServerId;
   const alternatives = evaluateRunnerRunTargets({
     input,
-    deckCapabilities: input.ownDeckCapabilities,
+    ...(input.ownDeckCapabilities
+      ? { deckCapabilities: input.ownDeckCapabilities }
+      : {}),
   }).filter((target) => target.accessServerId === accessServerId);
 
   expect(
