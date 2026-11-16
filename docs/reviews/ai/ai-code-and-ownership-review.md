@@ -1330,3 +1330,211 @@ ihren eigenen Projektions- oder Zulassungsvertrag. Punkt 6 kann getrennt
 mit einer kleinen Prüfreihe für die Berichtswerte folgen. Die drei
 kleinen Wartbarkeitsänderungen aus Punkt 1 bis 3 und der Ersatzpfad aus
 Punkt 8 sind separat abnehmbar.
+
+## Siebte Zufallsstichprobe mit zehn Dateien
+
+Untersucht wurde der lokal integrierte Stand `0505e46af`. Die
+reproduzierbare Ziehung mit Seed `898326763` verwendete einen ordinal sortierten
+Pool von 876 versionierten TypeScript-Quelldateien. Tests, Deklarationsdateien
+und Testhilfen waren ausgeschlossen. Zusätzlich schloss der Filter alle
+Dateinamen aus, die im bisherigen Review vorkommen. Das entfernte 123
+weitere Pfade. Die Nummern entsprechen der Ziehungsreihenfolge.
+
+P1 ist hier ein belegter Fehler in der produktiven Bewertung. P2 betrifft
+eine fehlerhafte Bindung oder einen falschen Messwert. P3 umfasst
+Wartbarkeit und vermeidbare Arbeit.
+
+### 1. `corp/punish/punish-development-draw.ts`
+
+**Kein konkreter Änderungsbedarf.** Der Owner zählt passende Kopien aus
+dem eigenen bekannten Deckbestand und lässt nur den aktuellen Ein-Klick-Draw
+zu. Im nativen Classic-Fall nach Pflichtdraw blieben bei vier passenden
+Karten unter zehn R&D-Karten ein Versuch und das echte Draw-Angebot.
+Nach dem freiwilligen Basic Draw blieben vier Treffer unter neun Karten
+und null Versuche, obwohl ein weiteres Draw-Angebot vorhanden war.
+Der Plan behandelt die gezogene Karte als neue Beobachtung. Die bestehenden
+Kontrollen decken Handgrenze, konkurrierenden Score und akute Defense ab.
+[Versuchsbindung](../../../packages/ai/src/corp/punish/punish-development-draw.ts#L45) ·
+[Native Draw-Prüfung](../../../packages/ai/src/evaluation/decision-checkpoints/manual-corp-punish-draw.test.ts)
+
+### 2. `runtime/semantic-runtime-corp-evidence.ts`
+
+**P3, statischer Aufrufpfad.** Siebzehn injizierte Abfragen speisen Strings
+für die frühere Corp-Bewertung. Die Funktion wird noch zusammengesteckt
+und weitergereicht. Beide Simulations-Einstiege übernehmen aus dieser
+Composition nur `tagPunishWindowDiagnosticsForSimulationAction`. Die
+Referenzsuche im gesamten versionierten Baum ergibt für die besprochene
+Evidence-Funktion keine Abfrage an einem Ende dieser Kette. Entfernen der
+unbenutzten Evidence-Verdrahtung und des reinen Weiterleiters reduziert die
+Zahl der Schnittstellen beim Umbau des Score-/Defense-Pfads. Abnahme über
+identische Punish-Diagnosen sowie Score- und Live-Entscheidungen. Aufwand
+ungefähr ein halber Tag.
+[Evidence-API](../../../packages/ai/src/runtime/semantic-runtime-corp-evidence.ts#L15) ·
+[Weitergabe](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-composition.ts#L150) ·
+[Simulations-Einstieg](../../../packages/ai/src/simulation/ai-product-simulation-composition.ts#L70)
+
+### 3. `runtime/protection-definition.ts`
+
+**P2 im Simulationsconsumer, mit Engine-Zustand reproduziert.** Die Datei
+erkennt korrekt die fachliche Schutzfunktion einer Definition. Der Consumer
+behandelt diese Fähigkeit wie aktuell wirksamen Schutz. Ungerezzte *Red
+Herrings* erhöhen den Simulationswert des leeren Forts von −45 auf −10,
+sowohl bei null Credits ohne LegalAction für Rez als auch bei einem Credit
+mit Rez-Angebot. Dieser Wert geht in die Diagnose geschützter Advances ein.
+Die Definitionserkennung als Kartenfähigkeit erhalten. Für den Messwert
+die tatsächlich aktive Wirkung und einen ausdrücklich separat belegten
+bezahlbaren Rez-Pfad abbilden. Abnahme mit den nativen Varianten aktiv,
+bezahlbar und unbezahlbar. Aufwand ungefähr ein halber Tag.
+[Definition](../../../packages/ai/src/runtime/protection-definition.ts#L3) ·
+[Gewichtung](../../../packages/ai/src/simulation/remote-protection-score.ts#L30) ·
+[Advance-Diagnose](../../../packages/ai/src/simulation/final-advance-assessment.ts#L58)
+
+### 4. `runner/run-window/run-window-discovery.ts`
+
+**P3, synthetisch gemessene Sucharbeit.** Die Discovery prüft jeden
+Semantikkandidaten gegen mehrere lineare LegalAction-Suchen, selbst wenn
+kein Run-Fenster vorhanden ist. Ein instrumentierter Aufruf ohne Run und
+mit 24, 48 und 96 gewöhnlichen Credit-Angeboten durchlief dabei 900, 3.528
+und 13.968 `find`-Prädikate und lieferte jeweils null Signale. Das misst
+Suchschritte, keine Spielzeit. Pro Entscheidung denselben Action-ID-Index
+und dieselbe bereits gefilterte Fenstermenge verwenden. Abnahme mit
+deutlich weniger Suchschritten und identischen nativen Pflicht-/Bonuslauf-
+Bindings samt Ziel, Root, Leaf und optionalem Verzicht. Aufwand ungefähr
+ein halber bis ein Tag.
+[Discovery](../../../packages/ai/src/runner/run-window/run-window-discovery.ts#L59) ·
+[Fenstererkennung](../../../packages/ai/src/runner/run-window/run-window-action-facts.ts#L48) ·
+[Native Folge](../../../packages/ai/src/simulation/proteus-pirate-broadcast-run-sequence-coverage.test.ts)
+
+### 5. `run-analysis/visible-run-analysis-contracts.ts`
+
+**P1, native ICE-Pfadquote und Entwicklungsentscheidung reproduziert.**
+Der gemeinsame Kontext erklärt das aktuelle Trace-Profil als optional.
+Ein fehlender Wert wird in der Berechnung zu Modern. Bei demselben
+Engine-PlayerView mit `classic_blind`, rezztem Rex auf HQ, drei Corp-Credits
+und sechs Runner-Credits ohne Breaker prognostiziert der implizite Aufruf
+Zugriff mit null Restcredits. Mit gebundenem Profil ist der Zugriff
+blockiert. Zwei Consumer für passive Stärkeinvestitionen lassen das Profil
+derzeit weg.
+
+Der Entwicklungsowner lässt in einem separaten nativen Classic-Fall
+Clown mit Wert 100 zu. Krash liegt installiert, Rex und Datacomb liegen
+gerezzt auf R&D, der Runner hat 20 Credits. Im isolierten Bewertungsaufruf
+beträgt die Mindestreserve null. Derselbe Aufruf mit demselben Angebot und explizitem
+Trace-Profil erzeugt keine zugelassene Entwicklungsquote. Der
+Test vergleicht den Owner und sein echtes Installationsangebot vor der
+globalen Planauswahl. Ein Modern-Kontrollfall mit zwei Barrieren plus Rex
+liefert mit und ohne explizites Modern dieselbe Bewertung.
+
+Die produktiven Pfadaufrufe mit dem gemeinsamen sichtbaren Trace-Kontext
+binden und fehlende Profile bei Trace-verarbeitenden Quotes früh sichtbar
+machen. Zuerst die beiden passiven Stärkeconsumer migrieren. Abnahme mit
+dem Classic/Modern-Kontrast, unveränderter Route ohne Trace und exakter
+heutiger Installationsbindung. Aufwand ungefähr ein bis zwei Tage.
+[Kontext](../../../packages/ai/src/run-analysis/visible-run-analysis-contracts.ts#L66) ·
+[Profilauswahl](../../../packages/ai/src/run-analysis/trace-rules-profile-planning.ts#L17) ·
+[Entwicklung](../../../packages/ai/src/runner/hand-development/passive-strength-development.ts#L118) ·
+[Investition](../../../packages/ai/src/runner/hand-development/passive-strength-investment.ts#L138)
+
+### 6. `runner/installed-agenda/installed-agenda-types.ts`
+
+**P2, natives Theorem-Proof-Angebot mit einzelnen Eingabemutationen.**
+Der hier definierte Zustand trägt Action-IDs und einen fertigen Terminal-
+Entscheid ohne StateVersion. Im erzeugenden Owner ergibt dasselbe Angebot
+trotz abgelaufener Aktionsversion oder fremder Aktionsseite dasselbe Signal
+über drei Agendapunkte. Mit `Infinity` im lokalen sichtbaren Gegenstück
+wird es zum Terminal-Signal. Die modulinterne Materialisierung filtert nur
+auf die ID. Die Szenarien belegen fehlerhafte Planungsdaten vor der
+nachgelagerten Legalitätsprüfung. Die falsche Aktionsseite wurde direkt
+am Signalproduzenten eingespeist. Das reguläre KI-DTO prüft die Seite
+bereits beim Eingang.
+
+Den Signalvertrag an das exakte aktuelle Angebot der Runner-Seite, die
+kontrollierte installierte Quelle und sichere ganzzahlige Punkte binden.
+Bei der Abnahme dieselbe LegalAction, den Owner und die drei echten Punkte
+im nativen Theorem-Proof-Fall erhalten. Gegenproben decken alte Version,
+fremde Seite, falsche Quelle und nicht endliche Punkte ab. Aufwand ungefähr
+ein halber bis ein Tag.
+[Signal](../../../packages/ai/src/runner/installed-agenda/installed-agenda-types.ts#L1) ·
+[Produzent](../../../packages/ai/src/runner/installed-agenda/installed-agenda-signals.ts#L7) ·
+[Routenfilter](../../../packages/ai/src/runner/installed-agenda/installed-agenda-plan-module.ts#L77)
+
+### 7. `runtime/runner-mu-pressure-context.ts`
+
+**P3, statischer Aufrufpfad.** Die Composition erzeugt und exportiert noch
+fünf ältere MU-Pressure-Score-/Evidence-Funktionen. Die Live-Runtime
+konsumiert aus derselben Baseline-Composition die eigentliche
+Programminstallations-/Trash-Assessment-API. Für die fünf Bonusfunktionen
+endet die Referenzkette in Rückgabeobjekten; die versionierte Suche findet
+keine fachliche Abfrage durch Live-Runtime oder Simulation. Die ungenutzte
+Bewertungsverdrahtung kann nach Prüfung der Exports entfernt werden.
+Abnahme über unveränderte native MU-Installations-, Opfer- und
+Coverage-Routen samt Strukturprüfung. Aufwand ungefähr ein halber Tag.
+[MU-Context](../../../packages/ai/src/runtime/runner-mu-pressure-context.ts#L97) ·
+[Weitergabe](../../../packages/ai/src/runtime/runner-program-pressure-composition.ts#L43) ·
+[Live-Verbrauch](../../../packages/ai/src/runtime/ai-live-runtime-composition.ts#L128)
+
+### 8. `corp/defense/corp-defense-turn-planning.ts`
+
+**P2, zwei Gegenproben auf der vorhandenen Defense-Testfixture.** Erstens
+nimmt der Funding-Head eine Immediate-Liquid-Projektion an, wenn ihr Betrag
+die Lücke schließt. Die Änderung von `guaranteed` auf `conditional` oder
+`unknown` lässt dieselbe Linie `fund_then_install` mit Funding-Gap null
+und `rezReadyAfterLine: true` entstehen. Ein altes Timing wird dagegen
+bereits durch den aktuellen Economy-Guard abgewiesen. Die Einnahme braucht
+die exakte garantierte Projektion des aktuellen Angebots. Die Teilfinanzierung
+muss dieselbe Zulassungsgrenze verwenden.
+
+Zweitens reicht die Vereinigung von ausgewählten und verfügbaren Zielen
+zur Installationsbindung. Bei ausgewähltem HQ und nur angebotenem R&D
+bleibt die R&D-Linie erhalten und der Aufruf bindet beide Forts. Der
+Provider-Knoten braucht die konkrete ausgewählte und aktuell angebotene
+Zielbindung des Defense-Signals. Die identischen Install-/Staging-Checks
+können diesen Guard teilen. Der produktive Corp-TurnPlanner übernimmt
+solche Fachlinien für die weitere Routenprüfung. Die Proben zeigen
+beschädigte Linien vor dieser Prüfung. Abnahme für garantierte und nur
+bedingte Einnahmen sowie exakte und fremde Fort-Bindung bei unveränderter
+Owner-Zuordnung. Für beide Punkte zusammen ungefähr ein bis zwei Tage.
+[Funding](../../../packages/ai/src/corp/defense/corp-defense-turn-planning.ts#L470) ·
+[Zielbindung](../../../packages/ai/src/corp/defense/corp-defense-turn-planning.ts#L1184) ·
+[Produktive Verwendung](../../../packages/ai/src/runtime/plan-first-live-runtime.ts#L700)
+
+### 9. `simulation/visible-root-agenda-metrics.ts`
+
+**P3, produktive Modulgrenze und synthetischer DTO-Gegenfall.** Der
+vermeintliche Metrics-Adapter speist die produktive Blink-Risikobewertung.
+Der `known`-Guard hält unbekannte Karten selbst bei einer eingesetzten
+Agenda-ID aus der Entscheidung. Bei einem widersprüchlichen bekannten DTO
+mit Typ `upgrade` und Agenda-Definition liefert der Helper dennoch `true`.
+Die öffentliche Kartentyp-Abfrage unter dem Runtime-Vertrag bündeln und
+die Definition zur Auflösung eines fehlenden Typs verwenden. Bei
+widersprüchlichen Kombinationen die Projektion sichtbar prüfen. Abnahme
+mit bekannten, verdeckten und widersprüchlichen Karten und erhaltener
+nativer Blink-Entscheidung. Aufwand ungefähr zwei bis vier Stunden.
+[Adapter](../../../packages/ai/src/simulation/visible-root-agenda-metrics.ts#L6) ·
+[Prädikat](../../../packages/ai/src/runtime/visible-root-agenda.ts#L6) ·
+[Live-Bewertung](../../../packages/ai/src/runtime/runner-blink-encounter-break-context.ts#L163)
+
+### 10. `decision/score-components.ts`
+
+**Kein konkreter Änderungsbedarf.** Der kleine interne Typ grenzt die
+Komponenten der semantischen Bewertung auf neun benannte Werte ein. Alle
+neun haben aktive Produzenten in Goal Fit oder Shadow-Entscheidung. Der öffentliche Score-Breakdown verwendet einen eigenen Typ für seine
+Darstellungsfelder. Der kleine gemeinsame Vertrag verhindert freie
+Schreibweisen an der Bewertungsstelle.
+[Typ](../../../packages/ai/src/decision/score-components.ts#L1) ·
+[Goal-Fit-Produzent](../../../packages/ai/src/decision/action-goal-fit.ts#L30) ·
+[Shadow-Produzent](../../../packages/ai/src/decision/semantic-shadow-decision.ts#L286)
+
+### Prüfstand und Reihenfolge
+
+Der zusammengeführte Stand bestand vor dem Fast-Forward 630 Tests in 15
+Dateien. 227 fokussierte Stichprobentests in 17 Dateien sind grün.
+Die neuen Gegenproben liefen in isolierten Engine-Zuständen oder gegen
+gezielt geänderte Eingabekopien. Der Clown-Vergleich führte die Variante
+mit Profilübergabe im Arbeitsspeicher aus.
+
+Zuerst die Trace-Kontext-Bindung aus Punkt 5 korrigieren. Danach die
+Defense-Funding-/Fortgrenze aus Punkt 8 und das Score-Signal aus Punkt 6
+absichern. Punkt 3 korrigiert eine Reportkennzahl unabhängig von der
+Spielentscheidung. Die beiden entbehrlichen Verdrahtungen aus Punkt 2
+und 7 sowie der Run-Index aus Punkt 4 sind separat abnehmbar.
