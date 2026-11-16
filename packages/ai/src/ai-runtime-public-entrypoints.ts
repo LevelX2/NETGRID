@@ -49,7 +49,6 @@ import {
 } from "./runtime/public-event-history";
 import { semanticRuntimeActionTypeIsReactive } from "./runtime/reactive-action";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
-import { corpVisibleRunnerHardwarePayoffEvidence } from "./runtime/runner-hardware-payoff-evidence";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import { runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason } from "./runtime/runner-known-ice-path-score";
 import { runnerMultiRunEventScoreValue } from "./runtime/runner-multi-run-event-score";
@@ -218,7 +217,6 @@ export const aiLiveRuntimeDependencies = {
   tagSourceProfileForDefinition: classifyTagSourceFromOntology,
   runnerDamagePreventionEvidence: corpVisibleRunnerDamagePreventionEvidence,
   runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
-  runnerHardwarePayoffEvidence: corpVisibleRunnerHardwarePayoffEvidence,
   runnerSurvivalCounterContextForInput,
   applyTagPunishOntologyDiagnostics,
   applyCorpVisibleTagPunishTakenWindowDiagnostics,

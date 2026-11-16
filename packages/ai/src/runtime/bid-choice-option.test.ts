@@ -1,4 +1,15 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+  getPlayerView,
+} from "@netgrid/engine";
+import {
+  ORIGINALSET_DEFAULT_DECKS,
+  type AiDecisionInput,
+  type LegalAction,
+} from "@netgrid/shared";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { describe, expect, it } from "vitest";
 
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
@@ -154,18 +165,102 @@ describe("selectedBidChoiceOptionId", () => {
     ).toThrow("invalid_support_graph");
   });
 
-  it("uses the highest legal Runner bid against a hidden secret-spend comparison", () => {
-    expect(
-      selectedBidChoiceOptionId(
-        input("runner", "normal"),
-        bidChoice(
-          "card_implementation.secret_spend_compare:run:ice:0",
-          range(0, 2),
+  it.each(["corp", "runner"] as const)(
+    "spends zero as %s in the secret comparison instead of applying trace policy",
+    (side) => {
+      expect(
+        selectedBidChoiceOptionId(
+          input(side, "normal"),
+          bidChoice(
+            "card_implementation.secret_spend_compare:run:ice:0",
+            range(0, 2),
+          ),
+          {},
         ),
+      ).toBe("bid_0");
+    },
+  );
+
+  it.each([0, 1, 2])(
+    "keeps the Engine run continuing after a hidden Corp bid of %i",
+    (corpBid) => {
+      const definitionId = "onr_v1_272_too-many-doors";
+      const corp = ORIGINALSET_DEFAULT_DECKS.corp;
+      let state = createGameAfterSetup({
+        seed: "secret-compare-runtime-choice",
+        corpDeck: {
+          ...corp,
+          cards: [...corp.cards, { id: definitionId, quantity: 1 }],
+        },
+      });
+      state.activeSide = "runner";
+      state.phase = "runner_action_phase";
+      state.timingPoint = "runner_action.main";
+      RealEngineFixtureBuilder.forState(state)
+        .withCorpCredits(5)
+        .withRunnerCredits(5)
+        .withRunnerClicks(4)
+        .withRezzedCorpIceOnServer("rd", definitionId);
+      function apply(action: LegalAction, selectedOptionIds?: string[]) {
+        const result = applyAction(state, {
+          matchId: state.matchId,
+          side: action.side,
+          actionId: action.actionId,
+          clientKnownStateVersion: state.stateVersion,
+          ...(selectedOptionIds
+            ? {
+                selectedChoices: {
+                  choiceId: state.pendingChoice!.choiceId,
+                  selectedOptionIds,
+                },
+              }
+            : {}),
+        });
+        if (!result.ok) throw Error(result.error.message);
+        state = result.state;
+      }
+      const start = getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      expect(start).toBeDefined();
+      apply(start!);
+      for (let i = 0; i < 5 && !state.pendingChoice; i += 1) {
+        const advance = getLegalActions(state, state.activeSide).find(
+          (action) =>
+            action.type === "continue_run" || action.type === "decline_rez",
+        );
+        expect(advance).toBeDefined();
+        apply(advance!);
+      }
+      expect(
+        state.pendingChoice?.source.startsWith(
+          "card_implementation.secret_spend_compare:",
+        ),
+      ).toBe(true);
+      const corpChoice = getLegalActions(state, "corp").find(
+        (action) => action.type === "resolve_choice",
+      )!;
+      apply(corpChoice, ["bid_" + corpBid]);
+      const publicInput = {
+        ...input("runner", "hard"),
+        playerView: getPlayerView(state, "runner"),
+        legalActions: getLegalActions(state, "runner"),
+      };
+      const runnerChoice = publicInput.legalActions.find(
+        (action) => action.type === "resolve_choice",
+      )!;
+      const selected = selectedBidChoiceOptionId(
+        publicInput,
+        publicInput.playerView.pendingChoice!,
         {},
-      ),
-    ).toBe("bid_2");
-  });
+      );
+      expect(selected).toBe("bid_0");
+      apply(runnerChoice, [selected!]);
+      expect(state.run).toBeDefined();
+      expect(state.runner.credits).toBe(5);
+    },
+  );
 
   it("pays the exact visible Seed-7 trace guarantee when the Corp cannot bid", () => {
     expect(

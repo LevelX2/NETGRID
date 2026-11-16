@@ -67,7 +67,7 @@ export function testDependencies(
       action: LegalAction,
     ) => boolean;
   } = {},
-): CorpBoardTriageDependencies<"test"> {
+): CorpBoardTriageDependencies {
   return {
     actionCreditCost: options.actionCreditCost ?? (() => 0),
     rolesForAction: () => [],

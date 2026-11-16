@@ -83,9 +83,7 @@ import {
   isVisibleHardEndRunSubroutine,
   isVisiblePayEndRunSubroutine,
   isVisibleRunnerCreditLossSubroutine,
-  isVisibleSecretSpendEndRunSubroutine,
   isVisibleTrashUnlessRunnerPaysSubroutine,
-  secretSpendAccessPaymentForVisibleCorpCredits,
 } from "./run-analysis/visible-subroutine-semantics";
 
 export {
@@ -988,81 +986,6 @@ function assessKnownRezzedIcePathInternal(
           carriedBreakerStrengths,
         );
       }
-    }
-    const secretSpendEndRunSubroutines =
-      quote?.subroutines.filter(isVisibleSecretSpendEndRunSubroutine) ?? [];
-    for (const subroutine of secretSpendEndRunSubroutines) {
-      const payCost = secretSpendAccessPaymentForVisibleCorpCredits(
-        visibleCorpCreditsThroughPath,
-      );
-      const breakAssessment = runPathEffectsPreventFutureBreaking(
-        activeRunPathEffects,
-      )
-        ? undefined
-        : minimumCreditsToBreakVisibleSubroutines(
-            effectiveIceForQuote(effectiveIce, quote),
-            rigCardsForEncounter,
-            [subroutine],
-            breakerStrengths,
-            additionalBreakCostPerSubroutine,
-            breakerState.pendingFreeBreaks,
-            deflectorContext.allowRandomBreakAttempts,
-            creditBudget,
-          );
-      if (payCost === undefined) {
-        const breakPayment = breakAssessment
-          ? projectBreakerCreditPayment(creditBudget, breakAssessment)
-          : undefined;
-        if (breakAssessment && breakPayment?.affordable) {
-          visibleBreakCost += breakAssessment.cost;
-          futureClicksLost += breakAssessment.futureClicksLost ?? 0;
-          spendPathBreak(breakAssessment);
-          creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
-          firstKnownIceBreakable = true;
-          recordProjectedBreakerStrength(
-            breakAssessment,
-            breakerStrengths,
-            carriedBreakerStrengths,
-          );
-          continue;
-        }
-        conditionalAccessReasons.add("visible_secret_spend_end_run");
-        continue;
-      }
-      const payment = bestAccessPreservingPayment(
-        creditBudget,
-        payCost,
-        breakAssessment,
-      );
-      if (!payment.affordable) {
-        return blockedPathAssessment(
-          visibleBreakCost + payment.cost,
-          payment.creditsAfterPath,
-          iceIndex,
-          effectiveIce.definitionId,
-          effectiveIce.subtypes,
-          pathCostBeforeIce,
-          firstKnownIceBreakable,
-          assessedKnownIceCount,
-          pathCostBeforeIce > 0
-            ? "later_ice_unaffordable_after_prior_ice_cost"
-            : "ice_unaffordable",
-        );
-      }
-      visibleBreakCost += payment.cost;
-      if (payment.breakAssessment) {
-        futureClicksLost += payment.breakAssessment.futureClicksLost ?? 0;
-        spendPathBreak(payment.breakAssessment);
-        recordProjectedBreakerStrength(
-          payment.breakAssessment,
-          breakerStrengths,
-          carriedBreakerStrengths,
-        );
-      } else {
-        spendGeneralCredits(creditBudget, payment.cost);
-      }
-      creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
-      firstKnownIceBreakable = true;
     }
     const visibleHazardProjections = visibleIceRunHazardsForQuote({
       quote,

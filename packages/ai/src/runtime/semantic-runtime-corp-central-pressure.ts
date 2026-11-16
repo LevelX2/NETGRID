@@ -5,7 +5,8 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "../ai-hints";
+import { mergedPublicHistory } from "./public-event-history";
 import { decisionDerivedValue } from "./decision-derived-cache";
 import { rolesMatch } from "../role-match";
 
@@ -23,6 +24,7 @@ export type CorpCentralPressureAssessment = {
   visibleMultiaccess: boolean;
   visibleVirusPressure: boolean;
   eventMultiaccess: boolean;
+  recentEventMultiaccess: boolean;
   runnerRunCredits: number;
   hqAgendaExposure: boolean;
   evidence: string[];
@@ -44,7 +46,6 @@ type HintEffectWithTarget = {
   target?: string;
 };
 
-const AI_HINTS_BY_CARD = createAiHintsByCard();
 const CENTRAL_PRESSURE_ASSESSMENT_DECISION_CACHE_KEYS = {
   hq: Symbol("corp-central-pressure-assessment-hq"),
   rd: Symbol("corp-central-pressure-assessment-rd"),
@@ -67,9 +68,7 @@ export function semanticRuntimeCorpCentralPressureAssessment(
 
 /**
  * Selects R&D only when the visible facts establish a concentrated attack.
- * Near ties deliberately remain deterministic until an
- * Engine-recorded AI choice protocol exists; consuming neither hidden state
- * nor an unrecorded pseudo-random value is permitted here.
+ * This evidence is a deterministic input to the selection policy.
  */
 export function semanticRuntimeCorpCentralDefenseAllocationDirection(
   input: AiDecisionInput,
@@ -80,7 +79,7 @@ export function semanticRuntimeCorpCentralDefenseAllocationDirection(
   const strongRdFocus =
     rd.visibleMultiaccess &&
     (rd.visibleVirusPressure ||
-      rd.eventMultiaccess ||
+      rd.recentEventMultiaccess ||
       rd.recentSuccessfulAccessRunnerTurns >= 2);
   if (strongRdFocus) {
     return {
@@ -161,6 +160,7 @@ function buildSemanticRuntimeCorpCentralPressureAssessment(
     visibleMultiaccess,
     visibleVirusPressure,
     eventMultiaccess,
+    recentEventMultiaccess: recentEvents.some(centralEventHasMultiaccess),
     runnerRunCredits,
     hqAgendaExposure,
     evidence: [
@@ -190,18 +190,9 @@ function centralSuccessfulAccessRunnerTurns(
       .filter((event) => centralSuccessfulAccessActionType(event))
       .map((event) => event.eventId),
   );
-  const eventsById = new Map(
-    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
-      (event) => [event.eventId, event],
-    ),
-  );
   const completedRunnerTurns: boolean[] = [];
   let accessedThisTurn = false;
-  for (const event of [...eventsById.values()].sort(
-    (left, right) =>
-      left.stateVersionAfter - right.stateVersionAfter ||
-      left.eventId.localeCompare(right.eventId),
-  )) {
+  for (const event of mergedPublicHistory(input)) {
     if (successfulEventIds.has(event.eventId)) accessedThisTurn = true;
     if (
       eventActionType(event) === "end_turn" &&
@@ -281,12 +272,7 @@ function buildSemanticRuntimeCorpCentralEvents(
   input: AiDecisionInput,
   serverId: CorpCentralServerId,
 ): PublicGameEvent[] {
-  const eventsById = new Map(
-    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
-      (event) => [event.eventId, event],
-    ),
-  );
-  return [...eventsById.values()].filter((event) => {
+  return mergedPublicHistory(input).filter((event) => {
     const payload = event.publicPayload;
     return (
       stringPayload(payload, "actor") === "runner" &&
@@ -401,16 +387,23 @@ function visibleCardCreatesCentralVirusPressure(
     ...(hint?.planRoles ?? []),
     ...(hint?.tacticSignals ?? []),
   ].map((signal) => signal.toLocaleLowerCase("en-US"));
-  const serverSignal =
-    serverId === "rd"
-      ? signals.some((signal) =>
-          signalHasAnyToken(signal, ["rnd", "rd", "r_and_d"]),
-        )
-      : signals.some((signal) => signalHasAnyToken(signal, ["hq"]));
-  const payoffSignal = signals.some((signal) =>
-    signalHasAnyToken(signal, ["virus", "multiaccess", "free_trash", "access"]),
+  const serverSignal = rolesMatch(
+    signals,
+    serverId === "rd" ? ["rnd", "rd", "r_and_d"] : ["hq"],
   );
-  if (serverSignal && payoffSignal) return true;
+  const counterSignal = rolesMatch(
+    [
+      ...signals,
+      ...(card.subtypes ?? []).map((subtype) => subtype.toLowerCase()),
+    ],
+    ["virus", "counter"],
+  );
+  const payoffSignal = rolesMatch(signals, [
+    "multiaccess",
+    "free_trash",
+    "access",
+  ]);
+  if (serverSignal && counterSignal && payoffSignal) return true;
 
   const text = `${card.title ?? ""} ${card.rulesText ?? ""} ${
     card.definitionId ?? ""
@@ -434,15 +427,6 @@ function visibleCardCreatesCentralVirusPressure(
     tokenSet.has("additional") ||
     tokenSet.has("multiaccess");
   return counterOrVirus && payoff;
-}
-
-function signalHasAnyToken(
-  signal: string,
-  needles: readonly string[],
-): boolean {
-  const needleSet = new Set(needles);
-  const tokens = signal.split(/[._:-]+/).filter(Boolean);
-  return tokens.some((token) => needleSet.has(token));
 }
 
 function hintEffectsWithTarget(

@@ -902,16 +902,16 @@ function nextCorpTurnTagProtectionActions(
     const credits = currentLegalActionResourceCost(install, "credits");
     const clicks = currentLegalActionResourceCost(install, "clicks");
     const remainingCredits = own.credits - credits;
-    const restoreGrip = handAfterInstall < minimumAfterInstall;
+    const drawsNeeded = Math.max(0, minimumAfterInstall - handAfterInstall);
     if (
       remainingCredits < 0 ||
       clicks > own.clicks ||
       (!confirmedDamage && (credits > 0 || clicks > 1)) ||
-      (restoreGrip &&
+      (drawsNeeded > 0 &&
         (!basicDraw ||
-          clicks + currentLegalActionResourceCost(basicDraw, "clicks") >
+          clicks + drawsNeeded * currentLegalActionResourceCost(basicDraw, "clicks") >
             own.clicks ||
-          own.stackOrRdCount < minimumAfterInstall - handAfterInstall ||
+          own.stackOrRdCount < drawsNeeded ||
           runnerDrawTaxLiabilityProjection(input, basicDraw).sourceCount >
             0)) ||
       !canAvoidOneNextCorpTag(card, remainingCredits, !confirmedDamage)
@@ -1086,9 +1086,9 @@ function runnerRiskAdjustedHandBufferForAttractiveRuns(
   let strongestRisk = -1;
   let sameTurnRunPreparation = false;
 
-  // A ready route keeps its own reserve. Preparing a different optional probe
-  // must not raise the global safety floor and preempt that executable route.
-  // Concrete agenda/score consumers can still require their own preparation.
+  // For quoted draw preparation, a ready route keeps its own reserve.
+  // Concrete agenda/score consumers can still request preparation. The
+  // second pass accounts separately for pressure from multiple unknown ICE.
   const currentRunAvailable = runTargets.some(
     (target) =>
       (target.recommendation === "run_now" ||

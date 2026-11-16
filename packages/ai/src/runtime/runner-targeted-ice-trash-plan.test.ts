@@ -854,6 +854,8 @@ function resolveChoiceAction(): LegalAction {
     actionId: "runner.resolve-choice.11",
     type: "resolve_choice",
     side: "runner",
+    timingPoint: "runner_action.main",
+    expiresAtStateVersion: 11,
   } as LegalAction;
 }
 

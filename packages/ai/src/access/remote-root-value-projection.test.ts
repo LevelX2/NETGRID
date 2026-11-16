@@ -152,6 +152,20 @@ describe("remote root value projection", () => {
     });
   });
 
+  it("keeps the parts of compound roles on the same annotation", () => {
+    expect(
+      projectRemoteRootValue({
+        definitionId: "unrelated-roles",
+        roles: ["economy", "pool_control", "agenda", "protection_averse"],
+        visibleCard: {
+          instanceId: "pool",
+          known: true,
+          counters: { bit: 1 },
+        },
+      }).kind,
+    ).toBe("non_economy_counter");
+  });
+
   it("projects typed advancement-transfer support as score acceleration", () => {
     expect(
       projectRemoteRootValue({

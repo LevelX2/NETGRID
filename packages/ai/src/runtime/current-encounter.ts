@@ -37,8 +37,6 @@ export function encounterHasImmediateUnbrokenThreat(
       return (
         type === "end_the_run" ||
         type === "end_the_run_unless_runner_pays" ||
-        type ===
-          "secret_spend_compare_end_run_unless_corp_spent_at_least_runner" ||
         type === "do_damage" ||
         type === "random_damage" ||
         type === "brain_damage" ||

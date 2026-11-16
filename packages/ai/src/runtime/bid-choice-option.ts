@@ -3,6 +3,7 @@ import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgri
 import { type AiDecisionInput, type CardDefinitionId } from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
+import { ACCESS_PRESERVING_SECRET_COMPARE_BID } from "../run-analysis/visible-subroutine-semantics";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 import { assessCorpTraceBid } from "./corp-trace-bid-assessment";
@@ -31,6 +32,15 @@ export function selectedBidChoiceOptionId(
   choice: PendingChoice,
   traceContext: LatestTraceContext,
 ): string | undefined {
+  if (choice.source.startsWith("card_implementation.secret_spend_compare:")) {
+    // The Run ends only if the Runner spends more than the Corp. Zero
+    // preserves access for the Runner and maximizes the Corp's chance to stop it.
+    return choice.options.find(
+      (option) =>
+        option.selectable !== false &&
+        option.value === ACCESS_PRESERVING_SECRET_COMPARE_BID,
+    )?.id;
+  }
   const bidOptions: RunnerTraceBidOption[] = choice.options
     .map((option) => {
       const amount =
@@ -63,10 +73,6 @@ export function selectedBidChoiceOptionId(
   let desired = 0;
   if (input.side === "corp") {
     desired = corpDesiredBidAmount(input, choice, traceContext, maxBid);
-  } else if (
-    choice.source.startsWith("card_implementation.secret_spend_compare:")
-  ) {
-    desired = maxBid;
   } else {
     const runnerNeedsStrictlyMore =
       traceContext.traceRulesProfile === "classic_blind_corp_ties" ||

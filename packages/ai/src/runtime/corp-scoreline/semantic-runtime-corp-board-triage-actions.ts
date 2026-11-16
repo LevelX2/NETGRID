@@ -206,14 +206,12 @@ export function triageNeedsFunding(triage: CorpBoardTriage): boolean {
   );
 }
 
-export function actionIsUnfundedTargetProtectionInstall<
-  TConsumer extends string,
->(
+export function actionIsUnfundedTargetProtectionInstall(
   input: AiDecisionInput,
   action: LegalAction,
   actionServerId: string | undefined,
   triage: CorpBoardTriage,
-  _dependencies: CorpBoardTriageDependencies<TConsumer>,
+  _dependencies: CorpBoardTriageDependencies,
 ): boolean {
   if (action.type !== "install_card") return false;
   if (action.payload?.placement !== "ice") return false;
@@ -251,14 +249,12 @@ export function actionDistractsFromCentralProtection(
   return false;
 }
 
-export function actionRelievesHqAgendaPressureViaSafeRemote<
-  TConsumer extends string,
->(
+export function actionRelievesHqAgendaPressureViaSafeRemote(
   input: AiDecisionInput,
   action: LegalAction,
   actionServerId: string | undefined,
   triage: CorpBoardTriage,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): boolean {
   if (triage.primary !== "protect_hq" || triage.severity !== "high") {
     return false;
@@ -334,10 +330,10 @@ export function actionBuildsScoreRemote(
   );
 }
 
-export function actionProvidesEconomy<TConsumer extends string>(
+export function actionProvidesEconomy(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
   if (actionHasImmediateCreditGain(action)) return true;

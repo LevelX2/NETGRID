@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { sortedUnique } from "./collection";
 
 export type RunnerHandFundingTarget = {
   value: number;
@@ -34,7 +35,8 @@ export function runnerHandFundingTarget(
     .map((card) => {
       const roles = dependencies.rolesForCardId(card.definitionId);
       const cost = dependencies.visibleCardPlayOrInstallCost(card);
-      if (cost <= credits || cost <= 0) return undefined;
+      if (!Number.isSafeInteger(cost) || cost <= credits || cost <= 0)
+        return undefined;
       const reasons: string[] = [];
       let value = 0;
       if (dependencies.cardAddressesVisibleBreakerNeed(input, card)) {
@@ -89,8 +91,4 @@ export function runnerHandFundingTarget(
         right.value - left.value || left.reason.localeCompare(right.reason),
     );
   return candidates[0];
-}
-
-function sortedUnique(values: string[]): string[] {
-  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
 }

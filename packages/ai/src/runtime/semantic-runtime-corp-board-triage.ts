@@ -64,9 +64,9 @@ export { normalizedCorpBoardTriageValue } from "./corp-scoreline/semantic-runtim
 const CORP_BOARD_TRIAGE_DECISION_CACHE_KEY = Symbol("corp-board-triage");
 type CorpBoardTriageDecisionCache = WeakMap<object, CorpBoardTriage>;
 
-export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
+export function semanticRuntimeCorpBoardTriage(
   input: AiDecisionInput,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage {
   const cache = decisionDerivedValue<CorpBoardTriageDecisionCache>(
     input,
@@ -80,9 +80,9 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   return triage;
 }
 
-function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
+function buildSemanticRuntimeCorpBoardTriage(
   input: AiDecisionInput,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage {
   const actions = corpLegalActions(input).map((action) =>
     scoredLegalAction(input, action, dependencies),
@@ -383,11 +383,11 @@ function corpScoreNowAgendaPoints(
   return source ? corpTriageVisibleAgendaPoints(source) : 0;
 }
 
-function openingCentralBaselineTriage<TConsumer extends string>(
+function openingCentralBaselineTriage(
   input: AiDecisionInput,
   actions: readonly ScoredLegalAction[],
   currentCredits: number,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage | undefined {
   if (typeof input.actionNumber !== "number" || input.actionNumber > 8) {
     return undefined;
@@ -432,12 +432,10 @@ function openingCentralBaselineTriage<TConsumer extends string>(
   };
 }
 
-export function semanticRuntimeCorpBoardTriageActionComponent<
-  TConsumer extends string,
->(
+export function semanticRuntimeCorpBoardTriageActionComponent(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
   actionSemanticCandidate?: ActionSemanticCandidate,
 ): AiDecisionScoreComponent | undefined {
   return semanticRuntimeCorpBoardTriageActionComponentForTriage(

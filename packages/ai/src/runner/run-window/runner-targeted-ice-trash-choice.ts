@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import type { RunnerTargetedIceTrashChoiceContinuation } from "../../runtime/runner-targeted-ice-trash-plan";
@@ -43,7 +44,7 @@ export function selectedRunnerTargetedIceTrashChoiceOptionId(
   const continuation = moduleState?.choiceContinuation;
   const exactOrigin =
     input.side === "runner" &&
-    action.side === "runner" &&
+    actionMatchesCurrentDecision(input, action) &&
     action.type === "resolve_choice" &&
     choice.side === "runner" &&
     choice.kind === "select_cards" &&
@@ -106,10 +107,11 @@ function targetedIceTrashChoiceSource(choice: PendingChoice):
   const separator = suffix.lastIndexOf(":");
   if (separator <= 0) return undefined;
   const sourceCardInstanceId = suffix.slice(0, separator);
-  const choiceStateVersion = Number(suffix.slice(separator + 1));
+  const rawStateVersion = suffix.slice(separator + 1);
+  const choiceStateVersion = Number(rawStateVersion);
   if (
-    sourceCardInstanceId.length === 0 ||
-    !Number.isInteger(choiceStateVersion)
+    !/^\d+$/.test(rawStateVersion) ||
+    !Number.isSafeInteger(choiceStateVersion)
   ) {
     return undefined;
   }

@@ -295,6 +295,10 @@ Quote eröffnet keine LegalAction: Der vorhandene Run-Window-Owner führt nur
 die aktuell legal gebundene Fortsetzung aus. Native Engine-Prüfungen sichern
 den gemeinsamen Preis, echte Zugriffskonversion und deterministisches Replay.
 
+Beim verdeckten Creditvergleich beendet die Engine den Run, wenn der
+Runner mehr als die Corp bietet. Das legale Nullgebot erhält den Zugang
+kostenlos. Pfadquote und Choice-Ausführung verwenden dieselbe Regel.
+
 Die gewöhnliche Run-Startquote finanziert positiven bekannten Hirnschaden-
 Schutz gemeinsam mit allen unabhängigen ETR-Breaks. Die aktuelle
 Encounter-Abwehr priorisiert diesen Schutz bereits; eine vorgeschaltete

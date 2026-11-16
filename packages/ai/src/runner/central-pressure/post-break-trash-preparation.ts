@@ -3,6 +3,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import type { RunnerPressureSignal } from "../../plans/runner-tactical-plan-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 type Source = {
@@ -49,8 +50,7 @@ function currentQuote(
     q.schemaVersion !== "runner-post-break-trash-quote-v1" ||
     q.stateVersion !== input.playerView.stateVersion ||
     q.actionId !== action.actionId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
+    !actionMatchesCurrentDecision(input, action) ||
     q.serverId !== action.payload?.serverId ||
     !Array.isArray(q.sources) ||
     !Array.isArray(q.targets) ||
@@ -137,7 +137,9 @@ export function runnerPostBreakTrashPreparationSignals(
     )?.moduleState as
       | { kind: "central_pressure"; signal: RunnerPressureSignal }
       | undefined;
-    const commitment = priorState?.signal.postBreakTrashCommitment;
+    const commitment = priorState?.kind === "central_pressure"
+      ? priorState.signal.postBreakTrashCommitment
+      : undefined;
     if (
       commitment &&
       commitment.serverId === server.id &&
@@ -204,6 +206,7 @@ export function runnerPostBreakTrashPreparationSignals(
           : input.legalActions.find(
               (a) =>
                 a.type === "install_card" &&
+                actionMatchesCurrentDecision(input, a) &&
                 a.source === card.instanceId &&
                 !a.actionId.includes("trash_before") &&
                 !a.choiceRequirements?.length &&

@@ -1,5 +1,6 @@
 import type { VisibleCard } from "@netgrid/shared";
 import type { AiRuntimeValueHints } from "../ai-hints";
+import { rolesMatch } from "../role-match";
 
 export type RemoteRootValueKind =
   | "finite_economy_pool"
@@ -63,14 +64,13 @@ export function projectRemoteRootValue(
       (effect.resource === "credit" || effect.resource === "credits") &&
       effect.finite !== true,
   );
-  const roleText = roles.join(" ");
   const kind = remoteRootValueKind({
     hasBitCounter: counters.bit !== undefined,
     hasRecurringCreditCounter: counters.recurring_credit !== undefined,
     hasFiniteEconomyEffect,
     hasRecurringEconomyEffect,
     scoreAcceleration,
-    roleText,
+    roles,
   });
   const finitePoolValueRemaining =
     kind === "finite_economy_pool" ? Math.max(0, counters.bit ?? 0) : 0;
@@ -104,33 +104,28 @@ function remoteRootValueKind(params: {
   hasFiniteEconomyEffect: boolean;
   hasRecurringEconomyEffect: boolean;
   scoreAcceleration: boolean;
-  roleText: string;
+  roles: readonly string[];
 }): RemoteRootValueKind {
-  const roleTokens = tokensForRoleText(params.roleText);
+  const { roles } = params;
   if (params.scoreAcceleration) return "score_acceleration";
   if (
     params.hasBitCounter &&
     (params.hasFiniteEconomyEffect ||
-      tokensIncludeAny(roleTokens, ["campaign", "finite"]) ||
-      tokensIncludePhrase(roleTokens, ["economy", "pool"]) ||
-      tokensIncludePhrase(roleTokens, ["counter", "bank"]))
+      rolesMatch(roles, ["campaign", "finite", "economy_pool", "counter_bank"]))
   ) {
     return "finite_economy_pool";
   }
   if (params.hasRecurringCreditCounter || params.hasRecurringEconomyEffect) {
     return "recurring_economy";
   }
-  if (tokensIncludeAny(roleTokens, ["campaign", "drip"])) {
+  if (rolesMatch(roles, ["campaign", "drip"])) {
     return "campaign_drip";
   }
-  if (
-    tokensIncludePhrase(roleTokens, ["scoring", "protection"]) ||
-    tokensIncludePhrase(roleTokens, ["agenda", "protection"])
-  ) {
+  if (rolesMatch(roles, ["scoring_protection", "agenda_protection"])) {
     return "scoring_protection";
   }
-  if (tokensIncludeAny(roleTokens, ["ambush"])) return "ambush";
-  if (tokensIncludeAny(roleTokens, ["engine", "persistent"])) {
+  if (rolesMatch(roles, ["ambush"])) return "ambush";
+  if (rolesMatch(roles, ["engine", "persistent"])) {
     return "persistent_engine";
   }
   if (params.hasBitCounter) return "non_economy_counter";
@@ -155,31 +150,5 @@ function hasStructuredScoreAcceleration(
           effect.resource === "advancement_counters" &&
           effect.target === "advance.counter_transfer"),
     )
-  );
-}
-
-function tokensForRoleText(value: string): string[] {
-  return value
-    .toLocaleLowerCase("en-US")
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-}
-
-function tokensIncludeAny(
-  tokens: readonly string[],
-  accepted: readonly string[],
-): boolean {
-  const acceptedSet = new Set(accepted);
-  return tokens.some((token) => acceptedSet.has(token));
-}
-
-function tokensIncludePhrase(
-  tokens: readonly string[],
-  phrase: readonly string[],
-): boolean {
-  return tokens.some((token, index) =>
-    phrase.every(
-      (phraseToken, offset) => tokens[index + offset] === phraseToken,
-    ),
   );
 }

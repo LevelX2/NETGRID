@@ -2198,38 +2198,28 @@ describe("shared runner run route quote", () => {
     });
   });
 
-  it("pays a visible Too Many Doors bid only when the Corp cannot force a tie", () => {
-    const ice = quotedSpecialIce("rd-too-many-doors", "Too Many Doors", [
-      {
-        id: "rd-too-many-doors-secret-bid",
-        type: "secret_spend_compare_end_run_unless_corp_spent_at_least_runner",
-      },
-    ]);
-    const payablePath = assessKnownRezzedIcePath([ice], [], 1, [], 0);
-    const conditionalPath = assessKnownRezzedIcePath([ice], [], 2, [], 2);
-
-    expect(payablePath).toMatchObject({
-      blocked: false,
-      canReachAccess: true,
-      visibleBreakCost: 1,
-      creditsAfterPath: 0,
-    });
-    expect(conditionalPath).toMatchObject({
-      blocked: false,
-      canReachAccess: true,
-      creditsAfterPath: 2,
-      conditionalAccessReasons: ["visible_secret_spend_end_run"],
-    });
-    expect(
-      quoteRunnerRunRoute({
-        path: conditionalPath,
-        availableCredits: 2,
-      }),
-    ).toMatchObject({
-      reachability: "conditional_access",
-      conditionalReasons: ["visible_secret_spend_end_run"],
-    });
-  });
+  it.each([0, 1, 2, 10])(
+    "preserves access against Too Many Doors for free at %i Corp credits",
+    (corpCredits) => {
+      const ice = quotedSpecialIce("rd-too-many-doors", "Too Many Doors", [
+        {
+          id: "rd-too-many-doors-secret-bid",
+          type: "secret_spend_compare_end_run_unless_corp_spent_at_least_runner",
+        },
+      ]);
+      const path = assessKnownRezzedIcePath([ice], [], 0, [], corpCredits);
+      expect(path).toMatchObject({
+        blocked: false,
+        canReachAccess: true,
+        visibleBreakCost: 0,
+        creditsAfterPath: 0,
+      });
+      expect(quoteRunnerRunRoute({ path, availableCredits: 0 })).toMatchObject({
+        reachability: "guaranteed_access",
+        conditionalReasons: [],
+      });
+    },
+  );
 
   it("keeps visible Corp encounter ETR and random ICE effects conditional", () => {
     const paidEncounterEtr = quotedSpecialIce("rd-riddler", "Riddler", []);

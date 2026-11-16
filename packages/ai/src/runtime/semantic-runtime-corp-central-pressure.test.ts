@@ -123,6 +123,61 @@ describe("semanticRuntimeCorpCentralPressureAssessment", () => {
     ).toBe(0);
   });
 
+  it("distinguishes hardware multiaccess from virus pressure and requires a current multiaccess event for diversion", () => {
+    const runnerRig = [
+      runnerCard("interface", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+        type: "hardware",
+        title: "R&D Interface",
+        rulesText: "Access 1 additional card when you access R&D.",
+      }),
+    ];
+    const ownGripOrHq: VisibleCard[] = [
+      {
+        instanceId: "agenda",
+        known: true,
+        type: "agenda",
+        owner: "corp",
+      } as VisibleCard,
+    ];
+    const access = publicCentralEvent(
+      "rd-multiaccess",
+      "access_card",
+      "rd",
+      20,
+    );
+    access.publicPayload.effectiveAccessCount = 2;
+    const old = corpInput({
+      runnerRig,
+      ownGripOrHq,
+      eventTail: [access],
+      stateVersion: 100,
+    });
+    expect(
+      semanticRuntimeCorpCentralPressureAssessment(old, "rd"),
+    ).toMatchObject({
+      visibleMultiaccess: true,
+      visibleVirusPressure: false,
+      eventMultiaccess: true,
+      recentEventMultiaccess: false,
+    });
+    expect(
+      semanticRuntimeCorpCentralDefenseAllocationDirection(old),
+    ).toBeUndefined();
+
+    const current = corpInput({
+      runnerRig,
+      ownGripOrHq,
+      eventTail: [access],
+      stateVersion: 25,
+    });
+    expect(
+      semanticRuntimeCorpCentralDefenseAllocationDirection(current),
+    ).toMatchObject({
+      selectedServerId: "rd",
+    });
+  });
+
   it("permits a visible Highlighter R&D focus to divert central defense despite a known HQ agenda", () => {
     const input = corpInput({
       ownGripOrHq: [

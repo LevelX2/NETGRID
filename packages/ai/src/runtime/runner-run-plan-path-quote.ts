@@ -68,8 +68,8 @@ import {
 } from "./runner-encounter-credit-budget";
 import { runnerRunPlanAcceptsConditionalRoute } from "./runner-run-release";
 import {
-  isVisibleSecretSpendEndRunSubroutine,
-  secretSpendAccessPaymentForVisibleCorpCredits,
+  ACCESS_PRESERVING_SECRET_COMPARE_BID,
+  isVisibleSecretSpendCompareSubroutine,
 } from "../run-analysis/visible-subroutine-semantics";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
@@ -495,28 +495,17 @@ function cheapestKnownIceSequence(params: {
   if (!ice.known || ice.rezzed === false || !ice.definitionId) return undefined;
   const requiredSubroutineIndexes = knownRequiredSubroutineIndexes(input, ice);
   if (requiredSubroutineIndexes.size <= 0) {
-    const secretSpendSubroutine = ice.effectiveRunQuote?.subroutines.find(
-      isVisibleSecretSpendEndRunSubroutine,
-    );
-    const secretSpendCost = secretSpendSubroutine
-      ? secretSpendAccessPaymentForVisibleCorpCredits(
-          input.playerView.opponent.credits,
-        )
-      : undefined;
-    return secretSpendCost === undefined
-      ? undefined
-      : sequenceForActions({
-          actions: [],
-          totalCost: secretSpendCost,
-          usesPump: false,
-          usesBreak: false,
-          evidence: [
-            "known_ice_secret_spend_access_payment:true",
-            `secret_spend_access_payment:${secretSpendCost}`,
-          ],
-          plan,
-          input,
-        });
+    if (!ice.effectiveRunQuote?.subroutines.some(isVisibleSecretSpendCompareSubroutine))
+      return undefined;
+    return sequenceForActions({
+      actions: [],
+      totalCost: ACCESS_PRESERVING_SECRET_COMPARE_BID,
+      usesPump: false,
+      usesBreak: false,
+      evidence: ["known_ice_secret_spend_zero_preserves_access"],
+      plan,
+      input,
+    });
   }
   const accessThreatCount = requiredSubroutineIndexes.size;
   const assessment = minimumCreditsToBreakEndTheRunSubroutines(

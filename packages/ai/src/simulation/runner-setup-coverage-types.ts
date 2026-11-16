@@ -105,7 +105,7 @@ export function runnerHasKnownBlockedPathByCoverage(
         input.playerView.own.rig ?? [],
         input.playerView.own.credits,
         server.root,
-      ).blocked,
+      ).knownPathBlockedByMissingCoverage,
   );
 }
 
@@ -167,8 +167,14 @@ export function runnerCoverageRecoveryActionForMetrics(
   action: LegalAction,
   dependencies: RunnerCoverageActionDependencies,
 ): boolean {
-  const roles = dependencies.rolesForAction(input, action);
-  return rolesMatch(roles, ["recovery", "trash_recovery", "search_trash"]);
+  return (
+    action.side === "runner" &&
+    rolesMatch(dependencies.rolesForAction(input, action), [
+      "recovery",
+      "trash_recovery",
+      "search_trash",
+    ])
+  );
 }
 
 export function createRunnerCoverageActionContext(

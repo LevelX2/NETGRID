@@ -303,18 +303,6 @@ it.each(["modern_open", "classic_blind", "classic_blind_corp_ties"] as const)(
             latestTraceContext(bidInput),
           ),
         ).toBe("bid_0");
-        const unrelatedChoice = {
-          ...choice,
-          source: "card_implementation.secret_spend_compare:unrelated",
-        };
-        if (side === "runner")
-          expect(
-            selectedBidChoiceOptionId(
-              bidInput,
-              unrelatedChoice,
-              latestTraceContext(bidInput),
-            ),
-          ).not.toBe("bid_0");
       } else {
         const assessed = assessTraceBidCandidates(
           bidInput,
