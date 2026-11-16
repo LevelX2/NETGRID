@@ -1094,7 +1094,7 @@ export function chronicleEventDetail(
     return say("eventRun", {}, undefined, "run");
   const genericKey = (
     {
-      decline_trash: "declineTrash",
+      decline_trash: "accessAcknowledged",
       move_to_set_aside: "setAside",
       move_to_removed_from_game: "removedFromGame",
       return_from_set_aside: "returnedFromSetAside",

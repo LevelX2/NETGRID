@@ -2421,7 +2421,7 @@
       "eventRun": "{subject} : {source} joué et piratage de {server} lancé.",
       "runCreditLossReplacement": "{subject} : accès remplacé par {source} et paiement de {paid} {paid, select, 1 {crédit} other {crédits}}. La Corpo a perdu {lost} {lost, select, 1 {crédit} other {crédits}}.",
       "runCreditLossReplacementAmountsMissing": "{subject} : accès remplacé par {source}. Le montant payé ou perdu est manquant.",
-      "declineTrash": "{subject} : effacement refusé pendant l'accès à {server}.",
+      "accessAcknowledged": "{subject} : accès à une carte de {server} terminé.",
       "setAside": "{subject} : {source} mis de côté.",
       "removedFromGame": "{subject} : {source} retiré de la partie.",
       "returnedFromSetAside": "{subject} : {source} récupéré depuis la zone de mise de côté.",

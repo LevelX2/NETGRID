@@ -2337,7 +2337,7 @@
       "eventRun": "{subject}: played {source} and started a run on {server}.",
       "runCreditLossReplacement": "{subject}: replaced access with {source} and paid {paid} {paid, select, 1 {credit} other {credits}}. The Corp lost {lost} {lost, select, 1 {credit} other {credits}}.",
       "runCreditLossReplacementAmountsMissing": "{subject}: replaced access with {source}. The amount paid or lost is missing.",
-      "declineTrash": "{subject}: declined to trash during access on {server}.",
+      "accessAcknowledged": "{subject}: finished accessing a card on {server}.",
       "setAside": "{subject}: set aside {source}.",
       "removedFromGame": "{subject}: removed {source} from the game.",
       "returnedFromSetAside": "{subject}: returned {source} from the set-aside area.",
