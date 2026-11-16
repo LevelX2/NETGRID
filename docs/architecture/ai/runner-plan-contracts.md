@@ -4142,8 +4142,9 @@ Plan, Quelle, ursprüngliche Action und Engine-Fenster bleiben dabei gebunden.
 Ein durch Zahlungsunterstützung unterbrochenes Encounter ist keine neue
 Entscheidung über ungeblockten Schaden. Während die Engine ausschließlich
 die markierte Kostenfortsetzung und ihre Zahlungshilfen anbietet, verlangt
-die Schadensbewertung keine dort nicht angebotene Encounter-Continue-Quote;
-der bestehende Continuation-Owner validiert und erhält die ursprüngliche
+weder die Schadensbewertung noch die vollständige Pump-Kostenprognose
+des Informationsplans eine dort nicht angebotene Encounter-Continue-Quote.
+Der bestehende Continuation-Owner validiert und erhält die ursprüngliche
 Action-, Plan- und Step-Bindung. Im regulären Encounter bleiben fehlende
 Restquoten ein strukturierter Fehler.
 

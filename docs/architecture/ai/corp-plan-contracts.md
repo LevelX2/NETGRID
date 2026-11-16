@@ -1405,8 +1405,10 @@ Paarung 525 G2 D268 belegt den zuvor verworfenen finanzierten Glacier-RD-Pfad
 mit zwei Punkten; die reale spätere Rez verbraucht genau einen Punkt.
 
 Für den an einen Agenda-Score gebundenen kostenlosen ICE-Rez bestimmt
-`scored-agenda-free-rez-defense-target.ts` das installierte Ziel vor dem
-Score. Bei mehreren Zielservern steht ihre aktuelle erwartete
+`scored-agenda-free-rez-defense-target.ts` nach einem nichtterminalen
+Score-Ausblick das installierte Ziel vor dem Score. Einen exakt ausgewählten,
+spielentscheidenden Score führt der Score-Executor ohne Gratis-Rez-Zielbindung
+aus. Die Engine beendet das Spiel mit der Wertung. Bei mehreren Zielservern steht ihre aktuelle erwartete
 Agendapunkt-Exposition vor der ersparten normalen Rez-Zahlung. HQ/R&D
 konsumieren die bestehenden zentralen Defense-Fakten; eigene übrige
 Agenden und der öffentliche Runnerpfad liefern den Remote-/Archivesbedarf.

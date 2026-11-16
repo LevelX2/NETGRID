@@ -1618,9 +1618,15 @@ function completeInformationLockPumpCost(
   input: AiDecisionInput,
   action: LegalAction,
 ): number | undefined {
+  if (action.payload?.runnerCostPenaltySupportContinuation === true)
+    return undefined;
   const remaining = currentEncounterCompleteSubroutineIndexes(input);
   const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
-  if (remaining?.size !== 1 || !quote || quote.conditionalEncounterEffects?.length)
+  if (
+    remaining?.size !== 1 ||
+    !quote ||
+    quote.conditionalEncounterEffects?.length
+  )
     return undefined;
   const lock = quote.subroutines.find((_, index) => remaining.has(index));
   if (
