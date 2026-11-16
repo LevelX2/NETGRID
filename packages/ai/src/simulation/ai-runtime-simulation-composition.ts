@@ -8,9 +8,9 @@ import {
 } from "../runtime/runner-semantic-support-composition";
 import { createAiContextDiagnosticsComposition } from "../runtime/ai-context-diagnostics-composition";
 import {
-  createSemanticRuntimeCorpScoringComposition,
-  type SemanticRuntimeCorpScoringCompositionDependencies,
-} from "../runtime/semantic-runtime-corp-scoring-composition";
+  createCorpTagPunishWindowComposition,
+  type CorpTagPunishWindowCompositionDependencies,
+} from "./corp-tag-punish-window-composition";
 import {
   createAiSimulationComposition,
   type AiSimulationCompositionDependencies,
@@ -75,7 +75,7 @@ export type AiRuntimeSimulationCompositionDependencies =
       | RuntimeContextDiagnosticsDependencyKeys
     > &
     Omit<
-      SemanticRuntimeCorpScoringCompositionDependencies<string>,
+      CorpTagPunishWindowCompositionDependencies,
       RuntimeContextDiagnosticsDependencyKeys
     >;
 
@@ -106,9 +106,10 @@ export function createAiRuntimeSimulationComposition(
     ...createRuntimeComposedDependencies(dependencies, contextDiagnostics),
     previousPlan: () => undefined,
   });
-  const corpScoring = createSemanticRuntimeCorpScoringComposition(
-    createRuntimeComposedDependencies(dependencies, contextDiagnostics),
-  );
+  const { tagPunishWindowDiagnosticsForSimulationAction } =
+    createCorpTagPunishWindowComposition(
+      createRuntimeComposedDependencies(dependencies, contextDiagnostics),
+    );
   const runtimeEntrypoints = createAiLiveRuntimeComposition(dependencies);
   const simulationEntrypoints = createAiSimulationComposition({
     ...dependencies,
@@ -118,8 +119,7 @@ export function createAiRuntimeSimulationComposition(
     chooseAiAction: runtimeEntrypoints.chooseAiAction,
     chooseRunnerAction: runtimeEntrypoints.chooseRunnerAction,
     chooseCorpAction: runtimeEntrypoints.chooseCorpAction,
-    tagPunishWindowDiagnosticsForSimulationAction:
-      corpScoring.tagPunishWindowDiagnosticsForSimulationAction,
+    tagPunishWindowDiagnosticsForSimulationAction,
   });
 
   return {

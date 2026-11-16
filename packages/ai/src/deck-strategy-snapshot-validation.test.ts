@@ -77,6 +77,20 @@ describe("AI deck snapshot runtime validation", () => {
     );
   });
 
+  it.each(["duplicate", "malformed"])("rejects %s card rows", (invalidity) => {
+    const snapshot = snapshotById("demo_corp_008_snapshot_v0_8");
+    if (invalidity === "duplicate") {
+      snapshot.cards.push({ ...snapshot.cards[0]! });
+    } else {
+      snapshot.cards.push(null as never);
+    }
+
+    expectSnapshotError(
+      () => assertValidAiDeckSnapshotForRuntime(snapshot, { side: "corp" }),
+      "ai_deck_snapshot_invalid",
+    );
+  });
+
   it("rejects stale ownDeckSnapshot metadata for normal runtime", () => {
     const snapshot = snapshotById("demo_corp_008_snapshot_v0_8");
 

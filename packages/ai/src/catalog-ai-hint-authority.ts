@@ -13,7 +13,7 @@ export { validateGeneratedArtifact } from "./generated-ai-hint-artifact-validati
 export type { AiCardHint, AiRuntimeValueHintKey, AiRuntimeValueHints };
 
 const generatedArtifact = validateGeneratedArtifact(generatedCardSpecAiHints);
-export const AI_HINTS_BY_CARD = new Map<string, AiCardHint>();
+const canonicalHints = new Map<string, AiCardHint>();
 const derivedCardSpecAiHintIds = new Set(generatedArtifact.cardIds);
 
 export function cardIdHasGeneratedCardSpecAiHint(cardId: string): boolean {
@@ -21,11 +21,35 @@ export function cardIdHasGeneratedCardSpecAiHint(cardId: string): boolean {
 }
 
 for (const record of generatedArtifact.cards) {
-  AI_HINTS_BY_CARD.set(record.cardId, deepFreezeCatalogReadModel(record.hint));
+  canonicalHints.set(record.cardId, deepFreezeCatalogReadModel(record.hint));
 }
 
+export const AI_HINTS_BY_CARD: ReadonlyMap<string, AiCardHint> = Object.freeze({
+  get size() {
+    return canonicalHints.size;
+  },
+  get: canonicalHints.get.bind(canonicalHints),
+  has: canonicalHints.has.bind(canonicalHints),
+  entries: canonicalHints.entries.bind(canonicalHints),
+  keys: canonicalHints.keys.bind(canonicalHints),
+  values: canonicalHints.values.bind(canonicalHints),
+  [Symbol.iterator]: canonicalHints[Symbol.iterator].bind(canonicalHints),
+  forEach(
+    callback: (
+      value: AiCardHint,
+      key: string,
+      map: ReadonlyMap<string, AiCardHint>,
+    ) => void,
+    thisArg?: unknown,
+  ) {
+    for (const [key, hint] of canonicalHints)
+      callback.call(thisArg, hint, key, AI_HINTS_BY_CARD);
+  },
+});
+
+/** An owned copy for callers constructing a custom hint context. */
 export function createAiHintsByCard(): Map<string, AiCardHint> {
-  return new Map(AI_HINTS_BY_CARD);
+  return new Map(canonicalHints);
 }
 
 export type CatalogAiHintProvenance = {

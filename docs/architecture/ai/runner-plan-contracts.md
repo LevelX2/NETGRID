@@ -701,6 +701,11 @@ Diese Dienste wählen keinen Executor. Die gemeinsame Herkunft eines laufenden
 Runs ist in `plans/runner-run-origin-contract.ts` typisiert. Kein Central-Modul
 importiert die Live-Runtime oder eine Planregistry zurück.
 
+Der Run-Window-Owner bindet Zahlungsangebote und die Fortsetzung einer
+unterbrochenen Aktion an die Seite, StateVersion und den Timingpunkt der
+aktuellen Engine-Entscheidung. Bei einem bestehenden Zahlungsfenster
+müssen auch die ursprüngliche Aktions-ID und die Fenster-ID übereinstimmen.
+
 ## 3. `runner.contest_remote`
 
 Bei einer vom bestehenden öffentlichen Terminal-Contest-Vertrag erkannten

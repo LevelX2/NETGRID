@@ -84,8 +84,13 @@ export function assertValidAiDeckSnapshotForRuntime(
     );
   }
 
+  const seenCards = new Set<string>();
   for (const entry of snapshot.cards) {
-    if (!isNonEmptyString(entry.cardId)) {
+    if (
+      entry === null ||
+      typeof entry !== "object" ||
+      !isNonEmptyString(entry.cardId)
+    ) {
       throw new AiDeckSnapshotRuntimeError(
         "ai_deck_snapshot_invalid",
         `Deck snapshot ${snapshot.deckSnapshotId} contains a card entry without cardId.`,
@@ -102,14 +107,22 @@ export function assertValidAiDeckSnapshotForRuntime(
         [`card:${entry.cardId}`, `quantity:${entry.quantity}`],
       );
     }
-    const runtimeCard = RUNTIME_CARDS[entry.cardId];
-    if (!runtimeCard) {
+    if (seenCards.has(entry.cardId)) {
+      throw new AiDeckSnapshotRuntimeError(
+        "ai_deck_snapshot_invalid",
+        `Deck snapshot ${snapshot.deckSnapshotId} contains duplicate card ${entry.cardId}.`,
+        [`card:${entry.cardId}`, "duplicate_card"],
+      );
+    }
+    seenCards.add(entry.cardId);
+    if (!Object.hasOwn(RUNTIME_CARDS, entry.cardId)) {
       throw new AiDeckSnapshotRuntimeError(
         "ai_deck_snapshot_unknown_card",
         `Deck snapshot ${snapshot.deckSnapshotId} references unknown runtime card ${entry.cardId}.`,
         [`card:${entry.cardId}`],
       );
     }
+    const runtimeCard = RUNTIME_CARDS[entry.cardId]!;
     if (runtimeCard.side !== snapshot.side) {
       throw new AiDeckSnapshotRuntimeError(
         "ai_deck_snapshot_invalid",

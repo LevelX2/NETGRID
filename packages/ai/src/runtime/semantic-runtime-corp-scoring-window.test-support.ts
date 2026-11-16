@@ -517,6 +517,7 @@ export function brokerResource(
     rulesText:
       "A: Put 3 credits from the bank on Broker. A: Take all the bits from Broker.",
     owner: "runner",
+    counters: { bit: hostedCredits },
     counterDisplays: [
       {
         id: `${instanceId}-bits`,

@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
-import { AI_HINTS_BY_CARD } from "./ai-hints";
+import { AI_HINTS_BY_CARD, createAiHintsByCard } from "./ai-hints";
 
 const hints = [...AI_HINTS_BY_CARD.values()];
 const hintById = new Map(hints.map((hint) => [hint.cardId, hint]));
 
 describe("static AI hint semantics", () => {
+  it("keeps private fixture edits out of the canonical hint catalog", () => {
+    const cardId = "onr_v1_129_hq-interface";
+    const copy = createAiHintsByCard();
+
+    expect(copy.delete(cardId)).toBe(true);
+    expect(AI_HINTS_BY_CARD.has(cardId)).toBe(true);
+    expect(Reflect.get(AI_HINTS_BY_CARD, "delete")).toBeUndefined();
+  });
+
   it("keeps one unique static record per active card", () => {
     expect(hints.length).toBeGreaterThanOrEqual(618);
     expect(hintById.size).toBe(hints.length);

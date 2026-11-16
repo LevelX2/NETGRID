@@ -86,6 +86,34 @@ it("keeps the last tag source with real R&D complements at manual D45", () => {
 });
 
 describe("native cleanup choice", () => {
+  it.each([
+    { sources: 2, runnerCredits: 3, damage: 4 },
+    { sources: 1, runnerCredits: 6, damage: 0 },
+  ])(
+    "shares the Runner credit pool across incoming tags with $sources sources and $runnerCredits credits",
+    ({ sources, runnerCredits, damage }) => {
+      const { input } = cleanup({
+        hand: [TROJAN, TROJAN, SCORCHED, OVERTIME, WALL, CREDIT],
+        credits: 30,
+        grip: 3,
+      });
+      const opponent = input.playerView.opponent;
+      opponent.credits = runnerCredits;
+      opponent.rig = Array.from({ length: sources }, (_, index) => ({
+        instanceId: `visible-nasuko-${index}`,
+        definitionId: "onr_v1_135_nasuko-cycle",
+        type: "resource",
+        known: true,
+      }));
+      const retained = input.playerView.own.gripOrHq.filter((card) =>
+        [TROJAN, SCORCHED].includes(card.definitionId ?? ""),
+      );
+      expect(prepareCorpPunishHandRetention(input)(retained).damage).toBe(
+        damage,
+      );
+    },
+  );
+
   it("keeps two distinct damage instances when both are needed and funded", () => {
     const { input, state } = cleanup({
       hand: [TROJAN, SCORCHED, SCORCHED, OVERTIME, WALL, CREDIT],

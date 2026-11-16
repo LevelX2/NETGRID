@@ -1,26 +1,39 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
-import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
+import { AI_HINTS_BY_CARD as AI_HINTS, type AiCardHint } from "../ai-hints";
 import { rolesMatch } from "../role-match";
-import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
-
-type AiCardHintWithSignals = AiCardHint & { tacticSignals?: string[] };
-
-const AI_HINTS = createAiHintsByCard();
+import {
+  corpInstalledTaggedMeatDamageProfile,
+  corpScoredTaggedMeatDamageProfile,
+  corpTaggedMeatDamageOperationProfile,
+} from "../runtime/corp-canonical-card-facts";
 
 export function corpVisibleMeatDamagePayoff(input: AiDecisionInput): boolean {
-  const archivedCardIds = new Set(
-    input.playerView.own.heapOrArchives.map((card) => card.instanceId),
+  if (input.side !== "corp") return false;
+  const { own, servers } = input.playerView;
+  return (
+    own.gripOrHq.some(
+      (card) =>
+        card.known &&
+        corpTaggedMeatDamageOperationProfile(card.definitionId) !== undefined,
+    ) ||
+    own.scoreArea.some(
+      (card) =>
+        card.known &&
+        corpScoredTaggedMeatDamageProfile(card.definitionId) !== undefined,
+    ) ||
+    servers.some(
+      (server) =>
+        server.id !== "archives" &&
+        server.root.some(
+          (card) =>
+            card.known &&
+            card.rezzed === true &&
+            corpInstalledTaggedMeatDamageProfile(card.definitionId) !==
+              undefined,
+        ),
+    )
   );
-  const ownVisibleCards = [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.own.scoreArea,
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.ice.filter((card) => !archivedCardIds.has(card.instanceId)),
-      ...server.root.filter((card) => !archivedCardIds.has(card.instanceId)),
-    ]),
-  ];
-  return ownVisibleCards.some(visibleCardHasMeatDamagePayoff);
 }
 
 export function corpVisibleRunnerDamagePreventionEvidence(
@@ -66,15 +79,6 @@ export function corpVisibleRunnerResourceTrashEvidence(
     };
   }
   return { valueBonus: 0, evidence: [] };
-}
-
-function visibleCardHasMeatDamagePayoff(card: VisibleCard): boolean {
-  const payoff = classifyTagPunishPayoffFromOntology(card.definitionId);
-  return (
-    payoff?.payoffKinds.some(
-      (kind) => kind === "damage" || kind === "scored_agenda_damage_like",
-    ) === true
-  );
 }
 
 function visibleCardPreventsDamage(card: VisibleCard): boolean {
@@ -133,11 +137,7 @@ function effectTargetMatchesTerm(effect: unknown, term: string): boolean {
 }
 
 function hintHasSignal(hint: AiCardHint | undefined, signal: string): boolean {
-  return (
-    (hint as AiCardHintWithSignals | undefined)?.tacticSignals?.includes(
-      signal,
-    ) === true
-  );
+  return hint?.tacticSignals?.includes(signal) === true;
 }
 
 function hintHasEffectKind(

@@ -17,7 +17,7 @@ import {
   corpAction,
   corpCard,
   corpInputWithHqCardsAndServers,
-} from "../semantic-runtime-corp-score.test-support";
+} from "./corp-defensive-draw.test-support";
 
 const draw = corpAction("corp.draw_card", "draw_card", {}, "basic_action");
 draw.costs = [{ clicks: 1 }];

@@ -156,7 +156,7 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
       ? scoringWindowPostRezProtectionAssessment(
           input,
           projectedServer,
-          runnerExposureCredits,
+          runnerExposureCreditActions,
           creditsAfterAction,
           preExposureAdvancementCreditReserve,
         )

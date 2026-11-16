@@ -1,3 +1,4 @@
+import { summarizeRunnerReserveAfterRuns } from "./runner-reserve-diagnostics";
 import { minNumberOrZero as minDefined } from "../runtime/collection";
 import { roundNumber as round } from "../runtime/number-rounding";
 import { isRemoteServerTarget } from "../runtime/server-target";
@@ -1728,21 +1729,7 @@ export function summarizeMatchProgressionMetrics(
     runnerReservePreservingEconomyActions: actionSequence.filter(
       (entry) => entry.runnerReservePreservingEconomy === true,
     ).length,
-    runnerReserveAfterSuccessfulRun: averageNumber(
-      actionSequence
-        .map((entry) => entry.runnerReserveAfterSuccessfulRun)
-        .filter((value): value is number => typeof value === "number"),
-    ),
-    runnerReserveAfterRemoteAccess: averageNumber(
-      actionSequence
-        .map((entry) => entry.runnerReserveAfterRemoteAccess)
-        .filter((value): value is number => typeof value === "number"),
-    ),
-    runnerReserveAfterCentralRun: averageNumber(
-      actionSequence
-        .map((entry) => entry.runnerReserveAfterCentralRun)
-        .filter((value): value is number => typeof value === "number"),
-    ),
+    ...summarizeRunnerReserveAfterRuns(summaries),
     runnerReserveBeforeAdvancedRemoteContest: averageNumber(
       actionSequence
         .map((entry) => entry.runnerReserveBeforeAdvancedRemoteContest)

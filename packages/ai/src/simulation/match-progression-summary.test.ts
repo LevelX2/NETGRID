@@ -4,6 +4,21 @@ import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { summarizeMatchProgressionMetrics } from "./match-progression-summary";
 
 describe("summarizeMatchProgressionMetrics", () => {
+  it("takes the last reserve observation once per successful run", () => {
+    const observe = (runId: string, reserve: number) => ({
+      ...action("access_card"),
+      runnerReserveRunId: runId,
+      runnerReserveAfterSuccessfulRun: reserve,
+      runnerReserveAfterCentralRun: reserve,
+    });
+    const metrics = summarizeMatchProgressionMetrics([
+      summary([observe("run-1", 1), observe("run-1", -1)]),
+      summary([observe("run-1", 3)]),
+    ]);
+
+    expect(metrics.runnerReserveAfterSuccessfulRun).toBe(1);
+  });
+
   it("counts successful run action types exactly", () => {
     const metrics = summarizeMatchProgressionMetrics([
       summary([

@@ -4,9 +4,9 @@ import {
 } from "../runtime/ai-live-runtime-composition";
 import { createAiContextDiagnosticsComposition } from "../runtime/ai-context-diagnostics-composition";
 import {
-  createSemanticRuntimeCorpScoringComposition,
-  type SemanticRuntimeCorpScoringCompositionDependencies,
-} from "../runtime/semantic-runtime-corp-scoring-composition";
+  createCorpTagPunishWindowComposition,
+  type CorpTagPunishWindowCompositionDependencies,
+} from "./corp-tag-punish-window-composition";
 import {
   createAiGameSimulator,
   type AiGameSimulatorDependencies,
@@ -36,10 +36,7 @@ export type AiProductSimulationCompositionDependencies =
       | "tagPunishWindowDiagnosticsForSimulationAction"
       | ContextDependencyKeys
     > &
-    Omit<
-      SemanticRuntimeCorpScoringCompositionDependencies<string>,
-      ContextDependencyKeys
-    > &
+    Omit<CorpTagPunishWindowCompositionDependencies, ContextDependencyKeys> &
     Omit<
       Parameters<typeof createQualityTagsForAction>[0],
       ContextDependencyKeys
@@ -67,9 +64,10 @@ export function createAiProductSimulationComposition(
   dependencies: AiProductSimulationCompositionDependencies,
 ) {
   const diagnostics = createAiContextDiagnosticsComposition(dependencies);
-  const corpScoring = createSemanticRuntimeCorpScoringComposition(
-    withContextDiagnostics(dependencies, diagnostics),
-  );
+  const { tagPunishWindowDiagnosticsForSimulationAction } =
+    createCorpTagPunishWindowComposition(
+      withContextDiagnostics(dependencies, diagnostics),
+    );
   const runtime = createAiLiveRuntimeComposition(dependencies);
   const qualityTagsForAction = createQualityTagsForAction({
     extractFeatures: diagnostics.extractAiFeatures,
@@ -96,8 +94,7 @@ export function createAiProductSimulationComposition(
       diagnostics.runnerBreakerCoverageDiagnosticsForSimulationAction,
     runnerEconomySetupDiagnosticsForSimulationAction:
       diagnostics.runnerEconomySetupDiagnosticsForSimulationAction,
-    tagPunishWindowDiagnosticsForSimulationAction:
-      corpScoring.tagPunishWindowDiagnosticsForSimulationAction,
+    tagPunishWindowDiagnosticsForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction:
       diagnostics.corpFutureRunIceDiagnosticsForSimulationAction,
     qualityTagsForAction,

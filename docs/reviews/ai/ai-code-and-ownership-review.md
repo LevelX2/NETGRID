@@ -989,8 +989,10 @@ Den ungenutzten skalaren Corp-Pfad aus der Factory entfernen und die
 Komposition auf den tatsächlich übergebenen Komponentenprovider
 zusammenziehen. Abnahme mit gleichen Komponenten und gleicher Reihenfolge
 für die bestehenden Corp-Diagnosefälle. Aufwand ungefähr zwei bis vier Stunden.
-[Context](../../../packages/ai/src/runtime/semantic-runtime-corp-score-context.ts#L13) ·
-[Einziger Anschluss](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts#L128)
+Die spätere Reachability-Prüfung bestätigte, dass auch die Komponenten
+keinen lesenden Aufrufer mehr hatten. Context und Scoring-Komposition
+sind entfernt. Die produktive Score-Planung folgt dem
+[Corp-Planvertrag](../../architecture/ai/corp-plan-contracts.md).
 
 ### 6. `runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts`
 
@@ -1369,8 +1371,8 @@ unbenutzten Evidence-Verdrahtung und des reinen Weiterleiters reduziert die
 Zahl der Schnittstellen beim Umbau des Score-/Defense-Pfads. Abnahme über
 identische Punish-Diagnosen sowie Score- und Live-Entscheidungen. Aufwand
 ungefähr ein halber Tag.
-[Verbleibende Score-Composition](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-composition.ts) ·
-[Simulations-Einstieg](../../../packages/ai/src/simulation/ai-product-simulation-composition.ts#L70)
+Die [Punish-Diagnostik](../../../packages/ai/src/simulation/corp-tag-punish-window-composition.ts)
+ist direkt an die Simulation angebunden.
 
 ### 3. `runtime/protection-definition.ts`
 

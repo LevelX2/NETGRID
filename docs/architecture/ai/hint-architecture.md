@@ -37,6 +37,9 @@ Ontologieprüfung wie die übrige Hint-Validierung, einschließlich Effekt,
 Zielprofil und Strategiebindung. Ein fehlerhaftes Artefakt verlangt einen
 Ursachenfix.
 
+`AI_HINTS_BY_CARD` bietet eine schreibgeschützte Sicht auf die validierten
+Hints. `createAiHintsByCard` liefert eine eigene Map für getrennte Kontexte.
+
 Aktuelle Befehle aus [package.json](../../../package.json):
 
 - `corepack pnpm generate:card-spec-ai-hints`: Artefakt schreiben.
