@@ -1150,3 +1150,183 @@ Gültige Suchen behalten Ziel, Root und Executor. 484 fokussierte Tests in
 15 Dateien bestanden.
 Der KI-Typecheck, die Strukturgates und der abschließende Lauf mit
 15 Zahlungstests waren grün.
+
+## Sechste Zufallsstichprobe mit zehn Dateien
+
+Geprüfter Stand ist der lokal integrierte Commit `16bece175`. Die
+Zufallsauswahl ohne Wiederholung verwendete Seed `572785593` und einen
+ordinal sortierten Pool aus 872 versionierten KI-Quelldateien. Tests,
+Testhilfen, die 40 bisherigen Stichprobendateien und alle in den früheren
+Stichprobenabschnitten verlinkten Quelldateien waren ausgeschlossen.
+Die Nummern entsprechen der Ziehungsreihenfolge.
+
+P1 bezeichnet hier einen belegten Fehler an einer produktiven KI-Entscheidung.
+P2 betrifft eine verletzte Bindung oder einen falschen Messwert. P3 umfasst
+Wartbarkeit und vermeidbaren Aufwand bei gleichem fachlichen Ergebnis.
+
+### 1. `corp/economy/economy-routes.ts`
+
+**P2, Engine-Angebot mit gezielt verändertem Timing.** Der Economy-Guard
+findet für Nicht-ICE-Kandidaten ein Angebot anhand der Action-ID. Beim
+echten *Accounts Receivable*-Kandidaten reicht dieselbe ID im ersetzten
+Timingpunkt aus, damit der Guard den Payload für ausführbar hält.
+Die Scheduler-Version und die Engine-Validierung wirken später. Die
+Zulassung sollte Seite, Zeitpunkt und Version des aktuellen Angebots
+prüfen. Abnahme mit nativem gültigem Angebot und falschem Timing.
+
+**P3, statisch.** Die Berechnung derselben ICE-Liquidationsquote kann pro
+Kandidat in der Zulassung und beim anschließenden Funding-Filter erneut
+laufen. Den bestehenden Liquidationsentscheid einmal pro aktuellem
+Kandidaten übernehmen und Zulassung, Reihenfolge sowie Ablehnungsgrund
+abgleichen. Beide Änderungen zusammen ungefähr ein halber bis ein Tag.
+[Zulassung](../../../packages/ai/src/corp/economy/economy-routes.ts#L566) ·
+[Funding-Filter](../../../packages/ai/src/corp/economy/economy-routes.ts#L278)
+
+### 2. `runtime/runner-loan-state-context.ts`
+
+**P3, statisch.** Zustand, Liability Assessment und Liability Policy
+deklarieren dieselben drei Spielphasen eigenständig. Eine gemeinsame
+Definition vermeidet abweichende Typverträge bei der nächsten Änderung.
+Die bestehenden Phasengrenzen, Tag-Reihenfolge und Finanzierungsprüfungen
+sind mit den vorhandenen Loan-Tests abdeckbar. Aufwand ungefähr eine Stunde.
+[Zustand](../../../packages/ai/src/runtime/runner-loan-state-context.ts#L3) ·
+[Assessment](../../../packages/ai/src/runtime/runner-loan-liability-assessment.ts#L7) ·
+[Policy](../../../packages/ai/src/runtime/runner-loan-liability-policy.ts#L3)
+
+### 3. `runner/economy/installed-card-liquidation.ts`
+
+**P3, statisch.** Der Owner prüft das aktuelle Angebot und die Optionsmatrix
+und verkauft nur bei belegtem, positivem Restwert. Er und der MU-Überschuss-
+Guard zählen installierte Kopien, gehostete Karten und Counter getrennt.
+Die gemeinsamen Fakten pro Rig und Karte einmal ermitteln. Die fachlich
+eigenständige Deckprüfung für überschüssigen Speicher bleibt an ihrem Owner.
+Abnahme über identische Option, Quote, Ablehnungsgründe und Reihenfolge,
+einschließlich verkaufbarem MU-Überschuss. Aufwand zwei bis vier Stunden.
+[Liquidation](../../../packages/ai/src/runner/economy/installed-card-liquidation.ts) ·
+[MU-Guard](../../../packages/ai/src/runner/economy/installed-memory-surplus.ts#L13)
+
+### 4. `corp/hand-management/hand-overflow.ts`
+
+**P2, Engine-Angebot mit gezielt veränderter Projektion.** Der Owner schützt
+den Verteidigungsbedarf und prüft Kosten, Quelle und Zielserver. Für eine
+Operation akzeptiert er beim echten *Accounts Receivable*-Kandidaten
+sowohl die gebundene Handreduktion `-1` als auch den eingesetzten Wert
+`-Infinity`. Die Zulassung sollte eine endliche ganzzahlige Reduktion mit
+passender Herkunft aus dem aktuellen Angebot fordern. Planbindung und
+Zulassung sollten dieselbe garantierte Handreduktion verwenden. Abnahme
+mit unverändertem realem Angebot und ungültigen Projektionswerten.
+Aufwand ungefähr ein halber Tag.
+[Projektionsprüfung](../../../packages/ai/src/corp/hand-management/hand-overflow.ts#L270) ·
+[Operationszulassung](../../../packages/ai/src/corp/hand-management/hand-overflow.ts#L321) ·
+[Planbindung](../../../packages/ai/src/corp/hand-management/hand-overflow.ts#L75)
+
+### 5. `runner/defense-recovery/runner-discard-choice-plan.ts`
+
+**P2, native Runner-Pflichtablage mit verändertem Angebot.** Der Owner
+prüft die Karten im Grip und schützt belegte Notfallkarten. Bei der
+Gegenprobe gab sein Bindungspfad weiterhin dieselbe Kartenoption aus,
+obwohl die lokale Angebotskopie diese Option nicht mehr enthielt und
+einen alten Ablaufwert sowie einen fremden Timingpunkt trug. Der
+nachgelagerte Payload-Builder übernimmt die gebundene Option nach
+Prüfung seiner IDs und beobachteten Version. Die exakte aktuelle
+LegalAction und ihre zulässigen Optionen vor der Kartenwertung prüfen.
+Abnahme mit gültiger Pflichtablage, fehlender Option und veraltetem
+Angebot bei erhaltenem Plan-Owner. Aufwand ungefähr ein halber bis ein Tag.
+[Choice-Bindung](../../../packages/ai/src/runner/defense-recovery/runner-discard-choice-plan.ts#L38) ·
+[Payload-Verwendung](../../../packages/ai/src/runtime/selected-choices-for-decision.ts#L181)
+
+### 6. `simulation/strategic-plan-conversion-metrics.ts`
+
+**P2, reproduziert mit konstruierten Aktionsfolgen.** Bei derselben
+Runner-Planwiederholung sinkt `sameStrategicPlanRepeatedWithoutProgress`
+von eins auf null, sobald zwischen den Runner-Einträgen die Corp punktet.
+Der Fortschritt wird für beide Seiten gespeichert. Außerdem zählt ein
+beim Export noch unbeobachteter Anschluss als Aufgabe ohne Grund.
+Fortschritt pro Seite verfolgen und Aufgabe aus einer beobachteten
+Folgeentscheidung oder einem ausdrücklichen Grund ableiten. Abnahme
+mit gemischten Seiten und abgeschnittener Beobachtungsfolge. Das ändert
+die Auswertung von Selbstspielen. Aufwand ungefähr ein Tag.
+[Planverlauf](../../../packages/ai/src/simulation/strategic-plan-conversion-metrics.ts#L129) ·
+[Fortschrittszuordnung](../../../packages/ai/src/simulation/strategic-plan-conversion-metrics.ts#L262)
+
+### 7. `corp/punish/punish-trace-binding.ts`
+
+**P2, natives Trace-Angebot mit passendem residentem Plan.** Bei *Audit
+of Call Records* bindet der Owner das gespeicherte `bid_0` auch dann,
+wenn die Angebotskopie diese Option sperrt. In separaten Gegenproben
+erhielten eine fremde Aktionsseite und ein fremder Timingpunkt ebenfalls
+das Gebot. Ein gemeinsamer Guard für Window und Payload sollte Seite,
+Quelle, Timing und die genau passende auswählbare Option des aktuellen
+Angebots prüfen. Der Owner kann sein gespeichertes Gebot weiterhin ohne
+neue Bewertung übernehmen. Abnahme mit exakt gebundenem nativem Gebot
+und den drei gezielten Ablehnungsfällen. Aufwand ungefähr ein halber
+bis ein Tag.
+[Trace-Bindung](../../../packages/ai/src/corp/punish/punish-trace-binding.ts#L52) ·
+[Nativer Test](../../../packages/ai/src/runtime/corp-punish-route-forced-trace-real-engine.test.ts)
+
+### 8. `runtime/encounter-action.ts`
+
+**P2, Gegenprobe mit geändertem Pump-Payload.** Der echte dynamische
+Matador-Betrag `5` wird übernommen. Der eingesetzte Wert `0.5` gilt
+ebenfalls als Stärkegewinn. Eine ausgewiesene Pump-Aktion sollte einen
+positiven ganzzahligen Betrag im Engine-Angebot haben. Abnahme mit
+dynamischem Matador-Betrag und ungültigen Werten in der Angebotskopie.
+
+**P3, Katalog geprüft.** Kein aktueller Eintrag des KI-Kompatibilitäts-
+katalogs erfüllt die Bedingungen der statischen Ersatzsuche. Den
+Ersatzpfad nach Prüfung der aktuellen Engine-Angebote entfernen und den
+Engine-Payload als Quelle für Breaker und Kartenfähigkeiten verwenden.
+Beides zusammen ungefähr ein halber Tag.
+[Pump-Helper](../../../packages/ai/src/runtime/encounter-action.ts#L14) ·
+[Pump-Tests](../../../packages/ai/src/runtime/encounter-action.test.ts) ·
+[Engine-Producer](../../../packages/engine/src/ability-engine/icebreaker-abilities.ts#L110)
+
+### 9. `runtime/corp-trace-hardware-trash-choice.ts`
+
+**Kein konkreter Änderungsbedarf.** Die Fortsetzung verlangt eine
+eindeutige gespeicherte Defense-Entscheidung mit demselben Trace- und
+ICE-Kontext. Sie bindet dieselbe öffentliche Hardware und Options-ID
+an das aktuelle Angebot. Die nativen Cinderella-Fälle prüfen, dass
+der gespeicherte Zielentscheid auch bei später geänderten Countern
+bestehen bleibt. Ungültige Wahl-, Offer- und Owner-Daten werden in den
+vorhandenen Gegenproben abgewiesen.
+[Resolver](../../../packages/ai/src/runtime/corp-trace-hardware-trash-choice.ts#L22) ·
+[Choice-Fakten](../../../packages/ai/src/corp/defense/trace-hardware-trash-choice-facts.ts#L15) ·
+[Nativer Test](../../../packages/ai/src/evaluation/decision-checkpoints/meta-474-trace-hardware-trash.test.ts)
+
+### 10. `runner/hand-development/hosted-breaker-development.ts`
+
+**P1, reproduziert mit alter und korrigierter Auswertung desselben
+Engine-Angebots.** Die Bewertung gehosteter Breaker gibt das Trace-Profil
+der Runner-Sicht nicht an die ICE-Pfadquote weiter. Im nativen `classic_blind`
+mit Rex auf HQ, vorhandenem Corp-Gebotsspielraum von einem Credit, 20
+liquiden Runner-Credits und vier Actions verwirft der aktuelle Owner die
+Installation von *Eurocorpse™ Spin Chip* mit *Raptor* als unrentabel.
+Allein die Übergabe des aktuellen Profils ergibt den erwarteten Vorteil
+von zwei Credits pro Zug und `net = 3.5` im bestehenden Horizont von fünf
+Zügen. Die Vergleichsläufe mit Corp-Gebotsspielraum null und zwei
+haben auf dem jeweiligen Zustand denselben Entscheid in beiden Varianten.
+
+Den vorhandenen Trace-Planungskontext für beide Pfadquoten des
+Investitionsvergleichs verwenden. Abnahme mit dem nativen Classic- und
+Modern-Gegenfall, jeweils bei identischer Liquidität und exaktem
+Installationsangebot. Aufwand ungefähr ein halber bis ein Tag.
+[Pfadquote](../../../packages/ai/src/runner/hand-development/hosted-breaker-development.ts#L206) ·
+[Einbindung des Owners](../../../packages/ai/src/runner/hand-development/hand-development-evaluation.ts#L181) ·
+[Native Installationsfälle](../../../packages/ai/src/runtime/hosted-breaker-development-real-engine.test.ts)
+
+### Prüfstand und Reihenfolge
+
+511 fokussierte Tests in 16 Dateien sind grün. Die neuen Gegenproben
+verändern nur isolierte Angebots- oder Projektionskopien beziehungsweise
+vergleichen zwei Auswertungen desselben Engine-Zustands. Die P2-Gegenfälle
+zur Aktionsbindung zeigen die zu frühe KI-Zulassung vor der Engine-Prüfung.
+Der Classic-Fall aus Punkt 10 zeigt die falsche Owner-Entscheidung im
+nativen Installationsangebot.
+
+Zuerst den Kontextverlust aus Punkt 10 beheben. Danach die aktuellen
+Angebote in Punkt 5 und 7 absichern. Punkt 1, 4 und 8 kontrollieren jeweils
+ihren eigenen Projektions- oder Zulassungsvertrag. Punkt 6 kann getrennt
+mit einer kleinen Prüfreihe für die Berichtswerte folgen. Die drei
+kleinen Wartbarkeitsänderungen aus Punkt 1 bis 3 und der Ersatzpfad aus
+Punkt 8 sind separat abnehmbar.
