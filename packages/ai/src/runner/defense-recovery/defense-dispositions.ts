@@ -123,7 +123,9 @@ export function runnerDefenseSafetyDispositions(params: {
           "runner.defense_and_recovery",
           "runner_optional_run_would_enable_known_next_corp_turn_flatline",
         );
-      } else if (runnerNextCorpTurnGripBlocksAction(input, candidate, signals)) {
+      } else if (
+        runnerNextCorpTurnGripBlocksAction(input, candidate, signals)
+      ) {
         add(
           id,
           "runner.defense_and_recovery",
@@ -218,7 +220,7 @@ function handDeltaForVoluntaryAction(
   const searchReturn =
     handCardSpent === 1 &&
     action !== undefined &&
-    isBoundSingleStackSearchPlay(input, candidate, action)
+    isBoundSingleSearchToGripPlay(input, candidate, action)
       ? 1
       : 0;
   const safeDraw =
@@ -246,7 +248,7 @@ function handDeltaForVoluntaryAction(
   );
 }
 
-function isBoundSingleStackSearchPlay(
+function isBoundSingleSearchToGripPlay(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   action: LegalAction,
@@ -276,10 +278,13 @@ function isBoundSingleStackSearchPlay(
   }
   const ability = cardSpecPlanningCardByDefinitionId(
     sourceDefinitionId,
-  )?.planning.engine.abilities?.find((entry) => entry.capabilityKey === abilityKey);
+  )?.planning.engine.abilities?.find(
+    (entry) => entry.capabilityKey === abilityKey,
+  );
   return (
     ability?.kind === "on_play" &&
     ability.effects.length === 1 &&
-    ability.effects[0]?.kind === "search_stack_to_grip"
+    (ability.effects[0]?.kind === "search_stack_to_grip" ||
+      ability.effects[0]?.kind === "search_trash_to_grip")
   );
 }

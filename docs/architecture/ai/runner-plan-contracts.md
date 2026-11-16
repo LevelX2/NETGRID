@@ -2666,9 +2666,11 @@ Suchablehnung mit sowie ohne den aktiven letzten-Klick-Schutz.
 
 Die Grip-Zugendprüfung zählt bei einer aktuell vom Engine-Angebot und der
 kanonischen On-Play-Fähigkeit gebundenen Suche mit genau einem verpflichtenden
-`search_stack_to_grip` die zurückkehrende Karte. Das Ereignis verbraucht eine
+`search_stack_to_grip` oder `search_trash_to_grip` die zurückkehrende Karte. Das Ereignis verbraucht eine
 Karte und gibt bei regulärer Choice-Auflösung eine Karte in den Grip. Die
-Planbindung der konkreten Suchantwort bleibt bei Coverage. Der Nachweis deckt
+Planbindung der konkreten Suchantwort bleibt bei Coverage. Paarung 759
+G29/D50 belegt die gebundene Heap-Rückholung mit unverändert fünf Handkarten
+nach der verpflichtenden Choice. Der Nachweis deckt
 weder fakultative Suchen noch Installationen aus dem Stack oder unbekannte
 weitere Effekte ab. Paarung 746 G31/D20 belegt die Grip-neutrale, gebundene
 Suche. Im selben Zustand bleibt das Grip-verbrauchende Sabotage-Event gesperrt.
