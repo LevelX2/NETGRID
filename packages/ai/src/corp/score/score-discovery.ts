@@ -17,7 +17,10 @@ import { visibleCardIsAgenda } from "../../runtime/visible-action-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
 import { withCorpCounterBankReplacementPreparation } from "./score-counter-bank-replacement";
-import { corpAssetPreservingSameTurnScoreRoutes } from "./score-asset-preservation";
+import {
+  corpAssetPreservingSameTurnScoreRoutes,
+  withCorpCampaignSlotRelease,
+} from "./score-asset-preservation";
 import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
 import { withCorpSameTurnScoreDefenseReserve } from "./score-reserve-restoration";
 import {
@@ -466,7 +469,7 @@ export function reconcileCorpScoreProjects({
         ),
       ),
     ),
-  ];
+  ].map((project) => withCorpCampaignSlotRelease(input, candidates, project));
   const deferredLastClickScoreProject =
     corpKnownDeferredLastClickScoreProject(scoreProjects);
   const exactLastClickLiquidityHeadAvailable =

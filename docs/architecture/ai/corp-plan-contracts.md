@@ -2672,13 +2672,40 @@ und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
 
-Eine für eine konkrete Agenda-Installation geführte Score-Reservierung
-sperrt neue Kampagnen im selben Remote. Die Wirtschaftlichkeitsprüfung einer
-Kampagne mit endlichem Pool verwendet die im aktuellen Zug verbleibenden
-Auszahlungsklicks. Für jeden weiteren Zug im risikobereinigten Horizont
-rechnet sie mit einer zusätzlichen Auszahlung. Ein vollständiger
-Kampagnenabbau mit mehreren Auszahlungen je Folgezug und anschließender
-Agenda-Installation ist damit eine offene mehrzügige Planung.
+Die Wirtschaftlichkeitsprüfung einer Kampagne mit endlichem Pool bilanziert
+die tatsächlichen Restklicks und den privaten Engine-Ausblick für die zwei
+folgenden Korp-Züge. Bereits gebundene Advances einer residenten
+Score-Fortsetzung mindern die freie Kapazität. Sichtbar angreifbare und
+ungeklärte Forts erhalten nur das aktuelle Auszahlungsfenster. Der Restpool,
+der früheste Leerungszug und dessen verbleibende Klicks bleiben vom
+liquiden Ertrag getrennt. Spätere Auszahlungen bleiben ein Ausblick, der am
+realen Folgezustand neu bewertet wird.
+
+Eine ausführbare Scorefolge oder Frist schützt den Platz für ihre Agenda.
+Economy kann eine vorübergehend freie Root eines gegenwärtig
+unterfinanzierten Scoreprojekts für eine automatisch selbst abräumende
+Kampagne verwenden, wenn sie den konkreten Fehlbetrag deckt und nach der
+Leerung noch ein Installationsklick verbleibt. Ein aktuell legaler
+Score, eine bindende Frist oder ein bereits belegter Platz schließt diese
+Zulassung aus. Die Engine revalidiert Installation, Rez und jeden Abruf.
+
+Ein bereits rezzter endlicher Pool kann vor einer sicher geschützten
+Agenda-Installation im selben Zug geleert werden. Score stellt die
+Installation bis zum Abruf zurück, wenn diese Folge denselben
+gequoteten Scoretermin erhält. Economy materialisiert den aktuellen
+Abruf. Ein letzter Abruf mit einem Credit erhält dadurch ebenfalls einen
+konkreten Zweck. Nach dem Engine-Ereignis für den Trash prüft Score den
+freien Platz und die nächste LegalAction. Der letzte Klick kann dann
+eine zertifizierte, geschützte Agenda-Installation tragen. Ein bereits
+ausführbarer Sofortsieg hat Vorrang vor dem Abruf.
+
+Direkt nach der bestätigten Leerung schützt eine ausführbare oder
+fristgebundene Scorefolge das Fort weiterhin. Eine bloß wartende
+Scoreoption darf den freien Platz in diesem Fenster für aktuelle
+Economy-, ICE-Support- und Ambush-Angebote freigeben. Jeder dieser Pläne
+prüft sein eigenes Ziel und seine LegalActions. Der native Rockerboy-Test
+belegt die Installation im letzten Klick, 3+2 Auszahlungen, die folgende
+Agenda im selben Fort und einen identischen StateHash bei Wiederholung.
 
 Ein bereits zugelassener Defense-Finanzierungsparent darf seinen aktuellen
 Basic-Credit-Schritt durch die kostenlose Vorbereitung einer besseren

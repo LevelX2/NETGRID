@@ -57,6 +57,7 @@ export type CorpScoreProjectSignal = {
     | "corp_access_punishing_agenda_deception_score_install"
     | "corp_score_protection_assessment_unknown"
     | "corp_last_click_score_install_deferred"
+    | "corp_score_awaits_campaign_slot_release"
     | "corp_score_protection_funding_gap"
     | "corp_near_matchpoint_remote_maturity_required"
     | "corp_last_viable_deckout_matchpoint_install"
@@ -196,6 +197,12 @@ export type CorpScoreProjectSignal = {
   /** Free preparation of this same admitted agenda installation, never a separate liquidation goal. */
   counterBankReplacement?: {
     installActionId: string;
+    stateVersion: number;
+  };
+  /** An exact current payout prefix can preserve the same next-turn score. */
+  campaignSlotRelease?: {
+    payoutActionId: string;
+    sourceCardInstanceId: string;
     stateVersion: number;
   };
   terminalScore: boolean;

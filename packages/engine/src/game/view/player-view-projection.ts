@@ -50,7 +50,10 @@ import {
   visibleEffectiveIceRunQuote,
 } from "./visible-run-quote";
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
-import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
+import {
+  visibleCorpFutureFlexibleClicks,
+  visibleCorpScoreContinuationQuote,
+} from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
 import { visibleCorpRestrictedCreditBankQuote } from "./visible-corp-restricted-credit-bank-quote";
 import { visibleServerStatuses } from "./server-status-view";
@@ -598,6 +601,7 @@ export function buildPlayerViewProjection(
               }
             : {}),
           clicks: state.corp.clicks,
+          corpFutureFlexibleClicks: visibleCorpFutureFlexibleClicks(state),
           agendaPoints: agendaPoints(state, "corp"),
           gripOrHq: state.corp.hq.map((id) => {
             const visibleCard = visibleOwnCard(state, id);

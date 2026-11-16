@@ -4322,6 +4322,8 @@ export type PlayerView = {
     tags: number;
     /** Runner-private, currently available free Net/Core prevention. */
     freeNetOrCoreDamagePreventionRemaining?: number;
+    /** Corp-private flexible clicks for the next two Corp turns from currently known grants and debt. */
+    corpFutureFlexibleClicks?: [number, number];
     /** Corp-private current mandatory payment; insufficient credits lose the game. */
     corpEndTurnCreditObligation?: {
       creditsDue: number;

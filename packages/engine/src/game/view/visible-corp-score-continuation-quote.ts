@@ -93,20 +93,37 @@ export function visibleCorpScoreContinuationQuote(
 }
 
 export function guaranteedNextCorpTurnFlexibleClicks(state: GameState): number {
-  return Math.max(
-    0,
-    STANDARD_CORP_TURN_CLICKS +
-      unrestrictedFutureCorpActionGrants(state) +
-      unrestrictedScoredAgendaActionGrants(state) -
-      corpActionDebtPending(state),
-  );
+  return visibleCorpFutureFlexibleClicks(state)[0];
 }
 
-function unrestrictedFutureCorpActionGrants(state: GameState): number {
+export function visibleCorpFutureFlexibleClicks(
+  state: GameState,
+): [number, number] {
+  const continuingClicks =
+    STANDARD_CORP_TURN_CLICKS + unrestrictedScoredAgendaActionGrants(state);
+  const nextClicks =
+    continuingClicks + unrestrictedFutureCorpActionGrants(state, 0);
+  const debt = corpActionDebtPending(state);
+  const remainingDebt = Math.max(0, debt - nextClicks);
+  return [
+    Math.max(0, nextClicks - debt),
+    Math.max(
+      0,
+      continuingClicks +
+        unrestrictedFutureCorpActionGrants(state, 1) -
+        remainingDebt,
+    ),
+  ];
+}
+
+function unrestrictedFutureCorpActionGrants(
+  state: GameState,
+  elapsedCorpTurns: number,
+): number {
   return (state.actionEconomy?.futureGrants ?? []).reduce(
     (sum, grant) =>
       grant.side === "corp" &&
-      grant.remainingTurns > 0 &&
+      grant.remainingTurns > elapsedCorpTurns &&
       grant.restriction === undefined
         ? sum + Math.max(0, Math.floor(grant.amountPerTurn))
         : sum,

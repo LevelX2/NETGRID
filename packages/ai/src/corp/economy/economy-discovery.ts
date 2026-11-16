@@ -27,6 +27,7 @@ import {
   corpImmediateOperationThresholdPreparations,
   corpOptionalActionCapacityConversions,
   corpRequiredEconomyNeeds,
+  corpReservedCampaignNextTurnClicks,
   corpVisibleCardEconomyWithdrawals,
 } from "./economy-signals";
 
@@ -157,7 +158,18 @@ export function buildCorpEconomySignals({
       ...(turnLiquidityDevelopment ? [turnLiquidityDevelopment] : []),
       ...operationThresholdPreparations,
       ...corpImmediateOperationEconomyConversions(input, candidates),
-      ...corpVisibleCardEconomyWithdrawals(input, candidates).filter(
+      ...corpVisibleCardEconomyWithdrawals(input, candidates, {
+        slotReleaseActionIds: new Set(
+          scoreProjects.flatMap((project) =>
+            project.campaignSlotRelease?.stateVersion ===
+            input.playerView.stateVersion
+              ? [project.campaignSlotRelease.payoutActionId]
+              : [],
+          ),
+        ),
+        reservedNextTurnClicks:
+          corpReservedCampaignNextTurnClicks(scoreProjects),
+      }).filter(
         (signal) =>
           bankInvestments.get(signal.sourceInstanceId)?.shouldCashout !==
             false ||

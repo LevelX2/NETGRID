@@ -34,9 +34,47 @@ describe("Corp economy asset payback", () => {
     input.playerView.servers = [remote("remote_1", [knownRezzedWall("wall")])];
     expect(quote(1)).toMatchObject({
       protectionState: "protected_not_contestable",
-      projectedNetCredits: 1,
+      projectedNetCredits: 5,
     });
   });
+  it("empties a protected campaign in 3+2 payouts after a last-click installation", () => {
+    const input = corpInput(
+      remote("remote_1", [knownRezzedWall("remote-wall")]),
+    );
+    input.playerView.own.clicks = 1;
+    const quote = (reservedNextTurnClicks = 0) =>
+      assessCorpEconomyAssetPayback({
+        input,
+        serverId: "remote_1",
+        cadence: "finite_pool",
+        baselineHorizonTurns: 3,
+        finitePoolCredits: 15,
+        payoutCreditsPerExecution: 3,
+        payoutActionCost: 1,
+        setupCreditCost: 4,
+        setupActionCost: 1,
+        reservedNextTurnClicks,
+      });
+    expect(quote()).toMatchObject({
+      projectedCredits: 15,
+      projectedNetCredits: 5,
+      projectedPayoutsByTurn: [0, 3, 2],
+      projectedExhaustion: { turnsFromNow: 2, remainingFlexibleClicks: 1 },
+    });
+    expect(quote(2)).toMatchObject({
+      projectedCredits: 12,
+      projectedPayoutsByTurn: [0, 1, 3],
+    });
+    input.playerView.own.corpFutureFlexibleClicks = [1, 3];
+    expect(quote()).toMatchObject({
+      projectedCredits: 12,
+      projectedPayoutsByTurn: [0, 1, 3],
+    });
+    expect(quote()?.projectedExhaustion).toBeUndefined();
+    delete input.playerView.own.corpFutureFlexibleClicks;
+    expect(quote()?.projectedPayoutsByTurn).toEqual([0]);
+  });
+
   it("counts the last partial withdrawal without inventing credits beyond the finite pool", () => {
     expect(
       assessCorpEconomyAssetPayback({
@@ -73,7 +111,7 @@ describe("Corp economy asset payback", () => {
       protectionState: "unprotected",
       riskAdjustedHorizonTurns: 1,
       projectedPayoutExecutions: 2,
-      unadjustedProjectedCredits: 8,
+      unadjustedProjectedCredits: 16,
       projectedCredits: 4,
       projectedOpportunityCostCredits: 3,
       projectedNetCredits: 1,
@@ -96,10 +134,10 @@ describe("Corp economy asset payback", () => {
     ).toMatchObject({
       protectionState: "protected_not_contestable",
       riskAdjustedHorizonTurns: 3,
-      projectedPayoutExecutions: 4,
-      projectedCredits: 8,
-      projectedOpportunityCostCredits: 5,
-      projectedNetCredits: 3,
+      projectedPayoutExecutions: 8,
+      projectedCredits: 16,
+      projectedOpportunityCostCredits: 9,
+      projectedNetCredits: 7,
     });
   });
 
@@ -156,7 +194,7 @@ function corpInput(
     side: "corp",
     legalActions: [],
     playerView: {
-      own: { credits: 10, clicks: 3 },
+      own: { credits: 10, clicks: 3, corpFutureFlexibleClicks: [3, 3] },
       opponent: { credits: 10, clicks: 4, rig: [] },
       servers: [remoteServer],
     },
