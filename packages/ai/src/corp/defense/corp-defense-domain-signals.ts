@@ -25,6 +25,7 @@ import {
   readCorpPublicOffServerAccessThreat,
 } from "./corp-central-defense-facts-adapter";
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
+import { terminalOffServerTraceBudget } from "./terminal-off-server-trace";
 import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
@@ -1234,6 +1235,12 @@ export function corpGlobalDefenseInstallRouteAssessment(
       !hasResidentRemoteAgenda &&
       (establishesMissingCentralCoverage ||
         (hasSelectedCentralPressure && hasStructuredDefenseValue)));
+  const offServerTraceBudget =
+    server?.ice.length === 0 &&
+    !server.statuses?.some((status) => status.kind === "run_prohibited") &&
+    readCorpPublicOffServerAccessThreat(input, serverId)?.threat === "terminal"
+      ? terminalOffServerTraceBudget(input.playerView)
+      : undefined;
   const projection = projectCorpFundedIceInstallRoute({
     need,
     action,
@@ -1254,6 +1261,9 @@ export function corpGlobalDefenseInstallRouteAssessment(
     runnerCredits: input.playerView.opponent.credits,
     projectedInstallCredits,
     projectedInstallClicks,
+    ...(offServerTraceBudget
+      ? { terminalOffServerTraceBudget: offServerTraceBudget }
+      : {}),
     ...(preferQualitativeSourceProgress
       ? { preferPostInstallSourceProgress: true }
       : {}),
@@ -1264,6 +1274,20 @@ export function corpGlobalDefenseInstallRouteAssessment(
       evidenceCode: `corp_ice_install_assessment_unknown:${projection.unknownReason}`,
     };
   }
+  if (
+    projection.certifiedZeroBidTraceStopId &&
+    corpSpendConsumesKnownCentralRezReserve(
+      input,
+      centralAllocation,
+      projection.creditsAfterDefense,
+      projection.clicksAfterDefense,
+    )
+  )
+    return {
+      knowledge: "known",
+      disposition: "effect_missing",
+      evidenceCode: "corp_off_server_ice_install_consumes_central_rez_reserve",
+    };
   if (
     projection.preservesReserves &&
     (projection.effect === "progress" || projection.effect === "satisfied")
