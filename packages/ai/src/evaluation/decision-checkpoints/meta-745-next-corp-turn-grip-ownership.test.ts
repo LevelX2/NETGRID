@@ -19,11 +19,7 @@ import {
 afterEach(resetResidentPlanPortfolioMemory);
 
 function decide(
-  checkpoint:
-    | typeof jettison
-    | typeof bypass
-    | typeof search
-    | typeof boundSearch,
+  checkpoint: typeof jettison | typeof bypass | typeof search | typeof boundSearch,
   event: string,
   extraClick = false,
 ) {
@@ -47,17 +43,13 @@ function decide(
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).toBe(false);
-  expect(
-    input.legalActions.some((action) => action.actionId === decision.actionId),
-  ).toBe(true);
+  expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
   const plan = decision.decisionDebug!.planFirstDecision!;
   return {
     actionId,
     selectedActionId: decision.actionId,
     plan,
-    dispositions: plan.dispositions.filter(
-      (entry) => entry.actionId === actionId,
-    ),
+    dispositions: plan.dispositions.filter((entry) => entry.actionId === actionId),
   };
 }
 
@@ -70,34 +62,27 @@ const protection = {
 it.each([
   ["ICE removal", jettison, "core-command-jettison-ice", "fnv1a:85b73d8a"],
   ["bypass", bypass, "social-engineering", "fnv1a:1998f9b1"],
-] as const)(
-  "keeps Grip over optional last-click %s",
-  (_label, cp, event, hash) => {
-    expect(cp.stateHash).toBe(hash);
-    const guarded = decide(cp, event);
-    expect(guarded.dispositions).toEqual([
-      { ...protection, actionId: guarded.actionId },
-    ]);
-    expect(guarded.selectedActionId).toBe("runner.gain_credit");
-    expect(
-      guarded.plan.turnPlanning!.consideredLines!.some(
-        (line) => line.firstActionId === guarded.actionId,
-      ),
-    ).toBe(false);
+] as const)("keeps Grip over optional last-click %s", (_label, cp, event, hash) => {
+  expect(cp.stateHash).toBe(hash);
+  const guarded = decide(cp, event);
+  expect(guarded.dispositions).toEqual([{ ...protection, actionId: guarded.actionId }]);
+  expect(guarded.selectedActionId).toBe("runner.gain_credit");
+  expect(
+    guarded.plan.turnPlanning!.consideredLines!.some(
+      (line) => line.firstActionId === guarded.actionId,
+    ),
+  ).toBe(false);
 
-    resetResidentPlanPortfolioMemory();
-    const canRefill = decide(cp, event, true);
-    expect(canRefill.dispositions).toEqual([]);
-    expect(canRefill.selectedActionId).toBe(canRefill.actionId);
-    expect(canRefill.plan.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ard",
-    );
-    expect(canRefill.plan.route).toMatchObject({
-      actionId: canRefill.actionId,
-      stateVersion: cp.input.playerView.stateVersion,
-    });
-  },
-);
+  resetResidentPlanPortfolioMemory();
+  const canRefill = decide(cp, event, true);
+  expect(canRefill.dispositions).toEqual([]);
+  expect(canRefill.selectedActionId).toBe(canRefill.actionId);
+  expect(canRefill.plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ard");
+  expect(canRefill.plan.route).toMatchObject({
+    actionId: canRefill.actionId,
+    stateVersion: cp.input.playerView.stateVersion,
+  });
+});
 
 it("keeps the Coverage rejection when a Grip-neutral search has no useful answer", () => {
   expect(search.stateHash).toBe("fnv1a:5f7140ae");
@@ -107,8 +92,7 @@ it("keeps the Coverage rejection when a Grip-neutral search has no useful answer
       actionId: guarded.actionId,
       ownerModuleId: "runner.rig_and_coverage",
       disposition: "explicitly_nonproductive",
-      evidenceCode:
-        "runner_coverage_search_rejected_without_deck_answer:breaker_sentry@no_server+breaker_wall@no_server",
+      evidenceCode: "runner_coverage_search_rejected_without_deck_answer:breaker_sentry@no_server+breaker_wall@no_server",
     },
   ]);
   expect(guarded.selectedActionId).toBe("runner.gain_credit");
@@ -120,8 +104,7 @@ it("keeps the Coverage rejection when a Grip-neutral search has no useful answer
       actionId: canRefill.actionId,
       ownerModuleId: "runner.rig_and_coverage",
       disposition: "explicitly_nonproductive",
-      evidenceCode:
-        "runner_coverage_search_rejected_without_deck_answer:breaker_sentry@no_server+breaker_wall@no_server",
+      evidenceCode: "runner_coverage_search_rejected_without_deck_answer:breaker_sentry@no_server+breaker_wall@no_server",
     },
   ]);
 });
@@ -131,9 +114,7 @@ it("executes a bound mandatory search that returns the spent card count to Grip"
   const ready = decide(boundSearch, "mantis-fixer-at-large");
   expect(ready.selectedActionId).toBe(ready.actionId);
   expect(ready.dispositions).toEqual([]);
-  expect(ready.plan.rootPlanInstanceId).toBe(
-    "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
-  );
+  expect(ready.plan.rootPlanInstanceId).toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate");
   expect(ready.plan.route).toMatchObject({
     actionId: ready.actionId,
     stateVersion: boundSearch.input.playerView.stateVersion,
@@ -205,6 +186,8 @@ it("credits the mandatory Grip return of an exact heap search on the final actio
     minimumHandBuffer: handSize,
     nextCorpTurnBufferTarget: handSize,
     nextCorpTurnGripPreservation: true,
+    handBufferPriorityClass: "P3",
+    evidenceCodes: [],
     activeTags: 0,
     visibleTagPunish: false,
     persistentHazardCounterRemovalAvailable: false,

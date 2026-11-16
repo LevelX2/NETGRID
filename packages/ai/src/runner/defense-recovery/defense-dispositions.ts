@@ -123,9 +123,7 @@ export function runnerDefenseSafetyDispositions(params: {
           "runner.defense_and_recovery",
           "runner_optional_run_would_enable_known_next_corp_turn_flatline",
         );
-      } else if (
-        runnerNextCorpTurnGripBlocksAction(input, candidate, signals)
-      ) {
+      } else if (runnerNextCorpTurnGripBlocksAction(input, candidate, signals)) {
         add(
           id,
           "runner.defense_and_recovery",
@@ -278,9 +276,7 @@ function isBoundSingleSearchToGripPlay(
   }
   const ability = cardSpecPlanningCardByDefinitionId(
     sourceDefinitionId,
-  )?.planning.engine.abilities?.find(
-    (entry) => entry.capabilityKey === abilityKey,
-  );
+  )?.planning.engine.abilities?.find((entry) => entry.capabilityKey === abilityKey);
   return (
     ability?.kind === "on_play" &&
     ability.effects.length === 1 &&
