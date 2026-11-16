@@ -127,10 +127,7 @@ import {
 import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
 import { visibleRootIsKnownAgenda } from "./runtime/visible-root-agenda";
-import {
-  classifyTagPunishPayoffFromOntology,
-  classifyTagSourceFromOntology,
-} from "./tag-punish-ontology-consumer";
+import { classifyTagPunishPayoffFromOntology } from "./tag-punish-ontology-consumer";
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
@@ -214,7 +211,6 @@ export const aiLiveRuntimeDependencies = {
   runnerRigTrashTarget: corpVisibleRunnerRigTrashTarget,
   runnerResourceTrashEvidence: corpVisibleRunnerResourceTrashEvidence,
   payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
-  tagSourceProfileForDefinition: classifyTagSourceFromOntology,
   runnerDamagePreventionEvidence: corpVisibleRunnerDamagePreventionEvidence,
   runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
   runnerSurvivalCounterContextForInput,

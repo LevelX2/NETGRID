@@ -115,3 +115,47 @@ export function isCorpRemoteAdvancementProgress(
   if (entry.actionType === "advance_card") return true;
   return (entry.advancementCountersAdded ?? 0) > 0;
 }
+
+export function countRunnerTurnsBelowContestReserve(
+  sequence: AiSimulationSummary["actionSequence"],
+): number {
+  const turns = new Set<number>();
+  for (const entry of sequence) {
+    if (
+      entry.side === "runner" &&
+      entry.runnerBelowReserveBefore === true &&
+      entry.turnNumber !== undefined
+    )
+      turns.add(entry.turnNumber);
+  }
+  return turns.size;
+}
+
+export function countPressureTargetSwitches(
+  sequence: AiSimulationSummary["actionSequence"],
+): number {
+  let previousTarget: string | undefined;
+  let switches = 0;
+  for (const entry of sequence) {
+    if (entry.side !== "runner" || entry.actionType !== "start_run") continue;
+    const target = entry.targetServerId ?? "unknown";
+    if (previousTarget !== undefined && previousTarget !== target) switches++;
+    previousTarget = target;
+  }
+  return switches;
+}
+
+export function successfulRunAccessTargets(
+  sequence: AiSimulationSummary["actionSequence"],
+): string[] {
+  const byRun = new Map<string, string>();
+  for (const entry of sequence) {
+    if (
+      entry.side === "runner" &&
+      entry.runnerReserveRunId &&
+      entry.runnerReserveAccessTarget
+    )
+      byRun.set(entry.runnerReserveRunId, entry.runnerReserveAccessTarget);
+  }
+  return [...byRun.values()];
+}

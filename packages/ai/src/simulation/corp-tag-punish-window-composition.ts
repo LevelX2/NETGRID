@@ -17,7 +17,7 @@ export type CorpTagPunishWindowCompositionDependencies =
 export function createCorpTagPunishWindowComposition(
   dependencies: CorpTagPunishWindowCompositionDependencies,
 ) {
-  const { corpOntologyPayoffAvailableForTagSource } =
+  const corpOntologyPayoffAvailableForTagSource =
     createCorpTagSourcePayoffContext(dependencies);
   return createTagPunishWindowDiagnosticsContext({
     ...dependencies,

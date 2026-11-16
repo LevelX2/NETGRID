@@ -6,7 +6,7 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
-import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-discovery-support";
+import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-install-discovery";
 import {
   v162CardReleaseGame,
   moveCorpCardToHq,

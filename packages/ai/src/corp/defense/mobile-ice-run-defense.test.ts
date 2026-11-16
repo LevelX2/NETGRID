@@ -382,7 +382,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       evidenceCode: "corp_mobile_ice_has_no_bound_current_terminal_agenda",
     });
   });
-  it.each(["state", "action", "target", "json", "payment"])(
+  it.each(["state", "action", "target", "json", "payment", "ice"])(
     "fails closed on a broken quote binding: %s",
     (broken) => {
       const { state } = fixture(),
@@ -393,6 +393,8 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       if (broken === "action") q.actionId = "another-action";
       if (broken === "target") q.targetServerId = "hq";
       if (broken === "payment") q.continuation.corpAgendaPointsAfterDefense--;
+      if (broken === "ice")
+        q.afterIce[0] = { known: true, rezzed: true, type: "ice" };
       action.payload!.corpMobileIceMoveQuoteJson =
         broken === "json" ? "{" : JSON.stringify(q);
       expect(() => assessMobileIceRunDefense(input, action)).toThrow(

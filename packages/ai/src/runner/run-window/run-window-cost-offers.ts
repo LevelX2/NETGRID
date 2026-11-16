@@ -18,6 +18,7 @@ export function originalPaymentSelectionReachesWindow(
   if (
     !previous ||
     !origin ||
+    windowId === undefined ||
     origin.windowId !== undefined ||
     previous.stateVersion !== origin.selectedAtStateVersion
   )
@@ -171,6 +172,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
   );
   const supportActionsMatchWindow = supportActions.every(
     (supportAction) =>
+      supportAction.type === "activated_card_ability" &&
       actionMatchesCurrentDecision(context.input, supportAction) &&
       supportAction.payload?.costPenaltySupportWindowId === windowId &&
       supportAction.payload?.costPenaltySupportOriginalActionId ===

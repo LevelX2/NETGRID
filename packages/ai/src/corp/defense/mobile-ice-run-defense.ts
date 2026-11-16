@@ -65,7 +65,8 @@ export function assessMobileIceRunDefense(
   };
   let q: Quote;
   try {
-    q = typeof raw === "string" ? JSON.parse(raw) : fail();
+    if (typeof raw !== "string") return fail();
+    q = JSON.parse(raw);
   } catch {
     return fail();
   }
@@ -84,6 +85,8 @@ export function assessMobileIceRunDefense(
     card?.known === true &&
     card.rezzed === true &&
     card.type === "ice" &&
+    typeof card.instanceId === "string" &&
+    typeof card.definitionId === "string" &&
     card.effectiveRunQuote?.iceInstanceId === card.instanceId &&
     card.effectiveRunQuote.iceDefinitionId === card.definitionId &&
     Array.isArray(card.effectiveRunQuote.subroutines);

@@ -64,7 +64,7 @@ export type RunnerHandUseDiagnosticsDependencies = {
     input: AiDecisionInput,
     excludeActionId: string,
   ) => boolean;
-  hasRunnerRunnablePressureAction: (
+  hasRunnerPlayablePressureCard: (
     input: AiDecisionInput,
     excludeActionId: string,
   ) => boolean;
@@ -127,7 +127,7 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
       input,
       action.actionId,
     );
-    const runnablePressure = dependencies.hasRunnerRunnablePressureAction(
+    const runnablePressure = dependencies.hasRunnerPlayablePressureCard(
       input,
       action.actionId,
     );

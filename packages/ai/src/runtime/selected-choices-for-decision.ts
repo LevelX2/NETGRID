@@ -1211,12 +1211,7 @@ export function selectedChoicesForDecision(
     choice.source === "card_implementation.runner_installed_multi_trash" &&
     corpInstalledHardwareTrashOperationProfile(choice.sourceCardDefinitionId)
   ) {
-    const selected = selectedCorpHardwareTrashChoiceOptionIds(
-      input,
-      action,
-      choice,
-      selectableOptions,
-    );
+    const selected = selectedCorpHardwareTrashChoiceOptionIds(input, action);
     if (!selected) {
       throw unresolvedChoiceFailure(
         input,

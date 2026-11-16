@@ -38,11 +38,8 @@ import {
   buildCorpDefenseProtectionSignals,
   prepareCorpDefenseDiscovery,
 } from "../corp/defense/defense-discovery";
-import {
-  CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
-  corpDefenseSignalOwnsAction,
-  corpDefensiveUpgradePlacement,
-} from "../corp/defense/defense-discovery-support";
+import { CORP_DEFENSE_DOMAIN_SIGNAL_FACTS, corpDefenseSignalOwnsAction } from "../corp/defense/defense-discovery-support";
+import { corpDefensiveUpgradePlacement } from "../corp/defense/defense-install-discovery";
 import {
   bindSelectedCorpDefenseDrawAttempt,
   bindSelectedCorpDefenseHqHold,

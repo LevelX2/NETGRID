@@ -1006,14 +1006,11 @@ und einem Klick an. Der Gegenfall zeigt eine künftige Änderungsfalle.
 `corpBurstEconomyOperationForAction` bekommt zudem eine generische
 Abhängigkeit, die es gar nicht liest.
 
-Als kleinen Schnitt die ungenutzte Abhängigkeit entfernen. Bei einer
-Erweiterung des Advance-Vertrags den aktuellen LegalAction-Preis separat
-vom Preis möglicher Folgeschritte prüfen. Abnahme zunächst mit unveränderten
-Corp-Economy-Komponenten für die bekannten nativen Preise.
-Aufwand für die Signaturpflege ungefähr zwei bis vier Stunden.
-[Closeout](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts#L92) ·
-[Economy-Helfer](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts#L412) ·
-[Engine-Angebot](../../../packages/engine/src/game/turn/corp-main-actions.ts#L730)
+Der alte Closeout-Helfer hatte nach der Umstellung auf den produktiven
+[Corp-Planvertrag](../../architecture/ai/corp-plan-contracts.md) keinen
+Aufrufer mehr. Der Diagnosepfad und seine isolierten Tests sind entfernt.
+Das [Engine-Angebot](../../../packages/engine/src/game/turn/corp-main-actions.ts#L730)
+bleibt die Quelle für die Kosten aktueller Advance-Aktionen.
 
 ### 7. `simulation/runner-action-valuation-baseline-metrics.ts`
 

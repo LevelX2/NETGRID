@@ -7,12 +7,7 @@ export type CorpRunDefenseAbilityAssessment = {
   evidenceCode: string;
 };
 
-export type CorpExactCardRezSupportAssessment = {
-  productive: boolean;
-  serverId: string;
-  value: number;
-  evidenceCode: string;
-};
+export type CorpExactCardRezSupportAssessment = CorpRunDefenseAbilityAssessment;
 
 export type CorpDefensiveUpgradePlacement = {
   signal?: CorpDefenseSignal;

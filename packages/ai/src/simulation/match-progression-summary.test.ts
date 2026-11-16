@@ -19,16 +19,59 @@ describe("summarizeMatchProgressionMetrics", () => {
     expect(metrics.runnerReserveAfterSuccessfulRun).toBe(1);
   });
 
-  it("counts successful run action types exactly", () => {
+  it("keeps pressure switches, low-reserve turns and ICE order within a match", () => {
+    const belowReserve = {
+      ...action("gain_credit"),
+      runnerCreditsBefore: 1,
+      runnerBelowReserveBefore: true,
+    };
+    const ice = {
+      ...action("install_card", "hq"),
+      side: "corp" as const,
+      installPlacement: "ice",
+    };
     const metrics = summarizeMatchProgressionMetrics([
       summary([
         action("start_run", "hq"),
+        action("start_run", "rd"),
+        belowReserve,
+        belowReserve,
+        { ...ice, corpFutureRunIceInstalledAsDeadEffect: true },
+      ]),
+      summary([action("start_run", "archives"), belowReserve, ice]),
+    ]);
+    expect(metrics.pressureTargetSwitches).toBe(1);
+    expect(metrics.runnerTurnsBelowContestReserve).toBe(2);
+    expect(metrics.corpMultiIceInstallOrderFutureEffectDead).toBe(0);
+  });
+
+  it("counts successful access runs once per match, including multiaccess", () => {
+    const observed = (actionType: string) => ({
+      ...action(actionType, "hq"),
+      runnerReserveRunId: "run-1",
+      runnerReserveAccessTarget: "hq",
+    });
+    const metrics = summarizeMatchProgressionMetrics([
+      summary([
+        observed("access_card"),
+        observed("decline_trash"),
+        observed("access_card"),
+      ]),
+      summary([observed("access_card")]),
+    ]);
+    expect(metrics.successfulCentralRuns).toBe(2);
+  });
+
+  it("counts successful remote access action types exactly", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      summary([
+        action("start_run", "remote_1"),
         action("access_card"),
         action("access_card_noise"),
       ]),
     ]);
 
-    expect(metrics.successfulCentralRuns).toBe(1);
+    expect(metrics.successfulRemoteAccesses).toBe(1);
   });
 });
 

@@ -13,7 +13,7 @@ import { projectGlobalRootSupportRezAfterInstall } from "../../../../engine/src/
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
-import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-discovery-support";
+import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-install-discovery";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
   restoreAiRuntimeCheckpoint,

@@ -134,6 +134,12 @@ im betrachteten Creditbudget. Aktiver Root-Schutz trägt 35 Punkte je Karte.
 Eine bezahlbare weitere Option trägt einmal 28 Punkte. Unbezahlbare
 ungerezzte Root-Karten tragen keine Schutzpunkte.
 
+Zielwechsel und ICE-Installationsreihenfolgen werden innerhalb eines Matches
+gezählt. Die Kreditreserve zählt je Runner-Zug höchstens einmal. Ein Run mit
+beobachtetem Zugriff zählt auch bei Multiaccess einmal. Der Druckindikator
+für spielbare Karten im Runner-Handeinsatz zählt nur Kartenaktionen.
+Das Doctrine-Gate prüft Laufzeitabbrüche des Kandidaten auch bei gültigem Replay.
+
 ## Vergleichsevidenz und Standardmodus
 
 Verhaltensfälle im expliziten `legacy_compare` tragen `[legacy_compare]` im Namen.

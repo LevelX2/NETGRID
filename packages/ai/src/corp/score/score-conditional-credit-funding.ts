@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
@@ -18,7 +19,13 @@ export function corpBasicCreditsDominatedByCurrentScore(
   candidates: readonly ActionSemanticCandidate[],
   projects: readonly CorpScoreProjectSignal[],
 ): ReadonlySet<string> {
-  if (input.playerView.run || input.playerView.own.clicks < 1) return new Set();
+  if (
+    input.side !== "corp" ||
+    input.playerView.timingPoint !== "corp_action.main" ||
+    input.playerView.run ||
+    input.playerView.own.clicks < 1
+  )
+    return new Set();
   const conversionCreditIds = basicCreditsLostBeforeCompleteConversion(
     input,
     candidates,
@@ -29,7 +36,7 @@ export function corpBasicCreditsDominatedByCurrentScore(
     (action) =>
       action.type === "score_agenda" &&
       action.side === "corp" &&
-      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      actionMatchesCurrentDecision(input, action) &&
       action.costs.length === 0,
   );
   if (freeScores.length !== 1) return new Set();
@@ -124,7 +131,7 @@ function basicCreditsLostBeforeCompleteConversion(
       input.legalActions.some(
         (action) =>
           project.actionIds?.includes(action.actionId) &&
-          action.expiresAtStateVersion === input.playerView.stateVersion,
+          actionMatchesCurrentDecision(input, action),
       ) &&
       input.playerView.own.scoreArea.every((card) =>
         corpDefinitionIsMainPhasePassive(card.definitionId, "past"),
@@ -201,6 +208,8 @@ export function corpConditionalScoreCreditFunding(
   project: CorpScoreProjectSignal,
 ): CorpScoreProjectSignal {
   if (
+    input.side !== "corp" ||
+    input.playerView.timingPoint !== "corp_action.main" ||
     project.phase !== "score_agenda" ||
     project.terminalScore ||
     !project.feasible ||
@@ -218,7 +227,7 @@ export function corpConditionalScoreCreditFunding(
       action.type === "score_agenda" &&
       action.side === "corp" &&
       action.source === project.agendaInstanceId &&
-      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      actionMatchesCurrentDecision(input, action) &&
       action.costs.length === 0,
   );
   if (!score) return project;

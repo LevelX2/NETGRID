@@ -1,3 +1,4 @@
+import type { RunnerSurvivalCounterContext } from "./runner-survival-counter-context";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 
@@ -12,14 +13,6 @@ import type {
 import { rolesMatch } from "../role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-taken-diagnostics";
-
-export type RunnerSurvivalCounterContext = {
-  any: boolean;
-  trace: boolean;
-  damage: boolean;
-  flatline: boolean;
-  link: boolean;
-};
 
 export type CorpVisibleTagPunishUnknownSkipDiagnosticsDependencies = {
   sourceDefinitionIdForAction: (

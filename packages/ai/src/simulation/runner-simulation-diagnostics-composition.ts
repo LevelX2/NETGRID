@@ -92,8 +92,7 @@ export function createRunnerSimulationDiagnosticsComposition(
         dependencies.hasRunnerPlayableEconomyAction,
       hasRunnerInstallableBreakerAction:
         dependencies.hasRunnerInstallableBreakerAction,
-      hasRunnerRunnablePressureAction:
-        dependencies.hasRunnerRunnablePressureAction,
+      hasRunnerPlayablePressureCard: dependencies.hasRunnerPlayablePressureCard,
       hasRunnerRemoteTrashAction: dependencies.hasRunnerRemoteTrashAction,
       runnerDiscardChoiceRoles: dependencies.runnerDiscardChoiceRoles,
       isRunnerDuplicateInstall: dependencies.isRunnerDuplicateInstall,

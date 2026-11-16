@@ -155,6 +155,9 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
       ...(reserveAfterAccess !== undefined && runId !== undefined
         ? {
             runnerReserveRunId: runId,
+            ...(accessTarget
+              ? { runnerReserveAccessTarget: accessTarget }
+              : {}),
             runnerReserveAfterSuccessfulRun: reserveAfterAccess,
           }
         : {}),

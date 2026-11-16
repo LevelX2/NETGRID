@@ -7,10 +7,8 @@ import { buildAiDecisionInputDto } from "../../input-dto";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { prepareCorpDefenseDiscovery } from "../../corp/defense/defense-discovery";
-import {
-  CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
-  corpDefensiveUpgradePlacement,
-} from "../../corp/defense/defense-discovery-support";
+import { CORP_DEFENSE_DOMAIN_SIGNAL_FACTS } from "../../corp/defense/defense-discovery-support";
+import { corpDefensiveUpgradePlacement } from "../../corp/defense/defense-install-discovery";
 import { corpQualitativeIceStagingSignal } from "../../corp/defense/corp-defense-domain-signals";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {

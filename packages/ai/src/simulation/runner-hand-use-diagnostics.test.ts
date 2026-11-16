@@ -41,7 +41,7 @@ function dependencies(
     runnerDrawKindForSimulationAction: () => ({}),
     hasRunnerPlayableEconomyAction: () => false,
     hasRunnerInstallableBreakerAction: () => false,
-    hasRunnerRunnablePressureAction: () => false,
+    hasRunnerPlayablePressureCard: () => false,
     hasRunnerRemoteTrashAction: () => false,
     runnerDiscardChoiceRoles: () => discardRoles,
     isRunnerDuplicateInstall: () => false,

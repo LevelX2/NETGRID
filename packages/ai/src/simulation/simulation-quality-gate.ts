@@ -101,8 +101,13 @@ export function evaluateSimulationQualityGate(
 }
 
 function runtimeFailureRate(result: AiSimulationRunResult): number {
-  const failures = result.summaries.filter(
+  return countSimulationRuntimeFailures(result) / Math.max(result.games, 1);
+}
+
+export function countSimulationRuntimeFailures(
+  run: Pick<AiSimulationRunResult, "summaries">,
+): number {
+  return run.summaries.filter(
     ({ terminationKind }) => terminationKind === "runtime_failure",
   ).length;
-  return failures / Math.max(result.games, 1);
 }

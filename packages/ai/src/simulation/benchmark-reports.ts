@@ -13,6 +13,7 @@ import type {
   AiMatchProgressionBenchmarkSuiteResult,
 } from "./ai-match-progression-types";
 import type { AiSelfplayTraceMiningResult } from "./selfplay-trace-mining";
+import { countSimulationRuntimeFailures } from "./simulation-quality-gate";
 import { CORP_STRATEGY_PANEL_TARGETS } from "./benchmark-deck-strategy-panel";
 import { buildSelfplayActionTypeDominanceReport } from "./selfplay-action-type-dominance";
 import { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./selfplay-why-coverage";
@@ -35,7 +36,13 @@ export function evaluateDoctrineQualityGate(
     maxRepeatedLowValueCentralRunDelta:
       thresholds.maxRepeatedLowValueCentralRunDelta ?? 2,
   };
+  const candidateRuntimeFailures = countSimulationRuntimeFailures(
+    benchmark.candidateRun,
+  );
   const hardFailures = [
+    ...(candidateRuntimeFailures > 0
+      ? [`candidate_runtime_failures:${candidateRuntimeFailures}`]
+      : []),
     ...(benchmark.candidateRun.illegalActions >
     resolved.maxCandidateIllegalActions
       ? [`candidate_illegal_actions:${benchmark.candidateRun.illegalActions}`]
@@ -143,6 +150,7 @@ export function formatDoctrineQualityBenchmarkReport(
   const safetyRows = [
     ["illegalActionDelta", benchmark.safety.illegalActionDelta],
     ["replayFailureDelta", benchmark.safety.replayFailureDelta],
+    ["runtimeFailureDelta", benchmark.safety.runtimeFailureDelta],
     ["timeoutRateDelta", benchmark.safety.timeoutRateDelta],
     ["fallbackRateDelta", benchmark.safety.fallbackRateDelta],
   ];

@@ -8,7 +8,6 @@ import type {
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { corpPurgeImpactScoreComponent } from "../../corp/virus-pressure/corp-purge-impact";
 import { corpCurrentRunAccessServerId } from "../../corp/defense/corp-central-defense-facts-adapter";
-import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import { createAiHintsByCard } from "../../ai-hints";
 import { rolesMatch } from "../../role-match";
@@ -17,77 +16,7 @@ import {
   traceActionLeavesImmediatePunishWindow,
   traceTagExpectedSuccessEstimate,
 } from "../trace-tag-success-estimate";
-import { type SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score-contracts";
-import {
-  corpBurstEconomyOperationForAction,
-  positiveOrZeroNumber,
-  semanticRuntimeCorpActionCreditCost,
-  visibleActionSourceId,
-} from "./semantic-runtime-corp-score-action-economy";
-import {
-  corpServerIceLocation,
-  minimumInnerUnrezzedIceRezCost,
-} from "./semantic-runtime-corp-score-install-sequencing";
-
 const AI_HINTS_BY_CARD = createAiHintsByCard();
-
-export function corpInstallServerId(action: LegalAction): string | undefined {
-  const serverId =
-    action.payload?.serverId ??
-    action.payload?.targetServerId ??
-    action.payload?.attackedServerId;
-  return typeof serverId === "string" ? serverId : undefined;
-}
-
-export function corpDownstreamRezReserveAssessment<TConsumer extends string>(
-  input: AiDecisionInput,
-  action: LegalAction,
-  actionSemanticCandidate: ActionSemanticCandidate | undefined,
-  dependencies: Pick<
-    SemanticRuntimeCorpScoreDependencies<TConsumer>,
-    "actionCreditCost"
-  >,
-  effectiveDefense: ReturnType<
-    typeof semanticRuntimeCorpEffectiveDefenseContext
-  >,
-): AiDecisionScoreComponent | undefined {
-  if (!effectiveDefense?.isRezzableNow) return undefined;
-  if (
-    !effectiveDefense.visibleBreakerCoverage &&
-    !effectiveDefense.zeroEffectRisk
-  ) {
-    return undefined;
-  }
-  const sourceId = visibleActionSourceId(action);
-  if (!sourceId) return undefined;
-  const location = corpServerIceLocation(input, sourceId);
-  if (!location || location.iceIndex <= 0) return undefined;
-  const innerRezFloor = minimumInnerUnrezzedIceRezCost(location);
-  if (innerRezFloor === undefined) return undefined;
-  const rezCost = semanticRuntimeCorpActionCreditCost(
-    dependencies,
-    action,
-    actionSemanticCandidate,
-  );
-  const postRezCredits = input.playerView.own.credits - rezCost;
-  if (postRezCredits >= innerRezFloor) return undefined;
-  const isCentral = location.server.id === "hq" || location.server.id === "rd";
-  const value = isCentral ? -1800 : -1300;
-  return {
-    key: "corp_downstream_rez_floor_preservation",
-    label: "Innere ICE-Reserve",
-    value,
-    reason: [
-      "downstream_rez_floor:blocked_after_current_rez",
-      `server:${location.server.id}`,
-      `post_rez_credits:${postRezCredits}`,
-      `inner_rez_floor:${innerRezFloor}`,
-      `visible_breaker_coverage:${effectiveDefense.visibleBreakerCoverage}`,
-      `zero_effect_risk:${effectiveDefense.zeroEffectRisk}`,
-      `downstream_reserve_value:${value}`,
-    ].join("|"),
-  };
-}
 
 export function corpRootRezTimingComponent(
   input: AiDecisionInput,

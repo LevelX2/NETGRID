@@ -40,8 +40,24 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("# AI Deck Doctrine Quality Benchmark Report");
     expect(report).toContain("| nakedAgendaInstalls |");
     expect(report).toContain("## Safety Delta");
+    expect(report).toContain("runtimeFailureDelta");
     expect(report).toContain(`Gate: ${gate.accepted ? "PASS" : "FAIL"}`);
     expect(gate.thresholds.maxCandidateIllegalActions).toBe(0);
+    const runtimeFailure = {
+      ...benchmark.candidateRun.summaries[0]!,
+      terminationKind: "runtime_failure" as const,
+      replayOk: true,
+    };
+    expect(
+      evaluateDoctrineQualityGate({
+        ...benchmark,
+        baselineRun: { ...benchmark.baselineRun, summaries: [runtimeFailure] },
+        candidateRun: {
+          ...benchmark.candidateRun,
+          summaries: [runtimeFailure],
+        },
+      }).hardFailures,
+    ).toContain("candidate_runtime_failures:1");
     expect(JSON.stringify({ gate, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );

@@ -7,7 +7,10 @@ export function sortedUnique(values: readonly string[]): string[] {
 }
 
 export function minNumberOrZero(values: readonly number[]): number {
-  return values.length > 0 ? Math.min(...values) : 0;
+  return values.reduce(
+    (minimum, value) => Math.min(minimum, value),
+    values[0] ?? 0,
+  );
 }
 
 export function uniqueBy<T>(

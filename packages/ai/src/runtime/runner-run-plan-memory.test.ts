@@ -3,9 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   getRunnerRunPlanMemorySnapshot,
-  MissingRunnerRunPlanError,
-  rememberRunnerRunPlanMemorySnapshot,
-  requireActiveRunnerRunPlan,
+  restoreRunnerRunPlanMemorySnapshot,
   resetRunnerRunPlanMemory,
 } from "./runner-run-plan-memory";
 import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
@@ -13,16 +11,19 @@ import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 describe("runner run plan memory", () => {
   beforeEach(() => resetRunnerRunPlanMemory());
 
-  it("throws when a runner decision reaches an active run without a run plan", () => {
-    expect(() => requireActiveRunnerRunPlan(runnerInput(true))).toThrow(
-      MissingRunnerRunPlanError,
-    );
+  it("rejects restoration from a later state version", () => {
+    expect(() =>
+      restoreRunnerRunPlanMemorySnapshot(runnerInput(true), {
+        ...activePlan(),
+        updatedAtStateVersion: 2,
+      }),
+    ).toThrow("invalid_runner_run_plan_memory_checkpoint");
   });
 
   it("clears the stored plan when the runner is no longer in a run", () => {
     const activeInput = runnerInput(true);
     const inactiveInput = runnerInput(false);
-    rememberRunnerRunPlanMemorySnapshot(activeInput, activePlan());
+    restoreRunnerRunPlanMemorySnapshot(activeInput, activePlan());
 
     expect(getRunnerRunPlanMemorySnapshot(activeInput)?.id).toBe("runplan-1");
     expect(getRunnerRunPlanMemorySnapshot(inactiveInput)).toBeUndefined();
@@ -47,5 +48,6 @@ function activePlan(): RunnerRunPlan {
   return {
     id: "runplan-1",
     lifecycle: "active",
+    updatedAtStateVersion: 1,
   } as RunnerRunPlan;
 }

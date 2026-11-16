@@ -156,12 +156,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     );
     if (!choice || !choiceAction) throw new Error("Missing hardware choice.");
     expect(
-      selectedCorpHardwareTrashChoiceOptionIds(
-        choiceInput,
-        choiceAction,
-        choice,
-        choice.options,
-      ),
+      selectedCorpHardwareTrashChoiceOptionIds(choiceInput, choiceAction),
     ).toEqual([expectedOptionId]);
 
     const choiceDecision = chooseCorpAction(decisionInput(state), {
@@ -354,14 +349,16 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
         }
         return forged;
       }),
-    ).toThrow(expect.objectContaining({
-      code: "engine_quote_contract_failed",
-      context: expect.objectContaining({
-        removalCondition: expect.stringContaining(
-          "corp_punish_quote:invalid_response_schema",
-        ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "engine_quote_contract_failed",
+        context: expect.objectContaining({
+          removalCondition: expect.stringContaining(
+            "corp_punish_quote:invalid_response_schema",
+          ),
+        }),
       }),
-    }));
+    );
     expect(input.playerView.corpPunishRouteQuoteSet).toBeUndefined();
   });
 });

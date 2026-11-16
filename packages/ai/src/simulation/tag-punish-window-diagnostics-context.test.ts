@@ -5,9 +5,25 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
+import { runnerSurvivalCounterContextForInput } from "./runner-survival-counter-context";
 import { createTagPunishWindowDiagnosticsContext } from "./tag-punish-window-diagnostics-context";
 
 describe("tag punish window diagnostics", () => {
+  it("distinguishes trace limit reduction from a link ability", () => {
+    const context = (definitionId: string) =>
+      runnerSurvivalCounterContextForInput({
+        playerView: { opponent: { rig: [{ known: true, definitionId }] } },
+      } as unknown as AiDecisionInput);
+    expect(context("onr_v1_051_rabbit")).toMatchObject({
+      trace: true,
+      link: false,
+    });
+    expect(context("onr_v1_063_signpost")).toMatchObject({
+      trace: true,
+      link: true,
+    });
+  });
+
   it("matches runner trace tag reason codes by bounded terms", () => {
     expect(diagnosticsForReason("corp.trace.bid_visible_amount")).toMatchObject(
       {

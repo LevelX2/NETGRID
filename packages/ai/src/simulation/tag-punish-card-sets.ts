@@ -1,7 +1,6 @@
-export const RUNNER_TRACE_DEFENSE_CONTEXT_IDS = new Set([
+export const RUNNER_TRACE_LINK_CONTEXT_IDS = new Set([
   "onr_v1_003_baedekers-net-map",
   "onr_v1_004_bakdoor",
-  "onr_v1_051_rabbit",
   "onr_v1_063_signpost",
 ]);
 export const RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS = new Set([
@@ -11,4 +10,8 @@ export const RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS = new Set([
 ]);
 export const RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS = new Set([
   "onr_v1_022_emergency-self-construct",
+]);
+
+export const RUNNER_TRACE_LIMIT_REDUCTION_CONTEXT_IDS = new Set([
+  "onr_v1_051_rabbit",
 ]);

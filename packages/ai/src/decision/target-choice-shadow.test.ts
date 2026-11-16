@@ -253,6 +253,29 @@ describe("TargetChoiceShadow", () => {
     );
   });
 
+  it("withholds a dry-run selection when only one of two requirements has options", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        choiceRequirements: [
+          {
+            choiceId: "offered",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["one"],
+          },
+          {
+            choiceId: "blocked",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: [],
+          },
+        ],
+      }),
+    });
+    expect(report.scorecard.coverageStatus).toBe("partial");
+    expect(report.selectionOutput.wouldSelect).toBeUndefined();
+  });
+
   it("blocks empty choice requirements without fabricating options", () => {
     const report = buildTargetChoiceShadowReport({
       action: action({
@@ -535,6 +558,15 @@ describe("TargetChoiceShadow", () => {
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
     });
+  });
+
+  it("rejects semantic target facts from another Engine offer", () => {
+    expect(() =>
+      buildTargetChoiceShadowReport({
+        action: action({ actionId: "different-action" }),
+        candidate: semanticCandidate({ actionId: "run-server" }),
+      }),
+    ).toThrow("target_choice_shadow_candidate_does_not_match_action");
   });
 
   it("keeps explicit side-safe target maps ahead of semantic candidate context", () => {

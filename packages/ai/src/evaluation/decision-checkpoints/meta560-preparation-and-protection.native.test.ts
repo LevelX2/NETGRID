@@ -14,10 +14,8 @@ import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { runnerCoverageInstallCreditPreparation } from "../../runner/rig-coverage/coverage-install-credit-preparation";
 import { corpInstalledIceHasFreeFullBreak } from "../../corp/defense/corp-free-full-break";
 import { buildCorpDefenseTurnPlanningSlice } from "../../corp/defense/corp-defense-turn-planning";
-import {
-  corpGlobalIceSupportAssetInstallSignal,
-  corpTerminalCentralRezReserveSignals,
-} from "../../corp/defense/defense-discovery-support";
+import { corpTerminalCentralRezReserveSignals } from "../../corp/defense/defense-discovery-support";
+import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-install-discovery";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,

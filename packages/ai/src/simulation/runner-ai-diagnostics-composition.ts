@@ -34,6 +34,7 @@ export type RunnerAiDiagnosticsCompositionDependencies =
       | "hasRunnerPlayableEconomyAction"
       | "hasRunnerInstallableBreakerAction"
       | "hasRunnerRunnablePressureAction"
+      | "hasRunnerPlayablePressureCard"
       | "runnerDiscardChoiceRoles"
       | "isRunnerDuplicateInstall"
       | "isRunnerRigInstallAction"
@@ -81,6 +82,8 @@ export function createRunnerAiDiagnosticsComposition(
       installClassification.hasRunnerInstallableBreakerAction,
     hasRunnerRunnablePressureAction:
       installClassification.hasRunnerRunnablePressureAction,
+    hasRunnerPlayablePressureCard:
+      installClassification.hasRunnerPlayablePressureCard,
     runnerDiscardChoiceRoles: installClassification.runnerDiscardChoiceRoles,
     isRunnerDuplicateInstall: installClassification.isRunnerDuplicateInstall,
     isRunnerRigInstallAction: installClassification.isRunnerRigInstallAction,

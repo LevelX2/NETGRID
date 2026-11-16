@@ -4,6 +4,8 @@ import {
   isRunnerNonAdditiveUtilityRole,
   isRunnerPressureRole,
 } from "../runtime/runner-role-classification";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
+import { isRemoteServerTarget } from "../runtime/server-target";
 import { rolesMatch } from "../role-match";
 
 type RunnerInstallClassificationDependencies = {
@@ -54,7 +56,7 @@ export function isRunnerEconomyActionForSimulation(
   dependencies: RunnerActionRoleDependencies,
 ): boolean {
   if (action.side !== "runner") return false;
-  if (action.type === "gain_credit") return true;
+  if (action.type === "gain_credit") return actionProvidesCredits(action);
   if (
     action.type !== "play_event" &&
     action.type !== "install_card" &&
@@ -142,8 +144,8 @@ export function hasRunnerRunnablePressureActionForSimulation(
   return input.legalActions.some((action) => {
     if (action.actionId === excludeActionId || action.side !== "runner")
       return false;
-    if (isRunnerPressureAction(input, action)) return true;
-    if (action.type !== "start_run") return false;
+    if (action.type !== "start_run")
+      return isRunnerPressureAction(input, action);
     const serverId =
       typeof action.payload?.serverId === "string"
         ? action.payload.serverId
@@ -152,9 +154,9 @@ export function hasRunnerRunnablePressureActionForSimulation(
     const server = input.playerView.servers.find(
       (candidate) => candidate.id === serverId,
     );
-    if (serverId.startsWith("remote_") && (server?.root.length ?? 0) === 0)
+    if (!server || (isRemoteServerTarget(serverId) && server.root.length === 0))
       return false;
-    return input.playerView.own.credits >= 3 || (server?.ice.length ?? 0) === 0;
+    return input.playerView.own.credits >= 3 || server.ice.length === 0;
   });
 }
 
@@ -279,6 +281,18 @@ export function createRunnerInstallClassificationContext(dependencies: {
       hasRunnerInstallableBreakerActionForSimulation(input, excludeActionId, {
         rolesForAction: dependencies.rolesForAction,
       }),
+    hasRunnerPlayablePressureCard: (
+      input: AiDecisionInput,
+      excludeActionId?: string,
+    ): boolean =>
+      input.legalActions.some(
+        (action) =>
+          action.actionId !== excludeActionId &&
+          action.type !== "start_run" &&
+          action.source !== "basic_action" &&
+          action.source !== "game_rule" &&
+          isRunnerPressureAction(input, action),
+      ),
     hasRunnerRunnablePressureAction: (
       input: AiDecisionInput,
       excludeActionId?: string,

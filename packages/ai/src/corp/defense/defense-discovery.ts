@@ -53,11 +53,13 @@ import {
   corpScoreProtectionInstallRouteScan,
   corpScoreProtectionStagingInstallSignal,
 } from "./corp-score-protection-routes";
+import {
+  corpDefensiveUpgradePlacement,
+  corpGlobalIceSupportAssetInstallSignal,
+} from "./defense-install-discovery";
 import { corpAgendaPurgeDefenseChoiceSignal } from "./defense-choice-signals";
 import {
   CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
-  corpDefensiveUpgradePlacement,
-  corpGlobalIceSupportAssetInstallSignal,
   corpLayeredIceStagingParent,
   corpResidentDelayedSuccessDefenseSignals,
   corpSelectedCentralDirectInstallRouteState,

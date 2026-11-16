@@ -531,6 +531,7 @@ export type AiSimulationActionSequenceEntry = {
   runnerExpensiveInstallBelowReserve?: boolean;
   runnerReservePreservingEconomy?: boolean;
   runnerReserveRunId?: string;
+  runnerReserveAccessTarget?: string;
   runnerReserveAfterSuccessfulRun?: number;
   runnerReserveAfterRemoteAccess?: number;
   runnerReserveAfterCentralRun?: number;
