@@ -1559,3 +1559,301 @@ Remote-Schutzmessung unterscheidet aktiven, Engine-legal bezahlbaren
 und unbezahlbaren Schutz.
 
 924 fokussierte Tests in 28 Dateien, KI-Typecheck und Strukturgates bestanden.
+
+## Achte Zufallsstichprobe mit zehn Dateien
+
+Quellstand `472f8edcc4908da3c5f586f3cd050fcc3301c92e`. Seed
+`1711308569`, 845 versionierte produktive KI-Quelldateien im sortierten
+Losbestand. Testdateien, Testhilfen, Fixtures und Deklarationsdateien waren
+ausgeschlossen. Zusätzlich waren 144 noch vorhandene Dateinamen aus den
+bisherigen Reviews gesperrt. Die Ziehung verwendete Fisher–Yates ohne
+Zurücklegen und wurde nach der lokalen Main-Integration ausgeführt.
+
+### 1. `runtime/corp-score-protection-assessment.ts`
+
+**P2, reproduzierte Zustandskollision.** Die exakte Schutzrechnung
+vergleicht Wahrscheinlichkeiten rational und weist sichtbare,
+zugriffsrelevante Trace-Effekte ohne Modell als unbekannt aus. Ihre
+Pfadzustände werden aber anhand zusammengefasster Credits, gehosteter
+Breaker-Credits, Stärken und der nächsten Encounter-Sperre dedupliziert.
+Das Kreditbuch enthält zusätzlich die Stealth-Beträge pro Quelle und
+verbleibende Zahlungsunterstützung. Synthetische Stealth-Verteilungen
+`[1, 1]` und `[2, 0]` besitzen denselben Schlüssel. Für einen
+verpflichtenden Verlust von zwei Credits derselben Quelle sind sie mit
+der echten Zahlungsfunktion unterschiedlich zahlungsfähig. Beim
+Vertauschen der Branch-Reihenfolge ändert sich, welcher Zustand
+übrig bleibt. Die aktuell verlinkten Karten dieser Effektfamilie
+verwenden optionalen Verlust. Mit diesem Modus kann nur der noch
+auf zwei Quellen verteilte Zustand eine anschließende Zahlung von
+zwei Credits leisten. Die Gegenprobe betrifft das Kreditbuch und den
+Pruning-Schlüssel. Eine falsche Gesamtschutzquote wurde im Spielzustand
+noch nicht reproduziert. Die Gleichheit über die
+zahlungsrelevanten Felder des Kreditbuchs definieren und anschließend
+eine aktuelle Mehr-ICE-Route mit optionalem Einzelquellenverlust abdecken.
+[Zustandsschlüssel](../../../packages/ai/src/runtime/corp-score-protection-assessment.ts#L1192) ·
+[Zahlungsprüfung](../../../packages/ai/src/run-analysis/visible-run-credit-budget.ts#L614) ·
+[Optionales Einzelquellen-Beispiel](../../../packages/cards/src/specs/originalset-v1/onr_v1_036_jackhammer.card-spec.ts#L61) ·
+[Trace-Grenze](../../../packages/ai/src/runtime/corp-score-protection-assessment.ts#L690)
+
+### 2. `runner/defense-recovery/next-corp-turn-grip.ts`
+
+**P2, nativer Angebotsrahmen mit gezielt veränderter Projektion.** Der
+Owner bindet das aktuelle Runner-Angebot über Seite, Timing und Version
+und rechnet Klicks, Credits, Stack und Draw Tax ein. Für den garantierten
+Griffzuwachs prüft er das Vorzeichen. Ein verbliebener Klick und eine
+Lücke von zwei Karten liefern für die echte Basic-Draw-Projektion
+keine Route. Der Austausch ausschließlich von `netHandDelta: 1`
+gegen `Infinity` führt zur Freigabe von `runner.draw_card`.
+Genaue ganzzahlige, sichere Hand- und Stack-Mengen aus der aktuellen
+Projektion verlangen und dieselbe Zulassung im Install-plus-Draw-Pfad
+verwenden. Die positiven Fälle aus Basic Draw und garantiertem
+Draw-Event bei der Abnahme erhalten.
+[Zulassung](../../../packages/ai/src/runner/defense-recovery/next-corp-turn-grip.ts#L60) ·
+[Bestehende Exact-Delta-Grenze](../../../packages/ai/src/actions/action-candidate-facts.ts#L4)
+
+### 3. `runner/run-window/runner-run-start-order-choice.ts`
+
+**P3, Diagnosepflege.** Der ausführende Continuation-Pfad vergleicht
+die gebundene Run-ID mit dem aktuellen Run, prüft den Ereignisübergang
+und verlangt das aktuelle Regelangebot. Die kanonische Auflösung
+verarbeitet reine Selbst-Trash- sowie homogene Random-Strength-Quellen.
+Der Funktionskommentar und die übergeordnete Fehlermeldung nennen nur
+reines Selbst-Trash. Kommentar und Diagnose auf die unterstützten Fälle
+abgleichen und die Entscheidungslogik unverändert mit den bestehenden
+Start-of-Run- und Choice-Tests verifizieren.
+[Auflösung](../../../packages/ai/src/runner/run-window/runner-run-start-order-choice.ts#L29) ·
+[Aktive Run-Bindung](../../../packages/ai/src/runner/run-window/run-window-start-continuation.ts#L101) ·
+[Diagnose](../../../packages/ai/src/runtime/selected-choices-for-decision.ts#L908)
+
+### 4. `runtime/runner-economy-commitment-score.ts`
+
+**P3, entbehrliche Verdrahtung.** Die Bank- und No-Run-Score-Ausgaben
+werden über zwei Kompositionen weitergereicht. Die repo-weite Suche
+nach beiden Score-Symbolen endet an der Development-Komposition.
+Die No-Run-Evidence wird nur von der unbenutzten Score-Ausgabe befragt
+und ansonsten durchgereicht. Die Bank-Evidence hat eine separate
+Referenz im Plan-Memory-Exclusion-Pfad. Die beiden Score-Ausgaben
+und die daran hängende No-Run-Evidence entfernen. Die betroffenen
+Kompositionsoberflächen per Typecheck und die nativen Economy-Linien
+per Regression verifizieren.
+[Score-Ausgaben](../../../packages/ai/src/runtime/runner-economy-commitment-score.ts#L49) ·
+[Weitergabe](../../../packages/ai/src/runtime/runner-development-support-composition.ts#L135)
+
+### 5. `runner/resource-lifecycle/resource-lifecycle-dispositions.ts`
+
+**Kein konkreter Änderungsbedarf.** Die kleine Abbildung behandelt den
+Retain-Fall. Sie übergibt ausschließlich vom Lifecycle-Signal
+benannte Action-IDs mit dem festen Owner an die zentrale
+Dispositionserfassung. Verfügbarkeit und Bindung stammen aus
+dem Signalproduzenten. Das hält die Entscheidung über das Objekt
+bei seinem Modul und die Verwertung beim Scheduler.
+[Abbildung](../../../packages/ai/src/runner/resource-lifecycle/resource-lifecycle-dispositions.ts#L4) ·
+[Signalproduzent](../../../packages/ai/src/runner/resource-lifecycle/resource-lifecycle-signals.ts#L94) ·
+[Live-Verbrauch](../../../packages/ai/src/runtime/plan-first-live-runtime.ts#L1803)
+
+### 6. `runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts`
+
+**P3, nachweislich redundanter Kontrollfluss.** Im
+`force_scoreline_clock`-Zweig prüft dieselbe Board-Projektion zweimal,
+ob eine Aktion eine konkrete Agenda-Scoreline fördert. In diesem
+Fall liefert die Emergency-Remote-Bedingung `match`, ebenso wie ihr
+direkter Nachfolger. Die Projektion einmal durchführen und den
+wirkungslosen Zweig entfernen. Die bestehenden Fälle für Funding,
+Zielfort und Deckout-Matchpoint decken die relevante Reihenfolge ab.
+[Kontrollfluss](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts#L145) ·
+[Verbrauch im Corp-Score](../../../packages/ai/src/runtime/semantic-runtime-corp-score.ts#L160)
+
+### 7. `simulation/doctrine-quality-benchmark-types.ts`
+
+**P2, reproduzierte fehlerhafte Gate-Einheit.** `timeoutRateDelta`
+teilt Timeout-Aktionen durch Spiele. Zwei Timeouts aus vier
+Entscheidungen bei einem Spiel ergeben gegenüber null Timeouts den
+Wert `2`. Der Fallback-Vergleich verwendet eine Entscheidungsrate.
+Das gemeinsame Quality-Gate vergleicht die falsch benannte
+Timeout-Kennzahl mit einem Ratengrenzwert. Beide Profile mit der
+Zahl aller jeweils gemessenen Entscheidungen normieren und
+Grenzwerte und Bericht auf dieselbe Einheit prüfen.
+`comparisonProfiles` ist zusätzlich öffentlich konfigurierbar,
+wird hier aber von keinem Consumer gelesen. Der separate
+Match-Progression-Benchmark besitzt einen eigenen benutzten Vertrag.
+[Typvertrag](../../../packages/ai/src/simulation/doctrine-quality-benchmark-types.ts#L22) ·
+[Berechnung](../../../packages/ai/src/simulation/doctrine-quality-benchmark-runner.ts#L76) ·
+[Gate](../../../packages/ai/src/simulation/benchmark-reports.ts#L39)
+
+### 8. `simulation/quality-metric-types.ts`
+
+**P2, reproduzierte Vermengung von Fehlerarten.** Die
+`illegalActions`-Metrik übernimmt `errors.length`. Der Simulator
+fügt dem Array sowohl Entscheidungsfehler vor einer Aktion als auch
+Ablehnungen einer eingereichten Aktion hinzu. Ein synthetischer
+Entscheidungsfehler bei leerer Aktionsfolge liefert bereits
+`illegalActions: 1`. Die Ursache aus den strukturierten
+Simulationsfehlern übernehmen. Ungültige Angebote bzw. abgelehnte
+Aktionen und Laufzeitfehler separat zählen und weiterhin beide
+Fehlerarten im Gate berücksichtigen.
+[Typvertrag](../../../packages/ai/src/simulation/quality-metric-types.ts#L1) ·
+[Metrik](../../../packages/ai/src/simulation/quality-metrics.ts#L40) ·
+[Fehlerproduzent](../../../packages/ai/src/simulation/ai-game-simulator.ts#L362)
+
+### 9. `runtime/ai-features.ts`
+
+**P3, doppelte Breaker-Klassifizierung.** Die Kartenwahl liest, ob
+das Rig einen nicht lauten Icebreaker enthält. Die Feature-Extraktion
+ermittelt dies anhand eigener Subtyp-Listen. Die Coverage-Schicht
+prüft sichtbare Programme und kann Rollen aus kanonisch implementierten
+Break-Fähigkeiten herleiten. Dadurch muss eine neue Fähigkeit an zwei
+unterschiedlichen Klassifizierungen vorbeigeführt werden. Die
+Feature-Berechnung auf den vorhandenen sichtbaren Breaker-Vertrag und
+die kanonische Noisy-Prüfung stützen. Gezielte Kontrollfälle für
+generische, nur über Fähigkeiten klassifizierbare und laute Breaker
+absichern, bevor die Suchbewertung umgestellt wird.
+[Feature](../../../packages/ai/src/runtime/ai-features.ts#L31) ·
+[Coverage-Klassifizierung](../../../packages/ai/src/runtime/runner-visible-breaker-coverage.ts#L202) ·
+[Suchbewertung](../../../packages/ai/src/runtime/search-choice-option.ts#L284)
+
+### 10. `runner/run-window/runner-run-window-additional-access.ts`
+
+**P2, synthetisch reproduzierter Bindungswiderspruch.** Das Aktionsmodell
+projiziert ein Fort aus Run-Projektion oder aktuellem LegalAction-Payload.
+Der Run-Window-Owner vereinigt diese Bindung mit den aus Effektzielen
+gelesenen Forts. Ein Modell mit HQ-Bindung und ausschließlich
+R&D-Effekt erreicht dadurch in beiden Run-Fenstern den Wert 500.
+Die bestehenden R&D- und HQ-Scope-Tests und die negative
+Archives-Gegenprobe bestätigen die jeweilige Einzelbindung. Aktuelle Aktionsbindung und
+deklarierte Effektscopes auf Übereinstimmung prüfen, falls beide
+verfügbar sind. Ein widersprüchliches natives Engine-Angebot ist
+bislang unbelegt.
+[Fortvereinigung](../../../packages/ai/src/runner/run-window/runner-run-window-additional-access.ts#L76) ·
+[Quelle des Aktions-Forts](../../../packages/ai/src/actions/run-access-decision-model.ts#L72)
+
+### Gezielter Nachlauf zur Trace-Profil-Übergabe
+
+Die TypeScript-Syntaxsuche erfasste 85 direkte und über Dependencies
+aufgerufene Stellen der beiden geteilten ICE-Pfadbewertungen. 80
+betreffen `assessKnownRezzedIcePath`, fünf
+`assessEngineCertifiedPostRezIcePath`. Bei 55 der 80 fehlt bereits
+das gesamte sechste Argument, davon liegen 19 unter `simulation/`.
+Ein Objekt im sechsten Argument garantiert die Profilbindung ebenfalls
+nicht, wie der Lock-Release-Score zeigt. Der Scan enthält Quotes
+ohne Trace-Relevanz und Bewertungs-/Simulationspfade. Er liefert
+eine Migrationsliste, die nach Owner und sichtbaren Trace-Fällen
+geprüft werden muss. Profil- und bidlose Aufrufe können auf
+`modern_open` und null Corp-Gebotsspielraum zurückfallen.
+[Profilauflösung](../../../packages/ai/src/run-analysis/trace-rules-profile-planning.ts#L21) ·
+[Pfad-API](../../../packages/ai/src/visible-run-analysis.ts#L146) ·
+[Lock-Release](../../../packages/ai/src/runtime/runner-run-lock-release-score.ts#L222)
+
+**P1, zwei live angebundene Planer mit nativem A/B-Nachweis.** In einer
+Engine-Runner-Sicht mit Wall of Static und Rex vor R&D, zwölf
+Runner-Credits, drei Corp-Credits und ohne Breaker bieten Social
+Engineering und Jettison Ice eine Vorbereitung an, die ausschließlich
+Wall of Static behandelt. Der HQ-Erfolg für Jettison Ice wurde über
+legale Engine-Aktionen gespielt. Die geprüften Aktionskandidaten
+stammen aus aktuellen LegalActions, der Parent-Zielwert stammt aus
+der Fixture. Unter `classic_blind` passieren beide Commitments auf
+dem integrierten Stand die Owner-Prüfung. Jettison Ice verwirft die
+Route mit explizitem Profil. Social Engineering lässt sie mit jeweils
+nur einem der fehlenden Werte weiterhin zu und verwirft sie erst mit
+Profil und sichtbaren Corp-Credits gemeinsam. Unter `modern_open`
+bleiben beide Vorbereitungen im Vergleich erhalten. Rex kann den
+verbleibenden Pfad im Classic-Fall auch nach erfolgreichem Bypass
+oder Trash stoppen. Es wurde
+die Fachzulassung der beiden Owner geprüft, ohne den globalen Scheduler
+auf einen finalen Zug festzulegen.
+[Bypass](../../../packages/ai/src/runner/run-window/runner-targeted-bypass-plan.ts#L123) ·
+[ICE-Trash](../../../packages/ai/src/runtime/runner-targeted-ice-trash-plan.ts#L222) ·
+[Central-Owner](../../../packages/ai/src/runner/central-pressure/central-pressure-signals.ts#L336) ·
+[Remote-Owner](../../../packages/ai/src/runner/remote-contest/remote-contest-signals.ts#L199)
+
+**P2, weitere verifizierte Aufruflücken.** Same-Turn-Breaker-Installation,
+Coverage-Recovery, Upgrades und Heap-Vorbereitung kennen sichtbare
+Corp-Credits, übergeben aber das Spielprofil nicht. Die direkten
+Zentral-/Remote-Payoff-Hilfen für die Rechnung nach dem ICE-Pfad
+lassen Profil und sichtbares Gebot aus. Bei der Corp fehlen
+Profilbindungen in der Engine-zertifizierten Defense-Layer-Quote,
+bei der Runner-Druck-Projektion des Scoring Window und bei aktiven
+ICE-Vergleichen für Stärkeimpuls und mobile Defense. Diese Befunde
+belegen fehlende Eingaben. Einzelne Owner können Traces zusätzlich
+durch vorgelagerte Beschränkungen ausschließen. Die jeweilige
+Entscheidungswirkung braucht ein auf diesen Owner zugeschnittenes
+Engine-Szenario.
+[Same-Turn-Breaker](../../../packages/ai/src/runner/rig-coverage/coverage-same-turn-breaker-preparation.ts#L75) ·
+[Coverage-Recovery](../../../packages/ai/src/runner/rig-coverage/coverage-recovery.ts#L113) ·
+[Upgrade](../../../packages/ai/src/runner/rig-coverage/coverage-breaker-upgrades.ts#L201) ·
+[Heap](../../../packages/ai/src/runner/rig-coverage/coverage-heap-preparation.ts#L125) ·
+[Central Payoff](../../../packages/ai/src/known-central-access-payoff.ts#L1047) ·
+[Remote Payoff](../../../packages/ai/src/known-remote-access-payoff.ts#L702) ·
+[Defense-Layer](../../../packages/ai/src/corp/defense/corp-defense-layer-certification.ts#L131) ·
+[Scoring Window](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts#L141) ·
+[Stärkeimpuls](../../../packages/ai/src/corp/defense/corp-temporary-ice-strength-pulse.ts#L171) ·
+[Mobile Defense](../../../packages/ai/src/corp/defense/mobile-ice-run-defense.ts#L159)
+
+Der geplante Run und sein aktiver Encounter brauchen getrennt gebundene
+Kontexte. `currentRunPathContext` liefert vor dem Run ein leeres Objekt.
+Der Investitionspfad verwendet bereits eine profilgebundene Quote,
+die bei sichtbarem Trace ohne Profil strukturiert abbricht. Für
+hypothetische Corp-Rez-Linien muss die bestehende Liquiditätsprojektion
+nach Rez- oder Vorbereitungskosten aus der jeweiligen Route erhalten
+bleiben. Zuerst Bypass und ICE-Trash migrieren, danach Runner-Coverage und
+Access Payoff, gefolgt von Corp Defense und Scoring. Anschließend die
+trace-relevanten Simulationsprofile abgleichen. Je Owner
+Classic-/Modern-Kontrollen und danach fehlendes Profil bei
+sichtbarem Trace als strukturierten Fehler abnehmen.
+[Kontext des aktiven Runs](../../../packages/ai/src/run-analysis/current-run-path-context.ts#L6) ·
+[Investitionsbindung](../../../packages/ai/src/run-analysis/trace-rules-profile-planning.ts#L28) ·
+[Referenz Main-Run-Evaluation](../../../packages/ai/src/runner-run-target-evaluation.ts#L546)
+
+
+#### Aufrufinventar ohne sechstes Argument
+
+Die Zeilennummern beziehen sich auf den geprüften Quellstand. Die
+folgenden Einträge umfassen auch Wrapper und vorbereitende Berechnungen.
+
+- [corp/defense/corp-defense-domain-signals.ts](../../../packages/ai/src/corp/defense/corp-defense-domain-signals.ts#L625) · 625, 634
+- [corp/defense/corp-temporary-ice-strength-pulse.ts](../../../packages/ai/src/corp/defense/corp-temporary-ice-strength-pulse.ts#L171) · 171, 181
+- [corp/defense/mobile-ice-run-defense.ts](../../../packages/ai/src/corp/defense/mobile-ice-run-defense.ts#L159) · 159, 171
+- [known-central-access-payoff.ts](../../../packages/ai/src/known-central-access-payoff.ts#L1047) · 1047
+- [known-remote-access-payoff.ts](../../../packages/ai/src/known-remote-access-payoff.ts#L702) · 702
+- [plans/tactical-plan-breaker-coverage.ts](../../../packages/ai/src/plans/tactical-plan-breaker-coverage.ts#L19) · 19
+- [plans/tactical-plan-corp-score-window.ts](../../../packages/ai/src/plans/tactical-plan-corp-score-window.ts#L49) · 49
+- [runner-economy-posture.ts](../../../packages/ai/src/runner-economy-posture.ts#L613) · 613, 915, 988
+- [runner/central-pressure/post-break-trash-preparation.ts](../../../packages/ai/src/runner/central-pressure/post-break-trash-preparation.ts#L158) · 158, 223
+- [runner/rig-coverage/coverage-breaker-upgrades.ts](../../../packages/ai/src/runner/rig-coverage/coverage-breaker-upgrades.ts#L201) · 201
+- [runner/rig-coverage/coverage-heap-preparation.ts](../../../packages/ai/src/runner/rig-coverage/coverage-heap-preparation.ts#L125) · 125
+- [runner/rig-coverage/coverage-recovery.ts](../../../packages/ai/src/runner/rig-coverage/coverage-recovery.ts#L113) · 113, 167, 283, 378
+- [runner/rig-coverage/coverage-same-turn-breaker-preparation.ts](../../../packages/ai/src/runner/rig-coverage/coverage-same-turn-breaker-preparation.ts#L75) · 75, 124
+- [runner/rig-coverage/coverage-support.ts](../../../packages/ai/src/runner/rig-coverage/coverage-support.ts#L142) · 142
+- [runner/rig-coverage/runner-search-coverage-need.ts](../../../packages/ai/src/runner/rig-coverage/runner-search-coverage-need.ts#L43) · 43
+- [runner/run-window/run-window-assessment.ts](../../../packages/ai/src/runner/run-window/run-window-assessment.ts#L1268) · 1268
+- [runner/run-window/runner-targeted-bypass-plan.ts](../../../packages/ai/src/runner/run-window/runner-targeted-bypass-plan.ts#L123) · 123, 143
+- [runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts#L201) · 201
+- [runtime/runner-run-only-action-adjustment.ts](../../../packages/ai/src/runtime/runner-run-only-action-adjustment.ts#L151) · 151
+- [runtime/runner-start-run-score.ts](../../../packages/ai/src/runtime/runner-start-run-score.ts#L56) · 56
+- [runtime/runner-targeted-ice-trash-plan.ts](../../../packages/ai/src/runtime/runner-targeted-ice-trash-plan.ts#L120) · 120, 222, 257
+- [runtime/runner-visible-card-discard-composition.ts](../../../packages/ai/src/runtime/runner-visible-card-discard-composition.ts#L35) · 35
+- [runtime/semantic-runtime-corp-remote-contestability-context.ts](../../../packages/ai/src/runtime/semantic-runtime-corp-remote-contestability-context.ts#L47) · 47
+
+Die Aufrufe unter `simulation/` sind separat für Messung und Diagnose
+zu prüfen.
+
+- [simulation/central-pressure-card.ts](../../../packages/ai/src/simulation/central-pressure-card.ts#L70) · 70
+- [simulation/central-run-pressure-justification.ts](../../../packages/ai/src/simulation/central-run-pressure-justification.ts#L122) · 122, 195
+- [simulation/no-fresh-central.ts](../../../packages/ai/src/simulation/no-fresh-central.ts#L133) · 133, 316
+- [simulation/remote-server-threat.ts](../../../packages/ai/src/simulation/remote-server-threat.ts#L116) · 116, 367
+- [simulation/runner-central-pressure-diagnostics.ts](../../../packages/ai/src/simulation/runner-central-pressure-diagnostics.ts#L164) · 164
+- [simulation/runner-credit-reserve.ts](../../../packages/ai/src/simulation/runner-credit-reserve.ts#L23) · 23
+- [simulation/runner-known-no-access.ts](../../../packages/ai/src/simulation/runner-known-no-access.ts#L54) · 54, 81, 131, 234, 246, 371
+- [simulation/runner-pressure-metrics.ts](../../../packages/ai/src/simulation/runner-pressure-metrics.ts#L121) · 121, 191
+- [simulation/runner-setup-coverage-types.ts](../../../packages/ai/src/simulation/runner-setup-coverage-types.ts#L103) · 103
+- [simulation/visible-break-cost-metric.ts](../../../packages/ai/src/simulation/visible-break-cost-metric.ts#L14) · 14
+
+### Prüfstand
+
+Der lokale Main-Fast-Forward übernahm den bereits mit 924 Tests in
+28 Dateien, KI-Typecheck und KI-Strukturgates geprüften Quellstand.
+Die elf offenen UI-Dateien in Main wurden vor und nach dem
+Fast-Forward mit gleichem Git-Status und SHA-256 verifiziert.
+Die achte Reviewrunde hat zusätzlich 429 fokussierte Tests in
+18 Dateien bestanden. Native und synthetische Gegenproben liefen
+isoliert. Die Profilvarianten wurden ausschließlich im Speicher verglichen.
+
