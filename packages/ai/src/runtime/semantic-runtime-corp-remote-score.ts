@@ -1,4 +1,5 @@
 import { visibleRunnerRunCreditPool } from "./visible-run-credit-facts";
+import { visibleRunnerExposureCreditValue } from "./visible-runner-action-economy";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -293,7 +294,10 @@ function semanticRuntimeCorpRemoteSupportInstallIsContestable(
   const visibleRunnerContestCredits =
     input.playerView.opponent.credits +
     visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []) +
-    semanticRuntimeCorpRunnerExposureCredits(input);
+    visibleRunnerExposureCreditValue(
+      input,
+      semanticRuntimeCorpRunnerExposureCreditActions(input),
+    );
   const trashCost = semanticRuntimeCorpVisibleTrashCost(sourceCard);
   if (server.ice.length === 0) {
     return visibleRunnerContestCredits >= trashCost;
@@ -301,7 +305,7 @@ function semanticRuntimeCorpRemoteSupportInstallIsContestable(
   const assessment = scoringWindowPostRezProtectionAssessment(
     input,
     sourceCard ? { ...server, root: [...server.root, sourceCard] } : server,
-    semanticRuntimeCorpRunnerExposureCredits(input),
+    semanticRuntimeCorpRunnerExposureCreditActions(input),
     corpRezCreditsAfterAction,
   );
   return (
@@ -312,7 +316,7 @@ function semanticRuntimeCorpRemoteSupportInstallIsContestable(
   );
 }
 
-function semanticRuntimeCorpRunnerExposureCredits(
+function semanticRuntimeCorpRunnerExposureCreditActions(
   input: AiDecisionInput,
 ): number {
   const visibleClicks = input.playerView.opponent.clicks;

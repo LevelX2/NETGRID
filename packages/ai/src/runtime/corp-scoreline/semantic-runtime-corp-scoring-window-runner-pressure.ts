@@ -50,12 +50,12 @@ export function scoringWindowVisibleCardTextTokens(
 export function scoringWindowAccessAssessment(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
-  extraRunnerCredits = 0,
+  runnerCreditActions = 0,
 ): ReturnType<typeof scoringWindowAccessAssessmentForMode> {
   return scoringWindowAccessAssessmentForMode(
     input,
     server,
-    extraRunnerCredits,
+    runnerCreditActions,
     "current_state",
   );
 }
@@ -63,14 +63,14 @@ export function scoringWindowAccessAssessment(
 export function scoringWindowPostRezProtectionAssessment(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
-  extraRunnerCredits = 0,
+  runnerCreditActions = 0,
   corpRezCredits = input.playerView.own.credits,
   corpRezCreditReserve = 0,
 ): ReturnType<typeof scoringWindowAccessAssessmentForMode> {
   return scoringWindowAccessAssessmentForMode(
     input,
     server,
-    extraRunnerCredits,
+    runnerCreditActions,
     "engine_post_rez",
     corpRezCredits,
     corpRezCreditReserve,
@@ -80,7 +80,7 @@ export function scoringWindowPostRezProtectionAssessment(
 function scoringWindowAccessAssessmentForMode(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
-  extraRunnerCredits: number,
+  runnerCreditActions: number,
   mode: "current_state" | "engine_post_rez",
   corpRezCredits = 0,
   corpRezCreditReserve = 0,
@@ -96,18 +96,14 @@ function scoringWindowAccessAssessmentForMode(
   evidence: string[];
 } {
   const visibleRunnerBaseContestCredits = input.playerView.opponent.credits;
-  const visibleRunnerExtraCredits = Math.max(0, Math.floor(extraRunnerCredits));
-  const visibleRunnerPreRunCreditBonus =
-    visibleRunnerExtraCredits > 0
-      ? visibleRunnerPreRunCreditBurstBonus(
-          input.playerView.opponent.rig ?? [],
-          visibleRunnerExtraCredits,
-        )
-      : 0;
+  const visibleRunnerExtraCredits = visibleRunnerExposureCreditValue(
+    input,
+    runnerCreditActions,
+  );
+  const visibleRunnerIncomeAboveBasic =
+    visibleRunnerExtraCredits - runnerCreditActions;
   const visibleRunnerGeneralContestCredits =
-    visibleRunnerBaseContestCredits +
-    visibleRunnerExtraCredits +
-    visibleRunnerPreRunCreditBonus;
+    visibleRunnerBaseContestCredits + visibleRunnerExtraCredits;
   const runnerPathCandidates = visibleRunnerBreakerPathCandidates(
     input,
     visibleRunnerGeneralContestCredits,
@@ -181,7 +177,7 @@ function scoringWindowAccessAssessmentForMode(
         "remote_access:unprotected",
         `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
         `visible_runner_extra_exposure_credits:${visibleRunnerExtraCredits}`,
-        `visible_runner_pre_run_credit_take_bonus:${visibleRunnerPreRunCreditBonus}`,
+        `visible_runner_income_above_basic_credits:${visibleRunnerIncomeAboveBasic}`,
       ],
     };
   }
@@ -282,75 +278,11 @@ function scoringWindowAccessAssessmentForMode(
         : []),
       `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
       `visible_runner_extra_exposure_credits:${visibleRunnerExtraCredits}`,
-      `visible_runner_pre_run_credit_take_bonus:${visibleRunnerPreRunCreditBonus}`,
+      `visible_runner_income_above_basic_credits:${visibleRunnerIncomeAboveBasic}`,
       ...(postRezProjection?.evidence ?? []),
       ...(observedReachability?.evidence ?? []),
     ],
   };
-}
-
-function visibleRunnerPreRunCreditBurstBonus(
-  rig: readonly VisibleCard[],
-  availableCreditActions: number,
-): number {
-  let remainingActions = Math.max(0, Math.floor(availableCreditActions));
-  if (remainingActions <= 0) return 0;
-  const takeAmounts = rig
-    .map(visibleRunnerPreRunCreditTakeAmount)
-    .filter((amount) => amount > 1)
-    .sort((left, right) => right - left);
-  let bonus = 0;
-  for (const amount of takeAmounts) {
-    if (remainingActions <= 0) break;
-    bonus += amount - 1;
-    remainingActions -= 1;
-  }
-  return bonus;
-}
-
-function visibleRunnerPreRunCreditTakeAmount(card: VisibleCard): number {
-  if (card.known === false) return 0;
-  const storedCredits = visibleRunnerStoredCreditCounterAmount(card);
-  if (storedCredits <= 1) return 0;
-  const tokens = scoringWindowVisibleCardTextTokens(card);
-  const tokenSet = new Set(tokens);
-  const hasCreditToken =
-    tokenSet.has("credit") ||
-    tokenSet.has("credits") ||
-    tokenSet.has("bit") ||
-    tokenSet.has("bits");
-  const hasTakeAll =
-    tokensIncludePhrase(tokens, ["take", "all"]) ||
-    tokensIncludePhrase(tokens, ["take", "all", "the"]) ||
-    tokensIncludePhrase(tokens, ["nimm", "alle"]) ||
-    tokensIncludePhrase(tokens, ["nehme", "alle"]);
-  return hasCreditToken && hasTakeAll ? storedCredits : 0;
-}
-
-function visibleRunnerStoredCreditCounterAmount(card: VisibleCard): number {
-  const counterAmount = Object.entries(card.counters ?? {}).reduce(
-    (sum, [key, value]) =>
-      visibleRunnerStoredCreditCounterKey(key) && typeof value === "number"
-        ? sum + Math.max(0, Math.floor(value))
-        : sum,
-    0,
-  );
-  const displayAmount = (card.counterDisplays ?? []).reduce((sum, display) => {
-    if (!visibleRunnerStoredCreditCounterKey(display.counterType)) return sum;
-    if (display.creditPool !== undefined) return sum;
-    return sum + Math.max(0, Math.floor(display.amount));
-  }, 0);
-  return Math.max(counterAmount, displayAmount);
-}
-
-function visibleRunnerStoredCreditCounterKey(key: string | undefined): boolean {
-  return (
-    key === "bit" ||
-    key === "bits" ||
-    key === "credit" ||
-    key === "credits" ||
-    key === "stored_credit"
-  );
 }
 
 function visibleRunnerInstalledIcebreakerCount(

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type {
   AiDecisionInput,
@@ -17,7 +17,10 @@ import {
 } from "../../runner-strategic-intent";
 import { discardKeepScore } from "../../runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
-import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import {
+  AI_HINTS_BY_CARD as mockedHints,
+  type AiCardHint,
+} from "../../ai-hints";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import { persistentEngineProfileForCard } from "./runner-persistent-install-evaluation";
 import {
@@ -31,6 +34,18 @@ import {
   visibleCard,
   visibleIdentity,
 } from "../../runner-hand-development.test-support";
+
+vi.mock(import("../../ai-hints"), async (importOriginal) => {
+  const actual = await importOriginal();
+  const hints = actual.createAiHintsByCard();
+  return {
+    ...actual,
+    AI_HINTS_BY_CARD: hints,
+    createAiHintsByCard: () => new Map(hints),
+  };
+});
+
+const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
 
 describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
   it("recognizes the first delayed-install engine as an actionable doctrine provider", () => {

@@ -1,11 +1,10 @@
-import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
+import { AI_HINTS_BY_CARD as AI_HINTS, type AiCardHint } from "./ai-hints";
 import type {
   AiHintBreakerProfile,
   AiHintCostProfile,
   KnownHintBreakerCoverage,
 } from "./hint-ontology";
 
-const AI_HINTS = createAiHintsByCard();
 const ACCESS_BLOCKING_BREAKER_RESTRICTIONS = new Set([
   "not_access_enabling_breaker",
   "not_reachability_coverage",
@@ -70,6 +69,9 @@ export function estimateBreakerCostProfileFromOntology(
   const profile = hint?.breakerProfile;
   if (!profile) return undefined;
   const costProfile = hint?.costProfile;
+  const reserveRiskPenalty = riskPenalty(costProfile?.reserveRisk);
+  const opportunityCostPenalty = riskPenalty(costProfile?.opportunityCost);
+  const sideEffectPenalty = breakerSideEffectPenalty(profile);
   return {
     ...(finiteNumber(costProfile?.credits)
       ? { installCredits: costProfile?.credits }
@@ -77,9 +79,9 @@ export function estimateBreakerCostProfileFromOntology(
     ...(finiteNumber(costProfile?.memory)
       ? { memory: costProfile?.memory }
       : {}),
-    reserveRiskPenalty: riskPenalty(costProfile?.reserveRisk),
-    opportunityCostPenalty: riskPenalty(costProfile?.opportunityCost),
-    sideEffectPenalty: breakerSideEffectPenalty(profile),
+    reserveRiskPenalty,
+    opportunityCostPenalty,
+    sideEffectPenalty,
     ...(finiteNumber(profile.pumpCost) ? { pumpCost: profile.pumpCost } : {}),
     ...(finiteNumber(profile.breakCost)
       ? { breakCost: profile.breakCost }
@@ -92,9 +94,9 @@ export function estimateBreakerCostProfileFromOntology(
       ...(finiteNumber(costProfile?.memory)
         ? [`structured_breaker_memory:${costProfile?.memory}`]
         : []),
-      `structured_breaker_reserve_risk_penalty:${riskPenalty(costProfile?.reserveRisk)}`,
-      `structured_breaker_opportunity_penalty:${riskPenalty(costProfile?.opportunityCost)}`,
-      `structured_breaker_side_effect_penalty:${breakerSideEffectPenalty(profile)}`,
+      `structured_breaker_reserve_risk_penalty:${reserveRiskPenalty}`,
+      `structured_breaker_opportunity_penalty:${opportunityCostPenalty}`,
+      `structured_breaker_side_effect_penalty:${sideEffectPenalty}`,
     ],
   };
 }

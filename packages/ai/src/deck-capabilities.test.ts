@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   buildDeckCapabilityProfile,
   redactedDeckCapabilityFacts,
 } from "./deck-capabilities";
-import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
+import { AI_HINTS_BY_CARD as mockedHints, type AiCardHint } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import match9d15Checkpoint from "../../../data/scenarios/ai-decision-checkpoints/cp-9d15-01-urgent-remote-inside-job.json";
 import type {
@@ -13,6 +13,18 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
+
+vi.mock(import("./ai-hints"), async (importOriginal) => {
+  const actual = await importOriginal();
+  const hints = actual.createAiHintsByCard();
+  return {
+    ...actual,
+    AI_HINTS_BY_CARD: hints,
+    createAiHintsByCard: () => new Map(hints),
+  };
+});
+
+const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
 
 describe("DeckCapabilityProfile", () => {
   it("builds runner breaker coverage, search access and bank tools from own deck facts", () => {

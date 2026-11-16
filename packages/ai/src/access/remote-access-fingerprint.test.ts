@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  remoteAccessFingerprint,
-  remoteAccessFingerprintChanged,
-} from "./remote-access-fingerprint";
+import { remoteAccessFingerprint } from "./remote-access-fingerprint";
 
 describe("remote access fingerprint", () => {
   it("includes side-safe identity, definition, position, counters and root count", () => {
@@ -34,12 +31,7 @@ describe("remote access fingerprint", () => {
       root: [{ instanceId: "b", definitionId: "same", known: true }],
     });
 
-    expect(
-      remoteAccessFingerprintChanged({
-        previousFingerprint: previous,
-        currentFingerprint: current,
-      }),
-    ).toBe(true);
+    expect(previous).not.toBe(current);
   });
 
   it("changes when visible counters or root count changes", () => {
@@ -67,11 +59,6 @@ describe("remote access fingerprint", () => {
       ],
     });
 
-    expect(
-      remoteAccessFingerprintChanged({
-        previousFingerprint: previous,
-        currentFingerprint: current,
-      }),
-    ).toBe(true);
+    expect(previous).not.toBe(current);
   });
 });

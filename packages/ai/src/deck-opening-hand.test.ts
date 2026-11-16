@@ -1,11 +1,30 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
+import { AI_HINTS_BY_CARD as mockedHints, type AiCardHint } from "./ai-hints";
 import {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
 } from "./deck-opening-hand";
+
+vi.mock(import("./ai-hints"), async (importOriginal) => {
+  const actual = await importOriginal();
+  const hints = actual.createAiHintsByCard();
+  return {
+    ...actual,
+    AI_HINTS_BY_CARD: hints,
+    createAiHintsByCard: () => new Map(hints),
+  };
+});
+
+const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
+const corpOpeningIncome = {
+  kind: "action_economy",
+  timing: "action",
+  scope: "corp",
+  resource: "credits",
+  amount: 2,
+} as const;
 
 describe("deck opening hand role classification", () => {
   it("mulligans the historical Manhunt hand when its strategy pieces are not opening-executable", () => {
@@ -116,6 +135,7 @@ describe("deck opening hand role classification", () => {
       cardId: "local_multi_economy",
       side: "corp",
       roles: ["economy_asset", "economy_operation", "draw_operation"],
+      effects: [corpOpeningIncome],
     });
     setTestCardRoles("local_multi_breaker", {
       cardId: "local_multi_breaker",
@@ -153,11 +173,12 @@ describe("deck opening hand role classification", () => {
     }
   });
 
-  it("counts opening economy roles by bounded role terms", () => {
+  it("requires a Corp credit effect and matches Runner economy roles by bounded terms", () => {
     setTestCardRoles("local_opening_economy", {
       cardId: "local_opening_economy",
       side: "corp",
       roles: ["economy_asset"],
+      effects: [corpOpeningIncome],
     });
     setTestCardRoles("local_opening_noise", {
       cardId: "local_opening_noise",

@@ -650,7 +650,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.evidence).toEqual(
       expect.arrayContaining([
         "visible_runner_exposure_contest_credits:18",
-        "exposure_visible_runner_pre_run_credit_take_bonus:5",
+        "exposure_visible_runner_income_above_basic_credits:5",
       ]),
     );
   });

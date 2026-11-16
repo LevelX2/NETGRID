@@ -4,6 +4,15 @@ import { describe, expect, it } from "vitest";
 import { corpVisibleMeatDamagePayoff } from "./corp-tag-punish-visible-payoff";
 
 describe("corpVisibleMeatDamagePayoff", () => {
+  it("does not count brain damage in HQ as a meat damage payoff", () => {
+    const input = corpInput();
+    input.playerView.own.gripOrHq = [
+      card("scrub", "onr_v1_231_cortical-scrub"),
+    ];
+
+    expect(corpVisibleMeatDamagePayoff(input)).toBe(false);
+  });
+
   it("does not treat an Archives card as a live damage payoff", () => {
     const scorched = card("scorched", "onr_v1_302_scorched-earth");
     const input = corpInput();

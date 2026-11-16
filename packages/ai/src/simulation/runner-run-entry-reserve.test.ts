@@ -1,3 +1,4 @@
+import { deckSnapshotCardCountsForTest } from "../deck-snapshot.test-support";
 import { afterEach, expect, it } from "vitest";
 import {
   ORIGINALSET_DEFAULT_DECKS,
@@ -181,9 +182,7 @@ function runnerInput(state: GameState) {
     ownDeckSnapshot: {
       deckSnapshotId: "run-entry-reserve-test",
       side: "runner",
-      cards: Object.values(state.cardInstances)
-        .filter((c) => c.owner === "runner")
-        .map((c) => ({ cardId: c.definitionId, quantity: 1 })),
+      cards: deckSnapshotCardCountsForTest(state, "runner"),
     },
     decisionId: `${state.matchId}:${state.stateVersion}:runner`,
     actionNumber: state.stateVersion,

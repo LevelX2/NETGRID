@@ -17,6 +17,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     "wrong_server",
     "wrong_run",
     "wrong_window",
+    "wrong_timing",
     "wrong_original",
     "intervening_runner",
     "missing_entry_target",
@@ -45,6 +46,8 @@ describe("Runner cost/penalty support plan continuation", () => {
       const next = traceBidInput(93, [action]);
       delete next.playerView.pendingChoice;
       next.playerView.timingPoint = "run.approach_ice";
+      action.timingPoint =
+        variant === "wrong_timing" ? "run.encounter_ice" : "run.approach_ice";
       next.eventTail = [
         {
           eventId: "evt_91",
@@ -154,6 +157,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     const next = traceBidInput(91, [support]);
     delete next.playerView.pendingChoice;
     next.playerView.timingPoint = "run.movement_rez_window";
+    support.timingPoint = "run.movement_rez_window";
     const resolution = resolvePlanBoundRunnerCostPenaltyContinuation(
       { input: next, actionCandidates: [], turnKey: "runner:turn:14" },
       selected.portfolio,
@@ -832,9 +836,11 @@ describe("Runner cost/penalty support plan continuation", () => {
     expect(engineWindowResult.portfolio?.selectedActionOrigin).toBeUndefined();
     const support = supportAction(70, originalAction.actionId);
     support.timingPoint = "run.encounter_ice";
+    const paymentInput = input(70, [support]);
+    paymentInput.playerView.timingPoint = "run.encounter_ice";
     expect(() =>
       reconcileSelectedRunnerCostPenaltySupportOrigin(
-        input(70, [support]),
+        paymentInput,
         planResult(70, support.actionId, "economy-root"),
         engineWindowResult.portfolio,
       ),

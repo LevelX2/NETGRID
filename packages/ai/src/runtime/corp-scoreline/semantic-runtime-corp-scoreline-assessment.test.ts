@@ -8,11 +8,9 @@ import {
   assessCorpScorelineWindow,
   scorelineAssessmentToTerminalWindowLike,
 } from "./semantic-runtime-corp-scoreline-assessment";
-import { semanticRuntimeCorpPassiveScoreLinePenalty } from "../semantic-runtime-corp-passive-scoreline";
-import { semanticRuntimeCorpScoreNowSafetyGate } from "../semantic-runtime-corp-score-safety";
 
 describe("assessCorpScorelineWindow", () => {
-  it("allows safe score-now and penalizes passive draw, economy and end turn", () => {
+  it("identifies a safe score-now path amid draw, economy and end-turn actions", () => {
     const score = action(
       "score",
       "score_agenda",
@@ -38,24 +36,6 @@ describe("assessCorpScorelineWindow", () => {
       recommendedNextStep: "score_now",
       blocked: false,
     });
-    expect(
-      semanticRuntimeCorpScoreNowSafetyGate(
-        input,
-        score,
-        consumerDeps(assessment),
-      ),
-    ).toMatchObject({ allowed: true });
-    for (const passive of [gain, draw, endTurn]) {
-      expect(
-        semanticRuntimeCorpPassiveScoreLinePenalty(
-          input,
-          passive,
-          passiveDeps(assessment),
-        ),
-      ).toEqual(
-        expect.objectContaining({ key: "corp_passive_scoreline_available" }),
-      );
-    }
   });
 
   it("does not mark score or advance safe when the remote is unsafe", () => {
@@ -79,16 +59,9 @@ describe("assessCorpScorelineWindow", () => {
 
     expect(path.safe).toBe(false);
     expect(path.blockers).toContain("cheap_contest");
-    expect(
-      semanticRuntimeCorpPassiveScoreLinePenalty(
-        input,
-        gain,
-        passiveDeps(assessment),
-      ),
-    ).toBeUndefined();
   });
 
-  it("recognizes economy that funds a blocked scoreline and does not punish it as passive", () => {
+  it("recognizes economy that funds a blocked scoreline", () => {
     const score = {
       ...action("score", "score_agenda", "agenda-installed", "remote_1"),
       costs: [{ credits: 5 }],
@@ -111,13 +84,6 @@ describe("assessCorpScorelineWindow", () => {
       recommendedNextStep: "fund_scoreline",
       blocked: false,
     });
-    expect(
-      semanticRuntimeCorpPassiveScoreLinePenalty(
-        input,
-        gain,
-        passiveDeps(assessment),
-      ),
-    ).toBeUndefined();
   });
 
   it("does not treat hidden-zone reveal wrappers as scoreline funding", () => {
@@ -283,7 +249,7 @@ describe("assessCorpScorelineWindow", () => {
     );
   });
 
-  it("keeps no-score-path states as none/defer without passive penalty", () => {
+  it("keeps no-score-path states as none/defer", () => {
     const draw = action("draw", "draw_card", "basic_action");
     const endTurn = action("end", "end_turn", "game_rule");
     const input = inputWithActions([draw, endTurn]);
@@ -292,13 +258,6 @@ describe("assessCorpScorelineWindow", () => {
     expect(assessment.windowKind).toBe("none");
     expect(assessment.recommendedNextStep).toBe("defer");
     expect(assessment.terminalWindow).toBe(false);
-    expect(
-      semanticRuntimeCorpPassiveScoreLinePenalty(
-        input,
-        draw,
-        passiveDeps(assessment),
-      ),
-    ).toBeUndefined();
   });
 
   it("does not emit fixed true evidence when no scoreline window exists", () => {
@@ -376,24 +335,6 @@ function scoreline(
     centralThreatHigh: () => overrides.centralThreatHigh === true,
     actionIsEconomy: (_input, action) => action.type === "gain_credit",
   });
-}
-
-function consumerDeps(assessment: ReturnType<typeof scoreline>) {
-  return {
-    scoreTerminalWindow: () =>
-      scorelineAssessmentToTerminalWindowLike(assessment),
-    scorelineWindowAssessment: () => assessment,
-  };
-}
-
-function passiveDeps(assessment: ReturnType<typeof scoreline>) {
-  return {
-    ...consumerDeps(assessment),
-    actionIsScoreLine: (input: AiDecisionInput, action: LegalAction) =>
-      sourceCard(input, action)?.type === "agenda",
-    rolesForAction: (_input: AiDecisionInput, action: LegalAction) =>
-      action.type === "gain_credit" ? ["economy"] : [],
-  };
 }
 
 function pathFor(assessment: ReturnType<typeof scoreline>, actionId: string) {

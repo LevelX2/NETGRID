@@ -1,3 +1,4 @@
+import type { RunnerAdvancedRemoteThreatObservation } from "./remote-server-threat";
 import type {
   AiDecisionActionAlternative,
   LegalAction,
@@ -496,8 +497,7 @@ export type AiSimulationActionSequenceEntry = {
   runnerInterfaceInstallTaken?: boolean;
   runnerInterfaceInstalledButUnusedTurn?: boolean;
   runnerRemoteContestCreditReserveAfterRun?: number;
-  runnerAdvancedRemoteThreatServerIds?: string[];
-  runnerContestableAdvancedRemoteThreatServerIds?: string[];
+  runnerAdvancedRemoteThreats?: RunnerAdvancedRemoteThreatObservation[];
   runnerContestedAdvancedRemoteServerId?: string;
   runnerCentralRunInsteadOfContestableAdvancedRemote?: boolean;
   runnerCentralRunInsteadWasJustified?: boolean;
@@ -530,6 +530,7 @@ export type AiSimulationActionSequenceEntry = {
   runnerLowValueSpendBelowReserve?: boolean;
   runnerExpensiveInstallBelowReserve?: boolean;
   runnerReservePreservingEconomy?: boolean;
+  runnerReserveRunId?: string;
   runnerReserveAfterSuccessfulRun?: number;
   runnerReserveAfterRemoteAccess?: number;
   runnerReserveAfterCentralRun?: number;

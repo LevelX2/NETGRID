@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { assessCorpTerminalAgendaDefense } from "../defense/corp-terminal-agenda-defense";
@@ -10,6 +11,7 @@ export function withCorpTerminalAgendaDefense(
   projects: readonly CorpScoreProjectSignal[],
 ): CorpScoreProjectSignal {
   if (
+    input.side !== "corp" ||
     input.playerView.phase === "run" ||
     !project.serverId ||
     !project.agendaInstanceId ||
@@ -54,7 +56,7 @@ export function withCorpTerminalAgendaDefense(
       (project.actionIds === undefined ||
         project.actionIds.includes(action.actionId)) &&
       action.type === "advance_card" &&
-      action.expiresAtStateVersion === input.playerView.stateVersion,
+      actionMatchesCurrentDecision(input, action),
   );
   if (!advance) return project;
   const advanceCredits = advance.costs.reduce(

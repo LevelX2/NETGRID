@@ -1,10 +1,7 @@
+import { quoteVisibleRunnerPathForMetrics } from "./visible-run-path-for-metrics";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { rolesMatch } from "../role-match";
-import {
-  runnerRunPathCreditBudgetWithVisiblePools,
-  type KnownRezzedIcePathAssessment,
-  type RunnerRunPathCreditBudget,
-} from "../visible-run-analysis";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import {
   centralPressureTargetsForCard,
   isCentralPressureCardForMetrics,
@@ -49,12 +46,7 @@ type NoFreshCentralDependencies = {
 };
 
 type TrueCentralCloseoutDependencies = {
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number | RunnerRunPathCreditBudget,
-    rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   rolesForCardId: (definitionId: string | undefined) => string[];
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
@@ -130,14 +122,10 @@ export function trueCentralCloseoutProfile(
     (candidate) => candidate.id === target,
   );
   if (!server) return { opportunity: false, reasons: [] };
-  const assessment = dependencies.assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    server.root,
+  const assessment = quoteVisibleRunnerPathForMetrics(
+    input,
+    server,
+    dependencies.assessKnownRezzedIcePath,
   );
   if (assessment.blocked) return { opportunity: false, reasons: [] };
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
@@ -313,14 +301,10 @@ export function runnerNoFreshCentralContext(
     const server = input.playerView.servers.find(
       (candidate) => candidate.id === target,
     );
-    const assessment = dependencies.assessKnownRezzedIcePath(
-      server?.ice ?? [],
-      input.playerView.own.rig ?? [],
-      runnerRunPathCreditBudgetWithVisiblePools(
-        input.playerView.own.credits,
-        input.playerView.own.rig ?? [],
-      ),
-      server?.root ?? [],
+    const assessment = quoteVisibleRunnerPathForMetrics(
+      input,
+      server,
+      dependencies.assessKnownRezzedIcePath,
     );
     if (
       !assessment.blocked &&

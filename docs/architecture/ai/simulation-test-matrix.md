@@ -95,6 +95,11 @@ strategische Entscheidungen mit jeweils einem anderen Plan als dem
 ausgewerteten, ohne Fortschritt, gemeldeten Abbruchgrund oder Ablauf. Ein kürzerer Export lässt die Aussage
 offen. Benchmarks dieser beiden Kennzahlen benötigen denselben Messvertrag.
 Encounter-Effektzähler werten die zugehörige Evidence aus Runner-Aktionen aus.
+Die Remote-Contest-Rate zählt je Spiel, Turn und Fort. Ein Versuch geht in
+den Zähler ein, wenn das angegriffene Fort zum Zeitpunkt des Run-Starts
+contestierbar war. Blocker werden am betroffenen Fort erfasst. Für die
+Run-Reserve zählt die letzte beobachtete Access-Reserve je Run. Bekannte
+ICE-Pfade verwenden das Trace-Profil und Corp-Creditbudget der Entscheidung.
 Das R&D-Regressionsfixture für wiederholten Zugriff erzeugt den beobachteten
 Vorzustand durch Engine-Aktionen mit einer fest gebundenen Deckpaarung.
 Vor der Wahlprüfung muss der aktuelle Belief die bekannte, unveränderte und

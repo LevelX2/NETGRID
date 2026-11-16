@@ -1,3 +1,4 @@
+import { deckSnapshotCardCountsForTest } from "../../deck-snapshot.test-support";
 import { corpProgramTrashDefenseSignals } from "../../corp/defense/program-trash-signal";
 import { programTrashCoverageLosses } from "../../corp/defense/program-trash-coverage";
 import { afterEach, expect, it } from "vitest";
@@ -176,10 +177,12 @@ it("diagnoses a pending Defense program-trash choice without its LegalAction", (
   const input = corpInput(choiceState());
   expect(() =>
     corpProgramTrashDefenseSignals({ ...input, legalActions: [] }, []),
-  ).toThrow(expect.objectContaining({
-    code: "missing_action_semantics",
-    context: expect.objectContaining({ owner: "rules_contract" }),
-  }));
+  ).toThrow(
+    expect.objectContaining({
+      code: "missing_action_semantics",
+      context: expect.objectContaining({ owner: "rules_contract" }),
+    }),
+  );
 });
 
 it("requires the selected Defense executor instead of ranking targets again in the resolver", () => {
@@ -234,9 +237,7 @@ function corpInput(state: GameState) {
     ownDeckSnapshot: {
       deckSnapshotId: "program-trash-coverage-test",
       side: "corp",
-      cards: Object.values(state.cardInstances)
-        .filter((c) => c.owner === "corp")
-        .map((c) => ({ cardId: c.definitionId, quantity: 1 })),
+      cards: deckSnapshotCardCountsForTest(state, "corp"),
     },
     decisionId: `${state.matchId}:${state.stateVersion}:corp`,
     actionNumber: state.stateVersion,

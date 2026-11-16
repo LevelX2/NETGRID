@@ -1,8 +1,20 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildRunnerDeckEngineDoctrine } from "./runner-deck-engine-doctrine";
-import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
+import { AI_HINTS_BY_CARD as mockedHints, type AiCardHint } from "./ai-hints";
+
+vi.mock(import("./ai-hints"), async (importOriginal) => {
+  const actual = await importOriginal();
+  const hints = actual.createAiHintsByCard();
+  return {
+    ...actual,
+    AI_HINTS_BY_CARD: hints,
+    createAiHintsByCard: () => new Map(hints),
+  };
+});
+
+const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
 
 describe("runner deck engine doctrine", () => {
   it("derives the Shell-game engine generically from providers and dependencies", () => {
@@ -235,10 +247,7 @@ describe("runner deck engine doctrine", () => {
           provider.capabilities.includes("runner.economy.recurring_breaker"),
         )
         .map((provider) => provider.cardId),
-    ).toEqual([
-      "onr_v1_071_vewy-vewy-quiet",
-      "onr_v1_124_corolla-speed-chip",
-    ]);
+    ).toEqual(["onr_v1_071_vewy-vewy-quiet", "onr_v1_124_corolla-speed-chip"]);
   });
 
   it("keeps sparse throughput support below high-strength development", () => {

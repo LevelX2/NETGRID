@@ -32,7 +32,8 @@ export function summarizeAdvancedRemoteThreatMetrics(
 > {
   const threatKeys = new Set<string>();
   const contestableKeys = new Set<string>();
-  const contestedKeys = new Set<string>();
+  const contestAttempts = new Set<string>();
+  const contestedContestableKeys = new Set<string>();
   const centralInsteadKeys = new Set<string>();
   const centralJustifiedKeys = new Set<string>();
   const centralBurnedKeys = new Set<string>();
@@ -42,52 +43,54 @@ export function summarizeAdvancedRemoteThreatMetrics(
   const blockedKnownIceKeys = new Set<string>();
   const baitLowValueKeys = new Set<string>();
   const repeatedCentralKeys = new Set<string>();
-  const threatFirstTurn = new Map<string, number>();
   const contestDeltas: number[] = [];
   const resolveDeltas: number[] = [];
   let insufficientPostRunStarts = 0;
   let sufficientPostRunStarts = 0;
 
-  for (const summary of summaries) {
+  for (const [gameIndex, summary] of summaries.entries()) {
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    const threatFirstTurn = new Map<string, number>();
     for (const entry of sequence) {
-      const turn = entry.turnNumber ?? 0;
-      for (const serverId of entry.runnerAdvancedRemoteThreatServerIds ?? []) {
-        const key = `${summary.seed}|${turn}|${serverId}`;
-        threatKeys.add(key);
-        const persistentKey = `${summary.seed}|${serverId}`;
-        if (!threatFirstTurn.has(persistentKey)) {
-          threatFirstTurn.set(persistentKey, turn);
+      const turn = entry.turnNumber;
+      if (turn !== undefined) {
+        for (const threat of entry.runnerAdvancedRemoteThreats ?? []) {
+          const { serverId, blocker } = threat;
+          const key = `${gameIndex}|${turn}|${serverId}`;
+          threatKeys.add(key);
+          if (!threatFirstTurn.has(serverId))
+            threatFirstTurn.set(serverId, turn);
+          if (blocker === "ice_cost" || blocker === "post_run_reserve")
+            blockedCreditKeys.add(key);
+          if (blocker === "post_run_reserve") blockedPostRunKeys.add(key);
+          if (blocker === "breaker_coverage") blockedBreakerKeys.add(key);
+          if (blocker === "ice_cost") blockedKnownIceKeys.add(key);
+          if (blocker === "bait_or_low_value") baitLowValueKeys.add(key);
+          if (!threat.contestable) continue;
+          contestableKeys.add(key);
+          if (entry.runnerCentralRunInsteadOfContestableAdvancedRemote)
+            centralInsteadKeys.add(key);
+          if (entry.runnerCentralRunInsteadWasJustified)
+            centralJustifiedKeys.add(key);
+          if (entry.runnerCentralRunBurnedRemoteContestReserve)
+            centralBurnedKeys.add(key);
+          if (entry.runnerRepeatedCentralRunWhileSameRemoteThreat)
+            repeatedCentralKeys.add(key);
         }
       }
-      for (const serverId of entry.runnerContestableAdvancedRemoteThreatServerIds ??
-        []) {
-        const key = `${summary.seed}|${turn}|${serverId}`;
-        contestableKeys.add(key);
-        if (entry.runnerRemoteContestBlockedByCredits)
-          blockedCreditKeys.add(key);
-        if (entry.runnerRemoteContestBlockedByPostRunReserve)
-          blockedPostRunKeys.add(key);
-        if (entry.runnerRemoteContestBlockedByBreakerCoverage)
-          blockedBreakerKeys.add(key);
-        if (entry.runnerRemoteContestBlockedByKnownIceCost)
-          blockedKnownIceKeys.add(key);
-        if (entry.runnerRemoteContestDeclinedAsBaitOrLowValue)
-          baitLowValueKeys.add(key);
-        if (entry.runnerCentralRunInsteadOfContestableAdvancedRemote)
-          centralInsteadKeys.add(key);
-        if (entry.runnerCentralRunInsteadWasJustified)
-          centralJustifiedKeys.add(key);
-        if (entry.runnerCentralRunBurnedRemoteContestReserve)
-          centralBurnedKeys.add(key);
-        if (entry.runnerRepeatedCentralRunWhileSameRemoteThreat)
-          repeatedCentralKeys.add(key);
-      }
-      if (entry.runnerContestedAdvancedRemoteServerId) {
+      if (turn !== undefined && entry.runnerContestedAdvancedRemoteServerId) {
         const serverId = entry.runnerContestedAdvancedRemoteServerId;
-        contestedKeys.add(`${summary.seed}|${turn}|${serverId}`);
-        const first = threatFirstTurn.get(`${summary.seed}|${serverId}`);
-        if (first !== undefined) contestDeltas.push(Math.max(0, turn - first));
+        const key = `${gameIndex}|${turn}|${serverId}`;
+        const first = threatFirstTurn.get(serverId);
+        if (!contestAttempts.has(key) && first !== undefined)
+          contestDeltas.push(Math.max(0, turn - first));
+        contestAttempts.add(key);
+        if (
+          entry.runnerAdvancedRemoteThreats?.some(
+            (threat) => threat.contestable && threat.serverId === serverId,
+          )
+        )
+          contestedContestableKeys.add(key);
       }
       if (
         entry.actionType === "score_agenda" ||
@@ -95,10 +98,12 @@ export function summarizeAdvancedRemoteThreatMetrics(
           entry.advancedAgendaStealSource === "remote")
       ) {
         const serverId = entry.targetServerId;
-        if (serverId) {
-          const first = threatFirstTurn.get(`${summary.seed}|${serverId}`);
-          if (first !== undefined)
+        if (serverId && turn !== undefined) {
+          const first = threatFirstTurn.get(serverId);
+          if (first !== undefined) {
             resolveDeltas.push(Math.max(0, turn - first));
+            threatFirstTurn.delete(serverId);
+          }
         }
       }
       if (entry.runnerRemoteRunStartedWithInsufficientPostRunReserve)
@@ -108,18 +113,17 @@ export function summarizeAdvancedRemoteThreatMetrics(
     }
   }
 
-  const skippedContestable = [...contestableKeys].filter(
-    (key) => !contestedKeys.has(key),
-  ).length;
+  const contestedContestable = contestedContestableKeys.size;
   return {
     uniqueAdvancedRemoteThreats: threatKeys.size,
     contestableAdvancedRemoteThreats: contestableKeys.size,
-    advancedRemoteThreatsContested: contestedKeys.size,
+    advancedRemoteThreatsContested: contestedContestable,
     advancedRemoteThreatContestRate:
       contestableKeys.size > 0
-        ? round(contestedKeys.size / contestableKeys.size)
+        ? round(contestedContestable / contestableKeys.size)
         : 0,
-    skippedContestableAdvancedRemoteThreats: skippedContestable,
+    skippedContestableAdvancedRemoteThreats:
+      contestableKeys.size - contestedContestable,
     centralRunInsteadOfContestableAdvancedRemote: centralInsteadKeys.size,
     centralRunInsteadWasJustified: centralJustifiedKeys.size,
     centralRunBurnedRemoteContestReserve: centralBurnedKeys.size,

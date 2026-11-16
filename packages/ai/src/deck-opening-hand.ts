@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
 import {
   deckDoctrineRoleIsAgenda,
   deckDoctrineRoleIsBreaker,
@@ -7,8 +7,6 @@ import {
   rolesForDeckDoctrineCard,
 } from "./deck-doctrine-card-roles";
 import { rolesMatch } from "./role-match";
-
-const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type OpeningHandEvaluation = {
   decision: "keep" | "mulligan";

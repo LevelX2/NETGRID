@@ -313,6 +313,7 @@ describe("corp action disposition contributors", () => {
 
   it("disposes generic Basic Credit through hand management while HQ overflows", () => {
     const current = input();
+    current.playerView.timingPoint = "corp_action.main";
     current.playerView.own.credits = 1;
     current.playerView.own.gripOrHq = Array.from({ length: 6 }, (_, index) => ({
       instanceId: `corp-card-${index}`,
@@ -324,6 +325,7 @@ describe("corp action disposition contributors", () => {
         side: "corp",
         type: "gain_credit",
         source: "basic_action",
+        timingPoint: "corp_action.main",
         expiresAtStateVersion: 12,
         targetRequirements: [],
         choiceRequirements: [],
@@ -334,6 +336,7 @@ describe("corp action disposition contributors", () => {
         side: "corp",
         type: "install_card",
         source: "corp-card-0",
+        timingPoint: "corp_action.main",
         expiresAtStateVersion: 12,
         targetRequirements: [],
         costs: [{ clicks: 1, credits: 8 }],

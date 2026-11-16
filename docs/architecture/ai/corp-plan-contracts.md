@@ -1979,6 +1979,12 @@ Liquiditätsbindung oder unvermeidbarem Damage-, Tag- oder Aktionsdruck. Damit
 bleibt die Schutzentscheidung beim Score-Parent und wird weder durch reine
 ICE-Anzahl noch durch gedruckte Kartenwerte ersetzt.
 
+Die Expositionsrechnung für einen Score verwendet das Runner-Aktionsbudget
+für allgemeine Credits. Wiederholbare Auszahlungen und die tatsächlich
+sichtbaren Bit-Bestände installierter Quellen gehen gemeinsam ein. Eine
+endliche Auszahlung ersetzt nur so viele Basiscredit-Aktionen, wie dafür
+Aktionen und Guthaben verfügbar sind.
+
 Ein jüngster öffentlicher Zugriff sperrt die erneute Agendaallokation nur,
 solange keine aktuelle Schutz-Neuquote denselben Score-Parent und Server
 zertifiziert. Für ein reifes Projekt über mehrere Züge müssen sowohl dessen
@@ -3702,6 +3708,9 @@ Nach dem Archives-Schutz und konkreten Score-/Defense-Bindungen zählt der
 begrenzte Wert der Handoptionen. Der Punish-Owner bewertet dafür feste
 Tag- und Meat-Damage-Operationen gemeinsam: unterschiedliche Auslöser,
 sichtbare Reaktionen, verfügbares Geld und die drei regulären Corp-Aktionen.
+Sichtbare Tag-Vermeidung verbraucht ein gemeinsames Runner-Creditbudget.
+Wegwerfreaktionen stehen je installierter Karte einmal zur Verfügung.
+Der Haltewert verwendet die verbleibenden Tags für den Schaden.
 Gleich viel Schaden wie Handkarten leert die Grip nur. Mehr Schaden erhält
 einen höheren Retentionswert, aber keine Zusage eines künftigen Flatlines.
 Ein einzelner passender Draw zählt schwächer und nur bei abgeglichener

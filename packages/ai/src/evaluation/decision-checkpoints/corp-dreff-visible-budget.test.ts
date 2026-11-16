@@ -1,3 +1,4 @@
+import { deckSnapshotCardCountsForTest } from "../../deck-snapshot.test-support";
 import { afterEach, expect, it } from "vitest";
 import {
   ORIGINALSET_DEFAULT_DECKS,
@@ -261,9 +262,7 @@ function corpInput(state: GameState) {
     ownDeckSnapshot: {
       deckSnapshotId: "dreff-budget-test",
       side: "corp",
-      cards: Object.values(state.cardInstances)
-        .filter((c) => c.owner === "corp")
-        .map((c) => ({ cardId: c.definitionId, quantity: 1 })),
+      cards: deckSnapshotCardCountsForTest(state, "corp"),
     },
     decisionId: `${state.matchId}:${state.stateVersion}:corp`,
     actionNumber: state.stateVersion,

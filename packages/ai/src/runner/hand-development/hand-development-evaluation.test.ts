@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 
 import type {
@@ -19,7 +19,10 @@ import {
 import { discardKeepScore } from "../../runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
-import { AI_HINTS_BY_CARD, type AiCardHint } from "../../ai-hints";
+import {
+  AI_HINTS_BY_CARD as mockedHints,
+  type AiCardHint,
+} from "../../ai-hints";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import {
   breakerVariantDeckCapabilities,
@@ -32,6 +35,18 @@ import {
   visibleCard,
   visibleIdentity,
 } from "../../runner-hand-development.test-support";
+
+vi.mock(import("../../ai-hints"), async (importOriginal) => {
+  const actual = await importOriginal();
+  const hints = actual.createAiHintsByCard();
+  return {
+    ...actual,
+    AI_HINTS_BY_CARD: hints,
+    createAiHintsByCard: () => new Map(hints),
+  };
+});
+
+const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
 
 describe("RunnerHandDevelopmentEvaluation", () => {
   it.each([0, 1])(
