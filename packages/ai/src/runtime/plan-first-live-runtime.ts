@@ -1839,6 +1839,7 @@ export function runnerActionDispositions(
       !domain.defense.forgoUnsafeRunCapacity &&
       candidate.semanticActionType === "run.start" &&
       candidate.runProjectionSummary?.serverId === "archives" &&
+      !dispositions.some((entry) => entry.actionId === candidate.actionId) &&
       archivesIsKnownWithoutAgenda(input) &&
       !domain.centralPressure.some(
         (signal) =>

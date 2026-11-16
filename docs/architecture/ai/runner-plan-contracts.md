@@ -314,6 +314,13 @@ aber weder Stealpreis noch Pfad-, Hand- oder Creditreserve. Ein zweiter
 pauschaler Archives-Zulassungspfad darf die bewertete Route nicht ersetzen;
 bezahlbare sichere Steals behalten ihren normalen Central-Parent.
 
+Die Nullnutzen-Disposition für normale Archives-Runs gilt für unklassifizierte
+LegalActions. Ein bereits vom Abwehrplan wegen konkreter Flatline-Gefahr
+abgelehnter Run behält dessen Owner und Ausgeschlossenheitsgrund.
+Discovery, Assessment und Materialisierung des Zentraldrucks binden nur
+Action-IDs ohne aktuelle Disposition. Ein erreichbarer Zentralpfad kann so
+als Kampagnenziel fortbestehen, während seine konkrete Ausführung gesperrt ist.
+
 **Klasse:** `strategic_campaign`
 **Rolle:** Vordergrund, zeitweise präemptierbar
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

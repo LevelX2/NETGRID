@@ -274,6 +274,12 @@ function pressureCandidates(
   context: PlanSchedulerContext,
   signal: RunnerPressureSignal,
 ): PlanMaterialization["candidates"] {
+  const availableCandidates = context.actionCandidates.filter(
+    (candidate) =>
+      !context.actionDispositions?.some(
+        (disposition) => disposition.actionId === candidate.actionId,
+      ),
+  );
   if (
     signal.routePreparation === "develop_payoff" ||
     signal.routePreparation === "convert_accumulated_pressure" ||
@@ -281,15 +287,19 @@ function pressureCandidates(
     signal.routePreparation === "targeted_ice_trash"
   ) {
     const preparationActionIds = new Set(signal.preparationActionIds ?? []);
-    return context.actionCandidates
+    return availableCandidates
       .filter((candidate) => preparationActionIds.has(candidate.actionId))
       .map((candidate) => ({
         candidate,
         stepValue: signal.marginalValue,
       }));
   }
-  return runnerCentralPressureRunCandidates(context.input, context.actionCandidates,
-    signal, domain(context).runTargetEvaluations);
+  return runnerCentralPressureRunCandidates(
+    context.input,
+    availableCandidates,
+    signal,
+    domain(context).runTargetEvaluations,
+  );
 }
 
 /** The same admitted route values serve materialization and preparation. A

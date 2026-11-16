@@ -20,6 +20,11 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
+import type { RunnerPlanDomain } from "../plans/runner-tactical-plan-contracts";
+import { centralPressureModule } from "../runner/central-pressure/central-pressure-plan-module";
+
 afterEach(resetResidentPlanPortfolioMemory);
 function fixture(runnerId: string, corpId: string) {
   const runner = catalog.decks.find((d) => d.standardDeckId === runnerId)!,
@@ -133,6 +138,68 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
       ?.find((a) => a.actionId === "runner.start_run.archives")
       ?.whyNot?.join("|"),
   ).toContain("runner_archives_visible_state_has_no_agenda_payoff");
+});
+
+it("blocks a Central route whose exact current action is dispositioned by Defense", () => {
+  const { state, snapshot } = fixture(
+    "standard_runner_ice_destruction_runner",
+    "standard_corp_cheap_bag_tricks",
+  );
+  const input = buildAiDecisionInput(state, "runner", {
+    difficulty: "hard",
+    ownDeckSnapshot: snapshot,
+  });
+  const actionCandidates = buildActionSemanticCandidates({
+    legalActions: input.legalActions,
+    observerSide: "runner",
+    stateVersion: input.playerView.stateVersion,
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  });
+  const actionId = "runner.start_run.rd";
+  expect(
+    actionCandidates.some((candidate) => candidate.actionId === actionId),
+  ).toBe(true);
+  const centralPressure: RunnerPlanDomain["centralPressure"] = [
+    {
+      pressureId: "central:rd",
+      serverId: "rd",
+      purpose: "access",
+      priorityClass: "P4",
+      strategyLineIds: [],
+      reachable: true,
+      marginalValue: 10,
+      evidenceCode: "central_run_available_before_safety_assessment",
+      runActionIds: [actionId],
+    },
+  ];
+  const context = {
+    input,
+    actionCandidates,
+    turnKey: "runner:turn:1",
+    domain: {
+      centralPressure,
+      terminalWins: [],
+      remoteContests: [],
+      developments: [],
+      runWindows: [],
+    },
+  };
+  const owner = centralPressureModule();
+  expect(owner.discover(context)[0]?.initialViability).toBe("ready");
+  expect(
+    owner.discover({
+      ...context,
+      actionDispositions: [
+        {
+          actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: "runner.defense_and_recovery",
+          evidenceCode: "runner_optional_run_would_enable_known_next_corp_turn_flatline",
+        },
+      ],
+    })[0]?.initialViability,
+  ).toBe("blocked");
 });
 
 it.each([false, true])(
