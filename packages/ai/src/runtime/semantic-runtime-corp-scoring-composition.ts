@@ -28,14 +28,6 @@ export type SemanticRuntimeCorpScoringCompositionDependencies<
     | "visibleServerCard"
     | "cardType"
     | "cardAdvancementRequirement"
-    | "emptyRemoteCount"
-    | "hasNakedScoreLine"
-    | "hasUnsafeRemoteScoreAction"
-    | "actionServerId"
-    | "server"
-    | "remoteIsProtected"
-    | "shouldBuildProtectedScoreRemote"
-    | "actionWouldCreateUnsafeRemoteScoreLine"
     | "advanceCompletesScore"
     | "corpRemoteRezFloorAssessment"
     | "corpHasRemoteRezFloorFundingNeed"
@@ -99,7 +91,6 @@ export function createSemanticRuntimeCorpScoringComposition<
 
   const {
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-    semanticRuntimeCorpEvidence,
     semanticRuntimeCorpScoreComponents,
   } = createSemanticRuntimeCorpScoringEvidenceComposition({
     ...dependencies,
@@ -109,17 +100,6 @@ export function createSemanticRuntimeCorpScoringComposition<
     cardType: board.semanticRuntimeVisibleCardType,
     cardAdvancementRequirement:
       board.semanticRuntimeVisibleCardAdvancementRequirement,
-    emptyRemoteCount: board.semanticRuntimeCorpEmptyRemoteCount,
-    hasNakedScoreLine: board.semanticRuntimeCorpHasNakedScoreLine,
-    hasUnsafeRemoteScoreAction:
-      board.semanticRuntimeCorpHasUnsafeRemoteScoreAction,
-    actionServerId: board.semanticRuntimeCorpActionServerId,
-    server: board.semanticRuntimeCorpServer,
-    remoteIsProtected: board.semanticRuntimeCorpRemoteIsProtected,
-    shouldBuildProtectedScoreRemote:
-      board.semanticRuntimeCorpShouldBuildProtectedScoreRemote,
-    actionWouldCreateUnsafeRemoteScoreLine:
-      board.semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
     advanceCompletesScore: board.semanticRuntimeCorpAdvanceCompletesScore,
     corpRemoteRezFloorAssessment:
       board.semanticRuntimeCorpRemoteRezFloorAssessment,
@@ -147,7 +127,6 @@ export function createSemanticRuntimeCorpScoringComposition<
     tagPunishWindowDiagnosticsForSimulationAction,
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
     semanticRuntimeCorpScorelineWindowAssessment,
-    semanticRuntimeCorpEvidence,
     semanticRuntimeCorpScoreComponents,
   };
 }

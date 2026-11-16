@@ -1,6 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { breakerCardBlocksAccessReachability } from "../../breaker-ontology-consumer";
+import { runnerInvestmentTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -63,7 +64,7 @@ export function assessHostedBreakerDevelopment(
   card: VisibleCard,
   minimumCreditFloor: number,
 ): HostedBreakerDevelopment | undefined {
-  const { own, traceRulesProfile } = input.playerView;
+  const { own } = input.playerView;
   const rig = own.rig ?? [];
   const installingHost = profile(card) !== undefined;
   const actions = input.legalActions.filter(
@@ -203,6 +204,7 @@ export function assessHostedBreakerDevelopment(
           s.ice.every((c) => c.known && c.rezzed),
       )
       .flatMap((server) => {
+        const traceContext = runnerInvestmentTraceContext(input, server.ice);
         const cost = (cards: readonly VisibleCard[]) => {
           const path = assessKnownRezzedIcePath(
             server.ice,
@@ -210,7 +212,7 @@ export function assessHostedBreakerDevelopment(
             runnerRunPathCreditBudgetWithVisiblePools(cash, cards),
             server.root,
             input.playerView.opponent.credits,
-            traceRulesProfile ? { traceRulesProfile } : undefined,
+            traceContext,
           );
           if (
             !path.canReachAccess ||

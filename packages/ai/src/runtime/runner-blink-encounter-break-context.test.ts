@@ -1,3 +1,4 @@
+import { visibleRootIsKnownAgenda } from "./visible-root-agenda";
 import type { LegalAction, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -237,3 +238,17 @@ function blinkBreakAction(): LegalAction {
   action.timingPoint = "run.encounter_ice";
   return action;
 }
+
+it("requires a consistent known root-agenda projection for Blink risk", () => {
+  const agenda = {
+    instanceId: "known-agenda",
+    definitionId: "onr_v1_209_political-coup",
+    known: true,
+    title: "Political Coup",
+  };
+  expect(visibleRootIsKnownAgenda(agenda)).toBe(true);
+  expect(visibleRootIsKnownAgenda({ ...agenda, known: false })).toBe(false);
+  expect(() =>
+    visibleRootIsKnownAgenda({ ...agenda, type: "upgrade" }),
+  ).toThrow("visible_root_agenda_type_conflicts_with_definition");
+});

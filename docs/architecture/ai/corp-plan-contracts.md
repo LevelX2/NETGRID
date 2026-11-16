@@ -1389,6 +1389,9 @@ Choice-Signale, Fortsetzungen und Payload-Bindungen liegen ebenfalls hier.
 die aktuelle LegalAction, den relevanten Server, den ICE-Typ, den Punktestand
 und die exakte Quotenvariante. `defense-plan-module.ts` vergleicht die
 fachlichen Routen und trifft die Allokationsentscheidung.
+Die Defense-Zuglinie übernimmt nur das aktuelle Installationsangebot mit
+dem ausgewählten Fort der Route. Einnahmen für vollständiges oder
+teilweises Funding benötigen dieselbe garantierte aktuelle Liquiditätsquote.
 `defense-validation.ts` verlangt je Rez-Routenart ihren zugehörigen
 Nachweis und für die Programm-Trash-Phase eine konkrete Choice-Bindung.
 Die Gleichheit ausgewählter Rez-Kosten umfasst die konkrete Variante

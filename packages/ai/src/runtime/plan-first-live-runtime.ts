@@ -3127,7 +3127,6 @@ function prepareRunnerDomain(
       const installedAgendaScores = runnerInstalledAgendaScoreSignals(
         input,
         candidates,
-        (instanceId) => visibleOwnCardByInstanceId(input, instanceId),
       );
       const immediateAgendaPointTerminalWins =
         runnerImmediateAgendaPointTerminalWinSignals(input, candidates);

@@ -2252,8 +2252,11 @@ Admission-geprüfte kartenbezogene Planinstanzen ersetzt.
 ICE-Stärkereduktion als eigenständigen Entwicklungszweck. Die Engine projiziert
 die zusätzliche Installation ausschließlich auf bekannte gerezzte ICE. Der
 bestehende Runpfad vergleicht danach die tatsächlichen liquiden Kosten mit und
-ohne Installation einschließlich kompatibler Creditpools. Er verwendet für
-Begegnungen `encounterStrength` aus der Engine-Quote; bereits installierte
+ohne Installation einschließlich kompatibler Creditpools. Passive
+Stärkeinvestitionen und die Hosted-Breaker-Entwicklung verwenden für beide
+Alternativen denselben Trace-Kontext der Engine-Spielersicht. Bei sichtbaren
+ICE-Traces muss das Profil vorliegen. Die Pfadquote verwendet für Begegnungen
+`encounterStrength` aus der Engine-Quote; bereits installierte
 Stärkemodifikatoren werden nicht erneut addiert.
 
 Die Alternative ohne Installation erhält das aktuelle Cashbudget, die
@@ -4858,9 +4861,11 @@ folgt ausschließlich dem [EndTurn-Vertrag](planning-architecture.md#17-endturn-
 
 [`createRunnerInstalledAgendaScoreModule`](../../../packages/ai/src/runner/installed-agenda/installed-agenda-plan-module.ts)
 ist der Einstieg im Verzeichnis `runner/installed-agenda/`. Die Signaldatei
-besitzt die Engine-markierte Score-Konversion, die erforderliche sichtbare
-Quellkarte, deren Punkte und die Prüfung der Siegschwelle. Typen und Planstatus
-liegen daneben. Das Planmodul bindet Discovery, P3 beziehungsweise P1 bei
+bindet die Engine-markierte Score-Konversion an Aktionsseite, Timing,
+StateVersion und dieselbe sichtbare, Runner-kontrollierte installierte Quelle.
+Der Plan erwartet eine positive ganzzahlige Punktzahl aus der Spielersicht,
+prüft damit die Siegschwelle und revalidiert die aktuelle Action vor der
+Materialisierung. Typen und Planstatus liegen daneben. Das Planmodul bindet Discovery, P3 beziehungsweise P1 bei
 terminaler Konversion, Assessment und Materialisierung an diese Action-IDs.
 
 Die Live-Runtime injiziert nur die vorhandene Suche nach der sichtbaren eigenen

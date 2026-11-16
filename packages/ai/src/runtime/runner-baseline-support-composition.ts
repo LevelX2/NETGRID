@@ -10,9 +10,9 @@ import {
   type RunnerBaselinePlanGuardContextDependencies,
 } from "./runner-baseline-plan-guard-context";
 import {
-  createRunnerProgramPressureComposition,
-  type RunnerProgramPressureCompositionDependencies,
-} from "./runner-program-pressure-composition";
+  createRunnerProgramInstallTrashContext,
+  type RunnerProgramInstallTrashContextDependencies,
+} from "./runner-program-install-trash-context";
 import {
   createRunnerVisibleCardDiscardComposition,
   type RunnerVisibleCardDiscardCompositionDependencies,
@@ -44,7 +44,7 @@ export type RunnerBaselineSupportCompositionDependencies =
       | "selectedRunnerForcedProgramTrashOptionIds"
       | "selectedRunnerMemoryCheckpointTrashOptionIds"
     > &
-    RunnerProgramPressureCompositionDependencies &
+    RunnerProgramInstallTrashContextDependencies &
     Omit<
       RunnerVisibleCardDiscardCompositionDependencies,
       "isVisibleIcebreakerProgram"
@@ -98,14 +98,8 @@ export function createRunnerBaselineSupportComposition(
     runnerProgramInstallTrashAssessmentForCard,
     runnerProgramInstallDisplacementPenalty,
     runnerProgramSacrificeExclusion,
-    runnerMuPressureInstallScoreComponent,
-    runnerMuPressureFundingScoreComponent,
-    runnerMuPressureInstallPriorityBonus,
-    runnerMuPressureFundingPriorityBonus,
-    runnerMuPressureActionEvidence,
-  } = createRunnerProgramPressureComposition({
+  } = createRunnerProgramInstallTrashContext({
     safeNonNegativeInteger: dependencies.safeNonNegativeInteger,
-    findVisibleCard: dependencies.findVisibleCard,
     visibleMemoryCost: dependencies.visibleMemoryCost,
     visibleCardsByInstanceId: dependencies.visibleCardsByInstanceId,
     visibleBreakerRoleCounts: dependencies.visibleBreakerRoleCounts,
@@ -115,8 +109,6 @@ export function createRunnerBaselineSupportComposition(
     isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
     visibleCounterValue: dependencies.visibleCounterValue,
     visibleInstallCost: dependencies.visibleInstallCost,
-    actionCreditCost: dependencies.actionCreditCost,
-    rolesForAction: dependencies.rolesForAction,
   });
 
   const selectedChoicesDependencies: SelectedChoicesForDecisionDependencies = {
@@ -168,10 +160,5 @@ export function createRunnerBaselineSupportComposition(
     runnerProgramInstallTrashAssessmentForCard,
     runnerProgramInstallDisplacementPenalty,
     runnerProgramSacrificeExclusion,
-    runnerMuPressureInstallScoreComponent,
-    runnerMuPressureFundingScoreComponent,
-    runnerMuPressureInstallPriorityBonus,
-    runnerMuPressureFundingPriorityBonus,
-    runnerMuPressureActionEvidence,
   };
 }

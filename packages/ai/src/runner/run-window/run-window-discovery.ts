@@ -56,9 +56,13 @@ export function buildRunnerRunWindowSignals({
   >;
   runTargets: readonly RunnerRunTargetEvaluation[];
 }) {
-  const hasRunWindowCandidate = candidates.some((candidate) =>
-    isRunnerRunWindowCandidate(input, candidate),
+  const actionsById = new Map(
+    input.legalActions.map((action) => [action.actionId, action]),
   );
+  const windowCandidates = candidates.filter((candidate) =>
+    isRunnerRunWindowCandidate(input, candidate, actionsById),
+  );
+  const hasRunWindowCandidate = windowCandidates.length > 0;
   const accessWindowCommitment = currentAccessWindowCommitment(
     input,
     economy,
@@ -121,7 +125,8 @@ export function buildRunnerRunWindowSignals({
           );
         const exactPhaseActionIds = runnerExactRunWindowPhaseActionIds(
           input,
-          candidates,
+          windowCandidates,
+          actionsById,
           runWindowActionAssessments,
           safetyAssessment !== undefined,
           currentEncounterRequiresDamageBreak ||
@@ -135,10 +140,16 @@ export function buildRunnerRunWindowSignals({
           runWindowActionAssessments,
           exactPhaseActionIds,
         );
-        const restrictedRunSequenceActions = candidates.flatMap((candidate) => {
-          const action = runnerRestrictedRunSequenceAction(input, candidate);
-          return action ? [action] : [];
-        });
+        const restrictedRunSequenceActions = windowCandidates.flatMap(
+          (candidate) => {
+            const action = runnerRestrictedRunSequenceAction(
+              input,
+              candidate,
+              actionsById,
+            );
+            return action ? [action] : [];
+          },
+        );
         const restrictedRunSequenceServerIds = [
           ...new Set(
             restrictedRunSequenceActions.flatMap((action) =>
@@ -166,11 +177,7 @@ export function buildRunnerRunWindowSignals({
           leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
           semanticActionTypes: [
             ...new Set(
-              candidates
-                .filter((candidate) =>
-                  isRunnerRunWindowCandidate(input, candidate),
-                )
-                .map((candidate) => candidate.semanticActionType),
+              windowCandidates.map((candidate) => candidate.semanticActionType),
             ),
           ],
           purposeCode: restrictedRunSequence

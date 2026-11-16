@@ -710,6 +710,7 @@ describe("Runner core plan modules", () => {
           opportunityId: "theorem-1",
           sourceCardInstanceId: "theorem-1",
           actionIds: ["score-theorem"],
+          observedAtStateVersion: 10,
           agendaPoints: 3,
           terminal: false,
           evidenceCode: "runner_installed_agenda_score_conversion",
@@ -793,6 +794,7 @@ describe("Runner core plan modules", () => {
             opportunityId: "terminal-theorem",
             sourceCardInstanceId: "terminal-theorem",
             actionIds: ["score-terminal-theorem"],
+            observedAtStateVersion: 10,
             agendaPoints: 3,
             terminal: true,
             evidenceCode: "runner_installed_agenda_score_conversion",
@@ -2716,10 +2718,24 @@ function context(
   return {
     input: {
       side: "runner",
-      legalActions: actionCandidates.map((value) => ({
-        actionId: value.actionId,
-        type: value.actionType,
-      })),
+      legalActions: actionCandidates.map((value) => {
+        const boundScore = domain.installedAgendaScores?.find((signal) =>
+          signal.actionIds.includes(value.actionId),
+        );
+        if (!boundScore)
+          return { actionId: value.actionId, type: value.actionType };
+        value.sourceCardInstanceId = boundScore.sourceCardInstanceId;
+        return {
+          actionId: value.actionId,
+          type: value.actionType,
+          side: "runner",
+          source: boundScore.sourceCardInstanceId,
+          timingPoint: "runner_action.main",
+          expiresAtStateVersion: boundScore.observedAtStateVersion,
+          abilityRef: { sourceCardInstanceId: boundScore.sourceCardInstanceId },
+          payload: { cardImplementationScoresSourceAsAgenda: true },
+        };
+      }),
       playerView: {
         stateVersion: 10,
         timingPoint: "runner_action.main",

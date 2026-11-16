@@ -1369,8 +1369,7 @@ unbenutzten Evidence-Verdrahtung und des reinen Weiterleiters reduziert die
 Zahl der Schnittstellen beim Umbau des Score-/Defense-Pfads. Abnahme über
 identische Punish-Diagnosen sowie Score- und Live-Entscheidungen. Aufwand
 ungefähr ein halber Tag.
-[Evidence-API](../../../packages/ai/src/runtime/semantic-runtime-corp-evidence.ts#L15) ·
-[Weitergabe](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-composition.ts#L150) ·
+[Verbleibende Score-Composition](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-composition.ts) ·
 [Simulations-Einstieg](../../../packages/ai/src/simulation/ai-product-simulation-composition.ts#L70)
 
 ### 3. `runtime/protection-definition.ts`
@@ -1469,8 +1468,7 @@ keine fachliche Abfrage durch Live-Runtime oder Simulation. Die ungenutzte
 Bewertungsverdrahtung kann nach Prüfung der Exports entfernt werden.
 Abnahme über unveränderte native MU-Installations-, Opfer- und
 Coverage-Routen samt Strukturprüfung. Aufwand ungefähr ein halber Tag.
-[MU-Context](../../../packages/ai/src/runtime/runner-mu-pressure-context.ts#L97) ·
-[Weitergabe](../../../packages/ai/src/runtime/runner-program-pressure-composition.ts#L43) ·
+[Installationsassessment](../../../packages/ai/src/runtime/runner-program-install-trash-context.ts) ·
 [Live-Verbrauch](../../../packages/ai/src/runtime/ai-live-runtime-composition.ts#L128)
 
 ### 8. `corp/defense/corp-defense-turn-planning.ts`
@@ -1510,7 +1508,6 @@ die Definition zur Auflösung eines fehlenden Typs verwenden. Bei
 widersprüchlichen Kombinationen die Projektion sichtbar prüfen. Abnahme
 mit bekannten, verdeckten und widersprüchlichen Karten und erhaltener
 nativer Blink-Entscheidung. Aufwand ungefähr zwei bis vier Stunden.
-[Adapter](../../../packages/ai/src/simulation/visible-root-agenda-metrics.ts#L6) ·
 [Prädikat](../../../packages/ai/src/runtime/visible-root-agenda.ts#L6) ·
 [Live-Bewertung](../../../packages/ai/src/runtime/runner-blink-encounter-break-context.ts#L163)
 
@@ -1538,3 +1535,27 @@ Defense-Funding-/Fortgrenze aus Punkt 8 und das Score-Signal aus Punkt 6
 absichern. Punkt 3 korrigiert eine Reportkennzahl unabhängig von der
 Spielentscheidung. Die beiden entbehrlichen Verdrahtungen aus Punkt 2
 und 7 sowie der Run-Index aus Punkt 4 sind separat abnehmbar.
+
+### Umsetzung der siebten Stichprobe
+
+Die passiven Stärke- und Hosted-Breaker-Investitionen verwenden denselben
+gebundenen Trace-Kontext. Die native Classic-Gegenprobe verwirft die
+Clown-Investition gegen Datacomb und Rex bei 20 Credits. Modern lässt sie
+am selben Angebots- und Liquiditätsrahmen zu. Ein fehlendes Profil bei
+sichtbarem Trace scheitert im Investitionspfad sichtbar.
+
+Defense verwendet für vollständige und teilweise Finanzierung dieselbe
+garantierte aktuelle Quote. Die betrachtete Zuglinie bindet nur das
+tatsächlich ausgewählte Installationsfort. Theorem Proof behält die
+native Route samt drei Agendapunkten. Veraltete Angebote, fremde Quellen
+und nicht endliche Punktezahlen werden am Signalproduzenten abgewiesen.
+
+Run-Fenster verwenden einen Action-ID-Index und eine gemeinsame gefilterte
+Menge. Die Vergleichsprobe ohne Fenster benötigt bei 24, 48 und 96
+Angeboten 24, 48 und 96 lineare Prädikatbesuche und liefert weiterhin null
+Signale. Die ungenutzte Corp-Evidence- und Runner-MU-Verdrahtung entfiel.
+Die Root-Agenda-Erkennung liegt im Runtime-Vertrag. Die
+Remote-Schutzmessung unterscheidet aktiven, Engine-legal bezahlbaren
+und unbezahlbaren Schutz.
+
+924 fokussierte Tests in 28 Dateien, KI-Typecheck und Strukturgates bestanden.

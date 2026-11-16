@@ -12,6 +12,7 @@ import type {
   RunnerInstalledAgendaScoreSignal,
   InstalledAgendaScoreState,
 } from "./installed-agenda-types";
+import { runnerInstalledAgendaScoreActionIsCurrent } from "./installed-agenda-signals";
 
 export function createRunnerInstalledAgendaScoreModule(): PlanModule {
   return {
@@ -51,6 +52,7 @@ export function createRunnerInstalledAgendaScoreModule(): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const signal = (instance.moduleState as InstalledAgendaScoreState).signal;
+      const candidates = installedAgendaScoreCandidates(context, signal);
       return {
         step: {
           stepId: `${instance.instanceId}:score`,
@@ -58,9 +60,7 @@ export function createRunnerInstalledAgendaScoreModule(): PlanModule {
             capabilityId: "score_installed_agenda",
             semanticActionTypes: [
               ...new Set(
-                installedAgendaScoreCandidates(context, signal).map(
-                  (entry) => entry.candidate.semanticActionType,
-                ),
+                candidates.map((entry) => entry.candidate.semanticActionType),
               ),
             ],
           },
@@ -68,7 +68,7 @@ export function createRunnerInstalledAgendaScoreModule(): PlanModule {
           purpose:
             "Convert the installed agenda replacement into agenda points.",
         },
-        candidates: installedAgendaScoreCandidates(context, signal),
+        candidates,
       };
     },
   };
@@ -78,9 +78,33 @@ function installedAgendaScoreCandidates(
   context: PlanSchedulerContext,
   signal: RunnerInstalledAgendaScoreSignal,
 ): PlanMaterialization["candidates"] {
-  const actionIds = new Set(signal.actionIds);
+  const { input } = context;
+  if (
+    signal.observedAtStateVersion !== input.playerView.stateVersion ||
+    !Number.isSafeInteger(signal.agendaPoints) ||
+    signal.agendaPoints <= 0
+  )
+    return [];
+  const actionIds = new Set(
+    input.legalActions
+      .filter(
+        (action) =>
+          signal.actionIds.includes(action.actionId) &&
+          runnerInstalledAgendaScoreActionIsCurrent(
+            input,
+            action,
+            signal.sourceCardInstanceId,
+          ),
+      )
+      .map((action) => action.actionId),
+  );
   return context.actionCandidates
-    .filter((candidate) => actionIds.has(candidate.actionId))
+    .filter(
+      (candidate) =>
+        actionIds.has(candidate.actionId) &&
+        candidate.stateVersion === signal.observedAtStateVersion &&
+        candidate.sourceCardInstanceId === signal.sourceCardInstanceId,
+    )
     .map((candidate) => ({
       candidate,
       stepValue: (signal.terminal ? 2_000 : 1_000) + signal.agendaPoints * 100,

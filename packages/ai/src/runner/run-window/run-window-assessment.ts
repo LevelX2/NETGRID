@@ -1413,17 +1413,16 @@ function runnerProgramPreservationPaymentValue(
 
 export function runnerExactRunWindowPhaseActionIds(
   input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
+  windowCandidates: readonly ActionSemanticCandidate[],
+  actionsById: ReadonlyMap<string, LegalAction>,
   assessments: Readonly<Record<string, { admissible: boolean }>>,
   safetyRequiresJackOut: boolean,
   encounterRequiresTargetPreservingBreak: boolean,
 ): string[] {
   const run = input.playerView.run;
   if (!run) return [];
-  const admissibleRunWindowCandidates = candidates.filter(
-    (candidate) =>
-      isRunnerRunWindowCandidate(input, candidate) &&
-      assessments[candidate.actionId]?.admissible === true,
+  const admissibleRunWindowCandidates = windowCandidates.filter(
+    (candidate) => assessments[candidate.actionId]?.admissible === true,
   );
   const fortToll = runnerFortPassTollWindow(input);
   if (fortToll) {
@@ -1449,17 +1448,14 @@ export function runnerExactRunWindowPhaseActionIds(
       .map((candidate) => candidate.actionId);
   }
   const viewingFinish = admissibleRunWindowCandidates.filter((candidate) =>
-    input.legalActions.some(
-      (action) =>
-        action.actionId === candidate.actionId &&
-        action.payload?.approachIceExposeViewDecision === "finish",
-    ),
+    actionsById.get(candidate.actionId)?.payload?.approachIceExposeViewDecision ===
+    "finish",
   );
   if (viewingFinish.length > 0)
     return viewingFinish.map((candidate) => candidate.actionId);
   const paymentSupport = admissibleRunWindowCandidates.filter(
     (candidate) =>
-      runnerRunPaymentSupportAction(input, candidate) !== undefined,
+      runnerRunPaymentSupportAction(input, candidate, actionsById) !== undefined,
   );
   if (paymentSupport.length > 0)
     return paymentSupport.map((candidate) => candidate.actionId);
@@ -1480,7 +1476,8 @@ export function runnerExactRunWindowPhaseActionIds(
         (candidate) =>
           candidate.actionType === "pump_breaker" ||
           candidate.actionType === "break_subroutine" ||
-          runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined,
+          runnerRunRemainderStrengthBoostAction(input, candidate, actionsById) !==
+            undefined,
       )
       .map((candidate) => candidate.actionId);
     if (directEncounterActionIds.length > 0) {
@@ -1508,7 +1505,8 @@ export function runnerExactRunWindowPhaseActionIds(
   }
   if (run.phase === "movement" && run.position?.kind === "server") {
     const preparedTrash = admissibleRunWindowCandidates.filter(
-      (candidate) => runnerPostPassTrashAction(input, candidate) !== undefined,
+      (candidate) =>
+        runnerPostPassTrashAction(input, candidate, actionsById) !== undefined,
     );
     if (preparedTrash.length > 0)
       return preparedTrash.map((candidate) => candidate.actionId);
@@ -1516,7 +1514,8 @@ export function runnerExactRunWindowPhaseActionIds(
       .filter(
         (candidate) =>
           candidate.actionType === "continue_run" ||
-          runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined,
+          runnerPostPassDerezAndEndRunAction(input, candidate, actionsById) !==
+            undefined,
       )
       .map((candidate) => candidate.actionId);
   }

@@ -8,6 +8,8 @@ import theorem173Json from "../../../../../data/scenarios/ai-decision-checkpoint
 import theorem183Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f450-10311-followup-theorem-proof-183.json";
 import activatedAbilityControlJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f450-10311-04.json";
 import { buildAiDecisionInput } from "../../index";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { runnerInstalledAgendaScoreSignals } from "../../runner/installed-agenda/installed-agenda-signals";
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
@@ -24,6 +26,45 @@ describe("F450 and 10311 follow-up decision checkpoints", () => {
     ["state version 309", theorem183Json],
   ])("scores the installed agenda at %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
+  });
+
+  it("rejects malformed bindings from the native Theorem Proof score offer", () => {
+    const checkpoint = fixture(theorem167Json);
+    const input = buildAiDecisionInput(
+      checkpoint.engine.testOnlyGameState,
+      "runner",
+      {
+        ownDeckSnapshot: checkpoint.deckSnapshot,
+        eventTail: checkpoint.engine.eventPrefix,
+      },
+    );
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    });
+    const [score] = runnerInstalledAgendaScoreSignals(input, candidates);
+    expect(score).toMatchObject({
+      agendaPoints: 3,
+      observedAtStateVersion: input.playerView.stateVersion,
+      terminal: false,
+    });
+    for (const kind of ["version", "side", "source", "points"] as const) {
+      const changed = structuredClone(input);
+      const action = changed.legalActions.find(
+        (offer) => offer.actionId === score!.actionIds[0],
+      )!;
+      if (kind === "version") action.expiresAtStateVersion--;
+      if (kind === "side") action.side = "corp";
+      if (kind === "source") action.source = "different-source";
+      if (kind === "points")
+        changed.playerView.own.rig!.find(
+          (card) => card.instanceId === action.source,
+        )!.agendaPoints = Infinity;
+      expect(() =>
+        runnerInstalledAgendaScoreSignals(changed, candidates),
+      ).toThrow("invalid_player_view_card_projection");
+    }
   });
 
   it("keeps the current active-zone R&D pressure control", () => {

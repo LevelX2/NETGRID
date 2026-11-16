@@ -128,7 +128,7 @@ import {
 } from "./simulation/runner-setup-coverage-types";
 import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
-import { visibleRootIsKnownAgendaForMetrics } from "./simulation/visible-root-agenda-metrics";
+import { visibleRootIsKnownAgenda } from "./runtime/visible-root-agenda";
 import {
   classifyTagPunishPayoffFromOntology,
   classifyTagSourceFromOntology,
@@ -190,7 +190,7 @@ export const aiLiveRuntimeDependencies = {
   runnerAdvancedRemoteContestContext,
   runnerSetupChosenFamilyForEntry,
   runnerStrategicBreakerTargetForMetrics,
-  visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
+  visibleRootIsKnownAgenda,
   runRiskAssessment: assessRandomBreakOrDamageRiskForRunAction,
   projectedCreditGainForAction: runnerProjectedCreditGainForAction,
   handDevelopmentEvaluations: evaluateRunnerHandDevelopment,

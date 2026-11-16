@@ -99,6 +99,12 @@ Die Activity-Vorschläge der Selfplay-Snapshot-Auswertung reservieren einen
 stabilen Namenssuffix für die Snapshot-ID. Ein langer Szenariohinweis darf
 diese Zuordnung nicht abschneiden.
 
+Die Simulationswertung des Remote-Schutzes unterscheidet aktive
+Root-Schutzkarten von einer aktuell Engine-legal bezahlbaren Rez-Option
+im betrachteten Creditbudget. Aktiver Root-Schutz trägt 35 Punkte je Karte.
+Eine bezahlbare weitere Option trägt einmal 28 Punkte. Unbezahlbare
+ungerezzte Root-Karten tragen keine Schutzpunkte.
+
 ## Vergleichsevidenz und Standardmodus
 
 Verhaltensfälle im expliziten `legacy_compare` tragen `[legacy_compare]` im Namen.

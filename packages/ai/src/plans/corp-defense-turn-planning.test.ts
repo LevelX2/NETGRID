@@ -168,6 +168,42 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
     );
     const line = slice.lines[0]!;
 
+    for (const reliability of ["conditional", "unknown"] as const) {
+      const uncertain = economyCandidate();
+      uncertain.economyProjection!.reliability = reliability;
+      const result = buildSlice(
+        input,
+        [defense],
+        [economy],
+        [uncertain, installCandidate("install-rd", "ice-1", "rd")],
+      );
+      expect(result.lines.some((entry) => entry.rezReadyAfterLine)).toBe(false);
+      expect(
+        result.lines.some((entry) => entry.currentActionId === "gain-credits"),
+      ).toBe(false);
+    }
+    const wrongFort = installCandidate("install-rd", "ice-1", "hq");
+    wrongFort.targetContext!.availableTargets = installCandidate(
+      "install-rd",
+      "ice-1",
+      "rd",
+    ).targetContext!.selectedTargets;
+    expect(
+      buildSlice(input, [defense], [economy], [economyCandidate(), wrongFort])
+        .lines,
+    ).toEqual([]);
+    const staleInput = structuredClone(input);
+    staleInput.legalActions.find((action) => action.actionId === "install-rd")!
+      .expiresAtStateVersion--;
+    expect(
+      buildSlice(
+        staleInput,
+        [defense],
+        [economy],
+        [economyCandidate(), installCandidate("install-rd", "ice-1", "rd")],
+      ).lines,
+    ).toEqual([]);
+
     expect(line).toMatchObject({
       disposition: "fund_then_install",
       currentActionId: "gain-credits",
@@ -416,6 +452,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
           expiresAtStateVersion: 30,
           payload: {
             placement: "ice",
+            cardId: "ice-1",
             serverId: "new_remote",
             postInstallRezQuoteComplete: true,
             postInstallRezQuoteCardId: "ice-1",
@@ -594,6 +631,36 @@ function buildSlice(
   economyNeeds: CorpEconomyNeedSignal[],
   candidates: ActionSemanticCandidate[],
 ) {
+  for (const signal of defenseNeeds) {
+    const offer =
+      signal.kind === "generic"
+        ? signal.installRoute?.projection
+        : signal.kind === "score_protection_install"
+          ? signal
+          : undefined;
+    if (
+      !offer ||
+      input.legalActions.some((action) => action.actionId === offer.actionId)
+    )
+      continue;
+    input.legalActions.push({
+      actionId: offer.actionId,
+      side: "corp",
+      type: "install_card",
+      label: "Install ICE",
+      source: offer.sourceCardInstanceId,
+      timingPoint: input.playerView.timingPoint,
+      expiresAtStateVersion: input.playerView.stateVersion,
+      costs: [{ clicks: 1 }],
+      visibility: "private_to_actor",
+      targetRequirements: [],
+      payload: {
+        placement: "ice",
+        cardId: offer.sourceCardInstanceId,
+        serverId: signal.serverId,
+      },
+    });
+  }
   return buildCorpDefenseTurnPlanningSlice({
     input,
     defenseNeeds,

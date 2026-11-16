@@ -8,7 +8,11 @@ import {
   projectVisibleIceAfterPassiveRunnerInstall,
   replayEvents,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState } from "@netgrid/shared";
+import {
+  DEMO_DECKS,
+  type DeckDefinition,
+  type GameState,
+} from "@netgrid/shared";
 import catalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
@@ -17,6 +21,7 @@ import { buildDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { evaluateRunnerHandDevelopment } from "../runner/hand-development/hand-development-evaluation";
 import { assessPassiveStrengthInvestment } from "../runner/hand-development/passive-strength-investment";
+import { assessPassiveStrengthDevelopment } from "../runner/hand-development/passive-strength-development";
 import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
@@ -124,6 +129,98 @@ function assess(state: GameState) {
 }
 
 describe("canonical passive strength investment", () => {
+  it.each([
+    ["classic_blind", false],
+    ["modern_open", true],
+  ] as const)(
+    "quotes Clown against the actual %s Rex rules",
+    (traceRulesProfile, admitted) => {
+      const rex = "onr_v1_264_rex";
+      const datacomb = "onr_proteus_018_datacomb";
+      const runnerDeck: DeckDefinition = {
+        ...DEMO_DECKS.demo_runner_001,
+        cards: [
+          { id: clownId, quantity: 2 },
+          { id: krashId, quantity: 12 },
+        ],
+      };
+      const corpDeck: DeckDefinition = {
+        ...DEMO_DECKS.demo_corp_001,
+        cards: [
+          ...DEMO_DECKS.demo_corp_001.cards,
+          { id: rex, quantity: 1 },
+          { id: datacomb, quantity: 1 },
+        ],
+      };
+      let state = createGameAfterSetup({
+        seed: "review-seven-passive",
+        runnerDeck,
+        corpDeck,
+        traceRulesProfile,
+      });
+      state = apply(
+        state,
+        "corp",
+        getLegalActions(state, "corp").find(
+          (action) => action.type === "mandatory_draw",
+        )!.actionId,
+      );
+      RealEngineFixtureBuilder.forState(state).withCorpHqSize(5);
+      state = apply(
+        state,
+        "corp",
+        getLegalActions(state, "corp").find(
+          (action) => action.type === "end_turn",
+        )!.actionId,
+      );
+      RealEngineFixtureBuilder.forState(state)
+        .withRunnerGripSize(0)
+        .withRunnerCardInGrip(clownId)
+        .withRunnerProgramInstalled(krashId)
+        .withRunnerCredits(20)
+        .withRunnerClicks(4)
+        .withCorpCredits(3)
+        .withRezzedCorpIceOnServer("rd", datacomb)
+        .withRezzedCorpIceOnServer("rd", rex);
+      state.runner.memoryUsed = 1;
+      const input = buildAiDecisionInput(state, "runner", {
+        ownDeckSnapshot: {
+          deckSnapshotId: runnerDeck.id,
+          side: "runner",
+          cards: runnerDeck.cards.map(({ id, quantity }) => ({
+            cardId: id,
+            quantity,
+          })),
+        },
+      });
+      const clown = input.playerView.own.gripOrHq.find(
+        (card) => card.definitionId === clownId,
+      )!;
+      const offer = input.legalActions.find(
+        (action) =>
+          action.type === "install_card" && action.source === clown.instanceId,
+      )!;
+      const development = (position: typeof input) =>
+        assessPassiveStrengthDevelopment(
+          position,
+          clownId,
+          clown.memoryCost!,
+          offer.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+          offer.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0),
+          0,
+          input.playerView.own.rig!,
+        );
+      expect(offer.expiresAtStateVersion).toBe(state.stateVersion);
+      expect(input.playerView.traceRulesProfile).toBe(traceRulesProfile);
+      expect(development(input)?.admitted === true).toBe(admitted);
+      const missing = structuredClone(input);
+      delete missing.playerView.traceRulesProfile;
+      expect(() => development(missing)).toThrow(
+        "invalid_player_view_card_projection",
+      );
+    },
+  );
+
   it("releases residual liquidity for Clown one decision earlier through strategic development", () => {
     const { checkpoints } = structuredClone(
       capturedContinuation,

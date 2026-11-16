@@ -1,8 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { createSemanticRuntimeCorpAdvancementCounterContext } from "./semantic-runtime-corp-advancement-counter-context";
 import type { SemanticRuntimeCorpAdvancementCounterDependencies } from "./semantic-runtime-corp-advancement-counter";
-import { createSemanticRuntimeCorpEvidenceContext } from "./semantic-runtime-corp-evidence-context";
-import type { SemanticRuntimeCorpEvidenceDependencies } from "./semantic-runtime-corp-evidence";
 import { createSemanticRuntimeCorpPassiveScoreLineContext } from "./semantic-runtime-corp-passive-scoreline-context";
 import type { SemanticRuntimeCorpPassiveScoreLineDependencies } from "./semantic-runtime-corp-passive-scoreline";
 import { createSemanticRuntimeCorpScoreSafetyContext } from "./semantic-runtime-corp-score-safety-context";
@@ -11,8 +9,6 @@ import { createSemanticRuntimeCorpScoreComponents } from "./semantic-runtime-cor
 import type { SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
-
-type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
 export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
   TConsumer extends string,
@@ -24,17 +20,11 @@ export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
     | "corpScoreNowSafetyGate"
     | "corpAdvancementCounterPlacementAssessment"
     | "corpPassiveScoreLinePenalty"
-  > &
-  Omit<
-    SemanticRuntimeCorpEvidenceDependencies<VisibleCorpServer>,
-    | "advancementCounterPlacementAssessment"
-    | "passiveScoreLinePenalty"
-    | "hasContestableRemoteScoreAction"
-    | "hasRemoteInstability"
-    | "hasRemoteRezFloorFundingNeed"
-    | "hasCentralRezFloorFundingNeed"
-    | "remoteRezFloorAssessment"
   > & {
+    advanceCompletesScore: (
+      input: AiDecisionInput,
+      action: LegalAction,
+    ) => boolean;
     corpScoringWindowAssessment: (
       input: AiDecisionInput,
       action: LegalAction,
@@ -91,38 +81,6 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
       scorelineWindowAssessment: dependencies.corpScorelineWindowAssessment,
     });
 
-  const { semanticRuntimeCorpEvidence } =
-    createSemanticRuntimeCorpEvidenceContext({
-      emptyRemoteCount: dependencies.emptyRemoteCount,
-      hasRemoteInstability: dependencies.corpHasRemoteInstability,
-      hasNakedScoreLine: dependencies.hasNakedScoreLine,
-      hasUnsafeRemoteScoreAction: dependencies.hasUnsafeRemoteScoreAction,
-      hasContestableRemoteScoreAction: (input) =>
-        input.legalActions.some((action) =>
-          Boolean(
-            dependencies.corpRemoteScoreContestabilityAssessment(input, action)
-              ?.contestable,
-          ),
-        ),
-      hasRemoteRezFloorFundingNeed:
-        dependencies.corpHasRemoteRezFloorFundingNeed,
-      hasCentralRezFloorFundingNeed:
-        dependencies.corpHasCentralRezFloorFundingNeed,
-      advancementCounterPlacementAssessment:
-        semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-      passiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
-      actionServerId: dependencies.actionServerId,
-      server: dependencies.server,
-      remoteIsProtected: dependencies.remoteIsProtected,
-      isRemoteServerTarget: dependencies.isRemoteServerTarget,
-      shouldBuildProtectedScoreRemote:
-        dependencies.shouldBuildProtectedScoreRemote,
-      actionWouldCreateUnsafeRemoteScoreLine:
-        dependencies.actionWouldCreateUnsafeRemoteScoreLine,
-      advanceCompletesScore: dependencies.advanceCompletesScore,
-      remoteRezFloorAssessment: dependencies.corpRemoteRezFloorAssessment,
-    });
-
   const semanticRuntimeCorpScoreComponents =
     createSemanticRuntimeCorpScoreComponents({
       actionCreditCost: dependencies.actionCreditCost,
@@ -157,7 +115,6 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
     semanticRuntimeCorpPassiveScoreLinePenalty,
     semanticRuntimeCorpScoreNowSafetyGate,
-    semanticRuntimeCorpEvidence,
     semanticRuntimeCorpScoreComponents,
   };
 }

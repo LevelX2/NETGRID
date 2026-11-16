@@ -3,11 +3,15 @@ import {
   traceRulesDefinition,
 } from "@netgrid/engine";
 import type {
+  AiDecisionInput,
   CardDefinitionId,
   TraceRulesProfile,
+  VisibleCard,
   VisibleEffectiveIceRunQuote,
   VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import type { VisibleDeflectorContext } from "./visible-run-analysis-contracts";
 
 export type VisibleClassicLinkModifier = {
   creditCost: number;
@@ -18,6 +22,33 @@ export function planningTraceRulesProfile(
   profile: TraceRulesProfile | undefined,
 ): TraceRulesProfile {
   return profile ?? "modern_open";
+}
+
+/** Trace facts for a Runner-main quote of the same known ICE before and after investment. */
+export function runnerInvestmentTraceContext(
+  input: AiDecisionInput,
+  ice: readonly VisibleCard[],
+): Pick<VisibleDeflectorContext, "traceRulesProfile"> {
+  const { traceRulesProfile } = input.playerView;
+  if (traceRulesProfile !== undefined) return { traceRulesProfile };
+  if (
+    ice.some((card) =>
+      card.effectiveRunQuote?.subroutines.some(
+        (subroutine) => subroutine.type === "initiate_trace",
+      ),
+    )
+  ) {
+    throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map(({ type }) => type),
+      owner: "rules_contract",
+      removalCondition:
+        "A Runner investment quote across a visible ICE Trace requires the current Engine trace rules profile.",
+    });
+  }
+  return {};
 }
 
 export function planningTraceCorpBaseStrength(
