@@ -824,7 +824,7 @@ export function selectedChoicesForDecision(
     choice.source.startsWith("runner_start.delayed_install")
   ) {
     const selectedOptionId = selectedShellTradersStartTurnChoiceOptionId(
-      choice,
+      { ...choice, options: selectableOptions },
       {
         input,
         rolesForCardId: dependencies.rolesForCardId,

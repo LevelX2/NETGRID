@@ -29,7 +29,6 @@ describe("assessRunnerBreakerDevelopment", () => {
       minimumCoverageComplete: true,
       architecture: "universal_single",
       optionalBreakerIds: [],
-      searchableOptionalBreakerIds: [],
       primaryBreakerNeed: false,
     });
   });
@@ -51,7 +50,6 @@ describe("assessRunnerBreakerDevelopment", () => {
       minimumCoverageComplete: true,
       architecture: "hybrid",
       optionalBreakerIds: ["efficient-wall-breaker"],
-      searchableOptionalBreakerIds: ["efficient-wall-breaker"],
       primaryBreakerNeed: false,
     });
   });
@@ -69,7 +67,7 @@ describe("assessRunnerBreakerDevelopment", () => {
     );
 
     expect(assessment.optionalBreakerIds).toEqual(["efficient-wall-breaker"]);
-    expect(assessment.searchableOptionalBreakerIds).toEqual([]);
+    expect(assessment.evidence).toContain("breaker_optional_searchable:none");
   });
 
   it("treats a universal breaker as an optional upgrade after a specialist suite works", () => {
@@ -85,7 +83,6 @@ describe("assessRunnerBreakerDevelopment", () => {
       minimumCoverageComplete: true,
       architecture: "hybrid",
       optionalBreakerIds: ["late-universal"],
-      searchableOptionalBreakerIds: ["late-universal"],
       primaryBreakerNeed: false,
     });
   });

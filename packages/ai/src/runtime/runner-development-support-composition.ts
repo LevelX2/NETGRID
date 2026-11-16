@@ -1,16 +1,12 @@
 import { createRunnerHandFundingContext } from "./runner-hand-funding-context";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
-import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
+import type { AiCardHint } from "../ai-hints";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { RunnerHandFundingTargetDependencies } from "./runner-hand-funding-target";
 import {
   createRunnerEconomyCommitmentComposition,
   type RunnerEconomyCommitmentCompositionDependencies,
 } from "./runner-economy-commitment-composition";
-import {
-  createRunnerLoanContext,
-  type RunnerLoanContextDependencies,
-} from "./runner-loan-context";
 import {
   createRunnerPersistentInstallContext,
   type RunnerPersistentInstallContextDependencies,
@@ -23,59 +19,44 @@ type RunnerDevelopmentCardDefinition = {
   mechanics?: unknown;
 };
 
-export type RunnerDevelopmentSupportCompositionDependencies =
-  RunnerLoanContextDependencies<
-    DeckCapabilityProfile,
-    RunnerStrategicIntentProfile,
-    RunnerHandDevelopmentEvaluation
+export type RunnerDevelopmentSupportCompositionDependencies = Omit<
+  RunnerHandFundingTargetDependencies,
+  "rolesMatch"
+> &
+  Omit<
+    RunnerPersistentInstallContextDependencies<
+      DeckCapabilityProfile,
+      RunnerStrategicIntentProfile
+    >,
+    "deckCapabilities" | "strategicIntent"
   > &
-    Omit<RunnerHandFundingTargetDependencies, "rolesMatch"> &
-    Omit<
-      RunnerPersistentInstallContextDependencies<
-        DeckCapabilityProfile,
-        RunnerStrategicIntentProfile
-      >,
-      "deckCapabilities" | "strategicIntent"
-    > &
-    Omit<
-      RunnerEconomyCommitmentCompositionDependencies,
-      | "runnerHandFundingTarget"
-      | "hintEffectsForDefinition"
-      | "definitionForCardId"
-      | "rulesTextForDefinition"
-    > & {
-      runtimeDefinition: (
-        definitionId: string,
-      ) => RunnerDevelopmentCardDefinition | undefined;
-      demoDefinition: (
-        definitionId: string,
-      ) => RunnerDevelopmentCardDefinition | undefined;
-    };
+  Omit<
+    RunnerEconomyCommitmentCompositionDependencies,
+    | "runnerHandFundingTarget"
+    | "hintEffectsForDefinition"
+    | "definitionForCardId"
+    | "rulesTextForDefinition"
+  > & {
+    deckCapabilitiesForInput: RunnerPersistentInstallContextDependencies<
+      DeckCapabilityProfile,
+      RunnerStrategicIntentProfile
+    >["deckCapabilities"];
+    strategicIntentForInput: RunnerPersistentInstallContextDependencies<
+      DeckCapabilityProfile,
+      RunnerStrategicIntentProfile
+    >["strategicIntent"];
+    hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
+    runtimeDefinition: (
+      definitionId: string,
+    ) => RunnerDevelopmentCardDefinition | undefined;
+    demoDefinition: (
+      definitionId: string,
+    ) => RunnerDevelopmentCardDefinition | undefined;
+  };
 
 export function createRunnerDevelopmentSupportComposition(
   dependencies: RunnerDevelopmentSupportCompositionDependencies,
 ) {
-  const { runnerLoanLiabilityAssessment } = createRunnerLoanContext({
-    hintForDefinitionId: dependencies.hintForDefinitionId,
-    sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
-    projectedCreditGainForAction: dependencies.projectedCreditGainForAction,
-    actionCreditCost: dependencies.actionCreditCost,
-    actionClickCost: dependencies.actionClickCost,
-    deckCapabilitiesForInput: dependencies.deckCapabilitiesForInput,
-    strategicIntentForInput: dependencies.strategicIntentForInput,
-    handDevelopmentEvaluations: dependencies.handDevelopmentEvaluations,
-    economyPosture: dependencies.economyPosture,
-    runTargets: dependencies.runTargets,
-    visibleCardPlayOrInstallCost: dependencies.visibleCardPlayOrInstallCost,
-    rolesForCardId: dependencies.rolesForCardId,
-    cardAddressesVisibleBreakerNeed:
-      dependencies.cardAddressesVisibleBreakerNeed,
-    isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
-    isRunnerPressureRole: dependencies.isRunnerPressureRole,
-    rolesForAction: dependencies.rolesForAction,
-    hasKnownUnaffordableLegalRun: dependencies.hasKnownUnaffordableLegalRun,
-  });
-
   const { runnerHandFundingTarget } = createRunnerHandFundingContext({
     rolesForCardId: dependencies.rolesForCardId,
     visibleCardPlayOrInstallCost: dependencies.visibleCardPlayOrInstallCost,
@@ -134,7 +115,6 @@ export function createRunnerDevelopmentSupportComposition(
   });
 
   return {
-    runnerLoanLiabilityAssessment,
     runnerHandFundingTarget,
     runnerBankInvestmentCommitmentScoreComponents,
     runnerBankInvestmentCommitmentEvidence,

@@ -1,10 +1,50 @@
+import type { AiSimulationSummary } from "../../ai-simulation-summary";
+import { chooseAiAction } from "../../../ai-runtime-public-entrypoints";
+import { reconstructBeliefState } from "../../../belief-state";
+import { resetResidentPlanPortfolioMemory } from "../../../plans/resident-plan-portfolio-memory";
+
 import { describe, expect, it } from "vitest";
 import selfplayExploitLeagueData from "../../../../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
 import { listExploitFixtures } from "./fixture-data";
-import { evaluateVisibleEtrBlockerFixtureSummary } from "./exploit-regression-fixtures";
-import type { AiSimulationSummary } from "../../ai-simulation-summary";
+import { applyFixtureAction } from "../../fixture-actions";
+import {
+  buildRndRepeatAccessFixtureInput,
+  createExploitRegressionFixturesRunner,
+  evaluateVisibleEtrBlockerFixtureSummary,
+  playRndRepeatAccessFixturePosition,
+} from "./exploit-regression-fixtures";
 
 describe("V1.4.3 regression fixture contracts", () => {
+  it("invalidates the observed low-value top when Corp draws it", () => {
+    const observed = playRndRepeatAccessFixturePosition();
+    if (!observed.ok) throw new Error(observed.message);
+    const ended = applyFixtureAction(
+      observed.state,
+      "runner",
+      (action) => action.type === "end_turn",
+      "end_runner_turn",
+    );
+    if (!ended.ok) throw new Error(ended.message);
+    const drawn = applyFixtureAction(
+      ended.state,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+      "draw_observed_rd_top",
+    );
+    if (!drawn.ok) throw new Error(drawn.message);
+
+    const memory = reconstructBeliefState(
+      buildRndRepeatAccessFixtureInput(drawn.state),
+    ).runnerOpponentModel?.rndTopFreshness;
+    expect(memory).toMatchObject({
+      freshness: "invalidated",
+      invalidationReasons: expect.arrayContaining([
+        expect.stringMatching(/^rd_known_top_drawn_by_corp:/),
+      ]),
+    });
+    expect(memory?.knownTopDefinitionId).toBeUndefined();
+  });
+
   it("provides the historical exploit fixtures", () => {
     const fixtures = listExploitFixtures();
 
@@ -201,5 +241,49 @@ describe("V1.4.3 regression fixture contracts", () => {
     expect(config.noCheatGate.evidence.join(" ")).toContain(
       "buildAiDecisionInput",
     );
+  });
+});
+
+it("checks native R&D knowledge before judging a repeat run", () => {
+  const simulateAiGame = () =>
+    ({
+      errors: [],
+      replayOk: true,
+      actionSequence: [{ runnerKnownPathBlockedByKnownEtr: true }],
+    }) as unknown as AiSimulationSummary;
+  const fixture = createExploitRegressionFixturesRunner({
+    simulateAiGame,
+    chooseRunnerAction: (input) => {
+      const facts =
+        reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
+      expect(facts).toMatchObject({
+        freshness: "stale_known_same_top",
+        knownTopIsLowValue: true,
+      });
+      expect(
+        input.eventTail.every(
+          (event) => event.stateVersionAfter <= input.playerView.stateVersion,
+        ),
+      ).toBe(true);
+      resetResidentPlanPortfolioMemory();
+      return chooseAiAction(input);
+    },
+  });
+  expect(fixture.runExploitRegressionFixtures()[0]).toMatchObject({
+    fixtureId: "v143-rnd-repeat-access-freshness",
+    passed: true,
+  });
+  const repeat = createExploitRegressionFixturesRunner({
+    simulateAiGame,
+    chooseRunnerAction: (input) =>
+      ({
+        actionId: input.legalActions.find(
+          (action) => action.type === "start_run",
+        )!.actionId,
+        reasonCode: "test_repeat",
+      }) as ReturnType<typeof chooseAiAction>,
+  });
+  expect(repeat.runExploitRegressionFixtures()[0]).toMatchObject({
+    passed: false,
   });
 });

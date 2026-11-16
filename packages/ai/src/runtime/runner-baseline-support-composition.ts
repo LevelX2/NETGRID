@@ -6,10 +6,6 @@ import type {
 
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import {
-  createRunnerBaselinePlanGuardContext,
-  type RunnerBaselinePlanGuardContextDependencies,
-} from "./runner-baseline-plan-guard-context";
-import {
   createRunnerProgramInstallTrashContext,
   type RunnerProgramInstallTrashContextDependencies,
 } from "./runner-program-install-trash-context";
@@ -17,10 +13,6 @@ import {
   createRunnerVisibleCardDiscardComposition,
   type RunnerVisibleCardDiscardCompositionDependencies,
 } from "./runner-visible-card-discard-composition";
-import {
-  createRunnerRunOnlyActionContext,
-  type RunnerRunOnlyActionAdjustmentDependencies,
-} from "./runner-run-only-action-adjustment";
 import { createRunnerStrategicIntentContext } from "./runner-strategic-intent-context";
 import {
   selectedChoicesForDecision as selectedChoicesForRuntimeDecision,
@@ -30,48 +22,33 @@ import { createVisibleIcebreakerProgramPredicate } from "./visible-icebreaker-pr
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import type { AiCardHint } from "../ai-hints";
 
-export type RunnerBaselineSupportCompositionDependencies =
-  RunnerBaselinePlanGuardContextDependencies &
-    RunnerRunOnlyActionAdjustmentDependencies & {
-      visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
-      hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
-    } & Omit<
-      SelectedChoicesForDecisionDependencies,
-      | "discardKeepScore"
-      | "rolesForCardId"
-      | "effectsForCardId"
-      | "selectedRunnerProgramInstallTrashOptionIds"
-      | "selectedRunnerForcedProgramTrashOptionIds"
-      | "selectedRunnerMemoryCheckpointTrashOptionIds"
-    > &
-    RunnerProgramInstallTrashContextDependencies &
-    Omit<
-      RunnerVisibleCardDiscardCompositionDependencies,
-      "isVisibleIcebreakerProgram"
-    >;
+export type RunnerBaselineSupportCompositionDependencies = {
+  visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
+  hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
+} & Omit<
+  SelectedChoicesForDecisionDependencies,
+  | "discardKeepScore"
+  | "rolesForCardId"
+  | "effectsForCardId"
+  | "selectedRunnerProgramInstallTrashOptionIds"
+  | "selectedRunnerForcedProgramTrashOptionIds"
+  | "selectedRunnerMemoryCheckpointTrashOptionIds"
+> &
+  RunnerProgramInstallTrashContextDependencies &
+  Omit<
+    RunnerVisibleCardDiscardCompositionDependencies,
+    "isVisibleIcebreakerProgram"
+  >;
 
 export function createRunnerBaselineSupportComposition(
   dependencies: RunnerBaselineSupportCompositionDependencies,
 ) {
-  const {
-    runnerHasConditionalPaymentContinueDecision,
-    baselineShellTradersPlanIsVisible,
-  } = createRunnerBaselinePlanGuardContext({
-    delayedInstallAbilityForAction: dependencies.delayedInstallAbilityForAction,
-    runnerHasInstalledPrograms: dependencies.runnerHasInstalledPrograms,
-  });
-
   const { deckCapabilitiesForInput } = createDeckCapabilitiesContext();
   const { runnerStrategicIntentForInput } =
     createRunnerStrategicIntentContext();
   const isVisibleIcebreakerProgram = createVisibleIcebreakerProgramPredicate(
     dependencies.visibleBreakerRolesForAi,
   );
-  const { runnerRunOnlyActionAdjustedSemanticChoice } =
-    createRunnerRunOnlyActionContext({
-      compareAction: dependencies.compareAction,
-    });
-
   const {
     visibleCardPlayOrInstallCostForAi,
     runnerCardLooksLikeCreditPayout,
@@ -93,11 +70,8 @@ export function createRunnerBaselineSupportComposition(
     selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds,
     selectedRunnerMemoryCheckpointTrashOptionIds,
-    runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallTrashAssessmentForCard,
-    runnerProgramInstallDisplacementPenalty,
-    runnerProgramSacrificeExclusion,
   } = createRunnerProgramInstallTrashContext({
     safeNonNegativeInteger: dependencies.safeNonNegativeInteger,
     visibleMemoryCost: dependencies.visibleMemoryCost,
@@ -142,23 +116,17 @@ export function createRunnerBaselineSupportComposition(
   }
 
   return {
-    runnerHasConditionalPaymentContinueDecision,
-    baselineShellTradersPlanIsVisible,
     selectedChoicesForDecision,
     discardKeepScore,
     deckCapabilitiesForInput,
     runnerStrategicIntentForInput,
     isVisibleIcebreakerProgram,
-    runnerRunOnlyActionAdjustedSemanticChoice,
     visibleCardPlayOrInstallCostForAi,
     runnerCardLooksLikeCreditPayout,
     runnerBadPublicityOrTraceTechCard,
     runnerCardAddressesVisibleBreakerNeed,
     visibleBreakerCardCanAddressIce,
-    runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallTrashAssessmentForCard,
-    runnerProgramInstallDisplacementPenalty,
-    runnerProgramSacrificeExclusion,
   };
 }

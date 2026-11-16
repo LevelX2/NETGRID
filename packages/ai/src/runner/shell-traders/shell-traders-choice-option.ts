@@ -18,26 +18,28 @@ export function selectedShellTradersStartTurnChoiceOptionId(
     rolesForCardId: (definitionId: string | undefined) => readonly string[];
   },
 ): string | undefined {
-  return (
-    choice.options.slice().sort((left, right) => {
-      const leftCounter = delayedInstallRemainingCounters(left);
-      const rightCounter = delayedInstallRemainingCounters(right);
-      const leftScore = context
-        ? shellTradersStartTurnOptionScore(left, leftCounter, context)
-        : 0;
-      const rightScore = context
-        ? shellTradersStartTurnOptionScore(right, rightCounter, context)
-        : 0;
-      const leftProgramBias = left.card?.type === "program" ? -1 : 0;
-      const rightProgramBias = right.card?.type === "program" ? -1 : 0;
-      return (
-        rightScore - leftScore ||
-        leftCounter - rightCounter ||
-        leftProgramBias - rightProgramBias ||
-        left.label.localeCompare(right.label, "de")
-      );
-    })[0] ?? choice.options[0]
-  )?.id;
+  const scored = choice.options.flatMap((option) => {
+    const counters = delayedInstallRemainingCounters(option);
+    if (option.selectable === false || counters === undefined) return [];
+    return [
+      {
+        option,
+        counters,
+        score: context
+          ? shellTradersStartTurnOptionScore(option, counters, context)
+          : 0,
+        program: option.card?.type === "program",
+      },
+    ];
+  });
+  return scored.sort(
+    (left, right) =>
+      right.score - left.score ||
+      left.counters - right.counters ||
+      Number(right.program) - Number(left.program) ||
+      left.option.label.localeCompare(right.option.label, "de") ||
+      left.option.id.localeCompare(right.option.id),
+  )[0]?.option.id;
 }
 
 function shellTradersStartTurnOptionScore(
@@ -120,9 +122,9 @@ function installedProgramHasUniqueBreakerRole(
 
 function delayedInstallRemainingCounters(
   option: PendingChoice["options"][number],
-): number {
+): number | undefined {
   const value = option.metadata?.delayedInstallRemainingCounters;
-  return typeof value === "number" && Number.isFinite(value)
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
     ? value
-    : Number.MAX_SAFE_INTEGER;
+    : undefined;
 }

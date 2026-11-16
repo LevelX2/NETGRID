@@ -1085,7 +1085,9 @@ export function highestPriorityScoreRemoteEntry(
 ): ScoredLegalAction | undefined {
   return [...entries].sort(
     (left, right) =>
-      scoreRemoteEntryPriority(right) - scoreRemoteEntryPriority(left),
+      scoreRemoteEntryPriority(right) - scoreRemoteEntryPriority(left) ||
+      (left.serverId ?? "").localeCompare(right.serverId ?? "") ||
+      left.action.actionId.localeCompare(right.action.actionId),
   )[0];
 }
 

@@ -25,12 +25,9 @@ const FIELD_CONSUMER_CONTRACTS: Readonly<Record<string, readonly string[]>> = {
   actionCapacityProfiles: [
     "action-card-semantic-profiles",
     "legal-action-capacity-contract",
-    "action-capacity-runtime-scoring",
+    "action-capacity-route",
   ],
-  actionStrategySupportPairs: [
-    "action-card-semantic-profiles",
-    "strategic-action-fit",
-  ],
+  actionStrategySupportPairs: ["action-card-semantic-profiles"],
   actionTacticSignals: [
     "action-card-semantic-profiles",
     "semantic-runtime-scoring",

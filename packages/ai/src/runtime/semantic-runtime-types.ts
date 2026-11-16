@@ -40,9 +40,3 @@ export type SemanticRuntimeCoverageSelectionDebug = {
   sourceTitle: string;
   evidence: string[];
 };
-
-export type SemanticRuntimeRunOnlyActionAdjustment = {
-  choice: SemanticRuntimeChoice;
-  rankedChoices: SemanticRuntimeChoice[];
-  memoryAction?: LegalAction;
-};

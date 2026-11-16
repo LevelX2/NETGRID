@@ -51,9 +51,29 @@ describe("shell traders choice option", () => {
       },
     ]);
 
-    expect(selectedShellTradersStartTurnChoiceOptionId(choice)).toBe(
-      "card_program",
-    );
+    expect(selectedShellTradersStartTurnChoiceOptionId(choice)).toBeUndefined();
+  });
+
+  it("skips unavailable options and invalid counter metadata", () => {
+    const choice = shellTradersChoice([
+      {
+        id: "unavailable",
+        label: "Unavailable",
+        selectable: false,
+        metadata: { delayedInstallRemainingCounters: 1 },
+      },
+      {
+        id: "negative",
+        label: "Negative",
+        metadata: { delayedInstallRemainingCounters: -1 },
+      },
+      {
+        id: "valid",
+        label: "Valid",
+        metadata: { delayedInstallRemainingCounters: 2 },
+      },
+    ]);
+    expect(selectedShellTradersStartTurnChoiceOptionId(choice)).toBe("valid");
   });
 
   it("advances a missing breaker before a merely closer redundant target", () => {

@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
+import { corpRemoteContestabilityAssessment } from "../defense/corp-remote-contestability";
 
 export type CorpEconomyAssetPaybackRisk = Readonly<{
   serverId: string;
@@ -78,6 +78,8 @@ export function assessCorpEconomyAssetPayback(params: {
     params.payoutActionCost === 0
       ? maximumFinitePoolExecutions
       : Math.floor(currentPayoutActionCapacity / params.payoutActionCost);
+  // The current window uses its quoted executions. Each later turn contributes
+  // at most one projected execution from the remaining finite pool.
   const payoutExecutionCapacity = (horizonTurns: number): number =>
     params.cadence === "finite_pool" && horizonTurns > 0
       ? currentPayoutExecutionCapacity + Math.max(0, horizonTurns - 1)

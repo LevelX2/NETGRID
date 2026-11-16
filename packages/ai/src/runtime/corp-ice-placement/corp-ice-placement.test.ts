@@ -1,3 +1,11 @@
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+} from "@netgrid/engine";
+import { DEMO_DECKS, type Side } from "@netgrid/shared";
+import { RealEngineFixtureBuilder } from "../../evaluation/real-engine-fixture-builder";
+import { buildAiDecisionInput } from "../ai-decision-input";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -333,6 +341,100 @@ describe("corp ICE action and Engine quote facts", () => {
 });
 
 describe("corp ICE factual support", () => {
+  it("preserves Corp density when MIT West Tier leaves the Runner deck publicly", () => {
+    const mit = "onr_v1_101_mit-west-tier";
+    const corpDeck = DEMO_DECKS.demo_corp_001;
+    const base = DEMO_DECKS.demo_runner_001;
+    const runnerDeck = {
+      ...base,
+      cards: [...base.cards, { id: mit, quantity: 1 }],
+    };
+    let state = createGameAfterSetup({
+      seed: "sample-20-ice-density",
+      runnerDeck,
+      corpDeck,
+    });
+    const take = (side: Side, predicate: (offer: LegalAction) => boolean) => {
+      const action = getLegalActions(state, side).find(predicate);
+      if (!action) throw new Error("Expected the fixture's Engine offer");
+      const applied = applyAction(state, {
+        matchId: state.matchId,
+        side,
+        actionId: action.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: state.stateVersion + ":" + action.actionId,
+      });
+      if (!applied.ok) throw new Error(applied.error.message);
+      state = applied.state;
+    };
+    const input = () =>
+      buildAiDecisionInput(state, "corp", {
+        ownDeckSnapshot: {
+          deckSnapshotId: corpDeck.id,
+          side: "corp",
+          cards: corpDeck.cards.map(({ id, quantity }) => ({
+            cardId: id,
+            quantity,
+          })),
+        },
+      });
+
+    take("corp", (offer) => offer.type === "mandatory_draw");
+    RealEngineFixtureBuilder.forState(state).withCorpHqSize(5);
+    take("corp", (offer) => offer.type === "end_turn");
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerCardInGrip(mit)
+      .withRunnerCredits(10);
+    const before = buildCorpIceDensityProfile(input());
+    expect(before).toMatchObject({
+      confidence: "deck_snapshot",
+      remainingIceCount: 6,
+    });
+    take(
+      "runner",
+      (offer) =>
+        offer.type === "play_event" &&
+        state.cardInstances[offer.source]?.definitionId === mit,
+    );
+    const after = input();
+    expect(after.playerView.specialZones?.removedFromGame).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ definitionId: mit, owner: "runner" }),
+      ]),
+    );
+    expect(buildCorpIceDensityProfile(after)).toEqual(before);
+  });
+
+  it("counts a Corp-owned visible ICE in a mixed special zone", () => {
+    const input = corpInput({ stackOrRdCount: 2 });
+    Object.assign(input, {
+      ownDeckSnapshot: {
+        deckSnapshotId: "mixed-special-zone",
+        side: "corp",
+        cards: [{ cardId: "simple_barrier_ice", quantity: 3 }],
+      },
+    });
+    input.playerView.specialZones = {
+      setAside: [],
+      removedFromGame: [
+        corpIce("our-ice", {
+          owner: "corp",
+          definitionId: "simple_barrier_ice",
+        }),
+        { ...card("runner-card", "event"), owner: "runner" },
+        { instanceId: "hidden-special", known: false },
+      ],
+      setAsideCount: 0,
+      removedFromGameCount: 3,
+    };
+    expect(buildCorpIceDensityProfile(input)).toMatchObject({
+      confidence: "deck_snapshot",
+      knownCardsOutsideDeck: 1,
+      knownIceOutsideDeck: 1,
+      remainingIceCount: 2,
+    });
+  });
+
   it("reports deck density independently from placement policy", () => {
     const input = corpInput({
       hq: [corpIce("hq-ice")],

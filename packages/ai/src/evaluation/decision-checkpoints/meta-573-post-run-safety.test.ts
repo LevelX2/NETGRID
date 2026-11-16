@@ -158,4 +158,43 @@ it("retains an already bound agenda conversion in the shared self-tag safety fac
   ).toBeUndefined();
 });
 
-it("does not invent the conditional success tag while the Corporation bank is empty", () => { const f=fixture();f.input.playerView.opponent.credits=0;const t=shipping(f.input);expect(t.evidence.join("|")).not.toContain("runner_post_run_self_tag_hand_buffer_unrecoverable"); });
+it("does not invent the conditional success tag while the Corporation bank is empty", () => {
+  const f = fixture();
+  f.input.playerView.opponent.credits = 0;
+  const t = shipping(f.input);
+  expect(t.evidence.join("|")).not.toContain(
+    "runner_post_run_self_tag_hand_buffer_unrecoverable",
+  );
+});
+
+it("quotes two tag avoidances from repeated credits or separate single-use sources", () => {
+  const { input } = fixture();
+  const projection = {
+    ...shipping(input).runActionProjection,
+    successfulRunSelfTags: 2,
+  };
+  const card = {
+    instanceId: "owned-tag-avoidance",
+    definitionId: "onr_v1_135_nasuko-cycle",
+    known: true,
+    rezzed: true,
+    type: "resource" as const,
+  };
+  const checkSafety = (creditsAfterRun: number) =>
+    runnerPostRunSelfTagHandSafety({
+      input,
+      projection,
+      handAfterAction: 1,
+      clicksAfterRun: 0,
+      creditsAfterRun,
+      preservesAgendaAccess: false,
+    });
+  input.playerView.own.rig = [card];
+  expect(checkSafety(6)).toBeUndefined();
+  expect(checkSafety(5)).toContain("unavoided_tags:1");
+  const fallGuy = { ...card, definitionId: "onr_v1_161_fall-guy" };
+  input.playerView.own.rig = [fallGuy];
+  expect(checkSafety(0)).toContain("unavoided_tags:1");
+  input.playerView.own.rig.push({ ...fallGuy, instanceId: "second-fall-guy" });
+  expect(checkSafety(0)).toBeUndefined();
+});

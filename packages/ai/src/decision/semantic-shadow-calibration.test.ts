@@ -7,6 +7,7 @@ import {
   SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION,
   SEMANTIC_SHADOW_BASELINE_V1,
   SEMANTIC_SHADOW_CALIBRATED_V1,
+  resolveSemanticShadowCalibrationProfile,
   semanticShadowCalibrationProfileFromEnv,
 } from "./semantic-shadow-calibration";
 import { buildSemanticShadowDecision } from "./semantic-shadow-decision";
@@ -36,9 +37,7 @@ describe("SemanticShadowCalibration", () => {
       expect(profile.baselineReference).toBe(
         "ai-shadow-league-baseline-2026-06-12",
       );
-      expect(profile.baselineReportPath).toBe(
-        "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
-      );
+
       expect(profile.baselineScenarioCount).toBe(18);
       expect(profile.baselineReportScenarioCount).toBe(18);
       expect(profile.calibrationSourceScenarioCount).toBe(18);
@@ -51,8 +50,6 @@ describe("SemanticShadowCalibration", () => {
         benchmarkId: "play-strength-calibration-baseline-2026-06-12",
         source: "play_strength_benchmark",
         sampleCount: 50,
-        reportPath:
-          "docs/reviews/ai/ai-play-strength-calibration-baseline-2026-06-12.md",
       });
       expect(profile.lockedAgainstCorpus).toMatchObject({
         corpusId: "real-engine-decision-corpus-v2-2026-06-13",
@@ -72,7 +69,6 @@ describe("SemanticShadowCalibration", () => {
       expect(profile.evidence).toEqual(
         expect.arrayContaining([
           "baseline_reference:ai-shadow-league-baseline-2026-06-12",
-          "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
           "baseline_scenario_count:18",
           "baseline_report_scenario_count:18",
           "calibration_source_scenario_count:18",
@@ -140,6 +136,19 @@ describe("SemanticShadowCalibration", () => {
     expect(SEMANTIC_SHADOW_CALIBRATED_V1.productiveUseAllowed).toBe(false);
     expect(SEMANTIC_SHADOW_CALIBRATED_V1.runtimeConsumerStatus).toBe("none");
     expect(SEMANTIC_SHADOW_CALIBRATED_V1.noRuntimeEffect).toBe(true);
+  });
+
+  it("rejects the same unknown id in explicit and environment configuration", () => {
+    const malformed = "shadow_calibratd_v1";
+    const diagnostic = `unknown_semantic_shadow_calibration_profile: ${malformed}`;
+    expect(() =>
+      resolveSemanticShadowCalibrationProfile(
+        malformed as "shadow_calibrated_v1",
+      ),
+    ).toThrow(diagnostic);
+    expect(() => semanticShadowCalibrationProfileFromEnv(malformed)).toThrow(
+      diagnostic,
+    );
   });
 
   it("exposes the calibrated profile only through explicit env opt-in", () => {

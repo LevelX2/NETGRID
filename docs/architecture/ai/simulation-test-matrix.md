@@ -102,6 +102,11 @@ Seite zu. Ein Planabbruch ohne Grund erfordert drei beobachtete eigene
 strategische Entscheidungen mit jeweils einem anderen Plan als dem
 ausgewerteten, ohne Fortschritt, gemeldeten Abbruchgrund oder Ablauf. Ein kürzerer Export lässt die Aussage
 offen. Benchmarks dieser beiden Kennzahlen benötigen denselben Messvertrag.
+Encounter-Effektzähler werten die zugehörige Evidence aus Runner-Aktionen aus.
+Das R&D-Regressionsfixture für wiederholten Zugriff erzeugt den beobachteten
+Vorzustand durch Engine-Aktionen mit einer fest gebundenen Deckpaarung.
+Vor der Wahlprüfung muss der aktuelle Belief die bekannte, unveränderte und
+geringwertige R&D-Oberkarte bestätigen.
 
 Die Activity-Vorschläge der Selfplay-Snapshot-Auswertung reservieren einen
 stabilen Namenssuffix für die Snapshot-ID. Ein langer Szenariohinweis darf

@@ -1,3 +1,4 @@
+import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -15,14 +16,7 @@ describe("semanticRuntimeCorpScoreNowSafetyGate", () => {
   });
 
   it("allows score-now only for exact legal score action ids", () => {
-    const dependencies = {
-      scoreTerminalWindow: () => ({
-        terminalWindow: true,
-        scoreActionIds: ["score-action"],
-        runnerAccessThreatHigh: false,
-        protectedRemoteIds: ["remote_1"],
-      }),
-    };
+    const dependencies = { scorelineWindowAssessment: () => scoreline() };
 
     expect(
       semanticRuntimeCorpScoreNowSafetyGate(
@@ -54,11 +48,72 @@ describe("semanticRuntimeCorpScoreNowSafetyGate", () => {
       ]),
     });
   });
+  it.each([
+    { expiresAtStateVersion: 0 },
+    { timingPoint: "corp_start.mandatory_draw" as LegalAction["timingPoint"] },
+    { source: "another-agenda" },
+  ])("rejects a score offer from a different context: %o", (override) => {
+    expect(
+      semanticRuntimeCorpScoreNowSafetyGate(
+        input(),
+        { ...action("score-action"), ...override },
+        { scorelineWindowAssessment: () => scoreline() },
+      ).allowed,
+    ).toBe(false);
+  });
+
+  it("explains a blocked current path without individual blockers", () => {
+    expect(
+      semanticRuntimeCorpScoreNowSafetyGate(input(), action("score-action"), {
+        scorelineWindowAssessment: () => scoreline(false),
+      }),
+    ).toMatchObject({
+      allowed: false,
+      evidence: expect.arrayContaining([
+        "unsafe_score_unknown_higher_priority",
+      ]),
+    });
+  });
 });
+
+function scoreline(safe = true): CorpScorelineWindowAssessment {
+  return {
+    windowKind: "score_now",
+    terminalWindow: true,
+    recommendedNextStep: "score_now",
+    paths: [
+      {
+        actionId: "score-action",
+        actionType: "score_agenda",
+        actionRoles: ["score_now"],
+        windowKind: "score_now",
+        recommendedNextStep: "score_now",
+        safe,
+        blocked: !safe,
+        blockers: [],
+        creditsBeforeAction: 5,
+        creditsAfterAction: 5,
+        evidence: [],
+      },
+    ],
+    scoreActionIds: ["score-action"],
+    advanceToScoreActionIds: [],
+    agendaInstallActionIds: [],
+    protectedRemoteIds: ["remote_1"],
+    blockedByCredits: false,
+    blockedByCheapContest: false,
+    blockedByRunnerContest: false,
+    blockedByHqThreat: false,
+    runnerAccessThreatHigh: false,
+    evidence: [],
+  };
+}
 
 function input(): AiDecisionInput {
   return {
     side: "corp",
+    playerView: { stateVersion: 1, timingPoint: "corp_action.main" },
+    legalActions: [action("score-action")],
   } as AiDecisionInput;
 }
 

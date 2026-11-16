@@ -14,8 +14,6 @@ export const SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV =
   "NETGRID_AI_PLAY_STRENGTH_CALIBRATION_PROFILE";
 export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE =
   "ai-shadow-league-baseline-2026-06-12" as const;
-export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH =
-  "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md" as const;
 export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT = 18;
 export const SEMANTIC_SHADOW_CALIBRATION_BENCHMARK_SAMPLE_COUNT = 50;
 export const SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID =
@@ -28,7 +26,6 @@ export type SemanticShadowCalibrationBenchmarkMetadata = {
   benchmarkId: typeof SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID;
   source: "play_strength_benchmark";
   sampleCount: number;
-  reportPath: "docs/reviews/ai/ai-play-strength-calibration-baseline-2026-06-12.md";
   evidence: string[];
 };
 
@@ -47,7 +44,6 @@ export type SemanticShadowCalibrationProfile = {
   scope: "semantic_shadow_decision_scoring";
   intendedScopes: readonly string[];
   baselineReference: string;
-  baselineReportPath: string;
   baselineScenarioCount: number;
   baselineReportScenarioCount: number;
   calibrationSourceScenarioCount: number;
@@ -66,6 +62,17 @@ export type SemanticShadowCalibrationProfile = {
   evidence: string[];
 };
 
+const calibrationProvenanceEvidence = [
+  `baseline_reference:${SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE}`,
+  `baseline_scenario_count:${SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT}`,
+  `baseline_report_scenario_count:${SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT}`,
+  `calibration_source_scenario_count:${SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT}`,
+  `created_from_benchmark:${SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID}`,
+  `benchmark_sample_count:${SEMANTIC_SHADOW_CALIBRATION_BENCHMARK_SAMPLE_COUNT}`,
+  `locked_against_corpus:${SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_ID}`,
+  `locked_corpus_scenario_count:${SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_SCENARIO_COUNT}`,
+];
+
 export const SEMANTIC_SHADOW_BASELINE_V1: SemanticShadowCalibrationProfile = {
   schemaVersion: SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION,
   profileId: "baseline_v1",
@@ -78,7 +85,6 @@ export const SEMANTIC_SHADOW_BASELINE_V1: SemanticShadowCalibrationProfile = {
     "play_strength_benchmark",
   ],
   baselineReference: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE,
-  baselineReportPath: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH,
   baselineScenarioCount: SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT,
   baselineReportScenarioCount:
     SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT,
@@ -124,15 +130,7 @@ export const SEMANTIC_SHADOW_BASELINE_V1: SemanticShadowCalibrationProfile = {
   noRuntimeEffect: true,
   evidence: [
     "baseline_v1:current_semantic_shadow_score",
-    "baseline_reference:ai-shadow-league-baseline-2026-06-12",
-    "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
-    "baseline_scenario_count:18",
-    "baseline_report_scenario_count:18",
-    "calibration_source_scenario_count:18",
-    "created_from_benchmark:play-strength-calibration-baseline-2026-06-12",
-    "benchmark_sample_count:50",
-    "locked_against_corpus:real-engine-decision-corpus-v2-2026-06-13",
-    "locked_corpus_scenario_count:50",
+    ...calibrationProvenanceEvidence,
   ],
 };
 
@@ -148,7 +146,6 @@ export const SEMANTIC_SHADOW_CALIBRATED_V1: SemanticShadowCalibrationProfile = {
     "play_strength_benchmark",
   ],
   baselineReference: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE,
-  baselineReportPath: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH,
   baselineScenarioCount: SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT,
   baselineReportScenarioCount:
     SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT,
@@ -195,15 +192,7 @@ export const SEMANTIC_SHADOW_CALIBRATED_V1: SemanticShadowCalibrationProfile = {
   noRuntimeEffect: true,
   evidence: [
     "shadow_calibrated_v1:diagnostic_weight_experiment_only",
-    "baseline_reference:ai-shadow-league-baseline-2026-06-12",
-    "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
-    "baseline_scenario_count:18",
-    "baseline_report_scenario_count:18",
-    "calibration_source_scenario_count:18",
-    "created_from_benchmark:play-strength-calibration-baseline-2026-06-12",
-    "benchmark_sample_count:50",
-    "locked_against_corpus:real-engine-decision-corpus-v2-2026-06-13",
-    "locked_corpus_scenario_count:50",
+    ...calibrationProvenanceEvidence,
   ],
 };
 
@@ -212,8 +201,6 @@ function calibrationBenchmarkMetadata(): SemanticShadowCalibrationBenchmarkMetad
     benchmarkId: SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID,
     source: "play_strength_benchmark",
     sampleCount: SEMANTIC_SHADOW_CALIBRATION_BENCHMARK_SAMPLE_COUNT,
-    reportPath:
-      "docs/reviews/ai/ai-play-strength-calibration-baseline-2026-06-12.md",
     evidence: [
       `created_from_benchmark:${SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID}`,
       `benchmark_sample_count:${SEMANTIC_SHADOW_CALIBRATION_BENCHMARK_SAMPLE_COUNT}`,
@@ -239,10 +226,9 @@ export function resolveSemanticShadowCalibrationProfile(
     | SemanticShadowCalibrationProfileId
     | undefined,
 ): SemanticShadowCalibrationProfile {
-  if (!profile) return semanticShadowCalibrationProfileFromEnv();
+  if (profile === undefined) return semanticShadowCalibrationProfileFromEnv();
   if (typeof profile !== "string") return profile;
-  if (profile === "baseline_v1") return SEMANTIC_SHADOW_BASELINE_V1;
-  return SEMANTIC_SHADOW_CALIBRATED_V1;
+  return calibrationProfileForId(profile);
 }
 
 export function semanticShadowCalibrationProfileFromEnv(
@@ -250,8 +236,7 @@ export function semanticShadowCalibrationProfileFromEnv(
     SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV
   ],
 ): SemanticShadowCalibrationProfile {
-  if (env === "shadow_calibrated_v1") return SEMANTIC_SHADOW_CALIBRATED_V1;
-  return SEMANTIC_SHADOW_BASELINE_V1;
+  return calibrationProfileForId(env || "baseline_v1");
 }
 
 export function semanticShadowCalibrationProfileEnvEnabled(
@@ -260,6 +245,21 @@ export function semanticShadowCalibrationProfileEnvEnabled(
   ],
 ): boolean {
   return env === "shadow_calibrated_v1" || env === "baseline_v1";
+}
+
+function calibrationProfileForId(
+  profileId: string,
+): SemanticShadowCalibrationProfile {
+  switch (profileId) {
+    case "baseline_v1":
+      return SEMANTIC_SHADOW_BASELINE_V1;
+    case "shadow_calibrated_v1":
+      return SEMANTIC_SHADOW_CALIBRATED_V1;
+    default:
+      throw new Error(
+        `unknown_semantic_shadow_calibration_profile: ${profileId}`,
+      );
+  }
 }
 
 export function componentWeight(

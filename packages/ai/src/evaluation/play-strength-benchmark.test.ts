@@ -81,9 +81,7 @@ describe("PlayStrengthCalibrationBenchmark", () => {
     expect(diff.candidateProfileId).toBe("shadow_calibrated_v1");
     expect(diff.candidateProfileVersion).toBe("2026-06-12");
     expect(diff.baselineReference).toBe("ai-shadow-league-baseline-2026-06-12");
-    expect(diff.baselineReportPath).toBe(
-      "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
-    );
+
     expect(diff.baselineScenarioCount).toBe(18);
     expect(diff.baselineReportScenarioCount).toBe(18);
     expect(diff.calibrationSourceScenarioCount).toBe(18);
@@ -96,8 +94,6 @@ describe("PlayStrengthCalibrationBenchmark", () => {
       benchmarkId: "play-strength-calibration-baseline-2026-06-12",
       source: "play_strength_benchmark",
       sampleCount: 50,
-      reportPath:
-        "docs/reviews/ai/ai-play-strength-calibration-baseline-2026-06-12.md",
     });
     expect(diff.lockedAgainstCorpus).toMatchObject({
       corpusId: "real-engine-decision-corpus-v2-2026-06-13",

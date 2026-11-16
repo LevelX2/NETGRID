@@ -54,6 +54,46 @@ const ALL_ACTION_TYPES = [
 ] as const satisfies readonly LegalAction["type"][];
 
 describe("Action semantic coverage", () => {
+  it("reports unsafe rows and counts hidden-info blocking separately from schema gaps", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [legalAction("gain_credit", 0)],
+      observerSide: "system",
+      stateVersion: 108,
+    });
+    const unsafe = {
+      ...candidate!,
+      semanticActionType: "DecisionDebug",
+      projectionIssues: [],
+    };
+    const blocked = {
+      ...candidate!,
+      projectionIssues: [
+        "hidden_info_blocked",
+      ] as ActionSemanticCandidate["projectionIssues"],
+    };
+
+    expect(
+      summarizeActionSemanticCandidateCoverage([unsafe, blocked]),
+    ).toMatchObject({
+      redactionSafe: false,
+      forbiddenMarkers: ["DecisionDebug"],
+      redactionUnsafeRows: 1,
+      hiddenInfoBlockers: 1,
+      schemaGapRows: 0,
+      schemaGaps: {},
+    });
+    expect(
+      summarizeActionSemanticCandidateCoverageSources({
+        syntheticCandidates: [unsafe],
+        engineBackedCandidates: [blocked],
+      }),
+    ).toMatchObject({
+      redactionUnsafeRows: 1,
+      hiddenInfoBlockedCount: 1,
+      schemaGapCount: 0,
+    });
+  });
+
   it("projects every LegalAction type with identity, gates, visibility, cost, timing and evidence", () => {
     const actions = ALL_ACTION_TYPES.map((type, index) =>
       legalAction(type, index),
@@ -451,8 +491,7 @@ describe("Action semantic coverage", () => {
     expect(summary.fieldCoverage.hasEffectKind).toBe(1);
     expect(summary.hiddenInfoBlockers).toBe(1);
     expect(sourceSummary.engineBackedCandidates).toBeGreaterThan(0);
-    expect(sourceSummary.hiddenInfoLeaks).toBe(0);
-    expect(sourceSummary.legalActionGenerationChanges).toBe(0);
+    expect(sourceSummary.redactionUnsafeRows).toBe(0);
     expect(summary.schemaGaps).toMatchObject({
       target_context_unavailable: 6,
     });
@@ -705,13 +744,6 @@ function coverageReportArtifact(
         unsafeRows: summary.redactionUnsafeRows,
         forbiddenMarkers: summary.forbiddenMarkers,
       },
-    },
-    gates: {
-      deterministic: true,
-      hiddenInfoLeaks: summary.redactionSafe ? 0 : summary.redactionUnsafeRows,
-      runtimeBehaviorChanges: 0,
-      actionSelectionChanges: 0,
-      legalActionGenerationChanges: 0,
     },
     noEffectFlags: [
       "no_runtime_scoring",

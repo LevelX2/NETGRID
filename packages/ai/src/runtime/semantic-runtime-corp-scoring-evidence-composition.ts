@@ -4,7 +4,6 @@ import type { SemanticRuntimeCorpAdvancementCounterDependencies } from "./semant
 import { createSemanticRuntimeCorpPassiveScoreLineContext } from "./semantic-runtime-corp-passive-scoreline-context";
 import type { SemanticRuntimeCorpPassiveScoreLineDependencies } from "./semantic-runtime-corp-passive-scoreline";
 import { createSemanticRuntimeCorpScoreSafetyContext } from "./semantic-runtime-corp-score-safety-context";
-import type { SemanticRuntimeCorpScoreSafetyDependencies } from "./semantic-runtime-corp-score-safety";
 import { createSemanticRuntimeCorpScoreComponents } from "./semantic-runtime-corp-score-context";
 import type { SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
@@ -14,7 +13,6 @@ export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
   TConsumer extends string,
 > = SemanticRuntimeCorpAdvancementCounterDependencies &
   Omit<SemanticRuntimeCorpPassiveScoreLineDependencies, "actionIsScoreLine"> &
-  SemanticRuntimeCorpScoreSafetyDependencies &
   Omit<
     SemanticRuntimeCorpScoreDependencies<TConsumer>,
     | "corpScoreNowSafetyGate"
@@ -75,9 +73,6 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
 
   const { semanticRuntimeCorpScoreNowSafetyGate } =
     createSemanticRuntimeCorpScoreSafetyContext({
-      ...(dependencies.scoreTerminalWindow
-        ? { scoreTerminalWindow: dependencies.scoreTerminalWindow }
-        : {}),
       scorelineWindowAssessment: dependencies.corpScorelineWindowAssessment,
     });
 

@@ -1,6 +1,9 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
-import { runnerObservedFreeStopEventId } from "../../run-analysis/runner-free-stop-observation";
+import {
+  runnerHasCurrentBasicProbeAction,
+  runnerObservedFreeStopEventId,
+} from "../../run-analysis/runner-free-stop-observation";
 
 /** Admission for the pressure owner's information route; current Engine
  * reachability and the known access payoff remain authoritative. */
@@ -8,9 +11,6 @@ export function runnerRepeatedFreeStopProbeEvidence(
   input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): string | undefined {
-  const action = input.legalActions.find(
-    (a) => a.actionId === evaluation.actionId,
-  );
   if (
     (evaluation.targetServerId !== "hq" &&
       evaluation.targetServerId !== "rd") ||
@@ -21,8 +21,11 @@ export function runnerRepeatedFreeStopProbeEvidence(
       (evaluation.accessPayoff === "access_bonus" &&
         evaluation.knownAccessState === "unknown")
     ) ||
-    action?.type !== "start_run" ||
-    action.source !== "basic_action"
+    !runnerHasCurrentBasicProbeAction(
+      input,
+      evaluation.actionId,
+      evaluation.targetServerId,
+    )
   )
     return undefined;
   const stoppedEventId = runnerObservedFreeStopEventId(

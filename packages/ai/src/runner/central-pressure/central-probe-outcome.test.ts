@@ -105,6 +105,26 @@ describe("central information admission after an observed free stop", () => {
       });
     },
   );
+  it("does not attach an observed HQ stop to the R&D action id", () => {
+    const input = buildAiDecisionInputDto(fixture().input);
+    const targets = evaluateRunnerRunTargets({ input });
+    const hq = targets.find(
+      (target) => target.actionId === "runner.start_run.hq",
+    )!;
+    const rd = targets.find(
+      (target) => target.actionId === "runner.start_run.rd",
+    )!;
+    expect(runnerRepeatedFreeStopProbeEvidence(input, hq)).toContain(
+      "free_stop_already_observed",
+    );
+    expect(
+      runnerRepeatedFreeStopProbeEvidence(input, {
+        ...hq,
+        actionId: rd.actionId,
+      }),
+    ).toBeUndefined();
+  });
+
   it("does not treat a power-counter change as credit banking", () => {
     const cp = JSON.parse(
       readFileSync(

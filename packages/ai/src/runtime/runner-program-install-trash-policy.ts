@@ -218,18 +218,6 @@ function programSacrificeCandidateHasReasonCategory(
   return new Set(candidate.reasonCategories).has(category);
 }
 
-export function runnerProgramInstallDisplacementPenalty(
-  assessment: RunnerProgramInstallTrashAssessment | undefined,
-): number {
-  if (!assessment?.memoryRequired) return 0;
-  if (!assessment.canFreeRequiredMemory) return 3200;
-  const selectedPenalty = assessment.selectedCandidates.reduce(
-    (sum, candidate) => sum + candidate.sacrificePenalty,
-    0,
-  );
-  return Math.min(2600, 240 + selectedPenalty);
-}
-
 export function programSacrificeCategory(
   sacrificePenalty: number,
   protectedRole: boolean,

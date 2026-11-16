@@ -40,7 +40,6 @@ export type PlayStrengthCalibrationProfileDiff = {
   candidateProfileId: string;
   candidateProfileVersion: string;
   baselineReference: string;
-  baselineReportPath: string;
   baselineScenarioCount: number;
   baselineReportScenarioCount: number;
   calibrationSourceScenarioCount: number;
@@ -128,7 +127,6 @@ export function comparePlayStrengthCalibrationProfiles(
     candidateProfileId: candidateProfile.profileId,
     candidateProfileVersion: candidateProfile.version,
     baselineReference: candidateProfile.baselineReference,
-    baselineReportPath: candidateProfile.baselineReportPath,
     baselineScenarioCount: candidateProfile.baselineScenarioCount,
     baselineReportScenarioCount: candidateProfile.baselineReportScenarioCount,
     calibrationSourceScenarioCount:
@@ -151,7 +149,6 @@ export function comparePlayStrengthCalibrationProfiles(
       `baseline_profile:${baselineProfile.profileId}`,
       `candidate_profile:${candidateProfile.profileId}`,
       `baseline_reference:${candidateProfile.baselineReference}`,
-      `baseline_report_path:${candidateProfile.baselineReportPath}`,
       `baseline_scenario_count:${candidateProfile.baselineScenarioCount}`,
       `baseline_report_scenario_count:${candidateProfile.baselineReportScenarioCount}`,
       `calibration_source_scenario_count:${candidateProfile.calibrationSourceScenarioCount}`,

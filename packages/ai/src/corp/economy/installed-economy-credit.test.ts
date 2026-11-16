@@ -21,6 +21,21 @@ describe("corpInstalledEconomyCreditAmount", () => {
       ),
     ).toBe(0);
   });
+
+  it.each([
+    [{ gainCreditsAmount: 2, cardImplementationCreditAmount: 2 }, 2],
+    [{ gainCreditsAmount: true }, 0],
+    [{ gainCreditsAmount: 1.5 }, 0],
+    [{ gainCreditsAmount: 2, cardImplementationCreditAmount: 3 }, 0],
+    [{ gainCreditsAmount: 2, cardImplementationCreditAmount: "2" }, 0],
+  ])(
+    "requires positive integers and consistent aliases: %o",
+    (payload, expected) => {
+      expect(corpInstalledEconomyCreditAmount(legalAction({ payload }))).toBe(
+        expected,
+      );
+    },
+  );
 });
 
 function legalAction(overrides: Partial<LegalAction> = {}): LegalAction {

@@ -3,7 +3,7 @@ import type { Side } from "@netgrid/shared";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { isMeaningfulBoardProgress } from "./meaningful-board-progress";
-import { summarizeOutcomeFollowupMetrics } from "./outcome-followup-metrics";
+import { summarizeEncounterEffectMetrics } from "./encounter-effect-metrics";
 import {
   actionsUntil,
   advanceConvertsToScore,
@@ -48,7 +48,7 @@ type BasicPlanConversionMetrics = Pick<
 
 type PlanConversionMetrics = BasicPlanConversionMetrics &
   ReturnType<typeof summarizeStrategicPlanConversionMetrics> &
-  ReturnType<typeof summarizeOutcomeFollowupMetrics>;
+  ReturnType<typeof summarizeEncounterEffectMetrics>;
 
 export function summarizePlanConversionMetrics(
   summaries: AiSimulationSummary[],
@@ -240,6 +240,6 @@ export function summarizePlanConversionMetrics(
       isMeaningfulBoardProgress,
       isCorpRemoteAdvancementProgress,
     ),
-    ...summarizeOutcomeFollowupMetrics(summaries, isMeaningfulBoardProgress),
+    ...summarizeEncounterEffectMetrics(summaries),
   };
 }
