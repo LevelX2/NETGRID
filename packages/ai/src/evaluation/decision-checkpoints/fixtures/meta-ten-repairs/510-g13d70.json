@@ -2770,6 +2770,8 @@
           "stateHashAfter": "fnv1a:cf212ef2",
           "visibilityClass": "public",
           "publicPayload": {
+            "traceId": "run_65.corp_onr_v1_228_cinderella_2.0.trace",
+            "traceSuccessful": true,
             "actor": "runner",
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
@@ -4937,6 +4939,8 @@
         "stateHashAfter": "fnv1a:cf212ef2",
         "visibilityClass": "public",
         "publicPayload": {
+          "traceId": "run_65.corp_onr_v1_228_cinderella_2.0.trace",
+          "traceSuccessful": true,
           "actor": "runner",
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",

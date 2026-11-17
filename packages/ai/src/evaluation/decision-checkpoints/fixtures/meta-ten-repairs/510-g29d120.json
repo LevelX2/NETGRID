@@ -3994,6 +3994,8 @@
           "stateHashAfter": "fnv1a:fae6c860",
           "visibilityClass": "public",
           "publicPayload": {
+            "traceId": "run_111.corp_onr_v1_228_cinderella_1.0.trace",
+            "traceSuccessful": true,
             "actor": "runner",
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
@@ -6072,6 +6074,8 @@
         "stateHashAfter": "fnv1a:fae6c860",
         "visibilityClass": "public",
         "publicPayload": {
+          "traceId": "run_111.corp_onr_v1_228_cinderella_1.0.trace",
+          "traceSuccessful": true,
           "actor": "runner",
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",

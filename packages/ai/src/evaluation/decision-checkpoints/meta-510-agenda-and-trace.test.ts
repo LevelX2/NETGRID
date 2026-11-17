@@ -88,6 +88,12 @@ it.each(["g13d70", "g22d65", "g29d120", "g38d80"])(
     );
     const before = load(key + "-engine") as GameState;
     expect(hashGameState(before)).toBe(cp.stateHash);
+    const completion = getPlayerView(before, "corp").publicEvents.at(-1)!;
+    expect(input.eventTail.at(-1)?.publicPayload).toMatchObject({
+      traceId: completion.publicPayload.traceId,
+      traceSuccessful: true,
+    });
+    expect(completion.publicPayload.traceSuccessful).toBe(true);
     const run = () => {
       expect(decision.selectedChoices).toBeDefined();
       const result = applyAction(structuredClone(before), {
@@ -122,6 +128,8 @@ it.each([
   "subroutine",
   "unknown_rez",
   "event",
+  "trace_id",
+  "trace_outcome",
   "choice_state",
   "action_state",
   "option_binding",
@@ -162,6 +170,10 @@ it.each([
     if (kind === "unknown_rez") delete source.rezzed;
     if (kind === "event")
       input.eventTail.at(-1).publicPayload.traceStep = "corp_bid";
+    if (kind === "trace_id")
+      input.eventTail.at(-1).publicPayload.traceId = "another-trace";
+    if (kind === "trace_outcome")
+      input.eventTail.at(-1).publicPayload.traceSuccessful = false;
     if (kind === "choice_state") choice.stateVersion--;
     if (kind === "action_state") input.legalActions[0].expiresAtStateVersion--;
     if (kind === "option_binding")
