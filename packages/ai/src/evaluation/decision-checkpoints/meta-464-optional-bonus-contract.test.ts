@@ -16,10 +16,19 @@ it.each([false, true])(
       runtime: AiRuntimeCheckpointV1;
     };
     // The Engine producer regression verifies this corrected action metadata.
-    if (optional)
-      for (const a of c.input.legalActions)
-        if (a.type === "start_run")
-          a.payload = { ...a.payload, optionalBonusRun: true };
+    if (optional) {
+      // Companion with only the empty Archives bonus run and its decline.
+      c.input.legalActions = c.input.legalActions.filter(
+        (action) =>
+          action.payload?.runnerAbility === "decline_successful_run_extra_run" ||
+          (action.type === "start_run" && action.payload?.serverId === "archives"),
+      );
+      const run = c.input.legalActions.find((action) => action.type === "start_run")!;
+      run.payload = { ...run.payload, optionalBonusRun: true };
+      c.input.playerView.legalActions = c.input.legalActions;
+      c.input.playerView.opponent.discardCount = 0;
+      c.input.playerView.servers.find((server) => server.id === "archives")!.root = [];
+    }
     resetResidentPlanPortfolioMemory();
     restoreResidentPlanPortfolioMemorySnapshot(
       c.input,

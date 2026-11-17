@@ -62,11 +62,13 @@ const protection = {
 it.each([
   ["ICE removal", jettison, "core-command-jettison-ice", "fnv1a:85b73d8a"],
   ["bypass", bypass, "social-engineering", "fnv1a:1998f9b1"],
-] as const)("keeps Grip over optional last-click %s", (_label, cp, event, hash) => {
+] as const)("keeps Grip over optional last-click %s", (label, cp, event, hash) => {
   expect(cp.stateHash).toBe(hash);
   const guarded = decide(cp, event);
   expect(guarded.dispositions).toEqual([{ ...protection, actionId: guarded.actionId }]);
-  expect(guarded.selectedActionId).toBe("runner.gain_credit");
+  expect(guarded.selectedActionId).toBe(
+    label === "bypass" ? "runner.start_run.hq" : "runner.gain_credit",
+  );
   expect(
     guarded.plan.turnPlanning!.consideredLines!.some(
       (line) => line.firstActionId === guarded.actionId,
@@ -75,6 +77,18 @@ it.each([
 
   resetResidentPlanPortfolioMemory();
   const canRefill = decide(cp, event, true);
+  if (label === "bypass") {
+    expect(canRefill.dispositions).toEqual([
+      {
+        actionId: canRefill.actionId,
+        ownerModuleId: "runner.pressure_central",
+        disposition: "explicitly_nonproductive",
+        evidenceCode: "runner_no_bound_targeted_bypass_route",
+      },
+    ]);
+    expect(canRefill.selectedActionId).not.toBe(canRefill.actionId);
+    return;
+  }
   expect(canRefill.dispositions).toEqual([]);
   expect(canRefill.selectedActionId).toBe(canRefill.actionId);
   expect(canRefill.plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ard");

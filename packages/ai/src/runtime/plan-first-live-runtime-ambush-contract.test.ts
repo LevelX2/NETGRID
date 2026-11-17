@@ -6,7 +6,6 @@ import type {
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -410,7 +409,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const advance = advanceAmbush(installedTrap);
     input.legalActions = [advance, gain].map((action) => ({
       ...action,
-      expiresAtStateVersion: 3,
+      expiresAtStateVersion: input.playerView.stateVersion,
     }));
     input.playerView.legalActions = input.legalActions;
 
@@ -498,7 +497,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     ];
     input.legalActions = [advance, gain].map((action) => ({
       ...action,
-      expiresAtStateVersion: 3,
+      expiresAtStateVersion: input.playerView.stateVersion,
     }));
     input.playerView.legalActions = input.legalActions;
 
@@ -520,14 +519,23 @@ describe("plan-first Corp ambush preplanning contract", () => {
     input.legalActions = [advanceAmbush(developedTrap), gain, end].map(
       (action) => ({
         ...action,
-        expiresAtStateVersion: 4,
+        expiresAtStateVersion: input.playerView.stateVersion,
       }),
     );
     input.playerView.legalActions = input.legalActions;
 
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError(PlanResolutionFailure);
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    const actionId = advanceAmbush(developedTrap).actionId;
+    expect(decision.actionId).not.toBe(actionId);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).toContainEqual(
+      expect.objectContaining({
+        actionId,
+        ownerModuleId: "corp.ambush_and_bluff",
+        disposition: "explicitly_nonproductive",
+        evidenceCode: "corp_ambush_advance_target_already_reached:vacant-soulkiller:1",
+      }),
+    );
   });
 
   it("abandons the resident Ambush normally after access or trash moves its source to Archives [legacy_compare]", () => {
@@ -574,12 +582,12 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const advanceScore = {
       ...advanceAmbush(scoringAgenda),
       actionId: "advance-scoring-agenda",
-      expiresAtStateVersion: 3,
+      expiresAtStateVersion: input.playerView.stateVersion,
     };
     input.legalActions = [
       advanceScore,
-      { ...gain, expiresAtStateVersion: 3 },
-      { ...end, expiresAtStateVersion: 3 },
+      { ...gain, expiresAtStateVersion: input.playerView.stateVersion },
+      { ...end, expiresAtStateVersion: input.playerView.stateVersion },
     ];
     input.playerView.legalActions = input.legalActions;
 
