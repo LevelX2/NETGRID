@@ -754,37 +754,37 @@
     },
     {
       "counter": 147,
-      "purpose": "damage:run_40.corp_onr_v1_280_zombie_1.0:core:subroutine:onr_v1_280_zombie:printed_subroutines_damage_brain:1:selection:0",
+      "purpose": "damage:40.c31h.0:core:subroutine:604:1:selection:0",
       "value": 0.6553422210982487
     },
     {
       "counter": 148,
-      "purpose": "damage:run_40.corp_onr_v1_280_zombie_1.1:core:subroutine:onr_v1_280_zombie:printed_subroutines_damage_brain_a:1:selection:0",
+      "purpose": "damage:40.c31h.1:core:subroutine:605:1:selection:0",
       "value": 0.24378411604432282
     },
     {
       "counter": 149,
-      "purpose": "hq_multiaccess:run_53:selection:0",
+      "purpose": "hq_multiaccess:53:selection:0",
       "value": 0.42384379155303253
     },
     {
       "counter": 150,
-      "purpose": "hq_multiaccess:run_58:selection:0",
+      "purpose": "hq_multiaccess:58:selection:0",
       "value": 0.8643682829072696
     },
     {
       "counter": 151,
-      "purpose": "hq_multiaccess:run_70:selection:0",
+      "purpose": "hq_multiaccess:70:selection:0",
       "value": 0.7290000933026248
     },
     {
       "counter": 152,
-      "purpose": "hq_multiaccess:run_96:selection:0",
+      "purpose": "hq_multiaccess:96:selection:0",
       "value": 0.29352485653654103
     },
     {
       "counter": 153,
-      "purpose": "hq_multiaccess:run_107:selection:0",
+      "purpose": "hq_multiaccess:107:selection:0",
       "value": 0.20918647410226598
     }
   ],
@@ -794,54 +794,54 @@
   "phase": "corp_action_phase",
   "timingPoint": "corp_action.main",
   "corp": {
-    "identity": "corp_corp_identity_001_0",
+    "identity": "cs",
     "credits": 17,
     "clicks": 3,
     "maxHandSize": 5,
     "badPublicity": 0,
     "hq": [
-      "corp_onr_classic_011_glacier_2",
-      "corp_onr_proteus_008_project-zurich_2",
-      "corp_onr_v1_309_bbs-whispering-campaign_1",
-      "corp_onr_v1_279_wall-of-static_1"
+      "c3i",
+      "ceu",
+      "c37x",
+      "c319"
     ],
     "rd": [
-      "corp_onr_v1_247_haunting-inquisition_2",
-      "corp_onr_proteus_029_marionette_1",
-      "corp_onr_v1_205_main-office-relocation_1",
-      "corp_onr_v1_317_data-masons_1",
-      "corp_onr_classic_011_glacier_1",
-      "corp_onr_v1_199_employee-empowerment_2",
-      "corp_onr_classic_018_reclamation-project_1",
-      "corp_onr_proteus_008_project-zurich_3",
-      "corp_onr_proteus_041_toughoniumtm-wall_1",
-      "corp_onr_v1_355_crystal-palace-station-grid_2",
-      "corp_onr_proteus_018_datacomb_1",
-      "corp_onr_v1_199_employee-empowerment_1",
-      "corp_onr_v1_268_shock-r_2",
-      "corp_onr_v1_281_accounts-receivable_3",
-      "corp_onr_v1_366_red-herrings_1",
-      "corp_onr_v1_309_bbs-whispering-campaign_3",
-      "corp_onr_proteus_008_project-zurich_1",
-      "corp_onr_classic_001_data-fort-remapping_1",
-      "corp_onr_v1_309_bbs-whispering-campaign_2",
-      "corp_onr_v1_358_dr-dreff_1",
-      "corp_onr_v1_247_haunting-inquisition_1",
-      "corp_onr_v1_357_dieter-esslin_1",
-      "corp_onr_v1_238_data-wall-2-0_1",
-      "corp_onr_v1_355_crystal-palace-station-grid_1",
-      "corp_onr_classic_017_corporate-shuffle_1",
-      "corp_onr_v1_358_dr-dreff_3",
-      "corp_onr_v1_205_main-office-relocation_2",
-      "corp_onr_v1_280_zombie_2"
+      "c2u6",
+      "cjh",
+      "c2kt",
+      "c39p",
+      "c3h",
+      "c2ji",
+      "c51",
+      "cev",
+      "cm5",
+      "c3i6",
+      "ch1",
+      "c2jh",
+      "c2yu",
+      "c31r",
+      "c3kl",
+      "c37z",
+      "cet",
+      "c19",
+      "c37y",
+      "c3it",
+      "c2u5",
+      "c3il",
+      "c2s5",
+      "c3i5",
+      "c4t",
+      "c3iv",
+      "c2ku",
+      "c31i"
     ],
     "archives": [
-      "corp_onr_v1_290_efficiency-experts_3",
-      "corp_onr_v1_281_accounts-receivable_2",
-      "corp_onr_v1_290_efficiency-experts_2",
-      "corp_onr_v1_281_accounts-receivable_1",
-      "corp_onr_v1_358_dr-dreff_2",
-      "corp_onr_v1_290_efficiency-experts_1"
+      "c33r",
+      "c31q",
+      "c33q",
+      "c31p",
+      "c3iu",
+      "c33p"
     ],
     "scoreArea": [],
     "servers": [
@@ -850,8 +850,8 @@
         "kind": "hq",
         "label": "HQ",
         "ice": [
-          "corp_onr_v1_279_wall-of-static_2",
-          "corp_onr_proteus_015_colonel-failure_1"
+          "c31a",
+          "cgd"
         ],
         "root": []
       },
@@ -860,11 +860,11 @@
         "kind": "rd",
         "label": "R&D",
         "ice": [
-          "corp_onr_v1_238_data-wall-2-0_2",
-          "corp_onr_v1_280_zombie_1",
-          "corp_onr_proteus_029_marionette_2",
-          "corp_onr_v1_268_shock-r_1",
-          "corp_onr_v1_237_data-wall_1"
+          "c2s6",
+          "c31h",
+          "cji",
+          "c2yt",
+          "c2rx"
         ],
         "root": []
       },
@@ -878,7 +878,7 @@
     ]
   },
   "runner": {
-    "identity": "runner_runner_identity_001_0",
+    "identity": "c3mg",
     "credits": 10,
     "clicks": 0,
     "maxHandSize": 5,
@@ -887,63 +887,63 @@
     "memoryUsed": 4,
     "memoryLimit": 4,
     "grip": [
-      "runner_onr_v1_108_score_3",
-      "runner_onr_v1_097_livewires-contacts_2",
-      "runner_onr_v1_184_top-runners-conference_2"
+      "c1z7",
+      "c1wq",
+      "c2g2"
     ],
     "stack": [
-      "runner_onr_v1_178_short-term-contract_1",
-      "runner_onr_v1_123_bodyweight-data-creche_1",
-      "runner_onr_v1_178_short-term-contract_3",
-      "runner_onr_v1_097_livewires-contacts_3",
-      "runner_onr_v1_139_r-and-d-interface_2",
-      "runner_onr_v1_079_bodyweight-synthetic-blood_3",
-      "runner_onr_v1_094_inside-job_2",
-      "runner_onr_v1_174_rigged-investments_2",
-      "runner_onr_v1_108_score_2",
-      "runner_onr_v1_095_jack-n-joe_3",
-      "runner_onr_v1_174_rigged-investments_1",
-      "runner_onr_v1_054_raptor_1",
-      "runner_onr_v1_179_silicon-saloon-franchise_1",
-      "runner_onr_v1_079_bodyweight-synthetic-blood_2",
-      "runner_onr_v1_094_inside-job_3",
-      "runner_onr_v1_123_bodyweight-data-creche_2",
-      "runner_onr_v1_094_inside-job_1",
-      "runner_onr_v1_177_the-short-circuit_1",
-      "runner_onr_v1_017_deep-thought_1",
-      "runner_onr_v1_045_newsgroup-filter_1",
-      "runner_onr_v1_076_all-nighter_1",
-      "runner_onr_v1_075_zetatech-software-installer_2",
-      "runner_onr_v1_095_jack-n-joe_2"
+      "c2ep",
+      "c22h",
+      "c2er",
+      "c1wr",
+      "c262",
+      "c1sr",
+      "c1w2",
+      "c2du",
+      "c1z6",
+      "c1wb",
+      "c2dt",
+      "c1n5",
+      "c2ex",
+      "c1sq",
+      "c1w3",
+      "c22i",
+      "c1w1",
+      "c2eh",
+      "c1ex",
+      "c1l5",
+      "c1s1",
+      "c1ru",
+      "c1wa"
     ],
     "heap": [
-      "runner_onr_v1_086_forged-activation-orders_1",
-      "runner_onr_v1_184_top-runners-conference_1",
-      "runner_onr_v1_179_silicon-saloon-franchise_2",
-      "runner_onr_v1_145_wutech-mem-chip_1",
-      "runner_onr_v1_097_livewires-contacts_1",
-      "runner_onr_v1_079_bodyweight-synthetic-blood_1",
-      "runner_onr_v1_074_worm_2",
-      "runner_onr_v1_095_jack-n-joe_1",
-      "runner_onr_v1_014_codecracker_2",
-      "runner_onr_v1_108_score_1"
+      "c1u9",
+      "c2g1",
+      "c2ey",
+      "c27d",
+      "c1wp",
+      "c1sp",
+      "c1rm",
+      "c1w9",
+      "c1ea",
+      "c1z5"
     ],
     "scoreArea": [],
     "rig": {
       "programs": [
-        "runner_onr_v1_074_worm_1",
-        "runner_onr_v1_054_raptor_2",
-        "runner_onr_v1_075_zetatech-software-installer_1",
-        "runner_onr_v1_014_codecracker_1"
+        "c1rl",
+        "c1n6",
+        "c1rt",
+        "c1e9"
       ],
       "hardware": [
-        "runner_onr_v1_139_r-and-d-interface_1"
+        "c261"
       ],
       "resources": [
-        "runner_onr_v1_178_short-term-contract_2",
-        "runner_onr_v1_157_crash-everett-inventive-fixer_1",
-        "runner_onr_v1_165_junkyard-bbs_1",
-        "runner_onr_v1_184_top-runners-conference_3"
+        "c2eq",
+        "c2a1",
+        "c2bt",
+        "c2g3"
       ]
     }
   },
@@ -952,9 +952,9 @@
     "removedFromGame": []
   },
   "cardInstances": {
-    "runner_runner_identity_001_0": {
-      "instanceId": "runner_runner_identity_001_0",
-      "definitionId": "runner_identity_001",
+    "c3mg": {
+      "instanceId": "c3mg",
+      "definitionId": 587,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -966,9 +966,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_corp_identity_001_0": {
-      "instanceId": "corp_corp_identity_001_0",
-      "definitionId": "corp_identity_001",
+    "cs": {
+      "instanceId": "cs",
+      "definitionId": 3,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -980,9 +980,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_014_codecracker_1": {
-      "instanceId": "runner_onr_v1_014_codecracker_1",
-      "definitionId": "onr_v1_014_codecracker",
+    "c1e9": {
+      "instanceId": "c1e9",
+      "definitionId": 226,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -994,9 +994,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_014_codecracker_2": {
-      "instanceId": "runner_onr_v1_014_codecracker_2",
-      "definitionId": "onr_v1_014_codecracker",
+    "c1ea": {
+      "instanceId": "c1ea",
+      "definitionId": 226,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1008,9 +1008,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_017_deep-thought_1": {
-      "instanceId": "runner_onr_v1_017_deep-thought_1",
-      "definitionId": "onr_v1_017_deep-thought",
+    "c1ex": {
+      "instanceId": "c1ex",
+      "definitionId": 229,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1022,9 +1022,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_045_newsgroup-filter_1": {
-      "instanceId": "runner_onr_v1_045_newsgroup-filter_1",
-      "definitionId": "onr_v1_045_newsgroup-filter",
+    "c1l5": {
+      "instanceId": "c1l5",
+      "definitionId": 257,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1036,9 +1036,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_054_raptor_1": {
-      "instanceId": "runner_onr_v1_054_raptor_1",
-      "definitionId": "onr_v1_054_raptor",
+    "c1n5": {
+      "instanceId": "c1n5",
+      "definitionId": 266,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1050,9 +1050,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_054_raptor_2": {
-      "instanceId": "runner_onr_v1_054_raptor_2",
-      "definitionId": "onr_v1_054_raptor",
+    "c1n6": {
+      "instanceId": "c1n6",
+      "definitionId": 266,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1064,9 +1064,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_074_worm_1": {
-      "instanceId": "runner_onr_v1_074_worm_1",
-      "definitionId": "onr_v1_074_worm",
+    "c1rl": {
+      "instanceId": "c1rl",
+      "definitionId": 286,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1078,9 +1078,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_074_worm_2": {
-      "instanceId": "runner_onr_v1_074_worm_2",
-      "definitionId": "onr_v1_074_worm",
+    "c1rm": {
+      "instanceId": "c1rm",
+      "definitionId": 286,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1092,9 +1092,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_075_zetatech-software-installer_1": {
-      "instanceId": "runner_onr_v1_075_zetatech-software-installer_1",
-      "definitionId": "onr_v1_075_zetatech-software-installer",
+    "c1rt": {
+      "instanceId": "c1rt",
+      "definitionId": 287,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1109,9 +1109,9 @@
         "bit": 2
       }
     },
-    "runner_onr_v1_075_zetatech-software-installer_2": {
-      "instanceId": "runner_onr_v1_075_zetatech-software-installer_2",
-      "definitionId": "onr_v1_075_zetatech-software-installer",
+    "c1ru": {
+      "instanceId": "c1ru",
+      "definitionId": 287,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1123,9 +1123,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_076_all-nighter_1": {
-      "instanceId": "runner_onr_v1_076_all-nighter_1",
-      "definitionId": "onr_v1_076_all-nighter",
+    "c1s1": {
+      "instanceId": "c1s1",
+      "definitionId": 288,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1137,9 +1137,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_079_bodyweight-synthetic-blood_1": {
-      "instanceId": "runner_onr_v1_079_bodyweight-synthetic-blood_1",
-      "definitionId": "onr_v1_079_bodyweight-synthetic-blood",
+    "c1sp": {
+      "instanceId": "c1sp",
+      "definitionId": 291,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1151,9 +1151,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_079_bodyweight-synthetic-blood_2": {
-      "instanceId": "runner_onr_v1_079_bodyweight-synthetic-blood_2",
-      "definitionId": "onr_v1_079_bodyweight-synthetic-blood",
+    "c1sq": {
+      "instanceId": "c1sq",
+      "definitionId": 291,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1165,9 +1165,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_079_bodyweight-synthetic-blood_3": {
-      "instanceId": "runner_onr_v1_079_bodyweight-synthetic-blood_3",
-      "definitionId": "onr_v1_079_bodyweight-synthetic-blood",
+    "c1sr": {
+      "instanceId": "c1sr",
+      "definitionId": 291,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1179,9 +1179,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_086_forged-activation-orders_1": {
-      "instanceId": "runner_onr_v1_086_forged-activation-orders_1",
-      "definitionId": "onr_v1_086_forged-activation-orders",
+    "c1u9": {
+      "instanceId": "c1u9",
+      "definitionId": 298,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1193,9 +1193,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_094_inside-job_1": {
-      "instanceId": "runner_onr_v1_094_inside-job_1",
-      "definitionId": "onr_v1_094_inside-job",
+    "c1w1": {
+      "instanceId": "c1w1",
+      "definitionId": 306,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1207,9 +1207,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_094_inside-job_2": {
-      "instanceId": "runner_onr_v1_094_inside-job_2",
-      "definitionId": "onr_v1_094_inside-job",
+    "c1w2": {
+      "instanceId": "c1w2",
+      "definitionId": 306,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1221,9 +1221,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_094_inside-job_3": {
-      "instanceId": "runner_onr_v1_094_inside-job_3",
-      "definitionId": "onr_v1_094_inside-job",
+    "c1w3": {
+      "instanceId": "c1w3",
+      "definitionId": 306,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1235,9 +1235,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_095_jack-n-joe_1": {
-      "instanceId": "runner_onr_v1_095_jack-n-joe_1",
-      "definitionId": "onr_v1_095_jack-n-joe",
+    "c1w9": {
+      "instanceId": "c1w9",
+      "definitionId": 307,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1249,9 +1249,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_095_jack-n-joe_2": {
-      "instanceId": "runner_onr_v1_095_jack-n-joe_2",
-      "definitionId": "onr_v1_095_jack-n-joe",
+    "c1wa": {
+      "instanceId": "c1wa",
+      "definitionId": 307,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1263,9 +1263,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_095_jack-n-joe_3": {
-      "instanceId": "runner_onr_v1_095_jack-n-joe_3",
-      "definitionId": "onr_v1_095_jack-n-joe",
+    "c1wb": {
+      "instanceId": "c1wb",
+      "definitionId": 307,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1277,9 +1277,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_097_livewires-contacts_1": {
-      "instanceId": "runner_onr_v1_097_livewires-contacts_1",
-      "definitionId": "onr_v1_097_livewires-contacts",
+    "c1wp": {
+      "instanceId": "c1wp",
+      "definitionId": 309,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1291,9 +1291,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_097_livewires-contacts_2": {
-      "instanceId": "runner_onr_v1_097_livewires-contacts_2",
-      "definitionId": "onr_v1_097_livewires-contacts",
+    "c1wq": {
+      "instanceId": "c1wq",
+      "definitionId": 309,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1305,9 +1305,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_097_livewires-contacts_3": {
-      "instanceId": "runner_onr_v1_097_livewires-contacts_3",
-      "definitionId": "onr_v1_097_livewires-contacts",
+    "c1wr": {
+      "instanceId": "c1wr",
+      "definitionId": 309,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1319,9 +1319,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_108_score_1": {
-      "instanceId": "runner_onr_v1_108_score_1",
-      "definitionId": "onr_v1_108_score",
+    "c1z5": {
+      "instanceId": "c1z5",
+      "definitionId": 320,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1333,9 +1333,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_108_score_2": {
-      "instanceId": "runner_onr_v1_108_score_2",
-      "definitionId": "onr_v1_108_score",
+    "c1z6": {
+      "instanceId": "c1z6",
+      "definitionId": 320,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1347,9 +1347,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_108_score_3": {
-      "instanceId": "runner_onr_v1_108_score_3",
-      "definitionId": "onr_v1_108_score",
+    "c1z7": {
+      "instanceId": "c1z7",
+      "definitionId": 320,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1361,9 +1361,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_123_bodyweight-data-creche_1": {
-      "instanceId": "runner_onr_v1_123_bodyweight-data-creche_1",
-      "definitionId": "onr_v1_123_bodyweight-data-creche",
+    "c22h": {
+      "instanceId": "c22h",
+      "definitionId": 335,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1375,9 +1375,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_123_bodyweight-data-creche_2": {
-      "instanceId": "runner_onr_v1_123_bodyweight-data-creche_2",
-      "definitionId": "onr_v1_123_bodyweight-data-creche",
+    "c22i": {
+      "instanceId": "c22i",
+      "definitionId": 335,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1389,9 +1389,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_139_r-and-d-interface_1": {
-      "instanceId": "runner_onr_v1_139_r-and-d-interface_1",
-      "definitionId": "onr_v1_139_r-and-d-interface",
+    "c261": {
+      "instanceId": "c261",
+      "definitionId": 351,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1403,9 +1403,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_139_r-and-d-interface_2": {
-      "instanceId": "runner_onr_v1_139_r-and-d-interface_2",
-      "definitionId": "onr_v1_139_r-and-d-interface",
+    "c262": {
+      "instanceId": "c262",
+      "definitionId": 351,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1417,9 +1417,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_145_wutech-mem-chip_1": {
-      "instanceId": "runner_onr_v1_145_wutech-mem-chip_1",
-      "definitionId": "onr_v1_145_wutech-mem-chip",
+    "c27d": {
+      "instanceId": "c27d",
+      "definitionId": 357,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1431,9 +1431,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_157_crash-everett-inventive-fixer_1": {
-      "instanceId": "runner_onr_v1_157_crash-everett-inventive-fixer_1",
-      "definitionId": "onr_v1_157_crash-everett-inventive-fixer",
+    "c2a1": {
+      "instanceId": "c2a1",
+      "definitionId": 369,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1445,9 +1445,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_165_junkyard-bbs_1": {
-      "instanceId": "runner_onr_v1_165_junkyard-bbs_1",
-      "definitionId": "onr_v1_165_junkyard-bbs",
+    "c2bt": {
+      "instanceId": "c2bt",
+      "definitionId": 377,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1459,9 +1459,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_174_rigged-investments_1": {
-      "instanceId": "runner_onr_v1_174_rigged-investments_1",
-      "definitionId": "onr_v1_174_rigged-investments",
+    "c2dt": {
+      "instanceId": "c2dt",
+      "definitionId": 386,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1473,9 +1473,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_174_rigged-investments_2": {
-      "instanceId": "runner_onr_v1_174_rigged-investments_2",
-      "definitionId": "onr_v1_174_rigged-investments",
+    "c2du": {
+      "instanceId": "c2du",
+      "definitionId": 386,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1487,9 +1487,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_177_the-short-circuit_1": {
-      "instanceId": "runner_onr_v1_177_the-short-circuit_1",
-      "definitionId": "onr_v1_177_the-short-circuit",
+    "c2eh": {
+      "instanceId": "c2eh",
+      "definitionId": 389,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1501,9 +1501,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_178_short-term-contract_1": {
-      "instanceId": "runner_onr_v1_178_short-term-contract_1",
-      "definitionId": "onr_v1_178_short-term-contract",
+    "c2ep": {
+      "instanceId": "c2ep",
+      "definitionId": 390,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1515,9 +1515,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_178_short-term-contract_2": {
-      "instanceId": "runner_onr_v1_178_short-term-contract_2",
-      "definitionId": "onr_v1_178_short-term-contract",
+    "c2eq": {
+      "instanceId": "c2eq",
+      "definitionId": 390,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1532,9 +1532,9 @@
         "bit": 6
       }
     },
-    "runner_onr_v1_178_short-term-contract_3": {
-      "instanceId": "runner_onr_v1_178_short-term-contract_3",
-      "definitionId": "onr_v1_178_short-term-contract",
+    "c2er": {
+      "instanceId": "c2er",
+      "definitionId": 390,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1546,9 +1546,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_179_silicon-saloon-franchise_1": {
-      "instanceId": "runner_onr_v1_179_silicon-saloon-franchise_1",
-      "definitionId": "onr_v1_179_silicon-saloon-franchise",
+    "c2ex": {
+      "instanceId": "c2ex",
+      "definitionId": 391,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1560,9 +1560,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_179_silicon-saloon-franchise_2": {
-      "instanceId": "runner_onr_v1_179_silicon-saloon-franchise_2",
-      "definitionId": "onr_v1_179_silicon-saloon-franchise",
+    "c2ey": {
+      "instanceId": "c2ey",
+      "definitionId": 391,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1574,9 +1574,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_184_top-runners-conference_1": {
-      "instanceId": "runner_onr_v1_184_top-runners-conference_1",
-      "definitionId": "onr_v1_184_top-runners-conference",
+    "c2g1": {
+      "instanceId": "c2g1",
+      "definitionId": 396,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1588,9 +1588,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_184_top-runners-conference_2": {
-      "instanceId": "runner_onr_v1_184_top-runners-conference_2",
-      "definitionId": "onr_v1_184_top-runners-conference",
+    "c2g2": {
+      "instanceId": "c2g2",
+      "definitionId": 396,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1602,9 +1602,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "runner_onr_v1_184_top-runners-conference_3": {
-      "instanceId": "runner_onr_v1_184_top-runners-conference_3",
-      "definitionId": "onr_v1_184_top-runners-conference",
+    "c2g3": {
+      "instanceId": "c2g3",
+      "definitionId": 396,
       "owner": "runner",
       "controller": "runner",
       "zone": {
@@ -1616,9 +1616,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_classic_001_data-fort-remapping_1": {
-      "instanceId": "corp_onr_classic_001_data-fort-remapping_1",
-      "definitionId": "onr_classic_001_data-fort-remapping",
+    "c19": {
+      "instanceId": "c19",
+      "definitionId": 5,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1630,9 +1630,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_classic_011_glacier_1": {
-      "instanceId": "corp_onr_classic_011_glacier_1",
-      "definitionId": "onr_classic_011_glacier",
+    "c3h": {
+      "instanceId": "c3h",
+      "definitionId": 15,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1644,9 +1644,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_classic_011_glacier_2": {
-      "instanceId": "corp_onr_classic_011_glacier_2",
-      "definitionId": "onr_classic_011_glacier",
+    "c3i": {
+      "instanceId": "c3i",
+      "definitionId": 15,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1658,9 +1658,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_classic_017_corporate-shuffle_1": {
-      "instanceId": "corp_onr_classic_017_corporate-shuffle_1",
-      "definitionId": "onr_classic_017_corporate-shuffle",
+    "c4t": {
+      "instanceId": "c4t",
+      "definitionId": 21,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1672,9 +1672,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_classic_018_reclamation-project_1": {
-      "instanceId": "corp_onr_classic_018_reclamation-project_1",
-      "definitionId": "onr_classic_018_reclamation-project",
+    "c51": {
+      "instanceId": "c51",
+      "definitionId": 22,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1686,9 +1686,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_proteus_008_project-zurich_1": {
-      "instanceId": "corp_onr_proteus_008_project-zurich_1",
-      "definitionId": "onr_proteus_008_project-zurich",
+    "cet": {
+      "instanceId": "cet",
+      "definitionId": 66,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1700,9 +1700,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_proteus_008_project-zurich_2": {
-      "instanceId": "corp_onr_proteus_008_project-zurich_2",
-      "definitionId": "onr_proteus_008_project-zurich",
+    "ceu": {
+      "instanceId": "ceu",
+      "definitionId": 66,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1714,9 +1714,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_proteus_008_project-zurich_3": {
-      "instanceId": "corp_onr_proteus_008_project-zurich_3",
-      "definitionId": "onr_proteus_008_project-zurich",
+    "cev": {
+      "instanceId": "cev",
+      "definitionId": 66,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1728,9 +1728,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_proteus_015_colonel-failure_1": {
-      "instanceId": "corp_onr_proteus_015_colonel-failure_1",
-      "definitionId": "onr_proteus_015_colonel-failure",
+    "cgd": {
+      "instanceId": "cgd",
+      "definitionId": 73,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1743,9 +1743,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_proteus_018_datacomb_1": {
-      "instanceId": "corp_onr_proteus_018_datacomb_1",
-      "definitionId": "onr_proteus_018_datacomb",
+    "ch1": {
+      "instanceId": "ch1",
+      "definitionId": 76,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1757,9 +1757,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_proteus_029_marionette_1": {
-      "instanceId": "corp_onr_proteus_029_marionette_1",
-      "definitionId": "onr_proteus_029_marionette",
+    "cjh": {
+      "instanceId": "cjh",
+      "definitionId": 87,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1771,9 +1771,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_proteus_029_marionette_2": {
-      "instanceId": "corp_onr_proteus_029_marionette_2",
-      "definitionId": "onr_proteus_029_marionette",
+    "cji": {
+      "instanceId": "cji",
+      "definitionId": 87,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1786,9 +1786,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_proteus_041_toughoniumtm-wall_1": {
-      "instanceId": "corp_onr_proteus_041_toughoniumtm-wall_1",
-      "definitionId": "onr_proteus_041_toughoniumtm-wall",
+    "cm5": {
+      "instanceId": "cm5",
+      "definitionId": 99,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1800,9 +1800,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_199_employee-empowerment_1": {
-      "instanceId": "corp_onr_v1_199_employee-empowerment_1",
-      "definitionId": "onr_v1_199_employee-empowerment",
+    "c2jh": {
+      "instanceId": "c2jh",
+      "definitionId": 411,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1814,9 +1814,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_199_employee-empowerment_2": {
-      "instanceId": "corp_onr_v1_199_employee-empowerment_2",
-      "definitionId": "onr_v1_199_employee-empowerment",
+    "c2ji": {
+      "instanceId": "c2ji",
+      "definitionId": 411,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1828,9 +1828,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_205_main-office-relocation_1": {
-      "instanceId": "corp_onr_v1_205_main-office-relocation_1",
-      "definitionId": "onr_v1_205_main-office-relocation",
+    "c2kt": {
+      "instanceId": "c2kt",
+      "definitionId": 417,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1842,9 +1842,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_205_main-office-relocation_2": {
-      "instanceId": "corp_onr_v1_205_main-office-relocation_2",
-      "definitionId": "onr_v1_205_main-office-relocation",
+    "c2ku": {
+      "instanceId": "c2ku",
+      "definitionId": 417,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1856,9 +1856,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_237_data-wall_1": {
-      "instanceId": "corp_onr_v1_237_data-wall_1",
-      "definitionId": "onr_v1_237_data-wall",
+    "c2rx": {
+      "instanceId": "c2rx",
+      "definitionId": 449,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1871,9 +1871,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_238_data-wall-2-0_1": {
-      "instanceId": "corp_onr_v1_238_data-wall-2-0_1",
-      "definitionId": "onr_v1_238_data-wall-2-0",
+    "c2s5": {
+      "instanceId": "c2s5",
+      "definitionId": 450,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1885,9 +1885,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_238_data-wall-2-0_2": {
-      "instanceId": "corp_onr_v1_238_data-wall-2-0_2",
-      "definitionId": "onr_v1_238_data-wall-2-0",
+    "c2s6": {
+      "instanceId": "c2s6",
+      "definitionId": 450,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1900,9 +1900,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_247_haunting-inquisition_1": {
-      "instanceId": "corp_onr_v1_247_haunting-inquisition_1",
-      "definitionId": "onr_v1_247_haunting-inquisition",
+    "c2u5": {
+      "instanceId": "c2u5",
+      "definitionId": 459,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1914,9 +1914,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_247_haunting-inquisition_2": {
-      "instanceId": "corp_onr_v1_247_haunting-inquisition_2",
-      "definitionId": "onr_v1_247_haunting-inquisition",
+    "c2u6": {
+      "instanceId": "c2u6",
+      "definitionId": 459,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1928,9 +1928,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_268_shock-r_1": {
-      "instanceId": "corp_onr_v1_268_shock-r_1",
-      "definitionId": "onr_v1_268_shock-r",
+    "c2yt": {
+      "instanceId": "c2yt",
+      "definitionId": 480,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1943,9 +1943,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_268_shock-r_2": {
-      "instanceId": "corp_onr_v1_268_shock-r_2",
-      "definitionId": "onr_v1_268_shock-r",
+    "c2yu": {
+      "instanceId": "c2yu",
+      "definitionId": 480,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1957,9 +1957,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_279_wall-of-static_1": {
-      "instanceId": "corp_onr_v1_279_wall-of-static_1",
-      "definitionId": "onr_v1_279_wall-of-static",
+    "c319": {
+      "instanceId": "c319",
+      "definitionId": 491,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1971,9 +1971,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_279_wall-of-static_2": {
-      "instanceId": "corp_onr_v1_279_wall-of-static_2",
-      "definitionId": "onr_v1_279_wall-of-static",
+    "c31a": {
+      "instanceId": "c31a",
+      "definitionId": 491,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -1986,9 +1986,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_280_zombie_1": {
-      "instanceId": "corp_onr_v1_280_zombie_1",
-      "definitionId": "onr_v1_280_zombie",
+    "c31h": {
+      "instanceId": "c31h",
+      "definitionId": 492,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2001,9 +2001,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_280_zombie_2": {
-      "instanceId": "corp_onr_v1_280_zombie_2",
-      "definitionId": "onr_v1_280_zombie",
+    "c31i": {
+      "instanceId": "c31i",
+      "definitionId": 492,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2015,9 +2015,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_281_accounts-receivable_1": {
-      "instanceId": "corp_onr_v1_281_accounts-receivable_1",
-      "definitionId": "onr_v1_281_accounts-receivable",
+    "c31p": {
+      "instanceId": "c31p",
+      "definitionId": 493,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2029,9 +2029,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_281_accounts-receivable_2": {
-      "instanceId": "corp_onr_v1_281_accounts-receivable_2",
-      "definitionId": "onr_v1_281_accounts-receivable",
+    "c31q": {
+      "instanceId": "c31q",
+      "definitionId": 493,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2043,9 +2043,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_281_accounts-receivable_3": {
-      "instanceId": "corp_onr_v1_281_accounts-receivable_3",
-      "definitionId": "onr_v1_281_accounts-receivable",
+    "c31r": {
+      "instanceId": "c31r",
+      "definitionId": 493,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2057,9 +2057,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_290_efficiency-experts_1": {
-      "instanceId": "corp_onr_v1_290_efficiency-experts_1",
-      "definitionId": "onr_v1_290_efficiency-experts",
+    "c33p": {
+      "instanceId": "c33p",
+      "definitionId": 502,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2071,9 +2071,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_290_efficiency-experts_2": {
-      "instanceId": "corp_onr_v1_290_efficiency-experts_2",
-      "definitionId": "onr_v1_290_efficiency-experts",
+    "c33q": {
+      "instanceId": "c33q",
+      "definitionId": 502,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2085,9 +2085,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_290_efficiency-experts_3": {
-      "instanceId": "corp_onr_v1_290_efficiency-experts_3",
-      "definitionId": "onr_v1_290_efficiency-experts",
+    "c33r": {
+      "instanceId": "c33r",
+      "definitionId": 502,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2099,9 +2099,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_309_bbs-whispering-campaign_1": {
-      "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_1",
-      "definitionId": "onr_v1_309_bbs-whispering-campaign",
+    "c37x": {
+      "instanceId": "c37x",
+      "definitionId": 521,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2113,9 +2113,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_309_bbs-whispering-campaign_2": {
-      "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_2",
-      "definitionId": "onr_v1_309_bbs-whispering-campaign",
+    "c37y": {
+      "instanceId": "c37y",
+      "definitionId": 521,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2127,9 +2127,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_309_bbs-whispering-campaign_3": {
-      "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_3",
-      "definitionId": "onr_v1_309_bbs-whispering-campaign",
+    "c37z": {
+      "instanceId": "c37z",
+      "definitionId": 521,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2141,9 +2141,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_317_data-masons_1": {
-      "instanceId": "corp_onr_v1_317_data-masons_1",
-      "definitionId": "onr_v1_317_data-masons",
+    "c39p": {
+      "instanceId": "c39p",
+      "definitionId": 529,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2155,9 +2155,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_355_crystal-palace-station-grid_1": {
-      "instanceId": "corp_onr_v1_355_crystal-palace-station-grid_1",
-      "definitionId": "onr_v1_355_crystal-palace-station-grid",
+    "c3i5": {
+      "instanceId": "c3i5",
+      "definitionId": 567,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2169,9 +2169,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_355_crystal-palace-station-grid_2": {
-      "instanceId": "corp_onr_v1_355_crystal-palace-station-grid_2",
-      "definitionId": "onr_v1_355_crystal-palace-station-grid",
+    "c3i6": {
+      "instanceId": "c3i6",
+      "definitionId": 567,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2183,9 +2183,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_357_dieter-esslin_1": {
-      "instanceId": "corp_onr_v1_357_dieter-esslin_1",
-      "definitionId": "onr_v1_357_dieter-esslin",
+    "c3il": {
+      "instanceId": "c3il",
+      "definitionId": 569,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2197,9 +2197,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_358_dr-dreff_1": {
-      "instanceId": "corp_onr_v1_358_dr-dreff_1",
-      "definitionId": "onr_v1_358_dr-dreff",
+    "c3it": {
+      "instanceId": "c3it",
+      "definitionId": 570,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2211,9 +2211,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_358_dr-dreff_2": {
-      "instanceId": "corp_onr_v1_358_dr-dreff_2",
-      "definitionId": "onr_v1_358_dr-dreff",
+    "c3iu": {
+      "instanceId": "c3iu",
+      "definitionId": 570,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2225,9 +2225,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_358_dr-dreff_3": {
-      "instanceId": "corp_onr_v1_358_dr-dreff_3",
-      "definitionId": "onr_v1_358_dr-dreff",
+    "c3iv": {
+      "instanceId": "c3iv",
+      "definitionId": 570,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2239,9 +2239,9 @@
       "advancementCounters": 0,
       "strengthModifier": 0
     },
-    "corp_onr_v1_366_red-herrings_1": {
-      "instanceId": "corp_onr_v1_366_red-herrings_1",
-      "definitionId": "onr_v1_366_red-herrings",
+    "c3kl": {
+      "instanceId": "c3kl",
+      "definitionId": 578,
       "owner": "corp",
       "controller": "corp",
       "zone": {
@@ -2256,7 +2256,7 @@
   },
   "eventLog": [
     {
-      "eventId": "evt_0",
+      "eventId": 1,
       "type": "game_created",
       "stateVersionBefore": 0,
       "stateVersionAfter": 0,
@@ -2279,7 +2279,7 @@
         "corpDeckId": "standard_standard_corp_dr_dreffs_letzte_visite_1.3.0",
         "runnerDeck": {
           "side": "runner",
-          "identityCardId": "runner_identity_001",
+          "identityCardId": 587,
           "deckName": "Last Call at R&D",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1",
@@ -2289,7 +2289,7 @@
         },
         "corpDeck": {
           "side": "corp",
-          "identityCardId": "corp_identity_001",
+          "identityCardId": 3,
           "deckName": "Dr. Dreffs letzte Visite",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2302,7 +2302,7 @@
       }
     },
     {
-      "eventId": "evt_1",
+      "eventId": 2,
       "type": "resolve_choice",
       "stateVersionBefore": 0,
       "stateVersionAfter": 1,
@@ -2387,7 +2387,7 @@
       }
     },
     {
-      "eventId": "evt_2",
+      "eventId": 3,
       "type": "resolve_choice",
       "stateVersionBefore": 1,
       "stateVersionAfter": 2,
@@ -2472,7 +2472,7 @@
       }
     },
     {
-      "eventId": "evt_3",
+      "eventId": 4,
       "type": "mandatory_draw",
       "stateVersionBefore": 2,
       "stateVersionAfter": 3,
@@ -2534,7 +2534,7 @@
       }
     },
     {
-      "eventId": "evt_4",
+      "eventId": 5,
       "type": "install_card",
       "stateVersionBefore": 3,
       "stateVersionAfter": 4,
@@ -2573,15 +2573,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.install_card.corp_onr_v1_238_data-wall-2-0_2.rd.corp_onr_v1_238_data-wall-2-0_2.0",
+            "actionId": "corp.install_card.c2s6.rd.c2s6.0",
             "clientKnownStateVersion": 3
           },
           "legalAction": {
-            "actionId": "corp.install_card.corp_onr_v1_238_data-wall-2-0_2.rd.corp_onr_v1_238_data-wall-2-0_2.0",
+            "actionId": "corp.install_card.c2s6.rd.c2s6.0",
             "side": "corp",
             "type": "install_card",
             "label": "ICE vor R&D installieren",
-            "source": "corp_onr_v1_238_data-wall-2-0_2",
+            "source": "c2s6",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -2592,14 +2592,14 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 3,
             "payload": {
-              "cardId": "corp_onr_v1_238_data-wall-2-0_2",
+              "cardId": "c2s6",
               "serverId": "rd",
               "placement": "ice",
               "iceInstallBaseCost": 0,
               "iceInstallAdditionalCost": 0,
               "iceInstallReduction": 0,
               "iceInstallTotalCost": 0,
-              "postInstallRezQuoteCardId": "corp_onr_v1_238_data-wall-2-0_2",
+              "postInstallRezQuoteCardId": "c2s6",
               "postInstallRezQuoteTargetServerId": "rd",
               "postInstallRezQuoteExpiresAtStateVersion": 3,
               "postInstallRezQuoteComplete": true,
@@ -2608,7 +2608,7 @@
               "postInstallRezQuoteBaseCredits": 2,
               "postInstallRezQuoteFinalCredits": 2,
               "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"corp_onr_v1_238_data-wall-2-0_2\",\"iceDefinitionId\":\"onr_v1_238_data-wall-2-0\",\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":\"onr_v1_238_data-wall-2-0\",\"sourceTitle\":\"Data Wall 2.0\"}]}",
+              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
               "effectKind": "install_card"
             }
           }
@@ -2616,7 +2616,7 @@
       }
     },
     {
-      "eventId": "evt_5",
+      "eventId": 6,
       "type": "play_operation",
       "stateVersionBefore": 4,
       "stateVersionAfter": 5,
@@ -2632,13 +2632,13 @@
         "turnActionOrdinalEnd": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+            "effectId": "502.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
             "amount": 3,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+            "sourceDefinitionId": 502,
             "sourceTitle": "Efficiency Experts"
           }
         ],
@@ -2655,7 +2655,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_v1_290_efficiency-experts",
+        "cardDefinitionId": 502,
         "title": "Efficiency Experts"
       },
       "privatePayload": {
@@ -2663,15 +2663,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_3.corp_onr_v1_290_efficiency-experts_3.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c33r.c33r.616",
             "clientKnownStateVersion": 4
           },
           "legalAction": {
-            "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_3.corp_onr_v1_290_efficiency-experts_3.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c33r.c33r.616",
             "side": "corp",
             "type": "play_operation",
             "label": "Efficiency Experts spielen",
-            "source": "corp_onr_v1_290_efficiency-experts_3",
+            "source": "c33r",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -2683,28 +2683,28 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 4,
             "abilityRef": {
-              "sourceCardInstanceId": "corp_onr_v1_290_efficiency-experts_3",
-              "sourceAbilityId": "onr_v1_290_efficiency-experts:abilities_on_play_gain_credits"
+              "sourceCardInstanceId": "c33r",
+              "sourceAbilityId": 616
             },
             "payload": {
-              "cardId": "corp_onr_v1_290_efficiency-experts_3",
+              "cardId": "c33r",
               "gainCreditsAmount": 3,
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_on_play_gain_credits",
-              "cardImplementationAbilityId": "onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+              "cardImplementationAbilityId": 616,
               "effectKind": "gain_credits",
               "gainedCredits": 3,
               "corpCreditsAfter": 8
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+                "effectId": "502.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
                 "amount": 3,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+                "sourceDefinitionId": 502,
                 "sourceTitle": "Efficiency Experts"
               }
             ]
@@ -2713,7 +2713,7 @@
       }
     },
     {
-      "eventId": "evt_6",
+      "eventId": 7,
       "type": "play_operation",
       "stateVersionBefore": 5,
       "stateVersionAfter": 6,
@@ -2729,13 +2729,13 @@
         "turnActionOrdinalEnd": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_281_accounts-receivable.effect.0.gain_credits",
+            "effectId": "493.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
             "amount": 9,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_281_accounts-receivable",
+            "sourceDefinitionId": 493,
             "sourceTitle": "Accounts Receivable"
           }
         ],
@@ -2752,7 +2752,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_v1_281_accounts-receivable",
+        "cardDefinitionId": 493,
         "title": "Accounts Receivable"
       },
       "privatePayload": {
@@ -2760,15 +2760,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_2.corp_onr_v1_281_accounts-receivable_2.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c31q.c31q.607",
             "clientKnownStateVersion": 5
           },
           "legalAction": {
-            "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_2.corp_onr_v1_281_accounts-receivable_2.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c31q.c31q.607",
             "side": "corp",
             "type": "play_operation",
             "label": "Accounts Receivable spielen",
-            "source": "corp_onr_v1_281_accounts-receivable_2",
+            "source": "c31q",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -2780,28 +2780,28 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 5,
             "abilityRef": {
-              "sourceCardInstanceId": "corp_onr_v1_281_accounts-receivable_2",
-              "sourceAbilityId": "onr_v1_281_accounts-receivable:abilities_on_play_gain_credits"
+              "sourceCardInstanceId": "c31q",
+              "sourceAbilityId": 607
             },
             "payload": {
-              "cardId": "corp_onr_v1_281_accounts-receivable_2",
+              "cardId": "c31q",
               "gainCreditsAmount": 9,
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_on_play_gain_credits",
-              "cardImplementationAbilityId": "onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+              "cardImplementationAbilityId": 607,
               "effectKind": "gain_credits",
               "gainedCredits": 9,
               "corpCreditsAfter": 12
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_281_accounts-receivable.effect.0.gain_credits",
+                "effectId": "493.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
                 "amount": 9,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_281_accounts-receivable",
+                "sourceDefinitionId": 493,
                 "sourceTitle": "Accounts Receivable"
               }
             ]
@@ -2810,7 +2810,7 @@
       }
     },
     {
-      "eventId": "evt_7",
+      "eventId": 8,
       "type": "end_turn",
       "stateVersionBefore": 6,
       "stateVersionAfter": 7,
@@ -2849,7 +2849,7 @@
       }
     },
     {
-      "eventId": "evt_8",
+      "eventId": 9,
       "type": "install_card",
       "stateVersionBefore": 7,
       "stateVersionAfter": 8,
@@ -2877,7 +2877,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_184_top-runners-conference",
+        "cardDefinitionId": 396,
         "title": "Top Runners' Conference"
       },
       "privatePayload": {
@@ -2885,15 +2885,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_184_top-runners-conference_1.runner_onr_v1_184_top-runners-conference_1",
+            "actionId": "runner.install_card.c2g1.c2g1",
             "clientKnownStateVersion": 7
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_184_top-runners-conference_1.runner_onr_v1_184_top-runners-conference_1",
+            "actionId": "runner.install_card.c2g1.c2g1",
             "side": "runner",
             "type": "install_card",
             "label": "Top Runners' Conference installieren",
-            "source": "runner_onr_v1_184_top-runners-conference_1",
+            "source": "c2g1",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -2915,7 +2915,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 7,
             "payload": {
-              "cardId": "runner_onr_v1_184_top-runners-conference_1",
+              "cardId": "c2g1",
               "effectKind": "install_card",
               "installCostPaid": 0,
               "runnerInstallNormalCreditsPaid": 0,
@@ -2929,7 +2929,7 @@
       }
     },
     {
-      "eventId": "evt_9",
+      "eventId": 10,
       "type": "install_card",
       "stateVersionBefore": 8,
       "stateVersionAfter": 9,
@@ -2957,7 +2957,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_074_worm",
+        "cardDefinitionId": 286,
         "title": "Worm"
       },
       "privatePayload": {
@@ -2965,15 +2965,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_074_worm_1.runner_onr_v1_074_worm_1",
+            "actionId": "runner.install_card.c1rl.c1rl",
             "clientKnownStateVersion": 8
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_074_worm_1.runner_onr_v1_074_worm_1",
+            "actionId": "runner.install_card.c1rl.c1rl",
             "side": "runner",
             "type": "install_card",
             "label": "Worm installieren",
-            "source": "runner_onr_v1_074_worm_1",
+            "source": "c1rl",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -2985,7 +2985,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 8,
             "payload": {
-              "cardId": "runner_onr_v1_074_worm_1",
+              "cardId": "c1rl",
               "effectKind": "install_card",
               "installCostPaid": 4,
               "runnerInstallNormalCreditsPaid": 4,
@@ -2999,7 +2999,7 @@
       }
     },
     {
-      "eventId": "evt_10",
+      "eventId": 11,
       "type": "play_event",
       "stateVersionBefore": 9,
       "stateVersionAfter": 10,
@@ -3015,18 +3015,18 @@
         "turnActionOrdinalEnd": 3,
         "runnerCreditsAfter": 0,
         "normalCreditsSpent": 1,
-        "sourceDefinitionId": "onr_v1_086_forged-activation-orders",
+        "sourceDefinitionId": 298,
         "abilityId": "force_rez_or_trash_ice",
         "amounts": {
           "runnerCreditsAfter": 0
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_086_forged-activation-orders"
+          "sourceDefinitionId": 298
         },
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_086_forged-activation-orders",
+        "cardDefinitionId": 298,
         "title": "Forged Activation Orders"
       },
       "privatePayload": {
@@ -3034,15 +3034,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_1.runner_onr_v1_086_forged-activation-orders_1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+            "actionId": "runner.play_event.c1u9.c1u9.382",
             "clientKnownStateVersion": 9
           },
           "legalAction": {
-            "actionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_1.runner_onr_v1_086_forged-activation-orders_1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+            "actionId": "runner.play_event.c1u9.c1u9.382",
             "side": "runner",
             "type": "play_event",
             "label": "Forged Activation Orders spielen",
-            "source": "runner_onr_v1_086_forged-activation-orders_1",
+            "source": "c1u9",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -3054,26 +3054,26 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 9,
             "abilityRef": {
-              "sourceCardInstanceId": "runner_onr_v1_086_forged-activation-orders_1",
-              "sourceAbilityId": "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice"
+              "sourceCardInstanceId": "c1u9",
+              "sourceAbilityId": 382
             },
             "payload": {
-              "cardId": "runner_onr_v1_086_forged-activation-orders_1",
+              "cardId": "c1u9",
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_on_play_corp_choice_rez_or_trash_ice",
-              "cardImplementationAbilityId": "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+              "cardImplementationAbilityId": 382,
               "normalCreditsSpent": 1,
               "runnerCreditsAfter": 0,
               "p3_48RunnerRunControl": "corp_choice_rez_or_trash_ice",
               "v1922RunnerEventAbility": "force_rez_or_trash_ice",
-              "sourceDefinitionId": "onr_v1_086_forged-activation-orders"
+              "sourceDefinitionId": 298
             }
           }
         }
       }
     },
     {
-      "eventId": "evt_11",
+      "eventId": 12,
       "type": "resolve_choice",
       "stateVersionBefore": 10,
       "stateVersionAfter": 11,
@@ -3148,7 +3148,7 @@
       }
     },
     {
-      "eventId": "evt_12",
+      "eventId": 13,
       "type": "resolve_choice",
       "stateVersionBefore": 11,
       "stateVersionAfter": 12,
@@ -3163,7 +3163,7 @@
         "serverLabel": "R&D",
         "choiceKind": "select_option",
         "choiceId": "card_implementation_corp_choice_rez_or_trash_ice_decision_11",
-        "targetCardDefinitionId": "onr_v1_238_data-wall-2-0",
+        "targetCardDefinitionId": 450,
         "targetIcePositionLabel": "ICE 1 in R&D",
         "rezCostPaid": 2,
         "targetServerLabel": "R&D",
@@ -3177,7 +3177,7 @@
           "rezCostPaid": 2
         },
         "targets": {
-          "targetCardDefinitionId": "onr_v1_238_data-wall-2-0",
+          "targetCardDefinitionId": 450,
           "serverLabel": "R&D",
           "targetServerLabel": "R&D",
           "choiceVisibility": "public"
@@ -3226,12 +3226,12 @@
               "choiceId": "card_implementation_corp_choice_rez_or_trash_ice_decision_11",
               "choiceVisibility": "public",
               "choiceKind": "select_option",
-              "cardId": "corp_onr_v1_238_data-wall-2-0_2",
+              "cardId": "c2s6",
               "abilityFamily": "run-access",
               "v1922RunnerEventAbility": "force_rez_or_trash_ice",
               "corpDecision": "rez_ice",
               "rezCostPaid": 2,
-              "targetCardDefinitionId": "onr_v1_238_data-wall-2-0",
+              "targetCardDefinitionId": 450,
               "targetServerLabel": "R&D",
               "targetIcePositionLabel": "ICE 1 in R&D"
             },
@@ -3241,7 +3241,7 @@
       }
     },
     {
-      "eventId": "evt_13",
+      "eventId": 14,
       "type": "draw_card",
       "stateVersionBefore": 12,
       "stateVersionAfter": 13,
@@ -3300,7 +3300,7 @@
       }
     },
     {
-      "eventId": "evt_14",
+      "eventId": 15,
       "type": "end_turn",
       "stateVersionBefore": 13,
       "stateVersionAfter": 14,
@@ -3339,7 +3339,7 @@
       }
     },
     {
-      "eventId": "evt_15",
+      "eventId": 16,
       "type": "mandatory_draw",
       "stateVersionBefore": 14,
       "stateVersionAfter": 15,
@@ -3401,7 +3401,7 @@
       }
     },
     {
-      "eventId": "evt_16",
+      "eventId": 17,
       "type": "install_card",
       "stateVersionBefore": 15,
       "stateVersionAfter": 16,
@@ -3440,15 +3440,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.install_card.corp_onr_v1_280_zombie_1.rd.corp_onr_v1_280_zombie_1.1",
+            "actionId": "corp.install_card.c31h.rd.c31h.1",
             "clientKnownStateVersion": 15
           },
           "legalAction": {
-            "actionId": "corp.install_card.corp_onr_v1_280_zombie_1.rd.corp_onr_v1_280_zombie_1.1",
+            "actionId": "corp.install_card.c31h.rd.c31h.1",
             "side": "corp",
             "type": "install_card",
             "label": "ICE vor R&D installieren",
-            "source": "corp_onr_v1_280_zombie_1",
+            "source": "c31h",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -3460,14 +3460,14 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 15,
             "payload": {
-              "cardId": "corp_onr_v1_280_zombie_1",
+              "cardId": "c31h",
               "serverId": "rd",
               "placement": "ice",
               "iceInstallBaseCost": 1,
               "iceInstallAdditionalCost": 0,
               "iceInstallReduction": 0,
               "iceInstallTotalCost": 1,
-              "postInstallRezQuoteCardId": "corp_onr_v1_280_zombie_1",
+              "postInstallRezQuoteCardId": "c31h",
               "postInstallRezQuoteTargetServerId": "rd",
               "postInstallRezQuoteExpiresAtStateVersion": 15,
               "postInstallRezQuoteComplete": true,
@@ -3476,7 +3476,7 @@
               "postInstallRezQuoteBaseCredits": 9,
               "postInstallRezQuoteFinalCredits": 9,
               "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"corp_onr_v1_280_zombie_1\",\"iceDefinitionId\":\"onr_v1_280_zombie\",\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":\"onr_v1_280_zombie\",\"sourceTitle\":\"Zombie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":\"onr_v1_280_zombie\",\"sourceTitle\":\"Zombie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":\"onr_v1_280_zombie\",\"sourceTitle\":\"Zombie\"}]}",
+              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c31h\",\"iceDefinitionId\":492,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":492,\"sourceTitle\":\"Zombie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":492,\"sourceTitle\":\"Zombie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":492,\"sourceTitle\":\"Zombie\"}]}",
               "effectKind": "install_card"
             }
           }
@@ -3484,7 +3484,7 @@
       }
     },
     {
-      "eventId": "evt_17",
+      "eventId": 18,
       "type": "play_operation",
       "stateVersionBefore": 16,
       "stateVersionAfter": 17,
@@ -3500,13 +3500,13 @@
         "turnActionOrdinalEnd": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+            "effectId": "502.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
             "amount": 3,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+            "sourceDefinitionId": 502,
             "sourceTitle": "Efficiency Experts"
           }
         ],
@@ -3523,7 +3523,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_v1_290_efficiency-experts",
+        "cardDefinitionId": 502,
         "title": "Efficiency Experts"
       },
       "privatePayload": {
@@ -3531,15 +3531,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_2.corp_onr_v1_290_efficiency-experts_2.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c33q.c33q.616",
             "clientKnownStateVersion": 16
           },
           "legalAction": {
-            "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_2.corp_onr_v1_290_efficiency-experts_2.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c33q.c33q.616",
             "side": "corp",
             "type": "play_operation",
             "label": "Efficiency Experts spielen",
-            "source": "corp_onr_v1_290_efficiency-experts_2",
+            "source": "c33q",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -3551,28 +3551,28 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 16,
             "abilityRef": {
-              "sourceCardInstanceId": "corp_onr_v1_290_efficiency-experts_2",
-              "sourceAbilityId": "onr_v1_290_efficiency-experts:abilities_on_play_gain_credits"
+              "sourceCardInstanceId": "c33q",
+              "sourceAbilityId": 616
             },
             "payload": {
-              "cardId": "corp_onr_v1_290_efficiency-experts_2",
+              "cardId": "c33q",
               "gainCreditsAmount": 3,
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_on_play_gain_credits",
-              "cardImplementationAbilityId": "onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+              "cardImplementationAbilityId": 616,
               "effectKind": "gain_credits",
               "gainedCredits": 3,
               "corpCreditsAfter": 12
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+                "effectId": "502.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
                 "amount": 3,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+                "sourceDefinitionId": 502,
                 "sourceTitle": "Efficiency Experts"
               }
             ]
@@ -3581,7 +3581,7 @@
       }
     },
     {
-      "eventId": "evt_18",
+      "eventId": 19,
       "type": "install_card",
       "stateVersionBefore": 17,
       "stateVersionAfter": 18,
@@ -3620,15 +3620,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.install_card.corp_onr_v1_279_wall-of-static_2.hq.corp_onr_v1_279_wall-of-static_2.0",
+            "actionId": "corp.install_card.c31a.hq.c31a.0",
             "clientKnownStateVersion": 17
           },
           "legalAction": {
-            "actionId": "corp.install_card.corp_onr_v1_279_wall-of-static_2.hq.corp_onr_v1_279_wall-of-static_2.0",
+            "actionId": "corp.install_card.c31a.hq.c31a.0",
             "side": "corp",
             "type": "install_card",
             "label": "ICE vor HQ installieren",
-            "source": "corp_onr_v1_279_wall-of-static_2",
+            "source": "c31a",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -3639,14 +3639,14 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 17,
             "payload": {
-              "cardId": "corp_onr_v1_279_wall-of-static_2",
+              "cardId": "c31a",
               "serverId": "hq",
               "placement": "ice",
               "iceInstallBaseCost": 0,
               "iceInstallAdditionalCost": 0,
               "iceInstallReduction": 0,
               "iceInstallTotalCost": 0,
-              "postInstallRezQuoteCardId": "corp_onr_v1_279_wall-of-static_2",
+              "postInstallRezQuoteCardId": "c31a",
               "postInstallRezQuoteTargetServerId": "hq",
               "postInstallRezQuoteExpiresAtStateVersion": 17,
               "postInstallRezQuoteComplete": true,
@@ -3655,7 +3655,7 @@
               "postInstallRezQuoteBaseCredits": 3,
               "postInstallRezQuoteFinalCredits": 3,
               "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"corp_onr_v1_279_wall-of-static_2\",\"iceDefinitionId\":\"onr_v1_279_wall-of-static\",\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":\"onr_v1_279_wall-of-static\",\"sourceTitle\":\"Wall of Static\"}]}",
+              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c31a\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
               "effectKind": "install_card"
             }
           }
@@ -3663,7 +3663,7 @@
       }
     },
     {
-      "eventId": "evt_19",
+      "eventId": 20,
       "type": "end_turn",
       "stateVersionBefore": 18,
       "stateVersionAfter": 19,
@@ -3676,13 +3676,13 @@
         "label": "Zug beenden",
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+            "effectId": "396.c2g1.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "runner",
             "amount": 2,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+            "sourceDefinitionId": 396,
             "sourceTitle": "Top Runners' Conference"
           }
         ],
@@ -3711,13 +3711,13 @@
             "expiresAtStateVersion": 18,
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "effectId": "396.c2g1.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
                 "amount": 2,
                 "reason": "start_of_turn",
-                "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+                "sourceDefinitionId": 396,
                 "sourceTitle": "Top Runners' Conference"
               }
             ]
@@ -3726,7 +3726,7 @@
       }
     },
     {
-      "eventId": "evt_20",
+      "eventId": 21,
       "type": "gain_credit",
       "stateVersionBefore": 19,
       "stateVersionAfter": 20,
@@ -3785,7 +3785,7 @@
       }
     },
     {
-      "eventId": "evt_21",
+      "eventId": 22,
       "type": "gain_credit",
       "stateVersionBefore": 20,
       "stateVersionAfter": 21,
@@ -3844,7 +3844,7 @@
       }
     },
     {
-      "eventId": "evt_22",
+      "eventId": 23,
       "type": "install_card",
       "stateVersionBefore": 21,
       "stateVersionAfter": 22,
@@ -3860,7 +3860,7 @@
         "turnActionOrdinalEnd": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.0.add_hosted_credits",
+            "effectId": "390.effect.0.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -3869,7 +3869,7 @@
             "addedCounterAmount": 12,
             "remainingCounters": 12,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract"
           }
         ],
@@ -3885,7 +3885,7 @@
         "remainingCounters": 12,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
-        "sourceDefinitionId": "onr_v1_178_short-term-contract",
+        "sourceDefinitionId": 390,
         "abilityFamily": "hosting-counters",
         "effectKind": "install_card",
         "amounts": {
@@ -3896,7 +3896,7 @@
           "hostedCreditsAfter": 12
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_178_short-term-contract"
+          "sourceDefinitionId": 390
         },
         "visibility": {
           "class": "public"
@@ -3909,7 +3909,7 @@
             "scope": {
               "kind": "public_card",
               "side": "runner",
-              "cardInstanceId": "runner_onr_v1_178_short-term-contract_2"
+              "cardInstanceId": "c2eq"
             },
             "before": 0,
             "amount": 12,
@@ -3928,7 +3928,7 @@
             "after": 12
           }
         ],
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "title": "Short-Term Contract"
       },
       "privatePayload": {
@@ -3936,15 +3936,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_178_short-term-contract_2.runner_onr_v1_178_short-term-contract_2",
+            "actionId": "runner.install_card.c2eq.c2eq",
             "clientKnownStateVersion": 21
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_178_short-term-contract_2.runner_onr_v1_178_short-term-contract_2",
+            "actionId": "runner.install_card.c2eq.c2eq",
             "side": "runner",
             "type": "install_card",
             "label": "Short-Term Contract installieren",
-            "source": "runner_onr_v1_178_short-term-contract_2",
+            "source": "c2eq",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -3966,7 +3966,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 21,
             "payload": {
-              "cardId": "runner_onr_v1_178_short-term-contract_2",
+              "cardId": "c2eq",
               "effectKind": "install_card",
               "installCostPaid": 1,
               "runnerInstallNormalCreditsPaid": 1,
@@ -3974,7 +3974,7 @@
               "runnerInstallRecurringCreditsPaid": 0,
               "runnerInstallTemporaryCreditsPaid": 0,
               "runnerCreditsAfter": 3,
-              "sourceDefinitionId": "onr_v1_178_short-term-contract",
+              "sourceDefinitionId": 390,
               "counterType": "bit",
               "hostedCreditsAdded": 12,
               "hostedCreditsAfter": 12,
@@ -3983,7 +3983,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_178_short-term-contract.effect.0.add_hosted_credits",
+                "effectId": "390.effect.0.add_hosted_credits",
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3992,7 +3992,7 @@
                 "addedCounterAmount": 12,
                 "remainingCounters": 12,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_178_short-term-contract",
+                "sourceDefinitionId": 390,
                 "sourceTitle": "Short-Term Contract"
               }
             ]
@@ -4001,7 +4001,7 @@
       }
     },
     {
-      "eventId": "evt_23",
+      "eventId": 24,
       "type": "activated_card_ability",
       "stateVersionBefore": 22,
       "stateVersionAfter": 23,
@@ -4017,7 +4017,7 @@
         "turnActionOrdinalEnd": 4,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            "effectId": "390.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -4026,12 +4026,12 @@
             "removedCounterAmount": 2,
             "remainingCounters": 10,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract"
           }
         ],
         "amount": 2,
-        "sourceDefinitionId": "onr_v1_178_short-term-contract",
+        "sourceDefinitionId": 390,
         "gainedCredits": 2,
         "runnerCreditsAfter": 5,
         "counterType": "bit",
@@ -4055,7 +4055,7 @@
           "hostedCreditsAfter": 10
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_178_short-term-contract"
+          "sourceDefinitionId": 390
         },
         "visibility": {
           "class": "public"
@@ -4068,7 +4068,7 @@
             "scope": {
               "kind": "public_card",
               "side": "runner",
-              "cardInstanceId": "runner_onr_v1_178_short-term-contract_2"
+              "cardInstanceId": "c2eq"
             },
             "before": 12,
             "amount": 2,
@@ -4087,7 +4087,7 @@
             "after": 10
           }
         ],
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "title": "Short-Term Contract"
       },
       "privatePayload": {
@@ -4095,15 +4095,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.activated_card_ability.runner_onr_v1_178_short-term-contract_2.runner_onr_v1_178_short-term-contract_2.activated.onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+            "actionId": "runner.activated_card_ability.c2eq.c2eq.activated.465",
             "clientKnownStateVersion": 22
           },
           "legalAction": {
-            "actionId": "runner.activated_card_ability.runner_onr_v1_178_short-term-contract_2.runner_onr_v1_178_short-term-contract_2.activated.onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+            "actionId": "runner.activated_card_ability.c2eq.c2eq.activated.465",
             "side": "runner",
             "type": "activated_card_ability",
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
-            "source": "runner_onr_v1_178_short-term-contract_2",
+            "source": "c2eq",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -4114,11 +4114,11 @@
             "visibility": "public",
             "expiresAtStateVersion": 22,
             "payload": {
-              "cardId": "runner_onr_v1_178_short-term-contract_2",
+              "cardId": "c2eq",
               "cardImplementationAbility": "activated",
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_activated_runner_main_take_hosted_credits",
-              "cardImplementationAbilityId": "onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+              "cardImplementationAbilityId": 465,
               "cardImplementationAbilityTiming": "runner_main",
               "cardImplementationAbilityLabel": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
               "gainCreditsAmount": 2,
@@ -4127,7 +4127,7 @@
               "cardImplementationHostedCreditCashOutMaxUses": 6,
               "hostedCreditTakeMode": "up_to_amount_if_available",
               "effectKind": "gain_credits",
-              "sourceDefinitionId": "onr_v1_178_short-term-contract",
+              "sourceDefinitionId": 390,
               "counterType": "bit",
               "hostedCreditsTaken": 2,
               "hostedCreditsAfter": 10,
@@ -4137,12 +4137,12 @@
               "runnerCreditsAfter": 5
             },
             "abilityRef": {
-              "sourceCardInstanceId": "runner_onr_v1_178_short-term-contract_2",
-              "sourceAbilityId": "onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits"
+              "sourceCardInstanceId": "c2eq",
+              "sourceAbilityId": 465
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+                "effectId": "390.effect.0.take_hosted_credits",
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4151,7 +4151,7 @@
                 "removedCounterAmount": 2,
                 "remainingCounters": 10,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_178_short-term-contract",
+                "sourceDefinitionId": 390,
                 "sourceTitle": "Short-Term Contract"
               }
             ]
@@ -4160,7 +4160,7 @@
       }
     },
     {
-      "eventId": "evt_24",
+      "eventId": 25,
       "type": "end_turn",
       "stateVersionBefore": 23,
       "stateVersionAfter": 24,
@@ -4199,7 +4199,7 @@
       }
     },
     {
-      "eventId": "evt_25",
+      "eventId": 26,
       "type": "mandatory_draw",
       "stateVersionBefore": 24,
       "stateVersionAfter": 25,
@@ -4261,7 +4261,7 @@
       }
     },
     {
-      "eventId": "evt_26",
+      "eventId": 27,
       "type": "play_operation",
       "stateVersionBefore": 25,
       "stateVersionAfter": 26,
@@ -4277,13 +4277,13 @@
         "turnActionOrdinalEnd": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_281_accounts-receivable.effect.0.gain_credits",
+            "effectId": "493.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
             "amount": 9,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_281_accounts-receivable",
+            "sourceDefinitionId": 493,
             "sourceTitle": "Accounts Receivable"
           }
         ],
@@ -4300,7 +4300,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_v1_281_accounts-receivable",
+        "cardDefinitionId": 493,
         "title": "Accounts Receivable"
       },
       "privatePayload": {
@@ -4308,15 +4308,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_1.corp_onr_v1_281_accounts-receivable_1.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c31p.c31p.607",
             "clientKnownStateVersion": 25
           },
           "legalAction": {
-            "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_1.corp_onr_v1_281_accounts-receivable_1.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c31p.c31p.607",
             "side": "corp",
             "type": "play_operation",
             "label": "Accounts Receivable spielen",
-            "source": "corp_onr_v1_281_accounts-receivable_1",
+            "source": "c31p",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -4328,28 +4328,28 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 25,
             "abilityRef": {
-              "sourceCardInstanceId": "corp_onr_v1_281_accounts-receivable_1",
-              "sourceAbilityId": "onr_v1_281_accounts-receivable:abilities_on_play_gain_credits"
+              "sourceCardInstanceId": "c31p",
+              "sourceAbilityId": 607
             },
             "payload": {
-              "cardId": "corp_onr_v1_281_accounts-receivable_1",
+              "cardId": "c31p",
               "gainCreditsAmount": 9,
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_on_play_gain_credits",
-              "cardImplementationAbilityId": "onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+              "cardImplementationAbilityId": 607,
               "effectKind": "gain_credits",
               "gainedCredits": 9,
               "corpCreditsAfter": 16
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_281_accounts-receivable.effect.0.gain_credits",
+                "effectId": "493.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
                 "amount": 9,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_281_accounts-receivable",
+                "sourceDefinitionId": 493,
                 "sourceTitle": "Accounts Receivable"
               }
             ]
@@ -4358,7 +4358,7 @@
       }
     },
     {
-      "eventId": "evt_27",
+      "eventId": 28,
       "type": "gain_credit",
       "stateVersionBefore": 26,
       "stateVersionAfter": 27,
@@ -4417,7 +4417,7 @@
       }
     },
     {
-      "eventId": "evt_28",
+      "eventId": 29,
       "type": "gain_credit",
       "stateVersionBefore": 27,
       "stateVersionAfter": 28,
@@ -4476,7 +4476,7 @@
       }
     },
     {
-      "eventId": "evt_29",
+      "eventId": 30,
       "type": "end_turn",
       "stateVersionBefore": 28,
       "stateVersionAfter": 29,
@@ -4489,13 +4489,13 @@
         "label": "Zug beenden",
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+            "effectId": "396.c2g1.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "runner",
             "amount": 2,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+            "sourceDefinitionId": 396,
             "sourceTitle": "Top Runners' Conference"
           }
         ],
@@ -4524,13 +4524,13 @@
             "expiresAtStateVersion": 28,
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "effectId": "396.c2g1.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
                 "amount": 2,
                 "reason": "start_of_turn",
-                "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+                "sourceDefinitionId": 396,
                 "sourceTitle": "Top Runners' Conference"
               }
             ]
@@ -4539,7 +4539,7 @@
       }
     },
     {
-      "eventId": "evt_30",
+      "eventId": 31,
       "type": "activated_card_ability",
       "stateVersionBefore": 29,
       "stateVersionAfter": 30,
@@ -4555,7 +4555,7 @@
         "turnActionOrdinalEnd": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            "effectId": "390.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -4564,12 +4564,12 @@
             "removedCounterAmount": 2,
             "remainingCounters": 8,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract"
           }
         ],
         "amount": 2,
-        "sourceDefinitionId": "onr_v1_178_short-term-contract",
+        "sourceDefinitionId": 390,
         "gainedCredits": 2,
         "runnerCreditsAfter": 9,
         "counterType": "bit",
@@ -4593,7 +4593,7 @@
           "hostedCreditsAfter": 8
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_178_short-term-contract"
+          "sourceDefinitionId": 390
         },
         "visibility": {
           "class": "public"
@@ -4606,7 +4606,7 @@
             "scope": {
               "kind": "public_card",
               "side": "runner",
-              "cardInstanceId": "runner_onr_v1_178_short-term-contract_2"
+              "cardInstanceId": "c2eq"
             },
             "before": 10,
             "amount": 2,
@@ -4625,7 +4625,7 @@
             "after": 8
           }
         ],
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "title": "Short-Term Contract"
       },
       "privatePayload": {
@@ -4633,15 +4633,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.activated_card_ability.runner_onr_v1_178_short-term-contract_2.runner_onr_v1_178_short-term-contract_2.activated.onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+            "actionId": "runner.activated_card_ability.c2eq.c2eq.activated.465",
             "clientKnownStateVersion": 29
           },
           "legalAction": {
-            "actionId": "runner.activated_card_ability.runner_onr_v1_178_short-term-contract_2.runner_onr_v1_178_short-term-contract_2.activated.onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+            "actionId": "runner.activated_card_ability.c2eq.c2eq.activated.465",
             "side": "runner",
             "type": "activated_card_ability",
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
-            "source": "runner_onr_v1_178_short-term-contract_2",
+            "source": "c2eq",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -4652,11 +4652,11 @@
             "visibility": "public",
             "expiresAtStateVersion": 29,
             "payload": {
-              "cardId": "runner_onr_v1_178_short-term-contract_2",
+              "cardId": "c2eq",
               "cardImplementationAbility": "activated",
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_activated_runner_main_take_hosted_credits",
-              "cardImplementationAbilityId": "onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+              "cardImplementationAbilityId": 465,
               "cardImplementationAbilityTiming": "runner_main",
               "cardImplementationAbilityLabel": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
               "gainCreditsAmount": 2,
@@ -4665,7 +4665,7 @@
               "cardImplementationHostedCreditCashOutMaxUses": 5,
               "hostedCreditTakeMode": "up_to_amount_if_available",
               "effectKind": "gain_credits",
-              "sourceDefinitionId": "onr_v1_178_short-term-contract",
+              "sourceDefinitionId": 390,
               "counterType": "bit",
               "hostedCreditsTaken": 2,
               "hostedCreditsAfter": 8,
@@ -4675,12 +4675,12 @@
               "runnerCreditsAfter": 9
             },
             "abilityRef": {
-              "sourceCardInstanceId": "runner_onr_v1_178_short-term-contract_2",
-              "sourceAbilityId": "onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits"
+              "sourceCardInstanceId": "c2eq",
+              "sourceAbilityId": 465
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+                "effectId": "390.effect.0.take_hosted_credits",
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4689,7 +4689,7 @@
                 "removedCounterAmount": 2,
                 "remainingCounters": 8,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_178_short-term-contract",
+                "sourceDefinitionId": 390,
                 "sourceTitle": "Short-Term Contract"
               }
             ]
@@ -4698,7 +4698,7 @@
       }
     },
     {
-      "eventId": "evt_31",
+      "eventId": 32,
       "type": "activated_card_ability",
       "stateVersionBefore": 30,
       "stateVersionAfter": 31,
@@ -4714,7 +4714,7 @@
         "turnActionOrdinalEnd": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            "effectId": "390.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -4723,12 +4723,12 @@
             "removedCounterAmount": 2,
             "remainingCounters": 6,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract"
           }
         ],
         "amount": 2,
-        "sourceDefinitionId": "onr_v1_178_short-term-contract",
+        "sourceDefinitionId": 390,
         "gainedCredits": 2,
         "runnerCreditsAfter": 11,
         "counterType": "bit",
@@ -4752,7 +4752,7 @@
           "hostedCreditsAfter": 6
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_178_short-term-contract"
+          "sourceDefinitionId": 390
         },
         "visibility": {
           "class": "public"
@@ -4765,7 +4765,7 @@
             "scope": {
               "kind": "public_card",
               "side": "runner",
-              "cardInstanceId": "runner_onr_v1_178_short-term-contract_2"
+              "cardInstanceId": "c2eq"
             },
             "before": 8,
             "amount": 2,
@@ -4784,7 +4784,7 @@
             "after": 6
           }
         ],
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "title": "Short-Term Contract"
       },
       "privatePayload": {
@@ -4792,15 +4792,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.activated_card_ability.runner_onr_v1_178_short-term-contract_2.runner_onr_v1_178_short-term-contract_2.activated.onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+            "actionId": "runner.activated_card_ability.c2eq.c2eq.activated.465",
             "clientKnownStateVersion": 30
           },
           "legalAction": {
-            "actionId": "runner.activated_card_ability.runner_onr_v1_178_short-term-contract_2.runner_onr_v1_178_short-term-contract_2.activated.onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+            "actionId": "runner.activated_card_ability.c2eq.c2eq.activated.465",
             "side": "runner",
             "type": "activated_card_ability",
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
-            "source": "runner_onr_v1_178_short-term-contract_2",
+            "source": "c2eq",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -4811,11 +4811,11 @@
             "visibility": "public",
             "expiresAtStateVersion": 30,
             "payload": {
-              "cardId": "runner_onr_v1_178_short-term-contract_2",
+              "cardId": "c2eq",
               "cardImplementationAbility": "activated",
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_activated_runner_main_take_hosted_credits",
-              "cardImplementationAbilityId": "onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+              "cardImplementationAbilityId": 465,
               "cardImplementationAbilityTiming": "runner_main",
               "cardImplementationAbilityLabel": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
               "gainCreditsAmount": 2,
@@ -4824,7 +4824,7 @@
               "cardImplementationHostedCreditCashOutMaxUses": 4,
               "hostedCreditTakeMode": "up_to_amount_if_available",
               "effectKind": "gain_credits",
-              "sourceDefinitionId": "onr_v1_178_short-term-contract",
+              "sourceDefinitionId": 390,
               "counterType": "bit",
               "hostedCreditsTaken": 2,
               "hostedCreditsAfter": 6,
@@ -4834,12 +4834,12 @@
               "runnerCreditsAfter": 11
             },
             "abilityRef": {
-              "sourceCardInstanceId": "runner_onr_v1_178_short-term-contract_2",
-              "sourceAbilityId": "onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits"
+              "sourceCardInstanceId": "c2eq",
+              "sourceAbilityId": 465
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+                "effectId": "390.effect.0.take_hosted_credits",
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4848,7 +4848,7 @@
                 "removedCounterAmount": 2,
                 "remainingCounters": 6,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_178_short-term-contract",
+                "sourceDefinitionId": 390,
                 "sourceTitle": "Short-Term Contract"
               }
             ]
@@ -4857,7 +4857,7 @@
       }
     },
     {
-      "eventId": "evt_32",
+      "eventId": 33,
       "type": "gain_credit",
       "stateVersionBefore": 31,
       "stateVersionAfter": 32,
@@ -4916,7 +4916,7 @@
       }
     },
     {
-      "eventId": "evt_33",
+      "eventId": 34,
       "type": "draw_card",
       "stateVersionBefore": 32,
       "stateVersionAfter": 33,
@@ -4975,7 +4975,7 @@
       }
     },
     {
-      "eventId": "evt_34",
+      "eventId": 35,
       "type": "end_turn",
       "stateVersionBefore": 33,
       "stateVersionAfter": 34,
@@ -5014,7 +5014,7 @@
       }
     },
     {
-      "eventId": "evt_35",
+      "eventId": 36,
       "type": "mandatory_draw",
       "stateVersionBefore": 34,
       "stateVersionAfter": 35,
@@ -5076,7 +5076,7 @@
       }
     },
     {
-      "eventId": "evt_36",
+      "eventId": 37,
       "type": "gain_credit",
       "stateVersionBefore": 35,
       "stateVersionAfter": 36,
@@ -5135,7 +5135,7 @@
       }
     },
     {
-      "eventId": "evt_37",
+      "eventId": 38,
       "type": "gain_credit",
       "stateVersionBefore": 36,
       "stateVersionAfter": 37,
@@ -5194,7 +5194,7 @@
       }
     },
     {
-      "eventId": "evt_38",
+      "eventId": 39,
       "type": "gain_credit",
       "stateVersionBefore": 37,
       "stateVersionAfter": 38,
@@ -5253,7 +5253,7 @@
       }
     },
     {
-      "eventId": "evt_39",
+      "eventId": 40,
       "type": "end_turn",
       "stateVersionBefore": 38,
       "stateVersionAfter": 39,
@@ -5266,13 +5266,13 @@
         "label": "Zug beenden",
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+            "effectId": "396.c2g1.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "runner",
             "amount": 2,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+            "sourceDefinitionId": 396,
             "sourceTitle": "Top Runners' Conference"
           }
         ],
@@ -5301,13 +5301,13 @@
             "expiresAtStateVersion": 38,
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "effectId": "396.c2g1.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
                 "amount": 2,
                 "reason": "start_of_turn",
-                "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+                "sourceDefinitionId": 396,
                 "sourceTitle": "Top Runners' Conference"
               }
             ]
@@ -5316,7 +5316,7 @@
       }
     },
     {
-      "eventId": "evt_40",
+      "eventId": 41,
       "type": "start_run",
       "stateVersionBefore": 39,
       "stateVersionAfter": 40,
@@ -5332,13 +5332,13 @@
         "turnActionOrdinalEnd": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.trash_source",
+            "effectId": "396.c2g1.effect.0.trash_source",
             "kind": "trash_source",
             "visibility": "public",
             "side": "runner",
             "amount": 1,
             "reason": "run_start",
-            "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+            "sourceDefinitionId": 396,
             "sourceTitle": "Top Runners' Conference"
           }
         ],
@@ -5399,13 +5399,13 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.trash_source",
+                "effectId": "396.c2g1.effect.0.trash_source",
                 "kind": "trash_source",
                 "visibility": "public",
                 "side": "runner",
                 "amount": 1,
                 "reason": "run_start",
-                "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+                "sourceDefinitionId": 396,
                 "sourceTitle": "Top Runners' Conference"
               }
             ]
@@ -5414,7 +5414,7 @@
       }
     },
     {
-      "eventId": "evt_41",
+      "eventId": 42,
       "type": "rez_ice",
       "stateVersionBefore": 40,
       "stateVersionAfter": 41,
@@ -5438,7 +5438,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_v1_280_zombie",
+        "cardDefinitionId": 492,
         "title": "Zombie"
       },
       "privatePayload": {
@@ -5446,15 +5446,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.rez_ice.corp_onr_v1_280_zombie_1.corp_onr_v1_280_zombie_1",
+            "actionId": "corp.rez_ice.c31h.c31h",
             "clientKnownStateVersion": 40
           },
           "legalAction": {
-            "actionId": "corp.rez_ice.corp_onr_v1_280_zombie_1.corp_onr_v1_280_zombie_1",
+            "actionId": "corp.rez_ice.c31h.c31h",
             "side": "corp",
             "type": "rez_ice",
             "label": "Zombie rezzen",
-            "source": "corp_onr_v1_280_zombie_1",
+            "source": "c31h",
             "timingPoint": "run.approach_ice",
             "costs": [
               {
@@ -5465,7 +5465,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 40,
             "payload": {
-              "cardId": "corp_onr_v1_280_zombie_1",
+              "cardId": "c31h",
               "abilityFamily": "run-access",
               "encounteredBlackIceCount": 1
             }
@@ -5474,7 +5474,7 @@
       }
     },
     {
-      "eventId": "evt_42",
+      "eventId": 43,
       "type": "continue_run",
       "stateVersionBefore": 41,
       "stateVersionAfter": 42,
@@ -5492,7 +5492,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_v1_280_zombie",
+            "sourceDefinitionId": 492,
             "sourceTitle": "Zombie",
             "subroutineIndex": 0,
             "subroutineType": "do_damage",
@@ -5506,7 +5506,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_v1_280_zombie",
+            "sourceDefinitionId": 492,
             "sourceTitle": "Zombie",
             "subroutineIndex": 1,
             "subroutineType": "do_damage",
@@ -5520,7 +5520,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_v1_280_zombie",
+            "sourceDefinitionId": 492,
             "sourceTitle": "Zombie",
             "subroutineIndex": 2,
             "subroutineType": "end_the_run",
@@ -5540,14 +5540,14 @@
         "runnerMaxHandSizeAfter": 3,
         "runnerGripBefore": 3,
         "runnerGripAfter": 1,
-        "sourceDefinitionId": "onr_v1_280_zombie",
+        "sourceDefinitionId": 492,
         "abilityFamily": "run-access",
         "effectKind": "damage",
         "amounts": {
           "damageAmount": 2
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_280_zombie"
+          "sourceDefinitionId": 492
         },
         "visibility": {
           "class": "hidden_info_barrier"
@@ -5574,7 +5574,7 @@
             "expiresAtStateVersion": 41,
             "payload": {
               "encounterContinue": true,
-              "sourceDefinitionId": "onr_v1_280_zombie",
+              "sourceDefinitionId": 492,
               "unbrokenSubroutineCount": 3,
               "encounterWillEndRun": true,
               "encounterSourceWillTrashAtEndOfTurn": false,
@@ -5600,7 +5600,7 @@
                 "visibility": "public",
                 "side": "runner",
                 "reason": "ice_subroutine",
-                "sourceDefinitionId": "onr_v1_280_zombie",
+                "sourceDefinitionId": 492,
                 "sourceTitle": "Zombie",
                 "subroutineIndex": 0,
                 "subroutineType": "do_damage",
@@ -5614,7 +5614,7 @@
                 "visibility": "public",
                 "side": "runner",
                 "reason": "ice_subroutine",
-                "sourceDefinitionId": "onr_v1_280_zombie",
+                "sourceDefinitionId": 492,
                 "sourceTitle": "Zombie",
                 "subroutineIndex": 1,
                 "subroutineType": "do_damage",
@@ -5628,7 +5628,7 @@
                 "visibility": "public",
                 "side": "runner",
                 "reason": "ice_subroutine",
-                "sourceDefinitionId": "onr_v1_280_zombie",
+                "sourceDefinitionId": 492,
                 "sourceTitle": "Zombie",
                 "subroutineIndex": 2,
                 "subroutineType": "end_the_run",
@@ -5640,7 +5640,7 @@
       }
     },
     {
-      "eventId": "evt_43",
+      "eventId": 44,
       "type": "draw_card",
       "stateVersionBefore": 42,
       "stateVersionAfter": 43,
@@ -5699,7 +5699,7 @@
       }
     },
     {
-      "eventId": "evt_44",
+      "eventId": 45,
       "type": "draw_card",
       "stateVersionBefore": 43,
       "stateVersionAfter": 44,
@@ -5758,7 +5758,7 @@
       }
     },
     {
-      "eventId": "evt_45",
+      "eventId": 46,
       "type": "install_card",
       "stateVersionBefore": 44,
       "stateVersionAfter": 45,
@@ -5786,7 +5786,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_054_raptor",
+        "cardDefinitionId": 266,
         "title": "Raptor"
       },
       "privatePayload": {
@@ -5794,15 +5794,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_054_raptor_2.runner_onr_v1_054_raptor_2",
+            "actionId": "runner.install_card.c1n6.c1n6",
             "clientKnownStateVersion": 44
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_054_raptor_2.runner_onr_v1_054_raptor_2",
+            "actionId": "runner.install_card.c1n6.c1n6",
             "side": "runner",
             "type": "install_card",
             "label": "Raptor installieren",
-            "source": "runner_onr_v1_054_raptor_2",
+            "source": "c1n6",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -5814,7 +5814,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 44,
             "payload": {
-              "cardId": "runner_onr_v1_054_raptor_2",
+              "cardId": "c1n6",
               "effectKind": "install_card",
               "installCostPaid": 1,
               "runnerInstallNormalCreditsPaid": 1,
@@ -5828,7 +5828,7 @@
       }
     },
     {
-      "eventId": "evt_46",
+      "eventId": 47,
       "type": "end_turn",
       "stateVersionBefore": 45,
       "stateVersionAfter": 46,
@@ -5867,7 +5867,7 @@
       }
     },
     {
-      "eventId": "evt_47",
+      "eventId": 48,
       "type": "mandatory_draw",
       "stateVersionBefore": 46,
       "stateVersionAfter": 47,
@@ -5929,7 +5929,7 @@
       }
     },
     {
-      "eventId": "evt_48",
+      "eventId": 49,
       "type": "install_card",
       "stateVersionBefore": 47,
       "stateVersionAfter": 48,
@@ -5968,15 +5968,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.install_card.corp_onr_proteus_029_marionette_2.rd.corp_onr_proteus_029_marionette_2.2",
+            "actionId": "corp.install_card.cji.rd.cji.2",
             "clientKnownStateVersion": 47
           },
           "legalAction": {
-            "actionId": "corp.install_card.corp_onr_proteus_029_marionette_2.rd.corp_onr_proteus_029_marionette_2.2",
+            "actionId": "corp.install_card.cji.rd.cji.2",
             "side": "corp",
             "type": "install_card",
             "label": "ICE vor R&D installieren",
-            "source": "corp_onr_proteus_029_marionette_2",
+            "source": "cji",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -5988,14 +5988,14 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 47,
             "payload": {
-              "cardId": "corp_onr_proteus_029_marionette_2",
+              "cardId": "cji",
               "serverId": "rd",
               "placement": "ice",
               "iceInstallBaseCost": 2,
               "iceInstallAdditionalCost": 0,
               "iceInstallReduction": 0,
               "iceInstallTotalCost": 2,
-              "postInstallRezQuoteCardId": "corp_onr_proteus_029_marionette_2",
+              "postInstallRezQuoteCardId": "cji",
               "postInstallRezQuoteTargetServerId": "rd",
               "postInstallRezQuoteExpiresAtStateVersion": 47,
               "postInstallRezQuoteComplete": true,
@@ -6004,7 +6004,7 @@
               "postInstallRezQuoteBaseCredits": 3,
               "postInstallRezQuoteFinalCredits": 3,
               "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"corp_onr_proteus_029_marionette_2\",\"iceDefinitionId\":\"onr_proteus_029_marionette\",\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":\"onr_proteus_029_marionette\",\"sourceTitle\":\"Marionette\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":\"onr_proteus_029_marionette\",\"sourceTitle\":\"Marionette\"}]}",
+              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cji\",\"iceDefinitionId\":87,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":87,\"sourceTitle\":\"Marionette\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":87,\"sourceTitle\":\"Marionette\"}]}",
               "effectKind": "install_card"
             }
           }
@@ -6012,7 +6012,7 @@
       }
     },
     {
-      "eventId": "evt_49",
+      "eventId": 50,
       "type": "draw_card",
       "stateVersionBefore": 48,
       "stateVersionAfter": 49,
@@ -6062,7 +6062,7 @@
       }
     },
     {
-      "eventId": "evt_50",
+      "eventId": 51,
       "type": "gain_credit",
       "stateVersionBefore": 49,
       "stateVersionAfter": 50,
@@ -6121,7 +6121,7 @@
       }
     },
     {
-      "eventId": "evt_51",
+      "eventId": 52,
       "type": "end_turn",
       "stateVersionBefore": 50,
       "stateVersionAfter": 51,
@@ -6160,7 +6160,7 @@
       }
     },
     {
-      "eventId": "evt_52",
+      "eventId": 53,
       "type": "draw_card",
       "stateVersionBefore": 51,
       "stateVersionAfter": 52,
@@ -6219,7 +6219,7 @@
       }
     },
     {
-      "eventId": "evt_53",
+      "eventId": 54,
       "type": "start_run",
       "stateVersionBefore": 52,
       "stateVersionAfter": 53,
@@ -6293,7 +6293,7 @@
       }
     },
     {
-      "eventId": "evt_54",
+      "eventId": 55,
       "type": "decline_rez",
       "stateVersionBefore": 53,
       "stateVersionAfter": 54,
@@ -6340,7 +6340,7 @@
       }
     },
     {
-      "eventId": "evt_55",
+      "eventId": 56,
       "type": "continue_run",
       "stateVersionBefore": 54,
       "stateVersionAfter": 55,
@@ -6388,7 +6388,7 @@
             "expiresAtStateVersion": 54,
             "payload": {
               "serverId": "hq",
-              "breachId": "run_53.breach",
+              "breachId": "53.breach",
               "baseAccessCount": 1,
               "installedAccessBonus": 0,
               "effectiveAccessCount": 1
@@ -6398,7 +6398,7 @@
       }
     },
     {
-      "eventId": "evt_56",
+      "eventId": 57,
       "type": "access_card",
       "stateVersionBefore": 55,
       "stateVersionAfter": 56,
@@ -6422,7 +6422,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_v1_358_dr-dreff",
+        "cardDefinitionId": 570,
         "title": "Dr. Dreff"
       },
       "privatePayload": {
@@ -6445,9 +6445,9 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 55,
             "payload": {
-              "accessedCardId": "corp_onr_v1_358_dr-dreff_2",
+              "accessedCardId": "c3iu",
               "serverId": "hq",
-              "breachId": "run_53.breach",
+              "breachId": "53.breach",
               "accessIndex": 0,
               "accessOrigin": "hq",
               "baseAccessCount": 1,
@@ -6459,7 +6459,7 @@
       }
     },
     {
-      "eventId": "evt_57",
+      "eventId": 58,
       "type": "trash_accessed_card",
       "stateVersionBefore": 56,
       "stateVersionAfter": 57,
@@ -6483,7 +6483,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_v1_358_dr-dreff",
+        "cardDefinitionId": 570,
         "title": "Dr. Dreff"
       },
       "privatePayload": {
@@ -6491,15 +6491,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.trash_accessed_card.corp_onr_v1_358_dr-dreff_2.3",
+            "actionId": "runner.trash_accessed_card.c3iu.3",
             "clientKnownStateVersion": 56
           },
           "legalAction": {
-            "actionId": "runner.trash_accessed_card.corp_onr_v1_358_dr-dreff_2.3",
+            "actionId": "runner.trash_accessed_card.c3iu.3",
             "side": "runner",
             "type": "trash_accessed_card",
             "label": "Dr. Dreff trashen",
-            "source": "corp_onr_v1_358_dr-dreff_2",
+            "source": "c3iu",
             "timingPoint": "access.resolve_card",
             "costs": [
               {
@@ -6516,7 +6516,7 @@
               "abilityFamily": "run-access",
               "effectKind": "trash_card",
               "serverId": "hq",
-              "breachId": "run_53.breach",
+              "breachId": "53.breach",
               "accessIndex": 0,
               "accessOrigin": "hq"
             }
@@ -6525,7 +6525,7 @@
       }
     },
     {
-      "eventId": "evt_58",
+      "eventId": 59,
       "type": "start_run",
       "stateVersionBefore": 57,
       "stateVersionAfter": 58,
@@ -6599,7 +6599,7 @@
       }
     },
     {
-      "eventId": "evt_59",
+      "eventId": 60,
       "type": "decline_rez",
       "stateVersionBefore": 58,
       "stateVersionAfter": 59,
@@ -6646,7 +6646,7 @@
       }
     },
     {
-      "eventId": "evt_60",
+      "eventId": 61,
       "type": "continue_run",
       "stateVersionBefore": 59,
       "stateVersionAfter": 60,
@@ -6694,7 +6694,7 @@
             "expiresAtStateVersion": 59,
             "payload": {
               "serverId": "hq",
-              "breachId": "run_58.breach",
+              "breachId": "58.breach",
               "baseAccessCount": 1,
               "installedAccessBonus": 0,
               "effectiveAccessCount": 1
@@ -6704,7 +6704,7 @@
       }
     },
     {
-      "eventId": "evt_61",
+      "eventId": 62,
       "type": "access_card",
       "stateVersionBefore": 60,
       "stateVersionAfter": 61,
@@ -6727,7 +6727,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_proteus_015_colonel-failure",
+        "cardDefinitionId": 73,
         "title": "Colonel Failure"
       },
       "privatePayload": {
@@ -6750,9 +6750,9 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 60,
             "payload": {
-              "accessedCardId": "corp_onr_proteus_015_colonel-failure_1",
+              "accessedCardId": "cgd",
               "serverId": "hq",
-              "breachId": "run_58.breach",
+              "breachId": "58.breach",
               "accessIndex": 0,
               "accessOrigin": "hq",
               "baseAccessCount": 1,
@@ -6764,7 +6764,7 @@
       }
     },
     {
-      "eventId": "evt_62",
+      "eventId": 63,
       "type": "install_card",
       "stateVersionBefore": 61,
       "stateVersionAfter": 62,
@@ -6780,7 +6780,7 @@
         "turnActionOrdinalEnd": 4,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_075_zetatech-software-installer.effect.0.add_hosted_credits",
+            "effectId": "287.effect.0.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -6789,7 +6789,7 @@
             "addedCounterAmount": 2,
             "remainingCounters": 2,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_075_zetatech-software-installer",
+            "sourceDefinitionId": 287,
             "sourceTitle": "Zetatech Software Installer"
           }
         ],
@@ -6805,7 +6805,7 @@
         "remainingCounters": 2,
         "hostedCreditsAdded": 2,
         "hostedCreditsAfter": 2,
-        "sourceDefinitionId": "onr_v1_075_zetatech-software-installer",
+        "sourceDefinitionId": 287,
         "abilityFamily": "hosting-counters",
         "effectKind": "install_card",
         "amounts": {
@@ -6816,7 +6816,7 @@
           "hostedCreditsAfter": 2
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_075_zetatech-software-installer"
+          "sourceDefinitionId": 287
         },
         "visibility": {
           "class": "public"
@@ -6829,7 +6829,7 @@
             "scope": {
               "kind": "public_card",
               "side": "runner",
-              "cardInstanceId": "runner_onr_v1_075_zetatech-software-installer_1"
+              "cardInstanceId": "c1rt"
             },
             "before": 0,
             "amount": 2,
@@ -6848,7 +6848,7 @@
             "after": 2
           }
         ],
-        "cardDefinitionId": "onr_v1_075_zetatech-software-installer",
+        "cardDefinitionId": 287,
         "title": "Zetatech Software Installer"
       },
       "privatePayload": {
@@ -6856,15 +6856,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_075_zetatech-software-installer_1.runner_onr_v1_075_zetatech-software-installer_1",
+            "actionId": "runner.install_card.c1rt.c1rt",
             "clientKnownStateVersion": 61
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_075_zetatech-software-installer_1.runner_onr_v1_075_zetatech-software-installer_1",
+            "actionId": "runner.install_card.c1rt.c1rt",
             "side": "runner",
             "type": "install_card",
             "label": "Zetatech Software Installer installieren",
-            "source": "runner_onr_v1_075_zetatech-software-installer_1",
+            "source": "c1rt",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -6876,7 +6876,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 61,
             "payload": {
-              "cardId": "runner_onr_v1_075_zetatech-software-installer_1",
+              "cardId": "c1rt",
               "effectKind": "install_card",
               "installCostPaid": 0,
               "runnerInstallNormalCreditsPaid": 0,
@@ -6884,7 +6884,7 @@
               "runnerInstallRecurringCreditsPaid": 0,
               "runnerInstallTemporaryCreditsPaid": 0,
               "runnerCreditsAfter": 10,
-              "sourceDefinitionId": "onr_v1_075_zetatech-software-installer",
+              "sourceDefinitionId": 287,
               "counterType": "bit",
               "hostedCreditsAdded": 2,
               "hostedCreditsAfter": 2,
@@ -6893,7 +6893,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_075_zetatech-software-installer.effect.0.add_hosted_credits",
+                "effectId": "287.effect.0.add_hosted_credits",
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6902,7 +6902,7 @@
                 "addedCounterAmount": 2,
                 "remainingCounters": 2,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_075_zetatech-software-installer",
+                "sourceDefinitionId": 287,
                 "sourceTitle": "Zetatech Software Installer"
               }
             ]
@@ -6911,7 +6911,7 @@
       }
     },
     {
-      "eventId": "evt_63",
+      "eventId": 64,
       "type": "end_turn",
       "stateVersionBefore": 62,
       "stateVersionAfter": 63,
@@ -6950,7 +6950,7 @@
       }
     },
     {
-      "eventId": "evt_64",
+      "eventId": 65,
       "type": "mandatory_draw",
       "stateVersionBefore": 63,
       "stateVersionAfter": 64,
@@ -7012,7 +7012,7 @@
       }
     },
     {
-      "eventId": "evt_65",
+      "eventId": 66,
       "type": "gain_credit",
       "stateVersionBefore": 64,
       "stateVersionAfter": 65,
@@ -7071,7 +7071,7 @@
       }
     },
     {
-      "eventId": "evt_66",
+      "eventId": 67,
       "type": "gain_credit",
       "stateVersionBefore": 65,
       "stateVersionAfter": 66,
@@ -7130,7 +7130,7 @@
       }
     },
     {
-      "eventId": "evt_67",
+      "eventId": 68,
       "type": "gain_credit",
       "stateVersionBefore": 66,
       "stateVersionAfter": 67,
@@ -7189,7 +7189,7 @@
       }
     },
     {
-      "eventId": "evt_68",
+      "eventId": 69,
       "type": "end_turn",
       "stateVersionBefore": 67,
       "stateVersionAfter": 68,
@@ -7228,7 +7228,7 @@
       }
     },
     {
-      "eventId": "evt_69",
+      "eventId": 70,
       "type": "draw_card",
       "stateVersionBefore": 68,
       "stateVersionAfter": 69,
@@ -7287,7 +7287,7 @@
       }
     },
     {
-      "eventId": "evt_70",
+      "eventId": 71,
       "type": "start_run",
       "stateVersionBefore": 69,
       "stateVersionAfter": 70,
@@ -7361,7 +7361,7 @@
       }
     },
     {
-      "eventId": "evt_71",
+      "eventId": 72,
       "type": "decline_rez",
       "stateVersionBefore": 70,
       "stateVersionAfter": 71,
@@ -7408,7 +7408,7 @@
       }
     },
     {
-      "eventId": "evt_72",
+      "eventId": 73,
       "type": "continue_run",
       "stateVersionBefore": 71,
       "stateVersionAfter": 72,
@@ -7456,7 +7456,7 @@
             "expiresAtStateVersion": 71,
             "payload": {
               "serverId": "hq",
-              "breachId": "run_70.breach",
+              "breachId": "70.breach",
               "baseAccessCount": 1,
               "installedAccessBonus": 0,
               "effectiveAccessCount": 1
@@ -7466,7 +7466,7 @@
       }
     },
     {
-      "eventId": "evt_73",
+      "eventId": 74,
       "type": "access_card",
       "stateVersionBefore": 72,
       "stateVersionAfter": 73,
@@ -7489,7 +7489,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_classic_011_glacier",
+        "cardDefinitionId": 15,
         "title": "Glacier"
       },
       "privatePayload": {
@@ -7512,9 +7512,9 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 72,
             "payload": {
-              "accessedCardId": "corp_onr_classic_011_glacier_2",
+              "accessedCardId": "c3i",
               "serverId": "hq",
-              "breachId": "run_70.breach",
+              "breachId": "70.breach",
               "accessIndex": 0,
               "accessOrigin": "hq",
               "baseAccessCount": 1,
@@ -7526,7 +7526,7 @@
       }
     },
     {
-      "eventId": "evt_74",
+      "eventId": 75,
       "type": "gain_credit",
       "stateVersionBefore": 73,
       "stateVersionAfter": 74,
@@ -7585,7 +7585,7 @@
       }
     },
     {
-      "eventId": "evt_75",
+      "eventId": 76,
       "type": "gain_credit",
       "stateVersionBefore": 74,
       "stateVersionAfter": 75,
@@ -7644,7 +7644,7 @@
       }
     },
     {
-      "eventId": "evt_76",
+      "eventId": 77,
       "type": "end_turn",
       "stateVersionBefore": 75,
       "stateVersionAfter": 76,
@@ -7683,7 +7683,7 @@
       }
     },
     {
-      "eventId": "evt_77",
+      "eventId": 78,
       "type": "mandatory_draw",
       "stateVersionBefore": 76,
       "stateVersionAfter": 77,
@@ -7745,7 +7745,7 @@
       }
     },
     {
-      "eventId": "evt_78",
+      "eventId": 79,
       "type": "gain_credit",
       "stateVersionBefore": 77,
       "stateVersionAfter": 78,
@@ -7804,7 +7804,7 @@
       }
     },
     {
-      "eventId": "evt_79",
+      "eventId": 80,
       "type": "gain_credit",
       "stateVersionBefore": 78,
       "stateVersionAfter": 79,
@@ -7863,7 +7863,7 @@
       }
     },
     {
-      "eventId": "evt_80",
+      "eventId": 81,
       "type": "gain_credit",
       "stateVersionBefore": 79,
       "stateVersionAfter": 80,
@@ -7922,7 +7922,7 @@
       }
     },
     {
-      "eventId": "evt_81",
+      "eventId": 82,
       "type": "end_turn",
       "stateVersionBefore": 80,
       "stateVersionAfter": 81,
@@ -7961,7 +7961,7 @@
       }
     },
     {
-      "eventId": "evt_82",
+      "eventId": 83,
       "type": "draw_card",
       "stateVersionBefore": 81,
       "stateVersionAfter": 82,
@@ -8020,7 +8020,7 @@
       }
     },
     {
-      "eventId": "evt_83",
+      "eventId": 84,
       "type": "play_event",
       "stateVersionBefore": 82,
       "stateVersionAfter": 83,
@@ -8036,13 +8036,13 @@
         "turnActionOrdinalEnd": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+            "effectId": "309.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "runner",
             "amount": 3,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+            "sourceDefinitionId": 309,
             "sourceTitle": "Livewire’s Contacts"
           }
         ],
@@ -8060,7 +8060,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_097_livewires-contacts",
+        "cardDefinitionId": 309,
         "title": "Livewire’s Contacts"
       },
       "privatePayload": {
@@ -8068,15 +8068,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.play_event.runner_onr_v1_097_livewires-contacts_1.runner_onr_v1_097_livewires-contacts_1.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+            "actionId": "runner.play_event.c1wp.c1wp.393",
             "clientKnownStateVersion": 82
           },
           "legalAction": {
-            "actionId": "runner.play_event.runner_onr_v1_097_livewires-contacts_1.runner_onr_v1_097_livewires-contacts_1.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+            "actionId": "runner.play_event.c1wp.c1wp.393",
             "side": "runner",
             "type": "play_event",
             "label": "Livewire’s Contacts spielen",
-            "source": "runner_onr_v1_097_livewires-contacts_1",
+            "source": "c1wp",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -8088,15 +8088,15 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 82,
             "abilityRef": {
-              "sourceCardInstanceId": "runner_onr_v1_097_livewires-contacts_1",
-              "sourceAbilityId": "onr_v1_097_livewires-contacts:abilities_on_play_gain_credits"
+              "sourceCardInstanceId": "c1wp",
+              "sourceAbilityId": 393
             },
             "payload": {
-              "cardId": "runner_onr_v1_097_livewires-contacts_1",
+              "cardId": "c1wp",
               "gainCreditsAmount": 3,
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_on_play_gain_credits",
-              "cardImplementationAbilityId": "onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+              "cardImplementationAbilityId": 393,
               "effectKind": "gain_credits",
               "normalCreditsSpent": 0,
               "runnerCreditsAfter": 15,
@@ -8104,13 +8104,13 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+                "effectId": "309.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
                 "amount": 3,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+                "sourceDefinitionId": 309,
                 "sourceTitle": "Livewire’s Contacts"
               }
             ]
@@ -8119,7 +8119,7 @@
       }
     },
     {
-      "eventId": "evt_84",
+      "eventId": 85,
       "type": "install_card",
       "stateVersionBefore": 83,
       "stateVersionAfter": 84,
@@ -8147,7 +8147,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+        "cardDefinitionId": 369,
         "title": "Crash Everett, Inventive Fixer"
       },
       "privatePayload": {
@@ -8155,15 +8155,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_157_crash-everett-inventive-fixer_1.runner_onr_v1_157_crash-everett-inventive-fixer_1",
+            "actionId": "runner.install_card.c2a1.c2a1",
             "clientKnownStateVersion": 83
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_157_crash-everett-inventive-fixer_1.runner_onr_v1_157_crash-everett-inventive-fixer_1",
+            "actionId": "runner.install_card.c2a1.c2a1",
             "side": "runner",
             "type": "install_card",
             "label": "Crash Everett, Inventive Fixer installieren",
-            "source": "runner_onr_v1_157_crash-everett-inventive-fixer_1",
+            "source": "c2a1",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -8185,7 +8185,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 83,
             "payload": {
-              "cardId": "runner_onr_v1_157_crash-everett-inventive-fixer_1",
+              "cardId": "c2a1",
               "effectKind": "install_card",
               "installCostPaid": 2,
               "runnerInstallNormalCreditsPaid": 2,
@@ -8199,7 +8199,7 @@
       }
     },
     {
-      "eventId": "evt_85",
+      "eventId": 86,
       "type": "draw_card",
       "stateVersionBefore": 84,
       "stateVersionAfter": 85,
@@ -8264,7 +8264,7 @@
       }
     },
     {
-      "eventId": "evt_86",
+      "eventId": 87,
       "type": "resolve_choice",
       "stateVersionBefore": 85,
       "stateVersionAfter": 86,
@@ -8277,7 +8277,7 @@
         "label": "Choice wurde beantwortet.",
         "choiceKind": "select_option",
         "redactedKind": "choice",
-        "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+        "sourceDefinitionId": 369,
         "trashedCount": 1,
         "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
         "crashEverettDisposition": "trash",
@@ -8287,7 +8287,7 @@
           "trashedCount": 1
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+          "sourceDefinitionId": 369,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "choice"
         },
@@ -8306,7 +8306,7 @@
             "selectedChoices": {
               "choiceId": "p3_61_crash_draw_85",
               "selectedOptionIds": [
-                "trash_runner_onr_v1_079_bodyweight-synthetic-blood_1"
+                "trash_c1sp"
               ]
             }
           },
@@ -8327,10 +8327,10 @@
                 "minSelections": 1,
                 "maxSelections": 1,
                 "optionIds": [
-                  "trash_runner_onr_v1_079_bodyweight-synthetic-blood_1",
-                  "top_runner_onr_v1_079_bodyweight-synthetic-blood_1",
-                  "trash_runner_onr_v1_014_codecracker_1",
-                  "top_runner_onr_v1_014_codecracker_1"
+                  "trash_c1sp",
+                  "top_c1sp",
+                  "trash_c1e9",
+                  "top_c1e9"
                 ]
               }
             ],
@@ -8339,7 +8339,7 @@
               "choiceVisibility": "hidden_info_barrier",
               "choiceKind": "select_option",
               "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
-              "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+              "sourceDefinitionId": 369,
               "crashEverettDisposition": "trash",
               "crashEverettDrawnCardCount": 2,
               "trashedCount": 1,
@@ -8350,7 +8350,7 @@
       }
     },
     {
-      "eventId": "evt_87",
+      "eventId": 88,
       "type": "end_turn",
       "stateVersionBefore": 86,
       "stateVersionAfter": 87,
@@ -8389,7 +8389,7 @@
       }
     },
     {
-      "eventId": "evt_88",
+      "eventId": 89,
       "type": "mandatory_draw",
       "stateVersionBefore": 87,
       "stateVersionAfter": 88,
@@ -8451,7 +8451,7 @@
       }
     },
     {
-      "eventId": "evt_89",
+      "eventId": 90,
       "type": "install_card",
       "stateVersionBefore": 88,
       "stateVersionAfter": 89,
@@ -8490,15 +8490,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.install_card.corp_onr_v1_268_shock-r_1.rd.corp_onr_v1_268_shock-r_1.3",
+            "actionId": "corp.install_card.c2yt.rd.c2yt.3",
             "clientKnownStateVersion": 88
           },
           "legalAction": {
-            "actionId": "corp.install_card.corp_onr_v1_268_shock-r_1.rd.corp_onr_v1_268_shock-r_1.3",
+            "actionId": "corp.install_card.c2yt.rd.c2yt.3",
             "side": "corp",
             "type": "install_card",
             "label": "ICE vor R&D installieren",
-            "source": "corp_onr_v1_268_shock-r_1",
+            "source": "c2yt",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -8510,14 +8510,14 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 88,
             "payload": {
-              "cardId": "corp_onr_v1_268_shock-r_1",
+              "cardId": "c2yt",
               "serverId": "rd",
               "placement": "ice",
               "iceInstallBaseCost": 3,
               "iceInstallAdditionalCost": 0,
               "iceInstallReduction": 0,
               "iceInstallTotalCost": 3,
-              "postInstallRezQuoteCardId": "corp_onr_v1_268_shock-r_1",
+              "postInstallRezQuoteCardId": "c2yt",
               "postInstallRezQuoteTargetServerId": "rd",
               "postInstallRezQuoteExpiresAtStateVersion": 88,
               "postInstallRezQuoteComplete": true,
@@ -8526,7 +8526,7 @@
               "postInstallRezQuoteBaseCredits": 1,
               "postInstallRezQuoteFinalCredits": 1,
               "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"corp_onr_v1_268_shock-r_1\",\"iceDefinitionId\":\"onr_v1_268_shock-r\",\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_prohibit_break_and_jack_out_next_ice\",\"type\":\"set_next_encounter_lock\",\"breakTags\":[\"stun\"],\"sourceDefinitionId\":\"onr_v1_268_shock-r\",\"sourceTitle\":\"Shock.r\",\"unbrokenRunEffect\":{\"preventsJackOut\":true}}]}",
+              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2yt\",\"iceDefinitionId\":480,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_prohibit_break_and_jack_out_next_ice\",\"type\":\"set_next_encounter_lock\",\"breakTags\":[\"stun\"],\"sourceDefinitionId\":480,\"sourceTitle\":\"Shock.r\",\"unbrokenRunEffect\":{\"preventsJackOut\":true}}]}",
               "effectKind": "install_card"
             }
           }
@@ -8534,7 +8534,7 @@
       }
     },
     {
-      "eventId": "evt_90",
+      "eventId": 91,
       "type": "gain_credit",
       "stateVersionBefore": 89,
       "stateVersionAfter": 90,
@@ -8593,7 +8593,7 @@
       }
     },
     {
-      "eventId": "evt_91",
+      "eventId": 92,
       "type": "gain_credit",
       "stateVersionBefore": 90,
       "stateVersionAfter": 91,
@@ -8652,7 +8652,7 @@
       }
     },
     {
-      "eventId": "evt_92",
+      "eventId": 93,
       "type": "end_turn",
       "stateVersionBefore": 91,
       "stateVersionAfter": 92,
@@ -8691,7 +8691,7 @@
       }
     },
     {
-      "eventId": "evt_93",
+      "eventId": 94,
       "type": "install_card",
       "stateVersionBefore": 92,
       "stateVersionAfter": 93,
@@ -8711,7 +8711,7 @@
         "runnerInstallHostedCreditsPaid": 2,
         "runnerInstallRecurringCreditsPaid": 0,
         "runnerInstallTemporaryCreditsPaid": 0,
-        "runnerInstallPaymentSourceDefinitionIds": "onr_v1_075_zetatech-software-installer",
+        "runnerInstallPaymentSourceDefinitionIds": 287,
         "runnerCreditsAfter": 13,
         "effectKind": "install_card",
         "amounts": {
@@ -8720,7 +8720,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_014_codecracker",
+        "cardDefinitionId": 226,
         "title": "Codecracker"
       },
       "privatePayload": {
@@ -8728,15 +8728,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_014_codecracker_1.runner_onr_v1_014_codecracker_1.runner_onr_v1_075_zetatech-software-installer_1.2.2",
+            "actionId": "runner.install_card.c1e9.c1e9.c1rt.2.2",
             "clientKnownStateVersion": 92
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_014_codecracker_1.runner_onr_v1_014_codecracker_1.runner_onr_v1_075_zetatech-software-installer_1.2.2",
+            "actionId": "runner.install_card.c1e9.c1e9.c1rt.2.2",
             "side": "runner",
             "type": "install_card",
             "label": "Codecracker installieren (Mit Zetatech Software Installer: 2 Bits)",
-            "source": "runner_onr_v1_014_codecracker_1",
+            "source": "c1e9",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -8748,13 +8748,13 @@
             "visibility": "public",
             "expiresAtStateVersion": 92,
             "payload": {
-              "cardId": "runner_onr_v1_014_codecracker_1",
+              "cardId": "c1e9",
               "effectKind": "install_card",
-              "runnerInstallPaymentSourceIds": "runner_onr_v1_075_zetatech-software-installer_1",
+              "runnerInstallPaymentSourceIds": "c1rt",
               "runnerInstallPaymentSourceAmounts": "2",
               "runnerInstallPaymentHostedCredits": 2,
               "runnerInstallPaymentLabel": "Mit Zetatech Software Installer: 2 Bits",
-              "runnerInstallPaymentSourceDefinitionIds": "onr_v1_075_zetatech-software-installer",
+              "runnerInstallPaymentSourceDefinitionIds": 287,
               "installCostPaid": 2,
               "runnerInstallNormalCreditsPaid": 0,
               "runnerInstallHostedCreditsPaid": 2,
@@ -8767,7 +8767,7 @@
       }
     },
     {
-      "eventId": "evt_94",
+      "eventId": 95,
       "type": "draw_card",
       "stateVersionBefore": 93,
       "stateVersionAfter": 94,
@@ -8832,7 +8832,7 @@
       }
     },
     {
-      "eventId": "evt_95",
+      "eventId": 96,
       "type": "resolve_choice",
       "stateVersionBefore": 94,
       "stateVersionAfter": 95,
@@ -8845,7 +8845,7 @@
         "label": "Choice wurde beantwortet.",
         "choiceKind": "select_option",
         "redactedKind": "choice",
-        "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+        "sourceDefinitionId": 369,
         "trashedCount": 1,
         "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
         "crashEverettDisposition": "trash",
@@ -8855,7 +8855,7 @@
           "trashedCount": 1
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+          "sourceDefinitionId": 369,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "choice"
         },
@@ -8874,7 +8874,7 @@
             "selectedChoices": {
               "choiceId": "p3_61_crash_draw_94",
               "selectedOptionIds": [
-                "trash_runner_onr_v1_074_worm_2"
+                "trash_c1rm"
               ]
             }
           },
@@ -8895,10 +8895,10 @@
                 "minSelections": 1,
                 "maxSelections": 1,
                 "optionIds": [
-                  "trash_runner_onr_v1_074_worm_2",
-                  "top_runner_onr_v1_074_worm_2",
-                  "trash_runner_onr_v1_165_junkyard-bbs_1",
-                  "top_runner_onr_v1_165_junkyard-bbs_1"
+                  "trash_c1rm",
+                  "top_c1rm",
+                  "trash_c2bt",
+                  "top_c2bt"
                 ]
               }
             ],
@@ -8907,7 +8907,7 @@
               "choiceVisibility": "hidden_info_barrier",
               "choiceKind": "select_option",
               "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
-              "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+              "sourceDefinitionId": 369,
               "crashEverettDisposition": "trash",
               "crashEverettDrawnCardCount": 2,
               "trashedCount": 1,
@@ -8918,7 +8918,7 @@
       }
     },
     {
-      "eventId": "evt_96",
+      "eventId": 97,
       "type": "start_run",
       "stateVersionBefore": 95,
       "stateVersionAfter": 96,
@@ -8992,7 +8992,7 @@
       }
     },
     {
-      "eventId": "evt_97",
+      "eventId": 98,
       "type": "decline_rez",
       "stateVersionBefore": 96,
       "stateVersionAfter": 97,
@@ -9039,7 +9039,7 @@
       }
     },
     {
-      "eventId": "evt_98",
+      "eventId": 99,
       "type": "continue_run",
       "stateVersionBefore": 97,
       "stateVersionAfter": 98,
@@ -9087,7 +9087,7 @@
             "expiresAtStateVersion": 97,
             "payload": {
               "serverId": "hq",
-              "breachId": "run_96.breach",
+              "breachId": "96.breach",
               "baseAccessCount": 1,
               "installedAccessBonus": 0,
               "effectiveAccessCount": 1
@@ -9097,7 +9097,7 @@
       }
     },
     {
-      "eventId": "evt_99",
+      "eventId": 100,
       "type": "access_card",
       "stateVersionBefore": 98,
       "stateVersionAfter": 99,
@@ -9120,7 +9120,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_proteus_015_colonel-failure",
+        "cardDefinitionId": 73,
         "title": "Colonel Failure"
       },
       "privatePayload": {
@@ -9143,9 +9143,9 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 98,
             "payload": {
-              "accessedCardId": "corp_onr_proteus_015_colonel-failure_1",
+              "accessedCardId": "cgd",
               "serverId": "hq",
-              "breachId": "run_96.breach",
+              "breachId": "96.breach",
               "accessIndex": 0,
               "accessOrigin": "hq",
               "baseAccessCount": 1,
@@ -9157,7 +9157,7 @@
       }
     },
     {
-      "eventId": "evt_100",
+      "eventId": 101,
       "type": "gain_credit",
       "stateVersionBefore": 99,
       "stateVersionAfter": 100,
@@ -9216,7 +9216,7 @@
       }
     },
     {
-      "eventId": "evt_101",
+      "eventId": 102,
       "type": "end_turn",
       "stateVersionBefore": 100,
       "stateVersionAfter": 101,
@@ -9255,7 +9255,7 @@
       }
     },
     {
-      "eventId": "evt_102",
+      "eventId": 103,
       "type": "mandatory_draw",
       "stateVersionBefore": 101,
       "stateVersionAfter": 102,
@@ -9317,7 +9317,7 @@
       }
     },
     {
-      "eventId": "evt_103",
+      "eventId": 104,
       "type": "install_card",
       "stateVersionBefore": 102,
       "stateVersionAfter": 103,
@@ -9356,15 +9356,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.install_card.corp_onr_v1_237_data-wall_1.rd.corp_onr_v1_237_data-wall_1.4",
+            "actionId": "corp.install_card.c2rx.rd.c2rx.4",
             "clientKnownStateVersion": 102
           },
           "legalAction": {
-            "actionId": "corp.install_card.corp_onr_v1_237_data-wall_1.rd.corp_onr_v1_237_data-wall_1.4",
+            "actionId": "corp.install_card.c2rx.rd.c2rx.4",
             "side": "corp",
             "type": "install_card",
             "label": "ICE vor R&D installieren",
-            "source": "corp_onr_v1_237_data-wall_1",
+            "source": "c2rx",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -9376,14 +9376,14 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 102,
             "payload": {
-              "cardId": "corp_onr_v1_237_data-wall_1",
+              "cardId": "c2rx",
               "serverId": "rd",
               "placement": "ice",
               "iceInstallBaseCost": 4,
               "iceInstallAdditionalCost": 0,
               "iceInstallReduction": 0,
               "iceInstallTotalCost": 4,
-              "postInstallRezQuoteCardId": "corp_onr_v1_237_data-wall_1",
+              "postInstallRezQuoteCardId": "c2rx",
               "postInstallRezQuoteTargetServerId": "rd",
               "postInstallRezQuoteExpiresAtStateVersion": 102,
               "postInstallRezQuoteComplete": true,
@@ -9392,7 +9392,7 @@
               "postInstallRezQuoteBaseCredits": 1,
               "postInstallRezQuoteFinalCredits": 1,
               "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"corp_onr_v1_237_data-wall_1\",\"iceDefinitionId\":\"onr_v1_237_data-wall\",\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":\"onr_v1_237_data-wall\",\"sourceTitle\":\"Data Wall\"}]}",
+              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rx\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
               "effectKind": "install_card"
             }
           }
@@ -9400,7 +9400,7 @@
       }
     },
     {
-      "eventId": "evt_104",
+      "eventId": 105,
       "type": "gain_credit",
       "stateVersionBefore": 103,
       "stateVersionAfter": 104,
@@ -9459,7 +9459,7 @@
       }
     },
     {
-      "eventId": "evt_105",
+      "eventId": 106,
       "type": "gain_credit",
       "stateVersionBefore": 104,
       "stateVersionAfter": 105,
@@ -9518,7 +9518,7 @@
       }
     },
     {
-      "eventId": "evt_106",
+      "eventId": 107,
       "type": "end_turn",
       "stateVersionBefore": 105,
       "stateVersionAfter": 106,
@@ -9531,7 +9531,7 @@
         "label": "Zug beenden",
         "resolvedEffects": [
           {
-            "effectId": "runner.start.restricted_hosted_credit.runner_onr_v1_075_zetatech-software-installer_1",
+            "effectId": "runner.start.restricted_hosted_credit.c1rt",
             "kind": "counter_change",
             "visibility": "public",
             "side": "runner",
@@ -9540,7 +9540,7 @@
             "counterType": "bit",
             "remainingCounters": 2,
             "addedCounterAmount": 2,
-            "sourceDefinitionId": "onr_v1_075_zetatech-software-installer",
+            "sourceDefinitionId": 287,
             "sourceTitle": "Zetatech Software Installer"
           }
         ],
@@ -9583,7 +9583,7 @@
             "expiresAtStateVersion": 105,
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.runner_onr_v1_075_zetatech-software-installer_1",
+                "effectId": "runner.start.restricted_hosted_credit.c1rt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9592,7 +9592,7 @@
                 "counterType": "bit",
                 "remainingCounters": 2,
                 "addedCounterAmount": 2,
-                "sourceDefinitionId": "onr_v1_075_zetatech-software-installer",
+                "sourceDefinitionId": 287,
                 "sourceTitle": "Zetatech Software Installer"
               }
             ]
@@ -9601,7 +9601,7 @@
       }
     },
     {
-      "eventId": "evt_107",
+      "eventId": 108,
       "type": "start_run",
       "stateVersionBefore": 106,
       "stateVersionAfter": 107,
@@ -9675,7 +9675,7 @@
       }
     },
     {
-      "eventId": "evt_108",
+      "eventId": 109,
       "type": "decline_rez",
       "stateVersionBefore": 107,
       "stateVersionAfter": 108,
@@ -9722,7 +9722,7 @@
       }
     },
     {
-      "eventId": "evt_109",
+      "eventId": 110,
       "type": "continue_run",
       "stateVersionBefore": 108,
       "stateVersionAfter": 109,
@@ -9770,7 +9770,7 @@
             "expiresAtStateVersion": 108,
             "payload": {
               "serverId": "hq",
-              "breachId": "run_107.breach",
+              "breachId": "107.breach",
               "baseAccessCount": 1,
               "installedAccessBonus": 0,
               "effectiveAccessCount": 1
@@ -9780,7 +9780,7 @@
       }
     },
     {
-      "eventId": "evt_110",
+      "eventId": 111,
       "type": "access_card",
       "stateVersionBefore": 109,
       "stateVersionAfter": 110,
@@ -9803,7 +9803,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_proteus_015_colonel-failure",
+        "cardDefinitionId": 73,
         "title": "Colonel Failure"
       },
       "privatePayload": {
@@ -9826,9 +9826,9 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 109,
             "payload": {
-              "accessedCardId": "corp_onr_proteus_015_colonel-failure_1",
+              "accessedCardId": "cgd",
               "serverId": "hq",
-              "breachId": "run_107.breach",
+              "breachId": "107.breach",
               "accessIndex": 0,
               "accessOrigin": "hq",
               "baseAccessCount": 1,
@@ -9840,7 +9840,7 @@
       }
     },
     {
-      "eventId": "evt_111",
+      "eventId": 112,
       "type": "install_card",
       "stateVersionBefore": 110,
       "stateVersionAfter": 111,
@@ -9868,7 +9868,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_165_junkyard-bbs",
+        "cardDefinitionId": 377,
         "title": "Junkyard BBS"
       },
       "privatePayload": {
@@ -9876,15 +9876,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_165_junkyard-bbs_1.runner_onr_v1_165_junkyard-bbs_1",
+            "actionId": "runner.install_card.c2bt.c2bt",
             "clientKnownStateVersion": 110
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_165_junkyard-bbs_1.runner_onr_v1_165_junkyard-bbs_1",
+            "actionId": "runner.install_card.c2bt.c2bt",
             "side": "runner",
             "type": "install_card",
             "label": "Junkyard BBS installieren",
-            "source": "runner_onr_v1_165_junkyard-bbs_1",
+            "source": "c2bt",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -9906,7 +9906,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 110,
             "payload": {
-              "cardId": "runner_onr_v1_165_junkyard-bbs_1",
+              "cardId": "c2bt",
               "effectKind": "install_card",
               "installCostPaid": 1,
               "runnerInstallNormalCreditsPaid": 1,
@@ -9920,7 +9920,7 @@
       }
     },
     {
-      "eventId": "evt_112",
+      "eventId": 113,
       "type": "draw_card",
       "stateVersionBefore": 111,
       "stateVersionAfter": 112,
@@ -9985,7 +9985,7 @@
       }
     },
     {
-      "eventId": "evt_113",
+      "eventId": 114,
       "type": "resolve_choice",
       "stateVersionBefore": 112,
       "stateVersionAfter": 113,
@@ -9998,7 +9998,7 @@
         "label": "Choice wurde beantwortet.",
         "choiceKind": "select_option",
         "redactedKind": "choice",
-        "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+        "sourceDefinitionId": 369,
         "trashedCount": 1,
         "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
         "crashEverettDisposition": "trash",
@@ -10008,7 +10008,7 @@
           "trashedCount": 1
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+          "sourceDefinitionId": 369,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "choice"
         },
@@ -10027,7 +10027,7 @@
             "selectedChoices": {
               "choiceId": "p3_61_crash_draw_112",
               "selectedOptionIds": [
-                "trash_runner_onr_v1_095_jack-n-joe_1"
+                "trash_c1w9"
               ]
             }
           },
@@ -10048,10 +10048,10 @@
                 "minSelections": 1,
                 "maxSelections": 1,
                 "optionIds": [
-                  "trash_runner_onr_v1_095_jack-n-joe_1",
-                  "top_runner_onr_v1_095_jack-n-joe_1",
-                  "trash_runner_onr_v1_184_top-runners-conference_3",
-                  "top_runner_onr_v1_184_top-runners-conference_3"
+                  "trash_c1w9",
+                  "top_c1w9",
+                  "trash_c2g3",
+                  "top_c2g3"
                 ]
               }
             ],
@@ -10060,7 +10060,7 @@
               "choiceVisibility": "hidden_info_barrier",
               "choiceKind": "select_option",
               "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
-              "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+              "sourceDefinitionId": 369,
               "crashEverettDisposition": "trash",
               "crashEverettDrawnCardCount": 2,
               "trashedCount": 1,
@@ -10071,7 +10071,7 @@
       }
     },
     {
-      "eventId": "evt_114",
+      "eventId": 115,
       "type": "gain_credit",
       "stateVersionBefore": 113,
       "stateVersionAfter": 114,
@@ -10130,7 +10130,7 @@
       }
     },
     {
-      "eventId": "evt_115",
+      "eventId": 116,
       "type": "end_turn",
       "stateVersionBefore": 114,
       "stateVersionAfter": 115,
@@ -10169,7 +10169,7 @@
       }
     },
     {
-      "eventId": "evt_116",
+      "eventId": 117,
       "type": "mandatory_draw",
       "stateVersionBefore": 115,
       "stateVersionAfter": 116,
@@ -10231,7 +10231,7 @@
       }
     },
     {
-      "eventId": "evt_117",
+      "eventId": 118,
       "type": "play_operation",
       "stateVersionBefore": 116,
       "stateVersionAfter": 117,
@@ -10247,13 +10247,13 @@
         "turnActionOrdinalEnd": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+            "effectId": "502.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
             "amount": 3,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+            "sourceDefinitionId": 502,
             "sourceTitle": "Efficiency Experts"
           }
         ],
@@ -10270,7 +10270,7 @@
         "visibility": {
           "class": "hidden_info_barrier"
         },
-        "cardDefinitionId": "onr_v1_290_efficiency-experts",
+        "cardDefinitionId": 502,
         "title": "Efficiency Experts"
       },
       "privatePayload": {
@@ -10278,15 +10278,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_1.corp_onr_v1_290_efficiency-experts_1.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c33p.c33p.616",
             "clientKnownStateVersion": 116
           },
           "legalAction": {
-            "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_1.corp_onr_v1_290_efficiency-experts_1.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+            "actionId": "corp.play_operation.c33p.c33p.616",
             "side": "corp",
             "type": "play_operation",
             "label": "Efficiency Experts spielen",
-            "source": "corp_onr_v1_290_efficiency-experts_1",
+            "source": "c33p",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -10298,28 +10298,28 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 116,
             "abilityRef": {
-              "sourceCardInstanceId": "corp_onr_v1_290_efficiency-experts_1",
-              "sourceAbilityId": "onr_v1_290_efficiency-experts:abilities_on_play_gain_credits"
+              "sourceCardInstanceId": "c33p",
+              "sourceAbilityId": 616
             },
             "payload": {
-              "cardId": "corp_onr_v1_290_efficiency-experts_1",
+              "cardId": "c33p",
               "gainCreditsAmount": 3,
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityKey": "abilities_on_play_gain_credits",
-              "cardImplementationAbilityId": "onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+              "cardImplementationAbilityId": 616,
               "effectKind": "gain_credits",
               "gainedCredits": 3,
               "corpCreditsAfter": 17
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+                "effectId": "502.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
                 "amount": 3,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+                "sourceDefinitionId": 502,
                 "sourceTitle": "Efficiency Experts"
               }
             ]
@@ -10328,7 +10328,7 @@
       }
     },
     {
-      "eventId": "evt_118",
+      "eventId": 119,
       "type": "gain_credit",
       "stateVersionBefore": 117,
       "stateVersionAfter": 118,
@@ -10387,7 +10387,7 @@
       }
     },
     {
-      "eventId": "evt_119",
+      "eventId": 120,
       "type": "install_card",
       "stateVersionBefore": 118,
       "stateVersionAfter": 119,
@@ -10426,15 +10426,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "corp",
-            "actionId": "corp.install_card.corp_onr_proteus_015_colonel-failure_1.hq.corp_onr_proteus_015_colonel-failure_1.1",
+            "actionId": "corp.install_card.cgd.hq.cgd.1",
             "clientKnownStateVersion": 118
           },
           "legalAction": {
-            "actionId": "corp.install_card.corp_onr_proteus_015_colonel-failure_1.hq.corp_onr_proteus_015_colonel-failure_1.1",
+            "actionId": "corp.install_card.cgd.hq.cgd.1",
             "side": "corp",
             "type": "install_card",
             "label": "ICE vor HQ installieren",
-            "source": "corp_onr_proteus_015_colonel-failure_1",
+            "source": "cgd",
             "timingPoint": "corp_action.main",
             "costs": [
               {
@@ -10446,14 +10446,14 @@
             "visibility": "private_to_actor",
             "expiresAtStateVersion": 118,
             "payload": {
-              "cardId": "corp_onr_proteus_015_colonel-failure_1",
+              "cardId": "cgd",
               "serverId": "hq",
               "placement": "ice",
               "iceInstallBaseCost": 1,
               "iceInstallAdditionalCost": 0,
               "iceInstallReduction": 0,
               "iceInstallTotalCost": 1,
-              "postInstallRezQuoteCardId": "corp_onr_proteus_015_colonel-failure_1",
+              "postInstallRezQuoteCardId": "cgd",
               "postInstallRezQuoteTargetServerId": "hq",
               "postInstallRezQuoteExpiresAtStateVersion": 118,
               "postInstallRezQuoteComplete": true,
@@ -10462,7 +10462,7 @@
               "postInstallRezQuoteBaseCredits": 17,
               "postInstallRezQuoteFinalCredits": 17,
               "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"corp_onr_proteus_015_colonel-failure_1\",\"iceDefinitionId\":\"onr_proteus_015_colonel-failure\",\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"subroutine_trash_program_a\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":\"onr_proteus_015_colonel-failure\",\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_b\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":\"onr_proteus_015_colonel-failure\",\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_c\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":\"onr_proteus_015_colonel-failure\",\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":\"onr_proteus_015_colonel-failure\",\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":\"onr_proteus_015_colonel-failure\",\"sourceTitle\":\"Colonel Failure\"}]}",
+              "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"subroutine_trash_program_a\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_b\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_c\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
               "effectKind": "install_card"
             }
           }
@@ -10470,7 +10470,7 @@
       }
     },
     {
-      "eventId": "evt_120",
+      "eventId": 121,
       "type": "end_turn",
       "stateVersionBefore": 119,
       "stateVersionAfter": 120,
@@ -10509,7 +10509,7 @@
       }
     },
     {
-      "eventId": "evt_121",
+      "eventId": 122,
       "type": "install_card",
       "stateVersionBefore": 120,
       "stateVersionAfter": 121,
@@ -10537,7 +10537,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_184_top-runners-conference",
+        "cardDefinitionId": 396,
         "title": "Top Runners' Conference"
       },
       "privatePayload": {
@@ -10545,15 +10545,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_184_top-runners-conference_3.runner_onr_v1_184_top-runners-conference_3",
+            "actionId": "runner.install_card.c2g3.c2g3",
             "clientKnownStateVersion": 120
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_184_top-runners-conference_3.runner_onr_v1_184_top-runners-conference_3",
+            "actionId": "runner.install_card.c2g3.c2g3",
             "side": "runner",
             "type": "install_card",
             "label": "Top Runners' Conference installieren",
-            "source": "runner_onr_v1_184_top-runners-conference_3",
+            "source": "c2g3",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -10575,7 +10575,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 120,
             "payload": {
-              "cardId": "runner_onr_v1_184_top-runners-conference_3",
+              "cardId": "c2g3",
               "effectKind": "install_card",
               "installCostPaid": 0,
               "runnerInstallNormalCreditsPaid": 0,
@@ -10589,7 +10589,7 @@
       }
     },
     {
-      "eventId": "evt_122",
+      "eventId": 123,
       "type": "draw_card",
       "stateVersionBefore": 121,
       "stateVersionAfter": 122,
@@ -10654,7 +10654,7 @@
       }
     },
     {
-      "eventId": "evt_123",
+      "eventId": 124,
       "type": "resolve_choice",
       "stateVersionBefore": 122,
       "stateVersionAfter": 123,
@@ -10667,7 +10667,7 @@
         "label": "Choice wurde beantwortet.",
         "choiceKind": "select_option",
         "redactedKind": "choice",
-        "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+        "sourceDefinitionId": 369,
         "trashedCount": 1,
         "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
         "crashEverettDisposition": "trash",
@@ -10677,7 +10677,7 @@
           "trashedCount": 1
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+          "sourceDefinitionId": 369,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "choice"
         },
@@ -10696,7 +10696,7 @@
             "selectedChoices": {
               "choiceId": "p3_61_crash_draw_122",
               "selectedOptionIds": [
-                "trash_runner_onr_v1_014_codecracker_2"
+                "trash_c1ea"
               ]
             }
           },
@@ -10717,10 +10717,10 @@
                 "minSelections": 1,
                 "maxSelections": 1,
                 "optionIds": [
-                  "trash_runner_onr_v1_139_r-and-d-interface_1",
-                  "top_runner_onr_v1_139_r-and-d-interface_1",
-                  "trash_runner_onr_v1_014_codecracker_2",
-                  "top_runner_onr_v1_014_codecracker_2"
+                  "trash_c261",
+                  "top_c261",
+                  "trash_c1ea",
+                  "top_c1ea"
                 ]
               }
             ],
@@ -10729,7 +10729,7 @@
               "choiceVisibility": "hidden_info_barrier",
               "choiceKind": "select_option",
               "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
-              "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+              "sourceDefinitionId": 369,
               "crashEverettDisposition": "trash",
               "crashEverettDrawnCardCount": 2,
               "trashedCount": 1,
@@ -10740,7 +10740,7 @@
       }
     },
     {
-      "eventId": "evt_124",
+      "eventId": 125,
       "type": "install_card",
       "stateVersionBefore": 123,
       "stateVersionAfter": 124,
@@ -10768,7 +10768,7 @@
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_139_r-and-d-interface",
+        "cardDefinitionId": 351,
         "title": "R&D Interface"
       },
       "privatePayload": {
@@ -10776,15 +10776,15 @@
           "action": {
             "matchId": "match_3defa0084c21bb65",
             "side": "runner",
-            "actionId": "runner.install_card.runner_onr_v1_139_r-and-d-interface_1.runner_onr_v1_139_r-and-d-interface_1",
+            "actionId": "runner.install_card.c261.c261",
             "clientKnownStateVersion": 123
           },
           "legalAction": {
-            "actionId": "runner.install_card.runner_onr_v1_139_r-and-d-interface_1.runner_onr_v1_139_r-and-d-interface_1",
+            "actionId": "runner.install_card.c261.c261",
             "side": "runner",
             "type": "install_card",
             "label": "R&D Interface installieren",
-            "source": "runner_onr_v1_139_r-and-d-interface_1",
+            "source": "c261",
             "timingPoint": "runner_action.main",
             "costs": [
               {
@@ -10796,7 +10796,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 123,
             "payload": {
-              "cardId": "runner_onr_v1_139_r-and-d-interface_1",
+              "cardId": "c261",
               "effectKind": "install_card",
               "installCostPaid": 4,
               "runnerInstallNormalCreditsPaid": 4,
@@ -10810,7 +10810,7 @@
       }
     },
     {
-      "eventId": "evt_125",
+      "eventId": 126,
       "type": "draw_card",
       "stateVersionBefore": 124,
       "stateVersionAfter": 125,
@@ -10875,7 +10875,7 @@
       }
     },
     {
-      "eventId": "evt_126",
+      "eventId": 127,
       "type": "resolve_choice",
       "stateVersionBefore": 125,
       "stateVersionAfter": 126,
@@ -10888,7 +10888,7 @@
         "label": "Choice wurde beantwortet.",
         "choiceKind": "select_option",
         "redactedKind": "choice",
-        "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+        "sourceDefinitionId": 369,
         "trashedCount": 1,
         "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
         "crashEverettDisposition": "trash",
@@ -10898,7 +10898,7 @@
           "trashedCount": 1
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+          "sourceDefinitionId": 369,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "choice"
         },
@@ -10917,7 +10917,7 @@
             "selectedChoices": {
               "choiceId": "p3_61_crash_draw_125",
               "selectedOptionIds": [
-                "trash_runner_onr_v1_108_score_1"
+                "trash_c1z5"
               ]
             }
           },
@@ -10938,10 +10938,10 @@
                 "minSelections": 1,
                 "maxSelections": 1,
                 "optionIds": [
-                  "trash_runner_onr_v1_108_score_1",
-                  "top_runner_onr_v1_108_score_1",
-                  "trash_runner_onr_v1_184_top-runners-conference_2",
-                  "top_runner_onr_v1_184_top-runners-conference_2"
+                  "trash_c1z5",
+                  "top_c1z5",
+                  "trash_c2g2",
+                  "top_c2g2"
                 ]
               }
             ],
@@ -10950,7 +10950,7 @@
               "choiceVisibility": "hidden_info_barrier",
               "choiceKind": "select_option",
               "drawReplacementSourceTitle": "Crash Everett, Inventive Fixer",
-              "sourceDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+              "sourceDefinitionId": 369,
               "crashEverettDisposition": "trash",
               "crashEverettDrawnCardCount": 2,
               "trashedCount": 1,
@@ -10961,7 +10961,7 @@
       }
     },
     {
-      "eventId": "evt_127",
+      "eventId": 128,
       "type": "end_turn",
       "stateVersionBefore": 126,
       "stateVersionAfter": 127,
@@ -11000,7 +11000,7 @@
       }
     },
     {
-      "eventId": "evt_128",
+      "eventId": 129,
       "type": "mandatory_draw",
       "stateVersionBefore": 127,
       "stateVersionAfter": 128,
@@ -11080,7 +11080,7 @@
   "deckMetadata": {
     "runner": {
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "deckName": "Last Call at R&D",
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
@@ -11090,7 +11090,7 @@
     },
     "corp": {
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "deckName": "Dr. Dreffs letzte Visite",
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -11122,7 +11122,7 @@
     "trashedNodeLastTurn": false,
     "installedResourceIdsThisTurn": [],
     "installedResourceIdsLastTurn": [
-      "runner_onr_v1_184_top-runners-conference_3"
+      "c2g3"
     ],
     "abilityUsedSourceIdsByLimitKey": {},
     "startOfTurnFloatingCreditsApplied": true,

@@ -2,7 +2,7 @@
   "schemaVersion": "known-corp-card-vertical-slice-checkpoint-v1",
   "checkpointId": "known-trap-prevents-unsafe-remote-run",
   "side": "runner",
-  "serverId": "remote_1",
+  "serverId": "r1",
   "cardDefinitionId": 557,
   "cardInstanceId": "trap-installed",
   "corpCredits": 4,

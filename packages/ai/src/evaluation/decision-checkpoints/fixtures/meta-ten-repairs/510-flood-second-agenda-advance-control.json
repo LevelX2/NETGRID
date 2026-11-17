@@ -5,13 +5,13 @@
   "originalPrefixActions": 342,
   "prefixEveryHashMatches": true,
   "nativeCheckpointHashMatches": true,
-  "originalAction": "corp.install_card.corp_onr_v1_191_black-ice-quality-assurance_2.new_remote.corp_onr_v1_191_black-ice-quality-assurance_2",
-  "alternative": "corp.advance_card.corp_onr_v1_191_black-ice-quality-assurance_1.corp_onr_v1_191_black-ice-quality-assurance_1",
+  "originalAction": "corp.install_card.c2hq.new_remote.c2hq",
+  "alternative": "corp.advance_card.c2hp.c2hp",
   "allCommandsActualEngineLegal": true,
   "steps": [
     {
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_191_black-ice-quality-assurance_1.corp_onr_v1_191_black-ice-quality-assurance_1",
+      "actionId": "corp.advance_card.c2hp.c2hp",
       "before": {
         "hash": "fnv1a:b8988aea",
         "stateVersion": 342,
@@ -47,7 +47,7 @@
       "selectedChoices": {
         "choiceId": "discard_corp_344",
         "selectedOptionIds": [
-          "card_corp_onr_v1_258_neural-blade_2"
+          "card_c2wm"
         ]
       },
       "before": {
@@ -65,7 +65,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.start_run.remote_1",
+      "actionId": "runner.start_run.r1",
       "before": {
         "hash": "fnv1a:27bedd4c",
         "stateVersion": 345,
@@ -81,7 +81,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.rez_ice.corp_onr_v1_261_quandary_2.corp_onr_v1_261_quandary_2",
+      "actionId": "corp.rez_ice.c2xa.c2xa",
       "before": {
         "hash": "fnv1a:a957116a",
         "stateVersion": 346,
@@ -113,7 +113,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.break_subroutine.runner_onr_v1_016_cyfermaster_1.runner_onr_v1_016_cyfermaster_1.runner_onr_v1_016_cyfermaster_1.corp_onr_v1_261_quandary_2.0.printed_subroutines_end_the_run.onr_v1_016_cyfermaster:icebreaker_abilities_break_subroutine",
+      "actionId": "runner.break_subroutine.c1ep.c1ep.c1ep.c2xa.0.printed_subroutines_end_the_run.294",
       "before": {
         "hash": "fnv1a:f79dfe76",
         "stateVersion": 348,
@@ -161,7 +161,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.remote_1",
+      "actionId": "corp.decline_rez.r1",
       "before": {
         "hash": "fnv1a:85096ff9",
         "stateVersion": 351,
@@ -209,7 +209,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.remote_1",
+      "actionId": "corp.decline_rez.r1",
       "before": {
         "hash": "fnv1a:aef3a5bf",
         "stateVersion": 354,
@@ -257,7 +257,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.remote_1",
+      "actionId": "corp.decline_rez.r1",
       "before": {
         "hash": "fnv1a:11a76c42",
         "stateVersion": 357,
@@ -305,7 +305,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.remote_1",
+      "actionId": "corp.decline_rez.r1",
       "before": {
         "hash": "fnv1a:e3a2f11d",
         "stateVersion": 360,
@@ -337,7 +337,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.steal_agenda.corp_onr_v1_191_black-ice-quality-assurance_1",
+      "actionId": "runner.steal_agenda.c2hp",
       "before": {
         "hash": "fnv1a:6a56748b",
         "stateVersion": 362,

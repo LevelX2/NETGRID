@@ -18,10 +18,10 @@
       "phase": "corp_action_phase",
       "own": {
         "identity": {
-          "instanceId": "corp_corp_identity_001_0",
+          "instanceId": "cs",
           "known": true,
           "title": "Korp",
-          "definitionId": "corp_identity_001",
+          "definitionId": 3,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -35,10 +35,10 @@
         "agendaPoints": 0,
         "gripOrHq": [
           {
-            "instanceId": "corp_onr_v1_329_investment-firm_2",
+            "instanceId": "c3ce",
             "known": true,
             "title": "Investment Firm",
-            "definitionId": "onr_v1_329_investment-firm",
+            "definitionId": 541,
             "type": "asset",
             "subtypes": [
               "transactions"
@@ -52,10 +52,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_v1_278_wall-of-ice_1",
+            "instanceId": "c311",
             "known": true,
             "title": "Wall of Ice",
-            "definitionId": "onr_v1_278_wall-of-ice",
+            "definitionId": 490,
             "type": "ice",
             "subtypes": [
               "wall"
@@ -69,10 +69,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_v1_350_antiquated-interface-routines_2",
+            "instanceId": "c3h2",
             "known": true,
             "title": "Antiquated Interface Routines",
-            "definitionId": "onr_v1_350_antiquated-interface-routines",
+            "definitionId": 562,
             "type": "upgrade",
             "subtypes": [],
             "rulesText": "All ice on this fort has +1 strength.",
@@ -87,10 +87,10 @@
         "stackOrRdCount": 46,
         "heapOrArchives": [
           {
-            "instanceId": "corp_onr_v1_290_efficiency-experts_2",
+            "instanceId": "c33q",
             "known": true,
             "title": "Efficiency Experts",
-            "definitionId": "onr_v1_290_efficiency-experts",
+            "definitionId": 502,
             "type": "operation",
             "subtypes": [
               "transactions"
@@ -113,10 +113,10 @@
       },
       "opponent": {
         "identity": {
-          "instanceId": "runner_runner_identity_001_0",
+          "instanceId": "c3mg",
           "known": true,
           "title": "Runner",
-          "definitionId": "runner_identity_001",
+          "definitionId": 587,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -153,10 +153,10 @@
           "label": "R&D",
           "ice": [
             {
-              "instanceId": "corp_onr_v1_263_reinforced-wall_1",
+              "instanceId": "c2xp",
               "known": true,
               "title": "Reinforced Wall",
-              "definitionId": "onr_v1_263_reinforced-wall",
+              "definitionId": 475,
               "type": "ice",
               "subtypes": [
                 "wall"
@@ -170,27 +170,27 @@
               "controller": "corp",
               "effectivePostRezRunQuote": {
                 "context": "installed_post_rez",
-                "cardId": "corp_onr_v1_263_reinforced-wall_1",
-                "iceDefinitionId": "onr_v1_263_reinforced-wall",
+                "cardId": "c2xp",
+                "iceDefinitionId": 475,
                 "targetServerId": "rd",
                 "projectedServerId": "rd",
                 "expiresAtStateVersion": 6,
                 "complete": true,
                 "effectiveRunQuote": {
-                  "iceInstanceId": "corp_onr_v1_263_reinforced-wall_1",
-                  "iceDefinitionId": "onr_v1_263_reinforced-wall",
+                  "iceInstanceId": "c2xp",
+                  "iceDefinitionId": 475,
                   "effectiveStrength": 4,
                   "subroutines": [
                     {
                       "id": "printed_subroutines_end_the_run",
                       "type": "end_the_run",
-                      "sourceDefinitionId": "onr_v1_263_reinforced-wall",
+                      "sourceDefinitionId": 475,
                       "sourceTitle": "Reinforced Wall"
                     },
                     {
                       "id": "printed_subroutines_end_the_run_a",
                       "type": "end_the_run",
-                      "sourceDefinitionId": "onr_v1_263_reinforced-wall",
+                      "sourceDefinitionId": 475,
                       "sourceTitle": "Reinforced Wall"
                     }
                   ]
@@ -199,7 +199,7 @@
               "effectiveRezCostQuote": {
                 "context": "installed",
                 "targetServerId": "rd",
-                "cardId": "corp_onr_v1_263_reinforced-wall_1",
+                "cardId": "c2xp",
                 "projectedServerId": "rd",
                 "expiresAtStateVersion": 6,
                 "complete": true,
@@ -212,7 +212,7 @@
               },
               "effectiveRezResourceExchangeQuote": {
                 "context": "installed",
-                "cardId": "corp_onr_v1_263_reinforced-wall_1",
+                "cardId": "c2xp",
                 "targetServerId": "rd",
                 "projectedServerId": "rd",
                 "expiresAtStateVersion": 6,
@@ -223,10 +223,10 @@
           ],
           "root": [
             {
-              "instanceId": "corp_onr_v1_370_tesseract-fort-construction_1",
+              "instanceId": "c3lh",
               "known": true,
               "title": "Tesseract Fort Construction",
-              "definitionId": "onr_v1_370_tesseract-fort-construction",
+              "definitionId": 582,
               "type": "upgrade",
               "subtypes": [],
               "rulesText": "All ice on this fort has an additional subroutine, \"*End the run unless Runner pays [1],\" after all other subroutines.",
@@ -245,10 +245,10 @@
           "ice": [],
           "root": [
             {
-              "instanceId": "corp_onr_v1_290_efficiency-experts_2",
+              "instanceId": "c33q",
               "known": true,
               "title": "Efficiency Experts",
-              "definitionId": "onr_v1_290_efficiency-experts",
+              "definitionId": 502,
               "type": "operation",
               "subtypes": [
                 "transactions"
@@ -296,7 +296,7 @@
       "deckMetadata": {
         "own": {
           "side": "corp",
-          "identityCardId": "corp_identity_001",
+          "identityCardId": 3,
           "deckName": "Ivory Bastion",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1",
@@ -306,7 +306,7 @@
         },
         "opponent": {
           "side": "runner",
-          "identityCardId": "runner_identity_001",
+          "identityCardId": 587,
           "deckName": "Bit-Denial Lock",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1",
@@ -319,7 +319,7 @@
       "agendaPointsToWin": 7,
       "publicEvents": [
         {
-          "eventId": "evt_0",
+          "eventId": 1,
           "type": "game_created",
           "stateVersionBefore": 0,
           "stateVersionAfter": 0,
@@ -345,7 +345,7 @@
               "deckName": "Bit-Denial Lock",
               "deckHash": "fnv1a:d4d08930",
               "side": "runner",
-              "identityCardId": "runner_identity_001",
+              "identityCardId": 587,
               "formatProfileId": "netgrid_private_local_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             },
@@ -353,14 +353,14 @@
               "deckName": "Ivory Bastion",
               "deckHash": "fnv1a:a20b4880",
               "side": "corp",
-              "identityCardId": "corp_identity_001",
+              "identityCardId": 3,
               "formatProfileId": "netgrid_private_local_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             }
           }
         },
         {
-          "eventId": "evt_1",
+          "eventId": 2,
           "type": "resolve_choice",
           "stateVersionBefore": 0,
           "stateVersionAfter": 1,
@@ -391,7 +391,7 @@
           }
         },
         {
-          "eventId": "evt_2",
+          "eventId": 3,
           "type": "resolve_choice",
           "stateVersionBefore": 1,
           "stateVersionAfter": 2,
@@ -422,7 +422,7 @@
           }
         },
         {
-          "eventId": "evt_3",
+          "eventId": 4,
           "type": "mandatory_draw",
           "stateVersionBefore": 2,
           "stateVersionAfter": 3,
@@ -449,7 +449,7 @@
           }
         },
         {
-          "eventId": "evt_4",
+          "eventId": 5,
           "type": "install_card",
           "stateVersionBefore": 3,
           "stateVersionAfter": 4,
@@ -477,7 +477,7 @@
           }
         },
         {
-          "eventId": "evt_5",
+          "eventId": 6,
           "type": "play_operation",
           "stateVersionBefore": 4,
           "stateVersionAfter": 5,
@@ -489,7 +489,7 @@
             "actionType": "play_operation",
             "label": "Efficiency Experts spielen",
             "title": "Efficiency Experts",
-            "cardDefinitionId": "onr_v1_290_efficiency-experts",
+            "cardDefinitionId": 502,
             "abilityFamily": "payment-costs",
             "effectKind": "gain_credits",
             "gainedCredits": 3,
@@ -505,20 +505,20 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+                "effectId": "502.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
                 "amount": 3,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+                "sourceDefinitionId": 502,
                 "sourceTitle": "Efficiency Experts"
               }
             ]
           }
         },
         {
-          "eventId": "evt_6",
+          "eventId": 7,
           "type": "install_card",
           "stateVersionBefore": 5,
           "stateVersionAfter": 6,
@@ -548,11 +548,11 @@
       ],
       "legalActions": [
         {
-          "actionId": "corp.rez_card.corp_onr_v1_370_tesseract-fort-construction_1.rd.corp_onr_v1_370_tesseract-fort-construction_1",
+          "actionId": "corp.rez_card.c3lh.rd.c3lh",
           "side": "corp",
           "type": "rez_card",
           "label": "Karte in R&D rezzen",
-          "source": "corp_onr_v1_370_tesseract-fort-construction_1",
+          "source": "c3lh",
           "timingPoint": "corp_action.main",
           "costs": [
             {
@@ -564,7 +564,7 @@
           "expiresAtStateVersion": 6,
           "payload": {
             "serverId": "rd",
-            "cardId": "corp_onr_v1_370_tesseract-fort-construction_1"
+            "cardId": "c3lh"
           }
         },
         {
@@ -583,7 +583,7 @@
     },
     "eventTail": [
       {
-        "eventId": "evt_0",
+        "eventId": 1,
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
@@ -609,7 +609,7 @@
             "deckName": "Bit-Denial Lock",
             "deckHash": "fnv1a:d4d08930",
             "side": "runner",
-            "identityCardId": "runner_identity_001",
+            "identityCardId": 587,
             "formatProfileId": "netgrid_private_local_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           },
@@ -617,14 +617,14 @@
             "deckName": "Ivory Bastion",
             "deckHash": "fnv1a:a20b4880",
             "side": "corp",
-            "identityCardId": "corp_identity_001",
+            "identityCardId": 3,
             "formatProfileId": "netgrid_private_local_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           }
         }
       },
       {
-        "eventId": "evt_1",
+        "eventId": 2,
         "type": "resolve_choice",
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
@@ -655,7 +655,7 @@
         }
       },
       {
-        "eventId": "evt_2",
+        "eventId": 3,
         "type": "resolve_choice",
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
@@ -686,7 +686,7 @@
         }
       },
       {
-        "eventId": "evt_3",
+        "eventId": 4,
         "type": "mandatory_draw",
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
@@ -713,7 +713,7 @@
         }
       },
       {
-        "eventId": "evt_4",
+        "eventId": 5,
         "type": "install_card",
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
@@ -741,7 +741,7 @@
         }
       },
       {
-        "eventId": "evt_5",
+        "eventId": 6,
         "type": "play_operation",
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
@@ -753,7 +753,7 @@
           "actionType": "play_operation",
           "label": "Efficiency Experts spielen",
           "title": "Efficiency Experts",
-          "cardDefinitionId": "onr_v1_290_efficiency-experts",
+          "cardDefinitionId": 502,
           "abilityFamily": "payment-costs",
           "effectKind": "gain_credits",
           "gainedCredits": 3,
@@ -769,20 +769,20 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+              "effectId": "502.effect.0.gain_credits",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
               "amount": 3,
               "reason": "card_resolver",
-              "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+              "sourceDefinitionId": 502,
               "sourceTitle": "Efficiency Experts"
             }
           ]
         }
       },
       {
-        "eventId": "evt_6",
+        "eventId": 7,
         "type": "install_card",
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
@@ -812,11 +812,11 @@
     ],
     "legalActions": [
       {
-        "actionId": "corp.rez_card.corp_onr_v1_370_tesseract-fort-construction_1.rd.corp_onr_v1_370_tesseract-fort-construction_1",
+        "actionId": "corp.rez_card.c3lh.rd.c3lh",
         "side": "corp",
         "type": "rez_card",
         "label": "Karte in R&D rezzen",
-        "source": "corp_onr_v1_370_tesseract-fort-construction_1",
+        "source": "c3lh",
         "timingPoint": "corp_action.main",
         "costs": [
           {
@@ -828,7 +828,7 @@
         "expiresAtStateVersion": 6,
         "payload": {
           "serverId": "rd",
-          "cardId": "corp_onr_v1_370_tesseract-fort-construction_1"
+          "cardId": "c3lh"
         }
       },
       {
@@ -886,7 +886,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 6,
-      "sideSafePlanningFingerprint": "fnv1a:b563d1a7"
+      "sideSafePlanningFingerprint": "fnv1a:6923e0ae"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_ivory_bastion_1.1.0",
@@ -894,7 +894,7 @@
       "deckVersion": "1",
       "name": "Ivory Bastion",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -903,119 +903,119 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_212_priority-requisition",
+          "cardId": 424,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_215_security-net-optimization",
+          "cardId": 427,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_219_superior-net-barriers",
+          "cardId": 431,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_230_cortical-scanner",
+          "cardId": 442,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_232_crystal-wall",
+          "cardId": 444,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_239_endless-corridor",
+          "cardId": 451,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_263_reinforced-wall",
+          "cardId": 475,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_265_rock-is-strong",
+          "cardId": 477,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_278_wall-of-ice",
+          "cardId": 490,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_311_braindance-campaign",
+          "cardId": 523,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_317_data-masons",
+          "cardId": 529,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_324_fortress-architects",
+          "cardId": 536,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_329_investment-firm",
+          "cardId": 541,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "cardId": 562,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "cardId": 567,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_360_jerusalem-city-grid",
+          "cardId": 572,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
+          "cardId": 578,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "cardId": 582,
           "quantity": 1
         }
       ],
@@ -1029,7 +1029,7 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Ivory Bastion",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1",
@@ -1063,7 +1063,7 @@
         },
         "economyBankTools": [
           {
-            "cardId": "onr_v1_193_corporate-coup",
+            "cardId": 405,
             "title": "Corporate Coup",
             "ownerSide": "corp",
             "status": "in_deck",
@@ -1080,7 +1080,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_309_bbs-whispering-campaign",
+            "cardId": 521,
             "title": "BBS Whispering Campaign",
             "ownerSide": "corp",
             "status": "in_deck",
@@ -1097,7 +1097,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_311_braindance-campaign",
+            "cardId": 523,
             "title": "Braindance Campaign",
             "ownerSide": "corp",
             "status": "in_deck",
@@ -1114,8 +1114,8 @@
             ]
           },
           {
-            "cardId": "onr_v1_329_investment-firm",
-            "sourceCardInstanceId": "corp_onr_v1_329_investment-firm_2",
+            "cardId": 541,
+            "sourceCardInstanceId": "c3ce",
             "title": "Investment Firm",
             "ownerSide": "corp",
             "status": "in_hand",
@@ -1126,7 +1126,7 @@
             "confidence": "medium",
             "evidence": [
               "capability_source:role_or_subtype",
-              "bank_source_instance:corp_onr_v1_329_investment-firm_2",
+              "bank_source_instance:c3ce",
               "bank_status:in_hand",
               "bank_build_legal:false",
               "bank_cashout_legal:false"
@@ -1174,259 +1174,259 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_297_overtime-incentives",
+              "cardId": 509,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "action.corp_extra_action_support",
               "reason": "support:tempoSource"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.agenda_steal_tax",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -1448,140 +1448,140 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "cardId": 562,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "cardId": 567,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -1605,14 +1605,14 @@
           "finalScore": 83,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.asset_economy",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.asset_economy",
@@ -1620,7 +1620,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "strategicRole",
               "role": "engine_anchor",
@@ -1628,14 +1628,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.asset_economy",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.asset_economy",
@@ -1643,7 +1643,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "strategicRole",
               "role": "engine_anchor",
@@ -1651,14 +1651,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_329_investment-firm",
+              "cardId": 541,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.asset_economy",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_329_investment-firm",
+              "cardId": 541,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.asset_economy",
@@ -1666,7 +1666,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_329_investment-firm",
+              "cardId": 541,
               "quantity": 2,
               "source": "strategicRole",
               "role": "engine_anchor",
@@ -1676,147 +1676,147 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_324_fortress-architects",
+              "cardId": 536,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
             {
-              "cardId": "onr_v1_329_investment-firm",
+              "cardId": 541,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.agenda_steal_tax",
               "reason": "support:remoteProtection"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:remoteProtection"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -1837,336 +1837,336 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
@@ -2186,7 +2186,7 @@
           "finalScore": 33,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.damage_kill",
@@ -2194,7 +2194,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "strategicRole",
               "role": "punish_payoff,tax_tool",
@@ -2204,91 +2204,91 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -2315,133 +2315,133 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_215_security-net-optimization",
+              "cardId": 427,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_219_superior-net-barriers",
+              "cardId": 431,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_220_tycho-extension",
+              "cardId": 432,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_282_annual-reviews",
+              "cardId": 494,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "draw.corp_draw",
               "reason": "support:drawOrShuffle"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -2466,259 +2466,259 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_282_annual-reviews",
+              "cardId": 494,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "draw.corp_draw",
               "reason": "support:drawSource"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.agenda_steal_tax",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -2740,294 +2740,294 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.agenda_steal_tax",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -3047,7 +3047,7 @@
           "finalScore": 50,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_297_overtime-incentives",
+              "cardId": 509,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.fast_advance",
@@ -3057,266 +3057,266 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_215_security-net-optimization",
+              "cardId": 427,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_219_superior-net-barriers",
+              "cardId": 431,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_220_tycho-extension",
+              "cardId": 432,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -3336,14 +3336,14 @@
           "finalScore": 96,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3351,7 +3351,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor,scoring_tool",
@@ -3359,7 +3359,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_215_security-net-optimization",
+              "cardId": 427,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3367,7 +3367,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_215_security-net-optimization",
+              "cardId": 427,
               "quantity": 1,
               "source": "strategicRole",
               "role": "defensive_tool,tax_tool",
@@ -3375,14 +3375,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_219_superior-net-barriers",
+              "cardId": 431,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_219_superior-net-barriers",
+              "cardId": 431,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3390,7 +3390,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_219_superior-net-barriers",
+              "cardId": 431,
               "quantity": 1,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3398,7 +3398,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3406,7 +3406,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "strategicRole",
               "role": "punish_payoff,tax_tool",
@@ -3414,7 +3414,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3422,7 +3422,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3430,7 +3430,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_324_fortress-architects",
+              "cardId": 536,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3438,14 +3438,14 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "cardId": 562,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "cardId": 562,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3453,7 +3453,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "cardId": 562,
               "quantity": 2,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3461,7 +3461,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "cardId": 567,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3469,7 +3469,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "cardId": 567,
               "quantity": 1,
               "source": "strategicRole",
               "role": "defensive_tool,tax_tool",
@@ -3477,14 +3477,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3492,7 +3492,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3500,14 +3500,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3515,7 +3515,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "strategicRole",
               "role": "defensive_tool,engine_anchor",
@@ -3525,336 +3525,336 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -3873,203 +3873,203 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.agenda_steal_tax",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.agenda_steal_tax",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -4093,7 +4093,7 @@
           "finalScore": 93,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.remote_scoring",
@@ -4101,7 +4101,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor,scoring_tool",
@@ -4109,7 +4109,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_215_security-net-optimization",
+              "cardId": 427,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.remote_scoring",
@@ -4117,7 +4117,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_215_security-net-optimization",
+              "cardId": 427,
               "quantity": 1,
               "source": "strategicRole",
               "role": "defensive_tool,tax_tool",
@@ -4125,7 +4125,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "cardId": 567,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.remote_scoring",
@@ -4133,7 +4133,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "cardId": 567,
               "quantity": 1,
               "source": "strategicRole",
               "role": "defensive_tool,tax_tool",
@@ -4141,14 +4141,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.remote_scoring",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_366_red-herrings",
+              "cardId": 578,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.remote_scoring",
@@ -4156,7 +4156,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.remote_scoring",
@@ -4164,7 +4164,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_370_tesseract-fort-construction",
+              "cardId": 582,
               "quantity": 1,
               "source": "strategicRole",
               "role": "defensive_tool,engine_anchor",
@@ -4174,336 +4174,336 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_215_security-net-optimization",
+              "cardId": 427,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_219_superior-net-barriers",
+              "cardId": 431,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_220_tycho-extension",
+              "cardId": 432,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
@@ -4522,287 +4522,287 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_212_priority-requisition",
+              "cardId": 424,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_215_security-net-optimization",
+              "cardId": 427,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_219_superior-net-barriers",
+              "cardId": 431,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_220_tycho-extension",
+              "cardId": 432,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_230_cortical-scanner",
+              "cardId": 442,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_232_crystal-wall",
+              "cardId": 444,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_239_endless-corridor",
+              "cardId": 451,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_245_fire-wall",
+              "cardId": 457,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_263_reinforced-wall",
+              "cardId": 475,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_265_rock-is-strong",
+              "cardId": 477,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -4821,91 +4821,91 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_193_corporate-coup",
+              "cardId": 405,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_281_accounts-receivable",
+              "cardId": 493,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_290_efficiency-experts",
+              "cardId": 502,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_311_braindance-campaign",
+              "cardId": 523,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_317_data-masons",
+              "cardId": 529,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_360_jerusalem-city-grid",
+              "cardId": 572,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -5251,7 +5251,7 @@
       },
       "cardRoles": [
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5280,7 +5280,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_212_priority-requisition",
+          "cardId": 424,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5303,7 +5303,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_215_security-net-optimization",
+          "cardId": 427,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5324,7 +5324,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_219_superior-net-barriers",
+          "cardId": 431,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5349,7 +5349,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5365,7 +5365,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_230_cortical-scanner",
+          "cardId": 442,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5383,7 +5383,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_232_crystal-wall",
+          "cardId": 444,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5400,7 +5400,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5417,7 +5417,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5434,42 +5434,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_239_endless-corridor",
-          "quantity": 2,
-          "status": "partial",
-          "roles": [
-            "etr_ice",
-            "ice",
-            "protect_hq",
-            "protect_rnd"
-          ],
-          "functionSignals": [
-            "corp_ice.end_run",
-            "corp_ice.multi_end_run",
-            "ice.etr"
-          ],
-          "strategyAnchors": [],
-          "warnings": []
-        },
-        {
-          "cardId": "onr_v1_245_fire-wall",
-          "quantity": 2,
-          "status": "partial",
-          "roles": [
-            "etr_ice",
-            "ice",
-            "protect_hq",
-            "protect_rnd"
-          ],
-          "functionSignals": [
-            "corp_ice.end_run",
-            "ice.etr"
-          ],
-          "strategyAnchors": [],
-          "warnings": []
-        },
-        {
-          "cardId": "onr_v1_263_reinforced-wall",
+          "cardId": 451,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5487,7 +5452,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_265_rock-is-strong",
+          "cardId": 457,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5504,7 +5469,42 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_278_wall-of-ice",
+          "cardId": 475,
+          "quantity": 2,
+          "status": "partial",
+          "roles": [
+            "etr_ice",
+            "ice",
+            "protect_hq",
+            "protect_rnd"
+          ],
+          "functionSignals": [
+            "corp_ice.end_run",
+            "corp_ice.multi_end_run",
+            "ice.etr"
+          ],
+          "strategyAnchors": [],
+          "warnings": []
+        },
+        {
+          "cardId": 477,
+          "quantity": 2,
+          "status": "partial",
+          "roles": [
+            "etr_ice",
+            "ice",
+            "protect_hq",
+            "protect_rnd"
+          ],
+          "functionSignals": [
+            "corp_ice.end_run",
+            "ice.etr"
+          ],
+          "strategyAnchors": [],
+          "warnings": []
+        },
+        {
+          "cardId": 490,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5531,7 +5531,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5548,7 +5548,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3,
           "status": "partial",
           "roles": [
@@ -5566,7 +5566,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5582,7 +5582,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3,
           "status": "partial",
           "roles": [
@@ -5600,7 +5600,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5615,7 +5615,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5641,7 +5641,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_311_braindance-campaign",
+          "cardId": 523,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5661,7 +5661,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_317_data-masons",
+          "cardId": 529,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5682,7 +5682,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_324_fortress-architects",
+          "cardId": 536,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5699,7 +5699,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_329_investment-firm",
+          "cardId": 541,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5714,7 +5714,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "cardId": 562,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5736,7 +5736,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "cardId": 567,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5759,7 +5759,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_360_jerusalem-city-grid",
+          "cardId": 572,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5782,7 +5782,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
+          "cardId": 578,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5808,7 +5808,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "cardId": 582,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -7984,20 +7984,20 @@
             "signals": [
               {
                 "kind": "generic",
-                "defenseId": "rez-exact-card-support:corp_onr_v1_370_tesseract-fort-construction_1",
+                "defenseId": "rez-exact-card-support:c3lh",
                 "serverId": "rd",
                 "phase": "rez_response",
                 "sourceDefinitionIds": [
-                  "onr_v1_370_tesseract-fort-construction"
+                  582
                 ],
                 "actionIds": [
-                  "corp.rez_card.corp_onr_v1_370_tesseract-fort-construction_1.rd.corp_onr_v1_370_tesseract-fort-construction_1"
+                  "corp.rez_card.c3lh.rd.c3lh"
                 ],
-                "targetIceInstanceId": "corp_onr_v1_370_tesseract-fort-construction_1",
+                "targetIceInstanceId": "c3lh",
                 "urgent": false,
                 "rezWindowVerdict": "productive",
                 "value": 120,
-                "evidenceCode": "corp_rez_structured_ice_support_matches:corp_onr_v1_263_reinforced-wall_1"
+                "evidenceCode": "corp_rez_structured_ice_support_matches:c2xp"
               }
             ],
             "centralAllocation": {
@@ -8079,7 +8079,7 @@
           "updatedAtStateVersion": 6,
           "evidenceRefs": [
             {
-              "code": "corp_rez_structured_ice_support_matches:corp_onr_v1_263_reinforced-wall_1",
+              "code": "corp_rez_structured_ice_support_matches:c2xp",
               "source": "visible_state"
             }
           ]
@@ -8094,7 +8094,7 @@
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.economy:defense-reserve%3Ahq%3Acorp_onr_v1_278_wall-of-ice_1",
+          "instanceId": "plan:corp.economy:defense-reserve%3Ahq%3Ac311",
           "stateVersion": 6,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
@@ -8109,7 +8109,7 @@
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install-defense-support:corp_onr_v1_370_tesseract-fort-construction_1:rd",
+          "campaignId": "campaign:corp.defend_servers:install-defense-support:c3lh:rd",
           "kind": "defense",
           "status": "blocked",
           "origin": {
@@ -8144,7 +8144,7 @@
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_263_reinforced-wall_1.hq.corp_onr_v1_263_reinforced-wall_1.0",
+          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.c2xp.hq.c2xp.0",
           "kind": "defense",
           "status": "blocked",
           "origin": {
@@ -8176,12 +8176,12 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_v1_263_reinforced-wall_1.hq.corp_onr_v1_263_reinforced-wall_1.0"
+            "corp_defense_exact_route_funding_required:hq:corp.install_card.c2xp.hq.c2xp.0"
           ]
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_278_wall-of-ice_1.hq.corp_onr_v1_278_wall-of-ice_1.0",
+          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.c311.hq.c311.0",
           "kind": "defense",
           "status": "blocked",
           "origin": {
@@ -8213,12 +8213,12 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_v1_278_wall-of-ice_1.hq.corp_onr_v1_278_wall-of-ice_1.0"
+            "corp_defense_exact_route_funding_required:hq:corp.install_card.c311.hq.c311.0"
           ]
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_263_reinforced-wall_1.rd.corp_onr_v1_263_reinforced-wall_1.0",
+          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.c2xp.rd.c2xp.0",
           "kind": "defense",
           "status": "blocked",
           "origin": {
@@ -8250,12 +8250,12 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_score_material_capacity_release:rd:corp.install_card.corp_onr_v1_263_reinforced-wall_1.rd.corp_onr_v1_263_reinforced-wall_1.0"
+            "corp_score_material_capacity_release:rd:corp.install_card.c2xp.rd.c2xp.0"
           ]
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_278_wall-of-ice_1.rd.corp_onr_v1_278_wall-of-ice_1.0",
+          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.c311.rd.c311.0",
           "kind": "defense",
           "status": "blocked",
           "origin": {
@@ -8287,19 +8287,19 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_defense_exact_route_funding_required:rd:corp.install_card.corp_onr_v1_278_wall-of-ice_1.rd.corp_onr_v1_278_wall-of-ice_1.0"
+            "corp_defense_exact_route_funding_required:rd:corp.install_card.c311.rd.c311.0"
           ]
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez-exact-card-support:corp_onr_v1_370_tesseract-fort-construction_1",
+          "campaignId": "campaign:corp.defend_servers:rez-exact-card-support:c3lh",
           "kind": "defense",
           "status": "continuable",
           "origin": {
             "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd",
-            "targetCardInstanceId": "corp_onr_v1_370_tesseract-fort-construction_1"
+            "targetCardInstanceId": "c3lh"
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 3,
@@ -8323,7 +8323,7 @@
             "campaign_requote:current",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_rez_structured_ice_support_matches:corp_onr_v1_263_reinforced-wall_1"
+            "corp_rez_structured_ice_support_matches:c2xp"
           ]
         }
       ],
@@ -8366,7 +8366,7 @@
                 "nodeId": "fnv1a:48a25e21",
                 "invocation": {
                   "semanticActionType": "corp_window.rez",
-                  "sourceCardInstanceId": "corp_onr_v1_370_tesseract-fort-construction_1",
+                  "sourceCardInstanceId": "c3lh",
                   "boundTargets": [
                     {
                       "slotId": "server",
@@ -8380,7 +8380,7 @@
                     }
                   ],
                   "boundChoices": [],
-                  "routeKey": "fnv1a:7b747541"
+                  "routeKey": "fnv1a:44f7a771"
                 },
                 "expectation": {
                   "nodeId": "fnv1a:48a25e21",
@@ -8427,7 +8427,7 @@
           "expectationId": "fnv1a:d5d5c527",
           "phaseId": "fnv1a:7cd84ef8",
           "nodeId": "fnv1a:48a25e21",
-          "routeKey": "fnv1a:7b747541",
+          "routeKey": "fnv1a:44f7a771",
           "expectedStateDeltaCodes": [
             "action_applied:corp_window.rez",
             "milestone_attempted:allocate_server_defense"
@@ -8442,13 +8442,13 @@
         "sourcePlanId": "fnv1a:ec041b08",
         "phaseId": "fnv1a:7cd84ef8",
         "nodeId": "fnv1a:48a25e21",
-        "routeKey": "fnv1a:7b747541",
+        "routeKey": "fnv1a:44f7a771",
         "stateIdentity": {
           "stateVersion": 6,
           "sideSafePlanningFingerprint": "fnv1a:dc5e8c3d"
         },
         "currentBinding": {
-          "actionId": "corp.rez_card.corp_onr_v1_370_tesseract-fort-construction_1.rd.corp_onr_v1_370_tesseract-fort-construction_1",
+          "actionId": "corp.rez_card.c3lh.rd.c3lh",
           "stateVersion": 6,
           "semanticActionSetFingerprint": "fnv1a:052ffcda",
           "invocationKey": "fnv1a:f6774b79"

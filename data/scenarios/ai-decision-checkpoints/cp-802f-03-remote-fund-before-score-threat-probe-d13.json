@@ -25,90 +25,90 @@
     "deckHash": "fnv1a:1a42a50c",
     "cards": [
       {
-        "cardId": "onr_classic_027_early-worm",
+        "cardId": 31,
         "quantity": 3
       },
       {
-        "cardId": "onr_classic_028_matador",
+        "cardId": 32,
         "quantity": 3
       },
       {
-        "cardId": "onr_classic_029_ms-todon",
+        "cardId": 33,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_030_psychic-friend",
+        "cardId": 34,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_031_rent-i-con",
+        "cardId": 35,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_032_schematics-search-engine",
+        "cardId": 36,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_033_superglue",
+        "cardId": 37,
         "quantity": 3
       },
       {
-        "cardId": "onr_classic_037_finders-keepers",
+        "cardId": 41,
         "quantity": 3
       },
       {
-        "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+        "cardId": 42,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_039_library-search",
+        "cardId": 43,
         "quantity": 3
       },
       {
-        "cardId": "onr_classic_040_meat-upgrade",
+        "cardId": 44,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_041_networking",
+        "cardId": 45,
         "quantity": 3
       },
       {
-        "cardId": "onr_classic_042_panzer-run",
+        "cardId": 46,
         "quantity": 3
       },
       {
-        "cardId": "onr_classic_043_running-interference",
+        "cardId": 47,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_045_elena-laskova",
+        "cardId": 49,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_046_executive-file-clerk",
+        "cardId": 50,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_047_little-black-box",
+        "cardId": 51,
         "quantity": 1
       },
       {
-        "cardId": "onr_classic_050_sandbox-dig",
+        "cardId": 54,
         "quantity": 2
       },
       {
-        "cardId": "onr_classic_051_vintage-camaro",
+        "cardId": 55,
         "quantity": 1
       },
       {
-        "cardId": "onr_classic_052_zetatech-portastation",
+        "cardId": 56,
         "quantity": 2
       }
     ]
   },
   "engine": {
     "stateVersion": 23,
-    "stateHash": "fnv1a:026e1a63",
+    "stateHash": "fnv1a:01040587",
     "testOnlyGameState": {
       "matchId": "match_802f73f6ccd2d6fe",
       "baseline": {
@@ -619,7 +619,7 @@
         },
         {
           "counter": 98,
-          "purpose": "hq_multiaccess:run_22:selection:0",
+          "purpose": "hq_multiaccess:22:selection:0",
           "value": 0.25865721923471885
         }
       ],
@@ -627,57 +627,57 @@
       "phase": "runner_action_phase",
       "timingPoint": "runner_action.main",
       "corp": {
-        "identity": "corp_corp_identity_001_0",
+        "identity": "cs",
         "credits": 7,
         "clicks": 0,
         "maxHandSize": 5,
         "badPublicity": 0,
         "hq": [
-          "corp_onr_v1_292_management-shake-up_1",
-          "corp_onr_v1_366_red-herrings_1",
-          "corp_onr_v1_309_bbs-whispering-campaign_1"
+          "c345",
+          "c3kl",
+          "c37x"
         ],
         "rd": [
-          "corp_onr_v1_281_accounts-receivable_1",
-          "corp_onr_proteus_062_lesley-major_1",
-          "corp_onr_v1_237_data-wall_2",
-          "corp_onr_v1_261_quandary_1",
-          "corp_onr_v1_261_quandary_2",
-          "corp_onr_v1_290_efficiency-experts_2",
-          "corp_onr_v1_237_data-wall_1",
-          "corp_onr_v1_245_fire-wall_1",
-          "corp_onr_v1_206_marine-arcology_1",
-          "corp_onr_v1_295_night-shift_1",
-          "corp_onr_v1_281_accounts-receivable_3",
-          "corp_onr_v1_214_project-babylon_1",
-          "corp_onr_v1_269_shotgun-wire_1",
-          "corp_onr_v1_290_efficiency-experts_3",
-          "corp_onr_proteus_008_project-zurich_2",
-          "corp_onr_v1_297_overtime-incentives_1",
-          "corp_onr_v1_304_systematic-layoffs_2",
-          "corp_onr_v1_347_vapor-ops_1",
-          "corp_onr_v1_245_fire-wall_2",
-          "corp_onr_v1_262_razor-wire_1",
-          "corp_onr_v1_304_systematic-layoffs_1",
-          "corp_onr_proteus_021_dog-pile_1",
-          "corp_onr_v1_231_cortical-scrub_2",
-          "corp_onr_v1_252_keeper_2",
-          "corp_onr_proteus_013_caryatid_1",
-          "corp_onr_v1_340_setup_2",
-          "corp_onr_v1_238_data-wall-2-0_2",
-          "corp_onr_v1_206_marine-arcology_2",
-          "corp_onr_v1_290_efficiency-experts_1",
-          "corp_onr_v1_309_bbs-whispering-campaign_2",
-          "corp_onr_v1_252_keeper_1",
-          "corp_onr_v1_195_corporate-retreat_1",
-          "corp_onr_v1_238_data-wall-2-0_1",
-          "corp_onr_v1_216_security-purge_1",
-          "corp_onr_v1_340_setup_1",
-          "corp_onr_v1_244_filter_1"
+          "c31p",
+          "cqt",
+          "c2ry",
+          "c2x9",
+          "c2xa",
+          "c33q",
+          "c2rx",
+          "c2tp",
+          "c2l1",
+          "c34t",
+          "c31r",
+          "c2mt",
+          "c2z1",
+          "c33r",
+          "ceu",
+          "c359",
+          "c36u",
+          "c3gd",
+          "c2tq",
+          "c2xh",
+          "c36t",
+          "chp",
+          "c2qm",
+          "c2va",
+          "cfx",
+          "c3eu",
+          "c2s6",
+          "c2l2",
+          "c33p",
+          "c37y",
+          "c2v9",
+          "c2il",
+          "c2s5",
+          "c2n9",
+          "c3et",
+          "c2th"
         ],
         "archives": [
-          "corp_onr_v1_281_accounts-receivable_2",
-          "corp_onr_v1_347_vapor-ops_2"
+          "c31q",
+          "c3ge"
         ],
         "scoreArea": [],
         "servers": [
@@ -692,7 +692,9 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": ["corp_onr_v1_244_filter_2"],
+            "ice": [
+              "c2ti"
+            ],
             "root": []
           },
           {
@@ -703,16 +705,20 @@
             "root": []
           },
           {
-            "id": "remote_1",
+            "id": "r1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": ["corp_onr_v1_231_cortical-scrub_1"],
-            "root": ["corp_onr_proteus_008_project-zurich_1"]
+            "ice": [
+              "c2ql"
+            ],
+            "root": [
+              "cet"
+            ]
           }
         ]
       },
       "runner": {
-        "identity": "runner_runner_identity_001_0",
+        "identity": "c3mg",
         "credits": 6,
         "clicks": 3,
         "maxHandSize": 5,
@@ -721,56 +727,58 @@
         "memoryUsed": 0,
         "memoryLimit": 4,
         "grip": [
-          "runner_onr_classic_045_elena-laskova_2",
-          "runner_onr_classic_051_vintage-camaro_1",
-          "runner_onr_classic_028_matador_1",
-          "runner_onr_classic_037_finders-keepers_1",
-          "runner_onr_classic_032_schematics-search-engine_2"
+          "cay",
+          "cc9",
+          "c75",
+          "c95",
+          "c82"
         ],
         "stack": [
-          "runner_onr_classic_043_running-interference_1",
-          "runner_onr_classic_031_rent-i-con_1",
-          "runner_onr_classic_043_running-interference_2",
-          "runner_onr_classic_052_zetatech-portastation_1",
-          "runner_onr_classic_039_library-search_3",
-          "runner_onr_classic_033_superglue_2",
-          "runner_onr_classic_038_gypsytm-schedule-analyzer_2",
-          "runner_onr_classic_039_library-search_2",
-          "runner_onr_classic_027_early-worm_1",
-          "runner_onr_classic_039_library-search_1",
-          "runner_onr_classic_030_psychic-friend_1",
-          "runner_onr_classic_028_matador_3",
-          "runner_onr_classic_029_ms-todon_1",
-          "runner_onr_classic_050_sandbox-dig_1",
-          "runner_onr_classic_038_gypsytm-schedule-analyzer_1",
-          "runner_onr_classic_027_early-worm_2",
-          "runner_onr_classic_031_rent-i-con_2",
-          "runner_onr_classic_037_finders-keepers_2",
-          "runner_onr_classic_042_panzer-run_2",
-          "runner_onr_classic_027_early-worm_3",
-          "runner_onr_classic_028_matador_2",
-          "runner_onr_classic_037_finders-keepers_3",
-          "runner_onr_classic_045_elena-laskova_1",
-          "runner_onr_classic_041_networking_2",
-          "runner_onr_classic_030_psychic-friend_2",
-          "runner_onr_classic_041_networking_1",
-          "runner_onr_classic_032_schematics-search-engine_1",
-          "runner_onr_classic_033_superglue_3",
-          "runner_onr_classic_042_panzer-run_1",
-          "runner_onr_classic_040_meat-upgrade_2",
-          "runner_onr_classic_040_meat-upgrade_1",
-          "runner_onr_classic_050_sandbox-dig_2",
-          "runner_onr_classic_047_little-black-box_1",
-          "runner_onr_classic_041_networking_3",
-          "runner_onr_classic_052_zetatech-portastation_2",
-          "runner_onr_classic_046_executive-file-clerk_1",
-          "runner_onr_classic_029_ms-todon_2",
-          "runner_onr_classic_042_panzer-run_3",
-          "runner_onr_classic_033_superglue_1",
-          "runner_onr_classic_046_executive-file-clerk_2"
+          "cah",
+          "c7t",
+          "cai",
+          "cch",
+          "c9n",
+          "c8a",
+          "c9e",
+          "c9m",
+          "c6x",
+          "c9l",
+          "c7l",
+          "c77",
+          "c7d",
+          "cc1",
+          "c9d",
+          "c6y",
+          "c7u",
+          "c96",
+          "caa",
+          "c6z",
+          "c76",
+          "c97",
+          "cax",
+          "ca2",
+          "c7m",
+          "ca1",
+          "c81",
+          "c8b",
+          "ca9",
+          "c9u",
+          "c9t",
+          "cc2",
+          "cbd",
+          "ca3",
+          "cci",
+          "cb5",
+          "c7e",
+          "cab",
+          "c89",
+          "cb6"
         ],
         "heap": [],
-        "scoreArea": ["corp_onr_proteus_007_project-venice_1"],
+        "scoreArea": [
+          "cel"
+        ],
         "rig": {
           "programs": [],
           "hardware": [],
@@ -782,9 +790,9 @@
         "removedFromGame": []
       },
       "cardInstances": {
-        "runner_runner_identity_001_0": {
-          "instanceId": "runner_runner_identity_001_0",
-          "definitionId": "runner_identity_001",
+        "c3mg": {
+          "instanceId": "c3mg",
+          "definitionId": 587,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -796,9 +804,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_corp_identity_001_0": {
-          "instanceId": "corp_corp_identity_001_0",
-          "definitionId": "corp_identity_001",
+        "cs": {
+          "instanceId": "cs",
+          "definitionId": 3,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -810,9 +818,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_027_early-worm_1": {
-          "instanceId": "runner_onr_classic_027_early-worm_1",
-          "definitionId": "onr_classic_027_early-worm",
+        "c6x": {
+          "instanceId": "c6x",
+          "definitionId": 31,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -824,9 +832,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_027_early-worm_2": {
-          "instanceId": "runner_onr_classic_027_early-worm_2",
-          "definitionId": "onr_classic_027_early-worm",
+        "c6y": {
+          "instanceId": "c6y",
+          "definitionId": 31,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -838,9 +846,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_027_early-worm_3": {
-          "instanceId": "runner_onr_classic_027_early-worm_3",
-          "definitionId": "onr_classic_027_early-worm",
+        "c6z": {
+          "instanceId": "c6z",
+          "definitionId": 31,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -852,9 +860,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_028_matador_1": {
-          "instanceId": "runner_onr_classic_028_matador_1",
-          "definitionId": "onr_classic_028_matador",
+        "c75": {
+          "instanceId": "c75",
+          "definitionId": 32,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -866,9 +874,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_028_matador_2": {
-          "instanceId": "runner_onr_classic_028_matador_2",
-          "definitionId": "onr_classic_028_matador",
+        "c76": {
+          "instanceId": "c76",
+          "definitionId": 32,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -880,9 +888,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_028_matador_3": {
-          "instanceId": "runner_onr_classic_028_matador_3",
-          "definitionId": "onr_classic_028_matador",
+        "c77": {
+          "instanceId": "c77",
+          "definitionId": 32,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -894,9 +902,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_029_ms-todon_1": {
-          "instanceId": "runner_onr_classic_029_ms-todon_1",
-          "definitionId": "onr_classic_029_ms-todon",
+        "c7d": {
+          "instanceId": "c7d",
+          "definitionId": 33,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -908,9 +916,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_029_ms-todon_2": {
-          "instanceId": "runner_onr_classic_029_ms-todon_2",
-          "definitionId": "onr_classic_029_ms-todon",
+        "c7e": {
+          "instanceId": "c7e",
+          "definitionId": 33,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -922,9 +930,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_030_psychic-friend_1": {
-          "instanceId": "runner_onr_classic_030_psychic-friend_1",
-          "definitionId": "onr_classic_030_psychic-friend",
+        "c7l": {
+          "instanceId": "c7l",
+          "definitionId": 34,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -936,9 +944,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_030_psychic-friend_2": {
-          "instanceId": "runner_onr_classic_030_psychic-friend_2",
-          "definitionId": "onr_classic_030_psychic-friend",
+        "c7m": {
+          "instanceId": "c7m",
+          "definitionId": 34,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -950,9 +958,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_031_rent-i-con_1": {
-          "instanceId": "runner_onr_classic_031_rent-i-con_1",
-          "definitionId": "onr_classic_031_rent-i-con",
+        "c7t": {
+          "instanceId": "c7t",
+          "definitionId": 35,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -964,9 +972,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_031_rent-i-con_2": {
-          "instanceId": "runner_onr_classic_031_rent-i-con_2",
-          "definitionId": "onr_classic_031_rent-i-con",
+        "c7u": {
+          "instanceId": "c7u",
+          "definitionId": 35,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -978,9 +986,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_032_schematics-search-engine_1": {
-          "instanceId": "runner_onr_classic_032_schematics-search-engine_1",
-          "definitionId": "onr_classic_032_schematics-search-engine",
+        "c81": {
+          "instanceId": "c81",
+          "definitionId": 36,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -992,9 +1000,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_032_schematics-search-engine_2": {
-          "instanceId": "runner_onr_classic_032_schematics-search-engine_2",
-          "definitionId": "onr_classic_032_schematics-search-engine",
+        "c82": {
+          "instanceId": "c82",
+          "definitionId": 36,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1006,9 +1014,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_033_superglue_1": {
-          "instanceId": "runner_onr_classic_033_superglue_1",
-          "definitionId": "onr_classic_033_superglue",
+        "c89": {
+          "instanceId": "c89",
+          "definitionId": 37,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1020,9 +1028,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_033_superglue_2": {
-          "instanceId": "runner_onr_classic_033_superglue_2",
-          "definitionId": "onr_classic_033_superglue",
+        "c8a": {
+          "instanceId": "c8a",
+          "definitionId": 37,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1034,9 +1042,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_033_superglue_3": {
-          "instanceId": "runner_onr_classic_033_superglue_3",
-          "definitionId": "onr_classic_033_superglue",
+        "c8b": {
+          "instanceId": "c8b",
+          "definitionId": 37,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1048,9 +1056,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_037_finders-keepers_1": {
-          "instanceId": "runner_onr_classic_037_finders-keepers_1",
-          "definitionId": "onr_classic_037_finders-keepers",
+        "c95": {
+          "instanceId": "c95",
+          "definitionId": 41,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1062,9 +1070,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_037_finders-keepers_2": {
-          "instanceId": "runner_onr_classic_037_finders-keepers_2",
-          "definitionId": "onr_classic_037_finders-keepers",
+        "c96": {
+          "instanceId": "c96",
+          "definitionId": 41,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1076,9 +1084,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_037_finders-keepers_3": {
-          "instanceId": "runner_onr_classic_037_finders-keepers_3",
-          "definitionId": "onr_classic_037_finders-keepers",
+        "c97": {
+          "instanceId": "c97",
+          "definitionId": 41,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1090,9 +1098,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_038_gypsytm-schedule-analyzer_1": {
-          "instanceId": "runner_onr_classic_038_gypsytm-schedule-analyzer_1",
-          "definitionId": "onr_classic_038_gypsytm-schedule-analyzer",
+        "c9d": {
+          "instanceId": "c9d",
+          "definitionId": 42,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1104,9 +1112,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_038_gypsytm-schedule-analyzer_2": {
-          "instanceId": "runner_onr_classic_038_gypsytm-schedule-analyzer_2",
-          "definitionId": "onr_classic_038_gypsytm-schedule-analyzer",
+        "c9e": {
+          "instanceId": "c9e",
+          "definitionId": 42,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1118,9 +1126,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_039_library-search_1": {
-          "instanceId": "runner_onr_classic_039_library-search_1",
-          "definitionId": "onr_classic_039_library-search",
+        "c9l": {
+          "instanceId": "c9l",
+          "definitionId": 43,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1132,9 +1140,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_039_library-search_2": {
-          "instanceId": "runner_onr_classic_039_library-search_2",
-          "definitionId": "onr_classic_039_library-search",
+        "c9m": {
+          "instanceId": "c9m",
+          "definitionId": 43,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1146,9 +1154,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_039_library-search_3": {
-          "instanceId": "runner_onr_classic_039_library-search_3",
-          "definitionId": "onr_classic_039_library-search",
+        "c9n": {
+          "instanceId": "c9n",
+          "definitionId": 43,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1160,9 +1168,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_040_meat-upgrade_1": {
-          "instanceId": "runner_onr_classic_040_meat-upgrade_1",
-          "definitionId": "onr_classic_040_meat-upgrade",
+        "c9t": {
+          "instanceId": "c9t",
+          "definitionId": 44,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1174,9 +1182,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_040_meat-upgrade_2": {
-          "instanceId": "runner_onr_classic_040_meat-upgrade_2",
-          "definitionId": "onr_classic_040_meat-upgrade",
+        "c9u": {
+          "instanceId": "c9u",
+          "definitionId": 44,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1188,9 +1196,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_041_networking_1": {
-          "instanceId": "runner_onr_classic_041_networking_1",
-          "definitionId": "onr_classic_041_networking",
+        "ca1": {
+          "instanceId": "ca1",
+          "definitionId": 45,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1202,9 +1210,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_041_networking_2": {
-          "instanceId": "runner_onr_classic_041_networking_2",
-          "definitionId": "onr_classic_041_networking",
+        "ca2": {
+          "instanceId": "ca2",
+          "definitionId": 45,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1216,9 +1224,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_041_networking_3": {
-          "instanceId": "runner_onr_classic_041_networking_3",
-          "definitionId": "onr_classic_041_networking",
+        "ca3": {
+          "instanceId": "ca3",
+          "definitionId": 45,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1230,9 +1238,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_042_panzer-run_1": {
-          "instanceId": "runner_onr_classic_042_panzer-run_1",
-          "definitionId": "onr_classic_042_panzer-run",
+        "ca9": {
+          "instanceId": "ca9",
+          "definitionId": 46,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1244,9 +1252,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_042_panzer-run_2": {
-          "instanceId": "runner_onr_classic_042_panzer-run_2",
-          "definitionId": "onr_classic_042_panzer-run",
+        "caa": {
+          "instanceId": "caa",
+          "definitionId": 46,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1258,9 +1266,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_042_panzer-run_3": {
-          "instanceId": "runner_onr_classic_042_panzer-run_3",
-          "definitionId": "onr_classic_042_panzer-run",
+        "cab": {
+          "instanceId": "cab",
+          "definitionId": 46,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1272,9 +1280,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_043_running-interference_1": {
-          "instanceId": "runner_onr_classic_043_running-interference_1",
-          "definitionId": "onr_classic_043_running-interference",
+        "cah": {
+          "instanceId": "cah",
+          "definitionId": 47,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1286,9 +1294,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_043_running-interference_2": {
-          "instanceId": "runner_onr_classic_043_running-interference_2",
-          "definitionId": "onr_classic_043_running-interference",
+        "cai": {
+          "instanceId": "cai",
+          "definitionId": 47,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1300,9 +1308,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_045_elena-laskova_1": {
-          "instanceId": "runner_onr_classic_045_elena-laskova_1",
-          "definitionId": "onr_classic_045_elena-laskova",
+        "cax": {
+          "instanceId": "cax",
+          "definitionId": 49,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1314,9 +1322,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_045_elena-laskova_2": {
-          "instanceId": "runner_onr_classic_045_elena-laskova_2",
-          "definitionId": "onr_classic_045_elena-laskova",
+        "cay": {
+          "instanceId": "cay",
+          "definitionId": 49,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1328,9 +1336,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_046_executive-file-clerk_1": {
-          "instanceId": "runner_onr_classic_046_executive-file-clerk_1",
-          "definitionId": "onr_classic_046_executive-file-clerk",
+        "cb5": {
+          "instanceId": "cb5",
+          "definitionId": 50,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1342,9 +1350,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_046_executive-file-clerk_2": {
-          "instanceId": "runner_onr_classic_046_executive-file-clerk_2",
-          "definitionId": "onr_classic_046_executive-file-clerk",
+        "cb6": {
+          "instanceId": "cb6",
+          "definitionId": 50,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1356,9 +1364,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_047_little-black-box_1": {
-          "instanceId": "runner_onr_classic_047_little-black-box_1",
-          "definitionId": "onr_classic_047_little-black-box",
+        "cbd": {
+          "instanceId": "cbd",
+          "definitionId": 51,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1370,9 +1378,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_050_sandbox-dig_1": {
-          "instanceId": "runner_onr_classic_050_sandbox-dig_1",
-          "definitionId": "onr_classic_050_sandbox-dig",
+        "cc1": {
+          "instanceId": "cc1",
+          "definitionId": 54,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1384,9 +1392,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_050_sandbox-dig_2": {
-          "instanceId": "runner_onr_classic_050_sandbox-dig_2",
-          "definitionId": "onr_classic_050_sandbox-dig",
+        "cc2": {
+          "instanceId": "cc2",
+          "definitionId": 54,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1398,9 +1406,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_051_vintage-camaro_1": {
-          "instanceId": "runner_onr_classic_051_vintage-camaro_1",
-          "definitionId": "onr_classic_051_vintage-camaro",
+        "cc9": {
+          "instanceId": "cc9",
+          "definitionId": 55,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1412,9 +1420,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_052_zetatech-portastation_1": {
-          "instanceId": "runner_onr_classic_052_zetatech-portastation_1",
-          "definitionId": "onr_classic_052_zetatech-portastation",
+        "cch": {
+          "instanceId": "cch",
+          "definitionId": 56,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1426,9 +1434,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_052_zetatech-portastation_2": {
-          "instanceId": "runner_onr_classic_052_zetatech-portastation_2",
-          "definitionId": "onr_classic_052_zetatech-portastation",
+        "cci": {
+          "instanceId": "cci",
+          "definitionId": 56,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1440,9 +1448,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_007_project-venice_1": {
-          "instanceId": "corp_onr_proteus_007_project-venice_1",
-          "definitionId": "onr_proteus_007_project-venice",
+        "cel": {
+          "instanceId": "cel",
+          "definitionId": 65,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1454,24 +1462,24 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_008_project-zurich_1": {
-          "instanceId": "corp_onr_proteus_008_project-zurich_1",
-          "definitionId": "onr_proteus_008_project-zurich",
+        "cet": {
+          "instanceId": "cet",
+          "definitionId": 66,
           "owner": "corp",
           "controller": "corp",
           "zone": {
             "side": "corp",
             "zone": "serverRoot",
-            "serverId": "remote_1"
+            "serverId": "r1"
           },
           "faceup": false,
           "rezzed": false,
           "advancementCounters": 2,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_008_project-zurich_2": {
-          "instanceId": "corp_onr_proteus_008_project-zurich_2",
-          "definitionId": "onr_proteus_008_project-zurich",
+        "ceu": {
+          "instanceId": "ceu",
+          "definitionId": 66,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1483,9 +1491,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_013_caryatid_1": {
-          "instanceId": "corp_onr_proteus_013_caryatid_1",
-          "definitionId": "onr_proteus_013_caryatid",
+        "cfx": {
+          "instanceId": "cfx",
+          "definitionId": 71,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1497,9 +1505,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_021_dog-pile_1": {
-          "instanceId": "corp_onr_proteus_021_dog-pile_1",
-          "definitionId": "onr_proteus_021_dog-pile",
+        "chp": {
+          "instanceId": "chp",
+          "definitionId": 79,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1511,9 +1519,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_062_lesley-major_1": {
-          "instanceId": "corp_onr_proteus_062_lesley-major_1",
-          "definitionId": "onr_proteus_062_lesley-major",
+        "cqt": {
+          "instanceId": "cqt",
+          "definitionId": 120,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1525,9 +1533,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_195_corporate-retreat_1": {
-          "instanceId": "corp_onr_v1_195_corporate-retreat_1",
-          "definitionId": "onr_v1_195_corporate-retreat",
+        "c2il": {
+          "instanceId": "c2il",
+          "definitionId": 407,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1539,9 +1547,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_206_marine-arcology_1": {
-          "instanceId": "corp_onr_v1_206_marine-arcology_1",
-          "definitionId": "onr_v1_206_marine-arcology",
+        "c2l1": {
+          "instanceId": "c2l1",
+          "definitionId": 418,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1553,9 +1561,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_206_marine-arcology_2": {
-          "instanceId": "corp_onr_v1_206_marine-arcology_2",
-          "definitionId": "onr_v1_206_marine-arcology",
+        "c2l2": {
+          "instanceId": "c2l2",
+          "definitionId": 418,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1567,9 +1575,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_214_project-babylon_1": {
-          "instanceId": "corp_onr_v1_214_project-babylon_1",
-          "definitionId": "onr_v1_214_project-babylon",
+        "c2mt": {
+          "instanceId": "c2mt",
+          "definitionId": 426,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1581,9 +1589,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_216_security-purge_1": {
-          "instanceId": "corp_onr_v1_216_security-purge_1",
-          "definitionId": "onr_v1_216_security-purge",
+        "c2n9": {
+          "instanceId": "c2n9",
+          "definitionId": 428,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1595,24 +1603,24 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_231_cortical-scrub_1": {
-          "instanceId": "corp_onr_v1_231_cortical-scrub_1",
-          "definitionId": "onr_v1_231_cortical-scrub",
+        "c2ql": {
+          "instanceId": "c2ql",
+          "definitionId": 443,
           "owner": "corp",
           "controller": "corp",
           "zone": {
             "side": "corp",
             "zone": "serverIce",
-            "serverId": "remote_1"
+            "serverId": "r1"
           },
           "faceup": false,
           "rezzed": false,
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_231_cortical-scrub_2": {
-          "instanceId": "corp_onr_v1_231_cortical-scrub_2",
-          "definitionId": "onr_v1_231_cortical-scrub",
+        "c2qm": {
+          "instanceId": "c2qm",
+          "definitionId": 443,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1624,9 +1632,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_237_data-wall_1": {
-          "instanceId": "corp_onr_v1_237_data-wall_1",
-          "definitionId": "onr_v1_237_data-wall",
+        "c2rx": {
+          "instanceId": "c2rx",
+          "definitionId": 449,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1638,9 +1646,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_237_data-wall_2": {
-          "instanceId": "corp_onr_v1_237_data-wall_2",
-          "definitionId": "onr_v1_237_data-wall",
+        "c2ry": {
+          "instanceId": "c2ry",
+          "definitionId": 449,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1652,9 +1660,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_238_data-wall-2-0_1": {
-          "instanceId": "corp_onr_v1_238_data-wall-2-0_1",
-          "definitionId": "onr_v1_238_data-wall-2-0",
+        "c2s5": {
+          "instanceId": "c2s5",
+          "definitionId": 450,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1666,9 +1674,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_238_data-wall-2-0_2": {
-          "instanceId": "corp_onr_v1_238_data-wall-2-0_2",
-          "definitionId": "onr_v1_238_data-wall-2-0",
+        "c2s6": {
+          "instanceId": "c2s6",
+          "definitionId": 450,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1680,9 +1688,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_244_filter_1": {
-          "instanceId": "corp_onr_v1_244_filter_1",
-          "definitionId": "onr_v1_244_filter",
+        "c2th": {
+          "instanceId": "c2th",
+          "definitionId": 456,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1694,9 +1702,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_244_filter_2": {
-          "instanceId": "corp_onr_v1_244_filter_2",
-          "definitionId": "onr_v1_244_filter",
+        "c2ti": {
+          "instanceId": "c2ti",
+          "definitionId": 456,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1709,9 +1717,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_245_fire-wall_1": {
-          "instanceId": "corp_onr_v1_245_fire-wall_1",
-          "definitionId": "onr_v1_245_fire-wall",
+        "c2tp": {
+          "instanceId": "c2tp",
+          "definitionId": 457,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1723,9 +1731,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_245_fire-wall_2": {
-          "instanceId": "corp_onr_v1_245_fire-wall_2",
-          "definitionId": "onr_v1_245_fire-wall",
+        "c2tq": {
+          "instanceId": "c2tq",
+          "definitionId": 457,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1737,9 +1745,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_252_keeper_1": {
-          "instanceId": "corp_onr_v1_252_keeper_1",
-          "definitionId": "onr_v1_252_keeper",
+        "c2v9": {
+          "instanceId": "c2v9",
+          "definitionId": 464,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1751,9 +1759,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_252_keeper_2": {
-          "instanceId": "corp_onr_v1_252_keeper_2",
-          "definitionId": "onr_v1_252_keeper",
+        "c2va": {
+          "instanceId": "c2va",
+          "definitionId": 464,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1765,9 +1773,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_261_quandary_1": {
-          "instanceId": "corp_onr_v1_261_quandary_1",
-          "definitionId": "onr_v1_261_quandary",
+        "c2x9": {
+          "instanceId": "c2x9",
+          "definitionId": 473,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1779,9 +1787,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_261_quandary_2": {
-          "instanceId": "corp_onr_v1_261_quandary_2",
-          "definitionId": "onr_v1_261_quandary",
+        "c2xa": {
+          "instanceId": "c2xa",
+          "definitionId": 473,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1793,9 +1801,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_262_razor-wire_1": {
-          "instanceId": "corp_onr_v1_262_razor-wire_1",
-          "definitionId": "onr_v1_262_razor-wire",
+        "c2xh": {
+          "instanceId": "c2xh",
+          "definitionId": 474,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1807,9 +1815,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_269_shotgun-wire_1": {
-          "instanceId": "corp_onr_v1_269_shotgun-wire_1",
-          "definitionId": "onr_v1_269_shotgun-wire",
+        "c2z1": {
+          "instanceId": "c2z1",
+          "definitionId": 481,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1821,9 +1829,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_281_accounts-receivable_1": {
-          "instanceId": "corp_onr_v1_281_accounts-receivable_1",
-          "definitionId": "onr_v1_281_accounts-receivable",
+        "c31p": {
+          "instanceId": "c31p",
+          "definitionId": 493,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1835,9 +1843,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_281_accounts-receivable_2": {
-          "instanceId": "corp_onr_v1_281_accounts-receivable_2",
-          "definitionId": "onr_v1_281_accounts-receivable",
+        "c31q": {
+          "instanceId": "c31q",
+          "definitionId": 493,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1849,9 +1857,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_281_accounts-receivable_3": {
-          "instanceId": "corp_onr_v1_281_accounts-receivable_3",
-          "definitionId": "onr_v1_281_accounts-receivable",
+        "c31r": {
+          "instanceId": "c31r",
+          "definitionId": 493,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1863,9 +1871,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_290_efficiency-experts_1": {
-          "instanceId": "corp_onr_v1_290_efficiency-experts_1",
-          "definitionId": "onr_v1_290_efficiency-experts",
+        "c33p": {
+          "instanceId": "c33p",
+          "definitionId": 502,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1877,9 +1885,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_290_efficiency-experts_2": {
-          "instanceId": "corp_onr_v1_290_efficiency-experts_2",
-          "definitionId": "onr_v1_290_efficiency-experts",
+        "c33q": {
+          "instanceId": "c33q",
+          "definitionId": 502,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1891,9 +1899,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_290_efficiency-experts_3": {
-          "instanceId": "corp_onr_v1_290_efficiency-experts_3",
-          "definitionId": "onr_v1_290_efficiency-experts",
+        "c33r": {
+          "instanceId": "c33r",
+          "definitionId": 502,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1905,9 +1913,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_292_management-shake-up_1": {
-          "instanceId": "corp_onr_v1_292_management-shake-up_1",
-          "definitionId": "onr_v1_292_management-shake-up",
+        "c345": {
+          "instanceId": "c345",
+          "definitionId": 504,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1919,9 +1927,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_295_night-shift_1": {
-          "instanceId": "corp_onr_v1_295_night-shift_1",
-          "definitionId": "onr_v1_295_night-shift",
+        "c34t": {
+          "instanceId": "c34t",
+          "definitionId": 507,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1933,9 +1941,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_297_overtime-incentives_1": {
-          "instanceId": "corp_onr_v1_297_overtime-incentives_1",
-          "definitionId": "onr_v1_297_overtime-incentives",
+        "c359": {
+          "instanceId": "c359",
+          "definitionId": 509,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1947,9 +1955,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_304_systematic-layoffs_1": {
-          "instanceId": "corp_onr_v1_304_systematic-layoffs_1",
-          "definitionId": "onr_v1_304_systematic-layoffs",
+        "c36t": {
+          "instanceId": "c36t",
+          "definitionId": 516,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1961,9 +1969,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_304_systematic-layoffs_2": {
-          "instanceId": "corp_onr_v1_304_systematic-layoffs_2",
-          "definitionId": "onr_v1_304_systematic-layoffs",
+        "c36u": {
+          "instanceId": "c36u",
+          "definitionId": 516,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1975,9 +1983,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_309_bbs-whispering-campaign_1": {
-          "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_1",
-          "definitionId": "onr_v1_309_bbs-whispering-campaign",
+        "c37x": {
+          "instanceId": "c37x",
+          "definitionId": 521,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1989,9 +1997,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_309_bbs-whispering-campaign_2": {
-          "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_2",
-          "definitionId": "onr_v1_309_bbs-whispering-campaign",
+        "c37y": {
+          "instanceId": "c37y",
+          "definitionId": 521,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2003,9 +2011,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_340_setup_1": {
-          "instanceId": "corp_onr_v1_340_setup_1",
-          "definitionId": "onr_v1_340_setup",
+        "c3et": {
+          "instanceId": "c3et",
+          "definitionId": 552,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2017,9 +2025,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_340_setup_2": {
-          "instanceId": "corp_onr_v1_340_setup_2",
-          "definitionId": "onr_v1_340_setup",
+        "c3eu": {
+          "instanceId": "c3eu",
+          "definitionId": 552,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2031,9 +2039,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_347_vapor-ops_1": {
-          "instanceId": "corp_onr_v1_347_vapor-ops_1",
-          "definitionId": "onr_v1_347_vapor-ops",
+        "c3gd": {
+          "instanceId": "c3gd",
+          "definitionId": 559,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2045,9 +2053,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_347_vapor-ops_2": {
-          "instanceId": "corp_onr_v1_347_vapor-ops_2",
-          "definitionId": "onr_v1_347_vapor-ops",
+        "c3ge": {
+          "instanceId": "c3ge",
+          "definitionId": 559,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2059,9 +2067,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_366_red-herrings_1": {
-          "instanceId": "corp_onr_v1_366_red-herrings_1",
-          "definitionId": "onr_v1_366_red-herrings",
+        "c3kl": {
+          "instanceId": "c3kl",
+          "definitionId": 578,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2091,7 +2099,7 @@
       "deckMetadata": {
         "runner": {
           "side": "runner",
-          "identityCardId": "runner_identity_001",
+          "identityCardId": 587,
           "deckName": "Classic Runner - Prep Economy Pressure",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2101,7 +2109,7 @@
         },
         "corp": {
           "side": "corp",
-          "identityCardId": "corp_identity_001",
+          "identityCardId": 3,
           "deckName": "Fast Advance, Baby",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2166,7 +2174,7 @@
     },
     "eventPrefix": [
       {
-        "eventId": "evt_0",
+        "eventId": 1,
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
@@ -2188,7 +2196,7 @@
           "corpDeckId": "local_corp_mr96xg94_snapshot_v0_6",
           "runnerDeck": {
             "side": "runner",
-            "identityCardId": "runner_identity_001",
+            "identityCardId": 587,
             "deckName": "Classic Runner - Prep Economy Pressure",
             "cardPoolSnapshotId": "card-snapshot-0.8",
             "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2198,7 +2206,7 @@
           },
           "corpDeck": {
             "side": "corp",
-            "identityCardId": "corp_identity_001",
+            "identityCardId": 3,
             "deckName": "Fast Advance, Baby",
             "cardPoolSnapshotId": "card-snapshot-0.8",
             "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2211,7 +2219,7 @@
         }
       },
       {
-        "eventId": "evt_1",
+        "eventId": 2,
         "type": "resolve_choice",
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
@@ -2244,7 +2252,7 @@
         }
       },
       {
-        "eventId": "evt_2",
+        "eventId": 3,
         "type": "resolve_choice",
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
@@ -2277,7 +2285,7 @@
         }
       },
       {
-        "eventId": "evt_3",
+        "eventId": 4,
         "type": "mandatory_draw",
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
@@ -2293,7 +2301,7 @@
         }
       },
       {
-        "eventId": "evt_4",
+        "eventId": 5,
         "type": "play_operation",
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
@@ -2308,13 +2316,13 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "onr_v1_281_accounts-receivable.effect.0.gain_credits",
+              "effectId": "493.effect.0.gain_credits",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
               "amount": 9,
               "reason": "card_resolver",
-              "sourceDefinitionId": "onr_v1_281_accounts-receivable",
+              "sourceDefinitionId": 493,
               "sourceTitle": "Accounts Receivable"
             }
           ],
@@ -2327,12 +2335,12 @@
           "visibility": {
             "class": "hidden_info_barrier"
           },
-          "cardDefinitionId": "onr_v1_281_accounts-receivable",
+          "cardDefinitionId": 493,
           "title": "Accounts Receivable"
         }
       },
       {
-        "eventId": "evt_5",
+        "eventId": 6,
         "type": "install_card",
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
@@ -2361,7 +2369,7 @@
         }
       },
       {
-        "eventId": "evt_6",
+        "eventId": 7,
         "type": "install_card",
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
@@ -2390,7 +2398,7 @@
         }
       },
       {
-        "eventId": "evt_7",
+        "eventId": 8,
         "type": "end_turn",
         "stateVersionBefore": 6,
         "stateVersionAfter": 7,
@@ -2406,7 +2414,7 @@
         }
       },
       {
-        "eventId": "evt_8",
+        "eventId": 9,
         "type": "start_run",
         "stateVersionBefore": 7,
         "stateVersionAfter": 8,
@@ -2435,7 +2443,7 @@
         }
       },
       {
-        "eventId": "evt_9",
+        "eventId": 10,
         "type": "access_card",
         "stateVersionBefore": 8,
         "stateVersionAfter": 9,
@@ -2457,12 +2465,12 @@
           "visibility": {
             "class": "hidden_info_barrier"
           },
-          "cardDefinitionId": "onr_v1_347_vapor-ops",
+          "cardDefinitionId": 559,
           "title": "Vapor Ops"
         }
       },
       {
-        "eventId": "evt_10",
+        "eventId": 11,
         "type": "trash_accessed_card",
         "stateVersionBefore": 9,
         "stateVersionAfter": 10,
@@ -2484,12 +2492,12 @@
           "visibility": {
             "class": "hidden_info_barrier"
           },
-          "cardDefinitionId": "onr_v1_347_vapor-ops",
+          "cardDefinitionId": 559,
           "title": "Vapor Ops"
         }
       },
       {
-        "eventId": "evt_11",
+        "eventId": 12,
         "type": "gain_credit",
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
@@ -2513,7 +2521,7 @@
         }
       },
       {
-        "eventId": "evt_12",
+        "eventId": 13,
         "type": "start_run",
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
@@ -2542,7 +2550,7 @@
         }
       },
       {
-        "eventId": "evt_13",
+        "eventId": 14,
         "type": "access_card",
         "stateVersionBefore": 12,
         "stateVersionAfter": 13,
@@ -2564,12 +2572,12 @@
           "visibility": {
             "class": "hidden_info_barrier"
           },
-          "cardDefinitionId": "onr_proteus_007_project-venice",
+          "cardDefinitionId": 65,
           "title": "Project Venice"
         }
       },
       {
-        "eventId": "evt_14",
+        "eventId": 15,
         "type": "steal_agenda",
         "stateVersionBefore": 13,
         "stateVersionAfter": 14,
@@ -2589,12 +2597,12 @@
           "visibility": {
             "class": "hidden_info_barrier"
           },
-          "cardDefinitionId": "onr_proteus_007_project-venice",
+          "cardDefinitionId": 65,
           "title": "Project Venice"
         }
       },
       {
-        "eventId": "evt_15",
+        "eventId": 16,
         "type": "gain_credit",
         "stateVersionBefore": 14,
         "stateVersionAfter": 15,
@@ -2618,7 +2626,7 @@
         }
       },
       {
-        "eventId": "evt_16",
+        "eventId": 17,
         "type": "end_turn",
         "stateVersionBefore": 15,
         "stateVersionAfter": 16,
@@ -2634,7 +2642,7 @@
         }
       },
       {
-        "eventId": "evt_17",
+        "eventId": 18,
         "type": "mandatory_draw",
         "stateVersionBefore": 16,
         "stateVersionAfter": 17,
@@ -2650,7 +2658,7 @@
         }
       },
       {
-        "eventId": "evt_18",
+        "eventId": 19,
         "type": "install_card",
         "stateVersionBefore": 17,
         "stateVersionAfter": 18,
@@ -2683,7 +2691,7 @@
         }
       },
       {
-        "eventId": "evt_19",
+        "eventId": 20,
         "type": "advance_card",
         "stateVersionBefore": 18,
         "stateVersionAfter": 19,
@@ -2709,7 +2717,7 @@
         }
       },
       {
-        "eventId": "evt_20",
+        "eventId": 21,
         "type": "advance_card",
         "stateVersionBefore": 19,
         "stateVersionAfter": 20,
@@ -2735,7 +2743,7 @@
         }
       },
       {
-        "eventId": "evt_21",
+        "eventId": 22,
         "type": "end_turn",
         "stateVersionBefore": 20,
         "stateVersionAfter": 21,
@@ -2751,7 +2759,7 @@
         }
       },
       {
-        "eventId": "evt_22",
+        "eventId": 23,
         "type": "start_run",
         "stateVersionBefore": 21,
         "stateVersionAfter": 22,
@@ -2780,7 +2788,7 @@
         }
       },
       {
-        "eventId": "evt_23",
+        "eventId": 24,
         "type": "access_card",
         "stateVersionBefore": 22,
         "stateVersionAfter": 23,
@@ -2801,7 +2809,7 @@
           "visibility": {
             "class": "hidden_info_barrier"
           },
-          "cardDefinitionId": "onr_v1_292_management-shake-up",
+          "cardDefinitionId": 504,
           "title": "Management Shake-Up"
         }
       }
@@ -3073,7 +3081,9 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": ["continued:runner.hq_pressure"]
+          "evidence": [
+            "continued:runner.hq_pressure"
+          ]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -3335,7 +3345,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3495,7 +3508,7 @@
               ],
               "targetVector": {
                 "kind": "remote",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_contest",
@@ -3564,7 +3577,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3644,7 +3660,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3666,7 +3685,9 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": ["supporting_only:runner.economy_first"],
+              "runtimeBlockers": [
+                "supporting_only:runner.economy_first"
+              ],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -3726,7 +3747,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3799,7 +3823,7 @@
               ],
               "targetVector": {
                 "kind": "remote",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_trash",
@@ -3899,7 +3923,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3949,13 +3976,19 @@
     "acceptableActions": [
       {
         "type": "start_run",
-        "targetServerId": "remote_1"
+        "targetServerId": "r1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.contest_remote"],
-      "acceptableCapabilities": ["contest_remote"],
-      "requiredAssessmentEvidence": ["runner_direct_run_converts_now:remote_1"]
+      "acceptablePlanKinds": [
+        "runner.contest_remote"
+      ],
+      "acceptableCapabilities": [
+        "contest_remote"
+      ],
+      "requiredAssessmentEvidence": [
+        "runner_direct_run_converts_now:r1"
+      ]
     }
   }
 }

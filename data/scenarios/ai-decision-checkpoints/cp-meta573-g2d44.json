@@ -18,10 +18,10 @@
       "phase": "run",
       "own": {
         "identity": {
-          "instanceId": "runner_runner_identity_001_0",
+          "instanceId": "c3mg",
           "known": true,
           "title": "Runner",
-          "definitionId": "runner_identity_001",
+          "definitionId": 587,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -36,10 +36,10 @@
         "agendaPoints": 0,
         "gripOrHq": [
           {
-            "instanceId": "runner_onr_v1_083_desperate-competitor_1",
+            "instanceId": "c1tl",
             "known": true,
             "title": "Desperate Competitor",
-            "definitionId": "onr_v1_083_desperate-competitor",
+            "definitionId": 295,
             "type": "event",
             "subtypes": [],
             "rulesText": "Play only if you liberated any Gray Ops agendas this turn. Score 1 agenda point.",
@@ -57,10 +57,10 @@
         "stackOrRdCount": 37,
         "heapOrArchives": [
           {
-            "instanceId": "runner_onr_v1_114_temple-microcode-outlet_1",
+            "instanceId": "c20h",
             "known": true,
             "title": "Temple Microcode Outlet",
-            "definitionId": "onr_v1_114_temple-microcode-outlet",
+            "definitionId": 326,
             "type": "event",
             "subtypes": [
               "bbs"
@@ -77,10 +77,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_v1_107_romp-through-hq_2",
+            "instanceId": "c1yy",
             "known": true,
             "title": "Romp through HQ",
-            "definitionId": "onr_v1_107_romp-through-hq",
+            "definitionId": 319,
             "type": "event",
             "subtypes": [
               "sabotage"
@@ -97,10 +97,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_v1_118_weather-to-finance-pipe_1",
+            "instanceId": "c21d",
             "known": true,
             "title": "Weather-to-Finance Pipe",
-            "definitionId": "onr_v1_118_weather-to-finance-pipe",
+            "definitionId": 330,
             "type": "event",
             "subtypes": [
               "sabotage"
@@ -117,10 +117,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_v1_115_terrorist-reprisal_1",
+            "instanceId": "c20p",
             "known": true,
             "title": "Terrorist Reprisal",
-            "definitionId": "onr_v1_115_terrorist-reprisal",
+            "definitionId": 327,
             "type": "event",
             "subtypes": [],
             "rulesText": "Play only if the Corp scored any Black Ops agendas during its last turn. The Corp discards five cards at random.",
@@ -138,10 +138,10 @@
         "scoreArea": [],
         "rig": [
           {
-            "instanceId": "runner_onr_v1_047_pile-driver_1",
+            "instanceId": "c1ll",
             "known": true,
             "title": "Pile Driver",
-            "definitionId": "onr_v1_047_pile-driver",
+            "definitionId": 259,
             "type": "program",
             "subtypes": [
               "icebreaker",
@@ -157,10 +157,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_v1_016_cyfermaster_1",
+            "instanceId": "c1ep",
             "known": true,
             "title": "Cyfermaster™",
-            "definitionId": "onr_v1_016_cyfermaster",
+            "definitionId": 228,
             "type": "program",
             "subtypes": [
               "icebreaker"
@@ -175,10 +175,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_v1_072_wild-card_2",
+            "instanceId": "c1r6",
             "known": true,
             "title": "Wild Card",
-            "definitionId": "onr_v1_072_wild-card",
+            "definitionId": 284,
             "type": "program",
             "subtypes": [
               "icebreaker",
@@ -217,10 +217,10 @@
       },
       "opponent": {
         "identity": {
-          "instanceId": "corp_corp_identity_001_0",
+          "instanceId": "cs",
           "known": true,
           "title": "Korp",
-          "definitionId": "corp_identity_001",
+          "definitionId": 3,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -251,13 +251,13 @@
           },
           "ice": [
             {
-              "instanceId": "hidden_e640c516",
+              "instanceId": "h4kg6sc",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "hidden_ebde701c",
+              "instanceId": "h1kpfqnk",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -276,7 +276,7 @@
           },
           "ice": [
             {
-              "instanceId": "hidden_e440c1f0",
+              "instanceId": "h54fe6a",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -296,10 +296,10 @@
           "ice": [],
           "root": [
             {
-              "instanceId": "corp_onr_v1_290_efficiency-experts_2",
+              "instanceId": "c33q",
               "known": true,
               "title": "Efficiency Experts",
-              "definitionId": "onr_v1_290_efficiency-experts",
+              "definitionId": 502,
               "type": "operation",
               "subtypes": [
                 "transactions"
@@ -318,20 +318,20 @@
           ]
         },
         {
-          "id": "remote_1",
+          "id": "r1",
           "label": "Remote 1",
           "runnerAgendaStealCostQuote": {
             "stateVersion": 43,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "minimumCreditCost": 0,
             "complete": true
           },
           "ice": [
             {
-              "instanceId": "corp_onr_v1_234_data-darts_2",
+              "instanceId": "c2ra",
               "known": true,
               "title": "Data Darts",
-              "definitionId": "onr_v1_234_data-darts",
+              "definitionId": 446,
               "type": "ice",
               "subtypes": [
                 "ap",
@@ -346,8 +346,8 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_onr_v1_234_data-darts_2",
-                "iceDefinitionId": "onr_v1_234_data-darts",
+                "iceInstanceId": "c2ra",
+                "iceDefinitionId": 446,
                 "effectiveStrength": 3,
                 "encounterStrength": 3,
                 "subroutines": [
@@ -356,7 +356,7 @@
                     "type": "do_damage",
                     "amount": 3,
                     "damageType": "net",
-                    "sourceDefinitionId": "onr_v1_234_data-darts",
+                    "sourceDefinitionId": 446,
                     "sourceTitle": "Data Darts",
                     "unbrokenRunEffect": {
                       "causesDamageOrProgramTrash": true
@@ -365,7 +365,7 @@
                   {
                     "id": "printed_subroutines_prohibit_break_next_ice",
                     "type": "set_next_encounter_no_break_subroutines",
-                    "sourceDefinitionId": "onr_v1_234_data-darts",
+                    "sourceDefinitionId": 446,
                     "sourceTitle": "Data Darts",
                     "unbrokenRunEffect": {
                       "preventsFutureBreaking": true
@@ -377,7 +377,7 @@
           ],
           "root": [
             {
-              "instanceId": "hidden_474d75a7",
+              "instanceId": "hbock58",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -385,21 +385,21 @@
           ]
         },
         {
-          "id": "remote_2",
+          "id": "r2",
           "label": "Remote 2",
           "runnerAgendaStealCostQuote": {
             "stateVersion": 43,
-            "serverId": "remote_2",
+            "serverId": "r2",
             "minimumCreditCost": 0,
             "complete": true
           },
           "ice": [],
           "root": [
             {
-              "instanceId": "corp_onr_v1_345_trap_1",
+              "instanceId": "c3fx",
               "known": true,
               "title": "TRAP!",
-              "definitionId": "onr_v1_345_trap",
+              "definitionId": 557,
               "type": "asset",
               "subtypes": [
                 "ambush"
@@ -422,12 +422,12 @@
         "removedFromGameCount": 0
       },
       "run": {
-        "runId": "run_40",
-        "attackedServerId": "remote_1",
+        "runId": 40,
+        "attackedServerId": "r1",
         "phase": "movement",
         "position": {
           "kind": "server",
-          "serverId": "remote_1"
+          "serverId": "r1"
         },
         "badPublicityCredits": 0,
         "nextEncounterNoBreakSubroutines": true,
@@ -436,7 +436,7 @@
       "deckMetadata": {
         "own": {
           "side": "runner",
-          "identityCardId": "runner_identity_001",
+          "identityCardId": 587,
           "deckName": "King of the Road",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "formatProfileId": "local-demo-v0.8",
@@ -444,7 +444,7 @@
         },
         "opponent": {
           "side": "corp",
-          "identityCardId": "corp_identity_001",
+          "identityCardId": 3,
           "deckName": "Dead Channel",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
@@ -457,7 +457,7 @@
       "agendaPointsToWin": 7,
       "publicEvents": [
         {
-          "eventId": "evt_0",
+          "eventId": 1,
           "type": "game_created",
           "stateVersionBefore": 0,
           "stateVersionAfter": 0,
@@ -483,7 +483,7 @@
               "deckName": "King of the Road",
               "deckHash": "fnv1a:6f45017d",
               "side": "runner",
-              "identityCardId": "runner_identity_001",
+              "identityCardId": 587,
               "formatProfileId": "local-demo-v0.8",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             },
@@ -491,14 +491,14 @@
               "deckName": "Dead Channel",
               "deckHash": "fnv1a:841e25c8",
               "side": "corp",
-              "identityCardId": "corp_identity_001",
+              "identityCardId": 3,
               "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             }
           }
         },
         {
-          "eventId": "evt_1",
+          "eventId": 2,
           "type": "resolve_choice",
           "stateVersionBefore": 0,
           "stateVersionAfter": 1,
@@ -529,7 +529,7 @@
           }
         },
         {
-          "eventId": "evt_2",
+          "eventId": 3,
           "type": "resolve_choice",
           "stateVersionBefore": 1,
           "stateVersionAfter": 2,
@@ -560,7 +560,7 @@
           }
         },
         {
-          "eventId": "evt_3",
+          "eventId": 4,
           "type": "mandatory_draw",
           "stateVersionBefore": 2,
           "stateVersionAfter": 3,
@@ -587,7 +587,7 @@
           }
         },
         {
-          "eventId": "evt_4",
+          "eventId": 5,
           "type": "install_card",
           "stateVersionBefore": 3,
           "stateVersionAfter": 4,
@@ -615,7 +615,7 @@
           }
         },
         {
-          "eventId": "evt_5",
+          "eventId": 6,
           "type": "install_card",
           "stateVersionBefore": 4,
           "stateVersionAfter": 5,
@@ -626,7 +626,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -643,7 +643,7 @@
           }
         },
         {
-          "eventId": "evt_6",
+          "eventId": 7,
           "type": "install_card",
           "stateVersionBefore": 5,
           "stateVersionAfter": 6,
@@ -671,7 +671,7 @@
           }
         },
         {
-          "eventId": "evt_7",
+          "eventId": 8,
           "type": "end_turn",
           "stateVersionBefore": 6,
           "stateVersionAfter": 7,
@@ -688,7 +688,7 @@
           }
         },
         {
-          "eventId": "evt_8",
+          "eventId": 9,
           "type": "install_card",
           "stateVersionBefore": 7,
           "stateVersionAfter": 8,
@@ -700,7 +700,7 @@
             "actionType": "install_card",
             "label": "Pile Driver installieren",
             "title": "Pile Driver",
-            "cardDefinitionId": "onr_v1_047_pile-driver",
+            "cardDefinitionId": 259,
             "effectKind": "install_card",
             "runnerCreditsAfter": 4,
             "amounts": {
@@ -712,7 +712,7 @@
           }
         },
         {
-          "eventId": "evt_9",
+          "eventId": 10,
           "type": "install_card",
           "stateVersionBefore": 8,
           "stateVersionAfter": 9,
@@ -724,7 +724,7 @@
             "actionType": "install_card",
             "label": "Cyfermaster™ installieren",
             "title": "Cyfermaster™",
-            "cardDefinitionId": "onr_v1_016_cyfermaster",
+            "cardDefinitionId": 228,
             "effectKind": "install_card",
             "runnerCreditsAfter": 0,
             "amounts": {
@@ -736,7 +736,7 @@
           }
         },
         {
-          "eventId": "evt_10",
+          "eventId": 11,
           "type": "draw_card",
           "stateVersionBefore": 9,
           "stateVersionAfter": 10,
@@ -757,7 +757,7 @@
           }
         },
         {
-          "eventId": "evt_11",
+          "eventId": 12,
           "type": "gain_credit",
           "stateVersionBefore": 10,
           "stateVersionAfter": 11,
@@ -782,7 +782,7 @@
           }
         },
         {
-          "eventId": "evt_12",
+          "eventId": 13,
           "type": "end_turn",
           "stateVersionBefore": 11,
           "stateVersionAfter": 12,
@@ -799,7 +799,7 @@
           }
         },
         {
-          "eventId": "evt_13",
+          "eventId": 14,
           "type": "mandatory_draw",
           "stateVersionBefore": 12,
           "stateVersionAfter": 13,
@@ -826,7 +826,7 @@
           }
         },
         {
-          "eventId": "evt_14",
+          "eventId": 15,
           "type": "gain_credit",
           "stateVersionBefore": 13,
           "stateVersionAfter": 14,
@@ -851,7 +851,7 @@
           }
         },
         {
-          "eventId": "evt_15",
+          "eventId": 16,
           "type": "gain_credit",
           "stateVersionBefore": 14,
           "stateVersionAfter": 15,
@@ -876,7 +876,7 @@
           }
         },
         {
-          "eventId": "evt_16",
+          "eventId": 17,
           "type": "install_card",
           "stateVersionBefore": 15,
           "stateVersionAfter": 16,
@@ -904,7 +904,7 @@
           }
         },
         {
-          "eventId": "evt_17",
+          "eventId": 18,
           "type": "end_turn",
           "stateVersionBefore": 16,
           "stateVersionAfter": 17,
@@ -921,7 +921,7 @@
           }
         },
         {
-          "eventId": "evt_18",
+          "eventId": 19,
           "type": "play_event",
           "stateVersionBefore": 17,
           "stateVersionAfter": 18,
@@ -933,8 +933,8 @@
             "actionType": "play_event",
             "label": "Temple Microcode Outlet spielen",
             "title": "Temple Microcode Outlet",
-            "cardDefinitionId": "onr_v1_114_temple-microcode-outlet",
-            "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
+            "cardDefinitionId": 326,
+            "sourceDefinitionId": 326,
             "redactedKind": "hidden_zone",
             "hiddenZoneAction": "p3_37_search_stack_to_grip",
             "abilityFamily": "hidden-zone",
@@ -946,7 +946,7 @@
               "runnerCreditsAfter": 0
             },
             "targets": {
-              "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
+              "sourceDefinitionId": 326,
               "redactedKind": "hidden_zone"
             },
             "visibility": {
@@ -957,7 +957,7 @@
           }
         },
         {
-          "eventId": "evt_19",
+          "eventId": 20,
           "type": "resolve_choice",
           "stateVersionBefore": 18,
           "stateVersionAfter": 19,
@@ -969,8 +969,8 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "title": "Wild Card",
-            "cardDefinitionId": "onr_v1_072_wild-card",
-            "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
+            "cardDefinitionId": 284,
+            "sourceDefinitionId": 326,
             "choiceVisibility": "hidden_info_barrier",
             "redactedKind": "hidden_zone",
             "hiddenZoneAction": "p3_37_search_stack_to_grip",
@@ -980,8 +980,8 @@
             "effectKind": "hidden_zone",
             "hiddenZoneBarrier": true,
             "targets": {
-              "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
-              "cardDefinitionId": "onr_v1_072_wild-card",
+              "sourceDefinitionId": 326,
+              "cardDefinitionId": 284,
               "choiceVisibility": "hidden_info_barrier",
               "redactedKind": "hidden_zone"
             },
@@ -993,7 +993,7 @@
           }
         },
         {
-          "eventId": "evt_20",
+          "eventId": 21,
           "type": "install_card",
           "stateVersionBefore": 19,
           "stateVersionAfter": 20,
@@ -1005,7 +1005,7 @@
             "actionType": "install_card",
             "label": "Wild Card installieren",
             "title": "Wild Card",
-            "cardDefinitionId": "onr_v1_072_wild-card",
+            "cardDefinitionId": 284,
             "effectKind": "install_card",
             "runnerCreditsAfter": 0,
             "amounts": {
@@ -1017,7 +1017,7 @@
           }
         },
         {
-          "eventId": "evt_21",
+          "eventId": 22,
           "type": "gain_credit",
           "stateVersionBefore": 20,
           "stateVersionAfter": 21,
@@ -1042,7 +1042,7 @@
           }
         },
         {
-          "eventId": "evt_22",
+          "eventId": 23,
           "type": "gain_credit",
           "stateVersionBefore": 21,
           "stateVersionAfter": 22,
@@ -1067,7 +1067,7 @@
           }
         },
         {
-          "eventId": "evt_23",
+          "eventId": 24,
           "type": "end_turn",
           "stateVersionBefore": 22,
           "stateVersionAfter": 23,
@@ -1084,7 +1084,7 @@
           }
         },
         {
-          "eventId": "evt_24",
+          "eventId": 25,
           "type": "mandatory_draw",
           "stateVersionBefore": 23,
           "stateVersionAfter": 24,
@@ -1111,7 +1111,7 @@
           }
         },
         {
-          "eventId": "evt_25",
+          "eventId": 26,
           "type": "draw_card",
           "stateVersionBefore": 24,
           "stateVersionAfter": 25,
@@ -1132,7 +1132,7 @@
           }
         },
         {
-          "eventId": "evt_26",
+          "eventId": 27,
           "type": "install_card",
           "stateVersionBefore": 25,
           "stateVersionAfter": 26,
@@ -1143,7 +1143,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -1160,7 +1160,7 @@
           }
         },
         {
-          "eventId": "evt_27",
+          "eventId": 28,
           "type": "install_card",
           "stateVersionBefore": 26,
           "stateVersionAfter": 27,
@@ -1171,7 +1171,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_2",
+            "serverId": "r2",
             "serverLabel": "Remote 2",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -1188,7 +1188,7 @@
           }
         },
         {
-          "eventId": "evt_28",
+          "eventId": 29,
           "type": "rez_card",
           "stateVersionBefore": 27,
           "stateVersionAfter": 28,
@@ -1200,8 +1200,8 @@
             "actionType": "rez_card",
             "label": "Karte in Remote 2 rezzen",
             "title": "TRAP!",
-            "cardDefinitionId": "onr_v1_345_trap",
-            "serverId": "remote_2",
+            "cardDefinitionId": 557,
+            "serverId": "r2",
             "serverLabel": "Remote 2",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:a85ce8b2",
@@ -1214,7 +1214,7 @@
           }
         },
         {
-          "eventId": "evt_29",
+          "eventId": 30,
           "type": "end_turn",
           "stateVersionBefore": 28,
           "stateVersionAfter": 29,
@@ -1231,7 +1231,7 @@
           }
         },
         {
-          "eventId": "evt_30",
+          "eventId": 31,
           "type": "draw_card",
           "stateVersionBefore": 29,
           "stateVersionAfter": 30,
@@ -1252,7 +1252,7 @@
           }
         },
         {
-          "eventId": "evt_31",
+          "eventId": 32,
           "type": "gain_credit",
           "stateVersionBefore": 30,
           "stateVersionAfter": 31,
@@ -1277,7 +1277,7 @@
           }
         },
         {
-          "eventId": "evt_32",
+          "eventId": 33,
           "type": "gain_credit",
           "stateVersionBefore": 31,
           "stateVersionAfter": 32,
@@ -1302,7 +1302,7 @@
           }
         },
         {
-          "eventId": "evt_33",
+          "eventId": 34,
           "type": "gain_credit",
           "stateVersionBefore": 32,
           "stateVersionAfter": 33,
@@ -1327,7 +1327,7 @@
           }
         },
         {
-          "eventId": "evt_34",
+          "eventId": 35,
           "type": "end_turn",
           "stateVersionBefore": 33,
           "stateVersionAfter": 34,
@@ -1344,7 +1344,7 @@
           }
         },
         {
-          "eventId": "evt_35",
+          "eventId": 36,
           "type": "mandatory_draw",
           "stateVersionBefore": 34,
           "stateVersionAfter": 35,
@@ -1371,7 +1371,7 @@
           }
         },
         {
-          "eventId": "evt_36",
+          "eventId": 37,
           "type": "play_operation",
           "stateVersionBefore": 35,
           "stateVersionAfter": 36,
@@ -1383,7 +1383,7 @@
             "actionType": "play_operation",
             "label": "Efficiency Experts spielen",
             "title": "Efficiency Experts",
-            "cardDefinitionId": "onr_v1_290_efficiency-experts",
+            "cardDefinitionId": 502,
             "abilityFamily": "payment-costs",
             "effectKind": "gain_credits",
             "gainedCredits": 3,
@@ -1399,20 +1399,20 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+                "effectId": "502.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
                 "amount": 3,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+                "sourceDefinitionId": 502,
                 "sourceTitle": "Efficiency Experts"
               }
             ]
           }
         },
         {
-          "eventId": "evt_37",
+          "eventId": 38,
           "type": "draw_card",
           "stateVersionBefore": 36,
           "stateVersionAfter": 37,
@@ -1433,7 +1433,7 @@
           }
         },
         {
-          "eventId": "evt_38",
+          "eventId": 39,
           "type": "gain_credit",
           "stateVersionBefore": 37,
           "stateVersionAfter": 38,
@@ -1458,7 +1458,7 @@
           }
         },
         {
-          "eventId": "evt_39",
+          "eventId": 40,
           "type": "end_turn",
           "stateVersionBefore": 38,
           "stateVersionAfter": 39,
@@ -1475,7 +1475,7 @@
           }
         },
         {
-          "eventId": "evt_40",
+          "eventId": 41,
           "type": "start_run",
           "stateVersionBefore": 39,
           "stateVersionAfter": 40,
@@ -1486,7 +1486,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 1",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -1507,7 +1507,7 @@
           }
         },
         {
-          "eventId": "evt_41",
+          "eventId": 42,
           "type": "rez_ice",
           "stateVersionBefore": 40,
           "stateVersionAfter": 41,
@@ -1519,8 +1519,8 @@
             "actionType": "rez_ice",
             "label": "Data Darts rezzen",
             "title": "Data Darts",
-            "cardDefinitionId": "onr_v1_234_data-darts",
-            "serverId": "remote_1",
+            "cardDefinitionId": 446,
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "installedPositionKey": "installed-position-v1:57d0f8a6",
@@ -1534,7 +1534,7 @@
           }
         },
         {
-          "eventId": "evt_42",
+          "eventId": 43,
           "type": "decline_rez",
           "stateVersionBefore": 41,
           "stateVersionAfter": 42,
@@ -1551,7 +1551,7 @@
           }
         },
         {
-          "eventId": "evt_43",
+          "eventId": 44,
           "type": "continue_run",
           "stateVersionBefore": 42,
           "stateVersionAfter": 43,
@@ -1565,8 +1565,8 @@
             "actor": "runner",
             "actionType": "continue_run",
             "label": "Subroutinen auslösen",
-            "sourceDefinitionId": "onr_v1_234_data-darts",
-            "serverId": "remote_1",
+            "sourceDefinitionId": 446,
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "effectKind": "damage",
@@ -1577,7 +1577,7 @@
               "damageAmount": 3
             },
             "targets": {
-              "sourceDefinitionId": "onr_v1_234_data-darts",
+              "sourceDefinitionId": 446,
               "serverLabel": "Remote 1"
             },
             "visibility": {
@@ -1591,7 +1591,7 @@
                 "side": "runner",
                 "amount": 3,
                 "reason": "ice_subroutine",
-                "sourceDefinitionId": "onr_v1_234_data-darts",
+                "sourceDefinitionId": 446,
                 "sourceTitle": "Data Darts"
               },
               {
@@ -1600,7 +1600,7 @@
                 "visibility": "public",
                 "side": "runner",
                 "reason": "ice_subroutine",
-                "sourceDefinitionId": "onr_v1_234_data-darts",
+                "sourceDefinitionId": 446,
                 "sourceTitle": "Data Darts"
               }
             ]
@@ -1636,7 +1636,7 @@
     },
     "eventTail": [
       {
-        "eventId": "evt_0",
+        "eventId": 1,
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
@@ -1662,7 +1662,7 @@
             "deckName": "King of the Road",
             "deckHash": "fnv1a:6f45017d",
             "side": "runner",
-            "identityCardId": "runner_identity_001",
+            "identityCardId": 587,
             "formatProfileId": "local-demo-v0.8",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           },
@@ -1670,14 +1670,14 @@
             "deckName": "Dead Channel",
             "deckHash": "fnv1a:841e25c8",
             "side": "corp",
-            "identityCardId": "corp_identity_001",
+            "identityCardId": 3,
             "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           }
         }
       },
       {
-        "eventId": "evt_1",
+        "eventId": 2,
         "type": "resolve_choice",
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
@@ -1708,7 +1708,7 @@
         }
       },
       {
-        "eventId": "evt_2",
+        "eventId": 3,
         "type": "resolve_choice",
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
@@ -1739,7 +1739,7 @@
         }
       },
       {
-        "eventId": "evt_3",
+        "eventId": 4,
         "type": "mandatory_draw",
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
@@ -1766,7 +1766,7 @@
         }
       },
       {
-        "eventId": "evt_4",
+        "eventId": 5,
         "type": "install_card",
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
@@ -1794,7 +1794,7 @@
         }
       },
       {
-        "eventId": "evt_5",
+        "eventId": 6,
         "type": "install_card",
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
@@ -1805,7 +1805,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -1822,7 +1822,7 @@
         }
       },
       {
-        "eventId": "evt_6",
+        "eventId": 7,
         "type": "install_card",
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
@@ -1850,7 +1850,7 @@
         }
       },
       {
-        "eventId": "evt_7",
+        "eventId": 8,
         "type": "end_turn",
         "stateVersionBefore": 6,
         "stateVersionAfter": 7,
@@ -1867,7 +1867,7 @@
         }
       },
       {
-        "eventId": "evt_8",
+        "eventId": 9,
         "type": "install_card",
         "stateVersionBefore": 7,
         "stateVersionAfter": 8,
@@ -1879,7 +1879,7 @@
           "actionType": "install_card",
           "label": "Pile Driver installieren",
           "title": "Pile Driver",
-          "cardDefinitionId": "onr_v1_047_pile-driver",
+          "cardDefinitionId": 259,
           "effectKind": "install_card",
           "runnerCreditsAfter": 4,
           "amounts": {
@@ -1891,7 +1891,7 @@
         }
       },
       {
-        "eventId": "evt_9",
+        "eventId": 10,
         "type": "install_card",
         "stateVersionBefore": 8,
         "stateVersionAfter": 9,
@@ -1903,7 +1903,7 @@
           "actionType": "install_card",
           "label": "Cyfermaster™ installieren",
           "title": "Cyfermaster™",
-          "cardDefinitionId": "onr_v1_016_cyfermaster",
+          "cardDefinitionId": 228,
           "effectKind": "install_card",
           "runnerCreditsAfter": 0,
           "amounts": {
@@ -1915,7 +1915,7 @@
         }
       },
       {
-        "eventId": "evt_10",
+        "eventId": 11,
         "type": "draw_card",
         "stateVersionBefore": 9,
         "stateVersionAfter": 10,
@@ -1936,7 +1936,7 @@
         }
       },
       {
-        "eventId": "evt_11",
+        "eventId": 12,
         "type": "gain_credit",
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
@@ -1961,7 +1961,7 @@
         }
       },
       {
-        "eventId": "evt_12",
+        "eventId": 13,
         "type": "end_turn",
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
@@ -1978,7 +1978,7 @@
         }
       },
       {
-        "eventId": "evt_13",
+        "eventId": 14,
         "type": "mandatory_draw",
         "stateVersionBefore": 12,
         "stateVersionAfter": 13,
@@ -2005,7 +2005,7 @@
         }
       },
       {
-        "eventId": "evt_14",
+        "eventId": 15,
         "type": "gain_credit",
         "stateVersionBefore": 13,
         "stateVersionAfter": 14,
@@ -2030,7 +2030,7 @@
         }
       },
       {
-        "eventId": "evt_15",
+        "eventId": 16,
         "type": "gain_credit",
         "stateVersionBefore": 14,
         "stateVersionAfter": 15,
@@ -2055,7 +2055,7 @@
         }
       },
       {
-        "eventId": "evt_16",
+        "eventId": 17,
         "type": "install_card",
         "stateVersionBefore": 15,
         "stateVersionAfter": 16,
@@ -2083,7 +2083,7 @@
         }
       },
       {
-        "eventId": "evt_17",
+        "eventId": 18,
         "type": "end_turn",
         "stateVersionBefore": 16,
         "stateVersionAfter": 17,
@@ -2100,7 +2100,7 @@
         }
       },
       {
-        "eventId": "evt_18",
+        "eventId": 19,
         "type": "play_event",
         "stateVersionBefore": 17,
         "stateVersionAfter": 18,
@@ -2112,8 +2112,8 @@
           "actionType": "play_event",
           "label": "Temple Microcode Outlet spielen",
           "title": "Temple Microcode Outlet",
-          "cardDefinitionId": "onr_v1_114_temple-microcode-outlet",
-          "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
+          "cardDefinitionId": 326,
+          "sourceDefinitionId": 326,
           "redactedKind": "hidden_zone",
           "hiddenZoneAction": "p3_37_search_stack_to_grip",
           "abilityFamily": "hidden-zone",
@@ -2125,7 +2125,7 @@
             "runnerCreditsAfter": 0
           },
           "targets": {
-            "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
+            "sourceDefinitionId": 326,
             "redactedKind": "hidden_zone"
           },
           "visibility": {
@@ -2136,7 +2136,7 @@
         }
       },
       {
-        "eventId": "evt_19",
+        "eventId": 20,
         "type": "resolve_choice",
         "stateVersionBefore": 18,
         "stateVersionAfter": 19,
@@ -2148,8 +2148,8 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "title": "Wild Card",
-          "cardDefinitionId": "onr_v1_072_wild-card",
-          "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
+          "cardDefinitionId": 284,
+          "sourceDefinitionId": 326,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "hidden_zone",
           "hiddenZoneAction": "p3_37_search_stack_to_grip",
@@ -2159,8 +2159,8 @@
           "effectKind": "hidden_zone",
           "hiddenZoneBarrier": true,
           "targets": {
-            "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
-            "cardDefinitionId": "onr_v1_072_wild-card",
+            "sourceDefinitionId": 326,
+            "cardDefinitionId": 284,
             "choiceVisibility": "hidden_info_barrier",
             "redactedKind": "hidden_zone"
           },
@@ -2172,7 +2172,7 @@
         }
       },
       {
-        "eventId": "evt_20",
+        "eventId": 21,
         "type": "install_card",
         "stateVersionBefore": 19,
         "stateVersionAfter": 20,
@@ -2184,7 +2184,7 @@
           "actionType": "install_card",
           "label": "Wild Card installieren",
           "title": "Wild Card",
-          "cardDefinitionId": "onr_v1_072_wild-card",
+          "cardDefinitionId": 284,
           "effectKind": "install_card",
           "runnerCreditsAfter": 0,
           "amounts": {
@@ -2196,7 +2196,7 @@
         }
       },
       {
-        "eventId": "evt_21",
+        "eventId": 22,
         "type": "gain_credit",
         "stateVersionBefore": 20,
         "stateVersionAfter": 21,
@@ -2221,7 +2221,7 @@
         }
       },
       {
-        "eventId": "evt_22",
+        "eventId": 23,
         "type": "gain_credit",
         "stateVersionBefore": 21,
         "stateVersionAfter": 22,
@@ -2246,7 +2246,7 @@
         }
       },
       {
-        "eventId": "evt_23",
+        "eventId": 24,
         "type": "end_turn",
         "stateVersionBefore": 22,
         "stateVersionAfter": 23,
@@ -2263,7 +2263,7 @@
         }
       },
       {
-        "eventId": "evt_24",
+        "eventId": 25,
         "type": "mandatory_draw",
         "stateVersionBefore": 23,
         "stateVersionAfter": 24,
@@ -2290,7 +2290,7 @@
         }
       },
       {
-        "eventId": "evt_25",
+        "eventId": 26,
         "type": "draw_card",
         "stateVersionBefore": 24,
         "stateVersionAfter": 25,
@@ -2311,7 +2311,7 @@
         }
       },
       {
-        "eventId": "evt_26",
+        "eventId": 27,
         "type": "install_card",
         "stateVersionBefore": 25,
         "stateVersionAfter": 26,
@@ -2322,7 +2322,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "ice",
           "redactedKind": "installed_card",
@@ -2339,7 +2339,7 @@
         }
       },
       {
-        "eventId": "evt_27",
+        "eventId": 28,
         "type": "install_card",
         "stateVersionBefore": 26,
         "stateVersionAfter": 27,
@@ -2350,7 +2350,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_2",
+          "serverId": "r2",
           "serverLabel": "Remote 2",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -2367,7 +2367,7 @@
         }
       },
       {
-        "eventId": "evt_28",
+        "eventId": 29,
         "type": "rez_card",
         "stateVersionBefore": 27,
         "stateVersionAfter": 28,
@@ -2379,8 +2379,8 @@
           "actionType": "rez_card",
           "label": "Karte in Remote 2 rezzen",
           "title": "TRAP!",
-          "cardDefinitionId": "onr_v1_345_trap",
-          "serverId": "remote_2",
+          "cardDefinitionId": 557,
+          "serverId": "r2",
           "serverLabel": "Remote 2",
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:a85ce8b2",
@@ -2393,7 +2393,7 @@
         }
       },
       {
-        "eventId": "evt_29",
+        "eventId": 30,
         "type": "end_turn",
         "stateVersionBefore": 28,
         "stateVersionAfter": 29,
@@ -2410,7 +2410,7 @@
         }
       },
       {
-        "eventId": "evt_30",
+        "eventId": 31,
         "type": "draw_card",
         "stateVersionBefore": 29,
         "stateVersionAfter": 30,
@@ -2431,7 +2431,7 @@
         }
       },
       {
-        "eventId": "evt_31",
+        "eventId": 32,
         "type": "gain_credit",
         "stateVersionBefore": 30,
         "stateVersionAfter": 31,
@@ -2456,7 +2456,7 @@
         }
       },
       {
-        "eventId": "evt_32",
+        "eventId": 33,
         "type": "gain_credit",
         "stateVersionBefore": 31,
         "stateVersionAfter": 32,
@@ -2481,7 +2481,7 @@
         }
       },
       {
-        "eventId": "evt_33",
+        "eventId": 34,
         "type": "gain_credit",
         "stateVersionBefore": 32,
         "stateVersionAfter": 33,
@@ -2506,7 +2506,7 @@
         }
       },
       {
-        "eventId": "evt_34",
+        "eventId": 35,
         "type": "end_turn",
         "stateVersionBefore": 33,
         "stateVersionAfter": 34,
@@ -2523,7 +2523,7 @@
         }
       },
       {
-        "eventId": "evt_35",
+        "eventId": 36,
         "type": "mandatory_draw",
         "stateVersionBefore": 34,
         "stateVersionAfter": 35,
@@ -2550,7 +2550,7 @@
         }
       },
       {
-        "eventId": "evt_36",
+        "eventId": 37,
         "type": "play_operation",
         "stateVersionBefore": 35,
         "stateVersionAfter": 36,
@@ -2562,7 +2562,7 @@
           "actionType": "play_operation",
           "label": "Efficiency Experts spielen",
           "title": "Efficiency Experts",
-          "cardDefinitionId": "onr_v1_290_efficiency-experts",
+          "cardDefinitionId": 502,
           "abilityFamily": "payment-costs",
           "effectKind": "gain_credits",
           "gainedCredits": 3,
@@ -2578,20 +2578,20 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+              "effectId": "502.effect.0.gain_credits",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
               "amount": 3,
               "reason": "card_resolver",
-              "sourceDefinitionId": "onr_v1_290_efficiency-experts",
+              "sourceDefinitionId": 502,
               "sourceTitle": "Efficiency Experts"
             }
           ]
         }
       },
       {
-        "eventId": "evt_37",
+        "eventId": 38,
         "type": "draw_card",
         "stateVersionBefore": 36,
         "stateVersionAfter": 37,
@@ -2612,7 +2612,7 @@
         }
       },
       {
-        "eventId": "evt_38",
+        "eventId": 39,
         "type": "gain_credit",
         "stateVersionBefore": 37,
         "stateVersionAfter": 38,
@@ -2637,7 +2637,7 @@
         }
       },
       {
-        "eventId": "evt_39",
+        "eventId": 40,
         "type": "end_turn",
         "stateVersionBefore": 38,
         "stateVersionAfter": 39,
@@ -2654,7 +2654,7 @@
         }
       },
       {
-        "eventId": "evt_40",
+        "eventId": 41,
         "type": "start_run",
         "stateVersionBefore": 39,
         "stateVersionAfter": 40,
@@ -2665,7 +2665,7 @@
           "actor": "runner",
           "actionType": "start_run",
           "label": "Run auf Remote 1",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "baseAccessCount": 1,
           "installedAccessBonus": 0,
@@ -2686,7 +2686,7 @@
         }
       },
       {
-        "eventId": "evt_41",
+        "eventId": 42,
         "type": "rez_ice",
         "stateVersionBefore": 40,
         "stateVersionAfter": 41,
@@ -2698,8 +2698,8 @@
           "actionType": "rez_ice",
           "label": "Data Darts rezzen",
           "title": "Data Darts",
-          "cardDefinitionId": "onr_v1_234_data-darts",
-          "serverId": "remote_1",
+          "cardDefinitionId": 446,
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "ice",
           "installedPositionKey": "installed-position-v1:57d0f8a6",
@@ -2713,7 +2713,7 @@
         }
       },
       {
-        "eventId": "evt_42",
+        "eventId": 43,
         "type": "decline_rez",
         "stateVersionBefore": 41,
         "stateVersionAfter": 42,
@@ -2730,7 +2730,7 @@
         }
       },
       {
-        "eventId": "evt_43",
+        "eventId": 44,
         "type": "continue_run",
         "stateVersionBefore": 42,
         "stateVersionAfter": 43,
@@ -2744,8 +2744,8 @@
           "actor": "runner",
           "actionType": "continue_run",
           "label": "Subroutinen auslösen",
-          "sourceDefinitionId": "onr_v1_234_data-darts",
-          "serverId": "remote_1",
+          "sourceDefinitionId": 446,
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "abilityFamily": "run-access",
           "effectKind": "damage",
@@ -2756,7 +2756,7 @@
             "damageAmount": 3
           },
           "targets": {
-            "sourceDefinitionId": "onr_v1_234_data-darts",
+            "sourceDefinitionId": 446,
             "serverLabel": "Remote 1"
           },
           "visibility": {
@@ -2770,7 +2770,7 @@
               "side": "runner",
               "amount": 3,
               "reason": "ice_subroutine",
-              "sourceDefinitionId": "onr_v1_234_data-darts",
+              "sourceDefinitionId": 446,
               "sourceTitle": "Data Darts"
             },
             {
@@ -2779,7 +2779,7 @@
               "visibility": "public",
               "side": "runner",
               "reason": "ice_subroutine",
-              "sourceDefinitionId": "onr_v1_234_data-darts",
+              "sourceDefinitionId": 446,
               "sourceTitle": "Data Darts"
             }
           ]
@@ -2854,7 +2854,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 43,
-      "sideSafePlanningFingerprint": "fnv1a:958ac83c"
+      "sideSafePlanningFingerprint": "fnv1a:2af485a2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_adb10896_1.1.0",
@@ -2862,134 +2862,134 @@
       "deckVersion": "1",
       "name": "King of the Road",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.1",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_006_black-dahlia",
+          "cardId": 218,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_031_hammer",
+          "cardId": 243,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_047_pile-driver",
+          "cardId": 259,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_052_raffles",
+          "cardId": 264,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_054_raptor",
+          "cardId": 266,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_060_shaka",
+          "cardId": 272,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_070_tinweasel",
+          "cardId": 282,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_072_wild-card",
+          "cardId": 284,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_073_wizards-book",
+          "cardId": 285,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_076_all-nighter",
+          "cardId": 288,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": 293,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_083_desperate-competitor",
+          "cardId": 295,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "cardId": 296,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": 297,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_090_hot-tip-for-wns",
+          "cardId": 302,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_096_kilroy-was-here",
+          "cardId": 308,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_106_private-ldl-access",
+          "cardId": 318,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_107_romp-through-hq",
+          "cardId": 319,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_115_terrorist-reprisal",
+          "cardId": 327,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "cardId": 330,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 2
         }
       ],
@@ -3004,7 +3004,7 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "King of the Road",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
@@ -3018,7 +3018,7 @@
       "runner": {
         "breakerInventory": [
           {
-            "cardId": "onr_v1_006_black-dahlia",
+            "cardId": 218,
             "title": "Black Dahlia",
             "coverage": [
               "sentry",
@@ -3044,7 +3044,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_016_cyfermaster",
+            "cardId": 228,
             "title": "Cyfermaster™",
             "coverage": [
               "code_gate",
@@ -3070,7 +3070,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_031_hammer",
+            "cardId": 243,
             "title": "Hammer",
             "coverage": [
               "subtype_limited",
@@ -3099,7 +3099,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_040_loony-goon",
+            "cardId": 252,
             "title": "Loony Goon",
             "coverage": [
               "sentry",
@@ -3125,7 +3125,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_047_pile-driver",
+            "cardId": 259,
             "title": "Pile Driver",
             "coverage": [
               "subtype_limited",
@@ -3154,7 +3154,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_052_raffles",
+            "cardId": 264,
             "title": "Raffles",
             "coverage": [
               "code_gate",
@@ -3180,7 +3180,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_054_raptor",
+            "cardId": 266,
             "title": "Raptor",
             "coverage": [
               "sentry",
@@ -3206,7 +3206,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_060_shaka",
+            "cardId": 272,
             "title": "Shaka",
             "coverage": [
               "sentry",
@@ -3232,7 +3232,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_070_tinweasel",
+            "cardId": 282,
             "title": "Tinweasel",
             "coverage": [
               "code_gate",
@@ -3257,7 +3257,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_072_wild-card",
+            "cardId": 284,
             "title": "Wild Card",
             "coverage": [
               "sentry",
@@ -3284,7 +3284,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_073_wizards-book",
+            "cardId": 285,
             "title": "Wizard’s Book",
             "coverage": [
               "code_gate",
@@ -3320,8 +3320,8 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_031_hammer",
-              "onr_v1_047_pile-driver"
+              "243",
+              "259"
             ],
             "blockers": []
           },
@@ -3334,9 +3334,9 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_016_cyfermaster",
-              "onr_v1_052_raffles",
-              "onr_v1_070_tinweasel"
+              "228",
+              "264",
+              "282"
             ],
             "blockers": []
           },
@@ -3349,9 +3349,9 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_006_black-dahlia",
-              "onr_v1_040_loony-goon",
-              "onr_v1_054_raptor"
+              "218",
+              "252",
+              "266"
             ],
             "blockers": []
           },
@@ -3403,9 +3403,9 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_006_black-dahlia",
-              "onr_v1_016_cyfermaster",
-              "onr_v1_031_hammer"
+              "218",
+              "228",
+              "243"
             ],
             "blockers": []
           },
@@ -3426,7 +3426,7 @@
         "searchAccess": {
           "tools": [
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "title": "Temple Microcode Outlet",
               "status": "discarded",
               "canSearchPrograms": true,
@@ -3524,140 +3524,140 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
@@ -3680,14 +3680,14 @@
           "finalScore": 78,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "cardId": 296,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.hq_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "cardId": 296,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3695,7 +3695,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "cardId": 296,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3703,14 +3703,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_085_executive-wiretaps",
+              "cardId": 297,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.hq_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_085_executive-wiretaps",
+              "cardId": 297,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3718,7 +3718,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_085_executive-wiretaps",
+              "cardId": 297,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3726,14 +3726,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.hq_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3741,7 +3741,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3751,140 +3751,140 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
@@ -3904,14 +3904,14 @@
           "finalScore": 57,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_081_custodial-position",
+              "cardId": 293,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.interface_closeout",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
+              "cardId": 293,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
@@ -3919,7 +3919,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
+              "cardId": 293,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3927,7 +3927,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_085_executive-wiretaps",
+              "cardId": 297,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
@@ -3935,7 +3935,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_085_executive-wiretaps",
+              "cardId": 297,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3945,112 +3945,112 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -4072,140 +4072,140 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
@@ -4230,154 +4230,154 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:remoteAccess"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:remoteAccess"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
@@ -4399,154 +4399,154 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_144_tycho-mem-chip",
+              "cardId": 356,
               "quantity": 1,
               "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
             {
-              "cardId": "onr_v1_145_wutech-mem-chip",
+              "cardId": 357,
               "quantity": 2,
               "source": "cardHint",
               "signal": "memory_or_hand_size",
@@ -4566,7 +4566,7 @@
           "finalScore": 77,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_081_custodial-position",
+              "cardId": 293,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.rnd_pressure",
@@ -4574,7 +4574,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
+              "cardId": 293,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -4582,14 +4582,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.rnd_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.rnd_pressure",
@@ -4597,7 +4597,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -4605,7 +4605,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_106_private-ldl-access",
+              "cardId": 318,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "runner.rnd_pressure",
@@ -4615,154 +4615,154 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_144_tycho-mem-chip",
+              "cardId": 356,
               "quantity": 1,
               "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
             {
-              "cardId": "onr_v1_145_wutech-mem-chip",
+              "cardId": 357,
               "quantity": 2,
               "source": "cardHint",
               "signal": "memory_or_hand_size",
@@ -4782,14 +4782,14 @@
           "finalScore": 81,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_076_all-nighter",
+              "cardId": 288,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.run_event_tempo",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
+              "cardId": 293,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.run_event_tempo",
@@ -4797,7 +4797,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
+              "cardId": 293,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -4805,7 +4805,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_085_executive-wiretaps",
+              "cardId": 297,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.run_event_tempo",
@@ -4813,7 +4813,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_085_executive-wiretaps",
+              "cardId": 297,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -4821,7 +4821,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.run_event_tempo",
@@ -4830,238 +4830,238 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_076_all-nighter",
+              "cardId": 288,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
+              "cardId": 293,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_083_desperate-competitor",
+              "cardId": 295,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "cardId": 296,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_085_executive-wiretaps",
+              "cardId": 297,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_090_hot-tip-for-wns",
+              "cardId": 302,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_106_private-ldl-access",
+              "cardId": 318,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_115_terrorist-reprisal",
+              "cardId": 327,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_118_weather-to-finance-pipe",
+              "cardId": 330,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
@@ -5081,7 +5081,7 @@
           "finalScore": 60,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.search.breaker",
@@ -5091,154 +5091,154 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_006_black-dahlia",
+              "cardId": 218,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_016_cyfermaster",
+              "cardId": 228,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_031_hammer",
+              "cardId": 243,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_040_loony-goon",
+              "cardId": 252,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_047_pile-driver",
+              "cardId": 259,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_052_raffles",
+              "cardId": 264,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_054_raptor",
+              "cardId": 266,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_060_shaka",
+              "cardId": 272,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_070_tinweasel",
+              "cardId": 282,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_072_wild-card",
+              "cardId": 284,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_073_wizards-book",
+              "cardId": 285,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_094_inside-job",
+              "cardId": 306,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "run.bypass_first_ice",
               "reason": "support:breakerCoverage:conditional_access"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_144_tycho-mem-chip",
+              "cardId": 356,
               "quantity": 1,
               "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
             {
-              "cardId": "onr_v1_145_wutech-mem-chip",
+              "cardId": 357,
               "quantity": 2,
               "source": "cardHint",
               "signal": "memory_or_hand_size",
@@ -5257,56 +5257,56 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "cardId": 291,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_095_jack-n-joe",
+              "cardId": 307,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_096_kilroy-was-here",
+              "cardId": 308,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_097_livewires-contacts",
+              "cardId": 309,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_101_mit-west-tier",
+              "cardId": 313,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_v1_107_romp-through-hq",
+              "cardId": 319,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.trash_credit",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "cardId": 326,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
@@ -5451,8 +5451,8 @@
         "schemaVersion": "runner-deck-engine-doctrine-v1",
         "providers": [
           {
-            "providerId": "runner.provider:onr_v1_006_black-dahlia",
-            "cardId": "onr_v1_006_black-dahlia",
+            "providerId": "runner.provider:218",
+            "cardId": 218,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5462,14 +5462,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_006_black-dahlia",
+              "provider_card:218",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_016_cyfermaster",
-            "cardId": "onr_v1_016_cyfermaster",
+            "providerId": "runner.provider:228",
+            "cardId": 228,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5479,14 +5479,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_016_cyfermaster",
+              "provider_card:228",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_031_hammer",
-            "cardId": "onr_v1_031_hammer",
+            "providerId": "runner.provider:243",
+            "cardId": 243,
             "copies": 2,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5496,14 +5496,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_031_hammer",
+              "provider_card:243",
               "provider_copies:2",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_040_loony-goon",
-            "cardId": "onr_v1_040_loony-goon",
+            "providerId": "runner.provider:252",
+            "cardId": 252,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5513,14 +5513,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_040_loony-goon",
+              "provider_card:252",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_047_pile-driver",
-            "cardId": "onr_v1_047_pile-driver",
+            "providerId": "runner.provider:259",
+            "cardId": 259,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5530,14 +5530,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_047_pile-driver",
+              "provider_card:259",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_052_raffles",
-            "cardId": "onr_v1_052_raffles",
+            "providerId": "runner.provider:264",
+            "cardId": 264,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5547,14 +5547,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_052_raffles",
+              "provider_card:264",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_054_raptor",
-            "cardId": "onr_v1_054_raptor",
+            "providerId": "runner.provider:266",
+            "cardId": 266,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5564,14 +5564,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_054_raptor",
+              "provider_card:266",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_060_shaka",
-            "cardId": "onr_v1_060_shaka",
+            "providerId": "runner.provider:272",
+            "cardId": 272,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5581,14 +5581,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_060_shaka",
+              "provider_card:272",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_070_tinweasel",
-            "cardId": "onr_v1_070_tinweasel",
+            "providerId": "runner.provider:282",
+            "cardId": 282,
             "copies": 2,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5598,14 +5598,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_070_tinweasel",
+              "provider_card:282",
               "provider_copies:2",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_072_wild-card",
-            "cardId": "onr_v1_072_wild-card",
+            "providerId": "runner.provider:284",
+            "cardId": 284,
             "copies": 2,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5615,14 +5615,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_072_wild-card",
+              "provider_card:284",
               "provider_copies:2",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_073_wizards-book",
-            "cardId": "onr_v1_073_wizards-book",
+            "providerId": "runner.provider:285",
+            "cardId": 285,
             "copies": 2,
             "capabilities": [
               "runner.coverage.breaker"
@@ -5632,14 +5632,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_073_wizards-book",
+              "provider_card:285",
               "provider_copies:2",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_079_bodyweight-synthetic-blood",
-            "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+            "providerId": "runner.provider:291",
+            "cardId": 291,
             "copies": 2,
             "capabilities": [
               "runner.throughput.draw"
@@ -5649,14 +5649,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_079_bodyweight-synthetic-blood",
+              "provider_card:291",
               "provider_copies:2",
               "provides:runner.throughput.draw"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_095_jack-n-joe",
-            "cardId": "onr_v1_095_jack-n-joe",
+            "providerId": "runner.provider:307",
+            "cardId": 307,
             "copies": 3,
             "capabilities": [
               "runner.throughput.draw"
@@ -5666,14 +5666,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_095_jack-n-joe",
+              "provider_card:307",
               "provider_copies:3",
               "provides:runner.throughput.draw"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_101_mit-west-tier",
-            "cardId": "onr_v1_101_mit-west-tier",
+            "providerId": "runner.provider:313",
+            "cardId": 313,
             "copies": 1,
             "capabilities": [
               "runner.throughput.draw"
@@ -5683,14 +5683,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_101_mit-west-tier",
+              "provider_card:313",
               "provider_copies:1",
               "provides:runner.throughput.draw"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_114_temple-microcode-outlet",
-            "cardId": "onr_v1_114_temple-microcode-outlet",
+            "providerId": "runner.provider:326",
+            "cardId": 326,
             "copies": 1,
             "capabilities": [
               "runner.throughput.search"
@@ -5700,7 +5700,7 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_114_temple-microcode-outlet",
+              "provider_card:326",
               "provider_copies:1",
               "provides:runner.throughput.search"
             ]
@@ -5713,17 +5713,17 @@
               "runner.coverage.breaker"
             ],
             "providerIds": [
-              "runner.provider:onr_v1_006_black-dahlia",
-              "runner.provider:onr_v1_016_cyfermaster",
-              "runner.provider:onr_v1_031_hammer",
-              "runner.provider:onr_v1_040_loony-goon",
-              "runner.provider:onr_v1_047_pile-driver",
-              "runner.provider:onr_v1_052_raffles",
-              "runner.provider:onr_v1_054_raptor",
-              "runner.provider:onr_v1_060_shaka",
-              "runner.provider:onr_v1_070_tinweasel",
-              "runner.provider:onr_v1_072_wild-card",
-              "runner.provider:onr_v1_073_wizards-book"
+              "runner.provider:218",
+              "runner.provider:228",
+              "runner.provider:243",
+              "runner.provider:252",
+              "runner.provider:259",
+              "runner.provider:264",
+              "runner.provider:266",
+              "runner.provider:272",
+              "runner.provider:282",
+              "runner.provider:284",
+              "runner.provider:285"
             ],
             "supportProviderIds": [],
             "distinctProviderDefinitions": 11,
@@ -5741,17 +5741,17 @@
             "lineId": "runner.engine.persistent_rig",
             "status": "coherent",
             "providerIds": [
-              "runner.provider:onr_v1_006_black-dahlia",
-              "runner.provider:onr_v1_016_cyfermaster",
-              "runner.provider:onr_v1_031_hammer",
-              "runner.provider:onr_v1_040_loony-goon",
-              "runner.provider:onr_v1_047_pile-driver",
-              "runner.provider:onr_v1_052_raffles",
-              "runner.provider:onr_v1_054_raptor",
-              "runner.provider:onr_v1_060_shaka",
-              "runner.provider:onr_v1_070_tinweasel",
-              "runner.provider:onr_v1_072_wild-card",
-              "runner.provider:onr_v1_073_wizards-book"
+              "runner.provider:218",
+              "runner.provider:228",
+              "runner.provider:243",
+              "runner.provider:252",
+              "runner.provider:259",
+              "runner.provider:264",
+              "runner.provider:266",
+              "runner.provider:272",
+              "runner.provider:282",
+              "runner.provider:284",
+              "runner.provider:285"
             ],
             "dependencyIds": [
               "runner.dependency.breaker_coverage"
@@ -5791,17 +5791,17 @@
             "lineId": "runner.engine.delayed_install",
             "status": "supported",
             "providerIds": [
-              "runner.provider:onr_v1_006_black-dahlia",
-              "runner.provider:onr_v1_016_cyfermaster",
-              "runner.provider:onr_v1_031_hammer",
-              "runner.provider:onr_v1_040_loony-goon",
-              "runner.provider:onr_v1_047_pile-driver",
-              "runner.provider:onr_v1_052_raffles",
-              "runner.provider:onr_v1_054_raptor",
-              "runner.provider:onr_v1_060_shaka",
-              "runner.provider:onr_v1_070_tinweasel",
-              "runner.provider:onr_v1_072_wild-card",
-              "runner.provider:onr_v1_073_wizards-book"
+              "runner.provider:218",
+              "runner.provider:228",
+              "runner.provider:243",
+              "runner.provider:252",
+              "runner.provider:259",
+              "runner.provider:264",
+              "runner.provider:266",
+              "runner.provider:272",
+              "runner.provider:282",
+              "runner.provider:284",
+              "runner.provider:285"
             ],
             "dependencyIds": [
               "runner.dependency.breaker_coverage"
@@ -5822,17 +5822,17 @@
             "lineId": "runner.engine.compatible_recurring_economy",
             "status": "supported",
             "providerIds": [
-              "runner.provider:onr_v1_006_black-dahlia",
-              "runner.provider:onr_v1_016_cyfermaster",
-              "runner.provider:onr_v1_031_hammer",
-              "runner.provider:onr_v1_040_loony-goon",
-              "runner.provider:onr_v1_047_pile-driver",
-              "runner.provider:onr_v1_052_raffles",
-              "runner.provider:onr_v1_054_raptor",
-              "runner.provider:onr_v1_060_shaka",
-              "runner.provider:onr_v1_070_tinweasel",
-              "runner.provider:onr_v1_072_wild-card",
-              "runner.provider:onr_v1_073_wizards-book"
+              "runner.provider:218",
+              "runner.provider:228",
+              "runner.provider:243",
+              "runner.provider:252",
+              "runner.provider:259",
+              "runner.provider:264",
+              "runner.provider:266",
+              "runner.provider:272",
+              "runner.provider:282",
+              "runner.provider:284",
+              "runner.provider:285"
             ],
             "dependencyIds": [
               "runner.dependency.breaker_coverage"
@@ -5853,10 +5853,10 @@
             "lineId": "runner.engine.throughput_until_ready",
             "status": "coherent",
             "providerIds": [
-              "runner.provider:onr_v1_079_bodyweight-synthetic-blood",
-              "runner.provider:onr_v1_095_jack-n-joe",
-              "runner.provider:onr_v1_101_mit-west-tier",
-              "runner.provider:onr_v1_114_temple-microcode-outlet"
+              "runner.provider:291",
+              "runner.provider:307",
+              "runner.provider:313",
+              "runner.provider:326"
             ],
             "dependencyIds": [
               "runner.dependency.breaker_coverage"
@@ -6151,7 +6151,7 @@
       },
       "cardRoles": [
         {
-          "cardId": "onr_v1_006_black-dahlia",
+          "cardId": 218,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6169,7 +6169,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6187,7 +6187,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_031_hammer",
+          "cardId": 243,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -6205,7 +6205,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6224,7 +6224,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_047_pile-driver",
+          "cardId": 259,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6243,7 +6243,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_052_raffles",
+          "cardId": 264,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6261,7 +6261,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_054_raptor",
+          "cardId": 266,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6279,7 +6279,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_060_shaka",
+          "cardId": 272,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6297,7 +6297,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_070_tinweasel",
+          "cardId": 282,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -6315,7 +6315,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_072_wild-card",
+          "cardId": 284,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -6333,7 +6333,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_073_wizards-book",
+          "cardId": 285,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -6351,7 +6351,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_076_all-nighter",
+          "cardId": 288,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -6371,7 +6371,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -6387,7 +6387,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": 293,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -6411,7 +6411,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_083_desperate-competitor",
+          "cardId": 295,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6426,7 +6426,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "cardId": 296,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -6454,7 +6454,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": 297,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -6478,7 +6478,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_090_hot-tip-for-wns",
+          "cardId": 302,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6493,7 +6493,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -6514,7 +6514,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3,
           "status": "partial",
           "roles": [
@@ -6530,7 +6530,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_096_kilroy-was-here",
+          "cardId": 308,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -6551,7 +6551,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -6568,7 +6568,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6582,7 +6582,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_106_private-ldl-access",
+          "cardId": 318,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -6604,7 +6604,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_107_romp-through-hq",
+          "cardId": 319,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -6625,7 +6625,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -6642,7 +6642,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -6659,7 +6659,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_115_terrorist-reprisal",
+          "cardId": 327,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6673,7 +6673,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "cardId": 330,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6694,7 +6694,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6707,7 +6707,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -7650,7 +7650,7 @@
             ],
             "targetVector": {
               "kind": "remote",
-              "targetId": "remote_1",
+              "targetId": "r1",
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.remote_trash",
@@ -7744,7 +7744,7 @@
             ],
             "targetVector": {
               "kind": "remote",
-              "targetId": "remote_1",
+              "targetId": "r1",
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.remote_contest",
@@ -7871,8 +7871,8 @@
       ],
       "engineProviders": [
         {
-          "providerId": "runner.provider:onr_v1_006_black-dahlia",
-          "cardId": "onr_v1_006_black-dahlia",
+          "providerId": "runner.provider:218",
+          "cardId": 218,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -7882,14 +7882,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_006_black-dahlia",
+            "provider_card:218",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_016_cyfermaster",
-          "cardId": "onr_v1_016_cyfermaster",
+          "providerId": "runner.provider:228",
+          "cardId": 228,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -7899,14 +7899,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_016_cyfermaster",
+            "provider_card:228",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_031_hammer",
-          "cardId": "onr_v1_031_hammer",
+          "providerId": "runner.provider:243",
+          "cardId": 243,
           "copies": 2,
           "capabilities": [
             "runner.coverage.breaker"
@@ -7916,14 +7916,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_031_hammer",
+            "provider_card:243",
             "provider_copies:2",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_040_loony-goon",
-          "cardId": "onr_v1_040_loony-goon",
+          "providerId": "runner.provider:252",
+          "cardId": 252,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -7933,14 +7933,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_040_loony-goon",
+            "provider_card:252",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_047_pile-driver",
-          "cardId": "onr_v1_047_pile-driver",
+          "providerId": "runner.provider:259",
+          "cardId": 259,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -7950,14 +7950,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_047_pile-driver",
+            "provider_card:259",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_052_raffles",
-          "cardId": "onr_v1_052_raffles",
+          "providerId": "runner.provider:264",
+          "cardId": 264,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -7967,14 +7967,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_052_raffles",
+            "provider_card:264",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_054_raptor",
-          "cardId": "onr_v1_054_raptor",
+          "providerId": "runner.provider:266",
+          "cardId": 266,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -7984,14 +7984,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_054_raptor",
+            "provider_card:266",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_060_shaka",
-          "cardId": "onr_v1_060_shaka",
+          "providerId": "runner.provider:272",
+          "cardId": 272,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -8001,14 +8001,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_060_shaka",
+            "provider_card:272",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_070_tinweasel",
-          "cardId": "onr_v1_070_tinweasel",
+          "providerId": "runner.provider:282",
+          "cardId": 282,
           "copies": 2,
           "capabilities": [
             "runner.coverage.breaker"
@@ -8018,14 +8018,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_070_tinweasel",
+            "provider_card:282",
             "provider_copies:2",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_072_wild-card",
-          "cardId": "onr_v1_072_wild-card",
+          "providerId": "runner.provider:284",
+          "cardId": 284,
           "copies": 2,
           "capabilities": [
             "runner.coverage.breaker"
@@ -8035,14 +8035,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_072_wild-card",
+            "provider_card:284",
             "provider_copies:2",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_073_wizards-book",
-          "cardId": "onr_v1_073_wizards-book",
+          "providerId": "runner.provider:285",
+          "cardId": 285,
           "copies": 2,
           "capabilities": [
             "runner.coverage.breaker"
@@ -8052,14 +8052,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_073_wizards-book",
+            "provider_card:285",
             "provider_copies:2",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_079_bodyweight-synthetic-blood",
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "providerId": "runner.provider:291",
+          "cardId": 291,
           "copies": 2,
           "capabilities": [
             "runner.throughput.draw"
@@ -8069,14 +8069,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_079_bodyweight-synthetic-blood",
+            "provider_card:291",
             "provider_copies:2",
             "provides:runner.throughput.draw"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_095_jack-n-joe",
-          "cardId": "onr_v1_095_jack-n-joe",
+          "providerId": "runner.provider:307",
+          "cardId": 307,
           "copies": 3,
           "capabilities": [
             "runner.throughput.draw"
@@ -8086,14 +8086,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_095_jack-n-joe",
+            "provider_card:307",
             "provider_copies:3",
             "provides:runner.throughput.draw"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_101_mit-west-tier",
-          "cardId": "onr_v1_101_mit-west-tier",
+          "providerId": "runner.provider:313",
+          "cardId": 313,
           "copies": 1,
           "capabilities": [
             "runner.throughput.draw"
@@ -8103,14 +8103,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_101_mit-west-tier",
+            "provider_card:313",
             "provider_copies:1",
             "provides:runner.throughput.draw"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_114_temple-microcode-outlet",
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "providerId": "runner.provider:326",
+          "cardId": 326,
           "copies": 1,
           "capabilities": [
             "runner.throughput.search"
@@ -8120,7 +8120,7 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_114_temple-microcode-outlet",
+            "provider_card:326",
             "provider_copies:1",
             "provides:runner.throughput.search"
           ]
@@ -8133,17 +8133,17 @@
             "runner.coverage.breaker"
           ],
           "providerIds": [
-            "runner.provider:onr_v1_006_black-dahlia",
-            "runner.provider:onr_v1_016_cyfermaster",
-            "runner.provider:onr_v1_031_hammer",
-            "runner.provider:onr_v1_040_loony-goon",
-            "runner.provider:onr_v1_047_pile-driver",
-            "runner.provider:onr_v1_052_raffles",
-            "runner.provider:onr_v1_054_raptor",
-            "runner.provider:onr_v1_060_shaka",
-            "runner.provider:onr_v1_070_tinweasel",
-            "runner.provider:onr_v1_072_wild-card",
-            "runner.provider:onr_v1_073_wizards-book"
+            "runner.provider:218",
+            "runner.provider:228",
+            "runner.provider:243",
+            "runner.provider:252",
+            "runner.provider:259",
+            "runner.provider:264",
+            "runner.provider:266",
+            "runner.provider:272",
+            "runner.provider:282",
+            "runner.provider:284",
+            "runner.provider:285"
           ],
           "supportProviderIds": [],
           "distinctProviderDefinitions": 11,
@@ -9203,7 +9203,7 @@
               ],
               "targetVector": {
                 "kind": "remote",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_trash",
@@ -9297,7 +9297,7 @@
               ],
               "targetVector": {
                 "kind": "remote",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_contest",
@@ -9423,8 +9423,8 @@
       "stateVersion": 43,
       "instances": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-          "dedupeKey": "remote:remote_1",
+          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "dedupeKey": "remote:r1",
           "moduleId": "runner.contest_remote",
           "moduleVersion": "1",
           "side": "runner",
@@ -9444,7 +9444,7 @@
           },
           "target": {
             "kind": "server",
-            "id": "remote_1"
+            "id": "r1"
           },
           "openNeedIds": [],
           "phase": "execute",
@@ -9452,8 +9452,8 @@
           "moduleState": {
             "kind": "remote_contest",
             "signal": {
-              "contestId": "remote:remote_1",
-              "serverId": "remote_1",
+              "contestId": "remote:r1",
+              "serverId": "r1",
               "purpose": "information",
               "knownAgendaThreat": false,
               "terminalPatternThreat": false,
@@ -9470,7 +9470,7 @@
               },
               "runRiskContract": {
                 "schemaVersion": "runner-run-risk-contract-v1",
-                "serverId": "remote_1",
+                "serverId": "r1",
                 "observedAtStateVersion": 39,
                 "runCommitment": "probe_only",
                 "unrezzedIceRisk": 0.66,
@@ -9516,7 +9516,7 @@
                 },
                 "evidenceCodes": [
                   "runner_run_risk_contract_bound",
-                  "runner_run_risk_contract_server:remote_1",
+                  "runner_run_risk_contract_server:r1",
                   "runner_run_risk_contract_commitment:probe_only",
                   "runner_run_risk_contract_reserve_status:satisfied"
                 ]
@@ -9529,7 +9529,7 @@
                 "decision": "retain_information",
                 "boundaryKind": "visible_ice_path_changed",
                 "observedAtStateVersion": 42,
-                "observedIceInstanceId": "corp_onr_v1_234_data-darts_2",
+                "observedIceInstanceId": "c2ra",
                 "knownPathCost": 0,
                 "knownPathReachable": false,
                 "unknownIceCount": 0,
@@ -9608,8 +9608,8 @@
           ]
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_40",
-          "dedupeKey": "run:run_40",
+          "instanceId": "plan:runner.convert_run_window:run%3A40",
+          "dedupeKey": "run:40",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
           "side": "runner",
@@ -9629,19 +9629,19 @@
           },
           "target": {
             "kind": "window",
-            "id": "run:run_40"
+            "id": "run:40"
           },
-          "parentInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+          "parentInstanceId": "plan:runner.contest_remote:remote%3Ar1",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
           "moduleState": {
             "kind": "run_window",
             "signal": {
-              "windowId": "run:run_40",
-              "serverId": "remote_1",
-              "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3Arun_40",
+              "windowId": "run:40",
+              "serverId": "r1",
+              "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A40",
               "semanticActionTypes": [
                 "run.jack_out",
                 "run.continue"
@@ -9657,7 +9657,7 @@
               },
               "runRiskReassessment": {
                 "schemaVersion": "runner-run-risk-reassessment-v1",
-                "serverId": "remote_1",
+                "serverId": "r1",
                 "observedAtStateVersion": 43,
                 "decision": "preserve_continuation",
                 "currentUnrezzedIceRisk": 0.375,
@@ -9940,13 +9940,13 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
           "stateVersion": 43,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_40",
+          "instanceId": "plan:runner.convert_run_window:run%3A40",
           "stateVersion": 43,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
@@ -9963,7 +9963,7 @@
         "commitmentId": "fnv1a:1aaaece9",
         "sourcePlanId": "fnv1a:27a95366",
         "sourceLineHash": "fnv1a:85d2a88f",
-        "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+        "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "side": "runner",
         "turnKey": "runner:turn:7",
         "planningRulesFingerprint": "fnv1a:2cdee35c",
@@ -9980,7 +9980,7 @@
           {
             "phaseId": "fnv1a:b3063e23",
             "root": {
-              "planInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+              "planInstanceId": "plan:runner.contest_remote:remote%3Ar1",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -10084,14 +10084,14 @@
         "expectationId": "fnv1a:3b19c318"
       },
       "pendingRunnerCostPenaltySupportOrigin": {
-        "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-        "executorInstanceId": "plan:runner.convert_run_window:run%3Arun_40",
-        "sourceStepId": "plan:runner.convert_run_window:run%3Arun_40:convert",
+        "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+        "executorInstanceId": "plan:runner.convert_run_window:run%3A40",
+        "sourceStepId": "plan:runner.convert_run_window:run%3A40:convert",
         "originalActionId": "runner.continue_run",
         "selectedAtStateVersion": 43
       },
-      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3Arun_40"
+      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+      "executorInstanceId": "plan:runner.convert_run_window:run%3A40"
     }
   },
   "validation": {

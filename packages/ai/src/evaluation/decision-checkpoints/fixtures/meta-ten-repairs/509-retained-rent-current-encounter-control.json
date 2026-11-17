@@ -3,12 +3,12 @@
   "originalPrefix": 111,
   "checkpointHash": "fnv1a:0d5cf7f0",
   "equivalentCurrentEncounterCost": 3,
-  "retainedRent": "runner_onr_classic_031_rent-i-con_2",
+  "retainedRent": "c7u",
   "sameOriginalCurrentRunAccess": true,
   "creditsAfterRun": 9,
   "rows": [
     {
-      "actionId": "runner.pump_breaker.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_v1_245_fire-wall_2.onr_classic_027_early-worm:pump_strength_three",
+      "actionId": "runner.pump_breaker.c6y.c6y.c6y.c2tq.41",
       "type": "pump_breaker",
       "version": 112,
       "hash": "fnv1a:d3f91438",
@@ -18,7 +18,7 @@
       ]
     },
     {
-      "actionId": "runner.break_subroutine.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_v1_245_fire-wall_2.0.printed_subroutines_end_the_run.onr_classic_027_early-worm:break_wall_subroutine",
+      "actionId": "runner.break_subroutine.c6y.c6y.c6y.c2tq.0.printed_subroutines_end_the_run.40",
       "type": "break_subroutine",
       "version": 113,
       "hash": "fnv1a:e72a8e85",
@@ -68,7 +68,7 @@
       ]
     },
     {
-      "actionId": "runner.break_subroutine.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_proteus_038_snowbank_3.0.subroutine_end_run_unless_runner_pays_one.onr_classic_027_early-worm:break_wall_subroutine",
+      "actionId": "runner.break_subroutine.c6y.c6y.c6y.clj.0.subroutine_end_run_unless_runner_pays_one.40",
       "type": "break_subroutine",
       "version": 118,
       "hash": "fnv1a:3858ef42",

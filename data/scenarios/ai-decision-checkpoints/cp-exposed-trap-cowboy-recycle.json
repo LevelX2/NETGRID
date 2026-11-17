@@ -2,7 +2,7 @@
   "schemaVersion": "known-corp-card-vertical-slice-checkpoint-v1",
   "checkpointId": "exposed-weak-trap-recycled-to-hq",
   "side": "corp",
-  "serverId": "remote_1",
+  "serverId": "r1",
   "cardDefinitionId": 557,
   "cardInstanceId": "trap-installed",
   "recyclerDefinitionId": 528,

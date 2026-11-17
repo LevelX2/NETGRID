@@ -13,7 +13,7 @@
       "phase": "runner_action_phase",
       "own": {
         "identity": {
-          "instanceId": "runner_587_0",
+          "instanceId": "c3mg",
           "known": true,
           "title": "Runner",
           "definitionId": 587,
@@ -31,7 +31,7 @@
         "agendaPoints": 1,
         "gripOrHq": [
           {
-            "instanceId": "runner_280_3",
+            "instanceId": "c1qb",
             "known": true,
             "title": "Startup Immolator",
             "definitionId": 280,
@@ -46,7 +46,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_292_3",
+            "instanceId": "c1sz",
             "known": true,
             "title": "Core Command: Jettison Ice",
             "definitionId": 292,
@@ -66,7 +66,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_296_2",
+            "instanceId": "c1tu",
             "known": true,
             "title": "Edited Shipping Manifests",
             "definitionId": 296,
@@ -86,7 +86,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_380_2",
+            "instanceId": "c2ci",
             "known": true,
             "title": "Loan from Chiba",
             "definitionId": 380,
@@ -100,7 +100,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_307_3",
+            "instanceId": "c1wb",
             "known": true,
             "title": "Jack ’n’ Joe",
             "definitionId": 307,
@@ -121,7 +121,7 @@
         "stackOrRdCount": 21,
         "heapOrArchives": [
           {
-            "instanceId": "runner_317_2",
+            "instanceId": "c1yi",
             "known": true,
             "title": "Priority Wreck",
             "definitionId": 317,
@@ -141,7 +141,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_307_2",
+            "instanceId": "c1wa",
             "known": true,
             "title": "Jack ’n’ Joe",
             "definitionId": 307,
@@ -159,7 +159,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_307_1",
+            "instanceId": "c1w9",
             "known": true,
             "title": "Jack ’n’ Joe",
             "definitionId": 307,
@@ -177,7 +177,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_309_1",
+            "instanceId": "c1wp",
             "known": true,
             "title": "Livewire’s Contacts",
             "definitionId": 309,
@@ -195,7 +195,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_385_1",
+            "instanceId": "c2dl",
             "known": true,
             "title": "Restrictive Net Zoning",
             "definitionId": 385,
@@ -209,7 +209,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_385_3",
+            "instanceId": "c2dn",
             "known": true,
             "title": "Restrictive Net Zoning",
             "definitionId": 385,
@@ -223,7 +223,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_330_1",
+            "instanceId": "c21d",
             "known": true,
             "title": "Weather-to-Finance Pipe",
             "definitionId": 330,
@@ -243,7 +243,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_320_1",
+            "instanceId": "c1z5",
             "known": true,
             "title": "Score!",
             "definitionId": 320,
@@ -261,7 +261,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_380_1",
+            "instanceId": "c2ch",
             "known": true,
             "title": "Loan from Chiba",
             "definitionId": 380,
@@ -275,7 +275,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_309_3",
+            "instanceId": "c1wr",
             "known": true,
             "title": "Livewire’s Contacts",
             "definitionId": 309,
@@ -293,7 +293,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_296_1",
+            "instanceId": "c1tt",
             "known": true,
             "title": "Edited Shipping Manifests",
             "definitionId": 296,
@@ -313,7 +313,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_330_2",
+            "instanceId": "c21e",
             "known": true,
             "title": "Weather-to-Finance Pipe",
             "definitionId": 330,
@@ -333,7 +333,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_377_2",
+            "instanceId": "c2bu",
             "known": true,
             "title": "Junkyard BBS",
             "definitionId": 377,
@@ -349,7 +349,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_280_2",
+            "instanceId": "c1qa",
             "known": true,
             "title": "Startup Immolator",
             "definitionId": 280,
@@ -366,7 +366,7 @@
         ],
         "scoreArea": [
           {
-            "instanceId": "corp_426_1",
+            "instanceId": "c2mt",
             "known": true,
             "title": "Project Babylon",
             "definitionId": 426,
@@ -387,7 +387,7 @@
         ],
         "rig": [
           {
-            "instanceId": "runner_251_2",
+            "instanceId": "c1ju",
             "known": true,
             "title": "Krash",
             "definitionId": 251,
@@ -405,7 +405,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_347_2",
+            "instanceId": "c256",
             "known": true,
             "title": "Nasuko Cycle",
             "definitionId": 347,
@@ -421,7 +421,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_385_2",
+            "instanceId": "c2dm",
             "known": true,
             "title": "Restrictive Net Zoning",
             "definitionId": 385,
@@ -437,7 +437,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_377_3",
+            "instanceId": "c2bv",
             "known": true,
             "title": "Junkyard BBS",
             "definitionId": 377,
@@ -453,7 +453,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_366_1",
+            "instanceId": "c29d",
             "known": true,
             "title": "Broker",
             "definitionId": 366,
@@ -509,7 +509,7 @@
       },
       "opponent": {
         "identity": {
-          "instanceId": "corp_3_0",
+          "instanceId": "cs",
           "known": true,
           "title": "Korp",
           "definitionId": 3,
@@ -531,7 +531,7 @@
         "discardCount": 9,
         "scoreArea": [
           {
-            "instanceId": "corp_415_1",
+            "instanceId": "c2kd",
             "known": true,
             "title": "Hostile Takeover",
             "definitionId": 415,
@@ -548,7 +548,7 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_415_3",
+            "instanceId": "c2kf",
             "known": true,
             "title": "Hostile Takeover",
             "definitionId": 415,
@@ -565,7 +565,7 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_432_1",
+            "instanceId": "c2o5",
             "known": true,
             "title": "Tycho Extension",
             "definitionId": 432,
@@ -595,7 +595,7 @@
           },
           "ice": [
             {
-              "instanceId": "corp_491_2",
+              "instanceId": "c31a",
               "known": true,
               "title": "Wall of Static",
               "definitionId": 491,
@@ -611,7 +611,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_491_2",
+                "iceInstanceId": "c31a",
                 "iceDefinitionId": 491,
                 "effectiveStrength": 2,
                 "encounterStrength": 2,
@@ -626,13 +626,13 @@
               }
             },
             {
-              "instanceId": "hidden_f95f5deb",
+              "instanceId": "h1f5hds6",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "corp_457_1",
+              "instanceId": "c2tp",
               "known": true,
               "title": "Fire Wall",
               "definitionId": 457,
@@ -648,7 +648,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_457_1",
+                "iceInstanceId": "c2tp",
                 "iceDefinitionId": 457,
                 "effectiveStrength": 4,
                 "encounterStrength": 4,
@@ -676,7 +676,7 @@
           },
           "ice": [
             {
-              "instanceId": "corp_473_1",
+              "instanceId": "c2x9",
               "known": true,
               "title": "Quandary",
               "definitionId": 473,
@@ -692,7 +692,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_473_1",
+                "iceInstanceId": "c2x9",
                 "iceDefinitionId": 473,
                 "effectiveStrength": 2,
                 "encounterStrength": 2,
@@ -707,13 +707,13 @@
               }
             },
             {
-              "instanceId": "hidden_cee9c24e",
+              "instanceId": "h1kf0dgq",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "hidden_6b570050",
+              "instanceId": "h84dymk",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -733,7 +733,7 @@
           "ice": [],
           "root": [
             {
-              "instanceId": "corp_507_1",
+              "instanceId": "c34t",
               "known": true,
               "title": "Night Shift",
               "definitionId": 507,
@@ -751,7 +751,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_493_1",
+              "instanceId": "c31p",
               "known": true,
               "title": "Accounts Receivable",
               "definitionId": 493,
@@ -771,7 +771,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_493_2",
+              "instanceId": "c31q",
               "known": true,
               "title": "Accounts Receivable",
               "definitionId": 493,
@@ -791,7 +791,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_521_1",
+              "instanceId": "c37x",
               "known": true,
               "title": "BBS Whispering Campaign",
               "definitionId": 521,
@@ -808,7 +808,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_502_2",
+              "instanceId": "c33q",
               "known": true,
               "title": "Efficiency Experts",
               "definitionId": 502,
@@ -828,7 +828,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_507_2",
+              "instanceId": "c34u",
               "known": true,
               "title": "Night Shift",
               "definitionId": 507,
@@ -846,7 +846,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_521_3",
+              "instanceId": "c37z",
               "known": true,
               "title": "BBS Whispering Campaign",
               "definitionId": 521,
@@ -865,31 +865,31 @@
           ],
           "statuses": [
             {
-              "id": "server_status:archives:corp_ice_install:increase:runner_385_2:0",
+              "id": "server_status:archives:corp_ice_install:increase:c2dm:0",
               "kind": "cost_modifier",
               "scope": "target_server",
               "costKind": "corp_ice_install",
               "operation": "increase",
               "amount": 2,
               "targetServerId": "archives",
-              "sourceCardInstanceId": "runner_385_2",
+              "sourceCardInstanceId": "c2dm",
               "sourceTitle": "Restrictive Net Zoning",
               "sourceSide": "runner"
             }
           ]
         },
         {
-          "id": "remote_1",
+          "id": "r1",
           "label": "Remote 1",
           "runnerAgendaStealCostQuote": {
             "stateVersion": 210,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "minimumCreditCost": 0,
             "complete": true
           },
           "ice": [
             {
-              "instanceId": "corp_464_2",
+              "instanceId": "c2va",
               "known": true,
               "title": "Keeper",
               "definitionId": 464,
@@ -905,7 +905,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_464_2",
+                "iceInstanceId": "c2va",
                 "iceDefinitionId": 464,
                 "effectiveStrength": 4,
                 "encounterStrength": 4,
@@ -920,7 +920,7 @@
               }
             },
             {
-              "instanceId": "corp_461_1",
+              "instanceId": "c2ul",
               "known": true,
               "title": "Hunter",
               "definitionId": 461,
@@ -937,7 +937,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_461_1",
+                "iceInstanceId": "c2ul",
                 "iceDefinitionId": 461,
                 "effectiveStrength": 5,
                 "encounterStrength": 5,
@@ -957,7 +957,7 @@
               }
             },
             {
-              "instanceId": "hidden_cce9bf28",
+              "instanceId": "h1jv162s",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -965,7 +965,7 @@
           ],
           "root": [
             {
-              "instanceId": "hidden_12e73f7d",
+              "instanceId": "h1eun6zo",
               "known": false,
               "rezzed": false,
               "advancementCounters": 2,
@@ -1399,11 +1399,11 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "run_11.start",
+                "effectId": "11.start",
                 "kind": "start_run",
                 "visibility": "public",
                 "side": "runner",
-                "runId": "run_11",
+                "runId": 11,
                 "accessServerId": "hq",
                 "serverId": "hq"
               }
@@ -1922,7 +1922,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -1950,7 +1950,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -1995,7 +1995,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 1",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -2029,7 +2029,7 @@
             "label": "Keeper rezzen",
             "title": "Keeper",
             "cardDefinitionId": 464,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "installedPositionKey": "installed-position-v1:5cb22087",
@@ -2204,7 +2204,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -2231,7 +2231,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -2258,7 +2258,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -2287,7 +2287,7 @@
             "label": "Agenda in Remote 1 scoren",
             "title": "Hostile Takeover",
             "cardDefinitionId": 415,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:80e8e76a",
             "abilityFamily": "agenda-scoring",
@@ -2299,7 +2299,7 @@
               "corpCreditsAfter": 7
             },
             "targets": {
-              "scoredFromServerId": "remote_1"
+              "scoredFromServerId": "r1"
             },
             "visibility": {
               "class": "hidden_info_barrier"
@@ -2518,7 +2518,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -2546,7 +2546,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -2573,7 +2573,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -2788,7 +2788,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -2817,7 +2817,7 @@
             "label": "Agenda in Remote 1 scoren",
             "title": "Hostile Takeover",
             "cardDefinitionId": 415,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:7ee8e444",
             "abilityFamily": "agenda-scoring",
@@ -2829,7 +2829,7 @@
               "corpCreditsAfter": 9
             },
             "targets": {
-              "scoredFromServerId": "remote_1"
+              "scoredFromServerId": "r1"
             },
             "visibility": {
               "class": "hidden_info_barrier"
@@ -3094,7 +3094,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -3122,7 +3122,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -3150,7 +3150,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -3239,7 +3239,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 1",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -3273,7 +3273,7 @@
             "label": "Hunter rezzen",
             "title": "Hunter",
             "cardDefinitionId": 461,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "installedPositionKey": "installed-position-v1:0b456b4e",
@@ -3420,7 +3420,7 @@
             "actionType": "continue_run",
             "label": "ICE passieren",
             "sourceDefinitionId": 461,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -3445,7 +3445,7 @@
             "actor": "runner",
             "actionType": "continue_run",
             "label": "Run fortsetzen",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -3571,7 +3571,7 @@
             "actionType": "continue_run",
             "label": "ICE passieren",
             "sourceDefinitionId": 464,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -3596,7 +3596,7 @@
             "actor": "runner",
             "actionType": "continue_run",
             "label": "Run fortsetzen",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -3624,7 +3624,7 @@
             "label": "Karte accessen",
             "title": "Project Babylon",
             "cardDefinitionId": 426,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "accessedCardPositionKey": "root:0",
@@ -3658,7 +3658,7 @@
             "label": "Project Babylon stehlen",
             "title": "Project Babylon",
             "cardDefinitionId": 426,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:bc12dd17",
@@ -3859,7 +3859,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "380.runner_380_1.effect.0.lose_credits",
+                "effectId": "380.c2ch.effect.0.lose_credits",
                 "kind": "lose_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3993,7 +3993,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "380.runner_380_1.effect.0.pay_credits_or_lose_game",
+                "effectId": "380.c2ch.effect.0.pay_credits_or_lose_game",
                 "kind": "pay_credits_or_lose_game",
                 "visibility": "public",
                 "side": "runner",
@@ -4003,7 +4003,7 @@
                 "sourceTitle": "Loan from Chiba"
               },
               {
-                "effectId": "380.runner_380_1.effect.0.trash_source",
+                "effectId": "380.c2ch.effect.0.trash_source",
                 "kind": "trash_source",
                 "visibility": "public",
                 "side": "runner",
@@ -4071,7 +4071,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -4102,7 +4102,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
@@ -4153,7 +4153,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
@@ -4212,7 +4212,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
@@ -4361,7 +4361,7 @@
             "label": "Broker: 3 Credits auf Broker legen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_1",
+            "sourceCardInstanceId": "c29d",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "counter_change",
@@ -4453,7 +4453,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
@@ -4512,7 +4512,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
@@ -4571,7 +4571,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
@@ -4646,7 +4646,7 @@
             "label": "Broker: Credits von Broker nehmen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_1",
+            "sourceCardInstanceId": "c29d",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -4821,7 +4821,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
@@ -4880,7 +4880,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
@@ -4940,7 +4940,7 @@
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
             "trashedCardDefinitionId": 521,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:762ef974",
             "abilityFamily": "hosting-counters",
@@ -5024,7 +5024,7 @@
             "label": "Broker: 3 Credits auf Broker legen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_1",
+            "sourceCardInstanceId": "c29d",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "counter_change",
@@ -5650,11 +5650,11 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "run_163.start",
+                "effectId": "163.start",
                 "kind": "start_run",
                 "visibility": "public",
                 "side": "runner",
-                "runId": "run_163",
+                "runId": 163,
                 "accessServerId": "hq",
                 "serverId": "hq"
               }
@@ -5832,7 +5832,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -5860,7 +5860,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -5888,7 +5888,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -5934,7 +5934,7 @@
             "label": "Broker: 3 Credits auf Broker legen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_1",
+            "sourceCardInstanceId": "c29d",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "counter_change",
@@ -6098,7 +6098,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -6125,7 +6125,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -6152,7 +6152,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -6181,12 +6181,12 @@
             "label": "Agenda in Remote 1 scoren",
             "title": "Tycho Extension",
             "cardDefinitionId": 432,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:3e671e10",
             "abilityFamily": "agenda-scoring",
             "targets": {
-              "scoredFromServerId": "remote_1"
+              "scoredFromServerId": "r1"
             },
             "visibility": {
               "class": "hidden_info_barrier"
@@ -6393,7 +6393,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_2",
+            "serverId": "r2",
             "serverLabel": "Remote 2",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -6445,7 +6445,7 @@
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
             "sourceDefinitionId": 521,
-            "serverId": "remote_2",
+            "serverId": "r2",
             "serverLabel": "Remote 2",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:782efc9a",
@@ -6592,7 +6592,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 2",
-            "serverId": "remote_2",
+            "serverId": "r2",
             "serverLabel": "Remote 2",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -6626,7 +6626,7 @@
             "label": "Karte accessen",
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
-            "serverId": "remote_2",
+            "serverId": "r2",
             "serverLabel": "Remote 2",
             "installPlacement": "root",
             "accessedCardPositionKey": "root:0",
@@ -6660,7 +6660,7 @@
             "label": "BBS Whispering Campaign trashen",
             "title": "BBS Whispering Campaign",
             "cardDefinitionId": 521,
-            "serverId": "remote_2",
+            "serverId": "r2",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:782efc9a",
             "accessIndex": 0,
@@ -6832,7 +6832,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -6860,7 +6860,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -6887,7 +6887,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -6922,11 +6922,11 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
+          "actionId": "runner.activated_card_ability.c29d.c29d.activated.440",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Broker: 3 Credits auf Broker legen",
-          "source": "runner_366_1",
+          "source": "c29d",
           "timingPoint": "runner_action.main",
           "costs": [
             {
@@ -6935,26 +6935,26 @@
           ],
           "targetRequirements": [],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_366_1",
-            "sourceAbilityId": "366:store_credits"
+            "sourceCardInstanceId": "c29d",
+            "sourceAbilityId": 440
           },
           "visibility": "public",
           "expiresAtStateVersion": 210,
           "payload": {
             "cardImplementationAddsHostedCredits": true,
             "hostedCreditAddAmount": 3,
-            "cardId": "runner_366_1",
+            "cardId": "c29d",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "366:store_credits",
+            "cardImplementationAbilityId": 440,
             "cardImplementationAbilityKey": "store_credits"
           }
         },
         {
-          "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits",
+          "actionId": "runner.activated_card_ability.c29d.c29d.activated.441",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Broker: Credits von Broker nehmen",
-          "source": "runner_366_1",
+          "source": "c29d",
           "timingPoint": "runner_action.main",
           "costs": [
             {
@@ -6963,8 +6963,8 @@
           ],
           "targetRequirements": [],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_366_1",
-            "sourceAbilityId": "366:withdraw_credits"
+            "sourceCardInstanceId": "c29d",
+            "sourceAbilityId": 441
           },
           "visibility": "public",
           "expiresAtStateVersion": 210,
@@ -6973,19 +6973,19 @@
             "cardImplementationTakesHostedCredits": true,
             "hostedCreditTakeAmount": 6,
             "hostedCreditTakeMode": "all",
-            "cardId": "runner_366_1",
+            "cardId": "c29d",
             "gainCreditsAmount": 6,
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "366:withdraw_credits",
+            "cardImplementationAbilityId": 441,
             "cardImplementationAbilityKey": "withdraw_credits"
           }
         },
         {
-          "actionId": "runner.activated_card_ability.runner_377_3.runner_377_3.runner_280_2.activated.377:abilities_activated_runner_main_move_top_trash_to_grip.runner_280_2",
+          "actionId": "runner.activated_card_ability.c2bv.c2bv.c1qa.activated.450.c1qa",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Junkyard BBS: oberste Trash-Karte in die Grip nehmen",
-          "source": "runner_377_3",
+          "source": "c2bv",
           "timingPoint": "runner_action.main",
           "costs": [
             {
@@ -6995,18 +6995,18 @@
           ],
           "targetRequirements": [],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_377_3",
-            "sourceAbilityId": "377:abilities_activated_runner_main_move_top_trash_to_grip"
+            "sourceCardInstanceId": "c2bv",
+            "sourceAbilityId": 450
           },
           "visibility": "public",
           "expiresAtStateVersion": 210,
           "payload": {
             "targetDefinitionId": 280,
             "cardImplementationEffectKind": "move_top_trash_to_grip",
-            "targetCardId": "runner_280_2",
-            "cardId": "runner_377_3",
+            "targetCardId": "c1qa",
+            "cardId": "c2bv",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "377:abilities_activated_runner_main_move_top_trash_to_grip",
+            "cardImplementationAbilityId": 450,
             "cardImplementationAbilityKey": "abilities_activated_runner_main_move_top_trash_to_grip"
           }
         },
@@ -7055,11 +7055,11 @@
           }
         },
         {
-          "actionId": "runner.install_card.runner_280_3.runner_280_3",
+          "actionId": "runner.install_card.c1qb.c1qb",
           "side": "runner",
           "type": "install_card",
           "label": "Startup Immolator installieren",
-          "source": "runner_280_3",
+          "source": "c1qb",
           "timingPoint": "runner_action.main",
           "costs": [
             {
@@ -7072,15 +7072,15 @@
           "expiresAtStateVersion": 210,
           "payload": {
             "effectKind": "install_card",
-            "cardId": "runner_280_3"
+            "cardId": "c1qb"
           }
         },
         {
-          "actionId": "runner.install_card.runner_280_3.runner_280_3.runner_program_trash_before_install",
+          "actionId": "runner.install_card.c1qb.c1qb.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Startup Immolator mit Programmtrash installieren",
-          "source": "runner_280_3",
+          "source": "c1qb",
           "timingPoint": "runner_action.main",
           "costs": [
             {
@@ -7094,15 +7094,15 @@
           "payload": {
             "runnerProgramTrashBeforeInstall": true,
             "effectKind": "install_card",
-            "cardId": "runner_280_3"
+            "cardId": "c1qb"
           }
         },
         {
-          "actionId": "runner.play_event.runner_296_2.hq.runner_296_2.296:abilities_on_play_make_run",
+          "actionId": "runner.play_event.c1tu.hq.c1tu.380",
           "side": "runner",
           "type": "play_event",
           "label": "Edited Shipping Manifests auf HQ",
-          "source": "runner_296_2",
+          "source": "c1tu",
           "timingPoint": "runner_action.main",
           "costs": [
             {
@@ -7112,26 +7112,26 @@
           ],
           "targetRequirements": [],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_296_2",
-            "sourceAbilityId": "296:abilities_on_play_make_run"
+            "sourceCardInstanceId": "c1tu",
+            "sourceAbilityId": 380
           },
           "visibility": "private_to_actor",
           "expiresAtStateVersion": 210,
           "payload": {
             "serverId": "hq",
             "runnerEventRun": true,
-            "cardId": "runner_296_2",
+            "cardId": "c1tu",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "296:abilities_on_play_make_run",
+            "cardImplementationAbilityId": 380,
             "cardImplementationAbilityKey": "abilities_on_play_make_run"
           }
         },
         {
-          "actionId": "runner.install_card.runner_380_2.runner_380_2",
+          "actionId": "runner.install_card.c2ci.c2ci",
           "side": "runner",
           "type": "install_card",
           "label": "Loan from Chiba installieren",
-          "source": "runner_380_2",
+          "source": "c2ci",
           "timingPoint": "runner_action.main",
           "costs": [
             {
@@ -7154,16 +7154,16 @@
           "expiresAtStateVersion": 210,
           "payload": {
             "effectKind": "gain_credits",
-            "cardId": "runner_380_2",
+            "cardId": "c2ci",
             "gainCreditsAmount": 12
           }
         },
         {
-          "actionId": "runner.play_event.runner_307_3.runner_307_3.307:abilities_on_play_draw_cards",
+          "actionId": "runner.play_event.c1wb.c1wb.391",
           "side": "runner",
           "type": "play_event",
           "label": "Jack ’n’ Joe spielen",
-          "source": "runner_307_3",
+          "source": "c1wb",
           "timingPoint": "runner_action.main",
           "costs": [
             {
@@ -7173,8 +7173,8 @@
           ],
           "targetRequirements": [],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_307_3",
-            "sourceAbilityId": "307:abilities_on_play_draw_cards"
+            "sourceCardInstanceId": "c1wb",
+            "sourceAbilityId": 391
           },
           "visibility": "private_to_actor",
           "expiresAtStateVersion": 210,
@@ -7184,10 +7184,10 @@
             "projectedPostDrawDispositionCount": 0,
             "projectedNetHandDelta": 3,
             "visibleDrawTaxSourceCount": 0,
-            "cardId": "runner_307_3",
+            "cardId": "c1wb",
             "drawCardsAmount": 3,
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "307:abilities_on_play_draw_cards",
+            "cardImplementationAbilityId": 391,
             "cardImplementationAbilityKey": "abilities_on_play_draw_cards"
           }
         },
@@ -7208,7 +7208,7 @@
           "expiresAtStateVersion": 210,
           "payload": {
             "serverId": "hq",
-            "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.hq\",\"serverId\":\"hq\",\"sources\":[{\"sourceCardInstanceId\":\"runner_280_3\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"corp_491_2\",\"targetDefinitionId\":\"491\",\"trashCredits\":3},{\"targetIceInstanceId\":\"corp_457_1\",\"targetDefinitionId\":\"457\",\"trashCredits\":5}]}",
+            "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.hq\",\"serverId\":\"hq\",\"sources\":[{\"sourceCardInstanceId\":\"c1qb\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"c31a\",\"targetDefinitionId\":\"491\",\"trashCredits\":3},{\"targetIceInstanceId\":\"c2tp\",\"targetDefinitionId\":\"457\",\"trashCredits\":5}]}",
             "abilityFamily": "run-access",
             "effectKind": "run"
           }
@@ -7230,7 +7230,7 @@
           "expiresAtStateVersion": 210,
           "payload": {
             "serverId": "rd",
-            "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.rd\",\"serverId\":\"rd\",\"sources\":[{\"sourceCardInstanceId\":\"runner_280_3\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"corp_473_1\",\"targetDefinitionId\":\"473\",\"trashCredits\":2}]}",
+            "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.rd\",\"serverId\":\"rd\",\"sources\":[{\"sourceCardInstanceId\":\"c1qb\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"c2x9\",\"targetDefinitionId\":\"473\",\"trashCredits\":2}]}",
             "abilityFamily": "run-access",
             "effectKind": "run"
           }
@@ -7257,7 +7257,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.remote_1",
+          "actionId": "runner.start_run.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -7272,8 +7272,8 @@
           "visibility": "private_to_actor",
           "expiresAtStateVersion": 210,
           "payload": {
-            "serverId": "remote_1",
-            "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.remote_1\",\"serverId\":\"remote_1\",\"sources\":[{\"sourceCardInstanceId\":\"runner_280_3\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"corp_464_2\",\"targetDefinitionId\":\"464\",\"trashCredits\":4},{\"targetIceInstanceId\":\"corp_461_1\",\"targetDefinitionId\":\"461\",\"trashCredits\":2}]}",
+            "serverId": "r1",
+            "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.r1\",\"serverId\":\"r1\",\"sources\":[{\"sourceCardInstanceId\":\"c1qb\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"c2va\",\"targetDefinitionId\":\"464\",\"trashCredits\":4},{\"targetIceInstanceId\":\"c2ul\",\"targetDefinitionId\":\"461\",\"trashCredits\":2}]}",
             "abilityFamily": "run-access",
             "effectKind": "run"
           }
@@ -7402,7 +7402,7 @@
           "title": "BBS Whispering Campaign",
           "cardDefinitionId": 521,
           "sourceDefinitionId": 521,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:762ef974",
@@ -7461,7 +7461,7 @@
           "title": "BBS Whispering Campaign",
           "cardDefinitionId": 521,
           "sourceDefinitionId": 521,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:762ef974",
@@ -7521,7 +7521,7 @@
           "cardDefinitionId": 521,
           "sourceDefinitionId": 521,
           "trashedCardDefinitionId": 521,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:762ef974",
           "abilityFamily": "hosting-counters",
@@ -7605,7 +7605,7 @@
           "label": "Broker: 3 Credits auf Broker legen",
           "title": "Broker",
           "cardDefinitionId": 366,
-          "sourceCardInstanceId": "runner_366_1",
+          "sourceCardInstanceId": "c29d",
           "sourceDefinitionId": 366,
           "abilityFamily": "hosting-counters",
           "effectKind": "counter_change",
@@ -8231,11 +8231,11 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "run_163.start",
+              "effectId": "163.start",
               "kind": "start_run",
               "visibility": "public",
               "side": "runner",
-              "runId": "run_163",
+              "runId": 163,
               "accessServerId": "hq",
               "serverId": "hq"
             }
@@ -8413,7 +8413,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "ice",
           "redactedKind": "installed_card",
@@ -8441,7 +8441,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -8469,7 +8469,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -8515,7 +8515,7 @@
           "label": "Broker: 3 Credits auf Broker legen",
           "title": "Broker",
           "cardDefinitionId": 366,
-          "sourceCardInstanceId": "runner_366_1",
+          "sourceCardInstanceId": "c29d",
           "sourceDefinitionId": 366,
           "abilityFamily": "hosting-counters",
           "effectKind": "counter_change",
@@ -8679,7 +8679,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -8706,7 +8706,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -8733,7 +8733,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -8762,12 +8762,12 @@
           "label": "Agenda in Remote 1 scoren",
           "title": "Tycho Extension",
           "cardDefinitionId": 432,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:3e671e10",
           "abilityFamily": "agenda-scoring",
           "targets": {
-            "scoredFromServerId": "remote_1"
+            "scoredFromServerId": "r1"
           },
           "visibility": {
             "class": "hidden_info_barrier"
@@ -8974,7 +8974,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_2",
+          "serverId": "r2",
           "serverLabel": "Remote 2",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -9026,7 +9026,7 @@
           "title": "BBS Whispering Campaign",
           "cardDefinitionId": 521,
           "sourceDefinitionId": 521,
-          "serverId": "remote_2",
+          "serverId": "r2",
           "serverLabel": "Remote 2",
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:782efc9a",
@@ -9173,7 +9173,7 @@
           "actor": "runner",
           "actionType": "start_run",
           "label": "Run auf Remote 2",
-          "serverId": "remote_2",
+          "serverId": "r2",
           "serverLabel": "Remote 2",
           "baseAccessCount": 1,
           "installedAccessBonus": 0,
@@ -9207,7 +9207,7 @@
           "label": "Karte accessen",
           "title": "BBS Whispering Campaign",
           "cardDefinitionId": 521,
-          "serverId": "remote_2",
+          "serverId": "r2",
           "serverLabel": "Remote 2",
           "installPlacement": "root",
           "accessedCardPositionKey": "root:0",
@@ -9241,7 +9241,7 @@
           "label": "BBS Whispering Campaign trashen",
           "title": "BBS Whispering Campaign",
           "cardDefinitionId": 521,
-          "serverId": "remote_2",
+          "serverId": "r2",
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:782efc9a",
           "accessIndex": 0,
@@ -9413,7 +9413,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -9441,7 +9441,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -9468,7 +9468,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -9503,11 +9503,11 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
+        "actionId": "runner.activated_card_ability.c29d.c29d.activated.440",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Broker: 3 Credits auf Broker legen",
-        "source": "runner_366_1",
+        "source": "c29d",
         "timingPoint": "runner_action.main",
         "costs": [
           {
@@ -9516,26 +9516,26 @@
         ],
         "targetRequirements": [],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_366_1",
-          "sourceAbilityId": "366:store_credits"
+          "sourceCardInstanceId": "c29d",
+          "sourceAbilityId": 440
         },
         "visibility": "public",
         "expiresAtStateVersion": 210,
         "payload": {
           "cardImplementationAddsHostedCredits": true,
           "hostedCreditAddAmount": 3,
-          "cardId": "runner_366_1",
+          "cardId": "c29d",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "366:store_credits",
+          "cardImplementationAbilityId": 440,
           "cardImplementationAbilityKey": "store_credits"
         }
       },
       {
-        "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits",
+        "actionId": "runner.activated_card_ability.c29d.c29d.activated.441",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Broker: Credits von Broker nehmen",
-        "source": "runner_366_1",
+        "source": "c29d",
         "timingPoint": "runner_action.main",
         "costs": [
           {
@@ -9544,8 +9544,8 @@
         ],
         "targetRequirements": [],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_366_1",
-          "sourceAbilityId": "366:withdraw_credits"
+          "sourceCardInstanceId": "c29d",
+          "sourceAbilityId": 441
         },
         "visibility": "public",
         "expiresAtStateVersion": 210,
@@ -9554,19 +9554,19 @@
           "cardImplementationTakesHostedCredits": true,
           "hostedCreditTakeAmount": 6,
           "hostedCreditTakeMode": "all",
-          "cardId": "runner_366_1",
+          "cardId": "c29d",
           "gainCreditsAmount": 6,
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "366:withdraw_credits",
+          "cardImplementationAbilityId": 441,
           "cardImplementationAbilityKey": "withdraw_credits"
         }
       },
       {
-        "actionId": "runner.activated_card_ability.runner_377_3.runner_377_3.runner_280_2.activated.377:abilities_activated_runner_main_move_top_trash_to_grip.runner_280_2",
+        "actionId": "runner.activated_card_ability.c2bv.c2bv.c1qa.activated.450.c1qa",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Junkyard BBS: oberste Trash-Karte in die Grip nehmen",
-        "source": "runner_377_3",
+        "source": "c2bv",
         "timingPoint": "runner_action.main",
         "costs": [
           {
@@ -9576,18 +9576,18 @@
         ],
         "targetRequirements": [],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_377_3",
-          "sourceAbilityId": "377:abilities_activated_runner_main_move_top_trash_to_grip"
+          "sourceCardInstanceId": "c2bv",
+          "sourceAbilityId": 450
         },
         "visibility": "public",
         "expiresAtStateVersion": 210,
         "payload": {
           "targetDefinitionId": 280,
           "cardImplementationEffectKind": "move_top_trash_to_grip",
-          "targetCardId": "runner_280_2",
-          "cardId": "runner_377_3",
+          "targetCardId": "c1qa",
+          "cardId": "c2bv",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "377:abilities_activated_runner_main_move_top_trash_to_grip",
+          "cardImplementationAbilityId": 450,
           "cardImplementationAbilityKey": "abilities_activated_runner_main_move_top_trash_to_grip"
         }
       },
@@ -9636,11 +9636,11 @@
         }
       },
       {
-        "actionId": "runner.install_card.runner_280_3.runner_280_3",
+        "actionId": "runner.install_card.c1qb.c1qb",
         "side": "runner",
         "type": "install_card",
         "label": "Startup Immolator installieren",
-        "source": "runner_280_3",
+        "source": "c1qb",
         "timingPoint": "runner_action.main",
         "costs": [
           {
@@ -9653,15 +9653,15 @@
         "expiresAtStateVersion": 210,
         "payload": {
           "effectKind": "install_card",
-          "cardId": "runner_280_3"
+          "cardId": "c1qb"
         }
       },
       {
-        "actionId": "runner.install_card.runner_280_3.runner_280_3.runner_program_trash_before_install",
+        "actionId": "runner.install_card.c1qb.c1qb.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Startup Immolator mit Programmtrash installieren",
-        "source": "runner_280_3",
+        "source": "c1qb",
         "timingPoint": "runner_action.main",
         "costs": [
           {
@@ -9675,15 +9675,15 @@
         "payload": {
           "runnerProgramTrashBeforeInstall": true,
           "effectKind": "install_card",
-          "cardId": "runner_280_3"
+          "cardId": "c1qb"
         }
       },
       {
-        "actionId": "runner.play_event.runner_296_2.hq.runner_296_2.296:abilities_on_play_make_run",
+        "actionId": "runner.play_event.c1tu.hq.c1tu.380",
         "side": "runner",
         "type": "play_event",
         "label": "Edited Shipping Manifests auf HQ",
-        "source": "runner_296_2",
+        "source": "c1tu",
         "timingPoint": "runner_action.main",
         "costs": [
           {
@@ -9693,26 +9693,26 @@
         ],
         "targetRequirements": [],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_296_2",
-          "sourceAbilityId": "296:abilities_on_play_make_run"
+          "sourceCardInstanceId": "c1tu",
+          "sourceAbilityId": 380
         },
         "visibility": "private_to_actor",
         "expiresAtStateVersion": 210,
         "payload": {
           "serverId": "hq",
           "runnerEventRun": true,
-          "cardId": "runner_296_2",
+          "cardId": "c1tu",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "296:abilities_on_play_make_run",
+          "cardImplementationAbilityId": 380,
           "cardImplementationAbilityKey": "abilities_on_play_make_run"
         }
       },
       {
-        "actionId": "runner.install_card.runner_380_2.runner_380_2",
+        "actionId": "runner.install_card.c2ci.c2ci",
         "side": "runner",
         "type": "install_card",
         "label": "Loan from Chiba installieren",
-        "source": "runner_380_2",
+        "source": "c2ci",
         "timingPoint": "runner_action.main",
         "costs": [
           {
@@ -9735,16 +9735,16 @@
         "expiresAtStateVersion": 210,
         "payload": {
           "effectKind": "gain_credits",
-          "cardId": "runner_380_2",
+          "cardId": "c2ci",
           "gainCreditsAmount": 12
         }
       },
       {
-        "actionId": "runner.play_event.runner_307_3.runner_307_3.307:abilities_on_play_draw_cards",
+        "actionId": "runner.play_event.c1wb.c1wb.391",
         "side": "runner",
         "type": "play_event",
         "label": "Jack ’n’ Joe spielen",
-        "source": "runner_307_3",
+        "source": "c1wb",
         "timingPoint": "runner_action.main",
         "costs": [
           {
@@ -9754,8 +9754,8 @@
         ],
         "targetRequirements": [],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_307_3",
-          "sourceAbilityId": "307:abilities_on_play_draw_cards"
+          "sourceCardInstanceId": "c1wb",
+          "sourceAbilityId": 391
         },
         "visibility": "private_to_actor",
         "expiresAtStateVersion": 210,
@@ -9765,10 +9765,10 @@
           "projectedPostDrawDispositionCount": 0,
           "projectedNetHandDelta": 3,
           "visibleDrawTaxSourceCount": 0,
-          "cardId": "runner_307_3",
+          "cardId": "c1wb",
           "drawCardsAmount": 3,
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "307:abilities_on_play_draw_cards",
+          "cardImplementationAbilityId": 391,
           "cardImplementationAbilityKey": "abilities_on_play_draw_cards"
         }
       },
@@ -9789,7 +9789,7 @@
         "expiresAtStateVersion": 210,
         "payload": {
           "serverId": "hq",
-          "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.hq\",\"serverId\":\"hq\",\"sources\":[{\"sourceCardInstanceId\":\"runner_280_3\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"corp_491_2\",\"targetDefinitionId\":\"491\",\"trashCredits\":3},{\"targetIceInstanceId\":\"corp_457_1\",\"targetDefinitionId\":\"457\",\"trashCredits\":5}]}",
+          "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.hq\",\"serverId\":\"hq\",\"sources\":[{\"sourceCardInstanceId\":\"c1qb\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"c31a\",\"targetDefinitionId\":\"491\",\"trashCredits\":3},{\"targetIceInstanceId\":\"c2tp\",\"targetDefinitionId\":\"457\",\"trashCredits\":5}]}",
           "abilityFamily": "run-access",
           "effectKind": "run"
         }
@@ -9811,7 +9811,7 @@
         "expiresAtStateVersion": 210,
         "payload": {
           "serverId": "rd",
-          "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.rd\",\"serverId\":\"rd\",\"sources\":[{\"sourceCardInstanceId\":\"runner_280_3\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"corp_473_1\",\"targetDefinitionId\":\"473\",\"trashCredits\":2}]}",
+          "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.rd\",\"serverId\":\"rd\",\"sources\":[{\"sourceCardInstanceId\":\"c1qb\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"c2x9\",\"targetDefinitionId\":\"473\",\"trashCredits\":2}]}",
           "abilityFamily": "run-access",
           "effectKind": "run"
         }
@@ -9838,7 +9838,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.remote_1",
+        "actionId": "runner.start_run.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -9853,8 +9853,8 @@
         "visibility": "private_to_actor",
         "expiresAtStateVersion": 210,
         "payload": {
-          "serverId": "remote_1",
-          "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.remote_1\",\"serverId\":\"remote_1\",\"sources\":[{\"sourceCardInstanceId\":\"runner_280_3\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"corp_464_2\",\"targetDefinitionId\":\"464\",\"trashCredits\":4},{\"targetIceInstanceId\":\"corp_461_1\",\"targetDefinitionId\":\"461\",\"trashCredits\":2}]}",
+          "serverId": "r1",
+          "runnerPostBreakTrashQuoteJson": "{\"schemaVersion\":\"runner-post-break-trash-quote-v1\",\"stateVersion\":210,\"actionId\":\"runner.start_run.r1\",\"serverId\":\"r1\",\"sources\":[{\"sourceCardInstanceId\":\"c1qb\",\"sourceDefinitionId\":\"280\",\"installed\":false}],\"targets\":[{\"targetIceInstanceId\":\"c2va\",\"targetDefinitionId\":\"464\",\"trashCredits\":4},{\"targetIceInstanceId\":\"c2ul\",\"targetDefinitionId\":\"461\",\"trashCredits\":2}]}",
           "abilityFamily": "run-access",
           "effectKind": "run"
         }
@@ -9914,7 +9914,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 210,
-      "sideSafePlanningFingerprint": "fnv1a:7a8000c6"
+      "sideSafePlanningFingerprint": "fnv1a:c9ac916f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.1.0",
@@ -10172,7 +10172,7 @@
         "economyBankTools": [
           {
             "cardId": 366,
-            "sourceCardInstanceId": "runner_366_1",
+            "sourceCardInstanceId": "c29d",
             "title": "Broker",
             "ownerSide": "runner",
             "status": "installed",
@@ -10184,16 +10184,16 @@
             "buildActionLegal": true,
             "cashOutActionLegal": true,
             "buildActionIds": [
-              "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits"
+              "runner.activated_card_ability.c29d.c29d.activated.440"
             ],
             "cashOutActionIds": [
-              "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits"
+              "runner.activated_card_ability.c29d.c29d.activated.441"
             ],
             "estimatedPayout": 6,
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
-              "bank_source_instance:runner_366_1",
+              "bank_source_instance:c29d",
               "bank_status:installed",
               "bank_build_legal:true",
               "bank_cashout_legal:true"
@@ -12450,7 +12450,7 @@
         "evidence": [
           "target_source:runtime_context",
           "target_strategy:runner.hq_pressure",
-          "target_legal_run:hq|rd|archives|remote_1"
+          "target_legal_run:hq|rd|archives|r1"
         ]
       },
       "reserve": {
@@ -12658,7 +12658,7 @@
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.hq_pressure",
-                "target_legal_run:hq|rd|archives|remote_1"
+                "target_legal_run:hq|rd|archives|r1"
               ]
             },
             "reserve": {
@@ -12750,7 +12750,7 @@
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.interface_closeout",
-                "target_legal_run:hq|rd|archives|remote_1"
+                "target_legal_run:hq|rd|archives|r1"
               ]
             },
             "reserve": {
@@ -13075,7 +13075,7 @@
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.run_event_tempo",
-                "target_legal_run:hq|rd|archives|remote_1"
+                "target_legal_run:hq|rd|archives|r1"
               ]
             },
             "reserve": {
@@ -13249,11 +13249,11 @@
             ],
             "targetVector": {
               "kind": "remote",
-              "targetId": "remote_1",
+              "targetId": "r1",
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.remote_trash",
-                "target_legal_run:hq|rd|archives|remote_1"
+                "target_legal_run:hq|rd|archives|r1"
               ]
             },
             "reserve": {
@@ -13343,11 +13343,11 @@
             ],
             "targetVector": {
               "kind": "remote",
-              "targetId": "remote_1",
+              "targetId": "r1",
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.remote_contest",
-                "target_legal_run:hq|rd|archives|remote_1"
+                "target_legal_run:hq|rd|archives|r1"
               ]
             },
             "reserve": {
@@ -13766,7 +13766,7 @@
           "evidence": [
             "target_source:runtime_context",
             "target_strategy:runner.hq_pressure",
-            "target_legal_run:hq|rd|archives|remote_1"
+            "target_legal_run:hq|rd|archives|r1"
           ]
         },
         "reserve": {
@@ -13974,7 +13974,7 @@
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.hq_pressure",
-                  "target_legal_run:hq|rd|archives|remote_1"
+                  "target_legal_run:hq|rd|archives|r1"
                 ]
               },
               "reserve": {
@@ -14066,7 +14066,7 @@
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.interface_closeout",
-                  "target_legal_run:hq|rd|archives|remote_1"
+                  "target_legal_run:hq|rd|archives|r1"
                 ]
               },
               "reserve": {
@@ -14391,7 +14391,7 @@
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.run_event_tempo",
-                  "target_legal_run:hq|rd|archives|remote_1"
+                  "target_legal_run:hq|rd|archives|r1"
                 ]
               },
               "reserve": {
@@ -14565,11 +14565,11 @@
               ],
               "targetVector": {
                 "kind": "remote",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_trash",
-                  "target_legal_run:hq|rd|archives|remote_1"
+                  "target_legal_run:hq|rd|archives|r1"
                 ]
               },
               "reserve": {
@@ -14659,11 +14659,11 @@
               ],
               "targetVector": {
                 "kind": "remote",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_contest",
-                  "target_legal_run:hq|rd|archives|remote_1"
+                  "target_legal_run:hq|rd|archives|r1"
                 ]
               },
               "reserve": {
@@ -14729,8 +14729,8 @@
       "stateVersion": 210,
       "instances": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-          "dedupeKey": "remote:remote_1",
+          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "dedupeKey": "remote:r1",
           "moduleId": "runner.contest_remote",
           "moduleVersion": "1",
           "side": "runner",
@@ -14750,25 +14750,25 @@
           },
           "target": {
             "kind": "server",
-            "id": "remote_1"
+            "id": "r1"
           },
           "openNeedIds": [
-            "run-support:remote:remote_1"
+            "run-support:remote:r1"
           ],
           "phase": "execute",
           "milestone": "admitted",
           "moduleState": {
             "kind": "remote_contest",
             "signal": {
-              "contestId": "remote:remote_1",
-              "serverId": "remote_1",
+              "contestId": "remote:r1",
+              "serverId": "r1",
               "purpose": "contest",
               "knownAgendaThreat": true,
               "terminalPatternThreat": true,
               "reachable": false,
               "marginalValue": 1400,
-              "evidenceCode": "runner_run_support_fund_concrete_gap:remote_1:concrete_funding_gap_admitted",
-              "supportNeedId": "run-support:remote:remote_1",
+              "evidenceCode": "runner_run_support_fund_concrete_gap:r1:concrete_funding_gap_admitted",
+              "supportNeedId": "run-support:remote:r1",
               "accessCommitment": {
                 "payoff": "score_threat",
                 "intendedAction": "steal",
@@ -14778,7 +14778,7 @@
               },
               "runRiskContract": {
                 "schemaVersion": "runner-run-risk-contract-v1",
-                "serverId": "remote_1",
+                "serverId": "r1",
                 "observedAtStateVersion": 210,
                 "runCommitment": "probe_only",
                 "unrezzedIceRisk": 1,
@@ -14825,20 +14825,20 @@
                 },
                 "evidenceCodes": [
                   "runner_run_risk_contract_bound",
-                  "runner_run_risk_contract_server:remote_1",
+                  "runner_run_risk_contract_server:r1",
                   "runner_run_risk_contract_commitment:probe_only",
                   "runner_run_risk_contract_reserve_status:blocked"
                 ]
               },
               "runActionAssessments": {
-                "runner.start_run.remote_1": {
+                "runner.start_run.r1": {
                   "verdict": "explicitly_nonproductive",
                   "stepValue": 0,
                   "evidenceCodes": [
-                    "runner_remote_run_variant_prerun_reserve_blocked:remote_1",
-                    "target:remote_1",
+                    "runner_remote_run_variant_prerun_reserve_blocked:r1",
+                    "target:r1",
                     "target_kind:remote",
-                    "access_server:remote_1",
+                    "access_server:r1",
                     "access_target_kind:remote",
                     "access_payoff:score_threat",
                     "access_payoff_contestable:false",
@@ -14938,7 +14938,7 @@
                     "liquid_credits:14",
                     "economy_turn_credit_ceiling:20",
                     "remote_pressure_reserve:26",
-                    "remote_target:remote_1",
+                    "remote_target:r1",
                     "remote_memory_payoff:unknown",
                     "known_remote_root_unknown_count:1",
                     "run_action_projection:side_safe",
@@ -14948,7 +14948,7 @@
                     "run_action_projection_no_noisy_breakers:false",
                     "run_action_projection_bypass_first_ice:false",
                     "run_action_projection_access_signal:access_attempt",
-                    "run_action_projection_target:remote_1",
+                    "run_action_projection_target:r1",
                     "run_action_projection_target_kind:remote"
                   ],
                   "routeDiagnostic": {
@@ -14991,14 +14991,14 @@
           "updatedAtStateVersion": 210,
           "evidenceRefs": [
             {
-              "code": "runner_run_support_fund_concrete_gap:remote_1:concrete_funding_gap_admitted",
+              "code": "runner_run_support_fund_concrete_gap:r1:concrete_funding_gap_admitted",
               "source": "visible_state"
             }
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_366_1",
-          "dedupeKey": "runner_366_1",
+          "instanceId": "plan:runner.credit_bank:c29d",
+          "dedupeKey": "c29d",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
           "side": "runner",
@@ -15018,7 +15018,7 @@
           },
           "target": {
             "kind": "bank",
-            "id": "runner_366_1"
+            "id": "c29d"
           },
           "openNeedIds": [],
           "phase": "build",
@@ -15027,13 +15027,13 @@
             "kind": "credit_bank",
             "phase": "build",
             "signal": {
-              "bankId": "runner_366_1",
+              "bankId": "c29d",
               "phase": "build",
               "actionIds": [
-                "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits"
+                "runner.activated_card_ability.c29d.c29d.activated.440"
               ],
               "rejectedActionIds": [
-                "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits"
+                "runner.activated_card_ability.c29d.c29d.activated.441"
               ],
               "priorityClass": "P5",
               "currentStoredCredits": 6,
@@ -15053,7 +15053,7 @@
                 "runner_credit_bank_revalidated_remaining_loads:2",
                 "runner_credit_bank_incremental_income_advantage:4",
                 "capability_source:structured",
-                "bank_source_instance:runner_366_1",
+                "bank_source_instance:c29d",
                 "bank_status:installed",
                 "bank_build_legal:true",
                 "bank_cashout_legal:true"
@@ -15144,8 +15144,8 @@
                 "runner_hand_rotation_status:known_rotation_target_available",
                 "runner_hand_rotation_capacity_gap:0",
                 "runner_hand_rotation_known_low_retention_card",
-                "runner_hand_rotation_target_card:runner_280_3",
-                "runner_hand_rotation_target_card:runner_307_3"
+                "runner_hand_rotation_target_card:c1qb",
+                "runner_hand_rotation_target_card:c1wb"
               ]
             }
           },
@@ -15196,11 +15196,11 @@
               "source": "visible_state"
             },
             {
-              "code": "runner_hand_rotation_target_card:runner_280_3",
+              "code": "runner_hand_rotation_target_card:c1qb",
               "source": "visible_state"
             },
             {
-              "code": "runner_hand_rotation_target_card:runner_307_3",
+              "code": "runner_hand_rotation_target_card:c1wb",
               "source": "visible_state"
             }
           ]
@@ -15292,8 +15292,8 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:run-support%3Aremote%3Aremote_1",
-          "dedupeKey": "run-support:remote:remote_1",
+          "instanceId": "plan:runner.economy:run-support%3Aremote%3Ar1",
+          "dedupeKey": "run-support:remote:r1",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
           "side": "runner",
@@ -15313,10 +15313,10 @@
           },
           "target": {
             "kind": "capability",
-            "id": "run-support:remote:remote_1"
+            "id": "run-support:remote:r1"
           },
-          "parentInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-          "parentNeedId": "run-support:remote:remote_1",
+          "parentInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "parentNeedId": "run-support:remote:r1",
           "openNeedIds": [],
           "phase": "economy",
           "milestone": "need_open",
@@ -15324,17 +15324,17 @@
             "kind": "economy",
             "need": {
               "kind": "parent_plan_support",
-              "needId": "run-support:remote:remote_1",
+              "needId": "run-support:remote:r1",
               "driver": {
                 "kind": "contest",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "reasonCode": "concrete_funding_gap_admitted"
               },
               "targetCredits": 26,
               "currentCreditsAtRevalidation": 14,
               "gap": 12,
               "priorityClass": "P2",
-              "parentPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+              "parentPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
               "revalidation": {
                 "stateVersion": 210,
                 "status": "material_parent_open"
@@ -15342,7 +15342,7 @@
               "routeActionIds": [],
               "routeAssessment": {
                 "stateVersion": 210,
-                "routeId": "run-support:remote:remote_1:uncovered",
+                "routeId": "run-support:remote:r1:uncovered",
                 "status": "uncovered",
                 "reliability": "contingent",
                 "horizon": "same_turn",
@@ -15351,14 +15351,14 @@
                 "evidenceCodes": [
                   "funding_route_count:1",
                   "funding_route_best_status:uncovered",
-                  "funding_route_best_id:run-support:remote:remote_1:uncovered",
+                  "funding_route_best_id:run-support:remote:r1:uncovered",
                   "funding_route_status:uncovered",
                   "funding_route_projected_gap:12",
                   "runner_funding_known_retained_hand_gain:0",
                   "runner_funding_consumer_hand_buffer_preserved:5|required:2"
                 ]
               },
-              "evidenceCode": "runner_run_support_fund_concrete_gap:remote_1:concrete_funding_gap_admitted"
+              "evidenceCode": "runner_run_support_fund_concrete_gap:r1:concrete_funding_gap_admitted"
             }
           },
           "blockers": [
@@ -15398,7 +15398,7 @@
           "updatedAtStateVersion": 210,
           "evidenceRefs": [
             {
-              "code": "runner_run_support_fund_concrete_gap:remote_1:concrete_funding_gap_admitted",
+              "code": "runner_run_support_fund_concrete_gap:r1:concrete_funding_gap_admitted",
               "source": "visible_state"
             }
           ]
@@ -15759,7 +15759,7 @@
                   "opportunityCost": 0,
                   "effectiveRouteScore": -460
                 },
-                "runner.play_event.runner_296_2.hq.runner_296_2.296:abilities_on_play_make_run": {
+                "runner.play_event.c1tu.hq.c1tu.296:abilities_on_play_make_run": {
                   "rawRouteScore": -653,
                   "opportunityCost": 0,
                   "effectiveRouteScore": -653
@@ -15769,7 +15769,7 @@
                 "runner.start_run.hq": [
                   "runner_central_information_probe_known_path_not_admitted:hq"
                 ],
-                "runner.play_event.runner_296_2.hq.runner_296_2.296:abilities_on_play_make_run": [
+                "runner.play_event.c1tu.hq.c1tu.296:abilities_on_play_make_run": [
                   "run_route_excluded:path:blocked_unpayable",
                   "run_route_excluded:recommendation:gain_credits_first",
                   "run_route_excluded:score:-653",
@@ -16090,13 +16090,13 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
           "stateVersion": 210,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_366_1",
+          "instanceId": "plan:runner.credit_bank:c29d",
           "stateVersion": 210,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
@@ -16114,7 +16114,7 @@
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          "instanceId": "plan:runner.economy:run-support%3Aremote%3Ar1",
           "stateVersion": 210,
           "reason": "discovered",
           "detailCode": "new_proposal"
@@ -16150,7 +16150,7 @@
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_366_1",
+          "instanceId": "plan:runner.credit_bank:c29d",
           "stateVersion": 210,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -16163,7 +16163,7 @@
         "commitmentId": "fnv1a:c0d2a1af",
         "sourcePlanId": "fnv1a:cc3c2016",
         "sourceLineHash": "fnv1a:d6b7b624",
-        "sequenceRootPlanInstanceId": "plan:runner.credit_bank:runner_366_1",
+        "sequenceRootPlanInstanceId": "plan:runner.credit_bank:c29d",
         "side": "runner",
         "turnKey": "runner:turn:33",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -16180,7 +16180,7 @@
           {
             "phaseId": "fnv1a:b15e2582",
             "root": {
-              "planInstanceId": "plan:runner.credit_bank:runner_366_1",
+              "planInstanceId": "plan:runner.credit_bank:c29d",
               "moduleId": "runner.credit_bank",
               "milestoneId": "credit_bank_build",
               "provenance": "resident"
@@ -16197,14 +16197,14 @@
                 "nodeId": "fnv1a:e2c319c2",
                 "invocation": {
                   "semanticActionType": "card_ability.unknown",
-                  "sourceCardInstanceId": "runner_366_1",
+                  "sourceCardInstanceId": "c29d",
                   "sourceAbilityBinding": {
                     "kind": "card_spec_capability_key",
-                    "sourceAbilityId": "366:store_credits"
+                    "sourceAbilityId": 440
                   },
                   "boundTargets": [],
                   "boundChoices": [],
-                  "routeKey": "fnv1a:ebc09550"
+                  "routeKey": "fnv1a:315972fd"
                 },
                 "expectation": {
                   "nodeId": "fnv1a:e2c319c2",
@@ -16252,7 +16252,7 @@
           "expectationId": "fnv1a:04ea7a23",
           "phaseId": "fnv1a:b15e2582",
           "nodeId": "fnv1a:e2c319c2",
-          "routeKey": "fnv1a:ebc09550",
+          "routeKey": "fnv1a:315972fd",
           "expectedStateDeltaCodes": [
             "engine_action_applied:activated_card_ability"
           ]
@@ -16272,7 +16272,7 @@
           "sideSafePlanningFingerprint": "fnv1a:a5aa5a4f"
         },
         "currentBinding": {
-          "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
+          "actionId": "runner.activated_card_ability.c29d.c29d.activated.440",
           "stateVersion": 210,
           "semanticActionSetFingerprint": "fnv1a:9960ddb3",
           "invocationKey": "fnv1a:9b5e0d29"
@@ -16280,8 +16280,8 @@
         "actionType": "activated_card_ability",
         "expectationId": "fnv1a:04ea7a23"
       },
-      "rootForegroundInstanceId": "plan:runner.credit_bank:runner_366_1",
-      "executorInstanceId": "plan:runner.credit_bank:runner_366_1"
+      "rootForegroundInstanceId": "plan:runner.credit_bank:c29d",
+      "executorInstanceId": "plan:runner.credit_bank:c29d"
     }
   }
 }

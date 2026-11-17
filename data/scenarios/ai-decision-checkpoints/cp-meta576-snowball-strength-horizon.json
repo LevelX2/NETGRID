@@ -18,7 +18,7 @@
       "phase": "run",
       "own": {
         "identity": {
-          "instanceId": "runner_587_0",
+          "instanceId": "c3mg",
           "known": true,
           "title": "Runner",
           "definitionId": 587,
@@ -36,7 +36,7 @@
         "agendaPoints": 4,
         "gripOrHq": [
           {
-            "instanceId": "runner_299_1",
+            "instanceId": "c1uh",
             "known": true,
             "title": "Forgotten Backup Chip",
             "definitionId": 299,
@@ -54,7 +54,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_245_1",
+            "instanceId": "c1ih",
             "known": true,
             "title": "Imp",
             "definitionId": 245,
@@ -71,7 +71,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_326_3",
+            "instanceId": "c20j",
             "known": true,
             "title": "Temple Microcode Outlet",
             "definitionId": 326,
@@ -94,7 +94,7 @@
         "stackOrRdCount": 11,
         "heapOrArchives": [
           {
-            "instanceId": "runner_309_1",
+            "instanceId": "c1wp",
             "known": true,
             "title": "Livewire’s Contacts",
             "definitionId": 309,
@@ -112,7 +112,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_316_1",
+            "instanceId": "c1y9",
             "known": true,
             "title": "Playful AI",
             "definitionId": 316,
@@ -133,7 +133,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_390_2",
+            "instanceId": "c2eq",
             "known": true,
             "title": "Short-Term Contract",
             "definitionId": 390,
@@ -149,7 +149,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_320_2",
+            "instanceId": "c1z6",
             "known": true,
             "title": "Score!",
             "definitionId": 320,
@@ -167,7 +167,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_320_1",
+            "instanceId": "c1z5",
             "known": true,
             "title": "Score!",
             "definitionId": 320,
@@ -185,7 +185,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_326_2",
+            "instanceId": "c20i",
             "known": true,
             "title": "Temple Microcode Outlet",
             "definitionId": 326,
@@ -205,7 +205,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_396_1",
+            "instanceId": "c2g1",
             "known": true,
             "title": "Top Runners' Conference",
             "definitionId": 396,
@@ -219,7 +219,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_309_2",
+            "instanceId": "c1wq",
             "known": true,
             "title": "Livewire’s Contacts",
             "definitionId": 309,
@@ -237,7 +237,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_326_1",
+            "instanceId": "c20h",
             "known": true,
             "title": "Temple Microcode Outlet",
             "definitionId": 326,
@@ -257,7 +257,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_320_3",
+            "instanceId": "c1z7",
             "known": true,
             "title": "Score!",
             "definitionId": 320,
@@ -275,7 +275,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_301_1",
+            "instanceId": "c1ux",
             "known": true,
             "title": "Gideon’s Pawnshop",
             "definitionId": 301,
@@ -293,7 +293,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_291_2",
+            "instanceId": "c1sq",
             "known": true,
             "title": "Bodyweight™ Synthetic Blood",
             "definitionId": 291,
@@ -311,7 +311,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_307_3",
+            "instanceId": "c1wb",
             "known": true,
             "title": "Jack ’n’ Joe",
             "definitionId": 307,
@@ -329,7 +329,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_357_1",
+            "instanceId": "c27d",
             "known": true,
             "title": "WuTech Mem Chip",
             "definitionId": 357,
@@ -348,7 +348,7 @@
         ],
         "scoreArea": [
           {
-            "instanceId": "corp_415_2",
+            "instanceId": "c2ke",
             "known": true,
             "title": "Hostile Takeover",
             "definitionId": 415,
@@ -365,7 +365,7 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_408_1",
+            "instanceId": "c2it",
             "known": true,
             "title": "Corporate War",
             "definitionId": 408,
@@ -384,7 +384,7 @@
         ],
         "rig": [
           {
-            "instanceId": "runner_251_1",
+            "instanceId": "c1jt",
             "known": true,
             "title": "Krash",
             "definitionId": 251,
@@ -402,7 +402,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_213_1",
+            "instanceId": "c1bd",
             "known": true,
             "title": "Afreet",
             "definitionId": 213,
@@ -419,7 +419,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_286_1",
+            "instanceId": "c1rl",
             "known": true,
             "title": "Worm",
             "definitionId": 286,
@@ -438,7 +438,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_278_1",
+            "instanceId": "c1pt",
             "known": true,
             "title": "Snowball",
             "definitionId": 278,
@@ -457,7 +457,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_271_1",
+            "instanceId": "c1o9",
             "known": true,
             "title": "Self-Modifying Code",
             "definitionId": 271,
@@ -472,7 +472,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_271_2",
+            "instanceId": "c1oa",
             "known": true,
             "title": "Self-Modifying Code",
             "definitionId": 271,
@@ -487,7 +487,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_332_1",
+            "instanceId": "c21t",
             "known": true,
             "title": "“Armadillo” Armored Road Home",
             "definitionId": 332,
@@ -528,7 +528,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_357_2",
+            "instanceId": "c27e",
             "known": true,
             "title": "WuTech Mem Chip",
             "definitionId": 357,
@@ -545,7 +545,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_357_3",
+            "instanceId": "c27f",
             "known": true,
             "title": "WuTech Mem Chip",
             "definitionId": 357,
@@ -562,7 +562,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_356_1",
+            "instanceId": "c275",
             "known": true,
             "title": "Tycho Mem Chip",
             "definitionId": 356,
@@ -579,7 +579,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_392_1",
+            "instanceId": "c2f5",
             "known": true,
             "title": "Smith's Pawnshop",
             "definitionId": 392,
@@ -596,7 +596,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_388_1",
+            "instanceId": "c2e9",
             "known": true,
             "title": "The Shell Traders",
             "definitionId": 388,
@@ -610,7 +610,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_388_3",
+            "instanceId": "c2eb",
             "known": true,
             "title": "The Shell Traders",
             "definitionId": 388,
@@ -624,7 +624,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_388_2",
+            "instanceId": "c2ea",
             "known": true,
             "title": "The Shell Traders",
             "definitionId": 388,
@@ -638,7 +638,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_366_3",
+            "instanceId": "c29f",
             "known": true,
             "title": "Broker",
             "definitionId": 366,
@@ -654,7 +654,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_366_2",
+            "instanceId": "c29e",
             "known": true,
             "title": "Broker",
             "definitionId": 366,
@@ -670,7 +670,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_390_1",
+            "instanceId": "c2ep",
             "known": true,
             "title": "Short-Term Contract",
             "definitionId": 390,
@@ -726,7 +726,7 @@
       },
       "opponent": {
         "identity": {
-          "instanceId": "corp_3_0",
+          "instanceId": "cs",
           "known": true,
           "title": "Korp",
           "definitionId": 3,
@@ -748,7 +748,7 @@
         "discardCount": 22,
         "scoreArea": [
           {
-            "instanceId": "corp_432_1",
+            "instanceId": "c2o5",
             "known": true,
             "title": "Tycho Extension",
             "definitionId": 432,
@@ -765,7 +765,7 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_406_1",
+            "instanceId": "c2id",
             "known": true,
             "title": "Corporate Downsizing",
             "definitionId": 406,
@@ -795,7 +795,7 @@
           },
           "ice": [
             {
-              "instanceId": "corp_449_2",
+              "instanceId": "c2ry",
               "known": true,
               "title": "Data Wall",
               "definitionId": 449,
@@ -811,7 +811,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_449_2",
+                "iceInstanceId": "c2ry",
                 "iceDefinitionId": 449,
                 "effectiveStrength": 0,
                 "encounterStrength": 0,
@@ -826,7 +826,7 @@
               }
             },
             {
-              "instanceId": "corp_449_3",
+              "instanceId": "c2rz",
               "known": true,
               "title": "Data Wall",
               "definitionId": 449,
@@ -842,7 +842,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_449_3",
+                "iceInstanceId": "c2rz",
                 "iceDefinitionId": 449,
                 "effectiveStrength": 0,
                 "encounterStrength": 0,
@@ -857,7 +857,7 @@
               }
             },
             {
-              "instanceId": "corp_459_1",
+              "instanceId": "c2u5",
               "known": true,
               "title": "Haunting Inquisition",
               "definitionId": 459,
@@ -873,7 +873,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_459_1",
+                "iceInstanceId": "c2u5",
                 "iceDefinitionId": 459,
                 "effectiveStrength": 6,
                 "encounterStrength": 6,
@@ -898,7 +898,7 @@
               }
             },
             {
-              "instanceId": "corp_455_2",
+              "instanceId": "c2ta",
               "known": true,
               "title": "Fetch 4.0.1",
               "definitionId": 455,
@@ -915,7 +915,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_455_2",
+                "iceInstanceId": "c2ta",
                 "iceDefinitionId": 455,
                 "effectiveStrength": 3,
                 "encounterStrength": 3,
@@ -937,7 +937,7 @@
           ],
           "root": [
             {
-              "instanceId": "corp_564_1",
+              "instanceId": "c3hh",
               "known": true,
               "title": "Chester Mix",
               "definitionId": 564,
@@ -956,14 +956,14 @@
           ],
           "statuses": [
             {
-              "id": "server_status:hq:corp_ice_install:reduce:corp_564_1:0",
+              "id": "server_status:hq:corp_ice_install:reduce:c3hh:0",
               "kind": "cost_modifier",
               "scope": "target_server",
               "costKind": "corp_ice_install",
               "operation": "reduce",
               "amount": 2,
               "targetServerId": "hq",
-              "sourceCardInstanceId": "corp_564_1",
+              "sourceCardInstanceId": "c3hh",
               "sourceTitle": "Chester Mix",
               "sourceSide": "corp"
             }
@@ -980,7 +980,7 @@
           },
           "ice": [
             {
-              "instanceId": "corp_455_1",
+              "instanceId": "c2t9",
               "known": true,
               "title": "Fetch 4.0.1",
               "definitionId": 455,
@@ -997,7 +997,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_455_1",
+                "iceInstanceId": "c2t9",
                 "iceDefinitionId": 455,
                 "effectiveStrength": 3,
                 "encounterStrength": 3,
@@ -1017,13 +1017,13 @@
               }
             },
             {
-              "instanceId": "hidden_6d570376",
+              "instanceId": "h1wvwpxp",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "corp_434_2",
+              "instanceId": "c2om",
               "known": true,
               "title": "Ball and Chain",
               "definitionId": 434,
@@ -1039,7 +1039,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_434_2",
+                "iceInstanceId": "c2om",
                 "iceDefinitionId": 434,
                 "effectiveStrength": 5,
                 "encounterStrength": 5,
@@ -1058,7 +1058,7 @@
               }
             },
             {
-              "instanceId": "corp_434_1",
+              "instanceId": "c2ol",
               "known": true,
               "title": "Ball and Chain",
               "definitionId": 434,
@@ -1074,7 +1074,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_434_1",
+                "iceInstanceId": "c2ol",
                 "iceDefinitionId": 434,
                 "effectiveStrength": 5,
                 "encounterStrength": 5,
@@ -1093,7 +1093,7 @@
               }
             },
             {
-              "instanceId": "hidden_db693cd0",
+              "instanceId": "h49er5n",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -1113,7 +1113,7 @@
           "ice": [],
           "root": [
             {
-              "instanceId": "corp_510_2",
+              "instanceId": "c35i",
               "known": true,
               "title": "Planning Consultants",
               "definitionId": 510,
@@ -1133,7 +1133,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_512_1",
+              "instanceId": "c35x",
               "known": true,
               "title": "Project Consultants",
               "definitionId": 512,
@@ -1151,7 +1151,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_521_1",
+              "instanceId": "c37x",
               "known": true,
               "title": "BBS Whispering Campaign",
               "definitionId": 521,
@@ -1168,7 +1168,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_521_2",
+              "instanceId": "c37y",
               "known": true,
               "title": "BBS Whispering Campaign",
               "definitionId": 521,
@@ -1185,7 +1185,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_525_1",
+              "instanceId": "c38t",
               "known": true,
               "title": "City Surveillance",
               "definitionId": 525,
@@ -1202,7 +1202,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_536_1",
+              "instanceId": "c3b9",
               "known": true,
               "title": "Fortress Architects",
               "definitionId": 536,
@@ -1217,7 +1217,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_507_3",
+              "instanceId": "c34v",
               "known": true,
               "title": "Night Shift",
               "definitionId": 507,
@@ -1235,7 +1235,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_512_3",
+              "instanceId": "c35z",
               "known": true,
               "title": "Project Consultants",
               "definitionId": 512,
@@ -1253,7 +1253,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_530_1",
+              "instanceId": "c39x",
               "known": true,
               "title": "Department of Truth Enhancement",
               "definitionId": 530,
@@ -1270,7 +1270,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_564_2",
+              "instanceId": "c3hi",
               "known": true,
               "title": "Chester Mix",
               "definitionId": 564,
@@ -1287,7 +1287,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_508_2",
+              "instanceId": "c352",
               "known": true,
               "title": "Off-Site Backups",
               "definitionId": 508,
@@ -1305,7 +1305,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_507_1",
+              "instanceId": "c34t",
               "known": true,
               "title": "Night Shift",
               "definitionId": 507,
@@ -1323,7 +1323,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_466_1",
+              "instanceId": "c2vp",
               "known": true,
               "title": "Liche",
               "definitionId": 466,
@@ -1342,7 +1342,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_530_2",
+              "instanceId": "c39y",
               "known": true,
               "title": "Department of Truth Enhancement",
               "definitionId": 530,
@@ -1359,7 +1359,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_507_2",
+              "instanceId": "c34u",
               "known": true,
               "title": "Night Shift",
               "definitionId": 507,
@@ -1377,7 +1377,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_466_2",
+              "instanceId": "c2vq",
               "known": true,
               "title": "Liche",
               "definitionId": 466,
@@ -1396,7 +1396,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_490_2",
+              "instanceId": "c312",
               "known": true,
               "title": "Wall of Ice",
               "definitionId": 490,
@@ -1413,7 +1413,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_449_1",
+              "instanceId": "c2rx",
               "known": true,
               "title": "Data Wall",
               "definitionId": 449,
@@ -1430,7 +1430,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_456_3",
+              "instanceId": "c2tj",
               "known": true,
               "title": "Filter",
               "definitionId": 456,
@@ -1447,7 +1447,7 @@
               "controller": "corp"
             },
             {
-              "instanceId": "corp_490_1",
+              "instanceId": "c311",
               "known": true,
               "title": "Wall of Ice",
               "definitionId": 490,
@@ -1466,23 +1466,23 @@
           ]
         },
         {
-          "id": "remote_1",
+          "id": "r1",
           "label": "Remote 1",
           "runnerAgendaStealCostQuote": {
             "stateVersion": 502,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "minimumCreditCost": 0,
             "complete": true
           },
           "ice": [
             {
-              "instanceId": "hidden_b8d5cc83",
+              "instanceId": "h1nr1wsc",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "corp_480_2",
+              "instanceId": "c2yu",
               "known": true,
               "title": "Shock.r",
               "definitionId": 480,
@@ -1500,7 +1500,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_480_2",
+                "iceInstanceId": "c2yu",
                 "iceDefinitionId": 480,
                 "effectiveStrength": 3,
                 "encounterStrength": 3,
@@ -1521,13 +1521,13 @@
               }
             },
             {
-              "instanceId": "hidden_b9d5ce16",
+              "instanceId": "h1o11ihb",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "corp_480_1",
+              "instanceId": "c2yt",
               "known": true,
               "title": "Shock.r",
               "definitionId": 480,
@@ -1545,7 +1545,7 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_480_1",
+                "iceInstanceId": "c2yt",
                 "iceDefinitionId": 480,
                 "effectiveStrength": 3,
                 "encounterStrength": 3,
@@ -1568,7 +1568,7 @@
           ],
           "root": [
             {
-              "instanceId": "hidden_b334fe1a",
+              "instanceId": "h1kybar3",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -1583,16 +1583,16 @@
         "removedFromGameCount": 0
       },
       "run": {
-        "runId": "run_502",
-        "attackedServerId": "remote_1",
+        "runId": 502,
+        "attackedServerId": "r1",
         "phase": "encounter_ice",
         "position": {
           "kind": "ice",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "iceIndex": 3
         },
         "encounteredIce": {
-          "instanceId": "corp_480_1",
+          "instanceId": "c2yt",
           "known": true,
           "title": "Shock.r",
           "definitionId": 480,
@@ -1610,7 +1610,7 @@
           "owner": "corp",
           "controller": "corp",
           "effectiveRunQuote": {
-            "iceInstanceId": "corp_480_1",
+            "iceInstanceId": "c2yt",
             "iceDefinitionId": 480,
             "effectiveStrength": 3,
             "encounterStrength": 3,
@@ -2018,7 +2018,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "run_10.corp_455_1.0.trace",
+            "traceId": "10.c2t9.0.trace",
             "traceLimit": 3,
             "effectiveTraceLimit": 3,
             "targets": {
@@ -2056,8 +2056,8 @@
             "sourceDefinitionId": 455,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "run_10.corp_455_1.0.trace",
-            "choiceId": "run_10.corp_455_1.0.trace.corp.bid.12",
+            "traceId": "10.c2t9.0.trace",
+            "choiceId": "10.c2t9.0.trace.corp.bid.12",
             "traceStep": "corp_bid",
             "corpBid": 3,
             "traceLimit": 3,
@@ -2088,9 +2088,9 @@
             "sourceDefinitionId": 455,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "run_10.corp_455_1.0.trace",
+            "traceId": "10.c2t9.0.trace",
             "traceSuccessful": true,
-            "choiceId": "run_10.corp_455_1.0.trace.runner.bid.13",
+            "choiceId": "10.c2t9.0.trace.runner.bid.13",
             "traceStep": "runner_bid",
             "corpBid": 3,
             "traceLimit": 3,
@@ -3039,7 +3039,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -3132,7 +3132,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 1",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -3165,7 +3165,7 @@
             "actor": "runner",
             "actionType": "continue_run",
             "label": "Run fortsetzen",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -3214,7 +3214,7 @@
             "label": "Karte accessen",
             "title": "City Surveillance",
             "cardDefinitionId": 525,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "accessedCardPositionKey": "root:0",
@@ -3248,7 +3248,7 @@
             "label": "City Surveillance trashen",
             "title": "City Surveillance",
             "cardDefinitionId": 525,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:37c152d7",
             "accessIndex": 0,
@@ -3477,7 +3477,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -3759,7 +3759,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_2",
+            "sourceCardInstanceId": "c2eq",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -3814,7 +3814,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_2",
+            "sourceCardInstanceId": "c2eq",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -3961,7 +3961,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -4031,7 +4031,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_2",
+            "sourceCardInstanceId": "c2eq",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -4507,7 +4507,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_2",
+            "sourceCardInstanceId": "c2eq",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -4826,7 +4826,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_2",
+            "sourceCardInstanceId": "c2eq",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -5429,7 +5429,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -5481,7 +5481,7 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "sourceDefinitionId": 512,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "installPlacement": "root",
             "targetVisibility": "hidden_installed_card",
             "installedPositionKey": "installed-position-v1:3e671e10",
@@ -5511,12 +5511,12 @@
             "label": "Agenda in Remote 1 scoren",
             "title": "Tycho Extension",
             "cardDefinitionId": 432,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:3e671e10",
             "abilityFamily": "agenda-scoring",
             "targets": {
-              "scoredFromServerId": "remote_1"
+              "scoredFromServerId": "r1"
             },
             "visibility": {
               "class": "hidden_info_barrier"
@@ -6363,7 +6363,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_2",
+            "sourceCardInstanceId": "c2eq",
             "sourceDefinitionId": 390,
             "trashedCardDefinitionId": 390,
             "abilityFamily": "hosting-counters",
@@ -6691,7 +6691,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_213_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1bd",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -6997,7 +6997,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_213_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1bd",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7576,7 +7576,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_286_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1rl",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7927,7 +7927,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_231_runner_388_1",
+            "choiceId": "runner_start_delayed_install_231_c2e9",
             "removedCounterAmount": 1,
             "remainingCounters": 2,
             "amounts": {
@@ -7944,7 +7944,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_286_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1rl",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8318,7 +8318,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_246_runner_388_1",
+            "choiceId": "runner_start_delayed_install_246_c2e9",
             "removedCounterAmount": 1,
             "remainingCounters": 1,
             "amounts": {
@@ -8335,7 +8335,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_286_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1rl",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8369,7 +8369,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_247_runner_388_3",
+            "choiceId": "runner_start_delayed_install_247_c2eb",
             "removedCounterAmount": 0,
             "remainingCounters": 1,
             "amounts": {
@@ -8403,7 +8403,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "resolve_delayed_install_destination",
             "effectKind": "counter_change",
-            "choiceId": "delayed_install_destination_248_runner_286_1",
+            "choiceId": "delayed_install_destination_248_c1rl",
             "removedCounterAmount": 1,
             "remainingCounters": 0,
             "amounts": {
@@ -8420,7 +8420,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_3.runner_286_1",
+                "effectId": "runner.start.delayed_install.c2eb.c1rl",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8689,7 +8689,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "396.runner_396_1.effect.0.gain_credits",
+                "effectId": "396.c2g1.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8787,7 +8787,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_263_runner_388_1",
+            "choiceId": "runner_start_delayed_install_263_c2e9",
             "removedCounterAmount": 1,
             "remainingCounters": 9,
             "amounts": {
@@ -8804,7 +8804,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8861,7 +8861,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_265_runner_388_2",
+            "choiceId": "runner_start_delayed_install_265_c2ea",
             "removedCounterAmount": 1,
             "remainingCounters": 8,
             "amounts": {
@@ -8878,7 +8878,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_2.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2ea.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8912,7 +8912,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_266_runner_388_3",
+            "choiceId": "runner_start_delayed_install_266_c2eb",
             "removedCounterAmount": 1,
             "remainingCounters": 7,
             "amounts": {
@@ -8929,7 +8929,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_3.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2eb.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9247,7 +9247,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "396.runner_396_1.effect.0.gain_credits",
+                "effectId": "396.c2g1.effect.0.gain_credits",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9345,7 +9345,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_282_runner_388_1",
+            "choiceId": "runner_start_delayed_install_282_c2e9",
             "removedCounterAmount": 1,
             "remainingCounters": 6,
             "amounts": {
@@ -9362,7 +9362,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9419,7 +9419,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_284_runner_388_2",
+            "choiceId": "runner_start_delayed_install_284_c2ea",
             "removedCounterAmount": 1,
             "remainingCounters": 5,
             "amounts": {
@@ -9436,7 +9436,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_2.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2ea.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9470,7 +9470,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_285_runner_388_3",
+            "choiceId": "runner_start_delayed_install_285_c2eb",
             "removedCounterAmount": 1,
             "remainingCounters": 4,
             "amounts": {
@@ -9487,7 +9487,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_3.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2eb.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9536,7 +9536,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "396.runner_396_1.effect.0.trash_source",
+                "effectId": "396.c2g1.effect.0.trash_source",
                 "kind": "trash_source",
                 "visibility": "public",
                 "side": "runner",
@@ -10263,7 +10263,7 @@
             "label": "Broker: 3 Credits auf Broker legen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_3",
+            "sourceCardInstanceId": "c29f",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "counter_change",
@@ -10518,7 +10518,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_324_runner_388_1",
+            "choiceId": "runner_start_delayed_install_324_c2e9",
             "removedCounterAmount": 1,
             "remainingCounters": 3,
             "amounts": {
@@ -10535,7 +10535,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -10592,7 +10592,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_326_runner_388_2",
+            "choiceId": "runner_start_delayed_install_326_c2ea",
             "removedCounterAmount": 1,
             "remainingCounters": 2,
             "amounts": {
@@ -10609,7 +10609,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_2.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2ea.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -10643,7 +10643,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_327_runner_388_3",
+            "choiceId": "runner_start_delayed_install_327_c2eb",
             "removedCounterAmount": 1,
             "remainingCounters": 1,
             "amounts": {
@@ -10660,7 +10660,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_3.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2eb.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -10691,7 +10691,7 @@
             "label": "Broker: 3 Credits auf Broker legen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_3",
+            "sourceCardInstanceId": "c29f",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "counter_change",
@@ -11050,7 +11050,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "start_turn_remove_shell_counter",
             "effectKind": "counter_change",
-            "choiceId": "runner_start_delayed_install_341_runner_388_1",
+            "choiceId": "runner_start_delayed_install_341_c2e9",
             "removedCounterAmount": 0,
             "remainingCounters": 1,
             "amounts": {
@@ -11084,7 +11084,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "resolve_delayed_install_destination",
             "effectKind": "counter_change",
-            "choiceId": "delayed_install_destination_342_runner_278_1",
+            "choiceId": "delayed_install_destination_342_c1pt",
             "removedCounterAmount": 1,
             "remainingCounters": 0,
             "amounts": {
@@ -11101,7 +11101,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_278_1",
+                "effectId": "runner.start.delayed_install.c2e9.c1pt",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -11141,7 +11141,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_2.runner_357_2",
+                "effectId": "runner.start.delayed_install.c2ea.c27e",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -11172,7 +11172,7 @@
             "label": "Broker: Credits von Broker nehmen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_3",
+            "sourceCardInstanceId": "c29f",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -11742,7 +11742,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_357_3",
+                "effectId": "runner.start.delayed_install.c2e9.c27f",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -12138,7 +12138,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_356_1",
+                "effectId": "runner.start.delayed_install.c2e9.c275",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -12178,7 +12178,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_2.runner_356_1",
+                "effectId": "runner.start.delayed_install.c2ea.c275",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -12193,7 +12193,7 @@
                 "cardTitle": "Tycho Mem Chip"
               },
               {
-                "effectId": "runner.start.delayed_install.runner_388_3.runner_356_1",
+                "effectId": "runner.start.delayed_install.c2eb.c275",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -12580,7 +12580,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_356_1",
+                "effectId": "runner.start.delayed_install.c2e9.c275",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -12620,7 +12620,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_2.runner_356_1",
+                "effectId": "runner.start.delayed_install.c2ea.c275",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -12797,7 +12797,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -12949,7 +12949,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_271_2",
+                "effectId": "runner.start.delayed_install.c2e9.c1oa",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -13006,7 +13006,7 @@
             "abilityFamily": "hosting-counters",
             "abilityId": "resolve_delayed_install_destination",
             "effectKind": "counter_change",
-            "choiceId": "delayed_install_destination_411_runner_271_2",
+            "choiceId": "delayed_install_destination_411_c1oa",
             "removedCounterAmount": 1,
             "remainingCounters": 0,
             "amounts": {
@@ -13023,7 +13023,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_2.runner_271_2",
+                "effectId": "runner.start.delayed_install.c2ea.c1oa",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -13328,7 +13328,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -13672,7 +13672,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -13774,7 +13774,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.runner_388_1.runner_357_1",
+                "effectId": "runner.start.delayed_install.c2e9.c27d",
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -13803,7 +13803,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 1",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -13837,7 +13837,7 @@
             "label": "Shock.r rezzen",
             "title": "Shock.r",
             "cardDefinitionId": 480,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "installedPositionKey": "installed-position-v1:d8b1e20c",
@@ -13946,7 +13946,7 @@
             "actionType": "continue_run",
             "label": "ICE passieren",
             "sourceDefinitionId": 480,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -13971,7 +13971,7 @@
             "actor": "runner",
             "actionType": "continue_run",
             "label": "Run fortsetzen",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -14012,7 +14012,7 @@
             "actor": "runner",
             "actionType": "continue_run",
             "label": "Run fortsetzen",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -14037,7 +14037,7 @@
             "label": "Shock.r rezzen",
             "title": "Shock.r",
             "cardDefinitionId": 480,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "installedPositionKey": "installed-position-v1:dbb1e6c5",
@@ -14146,7 +14146,7 @@
             "actionType": "continue_run",
             "label": "ICE passieren",
             "sourceDefinitionId": 480,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -14194,7 +14194,7 @@
             "label": "Broker: 3 Credits auf Broker legen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_3",
+            "sourceCardInstanceId": "c29f",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "counter_change",
@@ -14265,7 +14265,7 @@
             "label": "Broker: 3 Credits auf Broker legen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_2",
+            "sourceCardInstanceId": "c29e",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "counter_change",
@@ -14510,7 +14510,7 @@
             "label": "Broker: Credits von Broker nehmen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_2",
+            "sourceCardInstanceId": "c29e",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -14613,7 +14613,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_1",
+            "sourceCardInstanceId": "c2ep",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -14668,7 +14668,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_1",
+            "sourceCardInstanceId": "c2ep",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -14790,7 +14790,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -14817,7 +14817,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -14917,7 +14917,7 @@
             "label": "Broker: Credits von Broker nehmen",
             "title": "Broker",
             "cardDefinitionId": 366,
-            "sourceCardInstanceId": "runner_366_3",
+            "sourceCardInstanceId": "c29f",
             "sourceDefinitionId": 366,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -15020,7 +15020,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 1",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -15136,7 +15136,7 @@
             "actionType": "continue_run",
             "label": "ICE passieren",
             "sourceDefinitionId": 480,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
@@ -15251,7 +15251,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -15280,7 +15280,7 @@
             "label": "Agenda in Remote 1 scoren",
             "title": "Corporate Downsizing",
             "cardDefinitionId": 406,
-            "serverId": "remote_1",
+            "serverId": "r1",
             "installPlacement": "root",
             "redactedKind": "hidden_zone",
             "hiddenZoneAction": "scored_agenda_hq_agenda_shuffle_credits",
@@ -15290,7 +15290,7 @@
             "effectKind": "hidden_zone",
             "hiddenZoneBarrier": true,
             "targets": {
-              "scoredFromServerId": "remote_1",
+              "scoredFromServerId": "r1",
               "redactedKind": "hidden_zone"
             },
             "visibility": {
@@ -15355,7 +15355,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -15425,7 +15425,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_1",
+            "sourceCardInstanceId": "c2ep",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -15480,7 +15480,7 @@
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
             "title": "Short-Term Contract",
             "cardDefinitionId": 390,
-            "sourceCardInstanceId": "runner_390_1",
+            "sourceCardInstanceId": "c2ep",
             "sourceDefinitionId": 390,
             "abilityFamily": "hosting-counters",
             "effectKind": "gain_credits",
@@ -15533,7 +15533,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 1",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "baseAccessCount": 1,
             "installedAccessBonus": 0,
@@ -15556,11 +15556,11 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.pump_breaker.runner_251_1.runner_251_1.runner_251_1.corp_480_1.251:icebreaker_abilities_increase_strength",
+          "actionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2yt.329",
           "side": "runner",
           "type": "pump_breaker",
           "label": "Krash: Stärke +1",
-          "source": "runner_251_1",
+          "source": "c1jt",
           "timingPoint": "run.encounter_ice",
           "costs": [
             {
@@ -15576,32 +15576,32 @@
             {
               "id": "subroutine",
               "kind": "subroutine",
-              "sourceIceRef": "corp_480_1"
+              "sourceIceRef": "c2yt"
             }
           ],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_251_1",
-            "sourceAbilityId": "251:icebreaker_abilities_increase_strength"
+            "sourceCardInstanceId": "c1jt",
+            "sourceAbilityId": 329
           },
-          "effectRef": "effect.251:icebreaker_abilities_increase_strength",
+          "effectRef": "effect.329",
           "visibility": "private_to_actor",
           "expiresAtStateVersion": 502,
           "payload": {
-            "breakerId": "runner_251_1",
-            "iceId": "corp_480_1",
+            "breakerId": "c1jt",
+            "iceId": "c2yt",
             "pumpStrengthAmount": 1,
-            "cardId": "runner_251_1",
+            "cardId": "c1jt",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "251:icebreaker_abilities_increase_strength",
+            "cardImplementationAbilityId": 329,
             "cardImplementationAbilityKey": "icebreaker_abilities_increase_strength"
           }
         },
         {
-          "actionId": "runner.pump_breaker.runner_278_1.runner_278_1.runner_278_1.corp_480_1.278:icebreaker_abilities_increase_strength",
+          "actionId": "runner.pump_breaker.c1pt.c1pt.c1pt.c2yt.362",
           "side": "runner",
           "type": "pump_breaker",
           "label": "Snowball: Stärke +1",
-          "source": "runner_278_1",
+          "source": "c1pt",
           "timingPoint": "run.encounter_ice",
           "costs": [
             {
@@ -15617,23 +15617,23 @@
             {
               "id": "subroutine",
               "kind": "subroutine",
-              "sourceIceRef": "corp_480_1"
+              "sourceIceRef": "c2yt"
             }
           ],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_278_1",
-            "sourceAbilityId": "278:icebreaker_abilities_increase_strength"
+            "sourceCardInstanceId": "c1pt",
+            "sourceAbilityId": 362
           },
-          "effectRef": "effect.278:icebreaker_abilities_increase_strength",
+          "effectRef": "effect.362",
           "visibility": "private_to_actor",
           "expiresAtStateVersion": 502,
           "payload": {
-            "breakerId": "runner_278_1",
-            "iceId": "corp_480_1",
+            "breakerId": "c1pt",
+            "iceId": "c2yt",
             "pumpStrengthAmount": 1,
-            "cardId": "runner_278_1",
+            "cardId": "c1pt",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "278:icebreaker_abilities_increase_strength",
+            "cardImplementationAbilityId": 362,
             "cardImplementationAbilityKey": "icebreaker_abilities_increase_strength"
           }
         },
@@ -15676,7 +15676,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "ice",
           "redactedKind": "installed_card",
@@ -16020,7 +16020,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -16122,7 +16122,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.runner_388_1.runner_357_1",
+              "effectId": "runner.start.delayed_install.c2e9.c27d",
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -16151,7 +16151,7 @@
           "actor": "runner",
           "actionType": "start_run",
           "label": "Run auf Remote 1",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "baseAccessCount": 1,
           "installedAccessBonus": 0,
@@ -16185,7 +16185,7 @@
           "label": "Shock.r rezzen",
           "title": "Shock.r",
           "cardDefinitionId": 480,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "ice",
           "installedPositionKey": "installed-position-v1:d8b1e20c",
@@ -16294,7 +16294,7 @@
           "actionType": "continue_run",
           "label": "ICE passieren",
           "sourceDefinitionId": 480,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "abilityFamily": "run-access",
           "targets": {
@@ -16319,7 +16319,7 @@
           "actor": "runner",
           "actionType": "continue_run",
           "label": "Run fortsetzen",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "abilityFamily": "run-access",
           "targets": {
@@ -16360,7 +16360,7 @@
           "actor": "runner",
           "actionType": "continue_run",
           "label": "Run fortsetzen",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "abilityFamily": "run-access",
           "targets": {
@@ -16385,7 +16385,7 @@
           "label": "Shock.r rezzen",
           "title": "Shock.r",
           "cardDefinitionId": 480,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "ice",
           "installedPositionKey": "installed-position-v1:dbb1e6c5",
@@ -16494,7 +16494,7 @@
           "actionType": "continue_run",
           "label": "ICE passieren",
           "sourceDefinitionId": 480,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "abilityFamily": "run-access",
           "targets": {
@@ -16542,7 +16542,7 @@
           "label": "Broker: 3 Credits auf Broker legen",
           "title": "Broker",
           "cardDefinitionId": 366,
-          "sourceCardInstanceId": "runner_366_3",
+          "sourceCardInstanceId": "c29f",
           "sourceDefinitionId": 366,
           "abilityFamily": "hosting-counters",
           "effectKind": "counter_change",
@@ -16613,7 +16613,7 @@
           "label": "Broker: 3 Credits auf Broker legen",
           "title": "Broker",
           "cardDefinitionId": 366,
-          "sourceCardInstanceId": "runner_366_2",
+          "sourceCardInstanceId": "c29e",
           "sourceDefinitionId": 366,
           "abilityFamily": "hosting-counters",
           "effectKind": "counter_change",
@@ -16858,7 +16858,7 @@
           "label": "Broker: Credits von Broker nehmen",
           "title": "Broker",
           "cardDefinitionId": 366,
-          "sourceCardInstanceId": "runner_366_2",
+          "sourceCardInstanceId": "c29e",
           "sourceDefinitionId": 366,
           "abilityFamily": "hosting-counters",
           "effectKind": "gain_credits",
@@ -16961,7 +16961,7 @@
           "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
           "title": "Short-Term Contract",
           "cardDefinitionId": 390,
-          "sourceCardInstanceId": "runner_390_1",
+          "sourceCardInstanceId": "c2ep",
           "sourceDefinitionId": 390,
           "abilityFamily": "hosting-counters",
           "effectKind": "gain_credits",
@@ -17016,7 +17016,7 @@
           "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
           "title": "Short-Term Contract",
           "cardDefinitionId": 390,
-          "sourceCardInstanceId": "runner_390_1",
+          "sourceCardInstanceId": "c2ep",
           "sourceDefinitionId": 390,
           "abilityFamily": "hosting-counters",
           "effectKind": "gain_credits",
@@ -17138,7 +17138,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -17165,7 +17165,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -17265,7 +17265,7 @@
           "label": "Broker: Credits von Broker nehmen",
           "title": "Broker",
           "cardDefinitionId": 366,
-          "sourceCardInstanceId": "runner_366_3",
+          "sourceCardInstanceId": "c29f",
           "sourceDefinitionId": 366,
           "abilityFamily": "hosting-counters",
           "effectKind": "gain_credits",
@@ -17368,7 +17368,7 @@
           "actor": "runner",
           "actionType": "start_run",
           "label": "Run auf Remote 1",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "baseAccessCount": 1,
           "installedAccessBonus": 0,
@@ -17484,7 +17484,7 @@
           "actionType": "continue_run",
           "label": "ICE passieren",
           "sourceDefinitionId": 480,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "abilityFamily": "run-access",
           "targets": {
@@ -17599,7 +17599,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -17628,7 +17628,7 @@
           "label": "Agenda in Remote 1 scoren",
           "title": "Corporate Downsizing",
           "cardDefinitionId": 406,
-          "serverId": "remote_1",
+          "serverId": "r1",
           "installPlacement": "root",
           "redactedKind": "hidden_zone",
           "hiddenZoneAction": "scored_agenda_hq_agenda_shuffle_credits",
@@ -17638,7 +17638,7 @@
           "effectKind": "hidden_zone",
           "hiddenZoneBarrier": true,
           "targets": {
-            "scoredFromServerId": "remote_1",
+            "scoredFromServerId": "r1",
             "redactedKind": "hidden_zone"
           },
           "visibility": {
@@ -17703,7 +17703,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -17773,7 +17773,7 @@
           "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
           "title": "Short-Term Contract",
           "cardDefinitionId": 390,
-          "sourceCardInstanceId": "runner_390_1",
+          "sourceCardInstanceId": "c2ep",
           "sourceDefinitionId": 390,
           "abilityFamily": "hosting-counters",
           "effectKind": "gain_credits",
@@ -17828,7 +17828,7 @@
           "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
           "title": "Short-Term Contract",
           "cardDefinitionId": 390,
-          "sourceCardInstanceId": "runner_390_1",
+          "sourceCardInstanceId": "c2ep",
           "sourceDefinitionId": 390,
           "abilityFamily": "hosting-counters",
           "effectKind": "gain_credits",
@@ -17881,7 +17881,7 @@
           "actor": "runner",
           "actionType": "start_run",
           "label": "Run auf Remote 1",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "baseAccessCount": 1,
           "installedAccessBonus": 0,
@@ -17904,11 +17904,11 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.pump_breaker.runner_251_1.runner_251_1.runner_251_1.corp_480_1.251:icebreaker_abilities_increase_strength",
+        "actionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2yt.329",
         "side": "runner",
         "type": "pump_breaker",
         "label": "Krash: Stärke +1",
-        "source": "runner_251_1",
+        "source": "c1jt",
         "timingPoint": "run.encounter_ice",
         "costs": [
           {
@@ -17924,32 +17924,32 @@
           {
             "id": "subroutine",
             "kind": "subroutine",
-            "sourceIceRef": "corp_480_1"
+            "sourceIceRef": "c2yt"
           }
         ],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_251_1",
-          "sourceAbilityId": "251:icebreaker_abilities_increase_strength"
+          "sourceCardInstanceId": "c1jt",
+          "sourceAbilityId": 329
         },
-        "effectRef": "effect.251:icebreaker_abilities_increase_strength",
+        "effectRef": "effect.329",
         "visibility": "private_to_actor",
         "expiresAtStateVersion": 502,
         "payload": {
-          "breakerId": "runner_251_1",
-          "iceId": "corp_480_1",
+          "breakerId": "c1jt",
+          "iceId": "c2yt",
           "pumpStrengthAmount": 1,
-          "cardId": "runner_251_1",
+          "cardId": "c1jt",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "251:icebreaker_abilities_increase_strength",
+          "cardImplementationAbilityId": 329,
           "cardImplementationAbilityKey": "icebreaker_abilities_increase_strength"
         }
       },
       {
-        "actionId": "runner.pump_breaker.runner_278_1.runner_278_1.runner_278_1.corp_480_1.278:icebreaker_abilities_increase_strength",
+        "actionId": "runner.pump_breaker.c1pt.c1pt.c1pt.c2yt.362",
         "side": "runner",
         "type": "pump_breaker",
         "label": "Snowball: Stärke +1",
-        "source": "runner_278_1",
+        "source": "c1pt",
         "timingPoint": "run.encounter_ice",
         "costs": [
           {
@@ -17965,23 +17965,23 @@
           {
             "id": "subroutine",
             "kind": "subroutine",
-            "sourceIceRef": "corp_480_1"
+            "sourceIceRef": "c2yt"
           }
         ],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_278_1",
-          "sourceAbilityId": "278:icebreaker_abilities_increase_strength"
+          "sourceCardInstanceId": "c1pt",
+          "sourceAbilityId": 362
         },
-        "effectRef": "effect.278:icebreaker_abilities_increase_strength",
+        "effectRef": "effect.362",
         "visibility": "private_to_actor",
         "expiresAtStateVersion": 502,
         "payload": {
-          "breakerId": "runner_278_1",
-          "iceId": "corp_480_1",
+          "breakerId": "c1pt",
+          "iceId": "c2yt",
           "pumpStrengthAmount": 1,
-          "cardId": "runner_278_1",
+          "cardId": "c1pt",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "278:icebreaker_abilities_increase_strength",
+          "cardImplementationAbilityId": 362,
           "cardImplementationAbilityKey": "icebreaker_abilities_increase_strength"
         }
       },
@@ -18052,7 +18052,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 502,
-      "sideSafePlanningFingerprint": "fnv1a:df41e0f7"
+      "sideSafePlanningFingerprint": "fnv1a:91088243"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_deep_market_engine_1.0.0",
@@ -18484,7 +18484,7 @@
         "economyBankTools": [
           {
             "cardId": 366,
-            "sourceCardInstanceId": "runner_366_2",
+            "sourceCardInstanceId": "c29e",
             "title": "Broker",
             "ownerSide": "runner",
             "status": "installed",
@@ -18495,7 +18495,7 @@
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
-              "bank_source_instance:runner_366_2",
+              "bank_source_instance:c29e",
               "bank_status:installed",
               "bank_build_legal:false",
               "bank_cashout_legal:false"
@@ -18503,7 +18503,7 @@
           },
           {
             "cardId": 366,
-            "sourceCardInstanceId": "runner_366_3",
+            "sourceCardInstanceId": "c29f",
             "title": "Broker",
             "ownerSide": "runner",
             "status": "installed",
@@ -18514,7 +18514,7 @@
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
-              "bank_source_instance:runner_366_3",
+              "bank_source_instance:c29f",
               "bank_status:installed",
               "bank_build_legal:false",
               "bank_cashout_legal:false"
@@ -18522,7 +18522,7 @@
           },
           {
             "cardId": 390,
-            "sourceCardInstanceId": "runner_390_1",
+            "sourceCardInstanceId": "c2ep",
             "title": "Short-Term Contract",
             "ownerSide": "runner",
             "status": "installed",
@@ -18538,7 +18538,7 @@
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
-              "bank_source_instance:runner_390_1",
+              "bank_source_instance:c2ep",
               "bank_status:installed",
               "bank_build_legal:false",
               "bank_cashout_legal:false"
@@ -18546,7 +18546,7 @@
           },
           {
             "cardId": 390,
-            "sourceCardInstanceId": "runner_390_2",
+            "sourceCardInstanceId": "c2eq",
             "title": "Short-Term Contract",
             "ownerSide": "runner",
             "status": "discarded",
@@ -18557,7 +18557,7 @@
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
-              "bank_source_instance:runner_390_2",
+              "bank_source_instance:c2eq",
               "bank_status:discarded",
               "bank_build_legal:false",
               "bank_cashout_legal:false"
@@ -22644,7 +22644,7 @@
             ],
             "targetVector": {
               "kind": "remote",
-              "targetId": "remote_1",
+              "targetId": "r1",
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.remote_contest",
@@ -22738,7 +22738,7 @@
             ],
             "targetVector": {
               "kind": "remote",
-              "targetId": "remote_1",
+              "targetId": "r1",
               "evidence": [
                 "target_source:runtime_context",
                 "target_strategy:runner.remote_trash",
@@ -24098,7 +24098,7 @@
               ],
               "targetVector": {
                 "kind": "remote",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_contest",
@@ -24192,7 +24192,7 @@
               ],
               "targetVector": {
                 "kind": "remote",
-                "targetId": "remote_1",
+                "targetId": "r1",
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_trash",
@@ -24356,8 +24356,8 @@
       "stateVersion": 502,
       "instances": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-          "dedupeKey": "remote:remote_1",
+          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "dedupeKey": "remote:r1",
           "moduleId": "runner.contest_remote",
           "moduleVersion": "1",
           "side": "runner",
@@ -24377,7 +24377,7 @@
           },
           "target": {
             "kind": "server",
-            "id": "remote_1"
+            "id": "r1"
           },
           "openNeedIds": [],
           "phase": "execute",
@@ -24385,8 +24385,8 @@
           "moduleState": {
             "kind": "remote_contest",
             "signal": {
-              "contestId": "remote:remote_1",
-              "serverId": "remote_1",
+              "contestId": "remote:r1",
+              "serverId": "r1",
               "purpose": "information",
               "knownAgendaThreat": false,
               "terminalPatternThreat": true,
@@ -24403,7 +24403,7 @@
               },
               "runRiskContract": {
                 "schemaVersion": "runner-run-risk-contract-v1",
-                "serverId": "remote_1",
+                "serverId": "r1",
                 "observedAtStateVersion": 501,
                 "runCommitment": "probe_only",
                 "unrezzedIceRisk": 1,
@@ -24450,7 +24450,7 @@
                 },
                 "evidenceCodes": [
                   "runner_run_risk_contract_bound",
-                  "runner_run_risk_contract_server:remote_1",
+                  "runner_run_risk_contract_server:r1",
                   "runner_run_risk_contract_commitment:probe_only",
                   "runner_run_risk_contract_reserve_status:satisfied"
                 ]
@@ -24463,7 +24463,7 @@
                 "decision": "retain_information",
                 "boundaryKind": "visible_ice_path_changed",
                 "observedAtStateVersion": 502,
-                "observedIceInstanceId": "corp_480_1",
+                "observedIceInstanceId": "c2yt",
                 "knownPathCost": 5,
                 "knownPathReachable": true,
                 "unknownIceCount": 2,
@@ -24542,8 +24542,8 @@
           ]
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_502",
-          "dedupeKey": "run:run_502",
+          "instanceId": "plan:runner.convert_run_window:run%3A502",
+          "dedupeKey": "run:502",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
           "side": "runner",
@@ -24563,19 +24563,19 @@
           },
           "target": {
             "kind": "window",
-            "id": "run:run_502"
+            "id": "run:502"
           },
-          "parentInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+          "parentInstanceId": "plan:runner.contest_remote:remote%3Ar1",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
           "moduleState": {
             "kind": "run_window",
             "signal": {
-              "windowId": "run:run_502",
-              "serverId": "remote_1",
-              "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3Arun_502",
+              "windowId": "run:502",
+              "serverId": "r1",
+              "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A502",
               "semanticActionTypes": [
                 "breaker.boost_strength",
                 "run.continue"
@@ -24591,7 +24591,7 @@
               },
               "runRiskReassessment": {
                 "schemaVersion": "runner-run-risk-reassessment-v1",
-                "serverId": "remote_1",
+                "serverId": "r1",
                 "observedAtStateVersion": 502,
                 "decision": "preserve_continuation",
                 "currentUnrezzedIceRisk": 1,
@@ -24685,7 +24685,7 @@
               "encounterIntent": "mitigate_threat",
               "encounterEvidenceCode": "runner_visible_encounter_requires_mitigation:480",
               "actionAssessments": {
-                "runner.pump_breaker.runner_251_1.runner_251_1.runner_251_1.corp_480_1.251:icebreaker_abilities_increase_strength": {
+                "runner.pump_breaker.c1jt.c1jt.c1jt.c2yt.251:icebreaker_abilities_increase_strength": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_encounter_action_plan_admissible",
@@ -24709,7 +24709,7 @@
                     "runner_information_boundary_encounter_budget:5"
                   ]
                 },
-                "runner.pump_breaker.runner_278_1.runner_278_1.runner_278_1.corp_480_1.278:icebreaker_abilities_increase_strength": {
+                "runner.pump_breaker.c1pt.c1pt.c1pt.c2yt.278:icebreaker_abilities_increase_strength": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_encounter_action_plan_admissible",
@@ -24797,8 +24797,8 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_366_2",
-          "dedupeKey": "runner_366_2",
+          "instanceId": "plan:runner.credit_bank:c29e",
+          "dedupeKey": "c29e",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
           "side": "runner",
@@ -24818,7 +24818,7 @@
           },
           "target": {
             "kind": "bank",
-            "id": "runner_366_2"
+            "id": "c29e"
           },
           "openNeedIds": [],
           "phase": "hold",
@@ -24827,7 +24827,7 @@
             "kind": "credit_bank",
             "phase": "hold",
             "signal": {
-              "bankId": "runner_366_2",
+              "bankId": "c29e",
               "phase": "hold",
               "actionIds": [],
               "rejectedActionIds": [],
@@ -24849,7 +24849,7 @@
                 "development_cashout_rejected:no_positive_payout",
                 "development_cashout_rejected:no_same_turn_conversion_window",
                 "capability_source:structured",
-                "bank_source_instance:runner_366_2",
+                "bank_source_instance:c29e",
                 "bank_status:installed",
                 "bank_build_legal:false",
                 "bank_cashout_legal:false"
@@ -24899,8 +24899,8 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_366_3",
-          "dedupeKey": "runner_366_3",
+          "instanceId": "plan:runner.credit_bank:c29f",
+          "dedupeKey": "c29f",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
           "side": "runner",
@@ -24920,7 +24920,7 @@
           },
           "target": {
             "kind": "bank",
-            "id": "runner_366_3"
+            "id": "c29f"
           },
           "openNeedIds": [],
           "phase": "hold",
@@ -24929,7 +24929,7 @@
             "kind": "credit_bank",
             "phase": "hold",
             "signal": {
-              "bankId": "runner_366_3",
+              "bankId": "c29f",
               "phase": "hold",
               "actionIds": [],
               "rejectedActionIds": [],
@@ -24951,7 +24951,7 @@
                 "development_cashout_rejected:no_positive_payout",
                 "development_cashout_rejected:no_same_turn_conversion_window",
                 "capability_source:structured",
-                "bank_source_instance:runner_366_3",
+                "bank_source_instance:c29f",
                 "bank_status:installed",
                 "bank_build_legal:false",
                 "bank_cashout_legal:false"
@@ -25001,8 +25001,8 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_390_1",
-          "dedupeKey": "runner_390_1",
+          "instanceId": "plan:runner.credit_bank:c2ep",
+          "dedupeKey": "c2ep",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
           "side": "runner",
@@ -25022,7 +25022,7 @@
           },
           "target": {
             "kind": "bank",
-            "id": "runner_390_1"
+            "id": "c2ep"
           },
           "openNeedIds": [],
           "phase": "hold",
@@ -25031,7 +25031,7 @@
             "kind": "credit_bank",
             "phase": "hold",
             "signal": {
-              "bankId": "runner_390_1",
+              "bankId": "c2ep",
               "phase": "hold",
               "actionIds": [],
               "rejectedActionIds": [],
@@ -25046,7 +25046,7 @@
                 "development_cashout_rejected:no_positive_payout",
                 "development_cashout_rejected:no_same_turn_conversion_window",
                 "capability_source:structured",
-                "bank_source_instance:runner_390_1",
+                "bank_source_instance:c2ep",
                 "bank_status:installed",
                 "bank_build_legal:false",
                 "bank_cashout_legal:false"
@@ -25099,31 +25099,31 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
           "stateVersion": 502,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_502",
+          "instanceId": "plan:runner.convert_run_window:run%3A502",
           "stateVersion": 502,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_366_2",
+          "instanceId": "plan:runner.credit_bank:c29e",
           "stateVersion": 502,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_366_3",
+          "instanceId": "plan:runner.credit_bank:c29f",
           "stateVersion": 502,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.credit_bank:runner_390_1",
+          "instanceId": "plan:runner.credit_bank:c2ep",
           "stateVersion": 502,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
@@ -25171,25 +25171,25 @@
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.shell_traders_pipeline:runner_388_1%3Arunner_245_1",
+          "instanceId": "plan:runner.shell_traders_pipeline:c2e9%3Ac1ih",
           "stateVersion": 502,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.shell_traders_pipeline:runner_388_2%3Arunner_245_1",
+          "instanceId": "plan:runner.shell_traders_pipeline:c2ea%3Ac1ih",
           "stateVersion": 502,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.shell_traders_pipeline:runner_388_3%3Arunner_245_1",
+          "instanceId": "plan:runner.shell_traders_pipeline:c2eb%3Ac1ih",
           "stateVersion": 502,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_502",
+          "instanceId": "plan:runner.convert_run_window:run%3A502",
           "stateVersion": 502,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -25202,7 +25202,7 @@
         "commitmentId": "fnv1a:a810ec5a",
         "sourcePlanId": "fnv1a:87b536c1",
         "sourceLineHash": "fnv1a:96847757",
-        "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+        "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "side": "runner",
         "turnKey": "runner:turn:55",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -25219,7 +25219,7 @@
           {
             "phaseId": "fnv1a:9c736e67",
             "root": {
-              "planInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+              "planInstanceId": "plan:runner.contest_remote:remote%3Ar1",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -25236,10 +25236,10 @@
                 "nodeId": "fnv1a:5d2a3efe",
                 "invocation": {
                   "semanticActionType": "breaker.boost_strength",
-                  "sourceCardInstanceId": "runner_278_1",
+                  "sourceCardInstanceId": "c1pt",
                   "sourceAbilityBinding": {
                     "kind": "card_spec_capability_key",
-                    "sourceAbilityId": "278:icebreaker_abilities_increase_strength"
+                    "sourceAbilityId": 362
                   },
                   "boundTargets": [
                     {
@@ -25247,7 +25247,7 @@
                       "values": [
                         {
                           "kind": "card",
-                          "id": "runner_278_1"
+                          "id": "c1pt"
                         }
                       ],
                       "ordering": "single"
@@ -25257,14 +25257,14 @@
                       "values": [
                         {
                           "kind": "capability",
-                          "id": "corp_480_1"
+                          "id": "c2yt"
                         }
                       ],
                       "ordering": "single"
                     }
                   ],
                   "boundChoices": [],
-                  "routeKey": "fnv1a:8ed9ce9d"
+                  "routeKey": "fnv1a:7bda21cb"
                 },
                 "expectation": {
                   "nodeId": "fnv1a:5d2a3efe",
@@ -25318,7 +25318,7 @@
           "expectationId": "fnv1a:1be8c6cc",
           "phaseId": "fnv1a:9c736e67",
           "nodeId": "fnv1a:5d2a3efe",
-          "routeKey": "fnv1a:8ed9ce9d",
+          "routeKey": "fnv1a:7bda21cb",
           "expectedStateDeltaCodes": [
             "action_applied:breaker.boost_strength",
             "milestone_attempted:convert_active_run_window"
@@ -25340,7 +25340,7 @@
           "sideSafePlanningFingerprint": "fnv1a:86eadf45"
         },
         "currentBinding": {
-          "actionId": "runner.pump_breaker.runner_278_1.runner_278_1.runner_278_1.corp_480_1.278:icebreaker_abilities_increase_strength",
+          "actionId": "runner.pump_breaker.c1pt.c1pt.c1pt.c2yt.362",
           "stateVersion": 502,
           "semanticActionSetFingerprint": "fnv1a:d024d2b3",
           "invocationKey": "fnv1a:cd1f7933"
@@ -25348,13 +25348,13 @@
         "actionType": "pump_breaker",
         "expectationId": "fnv1a:1be8c6cc"
       },
-      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3Arun_502",
+      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+      "executorInstanceId": "plan:runner.convert_run_window:run%3A502",
       "pendingRunnerCostPenaltySupportOrigin": {
-        "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-        "executorInstanceId": "plan:runner.convert_run_window:run%3Arun_502",
-        "sourceStepId": "plan:runner.convert_run_window:run%3Arun_502:convert",
-        "originalActionId": "runner.pump_breaker.runner_278_1.runner_278_1.runner_278_1.corp_480_1.278:icebreaker_abilities_increase_strength",
+        "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+        "executorInstanceId": "plan:runner.convert_run_window:run%3A502",
+        "sourceStepId": "plan:runner.convert_run_window:run%3A502:convert",
+        "originalActionId": "runner.pump_breaker.c1pt.c1pt.c1pt.c2yt.362",
         "selectedAtStateVersion": 502
       }
     }

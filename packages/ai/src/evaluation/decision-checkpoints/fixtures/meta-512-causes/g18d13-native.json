@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 12,
-  "stateHash": "fnv1a:440e7980",
+  "stateHash": "fnv1a:a0eb9836",
   "input": {
     "matchId": "match_5336674d1af3095c",
     "side": "corp",
@@ -18,10 +18,10 @@
       "phase": "run",
       "own": {
         "identity": {
-          "instanceId": "corp_corp_identity_001_0",
+          "instanceId": "cs",
           "known": true,
           "title": "Korp",
-          "definitionId": "corp_identity_001",
+          "definitionId": 3,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -35,10 +35,10 @@
         "agendaPoints": 0,
         "gripOrHq": [
           {
-            "instanceId": "corp_onr_v1_314_corporate-negotiating-center_1",
+            "instanceId": "c391",
             "known": true,
             "title": "Corporate Negotiating Center",
-            "definitionId": "onr_v1_314_corporate-negotiating-center",
+            "definitionId": 526,
             "type": "asset",
             "subtypes": [
               "asset"
@@ -52,10 +52,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_v1_374_washington-d-c-city-grid_2",
+            "instanceId": "c3me",
             "known": true,
             "title": "Washington, D.C., City Grid",
-            "definitionId": "onr_v1_374_washington-d-c-city-grid",
+            "definitionId": 586,
             "type": "upgrade",
             "subtypes": [
               "region"
@@ -69,10 +69,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_v1_220_tycho-extension_1",
+            "instanceId": "c2o5",
             "known": true,
             "title": "Tycho Extension",
-            "definitionId": "onr_v1_220_tycho-extension",
+            "definitionId": 432,
             "type": "agenda",
             "subtypes": [
               "asset"
@@ -86,10 +86,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_2",
+            "instanceId": "c37y",
             "known": true,
             "title": "BBS Whispering Campaign",
-            "definitionId": "onr_v1_309_bbs-whispering-campaign",
+            "definitionId": 521,
             "type": "asset",
             "subtypes": [
               "advertisement"
@@ -103,10 +103,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_v1_258_neural-blade_2",
+            "instanceId": "c2wm",
             "known": true,
             "title": "Neural Blade",
-            "definitionId": "onr_v1_258_neural-blade",
+            "definitionId": 470,
             "type": "ice",
             "subtypes": [
               "ap",
@@ -130,10 +130,10 @@
       },
       "opponent": {
         "identity": {
-          "instanceId": "runner_runner_identity_001_0",
+          "instanceId": "c3mg",
           "known": true,
           "title": "Runner",
-          "definitionId": "runner_identity_001",
+          "definitionId": 587,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -164,10 +164,10 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "corp_onr_v1_238_data-wall-2-0_1",
+              "instanceId": "c2s5",
               "known": true,
               "title": "Data Wall 2.0",
-              "definitionId": "onr_v1_238_data-wall-2-0",
+              "definitionId": 450,
               "type": "ice",
               "subtypes": [
                 "wall"
@@ -181,22 +181,22 @@
               "controller": "corp",
               "effectivePostRezRunQuote": {
                 "context": "installed_post_rez",
-                "cardId": "corp_onr_v1_238_data-wall-2-0_1",
-                "iceDefinitionId": "onr_v1_238_data-wall-2-0",
+                "cardId": "c2s5",
+                "iceDefinitionId": 450,
                 "targetServerId": "hq",
                 "projectedServerId": "hq",
                 "expiresAtStateVersion": 12,
                 "complete": true,
                 "effectiveRunQuote": {
-                  "iceInstanceId": "corp_onr_v1_238_data-wall-2-0_1",
-                  "iceDefinitionId": "onr_v1_238_data-wall-2-0",
+                  "iceInstanceId": "c2s5",
+                  "iceDefinitionId": 450,
                   "effectiveStrength": 1,
                   "encounterStrength": 1,
                   "subroutines": [
                     {
                       "id": "printed_subroutines_end_the_run",
                       "type": "end_the_run",
-                      "sourceDefinitionId": "onr_v1_238_data-wall-2-0",
+                      "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
                     }
                   ]
@@ -205,7 +205,7 @@
               "effectiveRezCostQuote": {
                 "context": "installed",
                 "targetServerId": "hq",
-                "cardId": "corp_onr_v1_238_data-wall-2-0_1",
+                "cardId": "c2s5",
                 "projectedServerId": "hq",
                 "expiresAtStateVersion": 12,
                 "complete": true,
@@ -218,7 +218,7 @@
               },
               "effectiveRezResourceExchangeQuote": {
                 "context": "installed",
-                "cardId": "corp_onr_v1_238_data-wall-2-0_1",
+                "cardId": "c2s5",
                 "targetServerId": "hq",
                 "projectedServerId": "hq",
                 "expiresAtStateVersion": 12,
@@ -233,10 +233,10 @@
           ],
           "root": [
             {
-              "instanceId": "corp_onr_v1_363_olivia-salazar_1",
+              "instanceId": "c3jx",
               "known": true,
               "title": "Olivia Salazar",
-              "definitionId": "onr_v1_363_olivia-salazar",
+              "definitionId": 575,
               "type": "upgrade",
               "subtypes": [
                 "sysop"
@@ -252,14 +252,14 @@
           ],
           "statuses": [
             {
-              "id": "server_status:hq:during_run_ice_rez_support:corp_onr_v1_363_olivia-salazar_1",
+              "id": "server_status:hq:during_run_ice_rez_support:c3jx",
               "kind": "during_run_ice_rez_support",
               "scope": "target_server",
               "costModel": "half_rez_cost_rounded_down",
               "target": "unrezzed_ice_on_this_fort",
               "limit": "once_per_run_per_source",
               "targetServerId": "hq",
-              "sourceCardInstanceId": "corp_onr_v1_363_olivia-salazar_1",
+              "sourceCardInstanceId": "c3jx",
               "sourceTitle": "Olivia Salazar",
               "sourceSide": "corp"
             }
@@ -305,7 +305,7 @@
         "removedFromGameCount": 0
       },
       "run": {
-        "runId": "run_12",
+        "runId": 12,
         "attackedServerId": "hq",
         "phase": "approach_ice",
         "position": {
@@ -319,7 +319,7 @@
       "deckMetadata": {
         "own": {
           "side": "corp",
-          "identityCardId": "corp_identity_001",
+          "identityCardId": 3,
           "deckName": "Siren Fortress",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1",
@@ -329,7 +329,7 @@
         },
         "opponent": {
           "side": "runner",
-          "identityCardId": "runner_identity_001",
+          "identityCardId": 587,
           "deckName": "Deep Market Engine",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1",
@@ -342,7 +342,7 @@
       "agendaPointsToWin": 7,
       "publicEvents": [
         {
-          "eventId": "evt_0",
+          "eventId": 1,
           "type": "game_created",
           "stateVersionBefore": 0,
           "stateVersionAfter": 0,
@@ -368,7 +368,7 @@
               "deckName": "Deep Market Engine",
               "deckHash": "fnv1a:968e74de",
               "side": "runner",
-              "identityCardId": "runner_identity_001",
+              "identityCardId": 587,
               "formatProfileId": "netgrid_private_local_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             },
@@ -376,14 +376,14 @@
               "deckName": "Siren Fortress",
               "deckHash": "fnv1a:322f4bf6",
               "side": "corp",
-              "identityCardId": "corp_identity_001",
+              "identityCardId": 3,
               "formatProfileId": "netgrid_private_local_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             }
           }
         },
         {
-          "eventId": "evt_1",
+          "eventId": 2,
           "type": "resolve_choice",
           "stateVersionBefore": 0,
           "stateVersionAfter": 1,
@@ -414,7 +414,7 @@
           }
         },
         {
-          "eventId": "evt_2",
+          "eventId": 3,
           "type": "resolve_choice",
           "stateVersionBefore": 1,
           "stateVersionAfter": 2,
@@ -445,7 +445,7 @@
           }
         },
         {
-          "eventId": "evt_3",
+          "eventId": 4,
           "type": "mandatory_draw",
           "stateVersionBefore": 2,
           "stateVersionAfter": 3,
@@ -472,7 +472,7 @@
           }
         },
         {
-          "eventId": "evt_4",
+          "eventId": 5,
           "type": "install_card",
           "stateVersionBefore": 3,
           "stateVersionAfter": 4,
@@ -500,7 +500,7 @@
           }
         },
         {
-          "eventId": "evt_5",
+          "eventId": 6,
           "type": "draw_card",
           "stateVersionBefore": 4,
           "stateVersionAfter": 5,
@@ -521,7 +521,7 @@
           }
         },
         {
-          "eventId": "evt_6",
+          "eventId": 7,
           "type": "install_card",
           "stateVersionBefore": 5,
           "stateVersionAfter": 6,
@@ -549,7 +549,7 @@
           }
         },
         {
-          "eventId": "evt_7",
+          "eventId": 8,
           "type": "rez_card",
           "stateVersionBefore": 6,
           "stateVersionAfter": 7,
@@ -561,7 +561,7 @@
             "actionType": "rez_card",
             "label": "Karte in HQ rezzen",
             "title": "Olivia Salazar",
-            "cardDefinitionId": "onr_v1_363_olivia-salazar",
+            "cardDefinitionId": 575,
             "serverId": "hq",
             "serverLabel": "HQ",
             "installPlacement": "root",
@@ -575,7 +575,7 @@
           }
         },
         {
-          "eventId": "evt_8",
+          "eventId": 9,
           "type": "end_turn",
           "stateVersionBefore": 7,
           "stateVersionAfter": 8,
@@ -592,7 +592,7 @@
           }
         },
         {
-          "eventId": "evt_9",
+          "eventId": 10,
           "type": "start_run",
           "stateVersionBefore": 8,
           "stateVersionAfter": 9,
@@ -624,7 +624,7 @@
           }
         },
         {
-          "eventId": "evt_10",
+          "eventId": 11,
           "type": "access_card",
           "stateVersionBefore": 9,
           "stateVersionAfter": 10,
@@ -651,7 +651,7 @@
           }
         },
         {
-          "eventId": "evt_11",
+          "eventId": 12,
           "type": "decline_trash",
           "stateVersionBefore": 10,
           "stateVersionAfter": 11,
@@ -673,7 +673,7 @@
           }
         },
         {
-          "eventId": "evt_12",
+          "eventId": 13,
           "type": "start_run",
           "stateVersionBefore": 11,
           "stateVersionAfter": 12,
@@ -707,11 +707,11 @@
       ],
       "legalActions": [
         {
-          "actionId": "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1",
+          "actionId": "corp.rez_ice.c2s5.c2s5",
           "side": "corp",
           "type": "rez_ice",
           "label": "Data Wall 2.0 rezzen",
-          "source": "corp_onr_v1_238_data-wall-2-0_1",
+          "source": "c2s5",
           "timingPoint": "run.approach_ice",
           "costs": [
             {
@@ -723,15 +723,15 @@
           "expiresAtStateVersion": 12,
           "payload": {
             "abilityFamily": "run-access",
-            "cardId": "corp_onr_v1_238_data-wall-2-0_1"
+            "cardId": "c2s5"
           }
         },
         {
-          "actionId": "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
+          "actionId": "corp.rez_ice.c2s5.hq.c2s5.c3jx",
           "side": "corp",
           "type": "rez_ice",
           "label": "Olivia Salazar: Data Wall 2.0 für 1 Credit rezzen",
-          "source": "corp_onr_v1_238_data-wall-2-0_1",
+          "source": "c2s5",
           "timingPoint": "run.approach_ice",
           "costs": [
             {
@@ -743,15 +743,15 @@
           "expiresAtStateVersion": 12,
           "payload": {
             "serverId": "hq",
-            "discountedRezSourceCardId": "corp_onr_v1_363_olivia-salazar_1",
-            "discountedRezSourceDefinitionId": "onr_v1_363_olivia-salazar",
+            "discountedRezSourceCardId": "c3jx",
+            "discountedRezSourceDefinitionId": 575,
             "discountedRezCostBase": 2,
             "temporaryDerezAfterRun": true,
             "rezCostPaid": 1,
             "rezCostReductionAmount": 1,
-            "rezCostReductionSourceDefinitionIds": "onr_v1_363_olivia-salazar",
+            "rezCostReductionSourceDefinitionIds": 575,
             "abilityFamily": "run-access",
-            "cardId": "corp_onr_v1_238_data-wall-2-0_1"
+            "cardId": "c2s5"
           }
         },
         {
@@ -770,7 +770,7 @@
     },
     "eventTail": [
       {
-        "eventId": "evt_0",
+        "eventId": 1,
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
@@ -796,7 +796,7 @@
             "deckName": "Deep Market Engine",
             "deckHash": "fnv1a:968e74de",
             "side": "runner",
-            "identityCardId": "runner_identity_001",
+            "identityCardId": 587,
             "formatProfileId": "netgrid_private_local_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           },
@@ -804,14 +804,14 @@
             "deckName": "Siren Fortress",
             "deckHash": "fnv1a:322f4bf6",
             "side": "corp",
-            "identityCardId": "corp_identity_001",
+            "identityCardId": 3,
             "formatProfileId": "netgrid_private_local_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           }
         }
       },
       {
-        "eventId": "evt_1",
+        "eventId": 2,
         "type": "resolve_choice",
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
@@ -842,7 +842,7 @@
         }
       },
       {
-        "eventId": "evt_2",
+        "eventId": 3,
         "type": "resolve_choice",
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
@@ -873,7 +873,7 @@
         }
       },
       {
-        "eventId": "evt_3",
+        "eventId": 4,
         "type": "mandatory_draw",
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
@@ -900,7 +900,7 @@
         }
       },
       {
-        "eventId": "evt_4",
+        "eventId": 5,
         "type": "install_card",
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
@@ -928,7 +928,7 @@
         }
       },
       {
-        "eventId": "evt_5",
+        "eventId": 6,
         "type": "draw_card",
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
@@ -949,7 +949,7 @@
         }
       },
       {
-        "eventId": "evt_6",
+        "eventId": 7,
         "type": "install_card",
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
@@ -977,7 +977,7 @@
         }
       },
       {
-        "eventId": "evt_7",
+        "eventId": 8,
         "type": "rez_card",
         "stateVersionBefore": 6,
         "stateVersionAfter": 7,
@@ -989,7 +989,7 @@
           "actionType": "rez_card",
           "label": "Karte in HQ rezzen",
           "title": "Olivia Salazar",
-          "cardDefinitionId": "onr_v1_363_olivia-salazar",
+          "cardDefinitionId": 575,
           "serverId": "hq",
           "serverLabel": "HQ",
           "installPlacement": "root",
@@ -1003,7 +1003,7 @@
         }
       },
       {
-        "eventId": "evt_8",
+        "eventId": 9,
         "type": "end_turn",
         "stateVersionBefore": 7,
         "stateVersionAfter": 8,
@@ -1020,7 +1020,7 @@
         }
       },
       {
-        "eventId": "evt_9",
+        "eventId": 10,
         "type": "start_run",
         "stateVersionBefore": 8,
         "stateVersionAfter": 9,
@@ -1052,7 +1052,7 @@
         }
       },
       {
-        "eventId": "evt_10",
+        "eventId": 11,
         "type": "access_card",
         "stateVersionBefore": 9,
         "stateVersionAfter": 10,
@@ -1079,7 +1079,7 @@
         }
       },
       {
-        "eventId": "evt_11",
+        "eventId": 12,
         "type": "decline_trash",
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
@@ -1101,7 +1101,7 @@
         }
       },
       {
-        "eventId": "evt_12",
+        "eventId": 13,
         "type": "start_run",
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
@@ -1135,11 +1135,11 @@
     ],
     "legalActions": [
       {
-        "actionId": "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1",
+        "actionId": "corp.rez_ice.c2s5.c2s5",
         "side": "corp",
         "type": "rez_ice",
         "label": "Data Wall 2.0 rezzen",
-        "source": "corp_onr_v1_238_data-wall-2-0_1",
+        "source": "c2s5",
         "timingPoint": "run.approach_ice",
         "costs": [
           {
@@ -1151,15 +1151,15 @@
         "expiresAtStateVersion": 12,
         "payload": {
           "abilityFamily": "run-access",
-          "cardId": "corp_onr_v1_238_data-wall-2-0_1"
+          "cardId": "c2s5"
         }
       },
       {
-        "actionId": "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
+        "actionId": "corp.rez_ice.c2s5.hq.c2s5.c3jx",
         "side": "corp",
         "type": "rez_ice",
         "label": "Olivia Salazar: Data Wall 2.0 für 1 Credit rezzen",
-        "source": "corp_onr_v1_238_data-wall-2-0_1",
+        "source": "c2s5",
         "timingPoint": "run.approach_ice",
         "costs": [
           {
@@ -1171,15 +1171,15 @@
         "expiresAtStateVersion": 12,
         "payload": {
           "serverId": "hq",
-          "discountedRezSourceCardId": "corp_onr_v1_363_olivia-salazar_1",
-          "discountedRezSourceDefinitionId": "onr_v1_363_olivia-salazar",
+          "discountedRezSourceCardId": "c3jx",
+          "discountedRezSourceDefinitionId": 575,
           "discountedRezCostBase": 2,
           "temporaryDerezAfterRun": true,
           "rezCostPaid": 1,
           "rezCostReductionAmount": 1,
-          "rezCostReductionSourceDefinitionIds": "onr_v1_363_olivia-salazar",
+          "rezCostReductionSourceDefinitionIds": 575,
           "abilityFamily": "run-access",
-          "cardId": "corp_onr_v1_238_data-wall-2-0_1"
+          "cardId": "c2s5"
         }
       },
       {
@@ -1237,7 +1237,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 12,
-      "sideSafePlanningFingerprint": "fnv1a:fc395e76"
+      "sideSafePlanningFingerprint": "fnv1a:22b85772"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",
@@ -1245,7 +1245,7 @@
       "deckVersion": "1",
       "name": "Siren Fortress",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -1254,91 +1254,91 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_188_ai-chief-financial-officer",
+          "cardId": 400,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_191_black-ice-quality-assurance",
+          "cardId": 403,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_204_ice-transmutation",
+          "cardId": 416,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_222_ball-and-chain",
+          "cardId": 434,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_228_cinderella",
+          "cardId": 440,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_247_haunting-inquisition",
+          "cardId": 459,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_258_neural-blade",
+          "cardId": 470,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_268_shock-r",
+          "cardId": 480,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_278_wall-of-ice",
+          "cardId": 490,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_296_off-site-backups",
+          "cardId": 508,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_314_corporate-negotiating-center",
+          "cardId": 526,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_352_chester-mix",
+          "cardId": 564,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_363_olivia-salazar",
+          "cardId": 575,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+          "cardId": 579,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_368_roving-submarine",
+          "cardId": 580,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_374_washington-d-c-city-grid",
+          "cardId": 586,
           "quantity": 2
         }
       ],
@@ -1353,7 +1353,7 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Siren Fortress",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1",
@@ -1387,8 +1387,8 @@
         },
         "economyBankTools": [
           {
-            "cardId": "onr_v1_309_bbs-whispering-campaign",
-            "sourceCardInstanceId": "corp_onr_v1_309_bbs-whispering-campaign_2",
+            "cardId": 521,
+            "sourceCardInstanceId": "c37y",
             "title": "BBS Whispering Campaign",
             "ownerSide": "corp",
             "status": "in_hand",
@@ -1399,7 +1399,7 @@
             "confidence": "medium",
             "evidence": [
               "capability_source:role_or_subtype",
-              "bank_source_instance:corp_onr_v1_309_bbs-whispering-campaign_2",
+              "bank_source_instance:c37y",
               "bank_status:in_hand",
               "bank_build_legal:false",
               "bank_cashout_legal:false"
@@ -1447,189 +1447,189 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:boardSafety"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -1654,91 +1654,91 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:damageOrTagPayoff"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:damageOrTagPayoff"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_352_chester-mix",
+              "cardId": 564,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+              "cardId": 579,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_368_roving-submarine",
+              "cardId": 580,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             },
             {
-              "cardId": "onr_v1_374_washington-d-c-city-grid",
+              "cardId": 586,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:upgrade",
@@ -1761,14 +1761,14 @@
           "finalScore": 77,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.asset_economy",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.asset_economy",
@@ -1776,7 +1776,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "strategicRole",
               "role": "engine_anchor",
@@ -1784,7 +1784,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_314_corporate-negotiating-center",
+              "cardId": 526,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.asset_economy",
@@ -1793,63 +1793,63 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_314_corporate-negotiating-center",
+              "cardId": 526,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:remoteProtection"
             },
             {
-              "cardId": "onr_v1_368_roving-submarine",
+              "cardId": 580,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "tax.remote",
@@ -1870,336 +1870,336 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -2219,7 +2219,7 @@
           "finalScore": 74,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.damage_kill",
@@ -2227,7 +2227,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "strategicRole",
               "role": "punish_payoff,tax_tool",
@@ -2235,7 +2235,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.damage_kill",
@@ -2243,7 +2243,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "strategicRole",
               "role": "punish_payoff,tax_tool",
@@ -2253,56 +2253,56 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:damagePayoff"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:tagOrTrace"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:damagePayoff"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -2322,7 +2322,7 @@
           "finalScore": 66,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.deck_recycle_engine",
@@ -2332,112 +2332,112 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "archives.corp_recycle_to_rnd",
               "reason": "support:recycleSource"
             },
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "draw.corp_draw",
               "reason": "support:drawOrShuffle"
             },
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "hq.corp_hand_to_rnd_shuffle",
               "reason": "support:drawOrShuffle"
             },
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "hq.corp_hand_to_rnd_shuffle",
               "reason": "support:recycleSource"
             },
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "rnd.corp_shuffle_recycle",
               "reason": "support:drawOrShuffle"
             },
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "rnd.corp_shuffle_recycle",
               "reason": "support:recycleSource"
             },
             {
-              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "cardId": 403,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_204_ice-transmutation",
+              "cardId": 416,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_220_tycho-extension",
+              "cardId": 432,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_296_off-site-backups",
+              "cardId": 508,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "archives.corp_recovery",
               "reason": "support:recycleSource"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -2456,196 +2456,196 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "draw.corp_draw",
               "reason": "support:drawSource"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:safety"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -2667,203 +2667,203 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
@@ -2884,210 +2884,210 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "cardId": 403,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_204_ice-transmutation",
+              "cardId": 416,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_220_tycho-extension",
+              "cardId": 432,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -3110,14 +3110,14 @@
           "finalScore": 97,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "cardId": 403,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "cardId": 403,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3125,7 +3125,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "cardId": 403,
               "quantity": 2,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3133,14 +3133,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_204_ice-transmutation",
+              "cardId": 416,
               "quantity": 3,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_204_ice-transmutation",
+              "cardId": 416,
               "quantity": 3,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3148,7 +3148,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_204_ice-transmutation",
+              "cardId": 416,
               "quantity": 3,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3156,14 +3156,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3171,7 +3171,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3179,7 +3179,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3187,7 +3187,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "strategicRole",
               "role": "punish_payoff,tax_tool",
@@ -3195,7 +3195,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3203,7 +3203,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3211,7 +3211,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3219,7 +3219,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3227,7 +3227,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3235,7 +3235,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3243,7 +3243,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3251,7 +3251,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "strategicRole",
               "role": "punish_payoff,tax_tool",
@@ -3259,7 +3259,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_v1_352_chester-mix",
+              "cardId": 564,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3267,7 +3267,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
@@ -3275,7 +3275,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "strategicRole",
               "role": "tax_tool",
@@ -3285,336 +3285,336 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:rezReserve"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -3633,105 +3633,105 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:remoteSafety"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "remote.scoring_protection",
               "reason": "support:scorePlan"
             },
             {
-              "cardId": "onr_v1_368_roving-submarine",
+              "cardId": 580,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "tax.remote",
@@ -3755,7 +3755,7 @@
           "finalScore": 92,
           "anchorEvidence": [
             {
-              "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+              "cardId": 579,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.remote_scoring",
@@ -3763,14 +3763,14 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_368_roving-submarine",
+              "cardId": 580,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.remote_scoring",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_368_roving-submarine",
+              "cardId": 580,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.remote_scoring",
@@ -3778,14 +3778,14 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_374_washington-d-c-city-grid",
+              "cardId": 586,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.remote_scoring",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_374_washington-d-c-city-grid",
+              "cardId": 586,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "corp.remote_scoring",
@@ -3793,7 +3793,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_374_washington-d-c-city-grid",
+              "cardId": 586,
               "quantity": 2,
               "source": "strategicRole",
               "role": "scoring_tool",
@@ -3803,336 +3803,336 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "cardId": 403,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_204_ice-transmutation",
+              "cardId": 416,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_220_tycho-extension",
+              "cardId": 432,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:ice"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
@@ -4151,252 +4151,252 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_188_ai-chief-financial-officer",
+              "cardId": 400,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_191_black-ice-quality-assurance",
+              "cardId": 403,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_204_ice-transmutation",
+              "cardId": 416,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_220_tycho-extension",
+              "cardId": 432,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
+              "cardId": 434,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_237_data-wall",
+              "cardId": 449,
               "quantity": 3,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_238_data-wall-2-0",
+              "cardId": 450,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_247_haunting-inquisition",
+              "cardId": 459,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.future_pressure",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_261_quandary",
+              "cardId": 473,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_268_shock-r",
+              "cardId": 480,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_278_wall-of-ice",
+              "cardId": 490,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
             {
-              "cardId": "onr_v1_279_wall-of-static",
+              "cardId": 491,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -4415,56 +4415,56 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:punishPayoff"
             },
             {
-              "cardId": "onr_v1_228_cinderella",
+              "cardId": 440,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:traceSupport"
             },
             {
-              "cardId": "onr_v1_258_neural-blade",
+              "cardId": 470,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "damage.payoff",
               "reason": "support:punishPayoff"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.finite_pool",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_309_bbs-whispering-campaign",
+              "cardId": 521,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_363_olivia-salazar",
+              "cardId": 575,
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
@@ -4813,7 +4813,7 @@
       },
       "cardRoles": [
         {
-          "cardId": "onr_v1_188_ai-chief-financial-officer",
+          "cardId": 400,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -4832,7 +4832,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_191_black-ice-quality-assurance",
+          "cardId": 403,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -4856,7 +4856,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_204_ice-transmutation",
+          "cardId": 416,
           "quantity": 3,
           "status": "complete",
           "roles": [
@@ -4872,7 +4872,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -4888,7 +4888,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_222_ball-and-chain",
+          "cardId": 434,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -4906,7 +4906,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_228_cinderella",
+          "cardId": 440,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -4938,7 +4938,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3,
           "status": "partial",
           "roles": [
@@ -4955,7 +4955,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -4972,7 +4972,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_247_haunting-inquisition",
+          "cardId": 459,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -4993,7 +4993,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_258_neural-blade",
+          "cardId": 470,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5021,7 +5021,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5038,7 +5038,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_268_shock-r",
+          "cardId": 480,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5059,7 +5059,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_278_wall-of-ice",
+          "cardId": 490,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5086,7 +5086,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5103,7 +5103,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_296_off-site-backups",
+          "cardId": 508,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5116,7 +5116,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5142,7 +5142,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_314_corporate-negotiating-center",
+          "cardId": 526,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5155,7 +5155,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_352_chester-mix",
+          "cardId": 564,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5174,7 +5174,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_363_olivia-salazar",
+          "cardId": 575,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5194,7 +5194,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+          "cardId": 579,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5208,7 +5208,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_368_roving-submarine",
+          "cardId": 580,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5230,7 +5230,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_374_washington-d-c-city-grid",
+          "cardId": 586,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -7574,16 +7574,16 @@
             "signals": [
               {
                 "kind": "generic",
-                "defenseId": "rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1",
+                "defenseId": "rez:c2s5:corp.rez_ice.c2s5.c2s5",
                 "serverId": "hq",
                 "phase": "rez_response",
                 "sourceDefinitionIds": [
-                  "onr_v1_238_data-wall-2-0"
+                  450
                 ],
                 "actionIds": [
-                  "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1"
+                  "corp.rez_ice.c2s5.c2s5"
                 ],
-                "targetIceInstanceId": "corp_onr_v1_238_data-wall-2-0_1",
+                "targetIceInstanceId": "c2s5",
                 "urgent": true,
                 "rezReserveAssessment": {
                   "preservesReserve": true,
@@ -7600,13 +7600,13 @@
                   }
                 },
                 "rezRoute": {
-                  "actionId": "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1",
-                  "sourceCardInstanceId": "corp_onr_v1_238_data-wall-2-0_1",
-                  "sourceDefinitionId": "onr_v1_238_data-wall-2-0",
+                  "actionId": "corp.rez_ice.c2s5.c2s5",
+                  "sourceCardInstanceId": "c2s5",
+                  "sourceDefinitionId": 450,
                   "targetServerId": "hq",
                   "quote": {
                     "context": "installed",
-                    "cardId": "corp_onr_v1_238_data-wall-2-0_1",
+                    "cardId": "c2s5",
                     "targetServerId": "hq",
                     "projectedServerId": "hq",
                     "expiresAtStateVersion": 12,
@@ -7678,20 +7678,20 @@
                 },
                 "rezWindowVerdict": "productive",
                 "value": 1,
-                "evidenceCode": "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1"
+                "evidenceCode": "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.c2s5.c2s5"
               },
               {
                 "kind": "generic",
-                "defenseId": "rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
+                "defenseId": "rez:c2s5:corp.rez_ice.c2s5.hq.c2s5.c3jx",
                 "serverId": "hq",
                 "phase": "rez_response",
                 "sourceDefinitionIds": [
-                  "onr_v1_238_data-wall-2-0"
+                  450
                 ],
                 "actionIds": [
-                  "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1"
+                  "corp.rez_ice.c2s5.hq.c2s5.c3jx"
                 ],
-                "targetIceInstanceId": "corp_onr_v1_238_data-wall-2-0_1",
+                "targetIceInstanceId": "c2s5",
                 "urgent": true,
                 "rezReserveAssessment": {
                   "preservesReserve": true,
@@ -7708,13 +7708,13 @@
                   }
                 },
                 "rezRoute": {
-                  "actionId": "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
-                  "sourceCardInstanceId": "corp_onr_v1_238_data-wall-2-0_1",
-                  "sourceDefinitionId": "onr_v1_238_data-wall-2-0",
+                  "actionId": "corp.rez_ice.c2s5.hq.c2s5.c3jx",
+                  "sourceCardInstanceId": "c2s5",
+                  "sourceDefinitionId": 450,
                   "targetServerId": "hq",
                   "quote": {
                     "context": "installed",
-                    "cardId": "corp_onr_v1_238_data-wall-2-0_1",
+                    "cardId": "c2s5",
                     "targetServerId": "hq",
                     "projectedServerId": "hq",
                     "expiresAtStateVersion": 12,
@@ -7726,7 +7726,7 @@
                     },
                     "costKind": "fixed",
                     "reductionSourceDefinitionIds": [
-                      "onr_v1_363_olivia-salazar"
+                      575
                     ]
                   },
                   "before": {
@@ -7789,7 +7789,7 @@
                 },
                 "rezWindowVerdict": "productive",
                 "value": 1,
-                "evidenceCode": "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1"
+                "evidenceCode": "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.c2s5.hq.c2s5.c3jx"
               },
               {
                 "kind": "generic",
@@ -7901,7 +7901,7 @@
           "updatedAtStateVersion": 12,
           "evidenceRefs": [
             {
-              "code": "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
+              "code": "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.c2s5.hq.c2s5.c3jx",
               "source": "visible_state"
             }
           ]
@@ -7922,7 +7922,7 @@
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_220_tycho-extension_1%3Anew_remote",
+          "instanceId": "plan:corp.score_agenda:agenda%3Ac2o5%3Anew_remote",
           "stateVersion": 12,
           "reason": "stale_ttl_expired",
           "detailCode": "stale_ttl_elapsed"
@@ -7939,13 +7939,13 @@
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
+          "campaignId": "campaign:agenda:c2o5:new_remote",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_220_tycho-extension_1%3Anew_remote",
+            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2o5%3Anew_remote",
             "moduleId": "corp.score_agenda",
-            "targetCardInstanceId": "corp_onr_v1_220_tycho-extension_1"
+            "targetCardInstanceId": "c2o5"
           },
           "milestoneId": "install_agenda",
           "createdAtStateVersion": 3,
@@ -7965,8 +7965,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_7:corp_rez:campaign:agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
-              "eventId": "evt_7",
+              "outcomeId": "8:corp_rez:campaign:agenda:c2o5:new_remote",
+              "eventId": 8,
               "eventType": "rez_card",
               "stateVersionAfter": 7,
               "kind": "corp_rez",
@@ -7977,8 +7977,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_9:run_declared:campaign:agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
-              "eventId": "evt_9",
+              "outcomeId": "10:run_declared:campaign:agenda:c2o5:new_remote",
+              "eventId": 10,
               "eventType": "start_run",
               "stateVersionAfter": 9,
               "kind": "run_declared",
@@ -7989,8 +7989,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_10:access_resolved:campaign:agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
-              "eventId": "evt_10",
+              "outcomeId": "11:access_resolved:campaign:agenda:c2o5:new_remote",
+              "eventId": 11,
               "eventType": "access_card",
               "stateVersionAfter": 10,
               "kind": "access_resolved",
@@ -8000,8 +8000,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:campaign:agenda:c2o5:new_remote",
+              "eventId": 13,
               "eventType": "start_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -8027,7 +8027,7 @@
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install-defense-support:corp_onr_v1_363_olivia-salazar_1:hq",
+          "campaignId": "campaign:corp.defend_servers:install-defense-support:c3jx:hq",
           "kind": "defense",
           "status": "blocked",
           "origin": {
@@ -8053,8 +8053,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_7:corp_rez:campaign:corp.defend_servers:install-defense-support:corp_onr_v1_363_olivia-salazar_1:hq",
-              "eventId": "evt_7",
+              "outcomeId": "8:corp_rez:campaign:corp.defend_servers:install-defense-support:c3jx:hq",
+              "eventId": 8,
               "eventType": "rez_card",
               "stateVersionAfter": 7,
               "kind": "corp_rez",
@@ -8065,8 +8065,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_10:access_resolved:campaign:corp.defend_servers:install-defense-support:corp_onr_v1_363_olivia-salazar_1:hq",
-              "eventId": "evt_10",
+              "outcomeId": "11:access_resolved:campaign:corp.defend_servers:install-defense-support:c3jx:hq",
+              "eventId": 11,
               "eventType": "access_card",
               "stateVersionAfter": 10,
               "kind": "access_resolved",
@@ -8076,8 +8076,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install-defense-support:corp_onr_v1_363_olivia-salazar_1:hq",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:campaign:corp.defend_servers:install-defense-support:c3jx:hq",
+              "eventId": 13,
               "eventType": "start_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -8101,7 +8101,7 @@
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.0",
+          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.c2s5.hq.c2s5.0",
           "kind": "defense",
           "status": "blocked",
           "origin": {
@@ -8127,8 +8127,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_7:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.0",
-              "eventId": "evt_7",
+              "outcomeId": "8:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.c2s5.hq.c2s5.0",
+              "eventId": 8,
               "eventType": "rez_card",
               "stateVersionAfter": 7,
               "kind": "corp_rez",
@@ -8139,8 +8139,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_10:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.0",
-              "eventId": "evt_10",
+              "outcomeId": "11:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c2s5.hq.c2s5.0",
+              "eventId": 11,
               "eventType": "access_card",
               "stateVersionAfter": 10,
               "kind": "access_resolved",
@@ -8150,8 +8150,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.0",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c2s5.hq.c2s5.0",
+              "eventId": 13,
               "eventType": "start_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -8177,7 +8177,7 @@
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.rd.corp_onr_v1_238_data-wall-2-0_1.0",
+          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.c2s5.rd.c2s5.0",
           "kind": "defense",
           "status": "blocked",
           "origin": {
@@ -8203,8 +8203,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_9:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.rd.corp_onr_v1_238_data-wall-2-0_1.0",
-              "eventId": "evt_9",
+              "outcomeId": "10:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c2s5.rd.c2s5.0",
+              "eventId": 10,
               "eventType": "start_run",
               "stateVersionAfter": 9,
               "kind": "run_declared",
@@ -8215,8 +8215,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_10:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.rd.corp_onr_v1_238_data-wall-2-0_1.0",
-              "eventId": "evt_10",
+              "outcomeId": "11:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c2s5.rd.c2s5.0",
+              "eventId": 11,
               "eventType": "access_card",
               "stateVersionAfter": 10,
               "kind": "access_resolved",
@@ -8240,14 +8240,14 @@
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez-defense-support:corp_onr_v1_363_olivia-salazar_1",
+          "campaignId": "campaign:corp.defend_servers:rez-defense-support:c3jx",
           "kind": "defense",
           "status": "blocked",
           "origin": {
             "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq",
-            "targetCardInstanceId": "corp_onr_v1_363_olivia-salazar_1"
+            "targetCardInstanceId": "c3jx"
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 3,
@@ -8267,8 +8267,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_7:corp_rez:campaign:corp.defend_servers:rez-defense-support:corp_onr_v1_363_olivia-salazar_1",
-              "eventId": "evt_7",
+              "outcomeId": "8:corp_rez:campaign:corp.defend_servers:rez-defense-support:c3jx",
+              "eventId": 8,
               "eventType": "rez_card",
               "stateVersionAfter": 7,
               "kind": "corp_rez",
@@ -8279,8 +8279,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_10:access_resolved:campaign:corp.defend_servers:rez-defense-support:corp_onr_v1_363_olivia-salazar_1",
-              "eventId": "evt_10",
+              "outcomeId": "11:access_resolved:campaign:corp.defend_servers:rez-defense-support:c3jx",
+              "eventId": 11,
               "eventType": "access_card",
               "stateVersionAfter": 10,
               "kind": "access_resolved",
@@ -8290,8 +8290,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:rez-defense-support:corp_onr_v1_363_olivia-salazar_1",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:campaign:corp.defend_servers:rez-defense-support:c3jx",
+              "eventId": 13,
               "eventType": "start_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -8317,14 +8317,14 @@
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1",
+          "campaignId": "campaign:corp.defend_servers:rez:c2s5:corp.rez_ice.c2s5.c2s5",
           "kind": "defense",
           "status": "continuable",
           "origin": {
             "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq",
-            "targetCardInstanceId": "corp_onr_v1_238_data-wall-2-0_1"
+            "targetCardInstanceId": "c2s5"
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 3,
@@ -8345,8 +8345,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_7:corp_rez:campaign:corp.defend_servers:rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1",
-              "eventId": "evt_7",
+              "outcomeId": "8:corp_rez:campaign:corp.defend_servers:rez:c2s5:corp.rez_ice.c2s5.c2s5",
+              "eventId": 8,
               "eventType": "rez_card",
               "stateVersionAfter": 7,
               "kind": "corp_rez",
@@ -8357,8 +8357,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_10:access_resolved:campaign:corp.defend_servers:rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1",
-              "eventId": "evt_10",
+              "outcomeId": "11:access_resolved:campaign:corp.defend_servers:rez:c2s5:corp.rez_ice.c2s5.c2s5",
+              "eventId": 11,
               "eventType": "access_card",
               "stateVersionAfter": 10,
               "kind": "access_resolved",
@@ -8368,8 +8368,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:campaign:corp.defend_servers:rez:c2s5:corp.rez_ice.c2s5.c2s5",
+              "eventId": 13,
               "eventType": "start_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -8387,19 +8387,19 @@
             "campaign_requote:current",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1"
+            "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.c2s5.c2s5"
           ]
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
+          "campaignId": "campaign:corp.defend_servers:rez:c2s5:corp.rez_ice.c2s5.hq.c2s5.c3jx",
           "kind": "defense",
           "status": "continuable",
           "origin": {
             "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq",
-            "targetCardInstanceId": "corp_onr_v1_238_data-wall-2-0_1"
+            "targetCardInstanceId": "c2s5"
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 3,
@@ -8420,8 +8420,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_7:corp_rez:campaign:corp.defend_servers:rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
-              "eventId": "evt_7",
+              "outcomeId": "8:corp_rez:campaign:corp.defend_servers:rez:c2s5:corp.rez_ice.c2s5.hq.c2s5.c3jx",
+              "eventId": 8,
               "eventType": "rez_card",
               "stateVersionAfter": 7,
               "kind": "corp_rez",
@@ -8432,8 +8432,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_10:access_resolved:campaign:corp.defend_servers:rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
-              "eventId": "evt_10",
+              "outcomeId": "11:access_resolved:campaign:corp.defend_servers:rez:c2s5:corp.rez_ice.c2s5.hq.c2s5.c3jx",
+              "eventId": 11,
               "eventType": "access_card",
               "stateVersionAfter": 10,
               "kind": "access_resolved",
@@ -8443,8 +8443,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:rez:corp_onr_v1_238_data-wall-2-0_1:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:campaign:corp.defend_servers:rez:c2s5:corp.rez_ice.c2s5.hq.c2s5.c3jx",
+              "eventId": 13,
               "eventType": "start_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -8462,7 +8462,7 @@
             "campaign_requote:current",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1"
+            "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.c2s5.hq.c2s5.c3jx"
           ]
         }
       ],
@@ -8505,7 +8505,7 @@
                 "nodeId": "fnv1a:3ff5ab81",
                 "invocation": {
                   "semanticActionType": "corp_window.rez",
-                  "sourceCardInstanceId": "corp_onr_v1_238_data-wall-2-0_1",
+                  "sourceCardInstanceId": "c2s5",
                   "boundTargets": [
                     {
                       "slotId": "server",
@@ -8519,7 +8519,7 @@
                     }
                   ],
                   "boundChoices": [],
-                  "routeKey": "fnv1a:86d96b08"
+                  "routeKey": "fnv1a:8445f8c9"
                 },
                 "expectation": {
                   "nodeId": "fnv1a:3ff5ab81",
@@ -8570,7 +8570,7 @@
           "expectationId": "fnv1a:745a419a",
           "phaseId": "fnv1a:e0250c63",
           "nodeId": "fnv1a:3ff5ab81",
-          "routeKey": "fnv1a:86d96b08",
+          "routeKey": "fnv1a:8445f8c9",
           "expectedStateDeltaCodes": [
             "action_applied:corp_window.rez",
             "milestone_attempted:allocate_server_defense"
@@ -8585,13 +8585,13 @@
         "sourcePlanId": "fnv1a:c9c922c5",
         "phaseId": "fnv1a:e0250c63",
         "nodeId": "fnv1a:3ff5ab81",
-        "routeKey": "fnv1a:86d96b08",
+        "routeKey": "fnv1a:8445f8c9",
         "stateIdentity": {
           "stateVersion": 12,
           "sideSafePlanningFingerprint": "fnv1a:8d61a473"
         },
         "currentBinding": {
-          "actionId": "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1",
+          "actionId": "corp.rez_ice.c2s5.hq.c2s5.c3jx",
           "stateVersion": 12,
           "semanticActionSetFingerprint": "fnv1a:b8a12d03",
           "invocationKey": "fnv1a:45c4ffe3"
