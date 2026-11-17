@@ -102,6 +102,40 @@ it.each([
   },
 );
 
+it("does not count a bare remote whose current run restriction blocks access", () => {
+  const { input, agenda, install } = fixture();
+  const existing = input.playerView.servers.find(
+    (server) =>
+      server.id.startsWith("remote_") &&
+      server.root.length === 1 &&
+      server.root[0]?.type === "agenda",
+  )!;
+  existing.ice = [];
+  const hasExposure = () =>
+    corpFloodInstallCreatesCombinedTerminalExposure(
+      input,
+      agenda,
+      "new_remote",
+      install.actionId,
+    );
+  expect(hasExposure()).toBe(true);
+  existing.statuses = [
+    {
+      id: "run-restriction",
+      kind: "run_prohibited",
+      scope: "target_server",
+      reason: "required_corp_activity_during_latest_corp_turn_missing",
+      targetServerId: existing.id,
+      sourceCardInstanceId: "run-restriction-source",
+      sourceAbilityId: "public-restriction",
+      sourceTitle: "Run restriction",
+      sourceSide: "corp",
+    },
+  ];
+
+  expect(hasExposure()).toBe(false);
+});
+
 it.each([
   [
     "two steals stay below the win target",

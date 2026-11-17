@@ -18,10 +18,8 @@ import {
   type DeckCapabilityProfile,
 } from "../deck-capabilities";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
-import {
-  type AiDeckStrategyProfile,
-  type DeckDoctrineV2Diagnostic,
-} from "../deck-doctrine-strategy";
+import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-diagnostic";
 import { buildDeckDoctrineRuntimeContext } from "../deck-doctrine-runtime-context";
 import {
   assertValidAiDeckSnapshotForRuntime,

@@ -3,8 +3,8 @@ import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import match978dCheckpoint from "../../../data/scenarios/ai-decision-checkpoints/cp-978d-01-matchpoint-wall-rez-d80.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
+import { buildDeckDoctrineV2Diagnostic } from "./deck-doctrine-diagnostic";
 import {
-  buildDeckDoctrineV2Diagnostic,
   buildDeckStrategyProfile,
   compareDeckStrategyRanking,
   DECK_STRATEGY_METADATA_CONSUMER_CONTRACT,

@@ -8,6 +8,8 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { actionClickCost, actionCreditCost } from "../../runtime/action-cost";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { corpGuaranteedOnPlayAdvancementCountersPerTarget } from "../../runtime/corp-canonical-card-facts";
@@ -87,7 +89,8 @@ export function corpForcedAgendaDiscardHasSaferTerminalAlternative(
   const runnerCredits =
     view.opponent.credits +
     visibleRunnerNextTurnPreparationCreditGain(runnerRig, preparationClicks);
-  const runnerPublicPreparedBreakers = visibleRunnerHeapBreakerPreparations(input);
+  const runnerPublicPreparedBreakers =
+    visibleRunnerHeapBreakerPreparations(input);
   const centralQuotes = (["hq", "rd"] as const).map((targetServerId) => {
     const server = view.servers.find((entry) => entry.id === targetServerId);
     if (!server) return undefined;
@@ -133,8 +136,17 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
   const view = input.playerView;
   // The Engine already reserves one run in this public next-turn click budget.
   const otherRunSlots = view.runnerNextTurnCreditClicks;
+  const install = input.legalActions.find(
+    (action) => action.actionId === installActionId,
+  );
   if (
+    input.side !== "corp" ||
     !serverId ||
+    !actionMatchesCurrentDecision(input, install) ||
+    install.type !== "install_card" ||
+    install.source !== agenda.instanceId ||
+    install.payload?.serverId !== serverId ||
+    install.payload?.placement !== "root" ||
     !isFiniteNonNegativeInteger(otherRunSlots) ||
     otherRunSlots === 0 ||
     !visibleCardIsAgenda(input, agenda) ||
@@ -158,6 +170,7 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
         server.id === serverId ||
         !server.id.startsWith("remote_") ||
         server.ice.length !== 0 ||
+        server.statuses?.some((status) => status.kind === "run_prohibited") ||
         server.root.length !== 1
       )
         return [];
@@ -179,7 +192,7 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
     paidRemoteCompletesFloodExposure(
       input,
       agenda,
-      installActionId,
+      install,
       serverId,
       pointsAfterNewAgenda,
       otherRunSlots - 1,
@@ -190,27 +203,17 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
 function paidRemoteCompletesFloodExposure(
   input: AiDecisionInput,
   agenda: VisibleCard,
-  installActionId: string,
+  install: LegalAction,
   targetServerId: string,
   pointsAfterNewAgenda: number,
   runnerPreparationClicks: number,
 ): boolean {
   const view = input.playerView;
   const publicRig = view.opponent.rig;
-  const install = input.legalActions.find(
-    (action) => action.actionId === installActionId,
-  );
   if (
     !publicRig ||
-    !install ||
-    install.type !== "install_card" ||
-    install.source !== agenda.instanceId ||
-    install.payload?.serverId !== targetServerId ||
-    install.payload?.placement !== "root" ||
-    install.expiresAtStateVersion !== view.stateVersion ||
-    install.costs.reduce((total, cost) => total + (cost.clicks ?? 0), 0) !==
-      1 ||
-    install.costs.some((cost) => (cost.credits ?? 0) !== 0)
+    actionClickCost(install) !== 1 ||
+    actionCreditCost(install) !== 0
   )
     return false;
   const remainingCorpClicks = view.own.clicks - 1;
@@ -384,8 +387,8 @@ function fundedUnchangedRemoteCredits(
     return undefined;
   const affordable = input.legalActions.filter(
     (action) =>
-      action.costs.reduce((total, cost) => total + (cost.clicks ?? 0), 0) <=
-      remainingClicks,
+      actionMatchesCurrentDecision(input, action) &&
+      actionClickCost(action) <= remainingClicks,
   );
   const basicCredit = (action: LegalAction) =>
     action.type === "gain_credit" &&

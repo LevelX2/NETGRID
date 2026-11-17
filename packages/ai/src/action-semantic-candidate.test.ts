@@ -213,6 +213,42 @@ describe("buildActionSemanticCandidates", () => {
     ]);
   });
 
+  it("keeps all legal server options without inventing a selected run target", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("start_run", 0, {
+          targetRequirements: [
+            {
+              id: "server",
+              kind: "server",
+              side: "corp",
+              visibility: "public",
+              allowedServers: ["hq", "rd"],
+            },
+          ],
+        }),
+      ],
+    });
+
+    expect(candidate?.runProjectionSummary).toBeUndefined();
+    expect(candidate?.targetContext?.availableTargets?.map(
+      ({ targetId }) => targetId,
+    )).toEqual(["hq", "rd"]);
+  });
+
+  it("preserves each exact target of a multi-subroutine break", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("break_subroutine", 0, {
+          payload: { iceId: "visible-ice", subroutineIndexes: "0,2" },
+        }),
+      ],
+    });
+
+    expect(candidate?.targetContext?.selectedTargets.map(({ targetId }) => targetId))
+      .toEqual(["visible-ice:subroutine:0", "visible-ice:subroutine:2"]);
+  });
+
   it("adds controlled basic action semantics without card hints", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [

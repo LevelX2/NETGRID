@@ -1,4 +1,4 @@
-import { createAiActionEntrypointsComposition } from "./ai-action-entrypoints-composition";
+import { createAiActionEntrypoints } from "./ai-action-entrypoints";
 import {
   createSemanticRuntimeDecisionContext,
   type SemanticRuntimeDecisionContextDependencies,
@@ -13,8 +13,7 @@ export function createSemanticRuntimeEntrypointsComposition(
   const { chooseSemanticRuntimeAction } =
     createSemanticRuntimeDecisionContext(dependencies);
 
-  const entrypoints = createAiActionEntrypointsComposition({
-    ...dependencies,
+  const entrypoints = createAiActionEntrypoints({
     chooseSemanticRuntimeAction,
   });
 

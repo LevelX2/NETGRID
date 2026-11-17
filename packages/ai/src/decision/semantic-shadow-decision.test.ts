@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-diagnostic";
 import {
   buildActionSemanticCandidates,
   type ActionSemanticCandidate,

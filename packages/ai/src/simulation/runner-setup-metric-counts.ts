@@ -45,9 +45,17 @@ export function countRunnerPressureWithinOwnActions(
   }).length;
 }
 
+type BooleanSimulationMetric = {
+  [Key in keyof AiSimulationActionSequenceEntry]-?: NonNullable<
+    AiSimulationActionSequenceEntry[Key]
+  > extends boolean
+    ? Key
+    : never;
+}[keyof AiSimulationActionSequenceEntry];
+
 export function countRunnerEconomySetupMetric(
   sequence: AiSimulationActionSequenceEntry[],
-  metric: keyof AiSimulationActionSequenceEntry,
+  metric: BooleanSimulationMetric,
 ): number {
   return sequence.filter((entry) => entry[metric] === true).length;
 }

@@ -16,7 +16,12 @@ import {
 import { isTrashUnlessRunnerPaysSubroutine } from "./encounter-subroutine";
 import { currentRunFuturePathAssessment } from "./runner-future-path-assessment";
 import { runnerHasInstalledPrograms } from "./runner-installed-program";
-import { parseSubroutineIndexes } from "./subroutine-indexes";
+import {
+  breakSubroutineIndexesForAction,
+  parseSubroutineIndexes,
+} from "./subroutine-indexes";
+import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
+import { serverBlocksStealthBitPayments } from "./server-target";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -52,28 +57,25 @@ export function encounterRunRemainderEffectAssessment(
   projectedSubroutineIndexes?: readonly number[],
 ): EncounterRunRemainderEffectAssessment {
   const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
-  const explicitBreakIndex =
-    action?.type === "break_subroutine" &&
-    typeof action.payload?.subroutineIndex === "number"
-      ? action.payload.subroutineIndex
+  const explicitBreakIndexes =
+    action?.type === "break_subroutine"
+      ? [...breakSubroutineIndexesForAction(action)]
       : undefined;
   const remainingIndexes =
     quote?.subroutines.some((subroutine) => subroutine.unbrokenRunEffect) &&
-    explicitBreakIndex === undefined &&
+    explicitBreakIndexes === undefined &&
     !projectedSubroutineIndexes
       ? currentEncounterUnbrokenSubroutineIndexes(input)
       : undefined;
   const targetIndexes =
     projectedSubroutineIndexes ??
-    (explicitBreakIndex !== undefined
-      ? [explicitBreakIndex]
-      : (quote?.subroutines
-          .map((subroutine, index) =>
-            subroutine.unbrokenRunEffect && remainingIndexes?.has(index)
-              ? index
-              : undefined,
-          )
-          .filter((index): index is number => index !== undefined) ?? []));
+    explicitBreakIndexes ??
+    quote?.subroutines.flatMap((subroutine, index) =>
+      subroutine.unbrokenRunEffect && remainingIndexes?.has(index)
+        ? [index]
+        : [],
+    ) ??
+    [];
   const effects: RunRemainderEffectEntry[] = targetIndexes.flatMap((index) => {
     const subroutine = quote?.subroutines[index];
     if (!subroutine?.unbrokenRunEffect) return [];
@@ -81,7 +83,7 @@ export function encounterRunRemainderEffectAssessment(
     const subroutineType = subroutine.type;
     if (currentEncounterNextOnlySubroutineHasNoTarget(input, subroutineType))
       return [];
-    return effect ? [{ index, effect, subroutineType }] : [];
+    return [{ index, effect, subroutineType }];
   });
   if (!quote || effects.length === 0) {
     return {
@@ -244,14 +246,23 @@ function deferredFullBreakIndexes(input: AiDecisionInput): number[] {
   const next = remaining.at(-1);
   if (!next) return [];
   const rig = input.playerView.own.rig ?? [];
+  const server = input.playerView.servers.find(
+    ({ id }) => id === run.attackedServerId,
+  );
+  if (!server) return [];
+  const liquidCredits = input.playerView.own.credits;
   const path = assessKnownRezzedIcePath(
     [...remaining, current],
     rig,
     runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
+      liquidCredits + visibleRunnerRunOnlyCredits(run),
       rig,
+      {
+        liquidCredits,
+        excludeStealthCredits: serverBlocksStealthBitPayments(server),
+      },
     ),
-    [],
+    server.root,
     input.playerView.opponent.credits,
     {
       ...currentRunPathContext(input),

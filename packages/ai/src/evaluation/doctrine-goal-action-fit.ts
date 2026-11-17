@@ -1,5 +1,5 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-diagnostic";
 import {
   scoreActionGoalFit,
   type ActionGoalFit,

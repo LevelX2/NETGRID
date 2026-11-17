@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util";
 import type { AiDecision, AiDecisionInput, Side } from "@netgrid/shared";
 
 export type AiDecisionCheckpointWarmupPolicy = "strict" | "rebase";
@@ -75,6 +76,14 @@ export function replayAiDecisionCheckpointWarmup(params: {
     if (persisted.actionId !== preview.actionId) {
       throw new Error(
         `warmup_nondeterministic_choice:decision=${row.decisionIndex}:preview=${preview.actionId}:persisted=${persisted.actionId}`,
+      );
+    }
+    if (
+      !isDeepStrictEqual(persisted.selectedChoices, preview.selectedChoices)
+    ) {
+      throw new Error(
+        "warmup_nondeterministic_selected_options:decision=" +
+          row.decisionIndex,
       );
     }
     compatibleSuffixDecisions += 1;

@@ -1,5 +1,8 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import type {
+  ActionSemanticCandidate,
+  LegalTargetSummary,
+} from "../action-semantic-candidate-types";
 import type {
   SemanticDecisionFrame,
   TacticalGoalLike,
@@ -175,19 +178,28 @@ function evidenceForCandidate(candidate: ActionSemanticCandidate): string[] {
 function targetServerForCandidate(
   candidate: ActionSemanticCandidate,
 ): string | undefined {
-  const selected = candidate.targetContext?.selectedTargets.find(
-    (target) => target.targetKind === "server" || target.targetZone,
+  const boundServer = normalizeServerId(
+    candidate.runProjectionSummary?.serverId,
   );
-  const available = candidate.targetContext?.availableTargets?.find(
-    (target) => target.targetKind === "server" || target.targetZone,
-  );
-  const raw =
-    candidate.runProjectionSummary?.serverId ??
-    selected?.targetZone ??
-    selected?.targetId ??
-    available?.targetZone ??
-    available?.targetId;
-  return normalizeServerId(raw);
+  if (boundServer) return boundServer;
+
+  const targetServerIds = (targets: readonly LegalTargetSummary[] = []) =>
+    new Set(
+      targets.flatMap((target) => {
+        const id =
+          target.targetKind === "server"
+            ? (normalizeServerId(target.targetId) ??
+              normalizeServerId(target.targetZone))
+            : normalizeServerId(target.targetZone);
+        return id ? [id] : [];
+      }),
+    );
+  const selected = targetServerIds(candidate.targetContext?.selectedTargets);
+  const ids =
+    selected.size > 0
+      ? selected
+      : targetServerIds(candidate.targetContext?.availableTargets);
+  return ids.size === 1 ? [...ids][0] : undefined;
 }
 
 function hasVisiblePunishBasis(candidate: ActionSemanticCandidate): boolean {

@@ -16,7 +16,7 @@ import {
   applySimulationEngineSelection,
   simulationEngineRuntimeOptions,
 } from "../simulation/engine-selection";
-import { buildDeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
+import { buildDeckDoctrineV2Diagnostic } from "../deck-doctrine-diagnostic";
 import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,

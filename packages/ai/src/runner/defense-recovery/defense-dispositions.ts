@@ -1,4 +1,5 @@
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunWindowSignal } from "../../plans/runner-tactical-plan-contracts";
 import type { RunnerDefenseSignals } from "./defense-types";
@@ -123,7 +124,9 @@ export function runnerDefenseSafetyDispositions(params: {
           "runner.defense_and_recovery",
           "runner_optional_run_would_enable_known_next_corp_turn_flatline",
         );
-      } else if (runnerNextCorpTurnGripBlocksAction(input, candidate, signals)) {
+      } else if (
+        runnerNextCorpTurnGripBlocksAction(input, candidate, signals)
+      ) {
         add(
           id,
           "runner.defense_and_recovery",
@@ -211,7 +214,9 @@ function handDeltaForVoluntaryAction(
       : 0;
   const projection = candidate.economyProjection;
   const action = input.legalActions.find(
-    (legal) => legal.actionId === candidate.actionId,
+    (legal) =>
+      legal.actionId === candidate.actionId &&
+      actionMatchesCurrentDecision(input, legal),
   );
   // An exact search-to-Grip play opens a mandatory one-card selection. The
   // native offer certifies a target exists. This move is outside draw taxes.
@@ -231,7 +236,12 @@ function handDeltaForVoluntaryAction(
       : 0;
   let selfDamage = 0;
   for (const cost of candidate.costProfile.selfDamage ?? []) {
-    if (typeof cost.amount !== "number") return -Infinity;
+    if (
+      typeof cost.amount !== "number" ||
+      !Number.isSafeInteger(cost.amount) ||
+      cost.amount < 0
+    )
+      return -Infinity;
     selfDamage += cost.amount;
   }
   if (safeDraw <= 0) return searchReturn - handCardSpent - selfDamage;
@@ -255,9 +265,6 @@ function isBoundSingleSearchToGripPlay(
     candidate;
   if (
     action.type !== "play_event" ||
-    action.side !== input.side ||
-    action.timingPoint !== input.playerView.timingPoint ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.source !== sourceCardInstanceId ||
     candidate.abilityBindingMethod !== "canonical_capability_id" ||
     !sourceDefinitionId ||
@@ -276,7 +283,9 @@ function isBoundSingleSearchToGripPlay(
   }
   const ability = cardSpecPlanningCardByDefinitionId(
     sourceDefinitionId,
-  )?.planning.engine.abilities?.find((entry) => entry.capabilityKey === abilityKey);
+  )?.planning.engine.abilities?.find(
+    (entry) => entry.capabilityKey === abilityKey,
+  );
   return (
     ability?.kind === "on_play" &&
     ability.effects.length === 1 &&

@@ -6,6 +6,10 @@
     "playerView": {
       "side": "corp",
       "runnerNextTurnCreditClicks": 3,
+      "corpMandatoryBaseDrawQuote": {
+        "baseCount": 1,
+        "virusDrawCount": 0
+      },
       "stateVersion": 469,
       "turnSerial": 64,
       "traceRulesProfile": "modern_open",

@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import { serverBlocksStealthBitPayments } from "../runtime/server-target";
 import { visibleIcePathTraceContext } from "./trace-rules-profile-planning";
 import type { VisibleDeflectorContext } from "./visible-run-analysis-contracts";
 
@@ -47,6 +48,9 @@ export function currentRunPathContext(
   }
   return {
     ...visibleIcePathTraceContext(input),
+    excludeStealthTraceCredits: serverBlocksStealthBitPayments(
+      input.playerView.servers.find(({ id }) => id === run.attackedServerId),
+    ),
     ...(run.runTraceLinkBonus !== undefined
       ? { runTraceLinkBonus: run.runTraceLinkBonus }
       : {}),

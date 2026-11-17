@@ -164,6 +164,23 @@ describe("conditional counter development and its memory milestone", () => {
     expect(next.runner.credits).toBe(9);
     expect(next.runner.memoryUsed).toBe(2);
   });
+  it("cannot certify a memory fit without the current Runner memory facts", () => {
+    const { input, evaluation } = assess(idleFixture());
+    delete input.playerView.own.memoryUsed;
+
+    expect(
+      assessSuccessfulRunCounterDevelopment(
+        input,
+        evaluation,
+        evaluateRunnerRunTargets({ input }),
+        buildRunnerEconomyPosture({ input }),
+      ),
+    ).toMatchObject({
+      admitted: false,
+      evidenceCodes: ["runner_success_counter_deferred_missing_memory_quote"],
+    });
+  });
+
   it("prepares memory for visible support after all breaker coverage is installed", () => {
     let s = idleFixture();
     s.runner.credits = 15;

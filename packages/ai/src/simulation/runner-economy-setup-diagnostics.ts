@@ -1,4 +1,4 @@
-import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
+import { quoteRunnerRunTarget } from "../runner-run-target-evaluation";
 import {
   type AiDecisionInput,
   type GameState,
@@ -155,12 +155,12 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
     ).draw;
     const runBelowKnownPathCost =
       runStarted &&
-      evaluateRunnerRunTargets({ input }).some(
-        (target) =>
-          target.actionId === action.actionId &&
-          target.targetServerId === targetServerId &&
-          target.pathPassability === "blocked_unpayable",
-      );
+      targetServerId !== undefined &&
+      quoteRunnerRunTarget({
+        input,
+        runActionId: action.actionId,
+        targetServerId,
+      })?.target.pathPassability === "blocked_unpayable";
     const installsBreaker =
       action.type === "install_card" &&
       rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"]);

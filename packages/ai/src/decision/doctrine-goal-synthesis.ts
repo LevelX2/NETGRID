@@ -1,7 +1,7 @@
 import type {
   DeckDoctrineV2Diagnostic,
   DeckDoctrineV2StrategyDiagnostic,
-} from "../deck-doctrine-strategy";
+} from "../deck-doctrine-diagnostic";
 import type { TacticalGoalLike } from "./semantic-decision-frame";
 
 const DOCTRINE_SCORE_NORMALIZATION_DIVISOR = 10;

@@ -6,6 +6,8 @@ import type {
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import { subroutineOnlyAffectsNextEncounter } from "../run-analysis/visible-run-hazards";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
+import { currentRunRemainingIce } from "./current-encounter";
+import { serverBlocksStealthBitPayments } from "./server-target";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -26,14 +28,18 @@ export function currentRunFuturePathAssessment(
     (candidate) => candidate.id === run.position?.serverId,
   );
   if (!server) return { blocked: false };
+  const futureRig = runnerRigAfterEncounter(input.playerView.own.rig ?? []);
   const assessment = assessKnownRezzedIcePath(
-    server.ice.slice(0, Math.max(0, run.position.iceIndex)),
-    runnerRigAfterEncounter(input.playerView.own.rig ?? []),
+    currentRunRemainingIce(input),
+    futureRig,
     runnerRunPathCreditBudgetWithVisiblePools(
       input.playerView.own.credits +
         visibleRunnerRunOnlyCredits(input.playerView.run),
-      input.playerView.own.rig ?? [],
-      { liquidCredits: input.playerView.own.credits },
+      futureRig,
+      {
+        liquidCredits: input.playerView.own.credits,
+        excludeStealthCredits: serverBlocksStealthBitPayments(server),
+      },
     ),
     server.root,
     input.playerView.opponent.credits,

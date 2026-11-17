@@ -64,6 +64,24 @@ describe("decision checkpoint warmup", () => {
     );
   });
 
+  it("rejects changed option order under the same resolve action", () => {
+    expect(() =>
+      replayAiDecisionCheckpointWarmup({
+        rows: [row(4, "same")],
+        policy: "rebase",
+        inputForStateVersion: input,
+        choose: (_value, persist) => ({
+          ...decision("same"),
+          selectedChoices: {
+            choiceId: "choice",
+            selectedOptionIds: persist ? ["b", "a"] : ["a", "b"],
+          },
+        }),
+        resetMemory: vi.fn(),
+      }),
+    ).toThrow("warmup_nondeterministic_selected_options:decision=4");
+  });
+
   it("rejects a warmup input for a different actor side", () => {
     expect(() =>
       replayAiDecisionCheckpointWarmup({
@@ -105,7 +123,7 @@ function row(decisionIndex: number, selectedActionId: string) {
   };
 }
 
-function decision(actionId: string): AiDecision {
+function decision(actionId: string): Extract<AiDecision, { actionId: string }> {
   return {
     actionId,
     reasonCode: "test",
