@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseRunnerAction } from "./index";
 import { evaluateRunnerRunTargets } from "./runner-run-target-evaluation";
@@ -50,15 +51,15 @@ function brokerAbilityPayload(
   route: "build" | "cash_out",
   sourceCardInstanceId = "366",
 ) {
-  const capabilityKey =
+  const key =
     route === "build" ? "store_credits" : "withdraw_credits";
   return {
     cardId: sourceCardInstanceId,
     sourceDefinitionId: 366,
     cardImplementationCapabilityBindingKind:
       "card_spec_capability_key" as const,
-    cardImplementationAbilityId: `366:${capabilityKey}`,
-    cardImplementationAbilityKey: capabilityKey,
+    cardImplementationAbilityId: canonicalCapabilityId(366, capabilityKey(key)),
+    cardImplementationAbilityKey: key,
     ...(route === "build"
       ? { cardImplementationAddsHostedCredits: true, hostedCreditAddAmount: 3 }
       : { cardImplementationTakesHostedCredits: true }),
@@ -102,7 +103,7 @@ function actionAlternative(decision: RunnerDecision, actionId: string) {
 /** The hand-built plain agenda has no self-cost or installed modifier. */
 function bindPlainRemoteAgendaQuote(input: ReturnType<typeof aiInput>): void {
   const remote = input.playerView.servers.find(
-    (entry) => entry.id === "remote_1",
+    (entry) => entry.id === "r1",
   )!;
   const agenda = remote.root.find(
     (card) => card.definitionId === 588,
@@ -283,7 +284,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "run-hq",
@@ -301,7 +302,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [wallOfStatic("491")],
         [visibleCard(588, "corp", "agenda")],
       ),
@@ -619,7 +620,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
     ]);
     input.playerView.own.credits = 6;
@@ -630,7 +631,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [visibleCard(588, "corp", "agenda")]),
+      server("r1", [], [visibleCard(588, "corp", "agenda")]),
     ];
     bindPlainRemoteAgendaQuote(input);
 
@@ -1061,7 +1062,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "mantis",
@@ -1074,8 +1075,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           payload: {
             cardId: "mantis-card",
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityId:
-              "311:abilities_on_play_search_stack_to_grip",
+            cardImplementationAbilityId: canonicalCapabilityId(311, capabilityKey("abilities_on_play_search_stack_to_grip")),
             cardImplementationAbilityKey: "abilities_on_play_search_stack_to_grip",
             cardImplementationEffectKind: "search_stack_to_grip",
             cardImplementationSearchFilter: "any_card",
@@ -1104,7 +1104,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       planKind: "runner.rig_and_coverage",
       capability: "search_answer_breaker_wall",
       priorityClass: "P4",
-      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
+      assessmentEvidence: "runner_known_remote_coverage_project:r1",
     });
     expect(actionAlternative(decision, "mantis")?.whyChosen).toEqual(
       expect.arrayContaining([
@@ -1130,7 +1130,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "prepare-dwarf",
@@ -1233,7 +1233,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "bodyweight",
@@ -1271,7 +1271,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
       priorityClass: "P4",
-      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
+      assessmentEvidence: "runner_known_remote_coverage_project:r1",
     });
     expect(decision.decisionDebug?.selectedActionType).toBe("play_event");
   });
@@ -1284,7 +1284,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "install-short-circuit",
@@ -1316,7 +1316,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       planKind: "runner.rig_and_coverage",
       capability: "setup_search_engine_breaker_wall",
       priorityClass: "P4",
-      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
+      assessmentEvidence: "runner_known_remote_coverage_project:r1",
     });
     expect(decision.decisionDebug?.selectedActionType).toBe("install_card");
   });
@@ -1329,7 +1329,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "install-short-circuit",
@@ -1361,7 +1361,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       planKind: "runner.rig_and_coverage",
       capability: "setup_search_engine_breaker_wall",
       priorityClass: "P4",
-      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
+      assessmentEvidence: "runner_known_remote_coverage_project:r1",
     });
   });
 
@@ -1373,7 +1373,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "short-circuit-search",
@@ -1390,8 +1390,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityKey:
               "abilities_activated_runner_main_search_stack_to_grip",
-            cardImplementationAbilityId:
-              "389:abilities_activated_runner_main_search_stack_to_grip",
+            cardImplementationAbilityId: canonicalCapabilityId(389, capabilityKey("abilities_activated_runner_main_search_stack_to_grip")),
             cardImplementationEffectKind: "search_stack_to_grip",
             cardImplementationSearchFilter: "program",
           },
@@ -1462,7 +1461,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "bodyweight",
@@ -1500,7 +1499,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
       priorityClass: "P4",
-      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
+      assessmentEvidence: "runner_known_remote_coverage_project:r1",
     });
   });
 
@@ -1512,7 +1511,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -1544,7 +1543,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
       priorityClass: "P4",
-      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
+      assessmentEvidence: "runner_known_remote_coverage_project:r1",
     });
     expect(actionAlternative(decision, "draw")?.whyChosen).toEqual(
       expect.arrayContaining([
@@ -1562,7 +1561,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "run-archives",
@@ -1590,7 +1589,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
       priorityClass: "P4",
-      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
+      assessmentEvidence: "runner_known_remote_coverage_project:r1",
     });
     expect(archivesAlternative?.whyNot).toEqual(
       expect.arrayContaining([
@@ -2063,8 +2062,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
             sourceDefinitionId: 320,
             gainCreditsAmount: 9,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityId:
-              "320:abilities_on_play_gain_credits",
+            cardImplementationAbilityId: canonicalCapabilityId(320, capabilityKey("abilities_on_play_gain_credits")),
             cardImplementationAbilityKey: "abilities_on_play_gain_credits",
           },
         },
@@ -2104,8 +2102,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
             sourceDefinitionId: 307,
             drawCardsAmount: 3,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityId:
-              "307:abilities_on_play_draw_cards",
+            cardImplementationAbilityId: canonicalCapabilityId(307, capabilityKey("abilities_on_play_draw_cards")),
             cardImplementationAbilityKey: "abilities_on_play_draw_cards",
           },
         },
@@ -2223,14 +2220,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
     ]);
     secondInput.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [visibleCard(588, "corp", "agenda")]),
+      server("r1", [], [visibleCard(588, "corp", "agenda")]),
     ];
     bindPlainRemoteAgendaQuote(secondInput);
     observeFixtureBasicAction(firstInput, secondInput, "gain-credit");
@@ -2424,7 +2421,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2438,7 +2435,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [visibleCard(588, "corp", "agenda")]),
+      server("r1", [], [visibleCard(588, "corp", "agenda")]),
     ];
     bindPlainRemoteAgendaQuote(input);
 
@@ -2469,7 +2466,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2484,7 +2481,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [{ instanceId: "hidden-remote", known: false }]),
+      server("r1", [], [{ instanceId: "hidden-remote", known: false }]),
     ];
     input.eventTail = [
       {
@@ -2631,7 +2628,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "run-hq",
@@ -2649,7 +2646,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [wallOfStatic("onr_v1_279.wall-of-static.fixture")],
         [visibleCard(588, "corp", "agenda")],
       ),
@@ -2670,7 +2667,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction(
         "run-hq",

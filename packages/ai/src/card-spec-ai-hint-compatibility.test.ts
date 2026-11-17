@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cs06PlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
@@ -8,7 +9,7 @@ const scenarioRef =
   "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported";
 
 const cases: Array<{
-  id: string;
+  id: CardDefinitionId;
   roles: string[];
   risks: string[];
   values: Record<string, number>;
@@ -190,7 +191,7 @@ const signalCases: Record<
     requiredMechanics: string[];
   }
 > = {
-  onr_v1_154_broker: {
+  366: {
     functionSignals: [
       "economy.action",
       "economy.action_credit",
@@ -364,7 +365,7 @@ const signalCases: Record<
       "trash_on_access",
     ],
   },
-  onr_proteus_020_digiconda: {
+  78: {
     functionSignals: [
       "corp_ice.end_run",
       "corp_ice.net_damage",
@@ -697,7 +698,7 @@ describe("CS06 effective AI hint compatibility", () => {
   it.each(Object.entries(signalCases))(
     "keeps the full semantic signal surface exact for %s",
     (id, expected) => {
-      const hint = requiredHint(id);
+      const hint = requiredHint(Number(id));
       expect(hint.functionSignals ?? []).toEqual(expected.functionSignals);
       expect(hint.tacticSignals ?? []).toEqual(expected.tacticSignals);
       expect(hint.actionTacticSignals ?? []).toEqual(
@@ -788,7 +789,7 @@ describe("CS06 effective AI hint compatibility", () => {
   });
 });
 
-function requiredHint(id: string): AiCardHint {
+function requiredHint(id: CardDefinitionId): AiCardHint {
   const hint = AI_HINTS_BY_CARD.get(id);
   if (!hint) throw new Error(`missing effective hint: ${id}`);
   return hint;
