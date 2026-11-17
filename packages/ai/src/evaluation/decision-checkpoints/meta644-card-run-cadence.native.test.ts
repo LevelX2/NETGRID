@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import type { CreateGameConfig, PlayerAction } from "@netgrid/shared";
-import { applyAction, createGame, getPlayerView } from "@netgrid/engine";
+import { applyAction, createGame, getPlayerView, hashState } from "@netgrid/engine";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -12,6 +12,7 @@ import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
+import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 
 const fixture = JSON.parse(
   readFileSync(
@@ -21,6 +22,10 @@ const fixture = JSON.parse(
 ) as {
   config: CreateGameConfig;
   actions: PlayerAction[];
+  setupArrangement: PostSetupDeckOrder;
+  initialStateHash: string;
+  finalStateHash: string;
+  prefixStateHashes: string[];
   checkpoint: {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
@@ -31,18 +36,22 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 function replayInput() {
   let state = createGame(fixture.config);
-  for (const action of fixture.actions) {
+  expect(hashState(state)).toBe(fixture.initialStateHash);
+  expect(fixture.prefixStateHashes).toHaveLength(fixture.actions.length);
+  for (const [index, action] of fixture.actions.entries()) {
     const next = applyAction(state, action);
     if (!next.ok)
       throw new Error(
         `native_prefix_rejected:${action.actionId}:${next.error.code}`,
       );
     state = next.state;
+    if (index === 1) applyPostSetupDeckOrder(state, fixture.setupArrangement);
+    expect(hashState(state)).toBe(fixture.prefixStateHashes[index]);
   }
+  expect(hashState(state)).toBe(fixture.finalStateHash);
   const playerView = getPlayerView(state, "runner");
   const captured = structuredClone(fixture.checkpoint.input);
-  // Engine replay regenerates public facts. No recorded event is patched or
-  // assigned the old checkpoint hash: AI turn-plan receipts are not replayed.
+  // The replayed PlayerView supplies the public bindings to the AI DTO.
   const input = {
     ...captured,
     ...buildAiDecisionInputDto({

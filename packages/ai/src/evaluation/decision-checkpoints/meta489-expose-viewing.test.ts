@@ -19,6 +19,7 @@ import {
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { applyPostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 
 const read = (name: string) =>
   JSON.parse(
@@ -70,6 +71,16 @@ function checkpoint() {
     seed: "current-smarteye-viewing",
     runnerDeck,
     corpDeck,
+  });
+  const runnerGrip = ["c23t", "c3o9", "c1pl", "c3pf", "c3oa"];
+  const gripIds = new Set(runnerGrip);
+  applyPostSetupDeckOrder(state, {
+    runnerGrip,
+    runnerStack: [...state.runner.grip, ...state.runner.stack].filter(
+      (id) => !gripIds.has(id),
+    ),
+    corpHq: state.corp.hq,
+    corpRd: state.corp.rd,
   });
   state = apply(state, "corp", "corp.mandatory_draw");
   RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
