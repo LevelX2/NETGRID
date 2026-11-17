@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { VisibleCard } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import type { CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
@@ -9,23 +10,23 @@ describe("visibleBreakerRoles", () => {
   it("derives breaker roles from visible subtypes instead of demo definition ids", () => {
     expect(
       visibleBreakerRoles(
-        visibleProgram("custom-fracter", ["Icebreaker", "Fracter"]),
+        visibleProgram(syntheticCardDefinitionId("custom-fracter"), ["Icebreaker", "Fracter"]),
       ),
     ).toEqual(["fracter"]);
     expect(visibleBreakerRoles(visibleProgram(597, []))).toEqual(
       [],
     );
     expect(
-      visibleBreakerRoles(visibleProgram("generic-breaker", ["Icebreaker"])),
+      visibleBreakerRoles(visibleProgram(syntheticCardDefinitionId("generic-breaker"), ["Icebreaker"])),
     ).toEqual(["icebreaker"]);
     expect(
       visibleBreakerRoles(
-        visibleProgram("spaced-killer", [" Icebreaker ", " Killer "]),
+        visibleProgram(syntheticCardDefinitionId("spaced-killer"), [" Icebreaker ", " Killer "]),
       ),
     ).toEqual(["killer"]);
     expect(
       visibleBreakerRoles(
-        visibleProgram("classic-worm", ["Icebreaker", "Worm"]),
+        visibleProgram(syntheticCardDefinitionId("classic-worm"), ["Icebreaker", "Worm"]),
       ),
     ).toEqual(["fracter"]);
   });
@@ -60,14 +61,15 @@ describe("visibleBreakerCardCanAddressIce", () => {
   });
 
   it("treats an effective structured ICE subtype as authoritative over alternate rules text", () => {
-    const pileDriver = visibleProgram("pile-driver", ["Icebreaker"]);
+    const pileDriver = visibleProgram(syntheticCardDefinitionId("pile-driver"), ["Icebreaker"]);
+    const creditBlocksId = syntheticCardDefinitionId("credit-blocks");
     const creditBlocks = {
-      ...visibleProgram("credit-blocks", ["Sentry"]),
+      ...visibleProgram(creditBlocksId, ["Sentry"]),
       type: "ice" as const,
       title: "Credit Blocks",
     };
     const visibleText = (card: VisibleCard) =>
-      card.definitionId === "credit-blocks"
+      card.definitionId === creditBlocksId
         ? "Sentry. End the run. May become a wall instead of a sentry."
         : "Break up to four wall subroutines on a single piece of ICE.";
 
@@ -87,11 +89,11 @@ describe("visibleBreakerCardCanAddressIce", () => {
   });
 });
 
-function visibleProgram(definitionId: number, subtypes: string[]): VisibleCard {
+function visibleProgram(definitionId: CardDefinitionId, subtypes: string[]): VisibleCard {
   return {
     instanceId: `${definitionId}-instance`,
     definitionId,
-    title: definitionId,
+    title: String(definitionId),
     type: "program",
     known: true,
     owner: "runner",
@@ -105,13 +107,14 @@ function canAddress(
   iceText: string,
   breakerText = "Break one ice subroutine.",
 ): boolean {
+  const iceDefinitionId = syntheticCardDefinitionId("visible-ice");
   return visibleBreakerCardCanAddressIce(
-    visibleProgram("semantic-breaker", ["Icebreaker"]),
-    visibleProgram("visible-ice", []),
+    visibleProgram(syntheticCardDefinitionId("semantic-breaker"), ["Icebreaker"]),
+    visibleProgram(iceDefinitionId, []),
     {
       visibleBreakerRoles: () => roles,
       visibleCardText: (card) =>
-        card.definitionId === "visible-ice"
+        card.definitionId === iceDefinitionId
           ? `${iceText}. End the run.`
           : breakerText,
     },

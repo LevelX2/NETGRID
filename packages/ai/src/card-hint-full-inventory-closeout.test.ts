@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
 
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 
@@ -33,7 +34,7 @@ describe("AI card hint full-inventory closeout", () => {
 
   it("keeps synthetic fixtures free of unrelated strategy roles", () => {
     const hints = hintById();
-    const plans = (cardId: string) => hints.get(cardId)?.planRoles;
+    const plans = (cardId: CardDefinitionId) => hints.get(cardId)?.planRoles;
 
     expect(plans(3)).toEqual([]);
     expect(plans(587)).toEqual([]);
