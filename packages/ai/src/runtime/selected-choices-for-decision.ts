@@ -39,10 +39,10 @@ import type {
 import type { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
 import { isExactScoreRecoveryChoiceOwner } from "../corp/score/score-recovery-choice-owner";
 import { isExactDefenseRecoveryChoiceOwner } from "../corp/defense/defense-recovery-choice-owner";
+import { selectedCorpDelayedSuccessOptionId } from "../corp/defense/delayed-success-choice-binding";
 import {
   selectedCorpScoreAdvancementOptionId,
   residentCorpScoredAgendaHqShuffleBinding,
-  selectedCorpDelayedSuccessOptionId,
   selectedCorpSatelliteMonitorsStartOptionId,
   selectedCorpScoredAgendaFreeRezOptionId,
   selectedCorpScoredAgendaIceMarkOptionId,
@@ -1555,10 +1555,13 @@ export function selectedChoicesForDecision(
       choice,
       latestTraceContext(input),
     );
-    return resolved(
-      selectedOptionId !== undefined ? [selectedOptionId] : [],
-      "post_bid_link",
-    );
+    if (selectedOptionId === undefined)
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "The current post-bid Trace choice has no selectable pass or quoted Link option.",
+      );
+    return resolved([selectedOptionId], "post_bid_link");
   }
   if (choice.source.endsWith(":corp_payment")) {
     const selectedOptionId = choice.options

@@ -1,5 +1,4 @@
 import {
-  AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   type AiDecision,
   type AiDecisionInput,
   type AiTurnPlanningDebug,
@@ -29,6 +28,11 @@ import {
 } from "./plan-route";
 import { runnerCoveragePlanHandDisposition } from "../runner/rig-coverage/coverage-plan-module";
 import { runnerDelayedInstallReplanningBoundary } from "./runner-delayed-install-replanning-boundary";
+import { debugForRunnerPlanner } from "./runner-turn-planner-debug";
+import {
+  boundedRunnerTurnUtility,
+  runnerEvaluationValues,
+} from "./runner-turn-planner-values";
 import {
   buildRunnerTurnPlanningCoverageReport,
   runnerTurnPlanningModuleCoverage,
@@ -234,7 +238,7 @@ export function prepareRunnerTurnPlanner(params: {
         selectedLine,
         liveActionId,
         selectedHead,
-        candidates: params.context.actionCandidates,
+        plannerSchemaVersion: RUNNER_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
         authorityMode: params.authorityMode ?? "shadow",
       });
       return {
@@ -379,12 +383,23 @@ function headsForRoute(params: {
     allowEngineOnlyTargetRequirements:
       params.route.instance.moduleId === "runner.expose_information",
   });
+  if (invocations.length === 0) return [];
   const rootPlanInstanceId = findRootPlanInstanceId(
     params.route.instance.instanceId,
     params.portfolio,
   );
   const campaignCapable =
     moduleCoverage.horizonCapability === "campaign_capable";
+  const cleanupProjection = runnerCandidateCleanupProjection(
+    params.input,
+    params.entryFrame,
+    params.route.candidate,
+  );
+  const evaluationValues = runnerEvaluationValues(
+    params.route.instance.moduleId,
+    params.route.assessment.withinClassValue + params.route.stepValue,
+    cleanupProjection.handQualityAdjustment,
+  );
   return invocations.map((invocation) => {
     const nextMilestoneId = params.route.step.capability.capabilityId;
     const stepFingerprint = turnPlanningFingerprint(
@@ -439,31 +454,21 @@ function headsForRoute(params: {
         stepFingerprint,
         invocationKey: invocation.invocationKey,
         quoteIds: campaignQuote ? [campaignQuote.quoteId] : [],
-        safetyPolicyVersion: "runner-turn-planner-shadow-v1",
+        safetyPolicyVersion: RUNNER_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
         allRouteDefiningChoicesBound: true,
       },
       ...(campaignQuote ? { campaignQuote } : {}),
-      evaluationValues: runnerEvaluationValues(
-        params.input,
-        params.route,
-        params.entryFrame,
-        params.route.candidate,
-      ),
+      evaluationValues,
       valueClaims: runnerMilestoneValueClaims({
-        input: params.input,
+        evaluationValues,
         route: params.route,
-        entryFrame: params.entryFrame,
         rootPlanInstanceId,
         nextMilestoneId,
         invocationKey: invocation.invocationKey,
       }),
       evidenceCodes: [
         "runner_current_plan_module_head",
-        ...runnerCandidateCleanupProjection(
-          params.input,
-          params.entryFrame,
-          params.route.candidate,
-        ).evidenceCodes,
+        ...cleanupProjection.evidenceCodes,
         `runner_vertical_slice:${moduleCoverage.ownerKind}`,
         ...(params.route.continuation
           ? [
@@ -482,20 +487,13 @@ function headsForRoute(params: {
 }
 
 function runnerMilestoneValueClaims(params: {
-  input: AiDecisionInput;
+  evaluationValues: Record<string, number>;
   route: PlanSchedulerPlanningRouteCandidate;
-  entryFrame: ProjectedDecisionFrame;
   rootPlanInstanceId: string;
   nextMilestoneId: string;
   invocationKey: string;
 }): TurnPlanningHeadCandidate["valueClaims"] {
-  const evaluationValues = runnerEvaluationValues(
-    params.input,
-    params.route,
-    params.entryFrame,
-    params.route.candidate,
-  );
-  return Object.entries(evaluationValues).flatMap(([dimensionId, amount]) =>
+  return Object.entries(params.evaluationValues).flatMap(([dimensionId, amount]) =>
     amount === 0
       ? []
       : [
@@ -644,7 +642,7 @@ function runnerCampaignQuote(params: {
     currentMilestoneId: params.route.instance.milestone,
     nextMilestoneId: params.nextMilestoneId,
     commitment: "soft",
-    remainingValue: boundedUtility(
+    remainingValue: boundedRunnerTurnUtility(
       params.route.assessment.withinClassValue + params.route.stepValue,
     ),
     expiresAt: "next_own_turn",
@@ -671,7 +669,6 @@ function runnerCandidateCleanupProjection(
   entryFrame: ProjectedDecisionFrame,
   candidate: ActionSemanticCandidate,
 ): {
-  requiredDiscards: number;
   handQualityAdjustment: number;
   evidenceCodes: string[];
 } {
@@ -689,7 +686,6 @@ function runnerCandidateCleanupProjection(
       )
     ) {
       return {
-        requiredDiscards: 0,
         handQualityAdjustment: 0,
         evidenceCodes: [
           "runner_cleanup_projection:future_action_capacity_remains",
@@ -714,7 +710,6 @@ function runnerCandidateCleanupProjection(
       unavoidableProtectedDiscards * 2_000
     );
     return {
-      requiredDiscards,
       handQualityAdjustment,
       evidenceCodes: [
         "runner_cleanup_projection:certified_turn_end",
@@ -725,47 +720,10 @@ function runnerCandidateCleanupProjection(
     };
   } catch {
     return {
-      requiredDiscards: 0,
       handQualityAdjustment: 0,
       evidenceCodes: ["runner_cleanup_projection:not_certified"],
     };
   }
-}
-
-function runnerEvaluationValues(
-  input: AiDecisionInput,
-  route: PlanSchedulerPlanningRouteCandidate,
-  entryFrame: ProjectedDecisionFrame,
-  candidate: ActionSemanticCandidate,
-): Record<string, number> {
-  const ownerKind = runnerTurnPlanningModuleCoverage(
-    route.instance.moduleId,
-  )?.ownerKind;
-  const dimension = {
-    economy: "economy",
-    breaker: "defense",
-    defense: "defense",
-    development: "hand_quality",
-    run: "agenda_progress",
-    multiaccess: "agenda_progress",
-    agenda: "terminal_outcome",
-    resource: "flexibility",
-    information: "flexibility",
-    turn_completion: "flexibility",
-  }[ownerKind ?? "turn_completion"];
-  const cleanupProjection = runnerCandidateCleanupProjection(
-    input,
-    entryFrame,
-    candidate,
-  );
-  return {
-    [dimension]: boundedUtility(
-      route.assessment.withinClassValue + route.stepValue,
-    ),
-    ...(cleanupProjection.handQualityAdjustment !== 0
-      ? { hand_quality: cleanupProjection.handQualityAdjustment }
-      : {}),
-  };
 }
 
 function deduplicateHeadRecords<
@@ -1058,294 +1016,6 @@ function priorityCoverageForHead(
   };
 }
 
-function debugForRunnerPlanner(params: {
-  input: AiDecisionInput;
-  rulesContext: PlanningRulesContext;
-  stateIdentity: PlanningStateIdentity;
-  heads: TurnPlanningHeadCandidate[];
-  records: readonly RunnerPlanningHeadRecord[];
-  coverage: RunnerTurnPlanningCoverageReport;
-  search: ReturnType<typeof searchDeterministicRemainderTurnPlans>;
-  selectedLine: TurnRemainderSearchLine | undefined;
-  liveActionId: string;
-  selectedHead: TurnPlanningHeadCandidate | undefined;
-  candidates: readonly ActionSemanticCandidate[];
-  authorityMode: "shadow" | "cutover";
-}): AiTurnPlanningDebug {
-  const selectedLine = params.selectedLine;
-  const selectedBoundary =
-    selectedLine?.stopReason === "observation_boundary"
-      ? selectedLine.projectedFrame.pendingBoundary
-      : undefined;
-  const phaseId = selectedLine
-    ? turnPlanningFingerprint("runner-debug-phase", {
-        lineId: selectedLine.lineId,
-      })
-    : "runner-no-selected-line";
-  return {
-    schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
-    mode: params.authorityMode,
-    stateVersion: params.stateIdentity.stateVersion,
-    sideSafePlanningFingerprint:
-      params.stateIdentity.sideSafePlanningFingerprint,
-    planningRulesFingerprint: params.rulesContext.fingerprint,
-    turnKey: `runner:turn:${params.input.playerView.turnSerial ?? "unknown"}`,
-    candidateAudit: {
-      schemaVersion: "ai-turn-planning-candidate-audit-v1",
-      provenance: "persisted_at_decision",
-    },
-    heads: params.heads.map((head) => {
-      const record = params.records.find(
-        (entry) => entry.head.candidateId === head.candidateId,
-      );
-      const assessment = record?.route.assessment;
-      return {
-        candidateId: head.candidateId,
-        moduleId: head.moduleId,
-        rootPlanInstanceId: head.rootPlanInstanceId,
-        ...(record
-          ? { executorPlanInstanceId: record.route.instance.instanceId }
-          : {}),
-        actionId: head.currentBinding.actionId,
-        semanticActionType: head.invocation.semanticActionType,
-        invocationKey: head.invocation.invocationKey,
-        witnessValid:
-          head.executableWitness.sideSafePlanningFingerprint ===
-          params.stateIdentity.sideSafePlanningFingerprint,
-        selectedInLine:
-          selectedLine?.steps.some(
-            (step) => step.candidateId === head.candidateId,
-          ) === true,
-        rootEligible: (record?.dependencyCandidateIds.length ?? 0) === 0,
-        dependencyCandidateIds: [...(record?.dependencyCandidateIds ?? [])],
-        ...(assessment && record
-          ? {
-              assessment: {
-                requestedPriorityClass: assessment.priorityClaim.requestedClass,
-                effectivePriorityClass:
-                  assessment.priorityValidation.effectiveClass,
-                readiness: assessment.readiness,
-                intentFit: assessment.intentFit,
-                withinClassValue: assessment.withinClassValue,
-                stepValue: record.route.stepValue,
-                resourceGaps: assessment.resourceGaps.map((gap) => ({
-                  needId: gap.needId,
-                  capability: gap.capability,
-                  minimum: gap.minimum,
-                  available: gap.available,
-                  deadline: gap.deadline,
-                })),
-                blockers: assessment.blockers.map((blocker) => ({
-                  code: blocker.code,
-                  owner: blocker.owner,
-                  removable: blocker.removable,
-                })),
-                evidenceCodes: [...assessment.evidenceCodes],
-              },
-            }
-          : {}),
-      };
-    }),
-    selectedLine: {
-      lineId: selectedLine?.lineId ?? "runner-no-selected-line",
-      stopReason: debugStopReason(selectedLine?.stopReason),
-      projectedFrameKey:
-        selectedLine?.projectedFrame.projectedFrameKey ??
-        params.stateIdentity.sideSafePlanningFingerprint,
-      cursor: { phaseIndex: 0, nodeIndex: 0 },
-      phases: selectedLine
-        ? [
-            {
-              phaseId,
-              rootPlanInstanceId: selectedLine.rootPlanInstanceId,
-              rootModuleId:
-                params.selectedHead?.moduleId ?? "runner.complete_turn",
-              rootProvenance: "resident",
-              entryFrameKey: params.stateIdentity.sideSafePlanningFingerprint,
-              completionCode: `runner_turn_line:${selectedLine.nextMilestoneId}`,
-              transitionKind:
-                selectedLine.stopReason === "observation_boundary"
-                  ? "observation_boundary"
-                  : "projected_plan_discovery_required",
-              supportBindings: [],
-              nodes: selectedLine.steps.map((step, index) => {
-                const boundaryAfter =
-                  index === selectedLine.steps.length - 1 &&
-                  selectedLine.stopReason === "observation_boundary"
-                    ? (selectedBoundary?.boundaryKind ??
-                      debugBoundaryForSemantic(
-                        step.invocation.semanticActionType,
-                      ))
-                    : undefined;
-                return {
-                  nodeId: turnPlanningFingerprint("runner-debug-node", {
-                    lineId: selectedLine.lineId,
-                    index,
-                    candidateId: step.candidateId,
-                  }),
-                  semanticActionType: step.invocation.semanticActionType,
-                  ...(boundaryAfter ? { boundaryAfter } : {}),
-                };
-              }),
-            },
-          ]
-        : [],
-    },
-    shadowComparison: {
-      liveActionId: params.liveActionId,
-      ...(params.selectedHead
-        ? {
-            shadowActionId: params.selectedHead.currentBinding.actionId,
-            shadowRootPlanInstanceId: params.selectedHead.rootPlanInstanceId,
-          }
-        : {}),
-      agreement:
-        params.selectedHead?.currentBinding.actionId === params.liveActionId,
-      comparisonClass:
-        params.selectedHead?.currentBinding.actionId === params.liveActionId
-          ? "agreement"
-          : params.selectedHead
-            ? "different_current_head"
-            : "no_shadow_line",
-      twoStepChangedHead: false,
-    },
-    ...(selectedBoundary
-      ? {
-          boundary: {
-            kind: selectedBoundary.boundaryKind,
-            residualTurnValueBasis: selectedBoundary.residualTurnValueBasis,
-            optionalityUnit: selectedBoundary.postBoundaryOptionality.unit,
-            optionalityMinimum:
-              selectedBoundary.postBoundaryOptionality.minimum,
-            optionalityMaximum:
-              selectedBoundary.postBoundaryOptionality.maximum,
-          },
-        }
-      : {}),
-    coverage: {
-      status: params.coverage.status,
-      coveragePercent: params.coverage.coveragePercent,
-      legalActionCount: params.coverage.legalActionCount,
-      productiveActionCount: params.coverage.productiveActionCount,
-      explicitlyNonproductiveActionCount:
-        params.coverage.explicitlyNonproductiveActionCount,
-      assessmentUnknownActionCount:
-        params.coverage.assessmentUnknownActionCount,
-      engineWindowActionCount: params.coverage.engineWindowActionCount,
-      missingActionCount: params.coverage.missingActionCount,
-      conflictingActionCount: params.coverage.conflictingActionCount,
-      issueCodes: params.coverage.issues.map((issue) => issue.code),
-      missingActionIds: params.coverage.actions
-        .filter((action) => action.classification === "missing")
-        .map((action) => action.actionId),
-      conflictingActionIds: params.coverage.actions
-        .filter((action) => action.classification === "conflicting")
-        .map((action) => action.actionId),
-    },
-    search: {
-      headCount: params.heads.length,
-      lineCount: params.search.lines.length,
-      expandedNodeCount: params.search.expandedNodeCount,
-      protectedPartitionCount: params.search.protectedPartitionKeys.length,
-      conservativeBaselineCount:
-        params.search.conservativeBaselineLineIds.length,
-      maximumDepth: params.search.budget.maximumDepth,
-      maximumExpandedNodes: params.search.budget.maximumExpandedNodes,
-      maximumBranchesPerPartition:
-        params.search.budget.maximumBranchesPerPartition,
-      maximumParetoLinesPerPartition:
-        params.search.budget.maximumParetoLinesPerPartition,
-      selectedLineScalarValue: selectedLine?.scalarValue ?? 0,
-      selectedLineStepCount: selectedLine?.steps.length ?? 0,
-    },
-    consideredLines: params.search.lines.map((line) => ({
-      lineId: line.lineId,
-      firstActionId:
-        params.heads.find(
-          (head) => head.candidateId === line.steps[0]?.candidateId,
-        )?.currentBinding.actionId ?? "unavailable",
-      rootPlanInstanceId: line.rootPlanInstanceId,
-      stepCount: line.steps.length,
-      scalarValue: line.scalarValue,
-      upperBoundValue: line.upperBoundValue,
-      partitionKey: line.partitionKey,
-      priorityClass: line.priorityClass,
-      stopReason: debugStopReason(line.stopReason),
-      violatedObligationCount:
-        line.priorityCoverage.violatedObligationIds.length,
-      steps: line.steps.map((step) => ({
-        candidateId: step.candidateId,
-        semanticActionType: step.invocation.semanticActionType,
-        rootPlanInstanceId: step.rootPlanInstanceId,
-        nextMilestoneId: step.nextMilestoneId,
-        actionId:
-          params.heads.find((head) => head.candidateId === step.candidateId)
-            ?.currentBinding.actionId ?? "unavailable",
-        ...(step.currentBinding
-          ? { currentActionId: step.currentBinding.actionId }
-          : {}),
-      })),
-      projectedEndState: {
-        creditMinimum: line.projectedFrame.ownCredits.minimum,
-        creditMaximum: line.projectedFrame.ownCredits.maximum,
-        unrestrictedActionMinimum:
-          line.projectedFrame.actionCapacityLedger.unrestricted.minimum,
-        unrestrictedActionMaximum:
-          line.projectedFrame.actionCapacityLedger.unrestricted.maximum,
-        handMinimum: line.projectedFrame.ownHand.count.minimum,
-        handMaximum: line.projectedFrame.ownHand.count.maximum,
-        ...(line.projectedFrame.pendingBoundary
-          ? {
-              pendingBoundaryKind:
-                line.projectedFrame.pendingBoundary.boundaryKind,
-            }
-          : {}),
-      },
-      evaluationValues: { ...line.evaluationValues },
-      evidenceCodes: [...line.evidenceCodes],
-    })),
-    pruneEvents: params.search.pruneEvents.map((event) => ({
-      candidateId: event.candidateId,
-      reasonCode: event.reasonCode,
-      partitionKey: event.partitionKey,
-      ...(event.prefixLineId ? { prefixLineId: event.prefixLineId } : {}),
-    })),
-    evidenceCodes: [
-      RUNNER_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
-      "runner_vertical_slices:economy,draw_install,run,breaker,multiaccess",
-      "runner_run_plan_is_context_not_execution_authority",
-      params.authorityMode === "cutover"
-        ? "runner_turn_planner_cutover_candidate"
-        : "runner_turn_planner_shadow_only",
-    ],
-  };
-}
-
-function debugBoundaryForSemantic(
-  semanticActionType: string,
-): string | undefined {
-  if (semanticActionType === "draw.card") return "private_observation";
-  if (semanticActionType === "run.start") return "opponent_response_window";
-  if (
-    semanticActionType.startsWith("run.") ||
-    semanticActionType.startsWith("access.") ||
-    semanticActionType.startsWith("breaker.") ||
-    semanticActionType.startsWith("icebreaker.")
-  ) {
-    return "engine_continuation";
-  }
-  return undefined;
-}
-
-function debugStopReason(
-  reason: TurnRemainderSearchLine["stopReason"] | undefined,
-): AiTurnPlanningDebug["selectedLine"]["stopReason"] {
-  if (reason === "turn_capacity_exhausted") return "projected_turn_end";
-  if (reason === "observation_boundary") return "observation_boundary";
-  if (reason === "search_complete") return "projected_plan_discovery_required";
-  return "bounded_search_horizon";
-}
-
 function findRootPlanInstanceId(
   instanceId: string,
   portfolio: Extract<PlanSchedulerResult, { lane: "plan" }>["portfolio"],
@@ -1361,11 +1031,4 @@ function findRootPlanInstanceId(
     );
   }
   return current?.instanceId ?? instanceId;
-}
-
-function boundedUtility(value: number): number {
-  if (!Number.isFinite(value)) return 0;
-  // Owner quotes may carry a bounded fractional tie-break after exact costs.
-  // Rounding erases that ordering before the authoritative remainder search.
-  return Math.max(-10_000, Math.min(10_000, value));
 }

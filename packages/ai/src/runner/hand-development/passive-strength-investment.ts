@@ -2,6 +2,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { projectVisibleIceAfterPassiveRunnerInstall } from "@netgrid/engine";
 import { runnerInvestmentTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -21,6 +22,7 @@ export function assessPassiveStrengthInvestment(
   economy: RunnerEconomyPosture,
 ) {
   if (
+    input.side !== "runner" ||
     !evaluation.definitionId ||
     !AI_HINTS_BY_CARD.get(evaluation.definitionId)?.effects?.some(
       (e) =>
@@ -41,17 +43,27 @@ export function assessPassiveStrengthInvestment(
     (a) =>
       a.actionId === evaluation.legalActionId &&
       a.type === "install_card" &&
-      a.side === "runner" &&
       a.source === evaluation.cardInstanceId &&
-      a.expiresAtStateVersion === input.playerView.stateVersion,
+      a.payload?.cardId === evaluation.cardInstanceId &&
+      actionMatchesCurrentDecision(input, a),
   );
   const card = own.gripOrHq.find(
-    (c) => c.instanceId === evaluation.cardInstanceId && c.known,
+    (c) =>
+      c.instanceId === evaluation.cardInstanceId &&
+      c.definitionId === evaluation.definitionId &&
+      c.known,
   );
   if (
     !action ||
     !card ||
-    action.costs.some((cost) => (cost.clicks ?? 0) > own.clicks) ||
+    action.costs.some(
+      (cost) =>
+        !Number.isSafeInteger(cost.clicks ?? 0) ||
+        (cost.clicks ?? 0) < 0 ||
+        !Number.isSafeInteger(cost.credits ?? 0) ||
+        (cost.credits ?? 0) < 0 ||
+        Object.keys(cost).some((kind) => kind !== "clicks" && kind !== "credits"),
+    ) ||
     action.payload?.runnerProgramTrashBeforeInstall === true ||
     action.targetRequirements.length ||
     (action.choiceRequirements?.length ?? 0) ||
@@ -75,6 +87,12 @@ export function assessPassiveStrengthInvestment(
     return deferred;
   const installCredits = action.costs.reduce((n, c) => n + (c.credits ?? 0), 0);
   const installClicks = action.costs.reduce((n, c) => n + (c.clicks ?? 0), 0);
+  if (
+    !Number.isSafeInteger(installCredits) ||
+    !Number.isSafeInteger(installClicks) ||
+    installCredits > own.credits ||
+    installClicks > own.clicks
+  ) return deferred;
   const liquid = own.credits - installCredits;
   const rig = own.rig ?? [];
   // Refresh only explicitly renewable pools, never a consumable bank. This is
@@ -96,7 +114,8 @@ export function assessPassiveStrengthInvestment(
       (a) =>
         a.actionId === target.actionId &&
         a.type === "start_run" &&
-        a.expiresAtStateVersion === input.playerView.stateVersion,
+        a.payload?.serverId === target.targetServerId &&
+        actionMatchesCurrentDecision(input, a),
     );
     const server = input.playerView.servers.find(
       (s) => s.id === target.targetServerId,

@@ -32,6 +32,31 @@ describe("post-bid link choice option", () => {
     ).toBe("trace_link_small");
   });
 
+  it("skips disabled link and pass options", () => {
+    const choice = postBidChoice([
+      { id: "pass", label: "Pass", selectable: false },
+      {
+        id: "trace_link_disabled",
+        label: "Disabled",
+        selectable: false,
+        metadata: { postBidTraceLinkDelta: 1 },
+      },
+      {
+        id: "trace_link_current",
+        label: "Current",
+        metadata: { postBidTraceLinkDelta: 2 },
+      },
+    ]);
+    expect(
+      selectedPostBidLinkChoiceOptionId(choice, {
+        traceValue: 1,
+        runnerLink: 0,
+        runnerBid: 0,
+        traceRulesProfile: "modern_open",
+      }),
+    ).toBe("trace_link_current");
+  });
+
   it("does not infer link deltas from labels without metadata", () => {
     const choice = postBidChoice([
       { id: "pass", label: "Keine Link-Faehigkeit nutzen" },

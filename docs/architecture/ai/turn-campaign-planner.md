@@ -14,6 +14,9 @@ Utilitybereich, erhält dabei aber deren Nachkommastellen. Ein gebundener
 Kostenvergleich darf seinen nachgeordneten Gleichstandsvorteil nicht durch
 Rundung vor Headbildung, Value Claim und Restzugsuche verlieren. Ganze
 Kosten, Ressourcen und LegalAction-Bindungen bleiben unverändert.
+Die Bewertung addiert den Aufwand der zertifizierten Pflichtablage zum
+Entwicklungswert derselben Aktion. Wertezitate und Diagnose verwenden
+dieselbe Berechnung.
 
 Die Typblöcke erläutern Konzepte; sie sind keine kopierte API-Spezifikation.
 Für reale Feldnamen, Pflichtfelder und Signaturen gelten die folgenden Quellen.

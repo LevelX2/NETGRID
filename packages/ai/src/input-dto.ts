@@ -3085,6 +3085,17 @@ function sanitizeVisibleChoiceRequest(
       if (
         playerViewSide === "runner" &&
         choice.side === "runner" &&
+        choice.source === "v120.event_modification.prevent" &&
+        optionKind === "prevent_damage"
+      ) {
+        const amount = option.metadata?.amount;
+        if (typeof amount !== "number" || !Number.isSafeInteger(amount) || amount <= 0)
+          throw new Error("invalid_runner_damage_prevention_amount");
+        metadata = { ...metadata, optionKind, amount };
+      }
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
         choice.source === "v120.event_modification.interrupt" &&
         (optionKind === "backup_trashed_programs" || optionKind === "allow_trash")
       ) {

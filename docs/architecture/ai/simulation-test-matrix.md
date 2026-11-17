@@ -160,6 +160,9 @@ reell erzeugte Kennzahl. Beide Profile müssen dieselben Kennzahlen mit
 endlichen Werten liefern. Corp-Score-Fenster stützen sich auf aktuell
 angebotene Engine-Score-Aktionen. Die Runner-Ökonomiediagnose erkennt
 Run-Starts am neuen Engine-Run und prüft das tatsächlich angegriffene Ziel.
+Bei umgeleiteten Zugriffen zählt der Zugriff am tatsächlichen Ziel. Die
+Entscheidungsdiagnose ermittelt Alternativen aus auswählbaren Optionen,
+gültigen Anzahlen und der Engine-Vorgabe zur Auswahlreihenfolge.
 Die Qualitätsmetriken zählen unzulässige Aktionsversuche anhand der
 tatsächlichen Ablehnung. Technische Abbrüche gehen in die Gesamtauswertung
 der Laufzeitfehler ein. R&D-Entfernungen zählen auf Ebene der Zugriffsaktion.

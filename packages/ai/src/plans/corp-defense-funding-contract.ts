@@ -1,5 +1,5 @@
 import { currentCorpRestrictedCreditBanks } from "../runtime/corp-restricted-credit-reserve";
-import { CorpGenericDefenseSignal } from "./corp-defense-contracts";
+import type { CorpGenericDefenseSignal } from "./corp-defense-contracts";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 
 export function corpGenericDefensePriorityClass(
@@ -86,17 +86,23 @@ export function genericDefenseFundingRequirement(
     if (typeof gap !== "number" || !Number.isSafeInteger(gap) || gap <= 0) {
       return undefined;
     }
+    const targetCredits = currentCredits === undefined
+      ? undefined
+      : currentCredits + gap;
+    if (
+      currentCredits !== undefined &&
+      (!Number.isSafeInteger(currentCredits) ||
+        currentCredits < 0 ||
+        !Number.isSafeInteger(targetCredits))
+    ) return undefined;
     return {
       gap,
-      ...(typeof currentCredits === "number" &&
-      Number.isSafeInteger(currentCredits) &&
-      currentCredits >= 0
-        ? { targetCredits: currentCredits + gap }
-        : {}),
+      ...(targetCredits !== undefined ? { targetCredits } : {}),
       iceInstanceId: projection.sourceCardInstanceId,
     };
   }
   const reserve = signal.rezReserveNeed;
+  const restrictedCredits = reserve?.storedRestrictedCredits ?? 0;
   if (
     signal.phase !== "fund_rez_reserve" ||
     !signal.targetIceInstanceId ||
@@ -104,19 +110,19 @@ export function genericDefenseFundingRequirement(
     !Number.isSafeInteger(reserve.currentCredits) ||
     !Number.isSafeInteger(reserve.requiredCredits) ||
     !Number.isSafeInteger(reserve.fundingGap) ||
+    reserve.fundingGap <= 0 ||
+    !Number.isSafeInteger(restrictedCredits) ||
+    restrictedCredits < 0 ||
     reserve.currentCredits < 0 ||
     reserve.requiredCredits <= reserve.currentCredits ||
     reserve.fundingGap !==
-      reserve.requiredCredits -
-        reserve.currentCredits -
-        (reserve.storedRestrictedCredits ?? 0)
+      reserve.requiredCredits - reserve.currentCredits - restrictedCredits
   ) {
     return undefined;
   }
   return {
     gap: reserve.fundingGap,
-    targetCredits:
-      reserve.requiredCredits - (reserve.storedRestrictedCredits ?? 0),
+    targetCredits: reserve.requiredCredits - restrictedCredits,
     iceInstanceId: signal.targetIceInstanceId,
   };
 }
@@ -130,16 +136,18 @@ export function genericDefenseFundingRequirementIsCurrent(
     iceInstanceId: string;
   }>,
 ): boolean {
+  const expected = genericDefenseFundingRequirement(
+    signal,
+    context.input.playerView.own.credits,
+  );
+  if (
+    !expected ||
+    expected.gap !== requirement.gap ||
+    expected.targetCredits !== requirement.targetCredits ||
+    expected.iceInstanceId !== requirement.iceInstanceId
+  ) return false;
   if (signal.phase === "install_ice") {
-    return (
-      (signal.installRoute?.disposition === "funding_only" ||
-        (signal.installRoute?.disposition === "productive" &&
-          !signal.installRoute.projection.funded &&
-          genericDefenseFundingRequirement(signal)?.gap === requirement.gap)) &&
-      signal.installRoute.projection.targetServerId === signal.serverId &&
-      signal.installRoute.projection.sourceCardInstanceId ===
-        requirement.iceInstanceId
-    );
+    return signal.installRoute?.projection.targetServerId === signal.serverId;
   }
   const reserve = signal.rezReserveNeed;
   const ice = context.input.playerView.servers

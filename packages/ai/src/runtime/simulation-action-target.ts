@@ -19,7 +19,7 @@ export function simulationActionLocation(
   corpNewRemoteCreated?: true;
   runnerRunStarted?: true;
 } {
-  if (action.side === "corp" && after.corp.servers.length > before.corp.servers.length) {
+  if (action.side === "corp") {
     const beforeIds = new Set(before.corp.servers.map(({ id }) => id));
     const created = after.corp.servers.filter(
       ({ id, kind }) => kind === "remote" && !beforeIds.has(id),
@@ -37,9 +37,13 @@ export function simulationActionLocation(
     (action.type === "access_card" ||
       action.type === "steal_agenda" ||
       action.type === "trash_accessed_card" ||
-      action.type === "decline_trash" ||
-      action.type === "jack_out")
+      action.type === "decline_trash")
   ) {
+    return {
+      targetServerId: before.run.accessServerOverride ?? before.run.attackedServerId,
+    };
+  }
+  if (action.side === "runner" && before.run && action.type === "jack_out") {
     return { targetServerId: before.run.attackedServerId };
   }
   const serverId = [

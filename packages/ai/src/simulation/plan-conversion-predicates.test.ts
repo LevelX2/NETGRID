@@ -175,6 +175,21 @@ describe("planIntentConvertedWithin", () => {
     });
   });
 
+  it("attributes access to the actual access destination of a redirected run", () => {
+    const before = {
+      run: { attackedServerId: "hq", accessServerOverride: "rd" },
+    } as GameState;
+    const event = { publicPayload: {} } as PublicGameEvent;
+    const steal = legalAction("steal", "runner", "steal_agenda", "Steal", { credits: 0 });
+    const exit = legalAction("exit", "runner", "jack_out", "Jack out", { credits: 0 });
+    expect(simulationActionLocation(steal, event, before, before)).toEqual({
+      targetServerId: "rd",
+    });
+    expect(simulationActionLocation(exit, event, before, before)).toEqual({
+      targetServerId: "hq",
+    });
+  });
+
   it("recognizes a run started by an event from the applied Engine state", () => {
     const before = {} as GameState;
     const after = {

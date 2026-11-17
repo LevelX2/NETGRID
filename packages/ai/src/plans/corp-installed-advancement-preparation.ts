@@ -1,5 +1,6 @@
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 
 /** Quotes only a pure fixed-cost activation on an owned installed source.
  * Unrezzed sources need the exact current Engine rez. Already rezzed sources
@@ -34,12 +35,11 @@ export function corpInstalledAdvancementPreparations(input: AiDecisionInput) {
           ? undefined
           : input.legalActions.find(
               (a) =>
-                a.side === "corp" &&
                 a.type === "rez_card" &&
                 a.source === card.instanceId &&
                 a.payload?.cardId === card.instanceId &&
                 a.payload?.serverId === server.id &&
-                a.expiresAtStateVersion === input.playerView.stateVersion,
+                actionMatchesCurrentDecision(input, a),
             );
         if (
           !card.rezzed &&
@@ -109,6 +109,7 @@ function exactCredits(action: LegalAction): number | undefined {
     )
       return undefined;
     total += cost.credits!;
+    if (!Number.isSafeInteger(total)) return undefined;
   }
   return total;
 }

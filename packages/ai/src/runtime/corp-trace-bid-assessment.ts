@@ -3,6 +3,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
 import { corpVisibleCardPlayCost } from "./corp-visible-card-play-cost";
+import { exactCurrentChoiceAction } from "./plan-bound-choice-contract";
 import type { LatestTraceContext } from "./trace-context";
 import { corpCurrentRunAgendaExposure } from "../corp/defense/corp-server-protection-reserve";
 
@@ -173,18 +174,12 @@ function currentTerminalRunLockBid(
     choice.stateVersion !== quote.stateVersion ||
     choice.source !== `trace:${trace.traceId}` ||
     !choice.options.some(
-      (option) => option.id === quote.optionId && option.value === quote.amount,
+      (option) =>
+        option.id === quote.optionId &&
+        option.value === quote.amount &&
+        option.selectable !== false,
     ) ||
-    !input.legalActions.some(
-      (action) =>
-        action.actionId === quote.actionId &&
-        action.expiresAtStateVersion === quote.stateVersion &&
-        action.choiceRequirements?.some(
-          (requirement) =>
-            requirement.choiceId === quote.choiceId &&
-            requirement.optionIds.includes(quote.optionId),
-        ),
-    )
+    exactCurrentChoiceAction(input, choice)?.actionId !== quote.actionId
   )
     return undefined;
   // The one-click lock exhausts the current turn's ordinary run horizon.

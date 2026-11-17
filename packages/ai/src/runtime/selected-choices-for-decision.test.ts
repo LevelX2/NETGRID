@@ -1077,6 +1077,7 @@ describe("selectedChoicesForDecision", () => {
             {
               id: "card_implementation_damage_prevent_runner_force_shield_1_0_1",
               label: "Force Shield: 1 Schaden verhindern",
+              metadata: { optionKind: "prevent_damage", amount: 1 },
             },
           ],
         },
@@ -2741,6 +2742,9 @@ function inputWithChoice(
       label: string;
       value?: string | number;
       selectable?: boolean;
+      metadata?: NonNullable<
+        AiDecisionInput["playerView"]["pendingChoice"]
+      >["options"][number]["metadata"];
       card?: NonNullable<
         AiDecisionInput["playerView"]["pendingChoice"]
       >["options"][number]["card"];

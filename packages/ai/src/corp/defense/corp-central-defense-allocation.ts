@@ -125,13 +125,13 @@ interface Fraction {
   readonly denominator: bigint;
 }
 
-const SERVER_ORDER: readonly CorpCentralDefenseServerId[] = ["hq", "rd"];
-const THREAT_RANK: Readonly<Record<CorpCentralDefenseThreat, number>> = {
-  none: 0,
-  material: 1,
-  acute: 2,
-  terminal: 3,
-};
+const SERVER_ORDER = Object.freeze(["hq", "rd"] as const);
+const DEFENSE_THREATS = new Set<CorpCentralDefenseThreat>([
+  "none",
+  "material",
+  "acute",
+  "terminal",
+]);
 
 function isSafeWhole(value: number, minimum = 0): boolean {
   return Number.isSafeInteger(value) && value >= minimum;
@@ -200,8 +200,9 @@ function publicFraction(
 }
 
 function isValidFacts(facts: CorpCentralDefenseFacts): boolean {
-  if (!facts.factsKnown || !SERVER_ORDER.includes(facts.serverId)) return false;
-  if (!(facts.threat in THREAT_RANK)) return false;
+  if (facts.factsKnown !== true || !SERVER_ORDER.includes(facts.serverId))
+    return false;
+  if (!DEFENSE_THREATS.has(facts.threat)) return false;
   if (!isSafeWhole(facts.installedIceCount)) return false;
   const { access, cards } = facts;
   if (!toFraction(access.successfulAccessProbability)) return false;

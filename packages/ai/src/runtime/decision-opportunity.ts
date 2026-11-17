@@ -1,4 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { selectableChoiceOptions } from "./choice-option";
+import { exactCurrentChoiceAction } from "./plan-bound-choice-contract";
 
 export type DecisionOpportunity =
   | "competitive"
@@ -24,22 +26,28 @@ export function assessDecisionOpportunity(
   selectedAction: LegalAction,
 ): DecisionOpportunityAssessment {
   const legalActionCount = input.legalActions.length;
-  const selectableChoiceCount =
-    selectedAction.type === "resolve_choice" && input.playerView.pendingChoice
-      ? input.playerView.pendingChoice.options.filter(
-          (option) => option.selectable !== false,
-        ).length
+  const choice = input.playerView.pendingChoice;
+  const choiceAlternatives =
+    choice &&
+    exactCurrentChoiceAction(input, choice)?.actionId ===
+      selectedAction.actionId
+      ? countChoiceAlternatives(
+          selectableChoiceOptions(choice.options).length,
+          choice.minSelections,
+          choice.maxSelections,
+          choice.selectionOrdering === "ordered",
+        )
       : undefined;
+  const actionableAlternativeCount = Math.min(
+    Number.MAX_SAFE_INTEGER,
+    Math.max(0, legalActionCount - 1) + (choiceAlternatives ?? 0),
+  );
   const kind: DecisionOpportunity =
-    selectableChoiceCount !== undefined && selectableChoiceCount <= 1
+    actionableAlternativeCount === 0 && choiceAlternatives !== undefined
       ? "forced_choice"
       : legalActionCount === 1 && TERMINAL_ACTION_TYPES.has(selectedAction.type)
         ? "forced_terminal"
         : "competitive";
-  const actionableAlternativeCount =
-    kind === "forced_choice"
-      ? Math.max(0, (selectableChoiceCount ?? 0) - 1)
-      : Math.max(0, legalActionCount - 1);
   return {
     kind,
     legalActionCount,
@@ -50,4 +58,24 @@ export function assessDecisionOpportunity(
       `decision_actionable_alternative_count:${actionableAlternativeCount}`,
     ],
   };
+}
+
+function countChoiceAlternatives(
+  optionCount: number,
+  minSelections: number,
+  maxSelections: number,
+  ordered: boolean,
+): number {
+  let possibleSelections = 0;
+  let optionsAtSize = 1;
+  const maxSize = Math.min(optionCount, maxSelections);
+  for (let size = 0; size <= maxSize; size += 1) {
+    if (size >= minSelections) {
+      if (optionsAtSize >= Number.MAX_SAFE_INTEGER - possibleSelections)
+        return Number.MAX_SAFE_INTEGER;
+      possibleSelections += Math.round(optionsAtSize);
+    }
+    optionsAtSize *= (optionCount - size) / (ordered ? 1 : size + 1);
+  }
+  return Math.max(0, possibleSelections - 1);
 }

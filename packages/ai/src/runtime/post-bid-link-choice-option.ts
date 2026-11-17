@@ -1,6 +1,7 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
 import { selectEfficientPostBidLinkOption } from "../trace-bid-efficiency";
+import { selectableChoiceOptions } from "./choice-option";
 import { type LatestTraceContext } from "./trace-context";
 
 type PendingChoice = NonNullable<
@@ -11,9 +12,14 @@ export function selectedPostBidLinkChoiceOptionId(
   choice: PendingChoice,
   traceContext: LatestTraceContext,
 ): string | undefined {
+  const options = selectableChoiceOptions(choice.options);
   const strongestLinkOption =
-    choice.options
-      .filter((option) => option.id.startsWith("trace_link_"))
+    options
+      .filter(
+        (option) =>
+          option.id.startsWith("trace_link_") &&
+          postBidTraceLinkDelta(option) !== undefined,
+      )
       .sort((left, right) => {
         const leftDelta = postBidTraceLinkDelta(left);
         const rightDelta = postBidTraceLinkDelta(right);
@@ -21,16 +27,19 @@ export function selectedPostBidLinkChoiceOptionId(
           (rightDelta ?? 0) - (leftDelta ?? 0) ||
           left.label.localeCompare(right.label, "de")
         );
-      })[0] ??
-    choice.options.find((option) => option.id === "pass") ??
-    choice.options[0];
+      })[0] ?? options.find((option) => option.id === "pass");
   const selected =
     selectEfficientPostBidLinkOption({
-      options: choice.options.map((option) => ({
-        id: option.id,
-        label: option.label,
-        ...postBidTraceLinkOptionDelta(option),
-      })),
+      options: options
+        .filter(
+          (option) =>
+            option.id === "pass" || postBidTraceLinkDelta(option) !== undefined,
+        )
+        .map((option) => ({
+          id: option.id,
+          label: option.label,
+          ...postBidTraceLinkOptionDelta(option),
+        })),
       ...(strongestLinkOption
         ? { fallbackOptionId: strongestLinkOption.id }
         : {}),
@@ -43,7 +52,7 @@ function postBidTraceLinkDelta(
   option: PendingChoice["options"][number],
 ): number | undefined {
   const delta = option.metadata?.postBidTraceLinkDelta;
-  return typeof delta === "number" && Number.isInteger(delta) && delta > 0
+  return typeof delta === "number" && Number.isSafeInteger(delta) && delta > 0
     ? delta
     : undefined;
 }
