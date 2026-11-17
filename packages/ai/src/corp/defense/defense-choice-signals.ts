@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
+import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
 import { corpServerAgendaExposure } from "./corp-server-protection-reserve";
 import {
@@ -47,39 +48,21 @@ export function corpAgendaPurgeDefenseChoiceSignal(
           nonEmptyString(card.definitionId),
       )
     : undefined;
-  const action = input.legalActions.find(
-    (legalAction) =>
-      legalAction.side === "corp" &&
-      legalAction.type === "resolve_choice" &&
-      legalAction.source === "game_rule" &&
-      legalAction.timingPoint === input.playerView.timingPoint &&
-      legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
-      legalAction.choiceRequirements?.length === 1 &&
-      legalAction.choiceRequirements[0]?.choiceId === choice.choiceId,
-  );
+  const action = exactCurrentChoiceAction(input, choice);
   const candidate = action
     ? candidates.find(
         (entry) =>
           entry.actionId === action.actionId &&
+          entry.actorSide === "corp" &&
+          entry.stateVersion === choice.stateVersion &&
           entry.semanticActionType === "choice.resolve",
       )
     : undefined;
-  const requirement = action?.choiceRequirements?.[0];
-  const choiceOptionIds = choice.options.map((option) => option.id);
-  const actionChoiceContractIsExact =
-    requirement !== undefined &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === choiceOptionIds.length &&
-    choiceOptionIds.every((optionId) =>
-      requirement.optionIds.includes(optionId),
-    );
   if (
     !sourceAgendaId ||
     !sourceAgenda?.definitionId ||
     !action ||
     !candidate ||
-    !actionChoiceContractIsExact ||
     sourceStateVersion !== input.playerView.stateVersion ||
     revealedCardIds.length === 0 ||
     new Set(revealedCardIds).size !== revealedCardIds.length ||
@@ -155,32 +138,54 @@ export function corpAgendaPurgeDefenseChoiceSignal(
   }
 
   const plannedLayers = new Map<string, number>();
+  const minimumCosts = new Map(
+    [...optionsByCardId].map(([cardId, byServer]) => [
+      cardId,
+      Math.min(
+        ...[...byServer.values()].flatMap((variants) =>
+          variants.map(({ creditCost }) => creditCost),
+        ),
+      ),
+    ]),
+  );
+  let requiredRemainingCredits = [...minimumCosts.values()].reduce(
+    (sum, value) => sum + value,
+    0,
+  );
   let remainingCredits = input.playerView.own.credits;
+  if (requiredRemainingCredits > remainingCredits) return undefined;
   const targets: Array<{
     cardId: string;
     serverId: string;
     optionId: string;
   }> = [];
   for (const [cardId, byServer] of optionsByCardId.entries()) {
-    const serverId = [...byServer.keys()].sort((left, right) => {
-      const difference =
-        corpAgendaPurgeDefenseTargetValue(
-          input,
-          right,
-          centralAllocation,
-          plannedLayers,
-        ) -
-        corpAgendaPurgeDefenseTargetValue(
-          input,
-          left,
-          centralAllocation,
-          plannedLayers,
-        );
-      return difference || technicalCompare(left, right);
-    })[0]!;
+    requiredRemainingCredits -= minimumCosts.get(cardId)!;
+    const currentBudget = remainingCredits - requiredRemainingCredits;
+    const serverId = [...byServer]
+      .filter(([, variants]) =>
+        variants.some(({ creditCost }) => creditCost <= currentBudget),
+      )
+      .map(([id]) => id)
+      .sort((left, right) => {
+        const difference =
+          corpAgendaPurgeDefenseTargetValue(
+            input,
+            right,
+            centralAllocation,
+            plannedLayers,
+          ) -
+          corpAgendaPurgeDefenseTargetValue(
+            input,
+            left,
+            centralAllocation,
+            plannedLayers,
+          );
+        return difference || technicalCompare(left, right);
+      })[0]!;
     const selectedVariant = byServer
       .get(serverId)!
-      .filter((variant) => variant.creditCost <= remainingCredits)
+      .filter((variant) => variant.creditCost <= currentBudget)
       .sort(
         (left, right) =>
           left.creditCost - right.creditCost ||
@@ -259,33 +264,16 @@ export function corpClassicDeflectorDefenseChoiceSignal(
   ) {
     return undefined;
   }
-  const action = input.legalActions.find(
-    (legalAction) =>
-      legalAction.side === "corp" &&
-      legalAction.type === "resolve_choice" &&
-      legalAction.source === "game_rule" &&
-      legalAction.timingPoint === input.playerView.timingPoint &&
-      legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
-      legalAction.choiceRequirements?.length === 1 &&
-      legalAction.choiceRequirements[0]?.choiceId === choice.choiceId,
-  );
+  const action = exactCurrentChoiceAction(input, choice);
   const candidate = action
     ? candidates.find(
         (entry) =>
           entry.actionId === action.actionId &&
+          entry.actorSide === "corp" &&
+          entry.stateVersion === choice.stateVersion &&
           entry.semanticActionType === "choice.resolve",
       )
     : undefined;
-  const requirement = action?.choiceRequirements?.[0];
-  const choiceOptionIds = choice.options.map((option) => option.id);
-  const exactActionBinding =
-    requirement !== undefined &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === choiceOptionIds.length &&
-    choiceOptionIds.every((optionId) =>
-      requirement.optionIds.includes(optionId),
-    );
   const run = input.playerView.run;
   const sourceServer = run
     ? input.playerView.servers.find(
@@ -304,8 +292,8 @@ export function corpClassicDeflectorDefenseChoiceSignal(
   if (
     !action ||
     !candidate ||
-    !exactActionBinding ||
     !run ||
+    run.runId !== context.runId ||
     run.phase !== "encounter_ice" ||
     run.encounteredIce?.instanceId !== context.sourceIceInstanceId ||
     sourceIce?.definitionId !== context.sourceDefinitionId ||

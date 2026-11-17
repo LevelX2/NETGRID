@@ -30,6 +30,15 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     });
   });
 
+  it("recognizes a hard stop that also trashes its source at turn end", () => {
+    const ice = corpIce("hard-stop");
+    expect(
+      visibleCorpIceDefenseProfile(ice, [
+        { type: "end_the_run_and_trash_source_at_end_of_turn" },
+      ]),
+    ).toMatchObject({ hasImmediateStop: true });
+  });
+
   it("uses current quoted subroutines instead of printed potential when supplied", () => {
     const hunting = corpIce("hunting", {
       definitionId: "onr_proteus_026_hunting-pack",

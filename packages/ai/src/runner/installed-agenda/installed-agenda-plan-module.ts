@@ -102,6 +102,7 @@ function installedAgendaScoreCandidates(
     .filter(
       (candidate) =>
         actionIds.has(candidate.actionId) &&
+        candidate.actorSide === "runner" &&
         candidate.stateVersion === signal.observedAtStateVersion &&
         candidate.sourceCardInstanceId === signal.sourceCardInstanceId,
     )

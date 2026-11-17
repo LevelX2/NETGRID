@@ -1,9 +1,6 @@
 import { quoteVisibleRunnerPathForMetrics } from "./visible-run-path-for-metrics";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import {
-  agendaPointsForMetrics,
-  remoteTrashCostForVisibleCard,
-} from "./card-metric-lookup";
+import { remoteTrashCostForVisibleCard } from "./card-metric-lookup";
 import { remoteTrashRoleForVisibleCard } from "./remote-trash-role";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import {
@@ -65,25 +62,8 @@ export function remoteServerHasScoreThreat(
   );
 }
 
-export function remoteTrashAccessProtectsAcuteThreatForMetrics(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return false;
-  if (remoteServerHasScoreThreat(input, serverId)) return true;
-  return server.root.some((card) => {
-    if (!card.known || card.type !== "agenda" || !card.definitionId)
-      return false;
-    return (
-      input.playerView.own.agendaPoints +
-        agendaPointsForMetrics(card.definitionId) >=
-      input.playerView.agendaPointsToWin - 1
-    );
-  });
-}
+export const remoteTrashAccessProtectsAcuteThreatForMetrics =
+  remoteServerHasScoreThreat;
 
 export function runnerHasVisibleRemoteScoreThreat(
   input: AiDecisionInput,
@@ -311,7 +291,7 @@ export function runnerRemoteThreatTargetingDiagnosticsForAction(
     ...(centralRun && contestableProfiles.length > 0 && !centralJustified
       ? { runnerRepeatedCentralRunWhileSameRemoteThreat: true }
       : {}),
-    ...(contested && !selectedProfile.contestable
+    ...(contested && selectedProfile.blockedByPostRunReserve
       ? { runnerRemoteRunStartedWithInsufficientPostRunReserve: true }
       : {}),
     ...(contested && selectedProfile.contestable
@@ -379,7 +359,8 @@ export function runnerContestBlockedByCredits(
     return (
       (assessment.blocked &&
         runnerKnownPathAssessmentIsCostNoAccess(assessment)) ||
-      assessment.creditsAfterPath < Math.min(3, reserveTarget - 2)
+      (assessment.canReachAccess &&
+        assessment.creditsAfterPath < Math.min(3, reserveTarget - 2))
     );
   });
 }

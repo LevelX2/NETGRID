@@ -231,6 +231,20 @@ describe("AI behavior baseline", () => {
       incompatibilities: ["seeds"],
     });
   });
+  it("rejects a stale or incomplete run manifest even when both configurations match", () => {
+    const reference = createBaseline();
+    const missingSlot = { ...reference, slots: [] };
+    expect(compareAiBehaviorBaselines(reference, missingSlot)).toMatchObject({
+      comparable: false,
+      incompatibilities: ["actual_slot_ids"],
+    });
+    const wrongGame = structuredClone(reference);
+    wrongGame.slots[0]!.games[0]!.seed = "other-game";
+    expect(compareAiBehaviorBaselines(reference, wrongGame)).toMatchObject({
+      comparable: false,
+      incompatibilities: ["actual_game_seeds:behavior-test-slot"],
+    });
+  });
 });
 
 function createBaseline(slot = createSlot({}), gitHead = "baseline-head") {

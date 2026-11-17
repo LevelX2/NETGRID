@@ -70,7 +70,6 @@ import {
   runnerEncounterPaymentForActions,
   spendRunnerEncounterBreakerCost,
 } from "./runner-encounter-credit-budget";
-import { runnerRunPlanAcceptsConditionalRoute } from "./runner-run-release";
 import {
   ACCESS_PRESERVING_SECRET_COMPARE_BID,
   isVisibleSecretSpendCompareSubroutine,
@@ -624,7 +623,12 @@ function cheapestTraceAccessSequence(params: {
       support,
     ).cheapestAffordableSafe;
     if (!guarantee) {
-      if (!runnerRunPlanAcceptsConditionalRoute(params.plan)) return undefined;
+      const commitment = params.plan.commitment;
+      if (
+        commitment?.route.reachability !== "conditional_access" ||
+        commitment.acceptedRisks.length === 0
+      )
+        return undefined;
       if (effect && effect.type !== "none") {
         acceptedEffectTypes.push(effect.type);
       }

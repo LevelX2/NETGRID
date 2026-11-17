@@ -101,6 +101,21 @@ describe("selectedMinimalProgramSacrificeCandidates", () => {
     ).toEqual(["economy"]);
   });
 
+  it("does not bundle a cheap but unnecessary sacrifice into an optional install", () => {
+    const small = selectableCandidate("small", 2, 100, 40);
+    const sufficient = selectableCandidate("sufficient", 3, 20, 80);
+    const assessment = runnerProgramInstallTrashAssessmentFromCards({
+      memoryUsed: 5,
+      memoryLimit: 5,
+      sourceMemoryCost: 3,
+      candidates: [small, sufficient],
+    });
+    expect(
+      assessment.selectedCandidates.map((entry) => entry.option?.id),
+    ).toEqual(["sufficient"]);
+    expect(assessment.memoryFreedBySelectedCandidates).toBe(3);
+  });
+
   it("does not reward surplus MU accumulated across a sufficient set", () => {
     expect(
       selectedMinimalProgramSacrificeCandidates(

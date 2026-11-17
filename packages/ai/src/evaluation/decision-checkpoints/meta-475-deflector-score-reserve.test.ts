@@ -45,6 +45,8 @@ function signal(cp: ReturnType<typeof checkpoint>) {
   )!;
   const candidate = {
     actionId: action.actionId,
+    actorSide: "corp",
+    stateVersion: cp.input.playerView.stateVersion,
     semanticActionType: "choice.resolve",
   } as ActionSemanticCandidate;
   return corpClassicDeflectorDefenseChoiceSignal(

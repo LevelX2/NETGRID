@@ -194,7 +194,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(11),
+        hideInput.legalActions[0]!,
         hideChoice,
         hideChoice.options,
       ),
@@ -231,9 +231,17 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassChoiceOptionId(
         targetInput,
-        resolveChoiceAction(13),
+        targetInput.legalActions[0]!,
         targetChoice,
         targetChoice.options,
+      ),
+    ).toBe("ice_hq-wall");
+    expect(
+      selectedRunnerTargetedBypassChoiceOptionId(
+        targetInput,
+        targetInput.legalActions[0]!,
+        targetChoice,
+        [...targetChoice.options].reverse(),
       ),
     ).toBe("ice_hq-wall");
   });
@@ -255,7 +263,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(13),
+        hideInput.legalActions[0]!,
         hideChoice,
         hideChoice.options,
       ),
@@ -275,7 +283,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(13),
+        hideInput.legalActions[0]!,
         hideChoice,
         hideChoice.options,
       ),
@@ -299,7 +307,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(12),
+        hideInput.legalActions[0]!,
         hideChoice,
         hideChoice.options,
       ),
@@ -323,7 +331,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassChoiceOptionId(
         missingOptionInput,
-        resolveChoiceAction(13),
+        missingOptionInput.legalActions[0]!,
         missingOptionInput.playerView.pendingChoice!,
         missingOptionInput.playerView.pendingChoice!.options,
       ),
@@ -344,7 +352,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassHideChoiceOptionId(
         staleInput,
-        resolveChoiceAction(11),
+        staleInput.legalActions[0]!,
         staleInput.playerView.pendingChoice!,
         staleInput.playerView.pendingChoice!.options,
       ),
@@ -378,7 +386,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassChoiceOptionId(
         restoredTargetInput,
-        resolveChoiceAction(13),
+        restoredTargetInput.legalActions[0]!,
         restoredTargetInput.playerView.pendingChoice!,
         restoredTargetInput.playerView.pendingChoice!.options,
       ),
@@ -398,7 +406,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassHideChoiceOptionId(
         wrongDefinitionInput,
-        resolveChoiceAction(11),
+        wrongDefinitionInput.legalActions[0]!,
         wrongDefinitionInput.playerView.pendingChoice!,
         wrongDefinitionInput.playerView.pendingChoice!.options,
       ),
@@ -639,7 +647,16 @@ function choiceInput(
       timingPoint: "runner_action.main",
       winner: null,
       own: { credits: 4 },
-      servers: [],
+      servers: [
+        {
+          id: "hq",
+          ice: [
+            { instanceId: "hq-outer", known: false },
+            { instanceId: "hq-wall", known: false },
+          ],
+          root: [],
+        },
+      ],
       ...(choice
         ? {
             pendingChoice: {

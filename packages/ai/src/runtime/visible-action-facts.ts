@@ -106,9 +106,9 @@ export function visibleOwnDefinitionIds(input: AiDecisionInput): Set<string> {
     [
       ...input.playerView.own.gripOrHq,
       ...input.playerView.own.scoreArea,
-      ...input.playerView.servers
-        .filter((server) => server.id !== "archives")
-        .flatMap((server) => [...server.ice, ...server.root]),
+      ...input.playerView.servers.flatMap((server) =>
+        server.id === "archives" ? server.ice : [...server.ice, ...server.root],
+      ),
     ]
       .filter((card) => card.known && card.definitionId)
       .map((card) => card.definitionId!),

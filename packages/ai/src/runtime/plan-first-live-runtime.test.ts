@@ -3058,6 +3058,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
     input.playerView.run = {
+      runId: "run_1",
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -3076,7 +3077,11 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       corpClassicDeflectorDefenseChoiceSignal(
         input,
-        buildActionSemanticCandidates(input),
+        buildActionSemanticCandidates({
+          legalActions: input.legalActions,
+          observerSide: "corp",
+          stateVersion: input.playerView.stateVersion,
+        }),
         undefined,
         0,
       ),
@@ -28786,6 +28791,7 @@ describe("authoritative plan-first live runtime", () => {
     )!.root = [
       visibleCard("advanced-remote-agenda", "corp", "agenda", {
         definitionId: "onr_v1_193_corporate-coup",
+        agendaPoints: CARD_DEFINITIONS_BY_ID["onr_v1_193_corporate-coup"]!.agendaPoints!,
         advancementCounters: 2,
         effectiveStealCostQuote: {
           stateVersion: input.playerView.stateVersion,

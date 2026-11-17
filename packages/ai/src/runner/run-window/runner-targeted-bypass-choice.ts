@@ -3,6 +3,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import {
   SOCIAL_ENGINEERING_DEFINITION_ID,
   type RunnerTargetedBypassChoiceContinuation,
@@ -46,6 +47,7 @@ export function selectedRunnerTargetedBypassHideChoiceOptionId(
   });
   const exactOptions = selectableOptions.filter(
     (option) =>
+      option.selectable !== false &&
       typeof option.value === "number" &&
       option.value === continuation.intendedHiddenAmount,
   );
@@ -76,21 +78,21 @@ export function selectedRunnerTargetedBypassChoiceOptionId(
     expectedChoiceKind: "select_cards",
     stateVersionOffset: 3,
   });
-  const serverOptions = selectableOptions.filter((option) => {
-    const value = targetedBypassOptionValue(option.value);
-    return value?.serverId === continuation.serverId;
-  });
-  const positionalOption = serverOptions[continuation.icePosition];
-  const positionalValue = targetedBypassOptionValue(positionalOption?.value);
-  const exactOption =
-    positionalOption &&
-    positionalValue?.serverId === continuation.serverId &&
-    typeof continuation.visibleIceInstanceId === "string" &&
-    continuation.visibleIceInstanceId.length > 0 &&
-    positionalValue.iceInstanceId === continuation.visibleIceInstanceId
-      ? positionalOption
-      : undefined;
-  if (!exactOption) {
+  const currentIce = input.playerView.servers.find(
+    ({ id }) => id === continuation.serverId,
+  )?.ice[continuation.icePosition];
+  const exactOptions =
+    currentIce && currentIce.instanceId === continuation.visibleIceInstanceId
+      ? selectableOptions.filter((option) => {
+          const value = targetedBypassOptionValue(option.value);
+          return (
+            option.selectable !== false &&
+            value?.serverId === continuation.serverId &&
+            value.iceInstanceId === currentIce.instanceId
+          );
+        })
+      : [];
+  if (exactOptions.length !== 1) {
     throw targetedBypassChoiceFailure(
       input,
       action,
@@ -98,7 +100,7 @@ export function selectedRunnerTargetedBypassChoiceOptionId(
       executor.instanceId,
     );
   }
-  return exactOption.id;
+  return exactOptions[0]!.id;
 }
 
 function targetedBypassContinuation(params: {
@@ -171,8 +173,7 @@ function targetedBypassContinuation(params: {
           executor.executionState === "preempted")));
   const exactOrigin =
     input.side === "runner" &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
+    exactCurrentChoiceAction(input, choice) === action &&
     choice.side === "runner" &&
     choice.kind === params.expectedChoiceKind &&
     choice.minSelections === 1 &&
@@ -299,10 +300,12 @@ function targetedBypassChoiceSource(
   const separator = suffix.lastIndexOf(":");
   if (separator <= 0) return undefined;
   const sourceCardInstanceId = suffix.slice(0, separator);
-  const choiceStateVersion = Number(suffix.slice(separator + 1));
+  const version = suffix.slice(separator + 1);
+  const choiceStateVersion = Number(version);
   if (
     sourceCardInstanceId.length === 0 ||
-    !Number.isInteger(choiceStateVersion)
+    !/^(0|[1-9][0-9]*)$/.test(version) ||
+    !Number.isSafeInteger(choiceStateVersion)
   ) {
     return undefined;
   }

@@ -5,6 +5,25 @@ import { runnerInput } from "../runner-hand-development.test-support";
 import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 
 describe("runnerTerminalContestThreat", () => {
+  it.each([2, 3])(
+    "does not treat a known single point as the missing %s points",
+    (pointsNeeded) => {
+      const decisionInput = input({
+        agendaPoints: 7 - pointsNeeded,
+        advancement: 2,
+      });
+      const remote = decisionInput.playerView.servers.find(
+        ({ id }) => id === "remote_1",
+      )!;
+      remote.root[0] = {
+        ...remote.root[0]!,
+        known: true,
+        type: "agenda",
+        agendaPoints: 1,
+      };
+      expect(runnerTerminalContestThreat(decisionInput)).toBeUndefined();
+    },
+  );
   it("recognizes a public two-point terminal remote without revealing its card", () => {
     expect(
       runnerTerminalContestThreat(input({ agendaPoints: 5, advancement: 2 })),

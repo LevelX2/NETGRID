@@ -265,11 +265,14 @@ function visibleEndTheRunSubroutineCount(sourceCard: {
   definitionId?: string;
   effectiveRunQuote?: { subroutines?: readonly { type?: string }[] };
 }): number {
-  const quoteCount =
-    sourceCard.effectiveRunQuote?.subroutines?.filter(
-      (subroutine) => subroutine.type === "end_the_run",
-    ).length ?? 0;
-  if (quoteCount > 0) return quoteCount;
+  const subroutines = sourceCard.effectiveRunQuote?.subroutines;
+  if (subroutines !== undefined) {
+    return subroutines.filter(
+      ({ type }) =>
+        type === "end_the_run" ||
+        type === "end_the_run_and_trash_source_at_end_of_turn",
+    ).length;
+  }
   return sourceCard.definitionId
     ? endTheRunSubroutineCount(sourceCard.definitionId)
     : 0;
@@ -463,6 +466,7 @@ function subroutineLooksLikeImmediateStop(subroutine: unknown): boolean {
   const type = subroutineType(subroutine);
   if (
     type === "end_the_run" ||
+    type === "end_the_run_and_trash_source_at_end_of_turn" ||
     type === "end_the_run_unless_runner_pays" ||
     type === "set_run_future_end_the_run_subroutine" ||
     type === "set_runner_run_lock_actions"
@@ -731,17 +735,21 @@ function signalSegmentHasTerm(segment: string, term: string): boolean {
   );
 }
 
+const FUTURE_ENCOUNTER_EFFECTS = new Set([
+  "set_run_encounter_tax",
+  "set_run_break_subroutine_cost_modifier",
+  "set_run_future_end_the_run_subroutine",
+  "set_run_future_strength_bonus",
+  "set_next_encounter_unless_fully_break_damage",
+  "set_next_encounter_lock",
+  "set_next_encounter_no_break_subroutines",
+]);
+
 export function corpIceEffectsOnlyReachFutureEncounters(
   types: readonly string[],
 ): boolean {
-  const futureTypes = new Set([
-    "set_run_encounter_tax",
-    "set_run_break_subroutine_cost_modifier",
-    "set_run_future_end_the_run_subroutine",
-    "set_run_future_strength_bonus",
-    "set_next_encounter_unless_fully_break_damage",
-    "set_next_encounter_lock",
-    "set_next_encounter_no_break_subroutines",
-  ]);
-  return types.length > 0 && types.every((type) => futureTypes.has(type));
+  return (
+    types.length > 0 &&
+    types.every((type) => FUTURE_ENCOUNTER_EFFECTS.has(type))
+  );
 }

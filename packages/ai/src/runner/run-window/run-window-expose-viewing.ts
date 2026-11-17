@@ -1,7 +1,12 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
-import type { ActiveRunnerRunRoot, RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
+import type {
+  ActiveRunnerRunRoot,
+  RunnerRunOrigin,
+} from "../../plans/runner-run-origin-contract";
 import type { RunnerRunWindowSignal } from "../../plans/runner-tactical-plan-contracts";
 import { turnPlanningFingerprint } from "../../plans/turn-planning-contracts";
 import { runnerVisibleLethalIceDamageAssessment } from "../../runner-damage-threat-assessment";
@@ -16,6 +21,9 @@ function runnerExposedIceRezContext(input: AiDecisionInput) {
   const ice = run?.approachedIce;
   const cost = ice?.effectiveRezCostQuote;
   const valid =
+    input.side === "runner" &&
+    actionMatchesCurrentDecision(input, finish) &&
+    finish.type === "trigger_ability" &&
     run?.phase === "approach_ice" &&
     input.playerView.timingPoint === "run.approach_ice" &&
     ice?.known === true &&
@@ -26,7 +34,9 @@ function runnerExposedIceRezContext(input: AiDecisionInput) {
     cost.targetServerId === run.attackedServerId &&
     cost.projectedServerId === run.attackedServerId &&
     cost.expiresAtStateVersion === input.playerView.stateVersion &&
-    cost.complete === true;
+    cost.complete === true &&
+    isFiniteNonNegativeInteger(cost.finalCredits) &&
+    isFiniteNonNegativeInteger(cost.mandatoryAdditionalCosts.agendaPoints);
   if (!valid || !cost?.complete || !ice || !run) {
     throw new PlanResolutionFailure("missing_plan_module_coverage", {
       side: input.side,
@@ -40,7 +50,9 @@ function runnerExposedIceRezContext(input: AiDecisionInput) {
     });
   }
   const visibleRezSupport = runnerExposedIceHasRezSupport(
-    input.playerView.servers.find((server) => server.id === run.attackedServerId),
+    input.playerView.servers.find(
+      (server) => server.id === run.attackedServerId,
+    ),
   );
   const directlyFunded = cost.finalCredits <= input.playerView.opponent.credits;
   return { finish, run, ice, cost, visibleRezSupport, directlyFunded };
@@ -49,9 +61,11 @@ function runnerExposedIceRezContext(input: AiDecisionInput) {
 export function runnerExposedIceHasRezSupport(
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): boolean {
-  return server?.statuses?.some(
-    (status) => status.kind === "during_run_ice_rez_support",
-  ) === true;
+  return (
+    server?.statuses?.some(
+      (status) => status.kind === "during_run_ice_rez_support",
+    ) === true
+  );
 }
 
 /** A previous exact, unaffordable viewing may later need a fresh quote. */
@@ -74,7 +88,12 @@ export function runnerUnfundedExposedIceRezCredits(
 export function runnerExposedIceSafetyAssessment(
   input: AiDecisionInput,
   activeRunRoot?: ActiveRunnerRunRoot,
-): { evidenceCode: string; exposedIceSafetyExit?: RunnerRunWindowSignal["exposedIceSafetyExit"] } | undefined {
+):
+  | {
+      evidenceCode: string;
+      exposedIceSafetyExit?: RunnerRunWindowSignal["exposedIceSafetyExit"];
+    }
+  | undefined {
   const context = runnerExposedIceRezContext(input);
   if (!context || context.cost.costKind === "variable") return undefined;
   const { finish, run, ice, cost, visibleRezSupport, directlyFunded } = context;
@@ -120,7 +139,8 @@ export function runnerExposedIceSafetyAssessment(
     damage.projectedDamage > damage.handCount &&
     !projection.effectiveRunQuote.conditionalEncounterEffects?.length &&
     projection.effectiveRunQuote.subroutines.every(
-      (subroutine) => subroutine.type === "do_damage" || subroutine.type === "end_the_run",
+      (subroutine) =>
+        subroutine.type === "do_damage" || subroutine.type === "end_the_run",
     )
       ? bindLethalExposedIceExit(input, finish, activeRunRoot)
       : undefined;
@@ -139,7 +159,8 @@ function runnerExposedIceReentryFacts(
     opponent: input.playerView.opponent,
     root: server.root,
     statuses: server.statuses,
-    ice: server.ice.map(({ rezzed, advancementCounters }) => ({
+    ice: server.ice.map(({ instanceId, rezzed, advancementCounters }) => ({
+      instanceId,
       rezzed,
       advancementCounters,
     })),
@@ -163,10 +184,9 @@ function bindLethalExposedIceExit(
   const runActionId = runActions?.length === 1 ? runActions[0] : undefined;
   const exit = input.legalActions.find(
     (action) =>
-      action.side === "runner" &&
+      actionMatchesCurrentDecision(input, action) &&
       action.type === "jack_out" &&
       action.source === "game_rule" &&
-      action.expiresAtStateVersion === stateVersion &&
       action.costs.length === 0 &&
       action.payload?.approachIceExposeJackOut === true &&
       action.payload.cardId === finish.payload?.cardId &&
@@ -176,7 +196,7 @@ function bindLethalExposedIceExit(
     !run ||
     !server ||
     !runActionId ||
-    typeof turnSerial !== 'number' ||
+    typeof turnSerial !== "number" ||
     server.ice.length !== 1 ||
     run.position?.kind !== "ice" ||
     run.position.iceIndex !== 0 ||
@@ -283,7 +303,8 @@ export function runnerImmediateExposedIceSafetyExit(
       action.source === "basic_action" &&
       action.payload?.serverId === server?.id,
   );
-  return server && repeatedRun &&
+  return server &&
+    repeatedRun &&
     runnerExposedIceReentryFacts(input, server) === exit.facts
     ? {
         actionId: repeatedRun.actionId,
@@ -362,12 +383,11 @@ export function runnerRunExposeViewingBinding(
     typeof run.runId !== "string" ||
     run.phase !== "approach_ice" ||
     input.playerView.timingPoint !== "run.approach_ice" ||
-    finish.side !== "runner" ||
+    !actionMatchesCurrentDecision(input, finish) ||
     finish.type !== "trigger_ability" ||
     finish.source !== source ||
     typeof source !== "string" ||
     typeof target !== "string" ||
-    finish.expiresAtStateVersion !== input.playerView.stateVersion ||
     finish.costs.length !== 0 ||
     ice?.instanceId !== target ||
     ice.known !== true ||

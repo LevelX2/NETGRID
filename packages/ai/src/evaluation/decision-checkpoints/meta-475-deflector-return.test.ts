@@ -49,6 +49,8 @@ function signal(cp: ReturnType<typeof checkpoint>) {
     [
       {
         actionId: action.actionId,
+        actorSide: "corp",
+        stateVersion: cp.input.playerView.stateVersion,
         semanticActionType: "choice.resolve",
       } as ActionSemanticCandidate,
     ],
@@ -111,6 +113,12 @@ it.each([
     ).toBe(unbreakable);
   },
 );
+
+it("declines to materialize a deflector choice from a previous run", () => {
+  const cp = checkpoint(10);
+  cp.input.playerView.run!.runId = "different-run";
+  expect(signal(cp)).toBeUndefined();
+});
 
 it("keeps the low-exposure route when its entry can be broken", () => {
   const cp = checkpoint(10);

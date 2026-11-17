@@ -255,6 +255,7 @@ describe("CardSpec generated AI hint artifact", () => {
     expect(inputs).toEqual(
       [
         "data/ai/card-spec-ai-hints-generated.json",
+        "data/scenarios/card-support-ai-supported-current.json",
         "packages/ai/src/action-plan-owner-contracts.ts",
         "packages/ai/src/ai-hint-contracts.ts",
         "packages/ai/src/catalog-ai-hint-authority.ts",
@@ -262,6 +263,7 @@ describe("CardSpec generated AI hint artifact", () => {
         "packages/ai/src/generated-ai-hint-artifact-validation.ts",
         "packages/ai/src/hint-ontology.ts",
         "packages/runtime-data/src/card-spec-ai-hints.ts",
+        "packages/runtime-data/src/card-support.ts",
       ].sort(),
     );
   });
@@ -309,6 +311,14 @@ describe("CardSpec generated AI hint artifact", () => {
     const duplicateId = structuredClone(generatedArtifact);
     duplicateId.cardIds[0] = duplicateId.cardIds[1]!;
     expect(() => validateGeneratedArtifact(duplicateId)).toThrow(
+      "invalid_card_spec_ai_hint_artifact_rows",
+    );
+
+    const unrelatedCard = structuredClone(generatedArtifact);
+    unrelatedCard.cardIds[0] = "unlisted_card";
+    unrelatedCard.cards[0]!.cardId = "unlisted_card";
+    unrelatedCard.cards[0]!.hint.cardId = "unlisted_card";
+    expect(() => validateGeneratedArtifact(unrelatedCard)).toThrow(
       "invalid_card_spec_ai_hint_artifact_rows",
     );
 

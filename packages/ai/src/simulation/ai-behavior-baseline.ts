@@ -773,17 +773,17 @@ function summarizeRuntimeFailureEvidence(
   | "runtimeFailureOwnerCounts"
   | "repeatedRuntimeFailureOwners"
 > {
-  const runtimeFailureCodeCounts: Record<string, number> = {};
-  const runtimeFailureOwnerCounts: Record<string, number> = {};
+  const codeCounts = new Map<string, number>();
+  const ownerCounts = new Map<string, number>();
   let classifiedRuntimeFailures = 0;
   let unclassifiedRuntimeFailures = 0;
   for (const game of games) {
     const runtimeFailures = game.runtimeFailures ?? [];
     for (const failure of runtimeFailures) {
-      incrementCount(runtimeFailureCodeCounts, failure.code);
+      incrementCount(codeCounts, failure.code);
       if (failure.classified && failure.owner) {
         classifiedRuntimeFailures += 1;
-        incrementCount(runtimeFailureOwnerCounts, failure.owner);
+        incrementCount(ownerCounts, failure.owner);
       } else {
         unclassifiedRuntimeFailures += 1;
       }
@@ -795,7 +795,7 @@ function summarizeRuntimeFailureEvidence(
     unclassifiedRuntimeFailures += unclassifiedRemainder;
     if (unclassifiedRemainder > 0) {
       incrementCount(
-        runtimeFailureCodeCounts,
+        codeCounts,
         "unclassified_runtime_failure",
         unclassifiedRemainder,
       );
@@ -804,10 +804,10 @@ function summarizeRuntimeFailureEvidence(
   return {
     classifiedRuntimeFailures,
     unclassifiedRuntimeFailures,
-    runtimeFailureCodeCounts,
-    runtimeFailureOwnerCounts,
+    runtimeFailureCodeCounts: Object.fromEntries(codeCounts),
+    runtimeFailureOwnerCounts: Object.fromEntries(ownerCounts),
     repeatedRuntimeFailureOwners: repeatedRuntimeFailureOwners(
-      runtimeFailureOwnerCounts,
+      Object.fromEntries(ownerCounts),
     ),
   };
 }
@@ -834,16 +834,14 @@ function summarizeActionLimitEvidence(
 function combineCountRecords(
   records: readonly Record<string, number>[],
 ): Record<string, number> {
-  const combined: Record<string, number> = {};
+  const combined = new Map<string, number>();
   for (const record of records) {
     for (const [key, count] of Object.entries(record)) {
       if (count > 0) incrementCount(combined, key, count);
     }
   }
   return Object.fromEntries(
-    Object.entries(combined).sort(([left], [right]) =>
-      left.localeCompare(right),
-    ),
+    [...combined].sort(([left], [right]) => left.localeCompare(right)),
   );
 }
 
@@ -857,11 +855,11 @@ function repeatedRuntimeFailureOwners(
 }
 
 function incrementCount(
-  counts: Record<string, number>,
+  counts: Map<string, number>,
   key: string,
   amount = 1,
 ): void {
-  counts[key] = (counts[key] ?? 0) + amount;
+  counts.set(key, (counts.get(key) ?? 0) + amount);
 }
 
 function countRecordRows(counts: Readonly<Record<string, number>>): string[] {
@@ -891,9 +889,28 @@ function baselineCompatibilityIssues(
       ? ["slot_ids"]
       : []),
   ];
+  if (issues.length > 0) return issues.sort();
   const baselineSlots = new Map(
     baseline.slots.map((slot) => [slot.slotId, slot]),
   );
+  for (const result of [baseline, candidate]) {
+    if (
+      !sameValues(
+        result.slots.map(({ slotId }) => slotId).sort(),
+        [...result.config.slotIds].sort(),
+      )
+    )
+      issues.push("actual_slot_ids");
+    for (const slot of result.slots) {
+      if (
+        !sameValues(
+          slot.games.map(({ seed }) => seed).sort(),
+          [...result.config.seeds].sort(),
+        )
+      )
+        issues.push(`actual_game_seeds:${slot.slotId}`);
+    }
+  }
   for (const slot of candidate.slots) {
     const expected = baselineSlots.get(slot.slotId);
     if (!expected) continue;

@@ -32,7 +32,9 @@ wirkt bei der Vorbereitung einer neuen Installation.
 Mechanische oder annotierte Fakten werden an ihrer Autorenquelle geändert,
 anschließend wird das Bündel erzeugt. Generierte Hintdatensätze werden nicht
 von Hand korrigiert. Schema-/Compilerstand und Quellenfingerprints werden
-beim Laden validiert. Der Loader verwendet für Capability-Semantik dieselbe
+beim Laden validiert. Die Karten-IDs des Bündels müssen mit der Kartenliste
+im aktuellen AI-Support-Szenario aus `@netgrid/runtime-data/card-support` übereinstimmen.
+Der Loader verwendet für Capability-Semantik dieselbe
 Ontologieprüfung wie die übrige Hint-Validierung, einschließlich Effekt,
 Zielprofil und Strategiebindung. Ein fehlerhaftes Artefakt verlangt einen
 Ursachenfix.

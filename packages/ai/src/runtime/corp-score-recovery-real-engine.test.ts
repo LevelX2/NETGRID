@@ -273,3 +273,19 @@ it("rejects a malformed DTO quote instead of dropping its binding", () => {
     "invalid_corp_score_recovery_quote_binding",
   );
 });
+
+it("rejects duplicate operation rows for an exact recovery choice", () => {
+  const recovery = inputFor(fixture()).legalActions.find(
+    (action) => action.corpScoreRecoveryQuote,
+  )!;
+  const quote = recovery.corpScoreRecoveryQuote!;
+  const first = quote.options[0]!;
+  expect(first).toBeDefined();
+  recovery.corpScoreRecoveryQuote = {
+    ...quote,
+    options: [...quote.options, first],
+  };
+  expect(() => sanitizeCorpScoreRecoveryQuote(recovery)).toThrow(
+    "invalid_corp_score_recovery_quote_binding",
+  );
+});

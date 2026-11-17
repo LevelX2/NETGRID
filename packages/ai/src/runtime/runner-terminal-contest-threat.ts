@@ -10,14 +10,13 @@ function rootMayBeAgenda(
   serverId: string,
   card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
   index: number,
-  minimumAgendaPoints = 0,
+  minimumAgendaPoints: number,
 ): boolean {
   if (card.known !== false)
     return (
       card.type === "agenda" &&
-      (minimumAgendaPoints === 0 ||
-        (card.agendaPoints !== undefined &&
-          card.agendaPoints >= minimumAgendaPoints))
+      card.agendaPoints !== undefined &&
+      card.agendaPoints >= minimumAgendaPoints
     );
   const memory = reconstructBeliefState(
     input,
@@ -42,9 +41,8 @@ function rootMayBeAgenda(
   }
   return (
     definition.type === "agenda" &&
-    (minimumAgendaPoints === 0 ||
-      (definition.agendaPoints !== undefined &&
-        definition.agendaPoints >= minimumAgendaPoints))
+    definition.agendaPoints !== undefined &&
+    definition.agendaPoints >= minimumAgendaPoints
   );
 }
 
@@ -63,6 +61,7 @@ export type RunnerTerminalContestThreat = {
 export function runnerTerminalContestThreat(
   input: AiDecisionInput,
 ): RunnerTerminalContestThreat | undefined {
+  if (input.side !== "runner") return undefined;
   const pointsNeeded = Math.max(
     0,
     input.playerView.agendaPointsToWin - input.playerView.opponent.agendaPoints,
@@ -99,7 +98,7 @@ export function runnerTerminalContestThreat(
           server.id.startsWith("remote_") &&
           previouslyScoredRemoteIds.has(server.id) &&
           server.root.some((card, index) =>
-            rootMayBeAgenda(input, server.id, card, index),
+            rootMayBeAgenda(input, server.id, card, index, pointsNeeded),
           ),
       )
       .map((server) => server.id)
@@ -130,13 +129,8 @@ export function runnerTerminalContestThreat(
           server.id.startsWith("remote_") &&
           server.root.some(
             (card, index) =>
-              rootMayBeAgenda(
-                input,
-                server.id,
-                card,
-                index,
-                pointsNeeded === 4 ? 4 : 0,
-              ) && (card.advancementCounters ?? 0) >= 1,
+              rootMayBeAgenda(input, server.id, card, index, pointsNeeded) &&
+              (card.advancementCounters ?? 0) >= 1,
           ),
       )
       .map((server) => server.id)
@@ -166,7 +160,7 @@ export function runnerTerminalContestThreat(
         server.id.startsWith("remote_") &&
         server.root.some(
           (card, index) =>
-            rootMayBeAgenda(input, server.id, card, index) &&
+            rootMayBeAgenda(input, server.id, card, index, pointsNeeded) &&
             (card.advancementCounters ?? 0) >= 2,
         ),
     )
@@ -194,7 +188,7 @@ export function runnerTerminalContestThreat(
         server.root.some(
           (card, index) =>
             card.known === false &&
-            rootMayBeAgenda(input, server.id, card, index),
+            rootMayBeAgenda(input, server.id, card, index, pointsNeeded),
         ),
     )
     .map((server) => server.id)
@@ -218,23 +212,25 @@ export function runnerTargetHasTerminalContestThreat(
   input: AiDecisionInput,
   targetServerId: string,
 ): boolean {
+  if (!targetServerId.startsWith("remote_")) return false;
   const terminalThreat = runnerTerminalContestThreat(input);
   if (!terminalThreat) return false;
+  if (terminalThreat.remoteServerIds.includes(targetServerId)) return true;
+  if (terminalThreat.kind !== "opponent_matchpoint") return false;
   const server = input.playerView.servers.find(
-    (candidate) => candidate.id === targetServerId,
+    ({ id }) => id === targetServerId,
   );
-  const visiblyAdvancedRoot =
+  return (
     server?.root.some(
       (card, index) =>
-        rootMayBeAgenda(input, server.id, card, index) &&
-        (card.advancementCounters ?? 0) > 0,
-    ) === true;
-  const repeatedMatchpointRemote =
-    terminalThreat.remoteServerIds.includes(targetServerId);
-  if (!visiblyAdvancedRoot && !repeatedMatchpointRemote) {
-    return false;
-  }
-  return (
-    terminalThreat.kind === "opponent_matchpoint" || repeatedMatchpointRemote
+        (card.advancementCounters ?? 0) > 0 &&
+        rootMayBeAgenda(
+          input,
+          server.id,
+          card,
+          index,
+          terminalThreat.pointsNeeded,
+        ),
+    ) === true
   );
 }

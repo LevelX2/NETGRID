@@ -319,6 +319,25 @@ describe("Corp core plan modules", () => {
         ],
       },
     });
+
+    for (const option of options) {
+      if (option.id.startsWith("agenda_purge_keeper-1_hq_"))
+        option.metadata.creditCost = 3;
+      if (option.id.startsWith("agenda_purge_razor-wire-1_"))
+        option.metadata.creditCost = 2;
+    }
+    expect(
+      corpAgendaPurgeDefenseChoiceSignal(
+        input,
+        [choiceCandidate],
+        knownCentralAllocation("hq"),
+      )?.choiceResolution,
+    ).toMatchObject({
+      targets: [
+        { cardId: "keeper-1", serverId: "rd" },
+        { cardId: "razor-wire-1", serverId: "hq" },
+      ],
+    });
   });
 
   it("assigns a paid Classic Deflector redirect through corp.defend_servers", () => {
@@ -380,6 +399,7 @@ describe("Corp core plan modules", () => {
           rig: [],
         },
         run: {
+          runId: "run_8",
           attackedServerId: "rd",
           phase: "encounter_ice",
           badPublicityCredits: 0,
@@ -435,7 +455,10 @@ describe("Corp core plan modules", () => {
     expect(
       corpClassicDeflectorDefenseChoiceSignal(
         input,
-        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        [{
+          ...candidate(actionId, "resolve_choice", "choice.resolve"),
+          stateVersion: 11,
+        }],
         knownCentralAllocation("rd"),
         0,
       ),
@@ -460,7 +483,10 @@ describe("Corp core plan modules", () => {
     expect(
       corpClassicDeflectorDefenseChoiceSignal(
         input,
-        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        [{
+          ...candidate(actionId, "resolve_choice", "choice.resolve"),
+          stateVersion: 11,
+        }],
         knownCentralAllocation("rd"),
         2,
       ),
@@ -485,7 +511,10 @@ describe("Corp core plan modules", () => {
     expect(
       corpClassicDeflectorDefenseChoiceSignal(
         input,
-        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        [{
+          ...candidate(actionId, "resolve_choice", "choice.resolve"),
+          stateVersion: 11,
+        }],
         knownCentralAllocation("rd"),
         3,
       ),
