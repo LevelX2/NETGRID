@@ -1,3 +1,4 @@
+import { ORIGINALSET_DEFAULT_DECKS } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -56,7 +57,7 @@ describe("known central access payoff HQ knownness", () => {
           {
             groupId: "candidate-hidden-ice",
             reason: "hidden_ice_install_candidates",
-            sourceEventId: "evt_install",
+            sourceEventId: 3,
             serverId: "remote_1",
             installPlacement: "ice",
             candidateDefinitions: [
@@ -206,7 +207,7 @@ describe("known central access payoff HQ knownness", () => {
           {
             groupId: "candidate-hidden-root",
             reason: "hidden_root_install_candidates",
-            sourceEventId: "evt_install",
+            sourceEventId: 3,
             serverId: "remote_1",
             installPlacement: "root",
             candidateDefinitions: [
@@ -386,7 +387,7 @@ describe("known central access payoff HQ knownness", () => {
     });
     expect(payoff.evidence).toEqual(
       expect.arrayContaining([
-        "hq_known_trash_definition:onr_v1_330_krumz",
+        "hq_known_trash_definition:542",
         "hq_known_trash_cost:2",
         "hq_known_trash_declined_count:0",
       ]),
@@ -430,7 +431,7 @@ describe("known central access payoff HQ knownness", () => {
     expect(payoff.reasons).toContain("known_hq_trash_payoff_already_declined");
     expect(payoff.evidence).toEqual(
       expect.arrayContaining([
-        "hq_known_trash_declined_definition:onr_v1_330_krumz",
+        "hq_known_trash_declined_definition:542",
         "hq_run_suppressed_by_recent_declined_trash:true",
       ]),
     );
@@ -474,7 +475,7 @@ describe("known central access payoff HQ knownness", () => {
       knownNoCurrentPayoff: false,
     });
     expect(payoff.evidence).toContain(
-      "hq_known_trash_definition:onr_v1_330_krumz",
+      "hq_known_trash_definition:542",
     );
   });
 
@@ -517,7 +518,7 @@ describe("known central access payoff HQ knownness", () => {
     expect(payoff.evidence).toEqual(
       expect.arrayContaining([
         "rnd_freshness:stale_known_same_top",
-        "rnd_known_top_definition:onr_v1_309_bbs-whispering-campaign",
+        "rnd_known_top_definition:521",
         "rnd_known_top_trash_affordable:true",
         "rd_run_suppressed_by_recent_declined_trash:true",
         "central_memory_payoff:known_low_value",
@@ -618,7 +619,7 @@ describe("known central access payoff HQ knownness", () => {
       input,
       "rd",
       beliefWithRndMemory({
-        lastKnownAccessEventId: "evt_rd_private_look",
+        lastKnownAccessEventId: 2,
         knownToRunner: true,
         freshness: "stale_known_same_top",
         knownTopDefinitionId: 596,
@@ -756,7 +757,7 @@ describe("known central access payoff HQ knownness", () => {
         input,
         "rd",
         beliefWithRndMemory({
-          lastKnownAccessEventId: "evt-known-rd",
+          lastKnownAccessEventId: 2,
           knownToRunner: true,
           freshness: "stale_known_same_top",
           knownTopDefinitionId: multiaccess
@@ -797,7 +798,7 @@ describe("known central access payoff HQ knownness", () => {
       input,
       "rd",
       beliefWithRndMemory({
-        lastKnownAccessEventId: "evt_rd_private_look",
+        lastKnownAccessEventId: 2,
         knownToRunner: true,
         freshness: "stale_known_same_top",
         knownTopDefinitionId: 596,
@@ -821,7 +822,7 @@ describe("known central access payoff HQ knownness", () => {
       expect.arrayContaining([
         "rnd_known_access_depth_estimate:2",
         "rnd_known_sequence_evaluated_count:2",
-        "rnd_known_sequence_agenda_definition:simple_agenda",
+        "rnd_known_sequence_agenda_definition:588",
         "central_memory_payoff:agenda",
         "rd_run_boosted_by_known_sequence_agenda:true",
       ]),
@@ -848,7 +849,7 @@ describe("known central access payoff HQ knownness", () => {
       input,
       "rd",
       beliefWithRndMemory({
-        lastKnownAccessEventId: "evt_rd_private_look",
+        lastKnownAccessEventId: 2,
         knownToRunner: true,
         freshness: "stale_known_same_top",
         knownTopDefinitionId: 596,
@@ -876,7 +877,7 @@ describe("known central access payoff HQ knownness", () => {
     expect(payoff.evidence).not.toEqual(
       expect.arrayContaining([
         "rnd_known_access_depth_estimate:2",
-        "rnd_known_sequence_agenda_definition:simple_agenda",
+        "rnd_known_sequence_agenda_definition:588",
       ]),
     );
   });
@@ -969,17 +970,17 @@ function aiInput(params: {
 }
 
 function publicEvent(
-  eventId: string,
+  eventLabel: string,
   type: string,
   stateVersionBefore: number,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type,
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
-    stateHashAfter: `hash_${eventId}`,
+    stateHashAfter: `hash_${eventLabel}`,
     visibilityClass: "hidden_info_barrier",
     publicPayload,
   } as PublicGameEvent;
@@ -987,12 +988,11 @@ function publicEvent(
 
 function beliefWithHqMemory(params: {
   handCount: number;
-  knownDefinitions: string[];
+  knownDefinitions: number[];
   unknownRestCount: number;
   candidateGroups?: RunnerOpponentModel["hqHandMemory"]["ledger"]["candidateGroups"];
 }): BeliefState {
   const rndTopFreshness: RunnerOpponentModel["rndTopFreshness"] = {
-    lastKnownAccessEventId: "test-invalidated-rd",
     knownToRunner: false,
     freshness: "invalidated",
     invalidationReasons: [],
@@ -1000,7 +1000,7 @@ function beliefWithHqMemory(params: {
   const safeDefinitions = params.knownDefinitions.map((definitionId) => ({
     definitionId,
     count: 1,
-    sourceEventIds: ["test-hq-look"],
+    sourceEventIds: [2],
   }));
   return {
     side: "runner",
@@ -1031,13 +1031,13 @@ function beliefWithHqMemory(params: {
           params.knownDefinitions.length === params.handCount &&
           params.unknownRestCount === 0 &&
           (params.candidateGroups?.length ?? 0) === 0,
-        sourceEventIds: ["test-hq-look"],
+        sourceEventIds: [2],
         invalidationReasons: [],
         ledger: {
           safeDefinitions,
           unknownRestCount: params.unknownRestCount,
           candidateGroups: params.candidateGroups ?? [],
-          sourceEventIds: ["test-hq-look"],
+          sourceEventIds: [2],
           invalidationReasons: [],
         },
       },
@@ -1089,7 +1089,7 @@ function visibleInstalledRunnerCard(
   return {
     instanceId: `${definitionId}_installed`,
     definitionId,
-    title: definitionId,
+    title: String(definitionId),
     owner: "runner",
     controller: "runner",
     type,
@@ -1100,7 +1100,7 @@ function visibleInstalledRunnerCard(
 function visibleIdentity(side: "runner" | "corp"): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: ORIGINALSET_DEFAULT_DECKS[side].identity,
     title: `${side} identity`,
     owner: side,
     controller: side,

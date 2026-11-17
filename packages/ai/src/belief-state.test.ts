@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
   PlayerView,
@@ -80,10 +81,10 @@ describe("belief-state revealed opponent ownership", () => {
       .map((entry) => entry.subject);
 
     expect(revealedOpponentSubjects).toContain(
-      "revealed_opponent_card:onr_v1_206_marine-arcology",
+      "revealed_opponent_card:418",
     );
     expect(revealedOpponentSubjects).not.toContain(
-      "revealed_opponent_card:onr_v1_047_pile-driver",
+      "revealed_opponent_card:259",
     );
   });
 });
@@ -284,7 +285,7 @@ describe("belief-state R&D top freshness", () => {
       knownSequenceDefinitionIds: [589],
     });
     expect(freshness?.invalidationReasons).toContain(
-      "rd_known_sequence_prefix_changed:evt_contradictory_access:0",
+      "rd_known_sequence_prefix_changed:4:0",
     );
   });
 
@@ -311,8 +312,8 @@ describe("belief-state R&D top freshness", () => {
     });
     expect(freshness?.invalidationReasons).toEqual(
       expect.arrayContaining([
-        "rd_access_sequence_binding_unavailable:evt_unbound_access",
-        "rd_access_removal_binding_unavailable:evt_unbound_trash",
+        "rd_access_sequence_binding_unavailable:3",
+        "rd_access_removal_binding_unavailable:4",
       ]),
     );
   });
@@ -568,7 +569,7 @@ describe("belief-state R&D top freshness", () => {
     expect(freshness?.knownTopDefinitionId).toBeUndefined();
     expect(freshness?.knownSequenceDefinitionIds).toBeUndefined();
     expect(freshness?.invalidationReasons).toContain(
-      "rd_access_removed_top_card:evt_2",
+      "rd_access_removed_top_card:4",
     );
   });
 
@@ -603,7 +604,7 @@ describe("belief-state R&D top freshness", () => {
     });
     expect(freshness?.knownTopDefinitionId).toBeUndefined();
     expect(freshness?.invalidationReasons).toContain(
-      "rd_access_removed_top_card:evt_label_2",
+      "rd_access_removed_top_card:4",
     );
   });
 
@@ -633,7 +634,7 @@ describe("belief-state R&D top freshness", () => {
       555,
     );
     expect(freshness?.invalidationReasons).not.toContain(
-      "rd_access_removed_top_card:evt_label_noise",
+      "rd_access_removed_top_card:4",
     );
   });
 });
@@ -719,13 +720,13 @@ describe("belief-state HQ hand memory retention", () => {
       belief.runnerOpponentModel?.hqHandMemory.ledger.candidateGroups,
     ).toEqual([
       expect.objectContaining({
-        sourceEventId: "evt_install_a",
+        sourceEventId: 4,
         installedPositionKey: "installed-position-v1:a",
       }),
     ]);
     expect(belief.runnerOpponentModel?.hiddenRemoteCandidateMemory).toEqual([
       expect.objectContaining({
-        sourceEventId: "evt_install_a",
+        sourceEventId: 4,
         installedPositionKey: "installed-position-v1:a",
       }),
     ]);
@@ -811,7 +812,7 @@ describe("belief-state HQ hand memory retention", () => {
       },
     });
     expect(memory?.invalidationReasons).toContain(
-      "corp_discarded_hq_card:evt_hidden_discard",
+      "corp_discarded_hq_card:4",
     );
   });
 
@@ -846,7 +847,7 @@ describe("belief-state HQ hand memory retention", () => {
       allCardsKnown: true,
     });
     expect(afterDraw?.invalidationReasons).toContain(
-      "known_rnd_top_moved_to_hq:evt_rd_access->evt_draw",
+      `known_rnd_top_moved_to_hq:${rdAccess.eventId}->${knownDraw.eventId}`,
     );
     expect(afterPlay).toMatchObject({
       handCount: 0,
@@ -854,7 +855,7 @@ describe("belief-state HQ hand memory retention", () => {
       knownCount: 0,
     });
     expect(afterPlay?.invalidationReasons).toContain(
-      "known_hq_card_played:evt_play",
+      `known_hq_card_played:${playedOperation.eventId}`,
     );
   });
 
@@ -892,7 +893,7 @@ describe("belief-state HQ hand memory retention", () => {
       },
     });
     expect(memory?.invalidationReasons).toContain(
-      "gypsy_known_agenda_stored_in_hq:evt_gypsy_resolution",
+      "gypsy_known_agenda_stored_in_hq:3",
     );
   });
 
@@ -1163,7 +1164,7 @@ describe("belief-state HQ hand memory retention", () => {
       candidateGroups: [],
     });
     expect(hqMemory?.invalidationReasons.join("|")).toContain(
-      "shuffle_changed_hq_hand:evt_reorder",
+      "shuffle_changed_hq_hand:4",
     );
   });
 
@@ -1283,7 +1284,7 @@ describe("belief-state HQ hand memory retention", () => {
       120,
     );
     expect(hqMemory?.invalidationReasons).toContain(
-      "known_hq_card_trash:evt_hq_trash",
+      "known_hq_card_trash:4",
     );
   });
 
@@ -1329,7 +1330,7 @@ describe("belief-state HQ hand memory retention", () => {
       ],
     });
     expect(hqMemory?.invalidationReasons).toContain(
-      "belief_warning:hq_all_known_contradiction:evt_hq_access_data_wall",
+      "belief_warning:hq_all_known_contradiction:4",
     );
     expect(belief.uncertainty).toContain(
       "belief_warning:hq_all_known_contradiction",
@@ -1549,7 +1550,7 @@ describe("Corp memory of Runner-known installed cards", () => {
         area: "root",
         positionKey: "root:0",
         learnedBy: "expose",
-        sourceEventId: "evt_expose_trap",
+        sourceEventId: 3,
       }),
     ]);
   });
@@ -1570,7 +1571,7 @@ describe("Corp memory of Runner-known installed cards", () => {
         serverId: "remote_1",
         positionKey: "root:0",
         learnedBy: "persistent_exposure",
-        sourceEventId: "evt_persistent_exposure_started",
+        sourceEventId: 3,
       }),
     ]);
   });
@@ -1638,7 +1639,7 @@ describe("Corp memory of Runner-known installed cards", () => {
         definitionId: 557,
         positionKey: "root:0",
         learnedBy: "persistent_exposure",
-        sourceEventId: "evt_persistent_exposure_ended",
+        sourceEventId: 5,
       }),
     ]);
   });
@@ -1744,7 +1745,7 @@ describe("Corp memory of Runner-known installed cards", () => {
       expect.objectContaining({
         cardInstanceId: "trap-1",
         learnedBy: "access",
-        sourceEventId: "evt_access_trap",
+        sourceEventId: 3,
       }),
     ]);
   });
@@ -1806,8 +1807,8 @@ describe("Corp memory of Runner-known installed cards", () => {
       actor: "runner",
       actionType: "resolve_choice",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "other_asset",
-      exposedCardDefinitionId: "other_asset",
+      publicRevealDefinitionId: syntheticCardDefinitionId("other_asset"),
+      exposedCardDefinitionId: syntheticCardDefinitionId("other_asset"),
       exposedServerId: "remote_2",
       exposedArea: "root",
       exposedIndex: 0,
@@ -1835,7 +1836,7 @@ describe("Corp memory of Runner-known installed cards", () => {
       expect.objectContaining({
         cardInstanceId: "other_asset_instance",
         serverId: "remote_2",
-        sourceEventId: "evt_expose_other",
+        sourceEventId: 4,
       }),
     ]);
   });
@@ -1924,7 +1925,7 @@ describe("belief-state public remote root type deductions", () => {
         unknownRootCount: 1,
         candidateTypes: ["upgrade"],
         confidence: 1,
-        sourceEventIds: ["evt_replacement", "evt_score"],
+        sourceEventIds: [5,6],
       }),
     ]);
     expect(belief.runnerOpponentModel?.remoteCardBelief).toEqual([]);
@@ -2024,7 +2025,7 @@ describe("belief-state remote hypothesis invalidations", () => {
     );
 
     expect(belief.invalidationLog).toContain(
-      "remote_state_changed:evt_remote_10_advance:remote_10",
+      "remote_state_changed:3:remote_10",
     );
     expect(remoteRootHypothesis?.invalidatedBy).toEqual([]);
   });
@@ -2040,7 +2041,7 @@ describe("belief-state reveal kind classification", () => {
         actor: "runner",
         actionType: "resolve_choice",
         revealKind: "expose",
-        cardDefinitionId: "neutral-card",
+        cardDefinitionId: syntheticCardDefinitionId("neutral-card"),
       },
     );
     const idOnlyExpose = publicEvent(
@@ -2050,14 +2051,14 @@ describe("belief-state reveal kind classification", () => {
       {
         actor: "runner",
         actionType: "resolve_choice",
-        cardDefinitionId: "custom-expose-tool",
+        cardDefinitionId: syntheticCardDefinitionId("custom-expose-tool"),
       },
     );
     const breachKind = publicEvent("evt_breach_kind", "resolve_choice", 3, {
       actor: "runner",
       actionType: "resolve_choice",
       revealKind: "breach",
-      cardDefinitionId: "custom-reveal-tool",
+      cardDefinitionId: syntheticCardDefinitionId("custom-reveal-tool"),
     });
 
     const classifications = reconstructBeliefState(
@@ -2065,15 +2066,15 @@ describe("belief-state reveal kind classification", () => {
     ).eventClassifications;
 
     expect(
-      classifications.find((entry) => entry.eventId === "evt_structured_expose")
+      classifications.find((entry) => entry.eventId === 3)
         ?.family,
     ).toBe("expose");
     expect(
-      classifications.find((entry) => entry.eventId === "evt_id_only_expose")
+      classifications.find((entry) => entry.eventId === 4)
         ?.family,
     ).toBe("other");
     expect(
-      classifications.find((entry) => entry.eventId === "evt_breach_kind")
+      classifications.find((entry) => entry.eventId === 5)
         ?.family,
     ).toBe("other");
   });
@@ -2266,17 +2267,17 @@ function rndPrivateLookEvent(
 }
 
 function publicEvent(
-  eventId: string,
+  eventLabel: string,
   type: string,
   stateVersionBefore: number,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type,
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
-    stateHashAfter: `hash_${eventId}`,
+    stateHashAfter: `hash_${eventLabel}`,
     visibilityClass: "hidden_info_barrier",
     publicPayload: {
       // These synthetic draw events represent ordinary one-card draws unless
@@ -2291,14 +2292,14 @@ function publicEvent(
 }
 
 function visibleCard(
-  definitionId: number,
+  definition: number | string,
   owner: "runner" | "corp",
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {
-    instanceId: `${definitionId}_instance`,
-    definitionId,
-    title: definitionId,
+    instanceId: `${definition}_instance`,
+    definitionId: typeof definition === "number" ? definition : syntheticCardDefinitionId(definition),
+    title: String(definition),
     type,
     known: true,
     owner,
