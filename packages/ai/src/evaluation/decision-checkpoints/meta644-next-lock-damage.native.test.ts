@@ -165,11 +165,16 @@ it("keeps the Engine lock through the next damage window and replays the fully p
   paid = advanceToInner(paid);
   for (let i = 0; i < 4; i++)
     paid = act(paid, (a) => a.type === "pump_breaker");
+  const damageRoutine = getPlayerView(paid, "runner").servers
+    .flatMap((server) => server.ice)
+    .find((ice) => ice.instanceId === paid.run?.encounteredIceId)
+    ?.effectiveRunQuote?.subroutines.find((routine) => routine.type === "do_damage");
+  expect(damageRoutine).toBeDefined();
   paid = act(
     paid,
-    (a) =>
-      a.type === "break_subroutine" &&
-      String(a.payload?.subroutineId).includes("damage"),
+    (action) =>
+      action.type === "break_subroutine" &&
+      action.payload?.subroutineId === damageRoutine!.id,
   );
   paid = advanceToAccess(paid);
   expect(paid.runner.credits).toBe(0);

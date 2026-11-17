@@ -85,7 +85,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("SP-565 admits the original free ETR when every paid continuation is inadmissible", () => {
   const r = decisionAt("g15d170");
   expect(r.decision.actionId).toBe(
-    "runner.continue_run.subroutine_end_run_unless_runner_pays_one",
+    "runner.continue_run.0",
   );
   expect(r.pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   expect(r.pf.rootPlanInstanceId).toBe(
@@ -105,7 +105,7 @@ it("SP-565 retains access when its paid continuation is actually funded and admi
     state.runner.credits = 100;
   });
   expect(r.decision.actionId).toBe(
-    "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
+    "runner.continue_run.0.0.1",
   );
   expect(r.pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   const state = applySelected(r);

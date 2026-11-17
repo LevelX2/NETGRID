@@ -133,7 +133,7 @@ describe("Native point-paid Corp Defense install contract", () => {
     apply("corp", "corp.decline_rez");
     apply(
       "runner",
-      "runner.continue_run.subroutine_end_run_a,subroutine_end_run_b",
+      "runner.continue_run.0,1",
     );
     expect(state.run).toBeUndefined();
   });
