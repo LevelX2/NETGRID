@@ -50,6 +50,7 @@ import {
   type SetupState,
   type Side,
   type StateHash,
+  type TraceId,
   type TraceSuccessEffect,
   type ValidationResult,
   type VisibleCard,
@@ -599,7 +600,7 @@ export function createStateRuntimeResolvers(
     state: GameState,
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
-    traceId: string,
+    traceId: TraceId,
     damageAmount: number,
     legalAction: LegalAction,
   ): {
@@ -662,7 +663,8 @@ export function createStateRuntimeResolvers(
     if (
       !continuation ||
       continuation.stage !== "select_hardware" ||
-      !choice?.source.startsWith("trace_success.hardware_wrecker:")
+      choice?.source !== `trace_success.hardware_wrecker:${continuation.traceId}` ||
+      choice.choiceId !== `trace_hardware_wrecker_${continuation.traceId}_${choice.stateVersion}`
     )
       throw new Error("Es ist keine Trace-Hardware-Auswahl offen.");
     if (legalAction.side !== "corp" || playerAction.side !== "corp")
@@ -756,7 +758,7 @@ export function createStateRuntimeResolvers(
     state: GameState,
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
-    traceId: string,
+    traceId: TraceId,
     targetCardId: CardInstanceId | undefined,
   ): NonNullable<LegalAction["payload"]> {
     if (

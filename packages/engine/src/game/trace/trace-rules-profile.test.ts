@@ -75,7 +75,7 @@ function trace(
   traceLimit: number,
 ): TraceState {
   return {
-    traceId: "trace_1",
+    traceId: 1,
     sourceCardInstanceId: "source_1",
     sourceDefinitionId: 466571496,
     traceRulesProfile,

@@ -9,6 +9,7 @@
 import type {
   CardInstanceId,
   GameState,
+  TraceId,
   TraceRulesProfile,
   TraceState,
 } from "@netgrid/shared";
@@ -18,7 +19,7 @@ export type CurrentTrace = NonNullable<GameState["trace"]>;
 export type TracePhase = CurrentTrace["status"];
 
 export type TraceWindowDescriptor = {
-  traceId: string;
+  traceId: TraceId;
   traceRulesProfile: TraceRulesProfile;
   phase: TracePhase;
   sourceCardInstanceId: CardInstanceId;

@@ -17,6 +17,7 @@ import type {
   ModifierKind,
   PlayerAction,
   Side,
+  TraceId,
 } from "@netgrid/shared";
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
 import type {
@@ -111,7 +112,7 @@ describe("trace orchestration", () => {
     );
 
     expect(state.trace).toMatchObject({
-      traceId: "op_trace.2.2680416230.source_1",
+      traceId: 2,
       sourceCardInstanceId: sourceId,
       sourceDefinitionId: sourceDefinition.id,
       traceLimit: 2,
@@ -121,9 +122,9 @@ describe("trace orchestration", () => {
       status: "corp_bid",
     });
     expect(state.pendingChoice).toMatchObject({
-      choiceId: "op_trace.2.2680416230.source_1.corp.bid.2",
+      choiceId: "2.corp.bid.2",
       side: "corp",
-      source: "trace:op_trace.2.2680416230.source_1",
+      source: "trace:2",
       kind: "bid_amount",
       stateVersion: 2,
       visibility: "public",
@@ -138,7 +139,7 @@ describe("trace orchestration", () => {
     ]);
     expect(action.payload).toMatchObject({
       traceStarted: true,
-      traceId: "op_trace.2.2680416230.source_1",
+      traceId: 2,
       sourceCardId: sourceId,
       sourceDefinitionId: sourceDefinition.id,
       traceLimit: 2,
@@ -174,11 +175,11 @@ describe("trace orchestration", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "trace:trace_1",
+      source: "trace:1",
       kind: "bid_amount",
     });
     expect(action.payload).toMatchObject({
-      traceId: "trace_1",
+      traceId: 1,
       traceStep: "corp_bid",
       traceLimit: 2,
       corpBid: 2,
@@ -392,11 +393,11 @@ describe("trace orchestration", () => {
     expect(state.runner.credits).toBe(3);
     expect(calls.followups).toEqual([]);
     expect(calls.tagRequests).toEqual([
-      { amount: 1, source: "trace:2680416230:trace_1" },
+      { amount: 1, source: "trace:2680416230:1" },
     ]);
     expect(state.runner.tags).toBe(1);
     expect(action.payload).toMatchObject({
-      traceId: "trace_1",
+      traceId: 1,
       traceStep: "runner_bid",
       traceSuccessful: true,
       tagsAdded: 1,
@@ -444,7 +445,7 @@ describe("trace orchestration", () => {
     );
 
     expect(calls.tagRequests).toEqual([
-      { amount: 2, source: "trace:2680416230:trace_1" },
+      { amount: 2, source: "trace:2680416230:1" },
     ]);
     expect(state.runner.tags).toBe(2);
     expect(action.payload).toMatchObject({
@@ -495,7 +496,7 @@ describe("trace orchestration", () => {
     expect(state.trace?.runnerBid).toBeUndefined();
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "trace:trace_1",
+      source: "trace:1",
     });
     expect(action.payload).toMatchObject({
       runnerCostPenaltySupportWindowOpened: true,
@@ -540,7 +541,7 @@ describe("trace orchestration", () => {
     );
 
     expect(state.pendingChoice).toMatchObject({
-      source: "trace_post_bid_link:trace_1",
+      source: "trace_post_bid_link:1",
       side: "runner",
       visibility: "hidden_info_barrier",
     });
@@ -609,7 +610,7 @@ describe("trace orchestration", () => {
       allocations: [],
     });
     expect(state.pendingChoice).toMatchObject({
-      source: `trace_runner_bid_payment:trace_1:${linkAId}`,
+      source: `trace_runner_bid_payment:1:${linkAId}`,
       prompt:
         "link_a_definition fuer Runner Link-Bid nutzen (bisher 0/8 Gesamtbid)",
     });
@@ -636,7 +637,7 @@ describe("trace orchestration", () => {
     expect(hostedCredits.get(linkAId)).toBe(5);
     expect(hostedCredits.get(linkBId)).toBe(2);
     expect(state.pendingChoice).toMatchObject({
-      source: `trace_runner_bid_payment:trace_1:${linkBId}`,
+      source: `trace_runner_bid_payment:1:${linkBId}`,
       prompt:
         "link_b_definition fuer Runner Link-Bid nutzen (bisher 3/8 Gesamtbid)",
     });
@@ -773,7 +774,7 @@ describe("trace orchestration", () => {
     expect(calls.followups).toEqual([]);
     expect(state.trace).toMatchObject({ status: "trace_success_cancel" });
     expect(state.pendingChoice).toMatchObject({
-      source: "trace_success_cancel:trace_1",
+      source: "trace_success_cancel:1",
       side: "runner",
       visibility: "hidden_info_barrier",
     });
@@ -811,9 +812,9 @@ describe("trace orchestration", () => {
     });
     state.run = { runId: 1, attackedServerId: "rd" } as any;
     state.pendingChoice = {
-      choiceId: "trace_1.post_bid_link.2",
+      choiceId: "1.post_bid_link.2",
       side: "runner",
-      source: "trace_post_bid_link:trace_1",
+      source: "trace_post_bid_link:1",
       prompt: "Post-bid Link-Faehigkeit nutzen",
       kind: "select_option",
       options: [
@@ -849,9 +850,9 @@ describe("trace orchestration", () => {
     expect(state.runner.credits).toBe(4);
     expect(calls.runActionCapSpends).toEqual([1]);
     expect(calls.submarineMarkers).toEqual([programId]);
-    expect(calls.followups).toEqual(["post_bid_link:trace_1"]);
+    expect(calls.followups).toEqual(["post_bid_link:1"]);
     expect(action.payload).toMatchObject({
-      traceId: "trace_1",
+      traceId: 1,
       traceStep: "post_bid_link",
       eventModificationDecision: "apply",
       sourceDefinitionId: programDefinition.id,
@@ -882,9 +883,9 @@ describe("trace orchestration", () => {
     });
     state.run = { runId: 1, attackedServerId: "rd" } as any;
     state.pendingChoice = {
-      choiceId: "trace_1.base_link.2",
+      choiceId: "1.base_link.2",
       side: "runner",
-      source: "trace_base_link:trace_1",
+      source: "trace_base_link:1",
       prompt: "Base-Link-Karte fuer Trace nutzen",
       kind: "select_option",
       options: [
@@ -1071,7 +1072,7 @@ function activeTrace(
   extras: Partial<NonNullable<GameState["trace"]>> = {},
 ): NonNullable<GameState["trace"]> {
   return {
-    traceId: "trace_1",
+    traceId: 1,
     sourceCardInstanceId,
     sourceDefinitionId,
     traceLimit: 2,
@@ -1084,7 +1085,7 @@ function activeTrace(
 function bidChoice(
   state: GameState,
   side: Side,
-  traceId: string,
+  traceId: TraceId,
   maxBid: number,
 ) {
   return {

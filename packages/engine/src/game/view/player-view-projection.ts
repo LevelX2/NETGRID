@@ -443,10 +443,12 @@ export function buildPlayerViewProjection(
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
+        ...(trace.sourceRunId !== undefined ? { sourceRunId: trace.sourceRunId } : {}),
         sourceCardInstanceId: trace.sourceCardInstanceId,
         ...(trace.subroutineIndex !== undefined &&
-        run?.encounteredIce?.instanceId === trace.sourceCardInstanceId &&
-        run.encounteredIce.known
+        ((run?.encounteredIce?.instanceId === trace.sourceCardInstanceId && run.encounteredIce.known) ||
+          (side === "corp" && trace.status === "trace_success_program_trash" &&
+            state.corp.servers.some((server) => server.ice.includes(trace.sourceCardInstanceId))))
           ? { sourceSubroutineIndex: trace.subroutineIndex }
           : {}),
         ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),

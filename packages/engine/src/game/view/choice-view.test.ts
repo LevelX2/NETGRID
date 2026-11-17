@@ -28,7 +28,7 @@ describe("ChoiceView projection", () => {
       );
       state.runner.credits = 5;
       state.trace = {
-        traceId: "classic-zero-bid",
+        traceId: 1,
         traceRulesProfile,
         sourceCardInstanceId: state.corp.identity,
         sourceDefinitionId:

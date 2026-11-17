@@ -38,7 +38,7 @@ describe("latestTraceContext", () => {
     input.playerView.side = "runner";
     input.playerView.own.credits = 2;
     input.playerView.trace = {
-      traceId: "open-trace",
+      traceId: 1,
       sourceDefinitionId: 461,
       profile: "modern_open",
       phase: "runner_bid",
@@ -72,7 +72,7 @@ describe("latestTraceContext", () => {
     const input = traceInput();
     input.playerView.stateVersion = 4;
     input.playerView.trace = {
-      traceId: "hunter-trace",
+      traceId: 2,
       sourceDefinitionId: 461,
       profile: "modern_open",
       phase: "runner_bid",
@@ -92,7 +92,7 @@ describe("latestTraceContext", () => {
         stateHashAfter: "hash",
         publicPayload: {
           sourceDefinitionId: 461,
-          traceId: "hunter-trace",
+          traceId: 2,
           traceValue: 2,
           corpBid: 2,
           runnerLink: 0,
@@ -105,7 +105,7 @@ describe("latestTraceContext", () => {
         stateVersionAfter: 4,
         stateHashAfter: "hash-other",
         publicPayload: {
-          traceId: "other-trace",
+          traceId: 3,
           sourceDefinitionId: 461,
           traceValue: 5,
           corpBid: 5,

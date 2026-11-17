@@ -115,7 +115,7 @@ it.each([
     .find((c) => c.instanceId === trace.sourceCardInstanceId)!;
   if (kind === "missing_trace") delete input.playerView.trace;
   if (kind === "trace_phase") trace.phase = "runner_bid";
-  if (kind === "trace_id") trace.traceId += "_wrong";
+  if (kind === "trace_id") trace.traceId++;
   if (kind === "trace_source") trace.sourceCardInstanceId += "_wrong";
   if (kind === "trace_definition") trace.sourceDefinitionId = syntheticCardDefinitionId("wrong-trace-source");
   if (kind === "choice_origin")

@@ -1308,7 +1308,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       },
     };
     state.trace = {
-      traceId: "obfuscated_trace",
+      traceId: 1,
       sourceCardInstanceId: sourceIce,
       sourceDefinitionId: WALL as CardDefinitionId,
       traceLimit: 1,
@@ -1323,9 +1323,9 @@ describe("PRO019 rule-contract baseline utilities", () => {
       returnActiveSide: state.activeSide,
     };
     state.pendingChoice = {
-      choiceId: "obfuscated_trace.runner.bid",
+      choiceId: "1.runner.bid",
       side: "runner",
-      source: "trace:obfuscated_trace",
+      source: "trace:1",
       prompt: "Runner Link-Bid wählen",
       kind: "bid_amount",
       options: [

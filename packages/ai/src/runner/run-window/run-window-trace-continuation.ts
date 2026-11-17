@@ -79,7 +79,6 @@ function resolvePlanBoundRunnerTraceChoice(
   const selected = baseLink
     ? planBoundRunnerTraceBaseLinkOption(input, choice)
     : planBoundRunnerTraceSuccessCancelOption(input, choice);
-  const traceId = choice.source.slice(prefix.length);
   const failedChecks = [
     [
       "previous",
@@ -99,7 +98,7 @@ function resolvePlanBoundRunnerTraceChoice(
         executorState?.kind === "remote_contest",
     ],
     ["server", run && executorState?.signal?.serverId === run.attackedServerId],
-    ["trace", trace?.traceId === traceId && trace.phase === phase],
+    ["trace", trace?.phase === phase && choice.source === `${prefix}${trace.traceId}`],
     [
       "choice",
       choice.kind === "select_option" &&

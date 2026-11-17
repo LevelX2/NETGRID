@@ -1909,7 +1909,8 @@ export function assertCorpRootRezCostQuoteValid(
     traceWindow &&
     state.trace !== undefined &&
     state.pendingChoice?.side === "corp" &&
-    state.pendingChoice.source.startsWith(`trace:${state.trace.traceId}`) &&
+    (state.pendingChoice.source === `trace:${state.trace.traceId}` ||
+      state.pendingChoice.source === `trace:${state.trace.traceId}:corp_payment`) &&
     cardImplementationForDefinitionId(
       instance.definitionId,
     )?.selfRezWindows?.some((window) => window.kind === "trace_attempt") ===

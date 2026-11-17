@@ -587,7 +587,7 @@ function stateForTrace(
 
 function corpBidTrace(extras: Partial<TraceState> = {}): TraceState {
   return {
-    traceId: "trace_1",
+    traceId: 1,
     sourceCardInstanceId: "source_1" as CardInstanceId,
     sourceDefinitionId: 2680416230 as CardDefinitionId,
     traceLimit: 2,

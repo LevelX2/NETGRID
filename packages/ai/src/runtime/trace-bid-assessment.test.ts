@@ -619,7 +619,7 @@ function traceState(input: {
     state.runner.grip = state.runner.grip.slice(0, input.runnerGripCount);
   }
   state.trace = {
-    traceId: "trace_assessment_1",
+    traceId: 1,
     sourceCardInstanceId: state.corp.identity,
     sourceDefinitionId: input.sourceDefinitionId,
     traceRulesProfile: input.profile,
@@ -638,9 +638,9 @@ function traceState(input: {
     successEffect: { type: "add_tag", amount: 1 },
   };
   state.pendingChoice = {
-    choiceId: `trace_assessment_1.${input.side}.bid.${state.stateVersion}`,
+    choiceId: `1.${input.side}.bid.${state.stateVersion}`,
     side: input.side,
-    source: "trace:trace_assessment_1",
+    source: "trace:1",
     prompt: "Gebot wählen",
     kind: "bid_amount",
     options: Array.from({ length: input.bidMax + 1 }, (_, bid) => ({

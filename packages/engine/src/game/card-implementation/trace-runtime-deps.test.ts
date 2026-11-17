@@ -185,13 +185,13 @@ describe("trace card implementation runtime deps", () => {
 
     expect(result).toMatchObject({
       traceStarted: true,
-      traceId: "op_trace.11.2523707740.source",
+      traceId: 11,
       sourceCardId,
       sourceDefinitionId,
       traceLimit: 4,
     });
     expect(gameState.trace).toMatchObject({
-      traceId: "op_trace.11.2523707740.source",
+      traceId: 11,
       sourceCardInstanceId: sourceCardId,
       sourceDefinitionId,
       traceLimit: 4,
@@ -205,7 +205,7 @@ describe("trace card implementation runtime deps", () => {
     expect(gameState.pendingChoice).toMatchObject({
       side: "corp",
       kind: "bid_amount",
-      source: "trace:op_trace.11.2523707740.source",
+      source: "trace:11",
       maxSelections: 1,
     });
     expect(gameState.pendingChoice?.options).toHaveLength(5);
@@ -214,7 +214,7 @@ describe("trace card implementation runtime deps", () => {
       existing: true,
       cardId: sourceCardId,
       traceStarted: true,
-      traceId: "op_trace.11.2523707740.source",
+      traceId: 11,
       sourceDefinitionId,
       traceLimit: 4,
     });

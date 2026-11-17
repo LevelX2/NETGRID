@@ -6,6 +6,7 @@
  * from index.ts. Hidden-info redaction and legacy payload forwarding are kept
  * here because PublicEvent and chronicle consumers depend on stable field names.
  */
+import { isTraceId } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardInstanceId,
@@ -102,12 +103,6 @@ export function publicContextForAction(
     publicServerLabelForCard(state, cardId) ??
     publicServerLabel(state, legalAction.payload?.serverId);
   const agendaId = cardId ?? sourceCardId;
-  const resolvedEffects = legalAction.resolvedEffects;
-
-  // CardImplementation runtime paths attach redacted ResolvedEffects here. Keep
-  // instance-level private data out unless execution already exposed public
-  // source titles or definition ids.
-  if (Array.isArray(resolvedEffects)) context.resolvedEffects = resolvedEffects;
   if (serverLabel) context.serverLabel = serverLabel;
   if (
     legalAction.type === "access_card" &&
@@ -547,14 +542,14 @@ export function publicContextForAction(
       typeof legalAction.payload?.traceSuccessful === "boolean";
     const hiddenTraceCommit =
       blindTrace &&
-      typeof legalAction.payload?.traceId === "string" &&
+      isTraceId(legalAction.payload?.traceId) &&
       legalAction.payload?.traceStarted !== true &&
       (legalAction.payload?.traceStep === "corp_bid" ||
         legalAction.payload?.traceStep === "runner_bid") &&
       legalAction.payload?.corpTracePaymentChoiceOpened !== true &&
       legalAction.payload?.traceLinkPaymentChoiceOpened !== true &&
       !traceBidsRevealed;
-    if (typeof legalAction.payload?.traceId === "string") {
+    if (isTraceId(legalAction.payload?.traceId)) {
       context.traceRulesProfile = traceRulesProfile;
       context.traceBidsRevealed = traceBidsRevealed;
       if (hiddenTraceCommit) {
@@ -687,6 +682,9 @@ export function publicContextForAction(
     }
     for (const key of [
       "traceId",
+      "traceSourceRunId",
+      "traceSourceCardInstanceId",
+      "traceSourceSubroutineIndex",
       "traceStep",
       "traceLimit",
       "effectiveTraceLimit",
@@ -878,7 +876,10 @@ export function publicContextForAction(
       delete context.fortTraceBitPoolServerId;
       delete context.temporaryTraceCreditsSourceDefinitionId;
     }
-    context.traceId = legalAction.payload.traceId;
+    if (isTraceId(legalAction.payload.traceId))
+      context.traceId = legalAction.payload.traceId;
+    if (typeof legalAction.payload.traceSourceRunId === "number")
+      context.traceSourceRunId = legalAction.payload.traceSourceRunId;
     context.sourceCardId = legalAction.payload.sourceCardId;
     context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.traceLimit === "number")

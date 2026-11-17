@@ -64,7 +64,7 @@ function setup() {
   state.runner.clicks = 1;
   state.runner.credits = 5;
   const runId = 1;
-  const traceId = "terminal-fang-trace";
+  const traceId = state.stateVersion;
   state.run = {
     runId,
     attackedServerId: "hq",
@@ -77,6 +77,7 @@ function setup() {
   };
   state.trace = {
     traceId,
+    sourceRunId: runId,
     sourceCardInstanceId: fang.instanceId,
     sourceDefinitionId: fangDefinitionId,
     traceRulesProfile: "modern_open",

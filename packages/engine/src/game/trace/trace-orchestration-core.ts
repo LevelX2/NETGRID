@@ -9,6 +9,7 @@ import {
   type PlayerAction,
   type ServerId,
   type Side,
+  type TraceId,
   type TraceSuccessEffect,
 } from "@netgrid/shared";
 import type {
@@ -168,7 +169,7 @@ export type TraceOrchestrationHost = {
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       targetCardId: CardInstanceId | undefined,
     ) => Record<string, unknown>;
   };
@@ -191,7 +192,7 @@ export function startTraceFromOperation(
   const sourceCardInstanceId = String(legalAction.payload?.cardId ?? "");
   if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
-  const traceId = `op_trace.${state.stateVersion + 1}.${sourceDefinitionId}.${sourceCardInstanceId}`;
+  const traceId = state.stateVersion + 1;
   const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
   const corpTraceCounterPool = host.counters.corpTraceCounterPoolTotal();
   const paymentCapacity =
@@ -297,7 +298,7 @@ export function handleTraceOrchestrationAction(
 export function traceBidChoice(
   state: GameState,
   side: Side,
-  traceId: string,
+  traceId: TraceId,
   prompt: string,
   maxBid: number,
   optionUnit = "Credits",

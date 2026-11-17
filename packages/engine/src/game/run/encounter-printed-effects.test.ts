@@ -535,12 +535,13 @@ describe("encounter printed effects boundary", () => {
     expect(result).toMatchObject({
       handled: true,
       suspended: true,
-      traceId: "1.ice_1.2.trace",
+      traceId: 10,
       traceLimit: 4,
       corpBidMax: 8,
     });
     expect(state.trace).toMatchObject({
-      traceId: "1.ice_1.2.trace",
+      traceId: 10,
+      sourceRunId: 1,
       sourceCardInstanceId: "ice_1",
       sourceDefinitionId: 2528423081,
       subroutineIndex: 2,
@@ -553,14 +554,15 @@ describe("encounter printed effects boundary", () => {
       status: "corp_bid",
     });
     expect(state.pendingChoice).toMatchObject({
-      choiceId: "1.ice_1.2.trace.corp.bid.10",
-      source: "trace:1.ice_1.2.trace",
+      choiceId: "10.corp.bid.10",
+      source: "trace:10",
       kind: "bid_amount",
       visibility: "public",
     });
     expect(legalAction.payload).toMatchObject({
       traceStarted: true,
-      traceId: "1.ice_1.2.trace",
+      traceId: 10,
+      traceSourceRunId: 1,
       sourceCardId: "ice_1",
       sourceDefinitionId: 2528423081,
       traceLimit: 4,
@@ -663,7 +665,8 @@ describe("encounter printed effects boundary", () => {
   it("applies printed Trace-success tag and counter followups without changing trace identifiers", () => {
     const state = makeState();
     state.trace = {
-      traceId: "1.ice_1.0.trace",
+      traceId: 9,
+      sourceRunId: state.run!.runId,
       sourceCardInstanceId: "ice_1" as CardInstanceId,
       sourceDefinitionId: 2528423081,
       subroutineIndex: 0,
@@ -709,7 +712,7 @@ describe("encounter printed effects boundary", () => {
     ).toBe(1);
     expect(state.run?.traceSuccessBySubroutineIndex).toEqual({ 0: true });
     expect(legalAction.payload).toMatchObject({
-      traceId: "1.ice_1.0.trace",
+      traceId: 9,
       traceStep: "runner_bid",
       traceLimit: 3,
       sourceDefinitionId: 2528423081,
@@ -757,7 +760,8 @@ describe("encounter printed effects boundary", () => {
     ({ profile, corp, base, payment, strength, tags }) => {
       const state = makeState();
       state.trace = {
-        traceId: "1.ice_1.0.trace",
+        traceId: 9,
+        sourceRunId: state.run!.runId,
         sourceCardInstanceId: "ice_1" as CardInstanceId,
         sourceDefinitionId: 2528423081,
         subroutineIndex: 0,
@@ -790,7 +794,8 @@ describe("encounter printed effects boundary", () => {
   it("applies printed Trace-success run-lock/end-run followups through callbacks", () => {
     const state = makeState();
     state.trace = {
-      traceId: "1.ice_1.1.trace",
+      traceId: 9,
+      sourceRunId: state.run!.runId,
       sourceCardInstanceId: "ice_1" as CardInstanceId,
       sourceDefinitionId: 2528423081,
       subroutineIndex: 1,
@@ -824,7 +829,7 @@ describe("encounter printed effects boundary", () => {
     expect(finishingAction).toBe(legalAction);
     expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
     expect(legalAction.payload).toMatchObject({
-      traceId: "1.ice_1.1.trace",
+      traceId: 9,
       traceStep: "post_bid_link",
       traceSuccessful: true,
       tagsAdded: 0,

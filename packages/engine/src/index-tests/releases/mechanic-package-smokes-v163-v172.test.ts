@@ -1821,7 +1821,8 @@ describe("V1.7.2 Mechanikpaket F", () => {
     );
 
     expect(state.pendingChoice?.side).toBe("corp");
-    expect(state.pendingChoice?.source.startsWith("trace:op_trace")).toBe(true);
+    expect(state.trace?.traceId).toBe(state.stateVersion);
+    expect(state.pendingChoice?.source).toBe(`trace:${state.stateVersion}`);
     expect(state.trace?.returnPhase).toBe("corp_action_phase");
     expect(state.trace?.returnTimingPoint).toBe("corp_action.main");
     expect(state.trace?.returnActiveSide).toBe("corp");

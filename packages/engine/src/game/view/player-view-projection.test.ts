@@ -287,7 +287,7 @@ describe("PlayerView projection", () => {
     };
     state.runner.rig.resources.push(phoneFreakId, hiddenSupportId);
     state.trace = {
-      traceId: "trace_visible_capacity",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId:
         state.cardInstances[state.corp.identity]!.definitionId,
@@ -319,7 +319,7 @@ describe("PlayerView projection", () => {
       traceRulesProfile: "classic_blind",
     });
     state.trace = {
-      traceId: "trace_hidden_view",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId:
         state.cardInstances[state.corp.identity]!.definitionId,
@@ -380,7 +380,7 @@ describe("PlayerView projection", () => {
     });
     state.runner.credits = 8;
     state.trace = {
-      traceId: "trace_hidden_runner_payment",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId:
         state.cardInstances[state.corp.identity]!.definitionId,
@@ -1094,7 +1094,7 @@ describe("PlayerView projection", () => {
     );
 
     state.trace = {
-      traceId: "visible-used-trace-source",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId:
         state.cardInstances[state.corp.identity]!.definitionId,

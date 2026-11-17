@@ -22,7 +22,7 @@ describe("publicContextForAction", () => {
       type: "resolve_subroutine",
       payload: {
         traceStarted: true,
-        traceId: "trace_start_hidden",
+        traceId: 1,
         traceLimit: 3,
         effectiveTraceLimit: 3,
         corpBidMax: 5,
@@ -60,7 +60,7 @@ describe("publicContextForAction", () => {
       side: "corp",
       type: "resolve_choice",
       payload: {
-        traceId: "trace_hidden",
+        traceId: 1,
         traceStep: "corp_bid",
         traceLimit: 3,
         corpBid: 2,
@@ -79,7 +79,7 @@ describe("publicContextForAction", () => {
       traceRulesProfile: "classic_blind",
       traceBidsRevealed: false,
       traceBidCommittedSide: "corp",
-      traceId: "trace_hidden",
+      traceId: 1,
       traceLimit: 3,
     });
     expect(context).not.toHaveProperty("corpBid");
@@ -108,7 +108,7 @@ describe("publicContextForAction", () => {
       side: "runner",
       type: "resolve_choice",
       payload: {
-        traceId: "trace_revealed",
+        traceId: 1,
         traceStep: "runner_bid",
         corpBid: 2,
         traceValue: 2,
@@ -146,7 +146,7 @@ describe("publicContextForAction", () => {
       side: "runner",
       type: "resolve_choice",
       payload: {
-        traceId: "trace_runner_hidden",
+        traceId: 1,
         traceStep: "runner_bid",
         runnerBid: 1,
       },

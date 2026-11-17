@@ -278,7 +278,7 @@ function openCorpTraceBidWindow(
   sourceCardId: CardInstanceId,
 ): void {
   state.trace = {
-    traceId: "pro014_trace",
+    traceId: 1,
     sourceCardInstanceId: sourceCardId,
     sourceDefinitionId: state.cardInstances[sourceCardId]!.definitionId,
     traceLimit: 5,
@@ -290,9 +290,9 @@ function openCorpTraceBidWindow(
     returnActiveSide: "corp",
   };
   state.pendingChoice = {
-    choiceId: "pro014_trace.corp.bid",
+    choiceId: "1.corp.bid",
     side: "corp",
-    source: "trace:pro014_trace",
+    source: "trace:1",
     prompt: "Corp Trace-Bid",
     kind: "bid_amount",
     options: Array.from({ length: 6 }, (_, amount) => ({
@@ -843,8 +843,8 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     let state = applyLegal(before, "corp", rezAction.actionId);
     expect(state.cardInstances[ldlId]?.rezzed).toBe(true);
-    expect(state.trace?.traceId).toBe("pro014_trace");
-    expect(state.pendingChoice?.source).toBe("trace:pro014_trace");
+    expect(state.trace?.traceId).toBe(1);
+    expect(state.pendingChoice?.source).toBe("trace:1");
     expectReplayStable(before, state);
 
     const stale = applyAction(state, {

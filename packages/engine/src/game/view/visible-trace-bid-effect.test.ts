@@ -10,7 +10,7 @@ describe("public fixed automatic trace effect", () => {
       setupMode: "completed",
     });
     state.trace = {
-      traceId: "fixed-trace",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId: 496,
       traceRulesProfile: "modern_open",

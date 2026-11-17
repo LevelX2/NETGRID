@@ -109,7 +109,7 @@ describe("card-implementation-ability-limits", () => {
     expect(current.run?.successfulRunAbilityUsedSourceIds).toEqual([SOURCE_A]);
 
     current.trace = {
-      traceId: "trace_1",
+      traceId: 1,
       sourceCardInstanceId: "trace_source" as CardInstanceId,
       sourceDefinitionId: 2594286542,
       traceLimit: 2,
@@ -143,7 +143,7 @@ describe("card-implementation-ability-limits", () => {
   it("blocks any second base-link source in the same trace attempt", () => {
     const current = state();
     current.trace = {
-      traceId: "trace_1",
+      traceId: 1,
       sourceCardInstanceId: "trace_source" as CardInstanceId,
       sourceDefinitionId: 2594286542,
       traceLimit: 2,

@@ -32,17 +32,6 @@ function checkpoint(file = "cp-meta-474-r8-g4-d299.json") {
     validation: Record<string, boolean>;
   };
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
-  if (file === "cp-meta-474-r8-g4-d299.json") {
-    // The capture predates projection of these two event fields. The native
-    // pending Choice is created only by the successful hardware-wrecker Trace
-    // and contains its exact id.
-    const payload = cp.input.eventTail.at(-1)!.publicPayload;
-    const source = cp.input.playerView.pendingChoice!.source;
-    expect(payload.traceStep).toBe("runner_bid");
-    expect(source.startsWith("trace_success.hardware_wrecker:")).toBe(true);
-    payload.traceId = source.slice("trace_success.hardware_wrecker:".length);
-    payload.traceSuccessful = true;
-  }
   const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   restoreAiRuntimeCheckpoint(
     input,
@@ -211,7 +200,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     if (kind === "event")
       input.eventTail.at(-1)!.publicPayload.traceStep = "corp_bid";
     if (kind === "trace_id")
-      input.eventTail.at(-1)!.publicPayload.traceId = "unrelated.trace";
+      input.eventTail.at(-1)!.publicPayload.traceId!++;
     if (kind === "trace_outcome")
       input.eventTail.at(-1)!.publicPayload.traceSuccessful = false;
     if (kind === "cost")
@@ -236,7 +225,7 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
     const input = checkpoint(nativeCheckpoint);
     const choice = input.playerView.pendingChoice!;
     expect(input.eventTail.at(-1)?.publicPayload).toMatchObject({
-      traceId: choice.source.slice("trace_success.hardware_wrecker:".length),
+      traceId: Number(choice.source.slice("trace_success.hardware_wrecker:".length)),
       traceStep: "post_bid_link",
       traceSuccessful: true,
     });
@@ -260,7 +249,7 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
     (kind) => {
       const input = checkpoint(nativeCheckpoint);
       const event = input.eventTail.at(-1)!;
-      if (kind === "trace") event.publicPayload.traceId = "different-trace";
+      if (kind === "trace") event.publicPayload.traceId!++;
       if (kind === "source") event.publicPayload.sourceDefinitionId = syntheticCardDefinitionId("different-ice");
       if (kind === "version") event.stateVersionAfter--;
       if (kind === "outcome") event.publicPayload.traceSuccessful = false;

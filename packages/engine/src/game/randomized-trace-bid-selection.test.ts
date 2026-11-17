@@ -113,7 +113,7 @@ describe("Engine-randomized Blind Trace bid selection", () => {
           ...quoted.quote,
           assessment: {
             ...quoted.quote.assessment,
-            traceId: "not-the-current-trace",
+            traceId: 2,
           },
         },
       },
@@ -204,7 +204,7 @@ function blindTraceBidState(
   state.corp.credits = 5;
   state.activeSide = "corp";
   state.trace = {
-    traceId: "trace_rng_1",
+    traceId: 1,
     sourceCardInstanceId,
     sourceDefinitionId,
     traceRulesProfile: "classic_blind",
@@ -216,9 +216,9 @@ function blindTraceBidState(
     successEffect: { type: "add_tag", amount: 1 },
   };
   state.pendingChoice = {
-    choiceId: `trace_rng_1.corp.bid.${state.stateVersion}`,
+    choiceId: `1.corp.bid.${state.stateVersion}`,
     side: "corp",
-    source: "trace:trace_rng_1",
+    source: "trace:1",
     prompt: "Verdecktes Korp-Gebot wählen",
     kind: "bid_amount",
     options: Array.from({ length: 4 }, (_, bid) => ({

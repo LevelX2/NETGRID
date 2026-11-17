@@ -1,4 +1,4 @@
-import { isRunId } from "@netgrid/shared";
+import { isRunId, isTraceId } from "@netgrid/shared";
 import { isCardDefinitionId } from "@netgrid/shared";
 import { parseOptionalCardDefinitionIdCsv } from "../../card-definition-id-input";
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
@@ -1345,18 +1345,16 @@ function validTraceHardwareTrashResolution(value: unknown): boolean {
     knownNonNegativeInteger(r.sourceStateVersion) &&
     knownNonNegativeInteger(r.subroutineIndex) &&
     isRunId(r.runId) &&
+    isTraceId(r.traceId) &&
     isCardDefinitionId(r.sourceDefinitionId) &&
     [
       r.choiceId,
       r.choiceSource,
-      r.traceId,
       r.sourceIceInstanceId,
       r.selectedOptionId,
       r.targetCardInstanceId,
     ].every(nonEmptyString) &&
     r.choiceSource === `trace_success.hardware_wrecker:${r.traceId}` &&
-    r.traceId ===
-      `${r.runId}.${r.sourceIceInstanceId}.${r.subroutineIndex}.trace` &&
     r.choiceId ===
       `trace_hardware_wrecker_${r.traceId}_${r.sourceStateVersion}` &&
     r.selectedOptionId === `hardware_${r.targetCardInstanceId}`
@@ -1371,7 +1369,7 @@ function validProgramTrashResolution(value: unknown): boolean {
     r.kind === "program_trash" &&
     !!origin &&
     ((origin.kind === "encounter" && isRunId(origin.runId)) ||
-      (origin.kind === "trace_success" && nonEmptyString(origin.traceId))) &&
+      (origin.kind === "trace_success" && isTraceId(origin.traceId))) &&
     knownNonNegativeInteger(r.sourceStateVersion) &&
     [
       r.choiceId,

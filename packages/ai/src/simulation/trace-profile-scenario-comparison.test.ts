@@ -284,7 +284,7 @@ function traceState(
   const corpBidMax =
     profile === "modern_open" ? scenario.corpCredits : scenario.traceLimit;
   state.trace = {
-    traceId: "trace_comparison_1",
+    traceId: 1,
     sourceCardInstanceId: state.corp.identity,
     sourceDefinitionId: scenario.sourceDefinitionId,
     traceRulesProfile: profile,
@@ -312,9 +312,9 @@ function bidChoice(
   visibility: "public" | "hidden_info_barrier",
 ): NonNullable<GameState["pendingChoice"]> {
   return {
-    choiceId: `trace_comparison_1.${side}.bid.${state.stateVersion}`,
+    choiceId: `1.${side}.bid.${state.stateVersion}`,
     side,
-    source: "trace:trace_comparison_1",
+    source: "trace:1",
     prompt: "Trace-Gebot wählen",
     kind: "bid_amount",
     options: Array.from({ length: maximum + 1 }, (_, bid) => ({

@@ -1,4 +1,4 @@
-import { parseRunIdToken } from "@netgrid/shared";
+import { isRunId, isTraceId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -44,25 +44,24 @@ export function corpTraceHardwareTrashChoiceFacts(
       "Preserve the current Engine hardware Choice, LegalAction, cardinality and state version.",
     );
 
-  const traceId = choice.source.slice(TRACE_HARDWARE_TRASH_SOURCE.length);
-  // This is the Engine trace-id protocol from encounter-printed-effects.ts,
-  // not a card-name inference or a reconstruction from private GameState.
-  const parts = /^([1-9][0-9]*)\.(.+)\.([0-9]+)\.trace$/.exec(traceId);
-  const runId = parseRunIdToken(parts?.[1]);
-  const subroutineIndex = parts ? Number(parts[3]) : NaN;
+  const event = input.eventTail.at(-1);
+  const payload = event?.publicPayload;
+  const traceId = payload?.traceId;
+  const runId = payload?.traceSourceRunId;
+  const sourceIceInstanceId = payload?.traceSourceCardInstanceId;
+  const subroutineIndex = payload?.traceSourceSubroutineIndex;
   if (
-    !parts ||
-    runId === undefined ||
-    !Number.isSafeInteger(subroutineIndex) ||
-    subroutineIndex < 0 ||
-    String(subroutineIndex) !== parts[3] ||
+    !isTraceId(traceId) ||
+    !isRunId(runId) ||
+    !knownNonNegativeInteger(subroutineIndex) ||
+    typeof sourceIceInstanceId !== "string" ||
     input.playerView.run !== undefined ||
+    choice.source !== `${TRACE_HARDWARE_TRASH_SOURCE}${traceId}` ||
     choice.choiceId !== `trace_hardware_wrecker_${traceId}_${version}`
   )
     fail(
       "Bind the completed ICE Trace to its exact native run, source, subroutine and Choice id.",
     );
-  const sourceIceInstanceId = parts![2]!;
   const locations = input.playerView.servers.flatMap((server) =>
     server.ice
       .filter((ice) => ice.instanceId === sourceIceInstanceId)
@@ -109,8 +108,6 @@ export function corpTraceHardwareTrashChoiceFacts(
     fail(
       "Supply the exact current Engine quote for the explicit source rez state and its hardware-trash Trace effect.",
     );
-  const event = input.eventTail.at(-1);
-  const payload = event?.publicPayload;
   const hardwareTraceCompleted =
     (payload?.traceStep === "runner_bid" || payload?.traceStep === "post_bid_link") &&
     payload.traceId === traceId &&

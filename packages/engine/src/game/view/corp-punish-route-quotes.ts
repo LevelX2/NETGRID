@@ -14,6 +14,7 @@ import {
   type GameEvent,
   type GameState,
   type LegalAction,
+  type TraceId,
 } from "@netgrid/shared";
 import {
   CapabilityIdentityError,
@@ -883,7 +884,7 @@ function certifyExactTraceTagResponse(
 
 function exactCorpTracePaymentCredits(
   event: GameEvent,
-  traceId: string,
+  traceId: TraceId,
   bid: number,
 ): number | undefined {
   const {

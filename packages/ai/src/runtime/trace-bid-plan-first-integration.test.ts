@@ -106,7 +106,7 @@ function blindCorpTraceState(): GameState {
   state.activeSide = "corp";
   state.corp.credits = 5;
   state.trace = {
-    traceId: "trace_plan_first_1",
+    traceId: 1,
     sourceCardInstanceId,
     sourceDefinitionId,
     traceRulesProfile: "classic_blind",
@@ -118,9 +118,9 @@ function blindCorpTraceState(): GameState {
     successEffect: { type: "add_tag", amount: 1 },
   };
   state.pendingChoice = {
-    choiceId: `trace_plan_first_1.corp.bid.${state.stateVersion}`,
+    choiceId: `1.corp.bid.${state.stateVersion}`,
     side: "corp",
-    source: "trace:trace_plan_first_1",
+    source: "trace:1",
     prompt: "Verdecktes Korp-Gebot wählen",
     kind: "bid_amount",
     options: Array.from({ length: 6 }, (_, bid) => ({

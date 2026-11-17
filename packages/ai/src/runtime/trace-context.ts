@@ -2,6 +2,7 @@ import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/eng
 import type {
   AiDecisionInput,
   CardDefinitionId,
+  TraceId,
   TraceRulesProfile,
 } from "@netgrid/shared";
 
@@ -79,7 +80,7 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
 function latestTraceContextFromEventTail(
   input: AiDecisionInput,
   visibleRunnerLink: number,
-  requiredTraceId?: string,
+  requiredTraceId?: TraceId,
 ): LatestTraceContext {
   for (const event of input.eventTail.slice().reverse()) {
     if (

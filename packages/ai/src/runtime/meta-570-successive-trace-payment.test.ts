@@ -205,7 +205,7 @@ it.each([
   if (boundary === "missing_completion")
     delete event.publicPayload.traceSuccessful;
   if (boundary === "wrong_trace")
-    event.publicPayload.traceId = "foreign_run.ice.trace";
+    event.publicPayload.traceSourceRunId = 1;
   if (boundary === "wrong_choice")
     event.publicPayload.choiceId = "foreign_choice";
   if (boundary === "wrong_step") event.publicPayload.traceStep = "corp_bid";

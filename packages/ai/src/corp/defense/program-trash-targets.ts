@@ -1,4 +1,4 @@
-import { parseRunIdToken } from "@netgrid/shared";
+import { isRunId, parseRunIdToken, parseTraceIdToken } from "@netgrid/shared";
 import { programTrashCoverageLosses } from "./program-trash-coverage";
 import type {
   AiDecisionInput,
@@ -64,9 +64,7 @@ export function corpProgramTrashChoiceContext(
     };
   }
   const trace = input.playerView.trace;
-  const traceParts = /^([1-9][0-9]*)\.(.+)\.([0-9]+)\.trace$/.exec(
-    context.contextId,
-  );
+  const traceId = parseTraceIdToken(context.contextId);
   const sources = input.playerView.servers.flatMap((server) =>
     server.ice
       .filter((ice) => ice.instanceId === context.sourceIceId)
@@ -79,13 +77,11 @@ export function corpProgramTrashChoiceContext(
   if (
     run !== undefined ||
     trace?.phase !== "trace_success_program_trash" ||
-    trace.traceId !== context.contextId ||
+    trace.traceId !== traceId ||
     trace.sourceCardInstanceId !== context.sourceIceId ||
     trace.sourceDefinitionId !== context.sourceDefinitionId ||
-    !traceParts ||
-    parseRunIdToken(traceParts[1]) === undefined ||
-    traceParts[2] !== context.sourceIceId ||
-    traceParts[3] !== String(context.subroutineIndex) ||
+    !isRunId(trace.sourceRunId) ||
+    trace.sourceSubroutineIndex !== context.subroutineIndex ||
     ice.known !== true ||
     ice.controller !== "corp" ||
     ice.type !== "ice" ||

@@ -72,7 +72,7 @@ it.each(["g13d70", "g22d65", "g29d120", "g38d80"])(
       .find(
         (c: { instanceId: string; effectiveRunQuote?: unknown }) =>
           c.effectiveRunQuote &&
-          input.playerView.pendingChoice.source.includes(c.instanceId),
+          input.eventTail.at(-1)?.publicPayload.traceSourceCardInstanceId === c.instanceId,
       )!;
     expect(source.rezzed).toBe(true);
     expect(source.effectivePostRezRunQuote).toBeUndefined();
@@ -139,10 +139,11 @@ it.each([
   (kind) => {
     const { input } = native("g13d70");
     const choice = input.playerView.pendingChoice;
+    const payload = input.eventTail.at(-1).publicPayload;
     const source = input.playerView.servers
       .flatMap((s: { ice: any[] }) => s.ice)
       .find((c: { instanceId: string }) =>
-        choice.source.includes(c.instanceId),
+        payload.traceSourceCardInstanceId === c.instanceId,
       )!;
     const current = source.effectiveRunQuote;
     // Even a complete hypothetical quote is not authority for an actually rezzed source.
@@ -166,12 +167,12 @@ it.each([
       current.subroutines[0].traceSuccessEffect = { type: "none" };
     if (kind === "amount") current.subroutines[0].traceSuccessEffect.amount = 0;
     if (kind === "subroutine")
-      choice.source = choice.source.replace(".0.trace", ".9.trace");
+      payload.traceSourceSubroutineIndex = 9;
     if (kind === "unknown_rez") delete source.rezzed;
     if (kind === "event")
       input.eventTail.at(-1).publicPayload.traceStep = "corp_bid";
     if (kind === "trace_id")
-      input.eventTail.at(-1).publicPayload.traceId = "another-trace";
+      payload.traceId++;
     if (kind === "trace_outcome")
       input.eventTail.at(-1).publicPayload.traceSuccessful = false;
     if (kind === "choice_state") choice.stateVersion--;

@@ -68,7 +68,7 @@ describe("economy-mutation", () => {
     const current = state();
     current.corp.credits = 9;
     current.trace = {
-      traceId: "trace_unrestricted_credits",
+      traceId: 1,
       sourceCardInstanceId: "ldl_1",
       sourceDefinitionId: 119,
       traceLimit: 5,

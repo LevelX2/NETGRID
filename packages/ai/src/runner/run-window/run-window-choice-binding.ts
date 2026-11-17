@@ -480,7 +480,7 @@ export function selectedRunnerTraceBaseLinkOptionId(
   const selectedOption = selectableOptions.find(
     (option) => option.id === binding?.selectedOptionId,
   );
-  const traceId = choice.source.slice("trace_base_link:".length);
+  const trace = input.playerView.trace;
   const selectedSourceId =
     selectedOption?.id === "pass"
       ? undefined
@@ -498,8 +498,8 @@ export function selectedRunnerTraceBaseLinkOptionId(
     binding.selectedOptionId === selectedOption?.id &&
     binding.sourceCardInstanceId === selectedSourceId &&
     binding.observedAtStateVersion === input.playerView.stateVersion &&
-    input.playerView.trace?.traceId === traceId &&
-    input.playerView.trace.phase === "base_link" &&
+    trace?.phase === "base_link" &&
+    choice.source === `trace_base_link:${trace.traceId}` &&
     choice.side === "runner" &&
     choice.stateVersion === input.playerView.stateVersion &&
     choice.minSelections === 1 &&
@@ -553,7 +553,7 @@ export function selectedRunnerTraceSuccessCancelOptionId(
   const selectedOption = selectableOptions.find(
     (option) => option.id === binding?.selectedOptionId,
   );
-  const traceId = choice.source.slice("trace_success_cancel:".length);
+  const trace = input.playerView.trace;
   const selectedSourceId =
     selectedOption?.id === "pass"
       ? undefined
@@ -579,8 +579,8 @@ export function selectedRunnerTraceSuccessCancelOptionId(
     binding.selectedOptionId === selectedOption?.id &&
     binding.sourceCardInstanceId === selectedSourceId &&
     binding.observedAtStateVersion === input.playerView.stateVersion &&
-    input.playerView.trace?.traceId === traceId &&
-    input.playerView.trace.phase === "trace_success_cancel" &&
+    trace?.phase === "trace_success_cancel" &&
+    choice.source === `trace_success_cancel:${trace.traceId}` &&
     choice.side === "runner" &&
     choice.visibility === "hidden_info_barrier" &&
     choice.stateVersion === input.playerView.stateVersion &&

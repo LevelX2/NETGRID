@@ -77,9 +77,9 @@ describe("post-bid link choice option", () => {
 
 function postBidChoice(options: PendingChoice["options"]): PendingChoice {
   return {
-    choiceId: "trace_1.post_bid_link.1",
+    choiceId: "1.post_bid_link.1",
     side: "runner",
-    source: "trace_post_bid_link:trace_1",
+    source: "trace_post_bid_link:1",
     prompt: "Post-bid Link-Faehigkeit nutzen",
     kind: "select_option",
     options,

@@ -2553,7 +2553,7 @@ describe("selectedChoicesForDecision", () => {
   it("uses the Engine-quoted Corp Trace allocation with the most specialized credits", () => {
     const input = inputWithChoice({
       kind: "select_option",
-      source: "trace:trace_1:corp_payment",
+      source: "trace:1:corp_payment",
       minSelections: 1,
       maxSelections: 1,
       options: [
@@ -2595,7 +2595,7 @@ describe("selectedChoicesForDecision", () => {
     const input = inputWithChoice(
       {
         kind: "select_option",
-        source: "trace_runner_bid_payment:trace_1:link_pool",
+        source: "trace_runner_bid_payment:1:link_pool",
         minSelections: 1,
         maxSelections: 1,
         options: [
@@ -2622,7 +2622,7 @@ describe("selectedChoicesForDecision", () => {
   it("fails closed on a malformed Corp Trace payment allocation", () => {
     const input = inputWithChoice({
       kind: "select_option",
-      source: "trace:trace_1:corp_payment",
+      source: "trace:1:corp_payment",
       minSelections: 1,
       maxSelections: 1,
       options: [

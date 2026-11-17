@@ -1,6 +1,7 @@
 import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import {
   parseRunIdToken,
+  parseTraceIdToken,
   type CardDefinition,
   type CardInstanceId,
   type CorpServer,
@@ -8,6 +9,7 @@ import {
   type LegalAction,
   type PlayerAction,
   type RunId,
+  type TraceId,
   type ServerId,
   type SubroutineDefinition,
 } from "@netgrid/shared";
@@ -38,7 +40,7 @@ type ClassicDeflectorChoiceContext = {
   autoBreakIfNoTarget: boolean;
 };
 type TrashProgramChoiceContext = {
-  continuationId: RunId | string;
+  continuationId: RunId | TraceId;
   sourceIceId: CardInstanceId;
   subroutineIndex: number;
   sourceDefinitionId: number;
@@ -1148,8 +1150,8 @@ function parseTrashProgramChoiceSource(
     | "trash_installed_program_unless_runner_pays";
   const decoded = decodeURIComponent(continuationIdToken ?? "");
   const continuationId =
-    continuation === "encounter" ? parseRunIdToken(decoded) : decoded;
-  if (continuationId === undefined || continuationId === "")
+    continuation === "encounter" ? parseRunIdToken(decoded) : parseTraceIdToken(decoded);
+  if (continuationId === undefined)
     throw new Error("Programmtrash-Fortsetzungsbindung ist ungültig.");
   return {
     continuationId,

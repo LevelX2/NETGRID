@@ -12,6 +12,7 @@ import type {
   ServerId,
   Side,
   SubroutineDefinition,
+  TraceId,
   TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
@@ -242,7 +243,7 @@ export type RunFlowHost = {
       state: GameState,
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       damageAmount: number,
       legalAction: LegalAction,
     ) => { payload: Record<string, unknown>; suspended: boolean };
@@ -250,14 +251,14 @@ export type RunFlowHost = {
       state: GameState,
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       targetCardId: CardInstanceId,
     ) => Record<string, unknown>;
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
     traceBidChoice: (
       state: GameState,
       side: Side,
-      traceId: string,
+      traceId: TraceId,
       prompt: string,
       maxBid: number,
     ) => ChoiceRequest;

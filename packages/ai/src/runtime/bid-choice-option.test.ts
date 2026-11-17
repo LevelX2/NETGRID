@@ -78,7 +78,7 @@ describe("selectedBidChoiceOptionId", () => {
           runnerCredits: 0,
           encounteredIceDefinitionId: 476,
         }),
-        bidChoice("trace:1.rex.0.trace", range(0, 5)),
+        bidChoice("trace:2", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");
@@ -93,7 +93,7 @@ describe("selectedBidChoiceOptionId", () => {
           runnerCredits: 11,
           encounteredIceDefinitionId: 476,
         }),
-        bidChoice("trace:1.rex.0.trace", range(0, 8)),
+        bidChoice("trace:2", range(0, 8)),
         { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");

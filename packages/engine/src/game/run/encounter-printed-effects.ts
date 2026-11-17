@@ -8,6 +8,7 @@ import {
   type ImminentEvent,
   type LegalAction,
   type SubroutineDefinition,
+  type TraceId,
   type TraceSuccessEffect,
   type ServerId,
 } from "@netgrid/shared";
@@ -72,14 +73,14 @@ export type EncounterPrintedEffectHost = {
     resolveTraceHardwareWreckerSuccess: (
       sourceDefinitionId: number,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       damageAmount: number,
       legalAction: LegalAction,
     ) => { payload: Record<string, unknown>; suspended: boolean };
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: number,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       targetCardId: CardInstanceId,
     ) => Record<string, unknown>;
     resolveTraceSuccessTrashProgramSubroutine: (
@@ -91,7 +92,7 @@ export type EncounterPrintedEffectHost = {
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
     traceBidChoice: (
       side: "corp" | "runner",
-      traceId: string,
+      traceId: TraceId,
       prompt: string,
       maxBid: number,
     ) => ChoiceRequest;
@@ -112,7 +113,7 @@ export type PrintedDamageResult = EncounterPrintedEffectResult & {
 };
 
 export type PrintedTraceStartResult = EncounterPrintedEffectResult & {
-  traceId?: string;
+  traceId?: TraceId;
   traceLimit?: number;
   corpBidMax?: number;
 };
@@ -436,7 +437,7 @@ export function startTraceFromPrintedSubroutine(
   if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
     run.resolvedSubroutineIndexes.push(subroutineIndex);
   const sourceDefinition = host.callbacks.definitionFor(sourceCardInstanceId);
-  const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
+  const traceId = state.stateVersion + 1;
   const fortTraceBitPoolSource = host.callbacks.fortTraceBitPoolSource();
   const fortTraceBits = fortTraceBitPoolSource
     ? host.callbacks.cardCounter(fortTraceBitPoolSource.cardId, "bit")
@@ -464,6 +465,7 @@ export function startTraceFromPrintedSubroutine(
         );
   state.trace = {
     traceId,
+    sourceRunId: run.runId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinition.id,
     traceRulesProfile: rules.profile,
@@ -508,6 +510,7 @@ export function startTraceFromPrintedSubroutine(
       ...(legalAction.payload ?? {}),
       traceStarted: true,
       traceId,
+      traceSourceRunId: run.runId,
       sourceCardId: sourceCardInstanceId,
       sourceDefinitionId: sourceDefinition.id,
       traceLimit,
@@ -555,6 +558,9 @@ export function applyPrintedTraceSuccessFollowups(
 ): TraceSuccessFollowupResult {
   const { state } = host;
   const { trace, traceStep, legalAction } = options;
+  const runOrigin = trace.sourceRunId === undefined
+    ? {}
+    : { traceSourceRunId: trace.sourceRunId };
   const result = describeTraceResultFromTrace(trace, {
     runnerLinkFallback:
       options.runnerLinkFallback ?? host.callbacks.calculateRunnerLink(),
@@ -656,6 +662,7 @@ export function applyPrintedTraceSuccessFollowups(
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         traceId: trace.traceId,
+        ...runOrigin,
         traceStep,
         sourceDefinitionId: trace.sourceDefinitionId,
         traceSuccessful: true,
@@ -708,6 +715,8 @@ export function applyPrintedTraceSuccessFollowups(
       trace.successEffect.type ===
         "end_run_trash_hardware_and_unpreventable_meat_damage"
     ) {
+      if (trace.sourceRunId !== state.run.runId || trace.subroutineIndex === undefined)
+        throw new Error("Trace-Hardware-Auswahl benötigt ihre genaue Encounter-Herkunft.");
       if (!state.winner && state.run)
         host.callbacks.finishRun(false, legalAction);
       const hardwareWrecker = host.callbacks.resolveTraceHardwareWreckerSuccess(
@@ -722,6 +731,9 @@ export function applyPrintedTraceSuccessFollowups(
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           traceId: trace.traceId,
+          ...runOrigin,
+          traceSourceCardInstanceId: trace.sourceCardInstanceId,
+          traceSourceSubroutineIndex: trace.subroutineIndex,
           traceStep,
           sourceDefinitionId: trace.sourceDefinitionId,
           traceSuccessful: true,
@@ -765,6 +777,7 @@ export function applyPrintedTraceSuccessFollowups(
   }
   const payload = {
     traceId: trace.traceId,
+    ...runOrigin,
     traceStep,
     traceLimit: trace.traceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,

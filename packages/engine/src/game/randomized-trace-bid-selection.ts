@@ -374,7 +374,7 @@ function traceBidSelectionPurpose(
     quote.side,
     "kind" in quote.assessment
       ? quote.assessment.kind
-      : quote.assessment.traceId,
+      : String(quote.assessment.traceId),
     quote.choiceId,
     quote.planStepId,
     quote.candidateFingerprint,

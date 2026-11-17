@@ -1,4 +1,4 @@
-import type { RunId } from "@netgrid/shared";
+import type { RunId, TraceId } from "@netgrid/shared";
 import type { CorpRestrictedCreditRouteQuote } from "@netgrid/shared";
 import type { CorpDefenseScoreReserveAssessment } from "../corp/defense/corp-defense-score-reserve";
 import { type CorpExactIceRezRouteProjection } from "../runtime/corp-exact-ice-rez-route";
@@ -91,7 +91,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         choiceId: string;
         choiceSource: string;
         sourceStateVersion: number;
-        traceId: string;
+        traceId: TraceId;
         runId: RunId;
         sourceIceInstanceId: string;
         sourceDefinitionId: number;
@@ -106,7 +106,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         sourceStateVersion: number;
         origin:
           | { kind: "encounter"; runId: RunId }
-          | { kind: "trace_success"; traceId: string };
+          | { kind: "trace_success"; traceId: TraceId };
         sourceIceInstanceId: string;
         selectedOptionId: string;
         targetCardInstanceId: string;

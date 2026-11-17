@@ -171,7 +171,7 @@ it("prices Manhunt, binds its zero-credit bid and then trashes a visible resourc
     stateVersion: traceInput.playerView.stateVersion,
     timingPoint: traceInput.playerView.timingPoint,
     windowKind: "trace" as const,
-    windowId: traceInput.playerView.trace!.traceId,
+    windowId: String(traceInput.playerView.trace!.traceId),
   };
   for (const invalid of ["source", "version", "option"] as const) {
     const altered = structuredClone(traceInput);
