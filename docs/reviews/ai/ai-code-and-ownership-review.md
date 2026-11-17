@@ -731,7 +731,7 @@ Geschätzt zwei bis vier Stunden für die Cadence, ein bis zwei Tage für
 das gemeinsame Routing mit unveränderten Parent- und Need-Bindungen.
 [Cadence](../../../packages/ai/src/runner/rig-coverage/coverage-signals.ts#L54) ·
 [Vorbereitungs- und Lückenpfade](../../../packages/ai/src/runner/rig-coverage/coverage-signals.ts#L158) ·
-[History](../../../packages/ai/src/runtime/public-event-history.ts#L18) ·
+[History](../../../packages/ai/src/public-event-history.ts#L17) ·
 [Nativer Coverage-Test](../../../packages/ai/src/runner/rig-coverage/coverage-credit-draw-real-engine.test.ts)
 
 ### 6. `plans/corp-tactical-plan-modules.ts`

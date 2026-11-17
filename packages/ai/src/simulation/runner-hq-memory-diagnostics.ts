@@ -6,7 +6,7 @@ import { roundNumber as round } from "../runtime/number-rounding";
 import {
   eventMayChangeHqPressure as aiEventMayChangeHqPressure,
   mergedPublicHistory,
-} from "../runtime/public-event-history";
+} from "../public-event-history";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import {
   agendaPointsForMetrics,

@@ -202,7 +202,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedChoicesForDecision(
         hideInput,
-        resolveChoiceAction(11),
+        hideInput.legalActions[0]!,
         choiceDependencies(),
       ),
     ).toEqual({
@@ -614,10 +614,27 @@ function choiceInput(
     profileId: "test",
     actionNumber: stateVersion,
     eventTail: [],
-    legalActions: choice ? [resolveChoiceAction(stateVersion)] : [],
+    legalActions: choice
+      ? [
+          {
+            ...resolveChoiceAction(stateVersion),
+            source: "game_rule",
+            timingPoint: "runner_action.main",
+            expiresAtStateVersion: stateVersion,
+            choiceRequirements: [
+              {
+                choiceId: `choice-${stateVersion}`,
+                minSelections: 1,
+                maxSelections: 1,
+                optionIds: choice.options.map((option) => option.id),
+              },
+            ],
+          },
+        ]
+      : [],
     playerView: {
       stateVersion,
-      timingPoint: choice ? "choice.resolve" : "runner_action.main",
+      timingPoint: "runner_action.main",
       winner: null,
       own: { credits: 4 },
       servers: [],

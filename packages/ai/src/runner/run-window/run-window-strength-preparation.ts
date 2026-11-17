@@ -3,7 +3,7 @@ import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { currentEncounteredIceCard } from "../../runtime/current-encounter";
 import { pumpStrengthAmountForAction } from "../../runtime/encounter-action";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { runnerRunRemainderStrengthBoostAction } from "./run-window-action-facts";
 
 /** Proven displacement of ordinary pumps in this encounter, not future cash. */
@@ -53,7 +53,7 @@ export function runnerRunStrengthPumpSavingsForAction(
     .flatMap((pump) => {
       const gain = pumpStrengthAmountForAction(pump);
       if (!gain || gain <= 0) return [];
-      const cost = legalActionCreditCost(pump);
+      const cost = nonNegativeActionCreditCost(pump);
       return [
         {
           gain,
@@ -69,6 +69,6 @@ export function runnerRunStrengthPumpSavingsForAction(
   const saved =
     Math.min(...pumps.map((pump) => pump.before)) -
     Math.min(...pumps.map((pump) => pump.after)) -
-    legalActionCreditCost(action);
+    nonNegativeActionCreditCost(action);
   return saved > 0 ? saved : undefined;
 }

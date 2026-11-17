@@ -11,7 +11,7 @@ import { runnerCandidateSourceDefinitionId } from "../runtime/runner-action-sour
 import { runnerTargetedIceTrashState } from "../runtime/runner-targeted-ice-trash-plan";
 import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
 import { runnerRunTargetCanConvertNow } from "./runner-plan-run-funding";
-import { mergedPublicHistory } from "../runtime/public-event-history";
+import { mergedPublicHistory } from "../public-event-history";
 
 export function runnerHasExpiringAgendaAccessPayoff(
   input: AiDecisionInput,

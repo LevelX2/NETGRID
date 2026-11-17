@@ -115,22 +115,13 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
       "move_to_removed_from_game",
       "move_to_set_aside",
     ].includes(action.type) && targetServerId === "rd"
-      ? { rndAccessRemovedTopCard: true }
+      ? { rndAccessRemovedCard: true }
       : {}),
     ...(action.type === "steal_agenda" && targetServerId === "rd"
       ? { rndAccessStoleAgenda: true }
       : {}),
     ...(action.type === "trash_accessed_card" && targetServerId === "rd"
       ? { rndAccessTrashedCard: true }
-      : {}),
-    ...(action.type === "access_card" &&
-    targetServerId === "rd" &&
-    !input.legalActions.some(
-      (candidate) =>
-        candidate.type === "steal_agenda" ||
-        candidate.type === "trash_accessed_card",
-    )
-      ? { rndAccessLeftTopCardUnchanged: true }
       : {}),
     ...(rndFreshness?.freshenedByRunnerAccess === true
       ? { rndTopFreshenedByRunnerAccess: true }

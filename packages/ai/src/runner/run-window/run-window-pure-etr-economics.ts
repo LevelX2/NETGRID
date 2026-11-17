@@ -4,7 +4,7 @@ import {
 } from "../../run-analysis/visible-run-credit-budget";
 
 import { completeEncounterBreakerPayment } from "./run-window-encounter-payment";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { parseSubroutineIndexes } from "../../runtime/subroutine-indexes";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
@@ -97,7 +97,7 @@ export function pureEndRunEncounterPayment(
       cost <= 0 ||
       action.payload?.payOrEndRunSubroutinePayment !== immediateCost ||
       Number(action.payload?.payOrTrashProgramSubroutinePayment ?? 0) !== 0 ||
-      legalActionCreditCost(action) !== immediateCost
+      nonNegativeActionCreditCost(action) !== immediateCost
     )
       return undefined;
     if (subroutines.some(isVisibleHardEndRunSubroutine))
@@ -139,7 +139,7 @@ function completeEncounterAfterFixedPayment(
     input,
     action,
     budget: runnerEncounterCreditBudgetForInput(input),
-    cost: legalActionCreditCost(action),
+    cost: nonNegativeActionCreditCost(action),
   });
   if (
     !first.affordable ||
@@ -186,7 +186,7 @@ function completeEncounterAfterFixedPayment(
     path.creditBudgetAfterPath,
   );
   return {
-    cost: legalActionCreditCost(action) + (path.visibleBreakCost ?? 0),
+    cost: nonNegativeActionCreditCost(action) + (path.visibleBreakCost ?? 0),
     cashCost: input.playerView.own.credits - after,
     liquidCreditsAfterPayment: after,
     carriesStrengthAcrossIce:

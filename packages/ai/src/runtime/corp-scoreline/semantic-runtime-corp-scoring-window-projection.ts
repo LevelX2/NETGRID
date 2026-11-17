@@ -6,7 +6,7 @@ import {
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
-import { decisionDerivedValue } from "../decision-derived-cache";
+import { decisionDerivedValue } from "../../decision-derived-cache";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-route";
 import type {
   CorpScoringWindowAgendaStealSeverity,

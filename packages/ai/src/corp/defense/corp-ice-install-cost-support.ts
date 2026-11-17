@@ -5,6 +5,7 @@ import type {
   CorpGenericDefenseSignal,
 } from "../../plans/corp-defense-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { comparePlanRouteCandidates } from "../../plans/plan-route";
 import type {
   PlanMaterialization,
   PlanSchedulerContext,
@@ -148,42 +149,42 @@ export function prepareSelectedCorpIceInstallation(
   selected: PlanMaterialization["candidates"],
   signals: readonly CorpGenericDefenseSignal[],
 ): PlanMaterialization["candidates"] {
-  return selected.map((head) => {
-    const install = context.input.legalActions.find(
-      (a) => a.actionId === head.candidate.actionId,
+  const [head] = [...selected].sort(comparePlanRouteCandidates);
+  if (!head) return selected;
+  const install = context.input.legalActions.find(
+    (a) => a.actionId === head.candidate.actionId,
+  );
+  if (
+    !install ||
+    install.type !== "install_card" ||
+    install.payload?.placement !== "ice"
+  )
+    return selected;
+  const supports = signals
+    .flatMap((signal) => {
+      if (
+        signal.iceInstallCostSupportActionId !== install.actionId ||
+        signal.followupIceInstanceId !== install.source ||
+        signal.serverId !== install.payload?.serverId
+      )
+        return [];
+      return context.actionCandidates.flatMap((candidate) => {
+        if (!signal.actionIds?.includes(candidate.actionId)) return [];
+        const action = context.input.legalActions.find(
+          (a) => a.actionId === candidate.actionId,
+        );
+        const saving = action
+          ? currentSavings(context.input, action, install)
+          : undefined;
+        return saving === undefined ? [] : [{ candidate, saving }];
+      });
+    })
+    .sort(
+      (a, b) =>
+        b.saving - a.saving ||
+        a.candidate.actionId.localeCompare(b.candidate.actionId),
     );
-    if (
-      !install ||
-      install.type !== "install_card" ||
-      install.payload?.placement !== "ice"
-    )
-      return head;
-    const supports = signals
-      .flatMap((signal) => {
-        if (
-          signal.iceInstallCostSupportActionId !== install.actionId ||
-          signal.followupIceInstanceId !== install.source ||
-          signal.serverId !== install.payload?.serverId
-        )
-          return [];
-        return context.actionCandidates.flatMap((candidate) => {
-          if (!signal.actionIds?.includes(candidate.actionId)) return [];
-          const action = context.input.legalActions.find(
-            (a) => a.actionId === candidate.actionId,
-          );
-          const saving = action
-            ? currentSavings(context.input, action, install)
-            : undefined;
-          return saving === undefined ? [] : [{ candidate, saving }];
-        });
-      })
-      .sort(
-        (a, b) =>
-          b.saving - a.saving ||
-          a.candidate.actionId.localeCompare(b.candidate.actionId),
-      );
-    return supports[0]
-      ? { candidate: supports[0].candidate, stepValue: head.stepValue }
-      : head;
-  });
+  return supports[0]
+    ? [{ candidate: supports[0].candidate, stepValue: head.stepValue }]
+    : selected;
 }

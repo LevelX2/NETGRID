@@ -21,7 +21,7 @@ import type { AccessReserveEconomyPosture } from "./access/access-reserve-adapte
 import {
   mergedPublicHistory,
   serverIdFromEvent,
-} from "./runtime/public-event-history";
+} from "./public-event-history";
 import {
   projectKnownCorpCardAccessEffect,
   projectKnownCorpCardProspectiveAccessEffect,

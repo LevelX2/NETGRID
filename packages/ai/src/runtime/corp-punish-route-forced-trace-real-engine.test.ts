@@ -173,7 +173,11 @@ it.each(["locked", "side", "timing", "missing"] as const)(
     if (kind === "side") action.side = "runner";
     if (kind === "timing") action.timingPoint = "game.checkpoint";
     if (kind === "missing") input.legalActions = [];
-    expect(() => chooseCorpAction(input)).toThrow("invalid_support_graph");
+    expect(() => chooseCorpAction(input)).toThrow(
+      kind === "side"
+        ? "actor_private_legal_action_projected_for_other_side"
+        : "invalid_support_graph",
+    );
   },
 );
 

@@ -1,3 +1,4 @@
+import { actionProvidesCredits } from "../../actions/action-effect-classification";
 import type { LegalAction } from "@netgrid/shared";
 import {
   allow,
@@ -18,6 +19,12 @@ export function basicSetupDecision(
     `pilot_scope:${BASIC_SETUP_PILOT_MODE}`,
     `action_type:${action.type}`,
   ];
+  if (action.type === "gain_credit" && !actionProvidesCredits(action))
+    return block(
+      BASIC_SETUP_PILOT_MODE,
+      "basic_setup_non_credit_gain_action",
+      baseEvidence,
+    );
   switch (action.type) {
     case "gain_credit":
     case "draw_card":

@@ -544,6 +544,13 @@ export function selectedChoicesForDecision(
 ): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
+  if (exactCurrentChoiceAction(input, choice) !== action) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Resolve only the exact current Engine choice offer for this actor.",
+    );
+  }
   currentPortfolio ??= residentPlanPortfolioSnapshot(input);
   const selectableOptions = selectableChoiceOptions(choice.options);
   const resolved = (
@@ -2731,8 +2738,8 @@ function validatedChoiceSelection(
   const selectableIds = new Set(selectableOptions.map((option) => option.id));
   const uniqueIds = new Set(selectedOptionIds);
   const selectionIsValid =
-    Number.isInteger(choice.minSelections) &&
-    Number.isInteger(choice.maxSelections) &&
+    Number.isSafeInteger(choice.minSelections) &&
+    Number.isSafeInteger(choice.maxSelections) &&
     choice.minSelections >= 0 &&
     choice.maxSelections >= choice.minSelections &&
     selectedOptionIds.length >= choice.minSelections &&

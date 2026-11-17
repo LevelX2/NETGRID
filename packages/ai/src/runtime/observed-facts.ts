@@ -1,5 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
-import { mergedPublicHistory } from "./public-event-history";
+import { mergedPublicHistory } from "../public-event-history";
 
 export type AiObservedFacts = {
   eventCounts: Record<string, number>;

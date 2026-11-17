@@ -1,5 +1,5 @@
 import { runnerRunPathCreditBudgetAfterEncounter } from "../../run-analysis/visible-run-credit-budget";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { breakSubroutineIndexesForAction } from "../../runtime/subroutine-indexes";
 import { currentEncounterRequiresDamagePreservingBreak } from "../../runtime/current-encounter-damage";
 import { currentEncounterMitigationForAction } from "../../runtime/runner-encounter-mitigation";
@@ -89,14 +89,14 @@ export function optionalDamageBreakContinuationPayments(
     optionalCost.conditionalAccessReason ||
     optionalCost.postBreakStealthLosses?.length ||
     optionalCost.futureClicksLost ||
-    optionalCost.cost !== legalActionCreditCost(action)
+    optionalCost.cost !== nonNegativeActionCreditCost(action)
   )
     return [];
   const initial = spendRunnerEncounterActionCost({
     input,
     action,
     budget: runnerEncounterCreditBudgetForInput(input),
-    cost: legalActionCreditCost(action),
+    cost: nonNegativeActionCreditCost(action),
   });
   if (!initial.affordable) return [];
   const remaining = new Set(
@@ -135,14 +135,18 @@ export function optionalDamageBreakContinuationPayments(
       costs.conditionalAccessReason ||
       costs.postBreakStealthLosses?.length ||
       costs.futureClicksLost ||
-      costs.cost !== legalActionCreditCost(candidate)
+      costs.cost !== nonNegativeActionCreditCost(candidate)
     )
       return [{ uncertified: true as const }];
     return [{ uncertified: false as const, candidate, indexes }];
   });
   if (alternatives.some((a) => a.uncertified)) return [];
   const pending = [
-    { remaining, budget: initial.budget, cost: legalActionCreditCost(action) },
+    {
+      remaining,
+      budget: initial.budget,
+      cost: nonNegativeActionCreditCost(action),
+    },
   ];
   const visited = new Set<string>();
   const results: RunnerRunContinuationPayment[] = [];
@@ -168,7 +172,7 @@ export function optionalDamageBreakContinuationPayments(
         [...alternative.indexes].some((i) => !state.remaining.has(i))
       )
         continue;
-      const cost = legalActionCreditCost(alternative.candidate);
+      const cost = nonNegativeActionCreditCost(alternative.candidate);
       const payment = spendRunnerEncounterActionCost({
         input,
         action: alternative.candidate,

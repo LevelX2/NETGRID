@@ -7,7 +7,7 @@ import {
 import {
   mergedPublicHistory,
   serverIdFromEvent,
-} from "../../runtime/public-event-history";
+} from "../../public-event-history";
 import { runnerCoverageGapIsTerminalRemoteThreat } from "../rig-coverage/coverage-support";
 import {
   runnerDamageThreatAssessment,

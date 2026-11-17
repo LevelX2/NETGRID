@@ -6,7 +6,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 import {
   mergedPublicHistory,
   serverIdFromEvent,
-} from "../../runtime/public-event-history";
+} from "../../public-event-history";
 import { isRemoteServerTarget } from "../../runtime/server-target";
 
 export function runnerInstallTaxTarget(

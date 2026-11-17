@@ -70,7 +70,6 @@ export function createRunnerDevelopmentSupportComposition(
 
   const {
     runnerPersistentInstallFitScoreComponent,
-    runnerPersistentInstallLegacyScoreDelta,
     runnerPersistentInstallEvidenceForAction,
     runnerPersistentInstallEvaluationForAction,
   } = createRunnerPersistentInstallContext({
@@ -123,7 +122,6 @@ export function createRunnerDevelopmentSupportComposition(
     runnerNoRunEconomyCommitmentEvidence,
     semanticRuntimePlanMemoryActionExclusion,
     runnerPersistentInstallFitScoreComponent,
-    runnerPersistentInstallLegacyScoreDelta,
     runnerPersistentInstallEvidenceForAction,
     runnerPersistentInstallEvaluationForAction,
   };

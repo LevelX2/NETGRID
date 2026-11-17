@@ -27,7 +27,7 @@ import { corpPassTaxRezAssessment } from "../../runtime/corp-pass-tax-rez-assess
 import { corpRootRezDiscountedIceAssessment } from "./corp-root-rez-discounted-ice";
 import { corpRootRezTimingComponent } from "../../runtime/corp-scoreline/semantic-runtime-corp-score-ice-components";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import {
   isServerId,
   serverForInstalledCard,
@@ -192,7 +192,7 @@ export function corpPostPassIceLifecycleDefenseSignal(
   const serverId = action?.payload?.serverId;
   const decision = action?.payload?.decision;
   const paymentAmount = action?.payload?.paymentAmount;
-  const creditCost = action ? legalActionCreditCost(action) : undefined;
+  const creditCost = action ? nonNegativeActionCreditCost(action) : undefined;
   if (
     action?.type !== "continue_run" ||
     action.side !== "corp" ||

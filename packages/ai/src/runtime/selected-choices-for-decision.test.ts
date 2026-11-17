@@ -524,7 +524,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("routes checkpoint memory cleanup to the dedicated minimal selector", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_cards",
@@ -538,7 +538,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
         selectedRunnerMemoryCheckpointTrashOptionIds: () => ["program_b"],
@@ -552,7 +551,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("routes a Shell Traders MU choice through the qualitative program replacement selector", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_cards",
@@ -571,7 +570,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
         selectedRunnerProgramInstallTrashOptionIds: () => ["card_redundant"],
@@ -585,7 +583,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("spends a useful Priority Wreck amount while keeping a small reserve", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -600,7 +598,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner", credits: 7, opponentCredits: 7 },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -611,7 +608,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("does not spend more on Priority Wreck than the Corp can lose", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -626,7 +623,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner", credits: 17, opponentCredits: 12 },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -634,7 +630,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("pays the current City Surveillance draw tax when the option is legal", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -648,7 +644,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -659,7 +654,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("takes the City Surveillance tag when no payment option is legal", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -670,7 +665,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner", credits: 0 },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -715,7 +709,7 @@ describe("selectedChoicesForDecision", () => {
 
   it("rejects a Corp rez-or-trash ICE payload without its defense executor binding", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice(
           {
             kind: "select_option",
@@ -730,7 +724,6 @@ describe("selectedChoicesForDecision", () => {
           },
           { side: "corp" },
         ),
-        resolveChoiceAction("corp"),
         unusedDependencies(),
       ),
     ).toThrowError(expect.objectContaining({ code: "window_origin_missing" }));
@@ -890,11 +883,7 @@ describe("selectedChoicesForDecision", () => {
     ];
 
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction("corp"),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError(
       expect.objectContaining({
         code: "window_origin_missing",
@@ -945,16 +934,12 @@ describe("selectedChoicesForDecision", () => {
     ];
 
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction("corp"),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError(expect.objectContaining({ code: "window_origin_missing" }));
   });
 
   it("rezes an affordable City Surveillance before passing the draw window", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice({
         kind: "select_option",
         source: "runner_draw.draw_tax_rez:12",
@@ -965,7 +950,6 @@ describe("selectedChoicesForDecision", () => {
           { id: "pass", label: "Passen" },
         ],
       }),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -976,7 +960,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("uses a legal Runner tag-avoidance source instead of passing", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -993,7 +977,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -1004,7 +987,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("keeps pass when no legal Runner tag-avoidance source is selectable", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -1015,7 +998,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -1026,7 +1008,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("keeps pass in a damage window without a legal prevention source", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -1037,7 +1019,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -1049,7 +1030,7 @@ describe("selectedChoicesForDecision", () => {
 
   it("fails closed when an intentional damage-window pass has no Engine pass option", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice(
           {
             kind: "select_option",
@@ -1072,7 +1053,6 @@ describe("selectedChoicesForDecision", () => {
             })),
           },
         ),
-        resolveChoiceAction("runner"),
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
@@ -1085,7 +1065,7 @@ describe("selectedChoicesForDecision", () => {
       known: true,
       type: "program",
     } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -1110,7 +1090,6 @@ describe("selectedChoicesForDecision", () => {
           rig: [forceShield],
         },
       ),
-      resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
         rolesForCardId: () => [],
@@ -1132,7 +1111,7 @@ describe("selectedChoicesForDecision", () => {
       known: true,
       type: "program",
     } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -1158,7 +1137,6 @@ describe("selectedChoicesForDecision", () => {
           rig: [oneShot],
         },
       ),
-      resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
         rolesForCardId: () => ["damage_prevention", "rig_defense"],
@@ -1173,13 +1151,12 @@ describe("selectedChoicesForDecision", () => {
 
   it("fails closed for an ambiguous mandatory choice without a resolver", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice({
           kind: "select_option",
           minSelections: 2,
           maxSelections: 2,
         }),
-        resolveChoiceAction(),
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
@@ -1445,21 +1422,20 @@ describe("selectedChoicesForDecision", () => {
 
   it("fails closed for an optional unknown choice instead of picking first", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice({
           kind: "select_option",
           minSelections: 0,
           maxSelections: 1,
           options: [{ id: "only_option", label: "Only option" }],
         }),
-        resolveChoiceAction(),
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
   });
 
   it("resolves an unknown mandatory choice when exactly one option is selectable", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice({
         kind: "select_option",
         minSelections: 1,
@@ -1469,7 +1445,6 @@ describe("selectedChoicesForDecision", () => {
           { id: "unavailable", label: "Unavailable", selectable: false },
         ],
       }),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -1480,7 +1455,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("resolves a mandatory choice only when every selectable option is forced", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice({
         kind: "select_option",
         minSelections: 2,
@@ -1490,7 +1465,6 @@ describe("selectedChoicesForDecision", () => {
           { id: "ice_b_hq", label: "ICE B HQ", value: "ice_b|hq" },
         ],
       }),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -1502,7 +1476,7 @@ describe("selectedChoicesForDecision", () => {
 
   it("rejects an invalid selection returned by a registered resolver", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice(
           {
             kind: "select_cards",
@@ -1515,7 +1489,6 @@ describe("selectedChoicesForDecision", () => {
           },
           { side: "runner" },
         ),
-        resolveChoiceAction("runner"),
         {
           ...unusedDependencies(),
           selectedRunnerMemoryCheckpointTrashOptionIds: () => [
@@ -1527,7 +1500,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("selects Corporate Negotiating Center HQ agenda options when revealing agendas", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice({
         kind: "select_cards",
         source: "v1917.corp_hq_agenda_reveal:cnc_source:8",
@@ -1538,7 +1511,6 @@ describe("selectedChoicesForDecision", () => {
           { id: "card_hq_agenda_2", label: "HQ-Agenda", value: "hq_agenda_2" },
         ],
       }),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2101,7 +2073,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("builds a valid Data Fort Reclamation selection instead of taking every HQ option", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_cards",
@@ -2127,7 +2099,6 @@ describe("selectedChoicesForDecision", () => {
           ],
         },
       ),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2138,7 +2109,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("does not install agendas through a Data Fort Reclamation fallback choice", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_cards",
@@ -2158,7 +2129,6 @@ describe("selectedChoicesForDecision", () => {
           ],
         },
       ),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2169,9 +2139,8 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("selects an affordable Data Fort Reclamation rez only from its exact Engine quote", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       optionalRezInput(optionalRezQuote()),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2203,9 +2172,8 @@ describe("selectedChoicesForDecision", () => {
       } as CorpOptionalRezChoiceQuote,
     ],
   ])("declines an %s Engine-quoted optional rez", (_label, quote) => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       optionalRezInput(quote),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2255,9 +2223,8 @@ describe("selectedChoicesForDecision", () => {
     ],
   ])("fails closed for an optional rez with %s", (_label, quote) => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         optionalRezInput(quote as CorpOptionalRezChoiceQuote | undefined),
-        resolveChoiceAction(),
         unusedDependencies(),
       ),
     ).toThrowError(
@@ -2275,9 +2242,8 @@ describe("selectedChoicesForDecision", () => {
     "fails closed for an optional rez with mismatched %s",
     (_label, options) => {
       expect(() =>
-        selectedChoicesForDecision(
+        resolveFixtureChoice(
           optionalRezInput(optionalRezQuote(), options),
-          resolveChoiceAction(),
           unusedDependencies(),
         ),
       ).toThrowError(
@@ -2307,11 +2273,7 @@ describe("selectedChoicesForDecision", () => {
     const input = optionalRezInput(optionalRezQuote());
     mutate(input);
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction(),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError(
       expect.objectContaining({
         code: "window_origin_missing",
@@ -2334,11 +2296,7 @@ describe("selectedChoicesForDecision", () => {
       },
     });
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction(),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError(
       expect.objectContaining({
         code: "window_origin_missing",
@@ -2423,7 +2381,7 @@ describe("selectedChoicesForDecision", () => {
 
   it("fails a Corp advancement choice without an exact resident score continuation", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice({
           kind: "select_option",
           source:
@@ -2438,7 +2396,6 @@ describe("selectedChoicesForDecision", () => {
             },
           ],
         }),
-        resolveChoiceAction(),
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
@@ -2467,11 +2424,7 @@ describe("selectedChoicesForDecision", () => {
     rememberResidentScoreChoiceContinuation(input, "different_agenda");
 
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction(),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError("window_origin_missing");
   });
 
@@ -3532,8 +3485,10 @@ function resolveChoiceAction(side: "corp" | "runner" = "corp"): LegalAction {
 function resolveChoiceActionForInput(input: AiDecisionInput): LegalAction {
   const choice = input.playerView.pendingChoice;
   if (!choice) throw new Error("Missing pending choice.");
-  return {
+  const action: LegalAction = {
     ...resolveChoiceAction(input.side),
+    targetRequirements: [],
+    visibility: "private_to_actor",
     timingPoint: input.playerView.timingPoint,
     expiresAtStateVersion: input.playerView.stateVersion,
     choiceRequirements: [
@@ -3545,6 +3500,21 @@ function resolveChoiceActionForInput(input: AiDecisionInput): LegalAction {
       },
     ],
   };
+  input.legalActions = [action];
+  input.playerView.legalActions = [action];
+  return action;
+}
+function resolveFixtureChoice(
+  input: AiDecisionInput,
+  dependencies: Parameters<typeof selectedChoicesForDecision>[2],
+  portfolio?: Parameters<typeof selectedChoicesForDecision>[3],
+) {
+  return selectedChoicesForDecision(
+    input,
+    resolveChoiceActionForInput(input),
+    dependencies,
+    portfolio,
+  );
 }
 
 function applyRealAction(

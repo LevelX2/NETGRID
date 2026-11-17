@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
-import { deriveTacticalPlanActionDemands } from "./tactical-plan-action-demands";
+import {
+  deriveTacticalPlanActionDemands,
+  primaryActionDemandForPlan,
+  publishTacticalPlanActionDemands,
+} from "./tactical-plan-action-demands";
 
 describe("tactical plan action demands", () => {
   it("keeps plan steps and blockers independent of the builder input", () => {
@@ -97,6 +101,57 @@ describe("tactical plan action demands", () => {
       gap: 1,
       acceptedRestrictions: ["unrestricted"],
     });
+  });
+
+  it("does not demand an action for an already scoreable agenda", () => {
+    const plan = createTacticalPlan({
+      planId: "corp:score",
+      side: "corp",
+      type: "corp.create_score_window",
+      priority: 1,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "score",
+        kind: "score_agenda",
+        desiredActionSemantics: ["score.agenda"],
+      }),
+      stateVersion: 1,
+    });
+    expect(deriveTacticalPlanActionDemands(plan, 0)).toEqual([]);
+  });
+
+  it("refreshes a declared demand without retaining the old action count", () => {
+    const plan = createTacticalPlan({
+      planId: "runner:breaker",
+      side: "runner",
+      type: "runner.obtain_breaker_coverage",
+      priority: 1,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "install",
+        kind: "install_breaker",
+        desiredActionSemantics: ["install.program"],
+      }),
+      stateVersion: 1,
+    });
+    const initial = publishTacticalPlanActionDemands(plan, 0);
+    const declared = {
+      ...initial,
+      actionDemands: [
+        {
+          ...initial.actionDemands![0]!,
+          demandId: "explicit",
+        },
+      ],
+    };
+    const current = primaryActionDemandForPlan(declared, 1);
+    expect(current?.demandId).toBe("explicit");
+    expect(current?.gap).toBe(0);
+    expect(
+      current?.evidence.filter((fact) =>
+        fact.startsWith("action_demand_current:"),
+      ),
+    ).toEqual(["action_demand_current:1"]);
   });
 
   it("accepts program-install capacity for a Runner breaker install", () => {

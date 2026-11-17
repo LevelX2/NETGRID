@@ -1638,7 +1638,6 @@ export function runnerActionDispositions(
       .map((development) => ({
         development,
         admission: runnerDevelopmentCardAdmission({
-          definitionId: development.definitionId,
           assignedDomainPlanIds: development.assignedDomainPlanIds,
           ...(development.purposeCode
             ? { concretePurposeCode: development.purposeCode }

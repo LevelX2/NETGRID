@@ -5,7 +5,7 @@ import {
   semanticRuntimeCorpCentralDefenseAllocationDirection,
   semanticRuntimeCorpCentralPressureAssessment,
 } from "./semantic-runtime-corp-central-pressure";
-import { withDecisionDerivedCache } from "./decision-derived-cache";
+import { withDecisionDerivedCache } from "../decision-derived-cache";
 
 describe("semanticRuntimeCorpCentralPressureAssessment", () => {
   it("reuses the immutable assessment within one decision only", () => {

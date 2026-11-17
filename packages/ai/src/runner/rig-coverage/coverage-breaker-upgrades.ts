@@ -2,7 +2,7 @@ import {
   runnerCandidateExecutesProgramSearch,
   runnerProgramSearchSourceCardInstanceId,
 } from "../../runtime/runner-program-search-facts";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import {
   runnerCandidateSourceDefinitionId,
   runnerInstallSourceInstanceId,
@@ -351,7 +351,7 @@ export function runnerBreakerUpgradeSearchRoute(
       return [
         {
           actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
+          creditCost: nonNegativeActionCreditCost(action),
           clickCost,
           consumesCard: action.type === "play_event",
         },
@@ -389,7 +389,7 @@ export function runnerVisibleBreakerUpgradeInstallRoute(
       return [
         {
           actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
+          creditCost: nonNegativeActionCreditCost(action),
           clickCost: action.costs.reduce(
             (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
             0,
@@ -428,7 +428,7 @@ export function runnerVisibleBreakerUpgradeMemoryBlockedInstallRoute(
       return [
         {
           actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
+          creditCost: nonNegativeActionCreditCost(action),
           clickCost: action.costs.reduce(
             (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
             0,
@@ -484,7 +484,7 @@ export function runnerBreakerUpgradeMemorySupportRoutes(
           actionId: action.actionId,
           definitionId: card.definitionId,
           additionalMu,
-          creditCost: legalActionCreditCost(action),
+          creditCost: nonNegativeActionCreditCost(action),
           clickCost: action.costs.reduce(
             (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
             0,

@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 
 export type ShellTradersAccessAssessment = {
@@ -88,7 +88,10 @@ export function assessShellTradersAccess(
       )
         return [];
       return [
-        { card, credits: (counters as number) * legalActionCreditCost(action) },
+        {
+          card,
+          credits: (counters as number) * nonNegativeActionCreditCost(action),
+        },
       ];
     },
   );
@@ -134,7 +137,7 @@ export function assessShellTradersAccess(
     const available =
       input.playerView.own.credits -
       completionCredits -
-      legalActionCreditCost(run);
+      nonNegativeActionCreditCost(run);
     if (available < 0) continue;
     const path = assessKnownRezzedIcePath(
       server.ice,
@@ -167,7 +170,9 @@ export function assessShellTradersAccess(
     )
       continue;
     const requiredCredits =
-      completionCredits + legalActionCreditCost(run) + path.visibleBreakCost;
+      completionCredits +
+      nonNegativeActionCreditCost(run) +
+      path.visibleBreakCost;
     if (requiredCredits > input.playerView.own.credits) continue;
     if (!best || requiredCredits < best.requiredCredits!)
       best = {

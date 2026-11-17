@@ -31,7 +31,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 
 import { rolesHaveBreakerRole } from "../../runtime/breaker-role-match";
 
-import { mergedPublicHistory } from "../../runtime/public-event-history";
+import { mergedPublicHistory } from "../../public-event-history";
 
 import { rolesMatch } from "../../role-match";
 

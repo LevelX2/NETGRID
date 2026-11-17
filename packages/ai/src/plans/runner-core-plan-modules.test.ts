@@ -1906,9 +1906,14 @@ describe("Runner core plan modules", () => {
     );
     const clearTag = candidate("clear", "remove_tag", "tag.remove");
     clearTag.tagEffectProfile = {
-      kind: "remove_tags", recipient: "runner", mode: "amount", amount: 1,
-      currentTagReduction: 1, acuteTagRemoval: true,
-      source: "legal_action_type", evidence: ["Basic remove_tag contract"],
+      kind: "remove_tags",
+      recipient: "runner",
+      mode: "amount",
+      amount: 1,
+      currentTagReduction: 1,
+      acuteTagRemoval: true,
+      source: "legal_action_type",
+      evidence: ["Basic remove_tag contract"],
     };
     const clearHazardCounter = candidate(
       "clear-mastiff-counter",
@@ -2433,7 +2438,6 @@ describe("Runner core plan modules", () => {
   it("admits card-specific development only with a concrete feasible purpose", () => {
     expect(
       runnerDevelopmentCardAdmission({
-        definitionId: "special-card",
         assignedDomainPlanIds: [],
         duplicateAlreadyInstalled: false,
         affordableOrSupportable: true,
@@ -2441,7 +2445,6 @@ describe("Runner core plan modules", () => {
     ).toEqual({ admitted: false, reasonCode: "no_concrete_plan_purpose" });
     expect(
       runnerDevelopmentCardAdmission({
-        definitionId: "special-card",
         assignedDomainPlanIds: ["runner.pressure_central"],
         concretePurposeCode: "increase_rnd_access",
         duplicateAlreadyInstalled: false,
@@ -2454,7 +2457,6 @@ describe("Runner core plan modules", () => {
     });
     expect(
       runnerDevelopmentCardAdmission({
-        definitionId: "special-card",
         assignedDomainPlanIds: [],
         concretePurposeCode: "unlock_recurring_draw",
         duplicateAlreadyInstalled: false,
@@ -2463,7 +2465,6 @@ describe("Runner core plan modules", () => {
     ).toMatchObject({ admitted: true });
     expect(
       runnerDevelopmentCardAdmission({
-        definitionId: "special-card",
         assignedDomainPlanIds: [],
         concretePurposeCode: "unknown:later",
         duplicateAlreadyInstalled: false,

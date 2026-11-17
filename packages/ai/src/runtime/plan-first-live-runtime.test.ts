@@ -24897,6 +24897,7 @@ describe("authoritative plan-first live runtime", () => {
       );
       const accessInput = aiInput("runner", [decline, trash]);
       accessInput.playerView.stateVersion = 2;
+      for (const action of [decline, trash]) action.expiresAtStateVersion = 2;
       accessInput.playerView.timingPoint = "access.resolve_card";
       accessInput.playerView.run = {
         attackedServerId: "hq",
@@ -24975,6 +24976,7 @@ describe("authoritative plan-first live runtime", () => {
       counters: { bit: 1 },
     });
     accessInput.playerView.stateVersion = 2;
+    for (const action of [decline, trash]) action.expiresAtStateVersion = 2;
     accessInput.playerView.own.credits = 10;
     accessInput.playerView.timingPoint = "access.resolve_card";
     accessInput.playerView.run = {
@@ -25930,6 +25932,7 @@ describe("authoritative plan-first live runtime", () => {
         showNonMatchingCards: false,
       },
     };
+    bindTestChoiceOffer(choiceInput, resolve);
     expect(
       selectedChoicesForDecision(choiceInput, resolve, {
         evaluateCorpOpeningHand: () => ({ decision: "keep" }),
@@ -26138,6 +26141,7 @@ describe("authoritative plan-first live runtime", () => {
         },
       ],
     };
+    bindTestChoiceOffer(choiceInput, resolve);
     expect(
       selectedChoicesForDecision(choiceInput, resolve, {
         evaluateCorpOpeningHand: () => ({ decision: "keep" }),
@@ -28200,6 +28204,7 @@ describe("authoritative plan-first live runtime", () => {
         },
       ],
     };
+    bindTestChoiceOffer(choiceInput, resolve);
     expect(
       selectedChoicesForDecision(choiceInput, resolve, {
         evaluateCorpOpeningHand: () => ({ decision: "keep" }),
@@ -29477,6 +29482,7 @@ describe("authoritative plan-first live runtime", () => {
         showNonMatchingCards: false,
       },
     };
+    bindTestChoiceOffer(choiceInput, resolve);
     choiceInput.playerView.servers = [
       server("hq"),
       server("rd"),
@@ -32115,4 +32121,18 @@ function runTargetEvaluation(params: {
     score: params.score,
     evidence: ["test_run_target"],
   };
+}
+
+function bindTestChoiceOffer(input: AiDecisionInput, action: LegalAction): void {
+  const choice = input.playerView.pendingChoice;
+  if (!choice) throw new Error("Missing fixture choice.");
+  action.source = "game_rule";
+  action.timingPoint = input.playerView.timingPoint;
+  action.expiresAtStateVersion = input.playerView.stateVersion;
+  action.choiceRequirements = [{
+    choiceId: choice.choiceId,
+    minSelections: choice.minSelections,
+    maxSelections: choice.maxSelections,
+    optionIds: choice.options.map((option) => option.id),
+  }];
 }

@@ -4,7 +4,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   findLastHistoryIndex,
   mergedPublicHistory,
-} from "../runtime/public-event-history";
+} from "../public-event-history";
 import { observedAccessOutcomeEvidence } from "./access-outcome-projection";
 
 export type AccessOutcomeMemoryStatus = {

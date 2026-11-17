@@ -6,7 +6,7 @@ import type {
 
 import { createAiHintsByCard } from "../ai-hints";
 import type { AiHintStructuredEffect } from "../hint-ontology";
-import { mergedPublicHistory } from "./public-event-history";
+import { mergedPublicHistory } from "../public-event-history";
 import { rolesMatch } from "../role-match";
 
 type CorpRemoteLike = {

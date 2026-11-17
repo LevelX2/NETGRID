@@ -12,11 +12,10 @@ export function exactCurrentChoiceAction(
   input: AiDecisionInput,
   choice: PendingChoice | undefined,
 ): LegalAction | undefined {
-  const { stateVersion, activeSide } = input.playerView;
+  const { stateVersion } = input.playerView;
   if (
     !choice ||
     choice.side !== input.side ||
-    activeSide !== input.side ||
     choice.stateVersion !== stateVersion
   )
     return undefined;

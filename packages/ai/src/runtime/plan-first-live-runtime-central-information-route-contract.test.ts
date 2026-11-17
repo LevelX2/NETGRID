@@ -552,6 +552,11 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     buildRunnerEconomyPosture: () => ({
       minimumCreditFloor: 3,
       desiredCreditReserve: 5,
+      creditReservePolicy: {
+        emergencyReserve: 0,
+        contestReserve: 0,
+        remoteScoreThreat: "none",
+      },
       fundingNeed: false,
       evidence: ["test_central_information_route"],
     }),

@@ -27,7 +27,7 @@ import {
   runnerHandBreakerForCoverage,
 } from "../../plans/tactical-plan-breaker-coverage";
 import { runnerTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
-import { mergedPublicHistory } from "../../runtime/public-event-history";
+import { mergedPublicHistory } from "../../public-event-history";
 import { runnerBreakerCoverageUpgrade } from "./coverage-breaker-upgrades";
 import { runnerSameTurnBreakerPreparation } from "./coverage-same-turn-breaker-preparation";
 import { runnerBreakerUpgradeSupportActions } from "./coverage-breaker-upgrades";

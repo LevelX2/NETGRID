@@ -600,7 +600,19 @@ describe("plan-first Remote contest continuation", () => {
     ];
     input.playerView.servers = [
       server("hq"),
-      server("rd"),
+      server("rd", [
+        withEffectiveRunQuote(
+          visibleCard("coverage-rd-code-gate", "corp", "ice", {
+            definitionId: "onr_v1_261_quandary",
+            rezzed: true,
+            subtypes: ["code_gate"],
+          }),
+          {
+            effectiveStrength: 2,
+            subroutines: [{ id: "coverage-rd-etr", type: "end_the_run" }],
+          },
+        ),
+      ]),
       server("archives"),
       server("remote_1", [puzzle], []),
     ];
@@ -1834,6 +1846,11 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     buildRunnerEconomyPosture: () => ({
       minimumCreditFloor: 0,
       desiredCreditReserve: 0,
+      creditReservePolicy: {
+        emergencyReserve: 0,
+        contestReserve: 0,
+        remoteScoreThreat: "none",
+      },
       fundingNeed: false,
       evidence: ["test_remote_contest_continuation"],
     }),

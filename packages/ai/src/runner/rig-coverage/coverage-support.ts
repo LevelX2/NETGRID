@@ -1,4 +1,4 @@
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
 import { runnerCandidateExecutesProgramSearch } from "../../runtime/runner-program-search-facts";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
@@ -191,7 +191,7 @@ export function runnerUrgentRemoteCoverageConversionQuote(
   const projectedKnownPathLiquidCost = quoteLiquidity - remainingLiquidity;
   const requiredCreditsWithoutFloor =
     (answerInstallCost as number) +
-    legalActionCreditCost(runAction) +
+    nonNegativeActionCreditCost(runAction) +
     projectedKnownPathLiquidCost;
   const remainingFundingClicks = Math.max(
     0,

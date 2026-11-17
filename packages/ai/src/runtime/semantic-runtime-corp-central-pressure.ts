@@ -6,8 +6,8 @@ import type {
 } from "@netgrid/shared";
 
 import { AI_HINTS_BY_CARD, type AiCardHint } from "../ai-hints";
-import { mergedPublicHistory } from "./public-event-history";
-import { decisionDerivedValue } from "./decision-derived-cache";
+import { mergedPublicHistory } from "../public-event-history";
+import { decisionDerivedValue } from "../decision-derived-cache";
 import { rolesMatch } from "../role-match";
 
 export type CorpCentralServerId = "hq" | "rd";

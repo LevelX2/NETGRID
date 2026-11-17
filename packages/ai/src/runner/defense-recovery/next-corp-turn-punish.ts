@@ -10,7 +10,7 @@ import type {
 } from "@netgrid/shared";
 import { reconstructBeliefState } from "../../belief-state";
 import { visibleRunnerTraceSupport } from "../../run-analysis/visible-run-hazards";
-import { decisionDerivedValue } from "../../runtime/decision-derived-cache";
+import { decisionDerivedValue } from "../../decision-derived-cache";
 import {
   fixedTagOperation,
   fixedTaggedDamageOperation,

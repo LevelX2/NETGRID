@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
@@ -31,7 +32,10 @@ export function assessRunStrengthStock(
     evidenceCodes: [`runner_run_strength_stock_deferred:${reason}`],
   });
   const own = input.playerView.own;
-  if (input.playerView.timingPoint !== "runner_action.main")
+  if (
+    input.side !== "runner" ||
+    input.playerView.timingPoint !== "runner_action.main"
+  )
     return defer("not_ordinary_development_window");
   const action = input.legalActions.find(
     (a) =>
@@ -39,7 +43,7 @@ export function assessRunStrengthStock(
       a.type === "install_card" &&
       a.side === "runner" &&
       a.source === evaluation.cardInstanceId &&
-      a.expiresAtStateVersion === input.playerView.stateVersion,
+      actionMatchesCurrentDecision(input, a),
   );
   const card = own.gripOrHq.find(
     (c) => c.known && c.instanceId === evaluation.cardInstanceId,
@@ -47,6 +51,7 @@ export function assessRunStrengthStock(
   if (
     !action ||
     !card ||
+    card.definitionId !== evaluation.definitionId ||
     action.payload?.runnerProgramTrashBeforeInstall === true ||
     action.targetRequirements.length > 0 ||
     (action.choiceRequirements?.length ?? 0) > 0 ||
@@ -58,7 +63,14 @@ export function assessRunStrengthStock(
     return defer("no_direct_install_capacity");
   const credits = action.costs.reduce((n, c) => n + (c.credits ?? 0), 0);
   const clicks = action.costs.reduce((n, c) => n + (c.clicks ?? 0), 0);
-  if (clicks > own.clicks || own.credits - credits < economy.minimumCreditFloor)
+  if (
+    !Number.isSafeInteger(credits) ||
+    credits < 0 ||
+    !Number.isSafeInteger(clicks) ||
+    clicks < 0 ||
+    clicks > own.clicks ||
+    own.credits - credits < economy.minimumCreditFloor
+  )
     return defer("preserve_resources");
   if (
     own.tags > 0 ||

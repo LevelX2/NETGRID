@@ -5,7 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { runnerRunStrengthPumpSavingsForAction } from "./run-window-strength-preparation";
 import { creditsToBreakVisibleSubroutinesWithBreaker } from "../../visible-run-analysis";
 import {
@@ -96,7 +96,7 @@ export function programProtectionEncounterPayment(
     selected.size !== next.size ||
     [...next].some((i) => !selected.has(i)) ||
     amount !== immediate ||
-    legalActionCreditCost(action) !== immediate ||
+    nonNegativeActionCreditCost(action) !== immediate ||
     payload.payOrEndRunSubroutinePayment !== 0
   )
     return invalid();
@@ -169,7 +169,7 @@ export function completeCancellableEncounterPayment(
     action.payload.encounterSourceWillTrashAtEndOfTurn !== false ||
     Number(action.payload.encounterFullBreakDamage ?? 0) !== 0 ||
     action.choiceRequirements?.length ||
-    legalActionCreditCost(action) !== 0 ||
+    nonNegativeActionCreditCost(action) !== 0 ||
     currentEncounterRequiresFullBreak(input)
   )
     return undefined;
@@ -239,7 +239,7 @@ export function completeEncounterBreakerPayment(
       input,
       action,
       budget: runnerEncounterCreditBudgetForInput(input),
-      cost: legalActionCreditCost(action),
+      cost: nonNegativeActionCreditCost(action),
     });
     if (!preparation.affordable || preparation.restrictedSpent > 0)
       return undefined;
@@ -274,7 +274,7 @@ export function completeEncounterBreakerPayment(
     if (!payment) return undefined;
     return {
       ...payment,
-      cost: legalActionCreditCost(action) + payment.cost,
+      cost: nonNegativeActionCreditCost(action) + payment.cost,
       cashCost: preparation.cashCost + payment.cashCost,
       // The run boost is already in the projected boundary base. Keep the
       // ordinary pump's carry flag: a carry-pump still needs whole-path pricing,

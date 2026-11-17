@@ -1,3 +1,4 @@
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -225,7 +226,7 @@ export function evaluateRunnerHandDevelopment(
       const installAction = params.input.legalActions.find(
         (a) => a.actionId === investment.actionId,
       )!;
-      const installCost = actionCreditCost(installAction)!;
+      const installCost = nonNegativeActionCreditCost(installAction);
       return {
         ...readyEvaluation,
         hostedBreakerDevelopment: investment,
@@ -631,15 +632,25 @@ function buildCardContext(
       undefined,
     ) ??
     matchingCandidates
+      .filter((candidate) => candidate.sourceCardInstanceId === card.instanceId)
       .map((candidate) =>
         params.input.legalActions.find(
-          (action) => action.actionId === candidate.actionId,
+          (action) =>
+            action.actionId === candidate.actionId &&
+            action.side === params.input.side &&
+            action.expiresAtStateVersion ===
+              params.input.playerView.stateVersion,
         ),
       )
       .find((action): action is LegalAction => action !== undefined);
   const signals = signalsForCard(card, matchingCandidates);
+  // A preparation offer can move the card now while leaving its installation cost due.
   const actionCost =
-    legalAction !== undefined ? actionCreditCost(legalAction) : undefined;
+    legalAction === undefined
+      ? undefined
+      : legalAction.type === "install_card" || legalAction.type === "play_event"
+        ? nonNegativeActionCreditCost(legalAction)
+        : actionCreditCost(legalAction);
   const installOrPlayCost =
     actionCost ??
     visibleOrRuntimeNumber(card, "installCost") ??
@@ -754,7 +765,9 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     return "access_payoff";
   if (cardProvidesTraceDefense(context)) return "defense_support";
   if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
-  if (runnerEffectsHaveOnlyTagClearCreditPool(context.signals.structuredEffects))
+  if (
+    runnerEffectsHaveOnlyTagClearCreditPool(context.signals.structuredEffects)
+  )
     return "defense_support";
   if (looksLikeBankTool(text)) return "bank_tool";
   if (looksLikeEconomyTool(text)) return "economy_engine";

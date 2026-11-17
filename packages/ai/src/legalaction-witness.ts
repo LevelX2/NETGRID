@@ -1,4 +1,6 @@
 import type { LegalAction, Side } from "@netgrid/shared";
+import { containsForbiddenSemanticMarker } from "./diagnostics/semantic-redaction";
+import { fnv1a } from "./runtime/stable-hash";
 import { assertAbilityRefIdentity } from "@netgrid/cards/planning";
 import {
   buildTargetRef,
@@ -153,13 +155,18 @@ export function buildLegalActionWitness(
   };
 
   if (legalActionWitnessIsRedactionSafe(witness)) return witness;
-  const {
-    abilityRef: _abilityRef,
-    choiceRef: _choiceRef,
-    ...redactedBase
-  } = witness;
   return {
-    ...redactedBase,
+    schemaVersion: "legalaction-witness-v1",
+    witnessKey: `blocked-witness:${fnv1a(witness.witnessKey)}`,
+    actionId: `blocked-action:${fnv1a(witness.actionId)}`,
+    stateVersion: witness.stateVersion,
+    side: witness.side,
+    actionType: safeId(witness.actionType),
+    costProfile: witness.costProfile,
+    timingProfile: {
+      timingPoint: safeId(witness.timingProfile.timingPoint),
+      expiresAtStateVersion: witness.timingProfile.expiresAtStateVersion,
+    },
     sourceRef: {
       kind: "hidden_blocked",
       ref: "hidden_blocked",
@@ -183,7 +190,12 @@ export function buildLegalActionWitness(
 }
 
 export function legalActionWitnessIsRedactionSafe(value: unknown): boolean {
-  return !legalActionWitnessContainsHiddenInfoMarker(JSON.stringify(value));
+  const serialized = JSON.stringify(value);
+  return (
+    serialized !== undefined &&
+    !containsForbiddenSemanticMarker(value) &&
+    !legalActionWitnessContainsHiddenInfoMarker(serialized)
+  );
 }
 
 function sourceRefForAction(action: LegalAction): LegalActionWitnessSourceRef {
@@ -206,7 +218,7 @@ function sourceRefForAction(action: LegalAction): LegalActionWitnessSourceRef {
   }
   return {
     kind: "actor_known_card",
-    ref: `actorKnownRef:${stableHash(action.source)}`,
+    ref: `actorKnownRef:${fnv1a(action.source)}`,
     redactionPolicy: "actor_private",
   };
 }
@@ -230,6 +242,15 @@ function targetRefForAction(
   selectedTargets: Readonly<Record<string, string>> | undefined,
   selectedChoices: Readonly<Record<string, unknown>> | undefined,
 ): LegalActionWitnessTargetRef {
+  if (
+    action.targetRequirements.some(
+      (requirement) => requirement.visibility === "engine_only",
+    )
+  )
+    return buildTargetRef({
+      kind: "hidden_blocked",
+      blocker: "hidden_target_blocked",
+    });
   const serverId = stringPayload(action, "serverId");
   if (serverId) {
     return {
@@ -243,7 +264,7 @@ function targetRefForAction(
   if (boundTargetCardRef) {
     const targetRef = buildTargetRef({
       kind: "ownInstalled",
-      actorSafeRef: `actorKnownRef:${stableHash(boundTargetCardRef)}`,
+      actorSafeRef: `actorKnownRef:${fnv1a(boundTargetCardRef)}`,
       evidence: ["target_card_prebound_by_legalaction"],
     });
     return {
@@ -264,7 +285,7 @@ function targetRefForAction(
     return {
       ...buildTargetRef({
         kind: "ownInstalled",
-        actorSafeRef: `actorKnownRef:${stableHash(selectedTarget)}`,
+        actorSafeRef: `actorKnownRef:${fnv1a(selectedTarget)}`,
       }),
     };
   }
@@ -400,13 +421,4 @@ function isAsciiLetterOrDigit(character: string): boolean {
     (character >= "A" && character <= "Z") ||
     (character >= "0" && character <= "9")
   );
-}
-
-function stableHash(value: string): string {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16).padStart(8, "0");
 }

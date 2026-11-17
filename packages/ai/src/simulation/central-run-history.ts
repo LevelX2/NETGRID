@@ -3,7 +3,7 @@ import {
   eventRefreshesCentralTarget,
   mergedPublicHistory,
   serverIdFromEvent,
-} from "../runtime/public-event-history";
+} from "../public-event-history";
 import type { CentralServerId } from "../runtime/server-target";
 
 export function recentCentralRunSameTargetWithoutRefresh(

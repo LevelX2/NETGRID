@@ -2,7 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import {
   mergedPublicHistory,
   serverIdFromEvent,
-} from "../runtime/public-event-history";
+} from "../public-event-history";
 
 /** Same-turn public outcome only. Each run owner decides whether this
  * observation excludes its current route; no hidden ICE is reconstructed. */

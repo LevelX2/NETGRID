@@ -50,7 +50,7 @@ import {
   corpScorelineAllowsMultiTurnDevelopment,
   corpScorelineFeasibilityForDecisionInput,
 } from "./corp-scoreline-feasibility";
-import { decisionDerivedValue } from "./decision-derived-cache";
+import { decisionDerivedValue } from "../decision-derived-cache";
 
 export type {
   CorpBoardTriage,

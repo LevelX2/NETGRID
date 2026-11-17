@@ -2,7 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import { mergedPublicHistory } from "./public-event-history";
+import { mergedPublicHistory } from "../public-event-history";
 
 /** Reconcealment does not erase an exposure that the belief owner still validates. */
 function rootMayBeAgenda(

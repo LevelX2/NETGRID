@@ -1,5 +1,8 @@
-import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
-import type { CentralServerId } from "./server-target";
+import type {
+  AiDecisionInput,
+  PublicGameEvent,
+  ServerId,
+} from "@netgrid/shared";
 import { decisionDerivedValue } from "./decision-derived-cache";
 
 const MERGED_PUBLIC_HISTORY_DECISION_CACHE_KEY = Symbol(
@@ -81,7 +84,7 @@ export function eventMayChangeHqPressure(event: PublicGameEvent): boolean {
 
 export function eventRefreshesCentralTarget(
   event: PublicGameEvent,
-  target: CentralServerId,
+  target: Exclude<ServerId, `remote_${number}` | "new_remote">,
 ): boolean {
   const actionType =
     typeof event.publicPayload.actionType === "string"

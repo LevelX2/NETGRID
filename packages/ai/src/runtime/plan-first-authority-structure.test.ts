@@ -411,11 +411,10 @@ describe("plan-first live authority structure", () => {
   });
 
   it("keeps the former ICE placement module sensor-and-facts only", () => {
-    const icePlacement = readSource(
-      "runtime",
-      "corp-ice-placement",
-      "corp-ice-placement.ts",
-    );
+    const icePlacement = [
+      readSource("runtime", "corp-ice-placement", "corp-ice-placement.ts"),
+      readSource("runtime", "corp-ice-placement", "corp-ice-placement-costs.ts"),
+    ].join("\n");
 
     expect(icePlacement).not.toMatch(
       /from\s+["'][^"']*(?:plans\/|plan-scheduler|plan-assessment|choice-ranking|action-order)[^"']*["']/,

@@ -4,7 +4,7 @@ import {
   findLastHistoryIndex,
   isArchivesAccessEvent,
   mergedPublicHistory,
-} from "./public-event-history";
+} from "../public-event-history";
 import { runnerPressureVariationBucket } from "../runner-run-target-guidance";
 
 export function runnerArchivesHasQualifiedHiddenPayoff(

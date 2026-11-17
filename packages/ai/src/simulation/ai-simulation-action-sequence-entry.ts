@@ -395,10 +395,9 @@ export type AiSimulationActionSequenceEntry = {
   hqKnownFromRndDraw?: boolean;
   hqRunBoostedByRndToHqAgenda?: boolean;
   hqRunSuppressedByRndToHqNonAgenda?: boolean;
-  rndAccessRemovedTopCard?: boolean;
+  rndAccessRemovedCard?: boolean;
   rndAccessStoleAgenda?: boolean;
   rndAccessTrashedCard?: boolean;
-  rndAccessLeftTopCardUnchanged?: boolean;
   rndTopFreshenedByRunnerAccess?: boolean;
   rndKnownTopAdvancedAfterAccess?: boolean;
   rndKnownTopSequenceAdvanced?: boolean;

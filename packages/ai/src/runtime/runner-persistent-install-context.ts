@@ -7,9 +7,8 @@ import {
   runnerPersistentInstallEvidenceForAction,
   runnerPersistentInstallEvaluationForAction,
   runnerPersistentInstallFitScoreComponent,
-  runnerPersistentInstallLegacyScoreDelta,
 } from "./runner-persistent-install-fit-score";
-import { decisionDerivedValue } from "./decision-derived-cache";
+import { decisionDerivedValue } from "../decision-derived-cache";
 
 type RunnerPersistentInstallEvaluation = {
   stackabilityClass: string;
@@ -44,9 +43,6 @@ export type RunnerPersistentInstallContext = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
-  runnerPersistentInstallLegacyScoreDelta: (
-    evaluation: RunnerPersistentInstallEvaluation | undefined,
-  ) => number;
   runnerPersistentInstallEvidenceForAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -101,7 +97,6 @@ export function createRunnerPersistentInstallContext<
       runnerPersistentInstallFitScoreComponent(input, action, {
         evaluationForAction,
       }),
-    runnerPersistentInstallLegacyScoreDelta,
     runnerPersistentInstallEvidenceForAction: (input, action) =>
       runnerPersistentInstallEvidenceForAction(input, action, {
         evaluationForAction,

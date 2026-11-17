@@ -47,7 +47,6 @@ import {
 } from "./runner-setup-metric-counts";
 import { summarizeRunnerSetupAttributionMetrics } from "./runner-setup-attribution-types";
 import { averageNumber, medianNumber } from "./simulation-metric-aggregation";
-import { summarizeStrategicLineMetrics } from "./strategic-line-metrics";
 import { summarizeTagPunishWindowMetrics } from "./tag-punish-window-metrics";
 
 export function summarizeMatchProgressionMetrics(
@@ -298,10 +297,6 @@ export function summarizeMatchProgressionMetrics(
   const centralCloseoutRepeatMetrics =
     summarizeCentralCloseoutRepeatMetrics(summaries);
   const planConversionMetrics = summarizePlanConversionMetrics(summaries);
-  const strategicLineMetrics = summarizeStrategicLineMetrics(
-    summaries,
-    isMeaningfulBoardProgress,
-  );
   const corpEffectiveRemoteSafetyMetrics =
     summarizeCorpEffectiveRemoteSafetyMetrics(summaries);
   const corpScoreConversionMetrics =
@@ -386,7 +381,6 @@ export function summarizeMatchProgressionMetrics(
       (runnerSteals + corpScores) / Math.max(games, 1),
     ),
     ...planConversionMetrics,
-    ...strategicLineMetrics,
     ...corpEffectiveRemoteSafetyMetrics,
     ...corpScoreConversionMetrics,
     ...corpIcePortfolioMetrics,
@@ -666,17 +660,14 @@ export function summarizeMatchProgressionMetrics(
         entry.actionType === "access_card" &&
         entry.targetServerId === "rd",
     ).length,
-    rndAccessRemovedTopCard: actionSequence.filter(
-      (entry) => entry.rndAccessRemovedTopCard === true,
+    rndAccessRemovedCard: actionSequence.filter(
+      (entry) => entry.rndAccessRemovedCard === true,
     ).length,
     rndAccessStoleAgenda: actionSequence.filter(
       (entry) => entry.rndAccessStoleAgenda === true,
     ).length,
     rndAccessTrashedCard: actionSequence.filter(
       (entry) => entry.rndAccessTrashedCard === true,
-    ).length,
-    rndAccessLeftTopCardUnchanged: actionSequence.filter(
-      (entry) => entry.rndAccessLeftTopCardUnchanged === true,
     ).length,
     rndTopFreshenedByRunnerAccess: actionSequence.filter(
       (entry) => entry.rndTopFreshenedByRunnerAccess === true,

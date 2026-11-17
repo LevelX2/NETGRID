@@ -514,7 +514,10 @@ describe("RealEngineDecisionCorpus", () => {
                 },
               ],
             },
-            candidate: candidateFor(samples, discardScenario, discardAction),
+            candidate: {
+              ...candidateFor(samples, discardScenario, discardAction),
+              actionId: "real-engine-tie-without-preference",
+            },
           }),
         ],
       },

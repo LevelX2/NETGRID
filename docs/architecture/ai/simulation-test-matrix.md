@@ -143,6 +143,11 @@ Tatsächlich erzeugte Tags werden anhand des Engine-Ergebnisses und der
 unterbrochenen Zugphase zugeordnet. Ein begonnenes Trace-Angebot wird als
 Quellenaktion erfasst, bis ein Engine-Ergebnis den Tag belegt.
 
+Strategische Fortschrittsmetriken verwenden die aktuell erzeugten
+Plan- und Ergebnisnachweise. Alte Zeilenkennzahlen ohne Datenproduzent
+sind aus Vergleich und Delta entfernt. R&D-Entfernungen zählen auf Ebene
+der Zugriffsaktion. Die Position im Stapel bleibt ohne Engine-Nachweis offen.
+
 ## Vergleichsevidenz und Standardmodus
 
 Verhaltensfälle im expliziten `legacy_compare` tragen `[legacy_compare]` im Namen.

@@ -56,7 +56,7 @@ import {
   currentRunHasPendingAutoPassIce,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { currentEncounterRequiresDamagePreservingBreak } from "../../runtime/current-encounter-damage";
 import {
   currentEncounterMitigationForAction,
@@ -140,7 +140,7 @@ function runnerRunPaymentSupportAssessment(
     ability.creditCost > 0 &&
     ability.creditCost <= cash &&
     ability.gainCredits > ability.creditCost &&
-    legalActionCreditCost(action) === ability.creditCost &&
+    nonNegativeActionCreditCost(action) === ability.creditCost &&
     action.payload?.gainCreditsAmount === ability.gainCredits;
   const preservesActivationCash =
     validPositivePaymentSource &&
@@ -546,7 +546,14 @@ export function runnerRunWindowActionAssessments(
     const action = input.legalActions.find(
       (entry) => entry.actionId === candidate.actionId,
     );
-    if (!action) {
+    if (
+      !action ||
+      action.side !== input.side ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      candidate.actorSide !== input.side ||
+      (candidate.stateVersion !== undefined &&
+        candidate.stateVersion !== input.playerView.stateVersion)
+    ) {
       assessments[candidate.actionId] = {
         admissible: false,
         evidenceCodes: [
@@ -805,8 +812,9 @@ function runnerRunWindowActionAssessment(
       commitment.sourceCardInstanceId === postPassTrash.source &&
       commitment.targetIceInstanceId === target?.instanceId &&
       commitment.observedAtStateVersion <= input.playerView.stateVersion &&
-      legalActionCreditCost(postPassTrash) <= commitment.trashCredits &&
-      legalActionCreditCost(postPassTrash) <= input.playerView.own.credits &&
+      nonNegativeActionCreditCost(postPassTrash) <= commitment.trashCredits &&
+      nonNegativeActionCreditCost(postPassTrash) <=
+        input.playerView.own.credits &&
       input.playerView.timingPoint === "run.jack_out_window" &&
       run.phase === "movement" &&
       target?.known === true &&
@@ -1273,6 +1281,9 @@ function runnerEncounterSubtypeChangeAssessment(
         : card,
     ),
     runnerRunWindowCreditBudget(input),
+    [],
+    input.playerView.opponent.credits,
+    currentRunPathContext(input),
   );
   if (!path.canReachAccess || path.blocked) {
     return {
@@ -1372,7 +1383,7 @@ function runnerPostPassDerezAndEndRunAssessment(
     Number.isFinite(targetDefinition.rezCost)
       ? Math.max(0, targetDefinition.rezCost ?? 0)
       : 0;
-  const paidCredits = legalActionCreditCost(action);
+  const paidCredits = nonNegativeActionCreditCost(action);
   if (rezCost === 0) {
     return {
       admissible: false,
@@ -1447,15 +1458,17 @@ export function runnerExactRunWindowPhaseActionIds(
       .filter((candidate) => candidate.actionType === "jack_out")
       .map((candidate) => candidate.actionId);
   }
-  const viewingFinish = admissibleRunWindowCandidates.filter((candidate) =>
-    actionsById.get(candidate.actionId)?.payload?.approachIceExposeViewDecision ===
-    "finish",
+  const viewingFinish = admissibleRunWindowCandidates.filter(
+    (candidate) =>
+      actionsById.get(candidate.actionId)?.payload
+        ?.approachIceExposeViewDecision === "finish",
   );
   if (viewingFinish.length > 0)
     return viewingFinish.map((candidate) => candidate.actionId);
   const paymentSupport = admissibleRunWindowCandidates.filter(
     (candidate) =>
-      runnerRunPaymentSupportAction(input, candidate, actionsById) !== undefined,
+      runnerRunPaymentSupportAction(input, candidate, actionsById) !==
+      undefined,
   );
   if (paymentSupport.length > 0)
     return paymentSupport.map((candidate) => candidate.actionId);
@@ -1476,8 +1489,11 @@ export function runnerExactRunWindowPhaseActionIds(
         (candidate) =>
           candidate.actionType === "pump_breaker" ||
           candidate.actionType === "break_subroutine" ||
-          runnerRunRemainderStrengthBoostAction(input, candidate, actionsById) !==
-            undefined,
+          runnerRunRemainderStrengthBoostAction(
+            input,
+            candidate,
+            actionsById,
+          ) !== undefined,
       )
       .map((candidate) => candidate.actionId);
     if (directEncounterActionIds.length > 0) {
@@ -1642,7 +1658,7 @@ function completeInformationLockPumpCost(
       candidate.payload.sourceDefinitionId === quote.iceDefinitionId &&
       candidate.payload.encounterFullBreakDamage === 0 &&
       !candidate.choiceRequirements?.length &&
-      legalActionCreditCost(candidate) === 0,
+      nonNegativeActionCreditCost(candidate) === 0,
   );
   if (!canContinueWithoutPaying) return undefined;
   // The first pump only has value if its complete, current-lock break route
@@ -1718,7 +1734,7 @@ function runnerRunWindowPlanStepExclusion(
     !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
     !currentMitigation?.supportsCurrentAction
   ) {
-    const actionCost = legalActionCreditCost(action);
+    const actionCost = nonNegativeActionCreditCost(action);
     const completePayment =
       action.type === "pump_breaker" &&
       informationReassessment?.decision === "retain_information"

@@ -81,6 +81,21 @@ export function createActionDemand(
     params.acceptedRestrictions ?? ["unrestricted"],
   );
   const requiredActionTypes = uniqueStrings(params.requiredActionTypes ?? []);
+  const currentEvidence = [
+    `action_demand_side:${params.side}`,
+    `action_demand_purpose:${params.purpose}`,
+    `action_demand_priority:${params.priority}`,
+    `action_demand_hardness:${params.hardness}`,
+    `action_demand_deadline:${params.deadline}`,
+    `action_demand_current:${currentActions}`,
+    `action_demand_target:${targetActions}`,
+    `action_demand_gap:${gap}`,
+    `action_demand_restrictions:${acceptedRestrictions.join(",")}`,
+    `action_demand_action_types:${requiredActionTypes.join(",") || "any"}`,
+  ];
+  const currentEvidencePrefixes = new Set(
+    currentEvidence.map((fact) => fact.split(":")[0]),
+  );
   return {
     schemaVersion: ACTION_DEMAND_SCHEMA_VERSION,
     demandId: params.demandId,
@@ -97,17 +112,10 @@ export function createActionDemand(
     acceptedRestrictions,
     requiredActionTypes,
     evidence: [
-      ...(params.evidence ?? []),
-      `action_demand_side:${params.side}`,
-      `action_demand_purpose:${params.purpose}`,
-      `action_demand_priority:${params.priority}`,
-      `action_demand_hardness:${params.hardness}`,
-      `action_demand_deadline:${params.deadline}`,
-      `action_demand_current:${currentActions}`,
-      `action_demand_target:${targetActions}`,
-      `action_demand_gap:${gap}`,
-      `action_demand_restrictions:${acceptedRestrictions.join(",")}`,
-      `action_demand_action_types:${requiredActionTypes.join(",") || "any"}`,
+      ...(params.evidence ?? []).filter(
+        (value) => !currentEvidencePrefixes.has(value.split(":")[0] ?? ""),
+      ),
+      ...currentEvidence,
     ],
   };
 }

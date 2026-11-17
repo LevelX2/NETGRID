@@ -54,6 +54,9 @@ export function runnerHqSuccessWindowSetupAssessment(
     input.playerView.own.credits,
     hqServer.root,
     input.playerView.opponent.credits,
+    input.playerView.traceRulesProfile === undefined
+      ? {}
+      : { traceRulesProfile: input.playerView.traceRulesProfile },
   );
   if (!hqPath.canReachAccess || hqPath.visibleTraceTagHazardUnavoidable) {
     return undefined;

@@ -21,7 +21,6 @@ export function developmentModule(): PlanModule {
     discover: (context) =>
       domain(context).developments.flatMap((signal) => {
         const admission = runnerDevelopmentCardAdmission({
-          definitionId: signal.definitionId,
           assignedDomainPlanIds: signal.assignedDomainPlanIds,
           ...(signal.purposeCode
             ? { concretePurposeCode: signal.purposeCode }

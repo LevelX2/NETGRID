@@ -424,6 +424,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
       seed: "last-call-panel-siren-batch-01-game-06",
+      maxActions: 720,
       corpDeckId: "standard_corp_siren_fortress",
       captures,
       capturePredicate: (snapshot) =>

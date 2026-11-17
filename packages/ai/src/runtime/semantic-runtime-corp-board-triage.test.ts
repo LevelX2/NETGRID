@@ -11,7 +11,7 @@ import {
   type CorpBoardTriageDependencies,
 } from "./semantic-runtime-corp-board-triage";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
-import { withDecisionDerivedCache } from "./decision-derived-cache";
+import { withDecisionDerivedCache } from "../decision-derived-cache";
 import {
   agendaCard,
   assetCard,

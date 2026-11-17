@@ -175,7 +175,7 @@ describe("AI public export contract", () => {
       "./runtime/evidence-value",
       "./runtime/installed-card-location",
       "./runtime/number-rounding",
-      "./runtime/public-event-history",
+      "./public-event-history",
       "./runtime/progression-card-target",
       "./runtime/protection-definition",
       "./runtime/simulation-action-event",

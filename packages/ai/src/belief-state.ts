@@ -7,7 +7,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
-import { decisionDerivedValue } from "./runtime/decision-derived-cache";
+import { decisionDerivedValue } from "./decision-derived-cache";
 import { publicInstalledExposures } from "./public-installed-exposure";
 
 type PublicHiddenZoneMutation = {

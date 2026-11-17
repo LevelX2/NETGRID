@@ -2,7 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import {
   mergedPublicHistory,
   serverIdFromEvent,
-} from "../runtime/public-event-history";
+} from "../public-event-history";
 
 export function runnerRunTargetHasOnlyUnknownOrUnrezzedIce(
   input: AiDecisionInput,

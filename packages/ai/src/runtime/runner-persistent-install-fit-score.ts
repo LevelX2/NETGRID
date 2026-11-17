@@ -64,15 +64,6 @@ export function runnerPersistentInstallFitScoreComponent(
   };
 }
 
-export function runnerPersistentInstallLegacyScoreDelta(
-  evaluation: RunnerPersistentInstallEvaluation | undefined,
-): number {
-  if (!evaluation) return 0;
-  return evaluation.finalInstallFit < 0
-    ? evaluation.finalInstallFit
-    : Math.min(180, Math.round(evaluation.finalInstallFit / 5));
-}
-
 export function runnerPersistentInstallEvidenceForAction(
   input: AiDecisionInput,
   action: LegalAction,

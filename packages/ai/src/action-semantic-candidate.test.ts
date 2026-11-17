@@ -41,6 +41,19 @@ const ALL_ACTION_TYPES = [
 ] as const satisfies readonly LegalAction["type"][];
 
 describe("buildActionSemanticCandidates", () => {
+  it("refuses to project an actor-private action for the other player", () => {
+    const action = legalAction("resolve_choice", 1, {
+      side: "corp",
+      visibility: "private_to_actor",
+    });
+    expect(() =>
+      buildActionSemanticCandidates({
+        legalActions: [action],
+        observerSide: "runner",
+      }),
+    ).toThrow("actor_private_legal_action_projected_for_other_side");
+  });
+
   it("projects Corp board recycling as a targeted non-credit action", () => {
     const action = legalAction("gain_credit", 1, {
       actionId: "corp.recycle.target",

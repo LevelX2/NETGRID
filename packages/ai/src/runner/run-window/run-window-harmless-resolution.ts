@@ -5,7 +5,7 @@ import {
   currentEncounterUnbrokenSubroutineIndexes,
 } from "../../runtime/current-encounter";
 import { breakSubroutineIndexesForAction } from "../../runtime/subroutine-indexes";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 
 /** The next Engine continuation can resolve only a prefix of an encounter.
  * Do not pay for a later group before an exactly certified harmless prefix.
@@ -18,7 +18,7 @@ export function paidBreakPrecedesHarmlessResolution(
   if (
     input.playerView.run?.phase !== "encounter_ice" ||
     action.type !== "break_subroutine" ||
-    legalActionCreditCost(action) <= 0 ||
+    nonNegativeActionCreditCost(action) <= 0 ||
     action.payload?.runnerCostPenaltySupportContinuation === true ||
     currentEncounterRequiresFullBreak(input)
   )

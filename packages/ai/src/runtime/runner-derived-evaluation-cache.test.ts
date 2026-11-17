@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
-import { withDecisionDerivedCache } from "./decision-derived-cache";
+import { withDecisionDerivedCache } from "../decision-derived-cache";
 import { createRunnerMultiRunContext } from "./runner-multi-run-context";
 import { createRunnerPersistentInstallContext } from "./runner-persistent-install-context";
 

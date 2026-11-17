@@ -46,7 +46,7 @@ import {
   eventVersion as aiEventVersion,
   serverIdFromEvent as aiServerIdFromEvent,
   mergedPublicHistory as mergedAiPublicHistory,
-} from "./runtime/public-event-history";
+} from "./public-event-history";
 import { semanticRuntimeActionTypeIsReactive } from "./runtime/reactive-action";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";

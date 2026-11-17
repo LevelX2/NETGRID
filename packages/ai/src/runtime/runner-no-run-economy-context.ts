@@ -5,7 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { runnerNoRunEconomyCommitmentScoreComponents as buildRunnerNoRunEconomyCommitmentScoreComponents } from "./runner-economy-commitment-score";
-import { mergedPublicHistory } from "./public-event-history";
+import { mergedPublicHistory } from "../public-event-history";
 import { rolesMatch } from "../role-match";
 
 type RunnerNoRunEconomyCommitmentStatus =

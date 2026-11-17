@@ -1281,6 +1281,15 @@ function genericDefensePortfolioCandidates(
     ),
     centralAllocation,
   );
+  if (
+    !eligibleSignals.some((signal) => signal.iceInstallCostSupportActionId) ||
+    engineRandomizedCentralIceInstallNearTie(
+      context,
+      selected,
+      centralAllocation,
+    )
+  )
+    return selected;
   return prepareSelectedCorpIceInstallation(context, selected, eligibleSignals);
 }
 
