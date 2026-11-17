@@ -13,12 +13,12 @@ import type { ActivatedAbilityBinding } from "./card-capability-binding";
 function binding(
   ability: ActivatedCardAbilityImplementation,
 ): ActivatedAbilityBinding {
-  const key = capabilityKey("test_activated_ability");
+  const key = capabilityKey("store_credits");
   return {
     kind: "card_spec_capability_key",
     ability,
     capabilityKey: key,
-    sourceAbilityId: canonicalCapabilityId(65535, key),
+    sourceAbilityId: canonicalCapabilityId(366, key),
   };
 }
 

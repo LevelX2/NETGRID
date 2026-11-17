@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards/engine";
 import type { CardInstanceId, GameState } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "./create-game";
@@ -25,8 +26,8 @@ describe("persisted card capability identity validation", () => {
     const continuation = {
       kind: "card_effect_activated" as const,
       sourceCardId: "source" as CardInstanceId,
-      sourceDefinitionId: 2403765484,
-      sourceAbilityId: "2403765484:draw",
+      sourceDefinitionId: 411,
+      sourceAbilityId: canonicalCapabilityId(411, capabilityKey("abilities_activated_corp_main_draw_cards")),
       drawEffectIndex: 0,
       nextEffectIndex: 1,
       creditGainOrdinal: 0,
@@ -53,7 +54,7 @@ describe("persisted card capability identity validation", () => {
       /capability identity is invalid/,
     );
     expect(errorsFor({ sourceAbilityId: "Bad/Id" })).toMatch(/invalid/);
-    expect(errorsFor({ sourceAbilityId: "2403765485:draw" })).toMatch(
+    expect(errorsFor({ sourceAbilityId: canonicalCapabilityId(4, capabilityKey("efficient_fracter_pump")) })).toMatch(
       /another definition/,
     );
   });

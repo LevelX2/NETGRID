@@ -24,7 +24,7 @@ import {
 } from "./card-capability-binding";
 
 const definition = {
-  id: 2403765484,
+  id: 366,
   title: "Test Card",
   side: "runner",
   type: "resource",
@@ -114,7 +114,7 @@ describe("stable CardSpec capability binding", () => {
     card.engine.abilities = [
       {
         kind: "on_play",
-        capabilityKey: "play" as CapabilityKey,
+        capabilityKey: "withdraw_credits" as CapabilityKey,
         addressability: ["quote"],
         costs: "printed",
         effects: [],
@@ -125,7 +125,7 @@ describe("stable CardSpec capability binding", () => {
         definition,
         {
           kind: "card_spec_capability_key",
-          sourceCapabilityId: "bad/id",
+          sourceCapabilityId: 0,
         },
         sources({ engine: card }),
       ),
@@ -135,7 +135,7 @@ describe("stable CardSpec capability binding", () => {
         definition,
         {
           kind: "card_spec_capability_key",
-          sourceCapabilityId: "bad/id",
+          sourceCapabilityId: 0,
         },
         sources({ engine: card }),
       ),
@@ -156,8 +156,8 @@ describe("stable CardSpec capability binding", () => {
   });
 
   it("keeps canonical identity and action IDs stable across array reordering", () => {
-    const first = activated("gain", 1);
-    const second = activated("draw", 2);
+    const first = activated("store_credits", 1);
+    const second = activated("withdraw_credits", 2);
     const firstBindings = activatedAbilityBindingsForDefinition(
       definition,
       sources({ engine: engineCard([first, second]) }),
@@ -216,16 +216,16 @@ describe("stable CardSpec capability binding", () => {
   });
 
   it("requires the exact canonical payload and AbilityRef without index fallback", () => {
-    const registry = sources({ engine: engineCard([activated("gain", 1)]) });
+    const registry = sources({ engine: engineCard([activated("store_credits", 1)]) });
     const sourceAbilityId = canonicalCapabilityId(
       definition.id,
-      "gain" as CapabilityKey,
+      "store_credits" as CapabilityKey,
     );
     const exact = action(
       {
         cardImplementationAbility: "activated",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityKey: "gain",
+        cardImplementationAbilityKey: "store_credits",
         cardImplementationAbilityId: sourceAbilityId,
       },
       { sourceCardInstanceId: "source" as CardInstanceId, sourceAbilityId },
@@ -246,7 +246,7 @@ describe("stable CardSpec capability binding", () => {
       { ...exact.payload, cardImplementationAbilityKey: "missing" },
       {
         ...exact.payload,
-        cardImplementationAbilityId: "other_card:gain",
+        cardImplementationAbilityId: canonicalCapabilityId(4, "efficient_fracter_pump" as CapabilityKey),
       },
     ])
       expect(() =>
@@ -273,18 +273,18 @@ describe("stable CardSpec capability binding", () => {
 
   it("rejects ambiguous keys and stale persisted identities", () => {
     const duplicated = sources({
-      engine: engineCard([activated("gain", 1), activated("gain", 2)]),
+      engine: engineCard([activated("store_credits", 1), activated("store_credits", 2)]),
     });
     const sourceAbilityId = canonicalCapabilityId(
       definition.id,
-      "gain" as CapabilityKey,
+      "store_credits" as CapabilityKey,
     );
     expect(() =>
       activatedAbilityBindingForLegalAction(
         definition,
         action({
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-          cardImplementationAbilityKey: "gain",
+          cardImplementationAbilityKey: "store_credits",
           cardImplementationAbilityId: sourceAbilityId,
         }),
         duplicated,
@@ -293,8 +293,8 @@ describe("stable CardSpec capability binding", () => {
     expect(() =>
       activatedAbilityBindingForPersistedIdentity(
         definition,
-        { sourceAbilityId: canonicalCapabilityId(definition.id, "missing" as CapabilityKey) },
-        sources({ engine: engineCard([activated("gain", 1)]) }),
+        { sourceAbilityId: canonicalCapabilityId(definition.id, "withdraw_credits" as CapabilityKey) },
+        sources({ engine: engineCard([activated("store_credits", 1)]) }),
       ),
     ).toThrowError(/existiert nicht/);
   });
@@ -302,14 +302,14 @@ describe("stable CardSpec capability binding", () => {
   it("binds canonical lifecycle and on-play quote capabilities without an index", () => {
     const sourceAbilityId = canonicalCapabilityId(
       definition.id,
-      "end-turn" as CapabilityKey,
+      "store_credits" as CapabilityKey,
     );
     const view = engineCard([]) as unknown as EngineCardView;
     (view.engine as Record<string, unknown>).lifecycle = {
       end_of_runner_turn: [
         {
           effects: [],
-          capabilityKey: "end-turn",
+          capabilityKey: "store_credits",
           addressability: ["action"],
         },
       ],
@@ -319,7 +319,7 @@ describe("stable CardSpec capability binding", () => {
         kind: "on_play",
         costs: "printed",
         effects: [],
-        capabilityKey: "play",
+        capabilityKey: "withdraw_credits",
         addressability: ["quote"],
       },
     ];
@@ -329,7 +329,7 @@ describe("stable CardSpec capability binding", () => {
         definition,
         action({
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-          cardImplementationAbilityKey: "end-turn",
+          cardImplementationAbilityKey: "store_credits",
           cardImplementationAbilityId: sourceAbilityId,
         }),
         registry,
@@ -340,7 +340,7 @@ describe("stable CardSpec capability binding", () => {
         definition,
         {
           kind: "card_spec_capability_key",
-          sourceCapabilityId: canonicalCapabilityId(definition.id, "play" as CapabilityKey),
+          sourceCapabilityId: canonicalCapabilityId(definition.id, "withdraw_credits" as CapabilityKey),
         },
         registry,
       ),
@@ -350,7 +350,7 @@ describe("stable CardSpec capability binding", () => {
         definition,
         {
           kind: "card_spec_capability_key",
-          sourceCapabilityId: canonicalCapabilityId(definition.id, "missing" as CapabilityKey),
+          sourceCapabilityId: canonicalCapabilityId(definition.id, "store_credits" as CapabilityKey),
         },
         registry,
       ),

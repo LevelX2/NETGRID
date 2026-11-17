@@ -1,3 +1,7 @@
+import {
+  canonicalCapabilityId,
+  capabilityKey as cardSpecCapabilityKey,
+} from "@netgrid/cards/engine";
 import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
@@ -198,7 +202,10 @@ function isBrokerCapabilityAction(
       "card_spec_capability_key" &&
     action.payload?.cardImplementationAbilityKey === capabilityKey &&
     action.payload?.cardImplementationAbilityId ===
-      `${BROKER_DEFINITION_ID}:${capabilityKey}` &&
+      canonicalCapabilityId(
+        BROKER_DEFINITION_ID,
+        cardSpecCapabilityKey(capabilityKey),
+      ) &&
     action.payload?.cardImplementationAbilityIndex === undefined &&
     action.payload?.cardImplementationLifecycleIndex === undefined
   );
@@ -213,7 +220,10 @@ function expectCanonicalBrokerCapability(
     cardId: brokerId,
     cardImplementationCapabilityBindingKind: "card_spec_capability_key",
     cardImplementationAbilityKey: capabilityKey,
-    cardImplementationAbilityId: `${BROKER_DEFINITION_ID}:${capabilityKey}`,
+    cardImplementationAbilityId: canonicalCapabilityId(
+      BROKER_DEFINITION_ID,
+      cardSpecCapabilityKey(capabilityKey),
+    ),
   });
   expect(action.payload).not.toHaveProperty("cardImplementationAbilityIndex");
   expect(action.payload).not.toHaveProperty("cardImplementationLifecycleIndex");
