@@ -43,10 +43,10 @@ it("does not project next-turn Heap recovery during a Corp rez window in a live 
   input.playerView.phase = "run";
   input.playerView.timingPoint = "run.approach_ice";
   input.playerView.run = {
-    runId: "current-run",
-    attackedServerId: "remote_1",
+    runId: input.playerView.stateVersion,
+    attackedServerId: "r1",
     phase: "approach_ice",
-    position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     successful: false,
   };
   expect(input.playerView.activeSide).toBe("corp");
@@ -66,13 +66,13 @@ it.each(["g4-d595", "g17-d455"])(
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
-    const definition =
-      name === "g4-d595" ? "project-babylon" : "tycho-extension";
+    const definition = name === "g4-d595" ? 426 : 432;
+    const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
     const action = input.legalActions.find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes(definition) &&
-        a.payload?.serverId === "remote_1",
+        definitions[a.source] === definition &&
+        a.payload?.serverId === "r1",
     )!;
     const candidate = candidates.find((c) => c.actionId === action.actionId)!;
     expect(candidate).toBeDefined();
@@ -89,7 +89,7 @@ it.each(["g4-d595", "g17-d455"])(
       corpMatureRemoteAffordableDefenseLayerCertification(
         input,
         candidate,
-        "remote_1",
+        "r1",
       ),
     ).toBeUndefined();
     expect(JSON.stringify([input.playerView, input.legalActions])).toBe(before);
@@ -101,7 +101,7 @@ it.each(["g4-d595", "g17-d455"])(
   "uses the public recovery in the underlying native %s scoring-window path",
   (name) => {
     const input = fixture(name);
-    const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    const server = input.playerView.servers.find((s) => s.id === "r1")!;
     const assessment = scoringWindowPostRezProtectionAssessment(
       input,
       server,
@@ -205,14 +205,14 @@ it("keeps a genuine current two-layer certificate when no public recovery is ins
   const action = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.source.includes("tycho-extension") &&
-      a.payload?.serverId === "remote_1",
+      visibleSourceDefinitionsByInstanceId(input.playerView)[a.source] === 432 &&
+      a.payload?.serverId === "r1",
   )!;
   expect(
     corpMatureRemoteAffordableDefenseLayerCertification(
       input,
       candidates.find((c) => c.actionId === action.actionId)!,
-      "remote_1",
+      "r1",
     ),
   ).toBeDefined();
 });
@@ -320,13 +320,13 @@ it.each(["g4-d595", "g17-d455"])(
   "does not let the funded Score consumer recreate the false native %s certificate",
   (name) => {
     const input = fixture(name);
-    const definition =
-      name === "g4-d595" ? "project-babylon" : "tycho-extension";
+    const definition = name === "g4-d595" ? 426 : 432;
+    const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
     const action = input.legalActions.find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes(definition) &&
-        a.payload?.serverId === "remote_1",
+        definitions[a.source] === definition &&
+        a.payload?.serverId === "r1",
     )!;
     const candidates = buildActionSemanticCandidates({
       legalActions: input.legalActions,
@@ -346,7 +346,7 @@ it.each(["g4-d595", "g17-d455"])(
       candidate,
       agenda,
       "native-public-heap-" + name,
-      "remote_1",
+      "r1",
       input.playerView.own.agendaPoints + (agenda.agendaPoints ?? 0) >= 7,
       false,
     );
@@ -359,11 +359,11 @@ it.each(["g4-d595", "g17-d455"])(
 
 it("keeps the rezzed fort pass modifier in the score protection evidence", () => {
   const input = fixture("g17-d455");
-  const server = input.playerView.servers.find(({ id }) => id === "remote_1")!;
+  const server = input.playerView.servers.find(({ id }) => id === "r1")!;
   const action = input.legalActions.find(
     (entry) =>
       entry.type === "install_card" &&
-      entry.source.includes("tycho-extension") &&
+      visibleSourceDefinitionsByInstanceId(input.playerView)[entry.source] === 432 &&
       entry.payload?.serverId === server.id,
   )!;
   const candidate = buildActionSemanticCandidates({

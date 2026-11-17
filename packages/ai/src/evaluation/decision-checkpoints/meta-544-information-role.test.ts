@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -47,7 +48,7 @@ it.each([
     const action = fixture.input.legalActions.find((a) => a.actionId === decision.actionId)!;
     expect(action).toBeDefined();
     expect(action.expiresAtStateVersion).toBe(view.stateVersion);
-    expect(action.payload?.cardId).toContain(selectedDefinition);
+    expect(visibleSourceDefinitionsByInstanceId(view)[action.source]).toBe(selectedDefinition);
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan?.selectedPlan?.moduleId).toBe(owner);
     expect(plan?.route?.actionId).toBe(action.actionId);

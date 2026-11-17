@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -46,10 +47,8 @@ describe("pairing 557 current preparation and post-install income", () => {
         pf = result.decisionDebug?.planFirstDecision;
       expect(result.fallbackUsed).toBe(false);
       expect(result.timeoutUsed).toBe(false);
-      expect(
-        cp.input.legalActions.find((a: any) => a.actionId === result.actionId)
-          ?.source,
-      ).toContain("forged-activation-orders");
+      const action = cp.input.legalActions.find((a: any) => a.actionId === result.actionId);
+      expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(298);
       // The Tokyo-Chiba root access is separate from the subsequent deck
       // sequence. The Corp drew Snowbank, leaving known Off-Site Backups.
       expect(reconstructBeliefState(cp.input).rndTopFreshness).toMatchObject({

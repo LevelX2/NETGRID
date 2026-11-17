@@ -7,7 +7,16 @@ import {
   hashState,
   replayEvents,
   CURRENT_RULES_BASELINE,
+  createGameAfterSetup,
 } from "@netgrid/engine";
+import {
+  emptyRunnerGripForTest,
+  installRunnerProgramForTest,
+  moveRunnerCardToGrip,
+  putCorpIceOnServer,
+  putCorpRootInRemote,
+  toRunnerTurn,
+} from "../../../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import type { GameState, PlayerAction } from "@netgrid/shared";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
@@ -124,6 +133,38 @@ function original(key: string) {
   restoreAiRuntimeCheckpoint(input, runner.deckSnapshotId, p.native.runtime);
   return { state, input, p };
 }
+function currentPreparation(kind: "hq" | "unprotected_remote") {
+  const f = fixture();
+  const runner = f.states.g15!.native.input.ownDeckSnapshot;
+  const corp = f.corpDeckSnapshot;
+  const state = toRunnerTurn(createGameAfterSetup({
+    seed: "meta553-information-" + kind,
+    runnerDeck: buildEngineDeck(runner),
+    corpDeck: buildEngineDeck(corp),
+    runnerDeckMetadata: runner.publicMetadata!,
+    corpDeckMetadata: corp.publicMetadata!,
+  }));
+  emptyRunnerGripForTest(state);
+  moveRunnerCardToGrip(state, 162);
+  putCorpIceOnServer(state, "hq", 434);
+  if (kind === "hq") {
+    for (const definitionId of [147, 155, 167, 181]) moveRunnerCardToGrip(state, definitionId);
+    installRunnerProgramForTest(state, 251);
+    installRunnerProgramForTest(state, 156);
+    state.runner.credits = 20;
+    state.runner.clicks = 1;
+  } else {
+    putCorpIceOnServer(state, "rd", 445);
+    const target = putCorpRootInRemote(state, 405);
+    state.cardInstances[target]!.advancementCounters = 2;
+    state.runner.credits = 3;
+    state.runner.clicks = 3;
+  }
+  return {
+    state,
+    input: buildAiDecisionInput(state, "runner", { ownDeckSnapshot: runner, difficulty: "hard" }),
+  };
+}
 function candidates(input: AiDecisionInputWithDeckCapabilities) {
   return buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -163,7 +204,6 @@ describe("native pre-rez approach information", () => {
   beforeEach(resetResidentPlanPortfolioMemory);
   it.each([
     ["g10", "hq"],
-    ["g21", "hq"],
     ["g15", "rd"],
   ])(
     "retains the Engine information fact and its current route admission: %s",
@@ -171,7 +211,7 @@ describe("native pre-rez approach information", () => {
       const { state, input, p } = original(key!);
       const engine = getLegalActions(state, "runner").find(
         (a) =>
-          a.actionId.includes("decoy-signal") && a.payload?.serverId === server,
+          state.cardInstances[a.source]?.definitionId === 162 && a.payload?.serverId === server,
       )!;
       expect(engine.payload?.eventApproachIceExposeBeforeRez).toBe(true);
       expect(
@@ -237,11 +277,23 @@ describe("native pre-rez approach information", () => {
       ).toBe(state.stateVersion + 1);
     },
   );
+  it("admits a current HQ information route before Corp rez", () => {
+    const { state, input } = currentPreparation("hq");
+    const action = getLegalActions(state, "runner").find(
+      (a) => state.cardInstances[a.source]?.definitionId === 162 && a.payload?.serverId === "hq",
+    )!;
+    expect(action.payload?.eventApproachIceExposeBeforeRez).toBe(true);
+    const { a, p } = normal(input);
+    expect(a.actionId).toBe(action.actionId);
+    expect(p.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ahq");
+    expect(p.leafExecutorInstanceId).toBe(p.rootPlanInstanceId);
+    expect(advance(state, { side: "runner", actionId: a.actionId }).stateVersion).toBe(state.stateVersion + 1);
+  });
   it("rejects information value on known ICE and an empty fort", () => {
     const { input } = original("g15"),
       cs = candidates(input),
       ts = evaluateRunnerRunTargets({ input, actionCandidates: cs });
-    for (const server of ["archives", "remote_1"]) {
+    for (const server of ["archives", "r1"]) {
       const c = cs.find(
         (c) =>
           c.sourceDefinitionId === 162 &&
@@ -267,16 +319,16 @@ describe("native pre-rez approach information", () => {
     );
   });
   it("keeps the directly reachable unprotected remote ahead of optional central information", () => {
-    const { input } = original("hold"),
+    const { input } = currentPreparation("unprotected_remote"),
       { a, p } = normal(input);
-    expect(a.actionId).toBe("runner.start_run.remote_1");
+    expect(a.actionId).toBe("runner.start_run.r1");
     expect(p.selectedPlan?.moduleId).toBe("runner.contest_remote");
   });
   it("continues through the actual expose owner before any Corp rez decision", () => {
     let { state, input } = original("g15");
     const originalState = structuredClone(state),
       { a } = normal(input);
-    expect(a.actionId).toContain("decoy-signal");
+    expect(state.cardInstances[a.source]?.definitionId).toBe(162);
     state = advance(state, { side: "runner", actionId: a.actionId });
     const next = buildAiDecisionInput(state, "runner", {
       ownDeckSnapshot: input.ownDeckSnapshot!,

@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
@@ -161,7 +162,7 @@ describe("pairing557 full staged pay-ETR scope (SP-664)", () => {
     )!;
     expect(pureEndRunEncounterPayment(f.input, co)).toBeUndefined();
     const pump = f.input.legalActions.find(
-      (a: any) => a.type === "pump_breaker" && a.source.includes("codecracker"),
+      (a: any) => a.type === "pump_breaker" && visibleSourceDefinitionsByInstanceId(f.input.playerView)[a.source] === 226,
     )!;
     expect(pureEndRunEncounterPayment(f.input, pump)).toMatchObject({
       cost: 1,
@@ -217,7 +218,7 @@ describe("pairing557 full staged pay-ETR scope (SP-664)", () => {
         .ice.some((c: any) => !c.known || !c.rezzed),
     ).toBe(true);
     const pump = f.input.legalActions.find(
-      (a: any) => a.type === "pump_breaker" && a.source.includes("codecracker"),
+      (a: any) => a.type === "pump_breaker" && visibleSourceDefinitionsByInstanceId(f.input.playerView)[a.source] === 226,
     );
     const payment = pureEndRunEncounterPayment(f.input, pump)!;
     expect(completeCurrentEncounterEconomics(f.input, payment)).toMatchObject({

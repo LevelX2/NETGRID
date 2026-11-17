@@ -71,17 +71,16 @@ it("rejects the native mature certificate which misses the one-credit start refi
       buildActionCardSemanticProfilesByDefinitionId(),
   });
   const c = candidates.find((c) =>
-    input.legalActions.some(
+    c.sourceDefinitionId === 432 && input.legalActions.some(
       (a) =>
         a.actionId === c.actionId &&
-        a.source?.includes("tycho-extension") &&
-        a.payload?.serverId === "remote_1",
+        a.payload?.serverId === "r1",
     ),
   )!;
   expect(c).toBeDefined();
   const before = JSON.stringify([input.playerView, input.legalActions]);
   expect(
-    corpMatureRemoteAffordableDefenseLayerCertification(input, c, "remote_1"),
+    corpMatureRemoteAffordableDefenseLayerCertification(input, c, "r1"),
   ).toBeUndefined();
   restoreAiRuntimeCheckpoint(
     input,
@@ -118,7 +117,7 @@ it("matches the actual next-turn public pool without borrowing it for the curren
   expect(next.stealthCreditsBySourceId).toEqual({
     [source(rig).instanceId]: 1,
   });
-  const server = current.servers.find((s) => s.id === "remote_1")!;
+  const server = current.servers.find((s) => s.id === "r1")!;
   const assess = (budget: typeof next) =>
     assessEngineCertifiedPostRezIcePath(
       [...server.ice],
@@ -139,7 +138,7 @@ it("matches the actual next-turn public pool without borrowing it for the curren
 });
 it("uses the same future typed pool in scoring-window protection and keeps live pools current", () => {
   const input = fixture(276).input,
-    server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    server = input.playerView.servers.find((s) => s.id === "r1")!;
   expect(
     scoringWindowPostRezProtectionAssessment(input, server, 3).evidence,
   ).toContain("remote_access:can_reach:true");
@@ -256,7 +255,7 @@ it("does not buy a public delayed breaker with restricted run credits", () => {
     { ...rent, counters: { shell: 2 } },
   ];
   input.playerView.specialZones.setAsideCount = 1;
-  const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+  const server = input.playerView.servers.find((s) => s.id === "r1")!;
   const result = scoringWindowPostRezProtectionAssessment(input, server, 0);
   expect(result.evidence).toContain("public_staged_breaker_used:false");
   expect(result.evidence).toContain("remote_access:can_reach:false");

@@ -125,7 +125,7 @@ describe("native equivalent funding and independent finite liquidity", () => {
     const f = capture("cruising"),
       { action, plan } = decide(f);
     expect(action.type).toBe("play_event");
-    expect(action.actionId).toContain("cruising-for-netwatch");
+    expect(visibleSourceDefinitionsByInstanceId(f.input.playerView)[action.source]).toBe(161);
     expect(plan.rootPlanInstanceId).toBe(
       "plan:runner.pressure_central:central%3Ard",
     );
@@ -171,7 +171,7 @@ describe("native equivalent funding and independent finite liquidity", () => {
     const positive = runnerExactFundingRouteContract(f.input, cs, request);
     expect(positive.routeAssessment.status).toBe("covered_guaranteed");
     expect(positive.routeAssessment.totalClickCost).toBe(2);
-    expect(positive.routeActionIds[0]).toContain("cruising-for-netwatch");
+    expect(cs.find((c) => c.actionId === positive.routeActionIds[0])?.sourceDefinitionId).toBe(161);
     const negative = runnerExactFundingRouteContract(f.input, cs, {
       ...request,
       remainingClicks: 1,

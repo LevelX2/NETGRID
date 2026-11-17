@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { createRunnerProgramInstallTrashContext } from "../../runtime/runner-program-install-trash-context";
 import { aiLiveRuntimeDependencies } from "../../ai-runtime-public-entrypoints";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
@@ -100,8 +101,8 @@ it("uses the funded bypass instead of borrowing its reserve for a blocked basic 
   const cp = fixture(11, 393),
     { action, plan } = decide(cp);
   expect(action.type).toBe("play_event");
-  expect(action.source).toContain("inside-job");
-  expect(action.payload?.serverId).toBe("remote_3");
+  expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(306);
+  expect(action.payload?.serverId).toBe("r3");
   expect(plan.selectedPlan?.moduleId).toBe("runner.contest_remote");
   expect(plan.rootPlanInstanceId).toBe(plan.leafExecutorInstanceId);
   const target = evaluateRunnerRunTargets({ input: cp.input }).find(
@@ -114,11 +115,11 @@ it("installs the exact cheaper decoder under the same remote parent at G24/D139"
   const cp = fixture(24, 139),
     { action, plan } = decide(cp);
   expect(action.type).toBe("install_card");
-  expect(action.source).toContain("cyfermaster");
+  expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(228);
   expect(action.payload?.runnerProgramTrashBeforeInstall).not.toBe(true);
   expect(plan.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "plan:runner.contest_remote:remote%3Ar1",
   );
   expect(plan.selectedPlan?.parentInstanceId).toBe(plan.rootPlanInstanceId);
 });
@@ -128,7 +129,7 @@ it("keeps the basic run available once its own unknown-ICE reserve is funded", (
   cp.input.playerView.own.credits = 15;
   const { action } = decide(cp);
   expect(action.type).toBe("start_run");
-  expect(action.payload?.serverId).toBe("remote_3");
+  expect(action.payload?.serverId).toBe("r3");
 });
 it.each([
   "short_cash",
@@ -152,7 +153,7 @@ it.each([
       input.legalActions = input.legalActions.filter(
         (a) => a.type !== "install_card",
       );
-    const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    const server = input.playerView.servers.find((s) => s.id === "r1")!;
     if (variant === "missing_steal_quote")
       delete server.runnerAgendaStealCostQuote;
     if (variant === "stale_steal_quote")
@@ -165,7 +166,7 @@ it.each([
       ice.rezzed = false;
     }
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.remote_1",
+      (e) => e.actionId === "runner.start_run.r1",
     )!;
     if (variant === "known_no_payoff")
       target.knownAccessState = "known_no_current_payoff";
@@ -195,7 +196,7 @@ it("quotes all eight credits and both actions of the native cheaper route", () =
   const cp = fixture(24, 139),
     input = cp.input;
   const target = evaluateRunnerRunTargets({ input }).find(
-    (e) => e.actionId === "runner.start_run.remote_1",
+    (e) => e.actionId === "runner.start_run.r1",
   )!;
   expect(target.pathCost).toBe(16);
   expect(target.accessPayoffContestable).toBe(false);
@@ -271,9 +272,8 @@ it.each(["bypass", "decoder"] as const)(
     });
     state = toRunnerTurn(state);
     installRunnerProgramForTest(state, 251);
-    moveRunnerCardToGrip(state, 306);
-    if (variant === "decoder")
-      moveRunnerCardToGrip(state, 228);
+    const bypass = moveRunnerCardToGrip(state, 306);
+    const decoder = variant === "decoder" ? moveRunnerCardToGrip(state, 228) : undefined;
     const target = putCorpRootInRemote(
       state,
       variant === "bypass"
@@ -287,7 +287,7 @@ it.each(["bypass", "decoder"] as const)(
       ? [457]
       : [464, 473]) {
       const ice =
-        state.cardInstances[putCorpIceOnServer(state, "remote_1", id)]!;
+        state.cardInstances[putCorpIceOnServer(state, "r1", id)]!;
       ice.rezzed = variant === "decoder";
       ice.faceup = ice.rezzed;
     }
@@ -322,21 +322,19 @@ it.each(["bypass", "decoder"] as const)(
         action = legal.find(
           (a) =>
             a.type === (variant === "bypass" ? "play_event" : "install_card") &&
-            String(a.payload?.cardId ?? "").includes(
-              variant === "bypass" ? "inside-job" : "cyfermaster",
-            ) &&
-            (variant === "decoder" || a.payload?.serverId === "remote_1"),
+            a.payload?.cardId === (variant === "bypass" ? bypass : decoder) &&
+            (variant === "decoder" || a.payload?.serverId === "r1"),
         );
       } else if (variant === "decoder" && !state.run) {
         action = legal.find(
-          (a) => a.type === "start_run" && a.payload?.serverId === "remote_1",
+          (a) => a.type === "start_run" && a.payload?.serverId === "r1",
         );
       } else {
         action =
           legal.find(
             (a) =>
               a.type === "break_subroutine" &&
-              String(a.payload?.breakerId).includes("cyfermaster"),
+              a.payload?.breakerId === decoder,
           ) ??
           legal.find((a) => a.type === "steal_agenda") ??
           legal.find((a) => a.type === "access_card") ??

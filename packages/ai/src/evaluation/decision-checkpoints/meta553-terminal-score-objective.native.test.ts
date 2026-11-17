@@ -29,8 +29,8 @@ const recorded = JSON.parse(
   input: AiDecisionInputWithDeckCapabilities;
   runtime: AiRuntimeCheckpointV1;
 };
-const genetics = "corp_414_2";
-const actionId = "corp.install_card." + genetics + ".remote_1." + genetics;
+const genetics = "c2k6";
+const actionId = "corp.install_card." + genetics + ".r1." + genetics;
 beforeEach(resetResidentPlanPortfolioMemory);
 
 function native() {
@@ -105,7 +105,7 @@ describe("pairing 553 terminal score objective", () => {
     expect(result.actionId).toBe(actionId);
     const pf = result.decisionDebug?.planFirstDecision;
     expect(pf?.rootPlanInstanceId).toContain(
-      encodeURIComponent("agenda:" + genetics + ":remote_1"),
+      encodeURIComponent("agenda:" + genetics + ":r1"),
     );
     expect(pf?.leafExecutorInstanceId).toBe(pf?.rootPlanInstanceId);
     expect(pf?.route).toMatchObject({
@@ -120,7 +120,8 @@ describe("pairing 553 terminal score objective", () => {
     restoreAiRuntimeCheckpoint(cp.input, snapshotId, cp.runtime);
     const result = chooseAiAction(cp.input);
     expect(result.fallbackUsed).toBe(false);
-    expect(result.actionId).toContain("corporate-coup");
+    const action = cp.input.legalActions.find((a) => a.actionId === result.actionId)!;
+    expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(405);
     expect(
       cp.input.legalActions.some((a) => a.actionId === result.actionId),
     ).toBe(true);

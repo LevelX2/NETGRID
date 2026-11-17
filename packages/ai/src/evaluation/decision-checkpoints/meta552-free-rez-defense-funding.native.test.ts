@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -212,7 +213,8 @@ describe("native free rez before Defense funding", () => {
     const payout = getLegalActions(improved, "corp").find(
       (a) =>
         a.type === "activated_card_ability" &&
-        a.actionId.includes("take_hosted_credits"),
+        a.source === rez.source &&
+        a.abilityRef?.sourceAbilityId === canonicalCapabilityId(521, capabilityKey("abilities_activated_corp_main_take_hosted_credits")),
     )!;
     improved = advance(improved, { side: "corp", actionId: payout.actionId });
     expect([basic.corp.credits, basic.corp.clicks]).toEqual([6, 1]);
@@ -258,7 +260,7 @@ describe("native free rez before Defense funding", () => {
       } else {
         expect(current.corp.credits).toBe(7);
         expect(p?.rootPlanInstanceId).toBe(
-          "plan:corp.score_agenda:agenda%3Acorp_432_1%3Aremote_1",
+          "plan:corp.score_agenda:agenda%3Ac2o5%3Ar1",
         );
         expect(p?.selectedPlan?.moduleId).toBe("corp.defend_servers");
       }
