@@ -30,6 +30,7 @@ import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
+import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 
 function fixture() {
   return JSON.parse(
@@ -43,6 +44,8 @@ function fixture() {
   ) as {
     matchId: string;
     seed: string;
+    initialStateHash: string;
+    setupArrangement: PostSetupDeckOrder;
     runnerDeckSnapshot: DeckSnapshot;
     native: {
       input: AiDecisionInputWithDeckCapabilities & {
@@ -55,6 +58,7 @@ function fixture() {
     prefixActions: Array<{
       side: "runner" | "corp";
       actionId: string;
+      stateHashAfter: string;
       selectedChoices?: PlayerAction["selectedChoices"];
     }>;
     originalContinuation: Array<{
@@ -85,7 +89,7 @@ function advance(
   if (!r.ok) throw Error(JSON.stringify(r.error));
   return r.state;
 }
-function originalState() {
+function scenarioState() {
   const f = fixture(),
     corp = f.native.input.ownDeckSnapshot!,
     runner = f.runnerDeckSnapshot!;
@@ -121,12 +125,17 @@ function originalState() {
     runnerDeckMetadata: runner.publicMetadata,
     corpDeckMetadata: corp.publicMetadata,
   });
-  for (const a of f.prefixActions) state = advance(state, a);
+  expect(hashState(state)).toBe(f.initialStateHash);
+  for (const [index, action] of f.prefixActions.entries()) {
+    state = advance(state, action);
+    if (index === 1) applyPostSetupDeckOrder(state, f.setupArrangement);
+    expect(hashState(state)).toBe(action.stateHashAfter);
+  }
   expect(hashState(state)).toBe(f.native.stateHash);
   return { f, state };
 }
 function offers() {
-  const { f, state } = originalState();
+  const { f, state } = scenarioState();
   const input = buildAiDecisionInput(state, "corp", {
     ownDeckSnapshot: f.native.input.ownDeckSnapshot!,
     difficulty: "hard",
@@ -193,8 +202,8 @@ describe("native free rez before Defense funding", () => {
       ),
     ).toThrow("missing_plan_module_coverage");
   });
-  it("reconstructs the original Engine state and strictly improves the one-click funding prefix", () => {
-    const { f, state } = originalState();
+  it("replays the authored Engine scene and strictly improves the one-click funding prefix", () => {
+    const { f, state } = scenarioState();
     expect(Object.keys(f.native.validation)).toHaveLength(9);
     expect(Object.values(f.native.validation).every(Boolean)).toBe(true);
     const rez = getLegalActions(state, "corp").find(
@@ -227,7 +236,7 @@ describe("native free rez before Defense funding", () => {
     expect(hashState(replay.state)).toBe(hashState(improved));
   });
   it("keeps free setup and real payout under Defense, then revalidates the funded prefix before Score protection", () => {
-    const { f, state } = originalState();
+    const { f, state } = scenarioState();
     let current = structuredClone(state);
     const actions: string[] = [];
     for (let index = 0; index < 3; index++) {

@@ -6,7 +6,7 @@
     "provenance": "reconstructed_from_persisted_decision_sources",
     "actor": "corp",
     "stateVersion": 25,
-    "stateHash": "fnv1a:82b3cf23",
+    "stateHash": "fnv1a:f1a5b04f",
     "input": {
       "matchId": "match_a19a37d6c70040a5",
       "side": "corp",
@@ -12602,7 +12602,8 @@
         "selectedOptionIds": [
           "keep"
         ]
-      }
+      },
+      "stateHashAfter": "fnv1a:dbeb4b5c"
     },
     {
       "side": "corp",
@@ -12613,122 +12614,146 @@
         "selectedOptionIds": [
           "keep"
         ]
-      }
+      },
+      "stateHashAfter": "fnv1a:320376ef"
     },
     {
       "side": "corp",
       "actionId": "corp.mandatory_draw",
-      "actionType": "mandatory_draw"
+      "actionType": "mandatory_draw",
+      "stateHashAfter": "fnv1a:0cb72507"
     },
     {
       "side": "corp",
       "actionId": "corp.install_card.c2rz.hq.c2rz.0",
-      "actionType": "install_card"
+      "actionType": "install_card",
+      "stateHashAfter": "fnv1a:f5095dbc"
     },
     {
       "side": "corp",
       "actionId": "corp.install_card.c2u5.rd.c2u5.0",
-      "actionType": "install_card"
+      "actionType": "install_card",
+      "stateHashAfter": "fnv1a:c767b465"
     },
     {
       "side": "corp",
       "actionId": "corp.install_card.c3jy.hq.c3jy",
-      "actionType": "install_card"
+      "actionType": "install_card",
+      "stateHashAfter": "fnv1a:c3b157f2"
     },
     {
       "side": "corp",
       "actionId": "corp.rez_card.c3jy.hq.c3jy",
-      "actionType": "rez_card"
+      "actionType": "rez_card",
+      "stateHashAfter": "fnv1a:a88cf96b"
     },
     {
       "side": "corp",
       "actionId": "corp.end_turn",
-      "actionType": "end_turn"
+      "actionType": "end_turn",
+      "stateHashAfter": "fnv1a:c12ec5b4"
     },
     {
       "side": "runner",
       "actionId": "runner.install_card.c1ll.c1ll",
-      "actionType": "install_card"
+      "actionType": "install_card",
+      "stateHashAfter": "fnv1a:41b63cd9"
     },
     {
       "side": "runner",
       "actionId": "runner.start_run.rd",
-      "actionType": "start_run"
+      "actionType": "start_run",
+      "stateHashAfter": "fnv1a:841e6724"
     },
     {
       "side": "corp",
       "actionId": "corp.decline_rez",
-      "actionType": "decline_rez"
+      "actionType": "decline_rez",
+      "stateHashAfter": "fnv1a:a33640fa"
     },
     {
       "side": "runner",
       "actionId": "runner.continue_run",
-      "actionType": "continue_run"
+      "actionType": "continue_run",
+      "stateHashAfter": "fnv1a:1820ce51"
     },
     {
       "side": "runner",
       "actionId": "runner.access_card",
-      "actionType": "access_card"
+      "actionType": "access_card",
+      "stateHashAfter": "fnv1a:72ac815d"
     },
     {
       "side": "runner",
       "actionId": "runner.start_run.hq",
-      "actionType": "start_run"
+      "actionType": "start_run",
+      "stateHashAfter": "fnv1a:91ff1732"
     },
     {
       "side": "corp",
       "actionId": "corp.rez_ice.c2rz.hq.c2rz.c3jy",
-      "actionType": "rez_ice"
+      "actionType": "rez_ice",
+      "stateHashAfter": "fnv1a:2e2a952f"
     },
     {
       "side": "runner",
       "actionId": "runner.break_subroutine.c1ll.c1ll.c1ll.c2rz.0.338",
-      "actionType": "break_subroutine"
+      "actionType": "break_subroutine",
+      "stateHashAfter": "fnv1a:c1d3bc79"
     },
     {
       "side": "runner",
       "actionId": "runner.continue_run",
-      "actionType": "continue_run"
+      "actionType": "continue_run",
+      "stateHashAfter": "fnv1a:6d32139c"
     },
     {
       "side": "runner",
       "actionId": "runner.continue_run",
-      "actionType": "continue_run"
+      "actionType": "continue_run",
+      "stateHashAfter": "fnv1a:1b6aee96"
     },
     {
       "side": "runner",
       "actionId": "runner.access_card",
-      "actionType": "access_card"
+      "actionType": "access_card",
+      "stateHashAfter": "fnv1a:1654aa7c"
     },
     {
       "side": "runner",
       "actionId": "runner.trash_accessed_card.c3jy.1",
-      "actionType": "trash_accessed_card"
+      "actionType": "trash_accessed_card",
+      "stateHashAfter": "fnv1a:3c38c719"
     },
     {
       "side": "runner",
       "actionId": "runner.access_card",
-      "actionType": "access_card"
+      "actionType": "access_card",
+      "stateHashAfter": "fnv1a:31d41648"
     },
     {
       "side": "runner",
       "actionId": "runner.play_event.c1wr.c1wr.393",
-      "actionType": "play_event"
+      "actionType": "play_event",
+      "stateHashAfter": "fnv1a:ed9a85de"
     },
     {
       "side": "runner",
       "actionId": "runner.end_turn",
-      "actionType": "end_turn"
+      "actionType": "end_turn",
+      "stateHashAfter": "fnv1a:3754c758"
     },
     {
       "side": "corp",
       "actionId": "corp.mandatory_draw",
-      "actionType": "mandatory_draw"
+      "actionType": "mandatory_draw",
+      "stateHashAfter": "fnv1a:9bb0c52d"
     },
     {
       "side": "corp",
       "actionId": "corp.install_card.c37x.new_remote.c37x",
-      "actionType": "install_card"
+      "actionType": "install_card",
+      "stateHashAfter": "fnv1a:f1a5b04f"
     }
   ],
   "originalContinuation": [
@@ -12742,5 +12767,110 @@
       "actionId": "corp.install_card.c2wm.hq.c2wm.1",
       "actionType": "install_card"
     }
-  ]
+  ],
+  "setupArrangement": {
+    "runnerGrip": [
+      "c1z6",
+      "c1z7",
+      "c1ll",
+      "c1wr",
+      "c2eb"
+    ],
+    "runnerStack": [
+      "c261",
+      "c29f",
+      "c1eq",
+      "c2az",
+      "c29e",
+      "c1wx",
+      "c263",
+      "c277",
+      "c1sq",
+      "c2bt",
+      "c2e9",
+      "c1wp",
+      "c1sh",
+      "c1xm",
+      "c1wq",
+      "c24r",
+      "c1sr",
+      "c262",
+      "c2ax",
+      "c1z5",
+      "c1bm",
+      "c1bl",
+      "c1l5",
+      "c1wz",
+      "c275",
+      "c1lm",
+      "c1sp",
+      "c29d",
+      "c2d5",
+      "c1xl",
+      "c2ay",
+      "c1fu",
+      "c1ft",
+      "c24p",
+      "c2ea",
+      "c1wy",
+      "c1ep",
+      "c24q",
+      "c1op",
+      "c276"
+    ],
+    "corpHq": [
+      "c2rz",
+      "c312",
+      "c2o5",
+      "c2u5",
+      "c37x"
+    ],
+    "corpRd": [
+      "c3jy",
+      "c2wm",
+      "c2hq",
+      "c2x9",
+      "c31a",
+      "c2km",
+      "c391",
+      "c2py",
+      "c2h1",
+      "c2kn",
+      "c2s6",
+      "c2s5",
+      "c2u6",
+      "c2xa",
+      "c311",
+      "c2om",
+      "c3kt",
+      "c2yu",
+      "c3l2",
+      "c37y",
+      "c2px",
+      "c3l1",
+      "c2yt",
+      "c3hh",
+      "c2wl",
+      "c2h2",
+      "c392",
+      "c352",
+      "c2hp",
+      "c3me",
+      "c3hi",
+      "c2ry",
+      "c3jx",
+      "c2kl",
+      "c2rx",
+      "c2ol",
+      "c3ku",
+      "c3md",
+      "c319",
+      "c351"
+    ]
+  },
+  "provenance": {
+    "kind": "authored_post_setup_permutation",
+    "accessTargetDefinitionId": 490
+  },
+  "initialStateHash": "fnv1a:1a5964bc"
 }
