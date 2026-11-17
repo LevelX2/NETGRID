@@ -1260,7 +1260,10 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("recognizes the current Engine source for the existing random-dice split resolver", () => {
+  it.each([
+    { highestSelectable: true, expected: "gain_3_set_aside_0" },
+    { highestSelectable: false, expected: "gain_2_set_aside_1" },
+  ])("ranks selectable random-dice splits when the highest is selectable=$highestSelectable", ({ highestSelectable, expected }) => {
     const input = inputWithChoice(
       {
         kind: "select_option",
@@ -1272,6 +1275,7 @@ describe("selectedChoicesForDecision", () => {
           id: `gain_${gainedCredits}_set_aside_${3 - gainedCredits}`,
           label: `${gainedCredits} credits`,
           value: gainedCredits,
+          ...(gainedCredits === 3 ? { selectable: highestSelectable } : {}),
         })),
       },
       { side: "runner" },
@@ -1286,7 +1290,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["gain_3_set_aside_0"],
+      selectedOptionIds: [expected],
     });
   });
 

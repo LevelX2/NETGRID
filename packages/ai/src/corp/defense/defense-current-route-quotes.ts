@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { PlanSchedulerContext } from "../../plans/plan-scheduler";
 import {
@@ -164,7 +165,7 @@ export function exactInstallProjectionIsCurrent(
             ),
       ));
   return (
-    action?.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    actionMatchesCurrentDecision(context.input, action) &&
     action.side === "corp" &&
     action.type === "install_card" &&
     action.source === projection.sourceCardInstanceId &&

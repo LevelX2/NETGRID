@@ -613,7 +613,6 @@ export type AiMatchProgressionMetrics = {
   runnerSearchCardAvailableForMissingBreaker: number;
   runnerSearchCardUsedForMissingBreaker: number;
   runnerSearchCardAvailableButUnused: number;
-  runnerTutorConvertedToBreakerInstall: number;
   runnerTutorConvertedToUsefulRun: number;
   runnerBreakerInstallConvertedToUsefulRun: number;
   runnerCoverageImproved: number;
@@ -644,8 +643,6 @@ export type AiMatchProgressionMetrics = {
   runnerPhaseExitBlockedByCost: number;
   runnerPhaseExitBlockedByCoverage: number;
   runnerPhaseExitBlockedByTargetValue: number;
-  runnerProbeRevealedIceThenSearchedBreaker: number;
-  runnerProbeRevealedIceButDidNotReact: number;
   runnerSetupBreakerSearchStalled: number;
   runnerSetupEconomyStalled: number;
   runnerPhaseExitToPressure: number;

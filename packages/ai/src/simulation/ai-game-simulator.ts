@@ -104,6 +104,7 @@ export type AiGameSimulatorDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
     targetServerId: string | undefined,
+    runStarted: boolean,
   ) => ActionSequenceEntryDiagnostics;
   runnerEconomySetupDiagnosticsForSimulationAction: (
     input: AiDecisionInput,
@@ -511,6 +512,7 @@ export function createAiGameSimulator(
           input,
           action,
           targetServerId,
+          runnerRunStarted === true,
         );
       const runnerEconomySetup =
         runnerEconomySetupDiagnosticsForSimulationAction(

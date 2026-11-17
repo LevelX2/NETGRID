@@ -20,6 +20,7 @@ import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-av
 import {
   agendaPoints,
   counterDisplaysField,
+  agendaCostCounterDisplaysForServer,
   poxCounterDisplaysForServer,
   purgeableRunnerVirusCounterDisplaysForServer,
   spyCounterDisplaysForServer,
@@ -245,6 +246,7 @@ export function buildPlayerViewProjection(
       ...(statuses.length > 0 ? { statuses } : {}),
       ...counterDisplaysField([
         ...(poxCounterDisplaysForServer(state, server.id) ?? []),
+        ...(agendaCostCounterDisplaysForServer(state, server.id) ?? []),
         ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ??
           []),
         ...(spyCounterDisplaysForServer(state, server.id) ?? []),

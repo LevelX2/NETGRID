@@ -993,6 +993,28 @@ export function poxCounterDisplaysForServer(
   ];
 }
 
+export function agendaCostCounterDisplaysForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): VisibleCard["counterDisplays"] {
+  const amount = Math.max(
+    0,
+    Math.floor(state.serverAgendaCostCountersByServer?.[serverId] ?? 0),
+  );
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "agenda_cost_virus",
+      amount,
+      displayKind: "virus",
+      label: "Agenda-Kosten-Counter",
+      ariaLabel: `${amount} Agenda-Kosten-Counter auf diesem Server`,
+      counterType: "virus",
+      usageHint: "status_marker",
+    },
+  ];
+}
+
 export function spyCounterDisplaysForServer(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,

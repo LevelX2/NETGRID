@@ -197,6 +197,61 @@ it.each([0, 1, 2])(
   },
 );
 
+it("keeps the standard server virus pools separate from Proteus Purge", () => {
+  const state = createGame({
+    seed: "purge-separate-server-pools",
+    setupMode: "completed",
+  });
+  state.activeSide = "corp";
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.corp.clicks = 3;
+  state.poxCountersByServer = { hq: 2 };
+  state.serverAgendaCostCountersByServer = { rd: 2 };
+  state.purgeableRunnerVirusCounters = { corp: { tax: 2 } };
+  const legalActions = getLegalActions(state, "corp");
+  const input: AiDecisionInput = {
+    matchId: state.matchId,
+    side: "corp",
+    legalActions,
+    playerView: getPlayerView(state, "corp"),
+    eventTail: [],
+    seed: state.seed,
+    decisionId: "separate-purge-pools",
+    actionNumber: state.stateVersion,
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.2-normal",
+  };
+  const standard = legalActions.find((action) => action.type === "purge_virus_counters")!;
+  const proteus = legalActions.find((action) => action.type === "purge_runner_virus_counters")!;
+  const posture = { primary: "low_value", severity: "low" } as const;
+  const standardImpact = corpPurgeImpactScoreComponent(input, standard, posture);
+  expect(standardImpact?.reason).toContain("purge_visible_counter_total:4");
+  expect(standardImpact?.value).toBeGreaterThan(0);
+  const proteusImpact = corpPurgeImpactScoreComponent(input, proteus, posture);
+  expect(proteusImpact?.reason).toContain("purge_visible_counter_total:2");
+  expect(proteusImpact?.reason).toContain("purge_active_runner_counter_types:tax");
+  const apply = (action: LegalAction) => {
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    if (!result.ok) throw new Error(result.error.message);
+    return result.state;
+  };
+  expect(apply(standard)).toMatchObject({
+    poxCountersByServer: {},
+    serverAgendaCostCountersByServer: {},
+    purgeableRunnerVirusCounters: { corp: { tax: 2 } },
+  });
+  expect(apply(proteus)).toMatchObject({
+    poxCountersByServer: { hq: 2 },
+    serverAgendaCostCountersByServer: { rd: 2 },
+  });
+});
+
 it.each([
   { archives: 0, rd: 0, installed: true, active: 0 },
   { archives: 1, rd: 0, installed: true, active: 0 },

@@ -180,6 +180,25 @@ describe("Threat and Opportunity projections", () => {
     ).toBe(false);
   });
 
+  it("identifies funding rather than missing breakers on a covered but unaffordable path", () => {
+    const frame = frameWithRunTargets([
+      runTarget({
+        targetServerId: "rd",
+        targetKind: "rd",
+        pathPassability: "blocked_unpayable",
+        recommendation: "gain_credits_first",
+        accessPayoff: "unknown",
+      }),
+    ]);
+
+    const pathThreats = buildAiThreatProjections(frame).filter(
+      (threat) => threat.targetId === "rd",
+    );
+    expect(pathThreats.map((threat) => threat.threat)).toEqual([
+      "runner_economy_starvation",
+    ]);
+  });
+
   it("projects runner economy starvation from economy posture", () => {
     const frame = buildSemanticDecisionFrame({
       input: inputFor("runner", [

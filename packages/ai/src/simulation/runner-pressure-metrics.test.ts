@@ -10,7 +10,10 @@ import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-buil
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import { runnerEncounterCreditBudgetForInput } from "../runtime/runner-encounter-credit-budget";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { simulationActionLocation } from "../runtime/simulation-action-target";
+import { createRunnerBreakerCoverageDiagnosticsForSimulationAction } from "./runner-breaker-coverage-diagnostics";
 import { createRunnerPressureMetricContext } from "./runner-pressure-metrics";
+import { countRunnerCoverageConversions } from "./runner-setup-metric-counts";
 
 it("respects a fort's Trace payment restriction without treating bad publicity as liquid reserve", () => {
   const lockout = "onr_v1_373_twenty-four-hour-surveillance";
@@ -122,6 +125,102 @@ it("respects a fort's Trace payment restriction without treating bad publicity a
     stealthCreditsBySourceId: {},
   });
   expect(encounterBudget("rd").stealthNonNoisyIcebreakerCredits).toBe(3);
+});
+
+it("counts a native event-started run as pressure and as a coverage follow-up", () => {
+  const insideJob = "onr_v1_094_inside-job";
+  const baseRunner = DEMO_DECKS.demo_runner_001;
+  const runnerDeck = {
+    ...baseRunner,
+    cards: [
+      ...baseRunner.cards.filter(({ id }) => id !== insideJob),
+      { id: insideJob, quantity: 1 },
+    ],
+  };
+  let state = createGameAfterSetup({
+    seed: "runner-coverage-event-start",
+    traceRulesProfile: "modern_open",
+    runnerDeck,
+  });
+  state = applyCorpAction(state, "mandatory_draw");
+  RealEngineFixtureBuilder.forState(state).withCorpHqSize(4);
+  state = applyCorpAction(state, "end_turn");
+  RealEngineFixtureBuilder.forState(state).withRunnerCardInGrip(insideJob);
+  const input = buildAiDecisionInput(state, "runner", {
+    ownDeckSnapshot: {
+      deckSnapshotId: runnerDeck.id,
+      side: "runner",
+      cards: runnerDeck.cards.map(({ id, quantity }) => ({ cardId: id, quantity })),
+    },
+  });
+  const action = input.legalActions.find(
+    (offer) =>
+      offer.type === "play_event" &&
+      offer.payload?.serverId === "hq" &&
+      state.cardInstances[offer.source]?.definitionId === insideJob,
+  );
+  if (!action) throw new Error("Missing native Inside Job action");
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  const location = simulationActionLocation(action, result.event, state, result.state);
+  expect(location).toMatchObject({ runnerRunStarted: true, targetServerId: "hq" });
+  const diagnose = createRunnerBreakerCoverageDiagnosticsForSimulationAction({
+    assessRunnerCoveragePressureForMetrics: () => ({
+      blockedServers: new Set(),
+      knownIceBlockedServers: new Set(),
+      missingBreakerRoles: new Set(),
+      matchingInstallActionIds: new Set(),
+      searchActionIds: new Set(),
+      recoveryActionIds: new Set(),
+      heapMatchingBreakerCount: 0,
+    }),
+    assessRunnerPressureReadyForMetrics: () => ({
+      broadReady: true,
+      readyTargets: [{ serverId: "hq", targetType: "hq" }],
+      falsePositive: false,
+      blockers: new Set(),
+    }),
+    isRunnerEconomyAction: () => false,
+    isRunnerRigInstallAction: () => false,
+    runnerCoverageSearchActionForMetrics: () => false,
+  });
+  const flags = diagnose(input, action, location.targetServerId, location.runnerRunStarted === true);
+  expect(flags).toMatchObject({
+    runnerPressureTakenAfterCoverageReady: true,
+    runnerPhaseExitToPressure: true,
+  });
+  expect(flags.runnerPressureSkippedAfterCoverageReady).toBeUndefined();
+  const entry = {
+    side: "runner" as const,
+    stateVersionBefore: state.stateVersion,
+    reasonCode: "fixture",
+    explanation: "",
+    confidence: 1,
+    evidence: [],
+    fallbackUsed: false,
+    timeoutUsed: false,
+    qualityTags: [],
+    stateHashAfter: result.event.stateHashAfter,
+  };
+  expect(
+    countRunnerCoverageConversions(
+      [
+        {
+          ...entry,
+          actionType: "install_card",
+          runnerCoverageImproved: true,
+        },
+        { ...flags, ...entry, actionType: action.type, ...location },
+      ],
+      (candidate) => candidate.runnerCoverageImproved === true,
+      () => false,
+    ),
+  ).toBe(1);
 });
 
 function applyCorpAction(

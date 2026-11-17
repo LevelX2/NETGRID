@@ -29,12 +29,12 @@ import {
   type PlanAssessment,
   type PriorityClass,
 } from "./plan-assessment";
+import { isStandardEndTurnCandidate } from "./plan-early-end-turn";
 import type { PlanProposal } from "./plan-kernel-types";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import {
   createSidePlanRegistry,
   enumerateCurrentPlanSchedulerRoutes,
-  isStandardEndTurnCandidate,
   runPlanScheduler,
   type PlanModule,
   type PlanSchedulerContext,
@@ -58,6 +58,44 @@ describe("shared plan scheduler", () => {
 
     expect(isStandardEndTurnCandidate(cardEndTurn)).toBe(false);
     expect(isStandardEndTurnCandidate(standardEndTurn)).toBe(true);
+  });
+
+  it("rejects a stale Engine offer behind an otherwise current selected route", () => {
+    const action = candidate("corp-credit", "corp");
+    const schedulerContext = context("corp", [action]);
+    schedulerContext.input.legalActions[0]!.expiresAtStateVersion -= 1;
+    const registry = createSidePlanRegistry({
+      side: "corp",
+      priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+      modules: [module("corp", "corp.economy", "P5", action)],
+    });
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry,
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow("missing_plan_module_coverage");
+  });
+
+  it("rejects an assessment bound to another resident plan", () => {
+    const action = candidate("corp-credit", "corp");
+    const drifted = module("corp", "corp.economy", "P5", action);
+    drifted.assess = () => assessment("plan:corp.draw_cycle:general", "corp", "P1");
+    const registry = createSidePlanRegistry({
+      side: "corp",
+      priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+      modules: [drifted, module("corp", "corp.draw_cycle", "P5", action)],
+    });
+
+    expect(() =>
+      runPlanScheduler({
+        context: context("corp", [action]),
+        registry,
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow("invalid_plan_identity");
   });
 
   it.each([
@@ -2139,6 +2177,9 @@ function context(
       legalActions: actionCandidates.map((candidate) => ({
         actionId: candidate.actionId,
         type: candidate.actionType,
+        side,
+        timingPoint: `${side}_action.main`,
+        expiresAtStateVersion: 10,
         source:
           candidate.sourceKind === "basic_action"
             ? "basic_action"

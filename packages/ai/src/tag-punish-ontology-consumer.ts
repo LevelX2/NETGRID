@@ -1,5 +1,5 @@
 import type { LegalAction } from "@netgrid/shared";
-import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
 import type {
   AiHintCondition,
   AiHintStructuredEffect,
@@ -7,8 +7,6 @@ import type {
   KnownHintEffectKind,
 } from "./hint-ontology";
 import { rolesMatch } from "./role-match";
-
-const AI_HINTS = createAiHintsByCard();
 
 export type StructuredTagPunishProfile = {
   tagSource: boolean;
@@ -49,7 +47,7 @@ export function getStructuredTagPunishProfileForCard(
   cardId: string | undefined,
 ): StructuredTagPunishProfile | undefined {
   if (!cardId) return undefined;
-  return tagPunishProfileFromHint(AI_HINTS.get(cardId));
+  return tagPunishProfileFromHint(AI_HINTS_BY_CARD.get(cardId));
 }
 
 export function classifyTagSourceFromOntology(

@@ -1510,7 +1510,7 @@ export function selectedChoicesForDecision(
     choice.source.startsWith("v1921.playful_ai") ||
     choice.source.startsWith("card_implementation.random_dice_split:")
   ) {
-    const selectedOptionId = selectedPlayfulAiChoiceOptionId(choice);
+    const selectedOptionId = selectedPlayfulAiChoiceOptionId(selectableOptions);
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "playful_ai",

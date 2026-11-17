@@ -6,7 +6,7 @@ import type {
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
-import { isStandardEndTurnCandidate } from "./plan-scheduler";
+import { isStandardEndTurnCandidate } from "./plan-early-end-turn";
 
 type TurnCompletionState = {
   kind: "turn_completion";

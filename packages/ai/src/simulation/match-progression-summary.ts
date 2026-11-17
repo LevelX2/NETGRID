@@ -664,9 +664,6 @@ export function summarizeMatchProgressionMetrics(
     runnerSearchCardAvailableButUnused: actionSequence.filter(
       (entry) => entry.runnerSearchCardAvailableButUnused === true,
     ).length,
-    runnerTutorConvertedToBreakerInstall: actionSequence.filter(
-      (entry) => entry.runnerTutorConvertedToBreakerInstall === true,
-    ).length,
     runnerTutorConvertedToUsefulRun: countRunnerCoverageConversions(
       actionSequence,
       (entry) => entry.runnerSearchCardUsedForMissingBreaker === true,
@@ -776,12 +773,6 @@ export function summarizeMatchProgressionMetrics(
     ).length,
     runnerPhaseExitBlockedByTargetValue: actionSequence.filter(
       (entry) => entry.runnerPhaseExitBlockedByTargetValue === true,
-    ).length,
-    runnerProbeRevealedIceThenSearchedBreaker: actionSequence.filter(
-      (entry) => entry.runnerProbeRevealedIceThenSearchedBreaker === true,
-    ).length,
-    runnerProbeRevealedIceButDidNotReact: actionSequence.filter(
-      (entry) => entry.runnerProbeRevealedIceButDidNotReact === true,
     ).length,
     runnerSetupBreakerSearchStalled: actionSequence.filter(
       (entry) => entry.runnerSetupBreakerSearchStalled === true,

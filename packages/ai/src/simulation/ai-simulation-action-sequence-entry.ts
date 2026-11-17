@@ -370,7 +370,6 @@ export type AiSimulationActionSequenceEntry = {
   runnerSearchCardAvailableForMissingBreaker?: boolean;
   runnerSearchCardUsedForMissingBreaker?: boolean;
   runnerSearchCardAvailableButUnused?: boolean;
-  runnerTutorConvertedToBreakerInstall?: boolean;
   runnerTutorConvertedToUsefulRun?: boolean;
   runnerBreakerInstallConvertedToUsefulRun?: boolean;
   runnerCoverageImproved?: boolean;
@@ -397,8 +396,6 @@ export type AiSimulationActionSequenceEntry = {
   runnerPhaseExitBlockedByCost?: boolean;
   runnerPhaseExitBlockedByCoverage?: boolean;
   runnerPhaseExitBlockedByTargetValue?: boolean;
-  runnerProbeRevealedIceThenSearchedBreaker?: boolean;
-  runnerProbeRevealedIceButDidNotReact?: boolean;
   runnerSetupBreakerSearchStalled?: boolean;
   runnerSetupEconomyStalled?: boolean;
   runnerPhaseExitToPressure?: boolean;
