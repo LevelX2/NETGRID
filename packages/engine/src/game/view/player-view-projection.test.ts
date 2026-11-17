@@ -187,7 +187,7 @@ describe("PlayerView projection", () => {
   it("projects the public resolved encounter tax for both sides without exposing hands", () => {
     const state = createGameAfterSetup({ seed: "resolved-encounter-tax-view" });
     state.run = {
-      runId: "run_tax_view",
+      runId: 942408,
       attackedServerId: "hq",
       phase: "movement",
       position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -515,7 +515,7 @@ describe("PlayerView projection", () => {
     state.specialZones ??= { setAside: [], removedFromGame: [] };
     state.specialZones.setAside.push(iceId);
     state.run = {
-      runId: "run_set_aside_quote",
+      runId: 777965,
       attackedServerId: "hq",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "hq", iceIndex: 0 },

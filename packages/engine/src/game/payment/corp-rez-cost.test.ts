@@ -99,7 +99,7 @@ function makeState(noisyUsed = false): GameState {
     winner: null,
     agendaPointsToWin: 7,
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "approach_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },

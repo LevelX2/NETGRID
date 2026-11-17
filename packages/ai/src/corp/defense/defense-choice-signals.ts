@@ -1,3 +1,4 @@
+import { parseRunIdToken, type RunId } from "@netgrid/shared";
 import { isCardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -233,7 +234,7 @@ export function corpAgendaPurgeDefenseChoiceSignal(
 }
 
 type ClassicDeflectorChoiceContext = Readonly<{
-  runId: string;
+  runId: RunId;
   sourceIceInstanceId: string;
   subroutineIndex: number;
   sourceDefinitionId: number;
@@ -560,9 +561,10 @@ function parseClassicDeflectorChoiceContext(
     const sourceDefinitionId = parseCardDefinitionId(
       decodeURIComponent(parts[4]),
     );
-    if (sourceDefinitionId === undefined) return undefined;
+    const runId = parseRunIdToken(decodeURIComponent(parts[1]));
+    if (sourceDefinitionId === undefined || runId === undefined) return undefined;
     return {
-      runId: decodeURIComponent(parts[1]),
+      runId,
       sourceIceInstanceId: decodeURIComponent(parts[2]),
       subroutineIndex,
       sourceDefinitionId,

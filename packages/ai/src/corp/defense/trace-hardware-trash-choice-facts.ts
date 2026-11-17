@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -19,13 +20,13 @@ export function corpTraceHardwareTrashChoiceFacts(
   choice: PendingChoice,
   options: PendingChoiceOptions,
 ) {
-  const fail = (reason: string): never => {
+  function fail(reason: string): never {
     throw unresolvedChoiceFailure(
       input,
       action,
       `corp.defend_servers: ${reason}`,
     );
-  };
+  }
   const version = input.playerView.stateVersion;
   const requirement = action.choiceRequirements?.[0];
   if (
@@ -46,10 +47,12 @@ export function corpTraceHardwareTrashChoiceFacts(
   const traceId = choice.source.slice(TRACE_HARDWARE_TRASH_SOURCE.length);
   // This is the Engine trace-id protocol from encounter-printed-effects.ts,
   // not a card-name inference or a reconstruction from private GameState.
-  const parts = /^(run_[0-9]+)\.(.+)\.([0-9]+)\.trace$/.exec(traceId);
+  const parts = /^([1-9][0-9]*)\.(.+)\.([0-9]+)\.trace$/.exec(traceId);
+  const runId = parseRunIdToken(parts?.[1]);
   const subroutineIndex = parts ? Number(parts[3]) : NaN;
   if (
     !parts ||
+    runId === undefined ||
     !Number.isSafeInteger(subroutineIndex) ||
     subroutineIndex < 0 ||
     String(subroutineIndex) !== parts[3] ||
@@ -59,7 +62,6 @@ export function corpTraceHardwareTrashChoiceFacts(
     fail(
       "Bind the completed ICE Trace to its exact native run, source, subroutine and Choice id.",
     );
-  const runId = parts![1]!;
   const sourceIceInstanceId = parts![2]!;
   const locations = input.playerView.servers.flatMap((server) =>
     server.ice

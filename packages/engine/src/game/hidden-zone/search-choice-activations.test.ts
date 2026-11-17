@@ -230,7 +230,7 @@ describe("hidden-zone search choice activations", () => {
   it("starts p3_38 Mystery Box with a Corp review before Runner program choice", () => {
     const program = "program" as CardInstanceId;
     const resource = "resource" as CardInstanceId;
-    const run = { runId: "run_1" };
+    const run = { runId: 1 };
     const host = makeHost({
       run: run as NonNullable<HiddenZoneSearchActivationHost["state"]["run"]>,
       stack: [program, resource],
@@ -319,7 +319,7 @@ describe("hidden-zone search choice activations", () => {
   it("starts Mystery Box public install choice without changing payload fields", () => {
     const program = "program" as CardInstanceId;
     const resource = "resource" as CardInstanceId;
-    const run = { runId: "run_1" };
+    const run = { runId: 1 };
     const host = makeHost({
       run: run as NonNullable<HiddenZoneSearchActivationHost["state"]["run"]>,
       stack: [program, resource],

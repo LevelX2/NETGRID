@@ -1,3 +1,4 @@
+import type { RunId } from "@netgrid/shared";
 import type { RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type {
@@ -229,7 +230,7 @@ export type RunnerRunWindowActionAssessment = {
     sourceDefinitionId: number;
     targetDefinitionId: number;
     serverId: string;
-    runId: string;
+    runId: RunId;
     plannedAtStateVersion: number;
     installCost: number;
     targetMemoryCost: number;

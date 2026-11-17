@@ -672,7 +672,7 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     state.timingPoint = "run.approach_ice";
     state.activeSide = "corp";
     state.run = {
-      runId: "identity_runner_window_run",
+      runId: 279265,
       attackedServerId: "hq",
       phase: "approach_ice",
       position: { kind: "ice", serverId: "hq", iceIndex: 0 },

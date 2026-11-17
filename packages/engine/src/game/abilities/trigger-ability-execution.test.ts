@@ -32,7 +32,7 @@ describe("trigger ability execution", () => {
       "runner",
     );
     state.run = {
-      runId: "run_lockjaw",
+      runId: 425334,
       attackedServerId: "rd",
       phase: "encounter_ice",
       remainderStrengthBonusByBreaker: {},
@@ -42,7 +42,7 @@ describe("trigger ability execution", () => {
       sourceCardId,
       sourceDefinitionId: 149,
       targetCardId,
-      runId: "run_lockjaw",
+      runId: 425334,
       amount: 2,
     };
     const action = triggerAction(state, "runner", {});

@@ -158,7 +158,7 @@ function host(
       stateVersion: 1,
       randomCounter: 0,
       run: {
-        runId: "run-1",
+        runId: 944636,
         phase: "movement",
       } as unknown as NonNullable<
         HiddenZoneSearchChoiceHandlerHost["state"]["run"]

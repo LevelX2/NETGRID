@@ -7,7 +7,7 @@ import { temporaryEncounterOptionFacts } from "./temporary-encounter-option-fact
 function stateWithRun() {
   const state = createGameAfterSetup({ seed: "temporary-encounter-facts" });
   state.run = {
-    runId: "test-run",
+    runId: 735533,
     attackedServerId: "hq",
     phase: "movement",
     position: { kind: "ice", serverId: "hq", iceIndex: 0 },

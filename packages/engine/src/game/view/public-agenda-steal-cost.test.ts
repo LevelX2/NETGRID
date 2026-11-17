@@ -76,7 +76,7 @@ it("counts a public access snapshot once and preserves it after its active sourc
   const { state, tax } = fixture();
   state.cardInstances[tax]!.rezzed = true;
   state.run = {
-    runId: "public-steal-cost-snapshot",
+    runId: 201431,
     attackedServerId: "remote_1",
     phase: "access",
     position: { kind: "server", serverId: "remote_1" },

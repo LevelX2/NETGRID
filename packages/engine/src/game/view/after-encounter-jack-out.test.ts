@@ -5,7 +5,7 @@ import type { GameState } from "@netgrid/shared";
 function encounter(restrictions: Partial<NonNullable<GameState["run"]>> = {}) {
   const state = createGameAfterSetup({ seed: "public-after-encounter-exit" });
   state.run = {
-    runId: "test-run",
+    runId: 735533,
     attackedServerId: "rd",
     phase: "encounter_ice",
     position: { kind: "ice", serverId: "rd", iceIndex: 0 },

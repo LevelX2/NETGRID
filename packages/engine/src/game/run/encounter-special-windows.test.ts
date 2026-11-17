@@ -112,7 +112,7 @@ function makeState(): GameState {
       }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -157,7 +157,7 @@ describe("encounter special windows boundary", () => {
     expect(start).toMatchObject({ handled: true, suspended: true });
     expect(state.pendingChoice).toMatchObject({
       choiceId:
-        "card_implementation.secret_spend_compare:run_1:ice_current:2.corp.10",
+        "card_implementation.secret_spend_compare:1:ice_current:2.corp.10",
       side: "corp",
       kind: "bid_amount",
       visibility: "hidden_info_barrier",
@@ -179,7 +179,7 @@ describe("encounter special windows boundary", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "card_implementation.secret_spend_compare:run_1:ice_current:2",
+      source: "card_implementation.secret_spend_compare:1:ice_current:2",
       visibility: "hidden_info_barrier",
     });
     expect(legalAction.payload).not.toHaveProperty("secretSpendCorp");
@@ -237,7 +237,7 @@ describe("encounter special windows boundary", () => {
       repositionIndex: 2,
     });
     expect(purposes).toEqual([
-      "rewind_run_to_rezzed_ice_by_die.run_1.ice_current",
+      "rewind_run_to_rezzed_ice_by_die.1.ice_current",
     ]);
     expect(state.run?.vacuumLinkRewindChoice).toMatchObject({
       rezzedIceBack: 2,

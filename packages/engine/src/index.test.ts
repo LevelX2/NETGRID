@@ -1286,7 +1286,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     serverId: ServerId = "rd",
   ): GameState {
     state.run = {
-      runId: `pro009_run_${state.stateVersion}`,
+      runId: state.stateVersion + 1,
       attackedServerId: serverId as Exclude<ServerId, "new_remote">,
       phase: "encounter_ice",
       position: {

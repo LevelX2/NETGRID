@@ -1,3 +1,4 @@
+import { isRunId } from "@netgrid/shared";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
@@ -379,7 +380,7 @@ export function runnerRunExposeViewingBinding(
     !rootPlanInstanceId ||
     input.side !== "runner" ||
     !run ||
-    typeof run.runId !== "string" ||
+    !isRunId(run.runId) ||
     run.phase !== "approach_ice" ||
     input.playerView.timingPoint !== "run.approach_ice" ||
     !actionMatchesCurrentDecision(input, finish) ||

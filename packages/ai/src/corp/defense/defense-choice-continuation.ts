@@ -1,3 +1,4 @@
+import { isRunId } from "@netgrid/shared";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
@@ -124,8 +125,8 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
   const reactiveRunStartEvent = currentEventTail.find((event) => {
     if (event.publicPayload?.actor !== "runner") return false;
     if (
-      typeof activeRunId !== "string" ||
-      activeRunId !== `run_${event.stateVersionAfter}`
+      !isRunId(activeRunId) ||
+      activeRunId !== event.stateVersionAfter
     ) {
       return false;
     }

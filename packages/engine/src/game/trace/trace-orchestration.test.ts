@@ -516,7 +516,7 @@ describe("trace orchestration", () => {
       },
       runnerPrograms: [programId],
     });
-    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.run = { runId: 1, attackedServerId: "rd" } as any;
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
       traceValue: 3,
@@ -809,7 +809,7 @@ describe("trace orchestration", () => {
       postBidLinkBonus: 0,
       postBidLinkSourceIds: [],
     });
-    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.run = { runId: 1, attackedServerId: "rd" } as any;
     state.pendingChoice = {
       choiceId: "trace_1.post_bid_link.2",
       side: "runner",
@@ -880,7 +880,7 @@ describe("trace orchestration", () => {
     state.trace = activeTrace(sourceId, sourceDefinition.id, "base_link", {
       traceValue: 4,
     });
-    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.run = { runId: 1, attackedServerId: "rd" } as any;
     state.pendingChoice = {
       choiceId: "trace_1.base_link.2",
       side: "runner",

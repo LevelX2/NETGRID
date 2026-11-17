@@ -79,7 +79,7 @@ describe("win conditions", () => {
       visibility: "public",
     };
     state.run = {
-      runId: "arch_62_run",
+      runId: 699176,
       attackedServerId: "hq",
       phase: "approach_ice",
       position: { kind: "server", serverId: "hq" },

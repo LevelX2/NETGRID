@@ -121,7 +121,7 @@ function makeState(
       ),
     },
     run: {
-      runId: "run_8",
+      runId: 8,
       attackedServerId: "hq",
       phase: options.phase ?? "encounter_ice",
       position:

@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
@@ -64,9 +65,9 @@ export function resolvePlanBoundRunnerRunStartOrderChoice(
   const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
   const [requirement] = action?.choiceRequirements ?? [];
   const optionIds = choice.options.map((option) => option.id);
-  const sourceRunId = /^runner_run_start\.order:([^:\s]+)$/.exec(
-    choice.source,
-  )?.[1];
+  const sourceRunId = parseRunIdToken(
+    /^runner_run_start\.order:([^:\s]+)$/.exec(choice.source)?.[1],
+  );
   const originIsRunStartOrder =
     origin?.immediateChoicePolicy === "resolve_runner_run_start_order";
   const continuationEvents = (context.input.eventTail ?? []).filter(

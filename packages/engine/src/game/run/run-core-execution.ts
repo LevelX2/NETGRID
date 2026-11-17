@@ -126,7 +126,7 @@ export function startRun(
   state.phase = "run";
   state.activeSide = "runner";
   state.run = {
-    runId: `run_${state.stateVersion + 1}`,
+    runId: state.stateVersion + 1,
     ...(flags.currentRunnerActionOrdinal
       ? { runnerActionOrdinal: flags.currentRunnerActionOrdinal }
       : {}),

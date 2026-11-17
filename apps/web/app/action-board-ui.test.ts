@@ -1025,7 +1025,7 @@ describe("V1.0.5 action board UI helpers", () => {
       runWindowActionButtonLabel(
         view("runner", {
           run: {
-            runId: "run_payment_support",
+            runId: 3,
             attackedServerId: "hq",
             phase: "encounter_ice",
             successful: false,
@@ -1457,7 +1457,7 @@ describe("V1.0.5 action board UI helpers", () => {
       phase: "run",
       timingPoint: "run.approach_ice",
       run: {
-        runId: "run_7",
+        runId: 7,
         attackedServerId: "rd",
         phase: "approach_ice",
         position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -1515,7 +1515,7 @@ describe("V1.0.5 action board UI helpers", () => {
     const running = view("corp", {
       phase: "run",
       run: {
-        runId: "run_8",
+        runId: 8,
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "server", serverId: "hq" },
@@ -2760,7 +2760,7 @@ describe("V1.0.5 action board UI helpers", () => {
       phase: "run",
       timingPoint: "run.jack_out_window",
       run: {
-        runId: "run_9",
+        runId: 9,
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },

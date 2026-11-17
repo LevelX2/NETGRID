@@ -177,6 +177,16 @@ export function isCardDefinitionId(value: unknown): value is CardDefinitionId {
 }
 
 export type CardInstanceId = string;
+export type RunId = number;
+
+export function isRunId(value: unknown): value is RunId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
+export function parseRunIdToken(value: string | undefined): RunId | undefined {
+  const id = Number(value);
+  return isRunId(id) && String(id) === value ? id : undefined;
+}
 export type FixedPlayCostDefinition = {
   kind: "fixed";
   credits: number;
@@ -565,7 +575,7 @@ export type ResolvedGameEffect = {
   cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;
   /** Public binding for a run started inside another action or choice. */
-  runId?: string;
+  runId?: RunId;
   /** Actual access destination; serverId remains the attacked server. */
   accessServerId?: Exclude<ServerId, "new_remote">;
   serverId?: ServerId;
@@ -1535,7 +1545,7 @@ export type MultiServerSuccessSequenceState = {
 };
 
 export type RunState = {
-  runId: string;
+  runId: RunId;
   /** Continuous runner action ordinal that initiated this run, if any. */
   runnerActionOrdinal?: number;
   attackedServerId: Exclude<ServerId, "new_remote">;
@@ -2207,12 +2217,12 @@ export type PendingAddTagContinuation =
     }
   | {
       kind: "successful_run_access_replacement";
-      runId: string;
+      runId: RunId;
       runnerTagsBefore: number;
     }
   | {
       kind: "run_end_cleanup";
-      runId: string;
+      runId: RunId;
       successful: boolean;
       runnerTagsBefore: number;
     }
@@ -2311,7 +2321,7 @@ export type GameState = {
     targetHardwareId?: CardInstanceId;
   };
   pendingRunStartDamageContinuation?: {
-    runId: string;
+    runId: RunId;
     counterEffectIndex: number;
     nextCounterOrdinal: number;
     counterCount: number;
@@ -2341,7 +2351,7 @@ export type GameState = {
     continuation?: CardCreditGainContinuation;
   };
   pendingRunStartSourceOrder?: {
-    runId: string;
+    runId: RunId;
     remaining: Array<{
       kind: "card_implementation" | "random_strength";
       sourceCardId: CardInstanceId;
@@ -2352,11 +2362,11 @@ export type GameState = {
     sourceCardId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     targetCardId: CardInstanceId;
-    runId: string;
+    runId: RunId;
     amount: number;
   };
   pendingRunEndTrashContinuation?: {
-    runId: string;
+    runId: RunId;
     deferActionDebtConsumption: boolean;
     remainingSourceCardIds: CardInstanceId[];
     activeSourceCardId?: CardInstanceId;
@@ -2478,7 +2488,7 @@ export type GameState = {
   }>;
   secretSpendComparison?: {
     source: "secret_spend_compare";
-    runId: string;
+    runId: RunId;
     sourceIceId: CardInstanceId;
     subroutineIndex: number;
     corpSpend?: number;
@@ -2764,7 +2774,7 @@ export type CorpRootRezDiscountedIceQuote = {
   sourceCardInstanceId: CardInstanceId;
   targetServerId: Exclude<ServerId, "new_remote">;
   targetIceInstanceId: CardInstanceId;
-  runId: string;
+  runId: RunId;
   stateVersion: number;
   ordinaryCredits: number;
   discountedCredits: number;
@@ -2809,7 +2819,7 @@ export const RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION =
 /** Runner-private binding of a mandatory, currently active run replacement. */
 export type RunnerSuccessfulRunFortIceTrashQuote = {
   schemaVersion: typeof RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION;
-  runId: string;
+  runId: RunId;
   stateVersion: number;
   serverId: Exclude<ServerId, "new_remote">;
   sourceCardInstanceId: CardInstanceId;
@@ -3452,7 +3462,7 @@ export type VisibleCorpIcePostRezRunQuote =
       effectiveRunQuote: VisibleEffectiveIceRunQuote;
       /** Fixed inner-ICE continuation after this run's outer bypass soak. */
       bypassContinuation?: {
-        runId: string;
+        runId: RunId;
         outerIceId: CardInstanceId;
         rezCredits: number;
       };
@@ -3689,7 +3699,7 @@ export type VisibleCorpTraceIceRezQuote = {
   sourceCardInstanceId: CardInstanceId;
   targetServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
-  runId: string;
+  runId: RunId;
   rezCredits: number;
   variableValue?: number;
   corpBid: 0;
@@ -3704,7 +3714,7 @@ export type VisibleCorpPassTaxRezQuote = {
   sourceCardInstanceId: CardInstanceId;
   targetServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
-  runId: string;
+  runId: RunId;
   rezCredits: number;
   creditsPerPass: number;
   remainingPasses: number;
@@ -4280,7 +4290,7 @@ export type VisibleTraceState = {
   runnerBidCommitted: boolean;
   /** Corp-only current choice whose fixed run lock defeats every visible response. */
   currentRunLockBidQuote?: {
-    runId: string;
+    runId: RunId;
     stateVersion: number;
     actionId: string;
     choiceId: string;
@@ -4402,7 +4412,7 @@ export type PlayerView = {
   /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
   corpPunishRouteQuoteSet?: CorpPunishRouteQuoteSet;
   run?: {
-    runId?: string;
+    runId?: RunId;
     /** Public Engine fact; a run opportunity, not a guarantee of legality or access. */
     followupRunOpportunity?: "after_run" | "after_successful_run";
     /** Remaining runs of public event sequences, independent of run success. */

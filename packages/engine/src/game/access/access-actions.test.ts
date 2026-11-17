@@ -116,11 +116,11 @@ function makeHost(
     run:
       overrides.accessedCardId === undefined && !overrides.breach
         ? {
-            runId: "run_1",
+            runId: 1,
             attackedServerId: serverId,
           }
         : {
-            runId: "run_1",
+            runId: 1,
             attackedServerId: serverId,
             ...(accessedCardId ? { accessedCardId } : {}),
             ...(overrides.breach ? { breach: overrides.breach } : {}),
@@ -385,7 +385,7 @@ describe("access action generation", () => {
       serverId: "hq",
       purgeableCorpCounters: { crumble: 2 },
       breach: {
-        breachId: "run_1.breach",
+        breachId: "1.breach",
         serverId: "hq",
         accessMode: "single",
         completed: false,

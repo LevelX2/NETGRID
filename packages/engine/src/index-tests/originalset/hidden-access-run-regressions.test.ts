@@ -1183,8 +1183,8 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
 
   it("keeps Vacuum Link and Pacifica Regional AI deterministic and revalidated", () => {
     for (const scenario of [
-      { seed: "spotcheck-vacuum-0", die: 1, rewind: true },
-      { seed: "spotcheck-vacuum-2", die: 4, rewind: false },
+      { seed: "spotcheck-vacuum-3", die: 1, rewind: true },
+      { seed: "spotcheck-vacuum-1", die: 4, rewind: false },
     ] as const) {
       let state = toRunnerTurn(v190CardReleaseGame(scenario.seed));
       state.runner.credits = 40;

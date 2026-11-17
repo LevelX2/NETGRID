@@ -157,7 +157,7 @@ describe("damage core", () => {
     state.runnerTurnFlags = {
       runnerActionOrdinal: 7,
     } as NonNullable<GameState["runnerTurnFlags"]>;
-    state.run = { runId: "bonus_run", attackedServerId: "rd" } as any;
+    state.run = { runId: 857038, attackedServerId: "rd" } as any;
 
     doDamage(state, {
       damageId: "bonus_run_damage",
@@ -182,7 +182,7 @@ describe("damage core", () => {
       runnerActionOrdinal: 7,
     } as NonNullable<GameState["runnerTurnFlags"]>;
     state.run = {
-      runId: "action_run",
+      runId: 898613,
       attackedServerId: "rd",
       runnerActionOrdinal: 7,
     } as any;
@@ -221,7 +221,7 @@ describe("damage core", () => {
 
   it("keeps flatline timing and state markers stable", () => {
     const state = minimalState({ cardInstances: {}, runnerGrip: [] });
-    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.run = { runId: 1, attackedServerId: "rd" } as any;
     configureDamageCoreHost(testHost());
 
     const summary = doDamage(state, {
@@ -469,7 +469,7 @@ describe("damage core", () => {
       runnerGrip: gripCardIds,
     });
     state.run = {
-      runId: "weefle_run",
+      runId: 236827,
       attackedServerId: "rd",
       damagePreventionPool: {
         sourceDefinitionId: 185,

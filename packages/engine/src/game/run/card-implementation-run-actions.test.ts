@@ -55,7 +55,7 @@ function makeState(options: { activeRun?: boolean } = {}): GameState {
       ? {}
       : {
           run: {
-            runId: "run_1",
+            runId: 1,
             attackedServerId: "rd",
             phase: "encounter_ice",
             position: { kind: "ice", serverId: "rd", iceIndex: 0 },

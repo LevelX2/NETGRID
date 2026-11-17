@@ -1,3 +1,4 @@
+import { isRunId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 // Read-only Game invariant validation. This module does not execute actions,
 // mutate state, or build PublicPayloads.
@@ -307,6 +308,8 @@ export function validateGameState(state: GameState): ValidationResult {
     );
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes))
     errors.push("Run resolved subroutine index list is missing.");
+  if (state.run && !isRunId(state.run.runId))
+    errors.push("Run id must be a positive safe integer.");
   if (state.run?.remainderStrengthBonusByBreaker) {
     for (const [breakerId, amount] of Object.entries(
       state.run.remainderStrengthBonusByBreaker,

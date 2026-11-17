@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -283,7 +284,7 @@ export function createPendingChoiceRuntimeHosts(
         throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
       const [, runId = "", sourceCardId = "", serverId = ""] =
         choice.source.split(":");
-      if (run.runId !== runId || run.attackedServerId !== serverId)
+      if (run.runId !== parseRunIdToken(runId) || run.attackedServerId !== serverId)
         throw new Error("Die Spend-Cap-Choice passt nicht mehr zum Run.");
       const selected =
         deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
@@ -492,7 +493,7 @@ export function createPendingChoiceRuntimeHosts(
       if (!run) throw new Error("Es laeuft kein Run fuer Fort-Reorder.");
       const [, runId = "", sourceCardId = "", serverId = ""] =
         choice.source.split(":");
-      if (run.runId !== runId || run.attackedServerId !== serverId)
+      if (run.runId !== parseRunIdToken(runId) || run.attackedServerId !== serverId)
         throw new Error("Die Reorder-Choice passt nicht mehr zum Run.");
       const selectedIds = selectedChoiceCardIds(choice, playerAction);
       const server = deps.mustServer(state, serverId);

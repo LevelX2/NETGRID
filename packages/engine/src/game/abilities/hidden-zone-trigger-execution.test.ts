@@ -44,7 +44,7 @@ describe("hidden zone trigger execution", () => {
     const resourceId = "stack_resource" as CardInstanceId;
     const state = baseState();
     state.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       successfulRunAbilityUsedSourceIds: [],
     } as any;
@@ -101,7 +101,7 @@ describe("hidden zone trigger execution", () => {
     const state = baseState();
     state.randomCounter = 4;
     state.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       successfulRunAbilityUsedSourceIds: [],
     } as any;
@@ -135,7 +135,7 @@ describe("hidden zone trigger execution", () => {
 
     expect(state.pendingChoice).toBeUndefined();
     expect(shuffledPurposes).toEqual([
-      `v1915.revealed_stack_program_install.shuffle.no_program.${sourceId}.run_1`,
+      `v1915.revealed_stack_program_install.shuffle.no_program.${sourceId}.1`,
     ]);
     expect(action.payload).toMatchObject({
       programFound: false,

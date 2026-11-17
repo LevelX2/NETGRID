@@ -193,7 +193,7 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
     state.phase = "run";
     state.timingPoint = "access.resolve_card";
     state.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: serverId,
       phase: "access",
       position: { kind: "server", serverId },

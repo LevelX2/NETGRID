@@ -1,3 +1,4 @@
+import { isRunId } from "@netgrid/shared";
 import { createHash, randomBytes } from "node:crypto";
 import {
   closeSync,
@@ -43,7 +44,7 @@ import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
 import { preserveStoppedSqliteTarget } from "./storage-restore-snapshot";
 import { isStateSnapshotId, type StateSnapshotId } from "./state-snapshot-id";
 
-export const SQLITE_STORAGE_SCHEMA_VERSION = 6;
+export const SQLITE_STORAGE_SCHEMA_VERSION = 7;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH =
   "data/runtime/multiplayer/netgrid.sqlite";
@@ -5141,6 +5142,9 @@ function gameStateForStorage(
   if (!state) return undefined;
   const {
     eventLog: _eventLog,
+    corp: _corp,
+    runner: _runner,
+    specialZones: _specialZones,
     cardInstances,
     randomDrawRecords,
     aiTurnPlanRandomDrawRecords,
@@ -5218,6 +5222,7 @@ export function decodeStoredGameState(json: string): GameState {
     !stored ||
     typeof stored !== "object" ||
     "eventLog" in stored ||
+    (stored.run !== undefined && !isRunId(stored.run?.runId)) ||
     !Array.isArray(stored.cardZones) ||
     !Array.isArray(stored.randomPurposes) ||
     stored.randomPurposes.some(
@@ -5232,6 +5237,9 @@ export function decodeStoredGameState(json: string): GameState {
   const {
     cardInstances,
     cardZones,
+    corp: _corp,
+    runner: _runner,
+    specialZones: _specialZones,
     randomPurposes,
     randomDrawRecords,
     aiTurnPlanRandomDrawRecords,

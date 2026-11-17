@@ -226,7 +226,7 @@ function makeHost(legalAction: LegalAction) {
     },
     cardInstances,
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       accessedCardId: "trap",
     },

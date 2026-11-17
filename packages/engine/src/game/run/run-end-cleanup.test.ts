@@ -150,7 +150,7 @@ function makeHost(
     run:
       options.run ??
       ({
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },
@@ -359,7 +359,7 @@ describe("multi-server success sequence run-end cleanup", () => {
   it("continues the sequence after an unsuccessful run and remembers the failure", () => {
     const { host, state, legalAction } = makeHost({
       run: {
-        runId: "run_pirate",
+        runId: 314974,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -410,7 +410,7 @@ describe("multi-server success sequence run-end cleanup", () => {
   it("adds exactly one future action debt only after the final run when any sequence run failed", () => {
     const { host, state, legalAction } = makeHost({
       run: {
-        runId: "run_pirate_final",
+        runId: 339289,
         attackedServerId: "archives",
         phase: "movement",
         position: { kind: "server", serverId: "archives" },
@@ -450,7 +450,7 @@ describe("multi-server success sequence run-end cleanup", () => {
   it("keeps the next sequence run pending without consuming existing debt after a successful partial run", () => {
     const { host, state, legalAction } = makeHost({
       run: {
-        runId: "run_pirate",
+        runId: 314974,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -499,7 +499,7 @@ describe("run end cleanup", () => {
   it("returns run temporary credits and applies Lucidrine-style run-end core damage", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_lucidrine",
+        runId: 428980,
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },
@@ -573,7 +573,7 @@ describe("run end cleanup", () => {
   it("adds Proteus purgeable Corp-bucket counters after successful central runs", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_highlighter",
+        runId: 529758,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -610,7 +610,7 @@ describe("run end cleanup", () => {
     });
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
-      runId: "run_highlighter",
+      runId: 529758,
       serverId: "rd",
       counterType: "highlighter",
       counterDelta: 1,
@@ -622,7 +622,7 @@ describe("run end cleanup", () => {
   it("adds Cascade as a Corp-bucket counter after successful R&D runs", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_cascade",
+        runId: 192103,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -662,7 +662,7 @@ describe("run end cleanup", () => {
     });
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
-      runId: "run_cascade",
+      runId: 192103,
       serverId: "rd",
       counterType: "cascade",
       counterDelta: 1,
@@ -684,7 +684,7 @@ describe("run end cleanup", () => {
   it("adds Proteus access-trash counters after matching successful runs", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_garbage",
+        runId: 623546,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -730,7 +730,7 @@ describe("run end cleanup", () => {
   it("adds Scaldan purgeable counters after successful HQ runs", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_scaldan",
+        runId: 874571,
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "server", serverId: "hq" },
@@ -767,7 +767,7 @@ describe("run end cleanup", () => {
     });
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
-      runId: "run_scaldan",
+      runId: 874571,
       serverId: "hq",
       counterType: "scaldan",
       counterDelta: 1,
@@ -779,7 +779,7 @@ describe("run end cleanup", () => {
   it("spends Superserum-style prevention charges before adding purgeable counters", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_superserum_charges",
+        runId: 246664,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -871,7 +871,7 @@ describe("run end cleanup", () => {
   it("adds a central socket counter without automatically converting a complete set", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_pipeline",
+        runId: 578057,
         attackedServerId: "archives",
         phase: "movement",
         position: { kind: "server", serverId: "archives" },
@@ -919,7 +919,7 @@ describe("run end cleanup", () => {
     expect(fixture.state.purgeableRunnerVirusCounters?.corp?.pipe ?? 0).toBe(0);
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
-      runId: "run_pipeline",
+      runId: 578057,
       serverId: "archives",
       counterType: "socket_archives",
       counterDelta: 1,
@@ -942,7 +942,7 @@ describe("run end cleanup", () => {
   it("uses the semantic successful-run server for flags and virus triggers", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_shredder_pipeline",
+        runId: 379669,
         attackedServerId: "archives",
         successfulRunServerOverride: "hq",
         phase: "movement",
@@ -996,7 +996,7 @@ describe("run end cleanup", () => {
   it("removes Garbage counters once at run end after one or more free trashes", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_garbage",
+        runId: 623546,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -1025,7 +1025,7 @@ describe("run end cleanup", () => {
   it("derezzes Olivia Salazar temporary rezzed ICE at run end", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_olivia",
+        runId: 707261,
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },
@@ -1051,7 +1051,7 @@ describe("run end cleanup", () => {
   it("applies Dupré run-end counters and resets fort binding on fort change", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_dupre",
+        runId: 742965,
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },
@@ -1081,7 +1081,7 @@ describe("run end cleanup", () => {
   it("does not award a fort-bound breaker counter after pump-only use", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_dupre_pump_only",
+        runId: 734383,
         attackedServerId: "remote_1",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
@@ -1114,7 +1114,7 @@ describe("run end cleanup", () => {
         ),
       },
       run: {
-        runId: "run_dupre_multi",
+        runId: 190055,
         attackedServerId: "remote_1",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
@@ -1138,7 +1138,7 @@ describe("run end cleanup", () => {
   it("records Dupré usage during the run and resolves Pattel's Virus choices through stable pending-choice fields", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_dupre_record",
+        runId: 419019,
         attackedServerId: "remote_1",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
@@ -1272,7 +1272,7 @@ describe("run end cleanup", () => {
   it("records and trashes Rent-I-Con-style breakers used during the run", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_rent",
+        runId: 836004,
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },
@@ -1315,7 +1315,7 @@ describe("run end cleanup", () => {
     let trashResolutionCalls = 0;
     const fixture = makeHost({
       run: {
-        runId: "run_rent_twice",
+        runId: 436879,
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },
@@ -1431,7 +1431,7 @@ describe("run end cleanup", () => {
 
   it("clears encounter temporary trace credits with the existing payload fields", () => {
     const run = {
-      runId: "run_trace",
+      runId: 773228,
       attackedServerId: "remote_1",
       encounterTemporaryTraceCredits: {
         remaining: 2,
@@ -1453,7 +1453,7 @@ describe("run end cleanup", () => {
     "rejects invalid encounter temporary trace credit remainder %s before cleanup mutation",
     (remaining) => {
       const run = {
-        runId: "run_trace",
+        runId: 773228,
         attackedServerId: "remote_1",
         encounterTemporaryTraceCredits: {
           remaining,

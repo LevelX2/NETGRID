@@ -85,7 +85,7 @@ describe("card-implementation-ability-limits", () => {
   it("uses run and trace lifecycle state for matching limit scopes", () => {
     const current = state();
     current.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "hq",
       phase: "access",
       position: { kind: "server", serverId: "hq" },

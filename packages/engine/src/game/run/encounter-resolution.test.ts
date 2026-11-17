@@ -94,7 +94,7 @@ function makeState(): GameState {
       }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -407,7 +407,7 @@ describe("encounter resolution boundary", () => {
     expect(result).toMatchObject({ handled: true, stateChanged: true });
     expect(dealt).toEqual([
       {
-        damageId: "run_1.ice_1.post_encounter_net_damage",
+        damageId: "1.ice_1.post_encounter_net_damage",
         damageType: "net",
         amount: 3,
         source: "subroutine:454:next_encounter",

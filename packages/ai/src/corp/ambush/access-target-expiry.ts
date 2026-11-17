@@ -1,8 +1,10 @@
+import type { RunId } from "@netgrid/shared";
+import { isRunId } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
 
 export type CorpAccessTargetExpiry = {
-  runId: string;
+  runId: RunId;
   targetProgramInstanceIds: string[];
 };
 
@@ -50,8 +52,7 @@ export function accessStrengthTargetsExpireBeforeNextEncounter(
     input.side !== "corp" ||
     input.playerView.timingPoint !== "access.resolve_card" ||
     run?.phase !== "access" ||
-    typeof run.runId !== "string" ||
-    run.runId.length === 0 ||
+    !isRunId(run.runId) ||
     run.successful !== true ||
     run.breach?.remainingCount !== 0 ||
     !run.runEndTrashUsedBreakerIdsThisRun?.length

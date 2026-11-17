@@ -105,7 +105,7 @@ function makeState(
       [inner]: instance(inner, 1420618623, { rezzed: false }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: options.phase ?? "encounter_ice",
       position,

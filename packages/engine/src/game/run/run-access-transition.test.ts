@@ -121,7 +121,7 @@ function makeHost(
     run:
       options.run ??
       ({
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -253,7 +253,7 @@ describe("run access transition", () => {
   it("names successful-run HQ ICE choices and exposes their credit cost", () => {
     const fixture = makeHost({ corpCredits: 5 });
     fixture.state.run = {
-      runId: "run_dreff",
+      runId: 510288,
       attackedServerId: "remote_1",
       phase: "movement",
       position: { kind: "server", serverId: "remote_1" },
@@ -321,7 +321,7 @@ describe("run access transition", () => {
   it("opens the HQ expose hook once when the authoritative breach starts", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_hq",
+        runId: 709564,
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "server", serverId: "hq" },
@@ -342,7 +342,7 @@ describe("run access transition", () => {
     expect(fixture.hqExposeCalls).toEqual(["hq"]);
     expect(legalAction.payload).toMatchObject({
       serverId: "hq",
-      breachId: "run_hq.breach",
+      breachId: "709564.breach",
       effectiveAccessCount: 1,
     });
   });
@@ -351,7 +351,7 @@ describe("run access transition", () => {
     const fixture = makeHost({
       corpCredits: 4,
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "server", serverId: "hq" },
@@ -393,7 +393,7 @@ describe("run access transition", () => {
       corpCredits: 5,
       runnerCredits: 6,
       run: {
-        runId: "run_priority",
+        runId: 619959,
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "server", serverId: "hq" },
@@ -442,7 +442,7 @@ describe("run access transition", () => {
   it("applies Archives face-up to R&D replacement with stable payload", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_archives",
+        runId: 335396,
         attackedServerId: "archives",
         phase: "movement",
         position: { kind: "server", serverId: "archives" },

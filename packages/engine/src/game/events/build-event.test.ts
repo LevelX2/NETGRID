@@ -55,7 +55,7 @@ describe("game event builder", () => {
       });
       const next = nextState(previous);
       next.run = {
-        runId: "run_public",
+        runId: 441226,
         attackedServerId: "hq",
         accessServerOverride: "rd",
         phase: "access",
@@ -90,11 +90,11 @@ describe("game event builder", () => {
       else {
         expect(event.publicPayload.resolvedEffects).toEqual([
           {
-            effectId: "run_public.start",
+            effectId: "441226.start",
             kind: "start_run",
             visibility: "public",
             side: "runner",
-            runId: "run_public",
+            runId: 441226,
             serverId: "hq",
             accessServerId: "rd",
           },

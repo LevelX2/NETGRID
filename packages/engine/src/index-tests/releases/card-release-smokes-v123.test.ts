@@ -1584,7 +1584,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.timingPoint = "access.resolve_card";
     state.activeSide = "runner";
     state.run = {
-      runId: "p359_i_spy_run",
+      runId: 811657,
       attackedServerId: "remote_1",
       phase: "access",
       position: { kind: "server", serverId: "remote_1" },

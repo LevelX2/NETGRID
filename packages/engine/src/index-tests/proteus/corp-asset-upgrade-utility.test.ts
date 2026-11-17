@@ -1123,7 +1123,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     state.corp.credits = 4;
     state.run = {
-      runId: "raymond_orphan_pool",
+      runId: 922087,
       attackedServerId: "hq",
       phase: "movement",
       position: { kind: "server", serverId: "hq" },

@@ -1,3 +1,4 @@
+import { parseRunIdToken, type RunId } from "@netgrid/shared";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import { parseCardDefinitionId } from "../../card-definition-id-input";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
@@ -77,7 +78,7 @@ export function selectedCorpClassicDeflectorOptionId(
   const creditCost = Number(sourceParts[7]);
   let decoded:
     | {
-        runId: string;
+        runId: RunId;
         sourceIceInstanceId: string;
         sourceDefinitionId: number;
         subroutineId: string;
@@ -95,9 +96,10 @@ export function selectedCorpClassicDeflectorOptionId(
       const sourceDefinitionId = parseCardDefinitionId(
         decodeURIComponent(sourceParts[4]),
       );
-      if (sourceDefinitionId !== undefined) {
+      const runId = parseRunIdToken(decodeURIComponent(sourceParts[1]));
+      if (sourceDefinitionId !== undefined && runId !== undefined) {
         decoded = {
-          runId: decodeURIComponent(sourceParts[1]),
+          runId,
           sourceIceInstanceId: decodeURIComponent(sourceParts[2]),
           sourceDefinitionId,
           subroutineId: decodeURIComponent(sourceParts[5]),

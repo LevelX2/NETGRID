@@ -671,7 +671,7 @@ export function runnerFutureEncounterDamageJackOutAssessment(
       // Engine run-core-execution binds every run origin, including events
       // and abilities, to the state version of its creating action. The
       // action type alone cannot delimit an event-started run's effects.
-      input.playerView.run?.runId === `run_${event.stateVersionAfter}`,
+      input.playerView.run?.runId === event.stateVersionAfter,
   );
   const triggerEvent = futureEncounterDamageTrigger(
     history,

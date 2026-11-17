@@ -3068,7 +3068,7 @@
     },
     "turnSerial": 1,
     "run": {
-      "runId": "run_10",
+      "runId": 10,
       "runnerActionOrdinal": 3,
       "attackedServerId": "rd",
       "phase": "approach_ice",
@@ -3431,7 +3431,7 @@
           "removedFromGameCount": 0
         },
         "run": {
-          "runId": "run_10",
+          "runId": 10,
           "attackedServerId": "rd",
           "phase": "approach_ice",
           "position": {

@@ -188,7 +188,7 @@ export function summarizeRunnerReserveAfterRuns(
 ) {
   const finalSamples = summaries.flatMap((summary) => {
     const samplesByRun = new Map<
-      string,
+      number,
       AiSimulationSummary["actionSequence"][number]
     >();
     for (const entry of summary.actionSequence) {

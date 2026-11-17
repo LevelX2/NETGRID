@@ -1,11 +1,13 @@
 import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import {
+  parseRunIdToken,
   type CardDefinition,
   type CardInstanceId,
   type CorpServer,
   type GameState,
   type LegalAction,
   type PlayerAction,
+  type RunId,
   type ServerId,
   type SubroutineDefinition,
 } from "@netgrid/shared";
@@ -26,7 +28,7 @@ type SourceMetadata = {
   subroutineId: string;
 };
 type ClassicDeflectorChoiceContext = {
-  runId: string;
+  runId: RunId;
   sourceIceId: CardInstanceId;
   subroutineIndex: number;
   sourceDefinitionId: number;
@@ -36,7 +38,7 @@ type ClassicDeflectorChoiceContext = {
   autoBreakIfNoTarget: boolean;
 };
 type TrashProgramChoiceContext = {
-  runId: string;
+  continuationId: RunId | string;
   sourceIceId: CardInstanceId;
   subroutineIndex: number;
   sourceDefinitionId: number;
@@ -774,6 +776,8 @@ function parseClassicDeflectorChoiceSource(
     throw new Error("Deflector-Choice-Quelle ist ungueltig.");
   const subroutineIndex = Number(indexRaw);
   const cost = Number(costRaw ?? "0");
+  const runId = parseRunIdToken(decodeURIComponent(encodedRunId));
+  if (runId === undefined) throw new Error("Deflector-Runbindung ist ungültig.");
   const sourceDefinitionId = parseCardDefinitionIdToken(
     decodeURIComponent(encodedSourceDefinitionId),
   );
@@ -784,7 +788,7 @@ function parseClassicDeflectorChoiceSource(
   if (!Number.isInteger(cost) || cost < 0)
     throw new Error("Deflector-Kosten sind ungueltig.");
   return {
-    runId: decodeURIComponent(encodedRunId),
+    runId,
     sourceIceId: decodeURIComponent(encodedSourceIceId) as CardInstanceId,
     subroutineIndex,
     sourceDefinitionId,
@@ -913,14 +917,14 @@ export function resolveTrashProgramChoice(
   if (context.continuation === "encounter") {
     const run = mustRun(host.state);
     if (
-      run.runId !== context.runId ||
+      run.runId !== context.continuationId ||
       run.encounteredIceId !== context.sourceIceId
     )
       throw new Error(
         "Die Programmtrash-Choice passt nicht mehr zum Encounter.",
       );
   } else if (
-    host.state.trace?.traceId !== context.runId ||
+    host.state.trace?.traceId !== context.continuationId ||
     host.state.trace.sourceCardInstanceId !== context.sourceIceId
   ) {
     throw new Error("Die Programmtrash-Choice passt nicht mehr zum Trace.");
@@ -1057,7 +1061,7 @@ function startTrashProgramChoice(
     choiceId,
     side: "corp",
     source: trashProgramChoiceSource({
-      runId: continuationId,
+      continuationId,
       sourceIceId,
       subroutineIndex: input.subroutineIndex,
       sourceDefinitionId: input.definition.id,
@@ -1092,7 +1096,7 @@ function startTrashProgramChoice(
 function trashProgramChoiceSource(context: TrashProgramChoiceContext): string {
   return [
     TRASH_PROGRAM_CHOICE_SOURCE_PREFIX,
-    encodeURIComponent(context.runId),
+    encodeURIComponent(context.continuationId),
     encodeURIComponent(context.sourceIceId),
     context.subroutineIndex,
     encodeURIComponent(context.sourceDefinitionId),
@@ -1107,7 +1111,7 @@ function parseTrashProgramChoiceSource(
 ): TrashProgramChoiceContext {
   const [
     prefix,
-    runId,
+    continuationIdToken,
     sourceIceId,
     index,
     sourceDefinitionIdToken,
@@ -1142,8 +1146,13 @@ function parseTrashProgramChoiceSource(
     | "initiate_trace"
     | "trash_installed_program"
     | "trash_installed_program_unless_runner_pays";
+  const decoded = decodeURIComponent(continuationIdToken ?? "");
+  const continuationId =
+    continuation === "encounter" ? parseRunIdToken(decoded) : decoded;
+  if (continuationId === undefined || continuationId === "")
+    throw new Error("Programmtrash-Fortsetzungsbindung ist ungültig.");
   return {
-    runId: decodeURIComponent(runId ?? ""),
+    continuationId,
     sourceIceId: decodeURIComponent(sourceIceId ?? "") as CardInstanceId,
     subroutineIndex,
     sourceDefinitionId,
