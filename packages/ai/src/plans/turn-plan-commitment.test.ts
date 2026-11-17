@@ -477,6 +477,29 @@ describe("turn plan commitment", () => {
     });
   });
 
+  it("rejects a receipt from a divergent planning fingerprint at the same state version", () => {
+    const setup = scenario({ samePhase: true });
+    const commitment = createCommitment(setup);
+    const { lease } = executableLease(
+      commitment,
+      setup,
+      setup.firstAction,
+      identity(10, "safe:10"),
+    );
+    expect(
+      advanceTurnPlanCommitment(commitment, {
+        lease: { ...lease, stateIdentity: identity(10, "divergent:10") },
+        runtimeInstanceId: "runtime:a",
+        turnKey: "corp:1",
+        stateIdentityAfter: identity(11, "safe:11"),
+        outcomeCodes: ["credits:+1", "clicks:-1"],
+      }),
+    ).toMatchObject({
+      commitment: { status: "invalidated" },
+      replanReason: "commitment_contract_invalid",
+    });
+  });
+
   it("replans on a scheduled boundary, material outcome deviation or urgent interrupt", () => {
     const boundarySetup = scenario({ boundary: true });
     const boundaryCommitment = createCommitment(boundarySetup);

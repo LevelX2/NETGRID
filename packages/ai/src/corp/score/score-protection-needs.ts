@@ -5,6 +5,7 @@ import { corpFundedCentralProtectionReserve } from "../defense/corp-server-prote
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-card-facts";
 import {
   assessBestFundedCorpScoreProtection,
@@ -131,22 +132,25 @@ export function corpFundedScoreProtectionNeed(
       removalCondition: `Bind score protection need ${projectId} to visible server ${serverId}.`,
     });
   }
-  const serverIce = (server?.ice ?? []).map((ice) => ({
-    instanceId: ice.instanceId,
-    known: ice.known,
-    ...(ice.definitionId ? { definitionId: ice.definitionId } : {}),
-    ...(ice.rezzed !== undefined ? { rezzed: ice.rezzed } : {}),
-    ...(ice.strength !== undefined ? { strength: ice.strength } : {}),
-    ...(ice.subtypes ? { subtypes: ice.subtypes } : {}),
-    ...(ice.effectiveRunQuote
-      ? { effectiveRunQuote: ice.effectiveRunQuote }
-      : {}),
-    ...(ice.effectiveRezCostQuote
-      ? { effectiveRezCostQuote: ice.effectiveRezCostQuote }
-      : {}),
-  }));
+  const removesRootAssets =
+    candidate.actionType === "install_card" &&
+    input.legalActions.some(
+      (action) =>
+        action.actionId === candidate.actionId &&
+        actionMatchesCurrentDecision(input, action) &&
+        action.source === agenda.instanceId &&
+        action.payload?.serverId === serverId &&
+        action.payload.rootReplacement === "asset_to_agenda",
+    );
   const baseline = assessBestFundedCorpScoreProtection({
-    serverIce,
+    serverIce: server?.ice ?? [],
+    ...(server
+      ? {
+          serverRoot: removesRootAssets
+            ? server.root.filter((card) => card.type !== "asset")
+            : server.root,
+        }
+      : {}),
     runnerRig: input.playerView.opponent.rig ?? [],
     runnerDeckCount: input.playerView.opponent.deckCount,
     runnerSetAside: input.playerView.specialZones?.setAside ?? [],

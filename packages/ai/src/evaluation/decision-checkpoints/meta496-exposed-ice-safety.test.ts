@@ -6,6 +6,7 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { runnerExposedIceSafetyAssessment } from "../../runner/run-window/run-window-expose-viewing";
+import { runnerKnownCardPositionDiagnosticsForMetrics } from "../../simulation/runner-known-card-position-diagnostics";
 
 const read = (name: string) =>
   JSON.parse(
@@ -47,6 +48,26 @@ describe("exposed ICE safety in the selected Run window (SP-520)", () => {
         .effectivePostRezRunQuote,
     ).toBeUndefined();
   });
+  it("uses the current Engine quote for the exposed break-cost metric", () => {
+    const { input } = checkpoint();
+    input.playerView.own.rig!.push(
+      read("meta496-installed-sentry-countercase").card,
+    );
+    const projected = { ...input, ...buildAiDecisionInputDto(input) };
+    const finish = projected.legalActions.find(
+      (action) => action.payload?.approachIceExposeViewDecision === "finish",
+    )!;
+    const metrics = () =>
+      runnerKnownCardPositionDiagnosticsForMetrics(
+        projected,
+        finish,
+        projected.playerView.run?.attackedServerId,
+      );
+    expect(metrics().runCostAdjustedByKnownUnrezzedIce).toBeGreaterThan(0);
+    delete projected.playerView.run!.approachedIce!.effectivePostRezRunQuote;
+    expect(metrics().runCostAdjustedByKnownUnrezzedIce).toBeUndefined();
+  });
+
   it("keeps the native Root and executor but selects the free exit before lethal rez", () => {
     const { input, runtime } = checkpoint();
     const projected = { ...input, ...buildAiDecisionInputDto(input) };

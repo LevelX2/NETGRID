@@ -135,6 +135,21 @@ describe("Defense-owned scored-agenda free rez", () => {
     ).toBe(13);
   });
 
+  it("only ranks rez targets with payable additional agenda points after scoring", () => {
+    const { input } = fixture("free-rez-single-remote");
+    const chips = (input as AiDecisionInput).playerView.servers.flatMap(
+      (server) => server.ice,
+    );
+    for (const card of chips) {
+      if (card.effectiveRezCostQuote?.complete) {
+        card.effectiveRezCostQuote.mandatoryAdditionalCosts.agendaPoints = 20;
+      }
+    }
+    expect(
+      corpScoredAgendaFreeRezDefenseTarget(input, sourceAgendaId),
+    ).toBeUndefined();
+  });
+
   it("rejects missing central access facts instead of substituting a cost ranking", () => {
     const { input } = fixture("free-rez-central-loss");
     delete input.playerView.corpCentralAccessQuotes;

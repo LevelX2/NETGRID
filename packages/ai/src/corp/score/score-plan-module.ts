@@ -1,4 +1,5 @@
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
 import {
   assessment,
@@ -353,6 +354,8 @@ function scoreCandidates(
         return (
           signal.agendaDefinitionId !== undefined &&
           candidate.sourceDefinitionId === signal.agendaDefinitionId &&
+          (signal.agendaInstanceId === undefined ||
+            candidate.sourceCardInstanceId === signal.agendaInstanceId) &&
           (!signal.serverId ||
             candidateTargetIds(candidate).includes(signal.serverId))
         );
@@ -404,10 +407,10 @@ function scoreCandidateStepValue(
     (server) => server.id === action?.payload?.selectedServerId,
   );
   if (
-    action?.type !== "score_agenda" ||
+    !actionMatchesCurrentDecision(input, action) ||
+    action.type !== "score_agenda" ||
     action.side !== "corp" ||
     action.source !== candidate.sourceCardInstanceId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     !selectedServer ||
     effects.some(
       (effect) =>
@@ -568,6 +571,7 @@ function scoreResourceGaps(
   if (
     !protectionNeed ||
     protectionNeed.parentProjectId !== signal.projectId ||
+    protectionNeed.needId !== protectionProvider.parentNeedId ||
     protectionNeed.targetServerId !== protectionProvider.serverId ||
     protectionNeed.observedAtStateVersion !==
       context.input.playerView.stateVersion

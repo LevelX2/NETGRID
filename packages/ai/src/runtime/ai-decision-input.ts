@@ -139,7 +139,7 @@ export function buildAiDecisionInput(
     },
   );
   const playerView = getPlayerView(state, side);
-  const legalActions = getLegalActions(state, side);
+  const legalActions = playerView.legalActions;
   if (side === "corp" && playerView.pendingChoice) {
     const choice = playerView.pendingChoice;
     const resolution = legalActions.find(

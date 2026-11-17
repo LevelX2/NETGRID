@@ -109,26 +109,6 @@ export function planSafeRunExclusionEvidence(
   );
 }
 
-function witnessedRunRouteExists(
-  candidates: readonly ActionSemanticCandidate[],
-  evaluations: readonly RunnerRunTargetEvaluation[],
-  serverId: string,
-): boolean {
-  const serverEvaluations = evaluations.filter(
-    (evaluation) => evaluation.targetServerId === serverId,
-  );
-  if (serverEvaluations.length > 0) {
-    return serverEvaluations.some(
-      (evaluation) => evaluation.pathPassability === "reachable",
-    );
-  }
-  return candidates.some(
-    (candidate) =>
-      candidate.semanticActionType === "run.start" &&
-      candidate.runProjectionSummary?.serverId === serverId,
-  );
-}
-
 export function witnessedRunActionIds(
   candidates: readonly ActionSemanticCandidate[],
   evaluations: readonly RunnerRunTargetEvaluation[],

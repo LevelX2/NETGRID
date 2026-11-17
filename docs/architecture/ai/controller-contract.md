@@ -132,7 +132,9 @@ gemacht werden.
 `releaseAiMatchRuntime(matchId)` gibt residente Portfolios, Portfolio-
 Snapshots, Strategic Intent und Runner-Runpläne aller Seiten und Profile des
 benannten Matches frei. Die Speicher halten ihre Matchzuständigkeit als
-eigene Metadaten; die Freigabe interpretiert keine opaken Cachekeys.
+eigene Metadaten. Die Freigabe interpretiert keine opaken Cachekeys.
+Das residente Portfolio übernimmt bei einer gebundenen Entscheidungs-ID
+den vollständigen Scope vor dem Versions- und Seitensuffix.
 
 Der Server gibt dieses Gedächtnis und vorbereitete KI-Debugentscheidungen
 nach erfolgreicher terminaler Persistenz, nach Matchlöschung, nach akzeptiertem
@@ -148,8 +150,9 @@ Bei Engine-Zufall bindet die ausstehende Lease den ausgegebenen Quote.
 Das aktorprivate Receipt bestätigt die gezogene Variante aus genau dieser
 Kandidatenmenge. Ein bestätigter Zufallsschritt bildet eine Beobachtungsgrenze
 für die Planung. Reguläre Aktionen schreiben das Commitment anhand des
-gebundenen Steps fort. Eine Abweichung führt zur Revalidierung am aktuellen
-Engine-Zustand.
+gebundenen Steps fort. Die Lease bindet dazu die aktuelle Zustandsversion
+und den side-sicheren Planning-Fingerprint. Eine Abweichung führt zur
+Revalidierung am aktuellen Engine-Zustand.
 
 Der Produktsimulator verwendet den in seiner `decisionId` gebundenen
 `simulationScopeId` als Owner des Prozessgedächtnisses. Nach der Deckprüfung

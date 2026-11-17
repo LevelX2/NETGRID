@@ -72,6 +72,38 @@ describe("selfplayTraceFactsForDecision", () => {
     expect(JSON.stringify(facts)).not.toContain("privatePayload");
   });
 
+  it("keeps all explicit snapshot indices when a seed is requested more than once", () => {
+    const alternative = {
+      rank: 1,
+      actionId: "safe",
+      actionType: "gain_credit",
+      selected: true,
+      whyChosen: [],
+      whyNot: [],
+    };
+    const actionSequence = Array.from({ length: 4 }, () => ({
+      actionAlternatives: [alternative],
+    }));
+    retainActionAlternativesForFindingWindows(
+      [{ seed: "seed", actionSequence }],
+      [
+        {
+          summaryIndex: 0,
+          actionIndex: -1,
+          detectorIds: ["action_limit_reached"],
+        },
+      ],
+      1,
+      [
+        { seed: "seed", actionIndices: [1] },
+        { seed: "seed", actionIndices: [3] },
+      ],
+    );
+    expect(
+      actionSequence.map((entry) => entry.actionAlternatives?.length),
+    ).toEqual([undefined, 1, undefined, 1]);
+  });
+
   it("does not attach unrelated alternatives when a finding window is invalid", () => {
     const summaries = [
       {

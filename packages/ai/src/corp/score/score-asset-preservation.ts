@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
@@ -10,6 +11,7 @@ import { corpRemoteContestabilityAssessment } from "../defense/corp-remote-conte
 import { corpRezHostedCreditPayoutProfile } from "../../runtime/corp-canonical-card-facts";
 import { corpAgendaInstallHasCertifiedNearTermScoreHorizon } from "./score-project-signals";
 import { corpScorePriorityClass } from "./corp-score-priority";
+import { canonicalTurnPlanningSerialize } from "../../plans/turn-planning-contracts";
 
 /** Score owns route dominance; Economy only supplies certified current payouts. */
 export function corpAssetPreservingSameTurnScoreRoutes(
@@ -117,7 +119,8 @@ export function equivalentSameTurnScoreResources(
   return (
     left.sameTurnGuaranteed &&
     right.sameTurnGuaranteed &&
-    JSON.stringify(signature(left)) === JSON.stringify(signature(right))
+    canonicalTurnPlanningSerialize(signature(left)) ===
+      canonicalTurnPlanningSerialize(signature(right))
   );
 }
 
@@ -141,7 +144,12 @@ export function withCorpCampaignSlotRelease(
   }
   const serverId = project.serverId;
   const install = input.legalActions.find(
-    (action) => action.actionId === project.actionIds![0],
+    (action) =>
+      action.actionId === project.actionIds![0] &&
+      actionMatchesCurrentDecision(input, action) &&
+      action.type === "install_card" &&
+      action.source === project.agendaInstanceId &&
+      action.payload?.serverId === serverId,
   );
   const candidate = candidates.find(
     (entry) => entry.actionId === install?.actionId,
@@ -197,6 +205,7 @@ export function withCorpCampaignSlotRelease(
   const expectedIncome = Math.min(pool, profile.payoutCredits);
   const currentPayout = input.legalActions.find(
     (action) =>
+      actionMatchesCurrentDecision(input, action) &&
       action.type === "activated_card_ability" &&
       action.source === asset.instanceId &&
       action.payload?.hostedCreditTakeAmount === expectedIncome,

@@ -468,7 +468,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       const slice = buildSlice(
         input,
         blocked,
-        [agendaCandidate(), economyCandidate()],
+        [agendaCandidate(), economyCandidate(2)],
         [],
         [fundingNeed],
       );
@@ -481,6 +481,8 @@ describe("Corp agenda turn-planning vertical slice", () => {
           providerModuleId: "corp.economy",
           expectedNeedProgress: "net_funding_gap_reduction",
           fundingGapBefore: 4,
+          totalCreditCost: 2,
+          remainingCredits: 13,
           evaluation: expect.objectContaining({
             agendaProgress: 0,
             defense: 0,
@@ -807,21 +809,23 @@ function iceCandidate(
   });
 }
 
-function economyCandidate(): ActionSemanticCandidate {
+function economyCandidate(creditCost = 0): ActionSemanticCandidate {
+  const base = candidate({
+    actionId: "economy",
+    semanticActionType: "economy.gain_credit",
+    sourceCardInstanceId: "economy-card",
+  });
   return {
-    ...candidate({
-      actionId: "economy",
-      semanticActionType: "economy.gain_credit",
-      sourceCardInstanceId: "economy-card",
-    }),
+    ...base,
+    costProfile: { ...base.costProfile, creditCost },
     economyProjection: {
       schemaVersion: "action-economy-projection-v1",
       kind: "immediate_liquid",
       timing: "immediate",
       creditRestriction: "general",
       clickCost: 1,
-      creditCost: 0,
-      grossLiquidCreditGain: 3,
+      creditCost,
+      grossLiquidCreditGain: 3 + creditCost,
       netLiquidCreditGain: 3,
       cardsDrawn: 0,
       cardsConsumed: 1,

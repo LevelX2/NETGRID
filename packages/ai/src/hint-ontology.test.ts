@@ -674,6 +674,10 @@ describe("AI hint ontology validation", () => {
     ],
     [[{ capabilityKey: "forged", owner: "runner.unknown" }], "forged owner"],
     [
+      [{ capabilityKey: "  ", owner: "runner.resource_lifecycle" }],
+      "blank capability key",
+    ],
+    [
       [{ capabilityKey: "wrong-side", owner: "corp.score_agenda" }],
       "wrong side",
     ],

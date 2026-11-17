@@ -139,15 +139,24 @@ function bindingFailure(
 }
 
 function memoryKey(input: AiDecisionInput): string {
-  return [
+  return JSON.stringify([
     memoryContextId(input),
     input.side,
     input.profileId,
     RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
-  ].join(":");
+  ]);
 }
 
 function memoryContextId(input: AiDecisionInput): string {
-  const [decisionScope] = input.decisionId.split(":");
-  return decisionScope || input.seed;
+  // Simulation and replay may select a decision scope distinct from the match ID.
+  // Split at the decision suffix so a colon inside that scope stays significant.
+  const decisionScope = /^(.*):\d+:(?:corp|runner)(?::[^:]+)?$/.exec(
+    input.decisionId,
+  )?.[1];
+  return (
+    decisionScope ||
+    input.matchId ||
+    input.decisionId.split(":")[0] ||
+    input.seed
+  );
 }

@@ -8,6 +8,7 @@ export function runnerRecurringEconomyActionDispositions(
   protectedActionIds: ReadonlySet<string>,
 ): PlanActionDisposition[] {
   const dispositions: PlanActionDisposition[] = [];
+  const deferredActionIds = new Set<string>();
   const recurringEconomyInstallActionIds = new Set(
     signals
       .filter((signal) => signal.phase === "install")
@@ -23,12 +24,11 @@ export function runnerRecurringEconomyActionDispositions(
         // A local income deferral cannot reject another exact purpose of
         // the same hardware, such as the coverage owner's MU preparation.
         protectedActionIds.has(candidate.actionId) ||
-        dispositions.some(
-          (disposition) => disposition.actionId === candidate.actionId,
-        )
+        deferredActionIds.has(candidate.actionId)
       ) {
         continue;
       }
+      deferredActionIds.add(candidate.actionId);
       dispositions.push({
         actionId: candidate.actionId,
         disposition: "explicitly_nonproductive",

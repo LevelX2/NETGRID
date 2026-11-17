@@ -355,3 +355,55 @@ it.each(["g4-d595", "g17-d455"])(
     ).toBe(false);
   },
 );
+
+it("keeps the rezzed fort pass modifier in the score protection evidence", () => {
+  const input = fixture("g17-d455");
+  const server = input.playerView.servers.find(({ id }) => id === "remote_1")!;
+  const action = input.legalActions.find(
+    (entry) =>
+      entry.type === "install_card" &&
+      entry.source.includes("tycho-extension") &&
+      entry.payload?.serverId === server.id,
+  )!;
+  const candidate = buildActionSemanticCandidates({
+    legalActions: [action],
+    observerSide: "corp",
+    stateVersion: input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+      input.playerView,
+    ),
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  })[0]!;
+  const agenda = input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === action.source,
+  )!;
+  const assess = () =>
+    corpFundedScoreProtectionNeed(
+      input,
+      candidate,
+      agenda,
+      "score-pass-modifier",
+      server.id,
+      false,
+      false,
+    ).baseline;
+  const before = assess();
+  server.root.push({
+    instanceId: "pass-protection",
+    definitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+    type: "upgrade",
+    known: true,
+    owner: "corp",
+    controller: "corp",
+    rezzed: true,
+  });
+  const after = assess();
+  if (before.knowledge !== "known" || after.knowledge !== "known")
+    throw new Error("Expected a known comparison for the same funded fort");
+  const prior = before.protection.runnerAccessSuccessProbability;
+  const current = after.protection.runnerAccessSuccessProbability;
+  expect(current.numerator * prior.denominator).toBeLessThan(
+    prior.numerator * current.denominator,
+  );
+});

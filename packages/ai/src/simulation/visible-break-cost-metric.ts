@@ -1,40 +1,41 @@
-import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import {
-  assessKnownRezzedIcePath,
-  runnerRunPathCreditBudgetWithVisiblePools,
-} from "../visible-run-analysis";
+import type { AiDecisionInput } from "@netgrid/shared";
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
+import { runnerRunPathCreditBudgetAfterEncounter } from "../run-analysis/visible-run-credit-budget";
+import { runnerEncounterCreditBudgetForInput } from "../runtime/runner-encounter-credit-budget";
+import { assessEngineCertifiedPostRezIcePath } from "../visible-run-analysis";
 
-export function visibleBreakCostForKnownIceDefinition(
+/** Record a conditional break price only while the Engine exposes this ICE. */
+export function visibleBreakCostForExposedIce(
   input: AiDecisionInput,
-  definitionId: string,
-): number {
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-  if (!definition) return 0;
-  const assessment = assessKnownRezzedIcePath(
-    [
-      {
-        instanceId: `known_unrezzed_${definitionId}`,
-        known: true,
-        definitionId,
-        type: "ice",
-        subtypes: definition.subtypes ?? [],
-        rezzed: true,
-        strength: definition.strength,
-        subroutines: definition.subroutines ?? [],
-        owner: "corp",
-        controller: "corp",
-      } as VisibleCard,
-    ],
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    [],
-    input.playerView.opponent.credits,
-    visibleRunnerPathTraceContext(input),
+): number | undefined {
+  const run = input.playerView.run;
+  const ice = run?.approachedIce;
+  if (
+    input.side !== "runner" ||
+    run?.phase !== "approach_ice" ||
+    ice?.known !== true ||
+    ice.rezzed !== false ||
+    ice.effectivePostRezRunQuote?.complete !== true
+  )
+    return undefined;
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === run.attackedServerId,
   );
-  return assessment.visibleBreakCost ?? 0;
+  if (!server) return undefined;
+  const path = assessEngineCertifiedPostRezIcePath(
+    [ice],
+    server.id,
+    input.playerView.stateVersion,
+    new Set([ice.instanceId]),
+    input.playerView.own.rig ?? [],
+    runnerRunPathCreditBudgetAfterEncounter(
+      runnerEncounterCreditBudgetForInput(input),
+    ),
+    server.root,
+    input.playerView.opponent.credits,
+    currentRunPathContext(input),
+  );
+  if (!path.canReachAccess || path.assessedKnownIceCount !== 1)
+    return undefined;
+  return path.visibleBreakCost ?? 0;
 }

@@ -504,6 +504,7 @@ describe("Corp core plan modules", () => {
       "install_agenda",
       {
         ...cardAction("install", "install.card", "agenda-def"),
+        sourceCardInstanceId: "agenda-1",
         targetContext: targetContext("remote_1", "server"),
       },
       "agenda-def",
@@ -558,14 +559,21 @@ describe("Corp core plan modules", () => {
   it("keeps an explicitly bound score route closed to sibling action variants", () => {
     const committed = {
       ...cardAction("install-committed", "install.card", "agenda-def"),
+      sourceCardInstanceId: "agenda-1",
       targetContext: targetContext("remote_1", "server"),
     };
     const sibling = {
       ...cardAction("install-sibling", "install.card", "agenda-def"),
+      sourceCardInstanceId: "agenda-1",
       targetContext: targetContext("remote_1", "server"),
     };
     const module = corpModule("corp.score_agenda");
-    const corpContext = context([committed, sibling], {
+    const wrongCopy = {
+      ...cardAction("install-wrong-copy", "install.card", "agenda-def"),
+      sourceCardInstanceId: "agenda-2",
+      targetContext: targetContext("remote_1", "server"),
+    };
+    const corpContext = context([committed, sibling, wrongCopy], {
       scoreProjects: [
         {
           projectId: "score-1",
@@ -573,7 +581,7 @@ describe("Corp core plan modules", () => {
           agendaPoints: 2,
           agendaInstanceId: "agenda-1",
           serverId: "remote_1",
-          actionIds: ["install-committed"],
+          actionIds: ["install-committed", "install-wrong-copy"],
           phase: "install_agenda",
           sameTurnCloseout: true,
           terminalScore: false,

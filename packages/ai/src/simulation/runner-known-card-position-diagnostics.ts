@@ -8,7 +8,7 @@ import {
   definitionTypeForMetrics,
   trashCostForDefinitionForMetrics,
 } from "./card-metric-lookup";
-import { visibleBreakCostForKnownIceDefinition } from "./visible-break-cost-metric";
+import { visibleBreakCostForExposedIce } from "./visible-break-cost-metric";
 
 export function runnerKnownCardPositionDiagnosticsForMetrics(
   input: AiDecisionInput,
@@ -53,14 +53,11 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
   const targetKnownRemote = runTarget
     ? knownRemote.filter((entry) => entry.zone === runTarget)
     : [];
-  const targetKnownUnrezzedIce = runTarget
-    ? knownUnrezzedIce.filter((entry) => entry.zone === runTarget)
-    : [];
-  const runCostAdjusted = targetKnownUnrezzedIce.reduce(
-    (sum, entry) =>
-      sum + visibleBreakCostForKnownIceDefinition(input, entry.definitionId),
-    0,
-  );
+  const runCostAdjusted =
+    action.payload?.approachIceExposeViewDecision === "finish" ||
+    action.payload?.approachIceExposeJackOut === true
+      ? visibleBreakCostForExposedIce(input)
+      : undefined;
   const hqKnownFromRndDraw =
     hqMemory?.invalidationReasons.includes("known_rnd_top_moved_to_hq") ??
     false;
@@ -216,7 +213,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
           knownUnrezzedIceRetained: true,
         }
       : {}),
-    ...(runCostAdjusted > 0
+    ...(runCostAdjusted !== undefined && runCostAdjusted > 0
       ? { runCostAdjustedByKnownUnrezzedIce: runCostAdjusted }
       : {}),
     ...(action.type === "jack_out" && knownUnrezzedIce.length > 0

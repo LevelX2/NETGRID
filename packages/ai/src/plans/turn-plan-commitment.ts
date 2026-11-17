@@ -493,15 +493,11 @@ export function rematerializeCommittedTurnStep(params: {
     ]);
   }
   const lease: TurnPlanExecutionLease = {
-    leaseId: turnPlanningFingerprint("turn-plan-execution-lease", {
-      commitmentId: commitment.commitmentId,
-      phaseIndex: commitment.cursor.phaseIndex,
-      nodeIndex: commitment.cursor.nodeIndex,
-      stateIdentity: params.stateIdentity,
-      actionId: head.currentBinding.actionId,
-      invocationKey: head.invocation.invocationKey,
-      expectationId: commitment.nextExpectedTransition.expectationId,
-    }),
+    leaseId: turnPlanExecutionLeaseId(
+      commitment,
+      params.stateIdentity,
+      head.currentBinding,
+    ),
     commitmentId: commitment.commitmentId,
     sourcePlanId: commitment.sourcePlanId,
     phaseId: commitment.phases[commitment.cursor.phaseIndex]?.phaseId ?? "",
@@ -522,6 +518,22 @@ export function rematerializeCommittedTurnStep(params: {
     head: structuredClone(head),
     legalAction: structuredClone(legalAction),
   };
+}
+
+function turnPlanExecutionLeaseId(
+  commitment: TurnPlanCommitment,
+  stateIdentity: PlanningStateIdentity,
+  binding: CurrentLegalActionBinding,
+): string {
+  return turnPlanningFingerprint("turn-plan-execution-lease", {
+    commitmentId: commitment.commitmentId,
+    phaseIndex: commitment.cursor.phaseIndex,
+    nodeIndex: commitment.cursor.nodeIndex,
+    stateIdentity,
+    actionId: binding.actionId,
+    invocationKey: binding.invocationKey,
+    expectationId: commitment.nextExpectedTransition.expectationId,
+  });
 }
 
 function legalActionMatchesInvocationSource(
@@ -569,8 +581,27 @@ export function advanceTurnPlanCommitment(
   if (restart) {
     return continuationReplan(commitment, restart.reason, restart.observation);
   }
+  if (
+    commitment.status !== "active" ||
+    commitment.phaseEntry.status !== "validated"
+  ) {
+    return continuationReplan(
+      commitment,
+      "commitment_contract_invalid",
+      "commitment_invalidated",
+    );
+  }
   const node = currentCommittedNode(commitment);
   const leaseMatches =
+    receipt.lease.leaseId ===
+      turnPlanExecutionLeaseId(
+        commitment,
+        receipt.lease.stateIdentity,
+        receipt.lease.currentBinding,
+      ) &&
+    receipt.lease.actionType === node.expectation.actionType &&
+    receipt.lease.stateIdentity.sideSafePlanningFingerprint ===
+      commitment.lastValidatedStateIdentity.sideSafePlanningFingerprint &&
     receipt.lease.commitmentId === commitment.commitmentId &&
     receipt.lease.sourcePlanId === commitment.sourcePlanId &&
     receipt.lease.phaseId ===
