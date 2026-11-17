@@ -3,26 +3,26 @@
     {
       "side": "corp",
       "actionId": "corp.advance_card.c2km.c2km",
-      "beforeHash": "fnv1a:418f854f",
-      "afterHash": "fnv1a:f06aa037"
+      "beforeHash": "fnv1a:5cdd65c7",
+      "afterHash": "fnv1a:73e1460e"
     },
     {
       "side": "corp",
       "actionId": "corp.advance_card.c2km.c2km",
-      "beforeHash": "fnv1a:f06aa037",
-      "afterHash": "fnv1a:19490421"
+      "beforeHash": "fnv1a:73e1460e",
+      "afterHash": "fnv1a:a8deda1e"
     },
     {
       "side": "corp",
       "actionId": "corp.advance_card.c2km.c2km",
-      "beforeHash": "fnv1a:19490421",
-      "afterHash": "fnv1a:b20dc11f"
+      "beforeHash": "fnv1a:a8deda1e",
+      "afterHash": "fnv1a:07119f42"
     },
     {
       "side": "corp",
       "actionId": "corp.score_agenda.c2km.c2km",
-      "beforeHash": "fnv1a:b20dc11f",
-      "afterHash": "fnv1a:a7607803"
+      "beforeHash": "fnv1a:07119f42",
+      "afterHash": "fnv1a:a445c280"
     },
     {
       "side": "corp",
@@ -33,20 +33,20 @@
           "card_c2u5"
         ]
       },
-      "beforeHash": "fnv1a:a7607803",
-      "afterHash": "fnv1a:695d1285"
+      "beforeHash": "fnv1a:a445c280",
+      "afterHash": "fnv1a:4bd5cd71"
     },
     {
       "side": "corp",
       "actionId": "corp.end_turn",
-      "beforeHash": "fnv1a:695d1285",
-      "afterHash": "fnv1a:d835b55a"
+      "beforeHash": "fnv1a:4bd5cd71",
+      "afterHash": "fnv1a:35d6a668"
     }
   ],
   "scorePoints": 6,
   "credits": 0,
   "winner": null,
-  "hash": "fnv1a:d835b55a",
+  "hash": "fnv1a:35d6a668",
   "everyOriginalCommandHashMatches": true,
   "limit": "Sechs tatsächliche Originalcommands bis nach dem finanzierten zweiten Trans-Score; keine volle alternative Gewinnerpopulation.",
   "deterministicReplay": true
