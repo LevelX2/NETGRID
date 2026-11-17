@@ -4,7 +4,12 @@ import {
   deckTemplatesResponse,
   deckValidationResponse,
 } from "./deck-data";
-import type { DeckValidationResult, EditableDeck } from "@netgrid/decks";
+import type {
+  DeckSnapshot,
+  DeckValidationResult,
+  EditableDeck,
+} from "@netgrid/decks";
+import { POST } from "./validate/route";
 
 const previousTestCardSetting = process.env.NETGRID_ENABLE_TEST_CARDS;
 
@@ -15,6 +20,41 @@ afterEach(() => {
 });
 
 describe("deck test-card availability", () => {
+  it("rejects a string ID on the validation route without dropping the entry", async () => {
+    process.env.NETGRID_ENABLE_TEST_CARDS = "true";
+    const { snapshots } = deckSnapshotsResponse().body as {
+      snapshots: DeckSnapshot[];
+    };
+    const snapshot = snapshots.find((candidate) => candidate.validation.ok);
+    if (!snapshot) throw new Error("Expected a valid numeric deck snapshot");
+    const deck = { ...snapshot, deckId: snapshot.sourceDeckId };
+    const evaluate = (value: unknown) =>
+      POST(
+        new Request("http://localhost/api/decks/validate", {
+          method: "POST",
+          body: JSON.stringify({ deck: value }),
+        }),
+      );
+    const valid = await evaluate(deck);
+    expect(valid.status).toBe(200);
+    expect(await valid.json()).toMatchObject({ validation: { ok: true } });
+
+    const invalid = await evaluate({
+      ...deck,
+      cards: [
+        ...deck.cards,
+        { cardId: String(deck.cards[0]!.cardId), quantity: 1 },
+      ],
+    });
+    expect(invalid.status).toBe(400);
+    expect(await invalid.json()).toEqual({
+      error: {
+        code: "deck_invalid",
+        message: "Deck enthält eine ungültige Karten-ID.",
+      },
+    });
+  });
+
   it.each(["netgrid_private_local_v1", "unknown-profile"])(
     "transports structured validation issues through JSON for %s",
     (formatProfileId) => {

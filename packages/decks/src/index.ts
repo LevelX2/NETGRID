@@ -1,4 +1,4 @@
-import type { CardDefinitionId } from "@netgrid/shared";
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import type { CatalogCard, CatalogStatusKey } from "@netgrid/catalog";
 import {
   createDeckValidationIssue,
@@ -39,6 +39,15 @@ export type DeckCardEntry = {
   cardId: CardDefinitionId;
   quantity: number;
 };
+
+export class DeckCardIdentifierError extends Error {
+  readonly code = "deck_invalid";
+  readonly name = "DeckCardIdentifierError";
+
+  constructor() {
+    super("Deck enthält eine ungültige Karten-ID.");
+  }
+}
 
 export type DeckTableLayoutEntry = {
   cardId: CardDefinitionId;
@@ -410,15 +419,13 @@ export function importDeck(
     return { ok: false, errors: ["Deck Side ist ungültig."] };
   if (
     !deck.name ||
-    typeof deck.identityCardId !== "number" ||
-    !Number.isSafeInteger(deck.identityCardId) ||
-    deck.identityCardId < 1 ||
+    !isCardDefinitionId(deck.identityCardId) ||
     !Array.isArray(deck.cards)
   )
     return { ok: false, errors: ["Deck Pflichtfelder fehlen."] };
   if (
     deck.cards.some(
-      (entry) => !entry || !Number.isSafeInteger(entry.cardId) || entry.cardId < 1,
+      (entry) => !entry || !isCardDefinitionId(entry.cardId),
     )
   )
     return { ok: false, errors: ["Deck enthält eine ungültige Karten-ID."] };
@@ -494,6 +501,9 @@ function validateDeckLike(
   >,
   context: DeckValidationContext,
 ): DeckValidationResult {
+  if (!isCardDefinitionId(deck.identityCardId))
+    throw new DeckCardIdentifierError();
+  const cards = normalizeCards(deck.cards);
   const errors: string[] = [];
   const errorCodes: string[] = [];
   const warnings: string[] = [];
@@ -585,7 +595,7 @@ function validateDeckLike(
   let totalCards = 0;
   let agendaPoints = 0;
   let influenceSpent = 0;
-  for (const entry of normalizeCards(deck.cards)) {
+  for (const entry of cards) {
     totalCards += entry.quantity;
     const card = context.cardsById[entry.cardId];
     if (!Number.isInteger(entry.quantity) || entry.quantity <= 0)
@@ -832,10 +842,12 @@ function influenceCostForCard(
 }
 
 function normalizeCards(cards: DeckCardEntry[]): DeckCardEntry[] {
+  if (!Array.isArray(cards)) throw new DeckCardIdentifierError();
   const byId = new Map<CardDefinitionId, number>();
   for (const entry of cards) {
-    if (!Number.isSafeInteger(entry.cardId) || entry.cardId <= 0 || !Number.isFinite(entry.quantity))
-      continue;
+    if (!entry || !isCardDefinitionId(entry.cardId))
+      throw new DeckCardIdentifierError();
+    if (!Number.isFinite(entry.quantity)) continue;
     byId.set(
       entry.cardId,
       (byId.get(entry.cardId) ?? 0) + Math.floor(entry.quantity),

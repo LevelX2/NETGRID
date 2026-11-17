@@ -17,6 +17,7 @@ import {
   computeDeckHash,
   createDeckSnapshot,
   createEditableDeckFromTemplate,
+  DeckCardIdentifierError,
   exportDeck,
   importDeck,
   validateDeckSnapshot,
@@ -375,6 +376,24 @@ describe("deck validation and snapshots", () => {
     expect(imported.ok).toBe(true);
     if (!imported.ok) throw new Error("import failed");
     expect(validateEditableDeck(imported.deck, context).ok).toBe(true);
+  });
+
+  it("rejects string card IDs before normalizing an otherwise valid deck", () => {
+    const deck = createEditableDeckFromTemplate(
+      templates[0]!,
+      "2026-05-03T12:00:00.000Z",
+    );
+    expect(validateEditableDeck(deck, context).ok).toBe(true);
+    const invalidDeck = {
+      ...deck,
+      cards: [
+        ...deck.cards,
+        { cardId: String(deck.cards[0]!.cardId), quantity: 1 },
+      ],
+    };
+    expect(() =>
+      validateEditableDeck(invalidDeck as unknown as EditableDeck, context),
+    ).toThrow(DeckCardIdentifierError);
   });
 
   it("builds engine decks only from validated snapshots", () => {
