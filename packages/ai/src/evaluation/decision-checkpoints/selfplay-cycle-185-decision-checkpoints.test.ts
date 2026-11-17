@@ -1,3 +1,5 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -31,15 +33,15 @@ describe("selfplay cycle 185 decision checkpoints", () => {
 
     expect(decision).toMatchObject({
       actionId:
-        "corp.install_card.corp_406_2.remote_2.corp_406_2",
+        "corp.install_card.c2ie.r2.c2ie",
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:agenda%3Acorp_406_2%3Aremote_2",
+            "plan:corp.score_agenda:agenda%3Ac2ie%3Ar2",
           leafExecutorInstanceId:
-            "plan:corp.score_agenda:agenda%3Acorp_406_2%3Aremote_2",
+            "plan:corp.score_agenda:agenda%3Ac2ie%3Ar2",
           route: {
             actionType: "install_card",
             capabilityId: "install_score_agenda",
@@ -50,18 +52,23 @@ describe("selfplay cycle 185 decision checkpoints", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "corp_last_draw_hq_agenda_recycle_install:remote_2",
+          "corp_last_draw_hq_agenda_recycle_install:r2",
         ),
       ]),
     );
+    const definitions = visibleSourceDefinitionsByInstanceId(capture.input.playerView);
+    const war = capture.input.legalActions.find((action) =>
+      action.type === "install_card" && definitions[action.source] === 408 && action.payload?.serverId === "r2",
+    );
+    expect(war).toBeDefined();
     expect(
       decision.decisionDebug?.planFirstDecision?.dispositions.find((entry) =>
-        entry.actionId.includes("corporate-war_1.remote_2"),
+        entry.actionId === war?.actionId,
       ),
     ).toMatchObject({
       disposition: "explicitly_nonproductive",
       ownerModuleId: "corp.score_agenda",
-      evidenceCode: "corp_score_protection_required:remote_2",
+      evidenceCode: "corp_score_protection_required:r2",
     });
   });
 
@@ -76,10 +83,10 @@ describe("selfplay cycle 185 decision checkpoints", () => {
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
-    expect(decision.actionId).not.toContain("off-site-backups");
+    expect(decision.actionId).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 508));
     expect(
       decision.decisionDebug?.planFirstDecision?.dispositions.find((entry) =>
-        entry.actionId.includes("off-site-backups"),
+        referencesDefaultDeckCard(entry.actionId, 508),
       ),
     ).toMatchObject({
       disposition: "explicitly_nonproductive",

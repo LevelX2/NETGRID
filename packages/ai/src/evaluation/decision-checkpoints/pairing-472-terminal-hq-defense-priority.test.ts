@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { describe, expect, it } from "vitest";
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import {
   chooseAiAction,
   restoreResidentPlanPortfolioMemorySnapshot,
@@ -50,15 +51,12 @@ function restore(captured: CapturedCheckpoint) {
 function expectTerminalHqClosure(input: AiDecisionInput) {
   const decision = chooseAiAction(input, { persistTacticalPlanMemory: false });
   expect(decision).toMatchObject({
-    actionId: expect.stringMatching(
-      /^corp\.install_card\.corp_onr_v1_244_filter_[12]\.hq\./,
-    ),
     fallbackUsed: false,
     timeoutUsed: false,
   });
-  expect(
-    input.legalActions.some((action) => action.actionId === decision.actionId),
-  ).toBe(true);
+  const action = input.legalActions.find((a) => a.actionId === decision.actionId)!;
+  expect(action).toMatchObject({ type: "install_card", payload: { serverId: "hq" } });
+  expect(visibleSourceDefinitionsByInstanceId(input.playerView)[action.source]).toBe(456);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
     leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",

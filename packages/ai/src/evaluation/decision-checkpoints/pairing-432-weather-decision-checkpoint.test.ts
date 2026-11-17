@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { expect, it } from "vitest";
 import captureJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-432-weather-d25.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -37,8 +38,11 @@ it.each([0, 2, 9])(
     input.playerView.opponent.credits = credits;
     input.playerView.own.agendaPoints = 6;
     const e = evaluateRunnerRunTargets({ input });
-    const weather = e.find((x) => x.actionId.includes("weather-to-finance"))!;
-    const manifests = e.find((x) => x.actionId.includes("edited-shipping"))!;
+    const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
+    const weatherOffer = input.legalActions.find((a) => definitions[a.source] === 330);
+    const manifestsOffer = input.legalActions.find((a) => definitions[a.source] === 296);
+    const weather = e.find((x) => x.actionId === weatherOffer?.actionId)!;
+    const manifests = e.find((x) => x.actionId === manifestsOffer?.actionId)!;
     const basic = e.find((x) => x.actionId === "runner.start_run.hq")!;
     expect(weather.runActionProjection.accessReplacement).toBe(
       "corp_lose_credits",

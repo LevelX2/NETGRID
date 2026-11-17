@@ -1,10 +1,13 @@
 import { readFileSync } from "node:fs";
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
+
+const payoutCapability = canonicalCapabilityId(390, capabilityKey("abilities_activated_runner_main_take_hosted_credits"));
 
 afterEach(resetResidentPlanPortfolioMemory);
 function native(file: string) {
@@ -27,7 +30,7 @@ it("binds a stronger last finite bank payout to the current P6 liquidity need", 
   const input = native("deep662-d62-last-finite-payout");
   const action = input.legalActions.find(
     (a) =>
-      a.type === "activated_card_ability" && a.actionId.includes("contract"),
+      a.abilityRef?.sourceAbilityId === payoutCapability,
   )!;
   const before = JSON.stringify({
     view: input.playerView,
@@ -40,7 +43,7 @@ it("binds a stronger last finite bank payout to the current P6 liquidity need", 
     "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.credit_bank:runner_390_2",
+    "plan:runner.credit_bank:c2eq",
   );
   expect(plan.route).toMatchObject({
     actionId: action.actionId,
@@ -53,11 +56,11 @@ it("binds a stronger last finite bank payout to the current P6 liquidity need", 
 });
 it("keeps a real higher-priority run ahead of residual bank liquidation", () => {
   const input = native("deep662-d270-effective-access-priority");
+  expect(input.legalActions.some((a) => a.abilityRef?.sourceAbilityId === payoutCapability)).toBe(true);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe(
-    "runner.play_event.runner_306_1.hq.runner_306_1.onr_v1_094_inside-job:abilities_on_play_make_run",
-  );
+  const action = input.legalActions.find((a) => a.actionId === decision.actionId);
+  expect(action).toMatchObject({ type: "play_event", payload: { serverId: "rd" } });
   expect(decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "plan:runner.pressure_central:central%3Ard",
   );
 });

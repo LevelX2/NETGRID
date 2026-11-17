@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-search-payment-d321.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
@@ -29,7 +30,10 @@ it("restores the preempted coverage search before resolving its source and progr
     runtime,
   );
   const payment = chooseAiAction(input);
-  expect(payment.actionId).toContain("pay_three_trash_source_gain_six");
+  const paymentAction = input.legalActions.find((a) => a.actionId === payment.actionId);
+  expect(paymentAction?.abilityRef?.sourceAbilityId).toBe(
+    canonicalCapabilityId(210, capabilityKey("pay_three_trash_source_gain_six")),
+  );
   const continuation = chooseAiAction(nextInputs[0]!);
   expect(continuation.actionId).toBe(pending.originalActionId);
   expect(continuation.fallbackUsed).toBe(false);
@@ -49,7 +53,7 @@ it("restores the preempted coverage search before resolving its source and progr
   const target = chooseAiAction(nextInputs[2]!);
   expect(target.actionId).toBe(nextInputs[2]!.legalActions[0]!.actionId);
   expect(target.selectedChoices).toMatchObject({
-    selectedOptionIds: ["card_runner_35_2"],
+    selectedOptionIds: ["card_c7u"],
   });
   const executor = residentPlanPortfolioSnapshot(
     nextInputs[2]!,
@@ -59,15 +63,15 @@ it("restores the preempted coverage search before resolving its source and progr
     gap: {
       directSearchChoiceBindings: [
         expect.objectContaining({
-          targetCardInstanceId: "runner_35_2",
+          targetCardInstanceId: "c7u",
           installMemorySacrificeBinding: expect.objectContaining({
             requiredMemoryToFree: 2,
             selectedCards: [
               {
-                cardInstanceId: "runner_283_2",
+                cardInstanceId: "c1qy",
                 memoryCost: 1,
               },
-              { cardInstanceId: "runner_223_1", memoryCost: 1 },
+              { cardInstanceId: "c1dl", memoryCost: 1 },
             ],
           }),
         }),

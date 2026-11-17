@@ -26,8 +26,10 @@ describe("selfplay cycle 130 decision checkpoints", () => {
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
+    const shield = capture.input.playerView.own.rig?.find((card) => card.definitionId === 240);
     const prevention = capture.input.playerView.pendingChoice?.options.find(
-      (option) => option.value === 1 && option.id.includes("force-shield"),
+      (option) => option.value === 1 && option.id ===
+        `card_implementation_damage_prevent_${shield?.instanceId}_0_1__prevent_amount_1`,
     );
     if (!prevention) throw new Error("Expected the recorded Force Shield option");
     prevention.metadata = { optionKind: "prevent_damage", amount: 1 };
@@ -37,9 +39,9 @@ describe("selfplay cycle 130 decision checkpoints", () => {
       actionId: "runner.resolve_choice",
       selectedChoices: {
         choiceId:
-          "v120_choice_v120_window_imminent_damage_306_run_305.corp_446_2.0_next_100_runner",
+          "v120_choice_v120_window_imminent_damage_306_305.c2ra.0_next_100_runner",
         selectedOptionIds: [
-          "card_implementation_damage_prevent_runner_240_1_0_1__prevent_amount_1",
+          "card_implementation_damage_prevent_c1hd_0_1__prevent_amount_1",
         ],
       },
     });
@@ -47,7 +49,7 @@ describe("selfplay cycle 130 decision checkpoints", () => {
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       lane: "engine_window",
       selectionAuthority: "engine_window",
-      rootPlanInstanceId: "run:run_305",
+      rootPlanInstanceId: "run:305",
       leafExecutorInstanceId: "rules.window_resolution",
       engineWindowAction: {
         actionId: "runner.resolve_choice",
