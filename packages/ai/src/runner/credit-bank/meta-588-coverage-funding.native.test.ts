@@ -261,14 +261,35 @@ it("keeps a same-speed guaranteed income alternative and never publishes two ban
   other.sourceKind = "card";
   other.economyProjection!.netLiquidCreditGain = 5;
   other.economyProjection!.grossLiquidCreditGain = 5;
-  expect(
+  other.legalActionRef = {
+    ...other.legalActionRef,
+    actionId: other.actionId,
+    actionType: other.actionType,
+  };
+  const withAlternative = (input: typeof f.input) =>
     bindRunnerCreditBankCoverageFunding(
-      f.input,
+      input,
       [...f.candidates, other],
       f.gaps,
       f.banks,
       f.development,
-    ).creditBanks.some((b) => b.coverageFunding),
+    );
+  expect(withAlternative(f.input).creditBanks.some((b) => b.coverageFunding)).toBe(
+    true,
+  );
+  const basicOffer = f.input.legalActions.find((a) => a.actionId === basic.actionId)!;
+  const currentOffer = {
+    ...basicOffer,
+    actionId: other.actionId,
+    type: "activated_card_ability" as const,
+    source: "other-income",
+    payload: { effectKind: "gain_credits", gainCreditsAmount: 5 },
+  };
+  expect(
+    withAlternative({
+      ...f.input,
+      legalActions: [...f.input.legalActions, currentOffer],
+    }).creditBanks.some((b) => b.coverageFunding),
   ).toBe(false);
   const supported = bindRunnerCreditBankCoverageFunding(
     f.input,

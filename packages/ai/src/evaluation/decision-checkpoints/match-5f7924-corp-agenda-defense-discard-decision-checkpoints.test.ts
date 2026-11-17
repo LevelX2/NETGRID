@@ -17,6 +17,7 @@ import markedAccountsDiscardJson from "../../../../../data/scenarios/ai-decision
 import conditionalUpgradeDiscardControlJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f7924-04-conditional-upgrade-discard-control-d26.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import {
@@ -33,7 +34,7 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(turn7AgendaDefenseJson);
   });
 
-  it("continues the same bounded score project after both defensive support heads", () => {
+  it("builds both bound defensive layers before deferring the four-advance agenda", () => {
     expectScoreProtectionDevelopmentContinuation(turn7AgendaDefenseJson, 1);
   });
 
@@ -65,26 +66,12 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(turn9AgendaDefenseJson);
   });
 
-  it("uses the third turn-9 action for the currently admitted bound agenda", () => {
+  it("defers the turn-9 install when its access protection only covers one Runner window", () => {
     const { input, decision } = decisionsAfterBoundAgendaDefense(
       turn9AgendaDefenseJson,
       2,
     );
-    const selected = input.legalActions.find(
-      (action) => action.actionId === decision.actionId,
-    );
-    expect(selected).toMatchObject({
-      type: "install_card",
-      source: "corp_onr_proteus_005_marked-accounts_1",
-      payload: { serverId: "remote_1" },
-    });
-    expect(decision.decisionDebug?.planKind).toBe("corp.score_agenda");
-    expect(decision.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-      "install_score_agenda",
-    );
-    expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1",
-    );
+    expectLongScoreHorizonDeferral(input, decision);
   });
 
   it("retains Marked Accounts and discards one of three Jack Attacks", () => {
@@ -138,29 +125,7 @@ function expectScoreProtectionDevelopmentContinuation(
     state = applyDecision(state, second);
     ({ input, decision: second } = nextDecision(state, checkpoint));
   }
-  const selected = input.legalActions.find(
-    (action) => action.actionId === second.actionId,
-  );
-
-  expect(
-    selected,
-    JSON.stringify({
-      selected,
-      remote: input.playerView.servers.find(
-        (server) => server.id === "remote_1",
-      ),
-      dispositions:
-        second.decisionDebug?.planFirstDecision?.dispositions.filter(
-          (entry) =>
-            entry.actionId.includes("marked-accounts") ||
-            entry.actionId.includes("jack-attack"),
-        ),
-    }),
-  ).toMatchObject({
-    type: "install_card",
-    source: "corp_onr_proteus_005_marked-accounts_1",
-    payload: { serverId: "remote_1" },
-  });
+  expectLongScoreHorizonDeferral(input, second);
   const firstPlan = first.decision!.decisionDebug!.planFirstDecision!;
   expect(firstPlan.selectedPlan?.parentInstanceId).toBe(
     "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Anew_remote",
@@ -168,12 +133,7 @@ function expectScoreProtectionDevelopmentContinuation(
   expect(
     first.selectedAction?.payload?.postInstallRezQuoteProjectedServerId,
   ).toBe("remote_1");
-  expect(second.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId:
-      "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1",
-    selectedPlan: { moduleId: "corp.score_agenda", phase: "install_agenda" },
-    route: { actionId: selected!.actionId, stateVersion: state.stateVersion },
-  });
+
   expect(
     input.playerView.servers
       .find((server) => server.id === "remote_1")
@@ -192,6 +152,41 @@ function expectScoreProtectionDevelopmentContinuation(
   );
   expect(replay.ok).toBe(true);
   expect(hashGameState(replay.state)).toBe(hashGameState(state));
+}
+
+function expectLongScoreHorizonDeferral(
+  input: ReturnType<typeof buildAiDecisionInput>,
+  decision: AiDecision,
+): void {
+  const remote = input.playerView.servers.find(({ id }) => id === "remote_1")!;
+  const agenda = input.playerView.own.gripOrHq.find(
+    ({ instanceId }) => instanceId === "corp_onr_proteus_005_marked-accounts_1",
+  )!;
+  expect(input.playerView.own.clicks).toBe(1);
+  expect(agenda.advancementRequirement).toBe(4);
+  expect(
+    assessCorpScoreRushRisk({
+      input,
+      server: remote,
+      agendaPoints: agenda.agendaPoints!,
+      remainingAdvancementClicks: agenda.advancementRequirement!,
+    }),
+  ).toMatchObject({ admission: "unknown", reason: "score_horizon_too_slow" });
+  const installation = input.legalActions.find(
+    (action) =>
+      action.type === "install_card" &&
+      action.source === agenda.instanceId &&
+      action.payload?.serverId === remote.id,
+  );
+  expect(installation).toBeDefined();
+  expect(decision.actionId).not.toBe(installation!.actionId);
+  expect(decision.decisionDebug?.planFirstDecision?.dispositions).toContainEqual(
+    expect.objectContaining({
+      actionId: installation!.actionId,
+      disposition: "explicitly_nonproductive",
+      evidenceCode: "corp_last_click_score_install_deferred:remote_1",
+    }),
+  );
 }
 
 function decisionsAfterBoundAgendaDefense(

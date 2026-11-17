@@ -132,6 +132,7 @@ type SearchState = {
   reliability: ActionCapacityRouteReliability;
   maximumTurnOffset: 0 | 1 | 2 | 3;
   usedOptionIds: Set<string>;
+  usedActionIds: Set<string>;
   consumedCardKeys: Set<string>;
   sourceCountersSpent: Map<string, number>;
 };
@@ -149,6 +150,7 @@ export function searchActionCapacityRoutes(
     reliability: "guaranteed",
     maximumTurnOffset: 0,
     usedOptionIds: new Set(),
+    usedActionIds: new Set(),
     consumedCardKeys: new Set(),
     sourceCountersSpent: new Map(),
   };
@@ -188,6 +190,8 @@ export function searchActionCapacityRoutes(
     if (state.steps.length >= maxSteps) continue;
     for (const option of options) {
       if (state.usedOptionIds.has(option.optionId)) continue;
+      const legalActionId = option.steps[0]?.actionId;
+      if (legalActionId && state.usedActionIds.has(legalActionId)) continue;
       if (option.currentActivationActionCost > state.unrestrictedActions)
         continue;
       if (option.creditCost > state.credits) continue;
@@ -221,6 +225,9 @@ export function searchActionCapacityRoutes(
           option.maximumTurnOffset,
         ) as 0 | 1 | 2 | 3,
         usedOptionIds: new Set([...state.usedOptionIds, option.optionId]),
+        usedActionIds: legalActionId
+          ? new Set([...state.usedActionIds, legalActionId])
+          : state.usedActionIds,
         consumedCardKeys: new Set([
           ...state.consumedCardKeys,
           ...(option.consumedCardKey ? [option.consumedCardKey] : []),
@@ -253,7 +260,14 @@ export function actionDemandHardBlockerIsResolved(
   demand: ActionDemand,
   route: ActionCapacityRoute,
 ): boolean {
-  if (demand.hardness !== "hard") return route.status !== "uncovered";
+  if (route.demandId !== demand.demandId) return false;
+  if (demand.hardness !== "hard") {
+    return (
+      route.status === "already_sufficient" ||
+      route.status === "covered_guaranteed" ||
+      route.status === "covered_contingent"
+    );
+  }
   return (
     route.status === "already_sufficient" ||
     route.status === "covered_guaranteed"

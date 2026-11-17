@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { isVisibleDirectDamageSubroutine } from "../run-analysis/visible-subroutine-semantics";
 import { projectRunnerVisibleIceDamage } from "../runner-damage-threat-assessment";
 import {
   currentEncounteredIceCard,
@@ -192,6 +193,7 @@ function unbrokenEncounterSubroutines(
   input: AiDecisionInput,
   action: LegalAction,
   subroutines: readonly VisibleEncounterSubroutine[],
+  scope: "remaining" | "next" = "remaining",
 ): readonly VisibleEncounterSubroutine[] {
   // A failed attempt leaves every currently open subroutine unresolved, not
   // only its selected target. The Engine's continuation quote identifies that
@@ -205,14 +207,27 @@ function unbrokenEncounterSubroutines(
       candidate.type === "continue_run" &&
       candidate.payload?.encounterContinue === true,
   );
-  const quotedIds = continuation?.payload?.encounterSubroutineIds;
-  const ids =
-    typeof quotedIds === "string" ? quotedIds.split(",").filter(Boolean) : [];
+  const payload = continuation?.payload;
+  const nextIds = payload?.encounterSubroutineIds;
+  const useRemaining =
+    scope === "remaining" &&
+    (payload?.encounterRemainingSubroutineIds !== undefined ||
+      payload?.encounterRemainingSubroutineCount !== undefined);
+  const quotedIds = useRemaining ? payload?.encounterRemainingSubroutineIds : nextIds;
+  const count = useRemaining
+    ? payload?.encounterRemainingSubroutineCount
+    : payload?.unbrokenSubroutineCount;
+  const ids = typeof quotedIds === "string" && quotedIds.length
+    ? quotedIds.split(",")
+    : [];
   if (
     typeof quotedIds !== "string" ||
     new Set(ids).size !== ids.length ||
-    ids.length !== continuation?.payload?.unbrokenSubroutineCount ||
-    ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id))
+    ids.length !== count ||
+    ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id)) ||
+    (useRemaining &&
+      (typeof nextIds !== "string" ||
+        (nextIds.length > 0 && nextIds.split(",").some((id) => !ids.includes(id)))))
   ) {
     throw Object.assign(
       new Error(
@@ -234,17 +249,10 @@ function unbrokenEncounterSubroutines(
 function visibleDirectDamageAmount(
   subroutine: VisibleEncounterSubroutine,
 ): number {
-  const type = subroutine.type.toLowerCase();
-  const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
-  const directDamage =
-    type === "brain_damage" ||
-    type === "core_damage" ||
-    type === "do_brain_damage" ||
-    type === "do_core_damage" ||
-    type === "do_damage" ||
-    typeof damageTypeValue === "string";
-  if (!directDamage) return 0;
-  return Math.max(0, Math.floor(subroutine.amount ?? 1));
+  return isVisibleDirectDamageSubroutine(subroutine) &&
+    subroutine.type !== "set_next_encounter_unless_fully_break_damage"
+    ? Math.max(0, Math.floor(subroutine.amount ?? 1))
+    : 0;
 }
 
 /** Compare the same forced encounter continuation with a successful exact
@@ -278,7 +286,7 @@ function randomBreakHasSurvivingBranchAgainstCertainLoss(
     [...targets].some((i) => subroutines[i]?.type !== "do_damage")
   )
     return false;
-  const remaining = unbrokenEncounterSubroutines(input, action, subroutines);
+  const remaining = unbrokenEncounterSubroutines(input, action, subroutines, "next");
   if (
     !remaining.length ||
     remaining.some((s) => s.type !== "do_damage" && s.type !== "end_the_run")

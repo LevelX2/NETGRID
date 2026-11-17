@@ -1305,6 +1305,36 @@ describe("visible run analysis Deflector paths", () => {
     expect(assessment.visibleBreakCost).toBe(0);
   });
 
+  it("reserves a break when the outer ICE funds a paid inner deflection", () => {
+    const inner = trapdoorDeflectorIce("hq-vortex");
+    inner.definitionId = "onr_classic_015_vortex";
+    inner.strength = 2;
+    inner.effectiveRunQuote = {
+      iceInstanceId: inner.instanceId,
+      iceDefinitionId: inner.definitionId,
+      effectiveStrength: 2,
+      subroutines: [{
+        id: "paid-deflection",
+        type: "deflect_run",
+        deflectorTarget: "any_data_fort",
+        deflectorCost: 2,
+      }],
+    };
+    const outer = [
+      classicCodeGateIce("hq-outer-one"),
+      classicCodeGateIce("hq-outer-two"),
+    ];
+    const rig = [{ ...codecrackerBreaker("runner-codecracker"), strength: 0 }];
+    const initial = assessKnownRezzedIcePath(
+      [inner, ...outer.slice(0, 1)], rig, 6, [], 0, { visibleCorpCredits: 0 },
+    );
+    const nowFunded = assessKnownRezzedIcePath(
+      [inner, ...outer], rig, 6, [], 0, { visibleCorpCredits: 0 },
+    );
+    expect(initial).toMatchObject({ canReachAccess: true, visibleBreakCost: 2 });
+    expect(nowFunded).toMatchObject({ canReachAccess: true, visibleBreakCost: 6 });
+  });
+
   it("keeps an any-data-fort Deflector live without a remote", () => {
     const assessment = assessKnownRezzedIcePath(
       [

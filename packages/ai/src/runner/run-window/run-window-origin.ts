@@ -216,6 +216,7 @@ export function reassessActiveInformationRunParent(
     [...currentRunRemainingIce(input), remainingEncounter],
     (ice) => ice.instanceId,
   );
+  const pathContext = currentRunPathContext(input);
   const pathBeforeDamageBudget = assessKnownRezzedIcePath(
     remainingIce,
     input.playerView.own.rig ?? [],
@@ -223,14 +224,17 @@ export function reassessActiveInformationRunParent(
       input.playerView.own.credits +
         visibleRunnerRunOnlyCredits(input.playerView.run),
       input.playerView.own.rig ?? [],
-      { liquidCredits: input.playerView.own.credits },
+      {
+        liquidCredits: input.playerView.own.credits,
+        excludeStealthCredits: pathContext.excludeStealthTraceCredits === true,
+      },
     ),
     input.playerView.servers.find(
       (server) => server.id === run.attackedServerId,
     )?.root ?? [],
     input.playerView.opponent.credits,
     {
-      ...currentRunPathContext(input),
+      ...pathContext,
       quoteNextEncounterDamageForHandBudget: true,
     },
   );

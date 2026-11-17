@@ -118,16 +118,21 @@ describe("runner Blink encounter break context", () => {
   });
 
   it.each([
-    { openDamage: true, excluded: true, damage: 1 },
-    { openDamage: false, excluded: false, damage: 0 },
+    { openDamage: true, laterGroup: false, excluded: true, damage: 1 },
+    { openDamage: false, laterGroup: false, excluded: false, damage: 0 },
+    { openDamage: true, laterGroup: true, excluded: true, damage: 1 },
   ])(
-    "counts other unbroken damage but not an already broken subroutine: $openDamage",
-    ({ openDamage, excluded, damage }) => {
+    "counts open damage=$openDamage with a later group=$laterGroup",
+    ({ openDamage, laterGroup, excluded, damage }) => {
       const action = blinkBreakAction();
-      const input = aiInput("runner", [
-        action,
-        encounterContinue(openDamage ? ["damage", "next-lock"] : ["next-lock"]),
-      ]);
+      const remaining = openDamage ? ["damage", "next-lock"] : ["next-lock"];
+      const continuation = encounterContinue(laterGroup ? ["next-lock"] : remaining);
+      continuation.payload = {
+        ...continuation.payload,
+        encounterRemainingSubroutineIds: remaining.join(","),
+        encounterRemainingSubroutineCount: remaining.length,
+      };
+      const input = aiInput("runner", [action, continuation]);
       input.playerView.own.gripOrHq = Array.from({ length: 3 }, (_, index) =>
         visibleCard(`grip-${index}`, "runner", "event"),
       );
