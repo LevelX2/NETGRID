@@ -1062,9 +1062,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       unbrokenSubroutineCount: 1,
       encounterWillEndRun: false,
     });
-    expect(String(continueAction.payload?.encounterSubroutineIds)).toContain(
-      "relative_ice_outside_84.trace.1",
-    );
+    expect(continueAction.payload?.encounterSubroutineIds).toBe("0");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -1083,7 +1081,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       (action) => action.type === "continue_run",
     );
     expect(secondTraceAction.payload?.encounterSubroutineIds).toBe(
-      "relative_ice_outside_84.trace.2",
+      "1",
     );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,
@@ -1501,10 +1499,7 @@ describe("Proteus Dynamic Public ETR ICE", () => {
     }
     state = startEncounterWithRezzedIce(state, "rd");
     const subroutineIds = effectiveSubroutineIds(state, "rd", minotaurId);
-    expect(subroutineIds).toEqual([
-      `card_implementation.${MINOTAUR}.additional_subroutine.1.repeat.1.end_the_run`,
-      `card_implementation.${MINOTAUR}.additional_subroutine.2.repeat.2.end_the_run`,
-    ]);
+    expect(subroutineIds).toEqual(["0", "1"]);
     expect(state.run?.encounteredIceId).toBe(outerTransformedAwayId);
   });
 
@@ -1565,9 +1560,7 @@ describe("Proteus Dynamic Public ETR ICE", () => {
       (action) => action.actionId === addAction.actionId,
     );
     expect(state.corp.credits).toBe(8);
-    expect(effectiveSubroutineIds(state, "rd", riddlerId)).toEqual([
-      `card_implementation.${RIDDLER}.current_encounter_additional_subroutine.1.end_the_run`,
-    ]);
+    expect(effectiveSubroutineIds(state, "rd", riddlerId)).toEqual(["0"]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       sourceDefinitionId: RIDDLER,
@@ -1879,7 +1872,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 1,
-      encounterSubroutineIds: "subroutine_brain_damage_one",
+      encounterSubroutineIds: "0",
     });
 
     expect(
@@ -1969,13 +1962,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       encounterWillEndRun: true,
     });
     expect(continueAction.payload?.encounterSubroutineIds).toBe(
-      [
-        "subroutine_trash_program_a",
-        "subroutine_trash_program_b",
-        "subroutine_trash_program_c",
-        "subroutine_end_run_a",
-        "subroutine_end_run_b",
-      ].join(","),
+      "0,1,2,3,4",
     );
     state = apply(
       state,
@@ -2460,9 +2447,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "runner",
       (action) =>
         action.type === "continue_run" &&
-        String(action.payload?.encounterSubroutineIds ?? "").includes(
-          `card_implementation.${ICEBERG}.current_encounter_additional_subroutine.1.end_the_run`,
-        ),
+        action.payload?.encounterSubroutineIds === "0,1",
     );
     expect(continueAction.payload?.unbrokenSubroutineCount).toBe(2);
   });

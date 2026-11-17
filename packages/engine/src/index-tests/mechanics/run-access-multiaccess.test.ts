@@ -229,6 +229,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         ),
       );
       state.runner.credits = 8;
+      putCorpIceOnServer(state, expectation.serverId, 439);
       moveRunnerCardToGrip(state, expectation.definitionId);
 
       state = apply(

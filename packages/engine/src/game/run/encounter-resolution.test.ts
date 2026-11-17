@@ -411,6 +411,7 @@ describe("encounter resolution boundary", () => {
         damageType: "net",
         amount: 3,
         source: "subroutine:454:next_encounter",
+        randomSource: ["c", 454] as const,
       },
     ]);
     expect(damagePayload).toMatchObject({

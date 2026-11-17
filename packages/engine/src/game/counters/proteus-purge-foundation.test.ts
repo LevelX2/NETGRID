@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -533,7 +534,11 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       initial.randomDrawRecords.length,
     );
     const rolls = randomRecords
-      .filter((record) => String(record.purpose).includes("virus.136.install"))
+      .filter(
+        (record) =>
+          record.purpose[0] === RandomPurposeCode.VirusInstallDie &&
+          record.purpose[1] === 136,
+      )
       .map((record) => Math.floor(record.value * 6) + 1);
     const hitCount = rolls.filter((roll) => roll === 6).length;
 

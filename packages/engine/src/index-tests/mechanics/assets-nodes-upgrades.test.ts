@@ -1177,6 +1177,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     };
     const agendaId = moveCorpCardToHq(state, 588);
     const operationId = moveCorpCardToHq(state, 596);
+    keepOnlyCorpHqCards(state, [agendaId, operationId]);
     const creditsBefore = state.corp.credits;
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;

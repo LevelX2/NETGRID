@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
@@ -449,7 +450,7 @@ describe("PublicContext golden payload gate", () => {
           gainedCredits: 3,
           hostedCreditsAfter: 2,
           randomCounterAfter: 15,
-          randomPurpose: "v1921.die.public-context-golden",
+          randomPurpose: RandomPurposeCode.RunnerStartEffectDie,
           recurringCreditsLoaded: 2,
           resourceAbility: "short_term_contract",
           runnerCreditsAfter: 9,
@@ -477,7 +478,7 @@ describe("PublicContext golden payload gate", () => {
       gainedCredits: 3,
       hostedCreditsAfter: 2,
       randomCounterAfter: 15,
-      randomPurpose: "v1921.die.public-context-golden",
+      randomPurpose: RandomPurposeCode.RunnerStartEffectDie,
       recurringCreditsLoaded: 2,
       resourceAbility: "short_term_contract",
       runnerCreditsAfter: 9,
@@ -591,7 +592,7 @@ describe("PublicContext golden payload gate", () => {
             type: "trigger_ability",
             label: "Contract random field list",
             payload: {
-              randomPurpose: "v1921.die.contract",
+              randomPurpose: RandomPurposeCode.RunnerStartEffectDie,
               serverLabel: "HQ",
               sourceDefinitionId: 595,
               v1921DieRoll: 2,

@@ -1753,6 +1753,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 6;
     state.runner.clicks = 4;
     state.corp.credits = 4;
+    keepOnlyCorpHqCards(state, []);
     const hqCards = [
       moveCorpCardCopyToHq(state, 596),
       moveCorpCardCopyToHq(state, 596),
@@ -7030,6 +7031,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 10;
     state.runner.clicks = 4;
     state.corp.credits = 20;
+    keepOnlyCorpHqCards(state, []);
     const hauntingId = putCorpIceOnServer(
       state,
       "rd",

@@ -273,7 +273,8 @@ describe("encounter printed effects boundary", () => {
       {
         definition: definitionFor("ice_1" as CardInstanceId),
         subroutine: {
-          id: "net_damage",
+          id: "0",
+          provenance: ["p", 2528423081, 0],
           type: "do_damage",
           damageType: "net",
           amount: 2,
@@ -320,7 +321,8 @@ describe("encounter printed effects boundary", () => {
       {
         definition: definitionFor("ice_1" as CardInstanceId),
         subroutine: {
-          id: "random_core_damage",
+          id: "0",
+          provenance: ["p", 2528423081, 0],
           type: "random_damage",
           damageType: "core",
           dieFaces: 6,
@@ -367,7 +369,8 @@ describe("encounter printed effects boundary", () => {
       {
         definition: definitionFor("ice_1" as CardInstanceId),
         subroutine: {
-          id: "random_core_damage",
+          id: "0",
+          provenance: ["p", 2528423081, 0],
           type: "random_damage",
           damageType: "core",
           dieFaces: 6,
@@ -482,7 +485,8 @@ describe("encounter printed effects boundary", () => {
       {
         definition: definitionFor("ice_1" as CardInstanceId),
         subroutine: {
-          id: "core_damage",
+          id: "0",
+          provenance: ["p", 2528423081, 0],
           type: "do_damage",
           damageType: "core",
           amount: 1,

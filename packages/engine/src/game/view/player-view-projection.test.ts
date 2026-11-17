@@ -535,15 +535,15 @@ describe("PlayerView projection", () => {
         iceDefinitionId: 73,
         subroutines: [
           expect.objectContaining({
-            id: "subroutine_trash_program_a",
+            id: "0",
             type: "trash_installed_program",
           }),
           expect.objectContaining({
-            id: "subroutine_trash_program_b",
+            id: "1",
             type: "trash_installed_program",
           }),
           expect.objectContaining({
-            id: "subroutine_trash_program_c",
+            id: "2",
             type: "trash_installed_program",
           }),
           expect.objectContaining({ type: "end_the_run" }),

@@ -1068,12 +1068,12 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "r1",
       "strategic",
     );
-    const hqBefore = state.corp.hq.length;
     const drawnIds = [
       putCorpCardOnTopOfRd(state, 588),
       putCorpCardOnTopOfRd(state, 596),
       putCorpCardOnTopOfRd(state, 589),
     ];
+    const hqBefore = state.corp.hq.length;
 
     drawCorpCards(state, 3);
 

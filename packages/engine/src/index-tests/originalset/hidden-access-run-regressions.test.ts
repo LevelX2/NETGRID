@@ -2994,7 +2994,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(dataDartsContinue.payload).toMatchObject({
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+        "0,1",
     });
     expect(dataDartsContinue.payload?.encounterWillEndRun).toBe(false);
     state = apply(
@@ -3357,7 +3357,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+        "0,1",
     });
     expect(continueAction.payload).not.toHaveProperty(
       "payOrEndRunSubroutineIndexes",
@@ -4720,7 +4720,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "printed_subroutines_damage_net,printed_subroutines_end_the_run",
+        "0,1",
       encounterWillEndRun: true,
     });
     state = apply(

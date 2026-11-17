@@ -91,7 +91,7 @@ function makeState(): GameState {
         side: "runner",
         zone: "rig",
       }),
-      ice_1: instance("ice_1", 2579180997, {
+      ice_1: instance("ice_1", 435, {
         side: "corp",
         zone: "serverIce",
         serverId: "rd",
@@ -131,7 +131,7 @@ function makeHost(
   } = {},
 ): EncounterPrintedNonTraceHost {
   const definitions: Record<string, CardDefinition> = {
-    2579180997: definition(2579180997, "Test ICE", "ice"),
+    435: definition(435, "Test ICE", "ice"),
     462: definition(462, "Ice Pick Willie", "ice"),
     484: definition(484, "Secret Spend Compare", "ice"),
     1180041019: definition(1180041019, "Cheap Program", "program", {
@@ -278,7 +278,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition(2579180997, "Test ICE", "ice"),
+      definition: definition(435, "Test ICE", "ice"),
       subroutine: { id: "end", type: "end_the_run" } as SubroutineDefinition,
       subroutineIndex: 0,
       legalAction,
@@ -287,13 +287,13 @@ describe("encounter printed non-trace effects boundary", () => {
     expect(result).toMatchObject({
       handled: true,
       runShouldEnd: true,
-      sourceDefinitionId: 2579180997,
+      sourceDefinitionId: 435,
       iceId: "ice_1",
     });
     expect(legalAction.resolvedEffects).toEqual([
       expect.objectContaining({
         kind: "resolve_subroutine",
-        sourceDefinitionId: 2579180997,
+        sourceDefinitionId: 435,
         subroutineIndex: 0,
         subroutineType: "end_the_run",
         endedRun: true,
@@ -346,7 +346,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const paid = new Set([0]);
 
     const paidResult = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition(2579180997, "Test ICE", "ice"),
+      definition: definition(435, "Test ICE", "ice"),
       subroutine: {
         id: "pay",
         type: "end_the_run_unless_runner_pays",
@@ -359,7 +359,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const unpaidResult = resolveEncounterPrintedNonTraceEffect(
       makeHost(state),
       {
-        definition: definition(2579180997, "Test ICE", "ice"),
+        definition: definition(435, "Test ICE", "ice"),
         subroutine: {
           id: "unpaid",
           type: "end_the_run_unless_runner_pays",
@@ -387,10 +387,11 @@ describe("encounter printed non-trace effects boundary", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
     const subroutine = {
-      id: "trash_program",
+      id: "0",
+      provenance: ["p", 435, 0],
       type: "trash_installed_program",
     } as SubroutineDefinition;
-    const ice = definition(2579180997, "Test ICE", "ice", {
+    const ice = definition(435, "Test ICE", "ice", {
       subroutines: [subroutine],
     });
     const host = makeHost(state, { definitions: { [ice.id]: ice } });
@@ -448,10 +449,11 @@ describe("encounter printed non-trace effects boundary", () => {
       },
     };
     const subroutine = {
-      id: "trash_program",
+      id: "0",
+      provenance: ["p", 435, 0],
       type: "trash_installed_program",
     } as SubroutineDefinition;
-    const ice = definition(2579180997, "Test ICE", "ice", {
+    const ice = definition(435, "Test ICE", "ice", {
       subroutines: [subroutine],
     });
     const host = makeHost(state, { definitions: { [ice.id]: ice } });
@@ -478,10 +480,11 @@ describe("encounter printed non-trace effects boundary", () => {
     const state = makeState();
     const openAction = { payload: {} } as LegalAction;
     const subroutine = {
-      id: "trash_program",
+      id: "0",
+      provenance: ["p", 435, 0],
       type: "trash_installed_program",
     } as SubroutineDefinition;
-    const ice = definition(2579180997, "Test ICE", "ice", {
+    const ice = definition(435, "Test ICE", "ice", {
       subroutines: [subroutine],
     });
     const host = makeHost(state, {
@@ -520,10 +523,11 @@ describe("encounter printed non-trace effects boundary", () => {
   it("revalidates the selected program when resolving the Corp choice", () => {
     const state = makeState();
     const subroutine = {
-      id: "trash_program",
+      id: "0",
+      provenance: ["p", 435, 0],
       type: "trash_installed_program",
     } as SubroutineDefinition;
-    const ice = definition(2579180997, "Test ICE", "ice", {
+    const ice = definition(435, "Test ICE", "ice", {
       subroutines: [subroutine],
     });
     const host = makeHost(state, { definitions: { [ice.id]: ice } });
@@ -549,7 +553,7 @@ describe("encounter printed non-trace effects boundary", () => {
   it("delegates direct action-forgo markers through the encounter-resolution callback", () => {
     const state = makeState();
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition(2579180997, "Test ICE", "ice"),
+      definition: definition(435, "Test ICE", "ice"),
       subroutine: {
         id: "forgo",
         type: "set_runner_forgo_next_action",

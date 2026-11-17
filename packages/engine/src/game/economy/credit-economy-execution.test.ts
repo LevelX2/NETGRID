@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardInstance,
@@ -145,7 +146,7 @@ describe("credit economy execution", () => {
       ),
     ).toEqual({ handled: true, actionType: "gain_credit" });
     expect(action.payload).toMatchObject({
-      randomPurpose: "v1921.die.1038876825.program_probe",
+      randomPurpose: RandomPurposeCode.ProgramProbe,
       v1921DieRoll: 1,
       randomCounterAfter: randomCounterBefore + 1,
     });

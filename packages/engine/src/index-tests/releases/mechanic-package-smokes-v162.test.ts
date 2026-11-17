@@ -1629,10 +1629,10 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(pumpedWithEncoder, action) === 591,
     );
     expect(breakActions.map((action) => action.payload?.subroutineId)).toEqual([
-      "printed_subroutines_end_the_run",
-      "printed_subroutines_end_the_run_a",
-      "printed_subroutines_end_the_run_b",
-      "card_implementation.532.additional_subroutine.1.end_the_run",
+      "0",
+      "1",
+      "2",
+      "3",
     ]);
     expect(breakActions[3]?.payload).toMatchObject({
       dynamicSourceDefinitionId: 532,
@@ -1901,8 +1901,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       breakActions.map((action) => action.payload?.subroutineIndex),
     ).toEqual([3]);
     expect(breakActions[0]?.payload).toMatchObject({
-      subroutineId:
-        "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+      subroutineId: "3",
       dynamicSourceDefinitionId: 582,
       dynamicSourceTitle: "Tesseract Fort Construction",
       dynamicSourceKind: "additional_subroutine",
@@ -1962,8 +1961,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
     expect(refuseContinue.payload).toMatchObject({
       unbrokenSubroutineCount: 1,
-      encounterSubroutineIds:
-        "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+      encounterSubroutineIds: "3",
     });
     const refused = apply(
       refusing,

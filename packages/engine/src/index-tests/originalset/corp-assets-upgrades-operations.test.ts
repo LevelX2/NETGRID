@@ -985,6 +985,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       (action) => action.type === "mandatory_draw",
     );
     encoder.corp.credits = 20;
+    keepOnlyCorpHqCards(encoder, []);
     putCorpRootInRemote(encoder, 532);
     encoder = apply(
       encoder,

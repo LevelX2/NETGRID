@@ -1781,7 +1781,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
         source: { kind: "game_rule" },
         controller: "corp",
         affectedSide: "runner",
-        payload: { damageType: "net", amount: 1, source: "pro012_test" },
+        payload: { damageType: "net", amount: 1, source: "pro012_test", randomSource: ["g", 0] },
         visibility: "public",
         createdAtStateVersion: state.stateVersion + 1,
       } as any,
@@ -1798,7 +1798,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
         source: { kind: "game_rule" },
         controller: "corp",
         affectedSide: "runner",
-        payload: { damageType: "meat", amount: 3, source: "pro012_test" },
+        payload: { damageType: "meat", amount: 3, source: "pro012_test", randomSource: ["g", 0] },
         visibility: "public",
         createdAtStateVersion: state.stateVersion + 1,
       } as any,
@@ -1818,7 +1818,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       option.id.includes(String(boltId)),
     )!.id;
     const result = resolveChoice(state, "runner", optionId);
-    expect(result.ok).toBe(true);
+    expect(result.ok ? "ok" : result.error.message).toBe("ok");
     state = result.state;
     expectHiddenResourceTrashed(state, boltId, 190);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2608,6 +2608,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       damageType: "meat",
       amount: 1,
       source: "pro012_test",
+      randomSource: ["g", 0] as const,
     });
     expect(summary.flatline).toBe(false);
     expect(state.pendingChoice?.source).toContain(
@@ -2660,6 +2661,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       damageType: "net",
       amount: 1,
       source: "pro012_test",
+      randomSource: ["g", 0] as const,
     });
     expect(netState.pendingChoice).toBeUndefined();
 
@@ -2675,6 +2677,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       damageType: "meat",
       amount: 1,
       source: "pro012_test",
+      randomSource: ["g", 0] as const,
     });
     expect(flatlineState.pendingChoice).toBeUndefined();
     expect(flatlineState.winner).toBe("corp");
