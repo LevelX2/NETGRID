@@ -24,9 +24,9 @@ Zu den aktuellen Fachbereichen gehören unter anderem:
   Installer-, Launcher- und Updatezielbild mit sequenziellem Paketprozess;
 - weitere fachlich benannte Bereiche für aktuelle Architekturthemen.
 
-## Umsetzungspläne
+## Laufzeitverträge
 
-- [Kompakte technische Schlüssel in Karten, Spielzustand und Transport](compact-runtime-identifiers-plan.md)
+- [Kompakte technische Schlüssel in Karten, Spielzustand und Transport](compact-runtime-identifiers.md)
 
 ## Current-State-Regel
 
