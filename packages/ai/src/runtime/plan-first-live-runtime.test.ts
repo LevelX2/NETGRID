@@ -25368,22 +25368,25 @@ describe("authoritative plan-first live runtime", () => {
         [visibleCard("discarded-operation", "corp", "operation")],
       ),
     ];
+    const target = safeRuntimeRunTarget(run.actionId, "archives");
     const context = liveContext({
       evaluateRunnerRunTargets: () => [
         {
           actionId: "run-archives",
           accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
           targetKind: "archives",
+          accessTargetKind: "archives",
           targetServerId: "archives",
           pathPassability: "reachable",
           recommendation: "run_if_free",
           score: 50,
           multiaccessAvailable: false,
           knownAccessState: "unknown",
+          creditsAfterRun: input.playerView.own.credits,
+          fundingNeed: target.fundingNeed,
           evidence: ["test_generic_archives_pressure"],
           runActionProjection: {
-            ...safeRuntimeRunTarget("run-archives", "archives")
-              .runActionProjection,
+            ...target.runActionProjection,
             targetKind: "archives",
           },
         },
@@ -25428,6 +25431,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 30;
     input.playerView.opponent.discardCount = 0;
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const target = safeRuntimeRunTarget(run.actionId, "archives");
     const context = liveContext({
       evaluateRunnerRunTargets: () => [
         {
@@ -25442,10 +25446,11 @@ describe("authoritative plan-first live runtime", () => {
           multiaccessAvailable: false,
           knownAccessState: "unknown",
           accessPayoff: "unknown",
+          creditsAfterRun: input.playerView.own.credits,
+          fundingNeed: target.fundingNeed,
           evidence: ["test_high_score_without_archives_payoff"],
           runActionProjection: {
-            ...safeRuntimeRunTarget("run-archives", "archives")
-              .runActionProjection,
+            ...target.runActionProjection,
             targetKind: "archives",
           },
         },
