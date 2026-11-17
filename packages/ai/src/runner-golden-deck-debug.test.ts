@@ -1,7 +1,9 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   LegalAction,
   PlayerView,
   PublicGameEvent,
@@ -27,12 +29,6 @@ import {
 import { buildRunnerTacticalGoals } from "./runner-tactical-goals";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
-
-const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as Array<{
-  deckSnapshotId: string;
-  side: "runner" | "corp";
-  cards: Array<{ cardId: string; quantity: number }>;
-}>;
 
 type AiDecisionInputWithRunnerProjection = AiDecisionInput & {
   ownDeckCapabilities: DeckCapabilityProfile;
@@ -498,13 +494,13 @@ function goldenInput(params: {
 }
 
 function goldenBlinkSnapshot(): AiDeckStrategyDeckSnapshot {
-  const snapshot = benchmarkSnapshots.find(
+  const snapshot = benchmarkSnapshotsData.snapshots.find(
     (candidate) =>
       candidate.deckSnapshotId ===
       "local_realistic_runner_blink_pressure_rig_snapshot_v1",
   );
-  if (!snapshot)
-    throw new Error("Missing Blink Pressure Rig benchmark snapshot");
+  if (snapshot?.side !== "runner")
+    throw new Error("Missing Runner Blink Pressure Rig benchmark snapshot");
   return {
     deckSnapshotId: snapshot.deckSnapshotId,
     side: snapshot.side,
@@ -610,7 +606,7 @@ function legalAction(
 function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(`${side}-identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,
@@ -654,16 +650,16 @@ function wallOfStatic(instanceId: string): VisibleCard {
 }
 
 function rdAccessEvent(
-  eventId: string,
+  label: string,
   stateVersionBefore: number,
-  cardDefinitionId: number,
+  cardDefinitionId: CardDefinitionId,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type: "access_card",
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${label}`,
     visibilityClass: "public",
     publicPayload: {
       actor: "runner",

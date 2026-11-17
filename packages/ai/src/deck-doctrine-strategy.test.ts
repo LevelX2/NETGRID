@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
@@ -12,13 +13,6 @@ import {
   type DeckStrategyScore,
 } from "./deck-doctrine-strategy";
 
-const snapshots = snapshotsData08.snapshots as Array<{
-  deckSnapshotId: string;
-  side: "runner" | "corp";
-  formatProfileId?: string;
-  publicMetadata?: AiDeckStrategyDeckSnapshot["publicMetadata"];
-  cards: Array<{ cardId: string; quantity: number }>;
-}>;
 const realDoctrineSnapshotIds = [
   "demo_runner_008_snapshot_v0_8",
   "demo_corp_008_snapshot_v0_8",
@@ -501,7 +495,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       side: "corp",
       cards: [
         { cardId: 579, quantity: 2 },
-        { cardId: "test_city-gridish-noise", quantity: 3 },
+        { cardId: syntheticCardDefinitionId("test_city-gridish-noise"), quantity: 3 },
       ],
     });
 
@@ -777,10 +771,13 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
 });
 
 function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
-  const snapshot = snapshots.find(
+  const snapshot = snapshotsData08.snapshots.find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );
-  if (!snapshot) throw new Error(`Missing snapshot fixture ${snapshotId}`);
+  if (!snapshot || (snapshot.side !== "runner" && snapshot.side !== "corp"))
+    throw new Error(`Invalid snapshot fixture ${snapshotId}`);
+  if (snapshot.publicMetadata && snapshot.publicMetadata.side !== snapshot.side)
+    throw new Error(`Snapshot metadata side mismatch for ${snapshotId}`);
   return {
     deckSnapshotId: snapshot.deckSnapshotId,
     side: snapshot.side,
@@ -788,7 +785,7 @@ function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
       ? { formatProfileId: snapshot.formatProfileId }
       : {}),
     ...(snapshot.publicMetadata
-      ? { publicMetadata: snapshot.publicMetadata }
+      ? { publicMetadata: { ...snapshot.publicMetadata, side: snapshot.side } }
       : {}),
     cards: snapshot.cards.map((card) => ({
       cardId: card.cardId,
@@ -813,8 +810,8 @@ function standardDeckByName(name: string): AiDeckStrategyDeckSnapshot {
 }
 
 function rankingScore(
-  anchorCardIds: readonly string[],
-  supportCardIds: readonly string[],
+  anchorLabels: readonly string[],
+  supportLabels: readonly string[],
 ): DeckStrategyScore {
   return {
     anchorScore: 60,
@@ -824,14 +821,14 @@ function rankingScore(
     runtimeStatus: "productive",
     runtimeBlockers: [],
     supportGaps: [],
-    anchorEvidence: anchorCardIds.map((cardId) => ({
-      cardId,
+    anchorEvidence: anchorLabels.map((label) => ({
+      cardId: syntheticCardDefinitionId(label),
       quantity: 1,
       source: "derivedStrategyAnchor",
       reason: "test",
     })),
-    supportEvidence: supportCardIds.map((cardId) => ({
-      cardId,
+    supportEvidence: supportLabels.map((label) => ({
+      cardId: syntheticCardDefinitionId(label),
       quantity: 1,
       source: "functionSignal",
       signal: "test.support",

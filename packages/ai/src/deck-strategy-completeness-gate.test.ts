@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import snapshotData from "../../../data/decks/deck-snapshots-0.8.json";
@@ -19,11 +20,7 @@ describe("deck strategy completeness gate", () => {
   const activeDecks = standardDeckCatalog.decks.filter(
     (deck) => deck.status === "active",
   );
-  const versionedSnapshots = snapshotData.snapshots as Array<{
-    deckSnapshotId: string;
-    side: "runner" | "corp";
-    cards: Array<{ cardId: string; quantity: number }>;
-  }>;
+  const versionedSnapshots = snapshotData.snapshots;
 
   it("classifies every active standard deck and preserves the catalog floor", () => {
     // Catalog growth must not invalidate this completeness gate. The lower bound
@@ -102,7 +99,15 @@ describe("deck strategy completeness gate", () => {
 
   it("keeps all 21 versioned snapshots deterministic and taxonomy-complete", () => {
     expect(versionedSnapshots).toHaveLength(21);
-    for (const snapshot of versionedSnapshots) {
+    for (const { side, publicMetadata, ...source } of versionedSnapshots) {
+      if (side !== "runner" && side !== "corp") throw new Error(`Invalid deck side ${side}`);
+      if (publicMetadata && publicMetadata.side !== side)
+        throw new Error(`Snapshot metadata side mismatch for ${source.deckSnapshotId}`);
+      const snapshot: AiDeckStrategyDeckSnapshot = {
+        ...source,
+        side,
+        ...(publicMetadata ? { publicMetadata: { ...publicMetadata, side } } : {}),
+      };
       const profile = buildDeckStrategyProfile(snapshot);
       expect(profile).toEqual(buildDeckStrategyProfile(snapshot));
       expect(Object.keys(profile.strategyScores).sort()).toEqual(
@@ -211,7 +216,7 @@ function productiveScore(strategyId: string): DeckStrategyScore {
     supportGaps: [],
     anchorEvidence: [
       {
-        cardId: "fixture-anchor",
+        cardId: syntheticCardDefinitionId("fixture-anchor"),
         quantity: 1,
         source: "derivedStrategyAnchor",
         strategyId,
@@ -226,7 +231,7 @@ function assertWarningsHaveCardProvenance(
   profile: AiDeckStrategyProfile,
   snapshot: AiDeckStrategyDeckSnapshot,
 ): void {
-  const cardIds = new Set(snapshot.cards.map((card) => card.cardId));
+  const cardIds = new Set(snapshot.cards.map((card) => String(card.cardId)));
   for (const warning of profile.warnings) {
     expect(warning.split(":").some((token) => cardIds.has(token))).toBe(true);
   }

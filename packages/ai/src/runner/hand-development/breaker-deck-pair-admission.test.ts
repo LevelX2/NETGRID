@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import type { CardDefinitionId } from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -27,7 +28,7 @@ function checkpointInput(reference: string) {
   return { checkpoint, input };
 }
 
-function variant(input: AiDecisionInputWithDeckCapabilities, cardId: string) {
+function variant(input: AiDecisionInputWithDeckCapabilities, cardId: CardDefinitionId) {
   return evaluateRunnerHandDevelopment({
     input,
     deckCapabilities: input.ownDeckCapabilities!,

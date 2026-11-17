@@ -99,11 +99,12 @@ describe("AI hint ontology validation", () => {
 
     for (const cardId of pilotCardIds) {
       const hint = hintsByCard.get(cardId);
-      expect(hint, cardId).toBeDefined();
-      expect(validateAiHintOntologyFields(hint).errors, cardId).toEqual([]);
-      expect(hint?.requiredMechanics?.length, cardId).toBeGreaterThan(0);
-      expect(hint?.quality?.hintReviewed, cardId).toBe(true);
-      expect(hint?.quality?.strategyCovered, cardId).toBe(
+      const description = `Card ${cardId}`;
+      expect(hint, description).toBeDefined();
+      expect(validateAiHintOntologyFields(hint).errors, description).toEqual([]);
+      expect(hint?.requiredMechanics?.length, description).toBeGreaterThan(0);
+      expect(hint?.quality?.hintReviewed, description).toBe(true);
+      expect(hint?.quality?.strategyCovered, description).toBe(
         strategyCoveredPilotCardIds.has(cardId),
       );
     }
