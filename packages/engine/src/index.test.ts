@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import { serializedDefinitionReferences } from "./test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import { cardSpecSetIdsForDefinitionId } from "@netgrid/cards/engine";
@@ -2203,12 +2204,12 @@ describe("MVP 0.1 engine foundation", () => {
     });
     expect(
       state.randomDrawRecords.some(
-        (record) => record.purpose === "setup.shuffle.runner.mulligan",
+        (record) => record.purpose[0] === RandomPurposeCode.MulliganRunnerShuffle,
       ),
     ).toBe(true);
     expect(
       state.randomDrawRecords.some(
-        (record) => record.purpose === "setup.draw.runner.mulligan_hand",
+        (record) => record.purpose[0] === RandomPurposeCode.MulliganRunnerDraw,
       ),
     ).toBe(true);
     expect(
@@ -2673,7 +2674,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
       expect(state.randomDrawRecords.at(-1)).toMatchObject({
         counter: randomBefore,
-        purpose: `hq_multiaccess:${state.run?.runId}:selection:0`,
+        purpose: [RandomPurposeCode.HqMultiaccess, state.run?.runId, 0],
       });
       expect(state.randomCounter).toBe(randomBefore + 1);
       for (const definitionId of hqDefinitions) {

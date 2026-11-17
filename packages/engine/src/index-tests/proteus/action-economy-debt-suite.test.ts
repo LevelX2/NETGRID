@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -374,7 +375,9 @@ function viacoxStateForRoll(
     }
     const next = nextRunnerActionPhase(state);
     const randomRecord = next.randomDrawRecords.find((record) =>
-      record.purpose.includes("viacox"),
+      record.purpose[0] === RandomPurposeCode.TurnStartActionDie &&
+      record.purpose[1] === 0 &&
+      record.purpose[2] === BARGAIN_WITH_VIACOX,
     );
     const rolled = randomRecord
       ? Math.floor(randomRecord.value * 6) + 1
@@ -901,7 +904,9 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       );
       expect(
         state.randomDrawRecords.some((record) =>
-          record.purpose.includes("viacox"),
+          record.purpose[0] === RandomPurposeCode.TurnStartActionDie &&
+          record.purpose[1] === 0 &&
+          record.purpose[2] === BARGAIN_WITH_VIACOX,
         ),
       ).toBe(true);
 
@@ -997,7 +1002,9 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     expect(grant?.dieRoll).toBeLessThanOrEqual(6);
     expect(
       state.randomDrawRecords.some((record) =>
-        record.purpose.includes("viacox"),
+        record.purpose[0] === RandomPurposeCode.TurnStartActionDie &&
+        record.purpose[1] === 0 &&
+        record.purpose[2] === BARGAIN_WITH_VIACOX,
       ),
     ).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(

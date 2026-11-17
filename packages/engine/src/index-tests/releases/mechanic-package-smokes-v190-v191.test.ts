@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -254,9 +255,8 @@ describe("V1.9.0 Mechanikpaket I", () => {
           String(action.payload?.breakerId) === blinkId,
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
-        record.purpose.startsWith(
-          "v190.die.icebreaker.random_break_or_damage.219.",
-        ),
+        record.purpose[0] === RandomPurposeCode.BreakerRandomDie &&
+        record.purpose[1] === 219,
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
@@ -356,9 +356,8 @@ describe("V1.9.0 Mechanikpaket I", () => {
         "postPassTrashCheckUsedBreakerIdsThisEncounter",
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
-        record.purpose.startsWith(
-          "v190.die.217.post_encounter.",
-        ),
+        record.purpose[0] === RandomPurposeCode.PostEncounterDie &&
+        record.purpose[1] === 217,
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
@@ -422,9 +421,8 @@ describe("V1.9.0 Mechanikpaket I", () => {
           String(action.payload?.breakerId) === blinkId,
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
-        record.purpose.startsWith(
-          "v190.die.icebreaker.random_break_or_damage.219.",
-        ),
+        record.purpose[0] === RandomPurposeCode.BreakerRandomDie &&
+        record.purpose[1] === 219,
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
@@ -537,9 +535,8 @@ describe("V1.9.0 Mechanikpaket I", () => {
     const discarded = state.corp.archives.slice(-Math.min(5, hqBefore));
     expect(new Set(discarded).size).toBe(discarded.length);
     const discardRecords = state.randomDrawRecords.filter((record) =>
-      record.purpose.startsWith(
-        "card_implementation.random.327.hq_discard",
-      ),
+      record.purpose[0] === RandomPurposeCode.ImplementationHqDiscard &&
+      record.purpose[1] === 327,
     );
     expect(discardRecords).toHaveLength(Math.min(5, hqBefore));
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
@@ -713,7 +710,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "printed_subroutines_trash_program,printed_subroutines_end_the_run",
+        "0,1",
       encounterWillEndRun: true,
     });
     unbroken = apply(
@@ -879,7 +876,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     expect(tesseractContinue.payload).toMatchObject({
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "printed_subroutines_trash_program,printed_subroutines_end_the_run",
+        "0,1",
     });
     expect(tesseractContinue.payload).not.toHaveProperty(
       "payOrEndRunSubroutineIndexes",
@@ -974,7 +971,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       );
 
       const dieRecord = state.randomDrawRecords.find((record) =>
-        record.purpose.startsWith("v190.die.rewind_run_to_rezzed_ice_by_die."),
+        record.purpose[0] === RandomPurposeCode.RewindEncounterDie,
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
@@ -1187,7 +1184,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
       state = applyChoices(state, "corp", selectedIds);
 
       const randomRecords = state.randomDrawRecords.filter((record) =>
-        record.purpose.startsWith("v191.random.runner_virus_hq_discard_phase"),
+        record.purpose[0] === RandomPurposeCode.VirusHqDiscard,
       );
       expect(randomRecords).toHaveLength(1);
       const discardEvent = [...state.eventLog]
@@ -1263,9 +1260,8 @@ describe("V1.9.1 Mechanikpaket J", () => {
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     const dieRecords = state.randomDrawRecords.filter((record) =>
-      record.purpose.startsWith(
-        "v190.die.virus_counter.246.start_of_turn.roll.",
-      ),
+      record.purpose[0] === RandomPurposeCode.VirusRunnerStartDie &&
+      record.purpose[1] === 246,
     );
     expect(dieRecords.length).toBeGreaterThan(0);
 

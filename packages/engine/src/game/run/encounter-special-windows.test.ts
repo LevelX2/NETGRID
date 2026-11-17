@@ -1,3 +1,4 @@
+import { RandomPurposeCode, type RandomPurpose } from "@netgrid/shared";
 import {
   type CardInstance,
   type CardInstanceId,
@@ -215,7 +216,7 @@ describe("encounter special windows boundary", () => {
     const state = makeState();
     state.run!.encounteredIceId = "ice_current" as CardInstanceId;
     const legalAction = { payload: {} } as LegalAction;
-    const purposes: string[] = [];
+    const purposes: RandomPurpose[] = [];
     const host = encounterSpecialWindowHost(state, {
       rollDie: (purpose) => {
         purposes.push(purpose);
@@ -237,7 +238,7 @@ describe("encounter special windows boundary", () => {
       repositionIndex: 2,
     });
     expect(purposes).toEqual([
-      "rewind_run_to_rezzed_ice_by_die.1.ice_current",
+      [RandomPurposeCode.RewindEncounterDie, 1, "ice_current"],
     ]);
     expect(state.run?.vacuumLinkRewindChoice).toMatchObject({
       rezzedIceBack: 2,

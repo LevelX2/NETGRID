@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
@@ -20,7 +21,6 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import { nextRandom } from "../../game/state/draw-random";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
@@ -1749,7 +1749,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);
     expect(
       state.randomDrawRecords.some((record) =>
-        record.purpose.includes("start_turn_random_effect_table."),
+        record.purpose[0] === RandomPurposeCode.RunnerStartEffectDie &&
+        record.purpose[1] === 384,
       ),
     ).toBe(true);
     expect(
@@ -1799,8 +1800,6 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           state,
           384,
         );
-        for (let index = 0; index < seedIndex; index += 1)
-          nextRandom(state, `test.quest_outcome_offset.${index}`);
         const randomBefore = state.randomDrawRecords.length;
         const replayStart = state.eventLog.length;
         state = apply(state, "runner", (action) => action.type === "end_turn");

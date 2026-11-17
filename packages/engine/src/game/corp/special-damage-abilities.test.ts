@@ -1,3 +1,4 @@
+import { RandomPurposeCode, type RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -85,7 +86,7 @@ function makeHost(legalAction?: LegalAction) {
       amount: number;
       source: CardDefinitionId;
     }>,
-    rolls: [] as string[],
+    rolls: [] as RandomPurpose[],
     trashedCorp: [] as CardInstanceId[],
   };
   const host: CorpSpecialDamageAbilityHost = {
@@ -315,7 +316,7 @@ describe("corp special damage abilities", () => {
       dieRoll: 2,
       sourceTrashed: true,
     });
-    expect(calls.rolls).toEqual(["v1921.die.551.tag_damage"]);
+    expect(calls.rolls).toEqual([[RandomPurposeCode.TagDamageDie, 551]]);
     expect(calls.damages).toEqual([{ type: "meat", amount: 10, source: 551 }]);
     expect(calls.trashedCorp).toEqual(["dog"]);
     expect(legalAction.payload).toMatchObject({

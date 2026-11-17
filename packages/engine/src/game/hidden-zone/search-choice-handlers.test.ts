@@ -1,3 +1,4 @@
+import { type RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -145,7 +146,7 @@ function host(
     side: "runner",
     payload: {},
   } as LegalAction;
-  const shuffles: string[] = [];
+  const shuffles: RandomPurpose[] = [];
   const trashed: CardInstanceId[] = [];
   return {
     choice: selectedChoice,

@@ -1,3 +1,4 @@
+import { RandomPurposeCode, type RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardInstance,
@@ -117,7 +118,7 @@ describe("hidden zone trigger execution", () => {
       1272389757,
       "runner",
     );
-    const shuffledPurposes: string[] = [];
+    const shuffledPurposes: RandomPurpose[] = [];
     const action = triggerAction(state, {
       cardId: sourceId,
       v1915RunnerProgramAbility: "top5_program_install",
@@ -135,7 +136,7 @@ describe("hidden zone trigger execution", () => {
 
     expect(state.pendingChoice).toBeUndefined();
     expect(shuffledPurposes).toEqual([
-      `v1915.revealed_stack_program_install.shuffle.no_program.${sourceId}.1`,
+      [RandomPurposeCode.RevealedProgramEmptyShuffle, sourceId, 1],
     ]);
     expect(action.payload).toMatchObject({
       programFound: false,
@@ -158,7 +159,7 @@ describe("hidden zone trigger execution", () => {
 });
 
 type HostOptions = {
-  shuffleRunnerStack?: (purpose: string) => void;
+  shuffleRunnerStack?: (purpose: RandomPurpose) => void;
 };
 
 function baseState(): GameState {

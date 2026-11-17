@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import type { GameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { cloneGameStateForAction } from "./apply-action-state";
@@ -38,10 +39,11 @@ describe("apply action state clone", () => {
       seed: "arch-62-apply-action-state-random",
       setupMode: "completed",
     });
+    const counter = state.randomCounter++;
     state.randomDrawRecords.push({
-      counter: 7,
-      purpose: "arch_62_clone_policy",
-      value: 3,
+      counter,
+      purpose: [RandomPurposeCode.StackSearchShuffle, state.stateVersion],
+      value: 0.3,
     });
 
     const clone = cloneGameStateForAction(state);
@@ -52,7 +54,10 @@ describe("apply action state clone", () => {
     expect(clone.randomDrawRecords[recordIndex]).not.toBe(
       state.randomDrawRecords[recordIndex],
     );
+    expect(clone.randomDrawRecords[recordIndex]!.purpose).not.toBe(
+      state.randomDrawRecords[recordIndex]!.purpose,
+    );
     clone.randomDrawRecords[recordIndex]!.counter = 99;
-    expect(state.randomDrawRecords[recordIndex]!.counter).toBe(7);
+    expect(state.randomDrawRecords[recordIndex]!.counter).toBe(counter);
   });
 });
