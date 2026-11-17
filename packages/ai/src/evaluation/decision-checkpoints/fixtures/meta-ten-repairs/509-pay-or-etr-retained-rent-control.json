@@ -1,6 +1,6 @@
 {
   "originalPrefix": 21,
-  "checkpointHash": "fnv1a:021dcae8",
+  "checkpointHash": "fnv1a:4f748f41",
   "originalCurrentEncounterCost": 1,
   "controlledCurrentEncounterCost": 1,
   "sameCurrentRunAccess": true,
@@ -8,38 +8,38 @@
   "retainedRent": true,
   "rows": [
     {
-      "id": "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
-      "hash": "fnv1a:a94a8457",
+      "id": "runner.continue_run.0.0.1",
+      "hash": "fnv1a:684ae614",
       "credits": 3,
       "phase": "movement"
     },
     {
       "id": "runner.continue_run",
-      "hash": "fnv1a:f6a5c9a7",
+      "hash": "fnv1a:ed00b846",
       "credits": 3,
       "phase": "access"
     },
     {
       "id": "runner.access_card",
-      "hash": "fnv1a:b083b7f1",
+      "hash": "fnv1a:9048b492",
       "credits": 3,
       "phase": "access"
     },
     {
       "id": "runner.trash_accessed_card.c3kn.1",
-      "hash": "fnv1a:89a9f080",
+      "hash": "fnv1a:7ed02a93",
       "credits": 2,
       "phase": "access"
     },
     {
       "id": "runner.access_card",
-      "hash": "fnv1a:48746371",
+      "hash": "fnv1a:c3ccfd88",
       "credits": 2,
       "phase": "access"
     },
     {
       "id": "runner.decline_trash",
-      "hash": "fnv1a:651263b2",
+      "hash": "fnv1a:6170067f",
       "credits": 2
     }
   ],

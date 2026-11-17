@@ -101,7 +101,7 @@ it("retains the native unused universal source at equal complete current path co
 it("uses exact offered Pay-or-ETR payment instead of a same-cost newly consumed source", () => {
   const d = decide("g13d22");
   expect(d.actionId).toBe(
-    "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
+    "runner.continue_run.0.0.1",
   );
   expect(economics(d.input, d.actionId)).toMatchObject({
     totalCost: 1,
@@ -243,7 +243,7 @@ it("requires exact offered open continuation payment and rejects an unknown inne
   const action = input.legalActions.find(
     (a: { actionId: string }) =>
       a.actionId ===
-      "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
+      "runner.continue_run.0.0.1",
   )!;
   for (const payload of [
     { ...action.payload, encounterWillEndRun: true },
