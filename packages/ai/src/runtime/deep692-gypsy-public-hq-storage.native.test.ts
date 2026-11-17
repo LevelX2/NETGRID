@@ -40,13 +40,13 @@ function project(change?: "not_stored" | "no_identity" | "private_sentinels") {
 }
 it("retains the two published HQ-storage facts through the real native DTO boundary", () => {
   const input = project(),
-    event = input.playerView.publicEvents.find((e) => e.eventId === "evt_105");
+    event = input.playerView.publicEvents.find((e) => e.eventId === saved.enginePublicEvent.eventId);
   expect(event?.publicPayload).toMatchObject({
     agendaStoredInHq: true,
     storedAgendaDefinitionId: 424,
   });
   expect(
-    input.eventTail.find((e) => e.eventId === "evt_105")?.publicPayload,
+    input.eventTail.find((e) => e.eventId === saved.enginePublicEvent.eventId)?.publicPayload,
   ).toMatchObject({
     agendaStoredInHq: true,
     storedAgendaDefinitionId: 424,
@@ -57,7 +57,7 @@ it("lets the existing belief owner learn the agenda that the Engine publicly mov
     reconstructBeliefState(project()).runnerOpponentModel?.hqHandMemory;
   expect(memory?.knownDefinitions).toContain(424);
   expect(memory?.invalidationReasons).toContain(
-    "gypsy_known_agenda_stored_in_hq:evt_105",
+    `gypsy_known_agenda_stored_in_hq:${saved.enginePublicEvent.eventId}`,
   );
 });
 it.each(["not_stored", "no_identity"] as const)(

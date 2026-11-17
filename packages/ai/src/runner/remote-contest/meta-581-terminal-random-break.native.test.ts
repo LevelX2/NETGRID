@@ -52,7 +52,7 @@ function evaluation(input: AiDecisionInputWithDeckCapabilities) {
     actionCandidates: buildActionSemanticCandidates(input),
     deckCapabilities: input.ownDeckCapabilities!,
     strategicIntent: input.ownRunnerStrategicIntent!,
-  }).find((e) => e.targetServerId === "remote_1")!;
+  }).find((e) => e.targetServerId === "r1")!;
 }
 function play(seed?: string) {
   resetResidentPlanPortfolioMemory();
@@ -96,13 +96,13 @@ function play(seed?: string) {
     )!;
     expect(action).toBeDefined();
     if (n === 0) {
-      expect(action.actionId).toBe("runner.start_run.remote_1");
+      expect(action.actionId).toBe("runner.start_run.r1");
       expect(
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe("runner.contest_remote");
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Aremote_1");
+      ).toBe("plan:runner.contest_remote:remote%3Ar1");
     }
     if (action.type === "break_subroutine") {
       expect(action.payload?.subroutineIndex).toBe(1);
@@ -111,7 +111,7 @@ function play(seed?: string) {
       );
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Aremote_1");
+      ).toBe("plan:runner.contest_remote:remote%3Ar1");
       expect(JSON.stringify(decision.decisionDebug)).toContain(
         "runner_bound_terminal_random_break_last_chance",
       );
@@ -128,6 +128,18 @@ function play(seed?: string) {
     const result = applyAction(state, command);
     expect(result.ok).toBe(true);
     if (!result.ok) throw Error(result.error.message);
+    if (action.type === "break_subroutine") {
+      const dice = result.state.randomDrawRecords
+        .slice(state.randomDrawRecords.length)
+        .filter((draw) => draw.purpose.startsWith("v190.die.icebreaker.random_break_or_damage."));
+      expect(dice).toHaveLength(1);
+      const roll = Math.floor(dice[0]!.value * 6) + 1;
+      expect(result.event.publicPayload).toMatchObject({
+        randomBreakOutcomeRoll: roll,
+        randomBreakOutcomeSuccess: roll >= 4,
+        randomBreakOutcomeDamageAmount: roll >= 4 ? 0 : roll,
+      });
+    }
     state = result.state;
     steps.push({
       action: action.actionId,
@@ -150,8 +162,8 @@ function play(seed?: string) {
   expect(hashGameState(replay)).toBe(hashGameState(state));
   return state.winner;
 }
-it("keeps the original losing die while attempting the bound last chance instead of four economy actions", () => {
-  expect(play()).toBe("corp");
+it("attempts the bound last chance under the original seed and follows the current deterministic die", () => {
+  expect(play()).toBe("runner");
 }, 30000);
 it("preserves a real winning branch and honest backfire losses over 24 separate Engine dice", () => {
   const winners = Array.from({ length: 24 }, (_, i) =>
@@ -183,7 +195,7 @@ it.each([
     input.playerView.own.gripOrHq = [input.playerView.own.rig![0]!];
   if (kind === "tag") input.playerView.own.tags = 1;
   if (kind === "missing-rig-fact") delete input.playerView.own.rig;
-  const ice = input.playerView.servers.find((s) => s.id === "remote_1")!
+  const ice = input.playerView.servers.find((s) => s.id === "r1")!
     .ice[1]!;
   if (kind === "unknown-ice") ice.known = false;
   if (kind === "positive-damage")

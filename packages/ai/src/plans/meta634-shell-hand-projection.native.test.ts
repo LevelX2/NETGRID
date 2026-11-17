@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import type { LegalAction } from "@netgrid/shared";
 import { afterEach, expect, it } from "vitest";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -22,13 +23,11 @@ function source() {
     ...structuredClone(cp.input),
     ...buildAiDecisionInputDto(structuredClone(cp.input)),
   };
-  const action = input.legalActions.find((a: { actionId: string }) =>
-    a.actionId.includes(".set_aside_from_grip."),
-  );
-  const target = action.payload.targetCardId;
+  const target = input.playerView.own.gripOrHq.find((card: { definitionId?: number }) => card.definitionId === 356);
   const actual = input.legalActions.find(
-    (a: { payload?: { targetCardId?: string } }) =>
-      a.payload?.targetCardId?.includes("tycho-mem-chip"),
+    (a: { payload?: { delayedInstallAbility?: string; targetCardId?: string } }) =>
+      a.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+      a.payload.targetCardId === target?.instanceId,
   );
   if (!target || !actual) throw Error("native_target_missing");
   return {
@@ -66,8 +65,12 @@ it("keeps the native transfer valid but does not choose unneeded memory preparat
   );
   const before = JSON.stringify(input.playerView),
     decision = chooseAiAction(input);
+  const score = input.legalActions.find((a: LegalAction) =>
+    a.type === "play_event" && a.source === "c1z5" && a.abilityRef?.sourceAbilityId === 404,
+  );
+  expect(score).toBeDefined();
   expect(decision).toMatchObject({
-    actionId: "runner.play_event.runner_320_1.runner_320_1.onr_v1_108_score:abilities_on_play_gain_credits",
+    actionId: score?.actionId,
     fallbackUsed: false,
     timeoutUsed: false,
   });
