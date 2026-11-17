@@ -637,6 +637,33 @@ describe("Corp same-turn score conversion", () => {
     ).toMatchObject({ actionId: "falsified", sourceCardId: "funded" });
   });
 
+  it("does not spend one movement operation on two different counter sources", () => {
+    const agenda = card("agenda", "agenda", { advancementRequirement: 4 });
+    const sources = ["left", "right"].map((id) =>
+      card(id, "asset", { advancementCounters: 2 }),
+    );
+    const input = corpInput({
+      clicks: 3,
+      credits: 0,
+      hq: [agenda],
+      root: sources,
+      actions: [
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("one-move-operation", "play_operation", "falsified", {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: 3,
+          scoreConversionSourceMode: "chosen_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+    expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+  });
+
   it("executes the Counter Shell Team plus Falsified difficulty-four score line", () => {
     const agenda = card("project-venice", "agenda", {
       advancementRequirement: 4,

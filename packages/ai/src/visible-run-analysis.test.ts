@@ -19,6 +19,7 @@ import {
   canVisibleBreakerBreakQuotedSubroutines,
   creditsToBreakVisibleSubroutinesWithBreaker,
   minimumCreditsToBreakVisibleSubroutines,
+  projectIceForRunPathEffects,
 } from "./run-analysis/visible-run-breaker-path";
 import {
   visibleRunnerTraceSupport,
@@ -62,6 +63,23 @@ describe("visible run analysis known-path classification", () => {
     expect(() => assessKnownRezzedIcePath([ice], [], 5)).toThrow(
       "missing its authoritative effective run quote",
     );
+  });
+
+  it("gives each projected end-the-run subroutine a unique identity", () => {
+    const ice = classicWallIce("projected-wall");
+    const pathIce = projectIceForRunPathEffects(
+      ice,
+      [
+        { addsFutureEndTheRunSubroutines: 1 },
+        { addsFutureEndTheRunSubroutines: 2 },
+      ],
+      0,
+    );
+    const ids = pathIce.effectiveRunQuote!.subroutines.map(
+      (subroutine) => subroutine.id,
+    );
+    expect(ids).toHaveLength(ice.effectiveRunQuote!.subroutines.length + 3);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("classifies cost-blocked known no-access paths", () => {
@@ -1344,6 +1362,21 @@ describe("visible run analysis runner run credit pools", () => {
     });
   });
 
+  it("uses the funded hosted breaker even if another copy needs fewer gross credits", () => {
+    const cheaper = { ...codecrackerBreaker("runner-cheaper"), strength: 1 };
+    const funded = codecrackerBreaker("runner-funded");
+    const ice = classicCodeGateIce("remote-hosted-code-gate");
+    const assessment = assessKnownRezzedIcePath([ice], [cheaper, funded], {
+      credits: 0,
+      traceEligibleCredits: 0,
+      hostedIcebreakerCreditsByBreakerInstanceId: { [funded.instanceId]: 2 },
+    });
+    expect(assessment).toMatchObject({
+      canReachAccess: true,
+      visibleBreakCost: 2,
+    });
+  });
+
   it("uses visible non-noisy breaker credits for a Codecracker known path", () => {
     const rig = [
       codecrackerBreaker("runner-codecracker"),
@@ -1778,6 +1811,28 @@ describe("visible run analysis trace hazards", () => {
       safeForAccess: true,
       consumedSourceIds: [],
     });
+  });
+
+  it("cannot use two mutually exclusive link abilities of one installed source", () => {
+    const source = {
+      sourceCardInstanceId: "shared-source",
+      sourceDefinitionId: "shared-definition",
+      sourceTitle: "Link Source",
+      activationCost: 1,
+      tapSource: false,
+      trashSource: false,
+      safeForAccess: true,
+      useLimit: { kind: "once_per_trace" as const },
+    };
+    expect(
+      visibleTracePostBidSelections(
+        [
+          { ...source, linkDelta: 2 },
+          { ...source, linkDelta: 3 },
+        ],
+        8,
+      ).map((selection) => selection.linkDelta),
+    ).toEqual([0, 2, 3]);
   });
 
   it("uses restricted trace credits for post-bid activation costs", () => {

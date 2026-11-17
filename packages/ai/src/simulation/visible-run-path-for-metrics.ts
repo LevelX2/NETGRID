@@ -1,5 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import { visibleIcePathTraceContext } from "../run-analysis/trace-rules-profile-planning";
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import {
   runnerRunPathCreditBudgetWithVisiblePools,
   type assessKnownRezzedIcePath,
@@ -20,6 +20,6 @@ export function quoteVisibleRunnerPathForMetrics(
     ),
     server?.root ?? [],
     input.playerView.opponent.credits,
-    visibleIcePathTraceContext(input),
+    visibleRunnerPathTraceContext(input),
   );
 }

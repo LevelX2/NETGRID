@@ -48,6 +48,7 @@ export function projectIceForRunPathEffects(
   const subroutines = baseQuote.subroutines.map((subroutine) => ({
     ...subroutine,
   }));
+  let projectedSubroutineCount = 0;
   for (const effect of effects) {
     const addedEndTheRun = Math.max(
       0,
@@ -55,7 +56,7 @@ export function projectIceForRunPathEffects(
     );
     for (let index = 0; index < addedEndTheRun; index += 1) {
       subroutines.push({
-        id: `visible_projection.future_end_the_run.${iceIndex}.${index + 1}`,
+        id: `visible_projection.future_end_the_run.${iceIndex}.${++projectedSubroutineCount}`,
         type: "end_the_run",
       });
     }
@@ -282,7 +283,6 @@ export function minimumCreditsToBreakVisibleSubroutines(
     targetSubroutines,
     additionalBreakCostPerSubroutine,
   );
-  if (freeBreak) return freeBreak;
   const costs = rigCards
     .map((card) =>
       creditsToBreakVisibleSubroutinesWithBreaker(
@@ -294,13 +294,7 @@ export function minimumCreditsToBreakVisibleSubroutines(
         allowRandomBreakAttempt,
       ),
     )
-    .filter((cost): cost is BreakAssessment => cost !== undefined)
-    .sort(
-      (left, right) =>
-        left.cost - right.cost ||
-        compareRestrictedBreakerPayment(creditBudget, left, right) ||
-        left.breakerInstanceId.localeCompare(right.breakerInstanceId),
-    );
+    .filter((cost): cost is BreakAssessment => cost !== undefined);
   const withPendingFreeBreak: BreakAssessment[] = (
     targetSubroutines.length > 1
       ? targetSubroutines
@@ -332,10 +326,8 @@ export function minimumCreditsToBreakVisibleSubroutines(
                 (assessment): assessment is BreakAssessment =>
                   assessment !== undefined,
               )
-              .sort(
-                (left, right) =>
-                  left.cost - right.cost ||
-                  compareRestrictedBreakerPayment(creditBudget, left, right),
+              .sort((left, right) =>
+                compareBreakAssessments(creditBudget, left, right),
               )[0];
             return paid
               ? {
@@ -349,11 +341,9 @@ export function minimumCreditsToBreakVisibleSubroutines(
           .filter((assessment) => assessment !== undefined)
       : []
   ) as BreakAssessment[];
-  return [...costs, ...withPendingFreeBreak].sort(
-    (left, right) =>
-      left.cost - right.cost ||
-      compareRestrictedBreakerPayment(creditBudget, left, right) ||
-      left.breakerInstanceId.localeCompare(right.breakerInstanceId),
+  if (freeBreak) costs.unshift(freeBreak);
+  return [...costs, ...withPendingFreeBreak].sort((left, right) =>
+    compareBreakAssessments(creditBudget, left, right),
   )[0];
 }
 
@@ -431,7 +421,6 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
         })),
     additionalBreakCostPerSubroutine,
   );
-  if (freeBreak) return freeBreak;
   const costs = rigCards
     .map((card) =>
       creditsToBreakEndTheRunSubroutinesWithBreaker(
@@ -444,13 +433,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
         allowRandomBreakAttempt,
       ),
     )
-    .filter((cost): cost is BreakAssessment => cost !== undefined)
-    .sort(
-      (left, right) =>
-        left.cost - right.cost ||
-        compareRestrictedBreakerPayment(creditBudget, left, right) ||
-        left.breakerInstanceId.localeCompare(right.breakerInstanceId),
-    );
+    .filter((cost): cost is BreakAssessment => cost !== undefined);
   const allTargets =
     targetSubroutines ??
     (visibleRunCardDefinition(ice.definitionId ?? "")?.subroutines ?? [])
@@ -488,10 +471,8 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
                 (assessment): assessment is BreakAssessment =>
                   assessment !== undefined,
               )
-              .sort(
-                (left, right) =>
-                  left.cost - right.cost ||
-                  compareRestrictedBreakerPayment(creditBudget, left, right),
+              .sort((left, right) =>
+                compareBreakAssessments(creditBudget, left, right),
               )[0];
             return paid
               ? {
@@ -505,11 +486,9 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
           .filter((assessment) => assessment !== undefined)
       : []
   ) as BreakAssessment[];
-  return [...costs, ...withPendingFreeBreak].sort(
-    (left, right) =>
-      left.cost - right.cost ||
-      compareRestrictedBreakerPayment(creditBudget, left, right) ||
-      left.breakerInstanceId.localeCompare(right.breakerInstanceId),
+  if (freeBreak) costs.unshift(freeBreak);
+  return [...costs, ...withPendingFreeBreak].sort((left, right) =>
+    compareBreakAssessments(creditBudget, left, right),
   )[0];
 }
 
@@ -1015,16 +994,23 @@ export function hasSubtype(
   return subtypes.some((subtype) => subtypeKey(subtype) === expected);
 }
 
-// For equal mechanical cost, preserve cash by using the actually applicable
-// restricted pool. Instance-id ordering must not hide a funded hosted copy.
-function compareRestrictedBreakerPayment(
+function compareBreakAssessments(
   budget: MutableRunnerRunPathCreditBudget | undefined,
   left: BreakAssessment,
   right: BreakAssessment,
 ): number {
-  if (!budget) return 0; // A deliberately budget-free quote compares gross cost.
+  const leftPayment = budget
+    ? projectBreakerCreditPayment(budget, left)
+    : undefined;
+  const rightPayment = budget
+    ? projectBreakerCreditPayment(budget, right)
+    : undefined;
   return (
-    projectBreakerCreditPayment(budget, right).creditsAfterPath -
-    projectBreakerCreditPayment(budget, left).creditsAfterPath
+    Number(rightPayment?.affordable ?? false) -
+      Number(leftPayment?.affordable ?? false) ||
+    left.cost - right.cost ||
+    (rightPayment?.creditsAfterPath ?? 0) -
+      (leftPayment?.creditsAfterPath ?? 0) ||
+    left.breakerInstanceId.localeCompare(right.breakerInstanceId)
   );
 }

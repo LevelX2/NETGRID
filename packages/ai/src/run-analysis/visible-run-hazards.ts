@@ -1005,6 +1005,7 @@ export function visibleTracePostBidSelections(
     rewardCreditsOnAvoidTrace: number;
     safeForAccess: boolean;
     consumedSourceIds: string[];
+    oncePerTraceSourceIds: string[];
   }> = [
     {
       linkDelta: 0,
@@ -1012,9 +1013,18 @@ export function visibleTracePostBidSelections(
       rewardCreditsOnAvoidTrace: 0,
       safeForAccess: true,
       consumedSourceIds: [],
+      oncePerTraceSourceIds: [],
     },
   ];
-  for (const option of options) {
+  if (!Number.isSafeInteger(activationBudget) || activationBudget < 0)
+    throw new Error("invalid_trace_activation_budget");
+  const consumesSource = (option: VisibleRunnerTracePostBidLinkOption) =>
+    option.tapSource || option.trashSource;
+  // Reusable payments can happen before the tap or trash of their source.
+  for (const option of [...options].sort(
+    (left, right) =>
+      Number(consumesSource(left)) - Number(consumesSource(right)),
+  )) {
     if (
       option.useLimit.kind === "repeatable_while_legal" &&
       option.activationCost === 0
@@ -1023,15 +1033,22 @@ export function visibleTracePostBidSelections(
         `Unbegrenzte kostenlose Post-Bid-Link-Nutzung: ${option.sourceDefinitionId}`,
       );
     const nextSelections = [...selections];
+    const oneUse =
+      option.useLimit.kind === "once_per_trace" || consumesSource(option);
     for (const selection of selections) {
+      if (
+        selection.consumedSourceIds.includes(option.sourceCardInstanceId) ||
+        (oneUse &&
+          selection.oncePerTraceSourceIds.includes(option.sourceCardInstanceId))
+      )
+        continue;
       const remainingBudget = Math.max(
         0,
         activationBudget - selection.activationCost,
       );
-      const maxUses =
-        option.useLimit.kind === "once_per_trace"
-          ? 1
-          : Math.floor(remainingBudget / option.activationCost);
+      const maxUses = oneUse
+        ? 1
+        : Math.floor(remainingBudget / option.activationCost);
       for (let uses = 1; uses <= maxUses; uses += 1) {
         const activationCost =
           selection.activationCost + option.activationCost * uses;
@@ -1047,12 +1064,17 @@ export function visibleTracePostBidSelections(
             option.tapSource || option.trashSource
               ? [...selection.consumedSourceIds, option.sourceCardInstanceId]
               : selection.consumedSourceIds,
+          oncePerTraceSourceIds: oneUse
+            ? [...selection.oncePerTraceSourceIds, option.sourceCardInstanceId]
+            : selection.oncePerTraceSourceIds,
         });
       }
     }
     selections = nextSelections;
   }
-  return selections;
+  return selections.map(
+    ({ oncePerTraceSourceIds: _used, ...selection }) => selection,
+  );
 }
 
 function traceSupportQuoteWithoutConsumedSources(
@@ -1205,7 +1227,6 @@ export function unbrokenEffectIsUnavoidableTraceRunLock(
     sourceSubroutine,
     traceRulesProfile,
   );
-  if (traceBaseStrength === undefined) return true;
   const support = visibleRunnerTraceSupport(
     options.runnerTraceSupportQuote,
     remainingCredits,
@@ -1217,6 +1238,9 @@ export function unbrokenEffectIsUnavoidableTraceRunLock(
         : {}),
     },
   );
+  if (cheapestTraceSuccessCancel(support, support.availableCredits))
+    return false;
+  if (traceBaseStrength === undefined) return true;
   const corpStrength =
     traceBaseStrength + Math.max(0, options.visibleCorpBidCapacity ?? 0);
   return (

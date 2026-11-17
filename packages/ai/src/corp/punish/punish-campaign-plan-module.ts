@@ -5,7 +5,10 @@ import {
   state,
 } from "../../plans/corp-tactical-module-support";
 import type { ResourceGap } from "../../plans/plan-assessment";
-import type { PlanModule } from "../../plans/plan-scheduler";
+import type {
+  PlanModule,
+  PlanSchedulerContext,
+} from "../../plans/plan-scheduler";
 import { punishCandidates, punishMaterialization } from "./punish-plan-support";
 import { CorpPunishCampaignSignal, PunishState } from "./punish-types";
 
@@ -20,7 +23,7 @@ export function punishCampaignModule(): PlanModule {
           signal.campaignId,
           { kind: "punish_campaign", signal } satisfies PunishState,
           punishCampaignPriority(signal),
-          signal.routeContract ? [] : punishCandidates(context, signal),
+          punishCampaignCandidates(context, signal),
           signal.evidenceCodes ?? signal.evidenceCode,
           { kind: "player", id: "runner" },
           "sticky_goal",
@@ -35,9 +38,7 @@ export function punishCampaignModule(): PlanModule {
     assess: (instance, context, portfolio) => {
       const current = state<PunishState>(instance);
       const routeExists =
-        !current.signal.routeContract &&
-        current.signal.feasible &&
-        punishCandidates(context, current.signal).length > 0;
+        punishCampaignCandidates(context, current.signal).length > 0;
       return assessment(
         instance,
         punishCampaignPriority(current.signal),
@@ -67,6 +68,15 @@ export function punishCampaignModule(): PlanModule {
         : punishMaterialization(instance, context);
     },
   };
+}
+
+function punishCampaignCandidates(
+  context: PlanSchedulerContext,
+  signal: CorpPunishCampaignSignal,
+) {
+  return signal.routeContract || signal.developmentDrawNeed
+    ? []
+    : punishCandidates(context, signal);
 }
 
 function punishCampaignPriority(

@@ -3757,10 +3757,7 @@ function buildCorpDomain(
     previous,
     scoreProjects,
     ambushes,
-    availableRemoteRezCredits: corpAvailableRemoteRezCredits(
-      input,
-      centralDefenseAllocation,
-    ),
+    availableRemoteRezCredits: corpAvailableRemoteRezCredits(input),
   });
   const { defenseNeeds } = buildCorpDefenseNeeds({
     input,

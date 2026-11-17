@@ -31,6 +31,23 @@ describe("Corp HQ retain payment choice", () => {
     expect(selected).toEqual(["card_high"]);
   });
 
+  it("selects the exact best affordable group from a large pre-cleanup HQ", () => {
+    const cards = Array.from({ length: 24 }, (_, index) =>
+      card(String(index), String(index)),
+    );
+    const input = corpInput(cards, 29);
+    const choice = input.playerView.pendingChoice!;
+    const selected = selectedCorpHqRetainPaymentOptionIds(
+      input,
+      choice,
+      choice.options,
+      (_input, candidate) => ({ total: Number(candidate.instanceId) }),
+    );
+    expect(selected).toEqual(
+      Array.from({ length: 12 }, (_, index) => "card_" + (23 - index)),
+    );
+  });
+
   it("keeps all valuable cards when credits cover both payment and reserve", () => {
     const cards = [card("one", "One"), card("two", "Two")];
     const input = corpInput(cards, 9);

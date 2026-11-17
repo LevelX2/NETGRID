@@ -6,25 +6,19 @@ import {
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
 
-export type CorpDefensePackageRetentionQuote = Readonly<{
+export type CorpDefensePackageRetentionPair = Readonly<{
+  iceInstanceId: string;
+  supportInstanceId: string;
   bonus: number;
-  evidenceCode: string;
 }>;
 
-const NO_PACKAGE_QUOTE: CorpDefensePackageRetentionQuote = Object.freeze({
-  bonus: 0,
-  evidenceCode: "corp_defense_package_retention_not_applicable",
-});
-
-export function quoteCorpDefensePackageRetention(
+export function corpDefensePackageRetentionPairs(
   input: AiDecisionInput,
   retainedCards: readonly VisibleCard[],
-): CorpDefensePackageRetentionQuote {
-  if (input.side !== "corp" || retainedCards.length < 2) {
-    return NO_PACKAGE_QUOTE;
-  }
+): CorpDefensePackageRetentionPair[] {
+  if (input.side !== "corp" || retainedCards.length < 2) return [];
   const allocation = allocateCorpCentralDefenseFromAiFacts({ input });
-  if (allocation.status !== "known") return NO_PACKAGE_QUOTE;
+  if (allocation.status !== "known") return [];
   const serverId = allocation.selectedServerId;
   const evidence = allocation.evidence[serverId];
   const server = input.playerView.servers.find(
@@ -37,7 +31,7 @@ export function quoteCorpDefensePackageRetention(
       evidence.threat !== "terminal" &&
       evidence.recentSuccessfulAccessRunnerTurns === 0)
   ) {
-    return NO_PACKAGE_QUOTE;
+    return [];
   }
   const ice = retainedCards.filter(
     (card) =>
@@ -53,36 +47,19 @@ export function quoteCorpDefensePackageRetention(
       typeof card.definitionId === "string" &&
       definitionHasActionIceRezSupport(card.definitionId),
   );
-  let best:
-    | {
-        ice: VisibleCard;
-        support: VisibleCard;
-        liability: NonNullable<ReturnType<typeof actionIceRezSupportLiability>>;
-        bonus: number;
-      }
-    | undefined;
-  for (const iceCard of ice) {
-    for (const support of supports) {
+  return ice.flatMap((iceCard) =>
+    supports.flatMap((support) => {
       const liability = actionIceRezSupportLiability(support.definitionId!);
-      if (!liability) continue;
-      const liabilityPenalty =
+      if (!liability) return [];
+      const penalty =
         liability === "temporary" ? 60 : liability === "installment" ? 40 : 0;
-      const bonus = 330 + Math.min(8, iceCard.rezCost!) * 10 - liabilityPenalty;
-      if (
-        !best ||
-        bonus > best.bonus ||
-        (bonus === best.bonus &&
-          `${iceCard.instanceId}:${support.instanceId}` <
-            `${best.ice.instanceId}:${best.support.instanceId}`)
-      ) {
-        best = { ice: iceCard, support, liability, bonus };
-      }
-    }
-  }
-  return best
-    ? {
-        bonus: best.bonus,
-        evidenceCode: `corp_defense_package_retention:${serverId}:${best.liability}:ice_rez_${best.ice.rezCost}:bonus_${best.bonus}`,
-      }
-    : NO_PACKAGE_QUOTE;
+      return [
+        {
+          iceInstanceId: iceCard.instanceId,
+          supportInstanceId: support.instanceId,
+          bonus: 330 + Math.min(8, iceCard.rezCost!) * 10 - penalty,
+        },
+      ];
+    }),
+  );
 }

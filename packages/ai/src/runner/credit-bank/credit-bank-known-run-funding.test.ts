@@ -12,6 +12,7 @@ import {
 } from "../../runner-run-target-evaluation";
 import { assessRunnerRunFundingAdmission } from "../../runtime/runner-run-funding-admission";
 import { creditBankFundsKnownUrgentRun } from "./credit-bank-known-run-funding";
+import { runnerCreditBankRunFundingClickCapacity } from "./credit-bank-basic-run-funding";
 
 function params() {
   const fixture = structuredClone(cp) as AiDecisionCheckpointV1;
@@ -127,4 +128,24 @@ it("retains the run click and requires an admitted parent", () => {
   p.input.playerView.own.clicks = 4;
   p.admission.admitted = false;
   expect(creditBankFundsKnownUrgentRun(p)).toBeUndefined();
+});
+
+it("reserves the actual number of clicks for the current target run", () => {
+  const { input, target } = params();
+  const action = input.legalActions.find(
+    (offer) => offer.actionId === target.actionId,
+  )!;
+  input.playerView.own.clicks = 2;
+  action.costs = [];
+  expect(runnerCreditBankRunFundingClickCapacity(input, target.actionId)).toBe(
+    2,
+  );
+  action.costs = [{ clicks: 2 }];
+  expect(runnerCreditBankRunFundingClickCapacity(input, target.actionId)).toBe(
+    0,
+  );
+  action.expiresAtStateVersion--;
+  expect(
+    runnerCreditBankRunFundingClickCapacity(input, target.actionId),
+  ).toBeUndefined();
 });

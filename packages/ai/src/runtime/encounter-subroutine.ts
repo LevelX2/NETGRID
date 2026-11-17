@@ -69,7 +69,9 @@ export function isAcceptableNonlethalDamageSubroutine(
       return false;
   }
   const amount = Math.max(1, Math.floor(subroutine.amount ?? 1));
-  return amount <= (input.playerView.own.gripOrHq?.length ?? 0);
+  return (
+    amount + (requiredHandFloor ?? 0) <= input.playerView.own.gripOrHq.length
+  );
 }
 
 export function encounterContinueAcceptsOnlyNonlethalDamageThreats(

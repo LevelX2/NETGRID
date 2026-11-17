@@ -18,6 +18,7 @@ export function corpPunishCampaignOwnsCandidate(
   if (signal.routeContract) {
     return (
       signal.routeContract.quoteStatus === "complete" &&
+      signal.routeContract.quoteStateVersion === candidate.stateVersion &&
       signal.routeContract.horizon === "execute" &&
       signal.routeContract.currentHeadActionId === candidate.actionId &&
       signal.feasible &&

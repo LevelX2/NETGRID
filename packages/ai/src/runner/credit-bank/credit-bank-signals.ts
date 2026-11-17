@@ -1,3 +1,4 @@
+import { mergedPublicHistory } from "../../public-event-history";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type {
@@ -30,7 +31,10 @@ import {
   clickCreditBankProfile,
 } from "../../plans/credit-bank-investment";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
-import { creditBankReplacesBasicRunFunding } from "./credit-bank-basic-run-funding";
+import {
+  creditBankReplacesBasicRunFunding,
+  runnerCreditBankRunFundingClickCapacity,
+} from "./credit-bank-basic-run-funding";
 import { creditBankFloorRecoveryWindow } from "./credit-bank-floor-recovery";
 import { creditBankFundsKnownUrgentRun } from "./credit-bank-known-run-funding";
 import { finiteBankTurnLiquiditySupport } from "./credit-bank-turn-liquidity";
@@ -783,14 +787,6 @@ function creditBankBuiltThisTurn(
   const sourceCardInstanceId = tool.sourceCardInstanceId;
   if (!sourceCardInstanceId) return false;
 
-  const events = uniqueBy(
-    [...input.playerView.publicEvents, ...input.eventTail],
-    (event) => event.eventId,
-  ).sort(
-    (left, right) =>
-      left.stateVersionAfter - right.stateVersionAfter ||
-      left.eventId.localeCompare(right.eventId),
-  );
   const currentTurnSerial = input.playerView.turnSerial;
   if (
     currentTurnSerial === undefined ||
@@ -799,7 +795,7 @@ function creditBankBuiltThisTurn(
   ) {
     return false;
   }
-  return events.some((event) => {
+  return mergedPublicHistory(input).some((event) => {
     const resolvedEffects = Array.isArray(event.publicPayload?.resolvedEffects)
       ? event.publicPayload.resolvedEffects
       : [];
@@ -835,13 +831,7 @@ function runnerCreditBankRunFundingRoute(params: {
       priorityClass?: "P4";
     }
   | undefined {
-  const remainingFundingClicks = Math.max(
-    0,
-    params.input.playerView.own.clicks - 1,
-  );
-  if (remainingFundingClicks <= 0 || params.cashOutActionIds.length === 0) {
-    return undefined;
-  }
+  if (params.cashOutActionIds.length === 0) return undefined;
   const cashOutActionIds = new Set(params.cashOutActionIds);
   for (const evaluation of [...params.runTargets].sort((left, right) => {
     const urgencyDelta =
@@ -859,6 +849,11 @@ function runnerCreditBankRunFundingRoute(params: {
     ) {
       continue;
     }
+    const remainingFundingClicks = runnerCreditBankRunFundingClickCapacity(
+      params.input,
+      evaluation.actionId,
+    );
+    if (remainingFundingClicks === undefined) continue;
     const requiredPostRunReserve =
       params.services.requiredPostRunReserve(evaluation);
     const admission = assessRunnerRunFundingAdmission({
@@ -1129,13 +1124,4 @@ function runnerCreditBankRunFundingRoute(params: {
     }
   }
   return undefined;
-}
-
-function uniqueBy<T>(
-  values: readonly T[],
-  keyForValue: (value: T) => string,
-): T[] {
-  return [
-    ...new Map(values.map((value) => [keyForValue(value), value])).values(),
-  ];
 }

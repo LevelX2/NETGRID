@@ -7,6 +7,7 @@ import {
   KNOWN_HINT_ACTION_CAPACITY_CLASSES,
   KNOWN_HINT_EFFECT_KINDS,
   validateAiHintOntologyFields,
+  validateAiHintActionCapabilitySemantics,
 } from "./hint-ontology";
 
 const repoRoot = path.resolve(
@@ -16,6 +17,35 @@ const repoRoot = path.resolve(
 const currentHints = generatedArtifact.cards.map((record) => record.hint);
 
 describe("AI hint ontology validation", () => {
+  it("checks exact cost dimensions in standalone capability validation", () => {
+    expect(
+      validateAiHintActionCapabilitySemantics([
+        { capabilityKey: "draw", costProfile: { clicks: 0.5, credits: -1 } },
+      ]).errors.map(({ path }) => path),
+    ).toEqual([
+      "$.actionCapabilitySemantics[0].costProfile.clicks",
+      "$.actionCapabilitySemantics[0].costProfile.credits",
+    ]);
+  });
+
+  it("applies the hint side-safety contract to standalone capability effects", () => {
+    expect(
+      validateAiHintActionCapabilitySemantics([
+        {
+          capabilityKey: "draw",
+          effects: [
+            {
+              kind: "draw",
+              timing: "action",
+              scope: "runner",
+              privatePayload: "unexpected",
+            },
+          ],
+        },
+      ]).errors.some((issue) => issue.kind === "hidden_info_risk"),
+    ).toBe(true);
+  });
+
   it("accepts all generated hints except the exact known asset-economy evidence debt", () => {
     const results = currentHints.map((hint) => ({
       cardId: hint.cardId,

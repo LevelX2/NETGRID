@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { PlanInstance } from "../../plans/plan-kernel-types";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type {
   DefenseState,
   RunnerDefenseSignals,
@@ -41,9 +42,37 @@ export function bindRunnerCreditBankDefenseFunding(
     current.firstStepActionId !== bank.routeAssessment.firstStepActionId
   )
     return [...signals];
-  const first = candidates.find(
-    (c) => c.actionId === current.firstStepActionId,
-  )!;
+  const firstSteps = candidates.filter(
+    (candidate) =>
+      candidate.actorSide === "runner" &&
+      candidate.stateVersion === current.stateVersion &&
+      candidate.actionId === current.firstStepActionId &&
+      candidate.planOwnerBinding?.owner === "runner.credit_bank" &&
+      candidate.planOwnerBinding.route === "cash_out",
+  );
+  const [first] = firstSteps;
+  const providerCount = signals.filter(
+    (signal) => signal.bankId === first?.sourceCardInstanceId,
+  ).length;
+  if (
+    firstSteps.length !== 1 ||
+    !first?.sourceCardInstanceId ||
+    providerCount !== 1
+  ) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map(({ type }) => type),
+      ...(current.firstStepActionId
+        ? { unresolvedActionIds: [current.firstStepActionId] }
+        : {}),
+      owner: "support_graph",
+      planInstanceId: need.parentPlanInstanceId,
+      removalCondition:
+        "Bind the first quoted tag-clear cashout to one current bank signal and its exact action source.",
+    });
+  }
   return signals.map((signal) => {
     if (signal.bankId !== first.sourceCardInstanceId) return signal;
     const { runFunding, ...resident } = signal;
@@ -86,6 +115,7 @@ export function runnerCreditBankDefenseParentValue(
     current.revalidation.stateVersion === stateVersion &&
     current.bankFunding?.routeAssessment.routeId ===
       need.bankFunding?.routeAssessment.routeId &&
+    current.bankFunding?.activeTags === need.bankFunding?.activeTags &&
     current.bankFunding?.activeTags === state.signals.activeTags &&
     state.signals.activeTags > 0
     ? RUNNER_TAG_CLEAR_FUNDING_VALUE

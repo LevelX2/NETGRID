@@ -111,6 +111,7 @@ export function runnerCentralRunPressureJustificationReasons(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === centralTarget,
   );
+  if (!server) return [];
   const assessment = quoteVisibleRunnerPathForMetrics(
     input,
     server,
@@ -130,7 +131,7 @@ export function runnerCentralRunPressureJustificationReasons(
   const hasMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
     rolesMatch(dependencies.rolesForCardId(card.definitionId), ["multiaccess"]),
   );
-  const openOrCheap = visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0;
+  const openOrCheap = visibleBreakCost <= 1 || server.ice.length === 0;
   const preservesReserve =
     assessment.creditsAfterPath >=
     dependencies.runnerCreditReserveTargetForInput(input);
@@ -180,12 +181,13 @@ export function runnerCentralRunBurnsRemoteContestReserve(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === targetServerId,
   );
+  if (!server || contestableProfiles.length === 0) return false;
   const assessment = quoteVisibleRunnerPathForMetrics(
     input,
     server,
     dependencies.assessKnownRezzedIcePath,
   );
-  if (assessment.blocked || contestableProfiles.length === 0) return false;
+  if (assessment.blocked) return false;
   const creditsAfterPath = assessment.creditsAfterPath;
   const requiredReserve = Math.max(
     ...contestableProfiles.map((profile) => profile.postRunReserveTarget),

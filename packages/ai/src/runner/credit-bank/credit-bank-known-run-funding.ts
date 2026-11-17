@@ -1,4 +1,7 @@
-import type { creditBankReplacesBasicRunFunding } from "./credit-bank-basic-run-funding";
+import {
+  runnerCreditBankRunFundingClickCapacity,
+  type creditBankReplacesBasicRunFunding,
+} from "./credit-bank-basic-run-funding";
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
 import { searchFundingRoutes } from "../../plans/funding-route";
 import { runnerRunTargetIsDirectlyConvertible } from "../../runtime/runner-run-funding-admission";
@@ -9,7 +12,10 @@ export function creditBankFundsKnownUrgentRun(
   params: Parameters<typeof creditBankReplacesBasicRunFunding>[0],
 ): ReturnType<typeof creditBankReplacesBasicRunFunding> {
   const { input, target, admission } = params;
-  const remainingClicks = input.playerView.own.clicks - 1;
+  const remainingClicks = runnerCreditBankRunFundingClickCapacity(
+    input,
+    target.actionId,
+  );
   if (
     !admission.admitted ||
     !admission.urgentScoreThreat ||
@@ -17,7 +23,7 @@ export function creditBankFundsKnownUrgentRun(
     !target.routeQuote ||
     target.routeQuote.unknownIceCount !== 0 ||
     target.routeQuote.conditionalReasons.length !== 0 ||
-    remainingClicks < 1 ||
+    remainingClicks === undefined ||
     params.cashOutActionIds.length === 0
   )
     return undefined;

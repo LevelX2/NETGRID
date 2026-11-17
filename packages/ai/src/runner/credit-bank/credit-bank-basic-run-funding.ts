@@ -1,3 +1,5 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { actionClickCost } from "../../runtime/action-cost";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type {
@@ -44,8 +46,11 @@ export function creditBankReplacesBasicRunFunding(params: {
     target.recommendation !== "gain_credits_first"
   )
     return undefined;
-  const remainingClicks = input.playerView.own.clicks - 1;
-  if (remainingClicks < 1) return undefined;
+  const remainingClicks = runnerCreditBankRunFundingClickCapacity(
+    input,
+    target.actionId,
+  );
+  if (remainingClicks === undefined) return undefined;
   const needId = `run-support:central:${target.targetServerId}`;
   const parentPlanInstanceId = `plan:runner.pressure_central:${encodeURIComponent(`central:${target.targetServerId}`)}`;
   const demand = createRunnerCreditDemand({
@@ -145,4 +150,25 @@ export function creditBankReplacesBasicRunFunding(params: {
     };
   }
   return undefined;
+}
+
+export function runnerCreditBankRunFundingClickCapacity(
+  input: AiDecisionInput,
+  runActionId: string,
+): number | undefined {
+  const costs = new Set(
+    input.legalActions
+      .filter(
+        (action) =>
+          action.actionId === runActionId &&
+          actionMatchesCurrentDecision(input, action),
+      )
+      .map(actionClickCost),
+  );
+  if (costs.size !== 1) return undefined;
+  const [runClicks] = costs;
+  const remaining = input.playerView.own.clicks - runClicks!;
+  return Number.isSafeInteger(remaining) && remaining >= 0
+    ? remaining
+    : undefined;
 }

@@ -1,4 +1,7 @@
-import type { KnownRezzedIcePathAssessment } from "./visible-run-analysis-contracts";
+import type {
+  KnownRezzedIcePathAssessment,
+  VisibleIceRunHazard,
+} from "./visible-run-analysis-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -8,7 +11,6 @@ import type { BeliefState } from "../belief-state";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/runner-hand-development-types";
-import type { VisibleIceRunHazard } from "./visible-run-analysis-contracts";
 import type { RunnerRunRouteQuote } from "./runner-run-route-quote";
 
 export const RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION =
