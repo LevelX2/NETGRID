@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
   RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
@@ -448,7 +449,7 @@ describe("action economy projection", () => {
         action.payload = {
           cardId: "root-1",
           rootRez: true,
-          serverId: "remote_1",
+          serverId: "r1",
         };
       },
     ],
@@ -537,17 +538,19 @@ function project(action: LegalAction) {
 }
 
 function restrictedCreditAction(): LegalAction {
+  const key = "corp_paid_spend_advancement_for_install_rez_credits";
+  const abilityId = canonicalCapabilityId(117, capabilityKey(key));
   return legalAction("restricted-payout", "activated_card_ability", {
     source: "payout-source",
     costs: [],
     abilityRef: {
       sourceCardInstanceId: "payout-source",
-      sourceAbilityId: "test-card:payout",
+      sourceAbilityId: abilityId,
     },
     payload: {
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-      cardImplementationAbilityId: "test-card:payout",
-      cardImplementationAbilityKey: "payout",
+      cardImplementationAbilityId: abilityId,
+      cardImplementationAbilityKey: key,
       cardId: "payout-source",
       cardImplementationEffectKind: "gain_temporary_corp_credits",
       restrictedCreditGainAmount: 3,
@@ -587,12 +590,12 @@ function rootRezCreditAction(): LegalAction {
     payload: {
       cardId: "root-1",
       rootRez: true,
-      serverId: "remote_1",
+      serverId: "r1",
       rootRezCreditOutcomeQuoteSchemaVersion:
         "corp-root-rez-credit-outcome-quote-v1",
       rootRezCreditOutcomeQuoteComplete: true,
       rootRezCreditOutcomeQuoteSourceCardInstanceId: "root-1",
-      rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+      rootRezCreditOutcomeQuoteTargetServerId: "r1",
       rootRezCreditOutcomeQuoteStateVersion: 1,
       rootRezCreditOutcomeQuoteTimingPoint: "run.movement_rez_window",
       rootRezCreditOutcomeQuoteActionId: "rez-root-1",

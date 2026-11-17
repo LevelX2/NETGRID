@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   applyAction,
   createGameAfterSetup,
@@ -23,7 +24,7 @@ import {
 } from "../corp/punish/punish-route-quote-input";
 
 const POWER_GRID = 511;
-const POWER_GRID_CAPABILITY_ID = `${POWER_GRID}:corp_utility_installed_hardware_trash_by_counter`;
+const POWER_GRID_CAPABILITY_ID = canonicalCapabilityId(POWER_GRID, capabilityKey("corp_utility_installed_hardware_trash_by_counter"));
 const RD_INTERFACE = 351;
 const SIMPLE_HARDWARE = 602;
 const CYBERNETICS = 339;

@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -29,7 +30,7 @@ describe("capability-bound action plan owners", () => {
         canonicalAction(366, "withdraw_credits", "runner", 1),
       ],
       cardSemanticProfilesByDefinitionId: {
-        onr_v1_154_broker: brokerProfile,
+        366: brokerProfile,
       },
     });
 
@@ -94,15 +95,12 @@ describe("capability-bound action plan owners", () => {
   });
 
   it("does not fall back card-wide for missing or forged capabilities", () => {
-    const forgedCapability = buildActionSemanticCandidates({
-      legalActions: [
-        canonicalAction(366, "forged_route", "runner", 0),
-      ],
-      cardSemanticProfilesByDefinitionId: {
-        onr_v1_154_broker: brokerProfile,
-      },
-    })[0];
-    expect(forgedCapability?.planOwnerBinding).toBeUndefined();
+    const forgedAction = canonicalAction(366, "store_credits", "runner", 0);
+    forgedAction.payload!.cardImplementationAbilityKey = "forged_route";
+    expect(() => buildActionSemanticCandidates({
+      legalActions: [forgedAction],
+      cardSemanticProfilesByDefinitionId: { 366: brokerProfile },
+    })).toThrow(/mismatch|conflict|canonical/i);
 
     const nonCanonical = canonicalAction(
       366,
@@ -120,7 +118,7 @@ describe("capability-bound action plan owners", () => {
       buildActionSemanticCandidates({
         legalActions: [nonCanonical],
         cardSemanticProfilesByDefinitionId: {
-          onr_v1_154_broker: brokerProfile,
+          366: brokerProfile,
         },
       })[0]?.planOwnerBinding,
     ).toBeUndefined();
@@ -133,7 +131,7 @@ describe("capability-bound action plan owners", () => {
           canonicalAction(366, "store_credits", "runner", 0),
         ],
         cardSemanticProfilesByDefinitionId: {
-          onr_v1_154_broker: {
+          366: {
             ...brokerProfile,
             actionPlanOwnerBindings: [
               ...brokerProfile.actionPlanOwnerBindings!,
@@ -148,14 +146,14 @@ describe("capability-bound action plan owners", () => {
 
 function canonicalAction(
   definitionId: number,
-  capabilityKey: string,
+  key: string,
   side: "runner" | "corp",
   index: number,
 ): LegalAction {
   const source = `${side}-source-${index}`;
-  const sourceAbilityId = `${definitionId}:${capabilityKey}`;
+  const sourceAbilityId = canonicalCapabilityId(definitionId, capabilityKey(key));
   return {
-    actionId: `plan-owner-${index}-${capabilityKey}`,
+    actionId: `plan-owner-${index}-${key}`,
     side,
     type: "activated_card_ability",
     label: "Plan owner witness",
@@ -170,7 +168,7 @@ function canonicalAction(
       sourceDefinitionId: definitionId,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityId: sourceAbilityId,
-      cardImplementationAbilityKey: capabilityKey,
+      cardImplementationAbilityKey: key,
     },
   };
 }

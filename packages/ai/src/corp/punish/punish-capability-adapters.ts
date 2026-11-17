@@ -1,4 +1,4 @@
-import type { CorpPunishRouteStepKind } from "@netgrid/shared";
+import type { CanonicalCapabilityId, CorpPunishRouteStepKind } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import {
   corpDirectTagOperationProfile,
@@ -18,7 +18,7 @@ export type PunishComponentAdapter = {
   >;
   routeOrder: number;
   sourceCapabilityBindingKind: "card_spec_capability_key";
-  sourceCapabilityId: string;
+  sourceCapabilityId: CanonicalCapabilityId;
   agendaPointCost?: number;
   damageAmount?: number;
 };

@@ -1,5 +1,5 @@
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
-import { type AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, CanonicalCapabilityId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { corpScoredAgendaFreeRezDefenseTarget } from "../defense/scored-agenda-free-rez-defense-target";
 import { corpScoredAgendaIceMarkDefenseTarget } from "../defense/corp-defense-domain-signals";
@@ -238,7 +238,7 @@ function corpScoredAgendaHqShuffleChoiceBinding(params: {
   fundingGap: number;
   discardKeepScore: DiscardKeepScorer | undefined;
 }): {
-  sourceCapabilityId: string;
+  sourceCapabilityId: CanonicalCapabilityId;
   creditPerAgendaPoint: number;
   selectedCardInstanceIds: string[];
 } {

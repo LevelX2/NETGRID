@@ -1,10 +1,12 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import type { CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { corpFundedDefenseContinuationWindow } from "../defense/corp-funded-continuation-window";
 import { corpIceInstallHasCurrentCompleteRezQuote } from "../defense/corp-defense-domain-signals";
-import type {
-  AiDecisionInput,
-  CorpHostedCreditBankCycleQuote,
+import {
+  isCanonicalCapabilityId,
+  type AiDecisionInput,
+  type CorpHostedCreditBankCycleQuote,
 } from "@netgrid/shared";
 import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -93,10 +95,10 @@ export function currentCorpHostedBankCycleQuotes(
       card.owner !== "corp" ||
       card.controller !== "corp" ||
       card.definitionId !== q.sourceDefinitionId ||
-      !server?.id.startsWith("remote_") ||
+      !isRemoteServerId(server?.id) ||
       q.currentHostedCredits !== (card.counters?.bit ?? 0) ||
-      typeof q.loadAbilityId !== "string" ||
-      typeof q.cashoutAbilityId !== "string" ||
+      !isCanonicalCapabilityId(q.loadAbilityId) ||
+      !isCanonicalCapabilityId(q.cashoutAbilityId) ||
       q.loadAbilityId === q.cashoutAbilityId ||
       (q.headKind === "rez"
         ? card.rezzed ||
@@ -171,7 +173,7 @@ function admitsIncrementalInstallFunding(
     input.playerView.own.gripOrHq.some((c) => c.known && c.type === "agenda") ||
     input.playerView.servers.some(
       (s) =>
-        s.id.startsWith("remote_") &&
+        isRemoteServerId(s.id) &&
         s.root.some((c) => c.known && c.type === "agenda"),
     ) ||
     context.ambushes.some((p) => p.actionIds.length > 0) ||

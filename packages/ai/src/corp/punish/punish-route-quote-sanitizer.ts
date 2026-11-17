@@ -1,7 +1,9 @@
 import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  isCanonicalCapabilityId,
   isCardDefinitionId,
+  type CanonicalCapabilityId,
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
   type CorpPunishRouteQuoteSet,
@@ -385,7 +387,7 @@ function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
         validPunishStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
         step.sourceCapabilityBindingKind === "card_spec_capability_key" &&
-        nonblank(step.sourceCapabilityId) &&
+        isCanonicalCapabilityId(step.sourceCapabilityId) &&
         (step.currentLegalActionId === undefined ||
           (index === 0 && nonblank(step.currentLegalActionId))),
     ) &&
@@ -468,7 +470,7 @@ function validOrderedPunishSteps(
         step.order !== index ||
         !nonblank(step.sourceCardInstanceId) ||
         !isCardDefinitionId(step.sourceCardDefinitionId) ||
-        !nonblank(step.sourceCapabilityId) ||
+        !isCanonicalCapabilityId(step.sourceCapabilityId) ||
         !validPunishStepKind(step.kind) ||
         !nonNegativeInteger(step.clicks) ||
         !nonNegativeInteger(step.credits) ||
@@ -585,7 +587,7 @@ function validHardwareTrashProjection(
 }
 
 function canonicalCapabilityMatchesDefinition(
-  sourceCapabilityId: string,
+  sourceCapabilityId: CanonicalCapabilityId,
   sourceDefinitionId: number,
 ): boolean {
   try {
@@ -768,7 +770,7 @@ function punishRequestFingerprint(
       step.kind,
       step.sourceCardInstanceId,
       step.sourceCapabilityBindingKind,
-      step.sourceCapabilityId,
+      String(step.sourceCapabilityId),
       ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
   ]);

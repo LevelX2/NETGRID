@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   DEMO_DECKS,
@@ -60,8 +62,7 @@ describe("decision-local Corp punish route quote input", () => {
             expect.objectContaining({
               kind: "trace_tag",
               sourceCardInstanceId: "netwatch",
-              sourceCapabilityId:
-                "419:abilities_activated_corp_main_trace",
+              sourceCapabilityId: canonicalCapabilityId(419, capabilityKey("abilities_activated_corp_main_trace")),
             }),
             expect.objectContaining({ kind: "meat_damage" }),
           ],
@@ -195,15 +196,13 @@ describe("decision-local Corp punish route quote input", () => {
               kind: "tag",
               sourceCardInstanceId: "data-sifters",
               sourceCapabilityBindingKind: "card_spec_capability_key",
-              sourceCapabilityId:
-                "106:on_play_tag_after_runner_trashed_node",
+              sourceCapabilityId: canonicalCapabilityId(106, capabilityKey("on_play_tag_after_runner_trashed_node")),
             }),
             expect.objectContaining({
               kind: "meat_damage",
               sourceCardInstanceId: "scorched",
               sourceCapabilityBindingKind: "card_spec_capability_key",
-              sourceCapabilityId:
-                "514:abilities_on_play_damage",
+              sourceCapabilityId: canonicalCapabilityId(514, capabilityKey("abilities_on_play_damage")),
             }),
           ],
         }),
@@ -252,8 +251,7 @@ describe("decision-local Corp punish route quote input", () => {
             kind: "trace_tag",
             sourceCardInstanceId: "chance",
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId:
-              "496:abilities_on_play_trace",
+            sourceCapabilityId: canonicalCapabilityId(496, capabilityKey("abilities_on_play_trace")),
           }),
           expect.objectContaining({
             kind: "meat_damage",
@@ -286,8 +284,7 @@ describe("decision-local Corp punish route quote input", () => {
             kind: "trace_tag",
             sourceCardInstanceId: "manhunt",
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId:
-              "108:on_play_trace_six_tags_by_margin",
+            sourceCapabilityId: canonicalCapabilityId(108, capabilityKey("on_play_trace_six_tags_by_margin")),
           }),
           expect.objectContaining({
             kind: "meat_damage",
@@ -376,8 +373,7 @@ describe("decision-local Corp punish route quote input", () => {
             kind: "other_punish",
             sourceCardInstanceId: "closed-accounts",
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId:
-              "497:abilities_on_play_lose_credits",
+            sourceCapabilityId: canonicalCapabilityId(497, capabilityKey("abilities_on_play_lose_credits")),
           }),
         ],
       }),
@@ -447,8 +443,7 @@ describe("decision-local Corp punish route quote input", () => {
             kind: "tag",
             sourceCardInstanceId: "trojan",
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId:
-              "518:corp_utility_encounter_tag",
+            sourceCapabilityId: canonicalCapabilityId(518, capabilityKey("corp_utility_encounter_tag")),
             currentLegalActionId: "play-trojan-horse",
           }),
         ],
@@ -671,7 +666,7 @@ function punishInput(params: {
         identity: {
           instanceId: "corp-identity",
           known: true,
-          definitionId: "corp-identity",
+          definitionId: syntheticCardDefinitionId("corp-identity"),
           title: "Corp identity",
           owner: "corp",
           controller: "corp",
@@ -691,7 +686,7 @@ function punishInput(params: {
         identity: {
           instanceId: "runner-identity",
           known: true,
-          definitionId: "runner-identity",
+          definitionId: syntheticCardDefinitionId("runner-identity"),
           title: "Runner identity",
           owner: "runner",
           controller: "runner",

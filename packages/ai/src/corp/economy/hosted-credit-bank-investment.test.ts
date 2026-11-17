@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { corpHostedBankLoadMatches } from "./hosted-credit-bank-facts";
 import { afterEach, describe, expect, it } from "vitest";
 import {
@@ -11,8 +12,8 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 import { corpHostedBankInvestments } from "./hosted-credit-bank-investment";
 
 const DEPARTMENT = 530;
-const LOAD = `${DEPARTMENT}:abilities_activated_corp_main_add_hosted_credits`;
-const CASH = `${DEPARTMENT}:abilities_activated_corp_main_take_hosted_credits`;
+const LOAD = canonicalCapabilityId(DEPARTMENT, capabilityKey("abilities_activated_corp_main_add_hosted_credits"));
+const CASH = canonicalCapabilityId(DEPARTMENT, capabilityKey("abilities_activated_corp_main_take_hosted_credits"));
 afterEach(resetResidentPlanPortfolioMemory);
 
 function fixture(
@@ -91,7 +92,7 @@ function fixture(
         placement: "ice",
         postInstallRezQuoteCardId: "future-ice",
         postInstallRezQuoteTargetServerId: "new_remote",
-        postInstallRezQuoteProjectedServerId: "remote_2",
+        postInstallRezQuoteProjectedServerId: "r2",
         postInstallRezQuoteExpiresAtStateVersion: 1,
         postInstallRezQuoteCostKind: "fixed",
         postInstallRezQuoteBaseCredits: params.futureCost ?? 14,
@@ -121,7 +122,7 @@ function fixture(
   ];
   input.playerView.opponent.rig = [];
   input.playerView.servers.push({
-    id: "remote_1",
+    id: "r1",
     label: "Remote 1",
     root: [
       visibleCard("department", "corp", "asset", {

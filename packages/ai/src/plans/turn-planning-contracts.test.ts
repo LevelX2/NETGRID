@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
@@ -173,7 +175,7 @@ describe("turn planning contracts", () => {
       sourceCardInstanceId: "corp_ice_1",
       sourceAbilityBinding: {
         kind: "card_spec_capability_key",
-        sourceAbilityId: "test_corp_ice:install",
+        sourceAbilityId: canonicalCapabilityId(14, capabilityKey("subroutine_paid_deflect_to_data_fort")),
       },
       boundTargets: [
         {
@@ -640,7 +642,7 @@ function decisionInput(): AiDecisionInput {
       own: {
         identity: {
           instanceId: "corp-identity",
-          definitionId: "corp-identity",
+          definitionId: syntheticCardDefinitionId("corp-identity"),
           title: "Corp",
           side: "corp",
           type: "identity",

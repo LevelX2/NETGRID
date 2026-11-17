@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   createGameAfterSetup,
@@ -17,6 +19,9 @@ import {
   summarizeActionSemanticCandidateCoverage,
   summarizeActionSemanticCandidateCoverageSources,
 } from "./action-semantic-coverage";
+
+const visibleAbilityKey = "store_credits";
+const visibleAbilityId = canonicalCapabilityId(366, capabilityKey(visibleAbilityKey));
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -389,21 +394,21 @@ describe("Action semantic coverage", () => {
           source: "runner-hidden-instance",
           abilityRef: {
             sourceCardInstanceId: "runner-hidden-instance",
-            sourceAbilityId: "runner-visible-definition:visible_ability",
+            sourceAbilityId: visibleAbilityId,
           },
           payload: {
             cardId: "runner-hidden-instance",
-            sourceDefinitionId: "runner-visible-definition",
+            sourceDefinitionId: 366,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "runner-visible-definition:visible_ability",
-            cardImplementationAbilityKey: "visible_ability",
+              visibleAbilityId,
+            cardImplementationAbilityKey: visibleAbilityKey,
           },
         }),
         legalAction("install_card", 5, {
           side: "corp",
           source: "corp-hidden-instance",
-          payload: { sourceDefinitionId: "corp-visible-definition" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("corp-visible-definition") },
         }),
         legalAction("advance_card", 6, {
           side: "corp",
@@ -638,21 +643,21 @@ function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
         source: "runner-hidden-instance",
         abilityRef: {
           sourceCardInstanceId: "runner-hidden-instance",
-          sourceAbilityId: "runner-visible-definition:visible_ability",
+          sourceAbilityId: visibleAbilityId,
         },
         payload: {
           cardId: "runner-hidden-instance",
-          sourceDefinitionId: "runner-visible-definition",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "runner-visible-definition:visible_ability",
-          cardImplementationAbilityKey: "visible_ability",
+            visibleAbilityId,
+          cardImplementationAbilityKey: visibleAbilityKey,
         },
       }),
       legalAction("install_card", 6, {
         side: "corp",
         source: "corp-hidden-instance",
-        payload: { sourceDefinitionId: "corp-visible-definition" },
+        payload: { sourceDefinitionId: syntheticCardDefinitionId("corp-visible-definition") },
       }),
       legalAction("advance_card", 7, {
         side: "corp",

@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
@@ -60,6 +61,8 @@ describe("turn plan commitment", () => {
 
   it("rematerializes a canonical capability only from one exact current LegalAction", () => {
     const setup = scenario();
+    const key = "abilities_activated_corp_main_gain_credits";
+    const abilityId = canonicalCapabilityId(418, capabilityKey(key));
     const rawCanonicalAction: LegalAction = {
       ...setup.firstAction,
       actionId: "action:canonical:10",
@@ -67,12 +70,12 @@ describe("turn plan commitment", () => {
       payload: {
         cardId: "card:source",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: "test_card:gain",
-        cardImplementationAbilityKey: "gain",
+        cardImplementationAbilityId: abilityId,
+        cardImplementationAbilityKey: key,
       },
       abilityRef: {
         sourceCardInstanceId: "card:source",
-        sourceAbilityId: "test_card:gain",
+        sourceAbilityId: abilityId,
       },
     };
     const canonicalAction = buildAiDecisionInputDto({
@@ -92,7 +95,7 @@ describe("turn plan commitment", () => {
       sourceCardInstanceId: "card:source",
       sourceAbilityBinding: {
         kind: "card_spec_capability_key",
-        sourceAbilityId: "test_card:gain",
+        sourceAbilityId: abilityId,
       },
     });
     setup.firstAction = canonicalAction;
@@ -158,7 +161,7 @@ describe("turn plan commitment", () => {
         ...canonicalAction,
         abilityRef: {
           sourceCardInstanceId: "other-source",
-          sourceAbilityId: "test_card:gain",
+          sourceAbilityId: abilityId,
         },
       },
     ]) {
