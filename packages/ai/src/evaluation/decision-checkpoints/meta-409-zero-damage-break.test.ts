@@ -14,7 +14,7 @@ describe("meta 409 zero-damage encounter purpose", () => {
     "preserves the run owner with ETR already broken=%s",
     (etrBroken) => {
       const capture = structuredClone(checkpoint);
-      const input = capture.input as AiDecisionInputWithDeckCapabilities;
+      const input = capture.input as unknown as AiDecisionInputWithDeckCapabilities;
       const zeroBreak = input.legalActions.find(
         (a) =>
           a.type === "break_subroutine" && a.payload?.subroutineIndex === 0,

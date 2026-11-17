@@ -296,7 +296,7 @@ describe("Runner contest recovery", () => {
   it("considers an immediately affordable multiple access in the same last-click window", () => {
     const input = capturedInput(terminalSpendReplay);
     const example =
-      multipleAccessReplay.input as AiDecisionInputWithDeckCapabilities;
+      multipleAccessReplay.input as unknown as AiDecisionInputWithDeckCapabilities;
     const event = example.legalActions.find(
       (action) =>
         action.type === "play_event" &&

@@ -21,7 +21,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 185 decision checkpoints", () => {
   it("starts the exact HQ-agenda recycle score plan before the final mandatory draw", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       deckoutAgendaRecycleJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -73,7 +73,7 @@ describe("selfplay cycle 185 decision checkpoints", () => {
   });
 
   it("does not treat archive recovery as an exact HQ-overflow reduction", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       hqOverflowRecoveryLoopJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

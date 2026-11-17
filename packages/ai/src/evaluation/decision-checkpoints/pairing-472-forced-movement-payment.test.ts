@@ -126,7 +126,7 @@ describe("pairing 472: forced movement preserves encounter-payment ownership", (
         (e) => e.stateVersionBefore === 256,
       )!.publicPayload.serverId = "rd";
     if (fault === "other_run")
-      captured.input.playerView.run!.runId = "different";
+      captured.input.playerView.run!.runId = captured.input.playerView.stateVersion + 1;
     if (fault === "unrelated_action")
       captured.input.eventTail!.find(
         (e) => e.stateVersionBefore === 256,
@@ -146,7 +146,7 @@ describe("pairing 472: forced movement preserves encounter-payment ownership", (
         ?.pendingRunnerCostPenaltySupportOrigin,
     ).toBeUndefined();
     const next = checkpoint(260).input;
-    if (fault === "other_run") next.playerView.run!.runId = "different";
+    if (fault === "other_run") next.playerView.run!.runId = next.playerView.stateVersion + 1;
     expect(() => chooseAiAction(next)).toThrow("window_origin_missing");
   });
 });

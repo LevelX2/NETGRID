@@ -263,7 +263,7 @@ describe("match 52de terminal agenda defense", () => {
       input.playerView.phase = "run";
       input.playerView.timingPoint = "run.approach_ice";
       input.playerView.run = {
-        runId: "test-run",
+        runId: input.playerView.stateVersion,
         attackedServerId: "r1",
         phase: "approach_ice",
         position: { kind: "ice", serverId: "r1", iceIndex: 1 },

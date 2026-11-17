@@ -18,7 +18,7 @@ type ReconstructedDecisionCapture = {
 
 describe("pairing 081 terminal contest reserve", () => {
   it("spends the urgent reserve under the existing remote-contest owner", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       captureJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

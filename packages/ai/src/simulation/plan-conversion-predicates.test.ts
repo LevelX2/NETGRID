@@ -193,7 +193,7 @@ describe("planIntentConvertedWithin", () => {
   it("recognizes a run started by an event from the applied Engine state", () => {
     const before = {} as GameState;
     const after = {
-      run: { runId: "run_1", attackedServerId: "hq" },
+      run: { runId: 1, attackedServerId: "hq" },
     } as GameState;
     const play = legalAction("event", "runner", "play_event", "Run event", { credits: 0 });
     const event = { publicPayload: {} } as PublicGameEvent;

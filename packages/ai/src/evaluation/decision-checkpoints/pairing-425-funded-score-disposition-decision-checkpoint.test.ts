@@ -11,7 +11,7 @@ import {
 it.each([false, true])(
   "retains the funded score owner and exact first step with a two-click counter conversion=%s",
   (counterConversion) => {
-    const capture = structuredClone(captureJson) as {
+    const capture = structuredClone<unknown>(captureJson) as {
       input: AiDecisionInputWithDeckCapabilities;
       runtime: AiRuntimeCheckpointV1;
     };

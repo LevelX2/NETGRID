@@ -209,7 +209,7 @@ describe("native expose-viewing continuation (SP-472)", () => {
           selectedAtStateVersion: remembered.selectedAtStateVersion - 1,
         },
       ];
-    if (boundary === "run") input.playerView.run!.runId = "different_run";
+    if (boundary === "run") input.playerView.run!.runId = input.playerView.stateVersion + 1;
     if (boundary === "root") p.rootForegroundInstanceId = "different_root";
     if (boundary === "event") input.eventTail = input.eventTail!.slice(0, -1);
     if (boundary === "parent") {

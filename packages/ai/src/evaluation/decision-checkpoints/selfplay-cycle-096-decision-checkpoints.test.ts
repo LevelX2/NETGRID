@@ -18,7 +18,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 096 decision checkpoints", () => {
   it("breaks the hard ETR when the remaining conditional ETR is payable", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       payEtrAfterBreakJson,
     ) as ReconstructedDecisionCapture;
     // Both quoted subroutines are still open in this checkpoint. Supply the

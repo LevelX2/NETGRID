@@ -115,7 +115,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     (defect) => {
       const { input, portfolio } = loadCheckpoint();
       if (defect === "lease") delete portfolio.turnPlanExecutionLease;
-      if (defect === "run") input.playerView.run!.runId = "different-run";
+      if (defect === "run") input.playerView.run!.runId = input.playerView.stateVersion + 1;
       if (defect === "server") {
         const encounter = input.eventTail.find(
           (event) => event.stateVersionBefore === 168,
@@ -204,7 +204,7 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
         (event) => event.stateVersionBefore === 171,
       )!;
       if (defect === "lease") delete portfolio.turnPlanExecutionLease;
-      if (defect === "run") input.playerView.run!.runId = "other-run";
+      if (defect === "run") input.playerView.run!.runId = input.playerView.stateVersion + 1;
       if (defect === "server") movement.publicPayload.serverId = "rd";
       if (defect === "gap") input.eventTail = input.eventTail.filter(
         (event) => event !== movement,
@@ -262,7 +262,7 @@ describe("SP-469: an initial expose child directly under the pressure root", () 
           (instance) => instance.instanceId !== runParent,
         );
       } else {
-        input.playerView.run!.runId = "different-run";
+        input.playerView.run!.runId = input.playerView.stateVersion + 1;
       }
       restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
       expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);

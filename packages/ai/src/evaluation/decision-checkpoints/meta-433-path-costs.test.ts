@@ -242,7 +242,7 @@ it("consumes one-shot payment support once across multiple passages", () => {
       paymentSupportSources: [
         {
           cardInstanceId: "bank",
-          sourceAbilityId: "withdraw",
+          sourceAbilityId: 441,
           creditCost: 0,
           gainCredits: 1,
         },

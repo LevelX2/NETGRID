@@ -137,7 +137,7 @@ describe("native trace eligibility of run-only money", () => {
       paymentSupportSources: [
         {
           cardInstanceId: "s",
-          sourceAbilityId: "cash",
+          sourceAbilityId: 272,
           creditCost: 1,
           gainCredits: 4,
         },

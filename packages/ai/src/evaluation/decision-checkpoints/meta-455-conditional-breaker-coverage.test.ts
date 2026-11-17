@@ -34,7 +34,7 @@ it.each([
 );
 
 it("does not add a conditional Sentry rider to the canonical deck inventory", () => {
-  const input = structuredClone(
+  const input = structuredClone<unknown>(
     checkpoint.input,
   ) as AiDecisionInputWithDeckCapabilities;
   const profile = buildDeckCapabilityProfileFromInput(

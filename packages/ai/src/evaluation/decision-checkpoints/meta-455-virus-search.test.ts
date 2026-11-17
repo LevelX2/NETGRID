@@ -70,7 +70,7 @@ it.each([0, 1, 2])(
 it.each(["unfunded", "hand_answer_payable", "no_memory", "full_hand"] as const)(
   "does not promote a staged search with %s",
   (constraint) => {
-    const input = structuredClone(
+    const input = structuredClone<unknown>(
       searchCheckpoint.input,
     ) as AiDecisionInputWithDeckCapabilities;
     const action = input.legalActions.find(

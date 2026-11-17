@@ -114,7 +114,7 @@ it.each([
     otherRoot.definitionId = syntheticCardDefinitionId("unmapped-test-definition");
   if (variant === "live_run")
     input.playerView.run = {
-      runId: "live",
+      runId: input.playerView.stateVersion,
       attackedServerId: "hq",
       phase: "movement",
       successful: false,

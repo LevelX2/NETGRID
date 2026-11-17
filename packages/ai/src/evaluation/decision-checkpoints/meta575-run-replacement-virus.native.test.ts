@@ -187,7 +187,7 @@ describe("pairing 575 successful-run replacement before broken-ICE counters", ()
         { stage: "window", code: "engine_window_single_legal_resolution" },
       ],
     };
-    if (variant === "different_run") run.runId = "another_run";
+    if (variant === "different_run") run.runId = input.playerView.stateVersion + 1;
     if (variant === "missing_run_position") delete run.position;
     if (variant === "different_executor")
       previous.executorInstanceId = previous.rootForegroundInstanceId!;

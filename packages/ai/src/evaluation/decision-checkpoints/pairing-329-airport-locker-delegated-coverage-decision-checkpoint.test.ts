@@ -25,7 +25,7 @@ type ReconstructedDecisionCapture = {
 
 describe("pairing 329 delegated Airport Locker coverage checkpoint", () => {
   it("keeps the central-pressure root and exact coverage child through the Engine choice", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       delegatedCoverageJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

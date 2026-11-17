@@ -11,7 +11,7 @@ import {
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 
 it("keeps the central executor and actual access instead of consuming a zero-yield denial run", () => {
-  const capture = structuredClone(captureJson) as {
+  const capture = structuredClone<unknown>(captureJson) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
@@ -35,7 +35,7 @@ it("keeps the central executor and actual access instead of consuming a zero-yie
 it.each([0, 1, 8])(
   "quotes only the actual denial payoff at %i visible Corp credits",
   (credits) => {
-    const input = structuredClone(
+    const input = structuredClone<unknown>(
       captureJson.input,
     ) as AiDecisionInputWithDeckCapabilities;
     input.playerView.opponent.credits = credits;

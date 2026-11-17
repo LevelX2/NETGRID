@@ -63,7 +63,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
   });
 
   it("runs visible agenda Archives instead of classifying the selected route as inactive", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       visibleArchivesWinJson,
     ) as ReconstructedDecisionCapture;
     bindExplicitZeroPublicStealQuotes(capture.input, []);

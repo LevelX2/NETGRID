@@ -18,7 +18,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 126 decision checkpoints", () => {
   it("ends score-protection backstop staging after two layers without inventing another remote", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       boundedScoreProtectionStagingJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

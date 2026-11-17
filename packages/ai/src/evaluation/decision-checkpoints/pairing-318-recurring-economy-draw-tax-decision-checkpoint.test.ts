@@ -23,7 +23,7 @@ type ReconstructedDecisionCapture = {
 
 describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
   it("keeps the resident economy hold while respecting observed affordable HQ damage and draw-tax risk", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       recurringEconomyTaxedDrawJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

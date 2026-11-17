@@ -26,7 +26,7 @@ const services = createRunnerProgramInstallTrashContext({
 
 it("does not declare the only stable breaker redundant to an incoming random-loss breaker", () => {
   expect(Object.values(checkpoint.validation).every(Boolean)).toBe(true);
-  const input = structuredClone(
+  const input = structuredClone<unknown>(
     checkpoint.input,
   ) as AiDecisionInputWithDeckCapabilities;
   const choice = input.playerView.pendingChoice!;
@@ -50,7 +50,7 @@ it("does not declare the only stable breaker redundant to an incoming random-los
 });
 
 it("preserves the previously bound historical choice and its plan owner", () => {
-  const input = structuredClone(
+  const input = structuredClone<unknown>(
     checkpoint.input,
   ) as AiDecisionInputWithDeckCapabilities;
   restoreAiRuntimeCheckpoint(

@@ -24,7 +24,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 245 decision checkpoints", () => {
   it("contests the remote without inventing confirmed damage from discarded Setup", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       taxedMultiDrawJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -67,7 +67,7 @@ describe("selfplay cycle 245 decision checkpoints", () => {
   });
 
   it("keeps an over-capacity taxed draw under exactly one disposition owner", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       taxedMultiDrawJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

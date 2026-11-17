@@ -11,7 +11,7 @@ import {
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 
 it("preserves normal HQ access over fixed denial against an empty Corp pool", () => {
-  const capture = structuredClone(captureJson) as {
+  const capture = structuredClone<unknown>(captureJson) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
@@ -32,7 +32,7 @@ it("preserves normal HQ access over fixed denial against an empty Corp pool", ()
 it.each([0, 2, 9])(
   "distinguishes fixed, variable and conditional replacement at %i Corp credits",
   (credits) => {
-    const input = structuredClone(
+    const input = structuredClone<unknown>(
       captureJson.input,
     ) as AiDecisionInputWithDeckCapabilities;
     input.playerView.opponent.credits = credits;

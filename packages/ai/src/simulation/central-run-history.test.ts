@@ -10,12 +10,12 @@ it("counts an actual event run and distinguishes a Runner draw from a Corp draw"
     actor: "runner",
     resolvedEffects: [
       {
-        effectId: "run-1.start",
+        effectId: "1.start",
         kind: "start_run",
         visibility: "public",
         side: "runner",
         serverId: "rd",
-        runId: "run-1",
+        runId: 1,
       },
     ],
   });

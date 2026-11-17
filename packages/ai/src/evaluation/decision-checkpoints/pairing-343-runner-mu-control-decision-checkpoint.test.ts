@@ -26,7 +26,7 @@ type ReconstructedDecisionCapture = {
 
 describe("pairing 343 Runner strategic MU control checkpoint", () => {
   it("does not force MU support when the current R&D route is already economical", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       captureJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

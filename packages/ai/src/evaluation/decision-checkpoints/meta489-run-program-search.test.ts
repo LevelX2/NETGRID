@@ -191,7 +191,7 @@ describe("native in-run program search (SP-333)", () => {
         choice.options = choice.options.filter(
           (option) => option.card?.definitionId !== 226,
         );
-      if (boundary === "run") input.playerView.run!.runId = "different_run";
+      if (boundary === "run") input.playerView.run!.runId = input.playerView.stateVersion + 1;
       if (boundary === "install_cost")
         for (const option of choice.options)
           if (option.card?.definitionId === 226)

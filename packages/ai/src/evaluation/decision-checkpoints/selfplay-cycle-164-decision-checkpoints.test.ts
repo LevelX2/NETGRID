@@ -18,7 +18,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 164 decision checkpoints", () => {
   it("keeps visible random core damage mitigation above an information-probe spend limit", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       brainDrainInformationBudgetJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

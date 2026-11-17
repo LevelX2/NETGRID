@@ -208,7 +208,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
       phase: "install_answer",
       gap: { installActionIds: expect.arrayContaining([installActionId]) },
     });
-    const paymentCapture = structuredClone(paymentJson) as Capture;
+    const paymentCapture = structuredClone<unknown>(paymentJson) as Capture;
     // Keep the observed selected origin, supplying its gap from the production
     // producer above; restarting D308 can instead select the Shell Traders plan.
     paymentCapture.runtime.residentPlanPortfolio!.instances.find(
@@ -237,7 +237,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
   });
 
   it("fails closed when the persisted coverage origin has no selected install binding", () => {
-    const capture = structuredClone(paymentJson) as Capture;
+    const capture = structuredClone<unknown>(paymentJson) as Capture;
     delete capture.runtime.residentPlanPortfolio!
       .pendingRunnerCostPenaltySupportOrigin;
     const payment = restore(capture);

@@ -39,7 +39,7 @@ describe("pairing 430 coverage search answers the actual ICE category", () => {
   ])(
     "binds the actual $role need and unchanged Engine choice to its answer",
     ({ searchJson, choiceJson, role, stateVersion, answer }) => {
-      const search = structuredClone(searchJson) as Capture;
+      const search = structuredClone<unknown>(searchJson) as Capture;
       bindPublicBoardStealQuoteCompanion(search.input);
       // The native sentry state now has a ready P4 R&D run. Isolate the P5
       // search route here; the native precedence is checked separately below.
@@ -49,7 +49,7 @@ describe("pairing 430 coverage search answers the actual ICE category", () => {
         );
         search.input.playerView.legalActions = search.input.legalActions;
       }
-      const choice = structuredClone(choiceJson) as Capture;
+      const choice = structuredClone<unknown>(choiceJson) as Capture;
       resetResidentPlanPortfolioMemory();
       restoreAiRuntimeCheckpoint(
         search.input,
@@ -80,7 +80,7 @@ describe("pairing 430 coverage search answers the actual ICE category", () => {
 });
 
 it("preserves the native ready R&D run ahead of optional sentry coverage search", () => {
-  const search = structuredClone(sentrySearchJson) as Capture;
+  const search = structuredClone<unknown>(sentrySearchJson) as Capture;
   bindPublicBoardStealQuoteCompanion(search.input);
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(

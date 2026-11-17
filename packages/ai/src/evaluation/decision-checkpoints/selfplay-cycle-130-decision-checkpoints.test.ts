@@ -18,7 +18,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 130 decision checkpoints", () => {
   it("keeps the second partial Force Shield prevention in the engine window", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       multiSourceDamagePreventionJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;

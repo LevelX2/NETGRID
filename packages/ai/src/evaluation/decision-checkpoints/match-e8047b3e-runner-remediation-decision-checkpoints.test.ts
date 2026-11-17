@@ -133,7 +133,7 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
   });
 
   it("rejects the old Neon Guillotine capture without Classic Link deltas", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       lethalTraceJson,
     ) as ReconstructedRunnerDecisionCapture;
     const choice = capture.input.playerView.pendingChoice;

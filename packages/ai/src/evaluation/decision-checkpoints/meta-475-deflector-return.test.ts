@@ -116,7 +116,7 @@ it.each([
 
 it("declines to materialize a deflector choice from a previous run", () => {
   const cp = checkpoint(10);
-  cp.input.playerView.run!.runId = "different-run";
+  cp.input.playerView.run!.runId = cp.input.playerView.stateVersion + 1;
   expect(signal(cp)).toBeUndefined();
 });
 
