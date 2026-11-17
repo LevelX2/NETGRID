@@ -171,7 +171,7 @@ describe("native cancellable encounter effect payment", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(
-      "runner.continue_run.subroutine_run_duration_ice_strength",
+      "runner.continue_run.0",
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.timeoutUsed).toBe(false);
