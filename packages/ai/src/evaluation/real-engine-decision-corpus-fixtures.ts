@@ -517,7 +517,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
       "corp_real_low_rez_reserve",
       "real-corp-low-rez-reserve",
       (fixture) => {
-        fixture.withCorpCredits(1);
+        fixture.withCorpCredits(1).withCorpHqSize(0);
       },
       [],
       "onr_origin_corp_ai_snapshot_v1",
@@ -534,6 +534,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
       (fixture) => {
         fixture
           .withCorpCredits(0)
+          .withCorpHqSize(0)
           .withCorpIceOnServer("hq", 589)
           .withCorpIceOnServer("rd", 590);
       },

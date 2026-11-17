@@ -142,6 +142,6 @@ it("continues under the existing owner and wins through seven actual Engine step
   expect(proofs.map((p) => p.winner)).toEqual(["runner", "runner"]);
   expect(proofs.map((p) => p.points)).toEqual([8, 8]);
   expect(proofs.map((p) => p.credits)).toEqual([1, 1]);
-  expect(proofs[0].hash).toBe("fnv1a:171e510c");
+  expect(proofs[0].hash).toBe("fnv1a:a4425d7f");
   expect(proofs[1].hash).toBe(proofs[0].hash);
 });

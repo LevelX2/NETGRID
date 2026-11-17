@@ -416,7 +416,7 @@ describe("corp ICE factual support", () => {
     const before = buildCorpIceDensityProfile(input());
     expect(before).toMatchObject({
       confidence: "deck_snapshot",
-      remainingIceCount: 6,
+      remainingIceCount: 5,
     });
     take(
       "runner",

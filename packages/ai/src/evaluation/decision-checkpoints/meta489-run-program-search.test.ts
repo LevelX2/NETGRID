@@ -142,8 +142,13 @@ describe("native in-run program search (SP-333)", () => {
         )!.hostedOn = "different_host";
       if (boundary === "later_damage_group") {
         const run = input.playerView.run!;
+        const subroutines = run.encounteredIce!.effectiveRunQuote!.subroutines;
+        const endRun = subroutines.find(
+          (subroutine) => subroutine.type === "end_the_run",
+        );
+        if (!endRun) throw Error("Expected native end-run subroutine");
         const damage = {
-          id: "later-damage",
+          id: subroutines.length.toString(36),
           type: "do_damage",
           damageType: "net",
           amount: 1,
@@ -161,7 +166,7 @@ describe("native in-run program search (SP-333)", () => {
         )!;
         continuation.payload = {
           ...continuation.payload,
-          encounterRemainingSubroutineIds: "subroutine_end_run,later-damage",
+          encounterRemainingSubroutineIds: [endRun.id, damage.id].join(","),
           encounterRemainingSubroutineCount: 2,
         };
       }

@@ -4,7 +4,7 @@
     "provenance": "reconstructed_from_persisted_decision_sources",
     "actor": "runner",
     "stateVersion": 157,
-    "stateHash": "fnv1a:bd24580a",
+    "stateHash": "fnv1a:e5b705ed",
     "input": {
       "matchId": "match_30a8453cb332a764",
       "side": "runner",
@@ -525,7 +525,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "subroutine_paid_deflect_to_data_fort",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "any_data_fort",
                       "deflectorCost": 2,
@@ -573,7 +573,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_trash_program",
+                      "id": "0",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 12,
                       "sourceTitle": "Deadeye",
@@ -582,7 +582,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 12,
                       "sourceTitle": "Deadeye"
@@ -7032,7 +7032,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 157,
-        "sideSafePlanningFingerprint": "fnv1a:8328b280"
+        "sideSafePlanningFingerprint": "fnv1a:6a967921"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_runner_mit_ansage_der_perfekte_coup_2026_07_09_1.0.0",
@@ -15808,7 +15808,7 @@
                 "postInstallRezQuoteBaseCredits": 5,
                 "postInstallRezQuoteFinalCredits": 5,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2t\",\"iceDefinitionId\":12,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":12,\"sourceTitle\":\"Deadeye\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":12,\"sourceTitle\":\"Deadeye\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2t\",\"iceDefinitionId\":12,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":12,\"sourceTitle\":\"Deadeye\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":12,\"sourceTitle\":\"Deadeye\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -15890,7 +15890,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3a\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3a\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -16245,11 +16245,11 @@
             "action": {
               "matchId": "match_30a8453cb332a764",
               "side": "runner",
-              "actionId": "runner.continue_run.subroutine_trash_program,subroutine_end_run",
+              "actionId": "runner.continue_run.0,1",
               "clientKnownStateVersion": 10
             },
             "legalAction": {
-              "actionId": "runner.continue_run.subroutine_trash_program,subroutine_end_run",
+              "actionId": "runner.continue_run.0,1",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -16265,8 +16265,8 @@
                 "unbrokenSubroutineCount": 2,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "subroutine_trash_program,subroutine_end_run",
-                "encounterRemainingSubroutineIds": "subroutine_trash_program,subroutine_end_run",
+                "encounterSubroutineIds": "0,1",
+                "encounterRemainingSubroutineIds": "0,1",
                 "encounterRemainingSubroutineCount": 2,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -17734,7 +17734,7 @@
                 "postInstallRezQuoteFinalCredits": 0,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 1,
                 "postInstallRezQuoteMandatoryAdditionalCostKind": "agenda_point",
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -18303,11 +18303,11 @@
             "action": {
               "matchId": "match_30a8453cb332a764",
               "side": "runner",
-              "actionId": "runner.continue_run.subroutine_paid_deflect_to_data_fort",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 44
             },
             "legalAction": {
-              "actionId": "runner.continue_run.subroutine_paid_deflect_to_data_fort",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen",
@@ -18323,8 +18323,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": false,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "subroutine_paid_deflect_to_data_fort",
-                "encounterRemainingSubroutineIds": "subroutine_paid_deflect_to_data_fort",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
@@ -18520,11 +18520,11 @@
             "action": {
               "matchId": "match_30a8453cb332a764",
               "side": "runner",
-              "actionId": "runner.continue_run.subroutine_trash_program,subroutine_end_run",
+              "actionId": "runner.continue_run.0,1",
               "clientKnownStateVersion": 46
             },
             "legalAction": {
-              "actionId": "runner.continue_run.subroutine_trash_program,subroutine_end_run",
+              "actionId": "runner.continue_run.0,1",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -18540,8 +18540,8 @@
                 "unbrokenSubroutineCount": 2,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "subroutine_trash_program,subroutine_end_run",
-                "encounterRemainingSubroutineIds": "subroutine_trash_program,subroutine_end_run",
+                "encounterSubroutineIds": "0,1",
+                "encounterRemainingSubroutineIds": "0,1",
                 "encounterRemainingSubroutineCount": 2,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
@@ -18718,11 +18718,11 @@
             "action": {
               "matchId": "match_30a8453cb332a764",
               "side": "runner",
-              "actionId": "runner.continue_run.subroutine_end_run",
+              "actionId": "runner.continue_run.1",
               "clientKnownStateVersion": 48
             },
             "legalAction": {
-              "actionId": "runner.continue_run.subroutine_end_run",
+              "actionId": "runner.continue_run.1",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -18738,8 +18738,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "subroutine_end_run",
-                "encounterRemainingSubroutineIds": "subroutine_end_run",
+                "encounterSubroutineIds": "1",
+                "encounterRemainingSubroutineIds": "1",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -20894,7 +20894,7 @@
                 "postInstallRezQuoteBaseCredits": 0,
                 "postInstallRezQuoteFinalCredits": 0,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c4e\",\"iceDefinitionId\":19,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":19,\"sourceTitle\":\"Vortex\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c4e\",\"iceDefinitionId\":19,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":19,\"sourceTitle\":\"Vortex\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -21488,11 +21488,11 @@
             "action": {
               "matchId": "match_30a8453cb332a764",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.0.subroutine_trash_program.42",
+              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.0.0.42",
               "clientKnownStateVersion": 92
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.0.subroutine_trash_program.42",
+              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.0.0.42",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Matador: Subroutine 1 brechen",
@@ -21526,7 +21526,7 @@
                 "breakerId": "c77",
                 "iceId": "c2t",
                 "subroutineIndex": 0,
-                "subroutineId": "subroutine_trash_program",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 12,
                 "targetIceTitle": "Deadeye",
                 "breakSubroutineBaseCost": 1,
@@ -21570,11 +21570,11 @@
             "action": {
               "matchId": "match_30a8453cb332a764",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.1.subroutine_end_run.42",
+              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.1.1.42",
               "clientKnownStateVersion": 93
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.1.subroutine_end_run.42",
+              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.1.1.42",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Matador: Subroutine 2 brechen",
@@ -21608,7 +21608,7 @@
                 "breakerId": "c77",
                 "iceId": "c2t",
                 "subroutineIndex": 1,
-                "subroutineId": "subroutine_end_run",
+                "subroutineId": "1",
                 "targetIceDefinitionId": 12,
                 "targetIceTitle": "Deadeye",
                 "breakSubroutineBaseCost": 1,
@@ -23791,7 +23791,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3x\",\"iceDefinitionId\":17,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_trash_source_a\",\"type\":\"end_the_run_and_trash_source_at_end_of_turn\",\"sourceDefinitionId\":17,\"sourceTitle\":\"Puzzle\"},{\"id\":\"subroutine_end_run_trash_source_b\",\"type\":\"end_the_run_and_trash_source_at_end_of_turn\",\"sourceDefinitionId\":17,\"sourceTitle\":\"Puzzle\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3x\",\"iceDefinitionId\":17,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_and_trash_source_at_end_of_turn\",\"sourceDefinitionId\":17,\"sourceTitle\":\"Puzzle\"},{\"id\":\"1\",\"type\":\"end_the_run_and_trash_source_at_end_of_turn\",\"sourceDefinitionId\":17,\"sourceTitle\":\"Puzzle\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -25131,11 +25131,11 @@
             "action": {
               "matchId": "match_30a8453cb332a764",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.0.subroutine_trash_program.42",
+              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.0.0.42",
               "clientKnownStateVersion": 147
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.0.subroutine_trash_program.42",
+              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.0.0.42",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Matador: Subroutine 1 brechen",
@@ -25169,7 +25169,7 @@
                 "breakerId": "c77",
                 "iceId": "c2t",
                 "subroutineIndex": 0,
-                "subroutineId": "subroutine_trash_program",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 12,
                 "targetIceTitle": "Deadeye",
                 "breakSubroutineBaseCost": 1,
@@ -25213,11 +25213,11 @@
             "action": {
               "matchId": "match_30a8453cb332a764",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.1.subroutine_end_run.42",
+              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.1.1.42",
               "clientKnownStateVersion": 148
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.1.subroutine_end_run.42",
+              "actionId": "runner.break_subroutine.c77.c77.c77.c2t.1.1.42",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Matador: Subroutine 2 brechen",
@@ -25251,7 +25251,7 @@
                 "breakerId": "c77",
                 "iceId": "c2t",
                 "subroutineIndex": 1,
-                "subroutineId": "subroutine_end_run",
+                "subroutineId": "1",
                 "targetIceDefinitionId": 12,
                 "targetIceTitle": "Deadeye",
                 "breakSubroutineBaseCost": 1,
@@ -26009,7 +26009,7 @@
     "provenance": "reconstructed_from_persisted_decision_sources",
     "actor": "corp",
     "stateVersion": 38,
-    "stateHash": "fnv1a:188bfeff",
+    "stateHash": "fnv1a:725d1bb7",
     "input": {
       "matchId": "match_219553222d759e81",
       "side": "corp",
@@ -26261,7 +26261,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "subroutine_deflect_to_subsidiary_fort",
+                        "id": "0",
                         "type": "deflect_run",
                         "deflectorTarget": "subsidiary_data_fort",
                         "deflectorAutoBreakIfNoTarget": true,
@@ -28673,7 +28673,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 38,
-        "sideSafePlanningFingerprint": "fnv1a:d10725ef"
+        "sideSafePlanningFingerprint": "fnv1a:74b20ed9"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_classic_corp_superserum_control_grid_2026_07_01_1.1.0",
@@ -40914,7 +40914,7 @@
                 "postInstallRezQuoteBaseCredits": 8,
                 "postInstallRezQuoteFinalCredits": 8,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2d\",\"iceDefinitionId\":10,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_4\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":10,\"sourceTitle\":\"Bolter Swarm\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":10,\"sourceTitle\":\"Bolter Swarm\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2d\",\"iceDefinitionId\":10,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":10,\"sourceTitle\":\"Bolter Swarm\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":10,\"sourceTitle\":\"Bolter Swarm\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
                 "effectKind": "install_card"
               }
             }
@@ -41881,7 +41881,7 @@
                 "postInstallRezQuoteBaseCredits": 8,
                 "postInstallRezQuoteFinalCredits": 8,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2e\",\"iceDefinitionId\":10,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_4\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":10,\"sourceTitle\":\"Bolter Swarm\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":10,\"sourceTitle\":\"Bolter Swarm\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2e\",\"iceDefinitionId\":10,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":10,\"sourceTitle\":\"Bolter Swarm\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":10,\"sourceTitle\":\"Bolter Swarm\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
                 "effectKind": "install_card"
               }
             }
@@ -41963,7 +41963,7 @@
                 "postInstallRezQuoteBaseCredits": 3,
                 "postInstallRezQuoteFinalCredits": 3,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c45\",\"iceDefinitionId\":18,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"subroutine_deflect_to_subsidiary_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"subsidiary_data_fort\",\"deflectorAutoBreakIfNoTarget\":true,\"sourceDefinitionId\":18,\"sourceTitle\":\"Trapdoor\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c45\",\"iceDefinitionId\":18,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"subsidiary_data_fort\",\"deflectorAutoBreakIfNoTarget\":true,\"sourceDefinitionId\":18,\"sourceTitle\":\"Trapdoor\"}]}",
                 "effectKind": "install_card"
               }
             }

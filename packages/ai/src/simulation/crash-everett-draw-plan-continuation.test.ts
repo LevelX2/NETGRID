@@ -21,6 +21,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
+import { applyPostSetupDeckOrder } from "../evaluation/decision-checkpoints/post-setup-deck-order.test-support";
 
 const CRASH_EVERETT = 369;
 const CITY_SURVEILLANCE = 525;
@@ -34,14 +35,25 @@ describe("Crash Everett draw-plan continuation", () => {
       const observations = [];
       for (const filtering of [false, true]) {
         resetResidentPlanPortfolioMemory();
-        let state = toRunnerTurn(
-          createGameAfterSetup({
-            seed: "draw-filter-value-review",
-            runnerDeck,
-            corpDeck,
-            agendaPointsToWin: 7,
-          }),
+        const initial = createGameAfterSetup({
+          seed: "draw-filter-value-review",
+          runnerDeck,
+          corpDeck,
+          agendaPointsToWin: 7,
+        });
+        const runnerGrip = ["cvd", "c19l", "c121", "c10h", "c149"];
+        const nextBufferCard = "c19m";
+        const runnerStack = [...initial.runner.grip, ...initial.runner.stack].filter(
+          (id) => !runnerGrip.includes(id) && id !== nextBufferCard,
         );
+        runnerStack.push(nextBufferCard);
+        applyPostSetupDeckOrder(initial, {
+          runnerGrip,
+          runnerStack,
+          corpHq: initial.corp.hq,
+          corpRd: initial.corp.rd,
+        });
+        let state = toRunnerTurn(initial);
         state.runner.credits = 10;
         const crashId = moveRunnerCardToGrip(state, CRASH_EVERETT);
         state = applyLegal(

@@ -21,7 +21,7 @@ describe("Corp mixed draw score-protection coverage", () => {
     const captures = new Map<number, AiSimulationDecisionCheckpointCapture>();
     const summary = simulateAiGame({
       ...resolved.config,
-      seed: "ai-behavior-baseline-v1-05",
+      seed: "corp-day-shift-economy-73",
       maxActions: 27,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
