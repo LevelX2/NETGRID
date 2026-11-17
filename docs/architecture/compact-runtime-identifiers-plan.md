@@ -43,11 +43,16 @@ sowie die StateVersion für geöffnete Choices. Die Engine bindet diese Nummern
 an das Angebot einer Seite. Der Server prüft zusätzlich die MatchVersion.
 
 Die integrierte Abnahme umfasst die KI-Regressionen mit aktualisierten
-Testaufzeichnungen. Für gedruckte und hinzugefügte Subroutinen sowie weitere
-interne Regelfenster gelten ihre bestehenden Regelbindungen. In SQLite
-speichert eine Zufallsaufzeichnung die Position ihres Zwecks in einer
-gemeinsamen Liste. Typisierte Zufallszwecke im Engine-Vertrag sind ein
-weiterer Schritt.
+Testaufzeichnungen. In SQLite speichert eine Zufallsaufzeichnung die
+Position ihres Zwecks in einer gemeinsamen Liste. Typisierte Zufallszwecke
+im Engine-Vertrag und encounterlokale Subroutinenreferenzen stehen noch aus.
+
+Gedruckte Unterroutinen verwenden derzeit denselben Schlüssel für die
+CardSpec-Regelbindung, das Aktionsangebot und teilweise den Zufallszweck
+bei Schaden. Die kompakte Referenz sollte die Engine nach Aufbau der
+endgültigen Encounter-Folge vergeben. Regelherkunft, Bindung kopierter
+Unterroutinen und RNG-Eingabe benötigen dabei jeweils eine eigene
+Bindung. [Encounter-Folge](../../packages/engine/src/game/run/effective-ice-run-subroutines.ts) · [Schadensauflösung](../../packages/engine/src/game/damage/damage-event-resolution.ts)
 
 ## Umfang und Vergabe der Schlüssel
 
