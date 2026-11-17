@@ -27,7 +27,7 @@ describe("access outcome memory", () => {
   it("derives no-progress remote access memory from side-safe public events", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
@@ -64,7 +64,7 @@ describe("access outcome memory", () => {
         "remote_access_outcome_no_progress:true",
         "known_remote_no_current_payoff",
         "repeated_remote_no_progress_suppressed",
-        "remote_access_outcome_source_event:evt-access",
+        "remote_access_outcome_source_event:10",
         "access_outcome_memory_match:access-outcome-memory-match",
       ]),
     );
@@ -97,12 +97,12 @@ describe("access outcome memory", () => {
   it("derives no-progress memory from visible remote labels", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run", 8, "start_run", {
+        publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
           serverLabel: "Remote 1",
         }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
           targets: { serverLabel: "Remote 1" },
@@ -131,23 +131,23 @@ describe("access outcome memory", () => {
   it("retains the latest observed no-progress access across later failed runs on the unchanged remote", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run-accessed", 8, "start_run", {
+        publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
           serverId: "remote_1",
         }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
           cardDefinitionId: 529,
         }),
-        publicEvent("evt-run-failed", 10, "start_run", {
+        publicEvent(10, "start_run", {
           actor: "runner",
           actionType: "start_run",
           serverId: "remote_1",
         }),
-        publicEvent("evt-end-run", 11, "end_run", {
+        publicEvent(11, "end_run", {
           actor: "runner",
           actionType: "end_run",
           serverId: "remote_1",
@@ -170,7 +170,7 @@ describe("access outcome memory", () => {
       applies: true,
       suppressesPlanBonus: true,
       evidence: expect.arrayContaining([
-        "remote_access_outcome_source_event:evt-access",
+        "remote_access_outcome_source_event:10",
         "repeated_remote_no_progress_suppressed",
       ]),
     });
@@ -179,18 +179,18 @@ describe("access outcome memory", () => {
   it("remembers a declined trash without attributing an unobserved reason", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run", 8, "start_run", {
+        publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
           serverId: "remote_1",
         }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
           cardDefinitionId: 529,
         }),
-        publicEvent("evt-decline", 10, "decline_trash", {
+        publicEvent(10, "decline_trash", {
           actor: "runner",
           actionType: "decline_trash",
           serverId: "remote_1",
@@ -216,7 +216,7 @@ describe("access outcome memory", () => {
       evidence: expect.arrayContaining([
         "remote_access_outcome_decision:decline",
         "remote_access_outcome_reason:unknown",
-        "remote_access_outcome_decline_event:evt-decline",
+        "remote_access_outcome_decline_event:11",
       ]),
     });
   });
@@ -224,18 +224,18 @@ describe("access outcome memory", () => {
   it("does not derive no-progress memory after a visible remote change", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run", 8, "start_run", {
+        publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
           serverId: "remote_1",
         }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
           cardDefinitionId: 529,
         }),
-        publicEvent("evt-install", 10, "install_card", {
+        publicEvent(10, "install_card", {
           actor: "corp",
           actionType: "install_card",
           serverId: "remote_1",
@@ -315,17 +315,16 @@ function aiInput(params: {
 }
 
 function publicEvent(
-  eventId: string,
   stateVersionAfter: number,
   type: string,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type,
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${stateVersionAfter}`,
     visibilityClass: "public",
     publicPayload,
   };
@@ -357,7 +356,7 @@ function runAction(actionId: string, serverId: string): LegalAction {
 function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: side === "runner" ? 587 : 3,
     title: `${side} identity`,
     owner: side,
     controller: side,

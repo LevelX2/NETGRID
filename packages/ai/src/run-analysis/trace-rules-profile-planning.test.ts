@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   VisibleEffectiveIceRunQuote,
@@ -32,6 +33,7 @@ describe("trace rules profile planning", () => {
       supportQuote({
         baseLink: 3,
         sourceDefinitionId: 216,
+        sourceTitle: "Bakdoor",
       }),
       5,
       0,
@@ -53,6 +55,7 @@ describe("trace rules profile planning", () => {
         baseLink: 9,
         activationCost: 1,
         sourceDefinitionId: 360,
+        sourceTitle: "Access Through Alpha",
       }),
       10,
       0,
@@ -122,6 +125,7 @@ describe("trace rules profile planning", () => {
       {
         baseLink: 3,
         sourceDefinitionId: 216,
+        sourceTitle: "Bakdoor",
       },
       [
         {
@@ -137,7 +141,7 @@ describe("trace rules profile planning", () => {
         },
         {
           sourceCardInstanceId: "signpost_1",
-          sourceDefinitionId: "synthetic_signpost",
+          sourceDefinitionId: syntheticCardDefinitionId("synthetic_signpost"),
           sourceTitle: "Signpost-like",
           linkDelta: 2,
           activationCost: 1,
@@ -170,6 +174,7 @@ function supportQuote(
     baseLink: number;
     activationCost?: number;
     sourceDefinitionId?: number;
+    sourceTitle?: string;
   },
   postBidLinkOptions: VisibleRunnerTraceSupportQuote["postBidLinkOptions"] = [],
 ): VisibleRunnerTraceSupportQuote {
@@ -184,7 +189,7 @@ function supportQuote(
         ...(base.sourceDefinitionId
           ? {
               sourceDefinitionId: base.sourceDefinitionId,
-              sourceTitle: base.sourceDefinitionId,
+              ...(base.sourceTitle ? { sourceTitle: base.sourceTitle } : {}),
             }
           : {}),
       },

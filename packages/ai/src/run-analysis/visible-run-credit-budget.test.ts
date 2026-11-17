@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   normalizeRunnerRunPathCreditBudget,
@@ -17,7 +18,7 @@ function assessment(
   return {
     cost: options.cost ?? 0,
     breakerInstanceId: "breaker",
-    breakerDefinitionId: "breaker",
+    breakerDefinitionId: syntheticCardDefinitionId("breaker"),
     breakerSubtypes: ["icebreaker"],
     endingStrength: 0,
     carriesStrengthAcrossIce: false,

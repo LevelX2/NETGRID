@@ -38,7 +38,7 @@ describe("Paarung 576: getrennte Begegnungs- und Runstärke", () => {
       creditsAfterPath: 6,
     });
     expect(
-      path.carriedBreakerStrengthAfterPath?.runner_onr_v1_066_snowball_1,
+      path.carriedBreakerStrengthAfterPath?.runner_278_1,
     ).toBe(2);
   });
   it("erhält nur den echten Runbonus nach dem einzelnen äußeren ICE", () => {
@@ -59,7 +59,7 @@ describe("Paarung 576: getrennte Begegnungs- und Runstärke", () => {
       creditsAfterPath: 9,
     });
     expect(
-      path.carriedBreakerStrengthAfterPath?.runner_onr_v1_066_snowball_1,
+      path.carriedBreakerStrengthAfterPath?.runner_278_1,
     ).toBe(1);
   });
 });

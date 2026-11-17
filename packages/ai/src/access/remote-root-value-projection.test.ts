@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import { projectRemoteRootValue } from "./remote-root-value-projection";
 
@@ -29,7 +30,7 @@ describe("remote root value projection", () => {
   it("ignores unrelated value numbers in remote-root valuation", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "typed-root-value",
+        definitionId: syntheticCardDefinitionId("typed-root-value"),
         roles: ["ambush"],
         valueHints: { damage: 15 },
       }),
@@ -40,7 +41,7 @@ describe("remote root value projection", () => {
 
     expect(
       projectRemoteRootValue({
-        definitionId: "typed-root-value",
+        definitionId: syntheticCardDefinitionId("typed-root-value"),
         roles: ["ambush"],
         valueHints: { damage: 15, remoteRootValue: 4 },
       }),
@@ -53,12 +54,12 @@ describe("remote root value projection", () => {
   it("does not treat recurring credits as finite pools", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "recurring-economy",
+        definitionId: syntheticCardDefinitionId("recurring-economy"),
         roles: ["economy"],
         visibleCard: {
           instanceId: "recurring",
           known: true,
-          definitionId: "recurring-economy",
+          definitionId: syntheticCardDefinitionId("recurring-economy"),
           type: "asset",
           counters: { recurring_credit: 3 },
         },
@@ -73,12 +74,12 @@ describe("remote root value projection", () => {
   it("keeps bit counters without economy semantics non-economic", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "bit-counter-non-economy",
+        definitionId: syntheticCardDefinitionId("bit-counter-non-economy"),
         roles: ["ambush"],
         visibleCard: {
           instanceId: "ambush",
           known: true,
-          definitionId: "bit-counter-non-economy",
+          definitionId: syntheticCardDefinitionId("bit-counter-non-economy"),
           type: "asset",
           counters: { bit: 2 },
         },
@@ -93,11 +94,11 @@ describe("remote root value projection", () => {
   it("does not infer finite economy from asset type alone", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "plain-asset",
+        definitionId: syntheticCardDefinitionId("plain-asset"),
         visibleCard: {
           instanceId: "plain",
           known: true,
-          definitionId: "plain-asset",
+          definitionId: syntheticCardDefinitionId("plain-asset"),
           type: "asset",
         },
       }),
@@ -110,13 +111,13 @@ describe("remote root value projection", () => {
   it("does not mark finite economy semantics depleted without a visible pool counter", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "campaign-with-hidden-pool",
+        definitionId: syntheticCardDefinitionId("campaign-with-hidden-pool"),
         roles: ["campaign", "economy"],
         effects: [{ kind: "economy", scope: "corp", finite: true }],
         visibleCard: {
           instanceId: "campaign",
           known: true,
-          definitionId: "campaign-with-hidden-pool",
+          definitionId: syntheticCardDefinitionId("campaign-with-hidden-pool"),
           type: "asset",
         },
       }),
@@ -130,7 +131,7 @@ describe("remote root value projection", () => {
   it("bounds role text classification by role tokens", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "remote-role-noise",
+        definitionId: syntheticCardDefinitionId("remote-role-noise"),
         roles: [
           "campaigner_noise",
           "engineer_noise",
@@ -144,7 +145,7 @@ describe("remote root value projection", () => {
 
     expect(
       projectRemoteRootValue({
-        definitionId: "remote-role-structured",
+        definitionId: syntheticCardDefinitionId("remote-role-structured"),
         roles: ["agenda_protection"],
       }),
     ).toMatchObject({
@@ -155,7 +156,7 @@ describe("remote root value projection", () => {
   it("keeps the parts of compound roles on the same annotation", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "unrelated-roles",
+        definitionId: syntheticCardDefinitionId("unrelated-roles"),
         roles: ["economy", "pool_control", "agenda", "protection_averse"],
         visibleCard: {
           instanceId: "pool",
@@ -169,7 +170,7 @@ describe("remote root value projection", () => {
   it("projects typed advancement-transfer support as score acceleration", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "typed-counter-transfer-engine",
+        definitionId: syntheticCardDefinitionId("typed-counter-transfer-engine"),
         roles: ["asset", "economy"],
         effects: [
           {

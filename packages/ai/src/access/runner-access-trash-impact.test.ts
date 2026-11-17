@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   cardSpecPlanningCardByDefinitionId,
   type CardSpecPlanningCompatibilityCard,
@@ -50,7 +51,7 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
     "derives future credits generically and deducts the canonical rez cost %s",
     (rezCost) => {
       const source = lookupPlanningCard(521);
-      const definitionId = "fixture-unrezzed-stored-economy";
+      const definitionId = syntheticCardDefinitionId("fixture-unrezzed-stored-economy");
       const planningCard = {
         ...source,
         definition: { ...source.definition, rezCost },
@@ -145,7 +146,7 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
     "derives recurring draw-tag impact from capability facts, present=%s",
     (present) => {
       const source = lookupPlanningCard(525);
-      const definitionId = "fixture-recurring-draw-tax";
+      const definitionId = syntheticCardDefinitionId("fixture-recurring-draw-tax");
       const planningCard = {
         ...source,
         planning: {

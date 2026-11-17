@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import { rankKnownRemoteAccessTargets } from "./access-target-ranking";
 import type { KnownRemoteAccessCandidate } from "./access-target-ranking";
@@ -43,7 +44,7 @@ function candidate(
 ): KnownRemoteAccessCandidate {
   return {
     positionKey,
-    definitionId: `${targetKind}-${positionKey}`,
+    definitionId: syntheticCardDefinitionId(`${targetKind}-${positionKey}`),
     targetKind,
     valueScore,
     commitment: {
