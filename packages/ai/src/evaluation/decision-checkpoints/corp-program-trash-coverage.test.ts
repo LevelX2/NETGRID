@@ -25,6 +25,9 @@ import { selectedCorpProgramTrashChoiceOptionIds } from "../../runtime/corp-prog
 
 const REX = 476;
 const RAPTOR = 266;
+const CYFERMASTER = 228;
+const KRASH = 251;
+const WORM = 286;
 
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -91,7 +94,8 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
   const initial = choiceState();
   const input = corpInput(initial);
   const decision = chooseCorpAction(input);
-  expect(selectedTarget(input, decision)).toContain("worm");
+  const worm = input.playerView.opponent.rig!.find((card) => card.definitionId === WORM)!;
+  expect(selectedTarget(input, decision)).toBe(worm.instanceId);
   expect(decision.actionId).toBe(input.legalActions[0]!.actionId);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     lane: "plan",
@@ -114,9 +118,7 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
   });
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(result.error.message);
-  expect(
-    result.state.runner.rig.programs.some((id) => id.includes("worm")),
-  ).toBe(false);
+  expect(result.state.runner.rig.programs).not.toContain(worm.instanceId);
   const replay = replayEvents(
     initial,
     result.state.eventLog.slice(initial.eventLog.length),
@@ -127,35 +129,31 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
 
 it("preserves redundant Wall coverage and instead removes the unique affordable decoder", () => {
   const input = corpInput(choiceState({ dwarf: true, gate: true }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain(
-    "cyfermaster",
-  );
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(CYFERMASTER);
 });
 
 it("recognizes universal replacement cost but prioritizes its unique Sentry coverage", () => {
   const input = corpInput(choiceState({ krash: true }));
   const programs = input.playerView.opponent.rig!;
   const losses = programTrashCoverageLosses(input, programs);
-  const worm = programs.find((p) => p.definitionId === 286)!;
-  const krash = programs.find((p) => p.definitionId === 251)!;
+  const worm = programs.find((p) => p.definitionId === WORM)!;
+  const krash = programs.find((p) => p.definitionId === KRASH)!;
   expect(losses.get(worm.instanceId)).toEqual({
     lostAffordableIce: 0,
     additionalCredits: 4,
   });
   expect(losses.get(krash.instanceId)?.lostAffordableIce).toBe(1);
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain("krash");
+  expect(selectedTarget(input, chooseCorpAction(input))).toBe(krash.instanceId);
 });
 
 it("does not award coverage loss for unrezzed ICE", () => {
   const input = corpInput(choiceState({ unrezzedWall: true }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain(
-    "cyfermaster",
-  );
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(CYFERMASTER);
 });
 
 it("does not award coverage loss for a path already unaffordable before the trash", () => {
   const input = corpInput(choiceState({ gate: true, credits: 1 }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain("worm");
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(WORM);
 });
 
 it("keeps the target unchanged when the public Runner hand count changes", () => {
@@ -228,6 +226,14 @@ function selectedTarget(
   return String(
     input.playerView.pendingChoice!.options.find((o) => o.id === id)!.value,
   );
+}
+
+function selectedTargetDefinition(
+  input: ReturnType<typeof corpInput>,
+  decision: ReturnType<typeof chooseCorpAction>,
+) {
+  const targetId = selectedTarget(input, decision);
+  return input.playerView.opponent.rig!.find((card) => card.instanceId === targetId)?.definitionId;
 }
 
 function corpInput(state: GameState) {
