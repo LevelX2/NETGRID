@@ -723,7 +723,7 @@ function installedApproachIceExposeSources(
 function approachIceExposeAbilityIdForSource(
   host: EncounterEntryHost,
   sourceCardId: CardInstanceId,
-): string {
+): number {
   const definition = host.cards.definitionFor(sourceCardId);
   const matches = (
     engineCardByDefinitionId(definition.id)?.engine.runEncounterInterventions ??

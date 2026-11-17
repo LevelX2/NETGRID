@@ -129,7 +129,7 @@ export function runnerPaymentInstallSetups(
       .sort(
         (a, b) =>
           b.netPaymentGain - a.netPaymentGain ||
-          a.capabilityId.localeCompare(b.capabilityId),
+          a.capabilityId - b.capabilityId,
       )
       .slice(0, 1);
   });

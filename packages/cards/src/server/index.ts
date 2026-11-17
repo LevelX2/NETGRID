@@ -1,3 +1,4 @@
+export { canonicalCapabilityId } from "../capability-identity";
 import type { CardDefinitionId } from "@netgrid/shared";
 import {
   publicCardViewForDefinitionId,

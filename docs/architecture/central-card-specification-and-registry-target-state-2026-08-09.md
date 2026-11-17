@@ -450,11 +450,11 @@ Zugsimulation und keine aktuelle Engine-Autorisierung.
 Jeder planungs- oder Action-adressierbare mechanische Knoten erhält einen
 innerhalb der CardSpec stabilen `capabilityKey`. Für normale aktivierte
 Fähigkeiten darf `abilityKey` als typisierter Alias dienen. Die kanonische
-quellenweite Identität lautet:
-
-```text
-<cardDefinitionId>:<capabilityKey>
-```
+Identität ist eine positive numerische `CanonicalCapabilityId`. Der
+[generierte Fähigkeitsindex](../../packages/cards/src/generated/card-capability-ids.ts)
+ordnet sie derselben Kartendefinition und demselben lokalen Schlüssel zu.
+Neue Fähigkeiten werden mit `pnpm generate:card-capability-ids` angehängt.
+Der Generator lässt Nummern entfernter Fähigkeiten reserviert.
 
 Sie darf in einer `CanonicalLegalActionInvocation` als `sourceAbilityId`
 transportiert werden, ersetzt aber weder das `capabilityId` einer

@@ -160,10 +160,10 @@ export function buildScoredAgendaAbilityActionsForCard(
           damageAmount,
         },
       );
-      action.abilityRef = {
-        sourceCardInstanceId: agendaId,
-        sourceAbilityId: primitive.cardImplementationAbilityId as string,
-      };
+      const sourceAbilityId = primitive.cardImplementationAbilityId;
+      if (typeof sourceAbilityId !== "number")
+        throw new Error("Missing canonical scored agenda ability identity.");
+      action.abilityRef = { sourceCardInstanceId: agendaId, sourceAbilityId };
       actions.push(action);
     }
     return { handled: true, actions };

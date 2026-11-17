@@ -1,11 +1,11 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { capabilityKey } from "./capability-identity";
+import { capabilityKey, createCapabilityIdentityRegistry } from "./capability-identity";
 import type { CardSpec } from "./contracts";
 import type { CardMechanicalSpec } from "./engine/card-mechanical-contracts";
 import {
   PROSPECTIVE_CLASS_BY_FAMILY,
-  compileProspectiveCapabilities,
+  compileProspectiveCapabilities as compileCapabilities,
   type ProspectiveCapability,
   type ProspectiveCapabilityFamily,
 } from "./prospective-capabilities";
@@ -98,6 +98,19 @@ function keyed(key: string) {
     capabilityKey: capabilityKey(key),
     addressability: ["action"] as const,
   };
+}
+
+const fixtureCapabilityId = createCapabilityIdentityRegistry([
+  [930, "store_credits"], [930, "withdraw_credits"], [931, "trash_at_end_of_turn"],
+  [932, "bind_ice"], [932, "break_sentry"], [932, "pump"],
+  [933, "choose_initial_subtype"], [933, "change_subtype"], [933, "break_selected_subtype"],
+  [934, "play_sneak_preview"], [936, "choose_rez_x"], [937, "access_unrezzed"],
+  [937, "access_installed"], [937, "access_central"], [938, "score_install_sequence"],
+  [939, "run_start_gate"], [946, "gain"],
+]).idFor;
+
+function compileProspectiveCapabilities(specification: CardSpec) {
+  return compileCapabilities(specification, fixtureCapabilityId);
 }
 
 function capabilities(specification: CardSpec, family: string) {
@@ -197,7 +210,7 @@ describe("compileProspectiveCapabilities", () => {
     const withdraw = byKey(broker, "withdraw_credits");
     expect(store.identity).toMatchObject({
       kind: "keyed",
-      canonicalCapabilityId: "930:store_credits",
+      canonicalCapabilityId: fixtureCapabilityId(930, capabilityKey("store_credits")),
     });
     expect(descriptorValue(store, ".costs")).toEqual([
       { kind: "action", amount: 1 },
@@ -316,7 +329,7 @@ describe("compileProspectiveCapabilities", () => {
     );
     expectUnique(liabilities.map((entry) => entry.sourcePath));
     expect(byKey(loan, "trash_at_end_of_turn").identity).toMatchObject({
-      canonicalCapabilityId: "931:trash_at_end_of_turn",
+      canonicalCapabilityId: fixtureCapabilityId(931, capabilityKey("trash_at_end_of_turn")),
     });
   });
 

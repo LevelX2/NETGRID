@@ -221,7 +221,7 @@ export type CanonicalLegalActionInvocation = {
   sourceCardInstanceId?: string;
   sourceAbilityBinding?: {
     kind: "card_spec_capability_key";
-    sourceAbilityId: string;
+    sourceAbilityId: number;
   };
   boundTargets: BoundTargetSlot[];
   boundChoices: CanonicalChoiceBinding[];

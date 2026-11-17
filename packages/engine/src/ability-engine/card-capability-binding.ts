@@ -94,7 +94,7 @@ export function onPlayAbilityForCapabilityIdentity(
   definition: CardDefinition,
   identity: {
     kind: "card_spec_capability_key";
-    sourceCapabilityId: string;
+    sourceCapabilityId: CanonicalCapabilityId;
   },
   sources: CardCapabilityAuthoritySources = DEFAULT_AUTHORITY_SOURCES,
 ): OnPlayCardAbilityImplementation | undefined {
@@ -278,7 +278,7 @@ function assertCanonicalPayloadBinding(
   const rawSourceAbilityId = legalAction.payload?.cardImplementationAbilityId;
   if (
     typeof rawCapabilityKey !== "string" ||
-    typeof rawSourceAbilityId !== "string"
+    typeof rawSourceAbilityId !== "number"
   )
     throw new CardCapabilityBindingError(
       "invalid_canonical_ability_binding",
@@ -307,7 +307,7 @@ function assertCanonicalPayloadBinding(
     );
   return {
     capabilityKey: parsed.capabilityKey,
-    sourceAbilityId: rawSourceAbilityId as CanonicalCapabilityId,
+    sourceAbilityId: parsed.canonicalCapabilityId,
   };
 }
 
@@ -363,7 +363,7 @@ export function activatedAbilityBindingPayload(
 
 export function activatedAbilityBindingForPersistedIdentity(
   definition: CardDefinition,
-  identity: { sourceAbilityId: string },
+  identity: { sourceAbilityId: CanonicalCapabilityId },
   sources: CardCapabilityAuthoritySources = DEFAULT_AUTHORITY_SOURCES,
 ): ActivatedAbilityBinding {
   const matches = activatedAbilityBindingsForDefinition(

@@ -1,8 +1,16 @@
-import type { AbilityRef, CardDefinitionId } from "@netgrid/shared";
+import {
+  isCanonicalCapabilityId,
+  type AbilityRef,
+  type CanonicalCapabilityId,
+  type CardDefinitionId,
+} from "@netgrid/shared";
+import { CARD_CAPABILITY_IDS } from "./generated/card-capability-ids";
+export type { CanonicalCapabilityId } from "@netgrid/shared";
+
+const CAPABILITY_KEY_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
 
 declare const capabilityKeyBrand: unique symbol;
 declare const abilityKeyBrand: unique symbol;
-declare const canonicalCapabilityIdBrand: unique symbol;
 
 /** Stable semantic identity within one CardSpec. */
 export type CapabilityKey = string & {
@@ -15,10 +23,6 @@ export type CapabilityKey = string & {
  */
 export type AbilityKey = CapabilityKey & {
   readonly [abilityKeyBrand]: "AbilityKey";
-};
-
-export type CanonicalCapabilityId = `${CardDefinitionId}:${CapabilityKey}` & {
-  readonly [canonicalCapabilityIdBrand]: "CanonicalCapabilityId";
 };
 
 export type CapabilityAddressability =
@@ -73,45 +77,75 @@ export function abilityKey(value: string): AbilityKey {
   return value as AbilityKey;
 }
 
-export function canonicalCapabilityId(
+export type CapabilityIdentityLedger = readonly (
+  readonly [CardDefinitionId, string] | null
+)[];
+
+export type ResolveCapabilityId = (
   definitionId: CardDefinitionId,
   key: CapabilityKey,
-): CanonicalCapabilityId {
-  cardDefinitionId(definitionId);
-  assertKeyText(key, "capabilityKey");
-  return `${definitionId}:${key}` as CanonicalCapabilityId;
+) => CanonicalCapabilityId;
+
+export function createCapabilityIdentityRegistry(ledger: CapabilityIdentityLedger) {
+  const byCard = new Map<CardDefinitionId, Map<CapabilityKey, CanonicalCapabilityId>>();
+  const byId = new Map<CanonicalCapabilityId, {
+    cardDefinitionId: CardDefinitionId;
+    capabilityKey: CapabilityKey;
+    canonicalCapabilityId: CanonicalCapabilityId;
+  }>();
+  for (const [index, entry] of ledger.entries()) {
+    if (entry === null) continue;
+    const definitionId = cardDefinitionId(entry[0]);
+    const key = capabilityKey(entry[1]);
+    const id = index + 1;
+    let capabilities = byCard.get(definitionId);
+    if (!capabilities) {
+      capabilities = new Map();
+      byCard.set(definitionId, capabilities);
+    }
+    if (capabilities.has(key))
+      throw new CapabilityIdentityError(
+        "invalid_canonical_capability_id",
+        String(id),
+        "capability is already assigned an identity",
+      );
+    capabilities.set(key, id);
+    byId.set(id, Object.freeze({
+      cardDefinitionId: definitionId,
+      capabilityKey: key,
+      canonicalCapabilityId: id,
+    }));
+  }
+  const idFor: ResolveCapabilityId = (definitionId, key) => {
+    const id = byCard.get(definitionId)?.get(key);
+    if (id === undefined)
+      throw new CapabilityIdentityError(
+        "invalid_canonical_capability_id",
+        String(definitionId) + ":" + key,
+        "capability has no assigned identity",
+      );
+    return id;
+  };
+  function resolve(value: unknown) {
+    const capability = isCanonicalCapabilityId(value) ? byId.get(value) : undefined;
+    if (capability === undefined)
+      throw new CapabilityIdentityError(
+        "invalid_canonical_capability_id",
+        "canonicalCapabilityId",
+        "must be an assigned positive numeric capability ID",
+      );
+    return capability;
+  }
+  return { idFor, resolve };
 }
 
-export function parseCanonicalCapabilityId(value: string): {
-  cardDefinitionId: CardDefinitionId;
-  capabilityKey: CapabilityKey;
-  canonicalCapabilityId: CanonicalCapabilityId;
-} {
-  const separator = value.lastIndexOf(":");
-  if (separator <= 0 || separator === value.length - 1)
-    throw new CapabilityIdentityError(
-      "invalid_canonical_capability_id",
-      "canonicalCapabilityId",
-      "must use <cardDefinitionId>:<capabilityKey>",
-    );
-  const definitionId = cardDefinitionId(Number(value.slice(0, separator)));
-  const key = capabilityKey(value.slice(separator + 1));
-  const canonicalId = canonicalCapabilityId(definitionId, key);
-  if (canonicalId !== value)
-    throw new CapabilityIdentityError(
-      "invalid_canonical_capability_id",
-      "canonicalCapabilityId",
-      "must be canonical",
-    );
-  return {
-    cardDefinitionId: definitionId,
-    capabilityKey: key,
-    canonicalCapabilityId: canonicalId,
-  };
-}
+const productCapabilityIdentities = createCapabilityIdentityRegistry(CARD_CAPABILITY_IDS);
+
+export const canonicalCapabilityId = productCapabilityIdentities.idFor;
+export const parseCanonicalCapabilityId = productCapabilityIdentities.resolve;
 
 export function assertCanonicalCapabilityId(
-  value: string,
+  value: unknown,
 ): asserts value is CanonicalCapabilityId {
   parseCanonicalCapabilityId(value);
 }
@@ -129,7 +163,7 @@ export function assertAbilityRefIdentity(
   const keys = Object.keys(record).sort();
   const expectedKeys = ["sourceAbilityId", "sourceCardInstanceId"];
   if (
-    typeof record.sourceAbilityId !== "string" ||
+    !isCanonicalCapabilityId(record.sourceAbilityId) ||
     typeof record.sourceCardInstanceId !== "string" ||
     record.sourceCardInstanceId.trim().length === 0 ||
     keys.length !== expectedKeys.length ||
@@ -160,8 +194,6 @@ export function assertAbilityKeyAlias(
       "abilityKey must be the same string value as capabilityKey",
     );
 }
-
-const CAPABILITY_KEY_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
 
 function assertKeyText(value: string, path: string): void {
   if (

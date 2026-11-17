@@ -749,10 +749,15 @@ export type ModifierDefinition = {
   sourceAbilityId?: string;
 };
 
+export type CanonicalCapabilityId = number;
+
+export function isCanonicalCapabilityId(value: unknown): value is CanonicalCapabilityId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type AbilityRef = {
   sourceCardInstanceId: CardInstanceId;
-  /** Canonical <cardDefinitionId>:<capabilityKey> identity. */
-  sourceAbilityId: string;
+  sourceAbilityId: CanonicalCapabilityId;
 };
 
 export type EffectSource =
@@ -1809,7 +1814,7 @@ export type RunState = {
     brokenSubroutineBreakerByIndex?: Partial<Record<number, CardInstanceId>>;
     pendingFreeBreaks: Array<{
       sourceBreakerInstanceId: CardInstanceId;
-      sourceAbilityId: string;
+      sourceAbilityId: CanonicalCapabilityId;
       iceSubtype: "sentry";
       remainingUses: number;
       mustBeNextEncounteredIce: true;
@@ -2086,7 +2091,7 @@ export type CorpDrawContinuation =
       kind: "card_effect_activated";
       sourceCardId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
-      sourceAbilityId: string;
+      sourceAbilityId: CanonicalCapabilityId;
       drawEffectIndex: number;
       nextEffectIndex: number;
       creditGainOrdinal: number;
@@ -2124,7 +2129,7 @@ export type CardCreditGainContinuation =
       kind: "card_effect_activated";
       sourceCardId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
-      sourceAbilityId: string;
+      sourceAbilityId: CanonicalCapabilityId;
       nextEffectIndex: number;
       creditGainOrdinal: number;
       originalActionPayload: LegalActionPayload;
@@ -2792,8 +2797,8 @@ export type CorpHostedCreditBankCycleQuote = {
   sourceServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
   headKind: "rez" | "load";
-  loadAbilityId: string;
-  cashoutAbilityId: string;
+  loadAbilityId: CanonicalCapabilityId;
+  cashoutAbilityId: CanonicalCapabilityId;
   currentCredits: number;
   currentClicks: number;
   currentHostedCredits: number;
@@ -3855,7 +3860,7 @@ export type VisibleRunStartRandomStrengthState =
     };
 
 export type VisibleRunnerPaymentSupportAbility = {
-  sourceAbilityId: string;
+  sourceAbilityId: CanonicalCapabilityId;
   capabilityKey: string;
   timing: "runner_cost_penalty_support";
   label: string;
@@ -3945,7 +3950,7 @@ export type CorpPunishRouteStepRequest = {
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
   sourceCapabilityBindingKind: "card_spec_capability_key";
-  sourceCapabilityId: string;
+  sourceCapabilityId: CanonicalCapabilityId;
   /**
    * Exact current head action selected by the caller when multiple legal
    * variants exist. Omitted only when asking the Engine to certify a
@@ -3983,7 +3988,7 @@ export type CorpPunishRouteStepQuote = {
   sourceCardInstanceId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
   sourceCapabilityBindingKind: "card_spec_capability_key";
-  sourceCapabilityId: string;
+  sourceCapabilityId: CanonicalCapabilityId;
   clicks: number;
   credits: number;
   agendaPointCost?: number;

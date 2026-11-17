@@ -1,6 +1,8 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  isCanonicalCapabilityId,
+  type CanonicalCapabilityId,
   type CardInstanceId,
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
@@ -1027,7 +1029,7 @@ export function corpPunishRouteRequestFingerprint(
       step.kind,
       step.sourceCardInstanceId,
       step.sourceCapabilityBindingKind,
-      step.sourceCapabilityId,
+      String(step.sourceCapabilityId),
       ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
   ]);
@@ -1569,7 +1571,7 @@ function exactRequestedHardwareTrashAction(
 function onPlayCapability(
   definition: (typeof CARD_DEFINITIONS_BY_ID)[number] & {},
   bindingKind: "card_spec_capability_key",
-  capabilityId: string,
+  capabilityId: CanonicalCapabilityId,
 ): OnPlayCardAbilityImplementation | undefined {
   return onPlayAbilityForCapabilityIdentity(definition, {
     kind: bindingKind,
@@ -2084,7 +2086,7 @@ function isCorpPunishRouteQuoteRequest(request: unknown): boolean {
         step.order === index &&
         validStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
-        nonblank(step.sourceCapabilityId) &&
+        isCanonicalCapabilityId(step.sourceCapabilityId) &&
         (step.currentLegalActionId === undefined ||
           (index === 0 && nonblank(step.currentLegalActionId))),
     )

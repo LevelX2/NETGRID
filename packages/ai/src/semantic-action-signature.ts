@@ -1,3 +1,4 @@
+import type { ActionAbilityIdentity } from "./action-semantic-candidate-types";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 
 export type SemanticActionSignature = {
@@ -6,7 +7,7 @@ export type SemanticActionSignature = {
   semanticActionType: string;
   sourceKind: string;
   sourceDefinitionId?: number;
-  abilityId?: string;
+  abilityId?: ActionAbilityIdentity;
   targetIdentity: string;
   costClass: string;
   timingClass: string;
@@ -20,7 +21,7 @@ export type SemanticActionSignatureInput = {
   semanticActionType?: string;
   sourceKind?: string;
   sourceDefinitionId?: number;
-  abilityId?: string;
+  abilityId?: ActionAbilityIdentity;
   targetIdentity?: string;
   costClass?: string;
   timingClass?: string;

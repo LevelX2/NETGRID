@@ -95,7 +95,7 @@ export function fundRunnerRunPathPayment(
       .sort(
         (a, b) =>
           b.gainCredits - b.creditCost - (a.gainCredits - a.creditCost) ||
-          a.sourceAbilityId.localeCompare(b.sourceAbilityId),
+          a.sourceAbilityId - b.sourceAbilityId,
       )[0];
     if (!ability) continue;
     const net = ability.gainCredits - ability.creditCost;

@@ -138,7 +138,7 @@ function canonicalPrimitiveActionMetadata(
   )
     return undefined;
   const sourceAbilityId = payload.cardImplementationAbilityId;
-  if (typeof sourceAbilityId !== "string")
+  if (typeof sourceAbilityId !== "number")
     throw new Error(
       "CardSpec primitive action is missing its canonical ability identity.",
     );

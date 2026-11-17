@@ -140,7 +140,7 @@ export type RunnerRunPathCreditBudget = {
   /** Conditional one-shot sources, usable only at a positive payment window. */
   paymentSupportSources?: readonly {
     cardInstanceId: string;
-    sourceAbilityId: string;
+    sourceAbilityId: number;
     creditCost: number;
     gainCredits: number;
   }[];

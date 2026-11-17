@@ -1379,7 +1379,7 @@ export function createCorpRuntimeResolvers(
 
   function abilityMetadata(
     sourceCardInstanceId: CardInstanceId,
-    sourceAbilityId: string,
+    sourceAbilityId: number,
     encounteredIceId?: CardInstanceId,
   ): Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements"> {
     parseCanonicalCapabilityId(sourceAbilityId);

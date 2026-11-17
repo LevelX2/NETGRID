@@ -268,7 +268,7 @@ export function boundCurrentStepProjection(
     payload.cardImplementationSourceCounterType.length > 0 &&
     isNonNegativeInteger(payload.cardImplementationSourceCounterCost) &&
     payload.cardImplementationSourceCounterCost > 0 &&
-    typeof payload.cardImplementationAbilityId === "string" &&
+    typeof payload.cardImplementationAbilityId === "number" &&
     candidate.sourceCardInstanceId === action.source &&
     extras.every((field) =>
       [

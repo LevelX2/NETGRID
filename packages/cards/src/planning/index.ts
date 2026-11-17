@@ -54,6 +54,7 @@ export type {
   ProspectiveUncertaintyClass,
 } from "../prospective-capabilities";
 export {
+  CapabilityIdentityError,
   canonicalCapabilityId,
   assertCanonicalCapabilityId,
   assertAbilityRefIdentity,

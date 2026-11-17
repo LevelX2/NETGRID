@@ -17,7 +17,7 @@ import {
 } from "./hidden-resource-payment-preselection";
 
 const ability: VisibleRunnerPaymentSupportAbility = {
-  sourceAbilityId: "test_hidden_resource:withdraw-1",
+  sourceAbilityId: 440,
   capabilityKey: "withdraw-1",
   timing: "runner_cost_penalty_support",
   label: "Swiss Bank Account: 6 Credits nehmen",
@@ -40,7 +40,7 @@ describe("hidden resource payment preselection", () => {
       matchId: "match-1",
       side: "runner",
       sourceCardId: "swiss-a",
-      sourceAbilityId: "test_hidden_resource:withdraw-1",
+      sourceAbilityId: 440,
       capabilityKey: "withdraw-1",
       selectedTurnSerial: 7,
       selectedRunId: 1,
@@ -107,7 +107,7 @@ describe("hidden resource payment preselection", () => {
 
   it("matches canonical payment support by exact capability identity", () => {
     const canonical: VisibleRunnerPaymentSupportAbility = {
-      sourceAbilityId: "test_hidden_resource:withdraw",
+      sourceAbilityId: 441,
       capabilityKey: "withdraw",
       timing: "runner_cost_penalty_support",
       label: "Withdraw",
@@ -129,7 +129,7 @@ describe("hidden resource payment preselection", () => {
       {
         cardId: "canonical-a",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: "test_hidden_resource:withdraw",
+        cardImplementationAbilityId: 441,
         cardImplementationAbilityKey: "withdraw",
         cardImplementationAbilityTiming: "runner_cost_penalty_support",
         costPenaltySupportWindowId: "window-1",
@@ -138,7 +138,7 @@ describe("hidden resource payment preselection", () => {
     );
     exact.abilityRef = {
       sourceCardInstanceId: "canonical-a",
-      sourceAbilityId: "test_hidden_resource:withdraw",
+      sourceAbilityId: 441,
     };
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [exact]),
@@ -354,7 +354,7 @@ function supportAction(
   windowId: string,
   stateVersion = 12,
 ): LegalAction {
-  const sourceAbilityId = `test_hidden_resource:${capabilityKey}`;
+  const sourceAbilityId = capabilityKey === "withdraw-1" ? 440 : 441;
   const result = action(
     actionId,
     "activated_card_ability",

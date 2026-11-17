@@ -13,7 +13,7 @@ export type CandidatePathBinding = {
   actionType: string;
   side: Side;
   sourceDefinitionId?: number;
-  abilityId?: string;
+  abilityId?: string | number;
   targetIdentity: string;
   costClass: string;
   timingClass: string;

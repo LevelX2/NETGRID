@@ -104,19 +104,19 @@ export type CorpTaggedDamagePayoffProfile = Readonly<{
 
 export type CorpTaggedMeatDamageProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   damageAmount: number;
   agendaPointCost?: number;
 }>;
 
 export type CorpTraceTagSourceProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
 }>;
 
 export type CorpOnPlayCapabilityProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
 }>;
 
 /** Fixed printed cost for a visible operation, independent of its play conditions. */
@@ -131,7 +131,7 @@ export function corpFixedOperationPlayCredits(
 
 export function corpPunishFixedCapabilityCost(
   definitionId: number,
-  capabilityId: string,
+  capabilityId: number,
 ): { clicks: number; credits: number } | undefined {
   const card = planningCard(definitionId)?.planning;
   if (card?.side !== "corp") return undefined;
@@ -180,7 +180,7 @@ export type CorpScoreConversionProfile = Readonly<{
 
 export type CorpArchivesToHqOperationProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   maxSelections: 1 | "all";
   filterCardType?: "ice";
   visibility: "hidden_info_barrier";
@@ -188,14 +188,14 @@ export type CorpArchivesToHqOperationProfile = Readonly<{
 
 export type CorpScoredAgendaFreeRezProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   visibility: "hidden_info_barrier";
   targetPurpose: "rez_best_defensive_ice";
 }>;
 
 export type CorpScoredAgendaIceMarkProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   visibility: "public";
   targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
   targetPreferences: readonly [
@@ -207,7 +207,7 @@ export type CorpScoredAgendaIceMarkProfile = Readonly<{
 
 export type CorpScoredAgendaHqShuffleProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   creditPerAgendaPoint: number;
   visibility: "hidden_info_barrier";
   targetPurpose: "choose_hq_agenda_subset_for_reveal_credit_and_shuffle";

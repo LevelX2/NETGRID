@@ -182,12 +182,12 @@ scheitern am erzeugenden Vertrag.
    erhalten eine neue Nummer. Der AST-Generator übernimmt numerische
    Literale, prüft Eindeutigkeit und erzeugt die jeweiligen Importindizes.
    Ableitungen wie Source-Refs und Fingerprints verwenden diese Identität.
-2. Je CardSpec adressierbare Fähigkeiten nummerieren. Den String-Vertrag
-   `<cardDefinitionId>:<capabilityKey>` durch strukturierte Referenzen
-   ersetzen. Eine Fähigkeit wird aus ihrer Definition und lokalen Nummer
-   aufgelöst. Engine, KI und Event-Projektion erhalten Typ und Funktion
-   über die vorhandenen Ability- und Capability-Verträge.
-   [Capability-Vertrag](../../packages/cards/src/capability-identity.ts) · [Registry-Generator](../../scripts/generate-card-spec-import-index.mjs)
+2. Adressierbare CardSpec-Fähigkeiten erhalten eine fortlaufende
+   `CanonicalCapabilityId`. Der generierte Index bindet jede Nummer an
+   Kartendefinition und lokalen `capabilityKey`. Neue Einträge werden
+   angehängt. Frei gewordene Nummern bleiben reserviert. Engine, KI und Web
+   verwenden dieselbe Nummer für die Bindung einer konkreten Fähigkeit.
+   [Capability-Vertrag](../../packages/cards/src/capability-identity.ts) · [Generator](../../scripts/generate-card-capability-ids.mjs)
 3. CardSpec-Projektionen, Catalog, `runtime-data`, Kartenpool,
    Standardsnapshots, Deckvalidator und Deck-Import/-Export umstellen.
    Deck- und Poolhashes aus dem neuen Zahlenformat ableiten. Verknüpfte

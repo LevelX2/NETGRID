@@ -33,7 +33,7 @@ export type RunnerCreditBankProspectivePlan = {
         projection: ProspectivePlanningStatus;
         resolution: ProspectivePlanningStatus;
         capabilityKey: string;
-        canonicalCapabilityId: string;
+        canonicalCapabilityId: number;
         actionCost: number;
         hostedCreditsAdded: number;
         sharedLimit?: {
@@ -57,7 +57,7 @@ export type RunnerCreditBankProspectivePlan = {
         projection: ProspectivePlanningStatus;
         resolution: ProspectivePlanningStatus;
         capabilityKey: string;
-        canonicalCapabilityId: string;
+        canonicalCapabilityId: number;
       }
     | {
         kind: "automatic_lifecycle";

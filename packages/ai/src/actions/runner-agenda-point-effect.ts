@@ -40,7 +40,7 @@ export function runnerImmediateAgendaPointGain(
   const quote = action?.payload;
   if (
     !currentSource ||
-    typeof action?.abilityRef?.sourceAbilityId !== "string" ||
+    typeof action?.abilityRef?.sourceAbilityId !== "number" ||
     quote?.runnerConditionalAgendaPointQuoteSchema !==
       "runner-conditional-agenda-point-v1" ||
     quote.runnerConditionalAgendaPointQuoteStateVersion !==

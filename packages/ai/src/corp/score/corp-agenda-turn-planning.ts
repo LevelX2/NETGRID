@@ -936,7 +936,7 @@ function invocationFor(
     ...(candidate.sourceCardInstanceId
       ? { sourceCardInstanceId: candidate.sourceCardInstanceId }
       : {}),
-    ...(candidate.abilityId &&
+    ...(typeof candidate.abilityId === "number" &&
     candidate.abilityBindingMethod === "canonical_capability_id"
       ? {
           sourceAbilityBinding: {

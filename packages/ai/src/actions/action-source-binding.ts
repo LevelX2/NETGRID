@@ -1,8 +1,9 @@
 import { cardDefinitionIdValue } from "../card-definition-id-input";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import { type CardDefinitionId, type LegalAction } from "@netgrid/shared";
+import { isCanonicalCapabilityId, type CardDefinitionId, type LegalAction } from "@netgrid/shared";
 import type {
   ActionAbilityBindingMethod,
+  ActionAbilityIdentity,
   ActionGateResult,
   ActionProjectionIssue,
   ActionSemanticCandidate,
@@ -146,7 +147,7 @@ function sourceCardInstanceIdForAction(
 }
 
 type ResolvedAbilityBinding = {
-  abilityId: string;
+  abilityId: ActionAbilityIdentity;
   method: ActionAbilityBindingMethod;
   sourceDefinitionId?: number;
   evidence: string[];
@@ -159,10 +160,7 @@ function abilityBindingForAction(
 ): ResolvedAbilityBinding | undefined {
   if (action.abilityRef) assertAbilityRefIdentity(action.abilityRef);
   const canonicalAbilityRef = action.abilityRef;
-  const canonicalPayloadId = stringPayload(
-    action,
-    "cardImplementationAbilityId",
-  );
+  const canonicalPayloadId = action.payload?.cardImplementationAbilityId;
   const canonicalPayloadKey = stringPayload(
     action,
     "cardImplementationAbilityKey",
@@ -185,12 +183,12 @@ function abilityBindingForAction(
   ) {
     if (
       !canonicalAbilityRef ||
-      typeof canonicalSourceAbilityId !== "string" ||
+      !isCanonicalCapabilityId(canonicalSourceAbilityId) ||
       sourceCardInstanceId !== canonicalAbilityRef.sourceCardInstanceId ||
       action.source !== canonicalAbilityRef.sourceCardInstanceId ||
       hasLegacyIndexEvidence ||
       !hasCanonicalPayloadEvidence ||
-      canonicalPayloadId === undefined ||
+      !isCanonicalCapabilityId(canonicalPayloadId) ||
       canonicalPayloadKey === undefined ||
       canonicalBindingKind !== "card_spec_capability_key"
     )
@@ -409,7 +407,7 @@ function updateSourceAbilityGates(
           status: "pass",
           severity: "info",
           reason: `Ability bound by ${abilityBinding.method}.`,
-          evidence: [abilityBinding.abilityId],
+          evidence: [String(abilityBinding.abilityId)],
         };
       }
       if (!requiresAbilityBinding(action)) {

@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { CapabilityIdentityError, cardSpecPlanningCardByDefinitionId, parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunWindowSignal } from "../../plans/runner-tactical-plan-contracts";
@@ -269,7 +269,7 @@ function isBoundSingleSearchToGripPlay(
     candidate.abilityBindingMethod !== "canonical_capability_id" ||
     !sourceDefinitionId ||
     !abilityKey ||
-    abilityId !== `${sourceDefinitionId}:${abilityKey}` ||
+    typeof abilityId !== "number" ||
     action.abilityRef?.sourceCardInstanceId !== sourceCardInstanceId ||
     action.abilityRef?.sourceAbilityId !== abilityId ||
     !input.playerView.own.gripOrHq.some(
@@ -280,6 +280,14 @@ function isBoundSingleSearchToGripPlay(
     )
   ) {
     return false;
+  }
+  try {
+    const capability = parseCanonicalCapabilityId(abilityId);
+    if (capability.cardDefinitionId !== sourceDefinitionId ||
+        capability.capabilityKey !== abilityKey) return false;
+  } catch (error) {
+    if (error instanceof CapabilityIdentityError) return false;
+    throw error;
   }
   const ability = cardSpecPlanningCardByDefinitionId(
     sourceDefinitionId,

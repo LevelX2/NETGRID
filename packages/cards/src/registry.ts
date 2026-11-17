@@ -1,8 +1,10 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import {
   canonicalCapabilityId,
+  createCapabilityIdentityRegistry,
   type CanonicalCapabilityId,
   type CapabilityKey,
+  type CapabilityIdentityLedger,
 } from "./capability-identity";
 import {
   assertCardSpecContract,
@@ -55,6 +57,7 @@ export type CardRegistry = Readonly<{
 export type CardRegistryInput = {
   cardSpecs: readonly CardSpec[];
   setSpecs: readonly SetSpec[];
+  capabilityIdentities?: CapabilityIdentityLedger;
 };
 
 export type CardRegistryErrorCode =
@@ -128,7 +131,10 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
   const cardIds = new Set<CardDefinitionId>();
   const printingIds = new Set<string>();
   const setIds = new Set<string>();
-  const capabilityIds = new Set<string>();
+  const capabilityIds = new Set<CanonicalCapabilityId>();
+  const resolveCapabilityId = input.capabilityIdentities === undefined
+    ? canonicalCapabilityId
+    : createCapabilityIdentityRegistry(input.capabilityIdentities).idFor;
   const rawCapabilities: CapabilityRecord[] = [];
 
   for (const set of input.setSpecs) {
@@ -161,7 +167,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
       printingIds.add(printing.printingId);
     }
     for (const capability of collectCapabilities(spec)) {
-      const id = canonicalCapabilityId(definitionId, capability.capabilityKey);
+      const id = resolveCapabilityId(definitionId, capability.capabilityKey);
       if (capabilityIds.has(id))
         fail(
           "duplicate_capability_id",
@@ -254,6 +260,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
       projectPlanningCard(
         spec,
         sectionFingerprints.get(spec.identity.cardDefinitionId)!,
+        resolveCapabilityId,
       ),
     ]),
   );
@@ -280,7 +287,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
   const capabilitiesById = new Map(
     rawCapabilities
       .sort((left, right) =>
-        compareText(left.canonicalCapabilityId, right.canonicalCapabilityId),
+        left.canonicalCapabilityId - right.canonicalCapabilityId,
       )
       .map((record) => [
         record.canonicalCapabilityId,

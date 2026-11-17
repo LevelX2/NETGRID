@@ -19,7 +19,7 @@ export function runnerFundingPaymentWindowQuote(
         entry.actionId === installation?.actionId &&
         step.stepId ===
           `payment_window:${entry.sourceCardInstanceId}:${entry.capabilityId}` &&
-        step.projectionId === entry.capabilityId &&
+        step.projectionId === String(entry.capabilityId) &&
         step.sourceDefinitionId === entry.sourceDefinitionId,
     );
     if (

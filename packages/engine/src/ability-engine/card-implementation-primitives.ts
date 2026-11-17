@@ -1,4 +1,5 @@
 import type {
+  CanonicalCapabilityId,
   CardDefinitionId,
   CardInstanceId,
   LegalAction,
@@ -63,7 +64,7 @@ export class CardImplementationPrimitiveIdentityError extends Error {
 export type CardImplementationPrimitiveIdentity =
   | {
       authority: "card_spec_capability_key";
-      abilityId: string;
+      abilityId: CanonicalCapabilityId;
       abilityKey: string;
     }
   | {

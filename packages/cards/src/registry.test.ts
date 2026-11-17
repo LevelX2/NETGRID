@@ -1,6 +1,6 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { canonicalCapabilityId, capabilityKey } from "./capability-identity";
+import { createCapabilityIdentityRegistry, capabilityKey } from "./capability-identity";
 import type { CardSpec, SetSpec } from "./contracts";
 import {
   assertCardRegistryPlanningContext,
@@ -66,11 +66,14 @@ function capabilitySpec(id = 901, key = "gain"): CardSpec {
   return spec;
 }
 
+const testCapabilityIds = [[901, "gain"], [905, "gain"], [906, "gain"]] as const;
+const testCapabilityId = createCapabilityIdentityRegistry(testCapabilityIds).idFor;
+
 function registryFor(
   cards: readonly CardSpec[] = [cloneSpec()],
   sets: readonly SetSpec[] = [setSpec()],
 ) {
-  return createCardRegistry({ cardSpecs: cards, setSpecs: sets });
+  return createCardRegistry({ cardSpecs: cards, setSpecs: sets, capabilityIdentities: testCapabilityIds });
 }
 
 describe("CardRegistry", () => {
@@ -158,7 +161,7 @@ describe("CardRegistry", () => {
       [setSpec({ publication: { status: "active" } })],
     );
     const definitionId = 901;
-    const capabilityId = canonicalCapabilityId(
+    const capabilityId = testCapabilityId(
       definitionId,
       capabilityKey("gain"),
     );
@@ -703,7 +706,7 @@ describe("CardRegistry", () => {
     ).toThrow();
     const capability = engineCapabilityViewForId(
       registry,
-      canonicalCapabilityId(
+      testCapabilityId(
         901,
         capabilityKey("gain"),
       ),

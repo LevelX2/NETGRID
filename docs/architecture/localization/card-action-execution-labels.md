@@ -39,7 +39,7 @@ oder Engine-Ausführung.
 
 - Deutsch bleibt die Autorenreferenz für `capabilityText.actionLabel`.
 - Bestätigte englische und französische Ausführungstexte werden anhand der
-  kanonischen `<cardDefinitionId>:<capabilityKey>`-Identität ausgewählt.
+  kanonischen numerische `CanonicalCapabilityId` ausgewählt.
 - Dynamische Ziel-, Kosten- oder Mengenparameter dürfen nur aus strukturierten,
   side-sicheren `LegalAction`-Daten stammen.
 - Einzelne Karten ohne mehrere unterschiedliche Autorenlabels werden nicht

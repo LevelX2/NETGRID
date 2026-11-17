@@ -45,6 +45,8 @@
     "check:engine-source-structure:selftest": "node scripts/check-engine-source-structure.mjs --self-test",
     "check:cards-source-structure": "node scripts/check-cards-source-structure.mjs",
     "check:cards-source-structure:selftest": "node scripts/check-cards-source-structure.mjs --self-test",
+    "generate:card-capability-ids": "node --import tsx scripts/generate-card-capability-ids.mjs --write",
+    "check:card-capability-ids": "node --import tsx scripts/generate-card-capability-ids.mjs --check",
     "generate:card-spec-import-index": "node scripts/generate-card-spec-import-index.mjs --write",
     "generate:card-spec-ai-hints": "pnpm exec tsx scripts/generate-card-spec-ai-hints.mts --write",
     "check:card-spec-ai-hints": "pnpm exec tsx scripts/generate-card-spec-ai-hints.mts --check",

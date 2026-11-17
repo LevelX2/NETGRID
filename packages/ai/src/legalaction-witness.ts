@@ -26,7 +26,7 @@ export type LegalActionWitnessSourceRef =
 
 export type LegalActionWitnessAbilityRef = {
   kind: "ability";
-  abilityId: string;
+  abilityId: number;
   sourceRef: LegalActionWitnessSourceRef;
   redactionPolicy: LegalActionWitnessRedactionPolicy;
 };
@@ -231,7 +231,7 @@ function abilityRefForAction(
   assertAbilityRefIdentity(action.abilityRef);
   return {
     kind: "ability",
-    abilityId: safeId(action.abilityRef.sourceAbilityId),
+    abilityId: action.abilityRef.sourceAbilityId,
     sourceRef,
     redactionPolicy: sourceRef.redactionPolicy,
   };

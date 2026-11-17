@@ -492,7 +492,7 @@ function runnerTopHeapReturnStatus(
     action.abilityRef?.sourceCardInstanceId === source &&
     payload.cardImplementationCapabilityBindingKind ===
       "card_spec_capability_key" &&
-    typeof payload.cardImplementationAbilityId === "string" &&
+    typeof payload.cardImplementationAbilityId === "number" &&
     payload.cardImplementationAbilityId === action.abilityRef.sourceAbilityId &&
     typeof target === "string" &&
     target.length > 0 &&

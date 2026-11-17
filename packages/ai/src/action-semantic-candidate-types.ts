@@ -1,4 +1,5 @@
 import type {
+  CanonicalCapabilityId,
   CardDefinitionId,
   CardInstanceId,
   LegalAction,
@@ -23,6 +24,8 @@ export type ActionSemanticSourceKind =
   | "game_rule"
   | "choice"
   | "unknown";
+
+export type ActionAbilityIdentity = string | CanonicalCapabilityId;
 
 export type ActionAbilityBindingMethod =
   | "canonical_capability_id"
@@ -518,7 +521,7 @@ export type ActionSemanticCandidate = {
   sourceCardId?: CardInstanceId | CardDefinitionId;
   sourceCardInstanceId?: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
-  abilityId?: string;
+  abilityId?: ActionAbilityIdentity;
   abilityKey?: string;
   primitiveKind?: string;
   effectKind?: string;
@@ -609,13 +612,13 @@ export type SideSafeActionAbilityBinding = {
    */
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
-  abilityId: string;
+  abilityId: ActionAbilityIdentity;
   method: "single_legal_ability_inferred";
   evidence: string[];
 };
 
 export type ActionCardAbilitySemanticProfile = {
-  abilityId: string;
+  abilityId: ActionAbilityIdentity;
   tacticSignals: readonly string[];
   functionalEffects?: readonly AiHintStructuredEffect[];
   compatibilitySignals?: readonly string[];

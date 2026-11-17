@@ -96,7 +96,7 @@ export type PaymentWindowFundingSetup = {
   actionId: string;
   sourceCardInstanceId: string;
   sourceDefinitionId: number;
-  capabilityId: string;
+  capabilityId: number;
   installClickCost: number;
   installCreditCost: number;
   activationCreditCost: number;
@@ -298,7 +298,7 @@ function paymentWindowFundingOption(
       {
         stepId: `payment_window:${setup.sourceCardInstanceId}:${setup.capabilityId}`,
         kind: "future_projection",
-        projectionId: setup.capabilityId,
+        projectionId: String(setup.capabilityId),
         ownTurnOffset: 0,
         clickCost: 0,
         creditCost: setup.activationCreditCost,

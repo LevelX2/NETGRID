@@ -1367,7 +1367,7 @@ export function currentTurnPlanningInvocationVariants(params: {
       ...(params.candidate.sourceCardInstanceId
         ? { sourceCardInstanceId: params.candidate.sourceCardInstanceId }
         : {}),
-      ...(params.candidate.abilityId &&
+      ...(typeof params.candidate.abilityId === "number" &&
       params.candidate.abilityBindingMethod === "canonical_capability_id"
         ? {
             sourceAbilityBinding: {

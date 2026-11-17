@@ -91,7 +91,7 @@ export type RunnerEncounterActionHost = {
     ) => LegalAction;
     abilityMetadata: (
       sourceCardInstanceId: CardInstanceId,
-      abilityId: string,
+      abilityId: number,
       encounteredIceId?: CardInstanceId,
     ) => Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements">;
   };

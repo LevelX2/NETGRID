@@ -1,4 +1,4 @@
-import { listPublicCardViews } from "@netgrid/cards/server";
+import { canonicalCapabilityId, listPublicCardViews } from "@netgrid/cards/server";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -17,7 +17,7 @@ const EXPECTED_MULTI_CAPABILITY_LABEL_COUNT = 46;
 describe("card capability action translations", () => {
   it("names Data Fort Remapping and its run-ending effect without needing a catalog lookup", () => {
     const capabilityId =
-      "5:spend_remap_counter_end_run";
+      4;
     const action: LegalAction = {
       actionId: "remap_action",
       side: "corp",
@@ -71,7 +71,7 @@ describe("card capability action translations", () => {
     for (const card of multiCapabilityCards) {
       const sourceLabels = card.capabilityText ?? [];
       for (const entry of sourceLabels) {
-        const capabilityId = `${card.cardDefinitionId}:${entry.capabilityKey}`;
+        const capabilityId = canonicalCapabilityId(card.cardDefinitionId, entry.capabilityKey);
         expect(
           CARD_CAPABILITY_ACTION_TRANSLATION_CATALOGS.en[capabilityId],
           `${capabilityId} must have an English execution label`,
@@ -91,7 +91,7 @@ describe("card capability action translations", () => {
           sourceLabels.map(
             (entry) =>
               CARD_CAPABILITY_ACTION_TRANSLATION_CATALOGS[locale][
-                `${card.cardDefinitionId}:${entry.capabilityKey}`
+                canonicalCapabilityId(card.cardDefinitionId, entry.capabilityKey)
               ],
           ),
         );
@@ -150,7 +150,7 @@ describe("card capability action translations", () => {
     const original = structuredClone(action);
 
     expect(cardCapabilityIdForAction(action)).toBe(
-      "366:store_credits",
+      440,
     );
     expect(actionButtonLabel(action, undefined, "en")).toBe(
       "Broker: place 3 credits on Broker",
@@ -161,7 +161,7 @@ describe("card capability action translations", () => {
       ...action,
       payload: {
         ...action.payload,
-        cardImplementationAbilityId: "366:withdraw_credits",
+        cardImplementationAbilityId: 441,
       },
     } satisfies LegalAction;
     expect(cardCapabilityIdForAction(mismatched)).toBeNull();
@@ -172,7 +172,7 @@ function brokerAction(
   capabilityKey: "store_credits" | "withdraw_credits",
   label: string,
 ): LegalAction {
-  const sourceAbilityId = `366:${capabilityKey}`;
+  const sourceAbilityId = capabilityKey === "store_credits" ? 440 : 441;
   return {
     actionId: `action:${capabilityKey}`,
     side: "runner",

@@ -1,5 +1,4 @@
-import type { RunId } from "./index";
-import type { CardDefinitionId } from "./index";
+import type { CanonicalCapabilityId, CardDefinitionId, RunId } from "./index";
 
 export const CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION =
   "corp-restricted-credit-route-v1" as const;
@@ -50,7 +49,7 @@ export type CorpRestrictedCreditRouteQuote = {
   schemaVersion: typeof CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION;
   request: CorpRestrictedCreditRouteRequest;
   payoutSourceCardInstanceId: string;
-  payoutSourceAbilityId: string;
+  payoutSourceAbilityId: CanonicalCapabilityId;
   payoutCredits: number;
   /** Exact same-window payouts needed before this consumer becomes legal. */
   payoutCount: number;

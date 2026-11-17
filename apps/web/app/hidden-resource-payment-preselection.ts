@@ -1,4 +1,4 @@
-import type { RunId } from "@netgrid/shared";
+import { isCanonicalCapabilityId, type CanonicalCapabilityId, type RunId } from "@netgrid/shared";
 import type {
   LegalAction,
   PlayerView,
@@ -8,7 +8,7 @@ import type {
 } from "@netgrid/shared";
 
 type PaymentSupportAbilityIdentity = {
-  sourceAbilityId: string;
+  sourceAbilityId: CanonicalCapabilityId;
   capabilityKey: string;
 };
 
@@ -27,7 +27,7 @@ function samePaymentSupportAbilityIdentity(
   right: PaymentSupportAbilityIdentity,
 ): boolean {
   return (
-    left.sourceAbilityId.length > 0 &&
+    isCanonicalCapabilityId(left.sourceAbilityId) &&
     left.capabilityKey.length > 0 &&
     right.sourceAbilityId === left.sourceAbilityId &&
     right.capabilityKey === left.capabilityKey
