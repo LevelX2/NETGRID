@@ -632,16 +632,32 @@ function formatSemanticChronicleEvent(
     numberValue(payload.count) ??
     numberValue(payload.discardCount) ??
     1;
+  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
   const cardDefinitionId =
     publicStackRevealDefinitionId ??
     stringValue(payload.cardDefinitionId) ??
-    stringValue(payload.sourceDefinitionId) ??
+    sourceDefinitionId ??
     stringValue(payload.targetCardDefinitionId);
+  const mergedEffects = resolvedEffectsFromPayload(
+    payload.resolvedEffects,
+  ).filter((effect) => shouldMergeCardResolverEffect(event, effect));
+  const resolverTitle =
+    cardDefinitionId === undefined
+      ? undefined
+      : mergedEffects.find(
+          (effect) =>
+            effect.sourceDefinitionId === cardDefinitionId &&
+            effect.sourceTitle,
+        )?.sourceTitle;
   const cardTitle =
     (socialEngineeringChoice ? "Social Engineering" : undefined) ??
     context.cardTitle ??
     publicCardTitle(cardDefinitionId, context.cardPresentationsById) ??
     stringValue(payload.title) ??
+    (cardDefinitionId === sourceDefinitionId
+      ? stringValue(payload.sourceTitle)
+      : undefined) ??
+    resolverTitle ??
     translate("card.unknown");
   const server = semanticServerLabel(
     stringValue(payload.serverLabel) ??
@@ -1060,14 +1076,7 @@ function formatSemanticChronicleEvent(
     delete result.cardText;
     result.cardDetailLines = [];
   }
-  return chronicleEventSupplement(
-    event,
-    result,
-    context,
-    resolvedEffectsFromPayload(payload.resolvedEffects).filter((effect) =>
-      shouldMergeCardResolverEffect(event, effect),
-    ),
-  );
+  return chronicleEventSupplement(event, result, context, mergedEffects);
 }
 
 export function formatChronicleEvent(
@@ -5456,10 +5465,10 @@ function formatSemanticChronicleEffect(
   const actor = sideValue(effect.side);
   const amount = numberValue(effect.amount) ?? 0;
   const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
-  const sourceTitle =
+  const knownSourceTitle =
     stringValue(effect.sourceTitle) ??
-    publicCardTitle(sourceDefinitionId, cardPresentationsById) ??
-    translate("card.unknown");
+    publicCardTitle(sourceDefinitionId, cardPresentationsById);
+  const sourceTitle = knownSourceTitle ?? translate("card.unknown");
   const isAi = Boolean(
     stringValue(event.publicPayload.aiExplanation) ||
     stringValue(event.publicPayload.aiReasonCode),
@@ -5507,6 +5516,23 @@ function formatSemanticChronicleEffect(
   const visibility = publiclyRevealedDamage
     ? "public"
     : chronicleEffectVisibility(effect, side);
+  if (visibility === "public" && kind === "start_run") {
+    const server = semanticServerLabel(
+      stringValue(effect.serverLabel) ?? stringValue(effect.serverId),
+      translate,
+    );
+    return {
+      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      category: "run",
+      importance: "normal",
+      visibility,
+      ...(actor ? { actor } : {}),
+      title: translate("event.runStarted", { subject, server }),
+      chips: [translate("effect.automatic")],
+      cardDetailLines: [],
+      groupLabel: translate("group.run", { server }),
+    };
+  }
   const removedShellCounters = positiveIntegerValue(
     effect.removedCounterAmount,
   );
@@ -5563,6 +5589,20 @@ function formatSemanticChronicleEffect(
       stringValue(event.publicPayload.selectedServerId),
     translate,
   );
+  const hasCardTarget =
+    kind === "rez_card" ||
+    kind === "score_agenda" ||
+    kind === "steal_agenda" ||
+    kind === "trash_card";
+  const targetDefinitionId = stringValue(effect.cardDefinitionId);
+  const targetTitle =
+    hasCardTarget && visibility !== "redacted"
+      ? (publicCardTitle(targetDefinitionId, cardPresentationsById) ??
+        stringValue(effect.cardTitle))
+      : undefined;
+  const displayedDefinitionId = targetTitle
+    ? targetDefinitionId
+    : sourceDefinitionId;
   const category: ChronicleCategory =
     endRunSubroutine ||
     payOrEndRun ||
@@ -5575,9 +5615,13 @@ function formatSemanticChronicleEffect(
         ? "economy"
         : kind === "damage" || kind === "add_tags" || kind === "remove_tags"
           ? "danger"
-          : kind === "draw_cards" || kind === "trash_card"
-            ? "card"
-            : "system";
+          : kind === "score_agenda" || kind === "steal_agenda"
+            ? "agenda"
+            : kind === "draw_cards" ||
+                kind === "trash_card" ||
+                kind === "rez_card"
+              ? "card"
+              : "system";
   if (runLockSubroutine && visibility !== "redacted") {
     const actions = positiveIntegerValue(effect.amount);
     const subroutine =
@@ -5659,7 +5703,7 @@ function formatSemanticChronicleEffect(
       groupLabel: translate("group.run", { server: runServer }),
     };
   }
-  const key =
+  let key =
     visibility === "redacted"
       ? "effect.redacted"
       : endRunSubroutine
@@ -5689,6 +5733,11 @@ function formatSemanticChronicleEffect(
                         : kind === "remove_tags"
                           ? "effect.tagsRemoved"
                           : "effect.resolved";
+  if (kind === "trash_card" && targetTitle)
+    key =
+      knownSourceTitle && knownSourceTitle !== targetTitle
+        ? "effect.namedCardTrashedBySource"
+        : "event.cardTrashed";
   return {
     id: `${event.eventId}:effect:${effect.effectId || index}`,
     category,
@@ -5707,6 +5756,7 @@ function formatSemanticChronicleEffect(
         amount: payOrEndRun ? paidCredits : amount,
         count: amount,
         source: sourceTitle,
+        card: targetTitle ?? "",
         damageType,
         number: subroutineNumber ?? 1,
       }) +
@@ -5739,10 +5789,12 @@ function formatSemanticChronicleEffect(
       ...(kind === "damage" ? [`${amount} ${damageType}`] : []),
       ...(flatline ? [translate("effect.flatline")] : []),
     ],
-    ...(visibility !== "redacted" && sourceDefinitionId
-      ? { cardDefinitionId: sourceDefinitionId }
+    ...(visibility !== "redacted" && displayedDefinitionId
+      ? { cardDefinitionId: displayedDefinitionId }
       : {}),
-    ...(visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
+    ...(visibility !== "redacted"
+      ? { cardTitle: targetTitle ?? sourceTitle }
+      : {}),
     cardDetailLines: [],
     groupLabel:
       category === "run"
@@ -5770,9 +5822,18 @@ export function formatChronicleEffectItems(
     event.publicPayload.resolvedEffects,
   );
   const payload = event.publicPayload;
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  const chosenIcePosition = payloadNumberValue(payload, "chosenIcePosition");
+  const socialEngineeringStart =
+    actionType === "resolve_choice" &&
+    payload.sourceDefinitionId === SOCIAL_ENGINEERING_ID &&
+    payloadBooleanValue(payload, "autoPassChosenIce") === true &&
+    chosenIcePosition !== undefined &&
+    Number.isInteger(chosenIcePosition) &&
+    chosenIcePosition >= 0;
   const shownRunStartServer =
-    (stringValue(payload.actionType) ?? event.type) === "play_event" &&
-    payload.runnerEventRun === true
+    (actionType === "play_event" && payload.runnerEventRun === true) ||
+    socialEngineeringStart
       ? stringValue(payload.serverId)
       : undefined;
   const turnEndTrashItems = endTurnTrashChronicleItems(

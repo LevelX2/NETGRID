@@ -155,6 +155,42 @@ describe.each(Object.keys(locales) as Locale[])(
       expect(item.title).not.toContain("5");
     });
 
+    it("names cards from the public outcome even without a catalog entry", () => {
+      for (const [id, title] of [
+        [41, "Strategic Planning Group"],
+        [98, "Bioweapons Engineering"],
+        [112, "Worm"],
+        [113, "Worm"],
+        [151, "Weather-to-Finance Pipe"],
+        [252, "Jack 'n' Joe"],
+        [340, "Jackhammer"],
+      ] as const) {
+        const [item] = render(id, locale);
+        expect(item!.title, `Case ${id}`).toContain(title);
+        expect(item!.title, `Case ${id}`).not.toContain(
+          locales[locale].Chronicle.card.unknown,
+        );
+      }
+    });
+
+    it("shows the prevention source and its trash once", () => {
+      const [item] = render(261, locale, { trashedCardTitle: "Fall Guy" });
+      expect(item).toMatchObject({
+        cardDefinitionId: "onr_v1_161_fall-guy",
+        cardTitle: "Fall Guy",
+      });
+      expect(item!.title).toContain("Fall Guy");
+      expect(item!.title).not.toContain("City Surveillance");
+      expect(item!.description?.match(/Fall Guy/g)).toHaveLength(1);
+    });
+
+    it("shows the stack shuffle once", () => {
+      const [item] = render(345, locale);
+      expect(item!.description).toBe(
+        locales[locale].Chronicle.details.stackShuffled,
+      );
+    });
+
     it("does not turn hidden card identities into public prose", () => {
       for (const id of [399, 400]) {
         const text = JSON.stringify(render(id, locale));
