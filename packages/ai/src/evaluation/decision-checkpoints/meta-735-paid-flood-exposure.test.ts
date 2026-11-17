@@ -1,38 +1,133 @@
 import { afterEach, expect, it } from "vitest";
-import capture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-735-r1-g20-d300.json";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+} from "@netgrid/engine";
+import type { DeckDefinition } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { corpFloodInstallCreatesCombinedTerminalExposure } from "../../corp/score/score-flood-exposure";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
-import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
-  restoreAiRuntimeCheckpoint,
-  type AiRuntimeCheckpointV1,
-} from "./runtime-checkpoint";
+  buildAiDecisionInput,
+  type AiDecisionInputWithDeckCapabilities,
+} from "../../runtime/ai-decision-input";
+import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 
-const checkpoint = capture as unknown as {
-  input: AiDecisionInputWithDeckCapabilities;
-  runtime: AiRuntimeCheckpointV1;
-  validation: Record<string, boolean>;
+const corporateWar = 408;
+const fetalAi = 62;
+const fireWall = 457;
+const sphinx = 97;
+const broker = 366;
+const corpDeck: DeckDefinition = {
+  id: "paid-flood-corp",
+  name: "Paid flood exposure",
+  side: "corp",
+  identity: 3,
+  cards: [
+    { id: corporateWar, quantity: 3 },
+    { id: fetalAi, quantity: 3 },
+    { id: fireWall, quantity: 2 },
+    { id: sphinx, quantity: 2 },
+    { id: 596, quantity: 3 },
+  ],
 };
-const agendaId = "corp_408_2";
-const fetalId = "corp_62_1";
-const brokerId = "runner_366_3";
+const runnerDeck: DeckDefinition = {
+  id: "paid-flood-runner",
+  name: "Funded access",
+  side: "runner",
+  identity: 587,
+  cards: [
+    { id: 228, quantity: 1 }, // Cyfermaster
+    { id: 286, quantity: 1 }, // Worm
+    { id: 278, quantity: 1 }, // Snowball
+    { id: broker, quantity: 1 },
+    { id: 594, quantity: 5 },
+  ],
+};
+
 afterEach(resetResidentPlanPortfolioMemory);
 
-function fixture(sourceId = agendaId) {
-  const input = structuredClone(checkpoint.input);
+function fixture(sourceDefinitionId = corporateWar) {
+  const initial = createGameAfterSetup({
+    seed: "paid-remote-flood",
+    agendaPointsToWin: 7,
+    corpDeck,
+    runnerDeck,
+  });
+  const draw = getLegalActions(initial, "corp").find(
+    (action) => action.type === "mandatory_draw",
+  );
+  if (!draw) throw new Error("Missing mandatory draw");
+  const result = applyAction(initial, {
+    matchId: initial.matchId,
+    side: "corp",
+    actionId: draw.actionId,
+    clientKnownStateVersion: initial.stateVersion,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  const state = result.state;
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpHqSize(0)
+    .withCorpRemoteRoot("remote_1", corporateWar)
+    .withRezzedCorpIceOnServer("remote_1", fireWall)
+    .withCorpIceOnServer("remote_1", sphinx)
+    .withCorpCredits(11)
+    .withRunnerCredits(11)
+    .withRunnerProgramInstalled(228)
+    .withRunnerProgramInstalled(286)
+    .withRunnerProgramInstalled(278)
+    .withRunnerResourceInstalled(broker, { bit: 6 })
+    .withRunnerGripSize(3);
+  state.corp.clicks = 2;
+
+  const stolen = state.corp.rd.find(
+    (id) => state.cardInstances[id]?.definitionId === fetalAi,
+  )!;
+  state.corp.rd = state.corp.rd.filter((id) => id !== stolen);
+  state.runner.scoreArea.push(stolen);
+  Object.assign(state.cardInstances[stolen]!, {
+    controller: "runner",
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "scoreArea" },
+  });
+  for (const id of state.corp.rd.filter((id) => {
+    const definitionId = state.cardInstances[id]?.definitionId;
+    return definitionId === corporateWar || definitionId === fetalAi;
+  })) {
+    state.corp.rd = state.corp.rd.filter((candidate) => candidate !== id);
+    state.corp.hq.push(id);
+    state.cardInstances[id]!.zone = { side: "corp", zone: "hq" };
+  }
+  for (const id of state.corp.rd.splice(3)) {
+    state.corp.archives.push(id);
+    state.cardInstances[id]!.zone = { side: "corp", zone: "archives" };
+  }
+
+  const input = buildAiDecisionInput(state, "corp", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: corpDeck.id,
+      side: "corp",
+      cards: corpDeck.cards.map(({ id, quantity }) => ({
+        cardId: id,
+        quantity,
+      })),
+    },
+  });
   const agenda = input.playerView.own.gripOrHq.find(
-    (card) => card.instanceId === sourceId,
+    (card) => card.definitionId === sourceDefinitionId,
   )!;
   const install = input.legalActions.find(
     (action) =>
-      action.source === sourceId && action.payload?.serverId === "new_remote",
+      action.source === agenda.instanceId &&
+      action.payload?.serverId === "new_remote",
   )!;
   return { input, agenda, install };
 }
 
 it("holds the new naked agenda when the best funded existing ICE still permits the first steal", () => {
-  expect(Object.values(checkpoint.validation)).toEqual(Array(9).fill(true));
   const { input } = fixture();
   const bareAgendaInstalls = input.legalActions.filter(
     (action) =>
@@ -56,12 +151,6 @@ it("holds the new naked agenda when the best funded existing ICE still permits t
       ),
     ).toBe(true);
   }
-  if (!input.ownDeckSnapshot) throw new Error("Deck snapshot missing");
-  restoreAiRuntimeCheckpoint(
-    input,
-    input.ownDeckSnapshot.deckSnapshotId,
-    checkpoint.runtime,
-  );
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);
   expect(bareAgendaInstalls.map((action) => action.actionId)).not.toContain(
@@ -73,11 +162,11 @@ it.each([
   [
     "the visible bank has no credits for the extra steal cost",
     (input: AiDecisionInputWithDeckCapabilities) => {
-      const broker = input.playerView.opponent.rig!.find(
-        (card) => card.instanceId === brokerId,
+      const bank = input.playerView.opponent.rig!.find(
+        (card) => card.definitionId === broker,
       )!;
-      expect(broker.counters?.bit).toBe(6);
-      broker.counters = { ...broker.counters, bit: 0 };
+      expect(bank.counters?.bit).toBe(6);
+      bank.counters = { ...bank.counters, bit: 0 };
     },
   ],
   [
@@ -89,7 +178,7 @@ it.each([
 ] as const)(
   "keeps the Fetal AI exposure uncertain when %s",
   (_name, adjust) => {
-    const { input, agenda, install } = fixture(fetalId);
+    const { input, agenda, install } = fixture(fetalAi);
     adjust(input);
     expect(
       corpFloodInstallCreatesCombinedTerminalExposure(

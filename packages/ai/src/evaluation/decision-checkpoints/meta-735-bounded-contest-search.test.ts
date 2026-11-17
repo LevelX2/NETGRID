@@ -1,58 +1,130 @@
 import { afterEach, expect, it } from "vitest";
-import capture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-735-r1-g12-d175.json";
+import { createGameAfterSetup } from "@netgrid/engine";
+import type { DeckDefinition } from "@netgrid/shared";
+import catalog from "../../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
-import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
-  restoreAiRuntimeCheckpoint,
-  type AiRuntimeCheckpointV1,
-} from "./runtime-checkpoint";
+  buildAiDecisionInput,
+  type AiDecisionInputWithDeckCapabilities,
+} from "../../runtime/ai-decision-input";
+import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 
-const checkpoint = capture as unknown as {
-  input: AiDecisionInputWithDeckCapabilities;
-  runtime: AiRuntimeCheckpointV1;
-  validation: Record<string, boolean>;
-};
 const remoteRoot = "plan:runner.contest_remote:remote%3Aremote_1";
 const wallExecutor = "plan:runner.rig_and_coverage:coverage%3Abreaker_wall";
+const aujourdOui = 363;
 afterEach(resetResidentPlanPortfolioMemory);
 
-function decide(adjust?: (input: AiDecisionInputWithDeckCapabilities) => void) {
-  const input = structuredClone(checkpoint.input);
-  adjust?.(input);
-  if (!input.ownDeckSnapshot) throw new Error("Deck snapshot missing");
-  restoreAiRuntimeCheckpoint(
-    input,
-    input.ownDeckSnapshot.deckSnapshotId,
-    checkpoint.runtime,
+function deck(id: string, side: DeckDefinition["side"]): DeckDefinition {
+  const entry = catalog.decks.find(
+    (candidate) => candidate.standardDeckId === id,
   );
-  const search = input.legalActions.find((action) =>
-    action.abilityRef?.sourceAbilityId.endsWith(
-      "_look_top_stack_take_matching",
-    ),
+  if (!entry || entry.side !== side) throw new Error(`Missing deck ${id}`);
+  return {
+    id,
+    side,
+    name: entry.name,
+    identity: entry.identityCardId,
+    cards: entry.cards.map(({ cardId, quantity }) => ({
+      id: cardId,
+      quantity,
+    })),
+  };
+}
+
+function searchInput(): AiDecisionInputWithDeckCapabilities {
+  const runnerDeck = deck("standard_runner_mp48400s", "runner");
+  const corpDeck = deck("standard_corp_lucidrine_lockdown", "corp");
+  const state = createGameAfterSetup({
+    seed: "bounded-terminal-contest",
+    agendaPointsToWin: 7,
+    runnerDeck,
+    corpDeck,
+  });
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerCredits(12)
+    .withRunnerClicks(4)
+    .withCorpCredits(2)
+    .withRunnerProgramInstalled(278) // Snowball
+    .withRunnerProgramInstalled(228) // Cyfermaster
+    .withRunnerResourceInstalled(aujourdOui)
+    .withRunnerResourceInstalled(366)
+    .withRunnerGripSize(0)
+    .withRunnerCardInGrip(373)
+    .withRunnerCardInGrip(333)
+    .withRunnerCardInGrip(358)
+    .withRunnerCardInGrip(224)
+    .withCorpRemoteRoot("remote_1", 408, 4)
+    .withRezzedCorpIceOnServer("remote_1", 457)
+    .withRezzedCorpIceOnServer("remote_1", 90);
+
+  for (const id of [...state.corp.hq, ...state.corp.rd]
+    .filter((id) => state.cardInstances[id]?.definitionId === 62)
+    .slice(0, 2)) {
+    state.corp.hq = state.corp.hq.filter((candidate) => candidate !== id);
+    state.corp.rd = state.corp.rd.filter((candidate) => candidate !== id);
+    state.corp.scoreArea.push(id);
+    Object.assign(state.cardInstances[id]!, {
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "scoreArea" },
+    });
+  }
+  state.activeSide = "runner";
+  state.phase = "runner_action_phase";
+  state.timingPoint = "runner_action.main";
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: runnerDeck.id,
+      side: "runner",
+      cards: runnerDeck.cards.map(({ id, quantity }) => ({
+        cardId: id,
+        quantity,
+      })),
+    },
+  });
+}
+
+function decide(adjust?: (input: AiDecisionInputWithDeckCapabilities) => void) {
+  const input = searchInput();
+  adjust?.(input);
+  const search = input.legalActions.find(
+    (action) =>
+      action.payload?.cardImplementationAbilityKey ===
+      "abilities_activated_runner_main_look_top_stack_take_matching",
+  )!;
+  const targetRun = input.legalActions.find(
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "remote_1",
   )!;
   const decision = chooseAiAction(input);
-  return { decision, search, portfolio: residentPlanPortfolioSnapshot(input) };
+  return {
+    decision,
+    search,
+    targetRun,
+    portfolio: residentPlanPortfolioSnapshot(input),
+  };
 }
 
 it("keeps the legal bounded lookup with the terminal Wall contest while its result stays unknown", () => {
-  expect(Object.values(checkpoint.validation)).toEqual(Array(9).fill(true));
-  const { decision, search, portfolio } = decide();
+  const { decision, search, targetRun, portfolio } = decide();
+  const executorId = `${wallExecutor}%3Arun%3A${encodeURIComponent(targetRun.actionId)}`;
   expect(decision).toMatchObject({
     actionId: search.actionId,
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId: remoteRoot,
-        leafExecutorInstanceId: wallExecutor,
+        leafExecutorInstanceId: executorId,
       },
     },
   });
   const coverage = portfolio?.instances.find(
-    (instance) => instance.instanceId === wallExecutor,
+    (instance) => instance.instanceId === executorId,
   );
   expect(coverage?.moduleState).toMatchObject({
     phase: "search_answer",
