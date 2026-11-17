@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, Side } from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
 
@@ -17,7 +18,7 @@ vi.mock(import("./ai-hints"), async (importOriginal) => {
   };
 });
 
-const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
+const AI_HINTS_BY_CARD = mockedHints as Map<number, AiCardHint>;
 const corpOpeningIncome = {
   kind: "action_economy",
   timing: "action",
@@ -121,42 +122,42 @@ describe("deck opening hand role classification", () => {
   });
 
   it("counts each opening card once per role family", () => {
-    setTestCardRoles("local_multi_agenda", {
-      cardId: "local_multi_agenda",
+    setTestCardRoles(syntheticCardDefinitionId("local_multi_agenda"), {
+      cardId: syntheticCardDefinitionId("local_multi_agenda"),
       side: "corp",
       roles: ["agenda", "corp_score_agenda", "agenda_rush"],
     });
-    setTestCardRoles("local_multi_ice", {
-      cardId: "local_multi_ice",
+    setTestCardRoles(syntheticCardDefinitionId("local_multi_ice"), {
+      cardId: syntheticCardDefinitionId("local_multi_ice"),
       side: "corp",
       roles: ["corp_install_ice", "barrier_ice", "etr_ice", "taxing_ice"],
     });
-    setTestCardRoles("local_multi_economy", {
-      cardId: "local_multi_economy",
+    setTestCardRoles(syntheticCardDefinitionId("local_multi_economy"), {
+      cardId: syntheticCardDefinitionId("local_multi_economy"),
       side: "corp",
       roles: ["economy_asset", "economy_operation", "draw_operation"],
       effects: [corpOpeningIncome],
     });
-    setTestCardRoles("local_multi_breaker", {
-      cardId: "local_multi_breaker",
+    setTestCardRoles(syntheticCardDefinitionId("local_multi_breaker"), {
+      cardId: syntheticCardDefinitionId("local_multi_breaker"),
       side: "runner",
       roles: ["breaker_fracter", "breaker_decoder", "runner_program"],
     });
-    setTestCardRoles("local_runner_economy", {
-      cardId: "local_runner_economy",
+    setTestCardRoles(syntheticCardDefinitionId("local_runner_economy"), {
+      cardId: syntheticCardDefinitionId("local_runner_economy"),
       side: "runner",
       roles: ["draw_event"],
     });
     try {
       const corp = evaluateCorpOpeningHand(
         input("corp", [
-          "local_multi_agenda",
-          "local_multi_ice",
-          "local_multi_economy",
+          syntheticCardDefinitionId("local_multi_agenda"),
+          syntheticCardDefinitionId("local_multi_ice"),
+          syntheticCardDefinitionId("local_multi_economy"),
         ]),
       );
       const runner = evaluateRunnerOpeningHand(
-        input("runner", ["local_multi_breaker", "local_runner_economy"]),
+        input("runner", [syntheticCardDefinitionId("local_multi_breaker"), syntheticCardDefinitionId("local_runner_economy")]),
       );
 
       expect(corp.evidence).toContain("opening_agendas:1");
@@ -165,76 +166,76 @@ describe("deck opening hand role classification", () => {
       expect(runner.evidence).toContain("opening_breakers:1");
       expect(runner.evidence).toContain("opening_setup:1");
     } finally {
-      AI_HINTS_BY_CARD.delete("local_multi_agenda");
-      AI_HINTS_BY_CARD.delete("local_multi_ice");
-      AI_HINTS_BY_CARD.delete("local_multi_economy");
-      AI_HINTS_BY_CARD.delete("local_multi_breaker");
-      AI_HINTS_BY_CARD.delete("local_runner_economy");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_multi_agenda"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_multi_ice"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_multi_economy"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_multi_breaker"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_runner_economy"));
     }
   });
 
   it("requires a Corp credit effect and matches Runner economy roles by bounded terms", () => {
-    setTestCardRoles("local_opening_economy", {
-      cardId: "local_opening_economy",
+    setTestCardRoles(syntheticCardDefinitionId("local_opening_economy"), {
+      cardId: syntheticCardDefinitionId("local_opening_economy"),
       side: "corp",
       roles: ["economy_asset"],
       effects: [corpOpeningIncome],
     });
-    setTestCardRoles("local_opening_noise", {
-      cardId: "local_opening_noise",
+    setTestCardRoles(syntheticCardDefinitionId("local_opening_noise"), {
+      cardId: syntheticCardDefinitionId("local_opening_noise"),
       side: "corp",
       roles: ["uneconomy_noise", "drawish_noise"],
     });
-    setTestCardRoles("local_runner_economy", {
-      cardId: "local_runner_economy",
+    setTestCardRoles(syntheticCardDefinitionId("local_runner_economy"), {
+      cardId: syntheticCardDefinitionId("local_runner_economy"),
       side: "runner",
       roles: ["draw_event"],
     });
-    setTestCardRoles("local_runner_noise", {
-      cardId: "local_runner_noise",
+    setTestCardRoles(syntheticCardDefinitionId("local_runner_noise"), {
+      cardId: syntheticCardDefinitionId("local_runner_noise"),
       side: "runner",
       roles: ["economyish_noise", "withdraw_noise"],
     });
     try {
       expect(
         evaluateCorpOpeningHand(
-          input("corp", ["local_opening_economy", "local_opening_noise"]),
+          input("corp", [syntheticCardDefinitionId("local_opening_economy"), syntheticCardDefinitionId("local_opening_noise")]),
         ).evidence,
       ).toContain("opening_economy:1");
       expect(
         evaluateRunnerOpeningHand(
-          input("runner", ["local_runner_economy", "local_runner_noise"]),
+          input("runner", [syntheticCardDefinitionId("local_runner_economy"), syntheticCardDefinitionId("local_runner_noise")]),
         ).evidence,
       ).toContain("opening_economy:1");
     } finally {
-      AI_HINTS_BY_CARD.delete("local_opening_economy");
-      AI_HINTS_BY_CARD.delete("local_opening_noise");
-      AI_HINTS_BY_CARD.delete("local_runner_economy");
-      AI_HINTS_BY_CARD.delete("local_runner_noise");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_opening_economy"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_opening_noise"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_runner_economy"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_runner_noise"));
     }
   });
 
   it("counts Corp remote-root opening support by bounded role terms", () => {
-    setTestCardRoles("local_remote_support", {
-      cardId: "local_remote_support",
+    setTestCardRoles(syntheticCardDefinitionId("local_remote_support"), {
+      cardId: syntheticCardDefinitionId("local_remote_support"),
       side: "corp",
       roles: ["remote_support"],
     });
-    setTestCardRoles("local_remote_support_noise", {
-      cardId: "local_remote_support_noise",
+    setTestCardRoles(syntheticCardDefinitionId("local_remote_support_noise"), {
+      cardId: syntheticCardDefinitionId("local_remote_support_noise"),
       side: "corp",
       roles: ["remote_supportish_noise", "classet_noise", "upgradeish_noise"],
     });
     try {
       const protectedRemoteSupport = evaluateCorpOpeningHand(
-        input("corp", ["local_remote_support"], {
+        input("corp", [syntheticCardDefinitionId("local_remote_support")], {
           ownDeckCapabilities: {
             corp: { remotePlanProfile: { remoteProtectionToolsKnown: 1 } },
           },
         }),
       );
       const noiseOnly = evaluateCorpOpeningHand(
-        input("corp", ["local_remote_support_noise"], {
+        input("corp", [syntheticCardDefinitionId("local_remote_support_noise")], {
           ownDeckCapabilities: {
             corp: { remotePlanProfile: { remoteProtectionToolsKnown: 1 } },
           },
@@ -243,35 +244,35 @@ describe("deck opening hand role classification", () => {
 
       expect(protectedRemoteSupport.score).toBe(noiseOnly.score + 10);
     } finally {
-      AI_HINTS_BY_CARD.delete("local_remote_support");
-      AI_HINTS_BY_CARD.delete("local_remote_support_noise");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_remote_support"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_remote_support_noise"));
     }
   });
 
   it("caps a three-card explicit run-pressure opening without breaker access", () => {
-    setTestCardRoles("local_true_run_pressure", {
-      cardId: "local_true_run_pressure",
+    setTestCardRoles(syntheticCardDefinitionId("local_true_run_pressure"), {
+      cardId: syntheticCardDefinitionId("local_true_run_pressure"),
       side: "runner",
       roles: ["run_pressure"],
     });
-    setTestCardRoles("local_pressure_economy", {
-      cardId: "local_pressure_economy",
+    setTestCardRoles(syntheticCardDefinitionId("local_pressure_economy"), {
+      cardId: syntheticCardDefinitionId("local_pressure_economy"),
       side: "runner",
       roles: ["economy_event"],
     });
-    setTestCardRoles("local_pressure_setup", {
-      cardId: "local_pressure_setup",
+    setTestCardRoles(syntheticCardDefinitionId("local_pressure_setup"), {
+      cardId: syntheticCardDefinitionId("local_pressure_setup"),
       side: "runner",
       roles: ["runner_program"],
     });
     try {
       const evaluation = evaluateRunnerOpeningHand(
         input("runner", [
-          "local_true_run_pressure",
-          "local_true_run_pressure",
-          "local_true_run_pressure",
-          "local_pressure_economy",
-          "local_pressure_setup",
+          syntheticCardDefinitionId("local_true_run_pressure"),
+          syntheticCardDefinitionId("local_true_run_pressure"),
+          syntheticCardDefinitionId("local_true_run_pressure"),
+          syntheticCardDefinitionId("local_pressure_economy"),
+          syntheticCardDefinitionId("local_pressure_setup"),
         ]),
       );
 
@@ -284,25 +285,25 @@ describe("deck opening hand role classification", () => {
         ]),
       });
     } finally {
-      AI_HINTS_BY_CARD.delete("local_true_run_pressure");
-      AI_HINTS_BY_CARD.delete("local_pressure_economy");
-      AI_HINTS_BY_CARD.delete("local_pressure_setup");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_true_run_pressure"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_pressure_economy"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_pressure_setup"));
     }
   });
 
   it("keeps an in-hand breaker recognized by the canonical deck capability profile", () => {
-    setTestCardRoles("local_capability_breaker", {
-      cardId: "local_capability_breaker",
+    setTestCardRoles(syntheticCardDefinitionId("local_capability_breaker"), {
+      cardId: syntheticCardDefinitionId("local_capability_breaker"),
       side: "runner",
       roles: ["runner_program"],
     });
-    setTestCardRoles("local_capability_pressure", {
-      cardId: "local_capability_pressure",
+    setTestCardRoles(syntheticCardDefinitionId("local_capability_pressure"), {
+      cardId: syntheticCardDefinitionId("local_capability_pressure"),
       side: "runner",
       roles: ["run_pressure"],
     });
-    setTestCardRoles("local_capability_economy", {
-      cardId: "local_capability_economy",
+    setTestCardRoles(syntheticCardDefinitionId("local_capability_economy"), {
+      cardId: syntheticCardDefinitionId("local_capability_economy"),
       side: "runner",
       roles: ["economy_event"],
     });
@@ -311,11 +312,11 @@ describe("deck opening hand role classification", () => {
         input(
           "runner",
           [
-            "local_capability_breaker",
-            "local_capability_pressure",
-            "local_capability_pressure",
-            "local_capability_pressure",
-            "local_capability_economy",
+            syntheticCardDefinitionId("local_capability_breaker"),
+            syntheticCardDefinitionId("local_capability_pressure"),
+            syntheticCardDefinitionId("local_capability_pressure"),
+            syntheticCardDefinitionId("local_capability_pressure"),
+            syntheticCardDefinitionId("local_capability_economy"),
           ],
           {
             difficulty: "hard",
@@ -329,7 +330,7 @@ describe("deck opening hand role classification", () => {
               runner: {
                 breakerInventory: [
                   {
-                    cardId: "local_capability_breaker",
+                    cardId: syntheticCardDefinitionId("local_capability_breaker"),
                     coverage: ["wall", "code_gate", "sentry"],
                     locations: ["in_hand", "in_deck"],
                     confidence: "high",
@@ -350,20 +351,20 @@ describe("deck opening hand role classification", () => {
         ]),
       });
     } finally {
-      AI_HINTS_BY_CARD.delete("local_capability_breaker");
-      AI_HINTS_BY_CARD.delete("local_capability_pressure");
-      AI_HINTS_BY_CARD.delete("local_capability_economy");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_capability_breaker"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_capability_pressure"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_capability_economy"));
     }
   });
 
   it("does not treat low-confidence or non-hand capability inventory as opening access", () => {
-    setTestCardRoles("local_uncertain_breaker", {
-      cardId: "local_uncertain_breaker",
+    setTestCardRoles(syntheticCardDefinitionId("local_uncertain_breaker"), {
+      cardId: syntheticCardDefinitionId("local_uncertain_breaker"),
       side: "runner",
       roles: ["runner_program"],
     });
-    setTestCardRoles("local_uncertain_pressure", {
-      cardId: "local_uncertain_pressure",
+    setTestCardRoles(syntheticCardDefinitionId("local_uncertain_pressure"), {
+      cardId: syntheticCardDefinitionId("local_uncertain_pressure"),
       side: "runner",
       roles: ["run_pressure"],
     });
@@ -376,11 +377,11 @@ describe("deck opening hand role classification", () => {
           input(
             "runner",
             [
-              "local_uncertain_breaker",
-              "local_uncertain_pressure",
-              "local_uncertain_pressure",
-              "local_uncertain_pressure",
-              "local_uncertain_pressure",
+              syntheticCardDefinitionId("local_uncertain_breaker"),
+              syntheticCardDefinitionId("local_uncertain_pressure"),
+              syntheticCardDefinitionId("local_uncertain_pressure"),
+              syntheticCardDefinitionId("local_uncertain_pressure"),
+              syntheticCardDefinitionId("local_uncertain_pressure"),
             ],
             {
               difficulty: "hard",
@@ -389,7 +390,7 @@ describe("deck opening hand role classification", () => {
                 runner: {
                   breakerInventory: [
                     {
-                      cardId: "local_uncertain_breaker",
+                      cardId: syntheticCardDefinitionId("local_uncertain_breaker"),
                       coverage: ["universal"],
                       ...capability,
                     },
@@ -409,8 +410,8 @@ describe("deck opening hand role classification", () => {
         });
       }
     } finally {
-      AI_HINTS_BY_CARD.delete("local_uncertain_breaker");
-      AI_HINTS_BY_CARD.delete("local_uncertain_pressure");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_uncertain_breaker"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_uncertain_pressure"));
     }
   });
 
@@ -460,27 +461,27 @@ describe("deck opening hand role classification", () => {
 });
 
 function registerRunnerSearchOpeningRoles(): void {
-  setTestCardRoles("local_opening_search", {
-    cardId: "local_opening_search",
+  setTestCardRoles(syntheticCardDefinitionId("local_opening_search"), {
+    cardId: syntheticCardDefinitionId("local_opening_search"),
     side: "runner",
     roles: ["program_search", "run_pressure"],
   });
-  setTestCardRoles("local_opening_economy", {
-    cardId: "local_opening_economy",
+  setTestCardRoles(syntheticCardDefinitionId("local_opening_economy"), {
+    cardId: syntheticCardDefinitionId("local_opening_economy"),
     side: "runner",
     roles: ["economy_event", "run_pressure"],
   });
-  setTestCardRoles("local_opening_setup", {
-    cardId: "local_opening_setup",
+  setTestCardRoles(syntheticCardDefinitionId("local_opening_setup"), {
+    cardId: syntheticCardDefinitionId("local_opening_setup"),
     side: "runner",
     roles: ["runner_program"],
   });
 }
 
 function unregisterRunnerSearchOpeningRoles(): void {
-  AI_HINTS_BY_CARD.delete("local_opening_search");
-  AI_HINTS_BY_CARD.delete("local_opening_economy");
-  AI_HINTS_BY_CARD.delete("local_opening_setup");
+  AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_opening_search"));
+  AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_opening_economy"));
+  AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_opening_setup"));
 }
 
 function runnerSearchOpeningInput(
@@ -493,11 +494,11 @@ function runnerSearchOpeningInput(
   const result = input(
     "runner",
     [
-      "local_opening_search",
-      "local_opening_economy",
-      "local_opening_economy",
-      "local_opening_economy",
-      "local_opening_setup",
+      syntheticCardDefinitionId("local_opening_search"),
+      syntheticCardDefinitionId("local_opening_economy"),
+      syntheticCardDefinitionId("local_opening_economy"),
+      syntheticCardDefinitionId("local_opening_economy"),
+      syntheticCardDefinitionId("local_opening_setup"),
     ],
     {
       difficulty: "hard",
@@ -513,7 +514,7 @@ function runnerSearchOpeningInput(
           searchAccess: {
             tools: [
               {
-                cardId: "local_opening_search",
+                cardId: syntheticCardDefinitionId("local_opening_search"),
                 status: options.searchStatus ?? "in_hand",
                 canSearchBreakers: true,
                 confidence: "high",
@@ -553,7 +554,7 @@ function input(
         gripOrHq: definitionIds.map((definitionId) => ({
           definitionId,
           instanceId: `${definitionId}-1`,
-          title: definitionId,
+          title: String(definitionId),
           owner: side,
           controller: side,
           known: true,
@@ -585,7 +586,7 @@ function corpOpeningInput(
 }
 
 function setTestCardRoles(
-  cardId: string,
+  cardId: number,
   hint: Pick<AiCardHint, "cardId" | "side" | "roles"> & Partial<AiCardHint>,
 ): void {
   AI_HINTS_BY_CARD.set(cardId, {

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
@@ -438,7 +439,7 @@ describe("discard keep score", () => {
       "runner",
       [runnerCard("installed-fracter", "program")],
       {
-        "installed-fracter": ["support_breaker_fracter"],
+        [syntheticCardDefinitionId("installed-fracter")]: ["support_breaker_fracter"],
       },
     ).baseValue;
     const installedNoise = score(
@@ -447,7 +448,7 @@ describe("discard keep score", () => {
       "runner",
       [runnerCard("installed-noise", "program")],
       {
-        "installed-noise": ["breaker_fracterish_noise"],
+        [syntheticCardDefinitionId("installed-noise")]: ["breaker_fracterish_noise"],
       },
     ).baseValue;
     const supportBreaker = score(
@@ -550,8 +551,8 @@ describe("discard keep score", () => {
     const compatibleBreaker = runnerCard("compatible-breaker", "program");
     const noisyBreaker = runnerCard("noisy-breaker", "program");
     const rolesByCardId = {
-      "compatible-breaker": ["icebreaker"],
-      "noisy-breaker": ["icebreaker", "noisy"],
+      [compatibleBreaker.definitionId!]: ["icebreaker"],
+      [noisyBreaker.definitionId!]: ["icebreaker", "noisy"],
     };
     const usable = score(
       cloak,
@@ -893,7 +894,7 @@ describe("discard keep score", () => {
       "runner",
       [installedKrash],
       {
-        onr_v1_039_krash: AI_HINTS_BY_CARD.get(251)!.roles!,
+        251: AI_HINTS_BY_CARD.get(251)!.roles!,
       },
       { extraGrip: [secondKrash, support] },
     );
@@ -903,7 +904,7 @@ describe("discard keep score", () => {
       "runner",
       [installedKrash],
       {
-        onr_v1_039_krash: AI_HINTS_BY_CARD.get(251)!.roles!,
+        251: AI_HINTS_BY_CARD.get(251)!.roles!,
       },
       { extraGrip: [krash, secondKrash] },
     );
@@ -1149,11 +1150,11 @@ function input(
   return decisionInput;
 }
 
-function corpCard(definitionId: number, type: string): VisibleCard {
+function corpCard(definition: number | string, type: string): VisibleCard {
   return {
-    instanceId: `${definitionId}-instance`,
-    definitionId,
-    title: definitionId,
+    instanceId: `${definition}-instance`,
+    definitionId: typeof definition === "number" ? definition : syntheticCardDefinitionId(definition),
+    title: String(definition),
     side: "corp",
     type,
     zone: "hq",
@@ -1162,11 +1163,11 @@ function corpCard(definitionId: number, type: string): VisibleCard {
   } as VisibleCard;
 }
 
-function runnerCard(definitionId: number, type: string): VisibleCard {
+function runnerCard(definition: number | string, type: string): VisibleCard {
   return {
-    instanceId: `${definitionId}-instance`,
-    definitionId,
-    title: definitionId,
+    instanceId: `${definition}-instance`,
+    definitionId: typeof definition === "number" ? definition : syntheticCardDefinitionId(definition),
+    title: String(definition),
     side: "runner",
     type,
     zone: "grip",

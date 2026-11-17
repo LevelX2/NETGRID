@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -6,7 +7,6 @@ import {
 } from "./deck-capabilities";
 import { AI_HINTS_BY_CARD as mockedHints, type AiCardHint } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
-import match9d15Checkpoint from "../../../data/scenarios/ai-decision-checkpoints/cp-9d15-01-urgent-remote-inside-job.json";
 import type {
   LegalAction,
   PlayerView,
@@ -24,7 +24,7 @@ vi.mock(import("./ai-hints"), async (importOriginal) => {
   };
 });
 
-const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
+const AI_HINTS_BY_CARD = mockedHints as Map<number, AiCardHint>;
 
 describe("DeckCapabilityProfile", () => {
   it("builds runner breaker coverage, search access and bank tools from own deck facts", () => {
@@ -133,12 +133,12 @@ describe("DeckCapabilityProfile", () => {
   it("bounds memory tool text signals to exact tokens", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
-      visibleCard("memory-1", "local_memory_tool", "runner", "hardware", {
+      visibleCard("memory-1", syntheticCardDefinitionId("local_memory_tool"), "runner", "hardware", {
         title: "Memory Tool",
       }),
       visibleCard(
         "municipal-1",
-        "local_municipal_noise",
+        syntheticCardDefinitionId("local_municipal_noise"),
         "runner",
         "hardware",
         {
@@ -362,7 +362,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.rig = [
       visibleCard(
         "stored-credits-1",
-        "local_stored_credits_tool",
+        syntheticCardDefinitionId("local_stored_credits_tool"),
         "runner",
         "resource",
         {
@@ -371,7 +371,7 @@ describe("DeckCapabilityProfile", () => {
       ),
       visibleCard(
         "stored-noise-1",
-        "local_stored_noise_tool",
+        syntheticCardDefinitionId("local_stored_noise_tool"),
         "runner",
         "resource",
         {
@@ -491,13 +491,13 @@ describe("DeckCapabilityProfile", () => {
   it("does not infer a Runner credit-bank contract from a deposit phrase", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
-      visibleCard("capacity-1", "local_capacity_tool", "runner", "resource", {
+      visibleCard("capacity-1", syntheticCardDefinitionId("local_capacity_tool"), "runner", "resource", {
         title: "Bank",
         rulesText: "Put [3] credits on this card.",
       }),
       visibleCard(
         "capacity-noise-1",
-        "local_capacity_noise",
+        syntheticCardDefinitionId("local_capacity_noise"),
         "runner",
         "resource",
         {
@@ -575,13 +575,13 @@ describe("DeckCapabilityProfile", () => {
   });
 
   it("matches search access roles by bounded role terms", () => {
-    setTestCardRoles("local_structured_search", {
-      cardId: "local_structured_search",
+    setTestCardRoles(syntheticCardDefinitionId("local_structured_search"), {
+      cardId: syntheticCardDefinitionId("local_structured_search"),
       side: "runner",
       roles: ["setup_program_search"],
     });
-    setTestCardRoles("local_noise_tool", {
-      cardId: "local_noise_tool",
+    setTestCardRoles(syntheticCardDefinitionId("local_noise_tool"), {
+      cardId: syntheticCardDefinitionId("local_noise_tool"),
       side: "runner",
       roles: ["program_searchish_noise", "searchlight_noise"],
     });
@@ -590,14 +590,14 @@ describe("DeckCapabilityProfile", () => {
       inputView.own.gripOrHq = [
         visibleCard(
           "search-1",
-          "local_structured_search",
+          syntheticCardDefinitionId("local_structured_search"),
           "runner",
           "program",
           {
             title: "Structured Search",
           },
         ),
-        visibleCard("noise-1", "local_noise_tool", "runner", "program", {
+        visibleCard("noise-1", syntheticCardDefinitionId("local_noise_tool"), "runner", "program", {
           title: "Noise Tool",
         }),
       ];
@@ -610,26 +610,26 @@ describe("DeckCapabilityProfile", () => {
 
       expect(
         profile.runner?.searchAccess.tools.map((tool) => tool.cardId),
-      ).toEqual(["local_structured_search"]);
+      ).toEqual([syntheticCardDefinitionId("local_structured_search")]);
       expect(profile.runner?.searchAccess.tools[0]?.evidence).toContain(
         "capability_source:structured",
       );
     } finally {
-      AI_HINTS_BY_CARD.delete("local_structured_search");
-      AI_HINTS_BY_CARD.delete("local_noise_tool");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_structured_search"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_noise_tool"));
     }
   });
 
   it("bounds text-only search access terms to exact tokens", () => {
     const inputView = playerView("runner");
     inputView.own.gripOrHq = [
-      visibleCard("text-search-1", "local_text_search", "runner", "program", {
+      visibleCard("text-search-1", syntheticCardDefinitionId("local_text_search"), "runner", "program", {
         title: "Local Text Search",
         rulesText: "Search your stack for a program.",
       }),
       visibleCard(
         "searchlight-1",
-        "local_searchlight_noise",
+        syntheticCardDefinitionId("local_searchlight_noise"),
         "runner",
         "program",
         {
@@ -647,7 +647,7 @@ describe("DeckCapabilityProfile", () => {
 
     expect(
       profile.runner?.searchAccess.tools.map((tool) => tool.cardId),
-    ).toEqual(["local_text_search"]);
+    ).toEqual([syntheticCardDefinitionId("local_text_search")]);
     expect(profile.runner?.searchAccess.tools[0]).toMatchObject({
       canSearchPrograms: true,
       canSearchBreakers: true,
@@ -703,13 +703,13 @@ describe("DeckCapabilityProfile", () => {
   });
 
   it("matches breaker capability roles by bounded role prefixes", () => {
-    setTestCardRoles("local_structured_breaker", {
-      cardId: "local_structured_breaker",
+    setTestCardRoles(syntheticCardDefinitionId("local_structured_breaker"), {
+      cardId: syntheticCardDefinitionId("local_structured_breaker"),
       side: "runner",
       roles: ["breaker_fracter"],
     });
-    setTestCardRoles("local_noise_breaker", {
-      cardId: "local_noise_breaker",
+    setTestCardRoles(syntheticCardDefinitionId("local_noise_breaker"), {
+      cardId: syntheticCardDefinitionId("local_noise_breaker"),
       side: "runner",
       roles: ["breakerish_fracter"],
     });
@@ -718,7 +718,7 @@ describe("DeckCapabilityProfile", () => {
       inputView.own.gripOrHq = [
         visibleCard(
           "structured-breaker-1",
-          "local_structured_breaker",
+          syntheticCardDefinitionId("local_structured_breaker"),
           "runner",
           "program",
           {
@@ -727,7 +727,7 @@ describe("DeckCapabilityProfile", () => {
         ),
         visibleCard(
           "noise-breaker-1",
-          "local_noise_breaker",
+          syntheticCardDefinitionId("local_noise_breaker"),
           "runner",
           "program",
           {
@@ -746,14 +746,14 @@ describe("DeckCapabilityProfile", () => {
       expect(profile.runner?.breakerInventory).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            cardId: "local_structured_breaker",
+            cardId: syntheticCardDefinitionId("local_structured_breaker"),
             confidence: "medium",
             evidence: expect.arrayContaining([
               "capability_source:role_or_subtype",
             ]),
           }),
           expect.objectContaining({
-            cardId: "local_noise_breaker",
+            cardId: syntheticCardDefinitionId("local_noise_breaker"),
             confidence: "low",
             evidence: expect.arrayContaining([
               "capability_source:text_fallback",
@@ -763,21 +763,21 @@ describe("DeckCapabilityProfile", () => {
         ]),
       );
     } finally {
-      AI_HINTS_BY_CARD.delete("local_structured_breaker");
-      AI_HINTS_BY_CARD.delete("local_noise_breaker");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_structured_breaker"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_noise_breaker"));
     }
   });
 
   it("bounds text-only breaker coverage terms to exact tokens", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
-      visibleCard("text-fracter-1", "local_text_fracter", "runner", "program", {
+      visibleCard("text-fracter-1", syntheticCardDefinitionId("local_text_fracter"), "runner", "program", {
         title: "Local Text Fracter",
         rulesText: "Break one ice subroutine.",
       }),
       visibleCard(
         "fracteroid-1",
-        "local_fracteroid_noise",
+        syntheticCardDefinitionId("local_fracteroid_noise"),
         "runner",
         "program",
         {
@@ -787,7 +787,7 @@ describe("DeckCapabilityProfile", () => {
       ),
       visibleCard(
         "icebreakerish-1",
-        "local_icebreakerish_noise",
+        syntheticCardDefinitionId("local_icebreakerish_noise"),
         "runner",
         "program",
         {
@@ -805,7 +805,7 @@ describe("DeckCapabilityProfile", () => {
 
     expect(
       profile.runner?.breakerInventory.map((entry) => entry.cardId),
-    ).toEqual(["local_text_fracter"]);
+    ).toEqual([syntheticCardDefinitionId("local_text_fracter")]);
     expect(profile.runner?.breakerInventory[0]?.coverage).toEqual([
       "subtype_limited",
       "wall",
@@ -834,28 +834,28 @@ describe("DeckCapabilityProfile", () => {
   });
 
   it("matches corp plan roles by bounded role terms", () => {
-    setTestCardRoles("local_plan_a", {
-      cardId: "local_plan_a",
+    setTestCardRoles(syntheticCardDefinitionId("local_plan_a"), {
+      cardId: syntheticCardDefinitionId("local_plan_a"),
       side: "corp",
       roles: ["remote_score_support"],
     });
-    setTestCardRoles("local_plan_b", {
-      cardId: "local_plan_b",
+    setTestCardRoles(syntheticCardDefinitionId("local_plan_b"), {
+      cardId: syntheticCardDefinitionId("local_plan_b"),
       side: "corp",
       roles: ["protect_remote"],
     });
-    setTestCardRoles("local_plan_c", {
-      cardId: "local_plan_c",
+    setTestCardRoles(syntheticCardDefinitionId("local_plan_c"), {
+      cardId: syntheticCardDefinitionId("local_plan_c"),
       side: "corp",
       roles: ["remote_economy_asset"],
     });
-    setTestCardRoles("local_plan_d", {
-      cardId: "local_plan_d",
+    setTestCardRoles(syntheticCardDefinitionId("local_plan_d"), {
+      cardId: syntheticCardDefinitionId("local_plan_d"),
       side: "corp",
       roles: ["remote_ambush"],
     });
-    setTestCardRoles("local_plan_e", {
-      cardId: "local_plan_e",
+    setTestCardRoles(syntheticCardDefinitionId("local_plan_e"), {
+      cardId: syntheticCardDefinitionId("local_plan_e"),
       side: "corp",
       roles: [
         "scoreish_noise",
@@ -868,26 +868,26 @@ describe("DeckCapabilityProfile", () => {
       const inputView = playerView("corp");
       inputView.servers = [
         server("remote_1", [
-          visibleCard("plan-a", "local_plan_a", "corp", "operation", {
+          visibleCard("plan-a", syntheticCardDefinitionId("local_plan_a"), "corp", "operation", {
             title: "Structured Plan A",
           }),
-          visibleCard("plan-b", "local_plan_b", "corp", "upgrade", {
+          visibleCard("plan-b", syntheticCardDefinitionId("local_plan_b"), "corp", "upgrade", {
             title: "Structured Plan B",
           }),
-          visibleCard("plan-c", "local_plan_c", "corp", "asset", {
+          visibleCard("plan-c", syntheticCardDefinitionId("local_plan_c"), "corp", "asset", {
             title: "Structured Plan C",
           }),
-          visibleCard("plan-d", "local_plan_d", "corp", "asset", {
+          visibleCard("plan-d", syntheticCardDefinitionId("local_plan_d"), "corp", "asset", {
             title: "Structured Plan D",
           }),
-          visibleCard("plan-e", "local_plan_e", "corp", "asset", {
+          visibleCard("plan-e", syntheticCardDefinitionId("local_plan_e"), "corp", "asset", {
             title: "Role Noise",
           }),
-          visibleCard("plan-f", "local_plan_f", "corp", "asset", {
+          visibleCard("plan-f", syntheticCardDefinitionId("local_plan_f"), "corp", "asset", {
             title: "Subtype Ambush",
             subtypes: ["Ambush"],
           }),
-          visibleCard("plan-g", "local_plan_g", "corp", "asset", {
+          visibleCard("plan-g", syntheticCardDefinitionId("local_plan_g"), "corp", "asset", {
             title: "Subtype Noise",
             subtypes: ["ambushish"],
           }),
@@ -907,11 +907,11 @@ describe("DeckCapabilityProfile", () => {
         ambushToolsKnown: 2,
       });
     } finally {
-      AI_HINTS_BY_CARD.delete("local_plan_a");
-      AI_HINTS_BY_CARD.delete("local_plan_b");
-      AI_HINTS_BY_CARD.delete("local_plan_c");
-      AI_HINTS_BY_CARD.delete("local_plan_d");
-      AI_HINTS_BY_CARD.delete("local_plan_e");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_plan_a"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_plan_b"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_plan_c"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_plan_d"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_plan_e"));
     }
   });
 
@@ -921,43 +921,43 @@ describe("DeckCapabilityProfile", () => {
       server("remote_1", [
         visibleCard(
           "corp-advance",
-          "local_alpha_advance",
+          syntheticCardDefinitionId("local_alpha_advance"),
           "corp",
           "operation",
           {
             title: "Advance Tool",
           },
         ),
-        visibleCard("corp-score", "local_alpha_score", "corp", "operation", {
+        visibleCard("corp-score", syntheticCardDefinitionId("local_alpha_score"), "corp", "operation", {
           title: "Score Support",
         }),
-        visibleCard("corp-rez", "local_alpha_rez", "corp", "asset", {
+        visibleCard("corp-rez", syntheticCardDefinitionId("local_alpha_rez"), "corp", "asset", {
           title: "Rez Credits",
         }),
-        visibleCard("corp-tax", "local_alpha_tax", "corp", "ice", {
+        visibleCard("corp-tax", syntheticCardDefinitionId("local_alpha_tax"), "corp", "ice", {
           title: "Tax ICE",
         }),
-        visibleCard("corp-wall", "local_alpha_wall", "corp", "ice", {
+        visibleCard("corp-wall", syntheticCardDefinitionId("local_alpha_wall"), "corp", "ice", {
           title: "Barrier",
         }),
-        visibleCard("corp-code-gate", "local_alpha_code_gate", "corp", "ice", {
+        visibleCard("corp-code-gate", syntheticCardDefinitionId("local_alpha_code_gate"), "corp", "ice", {
           rulesText: "Code gate.",
         }),
-        visibleCard("corp-sentry", "local_alpha_sentry", "corp", "ice", {
+        visibleCard("corp-sentry", syntheticCardDefinitionId("local_alpha_sentry"), "corp", "ice", {
           subtypes: ["Sentry"],
         }),
-        visibleCard("corp-campaign", "local_alpha_campaign", "corp", "asset", {
+        visibleCard("corp-campaign", syntheticCardDefinitionId("local_alpha_campaign"), "corp", "asset", {
           title: "Campaign",
         }),
-        visibleCard("corp-noise", "local_alpha_noise", "corp", "operation", {
+        visibleCard("corp-noise", syntheticCardDefinitionId("local_alpha_noise"), "corp", "operation", {
           title: "Advanceish Scoreish Rezish Creditsish",
         }),
-        visibleCard("corp-tax-noise", "local_alpha_noise_ice", "corp", "ice", {
+        visibleCard("corp-tax-noise", syntheticCardDefinitionId("local_alpha_noise_ice"), "corp", "ice", {
           title: "Taxi Traceish Payee Loser",
         }),
         visibleCard(
           "corp-ice-type-noise",
-          "local_alpha_ice_type_noise",
+          syntheticCardDefinitionId("local_alpha_ice_type_noise"),
           "corp",
           "ice",
           {
@@ -966,7 +966,7 @@ describe("DeckCapabilityProfile", () => {
         ),
         visibleCard(
           "corp-remote-noise",
-          "local_alpha_remote_noise",
+          syntheticCardDefinitionId("local_alpha_remote_noise"),
           "corp",
           "asset",
           {
@@ -997,8 +997,8 @@ describe("DeckCapabilityProfile", () => {
   });
 
   it("derives Runner multiaccess pressure from structured access facts", () => {
-    setTestCardRoles("local_runner_attack_a", {
-      cardId: "local_runner_attack_a",
+    setTestCardRoles(syntheticCardDefinitionId("local_runner_attack_a"), {
+      cardId: syntheticCardDefinitionId("local_runner_attack_a"),
       side: "runner",
       roles: [],
       effects: [
@@ -1013,18 +1013,18 @@ describe("DeckCapabilityProfile", () => {
         },
       ],
     });
-    setTestCardRoles("local_runner_attack_b", {
-      cardId: "local_runner_attack_b",
+    setTestCardRoles(syntheticCardDefinitionId("local_runner_attack_b"), {
+      cardId: syntheticCardDefinitionId("local_runner_attack_b"),
       side: "runner",
       roles: ["remote_contest_tool"],
     });
-    setTestCardRoles("local_runner_attack_c", {
-      cardId: "local_runner_attack_c",
+    setTestCardRoles(syntheticCardDefinitionId("local_runner_attack_c"), {
+      cardId: syntheticCardDefinitionId("local_runner_attack_c"),
       side: "runner",
       roles: ["early_setup"],
     });
-    setTestCardRoles("local_runner_attack_noise", {
-      cardId: "local_runner_attack_noise",
+    setTestCardRoles(syntheticCardDefinitionId("local_runner_attack_noise"), {
+      cardId: syntheticCardDefinitionId("local_runner_attack_noise"),
       side: "runner",
       roles: [
         "interface_multiaccess",
@@ -1035,18 +1035,18 @@ describe("DeckCapabilityProfile", () => {
     try {
       const inputView = playerView("runner");
       inputView.own.gripOrHq = [
-        visibleCard("attack-a", "local_runner_attack_a", "runner", "event", {
+        visibleCard("attack-a", syntheticCardDefinitionId("local_runner_attack_a"), "runner", "event", {
           title: "Attack Plan A",
         }),
-        visibleCard("attack-b", "local_runner_attack_b", "runner", "event", {
+        visibleCard("attack-b", syntheticCardDefinitionId("local_runner_attack_b"), "runner", "event", {
           title: "Attack Plan B",
         }),
-        visibleCard("attack-c", "local_runner_attack_c", "runner", "hardware", {
+        visibleCard("attack-c", syntheticCardDefinitionId("local_runner_attack_c"), "runner", "hardware", {
           title: "Attack Plan C",
         }),
         visibleCard(
           "attack-noise",
-          "local_runner_attack_noise",
+          syntheticCardDefinitionId("local_runner_attack_noise"),
           "runner",
           "event",
           {
@@ -1067,22 +1067,37 @@ describe("DeckCapabilityProfile", () => {
         setupToolsKnown: 1,
       });
     } finally {
-      AI_HINTS_BY_CARD.delete("local_runner_attack_a");
-      AI_HINTS_BY_CARD.delete("local_runner_attack_b");
-      AI_HINTS_BY_CARD.delete("local_runner_attack_c");
-      AI_HINTS_BY_CARD.delete("local_runner_attack_noise");
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_runner_attack_a"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_runner_attack_b"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_runner_attack_c"));
+      AI_HINTS_BY_CARD.delete(syntheticCardDefinitionId("local_runner_attack_noise"));
     }
   });
 
   it("keeps the non-Broker 9D15 deck search and remote-contest capabilities truthful", () => {
-    const capturedSnapshot =
-      match9d15Checkpoint.deckSnapshot as AiDeckStrategyDeckSnapshot;
-    const deckSnapshot = {
-      ...capturedSnapshot,
-      cards: capturedSnapshot.cards.filter(
-        (card) => card.cardId !== 366,
-      ),
-    };
+    const deckSnapshot = runnerSnapshot([
+      [228,2],
+      [233,2],
+      [251,2],
+      [252,2],
+      [278,1],
+      [286,1],
+      [288,3],
+      [291,3],
+      [293,2],
+      [297,2],
+      [306,2],
+      [307,3],
+      [309,3],
+      [313,2],
+      [318,1],
+      [319,2],
+      [320,3],
+      [326,1],
+      [341,3],
+      [351,2],
+      [357,1],
+    ]);
 
     const profile = buildDeckCapabilityProfile({
       side: "runner",
@@ -1274,7 +1289,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.rig = [
       visibleCard(
         "fallback-breaker-1",
-        "local_text_only_breaker",
+        syntheticCardDefinitionId("local_text_only_breaker"),
         "runner",
         "program",
         {
@@ -1294,7 +1309,7 @@ describe("DeckCapabilityProfile", () => {
       "capability_source_priority:structured>roles>visible_board>text_fallback",
     );
     expect(profile.runner?.breakerInventory[0]).toMatchObject({
-      cardId: "local_text_only_breaker",
+      cardId: syntheticCardDefinitionId("local_text_only_breaker"),
       confidence: "low",
       evidence: expect.arrayContaining([
         "capability_source:text_fallback",
@@ -1326,7 +1341,7 @@ describe("DeckCapabilityProfile", () => {
 });
 
 function runnerSnapshot(
-  cards: Array<[cardId: string, quantity: number]>,
+  cards: Array<[cardId: number, quantity: number]>,
 ): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId: "deck-capability-test-runner",
@@ -1378,7 +1393,7 @@ function playerView(side: Side): PlayerView {
 function visibleIdentity(side: Side): PlayerView["own"]["identity"] {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(`${side}-identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,
@@ -1412,7 +1427,7 @@ function visibleCard(
   return {
     instanceId,
     definitionId,
-    title: definitionId,
+    title: String(definitionId),
     owner: side,
     controller: side,
     type,
@@ -1446,7 +1461,7 @@ function legalAction(
 }
 
 function setTestCardRoles(
-  cardId: string,
+  cardId: number,
   hint: Pick<AiCardHint, "cardId" | "side" | "roles"> & Partial<AiCardHint>,
 ): void {
   AI_HINTS_BY_CARD.set(cardId, {
