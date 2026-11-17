@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  createObservedAccessOutcome,
   createProjectedAccessOutcome,
+  observedAccessOutcomeEvidence,
 } from "./access-outcome-projection";
 
 describe("access outcome projection", () => {
@@ -24,7 +24,7 @@ describe("access outcome projection", () => {
   });
 
   it("models observed access outcomes separately", () => {
-    const observed = createObservedAccessOutcome({
+    const observed = observedAccessOutcomeEvidence({
       serverId: "remote_1",
       knownRootDefinitionId: "onr_v1_326_holovid-campaign",
       observedIntent: "trash",
@@ -32,8 +32,7 @@ describe("access outcome projection", () => {
       stateVersion: 13,
     });
 
-    expect(observed.kind).toBe("observed_access_outcome");
-    expect(observed.evidence).toEqual(
+    expect(observed).toEqual(
       expect.arrayContaining([
         "observed_access_outcome_intent:trash",
         "observed_access_outcome_reason:trash_affordable",

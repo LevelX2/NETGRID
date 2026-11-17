@@ -13,16 +13,6 @@ export type ProjectedAccessOutcome = {
   evidence: string[];
 };
 
-export type ObservedAccessOutcome = {
-  kind: "observed_access_outcome";
-  serverId: string;
-  knownRootDefinitionId: string;
-  observedIntent: AccessIntent;
-  reason: AccessDecisionReason;
-  stateVersion: number;
-  evidence: string[];
-};
-
 export function createProjectedAccessOutcome(params: {
   serverId: string;
   knownRootDefinitionId: string;
@@ -34,20 +24,6 @@ export function createProjectedAccessOutcome(params: {
     kind: "projected_access_outcome",
     ...params,
     evidence: projectedAccessOutcomeEvidence(params),
-  };
-}
-
-export function createObservedAccessOutcome(params: {
-  serverId: string;
-  knownRootDefinitionId: string;
-  observedIntent: AccessIntent;
-  reason: AccessDecisionReason;
-  stateVersion: number;
-}): ObservedAccessOutcome {
-  return {
-    kind: "observed_access_outcome",
-    ...params,
-    evidence: observedAccessOutcomeEvidence(params),
   };
 }
 

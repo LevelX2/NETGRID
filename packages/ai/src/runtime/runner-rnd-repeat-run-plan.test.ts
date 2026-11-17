@@ -7,26 +7,8 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { chooseRunnerAction } from "../ai-runtime-public-entrypoints";
-import { staleKnownRndRepeatRunPenalty } from "./runner-rnd-repeat-run-score";
 
-describe("staleKnownRndRepeatRunPenalty", () => {
-  it("recognizes label-only R&D access events as stale known low-value top cards", () => {
-    const runRd = runAction("run-rd", "rd");
-    const input = runnerInput({
-      legalActions: [runRd],
-      events: [
-        rdLabelOnlyAccessEvent(
-          "evt_rd_access",
-          1,
-          "onr_v1_281_accounts-receivable",
-          "Accounts Receivable",
-        ),
-      ],
-    });
-
-    expect(staleKnownRndRepeatRunPenalty(input, runRd)).toBe(420);
-  });
-
+describe("R&D repeat-run planning", () => {
   it("develops exact basic liquidity after rejecting a repeated low-value R&D run [legacy_compare]", () => {
     const runRd = runAction("run-rd", "rd");
     const gain = action("gain", "gain_credit");
@@ -124,8 +106,8 @@ function runnerInput(params: {
     eventTail: params.events,
     legalActions: params.legalActions,
     difficulty: "normal",
-    seed: "runner-rnd-repeat-run-score-test",
-    decisionId: "runner-rnd-repeat-run-score-test:runner",
+    seed: "runner-rnd-repeat-run-plan-test",
+    decisionId: "runner-rnd-repeat-run-plan-test:runner",
     actionNumber: 1,
     profileId: "runner-ai-test",
   };

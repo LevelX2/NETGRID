@@ -3828,6 +3828,22 @@ function sanitizeLegalActionPayload(
   const result: NonNullable<LegalAction["payload"]> = {
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };
+  if (action.side === "runner" && action.type === "trash_accessed_card") {
+    for (const key of [
+      "accessTrashBaseCost",
+      "accessTrashCostModifier",
+      "accessTrashTotalCost",
+      "upgradeTrashRecurringCreditsAvailable",
+      "poltergeistRecurringCreditsAvailable",
+    ] as const) {
+      const amount = payload[key];
+      if (
+        typeof amount === "number" &&
+        Number.isSafeInteger(amount) &&
+        (key === "accessTrashCostModifier" || amount >= 0)
+      ) result[key] = amount;
+    }
+  }
   const runSpendingCap = payload.runSpendingCap;
   if (action.type === "start_run" && isNonNegativeSafeInteger(runSpendingCap)) {
     result.runSpendingCap = runSpendingCap;

@@ -3,6 +3,7 @@ import {
   type CardInstanceId,
   type GameState,
   type LegalAction,
+  type PlayerView,
   type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
@@ -64,23 +65,17 @@ export function advancedAgendaStealSourceForAction(
 }
 
 export function remoteHasNearFinalAgenda(
-  state: GameState,
+  view: Pick<PlayerView, "servers">,
   serverId: string,
 ): boolean {
-  const server = state.corp.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return false;
-  return server.root.some((cardId) => {
-    const instance = state.cardInstances[cardId];
-    if (!instance) return false;
-    if (cardTargetTypeForInstance(state, cardId) !== "agenda") return false;
-    const requirement =
-      CARD_DEFINITIONS_BY_ID[instance.definitionId]?.advancementRequirement ??
-      RUNTIME_CARDS[instance.definitionId]?.numeric.advancementRequirement ??
-      0;
-    return Math.max(0, requirement - instance.advancementCounters) <= 2;
-  });
+  const server = view.servers.find((candidate) => candidate.id === serverId);
+  return server?.root.some(
+    (card) =>
+      card.known === true &&
+      card.type === "agenda" &&
+      card.advancementRequirement !== undefined &&
+      card.advancementRequirement - (card.advancementCounters ?? 0) <= 2,
+  ) === true;
 }
 
 export function rezCostForDefinitionId(

@@ -482,6 +482,7 @@ export function createAiGameSimulator(
       });
       const protectBeforeAdvance = isProtectBeforeAdvanceSimulationAction(
         stateBeforeAction,
+        result.state,
         input,
         action,
         targetServerId,

@@ -57,7 +57,7 @@ import {
   corpTriageVisibleAgendaPoints,
   corpTriageVisibleCardIsAgenda,
   existingReadyRemoteCanReceiveScoreline,
-  inputWithOpponentDefaults,
+  requireCorpTriageOpponentView,
   legalEconomyActionExists,
 } from "./semantic-runtime-corp-board-triage-actions";
 
@@ -445,7 +445,7 @@ export function corpHqAgendaFloodScorelinePressure(
       ? "critical"
       : "high";
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(
-    inputWithOpponentDefaults(input),
+    requireCorpTriageOpponentView(input),
     "hq",
   );
 
@@ -498,7 +498,7 @@ export function corpHqAgendaFloodIsPressured(
     corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
   if (runnerAgendaPoints >= 3) return true;
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(
-    inputWithOpponentDefaults(input),
+    requireCorpTriageOpponentView(input),
     "hq",
   );
   return (
@@ -586,11 +586,11 @@ export function scorelineEntryCanEmergencyRelieveHqAgendaFlood(
     return false;
   }
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(
-    inputWithOpponentDefaults(input),
+    requireCorpTriageOpponentView(input),
     "hq",
   );
   const rdPressure = semanticRuntimeCorpCentralPressureAssessment(
-    inputWithOpponentDefaults(input),
+    requireCorpTriageOpponentView(input),
     "rd",
   );
   return (
@@ -843,7 +843,7 @@ export function scoreNowCentralProtectionInterruptTriage(
     corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
   if (runnerAgendaPoints < 3) return undefined;
 
-  const pressureInput = inputWithOpponentDefaults(input);
+  const pressureInput = requireCorpTriageOpponentView(input);
   const rdPressure = semanticRuntimeCorpCentralPressureAssessment(
     pressureInput,
     "rd",
@@ -1713,7 +1713,7 @@ export function preScoreCentralProtectionTriage(
   currentCredits: number,
   dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage | undefined {
-  const pressureInput = inputWithOpponentDefaults(input);
+  const pressureInput = requireCorpTriageOpponentView(input);
   const rdPressure = semanticRuntimeCorpCentralPressureAssessment(
     pressureInput,
     "rd",

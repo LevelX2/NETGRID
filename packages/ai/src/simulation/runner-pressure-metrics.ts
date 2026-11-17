@@ -5,8 +5,10 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { KnownPositionMemory } from "../belief-state";
-import { centralServerId } from "../runtime/server-target";
+import { actionCreditCost } from "../runtime/action-cost";
+import { centralServerId, serverBlocksStealthBitPayments } from "../runtime/server-target";
 import {
   runnerRunPathCreditBudgetWithVisiblePools,
   type assessKnownRezzedIcePath,
@@ -49,6 +51,30 @@ export type RunnerPressureMetricDependencies = {
 export function createRunnerPressureMetricContext(
   dependencies: RunnerPressureMetricDependencies,
 ) {
+  const assessVisibleServerPath = (
+    input: AiDecisionInput,
+    server: AiDecisionInput["playerView"]["servers"][number],
+    liquidCredits = input.playerView.own.credits,
+  ) => {
+    const { own, opponent } = input.playerView;
+    const excludeStealthCredits = serverBlocksStealthBitPayments(server);
+    return dependencies.assessKnownRezzedIcePath(
+      server.ice,
+      own.rig ?? [],
+      runnerRunPathCreditBudgetWithVisiblePools(
+        liquidCredits + (own.availableBadPublicityRunCredits ?? 0),
+        own.rig ?? [],
+        { liquidCredits, excludeStealthCredits },
+      ),
+      server.root,
+      opponent.credits,
+      {
+        ...visibleRunnerPathTraceContext(input),
+        ...(excludeStealthCredits ? { excludeStealthTraceCredits: true } : {}),
+      },
+    );
+  };
+
   const runnerRemotePressureReadyForMetrics = (
     input: AiDecisionInput,
     server: AiDecisionInput["playerView"]["servers"][number],
@@ -62,7 +88,9 @@ export function createRunnerPressureMetricContext(
     const knownMemory = dependencies.knownPositionMemoryForInput(input);
     const knownRemoteEntries = knownMemory.filter(
       (entry) =>
-        entry.zone === server.id && entry.positionKey.startsWith("root:"),
+        entry.zone === server.id &&
+        entry.positionKey.startsWith("root:") &&
+        entry.invalidatedBy.length === 0,
     );
     const knownAgenda = knownRemoteEntries.some(
       (entry) =>
@@ -98,6 +126,7 @@ export function createRunnerPressureMetricContext(
     const seen = new Set<string>();
     for (const action of input.legalActions) {
       if (
+        !actionMatchesCurrentDecision(input, action) ||
         action.type !== "start_run" ||
         typeof action.payload?.serverId !== "string"
       )
@@ -113,18 +142,11 @@ export function createRunnerPressureMetricContext(
         !dependencies.runnerStrategicBreakerTargetForMetrics(server)
       )
         continue;
-      const assessment = dependencies.assessKnownRezzedIcePath(
-        server.ice,
-        input.playerView.own.rig ?? [],
-        runnerRunPathCreditBudgetWithVisiblePools(
-          input.playerView.own.credits,
-          input.playerView.own.rig ?? [],
-        ),
-        server.root,
-        input.playerView.opponent.credits,
-        visibleRunnerPathTraceContext(input),
+      const assessment = assessVisibleServerPath(
+        input,
+        server,
+        input.playerView.own.credits - actionCreditCost(action),
       );
-      const creditsAfterPath = assessment.creditsAfterPath;
       if (!assessment.blocked) broadReady = true;
       if (assessment.blocked) {
         blockers.add(
@@ -135,6 +157,10 @@ export function createRunnerPressureMetricContext(
             : "no_valuable_target",
         );
         continue;
+      }
+      const creditsAfterPath = assessment.creditBudgetAfterPath?.traceEligibleCredits;
+      if (creditsAfterPath === undefined) {
+        throw new Error("runner_pressure_metrics_completed_path_missing_credit_ledger");
       }
       if (serverId.startsWith("remote_")) {
         const remoteReady = runnerRemotePressureReadyForMetrics(
@@ -185,17 +211,7 @@ export function createRunnerPressureMetricContext(
     for (const server of input.playerView.servers) {
       if (!dependencies.runnerStrategicBreakerTargetForMetrics(server))
         continue;
-      const assessment = dependencies.assessKnownRezzedIcePath(
-        server.ice,
-        rigCards,
-        runnerRunPathCreditBudgetWithVisiblePools(
-          input.playerView.own.credits,
-          rigCards,
-        ),
-        server.root,
-        input.playerView.opponent.credits,
-        visibleRunnerPathTraceContext(input),
-      );
+      const assessment = assessVisibleServerPath(input, server);
       const rezzedMissing = assessment.blocked
         ? server.ice
             .filter(

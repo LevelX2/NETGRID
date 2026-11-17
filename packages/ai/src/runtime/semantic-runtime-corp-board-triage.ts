@@ -15,7 +15,7 @@ import {
   corpLegalActions,
   corpRemoteScoringStrategyWantsRemoteDevelopment,
   corpTriageVisibleAgendaPoints,
-  inputWithOpponentDefaults,
+  requireCorpTriageOpponentView,
   legalEconomyActionExists,
   normalizedCorpBoardTriageValue,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-actions";
@@ -153,7 +153,7 @@ function buildSemanticRuntimeCorpBoardTriage(
     return forceScorelineTriage(forcedScorelinePressure, currentCredits);
   }
 
-  const pressureInput = inputWithOpponentDefaults(input);
+  const pressureInput = requireCorpTriageOpponentView(input);
   const centralPressure = highestPriorityTriageCentralPressure(pressureInput);
   const centralPressureSeverity = centralPressure
     ? centralTriageSeverity(pressureInput, centralPressure)

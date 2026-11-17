@@ -303,7 +303,7 @@ describe("Corp upgrade placement signal contract", () => {
     },
   );
 
-  it.each(["wrong_category", "unknown", "missing_action", "wrong_source", "wrong_fort", "stale"])(
+  it.each(["wrong_category", "unknown", "missing_action", "wrong_source", "wrong_fort", "stale", "wrong_timing"])(
     "does not invent prepared Weapons Depot support from %s",
     (variant) => {
       const agenda = eligibleAgenda("onr_proteus_077_weapons-depot");
@@ -313,6 +313,7 @@ describe("Corp upgrade placement signal contract", () => {
       if (variant === "wrong_source") action.source = "another-agenda";
       if (variant === "wrong_fort") action.payload!.serverId = "remote_2";
       if (variant === "stale") action.expiresAtStateVersion = 0;
+      if (variant === "wrong_timing") action.timingPoint = "corp_discard.select_cards";
       const scenario = placementScenario("onr_proteus_077_weapons-depot", "remote_1", {
         remoteIce: [visibleCard("ice", "simple_ice", "ice")],
         hqAgendas: [agenda],
@@ -321,6 +322,19 @@ describe("Corp upgrade placement signal contract", () => {
       expect(corpUpgradePlacementAssessment(scenario)?.recommendation).toBe("defer");
     },
   );
+
+  it("does not treat an advanced ambush as an active Agenda discount target", () => {
+    const component = placementComponent(AGENDA_DIFFICULTY_UPGRADES[0], "remote_1", {
+      remoteIce: [visibleCard("ice", "simple_ice", "ice")],
+      remoteRoot: [
+        visibleCard("ambush", "onr_v1_348_virus-test-site", "asset", {
+          advancementCounters: 2,
+        }),
+      ],
+    });
+    expect(component?.value).toBe(-1700);
+    expect(component?.reason).toContain("defer_reason:no_scoring_remote_payoff");
+  });
 
   it("preserves unrestricted Washington prepared support without a held agenda", () => {
     expect(placementComponent(AGENDA_DIFFICULTY_UPGRADES[0], "remote_1", {
@@ -414,7 +428,9 @@ function placementScenario(
 
   return {
     input: {
+      side: "corp",
       playerView: {
+        timingPoint: "corp_action.main",
         stateVersion: 1,
         own: { gripOrHq: options.hqAgendas ?? [] },
         servers: [

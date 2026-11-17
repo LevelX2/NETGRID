@@ -12,8 +12,7 @@ import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
 } from "../runner-visible-breaker-coverage";
-import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
-import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   corpIcePlacementActionCreditCostFact,
   corpIcePlacementPostInstallRezCostFact,
@@ -31,9 +30,7 @@ import type {
 } from "./semantic-runtime-corp-board-triage-contracts";
 
 export function corpLegalActions(input: AiDecisionInput): LegalAction[] {
-  return (input.legalActions ?? input.playerView.legalActions ?? []).filter(
-    (action) => action.side === "corp",
-  );
+  return input.legalActions.filter((action) => action.side === "corp");
 }
 
 export function existingReadyRemoteCanReceiveScoreline(
@@ -681,36 +678,14 @@ export function normalizedCorpBoardTriageValue(rawValue: number): number {
   return Math.max(-100, Math.min(100, Math.round(rawValue / 50)));
 }
 
-export function inputWithOpponentDefaults(
-  input: AiDecisionInput,
-): AiDecisionInput {
+export function requireCorpTriageOpponentView(input: AiDecisionInput): AiDecisionInput {
   if (input.playerView.opponent) return input;
-  return {
-    ...input,
-    playerView: {
-      ...input.playerView,
-      opponent: {
-        identity: {
-          instanceId: "triage-runner-identity",
-          known: true,
-          side: "runner",
-          owner: "runner",
-          type: "identity",
-          counterDisplays: [],
-        },
-        credits: 0,
-        clicks: 0,
-        agendaPoints: 0,
-        tags: 0,
-        handCount: 0,
-        maxHandSize: 5,
-        deckCount: 0,
-        discardCount: 0,
-        rig: [],
-        heapOrArchives: [],
-        gripOrHq: [],
-        scoreArea: [],
-      },
-    },
-  } as unknown as AiDecisionInput;
+  throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map((action) => action.type),
+    owner: "rules_contract",
+    removalCondition: "Corp board triage requires the Engine's side-safe opponent view.",
+  });
 }

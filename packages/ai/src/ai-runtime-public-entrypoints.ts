@@ -53,10 +53,6 @@ import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import { runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason } from "./runtime/runner-known-ice-path-score";
 import { runnerMultiRunEventScoreValue } from "./runtime/runner-multi-run-event-score";
 import {
-  rndFreshRepeatRunBoost,
-  staleKnownRndRepeatRunPenalty,
-} from "./runtime/runner-rnd-repeat-run-score";
-import {
   isRunnerEconomyRole,
   isRunnerPressureRole,
 } from "./runtime/runner-role-classification";
@@ -213,8 +209,6 @@ export const aiLiveRuntimeDependencies = {
   shouldAvoidRandomBreakOrDamageRisk: randomBreakOrDamageRiskShouldAvoidRun,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
   remoteRootTrashCost: remoteTrashCostForVisibleCard,
-  staleKnownRndRepeatRunPenalty,
-  rndFreshRepeatRunBoost,
   publicHistory: mergedAiPublicHistory,
   eventVersion: aiEventVersion,
   serverIdFromEvent: aiServerIdFromEvent,
