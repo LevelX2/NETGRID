@@ -7,6 +7,7 @@ import {
 } from "@netgrid/shared";
 import {
   canonicalCapabilityId,
+  capabilityKey as cardSpecCapabilityKey,
   engineCardByDefinitionId,
 } from "@netgrid/cards/engine";
 import { describe, expect, it } from "vitest";
@@ -22,6 +23,7 @@ import {
 const WILSON = 399;
 const URBAN = 519;
 const SCORCHED = 514;
+const UNREGISTERED_CAPABILITY_ID = Number.MAX_SAFE_INTEGER;
 
 describe("Corp punish-route quote request", () => {
   it.each([true, false])(
@@ -388,8 +390,7 @@ describe("Corp punish-route quote request", () => {
         probe.cardInstances[id]!.controller = "runner";
       if (boundary === "clicks") probe.corp.clicks = 0;
       if (boundary === "capability")
-        req.steps[0]!.sourceCapabilityId =
-          "419:missing";
+        req.steps[0]!.sourceCapabilityId = UNREGISTERED_CAPABILITY_ID;
       if (boundary === "action")
         req.steps[0]!.currentLegalActionId = "foreign-action";
       expect(quoteCorpPunishRoute(probe, req), boundary).toMatchObject({
@@ -520,7 +521,7 @@ describe("Corp punish-route quote request", () => {
       {
         ...step(state, "hardware-trash", 0, "hardware_trash", source),
         sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: "511:missing",
+        sourceCapabilityId: UNREGISTERED_CAPABILITY_ID,
       },
     ]);
 
@@ -533,7 +534,7 @@ describe("Corp punish-route quote request", () => {
     });
   });
 
-  it("returns a structured incomplete quote for a malformed canonical capability id", () => {
+  it("rejects a nonnumeric capability ID at the request boundary", () => {
     const state = corpActionState("punish-route-malformed-capability-id");
     const source = addCorpCardToHqForTest(
       state,
@@ -544,17 +545,14 @@ describe("Corp punish-route quote request", () => {
       {
         ...step(state, "tag", 0, "tag", source),
         sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: "bad/id",
+        sourceCapabilityId: "bad/id" as unknown as number,
       },
     ]);
 
     expect(() => quoteCorpPunishRoute(state, request)).not.toThrow();
     expect(quoteCorpPunishRoute(state, request)).toMatchObject({
-      ok: true,
-      quote: {
-        complete: false,
-        incompleteReasons: ["source_capability_missing"],
-      },
+      ok: false,
+      error: { code: "ERR_INVALID_TARGET" },
     });
   });
 
@@ -714,7 +712,7 @@ describe("Corp punish-route quote request", () => {
             kind: "tag",
             sourceCardDefinitionId: 518,
             sourceCapabilityId:
-              "518:corp_utility_encounter_tag",
+              632,
             currentLegalAction: {
               actionId: currentAction.actionId,
               source: trojan,
@@ -1299,7 +1297,7 @@ describe("Corp punish-route quote request", () => {
             kind: "other_punish",
             sourceCardDefinitionId: 497,
             sourceCapabilityId:
-              "497:abilities_on_play_lose_credits",
+              611,
             clicks: 1,
             credits: 1,
             currentLegalAction: {
@@ -1547,7 +1545,7 @@ describe("Corp punish-route quote request", () => {
         routeRequest(state, [
           {
             ...step(state, "bad-capability", 0, "tag", trace),
-            sourceCapabilityId: "ability:on_play:7",
+            sourceCapabilityId: UNREGISTERED_CAPABILITY_ID,
           },
         ]),
       ),
@@ -1581,7 +1579,7 @@ function agendaFundedDamageState() {
   const id = addCorpCardToHqForTest(state, definitionId, "rock");
   state.corp.hq = state.corp.hq.filter((cardId) => cardId !== id);
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -1590,7 +1588,7 @@ function agendaFundedDamageState() {
   state.cardInstances[id]!.zone = {
     side: "corp",
     zone: "serverRoot",
-    serverId: "remote_1",
+    serverId: "r1",
   };
   state.cardInstances[id]!.faceup = true;
   state.cardInstances[id]!.rezzed = true;
@@ -1673,7 +1671,7 @@ function step(
     sourceCapabilityId:
       definitionId && capability
         ? canonicalCapabilityId(definitionId, capability.capabilityKey)
-        : "unknown_card:missing",
+        : UNREGISTERED_CAPABILITY_ID,
   };
 }
 
@@ -1702,7 +1700,10 @@ function canonicalStep(
     kind,
     sourceCardInstanceId,
     sourceCapabilityBindingKind: "card_spec_capability_key",
-    sourceCapabilityId: `${sourceDefinitionId}:${capabilityKey}`,
+    sourceCapabilityId: canonicalCapabilityId(
+      sourceDefinitionId,
+      cardSpecCapabilityKey(capabilityKey),
+    ),
   };
 }
 
