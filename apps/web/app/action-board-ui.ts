@@ -5,7 +5,15 @@ import {
   type SelectionId,
 } from "../lib/presented-player-view";
 import type { AccessPresentationId } from "./access-reveal-ui";
-import { isCardDefinitionId, type MatchEventId, type PublicGameEvent, type Side, type VisibleCard, type VisibleServerStatus } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  isRemoteServerId,
+  type MatchEventId,
+  type PublicGameEvent,
+  type Side,
+  type VisibleCard,
+  type VisibleServerStatus,
+} from "@netgrid/shared";
 import type { LegalAction, PlayerView, VisibleChoiceOption } from "../lib/presented-player-view";
 import { actionHasAbility } from "./action-payload";
 import {
@@ -2552,10 +2560,10 @@ export function serverBoardRows<T extends { id: string }>(
       (left, right) => centralOrder.get(left.id)! - centralOrder.get(right.id)!,
     );
   const remotes = servers
-    .filter((server) => /^r\d+$/.test(server.id))
-    .sort((left, right) => remoteNumber(left.id) - remoteNumber(right.id));
+    .filter((server) => isRemoteServerId(server.id))
+    .sort((left, right) => Number(left.id.slice(1)) - Number(right.id.slice(1)));
   const other = servers.filter(
-    (server) => !centralOrder.has(server.id) && !/^r\d+$/.test(server.id),
+    (server) => !centralOrder.has(server.id) && !isRemoteServerId(server.id),
   );
   const centralRow = { kind: "centrals" as const, servers: central };
   const remoteRow = {
@@ -5047,10 +5055,4 @@ function visibleActionCards(view: PlayerView): VisibleCard[] {
 
 function addStringRef(refs: Set<string>, value: unknown): void {
   if (typeof value === "string" && value.trim()) refs.add(value);
-}
-
-function remoteNumber(serverId: string): number {
-  return Number(
-    /^r(\d+)$/.exec(serverId)?.[1] ?? Number.MAX_SAFE_INTEGER,
-  );
 }

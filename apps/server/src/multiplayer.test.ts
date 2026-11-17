@@ -1,4 +1,9 @@
-import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  type ApiJoinMatchResponse,
+  type ApiSidePayload,
+  type CardDefinitionId,
+} from "@netgrid/shared";
 import {
   mkdtemp,
   readFile,
@@ -10408,39 +10413,6 @@ describe("MVP 0.2 multiplayer service", () => {
     stored.gameState.pendingChoice = choiceRequest(stored.gameState, "runner");
     await storage.save(stored);
 
-    const runnerBootstrap = await service.bootstrap(
-      created.matchId,
-      "runner",
-      created.hostSessionToken,
-    );
-    const corpBootstrap = await service.bootstrap(
-      created.matchId,
-      "corp",
-      joined.sessionToken,
-    );
-    expect("error" in runnerBootstrap).toBe(false);
-    expect("error" in corpBootstrap).toBe(false);
-    if ("error" in runnerBootstrap || "error" in corpBootstrap)
-      throw new Error("Bootstrap failed");
-    expect(runnerBootstrap.playerView.pendingChoice?.choiceId).toBe(
-      "choice_v093_runner",
-    );
-    expect(corpBootstrap.playerView.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(corpBootstrap)).not.toContain(
-      "Runner private option",
-    );
-
-    const reconnected = await service.reconnectMatch(created.matchId, {
-      side: "runner",
-      sessionToken: created.hostSessionToken,
-      reconnectToken: created.hostReconnectToken,
-    });
-    expect("error" in reconnected).toBe(false);
-    if ("error" in reconnected) throw new Error(reconnected.error.message);
-    expect(reconnected.playerView.pendingChoice?.choiceId).toBe(
-      "choice_v093_runner",
-    );
-
     const handle = createNetgridHttpServer(service);
     await new Promise<void>((resolve) =>
       handle.server.listen(0, "127.0.0.1", resolve),
@@ -10448,9 +10420,44 @@ describe("MVP 0.2 multiplayer service", () => {
     const address = handle.server.address();
     if (!address || typeof address === "string")
       throw new Error("Missing server address");
-    const socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+    const matchUrl = `http://127.0.0.1:${address.port}/api/matches/${created.matchId}`;
+    let socket: WebSocket | undefined;
 
     try {
+      const runnerResponse = await fetch(`${matchUrl}/bootstrap?side=runner`, {
+        headers: { authorization: `Bearer ${created.hostSessionToken}` },
+      });
+      const corpResponse = await fetch(`${matchUrl}/bootstrap?side=corp`, {
+        headers: { authorization: `Bearer ${joined.sessionToken}` },
+      });
+      expect(runnerResponse.status).toBe(200);
+      expect(corpResponse.status).toBe(200);
+      const runnerBootstrap = (await runnerResponse.json()) as ApiSidePayload;
+      const corpBootstrap = (await corpResponse.json()) as ApiSidePayload;
+      const offeredChoice = runnerBootstrap.playerView.pendingChoice;
+      expect(offeredChoice?.choiceId).toBe(stored.gameState.stateVersion + 1);
+      expect(offeredChoice?.options[0]).toMatchObject({
+        id: 1,
+        presentation: "keep",
+        label: "Runner private option",
+      });
+      expect(corpBootstrap.playerView.pendingChoice).toBeUndefined();
+      expect(JSON.stringify(corpBootstrap)).not.toContain("Runner private option");
+
+      const reconnectResponse = await fetch(`${matchUrl}/reconnect`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          side: "runner",
+          sessionToken: created.hostSessionToken,
+          reconnectToken: created.hostReconnectToken,
+        }),
+      });
+      expect(reconnectResponse.status).toBe(200);
+      const reconnected = (await reconnectResponse.json()) as ApiJoinMatchResponse;
+      expect(reconnected.playerView?.pendingChoice).toEqual(offeredChoice);
+
+      socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
       await waitForOpen(socket);
       socket.send(
         JSON.stringify({
@@ -10463,13 +10470,11 @@ describe("MVP 0.2 multiplayer service", () => {
         }),
       );
       const choiceMessage = await waitForMessage(socket, "state_update");
-      const { playerView } = messagePayload(choiceMessage) as SidePayload;
-      const choice = playerView.pendingChoice;
-      expect(choice?.choiceId).toBe("choice_v093_runner");
-      expect(choice?.options?.[0]?.label).toBe("Runner private option");
+      const { playerView } = messagePayload(choiceMessage) as ApiSidePayload;
+      expect(playerView.pendingChoice).toEqual(offeredChoice);
       expect(JSON.stringify(choiceMessage)).not.toContain("hostSessionToken");
     } finally {
-      socket.close();
+      socket?.close();
       await handle.close();
     }
   });
@@ -13085,8 +13090,7 @@ describe("MVP 0.2 multiplayer service", () => {
               order: 0,
               kind: "meat_damage",
               sourceCardInstanceId: "missing-server-source",
-              sourceCapabilityId:
-                "missing_server_definition:missing_capability",
+              sourceCapabilityId: Number.MAX_SAFE_INTEGER,
               sourceCapabilityBindingKind: "card_spec_capability_key",
             },
           ],
@@ -14755,14 +14759,14 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     initial.corp.credits = 5;
     putCorpRootInRemoteForTest(initial, 594);
-    putCorpIceOnServerForTest(initial, "remote_1", 589);
+    putCorpIceOnServerForTest(initial, "r1", 589);
     initial.eventLog[0]!.stateHashAfter = hashState(initial);
     let gameState = toRunnerTurnEngine(initial);
     gameState = applyEngineAction(
       gameState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     gameState = applyEngineAction(
       gameState,
@@ -16451,7 +16455,7 @@ function sourceDefinitionForServerTest(
 
 function putCorpIceOnServerForTest(
   state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  serverId: "hq" | "rd" | "archives" | `r${number}`,
   definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
@@ -16476,11 +16480,11 @@ function putCorpRootInRemoteForTest(
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   let server = state.corp.servers.find(
-    (candidate) => candidate.id === "remote_1",
+    (candidate) => candidate.id === "r1",
   );
   if (!server) {
     server = {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -16492,7 +16496,7 @@ function putCorpRootInRemoteForTest(
   server.root.push(id);
   state.cardInstances[id] = {
     ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: false,
     rezzed: false,
   };

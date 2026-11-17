@@ -2,11 +2,11 @@ import type {
   ChoiceRequirement,
   LegalAction,
   PlayerView,
-  ServerId,
   Side,
   VisibleChoiceOption,
   VisibleChoiceRequest,
 } from "./index";
+import { isRemoteServerId, type ServerId } from "./server-ids";
 
 export type MatchActionId = number;
 export type MatchChoiceId = number;
@@ -89,9 +89,9 @@ export function choiceOptionServerForEngineKey(
     serverKey === "rd" ||
     serverKey === "archives" ||
     serverKey === "new_remote" ||
-    /^r\d+$/.test(serverKey)
+    isRemoteServerId(serverKey)
   )
-    return serverKey as ServerId;
+    return serverKey;
 }
 
 export type OfferedChoiceOption = Omit<

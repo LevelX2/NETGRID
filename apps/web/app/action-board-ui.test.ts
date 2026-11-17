@@ -174,11 +174,11 @@ describe("localized action presentation", () => {
                 ["hq", "HQ"],
                 ["rd", "R&D"],
                 ["archives", archives],
-                ["remote_3", remote],
+                ["r3", remote],
                 ["new_remote", newRemote],
               ]
             : [
-                ["remote_3", remote],
+                ["r3", remote],
                 ["new_remote", newRemote],
               ];
         const actions = destinations.map(([serverId]) =>
@@ -224,7 +224,7 @@ describe("localized action presentation", () => {
         "Agenda installieren und Node ersetzen",
         {
           cardId: "agenda",
-          serverId: "remote_3",
+          serverId: "r3",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         },
@@ -248,7 +248,7 @@ describe("localized action presentation", () => {
     const playerView = view("corp", {
       servers: [
         { id: "hq", label: "HQ", ice: [first], root: [] },
-        { id: "remote_3", label: "Remote 3", ice: [coyote, second], root: [] },
+        { id: "r3", label: "Remote 3", ice: [coyote, second], root: [] },
       ],
     });
     const actions = [first, second, coyote].map((target) =>
@@ -303,7 +303,7 @@ describe("localized action presentation", () => {
       const playerView = view("corp", {
         servers: [
           {
-            id: "remote_3",
+            id: "r3",
             label: "Remote 3",
             ice: [
               card("ice_a", "Colonel Failure", "ice"),
@@ -1185,7 +1185,7 @@ describe("V1.0.5 action board UI helpers", () => {
       "game_rule",
       "Spy-Counter in Remote 1 entfernen",
       {
-        serverId: "remote_1",
+        serverId: "r1",
         corpAbility: "remove_spy_counter",
         counterType: "spy",
         removedCounterAmount: 1,
@@ -1237,22 +1237,22 @@ describe("V1.0.5 action board UI helpers", () => {
           type === "ice" ? "rez_ice" : "rez_card",
           target.instanceId,
           `${title} rezzen`,
-          { cardId: target.instanceId, serverId: "remote_1" },
+          { cardId: target.instanceId, serverId: "r1" },
           "run.approach_ice",
         );
         const running = view("corp", {
           servers: [
             {
-              id: "remote_1",
+              id: "r1",
               label: "Remote 1",
               ice: type === "ice" ? [target] : [],
               root: type === "ice" ? [] : [target],
             },
           ],
           run: {
-            attackedServerId: "remote_1",
+            attackedServerId: "r1",
             phase: "approach_ice",
-            position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+            position: { kind: "ice", serverId: "r1", iceIndex: 0 },
             successful: false,
           },
         });
@@ -1651,7 +1651,7 @@ describe("V1.0.5 action board UI helpers", () => {
     ).toBe("Weiterlaufen: zu ICE 3");
     expect(serverDisplayLabel("rd")).toBe("R&D");
     expect(serverDisplayLabel("archives")).toBe("Archive");
-    expect(serverDisplayLabel("remote_2")).toBe("Remote 2");
+    expect(serverDisplayLabel("r2")).toBe("Remote 2");
     expect(serverDisplayLabel("Remote 3")).toBe("Remote 3");
     expect(
       actionButtonLabel(
@@ -1689,21 +1689,21 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(
       serverTargetIdForAction(
         legalAction("runner", "start_run", "basic_action", "Run auf HQ", {
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           serverId: "hq",
         }),
       ),
-    ).toBe("remote_1");
+    ).toBe("r1");
     expect(
       serverTargetIdForChoiceOption(
         { id: "fort_rd", label: "R&D", value: "rd" },
-        ["hq", "rd", "archives", "remote_1"],
+        ["hq", "rd", "archives", "r1"],
       ),
     ).toBe("rd");
     expect(
       serverTargetIdForChoiceOption(
         { id: "fort_none", label: "Keine Karten exposen", value: "none" },
-        ["hq", "rd", "archives", "remote_1"],
+        ["hq", "rd", "archives", "r1"],
       ),
     ).toBeNull();
   });
@@ -1829,7 +1829,7 @@ describe("V1.0.5 action board UI helpers", () => {
       definitionId: 582,
     };
     const server = {
-      id: "remote_1" as const,
+      id: "r1" as const,
       label: "Remote 1",
       ice: [card("ice_1", "Wall of Static", "ice")],
       root: [tesseract],
@@ -2071,16 +2071,16 @@ describe("V1.0.5 action board UI helpers", () => {
         timingPoint: "run.movement_rez_window",
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [card("inner", "Inner ICE", "ice"), shock],
             root: [],
           },
         ],
         run: {
-          attackedServerId: "remote_1",
+          attackedServerId: "r1",
           phase: "movement",
-          position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+          position: { kind: "ice", serverId: "r1", iceIndex: 1 },
           successful: false,
         },
       });
@@ -2126,7 +2126,7 @@ describe("V1.0.5 action board UI helpers", () => {
       expect(runHeaderTargetLabel(running, messages.Board.run.hiddenIce)).toBe(
         `→ ICE 2 · ${messages.Board.run.hiddenIce}`,
       );
-      running.run!.position = { kind: "server", serverId: "remote_1" };
+      running.run!.position = { kind: "server", serverId: "r1" };
       expect(
         runHeaderTargetLabel(running, messages.Board.run.hiddenIce),
       ).toBeNull();
@@ -2363,14 +2363,14 @@ describe("V1.0.5 action board UI helpers", () => {
       "rez_ice",
       "game_rule",
       "Karte in Remote 1 rezzen",
-      { cardId: "upgrade_1", serverId: "remote_1" },
+      { cardId: "upgrade_1", serverId: "r1" },
     );
     const runIceRez = legalAction(
       "corp",
       "rez_ice",
       "game_rule",
       "ICE rezzen",
-      { cardId: "ice_1", serverId: "remote_1" },
+      { cardId: "ice_1", serverId: "r1" },
       "run.approach_ice",
     );
 
@@ -2596,7 +2596,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(showInstalledCorpState("archives", "root")).toBe(false);
     expect(showInstalledCorpState("archives", "ice")).toBe(true);
     expect(showInstalledCorpState("hq", "root")).toBe(true);
-    expect(showInstalledCorpState("remote_1", "root")).toBe(true);
+    expect(showInstalledCorpState("r1", "root")).toBe(true);
   });
 
   it("renders opponent remote root cards in install order without leaked hidden root types", () => {
@@ -2626,7 +2626,7 @@ describe("V1.0.5 action board UI helpers", () => {
       trashCost: 4,
     };
 
-    const runnerCards = corpRootCardsForDisplay("runner", "remote_1", [
+    const runnerCards = corpRootCardsForDisplay("runner", "r1", [
       leakedUpgradeA,
       rezzedNode,
       exposedUnrezzedUpgrade,
@@ -2663,7 +2663,7 @@ describe("V1.0.5 action board UI helpers", () => {
     }
 
     expect(
-      corpRootCardsForDisplay("corp", "remote_1", [leakedUpgradeA]),
+      corpRootCardsForDisplay("corp", "r1", [leakedUpgradeA]),
     ).toEqual([leakedUpgradeA]);
   });
 
@@ -2720,8 +2720,9 @@ describe("V1.0.5 action board UI helpers", () => {
       { id: "hq", label: "HQ", ice: [], root: [] },
       { id: "rd", label: "R&D", ice: [], root: [] },
       { id: "archives", label: "Archives", ice: [], root: [] },
-      { id: "remote_2", label: "Remote 2", ice: [], root: [] },
-      { id: "remote_1", label: "Remote 1", ice: [], root: [] },
+      { id: "r10", label: "Remote 10", ice: [], root: [] },
+      { id: "r2", label: "Remote 2", ice: [], root: [] },
+      { id: "r1", label: "Remote 1", ice: [], root: [] },
     ];
 
     expect(
@@ -2731,7 +2732,7 @@ describe("V1.0.5 action board UI helpers", () => {
       ]),
     ).toEqual([
       ["centrals", ["hq", "rd", "archives"]],
-      ["remotes", ["remote_1", "remote_2"]],
+      ["remotes", ["r1", "r2", "r10"]],
     ]);
 
     expect(
@@ -2740,7 +2741,7 @@ describe("V1.0.5 action board UI helpers", () => {
         row.servers.map((server) => server.id),
       ]),
     ).toEqual([
-      ["remotes", ["remote_1", "remote_2"]],
+      ["remotes", ["r1", "r2", "r10"]],
       ["centrals", ["hq", "rd", "archives"]],
     ]);
   });
@@ -2761,20 +2762,20 @@ describe("V1.0.5 action board UI helpers", () => {
       timingPoint: "run.jack_out_window",
       run: {
         runId: 9,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
         successful: false,
       },
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root: [vaporOps],
         },
         {
-          id: "remote_2",
+          id: "r2",
           label: "Remote 2",
           ice: [],
           root: [remoteTwoVaporOps],
@@ -3177,7 +3178,7 @@ describe("V1.0.5 action board UI helpers", () => {
       ...hqChoice,
       choiceId: "data_fort_reclamation_rez_9",
       source:
-        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:corp_ice_1:1:9",
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:r1:corp_ice_1:1:9",
       prompt:
         "Data Fort Reclamation: Karte 1 von 1 rezzen (10 temporäre Credits verfügbar).",
       maxSelections: 1,
@@ -3185,7 +3186,7 @@ describe("V1.0.5 action board UI helpers", () => {
     const board = view("corp", {
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [card("corp_ice_1", "ICE", "ice")],
           root: [],
@@ -3214,7 +3215,7 @@ describe("V1.0.5 action board UI helpers", () => {
         rig: [runnerProgram],
       },
       servers: [
-        { id: "remote_1", label: "Remote 1", ice: [ice, ice2], root: [bbs] },
+        { id: "r1", label: "Remote 1", ice: [ice, ice2], root: [bbs] },
       ],
     });
     const fieldChoice: NonNullable<PlayerView["pendingChoice"]> = {
@@ -3281,7 +3282,7 @@ describe("V1.0.5 action board UI helpers", () => {
     const hiddenSlot = { ...ice, instanceId: "hidden_ice_slot", known: false };
     const hiddenSlotBoard = view("runner", {
       servers: [
-        { id: "remote_1", label: "Remote 1", ice: [hiddenSlot], root: [] },
+        { id: "r1", label: "Remote 1", ice: [hiddenSlot], root: [] },
       ],
     });
     const hiddenSlotSingleExposeChoice: NonNullable<
@@ -3324,7 +3325,7 @@ describe("V1.0.5 action board UI helpers", () => {
       choiceId: "fort_ice_reorder_7",
       side: "corp",
       source:
-        "corp.start_of_run_redirect.herman_reorder:run_1:herman_1:remote_1",
+        "corp.start_of_run_redirect.herman_reorder:run_1:herman_1:r1",
       prompt: "Wähle die ICE in der neuen Reihenfolge vor diesem Server.",
       options: [
         { id: "card_corp_ice_1", label: "Wall", value: "corp_ice_1" },
@@ -4175,11 +4176,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("maps source-bound effects to generic server status chips", () => {
     const statuses: VisibleServerStatus[] = [
       {
-        id: "server_status:remote_1:run_prohibited:card_7:fort_activity_gate",
+        id: "server_status:r1:run_prohibited:card_7:fort_activity_gate",
         kind: "run_prohibited",
         scope: "target_server",
         reason: "required_corp_activity_during_latest_corp_turn_missing",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "card_7",
         sourceAbilityId: "fort_activity_gate",
         sourceTitle: "Öffentliche Sperrquelle",
@@ -4198,35 +4199,35 @@ describe("V1.0.6 resource and card-display helpers", () => {
         sourceSide: "runner",
       },
       {
-        id: "server_status:remote_1:corp_ice_install:reduce:card_9:0",
+        id: "server_status:r1:corp_ice_install:reduce:card_9:0",
         kind: "cost_modifier",
         scope: "target_server",
         costKind: "corp_ice_install",
         operation: "reduce",
         amount: 1,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "card_9",
         sourceTitle: "Öffentliche Korp-Kostenquelle",
         sourceSide: "corp",
       },
       {
-        id: "server_status:remote_1:run_payment_restriction:card_10:stealth_bits",
+        id: "server_status:r1:run_payment_restriction:card_10:stealth_bits",
         kind: "run_payment_restriction",
         scope: "target_server",
         restriction: "runner_stealth_bit_payment_sources",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "card_10",
         sourceTitle: "Öffentliche Zahlungsbeschränkung",
         sourceSide: "corp",
       },
       {
-        id: "server_status:remote_1:during_run_ice_rez_support:card_11",
+        id: "server_status:r1:during_run_ice_rez_support:card_11",
         kind: "during_run_ice_rez_support",
         scope: "target_server",
         costModel: "half_rez_cost_rounded_down",
         target: "unrezzed_ice_on_this_fort",
         limit: "once_per_run_per_source",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "card_11",
         sourceTitle: "Öffentliche Rez-Unterstützung",
         sourceSide: "corp",
@@ -4652,7 +4653,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "play_event",
           "card_1",
           "Expose Event auf Remote 2",
-          { cardId: "card_1", serverId: "remote_2" },
+          { cardId: "card_1", serverId: "r2" },
         ),
       ),
     ).toBe("Spielen auf Remote 2");
@@ -4674,7 +4675,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "score_agenda",
           "agenda_1",
           "Security Net Optimization scoren und Remote 2 wählen",
-          { cardId: "agenda_1", selectedServerId: "remote_2" },
+          { cardId: "agenda_1", selectedServerId: "r2" },
         ),
       ),
     ).toBe("Scoren: Remote 2 wählen");
@@ -4800,7 +4801,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "Karte in Remote 1 installieren",
           {
             cardId: "agenda_1",
-            serverId: "remote_1",
+            serverId: "r1",
             placement: "root",
             rootReplacement: "asset_to_agenda",
           },
@@ -4915,7 +4916,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "install_card",
           "restrictive_1",
           "Restrictive Net Zoning auf Remote 1 ausrichten",
-          { cardId: "restrictive_1", selectedServerId: "remote_1" },
+          { cardId: "restrictive_1", selectedServerId: "r1" },
         ),
       ),
     ).toBe("Auf Remote 1 ausrichten");
@@ -4955,7 +4956,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "install_card",
       "agenda_1",
       "Karte in Remote 1 installieren",
-      { cardId: "agenda_1", serverId: "remote_1", placement: "root" },
+      { cardId: "agenda_1", serverId: "r1", placement: "root" },
     );
 
     expect(orderedCardContextActions([newRemoteIce, hqIce, rdIce])).toEqual([
@@ -5889,7 +5890,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       {
         cardId: "remote_asset",
         rootRez: true,
-        serverId: "remote_2",
+        serverId: "r2",
       },
       "run.approach_ice",
     );
