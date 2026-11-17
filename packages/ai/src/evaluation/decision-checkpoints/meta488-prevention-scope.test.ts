@@ -1,14 +1,17 @@
-import { readFileSync } from "node:fs";
+import { createGameAfterSetup } from "@netgrid/engine";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { PublicGameEvent } from "@netgrid/shared";
-import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
-import { buildAiDecisionInputDto } from "../../input-dto";
-import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
-  restoreAiRuntimeCheckpoint,
-  type AiRuntimeCheckpointV1,
-} from "./runtime-checkpoint";
+  ORIGINALSET_DEFAULT_DECKS,
+  type PublicGameEvent,
+} from "@netgrid/shared";
+import {
+  removeEverywhere,
+  toRunnerTurn,
+} from "../../../../engine/src/test-fixtures/mechanic-smoke-fixtures";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { runnerEffectsDamagePreventionTypes } from "../../runner-canonical-hint-semantics";
@@ -19,24 +22,78 @@ import {
   visibleCard,
 } from "../../runner-hand-development.test-support";
 
-function capture() {
-  const fixture = JSON.parse(
-    readFileSync(
-      new URL(
-        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta488-g24-d82-prevention.json",
-        import.meta.url,
+const ARMORED_FRIDGE = 333;
+const SCORE = 320;
+const BRAIN_WASH = 69;
+const WORM = 286;
+const HQ_INTERFACE = 341;
+const HAND = [373, 366, SCORE, 228, ARMORED_FRIDGE];
+
+function nativeInput(damageType: "meat" | "core") {
+  const runnerDeck = {
+    ...ORIGINALSET_DEFAULT_DECKS.runner,
+    cards: [
+      ...[...HAND, WORM, HQ_INTERFACE].map((id) => ({ id, quantity: 1 })),
+      { id: 595, quantity: 2 },
+    ],
+  };
+  const corpDeck = {
+    ...ORIGINALSET_DEFAULT_DECKS.corp,
+    cards: [
+      ...ORIGINALSET_DEFAULT_DECKS.corp.cards.filter(
+        (card) => card.id !== BRAIN_WASH,
       ),
-      "utf8",
-    ),
-  ) as {
-    input: AiDecisionInputWithDeckCapabilities;
-    runtime: AiRuntimeCheckpointV1;
-    validation: Record<string, boolean>;
+      { id: BRAIN_WASH, quantity: 1 },
+    ],
   };
-  return {
-    ...fixture,
-    input: { ...fixture.input, ...buildAiDecisionInputDto(fixture.input) },
-  };
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed: "damaged-hand-prevention:" + damageType,
+      runnerDeck,
+      corpDeck,
+    }),
+  );
+  const builder = RealEngineFixtureBuilder.forState(state)
+    .withRunnerGripSize(0)
+    .withRunnerCredits(7)
+    .withRunnerClicks(1)
+    .withCorpCredits(12)
+    .withRunnerProgramInstalled(WORM)
+    .withRezzedCorpIceOnServer("hq", BRAIN_WASH);
+  for (const definitionId of HAND) builder.withRunnerCardInGrip(definitionId);
+  const hqInterface = Object.values(state.cardInstances).find(
+    (card) => card.definitionId === HQ_INTERFACE,
+  )!;
+  removeEverywhere(state, hqInterface.instanceId);
+  state.runner.rig.hardware.push(hqInterface.instanceId);
+  hqInterface.zone = { side: "runner", zone: "rig" };
+  hqInterface.faceup = true;
+  hqInterface.rezzed = true;
+  state.runner.coreDamage = 2;
+
+  const input = buildAiDecisionInput(state, "runner", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: "damaged-hand-prevention",
+      side: "runner",
+      cards: runnerDeck.cards.map(({ id, quantity }) => ({
+        cardId: id,
+        quantity,
+      })),
+    },
+  });
+  const observation = damageObservation(damageType);
+  input.eventTail = [observation];
+  input.playerView.publicEvents = [observation];
+  const fridge = input.playerView.own.gripOrHq.find(
+    (card) => card.definitionId === ARMORED_FRIDGE,
+  )!;
+  const fridgeInstall = input.legalActions.find(
+    (action) =>
+      action.type === "install_card" && action.source === fridge.instanceId,
+  );
+  if (!fridgeInstall) throw new Error("Missing legal Armored Fridge install");
+  return { input, fridgeInstall };
 }
 
 function preventionInput(
@@ -77,13 +134,17 @@ function preventionInput(
     memoryLimit: 4,
     legalActions: [installAction("install-prevention", card, meatOnly ? 3 : 0)],
   });
-  const source =
-    damageType === "meat"
-      ? 519
-      : damageType === "core"
-        ? 69
-        : 79;
-  const event: PublicGameEvent = {
+  const event = damageObservation(damageType);
+  input.eventTail = [event];
+  input.playerView.publicEvents = [event];
+  return input;
+}
+
+function damageObservation(
+  damageType: "net" | "meat" | "core",
+): PublicGameEvent {
+  const source = damageType === "meat" ? 519 : damageType === "core" ? 69 : 79;
+  return {
     eventId: 2,
     type: "damage_resolved",
     stateVersionBefore: 0,
@@ -99,38 +160,33 @@ function preventionInput(
       damageResolved: true,
     },
   };
-  input.eventTail = [event];
-  input.playerView.publicEvents = [event];
-  return input;
 }
 
 describe("type-bound prevention development", () => {
   beforeEach(resetResidentPlanPortfolioMemory);
 
-  it("does not execute Meat-only defense against the original public Core threat", () => {
-    const fixture = capture();
-    expect(Object.values(fixture.validation).every(Boolean)).toBe(true);
-    restoreAiRuntimeCheckpoint(
-      fixture.input,
-      fixture.input.ownDeckSnapshot!.deckSnapshotId,
-      fixture.runtime,
-    );
-    expect(runnerDamageThreatAssessment(fixture.input).flatlineRisk.level).toBe(
+  it("does not execute Meat-only defense against a current public Core threat", () => {
+    const { input, fridgeInstall } = nativeInput("core");
+    expect(runnerDamageThreatAssessment(input).flatlineRisk.level).toBe(
       "confirmed",
     );
     const evaluation = evaluateRunnerHandDevelopment({
-      input: fixture.input,
+      input: input,
     }).find((e) => e.definitionId === 333);
     expect(evaluation).toMatchObject({
       developmentRole: "defense_support",
       currentNeed: "none",
       deferReason: "no_current_need",
     });
-    const result = chooseAiAction(fixture.input);
-    const chosen = fixture.input.legalActions.find(
+    const result = chooseAiAction(input);
+    const chosen = input.legalActions.find(
       (a) => a.actionId === result.actionId,
     );
-    expect(chosen?.source).toBe("runner_320_1");
+    expect(
+      input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === chosen?.source,
+      )?.definitionId,
+    ).toBe(SCORE);
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.defense_and_recovery");
@@ -140,7 +196,7 @@ describe("type-bound prevention development", () => {
     expect(result.decisionDebug?.planFirstDecision?.dispositions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          actionId: expect.stringContaining("armored-fridge"),
+          actionId: fridgeInstall.actionId,
           ownerModuleId: "runner.defense_and_recovery",
           disposition: "explicitly_nonproductive",
         }),
@@ -164,28 +220,7 @@ describe("type-bound prevention development", () => {
   );
 
   it("retains a real Meat prevention need", () => {
-    // Controlled public-history variant of the native frame; LegalActions,
-    // generated hints, costs, doctrine and the actor's own cards stay exact.
-    const { input } = capture();
-    const version = input.playerView.stateVersion;
-    const meat: PublicGameEvent = {
-      eventId: version - 1 + 1,
-      type: "damage_resolved",
-      stateVersionBefore: version - 2,
-      stateVersionAfter: version - 1,
-      stateHashAfter: "fnv1a:controlled-meat",
-      visibilityClass: "public",
-      publicPayload: {
-        actor: "corp",
-        targetSide: "runner",
-        damageType: "meat",
-        sourceDefinitionId: 519,
-        damageAmount: 1,
-        damageResolved: true,
-      },
-    };
-    input.eventTail.push(meat);
-    input.playerView.publicEvents.push(meat);
+    const { input, fridgeInstall } = nativeInput("meat");
     expect(
       evaluateRunnerHandDevelopment({ input }).find(
         (e) => e.definitionId === 333,
@@ -196,9 +231,7 @@ describe("type-bound prevention development", () => {
       deferReason: "none",
     });
     const result = chooseAiAction(input);
-    expect(result.actionId).toContain(
-      "install_card.runner_onr_v1_121_armored-fridge",
-    );
+    expect(result.actionId).toBe(fridgeInstall.actionId);
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.defense_and_recovery");
@@ -227,9 +260,7 @@ describe("type-bound prevention development", () => {
       )?.currentNeed,
     ).toBe("none");
     expect(
-      runnerEffectsDamagePreventionTypes(
-        AI_HINTS_BY_CARD.get(240)?.effects,
-      ),
+      runnerEffectsDamagePreventionTypes(AI_HINTS_BY_CARD.get(240)?.effects),
     ).toEqual(["core", "net"]);
     for (const hint of AI_HINTS_BY_CARD.values())
       expect(() =>
