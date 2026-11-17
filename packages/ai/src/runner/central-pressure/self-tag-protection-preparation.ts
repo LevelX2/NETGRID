@@ -214,7 +214,7 @@ export function bindRunnerCentralSelfTagProtection(params: {
   if (!need) return { centralPressure, defense };
   return {
     centralPressure: centralPressure.map((parent) =>
-      parent.serverId === need.serverId
+      planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: parent.pressureId }) === need.parentPlanInstanceId
         ? {
             ...parent,
             reachable: false,

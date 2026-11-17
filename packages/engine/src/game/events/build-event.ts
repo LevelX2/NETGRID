@@ -9,6 +9,7 @@ import {
   type LegalAction,
   type AbilityPayloadDiscriminatorField,
   type PlayerAction,
+  type PublicEventPayload,
   type ResolvedGameEffect,
   type Side,
   type StateHash,
@@ -145,6 +146,12 @@ export function buildEventWithHost(
     ...runnerCostPenaltySupportEventContext(state, legalAction),
     ...actionContext,
     ...installedPositionContext,
+    ...publicCorpZoneObservations(
+      previousState,
+      state,
+      legalAction,
+      actionContext.serverId === "hq" && installedPositionContext.installPlacement !== "root",
+    ),
     ...buildPublicAbilitySchemaContext(
       legalAction.type,
       legalAction.payload,
@@ -198,6 +205,45 @@ export function buildEventWithHost(
       },
     },
   };
+}
+
+function publicCorpZoneObservations(
+  previous: GameState,
+  current: GameState,
+  action: LegalAction,
+  accessesHqHand: boolean,
+): Pick<
+  PublicEventPayload,
+  | "corpHqCountBefore"
+  | "corpHqCountAfter"
+  | "corpRdDrawnToHqCount"
+  | "corpRdDrawOrderUnresolved"
+> {
+  const before = previous.corp.hq.length;
+  const after = current.corp.hq.length;
+  const hqObservation =
+    before !== after || (action.type === "access_card" && accessesHqHand)
+      ? { corpHqCountBefore: before, corpHqCountAfter: after }
+      : {};
+  if (
+    action.side !== "corp" ||
+    (action.type !== "draw_card" && action.type !== "mandatory_draw")
+  ) {
+    return hqObservation;
+  }
+  const priorRd = previous.corp.rd;
+  const currentRd = current.corp.rd;
+  const removed = priorRd.length - currentRd.length;
+  const currentHq = new Set(current.corp.hq);
+  const prefixReachedHq =
+    !previous.pendingCorpDraw &&
+    !current.pendingCorpDraw &&
+    removed >= 0 &&
+    currentRd.every((cardId, index) => cardId === priorRd[removed + index]) &&
+    priorRd.slice(0, removed).every((cardId) => currentHq.has(cardId));
+  return prefixReachedHq
+    ? { ...hqObservation, corpRdDrawnToHqCount: removed }
+    : { ...hqObservation, corpRdDrawOrderUnresolved: true };
 }
 
 function runnerCostPenaltySupportEventContext(

@@ -344,13 +344,22 @@ describe("strategic runtime context", () => {
   });
 
   it("hard-blocks a Corp scoreline when the deck cannot reach the agenda win target", () => {
+    const view = playerView("corp", {
+      credits: 4,
+      ownAgendaPoints: 4,
+      opponentAgendaPoints: 2,
+    });
+    const corporateWar = (copy: number): VisibleCard => ({
+      instanceId: "corporate-war-" + copy,
+      definitionId: "onr_v1_196_corporate-war",
+      known: true,
+      type: "agenda",
+    });
+    view.own.scoreArea = [corporateWar(1), corporateWar(2)];
+    view.opponent.scoreArea = [corporateWar(3)];
     const context = buildStrategicRuntimeContext({
       side: "corp",
-      playerView: playerView("corp", {
-        credits: 4,
-        ownAgendaPoints: 3,
-        opponentAgendaPoints: 6,
-      }),
+      playerView: view,
       legalActions: [action("draw", "corp", "draw_card", 0)],
       strategyProfile: multiStrategyProfile("corp", {
         primary: ["corp.fast_advance", "corp.tag_trace_punish"],

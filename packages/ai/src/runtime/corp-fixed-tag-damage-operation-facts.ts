@@ -1,6 +1,7 @@
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { corpFixedOperationPlayCredits } from "./corp-canonical-card-facts";
+import { mergedPublicHistory } from "../public-event-history";
 
 export type FixedTagOperation = {
   trigger:
@@ -96,11 +97,11 @@ export function publicRunnerTurnObservations(
   input: AiDecisionInput,
   turn: number | undefined,
 ) {
-  const starts = new Set<string>();
+  if (turn === undefined) return { runs: 0, stoleAgenda: false };
+  let runs = 0;
   let stoleAgenda = false;
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+  for (const event of mergedPublicHistory(input)) {
     if (
-      turn === undefined ||
       event.turnSerial !== turn ||
       event.stateVersionAfter > input.playerView.stateVersion ||
       event.publicPayload.actor !== "runner"
@@ -113,8 +114,8 @@ export function publicRunnerTurnObservations(
         (effect) => effect.kind === "start_run" && effect.side === "runner",
       )
     ) {
-      starts.add(event.eventId);
+      runs += 1;
     }
   }
-  return { runs: starts.size, stoleAgenda };
+  return { runs, stoleAgenda };
 }

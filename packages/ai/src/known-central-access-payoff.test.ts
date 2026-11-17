@@ -701,6 +701,7 @@ describe("known central access payoff HQ knownness", () => {
       publicEvent("evt_corp_draw", "mandatory_draw", stateVersion, {
         actor: "corp",
         actionType: "mandatory_draw",
+        corpRdDrawnToHqCount: 1,
       }),
     );
     const input = aiInput({

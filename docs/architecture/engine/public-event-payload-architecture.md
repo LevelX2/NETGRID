@@ -88,6 +88,14 @@ Breach beziehungsweise dem aufgelösten Run. Installierte Karten behalten ihre
 konkrete öffentliche Position. Serverlabels sind keine maschinelle Bindung.
 Die KI-DTO erhält die öffentlichen Runbindungen ohne private Replay-Daten.
 
+Ein HQ-Zugriff und eine Änderung der HQ-Größe veröffentlichen die Kartenzahl
+vor und nach genau diesem Ereignis, ohne Angaben zu den Karten. Ein
+abgeschlossener Corp-Draw belegt die Zahl der aus der Spitze von R&D nach HQ
+verschobenen Karten. Bei einer noch offenen Ersetzungsentscheidung oder einer
+unbelegten Reihenfolge enthält das Ereignis stattdessen den entsprechenden
+öffentlichen Status. Die KI verwendet diese Fakten aus dem jeweiligen Ereignis
+für die historischen Hand- und Deckbeobachtungen.
+
 - Nur der normalisierte öffentliche Payload wird in PlayerViews, Chronicle,
   PublicEvents, Serverprojektionen und KI-Inputs übernommen.
 - Hidden-Info-Felder werden weiterhin durch die bestehenden positiven

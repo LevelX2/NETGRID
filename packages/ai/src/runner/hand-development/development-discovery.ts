@@ -13,7 +13,10 @@ import type {
   RunnerRunTargetEvaluation,
 } from "../../runner-run-target-evaluation";
 import type { DiscardKeepScorer } from "../../runtime/discard-choice-selection";
-import { runnerCandidateIsOneShotSearch } from "../../runtime/runner-development-action-facts";
+import {
+  runnerCandidateIsOneShotSearch,
+  runnerCandidateIsOptionalProgramTrashInstall,
+} from "../../runtime/runner-development-action-facts";
 import { runnerExactFundingRouteContract } from "../../runtime/runner-exact-funding-routes";
 import {
   runnerStrategicExchangeHardExclusion,
@@ -105,6 +108,32 @@ export function buildRunnerCardDevelopmentSignals({
   cardDevelopments: RunnerPlanDomain["developments"];
   developmentFundingNeeds: RunnerCorePlanDomain["fundingNeeds"];
 } {
+  const specialistOwnedActionIds = new Set([
+    ...creditBanks.flatMap((signal) => [
+      ...signal.actionIds,
+      ...(signal.rejectedActionIds ?? []),
+    ]),
+    ...(recurringEconomy ?? []).flatMap((signal) => signal.actionIds),
+    ...(resourceLifecycle ?? []).flatMap((signal) => [
+      ...signal.actionIds,
+      ...(signal.rejectedActionIds ?? []),
+    ]),
+    ...(installedAgendaScores ?? []).flatMap((signal) => signal.actionIds),
+    ...immediateAgendaPointTerminalWins.flatMap(
+      (signal) => signal.actionIds ?? [],
+    ),
+    ...immediateAgendaPointDevelopments.flatMap(
+      (signal) => signal.actionIds,
+    ),
+    ...shellTradersPipelines.flatMap((signal) => [
+      ...signal.actionIds,
+      ...(signal.rejectedActions ?? []).map(({ actionId }) => actionId),
+    ]),
+    ...defenseSupportAllInstallActionIds,
+    ...exposeInformation.flatMap(
+      (signal) => signal.actionIds ?? [signal.selectedActionId],
+    ),
+  ]);
   const handCardDevelopments: RunnerPlanDomain["developments"] =
     handDevelopment.flatMap((evaluation): RunnerPlanDomain["developments"] => {
       const runStrengthStock = assessRunStrengthStock(
@@ -280,23 +309,9 @@ export function buildRunnerCardDevelopmentSignals({
               ) {
                 return false;
               }
-              const canonicalAction = input.legalActions.find(
-                (action) => action.actionId === candidate.actionId,
-              );
-              const alternativeAction = input.legalActions.find(
-                (action) => action.actionId === entry.actionId,
-              );
-              return !(
-                canonicalAction?.payload?.runnerProgramTrashBeforeInstall !==
-                  true &&
-                !candidate.actionId.endsWith(
-                  ".runner_program_trash_before_install",
-                ) &&
-                (alternativeAction?.payload?.runnerProgramTrashBeforeInstall ===
-                  true ||
-                  entry.actionId.endsWith(
-                    ".runner_program_trash_before_install",
-                  ))
+              return (
+                runnerCandidateIsOptionalProgramTrashInstall(input, candidate) ||
+                !runnerCandidateIsOptionalProgramTrashInstall(input, entry)
               );
             })
           : [];
@@ -309,32 +324,6 @@ export function buildRunnerCardDevelopmentSignals({
             )
           : undefined;
       if (installTax && !installTax.target) return [];
-      const specialistOwnedActionIds = new Set([
-        ...creditBanks.flatMap((signal) => [
-          ...signal.actionIds,
-          ...(signal.rejectedActionIds ?? []),
-        ]),
-        ...(recurringEconomy ?? []).flatMap((signal) => signal.actionIds),
-        ...(resourceLifecycle ?? []).flatMap((signal) => [
-          ...signal.actionIds,
-          ...(signal.rejectedActionIds ?? []),
-        ]),
-        ...(installedAgendaScores ?? []).flatMap((signal) => signal.actionIds),
-        ...immediateAgendaPointTerminalWins.flatMap(
-          (signal) => signal.actionIds ?? [],
-        ),
-        ...immediateAgendaPointDevelopments.flatMap(
-          (signal) => signal.actionIds,
-        ),
-        ...shellTradersPipelines.flatMap((signal) => [
-          ...signal.actionIds,
-          ...(signal.rejectedActions ?? []).map(({ actionId }) => actionId),
-        ]),
-        ...defenseSupportAllInstallActionIds,
-        ...exposeInformation.flatMap(
-          (signal) => signal.actionIds ?? [signal.selectedActionId],
-        ),
-      ]);
       if (
         (candidate !== undefined &&
           specialistOwnedActionIds.has(candidate.actionId)) ||

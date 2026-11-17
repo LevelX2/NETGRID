@@ -1,4 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
+import { actionClickCost } from "../runtime/action-cost";
 import { runnerRunProjectionPreservesNormalAccess } from "../actions/run-action-projection";
 import type {
   RunnerEconomyPosture,
@@ -22,13 +24,12 @@ export function compareRunnerCentralAccessRoutes(
     input.legalActions
       .filter(
         (action) =>
-          action.side === "runner" &&
-          action.expiresAtStateVersion === input.playerView.stateVersion &&
+          actionMatchesCurrentDecision(input, action) &&
           (action.type === "start_run" || action.type === "play_event"),
       )
       .map((action) => [
         action.actionId,
-        action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0),
+        actionClickCost(action),
       ]),
   );
   const routes = runTargets.filter((target) => {

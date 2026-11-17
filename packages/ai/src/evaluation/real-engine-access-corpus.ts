@@ -10,6 +10,7 @@ import {
   type AccessDecisionProjection,
 } from "../decision/access-decision-projection";
 
+// These report-only fixtures exercise access projections without an Engine session.
 export const REAL_ENGINE_ACCESS_CORPUS_SCENARIO_IDS = [
   "access_remote_known_agenda_steal",
   "access_remote_trash_affordable",

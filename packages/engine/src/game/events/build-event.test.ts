@@ -17,6 +17,24 @@ import {
 import { publicCounterMutation } from "../counters/public-counter-mutations";
 
 describe("game event builder", () => {
+  it("publishes actual draw and hand sizes without exposing drawn cards", () => {
+    const state = createGame({ seed: "public-draw-count", setupMode: "completed" });
+    const drawnId = state.corp.rd[0];
+    const legalAction = mandatoryDrawLegalAction(state);
+    const result = applyAction(state, playerActionFor(state, legalAction));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected a completed draw");
+    for (const surface of [toPublicEvent(result.event), toPublicEventForSide(result.event, "runner")]) {
+      expect(surface.publicPayload).toMatchObject({
+        corpHqCountBefore: state.corp.hq.length,
+        corpHqCountAfter: result.state.corp.hq.length,
+        corpRdDrawnToHqCount: 1,
+      });
+      expect(JSON.stringify(surface)).not.toContain(drawnId);
+      expect(surface).not.toHaveProperty("privatePayload");
+    }
+  });
+
   it.each([
     "start_run",
     "play_event",

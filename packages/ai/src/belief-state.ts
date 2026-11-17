@@ -258,7 +258,7 @@ type KnownHqHandEntry = {
 
 type KnownRndDrawMemory = {
   drawEventId: string;
-  definitionId: string;
+  definitionIds: readonly string[];
   sourceEventId: string;
 };
 
@@ -1072,7 +1072,7 @@ function deriveKnownHqHandMemory(
       rememberObservedHqAccessDefinitionWithConsistencyCheck(
         knownCards,
         candidateGroups,
-        input.playerView.opponent.handCount,
+        observedHqHandCountAfter(event, input),
         classification.eventId,
         definitionId,
         invalidationReasons,
@@ -1104,11 +1104,13 @@ function deriveKnownHqHandMemory(
     invalidationReasons.push(`${adjustment.reason}:${classification.eventId}`);
     const knownRndDraw = knownRndDrawByEventId.get(classification.eventId);
     if (adjustment.kind === "unknown_arrival" && knownRndDraw) {
-      knownCards.push({
-        key: `${classification.eventId}:rnd_top_draw:${knownCards.length}`,
-        definitionId: knownRndDraw.definitionId,
-        eventId: classification.eventId,
-      });
+      for (const [index, drawnDefinitionId] of knownRndDraw.definitionIds.entries()) {
+        knownCards.push({
+          key: `${classification.eventId}:rnd_top_draw:${index}`,
+          definitionId: drawnDefinitionId,
+          eventId: classification.eventId,
+        });
+      }
       invalidationReasons.push(
         `known_rnd_top_moved_to_hq:${knownRndDraw.sourceEventId}->${classification.eventId}`,
       );
@@ -1125,7 +1127,7 @@ function deriveKnownHqHandMemory(
       const departure = hqHiddenInstallDepartureMemory(
         classification,
         knownCards,
-        input.playerView.opponent.handCount,
+        observedHqHandCountBefore(event),
       );
       knownCards.length = 0;
       knownCards.push(...departure.safeEntries);
@@ -1274,7 +1276,7 @@ function hqCandidateGroupsWithinAvailableSlots(
 function hqHiddenInstallDepartureMemory(
   event: BeliefEventClassification,
   knownCards: KnownHqHandEntry[],
-  handCountAfterDeparture: number,
+  handCountBeforeDeparture: number | undefined,
 ): HqHiddenInstallDepartureMemory {
   if (knownCards.length === 0) return { safeEntries: [] };
 
@@ -1287,14 +1289,12 @@ function hqHiddenInstallDepartureMemory(
       : knownCards.filter((card) =>
           hqDefinitionMatchesInstallPlacement(card.definitionId, placement),
         );
-  const handCountBeforeDeparture = Math.max(
-    handCountAfterDeparture + 1,
-    knownCards.length,
-  );
-  const unknownCandidateCount = Math.max(
-    0,
-    handCountBeforeDeparture - knownCards.length,
-  );
+  if (handCountBeforeDeparture === undefined) {
+    const possibleDepartures = new Set(matchingCandidateEntries.map((entry) => entry.key));
+    return { safeEntries: knownCards.filter((entry) => !possibleDepartures.has(entry.key)) };
+  }
+  if (handCountBeforeDeparture < knownCards.length) return { safeEntries: [] };
+  const unknownCandidateCount = handCountBeforeDeparture - knownCards.length;
   if (
     placement !== "unknown" &&
     matchingCandidateEntries.length === 0 &&
@@ -1521,7 +1521,7 @@ function deriveHiddenRemoteCandidateMemory(
       rememberObservedHqAccessDefinitionWithConsistencyCheck(
         knownCards,
         [],
-        input.playerView.opponent.handCount,
+        observedHqHandCountAfter(event, input),
         classification.eventId,
         definitionId,
       );
@@ -1538,11 +1538,13 @@ function deriveHiddenRemoteCandidateMemory(
 
     const knownRndDraw = knownRndDrawByEventId.get(classification.eventId);
     if (adjustment.kind === "unknown_arrival" && knownRndDraw) {
-      knownCards.push({
-        key: `${classification.eventId}:rnd_top_draw:${knownCards.length}`,
-        definitionId: knownRndDraw.definitionId,
-        eventId: classification.eventId,
-      });
+      for (const [index, drawnDefinitionId] of knownRndDraw.definitionIds.entries()) {
+        knownCards.push({
+          key: `${classification.eventId}:rnd_top_draw:${index}`,
+          definitionId: drawnDefinitionId,
+          eventId: classification.eventId,
+        });
+      }
       continue;
     }
     if (adjustment.kind === "remove_known" && definitionId) {
@@ -1558,7 +1560,7 @@ function deriveHiddenRemoteCandidateMemory(
           ? hqHiddenInstallDepartureMemory(
               classification,
               knownCards,
-              input.playerView.opponent.handCount,
+              observedHqHandCountBefore(event),
             )
           : undefined;
       if (
@@ -1834,6 +1836,20 @@ function corpDrawsFromRd(event: BeliefEventClassification): boolean {
   );
 }
 
+function observedCorpDrawnToHqCount(event: PublicGameEvent | undefined): number | undefined {
+  const payload = event?.publicPayload;
+  if (!payload || payload.corpRdDrawOrderUnresolved === true) return undefined;
+  // A completed mandatory draw publishes its exact base count when the
+  // Engine settles the whole transition without an intervening choice.
+  const count = payload.corpRdDrawnToHqCount ??
+    (event?.type === "mandatory_draw" && payload.corpMandatoryDrawCompleted === true
+      ? payload.corpMandatoryTotalBaseDrawCount
+      : undefined);
+  return typeof count === "number" && Number.isSafeInteger(count) && count >= 0
+    ? count
+    : undefined;
+}
+
 function hiddenZoneReorderChangesHq(event: BeliefEventClassification): boolean {
   return hiddenZoneMutationChangesZone(event.hiddenZoneMutation, "hq");
 }
@@ -1886,6 +1902,22 @@ function isInstalledRootEvent(event: BeliefEventClassification): boolean {
   );
 }
 
+function observedHqHandCountBefore(event: PublicGameEvent | undefined): number | undefined {
+  const count = event?.publicPayload.corpHqCountBefore;
+  return Number.isSafeInteger(count) && count! >= 0 ? count : undefined;
+}
+
+function observedHqHandCountAfter(
+  event: PublicGameEvent | undefined,
+  input: AiDecisionInput,
+): number | undefined {
+  const observed = event?.publicPayload.corpHqCountAfter;
+  if (Number.isSafeInteger(observed) && observed! >= 0) return observed;
+  if (event?.stateVersionAfter === input.playerView.stateVersion)
+    return input.playerView.opponent.handCount;
+  return undefined;
+}
+
 function rememberObservedHqAccessDefinition(
   knownCards: Array<{ key: string; definitionId: string; eventId: string }>,
   eventId: string,
@@ -1902,7 +1934,7 @@ function rememberObservedHqAccessDefinition(
 function rememberObservedHqAccessDefinitionWithConsistencyCheck(
   knownCards: KnownHqHandEntry[],
   candidateGroups: HqHandCandidateGroupMemory[],
-  handCount: number,
+  handCount: number | undefined,
   eventId: string,
   definitionId: string,
   invalidationReasons?: string[],
@@ -1927,10 +1959,11 @@ function rememberObservedHqAccessDefinitionWithConsistencyCheck(
 function hqAccessContradictsCompleteHandMemory(
   knownCards: KnownHqHandEntry[],
   candidateGroups: HqHandCandidateGroupMemory[],
-  handCount: number,
+  handCount: number | undefined,
   definitionId: string,
 ): boolean {
   return (
+    handCount !== undefined &&
     handCount > 0 &&
     knownCards.length >= handCount &&
     candidateGroups.length === 0 &&
@@ -2968,16 +3001,26 @@ function deriveRndKnowledgeTimeline(
       continue;
     }
     if (lastKnownAccessEventId && corpDrawsFromRd(event)) {
-      const knownDrawnDefinitionId = knownSequenceDefinitionIds[0];
-      if (knownDrawnDefinitionId) {
+      const count = observedCorpDrawnToHqCount(publicEvent);
+      accessBatch = undefined;
+      if (count === undefined) {
+        freshness = "invalidated";
+        lastKnownAccessEventId = undefined;
+        freshenedByRunnerAccess = false;
+        knownSequenceDefinitionIds = [];
+        invalidationReasons.push(`rd_draw_order_unresolved:${event.eventId}`);
+        continue;
+      }
+      if (count === 0) continue;
+      const drawn = knownSequenceDefinitionIds.slice(0, count);
+      if (drawn.length > 0) {
         knownDraws.push({
           drawEventId: event.eventId,
-          definitionId: knownDrawnDefinitionId,
+          definitionIds: drawn,
           sourceEventId: lastKnownAccessEventId,
         });
       }
-      accessBatch = undefined;
-      knownSequenceDefinitionIds = knownSequenceDefinitionIds.slice(1);
+      knownSequenceDefinitionIds = knownSequenceDefinitionIds.slice(count);
       invalidationReasons.push(`rd_known_top_drawn_by_corp:${event.eventId}`);
       if (knownSequenceDefinitionIds.length > 0) {
         freshness = "stale_known_same_top";

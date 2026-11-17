@@ -1,11 +1,10 @@
 import { evidenceValue, hasEvidenceFlag } from "../runtime/evidence-value";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
-import { progressionEntriesWithRunTargets } from "./progression-action-sequence";
 import { averageNumber } from "./simulation-metric-aggregation";
 
 export function summarizeCorpEffectiveRemoteSafetyMetrics(
-  summaries: AiSimulationSummary[],
+  summaries: readonly AiSimulationSummary[],
 ): Pick<
   AiMatchProgressionMetrics,
   | "corpRemoteHasIceButRunnerPathCheap"
@@ -27,7 +26,6 @@ export function summarizeCorpEffectiveRemoteSafetyMetrics(
   let corpRemoteHasIceButRunnerPathCheap = 0;
   let corpAgendaInstalledInCheaplyContestableRemote = 0;
   let corpAdvanceInCheaplyContestableRemote = 0;
-  let corpCheapRemoteContestIgnored = 0;
   let corpRemoteProtectionOverestimatedByIcePresence = 0;
   let runnerCanContestScoringRemoteForActionOnly = 0;
   let runnerCanContestScoringRemoteWithCredits = 0;
@@ -41,8 +39,7 @@ export function summarizeCorpEffectiveRemoteSafetyMetrics(
   const knownPathCosts: number[] = [];
 
   for (const summary of summaries) {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    for (const entry of sequence) {
+    for (const entry of summary.actionSequence) {
       if (entry.side !== "corp") continue;
       if (
         hasEvidenceFlag(entry, "corp_remote_has_ice_but_runner_path_cheap:true")
@@ -136,7 +133,7 @@ export function summarizeCorpEffectiveRemoteSafetyMetrics(
       if (Number.isFinite(knownPathCost)) knownPathCosts.push(knownPathCost);
     }
   }
-  corpCheapRemoteContestIgnored =
+  const corpCheapRemoteContestIgnored =
     corpAgendaInstalledInCheaplyContestableRemote +
     corpAdvanceInCheaplyContestableRemote;
   return {

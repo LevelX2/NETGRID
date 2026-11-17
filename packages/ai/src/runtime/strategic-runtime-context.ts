@@ -920,9 +920,10 @@ function reserveRequirementForFamily(
   params: BuildStrategicRuntimeContextParams,
   family: StrategicIntentFamily,
 ): StrategicReserveRequirement {
+  const minimumActionCost = cheapestRelevantActionCost(params, family);
   const required = Math.max(
     defaultReserveCreditsForFamily(family),
-    cheapestRelevantActionCost(params, family) ?? 0,
+    minimumActionCost ?? 0,
   );
   if (required <= 0) {
     return {
@@ -943,7 +944,7 @@ function reserveRequirementForFamily(
       `reserve_family:${family}`,
       `reserve_required:${required}`,
       `reserve_available:${available}`,
-      `relevant_action_min_cost:${cheapestRelevantActionCost(params, family) ?? "none"}`,
+      `relevant_action_min_cost:${minimumActionCost ?? "none"}`,
     ],
   };
 }

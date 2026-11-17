@@ -681,6 +681,13 @@ export type PublicEventPayload = Record<string, unknown> & {
   hiddenZoneOrderChanged?: boolean;
   hiddenZoneChangesHq?: boolean;
   hiddenZoneChangesRd?: boolean;
+  /** Public HQ sizes at the boundaries of this event, with no hand identities. */
+  corpHqCountBefore?: number;
+  corpHqCountAfter?: number;
+  /** Proven movement of a top R&D prefix into HQ by this completed draw. */
+  corpRdDrawnToHqCount?: number;
+  /** A draw opened a choice or did not certify movement of a contiguous prefix. */
+  corpRdDrawOrderUnresolved?: true;
   /** Actor-safe canonical location of an installed Corp card. */
   serverId?: ServerId;
   installPlacement?: "ice" | "root";

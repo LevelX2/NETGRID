@@ -206,11 +206,11 @@ export function assessCorpDrawAdmission(params: {
   let disposition: CorpDrawAdmissionAssessment["disposition"];
   if (params.remainingAttempts !== 1) {
     disposition = "blocked_attempt_budget";
-  } else if (!validProjection || !consequenceFactsKnown) {
+  } else if (!validProjection || !consequenceFactsKnown || clickCost > params.currentClicks) {
     disposition = "blocked_unknown_projection";
   } else if (
     params.purpose === "punish_component_search" &&
-    (!punishSearch || !mandatoryCountKnown || clickCost > params.currentClicks)
+    (!punishSearch || !mandatoryCountKnown)
   ) {
     disposition = "blocked_unknown_projection";
   } else if (punishSearch && punishSearch.competingActionIds.length > 0) {

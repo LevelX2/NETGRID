@@ -89,6 +89,39 @@ describe("belief-state revealed opponent ownership", () => {
 });
 
 describe("belief-state R&D top freshness", () => {
+  it("moves the entire observed multi-card Corp draw into HQ in one event", () => {
+    const observed = rndPrivateLookEvent("evt_rd_look", 1, [
+      "simple_economy_operation",
+      "simple_economy_operation",
+      "simple_agenda",
+    ]);
+    const draw = publicEvent("evt_draw_two", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+      corpRdDrawnToHqCount: 2,
+    });
+    const belief = reconstructBeliefState(runnerInput([observed, draw], 2));
+    expect(belief.rndTopFreshness).toMatchObject({
+      knownSequenceDefinitionIds: ["simple_agenda"],
+    });
+    expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      allCardsKnown: true,
+      knownDefinitions: ["simple_economy_operation", "simple_economy_operation"],
+    });
+  });
+
+  it("drops exact R&D order when a draw opens an unresolved replacement", () => {
+    const observed = rndPrivateLookEvent("evt_rd_look", 1, ["simple_agenda"]);
+    const draw = publicEvent("evt_draw_pending", "draw_card", 2, {
+      actor: "corp",
+      actionType: "draw_card",
+      corpRdDrawOrderUnresolved: true,
+    });
+    const belief = reconstructBeliefState(runnerInput([observed, draw], 1));
+    expect(belief.rndTopFreshness?.knownTopDefinitionId).toBeUndefined();
+    expect(belief.runnerOpponentModel?.hqHandMemory.knownDefinitions).toEqual([]);
+  });
+
   it("keeps R&D root accesses and removals separate from the deck sequence", () => {
     const deckLook = rndPrivateLookEvent("evt_rd_look", 1, ["simple_agenda"]);
     const rootContext = {
@@ -606,6 +639,37 @@ describe("belief-state R&D top freshness", () => {
 });
 
 describe("belief-state HQ hand memory retention", () => {
+  it("uses HQ size at hidden installation even when the hand later shrinks", () => {
+    const look = hqPrivateLookEvent("evt_look", 1, [
+      "simple_agenda",
+      "simple_upgrade",
+    ]);
+    const draw = publicEvent("evt_draw", "draw_card", 2, {
+      actor: "corp",
+      actionType: "draw_card",
+      corpRdDrawnToHqCount: 1,
+    });
+    const install = publicEvent("evt_install", "install_card", 3, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "root",
+      corpHqCountBefore: 3,
+      corpHqCountAfter: 2,
+    });
+    const operation = publicEvent("evt_play", "play_operation", 4, {
+      actor: "corp",
+      actionType: "play_operation",
+      cardDefinitionId: "simple_economy_operation",
+      corpHqCountBefore: 2,
+      corpHqCountAfter: 1,
+    });
+    const model = reconstructBeliefState(runnerInput([look, draw, install, operation], 1)).runnerOpponentModel;
+    expect(model?.hiddenRemoteCandidateMemory).toMatchObject([
+      { serverId: "remote_1", unknownCandidateCount: 1, exhaustive: false },
+    ]);
+  });
+
   it("reconciles only the hidden install bound to the revealed position", () => {
     const firstAccess = publicEvent("evt_access_data_wall", "access_card", 1, {
       actor: "runner",
@@ -619,6 +683,7 @@ describe("belief-state HQ hand memory retention", () => {
       serverId: "remote_1",
       installPlacement: "ice",
       installedPositionKey: "installed-position-v1:a",
+      corpHqCountBefore: 2,
     });
     const secondAccess = publicEvent("evt_access_cortical", "access_card", 3, {
       actor: "runner",
@@ -632,6 +697,7 @@ describe("belief-state HQ hand memory retention", () => {
       serverId: "remote_1",
       installPlacement: "ice",
       installedPositionKey: "installed-position-v1:b",
+      corpHqCountBefore: 1,
     });
     const secondRez = publicEvent("evt_rez_b", "rez_ice", 5, {
       actor: "corp",
@@ -717,6 +783,7 @@ describe("belief-state HQ hand memory retention", () => {
         actionType: "resolve_choice",
         discardCount: 1,
         discardResolved: true,
+      corpHqCountBefore: 2,
       },
     );
 
@@ -845,6 +912,7 @@ describe("belief-state HQ hand memory retention", () => {
       actionType: "install_card",
       serverId: "remote_1",
       installPlacement: "ice",
+      corpHqCountBefore: 2,
     });
 
     const belief = reconstructBeliefState(
@@ -934,6 +1002,7 @@ describe("belief-state HQ hand memory retention", () => {
       actionType: "install_card",
       serverId: "remote_1",
       installPlacement: "ice",
+      corpHqCountBefore: 3,
     });
 
     const belief = reconstructBeliefState(
@@ -981,6 +1050,7 @@ describe("belief-state HQ hand memory retention", () => {
         actionType: "install_card",
         serverId: "remote_1_noise",
         installPlacement: "ice",
+      corpHqCountBefore: 3,
       },
     );
 
@@ -1009,6 +1079,7 @@ describe("belief-state HQ hand memory retention", () => {
         actionType: "install_card",
         serverId: "hq",
         installPlacement: "root",
+      corpHqCountBefore: 3,
       },
     );
     const accessedHqRootUpgrade = publicEvent(
@@ -1139,6 +1210,7 @@ describe("belief-state HQ hand memory retention", () => {
         actionType: "install_card",
         serverId: "remote_1",
         installPlacement: "root",
+      corpHqCountBefore: 2,
       },
     );
     const currentHqAccess = publicEvent("evt_hq_access", "access_card", 3, {
@@ -2206,7 +2278,15 @@ function publicEvent(
     stateVersionAfter: stateVersionBefore + 1,
     stateHashAfter: `hash_${eventId}`,
     visibilityClass: "hidden_info_barrier",
-    publicPayload,
+    publicPayload: {
+      // These synthetic draw events represent ordinary one-card draws unless
+      // the case supplies a different Engine observation.
+      ...(publicPayload.actor === "corp" &&
+      (type === "mandatory_draw" || type === "draw_card")
+        ? { corpRdDrawnToHqCount: 1 }
+        : {}),
+      ...publicPayload,
+    },
   } as PublicGameEvent;
 }
 
