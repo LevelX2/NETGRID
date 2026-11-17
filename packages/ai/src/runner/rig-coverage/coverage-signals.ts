@@ -471,22 +471,24 @@ export function uniqueCoverageGaps(
     // No selected hand answer means no current installation. An open set
     // would admit unrelated or already installed breakers, then change the
     // phase when their later disposition rejects them.
-    const installActionIds = visibleAnswer
-      ? coverageDevelopment
-        ? candidates
-            .filter((candidate) => {
-              const action = input.legalActions.find(
-                (legalAction) => legalAction.actionId === candidate.actionId,
-              );
-              return (
-                candidate.semanticActionType === "install.card" &&
-                runnerInstallSourceInstanceId(candidate, action) ===
-                  visibleAnswer.instanceId
-              );
-            })
-            .map((candidate) => candidate.actionId)
-        : legalCoverageInstallActionIds
-      : [];
+    const installActionIds = costRecovery?.installActionId
+      ? [costRecovery.installActionId]
+      : visibleAnswer
+        ? coverageDevelopment
+          ? candidates
+              .filter((candidate) => {
+                const action = input.legalActions.find(
+                  (legalAction) => legalAction.actionId === candidate.actionId,
+                );
+                return (
+                  candidate.semanticActionType === "install.card" &&
+                  runnerInstallSourceInstanceId(candidate, action) ===
+                    visibleAnswer.instanceId
+                );
+              })
+              .map((candidate) => candidate.actionId)
+          : legalCoverageInstallActionIds
+        : [];
     const sameTurnRunConversion =
       costRecovery?.sameTurnRunConversion ??
       runnerUrgentRemoteCoverageConversionQuote(

@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { runnerRunProjectionPreservesNormalAccess } from "../actions/run-action-projection";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
+import { runnerAgendaStealCreditRequirement } from "../run-analysis/runner-agenda-steal-cost";
 import { runnerTerminalContestThreat } from "../runtime/runner-terminal-contest-threat";
 export const INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET = 1;
 
@@ -78,6 +79,101 @@ export function runnerInformationProbeKnownPathIsAdmitted(
       (entry) =>
         entry === "central_memory_payoff:partial_known" ||
         entry === "remote_memory_payoff:partial_unknown",
+    )
+  );
+}
+
+export function runnerFinalClickCentralAccessBeforeTerminalScore(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+  runTargets: readonly RunnerRunTargetEvaluation[],
+  protectedLiquidFloor: number,
+): boolean {
+  const view = input.playerView;
+  const quote = evaluation.routeQuote;
+  if (
+    input.side !== "runner" ||
+    view.own.clicks !== 1 ||
+    (evaluation.targetKind !== "hq" && evaluation.targetKind !== "rd") ||
+    evaluation.targetServerId !== evaluation.accessServerId ||
+    evaluation.runActionProjection.sourceKind !== "basic_action" ||
+    evaluation.pathPassability !== "reachable" ||
+    quote?.reachability !== "guaranteed_access" ||
+    quote.fundingGap !== 0 ||
+    quote.effects.length !== 0 ||
+    (quote.conditionalRiskReasons?.length ?? 0) !== 0 ||
+    evaluation.prerunReserveQuote?.status !== "not_required" ||
+    evaluation.fundingNeed.reason !== "post_run_floor_gap" ||
+    (evaluation.knownAccessState !== "unknown" &&
+      evaluation.knownAccessState !== "fresh") ||
+    evaluation.accessPayoffContestable === false
+  )
+    return false;
+  const stealCost = runnerAgendaStealCreditRequirement(
+    input,
+    evaluation.accessServerId,
+  );
+  if (
+    stealCost === undefined ||
+    evaluation.creditsAfterRun - stealCost < protectedLiquidFloor
+  )
+    return false;
+
+  const currentActions = input.legalActions.filter(
+    (action) =>
+      action.side === "runner" &&
+      action.expiresAtStateVersion === view.stateVersion,
+  );
+  const currentRun = currentActions.some(
+    (action) =>
+      action.actionId === evaluation.actionId &&
+      action.type === "start_run" &&
+      action.payload?.serverId === evaluation.targetServerId &&
+      action.costs.reduce((clicks, cost) => clicks + (cost.clicks ?? 0), 0) ===
+        1,
+  );
+  // A free preparation might still enable a contest without using this click.
+  if (
+    !currentRun ||
+    currentActions.some(
+      (action) =>
+        action.type !== "end_turn" &&
+        action.costs.every((cost) => (cost.clicks ?? 0) === 0),
+    )
+  )
+    return false;
+
+  const threat = runnerTerminalContestThreat(input);
+  const pointsNeeded = view.agendaPointsToWin - view.own.agendaPoints;
+  if (
+    !threat?.remoteServerIds.length ||
+    pointsNeeded <= 0 ||
+    ![...view.own.scoreArea, ...(view.opponent.scoreArea ?? [])].some(
+      (card) =>
+        card.known &&
+        card.type === "agenda" &&
+        typeof card.agendaPoints === "number" &&
+        card.agendaPoints >= pointsNeeded,
+    )
+  )
+    return false;
+
+  const legalIds = new Set(currentActions.map((action) => action.actionId));
+  const remoteRoutes = runTargets.filter(
+    (target) => target.targetKind === "remote" && legalIds.has(target.actionId),
+  );
+  const remoteRunBlocked = (target: RunnerRunTargetEvaluation) =>
+    target.pathPassability !== "reachable" ||
+    target.prerunReserveQuote?.status === "blocked" ||
+    (target.routeQuote !== undefined && target.routeQuote.fundingGap > 0);
+  return (
+    !remoteRoutes.some(
+      (target) =>
+        target.knownAccessState !== "known_no_current_payoff" &&
+        !remoteRunBlocked(target),
+    ) &&
+    threat.remoteServerIds.every((serverId) =>
+      remoteRoutes.some((target) => target.targetServerId === serverId),
     )
   );
 }

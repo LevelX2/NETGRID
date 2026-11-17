@@ -620,6 +620,16 @@ Nullnutzen, unvermeidbare Gefahr, fehlende Zugriffskonversion und veraltete
 Actions begründen keine solche Alternative. Ein unbekanntes Root wird dadurch
 nicht als bekannte Agenda behandelt.
 
+Im letzten Klick kann der Zentraldruck einen vollständig gequoteten Basisrun
+auf HQ oder R&D zulassen, wenn eine öffentlich begründete terminale
+Bedrohung im Remote ansteht und der Contest im aktuellen Zug nicht mehr
+ausführbar ist. Der Plan prüft alle aktuellen Remote-Routen und vorbereitenden
+Angebote, die ohne den letzten Klick auskommen. Ein öffentlicher Scorebereich
+muss eine Agenda in der für einen Sieg nötigen Punktgröße belegen. Die Karte
+im Zielzugriff bleibt unbekannt. Mindestreserve, Handpuffer, sichtbare
+Steal-Kosten und Sicherheitsquote bleiben bindend. Match ce27c6b1 D112 prüft
+den HQ-Zugriff mit einem Klick gegen die noch offene Remote-Finanzierung.
+
 Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
 ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
@@ -1187,6 +1197,13 @@ garantierte Trace-/Breakreserve ist keine Betriebskostenersparnis einer
 neuen Installation. Zulassung verlangt niedrigere vollständige
 Installations- plus Pfadkosten als die so gequotete bestehende Abdeckung.
 Gleiche Kosten erzeugen keinen Effizienzbedarf, auch bei kostenloser Kopie.
+Das gilt auch für einen technisch finanzierten Zentralpfad, den seine
+allgemeine Nach-Run-Reserve zurückstellt. Hier bindet Coverage nur eine
+bereits legale Handinstallation, die den Pfad inklusive Installationskosten
+verbilligt und freien Speicher nutzt. Der aktuelle Handpuffer bleibt erhalten
+oder kann mit einem belegten Ziehschritt vor Zugende wiederhergestellt werden.
+Ein späterer Run bleibt an seiner eigenen Zulassung gebunden. Match
+ce27c6b1 D97 prüft die Installationsbindung bei elf statt zwölf Credits.
 
 Eine unbezahlbare vollständige Schadensvermeidung kann den vorhandenen
 Coverage-Owner ebenfalls mit einer günstigeren Handinstallation beauftragen.
