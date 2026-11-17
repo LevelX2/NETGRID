@@ -1,5 +1,7 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
@@ -19,6 +21,8 @@ const AGENDA_DIFFICULTY_UPGRADES = [
   130,
   135,
 ] as const;
+const SIMPLE_ICE_ID = syntheticCardDefinitionId("simple_ice");
+const TEST_AGENDA_ID = syntheticCardDefinitionId("test-agenda");
 
 describe("Corp upgrade placement signal contract", () => {
   it.each(AGENDA_DIFFICULTY_UPGRADES)(
@@ -53,16 +57,21 @@ describe("Corp upgrade placement signal contract", () => {
     },
   );
 
-  it.each(AGENDA_DIFFICULTY_UPGRADES)(
+  it.each([
+    [586, "research"],
+    [123, "gray_ops"],
+    [130, "research"],
+    [135, "black_ops"],
+  ] as const)(
     "gives %s positive fit on a prepared scoring remote",
-    (definitionId) => {
-      const agenda = eligibleAgenda(definitionId);
+    (definitionId, agendaSubtype) => {
+      const agenda = eligibleAgenda(agendaSubtype);
       const options = {
-        remoteIce: [visibleCard("remote-ice", "simple_ice", "ice")],
+        remoteIce: [visibleCard("remote-ice", SIMPLE_ICE_ID, "ice")],
         hqAgendas: [agenda],
         agendaInstalls: [agendaInstall(agenda)],
       };
-      const component = placementComponent(definitionId, "remote_1", {
+      const component = placementComponent(definitionId, "r1", {
         ...options,
       });
 
@@ -77,7 +86,7 @@ describe("Corp upgrade placement signal contract", () => {
       );
       expect(
         corpUpgradePlacementAssessment(
-          placementScenario(definitionId, "remote_1", {
+          placementScenario(definitionId, "r1", {
             ...options,
           }),
         )?.recommendation,
@@ -88,7 +97,7 @@ describe("Corp upgrade placement signal contract", () => {
   it("gives Research Bunker its strongest fit on an active scoreline remote", () => {
     const component = placementComponent(
       130,
-      "remote_1",
+      "r1",
       {
         remoteRoot: [
           visibleCard("remote-agenda", 588, "agenda", {
@@ -111,14 +120,14 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("places an agenda-steal tax only beside a visible agenda", () => {
-    const active = placementComponent(578, "remote_1", {
+    const active = placementComponent(578, "r1", {
       remoteRoot: [
         visibleCard("remote-agenda", 588, "agenda", {
           advancementRequirement: 3,
         }),
       ],
     });
-    const empty = placementComponent(578, "remote_1");
+    const empty = placementComponent(578, "r1");
 
     expect(active).toEqual(
       expect.objectContaining({
@@ -159,7 +168,7 @@ describe("Corp upgrade placement signal contract", () => {
       }),
     );
     expect(
-      placementComponent(125, "remote_1"),
+      placementComponent(125, "r1"),
     ).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_mismatch",
@@ -190,7 +199,7 @@ describe("Corp upgrade placement signal contract", () => {
       }),
     );
     expect(
-      placementComponent(131, "remote_1"),
+      placementComponent(131, "r1"),
     ).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_mismatch",
@@ -211,7 +220,7 @@ describe("Corp upgrade placement signal contract", () => {
     expect(deferred?.value).toBeLessThan(0);
     expect(
       placementComponent(128, "hq", {
-        hqIce: [visibleCard("hq-ice", "simple_ice", "ice")],
+        hqIce: [visibleCard("hq-ice", SIMPLE_ICE_ID, "ice")],
       }),
     ).toEqual(
       expect.objectContaining({
@@ -225,10 +234,10 @@ describe("Corp upgrade placement signal contract", () => {
   it("defers a region replacement without active marginal utility", () => {
     const replacement = placementScenario(
       130,
-      "remote_1",
+      "r1",
       {
         regionReplacementWarning: true,
-        remoteIce: [visibleCard("remote-ice", "simple_ice", "ice")],
+        remoteIce: [visibleCard("remote-ice", SIMPLE_ICE_ID, "ice")],
         remoteRoot: [
           visibleCard(
             "research-bunker-installed",
@@ -236,7 +245,7 @@ describe("Corp upgrade placement signal contract", () => {
             "upgrade",
             { subtypes: ["region"] },
           ),
-          eligibleAgenda(130),
+          eligibleAgenda("research"),
         ],
       },
     );
@@ -261,7 +270,7 @@ describe("Corp upgrade placement signal contract", () => {
   it("allows a region replacement that activates the current agenda category", () => {
     const replacement = placementScenario(
       130,
-      "remote_1",
+      "r1",
       {
         regionReplacementWarning: true,
         remoteRoot: [
@@ -271,7 +280,7 @@ describe("Corp upgrade placement signal contract", () => {
             "upgrade",
             { subtypes: ["region"] },
           ),
-          visibleCard("research-agenda", "research-agenda", "agenda", {
+          visibleCard("research-agenda", TEST_AGENDA_ID, "agenda", {
             subtypes: ["research"],
           }),
         ],
@@ -289,8 +298,8 @@ describe("Corp upgrade placement signal contract", () => {
   it.each(AGENDA_DIFFICULTY_UPGRADES.slice(1))(
     "defers %s with no compatible current agenda despite installed ICE",
     (definitionId) => {
-      const scenario = placementScenario(definitionId, "remote_1", {
-        remoteIce: [visibleCard("ice", "simple_ice", "ice")],
+      const scenario = placementScenario(definitionId, "r1", {
+        remoteIce: [visibleCard("ice", SIMPLE_ICE_ID, "ice")],
       });
       expect(corpUpgradePlacementAssessment(scenario)).toMatchObject({
         recommendation: "defer",
@@ -306,16 +315,16 @@ describe("Corp upgrade placement signal contract", () => {
   it.each(["wrong_category", "unknown", "missing_action", "wrong_source", "wrong_fort", "stale", "wrong_timing"])(
     "does not invent prepared Weapons Depot support from %s",
     (variant) => {
-      const agenda = eligibleAgenda(135);
+      const agenda = eligibleAgenda("black_ops");
       const action = agendaInstall(agenda);
       if (variant === "wrong_category") agenda.subtypes = ["research"];
       if (variant === "unknown") agenda.known = false;
       if (variant === "wrong_source") action.source = "another-agenda";
-      if (variant === "wrong_fort") action.payload!.serverId = "remote_2";
+      if (variant === "wrong_fort") action.payload!.serverId = "r2";
       if (variant === "stale") action.expiresAtStateVersion = 0;
       if (variant === "wrong_timing") action.timingPoint = "corp_discard.select_cards";
-      const scenario = placementScenario(135, "remote_1", {
-        remoteIce: [visibleCard("ice", "simple_ice", "ice")],
+      const scenario = placementScenario(135, "r1", {
+        remoteIce: [visibleCard("ice", SIMPLE_ICE_ID, "ice")],
         hqAgendas: [agenda],
         agendaInstalls: variant === "missing_action" ? [] : [action],
       });
@@ -324,8 +333,8 @@ describe("Corp upgrade placement signal contract", () => {
   );
 
   it("does not treat an advanced ambush as an active Agenda discount target", () => {
-    const component = placementComponent(AGENDA_DIFFICULTY_UPGRADES[0], "remote_1", {
-      remoteIce: [visibleCard("ice", "simple_ice", "ice")],
+    const component = placementComponent(AGENDA_DIFFICULTY_UPGRADES[0], "r1", {
+      remoteIce: [visibleCard("ice", SIMPLE_ICE_ID, "ice")],
       remoteRoot: [
         visibleCard("ambush", 560, "asset", {
           advancementCounters: 2,
@@ -337,31 +346,31 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("preserves unrestricted Washington prepared support without a held agenda", () => {
-    expect(placementComponent(AGENDA_DIFFICULTY_UPGRADES[0], "remote_1", {
-      remoteIce: [visibleCard("ice", "simple_ice", "ice")],
+    expect(placementComponent(AGENDA_DIFFICULTY_UPGRADES[0], "r1", {
+      remoteIce: [visibleCard("ice", SIMPLE_ICE_ID, "ice")],
     })?.value).toBe(850);
   });
 });
 
-function eligibleAgenda(definitionId: number): VisibleCard {
-  const subtype = definitionId.includes("networked") ? "gray_ops"
-    : definitionId.includes("weapons") ? "black_ops" : "research";
-  return visibleCard("eligible-agenda", "test-agenda", "agenda", { subtypes: [subtype] });
+function eligibleAgenda(subtype: "research" | "gray_ops" | "black_ops"): VisibleCard {
+  return visibleCard("eligible-agenda", TEST_AGENDA_ID, "agenda", {
+    subtypes: [subtype],
+  });
 }
 
 function agendaInstall(card: VisibleCard): LegalAction {
   return {
-    actionId: `corp.install_card.${card.instanceId}.remote_1`, side: "corp",
+    actionId: `corp.install_card.${card.instanceId}.r1`, side: "corp",
     type: "install_card", label: "Agenda installieren", source: card.instanceId,
     timingPoint: "corp_action.main", costs: [{ clicks: 1 }], targetRequirements: [],
     visibility: "private_to_actor", expiresAtStateVersion: 1,
-    payload: { cardId: card.instanceId, serverId: "remote_1", placement: "root" },
+    payload: { cardId: card.instanceId, serverId: "r1", placement: "root" },
   };
 }
 
 function placementComponent(
-  definitionId: number,
-  serverId: "hq" | "rd" | "remote_1",
+  definitionId: CardDefinitionId,
+  serverId: "hq" | "rd" | "r1",
   options: {
     regionReplacementWarning?: boolean;
     hqIce?: VisibleCard[];
@@ -377,8 +386,8 @@ function placementComponent(
 }
 
 function placementScenario(
-  definitionId: number,
-  serverId: "hq" | "rd" | "remote_1",
+  definitionId: CardDefinitionId,
+  serverId: "hq" | "rd" | "r1",
   options: {
     regionReplacementWarning?: boolean;
     hqIce?: VisibleCard[];
@@ -438,7 +447,7 @@ function placementScenario(
           { id: "rd", label: "R&D", ice: [], root: [] },
           { id: "archives", label: "Archives", ice: [], root: [] },
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: options.remoteIce ?? [],
             root: options.remoteRoot ?? [],
@@ -457,7 +466,7 @@ function placementScenario(
 
 function visibleCard(
   instanceId: string,
-  definitionId: number,
+  definitionId: CardDefinitionId,
   type: NonNullable<VisibleCard["type"]>,
   extra: Omit<
     Partial<VisibleCard>,
@@ -468,7 +477,7 @@ function visibleCard(
     instanceId,
     definitionId,
     known: true,
-    title: definitionId,
+    title: instanceId,
     type,
     rezzed: false,
     advancementCounters: 0,

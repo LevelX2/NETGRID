@@ -1836,7 +1836,7 @@ function playerView(
 function identity(side: "corp" | "runner"): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(`${side}-identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,

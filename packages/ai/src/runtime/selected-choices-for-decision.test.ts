@@ -7,6 +7,7 @@ import {
 } from "@netgrid/engine";
 import type {
   AiDecisionInput,
+  CanonicalCapabilityId,
   CardDefinitionId,
   CorpOptionalRezChoiceQuote,
   GameState,
@@ -694,7 +695,7 @@ describe("selectedChoicesForDecision", () => {
   it("fails closed when the Satellite Monitors source is not the exact rezzed card", () => {
     const input = satelliteMonitorsChoiceInput();
     input.playerView.servers[0]!.root[0]!.definitionId =
-      "onr_classic_022_wrong-card";
+      syntheticCardDefinitionId("wrong-satellite-monitors-card");
 
     expect(() =>
       selectedChoicesForDecision(
@@ -2228,7 +2229,7 @@ describe("selectedChoicesForDecision", () => {
       {
         ...optionalRezQuote(),
         reductionSourceDefinitionIds: [
-          ...optionalRezQuote().reductionSourceDefinitionIds,
+          ...optionalRezQuote().reductionSourceDefinitionIds!,
         ].reverse(),
       },
     ],
@@ -2924,7 +2925,7 @@ function rememberResidentScoreChoiceContinuation(
     | { sourceCardId: string; amount: number }
     | { placements: Array<{ targetCardId: string; amount: number }> },
   freeRezChoiceBinding?: {
-    sourceCapabilityId: string;
+    sourceCapabilityId: CanonicalCapabilityId;
     targetPurpose: "rez_best_defensive_ice";
     targetCardId: string;
     targetDefinitionId: number;
@@ -2932,13 +2933,13 @@ function rememberResidentScoreChoiceContinuation(
     selectedOptionId: string;
   },
   iceMarkChoiceBinding?: {
-    sourceCapabilityId: string;
+    sourceCapabilityId: CanonicalCapabilityId;
     targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
     targetCardId: string;
     targetDefinitionId: number;
   },
   hqAgendaShuffleChoiceBinding?: {
-    sourceCapabilityId: string;
+    sourceCapabilityId: CanonicalCapabilityId;
     creditPerAgendaPoint: number;
     selectedCardInstanceIds: string[];
   },

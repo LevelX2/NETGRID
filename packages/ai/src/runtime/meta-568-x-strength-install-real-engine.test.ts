@@ -6,7 +6,12 @@ import {
   getPlayerView,
   hashState,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState, LegalAction } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  DeckDefinition,
+  GameState,
+  LegalAction,
+} from "@netgrid/shared";
 import { afterEach, expect, it } from "vitest";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -37,7 +42,7 @@ function apply(state: GameState, action: LegalAction): GameState {
   if (!r.ok) throw Error(JSON.stringify(r.error));
   return r.state;
 }
-function fixture(card: string, credits: number) {
+function fixture(card: CardDefinitionId, credits: number) {
   let s = createGameAfterSetup({
     seed: "meta568-x-strength",
     corpDeck,
@@ -88,7 +93,7 @@ it.each([[78, 6]] as const)(
       (a) => a.actionId === decision.actionId,
     )!;
     expect(install.type).toBe("install_card");
-    expect(install.source).toContain(card);
+    expect(s.cardInstances[install.source]?.definitionId).toBe(card);
     expect(["hq", "rd"]).toContain(install.payload?.serverId);
     const predicted = JSON.parse(
       install.payload!.postInstallEffectiveRunQuoteJson as string,
@@ -151,7 +156,9 @@ it.each([83])(
       before = hashState(s),
       i = input(s);
     const installs = i.legalActions.filter(
-      (a) => a.type === "install_card" && a.source.includes(card),
+      (action) =>
+        action.type === "install_card" &&
+        s.cardInstances[action.source]?.definitionId === card,
     );
     expect(installs.length).toBeGreaterThan(0);
     for (const a of installs)
@@ -173,7 +180,7 @@ it.each([
     const r = chooseAiAction(i);
     const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
     expect(selected.type).toBe("install_card");
-    expect(selected.source).toContain(card);
+    expect(s.cardInstances[selected.source]?.definitionId).toBe(card);
     expect(["hq", "rd"]).toContain(selected.payload?.serverId);
     expect(r.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
       "corp.defend_servers",
@@ -229,7 +236,7 @@ it("keeps the minimum-X effect quote separate from current installed rez choices
   const install = getLegalActions(s, "corp").find(
     (a) =>
       a.type === "install_card" &&
-      a.source.includes("digiconda") &&
+      s.cardInstances[a.source]?.definitionId === 78 &&
       a.payload?.serverId === "rd",
   )!;
   expect(
@@ -249,7 +256,7 @@ it.each([82, 94])(
     const install = getLegalActions(s, "corp").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes(card) &&
+        s.cardInstances[a.source]?.definitionId === card &&
         a.payload?.serverId === "rd",
     )!;
     expect(
@@ -273,15 +280,19 @@ it.each([
 ] as const)(
   "keeps the first-stop qualitative installation fail-closed without the Engine effect quote for %s",
   (card, credits) => {
-    const i = input(fixture(card, credits));
-    for (const a of i.legalActions.filter(
-      (a) => a.type === "install_card" && a.source.includes(card),
-    ))
+    const s = fixture(card, credits);
+    const i = input(s);
+    const installs = i.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        s.cardInstances[action.source]?.definitionId === card,
+    );
+    expect(installs.length).toBeGreaterThan(0);
+    for (const a of installs)
       delete a.payload!.postInstallEffectiveRunQuoteJson;
     const r = chooseAiAction(i);
-    expect(
-      i.legalActions.find((a) => a.actionId === r.actionId)?.source,
-    ).not.toContain(card);
+    const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
+    expect(s.cardInstances[selected.source]?.definitionId).not.toBe(card);
     expect(r.fallbackUsed).toBe(false);
   },
 );
@@ -292,7 +303,7 @@ it("keeps an unfunded minimum-X installation at the existing staging milestone",
     r = chooseAiAction(i);
   const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
   expect(selected.type).toBe("install_card");
-  expect(selected.source).toContain("digiconda");
+  expect(s.cardInstances[selected.source]?.definitionId).toBe(78);
   expect(r.decisionDebug?.planFirstDecision?.selectedPlan).toMatchObject({
     moduleId: "corp.defend_servers",
     evidenceCodes: [
@@ -329,7 +340,9 @@ it.each([
   (_name, patch) => {
     const s = fixture(78, 6);
     const install = getLegalActions(s, "corp").find(
-      (a) => a.type === "install_card" && a.source.includes("digiconda"),
+      (action) =>
+        action.type === "install_card" &&
+        s.cardInstances[action.source]?.definitionId === 78,
     )!;
     expect(
       selectedPostInstallRezCreditsFromCurrentQuote(install.payload!),
@@ -347,14 +360,18 @@ it.each([
   "postInstallEffectiveRunQuoteJson",
   "postInstallRezQuoteExpiresAtStateVersion",
 ])("keeps the native owner fail-closed without %s", (key) => {
-  const i = input(fixture(78, 6));
-  for (const a of i.legalActions.filter(
-    (a) => a.source.includes("digiconda") && a.type === "install_card",
-  ))
+  const s = fixture(78, 6);
+  const i = input(s);
+  const installs = i.legalActions.filter(
+    (action) =>
+      action.type === "install_card" &&
+      s.cardInstances[action.source]?.definitionId === 78,
+  );
+  expect(installs.length).toBeGreaterThan(0);
+  for (const a of installs)
     delete a.payload![key];
   const r = chooseAiAction(i);
-  expect(
-    i.legalActions.find((a) => a.actionId === r.actionId)?.source,
-  ).not.toContain("digiconda");
+  const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
+  expect(s.cardInstances[selected.source]?.definitionId).not.toBe(78);
   expect(r.fallbackUsed).toBe(false);
 });

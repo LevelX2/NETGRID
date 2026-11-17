@@ -33,10 +33,13 @@ function facts(
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((entry) => entry.actionId === "runner.start_run.remote_1")!;
-  const bank = candidates.find((entry) =>
-    entry.actionId.endsWith(":withdraw_credits"),
-  )!;
+  }).find((entry) => entry.actionId === "runner.start_run.r1")!;
+  const bankAction = input.legalActions.find(
+    (action) => action.payload?.cardImplementationTakesHostedCredits === true,
+  );
+  const bank = candidates.find((entry) => entry.actionId === bankAction?.actionId);
+  if (!bank)
+    throw new Error("Expected a candidate for the Engine bank withdrawal action.");
   return { input, candidates, target, bank };
 }
 
@@ -95,8 +98,8 @@ it("certifies the composite route without installed tag prevention and exposes t
     bank.actionId,
   );
   expect(quote).toMatchObject({
-    parentPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    needId: "run-support:remote:remote_1",
+    parentPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+    needId: "run-support:remote:r1",
     routeActionIds: [bank.actionId],
     routeAssessment: {
       status: "covered_guaranteed",

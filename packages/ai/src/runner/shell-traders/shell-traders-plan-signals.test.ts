@@ -1,5 +1,7 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
@@ -75,7 +77,7 @@ describe("runner Shell Traders pipeline signals", () => {
 
     expect(
       signals(input, [
-        coverageGap("wall-gap", "breaker_wall", "remote_1", "P2"),
+        coverageGap("wall-gap", "breaker_wall", "r1", "P2"),
       ]),
     ).toEqual([
       expect.objectContaining({
@@ -90,7 +92,7 @@ describe("runner Shell Traders pipeline signals", () => {
         coverageBinding: {
           gapId: "wall-gap",
           requiredRole: "breaker_wall",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
         },
       }),
     ]);
@@ -175,7 +177,7 @@ describe("runner Shell Traders pipeline signals", () => {
 
     expect(
       signals(input, [
-        coverageGap("wall-gap", "breaker_wall", "remote_2", "P2"),
+        coverageGap("wall-gap", "breaker_wall", "r2", "P2"),
       ]),
     ).toEqual([
       expect.objectContaining({
@@ -204,7 +206,7 @@ describe("runner Shell Traders pipeline signals", () => {
     const secondDwarf = card("dwarf-small-b", 233, "program", {
       memoryCost: 1,
     });
-    const gap = coverageGap("wall-gap", "breaker_wall", "remote_2", "P2");
+    const gap = coverageGap("wall-gap", "breaker_wall", "r2", "P2");
     const input = runnerInput([], {
       rig: [shellTraders(), firstDwarf, secondDwarf, decoder],
       memoryLimit: 4,
@@ -244,9 +246,9 @@ describe("runner Shell Traders pipeline signals", () => {
     const input = runnerInput([action], {
       grip: [
         target,
-        card("buffer-1", "test-buffer-1", "event"),
-        card("buffer-2", "test-buffer-2", "event"),
-        card("buffer-3", "test-buffer-3", "event"),
+        card("buffer-1", syntheticCardDefinitionId("test-buffer-1"), "event"),
+        card("buffer-2", syntheticCardDefinitionId("test-buffer-2"), "event"),
+        card("buffer-3", syntheticCardDefinitionId("test-buffer-3"), "event"),
       ],
       rig: [source],
     });
@@ -288,10 +290,10 @@ describe("runner Shell Traders pipeline signals", () => {
     const input = runnerInput([action], {
       grip: [
         target,
-        card("buffer-1", "test-buffer-1", "event"),
-        card("buffer-2", "test-buffer-2", "event"),
-        card("buffer-3", "test-buffer-3", "event"),
-        card("buffer-4", "test-buffer-4", "event"),
+        card("buffer-1", syntheticCardDefinitionId("test-buffer-1"), "event"),
+        card("buffer-2", syntheticCardDefinitionId("test-buffer-2"), "event"),
+        card("buffer-3", syntheticCardDefinitionId("test-buffer-3"), "event"),
+        card("buffer-4", syntheticCardDefinitionId("test-buffer-4"), "event"),
       ],
       rig: [source],
     });
@@ -474,7 +476,10 @@ function runnerInput(
         memoryUsed: options.memoryUsed ?? 0,
       },
       opponent: {
-        identity: card("corp-identity", 3, "identity"),
+        identity: card("corp-identity", 3, "identity", {
+          owner: "corp",
+          controller: "corp",
+        }),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
@@ -550,7 +555,7 @@ function shellTraders(): VisibleCard {
 
 function card(
   instanceId: string,
-  definitionId: number,
+  definitionId: CardDefinitionId,
   type: NonNullable<VisibleCard["type"]>,
   extra: Partial<VisibleCard> = {},
 ): VisibleCard {
@@ -558,16 +563,10 @@ function card(
     instanceId,
     definitionId,
     known: true,
-    title: definitionId,
+    title: instanceId,
     type,
-    owner:
-      type === "identity" && definitionId.startsWith("corp")
-        ? "corp"
-        : "runner",
-    controller:
-      type === "identity" && definitionId.startsWith("corp")
-        ? "corp"
-        : "runner",
+    owner: "runner",
+    controller: "runner",
     ...extra,
   };
 }
@@ -590,7 +589,7 @@ describe("Shell Traders hosted-program displacement", () => {
     const target = card("target", 228, "program", {
       memoryCost: 1,
     });
-    const gap = coverageGap("wall-gap", "breaker_wall", "remote_1", "P2");
+    const gap = coverageGap("wall-gap", "breaker_wall", "r1", "P2");
     const result = assessShellTradersRigReplacement({
       input: runnerInput([], {
         rig: [host, wall, filler],
