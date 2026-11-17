@@ -37,6 +37,7 @@ import {
   type DeckCapabilityProfile,
 } from "../deck-capabilities";
 import {
+  completeRunnerEconomyFixturePolicy,
   attachOwnDeckSnapshot,
   aiInput,
   bindSyntheticAgendaInstallQuotes,
@@ -31653,7 +31654,14 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     practicalMicroRuntimeCandidates: () => [],
     ...overrides,
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  const context = createSemanticRuntimeDecisionContext(dependencies);
+  const context = createSemanticRuntimeDecisionContext({
+    ...dependencies,
+    buildRunnerEconomyPosture: (params) =>
+      completeRunnerEconomyFixturePolicy(
+        dependencies.buildRunnerEconomyPosture(params),
+        params.input.playerView.own.credits,
+      ),
+  });
   const chooseSemanticRuntimeAction = context.chooseSemanticRuntimeAction;
   return {
     ...context,

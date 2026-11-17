@@ -151,7 +151,9 @@ it.each(["wrong_timing", "disabled_decline"] as const)(
         code: "window_origin_missing",
         context: expect.objectContaining({
           owner: "continuation",
-          removalCondition: expect.stringContaining("Failed=choice_contract"),
+          removalCondition: expect.stringContaining(
+            invalidContract === "wrong_timing" ? "Failed=choice_contract" : "Failed=decline",
+          ),
         }),
       }),
     );

@@ -12,6 +12,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import {
+  completeRunnerEconomyFixturePolicy,
   aiInput,
   legalAction,
   safeRuntimeRunTarget,
@@ -1861,5 +1862,12 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     practicalMicroRuntimeCandidates: () => [],
     ...overrides,
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  return createSemanticRuntimeDecisionContext({
+    ...dependencies,
+    buildRunnerEconomyPosture: (params) =>
+      completeRunnerEconomyFixturePolicy(
+        dependencies.buildRunnerEconomyPosture(params),
+        params.input.playerView.own.credits,
+      ),
+  });
 }

@@ -2310,6 +2310,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     // The trace must remain unaffordable; four Corp credits no longer create
     // a negative quote against a Runner holding one hundred general credits.
     input.playerView.opponent.credits = 1_000;
+    input.playerView.traceRulesProfile = "modern_open";
     input.playerView.own.rig = [
       visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
       visibleCard("onr_v1_007_blink", "runner", "program"),
@@ -2838,6 +2839,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       ),
     ]);
     input.playerView.stateVersion = 3;
+    for (const action of input.legalActions) action.expiresAtStateVersion = 3;
     input.playerView.opponent.deckCount = 10;
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     const currentTurnSerial = input.playerView.turnSerial;

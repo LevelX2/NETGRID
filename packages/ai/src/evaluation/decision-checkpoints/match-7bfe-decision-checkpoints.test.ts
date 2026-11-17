@@ -100,7 +100,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       },
     };
     const result = expectCheckpointToPass(checkpoint);
-    expect(result.decision?.evidence.some((code) =>
+    expect(result.decision?.evidence?.some((code) =>
       code.startsWith("plan_assessment_evidence:corp_layered_remote_ice_staging:"),
     )).toBe(true);
   });

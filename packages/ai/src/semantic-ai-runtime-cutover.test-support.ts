@@ -541,3 +541,40 @@ export function publicEvent(
     publicPayload,
   };
 }
+
+/** Complete the reserve contract for test callers that stub economy posture. */
+export function completeRunnerEconomyFixturePolicy(
+  posture: import("./run-analysis/runner-run-target-types").RunnerEconomyPosture,
+  credits: number,
+): import("./run-analysis/runner-run-target-types").RunnerEconomyPosture {
+  const { minimumCreditFloor, desiredCreditReserve } = posture;
+  const reserve = posture.creditReservePolicy as
+    | Partial<typeof posture.creditReservePolicy>
+    | undefined;
+  if (reserve?.emergencyReserve !== undefined) return posture;
+  return {
+    ...posture,
+    creditReservePolicy: {
+      schemaVersion: 1,
+      phase: "opening",
+      currentCredits: credits,
+      liquidCredits: credits,
+      convertibleBankCredits: 0,
+      economyTurnCreditCeiling: desiredCreditReserve,
+      minimumCreditFloor,
+      breakerUseReserve: 0,
+      contestReserve: 0,
+      developmentReserve: 0,
+      emergencyReserve: minimumCreditFloor,
+      desiredCreditReserve,
+      remoteScoreThreat: "none",
+      canContestIfFunded: false,
+      belowReserveNow: credits < desiredCreditReserve,
+      spendingWouldDropBelowReserve: false,
+      reserveDrivers: [],
+      reserveOverrides: [],
+      evidence: ["synthetic_test_reserve_policy"],
+      ...reserve,
+    },
+  };
+}

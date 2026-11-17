@@ -156,3 +156,13 @@ function serverIdForLabel(value: unknown): string | undefined {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+export function publishOpenTraceBid(checkpoint: AiDecisionCheckpointV1): void {
+  const state = checkpoint.engine.testOnlyGameState;
+  const trace = state.trace;
+  if (trace?.status !== "runner_bid" || trace.traceValue === undefined)
+    throw new Error("Expected the fixture's open Runner bid with Corp strength");
+  state.traceRulesProfile = "modern_open";
+  trace.traceRulesProfile = "modern_open";
+  trace.bidsRevealed = true;
+}

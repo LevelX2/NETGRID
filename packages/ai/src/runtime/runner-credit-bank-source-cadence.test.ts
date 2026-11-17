@@ -6,6 +6,7 @@ import { buildDeckCapabilityProfileFromInput } from "../deck-capabilities";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
+  completeRunnerEconomyFixturePolicy,
   aiInput,
   legalAction,
   visibleCard,
@@ -397,7 +398,14 @@ function runtimeContext(desiredReserve = 14) {
     selectedChoicesForDecision: () => undefined,
     practicalMicroRuntimeCandidates: () => [],
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  return createSemanticRuntimeDecisionContext({
+    ...dependencies,
+    buildRunnerEconomyPosture: (params) =>
+      completeRunnerEconomyFixturePolicy(
+        dependencies.buildRunnerEconomyPosture(params),
+        params.input.playerView.own.credits,
+      ),
+  });
 }
 
 function bank(instanceId: string, amount: number): VisibleCard {

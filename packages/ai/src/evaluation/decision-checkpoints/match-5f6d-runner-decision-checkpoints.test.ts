@@ -9,7 +9,7 @@ import newsgroupD75Json from "../../../../../data/scenarios/ai-decision-checkpoi
 import newsgroupD83Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-06-newsgroup-dominance-d83.json";
 import newsgroupD84Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-07-newsgroup-dominance-d84.json";
 import stackSearchFirstPickJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-08-stack-search-first-pick.json";
-import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
+import { bindHistoricalRunEventCadence, publishOpenTraceBid } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -196,16 +196,6 @@ function mutateFixture(
   mutation(result);
   result.engine.stateHash = hashGameState(result.engine.testOnlyGameState);
   return result;
-}
-
-function publishOpenTraceBid(checkpoint: AiDecisionCheckpointV1): void {
-  const state = checkpoint.engine.testOnlyGameState;
-  const trace = state.trace;
-  if (trace?.status !== "runner_bid" || trace.traceValue === undefined)
-    throw new Error("Expected the fixture's open Runner bid with Corp strength");
-  state.traceRulesProfile = "modern_open";
-  trace.traceRulesProfile = "modern_open";
-  trace.bidsRevealed = true;
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

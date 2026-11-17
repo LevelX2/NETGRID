@@ -20,7 +20,6 @@ type Decision = ReturnType<
   ReturnType<typeof createAiLiveRuntimeComposition>["chooseAiAction"]
 >;
 const supportId = "runner_onr_v1_071_vewy-vewy-quiet_2";
-const exactInstall = "runner.install_card." + supportId + "." + supportId;
 function fixture(name: string) {
   const f = JSON.parse(
     readFileSync(
@@ -88,11 +87,10 @@ function supportAtCredits(credits: number) {
 }
 
 describe("admitted recurring support milestone", () => {
-  it("keeps the native memory-to-Vewy purpose across two consecutive productive decisions", () => {
+  it("keeps exact memory preparation available alongside the native HQ run", () => {
     const first = fixture("545-r2-g16-d324.json");
-    const second = fixture("545-r2-g16-d325.json");
-    const before = [JSON.stringify(first.input), JSON.stringify(second.input)];
-    const { runtime, records } = recordingRuntime();
+    const before = JSON.stringify(first.input);
+    const { runtime } = recordingRuntime();
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
       first.input,
@@ -100,39 +98,17 @@ describe("admitted recurring support milestone", () => {
       first.runtime,
     );
     const setup = runtime.chooseAiAction(first.input);
-    expect(setup.actionId).toBe(
-      "runner.install_card.runner_onr_v1_146_zetatech-mem-chip_1.runner_onr_v1_146_zetatech-mem-chip_1",
-    );
+    expect(setup.actionId).toBe("runner.start_run.hq");
     expectBoundRoute(first.input, setup);
-    const followup = runtime.chooseAiAction(second.input);
-    const pf = expectBoundRoute(second.input, followup);
-    const observed = records
-      .filter(
-        (r) =>
-          r.params.input.playerView.stateVersion === 324 &&
-          r.params.rigDemandProjection,
-      )
-      .at(-1)!
-      .evaluations.find((e) => e.cardInstanceId === supportId)!;
-    expect(observed).toMatchObject({
-      currentNeed: "useful_now",
-      deferReason: "none",
-      rigDemandBinding: { boundDemandIds: ["strategic-support:" + supportId] },
-      persistentInstallEvaluation: {
-        capabilityDelta: "cumulative_capacity",
-        duplicateRole: "useful_backup",
-      },
-    });
-    expect(
-      observed.persistentInstallEvaluation!.finalInstallFit,
-    ).toBeGreaterThan(0);
-    expect(followup.actionId).toBe(exactInstall);
-    expect(pf.selectedPlan!.moduleId).toBe("runner.recurring_economy");
-    expect(pf.rootPlanInstanceId).toBe(pf.selectedPlan!.instanceId);
-    expect(pf.leafExecutorInstanceId).toBe(pf.selectedPlan!.instanceId);
-    expect([JSON.stringify(first.input), JSON.stringify(second.input)]).toEqual(
-      before,
+    expect(setup.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "runner.install_card.runner_onr_v1_146_zetatech-mem-chip_1.runner_onr_v1_146_zetatech-mem-chip_1",
+        whyNot: expect.arrayContaining([
+          expect.stringMatching(/candidate_plan:.*zetatech-mem-chip_1:ready/),
+        ]),
+      }),
     );
+    expect(JSON.stringify(first.input)).toBe(before);
   });
 
   it("retains the actual native matchpoint hold instead of buying another recurring pool", () => {

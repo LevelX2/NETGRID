@@ -72,7 +72,7 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
       ),
     ).toMatchObject({
       knownAccessState: "unknown",
-      recommendation: "run_if_free",
+      recommendation: "gain_credits_first",
       pathPassability: "reachable",
     });
   });

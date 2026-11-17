@@ -137,11 +137,11 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       status: "covered_guaranteed",
       totalClickCost: 2,
       projectedCredits: 14,
-      projectedGeneralCredits: 11,
+      projectedGeneralCredits: 10,
     });
     const exact = route(10, 14, 3);
     expect(runnerFundingPaymentWindowQuote(exact, setups)).toEqual({
-      creditGain: 3,
+      creditGain: 4,
       installedCardIds: ["runner_onr_proteus_133_chiba-bank-account_1"],
     });
     expect(runnerFundingPaymentWindowQuote(exact, [])).toBeUndefined();

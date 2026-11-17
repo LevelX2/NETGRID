@@ -2478,6 +2478,7 @@
           "visibility": "public",
           "expiresAtStateVersion": 75,
           "payload": {
+            "runnerProgramTrashBeforeInstall": true,
             "effectKind": "install_card",
             "cardId": "runner_onr_v1_059_self-modifying-code_1"
           }
@@ -4749,6 +4750,7 @@
         "visibility": "public",
         "expiresAtStateVersion": 75,
         "payload": {
+          "runnerProgramTrashBeforeInstall": true,
           "effectKind": "install_card",
           "cardId": "runner_onr_v1_059_self-modifying-code_1"
         }

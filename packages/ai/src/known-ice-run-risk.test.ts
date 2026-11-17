@@ -369,6 +369,7 @@ function aiInput(params: {
   const playerView: PlayerView = {
     stateVersion: FIXTURE_STATE_VERSION,
     turnSerial: 1,
+    traceRulesProfile: "modern_open",
     side: "runner",
     activeSide: "runner",
     phase: "runner_action_phase",

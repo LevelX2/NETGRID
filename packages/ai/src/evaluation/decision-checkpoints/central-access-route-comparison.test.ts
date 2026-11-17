@@ -134,7 +134,7 @@ describe("Runner central routes with the same access destination", () => {
     const expensiveRuns = alternatives.filter(
       (route) =>
         route.creditsAfterRun === 1 &&
-        route.routeQuote?.reachability === "conditional_access",
+        route.routeQuote?.reachability === "guaranteed_access",
     );
     expect(expensiveRuns).toHaveLength(2);
     expect(excluded.map((entry) => entry.actionId).sort()).toEqual(

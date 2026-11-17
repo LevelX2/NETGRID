@@ -26,6 +26,11 @@ describe("selfplay cycle 130 decision checkpoints", () => {
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
+    const prevention = capture.input.playerView.pendingChoice?.options.find(
+      (option) => option.value === 1 && option.id.includes("force-shield"),
+    );
+    if (!prevention) throw new Error("Expected the recorded Force Shield option");
+    prevention.metadata = { optionKind: "prevent_damage", amount: 1 };
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({

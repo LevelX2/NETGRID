@@ -3132,6 +3132,7 @@
         "stateHashAfter": "fnv1a:92fc7b1f",
         "visibilityClass": "private_to_side",
         "publicPayload": {
+          "corpRdDrawnToHqCount": 1,
           "actor": "corp",
           "actionType": "mandatory_draw",
           "label": "Korp Pflichtkarte ziehen",

@@ -15,7 +15,7 @@ import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 afterEach(resetResidentPlanPortfolioMemory);
 
 it.each(["g25-d46", "g38-d208"])(
-  "keeps the native %s draw route when no improving hand answer is bound",
+  "binds current coverage or known central funding in native %s",
   (name) => {
     const fixture = JSON.parse(
       readFileSync(
@@ -63,8 +63,20 @@ it.each(["g25-d46", "g38-d208"])(
     );
 
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.draw_card");
     expect(decision.fallbackUsed).toBe(false);
+    if (name === "g25-d46") {
+      expect(decision.actionId).toBe("runner.gain_credit");
+      expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        leafExecutorInstanceId: "plan:runner.economy:run-support%3Acentral%3Ahq",
+        route: {
+          actionId: decision.actionId,
+          stateVersion: input.playerView.stateVersion,
+        },
+      });
+      return;
+    }
+    expect(decision.actionId).toBe("runner.draw_card");
     expect(
       input.legalActions.some(
         (action) => action.actionId === decision.actionId,
