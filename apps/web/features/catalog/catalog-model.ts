@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { createAppCollator } from "../../i18n/format";
 import { DEFAULT_APP_LOCALE, type AppLocale } from "../../i18n/locale";
 
@@ -53,13 +54,13 @@ export type CatalogStatusKey =
 export type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
 export type CatalogCardForTypeFilter = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   type: string;
   subtypes: string[];
 };
 
 export type CatalogCardForSetFilter = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   setId: string;
 };
 
@@ -76,7 +77,7 @@ export type CatalogSetIdFilterOption = {
 };
 
 export type CatalogCardForRarityFilter = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   rarity?: {
     code?: string;
     labelDe?: string;
@@ -93,12 +94,12 @@ export type CatalogAiInspectorSummary = {
 };
 
 export type CatalogCardForAiHintFilter = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   aiInspectorSummary?: CatalogAiInspectorSummary | null;
 };
 
 export type CatalogCardForBlockStatusFilter = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   statuses: {
     blocked: boolean;
   };
@@ -249,10 +250,10 @@ export function filterCatalogCardsByType<T extends CatalogCardForTypeFilter>(
 }
 
 export function nextCatalogSelection<T extends CatalogCardForTypeFilter>(
-  current: string | null,
+  current: CardDefinitionId | null,
   cards: T[],
   filters: CatalogTypeFilterState,
-): string | null {
+): CardDefinitionId | null {
   const filteredCards = filterCatalogCardsByType(cards, filters);
   if (current && filteredCards.some((card) => card.catalogCardId === current))
     return current;

@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent } from "@netgrid/shared";
 
@@ -9,10 +10,10 @@ import {
 describe("access presentation queue", () => {
   it("keeps four public Rush Hour accesses in event order despite repeated definitions", () => {
     const incoming = [
-      access("evt_11", "data_wall", "Data Wall", 0),
-      access("evt_12", "urban_renewal", "Urban Renewal", 1),
-      access("evt_13", "data_wall", "Data Wall", 2),
-      access("evt_14", "urban_renewal", "Urban Renewal", 3),
+      access("evt_11", 9143, "Data Wall", 0),
+      access("evt_12", 9144, "Urban Renewal", 1),
+      access("evt_13", 9143, "Data Wall", 2),
+      access("evt_14", 9144, "Urban Renewal", 3),
     ];
 
     expect(
@@ -25,7 +26,7 @@ describe("access presentation queue", () => {
   it("retains an access when later unrelated events arrive", () => {
     const pending = appendPendingAccessPresentationEvents(
       [],
-      [access("evt_14", "urban_renewal", "Urban Renewal", 3)],
+      [access("evt_14", 9144, "Urban Renewal", 3)],
       [],
     );
     const next = appendPendingAccessPresentationEvents(
@@ -44,7 +45,7 @@ describe("access presentation queue", () => {
     expect(
       appendPendingAccessPresentationEvents(
         [],
-        [access("evt_13", "data_wall", "Data Wall", 2), redacted],
+        [access("evt_13", 9143, "Data Wall", 2), redacted],
         ["evt_13"],
       ),
     ).toEqual([]);
@@ -52,8 +53,8 @@ describe("access presentation queue", () => {
 
   it("removes only the acknowledged access", () => {
     const pending = [
-      access("evt_13", "data_wall", "Data Wall", 2),
-      access("evt_14", "urban_renewal", "Urban Renewal", 3),
+      access("evt_13", 9143, "Data Wall", 2),
+      access("evt_14", 9144, "Urban Renewal", 3),
     ];
     expect(
       dismissPendingAccessPresentationEvent(pending, "evt_13").map(
@@ -65,7 +66,7 @@ describe("access presentation queue", () => {
 
 function access(
   eventId: string,
-  cardDefinitionId: string,
+  cardDefinitionId: CardDefinitionId,
   title: string,
   accessIndex: number,
 ): PublicGameEvent {

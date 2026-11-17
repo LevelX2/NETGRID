@@ -56,7 +56,7 @@ function nativeCheckpoint() {
   if (!drawn.ok) throw new Error(drawn.error.message);
   state = drawn.state;
   const damage = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_v1_302_scorched-earth",
+    (c) => c.definitionId === 514,
   )!;
   for (const zone of [state.corp.hq, state.corp.rd, state.corp.archives]) {
     const i = zone.indexOf(damage.instanceId);

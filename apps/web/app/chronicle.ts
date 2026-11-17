@@ -1,3 +1,5 @@
+import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "./card-definition-id";
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import {
   type PublicGameEvent,
   type ResolvedGameEffect,
@@ -81,7 +83,7 @@ export type ChronicleItem = {
   title: string;
   description?: string;
   chips: string[];
-  cardDefinitionId?: string;
+  cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;
   cardText?: string;
   cardDetailLines: string[];
@@ -112,18 +114,18 @@ export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
   hidden: "Verdeckt",
 };
 
-const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
-const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
-const SKIVVISS_ID = "onr_v1_064_skivviss";
-const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
-const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
-const BLINK_ID = "onr_v1_007_blink";
-const INSIDE_JOB_ID = "onr_v1_094_inside-job";
-const SOCIAL_ENGINEERING_ID = "onr_v1_111_social-engineering";
-const BALL_AND_CHAIN_ID = "onr_v1_222_ball-and-chain";
-const VIRAL_15_ID = "onr_v1_276_viral-15";
-const PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
-const GYPSY_SCHEDULE_ANALYZER_ID = "onr_classic_038_gypsytm-schedule-analyzer";
+const BRAINDANCE_CAMPAIGN_ID = 523;
+const SHELL_TRADERS_ID = 388;
+const SKIVVISS_ID = 276;
+const QUEST_FOR_CATTEKIN_ID = 384;
+const VACUUM_LINK_ID = 487;
+const BLINK_ID = 219;
+const INSIDE_JOB_ID = 306;
+const SOCIAL_ENGINEERING_ID = 323;
+const BALL_AND_CHAIN_ID = 434;
+const VIRAL_15_ID = 488;
+const PLAYFUL_AI_ID = 316;
+const GYPSY_SCHEDULE_ANALYZER_ID = 42;
 const EMPTY_EVENT_ID_SET: ReadonlySet<string> = new Set();
 
 export function chronicleAccessOutcomePlan(
@@ -193,8 +195,8 @@ function accessOutcomeMatches(
     accessIndex !== outcomeIndex
   )
     return false;
-  const accessCardDefinitionId = stringValue(access.cardDefinitionId);
-  const outcomeCardDefinitionId = stringValue(outcome.cardDefinitionId);
+  const accessCardDefinitionId = cardDefinitionIdValue(access.cardDefinitionId);
+  const outcomeCardDefinitionId = cardDefinitionIdValue(outcome.cardDefinitionId);
   return !(
     accessCardDefinitionId !== undefined &&
     outcomeCardDefinitionId !== undefined &&
@@ -598,12 +600,12 @@ function formatSemanticChronicleEvent(
     abilityId === "decline_optional_bonus_run";
   const socialEngineeringChoice =
     actionType === "resolve_choice" &&
-    stringValue(payload.sourceDefinitionId) === SOCIAL_ENGINEERING_ID;
+    cardDefinitionIdValue(payload.sourceDefinitionId) === SOCIAL_ENGINEERING_ID;
   const publicStackToGripReveal =
     actionType === "resolve_choice" &&
     stringValue(payload.hiddenZoneAction) === "p3_37_search_stack_to_grip" &&
     stringValue(payload.publicRevealKind) === "reveal" &&
-    stringValue(payload.publicRevealDefinitionId) !== undefined;
+    cardDefinitionIdValue(payload.publicRevealDefinitionId) !== undefined;
   const temporaryEncounterChosen =
     actionType === "resolve_choice" &&
     payload.hiddenZoneAction === "successful_run_temporary_encounter";
@@ -611,7 +613,7 @@ function formatSemanticChronicleEvent(
     actionType === "resolve_choice" &&
     payload.hiddenZoneAction === "successful_run_intervention_declined";
   const publicStackRevealDefinitionId = publicStackToGripReveal
-    ? stringValue(payload.publicRevealDefinitionId)
+    ? cardDefinitionIdValue(payload.publicRevealDefinitionId)
     : undefined;
   const hostedCreditsTaken = positiveIntegerValue(payload.hostedCreditsTaken);
   const hostedCreditsAdded = positiveIntegerValue(payload.hostedCreditsAdded);
@@ -632,12 +634,12 @@ function formatSemanticChronicleEvent(
     numberValue(payload.count) ??
     numberValue(payload.discardCount) ??
     1;
-  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
   const cardDefinitionId =
     publicStackRevealDefinitionId ??
-    stringValue(payload.cardDefinitionId) ??
+    cardDefinitionIdValue(payload.cardDefinitionId) ??
     sourceDefinitionId ??
-    stringValue(payload.targetCardDefinitionId);
+    cardDefinitionIdValue(payload.targetCardDefinitionId);
   const mergedEffects = resolvedEffectsFromPayload(
     payload.resolvedEffects,
   ).filter((effect) => shouldMergeCardResolverEffect(event, effect));
@@ -708,7 +710,7 @@ function formatSemanticChronicleEvent(
   } else if (temporaryEncounterChosen || temporaryEncounterDeclined) {
     const source =
       publicCardTitle(
-        stringValue(payload.sourceDefinitionId),
+        cardDefinitionIdValue(payload.sourceDefinitionId),
         context.cardPresentationsById,
       ) ??
       stringValue(payload.fortWindowSourceTitle) ??
@@ -716,7 +718,7 @@ function formatSemanticChronicleEvent(
     if (temporaryEncounterChosen) {
       const ice =
         publicCardTitle(
-          stringValue(payload.publicRevealDefinitionId),
+          cardDefinitionIdValue(payload.publicRevealDefinitionId),
           context.cardPresentationsById,
         ) ?? translate("card.unknown");
       explicitTitle = translate("event.temporaryEncounterChosen", {
@@ -735,7 +737,7 @@ function formatSemanticChronicleEvent(
     }
     category = "run";
   } else if (publicStackToGripReveal) {
-    const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+    const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
     const sourceTitle =
       publicCardTitle(sourceDefinitionId, context.cardPresentationsById) ??
       stringValue(payload.sourceTitle) ??
@@ -864,7 +866,7 @@ function formatSemanticChronicleEvent(
     const targetIceTitle =
       stringValue(payload.targetIceTitle) ??
       publicCardTitle(
-        stringValue(payload.targetIceDefinitionId),
+        cardDefinitionIdValue(payload.targetIceDefinitionId),
         context.cardPresentationsById,
       );
     if (
@@ -968,7 +970,7 @@ function formatSemanticChronicleEvent(
   const targetIceTitle =
     stringValue(payload.targetIceTitle) ??
     publicCardTitle(
-      stringValue(payload.targetIceDefinitionId),
+      cardDefinitionIdValue(payload.targetIceDefinitionId),
       context.cardPresentationsById,
     ) ??
     cardTitle;
@@ -995,7 +997,7 @@ function formatSemanticChronicleEvent(
   const publiclyIdentifiedAccessResult =
     ["access_card", "steal_agenda", "trash_accessed_card"].includes(
       actionType,
-    ) && stringValue(payload.cardDefinitionId) !== undefined;
+    ) && cardDefinitionIdValue(payload.cardDefinitionId) !== undefined;
   const publiclyRevealedTraceResult =
     actionType === "resolve_choice" &&
     payload.traceBidsRevealed === true &&
@@ -1089,23 +1091,23 @@ export function formatChronicleEvent(
       ...context,
       translate: context.translate,
     });
-  const titleForDefinitionId = (definitionId: string | undefined) =>
+  const titleForDefinitionId = (definitionId: CardDefinitionId | undefined) =>
     publicCardTitle(definitionId, context.cardPresentationsById);
   const targetCardTitleFromPayload = (payload: Record<string, unknown>) => {
     const explicitTitle = stringValue(payload.targetCardTitle);
     return (
       explicitTitle ??
-      titleForDefinitionId(stringValue(payload.targetCardDefinitionId))
+      titleForDefinitionId(cardDefinitionIdValue(payload.targetCardDefinitionId))
     );
   };
   const publicRevealTitleFromPayload = (payload: Record<string, unknown>) =>
-    titleForDefinitionId(stringValue(payload.publicRevealDefinitionId));
+    titleForDefinitionId(cardDefinitionIdValue(payload.publicRevealDefinitionId));
   const titlesForDefinitionIds = (value: string | undefined) =>
-    definitionIdsFromCsv(value)
+    cardDefinitionIdsFromCsv(value)
       .map(titleForDefinitionId)
       .filter((title): title is string => Boolean(title));
   const iceTitlesForDefinitionIds = (value: string | undefined) =>
-    definitionIdsFromCsv(value)
+    cardDefinitionIdsFromCsv(value)
       .map((definitionId) =>
         publicCardPresentation(definitionId, context.cardPresentationsById),
       )
@@ -1143,9 +1145,9 @@ export function formatChronicleEvent(
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
   let cardTitle = explicitCardTitle ?? labelCardTitle;
-  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
   const sourceTitle = stringValue(payload.sourceTitle);
-  let cardDefinitionId = stringValue(payload.cardDefinitionId);
+  let cardDefinitionId = cardDefinitionIdValue(payload.cardDefinitionId);
   let cardText = context.cardText ?? undefined;
   const isAi = Boolean(
     stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
@@ -1264,7 +1266,7 @@ export function formatChronicleEvent(
           importance =
             citySurveillanceDetails.tagsAdded > 0 ? "important" : "normal";
           visibility = "public";
-          cardDefinitionId = "onr_v1_313_city-surveillance";
+          cardDefinitionId = 525;
           cardTitle = "City Surveillance";
           title = phrase(
             subject,
@@ -1690,10 +1692,7 @@ export function formatChronicleEvent(
       }
       if (abilityId === "runner_program_trash_before_install") {
         const installedDefinitionId =
-          stringValueFromRecord(
-            payload.targets,
-            "installedProgramDefinitionId",
-          ) ?? sourceDefinitionId;
+          definitionIdFromRecord(payload.targets, "installedProgramDefinitionId") ?? sourceDefinitionId;
         const installedTitle =
           titleForDefinitionId(installedDefinitionId) ??
           sourceTitle ??
@@ -1751,7 +1750,7 @@ export function formatChronicleEvent(
         break;
       }
       if (payload.runnerMemoryCheckpointResolved === true) {
-        const trashedDefinitionIds = definitionIdsFromCsv(
+        const trashedDefinitionIds = cardDefinitionIdsFromCsv(
           stringValue(payload.trashedCardDefinitionIds),
         );
         const trashedTitles = titlesForDefinitionIds(
@@ -1808,9 +1807,7 @@ export function formatChronicleEvent(
             sourceTitle ??
             cardTitle ??
             "Viral 15";
-          const trashedDefinitionId = stringValue(
-            payload.trashedCardDefinitionId,
-          );
+          const trashedDefinitionId = cardDefinitionIdValue(payload.trashedCardDefinitionId);
           const trashedTitle =
             titleForDefinitionId(trashedDefinitionId) ??
             stringValue(payload.trashedTitle) ??
@@ -1835,13 +1832,13 @@ export function formatChronicleEvent(
             (effect.visibility === "hidden_info_barrier" ||
               stringValue(effect.reason) === "access_effect" ||
               isPattelAccessCounterType(effect.counterType)) &&
-            (stringValue(effect.sourceDefinitionId) ||
+            (cardDefinitionIdValue(effect.sourceDefinitionId) ||
               stringValue(effect.sourceTitle)),
         );
         const ambushDefinitionId =
-          stringValue(payload.ambushDefinitionId) ??
-          stringValue(payload.accessEffectSourceDefinitionId) ??
-          stringValue(ambushEffect?.sourceDefinitionId);
+          cardDefinitionIdValue(payload.ambushDefinitionId) ??
+          cardDefinitionIdValue(payload.accessEffectSourceDefinitionId) ??
+          cardDefinitionIdValue(ambushEffect?.sourceDefinitionId);
         const ambushPaidCost =
           numberValue(payload.ambushPaidCost) ??
           (isPattelAccessCounterType(ambushEffect?.counterType) &&
@@ -1892,7 +1889,7 @@ export function formatChronicleEvent(
           break;
         }
       }
-      if (sourceDefinitionId === "onr_v1_199_employee-empowerment") {
+      if (sourceDefinitionId === 411) {
         const decision = stringValue(
           payload.employeeEmpowermentStartDrawDecision,
         );
@@ -1992,9 +1989,7 @@ export function formatChronicleEvent(
         const baseLinkValue = numberValue(payload.baseLinkValue) ?? 0;
         const baseLinkCost = numberValue(payload.traceBaseLinkCostPaid) ?? 0;
         const runnerLink = numberValue(payload.runnerLink);
-        const baseLinkDefinitionId = stringValue(
-          payload.traceBaseLinkSourceDefinitionId,
-        );
+        const baseLinkDefinitionId = cardDefinitionIdValue(payload.traceBaseLinkSourceDefinitionId);
         const baseLinkTitle =
           titleForDefinitionId(baseLinkDefinitionId) ?? "eine Base-Link-Karte";
         category = "danger";
@@ -2089,9 +2084,7 @@ export function formatChronicleEvent(
         const linkDelta = numberValue(payload.postBidTraceLinkDelta) ?? 0;
         const linkBonus = numberValue(payload.postBidTraceLinkBonus) ?? 0;
         const linkCost = numberValue(payload.postBidTraceLinkCostPaid) ?? 0;
-        const linkDefinitionId = stringValue(
-          payload.postBidTraceLinkSourceDefinitionId,
-        );
+        const linkDefinitionId = cardDefinitionIdValue(payload.postBidTraceLinkSourceDefinitionId);
         const linkTitle =
           titleForDefinitionId(linkDefinitionId) ??
           cardTitle ??
@@ -2188,9 +2181,7 @@ export function formatChronicleEvent(
         const preventedTags =
           numberValue(payload.preventedTags) ??
           Math.max(0, originalTags - finalTags);
-        const trashedCardDefinitionId = stringValue(
-          payload.trashedCardDefinitionId,
-        );
+        const trashedCardDefinitionId = cardDefinitionIdValue(payload.trashedCardDefinitionId);
         const preventionSourceDefinitionId =
           payload.sourceTrashed === true && trashedCardDefinitionId
             ? trashedCardDefinitionId
@@ -2200,8 +2191,8 @@ export function formatChronicleEvent(
           sourceTitle ??
           cardTitle;
         const tagSourceDefinitionId =
-          stringValue(payload.accessEffectSourceDefinitionId) ??
-          stringValue(payload.ambushDefinitionId) ??
+          cardDefinitionIdValue(payload.accessEffectSourceDefinitionId) ??
+          cardDefinitionIdValue(payload.ambushDefinitionId) ??
           (sourceDefinitionId !== preventionSourceDefinitionId
             ? sourceDefinitionId
             : undefined);
@@ -2307,9 +2298,7 @@ export function formatChronicleEvent(
         break;
       }
       if (hiddenZoneAction === "v162_priority_requisition_free_rez") {
-        const targetDefinitionId = stringValue(
-          payload.priorityRequisitionTargetDefinitionId,
-        );
+        const targetDefinitionId = cardDefinitionIdValue(payload.priorityRequisitionTargetDefinitionId);
         const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
         category = "card";
         importance = "important";
@@ -2351,7 +2340,7 @@ export function formatChronicleEvent(
         break;
       }
       if (abilityId === "force_rez_or_trash_ice") {
-        const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+        const targetDefinitionId = cardDefinitionIdValue(payload.targetCardDefinitionId);
         const targetTitle = titleForDefinitionId(targetDefinitionId);
         const targetIceLabel =
           displayServerLabel(stringValue(payload.targetIcePositionLabel)) ??
@@ -2398,7 +2387,7 @@ export function formatChronicleEvent(
         visibility = "public";
         title = phrase(subject, "Aardvark gerezzt und Worm getrasht");
         cardDefinitionId =
-          cardDefinitionId ?? stringValue(payload.publicRevealDefinitionId);
+          cardDefinitionId ?? cardDefinitionIdValue(payload.publicRevealDefinitionId);
         chips.push("Aardvark", "Rez", "Worm Trash");
         break;
       }
@@ -2410,7 +2399,7 @@ export function formatChronicleEvent(
         break;
       }
       if (abilityId === "successful_hq_run_pay_rez_cost_trash_rezzed_ice") {
-        const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+        const targetDefinitionId = cardDefinitionIdValue(payload.targetCardDefinitionId);
         const targetServerLabel = displayServerLabel(
           stringValue(payload.targetServerLabel),
         );
@@ -2443,7 +2432,7 @@ export function formatChronicleEvent(
         cardDefinitionId =
           cardDefinitionId ??
           sourceDefinitionId ??
-          "onr_v1_113_synchronized-attack-on-hq";
+          325;
         title = `Synchronized Attack on HQ: ${subject} ${isYou ? "behältst" : "behält"} ${hqCardCountText(retainedCount)}, ${isYou ? "wirfst" : "wirft"} ${hqCardCountText(discardedCount)} verdeckt ab und ${isYou ? "bezahlst" : "bezahlt"} dafür ${creditText(creditsPaid)}.`;
         chips.push(
           "Synchronized Attack",
@@ -2456,15 +2445,13 @@ export function formatChronicleEvent(
       if (
         (hiddenZoneAction === "temporary_program_install" ||
           hiddenZoneAction === "p3_38_stack_or_trash_program_install") &&
-        stringValue(payload.installedProgramDefinitionId)
+        cardDefinitionIdValue(payload.installedProgramDefinitionId)
       ) {
         const source =
           titleForDefinitionId(sourceDefinitionId) ??
           sourceTitle ??
           "einer Kartenfähigkeit";
-        const programDefinitionId = stringValue(
-          payload.installedProgramDefinitionId,
-        );
+        const programDefinitionId = cardDefinitionIdValue(payload.installedProgramDefinitionId);
         const programTitle =
           titleForDefinitionId(programDefinitionId) ?? "ein Programm";
         const sourceZone =
@@ -2546,12 +2533,12 @@ export function formatChronicleEvent(
       ) {
         const searchesHeap = hiddenZoneAction === "p3_37_search_trash_to_grip";
         const revealedDefinitionId =
-          stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+          cardDefinitionIdValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
         const revealedTitle =
           titleForDefinitionId(revealedDefinitionId) ?? cardTitle;
         const isPublicReveal =
           stringValue(payload.publicRevealKind) === "reveal" ||
-          Boolean(stringValue(payload.publicRevealDefinitionId)) ||
+          Boolean(cardDefinitionIdValue(payload.publicRevealDefinitionId)) ||
           Boolean(cardDefinitionId);
         const searchSource = isPublicReveal
           ? titleForDefinitionId(sourceDefinitionId)
@@ -2611,7 +2598,7 @@ export function formatChronicleEvent(
         importance = "important";
         visibility = "public";
         cardDefinitionId =
-          stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+          cardDefinitionIdValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
         title =
           selectedCount > 0
             ? phrase(
@@ -2642,7 +2629,7 @@ export function formatChronicleEvent(
         importance = "important";
         visibility = "public";
         cardDefinitionId =
-          stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+          cardDefinitionIdValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
         title = phrase(
           subject,
           `${source} genutzt, ${programTitle} der Korp gezeigt und in die Hand genommen`,
@@ -2676,21 +2663,21 @@ export function formatChronicleEvent(
         const installed =
           payload.installed === true ||
           (numberValue(payload.installedProgramCount) ?? 0) > 0 ||
-          Boolean(stringValue(payload.installedProgramDefinitionId));
+          Boolean(cardDefinitionIdValue(payload.installedProgramDefinitionId));
         category = "run";
         importance = "important";
         visibility = "public";
         if (installed) {
           const programTitle =
             titleForDefinitionId(
-              stringValue(payload.installedProgramDefinitionId),
+              cardDefinitionIdValue(payload.installedProgramDefinitionId),
             ) ??
             publicRevealTitleFromPayload(payload) ??
             cardTitle ??
             "ein Programm";
           cardDefinitionId =
-            stringValue(payload.installedProgramDefinitionId) ??
-            stringValue(payload.publicRevealDefinitionId) ??
+            cardDefinitionIdValue(payload.installedProgramDefinitionId) ??
+            cardDefinitionIdValue(payload.publicRevealDefinitionId) ??
             cardDefinitionId;
           title = phrase(
             subject,
@@ -2747,7 +2734,7 @@ export function formatChronicleEvent(
         importance = "important";
         visibility = "public";
         cardDefinitionId =
-          stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+          cardDefinitionIdValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
         title = deferredForMemory
           ? phrase(
               subject,
@@ -2782,7 +2769,7 @@ export function formatChronicleEvent(
       if (hiddenZoneAction === "self_modifying_code_free_mu") {
         const installedTitle =
           titleForDefinitionId(
-            stringValue(payload.installedProgramDefinitionId),
+            cardDefinitionIdValue(payload.installedProgramDefinitionId),
           ) ??
           publicRevealTitleFromPayload(payload) ??
           cardTitle ??
@@ -2796,8 +2783,8 @@ export function formatChronicleEvent(
         importance = "important";
         visibility = "public";
         cardDefinitionId =
-          stringValue(payload.installedProgramDefinitionId) ??
-          stringValue(payload.publicRevealDefinitionId) ??
+          cardDefinitionIdValue(payload.installedProgramDefinitionId) ??
+          cardDefinitionIdValue(payload.publicRevealDefinitionId) ??
           cardDefinitionId;
         title = phrase(
           subject,
@@ -2979,7 +2966,7 @@ export function formatChronicleEvent(
         importance = "important";
         visibility = "public";
         cardDefinitionId =
-          stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+          cardDefinitionIdValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
         cardTitle = exposedTitle;
         title = phrase(
           subject,
@@ -3122,7 +3109,7 @@ export function formatChronicleEvent(
           stringValue(payload.fortWindowSourceTitle) ??
           "Dr. Dreff";
         const selectedIceTitle = titleForDefinitionId(
-          stringValue(payload.publicRevealDefinitionId),
+          cardDefinitionIdValue(payload.publicRevealDefinitionId),
         );
         const selectedIce = selectedIceTitle ?? "ein ICE aus HQ";
         const selectedIceWithOrigin = selectedIceTitle
@@ -3243,9 +3230,9 @@ export function formatChronicleEvent(
           numberValue(payload.movedCardCount) ??
           1;
         const returnedDefinitionId =
-          stringValue(payload.returnedCardDefinitionId) ??
-          stringValue(payload.targetDefinitionId) ??
-          stringValue(payload.targetCardDefinitionId);
+          cardDefinitionIdValue(payload.returnedCardDefinitionId) ??
+          cardDefinitionIdValue(payload.targetDefinitionId) ??
+          cardDefinitionIdValue(payload.targetCardDefinitionId);
         const returnedTitle = titleForDefinitionId(returnedDefinitionId);
         const source =
           titleForDefinitionId(sourceDefinitionId) ??
@@ -3497,10 +3484,7 @@ export function formatChronicleEvent(
           payloadBooleanValue(payload, "installDeferredForMemory") === true
         ) {
           const pendingDefinitionId =
-            stringValueFromRecord(
-              payload.targets,
-              "installedProgramDefinitionId",
-            ) ?? sourceDefinitionId;
+            definitionIdFromRecord(payload.targets, "installedProgramDefinitionId") ?? sourceDefinitionId;
           const pendingTitle =
             titleForDefinitionId(pendingDefinitionId) ??
             sourceTitle ??
@@ -4018,7 +4002,7 @@ export function formatChronicleEvent(
         const revealedTitles = publicRevealTitleList(
           payload.publicRevealTitles,
         );
-        const revealedDefinitionCount = definitionIdsFromCsv(
+        const revealedDefinitionCount = cardDefinitionIdsFromCsv(
           stringValue(payload.publicRevealDefinitionIds),
         ).length;
         const exposedCount =
@@ -4149,7 +4133,7 @@ export function formatChronicleEvent(
         const targetIceTitle = stringValue(payload.targetIceTitle);
         const targetIceSuffix = targetIceTitle ? ` auf ${targetIceTitle}` : "";
         const endsRunAfterBreak = payload.breakerEndsRunAfterBreak === true;
-        const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+        const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
         const blinkDieRoll = numberValue(payload.blinkDieRoll);
         const blinkBreakSuccess =
           payload.blinkBreakSuccess === true
@@ -4235,7 +4219,7 @@ export function formatChronicleEvent(
         const revealedTitles = publicRevealTitleList(
           payload.publicRevealTitles,
         );
-        const revealedDefinitionCount = definitionIdsFromCsv(
+        const revealedDefinitionCount = cardDefinitionIdsFromCsv(
           stringValue(payload.publicRevealDefinitionIds),
         ).length;
         const exposedCount =
@@ -4280,7 +4264,7 @@ export function formatChronicleEvent(
           stringValue(payload.temporaryIceSourceTitle) ??
           "Dr. Dreff";
         const temporaryIce =
-          titleForDefinitionId(stringValue(payload.temporaryIceDefinitionId)) ??
+          titleForDefinitionId(cardDefinitionIdValue(payload.temporaryIceDefinitionId)) ??
           "das temporäre ICE";
         category = "run";
         importance = "important";
@@ -4348,9 +4332,7 @@ export function formatChronicleEvent(
         stringValue(payload.corpPostPassIceAbility) ===
         "return_passed_ice_to_hq"
       ) {
-        const passedIceDefinitionId = stringValue(
-          payload.passedIceDefinitionId,
-        );
+        const passedIceDefinitionId = cardDefinitionIdValue(payload.passedIceDefinitionId);
         const source =
           titleForDefinitionId(sourceDefinitionId) ??
           titleForDefinitionId(passedIceDefinitionId) ??
@@ -4521,12 +4503,9 @@ export function formatChronicleEvent(
       if (abilityId === "rio_de_janeiro_passed_ice") {
         const dieRoll = payloadRandomRoll(payload);
         const runEnded = payload.rioRunEnded === true;
-        const passedIceDefinitionId = stringValue(
-          payload.passedIceDefinitionId,
-        );
+        const passedIceDefinitionId = cardDefinitionIdValue(payload.passedIceDefinitionId);
         const passedIce =
           titleForDefinitionId(passedIceDefinitionId) ??
-          passedIceDefinitionId ??
           "ein gerezztes ICE";
         category = "run";
         importance = runEnded ? "critical" : "important";
@@ -4540,7 +4519,7 @@ export function formatChronicleEvent(
         cardDefinitionId =
           passedIceDefinitionId ??
           cardDefinitionId ??
-          stringValue(payload.sourceDefinitionId);
+          cardDefinitionIdValue(payload.sourceDefinitionId);
         cardTitle = passedIceDefinitionId ? passedIce : cardTitle;
         chips.push(
           "Rio",
@@ -4618,7 +4597,7 @@ export function formatChronicleEvent(
         const trashedProgramTitle =
           stringValue(payload.trashedCardType) === "program"
             ? (titleForDefinitionId(
-                stringValue(payload.trashedCardDefinitionId),
+                cardDefinitionIdValue(payload.trashedCardDefinitionId),
               ) ?? stringValue(payload.trashedCardTitle))
             : undefined;
         const passedIceDefinitionId = cardDefinitionId ?? sourceDefinitionId;
@@ -4757,7 +4736,7 @@ export function formatChronicleEvent(
           ? publicRevealTitleList(payload.publicRevealTitles)
           : [];
         const revealedDefinitionCount = schematicsExpose
-          ? definitionIdsFromCsv(stringValue(payload.publicRevealDefinitionIds))
+          ? cardDefinitionIdsFromCsv(stringValue(payload.publicRevealDefinitionIds))
               .length
           : 0;
         const exposedCount = schematicsExpose
@@ -4812,9 +4791,7 @@ export function formatChronicleEvent(
           "delay_score_until_runner_next_turn_start" &&
         payload.delayedAgendaAccessScoreScheduled === true
       ) {
-        const delayedSourceDefinitionId = stringValue(
-          payload.delayedAgendaAccessSourceDefinitionId,
-        );
+        const delayedSourceDefinitionId = cardDefinitionIdValue(payload.delayedAgendaAccessSourceDefinitionId);
         const delayedSourceTitle =
           titleForDefinitionId(delayedSourceDefinitionId) ??
           "Bizarre Encryption Scheme";
@@ -5134,8 +5111,8 @@ export function formatChronicleEvent(
       if (v1922RunnerProgramAbility === "startup_immolator_trash_ice") {
         const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
         const targetDefinitionId =
-          stringValue(payload.targetIceDefinitionId) ??
-          stringValue(payload.trashedCardDefinitionId);
+          cardDefinitionIdValue(payload.targetIceDefinitionId) ??
+          cardDefinitionIdValue(payload.trashedCardDefinitionId);
         category = "run";
         importance = "important";
         visibility = "public";
@@ -5298,7 +5275,7 @@ export function formatChronicleEvent(
   }
   if (abilityId === "broken_ice_virus_counter") {
     const remaining = numberValue(payload.remainingCounters);
-    const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+    const targetDefinitionId = cardDefinitionIdValue(payload.targetCardDefinitionId);
     category = "run";
     importance = "important";
     visibility = "public";
@@ -5464,7 +5441,7 @@ function formatSemanticChronicleEffect(
 ): ChronicleItem {
   const actor = sideValue(effect.side);
   const amount = numberValue(effect.amount) ?? 0;
-  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(effect.sourceDefinitionId);
   const knownSourceTitle =
     stringValue(effect.sourceTitle) ??
     publicCardTitle(sourceDefinitionId, cardPresentationsById);
@@ -5499,15 +5476,15 @@ function formatSemanticChronicleEffect(
   const sourcePubliclyNamedByAccess =
     stringValue(event.publicPayload.actionType) === "access_card" &&
     sourceDefinitionId !== undefined &&
-    sourceDefinitionId === stringValue(event.publicPayload.cardDefinitionId) &&
+    sourceDefinitionId === cardDefinitionIdValue(event.publicPayload.cardDefinitionId) &&
     stringValue(event.publicPayload.title) !== undefined;
   const sourceExplicitlyRevealed =
     event.publicPayload.publicRevealKind === "reveal" &&
     sourceDefinitionId !== undefined &&
     [
-      stringValue(event.publicPayload.publicRevealDefinitionId),
-      stringValue(event.publicPayload.cardDefinitionId),
-      stringValue(event.publicPayload.ambushDefinitionId),
+      cardDefinitionIdValue(event.publicPayload.publicRevealDefinitionId),
+      cardDefinitionIdValue(event.publicPayload.cardDefinitionId),
+      cardDefinitionIdValue(event.publicPayload.ambushDefinitionId),
     ].includes(sourceDefinitionId);
   const publiclyRevealedDamage =
     kind === "damage" &&
@@ -5542,7 +5519,7 @@ function formatSemanticChronicleEffect(
     effect.counterType === "shell" &&
     removedShellCounters !== undefined
   ) {
-    const cardDefinitionId = stringValue(effect.cardDefinitionId);
+    const cardDefinitionId = cardDefinitionIdValue(effect.cardDefinitionId);
     const cardTitle =
       stringValue(effect.cardTitle) ??
       publicCardTitle(cardDefinitionId, cardPresentationsById) ??
@@ -5594,7 +5571,7 @@ function formatSemanticChronicleEffect(
     kind === "score_agenda" ||
     kind === "steal_agenda" ||
     kind === "trash_card";
-  const targetDefinitionId = stringValue(effect.cardDefinitionId);
+  const targetDefinitionId = cardDefinitionIdValue(effect.cardDefinitionId);
   const targetTitle =
     hasCardTarget && visibility !== "redacted"
       ? (publicCardTitle(targetDefinitionId, cardPresentationsById) ??
@@ -5656,7 +5633,7 @@ function formatSemanticChronicleEffect(
   }
   if (programTrashSubroutine && visibility !== "redacted") {
     const cardsTrashed = numberValue(effect.cardsTrashed);
-    const targetDefinitionId = stringValue(effect.cardDefinitionId);
+    const targetDefinitionId = cardDefinitionIdValue(effect.cardDefinitionId);
     const targetTitle =
       publicCardTitle(targetDefinitionId, cardPresentationsById) ??
       stringValue(effect.cardTitle);
@@ -5981,7 +5958,7 @@ function endTurnTrashChronicleItems(
 ): ChronicleItem[] {
   const payload = event.publicPayload;
   if ((stringValue(payload.actionType) ?? event.type) !== "end_turn") return [];
-  const definitionIds = definitionIdsFromCsv(
+  const definitionIds = cardDefinitionIdsFromCsv(
     stringValue(payload.corpInstalledCardTrashAtTurnEndDefinitionIds),
   );
   return definitionIds.map((cardDefinitionId, index) => {
@@ -6017,7 +5994,7 @@ function successfulRunCreditGainChronicleItem(
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const amount = positiveIntegerValue(payload.karlSuccessfulRunCreditGain);
-  const sourceDefinitionId = definitionIdsFromCsv(
+  const sourceDefinitionId = cardDefinitionIdsFromCsv(
     stringValue(payload.karlSuccessfulRunSourceDefinitionIds),
   )[0];
   if (!amount || !sourceDefinitionId) return undefined;
@@ -6142,7 +6119,7 @@ function runnerForgoneActionChronicleItem(
   const actionOrdinal = positiveIntegerValue(effect.runnerForgoneActionOrdinal);
   if (actionOrdinal === undefined) return undefined;
   const sourceTitle = stringValue(effect.sourceTitle) ?? "ICE";
-  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(effect.sourceDefinitionId);
   return {
     id: `${event.eventId}:runner-forgone-action:${actionOrdinal}`,
     category: "danger",
@@ -6199,13 +6176,13 @@ function encounterTaxChronicleItem(
   if (!requiredAmount || paidAmount === undefined) return undefined;
 
   const sourceDefinitionId =
-    stringValue(payload.encounterTaxSource) ?? BALL_AND_CHAIN_ID;
+    cardDefinitionIdValue(payload.encounterTaxSource) ?? BALL_AND_CHAIN_ID;
   const sourceTitle =
     publicCardTitle(sourceDefinitionId, cardPresentationsById) ??
     "Ball and Chain";
   const encounteredIceDefinitionId =
-    stringValue(payload.targetIceDefinitionId) ??
-    stringValue(payload.cardDefinitionId);
+    cardDefinitionIdValue(payload.targetIceDefinitionId) ??
+    cardDefinitionIdValue(payload.cardDefinitionId);
   const encounteredIceTitle =
     publicCardTitle(encounteredIceDefinitionId, cardPresentationsById) ??
     stringValue(payload.targetIceTitle) ??
@@ -6282,9 +6259,7 @@ function insideJobAutoPassChronicleItem(
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   if (payload.runStartBypassAutoPassedIce !== true) return undefined;
-  const passedIceDefinitionId = stringValue(
-    payload.runStartBypassPassedIceDefinitionId,
-  );
+  const passedIceDefinitionId = cardDefinitionIdValue(payload.runStartBypassPassedIceDefinitionId);
   const passedIcePosition = positiveIntegerValue(payload.passedIcePosition);
   const passedIceTitle =
     publicCardTitle(passedIceDefinitionId, cardPresentationsById) ??
@@ -6331,7 +6306,7 @@ function aiBoonRunStrengthChronicleItem(
   const runStrength = numberValue(payload.runStartRandomStrength);
   if (
     payloadAbilityId(payload) !== "run_start_random_strength_bonus" ||
-    stringValue(payload.sourceDefinitionId) !== "onr_v1_002_ai-boon" ||
+    cardDefinitionIdValue(payload.sourceDefinitionId) !== 214 ||
     dieRoll === undefined ||
     runStrength === undefined
   )
@@ -6355,7 +6330,7 @@ function aiBoonRunStrengthChronicleItem(
           `Wurf ${dieRoll}`,
           `Grundstärke ${runStrength}`,
         ]),
-    cardDefinitionId: "onr_v1_002_ai-boon",
+    cardDefinitionId: 214,
     cardTitle: "AI Boon",
     cardDetailLines: [],
     groupLabel: translate
@@ -6399,17 +6374,15 @@ function tagGainChronicleItem(
     drawTaxTagsAdded > 0;
   const sourceDefinitionId = drawTaxOnly
     ? undefined
-    : (stringValue(payload.sourceDefinitionId) ??
-      stringValue(payload.cardDefinitionId) ??
-      stringValue(payload.traceAutoSuccessSourceDefinitionId));
+    : (cardDefinitionIdValue(payload.sourceDefinitionId) ??
+      cardDefinitionIdValue(payload.cardDefinitionId) ??
+      cardDefinitionIdValue(payload.traceAutoSuccessSourceDefinitionId));
   const primarySourceTitle = drawTaxOnly
     ? "City Surveillance"
     : (titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
       stringValue(payload.sourceTitle) ??
       stringValue(payload.title));
-  const additionalSourceDefinitionId = stringValue(
-    payload.traceAutoSuccessSourceDefinitionId,
-  );
+  const additionalSourceDefinitionId = cardDefinitionIdValue(payload.traceAutoSuccessSourceDefinitionId);
   const additionalSourceTitle = titleForDefinitionId(
     additionalSourceDefinitionId,
     cardPresentationsById,
@@ -6514,14 +6487,14 @@ function traceHardwareWreckerChronicleItem(
   )
     return undefined;
   const actor = sideValue(payload.actor);
-  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
   const sourceTitle =
     titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.title) ??
     "Karteneffekt";
   const trashedCount = numberValue(payload.trashedCount) ?? 0;
   const trashedTitle = titleForDefinitionId(
-    stringValue(payload.trashedCardDefinitionId),
+    cardDefinitionIdValue(payload.trashedCardDefinitionId),
     cardPresentationsById,
   );
   const damageAmount = numberValue(payload.damageAmount) ?? 0;
@@ -6624,7 +6597,7 @@ export function isSocialEngineeringHiddenAmountSelectionEvent(
   const actionType = stringValue(payload.actionType) ?? event.type;
   if (
     actionType !== "resolve_choice" ||
-    stringValue(payload.sourceDefinitionId) !== SOCIAL_ENGINEERING_ID ||
+    cardDefinitionIdValue(payload.sourceDefinitionId) !== SOCIAL_ENGINEERING_ID ||
     payload.hiddenZoneBarrier !== true
   )
     return false;
@@ -6814,7 +6787,7 @@ function singleCardExposeSourceKey(
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   const actor = sideValue(payload.actor);
-  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
   if (
     actionType !== expectedActionType ||
     actor !== "runner" ||
@@ -6837,11 +6810,11 @@ function formatChronicleEffect(
   let actor = sideValue(effect.side);
   let subject = subjectFor(actor, side, false);
   const sourceTitle = stringValue(effect.sourceTitle);
-  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(effect.sourceDefinitionId);
   let displayCardDefinitionId = sourceDefinitionId;
   let displayCardTitle = sourceTitle;
   const cardTitle = stringValue(effect.cardTitle);
-  const cardDefinitionId = stringValue(effect.cardDefinitionId);
+  const cardDefinitionId = cardDefinitionIdValue(effect.cardDefinitionId);
   const amount = numberValue(effect.amount) ?? 0;
   const chips = [...baseChips(actor, false)];
   let category: ChronicleCategory = "system";
@@ -7617,7 +7590,7 @@ function accessEffectDamageChronicleItem(
   actor: Side | undefined,
   subject: string,
   sourceTitle: string | undefined,
-  sourceDefinitionId: string | undefined,
+  sourceDefinitionId: CardDefinitionId | undefined,
   amount: number,
   cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | null {
@@ -7676,9 +7649,9 @@ function accessAmbushTrashInstalledChronicleItem(
     return null;
   const payload = event.publicPayload ?? {};
   const sourceDefinitionId =
-    stringValue(effect.sourceDefinitionId) ??
-    stringValue(payload.ambushDefinitionId) ??
-    stringValue(payload.accessEffectSourceDefinitionId);
+    cardDefinitionIdValue(effect.sourceDefinitionId) ??
+    cardDefinitionIdValue(payload.ambushDefinitionId) ??
+    cardDefinitionIdValue(payload.accessEffectSourceDefinitionId);
   const isAccessAmbushTrash =
     stringValue(payload.hiddenZoneAction) ===
       "v1919_access_ambush_trash_installed" || Boolean(sourceDefinitionId);
@@ -7689,7 +7662,7 @@ function accessAmbushTrashInstalledChronicleItem(
     "Access-Ambush";
   const trashedTitles = titlesForDefinitionIds(
     stringValue(payload.trashedCardDefinitionIds) ??
-      stringValue(effect.cardDefinitionId),
+      cardDefinitionIdValue(effect.cardDefinitionId),
     cardPresentationsById,
   );
   const trashedCount =
@@ -7812,7 +7785,7 @@ function endTurnCreditPayoutChronicleItem(
     numberValue(payload.gainedCredits) ??
     numberValue(payload.gainCreditsAmount);
   if (gainedCredits === undefined || gainedCredits <= 0) return undefined;
-  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
   const sourceTitle =
     titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.sourceTitle) ??
@@ -7882,9 +7855,9 @@ function redactedAccessAmbushCounterChronicleItem(
   if (effect.kind !== "counter_change") return null;
   const payload = event.publicPayload ?? {};
   const sourceDefinitionId =
-    stringValue(effect.sourceDefinitionId) ??
-    stringValue(payload.ambushDefinitionId) ??
-    stringValue(payload.accessEffectSourceDefinitionId);
+    cardDefinitionIdValue(effect.sourceDefinitionId) ??
+    cardDefinitionIdValue(payload.ambushDefinitionId) ??
+    cardDefinitionIdValue(payload.accessEffectSourceDefinitionId);
   if (!sourceDefinitionId) return null;
   const source =
     stringValue(effect.sourceTitle) ??
@@ -8440,7 +8413,7 @@ function securityPurgeChronicleSummary(
   const agendaTitle =
     fallbackTitle ??
     titleForDefinitionId(
-      stringValue(payload.sourceDefinitionId),
+      cardDefinitionIdValue(payload.sourceDefinitionId),
       cardPresentationsById,
     ) ??
     "Security Purge";
@@ -8683,8 +8656,8 @@ function shouldMergeCardResolverEffect(
   const amount = numberValue(effect.amount);
   if (amount === undefined || amount < 0) return false;
   if (effect.kind !== "lose_credits" && amount <= 0) return false;
-  const playedDefinitionId = stringValue(payload.cardDefinitionId);
-  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  const playedDefinitionId = cardDefinitionIdValue(payload.cardDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(effect.sourceDefinitionId);
   if (
     playedDefinitionId &&
     sourceDefinitionId &&
@@ -8848,9 +8821,9 @@ function isPlayfulAiDiceLoopPayload(
 ): boolean {
   if (abilityId === "playful_ai_dice_loop") return true;
   const sourceDefinitionId =
-    stringValue(payload.sourceDefinitionId) ??
-    stringValue(payload.cardDefinitionId) ??
-    stringValueFromRecord(payload.targets, "sourceDefinitionId");
+    cardDefinitionIdValue(payload.sourceDefinitionId) ??
+    cardDefinitionIdValue(payload.cardDefinitionId) ??
+    definitionIdFromRecord(payload.targets, "sourceDefinitionId");
   return (
     sourceDefinitionId === PLAYFUL_AI_ID && abilityId === "random_dice_loop"
   );
@@ -9036,8 +9009,8 @@ function subroutineDamagePreventionSummary(
     numberValue(payload.originalAmount) ?? finalAmount + preventedAmount;
   if (originalAmount <= finalAmount) return undefined;
   const preventionSourceDefinitionId =
-    stringValue(payload.sourceDefinitionId) ??
-    stringValue(payload.cardDefinitionId);
+    cardDefinitionIdValue(payload.sourceDefinitionId) ??
+    cardDefinitionIdValue(payload.cardDefinitionId);
   const sourceTitle =
     titleForDefinitionId(preventionSourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.title) ??
@@ -9093,7 +9066,7 @@ function successfulRunCreditLossChronicleSummary(
   title: string;
   description: string;
   chips: string[];
-  cardDefinitionId: string;
+  cardDefinitionId: CardDefinitionId;
   sourceTitle: string;
   serverLabel: string;
 } | null {
@@ -9103,7 +9076,7 @@ function successfulRunCreditLossChronicleSummary(
     payload.accessSkipped !== true
   )
     return null;
-  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
   if (!sourceDefinitionId) return null;
   const sourceTitle =
     titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
@@ -9157,11 +9130,11 @@ function gypsyScheduleAnalyzerChronicleSummary(
   title: string;
   description: string;
   chips: string[];
-  cardDefinitionId: string;
+  cardDefinitionId: CardDefinitionId;
   sourceTitle: string;
 } {
   const sourceDefinitionId =
-    stringValue(payload.sourceDefinitionId) ?? GYPSY_SCHEDULE_ANALYZER_ID;
+    cardDefinitionIdValue(payload.sourceDefinitionId) ?? GYPSY_SCHEDULE_ANALYZER_ID;
   const sourceTitle =
     titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.sourceTitle) ??
@@ -9189,7 +9162,7 @@ function gypsyScheduleAnalyzerChronicleSummary(
       revealedTitles.at(-1) ??
       (revealedCount > 0 ? `Karte ${revealedCount}` : "eine Karte");
     const agendaRevealed =
-      definitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))
+      cardDefinitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))
         .length > 0;
     return {
       title: `${sourceTitle}: ${latestTitle} aus R&D aufgedeckt`,
@@ -9209,8 +9182,8 @@ function gypsyScheduleAnalyzerChronicleSummary(
     };
   }
   const storedAgendaDefinitionId =
-    stringValue(payload.storedAgendaDefinitionId) ??
-    definitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))[0];
+    cardDefinitionIdValue(payload.storedAgendaDefinitionId) ??
+    cardDefinitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))[0];
   const storedAgendaTitle = titleForDefinitionId(
     storedAgendaDefinitionId,
     cardPresentationsById,
@@ -9251,7 +9224,7 @@ function publicRevealTitlesFromPayload(
   payload: Record<string, unknown>,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string[] {
-  const definitionIds = definitionIdsFromCsv(
+  const definitionIds = cardDefinitionIdsFromCsv(
     stringValue(payload.publicRevealDefinitionIds),
   );
   const fromIds = definitionIds
@@ -9507,7 +9480,7 @@ function shellTradersAbilityFromPayload(
   const explicit = stringValue(payload.shellTradersAbility);
   if (explicit) return explicit;
   if (
-    stringValue(payload.sourceDefinitionId) === SHELL_TRADERS_ID &&
+    cardDefinitionIdValue(payload.sourceDefinitionId) === SHELL_TRADERS_ID &&
     (abilityId === "set_aside_from_grip" ||
       abilityId === "remove_shell_counter" ||
       abilityId === "start_turn_remove_shell_counter")
@@ -9523,7 +9496,7 @@ function targetCardTitleFromPayload(
 ): string | undefined {
   const explicitTitle = stringValue(payload.targetCardTitle);
   if (explicitTitle) return explicitTitle;
-  const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+  const targetDefinitionId = cardDefinitionIdValue(payload.targetCardDefinitionId);
   return publicCardTitle(targetDefinitionId, cardPresentationsById);
 }
 
@@ -9532,32 +9505,24 @@ function publicRevealTitleFromPayload(
   cardPresentationsById?: PublicCardPresentationsById,
 ): string | undefined {
   return titleForDefinitionId(
-    stringValue(payload.publicRevealDefinitionId),
+    cardDefinitionIdValue(payload.publicRevealDefinitionId),
     cardPresentationsById,
   );
 }
 
 function titleForDefinitionId(
-  definitionId: string | undefined,
+  definitionId: CardDefinitionId | undefined,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string | undefined {
   return publicCardTitle(definitionId, cardPresentationsById);
 }
 
-function definitionIdsFromCsv(value: string | undefined): string[] {
-  return value
-    ? value
-        .split(",")
-        .map((definitionId) => definitionId.trim())
-        .filter(Boolean)
-    : [];
-}
-
 function titlesForDefinitionIds(
-  value: string | undefined,
+  value: string | CardDefinitionId | undefined,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string[] {
-  return definitionIdsFromCsv(value)
+  const ids = isCardDefinitionId(value) ? [value] : cardDefinitionIdsFromCsv(value);
+  return ids
     .map((definitionId) =>
       titleForDefinitionId(definitionId, cardPresentationsById),
     )
@@ -9568,7 +9533,7 @@ function iceTitlesForDefinitionIds(
   value: string | undefined,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string[] {
-  return definitionIdsFromCsv(value)
+  return cardDefinitionIdsFromCsv(value)
     .map((definitionId) =>
       publicCardPresentation(definitionId, cardPresentationsById),
     )
@@ -9871,6 +9836,11 @@ function numberValueFromRecord(
 ): number | undefined {
   if (!value || typeof value !== "object") return undefined;
   return numberValue((value as Record<string, unknown>)[key]);
+}
+
+function definitionIdFromRecord(value: unknown, key: string): CardDefinitionId | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  return cardDefinitionIdValue((value as Record<string, unknown>)[key]);
 }
 
 function stringValueFromRecord(

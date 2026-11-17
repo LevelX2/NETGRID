@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import { Check, Move, Plus, Save, SlidersHorizontal, X } from "lucide-react";
 import type {
   CSSProperties,
@@ -41,7 +42,7 @@ import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
 import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
 
 type CatalogCardSummary = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   type: string;
   subtypes: string[];
@@ -54,7 +55,7 @@ type CatalogCardDetail = CatalogCardSummary & {
   collectorNumber: string;
   text: string;
   numeric: Record<string, number | null | undefined>;
-  definitionId?: string;
+  definitionId?: CardDefinitionId;
 };
 
 export function DeckTableBoard({
@@ -99,7 +100,7 @@ export function DeckTableBoard({
   layout: DeckTableLayout;
   deckName: string;
   deckSide: Side;
-  cardLookup: Map<string, CatalogCardSummary>;
+  cardLookup: Map<CardDefinitionId, CatalogCardSummary>;
   cardDetailsById: Record<string, CatalogCardDetail>;
   activeMenuKey: string | null;
   cardWidth: number;
@@ -122,7 +123,7 @@ export function DeckTableBoard({
   onClearSelection(): void;
   onDuplicateCard(
     pileId: string,
-    cardId: string,
+    cardId: CardDefinitionId,
     sourceOrder: number,
     copiesToAdd: number,
   ): void;
@@ -133,7 +134,7 @@ export function DeckTableBoard({
     targetOrder?: number,
   ): void;
   onRenamePile(pileId: string, name: string): void;
-  onRemoveCard(pileId: string, cardId: string, sourceOrder: number): void;
+  onRemoveCard(pileId: string, cardId: CardDefinitionId, sourceOrder: number): void;
   onArrangeDeck(mode: DeckTableArrangeMode): void;
   onInsertPileAt(pileId: string): void;
   onSave(): void;
@@ -375,7 +376,7 @@ function DeckTablePileView({
 }: {
   pile: DeckTablePile;
   showName: boolean;
-  cardLookup: Map<string, CatalogCardSummary>;
+  cardLookup: Map<CardDefinitionId, CatalogCardSummary>;
   cardDetailsById: Record<string, CatalogCardDetail>;
   deckSide: Side;
   activeMenuKey: string | null;
@@ -391,7 +392,7 @@ function DeckTablePileView({
   ): void;
   onDuplicateCard(
     pileId: string,
-    cardId: string,
+    cardId: CardDefinitionId,
     sourceOrder: number,
     copiesToAdd: number,
   ): void;
@@ -403,7 +404,7 @@ function DeckTablePileView({
   ): void;
   onInsertPileAt(pileId: string): void;
   onRenamePile(pileId: string, name: string): void;
-  onRemoveCard(pileId: string, cardId: string, sourceOrder: number): void;
+  onRemoveCard(pileId: string, cardId: CardDefinitionId, sourceOrder: number): void;
   onSelectPile(pileId: string): void;
   onSetPileSortMode(pileId: string, sortMode: DeckTablePileSortMode): void;
 }) {

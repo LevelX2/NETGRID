@@ -46,13 +46,13 @@ describe("access presentation outcome ownership", () => {
   it("folds a public Setup trash into its access presentation", () => {
     const access = event("evt_9", "access_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
     const trash = event("evt_10", "trash_accessed_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
@@ -70,16 +70,16 @@ describe("access presentation outcome ownership", () => {
   it("folds steal and decline outcomes into the same public access", () => {
     const access = event("evt_access", "access_card", {
       actor: "runner",
-      cardDefinitionId: "agenda_1",
+      cardDefinitionId: 11001,
       title: "Public Agenda",
     });
     const steal = event("evt_steal", "steal_agenda", {
       actor: "runner",
-      cardDefinitionId: "agenda_1",
+      cardDefinitionId: 11001,
     });
     const decline = event("evt_decline", "decline_trash", {
       actor: "runner",
-      cardDefinitionId: "agenda_1",
+      cardDefinitionId: 11001,
     });
 
     expect(
@@ -98,7 +98,7 @@ describe("access presentation outcome ownership", () => {
     });
     const trash = event("evt_trash", "trash_accessed_card", {
       actor: "runner",
-      cardDefinitionId: "secret_asset",
+      cardDefinitionId: 11002,
       title: "Secret Asset",
     });
 
@@ -116,15 +116,15 @@ describe("access presentation outcome ownership", () => {
 
   it("stops ownership at the next access in a multiaccess sequence", () => {
     const first = event("evt_first", "access_card", {
-      cardDefinitionId: "first",
+      cardDefinitionId: 11003,
       title: "First",
     });
     const second = event("evt_second", "access_card", {
-      cardDefinitionId: "second",
+      cardDefinitionId: 11004,
       title: "Second",
     });
     const trash = event("evt_trash", "trash_accessed_card", {
-      cardDefinitionId: "second",
+      cardDefinitionId: 11004,
       title: "Second",
     });
 

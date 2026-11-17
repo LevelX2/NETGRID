@@ -1,3 +1,5 @@
+import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
+import { type CardDefinitionId } from "@netgrid/shared";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   activeAiApprovedCardIds,
@@ -96,93 +98,93 @@ type CatalogDetailAiInspector = {
 };
 
 const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
-  "onr_proteus_002_charity-takeover",
-  "onr_proteus_009_viral-breeding-ground",
-  "onr_proteus_011_brain-wash",
-  "onr_proteus_012_bug-zapper",
-  "onr_proteus_013_caryatid",
-  "onr_proteus_015_colonel-failure",
-  "onr_proteus_017_credit-blocks",
-  "onr_proteus_020_digiconda",
-  "onr_proteus_021_dog-pile",
-  "onr_proteus_022_food-fight",
-  "onr_proteus_023_galatea",
-  "onr_proteus_024_gatekeeper",
-  "onr_proteus_025_homing-missile",
-  "onr_proteus_026_hunting-pack",
-  "onr_proteus_028_lesser-arcana",
-  "onr_proteus_030_mastermind",
-  "onr_proteus_031_minotaur",
-  "onr_proteus_032_misleading-access-menus",
-  "onr_proteus_033_mobile-barricade",
-  "onr_proteus_034_riddler",
-  "onr_proteus_036_sandstorm",
-  "onr_proteus_038_snowbank",
-  "onr_proteus_039_sphinx-2006",
-  "onr_proteus_040_sumo-2008",
-  "onr_proteus_041_toughoniumtm-wall",
-  "onr_proteus_044_walking-wall",
-  "onr_proteus_047_credit-consolidation",
-  "onr_proteus_048_data-sifters",
-  "onr_proteus_050_manhunt",
-  "onr_proteus_052_schlaghund-pointers",
-  "onr_proteus_053_underworld-mole",
-  "onr_proteus_054_bel-digmo-antibody",
-  "onr_proteus_057_doppelganger-antibody",
-  "onr_proteus_062_lesley-major",
-  "onr_proteus_065_networked-center",
-  "onr_proteus_068_pattel-antibody",
-  "onr_proteus_070_rasmin-bridger",
-  "onr_proteus_072_research-bunker",
-  "onr_proteus_075_stereogram-antibody",
-  "onr_proteus_077_weapons-depot",
-  "onr_proteus_078_armageddon",
-  "onr_proteus_079_big-frackin-gun",
-  "onr_proteus_080_black-widow",
-  "onr_proteus_081_boring-bit",
-  "onr_proteus_082_bulldozer",
-  "onr_proteus_083_corrosion",
-  "onr_proteus_084_crumble",
-  "onr_proteus_085_disintegrator",
-  "onr_proteus_086_enterprise-inc-shields",
-  "onr_proteus_088_fubar",
-  "onr_proteus_089_garbage-in",
-  "onr_proteus_090_highlighter",
-  "onr_proteus_091_lockjaw",
-  "onr_proteus_092_morphing-tool",
-  "onr_proteus_093_redecorator",
-  "onr_proteus_094_scaldan",
-  "onr_proteus_095_skeleton-passkeys",
-  "onr_proteus_096_skullcap",
-  "onr_proteus_097_taxman",
-  "onr_proteus_098_vienna-22",
-  "onr_proteus_099_viral-pipeline",
-  "onr_proteus_100_wrecking-ball",
-  "onr_proteus_101_all-hands",
-  "onr_proteus_103_cruising-for-netwatch",
-  "onr_proteus_104_decoy-signal",
-  "onr_proteus_105_demolition-run",
-  "onr_proteus_106_disgruntled-ice-technician",
-  "onr_proteus_107_drone-for-a-day",
-  "onr_proteus_108_faked-hit",
-  "onr_proteus_114_on-the-fast-track",
-  "onr_proteus_115_personal-touch-the",
-  "onr_proteus_117_poisoned-water-supply",
-  "onr_proteus_118_prearranged-drop",
-  "onr_proteus_120_reconnaissance",
-  "onr_proteus_121_remote-detonator",
-  "onr_proteus_122_rush-hour",
-  "onr_proteus_124_stakeout",
-  "onr_proteus_127_weefle-initiation",
-  "onr_proteus_130_back-door-to-rivals",
-  "onr_proteus_134_cortical-cybermodem",
-  "onr_proteus_135_cortical-stimulators",
-  "onr_proteus_138_deck-the",
-  "onr_proteus_139_eurocorpse-tm-spin-chip",
-  "onr_proteus_146_precision-bribery",
-  "onr_proteus_148_runner-sensei",
-  "onr_proteus_150_streetware-distributor",
-  "onr_proteus_151_sunburst-cranial-interface",
+  60,
+  67,
+  69,
+  70,
+  71,
+  73,
+  75,
+  78,
+  79,
+  80,
+  81,
+  82,
+  83,
+  84,
+  86,
+  88,
+  89,
+  90,
+  91,
+  92,
+  94,
+  96,
+  97,
+  98,
+  99,
+  102,
+  105,
+  106,
+  108,
+  110,
+  111,
+  112,
+  115,
+  120,
+  123,
+  126,
+  128,
+  130,
+  133,
+  135,
+  136,
+  137,
+  138,
+  139,
+  140,
+  141,
+  142,
+  143,
+  144,
+  146,
+  147,
+  148,
+  149,
+  150,
+  151,
+  152,
+  153,
+  154,
+  155,
+  156,
+  157,
+  158,
+  159,
+  161,
+  162,
+  163,
+  164,
+  165,
+  166,
+  172,
+  173,
+  175,
+  176,
+  178,
+  179,
+  180,
+  182,
+  185,
+  188,
+  192,
+  193,
+  196,
+  197,
+  204,
+  206,
+  208,
+  209,
 ] as const;
 
 describe("catalog API filters", () => {
@@ -208,7 +210,7 @@ describe("catalog API filters", () => {
     expect(response.status).toBe(200);
     const body = response.body as {
       cards: Array<{
-        catalogCardId: string;
+        catalogCardId: CardDefinitionId;
         statuses: { ai_supported: boolean };
       }>;
     };
@@ -219,19 +221,19 @@ describe("catalog API filters", () => {
       activeAiApprovedCardIds.slice().sort(),
     );
     const expectedOnrAiApproved = activeAiApprovedCardIds.filter((cardId) =>
-      cardId.startsWith("onr_v1_"),
+      ORIGINALSET_V1_CARD_IDS.includes(cardId),
     );
     expect(
       body.cards
-        .filter((card) => card.catalogCardId.startsWith("onr_v1_"))
+        .filter((card) => ORIGINALSET_V1_CARD_IDS.includes(card.catalogCardId))
         .map((card) => card.catalogCardId)
         .sort(),
     ).toEqual([...new Set(expectedOnrAiApproved)].sort());
     expect(body.cards.map((card) => card.catalogCardId)).toEqual(
       expect.arrayContaining([
-        "onr_v1_026_false-echo",
-        "onr_v1_075_zetatech-software-installer",
-        "onr_proteus_001_ai-board-member",
+        238,
+        287,
+        59,
       ]),
     );
     expect(body.cards.map((card) => card.catalogCardId)).toEqual(
@@ -250,7 +252,7 @@ describe("catalog API filters", () => {
       expect(candidateResponse.status).toBe(200);
       const candidateBody = candidateResponse.body as {
         card: {
-          catalogCardId: string;
+          catalogCardId: CardDefinitionId;
           statuses: {
             human_playable: boolean;
             deck_legal: boolean;
@@ -279,10 +281,10 @@ describe("catalog API filters", () => {
     );
     expect(humanPlayableResponse.status).toBe(200);
     const humanPlayableBody = humanPlayableResponse.body as {
-      cards: Array<{ catalogCardId: string }>;
+      cards: Array<{ catalogCardId: CardDefinitionId }>;
     };
     expect(humanPlayableBody.cards.map((card) => card.catalogCardId)).toEqual([
-      "onr_proteus_041_toughoniumtm-wall",
+      99,
     ]);
 
     for (const status of ["deck_legal", "format_legal"] as const) {
@@ -290,9 +292,9 @@ describe("catalog API filters", () => {
         new URLSearchParams({ status, q: "Toughonium" }),
       );
       expect(response.status).toBe(200);
-      const body = response.body as { cards: Array<{ catalogCardId: string }> };
+      const body = response.body as { cards: Array<{ catalogCardId: CardDefinitionId }> };
       expect(body.cards.map((card) => card.catalogCardId)).toEqual([
-        "onr_proteus_041_toughoniumtm-wall",
+        99,
       ]);
     }
 
@@ -301,14 +303,14 @@ describe("catalog API filters", () => {
     );
     expect(aiSupportedResponse.status).toBe(200);
     const aiSupportedBody = aiSupportedResponse.body as {
-      cards: Array<{ catalogCardId: string }>;
+      cards: Array<{ catalogCardId: CardDefinitionId }>;
     };
     expect(aiSupportedBody.cards.map((card) => card.catalogCardId)).toEqual([
-      "onr_proteus_041_toughoniumtm-wall",
+      99,
     ]);
 
     const firstProteusResponse = catalogDetailResponse(
-      "onr_proteus_001_ai-board-member",
+      59,
     );
     expect(firstProteusResponse.status).toBe(200);
     const firstProteusBody = firstProteusResponse.body as {
@@ -332,7 +334,7 @@ describe("catalog API filters", () => {
   }, 45_000);
 
   it("exposes display-only rarity metadata in list and detail responses", () => {
-    const detailResponse = catalogDetailResponse("onr_v1_001_afreet");
+    const detailResponse = catalogDetailResponse(213);
     expect(detailResponse.status).toBe(200);
     const detailBody = detailResponse.body as {
       card: {
@@ -357,18 +359,18 @@ describe("catalog API filters", () => {
     expect(listResponse.status).toBe(200);
     const listBody = listResponse.body as {
       cards: Array<{
-        catalogCardId: string;
+        catalogCardId: CardDefinitionId;
         rarity?: { code: string; labelDe: string };
       }>;
     };
     expect(
-      listBody.cards.find((card) => card.catalogCardId === "onr_v1_001_afreet")
+      listBody.cards.find((card) => card.catalogCardId === 213)
         ?.rarity,
     ).toMatchObject({ code: "uncommon", labelDe: "Ungewöhnlich" });
   });
 
   it("exposes the AI005 card-catalog inspector from Karten-Hints", () => {
-    const response = catalogDetailResponse("onr_v1_002_ai-boon");
+    const response = catalogDetailResponse(214);
     expect(response.status).toBe(200);
     const body = response.body as CatalogDetailAiInspector;
     const inspector = body.card.aiInspector;
@@ -377,7 +379,7 @@ describe("catalog API filters", () => {
     if (!inspector)
       throw new Error("Missing AI inspector for onr_v1_002_ai-boon");
     const aiBoonArtifact = generatedCardSpecAiHints.cards.find(
-      (entry) => entry.cardId === "onr_v1_002_ai-boon",
+      (entry) => entry.cardId === 214,
     );
     expect(aiBoonArtifact).toBeDefined();
     expect(inspector.schemaVersion).toBe("catalog-ai-hint-inspector-v1");
@@ -425,10 +427,10 @@ describe("catalog API filters", () => {
 
   it("attributes migrated inspector hints to the CardSpec compiler", () => {
     const brokerArtifact = generatedCardSpecAiHints.cards.find(
-      (entry) => entry.cardId === "onr_v1_154_broker",
+      (entry) => entry.cardId === 366,
     );
     expect(brokerArtifact).toBeDefined();
-    const response = catalogDetailResponse("onr_v1_154_broker");
+    const response = catalogDetailResponse(366);
     expect(response.status).toBe(200);
     const body = response.body as CatalogDetailAiInspector;
     expect(body.card.aiInspector?.source).toEqual({
@@ -449,7 +451,7 @@ describe("catalog API filters", () => {
   });
 
   it("exposes explicit Agenda strategy support pairs through the inspector API", () => {
-    const response = catalogDetailResponse("onr_v1_212_priority-requisition");
+    const response = catalogDetailResponse(424);
     expect(response.status).toBe(200);
     const body = response.body as CatalogDetailAiInspector;
     const inspector = body.card.aiInspector;
@@ -478,7 +480,7 @@ describe("catalog API filters", () => {
   });
 
   it("exposes reviewed remoteRole facts without derived warning taxonomy", () => {
-    const remoteResponse = catalogDetailResponse("onr_v1_364_omni-kismet-ph-d");
+    const remoteResponse = catalogDetailResponse(576);
     expect(remoteResponse.status).toBe(200);
     const remoteBody = remoteResponse.body as CatalogDetailAiInspector;
     expect(
@@ -488,7 +490,7 @@ describe("catalog API filters", () => {
       remoteBody.card.aiInspector?.mechanicalFacts?.remoteRole,
     ).toMatchObject({ kind: "ice_modifier" });
 
-    const gapResponse = catalogDetailResponse("onr_v1_017_deep-thought");
+    const gapResponse = catalogDetailResponse(229);
     expect(gapResponse.status).toBe(200);
     const gapBody = gapResponse.body as CatalogDetailAiInspector;
     expect(gapBody.card.aiInspector?.warnings.categories).toEqual([]);
@@ -505,7 +507,7 @@ describe("catalog API filters", () => {
     expect(response.status).toBe(200);
     const body = response.body as {
       cards: Array<{
-        catalogCardId: string;
+        catalogCardId: CardDefinitionId;
         aiInspectorSummary?: {
           available: boolean;
           mechanicalFactsFound: boolean;
@@ -518,7 +520,7 @@ describe("catalog API filters", () => {
     expect(body.cards).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          catalogCardId: "onr_v1_079_bodyweight-synthetic-blood",
+          catalogCardId: 291,
           aiInspectorSummary: expect.objectContaining({
             available: true,
             mechanicalFactsFound: true,
@@ -535,14 +537,14 @@ describe("catalog API filters", () => {
     expect(blockedResponse.status).toBe(200);
     const blockedBody = blockedResponse.body as {
       cards: Array<{
-        catalogCardId: string;
+        catalogCardId: CardDefinitionId;
         aiInspectorSummary?: unknown;
       }>;
     };
     expect(blockedBody.cards).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          catalogCardId: "catalog_preview_resource_001",
+          catalogCardId: 2,
           aiInspectorSummary: null,
         }),
       ]),
@@ -550,7 +552,7 @@ describe("catalog API filters", () => {
   });
 
   it("serves The Shell Traders catalog text from the confirmed spoiler instead of the old recurring-credit placeholder", () => {
-    const response = catalogDetailResponse("onr_v1_176_the-shell-traders");
+    const response = catalogDetailResponse(388);
     expect(response.status).toBe(200);
     const body = response.body as {
       card: {
@@ -569,17 +571,17 @@ describe("catalog API filters", () => {
   it("serves corrected Corp spoiler-aligned catalog text for active V1 cards", () => {
     const expectations = [
       {
-        cardId: "onr_v1_220_tycho-extension",
+        cardId: 432,
         contains: ["No additional ability."],
         notContains: ["Regeltext"],
       },
       {
-        cardId: "onr_v1_222_ball-and-chain",
+        cardId: 434,
         contains: ["Runner must pay [2]"],
         notContains: ["Runner must pay 1"],
       },
       {
-        cardId: "onr_v1_234_data-darts",
+        cardId: 446,
         contains: [
           "Do 3 net damage",
           "cannot break any subroutines of the next piece of ice",
@@ -587,7 +589,7 @@ describe("catalog API filters", () => {
         notContains: ["Do 1 net damage", "End the run"],
       },
       {
-        cardId: "onr_v1_236_data-raven",
+        cardId: 448,
         contains: [
           "give Runner a tag and a Data Raven counter",
           "taking an action to pay [1]",
@@ -595,7 +597,7 @@ describe("catalog API filters", () => {
         notContains: ["counter on Data Raven", "End the run"],
       },
       {
-        cardId: "onr_v1_320_encoder-inc",
+        cardId: 532,
         contains: [
           "cost [1] less to rez",
           'additional "End the run" subroutine',
@@ -603,12 +605,12 @@ describe("catalog API filters", () => {
         notContains: ["cost 2 less to rez"],
       },
       {
-        cardId: "onr_v1_349_aardvark",
+        cardId: 561,
         contains: ["any bits spent using that worm", "further icebreakers"],
         notContains: [],
       },
       {
-        cardId: "onr_v1_351_bizarre-encryption-scheme",
+        cardId: 563,
         contains: [
           "return the agenda to the fort instead",
           "Runner scores the agenda at the start of his or her next turn",
@@ -616,12 +618,12 @@ describe("catalog API filters", () => {
         notContains: [],
       },
       {
-        cardId: "onr_v1_352_chester-mix",
+        cardId: 564,
         contains: ["reduced by [2]"],
         notContains: ["reduced by 1"],
       },
       {
-        cardId: "onr_v1_353_chimera",
+        cardId: 565,
         contains: ["When Runner accesses Chimera, trash a daemon."],
         notContains: ["installed daemon program"],
       },
@@ -629,13 +631,13 @@ describe("catalog API filters", () => {
 
     for (const expectation of expectations) {
       const response = catalogDetailResponse(expectation.cardId);
-      expect(response.status, expectation.cardId).toBe(200);
+      expect(response.status, String(expectation.cardId)).toBe(200);
       const body = response.body as { card: { text: string } };
       for (const snippet of expectation.contains) {
-        expect(body.card.text, expectation.cardId).toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).toContain(snippet);
       }
       for (const snippet of expectation.notContains) {
-        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).not.toContain(snippet);
       }
     }
   });
@@ -643,19 +645,19 @@ describe("catalog API filters", () => {
   it("serves Runner icebreaker text from the same CardSpec projection in catalog and runtime", () => {
     const expectations = [
       {
-        cardId: "onr_v1_015_codeslinger",
+        cardId: 227,
         catalogContains: ["[1]: Break sentry subroutine."],
         sharedContains: ["1 Credits: Break 1 sentry subroutine."],
         notContains: ["0 credits: Break sentry subroutine."],
       },
       {
-        cardId: "onr_v1_018_dogcatcher",
+        cardId: 230,
         catalogContains: ["pit bull, hellhound, bloodhound, or watchdog"],
         sharedContains: ["Pit Bull, Hellhound, Bloodhound, or Watchdog"],
         notContains: ["Break ice subroutine"],
       },
       {
-        cardId: "onr_v1_019_dropp",
+        cardId: 231,
         catalogContains: [
           "[0]: Break all subroutines of a piece of ice, and end the run.",
           "[1]: +1 strength.",
@@ -666,19 +668,19 @@ describe("catalog API filters", () => {
         notContains: ["2 credits: +1 strength.", "Using Dropp ends your run."],
       },
       {
-        cardId: "onr_v1_036_jackhammer",
+        cardId: 248,
         catalogContains: ["lose 1 credit, if you can, from a stealth card"],
         sharedContains: ["lose 1 from a Stealth card, if you can"],
         notContains: [],
       },
       {
-        cardId: "onr_v1_052_raffles",
+        cardId: 264,
         catalogContains: ["[1]: Break code gate subroutine."],
         sharedContains: ["1 Credits: Break 1 code gate subroutine."],
         notContains: ["0 credits: Break code gate subroutine."],
       },
       {
-        cardId: "onr_v1_053_ramming-piston",
+        cardId: 265,
         catalogContains: [
           "[2]: Break wall subroutine.",
           "lose a total of [2] from stealth cards",
@@ -690,7 +692,7 @@ describe("catalog API filters", () => {
         notContains: ["trace limit reduced"],
       },
       {
-        cardId: "onr_v1_066_snowball",
+        cardId: 278,
         catalogContains: [
           "Snowball has +1 strength for each subroutine it has broken during a run",
         ],
@@ -703,18 +705,18 @@ describe("catalog API filters", () => {
 
     for (const expectation of expectations) {
       const response = catalogDetailResponse(expectation.cardId);
-      expect(response.status, expectation.cardId).toBe(200);
+      expect(response.status, String(expectation.cardId)).toBe(200);
       const body = response.body as { card: { text: string } };
       const sharedText =
         createRuntimeCardsById()[expectation.cardId]?.text ?? "";
 
       for (const snippet of expectation.catalogContains) {
-        expect(body.card.text, expectation.cardId).toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).toContain(snippet);
       }
-      expect(sharedText, expectation.cardId).toBe(body.card.text);
+      expect(sharedText, String(expectation.cardId)).toBe(body.card.text);
       for (const snippet of expectation.notContains) {
-        expect(body.card.text, expectation.cardId).not.toContain(snippet);
-        expect(sharedText, expectation.cardId).not.toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).not.toContain(snippet);
+        expect(sharedText, String(expectation.cardId)).not.toContain(snippet);
       }
     }
   });
@@ -722,67 +724,67 @@ describe("catalog API filters", () => {
   it("serves Runner prevention text from the same CardSpec projection in catalog and runtime", () => {
     const expectations = [
       {
-        cardId: "onr_v1_038_joan-of-arc",
+        cardId: 250,
         catalogContains: ["other installed programs", "bring Joan of Arc"],
         sharedContains: ["other installed programs", "bring Joan of Arc"],
         notContains: ["prevent 1 net or core damage"],
       },
       {
-        cardId: "onr_v1_121_armored-fridge",
+        cardId: 333,
         catalogContains: ["seven Ablative counters", "Prevent 1 meat damage"],
         sharedContains: ["7 Ablative counters", "prevent 1 meat damage"],
         notContains: ["prevent 2 meat damage"],
       },
       {
-        cardId: "onr_v1_128_green-knight-surge-buffers",
+        cardId: 340,
         catalogContains: ["Prevents up to 1 Net damage each turn."],
         sharedContains: ["Prevents 1 net damage each turn."],
         notContains: ["prevent 2 net damage"],
       },
       {
-        cardId: "onr_v1_130_lifesaver-nanosurgeons",
+        cardId: 342,
         catalogContains: ["Draw two cards", "Prevent 1 brain damage"],
         sharedContains: ["Draw two cards", "Prevent 1 brain damage"],
         notContains: ["prevent 1 core damage."],
       },
       {
-        cardId: "onr_v1_135_nasuko-cycle",
+        cardId: 347,
         catalogContains: ["Avoid receiving a tag"],
         sharedContains: ["Avoid receiving a tag"],
         notContains: ["prevent 1 net or meat damage"],
       },
       {
-        cardId: "onr_v1_143_techtronica-utility-suit",
+        cardId: 355,
         catalogContains: ["Provides +1 MU", "increasing your link"],
         sharedContains: ["Provides +1 MU", "increasing your link"],
         notContains: ["prevent 1 meat or net damage"],
       },
       {
-        cardId: "onr_v1_161_fall-guy",
+        cardId: 373,
         catalogContains: ["Avoid receiving a tag"],
         sharedContains: ["Avoid receiving a tag"],
         notContains: ["prevent 1 meat or net damage"],
       },
       {
-        cardId: "onr_v1_170_nomad-allies",
+        cardId: 382,
         catalogContains: ["Remove a tag", "Avoid receiving a tag"],
         sharedContains: ["Remove a tag", "Avoid receiving a tag"],
         notContains: ["prevent 1 net or meat damage"],
       },
       {
-        cardId: "onr_v1_185_trauma-team",
+        cardId: 397,
         catalogContains: ["two Trauma counters", "Put one Trauma counter"],
         sharedContains: ["2 Trauma counters", "Put 1 Trauma counter"],
         notContains: ["prevent 2 meat damage"],
       },
       {
-        cardId: "onr_v1_186_umbrella-policy",
+        cardId: 398,
         catalogContains: ["program or hardware card from being trashed"],
         sharedContains: ["program or hardware card from being trashed"],
         notContains: ["prevent 1 net, meat or core damage"],
       },
       {
-        cardId: "onr_v1_187_wilson-weeflerunner-apprentice",
+        cardId: 399,
         catalogContains: [
           "gain an action",
           "Prevent any amount of meat damage",
@@ -794,18 +796,18 @@ describe("catalog API filters", () => {
 
     for (const expectation of expectations) {
       const response = catalogDetailResponse(expectation.cardId);
-      expect(response.status, expectation.cardId).toBe(200);
+      expect(response.status, String(expectation.cardId)).toBe(200);
       const body = response.body as { card: { text: string } };
       const sharedText =
         createRuntimeCardsById()[expectation.cardId]?.text ?? "";
 
       for (const snippet of expectation.catalogContains) {
-        expect(body.card.text, expectation.cardId).toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).toContain(snippet);
       }
-      expect(sharedText, expectation.cardId).toBe(body.card.text);
+      expect(sharedText, String(expectation.cardId)).toBe(body.card.text);
       for (const snippet of expectation.notContains) {
-        expect(body.card.text, expectation.cardId).not.toContain(snippet);
-        expect(sharedText, expectation.cardId).not.toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).not.toContain(snippet);
+        expect(sharedText, String(expectation.cardId)).not.toContain(snippet);
       }
     }
   });
@@ -813,61 +815,61 @@ describe("catalog API filters", () => {
   it("serves Runner utility text from the same CardSpec projection in catalog and runtime", () => {
     const expectations = [
       {
-        cardId: "onr_v1_032_i-spy",
+        cardId: 244,
         catalogContains: ["Spy counter", "successful run on that fort"],
         sharedContains: ["Spy counter", "successful run on that fort"],
         notContains: ["top card of the Runner stack"],
       },
       {
-        cardId: "onr_v1_050_r-and-d-protocol-files",
+        cardId: 262,
         catalogContains: ["look at the top five cards of R&D"],
         sharedContains: ["look at the top five cards of R&D"],
         notContains: ["Microcyb Owl", "Stealth program"],
       },
       {
-        cardId: "onr_v1_082_deal-with-militech",
+        cardId: 294,
         catalogContains: ["Militech counter", "+1 strength"],
         sharedContains: ["Militech counter", "+1 strength"],
         notContains: [],
       },
       {
-        cardId: "onr_v1_084_edited-shipping-manifests",
+        cardId: 296,
         catalogContains: ["Corp loses [1]", "you gain [10]"],
         sharedContains: ["Corp loses 1", "you gain 10"],
         notContains: ["Corp draws 1 card"],
       },
       {
-        cardId: "onr_v1_091_hunt-club-bbs",
+        cardId: 303,
         catalogContains: ["Expose up to three installed cards."],
         sharedContains: ["Expose up to three installed Corp cards."],
         notContains: [],
       },
       {
-        cardId: "onr_v1_101_mit-west-tier",
+        cardId: 313,
         catalogContains: ["remove it from the game instead of trashing it"],
         sharedContains: ["remove MIT West Tier from the game"],
         notContains: [],
       },
       {
-        cardId: "onr_v1_106_private-ldl-access",
+        cardId: 318,
         catalogContains: ["treat run as a successful run on R&D"],
         sharedContains: ["treat run as a successful run on R&D"],
         notContains: [],
       },
       {
-        cardId: "onr_v1_114_temple-microcode-outlet",
+        cardId: 326,
         catalogContains: ["Show that program to the Corp"],
         sharedContains: ["Show that program to the Corp"],
         notContains: ["reveal it"],
       },
       {
-        cardId: "onr_v1_139_r-and-d-interface",
+        cardId: 351,
         catalogContains: ["access an additional card from R&D"],
         sharedContains: ["access 1 additional card whenever you access R&D"],
         notContains: [],
       },
       {
-        cardId: "onr_v1_155_code-viral-cache",
+        cardId: 367,
         catalogContains: ["two counters of your choice are not removed"],
         sharedContains: [
           "choose up to two Virus counters that are not removed",
@@ -875,19 +877,19 @@ describe("catalog API filters", () => {
         notContains: [],
       },
       {
-        cardId: "onr_v1_173_restrictive-net-zoning",
+        cardId: 385,
         catalogContains: ["must pay [2]"],
         sharedContains: ["must pay [2]"],
         notContains: ["must pay 1"],
       },
       {
-        cardId: "onr_v1_174_rigged-investments",
+        cardId: 386,
         catalogContains: ["Put [12]", "take [1]"],
         sharedContains: ["Put [12]", "take [1]"],
         notContains: ["2 recurring credits", "Install with 6 Bits"],
       },
       {
-        cardId: "onr_v1_184_top-runners-conference",
+        cardId: 396,
         catalogContains: ["Gain [2]"],
         sharedContains: ["Gain [2]"],
         notContains: ["Gain 3"],
@@ -896,18 +898,18 @@ describe("catalog API filters", () => {
 
     for (const expectation of expectations) {
       const response = catalogDetailResponse(expectation.cardId);
-      expect(response.status, expectation.cardId).toBe(200);
+      expect(response.status, String(expectation.cardId)).toBe(200);
       const body = response.body as { card: { text: string } };
       const sharedText =
         createRuntimeCardsById()[expectation.cardId]?.text ?? "";
 
       for (const snippet of expectation.catalogContains) {
-        expect(body.card.text, expectation.cardId).toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).toContain(snippet);
       }
-      expect(sharedText, expectation.cardId).toBe(body.card.text);
+      expect(sharedText, String(expectation.cardId)).toBe(body.card.text);
       for (const snippet of expectation.notContains) {
-        expect(body.card.text, expectation.cardId).not.toContain(snippet);
-        expect(sharedText, expectation.cardId).not.toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).not.toContain(snippet);
+        expect(sharedText, String(expectation.cardId)).not.toContain(snippet);
       }
     }
   });
@@ -915,12 +917,12 @@ describe("catalog API filters", () => {
   it("serves Runner virus text from the same CardSpec projection in catalog and runtime", () => {
     const expectations = [
       {
-        cardId: "onr_v1_009_butcher-boy",
+        cardId: 221,
         catalogContains: ["Butcher Boy counter", "start of each of your turns"],
         sharedContains: ["Butcher Boy counter", "start of each of your turns"],
       },
       {
-        cardId: "onr_v1_010_cascade",
+        cardId: 222,
         catalogContains: [
           "Cascade counter",
           "trash faceup one card stored in R&D",
@@ -931,12 +933,12 @@ describe("catalog API filters", () => {
         ],
       },
       {
-        cardId: "onr_v1_017_deep-thought",
+        cardId: 229,
         catalogContains: ["Thought counter", "look at the top card of R&D"],
         sharedContains: ["Thought counter", "look at the top card of R&D"],
       },
       {
-        cardId: "onr_v1_064_skivviss",
+        cardId: 276,
         catalogContains: ["Skivviss counter", "draw one extra card"],
         sharedContains: ["Skivviss counter", "draw one extra card"],
       },
@@ -944,19 +946,19 @@ describe("catalog API filters", () => {
 
     for (const expectation of expectations) {
       const response = catalogDetailResponse(expectation.cardId);
-      expect(response.status, expectation.cardId).toBe(200);
+      expect(response.status, String(expectation.cardId)).toBe(200);
       const body = response.body as { card: { text: string } };
       const sharedText =
         createRuntimeCardsById()[expectation.cardId]?.text ?? "";
 
       for (const snippet of expectation.catalogContains) {
-        expect(body.card.text, expectation.cardId).toContain(snippet);
+        expect(body.card.text, String(expectation.cardId)).toContain(snippet);
       }
-      expect(sharedText, expectation.cardId).toBe(body.card.text);
-      expect(body.card.text, expectation.cardId).not.toContain(
+      expect(sharedText, String(expectation.cardId)).toBe(body.card.text);
+      expect(body.card.text, String(expectation.cardId)).not.toContain(
         "recurring credit for run costs",
       );
-      expect(sharedText, expectation.cardId).not.toContain(
+      expect(sharedText, String(expectation.cardId)).not.toContain(
         "recurring credit for run costs",
       );
     }
@@ -964,17 +966,17 @@ describe("catalog API filters", () => {
 
   it("shows promoted longtail card details in the web catalog API", () => {
     for (const cardId of [
-      "onr_v1_026_false-echo",
-      "onr_v1_075_zetatech-software-installer",
-      "onr_v1_298_planning-consultants",
+      238,
+      287,
+      510,
     ]) {
       const response = catalogDetailResponse(cardId);
 
-      expect([200, 404], cardId).toContain(response.status);
+      expect([200, 404], String(cardId)).toContain(response.status);
       if (response.status === 404) continue;
       const body = response.body as {
         card: {
-          catalogCardId: string;
+          catalogCardId: CardDefinitionId;
           statuses: {
             ai_supported: boolean;
             human_playable: boolean;
@@ -983,11 +985,11 @@ describe("catalog API filters", () => {
           aiHints: { aiSupportStatus: string } | null;
         };
       };
-      expect(body.card.catalogCardId, cardId).toBe(cardId);
-      expect(body.card.statuses.ai_supported, cardId).toBe(true);
-      expect(body.card.statuses.human_playable, cardId).toBe(true);
-      expect(body.card.statuses.deck_legal, cardId).toBe(true);
-      expect(body.card.aiHints?.aiSupportStatus ?? "none", cardId).toBe(
+      expect(body.card.catalogCardId, String(cardId)).toBe(cardId);
+      expect(body.card.statuses.ai_supported, String(cardId)).toBe(true);
+      expect(body.card.statuses.human_playable, String(cardId)).toBe(true);
+      expect(body.card.statuses.deck_legal, String(cardId)).toBe(true);
+      expect(body.card.aiHints?.aiSupportStatus ?? "none", String(cardId)).toBe(
         "ai_supported",
       );
     }
@@ -1006,9 +1008,9 @@ describe("catalog API filters", () => {
     "serves the generated CardSpec hint projection for $cardId",
     (generated) => {
       const response = catalogDetailResponse(generated.cardId);
-      expect(response.status, generated.cardId).toBe(200);
+      expect(response.status, String(generated.cardId)).toBe(200);
       const body = response.body as CatalogDetailAiHints;
-      expect(body.card.aiHints, generated.cardId).toMatchObject({
+      expect(body.card.aiHints, String(generated.cardId)).toMatchObject({
         cardId: generated.hint.cardId,
         roles: generated.hint.roles,
         planRoles: generated.hint.planRoles,
@@ -1024,17 +1026,17 @@ describe("catalog API filters", () => {
 
   it("keeps generated detail hints deeply immutable across API responses", () => {
     for (const cardId of [
-      "onr_v1_154_broker",
-      "onr_proteus_001_ai-board-member",
+      366,
+      59,
     ]) {
       const first = catalogDetailResponse(cardId).body as CatalogDetailAiHints;
       const roles = first.card.aiHints?.roles;
-      expect(roles, cardId).toBeDefined();
-      expect(Object.isFrozen(roles), cardId).toBe(true);
-      expect(() => roles?.push("cs06_poison"), cardId).toThrow(TypeError);
+      expect(roles, String(cardId)).toBeDefined();
+      expect(Object.isFrozen(roles), String(cardId)).toBe(true);
+      expect(() => roles?.push("cs06_poison"), String(cardId)).toThrow(TypeError);
 
       const second = catalogDetailResponse(cardId).body as CatalogDetailAiHints;
-      expect(second.card.aiHints?.roles, cardId).not.toContain("cs06_poison");
+      expect(second.card.aiHints?.roles, String(cardId)).not.toContain("cs06_poison");
       expect(second.card.aiHints).toBe(first.card.aiHints);
     }
   });

@@ -1,3 +1,4 @@
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import { createGameAfterSetup, hashState } from "@netgrid/engine";
 import type {
   CardInstanceId,
@@ -106,7 +107,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
   const hiddenAgendaId = putCorpRootInRemote(
     hiddenState,
     "remote_1",
-    "simple_agenda",
+    588,
   );
   hiddenState.pendingChoice = {
     choiceId: "choice_spectator_hidden",
@@ -129,7 +130,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
 
   const futureState = structuredClone(hiddenState);
   futureState.stateVersion = 3;
-  putCorpRootInRemote(futureState, "remote_2", "simple_economy_asset");
+  putCorpRootInRemote(futureState, "remote_2", 594);
   futureState.runner.credits += 1;
 
   const eventLog: EventRecord[] = [
@@ -146,7 +147,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
           actor: "runner",
           actionType: "access_card",
           title: "Simple Agenda",
-          cardDefinitionId: "simple_agenda",
+          cardDefinitionId: 588,
           privatePayload: {
             runner: { cardInstances: hiddenState.cardInstances },
           },
@@ -155,7 +156,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
           joinToken: "raw_join_secret",
           tokenHash:
             "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-          decklist: ["simple_agenda"],
+          decklist: [588],
           deckHash: "deck:secret-hash",
           AIInput: { side: "runner" },
           DecisionDebug: { local_analysis: true },
@@ -179,7 +180,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
           actor: "corp",
           actionType: "future_public_marker",
           title: "Simple Economy Asset",
-          cardDefinitionId: "simple_economy_asset",
+          cardDefinitionId: 594,
           serverId: "remote_2",
         },
       },
@@ -205,7 +206,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
         corpSnapshotId: "demo_corp_008_snapshot_v0_8",
         runner: {
           side: "runner",
-          identityCardId: "runner_identity",
+          identityCardId: 587,
           deckName: "Runner Private Deck",
           cardPoolSnapshotId: "private-runner-card-pool",
           formatProfileId: "snapshot",
@@ -213,7 +214,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
         },
         corp: {
           side: "corp",
-          identityCardId: "corp_identity",
+          identityCardId: 3,
           deckName: "Corp Private Deck",
           cardPoolSnapshotId: "private-corp-card-pool",
           formatProfileId: "snapshot",
@@ -286,7 +287,6 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
       "FullState",
       "GameState",
       "Simple Agenda",
-      "simple_agenda",
       "Runner Private Deck",
       "Corp Private Deck",
       "runner-deck-hash-secret",
@@ -312,7 +312,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
 function putCorpRootInRemote(
   state: GameState,
   serverId: "remote_1" | "remote_2",
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const cardId = findCard(state, definitionId);
   removeEverywhere(state, cardId);
@@ -339,7 +339,7 @@ function putCorpRootInRemote(
   return cardId;
 }
 
-function findCard(state: GameState, definitionId: string): CardInstanceId {
+function findCard(state: GameState, definitionId: CardDefinitionId): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,
   );

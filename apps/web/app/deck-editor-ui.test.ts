@@ -18,13 +18,13 @@ describe("deck editor agenda status", () => {
         side: "corp",
         formatProfileId: "netgrid_private_local_v1",
         cards: [
-          { cardId: "hostile_takeover", quantity: 3 },
-          { cardId: "ice_wall", quantity: 2 },
+          { cardId: 9129, quantity: 3 },
+          { cardId: 9136, quantity: 2 },
         ],
       },
       {
-        hostile_takeover: agenda(1),
-        ice_wall: ice,
+        9129: agenda(1),
+        9136: ice,
       },
     );
 
@@ -44,13 +44,13 @@ describe("deck editor agenda status", () => {
         side: "corp",
         formatProfileId: "netgrid_private_local_v1",
         cards: [
-          { cardId: "two_point_agenda", quantity: 4 },
-          { cardId: "ice_wall", quantity: 19 },
+          { cardId: 9135, quantity: 4 },
+          { cardId: 9136, quantity: 19 },
         ],
       },
       {
-        two_point_agenda: agenda(2),
-        ice_wall: ice,
+        9135: agenda(2),
+        9136: ice,
       },
     );
 
@@ -70,14 +70,14 @@ describe("deck editor agenda status", () => {
         side: "corp",
         formatProfileId: "netgrid_private_local_v1",
         cards: [
-          { cardId: "two_point_agenda", quantity: 2 },
-          { cardId: "ice_wall", quantity: 16 },
+          { cardId: 9135, quantity: 2 },
+          { cardId: 9136, quantity: 16 },
         ],
       },
       {},
       new Map([
-        ["two_point_agenda", { type: "agenda" }],
-        ["ice_wall", { type: "ice" }],
+        [9135, { type: "agenda" }],
+        [9136, { type: "ice" }],
       ]),
     );
 
@@ -95,16 +95,16 @@ describe("deck editor agenda status", () => {
         side: "corp",
         formatProfileId: "netgrid_private_local_v1",
         cards: [
-          { cardId: "two_point_agenda", quantity: 4 },
-          { cardId: "ice_wall", quantity: 14 },
+          { cardId: 9135, quantity: 4 },
+          { cardId: 9136, quantity: 14 },
         ],
       },
       {
-        two_point_agenda: agenda(2),
+        9135: agenda(2),
       },
       new Map([
-        ["two_point_agenda", { type: "agenda" }],
-        ["ice_wall", { type: "ice" }],
+        [9135, { type: "agenda" }],
+        [9136, { type: "ice" }],
       ]),
     );
 
@@ -122,9 +122,9 @@ describe("deck editor agenda status", () => {
         {
           side: "runner",
           formatProfileId: "netgrid_private_local_v1",
-          cards: [{ cardId: "agenda_like_runner_card", quantity: 1 }],
+          cards: [{ cardId: 9137, quantity: 1 }],
         },
-        { agenda_like_runner_card: agenda(1) },
+        { 9137: agenda(1) },
       ),
     ).toBeNull();
   });

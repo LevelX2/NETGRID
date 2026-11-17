@@ -9,7 +9,7 @@ describe("winning agenda access result sequence", () => {
   it("keeps the public R&D agenda access ahead of the finished result", () => {
     const earlierAccess = event("evt_access_earlier", "access_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_305_team-restructuring",
+      cardDefinitionId: 517,
       title: "Team Restructuring",
       serverLabel: "R&D",
       accessOrigin: "rd",
@@ -18,7 +18,7 @@ describe("winning agenda access result sequence", () => {
     });
     const access = event("evt_access", "access_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      cardDefinitionId: 411,
       title: "Employee Empowerment",
       serverLabel: "R&D",
       accessOrigin: "rd",
@@ -30,7 +30,7 @@ describe("winning agenda access result sequence", () => {
       "steal_agenda",
       {
         actor: "runner",
-        cardDefinitionId: "onr_v1_199_employee-empowerment",
+        cardDefinitionId: 411,
         title: "Employee Empowerment",
         serverId: "rd",
         accessOrigin: "rd",
@@ -40,8 +40,8 @@ describe("winning agenda access result sequence", () => {
     const events = [earlierAccess, access, steal];
     const retained = retainedAccessRevealEvent(events, null);
     const details = {
-      "onr_v1_199_employee-empowerment": {
-        catalogCardId: "onr_v1_199_employee-empowerment",
+      411: {
+        catalogCardId: 411,
         title: "Employee Empowerment",
         side: "corp" as const,
         type: "agenda",
@@ -70,7 +70,7 @@ describe("winning agenda access result sequence", () => {
         dismissLabel: "Agenda bestätigen",
         actions: [],
         card: {
-          definitionId: "onr_v1_199_employee-empowerment",
+          definitionId: 411,
           title: "Employee Empowerment",
         },
       });
@@ -142,7 +142,7 @@ describe("winning agenda access result sequence", () => {
         accessOrigin: "rd",
         accessIndex: 2,
         breachId: "breach_final",
-        cardDefinitionId: "main_office_relocation",
+        cardDefinitionId: 11035,
         title: "Main-Office Relocation",
       },
       326,
@@ -150,7 +150,7 @@ describe("winning agenda access result sequence", () => {
     const earlierSteal = event("evt_earlier_steal", "steal_agenda", {
       actor: "runner",
       title: "Earlier agenda",
-      cardDefinitionId: "earlier",
+      cardDefinitionId: 11036,
       serverId: "hq",
     });
     const events = [earlierSteal, hiddenAccess, steal];
@@ -172,7 +172,7 @@ describe("winning agenda access result sequence", () => {
       serverLabel: "R&D",
       outcomeKind: "stolen",
       card: {
-        definitionId: "main_office_relocation",
+        definitionId: 11035,
         title: "Main-Office Relocation",
       },
       actions: [],

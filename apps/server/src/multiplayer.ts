@@ -1,3 +1,4 @@
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import { createHash, randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { setTimeout as yieldToEventLoop } from "node:timers/promises";
@@ -472,7 +473,7 @@ export type AiDecisionHistoricalLegalAction = {
   source: {
     kind: "card" | "basic_action" | "game_rule";
     sourceCardInstanceId?: string;
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: CardDefinitionId;
   };
   timingPoint: LegalAction["timingPoint"];
   costs: LegalAction["costs"];
@@ -1930,7 +1931,7 @@ export class MultiplayerService {
       const participantDecks = participantDeckInputsForRecord(record);
       const next = await this.createMatch({
         hostSide: nextHostSide,
-        participantIdentities: record.match.participantIdentities,
+        ...(record.match.participantIdentities ? { participantIdentities: record.match.participantIdentities } : {}),
         displayName: input.displayName ?? session.displayName,
         seed: `${record.gameState.seed}:series-game-${nextGameNumber}`,
         mode: nextMode,
@@ -10114,7 +10115,7 @@ function cardNames(state: GameState, ids: readonly string[]): string[] {
   return ids.map((id) => {
     const definitionId = state.cardInstances[id]?.definitionId;
     return definitionId
-      ? (CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId)
+      ? (CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? String(definitionId))
       : id;
   });
 }
@@ -10246,8 +10247,8 @@ function cardTitleForEvent(
 ): string | undefined {
   const direct = stringValue(event.publicPayload.title);
   if (direct) return direct;
-  const definitionId = stringValue(event.publicPayload.cardDefinitionId);
-  if (definitionId) return CARD_DEFINITIONS_BY_ID[definitionId]?.title;
+  const definitionId = event.publicPayload.cardDefinitionId;
+  if (isCardDefinitionId(definitionId)) return CARD_DEFINITIONS_BY_ID[definitionId]?.title;
   const side = sideValue(event.publicPayload.actor);
   const privatePayload = side ? event.privatePayload?.[side] : undefined;
   const source =

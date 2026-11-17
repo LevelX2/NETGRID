@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type {
   PlayerView,
   PublicGameEvent,
@@ -13,7 +14,7 @@ import { localCardImageUrl } from "./card-image-service";
 import { visibleKnownCardRulesText } from "../../app/card-text-source";
 
 type CardViewCatalogDetail = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   side: Side;
   type: string;
@@ -37,7 +38,7 @@ export type DisplayVisibleCard = VisibleCard & {
   setDetailLabel?: string;
 };
 
-export function visibleKnownCardIds(view: PlayerView | undefined): string[] {
+export function visibleKnownCardIds(view: PlayerView | undefined): CardDefinitionId[] {
   if (!view) return [];
   const cards = [
     ...view.own.gripOrHq,
@@ -151,7 +152,7 @@ export function visibleCardFromCatalogDetail(
 
 export function visibleCardFromPublicEvent(
   event: PublicGameEvent,
-  cardId: string,
+  cardId: CardDefinitionId,
   title: string,
 ): DisplayVisibleCard {
   const card: DisplayVisibleCard = {
@@ -188,7 +189,7 @@ export function aiBoonRunStrengthBadgeValue(
 ): number | null {
   if (
     !card.known ||
-    card.definitionId !== "onr_v1_002_ai-boon" ||
+    card.definitionId !== 214 ||
     card.type !== "program" ||
     typeof card.strength !== "number" ||
     options.preview ||

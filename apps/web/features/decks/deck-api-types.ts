@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type { DeckPublicMetadata, Side } from "@netgrid/shared";
 
 import type { DeckCardEntry, EditableDeck } from "./deck-table-model";
@@ -7,7 +8,7 @@ export type DeckTemplate = {
   sourceDeckId: string;
   name: string;
   side: Side;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   editableCopyAllowed: boolean;
   cards: DeckCardEntry[];
 };
@@ -21,7 +22,7 @@ export type DeckSnapshot = {
   deckVersion: string;
   name: string;
   side: Side;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;

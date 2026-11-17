@@ -1,4 +1,5 @@
 import type { PublicGameEvent, Side } from "@netgrid/shared";
+import { cardDefinitionIdValue } from "./card-definition-id";
 
 export type AccessPresentationOutcomeKind = "trashed" | "stolen" | "declined";
 
@@ -175,7 +176,7 @@ function publicAccessEventForOutcome(
     (event) => event.eventId === outcomeEvent.eventId,
   );
   if (outcomeIndex < 0) return null;
-  const outcomeCardId = stringValue(
+  const outcomeCardId = cardDefinitionIdValue(
     outcomeEvent.publicPayload.cardDefinitionId,
   );
   for (let index = outcomeIndex - 1; index >= 0; index -= 1) {
@@ -183,7 +184,7 @@ function publicAccessEventForOutcome(
     if (!event) continue;
     if (event.publicPayload.actionType !== "access_card") continue;
     if (!isPublicCardAccessEvent(event)) return null;
-    const accessCardId = stringValue(event.publicPayload.cardDefinitionId);
+    const accessCardId = cardDefinitionIdValue(event.publicPayload.cardDefinitionId);
     if (outcomeCardId && outcomeCardId !== accessCardId) return null;
     return event;
   }
@@ -228,7 +229,7 @@ function accessOutcome(
 function isPublicCardAccessEvent(event: PublicGameEvent): boolean {
   return (
     event.publicPayload.actionType === "access_card" &&
-    Boolean(stringValue(event.publicPayload.cardDefinitionId)) &&
+    Boolean(cardDefinitionIdValue(event.publicPayload.cardDefinitionId)) &&
     Boolean(stringValue(event.publicPayload.title))
   );
 }

@@ -17,7 +17,7 @@ import en from "../../messages/en.json";
 import fr from "../../messages/fr.json";
 
 const messages = { de, en, fr };
-const definitionId = "onr_v1_076_all-nighter";
+const definitionId = 288;
 
 it.each([
   ["de", "auf den Bonus-Run verzichtet."],
@@ -28,7 +28,7 @@ it.each([
   (locale, declineText) => {
     let state = toRunnerTurn(v192CardReleaseGame("all-nighter-chronicle"));
     const cardId = moveRunnerCardToGrip(state, definitionId);
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, 596);
     state = apply(
       state,
       "runner",
@@ -49,7 +49,7 @@ it.each([
     const { publicEvents } = getPlayerView(state, "corp");
     const play = publicEvents.find((event) => event.eventId === playId)!;
     const decline = publicEvents.find((event) => event.eventId === declineId)!;
-    const translate = createTranslator({
+    const translator = createTranslator({
       locale,
       messages: messages[locale],
       namespace: "Chronicle",
@@ -57,6 +57,9 @@ it.each([
         throw error;
       },
     });
+
+    const translate: import("../../app/chronicle").ChronicleTranslate = (key, values) =>
+      translator(key as Parameters<typeof translator>[0], values);
 
     expect(play.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({ kind: "start_run", serverId: "rd" }),

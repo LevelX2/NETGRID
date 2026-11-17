@@ -15,7 +15,7 @@ describe("successful run outcome presentation", () => {
         ),
       ).toEqual({
         eventId: "evt_weather",
-        sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+        sourceDefinitionId: 330,
         sourceTitle: "Weather-to-Finance Pipe",
         headline: "Erfolgreicher HQ-Run",
         resultText: "Korp verliert 4 Credits. Kein Karten-Access auf HQ.",
@@ -40,7 +40,7 @@ describe("successful run outcome presentation", () => {
     failed.publicPayload.runSuccessful = false;
     const unrelated = event("evt_other", "continue_run", 4);
     unrelated.publicPayload.sourceDefinitionId =
-      "onr_v1_084_edited-shipping-manifests";
+      296;
 
     expect(successfulRunOutcomePresentationFromEvent(unresolved)).toBeNull();
     expect(successfulRunOutcomePresentationFromEvent(failed)).toBeNull();
@@ -84,7 +84,7 @@ function event(
     publicPayload: {
       actionType,
       actor: "runner",
-      sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+      sourceDefinitionId: 330,
       sourceTitle: "Weather-to-Finance Pipe",
       serverId: "hq",
       accessReplacement: "corp_lose_credits",

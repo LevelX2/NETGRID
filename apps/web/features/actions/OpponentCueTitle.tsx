@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type { OpponentActionCue } from "../../app/action-cues";
 import type { ChronicleItem } from "../../app/chronicle";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
@@ -5,7 +6,7 @@ import { ChronicleCardTrigger } from "../chronicle/ChronicleCardTrigger";
 import type { CardDisplayMode } from "../settings/settings-model";
 
 type OpponentCueTitleCard = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   type: string;
   text: string;

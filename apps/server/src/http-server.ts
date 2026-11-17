@@ -4952,13 +4952,13 @@ function accountDeckInputFromBody(value: unknown): AccountDeckDraftInput {
   if (!value || typeof value !== "object")
     throw new AccountDeckError("account_deck_input_invalid");
   const body = value as Record<string, unknown>;
-  if (body.side !== "runner" && body.side !== "corp")
+  if ((body.side !== "runner" && body.side !== "corp") ||
+      typeof body.identityCardId !== "number" || !Array.isArray(body.cards))
     throw new AccountDeckError("account_deck_input_invalid");
   return {
     name: typeof body.name === "string" ? body.name : "",
     side: body.side,
-    identityCardId:
-      typeof body.identityCardId === "string" ? body.identityCardId : "",
+    identityCardId: body.identityCardId,
     cardPoolSnapshotId:
       typeof body.cardPoolSnapshotId === "string"
         ? body.cardPoolSnapshotId
@@ -4971,19 +4971,12 @@ function accountDeckInputFromBody(value: unknown): AccountDeckDraftInput {
     ...(typeof body.formatProfileVersion === "string"
       ? { formatProfileVersion: body.formatProfileVersion }
       : {}),
-    cards: Array.isArray(body.cards)
-      ? body.cards.map((entry) => {
-          const card =
-            entry && typeof entry === "object"
-              ? (entry as Record<string, unknown>)
-              : {};
-          return {
-            cardId: typeof card.cardId === "string" ? card.cardId : "",
-            quantity:
-              typeof card.quantity === "number" ? card.quantity : Number.NaN,
-          };
-        })
-      : [],
+    cards: body.cards.map((entry) => {
+      const card = entry && typeof entry === "object" ? (entry as Record<string, unknown>) : {};
+      if (typeof card.cardId !== "number" || typeof card.quantity !== "number")
+        throw new AccountDeckError("account_deck_input_invalid");
+      return { cardId: card.cardId, quantity: card.quantity };
+    }),
     ...(typeof body.notes === "string" ? { notes: body.notes } : {}),
     ...(body.tableLayout && typeof body.tableLayout === "object"
       ? {

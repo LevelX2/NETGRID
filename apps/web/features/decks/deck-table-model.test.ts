@@ -10,14 +10,14 @@ import {
 } from "./deck-table-model";
 
 const ICE = [
-  ["filter", "Filter", 0, 0],
-  ["data-wall", "Data Wall", 1, 0],
-  ["sleeper", "Sleeper", 1, 1],
-  ["data-wall-2", "Data Wall 2.0", 2, 1],
-  ["quandary", "Quandary", 2, 2],
-  ["wall-of-static", "Wall of Static", 3, 2],
-  ["asp", "Asp", 4, 4],
-  ["keeper", "Keeper", 4, 4],
+  [9189, "Filter", 0, 0],
+  [9190, "Data Wall", 1, 0],
+  [9191, "Sleeper", 1, 1],
+  [9192, "Data Wall 2.0", 2, 1],
+  [9193, "Quandary", 2, 2],
+  [9194, "Wall of Static", 3, 2],
+  [9195, "Asp", 4, 4],
+  [9196, "Keeper", 4, 4],
 ] as const;
 
 const cardLookup = new Map(
@@ -42,7 +42,7 @@ function deck(sortMode: DeckTableSortKey): EditableDeck {
     deckVersion: "test",
     name: "Sort test",
     side: "corp",
-    identityCardId: "identity",
+    identityCardId: 3,
     cardPoolSnapshotId: "snapshot",
     formatProfileId: "profile",
     cards: alphabeticalIds.map((cardId) => ({ cardId, quantity: 1 })),
@@ -71,7 +71,7 @@ function deck(sortMode: DeckTableSortKey): EditableDeck {
 function sortedIds(
   sortMode: DeckTableSortKey,
   details = detailsById,
-): string[] {
+): number[] {
   return normalizeDeckTableLayout(
     deck(sortMode),
     cardLookup,
@@ -82,50 +82,50 @@ function sortedIds(
 describe("deck table numeric sorting", () => {
   it("sorts ICE by rez cost with deterministic title tie-breaks", () => {
     expect(sortedIds("rez")).toEqual([
-      "filter",
-      "data-wall",
-      "sleeper",
-      "data-wall-2",
-      "quandary",
-      "wall-of-static",
-      "asp",
-      "keeper",
+      9189,
+      9190,
+      9191,
+      9192,
+      9193,
+      9194,
+      9195,
+      9196,
     ]);
   });
 
   it("sorts ICE by strength with deterministic title tie-breaks", () => {
     expect(sortedIds("strength")).toEqual([
-      "data-wall",
-      "filter",
-      "data-wall-2",
-      "sleeper",
-      "quandary",
-      "wall-of-static",
-      "asp",
-      "keeper",
+      9190,
+      9189,
+      9192,
+      9191,
+      9193,
+      9194,
+      9195,
+      9196,
     ]);
   });
 
   it("reapplies the chosen numeric sort when late details arrive", () => {
     expect(sortedIds("rez", {})).toEqual([
-      "asp",
-      "data-wall",
-      "data-wall-2",
-      "filter",
-      "keeper",
-      "quandary",
-      "sleeper",
-      "wall-of-static",
+      9195,
+      9190,
+      9192,
+      9189,
+      9196,
+      9193,
+      9191,
+      9194,
     ]);
     expect(sortedIds("rez")).toEqual([
-      "filter",
-      "data-wall",
-      "sleeper",
-      "data-wall-2",
-      "quandary",
-      "wall-of-static",
-      "asp",
-      "keeper",
+      9189,
+      9190,
+      9191,
+      9192,
+      9193,
+      9194,
+      9195,
+      9196,
     ]);
   });
 
@@ -151,7 +151,7 @@ describe("deck table numeric sorting", () => {
   it("marks numeric sorts as detail-dependent and exposes their active value", () => {
     expect(deckTableSortRequiresDetails("name")).toBe(false);
     expect(deckTableSortRequiresDetails("rez")).toBe(true);
-    expect(deckTableNumericSortValue("rez", detailsById.filter)).toBe(0);
+    expect(deckTableNumericSortValue("rez", detailsById[9189])).toBe(0);
     expect(deckTableNumericSortValue("install", detailsById.filter)).toBeNull();
   });
 

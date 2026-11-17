@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { Layers3 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
@@ -18,7 +19,7 @@ const SPECIAL_ZONE_CARD_WIDTH_PREFERRED = 140;
 const SPECIAL_ZONE_CARD_GAP = 6;
 
 type SpecialZoneCatalogDetail = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   side: Side;
   type: string;

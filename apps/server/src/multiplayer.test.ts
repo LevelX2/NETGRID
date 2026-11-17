@@ -1,3 +1,4 @@
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import {
   mkdtemp,
   readFile,
@@ -1086,9 +1087,9 @@ describe("Invite and lobby redaction harness", () => {
       tokenHash:
         "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       sessionId: "session_private_123",
-      decklist: [{ cardId: "onr_v1_001_afreet", quantity: 3 }],
+      decklist: [{ cardId: 213, quantity: 3 }],
       deckHash: "fnv1a:deadbeef",
-      hiddenCard: { definitionId: "simple_agenda" },
+      hiddenCard: { definitionId: 588 },
       AIInput: { side: "runner" },
       DecisionDebug: { explored: true },
       url: "http://127.0.0.1:3100/?matchId=match_1&joinToken=raw-join-token",
@@ -1891,9 +1892,9 @@ describe("Backend 0.5 private storage maintenance", () => {
           provenance?: string;
           signature?: string;
           deckSnapshotId?: string;
-          identityDefinitionId?: string;
+          identityDefinitionId?: CardDefinitionId;
           definitionCounts?: Array<{
-            definitionId: string;
+            definitionId: CardDefinitionId;
             quantity: number;
           }>;
           totalCards?: number;
@@ -2161,7 +2162,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           provenance?: string;
           signature?: string;
           definitionCounts?: Array<{
-            definitionId: string;
+            definitionId: CardDefinitionId;
             quantity: number;
           }>;
           zoneBalance?: {
@@ -2169,11 +2170,11 @@ describe("Backend 0.5 private storage maintenance", () => {
             stateVersion?: number;
             hiddenDeckCount?: number;
             knownOutsideDeckDefinitionCounts?: Array<{
-              definitionId: string;
+              definitionId: CardDefinitionId;
               quantity: number;
             }>;
             remainingPossibleDefinitionCounts?: Array<{
-              definitionId: string;
+              definitionId: CardDefinitionId;
               quantity: number;
             }>;
           };
@@ -5054,10 +5055,10 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(created.playerView.deckMetadata?.own.deckHash).toBe(
-      "fnv1a:d3ad4e1c",
+      "fnv1a:8fcdd81b",
     );
     expect(created.playerView.deckMetadata?.opponent.deckHash).toBe(
-      "fnv1a:54c7851f",
+      "fnv1a:f8ae8139",
     );
     expect(stored?.match.deckSetup.runnerSnapshotId).toBe(
       "demo_runner_004_snapshot_v0_6",
@@ -5065,7 +5066,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(stored?.match.settings.agendaPointsToWin).toBe(7);
     expect(stored?.match.settings.matchFormat).toBe("rules_match");
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
-    expect(JSON.stringify(created)).not.toContain("simple_priority_agenda");
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":599\b/);
     expect(JSON.stringify(created)).not.toContain("cardInstances");
 
     const invalidSnapshot = structuredClone(
@@ -5076,7 +5077,7 @@ describe("MVP 0.2 multiplayer service", () => {
     ) as DeckSnapshot | undefined;
     if (!invalidSnapshot) throw new Error("Missing runner snapshot");
     invalidSnapshot.cards.push({
-      cardId: "catalog_preview_resource_001",
+      cardId: 2,
       quantity: 1,
     });
     await expect(
@@ -5097,15 +5098,15 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("starts private local O:NR matches from the shared runtime card pool when the overlay is present", async () => {
     const cardsById = createRuntimeCardsById();
-    if (!cardsById["onr_v1_015_codeslinger"]) return;
+    if (!cardsById[227]) return;
     expect(
-      cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal,
+      cardsById[291]?.statuses.deck_legal,
     ).toBe(true);
-    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(
+    expect(cardsById[218]?.statuses.deck_legal).toBe(
       true,
     );
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(
+    expect(cardsById[230]?.statuses.deck_legal).toBe(true);
+    expect(cardsById[230]?.statuses.ai_supported).toBe(
       true,
     );
 
@@ -5120,29 +5121,29 @@ describe("MVP 0.2 multiplayer service", () => {
       deckVersion: "0.94.0-local-onr",
       name: "O:NR Runner Match Smoke",
       side: "runner",
-      identityCardId: "runner_identity_001",
+      identityCardId: 587,
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_015_codeslinger", quantity: 2 },
-        { cardId: "onr_v1_052_raffles", quantity: 2 },
-        { cardId: "onr_v1_054_raptor", quantity: 2 },
-        { cardId: "onr_v1_070_tinweasel", quantity: 2 },
-        { cardId: "onr_v1_144_tycho-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 },
-        { cardId: "onr_v1_095_jack-n-joe", quantity: 1 },
-        { cardId: "onr_v1_097_livewires-contacts", quantity: 1 },
-        { cardId: "onr_v1_108_score", quantity: 1 },
-        { cardId: "onr_v1_072_wild-card", quantity: 1 },
-        { cardId: "onr_v1_145_wutech-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
-        { cardId: "onr_v1_014_codecracker", quantity: 1 },
-        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
-        { cardId: "onr_v1_040_loony-goon", quantity: 1 },
-        { cardId: "onr_v1_060_shaka", quantity: 1 },
-        { cardId: "onr_v1_073_wizards-book", quantity: 1 },
-        { cardId: "simple_economy_event", quantity: 2 },
+        { cardId: 227, quantity: 2 },
+        { cardId: 264, quantity: 2 },
+        { cardId: 266, quantity: 2 },
+        { cardId: 282, quantity: 2 },
+        { cardId: 356, quantity: 1 },
+        { cardId: 358, quantity: 1 },
+        { cardId: 291, quantity: 1 },
+        { cardId: 307, quantity: 1 },
+        { cardId: 309, quantity: 1 },
+        { cardId: 320, quantity: 1 },
+        { cardId: 284, quantity: 1 },
+        { cardId: 357, quantity: 1 },
+        { cardId: 218, quantity: 1 },
+        { cardId: 226, quantity: 1 },
+        { cardId: 228, quantity: 1 },
+        { cardId: 252, quantity: 1 },
+        { cardId: 272, quantity: 1 },
+        { cardId: 285, quantity: 1 },
+        { cardId: 595, quantity: 2 },
       ],
       createdAt: now,
       updatedAt: now,
@@ -5152,46 +5153,46 @@ describe("MVP 0.2 multiplayer service", () => {
       deckVersion: "0.94.0-local-onr",
       name: "O:NR Corp Match Smoke",
       side: "corp",
-      identityCardId: "corp_identity_001",
+      identityCardId: 3,
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_203_hostile-takeover", quantity: 3 },
-        { cardId: "simple_agenda", quantity: 3 },
-        { cardId: "onr_v1_230_cortical-scanner", quantity: 2 },
-        { cardId: "onr_v1_232_crystal-wall", quantity: 2 },
-        { cardId: "onr_v1_237_data-wall", quantity: 2 },
-        { cardId: "onr_v1_238_data-wall-2-0", quantity: 2 },
-        { cardId: "onr_v1_239_endless-corridor", quantity: 2 },
-        { cardId: "onr_v1_220_tycho-extension", quantity: 2 },
-        { cardId: "onr_v1_281_accounts-receivable", quantity: 1 },
-        { cardId: "onr_v1_282_annual-reviews", quantity: 1 },
-        { cardId: "onr_v1_285_closed-accounts", quantity: 1 },
-        { cardId: "onr_v1_287_datapool-by-zetatech", quantity: 1 },
-        { cardId: "onr_v1_288_day-shift", quantity: 1 },
-        { cardId: "onr_v1_290_efficiency-experts", quantity: 1 },
-        { cardId: "onr_v1_301_punitive-counterstrike", quantity: 1 },
-        { cardId: "onr_v1_302_scorched-earth", quantity: 1 },
-        { cardId: "onr_v1_307_urban-renewal", quantity: 1 },
-        { cardId: "onr_v1_244_filter", quantity: 1 },
-        { cardId: "onr_v1_245_fire-wall", quantity: 1 },
-        { cardId: "onr_v1_252_keeper", quantity: 1 },
-        { cardId: "onr_v1_256_mazer", quantity: 1 },
-        { cardId: "onr_v1_253_laser-wire", quantity: 1 },
-        { cardId: "onr_v1_257_nerve-labyrinth", quantity: 1 },
-        { cardId: "onr_v1_259_in-the-face", quantity: 1 },
-        { cardId: "onr_v1_261_quandary", quantity: 1 },
-        { cardId: "onr_v1_262_razor-wire", quantity: 1 },
-        { cardId: "onr_v1_263_reinforced-wall", quantity: 1 },
-        { cardId: "onr_v1_265_rock-is-strong", quantity: 1 },
-        { cardId: "onr_v1_266_scramble", quantity: 1 },
-        { cardId: "onr_v1_269_shotgun-wire", quantity: 1 },
-        { cardId: "onr_v1_270_sleeper", quantity: 1 },
-        { cardId: "onr_v1_278_wall-of-ice", quantity: 1 },
-        { cardId: "onr_v1_279_wall-of-static", quantity: 1 },
-        { cardId: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
-        { cardId: "onr_v1_295_night-shift", quantity: 1 },
-        { cardId: "simple_economy_operation", quantity: 2 },
+        { cardId: 415, quantity: 3 },
+        { cardId: 588, quantity: 3 },
+        { cardId: 442, quantity: 2 },
+        { cardId: 444, quantity: 2 },
+        { cardId: 449, quantity: 2 },
+        { cardId: 450, quantity: 2 },
+        { cardId: 451, quantity: 2 },
+        { cardId: 432, quantity: 2 },
+        { cardId: 493, quantity: 1 },
+        { cardId: 494, quantity: 1 },
+        { cardId: 497, quantity: 1 },
+        { cardId: 499, quantity: 1 },
+        { cardId: 500, quantity: 1 },
+        { cardId: 502, quantity: 1 },
+        { cardId: 513, quantity: 1 },
+        { cardId: 514, quantity: 1 },
+        { cardId: 519, quantity: 1 },
+        { cardId: 456, quantity: 1 },
+        { cardId: 457, quantity: 1 },
+        { cardId: 464, quantity: 1 },
+        { cardId: 468, quantity: 1 },
+        { cardId: 465, quantity: 1 },
+        { cardId: 469, quantity: 1 },
+        { cardId: 471, quantity: 1 },
+        { cardId: 473, quantity: 1 },
+        { cardId: 474, quantity: 1 },
+        { cardId: 475, quantity: 1 },
+        { cardId: 477, quantity: 1 },
+        { cardId: 478, quantity: 1 },
+        { cardId: 481, quantity: 1 },
+        { cardId: 482, quantity: 1 },
+        { cardId: 490, quantity: 1 },
+        { cardId: 491, quantity: 1 },
+        { cardId: 505, quantity: 1 },
+        { cardId: 507, quantity: 1 },
+        { cardId: 596, quantity: 2 },
       ],
       createdAt: now,
       updatedAt: now,
@@ -5240,9 +5241,7 @@ describe("MVP 0.2 multiplayer service", () => {
       "local_onr_corp_match_smoke_snapshot",
     );
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
-    expect(JSON.stringify(created)).not.toContain(
-      "onr_v1_203_hostile-takeover",
-    );
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":415\b/);
     expect(JSON.stringify(created)).not.toContain("cardInstances");
 
     expect(created.joinUrl).toBeTruthy();
@@ -5259,7 +5258,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(joined.playerView.deckMetadata?.own.deckName).toBe(
       "O:NR Corp Match Smoke",
     );
-    expect(JSON.stringify(joined)).not.toContain("onr_v1_015_codeslinger");
+    expect(JSON.stringify(joined)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":227\b/);
     expect(JSON.stringify(joined)).not.toContain("cardInstances");
 
     const aiCreated = await service.createMatch({
@@ -5289,155 +5288,155 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("V1.9.9 card release matchstart", async () => {
     const cardsById = createRuntimeCardsById();
-    if (!cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]) return;
+    if (!cardsById[217]) return;
 
     expect(
-      cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses
+      cardsById[217]?.statuses
         .human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_007_blink"]?.statuses.human_playable).toBe(true);
+    expect(cardsById[219]?.statuses.human_playable).toBe(true);
     expect(
-      cardsById["onr_v1_115_terrorist-reprisal"]?.statuses.human_playable,
+      cardsById[327]?.statuses.human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_223_banpei"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_275_vacuum-link"]?.statuses.human_playable).toBe(
+    expect(cardsById[435]?.statuses.human_playable).toBe(true);
+    expect(cardsById[487]?.statuses.human_playable).toBe(
       true,
     );
     expect(
-      cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses
+      cardsById[217]?.statuses
         .ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(
+    expect(cardsById[225]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(
+    expect(cardsById[246]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_030_grubb"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_013_cockroach"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_034_incubator"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_030_grubb"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.human_playable).toBe(
+    expect(cardsById[242]?.statuses.human_playable).toBe(true);
+    expect(cardsById[225]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[246]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[242]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[288]?.statuses.human_playable).toBe(
       true,
     );
     expect(
-      cardsById["onr_v1_096_kilroy-was-here"]?.statuses.human_playable,
+      cardsById[308]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_107_romp-through-hq"]?.statuses.human_playable,
+      cardsById[319]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_184_top-runners-conference"]?.statuses.human_playable,
+      cardsById[396]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses
+      cardsById[400]?.statuses
         .human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.human_playable,
+      cardsById[423]?.statuses.human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_235_data-naga"]?.statuses.human_playable).toBe(
+    expect(cardsById[447]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.ai_supported).toBe(
+    expect(cardsById[288]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_096_kilroy-was-here"]?.statuses.ai_supported).toBe(
+    expect(cardsById[308]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_107_romp-through-hq"]?.statuses.ai_supported).toBe(
+    expect(cardsById[319]?.statuses.ai_supported).toBe(
       true,
     );
     expect(
-      cardsById["onr_v1_184_top-runners-conference"]?.statuses.ai_supported,
+      cardsById[396]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses.ai_supported,
+      cardsById[400]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.ai_supported,
+      cardsById[423]?.statuses.ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_235_data-naga"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[447]?.statuses.ai_supported).toBe(true);
     expect(
-      cardsById["onr_v1_207_netwatch-operations-office"]?.statuses
+      cardsById[419]?.statuses
         .human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_213_private-cybernet-police"]?.statuses.human_playable,
+      cardsById[425]?.statuses.human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.human_playable).toBe(
+    expect(cardsById[463]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.human_playable).toBe(true);
+    expect(cardsById[483]?.statuses.human_playable).toBe(true);
     expect(
-      cardsById["onr_v1_207_netwatch-operations-office"]?.statuses.ai_supported,
+      cardsById[419]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_213_private-cybernet-police"]?.statuses.ai_supported,
+      cardsById[425]?.statuses.ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.ai_supported).toBe(
+    expect(cardsById[463]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[483]?.statuses.ai_supported).toBe(true);
     expect(
-      cardsById["onr_v1_208_on-call-solo-team"]?.statuses.human_playable,
+      cardsById[420]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_217_strike-force-kali"]?.statuses.human_playable,
+      cardsById[429]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_208_on-call-solo-team"]?.statuses.ai_supported,
+      cardsById[420]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_217_strike-force-kali"]?.statuses.ai_supported,
+      cardsById[429]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_219_superior-net-barriers"]?.statuses.human_playable,
+      cardsById[431]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.human_playable,
+      cardsById[520]?.statuses.human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_236_data-raven"]?.statuses.human_playable).toBe(
+    expect(cardsById[448]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_001_afreet"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.human_playable).toBe(
+    expect(cardsById[213]?.statuses.human_playable).toBe(true);
+    expect(cardsById[230]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_019_dropp"]?.statuses.human_playable).toBe(true);
+    expect(cardsById[231]?.statuses.human_playable).toBe(true);
     expect(
-      cardsById["onr_v1_219_superior-net-barriers"]?.statuses.ai_supported,
+      cardsById[431]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.ai_supported,
+      cardsById[520]?.statuses.ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_236_data-raven"]?.statuses.ai_supported).toBe(
+    expect(cardsById[448]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(
+    expect(cardsById[213]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[230]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_019_dropp"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_349_aardvark"]?.statuses.human_playable).toBe(
+    expect(cardsById[231]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[561]?.statuses.human_playable).toBe(
       true,
     );
     expect(
-      cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses
+      cardsById[563]?.statuses
         .human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.human_playable).toBe(
+    expect(cardsById[564]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_353_chimera"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_349_aardvark"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[565]?.statuses.human_playable).toBe(true);
+    expect(cardsById[561]?.statuses.ai_supported).toBe(true);
     expect(
-      cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses.ai_supported,
+      cardsById[563]?.statuses.ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.ai_supported).toBe(
+    expect(cardsById[564]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_353_chimera"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[565]?.statuses.ai_supported).toBe(true);
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {
@@ -6897,7 +6896,7 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.serverId === "rd" &&
-        String(action.source).includes("ice"),
+        action.payload?.placement === "ice",
       "install-ice",
     );
     await submit(
@@ -7641,7 +7640,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(
       moved.actorPayload.playerView.specialZones?.setAside[0],
     ).toMatchObject({
-      definitionId: "simple_economy_event",
+      definitionId: 595,
       controller: "runner",
     });
     expect(
@@ -7729,7 +7728,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.deckMetadata?.opponent.deckName).toBe(
       "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
     );
-    expect(JSON.stringify(created)).not.toContain("onr_v1_101_mit-west-tier");
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":313\b/);
     expect(created.joinUrl).toBeTruthy();
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
       "joinToken",
@@ -7749,7 +7748,7 @@ describe("MVP 0.2 multiplayer service", () => {
       reconnectToken: joined.reconnectToken,
     };
     const before = await bootstrap(service, created.matchId, runner);
-    expect(before.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:349726b4");
+    expect(before.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:6ce0beca");
     const mit = mustAction(
       before,
       (action) =>
@@ -7770,7 +7769,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(played.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
     expect(played.publicEvent?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_101_mit-west-tier",
+      cardDefinitionId: 313,
       hiddenZoneBarrier: true,
     });
     expect(JSON.stringify(played.publicEvent?.publicPayload)).not.toContain(
@@ -7779,12 +7778,12 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(
       played.actorPayload.playerView.specialZones?.removedFromGame[0],
     ).toMatchObject({
-      definitionId: "onr_v1_101_mit-west-tier",
+      definitionId: 313,
       controller: "runner",
     });
     expect(
       played.opponentPayload.playerView.specialZones?.removedFromGame[0],
-    ).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    ).toMatchObject({ definitionId: 313 });
 
     const duplicate = await service.submitAction({
       matchId: created.matchId,
@@ -7811,7 +7810,7 @@ describe("MVP 0.2 multiplayer service", () => {
       throw new Error(reconnectedCorp.error.message);
     expect(
       reconnectedCorp.playerView.specialZones?.removedFromGame[0],
-    ).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    ).toMatchObject({ definitionId: 313 });
     expect(JSON.stringify(reconnectedCorp)).not.toContain("Dwarf");
     expect(JSON.stringify(reconnectedCorp)).not.toContain("Krash");
 
@@ -7830,7 +7829,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("starts V1.3.0 private local format snapshots and revalidates invalid or AI-unsupported decks server-side", async () => {
     const cardsById = createRuntimeCardsById();
-    if (!cardsById["onr_v1_021_dwarf"]) return;
+    if (!cardsById[233]) return;
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "mp-v130-format-foundation",
     });
@@ -7855,7 +7854,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe(
       "1.3.0",
     );
-    expect(JSON.stringify(created)).not.toContain("onr_v1_021_dwarf");
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":233\b/);
     expect(JSON.stringify(created)).not.toContain("decklist");
 
     const record = await service.loadForTest(created.matchId);
@@ -7871,7 +7870,7 @@ describe("MVP 0.2 multiplayer service", () => {
       ),
     );
     if (!invalidRunner) throw new Error("Missing V1.3.0 runner snapshot");
-    invalidRunner.cards.push({ cardId: "onr_v1_018_dogcatcher", quantity: 1 });
+    invalidRunner.cards.push({ cardId: 230, quantity: 1 });
     await expect(
       service.createMatch({
         hostSide: "runner",
@@ -7917,7 +7916,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     const cardsById = createRuntimeCardsById();
     expect(
-      cardsById["onr_proteus_001_ai-board-member"]?.statuses,
+      cardsById[59]?.statuses,
     ).toMatchObject({
       human_playable: true,
       deck_legal: true,
@@ -8015,7 +8014,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe(
       "1.0.0",
     );
-    expect(JSON.stringify(created)).not.toContain("onr_proteus_084_crumble");
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":142\b/);
     const record = await service.loadForTest(created.matchId);
     expect(record?.match.settings.cardPool).toBe("originalset_proteus");
 
@@ -8129,7 +8128,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(firstAccess.publicEvent?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       serverLabel: "Archives",
     });
     expect(JSON.stringify(firstAccess.actorPayload)).toContain(
@@ -8252,7 +8251,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(resolved.actorPayload.playerView.pendingChoice).toBeUndefined();
     expect(
       resolved.actorPayload.playerView.own.gripOrHq.some(
-        (card) => card.definitionId === "simple_agenda",
+        (card) => card.definitionId === 588,
       ),
     ).toBe(true);
     expect(resolved.actorPayload.playerView.own.heapOrArchives).toHaveLength(2);
@@ -8392,7 +8391,7 @@ describe("MVP 0.2 multiplayer service", () => {
       afterHqChoice.playerView.publicEvents.at(-1)?.publicPayload,
     ).toMatchObject({
       hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
-      sourceDefinitionId: "onr_classic_017_corporate-shuffle",
+      sourceDefinitionId: 21,
       movedCount: 1,
     });
     expect(
@@ -11524,7 +11523,7 @@ describe("MVP 0.2 multiplayer service", () => {
       gameState = applyEngineChoice(gameState, "corp", [
         String(gameState.pendingChoice.options[0]?.id),
       ]);
-    putCorpIceOnServerForTest(gameState, "rd", "simple_barrier_ice");
+    putCorpIceOnServerForTest(gameState, "rd", 589);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -11647,7 +11646,7 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_forged_runner",
       name: "Server Runner AI Forged Runner",
       cards: [
-        { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+        { id: 298, quantity: 1 },
         ...DEMO_DECKS.demo_runner_001.cards,
       ],
     };
@@ -11656,11 +11655,11 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_forged_corp",
       name: "Server Runner AI Forged Corp",
       cards: DEMO_DECKS.demo_corp_004.cards.some(
-        (card) => card.id === "simple_barrier_ice",
+        (card) => card.id === 589,
       )
         ? DEMO_DECKS.demo_corp_004.cards
         : [
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 589, quantity: 1 },
             ...DEMO_DECKS.demo_corp_004.cards,
           ],
     };
@@ -11677,11 +11676,11 @@ describe("MVP 0.2 multiplayer service", () => {
     const targetIceId = putCorpIceOnServerForTest(
       gameState,
       "hq",
-      "simple_barrier_ice",
+      589,
     );
     moveRunnerCardToGripForTest(
       gameState,
-      "onr_v1_086_forged-activation-orders",
+      298,
     );
     gameState = applyEngineAction(
       gameState,
@@ -11689,7 +11688,7 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinitionForServerTest(gameState, action) ===
-          "onr_v1_086_forged-activation-orders",
+          298,
     );
     const targetOptionId = gameState.pendingChoice?.options.find(
       (option) => option.value === targetIceId,
@@ -11824,7 +11823,7 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_forged_no_unrezzed_runner",
       name: "Server Runner AI Forged No Unrezzed Runner",
       cards: [
-        { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+        { id: 298, quantity: 1 },
         ...DEMO_DECKS.demo_runner_001.cards,
       ],
     };
@@ -11833,7 +11832,7 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_forged_no_unrezzed_corp",
       name: "Server Runner AI Forged No Unrezzed Corp",
       cards: [
-        { id: "onr_v1_263_reinforced-wall", quantity: 1 },
+        { id: 475, quantity: 1 },
         ...DEMO_DECKS.demo_corp_004.cards,
       ],
     };
@@ -11850,7 +11849,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const rezzedIceId = putCorpIceOnServerForTest(
       gameState,
       "hq",
-      "onr_v1_263_reinforced-wall",
+      475,
     );
     gameState.cardInstances[rezzedIceId] = {
       ...gameState.cardInstances[rezzedIceId]!,
@@ -11859,14 +11858,14 @@ describe("MVP 0.2 multiplayer service", () => {
     };
     moveRunnerCardToGripForTest(
       gameState,
-      "onr_v1_086_forged-activation-orders",
+      298,
     );
     expect(
       getLegalActions(gameState, "runner").some(
         (action) =>
           action.type === "play_event" &&
           sourceDefinitionForServerTest(gameState, action) ===
-            "onr_v1_086_forged-activation-orders",
+            298,
       ),
     ).toBe(true);
 
@@ -11913,7 +11912,7 @@ describe("MVP 0.2 multiplayer service", () => {
     if (!advanced.ok) throw new Error(advanced.error.message);
     expect(advanced.publicEvent?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "simple_economy_event",
+      cardDefinitionId: 595,
     });
     expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(
       before.playerView.stateVersion,
@@ -11938,21 +11937,21 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_mystery_box_runner",
       name: "Server Runner AI Mystery Box Runner",
       side: "runner",
-      identity: "runner_identity_001",
+      identity: 587,
       cards: [
-        { id: "onr_v1_043_mystery-box", quantity: 1 },
-        { id: "simple_decoder", quantity: 1 },
-        { id: "simple_economy_event", quantity: 8 },
+        { id: 255, quantity: 1 },
+        { id: 591, quantity: 1 },
+        { id: 595, quantity: 8 },
       ],
     };
     const corpDeck: DeckDefinition = {
       id: "server_runner_ai_mystery_box_corp",
       name: "Server Runner AI Mystery Box Corp",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
-        { id: "simple_agenda", quantity: 3 },
-        { id: "simple_economy_operation", quantity: 6 },
+        { id: 588, quantity: 3 },
+        { id: 596, quantity: 6 },
       ],
     };
     let gameState = toRunnerTurnEngine(
@@ -11968,21 +11967,21 @@ describe("MVP 0.2 multiplayer service", () => {
     expectCurrentRulesBaseline(gameState);
     gameState.runner.credits = 20;
     gameState.runner.memoryLimit = 8;
-    moveRunnerCardToGripForTest(gameState, "onr_v1_043_mystery-box");
+    moveRunnerCardToGripForTest(gameState, 255);
     gameState = applyEngineAction(
       gameState,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinitionForServerTest(gameState, action) ===
-          "onr_v1_043_mystery-box",
+          255,
     );
-    putRunnerCardOnTopOfStackForTest(gameState, "simple_economy_event");
+    putRunnerCardOnTopOfStackForTest(gameState, 595);
     const decoderId = putRunnerCardOnTopOfStackForTest(
       gameState,
-      "simple_decoder",
+      591,
     );
-    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    putCorpCardOnTopOfRdForTest(gameState, 588);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -11995,7 +11994,7 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) =>
         action.type === "activated_card_ability" &&
         sourceDefinitionForServerTest(gameState, action) ===
-          "onr_v1_043_mystery-box",
+          255,
     );
     expect(gameState.pendingChoice).toMatchObject({
       side: "corp",
@@ -12087,7 +12086,7 @@ describe("MVP 0.2 multiplayer service", () => {
       actionType: "resolve_choice",
       hiddenZoneAction:
         "p3_38_look_top_stack_show_to_corp_then_install_matching",
-      installedProgramDefinitionId: "simple_decoder",
+      installedProgramDefinitionId: 591,
       selfTrashed: true,
     });
     expect(JSON.stringify(runnerChoice.requesterPayload)).not.toContain(
@@ -12121,22 +12120,22 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_krash_filter_runner",
       name: "Server Runner AI Krash Filter Runner",
       side: "runner",
-      identity: "runner_identity_001",
+      identity: 587,
       cards: [
-        { id: "onr_v1_039_krash", quantity: 1 },
-        { id: "simple_economy_event", quantity: 8 },
+        { id: 251, quantity: 1 },
+        { id: 595, quantity: 8 },
       ],
     };
     const corpDeck: DeckDefinition = {
       id: "server_runner_ai_krash_filter_corp",
       name: "Server Runner AI Krash Filter Corp",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
-        { id: "onr_v1_244_filter", quantity: 1 },
-        { id: "simple_draw_operation", quantity: 1 },
-        { id: "simple_economy_operation", quantity: 3 },
-        { id: "simple_agenda", quantity: 3 },
+        { id: 456, quantity: 1 },
+        { id: 593, quantity: 1 },
+        { id: 596, quantity: 3 },
+        { id: 588, quantity: 3 },
       ],
     };
     let gameState = toRunnerTurnEngine(
@@ -12152,16 +12151,16 @@ describe("MVP 0.2 multiplayer service", () => {
     expectCurrentRulesBaseline(gameState);
     gameState.runner.credits = 5;
     gameState.corp.credits = 5;
-    moveRunnerCardToGripForTest(gameState, "onr_v1_039_krash");
+    moveRunnerCardToGripForTest(gameState, 251);
     gameState = applyEngineAction(gameState, "runner", (action) => {
       const cardId = String(action.payload?.cardId ?? "");
       return (
         action.type === "install_card" &&
-        gameState.cardInstances[cardId]?.definitionId === "onr_v1_039_krash"
+        gameState.cardInstances[cardId]?.definitionId === 251
       );
     });
-    putCorpIceOnServerForTest(gameState, "rd", "onr_v1_244_filter");
-    putCorpCardOnTopOfRdForTest(gameState, "simple_draw_operation");
+    putCorpIceOnServerForTest(gameState, "rd", 456);
+    putCorpCardOnTopOfRdForTest(gameState, 593);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -12313,7 +12312,7 @@ describe("MVP 0.2 multiplayer service", () => {
         seed: "central-access-redaction-engine",
       }),
     );
-    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    putCorpCardOnTopOfRdForTest(gameState, 588);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -12389,9 +12388,9 @@ describe("MVP 0.2 multiplayer service", () => {
       }),
     );
     gameState.runner.credits = 10;
-    const accessedId = putCorpCardOnTopOfRdForTest(gameState, "simple_upgrade");
+    const accessedId = putCorpCardOnTopOfRdForTest(gameState, 606);
     for (const [cardId, card] of Object.entries(gameState.cardInstances)) {
-      if (cardId !== accessedId && card.definitionId === "simple_upgrade") {
+      if (cardId !== accessedId && card.definitionId === 606) {
         removeEverywhereForTest(gameState, cardId);
         gameState.corp.rd.push(cardId as CardInstanceId);
         gameState.cardInstances[cardId] = {
@@ -12428,7 +12427,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(accessed.actorPayload.playerView.run?.accessedCard).toMatchObject({
       known: true,
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       title: "Simple Upgrade",
     });
     expect(
@@ -12533,7 +12532,7 @@ describe("MVP 0.2 multiplayer service", () => {
         seed: "hq-access-visible-engine",
       }),
     );
-    moveCorpCardToHqForTest(gameState, "simple_economy_operation");
+    moveCorpCardToHqForTest(gameState, 596);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -12600,8 +12599,8 @@ describe("MVP 0.2 multiplayer service", () => {
         seed: "belief-reconnect-rd-engine",
       }),
     );
-    putCorpCardOnTopOfRdForTest(gameState, "simple_economy_operation");
-    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    putCorpCardOnTopOfRdForTest(gameState, 596);
+    putCorpCardOnTopOfRdForTest(gameState, 588);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -12622,7 +12621,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const storedWithHiddenDecoy = await storage.load(created.matchId);
     expect(JSON.stringify(storedWithHiddenDecoy?.gameState)).toContain(
-      "simple_economy_operation",
+      596,
     );
 
     const livePayload = await service.bootstrap(
@@ -12655,7 +12654,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(reconnectBelief.knownPositionMemory?.[0]).toMatchObject({
       zone: "rd",
       positionKey: "top",
-      definitionId: "simple_agenda",
+      definitionId: 588,
     });
     expect(reconnectSerialized).not.toMatch(
       /privatePayload|cardInstances|privateDeckSnapshots|simple_economy_operation/i,
@@ -14159,7 +14158,7 @@ describe("MVP 0.2 multiplayer service", () => {
         side: "corp" | "runner";
         cards: Array<{
           instanceId: string;
-          definitionId: string;
+          definitionId: CardDefinitionId;
           title: string;
         }>;
       };
@@ -14302,7 +14301,7 @@ describe("MVP 0.2 multiplayer service", () => {
       throw new Error("Missing hidden Corp sentinel card");
     const hiddenCorpCard = {
       instanceId: hiddenCorpCardId,
-      definitionId: hiddenCorpSentinelDefinition[0],
+      definitionId: hiddenCorpSentinelDefinition[1].id,
       title: hiddenCorpSentinelDefinition[1].title,
     };
     runnerRecordBefore.gameState.cardInstances[hiddenCorpCardId]!.definitionId =
@@ -14464,7 +14463,7 @@ describe("MVP 0.2 multiplayer service", () => {
       throw new Error("Missing hidden Runner sentinel cards");
     const hiddenRunnerCards = hiddenRunnerCardIds.map((instanceId, index) => ({
       instanceId: instanceId!,
-      definitionId: hiddenRunnerSentinelDefinitions[index]![0],
+      definitionId: hiddenRunnerSentinelDefinitions[index]![1].id,
       title: hiddenRunnerSentinelDefinitions[index]![1].title,
     }));
     for (const hiddenRunnerCard of hiddenRunnerCards) {
@@ -14730,8 +14729,8 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "server-corp-ai-root-rez-active-runner-engine",
     });
     initial.corp.credits = 5;
-    putCorpRootInRemoteForTest(initial, "simple_economy_asset");
-    putCorpIceOnServerForTest(initial, "remote_1", "simple_barrier_ice");
+    putCorpRootInRemoteForTest(initial, 594);
+    putCorpIceOnServerForTest(initial, "remote_1", 589);
     initial.eventLog[0]!.stateHashAfter = hashState(initial);
     let gameState = toRunnerTurnEngine(initial);
     gameState = applyEngineAction(
@@ -15270,15 +15269,15 @@ const CORPORATE_SHUFFLE_CORP_DECK: DeckDefinition = {
   id: "server_corporate_shuffle_corp",
   name: "Server Corporate Shuffle Integration Harness",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 3 },
-    { id: "simple_economy_asset", quantity: 2 },
-    { id: "simple_tag_ice", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "onr_classic_017_corporate-shuffle", quantity: 1 },
-    { id: "onr_classic_025_strategic-planning-group", quantity: 1 },
+    { id: 588, quantity: 3 },
+    { id: 596, quantity: 3 },
+    { id: 594, quantity: 2 },
+    { id: 603, quantity: 2 },
+    { id: 589, quantity: 2 },
+    { id: 21, quantity: 1 },
+    { id: 29, quantity: 1 },
   ],
 };
 
@@ -15288,7 +15287,7 @@ const SERVER_DAMAGE_CORP_DECK: DeckDefinition = {
   name: "Server CardSpec Damage Harness",
   cards: [
     ...DEMO_DECKS.demo_corp_008.cards,
-    { id: "onr_v1_302_scorched-earth", quantity: 1 },
+    { id: 514, quantity: 1 },
   ],
 };
 
@@ -15298,7 +15297,7 @@ const SERVER_TRACE_CORP_DECK: DeckDefinition = {
   name: "Server CardSpec Trace Harness",
   cards: [
     ...DEMO_DECKS.demo_corp_008.cards,
-    { id: "onr_v1_236_data-raven", quantity: 1 },
+    { id: 448, quantity: 1 },
   ],
 };
 
@@ -15308,7 +15307,7 @@ const SERVER_DAMAGE_RUNNER_DECK: DeckDefinition = {
   name: "Server CardSpec Damage Runner Harness",
   cards: [
     ...DEMO_DECKS.demo_runner_008.cards,
-    { id: "onr_proteus_108_faked-hit", quantity: 1 },
+    { id: 166, quantity: 1 },
   ],
 };
 
@@ -15407,12 +15406,12 @@ async function joinedCorporateShuffleMatch(
   delete gameState.pendingCorpDraw;
   const operationId = moveCorpCardToHqForTest(
     gameState,
-    "onr_classic_017_corporate-shuffle",
+    21,
   );
   if (options.strategicPlanningGroup) {
     const strategicPlanningGroupId = putCorpRootInRemoteForTest(
       gameState,
-      "onr_classic_025_strategic-planning-group",
+      29,
     );
     gameState.cardInstances[strategicPlanningGroupId] = {
       ...gameState.cardInstances[strategicPlanningGroupId]!,
@@ -15703,7 +15702,7 @@ async function joinedV120EventModificationMatch(seed: string) {
   ready.eventModificationHarness = {
     damagePrevention: { side: "runner", preventAmount: 4 },
   };
-  moveCorpCardToHqForTest(ready, "onr_v1_302_scorched-earth");
+  moveCorpCardToHqForTest(ready, 514);
   ready.runner.tags = 1;
   ready.corp.credits = 10;
   record.gameState = ready;
@@ -15770,7 +15769,7 @@ async function joinedCanonicalDamageMatch(seed: string) {
       agendaPointsToWin: 7,
     }),
   );
-  moveRunnerCardToGripForTest(ready, "onr_proteus_108_faked-hit");
+  moveRunnerCardToGripForTest(ready, 166);
   ready.runner.credits = 10;
   record.gameState = ready;
   record.match.baseline = ready.baseline;
@@ -15836,7 +15835,7 @@ async function joinedCanonicalTraceMatch(seed: string) {
       agendaPointsToWin: 7,
     }),
   );
-  putCorpIceOnServerForTest(ready, "rd", "onr_v1_236_data-raven");
+  putCorpIceOnServerForTest(ready, "rd", 448);
   ready.corp.credits = 20;
   ready.runner.credits = 10;
   ready = applyEngineAction(
@@ -15926,7 +15925,7 @@ async function joinedV121ReplacementMatch(seed: string) {
   ready.eventModificationHarness = {
     damageReplacement: { side: "runner", tagAmount: 1 },
   };
-  moveCorpCardToHqForTest(ready, "onr_v1_302_scorched-earth");
+  moveCorpCardToHqForTest(ready, 514);
   ready.runner.tags = 1;
   ready.corp.credits = 10;
   record.gameState = ready;
@@ -15991,7 +15990,7 @@ async function joinedV122SpecialZoneMatch(seed: string) {
       agendaPointsToWin: 7,
     }),
   );
-  const cardId = moveRunnerCardToGripForTest(ready, "simple_economy_event");
+  const cardId = moveRunnerCardToGripForTest(ready, 595);
   ready.specialZoneHarness = {
     actor: "runner",
     cardInstanceId: cardId,
@@ -16056,7 +16055,7 @@ async function prepareV123MitRunnerTurn(
     mulligansTaken: {},
   };
   delete gameState.pendingChoice;
-  moveRunnerCardToGripForTest(gameState, "onr_v1_101_mit-west-tier");
+  moveRunnerCardToGripForTest(gameState, 313);
   const latestEventIndex = gameState.eventLog.length - 1;
   if (latestEventIndex >= 0)
     gameState.eventLog[latestEventIndex] = {
@@ -16117,17 +16116,17 @@ async function joinedV112ArchivesMatch(seed: string) {
   gameState.runner.credits = 10;
   const faceupOperation = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_economy_operation",
+    596,
     true,
   );
   const facedownAsset = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_economy_asset",
+    594,
     false,
   );
   const facedownAgenda = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_agenda",
+    588,
     false,
   );
   keepOnlyCorpArchivesCardsForTest(gameState, [
@@ -16195,7 +16194,7 @@ async function joinedOffSiteBackupsMatch(seed: string) {
     id: "server_off_site_backups_fixture",
     name: "Server Off-Site Backups Fixture",
     cards: [
-      { id: "onr_v1_296_off-site-backups", quantity: 1 },
+      { id: 508, quantity: 1 },
       ...DEMO_DECKS.demo_corp_008.cards,
     ],
   };
@@ -16214,15 +16213,15 @@ async function joinedOffSiteBackupsMatch(seed: string) {
   gameState.corp.credits = 10;
   gameState.corp.clicks = 10;
   gameState.corp.maxHandSize = 100;
-  moveCorpCardToHqForTest(gameState, "onr_v1_296_off-site-backups");
+  moveCorpCardToHqForTest(gameState, 508);
   const faceupOperation = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_economy_operation",
+    596,
     true,
   );
   const facedownAgenda = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_agenda",
+    588,
     false,
   );
   keepOnlyCorpArchivesCardsForTest(gameState, [
@@ -16420,7 +16419,7 @@ function applyEngineChoice(
 function sourceDefinitionForServerTest(
   state: GameState,
   action: LegalAction,
-): string | undefined {
+): CardDefinitionId | undefined {
   const cardId = String(action.payload?.cardId ?? action.source ?? "");
   return state.cardInstances[cardId]?.definitionId;
 }
@@ -16428,7 +16427,7 @@ function sourceDefinitionForServerTest(
 function putCorpIceOnServerForTest(
   state: GameState,
   serverId: "hq" | "rd" | "archives" | `remote_${number}`,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   const server = state.corp.servers.find(
@@ -16448,7 +16447,7 @@ function putCorpIceOnServerForTest(
 
 function putCorpRootInRemoteForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   let server = state.corp.servers.find(
@@ -16477,7 +16476,7 @@ function putCorpRootInRemoteForTest(
 
 function putCorpCardOnTopOfRdForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
@@ -16493,7 +16492,7 @@ function putCorpCardOnTopOfRdForTest(
 
 function moveCorpCardToHqForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
@@ -16509,7 +16508,7 @@ function moveCorpCardToHqForTest(
 
 function moveCorpCardToArchivesForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
   faceup = true,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
@@ -16544,7 +16543,7 @@ function keepOnlyCorpArchivesCardsForTest(
 
 function moveRunnerCardToGripForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
@@ -16560,7 +16559,7 @@ function moveRunnerCardToGripForTest(
 
 function putRunnerCardOnTopOfStackForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
@@ -16589,7 +16588,7 @@ function emptyRunnerGripForTest(state: GameState): void {
 
 function findCardForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,

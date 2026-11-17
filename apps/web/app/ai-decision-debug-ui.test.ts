@@ -98,7 +98,7 @@ describe("aiDecisionDebugHqHandRows", () => {
       allCardsKnown: false,
       safeKnownCards: [
         {
-          definitionId: "simple_economy_operation",
+          definitionId: 596,
           title: "Simple Economy Operation",
           type: "operation",
           count: 2,
@@ -145,7 +145,7 @@ describe("aiDecisionDebugHqHandRows", () => {
       allCardsKnown: false,
       knownCards: [
         {
-          definitionId: "simple_agenda",
+          definitionId: 588,
           title: "Simple Agenda",
           type: "agenda",
           count: 1,

@@ -26,7 +26,7 @@ describe("card rule translation catalogs", () => {
       for (const [locale, catalog] of Object.entries(catalogs)) {
         for (const definitionId of Object.keys(catalog)) {
           expect(
-            expectedIds[setId as keyof typeof expectedIds].has(definitionId),
+            expectedIds[setId as keyof typeof expectedIds].has(Number(definitionId)),
             `${locale}:${definitionId} must belong to ${setId}`,
           ).toBe(true);
         }
@@ -44,10 +44,10 @@ describe("card rule translation catalogs", () => {
     )) {
       const expected = [
         ...expectedIds[setId as keyof typeof expectedIds],
-      ].sort();
+      ].sort((a, b) => a - b);
       for (const [locale, catalog] of Object.entries(catalogs)) {
         expect(
-          Object.keys(catalog).sort(),
+          Object.keys(catalog).map(Number).sort((a, b) => a - b),
           `${locale}:${setId} must cover the complete product set`,
         ).toEqual(expected);
       }
@@ -68,7 +68,7 @@ describe("card rule translation catalogs", () => {
           expect(
             cardRuleTranslationIssues(
               {
-                definitionId,
+                definitionId: Number(definitionId),
                 title: card.title,
                 englishRulesText: card.text,
               },

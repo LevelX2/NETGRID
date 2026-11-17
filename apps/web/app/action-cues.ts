@@ -1,3 +1,5 @@
+import { cardDefinitionIdValue } from "./card-definition-id";
+import { type CardDefinitionId } from "@netgrid/shared";
 import type {
   PlayerView,
   PublicGameEvent,
@@ -37,7 +39,7 @@ export type OpponentActionCue = {
   actionType: string;
   title: string;
   description?: string;
-  cardDefinitionId?: string;
+  cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;
   visibility: ChronicleVisibility;
   importance: ChronicleImportance;
@@ -59,7 +61,7 @@ type TraceTagOutcome =
       pending: false;
       tagsAdded: number;
       preventedTags: number;
-      preventionCardIds: string[];
+      preventionCardIds: CardDefinitionId[];
     };
 
 export type DamageImpactCue = {
@@ -92,7 +94,7 @@ export type BoardHighlight =
   | {
       kind: "card";
       cardInstanceId?: string;
-      cardDefinitionId?: string;
+      cardDefinitionId?: CardDefinitionId;
       title?: string;
     }
   | {
@@ -184,7 +186,7 @@ export function deriveOpponentActionCues(
     const actionType = stringValue(payload.actionType) ?? event.type;
     if (
       actionType === "access_card" &&
-      stringValue(payload.cardDefinitionId) &&
+      cardDefinitionIdValue(payload.cardDefinitionId) &&
       stringValue(payload.title)
     )
       return [];
@@ -401,7 +403,7 @@ function traceTagPresentationEvents(
   const owners = new Map<string, PublicGameEvent>();
   const prevention = new Map<
     string,
-    { amount: number; cardIds: Set<string> }
+    { amount: number; cardIds: Set<CardDefinitionId> }
   >();
   const outcomes = new Map<string, TraceTagOutcome>();
   for (const event of events) {
@@ -426,11 +428,11 @@ function traceTagPresentationEvents(
       prevented !== undefined
     ) {
       const source =
-        stringValue(payload.trashedCardDefinitionId) ??
-        stringValue(payload.sourceDefinitionId);
+        cardDefinitionIdValue(payload.trashedCardDefinitionId) ??
+        cardDefinitionIdValue(payload.sourceDefinitionId);
       const summary = prevention.get(tagEventId) ?? {
         amount: 0,
-        cardIds: new Set<string>(),
+        cardIds: new Set<CardDefinitionId>(),
       };
       summary.amount += prevented;
       if (source && payload.sourceVisibility !== "redacted")
@@ -544,10 +546,10 @@ export function deriveDamageImpactCues(
           ) as Record<string, unknown> | undefined)
         : undefined;
       const sourceDefinitionId =
-        stringValue(payload.sourceDefinitionId) ??
-        stringValue(payload.cardDefinitionId) ??
-        stringValue(payload.publicRevealDefinitionId) ??
-        stringValue(resolvedDamageEffect?.sourceDefinitionId);
+        cardDefinitionIdValue(payload.sourceDefinitionId) ??
+        cardDefinitionIdValue(payload.cardDefinitionId) ??
+        cardDefinitionIdValue(payload.publicRevealDefinitionId) ??
+        cardDefinitionIdValue(resolvedDamageEffect?.sourceDefinitionId);
       const visibleSource = sourceDefinitionId
         ? visibleCards.get(sourceDefinitionId)
         : undefined;
@@ -648,7 +650,7 @@ function deriveHighlight(
   payload: Record<string, unknown>,
   actor: Side | undefined,
   visibility: ChronicleVisibility,
-  visibleCards: Map<string, VisibleCard>,
+  visibleCards: Map<CardDefinitionId, VisibleCard>,
 ): BoardHighlight | undefined {
   if (actionType === "game_created") return undefined;
   if (
@@ -708,8 +710,8 @@ function deriveHighlight(
   if (visibility === "redacted") return serverHighlight(payload);
 
   const cardDefinitionId =
-    stringValue(payload.cardDefinitionId) ??
-    stringValue(payload.sourceDefinitionId);
+    cardDefinitionIdValue(payload.cardDefinitionId) ??
+    cardDefinitionIdValue(payload.sourceDefinitionId);
   const visibleCard = cardDefinitionId
     ? visibleCards.get(cardDefinitionId)
     : undefined;
@@ -740,12 +742,12 @@ function deriveHighlight(
 function deriveRelatedCard(
   payload: Record<string, unknown>,
   visibility: ChronicleVisibility,
-  visibleCards: Map<string, VisibleCard>,
+  visibleCards: Map<CardDefinitionId, VisibleCard>,
 ): VisibleCard | undefined {
   if (visibility === "redacted") return undefined;
   const cardDefinitionId =
-    stringValue(payload.cardDefinitionId) ??
-    stringValue(payload.sourceDefinitionId);
+    cardDefinitionIdValue(payload.cardDefinitionId) ??
+    cardDefinitionIdValue(payload.sourceDefinitionId);
   const visibleCard = cardDefinitionId
     ? visibleCards.get(cardDefinitionId)
     : undefined;
@@ -954,7 +956,7 @@ function turnPhaseSide(phase: PlayerView["phase"]): Side | null {
   return null;
 }
 
-function visibleCardsByDefinition(view: PlayerView): Map<string, VisibleCard> {
+function visibleCardsByDefinition(view: PlayerView): Map<CardDefinitionId, VisibleCard> {
   const cards = [
     ...view.own.gripOrHq,
     ...view.own.heapOrArchives,

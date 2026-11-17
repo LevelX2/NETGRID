@@ -1,3 +1,4 @@
+import { isCardDefinitionId } from "@netgrid/shared";
 "use client";
 
 import type {

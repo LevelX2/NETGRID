@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import { useEffect, useId, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useTranslations } from "use-intl/react";
@@ -31,7 +32,7 @@ import { useCardTooltipHover } from "../cards/useCardTooltipHover";
 import { chronicleCardTooltipContentMode } from "./chronicle-card-tooltip-model";
 
 type ChronicleTriggerCard = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   type: string;
   text: string;

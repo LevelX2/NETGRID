@@ -1,3 +1,4 @@
+import { isCardDefinitionId } from "@netgrid/shared";
 import {
   AlertTriangle,
   Brain,
@@ -2524,8 +2525,8 @@ function aiDecisionDebugPrivateHandExportFromPreview(
       const title =
         typeof card.title === "string"
           ? card.title
-          : typeof card.definitionId === "string"
-            ? card.definitionId
+          : isCardDefinitionId(card.definitionId)
+            ? String(card.definitionId)
             : `Karte ${index + 1}`;
       const type = typeof card.type === "string" ? card.type : "unknown";
       const cost =
@@ -3921,8 +3922,8 @@ function aiDecisionDebugCardLabel(
   if (!entry) return "";
   return typeof entry.title === "string"
     ? entry.title
-    : typeof entry.definitionId === "string"
-      ? entry.definitionId
+    : isCardDefinitionId(entry.definitionId)
+      ? String(entry.definitionId)
       : "";
 }
 

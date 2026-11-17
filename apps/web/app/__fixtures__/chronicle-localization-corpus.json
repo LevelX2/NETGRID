@@ -1,109 +1,109 @@
 {
   "catalogs": [
     {
-      "simple_agenda": {
-        "title": "Simple Agenda",
-        "type": "agenda"
-      },
-      "simple_barrier_ice": {
-        "title": "Simple Barrier ICE",
-        "type": "ice"
-      },
-      "simple_code_gate_ice": {
-        "title": "Simple Code Gate ICE",
-        "type": "ice"
-      },
-      "simple_decoder": {
-        "title": "Simple Decoder",
-        "type": "program"
-      },
-      "simple_economy_asset": {
-        "title": "Simple Economy Asset",
-        "type": "asset"
-      },
-      "simple_economy_operation": {
-        "title": "Simple Economy Operation",
-        "type": "operation"
-      },
-      "simple_fracter": {
-        "title": "Simple Fracter",
-        "type": "program"
-      },
-      "simple_upgrade": {
-        "title": "Simple Upgrade",
-        "type": "upgrade"
-      },
-      "onr_classic_031_rent-i-con": {
+      "35": {
         "title": "Rent-I-Con",
         "type": "program"
       },
-      "onr_classic_038_gypsytm-schedule-analyzer": {
+      "42": {
         "title": "Gypsy™ Schedule Analyzer",
         "type": "hardware"
       },
-      "onr_proteus_005_marked-accounts": {
+      "63": {
         "title": "Marked Accounts",
         "type": "agenda"
       },
-      "onr_proteus_050_manhunt": {
+      "108": {
         "title": "Manhunt",
         "type": "operation"
       },
-      "onr_proteus_057_doppelganger-antibody": {
+      "115": {
         "title": "Doppelganger Antibody",
         "type": "asset"
       },
-      "onr_proteus_068_pattel-antibody": {
+      "126": {
         "title": "Pattel Antibody",
         "type": "asset"
       },
-      "onr_proteus_090_highlighter": {
+      "148": {
         "title": "Highlighter",
         "type": "program"
       },
-      "onr_v1_196_corporate-war": {
-        "title": "Corporate War",
-        "type": "agenda"
+      "169": {
+        "title": "Ice and Data Special Report",
+        "type": "event"
       },
-      "onr_v1_292_management-shake-up": {
-        "title": "Management Shake-Up",
-        "type": "operation"
-      },
-      "onr_v1_304_systematic-layoffs": {
-        "title": "Systematic Layoffs",
-        "type": "operation"
-      },
-      "onr_v1_035_invisibility": {
+      "247": {
         "title": "Invisibility",
         "type": "program"
       },
-      "onr_v1_040_loony-goon": {
-        "title": "Loony Goon",
-        "type": "program"
-      },
-      "onr_v1_039_krash": {
+      "251": {
         "title": "Krash",
         "type": "program"
       },
-      "onr_v1_089_gideons-pawnshop": {
+      "252": {
+        "title": "Loony Goon",
+        "type": "program"
+      },
+      "301": {
         "title": "Gideon’s Pawnshop",
         "type": "event"
       },
-      "onr_v1_114_temple-microcode-outlet": {
+      "326": {
         "title": "Temple Microcode Outlet",
         "type": "event"
       },
-      "onr_v1_157_crash-everett-inventive-fixer": {
+      "369": {
         "title": "Crash Everett, Inventive Fixer",
         "type": "resource"
       },
-      "onr_v1_165_junkyard-bbs": {
+      "377": {
         "title": "Junkyard BBS",
         "type": "resource"
       },
-      "onr_proteus_111_ice-and-data-special-report": {
-        "title": "Ice and Data Special Report",
-        "type": "event"
+      "408": {
+        "title": "Corporate War",
+        "type": "agenda"
+      },
+      "504": {
+        "title": "Management Shake-Up",
+        "type": "operation"
+      },
+      "516": {
+        "title": "Systematic Layoffs",
+        "type": "operation"
+      },
+      "588": {
+        "title": "Simple Agenda",
+        "type": "agenda"
+      },
+      "589": {
+        "title": "Simple Barrier ICE",
+        "type": "ice"
+      },
+      "590": {
+        "title": "Simple Code Gate ICE",
+        "type": "ice"
+      },
+      "591": {
+        "title": "Simple Decoder",
+        "type": "program"
+      },
+      "594": {
+        "title": "Simple Economy Asset",
+        "type": "asset"
+      },
+      "596": {
+        "title": "Simple Economy Operation",
+        "type": "operation"
+      },
+      "597": {
+        "title": "Simple Fracter",
+        "type": "program"
+      },
+      "606": {
+        "title": "Simple Upgrade",
+        "type": "upgrade"
       }
     }
   ],
@@ -598,7 +598,7 @@
         "actor": "corp",
         "actionType": "resolve_choice",
         "choiceVisibility": "hidden_info_barrier",
-        "sourceDefinitionId": "onr_classic_025_strategic-planning-group",
+        "sourceDefinitionId": 29,
         "drawReplacementSourceTitle": "Strategic Planning Group",
         "strategicPlanningGroupChoiceResolved": true,
         "strategicPlanningGroupBaseDrawCount": 1,
@@ -621,7 +621,7 @@
         "actor": "corp",
         "actionType": "resolve_choice",
         "choiceVisibility": "hidden_info_barrier",
-        "sourceDefinitionId": "onr_classic_025_strategic-planning-group",
+        "sourceDefinitionId": 29,
         "drawReplacementSourceTitle": "Strategic Planning Group",
         "strategicPlanningGroupChoiceResolved": true,
         "strategicPlanningGroupBaseDrawCount": 1,
@@ -665,7 +665,7 @@
         "actionType": "resolve_choice",
         "choiceKind": "select_cards",
         "redactedKind": "hidden_zone",
-        "sourceDefinitionId": "onr_classic_025_strategic-planning-group",
+        "sourceDefinitionId": 29,
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "classic_corporate_shuffle_hq_to_rd",
         "choiceVisibility": "hidden_info_barrier",
@@ -681,7 +681,7 @@
         "abilityId": "classic_corporate_shuffle_hq_to_rd",
         "effectKind": "hidden_zone",
         "targets": {
-          "sourceDefinitionId": "onr_classic_025_strategic-planning-group",
+          "sourceDefinitionId": 29,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "hidden_zone"
         },
@@ -704,7 +704,7 @@
         "actionType": "resolve_choice",
         "choiceKind": "select_cards",
         "redactedKind": "hidden_zone",
-        "sourceDefinitionId": "onr_classic_017_corporate-shuffle",
+        "sourceDefinitionId": 21,
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "classic_corporate_shuffle_hq_to_rd",
         "movedCardCount": 1,
@@ -717,7 +717,7 @@
           "movedCardCount": 1
         },
         "targets": {
-          "sourceDefinitionId": "onr_classic_017_corporate-shuffle",
+          "sourceDefinitionId": 21,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "hidden_zone"
         },
@@ -741,9 +741,9 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "expose_installed_cards_single_fort",
         "publicRevealKind": "expose",
-        "sourceDefinitionId": "onr_proteus_111_ice-and-data-special-report",
+        "sourceDefinitionId": 169,
         "revealedCount": 2,
-        "publicRevealDefinitionIds": "simple_barrier_ice,simple_economy_asset",
+        "publicRevealDefinitionIds": "589,594",
         "exposedServerLabels": "Remote 1 ICE 1,Remote 1 Root 1"
       },
       "context": {},
@@ -760,9 +760,9 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "multi_expose_installed_corp_cards",
         "publicRevealKind": "expose",
-        "sourceDefinitionId": "onr_v1_091_hunt-club-bbs",
+        "sourceDefinitionId": 303,
         "revealedCount": 3,
-        "publicRevealDefinitionIds": "simple_barrier_ice,simple_economy_asset,simple_upgrade",
+        "publicRevealDefinitionIds": "589,594,606",
         "exposedServerLabels": "HQ ICE 1,Remote 1 Root 1,R&D Root 1"
       },
       "context": {},
@@ -810,7 +810,7 @@
         "actionType": "start_run",
         "aiReasonCode": "runner.plan.central_pressure",
         "serverLabel": "R&D",
-        "sourceDefinitionId": "onr_v1_002_ai-boon",
+        "sourceDefinitionId": 214,
         "v1921RunnerProgramAbility": "run_start_random_strength_bonus",
         "v1921DieRoll": 5,
         "runStartRandomStrength": 5
@@ -828,7 +828,7 @@
         "actionType": "start_run",
         "aiReasonCode": "runner.plan.central_pressure",
         "serverLabel": "R&D",
-        "sourceDefinitionId": "onr_v1_002_ai-boon",
+        "sourceDefinitionId": 214,
         "v1921RunnerProgramAbility": "run_start_random_strength_bonus",
         "v1921DieRoll": 5,
         "runStartRandomStrength": 5
@@ -846,10 +846,10 @@
         "actionType": "play_event",
         "aiReasonCode": "runner.plan.central_pressure",
         "serverLabel": "R&D",
-        "cardDefinitionId": "onr_v1_098_lucidrine-booster-drug",
+        "cardDefinitionId": 310,
         "title": "Lucidrine Booster Drug",
         "runnerEventRun": true,
-        "sourceDefinitionId": "onr_v1_002_ai-boon",
+        "sourceDefinitionId": 214,
         "v1921RunnerProgramAbility": "run_start_random_strength_bonus",
         "v1921DieRoll": 5,
         "runStartRandomStrength": 5
@@ -867,10 +867,10 @@
         "actionType": "play_event",
         "aiReasonCode": "runner.plan.central_pressure",
         "serverLabel": "R&D",
-        "cardDefinitionId": "onr_v1_098_lucidrine-booster-drug",
+        "cardDefinitionId": 310,
         "title": "Lucidrine Booster Drug",
         "runnerEventRun": true,
-        "sourceDefinitionId": "onr_v1_002_ai-boon",
+        "sourceDefinitionId": 214,
         "v1921RunnerProgramAbility": "run_start_random_strength_bonus",
         "v1921DieRoll": 5,
         "runStartRandomStrength": 5
@@ -904,7 +904,7 @@
         "actor": "runner",
         "actionType": "play_event",
         "aiReasonCode": "runner.plan.remote_contest",
-        "cardDefinitionId": "onr_proteus_106_disgruntled-ice-technician",
+        "cardDefinitionId": 164,
         "title": "Disgruntled Ice Technician",
         "runnerEventRun": true,
         "serverLabel": "Remote 1"
@@ -923,7 +923,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_111_social-engineering",
+        "cardDefinitionId": 323,
         "title": "Social Engineering"
       },
       "context": {
@@ -941,7 +941,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "aiReasonCode": "runner.social_engineering",
-        "sourceDefinitionId": "onr_v1_111_social-engineering",
+        "sourceDefinitionId": 323,
         "hiddenZoneBarrier": true
       },
       "context": {},
@@ -955,7 +955,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_111_social-engineering",
+        "sourceDefinitionId": 323,
         "hiddenZoneBarrier": true,
         "amounts": {
           "secretHiddenAmountRevealed": 3,
@@ -976,7 +976,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_111_social-engineering",
+        "sourceDefinitionId": 323,
         "hiddenZoneBarrier": true,
         "amounts": {
           "secretHiddenAmountRevealed": 3,
@@ -997,7 +997,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_111_social-engineering",
+        "sourceDefinitionId": 323,
         "hiddenZoneBarrier": true,
         "amounts": {
           "secretHiddenAmountRevealed": 3,
@@ -1018,7 +1018,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_111_social-engineering",
+        "sourceDefinitionId": 323,
         "hiddenZoneBarrier": true,
         "amounts": {
           "secretHiddenAmountRevealed": 2,
@@ -1041,7 +1041,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "aiReasonCode": "runner.social_engineering",
-        "sourceDefinitionId": "onr_v1_111_social-engineering",
+        "sourceDefinitionId": 323,
         "hiddenZoneBarrier": true,
         "serverId": "hq",
         "serverLabel": "HQ",
@@ -1067,7 +1067,7 @@
         "actionType": "resolve_choice",
         "choiceVisibility": "public",
         "classicDeflector": true,
-        "sourceDefinitionId": "onr_classic_010_entrapment",
+        "sourceDefinitionId": 14,
         "deflectedRun": true,
         "selectedServerId": "remote_1",
         "selectedServerLabel": "Remote 1",
@@ -1081,7 +1081,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_classic_010_entrapment",
+            "sourceDefinitionId": 14,
             "sourceTitle": "Entrapment",
             "subroutineIndex": 0,
             "subroutineType": "deflect_run",
@@ -1102,7 +1102,7 @@
         "actionType": "resolve_choice",
         "choiceVisibility": "public",
         "classicDeflector": true,
-        "sourceDefinitionId": "onr_classic_010_entrapment",
+        "sourceDefinitionId": 14,
         "deflectedRun": true,
         "selectedServerId": "remote_1",
         "selectedServerLabel": "Remote 1",
@@ -1116,7 +1116,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_classic_010_entrapment",
+            "sourceDefinitionId": 14,
             "sourceTitle": "Entrapment",
             "subroutineIndex": 0,
             "subroutineType": "deflect_run",
@@ -1138,7 +1138,7 @@
         "classicDeflector": true,
         "deflectorChoiceOpened": true,
         "deflectorCost": 2,
-        "sourceDefinitionId": "onr_classic_015_vortex",
+        "sourceDefinitionId": 19,
         "resolvedEffects": [
           {
             "effectId": "subroutine_1",
@@ -1146,7 +1146,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_classic_015_vortex",
+            "sourceDefinitionId": 19,
             "sourceTitle": "Vortex",
             "subroutineIndex": 0,
             "subroutineType": "deflect_run"
@@ -1165,7 +1165,7 @@
         "actor": "runner",
         "actionType": "continue_run",
         "classicDeflector": true,
-        "sourceDefinitionId": "onr_classic_014_trapdoor",
+        "sourceDefinitionId": 18,
         "deflectedRun": true,
         "selectedServerId": "remote_1",
         "selectedServerLabel": "Remote 1",
@@ -1178,7 +1178,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_classic_014_trapdoor",
+            "sourceDefinitionId": 18,
             "sourceTitle": "Trapdoor",
             "subroutineIndex": 0,
             "subroutineType": "deflect_run",
@@ -1198,7 +1198,7 @@
         "actor": "runner",
         "actionType": "continue_run",
         "classicDeflector": true,
-        "sourceDefinitionId": "onr_classic_009_dumpster",
+        "sourceDefinitionId": 13,
         "deflectedRun": true,
         "selectedServerId": "archives",
         "selectedServerLabel": "Archives",
@@ -1211,7 +1211,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_classic_009_dumpster",
+            "sourceDefinitionId": 13,
             "sourceTitle": "Dumpster",
             "subroutineIndex": 0,
             "subroutineType": "deflect_run",
@@ -1232,7 +1232,7 @@
         "actionType": "resolve_choice",
         "choiceVisibility": "public",
         "classicDeflector": true,
-        "sourceDefinitionId": "onr_classic_010_entrapment",
+        "sourceDefinitionId": 14,
         "deflectedRun": true,
         "selectedServerId": "remote_1",
         "selectedServerLabel": "Remote 1",
@@ -1245,7 +1245,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_classic_010_entrapment",
+            "sourceDefinitionId": 14,
             "sourceTitle": "Entrapment",
             "subroutineIndex": 0,
             "subroutineType": "deflect_run",
@@ -1266,7 +1266,7 @@
         "actionType": "resolve_choice",
         "choiceVisibility": "public",
         "classicDeflector": true,
-        "sourceDefinitionId": "onr_classic_010_entrapment",
+        "sourceDefinitionId": 14,
         "deflectedRun": false,
         "paidCredits": 0,
         "resolvedEffects": [
@@ -1276,7 +1276,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_classic_010_entrapment",
+            "sourceDefinitionId": 14,
             "sourceTitle": "Entrapment",
             "subroutineIndex": 0,
             "subroutineType": "deflect_run",
@@ -1296,10 +1296,10 @@
         "actor": "corp",
         "actionType": "continue_run",
         "corpPostPassIceAbility": "return_passed_ice_to_hq",
-        "sourceDefinitionId": "onr_proteus_043_twisty-passages",
+        "sourceDefinitionId": 101,
         "sourceTitle": "Twisty Passages",
-        "passedIceDefinitionId": "onr_proteus_043_twisty-passages",
-        "returnedCardDefinitionId": "onr_proteus_043_twisty-passages",
+        "passedIceDefinitionId": 101,
+        "returnedCardDefinitionId": 101,
         "serverLabel": "R&D",
         "decision": "return_to_hq",
         "returnedToHq": true,
@@ -1317,9 +1317,9 @@
         "actor": "corp",
         "actionType": "continue_run",
         "corpPostPassIceAbility": "return_passed_ice_to_hq",
-        "sourceDefinitionId": "onr_proteus_043_twisty-passages",
+        "sourceDefinitionId": 101,
         "sourceTitle": "Twisty Passages",
-        "passedIceDefinitionId": "onr_proteus_043_twisty-passages",
+        "passedIceDefinitionId": 101,
         "serverLabel": "R&D",
         "decision": "pay",
         "paymentAmount": 1,
@@ -1337,7 +1337,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "runStartBypassAutoPassedIce": true,
-        "runStartBypassPassedIceDefinitionId": "simple_code_gate_ice",
+        "runStartBypassPassedIceDefinitionId": 590,
         "passedIcePosition": 2,
         "serverLabel": "R&D"
       },
@@ -1353,7 +1353,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "runStartBypassAutoPassedIce": true,
-        "runStartBypassPassedIceDefinitionId": "simple_code_gate_ice",
+        "runStartBypassPassedIceDefinitionId": 590,
         "passedIcePosition": 2,
         "serverLabel": "R&D"
       },
@@ -1381,11 +1381,11 @@
       "payload": {
         "actor": "runner",
         "actionType": "continue_run",
-        "targetIceDefinitionId": "simple_barrier_ice",
+        "targetIceDefinitionId": 589,
         "serverLabel": "R&D",
         "encounterTaxForFutureIce": 2,
         "encounterTaxPaid": 2,
-        "encounterTaxSource": "onr_v1_222_ball-and-chain"
+        "encounterTaxSource": 434
       },
       "context": {},
       "catalog": 0
@@ -1398,11 +1398,11 @@
       "payload": {
         "actor": "corp",
         "actionType": "rez_ice",
-        "targetIceDefinitionId": "simple_code_gate_ice",
+        "targetIceDefinitionId": 590,
         "serverLabel": "R&D",
         "encounterTaxForFutureIce": 2,
         "encounterTaxPaid": 0,
-        "encounterTaxSource": "onr_v1_222_ball-and-chain",
+        "encounterTaxSource": 434,
         "result": "ended"
       },
       "context": {},
@@ -1416,7 +1416,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "break_subroutine",
-        "cardDefinitionId": "onr_v1_031_hammer",
+        "cardDefinitionId": 243,
         "title": "Hammer",
         "targetIceTitle": "Wall of Static",
         "subroutineIndex": 0,
@@ -1437,8 +1437,8 @@
         "actor": "runner",
         "actionType": "continue_run",
         "postPassFutureStrengthAbility": "cancel_future_ice_strength_bonus",
-        "sourceDefinitionId": "onr_proteus_016_coyote",
-        "passedIceDefinitionId": "onr_proteus_016_coyote",
+        "sourceDefinitionId": 74,
+        "passedIceDefinitionId": 74,
         "serverLabel": "R&D",
         "decision": "pay",
         "paymentAmount": 2,
@@ -1459,7 +1459,7 @@
         "actionType": "jack_out",
         "serverLabel": "R&D",
         "v1922CorpIceAbility": "viral_15_jack_out_tax",
-        "sourceDefinitionId": "onr_v1_276_viral-15",
+        "sourceDefinitionId": 488,
         "jackOutAdditionalCost": 1,
         "runnerCreditsAfter": 4
       },
@@ -1474,7 +1474,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "continue_run",
-        "sourceDefinitionId": "onr_v1_276_viral-15",
+        "sourceDefinitionId": 488,
         "hiddenZoneBarrier": true,
         "passIceTrashProgramPrompt": true,
         "passIceTrashProgramCandidateCount": 2
@@ -1490,10 +1490,10 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_276_viral-15",
+        "sourceDefinitionId": 488,
         "hiddenZoneAction": "v1922_viral_15_program_trash",
         "programTrashCount": 1,
-        "trashedCardDefinitionId": "onr_v1_039_krash"
+        "trashedCardDefinitionId": 251
       },
       "context": {},
       "catalog": 0
@@ -1506,9 +1506,9 @@
       "payload": {
         "actor": "runner",
         "actionType": "trigger_ability",
-        "sourceDefinitionId": "onr_v1_068_startup-immolator",
-        "targetIceDefinitionId": "simple_barrier_ice",
-        "trashedCardDefinitionId": "simple_barrier_ice",
+        "sourceDefinitionId": 280,
+        "targetIceDefinitionId": 589,
+        "trashedCardDefinitionId": 589,
         "v1922RunnerProgramAbility": "startup_immolator_trash_ice",
         "rezCostPaid": 3,
         "trashedCount": 1,
@@ -1528,7 +1528,7 @@
         "actor": "runner",
         "actionType": "trigger_ability",
         "aiReasonCode": "successful_run_followup",
-        "sourceDefinitionId": "onr_v1_032_i-spy",
+        "sourceDefinitionId": 244,
         "runnerUtilityAbility": "i_spy_put_spy_counter",
         "counterType": "spy",
         "addedCounterAmount": 1,
@@ -1545,10 +1545,10 @@
       "payload": {
         "actor": "corp",
         "actionType": "rez_ice",
-        "cardDefinitionId": "onr_v1_232_crystal-wall",
+        "cardDefinitionId": 444,
         "title": "Crystal Wall",
         "cardType": "ice",
-        "oliviaSalazarRezSourceDefinitionId": "onr_v1_363_olivia-salazar",
+        "oliviaSalazarRezSourceDefinitionId": 575,
         "oliviaSalazarRezCostBase": 4,
         "oliviaSalazarTemporaryDerez": true,
         "rezCostPaid": 2
@@ -1567,7 +1567,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "rez_ice",
-        "cardDefinitionId": "onr_proteus_013_caryatid",
+        "cardDefinitionId": 71,
         "title": "Caryatid",
         "cardType": "ice",
         "baseRezCost": 7,
@@ -1590,7 +1590,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "activated_card_ability",
-        "cardDefinitionId": "onr_v1_209_political-coup",
+        "cardDefinitionId": 421,
         "title": "Political Coup",
         "cardImplementationAbility": "activated",
         "gainedCredits": 3,
@@ -1604,7 +1604,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 9,
-            "sourceDefinitionId": "onr_v1_209_political-coup",
+            "sourceDefinitionId": 421,
             "sourceTitle": "Political Coup",
             "reason": "card_resolver"
           }
@@ -1693,9 +1693,9 @@
         "actor": "runner",
         "actionType": "trigger_ability",
         "title": "The Shell Traders",
-        "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+        "sourceDefinitionId": 388,
         "abilityId": "remove_shell_counter",
-        "targetCardDefinitionId": "simple_fracter",
+        "targetCardDefinitionId": 597,
         "remainingCounters": 1
       },
       "context": {},
@@ -1711,7 +1711,7 @@
         "actionType": "end_turn",
         "title": "The Shell Traders",
         "shellTradersAbility": "start_turn_remove_shell_counter",
-        "targetCardDefinitionId": "simple_decoder",
+        "targetCardDefinitionId": 591,
         "remainingCounters": 0,
         "installedFromSpecialZone": true
       },
@@ -1729,7 +1729,7 @@
         "gainedCredits": 2,
         "runnerCreditsAfter": 12,
         "corpRezzedIceThisTurnCount": 2,
-        "sourceDefinitionId": "onr_v1_162_field-reporter-for-ice-and-data"
+        "sourceDefinitionId": 374
       },
       "context": {},
       "catalog": 0
@@ -1745,7 +1745,7 @@
         "gainedCredits": 2,
         "runnerCreditsAfter": 12,
         "corpRezzedIceThisTurnCount": 2,
-        "sourceDefinitionId": "onr_v1_162_field-reporter-for-ice-and-data"
+        "sourceDefinitionId": 374
       },
       "context": {},
       "catalog": 0
@@ -1763,7 +1763,7 @@
         "revealKind": "expose",
         "serverLabel": "HQ",
         "title": "Simple Barrier ICE",
-        "cardDefinitionId": "simple_barrier_ice"
+        "cardDefinitionId": 589
       },
       "context": {},
       "catalog": 0
@@ -1779,10 +1779,10 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "expose_installed_card_review",
         "publicRevealKind": "expose",
-        "publicRevealDefinitionId": "simple_upgrade",
-        "cardDefinitionId": "simple_upgrade",
+        "publicRevealDefinitionId": 606,
+        "cardDefinitionId": 606,
         "title": "Simple Upgrade",
-        "sourceDefinitionId": "onr_v1_058_seeya",
+        "sourceDefinitionId": 270,
         "sourceTitle": "SeeYa",
         "exposedServerId": "remote_1",
         "exposedServerLabel": "Remote 1",
@@ -1803,10 +1803,10 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "expose_installed_card_review",
         "publicRevealKind": "expose",
-        "publicRevealDefinitionId": "simple_upgrade",
-        "cardDefinitionId": "simple_upgrade",
+        "publicRevealDefinitionId": 606,
+        "cardDefinitionId": 606,
         "title": "Simple Upgrade",
-        "sourceDefinitionId": "onr_v1_058_seeya",
+        "sourceDefinitionId": 270,
         "sourceTitle": "SeeYa",
         "exposedServerId": "remote_2",
         "exposedServerLabel": "Remote 2",
@@ -1827,10 +1827,10 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "expose_installed_card_review",
         "publicRevealKind": "expose",
-        "publicRevealDefinitionId": "simple_barrier_ice",
-        "cardDefinitionId": "simple_barrier_ice",
+        "publicRevealDefinitionId": 589,
+        "cardDefinitionId": 589,
         "title": "Simple Barrier ICE",
-        "sourceDefinitionId": "onr_v1_058_seeya",
+        "sourceDefinitionId": 270,
         "sourceTitle": "SeeYa",
         "exposedServerId": "remote_1",
         "exposedServerLabel": "Remote 1",
@@ -1851,10 +1851,10 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "expose_installed_card_review",
         "publicRevealKind": "expose",
-        "publicRevealDefinitionId": "onr_v1_190_bioweapons-engineering",
-        "cardDefinitionId": "onr_v1_190_bioweapons-engineering",
+        "publicRevealDefinitionId": 402,
+        "cardDefinitionId": 402,
         "title": "Bioweapons Engineering",
-        "sourceDefinitionId": "onr_v1_042_mouse",
+        "sourceDefinitionId": 254,
         "sourceTitle": "Mouse",
         "exposedServerId": "remote_1",
         "exposedServerLabel": "Remote 1",
@@ -1883,10 +1883,10 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "expose_installed_card_review",
         "publicRevealKind": "expose",
-        "publicRevealDefinitionId": "onr_v1_190_bioweapons-engineering",
-        "cardDefinitionId": "onr_v1_190_bioweapons-engineering",
+        "publicRevealDefinitionId": 402,
+        "cardDefinitionId": 402,
         "title": "Bioweapons Engineering",
-        "sourceDefinitionId": "onr_v1_042_mouse",
+        "sourceDefinitionId": 254,
         "sourceTitle": "Mouse",
         "exposedServerId": "remote_1",
         "exposedServerLabel": "Remote 1",
@@ -1915,10 +1915,10 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "expose_installed_card_review",
         "publicRevealKind": "expose",
-        "publicRevealDefinitionId": "onr_v1_190_bioweapons-engineering",
-        "cardDefinitionId": "onr_v1_190_bioweapons-engineering",
+        "publicRevealDefinitionId": 402,
+        "cardDefinitionId": 402,
         "title": "Bioweapons Engineering",
-        "sourceDefinitionId": "onr_v1_042_mouse",
+        "sourceDefinitionId": 254,
         "sourceTitle": "Mouse",
         "exposedServerId": "remote_1",
         "exposedServerLabel": "Remote 1",
@@ -1946,14 +1946,14 @@
         "actionType": "access_card",
         "serverLabel": "HQ",
         "title": "Simple Agenda",
-        "cardDefinitionId": "simple_agenda",
+        "cardDefinitionId": 588,
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "schematics_search_engine_expose_installed_cards_review",
         "publicRevealKind": "expose",
-        "sourceDefinitionId": "onr_classic_032_schematics-search-engine",
+        "sourceDefinitionId": 36,
         "sourceTitle": "Schematics Search Engine",
         "revealedCount": 2,
-        "publicRevealDefinitionIds": "simple_barrier_ice,simple_economy_asset",
+        "publicRevealDefinitionIds": "589,594",
         "publicRevealTitles": "Simple Barrier ICE||Simple Economy Asset",
         "exposedServerLabels": "R&D ICE 1,Remote 1 Root 1"
       },
@@ -1974,10 +1974,10 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "schematics_search_engine_expose_installed_cards_review",
         "publicRevealKind": "expose",
-        "sourceDefinitionId": "onr_classic_032_schematics-search-engine",
+        "sourceDefinitionId": 36,
         "sourceTitle": "Schematics Search Engine",
         "revealedCount": 2,
-        "publicRevealDefinitionIds": "simple_barrier_ice,simple_economy_asset",
+        "publicRevealDefinitionIds": "589,594",
         "publicRevealTitles": "Simple Barrier ICE||Simple Economy Asset",
         "exposedServerLabels": "R&D ICE 1,Remote 1 Root 1"
       },
@@ -1998,10 +1998,10 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "schematics_search_engine_expose_installed_cards_review",
         "publicRevealKind": "expose",
-        "sourceDefinitionId": "onr_classic_032_schematics-search-engine",
+        "sourceDefinitionId": 36,
         "sourceTitle": "Schematics Search Engine",
         "revealedCount": 2,
-        "publicRevealDefinitionIds": "simple_barrier_ice,simple_economy_asset",
+        "publicRevealDefinitionIds": "589,594",
         "publicRevealTitles": "Simple Barrier ICE||Simple Economy Asset",
         "exposedServerLabels": "R&D ICE 1,Remote 1 Root 1"
       },
@@ -2018,7 +2018,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "schematics_search_engine_expose_installed_cards_finish",
-        "sourceDefinitionId": "onr_classic_032_schematics-search-engine",
+        "sourceDefinitionId": 36,
         "sourceTitle": "Schematics Search Engine"
       },
       "context": {},
@@ -2034,12 +2034,12 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "v1917_corporate_negotiating_center_hq_agenda_reveal",
-        "sourceDefinitionId": "onr_v1_314_corporate-negotiating-center",
+        "sourceDefinitionId": 526,
         "sourceTitle": "Corporate Negotiating Center",
         "publicRevealKind": "reveal",
-        "publicRevealDefinitionIds": "simple_agenda,onr_v1_203_hostile-takeover",
+        "publicRevealDefinitionIds": "588,415",
         "publicRevealTitles": "Simple Agenda||Hostile Takeover",
-        "revealedAgendaDefinitionIds": "simple_agenda,onr_v1_203_hostile-takeover",
+        "revealedAgendaDefinitionIds": "588,415",
         "revealedCount": 2,
         "gainedCredits": 2
       },
@@ -2056,12 +2056,12 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "corp_hq_agenda_reveal",
-        "sourceDefinitionId": "onr_v1_314_corporate-negotiating-center",
+        "sourceDefinitionId": 526,
         "sourceTitle": "Corporate Negotiating Center",
         "publicRevealKind": "reveal",
-        "publicRevealDefinitionIds": "simple_agenda",
+        "publicRevealDefinitionIds": "588",
         "publicRevealTitles": "Simple Agenda",
-        "revealedAgendaDefinitionIds": "simple_agenda",
+        "revealedAgendaDefinitionIds": "588",
         "revealedCount": 1,
         "gainedCredits": 1
       },
@@ -2078,7 +2078,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "corp_hq_agenda_reveal",
-        "sourceDefinitionId": "onr_v1_314_corporate-negotiating-center",
+        "sourceDefinitionId": 526,
         "sourceTitle": "Corporate Negotiating Center",
         "publicRevealKind": "reveal",
         "publicRevealDefinitionIds": "",
@@ -2101,12 +2101,12 @@
         "aiReasonCode": "corp.score_agenda",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "scored_agenda_hq_agenda_shuffle_credits",
-        "sourceDefinitionId": "onr_v1_194_corporate-downsizing",
+        "sourceDefinitionId": 406,
         "sourceTitle": "Corporate Downsizing",
         "publicRevealKind": "reveal",
-        "publicRevealDefinitionIds": "simple_agenda,onr_v1_203_hostile-takeover",
+        "publicRevealDefinitionIds": "588,415",
         "publicRevealTitles": "Simple Agenda||Hostile Takeover",
-        "shownCardDefinitionIds": "simple_agenda,onr_v1_203_hostile-takeover",
+        "shownCardDefinitionIds": "588,415",
         "shownCount": 2,
         "shuffledIntoRndCount": 2,
         "combinedAgendaPoints": 5,
@@ -2126,12 +2126,12 @@
         "aiReasonCode": "corp.score_agenda",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "scored_agenda_hq_agenda_shuffle_credits",
-        "sourceDefinitionId": "onr_v1_194_corporate-downsizing",
+        "sourceDefinitionId": 406,
         "sourceTitle": "Corporate Downsizing",
         "publicRevealKind": "reveal",
-        "publicRevealDefinitionIds": "simple_agenda,onr_v1_203_hostile-takeover",
+        "publicRevealDefinitionIds": "588,415",
         "publicRevealTitles": "Simple Agenda||Hostile Takeover",
-        "shownCardDefinitionIds": "simple_agenda,onr_v1_203_hostile-takeover",
+        "shownCardDefinitionIds": "588,415",
         "shownCount": 2,
         "shuffledIntoRndCount": 2,
         "combinedAgendaPoints": 5,
@@ -2150,7 +2150,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "scored_agenda_hq_agenda_shuffle_credits",
-        "sourceDefinitionId": "onr_v1_194_corporate-downsizing",
+        "sourceDefinitionId": 406,
         "sourceTitle": "Corporate Downsizing",
         "publicRevealKind": "reveal",
         "publicRevealDefinitionIds": "",
@@ -2172,9 +2172,9 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_180_smiths-pawnshop",
+        "sourceDefinitionId": 392,
         "smithsPawnshopTriggered": true,
-        "trashedCardDefinitionId": "onr_v1_028_force-shield",
+        "trashedCardDefinitionId": 240,
         "trashedCardTitle": "Force Shield",
         "creditsGained": 2,
         "gainedCredits": 2
@@ -2227,8 +2227,8 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "hiddenZoneAction": "self_modifying_code_install_program",
-        "publicRevealDefinitionId": "simple_decoder",
-        "installedProgramDefinitionId": "simple_decoder",
+        "publicRevealDefinitionId": 591,
+        "installedProgramDefinitionId": 591,
         "searchDestination": "runner_rig",
         "installed": true,
         "shuffled": true
@@ -2245,11 +2245,11 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "hiddenZoneAction": "p3_38_stack_or_trash_program_install",
-        "sourceDefinitionId": "onr_v1_110_sneak-preview",
+        "sourceDefinitionId": 322,
         "sourceTitle": "Sneak Preview",
         "searchReveal": "public",
         "searchDestination": "install_program",
-        "installedProgramDefinitionId": "onr_classic_031_rent-i-con",
+        "installedProgramDefinitionId": 35,
         "temporaryInstall": true,
         "shuffled": true
       },
@@ -2266,7 +2266,7 @@
         "actionType": "end_turn",
         "hiddenZoneAction": "temporary_program_install_end_turn_return",
         "returnedCount": 1,
-        "returnedCardDefinitionIds": "onr_classic_031_rent-i-con"
+        "returnedCardDefinitionIds": "35"
       },
       "context": {},
       "catalog": 0
@@ -2280,7 +2280,7 @@
         "actor": "runner",
         "actionType": "gain_credit",
         "hiddenZoneAction": "v1911_short_circuit_search",
-        "sourceDefinitionId": "onr_v1_177_the-short-circuit"
+        "sourceDefinitionId": 389
       },
       "context": {},
       "catalog": 0
@@ -2294,9 +2294,9 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "hiddenZoneAction": "v1911_short_circuit_search",
-        "sourceDefinitionId": "onr_v1_177_the-short-circuit",
-        "publicRevealDefinitionId": "simple_decoder",
-        "cardDefinitionId": "simple_decoder",
+        "sourceDefinitionId": 389,
+        "publicRevealDefinitionId": 591,
+        "cardDefinitionId": 591,
         "searchDestination": "runner_grip",
         "shuffled": true
       },
@@ -2314,8 +2314,8 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "p3_37_search_stack_to_grip",
         "searchFilter": "program",
-        "sourceDefinitionId": "onr_v1_177_the-short-circuit",
-        "cardDefinitionId": "onr_v1_177_the-short-circuit",
+        "sourceDefinitionId": 389,
+        "cardDefinitionId": 389,
         "abilityId": "p3_37_search_stack_to_grip",
         "effectKind": "hidden_zone",
         "aiReasonCode": "runner.semantic.coverage_search"
@@ -2332,11 +2332,11 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "hiddenZoneAction": "p3_38_look_top_stack_show_to_corp_then_install_matching",
-        "sourceDefinitionId": "onr_v1_043_mystery-box",
+        "sourceDefinitionId": 255,
         "revealCount": 5,
-        "revealedCardDefinitionIds": "simple_decoder,simple_fracter",
-        "publicRevealDefinitionId": "simple_decoder",
-        "installedProgramDefinitionId": "simple_decoder",
+        "revealedCardDefinitionIds": "591,597",
+        "publicRevealDefinitionId": 591,
+        "installedProgramDefinitionId": 591,
         "installed": true,
         "installedProgramCount": 1,
         "selfTrashed": true,
@@ -2356,9 +2356,9 @@
         "actor": "corp",
         "actionType": "resolve_choice",
         "hiddenZoneAction": "p3_38_look_top_stack_show_to_corp_then_install_matching",
-        "sourceDefinitionId": "onr_v1_043_mystery-box",
+        "sourceDefinitionId": 255,
         "revealCount": 5,
-        "revealedCardDefinitionIds": "simple_barrier_ice,simple_economy_event",
+        "revealedCardDefinitionIds": "589,595",
         "revealedProgramCount": 0,
         "programFound": false,
         "installedProgramCount": 0,
@@ -2377,10 +2377,10 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_304_systematic-layoffs",
+        "sourceDefinitionId": 516,
         "v1919OperationAbility": "add_advancement_counters",
-        "targetCardDefinitionId": "onr_v1_196_corporate-war",
-        "targetCardDefinitionIds": "onr_v1_196_corporate-war",
+        "targetCardDefinitionId": 408,
+        "targetCardDefinitionIds": "408",
         "addedAdvancementCounters": 2,
         "targetCount": 1,
         "advancementCountersAfter": 2
@@ -2396,7 +2396,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_304_systematic-layoffs",
+        "sourceDefinitionId": 516,
         "v1919OperationAbility": "add_advancement_counters",
         "addedAdvancementCounters": 2,
         "targetCount": 1,
@@ -2415,9 +2415,9 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_292_management-shake-up",
+        "sourceDefinitionId": 504,
         "v1919OperationAbility": "add_advancement_counters",
-        "targetCardDefinitionIds": "onr_v1_196_corporate-war",
+        "targetCardDefinitionIds": "408",
         "addedAdvancementCounters": 3,
         "targetCount": 2,
         "publicTargetCount": 1,
@@ -2436,7 +2436,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "hiddenZoneAction": "self_modifying_code_install_program",
-        "publicRevealDefinitionId": "simple_decoder",
+        "publicRevealDefinitionId": 591,
         "searchDestination": "runner_stack",
         "installed": false,
         "installBlockedReason": "insufficient_credits",
@@ -2454,7 +2454,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "hiddenZoneAction": "self_modifying_code_install_program",
-        "publicRevealDefinitionId": "simple_decoder",
+        "publicRevealDefinitionId": 591,
         "searchDestination": "install_program",
         "installDeferredForMemory": true,
         "installed": false,
@@ -2472,10 +2472,10 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "hiddenZoneAction": "self_modifying_code_free_mu",
-        "publicRevealDefinitionId": "simple_decoder",
-        "installedProgramDefinitionId": "simple_decoder",
+        "publicRevealDefinitionId": 591,
+        "installedProgramDefinitionId": 591,
         "trashedCount": 1,
-        "trashedCardDefinitionIds": "simple_fracter",
+        "trashedCardDefinitionIds": "597",
         "installed": true
       },
       "context": {},
@@ -2492,9 +2492,9 @@
         "aiReasonCode": "runner_program_install_memory_cleanup",
         "abilityId": "runner_program_trash_before_install",
         "effectKind": "install_card",
-        "sourceDefinitionId": "onr_v1_040_loony-goon",
+        "sourceDefinitionId": 252,
         "targets": {
-          "installedProgramDefinitionId": "onr_v1_040_loony-goon",
+          "installedProgramDefinitionId": 252,
           "installDeferredForMemory": true
         }
       },
@@ -2512,15 +2512,15 @@
         "aiReasonCode": "runner_program_install_memory_cleanup",
         "abilityId": "runner_program_trash_before_install",
         "effectKind": "install_card",
-        "sourceDefinitionId": "onr_v1_040_loony-goon",
+        "sourceDefinitionId": 252,
         "amounts": {
           "trashedCount": 1,
           "memoryUsedAfter": 4,
           "memoryLimitAfter": 4
         },
         "targets": {
-          "installedProgramDefinitionId": "onr_v1_040_loony-goon",
-          "trashedCardDefinitionIds": "onr_v1_035_invisibility",
+          "installedProgramDefinitionId": 252,
+          "trashedCardDefinitionIds": "247",
           "installed": true
         }
       },
@@ -2541,18 +2541,18 @@
         "zoneLabel": "Rig",
         "abilityId": "runner_program_trash_before_install",
         "effectKind": "install_card",
-        "sourceDefinitionId": "onr_v1_040_loony-goon",
-        "installedProgramDefinitionId": "onr_v1_040_loony-goon",
+        "sourceDefinitionId": 252,
+        "installedProgramDefinitionId": 252,
         "installDeferredForMemory": true,
         "targets": {
-          "sourceDefinitionId": "onr_v1_040_loony-goon",
-          "installedProgramDefinitionId": "onr_v1_040_loony-goon",
+          "sourceDefinitionId": 252,
+          "installedProgramDefinitionId": 252,
           "installDeferredForMemory": true
         },
         "visibility": {
           "class": "public"
         },
-        "cardDefinitionId": "onr_v1_040_loony-goon",
+        "cardDefinitionId": 252,
         "title": "Loony Goon"
       },
       "context": {},
@@ -2569,10 +2569,10 @@
         "choiceKind": "select_cards",
         "abilityId": "runner_program_trash_before_install",
         "effectKind": "install_card",
-        "sourceDefinitionId": "onr_v1_040_loony-goon",
-        "installedProgramDefinitionId": "onr_v1_040_loony-goon",
+        "sourceDefinitionId": 252,
+        "installedProgramDefinitionId": 252,
         "installed": true,
-        "trashedCardDefinitionIds": "onr_v1_035_invisibility",
+        "trashedCardDefinitionIds": "247",
         "trashedCount": 1,
         "memoryUsedAfter": 4,
         "memoryLimitAfter": 4,
@@ -2593,11 +2593,11 @@
           "memoryLimitAfter": 4
         },
         "targets": {
-          "sourceDefinitionId": "onr_v1_040_loony-goon",
-          "installedProgramDefinitionId": "onr_v1_040_loony-goon",
+          "sourceDefinitionId": 252,
+          "installedProgramDefinitionId": 252,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "hidden_zone",
-          "trashedCardDefinitionIds": "onr_v1_035_invisibility",
+          "trashedCardDefinitionIds": "247",
           "installed": true
         },
         "visibility": {
@@ -2622,7 +2622,7 @@
         "runnerMemoryDeficit": 1,
         "memoryFreed": 1,
         "trashedProgramCount": 1,
-        "trashedCardDefinitionIds": "simple_decoder",
+        "trashedCardDefinitionIds": "591",
         "runnerMemoryUsedAfter": 4,
         "runnerMemoryLimitAfter": 4
       },
@@ -2637,7 +2637,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "ambushDefinitionId": "onr_proteus_057_doppelganger-antibody",
+        "ambushDefinitionId": 115,
         "ambushPaidCost": 2
       },
       "context": {},
@@ -2651,7 +2651,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "ambushDefinitionId": "onr_proteus_057_doppelganger-antibody",
+        "ambushDefinitionId": 115,
         "ambushPaidCost": 0,
         "ambushPaymentDeclined": true
       },
@@ -2692,7 +2692,7 @@
             "counterType": "link_reduction_counter",
             "addedCounterAmount": 1,
             "remainingCounters": 1,
-            "sourceDefinitionId": "onr_proteus_057_doppelganger-antibody",
+            "sourceDefinitionId": 115,
             "sourceTitle": "Doppelganger Antibody"
           }
         ]
@@ -2708,7 +2708,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "ambushDefinitionId": "onr_proteus_057_doppelganger-antibody",
+        "ambushDefinitionId": 115,
         "ambushPaidCost": 2,
         "resolvedEffects": [
           {
@@ -2719,7 +2719,7 @@
             "counterType": "link_reduction_counter",
             "addedCounterAmount": 1,
             "remainingCounters": 1,
-            "sourceDefinitionId": "onr_proteus_057_doppelganger-antibody",
+            "sourceDefinitionId": 115,
             "sourceTitle": "Doppelganger Antibody"
           }
         ]
@@ -2736,11 +2736,11 @@
         "actor": "runner",
         "actionType": "access_card",
         "hiddenZoneAction": "v1919_access_ambush_trash_installed",
-        "ambushDefinitionId": "onr_v1_323_experimental-ai",
+        "ambushDefinitionId": 535,
         "advancementCounterCount": 1,
         "targetTrashCount": 1,
         "trashedCount": 1,
-        "trashedCardDefinitionIds": "onr_v1_007_blink",
+        "trashedCardDefinitionIds": "219",
         "resolvedEffects": [
           {
             "effectId": "experimental_ai_trash",
@@ -2749,9 +2749,9 @@
             "side": "runner",
             "amount": 1,
             "reason": "access_effect",
-            "sourceDefinitionId": "onr_v1_323_experimental-ai",
+            "sourceDefinitionId": 535,
             "sourceTitle": "Experimental AI",
-            "cardDefinitionId": "onr_v1_007_blink"
+            "cardDefinitionId": 219
           }
         ]
       },
@@ -2767,7 +2767,7 @@
         "actor": "runner",
         "actionType": "access_card",
         "hiddenZoneAction": "v1919_access_ambush_trash_installed",
-        "ambushDefinitionId": "onr_v1_323_experimental-ai",
+        "ambushDefinitionId": 535,
         "advancementCounterCount": 1,
         "targetTrashCount": 1,
         "trashedCount": 1,
@@ -2779,7 +2779,7 @@
             "side": "runner",
             "amount": 1,
             "reason": "access_effect",
-            "sourceDefinitionId": "onr_v1_323_experimental-ai",
+            "sourceDefinitionId": 535,
             "sourceTitle": "Experimental AI"
           }
         ]
@@ -2796,8 +2796,8 @@
         "actor": "runner",
         "actionType": "play_event",
         "title": "Playful AI",
-        "cardDefinitionId": "onr_v1_104_playful-ai",
-        "sourceDefinitionId": "onr_v1_104_playful-ai",
+        "cardDefinitionId": 316,
+        "sourceDefinitionId": 316,
         "abilityId": "random_dice_loop",
         "v1921RunnerEventAbility": "random_dice_loop",
         "v1921DieRoll": 5,
@@ -2818,7 +2818,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "title": "Playful AI",
-        "sourceDefinitionId": "onr_v1_104_playful-ai",
+        "sourceDefinitionId": 316,
         "abilityId": "random_dice_loop",
         "v1921RunnerEventAbility": "random_dice_loop",
         "v1921DieRoll": 5,
@@ -2841,8 +2841,8 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "sourceDefinitionId": "onr_classic_037_finders-keepers",
-        "cardDefinitionId": "onr_classic_037_finders-keepers",
+        "sourceDefinitionId": 41,
+        "cardDefinitionId": 41,
         "v1921RunnerEventAbility": "three_dice_gain_credits",
         "randomDiceLoopRolls": "2,5,6",
         "randomDiceLoopRolledDice": 3,
@@ -2862,7 +2862,7 @@
         "actor": "runner",
         "actionType": "play_event",
         "title": "Edited Shipping Manifests",
-        "cardDefinitionId": "onr_v1_084_edited-shipping-manifests",
+        "cardDefinitionId": 296,
         "accessReplacement": "corp_lose_credits_runner_tag_corp_draw",
         "creditLoss": 1,
         "corpCreditsAfter": 7,
@@ -2883,7 +2883,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "sourceDefinitionId": "onr_v1_118_weather-to-finance-pipe",
+        "sourceDefinitionId": 330,
         "sourceTitle": "Weather-to-Finance Pipe",
         "serverId": "hq",
         "accessReplacement": "corp_lose_credits",
@@ -2904,7 +2904,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "continue_run",
-        "sourceDefinitionId": "onr_v1_118_weather-to-finance-pipe",
+        "sourceDefinitionId": 330,
         "sourceTitle": "Weather-to-Finance Pipe",
         "serverId": "hq",
         "accessReplacement": "corp_lose_credits",
@@ -2925,7 +2925,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "sourceDefinitionId": "onr_v1_118_weather-to-finance-pipe",
+        "sourceDefinitionId": 330,
         "sourceTitle": "Weather-to-Finance Pipe",
         "serverId": "hq"
       },
@@ -2940,7 +2940,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "continue_run",
-        "sourceDefinitionId": "onr_v1_118_weather-to-finance-pipe",
+        "sourceDefinitionId": 330,
         "sourceTitle": "Weather-to-Finance Pipe",
         "serverId": "hq",
         "runSuccessful": false
@@ -2957,7 +2957,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Record Reconstructor",
-        "sourceDefinitionId": "onr_v1_142_record-reconstructor",
+        "sourceDefinitionId": 354,
         "accessReplacement": "archives_faceup_to_rd",
         "shuffledFaceUpArchivesCount": 4,
         "movedCount": 2,
@@ -2974,7 +2974,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "continue_run",
-        "sourceDefinitionId": "onr_v1_142_record-reconstructor",
+        "sourceDefinitionId": 354,
         "accessReplacement": "archives_faceup_to_rd",
         "shuffledFaceUpArchivesCount": 3,
         "movedCount": 2,
@@ -2991,18 +2991,18 @@
       "payload": {
         "actor": "runner",
         "actionType": "continue_run",
-        "sourceDefinitionId": "onr_classic_038_gypsytm-schedule-analyzer",
+        "sourceDefinitionId": 42,
         "sourceTitle": "Gypsy™ Schedule Analyzer",
         "accessReplacement": "reveal_rd_until_agenda_store_in_hq",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "gypsy_schedule_analyzer_reveal_rd_until_agenda",
-        "publicRevealDefinitionIds": "simple_economy_operation,simple_barrier_ice,simple_agenda",
+        "publicRevealDefinitionIds": "596,589,588",
         "publicRevealTitles": "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
-        "revealedAgendaDefinitionIds": "simple_agenda",
+        "revealedAgendaDefinitionIds": "588",
         "revealedCount": 3,
         "revealedNonAgendaCount": 2,
         "agendaStoredInHq": true,
-        "storedAgendaDefinitionId": "simple_agenda",
+        "storedAgendaDefinitionId": 588,
         "shuffledIntoRdCount": 2
       },
       "context": {},
@@ -3016,14 +3016,14 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_classic_038_gypsytm-schedule-analyzer",
+        "sourceDefinitionId": 42,
         "sourceTitle": "Gypsy™ Schedule Analyzer",
         "accessReplacement": "reveal_rd_until_agenda_store_in_hq",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "gypsy_schedule_analyzer_reveal_next",
-        "publicRevealDefinitionIds": "simple_economy_operation,simple_agenda",
+        "publicRevealDefinitionIds": "596,588",
         "publicRevealTitles": "Simple Economy Operation||Simple Agenda",
-        "revealedAgendaDefinitionIds": "simple_agenda",
+        "revealedAgendaDefinitionIds": "588",
         "revealedCount": 2,
         "revealedNonAgendaCount": 1,
         "agendaStoredInHq": false
@@ -3039,11 +3039,11 @@
       "payload": {
         "actor": "runner",
         "actionType": "continue_run",
-        "sourceDefinitionId": "onr_classic_038_gypsytm-schedule-analyzer",
+        "sourceDefinitionId": 42,
         "accessReplacement": "reveal_rd_until_agenda_store_in_hq",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "gypsy_schedule_analyzer_reveal_rd_until_agenda",
-        "publicRevealDefinitionIds": "simple_economy_operation,simple_barrier_ice",
+        "publicRevealDefinitionIds": "596,589",
         "publicRevealTitles": "Simple Economy Operation||Simple Barrier ICE",
         "revealedAgendaDefinitionIds": "",
         "revealedCount": 2,
@@ -3067,7 +3067,7 @@
         "hiddenZoneAction": "p3_33_private_look",
         "privateLookZone": "rd",
         "privateLookCount": 1,
-        "sourceDefinitionId": "onr_v1_183_technician-lover",
+        "sourceDefinitionId": 395,
         "sourceTitle": "Technician Lover",
         "aiReasonCode": "runner_private_look"
       },
@@ -3086,7 +3086,7 @@
         "hiddenZoneAction": "p3_33_private_look",
         "privateLookZone": "rd",
         "privateLookCount": 1,
-        "sourceDefinitionId": "onr_v1_183_technician-lover",
+        "sourceDefinitionId": 395,
         "sourceTitle": "Technician Lover",
         "aiReasonCode": "runner_private_look"
       },
@@ -3102,7 +3102,7 @@
         "actor": "corp",
         "actionType": "gain_credit",
         "title": "Schlaghund",
-        "cardDefinitionId": "onr_v1_339_schlaghund",
+        "cardDefinitionId": 551,
         "v1921AssetAbility": "schlaghund_tag_damage",
         "v1921DieRoll": 4,
         "runnerTags": 6,
@@ -3124,8 +3124,8 @@
         "actor": "runner",
         "actionType": "continue_run",
         "v1921UpgradeAbility": "rio_de_janeiro_passed_ice",
-        "sourceDefinitionId": "onr_v1_367_rio-de-janeiro-city-grid",
-        "passedIceDefinitionId": "simple_barrier_ice",
+        "sourceDefinitionId": 579,
+        "passedIceDefinitionId": 589,
         "serverLabel": "Remote 1",
         "v1921DieRoll": 1,
         "rioRunEnded": true
@@ -3183,7 +3183,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_278_wall-of-ice",
+            "sourceDefinitionId": 490,
             "sourceTitle": "Wall of Ice",
             "subroutineIndex": 0,
             "subroutineType": "do_damage",
@@ -3196,7 +3196,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_278_wall-of-ice",
+            "sourceDefinitionId": 490,
             "sourceTitle": "Wall of Ice",
             "subroutineIndex": 1,
             "subroutineType": "do_damage",
@@ -3209,7 +3209,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_278_wall-of-ice",
+            "sourceDefinitionId": 490,
             "sourceTitle": "Wall of Ice",
             "subroutineIndex": 2,
             "subroutineType": "end_the_run",
@@ -3234,7 +3234,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_classic_007_brain-drain",
+            "sourceDefinitionId": 11,
             "sourceTitle": "Brain Drain",
             "subroutineIndex": 0,
             "subroutineType": "random_damage",
@@ -3265,7 +3265,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_classic_007_brain-drain",
+            "sourceDefinitionId": 11,
             "sourceTitle": "Brain Drain",
             "subroutineIndex": 0,
             "subroutineType": "random_damage",
@@ -3288,7 +3288,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_061_shield",
+        "sourceDefinitionId": 273,
         "title": "Shield",
         "eventModificationDecision": "apply",
         "eventModificationOutcome": "prevented",
@@ -3305,7 +3305,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_proteus_012_bug-zapper",
+            "sourceDefinitionId": 70,
             "sourceTitle": "Bug Zapper",
             "subroutineIndex": 0,
             "subroutineType": "do_damage",
@@ -3318,7 +3318,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_proteus_012_bug-zapper",
+            "sourceDefinitionId": 70,
             "sourceTitle": "Bug Zapper",
             "subroutineIndex": 1,
             "subroutineType": "end_the_run",
@@ -3337,7 +3337,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_061_shield",
+        "sourceDefinitionId": 273,
         "title": "Shield",
         "eventModificationDecision": "apply",
         "eventModificationOutcome": "partially_prevented",
@@ -3354,7 +3354,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_proteus_012_bug-zapper",
+            "sourceDefinitionId": 70,
             "sourceTitle": "Bug Zapper",
             "subroutineIndex": 0,
             "subroutineType": "do_damage",
@@ -3383,11 +3383,11 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_223_banpei",
+            "sourceDefinitionId": 435,
             "sourceTitle": "Banpei",
             "subroutineIndex": 0,
             "subroutineType": "trash_installed_program",
-            "cardDefinitionId": "simple_decoder",
+            "cardDefinitionId": 591,
             "cardTitle": "Simple Decoder",
             "cardsTrashed": 1
           },
@@ -3396,7 +3396,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_223_banpei",
+            "sourceDefinitionId": 435,
             "sourceTitle": "Banpei",
             "subroutineIndex": 1,
             "subroutineType": "end_the_run",
@@ -3423,7 +3423,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_247_haunting-inquisition",
+            "sourceDefinitionId": 459,
             "sourceTitle": "Haunting Inquisition",
             "subroutineIndex": 0,
             "subroutineType": "set_runner_run_lock_actions",
@@ -3450,7 +3450,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_v1_271_tko-2-0",
+            "sourceDefinitionId": 483,
             "sourceTitle": "TKO 2.0",
             "subroutineIndex": 0,
             "subroutineType": "set_runner_forgo_next_action",
@@ -3462,7 +3462,7 @@
             "visibility": "public",
             "side": "runner",
             "reason": "ice_subroutine",
-            "sourceDefinitionId": "onr_v1_271_tko-2-0",
+            "sourceDefinitionId": 483,
             "sourceTitle": "TKO 2.0",
             "subroutineIndex": 1,
             "subroutineType": "end_the_run",
@@ -3484,7 +3484,7 @@
         "encounterContinue": true,
         "result": "ended",
         "unbrokenSubroutineCount": 2,
-        "trashedCardDefinitionId": "onr_v1_042_self-modifying-code",
+        "trashedCardDefinitionId": 271,
         "trashedCardType": "program",
         "trashedCount": 1,
         "resolvedEffects": [
@@ -3493,11 +3493,11 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_223_banpei",
+            "sourceDefinitionId": 435,
             "sourceTitle": "Banpei",
             "subroutineIndex": 0,
             "subroutineType": "trash_installed_program",
-            "cardDefinitionId": "onr_v1_042_self-modifying-code",
+            "cardDefinitionId": 271,
             "cardTitle": "Self-Modifying Code",
             "cardsTrashed": 1
           },
@@ -3506,7 +3506,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_223_banpei",
+            "sourceDefinitionId": 435,
             "sourceTitle": "Banpei",
             "subroutineIndex": 1,
             "subroutineType": "end_the_run",
@@ -3528,7 +3528,7 @@
         "encounterContinue": true,
         "result": "ended",
         "unbrokenSubroutineCount": 2,
-        "trashedCardDefinitionId": "onr_v1_042_self-modifying-code",
+        "trashedCardDefinitionId": 271,
         "trashedCardType": "program",
         "trashedCount": 1,
         "resolvedEffects": [
@@ -3537,11 +3537,11 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_223_banpei",
+            "sourceDefinitionId": 435,
             "sourceTitle": "Banpei",
             "subroutineIndex": 0,
             "subroutineType": "trash_installed_program",
-            "cardDefinitionId": "onr_v1_042_self-modifying-code",
+            "cardDefinitionId": 271,
             "cardTitle": "Self-Modifying Code",
             "cardsTrashed": 1
           },
@@ -3550,7 +3550,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_223_banpei",
+            "sourceDefinitionId": 435,
             "sourceTitle": "Banpei",
             "subroutineIndex": 1,
             "subroutineType": "end_the_run",
@@ -3583,7 +3583,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "v1922RunnerEventAbility": "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
-        "targetCardDefinitionId": "simple_barrier_ice",
+        "targetCardDefinitionId": 589,
         "targetServerLabel": "R&D",
         "rezCostPaid": 3,
         "trashedCount": 1
@@ -3602,7 +3602,7 @@
         "actor": "corp",
         "actionType": "resolve_choice",
         "v1922RunnerEventAbility": "successful_hq_run_corp_pay_to_retain_hq",
-        "sourceDefinitionId": "onr_v1_113_synchronized-attack-on-hq",
+        "sourceDefinitionId": 325,
         "retainedCount": 2,
         "discardedCount": 3
       },
@@ -3649,7 +3649,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "classic_corporate_shuffle_hq_to_rd",
-        "sourceDefinitionId": "onr_classic_017_corporate-shuffle",
+        "sourceDefinitionId": 21,
         "movedCount": 1
       },
       "context": {},
@@ -3665,10 +3665,10 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "v1922_corp_archives_to_hq",
-        "sourceDefinitionId": "onr_classic_018_reclamation-project",
+        "sourceDefinitionId": 22,
         "movedCount": 2,
         "archivesRevealCount": 2,
-        "archivesRevealDefinitionIds": "onr_v1_245_fire-wall,onr_v1_279_wall-of-static",
+        "archivesRevealDefinitionIds": "457,491",
         "archivesRevealTitles": "Fire Wall, Wall of Static"
       },
       "context": {},
@@ -3684,7 +3684,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "v1922_corp_archives_to_hq",
-        "sourceDefinitionId": "onr_classic_018_reclamation-project",
+        "sourceDefinitionId": 22,
         "movedCount": 0,
         "archivesRevealCount": 0,
         "archivesRevealDefinitionIds": "",
@@ -3718,9 +3718,9 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "successful_run_temporary_encounter",
-        "sourceDefinitionId": "onr_v1_358_dr-dreff",
+        "sourceDefinitionId": 570,
         "publicRevealKind": "reveal",
-        "publicRevealDefinitionId": "onr_v1_261_quandary",
+        "publicRevealDefinitionId": 473,
         "rezCostPaid": 1,
         "delayedSuccessfulRun": true
       },
@@ -3735,8 +3735,8 @@
       "payload": {
         "actor": "runner",
         "actionType": "continue_run",
-        "sourceDefinitionId": "onr_v1_358_dr-dreff",
-        "temporaryIceDefinitionId": "onr_v1_261_quandary",
+        "sourceDefinitionId": 570,
+        "temporaryIceDefinitionId": 473,
         "temporaryEncounterTrashed": true,
         "successfulRunFinalizedAfterIntervention": true
       },
@@ -3753,7 +3753,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "successful_run_intervention_declined",
-        "sourceDefinitionId": "onr_v1_358_dr-dreff",
+        "sourceDefinitionId": 570,
         "delayedSuccessfulRun": false
       },
       "context": {},
@@ -3767,7 +3767,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "access_card",
-        "cardDefinitionId": "onr_v1_358_dr-dreff",
+        "cardDefinitionId": 570,
         "title": "Dr. Dreff",
         "serverLabel": "HQ",
         "accessOrigin": "central_root"
@@ -3785,7 +3785,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "access_card",
-        "cardDefinitionId": "simple_economy_operation",
+        "cardDefinitionId": 596,
         "title": "Simple Economy Operation",
         "serverLabel": "HQ",
         "accessOrigin": "hq"
@@ -3821,7 +3821,7 @@
         "actionType": "resolve_choice",
         "v1922RunnerEventAbility": "force_rez_or_trash_ice",
         "corpDecision": "rez_ice",
-        "targetCardDefinitionId": "simple_barrier_ice",
+        "targetCardDefinitionId": 589,
         "targetServerLabel": "HQ",
         "targetIcePositionLabel": "ICE 2 in HQ",
         "rezCostPaid": 3
@@ -3866,7 +3866,7 @@
             "addedCounterAmount": 1,
             "remainingCounters": 2,
             "reason": "cockroach_successful_hq_run",
-            "sourceDefinitionId": "onr_v1_013_cockroach",
+            "sourceDefinitionId": 225,
             "sourceTitle": "Cockroach"
           }
         ]
@@ -3883,7 +3883,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "abilityId": "broken_ice_virus_counter",
-        "targetCardDefinitionId": "onr_v1_279_wall-of-static",
+        "targetCardDefinitionId": 491,
         "remainingCounters": 2
       },
       "context": {
@@ -3955,7 +3955,7 @@
         "installCostPaid": 2,
         "runnerInstallNormalCreditsPaid": 1,
         "runnerInstallHostedCreditsPaid": 1,
-        "runnerInstallPaymentSourceDefinitionIds": "onr_v1_075_zetatech-software-installer"
+        "runnerInstallPaymentSourceDefinitionIds": "287"
       },
       "context": {
         "cardTitle": "Hammer"
@@ -3990,10 +3990,10 @@
         "actor": "runner",
         "actionType": "install_card",
         "title": "Artemis 2020",
-        "cardDefinitionId": "onr_v1_122_artemis-2020",
+        "cardDefinitionId": 334,
         "zoneLabel": "Rig",
         "deckUniqueReplacement": true,
-        "trashedDeckDefinitionIds": "onr_v1_137_parraline-5750"
+        "trashedDeckDefinitionIds": "349"
       },
       "context": {
         "cardTitle": "Artemis 2020"
@@ -4027,7 +4027,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Security Net Optimization",
-        "cardDefinitionId": "onr_v1_215_security-net-optimization",
+        "cardDefinitionId": 427,
         "selectedServerId": "remote_1",
         "selectedServerLabel": "Remote 1"
       },
@@ -4045,7 +4045,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "AI Chief Financial Officer",
-        "cardDefinitionId": "onr_v1_188_ai-chief-financial-officer"
+        "cardDefinitionId": 400
       },
       "context": {
         "agendaPoints": 2,
@@ -4101,7 +4101,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "aardvark_rez_trash_worm",
-        "publicRevealDefinitionId": "onr_v1_327_aardvark"
+        "publicRevealDefinitionId": 561
       },
       "context": {},
       "catalog": 0
@@ -4117,7 +4117,7 @@
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "v162_priority_requisition_free_rez",
         "priorityRequisitionFreeRez": true,
-        "priorityRequisitionTargetDefinitionId": "onr_v1_230_cortical-scanner",
+        "priorityRequisitionTargetDefinitionId": 442,
         "rezCostPaid": 0
       },
       "context": {
@@ -4177,7 +4177,7 @@
             "kind": "resolve_subroutine",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_274_tutor",
+            "sourceDefinitionId": 486,
             "sourceTitle": "Tutor",
             "subroutineIndex": 0,
             "subroutineType": "set_run_future_end_the_run_subroutine"
@@ -4199,7 +4199,7 @@
         "encounterContinue": true,
         "encounterWillEndRun": true,
         "unbrokenSubroutineCount": 2,
-        "trashedCardDefinitionId": "simple_decoder",
+        "trashedCardDefinitionId": 591,
         "trashedCardType": "program",
         "trashedCount": 1
       },
@@ -4218,7 +4218,7 @@
         "encounterContinue": true,
         "encounterWillEndRun": false,
         "unbrokenSubroutineCount": 0,
-        "sourceDefinitionId": "onr_v1_238_data-wall-2-0"
+        "sourceDefinitionId": 450
       },
       "context": {},
       "catalog": 0
@@ -4249,7 +4249,7 @@
         "encounterContinue": true,
         "encounterWillEndRun": false,
         "unbrokenSubroutineCount": 0,
-        "cardDefinitionId": "test_cortical_scrub",
+        "cardDefinitionId": 11028,
         "title": "Cortical Scrub"
       },
       "context": {
@@ -4408,7 +4408,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Annual Reviews",
-        "cardDefinitionId": "onr_v1_282_annual-reviews",
+        "cardDefinitionId": 494,
         "aiReasonCode": "corp.draw.operation",
         "resolvedEffects": [
           {
@@ -4417,7 +4417,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_282_annual-reviews",
+            "sourceDefinitionId": 494,
             "sourceTitle": "Annual Reviews",
             "reason": "card_resolver"
           }
@@ -4437,7 +4437,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Annual Reviews",
-        "cardDefinitionId": "onr_v1_282_annual-reviews",
+        "cardDefinitionId": 494,
         "aiReasonCode": "corp.draw.operation",
         "resolvedEffects": [
           {
@@ -4446,7 +4446,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_282_annual-reviews",
+            "sourceDefinitionId": 494,
             "sourceTitle": "Annual Reviews",
             "reason": "card_resolver"
           }
@@ -4470,7 +4470,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_064_skivviss",
+            "sourceDefinitionId": 276,
             "sourceTitle": "Skivviss",
             "reason": "start_of_turn"
           }
@@ -4494,7 +4494,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_064_skivviss",
+            "sourceDefinitionId": 276,
             "sourceTitle": "Skivviss",
             "reason": "start_of_turn"
           }
@@ -4512,7 +4512,7 @@
         "actor": "runner",
         "actionType": "play_event",
         "title": "Livewire's Contacts",
-        "cardDefinitionId": "onr_v1_097_livewires-contacts",
+        "cardDefinitionId": 309,
         "resolvedEffects": [
           {
             "effectId": "play_event.effect.1",
@@ -4520,7 +4520,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+            "sourceDefinitionId": 309,
             "sourceTitle": "Livewire's Contacts",
             "reason": "card_resolver"
           }
@@ -4540,7 +4540,7 @@
         "actor": "runner",
         "actionType": "play_event",
         "title": "Livewire's Contacts",
-        "cardDefinitionId": "onr_v1_097_livewires-contacts",
+        "cardDefinitionId": 309,
         "resolvedEffects": [
           {
             "effectId": "play_event.effect.1",
@@ -4548,7 +4548,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+            "sourceDefinitionId": 309,
             "sourceTitle": "Livewire's Contacts",
             "reason": "card_resolver"
           }
@@ -4566,7 +4566,7 @@
         "actor": "runner",
         "actionType": "play_event",
         "title": "Do the 'Drine",
-        "cardDefinitionId": "onr_classic_036_do-the-drine",
+        "cardDefinitionId": 40,
         "runnerEventAbility": "do_the_drine_unpreventable_core_damage_for_credits",
         "xValue": 4,
         "damageType": "core",
@@ -4589,7 +4589,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Closed Accounts",
-        "cardDefinitionId": "onr_v1_285_closed-accounts",
+        "cardDefinitionId": 497,
         "creditsLost": 7,
         "runnerCreditsAfter": 0,
         "resolvedEffects": [
@@ -4599,7 +4599,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 7,
-            "sourceDefinitionId": "onr_v1_285_closed-accounts",
+            "sourceDefinitionId": 497,
             "sourceTitle": "Closed Accounts",
             "reason": "card_resolver"
           }
@@ -4619,7 +4619,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Closed Accounts",
-        "cardDefinitionId": "onr_v1_285_closed-accounts",
+        "cardDefinitionId": 497,
         "creditsLost": 7,
         "runnerCreditsAfter": 0,
         "resolvedEffects": [
@@ -4629,7 +4629,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 7,
-            "sourceDefinitionId": "onr_v1_285_closed-accounts",
+            "sourceDefinitionId": 497,
             "sourceTitle": "Closed Accounts",
             "reason": "card_resolver"
           }
@@ -4647,7 +4647,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Datapool® by Zetatech",
-        "cardDefinitionId": "onr_v1_287_datapool-by-zetatech",
+        "cardDefinitionId": 499,
         "tagsAdded": 2,
         "runnerTagsAfter": 3,
         "resolvedEffects": [
@@ -4658,7 +4658,7 @@
             "side": "runner",
             "amount": 2,
             "runnerTagsAfter": 3,
-            "sourceDefinitionId": "onr_v1_287_datapool-by-zetatech",
+            "sourceDefinitionId": 499,
             "sourceTitle": "Datapool® by Zetatech",
             "reason": "card_resolver"
           }
@@ -4678,7 +4678,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Datapool® by Zetatech",
-        "cardDefinitionId": "onr_v1_287_datapool-by-zetatech",
+        "cardDefinitionId": 499,
         "tagsAdded": 2,
         "runnerTagsAfter": 3,
         "resolvedEffects": [
@@ -4689,7 +4689,7 @@
             "side": "runner",
             "amount": 2,
             "runnerTagsAfter": 3,
-            "sourceDefinitionId": "onr_v1_287_datapool-by-zetatech",
+            "sourceDefinitionId": 499,
             "sourceTitle": "Datapool® by Zetatech",
             "reason": "card_resolver"
           }
@@ -4707,7 +4707,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Netwatch Credit Voucher",
-        "cardDefinitionId": "onr_v1_293_netwatch-credit-voucher",
+        "cardDefinitionId": 505,
         "tagsAdded": 1,
         "runnerTagsAfter": 2,
         "gainedCredits": 1,
@@ -4720,7 +4720,7 @@
             "side": "runner",
             "amount": 1,
             "runnerTagsAfter": 2,
-            "sourceDefinitionId": "onr_v1_293_netwatch-credit-voucher",
+            "sourceDefinitionId": 505,
             "sourceTitle": "Netwatch Credit Voucher",
             "reason": "card_resolver"
           },
@@ -4730,7 +4730,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_293_netwatch-credit-voucher",
+            "sourceDefinitionId": 505,
             "sourceTitle": "Netwatch Credit Voucher",
             "reason": "card_resolver"
           }
@@ -4750,7 +4750,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Netwatch Credit Voucher",
-        "cardDefinitionId": "onr_v1_293_netwatch-credit-voucher",
+        "cardDefinitionId": 505,
         "tagsAdded": 1,
         "runnerTagsAfter": 2,
         "gainedCredits": 1,
@@ -4763,7 +4763,7 @@
             "side": "runner",
             "amount": 1,
             "runnerTagsAfter": 2,
-            "sourceDefinitionId": "onr_v1_293_netwatch-credit-voucher",
+            "sourceDefinitionId": 505,
             "sourceTitle": "Netwatch Credit Voucher",
             "reason": "card_resolver"
           },
@@ -4773,7 +4773,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_293_netwatch-credit-voucher",
+            "sourceDefinitionId": 505,
             "sourceTitle": "Netwatch Credit Voucher",
             "reason": "card_resolver"
           }
@@ -4791,7 +4791,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Punitive Counterstrike",
-        "cardDefinitionId": "onr_v1_301_punitive-counterstrike",
+        "cardDefinitionId": 513,
         "damageResolved": true,
         "damageType": "meat",
         "damageAmount": 2,
@@ -4805,7 +4805,7 @@
             "amount": 2,
             "damageType": "meat",
             "cardsTrashed": 2,
-            "sourceDefinitionId": "onr_v1_301_punitive-counterstrike",
+            "sourceDefinitionId": 513,
             "sourceTitle": "Punitive Counterstrike",
             "reason": "card_resolver"
           }
@@ -4825,7 +4825,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Punitive Counterstrike",
-        "cardDefinitionId": "onr_v1_301_punitive-counterstrike",
+        "cardDefinitionId": 513,
         "damageResolved": true,
         "damageType": "meat",
         "damageAmount": 2,
@@ -4839,7 +4839,7 @@
             "amount": 2,
             "damageType": "meat",
             "cardsTrashed": 2,
-            "sourceDefinitionId": "onr_v1_301_punitive-counterstrike",
+            "sourceDefinitionId": 513,
             "sourceTitle": "Punitive Counterstrike",
             "reason": "card_resolver"
           }
@@ -4857,7 +4857,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Scorched Earth",
-        "cardDefinitionId": "onr_v1_302_scorched-earth",
+        "cardDefinitionId": 514,
         "damageResolved": true,
         "damageType": "meat",
         "damageAmount": 4,
@@ -4871,7 +4871,7 @@
             "amount": 4,
             "damageType": "meat",
             "cardsTrashed": 4,
-            "sourceDefinitionId": "onr_v1_302_scorched-earth",
+            "sourceDefinitionId": 514,
             "sourceTitle": "Scorched Earth",
             "reason": "card_resolver"
           }
@@ -4891,7 +4891,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Scorched Earth",
-        "cardDefinitionId": "onr_v1_302_scorched-earth",
+        "cardDefinitionId": 514,
         "damageResolved": true,
         "damageType": "meat",
         "damageAmount": 4,
@@ -4905,7 +4905,7 @@
             "amount": 4,
             "damageType": "meat",
             "cardsTrashed": 4,
-            "sourceDefinitionId": "onr_v1_302_scorched-earth",
+            "sourceDefinitionId": 514,
             "sourceTitle": "Scorched Earth",
             "reason": "card_resolver"
           }
@@ -4923,7 +4923,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Urban Renewal",
-        "cardDefinitionId": "onr_v1_307_urban-renewal",
+        "cardDefinitionId": 519,
         "damageResolved": true,
         "damageType": "meat",
         "damageAmount": 5,
@@ -4937,7 +4937,7 @@
             "amount": 5,
             "damageType": "meat",
             "cardsTrashed": 5,
-            "sourceDefinitionId": "onr_v1_307_urban-renewal",
+            "sourceDefinitionId": 519,
             "sourceTitle": "Urban Renewal",
             "reason": "card_resolver"
           }
@@ -4957,7 +4957,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Urban Renewal",
-        "cardDefinitionId": "onr_v1_307_urban-renewal",
+        "cardDefinitionId": 519,
         "damageResolved": true,
         "damageType": "meat",
         "damageAmount": 5,
@@ -4971,7 +4971,7 @@
             "amount": 5,
             "damageType": "meat",
             "cardsTrashed": 5,
-            "sourceDefinitionId": "onr_v1_307_urban-renewal",
+            "sourceDefinitionId": 519,
             "sourceTitle": "Urban Renewal",
             "reason": "card_resolver"
           }
@@ -4989,7 +4989,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Solo Squad",
-        "cardDefinitionId": "onr_v1_342_solo-squad",
+        "cardDefinitionId": 554,
         "cardImplementationAbility": "activated",
         "damageResolved": true,
         "damageType": "meat",
@@ -5004,7 +5004,7 @@
             "amount": 1,
             "damageType": "meat",
             "cardsTrashed": 1,
-            "sourceDefinitionId": "onr_v1_342_solo-squad",
+            "sourceDefinitionId": 554,
             "sourceTitle": "Solo Squad",
             "reason": "card_resolver"
           }
@@ -5024,7 +5024,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Solo Squad",
-        "cardDefinitionId": "onr_v1_342_solo-squad",
+        "cardDefinitionId": 554,
         "cardImplementationAbility": "activated",
         "damageResolved": true,
         "damageType": "meat",
@@ -5039,7 +5039,7 @@
             "amount": 1,
             "damageType": "meat",
             "cardsTrashed": 1,
-            "sourceDefinitionId": "onr_v1_342_solo-squad",
+            "sourceDefinitionId": 554,
             "sourceTitle": "Solo Squad",
             "reason": "card_resolver"
           }
@@ -5057,7 +5057,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "On-Call Solo Team",
-        "cardDefinitionId": "onr_v1_208_on-call-solo-team",
+        "cardDefinitionId": 420,
         "cardImplementationAbility": "activated",
         "damageResolved": true,
         "damageType": "meat",
@@ -5072,7 +5072,7 @@
             "amount": 1,
             "damageType": "meat",
             "cardsTrashed": 1,
-            "sourceDefinitionId": "onr_v1_208_on-call-solo-team",
+            "sourceDefinitionId": 420,
             "sourceTitle": "On-Call Solo Team",
             "reason": "card_resolver"
           }
@@ -5092,7 +5092,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "On-Call Solo Team",
-        "cardDefinitionId": "onr_v1_208_on-call-solo-team",
+        "cardDefinitionId": 420,
         "cardImplementationAbility": "activated",
         "damageResolved": true,
         "damageType": "meat",
@@ -5107,7 +5107,7 @@
             "amount": 1,
             "damageType": "meat",
             "cardsTrashed": 1,
-            "sourceDefinitionId": "onr_v1_208_on-call-solo-team",
+            "sourceDefinitionId": 420,
             "sourceTitle": "On-Call Solo Team",
             "reason": "card_resolver"
           }
@@ -5125,7 +5125,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Strike Force Kali",
-        "cardDefinitionId": "onr_v1_217_strike-force-kali",
+        "cardDefinitionId": 429,
         "cardImplementationAbility": "activated",
         "damageResolved": true,
         "damageType": "meat",
@@ -5140,7 +5140,7 @@
             "amount": 2,
             "damageType": "meat",
             "cardsTrashed": 2,
-            "sourceDefinitionId": "onr_v1_217_strike-force-kali",
+            "sourceDefinitionId": 429,
             "sourceTitle": "Strike Force Kali",
             "reason": "card_resolver"
           }
@@ -5160,7 +5160,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Strike Force Kali",
-        "cardDefinitionId": "onr_v1_217_strike-force-kali",
+        "cardDefinitionId": 429,
         "cardImplementationAbility": "activated",
         "damageResolved": true,
         "damageType": "meat",
@@ -5175,7 +5175,7 @@
             "amount": 2,
             "damageType": "meat",
             "cardsTrashed": 2,
-            "sourceDefinitionId": "onr_v1_217_strike-force-kali",
+            "sourceDefinitionId": 429,
             "sourceTitle": "Strike Force Kali",
             "reason": "card_resolver"
           }
@@ -5193,7 +5193,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Day Shift",
-        "cardDefinitionId": "onr_v1_288_day-shift",
+        "cardDefinitionId": 500,
         "drawnCards": 2,
         "gainedCredits": 1,
         "resolvedEffects": [
@@ -5203,7 +5203,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_288_day-shift",
+            "sourceDefinitionId": 500,
             "sourceTitle": "Day Shift",
             "reason": "card_resolver"
           },
@@ -5213,7 +5213,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_288_day-shift",
+            "sourceDefinitionId": 500,
             "sourceTitle": "Day Shift",
             "reason": "card_resolver"
           }
@@ -5231,7 +5231,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Day Shift",
-        "cardDefinitionId": "onr_v1_288_day-shift",
+        "cardDefinitionId": 500,
         "drawnCards": 2,
         "gainedCredits": 1,
         "resolvedEffects": [
@@ -5241,7 +5241,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_288_day-shift",
+            "sourceDefinitionId": 500,
             "sourceTitle": "Day Shift",
             "reason": "card_resolver"
           },
@@ -5251,7 +5251,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_288_day-shift",
+            "sourceDefinitionId": 500,
             "sourceTitle": "Day Shift",
             "reason": "card_resolver"
           }
@@ -5269,7 +5269,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Overtime Incentives",
-        "cardDefinitionId": "onr_v1_297_overtime-incentives",
+        "cardDefinitionId": 509,
         "aiReasonCode": "corp.operation.extra_actions",
         "gainedActions": 2,
         "resolvedEffects": [
@@ -5279,7 +5279,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_297_overtime-incentives",
+            "sourceDefinitionId": 509,
             "sourceTitle": "Overtime Incentives",
             "reason": "card_resolver"
           }
@@ -5297,7 +5297,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Overtime Incentives",
-        "cardDefinitionId": "onr_v1_297_overtime-incentives",
+        "cardDefinitionId": 509,
         "aiReasonCode": "corp.operation.extra_actions",
         "gainedActions": 2,
         "resolvedEffects": [
@@ -5307,7 +5307,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_297_overtime-incentives",
+            "sourceDefinitionId": 509,
             "sourceTitle": "Overtime Incentives",
             "reason": "card_resolver"
           }
@@ -5325,7 +5325,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Night Shift",
-        "cardDefinitionId": "onr_v1_295_night-shift",
+        "cardDefinitionId": 507,
         "gainedCredits": 2,
         "drawnCards": 1,
         "resolvedEffects": [
@@ -5335,7 +5335,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_295_night-shift",
+            "sourceDefinitionId": 507,
             "sourceTitle": "Night Shift",
             "reason": "card_resolver"
           },
@@ -5345,7 +5345,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_295_night-shift",
+            "sourceDefinitionId": 507,
             "sourceTitle": "Night Shift",
             "reason": "card_resolver"
           }
@@ -5363,7 +5363,7 @@
         "actor": "corp",
         "actionType": "play_operation",
         "title": "Night Shift",
-        "cardDefinitionId": "onr_v1_295_night-shift",
+        "cardDefinitionId": 507,
         "gainedCredits": 2,
         "drawnCards": 1,
         "resolvedEffects": [
@@ -5373,7 +5373,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_295_night-shift",
+            "sourceDefinitionId": 507,
             "sourceTitle": "Night Shift",
             "reason": "card_resolver"
           },
@@ -5383,7 +5383,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_295_night-shift",
+            "sourceDefinitionId": 507,
             "sourceTitle": "Night Shift",
             "reason": "card_resolver"
           }
@@ -5400,7 +5400,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_095_jack-n-joe",
+        "cardDefinitionId": 307,
         "drawnCount": 3,
         "resolvedEffects": [
           {
@@ -5409,7 +5409,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_095_jack-n-joe",
+            "sourceDefinitionId": 307,
             "sourceTitle": "Jack 'n' Joe",
             "reason": "card_resolver"
           }
@@ -5426,7 +5426,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_095_jack-n-joe",
+        "cardDefinitionId": 307,
         "drawnCount": 3,
         "resolvedEffects": [
           {
@@ -5435,7 +5435,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_095_jack-n-joe",
+            "sourceDefinitionId": 307,
             "sourceTitle": "Jack 'n' Joe",
             "reason": "card_resolver"
           }
@@ -5452,7 +5452,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_095_jack-n-joe",
+        "cardDefinitionId": 307,
         "drawnCount": 3,
         "citySurveillanceSourceCount": 1,
         "citySurveillanceCreditsPaid": 2,
@@ -5467,7 +5467,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_095_jack-n-joe",
+            "sourceDefinitionId": 307,
             "sourceTitle": "Jack 'n' Joe",
             "reason": "card_resolver"
           }
@@ -5484,7 +5484,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_095_jack-n-joe",
+        "cardDefinitionId": 307,
         "drawnCount": 3,
         "citySurveillanceSourceCount": 1,
         "citySurveillanceCreditsPaid": 2,
@@ -5499,7 +5499,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_095_jack-n-joe",
+            "sourceDefinitionId": 307,
             "sourceTitle": "Jack 'n' Joe",
             "reason": "card_resolver"
           }
@@ -5516,7 +5516,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+        "cardDefinitionId": 291,
         "title": "Bodyweight™ Synthetic Blood",
         "drawnCount": 5,
         "citySurveillanceSourceCount": 1,
@@ -5532,7 +5532,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 5,
-            "sourceDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+            "sourceDefinitionId": 291,
             "sourceTitle": "Bodyweight™ Synthetic Blood",
             "reason": "card_resolver"
           }
@@ -5549,7 +5549,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+        "cardDefinitionId": 291,
         "title": "Bodyweight™ Synthetic Blood",
         "drawCardsAmount": 5,
         "drawnCount": 1,
@@ -5563,7 +5563,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+            "sourceDefinitionId": 291,
             "sourceTitle": "Bodyweight™ Synthetic Blood",
             "reason": "card_resolver"
           }
@@ -5580,7 +5580,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+        "cardDefinitionId": 291,
         "title": "Bodyweight™ Synthetic Blood",
         "drawCardsAmount": 5,
         "drawnCount": 1,
@@ -5594,7 +5594,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+            "sourceDefinitionId": 291,
             "sourceTitle": "Bodyweight™ Synthetic Blood",
             "reason": "card_resolver"
           }
@@ -5612,7 +5612,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "aiReasonCode": "plan_first.engine_window",
-        "sourceDefinitionId": "onr_v1_313_city-surveillance",
+        "sourceDefinitionId": 525,
         "drawTaxSourceCount": 1,
         "drawTaxDecision": "pay",
         "drawTaxCreditsPaid": 1,
@@ -5632,7 +5632,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "aiReasonCode": "plan_first.engine_window",
-        "sourceDefinitionId": "onr_v1_313_city-surveillance",
+        "sourceDefinitionId": 525,
         "drawTaxSourceCount": 1,
         "drawTaxDecision": "pay",
         "drawTaxCreditsPaid": 1,
@@ -5658,9 +5658,9 @@
         "originalAmount": 1,
         "preventedTags": 1,
         "finalAmount": 0,
-        "sourceDefinitionId": "onr_v1_313_city-surveillance",
+        "sourceDefinitionId": 525,
         "sourceTrashed": true,
-        "trashedCardDefinitionId": "onr_v1_161_fall-guy",
+        "trashedCardDefinitionId": 373,
         "drawTaxSourceCount": 1,
         "drawTaxDecision": "tag",
         "drawTaxCreditsPaid": 0,
@@ -5678,7 +5678,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "aiReasonCode": "plan_first.engine_window",
-        "sourceDefinitionId": "onr_v1_313_city-surveillance",
+        "sourceDefinitionId": 525,
         "tagsAdded": 1,
         "runnerTagsAfter": 1,
         "drawTaxSourceCount": 1,
@@ -5699,7 +5699,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "aiReasonCode": "plan_first.engine_window",
-        "sourceDefinitionId": "onr_v1_313_city-surveillance",
+        "sourceDefinitionId": 525,
         "tagsAdded": 1,
         "runnerTagsAfter": 1,
         "drawTaxSourceCount": 1,
@@ -5719,7 +5719,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "play_operation",
-        "cardDefinitionId": "onr_v1_302_scorched-earth",
+        "cardDefinitionId": 514,
         "title": "Scorched Earth",
         "damageResolved": true,
         "damageType": "meat",
@@ -5738,7 +5738,7 @@
             "amount": 4,
             "damageType": "meat",
             "cardsTrashed": 0,
-            "sourceDefinitionId": "onr_v1_302_scorched-earth",
+            "sourceDefinitionId": 514,
             "sourceTitle": "Scorched Earth",
             "reason": "card_resolver"
           }
@@ -5755,7 +5755,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "play_operation",
-        "cardDefinitionId": "onr_v1_302_scorched-earth",
+        "cardDefinitionId": 514,
         "title": "Scorched Earth",
         "damageResolved": true,
         "damageType": "meat",
@@ -5774,7 +5774,7 @@
             "amount": 4,
             "damageType": "meat",
             "cardsTrashed": 0,
-            "sourceDefinitionId": "onr_v1_302_scorched-earth",
+            "sourceDefinitionId": 514,
             "sourceTitle": "Scorched Earth",
             "reason": "card_resolver"
           }
@@ -5792,7 +5792,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Newsgroup Filter",
-        "cardDefinitionId": "onr_v1_045_newsgroup-filter",
+        "cardDefinitionId": 257,
         "cardImplementationAbility": "activated",
         "gainedCredits": 2,
         "runnerCreditsAfter": 7,
@@ -5803,7 +5803,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_045_newsgroup-filter",
+            "sourceDefinitionId": 257,
             "sourceTitle": "Newsgroup Filter",
             "reason": "card_resolver"
           }
@@ -5821,7 +5821,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Newsgroup Filter",
-        "cardDefinitionId": "onr_v1_045_newsgroup-filter",
+        "cardDefinitionId": 257,
         "cardImplementationAbility": "activated",
         "gainedCredits": 2,
         "runnerCreditsAfter": 7,
@@ -5832,7 +5832,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_045_newsgroup-filter",
+            "sourceDefinitionId": 257,
             "sourceTitle": "Newsgroup Filter",
             "reason": "card_resolver"
           }
@@ -5850,7 +5850,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "ESA Contract",
-        "cardDefinitionId": "onr_v1_321_esa-contract",
+        "cardDefinitionId": 533,
         "cardImplementationAbility": "activated",
         "drawnCards": 2,
         "resolvedEffects": [
@@ -5860,7 +5860,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_321_esa-contract",
+            "sourceDefinitionId": 533,
             "sourceTitle": "ESA Contract",
             "reason": "card_resolver"
           }
@@ -5878,7 +5878,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "ESA Contract",
-        "cardDefinitionId": "onr_v1_321_esa-contract",
+        "cardDefinitionId": 533,
         "cardImplementationAbility": "activated",
         "drawnCards": 2,
         "resolvedEffects": [
@@ -5888,7 +5888,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_321_esa-contract",
+            "sourceDefinitionId": 533,
             "sourceTitle": "ESA Contract",
             "reason": "card_resolver"
           }
@@ -5905,8 +5905,8 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_199_employee-empowerment",
-        "cardDefinitionId": "onr_v1_199_employee-empowerment",
+        "sourceDefinitionId": 411,
+        "cardDefinitionId": 411,
         "employeeEmpowermentStartDrawDecision": "draw",
         "drawnCards": 1,
         "resolvedEffects": [
@@ -5916,7 +5916,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_199_employee-empowerment",
+            "sourceDefinitionId": 411,
             "sourceTitle": "Employee Empowerment",
             "reason": "start_of_turn"
           }
@@ -5933,8 +5933,8 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_199_employee-empowerment",
-        "cardDefinitionId": "onr_v1_199_employee-empowerment",
+        "sourceDefinitionId": 411,
+        "cardDefinitionId": 411,
         "employeeEmpowermentStartDrawDecision": "draw",
         "drawnCards": 1,
         "resolvedEffects": [
@@ -5944,7 +5944,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_199_employee-empowerment",
+            "sourceDefinitionId": 411,
             "sourceTitle": "Employee Empowerment",
             "reason": "start_of_turn"
           }
@@ -5961,8 +5961,8 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_199_employee-empowerment",
-        "cardDefinitionId": "onr_v1_199_employee-empowerment",
+        "sourceDefinitionId": 411,
+        "cardDefinitionId": 411,
         "employeeEmpowermentStartDrawDecision": "skip"
       },
       "context": {},
@@ -5977,7 +5977,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Employee Empowerment",
-        "cardDefinitionId": "onr_v1_199_employee-empowerment",
+        "cardDefinitionId": 411,
         "cardImplementationAbility": "activated",
         "drawnCards": 2,
         "resolvedEffects": [
@@ -5987,7 +5987,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_199_employee-empowerment",
+            "sourceDefinitionId": 411,
             "sourceTitle": "Employee Empowerment",
             "reason": "card_resolver"
           }
@@ -6005,7 +6005,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Marine Arcology",
-        "cardDefinitionId": "onr_v1_206_marine-arcology",
+        "cardDefinitionId": 418,
         "cardImplementationAbility": "activated",
         "gainedCredits": 3,
         "corpCreditsAfter": 13,
@@ -6016,7 +6016,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_206_marine-arcology",
+            "sourceDefinitionId": 418,
             "sourceTitle": "Marine Arcology",
             "reason": "card_resolver"
           }
@@ -6036,7 +6036,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Marine Arcology",
-        "cardDefinitionId": "onr_v1_206_marine-arcology",
+        "cardDefinitionId": 418,
         "cardImplementationAbility": "activated",
         "gainedCredits": 3,
         "corpCreditsAfter": 13,
@@ -6047,7 +6047,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_206_marine-arcology",
+            "sourceDefinitionId": 418,
             "sourceTitle": "Marine Arcology",
             "reason": "card_resolver"
           }
@@ -6065,7 +6065,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Political Overthrow",
-        "cardDefinitionId": "onr_v1_210_political-overthrow",
+        "cardDefinitionId": 422,
         "cardImplementationAbility": "activated",
         "gainedCredits": 3,
         "corpCreditsAfter": 13,
@@ -6076,7 +6076,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_210_political-overthrow",
+            "sourceDefinitionId": 422,
             "sourceTitle": "Political Overthrow",
             "reason": "card_resolver"
           }
@@ -6096,7 +6096,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Political Overthrow",
-        "cardDefinitionId": "onr_v1_210_political-overthrow",
+        "cardDefinitionId": 422,
         "cardImplementationAbility": "activated",
         "gainedCredits": 3,
         "corpCreditsAfter": 13,
@@ -6107,7 +6107,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 3,
-            "sourceDefinitionId": "onr_v1_210_political-overthrow",
+            "sourceDefinitionId": 422,
             "sourceTitle": "Political Overthrow",
             "reason": "card_resolver"
           }
@@ -6125,7 +6125,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "South African Mining Corp",
-        "cardDefinitionId": "onr_v1_343_south-african-mining-corp",
+        "cardDefinitionId": 555,
         "cardImplementationAbility": "activated",
         "gainedCredits": 6,
         "corpCreditsAfter": 16,
@@ -6136,7 +6136,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 6,
-            "sourceDefinitionId": "onr_v1_343_south-african-mining-corp",
+            "sourceDefinitionId": 555,
             "sourceTitle": "South African Mining Corp",
             "reason": "card_resolver"
           }
@@ -6156,7 +6156,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "South African Mining Corp",
-        "cardDefinitionId": "onr_v1_343_south-african-mining-corp",
+        "cardDefinitionId": 555,
         "cardImplementationAbility": "activated",
         "gainedCredits": 6,
         "corpCreditsAfter": 16,
@@ -6167,7 +6167,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 6,
-            "sourceDefinitionId": "onr_v1_343_south-african-mining-corp",
+            "sourceDefinitionId": 555,
             "sourceTitle": "South African Mining Corp",
             "reason": "card_resolver"
           }
@@ -6184,7 +6184,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_272_too-many-doors",
+        "sourceDefinitionId": 484,
         "secretSpendRevealed": true,
         "secretSpendCorp": 1,
         "secretSpendRunner": 2,
@@ -6204,7 +6204,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Silicon Saloon Franchise",
-        "cardDefinitionId": "onr_v1_179_silicon-saloon-franchise",
+        "cardDefinitionId": 391,
         "cardImplementationAbility": "activated",
         "gainedCredits": 1,
         "runnerCreditsAfter": 6,
@@ -6217,7 +6217,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_179_silicon-saloon-franchise",
+            "sourceDefinitionId": 391,
             "sourceTitle": "Silicon Saloon Franchise",
             "reason": "card_resolver"
           },
@@ -6227,7 +6227,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_179_silicon-saloon-franchise",
+            "sourceDefinitionId": 391,
             "sourceTitle": "Silicon Saloon Franchise",
             "reason": "card_resolver"
           }
@@ -6247,7 +6247,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Silicon Saloon Franchise",
-        "cardDefinitionId": "onr_v1_179_silicon-saloon-franchise",
+        "cardDefinitionId": 391,
         "cardImplementationAbility": "activated",
         "gainedCredits": 1,
         "runnerCreditsAfter": 6,
@@ -6260,7 +6260,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_179_silicon-saloon-franchise",
+            "sourceDefinitionId": 391,
             "sourceTitle": "Silicon Saloon Franchise",
             "reason": "card_resolver"
           },
@@ -6270,7 +6270,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_179_silicon-saloon-franchise",
+            "sourceDefinitionId": 391,
             "sourceTitle": "Silicon Saloon Franchise",
             "reason": "card_resolver"
           }
@@ -6288,7 +6288,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "title": "BBS Whispering Campaign",
-        "cardDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+        "cardDefinitionId": 521,
         "hostedCreditsAdded": 16,
         "hostedCreditsAfter": 16,
         "resolvedEffects": [
@@ -6299,7 +6299,7 @@
             "side": "corp",
             "amount": 16,
             "remainingCounters": 16,
-            "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+            "sourceDefinitionId": 521,
             "sourceTitle": "BBS Whispering Campaign",
             "reason": "card_resolver"
           }
@@ -6319,7 +6319,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "title": "BBS Whispering Campaign",
-        "cardDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+        "cardDefinitionId": 521,
         "hostedCreditsAdded": 16,
         "hostedCreditsAfter": 16,
         "resolvedEffects": [
@@ -6330,7 +6330,7 @@
             "side": "corp",
             "amount": 16,
             "remainingCounters": 16,
-            "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+            "sourceDefinitionId": 521,
             "sourceTitle": "BBS Whispering Campaign",
             "reason": "card_resolver"
           }
@@ -6348,7 +6348,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "title": "Rockerboy Promotion",
-        "cardDefinitionId": "onr_v1_337_rockerboy-promotion",
+        "cardDefinitionId": 549,
         "hostedCreditsAdded": 15,
         "hostedCreditsAfter": 15,
         "resolvedEffects": [
@@ -6359,7 +6359,7 @@
             "side": "corp",
             "amount": 15,
             "remainingCounters": 15,
-            "sourceDefinitionId": "onr_v1_337_rockerboy-promotion",
+            "sourceDefinitionId": 549,
             "sourceTitle": "Rockerboy Promotion",
             "reason": "card_resolver"
           }
@@ -6379,7 +6379,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "title": "Rockerboy Promotion",
-        "cardDefinitionId": "onr_v1_337_rockerboy-promotion",
+        "cardDefinitionId": 549,
         "hostedCreditsAdded": 15,
         "hostedCreditsAfter": 15,
         "resolvedEffects": [
@@ -6390,7 +6390,7 @@
             "side": "corp",
             "amount": 15,
             "remainingCounters": 15,
-            "sourceDefinitionId": "onr_v1_337_rockerboy-promotion",
+            "sourceDefinitionId": 549,
             "sourceTitle": "Rockerboy Promotion",
             "reason": "card_resolver"
           }
@@ -6408,7 +6408,7 @@
         "actor": "runner",
         "actionType": "install_card",
         "title": "Short-Term Contract",
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6419,7 +6419,7 @@
             "side": "runner",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract",
             "reason": "card_resolver"
           }
@@ -6439,7 +6439,7 @@
         "actor": "runner",
         "actionType": "install_card",
         "title": "Short-Term Contract",
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6450,7 +6450,7 @@
             "side": "runner",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract",
             "reason": "card_resolver"
           }
@@ -6468,7 +6468,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Corporate Coup",
-        "cardDefinitionId": "onr_v1_193_corporate-coup",
+        "cardDefinitionId": 405,
         "hostedCreditsAdded": 15,
         "hostedCreditsAfter": 15,
         "resolvedEffects": [
@@ -6479,7 +6479,7 @@
             "side": "corp",
             "amount": 15,
             "remainingCounters": 15,
-            "sourceDefinitionId": "onr_v1_193_corporate-coup",
+            "sourceDefinitionId": 405,
             "sourceTitle": "Corporate Coup",
             "reason": "card_resolver"
           }
@@ -6499,7 +6499,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Corporate Coup",
-        "cardDefinitionId": "onr_v1_193_corporate-coup",
+        "cardDefinitionId": 405,
         "hostedCreditsAdded": 15,
         "hostedCreditsAfter": 15,
         "resolvedEffects": [
@@ -6510,7 +6510,7 @@
             "side": "corp",
             "amount": 15,
             "remainingCounters": 15,
-            "sourceDefinitionId": "onr_v1_193_corporate-coup",
+            "sourceDefinitionId": 405,
             "sourceTitle": "Corporate Coup",
             "reason": "card_resolver"
           }
@@ -6528,7 +6528,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Political Coup",
-        "cardDefinitionId": "onr_v1_209_political-coup",
+        "cardDefinitionId": 421,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6539,7 +6539,7 @@
             "side": "corp",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_209_political-coup",
+            "sourceDefinitionId": 421,
             "sourceTitle": "Political Coup",
             "reason": "card_resolver"
           }
@@ -6559,7 +6559,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Political Coup",
-        "cardDefinitionId": "onr_v1_209_political-coup",
+        "cardDefinitionId": 421,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6570,7 +6570,7 @@
             "side": "corp",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_209_political-coup",
+            "sourceDefinitionId": 421,
             "sourceTitle": "Political Coup",
             "reason": "card_resolver"
           }
@@ -6588,7 +6588,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "title": "Braindance Campaign",
-        "cardDefinitionId": "onr_v1_311_braindance-campaign",
+        "cardDefinitionId": 523,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6599,7 +6599,7 @@
             "side": "corp",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_311_braindance-campaign",
+            "sourceDefinitionId": 523,
             "sourceTitle": "Braindance Campaign",
             "reason": "card_resolver"
           }
@@ -6619,7 +6619,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "title": "Braindance Campaign",
-        "cardDefinitionId": "onr_v1_311_braindance-campaign",
+        "cardDefinitionId": 523,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6630,7 +6630,7 @@
             "side": "corp",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_311_braindance-campaign",
+            "sourceDefinitionId": 523,
             "sourceTitle": "Braindance Campaign",
             "reason": "card_resolver"
           }
@@ -6648,7 +6648,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "title": "Holovid Campaign",
-        "cardDefinitionId": "onr_v1_326_holovid-campaign",
+        "cardDefinitionId": 538,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6659,7 +6659,7 @@
             "side": "corp",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_326_holovid-campaign",
+            "sourceDefinitionId": 538,
             "sourceTitle": "Holovid Campaign",
             "reason": "card_resolver"
           }
@@ -6679,7 +6679,7 @@
         "actor": "corp",
         "actionType": "rez_ice",
         "title": "Holovid Campaign",
-        "cardDefinitionId": "onr_v1_326_holovid-campaign",
+        "cardDefinitionId": 538,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6690,7 +6690,7 @@
             "side": "corp",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_326_holovid-campaign",
+            "sourceDefinitionId": 538,
             "sourceTitle": "Holovid Campaign",
             "reason": "card_resolver"
           }
@@ -6708,7 +6708,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Detroit Police Contract",
-        "cardDefinitionId": "onr_v1_198_detroit-police-contract",
+        "cardDefinitionId": 410,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6719,7 +6719,7 @@
             "side": "corp",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_198_detroit-police-contract",
+            "sourceDefinitionId": 410,
             "sourceTitle": "Detroit Police Contract",
             "reason": "card_resolver"
           }
@@ -6739,7 +6739,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Detroit Police Contract",
-        "cardDefinitionId": "onr_v1_198_detroit-police-contract",
+        "cardDefinitionId": 410,
         "hostedCreditsAdded": 12,
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
@@ -6750,7 +6750,7 @@
             "side": "corp",
             "amount": 12,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_198_detroit-police-contract",
+            "sourceDefinitionId": 410,
             "sourceTitle": "Detroit Police Contract",
             "reason": "card_resolver"
           }
@@ -6768,7 +6768,7 @@
         "actor": "corp",
         "actionType": "rez_card",
         "title": "Remote Facility",
-        "cardDefinitionId": "onr_v1_335_remote-facility",
+        "cardDefinitionId": 547,
         "rezCostPaid": 5,
         "resolvedEffects": [
           {
@@ -6777,7 +6777,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_335_remote-facility",
+            "sourceDefinitionId": 547,
             "sourceTitle": "Remote Facility",
             "reason": "card_resolver"
           }
@@ -6797,7 +6797,7 @@
         "actor": "corp",
         "actionType": "rez_card",
         "title": "Remote Facility",
-        "cardDefinitionId": "onr_v1_335_remote-facility",
+        "cardDefinitionId": 547,
         "rezCostPaid": 5,
         "resolvedEffects": [
           {
@@ -6806,7 +6806,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_335_remote-facility",
+            "sourceDefinitionId": 547,
             "sourceTitle": "Remote Facility",
             "reason": "card_resolver"
           }
@@ -6824,8 +6824,8 @@
         "actor": "corp",
         "actionType": "rez_card",
         "title": "Bel-Digmo Antibody",
-        "cardDefinitionId": "onr_proteus_054_bel-digmo-antibody",
-        "sourceDefinitionId": "onr_proteus_054_bel-digmo-antibody",
+        "cardDefinitionId": 112,
+        "sourceDefinitionId": 112,
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "shuffle_source_into_corp_rd",
         "movedCardCount": 1
@@ -6842,7 +6842,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Corporate War",
-        "cardDefinitionId": "onr_v1_196_corporate-war",
+        "cardDefinitionId": 408,
         "corporateWarThresholdMet": true,
         "onScoreGainCredits": 12,
         "corpCreditsAfter": 24
@@ -6861,7 +6861,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Corporate War",
-        "cardDefinitionId": "onr_v1_196_corporate-war",
+        "cardDefinitionId": 408,
         "corporateWarThresholdMet": false,
         "onScoreGainCredits": 0,
         "onScoreLostAllCredits": true,
@@ -6881,7 +6881,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Hostile Takeover",
-        "cardDefinitionId": "onr_v1_203_hostile-takeover",
+        "cardDefinitionId": 415,
         "resolvedEffects": [
           {
             "effectId": "onr_v1_203_hostile-takeover.score.gain_credits",
@@ -6890,7 +6890,7 @@
             "side": "corp",
             "amount": 5,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_203_hostile-takeover",
+            "sourceDefinitionId": 415,
             "sourceTitle": "Hostile Takeover"
           }
         ]
@@ -6909,7 +6909,7 @@
         "actor": "corp",
         "actionType": "score_agenda",
         "title": "Hostile Takeover",
-        "cardDefinitionId": "onr_v1_203_hostile-takeover",
+        "cardDefinitionId": 415,
         "resolvedEffects": [
           {
             "effectId": "onr_v1_203_hostile-takeover.score.gain_credits",
@@ -6918,7 +6918,7 @@
             "side": "corp",
             "amount": 5,
             "reason": "card_resolver",
-            "sourceDefinitionId": "onr_v1_203_hostile-takeover",
+            "sourceDefinitionId": 415,
             "sourceTitle": "Hostile Takeover"
           }
         ]
@@ -6935,7 +6935,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "BBS Whispering Campaign",
-        "cardDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+        "cardDefinitionId": 521,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 2,
         "hostedCreditsAfter": 14,
@@ -6948,7 +6948,7 @@
             "side": "corp",
             "amount": 2,
             "remainingCounters": 14,
-            "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+            "sourceDefinitionId": 521,
             "sourceTitle": "BBS Whispering Campaign",
             "reason": "card_resolver"
           }
@@ -6968,7 +6968,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "BBS Whispering Campaign",
-        "cardDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+        "cardDefinitionId": 521,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 2,
         "hostedCreditsAfter": 14,
@@ -6981,7 +6981,7 @@
             "side": "corp",
             "amount": 2,
             "remainingCounters": 14,
-            "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+            "sourceDefinitionId": 521,
             "sourceTitle": "BBS Whispering Campaign",
             "reason": "card_resolver"
           }
@@ -6999,7 +6999,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Rockerboy Promotion",
-        "cardDefinitionId": "onr_v1_337_rockerboy-promotion",
+        "cardDefinitionId": 549,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 3,
         "hostedCreditsAfter": 12,
@@ -7012,7 +7012,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_337_rockerboy-promotion",
+            "sourceDefinitionId": 549,
             "sourceTitle": "Rockerboy Promotion",
             "reason": "card_resolver"
           }
@@ -7032,7 +7032,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Rockerboy Promotion",
-        "cardDefinitionId": "onr_v1_337_rockerboy-promotion",
+        "cardDefinitionId": 549,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 3,
         "hostedCreditsAfter": 12,
@@ -7045,7 +7045,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_337_rockerboy-promotion",
+            "sourceDefinitionId": 549,
             "sourceTitle": "Rockerboy Promotion",
             "reason": "card_resolver"
           }
@@ -7063,7 +7063,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Short-Term Contract",
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 2,
         "hostedCreditsAfter": 10,
@@ -7076,7 +7076,7 @@
             "side": "runner",
             "amount": 2,
             "remainingCounters": 10,
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract",
             "reason": "card_resolver"
           }
@@ -7096,7 +7096,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Short-Term Contract",
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 2,
         "hostedCreditsAfter": 10,
@@ -7109,7 +7109,7 @@
             "side": "runner",
             "amount": 2,
             "remainingCounters": 10,
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract",
             "reason": "card_resolver"
           }
@@ -7127,7 +7127,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Corporate Coup",
-        "cardDefinitionId": "onr_v1_193_corporate-coup",
+        "cardDefinitionId": 405,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 3,
         "hostedCreditsAfter": 12,
@@ -7140,7 +7140,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_193_corporate-coup",
+            "sourceDefinitionId": 405,
             "sourceTitle": "Corporate Coup",
             "reason": "card_resolver"
           }
@@ -7160,7 +7160,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Corporate Coup",
-        "cardDefinitionId": "onr_v1_193_corporate-coup",
+        "cardDefinitionId": 405,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 3,
         "hostedCreditsAfter": 12,
@@ -7173,7 +7173,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 12,
-            "sourceDefinitionId": "onr_v1_193_corporate-coup",
+            "sourceDefinitionId": 405,
             "sourceTitle": "Corporate Coup",
             "reason": "card_resolver"
           }
@@ -7191,7 +7191,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Political Coup",
-        "cardDefinitionId": "onr_v1_209_political-coup",
+        "cardDefinitionId": 421,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 3,
         "hostedCreditsAfter": 9,
@@ -7204,7 +7204,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 9,
-            "sourceDefinitionId": "onr_v1_209_political-coup",
+            "sourceDefinitionId": 421,
             "sourceTitle": "Political Coup",
             "reason": "card_resolver"
           }
@@ -7224,7 +7224,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Political Coup",
-        "cardDefinitionId": "onr_v1_209_political-coup",
+        "cardDefinitionId": 421,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 3,
         "hostedCreditsAfter": 9,
@@ -7237,7 +7237,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 9,
-            "sourceDefinitionId": "onr_v1_209_political-coup",
+            "sourceDefinitionId": 421,
             "sourceTitle": "Political Coup",
             "reason": "card_resolver"
           }
@@ -7255,7 +7255,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Broker",
-        "cardDefinitionId": "onr_v1_154_broker",
+        "cardDefinitionId": 366,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 6,
         "hostedCreditsAfter": 0,
@@ -7268,7 +7268,7 @@
             "side": "runner",
             "amount": 6,
             "remainingCounters": 0,
-            "sourceDefinitionId": "onr_v1_154_broker",
+            "sourceDefinitionId": 366,
             "sourceTitle": "Broker",
             "reason": "card_resolver"
           }
@@ -7288,7 +7288,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Broker",
-        "cardDefinitionId": "onr_v1_154_broker",
+        "cardDefinitionId": 366,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 6,
         "hostedCreditsAfter": 0,
@@ -7301,7 +7301,7 @@
             "side": "runner",
             "amount": 6,
             "remainingCounters": 0,
-            "sourceDefinitionId": "onr_v1_154_broker",
+            "sourceDefinitionId": 366,
             "sourceTitle": "Broker",
             "reason": "card_resolver"
           }
@@ -7319,7 +7319,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Department of Truth Enhancement",
-        "cardDefinitionId": "onr_v1_318_department-of-truth-enhancement",
+        "cardDefinitionId": 530,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 6,
         "hostedCreditsAfter": 0,
@@ -7332,7 +7332,7 @@
             "side": "corp",
             "amount": 6,
             "remainingCounters": 0,
-            "sourceDefinitionId": "onr_v1_318_department-of-truth-enhancement",
+            "sourceDefinitionId": 530,
             "sourceTitle": "Department of Truth Enhancement",
             "reason": "card_resolver"
           }
@@ -7352,7 +7352,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Department of Truth Enhancement",
-        "cardDefinitionId": "onr_v1_318_department-of-truth-enhancement",
+        "cardDefinitionId": 530,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 6,
         "hostedCreditsAfter": 0,
@@ -7365,7 +7365,7 @@
             "side": "corp",
             "amount": 6,
             "remainingCounters": 0,
-            "sourceDefinitionId": "onr_v1_318_department-of-truth-enhancement",
+            "sourceDefinitionId": 530,
             "sourceTitle": "Department of Truth Enhancement",
             "reason": "card_resolver"
           }
@@ -7383,7 +7383,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Swiss Bank Account",
-        "cardDefinitionId": "onr_proteus_152_swiss-bank-account",
+        "cardDefinitionId": 210,
         "cardImplementationAbility": "activated",
         "cardImplementationAbilityTiming": "runner_cost_penalty_support",
         "costPenaltySupportWindowId": "runner_cost_penalty_support.217",
@@ -7394,7 +7394,7 @@
             "visibility": "hidden_info_barrier",
             "side": "runner",
             "amount": 6,
-            "sourceDefinitionId": "onr_proteus_152_swiss-bank-account",
+            "sourceDefinitionId": 210,
             "sourceTitle": "Swiss Bank Account",
             "reason": "card_resolver"
           }
@@ -7414,7 +7414,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Swiss Bank Account",
-        "cardDefinitionId": "onr_proteus_152_swiss-bank-account",
+        "cardDefinitionId": 210,
         "cardImplementationAbility": "activated",
         "cardImplementationAbilityTiming": "runner_cost_penalty_support",
         "costPenaltySupportWindowId": "runner_cost_penalty_support.217",
@@ -7425,7 +7425,7 @@
             "visibility": "hidden_info_barrier",
             "side": "runner",
             "amount": 6,
-            "sourceDefinitionId": "onr_proteus_152_swiss-bank-account",
+            "sourceDefinitionId": 210,
             "sourceTitle": "Swiss Bank Account",
             "reason": "card_resolver"
           }
@@ -7443,7 +7443,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Spinn Public Relations",
-        "cardDefinitionId": "onr_v1_344_spinn-public-relations",
+        "cardDefinitionId": 556,
         "cardImplementationAbility": "activated",
         "hostedCreditsAdded": 3,
         "hostedCreditsAfter": 3,
@@ -7455,7 +7455,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 3,
-            "sourceDefinitionId": "onr_v1_344_spinn-public-relations",
+            "sourceDefinitionId": 556,
             "sourceTitle": "Spinn Public Relations",
             "reason": "card_resolver"
           }
@@ -7475,7 +7475,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Spinn Public Relations",
-        "cardDefinitionId": "onr_v1_344_spinn-public-relations",
+        "cardDefinitionId": 556,
         "cardImplementationAbility": "activated",
         "hostedCreditsAdded": 3,
         "hostedCreditsAfter": 3,
@@ -7487,7 +7487,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 3,
-            "sourceDefinitionId": "onr_v1_344_spinn-public-relations",
+            "sourceDefinitionId": 556,
             "sourceTitle": "Spinn Public Relations",
             "reason": "card_resolver"
           }
@@ -7505,7 +7505,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Broker",
-        "cardDefinitionId": "onr_v1_154_broker",
+        "cardDefinitionId": 366,
         "cardImplementationAbility": "activated",
         "hostedCreditsAdded": 3,
         "hostedCreditsAfter": 3,
@@ -7517,7 +7517,7 @@
             "side": "runner",
             "amount": 3,
             "remainingCounters": 3,
-            "sourceDefinitionId": "onr_v1_154_broker",
+            "sourceDefinitionId": 366,
             "sourceTitle": "Broker",
             "reason": "card_resolver"
           }
@@ -7537,7 +7537,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Broker",
-        "cardDefinitionId": "onr_v1_154_broker",
+        "cardDefinitionId": 366,
         "cardImplementationAbility": "activated",
         "hostedCreditsAdded": 3,
         "hostedCreditsAfter": 3,
@@ -7549,7 +7549,7 @@
             "side": "runner",
             "amount": 3,
             "remainingCounters": 3,
-            "sourceDefinitionId": "onr_v1_154_broker",
+            "sourceDefinitionId": 366,
             "sourceTitle": "Broker",
             "reason": "card_resolver"
           }
@@ -7567,7 +7567,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Department of Truth Enhancement",
-        "cardDefinitionId": "onr_v1_318_department-of-truth-enhancement",
+        "cardDefinitionId": 530,
         "cardImplementationAbility": "activated",
         "hostedCreditsAdded": 3,
         "hostedCreditsAfter": 3,
@@ -7579,7 +7579,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 3,
-            "sourceDefinitionId": "onr_v1_318_department-of-truth-enhancement",
+            "sourceDefinitionId": 530,
             "sourceTitle": "Department of Truth Enhancement",
             "reason": "card_resolver"
           }
@@ -7599,7 +7599,7 @@
         "actor": "corp",
         "actionType": "activated_card_ability",
         "title": "Department of Truth Enhancement",
-        "cardDefinitionId": "onr_v1_318_department-of-truth-enhancement",
+        "cardDefinitionId": 530,
         "cardImplementationAbility": "activated",
         "hostedCreditsAdded": 3,
         "hostedCreditsAfter": 3,
@@ -7611,7 +7611,7 @@
             "side": "corp",
             "amount": 3,
             "remainingCounters": 3,
-            "sourceDefinitionId": "onr_v1_318_department-of-truth-enhancement",
+            "sourceDefinitionId": 530,
             "sourceTitle": "Department of Truth Enhancement",
             "reason": "card_resolver"
           }
@@ -7629,7 +7629,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Short-Term Contract",
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 1,
         "hostedCreditsAfter": 0,
@@ -7643,7 +7643,7 @@
             "side": "runner",
             "amount": 1,
             "remainingCounters": 0,
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract",
             "reason": "card_resolver"
           },
@@ -7653,7 +7653,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract",
             "reason": "card_resolver"
           }
@@ -7673,7 +7673,7 @@
         "actor": "runner",
         "actionType": "activated_card_ability",
         "title": "Short-Term Contract",
-        "cardDefinitionId": "onr_v1_178_short-term-contract",
+        "cardDefinitionId": 390,
         "cardImplementationAbility": "activated",
         "hostedCreditsTaken": 1,
         "hostedCreditsAfter": 0,
@@ -7687,7 +7687,7 @@
             "side": "runner",
             "amount": 1,
             "remainingCounters": 0,
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract",
             "reason": "card_resolver"
           },
@@ -7697,7 +7697,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_178_short-term-contract",
+            "sourceDefinitionId": 390,
             "sourceTitle": "Short-Term Contract",
             "reason": "card_resolver"
           }
@@ -7715,7 +7715,7 @@
         "actor": "runner",
         "actionType": "install_card",
         "title": "Loan from Chiba",
-        "cardDefinitionId": "onr_v1_168_loan-from-chiba",
+        "cardDefinitionId": 380,
         "resolvedEffects": [
           {
             "effectId": "runner.install.loan_from_chiba.card_123",
@@ -7723,7 +7723,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 12,
-            "sourceDefinitionId": "onr_v1_168_loan-from-chiba",
+            "sourceDefinitionId": 380,
             "sourceTitle": "Loan from Chiba",
             "reason": "card_resolver"
           }
@@ -7740,7 +7740,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "end_turn",
-        "cardDefinitionId": "onr_v1_168_loan-from-chiba",
+        "cardDefinitionId": 380,
         "title": "Loan from Chiba",
         "resolvedEffects": [
           {
@@ -7751,7 +7751,7 @@
             "amount": 10,
             "paidCredits": 10,
             "gameLost": false,
-            "sourceDefinitionId": "onr_v1_168_loan-from-chiba",
+            "sourceDefinitionId": 380,
             "sourceTitle": "Loan from Chiba",
             "reason": "source_left_play"
           }
@@ -7768,7 +7768,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "end_turn",
-        "cardDefinitionId": "onr_v1_168_loan-from-chiba",
+        "cardDefinitionId": 380,
         "title": "Loan from Chiba",
         "resolvedEffects": [
           {
@@ -7780,7 +7780,7 @@
             "paidCredits": 0,
             "gameLost": true,
             "winner": "corp",
-            "sourceDefinitionId": "onr_v1_168_loan-from-chiba",
+            "sourceDefinitionId": 380,
             "sourceTitle": "Loan from Chiba",
             "reason": "source_left_play"
           }
@@ -7837,7 +7837,7 @@
         "accessOrigin": "server_root",
         "agendaAccessReplacement": "delay_score_until_runner_next_turn_start",
         "delayedAgendaAccessScoreScheduled": true,
-        "delayedAgendaAccessSourceDefinitionId": "onr_v1_351_bizarre-encryption-scheme"
+        "delayedAgendaAccessSourceDefinitionId": 563
       },
       "context": {
         "cardTitle": "Hostile Takeover"
@@ -7920,7 +7920,7 @@
         "searchDestination": "grip",
         "searchShuffleAfter": true,
         "selectedCount": 1,
-        "cardDefinitionId": "onr_v1_036_jackhammer",
+        "cardDefinitionId": 248,
         "title": "Jackhammer"
       },
       "context": {},
@@ -7936,13 +7936,13 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "p3_37_search_stack_to_grip",
-        "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet",
+        "sourceDefinitionId": 326,
         "selectedCount": 1,
         "movedCardCount": 1,
         "searchDestination": "runner_grip",
         "publicRevealKind": "reveal",
-        "publicRevealDefinitionId": "onr_v1_039_krash",
-        "cardDefinitionId": "onr_v1_039_krash",
+        "publicRevealDefinitionId": 251,
+        "cardDefinitionId": 251,
         "shuffled": true,
         "aiReasonCode": "runner_stack_search_program"
       },
@@ -7959,7 +7959,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "p3_37_search_stack_to_grip",
-        "sourceDefinitionId": "onr_v1_105_mantis-fixer-at-large",
+        "sourceDefinitionId": 311,
         "selectedCount": 1,
         "movedCardCount": 1,
         "searchDestination": "runner_grip",
@@ -7979,14 +7979,14 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "p3_37_search_trash_to_grip",
-        "sourceDefinitionId": "onr_v1_089_gideons-pawnshop",
+        "sourceDefinitionId": 301,
         "selectedCount": 1,
         "movedCardCount": 1,
         "searchedZone": "runner_heap",
         "searchDestination": "runner_grip",
         "publicRevealKind": "reveal",
-        "publicRevealDefinitionId": "simple_decoder",
-        "cardDefinitionId": "simple_decoder",
+        "publicRevealDefinitionId": 591,
+        "cardDefinitionId": 591,
         "shufflePerformed": false,
         "aiReasonCode": "runner_heap_search_card"
       },
@@ -8003,9 +8003,9 @@
         "actionType": "activated_card_ability",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "p3_38_move_top_trash_to_grip",
-        "sourceDefinitionId": "onr_v1_165_junkyard-bbs",
-        "cardDefinitionId": "onr_v1_165_junkyard-bbs",
-        "returnedCardDefinitionId": "onr_v1_157_crash-everett-inventive-fixer",
+        "sourceDefinitionId": 377,
+        "cardDefinitionId": 377,
+        "returnedCardDefinitionId": 369,
         "returnedCount": 1,
         "sourceZone": "heap",
         "destinationZone": "grip",
@@ -8024,11 +8024,11 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "v1911_aujourdoui_top5",
-        "sourceDefinitionId": "onr_v1_151_aujourdoui",
+        "sourceDefinitionId": 363,
         "selectedCount": 2,
         "publicRevealKind": "reveal",
-        "publicRevealDefinitionId": "simple_decoder",
-        "publicRevealDefinitionIds": "simple_decoder,simple_fracter",
+        "publicRevealDefinitionId": 591,
+        "publicRevealDefinitionIds": "591,597",
         "shuffled": true
       },
       "context": {},
@@ -8044,7 +8044,7 @@
         "actionType": "resolve_choice",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "v1911_aujourdoui_top5",
-        "sourceDefinitionId": "onr_v1_151_aujourdoui",
+        "sourceDefinitionId": 363,
         "selectedCount": 0,
         "shuffled": true
       },
@@ -8064,7 +8064,7 @@
         "searchReveal": "hidden",
         "searchDestination": "grip",
         "selectedCount": 1,
-        "cardDefinitionId": "onr_v1_036_jackhammer",
+        "cardDefinitionId": 248,
         "title": "Jackhammer"
       },
       "context": {},
@@ -8080,7 +8080,7 @@
         "actionType": "continue_run",
         "encounterContinue": true,
         "traceStarted": true,
-        "sourceDefinitionId": "onr_v1_249_hunter",
+        "sourceDefinitionId": 461,
         "traceLimit": 4
       },
       "context": {
@@ -8098,7 +8098,7 @@
         "actionType": "resolve_choice",
         "aiReasonCode": "corp.trace.bid",
         "traceStep": "corp_bid",
-        "sourceDefinitionId": "onr_v1_249_hunter",
+        "sourceDefinitionId": 461,
         "traceLimit": 4,
         "corpBid": 2,
         "traceValue": 6,
@@ -8116,7 +8116,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "runner_bid",
-        "sourceDefinitionId": "onr_v1_249_hunter",
+        "sourceDefinitionId": 461,
         "traceLimit": 4,
         "corpBid": 2,
         "traceValue": 6,
@@ -8138,7 +8138,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "runner_bid",
-        "sourceDefinitionId": "onr_proteus_050_manhunt",
+        "sourceDefinitionId": 108,
         "corpBid": 0,
         "traceValue": 6,
         "runnerBid": 0,
@@ -8159,7 +8159,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "runner_bid",
-        "sourceDefinitionId": "onr_proteus_050_manhunt",
+        "sourceDefinitionId": 108,
         "corpBid": 0,
         "traceValue": 6,
         "runnerBid": 0,
@@ -8180,7 +8180,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "runner_bid",
-        "sourceDefinitionId": "onr_proteus_050_manhunt",
+        "sourceDefinitionId": 108,
         "corpBid": 0,
         "traceValue": 6,
         "runnerBid": 0,
@@ -8201,11 +8201,11 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "base_link",
-        "sourceDefinitionId": "onr_v1_284_chance-observation",
+        "sourceDefinitionId": 496,
         "corpBid": 1,
         "traceValue": 6,
         "baseLinkUsed": true,
-        "traceBaseLinkSourceDefinitionId": "onr_v1_003_baedekers-net-map",
+        "traceBaseLinkSourceDefinitionId": 215,
         "traceBaseLinkCostPaid": 0,
         "baseLinkValue": 1,
         "runnerLink": 1
@@ -8223,8 +8223,8 @@
         "actionType": "resolve_choice",
         "traceStep": "post_bid_link",
         "eventModificationDecision": "apply",
-        "sourceDefinitionId": "onr_v1_284_chance-observation",
-        "postBidTraceLinkSourceDefinitionId": "onr_v1_003_baedekers-net-map",
+        "sourceDefinitionId": 496,
+        "postBidTraceLinkSourceDefinitionId": 215,
         "postBidTraceLinkCostPaid": 1,
         "postBidTraceLinkDelta": 1,
         "postBidTraceLinkBonus": 1,
@@ -8248,7 +8248,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "post_bid_link",
-        "sourceDefinitionId": "onr_v1_284_chance-observation",
+        "sourceDefinitionId": 496,
         "postBidTraceLinkBonus": 1,
         "corpBid": 1,
         "traceValue": 6,
@@ -8269,7 +8269,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "runner_bid",
-        "sourceDefinitionId": "onr_v1_228_cinderella",
+        "sourceDefinitionId": 440,
         "corpBid": 1,
         "traceValue": 7,
         "runnerBid": 0,
@@ -8277,7 +8277,7 @@
         "traceSuccessful": true,
         "traceSuccessEffect": "hardware_trash_meat_damage_end_run",
         "trashedCount": 1,
-        "trashedCardDefinitionId": "onr_v1_028_force-shield",
+        "trashedCardDefinitionId": 240,
         "damageAmount": 2,
         "damageType": "meat",
         "damageCannotBePrevented": true
@@ -8294,7 +8294,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "runner_bid",
-        "sourceDefinitionId": "onr_v1_228_cinderella",
+        "sourceDefinitionId": 440,
         "corpBid": 1,
         "traceValue": 7,
         "runnerBid": 0,
@@ -8302,7 +8302,7 @@
         "traceSuccessful": true,
         "traceSuccessEffect": "hardware_trash_meat_damage_end_run",
         "trashedCount": 1,
-        "trashedCardDefinitionId": "onr_v1_028_force-shield",
+        "trashedCardDefinitionId": 240,
         "damageAmount": 2,
         "damageType": "meat",
         "damageCannotBePrevented": true
@@ -8335,7 +8335,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "traceStep": "runner_bid",
-        "sourceDefinitionId": "onr_v1_241_fang-2-0",
+        "sourceDefinitionId": 453,
         "corpBid": 6,
         "traceValue": 11,
         "runnerBid": 0,
@@ -8373,7 +8373,7 @@
         "actor": "runner",
         "actionType": "resolve_choice",
         "v1919RunnerEventAbility": "arasaka_owns_you_flatline_replacement",
-        "sourceDefinitionId": "onr_v1_078_arasaka-owns-you",
+        "sourceDefinitionId": 290,
         "originalAmount": 4,
         "preventedAmount": 4,
         "drawnCards": 4,
@@ -8400,11 +8400,11 @@
         "originalAmount": 1,
         "preventedTags": 1,
         "finalAmount": 0,
-        "sourceDefinitionId": "onr_v1_161_fall-guy",
+        "sourceDefinitionId": 373,
         "sourceTrashed": true,
-        "trashedCardDefinitionId": "onr_v1_161_fall-guy",
-        "ambushDefinitionId": "onr_proteus_005_marked-accounts",
-        "accessEffectSourceDefinitionId": "onr_proteus_005_marked-accounts",
+        "trashedCardDefinitionId": 373,
+        "ambushDefinitionId": 63,
+        "accessEffectSourceDefinitionId": 63,
         "accessedFromZone": "rd",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "v1917_access_ambush"
@@ -8426,11 +8426,11 @@
         "originalAmount": 1,
         "preventedTags": 1,
         "finalAmount": 0,
-        "sourceDefinitionId": "onr_v1_161_fall-guy",
+        "sourceDefinitionId": 373,
         "sourceTrashed": true,
-        "trashedCardDefinitionId": "onr_v1_161_fall-guy",
-        "ambushDefinitionId": "onr_proteus_005_marked-accounts",
-        "accessEffectSourceDefinitionId": "onr_proteus_005_marked-accounts",
+        "trashedCardDefinitionId": 373,
+        "ambushDefinitionId": 63,
+        "accessEffectSourceDefinitionId": 63,
         "accessedFromZone": "rd",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "v1917_access_ambush"
@@ -8446,7 +8446,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "play_event",
-        "cardDefinitionId": "onr_v1_117_valu-pak-software-bundle",
+        "cardDefinitionId": 329,
         "title": "Valu-Pak Software Bundle",
         "v1922RunnerEventAbility": "program_install_action_bundle",
         "gainedActions": 5,
@@ -8464,7 +8464,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "play_operation",
-        "cardDefinitionId": "onr_v1_289_edgerunner-inc-temps",
+        "cardDefinitionId": 501,
         "title": "Edgerunner, Inc., Temps",
         "v1922CorpOperationAbility": "install_action_bundle",
         "gainedActions": 3,
@@ -8481,10 +8481,10 @@
       "payload": {
         "actor": "corp",
         "actionType": "score_agenda",
-        "cardDefinitionId": "onr_v1_216_security-purge",
+        "cardDefinitionId": 428,
         "title": "Security Purge",
         "agendaAbility": "agenda_purge",
-        "publicRevealDefinitionIds": "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
+        "publicRevealDefinitionIds": "486,596,594",
         "revealedCount": 3,
         "revealedIceCount": 1,
         "pendingTrashCount": 2,
@@ -8504,10 +8504,10 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_216_security-purge",
+        "sourceDefinitionId": 428,
         "agendaAbility": "agenda_purge",
         "hiddenZoneAction": "agenda_purge_runner_review_completed",
-        "publicRevealDefinitionIds": "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
+        "publicRevealDefinitionIds": "486,596,594",
         "revealedCount": 3,
         "revealedIceCount": 1,
         "pendingTrashCount": 2,
@@ -8527,7 +8527,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_216_security-purge",
+        "sourceDefinitionId": 428,
         "agendaAbility": "agenda_purge",
         "hiddenZoneAction": "agenda_purge_install_targets",
         "revealedCount": 3,
@@ -8536,10 +8536,10 @@
         "trashedCount": 2,
         "agendaPurgeRunnerReviewResolved": true,
         "agendaPurgeTargetChoiceResolved": true,
-        "publicRevealDefinitionIds": "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
-        "installedIceDefinitionIds": "onr_v1_274_tutor",
+        "publicRevealDefinitionIds": "486,596,594",
+        "installedIceDefinitionIds": "486",
         "installedIceServerLabels": "R&D",
-        "trashedDefinitionIds": "simple_economy_operation,simple_economy_asset"
+        "trashedDefinitionIds": "596,594"
       },
       "context": {},
       "catalog": 0
@@ -8552,15 +8552,15 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_216_security-purge",
+        "sourceDefinitionId": 428,
         "agendaAbility": "agenda_purge",
         "hiddenZoneAction": "agenda_purge_runner_review_completed",
-        "publicRevealDefinitionIds": "simple_economy_operation,simple_economy_asset",
+        "publicRevealDefinitionIds": "596,594",
         "revealedCount": 2,
         "revealedIceCount": 0,
         "installedIceCount": 0,
         "trashedCount": 2,
-        "trashedDefinitionIds": "simple_economy_operation,simple_economy_asset",
+        "trashedDefinitionIds": "596,594",
         "agendaPurgeRunnerReviewResolved": true,
         "agendaPurgeTargetChoiceOpened": false,
         "agendaPurgeTargetChoiceResolved": true
@@ -8576,7 +8576,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "resolve_choice",
-        "sourceDefinitionId": "onr_v1_061_shield",
+        "sourceDefinitionId": 273,
         "title": "Shield",
         "eventModificationDecision": "apply",
         "preventedAmount": 2,
@@ -8593,7 +8593,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "gain_credit",
-        "sourceDefinitionId": "onr_v1_008_boardwalk",
+        "sourceDefinitionId": 220,
         "title": "Boardwalk",
         "v1921RunnerProgramAbility": "deterministic_die_probe",
         "v1921DieRoll": 4
@@ -8609,7 +8609,7 @@
       "payload": {
         "actor": "runner",
         "actionType": "break_subroutine",
-        "cardDefinitionId": "onr_v1_027_flak",
+        "cardDefinitionId": 239,
         "title": "Flak"
       },
       "context": {},
@@ -8623,7 +8623,7 @@
       "payload": {
         "actor": "corp",
         "actionType": "score_agenda",
-        "cardDefinitionId": "onr_proteus_008_project-zurich",
+        "cardDefinitionId": 66,
         "title": "Project Zurich",
         "agendaPoints": 2,
         "projectZurichOveradvance": 4,
@@ -8648,7 +8648,7 @@
             "side": "corp",
             "amount": 2,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_proteus_008_project-zurich",
+            "sourceDefinitionId": 66,
             "sourceTitle": "Project Zurich"
           }
         ]
@@ -8896,7 +8896,7 @@
             "side": "corp",
             "amount": 3,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_v1_064_skivviss",
+            "sourceDefinitionId": 276,
             "sourceTitle": "Skivviss"
           }
         ]
@@ -8920,7 +8920,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_371_tokyo-chiba-infighting",
+            "sourceDefinitionId": 583,
             "sourceTitle": "Tokyo-Chiba Infighting",
             "serverLabel": "Remote 1",
             "reason": "unsuccessful_run"
@@ -8946,7 +8946,7 @@
             "side": "runner",
             "amount": 0,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_v1_172_quest-for-cattekin",
+            "sourceDefinitionId": 384,
             "sourceTitle": "Quest for Cattekin",
             "v1921DieRoll": 4,
             "randomEffectOutcome": "no_effect"
@@ -8958,7 +8958,7 @@
             "side": "runner",
             "amount": 1,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_v1_172_quest-for-cattekin",
+            "sourceDefinitionId": 384,
             "sourceTitle": "Quest for Cattekin",
             "v1921DieRoll": 1,
             "randomEffectOutcome": "core_damage",
@@ -8972,7 +8972,7 @@
             "side": "runner",
             "amount": 1,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_v1_172_quest-for-cattekin",
+            "sourceDefinitionId": 384,
             "sourceTitle": "Quest for Cattekin",
             "v1921DieRoll": 2,
             "randomEffectOutcome": "net_damage",
@@ -8986,7 +8986,7 @@
             "side": "runner",
             "amount": 1,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_v1_172_quest-for-cattekin",
+            "sourceDefinitionId": 384,
             "sourceTitle": "Quest for Cattekin",
             "v1921DieRoll": 6,
             "randomEffectOutcome": "permanent_action",
@@ -9014,7 +9014,7 @@
             "side": "runner",
             "amount": 2,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+            "sourceDefinitionId": 52,
             "sourceTitle": "Omnitech \"Spinal Tap\" Cybermodem",
             "v1921DieRoll": 1,
             "randomEffectOutcome": "core_damage",
@@ -9042,7 +9042,7 @@
             "side": "runner",
             "amount": 0,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+            "sourceDefinitionId": 52,
             "sourceTitle": "Omnitech \"Spinal Tap\" Cybermodem",
             "v1921DieRoll": 4,
             "randomEffectOutcome": "no_effect"
@@ -9066,9 +9066,9 @@
             "kind": "rez_card",
             "visibility": "public",
             "side": "corp",
-            "cardDefinitionId": "onr_v1_371_tokyo-chiba-infighting",
+            "cardDefinitionId": 583,
             "cardTitle": "Tokyo-Chiba Infighting",
-            "sourceDefinitionId": "onr_v1_371_tokyo-chiba-infighting",
+            "sourceDefinitionId": 583,
             "sourceTitle": "Tokyo-Chiba Infighting",
             "reason": "region_install"
           }
@@ -9091,9 +9091,9 @@
             "kind": "rez_card",
             "visibility": "public",
             "side": "corp",
-            "cardDefinitionId": "onr_v1_356_namatoki-plaza",
+            "cardDefinitionId": 573,
             "cardTitle": "Namatoki Plaza",
-            "sourceDefinitionId": "onr_v1_356_namatoki-plaza",
+            "sourceDefinitionId": 573,
             "sourceTitle": "Namatoki Plaza",
             "reason": "install_rez"
           }
@@ -9117,9 +9117,9 @@
             "visibility": "public",
             "side": "corp",
             "reason": "region_limit",
-            "cardDefinitionId": "onr_v1_355_crystal-palace-station-grid",
+            "cardDefinitionId": 567,
             "cardTitle": "Crystal Palace Station Grid",
-            "sourceDefinitionId": "onr_v1_365_paris-city-grid",
+            "sourceDefinitionId": 577,
             "sourceTitle": "Paris City Grid",
             "serverLabel": "Remote 1"
           }
@@ -9144,7 +9144,7 @@
             "side": "corp",
             "reason": "region_limit",
             "redactedKind": "installed_card",
-            "sourceDefinitionId": "onr_v1_365_paris-city-grid",
+            "sourceDefinitionId": 577,
             "sourceTitle": "Paris City Grid",
             "serverLabel": "Remote 1"
           }
@@ -9167,7 +9167,7 @@
             "kind": "trash_source",
             "visibility": "public",
             "side": "runner",
-            "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+            "sourceDefinitionId": 396,
             "sourceTitle": "Top Runners' Conference",
             "reason": "run_start"
           }
@@ -9190,9 +9190,9 @@
             "kind": "trash_card",
             "visibility": "hidden_info_barrier",
             "side": "corp",
-            "cardDefinitionId": "simple_agenda",
+            "cardDefinitionId": 588,
             "cardTitle": "Simple Agenda",
-            "sourceDefinitionId": "secret_region_upgrade",
+            "sourceDefinitionId": 11027,
             "sourceTitle": "Secret Region Upgrade",
             "redactedKind": "region_replacement"
           }
@@ -9215,9 +9215,9 @@
             "kind": "trash_card",
             "visibility": "private_to_side",
             "side": "runner",
-            "cardDefinitionId": "onr_v1_036_jackhammer",
+            "cardDefinitionId": 248,
             "cardTitle": "Jackhammer",
-            "sourceDefinitionId": "runner_secret_source",
+            "sourceDefinitionId": 11026,
             "sourceTitle": "Runner Secret Source"
           }
         ]
@@ -9240,7 +9240,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 2,
-            "sourceDefinitionId": "onr_v1_184_top-runners-conference",
+            "sourceDefinitionId": 396,
             "sourceTitle": "Top Runners' Conference",
             "reason": "start_of_turn"
           }
@@ -9264,7 +9264,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_211_polymer-breakthrough",
+            "sourceDefinitionId": 423,
             "sourceTitle": "Polymer Breakthrough",
             "reason": "start_of_turn"
           },
@@ -9274,7 +9274,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_335_remote-facility",
+            "sourceDefinitionId": 547,
             "sourceTitle": "Remote Facility",
             "reason": "start_of_turn"
           },
@@ -9284,7 +9284,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_218_subsidiary-branch",
+            "sourceDefinitionId": 430,
             "sourceTitle": "Subsidiary Branch",
             "reason": "start_of_turn"
           }
@@ -9308,7 +9308,7 @@
             "visibility": "public",
             "side": "runner",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_163_floating-runner-bbs",
+            "sourceDefinitionId": 375,
             "sourceTitle": "Floating Runner BBS",
             "reason": "start_of_turn"
           },
@@ -9321,7 +9321,7 @@
             "counterType": "bit",
             "removedCounterAmount": 1,
             "remainingCounters": 11,
-            "sourceDefinitionId": "onr_v1_174_rigged-investments",
+            "sourceDefinitionId": 386,
             "sourceTitle": "Rigged Investments",
             "reason": "start_of_turn"
           }
@@ -9346,7 +9346,7 @@
             "side": "runner",
             "amount": 1,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_proteus_131_bargain-with-viacox",
+            "sourceDefinitionId": 189,
             "sourceTitle": "Bargain with Viacox",
             "dieRoll": 6,
             "restrictedActionFamily": "play_or_install_card",
@@ -9373,7 +9373,7 @@
             "side": "runner",
             "amount": 1,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_proteus_131_bargain-with-viacox",
+            "sourceDefinitionId": 189,
             "sourceTitle": "Bargain with Viacox",
             "dieRoll": 6,
             "restrictedActionFamily": "play_or_install_card",
@@ -9400,7 +9400,7 @@
             "side": "runner",
             "amount": 1,
             "reason": "start_of_turn",
-            "sourceDefinitionId": "onr_proteus_131_bargain-with-viacox",
+            "sourceDefinitionId": 189,
             "sourceTitle": "Bargain with Viacox",
             "dieRoll": 5,
             "restrictedActionFamily": "start_run_remote"
@@ -9428,7 +9428,7 @@
             "counterType": "recurring_credit",
             "remainingCounters": 1,
             "addedCounterAmount": 1,
-            "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+            "sourceDefinitionId": 388,
             "sourceTitle": "The Shell Traders",
             "reason": "start_of_turn"
           }
@@ -9453,7 +9453,7 @@
             "side": "corp",
             "amount": 1,
             "reason": "installed_economy_start_of_corp_turn",
-            "sourceDefinitionId": "onr_v1_329_investment-firm",
+            "sourceDefinitionId": 541,
             "sourceCardInstanceId": "investment_firm_1",
             "sourceTitle": "Investment Firm"
           },
@@ -9467,7 +9467,7 @@
             "counterType": "recurring_credit",
             "removedCounterAmount": 1,
             "remainingCounters": 1,
-            "sourceDefinitionId": "onr_v1_329_investment-firm",
+            "sourceDefinitionId": 541,
             "sourceCardInstanceId": "investment_firm_1",
             "sourceTitle": "Investment Firm"
           }
@@ -9492,7 +9492,7 @@
             "side": "corp",
             "amount": 1,
             "reason": "installed_economy_start_of_corp_turn",
-            "sourceDefinitionId": "onr_v1_329_investment-firm",
+            "sourceDefinitionId": 541,
             "sourceCardInstanceId": "investment_firm_1",
             "sourceTitle": "Investment Firm"
           },
@@ -9506,7 +9506,7 @@
             "counterType": "recurring_credit",
             "removedCounterAmount": 1,
             "remainingCounters": 1,
-            "sourceDefinitionId": "onr_v1_329_investment-firm",
+            "sourceDefinitionId": 541,
             "sourceCardInstanceId": "investment_firm_1",
             "sourceTitle": "Investment Firm"
           }
@@ -9533,9 +9533,9 @@
             "counterType": "shell",
             "removedCounterAmount": 1,
             "remainingCounters": 1,
-            "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+            "sourceDefinitionId": 388,
             "sourceTitle": "The Shell Traders",
-            "cardDefinitionId": "simple_fracter",
+            "cardDefinitionId": 597,
             "cardTitle": "Simple Fracter",
             "reason": "start_of_turn"
           }
@@ -9562,7 +9562,7 @@
             "counterType": "bit",
             "removedCounterAmount": 2,
             "remainingCounters": 10,
-            "sourceDefinitionId": "onr_v1_311_braindance-campaign",
+            "sourceDefinitionId": 523,
             "sourceTitle": "Braindance Campaign",
             "reason": "start_of_turn"
           }
@@ -9589,7 +9589,7 @@
             "counterType": "bit",
             "removedCounterAmount": 1,
             "remainingCounters": 0,
-            "sourceDefinitionId": "onr_v1_326_holovid-campaign",
+            "sourceDefinitionId": 538,
             "sourceTitle": "Holovid Campaign",
             "reason": "start_of_turn"
           },
@@ -9599,7 +9599,7 @@
             "visibility": "public",
             "side": "corp",
             "amount": 1,
-            "sourceDefinitionId": "onr_v1_326_holovid-campaign",
+            "sourceDefinitionId": 538,
             "sourceTitle": "Holovid Campaign",
             "reason": "start_of_turn"
           }
@@ -9626,7 +9626,7 @@
             "counterType": "bit",
             "removedCounterAmount": 2,
             "remainingCounters": 10,
-            "sourceDefinitionId": "onr_v1_198_detroit-police-contract",
+            "sourceDefinitionId": 410,
             "sourceTitle": "Detroit Police Contract",
             "reason": "start_of_turn"
           }
@@ -9653,7 +9653,7 @@
             "counterType": "bit",
             "removedCounterAmount": 1,
             "remainingCounters": 2,
-            "sourceDefinitionId": "onr_v1_344_spinn-public-relations",
+            "sourceDefinitionId": 556,
             "sourceTitle": "Spinn Public Relations",
             "reason": "start_of_turn"
           }
@@ -9677,9 +9677,9 @@
             "visibility": "public",
             "side": "runner",
             "amount": 2,
-            "cardDefinitionId": "onr_v1_203_hostile-takeover",
+            "cardDefinitionId": 415,
             "cardTitle": "Hostile Takeover",
-            "sourceDefinitionId": "onr_v1_351_bizarre-encryption-scheme",
+            "sourceDefinitionId": 563,
             "sourceTitle": "Bizarre Encryption Scheme",
             "reason": "start_of_turn"
           }
@@ -9706,7 +9706,7 @@
             "damageType": "net",
             "cardsTrashed": 1,
             "reason": "access_effect",
-            "sourceDefinitionId": "onr_proteus_071_bel-digmo-antibody",
+            "sourceDefinitionId": 112,
             "sourceTitle": "Bel-Digmo Antibody"
           }
         ]
@@ -9723,7 +9723,7 @@
         "actor": "runner",
         "actionType": "access_card",
         "title": "Pattel Antibody",
-        "cardDefinitionId": "onr_proteus_068_pattel-antibody",
+        "cardDefinitionId": 126,
         "serverLabel": "R&D",
         "accessIndex": 0,
         "baseAccessCount": 1,
@@ -9743,7 +9743,7 @@
         "actor": "runner",
         "actionType": "access_card",
         "title": "Bel-Digmo Antibody",
-        "cardDefinitionId": "onr_proteus_071_bel-digmo-antibody",
+        "cardDefinitionId": 112,
         "serverLabel": "R&D",
         "accessIndex": 1,
         "baseAccessCount": 1,
@@ -9788,7 +9788,7 @@
             "addedCounterAmount": 1,
             "remainingCounters": 1,
             "reason": "proteus_runner_virus_successful_run",
-            "sourceDefinitionId": "onr_proteus_090_highlighter",
+            "sourceDefinitionId": 148,
             "sourceTitle": "Highlighter"
           },
           {
@@ -9801,7 +9801,7 @@
             "addedCounterAmount": 1,
             "remainingCounters": 1,
             "reason": "proteus_runner_virus_successful_run",
-            "sourceDefinitionId": "onr_proteus_099_viral-pipeline",
+            "sourceDefinitionId": 157,
             "sourceTitle": "Viral Pipeline",
             "serverLabel": "R&D"
           },
@@ -9815,7 +9815,7 @@
             "addedCounterAmount": 1,
             "remainingCounters": 1,
             "reason": "proteus_runner_virus_successful_run",
-            "sourceDefinitionId": "onr_v1_010_cascade",
+            "sourceDefinitionId": 222,
             "sourceTitle": "Cascade",
             "serverLabel": "R&D"
           }
@@ -9833,7 +9833,7 @@
         "actor": "corp",
         "actionType": "resolve_choice",
         "targetCount": 2,
-        "targetCardDefinitionIds": "onr_v1_005_bartmoss-memorial-icebreaker,onr_v1_074_worm",
+        "targetCardDefinitionIds": "217,286",
         "resolvedEffects": [
           {
             "effectId": "pattel.access.counters",
@@ -9845,7 +9845,7 @@
             "addedCounterAmount": 2,
             "remainingCounters": 2,
             "reason": "access_effect",
-            "sourceDefinitionId": "onr_proteus_068_pattel-antibody",
+            "sourceDefinitionId": 126,
             "sourceTitle": "Pattel Antibody"
           }
         ]
@@ -9874,7 +9874,7 @@
             "addedCounterAmount": 0,
             "remainingCounters": 0,
             "reason": "access_effect",
-            "sourceDefinitionId": "onr_proteus_068_pattel-antibody",
+            "sourceDefinitionId": 126,
             "sourceTitle": "Pattel Antibody"
           }
         ]
@@ -9900,7 +9900,7 @@
             "amount": 1,
             "counterType": "breaker_strength_penalty",
             "addedCounterAmount": 1,
-            "sourceDefinitionId": "onr_proteus_068_pattel-antibody",
+            "sourceDefinitionId": 126,
             "sourceTitle": "Pattel Antibody"
           }
         ]

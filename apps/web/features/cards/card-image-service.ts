@@ -1,5 +1,6 @@
 "use client";
 
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import {
   createContext,
   createElement,
@@ -10,7 +11,6 @@ import {
 } from "react";
 import {
   isGeneratedCardImageId,
-  isLocalOnrCardId,
   isLocalizedDeCardImageId,
   LOCAL_CARD_IMAGE_VERSION,
   LOCALIZED_DE_CARD_IMAGE_VERSION,
@@ -48,18 +48,14 @@ export function CardImageCollectionRevisionProvider({
 }
 
 export function localCardImageUrl(
-  cardId: string | undefined | null,
+  cardId: CardDefinitionId | undefined | null,
   options: { preferGerman?: boolean } = {},
 ): string | undefined {
-  if (!cardId) return undefined;
+  if (!isCardDefinitionId(cardId)) return undefined;
   const encodedCardId = encodeURIComponent(cardId);
   if (options.preferGerman && isLocalizedDeCardImageId(cardId))
     return `/api/card-images/${encodedCardId}?skin=de&v=${LOCALIZED_DE_CARD_IMAGE_VERSION}`;
-  if (isGeneratedCardImageId(cardId))
-    return `/api/card-images/${encodedCardId}?v=${LOCAL_CARD_IMAGE_VERSION}`;
-  if (isLocalOnrCardId(cardId))
-    return `/api/card-images/${encodedCardId}?v=${LOCAL_CARD_IMAGE_VERSION}`;
-  return undefined;
+  return `/api/card-images/${encodedCardId}?v=${LOCAL_CARD_IMAGE_VERSION}`;
 }
 
 export function withCardImageVariant(

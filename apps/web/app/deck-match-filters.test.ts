@@ -1,3 +1,4 @@
+import { createRuntimeCardsById } from "@netgrid/catalog";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -9,15 +10,17 @@ import {
   snapshotAllowedForMatchCardPool,
 } from "../features/decks/deck-match-filters";
 
+const cardSetsById = createRuntimeCardsById();
+
 const baseDeck = {
   deckId: "local_runner",
   deckVersion: "test",
   name: "Runner",
   side: "runner" as const,
-  identityCardId: "runner_identity_001",
+  identityCardId: 587,
   cardPoolSnapshotId: "card-snapshot-0.8",
   formatProfileId: "netgrid_private_local_v1",
-  cards: [{ cardId: "onr_v1_001_afreet", quantity: 1 }],
+  cards: [{ cardId: 213, quantity: 1 }],
   createdAt: "2026-06-30T00:00:00.000Z",
   updatedAt: "2026-06-30T00:00:00.000Z",
 };
@@ -43,57 +46,57 @@ describe("deck match card-pool filters", () => {
     const classicDeck = {
       ...baseDeck,
       formatProfileId: CLASSIC_DECK_FORMAT_PROFILE_ID,
-      cards: [{ cardId: "onr_classic_041_networking", quantity: 1 }],
+      cards: [{ cardId: 45, quantity: 1 }],
     };
     const proteusDeck = {
       ...baseDeck,
       formatProfileId: PROTEUS_DECK_FORMAT_PROFILE_ID,
-      cards: [{ cardId: "onr_proteus_047_credit-consolidation", quantity: 1 }],
+      cards: [{ cardId: 105, quantity: 1 }],
     };
     const combinedDeck = {
       ...baseDeck,
       formatProfileId: CLASSIC_PROTEUS_DECK_FORMAT_PROFILE_ID,
       cards: [
-        { cardId: "onr_classic_041_networking", quantity: 1 },
-        { cardId: "onr_proteus_047_credit-consolidation", quantity: 1 },
+        { cardId: 45, quantity: 1 },
+        { cardId: 105, quantity: 1 },
       ],
     };
 
     expect(
-      editableDeckAllowedForMatchCardPool(classicDeck, "originalset"),
+      editableDeckAllowedForMatchCardPool(classicDeck, "originalset", cardSetsById),
     ).toBe(false);
     expect(
-      editableDeckAllowedForMatchCardPool(classicDeck, "originalset_classic"),
+      editableDeckAllowedForMatchCardPool(classicDeck, "originalset_classic", cardSetsById),
     ).toBe(true);
     expect(
       editableDeckAllowedForMatchCardPool(
         classicDeck,
-        "originalset_classic_proteus",
+        "originalset_classic_proteus", cardSetsById,
       ),
     ).toBe(true);
     expect(
-      editableDeckAllowedForMatchCardPool(classicDeck, "originalset_proteus"),
+      editableDeckAllowedForMatchCardPool(classicDeck, "originalset_proteus", cardSetsById),
     ).toBe(false);
     expect(
-      editableDeckAllowedForMatchCardPool(proteusDeck, "originalset_proteus"),
+      editableDeckAllowedForMatchCardPool(proteusDeck, "originalset_proteus", cardSetsById),
     ).toBe(true);
     expect(
       editableDeckAllowedForMatchCardPool(
         proteusDeck,
-        "originalset_classic_proteus",
+        "originalset_classic_proteus", cardSetsById,
       ),
     ).toBe(true);
     expect(
-      editableDeckAllowedForMatchCardPool(proteusDeck, "originalset_classic"),
+      editableDeckAllowedForMatchCardPool(proteusDeck, "originalset_classic", cardSetsById),
     ).toBe(false);
     expect(
       editableDeckAllowedForMatchCardPool(
         combinedDeck,
-        "originalset_classic_proteus",
+        "originalset_classic_proteus", cardSetsById,
       ),
     ).toBe(true);
     expect(
-      editableDeckAllowedForMatchCardPool(combinedDeck, "originalset_classic"),
+      editableDeckAllowedForMatchCardPool(combinedDeck, "originalset_classic", cardSetsById),
     ).toBe(false);
   });
 
@@ -101,19 +104,19 @@ describe("deck match card-pool filters", () => {
     const snapshot = {
       formatProfileId: CLASSIC_PROTEUS_DECK_FORMAT_PROFILE_ID,
       cards: [
-        { cardId: "onr_classic_041_networking", quantity: 1 },
-        { cardId: "onr_proteus_047_credit-consolidation", quantity: 1 },
+        { cardId: 45, quantity: 1 },
+        { cardId: 105, quantity: 1 },
       ],
     };
 
-    expect(snapshotAllowedForMatchCardPool(snapshot, "originalset")).toBe(
+    expect(snapshotAllowedForMatchCardPool(snapshot, "originalset", cardSetsById)).toBe(
       false,
     );
     expect(
-      snapshotAllowedForMatchCardPool(snapshot, "originalset_proteus"),
+      snapshotAllowedForMatchCardPool(snapshot, "originalset_proteus", cardSetsById),
     ).toBe(false);
     expect(
-      snapshotAllowedForMatchCardPool(snapshot, "originalset_classic_proteus"),
+      snapshotAllowedForMatchCardPool(snapshot, "originalset_classic_proteus", cardSetsById),
     ).toBe(true);
   });
 });

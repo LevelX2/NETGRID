@@ -127,9 +127,9 @@ import {
 } from "./action-board-ui";
 
 const TEST_CARD_PRESENTATIONS = {
-  simple_fracter: { title: "Simple Fracter", type: "program" },
-  onr_proteus_091_lockjaw: { title: "Lockjaw", type: "program" },
-  onr_v1_036_jackhammer: { title: "Jackhammer", type: "program" },
+  597: { title: "Simple Fracter", type: "program" },
+  149: { title: "Lockjaw", type: "program" },
+  248: { title: "Jackhammer", type: "program" },
 } as const;
 
 const actionButtonLabel: typeof actionButtonLabelWithoutCatalog = (action) =>
@@ -409,7 +409,7 @@ describe("localized action presentation", () => {
       "install_card",
       "runner_card_1",
       "Simple Fracter installieren",
-      { cardDefinitionId: "simple_fracter" },
+      { cardDefinitionId: 597 },
     );
 
     expect(
@@ -507,9 +507,9 @@ describe("localized action presentation", () => {
       "Lockjaw: Jackhammer +2",
       {
         cardId: "lockjaw_1",
-        sourceCardDefinitionId: "onr_proteus_091_lockjaw",
+        sourceCardDefinitionId: 149,
         targetCardId: "jackhammer_1",
-        targetCardDefinitionId: "onr_v1_036_jackhammer",
+        targetCardDefinitionId: 248,
         runnerAbility: "boost_icebreaker_for_run",
         strengthBoostAmount: 2,
       },
@@ -656,12 +656,12 @@ describe("localized action presentation", () => {
       for (const sourceTitle of ["Dr. Dreff", "Jenny Jett"]) {
         const pendingChoice = {
           ...choice("corp"),
-          sourceCardDefinitionId: "source_definition",
+          sourceCardDefinitionId: 11006,
           presentationKey: "delayed_success" as const,
         };
         const before = structuredClone(pendingChoice);
         const label = choicePromptPresentationLabel(pendingChoice, locale, {
-          source_definition: { title: sourceTitle },
+          11006: { title: sourceTitle },
         });
         expect(label).toBe(
           locale === "de"
@@ -1126,7 +1126,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         serverId: "rd",
         bonusRunNoClick: true,
-        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        bonusRunSource: 335,
       },
       "runner_action.main",
     );
@@ -1137,7 +1137,7 @@ describe("V1.0.5 action board UI helpers", () => {
       "Bodyweight Data Crèche: keinen Bonus-Run starten",
       {
         cardId: "bodyweight_1",
-        sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+        sourceDefinitionId: 335,
         runnerAbility: "decline_successful_run_extra_run",
         successfulRunExtraRunDecision: "decline",
       },
@@ -1210,7 +1210,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "ice_1",
         oliviaSalazarRezSourceCardId: "olivia_1",
-        oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+        oliviaSalazarRezSourceDefinitionId: 575,
         oliviaSalazarRezCostBase: 4,
         oliviaSalazarTemporaryDerez: true,
         rezCostPaid: 2,
@@ -1826,7 +1826,7 @@ describe("V1.0.5 action board UI helpers", () => {
   it("marks ICE in a server with rezzed Tesseract Fort Construction", () => {
     const tesseract = {
       ...card("tesseract_1", "Tesseract Fort Construction", "upgrade", true),
-      definitionId: "onr_v1_370_tesseract-fort-construction",
+      definitionId: 582,
     };
     const server = {
       id: "remote_1" as const,
@@ -2605,13 +2605,13 @@ describe("V1.0.5 action board UI helpers", () => {
       known: false,
       rezzed: false,
       title: "Simple Upgrade",
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       type: "upgrade",
       trashCost: 4,
     };
-    const rezzedNode = card("node_1", "Simple Economy Asset", "asset", true);
+    const rezzedNode = card(11007, "Simple Economy Asset", "asset", true);
     const exposedUnrezzedUpgrade = card(
-      "exposed_upgrade",
+      11008,
       "Simple Upgrade",
       "upgrade",
       false,
@@ -2621,7 +2621,7 @@ describe("V1.0.5 action board UI helpers", () => {
       known: false,
       rezzed: false,
       title: "Simple Upgrade",
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       type: "upgrade",
       trashCost: 4,
     };
@@ -2635,21 +2635,21 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(runnerCards.map((entry) => entry.instanceId)).toEqual([
       "upgrade_a",
-      "node_1",
-      "exposed_upgrade",
+      "11007",
+      "11008",
       "upgrade_b",
     ]);
     expect(runnerCards[1]).toMatchObject({
       known: true,
       title: "Simple Economy Asset",
-      definitionId: "node_1",
+      definitionId: 11007,
       type: "asset",
       rezzed: true,
     });
     expect(runnerCards[2]).toMatchObject({
       known: true,
       title: "Simple Upgrade",
-      definitionId: "exposed_upgrade",
+      definitionId: 11008,
       type: "upgrade",
       rezzed: false,
     });
@@ -3852,7 +3852,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("does not use legacy stored-credit card tables when CounterDisplays are missing", () => {
     const brokerRawOnly: VisibleCard = {
       ...card("broker_legacy", "Broker", "resource"),
-      definitionId: "onr_v1_154_broker",
+      definitionId: 366,
       counters: { bit: 3 },
     };
     const unknownRawOnly: VisibleCard = {
@@ -3867,7 +3867,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("does not select raw counters for board rendering when CounterDisplays are missing", () => {
     const rawOnly: VisibleCard = {
       ...card("broker_raw_only", "Broker", "resource"),
-      definitionId: "onr_v1_154_broker",
+      definitionId: 366,
       counters: { bit: 3, recurring_credit: 2, shell: 1 },
     };
     const displayCard: VisibleCard = {
@@ -3927,17 +3927,17 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("maps CounterDisplay special counters to compact badge models", () => {
     const rawArmoredFridge: VisibleCard = {
       ...card("fridge_1", "Armored Fridge", "hardware"),
-      definitionId: "onr_v1_121_armored-fridge",
+      definitionId: 333,
       counters: { power: 7 },
     };
     const rawEmptyArmoredFridge: VisibleCard = {
       ...card("fridge_1", "Armored Fridge", "hardware"),
-      definitionId: "onr_v1_121_armored-fridge",
+      definitionId: 333,
       counters: { power: 0 },
     };
     const rawDataRaven: VisibleCard = {
       ...card("data_raven_1", "Data Raven", "ice"),
-      definitionId: "onr_v1_236_data-raven",
+      definitionId: 448,
       counters: { power: 2 },
     };
     const rawUnknownPowerCard: VisibleCard = {
@@ -5250,7 +5250,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         shellCounterAmount: 2,
       },
     );
@@ -5263,7 +5263,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "remove_shell_counter",
         targetCardId: "simple_fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         counterType: "shell",
         removeCounterAmount: 1,
         remainingCountersBefore: 2,
@@ -5303,7 +5303,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
       },
     );
     const decoder = legalAction(
@@ -5315,7 +5315,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_decoder_1",
-        targetCardDefinitionId: "simple_decoder",
+        targetCardDefinitionId: 591,
       },
     );
 
@@ -5335,7 +5335,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "remove_shell_counter",
         targetCardId: "simple_fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         counterType: "shell",
         removeCounterAmount: 1,
         remainingCountersBefore: 2,
@@ -5350,7 +5350,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "remove_shell_counter",
         targetCardId: "simple_fracter_2",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         counterType: "shell",
         removeCounterAmount: 1,
         remainingCountersBefore: 4,
@@ -5405,7 +5405,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "junkyard_1",
         resourceAbility: "junkyard_bbs_return_top_heap",
         targetCardId: "fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         sourceZone: "heap",
         destinationZone: "grip",
       },
@@ -5740,12 +5740,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("binds break-action tooltips to the visible effective subroutine texts", () => {
     const encounteredIce: VisibleCard = {
       ...card("ice_1", "Bolter Cluster", "ice"),
-      definitionId: "onr_v1_224_bolter-cluster",
+      definitionId: 436,
       rulesText:
         "[Subroutine] Verursache 4 Netzwerkschaden.\n[Subroutine] Der Runner kann keine Subroutinen des nächsten ICE brechen.",
       effectiveRunQuote: {
         iceInstanceId: "ice_1",
-        iceDefinitionId: "onr_v1_224_bolter-cluster",
+        iceDefinitionId: 436,
         effectiveStrength: 4,
         subroutines: [
           { id: "bolter.damage", type: "do_damage", amount: 4 },
@@ -6559,7 +6559,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "HQ",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       title: "Simple Economy Operation",
     });
     const runCleanup = publicEvent("evt_cleanup", "action", {
@@ -6583,13 +6583,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
-      cardDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      cardDefinitionId: 115,
       title: "Doppelganger Antibody",
     });
     const ambushPayment = publicEvent("evt_ambush", "action", {
       actionType: "resolve_choice",
       actor: "corp",
-      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushDefinitionId: 115,
       ambushPaidCost: 2,
     });
 
@@ -6603,7 +6603,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       title: "Simple Economy Operation",
     });
     const runnerEndTurn = {
@@ -6627,7 +6627,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_upgrade",
+      cardDefinitionId: 606,
       title: "Simple Upgrade",
     });
     const declineTrash = {
@@ -6664,7 +6664,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       title: "Simple Agenda",
     });
     const runnerEndTurn = {
@@ -6693,7 +6693,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       title: "Simple Agenda",
     });
     const redactedRdAccess = publicEvent("evt_rd_access", "action", {
@@ -6713,7 +6713,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_ambush",
+      cardDefinitionId: 11009,
       title: "Simple Ambush",
     });
     const sameActionEffect = {
@@ -6734,7 +6734,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "resolve_choice",
       actor: "runner",
       publicRevealKind: "expose",
-      publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+      publicRevealDefinitionIds: "591,597",
       exposedServerLabels: "HQ,R&D",
     });
     const followUp = {
@@ -6749,7 +6749,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actor: "runner",
       publicRevealKind: "expose",
       hiddenZoneAction: "approach_ice_expose",
-      publicRevealDefinitionId: "simple_barrier_ice",
+      publicRevealDefinitionId: 589,
     });
     const smarteyeFinish = publicEvent("evt_smarteye_finish", "action", {
       actionType: "trigger_ability",
@@ -7043,16 +7043,16 @@ function legalAction(
 }
 
 function card(
-  instanceId: string,
+  instanceId: string | number,
   title: string,
   type: NonNullable<VisibleCard["type"]>,
   rezzed = true,
 ): VisibleCard {
   return {
-    instanceId,
+    instanceId: String(instanceId),
     known: true,
     title,
-    definitionId: instanceId,
+    ...(typeof instanceId === "number" ? { definitionId: instanceId } : {}),
     type,
     rezzed,
   };

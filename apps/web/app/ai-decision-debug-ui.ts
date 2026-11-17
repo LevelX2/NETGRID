@@ -1,3 +1,4 @@
+import { isCardDefinitionId } from "@netgrid/shared";
 export type AiDecisionDebugRow = [string, string];
 
 export type AiDecisionDebugDeckStrategySummary = {
@@ -480,8 +481,8 @@ function aiDecisionDebugCardLabel(
   if (!entry) return "";
   return typeof entry.title === "string"
     ? entry.title
-    : typeof entry.definitionId === "string"
-      ? entry.definitionId
+    : isCardDefinitionId(entry.definitionId)
+      ? String(entry.definitionId)
       : "";
 }
 

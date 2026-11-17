@@ -1,3 +1,4 @@
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import path from "node:path";
 import {
   CardImageStore,
@@ -32,7 +33,7 @@ const LOCALIZED_DE_IMAGE_DIR = path.join(
   "de",
 );
 export type CardImageLookupResult = {
-  cardId: string;
+  cardId: CardDefinitionId;
   printingId: string;
   kind: "personal" | "generated" | "localized_de";
   relativePath: string;
@@ -49,10 +50,12 @@ export type CardImageLookupOptions = {
 };
 
 export async function lookupCardImage(
-  cardId: string,
+  cardIdParam: string,
   requestUrl: string,
   options: CardImageLookupOptions = {},
 ): Promise<CardImageLookupResult | null> {
+  const cardId = Number(cardIdParam);
+  if (!isCardDefinitionId(cardId) || String(cardId) !== cardIdParam) return null;
   const printingId = PRINTING_IDS_BY_CARD_ID.get(cardId);
   if (printingId === undefined) return null;
   const request = safeRequestUrl(requestUrl);
@@ -106,7 +109,7 @@ export function imageDir(): string {
 }
 
 function imageResult(
-  cardId: string,
+  cardId: CardDefinitionId,
   printingId: string,
   kind: "generated" | "localized_de",
   relativePath: string,

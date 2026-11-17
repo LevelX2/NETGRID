@@ -44,7 +44,7 @@ describe("semantic chronicle localization", () => {
     (locale) => {
       const t = translate(locale);
       const result = event("resolve_choice", {
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
         autoPassChosenIce: true,
         chosenIcePosition: 0,
         serverId: "rd",
@@ -94,7 +94,7 @@ describe("semantic chronicle localization", () => {
               visibility: "public",
               side: "runner",
               cardTitle: "Public target",
-              cardDefinitionId: "public_target",
+              cardDefinitionId: 11010,
               sourceTitle: "Public source",
             },
           ],
@@ -107,7 +107,7 @@ describe("semantic chronicle localization", () => {
         );
         expect(item).toMatchObject({
           cardTitle: "Public target",
-          cardDefinitionId: "public_target",
+          cardDefinitionId: 11010,
         });
         expect(item!.title).toContain("Public target");
         if (kind === "rez_card")
@@ -139,17 +139,17 @@ describe("semantic chronicle localization", () => {
       const outcome = event("resolve_choice", {
         hiddenZoneAction: "hidden_stack_program_install",
         hiddenZoneBarrier: true,
-        sourceDefinitionId: "program_search",
+        sourceDefinitionId: 11011,
         publicRevealKind: "reveal",
-        publicRevealDefinitionId: "selected_program",
+        publicRevealDefinitionId: 11012,
         searchDestination: "runner_rig",
         installed: true,
       });
       const item = formatChronicleEvent(outcome, "corp", {
         translate: translate(locale),
         cardPresentationsById: {
-          program_search: { title: "Program Search" },
-          selected_program: { title: "Selected Program" },
+          11011: { title: "Program Search" },
+          11012: { title: "Selected Program" },
         },
       });
       expect(item.title).toContain("Program Search");
@@ -161,7 +161,7 @@ describe("semantic chronicle localization", () => {
         searchReveal: "public",
         searchDestination: "install_program",
         installSucceeded: true,
-        cardDefinitionId: "selected_program",
+        cardDefinitionId: 11012,
         title: "Selected Program",
       });
       const summary = formatChronicleEvent(search, "corp", {
@@ -202,7 +202,7 @@ describe("semantic chronicle localization", () => {
           for (const noIceTarget of correct ? [false] : [false, true]) {
             const result = event("resolve_choice", {
               actor: "corp",
-              sourceDefinitionId: "onr_v1_111_social-engineering",
+              sourceDefinitionId: 323,
               hiddenZoneBarrier: true,
               amounts: {
                 secretHiddenAmountRevealed: 3,
@@ -240,7 +240,7 @@ describe("semantic chronicle localization", () => {
             expect(item).toMatchObject({
               visibility: "public",
               cardTitle: "Social Engineering",
-              cardDefinitionId: "onr_v1_111_social-engineering",
+              cardDefinitionId: 323,
             });
             expect(item.title).not.toMatch(
               /Auswahl aufgelöst|resolved a choice|résolu un choix/,
@@ -253,7 +253,7 @@ describe("semantic chronicle localization", () => {
       const result = formatChronicleEvent(
         event("resolve_choice", {
           actor: "corp",
-          sourceDefinitionId: "onr_v1_111_social-engineering",
+          sourceDefinitionId: 323,
           amounts: { secretHiddenAmountRevealed: 3, secretGuessAmount: 4 },
           targets: { secretSpendGuessRunGuessCorrect: false },
         }),
@@ -275,7 +275,7 @@ describe("semantic chronicle localization", () => {
     (locale) => {
       const t = translate(locale);
       const hidden = event("resolve_choice", {
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
         hiddenZoneBarrier: true,
         targets: { secretSpendGuessRunStep: "runner_hidden_amount_selected" },
       });
@@ -288,7 +288,7 @@ describe("semantic chronicle localization", () => {
         );
         expect(hiddenItem.title).not.toMatch(/\d/);
         const target = event("resolve_choice", {
-          sourceDefinitionId: "onr_v1_111_social-engineering",
+          sourceDefinitionId: 323,
           hiddenZoneBarrier: true,
           serverId: "hq",
           amounts: { chosenIcePosition: 0 },
@@ -311,7 +311,7 @@ describe("semantic chronicle localization", () => {
       }
       const incomplete = formatChronicleEvent(
         event("resolve_choice", {
-          sourceDefinitionId: "onr_v1_111_social-engineering",
+          sourceDefinitionId: 323,
           targets: { secretSpendGuessRunGuessCorrect: true },
         }),
         "corp",
@@ -329,7 +329,7 @@ describe("semantic chronicle localization", () => {
         for (const runnerEventRun of [true, false, undefined]) {
           const item = formatChronicleEvent(
             event("play_event", {
-              cardDefinitionId: "onr_v1_084_edited-shipping-manifests",
+              cardDefinitionId: 296,
               title: "Edited Shipping Manifests",
               serverId: "hq",
               aiReasonCode: "plan_bound_runner_run",
@@ -368,7 +368,7 @@ describe("semantic chronicle localization", () => {
             traceValue: 1,
             runnerStrength: 1,
             baseLinkValue: 1,
-            traceBaseLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
+            traceBaseLinkSourceDefinitionId: 215,
             traceSuccessful,
           });
           const before = structuredClone(result);
@@ -418,17 +418,17 @@ describe("semantic chronicle localization", () => {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "successful_run_temporary_encounter",
-        sourceDefinitionId: "onr_v1_358_dr-dreff",
+        sourceDefinitionId: 570,
         publicRevealKind: "reveal",
-        publicRevealDefinitionId: "onr_proteus_016_coyote",
+        publicRevealDefinitionId: 74,
         rezCostPaid: 0,
         aiReasonCode: "plan_bound_corp_delayed_success_choice",
       });
       const context = {
         translate: translate(locale),
         cardPresentationsById: {
-          "onr_v1_358_dr-dreff": { title: "Dr. Dreff", type: "upgrade" },
-          onr_proteus_016_coyote: { title: "Coyote", type: "ice" },
+          570: { title: "Dr. Dreff", type: "upgrade" },
+          74: { title: "Coyote", type: "ice" },
         },
       };
       for (const side of ["corp", "runner"] as const) {
@@ -437,7 +437,7 @@ describe("semantic chronicle localization", () => {
           category: "run",
           visibility: "public",
           importance: "important",
-          cardDefinitionId: "onr_v1_358_dr-dreff",
+          cardDefinitionId: 570,
           chips: expect.arrayContaining(["Dr. Dreff", "Coyote"]),
         });
         expect(item.title).toContain("Dr. Dreff");
@@ -456,7 +456,7 @@ describe("semantic chronicle localization", () => {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "successful_run_intervention_declined",
-        sourceDefinitionId: "onr_v1_358_dr-dreff",
+        sourceDefinitionId: 570,
       });
       const declineItem = formatChronicleEvent(declined, "runner", context);
       expect(declineItem).toMatchObject({
@@ -472,6 +472,7 @@ describe("semantic chronicle localization", () => {
     "names each Shell Traders counter target and keeps its card link in %s",
     (locale) => {
       const targets = ["Simple Fracter", "Simple Decoder"];
+      const targetDefinitionIds = [597, 591];
       const resolvedEffects = targets.map((cardTitle, index) => ({
         effectId: `shell-removal-${index}`,
         kind: "counter_change",
@@ -482,9 +483,9 @@ describe("semantic chronicle localization", () => {
         counterType: "shell",
         removedCounterAmount: 1,
         remainingCounters: 1 - index,
-        sourceDefinitionId: "onr_v1_176_the-shell-traders",
+        sourceDefinitionId: 388,
         sourceTitle: "The Shell Traders",
-        cardDefinitionId: `target-${index}`,
+        cardDefinitionId: targetDefinitionIds[index],
         cardTitle,
       }));
       const removal = event("end_turn", { actor: "corp", resolvedEffects });
@@ -505,7 +506,7 @@ describe("semantic chronicle localization", () => {
           expect(item).toMatchObject({
             title: expected,
             category: "card",
-            cardDefinitionId: `target-${index}`,
+            cardDefinitionId: targetDefinitionIds[index],
             cardTitle: targets[index],
             visibility: "public",
           });
@@ -529,7 +530,7 @@ describe("semantic chronicle localization", () => {
       expect(JSON.stringify(hidden)).not.toContain("The Shell Traders");
       for (const target of targets)
         expect(JSON.stringify(hidden)).not.toContain(target);
-      expect(JSON.stringify(hidden)).not.toContain("target-");
+      expect(hidden.every((item) => item.cardDefinitionId === undefined)).toBe(true);
     },
   );
 
@@ -545,7 +546,7 @@ describe("semantic chronicle localization", () => {
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
             subroutineIndex: 0,
             subroutineType: "end_the_run_and_trash_source_at_end_of_turn",
@@ -569,7 +570,7 @@ describe("semantic chronicle localization", () => {
           title: expected,
           category: "run",
           importance: "important",
-          cardDefinitionId: "onr_classic_013_puzzle",
+          cardDefinitionId: 17,
         });
         expect(
           formatChronicleEvent(ended, side, { translate: translate(locale) })
@@ -588,7 +589,7 @@ describe("semantic chronicle localization", () => {
         translate(locale),
       );
       expect(JSON.stringify(hidden)).not.toContain("Puzzle");
-      expect(JSON.stringify(hidden)).not.toContain("onr_classic_013_puzzle");
+      expect(JSON.stringify(hidden)).not.toContain(17);
     },
   );
 
@@ -596,12 +597,12 @@ describe("semantic chronicle localization", () => {
     "reports each actual Puzzle trash at turn end in %s",
     (locale) => {
       const presentations = {
-        onr_classic_013_puzzle: { title: "Puzzle", type: "ice" },
+        17: { title: "Puzzle", type: "ice" },
       };
       const ended = event("end_turn", {
         corpInstalledCardsTrashedAtTurnEnd: 2,
         corpInstalledCardTrashAtTurnEndDefinitionIds:
-          "onr_classic_013_puzzle,onr_classic_013_puzzle",
+          "17,17",
       });
       const expected = {
         de: "Puzzle wurde am Ende des Zuges getrasht.",
@@ -622,7 +623,7 @@ describe("semantic chronicle localization", () => {
           category: "card",
           visibility: "public",
           icon: "discard",
-          cardDefinitionId: "onr_classic_013_puzzle",
+          cardDefinitionId: 17,
           cardTitle: "Puzzle",
         });
       expect(
@@ -687,7 +688,7 @@ describe("semantic chronicle localization", () => {
         actor: "corp",
         runApproachRootRezPass: true,
         runStartBypassAutoPassedIce: true,
-        runStartBypassPassedIceDefinitionId: "onr_v1_261_quandary",
+        runStartBypassPassedIceDefinitionId: 473,
         passedIcePosition: 3,
         serverLabel: "Remote 1",
       });
@@ -695,7 +696,7 @@ describe("semantic chronicle localization", () => {
         bypass,
         "corp",
         {
-          onr_v1_261_quandary: { title: "Quandary", type: "ice" },
+          473: { title: "Quandary", type: "ice" },
         },
         translate(locale),
       );
@@ -717,7 +718,7 @@ describe("semantic chronicle localization", () => {
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_proteus_032_misleading-access-menus",
+            sourceDefinitionId: 90,
             sourceTitle: "Misleading Access Menus",
             subroutineIndex: 0,
             subroutineType: "end_the_run_unless_runner_pays",
@@ -791,10 +792,10 @@ describe("semantic chronicle localization", () => {
 
   it("uses public card semantics without changing technical identity", () => {
     const installed = event("install_card", {
-      cardDefinitionId: "public_card",
+      cardDefinitionId: 11013,
     });
     const presentations = {
-      public_card: { title: "Public Card", type: "program" },
+      11013: { title: "Public Card", type: "program" },
     };
     const de = formatChronicleEvent(installed, "runner", {
       translate: translate("de"),
@@ -805,8 +806,8 @@ describe("semantic chronicle localization", () => {
       cardPresentationsById: presentations,
     });
 
-    expect(de.cardDefinitionId).toBe("public_card");
-    expect(en.cardDefinitionId).toBe("public_card");
+    expect(de.cardDefinitionId).toBe(11013);
+    expect(en.cardDefinitionId).toBe(11013);
     expect(de.title).toContain("Public Card");
     expect(en.title).toContain("Public Card");
   });
@@ -822,7 +823,7 @@ describe("semantic chronicle localization", () => {
           side: "corp",
           amount: 1,
           reason: "installed_economy_start_of_corp_turn",
-          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceDefinitionId: 541,
           sourceCardInstanceId: "investment_firm_1",
           sourceTitle: "Investment Firm",
         },
@@ -836,7 +837,7 @@ describe("semantic chronicle localization", () => {
           counterType: "recurring_credit",
           removedCounterAmount: 1,
           remainingCounters: 1,
-          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceDefinitionId: 541,
           sourceCardInstanceId: "investment_firm_1",
           sourceTitle: "Investment Firm",
         },
@@ -875,12 +876,12 @@ describe("semantic chronicle localization", () => {
       gainedCredits: 1,
       karlSuccessfulRunCreditGain: 1,
       karlSuccessfulRunSourceDefinitionIds:
-        "onr_v1_166_karl-de-veres-corporate-stooge",
+        "378",
       runnerCreditsAfter: 6,
       aiReasonCode: "plan_first.runner.pressure_central",
     });
     const presentations = {
-      "onr_v1_166_karl-de-veres-corporate-stooge": {
+      378: {
         title: "Karl de Veres, Corporate Stooge",
         type: "resource" as const,
       },
@@ -906,7 +907,7 @@ describe("semantic chronicle localization", () => {
       importance: "important",
       visibility: "public",
       actor: "runner",
-      cardDefinitionId: "onr_v1_166_karl-de-veres-corporate-stooge",
+      cardDefinitionId: 378,
       cardTitle: "Karl de Veres, Corporate Stooge",
     });
     expect(de?.chips).toContain("+1 Credit");
@@ -919,13 +920,13 @@ describe("semantic chronicle localization", () => {
     "distinguishes Broker loading from taking all hosted credits in %s",
     (locale) => {
       const presentations = {
-        onr_v1_154_broker: { title: "Broker", type: "resource" as const },
+        366: { title: "Broker", type: "resource" as const },
       };
       for (const take of [false, true]) {
         const amount = take ? 6 : 3;
         const broker = event("activated_card_ability", {
           actor: "runner",
-          cardDefinitionId: "onr_v1_154_broker",
+          cardDefinitionId: 366,
           cardImplementationAbility: "activated",
           ...(take
             ? { hostedCreditsTaken: amount, gainedCredits: amount }
@@ -942,7 +943,7 @@ describe("semantic chronicle localization", () => {
               side: "runner",
               amount,
               remainingCounters: take ? 0 : 6,
-              sourceDefinitionId: "onr_v1_154_broker",
+              sourceDefinitionId: 366,
               sourceTitle: "Broker",
               reason: "card_resolver",
             },
@@ -984,7 +985,7 @@ describe("semantic chronicle localization", () => {
   it("shows credits taken with Short-Term Contract instead of a generic ability", () => {
     const contract = event("activated_card_ability", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardDefinitionId: 390,
       cardImplementationAbility: "activated",
       hostedCreditsTaken: 2,
       hostedCreditsAfter: 10,
@@ -1000,14 +1001,14 @@ describe("semantic chronicle localization", () => {
           side: "runner",
           amount: 2,
           remainingCounters: 10,
-          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceDefinitionId: 390,
           sourceTitle: "Short-Term Contract",
           reason: "card_resolver",
         },
       ],
     });
     const presentations = {
-      "onr_v1_178_short-term-contract": {
+      390: {
         title: "Short-Term Contract",
         type: "resource" as const,
       },
@@ -1032,7 +1033,7 @@ describe("semantic chronicle localization", () => {
       title: "Die Runner-KI: 2 Credits von Short-Term Contract erhalten.",
       category: "economy",
       visibility: "public",
-      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardDefinitionId: 390,
       cardTitle: "Short-Term Contract",
     });
     expect(de.chips).toContain("Short-Term Contract");
@@ -1057,7 +1058,7 @@ describe("semantic chronicle localization", () => {
     const traceResult = event("resolve_choice", {
       actor: "runner",
       traceStep: "runner_bid",
-      sourceDefinitionId: "onr_proteus_050_manhunt",
+      sourceDefinitionId: 108,
       sourceTitle: "Manhunt",
       corpBid: 3,
       runnerBid: 0,
@@ -1145,7 +1146,7 @@ describe("semantic chronicle localization", () => {
       actor: "runner",
       traceRulesProfile: "classic_blind",
       traceBidsRevealed: true,
-      sourceDefinitionId: "onr_v1_221_asp",
+      sourceDefinitionId: 433,
       traceStep: "runner_bid",
       corpBid: 2,
       traceValue: 2,
@@ -1212,7 +1213,7 @@ describe("semantic chronicle localization", () => {
           removedCounterAmount: 1,
           remainingCounters: 2,
           reason: "start_of_turn",
-          sourceDefinitionId: "onr_proteus_150_streetware-distributor",
+          sourceDefinitionId: 208,
           sourceTitle: "Streetware Distributor",
         },
       ],
@@ -1236,7 +1237,7 @@ describe("semantic chronicle localization", () => {
       category: "economy",
       visibility: "public",
       actor: "runner",
-      cardDefinitionId: "onr_proteus_150_streetware-distributor",
+      cardDefinitionId: 208,
       cardTitle: "Streetware Distributor",
     });
     expect(englishItem?.title).toBe(
@@ -1290,7 +1291,7 @@ describe("semantic chronicle localization", () => {
       redactedKind: "installed_card",
       serverId: "remote_2",
       installPlacement: "ice",
-      cardDefinitionId: "secret_ice",
+      cardDefinitionId: 11014,
     });
     const hiddenRoot = event("install_card", {
       actor: "corp",
@@ -1298,11 +1299,11 @@ describe("semantic chronicle localization", () => {
       redactedKind: "installed_card",
       serverId: "hq",
       installPlacement: "root",
-      cardDefinitionId: "secret_agenda_or_asset_or_upgrade",
+      cardDefinitionId: 11015,
     });
     const presentations = {
-      secret_ice: { title: "Secret ICE", type: "ice" },
-      secret_agenda_or_asset_or_upgrade: {
+      11014: { title: "Secret ICE", type: "ice" },
+      11015: {
         title: "Secret Root Card",
         type: "agenda",
       },
@@ -1372,22 +1373,22 @@ describe("semantic chronicle localization", () => {
       actor: "runner",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_search_stack_to_grip",
-      sourceDefinitionId: "temple_microcode_outlet",
+      sourceDefinitionId: 11016,
       selectedCount: 1,
       movedCardCount: 1,
       searchDestination: "runner_grip",
       publicRevealKind: "reveal",
-      publicRevealDefinitionId: "codecracker",
-      cardDefinitionId: "codecracker",
+      publicRevealDefinitionId: 11017,
+      cardDefinitionId: 11017,
       shuffled: true,
       aiReasonCode: "runner_stack_search_program",
     });
     const presentations = {
-      temple_microcode_outlet: {
+      11016: {
         title: "Temple Microcode Outlet",
         type: "event",
       },
-      codecracker: { title: "Codecracker", type: "program" },
+      11017: { title: "Codecracker", type: "program" },
     };
 
     const de = formatChronicleEvent(templeSearch, "corp", {
@@ -1405,7 +1406,7 @@ describe("semantic chronicle localization", () => {
       category: "card",
       importance: "important",
       visibility: "public",
-      cardDefinitionId: "codecracker",
+      cardDefinitionId: 11017,
       cardTitle: "Codecracker",
     });
     expect(de.chips).toContain("Temple Microcode Outlet");
@@ -1420,9 +1421,9 @@ describe("semantic chronicle localization", () => {
 
   it("describes the public steps and lethal access effect of the R&D run", () => {
     const presentations = {
-      krash: { title: "Krash", type: "program" },
-      brain_wash: { title: "Brain Wash", type: "ice" },
-      fetal_ai: { title: "Fetal AI", type: "agenda" },
+      11018: { title: "Krash", type: "program" },
+      11019: { title: "Brain Wash", type: "ice" },
+      11020: { title: "Fetal AI", type: "agenda" },
     };
     const context = {
       translate: translate("de"),
@@ -1431,7 +1432,7 @@ describe("semantic chronicle localization", () => {
     };
     const pump = formatChronicleEvent(
       event("pump_breaker", {
-        cardDefinitionId: "krash",
+        cardDefinitionId: 11018,
         pumpStrengthAmount: 1,
       }),
       "runner",
@@ -1439,8 +1440,8 @@ describe("semantic chronicle localization", () => {
     );
     const broken = formatChronicleEvent(
       event("break_subroutine", {
-        cardDefinitionId: "krash",
-        targetIceDefinitionId: "brain_wash",
+        cardDefinitionId: 11018,
+        targetIceDefinitionId: 11019,
         targetIceTitle: "Brain Wash",
         subroutineIndex: 0,
       }),
@@ -1451,7 +1452,7 @@ describe("semantic chronicle localization", () => {
       event("continue_run", {
         encounterContinue: true,
         unbrokenSubroutineCount: 0,
-        sourceDefinitionId: "brain_wash",
+        sourceDefinitionId: 11019,
       }),
       "runner",
       context,
@@ -1463,7 +1464,7 @@ describe("semantic chronicle localization", () => {
     );
     const access = event("access_card", {
       serverLabel: "R&D",
-      cardDefinitionId: "fetal_ai",
+      cardDefinitionId: 11020,
       title: "Fetal AI",
       damageResolved: true,
       damageType: "net",
@@ -1471,7 +1472,7 @@ describe("semantic chronicle localization", () => {
       flatline: true,
       gameEndReason: "flatline",
       publicRevealKind: "reveal",
-      publicRevealDefinitionId: "fetal_ai",
+      publicRevealDefinitionId: 11020,
       resolvedEffects: [
         {
           effectId: "fetal-ai-damage",
@@ -1481,7 +1482,7 @@ describe("semantic chronicle localization", () => {
           amount: 2,
           damageType: "net",
           reason: "access_effect",
-          sourceDefinitionId: "fetal_ai",
+          sourceDefinitionId: 11020,
           sourceTitle: "Fetal AI",
         },
       ],
@@ -1533,7 +1534,7 @@ describe("semantic chronicle localization", () => {
           visibility: "public",
           side: "runner",
           reason: "ice_subroutine",
-          sourceDefinitionId: "snowbank",
+          sourceDefinitionId: 11021,
           sourceTitle: "Snowbank",
           subroutineIndex: 0,
           subroutineType: "end_the_run_unless_runner_pays",
@@ -1561,7 +1562,7 @@ describe("semantic chronicle localization", () => {
       groupLabel: "Run auf einen Server",
       importance: "normal",
       visibility: "public",
-      cardDefinitionId: "snowbank",
+      cardDefinitionId: 11021,
       cardTitle: "Snowbank",
     });
     expect(en?.title).toBe("The Runner AI: paid 1 credit to pass Snowbank.");
@@ -1582,7 +1583,7 @@ describe("semantic chronicle localization", () => {
           visibility: "public",
           side: "runner",
           reason: "ice_subroutine",
-          sourceDefinitionId: "onr_proteus_017_credit-blocks",
+          sourceDefinitionId: 75,
           sourceTitle: "Credit Blocks",
           subroutineIndex: 0,
           subroutineType: "end_the_run",
@@ -1615,7 +1616,7 @@ describe("semantic chronicle localization", () => {
       category: "run",
       importance: "important",
       groupLabel: "Run auf R&D",
-      cardDefinitionId: "onr_proteus_017_credit-blocks",
+      cardDefinitionId: 75,
       cardTitle: "Credit Blocks",
     });
     expect(de?.chips).toEqual(
@@ -1637,7 +1638,7 @@ describe("semantic chronicle localization", () => {
       encounterContinue: true,
       encounterWillEndRun: true,
       unbrokenSubroutineCount: 1,
-      sourceDefinitionId: "test_kipa",
+      sourceDefinitionId: 11022,
       resolvedEffects: [
         {
           effectId: "subroutine_1",
@@ -1645,7 +1646,7 @@ describe("semantic chronicle localization", () => {
           visibility: "public",
           side: "runner",
           reason: "ice_subroutine",
-          sourceDefinitionId: "test_kipa",
+          sourceDefinitionId: 11022,
           sourceTitle: "Kipa",
           subroutineIndex: 0,
           subroutineType: "end_the_run",
@@ -1683,7 +1684,7 @@ describe("semantic chronicle localization", () => {
         accessIndex: 0,
         effectiveAccessCount: 2,
         serverLabel: "R&D",
-        cardDefinitionId: "project_babylon",
+        cardDefinitionId: 11023,
         title: "Project Babylon",
         redactedKind: "hidden_zone",
         hiddenZoneBarrier: true,
@@ -1697,7 +1698,7 @@ describe("semantic chronicle localization", () => {
         breachId: "breach_rd",
         accessIndex: 0,
         serverLabel: "R&D",
-        cardDefinitionId: "project_babylon",
+        cardDefinitionId: 11023,
         title: "Project Babylon",
         redactedKind: "hidden_zone",
         hiddenZoneBarrier: true,
@@ -1712,7 +1713,7 @@ describe("semantic chronicle localization", () => {
         accessIndex: 1,
         effectiveAccessCount: 2,
         serverLabel: "R&D",
-        cardDefinitionId: "pad_campaign",
+        cardDefinitionId: 11024,
         title: "PAD Campaign",
         redactedKind: "hidden_zone",
         hiddenZoneBarrier: true,
@@ -1726,7 +1727,7 @@ describe("semantic chronicle localization", () => {
         breachId: "breach_rd",
         accessIndex: 1,
         serverLabel: "R&D",
-        cardDefinitionId: "pad_campaign",
+        cardDefinitionId: 11024,
         title: "PAD Campaign",
         redactedKind: "hidden_zone",
         hiddenZoneBarrier: true,
@@ -1766,7 +1767,7 @@ describe("semantic chronicle localization", () => {
   it("names damage from a publicly identified installed access card", () => {
     const access = event("access_card", {
       serverLabel: "Remote 1",
-      cardDefinitionId: "fetal_ai",
+      cardDefinitionId: 11020,
       title: "Fetal AI",
       damageResolved: true,
       damageType: "net",
@@ -1781,7 +1782,7 @@ describe("semantic chronicle localization", () => {
           amount: 2,
           damageType: "net",
           reason: "access_effect",
-          sourceDefinitionId: "fetal_ai",
+          sourceDefinitionId: 11020,
           sourceTitle: "Fetal AI",
         },
       ],
@@ -1791,7 +1792,7 @@ describe("semantic chronicle localization", () => {
     const context = {
       translate: translate("en"),
       cardPresentationsById: {
-        fetal_ai: { title: "Fetal AI", type: "agenda" },
+        11020: { title: "Fetal AI", type: "agenda" },
       },
     };
     const accessItem = formatChronicleEvent(access, "runner", context);
@@ -1806,7 +1807,7 @@ describe("semantic chronicle localization", () => {
     expect(accessItem).toMatchObject({
       title: "You: accessed Fetal AI in Remote 1.",
       visibility: "public",
-      cardDefinitionId: "fetal_ai",
+      cardDefinitionId: 11020,
       cardTitle: "Fetal AI",
     });
     expect(damageItem).toMatchObject({
@@ -1814,7 +1815,7 @@ describe("semantic chronicle localization", () => {
       category: "danger",
       importance: "important",
       visibility: "public",
-      cardDefinitionId: "fetal_ai",
+      cardDefinitionId: 11020,
       cardTitle: "Fetal AI",
     });
     expect(damageItem?.title).not.toBe("A hidden effect resolved.");
@@ -1828,7 +1829,7 @@ describe("semantic chronicle localization", () => {
           kind: "trash_card",
           visibility: "private_to_side",
           side: "corp",
-          sourceDefinitionId: "secret_card",
+          sourceDefinitionId: 11025,
           sourceTitle: "Secret Card",
           amount: 1,
         },
@@ -1844,7 +1845,7 @@ describe("semantic chronicle localization", () => {
       );
       expect(item?.visibility).toBe("redacted");
       expect(JSON.stringify(item)).not.toContain("Secret Card");
-      expect(JSON.stringify(item)).not.toContain("secret_card");
+      expect(JSON.stringify(item)).not.toContain(11025);
     }
   });
 });

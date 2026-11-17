@@ -23,10 +23,10 @@ describe("deck test-card availability", () => {
         deckVersion: "test",
         name: "Own deck",
         side: "corp",
-        identityCardId: "corp_identity_001",
+        identityCardId: 3,
         cardPoolSnapshotId: "card-snapshot-0.8",
         formatProfileId,
-        cards: [{ cardId: "unknown-card", quantity: 45 }],
+        cards: [{ cardId: 9127, quantity: 45 }],
         createdAt: "2026-09-13",
         updatedAt: "2026-09-13",
       };
@@ -44,7 +44,7 @@ describe("deck test-card availability", () => {
         expect(validation.issues).toContainEqual({
           code: "unknown_card",
           severity: "error",
-          params: { cardId: "unknown-card" },
+          params: { cardId: 9127 },
         });
         expect(validation.issues).toContainEqual({
           code: "agenda_points_too_low",

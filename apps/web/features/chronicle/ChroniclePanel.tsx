@@ -1,5 +1,6 @@
 "use client";
 
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "use-intl/react";
@@ -45,7 +46,7 @@ import {
 import { ChronicleEntry, type ChronicleGroupKind } from "./ChronicleEntry";
 
 type CatalogCardSummary = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   type: string;
   subtypes: string[];
@@ -58,7 +59,7 @@ type CatalogCardDetail = CatalogCardSummary & {
   collectorNumber: string;
   text: string;
   numeric: Record<string, number | null | undefined>;
-  definitionId?: string;
+  definitionId?: CardDefinitionId;
 };
 
 const CATALOG_NUMERIC_LABEL_KEYS = [
@@ -187,14 +188,14 @@ function payloadPositiveInteger(
     : null;
 }
 
-function revealedEventCardId(event: PublicGameEvent): string | null {
+function revealedEventCardId(event: PublicGameEvent): CardDefinitionId | null {
   const cardId =
     event.publicPayload.cardDefinitionId ??
     event.publicPayload.sourceDefinitionId ??
     event.publicPayload.targetCardDefinitionId ??
     event.publicPayload.publicRevealDefinitionId ??
     event.publicPayload.priorityRequisitionTargetDefinitionId;
-  return typeof cardId === "string" ? cardId : null;
+  return isCardDefinitionId(cardId) ? cardId : null;
 }
 
 function eventCardDetail(

@@ -1,3 +1,5 @@
+import { createRuntimeCardsById } from "@netgrid/catalog";
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { DatabaseSync } from "node:sqlite";
 import type {
   AiDifficulty,
@@ -14,6 +16,8 @@ import {
   openSqliteAccountDatabase,
   runSqliteStorageOperation,
 } from "./storage-sqlite";
+
+const cardsById = createRuntimeCardsById();
 
 export const ACCOUNT_MATCH_START_PREFERENCES_SCHEMA_VERSION =
   "netgrid-account-match-start-preferences-v1" as const;
@@ -353,7 +357,7 @@ function standardDeckMatches(
 function deckMatchesCardPool(
   deck: {
     formatProfileId: string;
-    cards: readonly { cardId: string }[];
+    cards: readonly { cardId: CardDefinitionId }[];
   },
   cardPool: ApiMatchCardPool,
 ): boolean {
@@ -379,11 +383,12 @@ function deckMatchesCardPool(
     (!hasClassic || !hasProteus)
   )
     return false;
-  return deck.cards.every(
-    (entry) =>
-      (!entry.cardId.startsWith("onr_classic_") || hasClassic) &&
-      (!entry.cardId.startsWith("onr_proteus_") || hasProteus),
-  );
+  return deck.cards.every((entry) => {
+    const card = cardsById[entry.cardId];
+    return card !== undefined &&
+      (card.setId !== "classic" || hasClassic) &&
+      (card.setId !== "proteus" || hasProteus);
+  });
 }
 
 function recordFrom(value: unknown): Record<string, unknown> {

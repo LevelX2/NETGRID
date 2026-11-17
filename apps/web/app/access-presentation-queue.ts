@@ -1,4 +1,4 @@
-import type { PublicGameEvent } from "@netgrid/shared";
+import { isCardDefinitionId, type PublicGameEvent } from "@netgrid/shared";
 
 export function appendPendingAccessPresentationEvents(
   current: PublicGameEvent[],
@@ -28,7 +28,7 @@ export function dismissPendingAccessPresentationEvent(
 function isPublicCardAccessEvent(event: PublicGameEvent): boolean {
   return (
     event.publicPayload.actionType === "access_card" &&
-    nonEmptyString(event.publicPayload.cardDefinitionId) &&
+    isCardDefinitionId(event.publicPayload.cardDefinitionId) &&
     nonEmptyString(event.publicPayload.title)
   );
 }

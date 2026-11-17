@@ -2118,20 +2118,24 @@ export default function Page() {
     : undefined;
   const latestEventId = payload?.playerView.publicEvents.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
+  const cardSetsById = useMemo(
+    () => Object.fromEntries(allCatalogCards.map((card) => [card.catalogCardId, card])),
+    [allCatalogCards],
+  );
   const selectionCardPool = mode === "join" ? joinCardPool : matchCardPool;
   const runnerSnapshots = deckSnapshots.filter(
     (snapshot) =>
       selectionCardPool !== undefined &&
       snapshot.side === "runner" &&
       snapshot.validation.ok &&
-      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool),
+      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool, cardSetsById),
   );
   const corpSnapshots = deckSnapshots.filter(
     (snapshot) =>
       selectionCardPool !== undefined &&
       snapshot.side === "corp" &&
       snapshot.validation.ok &&
-      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool),
+      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool, cardSetsById),
   );
   const runnerDeckSlotSnapshots = attachStandardDeckGuides(
     runnerSnapshots,
@@ -2144,7 +2148,7 @@ export default function Page() {
   const matchStartLocalDecks = localDecks.filter(
     (deck) =>
       selectionCardPool !== undefined &&
-      editableDeckAllowedForMatchCardPool(deck, selectionCardPool),
+      editableDeckAllowedForMatchCardPool(deck, selectionCardPool, cardSetsById),
   );
   const defaultCorpSnapshot =
     corpSnapshots.find(
@@ -2258,7 +2262,7 @@ export default function Page() {
         (snapshot) =>
           snapshot.side === side &&
           snapshot.validation.ok &&
-          snapshotAllowedForMatchCardPool(snapshot, cardPool),
+          snapshotAllowedForMatchCardPool(snapshot, cardPool, cardSetsById),
       );
       const defaultSnapshot =
         snapshots.find((snapshot) =>
@@ -2288,7 +2292,7 @@ export default function Page() {
         (deck) =>
           deck.deckId === selection.cloudDeckId &&
           deck.side === side &&
-          editableDeckAllowedForMatchCardPool(deck, cardPool),
+          editableDeckAllowedForMatchCardPool(deck, cardPool, cardSetsById),
       );
       if (!accountDeck) return fallback();
       if (side === "runner") {
@@ -2305,7 +2309,7 @@ export default function Page() {
         snapshot.sourceDeckId === selection.standardDeckId &&
         snapshot.side === side &&
         snapshot.validation.ok &&
-        snapshotAllowedForMatchCardPool(snapshot, cardPool),
+        snapshotAllowedForMatchCardPool(snapshot, cardPool, cardSetsById),
     );
     if (!standard) return fallback();
     if (side === "runner") {
@@ -2360,6 +2364,7 @@ export default function Page() {
       !matchStartSettingsLoaded ||
       !localDecksLoaded ||
       !standardDecksLoaded ||
+      allCatalogCards.length === 0 ||
       accountMatchStartPreferencesLoadedFor === accountId
     )
       return;
@@ -2392,6 +2397,7 @@ export default function Page() {
     accountMatchStartPreferencesLoadedFor,
     accountSession.account?.accountId,
     accountSession.status,
+    allCatalogCards.length,
     localDecksLoaded,
     matchStartSettingsLoaded,
     standardDecksLoaded,
@@ -5879,7 +5885,7 @@ export default function Page() {
     void commitDeckLibrary(localDecks, noticeT("deckSaved"));
   };
 
-  const updateDeckCardQuantity = (cardId: string, quantity: number) => {
+  const updateDeckCardQuantity = (cardId: import("@netgrid/shared").CardDefinitionId, quantity: number) => {
     if (!selectedDeck) return;
     const nextQuantity = Math.max(0, Math.floor(quantity));
     const existing = selectedDeck.cards.some(

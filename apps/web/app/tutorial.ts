@@ -83,11 +83,11 @@ const RUNNER_TUTORIAL_DECK: DeckDefinition = {
   id: "tutorial_runner_v160",
   name: "Tutorial Runner Deck V1.6.0",
   side: "runner",
-  identity: "runner_identity_001",
+  identity: 587,
   cards: [
-    { id: "simple_run_event", quantity: 5 },
-    { id: "simple_fracter", quantity: 5 },
-    { id: "simple_economy_event", quantity: 5 },
+    { id: 600, quantity: 5 },
+    { id: 597, quantity: 5 },
+    { id: 595, quantity: 5 },
   ],
 };
 
@@ -95,11 +95,11 @@ const CORP_TUTORIAL_ICE_DECK: DeckDefinition = {
   id: "tutorial_corp_ice_v160",
   name: "Tutorial Corp ICE Deck V1.6.0",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
-    { id: "simple_barrier_ice", quantity: 6 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 3 },
+    { id: 589, quantity: 6 },
+    { id: 588, quantity: 3 },
+    { id: 596, quantity: 3 },
   ],
 };
 
@@ -107,10 +107,10 @@ const CORP_TUTORIAL_AGENDA_DECK: DeckDefinition = {
   id: "tutorial_corp_agenda_v160",
   name: "Tutorial Corp Agenda Deck V1.6.0",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
-    { id: "simple_agenda", quantity: 8 },
-    { id: "simple_priority_agenda", quantity: 4 },
+    { id: 588, quantity: 8 },
+    { id: 599, quantity: 4 },
   ],
 };
 
@@ -118,10 +118,10 @@ const CORP_TUTORIAL_SCORE_DECK: DeckDefinition = {
   id: "tutorial_corp_score_v160",
   name: "Tutorial Corp Score Deck V1.6.0",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
-    { id: "simple_priority_agenda", quantity: 8 },
-    { id: "simple_economy_operation", quantity: 4 },
+    { id: 599, quantity: 8 },
+    { id: 596, quantity: 4 },
   ],
 };
 
@@ -129,11 +129,11 @@ const CORP_TUTORIAL_DAMAGE_DECK: DeckDefinition = {
   id: "tutorial_corp_damage_v160",
   name: "Tutorial Corp Damage Deck V1.6.0",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
-    { id: "onr_proteus_027_iceberg", quantity: 6 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 3 },
+    { id: 85, quantity: 6 },
+    { id: 588, quantity: 3 },
+    { id: 596, quantity: 3 },
   ],
 };
 

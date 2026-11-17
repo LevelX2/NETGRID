@@ -176,7 +176,7 @@ describe.each(Object.keys(locales) as Locale[])(
     it("shows the prevention source and its trash once", () => {
       const [item] = render(261, locale, { trashedCardTitle: "Fall Guy" });
       expect(item).toMatchObject({
-        cardDefinitionId: "onr_v1_161_fall-guy",
+        cardDefinitionId: 373,
         cardTitle: "Fall Guy",
       });
       expect(item!.title).toContain("Fall Guy");

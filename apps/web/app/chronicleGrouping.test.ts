@@ -86,7 +86,7 @@ describe("groupChronicleEntriesForRender", () => {
       chronicleResolveChoiceBelongsToRunPayload({
         runnerMemoryCheckpointResolved: true,
         trashedProgramCount: 1,
-        trashedCardDefinitionIds: "simple_decoder",
+        trashedCardDefinitionIds: 591,
       }),
     ).toBe(true);
   });
@@ -109,7 +109,7 @@ describe("groupChronicleEntriesForRender", () => {
         eventModificationDecision: "apply",
         eventModificationOutcome: "avoided",
         imminentEventType: "add_tag",
-        sourceDefinitionId: "onr_v1_161_fall-guy",
+        sourceDefinitionId: 373,
       }),
     ).toBe(true);
   });

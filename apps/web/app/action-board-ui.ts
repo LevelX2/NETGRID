@@ -1,3 +1,4 @@
+import { isCardDefinitionId } from "@netgrid/shared";
 import {
   type LegalAction,
   type PlayerView,
@@ -565,7 +566,7 @@ export type AdvancementCounterDisplay = {
   overflowLabel: string | null;
 };
 
-const TESSERACT_FORT_CONSTRUCTION_ID = "onr_v1_370_tesseract-fort-construction";
+const TESSERACT_FORT_CONSTRUCTION_ID = 582;
 const PURGEABLE_RUNNER_VIRUS_HELP =
   "Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.";
 
@@ -1603,7 +1604,7 @@ function localizedActionDefinitionTitle(
   definitionId: unknown,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string | null {
-  return typeof definitionId === "string"
+  return isCardDefinitionId(definitionId)
     ? (publicCardTitle(definitionId, cardPresentationsById) ?? null)
     : null;
 }
@@ -1628,7 +1629,7 @@ function localizedActionCardTitle(
     "agendaDefinitionId",
   ] as const) {
     const definitionId = action.payload?.[key];
-    if (typeof definitionId !== "string") continue;
+    if (!isCardDefinitionId(definitionId)) continue;
     const title = publicCardTitle(definitionId, cardPresentationsById);
     if (title) return title;
   }
@@ -1979,7 +1980,7 @@ function targetTitleFromDefinition(
   const explicitTitle = action.payload?.targetCardTitle;
   if (typeof explicitTitle === "string") return explicitTitle;
   const targetDefinitionId =
-    typeof action.payload?.targetCardDefinitionId === "string"
+    isCardDefinitionId(action.payload?.targetCardDefinitionId)
       ? action.payload.targetCardDefinitionId
       : undefined;
   return targetDefinitionId
@@ -2749,7 +2750,7 @@ export function retainedAccessRevealEvent(
       newerEvents.push(event);
       continue;
     }
-    if (typeof event.publicPayload.cardDefinitionId !== "string") return null;
+    if (!isCardDefinitionId(event.publicPayload.cardDefinitionId)) return null;
     if (typeof event.publicPayload.title !== "string") return null;
     return newerEvents.every((newerEvent) =>
       accessRevealCanBeRetainedPast(newerEvent, event),
@@ -2880,9 +2881,8 @@ function accessRevealCanBeRetainedPast(
   const actionType = String(newerEvent.publicPayload.actionType ?? "");
   if (
     actionType === "resolve_choice" &&
-    (typeof newerEvent.publicPayload.ambushDefinitionId === "string" ||
-      typeof newerEvent.publicPayload.accessEffectSourceDefinitionId ===
-        "string")
+    (isCardDefinitionId(newerEvent.publicPayload.ambushDefinitionId) ||
+      isCardDefinitionId(newerEvent.publicPayload.accessEffectSourceDefinitionId))
   )
     return true;
   return [
@@ -2895,7 +2895,7 @@ function accessRevealCanBeRetainedPast(
 }
 
 function eventHasPublicRevealDefinition(event: PublicGameEvent): boolean {
-  if (typeof event.publicPayload.publicRevealDefinitionId === "string")
+  if (isCardDefinitionId(event.publicPayload.publicRevealDefinitionId))
     return true;
   return (
     typeof event.publicPayload.publicRevealDefinitionIds === "string" &&

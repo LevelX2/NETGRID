@@ -172,7 +172,7 @@ function catalogPayload(): StandardDeckCatalogPayload {
           status: "active",
           name: "Runner Standard",
           side: "runner",
-          identityCardId: "runner_identity_001",
+          identityCardId: 587,
           cardPoolSnapshotId: "card-snapshot-0.8",
           formatProfileId: "netgrid_private_local_v1",
           cards: [],

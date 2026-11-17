@@ -18,7 +18,7 @@ const source = {
   visibility: "public",
   side: "runner",
   reason: "ice_subroutine",
-  sourceDefinitionId: "onr_proteus_006_colonel-failure",
+  sourceDefinitionId: 11037,
   sourceTitle: "Colonel Failure",
   subroutineIndex: 0,
   subroutineType: "trash_installed_program",
@@ -67,14 +67,14 @@ describe("program-trash chronicle", () => {
       expect(
         items(locale, {
           cardsTrashed: 1,
-          cardDefinitionId: "krash",
+          cardDefinitionId: 11038,
           cardTitle: "Krash",
         })[0],
       ).toMatchObject({
         title,
         category: "run",
         visibility: "public",
-        cardDefinitionId: "krash",
+        cardDefinitionId: 11038,
         cardTitle: "Krash",
       });
     },
@@ -115,7 +115,7 @@ describe("program-trash chronicle", () => {
     const [item] = items("en", {
       visibility: "private_to_side",
       cardsTrashed: 1,
-      cardDefinitionId: "private_program",
+      cardDefinitionId: 11039,
       cardTitle: "Private Program",
     });
     expect(item?.visibility).toBe("redacted");

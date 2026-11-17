@@ -109,7 +109,7 @@ describe("multiplayer side payload projection", () => {
     state.corp.scoreArea = [sourceAgendaId];
     state.cardInstances[sourceAgendaId] = {
       ...state.cardInstances[sourceAgendaId]!,
-      definitionId: "onr_v1_197_data-fort-reclamation",
+      definitionId: 409,
       owner: "corp",
       controller: "corp",
       faceup: true,
@@ -125,7 +125,7 @@ describe("multiplayer side payload projection", () => {
     });
     state.cardInstances[iceId] = {
       ...state.cardInstances[iceId]!,
-      definitionId: "simple_barrier_ice",
+      definitionId: 589,
       owner: "corp",
       controller: "corp",
       faceup: false,
@@ -134,7 +134,7 @@ describe("multiplayer side payload projection", () => {
     };
     state.hqInstallRezSequence = {
       sourceAgendaId,
-      sourceDefinitionId: "onr_v1_197_data-fort-reclamation",
+      sourceDefinitionId: 409,
       serverId: "remote_1",
       selectedCardIds: [iceId],
       nextCardIndex: 1,
@@ -182,7 +182,7 @@ describe("multiplayer side payload projection", () => {
     ).toMatchObject({
       choiceId: "choice_data_fort_optional_rez_12",
       cardId: iceId,
-      cardDefinitionId: "simple_barrier_ice",
+      cardDefinitionId: 589,
       targetServerId: "remote_1",
       installedZone: "serverIce",
       stateVersion: 12,
@@ -221,7 +221,7 @@ describe("multiplayer side payload projection", () => {
     });
     state.cardInstances[spgId] = {
       instanceId: spgId,
-      definitionId: "onr_classic_025_strategic-planning-group",
+      definitionId: 29,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
@@ -336,7 +336,7 @@ function deckMetadata(side: Side): DeckPublicMetadata {
   return {
     side,
     identityCardId:
-      side === "runner" ? "runner_identity_001" : "corp_identity_001",
+      side === "runner" ? 587 : 3,
     deckName: `${side} deck`,
     cardPoolSnapshotId: "test",
     formatProfileId: "test",

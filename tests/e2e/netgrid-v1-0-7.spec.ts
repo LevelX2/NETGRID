@@ -554,19 +554,19 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       deckVersion: "1.3.0-local",
       name: "E2E V1.3.0 Runner",
       side: "runner",
-      identityCardId: "runner_identity_001",
+      identityCardId: 587,
       cardPoolSnapshotId: "card-snapshot-0.8",
       cardPoolVersion: "private-local-onr-v1",
       formatProfileId: "netgrid_private_local_v1",
       formatProfileVersion: "1.3.0",
       cards: [
-        { cardId: "onr_v1_021_dwarf", quantity: 2 },
-        { cardId: "onr_v1_039_krash", quantity: 2 },
-        { cardId: "onr_v1_066_snowball", quantity: 2 },
-        { cardId: "onr_v1_074_worm", quantity: 2 },
-        { cardId: "onr_v1_081_custodial-position", quantity: 1 },
-        { cardId: "onr_v1_085_executive-wiretaps", quantity: 1 },
-        { cardId: "onr_v1_101_mit-west-tier", quantity: 2 },
+        { cardId: 233, quantity: 2 },
+        { cardId: 251, quantity: 2 },
+        { cardId: 278, quantity: 2 },
+        { cardId: 286, quantity: 2 },
+        { cardId: 293, quantity: 1 },
+        { cardId: 297, quantity: 1 },
+        { cardId: 313, quantity: 2 },
       ],
       createdAt: "2026-05-08T12:00:00.000Z",
       updatedAt: "2026-05-08T12:00:00.000Z",
@@ -586,7 +586,7 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
           ...legalDeck,
           deckId: "e2e_v130_invalid",
           cards: legalDeck.cards.map((entry) =>
-            entry.cardId === "onr_v1_021_dwarf"
+            entry.cardId === 233
               ? { ...entry, quantity: 4 }
               : entry,
           ),

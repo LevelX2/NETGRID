@@ -21,9 +21,9 @@ import {
 } from "./chronicle";
 
 const TEST_CARD_PRESENTATIONS = {
-  simple_agenda: { title: "Simple Agenda", type: "agenda" },
-  simple_barrier_ice: { title: "Simple Barrier ICE", type: "ice" },
-  simple_decoder: { title: "Simple Decoder", type: "program" },
+  588: { title: "Simple Agenda", type: "agenda" },
+  589: { title: "Simple Barrier ICE", type: "ice" },
+  591: { title: "Simple Decoder", type: "program" },
 } as const;
 
 function deriveOpponentActionCues(input: CueDerivationInput) {
@@ -178,7 +178,7 @@ describe("deriveOpponentActionCues", () => {
               damageType: "net",
               cardsTrashed: 1,
               reason: "access_effect",
-              sourceDefinitionId: "simple_damage_source",
+              sourceDefinitionId: 9119,
               sourceTitle: "Simple Damage Source",
             },
           ],
@@ -212,7 +212,7 @@ describe("deriveOpponentActionCues", () => {
               damageType: "net",
               cardsTrashed: 1,
               reason: "access_effect",
-              sourceDefinitionId: "simple_damage_source",
+              sourceDefinitionId: 9119,
               sourceTitle: "Simple Damage Source",
             },
           ],
@@ -267,7 +267,7 @@ describe("deriveOpponentActionCues", () => {
         event("evt_city_pay", "resolve_choice", {
           actor: "runner",
           aiReasonCode: "plan_first.engine_window",
-          sourceDefinitionId: "onr_v1_313_city-surveillance",
+          sourceDefinitionId: 525,
           drawTaxSourceCount: 1,
           drawTaxDecision: "pay",
           drawTaxCreditsPaid: 1,
@@ -276,7 +276,7 @@ describe("deriveOpponentActionCues", () => {
         event("evt_city_tag", "resolve_choice", {
           actor: "runner",
           aiReasonCode: "plan_first.engine_window",
-          sourceDefinitionId: "onr_v1_313_city-surveillance",
+          sourceDefinitionId: 525,
           tagsAdded: 1,
           runnerTagsAfter: 1,
           drawTaxSourceCount: 1,
@@ -303,7 +303,7 @@ describe("deriveOpponentActionCues", () => {
           actor: "corp",
           label: "Korp installiert eine Karte.",
           redactedKind: "installed_card",
-          cardDefinitionId: "simple_agenda",
+          cardDefinitionId: 588,
           title: "Simple Agenda",
           serverId: "remote_1",
           serverLabel: "Remote 1",
@@ -325,7 +325,7 @@ describe("deriveOpponentActionCues", () => {
     });
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
     expect(JSON.stringify(cues[0])).not.toContain("Simple Agenda");
-    expect(JSON.stringify(cues[0])).not.toContain("simple_agenda");
+    expect(JSON.stringify(cues[0])).not.toContain(588);
   });
 
   it("filters own actions and derives visible card highlights only from PlayerView-visible cards", () => {
@@ -337,7 +337,7 @@ describe("deriveOpponentActionCues", () => {
             instanceId: "card_simple_killer",
             known: true,
             title: "Simple Killer",
-            definitionId: "simple_killer",
+            definitionId: 598,
             type: "program",
           },
         ],
@@ -349,12 +349,12 @@ describe("deriveOpponentActionCues", () => {
       events: [
         event("evt_own", "install_card", {
           actor: "runner",
-          cardDefinitionId: "simple_killer",
+          cardDefinitionId: 598,
           title: "Simple Killer",
         }),
         event("evt_opp", "trash_resource", {
           actor: "corp",
-          cardDefinitionId: "simple_killer",
+          cardDefinitionId: 598,
           title: "Simple Killer",
         }),
       ],
@@ -373,8 +373,8 @@ describe("deriveOpponentActionCues", () => {
     const rioEvent = event("evt_rio", "continue_run", {
       actor: "runner",
       v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
-      sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
-      passedIceDefinitionId: "simple_barrier_ice",
+      sourceDefinitionId: 579,
+      passedIceDefinitionId: 589,
       serverLabel: "Remote 1",
       v1921DieRoll: 1,
       rioRunEnded: true,
@@ -401,7 +401,7 @@ describe("deriveOpponentActionCues", () => {
     expect(corpCues[0]?.title).toBe(
       "Der Runner hat Simple Barrier ICE passiert und Rio de Janeiro City Grid würfelt eine 1.",
     );
-    expect(runnerCues[0]?.cardDefinitionId).toBe("simple_barrier_ice");
+    expect(runnerCues[0]?.cardDefinitionId).toBe(589);
     expect(runnerCues[0]?.cardTitle).toBe("Simple Barrier ICE");
     expect(runnerCues[0]?.description).toBe(
       "Der Run endet durch Rio de Janeiro City Grid.",
@@ -422,14 +422,14 @@ describe("deriveOpponentActionCues", () => {
       encounterContinue: true,
       encounterWillEndRun: true,
       unbrokenSubroutineCount: 1,
-      sourceDefinitionId: "test_kipa",
+      sourceDefinitionId: 9110,
       resolvedEffects: [
         {
           effectId: "subroutine_1",
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
-          sourceDefinitionId: "test_kipa",
+          sourceDefinitionId: 9110,
           sourceTitle: "Kipa",
           subroutineIndex: 0,
           subroutineType: "end_the_run",
@@ -487,7 +487,7 @@ describe("deriveOpponentActionCues", () => {
     expect(runnerCues[0]?.description).toBe(
       "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2.",
     );
-    expect(runnerCues[0]?.cardDefinitionId).toBe("onr_v1_275_vacuum-link");
+    expect(runnerCues[0]?.cardDefinitionId).toBe(487);
     expect(runnerCues[0]?.cardTitle).toBe("Vacuum Link");
     expect(runnerCues[0]?.highlight).toEqual({
       kind: "run",
@@ -514,7 +514,7 @@ describe("deriveOpponentActionCues", () => {
           damageType: "net",
           cardsTrashed: 1,
           reason: "access_effect",
-          sourceDefinitionId: "onr_proteus_071_bel-digmo-antibody",
+          sourceDefinitionId: 9111,
           sourceTitle: "Bel-Digmo Antibody",
         },
       ],
@@ -556,7 +556,7 @@ describe("deriveOpponentActionCues", () => {
     const tagEvent = event("evt_manhunt_tags", "resolve_choice", {
       actor: "runner",
       traceStep: "runner_bid",
-      sourceDefinitionId: "onr_proteus_050_manhunt",
+      sourceDefinitionId: 108,
       corpBid: 3,
       traceValue: 6,
       runnerBid: 0,
@@ -587,7 +587,7 @@ describe("deriveOpponentActionCues", () => {
       source: "system",
       title: "Du hast 6 Tags erhalten.",
       description: "Du hast jetzt 6 Tags.",
-      cardDefinitionId: "onr_proteus_050_manhunt",
+      cardDefinitionId: 108,
       iconBadge: "+6",
       sound: "gain_tag",
       visibility: "public",
@@ -722,7 +722,7 @@ describe("deriveOpponentActionCues", () => {
         traceSuccessful: true,
         traceValue: 5,
         runnerStrength: 0,
-        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceDefinitionId: 461,
         tagsAdded: 0,
         eventModificationWindowOpened: true,
         imminentEventId: "hunter_tag",
@@ -734,7 +734,7 @@ describe("deriveOpponentActionCues", () => {
         imminentEventId: "unrelated_tag",
         eventModificationDecision: "apply",
         preventedTags: 1,
-        sourceDefinitionId: "onr_v1_161_fall-guy",
+        sourceDefinitionId: 373,
         tagsAdded: 0,
       });
       const avoided = event("evt_hunter_tag", "resolve_choice", {
@@ -766,7 +766,7 @@ describe("deriveOpponentActionCues", () => {
             pending: false,
             tagsAdded: 0,
             preventedTags: 1,
-            preventionCardIds: ["onr_v1_161_fall-guy"],
+            preventionCardIds: [373],
           },
         }),
       ]);
@@ -855,7 +855,7 @@ describe("deriveOpponentActionCues", () => {
           runnerGripBefore: 4,
           runnerGripAfter: 2,
           flatline: false,
-          sourceDefinitionId: "hidden_asset_1",
+          sourceDefinitionId: 9112,
           sourceTitle: "Hidden Trap",
         }),
       ],
@@ -876,7 +876,7 @@ describe("deriveOpponentActionCues", () => {
         sourceLabel: "Korp-Effekt",
       },
     ]);
-    expect(JSON.stringify(cues)).not.toContain("hidden_asset_1");
+    expect(JSON.stringify(cues)).not.toContain(9112);
     expect(JSON.stringify(cues)).not.toContain("Hidden Trap");
     expect(
       damageAudioCueFromPublicPayload({
@@ -950,7 +950,7 @@ describe("deriveOpponentActionCues", () => {
       damageAudioCueFromPublicPayload({
         damageResolved: true,
         damageAmount: 2,
-        sourceDefinitionId: "hidden_trap",
+        sourceDefinitionId: 9113,
       }),
     ).toBeNull();
   });
@@ -969,8 +969,8 @@ describe("deriveOpponentActionCues", () => {
           runnerGripAfter: 0,
           flatline: true,
           publicRevealKind: "reveal",
-          publicRevealDefinitionId: "onr_proteus_004_fetal-ai",
-          cardDefinitionId: "onr_proteus_004_fetal-ai",
+          publicRevealDefinitionId: 62,
+          cardDefinitionId: 62,
           title: "Fetal AI",
         }),
       ],
@@ -995,7 +995,7 @@ describe("deriveOpponentActionCues", () => {
           damageAmount: 0,
           cardsTrashed: 0,
           flatline: false,
-          sourceDefinitionId: "onr_proteus_021_dog-pile",
+          sourceDefinitionId: 79,
         }),
         event("evt_prevented", "resolve_choice", {
           damageResolved: true,
@@ -1090,14 +1090,14 @@ describe("deriveOpponentActionCues", () => {
       instanceId: "ice_0",
       known: true,
       title: "Inner ICE",
-      definitionId: "inner_ice",
+      definitionId: 9114,
       type: "ice" as const,
     };
     const visibleIce = {
       instanceId: "ice_1",
       known: true,
       title: "Gate ICE",
-      definitionId: "gate_ice",
+      definitionId: 9116,
       type: "ice" as const,
     };
     const playerView = view("runner", {
@@ -1117,7 +1117,7 @@ describe("deriveOpponentActionCues", () => {
       events: [
         event("evt_rez", "rez_ice", {
           actor: "corp",
-          cardDefinitionId: "gate_ice",
+          cardDefinitionId: 9116,
           title: "Gate ICE",
         }),
       ],
@@ -1134,7 +1134,7 @@ describe("deriveOpponentActionCues", () => {
       instanceId: "runner_panzer_run_1",
       known: true,
       title: "Panzer Run",
-      definitionId: "onr_classic_042_panzer-run",
+      definitionId: 46,
       type: "event" as const,
     };
     const playerView = view("corp", {
@@ -1151,7 +1151,7 @@ describe("deriveOpponentActionCues", () => {
       events: [
         event("evt_panzer_run", "play_event", {
           actor: "runner",
-          cardDefinitionId: "onr_classic_042_panzer-run",
+          cardDefinitionId: 46,
           title: "Panzer Run",
           gainedCredits: 4,
           drawnCount: 2,
@@ -1173,7 +1173,7 @@ describe("deriveOpponentActionCues", () => {
       events: [
         event("evt_access", "access_card", {
           actor: "runner",
-          cardDefinitionId: "agenda_1",
+          cardDefinitionId: 9117,
           title: "Public Agenda",
         }),
       ],
@@ -1185,13 +1185,13 @@ describe("deriveOpponentActionCues", () => {
   it("does not create duplicate outcome cues for a public access reveal", () => {
     const access = event("evt_access", "access_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
     const trash = event("evt_trash", "trash_accessed_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
@@ -1212,7 +1212,7 @@ describe("deriveOpponentActionCues", () => {
     });
     const trash = event("evt_trash", "trash_accessed_card", {
       actor: "runner",
-      cardDefinitionId: "public_after_trash",
+      cardDefinitionId: 9118,
       title: "Public After Trash",
       serverLabel: "R&D",
     });
@@ -1224,7 +1224,7 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues.map((cue) => cue.eventId)).toEqual(["evt_access", "evt_trash"]);
     expect(JSON.stringify(cues[0])).not.toContain("Public After Trash");
-    expect(JSON.stringify(cues[0])).not.toContain("public_after_trash");
+    expect(JSON.stringify(cues[0])).not.toContain(9118);
   });
 
   it("shows Technician Lover private look on use and suppresses the confirmation cue", () => {
@@ -1239,7 +1239,7 @@ describe("deriveOpponentActionCues", () => {
           hiddenZoneAction: "p3_33_private_look",
           privateLookZone: "rd",
           privateLookCount: 1,
-          sourceDefinitionId: "onr_v1_183_technician-lover",
+          sourceDefinitionId: 395,
           sourceTitle: "Technician Lover",
           aiReasonCode: "runner_private_look",
         }),
@@ -1249,7 +1249,7 @@ describe("deriveOpponentActionCues", () => {
           hiddenZoneAction: "p3_33_private_look",
           privateLookZone: "rd",
           privateLookCount: 1,
-          sourceDefinitionId: "onr_v1_183_technician-lover",
+          sourceDefinitionId: 395,
           sourceTitle: "Technician Lover",
           aiReasonCode: "runner_private_look",
         }),
@@ -1272,9 +1272,9 @@ describe("deriveOpponentActionCues", () => {
         event("evt_short_circuit", "resolve_choice", {
           actor: "runner",
           hiddenZoneAction: "v1911_short_circuit_search",
-          sourceDefinitionId: "onr_v1_177_the-short-circuit",
-          publicRevealDefinitionId: "simple_decoder",
-          cardDefinitionId: "simple_decoder",
+          sourceDefinitionId: 389,
+          publicRevealDefinitionId: 591,
+          cardDefinitionId: 591,
           searchDestination: "runner_grip",
           shuffled: true,
         }),
@@ -1300,14 +1300,14 @@ describe("deriveOpponentActionCues", () => {
           hiddenZoneBarrier: true,
           hiddenZoneAction:
             "v1917_corporate_negotiating_center_hq_agenda_reveal",
-          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceDefinitionId: 526,
           sourceTitle: "Corporate Negotiating Center",
           publicRevealKind: "reveal",
           publicRevealDefinitionIds:
-            "simple_agenda,onr_v1_203_hostile-takeover",
+            "588,415",
           publicRevealTitles: "Simple Agenda||Hostile Takeover",
           revealedAgendaDefinitionIds:
-            "simple_agenda,onr_v1_203_hostile-takeover",
+            "588,415",
           revealedCount: 2,
           gainedCredits: 2,
         }),
@@ -1330,12 +1330,12 @@ describe("deriveOpponentActionCues", () => {
           actor: "corp",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "corp_hq_agenda_reveal",
-          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceDefinitionId: 526,
           sourceTitle: "Corporate Negotiating Center",
           publicRevealKind: "reveal",
-          publicRevealDefinitionIds: "simple_agenda",
+          publicRevealDefinitionIds: 588,
           publicRevealTitles: "Simple Agenda",
-          revealedAgendaDefinitionIds: "simple_agenda",
+          revealedAgendaDefinitionIds: 588,
           revealedCount: 1,
           gainedCredits: 1,
         }),
@@ -1358,7 +1358,7 @@ describe("deriveOpponentActionCues", () => {
           actor: "corp",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "corp_hq_agenda_reveal",
-          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceDefinitionId: 526,
           sourceTitle: "Corporate Negotiating Center",
           publicRevealKind: "reveal",
           publicRevealDefinitionIds: "",
@@ -1387,7 +1387,7 @@ describe("deriveOpponentActionCues", () => {
           aiReasonCode: "corp.score_agenda",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
-          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          sourceDefinitionId: 406,
           sourceTitle: "Corporate Downsizing",
           publicRevealKind: "reveal",
           publicRevealDefinitionIds: "",
@@ -1420,13 +1420,13 @@ describe("deriveOpponentActionCues", () => {
           actor: "corp",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
-          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          sourceDefinitionId: 406,
           sourceTitle: "Corporate Downsizing",
           publicRevealKind: "reveal",
           publicRevealDefinitionIds:
-            "simple_agenda,onr_v1_203_hostile-takeover",
+            "588,415",
           publicRevealTitles: "Simple Agenda||Hostile Takeover",
-          shownCardDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+          shownCardDefinitionIds: "588,415",
           shownCount: 2,
           shuffledIntoRndCount: 2,
           combinedAgendaPoints: 5,
@@ -1749,7 +1749,7 @@ describe("deriveOpponentActionCues", () => {
             amount: 1,
             cardsTrashed: 1,
             reason: "access_effect",
-            sourceDefinitionId: "simple_damage_source",
+            sourceDefinitionId: 9119,
             sourceTitle: "Simple Damage Source",
           },
         ],
@@ -1859,7 +1859,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
         instanceId: `${side}_identity`,
         known: true,
         title: side === "corp" ? "Korp Identity" : "Runner Identity",
-        definitionId: `${side}_identity`,
+        definitionId: side === "corp" ? 3 : 587,
         type: "identity",
       },
       gripOrHq: [],
@@ -1883,7 +1883,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
         instanceId: `${side === "corp" ? "runner" : "corp"}_identity`,
         known: true,
         title: side === "corp" ? "Runner Identity" : "Korp Identity",
-        definitionId: `${side === "corp" ? "runner" : "corp"}_identity`,
+        definitionId: side === "corp" ? 587 : 3,
         type: "identity",
       },
       scoreArea: [],

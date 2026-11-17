@@ -218,7 +218,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
           finalScore: 50,
           anchorEvidence: [
             {
-              cardId: "onr_v1_139_r-and-d-interface",
+              cardId: 351,
               quantity: 1,
               source: "derivedStrategyAnchor",
               strategyId: "runner.rnd_pressure",
@@ -227,7 +227,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
           ],
           supportEvidence: [
             {
-              cardId: "onr_v1_021_dwarf",
+              cardId: 233,
               quantity: 1,
               source: "functionSignal",
               signal: "breaker.wall",

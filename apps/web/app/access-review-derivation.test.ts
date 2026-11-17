@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type {
   LegalAction,
   PlayerView,
@@ -20,7 +21,7 @@ describe("Access outcome presentation", () => {
     const access = event("evt_fetal_ai", {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "fetal_ai",
+      cardDefinitionId: 9145,
       title: "Fetal AI",
       serverLabel: "R&D",
       damageResolved: true,
@@ -34,7 +35,7 @@ describe("Access outcome presentation", () => {
     expect(
       accessRevealFromLatestEvent(
         access,
-        { fetal_ai: catalogCard("fetal_ai", "Fetal AI", "agenda") },
+        { 9145: catalogCard(9145, "Fetal AI", "agenda") },
         [],
         "runner",
         [access],
@@ -51,14 +52,14 @@ describe("Access outcome presentation", () => {
     const access = event("evt_access", {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
     const trash = event("evt_trash", {
       actionType: "trash_accessed_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
@@ -67,7 +68,7 @@ describe("Access outcome presentation", () => {
       accessRevealFromLatestEvent(
         access,
         {
-          onr_v1_340_setup: catalogCard("onr_v1_340_setup", "Setup!", "asset"),
+          552: catalogCard(552, "Setup!", "asset"),
         },
         [],
         "corp",
@@ -90,7 +91,7 @@ describe("Access outcome presentation", () => {
       const access = event(`evt_access_${accessOrigin}`, {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "public_agenda",
+        cardDefinitionId: 9148,
         title: "Public Agenda",
         serverLabel,
         accessOrigin,
@@ -98,15 +99,15 @@ describe("Access outcome presentation", () => {
       const steal = event(`evt_steal_${accessOrigin}`, {
         actionType: "steal_agenda",
         actor: "runner",
-        cardDefinitionId: "public_agenda",
+        cardDefinitionId: 9148,
       });
 
       expect(
         accessRevealFromLatestEvent(
           access,
           {
-            public_agenda: catalogCard(
-              "public_agenda",
+            9148: catalogCard(
+              9148,
               "Public Agenda",
               "agenda",
             ),
@@ -122,7 +123,7 @@ describe("Access outcome presentation", () => {
         dismissLabel: "Agenda bestätigen",
         actions: [],
         card: {
-          definitionId: "public_agenda",
+          definitionId: 9148,
           title: "Public Agenda",
           type: "agenda",
         },
@@ -132,14 +133,14 @@ describe("Access outcome presentation", () => {
 
   it("separates central root upgrades from HQ, R&D and Archives cards", () => {
     const details = {
-      root_upgrade: catalogCard("root_upgrade", "Root Upgrade", "upgrade"),
-      central_card: catalogCard("central_card", "Central Card", "operation"),
+      9151: catalogCard(9151, "Root Upgrade", "upgrade"),
+      9152: catalogCard(9152, "Central Card", "operation"),
     };
     const hqRoot = accessRevealFromLatestEvent(
       event("evt_hq_root", {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "root_upgrade",
+        cardDefinitionId: 9151,
         title: "Root Upgrade",
         serverLabel: "HQ",
         accessOrigin: "central_root",
@@ -154,7 +155,7 @@ describe("Access outcome presentation", () => {
       event("evt_hq", {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "central_card",
+        cardDefinitionId: 9152,
         title: "Central Card",
         serverLabel: "HQ",
         accessOrigin: "hq",
@@ -169,7 +170,7 @@ describe("Access outcome presentation", () => {
       event("evt_rd_root", {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "root_upgrade",
+        cardDefinitionId: 9151,
         title: "Root Upgrade",
         serverLabel: "R&D",
         accessOrigin: "central_root",
@@ -182,7 +183,7 @@ describe("Access outcome presentation", () => {
       event("evt_archives", {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "central_card",
+        cardDefinitionId: 9152,
         title: "Central Card",
         serverLabel: "Archive",
         accessOrigin: "archives",
@@ -215,7 +216,7 @@ describe("Access outcome presentation", () => {
     const firstAccess = event("evt_11", {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_237_data-wall",
+      cardDefinitionId: 449,
       title: "Data Wall",
       serverLabel: "R&D",
       accessIndex: 0,
@@ -225,7 +226,7 @@ describe("Access outcome presentation", () => {
     const secondAccess = event("evt_12", {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_307_urban-renewal",
+      cardDefinitionId: 519,
       title: "Urban Renewal",
       serverLabel: "R&D",
       accessIndex: 1,
@@ -235,7 +236,7 @@ describe("Access outcome presentation", () => {
     const thirdAccess = event("evt_13", {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_237_data-wall",
+      cardDefinitionId: 449,
       title: "Data Wall",
       serverLabel: "R&D",
       accessIndex: 2,
@@ -245,7 +246,7 @@ describe("Access outcome presentation", () => {
     const fourthAccess = event("evt_14", {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_307_urban-renewal",
+      cardDefinitionId: 519,
       title: "Urban Renewal",
       serverLabel: "R&D",
       accessIndex: 3,
@@ -315,12 +316,12 @@ describe("Gypsy Schedule Analyzer reveal review", () => {
     const review = gypsyScheduleAnalyzerRevealFromPendingChoice(
       view,
       {
-        simple_economy_operation: catalogCard(
-          "simple_economy_operation",
+        596: catalogCard(
+          596,
           "Simple Economy Operation",
           "operation",
         ),
-        simple_agenda: catalogCard("simple_agenda", "Simple Agenda", "agenda"),
+        588: catalogCard(588, "Simple Agenda", "agenda"),
       },
       [action],
       "runner",
@@ -328,16 +329,16 @@ describe("Gypsy Schedule Analyzer reveal review", () => {
         event("evt_old", {
           actionType: "resolve_choice",
           hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-          publicRevealDefinitionIds: "old_card",
+          publicRevealDefinitionIds: "11005",
           publicRevealTitles: "Old Card",
         }),
         {
           ...event("evt_gypsy", {
             actionType: "resolve_choice",
             hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-            publicRevealDefinitionIds: "simple_economy_operation,simple_agenda",
+            publicRevealDefinitionIds: "596,588",
             publicRevealTitles: "Simple Economy Operation||Simple Agenda",
-            revealedAgendaDefinitionIds: "simple_agenda",
+            revealedAgendaDefinitionIds: "588",
             revealedCount: 2,
           }),
           stateVersionAfter: 10,
@@ -373,7 +374,7 @@ describe("Security Purge reveal review", () => {
         agendaAbility: "agenda_purge",
         hiddenZoneAction: "agenda_purge_rd_top3",
         publicRevealDefinitionIds:
-          "simple_economy_asset,simple_economy_operation,simple_agenda",
+          "594,596,588",
         publicRevealTitles:
           "Simple Economy Asset||Simple Economy Operation||Simple Agenda",
         revealedCount: 3,
@@ -382,17 +383,17 @@ describe("Security Purge reveal review", () => {
         agendaPurgeTargetChoiceOpened: false,
       }),
       {
-        simple_economy_asset: catalogCard(
-          "simple_economy_asset",
+        594: catalogCard(
+          594,
           "Simple Economy Asset",
           "asset",
         ),
-        simple_economy_operation: catalogCard(
-          "simple_economy_operation",
+        596: catalogCard(
+          596,
           "Simple Economy Operation",
           "operation",
         ),
-        simple_agenda: catalogCard("simple_agenda", "Simple Agenda"),
+        588: catalogCard(588, "Simple Agenda"),
       },
       "corp",
     );
@@ -421,7 +422,7 @@ describe("Security Purge reveal review", () => {
       actor: "corp",
       agendaAbility: "agenda_purge",
       hiddenZoneAction: "agenda_purge_rd_top3",
-      publicRevealDefinitionIds: "simple_economy_asset",
+      publicRevealDefinitionIds: "594",
       revealedCount: 1,
       revealedIceCount: 0,
       trashedCount: 1,
@@ -452,7 +453,7 @@ describe("Security Purge reveal review", () => {
       actor: "corp",
       agendaAbility: "agenda_purge",
       hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
-      publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+      publicRevealDefinitionIds: "589,594",
       revealedCount: 2,
       revealedIceCount: 1,
       pendingTrashCount: 1,
@@ -477,7 +478,7 @@ describe("Security Purge reveal review", () => {
       actor: "corp",
       agendaAbility: "agenda_purge",
       hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
-      publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+      publicRevealDefinitionIds: "589,594",
       revealedCount: 2,
       revealedIceCount: 1,
       pendingTrashCount: 1,
@@ -504,15 +505,15 @@ describe("Corporate Negotiating Center reveal review", () => {
         hiddenZoneAction: "corp_hq_agenda_reveal",
         sourceTitle: "Corporate Negotiating Center",
         publicRevealKind: "reveal",
-        publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+        publicRevealDefinitionIds: "588,415",
         publicRevealTitles: "Simple Agenda||Hostile Takeover",
         revealedCount: 2,
         gainedCredits: 2,
       }),
       {
-        simple_agenda: catalogCard("simple_agenda", "Simple Agenda"),
-        "onr_v1_203_hostile-takeover": catalogCard(
-          "onr_v1_203_hostile-takeover",
+        588: catalogCard(588, "Simple Agenda"),
+        415: catalogCard(
+          415,
           "Hostile Takeover",
         ),
       },
@@ -543,7 +544,7 @@ describe("Corporate Negotiating Center reveal review", () => {
       actor: "corp",
       hiddenZoneAction: "corp_hq_agenda_reveal",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: "simple_agenda",
+      publicRevealDefinitionIds: "588",
       publicRevealTitles: "Simple Agenda",
     });
     const laterAction = {
@@ -568,7 +569,7 @@ describe("Corporate Negotiating Center reveal review", () => {
       actor: "corp",
       hiddenZoneAction: "corp_hq_agenda_reveal",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: "simple_agenda",
+      publicRevealDefinitionIds: "588",
       publicRevealTitles: "Simple Agenda",
     });
     const noReveal = event("evt_cnc_none", {
@@ -604,7 +605,7 @@ function event(
   };
 }
 
-function catalogCard(catalogCardId: string, title: string, type = "agenda") {
+function catalogCard(catalogCardId: CardDefinitionId, title: string, type = "agenda") {
   return {
     catalogCardId,
     title,

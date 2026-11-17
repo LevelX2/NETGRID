@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { Activity, Bot, Check, Move, Play, User } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type {
@@ -34,7 +35,7 @@ import { WindowEventIcon } from "./WindowEventIcon";
 import { windowEventIconKindForActionCue } from "./window-event-icon-kind";
 
 type OpponentOverlayCatalogDetail = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   side: Side;
   type: string;

@@ -17,7 +17,7 @@ const EXPECTED_MULTI_CAPABILITY_LABEL_COUNT = 46;
 describe("card capability action translations", () => {
   it("names Data Fort Remapping and its run-ending effect without needing a catalog lookup", () => {
     const capabilityId =
-      "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run";
+      "5:spend_remap_counter_end_run";
     const action: LegalAction = {
       actionId: "remap_action",
       side: "corp",
@@ -150,7 +150,7 @@ describe("card capability action translations", () => {
     const original = structuredClone(action);
 
     expect(cardCapabilityIdForAction(action)).toBe(
-      "onr_v1_154_broker:store_credits",
+      "366:store_credits",
     );
     expect(actionButtonLabel(action, undefined, "en")).toBe(
       "Broker: place 3 credits on Broker",
@@ -161,7 +161,7 @@ describe("card capability action translations", () => {
       ...action,
       payload: {
         ...action.payload,
-        cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
+        cardImplementationAbilityId: "366:withdraw_credits",
       },
     } satisfies LegalAction;
     expect(cardCapabilityIdForAction(mismatched)).toBeNull();
@@ -172,7 +172,7 @@ function brokerAction(
   capabilityKey: "store_credits" | "withdraw_credits",
   label: string,
 ): LegalAction {
-  const sourceAbilityId = `onr_v1_154_broker:${capabilityKey}`;
+  const sourceAbilityId = `366:${capabilityKey}`;
   return {
     actionId: `action:${capabilityKey}`,
     side: "runner",

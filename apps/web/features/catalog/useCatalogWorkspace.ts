@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { PlayerView, Side } from "@netgrid/shared";
@@ -70,7 +71,7 @@ export function useCatalogWorkspace(playerView: PlayerView | undefined) {
   const [catalogFilters, setCatalogFilters] = useState<
     CatalogListResponse["filters"] | null
   >(null);
-  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(
+  const [selectedCatalogId, setSelectedCatalogId] = useState<CardDefinitionId | null>(
     null,
   );
   const [catalogDetail, setCatalogDetail] = useState<CatalogCardDetail | null>(
@@ -117,7 +118,7 @@ export function useCatalogWorkspace(playerView: PlayerView | undefined) {
   );
 
   const ensureCatalogDetails = useCallback(
-    async (cardIds: readonly string[]) => {
+    async (cardIds: readonly CardDefinitionId[]) => {
       await catalogDetailRequestCoordinatorRef.current.ensure(
         cardIds,
         (cardId) => Boolean(catalogDetailsByIdRef.current[cardId]),
