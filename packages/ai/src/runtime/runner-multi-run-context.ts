@@ -1,7 +1,4 @@
-import type {
-  AiDecisionInput,
-  LegalAction,
-} from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import {
   runnerMultiRunEventAssessment,
@@ -118,6 +115,28 @@ export function createRunnerMultiRunContext<
     });
   }
 
+  function scopedRunTargets(
+    input: AiDecisionInput,
+    offeredAction: LegalAction,
+  ) {
+    const legalActions = [offeredAction];
+    const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
+    return dependencies
+      .runTargets({
+        input: {
+          ...input,
+          legalActions,
+          playerView: { ...input.playerView, legalActions },
+        },
+        deckCapabilities,
+        strategicIntent: dependencies.strategicIntentForInput(
+          input,
+          deckCapabilities,
+        ),
+      })
+      .filter((evaluation) => evaluation.actionId === offeredAction.actionId);
+  }
+
   function runnerMultiRunTargetEvaluation(
     input: AiDecisionInput,
     action: LegalAction,
@@ -131,24 +150,9 @@ export function createRunnerMultiRunContext<
           serverId: targetServerId,
         },
       };
-      const scopedInput: AiDecisionInput = {
-        ...input,
-        legalActions: [runAction],
-        playerView: {
-          ...input.playerView,
-          legalActions: [runAction],
-        },
-      };
-      const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
-      const strategicIntent = dependencies.strategicIntentForInput(
-        input,
-        deckCapabilities,
+      return scopedRunTargets(input, runAction).find(
+        (evaluation) => evaluation.targetServerId === targetServerId,
       );
-      return dependencies.runTargets({
-        input: scopedInput,
-        deckCapabilities,
-        strategicIntent,
-      })[0];
     });
   }
 
@@ -178,26 +182,7 @@ export function createRunnerMultiRunContext<
       input,
       action,
       actionWithoutTargetCacheKey,
-      () => {
-        const scopedInput: AiDecisionInput = {
-          ...input,
-          legalActions: [action],
-          playerView: {
-            ...input.playerView,
-            legalActions: [action],
-          },
-        };
-        const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
-        const strategicIntent = dependencies.strategicIntentForInput(
-          input,
-          deckCapabilities,
-        );
-        return dependencies.runTargets({
-          input: scopedInput,
-          deckCapabilities,
-          strategicIntent,
-        })[0];
-      },
+      () => scopedRunTargets(input, action)[0],
     );
   }
 

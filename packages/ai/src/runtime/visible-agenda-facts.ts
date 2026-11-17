@@ -11,17 +11,20 @@ export function requireVisibleAgendaPoints(
   card: VisibleCard,
 ): number {
   const definition = requireVisibleCardDefinition(input, card, "agenda");
-  if (card.agendaPoints !== undefined && !Number.isFinite(card.agendaPoints))
+  if (
+    card.agendaPoints !== undefined &&
+    !Number.isSafeInteger(card.agendaPoints)
+  )
     throw new PlanResolutionFailure("invalid_player_view_card_projection", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
       owner: "rules_contract",
-      removalCondition: `Project a finite agenda-point value for ${definition.id}.`,
+      removalCondition: `Project an integer agenda-point value for ${definition.id}.`,
     });
   const agendaPoints = card.agendaPoints ?? definition.agendaPoints;
-  if (typeof agendaPoints !== "number" || !Number.isFinite(agendaPoints))
+  if (typeof agendaPoints !== "number" || !Number.isSafeInteger(agendaPoints))
     throw new PlanResolutionFailure("missing_card_definition", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -40,7 +43,8 @@ export function requireVisibleAgendaAdvancementRequirement(
   const definition = requireVisibleCardDefinition(input, card, "agenda");
   if (
     card.advancementRequirement !== undefined &&
-    !Number.isFinite(card.advancementRequirement)
+    (!Number.isSafeInteger(card.advancementRequirement) ||
+      card.advancementRequirement < 0)
   )
     throw new PlanResolutionFailure("invalid_player_view_card_projection", {
       side: input.side,
@@ -48,11 +52,15 @@ export function requireVisibleAgendaAdvancementRequirement(
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
       owner: "rules_contract",
-      removalCondition: `Project a finite effective advancement requirement for ${definition.id}.`,
+      removalCondition: `Project a nonnegative integer advancement requirement for ${definition.id}.`,
     });
   const requirement =
     card.advancementRequirement ?? definition.advancementRequirement;
-  if (typeof requirement !== "number" || !Number.isFinite(requirement))
+  if (
+    typeof requirement !== "number" ||
+    !Number.isSafeInteger(requirement) ||
+    requirement < 0
+  )
     throw new PlanResolutionFailure("missing_card_definition", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,

@@ -164,6 +164,26 @@ describe("public next-turn basic run preparation", () => {
 });
 
 describe("PlayerView projection", () => {
+  it("quotes current required Corp draws from the state without modifying either side", () => {
+    const state = createGameAfterSetup({
+      seed: "corp-mandatory-base-draw-view",
+    });
+    expect(getPlayerView(state, "corp").corpMandatoryBaseDrawQuote).toEqual({
+      baseCount: 1,
+      virusDrawCount: 0,
+    });
+    state.purgeableRunnerVirusCounters = { corp: { skivviss: 2 } };
+    const before = hashState(state);
+    expect(getPlayerView(state, "corp").corpMandatoryBaseDrawQuote).toEqual({
+      baseCount: 3,
+      virusDrawCount: 2,
+    });
+    expect(getPlayerView(state, "runner")).not.toHaveProperty(
+      "corpMandatoryBaseDrawQuote",
+    );
+    expect(hashState(state)).toBe(before);
+  });
+
   it("projects the public resolved encounter tax for both sides without exposing hands", () => {
     const state = createGameAfterSetup({ seed: "resolved-encounter-tax-view" });
     state.run = {

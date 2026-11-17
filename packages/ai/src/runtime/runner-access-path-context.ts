@@ -61,10 +61,6 @@ export type RunnerAccessPathContextDependencies = {
     input: AiDecisionInput,
   ) => VisibleCard | undefined;
   actionCreditCost: (action: LegalAction) => number;
-  estimatedEncounterBreakCost: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => number | undefined;
   assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   knownIcePathReason: (
     assessment: KnownIcePathAssessment,
@@ -332,32 +328,6 @@ export function createRunnerAccessPathContext(
       (conditionalEndRunPayment.affordable
         ? 0
         : remainingPayEndRunSubroutines.length);
-    const currentEncounterContinue = input.legalActions.find(
-      (candidate) =>
-        candidate.type === "continue_run" &&
-        candidate.payload?.encounterContinue === true,
-    );
-    if (
-      currentEncounterContinue?.payload?.encounterWillEndRun === true &&
-      remainingCurrentEndRunAfterBreak > 0 &&
-      !spendRunnerEncounterActionCost({
-        input,
-        action,
-        budget: budgetAfterBreak,
-        cost: dependencies.estimatedEncounterBreakCost(input, action) ?? 1,
-      }).affordable
-    )
-      return {
-        canPreserveAccessPath: false,
-        evidence: [
-          "break_cannot_clear_current_ice:true",
-          `break_credits_after:${creditsAfterBreak}`,
-          `break_remaining_current_end_run:${remainingCurrentEndRunAfterBreak}`,
-          `break_remaining_pay_end_run_cost:${remainingPayEndRunCost}`,
-          `break_remaining_pay_end_run_affordable:${conditionalEndRunPayment.affordable}`,
-        ],
-      };
-
     const futureIce = currentRunRemainingIce(input);
     const futureRig = runnerRigAfterEncounter(input.playerView.own.rig ?? []);
     const currentIce = dependencies.currentEncounteredIceCard(input);
@@ -405,6 +375,15 @@ export function createRunnerAccessPathContext(
         ),
       );
     };
+    const conditionalEndRunIndexes = new Set(
+      quote?.subroutines.flatMap((subroutine, index) =>
+        unbrokenIndexes.has(index) &&
+        !breakIndexes.has(index) &&
+        isVisiblePayEndRunSubroutine(subroutine)
+          ? [index]
+          : [],
+      ) ?? [],
+    );
     const remainingForcedIndexes = new Set(
       quote?.subroutines.flatMap((subroutine, index) => {
         if (!unbrokenIndexes.has(index) || breakIndexes.has(index)) return [];
@@ -446,7 +425,10 @@ export function createRunnerAccessPathContext(
         ),
       );
     let forcedContinuationPath: KnownIcePathAssessment | undefined;
-    if (remainingForcedIndexes.size > 0) {
+    if (
+      remainingForcedIndexes.size > 0 ||
+      !conditionalEndRunPayment.affordable
+    ) {
       // All current forced breaks consume the same pools, including on the
       // innermost ICE. Optional prevention must leave the whole set payable.
       // Any inner path consumes the remaining budget afterwards.
@@ -457,7 +439,7 @@ export function createRunnerAccessPathContext(
           unbroken: new Set(
             [...unbrokenIndexes].filter((index) => !breakIndexes.has(index)),
           ),
-          budget: budgetAfterBreak,
+          budget: breakPayment.budget,
         },
       ];
       const visited = new Set<string>();
@@ -474,8 +456,20 @@ export function createRunnerAccessPathContext(
         ]);
         if (visited.has(key)) continue;
         visited.add(key);
-        if (state.remaining.size === 0) {
-          const path = assessFuturePath(state.budget);
+        const currentPaymentCost = [...conditionalEndRunIndexes].reduce(
+          (cost, index) =>
+            cost +
+            (state.unbroken.has(index)
+              ? Math.max(0, Math.floor(quote?.subroutines[index]?.amount ?? 0))
+              : 0),
+          0,
+        );
+        const remainingPayment = spendRunnerEncounterGeneralCost(
+          state.budget,
+          currentPaymentCost,
+        );
+        if (state.remaining.size === 0 && remainingPayment.affordable) {
+          const path = assessFuturePath(remainingPayment.budget);
           if (
             path.canReachAccess &&
             (!forcedContinuationPath ||
@@ -499,7 +493,12 @@ export function createRunnerAccessPathContext(
           const indexes =
             dependencies.breakSubroutineIndexesForAction(candidate);
           if (
-            ![...indexes].some((index) => state.remaining.has(index)) ||
+            ![...indexes].some(
+              (index) =>
+                state.remaining.has(index) ||
+                (!remainingPayment.affordable &&
+                  conditionalEndRunIndexes.has(index)),
+            ) ||
             [...indexes].some((index) => !state.unbroken.has(index))
           )
             continue;

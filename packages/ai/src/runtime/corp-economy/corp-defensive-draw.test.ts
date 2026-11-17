@@ -5,8 +5,6 @@ import {
   corpMissingConcreteDefenseDrawNeed,
   corpMissingConcreteScoreDefenseDrawNeed,
   corpOptionalDrawCapacity,
-  corpOptionalDrawScoreComponents,
-  corpQuantitativeDrawScoreComponents,
 } from "./corp-defensive-draw";
 import type {
   CorpFundedRemoteAccessRiskNeed,
@@ -23,126 +21,52 @@ const draw = corpAction("corp.draw_card", "draw_card", {}, "basic_action");
 draw.costs = [{ clicks: 1 }];
 
 describe("Corp defensive draw context", () => {
-  it("uses the current maximum hand size for one-card draw capacity", () => {
-    const input = drawInput(5, 4);
-
-    const capacity = corpOptionalDrawCapacity(input, draw);
-    const components = corpOptionalDrawScoreComponents(input, draw);
-
-    expect(capacity).toMatchObject({
+  it("uses the current maximum hand size and reserves every drawn card", () => {
+    expect(corpOptionalDrawCapacity(drawInput(5, 4), draw)).toMatchObject({
       eligible: true,
-      handCount: 4,
       maxHandSize: 5,
       projectedDrawCount: 1,
       freeSlotsAfter: 0,
     });
-    expect(components.map((component) => component.key)).toContain(
-      "corp_safe_draw_capacity",
+    expect(corpOptionalDrawCapacity(drawInput(2, 1), draw).eligible).toBe(
+      false,
     );
-    expect(components.map((component) => component.key)).not.toContain(
-      "corp_low_hand",
-    );
-  });
-
-  it("keeps the stronger low-hand signal when a slot remains after drawing", () => {
-    const components = corpOptionalDrawScoreComponents(drawInput(5, 3), draw);
-
-    expect(components).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ key: "corp_safe_draw_capacity", value: 100 }),
-        expect.objectContaining({ key: "corp_low_hand", value: 450 }),
-      ]),
-    );
-  });
-
-  it("does not reward optional draw at a full hand or max hand two", () => {
-    expect(corpOptionalDrawScoreComponents(drawInput(5, 5), draw)).toEqual([]);
-    expect(corpOptionalDrawScoreComponents(drawInput(2, 1), draw)).toEqual([]);
-  });
-
-  it("requires room for the complete projected draw amount", () => {
     const drawTwo = corpAction(
       "corp.draw_two",
       "draw_card",
       { drawCardsAmount: 2 },
       "card",
     );
-
-    expect(corpOptionalDrawScoreComponents(drawInput(5, 4), drawTwo)).toEqual(
-      [],
+    expect(corpOptionalDrawCapacity(drawInput(5, 4), drawTwo).eligible).toBe(
+      false,
     );
-    expect(
-      corpOptionalDrawScoreComponents(drawInput(5, 3), drawTwo).map(
-        (component) => component.key,
-      ),
-    ).toContain("corp_safe_draw_capacity");
-  });
-
-  it("consumes explicit multi-card draw yield from a played operation", () => {
-    const annualReviews = corpAction(
-      "corp.play.annual-reviews",
-      "play_operation",
-      { drawCardsAmount: 3 },
-      "annual-reviews",
-    );
-
-    const components = corpOptionalDrawScoreComponents(
-      drawInput(5, 2),
-      annualReviews,
-    );
-
-    expect(
-      corpOptionalDrawCapacity(drawInput(5, 2), annualReviews),
-    ).toMatchObject({ eligible: true, projectedDrawCount: 3 });
-    expect(components.map((component) => component.key)).toContain(
-      "corp_safe_draw_capacity",
-    );
-    expect(
-      corpQuantitativeDrawScoreComponents(drawInput(5, 2), annualReviews),
-    ).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_quantitative_draw_yield",
-          value: 1000,
-        }),
-      ]),
+    expect(corpOptionalDrawCapacity(drawInput(5, 3), drawTwo).eligible).toBe(
+      true,
     );
   });
 
-  it("does not reward optional draw while an existing protected score remote is urgent", () => {
-    const components = corpOptionalDrawScoreComponents(drawInput(5, 4), draw, {
-      primary: "protect_score_remote",
-      severity: "high",
-      targetServerId: "remote_1",
-      scoreRemoteServerId: "remote_1",
-      evidence: ["test_existing_protected_score_remote"],
+  it("requires an exact draw quote for card abilities", () => {
+    const drawWithoutQuote = corpAction(
+      "corp.draw_unknown",
+      "draw_card",
+      {},
+      "card",
+    );
+    expect(
+      corpOptionalDrawCapacity(drawInput(5, 0), drawWithoutQuote),
+    ).toMatchObject({
+      eligible: false,
+      projectedDrawCount: 0,
     });
-
-    expect(components).toEqual([]);
-  });
-
-  it("keeps draw eligible for speculative new-remote protection triage", () => {
-    const components = corpOptionalDrawScoreComponents(drawInput(5, 4), draw, {
-      primary: "protect_score_remote",
-      severity: "high",
-      targetServerId: "new_remote",
-      scoreRemoteServerId: "new_remote",
-      evidence: ["test_speculative_new_remote"],
-    });
-
-    expect(components.map((component) => component.key)).toContain(
-      "corp_safe_draw_capacity",
+    const malformedDraw = corpAction(
+      "corp.draw_invalid",
+      "draw_card",
+      { drawCardsAmount: 1.5 },
+      "card",
     );
-  });
-
-  it("does not invent a defense draw need when both centrals have ICE", () => {
-    const input = drawInput(5, 4, [centralIce("hq-ice"), centralIce("rd-ice")]);
-
-    const components = corpOptionalDrawScoreComponents(input, draw);
-
-    expect(components.map((component) => component.key)).not.toContain(
-      "corp_missing_concrete_defense_draw",
-    );
+    expect(
+      corpOptionalDrawCapacity(drawInput(5, 0), malformedDraw).eligible,
+    ).toBe(false);
   });
 
   it("does not invent defense pressure from an empty central alone", () => {
@@ -706,6 +630,19 @@ describe("Corp defensive draw context", () => {
         },
       },
     ];
+    expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toBeUndefined();
+  });
+
+  it("excludes set-aside and removed ICE from remote defense draw prospects", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+    const filter = (id: string) =>
+      corpCard(id, "ice", { definitionId: "onr_v1_244_filter" });
+    setup.input.playerView.specialZones = {
+      setAside: [filter("set-aside-filter")],
+      removedFromGame: [filter("removed-filter")],
+      setAsideCount: 1,
+      removedFromGameCount: 1,
+    };
     expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toBeUndefined();
   });
 

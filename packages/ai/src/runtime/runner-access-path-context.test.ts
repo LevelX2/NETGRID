@@ -21,7 +21,6 @@ const context = createRunnerAccessPathContext({
   currentEncounteredIceCard,
   actionCreditCost: (action) =>
     action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
-  estimatedEncounterBreakCost: (input, action) => action.costs[0]?.credits,
   assessKnownRezzedIcePath,
   knownIcePathReason: () => "path",
   isRemoteServerTarget,
@@ -113,6 +112,75 @@ describe("Runner encounter remote payoff", () => {
       evidence: expect.arrayContaining([
         "encounter_credits_after_access_path:2",
       ]),
+    });
+  });
+
+  it("uses the independently quoted cheaper breaker for a remaining mandatory break", () => {
+    const first = legalAction(
+      "costly-break",
+      "runner",
+      "break_subroutine",
+      "Break",
+      { credits: 3 },
+      {
+        source: "costly-breaker",
+        payload: { subroutineIndex: 0, breakerId: "costly-breaker" },
+      },
+    );
+    const second = legalAction(
+      "cheap-break",
+      "runner",
+      "break_subroutine",
+      "Break",
+      { credits: 1 },
+      {
+        source: "cheap-breaker",
+        payload: { subroutineIndex: 1, breakerId: "cheap-breaker" },
+      },
+    );
+    const cont = legalAction(
+      "after-breaks",
+      "runner",
+      "continue_run",
+      "Continue",
+      { credits: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 2,
+          encounterSubroutineIds: "first,second",
+        },
+      },
+    );
+    const input = aiInput("runner", [first, second, cont]);
+    const ice = withEffectiveRunQuote(
+      visibleCard("wall", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        rezzed: true,
+      }),
+      {
+        effectiveStrength: 0,
+        subroutines: [
+          { id: "first", type: "end_the_run" },
+          { id: "second", type: "end_the_run" },
+        ],
+      },
+    );
+    input.playerView.traceRulesProfile = "modern_open";
+    input.playerView.own.credits = 4;
+    input.playerView.servers = [server("rd", [ice])];
+    input.playerView.run = {
+      runId: "run_1",
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      encounteredIce: ice,
+      successful: false,
+    };
+    expect(context.breakAccessPathAssessment(input, first)).toMatchObject({
+      canPreserveAccessPath: true,
+      evidence: expect.arrayContaining(["break_credits_after:0"]),
     });
   });
 

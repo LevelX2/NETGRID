@@ -864,6 +864,15 @@ function sanitizePlayerView(
       view.runnerNextTurnCreditClicks < 0)
   )
     throw new Error("Invalid Engine Runner next-turn credit-click forecast.");
+  const mandatoryDraw = view.corpMandatoryBaseDrawQuote;
+  if (mandatoryDraw !== undefined &&
+    (view.side !== "corp" ||
+      !isNonNegativeSafeInteger(mandatoryDraw.virusDrawCount) ||
+      !isNonNegativeSafeInteger(mandatoryDraw.baseCount) ||
+      mandatoryDraw.baseCount <= mandatoryDraw.virusDrawCount)
+  ) {
+    throw new Error("Invalid Engine Corp mandatory base draw quote.");
+  }
   const futureCorpClicks = view.own.corpFutureFlexibleClicks;
   if (
     futureCorpClicks !== undefined &&
@@ -889,6 +898,12 @@ function sanitizePlayerView(
   return {
     side: view.side,
     stateVersion: view.stateVersion,
+    ...(mandatoryDraw
+      ? { corpMandatoryBaseDrawQuote: {
+        baseCount: mandatoryDraw.baseCount,
+        virusDrawCount: mandatoryDraw.virusDrawCount,
+      } }
+      : {}),
     ...(view.runnerNextTurnCreditClicks !== undefined
       ? { runnerNextTurnCreditClicks: view.runnerNextTurnCreditClicks }
       : {}),

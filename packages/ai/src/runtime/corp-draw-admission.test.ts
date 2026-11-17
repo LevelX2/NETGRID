@@ -277,6 +277,20 @@ describe("Corp draw admission", () => {
     });
   });
 
+  it("reserves the current mandatory base draw when it exceeds the standard floor", () => {
+    expect(
+      assessment({
+        consequenceFacts: consequenceFacts({
+          remainingDeckCardsBeforeDraw: 4,
+          mandatoryBaseDrawCount: 4,
+        }),
+      }),
+    ).toMatchObject({
+      disposition: "blocked_deckout_horizon",
+      mandatoryDrawHorizonAfterDraw: 3,
+    });
+  });
+
   it("admits a terminal defense draw despite a short mandatory-draw horizon", () => {
     expect(
       assessment({

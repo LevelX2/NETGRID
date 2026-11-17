@@ -1,3 +1,4 @@
+import { corpMandatoryBaseDrawQuote } from "../corp/score-mandatory-draw-horizon";
 // ARCH-5R extracts only the read-only PlayerView projection.
 // This module creates no LegalActions, executes no actions, and mutates no
 // GameState. The host passes LegalActions in from the game legal-actions facade.
@@ -676,6 +677,9 @@ export function buildPlayerViewProjection(
           memoryLimit: runnerMemoryLimit(state),
         },
     servers: visibleServers,
+    ...(side === "corp"
+      ? { corpMandatoryBaseDrawQuote: corpMandatoryBaseDrawQuote(state) }
+      : {}),
     ...(corpCentralAccessQuotes
       ? { corpCentralAccessQuotes: [...corpCentralAccessQuotes] }
       : {}),

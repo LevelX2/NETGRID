@@ -4376,6 +4376,11 @@ export type PlayerView = {
   };
   /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
   corpCentralAccessQuotes?: CorpCentralAccessQuote[];
+  /** Required base draws under the current Corp-visible position. Optional draws are excluded. */
+  corpMandatoryBaseDrawQuote?: {
+    baseCount: number;
+    virusDrawCount: number;
+  };
   /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
   corpPunishRouteQuoteSet?: CorpPunishRouteQuoteSet;
   run?: {

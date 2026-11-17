@@ -145,6 +145,21 @@ describe("remote-contest-candidate", () => {
     ).toBeUndefined();
   });
 
+  it("preserves an unknown score gap through JSON", () => {
+    const result = evaluateRemoteContestCandidate({
+      frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+      top: rankedAction("run-remote"),
+      topActionType: "start_run",
+      scoreGap: null,
+    });
+    expect(result).toMatchObject({
+      scoreGap: null,
+      candidateStatus: "blocked",
+      blockedReason: "remote_contest_score_gap_unknown",
+    });
+    expect(JSON.parse(JSON.stringify(result)).scoreGap).toBeNull();
+  });
+
   it.each([
     { scoreGap: Number.NaN, scoreGapThreshold: 0 },
     { scoreGap: Number.POSITIVE_INFINITY, scoreGapThreshold: 0 },
@@ -181,7 +196,10 @@ function frame(candidate: ActionSemanticCandidate): SemanticDecisionFrame {
       runTargets: [
         {
           schemaVersion: "runner-run-target-evaluation-v1",
-          accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" as const },
+          accessFacts: {
+            knownTargetDefinitionIds: [],
+            trashBudget: "unknown" as const,
+          },
           targetServerId: "remote_1",
           targetKind: "remote",
           accessServerId: "remote_1",

@@ -58,7 +58,6 @@ describe("AI public export contract", () => {
       "formatDoctrineQualityBenchmarkReport",
       "evaluateDoctrineQualityGate",
       "buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries",
-      "evaluatePracticalTacticBenchmark",
       "simulateAiGame",
     ];
 

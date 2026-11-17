@@ -1307,6 +1307,8 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
   if (
     !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
       remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
+      mandatoryBaseDrawCount:
+        input.playerView.corpMandatoryBaseDrawQuote?.baseCount,
       netDeckConsumption: netDeckConsumption!,
       terminalNeedBeforeMandatoryDraw:
         admittedTerminalDraw || exactTerminalScoreSupport,

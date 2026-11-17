@@ -121,7 +121,9 @@ export function buildCorpIceDensityProfile(
   };
 }
 
-function visibleCorpCardsOutsideRd(input: AiDecisionInput): VisibleCard[] {
+export function visibleCorpCardsOutsideRd(
+  input: AiDecisionInput,
+): VisibleCard[] {
   const cards = [
     ...input.playerView.own.gripOrHq,
     ...input.playerView.own.heapOrArchives,

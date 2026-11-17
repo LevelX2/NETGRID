@@ -77,6 +77,7 @@ export function assessCorpDrawAdmission(params: {
     knownAgendaCount: number;
     safeDiscardCandidateCount: number;
     remainingDeckCardsBeforeDraw: number;
+    mandatoryBaseDrawCount?: number | undefined;
     terminalNeedBeforeMandatoryDraw: boolean;
   };
   allowFinalClickScoreMaterialReplacement?: boolean;
@@ -144,6 +145,7 @@ export function assessCorpDrawAdmission(params: {
   const deckoutHorizonUnsafe = corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
     remainingDeckCardsBeforeDraw,
     netDeckConsumption,
+    mandatoryBaseDrawCount: params.consequenceFacts.mandatoryBaseDrawCount,
     terminalNeedBeforeMandatoryDraw,
   });
   const punishSearch = params.punishSearch;
@@ -334,12 +336,14 @@ export function assessCorpDrawAdmission(params: {
 export function corpVoluntaryDrawLeavesUnsafeMandatoryHorizon(params: {
   remainingDeckCardsBeforeDraw: number;
   netDeckConsumption: number;
+  mandatoryBaseDrawCount?: number | undefined;
   terminalNeedBeforeMandatoryDraw: boolean;
 }): boolean {
   return (
     nonNegativeSafeInteger(params.remainingDeckCardsBeforeDraw) &&
     Number.isSafeInteger(params.netDeckConsumption) &&
-    params.remainingDeckCardsBeforeDraw - params.netDeckConsumption < 3 &&
+    params.remainingDeckCardsBeforeDraw - params.netDeckConsumption <
+      Math.max(3, params.mandatoryBaseDrawCount ?? 0) &&
     !params.terminalNeedBeforeMandatoryDraw
   );
 }

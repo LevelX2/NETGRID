@@ -686,6 +686,12 @@ Ein tatsächlicher sofortiger Sieg oder eine exakt vorhandene kostenlose
 Scorefolge zum Sieg bleibt zulässig. Zusätzliche Draws und gegnerische
 Folgeaktionen sind damit nicht als harmlos bewiesen.
 
+Für die allgemeine Score-Machbarkeit liefert die aktuelle Corp-PlayerView
+die Pflichtzieh-Untergrenze aus gewerteten Agendas und wirksamen Viruscountern.
+Optionale Draws aus früheren Zügen fließen in diese Quote nicht ein. Der
+Runner-Virus-Purge bewertet verbleibende Corp-Züge nach Wegfall der gequoteten
+Virus-Draws. So verwenden Score-Owner und Purge-Bewertung denselben Engine-Stand.
+
 Vor einem nichtterminalen Same-Turn-Score berücksichtigt der Score-Owner bedingte
 Creditwirkungen aus dem kanonischen strukturierten Scoreprofil. Ist die Agenda
 bereits kostenlos scorebar und ihre Bonusschwelle mit den verbleibenden,

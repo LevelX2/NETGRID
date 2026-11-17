@@ -121,6 +121,8 @@ export function corpOptionalActionCapacityConversions(
       input.playerView.own.gripOrHq.length < input.playerView.own.maxHandSize &&
       !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
         remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
+        mandatoryBaseDrawCount:
+          input.playerView.corpMandatoryBaseDrawQuote?.baseCount,
         netDeckConsumption: 1,
         terminalNeedBeforeMandatoryDraw: false,
       });

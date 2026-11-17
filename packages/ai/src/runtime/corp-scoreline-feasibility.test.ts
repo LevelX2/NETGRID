@@ -37,11 +37,15 @@ describe("corpScorelineFeasibilityForDecisionInput", () => {
     });
   });
 
-  it("counts mandatory draw windows instead of raw deck cards when a public extra draw is active", () => {
+  it("uses current mandatory draws when the previous draw included optional cards", () => {
     const input = aiInput("corp", []);
     input.playerView.own.agendaPoints = 6;
     input.playerView.opponent.agendaPoints = 0;
     input.playerView.own.stackOrRdCount = 2;
+    input.playerView.corpMandatoryBaseDrawQuote = {
+      baseCount: 2,
+      virusDrawCount: 1,
+    };
     input.playerView.publicEvents.push({
       eventId: "evt-extra-mandatory-draw",
       type: "mandatory_draw",
@@ -54,10 +58,10 @@ describe("corpScorelineFeasibilityForDecisionInput", () => {
         label: "Korp Pflichtkarten ziehen",
         corpMandatoryDraw: true,
         corpMandatoryCardCount: 1,
-        corpMandatoryAdditionalCardCount: 1,
-        corpMandatoryTotalBaseDrawCount: 2,
+        corpMandatoryAdditionalCardCount: 3,
+        corpMandatoryTotalBaseDrawCount: 4,
         corpMandatoryAgendaCardCount: 0,
-        corpMandatoryOptionalAgendaCardCount: 0,
+        corpMandatoryOptionalAgendaCardCount: 2,
         corpMandatorySkivvissCardCount: 1,
         corpMandatoryAdditionalSourceCount: 1,
         corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",

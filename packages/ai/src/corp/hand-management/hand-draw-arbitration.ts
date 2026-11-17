@@ -242,6 +242,8 @@ export function arbitrateCorpHandConversionBeforeDraw(
         params.parentProvidesExactSameTurnCapacityRelease ?? false,
       consequenceFacts: {
         ...consequenceFacts,
+        mandatoryBaseDrawCount:
+          input.playerView.corpMandatoryBaseDrawQuote?.baseCount,
         safeDiscardCandidateCount: knownNonAgendaCleanupCandidates,
         terminalNeedBeforeMandatoryDraw:
           params.terminalNeedBeforeMandatoryDraw ?? false,

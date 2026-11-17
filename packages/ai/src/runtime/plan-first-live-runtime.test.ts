@@ -14775,6 +14775,7 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1"),
     ];
+    input.playerView.corpMandatoryBaseDrawQuote = { baseCount: 2, virusDrawCount: 1 };
     input.playerView.publicEvents.push({
       eventId: "terminal-extra-mandatory-draw",
       type: "mandatory_draw",

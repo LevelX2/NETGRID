@@ -5,6 +5,7 @@ import { selectedDiscardChoiceOptionIds } from "../../runtime/discard-choice-sel
 import {
   PendingChoice,
   PendingChoiceOptions,
+  exactCurrentChoiceAction,
   unresolvedChoiceFailure,
 } from "../../runtime/plan-bound-choice-contract";
 import type {
@@ -485,8 +486,6 @@ export function selectedRunnerTraceBaseLinkOptionId(
       : typeof selectedOption?.value === "string"
         ? selectedOption.value
         : undefined;
-  const [requirement] = action.choiceRequirements ?? [];
-  const optionIds = selectableOptions.map((option) => option.id);
   const exactBinding =
     portfolio?.side === "runner" &&
     executor !== undefined &&
@@ -510,17 +509,7 @@ export function selectedRunnerTraceBaseLinkOptionId(
         (input.playerView.own.rig ?? []).some(
           (card) => card.known && card.instanceId === selectedSourceId,
         ))) &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    exactCurrentChoiceAction(input, choice) === action;
   if (!exactBinding || !selectedOption) {
     throw unresolvedChoiceFailure(
       input,
@@ -578,8 +567,6 @@ export function selectedRunnerTraceSuccessCancelOptionId(
             entry.sourceCardInstanceId === selectedSourceId &&
             entry.activationCost <= input.playerView.own.credits,
         );
-  const [requirement] = action.choiceRequirements ?? [];
-  const optionIds = selectableOptions.map((option) => option.id);
   const exactBinding =
     portfolio?.side === "runner" &&
     executor !== undefined &&
@@ -605,17 +592,7 @@ export function selectedRunnerTraceSuccessCancelOptionId(
         (input.playerView.own.rig ?? []).some(
           (card) => card.known && card.instanceId === selectedSourceId,
         ))) &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    exactCurrentChoiceAction(input, choice) === action;
   if (!exactBinding || !selectedOption) {
     throw unresolvedChoiceFailure(
       input,

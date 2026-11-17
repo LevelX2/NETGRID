@@ -12,7 +12,6 @@ import {
 } from "@netgrid/engine";
 import type { CorpBoardTriage } from "../../runtime/semantic-runtime-corp-board-triage";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../../runtime/semantic-runtime-corp-central-pressure";
-import { currentCorpMandatoryDrawCardsPerWindow } from "../../runtime/corp-scoreline-feasibility";
 
 type VisibleVirusCounterCard = {
   card: VisibleCard;
@@ -106,15 +105,16 @@ export function assessCorpPurgeImpact(
     0,
   );
   const remainingDeckCards = input.playerView.own.stackOrRdCount;
+  const drawQuote = input.playerView.corpMandatoryBaseDrawQuote;
+  const drawsPerWindow =
+    drawQuote &&
+    (action.type === "purge_runner_virus_counters"
+      ? drawQuote.baseCount - drawQuote.virusDrawCount
+      : drawQuote.baseCount);
+  if (recurringActionLoss > 0 && drawsPerWindow === undefined) return undefined;
   const recoveryTurns =
-    typeof remainingDeckCards === "number"
-      ? Math.min(
-          4,
-          Math.floor(
-            Math.max(0, remainingDeckCards) /
-              currentCorpMandatoryDrawCardsPerWindow(input.playerView),
-          ),
-        )
+    remainingDeckCards !== undefined && drawsPerWindow !== undefined
+      ? Math.min(4, Math.floor(remainingDeckCards / drawsPerWindow))
       : 0;
   const preventedActionLoss = recoveryTurns * Math.min(3, recurringActionLoss);
 

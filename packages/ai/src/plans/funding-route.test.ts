@@ -250,6 +250,44 @@ describe("funding routes", () => {
     );
   });
 
+  it("cannot use tomorrow's gains to pay a current funding action", () => {
+    const demand = createRunnerCreditDemand({
+      demandId: "future-credit-timing",
+      purpose: "breaker_for_current_plan",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "start_of_next_own_turn",
+      currentCredits: 1,
+      targetCredits: 6,
+    });
+    const paidAction = liquidCandidate("current-paid", 4, { creditCost: 2 });
+    const tomorrow = {
+      projectionId: "tomorrow",
+      netLiquidCreditGain: 3,
+      clickCost: 0,
+      earliestOwnTurnOffset: 1 as const,
+      reliability: "guaranteed" as const,
+    };
+    expect(
+      searchFundingRoutes({
+        demand,
+        candidates: [paidAction],
+        remainingClicks: 1,
+        futureProjections: [tomorrow],
+      }).bestRoute.status,
+    ).toBe("uncovered");
+
+    const result = searchFundingRoutes({
+      demand,
+      candidates: [paidAction, liquidCandidate("today", 1)],
+      remainingClicks: 2,
+      futureProjections: [tomorrow],
+    });
+    expect(result.bestRoute.steps.map((step) => step.ownTurnOffset)).toEqual([
+      0, 0, 1,
+    ]);
+  });
+
   it("allows a guaranteed route to cover a hard blocker", () => {
     const demand = runnerDemand({ currentCredits: 0, targetCredits: 2 });
     const result = searchFundingRoutes({
