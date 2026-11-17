@@ -153,6 +153,33 @@ describe("corp ICE action and Engine quote facts", () => {
     });
   });
 
+  it("rejects a new-remote quote that points to an already existing server", () => {
+    const wall = corpIce("wall");
+    const action = installIceAction(wall, "new_remote");
+    action.payload = {
+      ...action.payload,
+      postInstallRezQuoteCardId: wall.instanceId,
+      postInstallRezQuoteTargetServerId: "new_remote",
+      postInstallRezQuoteProjectedServerId: "remote_1",
+      postInstallRezQuoteExpiresAtStateVersion: 1,
+      postInstallRezQuoteComplete: true,
+      postInstallRezQuoteBaseCredits: 3,
+      postInstallRezQuoteFinalCredits: 3,
+      postInstallRezQuoteMandatoryAgendaPointCost: 0,
+    };
+    const input = corpInput({ hq: [wall], servers: [server("hq", [])] });
+    input.legalActions = [action];
+    expect(corpIcePlacementPostInstallRezCostFact(input, action)).toMatchObject({
+      status: "known",
+      amount: 3,
+    });
+    input.playerView.servers.push(server("remote_1", []));
+    expect(corpIcePlacementPostInstallRezCostFact(input, action)).toMatchObject({
+      status: "unknown",
+      reason: "binding_drift",
+    });
+  });
+
   it.each([
     [
       "missing",

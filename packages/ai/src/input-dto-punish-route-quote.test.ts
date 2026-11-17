@@ -59,6 +59,28 @@ describe("AI input DTO Corp punish-route quote contract", () => {
     ).not.toHaveProperty("currentLegalAction");
   });
 
+  it("projects only declared fields from nested actor-private quote facts", () => {
+    const action = damageAction("tag-source", "tag-action");
+    const input = aiInput("corp", [action]);
+    const quoteSet = completeQuoteSet(action);
+    const route = quoteSet.routes[0]!;
+    for (const object of [
+      route.requestEcho.steps[0]!,
+      route.tagTrigger,
+      route.tagOutcomeEnvelope!.projectedRunnerTags,
+      route.responsePaymentEnvelope.totalCorpCredits,
+      route.damageEnvelope.rawDamage,
+      route.damageEnvelope.visiblePiercing.creditCost,
+    ]) {
+      Object.assign(object, { privatePayload: "unprojected-entry" });
+    }
+    input.playerView.corpPunishRouteQuoteSet = quoteSet;
+
+    const result = dtoFor(input.playerView, [action]).corpPunishRouteQuoteSet;
+    expect(result?.routes[0]?.routeId).toBe(route.routeId);
+    expect(JSON.stringify(result)).not.toContain("unprojected-entry");
+  });
+
   it("drops stale or non-Corp actor-private quote sets", () => {
     const action = damageAction("tag-source", "tag-action");
     const corpInput = aiInput("corp", [action]);

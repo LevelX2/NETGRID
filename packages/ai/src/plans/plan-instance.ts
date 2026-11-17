@@ -24,7 +24,6 @@ export function instantiatePlanProposal(
   proposal: PlanProposal,
   stateVersion: number,
 ): PlanInstance {
-  const normalizedVersion = nonNegativeInteger(stateVersion);
   const instance: PlanInstance = {
     instanceId: planInstanceIdForProposal(proposal),
     dedupeKey: normalizedIdentityToken(proposal.dedupeKey),
@@ -37,18 +36,7 @@ export function instantiatePlanProposal(
     portfolioRole: "unassigned",
     executionState: "idle",
     persistencePolicy: proposal.persistencePolicy,
-    retentionPolicy: {
-      ...proposal.retentionPolicy,
-      blockedStateVersionTtl: nonNegativeInteger(
-        proposal.retentionPolicy.blockedStateVersionTtl,
-      ),
-      dormantStateVersionTtl: nonNegativeInteger(
-        proposal.retentionPolicy.dormantStateVersionTtl,
-      ),
-      completedHistoryStateVersionTtl: nonNegativeInteger(
-        proposal.retentionPolicy.completedHistoryStateVersionTtl,
-      ),
-    },
+    retentionPolicy: { ...proposal.retentionPolicy },
     ...(proposal.target ? { target: { ...proposal.target } } : {}),
     ...(proposal.parentInstanceId
       ? { parentInstanceId: proposal.parentInstanceId }
@@ -79,8 +67,8 @@ export function instantiatePlanProposal(
       milestone: proposal.milestone,
       reasonCode: "plan_instance_created",
     },
-    createdAtStateVersion: normalizedVersion,
-    updatedAtStateVersion: normalizedVersion,
+    createdAtStateVersion: stateVersion,
+    updatedAtStateVersion: stateVersion,
     evidenceRefs: normalizeEvidenceRefs(proposal.evidenceRefs),
   };
   assertValidPlanInstance(instance);
@@ -159,12 +147,22 @@ export function planInstanceStateIssues(
     issues.push("ready_plan_has_blocker");
   }
   if (
+    !nonNegativeSafeInteger(instance.createdAtStateVersion) ||
+    !nonNegativeSafeInteger(instance.updatedAtStateVersion) ||
     instance.createdAtStateVersion > instance.updatedAtStateVersion ||
     (instance.lastProductiveAtStateVersion !== undefined &&
-      (instance.lastProductiveAtStateVersion < instance.createdAtStateVersion ||
+      (!nonNegativeSafeInteger(instance.lastProductiveAtStateVersion) ||
+        instance.lastProductiveAtStateVersion < instance.createdAtStateVersion ||
         instance.lastProductiveAtStateVersion > instance.updatedAtStateVersion))
   ) {
     issues.push("invalid_state_version_order");
+  }
+  if (
+    !nonNegativeSafeInteger(instance.retentionPolicy.blockedStateVersionTtl) ||
+    !nonNegativeSafeInteger(instance.retentionPolicy.dormantStateVersionTtl) ||
+    !nonNegativeSafeInteger(instance.retentionPolicy.completedHistoryStateVersionTtl)
+  ) {
+    issues.push("invalid_retention_policy");
   }
   return issues;
 }
@@ -199,9 +197,8 @@ function normalizedIdentityToken(value: string): string {
   return value.trim().replace(/\s+/g, "_").slice(0, 160);
 }
 
-function nonNegativeInteger(value: number): number {
-  if (!Number.isFinite(value)) return 0;
-  return Math.max(0, Math.floor(value));
+function nonNegativeSafeInteger(value: number): boolean {
+  return Number.isSafeInteger(value) && value >= 0;
 }
 
 function normalizeEvidenceRefs(

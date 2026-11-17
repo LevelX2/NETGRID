@@ -17,10 +17,6 @@ import {
   retainActionAlternativesForFindingWindows,
   stripSelfplayActionAlternatives,
 } from "./selfplay-trace-facts";
-import {
-  countPassiveActionWithScoreLineAvailable,
-  countUnsafeScoreChosen,
-} from "./score-window-counts";
 import { CURRENT_BENCHMARK_SEEDS } from "./soak-seed-data";
 
 export type AiSelfplayTraceMiningRunnerDependencies = {
@@ -165,9 +161,6 @@ export function createAiSelfplayTraceMiningRunner(
           summary.winner === "corp" && summary.gameEndReason === "flatline",
       ).length,
       scoreWindowMissed: progression.missedScoreWindows,
-      unsafeScoreChosen: countUnsafeScoreChosen(summaries),
-      passiveActionWithScoreLineAvailable:
-        countPassiveActionWithScoreLineAvailable(summaries),
       actionLimitClusters: summarizeSelfplayActionLimitClusters(summaries),
       actionLimitSubclusters:
         summarizeSelfplayActionLimitSubclusters(summaries),

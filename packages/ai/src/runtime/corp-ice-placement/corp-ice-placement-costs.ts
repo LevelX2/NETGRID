@@ -158,6 +158,12 @@ export function corpIcePlacementPostInstallRezCostFact(
     };
   }
   const projectedServerId = payload.postInstallRezQuoteProjectedServerId;
+  if (
+    targetServerId === "new_remote" &&
+    input.playerView.servers.some(({ id }) => id === projectedServerId)
+  ) {
+    return { status: "unknown", reason: "binding_drift", source };
+  }
   const baseCredits = payload.postInstallRezQuoteBaseCredits;
   const finalCredits = payload.postInstallRezQuoteFinalCredits;
   const mandatoryAgendaPointCost =

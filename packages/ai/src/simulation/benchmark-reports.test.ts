@@ -512,10 +512,6 @@ describe("benchmark report formatting", () => {
     expect(result.aggregate.runnerAgendaSteals).toBeGreaterThanOrEqual(0);
     expect(result.aggregate.corpFlatlines).toBeGreaterThanOrEqual(0);
     expect(result.aggregate.scoreWindowMissed).toBeGreaterThanOrEqual(0);
-    expect(result.aggregate.unsafeScoreChosen).toBeGreaterThanOrEqual(0);
-    expect(
-      result.aggregate.passiveActionWithScoreLineAvailable,
-    ).toBeGreaterThanOrEqual(0);
     expect(
       Object.values(result.aggregate.actionLimitClusters).reduce(
         (sum, count) => sum + count,
@@ -533,8 +529,6 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("| allRedactionSafe | 1 |");
     expect(report).toContain("| averageGameLength |");
     expect(report).toContain("| scoreWindowMissed |");
-    expect(report).toContain("| unsafeScoreChosen |");
-    expect(report).toContain("| passiveActionWithScoreLineAvailable |");
     expect(report).toContain("## Action Type Dominance");
     expect(report).toContain("- Status:");
     expect(report).toContain(
@@ -965,7 +959,7 @@ describe("benchmark report formatting", () => {
           reasonCode: "corp.semantic.basic_economy_draw",
           evidence: ["activeFundingNeed:false"],
           corpCreditsBelowCheapestRelevantRez: true,
-          corpScoreTerminalWindowScoreLegal: true,
+          scoreActionsAvailable: 1,
         }),
       ],
       errors: [],
@@ -981,7 +975,7 @@ describe("benchmark report formatting", () => {
           selectedActionId: "corp-no-need-gain",
           reasonCode: "corp.semantic.basic_economy_draw",
           evidence: ["activeFundingNeed:false"],
-          corpScoreTerminalWindowScoreLegal: true,
+          scoreActionsAvailable: 1,
         }),
       ],
     };

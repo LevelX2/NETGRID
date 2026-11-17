@@ -89,6 +89,9 @@ export function assessCorpScoreRushRisk(params: {
     !beforeScore.runnerCanReachAccessNow ||
     !beforeScore.agendaStealRelevantNow
   ) {
+    if (remainingAdvancementClicks > 3) {
+      return result("unknown", "score_horizon_too_slow");
+    }
     return result("accepted", "runner_cannot_reach_before_score");
   }
   if (terminalSteal) return result("rejected", "terminal_steal_risk");

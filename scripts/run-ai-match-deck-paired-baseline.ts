@@ -367,8 +367,6 @@ function legScore(leg: LegOutput | undefined) {
     corpAgendaScores: leg.traceMiningAggregate.corpAgendaScores,
     runnerAgendaSteals: leg.traceMiningAggregate.runnerAgendaSteals,
     corpFlatlines: leg.traceMiningAggregate.corpFlatlines,
-    passiveActionWithScoreLineAvailable:
-      leg.traceMiningAggregate.passiveActionWithScoreLineAvailable,
   };
 }
 
@@ -552,14 +550,6 @@ function combineTraceMiningAggregates(
     scoreWindowMissed: sumAggregates(
       aggregates,
       (aggregate) => aggregate.scoreWindowMissed,
-    ),
-    unsafeScoreChosen: sumAggregates(
-      aggregates,
-      (aggregate) => aggregate.unsafeScoreChosen,
-    ),
-    passiveActionWithScoreLineAvailable: sumAggregates(
-      aggregates,
-      (aggregate) => aggregate.passiveActionWithScoreLineAvailable,
     ),
     actionLimitClusters: mergeNumericRecords(
       aggregates.map((aggregate) => aggregate.actionLimitClusters),

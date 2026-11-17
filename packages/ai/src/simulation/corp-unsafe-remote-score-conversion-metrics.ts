@@ -66,8 +66,6 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   | "corpScoreWindowCompressionRate"
   | "corpScoreWindowCompressionSkipped"
   | "corpNonEssentialActionBeforeScoreWindow"
-  | "corpEconomyBeforeScoreWindow"
-  | "corpEconomyBeforeScoreWindowNecessary"
   | "corpProtectionBeforeScoreWindow"
   | "corpProtectionBeforeScoreWindowNoSafetyDelta"
   | "corpCentralProtectionBeforeScoreWindow"
@@ -179,8 +177,6 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   let corpScoreWindowCompressionTaken = 0;
   let corpScoreWindowCompressionSkipped = 0;
   let corpNonEssentialActionBeforeScoreWindow = 0;
-  let corpEconomyBeforeScoreWindow = 0;
-  let corpEconomyBeforeScoreWindowNecessary = 0;
   let corpProtectionBeforeScoreWindow = 0;
   let corpProtectionBeforeScoreWindowNoSafetyDelta = 0;
   let corpCentralProtectionBeforeScoreWindow = 0;
@@ -436,15 +432,6 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
           corpRunnerStealAfterDelayedScoreWindow += 1;
         }
       }
-      if (hasEvidenceFlag(entry, "corp_economy_before_score_window:true"))
-        corpEconomyBeforeScoreWindow += 1;
-      if (
-        hasEvidenceFlag(
-          entry,
-          "corp_economy_before_score_window_necessary:true",
-        )
-      )
-        corpEconomyBeforeScoreWindowNecessary += 1;
       if (hasEvidenceFlag(entry, "corp_protection_before_score_window:true"))
         corpProtectionBeforeScoreWindow += 1;
       if (
@@ -751,8 +738,6 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         : 0,
     corpScoreWindowCompressionSkipped,
     corpNonEssentialActionBeforeScoreWindow,
-    corpEconomyBeforeScoreWindow,
-    corpEconomyBeforeScoreWindowNecessary,
     corpProtectionBeforeScoreWindow,
     corpProtectionBeforeScoreWindowNoSafetyDelta,
     corpCentralProtectionBeforeScoreWindow,

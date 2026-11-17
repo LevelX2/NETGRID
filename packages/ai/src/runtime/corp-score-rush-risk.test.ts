@@ -53,6 +53,17 @@ describe("assessCorpScoreRushRisk", () => {
       admission: "accepted",
       reason: "runner_cannot_reach_before_score",
     });
+    expect(
+      assessCorpScoreRushRisk({
+        input,
+        server: target,
+        agendaPoints: 2,
+        remainingAdvancementClicks: 4,
+      }),
+    ).toMatchObject({
+      admission: "unknown",
+      reason: "score_horizon_too_slow",
+    });
   });
 });
 

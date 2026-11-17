@@ -82,6 +82,7 @@ export function runnerEconomySkipReasonForDiagnostics(context: {
   installsBreaker: boolean;
   advancedRemoteContestTaken: boolean;
   pressureAction: boolean;
+  runStarted: boolean;
 }): RunnerEconomySkipReason {
   if (context.advancedRemoteContestTaken) return "remote_contest";
   if (context.action.type === "trash_accessed_card") return "trash";
@@ -89,7 +90,7 @@ export function runnerEconomySkipReasonForDiagnostics(context: {
   if (context.setupAction) return "setup";
   if (context.draw) return "draw";
   if (context.pressureAction) return "pressure";
-  if (context.action.type === "start_run") return "run";
+  if (context.runStarted) return "run";
   if (context.action.type === "end_turn") return "end_turn";
   return "unknown_higher_priority";
 }

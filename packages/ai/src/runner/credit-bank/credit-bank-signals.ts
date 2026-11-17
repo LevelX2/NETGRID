@@ -204,7 +204,6 @@ export function runnerCreditBankSignals(
             rejectedActionIds: installActionIds,
             priorityClass: "P5" as const,
             currentStoredCredits,
-            portfolioStoredCredits,
             estimatedPayout,
             value: 0,
             evidenceCodes: [
@@ -241,7 +240,6 @@ export function runnerCreditBankSignals(
             actionIds: installActionIds,
             priorityClass: "P5" as const,
             currentStoredCredits,
-            portfolioStoredCredits,
             estimatedPayout,
             prospectivePlan,
             value: 180,
@@ -259,7 +257,6 @@ export function runnerCreditBankSignals(
           actionIds: installActionIds,
           priorityClass: "P5" as const,
           currentStoredCredits,
-          portfolioStoredCredits,
           estimatedPayout,
           prospectivePlan,
           value: 350,
@@ -460,7 +457,6 @@ export function runnerCreditBankSignals(
               ? ("P2" as const)
               : ("P4" as const)),
           currentStoredCredits,
-          portfolioStoredCredits,
           estimatedPayout,
           ...(investment ? { investment } : {}),
           value: concreteFundingNeed
@@ -513,7 +509,6 @@ export function runnerCreditBankSignals(
           ],
           priorityClass: "P6",
           currentStoredCredits,
-          portfolioStoredCredits,
           estimatedPayout,
           liquidityFunding: liquiditySupport.funding,
           value: 0,
@@ -549,7 +544,6 @@ export function runnerCreditBankSignals(
           ],
           priorityClass: "P5" as const,
           currentStoredCredits,
-          portfolioStoredCredits,
           estimatedPayout,
           ...(investment ? { investment } : {}),
           value: 0,
@@ -599,7 +593,6 @@ export function runnerCreditBankSignals(
             ? ("P4" as const)
             : ("P5" as const),
         currentStoredCredits,
-        portfolioStoredCredits,
         estimatedPayout,
         ...(investment ? { investment } : {}),
         value:

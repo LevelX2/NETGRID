@@ -109,6 +109,7 @@ export type AiGameSimulatorDependencies = {
     action: LegalAction,
     targetServerId: string | undefined,
     stateAfterAction: GameState,
+    runStarted: boolean,
   ) => ActionSequenceEntryDiagnostics;
   tagPunishWindowDiagnosticsForSimulationAction: (
     input: AiDecisionInput,
@@ -178,7 +179,7 @@ export function createAiGameSimulator(
         cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
         metrics: metricsFor(
           [],
-          deckSupportErrors,
+          { illegalActions: 0, total: deckSupportErrors.length },
           false,
           isHoldoutSeed(
             config.seed ?? "ai-vs-ai-smoke",
@@ -291,6 +292,7 @@ export function createAiGameSimulator(
     const agendaProgression = createAgendaProgressionObserver();
     const errors: string[] = [];
     const runtimeFailures: AiSimulationRuntimeFailure[] = [];
+    let illegalActions = 0;
     const maxActions = config.maxActions ?? 120;
     let completedTurns = 0;
 
@@ -387,6 +389,7 @@ export function createAiGameSimulator(
             ? randomizedResult.receipt.selectedLegalAction
             : undefined;
       if (!action) {
+        illegalActions += 1;
         const failure = classifiedSimulationRuntimeFailure({
           code:
             randomizedResult && !randomizedResult.ok
@@ -415,6 +418,7 @@ export function createAiGameSimulator(
           idempotencyKey: `ai-sim-${index}`,
         });
       if (!result.ok) {
+        illegalActions += 1;
         const failure = classifiedSimulationRuntimeFailure({
           code: `engine_apply_action_rejected:${result.error.code}`,
           owner: "rules_contract",
@@ -426,12 +430,8 @@ export function createAiGameSimulator(
         errors.push(simulationRuntimeFailureToken(failure));
         break;
       }
-      const { targetServerId, corpNewRemoteCreated } = simulationActionLocation(
-        action,
-        result.event,
-        stateBeforeAction,
-        result.state,
-      );
+      const { targetServerId, corpNewRemoteCreated, runnerRunStarted } =
+        simulationActionLocation(action, result.event, stateBeforeAction, result.state);
       const targetCardIds = targetCardIdsForSimulationAction(
         input,
         decision,
@@ -518,6 +518,7 @@ export function createAiGameSimulator(
           action,
           targetServerId,
           result.state,
+          runnerRunStarted === true,
         );
       const tagPunishDiagnostics =
         tagPunishWindowDiagnosticsForSimulationAction(
@@ -647,7 +648,7 @@ export function createAiGameSimulator(
       cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
       metrics: metricsFor(
         actionSequence,
-        errors,
+        { illegalActions, total: errors.length },
         replay.ok,
         isHoldoutSeed(seed, SOAK_SEEDS.holdoutSeeds),
       ),

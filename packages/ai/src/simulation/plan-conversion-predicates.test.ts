@@ -175,6 +175,20 @@ describe("planIntentConvertedWithin", () => {
     });
   });
 
+  it("recognizes a run started by an event from the applied Engine state", () => {
+    const before = {} as GameState;
+    const after = {
+      run: { runId: "run_1", attackedServerId: "hq" },
+    } as GameState;
+    const play = legalAction("event", "runner", "play_event", "Run event", { credits: 0 });
+    const event = { publicPayload: {} } as PublicGameEvent;
+    expect(simulationActionLocation(play, event, before, after)).toEqual({
+      targetServerId: "hq",
+      runnerRunStarted: true,
+    });
+    expect(simulationActionLocation(play, event, after, after)).toEqual({});
+  });
+
   it("keeps remote conversion on the server that was actually created", () => {
     const sequence = [
       { side: "corp", actionType: "install_card", targetServerId: "remote_1" },

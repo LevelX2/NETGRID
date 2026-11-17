@@ -186,4 +186,5 @@ export type PlanInstanceStateIssue =
   | "terminal_plan_has_commitment"
   | "blocked_plan_without_blocker"
   | "ready_plan_has_blocker"
-  | "invalid_state_version_order";
+  | "invalid_state_version_order"
+  | "invalid_retention_policy";

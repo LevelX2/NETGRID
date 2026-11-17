@@ -25,16 +25,12 @@ export type ProgressDeltaAction = {
   runnerCoverageImproved?: boolean;
   runnerRemoteTrashTaken?: boolean;
   advancedAgendaStolen?: boolean;
-  corpScoreTerminalScoreTaken?: boolean;
-  corpScoreTerminalAdvanceTaken?: boolean;
+  finalAdvance?: boolean;
   protectBeforeAdvance?: boolean;
-  corpScoreTerminalWindowScoreLegal?: boolean;
-  corpScoreTerminalWindowAdvanceToScoreLegal?: boolean;
-  corpScoreTerminalWindowAgendaInstallLegal?: boolean;
+  scoreActionsAvailable?: number;
   corpCreditsBelowCheapestRelevantRez?: boolean;
   corpCreditsBelowEstimatedCentralRezNeed?: boolean;
   corpCannotRezAnyNewlyInstalledIce?: boolean;
-  corpEconomyBeforeScorePlausibleRezOrAdvanceReserve?: boolean;
   runnerEconomyTakenToReachRunReserve?: boolean;
   runnerReservePreservingEconomy?: boolean;
   runnerBelowReserveBefore?: boolean;
@@ -141,14 +137,7 @@ function directProgressLabel(
   if (action.actionType === "steal_agenda" || action.advancedAgendaStolen) {
     return "progress_steal";
   }
-  if (
-    action.actionType === "score_agenda" ||
-    action.corpScoreTerminalScoreTaken ||
-    action.corpScoreTerminalAdvanceTaken ||
-    (action.actionType === "advance_card" &&
-      (action.corpScoreTerminalWindowScoreLegal ||
-        action.corpScoreTerminalWindowAdvanceToScoreLegal))
-  ) {
+  if (action.actionType === "score_agenda" || action.finalAdvance) {
     return "progress_score";
   }
   if (actionTextHasFlatlineSignal(text)) return "progress_flatline";
@@ -237,10 +226,7 @@ function isPlausibleNoProgress(action: ProgressDeltaAction): boolean {
     action.corpCreditsBelowCheapestRelevantRez ||
     action.corpCreditsBelowEstimatedCentralRezNeed ||
     action.corpCannotRezAnyNewlyInstalledIce ||
-    action.corpEconomyBeforeScorePlausibleRezOrAdvanceReserve ||
-    action.corpScoreTerminalWindowScoreLegal ||
-    action.corpScoreTerminalWindowAdvanceToScoreLegal ||
-    action.corpScoreTerminalWindowAgendaInstallLegal
+    (action.scoreActionsAvailable ?? 0) > 0
   ) {
     return true;
   }

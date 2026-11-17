@@ -12,7 +12,7 @@ import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
 describe("plan instance identity and orthogonal states", () => {
   it("instantiates a proposal without persisted priority or active lifecycle", () => {
     const proposal = readyRunnerProposal();
-    const instance = instantiatePlanProposal(proposal, 12.9);
+    const instance = instantiatePlanProposal(proposal, 12);
 
     expect(instance).toMatchObject({
       instanceId: "plan:runner.economy:neutral_credit",
@@ -30,6 +30,34 @@ describe("plan instance identity and orthogonal states", () => {
     expect(instance.evidenceRefs).toEqual([
       { code: "credits_below_floor", source: "visible_state" },
     ]);
+  });
+
+  it("rejects invalid Engine state versions and retention bounds", () => {
+    const proposal = readyRunnerProposal();
+    expect(() => instantiatePlanProposal(proposal, 12.9)).toThrowError(
+      expect.objectContaining({
+        code: "invalid_plan_identity",
+        context: expect.objectContaining({
+          removalCondition: expect.stringContaining("invalid_state_version_order"),
+        }),
+      }),
+    );
+    expect(() =>
+      instantiatePlanProposal({
+        ...proposal,
+        retentionPolicy: {
+          ...proposal.retentionPolicy,
+          blockedStateVersionTtl: Number.NaN,
+        },
+      }, 12),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "invalid_plan_identity",
+        context: expect.objectContaining({
+          removalCondition: expect.stringContaining("invalid_retention_policy"),
+        }),
+      }),
+    );
   });
 
   it("rejects duplicate proposals instead of silently recreating a plan", () => {

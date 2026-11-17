@@ -11,7 +11,6 @@ function bank(): RunnerCreditBankSignal {
     actionIds: ["withdraw-1"],
     priorityClass: "P2",
     currentStoredCredits: 9,
-    portfolioStoredCredits: 15,
     estimatedPayout: 9,
     value: 1209,
     evidenceCodes: ["bound_run_funding"],

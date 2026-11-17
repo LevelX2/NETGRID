@@ -14,7 +14,11 @@ export function simulationActionLocation(
   event: PublicGameEvent,
   before: GameState,
   after: GameState,
-): { targetServerId?: string; corpNewRemoteCreated?: true } {
+): {
+  targetServerId?: string;
+  corpNewRemoteCreated?: true;
+  runnerRunStarted?: true;
+} {
   if (action.side === "corp" && after.corp.servers.length > before.corp.servers.length) {
     const beforeIds = new Set(before.corp.servers.map(({ id }) => id));
     const created = after.corp.servers.filter(
@@ -25,7 +29,7 @@ export function simulationActionLocation(
     }
   }
   if (action.side === "runner" && after.run && after.run.runId !== before.run?.runId) {
-    return { targetServerId: after.run.attackedServerId };
+    return { targetServerId: after.run.attackedServerId, runnerRunStarted: true };
   }
   if (
     action.side === "runner" &&

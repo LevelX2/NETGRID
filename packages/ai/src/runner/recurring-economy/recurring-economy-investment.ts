@@ -105,42 +105,44 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
       target.pathPassability === "reachable" &&
       params.legalRunActionIds.has(target.actionId),
   );
-  const best = [...reachable].sort(
+  reachable.sort(
     (left, right) =>
       right.score - left.score || left.actionId.localeCompare(right.actionId),
-  )[0];
+  );
+  const best = reachable[0];
   const bestVisibleRunPayoff = best?.score ?? 0;
-  // A native preparation can make a run available without a current start_run.
-  // Its route priority is not the payoff of a hypothetical future run.
+  // A preparation can make a run available without a legal run head yet.
   const prepared = params.preparedRunOpportunities.find((route) => route.ready);
+  const terminalPreparation = params.preparedRunOpportunities.find(
+    (route) => route.ready && route.terminal,
+  );
   const opponentMatchpointRunPressure =
     params.opponentAgendaPoints >= params.agendaPointsToWin - 2 &&
-    (params.legalRunActionIds.size > 0 || prepared !== undefined);
-  const urgent =
-    opponentMatchpointRunPressure ||
-    prepared?.terminal === true ||
-    (best !== undefined &&
-      (best.scoreThreat ||
-        best.accessPayoff === "agenda" ||
-        best.accessPayoff === "score_threat" ||
-        (params.runnerAgendaPoints >= params.agendaPointsToWin - 2 &&
-          best.recommendation === "run_now")));
-  if (urgent) {
+    (best !== undefined || prepared !== undefined);
+  const urgentRun = reachable.find(
+    (target) =>
+      target.scoreThreat ||
+      target.accessPayoff === "agenda" ||
+      target.accessPayoff === "score_threat" ||
+      (params.runnerAgendaPoints >= params.agendaPointsToWin - 2 &&
+        target.recommendation === "run_now"),
+  );
+  const preemptingRun =
+    urgentRun ?? (opponentMatchpointRunPressure ? best : undefined);
+  const preemptingPreparation =
+    terminalPreparation ?? (opponentMatchpointRunPressure ? prepared : undefined);
+  if (preemptingRun || preemptingPreparation) {
     return {
       decision: "preempt_for_urgent_run",
       bestVisibleRunPayoff,
       evidenceCodes: [
-        ...(best
-          ? [`runner_recurring_economy_preempting_run_action:${best.actionId}`]
-          : prepared
-            ? [
-                `runner_recurring_economy_preempting_preparation_action:${prepared.actionId}`,
-                `runner_recurring_economy_prepared_run_parent:${prepared.parentPlanInstanceId}:${prepared.serverId}`,
-              ]
-            : [
-                "runner_recurring_economy_preempting_run_action:legal_run_surface",
-              ]),
-        `runner_recurring_economy_preempting_run_payoff:${best?.accessPayoff ?? "unknown"}`,
+        ...(preemptingRun
+          ? [`runner_recurring_economy_preempting_run_action:${preemptingRun.actionId}`]
+          : [
+              `runner_recurring_economy_preempting_preparation_action:${preemptingPreparation!.actionId}`,
+              `runner_recurring_economy_prepared_run_parent:${preemptingPreparation!.parentPlanInstanceId}:${preemptingPreparation!.serverId}`,
+            ]),
+        `runner_recurring_economy_preempting_run_payoff:${preemptingRun?.accessPayoff ?? "unknown"}`,
         ...(opponentMatchpointRunPressure
           ? ["runner_recurring_economy_preempting_opponent_matchpoint"]
           : []),

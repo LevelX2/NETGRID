@@ -11,12 +11,10 @@ import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { summarizeCentralCloseoutRepeatMetrics } from "./central-closeout-repeat-metrics";
 import { summarizeCorpEffectiveRemoteSafetyMetrics } from "./corp-effective-remote-safety-metrics";
-import { summarizeCorpEconomyBeforeScoreMetrics } from "./corp-economy-before-score-metrics";
 import {
   summarizeCorpFutureRunIceMetrics,
   summarizeCorpIcePortfolioMetrics,
 } from "./corp-ice-portfolio-metrics";
-import { corpScoreTerminalFollowupMetrics } from "./corp-score-terminal-followup-metrics";
 import { summarizeCorpUnsafeRemoteScoreConversionMetrics } from "./corp-unsafe-remote-score-conversion-metrics";
 import { isMeaningfulBoardProgress } from "./meaningful-board-progress";
 import {
@@ -338,11 +336,6 @@ export function summarizeMatchProgressionMetrics(
   const runnerKnownPathRunEntries = runnerRuns.filter(
     (entry) => typeof entry.runKnownPathCostAtStart === "number",
   );
-  const corpScoreTerminalEntries = actionSequence.filter(
-    (entry) => entry.corpScoreTerminalWindow === true,
-  );
-  const corpEconomyBeforeScoreMetrics =
-    summarizeCorpEconomyBeforeScoreMetrics(summaries);
   const hqMemoryEntries = actionSequence.filter(
     (entry) =>
       entry.side === "runner" && typeof entry.hqKnownCards === "number",
@@ -389,117 +382,6 @@ export function summarizeMatchProgressionMetrics(
     ...tagPunishWindowMetrics,
     ...remoteRoleOntologyMetrics,
     ...runnerSetupAttributionMetrics,
-    ...corpEconomyBeforeScoreMetrics,
-    corpScoreTerminalWindow: corpScoreTerminalEntries.length,
-    corpScoreTerminalWindowScoreLegal: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowScoreLegal === true,
-    ).length,
-    corpScoreTerminalWindowAdvanceToScoreLegal: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowAdvanceToScoreLegal === true,
-    ).length,
-    corpScoreTerminalWindowAgendaInstallLegal: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowAgendaInstallLegal === true,
-    ).length,
-    corpScoreTerminalWindowProtectedRemoteReady:
-      corpScoreTerminalEntries.filter(
-        (entry) => entry.corpScoreTerminalWindowProtectedRemoteReady === true,
-      ).length,
-    corpScoreTerminalWindowRemoteContestLow: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowRemoteContestLow === true,
-    ).length,
-    corpScoreTerminalWindowCreditsSufficient: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowCreditsSufficient === true,
-    ).length,
-    corpScoreTerminalWindowRunnerAccessThreatHigh:
-      corpScoreTerminalEntries.filter(
-        (entry) => entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true,
-      ).length,
-    corpScoreTerminalScoreTaken: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalScoreTaken === true,
-    ).length,
-    corpScoreTerminalAdvanceTaken: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalAdvanceTaken === true,
-    ).length,
-    corpScoreTerminalAgendaInstalled: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalAgendaInstalled === true,
-    ).length,
-    corpScoreTerminalSkipped: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkipped === true,
-    ).length,
-    corpScoreTerminalSkippedForProtection: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForProtection === true,
-    ).length,
-    corpScoreTerminalSkippedForEconomy: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForEconomy === true,
-    ).length,
-    corpScoreTerminalSkippedForDraw: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForDraw === true,
-    ).length,
-    corpScoreTerminalSkippedForInstallIce: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForInstallIce === true,
-    ).length,
-    corpScoreTerminalSkippedForInstallAssetOrUpgrade:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreTerminalSkippedForInstallAssetOrUpgrade === true,
-      ).length,
-    corpScoreTerminalSkippedForHqProtection: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForHqProtection === true,
-    ).length,
-    corpScoreTerminalSkippedForRndProtection: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForRndProtection === true,
-    ).length,
-    corpScoreTerminalSkippedForRemotePortfolio: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForRemotePortfolio === true,
-    ).length,
-    corpScoreTerminalSkippedForUnknownHigherPriority:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreTerminalSkippedForUnknownHigherPriority === true,
-      ).length,
-    ...corpScoreTerminalFollowupMetrics(actionSequence),
-    corpScoreConversionFixGateEligible: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreConversionFixGateEligible === true,
-    ).length,
-    corpScoreConversionFixGateBlockedByCheapContest:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateBlockedByCheapContest === true,
-      ).length,
-    corpScoreConversionFixGateBlockedByCredits: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreConversionFixGateBlockedByCredits === true,
-    ).length,
-    corpScoreConversionFixGateBlockedByRunnerContest:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateBlockedByRunnerContest === true,
-      ).length,
-    corpScoreConversionFixGateBlockedByHqThreat:
-      corpScoreTerminalEntries.filter(
-        (entry) => entry.corpScoreConversionFixGateBlockedByHqThreat === true,
-      ).length,
-    corpScoreConversionFixGateSuspiciousProtectionLoop:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateSuspiciousProtectionLoop === true,
-      ).length,
-    corpScoreConversionFixGateSuspiciousEconomyLoop:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateSuspiciousEconomyLoop === true,
-      ).length,
-    corpScoreConversionFixGateSuspiciousDraw: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreConversionFixGateSuspiciousDraw === true,
-    ).length,
-    corpScoreConversionFixGateSuspiciousRemotePortfolio:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateSuspiciousRemotePortfolio === true,
-      ).length,
-    corpScoreConversionFixGateSuspiciousUnknown:
-      corpScoreTerminalEntries.filter(
-        (entry) => entry.corpScoreConversionFixGateSuspiciousUnknown === true,
-      ).length,
     advancedAgendaSteals,
     advancedAgendaStealsFromRemote,
     advancedAgendaStealsFromCentral,

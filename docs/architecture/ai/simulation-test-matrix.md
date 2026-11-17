@@ -155,9 +155,15 @@ unterbrochenen Zugphase zugeordnet. Ein begonnenes Trace-Angebot wird als
 Quellenaktion erfasst, bis ein Engine-Ergebnis den Tag belegt.
 
 Strategische Fortschrittsmetriken verwenden die aktuell erzeugten
-Plan- und Ergebnisnachweise. Alte Zeilenkennzahlen ohne Datenproduzent
-sind aus Vergleich und Delta entfernt. R&D-Entfernungen zählen auf Ebene
-der Zugriffsaktion. Die Position im Stapel bleibt ohne Engine-Nachweis offen.
+Plan- und Ergebnisnachweise. Der Profilvergleich bildet das Delta für jede
+reell erzeugte Kennzahl. Beide Profile müssen dieselben Kennzahlen mit
+endlichen Werten liefern. Corp-Score-Fenster stützen sich auf aktuell
+angebotene Engine-Score-Aktionen. Die Runner-Ökonomiediagnose erkennt
+Run-Starts am neuen Engine-Run und prüft das tatsächlich angegriffene Ziel.
+Die Qualitätsmetriken zählen unzulässige Aktionsversuche anhand der
+tatsächlichen Ablehnung. Technische Abbrüche gehen in die Gesamtauswertung
+der Laufzeitfehler ein. R&D-Entfernungen zählen auf Ebene der Zugriffsaktion.
+Die Position im Stapel bleibt ohne Engine-Nachweis offen.
 
 ## Vergleichsevidenz und Standardmodus
 

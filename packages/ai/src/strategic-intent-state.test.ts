@@ -148,6 +148,21 @@ describe("StrategicIntentState contract", () => {
       previousStrategyId: "corp.remote_scoring",
     });
     expect(continued.commitment.decisionsCommitted).toBe(2);
+    const repeated = buildStrategicIntentState({
+      side: "corp",
+      stateVersion: 21,
+      strategyProfile: profileInput,
+      previousState: continued,
+      availableCredits: 7,
+      roleStatuses: activeRoles,
+    });
+    expect(repeated.commitment.decisionsCommitted).toBe(2);
+    expect(() => buildStrategicIntentState({
+      side: "corp",
+      stateVersion: 20,
+      strategyProfile: profileInput,
+      previousState: repeated,
+    })).toThrow("invalid_plan_identity");
   });
 
   it.each([

@@ -959,14 +959,14 @@ describe("SelfplayTraceMining", () => {
       selfplayAction("corp", 1, "gain_credit", {
         selectedActionId: "corp-reserve-positive",
         debugFacts: ["corpRezReserve:true", "protection:central"],
-        corpScoreTerminalWindowScoreLegal: true,
+        scoreActionsAvailable: 1,
       }),
     ]);
     const noise = selfplaySummary([
       selfplayAction("corp", 1, "gain_credit", {
         selectedActionId: "corp-reserve-noise",
         debugFacts: ["corpRezReserveish:true", "protectionist_noise"],
-        corpScoreTerminalWindowScoreLegal: true,
+        scoreActionsAvailable: 1,
       }),
     ]);
 

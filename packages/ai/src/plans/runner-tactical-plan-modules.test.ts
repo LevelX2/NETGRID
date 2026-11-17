@@ -17,7 +17,6 @@ import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 import {
   createRunnerTacticalPlanModules,
-  runnerVoluntaryActionFamilyOwner,
 } from "./runner-tactical-plan-modules";
 import { runnerPressureProgressReceipt } from "../runner/central-pressure/central-pressure-plan-module";
 
@@ -64,12 +63,6 @@ describe("Runner tactical plan modules", () => {
     expect(
       materialized.candidates.map(({ candidate }) => candidate.actionId),
     ).toEqual(["play-guide"]);
-    expect(
-      runnerVoluntaryActionFamilyOwner(
-        guide,
-        runnerContext.domain as RunnerPlanDomain,
-      ),
-    ).toBe("runner.expose_information");
   });
 
   it("owns early EndTurn only through a rules-proven terminal-win plan", () => {
@@ -119,15 +112,6 @@ describe("Runner tactical plan modules", () => {
       kind: "rules_proven_terminal_win",
       terminalCondition: "corp_empty_rd_mandatory_draw",
     });
-    expect(
-      runnerVoluntaryActionFamilyOwner(
-        endTurn,
-        runnerContext.domain as RunnerPlanDomain,
-      ),
-    ).toBe("runner.secure_terminal_win");
-    expect(
-      runnerVoluntaryActionFamilyOwner(endTurn, domain({})),
-    ).toBeUndefined();
   });
 
   it.each([
@@ -1494,22 +1478,20 @@ describe("Runner tactical plan modules", () => {
     });
   });
 
-  it("leaves unsupported generic draw and probe runs visibly ownerless", () => {
-    const planDomain = domain({});
-    expect(
-      runnerVoluntaryActionFamilyOwner(
-        candidate("draw", "draw_card", "draw.card"),
-        planDomain,
-      ),
-    ).toBeUndefined();
-    expect(
-      runnerVoluntaryActionFamilyOwner(run("unplanned-run", "hq"), planDomain),
-    ).toBeUndefined();
+  it("does not discover a plan for unsupported generic draw and probe runs", () => {
+    const runnerContext = context([
+      candidate("draw", "draw_card", "draw.card"),
+      run("unplanned-run", "hq"),
+    ], {});
+    const proposals = createRunnerTacticalPlanModules().flatMap(
+      (module) => module.discover(runnerContext),
+    );
+    expect(proposals).toEqual([]);
   });
 
   it("assigns a generic draw to its existing hand-development signal", () => {
     const draw = candidate("draw", "draw_card", "draw.card");
-    const planDomain = domain({
+    const runnerContext = context([draw], {
       developments: [
         {
           developmentId: "generic:draw-options",
@@ -1530,9 +1512,11 @@ describe("Runner tactical plan modules", () => {
       ],
     });
 
-    expect(runnerVoluntaryActionFamilyOwner(draw, planDomain)).toBe(
-      "runner.develop_board_and_hand",
-    );
+    const module = tacticalModule("runner.develop_board_and_hand");
+    const [proposal] = module.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const result = module.materialize(instance, {} as never, runnerContext);
+    expect(result.candidates.map(({ candidate }) => candidate.actionId)).toEqual([draw.actionId]);
   });
 });
 

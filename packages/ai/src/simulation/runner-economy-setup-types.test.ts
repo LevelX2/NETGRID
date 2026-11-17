@@ -45,6 +45,7 @@ describe("Runner economy diagnostic counts", () => {
       installsBreaker: false,
       advancedRemoteContestTaken: false,
       pressureAction: false,
+      runStarted: false,
     };
     const pass = {
       ...action(),
@@ -68,9 +69,17 @@ describe("Runner economy diagnostic counts", () => {
       runnerEconomySkipReasonForDiagnostics({
         ...context,
         advancedRemoteContestTaken: true,
+        runStarted: true,
         action: { ...action(), type: "start_run" },
       }),
     ).toBe("remote_contest");
+    expect(
+      runnerEconomySkipReasonForDiagnostics({
+        ...context,
+        runStarted: true,
+        action: { ...action(), type: "play_event" },
+      }),
+    ).toBe("run");
   });
 
   it("counts overlapping economy categories and omits empty categories", () => {

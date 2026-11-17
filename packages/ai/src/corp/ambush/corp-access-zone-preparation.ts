@@ -65,6 +65,10 @@ export function corpRdRecyclingSignals(
   reservedScoreServerIds: ReadonlySet<string> = new Set(),
   reservedScoreCredits = 0,
 ): CorpAmbushSignal[] {
+  if (input.side !== "corp") return [];
+  const actionsById = new Map(
+    input.legalActions.map((action) => [action.actionId, action]),
+  );
   const locations = [
     ...input.playerView.own.gripOrHq.map((card) => ({
       card,
@@ -123,16 +127,17 @@ export function corpRdRecyclingSignals(
     );
     const actions = candidates.filter((candidate) => {
       if (
+        candidate.actorSide !== "corp" ||
         candidate.sourceCardInstanceId !== card.instanceId ||
         candidate.costProfile.costKnownStatus !== "known" ||
         candidate.costProfile.additionalCosts.length > 0
       )
         return false;
-      const action = input.legalActions.find(
-        (action) => action.actionId === candidate.actionId,
-      );
+      const action = actionsById.get(candidate.actionId);
       if (
         !action ||
+        action.side !== "corp" ||
+        action.source !== card.instanceId ||
         action.expiresAtStateVersion !== input.playerView.stateVersion ||
         action.costs.some((cost) => (cost.credits ?? 0) !== 0) ||
         action.targetRequirements.length ||
@@ -184,9 +189,7 @@ export function corpRdRecyclingSignals(
     );
     actions.sort((left, right) => {
       const defense = (candidate: ActionSemanticCandidate) => {
-        const target = input.legalActions.find(
-          (a) => a.actionId === candidate.actionId,
-        )?.payload?.serverId;
+        const target = actionsById.get(candidate.actionId)?.payload?.serverId;
         return typeof target === "string"
           ? defenseByServer.get(target)
           : undefined;
@@ -206,8 +209,7 @@ export function corpRdRecyclingSignals(
     if (!selected && !server) return [];
     const target =
       server?.id ??
-      input.legalActions.find((a) => a.actionId === selected?.actionId)?.payload
-        ?.serverId;
+      (selected && actionsById.get(selected.actionId)?.payload?.serverId);
     if (typeof target !== "string") return [];
     const run = input.playerView.run;
     // Preserve an unknown protected remote through its ICE toll. There is no

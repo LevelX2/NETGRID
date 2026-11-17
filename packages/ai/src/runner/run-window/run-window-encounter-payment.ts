@@ -38,6 +38,13 @@ type CompleteEncounterPayment = {
   budget: ReturnType<typeof runnerRunPathCreditBudgetAfterEncounter>;
 };
 
+function currentRunnerEncounterOffer(input: AiDecisionInput, action: LegalAction): boolean {
+  return input.side === "runner" &&
+    action.side === "runner" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    input.legalActions.includes(action);
+}
+
 /** Complete, general-credit payment for a pure program-preservation encounter. */
 export function programProtectionEncounterPayment(
   input: AiDecisionInput,
@@ -87,8 +94,7 @@ export function programProtectionEncounterPayment(
     0,
   );
   if (
-    !input.legalActions.includes(action) ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !currentRunnerEncounterOffer(input, action) ||
     payload.sourceDefinitionId !== ice.definitionId ||
     payload.encounterContinue !== true ||
     payload.encounterWillEndRun !== false ||
@@ -166,6 +172,7 @@ export function completeCancellableEncounterPayment(
     action.type !== "continue_run" ||
     action.payload?.encounterContinue !== true ||
     action.payload.encounterWillEndRun !== false ||
+    !currentRunnerEncounterOffer(input, action) ||
     action.payload.encounterSourceWillTrashAtEndOfTurn !== false ||
     Number(action.payload.encounterFullBreakDamage ?? 0) !== 0 ||
     action.choiceRequirements?.length ||
@@ -219,6 +226,7 @@ export function completeEncounterBreakerPayment(
   input: AiDecisionInput,
   action: LegalAction,
 ): CompleteEncounterPayment | undefined {
+  if (!currentRunnerEncounterOffer(input, action)) return undefined;
   const strengthPreparation = runStrengthPreparation(input, action);
   if (
     input.playerView.run?.phase !== "encounter_ice" ||
@@ -232,7 +240,9 @@ export function completeEncounterBreakerPayment(
     const { source, breaker, amount } = strengthPreparation;
     const pump = input.legalActions.find(
       (entry) =>
-        entry.type === "pump_breaker" && entry.source === breaker.instanceId,
+        entry.type === "pump_breaker" &&
+        entry.source === breaker.instanceId &&
+        currentRunnerEncounterOffer(input, entry),
     );
     if (!pump) return undefined;
     const preparation = spendRunnerEncounterActionCost({
@@ -282,7 +292,10 @@ export function completeEncounterBreakerPayment(
     };
   }
   const continuation = input.legalActions.find(
-    (a) => a.type === "continue_run" && a.payload?.encounterContinue === true,
+    (entry) =>
+      entry.type === "continue_run" &&
+      entry.payload?.encounterContinue === true &&
+      currentRunnerEncounterOffer(input, entry),
   );
   if (
     !continuation ||

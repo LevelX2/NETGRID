@@ -112,8 +112,9 @@ describe("AI simulation harness", () => {
       seed: "ai-sim-invalid-deck-support",
       runnerDeck: {
         id: "invalid-runtime-deck",
+        name: "Invalid runtime deck",
         side: "runner",
-        identityCardId: "missing-identity",
+        identity: "runner_identity_001",
         cards: [{ id: "missing-card", quantity: 1 }],
       } as never,
     });
@@ -121,6 +122,7 @@ describe("AI simulation harness", () => {
     expect(result.terminationKind).toBe("runtime_failure");
     expect(result.winner).toBe("runtime_failure");
     expect(result.actions).toBe(0);
+    expect(result.metrics.illegalActions).toBe(0);
     expect(result.runtimeFailures).toEqual([
       expect.objectContaining({
         code: "simulation_deck_support_invalid",

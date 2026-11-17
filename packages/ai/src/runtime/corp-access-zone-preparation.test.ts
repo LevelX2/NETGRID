@@ -63,6 +63,18 @@ function setup(installed = false, protectedRemote = false) {
   return { input, action, card, candidates };
 }
 describe("zone-specific access preparation", () => {
+  it("rejects recycling evidence bound to another actor or card", () => {
+    const { input, action, candidates } = setup();
+    expect(corpRdRecyclingSignals(
+      { ...input, legalActions: [{ ...action, side: "runner" }] },
+      candidates,
+    )).toEqual([]);
+    expect(corpRdRecyclingSignals(
+      { ...input, legalActions: [{ ...action, source: "another-card" }] },
+      candidates,
+    )).toEqual([]);
+  });
+
   it("distinguishes free rez recycling from Archives-only access recycling", () => {
     expect(corpAccessZonePreparationProfile(BEL)).toMatchObject({
       zone: "rd",

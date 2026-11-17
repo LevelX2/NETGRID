@@ -72,7 +72,6 @@ function signal(
     actionIds: [],
     priorityClass: "P4",
     currentStoredCredits: 0,
-    portfolioStoredCredits: 0,
     estimatedPayout: 0,
     value: 72,
     evidenceCodes: ["runner_credit_bank_first_load"],

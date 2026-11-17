@@ -421,7 +421,6 @@ describe("Runner core plan modules", () => {
             actionIds: actionCandidates.map((entry) => entry.actionId),
             priorityClass: "P4",
             currentStoredCredits: phase === "build" ? 0 : 6,
-            portfolioStoredCredits: phase === "build" ? 0 : 6,
             estimatedPayout: phase === "build" ? 0 : 6,
             value: 10,
             evidenceCodes: [`broker_${phase}`],

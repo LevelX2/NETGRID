@@ -99,6 +99,7 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
     action: LegalAction,
     targetServerId: string | undefined,
     stateAfterAction: GameState,
+    runStarted: boolean,
   ): Partial<AiSimulationSummary["actionSequence"][number]> {
     if (input.side !== "runner" || action.side !== "runner") return {};
     const legalRunnerActions = input.legalActions.filter(
@@ -155,7 +156,9 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
       input,
       action,
     ).draw;
-    const runAction = action.type === "start_run";
+    const runBelowKnownPathCost =
+      runStarted &&
+      dependencies.runnerRunKnownPathCost(input, targetServerId) > creditsBefore;
     const installsBreaker =
       action.type === "install_card" &&
       rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"]);
@@ -169,8 +172,9 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
           setupAction,
           installsBreaker,
           advancedRemoteContestTaken: advancedRemoteContest.taken,
+          runStarted,
           pressureAction:
-            !runAction && dependencies.isRunnerPressureAction(input, action),
+            !runStarted && dependencies.isRunnerPressureAction(input, action),
         })
       : undefined;
     const rich = creditsBefore >= Math.max(8, reserveTarget + 3);
@@ -332,14 +336,13 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
       ...(economyStillBelowReserve
         ? { runnerEconomyTakenButStillBelowReserve: true }
         : {}),
-      ...(economySkipped && knownUnaffordablePath
-        ? {
-            runnerEconomySkippedThenUnaffordableRun: true,
-            runnerRunStartedAfterSkippingEconomy: runAction,
-          }
+      ...(economySkipped && runStarted
+        ? { runnerRunStartedAfterSkippingEconomy: true }
         : {}),
-      ...(runAction &&
-      dependencies.runnerRunKnownPathCost(input, targetServerId) > creditsBefore
+      ...(economySkipped && runBelowKnownPathCost
+        ? { runnerEconomySkippedThenUnaffordableRun: true }
+        : {}),
+      ...(runBelowKnownPathCost
         ? { runnerRunStartedBelowKnownPathCost: true }
         : {}),
       ...(economyOverPressure

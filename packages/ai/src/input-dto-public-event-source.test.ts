@@ -105,7 +105,7 @@ describe("AI input DTO public event source binding", () => {
         actionNumber: 1,
         profileId: "action-side-mismatch-test",
       }),
-    ).toThrow(/LegalAction side mismatch/);
+    ).toThrow(new Error("AI input LegalAction side mismatch."));
   });
 
   it("preserves the Engine-owned post-pass ICE lifecycle quote", () => {

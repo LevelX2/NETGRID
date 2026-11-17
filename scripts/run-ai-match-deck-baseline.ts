@@ -380,14 +380,6 @@ function combineTraceMiningAggregates(
       aggregates,
       (aggregate) => aggregate.scoreWindowMissed,
     ),
-    unsafeScoreChosen: sumAggregates(
-      aggregates,
-      (aggregate) => aggregate.unsafeScoreChosen,
-    ),
-    passiveActionWithScoreLineAvailable: sumAggregates(
-      aggregates,
-      (aggregate) => aggregate.passiveActionWithScoreLineAvailable,
-    ),
     actionLimitClusters: mergeNumericRecords(
       aggregates.map((aggregate) => aggregate.actionLimitClusters),
     ) as TraceMiningAggregate["actionLimitClusters"],

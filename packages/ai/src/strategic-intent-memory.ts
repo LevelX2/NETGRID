@@ -182,6 +182,8 @@ function nextTtl(
   if (state.transition.status === "abandoned") return 0;
   if (state.blockers.some((blocker) => blocker.severity === "hard")) return 1;
   if (state.transition.status === "continued") {
+    if (previous?.updatedAtStateVersion === state.stateVersion)
+      return previous.ttlDecisionsRemaining;
     return Math.min(4, (previous?.ttlDecisionsRemaining ?? 2) + 1);
   }
   if (state.transition.status === "paused") return 1;

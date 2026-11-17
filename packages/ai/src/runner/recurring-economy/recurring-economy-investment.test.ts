@@ -218,6 +218,47 @@ describe("assessRunnerRecurringEconomyRunHorizon", () => {
     });
   });
 
+  it("finds an urgent legal run below the highest payoff", () => {
+    const targets = [
+      {
+        actionId: "ordinary-run",
+        pathPassability: "reachable",
+        recommendation: "run_now",
+        score: 900,
+        accessPayoff: "fresh",
+        scoreThreat: false,
+      },
+      {
+        actionId: "urgent-run",
+        pathPassability: "reachable",
+        recommendation: "run_now",
+        score: 500,
+        accessPayoff: "agenda",
+        scoreThreat: true,
+      },
+    ] as RunnerRunTargetEvaluation[];
+    expect(
+      assessRunnerRecurringEconomyRunHorizon({
+        runTargets: targets,
+        legalRunActionIds: new Set(targets.map(({ actionId }) => actionId)),
+        preparedRunOpportunities: [],
+        runnerAgendaPoints: 0,
+        opponentAgendaPoints: 0,
+        agendaPointsToWin: 7,
+        installCost: 2,
+        futureValueAtRisk: 2,
+        realizedValue: 0,
+        payoutStillUnrealized: true,
+      }),
+    ).toMatchObject({
+      decision: "preempt_for_urgent_run",
+      bestVisibleRunPayoff: 900,
+      evidenceCodes: expect.arrayContaining([
+        "runner_recurring_economy_preempting_run_action:urgent-run",
+      ]),
+    });
+  });
+
   it("lets a recommended reachable run preempt when the opponent is at matchpoint", () => {
     expect(
       assess({

@@ -1,5 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 
 export type ShellTradersDestinationState = {
   kind: "shell_traders_destination";
@@ -22,20 +24,13 @@ export function shellTradersDestinationBinding(
     return undefined;
   const [, sourceId, targetId, reason, version, ...extra] =
     choice.source.split(":");
-  const action = input.legalActions.find(
-    (entry) => entry.type === "resolve_choice",
-  );
-  const requirement = action?.choiceRequirements?.[0];
-  const options = choice.options.filter(
-    (option) => option.selectable !== false,
-  );
+  const action = exactCurrentChoiceAction(input, choice);
+  const options = selectableChoiceOptions(choice.options);
   const rig = input.playerView.own.rig ?? [];
   const exact =
     input.side === "runner" &&
-    choice.side === "runner" &&
     choice.kind === "select_option" &&
-    choice.stateVersion === input.playerView.stateVersion &&
-    Number(version) === choice.stateVersion &&
+    version === String(choice.stateVersion) &&
     extra.length === 0 &&
     (reason === "paid" || reason === "start_turn") &&
     choice.sourceCardInstanceId === sourceId &&
@@ -43,20 +38,11 @@ export function shellTradersDestinationBinding(
     input.playerView.specialZones?.setAside.some(
       (card) => card.instanceId === targetId && card.known,
     ) &&
-    action?.side === "runner" &&
-    action.expiresAtStateVersion === choice.stateVersion &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
     choice.minSelections === 1 &&
     choice.maxSelections === 1 &&
-    requirement.optionIds.length === options.length &&
     options.length > 0 &&
     options.every(
       (option) =>
-        requirement.optionIds.includes(option.id) &&
         typeof option.metadata?.delayedInstallRequiresProgramTrash ===
           "boolean" &&
         (option.id === "rig"
@@ -75,9 +61,7 @@ export function shellTradersDestinationBinding(
         "Bind the Shell Traders destination to its current source, prepared target, exact choice/action and complete Engine displacement facts.",
     });
   }
-  const selected = options
-    .slice()
-    .sort(
+  const selected = options.sort(
       (a, b) =>
         Number(a.metadata!.delayedInstallRequiresProgramTrash) -
           Number(b.metadata!.delayedInstallRequiresProgramTrash) ||
@@ -100,15 +84,18 @@ export function exactShellTradersDestinationAction(
   input: AiDecisionInput,
   binding: ShellTradersDestinationState,
 ): LegalAction | undefined {
+  const choice = input.playerView.pendingChoice;
   if (
+    input.side !== "runner" ||
+    !choice ||
     binding.stateVersion !== input.playerView.stateVersion ||
-    binding.choiceId !== input.playerView.pendingChoice?.choiceId
+    binding.choiceId !== choice.choiceId ||
+    binding.sourceCardInstanceId !== choice.sourceCardInstanceId ||
+    !selectableChoiceOptions(choice.options).some(
+      (option) => option.id === binding.selectedOptionId,
+    )
   )
     return undefined;
-  return input.legalActions.find(
-    (action) =>
-      action.actionId === binding.actionId &&
-      action.type === "resolve_choice" &&
-      action.expiresAtStateVersion === binding.stateVersion,
-  );
+  const action = exactCurrentChoiceAction(input, choice);
+  return action?.actionId === binding.actionId ? action : undefined;
 }
